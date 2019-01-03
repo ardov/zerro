@@ -31,29 +31,29 @@ export const parseData = res => prevState => {
   return newState
 }
 
-export function saveState(state) {
-  const keysToSave = [
-    'lastSync',
-    'instrument',
-    'country',
-    'company',
-    'user',
-    'account',
-    'tag',
-    'budget',
-    'merchant',
-    'reminder',
-    'reminderMarker',
-    'transaction',
-    'token'
-  ]
+// export function saveState(state) {
+//   const keysToSave = [
+//     'lastSync',
+//     'instrument',
+//     'country',
+//     'company',
+//     'user',
+//     'account',
+//     'tag',
+//     'budget',
+//     'merchant',
+//     'reminder',
+//     'reminderMarker',
+//     'transaction',
+//     'token'
+//   ]
 
-  keysToSave.forEach(key => {
-    if (state[key]) {
-      localStorage.setItem(key, JSON.stringify(state[key]))
-    }
-  })
-}
+//   keysToSave.forEach(key => {
+//     if (state[key]) {
+//       localStorage.setItem(key, JSON.stringify(state[key]))
+//     }
+//   })
+// }
 
 export class Transaction {
   // {

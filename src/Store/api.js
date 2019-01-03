@@ -1,7 +1,7 @@
 const DEFAULT_TOKEN = process.env.REACT_APP_TOKEN
 const DOMAIN = process.env.REACT_APP_DOMAIN + 'test/?token='
 
-export const zenApi = {
+const zenApi = {
   getData(
     callback,
     params = {
@@ -30,3 +30,5 @@ export const zenApi = {
       .catch(err => console.warn(err))
   }
 }
+
+export default zenApi

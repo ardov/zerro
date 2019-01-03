@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
-import logo from './logo.svg'
+
 import './App.css'
-import { parseData, saveState } from './helpers'
-import { zenApi } from './api'
+import { StoreContext } from './Store/'
+import { parseData } from './Store/parseData'
+import { zenApi } from './Store/api'
 import Transaction from './Transaction'
 
 const Body = styled.div`
@@ -48,49 +49,30 @@ class Filter {
 }
 
 class App extends Component {
+  static contextType = StoreContext
+  actions = this.context.actions
+  data = this.context.data
   state = {
-    lastSync: 0,
-    instrument: {},
-    country: {},
-    company: {},
-    user: {},
-    account: {},
-    tag: {},
-    budget: {},
-    merchant: {},
-    reminder: {},
-    reminderMarker: {},
-    transaction: {},
-
-    token: null,
-    updatingData: false,
-    filter: {},
-    showFirst: 20
+    filter: {}
   }
 
   componentDidMount() {
-    this.updateData()
-  }
-
-  updateData() {
-    zenApi.getData(res => {
-      this.setState(parseData(res))
-      // saveState(this.state)
-    })
+    this.actions.updateData()
   }
 
   render() {
-    const transaction = this.state.transaction
+    const transaction = this.data.transaction
     return (
       <Body>
         <Menu>
-          <button onClick={() => console.log(this.state)}>Show state</button>
+          <button onClick={() => console.log(this.state)}>Log state</button>
+          <button onClick={() => console.log(this.context)}>Log context</button>
         </Menu>
         <Content>
           {transaction.list &&
             transaction.list
               .map(id => <Transaction data={transaction[id]} key={id} />)
-              .slice(0, this.state.showFirst)}
+              .slice(0, this.data.showFirst)}
         </Content>
       </Body>
     )
