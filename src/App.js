@@ -1,11 +1,10 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
 
-import './App.css'
 import { StoreContext } from './Store/'
-import { parseData } from './Store/parseData'
+import { parseData } from './Store/functions'
 import { zenApi } from './Store/api'
-import Transaction from './Transaction'
+import Transaction from './TransactionList/Transaction'
 
 const Body = styled.div`
   display: flex;
@@ -24,34 +23,11 @@ const Content = styled.div`
   flex-direction: column;
 `
 
-class Filter {
-  constructor(conditions) {
-    const defaultConditions = {
-      search: null,
-      isIncome: true,
-      isOutcome: true,
-      isTransition: true,
-      deleted: false,
-      fromDate: null,
-      toDate: null,
-      tags: null,
-      accounts: null,
-      amount: null
-    }
-    this.conditions = { ...defaultConditions, ...conditions }
-  }
-
-  conditions = {}
-
-  check(transaction, cnd = this.conditions) {
-    return true
-  }
-}
-
 class App extends Component {
   static contextType = StoreContext
   actions = this.context.actions
   data = this.context.data
+
   state = {
     filter: {}
   }
@@ -61,17 +37,31 @@ class App extends Component {
   }
 
   render() {
-    const transaction = this.data.transaction
+    const transactions = this.actions.getTransactions()
     return (
       <Body>
         <Menu>
           <button onClick={() => console.log(this.state)}>Log state</button>
           <button onClick={() => console.log(this.context)}>Log context</button>
+          <button onClick={() => console.log(this.actions.updateData())}>
+            Update Data
+          </button>
+          <button
+            onClick={() =>
+              console.log(
+                this.context.data.tag['8ab22cb6-ce01-4456-bf8f-0309cfa99def']
+              )
+            }
+          >
+            Log tag Data
+          </button>
         </Menu>
         <Content>
-          {transaction.list &&
-            transaction.list
-              .map(id => <Transaction data={transaction[id]} key={id} />)
+          {transactions &&
+            transactions
+              .map(transaction => (
+                <Transaction data={transaction} key={transaction.id} />
+              ))
               .slice(0, this.data.showFirst)}
         </Content>
       </Body>

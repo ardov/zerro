@@ -1,4 +1,5 @@
 import React from 'react'
+// import { StoreContext } from './Store'
 
 // {
 //   id: '8ECFEAB7-17F2-40F5-8B9B-279D2A136732',
@@ -29,13 +30,15 @@ import React from 'react'
 // }
 
 export default class Transaction extends React.Component {
+  // static contextType = StoreContext
   render() {
-    const { user, deleted, income, outcome, tag, payee } = this.props.data
+    const { user, deleted, income, outcome, tag, payee, type } = this.props.data
     return (
       <div>
-        User: {user} <br />
+        User: {user.id} <br />
         {deleted ? 'удалена' : 'не удалена'} <br />
         {income && '+' + income} {outcome && '-' + outcome} <br />
+        {type}
         <hr />
       </div>
     )
