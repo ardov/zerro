@@ -1,6 +1,6 @@
 import React from 'react'
 import zenApi from './api'
-import { parseData, populate } from './functions'
+import { parseData, populate, check } from './functions'
 
 export const StoreContext = React.createContext()
 
@@ -28,9 +28,7 @@ export default class Store extends React.Component {
     updatingData: false,
     filterConditions: {
       search: null,
-      isIncome: true,
-      isOutcome: true,
-      isTransition: true,
+      type: 'any',
       deleted: false,
       fromDate: null,
       toDate: null,
@@ -64,12 +62,10 @@ export default class Store extends React.Component {
     for (const id in transactions) {
       list.push(populate(transactions[id], this.state))
     }
-    return list.sort((a, b) => b.date - a.date)
+    return list
+      .filter(check(this.state.filterConditions))
+      .sort((a, b) => b.date - a.date)
   }
-  // getFilteredTransactions = (cnd = this.filterConditions) => {
-  //   const transaction = this.state.transaction
-  //   transaction.filter
-  // }
 
   /****************************************************************
    * RENDER

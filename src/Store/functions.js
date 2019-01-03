@@ -141,3 +141,38 @@ export const populate = (
   }
   return { ...el, ...parsed }
 }
+
+export const check = ({
+  search,
+  type,
+  deleted,
+  fromDate,
+  toDate,
+  //
+  tags,
+  accounts,
+  amountFrom,
+  amountTo
+}) => el => {
+  return (
+    (type === 'any' || el.type === type) &&
+    (!search || el.toUpperCase().includes(search.toUpperCase())) &&
+    (!deleted || !el.deleted) &&
+    (!fromDate || +el.date >= +fromDate) &&
+    (!toDate || +el.date <= +toDate)
+  )
+}
+
+// {
+//       search: null,
+//       isIncome: true,
+//       isOutcome: true,
+//       isTransition: true,
+//       deleted: false,
+//       fromDate: null,
+//       toDate: null,
+//       tags: null,
+//       accounts: null,
+//       amountFrom: null,
+//       amountTo: null
+//     }
