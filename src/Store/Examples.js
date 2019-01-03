@@ -1,4 +1,4 @@
-{
+let m = {
   "serverTimestamp": 1546203436,
   "instrument": [
     {

@@ -86,28 +86,3 @@ export default class Store extends React.Component {
     )
   }
 }
-
-class Filter {
-  constructor(conditions) {
-    const defaultConditions = {
-      search: null,
-      isIncome: true,
-      isOutcome: true,
-      isTransition: true,
-      deleted: false,
-      fromDate: null,
-      toDate: null,
-      tags: null,
-      accounts: null,
-      amountFrom: null,
-      amountTo: null
-    }
-    this.conditions = { ...defaultConditions, ...conditions }
-  }
-
-  conditions = {}
-
-  check(list, cnd = this.conditions) {
-    return true
-  }
-}
