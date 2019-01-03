@@ -132,5 +132,12 @@ export const populate = (
     }
   }
 
+  if (el.hasOwnProperty('latitude')) {
+    if (el.income && el.outcome) {
+      parsed.type = 'transfer'
+    } else {
+      parsed.type = el.income ? 'income' : 'outcome'
+    }
+  }
   return { ...el, ...parsed }
 }
