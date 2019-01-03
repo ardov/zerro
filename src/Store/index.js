@@ -64,7 +64,6 @@ export default class Store extends React.Component {
     for (const id in transactions) {
       list.push(populate(transactions[id], this.state))
     }
-    // debugger
     return list.sort((a, b) => b.date - a.date)
   }
   // getFilteredTransactions = (cnd = this.filterConditions) => {
