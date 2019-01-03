@@ -6,6 +6,7 @@ export const StoreContext = React.createContext()
 
 export default class Store extends React.Component {
   state = {
+    // DATA FROM ZENMONEY
     lastSync: 0,
     instrument: {},
     country: {},
@@ -19,10 +20,14 @@ export default class Store extends React.Component {
     reminderMarker: {},
     transaction: {},
 
+    // TOKEN
     token: null,
+
+    selectedTransactions: [],
+    // UI
     updatingData: false,
     filter: {},
-    showFirst: 20
+    showFirst: 200
   }
 
   /****************************************************************
