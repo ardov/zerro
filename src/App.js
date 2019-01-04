@@ -1,5 +1,8 @@
 import React, { Component } from 'react'
+import { BrowserRouter, Route } from 'react-router-dom'
 import styled from 'styled-components'
+
+import MyTransactions from './MyTransactions/'
 
 import { StoreContext } from './Store/'
 import { parseData } from './Store/functions'
@@ -56,43 +59,49 @@ class App extends Component {
     const transactions = this.actions.getTransactions()
     const selected = this.state.selectedTransaction
     return (
-      <Body>
-        <Menu>
-          <button onClick={() => console.log(this.state)}>Log state</button>
-          <button onClick={() => console.log(this.context)}>Log context</button>
-          <button onClick={() => console.log(this.actions.updateData())}>
-            Update Data
-          </button>
-          <button
-            onClick={() =>
-              console.log(
-                this.context.data.tag['8ab22cb6-ce01-4456-bf8f-0309cfa99def']
-              )
-            }
-          >
-            Log tag Data
-          </button>
-          <Filter />
-        </Menu>
-        <Content>
-          {transactions &&
-            transactions
-              .map(transaction => (
-                <Transaction
-                  data={transaction}
-                  key={transaction.id}
-                  onClick={e => {
-                    this.selectTransaction(transaction)
-                  }}
-                />
-              ))
-              .slice(0, this.data.showFirst)}
-        </Content>
-        <SelectedPanel>
-          <h1>Выбранная</h1>
-          {selected && selected.id}
-        </SelectedPanel>
-      </Body>
+      <BrowserRouter>
+        <Body>
+          <Route path="/" exact component={MyTransactions} />
+          {/* <Route path="/results" component={Results} /> */}
+          <Menu>
+            <button onClick={() => console.log(this.state)}>Log state</button>
+            <button onClick={() => console.log(this.context)}>
+              Log context
+            </button>
+            <button onClick={() => console.log(this.actions.updateData())}>
+              Update Data
+            </button>
+            <button
+              onClick={() =>
+                console.log(
+                  this.context.data.tag['8ab22cb6-ce01-4456-bf8f-0309cfa99def']
+                )
+              }
+            >
+              Log tag Data
+            </button>
+            <Filter />
+          </Menu>
+          <Content>
+            {transactions &&
+              transactions
+                .map(transaction => (
+                  <Transaction
+                    data={transaction}
+                    key={transaction.id}
+                    onClick={e => {
+                      this.selectTransaction(transaction)
+                    }}
+                  />
+                ))
+                .slice(0, this.data.showFirst)}
+          </Content>
+          <SelectedPanel>
+            <h1>Выбранная</h1>
+            {selected && selected.id}
+          </SelectedPanel>
+        </Body>
+      </BrowserRouter>
     )
   }
 }
