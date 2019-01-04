@@ -29,7 +29,7 @@ export default class Store extends React.Component {
     filterConditions: {
       search: null,
       type: 'any',
-      deleted: false,
+      showDeleted: false,
       fromDate: null,
       toDate: null,
       tags: null,
@@ -50,6 +50,12 @@ export default class Store extends React.Component {
       },
       { lastSync: this.state.lastSync }
     )
+  }
+
+  updateFilter = conditions => {
+    this.setState(state => {
+      return { filterConditions: { ...state.filterConditions, ...conditions } }
+    })
   }
 
   getElement = (type, id) => {
@@ -76,7 +82,8 @@ export default class Store extends React.Component {
       actions: {
         updateData: this.updateData,
         getElement: this.getElement,
-        getTransactions: this.getTransactions
+        getTransactions: this.getTransactions,
+        updateFilter: this.updateFilter
       }
     }
     return (

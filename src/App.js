@@ -5,6 +5,7 @@ import { StoreContext } from './Store/'
 import { parseData } from './Store/functions'
 import { zenApi } from './Store/api'
 import Transaction from './TransactionList/Transaction'
+import Filter from './Filter'
 
 const Body = styled.div`
   display: flex;
@@ -55,6 +56,7 @@ class App extends Component {
           >
             Log tag Data
           </button>
+          <Filter />
         </Menu>
         <Content>
           {transactions &&

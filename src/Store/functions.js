@@ -145,7 +145,7 @@ export const populate = (
 export const check = ({
   search,
   type,
-  deleted,
+  showDeleted,
   fromDate,
   toDate,
   //
@@ -154,10 +154,15 @@ export const check = ({
   amountFrom,
   amountTo
 }) => el => {
+  const checkSearch = () => {
+    if (!search) return true
+    if (!el.comment) return false
+    return el.comment.toUpperCase().includes(search.toUpperCase())
+  }
   return (
     (type === 'any' || el.type === type) &&
-    (!search || el.toUpperCase().includes(search.toUpperCase())) &&
-    (!deleted || !el.deleted) &&
+    checkSearch() &&
+    (showDeleted || !el.deleted) &&
     (!fromDate || +el.date >= +fromDate) &&
     (!toDate || +el.date <= +toDate)
   )
