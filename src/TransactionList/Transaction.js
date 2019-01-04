@@ -34,7 +34,7 @@ export default class Transaction extends React.Component {
   render() {
     const { user, deleted, income, outcome, tag, payee, type } = this.props.data
     return (
-      <div>
+      <div onClick={this.props.onClick}>
         User: {user.id} <br />
         {deleted ? 'удалена' : 'не удалена'} <br />
         {income && '+' + income} {outcome && '-' + outcome} <br />

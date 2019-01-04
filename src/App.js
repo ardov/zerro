@@ -23,6 +23,13 @@ const Content = styled.div`
   padding: 40px;
   flex-direction: column;
 `
+const SelectedPanel = styled.section`
+  border: 1px solid #eee;
+  flex-grow: 1;
+  display: flex;
+  padding: 40px;
+  flex-direction: column;
+`
 
 class App extends Component {
   static contextType = StoreContext
@@ -30,7 +37,15 @@ class App extends Component {
   data = this.context.data
 
   state = {
-    filter: {}
+    selectedTransaction: null
+  }
+
+  selectTransaction = tr => {
+    this.setState(state => {
+      return {
+        selectedTransaction: tr
+      }
+    })
   }
 
   componentDidMount() {
@@ -39,6 +54,7 @@ class App extends Component {
 
   render() {
     const transactions = this.actions.getTransactions()
+    const selected = this.state.selectedTransaction
     return (
       <Body>
         <Menu>
@@ -62,10 +78,20 @@ class App extends Component {
           {transactions &&
             transactions
               .map(transaction => (
-                <Transaction data={transaction} key={transaction.id} />
+                <Transaction
+                  data={transaction}
+                  key={transaction.id}
+                  onClick={e => {
+                    this.selectTransaction(transaction)
+                  }}
+                />
               ))
               .slice(0, this.data.showFirst)}
         </Content>
+        <SelectedPanel>
+          <h1>Выбранная</h1>
+          {selected && selected.id}
+        </SelectedPanel>
       </Body>
     )
   }
