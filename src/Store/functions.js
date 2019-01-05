@@ -54,7 +54,7 @@ export const populate = (
         case 'changed':
         case 'paidTill':
         case 'created':
-          parsed[key] = new Date(el[key])
+          parsed[key] = new Date(el[key] * 1000)
           break
 
         case 'startDate':
