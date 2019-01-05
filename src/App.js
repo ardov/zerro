@@ -8,6 +8,7 @@ import { StoreContext } from './Store/'
 import Transaction from './TransactionList/Transaction'
 import Filter from './Filter'
 import SelectedPanel from './SelectedPanel'
+import Header from './Header'
 
 const Body = styled.div`
   display: flex;
@@ -48,44 +49,30 @@ class App extends Component {
     const selected = this.state.selectedTransaction
     return (
       <BrowserRouter>
-        <Body>
-          <Route path="/" exact component={MyTransactions} />
-          {/* <Route path="/results" component={Results} /> */}
-          <Menu>
-            <button onClick={() => console.log(this.state)}>Log state</button>
-            <button onClick={() => console.log(this.context)}>
-              Log context
-            </button>
-            <button onClick={() => console.log(this.actions.updateData())}>
-              Update Data
-            </button>
-            <button
-              onClick={() =>
-                console.log(
-                  this.context.data.tag['8ab22cb6-ce01-4456-bf8f-0309cfa99def']
-                )
-              }
-            >
-              Log tag Data
-            </button>
-            <Filter />
-          </Menu>
-          <Content>
-            {transactions &&
-              transactions
-                .map(transaction => (
-                  <Transaction
-                    data={transaction}
-                    key={transaction.id}
-                    onClick={e => {
-                      this.selectTransaction(transaction)
-                    }}
-                  />
-                ))
-                .slice(0, this.data.showFirst)}
-          </Content>
-          <SelectedPanel />
-        </Body>
+        <div>
+          <Header />
+          <Body>
+            <Route path="/" exact component={MyTransactions} />
+            <Menu>
+              <Filter />
+            </Menu>
+            <Content>
+              {transactions &&
+                transactions
+                  .map(transaction => (
+                    <Transaction
+                      data={transaction}
+                      key={transaction.id}
+                      onClick={e => {
+                        this.selectTransaction(transaction)
+                      }}
+                    />
+                  ))
+                  .slice(0, this.data.showFirst)}
+            </Content>
+            <SelectedPanel />
+          </Body>
+        </div>
       </BrowserRouter>
     )
   }
