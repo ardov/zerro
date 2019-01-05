@@ -5,10 +5,9 @@ import styled from 'styled-components'
 import MyTransactions from './MyTransactions/'
 
 import { StoreContext } from './Store/'
-import { parseData } from './Store/functions'
-import { zenApi } from './Store/api'
 import Transaction from './TransactionList/Transaction'
 import Filter from './Filter'
+import SelectedPanel from './SelectedPanel'
 
 const Body = styled.div`
   display: flex;
@@ -26,13 +25,6 @@ const Content = styled.div`
   padding: 40px;
   flex-direction: column;
 `
-const SelectedPanel = styled.section`
-  border: 1px solid #eee;
-  flex-grow: 1;
-  display: flex;
-  padding: 40px;
-  flex-direction: column;
-`
 
 class App extends Component {
   static contextType = StoreContext
@@ -44,11 +36,7 @@ class App extends Component {
   }
 
   selectTransaction = tr => {
-    this.setState(state => {
-      return {
-        selectedTransaction: tr
-      }
-    })
+    this.actions.selectTransaction(tr.id)
   }
 
   componentDidMount() {
@@ -96,10 +84,7 @@ class App extends Component {
                 ))
                 .slice(0, this.data.showFirst)}
           </Content>
-          <SelectedPanel>
-            <h1>Выбранная</h1>
-            {selected && selected.id}
-          </SelectedPanel>
+          <SelectedPanel />
         </Body>
       </BrowserRouter>
     )

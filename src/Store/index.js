@@ -25,6 +25,7 @@ export default class Store extends React.Component {
 
     selectedTransactions: [],
     // UI
+    selectedTransaction: null,
     updatingData: false,
     filterConditions: {
       search: null,
@@ -58,6 +59,24 @@ export default class Store extends React.Component {
     })
   }
 
+  selectTransaction = id => {
+    this.setState(state => {
+      return { selectedTransaction: id }
+    })
+  }
+  deleteTransaction = id => {
+    const changed = {
+      transaction: { ...this.state.transaction[id], ...{ deleted: true } }
+    }
+
+    zenApi.getData(
+      res => {
+        this.setState(parseData(res))
+      },
+      { lastSync: this.state.lastSync, changed: changed }
+    )
+  }
+
   getElement = (type, id) => {
     return populate(this.state[type][id], this.state)
   }
@@ -83,7 +102,9 @@ export default class Store extends React.Component {
         updateData: this.updateData,
         getElement: this.getElement,
         getTransactions: this.getTransactions,
-        updateFilter: this.updateFilter
+        updateFilter: this.updateFilter,
+        selectTransaction: this.selectTransaction,
+        deleteTransaction: this.deleteTransaction
       }
     }
     return (

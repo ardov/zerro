@@ -45,6 +45,7 @@ export const populate = (
     transaction
   }
 ) => {
+  if (!el) return false
   const parsed = {}
 
   for (const key in el) {
