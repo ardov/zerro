@@ -6,6 +6,7 @@ import MyTransactions from './MyTransactions/'
 
 import { StoreContext } from './Store/'
 import Transaction from './TransactionList/Transaction'
+import TransactionList from './TransactionList/'
 import Filter from './Filter'
 import DetailsPanel from './DetailsPanel'
 import Header from './Header'
@@ -56,18 +57,7 @@ class App extends Component {
               <Filter />
             </Menu>
             <Content>
-              {transactions &&
-                transactions
-                  .map(transaction => (
-                    <Transaction
-                      data={transaction}
-                      key={transaction.id}
-                      onClick={e => {
-                        this.selectTransaction(transaction)
-                      }}
-                    />
-                  ))
-                  .slice(0, this.data.showFirst)}
+              <TransactionList transactions={transactions} />
             </Content>
             <DetailsPanel />
           </Body>
