@@ -86,15 +86,21 @@ export default class Store extends React.Component {
     return populate(this.state[type][id], this.state)
   }
 
-  getTransactions = () => {
+  getTransactions = ({
+    limit,
+    offset = 0,
+    conditions = this.state.filterConditions
+  }) => {
     const transactions = this.state.transaction
     const list = []
     for (const id in transactions) {
       list.push(populate(transactions[id], this.state))
     }
+
     return list
-      .filter(check(this.state.filterConditions))
+      .filter(check(conditions))
       .sort((a, b) => b.date - a.date)
+      .slice(offset, limit ? limit + offset : undefined)
   }
 
   /****************************************************************
