@@ -1,5 +1,5 @@
 import React from 'react'
-import { StoreContext } from './Store'
+import { StoreContext } from '../Store'
 import styled, { css } from 'styled-components'
 
 const Body = styled.section`
@@ -12,16 +12,11 @@ const Body = styled.section`
 
 export default class DetailsPanel extends React.Component {
   static contextType = StoreContext
-  deleteTransaction = this.context.actions.deleteTransaction
-  getElement = this.context.actions.getElement
-  id = this.context.data.selectedTransaction
 
   render() {
-    const tr = this.getElement(
-      'transaction',
-      this.context.data.selectedTransaction
-    )
-    console.log(tr)
+    const { deleteTransaction, getElement } = this.context.actions
+    const tr = getElement('transaction', this.context.data.openedTransaction)
+
     return (
       <Body>
         {tr && (
@@ -31,11 +26,18 @@ export default class DetailsPanel extends React.Component {
             {tr.id}
             <br />
             <button
-              onClick={e => {
-                this.deleteTransaction(tr.id)
+              onClick={() => {
+                deleteTransaction(tr.id)
               }}
             >
               Delete
+            </button>
+            <button
+              onClick={() => {
+                console.log(tr)
+              }}
+            >
+              Log Transaction
             </button>
           </div>
         )}

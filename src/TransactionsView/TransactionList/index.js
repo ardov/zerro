@@ -30,7 +30,9 @@ const Title = styled.h3`
   top: 0;
 `
 export default class TransactionList extends Component {
-  state = {}
+  handleTransactionClick = id => {
+    this.props.onTransactionOpen(id)
+  }
 
   render() {
     const { opened, transactions } = this.props
@@ -43,7 +45,14 @@ export default class TransactionList extends Component {
             <Group key={+date}>
               <Title>{date.toLocaleString()}</Title>
               {transactions.map(tr => (
-                <Transaction data={tr} key={tr.id} />
+                <Transaction
+                  data={tr}
+                  key={tr.id}
+                  opened={opened === tr.id}
+                  onClick={() => {
+                    this.handleTransactionClick(tr.id)
+                  }}
+                />
               ))}
             </Group>
           ))}

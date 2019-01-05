@@ -25,6 +25,13 @@ const Body = styled.div`
         opacity: 1;
       }
     `}
+
+  ${props =>
+    props.opened &&
+    css`
+      opacity: 1;
+      background-color: #eee;
+    `}
 `
 
 const Icon = styled.div`
@@ -101,7 +108,11 @@ export default class Transaction extends React.Component {
     }
 
     return (
-      <Body onClick={this.props.onClick} deleted={tr.deleted}>
+      <Body
+        onClick={this.props.onClick}
+        deleted={tr.deleted}
+        opened={this.props.opened}
+      >
         <Icon>{icon}</Icon>
         <Info>
           <MainInfo>

@@ -25,7 +25,7 @@ export default class Store extends React.Component {
 
     selectedTransactions: [],
     // UI
-    selectedTransaction: null,
+    openedTransaction: null,
     updatingData: false,
     filterConditions: {
       search: null,
@@ -61,7 +61,7 @@ export default class Store extends React.Component {
 
   selectTransaction = id => {
     this.setState(state => {
-      return { selectedTransaction: id }
+      return { openedTransaction: id }
     })
   }
   deleteTransaction = id => {
