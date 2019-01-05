@@ -7,7 +7,7 @@ import MyTransactions from './MyTransactions/'
 import { StoreContext } from './Store/'
 import Transaction from './TransactionList/Transaction'
 import Filter from './Filter'
-import SelectedPanel from './SelectedPanel'
+import DetailsPanel from './DetailsPanel'
 import Header from './Header'
 
 const Body = styled.div`
@@ -46,7 +46,6 @@ class App extends Component {
 
   render() {
     const transactions = this.actions.getTransactions()
-    const selected = this.state.selectedTransaction
     return (
       <BrowserRouter>
         <div>
@@ -70,7 +69,7 @@ class App extends Component {
                   ))
                   .slice(0, this.data.showFirst)}
             </Content>
-            <SelectedPanel />
+            <DetailsPanel />
           </Body>
         </div>
       </BrowserRouter>

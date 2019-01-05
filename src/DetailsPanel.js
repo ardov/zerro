@@ -1,5 +1,5 @@
 import React from 'react'
-import { StoreContext } from './Store/'
+import { StoreContext } from './Store'
 import styled, { css } from 'styled-components'
 
 const Body = styled.section`
@@ -10,7 +10,7 @@ const Body = styled.section`
   padding: 40px;
 `
 
-export default class SelectedPanel extends React.Component {
+export default class DetailsPanel extends React.Component {
   static contextType = StoreContext
   deleteTransaction = this.context.actions.deleteTransaction
   getElement = this.context.actions.getElement
