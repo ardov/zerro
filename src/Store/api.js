@@ -6,7 +6,7 @@ const zenApi = {
     const defaultParams = {
       lastSync: 0,
       token: DEFAULT_TOKEN,
-      changedObjects: {}
+      changed: {}
     }
     params = { ...defaultParams, ...params }
     const body = {
@@ -14,7 +14,7 @@ const zenApi = {
         currentClientTimestamp: Math.round(Date.now() / 1000),
         lastServerTimestamp: params.lastSync
       },
-      ...params.changedObjects
+      ...params.changed
     }
 
     const options = {

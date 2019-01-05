@@ -66,7 +66,12 @@ export default class Store extends React.Component {
   }
   deleteTransaction = id => {
     const changed = {
-      transaction: { ...this.state.transaction[id], ...{ deleted: true } }
+      transaction: [
+        {
+          ...this.state.transaction[id],
+          ...{ deleted: true, changed: Date.now() / 1000 }
+        }
+      ]
     }
 
     zenApi.getData(

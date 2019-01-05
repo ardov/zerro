@@ -12,7 +12,7 @@ const Body = styled.section`
 
 export default class SelectedPanel extends React.Component {
   static contextType = StoreContext
-  deleteTransaction = this.context.actions.updateFilter
+  deleteTransaction = this.context.actions.deleteTransaction
   getElement = this.context.actions.getElement
   id = this.context.data.selectedTransaction
 
@@ -29,6 +29,14 @@ export default class SelectedPanel extends React.Component {
             Выбранная
             <br />
             {tr.id}
+            <br />
+            <button
+              onClick={e => {
+                this.deleteTransaction(tr.id)
+              }}
+            >
+              Delete
+            </button>
           </div>
         )}
       </Body>
