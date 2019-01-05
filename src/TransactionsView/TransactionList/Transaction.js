@@ -1,6 +1,7 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
 import toArray from 'lodash/toArray'
+import { FormattedNumber } from 'react-intl'
 
 function getFirstSymbol(str) {
   return toArray(str)[0]
@@ -118,7 +119,15 @@ export default class Transaction extends React.Component {
           <MainInfo>
             <Tag>{mainTagTitle}</Tag>
             <Account>{account1.title}</Account>
-            <Sum type={tr.type}>{amount1 + ' ' + instrument1.symbol}</Sum>
+            <Sum type={tr.type}>
+              <FormattedNumber
+                value={amount1}
+                style={`currency`}
+                currency={instrument1.shortTitle}
+                minimumFractionDigits={0}
+                maximumFractionDigits={0}
+              />
+            </Sum>
           </MainInfo>
           <AdditionalInfo>
             {tr.payee && <Payee>{tr.payee}</Payee>} {tr.comment}
