@@ -23,6 +23,8 @@ const Content = styled.div`
   display: flex;
   padding: 40px;
   flex-direction: column;
+  overflow: auto;
+  max-height: 100vh;
 `
 
 export default class TransactionsView extends Component {

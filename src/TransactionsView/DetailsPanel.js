@@ -11,7 +11,7 @@ const formatDateTime = date =>
 
 const Body = styled.section`
   border-left: 1px solid #eee;
-  min-width: 400px;
+  width: 560px;
   display: flex;
   flex-direction: column;
   padding: 40px;
@@ -97,6 +97,76 @@ export default class DetailsPanel extends React.Component {
           {
             name: 'Со счёта',
             value: tr.outcomeAccount.title
+          },
+          {
+            name: 'originalPayee',
+            value: tr.originalPayee
+          },
+          {
+            name: 'Категории',
+            value: tr.tag.length
+              ? tr.tag.map(tag => tag.title).join(', ')
+              : '--'
+          },
+          {
+            name: 'payee',
+            value: tr.payee
+          },
+          {
+            name: 'deleted',
+            value: tr.deleted
+          },
+          {
+            name: 'hold',
+            value: tr.hold
+          },
+          {
+            name: 'qrCode',
+            value: tr.qrCode
+          },
+          {
+            name: 'comment',
+            value: tr.comment
+          },
+          {
+            name: 'opIncome',
+            value: tr.opIncome
+          },
+          {
+            name: 'opOutcome',
+            value: tr.opOutcome
+          },
+          {
+            name: 'opIncomeInstrument',
+            value: tr.opIncomeInstrument
+          },
+          {
+            name: 'opOutcomeInstrument',
+            value: tr.opOutcomeInstrument
+          },
+          {
+            name: 'GEO',
+            value: (
+              <a
+                href={`https://www.google.com/maps/@${tr.latitude},${
+                  tr.longitude
+                },18z`}
+              >
+                {tr.latitude + ' ' + tr.longitude}
+              </a>
+            )
+          },
+          {
+            name: 'merchant',
+            value: tr.merchant ? tr.merchant.title : 'null'
+          },
+          {
+            name: 'incomeBankID',
+            value: tr.incomeBankID
+          },
+          {
+            name: 'outcomeBankID',
+            value: tr.outcomeBankID
           }
         ]
       : null
@@ -122,6 +192,21 @@ export default class DetailsPanel extends React.Component {
             >
               Log Transaction
             </button>
+            <div>
+              <iframe
+                title="geo"
+                src={`https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d1040.2885062361672!2d${
+                  tr.longitude
+                }!3d${
+                  tr.latitude
+                }!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sru!2sru!4v1546784599411`}
+                width="380"
+                height="450"
+                frameBorder="0"
+                style={{ border: 0 }}
+                allowFullScreen
+              />
+            </div>
           </div>
         )}
       </Body>
