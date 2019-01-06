@@ -1,5 +1,10 @@
 import parseDate from 'date-fns/parse'
 
+/**
+ * Parses JSON from server and merges data into state.
+ * @param {Object} JSON from server
+ * @return {Object} New state
+ */
 export const parseData = res => state => {
   let newState = {
     lastSync: res.serverTimestamp
