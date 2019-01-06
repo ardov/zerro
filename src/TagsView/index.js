@@ -31,7 +31,6 @@ export default class TransactionsView extends Component {
     const { selectTransaction, getTransactions } = this.context.actions
     const { openedTransaction } = this.context.data
     const transactions = getTransactions({ limit: 100 })
-    console.log('called')
 
     return (
       <div>

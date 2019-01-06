@@ -46,7 +46,6 @@ export default class DetailsPanel extends React.Component {
   render() {
     const { deleteTransaction, getElement } = this.context.actions
     const tr = getElement('transaction', this.context.data.openedTransaction)
-    console.log(tr)
 
     const values = tr
       ? [
