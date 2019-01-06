@@ -6,6 +6,7 @@ import ru from 'react-intl/locale-data/ru'
 
 import { StoreContext } from './Store/'
 import TransactionsView from './TransactionsView/'
+import TagsView from './TagsView/'
 
 addLocaleData(ru)
 
@@ -20,7 +21,10 @@ export default class App extends Component {
     return (
       <IntlProvider locale="ru">
         <BrowserRouter>
-          <Route path="/" exact component={TransactionsView} />
+          <div>
+            <Route path="/" exact component={TransactionsView} />
+            <Route path="/tags" component={TagsView} />
+          </div>
         </BrowserRouter>
       </IntlProvider>
     )
