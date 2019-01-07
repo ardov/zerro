@@ -76,7 +76,7 @@ let m = {
     {
       id: 'c783bd69-0318-460a-a497-afb19efb1a7d',
       // "user": 166825,
-      changed: 1540660897,
+      // changed: 1540660897,
       icon: null,
       budgetIncome: false,
       budgetOutcome: false,
@@ -85,8 +85,8 @@ let m = {
       picture: null,
       title: '📒 Документы',
       showIncome: false,
-      showOutcome: true,
-      parent: null
+      showOutcome: true
+      // parent: null
     }
   ],
   budget: [
