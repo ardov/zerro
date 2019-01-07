@@ -1,0 +1,7 @@
+
+# HTID:8036634: DO NOT REMOVE OR MODIFY THIS LINE AND THE LINES BELOW
+php_value display_errors 1
+# DO NOT REMOVE OR MODIFY THIS LINE AND THE LINES ABOVE HTID:8036634:
+
+Header set Access-Control-Allow-Origin "*"
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
