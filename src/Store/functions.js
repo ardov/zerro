@@ -68,23 +68,23 @@ export const populate = (
           parsed[key] = parseDate(el[key])
           break
 
-        case 'parent':
-          if (typeof el[key] === 'string') {
-            // this is Tag
-            if (!tag[el[key]]) {
-              // Tag not parsed yet
-              tag[el[key]] = { id: el[key] }
-            }
-            parsed[key] = tag[el[key]]
-          } else {
-            // this is User
-            if (!user[el[key]]) {
-              // User not parsed yet
-              user[el[key]] = {}
-            }
-            parsed[key] = user[el[key]]
-          }
-          break
+        // case 'parent':
+        //   if (typeof el[key] === 'string') {
+        //     // this is Tag
+        //     if (!tag[el[key]]) {
+        //       // Tag not parsed yet
+        //       tag[el[key]] = { id: el[key] }
+        //     }
+        //     parsed[key] = tag[el[key]]
+        //   } else {
+        //     // this is User
+        //     if (!user[el[key]]) {
+        //       // User not parsed yet
+        //       user[el[key]] = {}
+        //     }
+        //     parsed[key] = user[el[key]]
+        //   }
+        //   break
 
         case 'currency':
         case 'instrument':

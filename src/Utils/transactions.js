@@ -39,33 +39,30 @@ export function groupTransactionsBy(groupType = 'day', arr) {
  */
 export function calcMetrics(arr) {
   const startObject = {
-    income: {
-      total: { sum: 0, transactions: [] },
-      byTags: {}
+    total: {
+      income: 0,
+      outcome: 0,
+      transactions: []
     },
-    outcome: {
-      total: { sum: 0, transactions: [] },
-      byTags: {}
-    }
+    byTag: {}
   }
 
   const reducer = (acc, tr) => {
     const type = tr.type
     if (type !== 'transfer' && !tr.deleted) {
       const amount = +(tr[type] * tr[type + 'Instrument'].rate).toFixed(2)
-      const mainTagId = tr.tag.length ? tr.tag[0].id : 'noTag'
+      const mainTagId = tr.tag ? tr.tag[0].id : 'noTag'
 
       // Add to total
-      acc[type].total.sum += amount
-      acc[type].total.transactions.push(tr.id)
+      acc.total[type] += amount
+      acc.total.transactions.push(tr)
 
       // Add to tag
-      if (acc[type].byTags[mainTagId]) {
-        acc[type].byTags[mainTagId].sum += amount
-        acc[type].byTags[mainTagId].transactions.push(tr.id)
-      } else {
-        acc[type].byTags[mainTagId] = { sum: amount, transactions: [tr.id] }
+      if (!acc.byTag[mainTagId]) {
+        acc.byTag[mainTagId] = { income: 0, outcome: 0, transactions: [] }
       }
+      acc.byTag[mainTagId][type] += amount
+      acc.byTag[mainTagId].transactions.push(tr)
     }
     return acc
   }

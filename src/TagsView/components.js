@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
-export const BarChart = ({ amounts = [], color = '#000' }) => {
+export const BarChart = ({ amounts = [], maxValue, barColor = '#000' }) => {
   const Body = styled.div`
     display: flex;
     flex-direction: row;
@@ -22,7 +22,7 @@ export const BarChart = ({ amounts = [], color = '#000' }) => {
     border-radius: 2px;
   `
 
-  const max = Math.max(...amounts)
+  const max = maxValue ? maxValue : Math.max(...amounts)
 
   return (
     <Body>
