@@ -1,6 +1,7 @@
 import React from 'react'
 import zenApi from './api'
 import { parseData, populate, check } from './functions'
+import { getTransactions, getElement, getTags } from './selectors'
 
 export const StoreContext = React.createContext()
 
@@ -64,6 +65,7 @@ export default class Store extends React.Component {
       return { openedTransaction: id }
     })
   }
+
   deleteTransaction = id => {
     const changed = {
       transaction: [
@@ -73,34 +75,12 @@ export default class Store extends React.Component {
         }
       ]
     }
-
     zenApi.getData(
       res => {
         this.setState(parseData(res))
       },
       { lastSync: this.state.lastSync, changed: changed }
     )
-  }
-
-  getElement = (type, id) => {
-    return populate(this.state[type][id], this.state)
-  }
-
-  getTransactions = ({
-    limit,
-    offset = 0,
-    conditions = this.state.filterConditions
-  }) => {
-    const transactions = this.state.transaction
-    const list = []
-    for (const id in transactions) {
-      list.push(populate(transactions[id], this.state))
-    }
-
-    return list
-      .filter(check(conditions))
-      .sort((a, b) => b.date - a.date)
-      .slice(offset, limit ? limit + offset : undefined)
   }
 
   /****************************************************************
@@ -111,8 +91,9 @@ export default class Store extends React.Component {
       data: this.state,
       actions: {
         updateData: this.updateData,
-        getElement: this.getElement,
-        getTransactions: this.getTransactions,
+        getElement: getElement(this.state, populate),
+        getTransactions: getTransactions(this.state, populate, check),
+        getTags: getTags(this.state, populate),
         updateFilter: this.updateFilter,
         selectTransaction: this.selectTransaction,
         deleteTransaction: this.deleteTransaction
