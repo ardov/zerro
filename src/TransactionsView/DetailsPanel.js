@@ -9,10 +9,15 @@ const formatDate = date => format(date, 'D MMMM YYYY, dd', { locale: ru })
 const formatDateTime = date =>
   format(date, 'D MMMM YYYY, dd, HH:mm:ss', { locale: ru })
 
-const Body = styled.section`
-  border-left: 1px solid #eee;
+const Panel = styled.section`
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
   width: 560px;
+  border-left: 1px solid #eee;
   display: flex;
+  overflow: auto;
   flex-direction: column;
   padding: 40px;
 `
@@ -171,7 +176,7 @@ export default class DetailsPanel extends React.Component {
       : null
 
     return (
-      <Body>
+      <Panel>
         {tr && (
           <div>
             {values.map(el => (
@@ -191,24 +196,26 @@ export default class DetailsPanel extends React.Component {
             >
               Log Transaction
             </button>
-            <div>
-              <iframe
-                title="geo"
-                src={`https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d1040.2885062361672!2d${
-                  tr.longitude
-                }!3d${
-                  tr.latitude
-                }!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sru!2sru!4v1546784599411`}
-                width="380"
-                height="450"
-                frameBorder="0"
-                style={{ border: 0 }}
-                allowFullScreen
-              />
-            </div>
+            {tr.latitude && (
+              <div>
+                <iframe
+                  title="geo"
+                  src={`https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d1040.2885062361672!2d${
+                    tr.longitude
+                  }!3d${
+                    tr.latitude
+                  }!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sru!2sru!4v1546784599411`}
+                  width="380"
+                  height="450"
+                  frameBorder="0"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                />
+              </div>
+            )}
           </div>
         )}
-      </Body>
+      </Panel>
     )
   }
 }

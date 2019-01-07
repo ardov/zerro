@@ -11,7 +11,6 @@ import DetailsPanel from './DetailsPanel'
 const Body = styled.div`
   display: flex;
   flex-direction: row;
-  min-height: 100vh;
 `
 const Menu = styled.div`
   width: 200px;
@@ -20,11 +19,8 @@ const Menu = styled.div`
 `
 const Content = styled.div`
   flex-grow: 1;
-  display: flex;
-  padding: 40px;
+  padding: 0 40px;
   flex-direction: column;
-  overflow: auto;
-  max-height: 100vh;
 `
 
 export default class TransactionsView extends Component {
