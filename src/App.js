@@ -4,7 +4,7 @@ import { BrowserRouter, Route } from 'react-router-dom'
 import { IntlProvider, addLocaleData } from 'react-intl'
 import ru from 'react-intl/locale-data/ru'
 
-import { StoreContext } from './Store/'
+import { StoreContext } from './store/'
 import TransactionsView from './TransactionsView/'
 import TagsView from './TagsView/'
 
@@ -14,7 +14,8 @@ export default class App extends Component {
   static contextType = StoreContext
 
   componentDidMount() {
-    this.context.actions.updateData()
+    // this.context.actions.updateData()
+    this.context.actions.initState()
   }
 
   render() {

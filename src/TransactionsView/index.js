@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
 
-import { StoreContext } from '../Store/'
+import { StoreContext } from '../store/'
 
 import Header from '../Header'
 import TransactionList from './TransactionList/'

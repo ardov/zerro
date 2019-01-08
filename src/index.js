@@ -6,7 +6,7 @@ import './index.css'
 import 'antd/dist/antd.css'
 
 import App from './App'
-import Store from './Store/'
+import Store from './store/'
 import * as serviceWorker from './serviceWorker'
 
 ReactDOM.render(

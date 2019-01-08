@@ -1,5 +1,5 @@
 import React from 'react'
-import { StoreContext } from '../Store'
+import { StoreContext } from '../store'
 import styled from 'styled-components'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'

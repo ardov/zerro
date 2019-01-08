@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
-import { StoreContext } from './Store/'
+import { StoreContext } from './store/'
 import { Link } from 'react-router-dom'
 import { Button } from 'antd'
 

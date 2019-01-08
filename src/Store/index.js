@@ -1,5 +1,7 @@
 import React from 'react'
-import zenApi from './api'
+import ZenApi from '../services/api'
+import Cookies from '../services/cookies'
+import LocalStorage from '../services/localstorage'
 import { parseData, populate, check } from './functions'
 import { getTransactions, getElement, getTags } from './selectors'
 
@@ -46,12 +48,30 @@ export default class Store extends React.Component {
    * METHODS
    ****************************************************************/
   updateData = () => {
-    zenApi.getData(
+    ZenApi.getData(
       res => {
-        this.setState(parseData(res))
+        this.setState(parseData(res), this.saveData)
       },
       { lastSync: this.state.lastSync }
     )
+  }
+
+  saveData = () => {
+    const state = this.state
+    LocalStorage.set('data', {
+      lastSync: state.lastSync,
+      instrument: state.instrument,
+      country: state.country,
+      company: state.company,
+      user: state.user,
+      account: state.account,
+      tag: state.tag,
+      // budget: state.budget,
+      merchant: state.merchant,
+      reminder: state.reminder,
+      reminderMarker: state.reminderMarker,
+      transaction: state.transaction
+    })
   }
 
   updateFilter = conditions => {
@@ -75,12 +95,33 @@ export default class Store extends React.Component {
         }
       ]
     }
-    zenApi.getData(
+    ZenApi.getData(
       res => {
         this.setState(parseData(res))
       },
       { lastSync: this.state.lastSync, changed: changed }
     )
+  }
+
+  initState = () => {
+    const localToken = Cookies.get('token')
+    const localData = LocalStorage.get('data')
+    console.log('Token + data', localToken, localData)
+
+    if (localToken && localData) {
+      this.setState(() => {
+        return { ...localData, ...{ token: localToken } }
+      }, this.updateData)
+    } else if (localToken) {
+      this.updateData()
+    } else {
+      ZenApi.auth(token => {
+        Cookies.set('token', token)
+        this.setState(() => {
+          return { token: token }
+        }, this.updateData)
+      })
+    }
   }
 
   /****************************************************************
@@ -90,6 +131,7 @@ export default class Store extends React.Component {
     const value = {
       data: this.state,
       actions: {
+        initState: this.initState,
         updateData: this.updateData,
         getElement: getElement(this.state, populate),
         getTransactions: getTransactions(this.state, populate, check),

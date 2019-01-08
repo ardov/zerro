@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
 
-import { StoreContext } from '../Store/'
+import { StoreContext } from '../store/'
 import { Checkbox, Input } from 'antd'
 
 const Search = Input.Search
