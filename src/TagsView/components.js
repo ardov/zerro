@@ -1,17 +1,22 @@
 import React from 'react'
 import styled from 'styled-components'
+import { Popover } from 'antd'
 
-export const BarChart = ({ amounts = [], maxValue, barColor = '#000' }) => {
+export const BarChart = ({ data = [], maxValue, barColor = '#000' }) => {
   const Body = styled.div`
     display: flex;
     flex-direction: row;
     height: 40px;
   `
-  const Month = styled.div`
+  const BarContainer = styled.div`
     flex-grow: 1;
     display: flex;
     padding: 4px;
     height: 40px;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
   `
   const Bar = styled.div`
     height: ${props => props.percent}%;
@@ -22,14 +27,16 @@ export const BarChart = ({ amounts = [], maxValue, barColor = '#000' }) => {
     border-radius: 2px;
   `
 
-  const max = maxValue ? maxValue : Math.max(...amounts)
+  const max = maxValue ? maxValue : Math.max(...data.map(el => el.sum))
 
   return (
     <Body>
-      {amounts.map(sum => (
-        <Month>
-          <Bar percent={(sum / max) * 100} />
-        </Month>
+      {data.map(el => (
+        <Popover content={el.content} title={el.title} key={+el.date}>
+          <BarContainer>
+            <Bar percent={(el.sum / max) * 100} />
+          </BarContainer>
+        </Popover>
       ))}
     </Body>
   )

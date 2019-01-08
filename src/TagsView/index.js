@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import styled from 'styled-components'
+// import styled from 'styled-components'
 
 import { StoreContext } from '../store/'
 
@@ -11,7 +11,7 @@ export default class TransactionsView extends Component {
 
   render() {
     const { getTags, getTransactions } = this.context.actions
-    const transactions = getTransactions({ limit: 1000 })
+    const transactions = getTransactions()
     const tags = getTags()
 
     return (

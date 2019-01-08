@@ -29,7 +29,7 @@ export default class TagList extends Component {
         const metrics = monthMetrics.byTag[tag.id]
           ? monthMetrics.byTag[tag.id]
           : { income: 0, outcome: 0, transactions: [] }
-        return { ...{ date: monthMetrics }, ...metrics }
+        return { ...{ date: monthMetrics.month }, ...metrics }
       })
     }
 
@@ -46,8 +46,8 @@ export default class TagList extends Component {
         <h1>Расход = {metricsTotal.total.outcome}</h1>
         {tags &&
           tags.map(tag => (
-            <Group>
-              <Tag tag={tag} key={tag.id} />
+            <Group key={tag.id}>
+              <Tag tag={tag} />
               {tag.children &&
                 tag.children.map(tag => <Tag tag={tag} key={tag.id} />)}
             </Group>
