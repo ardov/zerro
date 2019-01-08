@@ -106,7 +106,6 @@ export default class Store extends React.Component {
   initState = () => {
     const localToken = Cookies.get('token')
     const localData = LocalStorage.get('data')
-    console.log('Token + data', localToken, localData)
 
     if (localToken && localData) {
       this.setState(() => {
