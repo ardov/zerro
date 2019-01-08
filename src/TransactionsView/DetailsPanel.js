@@ -1,6 +1,6 @@
 import React from 'react'
 import { StoreContext } from '../Store'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import { FormattedNumber } from 'react-intl'
@@ -14,7 +14,7 @@ const Panel = styled.section`
   top: 0;
   align-self: flex-start;
   height: 100vh;
-  width: 560px;
+  width: 480px;
   border-left: 1px solid #eee;
   display: flex;
   overflow: auto;
@@ -108,9 +108,7 @@ export default class DetailsPanel extends React.Component {
           },
           {
             name: 'Категории',
-            value: tr.tag.length
-              ? tr.tag.map(tag => tag.title).join(', ')
-              : '--'
+            value: tr.tag ? tr.tag.map(tag => tag.title).join(', ') : '--'
           },
           {
             name: 'payee',

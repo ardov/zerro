@@ -2,8 +2,10 @@ import React, { Component } from 'react'
 import styled from 'styled-components'
 import { StoreContext } from './Store/'
 import { Link } from 'react-router-dom'
+import { Button } from 'antd'
 
 const Main = styled.header`
+  height: 48px;
   padding: 0 40px;
   display: flex;
   flex-direction: row;
@@ -15,7 +17,7 @@ const Main = styled.header`
 const Name = styled.h1`
   font-size: 20px;
   font-weight: 400;
-  line-height: 40px;
+  /* line-height: 48px; */
   padding: 0;
   margin: 0;
 `
@@ -24,7 +26,10 @@ const Buttons = styled.div`
   justify-self: flex-end;
 `
 
-const MenuButton = styled.button`
+const NavLink = styled(Link)`
+  margin-left: 16px;
+`
+const StyledButton = styled(Button)`
   margin-left: 16px;
 `
 
@@ -35,17 +40,23 @@ export default class TransactionList extends Component {
     return (
       <Main>
         <Name>ZenMoney+</Name>
-        <Link to="/">Транзакции</Link>
-        <Link to="/tags">Категории</Link>
+        <div>
+          <NavLink to="/">Транзакции</NavLink>
+          <NavLink to="/tags">Категории</NavLink>
+        </div>
         <Buttons>
-          <MenuButton onClick={() => console.log(this.context.data)}>
+          <StyledButton onClick={() => console.log(this.context.data)}>
             Log data
-          </MenuButton>
-          <MenuButton
-            onClick={() => console.log(this.context.actions.updateData())}
+          </StyledButton>
+
+          <StyledButton
+            icon="reload"
+            onClick={() => {
+              this.context.actions.updateData()
+            }}
           >
             Update Data
-          </MenuButton>
+          </StyledButton>
         </Buttons>
       </Main>
     )

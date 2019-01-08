@@ -7,6 +7,7 @@ import { BarChart } from './components'
 const Body = styled.div`
   display: flex;
   flex-direction: row;
+  align-items: center;
 `
 
 const Title = styled.div`

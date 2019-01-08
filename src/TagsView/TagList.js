@@ -1,52 +1,12 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
-import { format } from 'date-fns'
-import ru from 'date-fns/locale/ru'
 import { groupTransactionsBy, calcMetrics } from '../Utils/transactions'
 import Tag from './Tag'
 
-const Group = styled.section`
-  padding-top: 20px;
-  position: relative;
-
-  &:first-child {
-    padding-top: 0;
-  }
+const Group = styled.div`
+  margin-top: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 `
-const Body = styled.div`
-  display: flex;
-  flex-direction: row;
-  min-height: 100vh;
-`
-const Menu = styled.div`
-  width: 200px;
-  padding: 40px;
-  background: rgba(0, 0, 0, 0.06);
-`
-const Content = styled.div`
-  flex-grow: 1;
-  display: flex;
-  padding: 40px;
-  flex-direction: column;
-  overflow: auto;
-  max-height: 100vh;
-`
-function DateTitle({ date }) {
-  const Title = styled.h3`
-    margin: 0;
-    padding: 8px 0;
-    position: sticky;
-    top: 0;
-    background-color: #fff;
-    font-weight: 400;
-    color: rgba(0, 0, 0, 0.56);
-  `
-
-  const isCurrentYear = new Date().getFullYear() === date.getFullYear()
-  const formatString = isCurrentYear ? 'D MMMM, dd' : 'D MMMM YYYY, dd'
-  const formattedDate = format(date, formatString, { locale: ru })
-  return <Title>{formattedDate}</Title>
-}
 
 export default class TagList extends Component {
   render() {
@@ -82,9 +42,16 @@ export default class TagList extends Component {
 
     return (
       <div>
-        <h1>Доход = {metricsTotal && metricsTotal.income}</h1>
-        <h1>Расход = {metricsTotal && metricsTotal.outcome}</h1>
-        {tags && tags.map(tag => <Tag tag={tag} key={tag.id} />)}
+        <h1>Доход = {metricsTotal.total.income}</h1>
+        <h1>Расход = {metricsTotal.total.outcome}</h1>
+        {tags &&
+          tags.map(tag => (
+            <Group>
+              <Tag tag={tag} key={tag.id} />
+              {tag.children &&
+                tag.children.map(tag => <Tag tag={tag} key={tag.id} />)}
+            </Group>
+          ))}
       </div>
     )
   }

@@ -2,6 +2,7 @@ import React from 'react'
 import styled, { css } from 'styled-components'
 import toArray from 'lodash/toArray'
 import { FormattedNumber } from 'react-intl'
+import { Tag } from 'antd'
 
 function getFirstSymbol(str) {
   return toArray(str)[0]
@@ -57,7 +58,7 @@ const MainInfo = styled.div`
   line-height: 24px;
 `
 
-const Tag = styled.div`
+const MainTag = styled.div`
   flex-grow: 1;
 `
 const Account = styled.div`
@@ -81,14 +82,14 @@ const AdditionalInfo = styled.div`
   color: rgba(0, 0, 0, 0.56);
 `
 
-const Payee = styled.span`
-  display: inline;
-  background: #eee;
-  padding: 0 4px;
-  font-size: 12px;
-  line-height: 16px;
-  border-radius: 4px;
-`
+// const Payee = styled.span`
+//   display: inline;
+//   background: #eee;
+//   padding: 0 4px;
+//   font-size: 12px;
+//   line-height: 16px;
+//   border-radius: 4px;
+// `
 
 export default class Transaction extends React.Component {
   // static contextType = StoreContext
@@ -117,7 +118,7 @@ export default class Transaction extends React.Component {
         <Icon>{icon}</Icon>
         <Info>
           <MainInfo>
-            <Tag>{mainTagTitle}</Tag>
+            <MainTag>{mainTagTitle}</MainTag>
             <Account>{account1.title}</Account>
             <Sum type={tr.type}>
               <FormattedNumber
@@ -130,7 +131,7 @@ export default class Transaction extends React.Component {
             </Sum>
           </MainInfo>
           <AdditionalInfo>
-            {tr.payee && <Payee>{tr.payee}</Payee>} {tr.comment}
+            {tr.payee && <Tag>{tr.payee}</Tag>} {tr.comment}
           </AdditionalInfo>
         </Info>
       </Body>

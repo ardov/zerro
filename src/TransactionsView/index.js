@@ -13,9 +13,10 @@ const Body = styled.div`
   flex-direction: row;
 `
 const Menu = styled.div`
-  width: 200px;
+  width: 280px;
   padding: 40px;
-  background: rgba(0, 0, 0, 0.06);
+  /* background: rgba(0, 0, 0, 0.06); */
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
 `
 const Content = styled.div`
   flex-grow: 1;

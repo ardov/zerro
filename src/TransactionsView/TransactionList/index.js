@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import { groupTransactionsBy } from '../../Utils/transactions'
+import { Spin } from 'antd'
 
 import Transaction from './Transaction'
 
@@ -13,6 +14,12 @@ const Group = styled.section`
   &:first-child {
     padding-top: 0;
   }
+`
+const SpinContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
 `
 
 function DateTitle({ date }) {
@@ -39,10 +46,11 @@ export default class TransactionList extends Component {
   render() {
     const { opened, transactions } = this.props
     const groupped = groupTransactionsBy('day', transactions)
+    const hasData = !!groupped.length
 
     return (
       <div>
-        {groupped.length &&
+        {hasData &&
           groupped.map(({ date, transactions }) => (
             <Group key={+date}>
               <DateTitle date={date} />
@@ -58,6 +66,11 @@ export default class TransactionList extends Component {
               ))}
             </Group>
           ))}
+        {!groupped.length && (
+          <SpinContainer>
+            <Spin />
+          </SpinContainer>
+        )}
       </div>
     )
   }
