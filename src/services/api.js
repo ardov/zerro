@@ -1,5 +1,5 @@
 const DEFAULT_TOKEN = process.env.REACT_APP_TOKEN
-const DOMAIN = process.env.REACT_APP_DOMAIN + 'test/?token='
+const DOMAIN = process.env.REACT_APP_DOMAIN + 'diff/?token='
 
 const zenApi = {}
 zenApi.getData = (callback, params) => {
