@@ -1,8 +1,8 @@
-export const getTransactions = (state, populate, check) => ({
-  limit,
-  offset = 0,
-  conditions = state.filterConditions
-}) => {
+export const getTransactions = (state, populate, check) => (options = {}) => {
+  const limit = options.limit || 0
+  const offset = options.offset || 0
+  const conditions = options.conditions || state.filterConditions
+
   const transactions = state.transaction
   const list = []
   for (const id in transactions) {
