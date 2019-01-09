@@ -74,6 +74,22 @@ export default class Store extends React.Component {
     })
   }
 
+  edit = (type, arr) => {
+    const changed = {}
+    changed[type] = arr.map(obj => {
+      return {
+        ...this.state[type][obj.id],
+        ...{ tag: obj.tag, changed: Date.now() / 1000 }
+      }
+    })
+    ZenApi.getData(
+      res => {
+        this.setState(parseData(res))
+      },
+      { lastSync: this.state.lastSync, changed: changed }
+    )
+  }
+
   updateFilter = conditions => {
     this.setState(state => {
       return { filterConditions: { ...state.filterConditions, ...conditions } }
@@ -137,7 +153,8 @@ export default class Store extends React.Component {
         getTags: getTags(this.state, populate),
         updateFilter: this.updateFilter,
         selectTransaction: this.selectTransaction,
-        deleteTransaction: this.deleteTransaction
+        deleteTransaction: this.deleteTransaction,
+        edit: this.edit
       }
     }
     return (
