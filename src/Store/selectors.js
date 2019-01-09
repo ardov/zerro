@@ -11,7 +11,9 @@ export const getTransactions = (state, populate, check) => (options = {}) => {
 
   return list
     .filter(check(conditions))
-    .sort((a, b) => b.date - a.date)
+    .sort((a, b) =>
+      +b.date === +a.date ? b.created - a.created : b.date - a.date
+    )
     .slice(offset, limit ? limit + offset : undefined)
 }
 
