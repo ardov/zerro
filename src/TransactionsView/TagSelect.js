@@ -27,7 +27,7 @@ export default class TagSelect extends React.Component {
       <TreeSelect
         treeData={treeData}
         showSearch
-        style={{ width: 300 }}
+        style={{ display: 'block' }}
         value={this.props.value}
         dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
         placeholder="Выберите категории"

@@ -28,9 +28,15 @@ export default class TransactionsView extends Component {
   static contextType = StoreContext
 
   render() {
-    const { selectTransaction, getTransactions } = this.context.actions
+    const {
+      selectTransaction,
+      getTransactions,
+      edit,
+      getElement
+    } = this.context.actions
     const { openedTransaction } = this.context.data
     const transactions = getTransactions({ limit: 100 })
+    const opened = getElement('transaction', openedTransaction)
 
     return (
       <div>
@@ -48,7 +54,10 @@ export default class TransactionsView extends Component {
               }}
             />
           </Content>
-          <DetailsPanel />
+          <DetailsPanel
+            transaction={opened}
+            onSave={tr => edit('transaction', [tr])}
+          />
         </Body>
       </div>
     )

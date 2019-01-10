@@ -1,9 +1,11 @@
 import React from 'react'
 import { StoreContext } from '../store'
 import styled from 'styled-components'
+import TagSelect from './TagSelect'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import { FormattedNumber } from 'react-intl'
+import { Button } from 'antd'
 
 const formatDate = date => format(date, 'D MMMM YYYY, dd', { locale: ru })
 const formatDateTime = date =>
@@ -48,9 +50,35 @@ const Line = ({ name, value }) => {
 export default class DetailsPanel extends React.Component {
   static contextType = StoreContext
 
+  state = {
+    transaction: null,
+    changed: null
+  }
+
+  componentWillReceiveProps = ({ transaction }) => {
+    if (transaction) {
+      this.setState({
+        transaction: {
+          ...transaction,
+          ...{ tag: transaction.tag && transaction.tag.map(tag => tag.id) }
+        }
+      })
+    }
+  }
+
+  saveChanges = () => this.props.onSave(this.state.transaction)
+  updateTags = tags => {
+    this.setState(prev => {
+      return {
+        transaction: { ...prev.transaction, ...{ tag: tags } },
+        changed: { ...prev.changed, ...{ tag: tags } }
+      }
+    })
+  }
+
   render() {
-    const { deleteTransaction, getElement } = this.context.actions
-    const tr = getElement('transaction', this.context.data.openedTransaction)
+    const { deleteTransaction } = this.context.actions
+    const tr = this.state.transaction
 
     const values = tr
       ? [
@@ -173,27 +201,32 @@ export default class DetailsPanel extends React.Component {
         ]
       : null
 
+    const tags = tr && tr.tag
+
     return (
       <Panel>
         {tr && (
           <div>
-            {values.map(el => (
-              <Line name={el.name} value={el.value} key={el.name} />
-            ))}
-            <button
+            <TagSelect value={tags} onChange={this.updateTags} />
+            <div />
+            <Button
               onClick={() => {
                 deleteTransaction(tr.id)
               }}
             >
               Delete
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => {
                 console.log(tr)
               }}
             >
               Log Transaction
-            </button>
+            </Button>
+            <Button onClick={this.saveChanges}>Сохранить</Button>
+            {values.map(el => (
+              <Line name={el.name} value={el.value} key={el.name} />
+            ))}
             {tr.latitude && (
               <div>
                 <iframe
