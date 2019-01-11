@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import FilterTags from '../components/FilterTags'
 // import styled from 'styled-components'
 
 import { StoreContext } from '../store/'
@@ -31,6 +32,7 @@ export default class TransactionList extends Component {
         >
           Показывать удалённые
         </Checkbox>
+        <FilterTags conditions={conditions} />
       </div>
     )
   }
