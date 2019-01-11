@@ -2,7 +2,8 @@ import React from 'react'
 import ZenApi from '../services/api'
 import Cookies from '../services/cookies'
 import LocalStorage from '../services/localstorage'
-import { parseData, populate, check } from './functions'
+import { defaultConditions, check } from '../TransactionFilter/'
+import { parseData, populate } from './functions'
 import { getTransactions, getElement, getTags } from './selectors'
 
 export const StoreContext = React.createContext()
@@ -30,17 +31,7 @@ export default class Store extends React.Component {
     // UI
     openedTransaction: null,
     updatingData: false,
-    filterConditions: {
-      search: null,
-      type: 'any',
-      showDeleted: false,
-      fromDate: null,
-      toDate: null,
-      tags: null,
-      accounts: null,
-      amountFrom: null,
-      amountTo: null
-    },
+    filterConditions: defaultConditions,
     showFirst: 200
   }
 
