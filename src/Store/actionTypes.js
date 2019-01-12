@@ -12,3 +12,6 @@ export const FILTER_RESET_ALL = 'FILTER_RESET_ALL'
 export const UPDATE_DATA = 'UPDATE_DATA'
 
 export const MERGE_SERVER_DATA = 'MERGE_SERVER_DATA'
+export const SET_TOKEN = 'SET_TOKEN'
+export const SET_LOCAL_STATE = 'SET_LOCAL_STATE'
+// export const INIT_STATE = 'INIT_STATE'
