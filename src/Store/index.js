@@ -1,8 +1,6 @@
 import React from 'react'
 import ZenApi from '../services/api'
-import Cookies from '../services/cookies'
-import LocalStorage from '../services/localstorage'
-import { defaultConditions, check } from '../TransactionFilter/'
+import { check } from '../TransactionFilter/'
 import { parseData, populate } from './functions'
 import { getTransactions, getElement, getTags } from './selectors'
 import reducer from './reducers/'
@@ -28,45 +26,17 @@ export default class Store extends React.Component {
     // TOKEN
     token: null,
 
-    selectedTransactions: [],
+    // selectedTransactions: [],
     // UI
     openedTransaction: null,
-    updatingData: false,
-    filterConditions: defaultConditions,
-    showFirst: 200
+    // updatingData: false,
+    filterConditions: {}
+    // showFirst: 200
   }
 
   /****************************************************************
    * METHODS
    ****************************************************************/
-  //----
-  updateData = () => {
-    ZenApi.getData(
-      res => {
-        this.setState(parseData(res), this.saveData)
-      },
-      { lastSync: this.state.lastSync }
-    )
-  }
-
-  //----
-  saveData = () => {
-    const state = this.state
-    LocalStorage.set('data', {
-      lastSync: state.lastSync,
-      instrument: state.instrument,
-      country: state.country,
-      company: state.company,
-      user: state.user,
-      account: state.account,
-      tag: state.tag,
-      // budget: state.budget,
-      merchant: state.merchant,
-      reminder: state.reminder,
-      reminderMarker: state.reminderMarker,
-      transaction: state.transaction
-    })
-  }
 
   edit = (type, arr) => {
     const changed = {}
@@ -111,26 +81,6 @@ export default class Store extends React.Component {
       },
       { lastSync: this.state.lastSync, changed: changed }
     )
-  }
-
-  initState = () => {
-    const localToken = Cookies.get('token')
-    const localData = LocalStorage.get('data')
-
-    if (localToken && localData) {
-      this.setState(() => {
-        return { ...localData, ...{ token: localToken } }
-      }, this.updateData)
-    } else if (localToken) {
-      this.updateData()
-    } else {
-      ZenApi.auth(token => {
-        Cookies.set('token', token)
-        this.setState(() => {
-          return { token: token }
-        }, this.updateData)
-      })
-    }
   }
 
   getState = () => this.state

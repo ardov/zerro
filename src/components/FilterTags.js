@@ -4,7 +4,7 @@ import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 
 import { StoreContext } from '../store/'
-import { defaultConditions } from '../TransactionFilter/'
+// import { defaultConditions } from '../TransactionFilter/'
 // import { FormattedNumber } from 'react-intl'
 import { Tag } from 'antd'
 
@@ -13,7 +13,7 @@ const formatDate = date => format(date, 'D MMM YYYY', { locale: ru })
 export default class FilterTags extends Component {
   static contextType = StoreContext
   render() {
-    const conditions = this.props.conditions || defaultConditions
+    const conditions = this.props.conditions
 
     const {
       // search,

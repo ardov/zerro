@@ -82,15 +82,6 @@ const AdditionalInfo = styled.div`
   color: rgba(0, 0, 0, 0.56);
 `
 
-// const Payee = styled.span`
-//   display: inline;
-//   background: #eee;
-//   padding: 0 4px;
-//   font-size: 12px;
-//   line-height: 16px;
-//   border-radius: 4px;
-// `
-
 export default class Transaction extends React.Component {
   // static contextType = StoreContext
   render() {

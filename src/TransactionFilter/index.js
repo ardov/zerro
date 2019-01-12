@@ -1,36 +1,3 @@
-import concat from 'lodash/concat'
-
-export const defaultConditions = {
-  search: null,
-  type: null,
-  showDeleted: false,
-  fromDate: null,
-  toDate: null,
-  tags: null,
-  accounts: null,
-  amountFrom: null,
-  amountTo: null
-}
-
-export const conditionActions = conditions => (action, payload) => {
-  const actions = {
-    SET_CONDITION: (conditions, payload) => {
-      return { ...conditions, ...payload }
-    },
-    ADD_TAG: (conditions, id) => {
-      const tags = conditions.tags || []
-      return { ...conditions, ...{ tags: concat(tags, id) } }
-    },
-    RESET_CONDITION: (conditions, condition) => {
-      return { ...conditions, ...{ [condition]: defaultConditions[condition] } }
-    },
-    RESET_ALL: conditions => {
-      return { ...defaultConditions }
-    }
-  }
-  return actions[action](conditions, payload)
-}
-
 export const check = conditions => tr => {
   const {
     search,
@@ -46,8 +13,12 @@ export const check = conditions => tr => {
 
   const checkSearch = () => {
     if (!search) return true
-    if (!tr.comment) return false
-    return tr.comment.toUpperCase().includes(search.toUpperCase())
+    if (tr.comment && tr.comment.toUpperCase().includes(search.toUpperCase()))
+      return true
+    if (tr.payee && tr.payee.toUpperCase().includes(search.toUpperCase()))
+      return true
+
+    return false
   }
 
   const checkTags = () => {
