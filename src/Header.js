@@ -4,6 +4,8 @@ import { StoreContext } from './store/'
 import { Link } from 'react-router-dom'
 import { Button } from 'antd'
 
+import { updateData } from './store/actions'
+
 const Main = styled.header`
   height: 48px;
   padding: 0 40px;
@@ -52,7 +54,7 @@ export default class TransactionList extends Component {
           <StyledButton
             icon="reload"
             onClick={() => {
-              this.context.actions.updateData()
+              this.context.dispatch(updateData())
             }}
           >
             Update Data

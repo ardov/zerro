@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import styled from 'styled-components'
 
 import { StoreContext } from '../store/'
+import { openTransaction } from '../store/actions'
 
 import Header from '../Header'
 import TransactionList from './TransactionList/'
@@ -35,6 +36,7 @@ export default class TransactionsView extends Component {
       getElement
     } = this.context.actions
     const { openedTransaction } = this.context.data
+    const dispatch = this.context.dispatch
     const transactions = getTransactions({ limit: 100 })
     const opened = getElement('transaction', openedTransaction)
 
@@ -50,7 +52,7 @@ export default class TransactionsView extends Component {
               transactions={transactions}
               opened={openedTransaction}
               onTransactionOpen={id => {
-                selectTransaction(id)
+                dispatch(openTransaction(id))
               }}
             />
           </Content>

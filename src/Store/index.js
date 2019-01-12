@@ -5,6 +5,7 @@ import LocalStorage from '../services/localstorage'
 import { defaultConditions, check } from '../TransactionFilter/'
 import { parseData, populate } from './functions'
 import { getTransactions, getElement, getTags } from './selectors'
+import reducer from './reducers/'
 
 export const StoreContext = React.createContext()
 
@@ -38,6 +39,7 @@ export default class Store extends React.Component {
   /****************************************************************
    * METHODS
    ****************************************************************/
+  //----
   updateData = () => {
     ZenApi.getData(
       res => {
@@ -47,6 +49,7 @@ export default class Store extends React.Component {
     )
   }
 
+  //----
   saveData = () => {
     const state = this.state
     LocalStorage.set('data', {
@@ -130,11 +133,25 @@ export default class Store extends React.Component {
     }
   }
 
+  getState = () => this.state
+
+  dispatch = action => {
+    if (typeof action === 'function') {
+      action(this.dispatch, this.getState)
+    } else {
+      console.log('%c' + action.type, 'color: green', action.payload)
+
+      this.setState(state => reducer(state, action))
+    }
+  }
+
   /****************************************************************
    * RENDER
    ****************************************************************/
   render() {
     const value = {
+      // selectors,
+      dispatch: this.dispatch,
       data: this.state,
       actions: {
         initState: this.initState,
