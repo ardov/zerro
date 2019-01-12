@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import FilterTags from '../components/FilterTags'
+import { setCondition } from '../store/actions/filter'
 // import styled from 'styled-components'
 
 import { StoreContext } from '../store/'
@@ -13,6 +14,7 @@ export default class TransactionList extends Component {
   state = {}
 
   render() {
+    const dispatch = this.context.dispatch
     const conditions = this.context.data.filterConditions
     return (
       <div>
@@ -20,14 +22,14 @@ export default class TransactionList extends Component {
           value={conditions.search}
           placeholder="Поиск по комментариям"
           onChange={e => {
-            this.updateFilter({ search: e.target.value })
+            dispatch(setCondition({ search: e.target.value }))
           }}
         />
 
         <Checkbox
           checked={conditions.showDeleted}
           onChange={e => {
-            this.updateFilter({ showDeleted: e.target.checked })
+            dispatch(setCondition({ showDeleted: e.target.checked }))
           }}
         >
           Показывать удалённые
