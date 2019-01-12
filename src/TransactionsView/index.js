@@ -2,7 +2,11 @@ import React, { Component } from 'react'
 import styled from 'styled-components'
 
 import { StoreContext } from '../store/'
-import { openTransaction } from '../store/actions/'
+import {
+  openTransaction,
+  applyChangesToTransaction,
+  deleteTransaction
+} from '../store/actions/'
 
 import Header from '../Header'
 import TransactionList from './TransactionList/'
@@ -68,7 +72,11 @@ export default class TransactionsView extends Component {
           </Content>
           <DetailsPanel
             transaction={opened}
-            onSave={tr => edit('transaction', [tr])}
+            onDelete={id => dispatch(deleteTransaction(id))}
+            onSave={tr => {
+              console.log(tr)
+              dispatch(applyChangesToTransaction({ id: tr.id, tag: tr.tag }))
+            }}
           />
         </Body>
       </div>

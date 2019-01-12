@@ -50,7 +50,30 @@ export const deleteTransaction = id => (dispatch, getState) => {
       }
     ]
   }
+  ZenApi.getData(token, { lastSync, changed })
+    .then(json => {
+      if (json.error) {
+        console.warn('!!! Error', json)
+      } else {
+        dispatch({ type: types.MERGE_SERVER_DATA, payload: json })
+      }
+    })
+    .catch(err => {
+      console.warn('!!!', err)
+    })
+}
 
+export const applyChangesToTransaction = tr => (dispatch, getState) => {
+  const { token, lastSync, transaction } = getState()
+  const changed = {
+    transaction: [
+      {
+        ...transaction[tr.id],
+        ...tr,
+        changed: Date.now() / 1000
+      }
+    ]
+  }
   ZenApi.getData(token, { lastSync, changed })
     .then(json => {
       if (json.error) {

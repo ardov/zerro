@@ -53,12 +53,6 @@ export default class Store extends React.Component {
   //   )
   // }
 
-  updateFilter = conditions => {
-    this.setState(state => {
-      return { filterConditions: { ...state.filterConditions, ...conditions } }
-    })
-  }
-
   selectTransaction = id => {
     this.setState(state => {
       return { openedTransaction: id }

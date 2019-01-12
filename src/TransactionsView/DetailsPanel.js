@@ -1,5 +1,4 @@
 import React from 'react'
-import { StoreContext } from '../store'
 import styled from 'styled-components'
 import TagSelect from './TagSelect'
 import { format } from 'date-fns'
@@ -48,8 +47,6 @@ const Line = ({ name, value }) => {
 }
 
 export default class DetailsPanel extends React.Component {
-  static contextType = StoreContext
-
   state = {
     transaction: null,
     changed: null
@@ -77,7 +74,6 @@ export default class DetailsPanel extends React.Component {
   }
 
   render() {
-    const { deleteTransaction } = this.context.actions
     const tr = this.state.transaction
 
     const values = tr
@@ -211,7 +207,7 @@ export default class DetailsPanel extends React.Component {
             <div />
             <Button
               onClick={() => {
-                deleteTransaction(tr.id)
+                this.props.onDelete(tr.id)
               }}
             >
               Delete
