@@ -4,6 +4,10 @@ export const setCondition = id => {
   return { type: types.FILTER_SET_CONDITION, payload: id }
 }
 
+export const setTags = tags => {
+  return { type: types.FILTER_SET_TAGS, payload: tags }
+}
+
 export const addTag = id => {
   return { type: types.FILTER_ADD_TAG, payload: id }
 }

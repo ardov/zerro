@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import FilterTags from '../components/FilterTags'
-import { setCondition } from '../store/actions/filter'
+import TagSelect from './TagSelect'
+import { setCondition, setTags } from '../store/actions/filter'
 // import styled from 'styled-components'
 
 import { StoreContext } from '../store/'
@@ -33,6 +34,12 @@ export default class TransactionList extends Component {
         >
           Показывать удалённые
         </Checkbox>
+        <TagSelect
+          value={conditions.tags}
+          onChange={tags => {
+            dispatch(setTags(tags))
+          }}
+        />
         <FilterTags conditions={conditions} />
       </div>
     )

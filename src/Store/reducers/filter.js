@@ -27,6 +27,9 @@ export default function filterConditions(
     case types.FILTER_SET_CONDITION:
       return { ...conditions, ...payload }
 
+    case types.FILTER_SET_TAGS:
+      return { ...conditions, tags: payload.length ? payload : null }
+
     case types.FILTER_RESET_CONDITION:
       return {
         ...conditions,
