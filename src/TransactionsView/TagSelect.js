@@ -6,7 +6,7 @@ export default class TagSelect extends React.Component {
   static contextType = StoreContext
 
   render() {
-    const { getTags } = this.context.actions
+    const { getTags } = this.context.selectors
     const tags = getTags()
 
     const treeData = tags.map(tag => {
