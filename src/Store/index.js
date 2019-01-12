@@ -1,7 +1,6 @@
 import React from 'react'
-import ZenApi from '../services/api'
 import { check } from '../TransactionFilter/'
-import { parseData, populate } from './functions'
+import { populate } from './functions'
 import { getTransactions, getElement, getTags } from './selectors'
 import reducer from './reducers/'
 
@@ -38,21 +37,21 @@ export default class Store extends React.Component {
    * METHODS
    ****************************************************************/
 
-  edit = (type, arr) => {
-    const changed = {}
-    changed[type] = arr.map(obj => {
-      return {
-        ...this.state[type][obj.id],
-        ...{ tag: obj.tag, changed: Date.now() / 1000 }
-      }
-    })
-    ZenApi.getData(
-      res => {
-        this.setState(parseData(res))
-      },
-      { lastSync: this.state.lastSync, changed: changed }
-    )
-  }
+  // edit = (type, arr) => {
+  //   const changed = {}
+  //   changed[type] = arr.map(obj => {
+  //     return {
+  //       ...this.state[type][obj.id],
+  //       ...{ tag: obj.tag, changed: Date.now() / 1000 }
+  //     }
+  //   })
+  //   ZenApi.getData(
+  //     res => {
+  //       this.setState(parseData(res))
+  //     },
+  //     { lastSync: this.state.lastSync, changed: changed }
+  //   )
+  // }
 
   updateFilter = conditions => {
     this.setState(state => {
@@ -64,23 +63,6 @@ export default class Store extends React.Component {
     this.setState(state => {
       return { openedTransaction: id }
     })
-  }
-
-  deleteTransaction = id => {
-    const changed = {
-      transaction: [
-        {
-          ...this.state.transaction[id],
-          ...{ deleted: true, changed: Date.now() / 1000 }
-        }
-      ]
-    }
-    ZenApi.getData(
-      res => {
-        this.setState(parseData(res))
-      },
-      { lastSync: this.state.lastSync, changed: changed }
-    )
   }
 
   getState = () => this.state
@@ -110,8 +92,6 @@ export default class Store extends React.Component {
         getTransactions: getTransactions(this.state, populate, check),
         getTags: getTags(this.state, populate),
         updateFilter: this.updateFilter,
-        selectTransaction: this.selectTransaction,
-        deleteTransaction: this.deleteTransaction,
         edit: this.edit
       }
     }

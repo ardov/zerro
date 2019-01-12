@@ -1,39 +1,5 @@
 import parseDate from 'date-fns/parse'
 
-/**
- * Parses JSON from server and merges data into state.
- * @param {Object} JSON from server
- * @return {Object} New state
- */
-export const parseData = res => state => {
-  let newState = {
-    lastSync: res.serverTimestamp
-  }
-
-  const types = [
-    'instrument',
-    'country',
-    'company',
-    'user',
-    'account',
-    'tag',
-    // 'budget',
-    'merchant',
-    'reminder',
-    'reminderMarker',
-    'transaction'
-  ]
-
-  types.forEach(type => {
-    if (res[type]) {
-      res[type].forEach(el => {
-        state[type][el.id] = el
-      }) // not immutable, fix later
-    }
-  })
-  return newState
-}
-
 export const populate = (
   el,
   {
