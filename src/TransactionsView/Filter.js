@@ -9,13 +9,12 @@ import { Checkbox, Input } from 'antd'
 const Search = Input.Search
 export default class TransactionList extends Component {
   static contextType = StoreContext
-  updateFilter = this.context.actions.updateFilter
 
   state = {}
 
   render() {
     const dispatch = this.context.dispatch
-    const conditions = this.context.data.filterConditions
+    const conditions = this.context.selectors.getFilterConditions()
     return (
       <div>
         <Search

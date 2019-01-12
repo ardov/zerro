@@ -1,7 +1,11 @@
 import React from 'react'
-import { check } from '../TransactionFilter/'
-import { populate } from './functions'
-import { getTransactions, getElement, getTags } from './selectors'
+import {
+  getTransactions,
+  getElement,
+  getTags,
+  getOpened,
+  getFilterConditions
+} from './selectors'
 import reducer from './reducers/'
 
 export const StoreContext = React.createContext()
@@ -37,28 +41,6 @@ export default class Store extends React.Component {
    * METHODS
    ****************************************************************/
 
-  // edit = (type, arr) => {
-  //   const changed = {}
-  //   changed[type] = arr.map(obj => {
-  //     return {
-  //       ...this.state[type][obj.id],
-  //       ...{ tag: obj.tag, changed: Date.now() / 1000 }
-  //     }
-  //   })
-  //   ZenApi.getData(
-  //     res => {
-  //       this.setState(parseData(res))
-  //     },
-  //     { lastSync: this.state.lastSync, changed: changed }
-  //   )
-  // }
-
-  selectTransaction = id => {
-    this.setState(state => {
-      return { openedTransaction: id }
-    })
-  }
-
   getState = () => this.state
 
   dispatch = action => {
@@ -76,18 +58,14 @@ export default class Store extends React.Component {
    ****************************************************************/
   render() {
     const value = {
-      // selectors,
-      dispatch: this.dispatch,
-      data: this.state,
-      actions: {
-        initState: this.initState,
-        updateData: this.updateData,
-        getElement: getElement(this.state, populate),
-        getTransactions: getTransactions(this.state, populate, check),
-        getTags: getTags(this.state, populate),
-        updateFilter: this.updateFilter,
-        edit: this.edit
-      }
+      selectors: {
+        getElement: getElement(this.state),
+        getTransactions: getTransactions(this.state),
+        getTags: getTags(this.state),
+        getOpened: getOpened(this.state),
+        getFilterConditions: getFilterConditions(this.state)
+      },
+      dispatch: this.dispatch
     }
     return (
       <StoreContext.Provider value={value}>

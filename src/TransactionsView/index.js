@@ -39,12 +39,10 @@ export default class TransactionsView extends Component {
   }
 
   render() {
-    const { getTransactions, edit, getElement } = this.context.actions
-    const { openedTransaction } = this.context.data
+    const { getTransactions, getOpened } = this.context.selectors
     const dispatch = this.context.dispatch
     const transactions = getTransactions({ limit: this.state.limit })
-    const opened = getElement('transaction', openedTransaction)
-
+    const opened = getOpened()
     return (
       <div>
         <Header />
@@ -55,7 +53,7 @@ export default class TransactionsView extends Component {
           <Content>
             <TransactionList
               transactions={transactions}
-              opened={openedTransaction}
+              opened={opened}
               onTransactionOpen={id => {
                 dispatch(openTransaction(id))
               }}

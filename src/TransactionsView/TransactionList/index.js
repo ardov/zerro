@@ -47,6 +47,7 @@ export default class TransactionList extends Component {
     const { opened, transactions } = this.props
     const groupped = groupTransactionsBy('day', transactions)
     const hasData = !!groupped.length
+    const openedId = opened ? opened.id : null
 
     return (
       <div>
@@ -58,7 +59,7 @@ export default class TransactionList extends Component {
                 <Transaction
                   data={tr}
                   key={tr.id}
-                  opened={opened === tr.id}
+                  opened={openedId === tr.id}
                   onClick={() => {
                     this.handleTransactionClick(tr.id)
                   }}

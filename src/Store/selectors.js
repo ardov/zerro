@@ -1,4 +1,6 @@
-export const getTransactions = (state, populate, check) => (options = {}) => {
+import { populate, checkTransaction } from './helpers'
+
+export const getTransactions = state => (options = {}) => {
   const limit = options.limit || 0
   const offset = options.offset || 0
   const conditions = options.conditions || state.filterConditions
@@ -6,26 +8,26 @@ export const getTransactions = (state, populate, check) => (options = {}) => {
   const transactions = state.transaction
   const list = []
   for (const id in transactions) {
-    list.push(populate(transactions[id], state))
+    list.push(populate(state, transactions[id]))
   }
 
   return list
-    .filter(check(conditions))
+    .filter(checkTransaction(conditions))
     .sort((a, b) =>
       +b.date === +a.date ? b.created - a.created : b.date - a.date
     )
     .slice(offset, limit ? limit + offset : undefined)
 }
 
-export const getElement = (state, populate) => (type, id) => {
-  return populate(state[type][id], state)
+export const getElement = state => (type, id) => {
+  return populate(state, state[type][id])
 }
 
-export const getTags = (state, populate) => () => {
+export const getTags = state => () => {
   const tags = state.tag
   const list = []
   for (const id in tags) {
-    list.push(populate(tags[id], state))
+    list.push(populate(state, tags[id]))
   }
   const topLevel = list.filter(tag => !tag.parent)
   list
@@ -40,4 +42,17 @@ export const getTags = (state, populate) => () => {
     })
 
   return topLevel
+}
+
+export const getOpened = state => () => {
+  const id = state.openedTransaction
+  if (id) {
+    return getElement(state)('transaction', id)
+  } else {
+    return null
+  }
+}
+
+export const getFilterConditions = state => () => {
+  return state.filterConditions
 }

@@ -10,7 +10,7 @@ export default class TransactionsView extends Component {
   static contextType = StoreContext
 
   render() {
-    const { getTags, getTransactions } = this.context.actions
+    const { getTags, getTransactions } = this.context.selectors
     const transactions = getTransactions()
     const tags = getTags()
 
