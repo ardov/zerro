@@ -1,6 +1,8 @@
-export default function parseData(state, res) {
+import keyBy from 'lodash/keyBy'
+
+export default function parseData(state, response) {
   let newState = {
-    lastSync: res.serverTimestamp
+    lastSync: response.serverTimestamp
   }
 
   const types = [
@@ -18,11 +20,12 @@ export default function parseData(state, res) {
   ]
 
   types.forEach(type => {
-    if (res[type]) {
-      res[type].forEach(el => {
-        state[type][el.id] = el
-      }) // not immutable, fix later
+    if (response[type]) {
+      newState[type] = {
+        ...state[type],
+        ...keyBy(response[type], el => el.id)
+      }
     }
   })
-  return newState
+  return { ...state, ...newState }
 }
