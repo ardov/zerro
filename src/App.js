@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { BrowserRouter, Route } from 'react-router-dom'
+import { initState } from './store/actions/'
 
 import { IntlProvider, addLocaleData } from 'react-intl'
 import ru from 'react-intl/locale-data/ru'
@@ -14,8 +15,7 @@ export default class App extends Component {
   static contextType = StoreContext
 
   componentDidMount() {
-    // this.context.actions.updateData()
-    this.context.actions.initState()
+    this.context.dispatch(initState())
   }
 
   render() {

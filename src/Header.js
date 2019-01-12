@@ -4,7 +4,7 @@ import { StoreContext } from './store/'
 import { Link } from 'react-router-dom'
 import { Button } from 'antd'
 
-import { updateData } from './store/actions'
+import { updateData } from './store/actions/'
 
 const Main = styled.header`
   height: 48px;
