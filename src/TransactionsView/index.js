@@ -8,6 +8,7 @@ import Header from '../Header'
 import TransactionList from './TransactionList/'
 import Filter from './Filter'
 import DetailsPanel from './DetailsPanel'
+import { Button } from 'antd'
 
 const Body = styled.div`
   display: flex;
@@ -28,11 +29,16 @@ const Content = styled.div`
 export default class TransactionsView extends Component {
   static contextType = StoreContext
 
+  state = {
+    limit: 20,
+    limitStep: 50
+  }
+
   render() {
     const { getTransactions, edit, getElement } = this.context.actions
     const { openedTransaction } = this.context.data
     const dispatch = this.context.dispatch
-    const transactions = getTransactions({ limit: 100 })
+    const transactions = getTransactions({ limit: this.state.limit })
     const opened = getElement('transaction', openedTransaction)
 
     return (
@@ -50,6 +56,15 @@ export default class TransactionsView extends Component {
                 dispatch(openTransaction(id))
               }}
             />
+            <Button
+              onClick={() => {
+                this.setState(state => {
+                  return { limit: state.limit + state.limitStep }
+                })
+              }}
+            >
+              Load more
+            </Button>
           </Content>
           <DetailsPanel
             transaction={opened}
