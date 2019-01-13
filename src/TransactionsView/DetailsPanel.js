@@ -64,6 +64,7 @@ export default class DetailsPanel extends React.Component {
   }
 
   saveChanges = () => this.props.onSave(this.state.transaction)
+
   updateTags = tags => {
     this.setState(prev => {
       return {
@@ -205,13 +206,24 @@ export default class DetailsPanel extends React.Component {
           <div>
             <TagSelect value={tags} onChange={this.updateTags} />
             <div />
-            <Button
-              onClick={() => {
-                this.props.onDelete(tr.id)
-              }}
-            >
-              Delete
-            </Button>
+            {tr.deleted ? (
+              <Button
+                onClick={() => {
+                  this.props.onRestore(tr.id)
+                }}
+              >
+                Восстановить
+              </Button>
+            ) : (
+              <Button
+                onClick={() => {
+                  this.props.onDelete(tr.id)
+                }}
+              >
+                Удалить
+              </Button>
+            )}
+
             <Button
               onClick={() => {
                 console.log(tr)

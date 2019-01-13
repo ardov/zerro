@@ -5,7 +5,8 @@ import { StoreContext } from '../store/'
 import {
   openTransaction,
   applyChangesToTransaction,
-  deleteTransaction
+  deleteTransaction,
+  restoreTransaction
 } from '../store/actions/'
 
 import Header from '../Header'
@@ -71,6 +72,7 @@ export default class TransactionsView extends Component {
           <DetailsPanel
             transaction={opened}
             onDelete={id => dispatch(deleteTransaction(id))}
+            onRestore={id => dispatch(restoreTransaction(id))}
             onSave={tr => {
               console.log(tr)
               dispatch(applyChangesToTransaction({ id: tr.id, tag: tr.tag }))
