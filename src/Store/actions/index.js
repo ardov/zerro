@@ -14,16 +14,8 @@ export const setToken = token => {
 export const updateData = changed => (dispatch, getState) => {
   const { token, lastSync } = getState()
   ZenApi.getData(token, { lastSync, changed })
-    .then(json => {
-      if (json.error) {
-        console.warn('!!! Error', json)
-      } else {
-        dispatch({ type: types.MERGE_SERVER_DATA, payload: json })
-      }
-    })
-    .catch(err => {
-      console.warn('!!!', err)
-    })
+    .then(json => dispatch({ type: types.MERGE_SERVER_DATA, payload: json }))
+    .catch(err => console.warn('!!!', err))
 }
 
 export const initState = () => dispatch => {
@@ -51,16 +43,24 @@ export const deleteTransaction = id => (dispatch, getState) => {
     ]
   }
   ZenApi.getData(token, { lastSync, changed })
-    .then(json => {
-      if (json.error) {
-        console.warn('!!! Error', json)
-      } else {
-        dispatch({ type: types.MERGE_SERVER_DATA, payload: json })
+    .then(json => dispatch({ type: types.MERGE_SERVER_DATA, payload: json }))
+    .catch(err => console.warn('!!!', err))
+}
+
+export const restoreTransaction = id => (dispatch, getState) => {
+  const { token, lastSync, transaction } = getState()
+  const changed = {
+    transaction: [
+      {
+        ...transaction[id],
+        deleted: false,
+        changed: Date.now() / 1000
       }
-    })
-    .catch(err => {
-      console.warn('!!!', err)
-    })
+    ]
+  }
+  ZenApi.getData(token, { lastSync, changed })
+    .then(json => dispatch({ type: types.MERGE_SERVER_DATA, payload: json }))
+    .catch(err => console.warn('!!!', err))
 }
 
 export const applyChangesToTransaction = tr => (dispatch, getState) => {
@@ -75,14 +75,6 @@ export const applyChangesToTransaction = tr => (dispatch, getState) => {
     ]
   }
   ZenApi.getData(token, { lastSync, changed })
-    .then(json => {
-      if (json.error) {
-        console.warn('!!! Error', json)
-      } else {
-        dispatch({ type: types.MERGE_SERVER_DATA, payload: json })
-      }
-    })
-    .catch(err => {
-      console.warn('!!!', err)
-    })
+    .then(json => dispatch({ type: types.MERGE_SERVER_DATA, payload: json }))
+    .catch(err => console.warn('!!!', err))
 }

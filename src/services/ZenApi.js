@@ -13,7 +13,21 @@ ZenApi.getData = (token, payload = { lastSync: 0, changed: {} }) => {
     method: 'POST',
     body: JSON.stringify(body)
   }
-  return fetch(`${DOMAIN}/?token=${token}`, options).then(res => res.json())
+  return fetch(`${DOMAIN}/?token=${token}`, options)
+    .then(res => {
+      if (res.ok) {
+        return res.json()
+      } else {
+        throw new Error('Сайт вернул не ОК')
+      }
+    })
+    .then(json => {
+      if (json.error) {
+        throw new Error(json.error.message)
+      } else {
+        return json
+      }
+    })
 }
 
 ZenApi.auth = callback => {
