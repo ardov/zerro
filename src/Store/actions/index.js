@@ -33,18 +33,30 @@ export const initState = () => dispatch => {
 
 export const deleteTransaction = id => (dispatch, getState) => {
   const { token, lastSync, transaction } = getState()
+  const changedTransaction = {
+    ...transaction[id],
+    deleted: true,
+    changed: Date.now() / 1000
+  }
+  dispatch({ type: types.ADD_FAKE_TRANSACTION, payload: changedTransaction })
   const changed = {
-    transaction: [
-      {
-        ...transaction[id],
-        deleted: true,
-        changed: Date.now() / 1000
-      }
-    ]
+    transaction: [changedTransaction]
   }
   ZenApi.getData(token, { lastSync, changed })
-    .then(json => dispatch({ type: types.MERGE_SERVER_DATA, payload: json }))
-    .catch(err => console.warn('!!!', err))
+    .then(json => {
+      dispatch({ type: types.MERGE_SERVER_DATA, payload: json })
+      dispatch({
+        type: types.REMOVE_FAKE_TRANSACTION,
+        payload: changedTransaction.id
+      })
+    })
+    .catch(err => {
+      console.warn('!!!', err)
+      dispatch({
+        type: types.REMOVE_FAKE_TRANSACTION,
+        payload: changedTransaction.id
+      })
+    })
 }
 
 export const restoreTransaction = id => (dispatch, getState) => {
@@ -65,16 +77,27 @@ export const restoreTransaction = id => (dispatch, getState) => {
 
 export const applyChangesToTransaction = tr => (dispatch, getState) => {
   const { token, lastSync, transaction } = getState()
-  const changed = {
-    transaction: [
-      {
-        ...transaction[tr.id],
-        ...tr,
-        changed: Date.now() / 1000
-      }
-    ]
+  const changedTransaction = {
+    ...transaction[tr.id],
+    ...tr,
+    changed: Date.now() / 1000
   }
+  dispatch({ type: types.ADD_FAKE_TRANSACTION, payload: changedTransaction })
+  const changed = { transaction: [changedTransaction] }
+
   ZenApi.getData(token, { lastSync, changed })
-    .then(json => dispatch({ type: types.MERGE_SERVER_DATA, payload: json }))
-    .catch(err => console.warn('!!!', err))
+    .then(json => {
+      dispatch({ type: types.MERGE_SERVER_DATA, payload: json })
+      dispatch({
+        type: types.REMOVE_FAKE_TRANSACTION,
+        payload: changedTransaction.id
+      })
+    })
+    .catch(err => {
+      console.warn('!!!', err)
+      dispatch({
+        type: types.REMOVE_FAKE_TRANSACTION,
+        payload: changedTransaction.id
+      })
+    })
 }
