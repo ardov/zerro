@@ -4,17 +4,21 @@ import LocalStorage from '../../services/localstorage'
 
 const defaultState = {
   lastSync: 0,
+
   instrument: {},
   country: {},
   company: {},
   user: {},
+
   account: {},
   tag: {},
   budget: {},
   merchant: {},
   reminder: {},
   reminderMarker: {},
-  transaction: {}
+  transaction: {},
+
+  fakeTransaction: {}
 }
 
 export default function serverData(state = defaultState, action = {}) {
@@ -38,6 +42,18 @@ export default function serverData(state = defaultState, action = {}) {
         transaction: newState.transaction
       })
       return newState
+
+    case types.ADD_FAKE_TRANSACTION:
+      return {
+        ...state,
+        fakeTransaction: { ...state.fakeTransaction, [payload.id]: payload }
+      }
+
+    case types.REMOVE_FAKE_TRANSACTION:
+      return {
+        ...state,
+        fakeTransaction: { ...state.fakeTransaction, [payload]: undefined }
+      }
 
     case types.SET_LOCAL_STATE:
       return payload

@@ -14,10 +14,12 @@ export default class Store extends React.Component {
   state = {
     // DATA FROM ZENMONEY
     lastSync: 0,
+
     instrument: {},
     country: {},
     company: {},
     user: {},
+
     account: {},
     tag: {},
     budget: {},
@@ -25,6 +27,7 @@ export default class Store extends React.Component {
     reminder: {},
     reminderMarker: {},
     transaction: {},
+    fakeTransaction: {},
 
     // TOKEN
     token: null,
