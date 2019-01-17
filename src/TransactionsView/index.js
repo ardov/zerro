@@ -1,16 +1,16 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
 
-import { StoreContext } from '../store/'
+import { StoreContext } from '../store'
 import {
   openTransaction,
   applyChangesToTransaction,
   deleteTransaction,
   restoreTransaction
-} from '../store/actions/'
+} from '../store/actions'
 
 import Header from '../Header'
-import TransactionList from './TransactionList/'
+import TransactionList from './TransactionList'
 import Filter from './Filter'
 import DetailsPanel from './DetailsPanel'
 import { Button } from 'antd'

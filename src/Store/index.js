@@ -6,7 +6,7 @@ import {
   getOpened,
   getFilterConditions
 } from './selectors'
-import reducer from './reducers/'
+import reducer from './reducers'
 
 export const StoreContext = React.createContext()
 

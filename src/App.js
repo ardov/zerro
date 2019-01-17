@@ -1,13 +1,13 @@
 import React, { Component } from 'react'
 import { BrowserRouter, Route } from 'react-router-dom'
-import { initState } from './store/actions/'
+import { initState } from './store/actions'
 
 import { IntlProvider, addLocaleData } from 'react-intl'
 import ru from 'react-intl/locale-data/ru'
 
-import { StoreContext } from './store/'
-import TransactionsView from './TransactionsView/'
-import TagsView from './TagsView/'
+import { StoreContext } from './store'
+import TransactionsView from './TransactionsView'
+import TagsView from './TagsView'
 
 addLocaleData(ru)
 

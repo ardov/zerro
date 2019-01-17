@@ -4,7 +4,7 @@ import TagSelect from './TagSelect'
 import { setCondition, setTags } from '../store/actions/filter'
 // import styled from 'styled-components'
 
-import { StoreContext } from '../store/'
+import { StoreContext } from '../store'
 import { Checkbox, Input } from 'antd'
 
 const Search = Input.Search

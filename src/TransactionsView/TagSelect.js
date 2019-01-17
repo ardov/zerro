@@ -1,6 +1,6 @@
 import React from 'react'
 import { TreeSelect } from 'antd'
-import { StoreContext } from '../store/'
+import { StoreContext } from '../store'
 
 export default class TagSelect extends React.Component {
   static contextType = StoreContext

@@ -3,8 +3,8 @@ import styled from 'styled-components'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 
-import { StoreContext } from '../store/'
-// import { defaultConditions } from '../TransactionFilter/'
+import { StoreContext } from '../store'
+// import { defaultConditions } from '../TransactionFilter'
 // import { FormattedNumber } from 'react-intl'
 import { Tag } from 'antd'
 
