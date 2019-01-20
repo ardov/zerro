@@ -83,10 +83,14 @@ const AdditionalInfo = styled.div`
 `
 
 export default class Transaction extends React.Component {
-  // static contextType = StoreContext
   render() {
     const tr = this.props.data
-    let mainTagTitle = tr.tag ? tr.tag[0].title : 'Без категории'
+    let mainTagTitle =
+      tr.type === 'transfer'
+        ? 'Перевод'
+        : tr.tag
+        ? tr.tag[0].title
+        : 'Без категории'
     const account1 = tr.type === 'income' ? tr.incomeAccount : tr.outcomeAccount
     const amount1 = tr.type === 'income' ? tr.income : tr.outcome
     const instrument1 =
@@ -122,7 +126,10 @@ export default class Transaction extends React.Component {
             </Sum>
           </MainInfo>
           <AdditionalInfo>
-            {tr.payee && <Tag>{tr.payee}</Tag>} {tr.comment}
+            {tr.payee && (
+              <Tag onClick={this.props.onFilterByPayee}>{tr.payee}</Tag>
+            )}{' '}
+            {tr.comment}
           </AdditionalInfo>
         </Info>
       </Body>
