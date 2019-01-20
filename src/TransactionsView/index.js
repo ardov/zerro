@@ -8,6 +8,7 @@ import {
   deleteTransaction,
   restoreTransaction
 } from '../store/actions'
+import { setCondition } from '../store/actions/filter'
 
 import Header from '../Header'
 import TransactionList from './TransactionList'
@@ -58,6 +59,7 @@ export default class TransactionsView extends Component {
               onTransactionOpen={id => {
                 dispatch(openTransaction(id))
               }}
+              onSetFilter={condition => dispatch(setCondition(condition))}
             />
             <Button
               onClick={() => {
@@ -74,7 +76,6 @@ export default class TransactionsView extends Component {
             onDelete={id => dispatch(deleteTransaction(id))}
             onRestore={id => dispatch(restoreTransaction(id))}
             onSave={tr => {
-              console.log(tr)
               dispatch(applyChangesToTransaction({ id: tr.id, tag: tr.tag }))
             }}
           />

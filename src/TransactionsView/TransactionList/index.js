@@ -42,6 +42,9 @@ export default class TransactionList extends Component {
   handleTransactionClick = id => {
     this.props.onTransactionOpen(id)
   }
+  handleFilterByPayee = payee => {
+    this.props.onSetFilter({ search: payee })
+  }
 
   render() {
     const { opened, transactions } = this.props
@@ -62,6 +65,9 @@ export default class TransactionList extends Component {
                   opened={openedId === tr.id}
                   onClick={() => {
                     this.handleTransactionClick(tr.id)
+                  }}
+                  onFilterByPayee={() => {
+                    this.handleFilterByPayee(tr.payee)
                   }}
                 />
               ))}
