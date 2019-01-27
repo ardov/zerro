@@ -4,7 +4,7 @@ import { StoreContext } from './store'
 import { Link } from 'react-router-dom'
 import { Button } from 'antd'
 
-import { updateData } from './store/actions'
+import { updateData, logOut } from './store/actions'
 
 const Main = styled.header`
   height: 48px;
@@ -43,10 +43,18 @@ export default class TransactionList extends Component {
       <Main>
         <Name>ZenMoney+</Name>
         <div>
-          <NavLink to="/">Транзакции</NavLink>
+          <NavLink to="/transactions">Транзакции</NavLink>
           <NavLink to="/tags">Категории</NavLink>
         </div>
         <Buttons>
+          <StyledButton
+            onClick={() => {
+              this.context.dispatch(logOut())
+            }}
+          >
+            Выйти
+          </StyledButton>
+
           <StyledButton onClick={() => console.log(this.context.data)}>
             Log data
           </StyledButton>

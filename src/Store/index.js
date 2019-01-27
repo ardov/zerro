@@ -4,7 +4,8 @@ import {
   getElement,
   getTags,
   getOpened,
-  getFilterConditions
+  getFilterConditions,
+  getLoginState
 } from './selectors'
 import reducer from './reducers'
 
@@ -66,7 +67,8 @@ export default class Store extends React.Component {
         getTransactions: getTransactions(this.state),
         getTags: getTags(this.state),
         getOpened: getOpened(this.state),
-        getFilterConditions: getFilterConditions(this.state)
+        getFilterConditions: getFilterConditions(this.state),
+        getLoginState: getLoginState(this.state)
       },
       dispatch: this.dispatch
     }

@@ -66,3 +66,7 @@ export const getOpened = state => () => {
 export const getFilterConditions = state => () => {
   return state.filterConditions
 }
+
+export const getLoginState = state => () => {
+  return !!state.token
+}

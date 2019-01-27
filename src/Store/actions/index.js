@@ -1,6 +1,6 @@
 import * as types from '../actionTypes'
+import Cookies from 'cookies-js'
 import ZenApi from '../../services/ZenApi'
-import Cookies from '../../services/cookies'
 import LocalStorage from '../../services/localstorage'
 
 export const openTransaction = id => {
@@ -11,6 +11,27 @@ export const setToken = token => {
   return { type: types.SET_TOKEN, payload: token }
 }
 
+export const wipeData = () => {
+  return { type: types.WIPE_DATA }
+}
+
+export const logIn = () => (dispatch, getState) => {
+  dispatch(logOut())
+  ZenApi.getToken()
+    .then(token => {
+      dispatch(setToken(token))
+      dispatch(updateData())
+    })
+    .catch(err => console.warn('!!! Login failed', err))
+}
+
+export const logOut = () => (dispatch, getState) => {
+  dispatch(wipeData())
+  dispatch(setToken(null))
+  LocalStorage.clear()
+  Cookies.expire('token')
+}
+
 export const updateData = changed => (dispatch, getState) => {
   const { token, lastSync } = getState()
   ZenApi.getData(token, { lastSync, changed })
@@ -19,7 +40,7 @@ export const updateData = changed => (dispatch, getState) => {
 }
 
 export const initState = () => dispatch => {
-  const localToken = Cookies.get('token')
+  const localToken = ZenApi.getLocalToken()
   const localData = LocalStorage.get('data')
   if (localToken) {
     dispatch({ type: types.SET_TOKEN, payload: localToken })

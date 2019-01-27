@@ -43,6 +43,9 @@ export default function serverData(state = defaultState, action = {}) {
       })
       return newState
 
+    case types.WIPE_DATA:
+      return defaultState
+
     case types.ADD_FAKE_TRANSACTION:
       return {
         ...state,
