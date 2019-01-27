@@ -18,21 +18,29 @@ const Body = styled.div`
   flex-direction: row;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   align-items: flex-start;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
 
   ${props =>
     props.deleted &&
     css`
       opacity: 0.3;
-      &:hover {
-        opacity: 1;
-      }
     `}
 
   ${props =>
     props.opened &&
     css`
       opacity: 1;
-      background-color: #eee;
+      background-color: rgba(0, 0, 0, 0.1);
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+      }
     `}
 `
 
