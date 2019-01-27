@@ -41,7 +41,7 @@ export default class TransactionList extends Component {
   render() {
     return (
       <Main>
-        <Name>ZenMoney+</Name>
+        <Name>More Money Now</Name>
         <div>
           <NavLink to="/transactions">Транзакции</NavLink>
           <NavLink to="/tags">Категории</NavLink>
