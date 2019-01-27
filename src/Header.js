@@ -55,17 +55,13 @@ export default class TransactionList extends Component {
             Выйти
           </StyledButton>
 
-          <StyledButton onClick={() => console.log(this.context.data)}>
-            Log data
-          </StyledButton>
-
           <StyledButton
             icon="reload"
             onClick={() => {
               this.context.dispatch(updateData())
             }}
           >
-            Update Data
+            Обновить данные
           </StyledButton>
         </Buttons>
       </Main>
