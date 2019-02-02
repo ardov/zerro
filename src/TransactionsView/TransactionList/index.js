@@ -53,7 +53,7 @@ export default class TransactionList extends Component {
     const openedId = opened ? opened.id : null
 
     return (
-      <Group>
+      <div>
         {hasData &&
           groupped.map(({ date, transactions }) => (
             <Group key={+date}>
@@ -80,7 +80,7 @@ export default class TransactionList extends Component {
             <Spin />
           </SpinContainer>
         )}
-      </Group>
+      </div>
     )
   }
 }
