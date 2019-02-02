@@ -53,24 +53,26 @@ export default class TransactionList extends Component {
     const openedId = opened ? opened.id : null
 
     return (
-      <div>
+      <Group>
         {hasData &&
           groupped.map(({ date, transactions }) => (
             <Group key={+date}>
               <DateTitle date={date} />
-              {transactions.map(tr => (
-                <Transaction
-                  data={tr}
-                  key={tr.id}
-                  opened={openedId === tr.id}
-                  onClick={() => {
-                    this.handleTransactionClick(tr.id)
-                  }}
-                  onFilterByPayee={() => {
-                    this.handleFilterByPayee(tr.payee)
-                  }}
-                />
-              ))}
+              <div>
+                {transactions.map(tr => (
+                  <Transaction
+                    data={tr}
+                    key={tr.id}
+                    opened={openedId === tr.id}
+                    onClick={() => {
+                      this.handleTransactionClick(tr.id)
+                    }}
+                    onFilterByPayee={() => {
+                      this.handleFilterByPayee(tr.payee)
+                    }}
+                  />
+                ))}
+              </div>
             </Group>
           ))}
         {!groupped.length && (
@@ -78,7 +80,7 @@ export default class TransactionList extends Component {
             <Spin />
           </SpinContainer>
         )}
-      </div>
+      </Group>
     )
   }
 }
