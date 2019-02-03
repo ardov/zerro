@@ -1,43 +1,81 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Popover } from 'antd'
+import { Bar } from 'react-chartjs-2'
+
+const Body = styled.div`
+  margin: -10px;
+  /* flex-grow: 1; */
+  min-width: 3000px;
+`
+
+const options = {
+  // events: ['click'],
+  tooltips: {
+    intersect: false,
+    backgroundColor: 'white',
+    titleFontColor: '#000',
+    bodyFontColor: '#000',
+    custom: w => {
+      console.log('rrrrr', w)
+    }
+  },
+  maintainAspectRatio: false,
+  layout: {
+    padding: { top: 0, left: 0, right: 0, bottom: 0 }
+  },
+  legend: { display: false },
+  title: { display: false },
+  hover: { intersect: false, animationDuration: 0 },
+  scales: {
+    yAxes: [
+      {
+        gridLines: { display: false, drawBorder: false },
+        scaleLabel: { display: false },
+        ticks: { display: false, mirror: true }
+      }
+    ],
+    xAxes: [
+      {
+        gridLines: { display: false, drawBorder: true },
+        scaleLabel: { display: false },
+        ticks: { display: false, mirror: true },
+        barThickness: 10,
+        barPercentage: 1,
+        categoryPercentage: 0.9
+      }
+    ]
+  }
+}
 
 export const BarChart = ({ data = [], maxValue, barColor = '#000' }) => {
-  const Body = styled.div`
-    display: flex;
-    flex-direction: row;
-    height: 40px;
-  `
-  const BarContainer = styled.div`
-    flex-grow: 1;
-    display: flex;
-    padding: 4px;
-    height: 40px;
+  console.log('DATAAAA', data)
 
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.04);
-    }
-  `
-  const Bar = styled.div`
-    height: ${props => props.percent}%;
-    background-color: #000;
-    min-height: 1px;
-    min-width: 8px;
-    align-self: flex-end;
-    border-radius: 2px;
-  `
-
-  const max = maxValue ? maxValue : Math.max(...data.map(el => el.sum))
+  const barData = {
+    labels: data.map(el => el.title),
+    datasets: [
+      {
+        // label: 'My First dataset',
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        // borderColor: 'rgba(255,99,132,1)',
+        borderWidth: 0,
+        hoverBackgroundColor: 'rgba(255,99,132,0.4)',
+        hoverBorderColor: 'rgba(255,99,132,1)',
+        data: data.map(el => el.sum)
+      }
+    ]
+  }
 
   return (
     <Body>
-      {data.map(el => (
-        <Popover content={el.content} title={el.title} key={+el.date}>
-          <BarContainer>
-            <Bar percent={(el.sum / max) * 100} />
-          </BarContainer>
-        </Popover>
-      ))}
+      <Bar
+        data={barData}
+        // width={10}
+        height={60}
+        options={options}
+        getElementAtEvent={elem => {
+          console.log(elem)
+        }}
+      />
     </Body>
   )
 }
