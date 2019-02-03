@@ -1,47 +1,51 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import FilterTags from '../components/FilterTags'
 import TagSelect from './TagSelect'
 import { setCondition, setTags } from '../store/actions/filter'
-// import styled from 'styled-components'
-
-import { StoreContext } from '../store'
 import { Checkbox, Input } from 'antd'
+import { getFilterConditions } from '../store/selectors'
 
 const Search = Input.Search
-export default class TransactionList extends Component {
-  static contextType = StoreContext
-
+class TransactionList extends Component {
   state = {}
 
   render() {
-    const dispatch = this.context.dispatch
-    const conditions = this.context.selectors.getFilterConditions()
+    const conditions = this.props.conditions
     return (
       <div>
         <Search
           value={conditions.search}
           placeholder="Поиск по комментариям"
           onChange={e => {
-            dispatch(setCondition({ search: e.target.value }))
+            this.props.setCondition({ search: e.target.value })
           }}
         />
 
         <Checkbox
           checked={conditions.showDeleted}
           onChange={e => {
-            dispatch(setCondition({ showDeleted: e.target.checked }))
+            this.props.setCondition({ showDeleted: e.target.checked })
           }}
         >
           Показывать удалённые
         </Checkbox>
-        <TagSelect
-          value={conditions.tags}
-          onChange={tags => {
-            dispatch(setTags(tags))
-          }}
-        />
+        <TagSelect value={conditions.tags} onChange={this.props.setTags} />
         <FilterTags conditions={conditions} />
       </div>
     )
   }
 }
+const mapStateToProps = state => ({
+  conditions: getFilterConditions(state)()
+})
+
+const mapDispatchToProps = dispatch => ({
+  setCondition: condition => dispatch(setCondition(condition)),
+  setTags: tags => dispatch(setTags(tags))
+})
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TransactionList)

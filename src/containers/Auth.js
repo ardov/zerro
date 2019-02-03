@@ -1,6 +1,6 @@
-import React, { Component } from 'react'
+import React from 'react'
 import styled from 'styled-components'
-import { StoreContext } from '../store'
+import { connect } from 'react-redux'
 
 import { Button } from 'antd'
 import { logIn } from '../store/actions'
@@ -16,20 +16,23 @@ const Body = styled.div`
   min-height: 100vh;
 `
 
-export default class Auth extends Component {
-  static contextType = StoreContext
+function Auth(props) {
+  return (
+    <Body>
+      <Button type="primary" size="large" onClick={props.logIn}>
+        Войти через ДзенМани
+      </Button>
+    </Body>
+  )
+}
 
-  logIn = () => {
-    this.context.dispatch(logIn())
-  }
-
-  render() {
-    return (
-      <Body>
-        <Button type="primary" size="large" onClick={this.logIn}>
-          Войти через ДзенМани
-        </Button>
-      </Body>
-    )
+const mapDispatchToProps = dispatch => {
+  return {
+    logIn: () => dispatch(logIn())
   }
 }
+
+export default connect(
+  null,
+  mapDispatchToProps
+)(Auth)

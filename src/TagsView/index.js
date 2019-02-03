@@ -1,24 +1,25 @@
-import React, { Component } from 'react'
-// import styled from 'styled-components'
-
-import { StoreContext } from '../store'
+import React from 'react'
+import { connect } from 'react-redux'
 
 import Header from '../Header'
 import TagList from './TagList'
+import { getTags, getTransactions } from '../store/selectors'
 
-export default class TransactionsView extends Component {
-  static contextType = StoreContext
-
-  render() {
-    const { getTags, getTransactions } = this.context.selectors
-    const transactions = getTransactions()
-    const tags = getTags()
-
-    return (
-      <div>
-        <Header />
-        <TagList transactions={transactions} tags={tags} />
-      </div>
-    )
-  }
+function TransactionsView(props) {
+  return (
+    <div>
+      <Header />
+      <TagList transactions={props.transactions} tags={props.tags} />
+    </div>
+  )
 }
+
+const mapStateToProps = state => ({
+  transactions: getTransactions(state)(),
+  tags: getTags(state)()
+})
+
+export default connect(
+  mapStateToProps,
+  null
+)(TransactionsView)

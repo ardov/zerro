@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
+import { connect } from 'react-redux'
 
-import { StoreContext } from '../store'
 import {
   openTransaction,
   applyChangesToTransaction,
@@ -15,6 +15,7 @@ import TransactionList from './TransactionList'
 import Filter from './Filter'
 import DetailsPanel from './DetailsPanel'
 import { Button } from 'antd'
+import { getTransactions, getOpened } from '../store/selectors'
 
 const Body = styled.div`
   display: flex;
@@ -32,19 +33,15 @@ const Content = styled.div`
   flex-direction: column;
 `
 
-export default class TransactionsView extends Component {
-  static contextType = StoreContext
-
+class TransactionsView extends Component {
   state = {
     limit: 20,
     limitStep: 50
   }
 
   render() {
-    const { getTransactions, getOpened } = this.context.selectors
-    const dispatch = this.context.dispatch
-    const transactions = getTransactions({ limit: this.state.limit })
-    const opened = getOpened()
+    const { transactions, opened, dispatch } = this.props
+
     return (
       <div>
         <Header />
@@ -84,3 +81,17 @@ export default class TransactionsView extends Component {
     )
   }
 }
+
+const mapStateToProps = state => ({
+  transactions: getTransactions(state)({ limit: 10 }),
+  opened: getOpened(state)()
+})
+
+// const mapDispatchToProps = dispatch => ({
+//   actions: bindActionCreators(TodoActions, dispatch)
+// })
+
+export default connect(
+  mapStateToProps,
+  null
+)(TransactionsView)

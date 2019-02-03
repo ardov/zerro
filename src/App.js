@@ -1,26 +1,20 @@
 import React, { Component } from 'react'
 import { BrowserRouter, Route, Redirect, Switch } from 'react-router-dom'
-import { initState } from './store/actions'
+import { connect } from 'react-redux'
 
 import { IntlProvider, addLocaleData } from 'react-intl'
 import ru from 'react-intl/locale-data/ru'
 
-import { StoreContext } from './store'
 import TransactionsView from './TransactionsView'
 import TagsView from './TagsView'
 import Auth from './containers/Auth'
+import { getLoginState } from './store/selectors'
 
 addLocaleData(ru)
 
-export default class App extends Component {
-  static contextType = StoreContext
-
-  componentDidMount() {
-    this.context.dispatch(initState())
-  }
-
+class App extends Component {
   render() {
-    const isLoggedIn = this.context.selectors.getLoginState()
+    const isLoggedIn = this.props.isLoggedIn
 
     return (
       <IntlProvider locale="ru">
@@ -51,3 +45,12 @@ export default class App extends Component {
     )
   }
 }
+
+const mapStateToProps = state => ({
+  isLoggedIn: getLoginState(state)()
+})
+
+export default connect(
+  mapStateToProps,
+  null
+)(App)

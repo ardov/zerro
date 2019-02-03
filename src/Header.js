@@ -1,6 +1,6 @@
-import React, { Component } from 'react'
+import React from 'react'
+import { connect } from 'react-redux'
 import styled from 'styled-components'
-import { StoreContext } from './store'
 import { Link } from 'react-router-dom'
 import { Button } from 'antd'
 
@@ -19,15 +19,12 @@ const Main = styled.header`
 const Name = styled.h1`
   font-size: 20px;
   font-weight: 400;
-  /* line-height: 48px; */
   padding: 0;
   margin: 0;
 `
-
 const Buttons = styled.div`
   justify-self: flex-end;
 `
-
 const NavLink = styled(Link)`
   margin-left: 16px;
 `
@@ -35,36 +32,33 @@ const StyledButton = styled(Button)`
   margin-left: 16px;
 `
 
-export default class TransactionList extends Component {
-  static contextType = StoreContext
+function TransactionList(props) {
+  return (
+    <Main>
+      <Name>More Money Now</Name>
+      <div>
+        <NavLink to="/transactions">Транзакции</NavLink>
+        <NavLink to="/tags">Категории</NavLink>
+      </div>
+      <Buttons>
+        <StyledButton onClick={props.logOut}>Выйти</StyledButton>
 
-  render() {
-    return (
-      <Main>
-        <Name>More Money Now</Name>
-        <div>
-          <NavLink to="/transactions">Транзакции</NavLink>
-          <NavLink to="/tags">Категории</NavLink>
-        </div>
-        <Buttons>
-          <StyledButton
-            onClick={() => {
-              this.context.dispatch(logOut())
-            }}
-          >
-            Выйти
-          </StyledButton>
+        <StyledButton icon="reload" onClick={props.updateData}>
+          Обновить данные
+        </StyledButton>
+      </Buttons>
+    </Main>
+  )
+}
 
-          <StyledButton
-            icon="reload"
-            onClick={() => {
-              this.context.dispatch(updateData())
-            }}
-          >
-            Обновить данные
-          </StyledButton>
-        </Buttons>
-      </Main>
-    )
+const mapDispatchToProps = dispatch => {
+  return {
+    logOut: () => dispatch(logOut()),
+    updateData: () => dispatch(updateData())
   }
 }
+
+export default connect(
+  null,
+  mapDispatchToProps
+)(TransactionList)

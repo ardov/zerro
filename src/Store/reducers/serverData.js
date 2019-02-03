@@ -59,7 +59,7 @@ export default function serverData(state = defaultState, action = {}) {
       }
 
     case types.SET_LOCAL_STATE:
-      return payload
+      return { ...defaultState, ...payload }
 
     default:
       return state
