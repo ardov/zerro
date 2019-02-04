@@ -87,7 +87,15 @@ export default function Transaction(props) {
       <Amount data={tr} />
       {(tr.payee || tr.comment) && (
         <AdditionalInfo>
-          {tr.payee && <Tag onClick={props.onFilterByPayee}>{tr.payee}</Tag>}{' '}
+          {tr.payee && (
+            <Tag
+              onClick={() => {
+                props.onFilterByPayee(tr.payee)
+              }}
+            >
+              {tr.payee}
+            </Tag>
+          )}{' '}
           {tr.comment}
         </AdditionalInfo>
       )}
