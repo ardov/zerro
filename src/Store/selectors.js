@@ -25,6 +25,19 @@ export const getTransactions = state => (options = {}) => {
     .slice(offset, limit ? limit + offset : undefined)
 }
 
+export const getListOfTransactionsId = state => (options = {}) => {
+  const limit = options.limit || 0
+  const offset = options.offset || 0
+  const transactions = state.transaction
+  const list = []
+
+  for (const id in transactions) {
+    list.push(id)
+  }
+
+  return list.slice(offset, limit ? limit + offset : undefined)
+}
+
 export const getElement = state => (type, id) => {
   if (type === 'transaction' && state.fakeTransaction[id]) {
     return populate(state, state.fakeTransaction[id])
@@ -62,6 +75,8 @@ export const getOpened = state => () => {
     return null
   }
 }
+
+export const getOpenedId = state => () => state.openedTransaction
 
 export const getFilterConditions = state => () => {
   return state.filterConditions

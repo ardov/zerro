@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 import { IntlProvider, addLocaleData } from 'react-intl'
 import ru from 'react-intl/locale-data/ru'
 
-import TransactionsView from './TransactionsView'
+import TransactionsView from './components/TransactionsView'
 import TagsView from './TagsView'
 import Auth from './containers/Auth'
 import { getLoginState } from './store/selectors'

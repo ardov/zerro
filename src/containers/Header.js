@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Button } from 'antd'
 
-import { updateData, logOut } from './store/actions'
+import { updateData, logOut } from '../store/actions'
 
 const Main = styled.header`
   height: 48px;

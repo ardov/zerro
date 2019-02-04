@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import FilterTags from './FilterTags'
-import TagSelect from '../TransactionsView/TagSelect'
+import TagSelect from '../containers/TagSelect'
 import { Checkbox, Input } from 'antd'
 
 const Search = Input.Search

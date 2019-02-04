@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import Header from '../Header'
+import Header from '../containers/Header'
 import TagList from './TagList'
 import { getTags, getTransactions } from '../store/selectors'
 

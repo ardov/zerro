@@ -40,7 +40,7 @@ const Body = styled.div`
       opacity: 0.3;
     `}
   ${props =>
-    props.opened &&
+    props.isSelected &&
     css`
       opacity: 1;
       background-color: rgba(0, 0, 0, 0.1);
@@ -63,36 +63,34 @@ const AdditionalInfo = styled.div`
   color: rgba(0, 0, 0, 0.5);
 `
 
-export default class Transaction extends React.Component {
-  render() {
-    const tr = this.props.data
-    let mainTagTitle =
-      tr.type === 'transfer'
-        ? 'Перевод'
-        : tr.tag
-        ? tr.tag[0].title
-        : 'Без категории'
-    const account1 = tr.type === 'income' ? tr.incomeAccount : tr.outcomeAccount
+export default function Transaction(props) {
+  const tr = props.tr
+  // let mainTagTitle =
+  //   tr.type === 'transfer'
+  //     ? 'Перевод'
+  //     : tr.tag
+  //     ? tr.tag[0].title
+  //     : 'Без категории'
+  const account1 = tr.type === 'income' ? tr.incomeAccount : tr.outcomeAccount
 
-    return (
-      <Body
-        onClick={this.props.onClick}
-        deleted={tr.deleted}
-        opened={this.props.opened}
-      >
-        <Icon data={tr} />
-        <Tags data={tr} />
-        <Account>{account1.title}</Account>
-        <Amount data={tr} />
-        {(tr.payee || tr.comment) && (
-          <AdditionalInfo>
-            {tr.payee && (
-              <Tag onClick={this.props.onFilterByPayee}>{tr.payee}</Tag>
-            )}{' '}
-            {tr.comment}
-          </AdditionalInfo>
-        )}
-      </Body>
-    )
-  }
+  return (
+    <Body
+      onClick={() => {
+        props.onClick(props.id)
+      }}
+      deleted={tr.deleted}
+      isSelected={tr.isSelected}
+    >
+      <Icon data={tr} />
+      <Tags data={tr} />
+      <Account>{account1.title}</Account>
+      <Amount data={tr} />
+      {(tr.payee || tr.comment) && (
+        <AdditionalInfo>
+          {tr.payee && <Tag onClick={props.onFilterByPayee}>{tr.payee}</Tag>}{' '}
+          {tr.comment}
+        </AdditionalInfo>
+      )}
+    </Body>
+  )
 }
