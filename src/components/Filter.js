@@ -1,13 +1,10 @@
 import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import FilterTags from '../components/FilterTags'
-import TagSelect from './TagSelect'
-import { setCondition, setTags } from '../store/actions/filter'
+import FilterTags from './FilterTags'
+import TagSelect from '../TransactionsView/TagSelect'
 import { Checkbox, Input } from 'antd'
-import { getFilterConditions } from '../store/selectors'
 
 const Search = Input.Search
-class TransactionList extends Component {
+export default class Filter extends Component {
   state = {}
 
   render() {
@@ -36,16 +33,3 @@ class TransactionList extends Component {
     )
   }
 }
-const mapStateToProps = state => ({
-  conditions: getFilterConditions(state)()
-})
-
-const mapDispatchToProps = dispatch => ({
-  setCondition: condition => dispatch(setCondition(condition)),
-  setTags: tags => dispatch(setTags(tags))
-})
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TransactionList)

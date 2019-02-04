@@ -12,7 +12,7 @@ import { setCondition } from '../store/actions/filter'
 
 import Header from '../Header'
 import TransactionList from './TransactionList'
-import Filter from './Filter'
+import Filter from '../containers/Filter'
 import DetailsPanel from './DetailsPanel'
 import { Button } from 'antd'
 import { getTransactions, getOpened } from '../store/selectors'
