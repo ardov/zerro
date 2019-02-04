@@ -13,6 +13,11 @@ import * as serviceWorker from './serviceWorker'
 import ZenApi from './services/ZenApi'
 import LocalStorage from './services/localstorage'
 
+if (process.env.NODE_ENV !== 'production') {
+  const { whyDidYouUpdate } = require('why-did-you-update')
+  whyDidYouUpdate(React)
+}
+
 const defaultState = {
   // DATA FROM ZENMONEY
   lastSync: 0,
