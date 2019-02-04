@@ -32,7 +32,7 @@ const StyledButton = styled(Button)`
   margin-left: 16px;
 `
 
-function TransactionList(props) {
+function Header(props) {
   return (
     <Main>
       <Name>More Money Now</Name>
@@ -61,4 +61,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   null,
   mapDispatchToProps
-)(TransactionList)
+)(Header)
