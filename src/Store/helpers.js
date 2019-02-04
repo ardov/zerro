@@ -12,11 +12,12 @@ export const populate = (
     merchant,
     reminder,
     reminderMarker,
-    transaction
+    transaction,
+    openedTransaction
   },
   el
 ) => {
-  if (!el) return false
+  if (!el) return null
   const parsed = {}
 
   for (const key in el) {
@@ -111,6 +112,7 @@ export const populate = (
       parsed.type = el.income ? 'income' : 'outcome'
     }
   }
+  parsed.isSelected = el.id === openedTransaction
   return { ...el, ...parsed }
 }
 
