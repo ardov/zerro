@@ -18,7 +18,8 @@ export const loadData = changed => (dispatch, getState) => {
 }
 
 export const deleteTransaction = id => (dispatch, getState) => {
-  const { token, lastSync, transaction } = getState()
+  const { token, data } = getState()
+  const { lastSync, transaction } = data
   const changedTransaction = {
     ...transaction[id],
     deleted: true,
@@ -35,7 +36,8 @@ export const deleteTransaction = id => (dispatch, getState) => {
 }
 
 export const restoreTransaction = id => (dispatch, getState) => {
-  const { token, lastSync, transaction } = getState()
+  const { token, data } = getState()
+  const { lastSync, transaction } = data
   const changed = {
     transaction: [
       {
@@ -51,7 +53,8 @@ export const restoreTransaction = id => (dispatch, getState) => {
 }
 
 export const applyChangesToTransaction = tr => (dispatch, getState) => {
-  const { token, lastSync, transaction } = getState()
+  const { token, data } = getState()
+  const { lastSync, transaction } = data
   const changedTransaction = {
     ...transaction[tr.id],
     ...tr,
