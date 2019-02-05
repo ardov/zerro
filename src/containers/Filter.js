@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { setCondition, setTags } from '../store/actions/filter'
+import { setCondition, setTags } from '../store/filterConditions/actions'
 import { getFilterConditions } from '../store/selectors'
 import Filter from '../components/Filter'
 

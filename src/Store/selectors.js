@@ -4,16 +4,16 @@ export const getTransactions = state => (options = {}) => {
   const limit = options.limit || 0
   const offset = options.offset || 0
   const conditions = options.conditions || state.filterConditions
-  const transactions = state.transaction
-  const fakes = state.fakeTransaction
+  const transactions = state.data.transaction
+  const fakes = state.fakeTransactions
   const list = []
 
   for (const id in transactions) {
     if (fakes[id]) {
-      list.push(populate(state, fakes[id]))
+      list.push(populate(state.data, fakes[id]))
       console.log('FOUND IN FAKES', fakes[id])
     } else {
-      list.push(populate(state, transactions[id]))
+      list.push(populate(state.data, transactions[id]))
     }
   }
 
@@ -39,18 +39,18 @@ export const getListOfTransactionsId = state => (options = {}) => {
 }
 
 export const getElement = state => (type, id) => {
-  if (type === 'transaction' && state.fakeTransaction[id]) {
-    return populate(state, state.fakeTransaction[id])
+  if (type === 'transaction' && state.fakeTransactions[id]) {
+    return populate(state.data, state.fakeTransactions[id])
   } else {
-    return populate(state, state[type][id])
+    return populate(state.data, state.data[type][id])
   }
 }
 
 export const getTags = state => () => {
-  const tags = state.tag
+  const tags = state.data.tag
   const list = []
   for (const id in tags) {
-    list.push(populate(state, tags[id]))
+    list.push(populate(state.data, tags[id]))
   }
   const topLevel = list.filter(tag => !tag.parent)
   list
@@ -70,7 +70,7 @@ export const getTags = state => () => {
 export const getOpened = state => () => {
   const id = state.openedTransaction
   if (id) {
-    return getElement(state)('transaction', id)
+    return getElement(state.data)('transaction', id)
   } else {
     return null
   }

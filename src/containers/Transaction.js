@@ -1,8 +1,8 @@
 import { connect } from 'react-redux'
-import { setCondition } from '../store/actions/filter'
 import { getElement } from '../store/selectors'
-import { openTransaction } from '../store/actions'
+import { openTransaction } from '../store/openedTransaction/actions'
 import Transaction from '../components/Transaction'
+import { setCondition } from '../store/filterConditions/actions'
 
 const mapStateToProps = (state, ownProps) => ({
   tr: getElement(state)('transaction', ownProps.id)
