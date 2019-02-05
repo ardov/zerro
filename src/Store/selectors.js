@@ -10,10 +10,10 @@ export const getTransactions = state => (options = {}) => {
 
   for (const id in transactions) {
     if (fakes[id]) {
-      list.push(populate(state.data, fakes[id]))
+      list.push(populate(state, fakes[id]))
       console.log('FOUND IN FAKES', fakes[id])
     } else {
-      list.push(populate(state.data, transactions[id]))
+      list.push(populate(state, transactions[id]))
     }
   }
 
@@ -41,9 +41,9 @@ export const getListOfTransactionsId = state => (options = {}) => {
 export const getElement = state => (type, id) => {
   if (!state.fakeTransactions) debugger
   if (type === 'transaction' && state.fakeTransactions[id]) {
-    return populate(state.data, state.fakeTransactions[id])
+    return populate(state, state.fakeTransactions[id])
   } else {
-    return populate(state.data, state.data[type][id])
+    return populate(state, state.data[type][id])
   }
 }
 
@@ -51,7 +51,7 @@ export const getTags = state => () => {
   const tags = state.data.tag
   const list = []
   for (const id in tags) {
-    list.push(populate(state.data, tags[id]))
+    list.push(populate(state, tags[id]))
   }
   const topLevel = list.filter(tag => !tag.parent)
   list

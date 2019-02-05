@@ -1,7 +1,8 @@
 import parseDate from 'date-fns/parse'
 
-export const populate = (
-  {
+export const populate = ({ data, openedTransaction }, el) => {
+  if (!el) return null
+  const {
     instrument,
     country,
     company,
@@ -12,12 +13,8 @@ export const populate = (
     merchant,
     reminder,
     reminderMarker,
-    transaction,
-    openedTransaction
-  },
-  el
-) => {
-  if (!el) return null
+    transaction
+  } = data
   const parsed = {}
 
   for (const key in el) {
