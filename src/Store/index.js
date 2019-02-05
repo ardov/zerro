@@ -49,7 +49,7 @@ const getInitialState = () => {
   const localToken = ZenApi.getLocalToken()
   const localData = LocalStorage.get('data')
   if (localToken && localData) {
-    return { ...localData, token: localToken }
+    return { data: localData, token: localToken }
   }
   if (localToken) {
     return { token: localToken }

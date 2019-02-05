@@ -4,12 +4,16 @@ import {
   addFakeTransaction,
   removeFakeTransaction
 } from '../fakeTransactions/actions'
+import LocalStorage from '../../services/localstorage'
 
 export const loadData = changed => (dispatch, getState) => {
-  const { token, data } = getState()
-  const lastSync = data.lastSync
-  ZenApi.getData(token, { lastSync, changed })
-    .then(json => dispatch(updateData(json)))
+  const state = getState()
+  const lastSync = state.data.lastSync
+  ZenApi.getData(state.token, { lastSync, changed })
+    .then(json => {
+      dispatch(updateData(json))
+      LocalStorage.set('data', getState().data)
+    })
     .catch(err => console.warn('!!!', err))
 }
 

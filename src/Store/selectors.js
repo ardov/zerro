@@ -39,6 +39,7 @@ export const getListOfTransactionsId = state => (options = {}) => {
 }
 
 export const getElement = state => (type, id) => {
+  if (!state.fakeTransactions) debugger
   if (type === 'transaction' && state.fakeTransactions[id]) {
     return populate(state.data, state.fakeTransactions[id])
   } else {
@@ -70,7 +71,7 @@ export const getTags = state => () => {
 export const getOpened = state => () => {
   const id = state.openedTransaction
   if (id) {
-    return getElement(state.data)('transaction', id)
+    return getElement(state)('transaction', id)
   } else {
     return null
   }
