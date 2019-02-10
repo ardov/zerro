@@ -54,7 +54,7 @@ const getInitialState = () => {
   if (localToken) {
     return { token: localToken }
   }
-  return null
+  return 
 }
 
 export const store = configureStore({
