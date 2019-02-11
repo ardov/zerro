@@ -1,4 +1,7 @@
 import { populate, checkTransaction } from './helpers'
+import { groupTransactionsAndReturnId } from '../Utils/transactions'
+import moize from 'moize'
+import { createSelector } from 'reselect'
 
 export const getTransactions = state => (options = {}) => {
   const limit = options.limit || 0
@@ -38,14 +41,35 @@ export const getListOfTransactionsId = state => (options = {}) => {
   return list.slice(offset, limit ? limit + offset : undefined)
 }
 
+export const getGrouppedIds = moize(function(state, options = {}) {
+  return groupTransactionsAndReturnId('day', getTransactions(state)(options))
+})
+export const getGrouppedIds2 = createSelector()
+
 export const getElement = state => (type, id) => {
-  if (!state.fakeTransactions) debugger
   if (type === 'transaction' && state.fakeTransactions[id]) {
     return populate(state, state.fakeTransactions[id])
   } else {
     return populate(state, state.data[type][id])
   }
 }
+
+const getTransactionEl = (state, id) => {
+  if (state.fakeTransactions[id]) {
+    return populate(state, state.fakeTransactions[id])
+  } else {
+    return populate(state, state.data.transaction[id])
+  }
+}
+export const getTransaction = createSelector(
+  getTransactionEl,
+  tr => tr
+)
+export const makeGetTransaction = () =>
+  createSelector(
+    getTransactionEl,
+    tr => tr
+  )
 
 export const getTags = state => () => {
   const tags = state.data.tag
@@ -68,6 +92,7 @@ export const getTags = state => () => {
   return topLevel
 }
 
+export const getOpenedId = state => () => state.openedTransaction
 export const getOpened = state => () => {
   const id = state.openedTransaction
   if (id) {
@@ -76,8 +101,6 @@ export const getOpened = state => () => {
     return null
   }
 }
-
-export const getOpenedId = state => () => state.openedTransaction
 
 export const getFilterConditions = state => () => {
   return state.filterConditions

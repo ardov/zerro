@@ -20,15 +20,14 @@ const Body = styled.div`
   /* flex-grow: 1; */
 `
 
-export function Tags({ data }) {
-  const { type, tag } = data
+export function Tags({ type, mainTagTitle, secondaryTagTitles }) {
   if (type === 'transfer') {
     return (
       <Body>
         <Transfer>Перевод</Transfer>
       </Body>
     )
-  } else if (!tag) {
+  } else if (mainTagTitle === 'Без категории') {
     return (
       <Body>
         <NoTag>Без категории</NoTag>
@@ -37,10 +36,9 @@ export function Tags({ data }) {
   } else {
     return (
       <Body>
-        {tag.map(({ title }, i) => (
-          <Tag main={!i} key={title}>
-            {title}
-          </Tag>
+        <Tag main>{mainTagTitle}</Tag>
+        {secondaryTagTitles.map(title => (
+          <Tag key={title}>{title}</Tag>
         ))}
       </Body>
     )
