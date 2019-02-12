@@ -1,6 +1,6 @@
 import parseDate from 'date-fns/parse'
 
-export const populate = ({ data, openedTransaction }, el) => {
+export const populate = (data, el) => {
   if (!el) return null
   const {
     instrument,
@@ -9,11 +9,11 @@ export const populate = ({ data, openedTransaction }, el) => {
     user,
     account,
     tag,
-    budget,
-    merchant,
-    reminder,
-    reminderMarker,
-    transaction
+    // budget,
+    merchant
+    // reminder,
+    // reminderMarker
+    // transaction
   } = data
   const parsed = {}
 
@@ -23,13 +23,13 @@ export const populate = ({ data, openedTransaction }, el) => {
         case 'changed':
         case 'paidTill':
         case 'created':
-          parsed[key] = new Date(el[key] * 1000)
+          parsed[key] = +new Date(el[key] * 1000)
           break
 
         case 'startDate':
         case 'endDate':
         case 'date':
-          parsed[key] = parseDate(el[key])
+          parsed[key] = +parseDate(el[key])
           break
 
         // case 'parent':
@@ -78,9 +78,9 @@ export const populate = ({ data, openedTransaction }, el) => {
 
         case 'tag':
           if (typeof el[key] === 'string') {
-            parsed[key] = [tag[el[key]]]
+            parsed[key] = [tag[el[key]].title]
           } else {
-            parsed[key] = el[key].map(tagId => tag[tagId])
+            parsed[key] = el[key].map(tagId => tag[tagId].title)
           }
           break
 
@@ -88,13 +88,13 @@ export const populate = ({ data, openedTransaction }, el) => {
           parsed[key] = merchant[el[key]]
           break
 
-        case 'reminder':
-          parsed[key] = reminder[el[key]]
-          break
+        // case 'reminder':
+        //   parsed[key] = reminder[el[key]]
+        //   break
 
-        case 'reminderMarker':
-          parsed[key] = reminderMarker[el[key]]
-          break
+        // case 'reminderMarker':
+        //   parsed[key] = reminderMarker[el[key]]
+        //   break
 
         default:
           break
@@ -109,7 +109,7 @@ export const populate = ({ data, openedTransaction }, el) => {
       parsed.type = el.income ? 'income' : 'outcome'
     }
   }
-  parsed.isSelected = el.id === openedTransaction
+  // parsed.isSelected = el.id === openedTransaction
   return { ...el, ...parsed }
 }
 
