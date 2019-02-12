@@ -84,7 +84,7 @@ const AdditionalInfo = styled.div`
   color: rgba(0, 0, 0, 0.5);
 `
 
-export default class Transaction extends React.PureComponent {
+export default class Transaction extends React.Component {
   handleSelect = () => this.props.onClick(this.props.id)
   handlePayeeClick = () => this.props.onFilterByPayee(this.props.payee)
 
