@@ -15,8 +15,8 @@ function TransactionsView(props) {
 }
 
 const mapStateToProps = state => ({
-  transactions: getTransactions(state)(),
-  tags: getTags(state)()
+  transactions: getTransactions(state),
+  tags: getTags(state)
 })
 
 export default connect(

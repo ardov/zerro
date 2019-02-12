@@ -4,7 +4,7 @@ import { getFilterConditions } from '../store/selectors'
 import Filter from '../components/Filter'
 
 const mapStateToProps = state => ({
-  conditions: getFilterConditions(state)()
+  conditions: getFilterConditions(state)
 })
 
 const mapDispatchToProps = dispatch => ({

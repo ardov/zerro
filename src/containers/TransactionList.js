@@ -2,25 +2,12 @@ import React from 'react'
 import styled from 'styled-components'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
-import {
-  groupTransactionsBy,
-  groupTransactionsAndReturnId
-} from '../Utils/transactions'
+
 import { Spin } from 'antd'
 import { connect } from 'react-redux'
-import { getTransactions, getGrouppedIds } from '../store/selectors'
-
-import Transaction from './Transaction'
+import { getGrouppedIds2 } from '../store/selectors'
 import TransactionGroup from '../components/TransactionGroup'
 
-const Group = styled.section`
-  padding-top: 20px;
-  position: relative;
-
-  &:first-child {
-    padding-top: 0;
-  }
-`
 const SpinContainer = styled.div`
   display: flex;
   align-items: center;
@@ -36,15 +23,15 @@ function formatDate(date) {
 
 function TransactionList(props) {
   const { groupped } = props
+  const sliced = groupped.splice(0, 3)
   console.log('RENDER LIST')
 
-  // const groupped = groupTransactionsAndReturnId('day', transactions)
   const hasData = !!groupped.length
 
   return (
     <div>
       {hasData &&
-        groupped.map(({ date, transactions }) => (
+        sliced.map(({ date, transactions }) => (
           <TransactionGroup
             key={+date}
             name={formatDate(date)}
@@ -60,14 +47,7 @@ function TransactionList(props) {
   )
 }
 
-const lim = { limit: 4 }
-
-const mapStateToProps = (state, ownProps) => ({
-  // transactions: getTransactions(state)({ limit: ownProps.limit }),
-  groupped: getGrouppedIds(state, lim)
-})
-
 export default connect(
-  mapStateToProps,
+  (state, ownProps) => ({ groupped: getGrouppedIds2(state) }),
   null
 )(TransactionList)

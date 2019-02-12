@@ -38,7 +38,7 @@ function TagSelect(props) {
 }
 
 const mapStateToProps = state => ({
-  tags: getTags(state)()
+  tags: getTags(state)
 })
 
 export default connect(
