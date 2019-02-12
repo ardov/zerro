@@ -8,6 +8,8 @@ export default class Filter extends Component {
   state = {}
 
   render() {
+    console.log('FILTER RENDER')
+
     const conditions = this.props.conditions
     return (
       <div>
