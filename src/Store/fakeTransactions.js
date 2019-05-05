@@ -14,7 +14,10 @@ export default createReducer(
     }),
     [removeFakeTransaction]: (state, action) => ({
       ...state,
-      [action.payload]: undefined
+      [action.payload.id]: undefined
     })
   }
 )
+
+//SELECTOR
+export const getFakeTransaction = (state, id) => state.fakeTransaction[id]
