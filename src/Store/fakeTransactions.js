@@ -13,7 +13,7 @@ export default createReducer(initialState, {
   }),
   [removeFakeTransaction]: (state, action) => ({
     ...state,
-    [action.payload.id]: undefined
+    [action.payload]: undefined
   })
 })
 
