@@ -78,9 +78,9 @@ export const populate = (data, el) => {
 
         case 'tag':
           if (typeof el[key] === 'string') {
-            parsed[key] = [tag[el[key]].title]
+            parsed[key] = [tag[el[key]]]
           } else {
-            parsed[key] = el[key].map(tagId => tag[tagId].title)
+            parsed[key] = el[key].map(tagId => tag[tagId])
           }
           break
 
