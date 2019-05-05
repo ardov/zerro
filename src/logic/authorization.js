@@ -1,8 +1,8 @@
-import LocalStorage from '../../services/localstorage'
+import LocalStorage from '../services/localstorage'
 import Cookies from 'cookies-js'
-import ZenApi from '../../services/ZenApi'
-import { setToken } from './actions'
-import { updateData, wipeData } from '../data/actions'
+import ZenApi from '../services/ZenApi'
+import { setToken } from '../store/token'
+import { updateData, wipeData } from '../store/data/actions'
 
 export const logIn = () => (dispatch, getState) => {
   dispatch(logOut())

@@ -6,7 +6,7 @@ import dataReducer from './data/reducer'
 import fakeTransactionsReducer from './fakeTransactions'
 import filterConditionsReducer from './filterConditions/reducer'
 import openedTransactionReducer from './openedTransaction/reducer'
-import tokenReducer from './token/reducer'
+import tokenReducer from './token'
 
 const rootReducer = combineReducers({
   data: dataReducer,

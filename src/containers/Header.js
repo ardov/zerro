@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Button } from 'antd'
-import { logOut } from '../store/token/thunks'
+import { logOut } from '../logic/authorization'
 import { loadData } from '../store/data/thunks'
 
 const Main = styled.header`
