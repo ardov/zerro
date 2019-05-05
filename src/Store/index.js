@@ -3,7 +3,7 @@ import ZenApi from '../services/ZenApi'
 import LocalStorage from '../services/localstorage'
 
 import dataReducer from './data/reducer'
-import fakeTransactionsReducer from './fakeTransactions/reducer'
+import fakeTransactionsReducer from './fakeTransactions'
 import filterConditionsReducer from './filterConditions/reducer'
 import openedTransactionReducer from './openedTransaction/reducer'
 import tokenReducer from './token/reducer'
@@ -54,7 +54,7 @@ const getInitialState = () => {
   if (localToken) {
     return { token: localToken }
   }
-  return 
+  return
 }
 
 export const store = configureStore({

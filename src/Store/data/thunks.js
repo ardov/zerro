@@ -1,9 +1,6 @@
 import ZenApi from '../../services/ZenApi'
 import { updateData } from './actions'
-import {
-  addFakeTransaction,
-  removeFakeTransaction
-} from '../fakeTransactions/actions'
+import { addFakeTransaction, removeFakeTransaction } from '../fakeTransactions'
 import LocalStorage from '../../services/localstorage'
 
 export const loadData = changed => (dispatch, getState) => {
