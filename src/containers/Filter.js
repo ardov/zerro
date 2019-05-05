@@ -1,6 +1,9 @@
 import { connect } from 'react-redux'
-import { setCondition, setTags } from '../store/filterConditions/actions'
-import { getFilterConditions } from '../store/selectors'
+import {
+  setCondition,
+  setTags,
+  getFilterConditions
+} from '../store/filterConditions'
 import Filter from '../components/Filter'
 
 const mapStateToProps = state => ({

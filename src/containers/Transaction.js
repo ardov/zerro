@@ -1,8 +1,8 @@
 import { connect } from 'react-redux'
 
-import { openTransaction } from '../store/openedTransaction/actions'
+import { openTransaction } from '../store/openedTransaction'
 import Transaction from '../components/Transaction'
-import { setCondition } from '../store/filterConditions/actions'
+import { setCondition } from '../store/filterConditions'
 import { makeGetTransaction } from '../store/data/selectors'
 
 const makeMapStateToProps = () => {

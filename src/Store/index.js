@@ -4,8 +4,8 @@ import LocalStorage from '../services/localstorage'
 
 import dataReducer from './data/reducer'
 import fakeTransactionsReducer from './fakeTransactions'
-import filterConditionsReducer from './filterConditions/reducer'
-import openedTransactionReducer from './openedTransaction/reducer'
+import filterConditionsReducer from './filterConditions'
+import openedTransactionReducer from './openedTransaction'
 import tokenReducer from './token'
 
 const rootReducer = combineReducers({
