@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Button } from 'antd'
 import { logOut } from '../logic/authorization'
-import { loadData } from '../store/data/thunks'
+import { syncData } from '../store/data/thunks'
 
 const Main = styled.header`
   height: 48px;
@@ -43,7 +43,7 @@ function Header(props) {
       <Buttons>
         <StyledButton onClick={props.logOut}>Выйти</StyledButton>
 
-        <StyledButton icon="reload" onClick={props.loadData}>
+        <StyledButton icon="reload" onClick={props.syncData}>
           Обновить данные
         </StyledButton>
       </Buttons>
@@ -54,7 +54,7 @@ function Header(props) {
 const mapDispatchToProps = dispatch => {
   return {
     logOut: () => dispatch(logOut()),
-    loadData: () => dispatch(loadData())
+    syncData: () => dispatch(syncData())
   }
 }
 

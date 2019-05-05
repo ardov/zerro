@@ -2,7 +2,7 @@ import { configureStore, combineReducers } from 'redux-starter-kit'
 import ZenApi from '../services/ZenApi'
 import LocalStorage from '../services/localstorage'
 
-import dataReducer from './data/reducer'
+import dataReducer from './data'
 import fakeTransactionsReducer from './fakeTransactions'
 import filterConditionsReducer from './filterConditions'
 import openedTransactionReducer from './openedTransaction'

@@ -1,6 +1,13 @@
-import { createReducer } from 'redux-starter-kit'
-import * as actions from './actions'
+import { createAction, createReducer } from 'redux-starter-kit'
 import keyBy from 'lodash/keyBy'
+
+//ACTIONS
+
+export const updateData = createAction('data/update')
+export const wipeData = createAction('data/wipe')
+export const setData = createAction('data/set')
+
+//REDUCER
 
 const initialState = {
   lastSync: 0,
@@ -17,20 +24,17 @@ const initialState = {
   transaction: {}
 }
 
-const dataReducer = createReducer(initialState, {
-  [actions.wipeData]: (state, action) => initialState,
+export default createReducer(initialState, {
+  [wipeData]: (state, action) => initialState,
 
-  [actions.setData]: (state, action) => ({
+  [setData]: (state, action) => ({
     ...initialState,
     ...action.payload
   }),
 
-  [actions.updateData]: (state, action) => {
+  [updateData]: (state, action) => {
     const data = action.payload
-    let newState = {
-      lastSync: data.serverTimestamp
-    }
-
+    let newState = { lastSync: data.serverTimestamp }
     const types = [
       'instrument',
       'country',
@@ -44,7 +48,6 @@ const dataReducer = createReducer(initialState, {
       'reminderMarker',
       'transaction'
     ]
-
     types.forEach(type => {
       if (data[type]) {
         newState[type] = {
@@ -56,5 +59,3 @@ const dataReducer = createReducer(initialState, {
     return { ...state, ...newState }
   }
 })
-
-export default dataReducer
