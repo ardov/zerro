@@ -2,17 +2,26 @@ import ZenApi from '../../services/ZenApi'
 import { updateData } from './index'
 import { addFakeTransaction, removeFakeTransaction } from '../fakeTransactions'
 import LocalStorage from '../../services/localstorage'
+import { message } from 'antd'
 
 //All syncs with ZM goes through this thunk
 export const syncData = changed => (dispatch, getState) => {
+  message.loading('Синхронизируемся...', 0)
+
   const state = getState()
   const lastSync = state.data.lastSync
   return ZenApi.getData(state.token, { lastSync, changed }).then(
     json => {
       dispatch(updateData(json))
       LocalStorage.set('data', getState().data)
+      message.destroy()
+      message.success('Готово!')
     },
-    err => console.warn('!!!', err)
+    err => {
+      message.destroy()
+      message.error('Что-то пошло не так')
+      console.warn('Syncing failed', err)
+    }
   )
 }
 
