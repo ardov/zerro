@@ -1,12 +1,17 @@
 import { connect } from 'react-redux'
-import { setCondition } from '../store/actions/filter'
-import { getElement } from '../store/selectors'
-import { openTransaction } from '../store/actions'
-import Transaction from '../components/Transaction'
 
-const mapStateToProps = (state, ownProps) => ({
-  tr: getElement(state)('transaction', ownProps.id)
-})
+import { openTransaction } from '../store/openedTransaction'
+import Transaction from '../components/Transaction'
+import { setCondition } from '../store/filterConditions'
+import { makeGetTransaction } from '../store/data/selectors'
+
+const makeMapStateToProps = () => {
+  const getTransaction = makeGetTransaction()
+  const mapStateToProps = (state, props) => ({
+    ...getTransaction(state, props.id)
+  })
+  return mapStateToProps
+}
 
 const mapDispatchToProps = dispatch => ({
   onClick: id => dispatch(openTransaction(id)),
@@ -14,6 +19,6 @@ const mapDispatchToProps = dispatch => ({
 })
 
 export default connect(
-  mapStateToProps,
+  makeMapStateToProps,
   mapDispatchToProps
 )(Transaction)

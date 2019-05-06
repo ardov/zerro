@@ -3,8 +3,8 @@ import { connect } from 'react-redux'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Button } from 'antd'
-
-import { updateData, logOut } from '../store/actions'
+import { logOut } from '../logic/authorization'
+import { syncData } from '../store/data/thunks'
 
 const Main = styled.header`
   height: 48px;
@@ -43,7 +43,7 @@ function Header(props) {
       <Buttons>
         <StyledButton onClick={props.logOut}>Выйти</StyledButton>
 
-        <StyledButton icon="reload" onClick={props.updateData}>
+        <StyledButton icon="reload" onClick={props.syncData}>
           Обновить данные
         </StyledButton>
       </Buttons>
@@ -54,7 +54,7 @@ function Header(props) {
 const mapDispatchToProps = dispatch => {
   return {
     logOut: () => dispatch(logOut()),
-    updateData: () => dispatch(updateData())
+    syncData: () => dispatch(syncData())
   }
 }
 

@@ -25,7 +25,7 @@ const Content = styled.div`
 
 export default class TransactionsView extends Component {
   state = {
-    limit: 20,
+    limit: 4,
     limitStep: 50
   }
   loadMore = () => {
@@ -36,7 +36,7 @@ export default class TransactionsView extends Component {
 
   render() {
     return (
-      <div>
+      <React.Fragment>
         <Header />
         <Body>
           <Menu>
@@ -48,7 +48,7 @@ export default class TransactionsView extends Component {
           </Content>
           <DetailsPanel />
         </Body>
-      </div>
+      </React.Fragment>
     )
   }
 }

@@ -1,23 +1,20 @@
 import parseDate from 'date-fns/parse'
 
-export const populate = (
-  {
+export const populate = (data, el) => {
+  if (!el) return null
+  const {
     instrument,
     country,
     company,
     user,
     account,
     tag,
-    budget,
-    merchant,
-    reminder,
-    reminderMarker,
-    transaction,
-    openedTransaction
-  },
-  el
-) => {
-  if (!el) return null
+    // budget,
+    merchant
+    // reminder,
+    // reminderMarker
+    // transaction
+  } = data
   const parsed = {}
 
   for (const key in el) {
@@ -26,13 +23,13 @@ export const populate = (
         case 'changed':
         case 'paidTill':
         case 'created':
-          parsed[key] = new Date(el[key] * 1000)
+          parsed[key] = +new Date(el[key] * 1000)
           break
 
         case 'startDate':
         case 'endDate':
         case 'date':
-          parsed[key] = parseDate(el[key])
+          parsed[key] = +parseDate(el[key])
           break
 
         // case 'parent':
@@ -91,13 +88,13 @@ export const populate = (
           parsed[key] = merchant[el[key]]
           break
 
-        case 'reminder':
-          parsed[key] = reminder[el[key]]
-          break
+        // case 'reminder':
+        //   parsed[key] = reminder[el[key]]
+        //   break
 
-        case 'reminderMarker':
-          parsed[key] = reminderMarker[el[key]]
-          break
+        // case 'reminderMarker':
+        //   parsed[key] = reminderMarker[el[key]]
+        //   break
 
         default:
           break
@@ -112,7 +109,7 @@ export const populate = (
       parsed.type = el.income ? 'income' : 'outcome'
     }
   }
-  parsed.isSelected = el.id === openedTransaction
+  // parsed.isSelected = el.id === openedTransaction
   return { ...el, ...parsed }
 }
 

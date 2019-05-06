@@ -4,7 +4,6 @@ import { TreeSelect } from 'antd'
 import { getTags } from '../store/selectors'
 
 function TagSelect(props) {
-  if (!props.tags.map) debugger
   const treeData = props.tags.map(tag => {
     const children = tag.children
       ? tag.children.map(child => {
@@ -39,7 +38,7 @@ function TagSelect(props) {
 }
 
 const mapStateToProps = state => ({
-  tags: getTags(state)()
+  tags: getTags(state)
 })
 
 export default connect(

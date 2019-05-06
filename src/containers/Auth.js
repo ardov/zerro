@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { connect } from 'react-redux'
 
 import { Button } from 'antd'
-import { logIn } from '../store/actions'
+import { logIn } from '../logic/authorization'
 import ZenApi from '../services/ZenApi'
 
 ZenApi.checkCode()

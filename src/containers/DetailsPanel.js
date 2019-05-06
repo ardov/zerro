@@ -4,7 +4,7 @@ import {
   deleteTransaction,
   restoreTransaction,
   applyChangesToTransaction
-} from '../store/actions'
+} from '../store/data/thunks'
 import DetailsPanel from '../components/DetailsPanel'
 
 const mapStateToProps = (state, ownProps) => ({

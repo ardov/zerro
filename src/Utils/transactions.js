@@ -33,6 +33,36 @@ export function groupTransactionsBy(groupType = 'day', arr) {
 }
 
 /**
+ * Groups array of transactions returns IDs
+ * @param {String: groupType} day | week | month
+ * @param {Array: arr} Array of Transaction
+ * @return {Array} of objects {date, transactions}
+ */
+export function groupTransactionsAndReturnId(groupType = 'day', arr) {
+  if (!arr) return []
+  const groupTypes = {
+    day: date => startOfDay(date),
+    week: date => startOfWeek(date, { weekStartsOn: 1 }),
+    month: date => startOfMonth(date)
+  }
+
+  const reducer = (groupped, tr) => {
+    let lastDate = groupped.length ? groupped[groupped.length - 1].date : null
+    if (+lastDate === +groupTypes[groupType](tr.date)) {
+      groupped[groupped.length - 1].transactions.push(tr.id)
+    } else {
+      groupped.push({
+        date: groupTypes[groupType](tr.date),
+        transactions: [tr.id]
+      })
+    }
+    return groupped
+  }
+
+  return arr.reduce(reducer, [])
+}
+
+/**
  * Accumulates data about transaction array
  * @param {Array of Transaction} group type
  * @return {Object} results partitioned by income and outcome
