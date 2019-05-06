@@ -18,7 +18,6 @@ export const getTransactions = createSelector(
     for (const id in transactions) {
       if (fakes[id]) {
         list.push(populate(data, fakes[id]))
-        console.log('FOUND IN FAKES', fakes[id])
       } else {
         list.push(populate(data, transactions[id]))
       }
