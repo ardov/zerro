@@ -89,7 +89,6 @@ export default class Transaction extends React.Component {
   handlePayeeClick = () => this.props.onFilterByPayee(this.props.payee)
 
   render() {
-    console.log('Render trans')
     const props = this.props
     const {
       type,

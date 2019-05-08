@@ -23,8 +23,6 @@ const Title = styled.h3`
 
 export default class TransactionGroup extends React.PureComponent {
   render() {
-    console.log('RENDER GROUP', this.props.name, this.props.transactions)
-
     return (
       <Group>
         <Title>{this.props.name}</Title>
