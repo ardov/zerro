@@ -13,10 +13,13 @@ const redirectUri = process.env.REACT_APP_REDIRECT_URI
 
 const ZenApi = {}
 
-ZenApi.getData = function(token, payload = { lastSync: 0, changed: {} }) {
+ZenApi.getData = function(
+  token,
+  payload = { serverTimestamp: 0, changed: {} }
+) {
   const body = {
     currentClientTimestamp: Math.round(Date.now() / 1000),
-    lastServerTimestamp: payload.lastSync,
+    lastServerTimestamp: payload.serverTimestamp,
     ...payload.changed
   }
 

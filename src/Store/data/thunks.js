@@ -9,8 +9,8 @@ export const syncData = changed => (dispatch, getState) => {
   message.loading('Синхронизируемся...', 0)
 
   const state = getState()
-  const lastSync = state.data.lastSync
-  return ZenApi.getData(state.token, { lastSync, changed }).then(
+  const serverTimestamp = state.data.serverTimestamp || 0
+  return ZenApi.getData(state.token, { serverTimestamp, changed }).then(
     json => {
       dispatch(updateData(json))
       LocalStorage.set('data', getState().data)

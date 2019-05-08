@@ -16,35 +16,6 @@ const rootReducer = combineReducers({
   token: tokenReducer
 })
 
-// const defaultState = {
-//   // DATA FROM ZENMONEY
-//   lastSync: 0,
-
-//   instrument: {},
-//   country: {},
-//   company: {},
-//   user: {},
-
-//   account: {},
-//   tag: {},
-//   budget: {},
-//   merchant: {},
-//   reminder: {},
-//   reminderMarker: {},
-//   transaction: {},
-//   fakeTransaction: {},
-
-//   // TOKEN
-//   token: null,
-
-//   // selectedTransactions: [],
-//   // UI
-//   openedTransaction: null,
-//   // updatingData: false,
-//   filterConditions: {}
-//   // showFirst: 200
-// }
-
 const getInitialState = () => {
   const localToken = ZenApi.getLocalToken()
   const localData = LocalStorage.get('data')
