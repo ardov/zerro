@@ -69,16 +69,4 @@ export const getTags = createSelector(
   }
 )
 
-export const getOpenedId = state => () => state.openedTransaction
-export const getOpened = state => () => {
-  const id = state.openedTransaction
-  if (id) {
-    return getElement(state)('transaction', id)
-  } else {
-    return null
-  }
-}
-
-export const getFilterConditions = state => state.filterConditions
-
 export const getLoginState = state => () => !!state.token

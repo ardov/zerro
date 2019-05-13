@@ -1,16 +1,15 @@
 import { connect } from 'react-redux'
 
-import { openTransaction } from '../store/openedTransaction'
+import { openTransaction, getOpenedId } from '../store/openedTransaction'
 import Transaction from '../components/Transaction'
 import { setCondition } from '../store/filterConditions'
-import { makeGetTransaction } from '../store/data/selectors'
+import { getTransaction } from '../store/data/selectors/transaction'
 
-const makeMapStateToProps = () => {
-  const getTransaction = makeGetTransaction()
-  const mapStateToProps = (state, props) => ({
+const mapStateToProps = (state, props) => {
+  return {
+    isSelected: props.id === getOpenedId(state),
     ...getTransaction(state, props.id)
-  })
-  return mapStateToProps
+  }
 }
 
 const mapDispatchToProps = dispatch => ({
@@ -19,6 +18,6 @@ const mapDispatchToProps = dispatch => ({
 })
 
 export default connect(
-  makeMapStateToProps,
+  mapStateToProps,
   mapDispatchToProps
 )(Transaction)

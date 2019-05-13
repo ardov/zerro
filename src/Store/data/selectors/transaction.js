@@ -5,10 +5,9 @@ import { getAccountsById } from './accounts'
 import { getUsersById } from './users'
 import { getTagsById } from './tags'
 import { getMerchantsById } from './merchants'
-import { getOpenedId } from '../../openedTransaction'
 
 export const normalize = (
-  { instruments, accounts, users, tags, merchants, openedId },
+  { instruments, accounts, users, tags, merchants },
   raw
 ) => ({
   id: raw.id,
@@ -47,8 +46,7 @@ export const normalize = (
   reminderMarker: raw.reminderMarker,
 
   //COMPUTED PROPERTIES
-  type: getType(raw),
-  isSelected: raw.id === openedId
+  type: getType(raw)
 })
 
 export const getTransactionsById = createSelector(
@@ -58,14 +56,13 @@ export const getTransactionsById = createSelector(
     getUsersById,
     getTagsById,
     getMerchantsById,
-    getOpenedId,
     'data.transaction'
   ],
-  (instruments, accounts, users, tags, merchants, openedId, transactions) => {
+  (instruments, accounts, users, tags, merchants, transactions) => {
     const result = {}
     for (const id in transactions) {
       result[id] = normalize(
-        { instruments, accounts, users, tags, merchants, openedId },
+        { instruments, accounts, users, tags, merchants },
         transactions[id]
       )
     }
@@ -75,10 +72,16 @@ export const getTransactionsById = createSelector(
 
 export const getTransaction = (state, id) => getTransactionsById(state)[id]
 
+export const getOpenedTransaction = createSelector(
+  [getTransactionsById, 'openedTransaction'],
+  (transactions, openedId) => transactions[openedId]
+)
+
 // HELPERS
 
 function mapTags(ids, tags) {
-  return ids ? tags.map(id => tags[id]) : null
+  if (typeof ids === 'string') debugger
+  return ids ? ids.map(id => tags[id]) : null
 }
 
 function getType(tr) {
