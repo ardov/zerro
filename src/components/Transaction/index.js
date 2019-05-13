@@ -39,7 +39,7 @@ const Body = styled.div`
       opacity: 0.3;
     `}
   ${props =>
-    props.isSelected &&
+    props.isOpened &&
     css`
       opacity: 1;
       background-color: rgba(0, 0, 0, 0.1);
@@ -85,36 +85,33 @@ const AdditionalInfo = styled.div`
 `
 
 export default class Transaction extends React.Component {
-  handleSelect = () => this.props.onClick(this.props.id)
+  handleOpen = () => this.props.onClick(this.props.id)
   handlePayeeClick = () => this.props.onFilterByPayee(this.props.payee)
 
   render() {
-    const props = this.props
     const {
       type,
       incomeAccount,
       deleted,
       outcomeAccount,
-      isSelected,
+      isOpened,
+      isInSelectionMode,
+      isChecked,
       payee,
       tag,
       comment
-    } = props
+    } = this.props
 
     const mainTagTitle =
       type === 'transfer' ? 'Перевод' : tag ? tag[0].title : 'Без категории'
     const secondaryTagTitles = tag && tag.map(tag => tag.title).splice(1)
     const iconSymbol = getTagIcon(type, tag)
-    const amount = getAmount(props)
+    const amount = getAmount(this.props)
     const mainAccountTitle =
       type === 'income' ? incomeAccount.title : outcomeAccount.title
 
     return (
-      <Body
-        onClick={this.handleSelect}
-        deleted={deleted}
-        isSelected={isSelected}
-      >
+      <Body onClick={this.handleOpen} deleted={deleted} isOpened={isOpened}>
         <Icon>{iconSymbol}</Icon>
         <Tags {...{ type, mainTagTitle, secondaryTagTitles }} />
         <Account>{mainAccountTitle.title}</Account>

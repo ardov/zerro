@@ -2,28 +2,30 @@ import { configureStore, combineReducers } from 'redux-starter-kit'
 import ZenApi from '../services/ZenApi'
 import LocalStorage from '../services/localstorage'
 
-import dataReducer from './data'
-import fakeTransactionsReducer from './fakeTransactions'
-import filterConditionsReducer from './filterConditions'
-import openedTransactionReducer from './openedTransaction'
-import tokenReducer from './token'
+import data from './data'
+import fakeTransactions from './fakeTransactions'
+import filterConditions from './filterConditions'
+import openedTransaction from './openedTransaction'
+import token from './token'
+import selectedTransactions from './selectedTransactions'
 
 const rootReducer = combineReducers({
-  data: dataReducer,
-  fakeTransactions: fakeTransactionsReducer,
-  filterConditions: filterConditionsReducer,
-  openedTransaction: openedTransactionReducer,
-  token: tokenReducer
+  data,
+  fakeTransactions,
+  filterConditions,
+  openedTransaction,
+  selectedTransactions,
+  token
 })
 
 const getInitialState = () => {
-  const localToken = ZenApi.getLocalToken()
-  const localData = LocalStorage.get('data')
-  if (localToken && localData) {
-    return { data: localData, token: localToken }
+  const token = ZenApi.getLocalToken()
+  const data = LocalStorage.get('data')
+  if (token && data) {
+    return { data, token }
   }
-  if (localToken) {
-    return { token: localToken }
+  if (token) {
+    return { token }
   }
   return
 }
