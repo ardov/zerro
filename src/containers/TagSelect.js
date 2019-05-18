@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { TreeSelect } from 'antd'
-import { getTags } from '../store/selectors'
+import { getTagsTree } from '../store/data/selectors/tags'
 
 function TagSelect(props) {
   const treeData = props.tags.map(tag => {
@@ -38,7 +38,7 @@ function TagSelect(props) {
 }
 
 const mapStateToProps = state => ({
-  tags: getTags(state)
+  tags: getTagsTree(state)
 })
 
 export default connect(

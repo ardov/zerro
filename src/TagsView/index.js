@@ -3,7 +3,8 @@ import { connect } from 'react-redux'
 
 import Header from '../containers/Header'
 import TagList from './TagList'
-import { getTags, getTransactions } from '../store/selectors'
+import { getTransactions } from '../store/selectors'
+import { getTagsTree } from '../store/data/selectors/tags'
 
 function TransactionsView(props) {
   return (
@@ -16,7 +17,7 @@ function TransactionsView(props) {
 
 const mapStateToProps = state => ({
   transactions: getTransactions(state),
-  tags: getTags(state)
+  tags: getTagsTree(state)
 })
 
 export default connect(
