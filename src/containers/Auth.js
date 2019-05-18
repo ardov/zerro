@@ -26,11 +26,9 @@ function Auth(props) {
   )
 }
 
-const mapDispatchToProps = dispatch => {
-  return {
-    logIn: () => dispatch(logIn())
-  }
-}
+const mapDispatchToProps = dispatch => ({
+  logIn: () => dispatch(logIn())
+})
 
 export default connect(
   null,
