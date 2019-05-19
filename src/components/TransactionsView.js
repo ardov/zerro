@@ -14,12 +14,14 @@ const Body = styled.div`
 const Menu = styled.div`
   width: 280px;
   padding: 40px;
+  flex-shrink: 0;
   /* background: rgba(0, 0, 0, 0.06); */
   border-right: 1px solid rgba(0, 0, 0, 0.1);
 `
 const Content = styled.div`
   flex-grow: 1;
   padding: 0 40px;
+  min-width: 0;
   flex-direction: column;
 `
 

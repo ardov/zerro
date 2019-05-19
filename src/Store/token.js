@@ -1,9 +1,9 @@
 import { createReducer, createAction } from 'redux-starter-kit'
 
-//ACTIONS
+// ACTIONS
 export const setToken = createAction('token/set')
 
-//REDUCER
+// REDUCER
 export default createReducer(null, {
   [setToken]: (state, action) => action.payload
 })

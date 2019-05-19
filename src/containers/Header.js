@@ -51,12 +51,10 @@ function Header(props) {
   )
 }
 
-const mapDispatchToProps = dispatch => {
-  return {
-    logOut: () => dispatch(logOut()),
-    syncData: () => dispatch(syncData())
-  }
-}
+const mapDispatchToProps = dispatch => ({
+  logOut: () => dispatch(logOut()),
+  syncData: () => dispatch(syncData())
+})
 
 export default connect(
   null,

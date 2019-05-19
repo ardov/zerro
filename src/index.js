@@ -15,8 +15,6 @@ if (process.env.NODE_ENV !== 'production') {
   whyDidYouUpdate(React)
 }
 
-console.log('Initial state: ', store.getState())
-
 ReactDOM.render(
   <Provider store={store}>
     <App />

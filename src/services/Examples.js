@@ -104,7 +104,7 @@ let m = {
   merchant: [
     {
       // "id": "dbcec877-057c-456c-aa4d-09f5e0547739",
-      user: 166825,
+      // user: 166825,
       title: 'пятерочка'
       // "changed": 1440945120
     }

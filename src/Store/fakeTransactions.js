@@ -1,11 +1,13 @@
 import { createAction, createReducer } from 'redux-starter-kit'
 
-//ACTIONS
+// ACTIONS
 export const addFakeTransaction = createAction('fakeTransactions/add')
 export const removeFakeTransaction = createAction('fakeTransactions/remove')
 
-//REDUCER
+// INITIAL STATE
 const initialState = {}
+
+// REDUCER
 export default createReducer(initialState, {
   [addFakeTransaction]: (state, action) => ({
     ...state,
@@ -17,5 +19,5 @@ export default createReducer(initialState, {
   })
 })
 
-//SELECTOR
+// SELECTOR
 export const getFakeTransaction = (state, id) => state.fakeTransaction[id]

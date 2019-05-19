@@ -24,7 +24,6 @@ function formatDate(date) {
 function TransactionList(props) {
   const { groupped } = props
   const sliced = groupped.splice(0, 3)
-  console.log('RENDER LIST')
 
   const hasData = !!groupped.length
 

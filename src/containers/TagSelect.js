@@ -1,17 +1,17 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { TreeSelect } from 'antd'
-import { getTags } from '../store/selectors'
+import { getTagsTree } from '../store/data/selectors/tags'
 
 function TagSelect(props) {
   const treeData = props.tags.map(tag => {
     const children = tag.children
       ? tag.children.map(child => {
-          return { title: child.title, value: child.id, key: child.id }
+          return { title: child.fullTitle, value: child.id, key: child.id }
         })
       : undefined
     return {
-      title: tag.title,
+      title: tag.fullTitle,
       value: tag.id,
       key: tag.id,
       children: children
@@ -38,7 +38,7 @@ function TagSelect(props) {
 }
 
 const mapStateToProps = state => ({
-  tags: getTags(state)
+  tags: getTagsTree(state)
 })
 
 export default connect(

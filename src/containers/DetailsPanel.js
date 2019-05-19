@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { getOpened } from '../store/selectors'
+import { getOpenedTransaction } from '../store/data/selectors/transaction'
 import {
   deleteTransaction,
   restoreTransaction,
@@ -8,7 +8,7 @@ import {
 import DetailsPanel from '../components/DetailsPanel'
 
 const mapStateToProps = (state, ownProps) => ({
-  transaction: getOpened(state)()
+  transaction: getOpenedTransaction(state)
 })
 
 const mapDispatchToProps = dispatch => ({

@@ -45,40 +45,4 @@ export const getElement = state => (type, id) => {
   }
 }
 
-export const getTags = createSelector(
-  ['data'],
-  data => {
-    const tags = data.tag
-    const list = []
-    for (const id in tags) {
-      list.push(populate(data, tags[id]))
-    }
-    const topLevel = list.filter(tag => !tag.parent)
-    list
-      .filter(tag => tag.parent)
-      .forEach(tag => {
-        const parent = topLevel.find(topTag => topTag.id === tag.parent)
-        if (parent.children) {
-          parent.children.push(tag)
-        } else {
-          parent.children = [tag]
-        }
-      })
-
-    return topLevel
-  }
-)
-
-export const getOpenedId = state => () => state.openedTransaction
-export const getOpened = state => () => {
-  const id = state.openedTransaction
-  if (id) {
-    return getElement(state)('transaction', id)
-  } else {
-    return null
-  }
-}
-
-export const getFilterConditions = state => state.filterConditions
-
 export const getLoginState = state => () => !!state.token

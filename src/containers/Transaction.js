@@ -1,24 +1,28 @@
 import { connect } from 'react-redux'
 
-import { openTransaction } from '../store/openedTransaction'
+import { openTransaction, getOpenedId } from '../store/openedTransaction'
 import Transaction from '../components/Transaction'
 import { setCondition } from '../store/filterConditions'
-import { makeGetTransaction } from '../store/data/selectors'
+import { getTransaction } from '../store/data/selectors/transaction'
+import {
+  getSelectedIds,
+  toggleTransaction
+} from '../store/selectedTransactions'
 
-const makeMapStateToProps = () => {
-  const getTransaction = makeGetTransaction()
-  const mapStateToProps = (state, props) => ({
-    ...getTransaction(state, props.id)
-  })
-  return mapStateToProps
-}
+const mapStateToProps = (state, props) => ({
+  isOpened: props.id === getOpenedId(state),
+  isChecked: getSelectedIds(state).includes(props.id),
+  isInSelectionMode: !!getSelectedIds(state).length,
+  ...getTransaction(state, props.id)
+})
 
-const mapDispatchToProps = dispatch => ({
-  onClick: id => dispatch(openTransaction(id)),
+const mapDispatchToProps = (dispatch, props) => ({
+  onClick: () => dispatch(openTransaction(props.id)),
+  onToggle: () => dispatch(toggleTransaction(props.id)),
   onFilterByPayee: payee => dispatch(setCondition({ search: payee }))
 })
 
 export default connect(
-  makeMapStateToProps,
+  mapStateToProps,
   mapDispatchToProps
 )(Transaction)
