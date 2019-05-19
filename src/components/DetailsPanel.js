@@ -14,6 +14,7 @@ const Panel = styled.section`
   position: sticky;
   top: 0;
   align-self: flex-start;
+  flex-shrink: 0;
   height: 100vh;
   width: 480px;
   border-left: 1px solid #eee;
@@ -163,14 +164,14 @@ export default class DetailsPanel extends React.Component {
             name: 'opOutcome',
             value: tr.opOutcome
           },
-          {
-            name: 'opIncomeInstrument',
-            value: tr.opIncomeInstrument
-          },
-          {
-            name: 'opOutcomeInstrument',
-            value: tr.opOutcomeInstrument
-          },
+          // {
+          //   name: 'opIncomeInstrument',
+          //   value: tr.opIncomeInstrument
+          // },
+          // {
+          //   name: 'opOutcomeInstrument',
+          //   value: tr.opOutcomeInstrument
+          // },
           {
             name: 'GEO',
             value: (
@@ -203,7 +204,7 @@ export default class DetailsPanel extends React.Component {
     return (
       <Panel>
         {tr && (
-          <div>
+          <div key={tr.id}>
             <TagSelect value={tags} onChange={this.updateTags} />
             <div />
             {tr.deleted ? (
