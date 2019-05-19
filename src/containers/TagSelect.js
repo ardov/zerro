@@ -7,11 +7,11 @@ function TagSelect(props) {
   const treeData = props.tags.map(tag => {
     const children = tag.children
       ? tag.children.map(child => {
-          return { title: child.title, value: child.id, key: child.id }
+          return { title: child.fullTitle, value: child.id, key: child.id }
         })
       : undefined
     return {
-      title: tag.title,
+      title: tag.fullTitle,
       value: tag.id,
       key: tag.id,
       children: children
