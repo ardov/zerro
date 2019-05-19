@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components'
 import { Tag } from 'antd'
 import { MainLine } from './MainLine'
 import { Amount } from './Amount'
-import { Icon } from './Icon'
+import Icon from './Icon'
 
 const Body = styled.div`
   padding: 16px;

@@ -48,16 +48,24 @@ const Sym = styled.div`
       display: none;
     `}
 `
-
-export function Icon({ isChecked, isInSelectionMode, symbol, onToggle }) {
-  return (
-    <Body>
-      <StyledCheckbox
-        isInSelectionMode={isInSelectionMode}
-        checked={isChecked}
-        onChange={onToggle}
-      />
-      <Sym isInSelectionMode={isInSelectionMode}>{symbol}</Sym>
-    </Body>
-  )
+export default class Icon extends React.Component {
+  handleChange = e => {
+    e.stopPropagation()
+    this.props.onToggle()
+  }
+  render() {
+    const { isChecked, isInSelectionMode, symbol } = this.props
+    return (
+      <Body>
+        <StyledCheckbox
+          isInSelectionMode={isInSelectionMode}
+          checked={isChecked}
+          onClick={this.handleChange}
+        />
+        <Sym isInSelectionMode={isInSelectionMode}>{symbol}</Sym>
+      </Body>
+    )
+  }
 }
+
+// export function Icon({ isChecked, isInSelectionMode, symbol, onToggle }) {}
