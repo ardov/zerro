@@ -4,7 +4,10 @@ import { openTransaction, getOpenedId } from '../store/openedTransaction'
 import Transaction from '../components/Transaction'
 import { setCondition } from '../store/filterConditions'
 import { getTransaction } from '../store/data/selectors/transaction'
-import { getSelectedIds } from '../store/selectedTransactions'
+import {
+  getSelectedIds,
+  toggleTransaction
+} from '../store/selectedTransactions'
 
 const mapStateToProps = (state, props) => ({
   isOpened: props.id === getOpenedId(state),
@@ -13,8 +16,9 @@ const mapStateToProps = (state, props) => ({
   ...getTransaction(state, props.id)
 })
 
-const mapDispatchToProps = dispatch => ({
-  onClick: id => dispatch(openTransaction(id)),
+const mapDispatchToProps = (dispatch, props) => ({
+  onClick: () => dispatch(openTransaction(props.id)),
+  onToggle: () => dispatch(toggleTransaction(props.id)),
   onFilterByPayee: payee => dispatch(setCondition({ search: payee }))
 })
 

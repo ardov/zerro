@@ -5,6 +5,15 @@ export const checkTransaction = createAction('selectedTransactions/add')
 export const uncheckTransaction = createAction('selectedTransactions/remove')
 export const uncheckAllTransactions = createAction('selectedTransactions/wipe')
 
+// THUNKS
+export const toggleTransaction = id => (dispatch, getState) => {
+  if (getState().selectedTransactions.includes(id)) {
+    dispatch(uncheckTransaction(id))
+  } else {
+    dispatch(checkTransaction(id))
+  }
+}
+
 // INITIAL STATE
 const initialState = []
 

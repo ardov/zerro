@@ -3,6 +3,7 @@ import styled, { css } from 'styled-components'
 import { Tag } from 'antd'
 import { MainLine } from './MainLine'
 import { Amount } from './Amount'
+import { Icon } from './Icon'
 
 const Body = styled.div`
   padding: 16px;
@@ -44,18 +45,6 @@ const Body = styled.div`
       }
     `}
 `
-const Icon = styled.div`
-  grid-area: icon;
-  margin-top: -8px;
-  margin-right: 16px;
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-  color: #000;
-  line-height: 40px;
-  text-align: center;
-  font-size: 24px;
-`
 const Information = styled.div`
   display: flex;
   flex-direction: column;
@@ -78,7 +67,6 @@ const Account = styled.div`
   color: rgba(0, 0, 0, 0.4);
   margin-left: auto;
 `
-
 const StyledTag = styled(Tag)`
   margin-right: 8px;
 `
@@ -118,16 +106,18 @@ export default class Transaction extends React.Component {
       outcome,
       outcomeInstrument,
       opOutcome,
-      opOutcomeInstrument
+      opOutcomeInstrument,
+
+      onToggle
     } = this.props
 
-    const iconSymbol = tag ? tag[0].symbol : type === 'transfer' ? '↔' : '?'
+    const symbol = tag ? tag[0].symbol : type === 'transfer' ? '↔' : '?'
     const mainAccountTitle =
       type === 'income' ? incomeAccount.title : outcomeAccount.title
 
     return (
       <Body onClick={this.handleOpen} deleted={deleted} isOpened={isOpened}>
-        <Icon>{iconSymbol}</Icon>
+        <Icon {...{ isChecked, isInSelectionMode, symbol, onToggle }} />
         <Information>
           <Line>
             <MainLine {...{ type, tag, outcomeAccount, incomeAccount }} />
@@ -150,7 +140,7 @@ export default class Transaction extends React.Component {
               <StyledTag onClick={this.handlePayeeClick}>{payee}</StyledTag>
             )}
             {comment && <Comment>{comment}</Comment>}
-            {type !== 'transafer' && <Account>{mainAccountTitle}</Account>}
+            {type !== 'transfer' && <Account>{mainAccountTitle}</Account>}
           </Line>
         </Information>
       </Body>
