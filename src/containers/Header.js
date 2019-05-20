@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { Button } from 'antd'
 import { logOut } from '../logic/authorization'
 import { syncData } from '../store/data/thunks'
+import exportCsv from '../logic/exportCsv'
 
 const Main = styled.header`
   height: 48px;
@@ -41,11 +42,15 @@ function Header(props) {
         <NavLink to="/tags">Категории</NavLink>
       </div>
       <Buttons>
-        <StyledButton onClick={props.logOut}>Выйти</StyledButton>
-
         <StyledButton icon="reload" onClick={props.syncData}>
           Обновить данные
         </StyledButton>
+
+        <StyledButton icon="download" onClick={props.exportCsv}>
+          CSV
+        </StyledButton>
+
+        <StyledButton onClick={props.logOut}>Выйти</StyledButton>
       </Buttons>
     </Main>
   )
@@ -53,7 +58,8 @@ function Header(props) {
 
 const mapDispatchToProps = dispatch => ({
   logOut: () => dispatch(logOut()),
-  syncData: () => dispatch(syncData())
+  syncData: () => dispatch(syncData()),
+  exportCsv: () => dispatch(exportCsv)
 })
 
 export default connect(
