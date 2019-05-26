@@ -1,6 +1,5 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
-import { Tag } from 'antd'
 import { MainLine } from './MainLine'
 import { Amount } from './Amount'
 import Icon from './Icon'
@@ -66,9 +65,21 @@ const Account = styled.div`
   line-height: 16px;
   color: rgba(0, 0, 0, 0.4);
   margin-left: auto;
+  flex-shrink: 0;
 `
-const StyledTag = styled(Tag)`
+const Payee = styled.span`
   margin-right: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  transition: 0.2s;
+
+  &:hover {
+    color: rgba(0, 0, 0, 0.8);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  }
 `
 
 const Comment = styled.span`
@@ -136,10 +147,10 @@ export default class Transaction extends React.Component {
             />
           </Line>
           <Line>
-            {payee && (
-              <StyledTag onClick={this.handlePayeeClick}>{payee}</StyledTag>
-            )}
-            {comment && <Comment>{comment}</Comment>}
+            <Comment title={comment ? comment : ''}>
+              {payee && <Payee onClick={this.handlePayeeClick}>{payee}</Payee>}
+              {comment}
+            </Comment>
             {type !== 'transfer' && <Account>{mainAccountTitle}</Account>}
           </Line>
         </Information>
