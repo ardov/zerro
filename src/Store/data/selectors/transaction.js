@@ -5,6 +5,7 @@ import { getAccountsById } from './accounts'
 import { getUsersById } from './users'
 import { getTagsById } from './tags'
 import { getMerchantsById } from './merchants'
+import { groupTransactionsBy } from './Utils/transactions'
 
 export const normalize = (
   { instruments, accounts, users, tags, merchants },
@@ -71,6 +72,33 @@ export const getTransactionsById = createSelector(
 )
 
 export const getTransaction = (state, id) => getTransactionsById(state)[id]
+
+export const getTransactionList = createSelector(
+  [getTransactionsById],
+  transactions => {
+    let list = []
+    for (let id in transactions) {
+      list.push(transactions[id])
+    }
+    return list.sort((a, b) =>
+      +b.date === +a.date ? b.created - a.created : b.date - a.date
+    )
+    // .filter(checkTransaction(conditions))
+  }
+)
+
+export const getGrouppedByDay = createSelector(
+  [getTransactionList],
+  list => groupTransactionsBy('day', list)
+)
+export const getGrouppedByWeek = createSelector(
+  [getTransactionList],
+  list => groupTransactionsBy('week', list)
+)
+export const getGrouppedByMonth = createSelector(
+  [getTransactionList],
+  list => groupTransactionsBy('month', list)
+)
 
 export const getOpenedTransaction = createSelector(
   [getTransactionsById, 'openedTransaction'],

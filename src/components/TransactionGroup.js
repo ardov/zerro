@@ -29,7 +29,7 @@ export default class TransactionGroup extends React.PureComponent {
         <Title>{this.props.name}</Title>
         <div>
           {this.props.transactions.map(id => (
-            <Transaction key={id} id={id} />
+            <Transaction key={id.id} id={id.id} />
           ))}
         </div>
       </Group>

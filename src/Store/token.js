@@ -7,3 +7,6 @@ export const setToken = createAction('token/set')
 export default createReducer(null, {
   [setToken]: (state, action) => action.payload
 })
+
+// SELECTORS
+export const getLoginState = state => !!state.token

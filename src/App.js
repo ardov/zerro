@@ -8,7 +8,7 @@ import ru from 'react-intl/locale-data/ru'
 import TransactionsView from './components/TransactionsView'
 import TagsView from './TagsView'
 import Auth from './containers/Auth'
-import { getLoginState } from './store/selectors'
+import { getLoginState } from './store/token'
 
 addLocaleData(ru)
 
@@ -47,7 +47,7 @@ class App extends Component {
 }
 
 const mapStateToProps = state => ({
-  isLoggedIn: getLoginState(state)()
+  isLoggedIn: getLoginState(state)
 })
 
 export default connect(

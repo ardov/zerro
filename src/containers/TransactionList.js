@@ -5,8 +5,8 @@ import ru from 'date-fns/locale/ru'
 
 import { Spin } from 'antd'
 import { connect } from 'react-redux'
-import { getGrouppedIds2 } from '../store/selectors'
 import TransactionGroup from '../components/TransactionGroup'
+import { getGrouppedByDay } from '../store/data/selectors/transaction'
 
 const SpinContainer = styled.div`
   display: flex;
@@ -47,6 +47,6 @@ function TransactionList(props) {
 }
 
 export default connect(
-  (state, ownProps) => ({ groupped: getGrouppedIds2(state) }),
+  (state, ownProps) => ({ groupped: getGrouppedByDay(state) }),
   null
 )(TransactionList)
