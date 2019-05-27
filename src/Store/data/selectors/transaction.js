@@ -6,6 +6,7 @@ import { getUsersById } from './users'
 import { getTagsById } from './tags'
 import { getMerchantsById } from './merchants'
 import { groupTransactionsBy } from './Utils/transactions'
+import { getFilterConditions, checkTransaction } from '../../filterConditions'
 
 export const normalize = (
   { instruments, accounts, users, tags, merchants },
@@ -87,16 +88,21 @@ export const getTransactionList = createSelector(
   }
 )
 
+export const getFilteredTransactionList = createSelector(
+  [getTransactionList, getFilterConditions],
+  (list, conditions) => list.filter(checkTransaction(conditions))
+)
+
 export const getGrouppedByDay = createSelector(
-  [getTransactionList],
+  [getFilteredTransactionList],
   list => groupTransactionsBy('day', list)
 )
 export const getGrouppedByWeek = createSelector(
-  [getTransactionList],
+  [getFilteredTransactionList],
   list => groupTransactionsBy('week', list)
 )
 export const getGrouppedByMonth = createSelector(
-  [getTransactionList],
+  [getFilteredTransactionList],
   list => groupTransactionsBy('month', list)
 )
 
