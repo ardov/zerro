@@ -11,12 +11,6 @@ const formatDateTime = date =>
   format(date, 'D MMMM YYYY, dd, HH:mm:ss', { locale: ru })
 
 const Panel = styled.section`
-  position: sticky;
-  top: 0;
-  align-self: flex-start;
-  flex-shrink: 0;
-  height: 100vh;
-  width: 480px;
   border-left: 1px solid #eee;
   display: flex;
   overflow: auto;
