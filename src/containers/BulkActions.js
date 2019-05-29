@@ -9,7 +9,7 @@ import {
   setMainTagToTransactions,
   deleteTransactions
 } from '../store/data/thunks'
-import { Button } from 'antd'
+import { Button, Popconfirm, Icon } from 'antd'
 import TagSelect from './TagSelect'
 import pluralize from '../Utils/pluralize'
 
@@ -54,9 +54,21 @@ class BulkActions extends React.Component {
           placeholder="Выставить категорию"
         />
 
-        <StyledButton type="danger" block onClick={this.onDelete}>
-          Удалить выбранные ({num})
-        </StyledButton>
+        <Popconfirm
+          title={`${num} ${pluralize(num, [
+            'операция будет удалена',
+            'операции будут удалены',
+            'операций будут удалены'
+          ])}`}
+          okText="Удалить"
+          cancelText="Оставить"
+          onConfirm={this.onDelete}
+          icon={<Icon type="question-circle-o" style={{ color: 'red' }} />}
+        >
+          <StyledButton type="danger" block>
+            Удалить выбранные ({num})
+          </StyledButton>
+        </Popconfirm>
       </div>
     )
   }
@@ -64,7 +76,10 @@ class BulkActions extends React.Component {
 
 const mapDispatchToProps = dispatch => ({
   setTag: (ids, tagId) => dispatch(setMainTagToTransactions(ids, tagId)),
-  delete: ids => dispatch(deleteTransactions(ids)),
+  delete: ids => {
+    dispatch(deleteTransactions(ids))
+    dispatch(uncheckAllTransactions())
+  },
   uncheckAll: () => dispatch(uncheckAllTransactions())
 })
 
