@@ -3,10 +3,15 @@ import { updateData } from './index'
 import { addFakeTransaction, removeFakeTransaction } from '../fakeTransactions'
 import LocalStorage from '../../services/localstorage'
 import { message } from 'antd'
+import { getSelectedIds } from '../selectedTransactions'
 
 //All syncs with ZM goes through this thunk
-export const syncData = changed => (dispatch, getState) => {
-  message.loading('Синхронизируемся...', 0)
+export const syncData = (changed, messages = {}) => (dispatch, getState) => {
+  const processMessage = messages.process || 'Синхронизируемся...'
+  const successMessage = messages.success || 'Готово!'
+  const failMessage = messages.fail || 'Что-то пошло не так'
+
+  message.loading(processMessage, 0)
 
   const state = getState()
   const serverTimestamp = state.data.serverTimestamp || 0
@@ -15,26 +20,28 @@ export const syncData = changed => (dispatch, getState) => {
       dispatch(updateData(json))
       LocalStorage.set('data', getState().data)
       message.destroy()
-      message.success('Готово!')
+      message.success(successMessage)
     },
     err => {
       message.destroy()
-      message.error('Что-то пошло не так')
+      message.error(failMessage)
       console.warn('Syncing failed', err)
     }
   )
 }
 
-export const deleteTransaction = id => (dispatch, getState) => {
-  const transaction = getState().data.transaction
-  const changedTransaction = {
-    ...transaction[id],
-    deleted: true,
-    changed: Date.now() / 1000
+export const deleteTransactions = ids => (dispatch, getState) => {
+  const raws = getState().data.transaction
+  const messages = {
+    process: 'Удаляем транзакцию...'
   }
-  dispatch(addFakeTransaction(changedTransaction))
-  const changed = { transaction: [changedTransaction] }
-  dispatch(syncData(changed)).finally(() => dispatch(removeFakeTransaction(id)))
+  const idsToDelete = Array.isArray(ids) ? ids : [ids]
+  const deleted = idsToDelete.map(id => convertToDeleted(raws[id]))
+
+  // dispatch(addFakeTransaction(changedTransaction))
+  const changed = { transaction: deleted }
+  dispatch(syncData(changed, messages))
+  // .finally(() =>dispatch(removeFakeTransaction(ids)))
 }
 
 export const restoreTransaction = id => (dispatch, getState) => {
@@ -62,4 +69,49 @@ export const applyChangesToTransaction = tr => (dispatch, getState) => {
   dispatch(syncData({ transaction: [changedTransaction] })).finally(() =>
     dispatch(removeFakeTransaction(changedTransaction.id))
   )
+}
+
+export const setMainTagToTransactions = (transactions, tagId) => (
+  dispatch,
+  getState
+) => {
+  const messages = { process: 'Добавляем категории...' }
+
+  const raws = getState().data.transaction
+  const result = transactions.map(id => {
+    const tr = raws[id]
+    const newTags = tr.tag ? [tagId, ...tr.tag] : [tagId]
+    return {
+      ...tr,
+      tag: newTags,
+      changed: Math.floor(Date.now() / 1000)
+    }
+  })
+
+  dispatch(syncData({ transaction: result }, messages))
+}
+
+function convertToDeleted(raw) {
+  return {
+    ...raw,
+    deleted: true,
+    changed: Math.floor(Date.now() / 1000)
+  }
+}
+
+function setTags(raw, tags) {
+  return {
+    ...raw,
+    tag: tags,
+    changed: Math.floor(Date.now() / 1000)
+  }
+}
+
+function addMainTag(raw, tag) {
+  const newTags = raw.tag ? [tag, ...raw.tag] : [tag]
+  return {
+    ...raw,
+    tag: newTags,
+    changed: Math.floor(Date.now() / 1000)
+  }
 }
