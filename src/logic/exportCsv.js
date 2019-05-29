@@ -9,7 +9,10 @@ export default function exportCsv(_, getState) {
 
   var link = document.createElement('a')
   link.setAttribute('href', href)
-  link.setAttribute('download', 'transactions.csv')
+  link.setAttribute(
+    'download',
+    `transactions-${format(Date.now(), 'YYYYMMDD-HHmm')}.csv`
+  )
   document.body.appendChild(link) // Required for FF
 
   link.click()
@@ -49,7 +52,7 @@ const types = {
 
 const transactionToRowObj = t => ({
   Дата: format(t.date, 'YYYY-MM-DD'),
-  Создана: format(t.created, 'YYYY-MM-DD'),
+  Создана: format(t.created, 'YYYY-MM-DD HH:mm'),
   Тип: types[t.type],
   Категория: t.tag ? t.tag[0].fullTitle : '',
   'Доп категрии': '',

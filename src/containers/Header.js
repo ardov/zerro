@@ -3,9 +3,11 @@ import { connect } from 'react-redux'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Button } from 'antd'
+import { Menu, Dropdown, Icon } from 'antd'
 import { logOut } from '../logic/authorization'
 import { syncData } from '../store/data/thunks'
 import exportCsv from '../logic/exportCsv'
+import exportJSON from '../logic/exportJSON'
 
 const Main = styled.header`
   height: 48px;
@@ -34,6 +36,18 @@ const StyledButton = styled(Button)`
 `
 
 function Header(props) {
+  const exportMenu = (
+    <Menu>
+      <Menu.Item key="1" onClick={props.exportCsv}>
+        <Icon type="download" />
+        Скачать CSV
+      </Menu.Item>
+      <Menu.Item key="2" onClick={props.exportJSON}>
+        <Icon type="download" />
+        Полный бэкап
+      </Menu.Item>
+    </Menu>
+  )
   return (
     <Main>
       <Name>More Money Now</Name>
@@ -46,9 +60,11 @@ function Header(props) {
           Обновить данные
         </StyledButton>
 
-        <StyledButton icon="download" onClick={props.exportCsv}>
-          CSV
-        </StyledButton>
+        <Dropdown overlay={exportMenu}>
+          <StyledButton onClick={props.exportJSON}>
+            Экспорт <Icon type="down" />
+          </StyledButton>
+        </Dropdown>
 
         <StyledButton onClick={props.logOut}>Выйти</StyledButton>
       </Buttons>
@@ -59,7 +75,8 @@ function Header(props) {
 const mapDispatchToProps = dispatch => ({
   logOut: () => dispatch(logOut()),
   syncData: () => dispatch(syncData()),
-  exportCsv: () => dispatch(exportCsv)
+  exportCsv: () => dispatch(exportCsv),
+  exportJSON: () => dispatch(exportJSON)
 })
 
 export default connect(
