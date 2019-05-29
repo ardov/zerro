@@ -3,6 +3,7 @@ import { updateData } from './index'
 import { addFakeTransaction, removeFakeTransaction } from '../fakeTransactions'
 import LocalStorage from '../../services/localstorage'
 import { message } from 'antd'
+import uuidv1 from 'uuid/v1'
 import { getSelectedIds } from '../selectedTransactions'
 
 //All syncs with ZM goes through this thunk
@@ -51,9 +52,22 @@ export const restoreTransaction = id => (dispatch, getState) => {
       {
         ...transaction[id],
         deleted: false,
-        changed: Date.now() / 1000
+        changed: Math.floor(Date.now() / 1000),
+        id: uuidv1()
       }
     ]
+
+    // Deletion doesn't work now https://github.com/zenmoney/ZenPlugins/issues/323
+    //
+    // deletion: [
+    //   {
+    //     id: id,
+    //     object: 'transaction',
+    //     user: transaction[id].user,
+    //     stamp: transaction[id].changed
+    //     // stamp: Math.floor(Date.now() / 1000)
+    //   }
+    // ]
   }
   dispatch(syncData(changed))
 }
