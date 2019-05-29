@@ -20,6 +20,7 @@ function TagSelect(props) {
 
   return (
     <TreeSelect
+      className={props.className}
       treeData={treeData}
       showSearch
       style={{ display: 'block' }}
@@ -27,21 +28,18 @@ function TagSelect(props) {
       dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
       placeholder="Выберите категории"
       allowClear
-      multiple
+      multiple={!props.single}
       treeDefaultExpandAll
       filterTreeNode={(str, el) => {
         return el.props.title.toUpperCase().includes(str.toUpperCase())
       }}
       onChange={props.onChange}
+      {...props}
     />
   )
 }
 
-const mapStateToProps = state => ({
-  tags: getTagsTree(state)
-})
-
 export default connect(
-  mapStateToProps,
+  state => ({ tags: getTagsTree(state) }),
   null
 )(TagSelect)

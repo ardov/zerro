@@ -5,6 +5,7 @@ import Header from '../containers/Header'
 import TransactionList from '../containers/TransactionList'
 import Filter from '../containers/Filter'
 import DetailsPanel from '../containers/DetailsPanel'
+import BulkActions from '../containers/BulkActions'
 
 const Body = styled.div`
   display: flex;
@@ -32,6 +33,9 @@ const SidePanel = styled.div`
   align-self: flex-start;
   flex-shrink: 0; */
 `
+const StyledBulkActions = styled(BulkActions)`
+  margin-top: 24px;
+`
 
 export default class TransactionsView extends Component {
   render() {
@@ -41,6 +45,7 @@ export default class TransactionsView extends Component {
         <Body>
           <Menu>
             <Filter />
+            <StyledBulkActions />
           </Menu>
           <Content>
             <TransactionList />

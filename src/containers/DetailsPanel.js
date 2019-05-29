@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { getOpenedTransaction } from '../store/data/selectors/transaction'
 import {
-  deleteTransaction,
+  deleteTransactions,
   restoreTransaction,
   applyChangesToTransaction
 } from '../store/data/thunks'
@@ -12,7 +12,7 @@ const mapStateToProps = (state, ownProps) => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  onDelete: id => dispatch(deleteTransaction(id)),
+  onDelete: id => dispatch(deleteTransactions([id])),
   onRestore: id => dispatch(restoreTransaction(id)),
   onSave: tr => {
     dispatch(applyChangesToTransaction({ id: tr.id, tag: tr.tag }))
