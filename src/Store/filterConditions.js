@@ -53,25 +53,34 @@ export const checkTransaction = conditions => tr => {
     search,
     type,
     showDeleted,
-    fromDate,
-    toDate,
     tags,
     accounts,
+
+    fromDate,
+    toDate,
+
     amountFrom,
     amountTo
   } = conditions
 
-  const checkSearch = () => {
-    if (!search) return true
-    if (tr.comment && tr.comment.toUpperCase().includes(search.toUpperCase()))
-      return true
-    if (tr.payee && tr.payee.toUpperCase().includes(search.toUpperCase()))
-      return true
+  const checkSearch = (search, tr) =>
+    !search ||
+    (tr.comment && tr.comment.toUpperCase().includes(search.toUpperCase())) ||
+    (tr.payee && tr.payee.toUpperCase().includes(search.toUpperCase()))
 
-    return false
-  }
+  const checkType = (type, tr) => !type || tr.type === type
 
-  const checkTags = () => {
+  const checkDeleted = (showDeleted, tr) => showDeleted || !tr.deleted
+
+  const checkDate = (fromDate, toDate, tr) =>
+    (!fromDate || +tr.date >= +fromDate) && (!toDate || +tr.date <= +toDate)
+
+  const checkAccounts = (accounts, tr) =>
+    !accounts ||
+    accounts.includes(tr.incomeAccount) ||
+    accounts.includes(tr.outcomeAccount)
+
+  const checkTags = (tags, tr) => {
     if (!tags) return true
     if (!tr.tag) return false
     let result = false
@@ -81,9 +90,8 @@ export const checkTransaction = conditions => tr => {
     return result
   }
 
-  const checkAmount = () => {
+  const checkAmount = (amountFrom, amountTo, tr) => {
     if (!amountFrom && !amountTo) return true
-
     if (tr.type === 'income') {
       const income = tr.income * tr.incomeInstrument.rate
       return amountFrom <= income && income <= amountTo
@@ -99,20 +107,16 @@ export const checkTransaction = conditions => tr => {
         (amountFrom <= outcome && outcome <= amountTo)
       )
     }
-    console.warn('unknown type', tr.type)
     return false
   }
 
   return (
-    (!type || tr.type === type) &&
-    checkSearch() &&
-    (showDeleted || !tr.deleted) &&
-    (!fromDate || +tr.date >= +fromDate) &&
-    (!toDate || +tr.date <= +toDate) &&
-    checkTags() &&
-    (!accounts ||
-      accounts.includes(tr.incomeAccount) ||
-      accounts.includes(tr.outcomeAccount)) &&
-    checkAmount()
+    checkType(type, tr) &&
+    checkSearch(search, tr) &&
+    checkDeleted(showDeleted, tr) &&
+    checkDate(fromDate, toDate, tr) &&
+    checkTags(tags, tr) &&
+    checkAccounts(accounts, tr) &&
+    checkAmount(amountFrom, amountTo, tr)
   )
 }
