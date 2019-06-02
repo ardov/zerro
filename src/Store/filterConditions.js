@@ -48,7 +48,11 @@ export const getFilterConditions = state => state.filterConditions
 
 // HELPER
 
-export const checkTransaction = conditions => tr => {
+export function filterTransactionList(transactions, conditions = initialState) {
+  return transactions.filter(checkTransaction(conditions))
+}
+
+const checkTransaction = conditions => tr => {
   const {
     search,
     type,
