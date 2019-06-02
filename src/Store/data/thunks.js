@@ -56,18 +56,15 @@ export const restoreTransaction = id => (dispatch, getState) => {
         id: uuidv1()
       }
     ]
+  }
 
-    // Deletion doesn't work now https://github.com/zenmoney/ZenPlugins/issues/323
-    //
-    // deletion: [
-    //   {
-    //     id: id,
-    //     object: 'transaction',
-    //     user: transaction[id].user,
-    //     stamp: transaction[id].changed
-    //     // stamp: Math.floor(Date.now() / 1000)
-    //   }
-    // ]
+  dispatch(syncData(changed))
+}
+
+export const splitTransfer = id => (dispatch, getState) => {
+  const transaction = getState().data.transaction
+  const changed = {
+    transaction: split(transaction[id])
   }
   dispatch(syncData(changed))
 }
@@ -128,4 +125,39 @@ function addMainTag(raw, tag) {
     tag: newTags,
     changed: Math.floor(Date.now() / 1000)
   }
+}
+
+function split(raw) {
+  if (!(raw.income && raw.outcome)) return null
+  const result = [
+    {
+      ...raw,
+      changed: Math.floor(Date.now() / 1000),
+      deleted: true
+    },
+    {
+      ...raw,
+      changed: Math.floor(Date.now() / 1000),
+      id: uuidv1(),
+      income: 0,
+      incomeInstrument: raw.outcomeInstrument,
+      incomeAccount: raw.outcomeAccount,
+      opIncome: null,
+      opIncomeInstrument: null,
+      incomeBankID: null
+    },
+    {
+      ...raw,
+      changed: Math.floor(Date.now() / 1000),
+      id: uuidv1(),
+      outcome: 0,
+      outcomeInstrument: raw.incomeInstrument,
+      outcomeAccount: raw.incomeAccount,
+      opOutcome: null,
+      opOutcomeInstrument: null,
+      outcomeBankID: null
+    }
+  ]
+  // console.table(result)
+  return result
 }

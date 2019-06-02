@@ -31,12 +31,14 @@ export const normalize = (
   incomeAccount: accounts[raw.incomeAccount],
   opIncome: raw.opIncome,
   opIncomeInstrument: instruments[raw.opIncomeInstrument],
+  incomeBankID: raw.incomeBankID,
 
   outcome: raw.outcome,
   outcomeInstrument: instruments[raw.outcomeInstrument],
   outcomeAccount: accounts[raw.outcomeAccount],
   opOutcome: raw.opOutcome,
   opOutcomeInstrument: instruments[raw.opOutcomeInstrument],
+  outcomeBankID: raw.outcomeBankID,
 
   tag: mapTags(raw.tag, tags),
   comment: raw.comment,
@@ -46,8 +48,6 @@ export const normalize = (
 
   latitude: raw.latitude,
   longitude: raw.longitude,
-  incomeBankID: raw.incomeBankID,
-  outcomeBankID: raw.outcomeBankID,
   reminderMarker: raw.reminderMarker,
 
   //COMPUTED PROPERTIES

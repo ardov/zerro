@@ -211,6 +211,7 @@ export default class DetailsPanel extends React.Component {
               </Button>
             ) : (
               <Button
+                type="danger"
                 onClick={() => {
                   this.props.onDelete(tr.id)
                 }}
@@ -219,13 +220,12 @@ export default class DetailsPanel extends React.Component {
               </Button>
             )}
 
-            <Button
-              onClick={() => {
-                console.log(tr)
-              }}
-            >
-              Log Transaction
-            </Button>
+            {tr.type === 'transfer' && (
+              <Button onClick={() => this.props.onSplit(tr.id)}>
+                Разбить перевод
+              </Button>
+            )}
+            <Button onClick={() => console.log(tr)}>Log</Button>
             <Button onClick={this.saveChanges}>Сохранить</Button>
             {values.map(el => (
               <Line name={el.name} value={el.value} key={el.name} />

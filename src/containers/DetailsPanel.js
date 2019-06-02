@@ -3,7 +3,8 @@ import { getOpenedTransaction } from '../store/data/selectors/transaction'
 import {
   deleteTransactions,
   restoreTransaction,
-  applyChangesToTransaction
+  applyChangesToTransaction,
+  splitTransfer
 } from '../store/data/thunks'
 import DetailsPanel from '../components/DetailsPanel'
 
@@ -14,6 +15,7 @@ const mapStateToProps = (state, ownProps) => ({
 const mapDispatchToProps = dispatch => ({
   onDelete: id => dispatch(deleteTransactions([id])),
   onRestore: id => dispatch(restoreTransaction(id)),
+  onSplit: id => dispatch(splitTransfer(id)),
   onSave: tr => {
     dispatch(applyChangesToTransaction({ id: tr.id, tag: tr.tag }))
   }
