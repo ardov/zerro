@@ -133,12 +133,6 @@ function split(raw) {
     {
       ...raw,
       changed: Math.floor(Date.now() / 1000),
-      deleted: true
-    },
-    {
-      ...raw,
-      changed: Math.floor(Date.now() / 1000),
-      id: uuidv1(),
       income: 0,
       incomeInstrument: raw.outcomeInstrument,
       incomeAccount: raw.outcomeAccount,
