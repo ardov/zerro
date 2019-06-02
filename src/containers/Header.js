@@ -50,7 +50,7 @@ function Header(props) {
   )
   return (
     <Main>
-      <Name>More Money Now</Name>
+      <Name onClick={() => console.log(props.state)}>More Money Now</Name>
       <div>
         <NavLink to="/transactions">Транзакции</NavLink>
         <NavLink to="/tags">Категории</NavLink>
@@ -80,6 +80,6 @@ const mapDispatchToProps = dispatch => ({
 })
 
 export default connect(
-  null,
+  state => ({ state }),
   mapDispatchToProps
 )(Header)
