@@ -30,7 +30,15 @@ export default createReducer(initialState, {
     let newState = { serverTimestamp: data.serverTimestamp }
     for (let type in state) {
       if (data[type] && Array.isArray(data[type])) {
-        newState[type] = { ...state[type], ...keyBy(data[type], 'id') }
+        if (type === 'budget') {
+          // budgets has no id field, so their id would be tag id + date
+          newState[type] = {
+            ...state[type],
+            ...keyBy(data[type], b => b.tag + ',' + b.date)
+          }
+        } else {
+          newState[type] = { ...state[type], ...keyBy(data[type], 'id') }
+        }
       }
     }
     return { ...state, ...newState }
