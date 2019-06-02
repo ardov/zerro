@@ -29,3 +29,9 @@ export const getUsersById = createSelector(
 )
 
 export const getUser = (state, id) => getUsersById(state)[id]
+
+export const getRootUser = state => {
+  for (const user in getUsersById(state)) {
+    if (!user.parent) return user
+  }
+}
