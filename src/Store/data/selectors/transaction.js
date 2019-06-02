@@ -8,7 +8,6 @@ import { getMerchantsById } from './merchants'
 import { groupTransactionsBy } from './Utils/transactions'
 import {
   getFilterConditions,
-  checkTransaction,
   filterTransactionList
 } from '../../filterConditions'
 
