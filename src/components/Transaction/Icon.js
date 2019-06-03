@@ -36,7 +36,6 @@ const Sym = styled.div`
   text-align: center;
   font-size: 24px;
   line-height: 40px;
-  border: ${({ color }) => (color ? `1px solid ${color}` : `none`)};
   color: ${({ color }) => (color ? color : `#000`)};
 
   ${Body}:hover & {
