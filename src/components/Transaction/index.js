@@ -123,12 +123,13 @@ export default class Transaction extends React.Component {
     } = this.props
 
     const symbol = tag ? tag[0].symbol : type === 'transfer' ? '↔' : '?'
+    const color = tag ? tag[0].color : null
     const mainAccountTitle =
       type === 'income' ? incomeAccount.title : outcomeAccount.title
 
     return (
       <Body onClick={this.handleOpen} deleted={deleted} isOpened={isOpened}>
-        <Icon {...{ isChecked, isInSelectionMode, symbol, onToggle }} />
+        <Icon {...{ isChecked, isInSelectionMode, symbol, onToggle, color }} />
         <Information>
           <Line>
             <MainLine {...{ type, tag, outcomeAccount, incomeAccount }} />

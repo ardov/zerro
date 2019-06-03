@@ -1,6 +1,7 @@
 import toArray from 'lodash/toArray'
 import createSelector from 'selectorator'
 import { getUsersById } from './users'
+import { unsignedToRGB } from '../../../Utils/convertColor'
 
 export const normalize = ({ users }, raw) => ({
   id: raw.id,
@@ -10,7 +11,7 @@ export const normalize = ({ users }, raw) => ({
   budgetIncome: raw.budgetIncome,
   budgetOutcome: raw.budgetOutcome,
   required: raw.required,
-  color: raw.color,
+  color: raw.color ? unsignedToRGB(raw.color) : null,
   picture: raw.picture,
   showIncome: raw.showIncome,
   showOutcome: raw.showOutcome,

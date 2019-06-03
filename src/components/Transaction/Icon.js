@@ -37,6 +37,7 @@ const Sym = styled.div`
   text-align: center;
   font-size: 24px;
   line-height: 40px;
+  border: ${({ color }) => (color ? `1px solid ${color};` : `none;`)}
 
   ${Body}:hover & {
     display: none;
@@ -54,7 +55,7 @@ export default class Icon extends React.Component {
     this.props.onToggle()
   }
   render() {
-    const { isChecked, isInSelectionMode, symbol } = this.props
+    const { isChecked, isInSelectionMode, symbol, color } = this.props
     return (
       <Body>
         <StyledCheckbox
@@ -62,7 +63,9 @@ export default class Icon extends React.Component {
           checked={isChecked}
           onClick={this.handleChange}
         />
-        <Sym isInSelectionMode={isInSelectionMode}>{symbol}</Sym>
+        <Sym isInSelectionMode={isInSelectionMode} color={color}>
+          {symbol}
+        </Sym>
       </Body>
     )
   }
