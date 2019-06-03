@@ -33,11 +33,11 @@ const Sym = styled.div`
   right: 0;
   bottom: 0;
   border-radius: 20px;
-  color: #000;
   text-align: center;
   font-size: 24px;
   line-height: 40px;
-  border: ${({ color }) => (color ? `1px solid ${color};` : `none;`)}
+  border: ${({ color }) => (color ? `1px solid ${color}` : `none`)};
+  color: ${({ color }) => (color ? color : `#000`)};
 
   ${Body}:hover & {
     display: none;
