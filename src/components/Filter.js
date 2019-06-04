@@ -2,7 +2,16 @@ import React, { Component } from 'react'
 import styled from 'styled-components'
 import FilterTags from './FilterTags'
 import TagSelect from '../containers/TagSelect'
-import { Checkbox, Input, Form, Icon, Select, Drawer, Tooltip } from 'antd'
+import {
+  Checkbox,
+  Input,
+  Form,
+  Icon,
+  Select,
+  Drawer,
+  Tooltip,
+  Radio
+} from 'antd'
 
 const Option = Select.Option
 const Search = Input.Search
@@ -10,14 +19,13 @@ const InputGroup = Input.Group
 
 const StyledForm = styled(Form)`
   padding: 0;
-  max-height: 400px;
-  min-width: 360px;
   width: 100%;
 `
 export default class Filter extends Component {
   state = { isDrawerVisible: false }
 
-  handleTypeChange = value => {
+  handleTypeChange = e => {
+    const value = e.target.value
     if (value === 'all') {
       this.props.setCondition({ type: null })
     } else {
@@ -77,19 +85,6 @@ export default class Filter extends Component {
             </Form.Item>
 
             <Form.Item label="">
-              <Select
-                value={conditions.type || undefined}
-                onChange={this.handleTypeChange}
-                placeholder="Доходы, расходы и переводы"
-              >
-                <Option value="all">Доходы, расходы и переводы</Option>
-                <Option value="transfer">Перевод</Option>
-                <Option value="income">Доход</Option>
-                <Option value="outcome">Расход</Option>
-              </Select>
-            </Form.Item>
-
-            <Form.Item label="">
               <InputGroup style={{ display: 'flex' }}>
                 <Input
                   style={{ flexGrow: 1 }}
@@ -108,6 +103,19 @@ export default class Filter extends Component {
                   }}
                 />
               </InputGroup>
+            </Form.Item>
+
+            <Form.Item label="">
+              <Radio.Group
+                buttonStyle="solid"
+                value={conditions.type || 'all'}
+                onChange={this.handleTypeChange}
+              >
+                <Radio.Button value="all">Все</Radio.Button>
+                <Radio.Button value="income">Доход</Radio.Button>
+                <Radio.Button value="outcome">Расход</Radio.Button>
+                <Radio.Button value="transfer">Перевод</Radio.Button>
+              </Radio.Group>
             </Form.Item>
 
             <Form.Item label="">
