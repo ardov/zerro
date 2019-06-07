@@ -44,3 +44,6 @@ export default createReducer(initialState, {
     return { ...state, ...newState }
   }
 })
+
+// SELECTOR
+export const getLastSyncTime = state => state.data.serverTimestamp * 1000

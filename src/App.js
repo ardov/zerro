@@ -9,10 +9,19 @@ import TransactionsView from './components/TransactionsView'
 import TagsView from './TagsView'
 import Auth from './containers/Auth'
 import { getLoginState } from './store/token'
+import { syncData } from './store/data/thunks'
+import { getLastSyncTime } from './store/data'
 
 addLocaleData(ru)
 
+const SYNC_DELAY = 10 * 60 * 1000 // 10min
+
 class App extends Component {
+  componentDidMount = () => {
+    const { lastSync, sync } = this.props
+    if (Date.now() - lastSync > SYNC_DELAY) sync()
+  }
+
   render() {
     const isLoggedIn = this.props.isLoggedIn
 
@@ -47,10 +56,15 @@ class App extends Component {
 }
 
 const mapStateToProps = state => ({
-  isLoggedIn: getLoginState(state)
+  isLoggedIn: getLoginState(state),
+  lastSync: getLastSyncTime(state)
+})
+
+const mapDispatchToProps = dispatch => ({
+  sync: () => dispatch(syncData())
 })
 
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(App)
