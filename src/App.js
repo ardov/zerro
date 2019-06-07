@@ -31,15 +31,11 @@ class App extends Component {
           <Switch>
             <Route
               path="/transactions"
-              render={() =>
-                isLoggedIn ? <TransactionsView /> : <Redirect to="/login" />
-              }
+              render={() => (isLoggedIn ? <TransactionsView /> : <Auth />)}
             />
             <Route
               path="/tags"
-              render={() =>
-                isLoggedIn ? <TagsView /> : <Redirect to="/login" />
-              }
+              render={() => (isLoggedIn ? <TagsView /> : <Auth />)}
             />
             <Route
               path="/login"
