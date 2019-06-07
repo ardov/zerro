@@ -4,7 +4,6 @@ import { addFakeTransaction, removeFakeTransaction } from '../fakeTransactions'
 import LocalStorage from '../../services/localstorage'
 import { message } from 'antd'
 import uuidv1 from 'uuid/v1'
-import { getSelectedIds } from '../selectedTransactions'
 
 //All syncs with ZM goes through this thunk
 export const syncData = (changed, messages = {}) => (dispatch, getState) => {
