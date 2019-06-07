@@ -18,8 +18,8 @@ const SYNC_DELAY = 10 * 60 * 1000 // 10min
 
 class App extends Component {
   componentDidMount = () => {
-    const { lastSync, sync } = this.props
-    if (Date.now() - lastSync > SYNC_DELAY) sync()
+    const { lastSync, sync, isLoggedIn } = this.props
+    if (isLoggedIn && Date.now() - lastSync > SYNC_DELAY) sync()
   }
 
   render() {
