@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import { formatMoney } from '../../Utils/format'
 
 const colors = {
   income: '#21A355',
@@ -39,8 +40,8 @@ export function Amount({
 }) {
   switch (type) {
     case 'transfer':
-      const formattedIncome = formatAmount(income, incomeInstrument.shortTitle)
-      const formattedOutcome = formatAmount(
+      const formattedIncome = formatMoney(income, incomeInstrument.shortTitle)
+      const formattedOutcome = formatMoney(
         outcome,
         outcomeInstrument.shortTitle
       )
@@ -63,11 +64,11 @@ export function Amount({
         <Body>
           {!!opIncome && opIncomeInstrument && (
             <SecondarySum>
-              +{formatAmount(opIncome, opIncomeInstrument.shortTitle)}
+              +{formatMoney(opIncome, opIncomeInstrument.shortTitle)}
             </SecondarySum>
           )}
           <PrimarySum type={type}>
-            +{formatAmount(income, incomeInstrument.shortTitle)}
+            +{formatMoney(income, incomeInstrument.shortTitle)}
           </PrimarySum>
         </Body>
       )
@@ -76,11 +77,11 @@ export function Amount({
         <Body>
           {!!opOutcome && opOutcomeInstrument && (
             <SecondarySum>
-              −{formatAmount(opOutcome, opOutcomeInstrument.shortTitle)}
+              −{formatMoney(opOutcome, opOutcomeInstrument.shortTitle)}
             </SecondarySum>
           )}
           <PrimarySum type={type}>
-            −{formatAmount(outcome, outcomeInstrument.shortTitle)}
+            −{formatMoney(outcome, outcomeInstrument.shortTitle)}
           </PrimarySum>
         </Body>
       )
@@ -88,13 +89,4 @@ export function Amount({
     default:
       break
   }
-}
-
-function formatAmount(amount, shortCode) {
-  return new Intl.NumberFormat('ru', {
-    style: 'currency',
-    currency: shortCode,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(amount)
 }
