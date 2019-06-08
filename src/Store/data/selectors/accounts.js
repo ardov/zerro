@@ -42,3 +42,23 @@ export const getAccountsById = createSelector(
 )
 
 export const getAccount = (state, id) => getAccountsById(state)[id]
+
+export const getInBalance = createSelector(
+  [getAccountsById],
+  accounts =>
+    Object.keys(accounts)
+      .map(id => accounts[id])
+      .filter(acc => !acc.archive)
+      .filter(acc => acc.inBalance)
+      .sort((a, b) => b.balance - a.balance)
+)
+
+export const getOutOfBalance = createSelector(
+  [getAccountsById],
+  accounts =>
+    Object.keys(accounts)
+      .map(id => accounts[id])
+      .filter(acc => !acc.archive)
+      .filter(acc => !acc.inBalance)
+      .sort((a, b) => b.balance - a.balance)
+)
