@@ -6,6 +6,7 @@ import TransactionList from '../containers/TransactionList'
 import Filter from '../containers/Filter'
 import DetailsPanel from '../containers/DetailsPanel'
 import BulkActions from '../containers/BulkActions'
+import AccountList from '../containers/AccountList'
 
 const Body = styled.div`
   display: flex;
@@ -46,6 +47,7 @@ export default class TransactionsView extends Component {
           <Menu>
             <Filter />
             <StyledBulkActions />
+            <AccountList />
           </Menu>
           <Content>
             <TransactionList />
