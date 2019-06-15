@@ -67,7 +67,7 @@ export function groupTransactionsAndReturnId(groupType = 'day', arr) {
  * @param {Array of Transaction} group type
  * @return {Object} results partitioned by income and outcome
  */
-export function calcMetrics(arr) {
+export function calcMetrics(arr, instrumentRate = 1) {
   const startObject = {
     total: {
       income: 0,
@@ -80,7 +80,10 @@ export function calcMetrics(arr) {
   const reducer = (acc, tr) => {
     const type = tr.type
     if (type !== 'transfer' && !tr.deleted) {
-      const amount = +(tr[type] * tr[type + 'Instrument'].rate).toFixed(2)
+      const amount = +(
+        (tr[type] * tr[type + 'Instrument'].rate) /
+        instrumentRate
+      ).toFixed(2)
       const mainTagId = tr.tag ? tr.tag[0].id : 'noTag'
 
       // Add to total
