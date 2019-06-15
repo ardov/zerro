@@ -68,19 +68,19 @@ const checkTransaction = conditions => tr => {
     amountTo
   } = conditions
 
-  const checkSearch = (search, tr) =>
+  const checkSearch = (tr, search) =>
     !search ||
     (tr.comment && tr.comment.toUpperCase().includes(search.toUpperCase())) ||
     (tr.payee && tr.payee.toUpperCase().includes(search.toUpperCase()))
 
-  const checkType = (type, tr) => !type || tr.type === type
+  const checkType = (tr, type) => !type || tr.type === type
 
-  const checkDeleted = (showDeleted, tr) => showDeleted || !tr.deleted
+  const checkDeleted = (tr, showDeleted) => showDeleted || !tr.deleted
 
-  const checkDate = (fromDate, toDate, tr) =>
+  const checkDate = (tr, fromDate, toDate) =>
     (!fromDate || +tr.date >= +fromDate) && (!toDate || +tr.date <= +toDate)
 
-  const checkAccounts = (accounts, tr) => {
+  const checkAccounts = (tr, accounts) => {
     if (!accounts) return true
     const incomeAccountId = tr.incomeAccount ? tr.incomeAccount.id : null
     const outcomeAccountId = tr.outcomeAccount ? tr.outcomeAccount.id : null
@@ -89,7 +89,7 @@ const checkTransaction = conditions => tr => {
     )
   }
 
-  const checkTags = (tags, tr) => {
+  const checkTags = (tr, tags) => {
     if (!tags) return true
     if (!tr.tag && tags.includes(null)) return true
     if (!tr.tag) return false
@@ -113,12 +113,12 @@ const checkTransaction = conditions => tr => {
   }
 
   return (
-    checkType(type, tr) &&
-    checkSearch(search, tr) &&
-    checkDeleted(showDeleted, tr) &&
-    checkDate(fromDate, toDate, tr) &&
-    checkTags(tags, tr) &&
-    checkAccounts(accounts, tr) &&
+    checkType(tr, type) &&
+    checkSearch(tr, search) &&
+    checkDeleted(tr, showDeleted) &&
+    checkDate(tr, fromDate, toDate) &&
+    checkTags(tr, tags) &&
+    checkAccounts(tr, accounts) &&
     checkAmount(tr, amountFrom, 'greaterOrEqual') &&
     checkAmount(tr, amountTo, 'lessOrEqual')
   )
