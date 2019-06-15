@@ -1,7 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import styled, { css } from 'styled-components'
-import { getAccount } from '../../store/data/selectors/accounts'
+import styled from 'styled-components'
 import { formatMoney } from '../../Utils/format'
 
 const Body = styled.div`

@@ -1,5 +1,4 @@
 import React, { memo } from 'react'
-import styled from 'styled-components'
 import { format, isToday, isYesterday, isThisYear } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import { VariableSizeList as List } from 'react-window'
