@@ -91,6 +91,7 @@ const checkTransaction = conditions => tr => {
 
   const checkTags = (tags, tr) => {
     if (!tags) return true
+    if (!tr.tag && tags.includes(null)) return true
     if (!tr.tag) return false
     let result = false
     tr.tag.forEach(({ id }) => {
