@@ -58,16 +58,14 @@ export const getTagsTree = createSelector(
     for (const id in tags) {
       list.push(tags[id])
     }
-    const topLevel = list.filter(tag => !tag.parent)
+    const topLevel = list
+      .filter(tag => !tag.parent)
+      .map(parent => ({ ...parent, children: [] }))
     list
       .filter(tag => tag.parent)
       .forEach(tag => {
         const parent = topLevel.find(topTag => topTag.id === tag.parent)
-        if (parent.children) {
-          parent.children.push(tag)
-        } else {
-          parent.children = [tag]
-        }
+        parent.children.push(tag)
       })
 
     return topLevel
