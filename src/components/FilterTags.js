@@ -15,8 +15,8 @@ export default class FilterTags extends Component {
       // search,
       type,
       // showDeleted,
-      fromDate,
-      toDate
+      dateFrom,
+      dateTo
       // tags,
       // accounts,
       // amountFrom,
@@ -42,14 +42,14 @@ export default class FilterTags extends Component {
             {types[type]}
           </Tag>
         )}
-        {fromDate && (
+        {dateFrom && (
           <Tag color="blue" closable>
-            с {formatDate(fromDate)}
+            с {formatDate(dateFrom)}
           </Tag>
         )}
-        {toDate && (
+        {dateTo && (
           <Tag color="blue" closable>
-            по {formatDate(toDate)}
+            по {formatDate(dateTo)}
           </Tag>
         )}
       </Body>

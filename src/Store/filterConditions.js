@@ -13,8 +13,8 @@ const initialState = {
   search: null,
   type: null,
   showDeleted: false,
-  fromDate: null,
-  toDate: null,
+  dateFrom: null,
+  dateTo: null,
   tags: null,
   accounts: null,
   amountFrom: null,
@@ -57,8 +57,8 @@ export const check = conditions => tr => {
     tags,
     accounts,
 
-    fromDate,
-    toDate,
+    dateFrom,
+    dateTo,
 
     amountFrom,
     amountTo
@@ -73,8 +73,8 @@ export const check = conditions => tr => {
 
   const checkDeleted = (tr, showDeleted) => showDeleted || !tr.deleted
 
-  const checkDate = (tr, fromDate, toDate) =>
-    (!fromDate || +tr.date >= +fromDate) && (!toDate || +tr.date <= +toDate)
+  const checkDate = (tr, dateFrom, dateTo) =>
+    (!dateFrom || +tr.date >= +dateFrom) && (!dateTo || +tr.date <= +dateTo)
 
   const checkAccounts = (tr, accounts) => {
     if (!accounts) return true
@@ -112,7 +112,7 @@ export const check = conditions => tr => {
     checkType(tr, type) &&
     checkSearch(tr, search) &&
     checkDeleted(tr, showDeleted) &&
-    checkDate(tr, fromDate, toDate) &&
+    checkDate(tr, dateFrom, dateTo) &&
     checkTags(tr, tags) &&
     checkAccounts(tr, accounts) &&
     checkAmount(tr, amountFrom, 'greaterOrEqual') &&
