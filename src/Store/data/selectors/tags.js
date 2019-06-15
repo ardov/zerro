@@ -29,6 +29,24 @@ export const getTagsById = createSelector(
     for (const id in tags) {
       result[id] = normalize({ users }, tags[id])
     }
+    result[null] = {
+      id: null,
+      user: null,
+      changed: 0,
+      icon: null,
+      budgetIncome: true,
+      budgetOutcome: true,
+      required: false,
+      color: null,
+      picture: null,
+      showIncome: false,
+      showOutcome: false,
+      parent: null,
+
+      fullTitle: 'Без категории',
+      title: 'Без категории',
+      symbol: '?'
+    }
     return result
   }
 )
