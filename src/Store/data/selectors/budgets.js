@@ -28,4 +28,20 @@ export const getBudgetsById = createSelector(
   }
 )
 
+export const getBudgetsByMonthAndTag = createSelector(
+  [getBudgetsById],
+  budgets => {
+    const result = {}
+    for (const id in budgets) {
+      const budget = budgets[id]
+      const { date, tag } = budget
+      if (!result[date]) {
+        result[date] = {}
+      }
+      result[date][tag] = budget
+    }
+    return result
+  }
+)
+
 export const getBudget = (state, id) => getBudgetsById(state)[id]
