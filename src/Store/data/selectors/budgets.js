@@ -4,12 +4,11 @@ import { getUsersById } from './users'
 import { getTagsById } from './tags'
 
 export const normalize = ({ users, tags }, raw) => ({
-  id: raw.id,
   user: users[raw.user],
   changed: raw.changed * 1000,
 
   date: +parseDate(raw.date),
-  tag: tags[raw.tag],
+  tag: raw.tag,
 
   income: raw.income,
   incomeLock: raw.incomeLock,
