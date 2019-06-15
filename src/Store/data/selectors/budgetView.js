@@ -271,5 +271,5 @@ function groupTransfersOutsideBudget(
       (tr.income * tr.incomeInstrument.rate) / userInstrument.rate
   })
 
-  return accsById
+  return Object.keys(accsById).map(id => accsById[id])
 }
