@@ -72,7 +72,7 @@ export default class Month {
   // all transfers to accounts outside budget
   get transferOutcome() {
     return this.transfers.reduce(
-      (sum, account) => sum + account.transferOutcome,
+      (sum, account) => sum + account.transferIncome,
       0
     )
   }
