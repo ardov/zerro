@@ -29,19 +29,22 @@ export const getAllBudgets = createSelector(
     const firstMonth = startOfMonth(filteredTr[filteredTr.length - 1].date)
     const lastMonth = getLastMonth(budgets)
     const monthDates = generateMonthDates(firstMonth, lastMonth)
-    const months = monthDates.map(
-      date =>
-        new Month(date, {
-          transactions: filteredTr,
-          tags,
-          budgets,
-          accountsInBalance,
-          userInstrument,
-          prevFunds: 1200,
-          prevOverspent: 0,
-          budgetedInFuture: 0
-        })
-    )
+
+    let prevMonth = null // need this to save previous month to pass it
+    const months = monthDates.map((date, i) => {
+      const month = new Month(date, {
+        prevMonth,
+        startFunds: i === 0 ? 0 : null,
+        transactions: filteredTr,
+        tags,
+        budgets,
+        accountsInBalance,
+        userInstrument,
+        budgetedInFuture: 0
+      })
+      prevMonth = month
+      return month
+    })
 
     return { months }
   }

@@ -6,20 +6,22 @@ export default class Month {
   constructor(
     date,
     {
+      prevMonth,
+      startFunds = 0, // for first month only
       transactions = [],
       tags,
       budgets,
       accountsInBalance = [],
       userInstrument,
-      prevFunds = 0, // leftover from previous month (start balances for first month)
-      prevOverspent = 0, // sum of all availible sub zero
       budgetedInFuture = 0
     }
   ) {
     this.date = startOfMonth(date)
     this.endOfMonth = endOfMonth(date)
-    this.prevFunds = prevFunds
-    this.prevOverspent = prevOverspent
+    this.prevMonth = prevMonth
+    this.prevFunds = prevMonth ? prevMonth.funds : startFunds ? startFunds : 0
+    this.prevOverspent = prevMonth ? prevMonth.overspent : 0
+    this.prevTags = prevMonth ? prevMonth.tags : null
     this.budgetedInFuture = budgetedInFuture
 
     this.transactions = transactions.filter(
