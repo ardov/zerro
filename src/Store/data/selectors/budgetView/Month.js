@@ -1,6 +1,7 @@
 import { check } from '../../../filterConditions'
 import startOfMonth from 'date-fns/start_of_month'
 import endOfMonth from 'date-fns/end_of_month'
+import { calcMetrics } from '../Utils/transactions'
 
 export default class Month {
   constructor(
@@ -24,6 +25,8 @@ export default class Month {
     this.prevTags = prevMonth ? prevMonth.tags : null
     this.budgetedInFuture = budgetedInFuture
 
+    this.budgets = budgets
+
     this.transactions = transactions.filter(
       check({ dateFrom: this.date, dateTo: this.endOfMonth })
     )
@@ -34,7 +37,13 @@ export default class Month {
       userInstrument
     )
 
-    this.tags = calcTagsData(tags, this.transactions, budgets, userInstrument)
+    this.tags = calcTagsData(
+      tags,
+      this.prevTags,
+      this.transactions,
+      budgets,
+      userInstrument
+    )
   }
 
   get toBeBudgeted() {
@@ -94,40 +103,46 @@ export default class Month {
 //
 //
 
-function calcTagsData(tags, transactions, budgets, userInstrument) {
-  return [
-    {
-      id: 'idididi',
-      title: 'tag name',
+function calcTagsData(tags, prevTags, transactions, budgets, userInstrument) {
+  const metrics = calcMetrics(transactions, userInstrument.rate).byTag
+  const result = tags.map((parent, index) => {
+    const prevAvailible = prevTags ? prevTags[index].availible : 0
+    return {
+      // ...parent,
+      a: parent.title,
 
-      // CALCULATED FIELDS
+      // tag budget || sum of children budgets
       get totalBudgeted() {
-        // tag budget || sum of children budgets
+        if (!this.children) debugger
         return this.budgeted
           ? this.budgeted
           : this.children.reduce((sum, child) => sum + child.budgeted, 0)
       },
+
+      // sum of all children outcome + parent outcome
       get totalOutcome() {
-        // sum of all children outcome + parent outcome
         return (
           this.outcome +
           this.children.reduce((sum, child) => sum + child.outcome, 0)
         )
       },
+
+      // sum of all children income + parent income
       get totalIncome() {
-        // sum of all children income + parent income
         return (
           this.income +
           this.children.reduce((sum, child) => sum + child.income, 0)
         )
       },
+
+      // sum of all children availible + parent availible
       get totalAvailible() {
-        // sum of all children availible + parent availible
         return (
           this.availible +
           this.children.reduce((sum, child) => sum + child.availible, 0)
         )
       },
+
       get totalOverspent() {
         const parentOverspent = this.availible < 0 ? -this.availible : 0
         const childrenOverspent = this.children.reduce(
@@ -136,38 +151,36 @@ function calcTagsData(tags, transactions, budgets, userInstrument) {
         )
         return parentOverspent + childrenOverspent
       },
-
-      budgeted: 0, // parent budget
-      outcome: 500, // parent outcome
-      income: 0, // parent income
-      prevAvailible: 1000, // availible from previous month (>=0)
-
       get availible() {
         return this.budgeted - this.outcome + this.prevAvailible
       },
 
-      children: [
-        {
-          id: 'idididi',
-          title: 'tag name',
+      budgeted: budgets[parent.id] ? budgets[parent.id].outcome : 0,
+      outcome: metrics[parent.id] ? metrics[parent.id].outcome : 0, // parent outcome
+      income: metrics[parent.id] ? metrics[parent.id].income : 0, // parent income
+      prevAvailible: prevAvailible > 0 ? prevAvailible : 0, // availible from previous month (>=0)
 
-          // CALCULATED FIELDS
-          budgeted: 1000, // tag budget
-          outcome: 500, // sum of all outcome transactions
-          income: 500, // sum of all income transactions
-          prevAvailible: 1000, // availible from previous month (>=0)
-
+      children: parent.children.map((child, index2) => {
+        const prevAvailible = prevTags
+          ? prevTags[index].children[index2].availible
+          : 0
+        return {
+          ...child,
           get availible() {
             return this.budgeted - this.outcome + this.prevAvailible
-          }
+          },
+
+          budgeted: budgets[child.id] ? budgets[child.id].outcome : 0,
+          outcome: metrics[child.id] ? metrics[child.id].outcome : 0, // child outcome
+          income: metrics[child.id] ? metrics[child.id].income : 0, // child income
+          prevAvailible: prevAvailible > 0 ? prevAvailible : 0
         }
-      ]
+      })
     }
-  ]
+  })
+  return result
 }
-//
-//
-//
+
 function groupTransfersOutsideBudget(
   transactions,
   accountsInBalance,
