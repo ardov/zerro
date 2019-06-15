@@ -49,7 +49,8 @@ export const getFilterConditions = state => state.filterConditions
 // HELPER
 
 export function filterTransactionList(transactions, conditions = initialState) {
-  return transactions.filter(checkTransaction(conditions))
+  const merged = { initialState, ...conditions }
+  return transactions.filter(checkTransaction(merged))
 }
 
 const checkTransaction = conditions => tr => {
@@ -79,10 +80,14 @@ const checkTransaction = conditions => tr => {
   const checkDate = (fromDate, toDate, tr) =>
     (!fromDate || +tr.date >= +fromDate) && (!toDate || +tr.date <= +toDate)
 
-  const checkAccounts = (accounts, tr) =>
-    !accounts ||
-    accounts.includes(tr.incomeAccount) ||
-    accounts.includes(tr.outcomeAccount)
+  const checkAccounts = (accounts, tr) => {
+    if (!accounts) return true
+    const incomeAccountId = tr.incomeAccount ? tr.incomeAccount.id : null
+    const outcomeAccountId = tr.outcomeAccount ? tr.outcomeAccount.id : null
+    return (
+      accounts.includes(incomeAccountId) || accounts.includes(outcomeAccountId)
+    )
+  }
 
   const checkTags = (tags, tr) => {
     if (!tags) return true
