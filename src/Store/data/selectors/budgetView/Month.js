@@ -1,6 +1,5 @@
-import { check } from '../``../../filterConditions'
+import { check } from '../../../filterConditions'
 import startOfMonth from 'date-fns/start_of_month'
-import isSameMonth from 'date-fns/is_same_month'
 import endOfMonth from 'date-fns/end_of_month'
 
 export default class Month {
@@ -9,6 +8,7 @@ export default class Month {
     {
       transactions = [],
       tags,
+      budgets,
       accountsInBalance = [],
       userInstrument,
       prevFunds = 0, // leftover from previous month (start balances for first month)
@@ -16,13 +16,23 @@ export default class Month {
       budgetedInFuture = 0
     }
   ) {
-    this.transactions = transactions.filter(check({}))
-    this.date = date
+    this.date = startOfMonth(date)
     this.endOfMonth = endOfMonth(date)
     this.prevFunds = prevFunds
     this.prevOverspent = prevOverspent
     this.budgetedInFuture = budgetedInFuture
-    this.transfers = groupTransfersOutsideBudget()
+
+    this.transactions = transactions.filter(
+      check({ dateFrom: this.date, dateTo: this.endOfMonth })
+    )
+
+    this.transfers = groupTransfersOutsideBudget(
+      this.transactions,
+      accountsInBalance,
+      userInstrument
+    )
+
+    this.tags = calcTagsData(tags, this.transactions, budgets, userInstrument)
   }
 
   get toBeBudgeted() {
@@ -33,6 +43,7 @@ export default class Month {
         : 0
       : funds - budgeted
   }
+
   // FUNDS
   get funds() {
     const {
@@ -44,37 +55,114 @@ export default class Month {
     } = this
     return prevFunds - prevOverspent + income + transferIncome - transferOutcome
   }
+
+  // all income this month
   get income() {
-    // all income this month
     return this.tags.reduce((sum, tag) => sum + tag.totalOutcome, 0)
   }
+
+  // all transfers from accounts outside budget
   get transferIncome() {
-    // all transfers from accounts outside budget
     return this.transfers.reduce(
       (sum, account) => sum + account.transferOutcome,
       0
     )
   }
+
+  // all transfers to accounts outside budget
   get transferOutcome() {
-    // all transfers to accounts outside budget
     return this.transfers.reduce(
       (sum, account) => sum + account.transferOutcome,
       0
     )
   }
-  // Budgets
+
+  // BUDGETS
+  // sum of all budgets for this month
   get budgeted() {
-    // sum of all budgets for this month
     return this.tags.reduce((sum, tag) => sum + tag.totalBudgeted, 0)
   }
-  budgetedInFuture: 0 // sum of all budgeted in future
+
+  // Overspent needs for next month (sum of all availibles sub zero)
   get overspent() {
     return this.tags.reduce((sum, tag) => sum + tag.totalOverspent, 0)
-  } // needs for next month (sum of all availibles sub zero)
+  }
 }
 
 //
 //
+
+function calcTagsData(tags, transactions, budgets, userInstrument) {
+  return [
+    {
+      id: 'idididi',
+      title: 'tag name',
+
+      // CALCULATED FIELDS
+      get totalBudgeted() {
+        // tag budget || sum of children budgets
+        return this.budgeted
+          ? this.budgeted
+          : this.children.reduce((sum, child) => sum + child.budgeted, 0)
+      },
+      get totalOutcome() {
+        // sum of all children outcome + parent outcome
+        return (
+          this.outcome +
+          this.children.reduce((sum, child) => sum + child.outcome, 0)
+        )
+      },
+      get totalIncome() {
+        // sum of all children income + parent income
+        return (
+          this.income +
+          this.children.reduce((sum, child) => sum + child.income, 0)
+        )
+      },
+      get totalAvailible() {
+        // sum of all children availible + parent availible
+        return (
+          this.availible +
+          this.children.reduce((sum, child) => sum + child.availible, 0)
+        )
+      },
+      get totalOverspent() {
+        const parentOverspent = this.availible < 0 ? -this.availible : 0
+        const childrenOverspent = this.children.reduce(
+          (sum, child) => (child.availible < 0 ? sum - child.availible : sum),
+          0
+        )
+        return parentOverspent + childrenOverspent
+      },
+
+      budgeted: 0, // parent budget
+      outcome: 500, // parent outcome
+      income: 0, // parent income
+      prevAvailible: 1000, // availible from previous month (>=0)
+
+      get availible() {
+        return this.budgeted - this.outcome + this.prevAvailible
+      },
+
+      children: [
+        {
+          id: 'idididi',
+          title: 'tag name',
+
+          // CALCULATED FIELDS
+          budgeted: 1000, // tag budget
+          outcome: 500, // sum of all outcome transactions
+          income: 500, // sum of all income transactions
+          prevAvailible: 1000, // availible from previous month (>=0)
+
+          get availible() {
+            return this.budgeted - this.outcome + this.prevAvailible
+          }
+        }
+      ]
+    }
+  ]
+}
 //
 //
 //
