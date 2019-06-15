@@ -26,6 +26,12 @@ export const getAllBudgets = createSelector(
       })
     )
 
+    const startFunds = accountsInBalance.reduce(
+      (sum, acc) =>
+        (sum += (acc.startBalance * acc.instrument.rate) / userInstrument.rate),
+      0
+    )
+
     const firstMonth = startOfMonth(filteredTr[filteredTr.length - 1].date)
     const lastMonth = getLastMonth(budgets)
     const monthDates = generateMonthDates(firstMonth, lastMonth)
@@ -34,7 +40,7 @@ export const getAllBudgets = createSelector(
     const months = monthDates.map((date, i) => {
       const month = new Month(date, {
         prevMonth,
-        startFunds: i === 0 ? 0 : null,
+        startFunds: i === 0 ? startFunds : null,
         transactions: filteredTr,
         tags,
         budgets,
@@ -46,7 +52,14 @@ export const getAllBudgets = createSelector(
       return month
     })
 
-    return { months }
+    return {
+      months,
+      accs: accountsInBalance.map(acc => ({
+        title: acc.title,
+        start: acc.startBalance,
+        rate: acc.instrument.rate
+      }))
+    }
   }
 )
 
