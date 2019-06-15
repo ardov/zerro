@@ -6,6 +6,7 @@ import { getInBalance } from './accounts'
 import { check } from '../../filterConditions'
 import startOfMonth from 'date-fns/start_of_month'
 import isSameMonth from 'date-fns/is_same_month'
+import { getRootUser } from './users'
 
 // EXAMPLE
 
@@ -156,8 +157,15 @@ const month = {
 }
 
 export const getAllBudgets = createSelector(
-  [getTransactionList, getBudgetsByMonthAndTag, getTagsTree, getInBalance],
-  (transactions, budgets, tags, accountsInBalance) => {
+  [
+    getTransactionList,
+    getBudgetsByMonthAndTag,
+    getTagsTree,
+    getInBalance,
+    getRootUser
+  ],
+  (transactions, budgets, tags, accountsInBalance, rootUser) => {
+    const userInstrument = rootUser.currency
     const filteredTr = transactions.filter(
       check({
         deleted: false,
@@ -168,9 +176,16 @@ export const getAllBudgets = createSelector(
     const firstMonth = startOfMonth(filteredTr[filteredTr.length - 1].date)
     const lastMonth = getLastMonth(budgets)
     const months = generateMonths(firstMonth, lastMonth)
+
+    const transfers = groupTransfersOutsideBudget(
+      filteredTr,
+      accountsInBalance,
+      userInstrument
+    )
     return {
       month,
       months,
+      transfers,
       allTr: transactions,
       filteredTr: filteredTr
     }
@@ -213,9 +228,48 @@ function generateMonths(first, last) {
 }
 
 // HELPERS
-// function groupTransfersOutsideBudget(transactions, accountsInBalance) {
-//   const filteredTr = filterTransactionList(transactions, {
-//     deleted: false,
-//     accounts: accountsInBalance.map(acc => acc.id)
-//   })
-// }
+function groupTransfersOutsideBudget(
+  transactions,
+  accountsInBalance,
+  userInstrument
+) {
+  const accountIds = accountsInBalance.map(acc => acc.id)
+  const transfers = transactions.filter(check({ type: 'transfer' }))
+
+  const outcomeTransfers = transfers.filter(
+    tr => !accountIds.includes(tr.incomeAccount.id)
+  )
+  const incomeTransfers = transfers.filter(
+    tr => !accountIds.includes(tr.outcomeAccount.id)
+  )
+
+  const accsById = {}
+
+  outcomeTransfers.forEach(tr => {
+    const accId = tr.incomeAccount.id
+    if (!accsById[accId]) {
+      accsById[accId] = {
+        ...tr.incomeAccount,
+        transferIncome: 0,
+        transferOutcome: 0
+      }
+    }
+    accsById[accId].transferIncome +=
+      (tr.outcome * tr.outcomeInstrument.rate) / userInstrument.rate
+  })
+
+  incomeTransfers.forEach(tr => {
+    const accId = tr.outcomeAccount.id
+    if (!accsById[accId]) {
+      accsById[accId] = {
+        ...tr.outcomeAccount,
+        transferIncome: 0,
+        transferOutcome: 0
+      }
+    }
+    accsById[accId].transferOutcome +=
+      (tr.income * tr.incomeInstrument.rate) / userInstrument.rate
+  })
+
+  return accsById
+}
