@@ -3,7 +3,7 @@ import { getTransactionList } from './transaction'
 import { getBudgetsByMonthAndTag } from './budgets'
 import { getTagsTree } from './tags'
 import { getInBalance } from './accounts'
-import { filterTransactionList } from '../../filterConditions'
+import { check } from '../../filterConditions'
 import startOfMonth from 'date-fns/start_of_month'
 import isSameMonth from 'date-fns/is_same_month'
 
@@ -157,11 +157,13 @@ const month = {
 
 export const getAllBudgets = createSelector(
   [getTransactionList, getBudgetsByMonthAndTag, getTagsTree, getInBalance],
-  (transactions, budgets, tags, accounts) => {
-    const filteredTr = filterTransactionList(transactions, {
-      deleted: false,
-      accounts: accounts.map(acc => acc.id)
-    })
+  (transactions, budgets, tags, accountsInBalance) => {
+    const filteredTr = transactions.filter(
+      check({
+        deleted: false,
+        accounts: accountsInBalance.map(acc => acc.id)
+      })
+    )
 
     const firstMonth = startOfMonth(filteredTr[filteredTr.length - 1].date)
     const lastMonth = getLastMonth(budgets)
@@ -209,3 +211,11 @@ function generateMonths(first, last) {
   }
   return result
 }
+
+// HELPERS
+// function groupTransfersOutsideBudget(transactions, accountsInBalance) {
+//   const filteredTr = filterTransactionList(transactions, {
+//     deleted: false,
+//     accounts: accountsInBalance.map(acc => acc.id)
+//   })
+// }

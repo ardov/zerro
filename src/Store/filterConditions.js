@@ -48,12 +48,8 @@ export const getFilterConditions = state => state.filterConditions
 
 // HELPER
 
-export function filterTransactionList(transactions, conditions = initialState) {
-  const merged = { initialState, ...conditions }
-  return transactions.filter(checkTransaction(merged))
-}
-
-const checkTransaction = conditions => tr => {
+export const check = conditions => tr => {
+  const mergedConditions = { initialState, ...conditions }
   const {
     search,
     type,
@@ -66,7 +62,7 @@ const checkTransaction = conditions => tr => {
 
     amountFrom,
     amountTo
-  } = conditions
+  } = mergedConditions
 
   const checkSearch = (tr, search) =>
     !search ||
