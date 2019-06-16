@@ -55,6 +55,10 @@ export const getAllBudgets = createSelector(
 
     return {
       months,
+      onAccs: accountsInBalance.reduce(
+        (sum, acc) => +(sum + acc.balance).toFixed(0),
+        0
+      ),
       accs: accountsInBalance.map(acc => ({
         title: acc.title,
         start: acc.startBalance,
