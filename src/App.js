@@ -6,7 +6,7 @@ import { IntlProvider, addLocaleData } from 'react-intl'
 import ru from 'react-intl/locale-data/ru'
 
 import TransactionsView from './components/TransactionsView'
-import TagsView from './scenes/TagsView'
+import Tags from './scenes/Tags'
 import Auth from './containers/Auth'
 import { getLoginState } from './store/token'
 import { syncData } from './store/data/thunks'
@@ -35,7 +35,7 @@ class App extends Component {
             />
             <Route
               path="/tags"
-              render={() => (isLoggedIn ? <TagsView /> : <Auth />)}
+              render={() => (isLoggedIn ? <Tags /> : <Auth />)}
             />
             <Route
               path="/login"
