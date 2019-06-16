@@ -57,22 +57,13 @@ export default class Month {
 
   // FUNDS
   get funds() {
-    const {
-      prevFunds,
-      income,
-      transferIncome,
-      transferOutcome,
-      budgeted,
-      prevOutcome,
-      prevOverspent
-    } = this
     return round(
-      prevFunds -
-        prevOverspent -
-        budgeted +
-        income +
-        transferIncome -
-        transferOutcome
+      this.prevFunds -
+        this.prevOverspent -
+        this.budgeted +
+        this.income +
+        this.transferIncome -
+        this.transferOutcome
     )
   }
 
