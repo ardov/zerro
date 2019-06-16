@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 import { IntlProvider, addLocaleData } from 'react-intl'
 import ru from 'react-intl/locale-data/ru'
 
-import TransactionsView from './components/TransactionsView'
+import Transactions from './scenes/Transactions'
 import Tags from './scenes/Tags'
 import Auth from './scenes/Auth'
 import { getLoginState } from './store/token'
@@ -31,7 +31,7 @@ class App extends Component {
           <Switch>
             <Route
               path="/transactions"
-              render={() => (isLoggedIn ? <TransactionsView /> : <Auth />)}
+              render={() => (isLoggedIn ? <Transactions /> : <Auth />)}
             />
             <Route
               path="/tags"
