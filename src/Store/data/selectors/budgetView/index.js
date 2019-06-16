@@ -43,7 +43,7 @@ export const getAllBudgets = createSelector(
         startFunds: i === 0 ? startFunds : null,
         transactions: filteredTr,
         tags,
-        budgets,
+        budgets: budgets[+date] ? budgets[+date] : {},
         accountsInBalance,
         userInstrument,
         budgetedInFuture: 0
