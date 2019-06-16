@@ -1,11 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import Account from './Account'
-import styled, { css } from 'styled-components'
 import {
   getInBalance,
   getOutOfBalance
 } from '../../store/data/selectors/accounts'
+import { getAllBudgets } from '../../store/data/selectors/budgetView'
 
 const AccountList = props => (
   <div>
@@ -20,10 +20,13 @@ const AccountList = props => (
   </div>
 )
 
-const mapStateToProps = (state, props) => ({
-  inBalance: getInBalance(state),
-  outOfBalance: getOutOfBalance(state)
-})
+const mapStateToProps = (state, props) => {
+  console.log('ALL BUDGETS', getAllBudgets(state))
+  return {
+    inBalance: getInBalance(state),
+    outOfBalance: getOutOfBalance(state)
+  }
+}
 
 const mapDispatchToProps = (dispatch, props) => ({})
 
