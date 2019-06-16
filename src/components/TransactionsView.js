@@ -18,7 +18,6 @@ const Menu = styled.div`
   width: 280px;
   padding: 40px;
   flex-shrink: 0;
-  /* background: rgba(0, 0, 0, 0.06); */
   border-right: 1px solid rgba(0, 0, 0, 0.1);
 `
 const Content = styled.div`
@@ -29,10 +28,6 @@ const Content = styled.div`
 const SidePanel = styled.div`
   width: 480px;
   overflow: auto;
-  /* position: sticky;
-  top: 0;
-  align-self: flex-start;
-  flex-shrink: 0; */
 `
 const StyledBulkActions = styled(BulkActions)`
   margin-top: 24px;
