@@ -47,12 +47,12 @@ export default class Month {
   }
 
   get toBeBudgeted() {
-    const { funds, budgeted, budgetedInFuture } = this
-    return funds - budgeted > 0
-      ? funds - budgeted - budgetedInFuture > 0
-        ? funds - budgeted - budgetedInFuture
+    const { funds, budgetedInFuture } = this
+    return funds > 0
+      ? funds - budgetedInFuture > 0
+        ? funds - budgetedInFuture
         : 0
-      : funds - budgeted
+      : funds
   }
 
   // FUNDS
@@ -62,13 +62,14 @@ export default class Month {
       income,
       transferIncome,
       transferOutcome,
+      budgeted,
       prevOutcome,
       prevOverspent
     } = this
     return round(
       prevFunds -
-        // prevOverspent +
-        prevOutcome +
+        prevOverspent -
+        budgeted +
         income +
         transferIncome -
         transferOutcome
@@ -80,9 +81,14 @@ export default class Month {
     return this.tags.reduce((sum, tag) => round(sum + tag.totalIncome), 0)
   }
 
-  // all income this month
   get outcome() {
     return this.tags.reduce((sum, tag) => round(sum + tag.totalOutcome), 0)
+  }
+
+  get availible() {
+    return this.tags.reduce((sum, tag) => {
+      return tag.totalAvailible > 0 ? round(sum + tag.totalAvailible) : sum
+    }, 0)
   }
 
   // all transfers from accounts outside budget
