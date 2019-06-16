@@ -6,7 +6,7 @@ import { IntlProvider, addLocaleData } from 'react-intl'
 import ru from 'react-intl/locale-data/ru'
 
 import TransactionsView from './components/TransactionsView'
-import TagsView from './TagsView'
+import TagsView from './scenes/TagsView'
 import Auth from './containers/Auth'
 import { getLoginState } from './store/token'
 import { syncData } from './store/data/thunks'

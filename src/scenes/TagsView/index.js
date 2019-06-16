@@ -1,10 +1,10 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import Header from '../containers/Header'
+import Header from '../../containers/Header'
 import TagList from './TagList'
-import { getTagsTree } from '../store/data/selectors/tags'
-import { getTransactionList } from '../store/data/selectors/transaction'
+import { getTagsTree } from '../../store/data/selectors/tags'
+import { getTransactionList } from '../../store/data/selectors/transaction'
 
 function TransactionsView(props) {
   return (
