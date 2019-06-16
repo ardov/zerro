@@ -109,22 +109,22 @@ function convertToDeleted(raw) {
   }
 }
 
-function setTags(raw, tags) {
-  return {
-    ...raw,
-    tag: tags,
-    changed: Math.floor(Date.now() / 1000)
-  }
-}
+// function setTags(raw, tags) {
+//   return {
+//     ...raw,
+//     tag: tags,
+//     changed: Math.floor(Date.now() / 1000)
+//   }
+// }
 
-function addMainTag(raw, tag) {
-  const newTags = raw.tag ? [tag, ...raw.tag] : [tag]
-  return {
-    ...raw,
-    tag: newTags,
-    changed: Math.floor(Date.now() / 1000)
-  }
-}
+// function addMainTag(raw, tag) {
+//   const newTags = raw.tag ? [tag, ...raw.tag] : [tag]
+//   return {
+//     ...raw,
+//     tag: newTags,
+//     changed: Math.floor(Date.now() / 1000)
+//   }
+// }
 
 function split(raw) {
   if (!(raw.income && raw.outcome)) return null
