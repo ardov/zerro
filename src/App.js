@@ -8,6 +8,7 @@ import ru from 'react-intl/locale-data/ru'
 import Transactions from './scenes/Transactions'
 import Tags from './scenes/Tags'
 import Auth from './scenes/Auth'
+import Budgets from './scenes/Budgets'
 import { getLoginState } from './store/token'
 import { syncData } from './store/data/thunks'
 import { getLastSyncTime } from './store/data'
@@ -36,6 +37,10 @@ class App extends Component {
             <Route
               path="/tags"
               render={() => (isLoggedIn ? <Tags /> : <Auth />)}
+            />
+            <Route
+              path="/budget"
+              render={() => (isLoggedIn ? <Budgets /> : <Auth />)}
             />
             <Route
               path="/login"
