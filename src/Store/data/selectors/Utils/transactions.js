@@ -84,7 +84,7 @@ export function calcMetrics(arr, instrumentRate = 1) {
         (tr[type] * tr[type + 'Instrument'].rate) /
         instrumentRate
       ).toFixed(2)
-      const mainTagId = tr.tag ? tr.tag[0].id : 'noTag'
+      const mainTagId = tr.tag ? tr.tag[0].id : null
 
       // Add to total
       acc.total[type] += amount
