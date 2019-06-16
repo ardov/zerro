@@ -18,6 +18,7 @@ export const getAllBudgets = createSelector(
     getRootUser
   ],
   (transactions, budgets, tags, accountsInBalance, rootUser) => {
+    if (!rootUser) return null
     const userInstrument = rootUser.currency
     const filteredTr = transactions.filter(
       check({
