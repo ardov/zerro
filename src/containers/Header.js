@@ -54,6 +54,7 @@ function Header(props) {
       <div>
         <NavLink to="/transactions">Транзакции</NavLink>
         <NavLink to="/tags">Категории</NavLink>
+        <NavLink to="/budget">Бюджет</NavLink>
       </div>
       <Buttons>
         <StyledButton icon="reload" onClick={props.syncData}>
