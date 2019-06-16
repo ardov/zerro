@@ -69,20 +69,23 @@ function getLastMonth(budgets) {
   const lastBudget = new Date(
     Object.keys(budgets)
       .map(s => parseInt(s))
-      .sort((a, b) => b - a)
+      .sort((a, b) => a - b)
       .pop()
   )
-  const thisMonth = startOfMonth(Date.now())
-  return lastBudget > thisMonth ? lastBudget : thisMonth
+  const nextMonth = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth() + 1,
+    1
+  )
+  return lastBudget > nextMonth ? lastBudget : nextMonth
 }
 
 function generateMonthDates(first, last) {
-  if (isSameMonth(first, last)) return [first]
   const result = []
-  let current = first
-  while (!isSameMonth(current, last)) {
-    result.push(current)
+  let current = new Date(first.getFullYear(), first.getMonth() - 1, 1)
+  do {
     current = new Date(current.getFullYear(), current.getMonth() + 1, 1)
-  }
+    result.push(current)
+  } while (!isSameMonth(current, last))
   return result
 }
