@@ -64,18 +64,27 @@ export default class Month {
       transferOutcome,
       prevOverspent
     } = this
-    return prevFunds - prevOverspent + income + transferIncome - transferOutcome
+    return +(
+      prevFunds -
+      prevOverspent +
+      income +
+      transferIncome -
+      transferOutcome
+    ).toFixed(2)
   }
 
   // all income this month
   get income() {
-    return this.tags.reduce((sum, tag) => sum + tag.totalOutcome, 0)
+    return this.tags.reduce(
+      (sum, tag) => +(sum + tag.totalIncome).toFixed(2),
+      0
+    )
   }
 
   // all transfers from accounts outside budget
   get transferIncome() {
     return this.transfers.reduce(
-      (sum, account) => sum + account.transferOutcome,
+      (sum, account) => +(sum + account.transferOutcome).toFixed(2),
       0
     )
   }
@@ -83,7 +92,7 @@ export default class Month {
   // all transfers to accounts outside budget
   get transferOutcome() {
     return this.transfers.reduce(
-      (sum, account) => sum + account.transferIncome,
+      (sum, account) => +(sum + account.transferIncome).toFixed(2),
       0
     )
   }
@@ -91,12 +100,18 @@ export default class Month {
   // BUDGETS
   // sum of all budgets for this month
   get budgeted() {
-    return this.tags.reduce((sum, tag) => sum + tag.totalBudgeted, 0)
+    return this.tags.reduce(
+      (sum, tag) => +(sum + tag.totalBudgeted).toFixed(2),
+      0
+    )
   }
 
   // Overspent needs for next month (sum of all availibles sub zero)
   get overspent() {
-    return this.tags.reduce((sum, tag) => sum + tag.totalOverspent, 0)
+    return this.tags.reduce(
+      (sum, tag) => +(sum + tag.totalOverspent).toFixed(2),
+      0
+    )
   }
 }
 
@@ -116,14 +131,20 @@ function calcTagsData(tags, prevTags, transactions, budgets, userInstrument) {
         if (!this.children) debugger
         return this.budgeted
           ? this.budgeted
-          : this.children.reduce((sum, child) => sum + child.budgeted, 0)
+          : this.children.reduce(
+              (sum, child) => +(sum + child.budgeted).toFixed(2),
+              0
+            )
       },
 
       // sum of all children outcome + parent outcome
       get totalOutcome() {
         return (
           this.outcome +
-          this.children.reduce((sum, child) => sum + child.outcome, 0)
+          this.children.reduce(
+            (sum, child) => +(sum + child.outcome).toFixed(2),
+            0
+          )
         )
       },
 
@@ -131,7 +152,10 @@ function calcTagsData(tags, prevTags, transactions, budgets, userInstrument) {
       get totalIncome() {
         return (
           this.income +
-          this.children.reduce((sum, child) => sum + child.income, 0)
+          this.children.reduce(
+            (sum, child) => +(sum + child.income).toFixed(2),
+            0
+          )
         )
       },
 
@@ -139,20 +163,24 @@ function calcTagsData(tags, prevTags, transactions, budgets, userInstrument) {
       get totalAvailible() {
         return (
           this.availible +
-          this.children.reduce((sum, child) => sum + child.availible, 0)
+          this.children.reduce(
+            (sum, child) => +(sum + child.availible).toFixed(2),
+            0
+          )
         )
       },
 
       get totalOverspent() {
         const parentOverspent = this.availible < 0 ? -this.availible : 0
         const childrenOverspent = this.children.reduce(
-          (sum, child) => (child.availible < 0 ? sum - child.availible : sum),
+          (sum, child) =>
+            child.availible < 0 ? +(sum - child.availible).toFixed(2) : sum,
           0
         )
         return parentOverspent + childrenOverspent
       },
       get availible() {
-        return this.budgeted - this.outcome + this.prevAvailible
+        return +(this.budgeted - this.outcome + this.prevAvailible).toFixed(2)
       },
 
       budgeted: budgets[parent.id] ? budgets[parent.id].outcome : 0,
@@ -167,7 +195,9 @@ function calcTagsData(tags, prevTags, transactions, budgets, userInstrument) {
         return {
           ...child,
           get availible() {
-            return this.budgeted - this.outcome + this.prevAvailible
+            return +(this.budgeted - this.outcome + this.prevAvailible).toFixed(
+              2
+            )
           },
 
           budgeted: budgets[child.id] ? budgets[child.id].outcome : 0,
@@ -207,8 +237,10 @@ function groupTransfersOutsideBudget(
         transferOutcome: 0
       }
     }
-    accsById[accId].transferIncome +=
-      (tr.outcome * tr.outcomeInstrument.rate) / userInstrument.rate
+    accsById[accId].transferIncome += +(
+      (tr.outcome * tr.outcomeInstrument.rate) /
+      userInstrument.rate
+    ).toFixed(2)
   })
 
   incomeTransfers.forEach(tr => {
@@ -220,8 +252,10 @@ function groupTransfersOutsideBudget(
         transferOutcome: 0
       }
     }
-    accsById[accId].transferOutcome +=
-      (tr.income * tr.incomeInstrument.rate) / userInstrument.rate
+    accsById[accId].transferOutcome += +(
+      (tr.income * tr.incomeInstrument.rate) /
+      userInstrument.rate
+    ).toFixed(2)
   })
 
   return Object.keys(accsById).map(id => accsById[id])
