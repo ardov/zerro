@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
 import FilterTags from './FilterTags'
-import TagSelect from '../containers/TagSelect'
+import TagSelect from 'containers/TagSelect'
 import { Checkbox, Input, Form, Icon, Drawer, Tooltip, Radio } from 'antd'
 
 const Search = Input.Search

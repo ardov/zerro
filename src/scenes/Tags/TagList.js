@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import {
   groupTransactionsBy,
   calcMetrics
-} from '../../store/data/selectors/Utils/transactions'
+} from 'store/data/selectors/Utils/transactions'
 import Tag from './Tag'
 
 const Group = styled.div`

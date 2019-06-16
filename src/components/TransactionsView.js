@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
 
-import Header from '../containers/Header'
-import TransactionList from '../containers/TransactionList'
-import Filter from '../containers/Filter'
-import DetailsPanel from '../containers/DetailsPanel'
-import BulkActions from '../containers/BulkActions'
-import AccountList from '../containers/AccountList'
+import Header from 'containers/Header'
+import TransactionList from 'containers/TransactionList'
+import Filter from 'containers/Filter'
+import DetailsPanel from 'containers/DetailsPanel'
+import BulkActions from 'containers/BulkActions'
+import AccountList from 'containers/AccountList'
 
 const Body = styled.div`
   display: flex;

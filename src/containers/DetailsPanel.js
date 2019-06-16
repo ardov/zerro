@@ -1,12 +1,12 @@
 import { connect } from 'react-redux'
-import { getOpenedTransaction } from '../store/data/selectors/transaction'
+import { getOpenedTransaction } from 'store/data/selectors/transaction'
 import {
   deleteTransactions,
   restoreTransaction,
   applyChangesToTransaction,
   splitTransfer
-} from '../store/data/thunks'
-import DetailsPanel from '../components/DetailsPanel'
+} from 'store/data/thunks'
+import DetailsPanel from 'components/DetailsPanel'
 
 const mapStateToProps = (state, ownProps) => ({
   transaction: getOpenedTransaction(state)

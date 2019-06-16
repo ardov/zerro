@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import TagSelect from '../containers/TagSelect'
+import TagSelect from 'containers/TagSelect'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import { FormattedNumber } from 'react-intl'

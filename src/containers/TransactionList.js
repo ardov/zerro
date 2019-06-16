@@ -6,8 +6,8 @@ import { areEqual } from 'react-window'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { connect } from 'react-redux'
-import TransactionGroup from '../components/TransactionGroup'
-import { getGrouppedByDay } from '../store/data/selectors/transaction'
+import TransactionGroup from 'components/TransactionGroup'
+import { getGrouppedByDay } from 'store/data/selectors/transaction'
 
 function formatDate(date) {
   const formats = {

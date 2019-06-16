@@ -1,4 +1,4 @@
-import { getTransactionsById } from '../store/data/selectors/transaction'
+import { getTransactionsById } from 'store/data/selectors/transaction'
 import { format } from 'date-fns'
 
 export default function exportCsv(_, getState) {

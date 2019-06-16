@@ -3,8 +3,8 @@ import {
   setCondition,
   setTags,
   getFilterConditions
-} from '../store/filterConditions'
-import Filter from '../components/Filter'
+} from 'store/filterConditions'
+import Filter from 'components/Filter'
 
 const mapStateToProps = state => ({
   conditions: getFilterConditions(state)

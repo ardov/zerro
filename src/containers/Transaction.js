@@ -1,13 +1,10 @@
 import { connect } from 'react-redux'
 
-import { openTransaction, getOpenedId } from '../store/openedTransaction'
-import Transaction from '../components/Transaction'
-import { setCondition } from '../store/filterConditions'
-import { getTransaction } from '../store/data/selectors/transaction'
-import {
-  getSelectedIds,
-  toggleTransaction
-} from '../store/selectedTransactions'
+import { openTransaction, getOpenedId } from 'store/openedTransaction'
+import Transaction from 'components/Transaction'
+import { setCondition } from 'store/filterConditions'
+import { getTransaction } from 'store/data/selectors/transaction'
+import { getSelectedIds, toggleTransaction } from 'store/selectedTransactions'
 
 const mapStateToProps = (state, props) => ({
   isOpened: props.id === getOpenedId(state),

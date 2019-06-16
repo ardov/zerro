@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import Transaction from '../containers/Transaction'
+import Transaction from 'containers/Transaction'
 
 const GroupContainer = styled.div`
   padding: 0 16px;

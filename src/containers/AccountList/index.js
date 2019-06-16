@@ -1,11 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import Account from './Account'
-import {
-  getInBalance,
-  getOutOfBalance
-} from '../../store/data/selectors/accounts'
-import { getAllBudgets } from '../../store/data/selectors/budgetView'
+import { getInBalance, getOutOfBalance } from 'store/data/selectors/accounts'
+import { getAllBudgets } from 'store/data/selectors/budgetView'
 
 const AccountList = props => (
   <div>

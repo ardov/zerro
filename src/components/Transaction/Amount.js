@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { formatMoney } from '../../Utils/format'
+import { formatMoney } from 'Utils/format'
 
 const colors = {
   income: '#21A355',

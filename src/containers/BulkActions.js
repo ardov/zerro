@@ -4,14 +4,11 @@ import styled from 'styled-components'
 import {
   getSelectedIds,
   uncheckAllTransactions
-} from '../store/selectedTransactions'
-import {
-  setMainTagToTransactions,
-  deleteTransactions
-} from '../store/data/thunks'
+} from 'store/selectedTransactions'
+import { setMainTagToTransactions, deleteTransactions } from 'store/data/thunks'
 import { Button, Popconfirm, Icon } from 'antd'
 import TagSelect from './TagSelect'
-import pluralize from '../Utils/pluralize'
+import pluralize from 'Utils/pluralize'
 
 const Num = styled.h3`
   text-align: center;

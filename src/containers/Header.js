@@ -4,10 +4,10 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Button } from 'antd'
 import { Menu, Dropdown, Icon } from 'antd'
-import { logOut } from '../logic/authorization'
-import { syncData } from '../store/data/thunks'
-import exportCsv from '../logic/exportCsv'
-import exportJSON from '../logic/exportJSON'
+import { logOut } from 'logic/authorization'
+import { syncData } from 'store/data/thunks'
+import exportCsv from 'logic/exportCsv'
+import exportJSON from 'logic/exportJSON'
 
 const Main = styled.header`
   height: 48px;
