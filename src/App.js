@@ -7,7 +7,7 @@ import ru from 'react-intl/locale-data/ru'
 
 import TransactionsView from './components/TransactionsView'
 import Tags from './scenes/Tags'
-import Auth from './containers/Auth'
+import Auth from './scenes/Auth'
 import { getLoginState } from './store/token'
 import { syncData } from './store/data/thunks'
 import { getLastSyncTime } from './store/data'
