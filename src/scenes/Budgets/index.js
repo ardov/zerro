@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import styled from 'styled-components'
 
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
@@ -9,9 +10,10 @@ import Header from 'containers/Header'
 import { getAllBudgets } from 'store/data/selectors/budgetView'
 import { getRootUser } from 'store/data/selectors/users'
 import { formatMoney } from 'Utils/format'
+import AccountList from 'containers/AccountList'
 
 const getMonthName = date =>
-  format(date, 'MMMM YYYY', { locale: ru }).toUpperCase()
+  format(date, 'MMM YYYY', { locale: ru }).toUpperCase()
 
 function Budget(props) {
   const { month, instrument } = props
@@ -24,12 +26,39 @@ function Budget(props) {
     income,
     outcome,
     availible,
+    overspent,
+    prevFunds,
     transferIncome,
     transferOutcome,
     budgeted,
     tags
   } = month
 
+  return (
+    <div>
+      <h1>{getMonthName(date)}</h1>
+      <h2>Забюджетируй {formatSum(toBeBudgeted)}</h2>
+      <p>
+        Остаток с прошлого месяца {formatSum(prevFunds - prevOverspent)} (
+        {formatSum(prevFunds)} - {formatSum(prevOverspent)})
+      </p>
+      <p>На балансе в конце месяца {formatSum(funds - overspent)}</p>
+      <p>-</p>
+      <p>Перерасхоод с прошлого месяца {formatSum(prevOverspent)}</p>
+      <p>Забюджетирвано {formatSum(budgeted)}</p>
+      <p>Доход {formatSum(income)}</p>
+      <p>
+        Переводы вне баланса {formatSum(transferIncome - transferOutcome)} (+
+        {formatSum(transferIncome)}, -{formatSum(transferOutcome)})
+      </p>
+      <p>-</p>
+      <p>Расход {formatSum(outcome)}</p>
+    </div>
+  )
+}
+
+function TagTable({ tags, instrument }) {
+  const formatSum = sum => formatMoney(sum, instrument.shortTitle)
   const columns = [
     {
       title: 'Категрия',
@@ -56,7 +85,6 @@ function Budget(props) {
       render: text => text
     }
   ]
-
   const tableData = tags.map(tag => ({
     key: tag.id,
     name: tag.title,
@@ -66,28 +94,67 @@ function Budget(props) {
   }))
 
   return (
-    <div>
-      <h1>
-        {getMonthName(date)} ••• доступно {formatSum(toBeBudgeted)}
-      </h1>
-      <p>
-        Переводы вне баланса {formatSum(transferIncome - transferOutcome)} (+
-        {formatSum(transferIncome)}, -{formatSum(transferOutcome)})
-      </p>
-      <p>Доход {formatSum(income)}</p>
-      <p>Расход {formatSum(outcome)}</p>
-      <p>Забюджетирвано {formatSum(budgeted)}</p>
-      <h2>Категрии</h2>
-
-      <Table
-        title={() => 'Категрии'}
-        columns={columns}
-        dataSource={tableData}
-        pagination={{ defaultPageSize: 100 }}
-      />
-    </div>
+    <Table
+      title={() => 'Категории'}
+      columns={columns}
+      dataSource={tableData}
+      pagination={{ defaultPageSize: 100 }}
+    />
   )
 }
+function TransferTable({ transfers, instrument }) {
+  const formatSum = sum => formatMoney(sum, instrument.shortTitle)
+  const columns = [
+    {
+      title: 'Счёт',
+      dataIndex: 'name',
+      key: 'name',
+      render: text => text
+    },
+    {
+      title: 'Ушло на счёт',
+      dataIndex: 'transferIncome',
+      key: 'transferIncome',
+      render: text => text
+    },
+    {
+      title: 'Вернулось со счёта',
+      dataIndex: 'transferOutcome',
+      key: 'transferOutcome',
+      render: text => text
+    },
+    {
+      title: 'Итого',
+      dataIndex: 'total',
+      key: 'total',
+      render: text => text
+    }
+  ]
+  const tableData = transfers.map(account => ({
+    key: account.id,
+    name: account.title,
+    transferOutcome: formatSum(account.transferOutcome),
+    transferIncome: formatSum(account.transferIncome),
+    total: formatSum(account.transferOutcome - account.transferIncome)
+  }))
+
+  return (
+    <Table
+      title={() => 'Переводы на счета вне бюджета'}
+      columns={columns}
+      dataSource={tableData}
+      pagination={{ defaultPageSize: 100 }}
+    />
+  )
+}
+
+const Wrap = styled.div`
+  display: flex;
+  flex-direction: row;
+`
+const StyledAccountList = styled(AccountList)`
+  padding: 40px;
+`
 
 class Budgets extends React.Component {
   state = { selected: 0 }
@@ -97,8 +164,12 @@ class Budgets extends React.Component {
   prevMonth = () => {
     this.setState(prev => ({ selected: --prev.selected }))
   }
+  lastMonth = () => {
+    this.setState({ selected: this.props.budgets.length - 1 })
+  }
   render() {
     const budgets = this.props.budgets
+    if (!budgets) return null
     const instrument = this.props.user.currency
     const index = this.state.selected
     console.log(this.props.budgets)
@@ -106,9 +177,29 @@ class Budgets extends React.Component {
     return (
       <div>
         <Header />
-        <Button onClick={this.prevMonth}>Предыдущий месяц</Button>
-        <Button onClick={this.nextMonth}>Следующий месяц</Button>
-        {budgets && <Budget month={budgets[index]} instrument={instrument} />}
+        <Wrap>
+          <StyledAccountList />
+          <div>
+            <Button onClick={this.prevMonth} disabled={!index}>
+              Предыдущий
+            </Button>
+            <Button
+              onClick={this.nextMonth}
+              disabled={index >= budgets.length - 1}
+            >
+              Следующий
+            </Button>
+            <Button onClick={this.lastMonth}>Последний</Button>
+            {budgets && (
+              <Budget month={budgets[index]} instrument={instrument} />
+            )}
+          </div>
+          <TagTable tags={budgets[index].tags} instrument={instrument} />
+          <TransferTable
+            transfers={budgets[index].transfers}
+            instrument={instrument}
+          />
+        </Wrap>
       </div>
     )
   }
