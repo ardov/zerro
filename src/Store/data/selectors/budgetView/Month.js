@@ -123,15 +123,15 @@ function calcTagsData(tags, prevTags, transactions, budgets, userInstrument) {
   const result = tags.map((parent, index) => {
     const prevAvailible = prevTags ? prevTags[index].availible : 0
     return {
-      // ...parent,
-      a: parent.title,
+      ...parent,
 
       // tag budget || sum of children budgets
       get totalBudgeted() {
-        if (!this.children) debugger
-        return this.budgeted
-          ? this.budgeted
-          : this.children.reduce((sum, child) => round(sum + child.budgeted), 0)
+        const childrenBudget = this.children.reduce(
+          (sum, child) => round(sum + child.budgeted),
+          0
+        )
+        return round(this.budgeted + childrenBudget)
       },
 
       // sum of all children outcome + parent outcome

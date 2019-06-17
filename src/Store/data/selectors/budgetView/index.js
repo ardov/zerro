@@ -53,18 +53,7 @@ export const getAllBudgets = createSelector(
       return month
     })
 
-    return {
-      months,
-      onAccs: accountsInBalance.reduce(
-        (sum, acc) => +(sum + acc.balance).toFixed(0),
-        0
-      ),
-      accs: accountsInBalance.map(acc => ({
-        title: acc.title,
-        start: acc.startBalance,
-        rate: acc.instrument.rate
-      }))
-    }
+    return months
   }
 )
 
