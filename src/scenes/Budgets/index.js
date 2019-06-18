@@ -88,9 +88,9 @@ function TagTable({ tags, instrument }) {
   const tableData = tags.map(tag => ({
     key: tag.id,
     name: tag.title,
-    budgeted: formatSum(tag.totalBudgeted),
-    availible: formatSum(tag.totalAvailible),
-    outcome: formatSum(tag.totalOutcome)
+    budgeted: tag.totalBudgeted ? formatSum(tag.totalBudgeted) : '-',
+    availible: tag.totalAvailible ? formatSum(tag.totalAvailible) : '-',
+    outcome: tag.totalOutcome ? formatSum(tag.totalOutcome) : '-'
   }))
 
   return (
@@ -152,6 +152,10 @@ const Wrap = styled.div`
   display: flex;
   flex-direction: row;
 `
+const Grow1 = styled.div`
+  flex-grow: 1;
+  padding: 0 12px;
+`
 const StyledAccountList = styled(AccountList)`
   padding: 40px;
 `
@@ -194,11 +198,15 @@ class Budgets extends React.Component {
               <Budget month={budgets[index]} instrument={instrument} />
             )}
           </div>
-          <TagTable tags={budgets[index].tags} instrument={instrument} />
-          <TransferTable
-            transfers={budgets[index].transfers}
-            instrument={instrument}
-          />
+          <Grow1>
+            <TagTable tags={budgets[index].tags} instrument={instrument} />
+          </Grow1>
+          <Grow1>
+            <TransferTable
+              transfers={budgets[index].transfers}
+              instrument={instrument}
+            />
+          </Grow1>
         </Wrap>
       </div>
     )
