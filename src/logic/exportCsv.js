@@ -37,9 +37,11 @@ function transactionsToCsvContent(tr) {
   let csvContent = head.join(',') + '\r\n'
 
   for (const id in tr) {
-    const lineObj = transactionToRowObj(tr[id])
-    const row = head.map(col => lineObj[col]).join(',')
-    csvContent += row + '\r\n'
+    if (!tr[id].deleted) {
+      const lineObj = transactionToRowObj(tr[id])
+      const row = head.map(col => lineObj[col]).join(',')
+      csvContent += row + '\r\n'
+    }
   }
   return csvContent
 }
@@ -54,7 +56,7 @@ const transactionToRowObj = t => ({
   Дата: format(t.date, 'YYYY-MM-DD'),
   Создана: format(t.created, 'YYYY-MM-DD HH:mm'),
   Тип: types[t.type],
-  Категория: t.tag ? t.tag[0].fullTitle : '',
+  Категория: t.tag ? t.tag[0].fullTitle.replace(',', '') : '',
   'Доп категрии': '',
   'Со счёта': t.outcomeAccount ? t.outcomeAccount.title : '',
   Расход: !!t.outcome ? t.outcome : '',
