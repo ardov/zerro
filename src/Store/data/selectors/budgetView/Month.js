@@ -37,11 +37,17 @@ export default class Month {
       userInstrument
     )
 
+    this.transferFees = calcTransferFees(
+      this.transactions,
+      accountsInBalance,
+      userInstrument
+    )
+
     this.tags = calcTagsData(
       tags,
       this.prevTags,
       this.transactions,
-      budgets,
+      this.budgets,
       userInstrument
     )
   }
@@ -63,7 +69,8 @@ export default class Month {
         this.budgeted +
         this.income +
         this.transferIncome -
-        this.transferOutcome
+        this.transferOutcome -
+        this.transferFees
     )
   }
 
@@ -243,4 +250,20 @@ function groupTransfersOutsideBudget(
   })
 
   return Object.keys(accsById).map(id => accsById[id])
+}
+
+function calcTransferFees(transactions, accountsInBalance, userInstrument) {
+  const accountIds = accountsInBalance.map(acc => acc.id)
+  const transfers = transactions.filter(check({ type: 'transfer' }))
+
+  const innerTransfers = transfers.filter(
+    tr =>
+      accountIds.includes(tr.outcomeAccount.id) &&
+      accountIds.includes(tr.incomeAccount.id)
+  )
+  return innerTransfers.reduce((sum, tr) => {
+    return (sum +=
+      round((tr.outcome * tr.outcomeInstrument.rate) / userInstrument.rate) -
+      round((tr.income * tr.incomeInstrument.rate) / userInstrument.rate))
+  }, 0)
 }
