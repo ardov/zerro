@@ -4,7 +4,7 @@ import styled from 'styled-components'
 
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
-import { Table, Divider, Tag, Button } from 'antd'
+import { Table, Button } from 'antd'
 
 import Header from 'containers/Header'
 import { getAllBudgets } from 'store/data/selectors/budgetView'
@@ -30,8 +30,7 @@ function Budget(props) {
     prevFunds,
     transferIncome,
     transferOutcome,
-    budgeted,
-    tags
+    budgeted
   } = month
 
   return (
@@ -46,6 +45,7 @@ function Budget(props) {
       <p>-</p>
       <p>Перерасхоод с прошлого месяца {formatSum(prevOverspent)}</p>
       <p>Забюджетирвано {formatSum(budgeted)}</p>
+      <p>Доступно {formatSum(availible)}</p>
       <p>Доход {formatSum(income)}</p>
       <p>
         Переводы вне баланса {formatSum(transferIncome - transferOutcome)} (+
