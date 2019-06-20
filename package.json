@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "antd": "^3.19.3",
+    "browserslist": "4.6.3",
     "chart.js": "^2.7.3",
     "cookies-js": "^1.2.3",
     "date-fns": "^1.30.1",
