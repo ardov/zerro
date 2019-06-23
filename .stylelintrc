@@ -9,6 +9,7 @@
   "rules": {
     "order/properties-order": [],
     "order/properties-alphabetical-order": null,
-    "plugin/rational-order": true
+    "plugin/rational-order": true,
+    "declaration-block-trailing-semicolon": null
   }
 }
