@@ -9,7 +9,9 @@ import { getRootUser } from 'store/data/selectors/users'
 import AccountList from 'containers/AccountList'
 import { TagTable } from './TagTable'
 import { TransferTable } from './TransferTable'
-import { Budget } from './Budget'
+import BudgetInfo from './BudgetInfo'
+import MonthSelector from './MonthSelect'
+import isThisMonth from 'date-fns/is_this_month'
 
 const Wrap = styled.div`
   display: flex;
@@ -19,23 +21,39 @@ const Grow1 = styled.div`
   flex-grow: 1;
   padding: 0 12px;
 `
-const StyledAccountList = styled(AccountList)`
+const LeftPanel = styled.div`
   padding: 40px;
+`
+const StyledAccountList = styled(AccountList)`
+  margin-top: 24px;
+`
+const StyledBudgetInfo = styled(BudgetInfo)`
+  margin-top: 24px;
 `
 
 class Budgets extends React.Component {
   state = { selected: 0 }
-  nextMonth = () => {
-    this.setState(prev => ({ selected: ++prev.selected }))
+
+  componentDidMount = () => {
+    this.setCurrentMonth()
   }
-  prevMonth = () => {
-    this.setState(prev => ({ selected: --prev.selected }))
+
+  setCurrentMonth = () => {
+    if (this.props.budgets) {
+      const current = this.props.budgets.findIndex(budget =>
+        isThisMonth(budget.date)
+      )
+      this.setState({ selected: current })
+    }
   }
-  lastMonth = () => {
-    this.setState({ selected: this.props.budgets.length - 1 })
+  setMonth = i => {
+    this.setState({ selected: i })
   }
   render() {
+    if (!this.props.budgets) return null
+
     const budgets = this.props.budgets
+    const months = budgets.map(b => b.date)
     if (!budgets) return null
     const instrument = this.props.user.currency
     const index = this.state.selected
@@ -45,26 +63,17 @@ class Budgets extends React.Component {
       <div>
         <Header />
         <Wrap>
-          <StyledAccountList />
-          <div>
-            <Button onClick={this.prevMonth} disabled={!index}>
-              Предыдущий
-            </Button>
-            <Button
-              onClick={this.nextMonth}
-              disabled={index >= budgets.length - 1}
-            >
-              Следующий
-            </Button>
-            <Button onClick={this.lastMonth}>Последний</Button>
-            {budgets && (
-              <Budget month={budgets[index]} instrument={instrument} />
-            )}
-          </div>
+          <LeftPanel>
+            <MonthSelector
+              months={months}
+              current={index}
+              onChange={this.setMonth}
+            />
+            <StyledBudgetInfo month={budgets[index]} instrument={instrument} />
+            <StyledAccountList />
+          </LeftPanel>
           <Grow1>
             <TagTable tags={budgets[index].tags} instrument={instrument} />
-          </Grow1>
-          <Grow1>
             <TransferTable
               transfers={budgets[index].transfers}
               instrument={instrument}
