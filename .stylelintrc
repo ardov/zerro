@@ -1,9 +1,14 @@
 {
-  "processors": [
-    "stylelint-processor-styled-components"
-  ],
+  "defaultSeverity": "warning",
   "extends": [
     "stylelint-config-recommended",
+    "stylelint-config-sass-guidelines",
     "stylelint-config-styled-components"
-  ]
+  ],
+  "plugins": ["stylelint-order", "stylelint-config-rational-order/plugin"],
+  "rules": {
+    "order/properties-order": [],
+    "order/properties-alphabetical-order": null,
+    "plugin/rational-order": true
+  }
 }

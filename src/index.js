@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 
 import 'normalize.css'
-import './index.css'
+import './index.scss'
 import 'antd/dist/antd.css'
 
 import App from './App'
