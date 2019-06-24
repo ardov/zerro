@@ -7,7 +7,7 @@ import Header from 'containers/Header'
 import { getAllBudgets } from 'store/data/selectors/budgetView'
 import { getRootUser } from 'store/data/selectors/users'
 import AccountList from 'containers/AccountList'
-import { TagTable } from './TagTable'
+import TagTable from './TagTable'
 import { TransferTable } from './TransferTable'
 import BudgetInfo from './BudgetInfo'
 import MonthSelector from './MonthSelect'
@@ -73,7 +73,11 @@ class Budgets extends React.Component {
             <StyledAccountList />
           </LeftPanel>
           <Grow1>
-            <TagTable tags={budgets[index].tags} instrument={instrument} />
+            <TagTable
+              tags={budgets[index].tags}
+              instrument={instrument}
+              date={budgets[index].date}
+            />
             <TransferTable
               transfers={budgets[index].transfers}
               instrument={instrument}

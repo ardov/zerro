@@ -1,27 +1,17 @@
 import parseDate from 'date-fns/parse'
 import createSelector from 'selectorator'
-import { getUsersById } from './users'
+import { getUsersById, getRootUser } from './users'
 import { getTagsById } from './tags'
-
-export const normalize = ({ users, tags }, raw) => ({
-  user: users[raw.user],
-  changed: raw.changed * 1000,
-
-  date: +parseDate(raw.date),
-  tag: raw.tag,
-
-  income: raw.income,
-  incomeLock: raw.incomeLock,
-  outcome: raw.outcome,
-  outcomeLock: raw.outcomeLock
-})
+import { format } from 'date-fns'
+import ru from 'date-fns/locale/ru'
+import { syncData } from '../thunks'
 
 export const getBudgetsById = createSelector(
   [getUsersById, getTagsById, 'data.budget'],
   (users, tags, budgets) => {
     const result = {}
     for (const id in budgets) {
-      result[id] = normalize({ users, tags }, budgets[id])
+      result[id] = new Budget(budgets[id], users, tags)
     }
     return result
   }
@@ -43,4 +33,78 @@ export const getBudgetsByMonthAndTag = createSelector(
   }
 )
 
-export const getBudget = (state, id) => getBudgetsById(state)[id]
+export const getBudget = (state, month, tag) => {
+  return getBudgetsByMonthAndTag(state)[month]
+    ? getBudgetsByMonthAndTag(state)[month][tag]
+    : null
+}
+
+class Budget {
+  constructor(raw, users) {
+    this.user = users[raw.user]
+    this.changed = raw.changed * 1000
+
+    this.date = +parseDate(raw.date)
+    this.tag = raw.tag // just string, it can be "00000000-0000-0000-0000-000000000000"
+
+    this.income = raw.income
+    this.incomeLock = raw.incomeLock
+    this.outcome = raw.outcome
+    this.outcomeLock = raw.outcomeLock
+  }
+
+  get raw() {
+    return {
+      user: this.user.id,
+      changed: this.changed / 1000,
+
+      date: format(this.date, 'YYYY-MM-DD', { locale: ru }),
+      tag: this.tag,
+
+      income: this.income,
+      incomeLock: this.incomeLock,
+      outcome: this.outcome,
+      outcomeLock: this.outcomeLock,
+    }
+  }
+
+  static create({
+    user,
+    changed = Date.now() / 1000,
+    date,
+    tag,
+    income = 0,
+    incomeLock = false,
+    outcome = 0,
+    outcomeLock = false,
+  }) {
+    return {
+      user,
+      changed,
+      date,
+      tag,
+      income,
+      incomeLock,
+      outcome,
+      outcomeLock,
+    }
+  }
+}
+
+export const setOutcomeBudget = (outcome, month, tagId) => (
+  dispatch,
+  getState
+) => {
+  const budgets = getState().data.budget
+  const formattedMonth = format(month, 'YYYY-MM-DD', { locale: ru })
+  const id = tagId + ',' + formattedMonth
+  const userId = getRootUser(getState()).id
+
+  const budget = budgets[id]
+    ? budgets[id]
+    : Budget.create({ user: userId, date: formattedMonth, tag: tagId })
+  const changed = {
+    budget: [{ ...budget, outcome, changed: Date.now() / 1000 }],
+  }
+  dispatch(syncData(changed))
+}
