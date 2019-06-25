@@ -45,7 +45,7 @@ function TagTable({ tags, instrument, date, updateBudget }) {
   const formatSum = sum => formatMoney(sum, instrument.shortTitle)
   const columns = [
     {
-      title: 'Категрия',
+      title: 'Категория',
       dataIndex: 'name',
       key: 'name',
       render: text => text,
