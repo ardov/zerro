@@ -33,7 +33,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "deploy": "react-scripts build && cd ./build && now && now alias",
+    "deploy": "react-scripts build && cd ./build && now --target production",
     "eject": "react-scripts eject",
     "lint:css": "stylelint './src/**/*.js'"
   },
