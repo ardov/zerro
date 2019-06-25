@@ -15,7 +15,7 @@ export const getAllBudgets = createSelector(
     getBudgetsByMonthAndTag,
     getTagsTree,
     getInBalance,
-    getRootUser
+    getRootUser,
   ],
   (transactions, budgets, tags, accountsInBalance, rootUser) => {
     if (!rootUser) return null
@@ -23,7 +23,7 @@ export const getAllBudgets = createSelector(
     const filteredTr = transactions.filter(
       check({
         deleted: false,
-        accounts: accountsInBalance.map(acc => acc.id)
+        accounts: accountsInBalance.map(acc => acc.id),
       })
     )
 
@@ -47,11 +47,17 @@ export const getAllBudgets = createSelector(
         budgets: budgets[+date] ? budgets[+date] : {},
         accountsInBalance,
         userInstrument,
-        budgetedInFuture: 0
+        budgetedInFuture: 0,
       })
       prevMonth = month
       return month
     })
+
+    // Add future budget sum to months
+    months.reduceRight((realBudgetedInFuture, month) => {
+      month.realBudgetedInFuture = realBudgetedInFuture
+      return realBudgetedInFuture + month.budgeted
+    }, 0)
 
     return months
   }

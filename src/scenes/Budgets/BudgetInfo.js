@@ -72,6 +72,7 @@ export default function BudgetInfo({ month, instrument, className }) {
     transferIncome,
     transferOutcome,
     budgeted,
+    displayBudgetedInFuture,
   } = month
   const formatSum = sum => formatMoney(sum, instrument.shortTitle)
   const currency = instrument.shortTitle
@@ -92,13 +93,18 @@ export default function BudgetInfo({ month, instrument, className }) {
         currency={currency}
       />
       <Line
-        name={`В плане на ${getMonthName(date)}`}
-        amount={budgeted}
+        name={`План на ${getMonthName(date)}`}
+        amount={-budgeted}
         currency={currency}
       />
       <Line
         name={`Переводы`}
         amount={transferIncome - transferOutcome}
+        currency={currency}
+      />
+      <Line
+        name={`Запланировано в будущем`}
+        amount={-displayBudgetedInFuture}
         currency={currency}
       />
     </Body>

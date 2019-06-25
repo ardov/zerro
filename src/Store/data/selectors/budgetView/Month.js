@@ -14,7 +14,7 @@ export default class Month {
       budgets,
       accountsInBalance = [],
       userInstrument,
-      budgetedInFuture = 0
+      realBudgetedInFuture = 0,
     }
   ) {
     this.date = startOfMonth(date)
@@ -23,7 +23,7 @@ export default class Month {
     this.prevOverspent = prevMonth ? prevMonth.overspent : 0
     this.prevOutcome = prevMonth ? prevMonth.outcome : 0
     this.prevTags = prevMonth ? prevMonth.tags : null
-    this.budgetedInFuture = budgetedInFuture
+    this.realBudgetedInFuture = realBudgetedInFuture
 
     this.budgets = budgets
 
@@ -59,6 +59,19 @@ export default class Month {
         ? funds - budgetedInFuture
         : 0
       : funds
+  }
+
+  get displayBudgetedInFuture() {
+    const { funds, budgetedInFuture } = this
+    return funds > 0
+      ? funds - budgetedInFuture < 0
+        ? funds
+        : budgetedInFuture
+      : 0
+  }
+
+  get budgetedInFuture() {
+    return this.realBudgetedInFuture > 0 ? this.realBudgetedInFuture : 0
   }
 
   // FUNDS
@@ -196,9 +209,9 @@ function calcTagsData(tags, prevTags, transactions, budgets, userInstrument) {
           budgeted: budgets[child.id] ? budgets[child.id].outcome : 0,
           outcome: metrics[child.id] ? metrics[child.id].outcome : 0, // child outcome
           income: metrics[child.id] ? metrics[child.id].income : 0, // child income
-          prevAvailible: prevAvailible > 0 ? prevAvailible : 0
+          prevAvailible: prevAvailible > 0 ? prevAvailible : 0,
         }
-      })
+      }),
     }
   })
   return result
@@ -227,7 +240,7 @@ function groupTransfersOutsideBudget(
       accsById[accId] = {
         ...tr.incomeAccount,
         transferIncome: 0,
-        transferOutcome: 0
+        transferOutcome: 0,
       }
     }
     accsById[accId].transferIncome += round(
@@ -241,7 +254,7 @@ function groupTransfersOutsideBudget(
       accsById[accId] = {
         ...tr.outcomeAccount,
         transferIncome: 0,
-        transferOutcome: 0
+        transferOutcome: 0,
       }
     }
     accsById[accId].transferOutcome += round(
