@@ -69,21 +69,62 @@ function TagTable({ tags, instrument, date, updateBudget }) {
       render: text => text,
     },
   ]
-  const tableData = tags.map(tag => ({
-    key: tag.id,
-    name: tag.title,
-    budgeted: {
-      formatted: tag.totalBudgeted ? formatSum(tag.totalBudgeted) : '-',
-      totalBudgeted: tag.totalBudgeted,
-      totalAvailible: tag.totalAvailible,
-      totalOutcome: tag.totalOutcome,
-      date,
-      updateBudget,
-      tagId: tag.id,
-    },
-    availible: tag.totalAvailible ? formatSum(tag.totalAvailible) : '-',
-    outcome: tag.totalOutcome ? formatSum(tag.totalOutcome) : '-',
-  }))
+  const tableData = tags.reduce((arr, tag) => {
+    if (!tag.showOutcome && !tag.totalOutcome && !tag.totalAvailible) return arr
+    arr.push({
+      key: tag.id,
+      name: tag.title,
+      budgeted: {
+        formatted: tag.totalBudgeted ? formatSum(tag.totalBudgeted) : '-',
+        totalBudgeted: tag.totalBudgeted,
+        totalAvailible: tag.totalAvailible,
+        totalOutcome: tag.totalOutcome,
+        date,
+        updateBudget,
+        tagId: tag.id,
+      },
+      availible: tag.totalAvailible ? formatSum(tag.totalAvailible) : '-',
+      outcome: tag.totalOutcome ? formatSum(tag.totalOutcome) : '-',
+    })
+
+    if (tag.children.length) {
+      arr.push({
+        key: tag.id + '2',
+        name: '-----  Без подкатегории',
+        budgeted: {
+          formatted: tag.budgeted ? formatSum(tag.budgeted) : '-',
+          totalBudgeted: tag.budgeted,
+          totalAvailible: tag.availible,
+          totalOutcome: tag.outcome,
+          date,
+          updateBudget,
+          tagId: tag.id,
+        },
+        availible: tag.availible ? formatSum(tag.availible) : '-',
+        outcome: tag.outcome ? formatSum(tag.outcome) : '-',
+      })
+
+      tag.children.forEach(child =>
+        arr.push({
+          key: child.id,
+          name: '-----  ' + child.fullTitle,
+          budgeted: {
+            formatted: child.budgeted ? formatSum(child.budgeted) : '-',
+            totalBudgeted: child.budgeted,
+            totalAvailible: child.availible,
+            totalOutcome: child.outcome,
+            date,
+            updateBudget,
+            tagId: child.id,
+          },
+          availible: child.availible ? formatSum(child.availible) : '-',
+          outcome: child.outcome ? formatSum(child.outcome) : '-',
+        })
+      )
+    }
+
+    return arr
+  }, [])
   return (
     <Table
       title={() => 'Категории'}
