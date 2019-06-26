@@ -185,9 +185,9 @@ function calcTagsData(tags, prevTags, transactions, budgets, userInstrument) {
       income: metrics[parent.id] ? metrics[parent.id].income : 0, // parent income
       prevAvailible: prevAvailible > 0 ? prevAvailible : 0, // availible from previous month (>=0)
 
-      children: parent.children.map((child, index2) => {
+      children: parent.children.map((child, childIndex) => {
         const prevAvailible = prevTags
-          ? prevTags[index].children[index2].availible
+          ? prevTags[index].children[childIndex].availible
           : 0
         return {
           ...child,
