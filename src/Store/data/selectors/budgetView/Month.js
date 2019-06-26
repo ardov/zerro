@@ -53,25 +53,14 @@ export default class Month {
   }
 
   get toBeBudgeted() {
-    const { funds, budgetedInFuture } = this
-    return funds > 0
-      ? funds - budgetedInFuture > 0
-        ? funds - budgetedInFuture
-        : 0
-      : funds
+    return this.funds - this.budgetedInFuture
   }
 
-  get displayBudgetedInFuture() {
-    const { funds, budgetedInFuture } = this
-    return funds > 0
-      ? funds - budgetedInFuture < 0
-        ? funds
-        : budgetedInFuture
-      : 0
-  }
-
+  // cannot be negative or greater than funds
   get budgetedInFuture() {
-    return this.realBudgetedInFuture > 0 ? this.realBudgetedInFuture : 0
+    const { funds, realBudgetedInFuture } = this
+    if (realBudgetedInFuture <= 0 || funds <= 0) return 0
+    return realBudgetedInFuture > funds ? funds : realBudgetedInFuture
   }
 
   // FUNDS

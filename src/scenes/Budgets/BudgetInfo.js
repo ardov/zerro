@@ -62,17 +62,13 @@ export default function BudgetInfo({ month, instrument, className }) {
   const {
     date,
     prevOverspent,
-    funds,
     toBeBudgeted,
     income,
-    outcome,
-    availible,
-    overspent,
     prevFunds,
     transferIncome,
     transferOutcome,
     budgeted,
-    displayBudgetedInFuture,
+    budgetedInFuture,
   } = month
   const formatSum = sum => formatMoney(sum, instrument.shortTitle)
   const currency = instrument.shortTitle
@@ -104,7 +100,7 @@ export default function BudgetInfo({ month, instrument, className }) {
       />
       <Line
         name={`Запланировано в будущем`}
-        amount={-displayBudgetedInFuture}
+        amount={-budgetedInFuture}
         currency={currency}
       />
     </Body>
