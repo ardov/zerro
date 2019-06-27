@@ -11,19 +11,19 @@ import startOfWeek from 'date-fns/start_of_week'
 export function groupTransactionsBy(groupType = 'day', arr) {
   if (!arr) return []
   const groupTypes = {
-    day: date => startOfDay(date),
-    week: date => startOfWeek(date, { weekStartsOn: 1 }),
-    month: date => startOfMonth(date)
+    day: tr => startOfDay(tr.date),
+    week: tr => startOfWeek(tr.date, { weekStartsOn: 1 }),
+    month: tr => startOfMonth(tr.date),
   }
 
   const reducer = (groupped, tr) => {
     let lastDate = groupped.length ? groupped[groupped.length - 1].date : null
-    if (+lastDate === +groupTypes[groupType](tr.date)) {
+    if (+lastDate === +groupTypes[groupType](tr)) {
       groupped[groupped.length - 1].transactions.push(tr)
     } else {
       groupped.push({
-        date: groupTypes[groupType](tr.date),
-        transactions: [tr]
+        date: groupTypes[groupType](tr),
+        transactions: [tr],
       })
     }
     return groupped
@@ -43,7 +43,7 @@ export function groupTransactionsAndReturnId(groupType = 'day', arr) {
   const groupTypes = {
     day: date => startOfDay(date),
     week: date => startOfWeek(date, { weekStartsOn: 1 }),
-    month: date => startOfMonth(date)
+    month: date => startOfMonth(date),
   }
 
   const reducer = (groupped, tr) => {
@@ -53,7 +53,7 @@ export function groupTransactionsAndReturnId(groupType = 'day', arr) {
     } else {
       groupped.push({
         date: groupTypes[groupType](tr.date),
-        transactions: [tr.id]
+        transactions: [tr.id],
       })
     }
     return groupped
@@ -72,9 +72,9 @@ export function calcMetrics(arr, instrumentRate = 1) {
     total: {
       income: 0,
       outcome: 0,
-      transactions: []
+      transactions: [],
     },
-    byTag: {}
+    byTag: {},
   }
 
   const reducer = (acc, tr) => {
