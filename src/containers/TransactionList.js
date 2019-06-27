@@ -7,14 +7,14 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { connect } from 'react-redux'
 import TransactionGroup from 'components/TransactionGroup'
-import { getGrouppedByDay } from 'store/data/selectors/transaction'
+import { getTransactionList2 } from 'store/data/selectors/transaction'
 
 function formatDate(date) {
   const formats = {
     today: 'Сегодня, D MMMM, dd',
     yesterday: 'Вчера, D MMMM, dd',
     thisYear: 'D MMMM, dd',
-    previousYear: 'D MMMM YYYY, dd'
+    previousYear: 'D MMMM YYYY, dd',
   }
   const formatString = isToday(date)
     ? formats.today
@@ -88,6 +88,6 @@ class TransactionList extends React.Component {
 }
 
 export default connect(
-  state => ({ groupped: getGrouppedByDay(state) }),
+  (state, params) => ({ groupped: getTransactionList2(state, params) }),
   null
 )(TransactionList)
