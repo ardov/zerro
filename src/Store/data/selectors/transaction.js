@@ -48,7 +48,7 @@ export const normalize = (
   reminderMarker: raw.reminderMarker,
 
   //COMPUTED PROPERTIES
-  type: getType(raw)
+  type: getType(raw),
 })
 
 export const getTransactionsById = createSelector(
@@ -58,7 +58,7 @@ export const getTransactionsById = createSelector(
     getUsersById,
     getTagsById,
     getMerchantsById,
-    'data.transaction'
+    'data.transaction',
   ],
   (instruments, accounts, users, tags, merchants, transactions) => {
     const result = {}
@@ -81,9 +81,7 @@ export const getTransactionList = createSelector(
     for (let id in transactions) {
       list.push(transactions[id])
     }
-    return list.sort((a, b) =>
-      +b.date === +a.date ? b.created - a.created : b.date - a.date
-    )
+    return list.sort(sortBy('DATE'))
   }
 )
 
@@ -110,7 +108,33 @@ export const getOpenedTransaction = createSelector(
   (transactions, openedId) => transactions[openedId]
 )
 
+export const getTransactionList2 = (state, options) => {
+  const { ids, conditions, groupBy, sortType, ascending } = options
+  const list = ids
+    ? ids.map(id => getTransaction(state, id))
+    : getTransactionList(state)
+  const filtered = list
+    .filter(check(conditions))
+    .sort(sortBy(sortType, ascending))
+  return groupBy ? groupTransactionsBy(groupBy, filtered) : filtered
+}
+
 // HELPERS
+
+function sortBy(sortType = 'DATE', ascending = false) {
+  const sortFuncs = {
+    DATE: (tr1, tr2) => {
+      const result =
+        +tr2.date === +tr1.date
+          ? tr2.created - tr1.created
+          : tr2.date - tr1.date
+      return ascending ? -result : result
+    },
+    CHANGED: (tr1, tr2) =>
+      ascending ? tr1.changed - tr2.changed : tr2.changed - tr1.changed,
+  }
+  return sortFuncs[sortType]
+}
 
 function mapTags(ids, tags) {
   if (typeof ids === 'string') debugger
