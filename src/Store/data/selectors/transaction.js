@@ -110,11 +110,13 @@ export const getOpenedTransaction = createSelector(
 
 export const getTransactionList2 = (state, options) => {
   const { ids, conditions, groupBy, sortType, ascending } = options
+  const filterConditions =
+    conditions || conditions === null ? conditions : getFilterConditions(state)
   const list = ids
     ? ids.map(id => getTransaction(state, id))
     : getTransactionList(state)
   const filtered = list
-    .filter(check(conditions))
+    .filter(check(filterConditions))
     .sort(sortBy(sortType, ascending))
   return groupBy ? groupTransactionsBy(groupBy, filtered) : filtered
 }

@@ -45,7 +45,7 @@ export default class TransactionsView extends Component {
             <AccountList />
           </Menu>
           <Content>
-            <TransactionList />
+            <TransactionList groupBy={'day'} />
           </Content>
           <SidePanel>
             <DetailsPanel />
