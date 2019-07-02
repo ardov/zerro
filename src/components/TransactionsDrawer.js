@@ -1,6 +1,13 @@
 import React, { Component } from 'react'
+import styled from 'styled-components'
 import { Drawer } from 'antd'
 import TransactionList from 'containers/TransactionList'
+
+const StyledDrawer = styled(Drawer)`
+  & .ant-drawer-body {
+    padding: 0;
+  }
+`
 
 export default class TransactionsDrawer extends Component {
   render() {
@@ -14,8 +21,7 @@ export default class TransactionsDrawer extends Component {
     }
 
     return (
-      <Drawer
-        // title="Расширенные фильтры"
+      <StyledDrawer
         placement="right"
         closable={true}
         width={500}
@@ -26,7 +32,7 @@ export default class TransactionsDrawer extends Component {
         <div style={{ height: '100vh' }}>
           <TransactionList {...listOptions} />
         </div>
-      </Drawer>
+      </StyledDrawer>
     )
   }
 }
