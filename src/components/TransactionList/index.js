@@ -6,7 +6,7 @@ import { areEqual } from 'react-window'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { connect } from 'react-redux'
-import TransactionGroup from 'components/TransactionGroup'
+import TransactionGroup from './TransactionGroup'
 import { getTransactionList2 } from 'store/data/selectors/transaction'
 
 function formatDate(date) {

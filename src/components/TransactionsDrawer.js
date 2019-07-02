@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
 import { Drawer } from 'antd'
-import TransactionList from 'containers/TransactionList'
+import TransactionList from './TransactionList'
 
 const StyledDrawer = styled(Drawer)`
   & .ant-drawer-body {

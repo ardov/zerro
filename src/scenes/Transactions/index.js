@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import styled from 'styled-components'
 
 import Header from 'containers/Header'
-import TransactionList from 'containers/TransactionList'
+import TransactionList from 'components/TransactionList'
 import Filter from 'containers/Filter'
 import DetailsPanel from 'containers/DetailsPanel'
 import BulkActions from 'containers/BulkActions'
