@@ -15,7 +15,7 @@ export const getChangedArrays = state => {
     // merchant,
     // reminder,
     // reminderMarker,
-  } = state.changed
+  } = state.diff
   return {
     transaction: Object.values(transaction),
     // account: Object.values(account),

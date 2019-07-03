@@ -3,7 +3,7 @@ import ZenApi from '../services/ZenApi'
 import LocalStorage from '../services/localstorage'
 
 import data from './data'
-import changed from './changed'
+import diff from './diff'
 
 import filterConditions from './filterConditions'
 import openedTransaction from './openedTransaction'
@@ -13,7 +13,7 @@ import selectedTransactions from './selectedTransactions'
 export const store = configureStore({
   reducer: {
     data,
-    changed,
+    diff,
     filterConditions,
     openedTransaction,
     selectedTransactions,

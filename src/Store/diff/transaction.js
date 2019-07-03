@@ -2,7 +2,7 @@ import { createSlice } from 'redux-starter-kit'
 import { removeSynced } from './actions'
 
 const { reducer, actions } = createSlice({
-  slice: 'changed',
+  slice: 'diff/transaction',
   initialState: {},
   reducers: {
     setTransaction: (state, { payload }) => {

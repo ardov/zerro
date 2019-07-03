@@ -59,11 +59,11 @@ export const getTransactionsById = createSelector(
     getTagsById,
     getMerchantsById,
     'data.transaction',
-    'changed.transaction',
+    'diff.transaction',
   ],
-  (instruments, accounts, users, tags, merchants, transactions, changed) => {
+  (instruments, accounts, users, tags, merchants, transactions, diff) => {
     const result = {}
-    const merged = { ...transactions, ...changed }
+    const merged = { ...transactions, ...diff }
     for (const id in merged) {
       result[id] = normalize(
         { instruments, accounts, users, tags, merchants },
@@ -75,9 +75,9 @@ export const getTransactionsById = createSelector(
 )
 
 export const getRawTransactionsById = createSelector(
-  ['data.transaction', 'changed.transaction'],
-  (transactions, changed) => {
-    return { ...transactions, ...changed }
+  ['data.transaction', 'diff.transaction'],
+  (transactions, diff) => {
+    return { ...transactions, ...diff }
   }
 )
 

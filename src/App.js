@@ -10,7 +10,7 @@ import Tags from './scenes/Tags'
 import Auth from './scenes/Auth'
 import Budgets from './scenes/Budgets'
 import { getLoginState } from './store/token'
-import { syncData } from 'store/changed/sync'
+import { syncData } from 'store/diff/sync'
 import { getLastSyncTime } from './store/data'
 
 addLocaleData(ru)

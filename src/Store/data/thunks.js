@@ -1,6 +1,6 @@
 import uuidv1 from 'uuid/v1'
 import { getRawTransaction } from 'store/data/selectors/transaction'
-import { setTransaction } from 'store/changed/transaction'
+import { setTransaction } from 'store/diff/transaction'
 
 export const deleteTransactions = ids => (dispatch, getState) => {
   const state = getState()
