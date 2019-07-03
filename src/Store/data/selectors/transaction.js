@@ -74,6 +74,16 @@ export const getTransactionsById = createSelector(
   }
 )
 
+export const getRawTransactionsById = createSelector(
+  ['data.transaction', 'changed.transaction'],
+  (transactions, changed) => {
+    return { ...transactions, ...changed }
+  }
+)
+
+export const getRawTransaction = (state, id) =>
+  getRawTransactionsById(state)[id]
+
 export const getTransaction = (state, id) => getTransactionsById(state)[id]
 
 export const getTransactionList = createSelector(

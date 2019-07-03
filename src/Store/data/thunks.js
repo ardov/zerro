@@ -1,12 +1,12 @@
 import uuidv1 from 'uuid/v1'
-import { getTransaction } from 'store/data/selectors/transaction'
+import { getRawTransaction } from 'store/data/selectors/transaction'
 import { setTransaction } from 'store/changed/transaction'
 
 export const deleteTransactions = ids => (dispatch, getState) => {
   const state = getState()
   const trToDelete = Array.isArray(ids)
-    ? ids.map(id => getTransaction(state, id))
-    : [getTransaction(state, ids)]
+    ? ids.map(id => getRawTransaction(state, id))
+    : [getRawTransaction(state, ids)]
   const deleted = trToDelete.map(tr => convertToDeleted(tr))
   dispatch(setTransaction(deleted))
 }
@@ -14,7 +14,7 @@ export const deleteTransactions = ids => (dispatch, getState) => {
 export const restoreTransaction = id => (dispatch, getState) => {
   const state = getState()
   const tr = {
-    ...getTransaction(state, id),
+    ...getRawTransaction(state, id),
     deleted: false,
     changed: Math.floor(Date.now() / 1000),
     id: uuidv1(),
@@ -24,14 +24,14 @@ export const restoreTransaction = id => (dispatch, getState) => {
 
 export const splitTransfer = id => (dispatch, getState) => {
   const state = getState()
-  const tr = getTransaction(state, id)
+  const tr = getRawTransaction(state, id)
   dispatch(setTransaction(split(tr)))
 }
 
 export const applyChangesToTransaction = tr => (dispatch, getState) => {
   const state = getState()
   const changedTransaction = {
-    ...getTransaction(state, tr.id),
+    ...getRawTransaction(state, tr.id),
     ...tr,
     changed: Date.now() / 1000,
   }
@@ -44,7 +44,7 @@ export const setMainTagToTransactions = (transactions, tagId) => (
 ) => {
   const state = getState()
   const result = transactions.map(id => {
-    const tr = getTransaction(state, id)
+    const tr = getRawTransaction(state, id)
     const newTags = tr.tag ? [tagId, ...tr.tag] : [tagId]
     return {
       ...tr,
