@@ -1,111 +1,65 @@
-import ZenApi from '../../services/ZenApi'
-import { updateData } from './index'
-import { addFakeTransaction, removeFakeTransaction } from '../fakeTransactions'
-import LocalStorage from '../../services/localstorage'
-import { message } from 'antd'
 import uuidv1 from 'uuid/v1'
-
-//All syncs with ZM goes through this thunk
-export const syncData = (changed, messages = {}) => (dispatch, getState) => {
-  const processMessage = messages.process || 'Синхронизируемся...'
-  const successMessage = messages.success || 'Готово!'
-  const failMessage = messages.fail || 'Что-то пошло не так'
-
-  message.loading(processMessage, 0)
-
-  const state = getState()
-  const serverTimestamp = state.data.serverTimestamp || 0
-  return ZenApi.getData(state.token, { serverTimestamp, changed }).then(
-    json => {
-      dispatch(updateData(json))
-      LocalStorage.set('data', getState().data)
-      message.destroy()
-      message.success(successMessage)
-    },
-    err => {
-      message.destroy()
-      message.error(failMessage)
-      console.warn('Syncing failed', err)
-    }
-  )
-}
+import { getTransaction } from 'store/data/selectors/transaction'
+import { setTransaction } from 'store/changed/transaction'
 
 export const deleteTransactions = ids => (dispatch, getState) => {
-  const raws = getState().data.transaction
-  const messages = {
-    process: 'Удаляем транзакцию...'
-  }
-  const idsToDelete = Array.isArray(ids) ? ids : [ids]
-  const deleted = idsToDelete.map(id => convertToDeleted(raws[id]))
-
-  // dispatch(addFakeTransaction(changedTransaction))
-  const changed = { transaction: deleted }
-  dispatch(syncData(changed, messages))
-  // .finally(() =>dispatch(removeFakeTransaction(ids)))
+  const state = getState()
+  const trToDelete = Array.isArray(ids)
+    ? ids.map(id => getTransaction(state, id))
+    : [getTransaction(state, ids)]
+  const deleted = trToDelete.map(tr => convertToDeleted(tr))
+  dispatch(setTransaction(deleted))
 }
 
 export const restoreTransaction = id => (dispatch, getState) => {
-  const transaction = getState().data.transaction
-  const changed = {
-    transaction: [
-      {
-        ...transaction[id],
-        deleted: false,
-        changed: Math.floor(Date.now() / 1000),
-        id: uuidv1()
-      }
-    ]
+  const state = getState()
+  const tr = {
+    ...getTransaction(state, id),
+    deleted: false,
+    changed: Math.floor(Date.now() / 1000),
+    id: uuidv1(),
   }
-
-  dispatch(syncData(changed))
+  dispatch(setTransaction(tr))
 }
 
 export const splitTransfer = id => (dispatch, getState) => {
-  const transaction = getState().data.transaction
-  const changed = {
-    transaction: split(transaction[id])
-  }
-  dispatch(syncData(changed))
+  const state = getState()
+  const tr = getTransaction(state, id)
+  dispatch(setTransaction(split(tr)))
 }
 
 export const applyChangesToTransaction = tr => (dispatch, getState) => {
-  const transaction = getState().data.transaction
+  const state = getState()
   const changedTransaction = {
-    ...transaction[tr.id],
+    ...getTransaction(state, tr.id),
     ...tr,
-    changed: Date.now() / 1000
+    changed: Date.now() / 1000,
   }
-  dispatch(addFakeTransaction(changedTransaction))
-  dispatch(syncData({ transaction: [changedTransaction] })).finally(() =>
-    dispatch(removeFakeTransaction(changedTransaction.id))
-  )
+  dispatch(setTransaction(changedTransaction))
 }
 
 export const setMainTagToTransactions = (transactions, tagId) => (
   dispatch,
   getState
 ) => {
-  const messages = { process: 'Добавляем категории...' }
-
-  const raws = getState().data.transaction
+  const state = getState()
   const result = transactions.map(id => {
-    const tr = raws[id]
+    const tr = getTransaction(state, id)
     const newTags = tr.tag ? [tagId, ...tr.tag] : [tagId]
     return {
       ...tr,
       tag: newTags,
-      changed: Math.floor(Date.now() / 1000)
+      changed: Math.floor(Date.now() / 1000),
     }
   })
-
-  dispatch(syncData({ transaction: result }, messages))
+  dispatch(setTransaction(result))
 }
 
 function convertToDeleted(raw) {
   return {
     ...raw,
     deleted: true,
-    changed: Math.floor(Date.now() / 1000)
+    changed: Math.floor(Date.now() / 1000),
   }
 }
 
@@ -137,7 +91,7 @@ function split(raw) {
       incomeAccount: raw.outcomeAccount,
       opIncome: null,
       opIncomeInstrument: null,
-      incomeBankID: null
+      incomeBankID: null,
     },
     {
       ...raw,
@@ -148,9 +102,8 @@ function split(raw) {
       outcomeAccount: raw.incomeAccount,
       opOutcome: null,
       opOutcomeInstrument: null,
-      outcomeBankID: null
-    }
+      outcomeBankID: null,
+    },
   ]
-  // console.table(result)
   return result
 }

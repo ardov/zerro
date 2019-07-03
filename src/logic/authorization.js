@@ -3,7 +3,7 @@ import Cookies from 'cookies-js'
 import ZenApi from 'services/ZenApi'
 import { setToken } from 'store/token'
 import { wipeData } from 'store/data'
-import { syncData } from 'store/data/thunks'
+import { syncData } from 'store/changed/sync'
 
 export const logIn = () => (dispatch, getState) => {
   dispatch(logOut())

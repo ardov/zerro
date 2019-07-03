@@ -1,24 +1,28 @@
-import { configureStore, combineReducers } from 'redux-starter-kit'
+import { configureStore } from 'redux-starter-kit'
 import ZenApi from '../services/ZenApi'
 import LocalStorage from '../services/localstorage'
 
 import data from './data'
-import fakeTransactions from './fakeTransactions'
+import changed from './changed'
+
 import filterConditions from './filterConditions'
 import openedTransaction from './openedTransaction'
 import token from './token'
 import selectedTransactions from './selectedTransactions'
 
-const rootReducer = combineReducers({
-  data,
-  fakeTransactions,
-  filterConditions,
-  openedTransaction,
-  selectedTransactions,
-  token
+export const store = configureStore({
+  reducer: {
+    data,
+    changed,
+    filterConditions,
+    openedTransaction,
+    selectedTransactions,
+    token,
+  },
+  preloadedState: getInitialState(),
 })
 
-const getInitialState = () => {
+function getInitialState() {
   const token = ZenApi.getLocalToken()
   const data = LocalStorage.get('data')
   if (token && data) {
@@ -29,8 +33,3 @@ const getInitialState = () => {
   }
   return
 }
-
-export const store = configureStore({
-  reducer: rootReducer,
-  preloadedState: getInitialState()
-})

@@ -4,7 +4,6 @@ import { getUsersById, getRootUser } from './users'
 import { getTagsById } from './tags'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
-import { syncData } from '../thunks'
 
 export const getBudgetsById = createSelector(
   [getUsersById, getTagsById, 'data.budget'],
@@ -106,5 +105,5 @@ export const setOutcomeBudget = (outcome, month, tagId) => (
   const changed = {
     budget: [{ ...budget, outcome, changed: Date.now() / 1000 }],
   }
-  dispatch(syncData(changed))
+  // dispatch(syncData(changed))
 }

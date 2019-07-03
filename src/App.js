@@ -10,7 +10,7 @@ import Tags from './scenes/Tags'
 import Auth from './scenes/Auth'
 import Budgets from './scenes/Budgets'
 import { getLoginState } from './store/token'
-import { syncData } from './store/data/thunks'
+import { syncData } from 'store/changed/sync'
 import { getLastSyncTime } from './store/data'
 
 addLocaleData(ru)
@@ -58,11 +58,11 @@ class App extends Component {
 
 const mapStateToProps = state => ({
   isLoggedIn: getLoginState(state),
-  lastSync: getLastSyncTime(state)
+  lastSync: getLastSyncTime(state),
 })
 
 const mapDispatchToProps = dispatch => ({
-  sync: () => dispatch(syncData())
+  sync: () => dispatch(syncData()),
 })
 
 export default connect(

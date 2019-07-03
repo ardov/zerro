@@ -59,13 +59,15 @@ export const getTransactionsById = createSelector(
     getTagsById,
     getMerchantsById,
     'data.transaction',
+    'changed.transaction',
   ],
-  (instruments, accounts, users, tags, merchants, transactions) => {
+  (instruments, accounts, users, tags, merchants, transactions, changed) => {
     const result = {}
-    for (const id in transactions) {
+    const merged = { ...transactions, ...changed }
+    for (const id in merged) {
       result[id] = normalize(
         { instruments, accounts, users, tags, merchants },
-        transactions[id]
+        merged[id]
       )
     }
     return result
@@ -139,8 +141,7 @@ function sortBy(sortType = 'DATE', ascending = false) {
 }
 
 function mapTags(ids, tags) {
-  if (typeof ids === 'string') debugger
-  return ids ? ids.map(id => tags[id]) : null
+  return ids && ids.length ? ids.map(id => tags[id]) : null
 }
 
 function getType(tr) {
