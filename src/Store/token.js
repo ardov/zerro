@@ -1,13 +1,19 @@
-import { createReducer, createAction } from 'redux-starter-kit'
+import { createSlice } from 'redux-starter-kit'
 
-// ACTIONS
-export const setToken = createAction('token/set')
-
-// REDUCER
-export default createReducer(null, {
-  [setToken]: (state, action) => action.payload,
+const { reducer, actions, selectors } = createSlice({
+  slice: 'token',
+  initialState: null,
+  reducers: {
+    setToken: (state, action) => action.payload,
+  },
 })
 
+// REDUCER
+export default reducer
+
+// ACTIONS
+export const { setToken } = actions
+
 // SELECTORS
-export const getToken = state => state.token
-export const getLoginState = state => !!state.token
+export const { getToken } = selectors
+export const getLoginState = state => !!getToken(state)

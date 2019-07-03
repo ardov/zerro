@@ -1,9 +1,4 @@
-import { createAction, createReducer } from 'redux-starter-kit'
-import keyBy from 'lodash/keyBy'
-
-// ACTIONS
-export const updateData = createAction('data/update')
-export const wipeData = createAction('data/wipe')
+import { createSlice } from 'redux-starter-kit'
 
 // INITIAL STATE
 const initialState = {
@@ -18,32 +13,36 @@ const initialState = {
   merchant: {},
   reminder: {},
   reminderMarker: {},
-  transaction: {}
+  transaction: {},
 }
 
-// REDUCER
-export default createReducer(initialState, {
-  [wipeData]: (state, action) => initialState,
-
-  [updateData]: (state, action) => {
-    const data = action.payload
-    let newState = { serverTimestamp: data.serverTimestamp }
-    for (let type in state) {
-      if (data[type] && Array.isArray(data[type])) {
-        if (type === 'budget') {
-          // budgets has no id field, so their id would be tag id + date
-          newState[type] = {
-            ...state[type],
-            ...keyBy(data[type], b => b.tag + ',' + b.date)
-          }
-        } else {
-          newState[type] = { ...state[type], ...keyBy(data[type], 'id') }
+const { reducer, actions, selectors } = createSlice({
+  slice: 'data',
+  initialState,
+  reducers: {
+    wipeData: () => initialState,
+    updateData: (state, action) => {
+      const data = action.payload
+      state.serverTimestamp = data.serverTimestamp
+      for (let type in state) {
+        if (data[type] && Array.isArray(data[type])) {
+          data[type].forEach(item => {
+            // budgets has no id field, so their id would be tag id + date
+            const id = type === 'budget' ? `${item.tag},${item.date}` : item.id
+            state[type][id] = item
+          })
         }
       }
-    }
-    return { ...state, ...newState }
-  }
+    },
+  },
 })
 
-// SELECTOR
+// REDUCER
+export default reducer
+
+// ACTIONS
+export const { wipeData, updateData } = actions
+
+// SELECTORS
+export const { getData } = selectors
 export const getLastSyncTime = state => state.data.serverTimestamp * 1000

@@ -1,12 +1,5 @@
+import { createSlice } from 'redux-starter-kit'
 import concat from 'lodash/concat'
-import { createReducer, createAction } from 'redux-starter-kit'
-
-// ACTIONS
-export const addTag = createAction('filterConditions/addTag')
-export const setTags = createAction('filterConditions/setTags')
-export const setCondition = createAction('filterConditions/setCondition')
-export const resetAll = createAction('filterConditions/resetAll')
-export const resetCondition = createAction('filterConditions/resetCondition')
 
 // INITIAL STATE
 const initialState = {
@@ -18,36 +11,44 @@ const initialState = {
   tags: null,
   accounts: null,
   amountFrom: null,
-  amountTo: null
+  amountTo: null,
 }
 
-// REDUCER
-export default createReducer(initialState, {
-  [addTag]: (state, action) => {
-    const tags = state.tags || []
-    return { ...state, tags: concat(tags, action.payload) }
+const { reducer, actions, selectors } = createSlice({
+  slice: 'filterConditions',
+  initialState,
+  reducers: {
+    addTag: (state, { payload }) => {
+      const tags = state.tags || []
+      state.tags = concat(tags, payload)
+    },
+    setTags: (state, { payload }) => {
+      state.tags = payload
+    },
+    setCondition: (state, { payload }) => ({ ...state, ...payload }),
+    resetCondition: (state, { payload }) => {
+      state[payload] = initialState[payload]
+    },
+    resetAll: () => initialState,
   },
-
-  [setTags]: (state, action) => ({
-    ...state,
-    tags: action.payload.length ? action.payload : null
-  }),
-
-  [setCondition]: (state, action) => ({ ...state, ...action.payload }),
-
-  [resetCondition]: (state, action) => ({
-    ...state,
-    ...{ [action.payload]: initialState[action.payload] }
-  }),
-
-  [resetAll]: () => initialState
 })
 
+// REDUCER
+export default reducer
+
+// ACTIONS
+export const {
+  addTag,
+  setTags,
+  setCondition,
+  resetCondition,
+  resetAll,
+} = actions
+
 // SELECTORS
-export const getFilterConditions = state => state.filterConditions
+export const { getFilterConditions } = selectors
 
 // HELPER
-
 export const check = conditions => tr => {
   const mergedConditions = { initialState, ...conditions }
   const {
@@ -61,7 +62,7 @@ export const check = conditions => tr => {
     dateTo,
 
     amountFrom,
-    amountTo
+    amountTo,
   } = mergedConditions
 
   const checkSearch = (tr, search) =>

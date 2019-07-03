@@ -1,14 +1,19 @@
-import { createReducer, createAction } from 'redux-starter-kit'
+import { createSlice } from 'redux-starter-kit'
 
-// ACTIONS
-export const openTransaction = createAction('openedTransaction/open')
-export const closeTransaction = createAction('openedTransaction/close')
-
-// REDUCER
-export default createReducer(null, {
-  [openTransaction]: (state, action) => action.payload,
-  [closeTransaction]: () => null
+const { reducer, actions, selectors } = createSlice({
+  slice: 'openedTransaction',
+  initialState: [],
+  reducers: {
+    openTransaction: (state, { payload }) => payload,
+    closeTransaction: () => null,
+  },
 })
 
+// REDUCER
+export default reducer
+
+// ACTIONS
+export const { openTransaction, closeTransaction } = actions
+
 // SELECTORS
-export const getOpenedId = state => state.openedTransaction
+export const getOpenedId = selectors.getOpenedTransaction
