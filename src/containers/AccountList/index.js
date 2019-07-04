@@ -20,13 +20,10 @@ const AccountList = props => (
   </div>
 )
 
-const mapStateToProps = (state, props) => {
-  console.log('ALL BUDGETS', getAllBudgets(state))
-  return {
-    inBalance: getInBalance(state),
-    outOfBalance: getOutOfBalance(state)
-  }
-}
+const mapStateToProps = (state, props) => ({
+  inBalance: getInBalance(state),
+  outOfBalance: getOutOfBalance(state),
+})
 
 const mapDispatchToProps = (dispatch, props) => ({})
 
