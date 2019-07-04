@@ -32,3 +32,15 @@ export const getChangedNum = state => {
   const arrays = getChangedArrays(state)
   return Object.values(arrays).flat().length
 }
+
+export const getLastChangeTime = state => {
+  const arrays = getChangedArrays(state)
+  const lastUnix = Object.values(arrays)
+    .flat()
+    .reduce(
+      (lastChange, item) =>
+        item.changed > lastChange ? item.changed : lastChange,
+      0
+    )
+  return new Date(lastUnix * 1000)
+}

@@ -12,11 +12,12 @@ import Budgets from './scenes/Budgets'
 import { getLoginState } from './store/token'
 import { syncData } from 'store/diff/sync'
 import { getLastSyncTime } from './store/data'
-import { getChangedNum } from 'store/diff'
+import { getLastChangeTime } from 'store/diff'
 
 addLocaleData(ru)
 
 const SYNC_DELAY = 10 * 60 * 1000 // 10min
+const DELAY_AFTER_CHANGE = 3 * 1000 // 3sec
 const CHECK_DELAY = 5 * 1000 // 5sec
 
 class App extends Component {
@@ -42,9 +43,16 @@ class App extends Component {
 
   checkSync = () => {
     const checkSync = this.checkSync
-    const { lastSync, sync, isLoggedIn, isUnsaved } = this.props
+    const { lastSync, sync, isLoggedIn, lastChange } = this.props
 
-    if (isLoggedIn && (isUnsaved || Date.now() - lastSync > SYNC_DELAY)) {
+    const needRegularSync = Date.now() - lastSync > SYNC_DELAY
+    const hasUnsavedChanges = !!+lastChange
+    const itsTimeToSyncChanges = Date.now() - lastChange > DELAY_AFTER_CHANGE
+
+    if (
+      isLoggedIn &&
+      (needRegularSync || (hasUnsavedChanges && itsTimeToSyncChanges))
+    ) {
       sync()
     }
 
@@ -88,7 +96,7 @@ class App extends Component {
 const mapStateToProps = state => ({
   isLoggedIn: getLoginState(state),
   lastSync: getLastSyncTime(state),
-  isUnsaved: getChangedNum(state),
+  lastChange: getLastChangeTime(state),
 })
 
 const mapDispatchToProps = dispatch => ({
