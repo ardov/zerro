@@ -2,8 +2,8 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { Table } from 'antd'
 import { formatMoney } from 'Utils/format'
-import { Menu, Dropdown, Icon } from 'antd'
-import { setOutcomeBudget } from 'store/data/selectors/budgets'
+import { Menu, Dropdown } from 'antd'
+import { setOutcomeBudget } from 'store/diff/budget'
 
 function renderBudget({
   formatted,

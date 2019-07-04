@@ -18,8 +18,9 @@ const { reducer, actions } = createSlice({
   },
   extraReducers: {
     [removeSynced]: (state, { payload }) => {
+      const syncStarted = payload
       Object.keys(state).forEach(id => {
-        if (state[id].changed < payload) {
+        if (state[id].changed < syncStarted) {
           delete state[id]
         }
       })

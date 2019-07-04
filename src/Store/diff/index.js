@@ -1,9 +1,10 @@
 import { combineReducers } from 'redux-starter-kit'
 import transaction from './transaction'
+import budget from './budget'
 // import createSelector from 'selectorator'
 
 // REDUCER
-export default combineReducers({ transaction })
+export default combineReducers({ transaction, budget })
 
 // SELECTOR
 export const getChangedArrays = state => {
@@ -11,7 +12,7 @@ export const getChangedArrays = state => {
     transaction,
     // account,
     // tag,
-    // budget,
+    budget,
     // merchant,
     // reminder,
     // reminderMarker,
@@ -20,7 +21,7 @@ export const getChangedArrays = state => {
     transaction: Object.values(transaction),
     // account: Object.values(account),
     // tag: Object.values(tag),
-    // budget: Object.values(budget),
+    budget: Object.values(budget),
     // merchant: Object.values(merchant),
     // reminder: Object.values(reminder),
     // reminderMarker: Object.values(reminderMarker),
