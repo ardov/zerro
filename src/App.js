@@ -12,15 +12,44 @@ import Budgets from './scenes/Budgets'
 import { getLoginState } from './store/token'
 import { syncData } from 'store/diff/sync'
 import { getLastSyncTime } from './store/data'
+import { getChangedNum } from 'store/diff'
 
 addLocaleData(ru)
 
 const SYNC_DELAY = 10 * 60 * 1000 // 10min
+const CHECK_DELAY = 5 * 1000 // 5sec
 
 class App extends Component {
+  state = { syncTimer: null }
+
   componentDidMount = () => {
-    const { lastSync, sync, isLoggedIn } = this.props
-    if (isLoggedIn && Date.now() - lastSync > SYNC_DELAY) sync()
+    this.checkSync()
+    window.addEventListener('beforeunload', this.beforeUnload)
+  }
+
+  componentWillUnmount = () => {
+    window.removeEventListener('beforeunload', this.beforeUnload)
+    clearInterval(this.state.syncTimer)
+  }
+
+  beforeUnload = e => {
+    if (this.props.isUnsaved) {
+      window.alert('UNSAVED CHANGES')
+      ;(e || window.event).returnValue = null
+      return null
+    }
+  }
+
+  checkSync = () => {
+    const checkSync = this.checkSync
+    const { lastSync, sync, isLoggedIn, isUnsaved } = this.props
+
+    if (isLoggedIn && (isUnsaved || Date.now() - lastSync > SYNC_DELAY)) {
+      sync()
+    }
+
+    const syncTimer = setTimeout(checkSync, CHECK_DELAY)
+    this.setState({ syncTimer })
   }
 
   render() {
@@ -59,6 +88,7 @@ class App extends Component {
 const mapStateToProps = state => ({
   isLoggedIn: getLoginState(state),
   lastSync: getLastSyncTime(state),
+  isUnsaved: getChangedNum(state),
 })
 
 const mapDispatchToProps = dispatch => ({
