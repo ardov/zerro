@@ -13,12 +13,14 @@ import { getLoginState } from './store/token'
 import { syncData } from 'store/diff/sync'
 import { getLastSyncTime } from './store/data'
 import { getLastChangeTime } from 'store/diff'
+import { getIsPending } from 'store/isPending'
 
 addLocaleData(ru)
 
 const SYNC_DELAY = 10 * 60 * 1000 // 10min
 const DELAY_AFTER_CHANGE = 3 * 1000 // 3sec
 const CHECK_DELAY = 5 * 1000 // 5sec
+let timer = null
 
 class App extends Component {
   state = { syncTimer: null }
@@ -30,7 +32,8 @@ class App extends Component {
 
   componentWillUnmount = () => {
     window.removeEventListener('beforeunload', this.beforeUnload)
-    clearInterval(this.state.syncTimer)
+    // clearInterval(this.state.syncTimer)
+    clearInterval(timer)
   }
 
   beforeUnload = e => {
@@ -43,7 +46,7 @@ class App extends Component {
 
   checkSync = () => {
     const checkSync = this.checkSync
-    const { lastSync, sync, isLoggedIn, lastChange } = this.props
+    const { lastSync, sync, isLoggedIn, lastChange, isPending } = this.props
 
     const needRegularSync = Date.now() - lastSync > SYNC_DELAY
     const hasUnsavedChanges = !!+lastChange
@@ -51,13 +54,15 @@ class App extends Component {
 
     if (
       isLoggedIn &&
+      !isPending &&
       (needRegularSync || (hasUnsavedChanges && itsTimeToSyncChanges))
     ) {
       sync()
     }
 
     const syncTimer = setTimeout(checkSync, CHECK_DELAY)
-    this.setState({ syncTimer })
+    // this.setState({ syncTimer })
+    timer = syncTimer
   }
 
   render() {
@@ -97,6 +102,7 @@ const mapStateToProps = state => ({
   isLoggedIn: getLoginState(state),
   lastSync: getLastSyncTime(state),
   lastChange: getLastChangeTime(state),
+  isPending: getIsPending(state),
 })
 
 const mapDispatchToProps = dispatch => ({
