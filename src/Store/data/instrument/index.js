@@ -1,5 +1,5 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
-import { populate } from './populate'
+import populate from './populate'
 
 // INITIAL STATE
 const initialState = {}
