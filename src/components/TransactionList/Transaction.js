@@ -6,18 +6,19 @@ import Transaction from './TransactionPreview'
 import { setCondition } from 'store/filterConditions'
 import { getTransaction } from 'store/data/selectors/transaction'
 import { getSelectedIds, toggleTransaction } from 'store/selectedTransactions'
+import { getInstrument } from 'store/data/instrument'
 
 const mapStateToProps = (state, props) => {
   const tr = state.data.transaction[props.id]
   return {
     ...tr,
     date: +parseDate(tr.date),
-    incomeInstrument: state.data.instrument[tr.incomeInstrument],
+    incomeInstrument: getInstrument(state, tr.incomeInstrument),
     incomeAccount: state.data.account[tr.incomeAccount],
-    opIncomeInstrument: state.data.instrument[tr.opIncomeInstrument],
-    outcomeInstrument: state.data.instrument[tr.outcomeInstrument],
+    opIncomeInstrument: getInstrument(state, tr.opIncomeInstrument),
+    outcomeInstrument: getInstrument(state, tr.outcomeInstrument),
     outcomeAccount: state.data.account[tr.outcomeAccount],
-    opOutcomeInstrument: state.data.instrument[tr.opOutcomeInstrument],
+    opOutcomeInstrument: getInstrument(state, tr.opOutcomeInstrument),
     type:
       tr.income && tr.outcome ? 'transfer' : tr.income ? 'income' : 'outcome',
 
