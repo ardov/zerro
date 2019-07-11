@@ -3,7 +3,7 @@ import createSelector from 'selectorator'
 import { getInstruments } from 'store/data/instrument'
 import { getPopulatedAccounts } from 'store/data/account'
 import { getPopulatedUsers } from 'store/data/user'
-import { getTagsById } from './tags'
+import { getPopulatedTags } from 'store/data/tag'
 import { getMerchantsById } from './merchants'
 import { groupTransactionsBy } from './Utils/transactions'
 import { getFilterConditions, check } from '../../filterConditions'
@@ -56,7 +56,7 @@ export const getTransactionsById = createSelector(
     getInstruments,
     getPopulatedAccounts,
     getPopulatedUsers,
-    getTagsById,
+    getPopulatedTags,
     getMerchantsById,
     'data.transaction',
     'diff.transaction',

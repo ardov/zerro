@@ -1,7 +1,7 @@
 import createSelector from 'selectorator'
 import { getTransactionList } from '../transaction'
 import { getBudgetsByMonthAndTag } from '../budgets'
-import { getTagsTree } from '../tags'
+import { getTagsTree } from 'store/data/tag'
 import { getInBalance } from 'store/data/account'
 import { check } from 'store/filterConditions'
 import startOfMonth from 'date-fns/start_of_month'
