@@ -6,7 +6,7 @@ import { getInBalance } from '../accounts'
 import { check } from '../../../filterConditions'
 import startOfMonth from 'date-fns/start_of_month'
 import isSameMonth from 'date-fns/is_same_month'
-import { getRootUser } from '../users'
+import { getRootUser } from 'store/data/user'
 import Month from './Month'
 
 export const getAllBudgets = createSelector(

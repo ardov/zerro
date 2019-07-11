@@ -1,12 +1,12 @@
 import parseDate from 'date-fns/parse'
 import createSelector from 'selectorator'
-import { getUsersById } from './users'
+import { getUsers } from 'store/data/user'
 import { getTagsById } from './tags'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 
 export const getBudgetsById = createSelector(
-  [getUsersById, getTagsById, 'data.budget', 'diff.budget'],
+  [getUsers, getTagsById, 'data.budget', 'diff.budget'],
   (users, tags, serverBudgets, diffBudgets) => {
     const result = {}
     const budgets = { ...serverBudgets, ...diffBudgets }
