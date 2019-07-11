@@ -1,23 +1,30 @@
-import createSelector from 'selectorator'
+import { createSlice, createSelector } from 'redux-starter-kit'
+import { populate } from './populate'
 
-export const populate = raw => ({
-  id: raw.id,
-  title: raw.title,
-  shortTitle: raw.shortTitle,
-  symbol: raw.symbol,
-  rate: raw.rate,
-  changed: raw.changed * 1000,
+// INITIAL STATE
+const initialState = {}
+
+// SLICE
+const { reducer } = createSlice({
+  slice: 'instrument',
+  initialState,
+  reducers: {},
 })
 
+// REDUCER
+export default reducer
+
+// ACTIONS
+// ...
+
+// SELECTORS
 export const getInstruments = createSelector(
   ['data.instrument'],
-  instruments => {
-    const result = {}
-    for (const id in instruments) {
-      result[id] = populate(instruments[id])
-    }
-    return result
-  }
+  instruments =>
+    Object.keys(instruments).reduce((obj, id) => {
+      obj[id] = populate(instruments[id])
+      return obj
+    }, {})
 )
 
 export const getInstrument = (state, id) => getInstruments(state)[id]
