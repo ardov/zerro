@@ -1,5 +1,5 @@
 import createSelector from 'selectorator'
-import { getInstrumentsById } from './instruments'
+import { getInstruments } from 'store/data/instrument'
 import { getUsersById } from './users'
 
 export const normalize = ({ instruments, users }, raw) => ({
@@ -21,7 +21,7 @@ export const normalize = ({ instruments, users }, raw) => ({
   // startDate: null,
   // capitalization: null,
   // percent: null,
-  changed: raw.changed * 1000
+  changed: raw.changed * 1000,
   // syncID: ['3314', '8603', '9622'],
   // enableSMS: false,
   // endDateOffset: null,
@@ -31,7 +31,7 @@ export const normalize = ({ instruments, users }, raw) => ({
 })
 
 export const getAccountsById = createSelector(
-  [getInstrumentsById, getUsersById, 'data.account'],
+  [getInstruments, getUsersById, 'data.account'],
   (instruments, users, accounts) => {
     const result = {}
     for (const id in accounts) {
