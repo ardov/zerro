@@ -1,5 +1,7 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
 import populate from './populate'
+import { getUsers } from 'store/data/user'
+import { getInstruments } from 'store/data/instrument'
 
 // INITIAL STATE
 const initialState = {}
@@ -26,7 +28,7 @@ export const getAccounts = createSelector(
 export const getAccount = (state, id) => getAccounts(state)[id]
 
 export const getPopulatedAccounts = createSelector(
-  ['data.instrument', 'data.user', 'data.account'],
+  [getInstruments, getUsers, getAccounts],
   (instruments, users, accounts) => {
     const result = {}
     for (const id in accounts) {

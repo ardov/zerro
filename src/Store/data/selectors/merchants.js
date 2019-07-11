@@ -1,5 +1,5 @@
 import createSelector from 'selectorator'
-import { getUsers } from 'store/data/user'
+import { getPopulatedUsers } from 'store/data/user'
 
 export const normalize = ({ users }, raw) => ({
   id: raw.id,
@@ -9,7 +9,7 @@ export const normalize = ({ users }, raw) => ({
 })
 
 export const getMerchantsById = createSelector(
-  [getUsers, 'data.merchant'],
+  [getPopulatedUsers, 'data.merchant'],
   (users, merchants) => {
     const result = {}
     for (const id in merchants) {

@@ -19,6 +19,11 @@ export default reducer
 
 // SELECTORS
 export const getUsers = createSelector(
+  ['data.user'],
+  users => users
+)
+
+export const getPopulatedUsers = createSelector(
   ['data.instrument', 'data.country', 'data.user'],
   (instruments, countries, users) => {
     const result = {}
@@ -29,10 +34,10 @@ export const getUsers = createSelector(
   }
 )
 
-export const getUser = (state, id) => getUsers(state)[id]
+export const getPopulatedUser = (state, id) => getPopulatedUsers(state)[id]
 
 export const getRootUser = state => {
-  const users = getUsers(state)
+  const users = getPopulatedUsers(state)
   for (const id in users) {
     if (!users[id].parent) return users[id]
   }
