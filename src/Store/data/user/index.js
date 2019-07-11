@@ -1,7 +1,5 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
 import populate from './populate'
-import { getInstruments } from '../instrument'
-import { getCountriesById } from '../selectors/countries'
 
 // INITIAL STATE
 const initialState = {}
@@ -21,7 +19,7 @@ export default reducer
 
 // SELECTORS
 export const getUsers = createSelector(
-  [getInstruments, getCountriesById, 'data.user'],
+  ['data.instrument', 'data.country', 'data.user'],
   (instruments, countries, users) => {
     const result = {}
     for (const id in users) {
