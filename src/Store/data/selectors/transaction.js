@@ -1,7 +1,7 @@
 import parseDate from 'date-fns/parse'
 import createSelector from 'selectorator'
 import { getInstruments } from 'store/data/instrument'
-import { getAccountsById } from './accounts'
+import { getPopulatedAccounts } from 'store/data/account'
 import { getUsers } from 'store/data/user'
 import { getTagsById } from './tags'
 import { getMerchantsById } from './merchants'
@@ -54,7 +54,7 @@ export const normalize = (
 export const getTransactionsById = createSelector(
   [
     getInstruments,
-    getAccountsById,
+    getPopulatedAccounts,
     getUsers,
     getTagsById,
     getMerchantsById,

@@ -30,7 +30,7 @@ export const normalize = ({ instruments, users }, raw) => ({
   // payoffInterval: null
 })
 
-export const getAccountsById = createSelector(
+export const getPopulatedAccounts = createSelector(
   [getInstruments, getUsers, 'data.account'],
   (instruments, users, accounts) => {
     const result = {}
@@ -41,10 +41,11 @@ export const getAccountsById = createSelector(
   }
 )
 
-export const getAccount = (state, id) => getAccountsById(state)[id]
+export const getPopulatedAccount = (state, id) =>
+  getPopulatedAccounts(state)[id]
 
 export const getInBalance = createSelector(
-  [getAccountsById],
+  [getPopulatedAccounts],
   accounts =>
     Object.keys(accounts)
       .map(id => accounts[id])
@@ -54,7 +55,7 @@ export const getInBalance = createSelector(
 )
 
 export const getOutOfBalance = createSelector(
-  [getAccountsById],
+  [getPopulatedAccounts],
   accounts =>
     Object.keys(accounts)
       .map(id => accounts[id])
