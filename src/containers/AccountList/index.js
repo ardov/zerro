@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import Account from './Account'
-import { getInBalance, getOutOfBalance } from 'store/data/selectors/accounts'
+import { getInBalance, getOutOfBalance } from 'store/data/account'
 import { getAllBudgets } from 'store/data/selectors/budgetView'
 
 const getTotalBalance = accs =>

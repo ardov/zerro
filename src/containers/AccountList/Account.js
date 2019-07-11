@@ -43,7 +43,7 @@ class Account extends React.Component {
 }
 
 const mapStateToProps = (state, props) => ({
-  // ...getAccount(state, props.id)
+  // ...getPopulatedAccount(state, props.id)
 })
 
 const mapDispatchToProps = (dispatch, props) => ({})
