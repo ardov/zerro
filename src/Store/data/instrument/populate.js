@@ -1,4 +1,4 @@
-export const populate = raw => ({
+const populate = raw => ({
   id: raw.id,
   title: raw.title,
   shortTitle: raw.shortTitle,
@@ -6,3 +6,5 @@ export const populate = raw => ({
   rate: raw.rate,
   changed: raw.changed * 1000,
 })
+
+export default populate
