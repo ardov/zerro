@@ -1,23 +1,23 @@
 import createSelector from 'selectorator'
 
-export const normalize = raw => ({
+export const populate = raw => ({
   id: raw.id,
   title: raw.title,
   shortTitle: raw.shortTitle,
   symbol: raw.symbol,
   rate: raw.rate,
-  changed: raw.changed * 1000
+  changed: raw.changed * 1000,
 })
 
-export const getInstrumentsById = createSelector(
+export const getInstruments = createSelector(
   ['data.instrument'],
   instruments => {
     const result = {}
     for (const id in instruments) {
-      result[id] = normalize(instruments[id])
+      result[id] = populate(instruments[id])
     }
     return result
   }
 )
 
-export const getInstrument = (state, id) => getInstrumentsById(state)[id]
+export const getInstrument = (state, id) => getInstruments(state)[id]

@@ -1,15 +1,15 @@
 import createSelector from 'selectorator'
-import { getInstrumentsById } from './instruments'
+import { getInstruments } from 'store/data/instrument'
 
 export const normalize = (instruments, raw) => ({
   id: raw.id,
   title: raw.title,
   currency: instruments[raw.currency],
-  domain: raw.domain
+  domain: raw.domain,
 })
 
 export const getCountriesById = createSelector(
-  [getInstrumentsById, 'data.country'],
+  [getInstruments, 'data.country'],
   (instruments, countries) => {
     const result = {}
     for (const id in countries) {
