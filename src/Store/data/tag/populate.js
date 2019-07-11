@@ -1,11 +1,9 @@
-import toArray from 'lodash/toArray'
-import createSelector from 'selectorator'
-import { getPopulatedUsers } from 'store/data/user'
 import { unsignedToRGB } from 'Utils/convertColor'
+import toArray from 'lodash/toArray'
 
-export const normalize = ({ users }, raw) => ({
+const populate = raw => ({
   id: raw.id,
-  user: users[raw.user],
+  user: raw.user,
   changed: raw.changed * 1000,
   icon: raw.icon,
   budgetIncome: raw.budgetIncome,
@@ -22,57 +20,7 @@ export const normalize = ({ users }, raw) => ({
   symbol: toArray(raw.title)[0],
 })
 
-export const getTagsById = createSelector(
-  [getPopulatedUsers, 'data.tag'],
-  (users, tags) => {
-    const result = {}
-    for (const id in tags) {
-      result[id] = normalize({ users }, tags[id])
-    }
-    result[null] = {
-      id: null,
-      user: null,
-      changed: 0,
-      icon: null,
-      budgetIncome: true,
-      budgetOutcome: true,
-      required: false,
-      color: null,
-      picture: null,
-      showIncome: false,
-      showOutcome: false,
-      parent: null,
-
-      fullTitle: 'Без категории',
-      title: 'Без категории',
-      symbol: '?',
-    }
-    return result
-  }
-)
-
-export const getTagsTree = createSelector(
-  [getTagsById],
-  tags => {
-    const list = []
-    for (const id in tags) {
-      list.push(tags[id])
-    }
-    const topLevel = list
-      .filter(tag => !tag.parent)
-      .map(parent => ({ ...parent, children: [] }))
-    list
-      .filter(tag => tag.parent)
-      .forEach(tag => {
-        const parent = topLevel.find(topTag => topTag.id === tag.parent)
-        parent.children.push(tag)
-      })
-
-    return topLevel
-  }
-)
-
-export const getTag = (state, id) => getTagsById(state)[id]
+export default populate
 
 //
 
