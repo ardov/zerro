@@ -1,7 +1,7 @@
 import toArray from 'lodash/toArray'
 import createSelector from 'selectorator'
-import { getUsersById } from './users'
-import { unsignedToRGB } from '../../../Utils/convertColor'
+import { getUsers } from 'store/data/user'
+import { unsignedToRGB } from 'Utils/convertColor'
 
 export const normalize = ({ users }, raw) => ({
   id: raw.id,
@@ -19,11 +19,11 @@ export const normalize = ({ users }, raw) => ({
 
   fullTitle: raw.title,
   title: getTitle(raw.title),
-  symbol: toArray(raw.title)[0]
+  symbol: toArray(raw.title)[0],
 })
 
 export const getTagsById = createSelector(
-  [getUsersById, 'data.tag'],
+  [getUsers, 'data.tag'],
   (users, tags) => {
     const result = {}
     for (const id in tags) {
@@ -45,7 +45,7 @@ export const getTagsById = createSelector(
 
       fullTitle: 'Без категории',
       title: 'Без категории',
-      symbol: '?'
+      symbol: '?',
     }
     return result
   }

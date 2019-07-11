@@ -2,7 +2,7 @@ import parseDate from 'date-fns/parse'
 import createSelector from 'selectorator'
 import { getInstruments } from 'store/data/instrument'
 import { getAccountsById } from './accounts'
-import { getUsersById } from './users'
+import { getUsers } from 'store/data/user'
 import { getTagsById } from './tags'
 import { getMerchantsById } from './merchants'
 import { groupTransactionsBy } from './Utils/transactions'
@@ -55,7 +55,7 @@ export const getTransactionsById = createSelector(
   [
     getInstruments,
     getAccountsById,
-    getUsersById,
+    getUsers,
     getTagsById,
     getMerchantsById,
     'data.transaction',

@@ -5,7 +5,7 @@ import { Button } from 'antd'
 
 import Header from 'containers/Header'
 import { getAllBudgets } from 'store/data/selectors/budgetView'
-import { getRootUser } from 'store/data/selectors/users'
+import { getRootUser } from 'store/data/user'
 import AccountList from 'containers/AccountList'
 import TagTable from './TagTable'
 import { TransferTable } from './TransferTable'
