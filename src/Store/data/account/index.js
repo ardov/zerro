@@ -18,6 +18,13 @@ export default reducer
 // ...
 
 // SELECTORS
+export const getAccounts = createSelector(
+  ['data.account'],
+  accounts => accounts
+)
+
+export const getAccount = (state, id) => getAccounts(state)[id]
+
 export const getPopulatedAccounts = createSelector(
   ['data.instrument', 'data.user', 'data.account'],
   (instruments, users, accounts) => {
