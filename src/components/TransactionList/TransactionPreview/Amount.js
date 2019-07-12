@@ -5,26 +5,27 @@ import { formatMoney } from 'Utils/format'
 const colors = {
   income: '#21A355',
   outcome: 'rgba(0, 0, 0, 0.8)',
-  transfer: 'rgba(0, 0, 0, 0.5)'
+  transfer: 'rgba(0, 0, 0, 0.5)',
 }
 
 const Body = styled.div`
   align-self: flex-end;
-  text-align: right;
   color: ${props => colors[props.type]};
+  text-align: right;
 `
 const PrimarySum = styled.span`
   color: ${({ type }) => colors[type]};
+
   :not(:only-child):first-child::after {
-    content: '→';
     margin: 0 8px;
+    content: '→';
   }
 `
 const SecondarySum = styled.span`
+  margin-right: 8px;
   color: rgba(0, 0, 0, 0.4);
   font-size: 12px;
   line-height: 16px;
-  margin-right: 8px;
 `
 
 export function Amount({
@@ -36,7 +37,7 @@ export function Amount({
   outcome,
   outcomeInstrument,
   opOutcome,
-  opOutcomeInstrument
+  opOutcomeInstrument,
 }) {
   switch (type) {
     case 'transfer':

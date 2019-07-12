@@ -14,8 +14,8 @@ import TagSelect from './TagSelect'
 import pluralize from 'Utils/pluralize'
 
 const Num = styled.h3`
-  text-align: center;
   padding-bottom: 4px;
+  text-align: center;
 `
 
 const StyledButton = styled(Button)`
@@ -63,7 +63,7 @@ class BulkActions extends React.Component {
           okText="Удалить"
           cancelText="Оставить"
           onConfirm={this.onDelete}
-          icon={<Icon type="question-circle-o" style={{ color: 'red' }} />}
+          icon={<Icon type="question-circle-o" style={{ color: '#F00' }} />}
         >
           <StyledButton type="danger" block>
             Удалить выбранные ({num})

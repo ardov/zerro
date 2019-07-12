@@ -2,29 +2,31 @@ import React from 'react'
 import styled from 'styled-components'
 
 const Body = styled.div`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `
 const Tag = styled.span`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: rgba(0, 0, 0, 0.3);
   margin-right: 16px;
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
   :first-child {
     color: rgba(0, 0, 0, 0.8);
   }
 `
 const Account = styled.span`
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
   color: rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
   :first-child::after {
-    content: '→';
     margin: 0 8px;
+    content: '→';
   }
 `
 
