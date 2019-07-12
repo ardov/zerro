@@ -4,7 +4,7 @@ import { getInstruments } from 'store/data/instrument'
 import { getPopulatedAccounts } from 'store/data/account'
 import { getPopulatedUsers } from 'store/data/user'
 import { getPopulatedTags } from 'store/data/tag'
-import { getMerchantsById } from './merchants'
+import { getMerchants } from 'store/data/merchant'
 import { groupTransactionsBy } from './Utils/transactions'
 import { getFilterConditions, check } from '../../filterConditions'
 
@@ -57,7 +57,7 @@ export const getTransactionsById = createSelector(
     getPopulatedAccounts,
     getPopulatedUsers,
     getPopulatedTags,
-    getMerchantsById,
+    getMerchants,
     'data.transaction',
     'diff.transaction',
   ],
