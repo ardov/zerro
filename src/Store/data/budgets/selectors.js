@@ -17,6 +17,7 @@ export const getPopulatedBudgets = createSelector(
   }
 )
 
+export const getBudgetsToSave = state => state.data.budget
 export const getBudgetsToSync = state => state.diff.budget
 
 export const getBudgetsByMonthAndTag = createSelector(
@@ -34,3 +35,5 @@ export const getBudgetsByMonthAndTag = createSelector(
     return result
   }
 )
+
+export default { getBudgetsToSave, getBudgetsToSync, getBudgetsByMonthAndTag }

@@ -1,8 +1,8 @@
 import { createSlice } from 'redux-starter-kit'
 // import { format } from 'date-fns'
 // import ru from 'date-fns/locale/ru'
-import { getPopulatedBudgets, getBudgetsByMonthAndTag } from './selectors'
-import { getAllBudgets } from './budgetViewSelector'
+import selectors from './selectors'
+import getAllBudgets from './budgetViewSelector'
 
 // INITIAL STATE
 const initialState = {}
@@ -21,4 +21,9 @@ export default reducer
 // ...
 
 // SELECTORS
-export { getAllBudgets, getPopulatedBudgets, getBudgetsByMonthAndTag }
+export const {
+  getBudgetsToSync,
+  getBudgetsByMonthAndTag,
+  getBudgetsToSave,
+} = selectors
+export { getAllBudgets }

@@ -1,11 +1,11 @@
 import { createSlice } from 'redux-starter-kit'
 
 // INITIAL STATE
-const initialState = {}
+const initialState = 0
 
 // SLICE
 const { reducer } = createSlice({
-  slice: 'instruments',
+  slice: 'serverTimestamp',
   initialState,
   reducers: {},
 })
@@ -17,5 +17,4 @@ export default reducer
 // ...
 
 // SELECTORS
-export const getInstruments = state => state.data.instrument
-export const getInstrument = (state, id) => getInstruments(state)[id]
+export const getLastSyncTime = state => state.data.serverTimestamp * 1000

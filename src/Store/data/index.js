@@ -42,7 +42,3 @@ export default reducer
 
 // ACTIONS
 export const { wipeData, updateData } = actions
-
-// SELECTORS
-export const { getData } = selectors
-export const getLastSyncTime = state => state.data.serverTimestamp * 1000

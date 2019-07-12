@@ -5,7 +5,7 @@ const initialState = {}
 
 // SLICE
 const { reducer } = createSlice({
-  slice: 'company',
+  slice: 'companies',
   initialState,
   reducers: {},
 })
@@ -17,3 +17,4 @@ export default reducer
 // ...
 
 // SELECTORS
+export const getCompanies = state => state.data.company
