@@ -9,11 +9,13 @@ import filterConditions from './filterConditions'
 import openedTransaction from './openedTransaction'
 import token from './token'
 import selectedTransactions from './selectedTransactions'
+import isPending from './isPending'
 
 export const store = configureStore({
   reducer: {
     data,
     diff,
+    isPending,
     filterConditions,
     openedTransaction,
     selectedTransactions,
