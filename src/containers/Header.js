@@ -7,7 +7,7 @@ import { Menu, Dropdown, Icon } from 'antd'
 import { logOut } from 'logic/authorization'
 import exportCsv from 'logic/exportCsv'
 import exportJSON from 'logic/exportJSON'
-import { syncData } from 'store/diff/sync'
+import { syncData } from 'logic/sync'
 import { getChangedNum } from 'store/diff'
 
 const Main = styled.header`
