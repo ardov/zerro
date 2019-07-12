@@ -3,14 +3,14 @@ import styled, { css } from 'styled-components'
 import { Checkbox } from 'antd'
 
 const Body = styled.div`
-  margin-top: -8px;
-  margin-right: 16px;
-  width: 40px;
-  height: 40px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-top: -8px;
+  margin-right: 16px;
 `
 const StyledCheckbox = styled(Checkbox)`
   opacity: 0;
@@ -29,14 +29,14 @@ const StyledCheckbox = styled(Checkbox)`
 const Sym = styled.div`
   position: absolute;
   top: 0;
-  left: 0;
   right: 0;
   bottom: 0;
-  border-radius: 20px;
-  text-align: center;
+  left: 0;
+  color: ${({ color }) => (color ? color : `#000`)};
   font-size: 24px;
   line-height: 40px;
-  color: ${({ color }) => (color ? color : `#000`)};
+  text-align: center;
+  border-radius: 20px;
 
   ${Body}:hover & {
     display: none;

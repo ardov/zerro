@@ -5,39 +5,43 @@ import { Amount } from './Amount'
 import Icon from './Icon'
 
 const Body = styled.div`
-  padding: 16px;
   display: flex;
   flex-direction: row;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-bottom: none;
-  transition: all 0.2s ease-in-out;
+  padding: 16px;
   font-size: 16px;
   line-height: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 0;
   cursor: pointer;
+  transition: all 0.2s ease-in-out;
 
   &:first-child {
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
   }
+
   &:last-child {
-    border-bottom-left-radius: 6px;
-    border-bottom-right-radius: 6px;
     border: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius: 6px;
   }
+
   &:hover {
-    opacity: 1;
     background-color: rgba(0, 0, 0, 0.04);
+    opacity: 1;
   }
+
   ${props =>
     props.deleted &&
     css`
       opacity: 0.3;
     `}
+
   ${props =>
     props.isOpened &&
     css`
-      opacity: 1;
       background-color: rgba(0, 0, 0, 0.1);
+      opacity: 1;
 
       &:hover {
         background-color: rgba(0, 0, 0, 0.1);
@@ -53,26 +57,27 @@ const Information = styled.div`
 const Line = styled.div`
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
   align-items: baseline;
+  justify-content: space-between;
   min-width: 0;
+
   :not(:only-child):not(:first-child) {
     margin-top: 4px;
   }
 `
 const Account = styled.div`
+  flex-shrink: 0;
+  margin-left: auto;
+  color: rgba(0, 0, 0, 0.4);
   font-size: 12px;
   line-height: 16px;
-  color: rgba(0, 0, 0, 0.4);
-  margin-left: auto;
-  flex-shrink: 0;
 `
 const Payee = styled.span`
-  margin-right: 8px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   min-width: 0;
+  margin-right: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
   transition: 0.2s;
 
@@ -83,14 +88,14 @@ const Payee = styled.span`
 `
 
 const Comment = styled.span`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   min-width: 0;
+  margin-right: 16px;
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0.5);
   font-size: 12px;
   line-height: 16px;
-  color: rgba(0, 0, 0, 0.5);
-  margin-right: 16px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `
 
 export default class Transaction extends React.Component {
@@ -119,7 +124,7 @@ export default class Transaction extends React.Component {
       opOutcome,
       opOutcomeInstrument,
 
-      onToggle
+      onToggle,
     } = this.props
 
     const symbol = tag ? tag[0].symbol : type === 'transfer' ? '↔' : '?'
@@ -143,7 +148,7 @@ export default class Transaction extends React.Component {
                 outcome,
                 outcomeInstrument,
                 opOutcome,
-                opOutcomeInstrument
+                opOutcomeInstrument,
               }}
             />
           </Line>
