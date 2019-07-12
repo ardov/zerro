@@ -4,9 +4,9 @@ import parseDate from 'date-fns/parse'
 import { openTransaction, getOpenedId } from 'store/openedTransaction'
 import { setCondition } from 'store/filterConditions'
 import { getSelectedIds, toggleTransaction } from 'store/selectedTransactions'
-import { getInstrument } from 'store/data/instrument'
-import { getAccount } from 'store/data/account'
-import { getTag } from 'store/data/tag'
+import { getInstrument } from 'store/data/instruments'
+import { getAccount } from 'store/data/accounts'
+import { getTag } from 'store/data/tags'
 
 import Transaction from './TransactionPreview'
 

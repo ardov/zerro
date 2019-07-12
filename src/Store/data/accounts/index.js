@@ -1,14 +1,14 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
 import populate from './populate'
-import { getUsers } from 'store/data/user'
-import { getInstruments } from 'store/data/instrument'
+import { getUsers } from 'store/data/users'
+import { getInstruments } from 'store/data/instruments'
 
 // INITIAL STATE
 const initialState = {}
 
 // SLICE
 const { reducer } = createSlice({
-  slice: 'account',
+  slice: 'accounts',
   initialState,
   reducers: {},
 })

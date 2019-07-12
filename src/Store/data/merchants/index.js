@@ -5,7 +5,7 @@ const initialState = {}
 
 // SLICE
 const { reducer } = createSlice({
-  slice: 'merchant',
+  slice: 'merchants',
   initialState,
   reducers: {},
 })

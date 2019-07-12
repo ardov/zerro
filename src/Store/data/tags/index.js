@@ -6,7 +6,7 @@ const initialState = {}
 
 // SLICE
 const { reducer } = createSlice({
-  slice: 'tag',
+  slice: 'tags',
   initialState,
   reducers: {},
 })

@@ -9,7 +9,7 @@ const initialState = {}
 
 // SLICE
 const { reducer } = createSlice({
-  slice: 'budget',
+  slice: 'budgets',
   initialState,
   reducers: {},
 })
