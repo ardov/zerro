@@ -22,8 +22,6 @@ const CHECK_DELAY = 5 * 1000 // 5sec
 let timer = null
 
 class App extends Component {
-  state = { syncTimer: null }
-
   componentDidMount = () => {
     this.checkSync()
     window.addEventListener('beforeunload', this.beforeUnload)
@@ -31,7 +29,6 @@ class App extends Component {
 
   componentWillUnmount = () => {
     window.removeEventListener('beforeunload', this.beforeUnload)
-    // clearInterval(this.state.syncTimer)
     clearInterval(timer)
   }
 
