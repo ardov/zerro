@@ -1,11 +1,11 @@
 import ZenApi from 'services/ZenApi'
 import { updateData } from 'store/data'
-import LocalStorage from 'services/localstorage'
 import { message } from 'antd'
-import { getChangedArrays } from '.'
+import { getChangedArrays } from '../store/diff'
 import { getToken } from 'store/token'
-import { removeSynced } from './actions'
+import { removeSynced } from '../store/diff/actions'
 import { setPending } from 'store/isPending'
+import { saveDataLocally } from 'logic/localData'
 
 //All syncs with ZM goes through this thunk
 export const syncData = () => (dispatch, getState) => {
@@ -26,7 +26,7 @@ export const syncData = () => (dispatch, getState) => {
       dispatch(setPending(false))
       dispatch(updateData(json))
       dispatch(removeSynced(syncBegin))
-      LocalStorage.set('data', getState().data)
+      dispatch(saveDataLocally())
       if (Object.keys(json).length > 1) {
         message.success(successMessage)
       }

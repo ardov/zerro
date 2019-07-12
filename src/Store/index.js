@@ -1,6 +1,6 @@
 import { configureStore } from 'redux-starter-kit'
 import ZenApi from 'services/ZenApi'
-import LocalStorage from 'services/localstorage'
+import { getDataFromLS } from 'logic/localData'
 
 import data from './data'
 import diff from './diff'
@@ -25,13 +25,8 @@ export const store = configureStore({
 })
 
 function getInitialState() {
-  const token = ZenApi.getLocalToken()
-  const data = LocalStorage.get('data')
-  if (token && data) {
-    return { data, token }
+  return {
+    data: getDataFromLS(),
+    token: ZenApi.getLocalToken(),
   }
-  if (token) {
-    return { token }
-  }
-  return
 }
