@@ -18,7 +18,6 @@ import { getIsPending } from 'store/isPending'
 addLocaleData(ru)
 
 const SYNC_DELAY = 10 * 60 * 1000 // 10min
-const DELAY_AFTER_CHANGE = 3 * 1000 // 3sec
 const CHECK_DELAY = 5 * 1000 // 5sec
 let timer = null
 
@@ -50,7 +49,7 @@ class App extends Component {
 
     const needRegularSync = Date.now() - lastSync > SYNC_DELAY
     const hasUnsavedChanges = !!+lastChange
-    const itsTimeToSyncChanges = Date.now() - lastChange > DELAY_AFTER_CHANGE
+    const itsTimeToSyncChanges = Date.now() - lastChange > CHECK_DELAY
 
     if (
       isLoggedIn &&
@@ -60,9 +59,8 @@ class App extends Component {
       sync()
     }
 
-    const syncTimer = setTimeout(checkSync, CHECK_DELAY)
-    // this.setState({ syncTimer })
-    timer = syncTimer
+    clearInterval(timer)
+    timer = setTimeout(checkSync, CHECK_DELAY)
   }
 
   render() {
