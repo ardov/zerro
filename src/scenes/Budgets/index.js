@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { Button } from 'antd'
 
 import Header from 'containers/Header'
-import { getAllBudgets } from 'store/data/selectors/budgetView'
+import { getAllBudgets } from 'store/data/budget'
 import { getRootUser } from 'store/data/user'
 import AccountList from 'containers/AccountList'
 import TagTable from './TagTable'
