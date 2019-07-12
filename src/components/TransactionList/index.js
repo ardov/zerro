@@ -7,7 +7,7 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { connect } from 'react-redux'
 import TransactionGroup from './TransactionGroup'
-import { getTransactionList2 } from 'store/data/transaction'
+import { getTransactionList2 } from 'store/data/transactions'
 
 function formatDate(date) {
   const formats = {

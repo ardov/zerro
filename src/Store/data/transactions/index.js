@@ -1,12 +1,15 @@
 import parseDate from 'date-fns/parse'
 import createSelector from 'selectorator'
-import { getInstruments } from 'store/data/instrument'
-import { getPopulatedAccounts } from 'store/data/account'
-import { getPopulatedUsers } from 'store/data/user'
-import { getPopulatedTags } from 'store/data/tag'
-import { getMerchants } from 'store/data/merchant'
+import { getInstruments } from 'store/data/instruments'
+import { getPopulatedAccounts } from 'store/data/accounts'
+import { getPopulatedUsers } from 'store/data/users'
+import { getPopulatedTags } from 'store/data/tags'
+import { getMerchants } from 'store/data/merchants'
 import { groupTransactionsBy } from './Utils/transactions'
 import { getFilterConditions, check } from '../../filterConditions'
+
+export const getTransactionsToSave = state => state.data.transaction
+export const getTransactionsToSync = state => state.diff.transaction
 
 export const normalize = (
   { instruments, accounts, users, tags, merchants },

@@ -3,8 +3,8 @@ import { connect } from 'react-redux'
 
 import Header from 'containers/Header'
 import TagList from './TagList'
-import { getTagsTree } from 'store/data/tag'
-import { getTransactionList } from 'store/data/transaction'
+import { getTagsTree } from 'store/data/tags'
+import { getTransactionList } from 'store/data/transactions'
 
 function TransactionsView(props) {
   return (

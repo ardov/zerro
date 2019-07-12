@@ -1,6 +1,6 @@
 import { createSlice } from 'redux-starter-kit'
 import { removeSynced } from './actions'
-import { getRootUser } from 'store/data/user'
+import { getRootUser } from 'store/data/users'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 
