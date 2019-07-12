@@ -8,7 +8,7 @@ import {
 import {
   setMainTagToTransactions,
   deleteTransactions,
-} from 'store/data/transactions/thunks'
+} from 'store/data/transactions'
 import { Button, Popconfirm, Icon } from 'antd'
 import TagSelect from './TagSelect'
 import pluralize from 'Utils/pluralize'

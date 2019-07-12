@@ -5,7 +5,7 @@ import {
   restoreTransaction,
   applyChangesToTransaction,
   splitTransfer,
-} from 'store/data/transactions/thunks'
+} from 'store/data/transactions'
 import DetailsPanel from 'components/DetailsPanel'
 
 const mapStateToProps = (state, ownProps) => ({

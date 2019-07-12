@@ -32,6 +32,3 @@ export default reducer
 
 // ACTIONS
 export const { setTransaction, removeTransaction } = actions
-
-// SELECTOR
-export const getTransaction = (state, id) => state.dataToSync.transaction[id]

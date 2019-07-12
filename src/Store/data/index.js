@@ -16,7 +16,7 @@ const initialState = {
   transaction: {},
 }
 
-const { reducer, actions, selectors } = createSlice({
+const { reducer, actions } = createSlice({
   slice: 'data',
   initialState,
   reducers: {
