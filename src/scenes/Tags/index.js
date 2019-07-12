@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import Header from 'containers/Header'
 import TagList from './TagList'
 import { getTagsTree } from 'store/data/tag'
-import { getTransactionList } from 'store/data/selectors/transaction'
+import { getTransactionList } from 'store/data/transaction'
 
 function TransactionsView(props) {
   return (

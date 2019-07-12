@@ -1,5 +1,5 @@
 import createSelector from 'selectorator'
-import { getTransactionList } from 'store/data/selectors/transaction'
+import { getTransactionList } from 'store/data/transaction'
 import { getBudgetsByMonthAndTag } from 'store/data/budget/selectors'
 import { getTagsTree } from 'store/data/tag'
 import { getInBalance } from 'store/data/account'

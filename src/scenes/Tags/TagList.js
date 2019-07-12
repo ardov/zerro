@@ -2,8 +2,8 @@ import React, { Component } from 'react'
 import styled from 'styled-components'
 import {
   groupTransactionsBy,
-  calcMetrics
-} from 'store/data/selectors/Utils/transactions'
+  calcMetrics,
+} from 'store/data/transaction/Utils/transactions'
 import Tag from './Tag'
 
 const Group = styled.div`
@@ -20,7 +20,7 @@ export default class TagList extends Component {
         return {
           month: group.date,
           total: metrics.total,
-          byTag: metrics.byTag
+          byTag: metrics.byTag,
         }
       }
     )

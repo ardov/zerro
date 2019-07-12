@@ -1,4 +1,4 @@
-import { getTransactionsById } from 'store/data/selectors/transaction'
+import { getTransactionsById } from 'store/data/transaction'
 import { format } from 'date-fns'
 
 export default function exportCsv(_, getState) {
@@ -32,7 +32,7 @@ function transactionsToCsvContent(tr) {
     'Доход',
     'Валюта +',
     'Плательщик',
-    'Комментарий'
+    'Комментарий',
   ]
   let csvContent = head.join(',') + '\r\n'
 
@@ -49,7 +49,7 @@ function transactionsToCsvContent(tr) {
 const types = {
   income: 'Доход',
   outcome: 'Расход',
-  transfer: 'Перевод'
+  transfer: 'Перевод',
 }
 
 const transactionToRowObj = t => ({
@@ -65,5 +65,5 @@ const transactionToRowObj = t => ({
   Доход: !!t.income ? t.income : '',
   'Валюта +': t.incomeInstrument ? t.incomeInstrument.shortTitle : '',
   Плательщик: t.payee,
-  Комментарий: t.comment
+  Комментарий: t.comment,
 })
