@@ -44,10 +44,7 @@ export const convertDatesToServerFormat = item =>
   }, {})
 
 export const convertToSyncArray = diffObj =>
-  Object.keys(diffObj).reduce((arr, key) => {
-    arr.push(convertDatesToServerFormat(diffObj[key]))
-    return arr
-  }, [])
+  Object.values(diffObj).map(item => convertDatesToServerFormat(item))
 
 export const convertToClient = arr =>
   arr.reduce((obj, item) => {
