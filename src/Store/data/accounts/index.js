@@ -20,10 +20,8 @@ export default reducer
 // ...
 
 // SELECTORS
-export const getAccounts = createSelector(
-  ['data.account'],
-  accounts => accounts
-)
+export const getAccounts = state => state.data.account
+export const getAccountsToSave = getAccounts
 
 export const getAccount = (state, id) => getAccounts(state)[id]
 

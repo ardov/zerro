@@ -17,6 +17,7 @@ export default reducer
 // ...
 
 // SELECTORS
+export const getCountries = state => state.data.country
 // import createSelector from 'selectorator'
 // import { getInstruments } from 'store/data/instrument'
 

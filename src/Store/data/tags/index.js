@@ -19,6 +19,7 @@ export default reducer
 
 // SELECTORS
 export const getTags = state => state.data.tag
+export const getTagsToSave = state => getTags(state)
 export const getTag = (state, id) => state.data.tag[id]
 
 export const getPopulatedTags = createSelector(

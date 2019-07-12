@@ -17,3 +17,4 @@ export default reducer
 // ...
 
 // SELECTORS
+export const getReminderMarkers = state => state.data.reminderMarker

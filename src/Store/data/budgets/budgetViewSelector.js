@@ -9,7 +9,7 @@ import isSameMonth from 'date-fns/is_same_month'
 import { getRootUser } from 'store/data/users'
 import Month from './Month'
 
-export const getAllBudgets = createSelector(
+export default createSelector(
   [
     getTransactionList,
     getBudgetsByMonthAndTag,
