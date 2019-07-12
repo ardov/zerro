@@ -3,7 +3,6 @@ import { removeSynced } from './actions'
 import { getRootUser } from 'store/data/user'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
-import { Budget } from 'store/data/selectors/budgets'
 
 const { reducer, actions } = createSlice({
   slice: 'diff/budget',
@@ -43,10 +42,32 @@ export const setOutcomeBudget = (outcome, month, tagId) => (
 
   const budget = budgets[id]
     ? budgets[id]
-    : Budget.create({ user: userId, date: formattedMonth, tag: tagId })
+    : createBudget({ user: userId, date: formattedMonth, tag: tagId })
   const changed = { ...budget, outcome, changed: Date.now() / 1000 }
 
   dispatch(setBudget(changed))
+}
+
+function createBudget({
+  user,
+  changed = Date.now() / 1000,
+  date,
+  tag,
+  income = 0,
+  incomeLock = false,
+  outcome = 0,
+  outcomeLock = false,
+}) {
+  return {
+    user,
+    changed,
+    date,
+    tag,
+    income,
+    incomeLock,
+    outcome,
+    outcomeLock,
+  }
 }
 
 // SELECTOR
