@@ -1,8 +1,8 @@
-import { getTransactionsById } from 'store/data/transactions'
+import { getPopulatedTransactions } from 'store/data/transactions'
 import { format } from 'date-fns'
 
 export default function exportCsv(_, getState) {
-  const tr = getTransactionsById(getState())
+  const tr = getPopulatedTransactions(getState())
   const csvContent = transactionsToCsvContent(tr)
   const blob = new Blob([csvContent], { type: 'text/csv' })
   const href = window.URL.createObjectURL(blob)

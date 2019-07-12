@@ -1,7 +1,7 @@
 import { check } from 'store/filterConditions'
 import startOfMonth from 'date-fns/start_of_month'
 import endOfMonth from 'date-fns/end_of_month'
-import { calcMetrics } from 'store/data/transactions/Utils/transactions'
+import { calcMetrics } from 'store/data/transactions/helpers'
 
 export default class Month {
   constructor(

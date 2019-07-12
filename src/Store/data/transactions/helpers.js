@@ -1,3 +1,4 @@
+// HELPERS
 import startOfMonth from 'date-fns/start_of_month'
 import startOfDay from 'date-fns/start_of_day'
 import startOfWeek from 'date-fns/start_of_week'
@@ -101,4 +102,27 @@ export function calcMetrics(arr, instrumentRate = 1) {
   }
 
   return arr.reduce(reducer, startObject)
+}
+
+export function sortBy(sortType = 'DATE', ascending = false) {
+  const sortFuncs = {
+    DATE: (tr1, tr2) => {
+      const result =
+        +tr2.date === +tr1.date
+          ? tr2.created - tr1.created
+          : tr2.date - tr1.date
+      return ascending ? -result : result
+    },
+    CHANGED: (tr1, tr2) =>
+      ascending ? tr1.changed - tr2.changed : tr2.changed - tr1.changed,
+  }
+  return sortFuncs[sortType]
+}
+
+export function mapTags(ids, tags) {
+  return ids && ids.length ? ids.map(id => tags[id]) : null
+}
+
+export function getType(tr) {
+  return tr.income && tr.outcome ? 'transfer' : tr.income ? 'income' : 'outcome'
 }

@@ -2,7 +2,6 @@ import { createSlice } from 'redux-starter-kit'
 import { removeSynced } from './actions'
 import { getRootUser } from 'store/data/users'
 import { format } from 'date-fns'
-import ru from 'date-fns/locale/ru'
 
 const { reducer, actions } = createSlice({
   slice: 'diff/budget',
@@ -36,7 +35,7 @@ export const setOutcomeBudget = (outcome, month, tagId) => (
   getState
 ) => {
   const budgets = getState().data.budget
-  const formattedMonth = format(month, 'YYYY-MM-DD', { locale: ru })
+  const formattedMonth = format(month, 'YYYY-MM-DD')
   const id = tagId + ',' + formattedMonth
   const userId = getRootUser(getState()).id
 
@@ -69,6 +68,3 @@ function createBudget({
     outcomeLock,
   }
 }
-
-// SELECTOR
-export const getTransaction = (state, id) => state.dataToSync.transaction[id]
