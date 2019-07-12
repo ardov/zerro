@@ -3,9 +3,12 @@ import { connect } from 'react-redux'
 import styled from 'styled-components'
 import {
   getSelectedIds,
-  uncheckAllTransactions
+  uncheckAllTransactions,
 } from 'store/selectedTransactions'
-import { setMainTagToTransactions, deleteTransactions } from 'store/data/thunks'
+import {
+  setMainTagToTransactions,
+  deleteTransactions,
+} from 'store/data/transaction/thunks'
 import { Button, Popconfirm, Icon } from 'antd'
 import TagSelect from './TagSelect'
 import pluralize from 'Utils/pluralize'
@@ -55,7 +58,7 @@ class BulkActions extends React.Component {
           title={`${num} ${pluralize(num, [
             'операция будет удалена',
             'операции будут удалены',
-            'операций будут удалены'
+            'операций будут удалены',
           ])}`}
           okText="Удалить"
           cancelText="Оставить"
@@ -77,7 +80,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(deleteTransactions(ids))
     dispatch(uncheckAllTransactions())
   },
-  uncheckAll: () => dispatch(uncheckAllTransactions())
+  uncheckAll: () => dispatch(uncheckAllTransactions()),
 })
 
 export default connect(

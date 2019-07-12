@@ -1,5 +1,5 @@
 import uuidv1 from 'uuid/v1'
-import { getRawTransaction } from 'store/data/selectors/transaction'
+import { getRawTransaction } from 'store/data/transaction'
 import { setTransaction } from 'store/diff/transaction'
 
 export const deleteTransactions = ids => (dispatch, getState) => {
