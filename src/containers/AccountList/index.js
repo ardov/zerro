@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import Account from './Account'
 import { getInBalance, getOutOfBalance } from 'store/data/account'
-import { getAllBudgets } from 'store/data/selectors/budgetView'
+import { getAllBudgets } from 'store/data/budget'
 
 const getTotalBalance = accs =>
   accs.reduce((sum, acc) => +(sum + acc.balance).toFixed(2), 0)
