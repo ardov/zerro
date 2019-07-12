@@ -1,6 +1,6 @@
 import { configureStore } from 'redux-starter-kit'
-import ZenApi from '../services/ZenApi'
-import LocalStorage from '../services/localstorage'
+import ZenApi from 'services/ZenApi'
+import LocalStorage from 'services/localstorage'
 
 import data from './data'
 import diff from './diff'
