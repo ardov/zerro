@@ -1,5 +1,6 @@
 import { createSelector } from 'redux-starter-kit'
 import parseDate from 'date-fns/parse'
+import { convertToSyncArray } from 'Utils/converters'
 
 export const getPopulatedBudgets = createSelector(
   ['data.budget', 'diff.budget'],
@@ -18,7 +19,7 @@ export const getPopulatedBudgets = createSelector(
 )
 
 export const getBudgetsToSave = state => state.data.budget
-export const getBudgetsToSync = state => state.diff.budget
+export const getBudgetsToSync = state => convertToSyncArray(state.diff.budget)
 
 export const getBudgetsByMonthAndTag = createSelector(
   [getPopulatedBudgets],
