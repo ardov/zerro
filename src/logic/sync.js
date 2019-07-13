@@ -1,5 +1,5 @@
 import ZenApi from 'services/ZenApi'
-import { updateData } from 'store/data'
+import { updateData } from 'store/data/commonActions'
 import { message } from 'antd'
 import { getChangedArrays } from '../store/diff'
 import { getToken } from 'store/token'

@@ -1,44 +1,28 @@
-import { createSlice } from 'redux-starter-kit'
+import { combineReducers } from 'redux-starter-kit'
+import serverTimestamp from './serverTimestamp'
+import instrument from './instruments'
+import country from './_countries'
+import company from './_companies'
+import user from './users'
+import account from './accounts'
+import tag from './tags'
+import budget from './budgets'
+import merchant from './merchants'
+import reminder from './_reminders'
+import reminderMarker from './_reminderMarkers'
+import transaction from './transactions'
 
-// INITIAL STATE
-const initialState = {
-  serverTimestamp: 0,
-  instrument: {},
-  country: {},
-  company: {},
-  user: {},
-  account: {},
-  tag: {},
-  budget: {},
-  merchant: {},
-  reminder: {},
-  reminderMarker: {},
-  transaction: {},
-}
-
-const { reducer, actions } = createSlice({
-  slice: 'data',
-  initialState,
-  reducers: {
-    wipeData: () => initialState,
-    updateData: (state, action) => {
-      const data = action.payload
-      state.serverTimestamp = data.serverTimestamp
-      for (let type in state) {
-        if (data[type] && Array.isArray(data[type])) {
-          data[type].forEach(item => {
-            // budgets has no id field, so their id would be tag id + date
-            const id = type === 'budget' ? `${item.tag},${item.date}` : item.id
-            state[type][id] = item
-          })
-        }
-      }
-    },
-  },
+export default combineReducers({
+  serverTimestamp,
+  instrument,
+  country,
+  company,
+  user,
+  account,
+  tag,
+  budget,
+  merchant,
+  reminder,
+  reminderMarker,
+  transaction,
 })
-
-// REDUCER
-export default reducer
-
-// ACTIONS
-export const { wipeData, updateData } = actions

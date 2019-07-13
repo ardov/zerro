@@ -26,7 +26,9 @@ export default createSlice({
     [removeSynced]: removeSyncedFunc,
     [updateData]: (state, { payload }) => {
       if (payload.budget) {
-        payload.budget.forEach(item => (state[item.id] = item))
+        payload.budget.forEach(
+          item => (state[`${item.tag},${item.date}`] = item)
+        )
       }
     },
     // [updateData]: ({ server }, { payload }) => {

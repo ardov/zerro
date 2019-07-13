@@ -1,7 +1,7 @@
 import createSelector from 'selectorator'
 import { getInstruments } from 'store/data/instruments'
 import { getPopulatedAccounts } from 'store/data/accounts'
-import { getPopulatedUsers } from 'store/data/users'
+import { getUsers } from 'store/data/users'
 import { getPopulatedTags } from 'store/data/tags'
 import { getMerchants } from 'store/data/merchants'
 import { groupTransactionsBy, sortBy } from './helpers'
@@ -23,7 +23,7 @@ const getPopulatedTransactions = createSelector(
   [
     getInstruments,
     getPopulatedAccounts,
-    getPopulatedUsers,
+    getUsers,
     getPopulatedTags,
     getMerchants,
     getTransactions,

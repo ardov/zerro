@@ -2,7 +2,7 @@ import LocalStorage from 'services/localstorage'
 import Cookies from 'cookies-js'
 import ZenApi from 'services/ZenApi'
 import { setToken } from 'store/token'
-import { wipeData } from 'store/data'
+import { wipeData } from 'store/data/commonActions'
 import { syncData } from 'logic/sync'
 
 export const logIn = () => (dispatch, getState) => {

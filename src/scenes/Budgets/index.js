@@ -1,11 +1,10 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
-import { Button } from 'antd'
 
 import Header from 'containers/Header'
 import { getAllBudgets } from 'store/data/budgets'
-import { getRootUser } from 'store/data/users'
+import { getUserInstrument } from 'store/data/users'
 import AccountList from 'containers/AccountList'
 import TagTable from './TagTable'
 import { TransferTable } from './TransferTable'
@@ -50,15 +49,10 @@ class Budgets extends React.Component {
     this.setState({ selected: i })
   }
   render() {
-    if (!this.props.budgets) return null
-
-    const budgets = this.props.budgets
-    const months = budgets.map(b => b.date)
+    const { budgets, instrument } = this.props
+    const { selected } = this.state
     if (!budgets) return null
-    const instrument = this.props.user.currency
-    const index = this.state.selected
-    console.log(this.props.budgets)
-
+    const months = budgets.map(b => b.date)
     return (
       <div>
         <Header />
@@ -66,20 +60,23 @@ class Budgets extends React.Component {
           <LeftPanel>
             <MonthSelector
               months={months}
-              current={index}
+              current={selected}
               onChange={this.setMonth}
             />
-            <StyledBudgetInfo month={budgets[index]} instrument={instrument} />
+            <StyledBudgetInfo
+              month={budgets[selected]}
+              instrument={instrument}
+            />
             <StyledAccountList />
           </LeftPanel>
           <Grow1>
             <TagTable
-              tags={budgets[index].tags}
+              tags={budgets[selected].tags}
               instrument={instrument}
-              date={budgets[index].date}
+              date={budgets[selected].date}
             />
             <TransferTable
-              transfers={budgets[index].transfers}
+              transfers={budgets[selected].transfers}
               instrument={instrument}
             />
           </Grow1>
@@ -89,10 +86,12 @@ class Budgets extends React.Component {
   }
 }
 
-const mapStateToProps = (state, props) => ({
-  user: getRootUser(state),
-  budgets: getAllBudgets(state),
-})
+const mapStateToProps = (state, props) => {
+  return {
+    instrument: getUserInstrument(state),
+    budgets: getAllBudgets(state),
+  }
+}
 
 export default connect(
   mapStateToProps,
