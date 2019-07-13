@@ -1,24 +1,13 @@
-import { createSlice } from 'redux-starter-kit'
-// import { format } from 'date-fns'
-// import ru from 'date-fns/locale/ru'
 import selectors from './selectors'
 import getAllBudgets from './budgetViewSelector'
-
-// INITIAL STATE
-const initialState = {}
-
-// SLICE
-const { reducer } = createSlice({
-  slice: 'budgets',
-  initialState,
-  reducers: {},
-})
+import slice from './slice'
+import thunks from './thunks'
 
 // REDUCER
-export default reducer
+export default slice.reducer
 
 // ACTIONS
-// ...
+export const { setBudget } = slice.actions
 
 // SELECTORS
 export const {
@@ -27,3 +16,6 @@ export const {
   getBudgetsToSave,
 } = selectors
 export { getAllBudgets }
+
+// THUNKS
+export const { setOutcomeBudget } = thunks
