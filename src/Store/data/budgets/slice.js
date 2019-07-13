@@ -7,7 +7,8 @@ import {
 } from '../commonActions'
 
 // INITIAL STATE
-const initialState = { server: {}, diff: {} }
+const initialState = {}
+// const initialState = { server: {}, diff: {} }
 
 // SLICE
 export default createSlice({
@@ -23,12 +24,17 @@ export default createSlice({
   extraReducers: {
     [wipeData]: () => initialState,
     [removeSynced]: removeSyncedFunc,
-    [updateData]: ({ server }, { payload }) => {
+    [updateData]: (state, { payload }) => {
       if (payload.budget) {
-        payload.budget.forEach(
-          budget => (server[`${budget.tag},${budget.date}`] = budget)
-        )
+        payload.budget.forEach(item => (state[item.id] = item))
       }
     },
+    // [updateData]: ({ server }, { payload }) => {
+    //   if (payload.budget) {
+    //     payload.budget.forEach(
+    //       budget => (server[`${budget.tag},${budget.date}`] = budget)
+    //     )
+    //   }
+    // },
   },
 })

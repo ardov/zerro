@@ -1,4 +1,5 @@
 import { createSlice } from 'redux-starter-kit'
+import { wipeData, updateData } from 'store/data/commonActions'
 
 // INITIAL STATE
 const initialState = 0
@@ -8,6 +9,10 @@ const { reducer } = createSlice({
   slice: 'serverTimestamp',
   initialState,
   reducers: {},
+  extraReducers: {
+    [wipeData]: () => initialState,
+    [updateData]: (state, { payload }) => payload.serverTimestamp,
+  },
 })
 
 // REDUCER

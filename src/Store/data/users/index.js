@@ -1,4 +1,5 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
+import { wipeData, updateData } from 'store/data/commonActions'
 import populate from './populate'
 
 // INITIAL STATE
@@ -9,6 +10,14 @@ const { reducer } = createSlice({
   slice: 'users',
   initialState,
   reducers: {},
+  extraReducers: {
+    [wipeData]: () => initialState,
+    [updateData]: (state, { payload }) => {
+      if (payload.tag) {
+        payload.tag.forEach(item => (state[item.id] = item))
+      }
+    },
+  },
 })
 
 // REDUCER
