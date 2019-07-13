@@ -6,7 +6,7 @@ import { getInBalance } from 'store/data/accounts'
 import { check } from 'store/filterConditions'
 import startOfMonth from 'date-fns/start_of_month'
 import isSameMonth from 'date-fns/is_same_month'
-import { getRootUser } from 'store/data/users'
+import { getUserInstrument } from 'store/data/users'
 import Month from './Month'
 
 export default createSelector(
@@ -15,12 +15,11 @@ export default createSelector(
     getBudgetsByMonthAndTag,
     getTagsTree,
     getInBalance,
-    getRootUser,
+    getUserInstrument,
   ],
-  (transactions, budgets, tags, accountsInBalance, rootUser) => {
-    if (!rootUser) return null
+  (transactions, budgets, tags, accountsInBalance, userInstrument) => {
+    if (!userInstrument) return null
 
-    const userInstrument = rootUser.currency
     const filteredTr = transactions.filter(
       check({
         deleted: false,
@@ -28,11 +27,10 @@ export default createSelector(
       })
     )
 
-    const startFunds = accountsInBalance.reduce(
-      (sum, acc) =>
-        (sum += (acc.startBalance * acc.instrument.rate) / userInstrument.rate),
-      0
-    )
+    const startFunds = accountsInBalance.reduce((sum, acc) => {
+      return (sum +=
+        (acc.startBalance * acc.instrument.rate) / userInstrument.rate)
+    }, 0)
 
     const firstMonth = startOfMonth(filteredTr[filteredTr.length - 1].date)
     const lastMonth = getLastMonth(budgets)

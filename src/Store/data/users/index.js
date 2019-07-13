@@ -1,6 +1,6 @@
-import { createSlice, createSelector } from 'redux-starter-kit'
+import { createSlice } from 'redux-starter-kit'
 import { wipeData, updateData } from 'store/data/commonActions'
-import populate from './populate'
+import { getInstrument } from 'store/data/instruments'
 
 // INITIAL STATE
 const initialState = {}
@@ -13,8 +13,8 @@ const { reducer } = createSlice({
   extraReducers: {
     [wipeData]: () => initialState,
     [updateData]: (state, { payload }) => {
-      if (payload.tag) {
-        payload.tag.forEach(item => (state[item.id] = item))
+      if (payload.user) {
+        payload.user.forEach(item => (state[item.id] = item))
       }
     },
   },
@@ -23,31 +23,15 @@ const { reducer } = createSlice({
 // REDUCER
 export default reducer
 
-// ACTIONS
-// ...
-
 // SELECTORS
-export const getUsers = createSelector(
-  ['data.user'],
-  users => users
-)
-
-export const getPopulatedUsers = createSelector(
-  ['data.instrument', 'data.country', 'data.user'],
-  (instruments, countries, users) => {
-    const result = {}
-    for (const id in users) {
-      result[id] = populate(instruments, countries, users[id])
-    }
-    return result
-  }
-)
-
-export const getPopulatedUser = (state, id) => getPopulatedUsers(state)[id]
+export const getUsers = state => state.data.user
 
 export const getRootUser = state => {
-  const users = getPopulatedUsers(state)
-  for (const id in users) {
-    if (!users[id].parent) return users[id]
-  }
+  const users = getUsers(state)
+  return Object.values(users).reduce((res, user) => (user.parent ? user : res))
+}
+
+export const getUserInstrument = state => {
+  const instrumentId = getRootUser(state).currency
+  return getInstrument(state, instrumentId)
 }
