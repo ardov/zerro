@@ -1,18 +1,19 @@
 import { combineReducers } from 'redux-starter-kit'
 import transaction from './transaction'
-import budget from './budget'
+import { getBudgetsToSync } from 'store/data/budgets'
 // import createSelector from 'selectorator'
 
 // REDUCER
-export default combineReducers({ transaction, budget })
+export default combineReducers({ transaction })
 
 // SELECTOR
 export const getChangedArrays = state => {
+  const budget = getBudgetsToSync(state)
   const {
     transaction,
     // account,
     // tag,
-    budget,
+    // budget,
     // merchant,
     // reminder,
     // reminderMarker,
@@ -21,7 +22,7 @@ export const getChangedArrays = state => {
     transaction: Object.values(transaction),
     // account: Object.values(account),
     // tag: Object.values(tag),
-    budget: Object.values(budget),
+    budget,
     // merchant: Object.values(merchant),
     // reminder: Object.values(reminder),
     // reminderMarker: Object.values(reminderMarker),

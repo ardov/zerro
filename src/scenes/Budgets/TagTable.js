@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { Table } from 'antd'
 import { formatMoney } from 'Utils/format'
 import { Menu, Dropdown } from 'antd'
-import { setOutcomeBudget } from 'store/diff/budget'
+import { setOutcomeBudget } from 'store/data/budgets'
 
 function renderBudget({
   formatted,

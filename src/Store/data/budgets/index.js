@@ -11,9 +11,10 @@ export const { setBudget } = slice.actions
 
 // SELECTORS
 export const {
+  getBudgetsToSave,
   getBudgetsToSync,
   getBudgetsByMonthAndTag,
-  getBudgetsToSave,
+  getBudget,
 } = selectors
 export { getAllBudgets }
 

@@ -1,45 +1,33 @@
 import { getRootUser } from 'store/data/users'
-import { format } from 'date-fns'
 import slice from './slice'
-
+import selectors from './selectors'
 const { setBudget } = slice.actions
 
-export const setOutcomeBudget = (outcome, month, tagId) => (
+export const setOutcomeBudget = (outcome, month, tag) => (
   dispatch,
   getState
 ) => {
-  const budgets = getState().data.budget
-  const formattedMonth = format(month, 'YYYY-MM-DD')
-  const id = tagId + ',' + formattedMonth
-  const userId = getRootUser(getState()).id
-
-  const budget = budgets[id]
-    ? budgets[id]
-    : createBudget({ user: userId, date: formattedMonth, tag: tagId })
-  const changed = { ...budget, outcome, changed: Date.now() / 1000 }
-
+  const state = getState()
+  const created = selectors.getBudget(state, tag, month)
+  const user = getRootUser(state).id
+  const budget = created || createBudget({ user, date: +month, tag })
+  const changed = { ...budget, outcome, changed: Date.now() }
   dispatch(setBudget(changed))
 }
 
-function createBudget({
-  user,
-  changed = Date.now() / 1000,
-  date,
-  tag,
-  income = 0,
-  incomeLock = false,
-  outcome = 0,
-  outcomeLock = false,
-}) {
+function createBudget(b) {
   return {
-    user,
-    changed,
-    date,
-    tag,
-    income,
-    incomeLock,
-    outcome,
-    outcomeLock,
+    // required
+    user: b.user,
+    date: b.date,
+    tag: b.tag,
+
+    // optional
+    changed: b.changed || Date.now(),
+    income: b.income || 0,
+    incomeLock: b.incomeLock || false,
+    outcome: b.outcome || 0,
+    outcomeLock: b.outcomeLock || false,
   }
 }
 
