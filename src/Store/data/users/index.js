@@ -33,7 +33,10 @@ export const getUsersToSave = createSelector(
 
 export const getRootUser = state => {
   const users = getUsers(state)
-  return Object.values(users).reduce((res, user) => (user.parent ? user : res))
+  return Object.values(users).reduce(
+    (res, user) => (user.parent ? user : res),
+    {}
+  )
 }
 
 export const getUserInstrument = state => {
