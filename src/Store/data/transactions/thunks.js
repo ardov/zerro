@@ -1,12 +1,12 @@
 import uuidv1 from 'uuid/v1'
-import { getRawTransaction } from 'store/data/transactions'
-import { setTransaction } from 'store/diff/transaction'
+import { getTransaction } from 'store/data/transactions'
+import { setTransaction } from 'store/data/transactions'
 
 const deleteTransactions = ids => (dispatch, getState) => {
   const state = getState()
   const trToDelete = Array.isArray(ids)
-    ? ids.map(id => getRawTransaction(state, id))
-    : [getRawTransaction(state, ids)]
+    ? ids.map(id => getTransaction(state, id))
+    : [getTransaction(state, ids)]
   const deleted = trToDelete.map(tr => convertToDeleted(tr))
   dispatch(setTransaction(deleted))
 }
@@ -14,9 +14,9 @@ const deleteTransactions = ids => (dispatch, getState) => {
 const restoreTransaction = id => (dispatch, getState) => {
   const state = getState()
   const tr = {
-    ...getRawTransaction(state, id),
+    ...getTransaction(state, id),
     deleted: false,
-    changed: Math.floor(Date.now() / 1000),
+    changed: Date.now(),
     id: uuidv1(),
   }
   dispatch(setTransaction(tr))
@@ -24,16 +24,16 @@ const restoreTransaction = id => (dispatch, getState) => {
 
 const splitTransfer = id => (dispatch, getState) => {
   const state = getState()
-  const tr = getRawTransaction(state, id)
+  const tr = getTransaction(state, id)
   dispatch(setTransaction(split(tr)))
 }
 
 const applyChangesToTransaction = tr => (dispatch, getState) => {
   const state = getState()
   const changedTransaction = {
-    ...getRawTransaction(state, tr.id),
+    ...getTransaction(state, tr.id),
     ...tr,
-    changed: Date.now() / 1000,
+    changed: Date.now(),
   }
   dispatch(setTransaction(changedTransaction))
 }
@@ -44,12 +44,12 @@ const setMainTagToTransactions = (transactions, tagId) => (
 ) => {
   const state = getState()
   const result = transactions.map(id => {
-    const tr = getRawTransaction(state, id)
+    const tr = getTransaction(state, id)
     const newTags = tr.tag ? [tagId, ...tr.tag] : [tagId]
     return {
       ...tr,
       tag: newTags,
-      changed: Math.floor(Date.now() / 1000),
+      changed: Date.now(),
     }
   })
   dispatch(setTransaction(result))
@@ -67,7 +67,7 @@ function convertToDeleted(raw) {
   return {
     ...raw,
     deleted: true,
-    changed: Math.floor(Date.now() / 1000),
+    changed: Date.now(),
   }
 }
 
@@ -93,7 +93,7 @@ function split(raw) {
   const result = [
     {
       ...raw,
-      changed: Math.floor(Date.now() / 1000),
+      changed: Date.now(),
       income: 0,
       incomeInstrument: raw.outcomeInstrument,
       incomeAccount: raw.outcomeAccount,
@@ -103,7 +103,7 @@ function split(raw) {
     },
     {
       ...raw,
-      changed: Math.floor(Date.now() / 1000),
+      changed: Date.now(),
       id: uuidv1(),
       outcome: 0,
       outcomeInstrument: raw.incomeInstrument,

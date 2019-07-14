@@ -9,7 +9,7 @@ import { logOut } from 'logic/authorization'
 import exportCsv from 'logic/exportCsv'
 import exportJSON from 'logic/exportJSON'
 import { syncData } from 'logic/sync'
-import { getChangedNum } from 'store/diff'
+import { getChangedNum } from 'store/data/dataSelectors'
 import { getLastSyncTime } from 'store/data/serverTimestamp'
 
 const Main = styled.header`
