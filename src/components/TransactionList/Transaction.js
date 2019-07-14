@@ -1,5 +1,4 @@
 import { connect } from 'react-redux'
-import parseDate from 'date-fns/parse'
 
 import { openTransaction, getOpenedId } from 'store/openedTransaction'
 import { setCondition } from 'store/filterConditions'
@@ -9,12 +8,12 @@ import { getAccount } from 'store/data/accounts'
 import { getTag } from 'store/data/tags'
 
 import Transaction from './TransactionPreview'
+import { getTransaction } from 'store/data/transactions'
 
 const mapStateToProps = (state, props) => {
-  const tr = state.data.transaction[props.id]
+  const tr = getTransaction(state, props.id)
   return {
     ...tr,
-    date: +parseDate(tr.date),
     incomeInstrument: getInstrument(state, tr.incomeInstrument),
     incomeAccount: getAccount(state, tr.incomeAccount),
     opIncomeInstrument: getInstrument(state, tr.opIncomeInstrument),

@@ -1,7 +1,7 @@
 import ZenApi from 'services/ZenApi'
 import { updateData } from 'store/data/commonActions'
 import { message } from 'antd'
-import { getChangedArrays } from '../store/diff'
+import { getChangedArrays } from '../store/data/dataSelectors'
 import { getToken } from 'store/token'
 import { removeSynced } from '../store/data/commonActions'
 import { setPending } from 'store/isPending'

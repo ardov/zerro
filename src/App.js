@@ -12,7 +12,7 @@ import Budgets from 'scenes/Budgets'
 import { getLoginState } from 'store/token'
 import { syncData } from 'logic/sync'
 import { getLastSyncTime } from 'store/data/serverTimestamp'
-import { getLastChangeTime } from 'store/diff'
+import { getLastChangeTime } from 'store/data/dataSelectors'
 import { getIsPending } from 'store/isPending'
 import { loadLocalData } from 'logic/localData'
 

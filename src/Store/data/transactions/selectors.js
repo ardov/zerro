@@ -10,17 +10,17 @@ import { convertToSyncArray } from 'Utils/converters'
 import { populate } from './populate'
 
 const getTransactionsToSave = createSelector(
-  ['data.transaction'],
+  ['data.transaction.server'],
   transactions => convertToSyncArray(transactions)
 )
 const getTransactionsToSync = state =>
-  convertToSyncArray(state.diff.transaction)
+  convertToSyncArray(state.data.transaction.diff)
 
 const getTransactions = createSelector(
-  ['data.transaction', 'diff.transaction'],
+  ['data.transaction.server', 'diff.transaction.diff'],
   (transactions, diff) => ({ ...transactions, ...diff })
 )
-const getRawTransaction = (state, id) => getTransactions(state)[id]
+const getTransaction = (state, id) => getTransactions(state)[id]
 
 const getPopulatedTransactions = createSelector(
   [
@@ -80,7 +80,7 @@ export default {
   getTransactionsToSync,
   getPopulatedTransactions,
   getTransactions,
-  getRawTransaction,
+  getTransaction,
   getPopulatedTransaction,
   getTransactionList,
   getOpenedTransaction,
