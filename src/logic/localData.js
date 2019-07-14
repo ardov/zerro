@@ -4,7 +4,7 @@ import { getTransactionsToSave } from 'store/data/transactions'
 import { getInstrumentsToSave } from 'store/data/instruments'
 import { getMerchantsToSave } from 'store/data/merchants'
 import { getUsersToSave } from 'store/data/users'
-import { getLastSyncTime } from 'store/data/serverTimestamp'
+import { getServerTimestampToSave } from 'store/data/serverTimestamp'
 import { getAccountsToSave } from 'store/data/accounts'
 import { getTagsToSave } from 'store/data/tags'
 import { getCountriesToSave } from 'store/data/_countries'
@@ -16,7 +16,7 @@ import { updateData } from 'store/data/commonActions'
 export const saveDataLocally = () => (dispatch, getState) => {
   const state = getState()
   const dataToSave = {
-    serverTimestamp: getLastSyncTime(state) / 1000,
+    serverTimestamp: getServerTimestampToSave(state),
     instrument: getInstrumentsToSave(state),
     user: getUsersToSave(state),
     merchant: getMerchantsToSave(state),
@@ -24,7 +24,6 @@ export const saveDataLocally = () => (dispatch, getState) => {
     company: getCompaniesToSave(state),
     reminder: getRemindersToSave(state),
     reminderMarker: getReminderMarkersToSave(state),
-
     account: getAccountsToSave(state),
     tag: getTagsToSave(state),
     budget: getBudgetsToSave(state),

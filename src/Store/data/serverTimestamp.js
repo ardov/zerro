@@ -12,7 +12,7 @@ const { reducer } = createSlice({
   extraReducers: {
     [wipeData]: () => initialState,
     [updateData]: (state, { payload }) =>
-      payload ? payload.serverTimestamp : state,
+      payload ? payload.serverTimestamp * 1000 : state,
   },
 })
 
@@ -23,4 +23,5 @@ export default reducer
 // ...
 
 // SELECTORS
-export const getLastSyncTime = state => state.data.serverTimestamp * 1000
+export const getLastSyncTime = state => state.data.serverTimestamp
+export const getServerTimestampToSave = state => getLastSyncTime(state) / 1000
