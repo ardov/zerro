@@ -3,6 +3,7 @@ import populate from './populate'
 import { getUsers } from 'store/data/users'
 import { getInstruments } from 'store/data/instruments'
 import { wipeData, updateData } from 'store/data/commonActions'
+import { convertToSyncArray } from 'Utils/converters'
 
 // INITIAL STATE
 const initialState = {}
@@ -30,7 +31,11 @@ export default reducer
 
 // SELECTORS
 export const getAccounts = state => state.data.account
-export const getAccountsToSave = getAccounts
+
+export const getAccountsToSave = createSelector(
+  [getAccounts],
+  accounts => convertToSyncArray(accounts)
+)
 
 export const getAccount = (state, id) => getAccounts(state)[id]
 

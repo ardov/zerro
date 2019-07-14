@@ -1,28 +1,29 @@
 import LocalStorage from 'services/localstorage'
 import { getBudgetsToSave } from 'store/data/budgets/'
 import { getTransactionsToSave } from 'store/data/transactions'
-import { getInstruments } from 'store/data/instruments'
-import { getMerchants } from 'store/data/merchants'
-import { getUsers } from 'store/data/users'
+import { getInstrumentsToSave } from 'store/data/instruments'
+import { getMerchantsToSave } from 'store/data/merchants'
+import { getUsersToSave } from 'store/data/users'
 import { getLastSyncTime } from 'store/data/serverTimestamp'
 import { getAccountsToSave } from 'store/data/accounts'
 import { getTagsToSave } from 'store/data/tags'
-import { getCountries } from 'store/data/_countries'
-import { getCompanies } from 'store/data/_companies'
-import { getReminders } from 'store/data/_reminders'
-import { getReminderMarkers } from 'store/data/_reminderMarkers'
+import { getCountriesToSave } from 'store/data/_countries'
+import { getCompaniesToSave } from 'store/data/_companies'
+import { getRemindersToSave } from 'store/data/_reminders'
+import { getReminderMarkersToSave } from 'store/data/_reminderMarkers'
+import { updateData } from 'store/data/commonActions'
 
 export const saveDataLocally = () => (dispatch, getState) => {
   const state = getState()
   const dataToSave = {
-    serverTimestamp: getLastSyncTime(state),
-    instrument: getInstruments(state),
-    user: getUsers(state),
-    merchant: getMerchants(state),
-    country: getCountries(state),
-    company: getCompanies(state),
-    reminder: getReminders(state),
-    reminderMarker: getReminderMarkers(state),
+    serverTimestamp: getLastSyncTime(state) / 1000,
+    instrument: getInstrumentsToSave(state),
+    user: getUsersToSave(state),
+    merchant: getMerchantsToSave(state),
+    country: getCountriesToSave(state),
+    company: getCompaniesToSave(state),
+    reminder: getRemindersToSave(state),
+    reminderMarker: getReminderMarkersToSave(state),
 
     account: getAccountsToSave(state),
     tag: getTagsToSave(state),
@@ -32,13 +33,10 @@ export const saveDataLocally = () => (dispatch, getState) => {
   LocalStorage.set('data', dataToSave)
 }
 
-export const getDataFromLS = () => {
-  const data = LocalStorage.get('data')
-  return {
-    ...data,
-    account: data.account,
-    tag: data.tag,
-    budget: data.budget,
-    transaction: data.transaction,
-  }
-}
+export const loadLocalData = () => (dispatch, getState) =>
+  new Promise(resolve => {
+    const data = LocalStorage.get('data')
+    if (data) dispatch(updateData(data))
+
+    resolve()
+  })

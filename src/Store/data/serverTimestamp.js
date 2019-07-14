@@ -11,7 +11,8 @@ const { reducer } = createSlice({
   reducers: {},
   extraReducers: {
     [wipeData]: () => initialState,
-    [updateData]: (state, { payload }) => payload.serverTimestamp,
+    [updateData]: (state, { payload }) =>
+      payload ? payload.serverTimestamp : state,
   },
 })
 

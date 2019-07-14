@@ -14,6 +14,7 @@ import { syncData } from 'logic/sync'
 import { getLastSyncTime } from 'store/data/serverTimestamp'
 import { getLastChangeTime } from 'store/diff'
 import { getIsPending } from 'store/isPending'
+import { loadLocalData } from 'logic/localData'
 
 addLocaleData(ru)
 
@@ -23,7 +24,7 @@ let timer = null
 
 class App extends Component {
   componentDidMount = () => {
-    this.checkSync()
+    this.props.loadLocalData().then(this.checkSync)
     window.addEventListener('beforeunload', this.beforeUnload)
   }
 
@@ -43,7 +44,7 @@ class App extends Component {
   checkSync = () => {
     const checkSync = this.checkSync
     const { lastSync, sync, isLoggedIn, lastChange, isPending } = this.props
-
+    // Regular sync conditions
     const needRegularSync = Date.now() - lastSync > SYNC_DELAY
     const hasUnsavedChanges = !!+lastChange
     const itsTimeToSyncChanges = Date.now() - lastChange > CHECK_DELAY
@@ -61,7 +62,7 @@ class App extends Component {
   }
 
   render() {
-    const isLoggedIn = this.props.isLoggedIn
+    const { isLoggedIn } = this.props
 
     return (
       <IntlProvider locale="ru">
@@ -101,6 +102,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
+  loadLocalData: () => dispatch(loadLocalData()),
   sync: () => dispatch(syncData()),
 })
 

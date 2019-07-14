@@ -1,6 +1,7 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
 import { wipeData, updateData } from 'store/data/commonActions'
 import populate from './populate'
+import { convertToSyncArray } from 'Utils/converters'
 
 // INITIAL STATE
 const initialState = {}
@@ -28,7 +29,11 @@ export default reducer
 
 // SELECTORS
 export const getTags = state => state.data.tag
-export const getTagsToSave = state => getTags(state)
+export const getTagsToSave = createSelector(
+  [getTags],
+  tags => convertToSyncArray(tags)
+)
+
 export const getTag = (state, id) => state.data.tag[id]
 
 export const getPopulatedTags = createSelector(
