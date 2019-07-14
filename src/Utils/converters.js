@@ -45,10 +45,3 @@ export const convertDatesToServerFormat = item =>
 
 export const convertToSyncArray = diffObj =>
   Object.values(diffObj).map(item => convertDatesToServerFormat(item))
-
-export const convertToClient = arr =>
-  arr.reduce((obj, item) => {
-    const id = item.id ? item.id : `${item.tag},${item.date}` // if no id it's budget
-    obj[id] = convertDatesToMs(item)
-    return obj
-  }, {})

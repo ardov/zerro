@@ -1,18 +1,18 @@
 import createSelector from 'selectorator'
+import startOfMonth from 'date-fns/start_of_month'
+import isSameMonth from 'date-fns/is_same_month'
 import { getTransactionList } from 'store/data/transactions'
-import { getBudgetsByMonthAndTag } from 'store/data/budgets/selectors'
+import budgetSelectors from 'store/data/budgets/selectors'
 import { getTagsTree } from 'store/data/tags'
 import { getInBalance } from 'store/data/accounts'
 import { check } from 'store/filterConditions'
-import startOfMonth from 'date-fns/start_of_month'
-import isSameMonth from 'date-fns/is_same_month'
 import { getUserInstrument } from 'store/data/users'
 import Month from './Month'
 
 export default createSelector(
   [
     getTransactionList,
-    getBudgetsByMonthAndTag,
+    budgetSelectors.getBudgetsByMonthAndTag,
     getTagsTree,
     getInBalance,
     getUserInstrument,

@@ -54,6 +54,8 @@ class App extends Component {
       !isPending &&
       (needRegularSync || (hasUnsavedChanges && itsTimeToSyncChanges))
     ) {
+      console.log(`sync. ${needRegularSync ? 'regular' : ''}. `)
+
       sync()
     }
 

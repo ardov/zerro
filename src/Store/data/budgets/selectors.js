@@ -1,32 +1,24 @@
 import { createSelector } from 'redux-starter-kit'
-import parseDate from 'date-fns/parse'
+import { format } from 'date-fns'
 import { convertToSyncArray } from 'Utils/converters'
 
-export const getPopulatedBudgets = createSelector(
-  ['data.budget', 'diff.budget'],
-  (serverBudgets, diffBudgets) => {
-    const result = {}
-    const budgets = { ...serverBudgets, ...diffBudgets }
-    for (const id in budgets) {
-      result[id] = {
-        ...budgets[id],
-        date: +parseDate(budgets[id].date),
-        changed: budgets[id].changed * 1000,
-      }
-    }
-    return result
-  }
+const getBudgets = createSelector(
+  ['data.budget.server', 'data.budget.diff'],
+  (serverBudgets, diffBudgets) => ({ ...serverBudgets, ...diffBudgets })
 )
 
-export const getBudgetsToSave = createSelector(
-  ['data.budget'],
+const getBudget = (state, tag, month) =>
+  getBudgets(state)[`${tag},${format(month, 'YYYY-MM-DD')}`]
+
+const getBudgetsToSave = createSelector(
+  ['data.budget.server'],
   budgets => convertToSyncArray(budgets)
 )
 
-export const getBudgetsToSync = state => convertToSyncArray(state.diff.budget)
+const getBudgetsToSync = state => convertToSyncArray(state.data.budget.diff)
 
-export const getBudgetsByMonthAndTag = createSelector(
-  [getPopulatedBudgets],
+const getBudgetsByMonthAndTag = createSelector(
+  [getBudgets],
   budgets => {
     const result = {}
     for (const id in budgets) {
@@ -41,4 +33,9 @@ export const getBudgetsByMonthAndTag = createSelector(
   }
 )
 
-export default { getBudgetsToSave, getBudgetsToSync, getBudgetsByMonthAndTag }
+export default {
+  getBudgetsToSave,
+  getBudgetsToSync,
+  getBudgetsByMonthAndTag,
+  getBudget,
+}

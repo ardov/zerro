@@ -3,22 +3,23 @@ import { updateData } from 'store/data/commonActions'
 import { message } from 'antd'
 import { getChangedArrays } from '../store/diff'
 import { getToken } from 'store/token'
-import { removeSynced } from '../store/diff/actions'
+import { removeSynced } from '../store/data/commonActions'
 import { setPending } from 'store/isPending'
 import { saveDataLocally } from 'logic/localData'
+import { getServerTimestampToSave } from 'store/data/serverTimestamp'
 
 //All syncs with ZM goes through this thunk
 export const syncData = () => (dispatch, getState) => {
   const state = getState()
   const changed = getChangedArrays(state)
   const token = getToken(state)
-  const serverTimestamp = state.data.serverTimestamp || 0
+  const serverTimestamp = getServerTimestampToSave(state) || 0
 
   // MESSAGES
   const successMessage = 'Данные обновлены'
   const failMessage = 'Синхронизация не удалась'
 
-  const syncBegin = Date.now() / 1000
+  const syncBegin = Date.now()
   dispatch(setPending(true))
 
   return ZenApi.getData(token, { serverTimestamp, changed }).then(
