@@ -1,5 +1,6 @@
-import { createSlice } from 'redux-starter-kit'
+import { createSlice, createSelector } from 'redux-starter-kit'
 import { wipeData, updateData } from 'store/data/commonActions'
+import { convertToSyncArray } from 'Utils/converters'
 
 // INITIAL STATE
 const initialState = {}
@@ -27,3 +28,7 @@ export default reducer
 
 // SELECTORS
 export const getReminders = state => state.data.reminder
+export const getRemindersToSave = createSelector(
+  [getReminders],
+  reminders => convertToSyncArray(reminders)
+)

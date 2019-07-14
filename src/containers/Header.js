@@ -1,4 +1,5 @@
 import React from 'react'
+import { distanceInWordsToNow } from 'date-fns'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
@@ -9,6 +10,7 @@ import exportCsv from 'logic/exportCsv'
 import exportJSON from 'logic/exportJSON'
 import { syncData } from 'logic/sync'
 import { getChangedNum } from 'store/diff'
+import { getLastSyncTime } from 'store/data/serverTimestamp'
 
 const Main = styled.header`
   display: flex;
@@ -43,6 +45,7 @@ function Header({
   logOut,
   state,
   changedNum,
+  lastSync,
 }) {
   const exportMenu = (
     <Menu>
@@ -59,6 +62,9 @@ function Header({
   return (
     <Main>
       <Name onClick={() => console.log(state)}>More Money Now</Name>
+      <Name onClick={() => console.log(state)}>
+        {distanceInWordsToNow(new Date(lastSync), { includeSeconds: true })}
+      </Name>
       <div>
         <NavLink to="/transactions">Транзакции</NavLink>
         <NavLink to="/tags">Категории</NavLink>
@@ -95,6 +101,10 @@ const mapDispatchToProps = dispatch => ({
 })
 
 export default connect(
-  state => ({ state, changedNum: getChangedNum(state) }),
+  state => ({
+    state,
+    changedNum: getChangedNum(state),
+    lastSync: getLastSyncTime(state),
+  }),
   mapDispatchToProps
 )(Header)

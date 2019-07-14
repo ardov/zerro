@@ -1,6 +1,7 @@
-import { createSlice } from 'redux-starter-kit'
+import { createSlice, createSelector } from 'redux-starter-kit'
 import { wipeData, updateData } from 'store/data/commonActions'
 import { getInstrument } from 'store/data/instruments'
+import { convertToSyncArray } from 'Utils/converters'
 
 // INITIAL STATE
 const initialState = {}
@@ -25,6 +26,10 @@ export default reducer
 
 // SELECTORS
 export const getUsers = state => state.data.user
+export const getUsersToSave = createSelector(
+  [getUsers],
+  users => convertToSyncArray(users)
+)
 
 export const getRootUser = state => {
   const users = getUsers(state)

@@ -26,7 +26,6 @@ export const store = configureStore({
 
 function getInitialState() {
   return {
-    data: getDataFromLS(),
     token: ZenApi.getLocalToken(),
   }
 }

@@ -9,7 +9,10 @@ import { getFilterConditions, check } from 'store/filterConditions'
 import { convertToSyncArray } from 'Utils/converters'
 import { populate } from './populate'
 
-const getTransactionsToSave = state => state.data.transaction
+const getTransactionsToSave = createSelector(
+  ['data.transaction'],
+  transactions => convertToSyncArray(transactions)
+)
 const getTransactionsToSync = state =>
   convertToSyncArray(state.diff.transaction)
 
