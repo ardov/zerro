@@ -1,6 +1,5 @@
 import { configureStore } from 'redux-starter-kit'
 import ZenApi from 'services/ZenApi'
-import { getDataFromLS } from 'logic/localData'
 
 import data from './data'
 import diff from './diff'
@@ -21,11 +20,5 @@ export const store = configureStore({
     selectedTransactions,
     token,
   },
-  preloadedState: getInitialState(),
+  preloadedState: { token: ZenApi.getLocalToken() },
 })
-
-function getInitialState() {
-  return {
-    token: ZenApi.getLocalToken(),
-  }
-}

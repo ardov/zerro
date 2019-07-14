@@ -72,7 +72,7 @@ function TagTable({ tags, instrument, date, updateBudget }) {
   const tableData = tags.reduce((arr, tag) => {
     if (!tag.showOutcome && !tag.totalOutcome && !tag.totalAvailible) return arr
     arr.push({
-      key: tag.id,
+      key: tag.id + '1',
       name: tag.title,
       budgeted: {
         formatted: tag.totalBudgeted ? formatSum(tag.totalBudgeted) : '-',
