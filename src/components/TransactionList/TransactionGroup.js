@@ -7,19 +7,19 @@ const GroupContainer = styled.div`
   padding: 0 16px;
 `
 const Group = styled.div`
+  position: relative;
   max-width: 560px;
   margin: 0 auto;
-  position: relative;
 `
 const Title = styled.h3`
-  margin: 0;
-  padding: 8px 0;
   position: sticky;
   top: 0;
   z-index: 2;
-  background-color: #fff;
-  font-weight: 400;
+  margin: 0;
+  padding: 8px 0;
   color: rgba(0, 0, 0, 0.56);
+  font-weight: 400;
+  background-color: #fff;
 `
 
 export default class TransactionGroup extends React.PureComponent {
