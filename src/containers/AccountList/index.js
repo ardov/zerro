@@ -1,27 +1,62 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import Account from './Account'
+import styled from 'styled-components'
 import { getInBalance, getOutOfBalance } from 'store/data/accounts'
+import { getUserInstrument } from 'store/data/users'
 
-const getTotalBalance = accs =>
-  accs.reduce((sum, acc) => +(sum + acc.balance).toFixed(2), 0)
+const Heading = styled(Account)`
+  margin-top: 16px;
+  font-weight: 700;
+  font-size: 14px;
+`
 
-const AccountList = props => (
-  <div className={props.className}>
-    <h3>В бюджете ({getTotalBalance(props.inBalance)})</h3>
-    {props.inBalance.map(acc => (
-      <Account key={acc.id} {...acc} />
-    ))}
-    <h3>Не в бюджете ({getTotalBalance(props.outOfBalance)})</h3>
-    {props.outOfBalance.map(acc => (
-      <Account key={acc.id} {...acc} />
-    ))}
-  </div>
-)
+const getTotalBalance = (accs, targetInstrument) =>
+  accs.reduce((sum, acc) => {
+    const balance = acc.balance
+    const accRate = acc.instrument.rate
+    const targetRate = targetInstrument.rate
+    return +(sum += (balance * accRate) / targetRate).toFixed(2)
+  }, 0)
+
+const AccountList = ({
+  inBalance,
+  outOfBalance,
+  userInstrument,
+  className,
+}) => {
+  if (!userInstrument) return null
+
+  const inBalanceSum = getTotalBalance(inBalance, userInstrument)
+  const outOfBalanceSum = getTotalBalance(outOfBalance, userInstrument)
+
+  return (
+    <div className={className}>
+      <Heading
+        title="В бюджете"
+        balance={inBalanceSum}
+        instrument={userInstrument}
+      />
+      {inBalance.map(acc => (
+        <Account key={acc.id} {...acc} />
+      ))}
+
+      <Heading
+        title="Не в бюджете"
+        balance={outOfBalanceSum}
+        instrument={userInstrument}
+      />
+      {outOfBalance.map(acc => (
+        <Account key={acc.id} {...acc} />
+      ))}
+    </div>
+  )
+}
 
 const mapStateToProps = (state, props) => ({
   inBalance: getInBalance(state),
   outOfBalance: getOutOfBalance(state),
+  userInstrument: getUserInstrument(state),
 })
 
 const mapDispatchToProps = (dispatch, props) => ({})
