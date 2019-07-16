@@ -1,5 +1,4 @@
 import React from 'react'
-import { distanceInWordsToNow } from 'date-fns'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
@@ -62,9 +61,7 @@ function Header({
   return (
     <Main>
       <Name onClick={() => console.log(state)}>More Money Now</Name>
-      <Name onClick={() => console.log(state)}>
-        {distanceInWordsToNow(new Date(lastSync), { includeSeconds: true })}
-      </Name>
+
       <div>
         <NavLink to="/transactions">Транзакции</NavLink>
         <NavLink to="/tags">Категории</NavLink>
