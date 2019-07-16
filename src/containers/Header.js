@@ -10,6 +10,7 @@ import exportJSON from 'logic/exportJSON'
 import { syncData } from 'logic/sync'
 import { getChangedNum } from 'store/data/dataSelectors'
 import { getLastSyncTime } from 'store/data/serverTimestamp'
+import { getPendingState } from 'store/isPending'
 
 const Main = styled.header`
   display: flex;
@@ -42,9 +43,9 @@ function Header({
   exportJSON,
   syncData,
   logOut,
-  state,
   changedNum,
   lastSync,
+  isPending,
 }) {
   const exportMenu = (
     <Menu>
@@ -60,7 +61,7 @@ function Header({
   )
   return (
     <Main>
-      <Name onClick={() => console.log(state)}>More Money Now</Name>
+      <Name>More Money Now</Name>
 
       <div>
         <NavLink to="/transactions">Транзакции</NavLink>
@@ -71,6 +72,7 @@ function Header({
         <StyledButton
           icon="reload"
           onClick={syncData}
+          loading={isPending}
           type={changedNum ? 'primary' : ''}
         >
           {changedNum
@@ -78,8 +80,8 @@ function Header({
             : `Обновить данные`}
         </StyledButton>
 
-        <Dropdown overlay={exportMenu}>
-          <StyledButton onClick={exportJSON}>
+        <Dropdown overlay={exportMenu} trigger={['click']}>
+          <StyledButton>
             Экспорт <Icon type="down" />
           </StyledButton>
         </Dropdown>
@@ -99,9 +101,9 @@ const mapDispatchToProps = dispatch => ({
 
 export default connect(
   state => ({
-    state,
     changedNum: getChangedNum(state),
     lastSync: getLastSyncTime(state),
+    isPending: getPendingState(state),
   }),
   mapDispatchToProps
 )(Header)

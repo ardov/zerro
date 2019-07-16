@@ -13,7 +13,7 @@ import { getLoginState } from 'store/token'
 import { syncData } from 'logic/sync'
 import { getLastSyncTime } from 'store/data/serverTimestamp'
 import { getLastChangeTime } from 'store/data/dataSelectors'
-import { getIsPending } from 'store/isPending'
+import { getPendingState } from 'store/isPending'
 import { loadLocalData } from 'logic/localData'
 
 addLocaleData(ru)
@@ -100,7 +100,7 @@ const mapStateToProps = state => ({
   isLoggedIn: getLoginState(state),
   lastSync: getLastSyncTime(state),
   lastChange: getLastChangeTime(state),
-  isPending: getIsPending(state),
+  isPending: getPendingState(state),
 })
 
 const mapDispatchToProps = dispatch => ({
