@@ -5,6 +5,7 @@ import {
   updateData,
   removeSynced,
   removeSyncedFunc,
+  updateDataFunc,
 } from '../commonActions'
 import { convertDatesToMs } from 'Utils/converters'
 
@@ -13,7 +14,7 @@ const initialState = { server: {}, diff: {} }
 
 // SLICE
 export default createSlice({
-  slice: 'budgets',
+  slice: 'budget',
   initialState,
   reducers: {
     setBudget: ({ diff }, { payload }) => {
@@ -28,12 +29,13 @@ export default createSlice({
       removeSyncedFunc(diff, payload)
     },
     [updateData]: ({ server }, { payload }) => {
-      const budgets = payload.budget
-      if (budgets) {
-        budgets.forEach(budget => {
-          server[`${budget.tag},${budget.date}`] = convertDatesToMs(budget)
-        })
-      }
+      updateDataFunc(
+        server,
+        payload,
+        'budget',
+        convertDatesToMs,
+        b => `${b.tag},${b.date}`
+      )
     },
   },
 })
