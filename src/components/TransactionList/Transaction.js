@@ -5,7 +5,7 @@ import { setCondition } from 'store/filterConditions'
 import { getSelectedIds, toggleTransaction } from 'store/selectedTransactions'
 import { getInstrument } from 'store/data/instruments'
 import { getAccount } from 'store/data/accounts'
-import { getTag } from 'store/data/tags'
+import { getPopulatedTag } from 'store/data/tags'
 
 import Transaction from './TransactionPreview'
 import { getTransaction } from 'store/data/transactions'
@@ -23,7 +23,10 @@ const mapStateToProps = (state, props) => {
     type:
       tr.income && tr.outcome ? 'transfer' : tr.income ? 'income' : 'outcome',
 
-    tag: tr.tag && tr.tag.length ? tr.tag.map(id => getTag(state, id)) : null,
+    tag:
+      tr.tag && tr.tag.length
+        ? tr.tag.map(id => getPopulatedTag(state, id))
+        : null,
     isOpened: props.id === getOpenedId(state),
     isChecked: getSelectedIds(state).includes(props.id),
     isInSelectionMode: !!getSelectedIds(state).length,

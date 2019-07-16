@@ -1,7 +1,7 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
 import { wipeData, updateData, updateDataFunc } from 'store/data/commonActions'
-import populate from './populate'
 import { convertToSyncArray } from 'Utils/converters'
+import Tag from './Tag'
 
 // INITIAL STATE
 const initialState = {}
@@ -39,29 +39,14 @@ export const getPopulatedTags = createSelector(
   tags => {
     const result = {}
     for (const id in tags) {
-      result[id] = populate(tags[id])
+      result[id] = new Tag(tags[id])
     }
-    result[null] = {
-      id: null,
-      user: null,
-      changed: 0,
-      icon: null,
-      budgetIncome: true,
-      budgetOutcome: true,
-      required: false,
-      color: null,
-      picture: null,
-      showIncome: false,
-      showOutcome: false,
-      parent: null,
-
-      fullTitle: 'Без категории',
-      title: 'Без категории',
-      symbol: '?',
-    }
+    result[null] = Tag.nullTag
     return result
   }
 )
+
+export const getPopulatedTag = (state, id) => getPopulatedTags(state)[id]
 
 export const getTagsTree = createSelector(
   [getPopulatedTags],

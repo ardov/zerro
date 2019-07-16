@@ -56,7 +56,7 @@ const transactionToRowObj = t => ({
   Дата: format(t.date, 'YYYY-MM-DD'),
   Создана: format(t.created, 'YYYY-MM-DD HH:mm'),
   Тип: types[t.type],
-  Категория: t.tag ? t.tag[0].fullTitle.replace(',', '') : '',
+  Категория: t.tag ? t.tag[0].title.replace(',', '') : '',
   'Доп категрии': '',
   'Со счёта': t.outcomeAccount ? t.outcomeAccount.title : '',
   Расход: !!t.outcome ? t.outcome : '',

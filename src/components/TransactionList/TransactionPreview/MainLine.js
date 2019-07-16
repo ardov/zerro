@@ -42,7 +42,7 @@ export function MainLine({ type, tag, outcomeAccount, incomeAccount }) {
     return (
       <Body>
         {tag.map(tag => (
-          <Tag key={tag.id}>{tag.title}</Tag>
+          <Tag key={tag.id}>{tag.name}</Tag>
         ))}
       </Body>
     )
