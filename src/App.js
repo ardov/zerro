@@ -19,7 +19,7 @@ import { loadLocalData } from 'logic/localData'
 addLocaleData(ru)
 
 const SYNC_DELAY = 10 * 60 * 1000 // 10min
-const CHECK_DELAY = 5 * 1000 // 5sec
+const CHECK_DELAY = 10 * 1000 // 10sec
 let timer = null
 
 class App extends Component {
