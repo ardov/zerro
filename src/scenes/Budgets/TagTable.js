@@ -107,7 +107,7 @@ function TagTable({ tags, instrument, date, updateBudget }) {
       tag.children.forEach(child =>
         arr.push({
           key: child.id,
-          name: '-----  ' + child.fullTitle,
+          name: '-----  ' + child.title,
           budgeted: {
             formatted: child.budgeted ? formatSum(child.budgeted) : '-',
             totalBudgeted: child.budgeted,
