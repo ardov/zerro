@@ -7,8 +7,8 @@ const Body = styled.div`
   display: flex;
   flex-direction: row;
   min-width: 0;
-  padding: 8px;
   margin: 0 -8px;
+  padding: 8px;
   border-radius: 6px;
   transition: all 0.2s;
 
@@ -18,15 +18,15 @@ const Body = styled.div`
   }
 `
 const Title = styled.div`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `
 const Amount = styled.div`
-  text-align: right;
-  margin-left: 16px;
   flex-grow: 1;
+  margin-left: 16px;
+  text-align: right;
 `
 
 class Account extends React.Component {
