@@ -24,6 +24,7 @@ const AccountList = ({
   outOfBalance,
   userInstrument,
   className,
+  onAccountClick,
 }) => {
   if (!userInstrument) return null
 
@@ -38,7 +39,7 @@ const AccountList = ({
         instrument={userInstrument}
       />
       {inBalance.map(acc => (
-        <Account key={acc.id} {...acc} />
+        <Account key={acc.id} {...acc} onClick={() => onAccountClick(acc.id)} />
       ))}
 
       <Heading

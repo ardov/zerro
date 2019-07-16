@@ -15,15 +15,15 @@ const Body = styled.div`
   overflow: auto;
 `
 const Menu = styled.div`
+  flex-shrink: 0;
   width: 280px;
   padding: 40px;
-  flex-shrink: 0;
   border-right: 1px solid rgba(0, 0, 0, 0.1);
 `
 const Content = styled.div`
-  height: 100%;
   flex-grow: 1;
   min-width: 0;
+  height: 100%;
 `
 const SidePanel = styled.div`
   width: 480px;
