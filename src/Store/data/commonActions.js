@@ -13,3 +13,25 @@ export const removeSyncedFunc = (diff, syncStarted) => {
     }
   })
 }
+
+/**
+ * Updates items in state
+ */
+export const updateDataFunc = (
+  state,
+  payload,
+  domain = '',
+  converter,
+  getId
+) => {
+  if (payload[domain]) {
+    const toUpdate = payload[domain].forEach
+      ? payload[domain]
+      : Object.values(payload[domain])
+
+    toUpdate.forEach(item => {
+      const id = getId ? getId(item) : item.id
+      state[id] = converter ? converter(item) : item
+    })
+  }
+}

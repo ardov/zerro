@@ -1,5 +1,5 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
-import { wipeData, updateData } from 'store/data/commonActions'
+import { wipeData, updateData, updateDataFunc } from 'store/data/commonActions'
 import { getInstrument } from 'store/data/instruments'
 import { convertToSyncArray } from 'Utils/converters'
 
@@ -8,15 +8,13 @@ const initialState = {}
 
 // SLICE
 const { reducer } = createSlice({
-  slice: 'users',
+  slice: 'user',
   initialState,
   reducers: {},
   extraReducers: {
     [wipeData]: () => initialState,
     [updateData]: (state, { payload }) => {
-      if (payload.user) {
-        payload.user.forEach(item => (state[item.id] = item))
-      }
+      updateDataFunc(state, payload, 'user')
     },
   },
 })

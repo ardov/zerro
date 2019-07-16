@@ -6,6 +6,7 @@ import {
   updateData,
   removeSynced,
   removeSyncedFunc,
+  updateDataFunc,
 } from 'store/data/commonActions'
 import { convertDatesToMs } from 'Utils/converters'
 
@@ -14,7 +15,7 @@ const initialState = { server: {}, diff: {} }
 
 // SLICE
 const { reducer, actions } = createSlice({
-  slice: 'transactions',
+  slice: 'transaction',
   initialState,
   reducers: {
     setTransaction: ({ diff }, { payload }) => {
@@ -34,11 +35,7 @@ const { reducer, actions } = createSlice({
       removeSyncedFunc(diff, payload)
     },
     [updateData]: ({ server }, { payload }) => {
-      if (payload.transaction) {
-        payload.transaction.forEach(item => {
-          server[item.id] = convertDatesToMs(item)
-        })
-      }
+      updateDataFunc(server, payload, 'transaction', convertDatesToMs, null)
     },
   },
 })
