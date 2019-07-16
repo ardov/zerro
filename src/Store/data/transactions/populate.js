@@ -1,14 +1,12 @@
 import parseDate from 'date-fns/parse'
 import { mapTags, getType } from './helpers'
-export const populate = (
-  { instruments, accounts, users, tags, merchants },
-  raw
-) => ({
+
+export const populate = ({ instruments, accounts, tags, merchants }, raw) => ({
   id: raw.id,
-  user: users[raw.user],
+  user: raw.user,
   date: +parseDate(raw.date),
-  changed: raw.changed * 1000,
-  created: raw.created * 1000,
+  changed: raw.changed,
+  created: raw.created,
   deleted: raw.deleted,
   hold: raw.hold,
   qrCode: raw.qrCode,
@@ -32,6 +30,7 @@ export const populate = (
   latitude: raw.latitude,
   longitude: raw.longitude,
   reminderMarker: raw.reminderMarker,
+
   //COMPUTED PROPERTIES
   type: getType(raw),
 })

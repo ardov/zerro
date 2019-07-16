@@ -1,6 +1,5 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
 import populate from './populate'
-import { getUsers } from 'store/data/users'
 import { getInstruments } from 'store/data/instruments'
 import { wipeData, updateData, updateDataFunc } from 'store/data/commonActions'
 import { convertToSyncArray } from 'Utils/converters'
@@ -38,11 +37,11 @@ export const getAccountsToSave = createSelector(
 export const getAccount = (state, id) => getAccounts(state)[id]
 
 export const getPopulatedAccounts = createSelector(
-  [getInstruments, getUsers, getAccounts],
-  (instruments, users, accounts) => {
+  [getInstruments, getAccounts],
+  (instruments, accounts) => {
     const result = {}
     for (const id in accounts) {
-      result[id] = populate({ instruments, users }, accounts[id])
+      result[id] = populate({ instruments }, accounts[id])
     }
     return result
   }

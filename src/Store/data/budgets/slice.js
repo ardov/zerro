@@ -7,7 +7,6 @@ import {
   removeSyncedFunc,
   updateDataFunc,
 } from '../commonActions'
-import { convertDatesToMs } from 'Utils/converters'
 
 // INITIAL STATE
 const initialState = { server: {}, diff: {} }
@@ -29,13 +28,7 @@ export default createSlice({
       removeSyncedFunc(diff, payload)
     },
     [updateData]: ({ server }, { payload }) => {
-      updateDataFunc(
-        server,
-        payload,
-        'budget',
-        convertDatesToMs,
-        b => `${b.tag},${b.date}`
-      )
+      updateDataFunc(server, payload, 'budget', null, b => `${b.tag},${b.date}`)
     },
   },
 })

@@ -1,4 +1,5 @@
 import { createAction } from 'redux-starter-kit'
+import { convertDatesToMs } from 'Utils/converters'
 
 // ACTIONS
 export const wipeData = createAction('data/wipeData')
@@ -31,7 +32,7 @@ export const updateDataFunc = (
 
     toUpdate.forEach(item => {
       const id = getId ? getId(item) : item.id
-      state[id] = converter ? converter(item) : item
+      state[id] = converter ? converter(item) : convertDatesToMs(item)
     })
   }
 }
