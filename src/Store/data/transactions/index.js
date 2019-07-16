@@ -54,9 +54,8 @@ export const {
   getTransactions,
   getTransaction,
   getPopulatedTransaction,
-  getTransactionList,
   getOpenedTransaction,
-  getTransactionList2,
+  getTransactionList,
 } = selectors
 
 // THUNKS

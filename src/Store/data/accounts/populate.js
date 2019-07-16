@@ -1,6 +1,6 @@
-const populate = ({ instruments, users }, raw) => ({
+const populate = ({ instruments }, raw) => ({
   id: raw.id,
-  user: users[raw.user],
+  user: raw.user,
   instrument: instruments[raw.instrument],
   type: raw.type,
   role: raw.role,
@@ -17,7 +17,7 @@ const populate = ({ instruments, users }, raw) => ({
   // startDate: null,
   // capitalization: null,
   // percent: null,
-  changed: raw.changed * 1000,
+  changed: raw.changed,
   // syncID: ['3314', '8603', '9622'],
   // enableSMS: false,
   // endDateOffset: null,

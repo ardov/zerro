@@ -6,6 +6,7 @@ export const convertDatesToMs = item =>
     switch (key) {
       case 'changed':
       case 'created':
+      case 'paidTill':
         obj[key] = item[key] * 1000
         break
 
@@ -27,6 +28,7 @@ export const convertDatesToServerFormat = item =>
     switch (key) {
       case 'changed':
       case 'created':
+      case 'paidTill':
         obj[key] = +(item[key] / 1000).toFixed(0)
         break
 

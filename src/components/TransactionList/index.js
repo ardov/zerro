@@ -7,7 +7,7 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { connect } from 'react-redux'
 import TransactionGroup from './TransactionGroup'
-import { getTransactionList2 } from 'store/data/transactions'
+import { getTransactionList } from 'store/data/transactions'
 
 function formatDate(date) {
   const formats = {
@@ -88,6 +88,6 @@ class TransactionList extends React.Component {
 }
 
 export default connect(
-  (state, params) => ({ groupped: getTransactionList2(state, params) }),
+  (state, params) => ({ groupped: getTransactionList(state, params) }),
   null
 )(TransactionList)
