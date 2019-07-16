@@ -31,10 +31,10 @@ const Amount = styled.div`
 
 class Account extends React.Component {
   render() {
-    const { title, balance, instrument } = this.props
+    const { title, balance, instrument, className } = this.props
     const formattedBalance = formatMoney(balance, instrument.shortTitle)
     return (
-      <Body>
+      <Body className={className}>
         <Title title={title}>{title}</Title>
         <Amount>{formattedBalance}</Amount>
       </Body>
