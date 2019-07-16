@@ -15,4 +15,4 @@ export default reducer
 export const { setPending } = actions
 
 // SELECTORS
-export const { getIsPending } = selectors
+export const getPendingState = selectors.getIsPending
