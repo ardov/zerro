@@ -50,5 +50,6 @@ export const getLastChangeTime = state => {
         item.changed > lastChange ? item.changed : lastChange,
       0
     )
-  return new Date(lastChange)
+
+  return lastChange * 1000
 }

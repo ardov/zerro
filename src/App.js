@@ -19,7 +19,7 @@ import { loadLocalData } from 'logic/localData'
 addLocaleData(ru)
 
 const SYNC_DELAY = 10 * 60 * 1000 // 10min
-const CHECK_DELAY = 10 * 1000 // 10sec
+const CHECK_DELAY = 20 * 1000 // 20sec
 let timer = null
 
 class App extends Component {
@@ -30,11 +30,11 @@ class App extends Component {
 
   componentWillUnmount = () => {
     window.removeEventListener('beforeunload', this.beforeUnload)
-    clearInterval(timer)
+    window.clearTimeout(timer)
   }
 
   beforeUnload = e => {
-    if (this.props.isUnsaved) {
+    if (this.props.lastChange) {
       window.alert('UNSAVED CHANGES')
       ;(e || window.event).returnValue = null
       return null
@@ -46,7 +46,7 @@ class App extends Component {
     const { lastSync, sync, isLoggedIn, lastChange, isPending } = this.props
     // Regular sync conditions
     const needRegularSync = Date.now() - lastSync > SYNC_DELAY
-    const hasUnsavedChanges = !!+lastChange
+    const hasUnsavedChanges = !!lastChange
     const itsTimeToSyncChanges = Date.now() - lastChange > CHECK_DELAY
 
     if (
@@ -54,12 +54,10 @@ class App extends Component {
       !isPending &&
       (needRegularSync || (hasUnsavedChanges && itsTimeToSyncChanges))
     ) {
-      console.log(`sync. ${needRegularSync ? 'regular' : ''}. `)
-
+      console.log(`${needRegularSync ? 'regular' : ''}`)
       sync()
     }
 
-    clearInterval(timer)
     timer = setTimeout(checkSync, CHECK_DELAY)
   }
 
