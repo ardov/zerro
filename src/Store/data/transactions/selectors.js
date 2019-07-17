@@ -16,7 +16,7 @@ const getTransactionsToSync = state =>
   convertToSyncArray(state.data.transaction.diff)
 
 const getTransactions = createSelector(
-  ['data.transaction.server', 'diff.transaction.diff'],
+  ['data.transaction.server', 'data.transaction.diff'],
   (transactions, diff) => ({ ...transactions, ...diff })
 )
 const getTransaction = (state, id) => getTransactions(state)[id]
