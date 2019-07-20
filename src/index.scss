@@ -8,3 +8,16 @@ html {
 *::after {
   box-sizing: inherit;
 }
+
+:root {
+  // TEXT
+  --text-primary: #333;
+  --text-secondary: #999;
+  --text-placeholder: #aaa;
+  --text-success: #21a355;
+  // COLORS
+  --color-danger: #f00;
+  --color-accent: #1890ff;
+  // BG
+  --bg-hover: rgba(0, 0, 0, 0.04);
+}

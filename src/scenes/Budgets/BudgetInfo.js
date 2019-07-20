@@ -24,15 +24,15 @@ const ToBeBudgeted = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 104px;
+  padding: 16px;
   background: linear-gradient(
       105.52deg,
       rgba(255, 255, 255, 0) 0%,
       rgba(255, 255, 255, 0.3) 100%
     ),
     #cc1414;
-  box-shadow: 0px 8px 16px rgba(204, 20, 20, 0.3);
   border-radius: 6px;
-  padding: 16px;
+  box-shadow: 0 8px 16px rgba(204, 20, 20, 0.3);
   transition: 0.4s;
 
   ${props =>
@@ -44,7 +44,7 @@ const ToBeBudgeted = styled.div`
           rgba(255, 255, 255, 0.3) 100%
         ),
         #21a355;
-      box-shadow: 0px 8px 16px rgba(33, 163, 85, 0.3);
+      box-shadow: 0 8px 16px rgba(33, 163, 85, 0.3);
     `}
 `
 
@@ -120,7 +120,7 @@ const LineBody = styled.div`
   flex-direction: row;
   min-width: 0;
   margin-top: 8px;
-  color: rgba(0, 0, 0, 0.5);
+  color: var(--text-secondary);
 `
 const LineName = styled.div`
   flex-grow: 1;

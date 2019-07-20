@@ -27,7 +27,7 @@ const Body = styled.div`
   }
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: var(--bg-hover);
     opacity: 1;
   }
 
@@ -68,7 +68,7 @@ const Line = styled.div`
 const Account = styled.div`
   flex-shrink: 0;
   margin-left: auto;
-  color: rgba(0, 0, 0, 0.4);
+  color: var(--text-secondary);
   font-size: 12px;
   line-height: 16px;
 `
@@ -82,8 +82,8 @@ const Payee = styled.span`
   transition: 0.2s;
 
   &:hover {
-    color: rgba(0, 0, 0, 0.8);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--text-secondary);
   }
 `
 
@@ -91,7 +91,7 @@ const Comment = styled.span`
   min-width: 0;
   margin-right: 16px;
   overflow: hidden;
-  color: rgba(0, 0, 0, 0.5);
+  color: var(--text-secondary);
   font-size: 12px;
   line-height: 16px;
   white-space: nowrap;

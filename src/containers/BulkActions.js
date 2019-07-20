@@ -63,7 +63,12 @@ class BulkActions extends React.Component {
           okText="Удалить"
           cancelText="Оставить"
           onConfirm={this.onDelete}
-          icon={<Icon type="question-circle-o" style={{ color: '#F00' }} />}
+          icon={
+            <Icon
+              type="question-circle-o"
+              style={{ color: 'var(--color-danger' }}
+            />
+          }
         >
           <StyledButton type="danger" block>
             Удалить выбранные ({num})

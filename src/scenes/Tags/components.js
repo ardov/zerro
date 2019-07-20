@@ -13,15 +13,15 @@ const options = {
   tooltips: {
     intersect: false,
     backgroundColor: 'white',
-    titleFontColor: '#000',
-    bodyFontColor: '#000',
+    titleFontColor: 'var(--text-primary)',
+    bodyFontColor: 'var(--text-primary)',
     custom: w => {
       console.log('rrrrr', w)
-    }
+    },
   },
   maintainAspectRatio: false,
   layout: {
-    padding: { top: 0, left: 0, right: 0, bottom: 0 }
+    padding: { top: 0, left: 0, right: 0, bottom: 0 },
   },
   legend: { display: false },
   title: { display: false },
@@ -31,8 +31,8 @@ const options = {
       {
         gridLines: { display: false, drawBorder: false },
         scaleLabel: { display: false },
-        ticks: { display: false, mirror: true }
-      }
+        ticks: { display: false, mirror: true },
+      },
     ],
     xAxes: [
       {
@@ -41,10 +41,10 @@ const options = {
         ticks: { display: false, mirror: true },
         barThickness: 10,
         barPercentage: 1,
-        categoryPercentage: 0.9
-      }
-    ]
-  }
+        categoryPercentage: 0.9,
+      },
+    ],
+  },
 }
 
 export const BarChart = ({ data = [], maxValue, barColor = '#000' }) => {
@@ -60,9 +60,9 @@ export const BarChart = ({ data = [], maxValue, barColor = '#000' }) => {
         borderWidth: 0,
         hoverBackgroundColor: 'rgba(255,99,132,0.4)',
         hoverBorderColor: 'rgba(255,99,132,1)',
-        data: data.map(el => el.sum)
-      }
-    ]
+        data: data.map(el => el.sum),
+      },
+    ],
   }
 
   return (

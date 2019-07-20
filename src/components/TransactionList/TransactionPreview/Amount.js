@@ -3,9 +3,9 @@ import styled from 'styled-components'
 import { formatMoney } from 'Utils/format'
 
 const colors = {
-  income: '#21A355',
-  outcome: 'rgba(0, 0, 0, 0.8)',
-  transfer: 'rgba(0, 0, 0, 0.5)',
+  income: 'var(--text-success)',
+  outcome: 'var(--text-primary)',
+  transfer: 'var(--text-secondary)',
 }
 
 const Body = styled.div`
@@ -23,7 +23,7 @@ const PrimarySum = styled.span`
 `
 const SecondarySum = styled.span`
   margin-right: 8px;
-  color: rgba(0, 0, 0, 0.4);
+  color: var(--text-placeholder);
   font-size: 12px;
   line-height: 16px;
 `

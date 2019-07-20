@@ -13,7 +13,7 @@ const Body = styled.div`
   transition: all 0.2s;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: var(--bg-hover);
     transition: all 0s;
   }
 `

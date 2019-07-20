@@ -32,7 +32,7 @@ const Sym = styled.div`
   right: 0;
   bottom: 0;
   left: 0;
-  color: ${({ color }) => (color ? color : `#000`)};
+  color: ${({ color }) => (color ? color : `var(--text-primary)`)};
   font-size: 24px;
   line-height: 40px;
   text-align: center;

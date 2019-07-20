@@ -10,17 +10,17 @@ const Body = styled.div`
 const Tag = styled.span`
   margin-right: 16px;
   overflow: hidden;
-  color: rgba(0, 0, 0, 0.3);
+  color: var(--text-placeholder);
   white-space: nowrap;
   text-overflow: ellipsis;
 
   :first-child {
-    color: rgba(0, 0, 0, 0.8);
+    color: var(--text-primary);
   }
 `
 const Account = styled.span`
   overflow: hidden;
-  color: rgba(0, 0, 0, 0.8);
+  color: var(--text-primary);
   white-space: nowrap;
   text-overflow: ellipsis;
 

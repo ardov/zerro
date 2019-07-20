@@ -8,8 +8,8 @@ const Search = Input.Search
 const InputGroup = Input.Group
 
 const StyledForm = styled(Form)`
-  padding: 0;
   width: 100%;
+  padding: 0;
 `
 export default class Filter extends Component {
   state = { isDrawerVisible: false }
@@ -37,7 +37,7 @@ export default class Filter extends Component {
             <Tooltip title="Расширенные фильтры">
               <Icon
                 type="filter"
-                style={{ color: '#1890ff', cursor: 'pointer' }}
+                style={{ color: 'var(--color-accent)', cursor: 'pointer' }}
                 onClick={this.toggleDrawer}
               />
             </Tooltip>

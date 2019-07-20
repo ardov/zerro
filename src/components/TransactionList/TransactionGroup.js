@@ -17,7 +17,7 @@ const Title = styled.h3`
   z-index: 2;
   margin: 0;
   padding: 8px 0;
-  color: rgba(0, 0, 0, 0.56);
+  color: var(--text-secondary);
   font-weight: 400;
   background-color: #fff;
 `
