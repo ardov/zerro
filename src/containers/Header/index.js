@@ -47,7 +47,7 @@ function Header({
   lastSync,
   isPending,
 }) {
-  const exportMenu = (
+  const SettingsMenu = (
     <Menu>
       <Menu.Item key="1" onClick={exportCsv}>
         <Icon type="download" />
@@ -57,6 +57,11 @@ function Header({
         <Icon type="download" />
         Полный бэкап
       </Menu.Item>
+      <Menu.Divider />
+      <Menu.Item key="logOut" onClick={logOut}>
+        <Icon type="logout" />
+        Выйти
+      </Menu.Item>
     </Menu>
   )
   return (
@@ -64,8 +69,8 @@ function Header({
       <Name>More Money Now</Name>
 
       <div>
-        <NavLink to="/transactions">Транзакции</NavLink>
-        <NavLink to="/tags">Категории</NavLink>
+        <NavLink to="/transactions">История</NavLink>
+        {/* <NavLink to="/tags">Категории</NavLink> */}
         <NavLink to="/budget">Бюджет</NavLink>
       </div>
       <Buttons>
@@ -78,13 +83,9 @@ function Header({
           {changedNum ? `Сохранить (${changedNum})` : `Обновить`}
         </StyledButton>
 
-        <Dropdown overlay={exportMenu} trigger={['click']}>
-          <StyledButton>
-            Экспорт <Icon type="down" />
-          </StyledButton>
+        <Dropdown overlay={SettingsMenu} trigger={['click']}>
+          <StyledButton icon="setting" />
         </Dropdown>
-
-        <StyledButton onClick={logOut}>Выйти</StyledButton>
       </Buttons>
     </Main>
   )
