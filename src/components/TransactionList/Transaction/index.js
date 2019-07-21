@@ -7,7 +7,7 @@ import { getInstrument } from 'store/data/instruments'
 import { getAccount } from 'store/data/accounts'
 import { getPopulatedTag } from 'store/data/tags'
 
-import Transaction from './TransactionPreview'
+import Transaction from './Body'
 import { getTransaction } from 'store/data/transactions'
 
 const mapStateToProps = (state, props) => {

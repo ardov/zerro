@@ -11,26 +11,31 @@ const StyledDrawer = styled(Drawer)`
 
 export default class TransactionsDrawer extends Component {
   render() {
-    const props = this.props
-    const listOptions = {
-      ids: props.ids,
-      conditions: props.conditions,
-      groupBy: props.groupBy || 'day',
-      sortType: props.sortType,
-      ascending: props.ascending,
-    }
+    const {
+      ids,
+      conditions,
+      groupBy = 'day',
+      sortType,
+      ascending,
+
+      onClose,
+      visible,
+      ...rest
+    } = this.props
 
     return (
       <StyledDrawer
         placement="right"
         closable={true}
         width={500}
-        onClose={props.onClose}
-        visible={props.visible}
-        {...props}
+        onClose={onClose}
+        visible={visible}
+        {...rest}
       >
         <div style={{ height: '100vh' }}>
-          <TransactionList {...listOptions} />
+          <TransactionList
+            {...{ ids, conditions, groupBy, sortType, ascending }}
+          />
         </div>
       </StyledDrawer>
     )

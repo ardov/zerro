@@ -33,19 +33,6 @@ const Wrapper = styled.div`
   position: relative;
 `
 
-const SearchWrapper = styled.div`
-  position: absolute;
-  /* max-width: 560px; */
-  top: 0;
-  left: 0;
-  z-index: 3;
-  width: 100%;
-  height: 40px;
-  margin: 0 auto;
-  background-color: #222;
-  border: 1px solid red;
-`
-
 class TransactionList extends React.Component {
   state = { listRef: {} }
 
