@@ -1,6 +1,11 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import styled from 'styled-components'
-import FilterTags from './FilterTags'
+import {
+  setCondition,
+  setTags,
+  getFilterConditions,
+} from 'store/filterConditions'
 import TagSelect from 'containers/TagSelect'
 import { Checkbox, Input, Form, Icon, Drawer, Tooltip, Radio } from 'antd'
 
@@ -11,7 +16,7 @@ const StyledForm = styled(Form)`
   width: 100%;
   padding: 0;
 `
-export default class Filter extends Component {
+class Filter extends Component {
   state = { isDrawerVisible: false }
 
   handleTypeChange = e => {
@@ -27,10 +32,10 @@ export default class Filter extends Component {
     this.setState(prev => ({ isDrawerVisible: !prev.isDrawerVisible }))
 
   render() {
-    const conditions = this.props.conditions
+    const { conditions = {}, className } = this.props
 
     return (
-      <div>
+      <div className={className}>
         <Input
           value={conditions.search}
           suffix={
@@ -120,8 +125,21 @@ export default class Filter extends Component {
             </Form.Item>
           </StyledForm>
         </Drawer>
-        <FilterTags conditions={conditions} />
       </div>
     )
   }
 }
+
+const mapStateToProps = state => ({
+  conditions: getFilterConditions(state),
+})
+
+const mapDispatchToProps = dispatch => ({
+  setCondition: condition => dispatch(setCondition(condition)),
+  setTags: tags => dispatch(setTags(tags)),
+})
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Filter)

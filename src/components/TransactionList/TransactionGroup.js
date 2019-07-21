@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from 'styled-components'
-
 import Transaction from './Transaction'
 
 const GroupContainer = styled.div`
@@ -16,7 +15,7 @@ const Title = styled.h3`
   top: 0;
   z-index: 2;
   margin: 0;
-  padding: 8px 0;
+  padding: 16px 0 8px;
   color: var(--text-secondary);
   font-weight: 400;
   background-color: #fff;
@@ -24,12 +23,13 @@ const Title = styled.h3`
 
 export default class TransactionGroup extends React.PureComponent {
   render() {
+    const { style, name, transactions, topOffset = 0 } = this.props
     return (
-      <GroupContainer style={this.props.style}>
+      <GroupContainer style={style}>
         <Group>
-          <Title>{this.props.name}</Title>
+          <Title style={{ top: topOffset }}>{name}</Title>
           <div>
-            {this.props.transactions.map(id => (
+            {transactions.map(id => (
               <Transaction key={id.id} id={id.id} />
             ))}
           </div>

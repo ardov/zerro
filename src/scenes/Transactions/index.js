@@ -3,7 +3,6 @@ import styled from 'styled-components'
 
 import Header from 'containers/Header'
 import TransactionList from 'components/TransactionList'
-import Filter from 'containers/Filter'
 import DetailsPanel from 'containers/DetailsPanel'
 import BulkActions from 'containers/BulkActions'
 import AccountList from 'containers/AccountList'
@@ -18,9 +17,10 @@ const Menu = styled.div`
   flex-shrink: 0;
   width: 280px;
   padding: 40px;
+  overflow: auto;
   border-right: 1px solid rgba(0, 0, 0, 0.1);
 `
-const Content = styled.div`
+const StyledTransactionList = styled(TransactionList)`
   flex-grow: 1;
   min-width: 0;
   height: 100%;
@@ -28,9 +28,6 @@ const Content = styled.div`
 const SidePanel = styled.div`
   width: 480px;
   overflow: auto;
-`
-const StyledBulkActions = styled(BulkActions)`
-  margin-top: 24px;
 `
 
 export default class TransactionsView extends Component {
@@ -40,13 +37,12 @@ export default class TransactionsView extends Component {
         <Header />
         <Body>
           <Menu>
-            <Filter />
-            <StyledBulkActions />
+            <BulkActions />
             <AccountList />
           </Menu>
-          <Content>
-            <TransactionList groupBy={'day'} />
-          </Content>
+
+          <StyledTransactionList groupBy={'day'} />
+
           <SidePanel>
             <DetailsPanel />
           </SidePanel>
