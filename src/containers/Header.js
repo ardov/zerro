@@ -75,9 +75,7 @@ function Header({
           loading={isPending}
           type={changedNum ? 'primary' : ''}
         >
-          {changedNum
-            ? `Сохранить изменения (${changedNum})`
-            : `Обновить данные`}
+          {changedNum ? `Сохранить (${changedNum})` : `Обновить`}
         </StyledButton>
 
         <Dropdown overlay={exportMenu} trigger={['click']}>
