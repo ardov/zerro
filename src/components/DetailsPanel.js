@@ -11,19 +11,18 @@ const formatDateTime = date =>
   format(date, 'D MMMM YYYY, dd, HH:mm:ss', { locale: ru })
 
 const Panel = styled.section`
-  border-left: 1px solid #eee;
   display: flex;
-  overflow: auto;
   flex-direction: column;
   padding: 40px;
+  overflow: auto;
 `
 
 const Line = ({ name, value }) => {
   const Body = styled.div`
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: row;
     padding: 8px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   `
   const Name = styled.div`
     flex-shrink: 0;
@@ -44,7 +43,7 @@ const Line = ({ name, value }) => {
 export default class DetailsPanel extends React.Component {
   state = {
     transaction: null,
-    changed: null
+    changed: null,
   }
 
   componentWillReceiveProps = ({ transaction }) => {
@@ -52,8 +51,8 @@ export default class DetailsPanel extends React.Component {
       this.setState({
         transaction: {
           ...transaction,
-          ...{ tag: transaction.tag && transaction.tag.map(tag => tag.id) }
-        }
+          ...{ tag: transaction.tag && transaction.tag.map(tag => tag.id) },
+        },
       })
     }
   }
@@ -64,7 +63,7 @@ export default class DetailsPanel extends React.Component {
     this.setState(prev => {
       return {
         transaction: { ...prev.transaction, ...{ tag: tags } },
-        changed: { ...prev.changed, ...{ tag: tags } }
+        changed: { ...prev.changed, ...{ tag: tags } },
       }
     })
   }
@@ -76,19 +75,19 @@ export default class DetailsPanel extends React.Component {
       ? [
           {
             name: 'ID',
-            value: tr.id
+            value: tr.id,
           },
           {
             name: 'Дата',
-            value: formatDate(tr.date)
+            value: formatDate(tr.date),
           },
           {
             name: 'Создана',
-            value: formatDateTime(tr.created)
+            value: formatDateTime(tr.created),
           },
           {
             name: 'Последнее изменение',
-            value: formatDateTime(tr.changed)
+            value: formatDateTime(tr.changed),
           },
           {
             name: 'Доход',
@@ -100,11 +99,11 @@ export default class DetailsPanel extends React.Component {
                 minimumFractionDigits={0}
                 maximumFractionDigits={0}
               />
-            )
+            ),
           },
           {
             name: 'На счёт',
-            value: tr.incomeAccount.title
+            value: tr.incomeAccount.title,
           },
           {
             name: 'Расход',
@@ -116,47 +115,47 @@ export default class DetailsPanel extends React.Component {
                 minimumFractionDigits={0}
                 maximumFractionDigits={0}
               />
-            )
+            ),
           },
           {
             name: 'Со счёта',
-            value: tr.outcomeAccount.title
+            value: tr.outcomeAccount.title,
           },
           {
             name: 'originalPayee',
-            value: tr.originalPayee
+            value: tr.originalPayee,
           },
           {
             name: 'Категории',
-            value: tr.tag ? tr.tag.map(tag => tag.title).join(', ') : '--'
+            value: tr.tag ? tr.tag.map(tag => tag.title).join(', ') : '--',
           },
           {
             name: 'payee',
-            value: tr.payee
+            value: tr.payee,
           },
           {
             name: 'deleted',
-            value: tr.deleted
+            value: tr.deleted,
           },
           {
             name: 'hold',
-            value: tr.hold
+            value: tr.hold,
           },
           {
             name: 'qrCode',
-            value: tr.qrCode
+            value: tr.qrCode,
           },
           {
             name: 'comment',
-            value: tr.comment
+            value: tr.comment,
           },
           {
             name: 'opIncome',
-            value: tr.opIncome
+            value: tr.opIncome,
           },
           {
             name: 'opOutcome',
-            value: tr.opOutcome
+            value: tr.opOutcome,
           },
           // {
           //   name: 'opIncomeInstrument',
@@ -176,20 +175,20 @@ export default class DetailsPanel extends React.Component {
               >
                 {tr.latitude + ' ' + tr.longitude}
               </a>
-            )
+            ),
           },
           {
             name: 'merchant',
-            value: tr.merchant ? tr.merchant.title : 'null'
+            value: tr.merchant ? tr.merchant.title : 'null',
           },
           {
             name: 'incomeBankID',
-            value: tr.incomeBankID
+            value: tr.incomeBankID,
           },
           {
             name: 'outcomeBankID',
-            value: tr.outcomeBankID
-          }
+            value: tr.outcomeBankID,
+          },
         ]
       : null
 

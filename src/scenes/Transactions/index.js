@@ -28,6 +28,7 @@ const StyledTransactionList = styled(TransactionList)`
 const SidePanel = styled.div`
   width: 480px;
   overflow: auto;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
 `
 
 export default class TransactionsView extends Component {
