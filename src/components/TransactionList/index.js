@@ -1,7 +1,5 @@
 import React, { memo, forwardRef } from 'react'
 import styled from 'styled-components'
-import { format, isToday, isYesterday, isThisYear } from 'date-fns'
-import ru from 'date-fns/locale/ru'
 import { VariableSizeList as List } from 'react-window'
 import { areEqual } from 'react-window'
 import AutoSizer from 'react-virtualized-auto-sizer'
@@ -10,24 +8,11 @@ import { connect } from 'react-redux'
 import TransactionGroup from './TransactionGroup'
 import Search from './Search'
 import { getTransactionList } from 'store/data/transactions'
+import formatDate from './formatDate'
 
-function formatDate(date) {
-  const formats = {
-    today: 'Сегодня, D MMMM, dd',
-    yesterday: 'Вчера, D MMMM, dd',
-    thisYear: 'D MMMM, dd',
-    previousYear: 'D MMMM YYYY, dd',
-  }
-  const formatString = isToday(date)
-    ? formats.today
-    : isYesterday(date)
-    ? formats.yesterday
-    : isThisYear(date)
-    ? formats.thisYear
-    : formats.previousYear
-
-  return format(date, formatString, { locale: ru })
-}
+const GROUP_HEADER_HEIGHT = 48
+const TRANSACTION_HEIGHT = 77
+const BORDER_HEIGHT = 2
 
 const Wrapper = styled.div`
   position: relative;
@@ -42,24 +27,15 @@ class TransactionList extends React.Component {
 
   setRef = r => this.setState({ listRef: r })
 
-  getItemKey = i =>
-    +this.props.groupped[i].date +
-    '-' +
-    this.props.groupped[i].transactions.length
+  getItemKey = i => +this.props.groups[i].date
 
-  getItemSize = (i, d) => {
-    const GROUP_HEADER_HEIGHT = 48
-    const TRANSACTION_HEIGHT = 77
-    const BORDER_HEIGHT = 2
-    return (
-      GROUP_HEADER_HEIGHT +
-      TRANSACTION_HEIGHT * this.props.groupped[i].transactions.length +
-      BORDER_HEIGHT
-    )
-  }
+  getItemSize = (i, d) =>
+    GROUP_HEADER_HEIGHT +
+    TRANSACTION_HEIGHT * this.props.groups[i].transactions.length +
+    BORDER_HEIGHT
 
   render() {
-    const { groupped, className } = this.props
+    const { groups, className } = this.props
     const SEARCH_HEIGHT = 56
     const PADDING_BOTTOM = 40
 
@@ -82,9 +58,8 @@ class TransactionList extends React.Component {
         <TransactionGroup
           style={{ ...style, top: style.top + SEARCH_HEIGHT }}
           topOffset={SEARCH_HEIGHT}
-          key={+groupped[index].date}
-          name={formatDate(groupped[index].date)}
-          transactions={groupped[index].transactions}
+          name={formatDate(groups[index].date)}
+          transactions={groups[index].transactions}
         />
       ),
       areEqual
@@ -100,11 +75,11 @@ class TransactionList extends React.Component {
               ref={this.setRef}
               innerElementType={innerElementType}
               height={height}
-              itemCount={groupped.length}
+              itemCount={groups.length}
               itemSize={this.getItemSize}
               width={'100%'}
               itemKey={this.getItemKey}
-              itemData={groupped}
+              itemData={groups}
             >
               {Row}
             </List>
@@ -116,6 +91,6 @@ class TransactionList extends React.Component {
 }
 
 export default connect(
-  (state, params) => ({ groupped: getTransactionList(state, params) }),
+  (state, params) => ({ groups: getTransactionList(state, params) }),
   null
 )(TransactionList)
