@@ -1,16 +1,33 @@
 import { getRootUser } from 'store/data/users'
 import slice from './slice'
 import selectors from './selectors'
+import getMonths from './budgetViewSelector'
+import { getPopulatedTag } from '../tags'
 const { setBudget } = slice.actions
 
-export const setOutcomeBudget = (outcome, month, tag) => (
+export const setOutcomeBudget = (targetOutcome, monthDate, tagId) => (
   dispatch,
   getState
 ) => {
   const state = getState()
-  const created = selectors.getBudget(state, tag, month)
+  const created = selectors.getBudget(state, tagId, monthDate)
+  const months = getMonths(state)
   const user = getRootUser(state).id
-  const budget = created || createBudget({ user, date: +month, tag })
+  const parentTagId = getPopulatedTag(state, tagId).parent
+  const month = months.find(({ date }) => +date === +monthDate)
+
+  let outcome = targetOutcome
+
+  if (!parentTagId) {
+    // if it's top level category
+    const { budgeted, totalBudgeted } = month.tags.find(
+      ({ id }) => id === tagId
+    )
+    const childrenBudgets = totalBudgeted - budgeted
+    outcome = targetOutcome - childrenBudgets
+  }
+
+  const budget = created || createBudget({ user, date: +monthDate, tag: tagId })
   const changed = { ...budget, outcome, changed: Date.now() }
   dispatch(setBudget(changed))
 }
