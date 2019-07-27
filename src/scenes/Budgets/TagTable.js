@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Table } from 'antd'
-import { formatMoney } from 'Utils/format'
+import { formatMoney } from 'helpers/format'
 import { Menu, Dropdown } from 'antd'
 import { setOutcomeBudget } from 'store/data/budgets'
 

@@ -1,6 +1,6 @@
 import { createSelector } from 'redux-starter-kit'
 import { format } from 'date-fns'
-import { convertToSyncArray } from 'Utils/converters'
+import { convertToSyncArray } from 'helpers/converters'
 
 const getBudgets = createSelector(
   ['data.budget.server', 'data.budget.diff'],

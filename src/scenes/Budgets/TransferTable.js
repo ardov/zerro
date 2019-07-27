@@ -1,6 +1,6 @@
 import React from 'react'
 import { Table } from 'antd'
-import { formatMoney } from 'Utils/format'
+import { formatMoney } from 'helpers/format'
 export function TransferTable({ transfers, instrument }) {
   const formatSum = sum => formatMoney(sum, instrument.shortTitle)
   const columns = [
@@ -8,33 +8,33 @@ export function TransferTable({ transfers, instrument }) {
       title: 'Счёт',
       dataIndex: 'name',
       key: 'name',
-      render: text => text
+      render: text => text,
     },
     {
       title: 'Ушло на счёт',
       dataIndex: 'transferIncome',
       key: 'transferIncome',
-      render: text => text
+      render: text => text,
     },
     {
       title: 'Вернулось со счёта',
       dataIndex: 'transferOutcome',
       key: 'transferOutcome',
-      render: text => text
+      render: text => text,
     },
     {
       title: 'Итого',
       dataIndex: 'total',
       key: 'total',
-      render: text => text
-    }
+      render: text => text,
+    },
   ]
   const tableData = transfers.map(account => ({
     key: account.id,
     name: account.title,
     transferOutcome: formatSum(account.transferOutcome),
     transferIncome: formatSum(account.transferIncome),
-    total: formatSum(account.transferOutcome - account.transferIncome)
+    total: formatSum(account.transferOutcome - account.transferIncome),
   }))
   return (
     <Table

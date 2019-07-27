@@ -1,7 +1,7 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
 import { wipeData, updateData, updateDataFunc } from 'store/data/commonActions'
 import { getInstrument } from 'store/data/instruments'
-import { convertToSyncArray } from 'Utils/converters'
+import { convertToSyncArray } from 'helpers/converters'
 
 // INITIAL STATE
 const initialState = {}

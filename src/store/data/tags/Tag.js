@@ -1,4 +1,4 @@
-import { unsignedToRGB } from 'Utils/convertColor'
+import { unsignedToRGB } from 'helpers/convertColor'
 import toArray from 'lodash/toArray'
 
 export default class Tag {

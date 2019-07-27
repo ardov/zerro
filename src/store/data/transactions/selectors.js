@@ -5,7 +5,7 @@ import { getPopulatedTags } from 'store/data/tags'
 import { getMerchants } from 'store/data/merchants'
 import { groupTransactionsBy, sortBy } from './helpers'
 import { getFilterConditions, check } from 'store/filterConditions'
-import { convertToSyncArray } from 'Utils/converters'
+import { convertToSyncArray } from 'helpers/converters'
 import { populate } from './populate'
 
 const getTransactionsToSave = createSelector(

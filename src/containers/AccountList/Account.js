@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
-import { formatMoney } from 'Utils/format'
+import { formatMoney } from 'helpers/format'
 
 const Body = styled.div`
   display: flex;

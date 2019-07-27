@@ -11,7 +11,7 @@ import {
 } from 'store/data/transactions'
 import { Button, Popconfirm, Icon } from 'antd'
 import TagSelect from './TagSelect'
-import pluralize from 'Utils/pluralize'
+import pluralize from 'helpers/pluralize'
 
 const Num = styled.h3`
   padding-bottom: 4px;

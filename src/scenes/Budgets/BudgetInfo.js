@@ -1,5 +1,5 @@
 import React from 'react'
-import { formatMoney } from 'Utils/format'
+import { formatMoney } from 'helpers/format'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import styled, { css } from 'styled-components'

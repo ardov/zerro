@@ -8,7 +8,7 @@ import {
   removeSyncedFunc,
   updateDataFunc,
 } from 'store/data/commonActions'
-import { convertDatesToMs } from 'Utils/converters'
+import { convertDatesToMs } from 'helpers/converters'
 
 // INITIAL STATE
 const initialState = { server: {}, diff: {} }

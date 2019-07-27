@@ -1,5 +1,5 @@
 import { createAction } from 'redux-starter-kit'
-import { convertDatesToMs } from 'Utils/converters'
+import { convertDatesToMs } from 'helpers/converters'
 
 // ACTIONS
 export const wipeData = createAction('data/wipeData')
