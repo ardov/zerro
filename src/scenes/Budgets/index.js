@@ -61,6 +61,7 @@ class Budgets extends React.Component {
             <MonthSelector
               months={months}
               current={selected}
+              onSetCurrent={this.setCurrentMonth}
               onChange={this.setMonth}
             />
             <StyledBudgetInfo

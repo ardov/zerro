@@ -15,13 +15,16 @@ const Name = styled(Button)`
   text-align: left;
 `
 
-export default function MonthSelect({ months, current, onChange }) {
+export default function MonthSelect({
+  months,
+  current,
+  onChange,
+  onSetCurrent,
+}) {
   const currentMonth = months[current]
   return (
     <Group size="large">
-      <Name onClick={() => onChange(++current)}>
-        {getMonthName(currentMonth)}
-      </Name>
+      <Name onClick={onSetCurrent}>{getMonthName(currentMonth)}</Name>
       <Button
         icon="left"
         onClick={() => onChange(--current)}
