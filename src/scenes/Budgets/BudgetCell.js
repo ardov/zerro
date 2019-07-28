@@ -1,7 +1,11 @@
 import React from 'react'
+import styled from 'styled-components'
 import { formatMoney } from 'helpers/format'
-import { Menu, Dropdown, Input } from 'antd'
+import { Menu, Dropdown, InputNumber } from 'antd'
 
+const StyledInput = styled(InputNumber)`
+  min-width: 120px;
+`
 export class BudgetCell extends React.Component {
   state = {
     budgeted: this.props.isChild
@@ -13,9 +17,11 @@ export class BudgetCell extends React.Component {
     this.props.onUpdate(val, this.props.date, this.props.tag.id)
   }
   render() {
-    const { tag } = this.props
+    const { tag, isChild } = this.props
     const { budgeted } = this.state
-    console.log('render cell')
+    const availible = isChild ? tag.availible : tag.totalAvailible
+    const orginalBudgeted = isChild ? tag.budgeted : tag.totalBudgeted
+
     return (
       <Dropdown
         trigger={['click']}
@@ -23,18 +29,21 @@ export class BudgetCell extends React.Component {
           <Menu>
             <Menu.Item
               key="0"
-              onClick={() => this.onChange(budgeted - tag.totalAvailible)}
+              onClick={() => this.onChange(orginalBudgeted - availible)}
             >
               Сбросить остаток в ноль (
-              {formatMoney(budgeted - tag.totalAvailible)})
+              {formatMoney(orginalBudgeted - availible)})
             </Menu.Item>
           </Menu>
         }
       >
         <div>
-          <Input
+          <StyledInput
             value={budgeted}
-            onChange={e => this.onChange(+e.target.value)}
+            formatter={value => formatMoney(value, null, 0)}
+            parser={value => +value.replace(' ', '').replace(',', '.')}
+            decimalSeparator="."
+            onChange={this.onChange}
           />
         </div>
       </Dropdown>

@@ -1,8 +1,8 @@
-export function formatMoney(amount, shortCode) {
+export function formatMoney(amount, shortCode, decimals = 2) {
   return new Intl.NumberFormat('ru', {
     style: shortCode ? 'currency' : 'decimal',
-    currency: shortCode,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    currency: shortCode || undefined,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   }).format(amount)
 }
