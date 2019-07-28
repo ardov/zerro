@@ -19,6 +19,7 @@ function TagTable({ tags, instrument, date, updateBudget }) {
       title: 'Бюджет',
       dataIndex: 'budgeted',
       key: 'budgeted',
+      align: 'right',
       render: ({ date, updateBudget, tag, isChild = false }) => (
         <BudgetCell
           tag={tag}
@@ -33,11 +34,13 @@ function TagTable({ tags, instrument, date, updateBudget }) {
       title: 'Потрачено',
       dataIndex: 'outcome',
       key: 'outcome',
+      align: 'right',
     },
     {
       title: 'Доступно',
       dataIndex: 'availible',
       key: 'availible',
+      align: 'right',
     },
   ]
 
@@ -51,18 +54,29 @@ function TagTable({ tags, instrument, date, updateBudget }) {
       outcome: tag.totalOutcome ? formatSum(tag.totalOutcome) : '-',
 
       children: tag.children.length
-        ? tag.children.map(child => ({
-            key: child.id,
-            name: child.title,
-            budgeted: { date, updateBudget, tag: child, isChild: true },
-            availible: child.availible ? formatSum(child.availible) : '-',
-            outcome: child.outcome ? formatSum(child.outcome) : '-',
-          }))
+        ? tag.children
+            .filter(
+              tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailible
+            )
+            .map(child => ({
+              key: child.id,
+              name: child.title,
+              budgeted: { date, updateBudget, tag: child, isChild: true },
+              availible: child.availible ? formatSum(child.availible) : '-',
+              outcome: child.outcome ? formatSum(child.outcome) : '-',
+            }))
         : null,
     }))
     .sort((a, b) => a.name.localeCompare(b.name))
 
-  return <Table columns={columns} dataSource={tableData} pagination={false} />
+  return (
+    <Table
+      columns={columns}
+      dataSource={tableData}
+      indentSize={56}
+      pagination={false}
+    />
+  )
 }
 
 const mapDispatchToProps = dispatch => ({

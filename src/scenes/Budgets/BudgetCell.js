@@ -5,6 +5,11 @@ import { Menu, Dropdown, InputNumber } from 'antd'
 
 const StyledInput = styled(InputNumber)`
   min-width: 120px;
+
+  & .ant-input-number-input {
+    padding-right: 24px;
+    text-align: right;
+  }
 `
 export class BudgetCell extends React.Component {
   state = {
@@ -37,15 +42,13 @@ export class BudgetCell extends React.Component {
           </Menu>
         }
       >
-        <div>
-          <StyledInput
-            value={budgeted}
-            formatter={value => formatMoney(value, null, 0)}
-            parser={value => +value.replace(' ', '').replace(',', '.')}
-            decimalSeparator="."
-            onChange={this.onChange}
-          />
-        </div>
+        <StyledInput
+          value={budgeted}
+          formatter={value => formatMoney(value, null, 0)}
+          parser={value => +value.replace(' ', '').replace(',', '.')}
+          decimalSeparator="."
+          onChange={this.onChange}
+        />
       </Dropdown>
     )
   }
