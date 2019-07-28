@@ -14,10 +14,10 @@ const Body = styled.div`
 `
 
 const Title = styled.div`
-  width: 200px;
-  flex-shrink: 0;
   position: sticky;
   left: 0;
+  flex-shrink: 0;
+  width: 200px;
 `
 
 export default class Tag extends Component {
@@ -37,7 +37,7 @@ export default class Tag extends Component {
                 maximumFractionDigits={0}
               />
             ),
-            title: formatDate(m.date)
+            title: formatDate(m.date),
           }
         })
       : []

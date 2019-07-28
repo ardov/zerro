@@ -6,7 +6,7 @@ import { Menu, Dropdown, InputNumber } from 'antd'
 const StyledInput = styled(InputNumber)`
   min-width: 120px;
 
-  & .ant-input-number-input {
+  .ant-input-number-input {
     padding-right: 24px;
     text-align: right;
   }

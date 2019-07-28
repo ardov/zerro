@@ -1,10 +1,24 @@
 import React from 'react'
+import styled from 'styled-components'
 import { connect } from 'react-redux'
 import debounce from 'lodash/debounce'
 import { Table } from 'antd'
 import { formatMoney } from 'helpers/format'
 import { setOutcomeBudget } from 'store/data/budgets'
 import { BudgetCell } from './BudgetCell'
+
+const Availible = styled.span`
+  color: ${props =>
+    props.value === 0
+      ? 'var(--text-placeholder)'
+      : props.value < 0
+      ? 'var(--color-danger)'
+      : 'var(--text-success)'};
+`
+const Outcome = styled.span`
+  color: ${props =>
+    props.value === 0 ? 'var(--text-placeholder)' : 'var(--text-primary)'};
+`
 
 function TagTable({ tags, instrument, date, updateBudget }) {
   const formatSum = sum => formatMoney(sum, instrument.shortTitle)
@@ -35,12 +49,14 @@ function TagTable({ tags, instrument, date, updateBudget }) {
       dataIndex: 'outcome',
       key: 'outcome',
       align: 'right',
+      render: value => <Outcome value={value}>{formatSum(value)}</Outcome>,
     },
     {
       title: 'Доступно',
       dataIndex: 'availible',
       key: 'availible',
       align: 'right',
+      render: value => <Availible value={value}>{formatSum(value)}</Availible>,
     },
   ]
 
@@ -50,8 +66,8 @@ function TagTable({ tags, instrument, date, updateBudget }) {
       key: tag.id + '',
       name: tag.title,
       budgeted: { date, updateBudget, tag },
-      availible: tag.totalAvailible ? formatSum(tag.totalAvailible) : '-',
-      outcome: tag.totalOutcome ? formatSum(tag.totalOutcome) : '-',
+      availible: tag.totalAvailible,
+      outcome: tag.totalOutcome,
 
       children: tag.children.length
         ? tag.children
@@ -62,8 +78,8 @@ function TagTable({ tags, instrument, date, updateBudget }) {
               key: child.id,
               name: child.title,
               budgeted: { date, updateBudget, tag: child, isChild: true },
-              availible: child.availible ? formatSum(child.availible) : '-',
-              outcome: child.outcome ? formatSum(child.outcome) : '-',
+              availible: child.availible,
+              outcome: child.outcome,
             }))
         : null,
     }))
@@ -73,6 +89,7 @@ function TagTable({ tags, instrument, date, updateBudget }) {
     <Table
       columns={columns}
       dataSource={tableData}
+      defaultExpandAllRows={true}
       indentSize={56}
       pagination={false}
     />
