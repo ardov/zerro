@@ -50,22 +50,7 @@ export const getPopulatedAccounts = createSelector(
 export const getPopulatedAccount = (state, id) =>
   getPopulatedAccounts(state)[id]
 
-export const getInBalance = createSelector(
+export const getAccountList = createSelector(
   [getPopulatedAccounts],
-  accounts =>
-    Object.keys(accounts)
-      .map(id => accounts[id])
-      .filter(acc => !acc.archive)
-      .filter(acc => acc.inBalance)
-      .sort((a, b) => b.balance - a.balance)
-)
-
-export const getOutOfBalance = createSelector(
-  [getPopulatedAccounts],
-  accounts =>
-    Object.keys(accounts)
-      .map(id => accounts[id])
-      .filter(acc => !acc.archive)
-      .filter(acc => !acc.inBalance)
-      .sort((a, b) => b.balance - a.balance)
+  accounts => Object.values(accounts).sort((a, b) => b.balance - a.balance)
 )

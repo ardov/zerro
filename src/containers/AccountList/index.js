@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import Account from './Account'
 import styled from 'styled-components'
-import { getInBalance, getOutOfBalance } from 'store/data/accounts'
+import { getAccountList } from 'store/data/accounts'
 import { getUserInstrument } from 'store/data/users'
 
 const Heading = styled(Account)`
@@ -20,34 +20,34 @@ const getTotalBalance = (accs, targetInstrument) =>
   }, 0)
 
 const AccountList = ({
-  inBalance,
-  outOfBalance,
+  inBudget,
+  savings,
   userInstrument,
   className,
   onAccountClick,
 }) => {
   if (!userInstrument) return null
 
-  const inBalanceSum = getTotalBalance(inBalance, userInstrument)
-  const outOfBalanceSum = getTotalBalance(outOfBalance, userInstrument)
+  const inBudgetSum = getTotalBalance(inBudget, userInstrument)
+  const savingsSum = getTotalBalance(savings, userInstrument)
 
   return (
     <div className={className}>
       <Heading
         title="В бюджете"
-        balance={inBalanceSum}
+        balance={inBudgetSum}
         instrument={userInstrument}
       />
-      {inBalance.map(acc => (
+      {inBudget.map(acc => (
         <Account key={acc.id} {...acc} onClick={() => onAccountClick(acc.id)} />
       ))}
 
       <Heading
-        title="Не в бюджете"
-        balance={outOfBalanceSum}
+        title="Сбережения"
+        balance={savingsSum}
         instrument={userInstrument}
       />
-      {outOfBalance.map(acc => (
+      {savings.map(acc => (
         <Account key={acc.id} {...acc} />
       ))}
     </div>
@@ -55,8 +55,8 @@ const AccountList = ({
 }
 
 const mapStateToProps = (state, props) => ({
-  inBalance: getInBalance(state),
-  outOfBalance: getOutOfBalance(state),
+  inBudget: getAccountList(state).filter(a => !a.archive && !a.savings),
+  savings: getAccountList(state).filter(a => !a.archive && a.savings),
   userInstrument: getUserInstrument(state),
 })
 

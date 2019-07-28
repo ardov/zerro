@@ -34,7 +34,7 @@ class Account extends React.Component {
     const { title, balance, instrument, className } = this.props
     const formattedBalance = formatMoney(balance, instrument.shortTitle)
     return (
-      <Body className={className}>
+      <Body className={className} onClick={() => console.log(this.props)}>
         <Title title={title}>{title}</Title>
         <Amount>{formattedBalance}</Amount>
       </Body>

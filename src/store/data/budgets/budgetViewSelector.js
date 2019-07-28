@@ -4,7 +4,7 @@ import isSameMonth from 'date-fns/is_same_month'
 import { getTransactionList } from 'store/data/transactions'
 import budgetSelectors from 'store/data/budgets/selectors'
 import { getTagsTree } from 'store/data/tags'
-import { getInBalance } from 'store/data/accounts'
+import { getAccountList } from 'store/data/accounts'
 import { check } from 'store/filterConditions'
 import { getUserInstrument } from 'store/data/users'
 import Month from './Month'
@@ -14,20 +14,21 @@ export default createSelector(
     getTransactionList,
     budgetSelectors.getBudgetsByMonthAndTag,
     getTagsTree,
-    getInBalance,
+    getAccountList,
     getUserInstrument,
   ],
-  (transactions, budgets, tags, accountsInBalance, userInstrument) => {
+  (transactions, budgets, tags, accounts, userInstrument) => {
     if (!userInstrument) return null
 
+    const accountsInBudget = accounts.filter(a => !a.archive && !a.savings)
     const filteredTr = transactions.filter(
       check({
         deleted: false,
-        accounts: accountsInBalance.map(acc => acc.id),
+        accounts: accountsInBudget.map(acc => acc.id),
       })
     )
 
-    const startFunds = accountsInBalance.reduce((sum, acc) => {
+    const startFunds = accountsInBudget.reduce((sum, acc) => {
       return (sum +=
         (acc.startBalance * acc.instrument.rate) / userInstrument.rate)
     }, 0)
@@ -44,7 +45,7 @@ export default createSelector(
         transactions: filteredTr,
         tags,
         budgets: budgets[+date] ? budgets[+date] : {},
-        accountsInBalance,
+        accountsInBudget,
         userInstrument,
         budgetedInFuture: 0,
       })
