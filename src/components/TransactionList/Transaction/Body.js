@@ -101,6 +101,7 @@ const Comment = styled.span`
 export default class Transaction extends React.Component {
   handleOpen = () => this.props.onClick(this.props.id)
   handlePayeeClick = () => this.props.onFilterByPayee(this.props.payee)
+  handleSelectSimilar = () => this.props.selectChanged(this.props.changed)
 
   render() {
     const {
@@ -133,7 +134,12 @@ export default class Transaction extends React.Component {
       type === 'income' ? incomeAccount.title : outcomeAccount.title
 
     return (
-      <Body onClick={this.handleOpen} deleted={deleted} isOpened={isOpened}>
+      <Body
+        onClick={this.handleOpen}
+        deleted={deleted}
+        isOpened={isOpened}
+        onDoubleClick={this.handleSelectSimilar}
+      >
         <Icon {...{ isChecked, isInSelectionMode, symbol, onToggle, color }} />
         <Information>
           <Line>

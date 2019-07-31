@@ -1,8 +1,11 @@
 import { connect } from 'react-redux'
-
 import { openTransaction, getOpenedId } from 'store/openedTransaction'
 import { setCondition } from 'store/filterConditions'
-import { getSelectedIds, toggleTransaction } from 'store/selectedTransactions'
+import {
+  getSelectedIds,
+  toggleTransaction,
+  selectTransactionsByChangedDate,
+} from 'store/selectedTransactions'
 import { getInstrument } from 'store/data/instruments'
 import { getAccount } from 'store/data/accounts'
 import { getPopulatedTag } from 'store/data/tags'
@@ -36,6 +39,7 @@ const mapStateToProps = (state, props) => {
 const mapDispatchToProps = (dispatch, props) => ({
   onClick: () => dispatch(openTransaction(props.id)),
   onToggle: () => dispatch(toggleTransaction(props.id)),
+  selectChanged: changed => dispatch(selectTransactionsByChangedDate(changed)),
   onFilterByPayee: payee => dispatch(setCondition({ search: payee })),
 })
 

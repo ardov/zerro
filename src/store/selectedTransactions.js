@@ -1,10 +1,12 @@
 import { createSlice } from 'redux-starter-kit'
+import { getTransactions } from './data/transactions'
 
 const { reducer, actions, selectors } = createSlice({
   slice: 'selectedTransactions',
   initialState: [],
   reducers: {
     checkTransaction: (state, { payload }) => [...state, payload],
+    checkTransactions: (state, { payload }) => payload,
     uncheckTransaction: (state, { payload }) =>
       state.filter(id => id !== payload),
     uncheckAllTransactions: () => [],
@@ -24,6 +26,7 @@ export default reducer
 // ACTIONS
 export const {
   checkTransaction,
+  checkTransactions,
   uncheckTransaction,
   uncheckAllTransactions,
   toggleTransaction,
@@ -31,3 +34,13 @@ export const {
 
 // SELECTORS
 export const getSelectedIds = selectors.getSelectedTransactions
+
+// THUNKS
+export const selectTransactionsByChangedDate = date => (dispatch, getState) => {
+  const state = getState()
+  const transactions = getTransactions(state)
+  const ids = Object.values(transactions)
+    .filter(tr => tr.changed === +date)
+    .map(tr => tr.id)
+  dispatch(checkTransactions(ids))
+}
