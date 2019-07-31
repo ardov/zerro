@@ -37,7 +37,7 @@ function TagTable({ tags, instrument, date, updateBudget }) {
       render: ({ date, updateBudget, tag, isChild = false }) => (
         <BudgetCell
           tag={tag}
-          key={tag.id + tag.totalBudgeted}
+          key={`${tag.id}${isChild ? tag.budgeted : tag.totalBudgeted}`}
           date={date}
           isChild={isChild}
           onUpdate={debounce(updateBudget, 2000)}
