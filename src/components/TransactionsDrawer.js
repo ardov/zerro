@@ -14,7 +14,7 @@ export default class TransactionsDrawer extends Component {
     const {
       ids,
       conditions,
-      groupBy = 'day',
+      groupBy = 'DAY',
       sortType,
       ascending,
 

@@ -1,66 +1,33 @@
-// HELPERS
 import startOfMonth from 'date-fns/start_of_month'
 import startOfDay from 'date-fns/start_of_day'
 import startOfWeek from 'date-fns/start_of_week'
 
 /**
  * Groups array of transactions
- * @param {String: groupType} day | week | month
+ * @param {String: groupType} DAY | WEEK | MONTH
  * @param {Array: arr} Array of Transaction
  * @return {Array} of objects {date, transactions}
  */
-export function groupTransactionsBy(groupType = 'day', arr) {
+export function groupTransactionsBy(groupType = 'DAY', arr) {
   if (!arr) return []
   const groupTypes = {
-    day: tr => startOfDay(tr.date),
-    week: tr => startOfWeek(tr.date, { weekStartsOn: 1 }),
-    month: tr => startOfMonth(tr.date),
+    DAY: tr => startOfDay(tr.date),
+    WEEK: tr => startOfWeek(tr.date, { weekStartsOn: 1 }),
+    MONTH: tr => startOfMonth(tr.date),
+    CHANGED: tr => tr.changed,
   }
 
-  const reducer = (groupped, tr) => {
-    let lastDate = groupped.length ? groupped[groupped.length - 1].date : null
-    if (+lastDate === +groupTypes[groupType](tr)) {
-      groupped[groupped.length - 1].transactions.push(tr)
-    } else {
-      groupped.push({
-        date: groupTypes[groupType](tr),
-        transactions: [tr],
-      })
-    }
-    return groupped
-  }
+  const groupCollection = arr.reduce((obj, tr) => {
+    const group = +groupTypes[groupType](tr)
+    obj[group] = obj[group] || []
+    obj[group].push(tr)
+    return obj
+  }, {})
 
-  return arr.reduce(reducer, [])
-}
-
-/**
- * Groups array of transactions returns IDs
- * @param {String: groupType} day | week | month
- * @param {Array: arr} Array of Transaction
- * @return {Array} of objects {date, transactions}
- */
-export function groupTransactionsAndReturnId(groupType = 'day', arr) {
-  if (!arr) return []
-  const groupTypes = {
-    day: date => startOfDay(date),
-    week: date => startOfWeek(date, { weekStartsOn: 1 }),
-    month: date => startOfMonth(date),
-  }
-
-  const reducer = (groupped, tr) => {
-    let lastDate = groupped.length ? groupped[groupped.length - 1].date : null
-    if (+lastDate === +groupTypes[groupType](tr.date)) {
-      groupped[groupped.length - 1].transactions.push(tr.id)
-    } else {
-      groupped.push({
-        date: groupTypes[groupType](tr.date),
-        transactions: [tr.id],
-      })
-    }
-    return groupped
-  }
-
-  return arr.reduce(reducer, [])
+  return Object.keys(groupCollection).map(date => ({
+    date: +date,
+    transactions: groupCollection[date],
+  }))
 }
 
 /**

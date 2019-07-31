@@ -14,7 +14,7 @@ const Group = styled.div`
 export default class TagList extends Component {
   render() {
     const { tags, transactions = [] } = this.props
-    const metricsByMonths = groupTransactionsBy('week', transactions).map(
+    const metricsByMonths = groupTransactionsBy('WEEK', transactions).map(
       group => {
         const metrics = calcMetrics(group.transactions)
         return {
