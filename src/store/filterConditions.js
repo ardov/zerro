@@ -87,7 +87,7 @@ export const check = conditions => tr => {
   }
 
   const checkTags = (tr, tags) => {
-    if (!tags) return true
+    if (!tags || !tags.length) return true
     if (!tr.tag && tags.includes(null) && tr.type !== 'transfer') return true
     if (!tr.tag) return false
     let result = false
