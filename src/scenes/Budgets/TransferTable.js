@@ -42,7 +42,7 @@ export function TransferTable({ transfers, instrument }) {
       title={() => 'Переводы на счета вне бюджета'}
       columns={columns}
       dataSource={tableData}
-      pagination={{ defaultPageSize: 100 }}
+      pagination={false}
     />
   )
 }
