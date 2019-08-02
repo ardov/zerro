@@ -20,7 +20,7 @@ const Outcome = styled.span`
     props.value === 0 ? 'var(--text-placeholder)' : 'var(--text-primary)'};
 `
 
-function TagTable({ tags, instrument, date, updateBudget }) {
+function TagTable({ tags, instrument, date, updateBudget, ...rest }) {
   const formatSum = sum => formatMoney(sum, instrument.shortTitle)
 
   const columns = [
@@ -52,7 +52,7 @@ function TagTable({ tags, instrument, date, updateBudget }) {
       render: value => <Outcome value={value}>{formatSum(value)}</Outcome>,
     },
     {
-      title: 'Доступно',
+      title: 'Остаток',
       dataIndex: 'availible',
       key: 'availible',
       align: 'right',
@@ -87,11 +87,13 @@ function TagTable({ tags, instrument, date, updateBudget }) {
 
   return (
     <Table
+      size="small"
       columns={columns}
       dataSource={tableData}
       defaultExpandAllRows={true}
       indentSize={56}
       pagination={false}
+      {...rest}
     />
   )
 }

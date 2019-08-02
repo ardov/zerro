@@ -29,6 +29,10 @@ const StyledAccountList = styled(AccountList)`
 const StyledBudgetInfo = styled(BudgetInfo)`
   margin-top: 24px;
 `
+const StyledTagTable = styled(TagTable)`
+  margin-top: 40px;
+  margin-bottom: 24px;
+`
 
 class Budgets extends React.Component {
   state = { selected: 0 }
@@ -71,7 +75,7 @@ class Budgets extends React.Component {
             <StyledAccountList />
           </LeftPanel>
           <Grow1>
-            <TagTable
+            <StyledTagTable
               tags={budgets[selected].tags}
               instrument={instrument}
               date={budgets[selected].date}

@@ -38,6 +38,7 @@ export function TransferTable({ transfers, instrument }) {
   }))
   return (
     <Table
+      size="small"
       title={() => 'Переводы на счета вне бюджета'}
       columns={columns}
       dataSource={tableData}
