@@ -45,7 +45,7 @@ const setMainTagToTransactions = (transactions, tagId) => (
   const state = getState()
   const result = transactions.map(id => {
     const tr = getTransaction(state, id)
-    const newTags = tr.tag ? [tagId, ...tr.tag] : [tagId]
+    const newTags = tr.tag ? [tagId, ...tr.tag.splice(1)] : [tagId]
     return {
       ...tr,
       tag: newTags,
