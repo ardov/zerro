@@ -1,11 +1,11 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
 
-import Header from 'containers/Header'
+import Header from 'components/Header'
 import TransactionList from 'components/TransactionList'
-import DetailsPanel from 'containers/DetailsPanel'
-import BulkActions from 'containers/BulkActions'
-import AccountList from 'containers/AccountList'
+import DetailsPanel from 'components/DetailsPanel'
+import BulkActions from 'components/BulkActions'
+import AccountList from 'components/AccountList'
 
 const Body = styled.div`
   display: flex;

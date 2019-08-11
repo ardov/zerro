@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import Header from 'containers/Header'
+import Header from 'components/Header'
 import TagList from './TagList'
 import { getTagsTree } from 'store/data/tags'
 import { getTransactionList } from 'store/data/transactions'

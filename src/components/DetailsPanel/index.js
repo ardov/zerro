@@ -6,7 +6,7 @@ import {
   applyChangesToTransaction,
   splitTransfer,
 } from 'store/data/transactions'
-import DetailsPanel from 'components/DetailsPanel'
+import DetailsPanel from './DetailsPanel'
 
 const mapStateToProps = (state, ownProps) => ({
   transaction: getOpenedTransaction(state),

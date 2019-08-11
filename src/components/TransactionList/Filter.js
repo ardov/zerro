@@ -6,7 +6,7 @@ import {
   setTags,
   getFilterConditions,
 } from 'store/filterConditions'
-import TagSelect from 'containers/TagSelect'
+import TagSelect from 'components/TagSelect'
 import { Checkbox, Input, Form, Icon, Drawer, Tooltip, Radio } from 'antd'
 
 const Search = Input.Search
