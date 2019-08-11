@@ -16,6 +16,22 @@
       "dest": "/manifest.json"
     },
     {
+      "src": "^/apple-touch-icon.png",
+      "dest": "/apple-touch-icon.png"
+    },
+    {
+      "src": "^/favicon-32x32.png",
+      "dest": "/favicon-32x32.png"
+    },
+    {
+      "src": "^/favicon-16x16.png",
+      "dest": "/favicon-16x16.png"
+    },
+    {
+      "src": "^/safari-pinned-tab.svg",
+      "dest": "/safari-pinned-tab.svg"
+    },
+    {
       "src": "^/(.*)",
       "dest": "/index.html"
     }
