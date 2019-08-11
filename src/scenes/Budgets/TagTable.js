@@ -72,7 +72,7 @@ function TagTable({ tags, instrument, date, updateBudget, ...rest }) {
       children: tag.children.length
         ? tag.children
             .filter(
-              tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailible
+              child => child.showOutcome || child.totalOutcome || child.totalAvailible
             )
             .map(child => ({
               key: child.id,
