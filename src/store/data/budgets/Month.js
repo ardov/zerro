@@ -85,9 +85,9 @@ export default class Month {
     return this.tags.reduce((sum, tag) => round(sum + tag.totalOutcome), 0)
   }
 
-  get availible() {
+  get available() {
     return this.tags.reduce((sum, tag) => {
-      return tag.totalAvailible > 0 ? round(sum + tag.totalAvailible) : sum
+      return tag.totalAvailable > 0 ? round(sum + tag.totalAvailable) : sum
     }, 0)
   }
 
@@ -113,7 +113,7 @@ export default class Month {
     return this.tags.reduce((sum, tag) => round(sum + tag.totalBudgeted), 0)
   }
 
-  // Overspent needs for next month (sum of all availibles sub zero)
+  // Overspent needs for next month (sum of all availables sub zero)
   get overspent() {
     return this.tags.reduce((sum, tag) => round(sum + tag.totalOverspent), 0)
   }
@@ -130,7 +130,7 @@ function round(amount, digits = 2) {
 function calcTagsData(tags, prevTags, transactions, budgets, userInstrument) {
   const metrics = calcMetrics(transactions, userInstrument.rate).byTag
   const result = tags.map((parent, index) => {
-    const prevAvailible = prevTags ? prevTags[index].availible : 0
+    const prevAvailable = prevTags ? prevTags[index].available : 0
     return {
       ...parent,
 
@@ -145,60 +145,63 @@ function calcTagsData(tags, prevTags, transactions, budgets, userInstrument) {
 
       // sum of all children outcome + parent outcome
       get totalOutcome() {
-        return (
-          this.outcome +
-          this.children.reduce((sum, child) => round(sum + child.outcome), 0)
+        const childrenOutcome = this.children.reduce(
+          (sum, child) => round(sum + child.outcome),
+          0
         )
+        return round(this.outcome + childrenOutcome)
       },
 
       // sum of all children income + parent income
       get totalIncome() {
-        return (
-          this.income +
-          this.children.reduce((sum, child) => round(sum + child.income), 0)
+        const childrenIncome = this.children.reduce(
+          (sum, child) => round(sum + child.income),
+          0
         )
+        return round(this.income + childrenIncome)
       },
 
-      // sum of all children availible + parent availible
-      get totalAvailible() {
-        return (
-          this.availible +
-          this.children.reduce((sum, child) => round(sum + child.availible), 0)
-        )
+      // sum of all children available without overspent + parent available
+      get totalAvailable() {
+        const childrenAvailable = this.children.reduce((sum, child) => {
+          return child.available > 0 ? round(sum + child.available) : sum
+        }, 0)
+        return round(this.available + childrenAvailable)
       },
 
       get totalOverspent() {
-        const parentOverspent = this.availible < 0 ? -this.availible : 0
-        const childrenOverspent = this.children.reduce(
+        return this.available < 0 ? -this.available : 0
+      },
+
+      get available() {
+        const { prevAvailable, budgeted, outcome, children } = this
+        const childrenOverspent = children.reduce(
           (sum, child) =>
-            child.availible < 0 ? round(sum - child.availible) : sum,
+            child.available < 0 ? round(sum - child.available) : sum,
           0
         )
-        return parentOverspent + childrenOverspent
-      },
-      get availible() {
-        return round(this.budgeted - this.outcome + this.prevAvailible)
+        return round(prevAvailable + budgeted - outcome - childrenOverspent)
       },
 
       budgeted: budgets[parent.id] ? budgets[parent.id].outcome : 0,
       outcome: metrics[parent.id] ? metrics[parent.id].outcome : 0, // parent outcome
       income: metrics[parent.id] ? metrics[parent.id].income : 0, // parent income
-      prevAvailible: prevAvailible > 0 ? prevAvailible : 0, // availible from previous month (>=0)
+      prevAvailable: prevAvailable > 0 ? prevAvailable : 0, // available from previous month (>=0)
 
       children: parent.children.map((child, childIndex) => {
-        const prevAvailible = prevTags
-          ? prevTags[index].children[childIndex].availible
+        const prevAvailable = prevTags
+          ? prevTags[index].children[childIndex].available
           : 0
         return {
           ...child,
-          get availible() {
-            return round(this.budgeted - this.outcome + this.prevAvailible)
+          get available() {
+            return round(this.budgeted - this.outcome + this.prevAvailable)
           },
 
           budgeted: budgets[child.id] ? budgets[child.id].outcome : 0,
           outcome: metrics[child.id] ? metrics[child.id].outcome : 0, // child outcome
           income: metrics[child.id] ? metrics[child.id].income : 0, // child income
-          prevAvailible: prevAvailible > 0 ? prevAvailible : 0,
+          prevAvailable: prevAvailable > 0 ? prevAvailable : 0,
         }
       }),
     }
