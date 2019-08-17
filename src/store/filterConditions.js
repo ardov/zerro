@@ -1,5 +1,6 @@
 import { createSlice } from 'redux-starter-kit'
 import concat from 'lodash/concat'
+import { getType } from './data/transactions/helpers'
 
 // INITIAL STATE
 const initialState = {
@@ -99,10 +100,76 @@ export const check = conditions => tr => {
 
   const checkAmount = (tr, amount, compareType = 'lessOrEqual') => {
     if (!amount) return true
-    const trAmount =
-      tr.type === 'income'
-        ? tr.income * tr.incomeInstrument.rate
-        : tr.outcome * tr.outcomeInstrument.rate
+    const trAmount = tr.type === 'income' ? tr.income : tr.outcome
+
+    return compareType === 'lessOrEqual'
+      ? trAmount <= amount
+      : trAmount >= amount
+  }
+
+  return (
+    checkType(tr, type) &&
+    checkSearch(tr, search) &&
+    checkDeleted(tr, showDeleted) &&
+    checkDate(tr, dateFrom, dateTo) &&
+    checkTags(tr, tags) &&
+    checkAccounts(tr, accounts) &&
+    checkAmount(tr, amountFrom, 'greaterOrEqual') &&
+    checkAmount(tr, amountTo, 'lessOrEqual')
+  )
+}
+
+export const checkRaw = conditions => tr => {
+  const mergedConditions = { initialState, ...conditions }
+  const {
+    search,
+    type,
+    showDeleted,
+    tags,
+    accounts,
+
+    dateFrom,
+    dateTo,
+
+    amountFrom,
+    amountTo,
+  } = mergedConditions
+
+  const checkSearch = (tr, search) =>
+    !search ||
+    (tr.comment && tr.comment.toUpperCase().includes(search.toUpperCase())) ||
+    (tr.payee && tr.payee.toUpperCase().includes(search.toUpperCase()))
+
+  const checkType = (tr, type) => !type || getType(tr) === type
+
+  const checkDeleted = (tr, showDeleted) => showDeleted || !tr.deleted
+
+  const checkDate = (tr, dateFrom, dateTo) =>
+    (!dateFrom || +tr.date >= +dateFrom) && (!dateTo || +tr.date <= +dateTo)
+
+  const checkAccounts = (tr, accounts) => {
+    if (!accounts) return true
+    return (
+      accounts.includes(tr.incomeAccount) ||
+      accounts.includes(tr.outcomeAccount)
+    )
+  }
+
+  const checkTags = (tr, tags) => {
+    if (!tags || !tags.length) return true
+    if (!tr.tag && tags.includes(null) && getType(tr) !== 'transfer')
+      return true
+    if (!tr.tag) return false
+    let result = false
+    tr.tag.forEach(id => {
+      if (tags.includes(id)) result = true
+    })
+    return result
+  }
+
+  const checkAmount = (tr, amount, compareType = 'lessOrEqual') => {
+    if (!amount) return true
+    const trAmount = getType(tr) === 'income' ? tr.income : tr.outcome
 
     return compareType === 'lessOrEqual'
       ? trAmount <= amount
