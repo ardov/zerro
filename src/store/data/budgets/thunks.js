@@ -1,7 +1,7 @@
 import { getRootUser } from 'store/data/users'
 import slice from './slice'
 import selectors from './selectors'
-import getMonths from './budgetViewSelector'
+import getMonths from 'scenes/Budgets/selectors/budgetViewSelector'
 import { getPopulatedTag } from '../tags'
 const { setBudget } = slice.actions
 

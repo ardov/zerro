@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import styled from 'styled-components'
 
 import Header from 'components/Header'
-import { getAllBudgets } from 'store/data/budgets'
+import getAllBudgets from './selectors/budgetViewSelector'
 import { getUserInstrument } from 'store/data/users'
 import AccountList from 'components/AccountList'
 import TagTable from './TagTable'

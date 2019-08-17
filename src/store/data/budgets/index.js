@@ -1,5 +1,4 @@
 import selectors from './selectors'
-import getAllBudgets from './budgetViewSelector'
 import slice from './slice'
 import thunks from './thunks'
 
@@ -16,7 +15,6 @@ export const {
   getBudgetsByMonthAndTag,
   getBudget,
 } = selectors
-export { getAllBudgets }
 
 // THUNKS
 export const { setOutcomeBudget } = thunks
