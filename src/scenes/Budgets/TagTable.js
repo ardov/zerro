@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import debounce from 'lodash/debounce'
 import { Table } from 'antd'
 import { formatMoney } from 'helpers/format'
-import { setOutcomeBudget } from 'store/data/budgets'
+import { setOutcomeBudget } from './thunks'
 import { BudgetCell } from './BudgetCell'
 
 const Available = styled.span`
@@ -72,7 +72,8 @@ function TagTable({ tags, instrument, date, updateBudget, ...rest }) {
       children: tag.children.length
         ? tag.children
             .filter(
-              child => child.showOutcome || child.totalOutcome || child.totalAvailable
+              child =>
+                child.showOutcome || child.totalOutcome || child.totalAvailable
             )
             .map(child => ({
               key: child.id,

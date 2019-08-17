@@ -1,6 +1,6 @@
 import selectors from './selectors'
 import slice from './slice'
-import thunks from './thunks'
+// import thunks from './thunks'
 
 // REDUCER
 export default slice.reducer
@@ -17,4 +17,4 @@ export const {
 } = selectors
 
 // THUNKS
-export const { setOutcomeBudget } = thunks
+// export const { setOutcomeBudget } = thunks
