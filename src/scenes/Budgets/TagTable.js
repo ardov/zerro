@@ -7,7 +7,7 @@ import { formatMoney } from 'helpers/format'
 import { setOutcomeBudget } from 'store/data/budgets'
 import { BudgetCell } from './BudgetCell'
 
-const Availible = styled.span`
+const Available = styled.span`
   color: ${props =>
     props.value === 0
       ? 'var(--text-placeholder)'
@@ -53,32 +53,32 @@ function TagTable({ tags, instrument, date, updateBudget, ...rest }) {
     },
     {
       title: 'Остаток',
-      dataIndex: 'availible',
-      key: 'availible',
+      dataIndex: 'available',
+      key: 'available',
       align: 'right',
-      render: value => <Availible value={value}>{formatSum(value)}</Availible>,
+      render: value => <Available value={value}>{formatSum(value)}</Available>,
     },
   ]
 
   const tableData = tags
-    .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailible)
+    .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailable)
     .map(tag => ({
       key: tag.id + '',
       name: tag.title,
       budgeted: { date, updateBudget, tag },
-      availible: tag.totalAvailible,
+      available: tag.totalAvailable,
       outcome: tag.totalOutcome,
 
       children: tag.children.length
         ? tag.children
             .filter(
-              child => child.showOutcome || child.totalOutcome || child.totalAvailible
+              child => child.showOutcome || child.totalOutcome || child.totalAvailable
             )
             .map(child => ({
               key: child.id,
               name: child.title,
               budgeted: { date, updateBudget, tag: child, isChild: true },
-              availible: child.availible,
+              available: child.available,
               outcome: child.outcome,
             }))
         : null,

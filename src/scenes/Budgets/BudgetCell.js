@@ -24,7 +24,7 @@ export class BudgetCell extends React.Component {
   render() {
     const { tag, isChild } = this.props
     const { budgeted } = this.state
-    const availible = isChild ? tag.availible : tag.totalAvailible
+    const available = isChild ? tag.available : tag.totalAvailable
     const orginalBudgeted = isChild ? tag.budgeted : tag.totalBudgeted
 
     return (
@@ -34,10 +34,10 @@ export class BudgetCell extends React.Component {
           <Menu>
             <Menu.Item
               key="0"
-              onClick={() => this.onChange(orginalBudgeted - availible)}
+              onClick={() => this.onChange(orginalBudgeted - available)}
             >
               Сбросить остаток в ноль (
-              {formatMoney(orginalBudgeted - availible)})
+              {formatMoney(orginalBudgeted - available)})
             </Menu.Item>
           </Menu>
         }
