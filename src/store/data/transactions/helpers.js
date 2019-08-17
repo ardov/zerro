@@ -1,6 +1,7 @@
 import startOfMonth from 'date-fns/start_of_month'
 import startOfDay from 'date-fns/start_of_day'
 import startOfWeek from 'date-fns/start_of_week'
+import { convertAmount } from 'helpers/currencyHelpers'
 
 /**
  * Groups array of transactions
@@ -92,4 +93,24 @@ export function mapTags(ids, tags) {
 
 export function getType(tr) {
   return tr.income && tr.outcome ? 'transfer' : tr.income ? 'income' : 'outcome'
+}
+
+export function calcMetricsByTag(
+  transactions,
+  targetInstrumentId,
+  instruments
+) {
+  const convert = (amount, instrumentId) =>
+    convertAmount(amount, instrumentId, targetInstrumentId, instruments, 2)
+
+  return transactions.reduce((acc, tr) => {
+    const type = getType(tr)
+    if (type !== 'transfer') {
+      const amount = convert(tr[type], tr[type + 'Instrument'])
+      const mainTagId = tr.tag ? tr.tag[0] : null
+      if (!acc[mainTagId]) acc[mainTagId] = { income: 0, outcome: 0 }
+      acc[mainTagId][type] += amount
+    }
+    return acc
+  }, {})
 }
