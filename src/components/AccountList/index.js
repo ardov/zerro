@@ -55,8 +55,12 @@ const AccountList = ({
 }
 
 const mapStateToProps = (state, props) => ({
-  inBudget: getAccountList(state).filter(a => !a.archive && !a.savings),
-  savings: getAccountList(state).filter(a => !a.archive && a.savings),
+  inBudget: getAccountList(state).filter(
+    a => !a.archive && !a.savings && a.type !== 'debt'
+  ),
+  savings: getAccountList(state).filter(
+    a => !a.archive && a.savings && a.type !== 'debt'
+  ),
   userInstrument: getUserInstrument(state),
 })
 
