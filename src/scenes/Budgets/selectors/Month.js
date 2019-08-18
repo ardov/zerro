@@ -1,7 +1,8 @@
-import { check } from 'store/filterConditions'
+import { checkRaw } from 'store/filterConditions'
 import startOfMonth from 'date-fns/start_of_month'
 import endOfMonth from 'date-fns/end_of_month'
-import { calcMetrics } from 'store/data/transactions/helpers'
+import { calcMetricsByTag } from 'store/data/transactions/helpers'
+import { round, convertAmount } from 'helpers/currencyHelpers'
 
 export default class Month {
   constructor(
@@ -13,7 +14,9 @@ export default class Month {
       tags,
       budgets,
       accountsInBudget = [],
+      accounts,
       userInstrument,
+      instruments,
       realBudgetedInFuture = 0,
     }
   ) {
@@ -28,13 +31,15 @@ export default class Month {
     this.budgets = budgets
 
     this.transactions = transactions.filter(
-      check({ dateFrom: this.date, dateTo: endOfMonth(this.date) })
+      checkRaw({ dateFrom: this.date, dateTo: endOfMonth(this.date) })
     )
 
     this.transfers = groupTransfersOutsideBudget(
       this.transactions,
       accountsInBudget,
-      userInstrument
+      accounts,
+      userInstrument,
+      instruments
     )
 
     this.transferFees = calcTransferFees(
@@ -48,7 +53,8 @@ export default class Month {
       this.prevTags,
       this.transactions,
       this.budgets,
-      userInstrument
+      userInstrument,
+      instruments
     )
   }
 
@@ -119,16 +125,15 @@ export default class Month {
   }
 }
 
-//
-// HELPERS
-//
-
-function round(amount, digits = 2) {
-  return +amount.toFixed(2)
-}
-
-function calcTagsData(tags, prevTags, transactions, budgets, userInstrument) {
-  const metrics = calcMetrics(transactions, userInstrument.rate).byTag
+function calcTagsData(
+  tags,
+  prevTags,
+  transactions,
+  budgets,
+  userInstrument,
+  instruments
+) {
+  const metrics = calcMetricsByTag(transactions, userInstrument.id, instruments)
   const result = tags.map((parent, index) => {
     const prevAvailable = prevTags ? prevTags[index].available : 0
     return {
@@ -212,54 +217,64 @@ function calcTagsData(tags, prevTags, transactions, budgets, userInstrument) {
 function groupTransfersOutsideBudget(
   transactions,
   accountsInBudget,
-  userInstrument
+  accounts,
+  userInstrument,
+  instruments
 ) {
+  const convert = (amount, instrumentId) =>
+    convertAmount(amount, instrumentId, userInstrument.id, instruments)
+
   const accountIds = accountsInBudget.map(acc => acc.id)
-  const transfers = transactions.filter(check({ type: 'transfer' }))
+  const transfers = transactions.filter(checkRaw({ type: 'transfer' }))
 
   const outcomeTransfers = transfers.filter(
-    tr => !accountIds.includes(tr.incomeAccount.id)
+    tr => !accountIds.includes(tr.incomeAccount)
   )
   const incomeTransfers = transfers.filter(
-    tr => !accountIds.includes(tr.outcomeAccount.id)
+    tr => !accountIds.includes(tr.outcomeAccount)
   )
 
   const accsById = {}
 
   outcomeTransfers.forEach(tr => {
-    const accId = tr.incomeAccount.id
+    const accId = tr.incomeAccount
     if (!accsById[accId]) {
       accsById[accId] = {
-        ...tr.incomeAccount,
+        ...accounts[accId],
         transferIncome: 0,
         transferOutcome: 0,
       }
     }
-    accsById[accId].transferIncome += round(
-      (tr.outcome * tr.outcomeInstrument.rate) / userInstrument.rate
-    )
+    accsById[accId].transferIncome += convert(tr.outcome, tr.outcomeInstrument)
   })
 
   incomeTransfers.forEach(tr => {
-    const accId = tr.outcomeAccount.id
+    const accId = tr.outcomeAccount
     if (!accsById[accId]) {
       accsById[accId] = {
-        ...tr.outcomeAccount,
+        ...accounts[accId],
         transferIncome: 0,
         transferOutcome: 0,
       }
     }
-    accsById[accId].transferOutcome += round(
-      (tr.income * tr.incomeInstrument.rate) / userInstrument.rate
-    )
+    accsById[accId].transferOutcome += convert(tr.income, tr.incomeInstrument)
   })
+  console.log('accsById', accsById)
 
   return Object.keys(accsById).map(id => accsById[id])
 }
 
-function calcTransferFees(transactions, accountsInBudget, userInstrument) {
+function calcTransferFees(
+  transactions,
+  accountsInBudget,
+  userInstrument,
+  instruments
+) {
+  const convert = (amount, instrumentId) =>
+    convertAmount(amount, instrumentId, userInstrument.id, instruments)
+
   const accountIds = accountsInBudget.map(acc => acc.id)
-  const transfers = transactions.filter(check({ type: 'transfer' }))
+  const transfers = transactions.filter(checkRaw({ type: 'transfer' }))
 
   const innerTransfers = transfers.filter(
     tr =>
@@ -267,8 +282,9 @@ function calcTransferFees(transactions, accountsInBudget, userInstrument) {
       accountIds.includes(tr.incomeAccount.id)
   )
   return innerTransfers.reduce((sum, tr) => {
-    return (sum +=
-      round((tr.outcome * tr.outcomeInstrument.rate) / userInstrument.rate) -
-      round((tr.income * tr.incomeInstrument.rate) / userInstrument.rate))
+    return (sum += round(
+      convert(tr.outcome, tr.outcomeInstrument) -
+        convert(tr.income, tr.incomeInstrument)
+    ))
   }, 0)
 }
