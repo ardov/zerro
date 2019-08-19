@@ -95,6 +95,10 @@ export function getType(tr) {
   return tr.income && tr.outcome ? 'transfer' : tr.income ? 'income' : 'outcome'
 }
 
+export function getMainTag(tr) {
+  return tr.tag && tr.tag.length ? tr.tag[0] : null
+}
+
 export function calcMetricsByTag(
   transactions,
   targetInstrumentId,
