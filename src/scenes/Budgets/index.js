@@ -4,10 +4,11 @@ import styled from 'styled-components'
 
 import Header from 'components/Header'
 import getAllBudgets from './selectors/budgetViewSelector'
-import { getUserInstrument } from 'store/data/users'
+import { getUserInstrument } from 'store/data/instruments'
 import AccountList from 'components/AccountList'
 import TagTable from './TagTable'
 import { TransferTable } from './TransferTable'
+import { getAmountsByTag } from './selectors/getAmountsByTag'
 import BudgetInfo from './BudgetInfo'
 import MonthSelector from './MonthSelect'
 import isThisMonth from 'date-fns/is_this_month'
@@ -92,6 +93,8 @@ class Budgets extends React.Component {
 }
 
 const mapStateToProps = (state, props) => {
+  console.log(getAmountsByTag(state))
+
   return {
     instrument: getUserInstrument(state),
     budgets: getAllBudgets(state),
