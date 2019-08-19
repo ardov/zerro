@@ -21,8 +21,6 @@ const StyledFilter = styled(Filter)`
 
 export default class Search extends React.PureComponent {
   render() {
-    console.log('render search')
-
     const { style } = this.props
     return (
       <SearchContainer style={style}>

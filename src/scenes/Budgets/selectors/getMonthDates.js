@@ -7,8 +7,6 @@ import { getBudgetsByMonthAndTag } from 'store/data/budgets'
 const getFirstMonth = createSelector(
   [getTransactionsInBudget],
   transactions => {
-    console.log('Tr in budget:', transactions.length)
-
     if (transactions && transactions.length) {
       return +startOfMonth(transactions.sort((a, b) => a.date - b.date)[0].date)
     } else {

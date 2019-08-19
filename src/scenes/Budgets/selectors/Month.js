@@ -259,7 +259,6 @@ function groupTransfersOutsideBudget(
     }
     accsById[accId].transferOutcome += convert(tr.income, tr.incomeInstrument)
   })
-  console.log('accsById', accsById)
 
   return Object.keys(accsById).map(id => accsById[id])
 }
