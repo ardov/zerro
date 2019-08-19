@@ -1,7 +1,7 @@
 import createSelector from 'selectorator'
 import { getBudgetsByMonthAndTag } from 'store/data/budgets'
 import { getTagsTree } from 'store/data/tags'
-import { getUserInstrument } from 'store/data/users'
+import { getUserInstrument } from 'store/data/instruments'
 import { getInstruments } from 'store/data/instruments'
 import Month from './Month'
 import getMonthDates from './getMonthDates'

@@ -1,6 +1,6 @@
 import createSelector from 'selectorator'
 import { getAccounts } from 'store/data/accounts'
-import { getUserInstrument } from 'store/data/users'
+import { getUserInstrument } from 'store/data/instruments'
 import { getInstruments } from 'store/data/instruments'
 import { round } from 'helpers/currencyHelpers'
 import { getTransactions } from 'store/data/transactions'

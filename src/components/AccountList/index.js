@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import Account from './Account'
 import styled from 'styled-components'
 import { getAccountList } from 'store/data/accounts'
-import { getUserInstrument } from 'store/data/users'
+import { getUserInstrument } from 'store/data/instruments'
 
 const Heading = styled(Account)`
   margin-top: 16px;

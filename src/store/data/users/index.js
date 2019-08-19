@@ -1,6 +1,5 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
 import { wipeData, updateData, updateDataFunc } from 'store/data/commonActions'
-import { getInstrument } from 'store/data/instruments'
 import { convertToSyncArray } from 'helpers/converters'
 
 // INITIAL STATE
@@ -37,7 +36,4 @@ export const getRootUser = state => {
   )
 }
 
-export const getUserInstrument = state => {
-  const instrumentId = getRootUser(state).currency
-  return getInstrument(state, instrumentId)
-}
+export const getUserInstrumentId = state => getRootUser(state).currency
