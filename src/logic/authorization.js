@@ -18,6 +18,6 @@ export const logIn = () => (dispatch, getState) => {
 export const logOut = () => (dispatch, getState) => {
   dispatch(wipeData())
   dispatch(setToken(null))
-  LocalStorage.clear()
+  LocalStorage.remove('data')
   Cookies.expire('token')
 }
