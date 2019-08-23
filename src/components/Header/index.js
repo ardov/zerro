@@ -46,6 +46,13 @@ function Header({
         <NavLink to="/budget">Бюджет</NavLink>
       </div>
       <Buttons>
+        <a
+          href="https://www.notion.so/More-Money-ae7dee79e1b446dd81bf279e72eb6970"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          О проекте
+        </a>
         <StyledButton
           icon="reload"
           onClick={syncData}
