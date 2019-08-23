@@ -9,7 +9,7 @@ LocalStorage.get = key =>
     ? JSON.parse(LZString.decompress(localStorage.getItem(key)))
     : localStorage.getItem(key)
 
-LocalStorage.remove = key => localStorage.removeItem()
+LocalStorage.remove = key => localStorage.removeItem(key)
 LocalStorage.clear = () => localStorage.clear()
 
 export default LocalStorage
