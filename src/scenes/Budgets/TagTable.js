@@ -7,13 +7,14 @@ import { formatMoney } from 'helpers/format'
 import { setOutcomeBudget } from './thunks'
 import { BudgetCell } from './BudgetCell'
 
+const colorMap = {
+  positive: 'var(--text-success)',
+  negative: 'var(--color-danger)',
+  neutral: 'var(--text-placeholder)',
+}
+
 const Available = styled.span`
-  color: ${props =>
-    props.value === 0
-      ? 'var(--text-placeholder)'
-      : props.value < 0
-      ? 'var(--color-danger)'
-      : 'var(--text-success)'};
+  color: ${props => colorMap[props.displayType]};
 `
 const Outcome = styled.span`
   color: ${props =>
@@ -56,34 +57,49 @@ function TagTable({ tags, instrument, date, updateBudget, ...rest }) {
       dataIndex: 'available',
       key: 'available',
       align: 'right',
-      render: value => <Available value={value}>{formatSum(value)}</Available>,
+      render: props => (
+        <Available displayType={getAvailableColor(props)}>
+          {formatSum(props.value)}
+        </Available>
+      ),
     },
   ]
 
   const tableData = tags
     .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailable)
-    .map(tag => ({
-      key: tag.id + '',
-      name: tag.title,
-      budgeted: { date, updateBudget, tag },
-      available: tag.totalAvailable,
-      outcome: tag.totalOutcome,
+    .map(tag => {
+      const hasOverspent = !!tag.overspent
 
-      children: tag.children.length
-        ? tag.children
-            .filter(
-              child =>
-                child.showOutcome || child.totalOutcome || child.totalAvailable
-            )
-            .map(child => ({
-              key: child.id,
-              name: child.title,
-              budgeted: { date, updateBudget, tag: child, isChild: true },
-              available: child.available,
-              outcome: child.outcome,
-            }))
-        : null,
-    }))
+      return {
+        key: tag.id + '',
+        name: tag.title,
+        budgeted: { date, updateBudget, tag },
+        available: { value: tag.totalAvailable, hasOverspent, isChild: false },
+        outcome: tag.totalOutcome,
+
+        children: tag.children.length
+          ? tag.children
+              .filter(
+                child =>
+                  child.showOutcome ||
+                  child.totalOutcome ||
+                  child.totalAvailable
+              )
+              .map(child => ({
+                key: child.id,
+                name: child.title,
+                budgeted: { date, updateBudget, tag: child, isChild: true },
+                available: {
+                  value: child.available,
+                  hasOverspent,
+                  isChild: true,
+                  hasBudget: !!child.budgeted,
+                },
+                outcome: child.outcome,
+              }))
+          : null,
+      }
+    })
     .sort((a, b) => a.name.localeCompare(b.name))
 
   return (
@@ -108,3 +124,17 @@ export default connect(
   null,
   mapDispatchToProps
 )(TagTable)
+
+function getAvailableColor({ value, hasOverspent, isChild, hasBudget }) {
+  if (!isChild || hasBudget) {
+    return value === 0 ? 'neutral' : value < 0 ? 'negative' : 'positive'
+  } else {
+    return value > 0
+      ? 'positive'
+      : value === 0
+      ? 'neutral'
+      : hasOverspent
+      ? 'negative'
+      : 'neutral'
+  }
+}
