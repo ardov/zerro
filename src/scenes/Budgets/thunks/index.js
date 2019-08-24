@@ -12,11 +12,10 @@ export const setOutcomeBudget = (targetOutcome, monthDate, tagId) => (
 ) => {
   const state = getState()
   const created = selectors.getBudget(state, tagId, monthDate)
-  const monthDates = getMonthDates(state)
   const tags = getAmountsByTag(state)
   const user = getRootUser(state).id
   const parentTagId = getPopulatedTag(state, tagId).parent
-  const i = monthDates.findIndex(date => +date === +monthDate)
+  const i = getMonthDates(state).findIndex(date => +date === +monthDate)
 
   let outcome = targetOutcome
 
