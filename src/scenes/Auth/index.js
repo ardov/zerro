@@ -16,18 +16,30 @@ const Body = styled.div`
   min-height: 100vh;
 `
 
+const LinkAbout = styled.a`
+  margin-top: 16px;
+  font-size: 16px;
+`
+
 function Auth(props) {
   return (
     <Body>
       <Button type="primary" size="large" onClick={props.logIn}>
         Войти через ДзенМани
       </Button>
+      <LinkAbout
+        href="https://www.notion.so/More-Money-ae7dee79e1b446dd81bf279e72eb6970"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        О проекте
+      </LinkAbout>
     </Body>
   )
 }
 
 const mapDispatchToProps = dispatch => ({
-  logIn: () => dispatch(logIn())
+  logIn: () => dispatch(logIn()),
 })
 
 export default connect(
