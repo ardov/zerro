@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
 
+import startOfMonth from 'date-fns/start_of_month'
 import Header from 'components/Header'
 import getAllBudgets from './selectors/budgetViewSelector'
 import { getUserInstrument } from 'store/data/instruments'
@@ -9,9 +10,14 @@ import AccountList from 'components/AccountList'
 import TagTable from './TagTable'
 import { TransferTable } from './TransferTable'
 import { getAmountsByTag } from './selectors/getAmountsByTag'
+import {
+  getTotalsByMonth,
+  getTotalBudgetedByMonth,
+} from './selectors/getTotalsByMonth'
 import BudgetInfo from './BudgetInfo'
 import MonthSelector from './MonthSelect'
-import isThisMonth from 'date-fns/is_this_month'
+import getMonthDates from './selectors/getMonthDates'
+import { getTransfersOutsideBudget } from './selectors/getTransfersOutsideBudget'
 
 const Wrap = styled.div`
   display: flex;
@@ -36,53 +42,53 @@ const StyledTagTable = styled(TagTable)`
 `
 
 class Budgets extends React.Component {
-  state = { selected: 0 }
+  state = { selected: +startOfMonth(new Date()) }
 
-  componentDidMount = () => {
-    this.setCurrentMonth()
-  }
+  componentDidMount = () => this.setCurrentMonth()
 
-  setCurrentMonth = () => {
-    if (this.props.budgets) {
-      const current = this.props.budgets.findIndex(budget =>
-        isThisMonth(budget.date)
-      )
-      this.setState({ selected: current })
-    }
-  }
+  setCurrentMonth = () => this.setState({ selected: +startOfMonth(new Date()) })
+
   setMonth = i => {
-    this.setState({ selected: i })
+    const { monthDates } = this.props
+    this.setState({ selected: monthDates[i] })
   }
   render() {
-    const { budgets, instrument } = this.props
+    const {
+      instrument,
+      monthDates,
+      totals,
+      transfers,
+      amounts,
+
+      budgets,
+    } = this.props
+
     const { selected } = this.state
+    const index = monthDates.findIndex(date => date === selected)
     if (!budgets) return null
-    const months = budgets.map(b => b.date)
     return (
       <div>
         <Header />
         <Wrap>
           <LeftPanel>
             <MonthSelector
-              months={months}
-              current={selected}
+              months={monthDates}
+              current={index}
               onSetCurrent={this.setCurrentMonth}
               onChange={this.setMonth}
             />
-            <StyledBudgetInfo
-              month={budgets[selected]}
-              instrument={instrument}
-            />
+            <StyledBudgetInfo month={totals[index]} instrument={instrument} />
             <StyledAccountList />
           </LeftPanel>
           <Grow1>
             <StyledTagTable
-              tags={budgets[selected].tags}
+              tags={amounts[index]}
               instrument={instrument}
-              date={budgets[selected].date}
+              date={budgets[index].date}
             />
             <TransferTable
-              transfers={budgets[selected].transfers}
+              // TODO switch to transfers
+              transfers={budgets[index].transfers}
               instrument={instrument}
             />
           </Grow1>
@@ -94,9 +100,17 @@ class Budgets extends React.Component {
 
 const mapStateToProps = (state, props) => {
   console.log(getAmountsByTag(state))
+  console.log('getTotalsByMonth', getTotalsByMonth(state))
+  console.log('getAllBudgets', getAllBudgets(state))
+  console.log('getTotalBudgetedByMonth', getTotalBudgetedByMonth(state))
 
   return {
+    monthDates: getMonthDates(state),
+    totals: getTotalsByMonth(state),
+    transfers: getTransfersOutsideBudget(state),
+    amounts: getAmountsByTag(state),
     instrument: getUserInstrument(state),
+
     budgets: getAllBudgets(state),
   }
 }
