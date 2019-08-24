@@ -1,7 +1,6 @@
 import createSelector from 'selectorator'
 import { getAccounts } from 'store/data/accounts'
-import { getUserInstrument } from 'store/data/instruments'
-import { getInstruments } from 'store/data/instruments'
+import { convertCurrency } from 'store/data/instruments'
 import { round } from 'helpers/currencyHelpers'
 import { getTransactions } from 'store/data/transactions'
 import { checkRaw } from 'store/filterConditions'
@@ -15,15 +14,10 @@ export const getAccountsInBudget = createSelector(
 )
 
 export const getStartFunds = createSelector(
-  [getAccountsInBudget, getUserInstrument, getInstruments],
-  (accounts, userInstrument, instruments) =>
+  [getAccountsInBudget, convertCurrency],
+  (accounts, convert) =>
     accounts.reduce(
-      (sum, acc) =>
-        round(
-          sum +
-            (acc.startBalance * instruments[acc.instrument].rate) /
-              userInstrument.rate
-        ),
+      (sum, acc) => round(sum + convert(acc.startBalance, acc.instrument)),
       0
     )
 )
