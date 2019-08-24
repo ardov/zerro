@@ -21,8 +21,8 @@ const Outcome = styled.span`
     props.value === 0 ? 'var(--text-placeholder)' : 'var(--text-primary)'};
 `
 
-function TagTable({ tags, instrument, date, updateBudget, ...rest }) {
-  const formatSum = sum => formatMoney(sum, instrument.shortTitle)
+function TagTable({ tags, currency, date, updateBudget, ...rest }) {
+  const formatSum = sum => formatMoney(sum, currency)
 
   const columns = [
     {

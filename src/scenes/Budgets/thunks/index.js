@@ -1,8 +1,9 @@
 import { getRootUser } from 'store/data/users'
 import slice from 'store/data/budgets/slice'
 import selectors from 'store/data/budgets/selectors'
-import getMonths from 'scenes/Budgets/selectors/budgetViewSelector'
 import { getPopulatedTag } from 'store/data/tags'
+import getMonthDates from '../selectors/getMonthDates'
+import { getAmountsByTag } from '../selectors/getAmountsByTag'
 const { setBudget } = slice.actions
 
 export const setOutcomeBudget = (targetOutcome, monthDate, tagId) => (
@@ -11,18 +12,17 @@ export const setOutcomeBudget = (targetOutcome, monthDate, tagId) => (
 ) => {
   const state = getState()
   const created = selectors.getBudget(state, tagId, monthDate)
-  const months = getMonths(state)
+  const monthDates = getMonthDates(state)
+  const tags = getAmountsByTag(state)
   const user = getRootUser(state).id
   const parentTagId = getPopulatedTag(state, tagId).parent
-  const month = months.find(({ date }) => +date === +monthDate)
+  const i = monthDates.findIndex(date => +date === +monthDate)
 
   let outcome = targetOutcome
 
   if (!parentTagId) {
     // if it's top level category
-    const { budgeted, totalBudgeted } = month.tags.find(
-      ({ id }) => id === tagId
-    )
+    const { budgeted, totalBudgeted } = tags[i].find(({ id }) => id === tagId)
     const childrenBudgets = totalBudgeted - budgeted
     outcome = targetOutcome - childrenBudgets
   }

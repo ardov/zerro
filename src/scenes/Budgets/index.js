@@ -4,16 +4,12 @@ import styled from 'styled-components'
 
 import startOfMonth from 'date-fns/start_of_month'
 import Header from 'components/Header'
-import getAllBudgets from './selectors/budgetViewSelector'
 import { getUserInstrument } from 'store/data/instruments'
 import AccountList from 'components/AccountList'
 import TagTable from './TagTable'
 import { TransferTable } from './TransferTable'
 import { getAmountsByTag } from './selectors/getAmountsByTag'
-import {
-  getTotalsByMonth,
-  getTotalBudgetedByMonth,
-} from './selectors/getTotalsByMonth'
+import { getTotalsByMonth } from './selectors/getTotalsByMonth'
 import BudgetInfo from './BudgetInfo'
 import MonthSelector from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
@@ -53,19 +49,9 @@ class Budgets extends React.Component {
     this.setState({ selected: monthDates[i] })
   }
   render() {
-    const {
-      instrument,
-      monthDates,
-      totals,
-      transfers,
-      amounts,
-
-      budgets,
-    } = this.props
-
-    const { selected } = this.state
-    const index = monthDates.findIndex(date => date === selected)
-    if (!budgets) return null
+    const { instrument, monthDates, totals, transfers, amounts } = this.props
+    const index = monthDates.findIndex(date => date === this.state.selected)
+    const currency = instrument ? instrument.shortTitle : 'RUB'
     return (
       <div>
         <Header />
@@ -77,20 +63,16 @@ class Budgets extends React.Component {
               onSetCurrent={this.setCurrentMonth}
               onChange={this.setMonth}
             />
-            <StyledBudgetInfo month={totals[index]} instrument={instrument} />
+            <StyledBudgetInfo month={totals[index]} currency={currency} />
             <StyledAccountList />
           </LeftPanel>
           <Grow1>
             <StyledTagTable
               tags={amounts[index]}
-              instrument={instrument}
-              date={budgets[index].date}
+              currency={currency}
+              date={monthDates[index]}
             />
-            <TransferTable
-              // TODO switch to transfers
-              transfers={budgets[index].transfers}
-              instrument={instrument}
-            />
+            <TransferTable transfers={transfers[index]} currency={currency} />
           </Grow1>
         </Wrap>
       </div>
@@ -99,19 +81,12 @@ class Budgets extends React.Component {
 }
 
 const mapStateToProps = (state, props) => {
-  console.log(getAmountsByTag(state))
-  console.log('getTotalsByMonth', getTotalsByMonth(state))
-  console.log('getAllBudgets', getAllBudgets(state))
-  console.log('getTotalBudgetedByMonth', getTotalBudgetedByMonth(state))
-
   return {
     monthDates: getMonthDates(state),
     totals: getTotalsByMonth(state),
     transfers: getTransfersOutsideBudget(state),
     amounts: getAmountsByTag(state),
     instrument: getUserInstrument(state),
-
-    budgets: getAllBudgets(state),
   }
 }
 
