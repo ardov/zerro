@@ -5,18 +5,12 @@ import { getTransferFeesByMonth } from './getTransferFeesByMonth'
 import { getAmountsByTag } from './getAmountsByTag'
 import { round } from 'helpers/currencyHelpers'
 import getMonthDates from './getMonthDates'
-import { getBudgetsByMonthAndTag } from 'store/data/budgets'
 
 export const getTotalBudgetedByMonth = createSelector(
-  [getMonthDates, getBudgetsByMonthAndTag],
-  (months, budgets) =>
-    months.map(date =>
-      budgets[date]
-        ? Object.values(budgets[date]).reduce(
-            (sum, budget) => round(sum + budget.outcome),
-            0
-          )
-        : 0
+  [getAmountsByTag],
+  tagsByMonth =>
+    tagsByMonth.map(tags =>
+      tags.reduce((sum, tag) => round(sum + tag.totalBudgeted), 0)
     )
 )
 
