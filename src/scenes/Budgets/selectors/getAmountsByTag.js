@@ -1,34 +1,15 @@
 import createSelector from 'selectorator'
-import startOfMonth from 'date-fns/start_of_month'
-import { getType, getMainTag } from 'store/data/transactions/helpers'
-import getMonthDates from './getMonthDates'
+import { getMainTag } from 'store/data/transactions/helpers'
 import { getTagsTree } from 'store/data/tags'
 import { convertCurrency } from 'store/data/instruments'
 import { getBudgetsByMonthAndTag } from 'store/data/budgets'
-import { getTransactionsInBudget } from './baseSelectors'
 import { round } from 'helpers/currencyHelpers'
-
-export const getTransactionsByMonth = createSelector(
-  [getMonthDates, getTransactionsInBudget],
-  (monthDates, transactions) => {
-    const months = monthDates.reduce((months, date) => {
-      months[date] = { date, income: [], outcome: [], transfer: [] }
-      return months
-    }, {})
-
-    transactions.forEach(tr => {
-      const month = +startOfMonth(tr.date)
-      const type = getType(tr)
-      months[month][type].push(tr)
-    })
-    return months
-  }
-)
+import { getTransactionsByMonthAndType } from './getTransactionsByMonthAndType'
 
 export const getIncomeOutcomeByTag = createSelector(
-  [getTransactionsByMonth, convertCurrency],
+  [getTransactionsByMonthAndType, convertCurrency],
   (transactionsByMonth, convert) =>
-    Object.values(transactionsByMonth).map(month => {
+    transactionsByMonth.map(month => {
       const income = month.income.reduce((byTag, tr) => {
         const tag = getMainTag(tr)
         const amount = convert(tr.income, tr.incomeInstrument)
@@ -55,7 +36,7 @@ export const getAmountsByTag = createSelector(
         // Tag data
         ...parent,
 
-        // From previous selector
+        // From getIncomeOutcomeByTag selector
         outcome: month.outcome[parent.id] || 0,
         income: month.income[parent.id] || 0,
 
