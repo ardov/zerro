@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import Account from './Account'
 import styled from 'styled-components'
-import { getAccountList } from 'store/data/accounts'
+import { getAccountsInBudget, getSavingAccounts } from 'store/data/accounts'
 import { getUserInstrument } from 'store/data/instruments'
 
 const Heading = styled(Account)`
@@ -55,12 +55,8 @@ const AccountList = ({
 }
 
 const mapStateToProps = (state, props) => ({
-  inBudget: getAccountList(state).filter(
-    a => !a.archive && !a.savings && a.type !== 'debt'
-  ),
-  savings: getAccountList(state).filter(
-    a => !a.archive && a.savings && a.type !== 'debt'
-  ),
+  inBudget: getAccountsInBudget(state),
+  savings: getSavingAccounts(state),
   userInstrument: getUserInstrument(state),
 })
 

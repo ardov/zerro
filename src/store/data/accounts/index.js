@@ -54,3 +54,14 @@ export const getAccountList = createSelector(
   [getPopulatedAccounts],
   accounts => Object.values(accounts).sort((a, b) => b.balance - a.balance)
 )
+
+export const getAccountsInBudget = createSelector(
+  [getAccountList],
+  accounts =>
+    accounts.filter(a => !a.archive && !a.savings && a.type !== 'debt')
+)
+
+export const getSavingAccounts = createSelector(
+  [getAccountList],
+  accounts => accounts.filter(a => !a.archive && a.savings && a.type !== 'debt')
+)
