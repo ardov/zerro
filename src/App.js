@@ -9,11 +9,25 @@ import Auth from 'scenes/Auth'
 import Budgets from 'scenes/Budgets'
 import { getLoginState } from 'store/token'
 import RegularSyncHandler from 'components/RegularSyncHandler'
+import { ThemeProvider } from '@material-ui/styles'
+import { createMuiTheme } from '@material-ui/core/styles'
 
 addLocaleData(ru)
 
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#212121',
+    },
+    secondary: {
+      main: '#fff',
+    },
+  },
+})
+console.log('THEME', theme)
+
 const App = ({ isLoggedIn }) => (
-  <React.Fragment>
+  <ThemeProvider theme={theme}>
     <RegularSyncHandler>
       <IntlProvider locale="ru">
         <BrowserRouter>
@@ -41,7 +55,7 @@ const App = ({ isLoggedIn }) => (
         </BrowserRouter>
       </IntlProvider>
     </RegularSyncHandler>
-  </React.Fragment>
+  </ThemeProvider>
 )
 
 export default connect(
