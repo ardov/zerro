@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^4.3.3",
+    "@material-ui/icons": "^4.2.1",
     "antd": "^3.19.3",
     "browserslist": "4.6.3",
     "chart.js": "^2.7.3",
@@ -33,7 +35,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "deploy": "react-scripts build && cd ./build && now --target production",
+    "deploy": "react-scripts build && cd ./build && now --prod",
     "eject": "react-scripts eject",
     "lint:css": "stylelint './src/**/*.js'"
   },
