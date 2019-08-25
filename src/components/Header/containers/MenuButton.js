@@ -1,39 +1,49 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Menu, Dropdown, Icon } from 'antd'
 import { logOut } from 'logic/authorization'
 import exportCsv from 'logic/exportCsv'
 import exportJSON from 'logic/exportJSON'
+import { makeStyles } from '@material-ui/styles'
 import SettingsIcon from '@material-ui/icons/Settings'
+import SaveAltIcon from '@material-ui/icons/SaveAlt'
+import ExitToAppIcon from '@material-ui/icons/ExitToApp'
 import IconButton from '@material-ui/core/IconButton'
 import Tooltip from '@material-ui/core/Tooltip'
+import Menu from '@material-ui/core/Menu'
+import MenuItem from '@material-ui/core/MenuItem'
+
+const useStyles = makeStyles({ menuIcon: { marginRight: 8 } })
 
 function MenuButton({ exportCsv, exportJSON, logOut }) {
-  const SettingsMenu = (
-    <Menu>
-      <Menu.Item key="1" onClick={exportCsv}>
-        <Icon type="download" />
-        Скачать CSV
-      </Menu.Item>
-      <Menu.Item key="2" onClick={exportJSON}>
-        <Icon type="download" />
-        Полный бэкап
-      </Menu.Item>
-      <Menu.Divider />
-      <Menu.Item key="logOut" onClick={logOut}>
-        <Icon type="logout" />
-        Выйти
-      </Menu.Item>
-    </Menu>
-  )
+  const [anchorEl, setAnchorEl] = React.useState(null)
+  const classes = useStyles()
+
+  const handleClick = event => setAnchorEl(event.currentTarget)
+  const handleClose = () => setAnchorEl(null)
+
   return (
-    <Dropdown overlay={SettingsMenu} trigger={['click']}>
+    <React.Fragment>
       <Tooltip title="Настройки">
-        <IconButton>
+        <IconButton onClick={handleClick}>
           <SettingsIcon />
         </IconButton>
       </Tooltip>
-    </Dropdown>
+
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
+        <MenuItem onClick={exportCsv}>
+          <SaveAltIcon className={classes.menuIcon} />
+          Скачать CSV
+        </MenuItem>
+        <MenuItem onClick={exportJSON}>
+          <SaveAltIcon className={classes.menuIcon} />
+          Полный бэкап
+        </MenuItem>
+        <MenuItem onClick={logOut}>
+          <ExitToAppIcon className={classes.menuIcon} />
+          Выйти
+        </MenuItem>
+      </Menu>
+    </React.Fragment>
   )
 }
 
