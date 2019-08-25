@@ -7,7 +7,7 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 import { connect } from 'react-redux'
 import TransactionGroup from './TransactionGroup'
 import Search from './Search'
-import { getTransactionList } from 'store/data/transactions'
+import { getMainTransactionList } from 'store/data/transactions'
 import formatDate from './formatDate'
 
 const GROUP_HEADER_HEIGHT = 48
@@ -90,7 +90,11 @@ class TransactionList extends React.Component {
   }
 }
 
+const mapStateToProps = (state, params) => ({
+  groups: getMainTransactionList(state),
+})
+
 export default connect(
-  (state, params) => ({ groups: getTransactionList(state, params) }),
+  mapStateToProps,
   null
 )(TransactionList)
