@@ -107,7 +107,7 @@ function TagTable({ tags, currency, date, updateBudget, ...rest }) {
       size="small"
       columns={columns}
       dataSource={tableData}
-      defaultExpandAllRows={true}
+      defaultExpandAllRows={false}
       indentSize={56}
       pagination={false}
       {...rest}
