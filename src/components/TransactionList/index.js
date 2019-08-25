@@ -90,11 +90,7 @@ class TransactionList extends React.Component {
   }
 }
 
-const mapStateToProps = (state, params) => ({
-  groups: getMainTransactionList(state),
-})
-
 export default connect(
-  mapStateToProps,
+  state => ({ groups: getMainTransactionList(state) }),
   null
 )(TransactionList)
