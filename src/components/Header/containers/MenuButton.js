@@ -11,6 +11,7 @@ import IconButton from '@material-ui/core/IconButton'
 import Tooltip from '@material-ui/core/Tooltip'
 import Menu from '@material-ui/core/Menu'
 import MenuItem from '@material-ui/core/MenuItem'
+import Divider from '@material-ui/core/Divider'
 
 const useStyles = makeStyles({ menuIcon: { marginRight: 8 } })
 
@@ -38,6 +39,7 @@ function MenuButton({ exportCsv, exportJSON, logOut }) {
           <SaveAltIcon className={classes.menuIcon} />
           Полный бэкап
         </MenuItem>
+        <Divider />
         <MenuItem onClick={logOut}>
           <ExitToAppIcon className={classes.menuIcon} />
           Выйти
