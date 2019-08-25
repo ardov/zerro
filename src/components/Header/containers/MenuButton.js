@@ -15,7 +15,7 @@ import Divider from '@material-ui/core/Divider'
 
 const useStyles = makeStyles({ menuIcon: { marginRight: 8 } })
 
-function MenuButton({ exportCsv, exportJSON, logOut }) {
+function MenuButton({ exportCsv, exportJSON, logOut, ...rest }) {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const classes = useStyles()
 
@@ -25,23 +25,23 @@ function MenuButton({ exportCsv, exportJSON, logOut }) {
   return (
     <React.Fragment>
       <Tooltip title="Настройки">
-        <IconButton onClick={handleClick}>
+        <IconButton onClick={handleClick} {...rest}>
           <SettingsIcon />
         </IconButton>
       </Tooltip>
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem onClick={exportCsv}>
-          <SaveAltIcon className={classes.menuIcon} />
+          <SaveAltIcon className={classes.menuIcon} color="action" />
           Скачать CSV
         </MenuItem>
         <MenuItem onClick={exportJSON}>
-          <SaveAltIcon className={classes.menuIcon} />
+          <SaveAltIcon className={classes.menuIcon} color="action" />
           Полный бэкап
         </MenuItem>
         <Divider />
         <MenuItem onClick={logOut}>
-          <ExitToAppIcon className={classes.menuIcon} />
+          <ExitToAppIcon className={classes.menuIcon} color="action" />
           Выйти
         </MenuItem>
       </Menu>

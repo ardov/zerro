@@ -18,6 +18,7 @@ import { getTransfersOutsideBudget } from './selectors/getTransfersOutsideBudget
 const Wrap = styled.div`
   display: flex;
   flex-direction: row;
+  padding-top: 48px;
 `
 const Grow1 = styled.div`
   flex-grow: 1;

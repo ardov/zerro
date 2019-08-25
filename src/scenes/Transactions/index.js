@@ -10,7 +10,8 @@ import AccountList from 'components/AccountList'
 const Body = styled.div`
   display: flex;
   flex-direction: row;
-  height: calc(100vh - 48px);
+  height: 100vh;
+  padding-top: 48px;
   overflow: auto;
 `
 const Menu = styled.div`
