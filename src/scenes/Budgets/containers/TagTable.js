@@ -4,8 +4,10 @@ import { connect } from 'react-redux'
 import debounce from 'lodash/debounce'
 import { Table } from 'antd'
 import { formatMoney } from 'helpers/format'
-import { setOutcomeBudget } from './thunks'
+import { setOutcomeBudget } from '../thunks'
 import { BudgetCell } from './BudgetCell'
+import { getAmountsByTag } from '../selectors/getAmountsByTag'
+import { getUserCurrencyCode } from 'store/data/instruments'
 
 const colorMap = {
   positive: 'var(--text-success)',
@@ -115,13 +117,18 @@ function TagTable({ tags, currency, date, updateBudget, ...rest }) {
   )
 }
 
+const mapStateToProps = (state, { index }) => ({
+  tags: getAmountsByTag(state)[index],
+  currency: getUserCurrencyCode(state),
+})
+
 const mapDispatchToProps = dispatch => ({
   updateBudget: (outcome, month, tagId) =>
     dispatch(setOutcomeBudget(outcome, month, tagId)),
 })
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(TagTable)
 

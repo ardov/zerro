@@ -1,8 +1,11 @@
 import React from 'react'
+import { connect } from 'react-redux'
 import { Table } from 'antd'
 import { formatMoney } from 'helpers/format'
+import { getTransfersOutsideBudget } from '../selectors/getTransfersOutsideBudget'
+import { getUserCurrencyCode } from 'store/data/instruments'
 
-export function TransferTable({ transfers, currency, ...rest }) {
+function TransferTable({ transfers, currency, ...rest }) {
   const formatSum = sum => formatMoney(sum, currency)
   const columns = [
     {
@@ -48,3 +51,13 @@ export function TransferTable({ transfers, currency, ...rest }) {
     />
   )
 }
+
+const mapStateToProps = (state, { index }) => ({
+  transfers: getTransfersOutsideBudget(state)[index],
+  currency: getUserCurrencyCode(state),
+})
+
+export default connect(
+  mapStateToProps,
+  null
+)(TransferTable)

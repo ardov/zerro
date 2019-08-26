@@ -1,8 +1,11 @@
 import React from 'react'
+import { connect } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import styled, { css } from 'styled-components'
+import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
+import { getUserCurrencyCode } from 'store/data/instruments'
 
 const getMonthName = date => format(date, 'MMM', { locale: ru }).toLowerCase()
 
@@ -58,18 +61,19 @@ const Amount = styled.div`
 const Text = styled.div`
   color: #fff;
 `
-export default function BudgetInfo({ month, currency, ...rest }) {
-  const {
-    date,
-    prevOverspent,
-    toBeBudgeted,
-    income,
-    prevFunds,
-    transferIncome,
-    transferOutcome,
-    budgeted,
-    budgetedInFuture,
-  } = month
+function BudgetInfo({
+  date,
+  prevOverspent,
+  toBeBudgeted,
+  income,
+  prevFunds,
+  transferIncome,
+  transferOutcome,
+  budgeted,
+  budgetedInFuture,
+  currency,
+  ...rest
+}) {
   const formatSum = sum => formatMoney(sum, currency)
 
   return (
@@ -106,6 +110,16 @@ export default function BudgetInfo({ month, currency, ...rest }) {
     </Body>
   )
 }
+
+const mapStateToProps = (state, { index }) => ({
+  ...getTotalsByMonth(state)[index],
+  currency: getUserCurrencyCode(state),
+})
+
+export default connect(
+  mapStateToProps,
+  null
+)(BudgetInfo)
 
 function Line({ name, amount, currency }) {
   return (
