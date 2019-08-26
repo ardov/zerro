@@ -14,6 +14,7 @@ import Typography from '@material-ui/core/Typography'
 import Tabs from '@material-ui/core/Tabs'
 import Tab from '@material-ui/core/Tab'
 import Box from '@material-ui/core/Box'
+import Hidden from '@material-ui/core/Hidden'
 
 const routes = [
   { path: '/transactions', label: 'История' },
@@ -27,9 +28,11 @@ const Header = ({ match }) => {
   return (
     <AppBar>
       <Toolbar className={classes.toolbar}>
-        <Typography variant="h6" color="inherit">
-          ZERRO
-        </Typography>
+        <Hidden smDown>
+          <Typography variant="h6" color="inherit">
+            ZERRO
+          </Typography>
+        </Hidden>
 
         <Box flexGrow={1}>
           <Tabs
