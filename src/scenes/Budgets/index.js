@@ -1,7 +1,5 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import styled from 'styled-components'
-
 import startOfMonth from 'date-fns/start_of_month'
 import Header from 'components/Header'
 import { getUserInstrument } from 'store/data/instruments'
@@ -14,71 +12,52 @@ import BudgetInfo from './BudgetInfo'
 import MonthSelector from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
 import { getTransfersOutsideBudget } from './selectors/getTransfersOutsideBudget'
+import Box from '@material-ui/core/Box'
+import Grid from '@material-ui/core/Grid'
 
-const Wrap = styled.div`
-  display: flex;
-  flex-direction: row;
-  padding-top: 48px;
-`
-const Grow1 = styled.div`
-  flex-grow: 1;
-  padding: 0 12px;
-`
-const LeftPanel = styled.div`
-  padding: 40px;
-`
-const StyledAccountList = styled(AccountList)`
-  margin-top: 24px;
-`
-const StyledBudgetInfo = styled(BudgetInfo)`
-  margin-top: 24px;
-`
-const StyledTagTable = styled(TagTable)`
-  margin-top: 40px;
-  margin-bottom: 24px;
-`
+const Budgets = ({ instrument, monthDates, totals, transfers, amounts }) => {
+  const [month, setMonth] = React.useState(+startOfMonth(new Date()))
 
-class Budgets extends React.Component {
-  state = { selected: +startOfMonth(new Date()) }
+  const setCurrentMonth = () => setMonth(+startOfMonth(new Date()))
+  const setMonthByIndex = i => setMonth(monthDates[i])
+  const index = monthDates.findIndex(date => date === month)
+  const currency = instrument ? instrument.shortTitle : 'RUB'
 
-  componentDidMount = () => this.setCurrentMonth()
-
-  setCurrentMonth = () => this.setState({ selected: +startOfMonth(new Date()) })
-
-  setMonth = i => {
-    const { monthDates } = this.props
-    this.setState({ selected: monthDates[i] })
-  }
-  render() {
-    const { instrument, monthDates, totals, transfers, amounts } = this.props
-    const index = monthDates.findIndex(date => date === this.state.selected)
-    const currency = instrument ? instrument.shortTitle : 'RUB'
-    return (
-      <div>
-        <Header />
-        <Wrap>
-          <LeftPanel>
-            <MonthSelector
-              months={monthDates}
-              current={index}
-              onSetCurrent={this.setCurrentMonth}
-              onChange={this.setMonth}
-            />
-            <StyledBudgetInfo month={totals[index]} currency={currency} />
-            <StyledAccountList />
-          </LeftPanel>
-          <Grow1>
-            <StyledTagTable
-              tags={amounts[index]}
-              currency={currency}
-              date={monthDates[index]}
-            />
-            <TransferTable transfers={transfers[index]} currency={currency} />
-          </Grow1>
-        </Wrap>
-      </div>
-    )
-  }
+  return (
+    <Box pt={9} pb={3} px={3}>
+      <Header />
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={3}>
+          <MonthSelector
+            months={monthDates}
+            current={index}
+            onSetCurrent={setCurrentMonth}
+            onChange={setMonthByIndex}
+          />
+          <Box
+            component={BudgetInfo}
+            month={totals[index]}
+            currency={currency}
+            mt={3}
+          />
+          <Box component={AccountList} mt={3} />
+        </Grid>
+        <Grid item xs={12} md={9}>
+          <TagTable
+            tags={amounts[index]}
+            currency={currency}
+            date={monthDates[index]}
+          />
+          <Box
+            component={TransferTable}
+            transfers={transfers[index]}
+            currency={currency}
+            mt={3}
+          />
+        </Grid>
+      </Grid>
+    </Box>
+  )
 }
 
 const mapStateToProps = (state, props) => {

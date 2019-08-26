@@ -58,7 +58,7 @@ const Amount = styled.div`
 const Text = styled.div`
   color: #fff;
 `
-export default function BudgetInfo({ month, currency, className }) {
+export default function BudgetInfo({ month, currency, ...rest }) {
   const {
     date,
     prevOverspent,
@@ -73,7 +73,7 @@ export default function BudgetInfo({ month, currency, className }) {
   const formatSum = sum => formatMoney(sum, currency)
 
   return (
-    <Body className={className}>
+    <Body {...rest}>
       <ToBeBudgeted positive={toBeBudgeted >= 0}>
         <Amount>{formatSum(toBeBudgeted)}</Amount>
         <Text>Осталось запланировать</Text>

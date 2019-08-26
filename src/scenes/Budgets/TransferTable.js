@@ -2,7 +2,7 @@ import React from 'react'
 import { Table } from 'antd'
 import { formatMoney } from 'helpers/format'
 
-export function TransferTable({ transfers, currency }) {
+export function TransferTable({ transfers, currency, ...rest }) {
   const formatSum = sum => formatMoney(sum, currency)
   const columns = [
     {
@@ -44,6 +44,7 @@ export function TransferTable({ transfers, currency }) {
       columns={columns}
       dataSource={tableData}
       pagination={false}
+      {...rest}
     />
   )
 }
