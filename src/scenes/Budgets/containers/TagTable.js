@@ -5,7 +5,7 @@ import debounce from 'lodash/debounce'
 import { Table } from 'antd'
 import { formatMoney } from 'helpers/format'
 import { setOutcomeBudget } from '../thunks'
-import { BudgetCell } from './BudgetCell'
+import BudgetCell from './BudgetCell'
 import { getAmountsByTag } from '../selectors/getAmountsByTag'
 import { getUserCurrencyCode } from 'store/data/instruments'
 
@@ -37,10 +37,19 @@ function TagTable({ tags, currency, date, updateBudget, ...rest }) {
       dataIndex: 'budgeted',
       key: 'budgeted',
       align: 'right',
-      render: ({ date, updateBudget, tag, isChild = false }) => (
+      render: ({
+        budgeted,
+        available,
+        id,
+        date,
+        updateBudget,
+        isChild = false,
+      }) => (
         <BudgetCell
-          tag={tag}
-          key={`${tag.id}${isChild ? tag.budgeted : tag.totalBudgeted}`}
+          id={id}
+          budgeted={budgeted}
+          available={available}
+          key={id + budgeted}
           date={date}
           isChild={isChild}
           onUpdate={debounce(updateBudget, 2000)}
@@ -75,31 +84,19 @@ function TagTable({ tags, currency, date, updateBudget, ...rest }) {
       return {
         key: tag.id + '',
         name: tag.title,
-        budgeted: { date, updateBudget, tag },
+        budgeted: {
+          date,
+          updateBudget,
+          tag,
+          id: tag.id,
+          budgeted: tag.totalBudgeted,
+          available: tag.totalAvailable,
+          isChild: false,
+        },
         available: { value: tag.totalAvailable, hasOverspent, isChild: false },
         outcome: tag.totalOutcome,
 
-        children: tag.children.length
-          ? tag.children
-              .filter(
-                child =>
-                  child.showOutcome ||
-                  child.totalOutcome ||
-                  child.totalAvailable
-              )
-              .map(child => ({
-                key: child.id,
-                name: child.title,
-                budgeted: { date, updateBudget, tag: child, isChild: true },
-                available: {
-                  value: child.available,
-                  hasOverspent,
-                  isChild: true,
-                  hasBudget: !!child.budgeted,
-                },
-                outcome: child.outcome,
-              }))
-          : null,
+        children: getChildren({ tag, date, updateBudget, hasOverspent }),
       }
     })
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -144,4 +141,58 @@ function getAvailableColor({ value, hasOverspent, isChild, hasBudget }) {
       ? 'negative'
       : 'neutral'
   }
+}
+
+function getChildren({ tag, date, updateBudget, hasOverspent }) {
+  const children = tag.children.length
+    ? tag.children
+        .filter(
+          child =>
+            child.showOutcome || child.totalOutcome || child.totalAvailable
+        )
+        .map(child => ({
+          key: child.id,
+          name: child.title,
+          budgeted: {
+            date,
+            updateBudget,
+            tag,
+            id: child.id,
+            budgeted: child.budgeted,
+            available: child.available,
+            isChild: true,
+          },
+          available: {
+            value: child.available,
+            hasOverspent,
+            isChild: true,
+            hasBudget: !!child.budgeted,
+          },
+          outcome: child.outcome,
+        }))
+    : null
+  return children && tag.outcome
+    ? [
+        {
+          key: tag.id + '-unsorted',
+          name: 'Без подкатегории',
+          budgeted: {
+            updateBudget: () => {},
+            date,
+            id: tag.id,
+            budgeted: 0,
+            available: 0,
+            isChild: true,
+          },
+          available: {
+            value: -tag.outcome,
+            hasOverspent,
+            isChild: true,
+            hasBudget: false,
+          },
+          outcome: tag.outcome,
+        },
+        ...children,
+      ]
+    : children
 }

@@ -11,45 +11,48 @@ const StyledInput = styled(InputNumber)`
     text-align: right;
   }
 `
-export class BudgetCell extends React.Component {
-  state = {
-    budgeted: this.props.isChild
-      ? this.props.tag.budgeted
-      : this.props.tag.totalBudgeted,
-  }
-  onChange = val => {
-    this.setState({ budgeted: val })
-    this.props.onUpdate(val, this.props.date, this.props.tag.id)
-  }
-  render() {
-    const { tag, isChild } = this.props
-    const { budgeted } = this.state
-    const available = isChild ? tag.available : tag.totalAvailable
-    const orginalBudgeted = isChild ? tag.budgeted : tag.totalBudgeted
+export default function BudgetCell({
+  budgeted,
+  available,
+  id,
+  isChild,
+  date,
+  onUpdate,
+}) {
+  const [budgetedClone, setBudgetedClone] = React.useState(budgeted)
+  const [isVisible, setVisible] = React.useState(isChild ? !!budgeted : true)
 
-    return (
-      <Dropdown
-        trigger={['click']}
-        overlay={
-          <Menu>
-            <Menu.Item
-              key="0"
-              onClick={() => this.onChange(orginalBudgeted - available)}
-            >
-              Сбросить остаток в ноль (
-              {formatMoney(orginalBudgeted - available)})
-            </Menu.Item>
-          </Menu>
-        }
-      >
-        <StyledInput
-          value={budgeted}
-          formatter={value => formatMoney(value, null, 0)}
-          parser={value => +value.replace(' ', '').replace(',', '.')}
-          decimalSeparator="."
-          onChange={this.onChange}
-        />
-      </Dropdown>
-    )
+  const showInput = () => setVisible(true)
+
+  const onChange = val => {
+    setBudgetedClone(val)
+    onUpdate(val, date, id)
   }
+
+  const resetAvailable = () => {
+    onChange(budgeted - available)
+  }
+
+  return isVisible ? (
+    <Dropdown
+      trigger={['click']}
+      overlay={
+        <Menu>
+          <Menu.Item key="0" onClick={resetAvailable}>
+            Сбросить остаток в ноль ({formatMoney(budgeted - available)})
+          </Menu.Item>
+        </Menu>
+      }
+    >
+      <StyledInput
+        value={budgetedClone}
+        formatter={value => formatMoney(value, null, 0)}
+        parser={value => +value.replace(' ', '').replace(',', '.')}
+        decimalSeparator="."
+        onChange={onChange}
+      />
+    </Dropdown>
+  ) : (
+    <div onClick={showInput}>-</div>
+  )
 }
