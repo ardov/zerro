@@ -27,8 +27,11 @@ export const syncData = () => (dispatch, getState) => {
       dispatch(setPending(false))
       dispatch(updateData(json))
       dispatch(removeSynced(syncBegin))
-      dispatch(saveDataLocally())
-      if (Object.keys(json).length > 1) {
+
+      const changedDomains = Object.keys(json)
+      dispatch(saveDataLocally(changedDomains))
+
+      if (changedDomains.length > 1) {
         message.success(successMessage)
       }
       console.log('✅ Данные обновлены', new Date())
