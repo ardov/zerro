@@ -1,6 +1,6 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
-import { Checkbox } from 'antd'
+import Checkbox from '@material-ui/core/Checkbox'
 
 const Body = styled.div`
   position: relative;
@@ -41,33 +41,28 @@ const Sym = styled.div`
   ${Body}:hover & {
     display: none;
   }
-
-  ${props =>
-    props.isInSelectionMode &&
-    css`
-      display: none;
-    `}
 `
-export default class Icon extends React.Component {
-  handleChange = e => {
+export default function Icon({
+  isChecked,
+  isInSelectionMode,
+  symbol,
+  color,
+  onToggle,
+}) {
+  const handleChange = e => {
     e.stopPropagation()
-    this.props.onToggle()
+    onToggle()
   }
-  render() {
-    const { isChecked, isInSelectionMode, symbol, color } = this.props
-    return (
-      <Body>
-        <StyledCheckbox
-          isInSelectionMode={isInSelectionMode}
-          checked={isChecked}
-          onClick={this.handleChange}
-        />
-        <Sym isInSelectionMode={isInSelectionMode} color={color}>
-          {symbol}
-        </Sym>
-      </Body>
-    )
-  }
-}
 
-// export function Icon({ isChecked, isInSelectionMode, symbol, onToggle }) {}
+  return (
+    <Body>
+      <StyledCheckbox
+        isInSelectionMode={isInSelectionMode}
+        checked={isChecked}
+        onChange={handleChange}
+        color="primary"
+      />
+      {!isInSelectionMode && <Sym color={color}>{symbol}</Sym>}
+    </Body>
+  )
+}
