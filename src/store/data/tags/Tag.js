@@ -16,15 +16,11 @@ export default class Tag {
     this.showOutcome = raw.showOutcome || false
     this.parent = raw.parent || null
     this.title = raw.title || '!!!'
-  }
-  get name() {
-    return getTitle(this.title)
-  }
-  get symbol() {
-    return this.id ? toArray(this.title)[0] : '?'
-  }
-  get colorRGB() {
-    return this.color ? unsignedToRGB(this.color) : null
+
+    // COMPUTED
+    this.name = getTitle(raw.title)
+    this.symbol = toArray(raw.title)[0]
+    this.colorRGB = raw.color ? unsignedToRGB(raw.color) : null
   }
 
   static nullTag = new Tag({
