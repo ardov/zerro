@@ -3,8 +3,14 @@ import React from 'react'
 import styled from 'styled-components'
 
 import TagSelect from 'components/TagSelect'
-import { Checkbox, Input, Form, Radio } from 'antd'
+import { Checkbox, Input, Form } from 'antd'
 import Drawer from '@material-ui/core/Drawer'
+import Radio from '@material-ui/core/Radio'
+import RadioGroup from '@material-ui/core/RadioGroup'
+import FormHelperText from '@material-ui/core/FormHelperText'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
+import FormControl from '@material-ui/core/FormControl'
+import FormLabel from '@material-ui/core/FormLabel'
 
 const Search = Input.Search
 const InputGroup = Input.Group
@@ -63,16 +69,27 @@ export default function FilterDrawer({
         </Form.Item>
 
         <Form.Item label="">
-          <Radio.Group
-            buttonStyle="solid"
+          <RadioGroup
             value={conditions.type || 'all'}
             onChange={handleTypeChange}
           >
-            <Radio.Button value="all">Все</Radio.Button>
-            <Radio.Button value="income">Доход</Radio.Button>
-            <Radio.Button value="outcome">Расход</Radio.Button>
-            <Radio.Button value="transfer">Перевод</Radio.Button>
-          </Radio.Group>
+            <FormControlLabel value="all" control={<Radio />} label="Все" />
+            <FormControlLabel
+              value="income"
+              control={<Radio />}
+              label="Доход"
+            />
+            <FormControlLabel
+              value="outcome"
+              control={<Radio />}
+              label="Расход"
+            />
+            <FormControlLabel
+              value="transfer"
+              control={<Radio />}
+              label="Перевод"
+            />
+          </RadioGroup>
         </Form.Item>
 
         <Form.Item label="">
