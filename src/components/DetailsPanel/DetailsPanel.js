@@ -4,7 +4,7 @@ import TagSelect from 'components/TagSelect'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import { FormattedNumber } from 'react-intl'
-import { Button } from 'antd'
+import Button from '@material-ui/core/Button'
 
 const formatDate = date => format(date, 'D MMMM YYYY, dd', { locale: ru })
 const formatDateTime = date =>
@@ -169,9 +169,7 @@ export default class DetailsPanel extends React.Component {
             name: 'GEO',
             value: (
               <a
-                href={`https://www.google.com/maps/@${tr.latitude},${
-                  tr.longitude
-                },18z`}
+                href={`https://www.google.com/maps/@${tr.latitude},${tr.longitude},18z`}
               >
                 {tr.latitude + ' ' + tr.longitude}
               </a>
@@ -233,11 +231,7 @@ export default class DetailsPanel extends React.Component {
               <div>
                 <iframe
                   title="geo"
-                  src={`https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d1040.2885062361672!2d${
-                    tr.longitude
-                  }!3d${
-                    tr.latitude
-                  }!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sru!2sru!4v1546784599411`}
+                  src={`https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d1040.2885062361672!2d${tr.longitude}!3d${tr.latitude}!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sru!2sru!4v1546784599411`}
                   width="380"
                   height="450"
                   frameBorder="0"

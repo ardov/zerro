@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { connect } from 'react-redux'
 
-import { Button } from 'antd'
+import Button from '@material-ui/core/Button'
 import { logIn } from 'logic/authorization'
 import ZenApi from 'services/ZenApi'
 
@@ -24,7 +24,12 @@ const LinkAbout = styled.a`
 function Auth(props) {
   return (
     <Body>
-      <Button type="primary" size="large" onClick={props.logIn}>
+      <Button
+        variant="contained"
+        color="primary"
+        size="large"
+        onClick={props.logIn}
+      >
         Войти через ДзенМани
       </Button>
       <LinkAbout
