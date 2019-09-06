@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import Filter from 'components/TransactionList/Filter'
+import Filter from './Filter'
 
 const SearchContainer = styled.div`
   position: absolute;
@@ -13,19 +13,18 @@ const SearchContainer = styled.div`
   background-color: #fff;
   box-shadow: 0 16px 16px #fff;
 `
-const StyledFilter = styled(Filter)`
+const FilterWrapper = styled.div`
   position: relative;
   max-width: 560px;
   margin: 0 auto;
 `
 
-export default class Search extends React.PureComponent {
-  render() {
-    const { style } = this.props
-    return (
-      <SearchContainer style={style}>
-        <StyledFilter />
-      </SearchContainer>
-    )
-  }
+export default function TopBar({ style }) {
+  return (
+    <SearchContainer style={style}>
+      <FilterWrapper>
+        <Filter />
+      </FilterWrapper>
+    </SearchContainer>
+  )
 }

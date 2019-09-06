@@ -6,7 +6,7 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { connect } from 'react-redux'
 import TransactionGroup from './TransactionGroup'
-import Search from './Search'
+import TopBar from './TopBar'
 import { getMainTransactionList } from 'store/data/transactions'
 import formatDate from './formatDate'
 
@@ -36,7 +36,7 @@ class TransactionList extends React.Component {
 
   render() {
     const { groups, className } = this.props
-    const SEARCH_HEIGHT = 56
+    const SEARCH_HEIGHT = 72
     const PADDING_BOTTOM = 40
 
     const innerElementType = forwardRef(({ children, style, ...rest }, ref) => (
@@ -67,7 +67,7 @@ class TransactionList extends React.Component {
 
     return (
       <Wrapper className={className}>
-        <Search />
+        <TopBar />
         <AutoSizer disableWidth={true}>
           {({ height, width }) => (
             <List
