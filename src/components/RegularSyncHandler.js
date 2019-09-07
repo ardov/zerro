@@ -50,8 +50,6 @@ class RegularSyncHandler extends React.Component {
   }
 
   render() {
-    console.log('RENDER HOC')
-
     return this.props.children
   }
 }
