@@ -13,63 +13,54 @@ import {
   setMainTagToTransactions,
   deleteTransactions,
 } from 'store/data/transactions'
-import { makeStyles } from '@material-ui/core/styles'
 import Paper from '@material-ui/core/Paper'
 import InputBase from '@material-ui/core/InputBase'
 import IconButton from '@material-ui/core/IconButton'
 import FilterListIcon from '@material-ui/icons/FilterList'
 import Tooltip from '@material-ui/core/Tooltip'
-import MoreVertIcon from '@material-ui/icons/MoreVert'
-import Menu from '@material-ui/core/Menu'
-import MenuItem from '@material-ui/core/MenuItem'
-import Divider from '@material-ui/core/Divider'
-import FilterDrawer from './FilterDrawer.js'
+import Box from '@material-ui/core/Box'
+import Actions from './Actions.js'
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    padding: theme.spacing(0, 1, 0, 2),
-    display: 'flex',
-    alignItems: 'center',
-    width: '100%',
-  },
-  input: {
-    flex: 1,
-    width: 'auto',
-  },
-}))
+import FilterDrawer from './FilterDrawer.js'
 
 function Filter({
   setCondition,
   conditions = {},
   setTags,
+  setTag,
   selectedIds,
+  uncheckAll,
   ...rest
 }) {
-  const classes = useStyles()
   const [isDrawerVisible, setDrawerVisible] = React.useState(false)
   const toggleDrawer = () => setDrawerVisible(!isDrawerVisible)
 
   return (
-    <Paper className={classes.root} elevation={4} {...rest}>
-      <InputBase
-        className={classes.input}
-        value={conditions.search}
-        placeholder="Поиск по комментариям"
-        onChange={e => setCondition({ search: e.target.value })}
-      />
+    <Box display="flex" alignItems="center" pl={2} pr={1} {...rest} clone>
+      <Paper elevation={4}>
+        <Box flexGrow={1} clone>
+          {selectedIds.length ? (
+            <Actions {...{ selectedIds, setTags, uncheckAll }} />
+          ) : (
+            <InputBase
+              value={conditions.search || ''}
+              placeholder="Поиск по комментариям"
+              onChange={e => setCondition({ search: e.target.value })}
+            />
+          )}
+        </Box>
 
-      <Tooltip title="Расширенные фильтры">
-        <IconButton onClick={toggleDrawer} children={<FilterListIcon />} />
-      </Tooltip>
+        <Tooltip title="Расширенные фильтры">
+          <IconButton onClick={toggleDrawer} children={<FilterListIcon />} />
+        </Tooltip>
 
-      {!!selectedIds.length && <ActionButton />}
-
-      <FilterDrawer
-        onClose={toggleDrawer}
-        open={isDrawerVisible}
-        {...{ conditions, setCondition, setTags }}
-      />
-    </Paper>
+        <FilterDrawer
+          onClose={toggleDrawer}
+          open={isDrawerVisible}
+          {...{ conditions, setCondition, setTags }}
+        />
+      </Paper>
+    </Box>
   )
 }
 
@@ -95,34 +86,3 @@ export default connect(
   mapStateToProps,
   mapDispatchToProps
 )(Filter)
-
-function ActionButton({ onSetTag, onDelete, onUncheckAll, selectedIds }) {
-  const [anchorEl, setAnchorEl] = React.useState(null)
-  const classes = makeStyles({ menuIcon: { marginRight: 8 } })()
-  const handleClick = event => setAnchorEl(event.currentTarget)
-  const handleClose = () => setAnchorEl(null)
-
-  return (
-    <React.Fragment>
-      <Tooltip title="Настройки">
-        <IconButton onClick={handleClick} children={<MoreVertIcon />} />
-      </Tooltip>
-
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-        <MenuItem onClick={() => {}}>
-          {/* <SaveAltIcon className={classes.menuIcon} color="action" /> */}
-          Скачать CSV
-        </MenuItem>
-        <MenuItem onClick={() => {}}>
-          {/* <SaveAltIcon className={classes.menuIcon} color="action" /> */}
-          Полный бэкап
-        </MenuItem>
-        <Divider />
-        <MenuItem onClick={() => {}}>
-          {/* <ExitToAppIcon className={classes.menuIcon} color="action" /> */}
-          Выйти
-        </MenuItem>
-      </Menu>
-    </React.Fragment>
-  )
-}
