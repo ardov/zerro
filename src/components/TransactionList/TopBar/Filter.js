@@ -30,6 +30,7 @@ function Filter({
   setTag,
   selectedIds,
   uncheckAll,
+  deleteTransactions,
   ...rest
 }) {
   const [isDrawerVisible, setDrawerVisible] = React.useState(false)
@@ -75,7 +76,7 @@ const mapDispatchToProps = dispatch => ({
   setTags: tags => dispatch(setTags(tags)),
   // For BulkActions
   setTag: (ids, tagId) => dispatch(setMainTagToTransactions(ids, tagId)),
-  delete: ids => {
+  deleteTransactions: ids => {
     dispatch(deleteTransactions(ids))
     dispatch(uncheckAllTransactions())
   },
