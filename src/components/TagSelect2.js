@@ -16,8 +16,9 @@ import {
   TextField,
 } from '@material-ui/core'
 import AddIcon from '@material-ui/icons/Add'
+import EmojiIcon from 'components/EmojiIcon'
 
-function TagSelect({ tags, onTagSelect }) {
+function TagSelect({ tags, onTagSelect, trigger }) {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const handleClick = e => setAnchorEl(e.currentTarget)
   const handleClose = () => setAnchorEl(null)
@@ -25,9 +26,13 @@ function TagSelect({ tags, onTagSelect }) {
 
   return (
     <>
-      <IconButton onClick={handleClick}>
-        <AddIcon />
-      </IconButton>
+      {trigger ? (
+        React.cloneElement(trigger, { onClick: handleClick })
+      ) : (
+        <IconButton onClick={handleClick}>
+          <AddIcon />
+        </IconButton>
+      )}
       <TagSelectPopover
         tags={tags}
         open={open}
@@ -53,15 +58,36 @@ function TagSelectPopover({
   anchorEl,
   incomeOnly,
   outcomeOnly,
+  selectedIds,
   onTagSelect,
   onClose,
 }) {
   const [search, setSearch] = React.useState('')
 
+  const checkSearch = (tag, search) => {
+    const includes = (title, search) =>
+      title.toUpperCase().includes(search.toUpperCase())
+    if (includes(tag.title, search)) return true
+    return (
+      tag.children && tag.children.some(child => includes(child.title, search))
+    )
+  }
+
   const checkTag = tag =>
-    tag.title.toUpperCase().includes(search.toUpperCase()) &&
+    checkSearch(tag, search) &&
     (!incomeOnly || tag.showIncome) &&
     (!outcomeOnly || tag.showOutcome)
+
+  const filtered = tags
+    .filter(checkTag)
+    .map(tag =>
+      tag.children ? { ...tag, children: tag.children.filter(checkTag) } : tag
+    )
+
+  const handleClick = id => () => {
+    onTagSelect(id)
+    onClose()
+  }
 
   return (
     <Popover
@@ -77,33 +103,48 @@ function TagSelectPopover({
         horizontal: 'center',
       }}
     >
-      <Box
-        component={Paper}
-        pt={1}
-        px={1}
-        position="sticky"
-        top={0}
-        zIndex={10}
-        square
-        elevation={0}
-      >
-        <TextField
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          variant="outlined"
-          placeholder="Выберите категории"
-          fullWidth
-          autoFocus
-        />
+      <Box pt={1} px={1} position="sticky" top={0} zIndex={10} clone>
+        <Paper square elevation={0}>
+          <TextField
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            variant="outlined"
+            placeholder="Выберите категории"
+            fullWidth
+            autoFocus
+          />
+        </Paper>
       </Box>
       <List>
-        {tags.filter(checkTag).map(tag => (
-          <ListItem key={tag.id} onClick={() => onTagSelect(tag.id)} button>
-            <ListItemIcon>{tag.symbol}</ListItemIcon>
-            <ListItemText primary={tag.title}></ListItemText>
-          </ListItem>
+        {filtered.map(tag => (
+          <React.Fragment key={tag.id + 'frag'}>
+            <TagOption
+              key={tag.id}
+              tag={tag}
+              onClick={handleClick(tag.id)}
+              selected={selectedIds && selectedIds.find(tag.id)}
+            />
+            {tag.children &&
+              tag.children.map(tag => (
+                <TagOption
+                  key={tag.id}
+                  tag={tag}
+                  onClick={handleClick(tag.id)}
+                  isChild
+                />
+              ))}
+          </React.Fragment>
         ))}
       </List>
     </Popover>
+  )
+}
+
+function TagOption({ tag, isChild, ...rest }) {
+  return (
+    <ListItem button {...rest}>
+      <EmojiIcon symbol={tag.symbol} mr={2} ml={isChild ? 5 : 0} />
+      <ListItemText primary={tag.name}></ListItemText>
+    </ListItem>
   )
 }
