@@ -1,47 +1,28 @@
 import React from 'react'
-import styled, { css } from 'styled-components'
-import Checkbox from '@material-ui/core/Checkbox'
+import { makeStyles } from '@material-ui/core/styles'
+import { Checkbox, Box } from '@material-ui/core'
 
-const Body = styled.div`
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  margin-top: -8px;
-  margin-right: 16px;
-`
-const StyledCheckbox = styled(Checkbox)`
-  opacity: 0;
+const useStyles = makeStyles(theme => ({
+  checkbox: {
+    opacity: props => (props.hover || props.isInSelectionMode ? 1 : 0),
+    transition: '.2s',
+  },
+  symbol: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    color: ({ color }) => (color ? color : theme.palette.text.primary),
+    fontSize: '24px',
+    lineHeight: '40px',
+    textAlign: 'center',
+    borderRadius: 20,
+    opacity: props => (props.hover || props.isInSelectionMode ? 0 : 1),
+    transition: '.2s',
+  },
+}))
 
-  ${Body}:hover & {
-    opacity: 1;
-  }
-
-  ${props =>
-    props.isInSelectionMode &&
-    css`
-      opacity: 1;
-    `}
-`
-
-const Sym = styled.div`
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  color: ${({ color }) => (color ? color : `var(--text-primary)`)};
-  font-size: 24px;
-  line-height: 40px;
-  text-align: center;
-  border-radius: 20px;
-
-  ${Body}:hover & {
-    display: none;
-  }
-`
 export default function Icon({
   isChecked,
   isInSelectionMode,
@@ -49,20 +30,36 @@ export default function Icon({
   color,
   onToggle,
 }) {
+  const [hover, setHover] = React.useState(false)
+  const c = useStyles({ hover, isInSelectionMode, color })
+
   const handleChange = e => {
     e.stopPropagation()
     onToggle()
   }
+  const handleMouseEnter = () => setHover(true)
+  const handleMouseLeave = () => setHover(false)
 
   return (
-    <Body>
-      <StyledCheckbox
-        isInSelectionMode={isInSelectionMode}
+    <Box
+      position="relative"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      mt={-1}
+      mr={2}
+      width={40}
+      height={40}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <Checkbox
+        className={c.checkbox}
         checked={isChecked}
         onChange={handleChange}
         color="primary"
       />
-      {!isInSelectionMode && <Sym color={color}>{symbol}</Sym>}
-    </Body>
+      {!isInSelectionMode && !hover && <div className={c.symbol}>{symbol}</div>}
+    </Box>
   )
 }
