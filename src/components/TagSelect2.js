@@ -1,6 +1,5 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { TreeSelect } from 'antd'
 import { getTagsTree } from 'store/data/tags'
 import {
   Typography,
@@ -18,7 +17,7 @@ import {
 import AddIcon from '@material-ui/icons/Add'
 import EmojiIcon from 'components/EmojiIcon'
 
-function TagSelect({ tags, onTagSelect, trigger }) {
+function TagSelect({ tags, onTagSelect, trigger, incomeOnly, outcomeOnly }) {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const handleClick = e => setAnchorEl(e.currentTarget)
   const handleClose = () => setAnchorEl(null)
@@ -34,9 +33,7 @@ function TagSelect({ tags, onTagSelect, trigger }) {
         </IconButton>
       )}
       <TagSelectPopover
-        tags={tags}
-        open={open}
-        anchorEl={anchorEl}
+        {...{ tags, open, anchorEl, incomeOnly, outcomeOnly }}
         onClose={handleClose}
         onTagSelect={id => {
           console.log(id)
