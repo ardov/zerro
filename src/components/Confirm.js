@@ -6,7 +6,31 @@ import DialogContent from '@material-ui/core/DialogContent'
 import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
 
-export default function Confirm({
+export default function Confirm({ onOk, children, ...rest }) {
+  const [open, setOpen] = React.useState(false)
+  const openConfirm = () => setOpen(true)
+  const closeConfirm = () => setOpen(false)
+  const handleOk = () => {
+    closeConfirm()
+    onOk()
+  }
+  if (!children) return null
+  return (
+    <>
+      {React.Children.only(
+        React.cloneElement(children, { onClick: openConfirm })
+      )}
+      <ConfirmModal
+        {...rest}
+        open={open}
+        onOk={handleOk}
+        onCancel={closeConfirm}
+      ></ConfirmModal>
+    </>
+  )
+}
+
+function ConfirmModal({
   title = 'Вы уверены?',
   description = null,
   open = false,
@@ -19,14 +43,11 @@ export default function Confirm({
 }) {
   return (
     <Dialog open={open} onClose={onCancel}>
-      <DialogTitle id="alert-dialog-title">{title}</DialogTitle>
+      <DialogTitle>{title}</DialogTitle>
 
       {!!description && (
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Let Google help apps determine location. This means sending
-            anonymous location data to Google, even when no apps are running.
-          </DialogContentText>
+          <DialogContentText>{description}</DialogContentText>
         </DialogContent>
       )}
 
@@ -39,13 +60,5 @@ export default function Confirm({
         </Button>
       </DialogActions>
     </Dialog>
-  )
-}
-
-export function withConfirm(Component) {
-  return (
-    <>
-      <Component></Component>
-    </>
   )
 }

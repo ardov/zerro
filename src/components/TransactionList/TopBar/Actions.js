@@ -5,13 +5,9 @@ import Tooltip from '@material-ui/core/Tooltip'
 import Chip from '@material-ui/core/Chip'
 import Box from '@material-ui/core/Box'
 import pluralize from 'helpers/pluralize'
-import Confirm from './Confirm'
+import Confirm from 'components/Confirm'
 
 export default function Actions({ selectedIds, setTags, uncheckAll, ...rest }) {
-  const [isConfirmOpen, setConfirmOpen] = React.useState(false)
-  const showConfirm = () => setConfirmOpen(true)
-  const hideConfirm = () => setConfirmOpen(false)
-
   return (
     <Box {...rest}>
       <Chip
@@ -22,21 +18,21 @@ export default function Actions({ selectedIds, setTags, uncheckAll, ...rest }) {
         ])}`}
         onDelete={uncheckAll}
       />
-      <Tooltip title="Удалить выбранные">
-        <IconButton onClick={showConfirm} children={<DeleteOutlineIcon />} />
-      </Tooltip>
 
       <Confirm
-        open={isConfirmOpen}
-        onCancel={hideConfirm}
         title={`Удалить ${selectedIds.length} ${pluralize(selectedIds.length, [
           'операцию',
           'операции',
           'операций',
         ])}?`}
-        okColor="error"
+        onOk={() => console.log('OK')}
         okText="Удалить"
-      ></Confirm>
+        cancelText="Оставить"
+      >
+        <Tooltip title="Удалить выбранные">
+          <IconButton children={<DeleteOutlineIcon />} />
+        </Tooltip>
+      </Confirm>
     </Box>
   )
 }
