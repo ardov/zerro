@@ -1,29 +1,48 @@
 import React from 'react'
+import {
+  ExpansionPanel,
+  ExpansionPanelDetails,
+  ExpansionPanelSummary,
+} from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import IconButton from '@material-ui/core/IconButton'
 import ArrowRightIcon from '@material-ui/icons/ArrowRight'
 import { TagRow } from './TagRow'
 
 export const useStyles = makeStyles(theme => ({
-  root: {
-    padding: theme.spacing(0.5, 1),
+  panelRoot: {
+    padding: 0,
     borderTop: '1px solid',
     borderColor: theme.palette.divider,
-    display: 'flex',
-    alignItems: 'flex-start',
-    '&:hover': {
-      background: theme.palette.action.hover,
+    '&$expanded': { margin: 0 },
+    '&:before': { opacity: 0 },
+  },
+  summaryRoot: {
+    padding: 0,
+    minHeight: 0,
+    '&$expanded': {
+      minHeight: 0,
     },
   },
-  tags: {
-    display: 'grid',
-    flexGrow: 1,
+  summaryContent: {
+    margin: 0,
+    '&$expanded': {
+      margin: 0,
+    },
   },
-  expander: props => ({
-    opacity: props.hasChildren ? 1 : 0,
-    transform: props.expanded ? 'rotate(90deg)' : 'rotate(0deg)',
+  summaryDetails: {
+    flexDirection: 'column',
+    padding: theme.spacing(0, 0, 1),
+  },
+  expanded: {},
+
+  expandIcon: {
+    position: 'absolute',
+    left: -8,
+    top: 9,
+    transform: props => (props.expanded ? 'rotate(90deg)' : 'rotate(0deg)'),
     transition: '.3s',
-  }),
+  },
 }))
 
 export default function Row(props) {
@@ -43,18 +62,29 @@ export default function Row(props) {
     setBudget,
     date,
   } = props
-
-  const hasChildren = children && children.length
   const [expanded, setExpanded] = React.useState(false)
-  const c = useStyles({ hasChildren, expanded })
-  const toggleExpanded = () => setExpanded(!expanded)
+  const toggle = () => setExpanded(!expanded)
+  const hasChildren = Boolean(children && children.length)
+  const c = useStyles({ expanded })
 
   return (
-    <div className={c.root}>
-      <IconButton onClick={toggleExpanded} size="small">
-        <ArrowRightIcon className={c.expander} />
-      </IconButton>
-      <div className={c.tags}>
+    <ExpansionPanel
+      classes={{ root: c.panelRoot, expanded: c.expanded }}
+      elevation={0}
+      expanded={expanded}
+    >
+      <ExpansionPanelSummary
+        classes={{
+          root: c.summaryRoot,
+          content: c.summaryContent,
+          expanded: c.expanded,
+        }}
+      >
+        {hasChildren && (
+          <IconButton size="small" className={c.expandIcon} onClick={toggle}>
+            <ArrowRightIcon />
+          </IconButton>
+        )}
         <TagRow
           {...{
             id,
@@ -69,8 +99,9 @@ export default function Row(props) {
             date,
           }}
         />
-        {expanded &&
-          hasChildren &&
+      </ExpansionPanelSummary>
+      <ExpansionPanelDetails className={c.summaryDetails}>
+        {hasChildren &&
           children.map(child => (
             <TagRow
               key={child.id}
@@ -79,7 +110,7 @@ export default function Row(props) {
               {...{ setBudget, date }}
             ></TagRow>
           ))}
-      </div>
-    </div>
+      </ExpansionPanelDetails>
+    </ExpansionPanel>
   )
 }

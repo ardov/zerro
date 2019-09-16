@@ -7,8 +7,12 @@ import { makeStyles } from '@material-ui/styles'
 
 export const useStyles = makeStyles(theme => ({
   row: {
-    padding: theme.spacing(0.5, 1),
+    paddingTop: props => theme.spacing(props.isChild ? 0.5 : 1),
+    paddingBottom: props => theme.spacing(props.isChild ? 0.5 : 1),
+    paddingLeft: props => theme.spacing(props.isChild ? 7 : 2),
+    paddingRight: 1,
     display: 'grid',
+    width: '100%',
     gridTemplateColumns: 'auto 96px 96px 96px',
     alignItems: 'center',
     gridColumnGap: theme.spacing(2),
@@ -30,7 +34,6 @@ export const useStyles = makeStyles(theme => ({
   },
   emoji: { fontSize: '4em', transform: 'scale(.25)', color: '#000' },
   name: {
-    paddingLeft: props => (props.isChild ? theme.spacing(5) : 0),
     display: 'flex',
     alignItems: 'center',
     minWidth: 0,
