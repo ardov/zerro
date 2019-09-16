@@ -7,13 +7,13 @@ import { makeStyles } from '@material-ui/styles'
 
 export const useStyles = makeStyles(theme => ({
   row: {
-    padding: '4px 0',
+    padding: theme.spacing(0.5, 1),
     display: 'grid',
     gridTemplateColumns: 'auto 96px 96px 96px',
     alignItems: 'center',
-    gridColumnGap: 16,
+    gridColumnGap: theme.spacing(2),
     '&:hover': {
-      background: 'rgba(0,0,0,.04)',
+      background: theme.palette.action.hover,
     },
   },
   symbol: {
@@ -25,16 +25,16 @@ export const useStyles = makeStyles(theme => ({
     justifyContent: 'center',
     backgroundColor: 'rgba(0,0,0,0.04)',
     borderRadius: '50%',
-    marginRight: 12,
+    marginRight: theme.spacing(1.5),
     textAlign: 'center',
   },
   emoji: { fontSize: '4em', transform: 'scale(.25)', color: '#000' },
-  name: props => ({
-    paddingLeft: props.isChild ? 40 : 0,
+  name: {
+    paddingLeft: props => (props.isChild ? theme.spacing(5) : 0),
     display: 'flex',
     alignItems: 'center',
     minWidth: 0,
-  }),
+  },
 }))
 
 export function TagRow(props) {

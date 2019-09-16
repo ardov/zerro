@@ -7,11 +7,12 @@ import { TagRow } from './TagRow'
 export const useStyles = makeStyles(theme => ({
   root: {
     padding: theme.spacing(0.5, 1),
-    borderTop: '1px solid rgba(0, 0, 0, 0.06)',
+    borderTop: '1px solid',
+    borderColor: theme.palette.divider,
     display: 'flex',
     alignItems: 'flex-start',
     '&:hover': {
-      background: '#fafafa',
+      background: theme.palette.action.hover,
     },
   },
   tags: {
