@@ -2,25 +2,33 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { getTagsTree } from 'store/data/tags'
 import {
-  Typography,
   Popover,
-  Button,
   Paper,
   IconButton,
   Box,
   List,
   ListItem,
-  ListItemIcon,
   ListItemText,
   TextField,
 } from '@material-ui/core'
 import AddIcon from '@material-ui/icons/Add'
 import EmojiIcon from 'components/EmojiIcon'
 
-function TagSelect({ tags, onTagSelect, trigger, incomeOnly, outcomeOnly }) {
+function TagSelect({
+  tags,
+  onChange,
+  trigger,
+  incomeOnly,
+  outcomeOnly,
+  value,
+}) {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const handleClick = e => setAnchorEl(e.currentTarget)
   const handleClose = () => setAnchorEl(null)
+  const handleTagSelect = id => {
+    setAnchorEl(null)
+    onChange(id)
+  }
   const open = Boolean(anchorEl)
 
   return (
@@ -35,9 +43,8 @@ function TagSelect({ tags, onTagSelect, trigger, incomeOnly, outcomeOnly }) {
       <TagSelectPopover
         {...{ tags, open, anchorEl, incomeOnly, outcomeOnly }}
         onClose={handleClose}
-        onTagSelect={id => {
-          console.log(id)
-        }}
+        onTagSelect={handleTagSelect}
+        selectedIds={value}
       />
     </>
   )
@@ -81,10 +88,7 @@ function TagSelectPopover({
       tag.children ? { ...tag, children: tag.children.filter(checkTag) } : tag
     )
 
-  const handleClick = id => () => {
-    onTagSelect(id)
-    onClose()
-  }
+  const handleClick = id => () => onTagSelect(id)
 
   return (
     <Popover
@@ -106,7 +110,7 @@ function TagSelectPopover({
             value={search}
             onChange={e => setSearch(e.target.value)}
             variant="outlined"
-            placeholder="Выберите категории"
+            placeholder="Выберите категорию"
             fullWidth
             autoFocus
           />
