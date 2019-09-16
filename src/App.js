@@ -14,6 +14,10 @@ import { createMuiTheme } from '@material-ui/core/styles'
 
 addLocaleData(ru)
 
+const donorTheme = createMuiTheme({
+  palette: { primary: { main: '#21a355' } },
+})
+
 const theme = createMuiTheme({
   palette: {
     primary: {
@@ -22,6 +26,7 @@ const theme = createMuiTheme({
     secondary: {
       main: '#fff',
     },
+    success: donorTheme.palette.primary,
   },
 })
 console.log('THEME', theme)
