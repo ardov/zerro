@@ -4,7 +4,7 @@ import TagSelect from 'components/TagSelect'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import { FormattedNumber } from 'react-intl'
-import Button from '@material-ui/core/Button'
+import { Button, Box } from '@material-ui/core'
 
 const formatDate = date => format(date, 'D MMMM YYYY, dd', { locale: ru })
 const formatDateTime = date =>
@@ -207,14 +207,14 @@ export default class DetailsPanel extends React.Component {
                 Восстановить
               </Button>
             ) : (
-              <Button
-                type="danger"
-                onClick={() => {
-                  this.props.onDelete(tr.id)
-                }}
-              >
-                Удалить
-              </Button>
+              <Box color="error.main" display="inline">
+                <Button
+                  color="inherit"
+                  onClick={() => this.props.onDelete(tr.id)}
+                >
+                  Удалить
+                </Button>
+              </Box>
             )}
 
             {tr.type === 'transfer' && (
