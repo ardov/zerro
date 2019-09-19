@@ -1,24 +1,15 @@
 import React from 'react'
-
-import styled from 'styled-components'
-
 import TagSelect from 'components/TagSelect'
-import { Checkbox, Input, Form } from 'antd'
-import Drawer from '@material-ui/core/Drawer'
-import Radio from '@material-ui/core/Radio'
-import RadioGroup from '@material-ui/core/RadioGroup'
-import FormHelperText from '@material-ui/core/FormHelperText'
-import FormControlLabel from '@material-ui/core/FormControlLabel'
-import FormControl from '@material-ui/core/FormControl'
-import FormLabel from '@material-ui/core/FormLabel'
+import {
+  Drawer,
+  Box,
+  TextField,
+  FormControlLabel,
+  MenuItem,
+  Switch,
+  Grid,
+} from '@material-ui/core'
 
-const Search = Input.Search
-const InputGroup = Input.Group
-
-const StyledForm = styled(Form)`
-  width: 100%;
-  padding: 40px;
-`
 export default function FilterDrawer({
   conditions = {},
   setCondition,
@@ -29,78 +20,75 @@ export default function FilterDrawer({
 }) {
   const handleTypeChange = e => {
     const value = e.target.value
-    if (value === 'all') {
-      setCondition({ type: null })
-    } else {
-      setCondition({ type: value })
-    }
+    setCondition({ type: value || null })
   }
 
   return (
     <Drawer anchor="right" onClose={onClose} open={open} {...rest}>
-      <StyledForm>
-        <Form.Item label="">
-          <Search
-            value={conditions.search}
-            placeholder="Поиск по комментариям"
-            onChange={e => setCondition({ search: e.target.value })}
-          />
-        </Form.Item>
+      <Box p={5}>
+        <TextField
+          id="search-input"
+          label="Поиск по комментариям"
+          value={conditions.search || ''}
+          onChange={e => setCondition({ search: e.target.value })}
+          variant="outlined"
+          fullWidth
+        />
 
-        <Form.Item label="">
-          <TagSelect value={conditions.tags} onChange={setTags} />
-        </Form.Item>
+        <Box mt={3} display="flex">
+          <Grid container spacing={3}>
+            <Grid item xs={6}>
+              <TextField
+                variant="outlined"
+                label="Сумма от"
+                value={conditions.amountFrom || ''}
+                onChange={e => setCondition({ amountFrom: +e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                variant="outlined"
+                label="Сумма до"
+                value={conditions.amountTo || ''}
+                onChange={e => setCondition({ amountTo: +e.target.value })}
+              />
+            </Grid>
+          </Grid>
+        </Box>
 
-        <Form.Item label="">
-          <InputGroup style={{ display: 'flex' }}>
-            <Input
-              style={{ flexGrow: 1 }}
-              placeholder="Сумма от"
-              value={conditions.amountFrom}
-              onChange={e => setCondition({ amountFrom: +e.target.value })}
-            />
-            <Input
-              style={{ flexGrow: 1, borderLeft: 0 }}
-              placeholder="Сумма до"
-              value={conditions.amountTo}
-              onChange={e => setCondition({ amountTo: +e.target.value })}
-            />
-          </InputGroup>
-        </Form.Item>
-
-        <Form.Item label="">
-          <RadioGroup
-            value={conditions.type || 'all'}
+        <Box mt={3}>
+          <TextField
+            select
+            variant="outlined"
+            value={conditions.type || ''}
             onChange={handleTypeChange}
+            label="Тип транзакции"
+            fullWidth
           >
-            <FormControlLabel value="all" control={<Radio />} label="Все" />
-            <FormControlLabel
-              value="income"
-              control={<Radio />}
-              label="Доход"
-            />
-            <FormControlLabel
-              value="outcome"
-              control={<Radio />}
-              label="Расход"
-            />
-            <FormControlLabel
-              value="transfer"
-              control={<Radio />}
-              label="Перевод"
-            />
-          </RadioGroup>
-        </Form.Item>
+            <MenuItem value="">Все</MenuItem>
+            <MenuItem value="income">Доход</MenuItem>
+            <MenuItem value="outcome">Расход</MenuItem>
+            <MenuItem value="transfer">Перевод</MenuItem>
+          </TextField>
+        </Box>
 
-        <Form.Item label="">
-          <Checkbox
-            checked={conditions.showDeleted}
-            onChange={e => setCondition({ showDeleted: e.target.checked })}
-          >
-            Показывать удалённые
-          </Checkbox>
-        </Form.Item>
-      </StyledForm>
+        <Box mt={3}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={conditions.showDeleted}
+                onChange={e => setCondition({ showDeleted: e.target.checked })}
+                color="primary"
+              />
+            }
+            label="Показывать удалённые"
+          />
+        </Box>
+
+        <Box mt={3}>
+          <TagSelect value={conditions.tags} onChange={setTags} />
+        </Box>
+      </Box>
     </Drawer>
   )
 }
