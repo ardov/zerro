@@ -28,6 +28,7 @@ const theme = createMuiTheme({
     },
     success: donorTheme.palette.primary,
   },
+  shape: { borderRadius: 6 },
 })
 console.log('THEME', theme)
 
