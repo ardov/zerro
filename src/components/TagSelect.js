@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { getTagsTree, getTags } from 'store/data/tags'
+import { getTagsTree, getPopulatedTags } from 'store/data/tags'
 import { Box, Select, OutlinedInput, Chip, MenuItem } from '@material-ui/core'
 import EmojiIcon from 'components/EmojiIcon'
 
@@ -12,6 +12,7 @@ function TagSelect({
   outcomeOnly,
   value,
   single,
+  dispatch,
   ...rest
 }) {
   const [open, setOpen] = React.useState(false)
@@ -84,7 +85,7 @@ function TagSelect({
 export default connect(
   state => ({
     tags: getTagsTree(state),
-    tagList: getTags(state),
+    tagList: getPopulatedTags(state),
   }),
   null
 )(TagSelect)
