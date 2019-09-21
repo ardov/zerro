@@ -4,7 +4,6 @@ import styled from 'styled-components'
 import Header from 'components/Header'
 import TransactionList from 'components/TransactionList'
 import DetailsPanel from 'components/DetailsPanel'
-import BulkActions from 'components/BulkActions'
 import AccountList from 'components/AccountList'
 
 const Body = styled.div`
@@ -39,7 +38,6 @@ export default class TransactionsView extends Component {
         <Header />
         <Body>
           <Menu>
-            <BulkActions />
             <AccountList />
           </Menu>
 
