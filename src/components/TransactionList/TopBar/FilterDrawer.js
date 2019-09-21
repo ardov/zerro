@@ -73,6 +73,22 @@ export default function FilterDrawer({
         </Box>
 
         <Box mt={3}>
+          <TextField
+            select
+            variant="outlined"
+            value={conditions.type || ''}
+            onChange={handleTypeChange}
+            label="Тип транзакции"
+            fullWidth
+          >
+            <MenuItem value="">Все</MenuItem>
+            <MenuItem value="income">Доход</MenuItem>
+            <MenuItem value="outcome">Расход</MenuItem>
+            <MenuItem value="transfer">Перевод</MenuItem>
+          </TextField>
+        </Box>
+
+        <Box mt={3}>
           <FormControlLabel
             control={
               <Switch
