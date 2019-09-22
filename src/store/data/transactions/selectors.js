@@ -10,7 +10,7 @@ import { populate } from './populate'
 
 const getTransactionsToSave = createSelector(
   ['data.transaction.server'],
-  transactions => convertToSyncArray(transactions)
+  transactions => convertToSyncArray(transactions).filter(tr => !tr.deleted)
 )
 const getTransactionsToSync = state =>
   convertToSyncArray(state.data.transaction.diff)
