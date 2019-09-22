@@ -73,19 +73,7 @@ export default function FilterDrawer({
         </Box>
 
         <Box mt={3}>
-          <TextField
-            select
-            variant="outlined"
-            value={conditions.type || ''}
-            onChange={handleTypeChange}
-            label="Тип транзакции"
-            fullWidth
-          >
-            <MenuItem value="">Все</MenuItem>
-            <MenuItem value="income">Доход</MenuItem>
-            <MenuItem value="outcome">Расход</MenuItem>
-            <MenuItem value="transfer">Перевод</MenuItem>
-          </TextField>
+          <TagSelect value={conditions.tags} onChange={setTags} />
         </Box>
 
         <Box mt={3}>
@@ -99,10 +87,6 @@ export default function FilterDrawer({
             }
             label="Показывать удалённые"
           />
-        </Box>
-
-        <Box mt={3}>
-          <TagSelect value={conditions.tags} onChange={setTags} />
         </Box>
       </Box>
     </Drawer>
