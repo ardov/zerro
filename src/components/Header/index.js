@@ -26,7 +26,7 @@ const useStyles = makeStyles({ toolbar: { minHeight: 48 } })
 const Header = ({ match }) => {
   const classes = useStyles()
   return (
-    <AppBar>
+    <AppBar color="default">
       <Toolbar className={classes.toolbar}>
         <Hidden smDown>
           <Typography variant="h6" color="inherit">
@@ -37,6 +37,7 @@ const Header = ({ match }) => {
         <Box flexGrow={1}>
           <Tabs
             value={routes.findIndex(route => route.path === match.path)}
+            indicatorColor="primary"
             centered
           >
             {routes.map(route => (
