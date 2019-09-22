@@ -29,6 +29,9 @@ const theme = createMuiTheme({
     success: donorTheme.palette.primary,
   },
   shape: { borderRadius: 6 },
+  typography: {
+    fontFamily: "'Fira Sans', sans-serif",
+  },
 })
 console.log('THEME', theme)
 
