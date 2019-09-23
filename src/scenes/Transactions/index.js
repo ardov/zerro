@@ -1,10 +1,11 @@
-import React, { Component } from 'react'
+import React from 'react'
 import styled from 'styled-components'
 
 import Header from 'components/Header'
 import TransactionList from 'components/TransactionList'
 import DetailsPanel from 'components/DetailsPanel'
 import AccountList from 'components/AccountList'
+import Message from 'components/Message'
 
 const Body = styled.div`
   display: flex;
@@ -31,23 +32,22 @@ const SidePanel = styled.div`
   border-left: 1px solid rgba(0, 0, 0, 0.1);
 `
 
-export default class TransactionsView extends Component {
-  render() {
-    return (
-      <React.Fragment>
-        <Header />
-        <Body>
-          <Menu>
-            <AccountList />
-          </Menu>
+export default function TransactionsView() {
+  return (
+    <React.Fragment>
+      <Message />
+      <Header />
+      <Body>
+        <Menu>
+          <AccountList />
+        </Menu>
 
-          <StyledTransactionList groupBy={'DAY'} />
+        <StyledTransactionList groupBy={'DAY'} />
 
-          <SidePanel>
-            <DetailsPanel />
-          </SidePanel>
-        </Body>
-      </React.Fragment>
-    )
-  }
+        <SidePanel>
+          <DetailsPanel />
+        </SidePanel>
+      </Body>
+    </React.Fragment>
+  )
 }

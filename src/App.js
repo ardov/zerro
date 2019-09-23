@@ -20,12 +20,8 @@ const donorTheme = createMuiTheme({
 
 const theme = createMuiTheme({
   palette: {
-    primary: {
-      main: '#212121',
-    },
-    secondary: {
-      main: '#fff',
-    },
+    primary: { main: '#212121' },
+    secondary: { main: '#fff' },
     success: donorTheme.palette.primary,
   },
   shape: { borderRadius: 6 },

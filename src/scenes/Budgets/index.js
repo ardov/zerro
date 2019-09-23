@@ -11,6 +11,7 @@ import getMonthDates from './selectors/getMonthDates'
 import Box from '@material-ui/core/Box'
 import Grid from '@material-ui/core/Grid'
 import TagTable2 from './containers/TagTable2'
+import Message from 'components/Message'
 
 const Budgets = ({ monthDates }) => {
   const [month, setMonth] = React.useState(+startOfMonth(new Date()))
@@ -21,6 +22,7 @@ const Budgets = ({ monthDates }) => {
 
   return (
     <Box pt={9} pb={3} px={3}>
+      <Message />
       <Header />
       <Grid container spacing={3}>
         <Grid item xs={12} md={3}>

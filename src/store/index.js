@@ -7,6 +7,7 @@ import openedTransaction from './openedTransaction'
 import token from './token'
 import selectedTransactions from './selectedTransactions'
 import isPending from './isPending'
+import message from './message'
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     openedTransaction,
     selectedTransactions,
     token,
+    message,
   },
   preloadedState: { token: ZenApi.getLocalToken() },
 })
