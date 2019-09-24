@@ -27,17 +27,13 @@ const RefreshButton = ({
 }) => {
   return (
     <Tooltip title="Обновить данные">
-      <StyledBadge badgeContent={changedNum} color="secondary">
+      <StyledBadge badgeContent={changedNum}>
         <IconButton
           onClick={syncData}
           variant={changedNum ? 'contained' : 'outlined'}
           {...rest}
         >
-          {isPending ? (
-            <CircularProgress size={24} color="secondary" />
-          ) : (
-            <RefreshIcon />
-          )}
+          {isPending ? <CircularProgress size={24} /> : <RefreshIcon />}
         </IconButton>
       </StyledBadge>
     </Tooltip>
