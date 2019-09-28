@@ -4,7 +4,6 @@ import { Provider } from 'react-redux'
 
 import 'normalize.css'
 import './index.scss'
-import 'antd/dist/antd.css'
 
 import App from './App'
 import * as serviceWorker from './serviceWorker'
