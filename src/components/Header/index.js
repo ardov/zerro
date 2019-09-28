@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { makeStyles } from '@material-ui/styles'
 import RefreshButton from './containers/RefreshButton'
 import MenuButton from './containers/MenuButton'
+import ThemeButton from './containers/ThemeButton'
 import InfoIcon from '@material-ui/icons/Info'
 import IconButton from '@material-ui/core/IconButton'
 import Tooltip from '@material-ui/core/Tooltip'
@@ -29,9 +30,7 @@ const Header = ({ match }) => {
     <AppBar color="default">
       <Toolbar className={classes.toolbar}>
         <Hidden smDown>
-          <Typography variant="h6" color="inherit">
-            ZERRO
-          </Typography>
+          <Typography variant="h6">ZERRO</Typography>
         </Hidden>
 
         <Box flexGrow={1}>
@@ -53,7 +52,6 @@ const Header = ({ match }) => {
 
         <Tooltip title="О проекте">
           <IconButton
-            color="inherit"
             component="a"
             href="https://www.notion.so/More-Money-ae7dee79e1b446dd81bf279e72eb6970"
             target="_blank"
@@ -62,8 +60,9 @@ const Header = ({ match }) => {
             <InfoIcon />
           </IconButton>
         </Tooltip>
-        <RefreshButton color="inherit" />
-        <MenuButton color="inherit" />
+        <ThemeButton />
+        <RefreshButton />
+        <MenuButton />
       </Toolbar>
     </AppBar>
   )

@@ -9,58 +9,44 @@ import Auth from 'scenes/Auth'
 import Budgets from 'scenes/Budgets'
 import { getLoginState } from 'store/token'
 import RegularSyncHandler from 'components/RegularSyncHandler'
-import { ThemeProvider } from '@material-ui/styles'
-import { createMuiTheme } from '@material-ui/core/styles'
+import CssBaseline from '@material-ui/core/CssBaseline'
+import Theme from 'components/Theme'
 
 addLocaleData(ru)
 
-const donorTheme = createMuiTheme({
-  palette: { primary: { main: '#21a355' } },
-})
-
-const theme = createMuiTheme({
-  palette: {
-    primary: { main: '#212121' },
-    secondary: { main: '#fff' },
-    success: donorTheme.palette.primary,
-  },
-  shape: { borderRadius: 6 },
-  typography: {
-    fontFamily: "'IBM Plex Sans', sans-serif",
-  },
-})
-console.log('THEME', theme)
-
 const App = ({ isLoggedIn }) => (
-  <ThemeProvider theme={theme}>
-    <RegularSyncHandler>
-      <IntlProvider locale="ru">
-        <BrowserRouter>
-          <Switch>
-            <Route
-              path="/transactions"
-              render={() => (isLoggedIn ? <Transactions /> : <Auth />)}
-            />
-            <Route
-              path="/tags"
-              render={() => (isLoggedIn ? <Tags /> : <Auth />)}
-            />
-            <Route
-              path="/budget"
-              render={() => (isLoggedIn ? <Budgets /> : <Auth />)}
-            />
-            <Route
-              path="/login"
-              render={() =>
-                isLoggedIn ? <Redirect to="/transactions" /> : <Auth />
-              }
-            />
-            <Redirect to="/transactions" />
-          </Switch>
-        </BrowserRouter>
-      </IntlProvider>
-    </RegularSyncHandler>
-  </ThemeProvider>
+  <Theme>
+    <>
+      <CssBaseline />
+      <RegularSyncHandler>
+        <IntlProvider locale="ru">
+          <BrowserRouter>
+            <Switch>
+              <Route
+                path="/transactions"
+                render={() => (isLoggedIn ? <Transactions /> : <Auth />)}
+              />
+              <Route
+                path="/tags"
+                render={() => (isLoggedIn ? <Tags /> : <Auth />)}
+              />
+              <Route
+                path="/budget"
+                render={() => (isLoggedIn ? <Budgets /> : <Auth />)}
+              />
+              <Route
+                path="/login"
+                render={() =>
+                  isLoggedIn ? <Redirect to="/transactions" /> : <Auth />
+                }
+              />
+              <Redirect to="/transactions" />
+            </Switch>
+          </BrowserRouter>
+        </IntlProvider>
+      </RegularSyncHandler>
+    </>
+  </Theme>
 )
 
 export default connect(
