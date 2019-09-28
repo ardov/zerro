@@ -41,7 +41,15 @@ function Filter({
       <Paper elevation={4}>
         <Box flexGrow={1} clone>
           {selectedIds.length ? (
-            <Actions {...{ selectedIds, setTags, uncheckAll }} />
+            <Actions
+              {...{
+                selectedIds,
+                setTags,
+                uncheckAll,
+                onSetTag: tagId => setTag(selectedIds, tagId),
+                onDelete: () => deleteTransactions(selectedIds),
+              }}
+            />
           ) : (
             <InputBase
               value={conditions.search || ''}

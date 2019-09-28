@@ -9,7 +9,14 @@ import pluralize from 'helpers/pluralize'
 import Confirm from 'components/Confirm'
 import TagSelect2 from 'components/TagSelect2'
 
-export default function Actions({ selectedIds, setTags, uncheckAll, ...rest }) {
+export default function Actions({
+  selectedIds,
+  setTags,
+  uncheckAll,
+  onSetTag,
+  onDelete,
+  ...rest
+}) {
   return (
     <Box {...rest}>
       <Chip
@@ -31,7 +38,7 @@ export default function Actions({ selectedIds, setTags, uncheckAll, ...rest }) {
           'операции',
           'операций',
         ])}?`}
-        onOk={() => console.log('OK')}
+        onOk={onDelete}
         okText="Удалить"
         cancelText="Оставить"
       >
@@ -42,6 +49,7 @@ export default function Actions({ selectedIds, setTags, uncheckAll, ...rest }) {
 
       <Box ml={1} clone>
         <TagSelect2
+          onChange={onSetTag}
           trigger={
             <Tooltip title="Выставить категорию">
               <IconButton children={<LocalOfferOutlinedIcon />} />
