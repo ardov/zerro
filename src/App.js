@@ -26,7 +26,7 @@ const theme = createMuiTheme({
   },
   shape: { borderRadius: 6 },
   typography: {
-    fontFamily: "'Fira Sans', sans-serif",
+    fontFamily: "'IBM Plex Sans', sans-serif",
   },
 })
 console.log('THEME', theme)
