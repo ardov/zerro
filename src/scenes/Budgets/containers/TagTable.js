@@ -2,12 +2,33 @@ import React from 'react'
 import styled from 'styled-components'
 import { connect } from 'react-redux'
 import debounce from 'lodash/debounce'
-import { Table } from 'antd'
+
 import { formatMoney } from 'helpers/format'
 import { setOutcomeBudget } from '../thunks'
 import BudgetCell from './BudgetCell'
 import { getAmountsByTag } from '../selectors/getAmountsByTag'
 import { getUserCurrencyCode } from 'store/data/instruments'
+import { makeStyles } from '@material-ui/core/styles'
+import {
+  Box,
+  Paper,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from '@material-ui/core'
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    width: '100%',
+    marginTop: theme.spacing(3),
+    overflowX: 'auto',
+  },
+  table: { minWidth: 600 },
+  head: { position: 'sticky', top: 0 },
+}))
 
 const colorMap = {
   positive: 'var(--text-success)',
@@ -24,93 +45,84 @@ const Outcome = styled.span`
 `
 
 function TagTable({ tags, currency, date, updateBudget, ...rest }) {
+  const classes = useStyles()
   const formatSum = sum => formatMoney(sum, currency)
 
-  const columns = [
-    {
-      title: 'Категория',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Бюджет',
-      dataIndex: 'budgeted',
-      key: 'budgeted',
-      align: 'right',
-      render: ({
-        budgeted,
-        available,
-        id,
+  const rows = tags
+    .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailable)
+    .map(tag => ({
+      id: tag.id,
+      name: tag.title,
+      budgeted: tag.totalBudgeted,
+      available: tag.totalAvailable,
+      isChild: false,
+      date,
+      updateBudget,
+      hasOverspent: !!tag.overspent,
+      outcome: tag.totalOutcome,
+      children: getChildren({
+        tag,
         date,
         updateBudget,
-        isChild = false,
-      }) => (
-        <BudgetCell
-          id={id}
-          budgeted={budgeted}
-          available={available}
-          key={id + budgeted}
-          date={date}
-          isChild={isChild}
-          onUpdate={debounce(updateBudget, 2000)}
-        />
-      ),
-    },
-    {
-      title: 'Потрачено',
-      dataIndex: 'outcome',
-      key: 'outcome',
-      align: 'right',
-      render: value => <Outcome value={value}>{formatSum(value)}</Outcome>,
-    },
-    {
-      title: 'Остаток',
-      dataIndex: 'available',
-      key: 'available',
-      align: 'right',
-      render: props => (
-        <Available displayType={getAvailableColor(props)}>
-          {formatSum(props.value)}
-        </Available>
-      ),
-    },
-  ]
-
-  const tableData = tags
-    .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailable)
-    .map(tag => {
-      const hasOverspent = !!tag.overspent
-
-      return {
-        key: tag.id + '',
-        name: tag.title,
-        budgeted: {
-          date,
-          updateBudget,
-          tag,
-          id: tag.id,
-          budgeted: tag.totalBudgeted,
-          available: tag.totalAvailable,
-          isChild: false,
-        },
-        available: { value: tag.totalAvailable, hasOverspent, isChild: false },
-        outcome: tag.totalOutcome,
-
-        children: getChildren({ tag, date, updateBudget, hasOverspent }),
-      }
-    })
+        hasOverspent: !!tag.overspent,
+      }),
+    }))
     .sort((a, b) => a.name.localeCompare(b.name))
 
   return (
-    <Table
-      size="small"
-      columns={columns}
-      dataSource={tableData}
-      defaultExpandAllRows={false}
-      indentSize={56}
-      pagination={false}
-      {...rest}
-    />
+    <Paper className={classes.root}>
+      <Box p={2} clone>
+        <Typography variant="h6" id="tableTitle">
+          Бюджеты
+        </Typography>
+      </Box>
+      <Table className={classes.table} stickyHeader>
+        <TableHead>
+          <TableRow>
+            <TableCell>Категория</TableCell>
+            <TableCell align="right">Бюджет</TableCell>
+            <TableCell align="right">Потрачено</TableCell>
+            <TableCell align="right">Остаток</TableCell>
+          </TableRow>
+        </TableHead>
+
+        <TableBody>
+          {rows.map(row => (
+            <TableRow key={row.id} hover>
+              <TableCell component="th" scope="row">
+                {row.name}
+              </TableCell>
+              <TableCell align="right">
+                <BudgetCell
+                  id={row.id}
+                  budgeted={row.budgeted}
+                  available={row.available}
+                  key={row.id + row.budgeted}
+                  date={date}
+                  isChild={row.isChild}
+                  onUpdate={debounce(updateBudget, 2000)}
+                />
+              </TableCell>
+              <TableCell align="right">
+                <Outcome value={row.outcome}>{formatSum(row.outcome)}</Outcome>
+              </TableCell>
+              <TableCell align="right">
+                <Available
+                  displayType={getAvailableColor({
+                    value: row.available,
+                    hasOverspent: row.hasOverspent,
+                    isChild: row.isChild,
+                    hasBudget: row.hasBudget,
+                  })}
+                >
+                  {formatSum(row.available)}
+                </Available>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Paper>
   )
 }
 
