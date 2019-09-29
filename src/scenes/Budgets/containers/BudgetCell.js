@@ -29,9 +29,9 @@ export default function BudgetCell({
 
   const showInput = () => setVisible(true)
 
-  const onChange = val => {
-    setBudgetedClone(val)
-    onUpdate(val, date, id)
+  const onChange = e => {
+    setBudgetedClone(e.target.value)
+    onUpdate(e.target.value, date, id)
   }
 
   const resetAvailable = () => {
