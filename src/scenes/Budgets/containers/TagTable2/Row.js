@@ -38,7 +38,7 @@ export const useStyles = makeStyles(theme => ({
 
   expandIcon: {
     position: 'absolute',
-    left: -8,
+    left: 0,
     top: 9,
     transform: props => (props.expanded ? 'rotate(90deg)' : 'rotate(0deg)'),
     transition: '.3s',
@@ -66,6 +66,8 @@ export default function Row(props) {
   const toggle = () => setExpanded(!expanded)
   const hasChildren = Boolean(children && children.length)
   const c = useStyles({ expanded })
+
+  const hasOverspent = !!overspent
 
   return (
     <ExpansionPanel
@@ -95,6 +97,7 @@ export default function Row(props) {
             budgeted: totalBudgeted,
             outcome: totalOutcome,
             available: totalAvailable,
+            hasOverspent,
             setBudget,
             date,
           }}
@@ -107,7 +110,7 @@ export default function Row(props) {
               key={child.id}
               isChild={true}
               {...child}
-              {...{ setBudget, date }}
+              {...{ setBudget, date, hasOverspent }}
             ></TagRow>
           ))}
       </ExpansionPanelDetails>
