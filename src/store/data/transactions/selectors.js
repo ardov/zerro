@@ -8,9 +8,20 @@ import { getFilterConditions, check } from 'store/filterConditions'
 import { convertToSyncArray } from 'helpers/converters'
 import { populate } from './populate'
 
+function removeFalseKeys(object) {
+  let newObject = {}
+  Object.keys(object).forEach(key => {
+    if (object[key]) newObject[key] = object[key]
+  })
+  return newObject
+}
+
 const getTransactionsToSave = createSelector(
   ['data.transaction.server'],
-  transactions => convertToSyncArray(transactions).filter(tr => !tr.deleted)
+  transactions =>
+    convertToSyncArray(transactions)
+      .filter(tr => !tr.deleted)
+      .map(removeFalseKeys)
 )
 const getTransactionsToSync = state =>
   convertToSyncArray(state.data.transaction.diff)
