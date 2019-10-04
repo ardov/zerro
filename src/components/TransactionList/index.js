@@ -1,5 +1,5 @@
 import React, { memo, forwardRef } from 'react'
-import styled from 'styled-components'
+import { Box } from '@material-ui/core'
 import { VariableSizeList as List } from 'react-window'
 import { areEqual } from 'react-window'
 import AutoSizer from 'react-virtualized-auto-sizer'
@@ -13,10 +13,6 @@ import formatDate from './formatDate'
 const GROUP_HEADER_HEIGHT = 48
 const TRANSACTION_HEIGHT = 77
 const BORDER_HEIGHT = 2
-
-const Wrapper = styled.div`
-  position: relative;
-`
 
 class TransactionList extends React.Component {
   state = { listRef: {} }
@@ -66,7 +62,7 @@ class TransactionList extends React.Component {
     )
 
     return (
-      <Wrapper className={className}>
+      <Box position="relative" className={className}>
         <TopBar />
         <AutoSizer disableWidth={true}>
           {({ height, width }) => (
@@ -85,7 +81,7 @@ class TransactionList extends React.Component {
             </List>
           )}
         </AutoSizer>
-      </Wrapper>
+      </Box>
     )
   }
 }

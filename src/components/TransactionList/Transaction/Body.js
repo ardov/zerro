@@ -10,12 +10,12 @@ const useStyles = makeStyles(theme => ({
   payee: {
     minWidth: 0,
     marginRight: theme.spacing(1),
-    borderBottom: '1px solid rgba(0, 0, 0, 0.15)',
+    borderBottom: `1px solid ${theme.palette.divider}`,
     transition: '0.2s',
 
     '&:hover': {
       color: theme.palette.text.primary,
-      borderBottom: `1px solid ${theme.palette.text.primary}`,
+      borderBottom: `1px solid ${theme.palette.text.secondary}`,
     },
   },
   comment: {
