@@ -10,12 +10,16 @@ import Budgets from 'scenes/Budgets'
 import { getLoginState } from 'store/token'
 import RegularSyncHandler from 'components/RegularSyncHandler'
 import CssBaseline from '@material-ui/core/CssBaseline'
-import Theme from 'components/Theme'
+
+import { ThemeProvider } from '@material-ui/styles'
+
+import createTheme from 'helpers/createTheme'
+import { getTheme } from 'store/theme'
 
 addLocaleData(ru)
 
-const App = ({ isLoggedIn }) => (
-  <Theme>
+const App = ({ isLoggedIn, themeType }) => (
+  <ThemeProvider theme={createTheme(themeType)}>
     <>
       <CssBaseline />
       <RegularSyncHandler>
@@ -46,10 +50,10 @@ const App = ({ isLoggedIn }) => (
         </IntlProvider>
       </RegularSyncHandler>
     </>
-  </Theme>
+  </ThemeProvider>
 )
 
 export default connect(
-  state => ({ isLoggedIn: getLoginState(state) }),
+  state => ({ isLoggedIn: getLoginState(state), themeType: getTheme(state) }),
   null
 )(App)

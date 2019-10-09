@@ -1,23 +1,17 @@
-import React from 'react'
-import { connect } from 'react-redux'
-import { ThemeProvider } from '@material-ui/styles'
 import { createMuiTheme } from '@material-ui/core/styles'
-import { getTheme } from 'store/theme'
 
 const PRIMARY = isDark => (isDark ? '#fff' : '#212121')
-const SECONDARY = isDark => '#a5f'
+const SECONDARY = isDark => '#05f'
 const SUCCESS = isDark => '#21a355'
-const FONT = "'IBM Plex Sans', sans-serif"
-const RADIUS = 6
 
-const Theme = ({ children, type }) => {
+export default function createTheme(type = 'light') {
   const isDark = type === 'dark'
 
   const donorTheme = createMuiTheme({
     palette: { primary: { main: SUCCESS(isDark) } },
   })
 
-  const theme = createMuiTheme({
+  return createMuiTheme({
     palette: {
       primary: { main: PRIMARY(isDark) },
       secondary: { main: SECONDARY(isDark) },
@@ -28,15 +22,9 @@ const Theme = ({ children, type }) => {
       },
       type,
     },
-    shape: { borderRadius: RADIUS },
-    typography: { fontFamily: FONT },
+
+    shape: { borderRadius: 6 },
+
+    typography: { fontFamily: "'IBM Plex Sans', sans-serif" },
   })
-  console.log('THEME', theme)
-
-  return <ThemeProvider theme={theme}>{children}</ThemeProvider>
 }
-
-export default connect(
-  state => ({ type: getTheme(state) }),
-  null
-)(Theme)
