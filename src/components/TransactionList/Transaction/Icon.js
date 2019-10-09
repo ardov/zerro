@@ -18,6 +18,7 @@ const useStyles = makeStyles(theme => ({
     lineHeight: '40px',
     textAlign: 'center',
     borderRadius: 20,
+    backgroundColor: theme.palette.action.hover,
     opacity: props => (props.hover || props.isInSelectionMode ? 0 : 1),
     transition: '.2s',
   },
@@ -46,8 +47,8 @@ export default function Icon({
       display="flex"
       alignItems="center"
       justifyContent="center"
-      mt={-1}
       mr={2}
+      mt="2px" // todo: center normally
       width={40}
       height={40}
       onMouseEnter={handleMouseEnter}
