@@ -1,11 +1,11 @@
 import React from 'react'
-import { Typography, Box } from '@material-ui/core'
-import { Budgeted } from './Budgeted'
+import { Typography, Box, Link, IconButton, Tooltip } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import EmojiIcon from 'components/EmojiIcon'
 import { formatMoney } from 'helpers/format'
 import WarningIcon from '@material-ui/icons/Warning'
-
+import AddIcon from '@material-ui/icons/Add'
+import BudgetPopover from './BudgetPopover'
 export const useStyles = makeStyles(theme => ({
   row: {
     paddingTop: ({ isChild }) => theme.spacing(isChild ? 0.5 : 1),
@@ -49,7 +49,13 @@ export function TagRow(props) {
     date,
   } = props
   const c = useStyles({ isChild })
-  const onBudgetChange = amount => setBudget(amount, date, id)
+  const [anchorEl, setAnchorEl] = React.useState(null)
+  const showBudget = isChild ? !!budgeted : true
+
+  const handleBudgetChange = amount => {
+    setAnchorEl(null)
+    if (amount !== budgeted) setBudget(amount, date, id)
+  }
 
   const availableColor = getAvailableColor(
     available,
@@ -68,7 +74,39 @@ export function TagRow(props) {
         </Typography>
       </div>
 
-      <Budgeted value={budgeted} onChange={onBudgetChange} />
+      {showBudget ? (
+        <Box color={budgeted ? 'text.primary' : 'text.hint'} clone>
+          <Link
+            variant="body1"
+            align="right"
+            component="button"
+            onClick={e => setAnchorEl(e.currentTarget)}
+          >
+            {formatMoney(budgeted)}
+          </Link>
+        </Box>
+      ) : (
+        <Box ml="auto" clone>
+          <Tooltip title="Добавить бюджет">
+            <IconButton
+              size="small"
+              edge="end"
+              children={<AddIcon />}
+              onClick={e => setAnchorEl(e.currentTarget)}
+            />
+          </Tooltip>
+        </Box>
+      )}
+
+      <BudgetPopover
+        key={`${id}${budgeted}`}
+        budgeted={budgeted}
+        available={available}
+        prevBudgeted={0}
+        anchorEl={anchorEl}
+        open={!!anchorEl}
+        onChange={handleBudgetChange}
+      />
 
       <Box color={outcome ? 'text.primary' : 'text.hint'} clone>
         <Typography variant="body1" align="right">

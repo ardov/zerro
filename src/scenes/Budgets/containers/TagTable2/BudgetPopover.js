@@ -28,13 +28,7 @@ export default function BudgetPopover({
   const handleKeyDown = e => (e.keyCode === 13 ? onChange(+value) : false)
 
   return (
-    <Popover
-      disableRestoreFocus
-      disableAutoFocus
-      disableEnforceFocus
-      onClose={() => onChange(+value)}
-      {...rest}
-    >
+    <Popover disableRestoreFocus onClose={() => onChange(+value)} {...rest}>
       <Box p={2} pb={0}>
         <TextField
           autoFocus
