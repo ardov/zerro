@@ -1,48 +1,94 @@
 import React from 'react'
-import Button from '@material-ui/core/Button'
 import {
   Box,
   List,
   ListItem,
+  ListItemText,
   TextField,
+  InputAdornment,
   Popover,
-  Divider,
+  IconButton,
 } from '@material-ui/core'
+import CheckCircleIcon from '@material-ui/icons/CheckCircle'
+import { formatMoney } from 'helpers/format'
 
 export default function BudgetPopover({
   id,
-  amount,
-  prevAmount,
+  budgeted,
+  available,
+  prevBudgeted,
+  prevSpend,
+  currency,
   onChange,
   ...rest
 }) {
-  const [value, setValue] = React.useState(amount)
+  const [value, setValue] = React.useState(budgeted)
 
-  const handleChange = e => {
-    setValue(+e.target.value)
-  }
+  const handleChange = e => setValue(e.target.value)
+  const handleKeyDown = e => (e.keyCode === 13 ? onChange(+value) : false)
 
   return (
-    <Popover disableRestoreFocus disableAutoFocus disableEnforceFocus {...rest}>
-      <Box p={2}>
+    <Popover
+      disableRestoreFocus
+      disableAutoFocus
+      disableEnforceFocus
+      onClose={() => onChange(+value)}
+      {...rest}
+    >
+      <Box p={2} pb={0}>
         <TextField
+          autoFocus
           value={value}
           variant="outlined"
+          type="number"
           fullWidth
+          onFocus={e => e.target.select()}
           onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          helperText={`Остаток категории ${formatMoney(
+            available + +value - budgeted,
+            currency
+          )}`}
+          placeholder="0"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton edge="end" onClick={() => onChange(+value)}>
+                  <CheckCircleIcon />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
       </Box>
-      <Box p={2} pt={0}>
-        {prevAmount !== undefined && prevAmount !== null && (
-          <Button
-            onClick={() => {
-              onChange(prevAmount)
-            }}
+
+      <List>
+        {!!prevBudgeted && (
+          <ListItem
+            button
+            selected={+value === +prevBudgeted}
+            onClick={() => onChange(+prevBudgeted)}
           >
-            Бюджет в прошлом мес ({prevAmount})
-          </Button>
+            <ListItemText
+              primary="Бюджет в прошлом месяце"
+              secondary={formatMoney(prevBudgeted, currency)}
+            />
+          </ListItem>
         )}
-      </Box>
+
+        {!!prevSpend && (
+          <ListItem
+            button
+            selected={+value === +prevSpend}
+            onClick={() => onChange(+prevSpend)}
+          >
+            <ListItemText
+              primary="Расход в прошлом месяце"
+              secondary={formatMoney(prevSpend, currency)}
+            />
+          </ListItem>
+        )}
+      </List>
     </Popover>
   )
 }

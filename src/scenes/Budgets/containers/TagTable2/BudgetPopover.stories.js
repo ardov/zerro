@@ -6,13 +6,16 @@ import BudgetPopover from './BudgetPopover'
 import createTheme from 'helpers/createTheme'
 
 const data = {
-  amount: 100,
-  prevAmount: 0,
+  budgeted: 100,
+  available: 0,
+  prevBudgeted: 10,
+  prevSpend: 3000,
+  currency: 'USD',
+  open: true,
 }
 
 export const actions = {
   onChange: action('onChange'),
-  onClose: action('onClose'),
 }
 
 addDecorator(story => (
@@ -29,7 +32,6 @@ storiesOf('BudgetPopover', module)
       anchorPosition={{ top: 40, left: 40 }}
       anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
       transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-      open={true}
       {...data}
       {...actions}
     />
