@@ -4,7 +4,8 @@ import TagSelect from 'components/TagSelect'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import { FormattedNumber } from 'react-intl'
-import { Button } from 'antd'
+import { Button, Popover } from 'antd'
+import QRCode from 'qrcode.react'
 
 const formatDate = date => format(date, 'D MMMM YYYY, dd', { locale: ru })
 const formatDateTime = date =>
@@ -73,123 +74,127 @@ export default class DetailsPanel extends React.Component {
 
     const values = tr
       ? [
-          {
-            name: 'ID',
-            value: tr.id,
-          },
-          {
-            name: 'Дата',
-            value: formatDate(tr.date),
-          },
-          {
-            name: 'Создана',
-            value: formatDateTime(tr.created),
-          },
-          {
-            name: 'Последнее изменение',
-            value: formatDateTime(tr.changed),
-          },
-          {
-            name: 'Доход',
-            value: (
-              <FormattedNumber
-                value={tr.income}
-                style={`currency`}
-                currency={tr.incomeInstrument.shortTitle}
-                minimumFractionDigits={0}
-                maximumFractionDigits={0}
-              />
-            ),
-          },
-          {
-            name: 'На счёт',
-            value: tr.incomeAccount.title,
-          },
-          {
-            name: 'Расход',
-            value: (
-              <FormattedNumber
-                value={tr.outcome}
-                style={`currency`}
-                currency={tr.outcomeInstrument.shortTitle}
-                minimumFractionDigits={0}
-                maximumFractionDigits={0}
-              />
-            ),
-          },
-          {
-            name: 'Со счёта',
-            value: tr.outcomeAccount.title,
-          },
-          {
-            name: 'originalPayee',
-            value: tr.originalPayee,
-          },
-          {
-            name: 'Категории',
-            value: tr.tag ? tr.tag.map(tag => tag.title).join(', ') : '--',
-          },
-          {
-            name: 'payee',
-            value: tr.payee,
-          },
-          {
-            name: 'deleted',
-            value: tr.deleted,
-          },
-          {
-            name: 'hold',
-            value: tr.hold,
-          },
-          {
-            name: 'qrCode',
-            value: tr.qrCode,
-          },
-          {
-            name: 'comment',
-            value: tr.comment,
-          },
-          {
-            name: 'opIncome',
-            value: tr.opIncome,
-          },
-          {
-            name: 'opOutcome',
-            value: tr.opOutcome,
-          },
-          // {
-          //   name: 'opIncomeInstrument',
-          //   value: tr.opIncomeInstrument
-          // },
-          // {
-          //   name: 'opOutcomeInstrument',
-          //   value: tr.opOutcomeInstrument
-          // },
-          {
-            name: 'GEO',
-            value: (
-              <a
-                href={`https://www.google.com/maps/@${tr.latitude},${
-                  tr.longitude
-                },18z`}
-              >
-                {tr.latitude + ' ' + tr.longitude}
-              </a>
-            ),
-          },
-          {
-            name: 'merchant',
-            value: tr.merchant ? tr.merchant.title : 'null',
-          },
-          {
-            name: 'incomeBankID',
-            value: tr.incomeBankID,
-          },
-          {
-            name: 'outcomeBankID',
-            value: tr.outcomeBankID,
-          },
-        ]
+        {
+          name: 'ID',
+          value: tr.id,
+        },
+        {
+          name: 'Дата',
+          value: formatDate(tr.date),
+        },
+        {
+          name: 'Создана',
+          value: formatDateTime(tr.created),
+        },
+        {
+          name: 'Последнее изменение',
+          value: formatDateTime(tr.changed),
+        },
+        {
+          name: 'Доход',
+          value: (
+            <FormattedNumber
+              value={tr.income}
+              style={`currency`}
+              currency={tr.incomeInstrument.shortTitle}
+              minimumFractionDigits={0}
+              maximumFractionDigits={0}
+            />
+          ),
+        },
+        {
+          name: 'На счёт',
+          value: tr.incomeAccount.title,
+        },
+        {
+          name: 'Расход',
+          value: (
+            <FormattedNumber
+              value={tr.outcome}
+              style={`currency`}
+              currency={tr.outcomeInstrument.shortTitle}
+              minimumFractionDigits={0}
+              maximumFractionDigits={0}
+            />
+          ),
+        },
+        {
+          name: 'Со счёта',
+          value: tr.outcomeAccount.title,
+        },
+        {
+          name: 'originalPayee',
+          value: tr.originalPayee,
+        },
+        {
+          name: 'Категории',
+          value: tr.tag ? tr.tag.map(tag => tag.title).join(', ') : '--',
+        },
+        {
+          name: 'payee',
+          value: tr.payee,
+        },
+        {
+          name: 'deleted',
+          value: tr.deleted,
+        },
+        {
+          name: 'hold',
+          value: tr.hold,
+        },
+        {
+          name: tr.qrCode ? (
+            <Popover content={<QRCode value={tr.qrCode}/>} title="QR">
+              <a>qrCode</a>
+            </Popover>
+          ) : '',
+          value: tr.qrCode,
+        },
+        {
+          name: 'comment',
+          value: tr.comment,
+        },
+        {
+          name: 'opIncome',
+          value: tr.opIncome,
+        },
+        {
+          name: 'opOutcome',
+          value: tr.opOutcome,
+        },
+        // {
+        //   name: 'opIncomeInstrument',
+        //   value: tr.opIncomeInstrument
+        // },
+        // {
+        //   name: 'opOutcomeInstrument',
+        //   value: tr.opOutcomeInstrument
+        // },
+        {
+          name: 'GEO',
+          value: (
+            <a
+              href={`https://www.google.com/maps/@${tr.latitude},${
+                tr.longitude
+              },18z`}
+            >
+              {tr.latitude + ' ' + tr.longitude}
+            </a>
+          ),
+        },
+        {
+          name: 'merchant',
+          value: tr.merchant ? tr.merchant.title : 'null',
+        },
+        {
+          name: 'incomeBankID',
+          value: tr.incomeBankID,
+        },
+        {
+          name: 'outcomeBankID',
+          value: tr.outcomeBankID,
+        },
+      ]
       : null
 
     const tags = tr && tr.tag
@@ -198,8 +203,8 @@ export default class DetailsPanel extends React.Component {
       <Panel>
         {tr && (
           <div key={tr.id}>
-            <TagSelect value={tags} onChange={this.updateTags} />
-            <div />
+            <TagSelect value={tags} onChange={this.updateTags}/>
+            <div/>
             {tr.deleted ? (
               <Button
                 onClick={() => {
@@ -227,7 +232,7 @@ export default class DetailsPanel extends React.Component {
             <Button onClick={() => console.log(tr)}>Log</Button>
             <Button onClick={this.saveChanges}>Сохранить</Button>
             {values.map(el => (
-              <Line name={el.name} value={el.value} key={el.name} />
+              <Line name={el.name} value={el.value} key={el.name}/>
             ))}
             {tr.latitude && (
               <div>
