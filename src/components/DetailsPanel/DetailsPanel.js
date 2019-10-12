@@ -147,7 +147,7 @@ export default class DetailsPanel extends React.Component {
             <Popover content={<QRCode value={tr.qrCode}/>} title="QR">
               <a>qrCode</a>
             </Popover>
-          ) : '',
+          ) : 'qrCode',
           value: tr.qrCode,
         },
         {
