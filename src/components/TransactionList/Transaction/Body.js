@@ -39,7 +39,7 @@ const Body = styled.div`
   }
 
   &:last-child {
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    /* border: 1px solid rgba(0, 0, 0, 0.1); */
     border-bottom-right-radius: 6px;
     border-bottom-left-radius: 6px;
   }
