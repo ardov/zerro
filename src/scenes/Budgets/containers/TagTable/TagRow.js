@@ -15,6 +15,7 @@ export const useStyles = makeStyles(theme => ({
     display: 'grid',
     width: '100%',
     gridTemplateColumns: 'auto 120px 120px 120px',
+    gridTemplateAreas: `"name budget outcome available"`,
     alignItems: 'center',
     gridColumnGap: theme.spacing(4),
 
@@ -23,10 +24,14 @@ export const useStyles = makeStyles(theme => ({
     },
   },
   name: {
+    gridArea: 'name',
     display: 'flex',
     alignItems: 'center',
     minWidth: 0,
   },
+  budget: { gridArea: 'budget' },
+  outcome: { gridArea: 'outcome' },
+  available: { gridArea: 'available' },
   warning: {
     transform: 'translateY(4px)',
     marginRight: theme.spacing(0.5),
@@ -74,7 +79,11 @@ export function TagRow(props) {
       </div>
 
       {showBudget ? (
-        <Box color={budgeted ? 'text.primary' : 'text.hint'} clone>
+        <Box
+          color={budgeted ? 'text.primary' : 'text.hint'}
+          className={c.budget}
+          clone
+        >
           <Link
             variant="body1"
             align="right"
@@ -85,7 +94,7 @@ export function TagRow(props) {
           </Link>
         </Box>
       ) : (
-        <Box ml="auto" clone>
+        <Box ml="auto" className={c.budget} clone>
           <Tooltip title="Добавить бюджет">
             <IconButton
               size="small"
@@ -107,13 +116,17 @@ export function TagRow(props) {
         onChange={handleBudgetChange}
       />
 
-      <Box color={outcome ? 'text.primary' : 'text.hint'} clone>
+      <Box
+        color={outcome ? 'text.primary' : 'text.hint'}
+        className={c.outcome}
+        clone
+      >
         <Typography variant="body1" align="right">
           {formatMoney(outcome ? -outcome : 0)}
         </Typography>
       </Box>
 
-      <Box color={availableColor}>
+      <Box color={availableColor} className={c.available}>
         <Typography variant="body1" align="right">
           {hasInnerOverspent && (
             <WarningIcon color="error" fontSize="small" className={c.warning} />

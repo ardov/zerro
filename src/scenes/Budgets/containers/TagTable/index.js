@@ -17,7 +17,7 @@ function TagTable({ tags, currency, date, updateBudget, ...rest }) {
     <Box position="relative" py={1} clone>
       <Paper>
         <Box p={2} clone>
-          <Typography variant="h5">Бюджеты</Typography>
+          <Typography variant="h6">Бюджеты</Typography>
         </Box>
         <TagTableHeader
           position="sticky"
