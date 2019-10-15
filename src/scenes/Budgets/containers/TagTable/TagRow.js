@@ -17,6 +17,7 @@ export const useStyles = makeStyles(theme => ({
     gridTemplateColumns: 'auto 120px 120px 120px',
     alignItems: 'center',
     gridColumnGap: theme.spacing(4),
+
     '&:hover': {
       background: theme.palette.action.hover,
     },
@@ -35,10 +36,8 @@ export const useStyles = makeStyles(theme => ({
 export function TagRow(props) {
   const {
     id,
-    showOutcome,
     symbol,
     name,
-    overspent,
     budgeted,
     outcome,
     available,

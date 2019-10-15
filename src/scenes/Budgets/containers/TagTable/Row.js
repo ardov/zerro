@@ -57,7 +57,7 @@ export default function Row(props) {
     totalOutcome,
     children,
     // budgeted,
-    // outcome,
+    outcome,
     // available,
     setBudget,
     date,
@@ -90,10 +90,8 @@ export default function Row(props) {
         <TagRow
           {...{
             id,
-            showOutcome,
             symbol,
             name,
-            overspent,
             budgeted: totalBudgeted,
             outcome: totalOutcome,
             available: totalAvailable,
@@ -105,15 +103,62 @@ export default function Row(props) {
       </ExpansionPanelSummary>
       <ExpansionPanelDetails className={c.summaryDetails}>
         {hasChildren &&
-          children.map(child => (
-            <TagRow
-              key={child.id}
-              isChild={true}
-              {...child}
-              {...{ setBudget, date, hasOverspent }}
-            ></TagRow>
-          ))}
+          getChildrenData({
+            children,
+            parentOutcome: outcome,
+            date,
+            setBudget,
+            hasOverspent,
+          }).map(data => <TagRow key={data.id} {...data} />)}
       </ExpansionPanelDetails>
     </ExpansionPanel>
   )
+}
+
+function getChildrenData({
+  children,
+  parentOutcome,
+  date,
+  setBudget,
+  hasOverspent,
+}) {
+  const childrenData = children.length
+    ? children
+        .filter(
+          child =>
+            child.showOutcome || child.totalOutcome || child.totalAvailable
+        )
+        .map(child => ({
+          isChild: true,
+          id: child.id,
+          symbol: child.symbol,
+          name: child.name,
+          budgeted: child.budgeted,
+          outcome: child.outcome,
+          available: child.available,
+          hasOverspent,
+          setBudget,
+          date,
+        }))
+    : null
+
+  const additionalRows =
+    childrenData && parentOutcome
+      ? [
+          {
+            isChild: true,
+            id: 'unsorted',
+            symbol: '-',
+            name: 'Без подкатегории',
+            budgeted: 0,
+            outcome: parentOutcome,
+            available: 0,
+            hasOverspent,
+            setBudget,
+            date,
+          },
+        ]
+      : []
+
+  return [...additionalRows, ...childrenData]
 }
