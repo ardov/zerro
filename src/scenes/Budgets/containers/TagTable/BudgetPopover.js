@@ -82,6 +82,19 @@ export default function BudgetPopover({
             />
           </ListItem>
         )}
+
+        {available < 0 && (
+          <ListItem
+            button
+            selected={+value === +prevSpend}
+            onClick={() => onChange(+budgeted - available)}
+          >
+            <ListItemText
+              primary="Покрыть перерасход"
+              secondary={formatMoney(+budgeted - available, currency)}
+            />
+          </ListItem>
+        )}
       </List>
     </Popover>
   )
