@@ -8,7 +8,7 @@ import TransferTable from './containers/TransferTable'
 import BudgetInfo from './containers/BudgetInfo'
 import MonthSelector from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
-import Box from '@material-ui/core/Box'
+import { Box, Hidden } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid'
 import Message from 'components/Message'
 
@@ -32,7 +32,9 @@ const Budgets = ({ monthDates }) => {
             onChange={setMonthByIndex}
           />
           <Box component={BudgetInfo} index={index} mt={3} />
-          <Box component={AccountList} mt={3} />
+          <Hidden smDown>
+            <Box component={AccountList} mt={3} />
+          </Hidden>
         </Grid>
         <Grid item xs={12} md={9}>
           <TagTable index={index} date={monthDates[index]} />
