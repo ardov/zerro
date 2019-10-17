@@ -86,6 +86,22 @@ const Payee = styled.span`
     border-bottom: 1px solid var(--text-secondary);
   }
 `
+/*
+const Category = styled.span`
+  min-width: 0;
+  margin-right: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  transition: 0.2s;
+
+  &:hover {
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--text-secondary);
+  }
+`
+/**/
 
 const Comment = styled.span`
   min-width: 0;
@@ -101,6 +117,7 @@ const Comment = styled.span`
 export default class Transaction extends React.Component {
   handleOpen = () => this.props.onClick(this.props.id)
   handlePayeeClick = () => this.props.onFilterByPayee(this.props.payee)
+  handleCategoryClick = () => this.props.onFilterByPayee(this.props.tags[0])
   handleSelectSimilar = () => this.props.selectChanged(this.props.changed)
 
   render() {
