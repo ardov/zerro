@@ -4,6 +4,7 @@ import TagSelect from 'components/TagSelect'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import { FormattedNumber } from 'react-intl'
+import Reciept from './Reciept'
 import { Button, Box } from '@material-ui/core'
 
 const formatDate = date => format(date, 'D MMMM YYYY, dd', { locale: ru })
@@ -74,10 +75,6 @@ export default class DetailsPanel extends React.Component {
     const values = tr
       ? [
           {
-            name: 'ID',
-            value: tr.id,
-          },
-          {
             name: 'Дата',
             value: formatDate(tr.date),
           },
@@ -125,28 +122,25 @@ export default class DetailsPanel extends React.Component {
             name: 'originalPayee',
             value: tr.originalPayee,
           },
+
           {
-            name: 'Категории',
-            value: tr.tag ? tr.tag.map(tag => tag.title).join(', ') : '--',
+            name: 'Чек',
+            value: <Reciept value={tr.qrCode} />,
           },
           {
-            name: 'payee',
+            name: 'Плательщик',
             value: tr.payee,
           },
           {
-            name: 'deleted',
-            value: tr.deleted,
+            name: 'Deleted',
+            value: tr.deleted ? 'удалена' : 'не удалена',
           },
           {
             name: 'hold',
             value: tr.hold,
           },
           {
-            name: 'qrCode',
-            value: tr.qrCode,
-          },
-          {
-            name: 'comment',
+            name: 'Комментарий',
             value: tr.comment,
           },
           {
@@ -156,6 +150,10 @@ export default class DetailsPanel extends React.Component {
           {
             name: 'opOutcome',
             value: tr.opOutcome,
+          },
+          {
+            name: 'ID',
+            value: tr.id,
           },
           // {
           //   name: 'opIncomeInstrument',
@@ -224,9 +222,11 @@ export default class DetailsPanel extends React.Component {
             )}
             <Button onClick={() => console.log(tr)}>Log</Button>
             <Button onClick={this.saveChanges}>Сохранить</Button>
+
             {values.map(el => (
               <Line name={el.name} value={el.value} key={el.name} />
             ))}
+
             {tr.latitude && (
               <div>
                 <iframe
