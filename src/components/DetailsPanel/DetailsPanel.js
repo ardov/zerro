@@ -4,7 +4,7 @@ import TagSelect from 'components/TagSelect'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import { FormattedNumber } from 'react-intl'
-import { Button, Popover } from 'antd'
+import { Button, Popover, Badge } from 'antd'
 import QRCode from 'qrcode.react'
 
 const formatDate = date => format(date, 'D MMMM YYYY, dd', { locale: ru })
@@ -144,8 +144,8 @@ export default class DetailsPanel extends React.Component {
         },
         {
           name: tr.qrCode ? (
-            <Popover content={<QRCode value={tr.qrCode}/>} title="QR">
-              <a>qrCode</a>
+            <Popover content={<QRCode value={tr.qrCode}/>} placement="topLeft">
+              <Badge status={'light'}>qrCode</Badge>
             </Popover>
           ) : 'qrCode',
           value: tr.qrCode,

@@ -31,6 +31,9 @@ class Filter extends Component {
   toggleDrawer = () =>
     this.setState(prev => ({ isDrawerVisible: !prev.isDrawerVisible }))
 
+  clear = () =>
+    this.props.setCondition({ search: '' })
+
   render() {
     const { conditions = {}, className } = this.props
 
@@ -39,13 +42,28 @@ class Filter extends Component {
         <Input
           value={conditions.search}
           suffix={
-            <Tooltip title="Расширенные фильтры">
-              <Icon
-                type="filter"
-                style={{ color: 'var(--color-accent)', cursor: 'pointer' }}
-                onClick={this.toggleDrawer}
-              />
-            </Tooltip>
+            (
+              <div>
+                {conditions.search
+                  ?
+                <Tooltip title="Очистить">
+                  <Icon
+                    type="close"
+                    style={{ color: 'var(--color-accent)', cursor: 'pointer', marginRight: '6px' }}
+                    onClick={this.clear}
+                  />
+                </Tooltip>
+                  : null
+                }
+                <Tooltip title="Расширенные фильтры">
+                  <Icon
+                  type="filter"
+                  style={{ color: 'var(--color-accent)', cursor: 'pointer' }}
+                  onClick={this.toggleDrawer}
+                  />
+                </Tooltip>
+              </div>
+            )
           }
           placeholder="Поиск по комментариям"
           onChange={e => {
