@@ -26,7 +26,7 @@ const StyledTransactionList = styled(TransactionList)`
   height: 100%;
 `
 const SidePanel = styled.div`
-  width: 480px;
+  width: 450px;
   overflow: auto;
   border-left: 1px solid rgba(0, 0, 0, 0.1);
 `
