@@ -1,6 +1,7 @@
 import React from 'react'
-import { Box, Paper } from '@material-ui/core'
-import Transaction from './Transaction'
+import { withStyles } from '@material-ui/core/styles'
+import { Box, Paper, ListSubheader } from '@material-ui/core'
+import Transaction from './TransactionContainer'
 
 export default function TransactionGroup({
   style,
@@ -8,19 +9,20 @@ export default function TransactionGroup({
   transactions,
   topOffset = 0,
 }) {
+  const StyledSubheader = withStyles({ sticky: { top: topOffset } })(
+    ListSubheader
+  )
+
   return (
     <Box px={2} style={style}>
-      <Box position="relative" maxWidth={560} mx="auto" component={Paper}>
-        <Box position="sticky" top={topOffset} zIndex={2} px={2} pt={1}>
-          <Box
-            bgcolor="background.paper"
-            p={1}
-            borderRadius={60}
-            display="inline-block"
-            color="text.secondary"
-            children={name}
-          />
-        </Box>
+      <Box
+        position="relative"
+        maxWidth={560}
+        mx="auto"
+        py={1}
+        component={Paper}
+      >
+        <StyledSubheader>{name}</StyledSubheader>
 
         {transactions.map(id => (
           <Transaction key={id.id} id={id.id} />

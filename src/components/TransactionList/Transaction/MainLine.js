@@ -11,7 +11,7 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export const MainLine = ({ type, tag, outcomeAccount, incomeAccount }) => {
+export const MainLine = ({ type, tag }) => {
   const c = useStyles()
   return type === 'transfer' ? (
     <Typography noWrap>Перевод</Typography>

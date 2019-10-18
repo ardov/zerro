@@ -18,71 +18,60 @@ const PrimarySum = ({ type, children }) => (
   </Box>
 )
 
-const SecondarySum = ({ children }) => (
-  <Box mr={1} color="text.hint" clone>
-    <Typography variant="body2" component="span">
-      {children}
-    </Typography>
-  </Box>
-)
+const SecondarySum = ({ amount, currency }) =>
+  !!amount && (
+    <Box mr={1} color="text.hint" clone>
+      <Typography variant="body2" component="span">
+        {amount > 0 && '+'}
+        {formatMoney(amount, currency)}
+      </Typography>
+    </Box>
+  )
 
 export function Amount({
   type,
   income,
-  incomeInstrument,
+  incomeCurrency,
   opIncome,
-  opIncomeInstrument,
+  opIncomeCurrency,
   outcome,
-  outcomeInstrument,
+  outcomeCurrency,
   opOutcome,
-  opOutcomeInstrument,
+  opOutcomeCurrency,
 }) {
+  const formattedIncome = formatMoney(income, incomeCurrency)
+  const formattedOutcome = formatMoney(outcome, outcomeCurrency)
+
   switch (type) {
     case 'transfer':
-      const formattedIncome = formatMoney(income, incomeInstrument.shortTitle)
-      const formattedOutcome = formatMoney(
-        outcome,
-        outcomeInstrument.shortTitle
+      return formattedIncome === formattedOutcome ? (
+        <Body>
+          <PrimarySum type={type}>{formattedIncome}</PrimarySum>
+        </Body>
+      ) : (
+        <Body>
+          <PrimarySum type={type}>{formattedOutcome}</PrimarySum>
+          {' → '}
+          <PrimarySum type={type}>{formattedIncome}</PrimarySum>
+        </Body>
       )
-      if (formattedIncome === formattedOutcome) {
-        return (
-          <Body>
-            <PrimarySum type={type}>{formattedIncome}</PrimarySum>
-          </Body>
-        )
-      } else {
-        return (
-          <Body>
-            <PrimarySum type={type}>{formattedOutcome}</PrimarySum>
-            {' → '}
-            <PrimarySum type={type}>{formattedIncome}</PrimarySum>
-          </Body>
-        )
-      }
+
     case 'income':
       return (
         <Body>
-          {!!opIncome && opIncomeInstrument && (
-            <SecondarySum>
-              +{formatMoney(opIncome, opIncomeInstrument.shortTitle)}
-            </SecondarySum>
-          )}
-          <PrimarySum type={type}>
-            +{formatMoney(income, incomeInstrument.shortTitle)}
-          </PrimarySum>
+          <SecondarySum amount={opIncome} currency={opIncomeCurrency} />
+          <PrimarySum type={type}>+{formattedIncome}</PrimarySum>
         </Body>
       )
+
     case 'outcome':
       return (
         <Body>
-          {!!opOutcome && opOutcomeInstrument && (
-            <SecondarySum>
-              −{formatMoney(opOutcome, opOutcomeInstrument.shortTitle)}
-            </SecondarySum>
-          )}
-          <PrimarySum type={type}>
-            −{formatMoney(outcome, outcomeInstrument.shortTitle)}
-          </PrimarySum>
+          <SecondarySum
+            amount={opOutcome && -opOutcome}
+            currency={opOutcomeCurrency}
+          />
+          <PrimarySum type={type}>−{formattedOutcome}</PrimarySum>
         </Body>
       )
 
