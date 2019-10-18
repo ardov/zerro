@@ -10,9 +10,9 @@ import TopBar from './TopBar'
 import { getMainTransactionList } from 'store/data/transactions'
 import formatDate from './formatDate'
 
-const GROUP_HEADER_HEIGHT = 56
-const TRANSACTION_HEIGHT = 77
-const BORDER_HEIGHT = 2
+const GROUP_HEADER_HEIGHT = 48
+const TRANSACTION_HEIGHT = 72
+const PADDINGS = 16
 
 class TransactionList extends React.Component {
   state = { listRef: {} }
@@ -28,8 +28,7 @@ class TransactionList extends React.Component {
   getItemSize = (i, d) =>
     GROUP_HEADER_HEIGHT +
     TRANSACTION_HEIGHT * this.props.groups[i].transactions.length +
-    BORDER_HEIGHT +
-    16
+    PADDINGS
 
   render() {
     const { groups, className } = this.props
