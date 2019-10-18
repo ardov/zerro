@@ -1,9 +1,8 @@
 import React from 'react'
-import { ThemeProvider } from '@material-ui/styles'
-import { storiesOf, addDecorator } from '@storybook/react'
+import { storiesOf } from '@storybook/react'
 import { action } from '@storybook/addon-actions'
 import BudgetPopover from './BudgetPopover'
-import createTheme from 'helpers/createTheme'
+import decorator from 'helpers/storybookDecorator'
 
 const data = {
   budgeted: 100,
@@ -18,14 +17,8 @@ export const actions = {
   onChange: action('onChange'),
 }
 
-addDecorator(story => (
-  <ThemeProvider theme={createTheme()}>
-    <div style={{ padding: '3rem' }}>{story()}</div>
-  </ThemeProvider>
-))
-
 storiesOf('BudgetPopover', module)
-  // .addDecorator()
+  .addDecorator(decorator())
   .add('default', () => (
     <BudgetPopover
       anchorReference="anchorPosition"
