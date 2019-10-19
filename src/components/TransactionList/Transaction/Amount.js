@@ -1,14 +1,15 @@
 import React from 'react'
 import { Box, Typography } from '@material-ui/core'
 import { formatMoney } from 'helpers/format'
+import { withStyles } from '@material-ui/core/styles'
+
+const Body = props => <Box alignSelf="flex-end" textAlign="right" {...props} />
 
 const colors = {
   income: 'success.main',
   outcome: 'text.primary',
   transfer: 'text.secondary',
 }
-
-const Body = props => <Box alignSelf="flex-end" textAlign="right" {...props} />
 
 const PrimarySum = ({ type, children }) => (
   <Box color={colors[type]} clone>
@@ -18,14 +19,16 @@ const PrimarySum = ({ type, children }) => (
   </Box>
 )
 
+const StyledTypography = withStyles(theme => ({
+  root: { marginRight: theme.spacing(1), color: theme.palette.text.hint },
+}))(Typography)
+
 const SecondarySum = ({ amount, currency }) =>
   !!amount && (
-    <Box mr={1} color="text.hint" clone>
-      <Typography variant="body2" component="span">
-        {amount > 0 && '+'}
-        {formatMoney(amount, currency)}
-      </Typography>
-    </Box>
+    <StyledTypography variant="body2" component="span">
+      {amount > 0 && '+'}
+      {formatMoney(amount, currency)}
+    </StyledTypography>
   )
 
 export function Amount({
