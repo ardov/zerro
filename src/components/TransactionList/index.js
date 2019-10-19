@@ -28,7 +28,8 @@ class TransactionList extends React.Component {
   getItemSize = (i, d) =>
     GROUP_HEADER_HEIGHT +
     TRANSACTION_HEIGHT * this.props.groups[i].transactions.length +
-    PADDINGS
+    PADDINGS +
+    16
 
   render() {
     const { groups, className } = this.props
@@ -52,7 +53,7 @@ class TransactionList extends React.Component {
     const Row = memo(
       ({ index, style }) => (
         <TransactionGroup
-          style={{ ...style, top: style.top + SEARCH_HEIGHT }}
+          style={{ ...style, top: style.top + SEARCH_HEIGHT + 16 }}
           topOffset={SEARCH_HEIGHT}
           name={formatDate(groups[index].date)}
           transactions={groups[index].transactions}
