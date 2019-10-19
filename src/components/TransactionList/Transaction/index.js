@@ -1,6 +1,6 @@
 import React from 'react'
-import styled, { css } from 'styled-components'
 import { makeStyles } from '@material-ui/styles'
+import { withStyles } from '@material-ui/core/styles'
 import {
   Box,
   Typography,
@@ -13,6 +13,7 @@ import { Amount } from './Amount'
 import Icon from './Icon'
 
 const useStyles = makeStyles(theme => ({
+  listItem: { borderRadius: theme.shape.borderRadius },
   payee: {
     minWidth: 0,
     marginRight: theme.spacing(1),
@@ -29,49 +30,6 @@ const useStyles = makeStyles(theme => ({
     minWidth: 0,
   },
 }))
-
-const Body = styled.div`
-  display: flex;
-  flex-direction: row;
-  padding: 16px;
-  /* border: 1px solid rgba(0, 0, 0, 0.1); */
-  /* border-bottom: 0; */
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-
-  &:first-child {
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-  }
-
-  &:last-child {
-    /* border: 1px solid rgba(0, 0, 0, 0.1); */
-    border-bottom-right-radius: 6px;
-    border-bottom-left-radius: 6px;
-  }
-
-  &:hover {
-    background-color: var(--bg-hover);
-    opacity: 1;
-  }
-
-  ${props =>
-    props.deleted &&
-    css`
-      opacity: 0.3;
-    `}
-
-  ${props =>
-    props.isOpened &&
-    css`
-      background-color: rgba(0, 0, 0, 0.1);
-      opacity: 1;
-
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.1);
-      }
-    `}
-`
 
 export default function Transaction({
   id,
@@ -118,9 +76,9 @@ export default function Transaction({
 
   return (
     <ListItem
+      className={c.listItem}
       button
       onClick={handleOpen}
-      disabled={deleted}
       selected={isOpened}
       onDoubleClick={handleSelectSimilar}
     >
@@ -137,14 +95,7 @@ export default function Transaction({
       </ListItemAvatar>
       <ListItemText
         primary={
-          <Box
-            display="flex"
-            flexDirection="row"
-            alignItems="baseline"
-            justifyContent="space-between"
-            minWidth={0}
-            component="span"
-          >
+          <Box display="flex" justifyContent="space-between">
             <MainLine {...{ type, tag }} />
             <Amount
               {...{
@@ -162,14 +113,7 @@ export default function Transaction({
           </Box>
         }
         secondary={
-          <Box
-            display="flex"
-            flexDirection="row"
-            alignItems="baseline"
-            justifyContent="space-between"
-            minWidth={0}
-            component="span"
-          >
+          <Box display="flex" justifyContent="space-between" component="span">
             <Typography
               className={c.comment}
               title={comment ? comment : ''}
@@ -178,6 +122,7 @@ export default function Transaction({
               component="span"
               color="textSecondary"
             >
+              {deleted && <DeletedLabel />}
               {payee && (
                 <Typography
                   noWrap
@@ -205,5 +150,16 @@ export default function Transaction({
         }
       />
     </ListItem>
+  )
+}
+
+const DeletedLabel = () => {
+  const Label = withStyles(theme => ({
+    root: { marginRight: theme.spacing(1) },
+  }))(Typography)
+  return (
+    <Label color="error" variant="body2" component="span">
+      Удалена
+    </Label>
   )
 }
