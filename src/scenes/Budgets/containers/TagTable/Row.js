@@ -48,7 +48,7 @@ export const useStyles = makeStyles(theme => ({
 export default function Row(props) {
   const {
     id,
-    showOutcome,
+    // showOutcome,
     symbol,
     name,
     overspent,
