@@ -20,6 +20,7 @@ import FilterListIcon from '@material-ui/icons/FilterList'
 import Tooltip from '@material-ui/core/Tooltip'
 import Box from '@material-ui/core/Box'
 import Actions from './Actions.js'
+import CloseIcon from '@material-ui/icons/Close'
 
 import FilterDrawer from './FilterDrawer.js'
 
@@ -59,6 +60,15 @@ function Filter({
           )}
         </Box>
 
+        {!!conditions.search && (
+          <Tooltip title="Очистить поле">
+            <IconButton
+              onClick={() => setCondition({ search: '' })}
+              children={<CloseIcon />}
+            />
+          </Tooltip>
+        )}
+
         <Tooltip title="Расширенные фильтры">
           <IconButton onClick={toggleDrawer} children={<FilterListIcon />} />
         </Tooltip>
@@ -75,6 +85,7 @@ function Filter({
 
 const mapStateToProps = state => ({
   conditions: getFilterConditions(state),
+
   // For BulkActions
   selectedIds: getSelectedIds(state),
 })
@@ -82,6 +93,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   setCondition: condition => dispatch(setCondition(condition)),
   setTags: tags => dispatch(setTags(tags)),
+
   // For BulkActions
   setTag: (ids, tagId) => dispatch(setMainTagToTransactions(ids, tagId)),
   deleteTransactions: ids => {
