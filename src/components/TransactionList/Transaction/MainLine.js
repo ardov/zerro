@@ -13,17 +13,17 @@ const useStyles = makeStyles(theme => ({
 
 export const MainLine = ({ type, tag }) => {
   const c = useStyles()
-  return type === 'transfer' ? (
-    <Typography noWrap>Перевод</Typography>
-  ) : tag ? (
+  return (
     <Typography noWrap>
-      {tag.map(tag => (
-        <span className={c.tag} key={tag.id}>
-          {tag.name}
-        </span>
-      ))}
+      {type === 'transfer'
+        ? 'Перевод'
+        : tag
+        ? tag.map(tag => (
+            <span className={c.tag} key={tag.id}>
+              {tag.name}
+            </span>
+          ))
+        : 'Без категории'}
     </Typography>
-  ) : (
-    <Typography noWrap>Без категории</Typography>
   )
 }
