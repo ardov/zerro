@@ -23,9 +23,8 @@ export default function TransactionGroup({
         component={Paper}
       >
         <StyledSubheader>{name}</StyledSubheader>
-
-        {transactions.map(id => (
-          <Transaction key={id.id} id={id.id} />
+        {transactions.map(tr => (
+          <Transaction key={tr.id} id={tr.id} />
         ))}
       </Box>
     </Box>
