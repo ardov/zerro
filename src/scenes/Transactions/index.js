@@ -1,17 +1,20 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import Header from 'components/Header'
+import Nav from 'components/Navigation'
 import TransactionList from 'components/TransactionList'
 import DetailsPanel from 'components/DetailsPanel'
 import AccountList from 'components/AccountList'
 import Message from 'components/Message'
+import { Box, Drawer } from '@material-ui/core'
+import { withStyles } from '@material-ui/styles'
 
 const Body = styled.div`
   display: flex;
   flex-direction: row;
+  flex-grow: 1;
   height: 100vh;
-  padding-top: 48px;
+  /* padding-top: 48px; */
   overflow: auto;
 `
 const Menu = styled.div`
@@ -26,28 +29,30 @@ const StyledTransactionList = styled(TransactionList)`
   min-width: 0;
   height: 100%;
 `
-const SidePanel = styled.div`
-  width: 480px;
-  overflow: auto;
-  border-left: 1px solid rgba(0, 0, 0, 0.1);
-`
+
+const SidePanel = withStyles({ root: { width: 400 }, paper: { width: 400 } })(
+  Drawer
+)
 
 export default function TransactionsView() {
   return (
-    <React.Fragment>
+    <>
       <Message />
-      <Header />
-      <Body>
-        <Menu>
+
+      <Box display="flex">
+        <Nav />
+        <Box p={3} width={280} height="100vh" overflow="auto">
           <AccountList />
-        </Menu>
+        </Box>
 
-        <StyledTransactionList groupBy={'DAY'} />
+        <Box flexGrow={1} height="100vh">
+          <StyledTransactionList groupBy={'DAY'} />
+        </Box>
 
-        <SidePanel>
+        <SidePanel variant="persistent" anchor="right" open={true}>
           <DetailsPanel />
         </SidePanel>
-      </Body>
-    </React.Fragment>
+      </Box>
+    </>
   )
 }
