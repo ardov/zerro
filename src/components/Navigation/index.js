@@ -21,9 +21,11 @@ const routes = [
   { path: '/budget', label: 'Бюджет' },
 ]
 
-const NavDrawer = withStyles({ root: { width: 160 }, paper: { width: 160 } })(
+const NavDrawer = withStyles({ root: { width: 120 }, paper: { width: 120 } })(
   Drawer
 )
+
+const SmallTab = withStyles({ root: { minWidth: 120 } })(Tab)
 
 const Header = ({ match }) => (
   <NavDrawer variant="persistent" anchor="left" open={true}>
@@ -40,7 +42,7 @@ const Header = ({ match }) => (
           variant="scrollable"
         >
           {routes.map(route => (
-            <Tab
+            <SmallTab
               component={Link}
               label={route.label}
               to={route.path}
@@ -53,7 +55,7 @@ const Header = ({ match }) => (
       <Tooltip title="О проекте">
         <IconButton
           component="a"
-          href="https://www.notion.so/More-Money-ae7dee79e1b446dd81bf279e72eb6970"
+          href="https://www.notion.so/ZERRO-a943f930d0a64d008712e20ecd299dbd"
           target="_blank"
           rel="noopener noreferrer"
         >

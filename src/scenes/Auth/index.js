@@ -28,7 +28,7 @@ function Auth(props) {
       <Fade in timeout={1000}>
         <Box mt={2} clone>
           <Link
-            href="https://www.notion.so/More-Money-ae7dee79e1b446dd81bf279e72eb6970"
+            href="https://www.notion.so/ZERRO-a943f930d0a64d008712e20ecd299dbd"
             target="_blank"
             rel="noopener noreferrer"
             variant="body1"
