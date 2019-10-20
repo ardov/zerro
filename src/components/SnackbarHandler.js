@@ -9,7 +9,7 @@ const useStyles = makeStyles(theme => ({
   close: { padding: theme.spacing(0.5) },
 }))
 
-function Message({ text, removeMessage }) {
+function SnackbarHandler({ text, removeMessage, children }) {
   const classes = useStyles()
 
   const handleClose = (e, reason) => {
@@ -17,34 +17,33 @@ function Message({ text, removeMessage }) {
   }
 
   return (
-    <Snackbar
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'left',
-      }}
-      open={!!text}
-      autoHideDuration={3000}
-      onClose={handleClose}
-      ContentProps={{
-        'aria-describedby': 'message-id',
-      }}
-      message={<span id="message-id">{text}</span>}
-      action={[
-        <IconButton
-          key="close"
-          aria-label="close"
-          color="inherit"
-          className={classes.close}
-          onClick={handleClose}
-        >
-          <CloseIcon />
-        </IconButton>,
-      ]}
-    />
+    <>
+      {children}
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        open={!!text}
+        autoHideDuration={3000}
+        onClose={handleClose}
+        message={text}
+        action={[
+          <IconButton
+            key="close"
+            color="inherit"
+            className={classes.close}
+            onClick={handleClose}
+          >
+            <CloseIcon />
+          </IconButton>,
+        ]}
+      />
+    </>
   )
 }
 
 export default connect(
   state => ({ text: getMessage(state) }),
   dispatch => ({ removeMessage: () => dispatch(removeMessage()) })
-)(Message)
+)(SnackbarHandler)
