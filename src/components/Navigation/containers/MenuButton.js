@@ -3,24 +3,35 @@ import { connect } from 'react-redux'
 import { logOut } from 'logic/authorization'
 import exportCsv from 'logic/exportCsv'
 import exportJSON from 'logic/exportJSON'
+import { toggle } from 'store/theme'
 import { makeStyles } from '@material-ui/styles'
 import SettingsIcon from '@material-ui/icons/Settings'
 import SaveAltIcon from '@material-ui/icons/SaveAlt'
+import InvertColorsIcon from '@material-ui/icons/InvertColors'
 import ExitToAppIcon from '@material-ui/icons/ExitToApp'
-import IconButton from '@material-ui/core/IconButton'
-import Tooltip from '@material-ui/core/Tooltip'
-import Menu from '@material-ui/core/Menu'
-import MenuItem from '@material-ui/core/MenuItem'
-import Divider from '@material-ui/core/Divider'
+import {
+  Box,
+  Divider,
+  IconButton,
+  Tooltip,
+  Menu,
+  MenuItem,
+} from '@material-ui/core'
 
-const useStyles = makeStyles({ menuIcon: { marginRight: 8 } })
+const useStyles = makeStyles(({ spacing }) => ({
+  menuIcon: { marginRight: spacing(1) },
+}))
 
-function MenuButton({ exportCsv, exportJSON, logOut, ...rest }) {
+function MenuButton({ exportCsv, exportJSON, logOut, toggleTheme, ...rest }) {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const classes = useStyles()
 
   const handleClick = event => setAnchorEl(event.currentTarget)
   const handleClose = () => setAnchorEl(null)
+  const handleThemeChange = () => {
+    handleClose()
+    toggleTheme()
+  }
 
   return (
     <React.Fragment>
@@ -39,7 +50,20 @@ function MenuButton({ exportCsv, exportJSON, logOut, ...rest }) {
           <SaveAltIcon className={classes.menuIcon} color="action" />
           Полный бэкап
         </MenuItem>
-        <Divider />
+
+        <Box my={1}>
+          <Divider light />
+        </Box>
+
+        <MenuItem onClick={handleThemeChange}>
+          <InvertColorsIcon className={classes.menuIcon} color="action" />
+          Изменить тему
+        </MenuItem>
+
+        <Box my={1}>
+          <Divider light />
+        </Box>
+
         <MenuItem onClick={logOut}>
           <ExitToAppIcon className={classes.menuIcon} color="action" />
           Выйти
@@ -53,6 +77,7 @@ const mapDispatchToProps = dispatch => ({
   logOut: () => dispatch(logOut()),
   exportCsv: () => dispatch(exportCsv),
   exportJSON: () => dispatch(exportJSON),
+  toggleTheme: () => dispatch(toggle()),
 })
 
 export default connect(

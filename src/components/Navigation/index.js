@@ -3,17 +3,7 @@ import { withRouter } from 'react-router'
 import { Link } from 'react-router-dom'
 import RefreshButton from './containers/RefreshButton'
 import MenuButton from './containers/MenuButton'
-import ThemeButton from './containers/ThemeButton'
-import InfoIcon from '@material-ui/icons/Info'
-import {
-  IconButton,
-  Tooltip,
-  Typography,
-  Tabs,
-  Tab,
-  Box,
-  Drawer,
-} from '@material-ui/core'
+import { Typography, Tabs, Tab, Box, Drawer } from '@material-ui/core'
 import { withStyles } from '@material-ui/styles'
 
 const routes = [
@@ -29,7 +19,12 @@ const SmallTab = withStyles({ root: { minWidth: 120 } })(Tab)
 
 const Header = ({ match }) => (
   <NavDrawer variant="persistent" anchor="left" open={true}>
-    <Box display="flex" flexDirection="column" alignItems="center">
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      minHeight="100vh"
+    >
       <Box py={3}>
         <Typography variant="h6">ZERRO</Typography>
       </Box>
@@ -49,22 +44,20 @@ const Header = ({ match }) => (
               key={route.path}
             />
           ))}
+          <SmallTab
+            label="О проекте"
+            component="a"
+            href="https://www.notion.so/ZERRO-a943f930d0a64d008712e20ecd299dbd"
+            target="_blank"
+            rel="noopener noreferrer"
+          />
         </Tabs>
       </Box>
 
-      <Tooltip title="О проекте">
-        <IconButton
-          component="a"
-          href="https://www.notion.so/ZERRO-a943f930d0a64d008712e20ecd299dbd"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <InfoIcon />
-        </IconButton>
-      </Tooltip>
-      <ThemeButton />
-      <RefreshButton />
-      <MenuButton />
+      <Box mt="auto" py={3} display="flex" flexDirection="column">
+        <RefreshButton />
+        <MenuButton />
+      </Box>
     </Box>
   </NavDrawer>
 )
