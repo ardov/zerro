@@ -21,7 +21,7 @@ function TagTable({ tags, currency, date, updateBudget, ...rest }) {
         </Box>
         <TagTableHeader
           position="sticky"
-          top={48}
+          top={0}
           zIndex={2}
           bgcolor="background.paper"
         />
