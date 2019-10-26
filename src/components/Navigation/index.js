@@ -1,65 +1,49 @@
-import React from 'react'
-import { withRouter } from 'react-router'
-import { Link } from 'react-router-dom'
-import RefreshButton from './containers/RefreshButton'
-import MenuButton from './containers/MenuButton'
-import { Typography, Tabs, Tab, Box, Drawer } from '@material-ui/core'
-import { withStyles } from '@material-ui/styles'
+import React, { useState } from 'react'
+import { useMediaQuery, Fab } from '@material-ui/core'
+import { makeStyles } from '@material-ui/core/styles'
+import MenuIcon from '@material-ui/icons/Menu'
+import NavDrawer from './NavDrawer'
 
-const routes = [
-  { path: '/transactions', label: 'История' },
-  { path: '/budget', label: 'Бюджет' },
-]
+const useStyles = makeStyles(theme => ({
+  fab: {
+    position: 'fixed',
+    bottom: theme.spacing(2),
+    left: theme.spacing(2),
+    zIndex: 5,
+  },
+  drawerWidth: { width: 120 },
+}))
 
-const NavDrawer = withStyles({ root: { width: 120 }, paper: { width: 120 } })(
-  Drawer
-)
+export default function Header() {
+  const [open, setOpen] = useState(false)
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
+  const c = useStyles()
 
-const SmallTab = withStyles({ root: { minWidth: 120 } })(Tab)
+  const showDrawer = () => setOpen(true)
+  const hideDrawer = () => setOpen(false)
 
-const Header = ({ match }) => (
-  <NavDrawer variant="persistent" anchor="left" open={true}>
-    <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      minHeight="100vh"
-    >
-      <Box py={3}>
-        <Typography variant="h6">ZERRO</Typography>
-      </Box>
+  const menuOpen = !isMobile || open
 
-      <Box width="100%" py={3}>
-        <Tabs
-          value={routes.findIndex(route => route.path === match.path)}
-          indicatorColor="primary"
-          orientation="vertical"
-          variant="scrollable"
-        >
-          {routes.map(route => (
-            <SmallTab
-              component={Link}
-              label={route.label}
-              to={route.path}
-              key={route.path}
-            />
-          ))}
-          <SmallTab
-            label="О проекте"
-            component="a"
-            href="https://www.notion.so/ZERRO-a943f930d0a64d008712e20ecd299dbd"
-            target="_blank"
-            rel="noopener noreferrer"
-          />
-        </Tabs>
-      </Box>
+  return (
+    <>
+      {!menuOpen && (
+        <Fab
+          className={c.fab}
+          color="primary"
+          onClick={showDrawer}
+          children={<MenuIcon />}
+        />
+      )}
 
-      <Box mt="auto" py={3} display="flex" flexDirection="column">
-        <RefreshButton />
-        <MenuButton />
-      </Box>
-    </Box>
-  </NavDrawer>
-)
-
-export default withRouter(Header)
+      <NavDrawer
+        classes={
+          isMobile ? null : { paper: c.drawerWidth, root: c.drawerWidth }
+        }
+        variant={isMobile ? 'temporary' : 'persistent'}
+        anchor="left"
+        open={menuOpen}
+        onClose={hideDrawer}
+      />
+    </>
+  )
+}
