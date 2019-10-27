@@ -11,7 +11,7 @@ export default function Reciept({ value, ...rest }) {
       title={
         <Box display="flex" alignItems="center" flexDirection="column">
           <QRCode value={value} />
-          <Box mt={1} wordWrap="break-word" maxWidth={160} textAlign="center">
+          <Box mt={1} maxWidth={160} textAlign="center">
             {value}
           </Box>
         </Box>
