@@ -11,7 +11,13 @@ const routes = [
   { path: '/budget', label: 'Бюджет' },
 ]
 
-const NavigationDrawer = ({ location, ...rest }) => {
+const NavigationDrawer = ({
+  location,
+  match,
+  history,
+  staticContext,
+  ...rest
+}) => {
   const SmallTab = withStyles({ root: { minWidth: 120 } })(Tab)
   return (
     <Drawer {...rest}>
