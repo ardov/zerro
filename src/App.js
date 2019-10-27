@@ -11,9 +11,9 @@ import { getLoginState } from 'store/token'
 import RegularSyncHandler from 'components/RegularSyncHandler'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import SnackbarHandler from 'components/SnackbarHandler'
-
+import Nav from 'components/Navigation'
+import { Box } from '@material-ui/core'
 import { ThemeProvider } from '@material-ui/styles'
-
 import createTheme from 'helpers/createTheme'
 import { getTheme } from 'store/theme'
 
@@ -23,35 +23,9 @@ const App = ({ isLoggedIn, themeType }) => (
   <ThemeProvider theme={createTheme(themeType)}>
     <>
       <CssBaseline />
-      <SnackbarHandler>
-        <RegularSyncHandler>
-          <IntlProvider locale="ru">
-            <BrowserRouter>
-              <Switch>
-                <Route
-                  path="/transactions"
-                  render={() => (isLoggedIn ? <Transactions /> : <Auth />)}
-                />
-                <Route
-                  path="/tags"
-                  render={() => (isLoggedIn ? <Tags /> : <Auth />)}
-                />
-                <Route
-                  path="/budget"
-                  render={() => (isLoggedIn ? <Budgets /> : <Auth />)}
-                />
-                <Route
-                  path="/login"
-                  render={() =>
-                    isLoggedIn ? <Redirect to="/transactions" /> : <Auth />
-                  }
-                />
-                <Redirect to="/transactions" />
-              </Switch>
-            </BrowserRouter>
-          </IntlProvider>
-        </RegularSyncHandler>
-      </SnackbarHandler>
+      <IntlProvider locale="ru">
+        <BrowserRouter>{isLoggedIn ? <PrivateApp /> : <Auth />}</BrowserRouter>
+      </IntlProvider>
     </>
   </ThemeProvider>
 )
@@ -60,3 +34,19 @@ export default connect(
   state => ({ isLoggedIn: getLoginState(state), themeType: getTheme(state) }),
   null
 )(App)
+
+const PrivateApp = () => (
+  <Box display="flex">
+    <Nav />
+    <SnackbarHandler />
+    <RegularSyncHandler />
+    <Box height="100vh" overflow="auto" flexGrow={1}>
+      <Switch>
+        <Route path="/transactions" component={Transactions} />
+        <Route path="/tags" component={Tags} />
+        <Route path="/budget" component={Budgets} />
+        <Redirect to="/transactions" />
+      </Switch>
+    </Box>
+  </Box>
+)

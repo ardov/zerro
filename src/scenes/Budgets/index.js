@@ -1,7 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import startOfMonth from 'date-fns/start_of_month'
-import Nav from 'components/Navigation'
 import AccountList from 'components/AccountList'
 import TagTable from './containers/TagTable'
 import TransferTable from './containers/TransferTable'
@@ -19,28 +18,25 @@ const Budgets = ({ monthDates }) => {
   const index = monthDates.findIndex(date => date === month)
 
   return (
-    <Box display="flex">
-      <Nav />
-      <Box p={3} flexGrow={1}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={3}>
-            <MonthSelector
-              months={monthDates}
-              current={index}
-              onSetCurrent={setCurrentMonth}
-              onChange={setMonthByIndex}
-            />
-            <Box component={BudgetInfo} index={index} mt={3} />
-            <Hidden smDown>
-              <Box component={AccountList} mt={3} />
-            </Hidden>
-          </Grid>
-          <Grid item xs={12} md={9}>
-            <TagTable index={index} date={monthDates[index]} />
-            <Box component={TransferTable} index={index} mt={3} />
-          </Grid>
+    <Box p={3}>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={3}>
+          <MonthSelector
+            months={monthDates}
+            current={index}
+            onSetCurrent={setCurrentMonth}
+            onChange={setMonthByIndex}
+          />
+          <Box component={BudgetInfo} index={index} mt={3} />
+          <Hidden smDown>
+            <Box component={AccountList} mt={3} />
+          </Hidden>
         </Grid>
-      </Box>
+        <Grid item xs={12} md={9}>
+          <TagTable index={index} date={monthDates[index]} />
+          <Box component={TransferTable} index={index} mt={3} />
+        </Grid>
+      </Grid>
     </Box>
   )
 }

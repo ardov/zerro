@@ -1,9 +1,8 @@
 import React from 'react'
-import Nav from 'components/Navigation'
 import TransactionList from 'components/TransactionList'
 import DetailsPanel from 'components/DetailsPanel'
 import AccountList from 'components/AccountList'
-import { Box, Drawer } from '@material-ui/core'
+import { Box, Drawer, useMediaQuery } from '@material-ui/core'
 import { withStyles } from '@material-ui/styles'
 
 const StyledTransactionList = props => (
@@ -18,16 +17,26 @@ const SidePanel = withStyles({
 })(Drawer)
 
 export default function TransactionsView() {
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   return (
     <Box display="flex">
-      <Nav />
-      <Box p={3} width={280} height="100vh" overflow="auto">
+      <Box
+        p={3}
+        width={280}
+        height="100vh"
+        overflow="auto"
+        display={{ xs: 'none', md: 'block' }}
+      >
         <AccountList />
       </Box>
 
       <StyledTransactionList />
 
-      <SidePanel variant="persistent" anchor="right" open={true}>
+      <SidePanel
+        variant={isMobile ? 'temporary' : 'persistent'}
+        anchor="right"
+        open={!isMobile}
+      >
         <DetailsPanel />
       </SidePanel>
     </Box>
