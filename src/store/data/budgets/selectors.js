@@ -8,7 +8,7 @@ const getBudgets = createSelector(
 )
 
 const getBudget = (state, tag, month) =>
-  getBudgets(state)[`${tag},${format(month, 'YYYY-MM-DD')}`]
+  getBudgets(state)[`${tag},${format(month, 'yyyy-MM-dd')}`]
 
 const getBudgetsToSave = createSelector(
   ['data.budget.server'],

@@ -1,5 +1,5 @@
-import startOfMonth from 'date-fns/start_of_month'
-import isSameMonth from 'date-fns/is_same_month'
+import startOfMonth from 'date-fns/startOfMonth'
+import isSameMonth from 'date-fns/isSameMonth'
 import createSelector from 'selectorator'
 import { getTransactionsInBudget } from './baseSelectors'
 import { getBudgetsByMonthAndTag } from 'store/data/budgets'

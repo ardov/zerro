@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
 import { Box, Paper, Typography, Collapse, Link } from '@material-ui/core'
-import parse from 'date-fns/parse'
+import parse from 'date-fns/parseISO'
 import QRCode from 'qrcode.react'
 import { formatMoney } from 'helpers/format'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 
-const formatDate = date => format(date, 'DD.MM.YYYY, HH:mm', { locale: ru })
+const formatDate = date => format(date, 'dd.MM.yyyy, HH:mm', { locale: ru })
 
 export default function Reciept({ value, ...rest }) {
   const [showMore, setShowMore] = useState(false)

@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import startOfMonth from 'date-fns/start_of_month'
+import startOfMonth from 'date-fns/startOfMonth'
 import AccountList from 'components/AccountList'
 import TagTable from './containers/TagTable'
 import TransferTable from './containers/TransferTable'

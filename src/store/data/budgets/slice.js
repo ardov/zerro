@@ -18,7 +18,7 @@ export default createSlice({
   reducers: {
     setBudget: ({ diff }, { payload }) => {
       const budget = payload
-      const id = `${budget.tag},${format(budget.date, 'YYYY-MM-DD')}`
+      const id = `${budget.tag},${format(budget.date, 'yyyy-MM-dd')}`
       diff[id] = budget
     },
   },

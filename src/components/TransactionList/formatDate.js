@@ -3,10 +3,10 @@ import ru from 'date-fns/locale/ru'
 
 export default function formatDate(date) {
   const formats = {
-    today: 'Сегодня, D MMMM, dd',
-    yesterday: 'Вчера, D MMMM, dd',
-    thisYear: 'D MMMM, dd',
-    previousYear: 'D MMMM YYYY, dd',
+    today: 'Сегодня, d MMMM, EEEEEE',
+    yesterday: 'Вчера, d MMMM, EEEEEE',
+    thisYear: 'd MMMM, EEEEEE',
+    previousYear: 'd MMMM yyyy, EEEEEE',
   }
   const formatString = isToday(date)
     ? formats.today

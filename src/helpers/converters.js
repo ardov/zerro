@@ -1,4 +1,4 @@
-import parseDate from 'date-fns/parse'
+import parseDate from 'date-fns/parseISO'
 import { format } from 'date-fns'
 
 export const convertDatesToMs = item =>
@@ -35,7 +35,7 @@ export const convertDatesToServerFormat = item =>
       case 'date':
       case 'startDate':
       case 'endDate':
-        obj[key] = item[key] ? format(item[key], 'YYYY-MM-DD') : null
+        obj[key] = item[key] ? format(item[key], 'yyyy-MM-dd') : null
         break
 
       default:

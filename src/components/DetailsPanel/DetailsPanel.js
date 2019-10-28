@@ -7,9 +7,9 @@ import { FormattedNumber } from 'react-intl'
 import Reciept from './Reciept'
 import { Button, Box } from '@material-ui/core'
 
-const formatDate = date => format(date, 'D MMMM YYYY, dd', { locale: ru })
+const formatDate = date => format(date, 'd MMMM yyyy, EEEEEE', { locale: ru })
 const formatDateTime = date =>
-  format(date, 'D MMMM YYYY, dd, HH:mm:ss', { locale: ru })
+  format(date, 'd MMMM yyyy, EEEEEE, HH:mm:ss', { locale: ru })
 
 const Panel = styled.section`
   display: flex;
