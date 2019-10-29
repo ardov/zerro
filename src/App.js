@@ -16,6 +16,9 @@ import { Box } from '@material-ui/core'
 import { ThemeProvider } from '@material-ui/styles'
 import createTheme from 'helpers/createTheme'
 import { getTheme } from 'store/theme'
+import { MuiPickersUtilsProvider } from '@material-ui/pickers'
+import DateFnsUtils from '@date-io/date-fns'
+import ruDateLocale from 'date-fns/locale/ru'
 
 addLocaleData(ru)
 
@@ -24,7 +27,11 @@ const App = ({ isLoggedIn, themeType }) => (
     <>
       <CssBaseline />
       <IntlProvider locale="ru">
-        <BrowserRouter>{isLoggedIn ? <PrivateApp /> : <Auth />}</BrowserRouter>
+        <MuiPickersUtilsProvider utils={DateFnsUtils} locale={ruDateLocale}>
+          <BrowserRouter>
+            {isLoggedIn ? <PrivateApp /> : <Auth />}
+          </BrowserRouter>
+        </MuiPickersUtilsProvider>
       </IntlProvider>
     </>
   </ThemeProvider>
