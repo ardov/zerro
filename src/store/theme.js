@@ -1,7 +1,7 @@
 import { createSlice } from 'redux-starter-kit'
 
 // INITIAL STATE
-const initialState = 'light'
+const initialState = new Date().getHours() < 6 ? 'dark' : 'light'
 
 // SLICE
 const { reducer, actions, selectors } = createSlice({
