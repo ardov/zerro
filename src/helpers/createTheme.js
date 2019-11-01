@@ -1,7 +1,7 @@
 import { createMuiTheme } from '@material-ui/core/styles'
 
-const PRIMARY = isDark => (isDark ? '#fff' : '#212121')
-const SECONDARY = isDark => '#05f'
+const PRIMARY = isDark => (isDark ? '#cfd8dc' : '#455a64')
+const SECONDARY = isDark => '#ff5722'
 const SUCCESS = isDark => '#21a355'
 
 export default function createTheme(type = 'light') {
