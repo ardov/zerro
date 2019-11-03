@@ -30,10 +30,10 @@ const Amount = styled.div`
 `
 
 function Account(props) {
-  const { title, balance, instrument, className } = this.props
+  const { title, balance, instrument, className } = props
   const formattedBalance = formatMoney(balance, instrument.shortTitle)
   return (
-    <Body className={className} onClick={() => console.log(this.props)}>
+    <Body className={className} onClick={() => console.log(props)}>
       <Title title={title}>{title}</Title>
       <Amount>{formattedBalance}</Amount>
     </Body>
