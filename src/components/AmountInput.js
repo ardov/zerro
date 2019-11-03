@@ -13,7 +13,6 @@ export default function AmountInput({
   const [focused, setFocused] = useState(false)
 
   useEffect(() => {
-    setFocused(false)
     setVal(value)
   }, [value])
 
