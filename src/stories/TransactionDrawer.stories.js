@@ -6,6 +6,7 @@ import decorator from 'helpers/storybookDecorator'
 
 const transfer = {
   id: 'testId',
+  date: Date.now(),
   changed: Date.now() - 20000000,
   created: Date.now() - 200000000,
   type: 'transfer',
@@ -33,6 +34,7 @@ const transfer = {
 }
 const income = {
   id: 'testId',
+  date: Date.now(),
   changed: Date.now() - 20000000,
   created: Date.now() - 200000000,
   type: 'income',

@@ -4,7 +4,6 @@ import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import Reciept from './Reciept'
 import {
-  Button,
   Box,
   Typography,
   Drawer,
@@ -19,7 +18,6 @@ import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash'
 import CloseIcon from '@material-ui/icons/Close'
 import DeleteIcon from '@material-ui/icons/Delete'
 import { DatePicker } from '@material-ui/pickers'
-import { withStyles } from '@material-ui/styles'
 import Map from './Map'
 import AmountInput from 'components/AmountInput'
 
@@ -81,6 +79,17 @@ export default function DetailsDrawer({
     income !== localIncome ||
     payee !== localPayee ||
     date !== localDate
+
+  const onSave = () =>
+    onChange({
+      id,
+      comment: localComment,
+      outcome: localOutcome,
+      income: localIncome,
+      payee: localPayee,
+      date: localDate,
+    })
+
   return (
     <Drawer {...{ anchor, open, variant, onClose }}>
       <Box minWidth={320} position="relative">
@@ -126,7 +135,7 @@ export default function DetailsDrawer({
           <Box mt={2}>
             <DatePicker
               value={localDate}
-              onChange={date => setLocalDate(date)}
+              onChange={date => setLocalDate(+date)}
               label="Дата"
               fullWidth
               autoOk
@@ -189,7 +198,7 @@ export default function DetailsDrawer({
           </Typography>
         </Box>
 
-        <SaveButton visible={hasChanges} onSave={onChange} />
+        <SaveButton visible={hasChanges} onSave={onSave} />
       </Box>
     </Drawer>
   )
