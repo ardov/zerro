@@ -1,11 +1,13 @@
 import { createSlice } from 'redux-starter-kit'
 
+const initialState = null
+
 const { reducer, actions, selectors } = createSlice({
   slice: 'openedTransaction',
-  initialState: [],
+  initialState,
   reducers: {
     openTransaction: (state, { payload }) => payload,
-    closeTransaction: () => null,
+    closeTransaction: () => initialState,
   },
 })
 
