@@ -3,23 +3,24 @@ import { getTransaction } from 'store/data/transactions'
 import { setTransaction } from 'store/data/transactions'
 
 const deleteTransactions = ids => (dispatch, getState) => {
-  const state = getState()
-  const trToDelete = Array.isArray(ids)
-    ? ids.map(id => getTransaction(state, id))
-    : [getTransaction(state, ids)]
-  const deleted = trToDelete.map(tr => convertToDeleted(tr))
+  const array = ids.map ? ids : [ids]
+  const deleted = array.map(id => ({
+    ...getTransaction(getState(), id),
+    deleted: true,
+    changed: Date.now(),
+  }))
   dispatch(setTransaction(deleted))
 }
 
 const restoreTransaction = id => (dispatch, getState) => {
-  const state = getState()
-  const tr = {
-    ...getTransaction(state, id),
-    deleted: false,
-    changed: Date.now(),
-    id: uuidv1(),
-  }
-  dispatch(setTransaction(tr))
+  dispatch(
+    setTransaction({
+      ...getTransaction(getState(), id),
+      deleted: false,
+      changed: Date.now(),
+      id: uuidv1(),
+    })
+  )
 }
 
 const splitTransfer = id => (dispatch, getState) => {
@@ -29,13 +30,13 @@ const splitTransfer = id => (dispatch, getState) => {
 }
 
 const applyChangesToTransaction = tr => (dispatch, getState) => {
-  const state = getState()
-  const changedTransaction = {
-    ...getTransaction(state, tr.id),
-    ...tr,
-    changed: Date.now(),
-  }
-  dispatch(setTransaction(changedTransaction))
+  dispatch(
+    setTransaction({
+      ...getTransaction(getState(), tr.id),
+      ...tr,
+      changed: Date.now(),
+    })
+  )
 }
 
 const setMainTagToTransactions = (transactions, tagId) => (
@@ -61,14 +62,6 @@ export default {
   splitTransfer,
   applyChangesToTransaction,
   setMainTagToTransactions,
-}
-
-function convertToDeleted(raw) {
-  return {
-    ...raw,
-    deleted: true,
-    changed: Date.now(),
-  }
 }
 
 // function setTags(raw, tags) {
