@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import TransactionList from 'components/TransactionList'
 import AccountList from 'components/AccountList'
-import { Box, Drawer, useMediaQuery } from '@material-ui/core'
+import { Box, Drawer, useMediaQuery, Typography } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import TransactionPreview from 'components/TransactionPreview'
 
@@ -41,12 +41,27 @@ export default function TransactionsView() {
         anchor="right"
         open={!isMobile || !!opened}
       >
-        {opened && (
+        {opened ? (
           <TransactionPreview
             id={opened}
             key={opened}
             onClose={() => setOpened(null)}
           />
+        ) : (
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            minHeight="100vh"
+            color="text.hint"
+            p={3}
+          >
+            <Typography variant="body2" align="center" color="inherit">
+              Выберите операцию,
+              <br />
+              чтобы увидеть детали
+            </Typography>
+          </Box>
         )}
       </Drawer>
     </Box>
