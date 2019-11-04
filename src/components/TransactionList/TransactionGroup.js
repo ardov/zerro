@@ -8,6 +8,8 @@ export default function TransactionGroup({
   name,
   transactions,
   topOffset = 0,
+  opened,
+  setOpened,
 }) {
   const StyledSubheader = withStyles({ sticky: { top: topOffset } })(
     ListSubheader
@@ -24,7 +26,12 @@ export default function TransactionGroup({
       >
         <StyledSubheader>{name}</StyledSubheader>
         {transactions.map(tr => (
-          <Transaction key={tr.id} id={tr.id} />
+          <Transaction
+            key={tr.id}
+            id={tr.id}
+            isOpened={tr.id === opened}
+            onClick={() => setOpened(tr.id)}
+          />
         ))}
       </Box>
     </Box>

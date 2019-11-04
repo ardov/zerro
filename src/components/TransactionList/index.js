@@ -32,7 +32,7 @@ class TransactionList extends React.Component {
     16
 
   render() {
-    const { groups, className } = this.props
+    const { groups, className, opened, setOpened } = this.props
     const SEARCH_HEIGHT = 72
     const PADDING_BOTTOM = 40
 
@@ -57,6 +57,7 @@ class TransactionList extends React.Component {
           topOffset={SEARCH_HEIGHT}
           name={formatDate(groups[index].date)}
           transactions={groups[index].transactions}
+          {...{ opened, setOpened }}
         />
       ),
       areEqual

@@ -1,7 +1,7 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 import { action } from '@storybook/addon-actions'
-import Drawer from 'components/DetailsDrawer/Drawer'
+import Content from 'components/TransactionPreview/Content'
 import decorator from 'helpers/storybookDecorator'
 
 const transfer = {
@@ -71,7 +71,7 @@ export const actions = {
   onSelectSimilar: action('onSelectSimilar'),
 }
 
-storiesOf('TransactionDrawer', module)
+storiesOf('Transaction Preview', module)
   .addDecorator(decorator({ width: 400 }))
-  .add('transfer', () => <Drawer {...transfer} {...actions} open={true} />)
-  .add('income', () => <Drawer {...income} {...actions} open={true} />)
+  .add('transfer', () => <Content {...transfer} {...actions} open={true} />)
+  .add('income', () => <Content {...income} {...actions} open={true} />)

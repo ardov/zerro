@@ -1,15 +1,15 @@
 import { connect } from 'react-redux'
-import { setCondition } from 'store/filterConditions'
+import { getTransaction } from 'store/data/transactions'
 import {
-  getSelectedIds,
-  toggleTransaction,
-  selectTransactionsByChangedDate,
-} from 'store/selectedTransactions'
+  deleteTransactions,
+  restoreTransaction,
+  applyChangesToTransaction,
+  // splitTransfer,
+} from 'store/data/transactions'
+import { selectTransactionsByChangedDate } from 'store/selectedTransactions'
+import Content from './Content'
 import { getInstrument } from 'store/data/instruments'
 import { getAccount } from 'store/data/accounts'
-import { getPopulatedTag } from 'store/data/tags'
-import Transaction from './Transaction'
-import { getTransaction } from 'store/data/transactions'
 import { getType } from 'store/data/transactions/helpers'
 
 const mapStateToProps = (state, { id }) => {
@@ -41,24 +41,22 @@ const mapStateToProps = (state, { id }) => {
     opOutcome: tr.opOutcome,
     opOutcomeCurrency: opOutcomeInstrument && opOutcomeInstrument.shortTitle,
 
-    tag:
-      tr.tag && tr.tag.length
-        ? tr.tag.map(id => getPopulatedTag(state, id))
-        : null,
+    tag: tr.tag,
 
-    isChecked: getSelectedIds(state).includes(id),
-    isInSelectionMode: !!getSelectedIds(state).length,
+    ...tr,
   }
 }
 
 const mapDispatchToProps = (dispatch, { id }) => ({
-  onToggle: () => dispatch(toggleTransaction(id)),
-  onSelectChanged: changed =>
+  onChange: changes => dispatch(applyChangesToTransaction(changes)),
+  onDelete: () => dispatch(deleteTransactions([id])),
+  onRestore: () => dispatch(restoreTransaction(id)),
+  onSelectSimilar: changed =>
     dispatch(selectTransactionsByChangedDate(changed)),
-  onFilterByPayee: payee => dispatch(setCondition({ search: payee })),
+  // onSplit: id => dispatch(splitTransfer(id)), // does not work
 })
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(Transaction)
+)(Content)

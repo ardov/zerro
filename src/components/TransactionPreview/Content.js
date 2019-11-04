@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import TagSelect from 'components/TagSelect'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
@@ -56,10 +56,6 @@ export default function DetailsDrawer({
   reminderMarker,
   type,
 
-  anchor = 'right',
-  open,
-  variant,
-
   onClose,
   onChange,
   onDelete,
@@ -73,12 +69,24 @@ export default function DetailsDrawer({
   const [localIncome, setLocalIncome] = useState(income)
   const [localPayee, setLocalPayee] = useState(payee)
   const [localDate, setLocalDate] = useState(date)
+  const [localTag, setLocalTag] = useState(tag)
+
+  useEffect(() => {
+    setLocalComment(comment)
+    setLocalOutcome(outcome)
+    setLocalIncome(income)
+    setLocalPayee(payee)
+    setLocalDate(date)
+    setLocalTag(tag)
+  }, [id, changed, comment, outcome, income, payee, date, tag])
 
   const hasChanges =
     comment !== localComment ||
+    outcome !== localOutcome ||
     income !== localIncome ||
     payee !== localPayee ||
-    date !== localDate
+    date !== localDate ||
+    localTag !== tag
 
   const onSave = () =>
     onChange({
@@ -88,119 +96,118 @@ export default function DetailsDrawer({
       income: localIncome,
       payee: localPayee,
       date: localDate,
+      tag: localTag,
     })
 
   return (
-    <Drawer {...{ anchor, open, variant, onClose }}>
-      <Box minWidth={320} position="relative">
-        <Head
-          title={titles[type]}
-          onClose={onClose}
-          onDelete={onDelete}
-          onRestore={onRestore}
-          deleted={deleted}
-        />
+    <Box minWidth={320} position="relative">
+      <Head
+        title={titles[type]}
+        onClose={onClose}
+        onDelete={onDelete}
+        onRestore={onRestore}
+        deleted={deleted}
+      />
 
-        <Box p={3} bgcolor="background.default">
-          123
-        </Box>
-
-        <Box px={3}>
-          {type !== 'income' && (
-            <Box mt={2}>
-              <AmountInput
-                label={`Расход с ${outcomeAccountTitle}`}
-                currency={outcomeCurrency}
-                value={localOutcome}
-                onChange={setLocalOutcome}
-                fullWidth
-                margin="dense"
-              />
-            </Box>
-          )}
-
-          {type !== 'outcome' && (
-            <Box mt={2}>
-              <AmountInput
-                label={`Доход на ${incomeAccountTitle}`}
-                currency={incomeCurrency}
-                value={localIncome}
-                onChange={setLocalIncome}
-                fullWidth
-                margin="dense"
-              />
-            </Box>
-          )}
-
-          <Box mt={2}>
-            <DatePicker
-              value={localDate}
-              onChange={date => setLocalDate(+date)}
-              label="Дата"
-              fullWidth
-              autoOk
-              cancelLabel="Отмена"
-              okLabel="Ок"
-              format="dd MMMM yyyy, EEEEEE"
-              variant="dialog"
-              inputVariant="outlined"
-              margin="dense"
-            />
-          </Box>
-
-          <Box mt={2}>
-            <TextField
-              value={localPayee || ''}
-              onChange={e => setLocalPayee(e.target.value)}
-              label="Место платежа"
-              multiline
-              rowsMax="4"
-              fullWidth
-              helperText=""
-              variant="outlined"
-              margin="dense"
-            />
-          </Box>
-
-          <Box mt={2}>
-            <TextField
-              value={localComment || ''}
-              onChange={e => setLocalComment(e.target.value)}
-              label="Комментарий"
-              multiline
-              rowsMax="4"
-              fullWidth
-              helperText=""
-              variant="outlined"
-              margin="dense"
-            />
-          </Box>
-
-          <Reciept mt={2} value={qrCode} />
-
-          <Map mt={2} longitude={longitude} latitude={latitude} />
-        </Box>
-        <Box p={3}>
-          <Typography variant="caption" color="textSecondary">
-            Операция создана &ndash;{' '}
-            {format(created, 'dd MMM yyyy, HH:mm', { locale: ru })}
-            <br />
-            Последнее изменение &ndash;{' '}
-            {format(changed, 'dd MMM yyyy, HH:mm', { locale: ru })}
-            <br />
-            <Link
-              component="button"
-              color="secondary"
-              onClick={onSelectSimilar}
-            >
-              Выделить операции, изменённые в это же время
-            </Link>
-          </Typography>
-        </Box>
-
-        <SaveButton visible={hasChanges} onSave={onSave} />
+      <Box p={3} bgcolor="background.default">
+        <TagSelect value={localTag} onChange={setLocalTag} />
       </Box>
-    </Drawer>
+
+      <Box px={3}>
+        {type !== 'income' && (
+          <Box mt={2}>
+            <AmountInput
+              label={`Расход с ${outcomeAccountTitle}`}
+              currency={outcomeCurrency}
+              value={localOutcome}
+              onChange={setLocalOutcome}
+              fullWidth
+              margin="dense"
+            />
+          </Box>
+        )}
+
+        {type !== 'outcome' && (
+          <Box mt={2}>
+            <AmountInput
+              label={`Доход на ${incomeAccountTitle}`}
+              currency={incomeCurrency}
+              value={localIncome}
+              onChange={setLocalIncome}
+              fullWidth
+              margin="dense"
+            />
+          </Box>
+        )}
+
+        <Box mt={2}>
+          <DatePicker
+            value={localDate}
+            onChange={date => setLocalDate(+date)}
+            label="Дата"
+            fullWidth
+            autoOk
+            cancelLabel="Отмена"
+            okLabel="Ок"
+            format="dd MMMM yyyy, EEEEEE"
+            variant="dialog"
+            inputVariant="outlined"
+            margin="dense"
+          />
+        </Box>
+
+        <Box mt={2}>
+          <TextField
+            value={localPayee || ''}
+            onChange={e => setLocalPayee(e.target.value)}
+            label="Место платежа"
+            multiline
+            rowsMax="4"
+            fullWidth
+            helperText=""
+            variant="outlined"
+            margin="dense"
+          />
+        </Box>
+
+        <Box mt={2}>
+          <TextField
+            value={localComment || ''}
+            onChange={e => setLocalComment(e.target.value)}
+            label="Комментарий"
+            multiline
+            rowsMax="4"
+            fullWidth
+            helperText=""
+            variant="outlined"
+            margin="dense"
+          />
+        </Box>
+
+        <Reciept mt={2} value={qrCode} />
+
+        <Map mt={2} longitude={longitude} latitude={latitude} />
+      </Box>
+      <Box p={3}>
+        <Typography variant="caption" color="textSecondary">
+          Операция создана &ndash;{' '}
+          {format(created, 'dd MMM yyyy, HH:mm', { locale: ru })}
+          <br />
+          Последнее изменение &ndash;{' '}
+          {format(changed, 'dd MMM yyyy, HH:mm', { locale: ru })}
+          <br />
+          <Link
+            component="button"
+            color="secondary"
+            onClick={() => onSelectSimilar(changed)}
+          >
+            Выделить операции, изменённые в это же время
+          </Link>
+        </Typography>
+      </Box>
+
+      <SaveButton visible={hasChanges} onSave={onSave} />
+    </Box>
   )
 }
 
@@ -242,7 +249,7 @@ const Head = ({ title, onClose, onDelete, onRestore, deleted }) => (
 const SaveButton = ({ visible, onSave }) => (
   <Box
     mt={4}
-    zIndex={2}
+    zIndex={200}
     position="sticky"
     bottom={16}
     left="50%"

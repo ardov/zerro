@@ -1,9 +1,9 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 import { action } from '@storybook/addon-actions'
-import Reciept from 'components/DetailsDrawer/Reciept'
+import Reciept from 'components/TransactionPreview/Reciept'
 import decorator from 'helpers/storybookDecorator'
-import Map from 'components/DetailsDrawer/Map'
+import Map from 'components/TransactionPreview/Map'
 
 const value =
   't=20190320T2303&s=5803.00&fn=9251440300007971&i=141637&fp=4087570038&n=1'
