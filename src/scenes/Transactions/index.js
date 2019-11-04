@@ -40,6 +40,7 @@ export default function TransactionsView() {
         variant={isMobile ? 'temporary' : 'persistent'}
         anchor="right"
         open={!isMobile || !!opened}
+        onClose={() => setOpened(null)}
       >
         {opened ? (
           <TransactionPreview
