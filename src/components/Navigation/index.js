@@ -11,7 +11,7 @@ const useStyles = makeStyles(theme => ({
     left: theme.spacing(2),
     zIndex: 5,
   },
-  drawerWidth: { width: 120 },
+  drawerWidth: { width: 160 },
 }))
 
 export default function Header() {

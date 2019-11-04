@@ -3,10 +3,12 @@ import { connect } from 'react-redux'
 import { Box, Button, Link, Fade } from '@material-ui/core'
 import { logIn } from 'logic/authorization'
 import ZenApi from 'services/ZenApi'
-
+import { useTheme } from '@material-ui/styles'
+import Logo from '../../components/Logo'
 ZenApi.checkCode()
 
 function Auth(props) {
+  const theme = useTheme()
   return (
     <Box
       display="flex"
@@ -15,7 +17,12 @@ function Auth(props) {
       justifyContent="center"
       minHeight="100vh"
     >
-      <Fade in timeout={500}>
+      <Fade in timeout={5000}>
+        <Box mb={5}>
+          <Logo width="200" fill={theme.palette.divider} />
+        </Box>
+      </Fade>
+      <Fade in timeout={1000}>
         <Button
           variant="contained"
           color="primary"
@@ -25,14 +32,14 @@ function Auth(props) {
         />
       </Fade>
 
-      <Fade in timeout={1000}>
-        <Box mt={2} clone>
+      <Fade in timeout={3000}>
+        <Box mt={2}>
           <Link
             href="https://www.notion.so/ZERRO-a943f930d0a64d008712e20ecd299dbd"
             target="_blank"
             rel="noopener noreferrer"
             variant="body1"
-            children="О проекте"
+            children="Что это такое?"
           />
         </Box>
       </Fade>

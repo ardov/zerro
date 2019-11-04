@@ -3,8 +3,9 @@ import { withRouter } from 'react-router'
 import { Link } from 'react-router-dom'
 import RefreshButton from './containers/RefreshButton'
 import MenuButton from './containers/MenuButton'
-import { Typography, Tabs, Tab, Box, Drawer } from '@material-ui/core'
-import { withStyles } from '@material-ui/styles'
+import { Tabs, Tab, Box, Drawer } from '@material-ui/core'
+import { withStyles, useTheme } from '@material-ui/styles'
+import Logo from 'components/Logo'
 
 const routes = [
   { path: '/transactions', label: 'История' },
@@ -18,6 +19,7 @@ const NavigationDrawer = ({
   staticContext,
   ...rest
 }) => {
+  const theme = useTheme()
   const SmallTab = withStyles({ root: { minWidth: 120 } })(Tab)
   return (
     <Drawer {...rest}>
@@ -28,7 +30,7 @@ const NavigationDrawer = ({
         minHeight="100vh"
       >
         <Box py={3}>
-          <Typography variant="h6">ZERRO</Typography>
+          <Logo width="120" fill={theme.palette.text.secondary} />
         </Box>
 
         <Box width="100%" py={3}>
