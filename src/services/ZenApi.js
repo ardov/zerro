@@ -20,12 +20,12 @@ ZenApi.getData = function(
   const body = {
     currentClientTimestamp: Math.round(Date.now() / 1000),
     lastServerTimestamp: payload.serverTimestamp,
-    ...payload.changed
+    ...payload.changed,
   }
 
   const options = {
     method: 'POST',
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
   }
   return fetch(`${diffEndpoint}/?token=${token}`, options)
     .then(res => {
@@ -52,6 +52,7 @@ ZenApi.checkCode = function() {
     window.localStorage.setItem(CODE_DATA_KEY, code)
     window.close()
   } else if (error) {
+    window.alert('Неверный логин или пароль')
     window.close()
   }
 }
@@ -99,8 +100,8 @@ ZenApi.getToken = function() {
         client_secret: clientSecret,
         redirect_uri: redirectUri,
         code: authorizationCode,
-        grant_type: 'authorization_code'
-      })
+        grant_type: 'authorization_code',
+      }),
     }).then(response => response.json())
   }
 
