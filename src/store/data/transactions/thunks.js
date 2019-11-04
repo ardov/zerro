@@ -1,8 +1,10 @@
 import uuidv1 from 'uuid/v1'
 import { getTransaction } from 'store/data/transactions'
 import { setTransaction } from 'store/data/transactions'
+import sendEvent from 'helpers/sendEvent'
 
 const deleteTransactions = ids => (dispatch, getState) => {
+  sendEvent('Transaction: delete')
   const array = ids.map ? ids : [ids]
   const deleted = array.map(id => ({
     ...getTransaction(getState(), id),
@@ -13,6 +15,7 @@ const deleteTransactions = ids => (dispatch, getState) => {
 }
 
 const restoreTransaction = id => (dispatch, getState) => {
+  sendEvent('Transaction: restore')
   dispatch(
     setTransaction({
       ...getTransaction(getState(), id),
@@ -30,6 +33,7 @@ const splitTransfer = id => (dispatch, getState) => {
 }
 
 const applyChangesToTransaction = tr => (dispatch, getState) => {
+  sendEvent('Transaction: edit')
   dispatch(
     setTransaction({
       ...getTransaction(getState(), tr.id),
@@ -43,6 +47,7 @@ const setMainTagToTransactions = (transactions, tagId) => (
   dispatch,
   getState
 ) => {
+  sendEvent('Bulk Actions: set main tag')
   const state = getState()
   const result = transactions.map(id => {
     const tr = getTransaction(state, id)

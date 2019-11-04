@@ -1,5 +1,6 @@
 import { createSlice } from 'redux-starter-kit'
 import { getTransactions } from './data/transactions'
+import sendEvent from 'helpers/sendEvent'
 
 const { reducer, actions, selectors } = createSlice({
   slice: 'selectedTransactions',
@@ -37,6 +38,7 @@ export const getSelectedIds = selectors.getSelectedTransactions
 
 // THUNKS
 export const selectTransactionsByChangedDate = date => (dispatch, getState) => {
+  sendEvent('Transaction: select similar')
   const state = getState()
   const transactions = getTransactions(state)
   const ids = Object.values(transactions)

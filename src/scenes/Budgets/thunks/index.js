@@ -4,12 +4,14 @@ import selectors from 'store/data/budgets/selectors'
 import { getPopulatedTag } from 'store/data/tags'
 import getMonthDates from '../selectors/getMonthDates'
 import { getAmountsByTag } from '../selectors/getAmountsByTag'
+import sendEvent from 'helpers/sendEvent'
 const { setBudget } = slice.actions
 
 export const setOutcomeBudget = (targetOutcome, monthDate, tagId) => (
   dispatch,
   getState
 ) => {
+  sendEvent('Set Budget')
   const state = getState()
   const created = selectors.getBudget(state, tagId, monthDate)
   const tags = getAmountsByTag(state)

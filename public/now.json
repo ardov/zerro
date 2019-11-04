@@ -1,6 +1,5 @@
 {
   "name": "Zerro",
-  "alias": "zerro",
   "version": 2,
   "routes": [
     {

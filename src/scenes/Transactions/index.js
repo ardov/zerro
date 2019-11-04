@@ -4,6 +4,7 @@ import AccountList from 'components/AccountList'
 import { Box, Drawer, useMediaQuery, Typography } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import TransactionPreview from 'components/TransactionPreview'
+import sendEvent from 'helpers/sendEvent'
 
 const useStyles = makeStyles(theme => ({
   drawerWidth: { width: 360 },
@@ -19,6 +20,12 @@ export default function TransactionsView() {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const [opened, setOpened] = useState(null)
   const c = useStyles()
+
+  const onOpenTransaction = id => {
+    setOpened(id)
+    sendEvent('Transaction: see details')
+  }
+
   return (
     <Box display="flex">
       <Box
@@ -31,7 +38,7 @@ export default function TransactionsView() {
         <AccountList />
       </Box>
 
-      <StyledTransactionList {...{ opened, setOpened }} />
+      <StyledTransactionList {...{ opened, setOpened: onOpenTransaction }} />
 
       <Drawer
         classes={
