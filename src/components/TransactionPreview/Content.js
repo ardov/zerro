@@ -109,9 +109,11 @@ export default function DetailsDrawer({
         deleted={deleted}
       />
 
-      <Box p={3} bgcolor="background.default">
-        <TagSelect value={localTag} onChange={setLocalTag} />
-      </Box>
+      {type !== 'transfer' && (
+        <Box p={3} bgcolor="background.default">
+          <TagSelect value={localTag} onChange={setLocalTag} />
+        </Box>
+      )}
 
       <Box px={3}>
         {type !== 'income' && (
