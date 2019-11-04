@@ -94,7 +94,7 @@ export function TagRow(props) {
           </Link>
         </Box>
       ) : (
-        <Box ml="auto" className={c.budget} clone>
+        <Box display="flex" justifyContent="flex-end" className={c.budget}>
           <Tooltip title="Добавить бюджет">
             <IconButton
               size="small"
