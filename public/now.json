@@ -31,6 +31,10 @@
       "dest": "/safari-pinned-tab.svg"
     },
     {
+      "src": "^/social-preview.png",
+      "dest": "/social-preview.png"
+    },
+    {
       "src": "^/(.*)",
       "dest": "/index.html"
     }
