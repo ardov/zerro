@@ -1,56 +1,29 @@
 import React from 'react'
-import styled from 'styled-components'
+import { makeStyles } from '@material-ui/styles'
+import { Typography } from '@material-ui/core'
 
-const Body = styled.div`
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-`
-const Tag = styled.span`
-  margin-right: 16px;
-  overflow: hidden;
-  color: var(--text-placeholder);
-  white-space: nowrap;
-  text-overflow: ellipsis;
+const useStyles = makeStyles(theme => ({
+  tag: {
+    '&:not(:first-child)': {
+      marginLeft: theme.spacing(2),
+      color: theme.palette.text.hint,
+    },
+  },
+}))
 
-  :first-child {
-    color: var(--text-primary);
-  }
-`
-const Account = styled.span`
-  overflow: hidden;
-  color: var(--text-primary);
-  white-space: nowrap;
-  text-overflow: ellipsis;
-
-  :first-child::after {
-    margin: 0 8px;
-    content: '→';
-  }
-`
-
-export function MainLine({ type, tag, outcomeAccount, incomeAccount }) {
-  if (type === 'transfer') {
-    return (
-      <Body>
-        <Account>{outcomeAccount.title}</Account>
-        <Account>{incomeAccount.title}</Account>
-      </Body>
-    )
-  } else if (tag) {
-    return (
-      <Body>
-        {tag.map(tag => (
-          <Tag key={tag.id}>{tag.name}</Tag>
-        ))}
-      </Body>
-    )
-  } else {
-    return (
-      <Body>
-        <Tag main>Без категории</Tag>
-      </Body>
-    )
-  }
+export const MainLine = ({ type, tag }) => {
+  const c = useStyles()
+  return (
+    <Typography noWrap>
+      {type === 'transfer'
+        ? 'Перевод'
+        : tag
+        ? tag.map(tag => (
+            <span className={c.tag} key={tag.id}>
+              {tag.name}
+            </span>
+          ))
+        : 'Без категории'}
+    </Typography>
+  )
 }

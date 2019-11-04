@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import Header from 'components/Header'
+import Nav from 'components/Navigation'
 import TagList from './TagList'
 import { getTagsTree } from 'store/data/tags'
 import { getTransactionList } from 'store/data/transactions'
@@ -9,7 +9,7 @@ import { getTransactionList } from 'store/data/transactions'
 function TransactionsView(props) {
   return (
     <div>
-      <Header />
+      <Nav />
       <TagList transactions={props.transactions} tags={props.tags} />
     </div>
   )

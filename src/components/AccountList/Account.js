@@ -29,17 +29,15 @@ const Amount = styled.div`
   text-align: right;
 `
 
-class Account extends React.Component {
-  render() {
-    const { title, balance, instrument, className } = this.props
-    const formattedBalance = formatMoney(balance, instrument.shortTitle)
-    return (
-      <Body className={className} onClick={() => console.log(this.props)}>
-        <Title title={title}>{title}</Title>
-        <Amount>{formattedBalance}</Amount>
-      </Body>
-    )
-  }
+function Account(props) {
+  const { title, balance, instrument, className } = props
+  const formattedBalance = formatMoney(balance, instrument.shortTitle)
+  return (
+    <Body className={className} onClick={() => console.log(props)}>
+      <Title title={title}>{title}</Title>
+      <Amount>{formattedBalance}</Amount>
+    </Body>
+  )
 }
 
 const mapStateToProps = (state, props) => ({

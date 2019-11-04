@@ -1,6 +1,6 @@
 {
-  "short_name": "More Money Now",
-  "name": "ZenMoney dashboard",
+  "short_name": "ZERRO",
+  "name": "ZERRO",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,6 +10,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#212121",
+  "background_color": "#212121"
 }

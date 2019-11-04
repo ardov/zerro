@@ -26,6 +26,8 @@ export const updateDataFunc = (
   getId
 ) => {
   if (payload[domain]) {
+    // just to support old format
+    // if it's server data it's alvays array
     const toUpdate = payload[domain].forEach
       ? payload[domain]
       : Object.values(payload[domain])

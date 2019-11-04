@@ -1,73 +1,66 @@
 import React from 'react'
-import styled, { css } from 'styled-components'
-import { Checkbox } from 'antd'
+import { makeStyles } from '@material-ui/core/styles'
+import { Checkbox, Box } from '@material-ui/core'
 
-const Body = styled.div`
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  margin-top: -8px;
-  margin-right: 16px;
-`
-const StyledCheckbox = styled(Checkbox)`
-  opacity: 0;
+const useStyles = makeStyles(theme => ({
+  checkbox: {
+    opacity: props => (props.hover || props.isInSelectionMode ? 1 : 0),
+    transition: '.2s',
+  },
+  symbol: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    color: ({ color }) => (color ? color : theme.palette.text.primary),
+    fontSize: '24px',
+    lineHeight: '40px',
+    textAlign: 'center',
+    borderRadius: 20,
+    backgroundColor: theme.palette.action.hover,
+    opacity: props => (props.hover || props.isInSelectionMode ? 0 : 1),
+    transition: '.2s',
+  },
+}))
 
-  ${Body}:hover & {
-    opacity: 1;
-  }
+export default function Icon({
+  isChecked,
+  isInSelectionMode,
+  symbol,
+  color,
+  onToggle,
+}) {
+  const [hover, setHover] = React.useState(false)
+  const c = useStyles({ hover, isInSelectionMode, color })
 
-  ${props =>
-    props.isInSelectionMode &&
-    css`
-      opacity: 1;
-    `}
-`
-
-const Sym = styled.div`
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  color: ${({ color }) => (color ? color : `var(--text-primary)`)};
-  font-size: 24px;
-  line-height: 40px;
-  text-align: center;
-  border-radius: 20px;
-
-  ${Body}:hover & {
-    display: none;
-  }
-
-  ${props =>
-    props.isInSelectionMode &&
-    css`
-      display: none;
-    `}
-`
-export default class Icon extends React.Component {
-  handleChange = e => {
+  const handleChange = e => {
     e.stopPropagation()
-    this.props.onToggle()
+    onToggle()
   }
-  render() {
-    const { isChecked, isInSelectionMode, symbol, color } = this.props
-    return (
-      <Body>
-        <StyledCheckbox
-          isInSelectionMode={isInSelectionMode}
-          checked={isChecked}
-          onClick={this.handleChange}
-        />
-        <Sym isInSelectionMode={isInSelectionMode} color={color}>
-          {symbol}
-        </Sym>
-      </Body>
-    )
-  }
-}
+  const handleMouseEnter = () => setHover(true)
+  const handleMouseLeave = () => setHover(false)
 
-// export function Icon({ isChecked, isInSelectionMode, symbol, onToggle }) {}
+  return (
+    <Box
+      position="relative"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      mr={2}
+      mt="2px" // todo: center normally
+      width={40}
+      height={40}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <Checkbox
+        className={c.checkbox}
+        checked={isChecked}
+        onChange={handleChange}
+        color="primary"
+      />
+      {!isInSelectionMode && !hover && <div className={c.symbol}>{symbol}</div>}
+    </Box>
+  )
+}

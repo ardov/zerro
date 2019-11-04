@@ -1,40 +1,49 @@
 import React from 'react'
-import styled from 'styled-components'
 import { connect } from 'react-redux'
-
-import { Button } from 'antd'
+import { Box, Button, Link, Fade } from '@material-ui/core'
 import { logIn } from 'logic/authorization'
 import ZenApi from 'services/ZenApi'
-
+import { useTheme } from '@material-ui/styles'
+import Logo from '../../components/Logo'
 ZenApi.checkCode()
 
-const Body = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-`
-
-const LinkAbout = styled.a`
-  margin-top: 16px;
-  font-size: 16px;
-`
-
 function Auth(props) {
+  const theme = useTheme()
   return (
-    <Body>
-      <Button type="primary" size="large" onClick={props.logIn}>
-        Войти через ДзенМани
-      </Button>
-      <LinkAbout
-        href="https://www.notion.so/More-Money-ae7dee79e1b446dd81bf279e72eb6970"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        О проекте
-      </LinkAbout>
-    </Body>
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      minHeight="100vh"
+    >
+      <Fade in timeout={5000}>
+        <Box mb={5}>
+          <Logo width="200" fill={theme.palette.divider} />
+        </Box>
+      </Fade>
+      <Fade in timeout={1000}>
+        <Button
+          variant="contained"
+          color="primary"
+          size="large"
+          onClick={props.logIn}
+          children="Войти через ДзенМани"
+        />
+      </Fade>
+
+      <Fade in timeout={3000}>
+        <Box mt={2}>
+          <Link
+            href="https://www.notion.so/ZERRO-a943f930d0a64d008712e20ecd299dbd"
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="body1"
+            children="Что это такое?"
+          />
+        </Box>
+      </Fade>
+    </Box>
   )
 }
 

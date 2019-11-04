@@ -1,112 +1,59 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { BrowserRouter, Route, Redirect, Switch } from 'react-router-dom'
 import { connect } from 'react-redux'
-
 import { IntlProvider, addLocaleData } from 'react-intl'
 import ru from 'react-intl/locale-data/ru'
-
 import Transactions from 'scenes/Transactions'
 import Tags from 'scenes/Tags'
 import Auth from 'scenes/Auth'
 import Budgets from 'scenes/Budgets'
 import { getLoginState } from 'store/token'
-import { syncData } from 'logic/sync'
-import { getLastSyncTime } from 'store/data/serverTimestamp'
-import { getLastChangeTime } from 'store/data/dataSelectors'
-import { getPendingState } from 'store/isPending'
-import { loadLocalData } from 'logic/localData'
+import RegularSyncHandler from 'components/RegularSyncHandler'
+import CssBaseline from '@material-ui/core/CssBaseline'
+import SnackbarHandler from 'components/SnackbarHandler'
+import Nav from 'components/Navigation'
+import { Box } from '@material-ui/core'
+import { ThemeProvider } from '@material-ui/styles'
+import createTheme from 'helpers/createTheme'
+import { getTheme } from 'store/theme'
+import { MuiPickersUtilsProvider } from '@material-ui/pickers'
+import DateFnsUtils from '@date-io/date-fns'
+import ruDateLocale from 'date-fns/locale/ru'
 
 addLocaleData(ru)
 
-const SYNC_DELAY = 10 * 60 * 1000 // 10min
-const CHECK_DELAY = 20 * 1000 // 20sec
-let timer = null
-
-class App extends Component {
-  componentDidMount = () => {
-    this.props.loadLocalData().then(this.checkSync)
-    window.addEventListener('beforeunload', this.beforeUnload)
-  }
-
-  componentWillUnmount = () => {
-    window.removeEventListener('beforeunload', this.beforeUnload)
-    window.clearTimeout(timer)
-  }
-
-  beforeUnload = e => {
-    if (this.props.lastChange) {
-      window.alert('UNSAVED CHANGES')
-      ;(e || window.event).returnValue = null
-      return null
-    }
-  }
-
-  checkSync = () => {
-    const checkSync = this.checkSync
-    const { lastSync, sync, isLoggedIn, lastChange, isPending } = this.props
-    // Regular sync conditions
-    const needRegularSync = Date.now() - lastSync > SYNC_DELAY
-    const hasUnsavedChanges = !!lastChange
-    const itsTimeToSyncChanges = Date.now() - lastChange > CHECK_DELAY
-
-    if (
-      isLoggedIn &&
-      !isPending &&
-      (needRegularSync || (hasUnsavedChanges && itsTimeToSyncChanges))
-    ) {
-      console.log(`${needRegularSync ? 'regular' : ''}`)
-      sync()
-    }
-
-    timer = setTimeout(checkSync, CHECK_DELAY)
-  }
-
-  render() {
-    const { isLoggedIn } = this.props
-
-    return (
+const App = ({ isLoggedIn, themeType }) => (
+  <ThemeProvider theme={createTheme(themeType)}>
+    <>
+      <CssBaseline />
       <IntlProvider locale="ru">
-        <BrowserRouter>
-          <Switch>
-            <Route
-              path="/transactions"
-              render={() => (isLoggedIn ? <Transactions /> : <Auth />)}
-            />
-            <Route
-              path="/tags"
-              render={() => (isLoggedIn ? <Tags /> : <Auth />)}
-            />
-            <Route
-              path="/budget"
-              render={() => (isLoggedIn ? <Budgets /> : <Auth />)}
-            />
-            <Route
-              path="/login"
-              render={() =>
-                isLoggedIn ? <Redirect to="/transactions" /> : <Auth />
-              }
-            />
-            <Redirect to="/transactions" />
-          </Switch>
-        </BrowserRouter>
+        <MuiPickersUtilsProvider utils={DateFnsUtils} locale={ruDateLocale}>
+          <BrowserRouter>
+            {isLoggedIn ? <PrivateApp /> : <Auth />}
+          </BrowserRouter>
+        </MuiPickersUtilsProvider>
       </IntlProvider>
-    )
-  }
-}
-
-const mapStateToProps = state => ({
-  isLoggedIn: getLoginState(state),
-  lastSync: getLastSyncTime(state),
-  lastChange: getLastChangeTime(state),
-  isPending: getPendingState(state),
-})
-
-const mapDispatchToProps = dispatch => ({
-  loadLocalData: () => dispatch(loadLocalData()),
-  sync: () => dispatch(syncData()),
-})
+    </>
+  </ThemeProvider>
+)
 
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+  state => ({ isLoggedIn: getLoginState(state), themeType: getTheme(state) }),
+  null
 )(App)
+
+const PrivateApp = () => (
+  <Box display="flex">
+    <Nav />
+    <SnackbarHandler />
+    <RegularSyncHandler />
+    <Box height="100vh" overflow="auto" flexGrow={1}>
+      <Switch>
+        <Route path="/transactions" component={Transactions} />
+        <Route path="/tags" component={Tags} />
+        <Route path="/budget" component={Budgets} />
+        <Redirect to="/transactions" />
+      </Switch>
+    </Box>
+  </Box>
+)

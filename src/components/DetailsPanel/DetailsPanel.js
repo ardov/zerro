@@ -4,12 +4,12 @@ import TagSelect from 'components/TagSelect'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import { FormattedNumber } from 'react-intl'
-import { Button, Popover, Badge } from 'antd'
-import QRCode from 'qrcode.react'
+import Reciept from './Reciept'
+import { Button, Box } from '@material-ui/core'
 
-const formatDate = date => format(date, 'D MMMM YYYY, dd', { locale: ru })
+const formatDate = date => format(date, 'd MMMM yyyy, EEEEEE', { locale: ru })
 const formatDateTime = date =>
-  format(date, 'D MMMM YYYY, dd, HH:mm:ss', { locale: ru })
+  format(date, 'd MMMM yyyy, EEEEEE, HH:mm:ss', { locale: ru })
 
 const Panel = styled.section`
   display: flex;
@@ -74,6 +74,7 @@ export default class DetailsPanel extends React.Component {
 
     const values = tr
       ? [
+<<<<<<< HEAD
         {
           name: 'ID',
           value: tr.id,
@@ -195,6 +196,120 @@ export default class DetailsPanel extends React.Component {
           value: tr.outcomeBankID,
         },
       ]
+=======
+          {
+            name: 'Дата',
+            value: formatDate(tr.date),
+          },
+          {
+            name: 'Создана',
+            value: formatDateTime(tr.created),
+          },
+          {
+            name: 'Последнее изменение',
+            value: formatDateTime(tr.changed),
+          },
+          {
+            name: 'Доход',
+            value: (
+              <FormattedNumber
+                value={tr.income}
+                style={`currency`}
+                currency={tr.incomeInstrument.shortTitle}
+                minimumFractionDigits={0}
+                maximumFractionDigits={0}
+              />
+            ),
+          },
+          {
+            name: 'На счёт',
+            value: tr.incomeAccount.title,
+          },
+          {
+            name: 'Расход',
+            value: (
+              <FormattedNumber
+                value={tr.outcome}
+                style={`currency`}
+                currency={tr.outcomeInstrument.shortTitle}
+                minimumFractionDigits={0}
+                maximumFractionDigits={0}
+              />
+            ),
+          },
+          {
+            name: 'Со счёта',
+            value: tr.outcomeAccount.title,
+          },
+          {
+            name: 'originalPayee',
+            value: tr.originalPayee,
+          },
+
+          {
+            name: 'Чек',
+            value: <Reciept value={tr.qrCode} />,
+          },
+          {
+            name: 'Плательщик',
+            value: tr.payee,
+          },
+          {
+            name: 'Deleted',
+            value: tr.deleted ? 'удалена' : 'не удалена',
+          },
+          {
+            name: 'hold',
+            value: tr.hold,
+          },
+          {
+            name: 'Комментарий',
+            value: tr.comment,
+          },
+          {
+            name: 'opIncome',
+            value: tr.opIncome,
+          },
+          {
+            name: 'opOutcome',
+            value: tr.opOutcome,
+          },
+          {
+            name: 'ID',
+            value: tr.id,
+          },
+          // {
+          //   name: 'opIncomeInstrument',
+          //   value: tr.opIncomeInstrument
+          // },
+          // {
+          //   name: 'opOutcomeInstrument',
+          //   value: tr.opOutcomeInstrument
+          // },
+          {
+            name: 'GEO',
+            value: (
+              <a
+                href={`https://www.google.com/maps/@${tr.latitude},${tr.longitude},18z`}
+              >
+                {tr.latitude + ' ' + tr.longitude}
+              </a>
+            ),
+          },
+          {
+            name: 'merchant',
+            value: tr.merchant ? tr.merchant.title : 'null',
+          },
+          {
+            name: 'incomeBankID',
+            value: tr.incomeBankID,
+          },
+          {
+            name: 'outcomeBankID',
+            value: tr.outcomeBankID,
+          },
+        ]
+>>>>>>> origin/material-ui
       : null
 
     const tags = tr && tr.tag
@@ -214,14 +329,14 @@ export default class DetailsPanel extends React.Component {
                 Восстановить
               </Button>
             ) : (
-              <Button
-                type="danger"
-                onClick={() => {
-                  this.props.onDelete(tr.id)
-                }}
-              >
-                Удалить
-              </Button>
+              <Box color="error.main" display="inline">
+                <Button
+                  color="inherit"
+                  onClick={() => this.props.onDelete(tr.id)}
+                >
+                  Удалить
+                </Button>
+              </Box>
             )}
 
             {tr.type === 'transfer' && (
@@ -231,18 +346,16 @@ export default class DetailsPanel extends React.Component {
             )}
             <Button onClick={() => console.log(tr)}>Log</Button>
             <Button onClick={this.saveChanges}>Сохранить</Button>
+
             {values.map(el => (
               <Line name={el.name} value={el.value} key={el.name}/>
             ))}
+
             {tr.latitude && (
               <div>
                 <iframe
                   title="geo"
-                  src={`https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d1040.2885062361672!2d${
-                    tr.longitude
-                  }!3d${
-                    tr.latitude
-                  }!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sru!2sru!4v1546784599411`}
+                  src={`https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d1040.2885062361672!2d${tr.longitude}!3d${tr.latitude}!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sru!2sru!4v1546784599411`}
                   width="380"
                   height="450"
                   frameBorder="0"

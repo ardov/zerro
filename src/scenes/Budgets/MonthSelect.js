@@ -1,19 +1,12 @@
 import React from 'react'
-import { Button } from 'antd'
+import { Box, Paper, Typography, IconButton } from '@material-ui/core'
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
+import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
-import styled from 'styled-components'
 
 const getMonthName = date =>
-  format(date, 'MMMM YYYY', { locale: ru }).toUpperCase()
-
-const Group = styled(Button.Group)`
-  display: flex;
-`
-const Name = styled(Button)`
-  flex-grow: 1;
-  text-align: left;
-`
+  format(date, 'MMMM yyyy', { locale: ru }).toUpperCase()
 
 export default function MonthSelect({
   months,
@@ -23,18 +16,26 @@ export default function MonthSelect({
 }) {
   const currentMonth = months[current]
   return (
-    <Group size="large">
-      <Name onClick={onSetCurrent}>{getMonthName(currentMonth)}</Name>
-      <Button
-        icon="left"
-        onClick={() => onChange(--current)}
-        disabled={!current}
-      />
-      <Button
-        icon="right"
-        onClick={() => onChange(++current)}
-        disabled={current >= months.length - 1}
-      />
-    </Group>
+    <Box display="flex" px={2} py={0.5} alignItems="center" clone>
+      <Paper>
+        <Box flexGrow={1} clone>
+          <Typography onClick={onSetCurrent} noWrap>
+            {getMonthName(currentMonth)}
+          </Typography>
+        </Box>
+
+        <IconButton
+          children={<ChevronLeftIcon />}
+          onClick={() => onChange(--current)}
+          disabled={!current}
+        />
+
+        <IconButton
+          children={<ChevronRightIcon />}
+          onClick={() => onChange(++current)}
+          disabled={current >= months.length - 1}
+        />
+      </Paper>
+    </Box>
   )
 }

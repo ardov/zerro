@@ -1,89 +1,80 @@
 import React from 'react'
-import styled from 'styled-components'
+import { Box, Typography } from '@material-ui/core'
 import { formatMoney } from 'helpers/format'
+import { withStyles } from '@material-ui/core/styles'
+
+const Body = props => <Box alignSelf="flex-end" textAlign="right" {...props} />
 
 const colors = {
-  income: 'var(--text-success)',
-  outcome: 'var(--text-primary)',
-  transfer: 'var(--text-secondary)',
+  income: 'success.main',
+  outcome: 'text.primary',
+  transfer: 'text.secondary',
 }
 
-const Body = styled.div`
-  align-self: flex-end;
-  color: ${props => colors[props.type]};
-  text-align: right;
-`
-const PrimarySum = styled.span`
-  color: ${({ type }) => colors[type]};
+const PrimarySum = ({ type, children }) => (
+  <Box color={colors[type]} clone>
+    <Typography variant="body1" component="span">
+      {children}
+    </Typography>
+  </Box>
+)
 
-  :not(:only-child):first-child::after {
-    margin: 0 8px;
-    content: '→';
-  }
-`
-const SecondarySum = styled.span`
-  margin-right: 8px;
-  color: var(--text-placeholder);
-  font-size: 12px;
-  line-height: 16px;
-`
+const StyledTypography = withStyles(theme => ({
+  root: { marginRight: theme.spacing(1), color: theme.palette.text.hint },
+}))(Typography)
+
+const SecondarySum = ({ amount, currency }) =>
+  !!amount && (
+    <StyledTypography variant="body2" component="span">
+      {amount > 0 && '+'}
+      {formatMoney(amount, currency)}
+    </StyledTypography>
+  )
 
 export function Amount({
   type,
   income,
-  incomeInstrument,
+  incomeCurrency,
   opIncome,
-  opIncomeInstrument,
+  opIncomeCurrency,
   outcome,
-  outcomeInstrument,
+  outcomeCurrency,
   opOutcome,
-  opOutcomeInstrument,
+  opOutcomeCurrency,
 }) {
+  const formattedIncome = formatMoney(income, incomeCurrency)
+  const formattedOutcome = formatMoney(outcome, outcomeCurrency)
+
   switch (type) {
     case 'transfer':
-      const formattedIncome = formatMoney(income, incomeInstrument.shortTitle)
-      const formattedOutcome = formatMoney(
-        outcome,
-        outcomeInstrument.shortTitle
+      return formattedIncome === formattedOutcome ? (
+        <Body>
+          <PrimarySum type={type}>{formattedIncome}</PrimarySum>
+        </Body>
+      ) : (
+        <Body>
+          <PrimarySum type={type}>{formattedOutcome}</PrimarySum>
+          {' → '}
+          <PrimarySum type={type}>{formattedIncome}</PrimarySum>
+        </Body>
       )
-      if (formattedIncome === formattedOutcome) {
-        return (
-          <Body>
-            <PrimarySum type={type}>{formattedIncome}</PrimarySum>
-          </Body>
-        )
-      } else {
-        return (
-          <Body>
-            <PrimarySum type={type}>{formattedOutcome}</PrimarySum>
-            <PrimarySum type={type}>{formattedIncome}</PrimarySum>
-          </Body>
-        )
-      }
+
     case 'income':
       return (
         <Body>
-          {!!opIncome && opIncomeInstrument && (
-            <SecondarySum>
-              +{formatMoney(opIncome, opIncomeInstrument.shortTitle)}
-            </SecondarySum>
-          )}
-          <PrimarySum type={type}>
-            +{formatMoney(income, incomeInstrument.shortTitle)}
-          </PrimarySum>
+          <SecondarySum amount={opIncome} currency={opIncomeCurrency} />
+          <PrimarySum type={type}>+{formattedIncome}</PrimarySum>
         </Body>
       )
+
     case 'outcome':
       return (
         <Body>
-          {!!opOutcome && opOutcomeInstrument && (
-            <SecondarySum>
-              −{formatMoney(opOutcome, opOutcomeInstrument.shortTitle)}
-            </SecondarySum>
-          )}
-          <PrimarySum type={type}>
-            −{formatMoney(outcome, outcomeInstrument.shortTitle)}
-          </PrimarySum>
+          <SecondarySum
+            amount={opOutcome && -opOutcome}
+            currency={opOutcomeCurrency}
+          />
+          <PrimarySum type={type}>−{formattedOutcome}</PrimarySum>
         </Body>
       )
 

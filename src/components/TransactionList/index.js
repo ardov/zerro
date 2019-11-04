@@ -1,22 +1,18 @@
 import React, { memo, forwardRef } from 'react'
-import styled from 'styled-components'
+import { Box } from '@material-ui/core'
 import { VariableSizeList as List } from 'react-window'
 import { areEqual } from 'react-window'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { connect } from 'react-redux'
 import TransactionGroup from './TransactionGroup'
-import Search from './Search'
-import { getTransactionList } from 'store/data/transactions'
+import TopBar from './TopBar'
+import { getMainTransactionList } from 'store/data/transactions'
 import formatDate from './formatDate'
 
 const GROUP_HEADER_HEIGHT = 48
-const TRANSACTION_HEIGHT = 77
-const BORDER_HEIGHT = 2
-
-const Wrapper = styled.div`
-  position: relative;
-`
+const TRANSACTION_HEIGHT = 72
+const PADDINGS = 16
 
 class TransactionList extends React.Component {
   state = { listRef: {} }
@@ -32,11 +28,12 @@ class TransactionList extends React.Component {
   getItemSize = (i, d) =>
     GROUP_HEADER_HEIGHT +
     TRANSACTION_HEIGHT * this.props.groups[i].transactions.length +
-    BORDER_HEIGHT
+    PADDINGS +
+    16
 
   render() {
-    const { groups, className } = this.props
-    const SEARCH_HEIGHT = 56
+    const { groups, className, opened, setOpened } = this.props
+    const SEARCH_HEIGHT = 72
     const PADDING_BOTTOM = 40
 
     const innerElementType = forwardRef(({ children, style, ...rest }, ref) => (
@@ -56,18 +53,19 @@ class TransactionList extends React.Component {
     const Row = memo(
       ({ index, style }) => (
         <TransactionGroup
-          style={{ ...style, top: style.top + SEARCH_HEIGHT }}
+          style={{ ...style, top: style.top + SEARCH_HEIGHT + 16 }}
           topOffset={SEARCH_HEIGHT}
           name={formatDate(groups[index].date)}
           transactions={groups[index].transactions}
+          {...{ opened, setOpened }}
         />
       ),
       areEqual
     )
 
     return (
-      <Wrapper className={className}>
-        <Search />
+      <Box position="relative" className={className}>
+        <TopBar />
         <AutoSizer disableWidth={true}>
           {({ height, width }) => (
             <List
@@ -85,12 +83,12 @@ class TransactionList extends React.Component {
             </List>
           )}
         </AutoSizer>
-      </Wrapper>
+      </Box>
     )
   }
 }
 
 export default connect(
-  (state, params) => ({ groups: getTransactionList(state, params) }),
+  state => ({ groups: getMainTransactionList(state) }),
   null
 )(TransactionList)

@@ -8,9 +8,20 @@ import { getFilterConditions, check } from 'store/filterConditions'
 import { convertToSyncArray } from 'helpers/converters'
 import { populate } from './populate'
 
+function removeFalseKeys(object) {
+  let newObject = {}
+  Object.keys(object).forEach(key => {
+    if (object[key]) newObject[key] = object[key]
+  })
+  return newObject
+}
+
 const getTransactionsToSave = createSelector(
   ['data.transaction.server'],
-  transactions => convertToSyncArray(transactions)
+  transactions =>
+    convertToSyncArray(transactions)
+      .filter(tr => !tr.deleted)
+      .map(removeFalseKeys)
 )
 const getTransactionsToSync = state =>
   convertToSyncArray(state.data.transaction.diff)
@@ -63,6 +74,16 @@ const getTransactionList = (state, options = {}) => {
   return groupBy ? groupTransactionsBy(groupBy, filtered) : filtered
 }
 
+const getMainTransactionList = createSelector(
+  [getPopulatedTransactions, getFilterConditions],
+  (transactions, filterConditions) => {
+    const list = Object.values(transactions)
+      .filter(check(filterConditions))
+      .sort(sortBy())
+    return groupTransactionsBy('DAY', list)
+  }
+)
+
 export default {
   getTransactionsToSave,
   getTransactionsToSync,
@@ -72,4 +93,5 @@ export default {
   getPopulatedTransaction,
   getOpenedTransaction,
   getTransactionList,
+  getMainTransactionList,
 }

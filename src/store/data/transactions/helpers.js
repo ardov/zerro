@@ -1,6 +1,6 @@
-import startOfMonth from 'date-fns/start_of_month'
-import startOfDay from 'date-fns/start_of_day'
-import startOfWeek from 'date-fns/start_of_week'
+import startOfMonth from 'date-fns/startOfMonth'
+import startOfDay from 'date-fns/startOfDay'
+import startOfWeek from 'date-fns/startOfWeek'
 import { convertAmount } from 'helpers/currencyHelpers'
 
 /**

@@ -5,7 +5,7 @@ import ru from 'date-fns/locale/ru'
 import { BarChart } from './components'
 import { FormattedNumber } from 'react-intl'
 
-const formatDate = date => format(date, 'D MMMM YYYY, dd', { locale: ru })
+const formatDate = date => format(date, 'd MMMM yyyy, EEEEEE', { locale: ru })
 
 const Body = styled.div`
   display: flex;

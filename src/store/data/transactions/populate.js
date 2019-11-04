@@ -1,10 +1,9 @@
-import parseDate from 'date-fns/parse'
 import { mapTags, getType } from './helpers'
 
 export const populate = ({ instruments, accounts, tags, merchants }, raw) => ({
   id: raw.id,
   user: raw.user,
-  date: +parseDate(raw.date),
+  date: raw.date,
   changed: raw.changed,
   created: raw.created,
   deleted: raw.deleted,

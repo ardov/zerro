@@ -1,9 +1,9 @@
-import LocalStorage from 'services/localstorage'
 import Cookies from 'cookies-js'
 import ZenApi from 'services/ZenApi'
 import { setToken } from 'store/token'
 import { wipeData } from 'store/data/commonActions'
 import { syncData } from 'logic/sync'
+import { clearLocalData } from './localData'
 
 export const logIn = () => (dispatch, getState) => {
   dispatch(logOut())
@@ -18,6 +18,6 @@ export const logIn = () => (dispatch, getState) => {
 export const logOut = () => (dispatch, getState) => {
   dispatch(wipeData())
   dispatch(setToken(null))
-  LocalStorage.remove('data')
+  dispatch(clearLocalData())
   Cookies.expire('token')
 }

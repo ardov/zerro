@@ -1,13 +1,6 @@
 import React, { Component } from 'react'
-import styled from 'styled-components'
-import { Drawer } from 'antd'
 import TransactionList from './TransactionList'
-
-const StyledDrawer = styled(Drawer)`
-  & .ant-drawer-body {
-    padding: 0;
-  }
-`
+import { Drawer } from '@material-ui/core'
 
 export default class TransactionsDrawer extends Component {
   render() {
@@ -19,25 +12,18 @@ export default class TransactionsDrawer extends Component {
       ascending,
 
       onClose,
-      visible,
+      open,
       ...rest
     } = this.props
 
     return (
-      <StyledDrawer
-        placement="right"
-        closable={true}
-        width={500}
-        onClose={onClose}
-        visible={visible}
-        {...rest}
-      >
+      <Drawer anchor="right" onClose={onClose} open={open} {...rest}>
         <div style={{ height: '100vh' }}>
           <TransactionList
             {...{ ids, conditions, groupBy, sortType, ascending }}
           />
         </div>
-      </StyledDrawer>
+      </Drawer>
     )
   }
 }

@@ -1,96 +1,47 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import styled from 'styled-components'
-
-import startOfMonth from 'date-fns/start_of_month'
-import Header from 'components/Header'
-import { getUserInstrument } from 'store/data/instruments'
+import startOfMonth from 'date-fns/startOfMonth'
 import AccountList from 'components/AccountList'
-import TagTable from './TagTable'
-import { TransferTable } from './TransferTable'
-import { getAmountsByTag } from './selectors/getAmountsByTag'
-import { getTotalsByMonth } from './selectors/getTotalsByMonth'
-import BudgetInfo from './BudgetInfo'
+import TagTable from './containers/TagTable'
+import TransferTable from './containers/TransferTable'
+import BudgetInfo from './containers/BudgetInfo'
 import MonthSelector from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
-import { getTransfersOutsideBudget } from './selectors/getTransfersOutsideBudget'
+import { Box, Hidden } from '@material-ui/core'
+import Grid from '@material-ui/core/Grid'
 
-const Wrap = styled.div`
-  display: flex;
-  flex-direction: row;
-`
-const Grow1 = styled.div`
-  flex-grow: 1;
-  padding: 0 12px;
-`
-const LeftPanel = styled.div`
-  padding: 40px;
-`
-const StyledAccountList = styled(AccountList)`
-  margin-top: 24px;
-`
-const StyledBudgetInfo = styled(BudgetInfo)`
-  margin-top: 24px;
-`
-const StyledTagTable = styled(TagTable)`
-  margin-top: 40px;
-  margin-bottom: 24px;
-`
+const Budgets = ({ monthDates }) => {
+  const [month, setMonth] = React.useState(+startOfMonth(new Date()))
 
-class Budgets extends React.Component {
-  state = { selected: +startOfMonth(new Date()) }
+  const setCurrentMonth = () => setMonth(+startOfMonth(new Date()))
+  const setMonthByIndex = i => setMonth(monthDates[i])
+  const index = monthDates.findIndex(date => date === month)
 
-  componentDidMount = () => this.setCurrentMonth()
-
-  setCurrentMonth = () => this.setState({ selected: +startOfMonth(new Date()) })
-
-  setMonth = i => {
-    const { monthDates } = this.props
-    this.setState({ selected: monthDates[i] })
-  }
-  render() {
-    const { instrument, monthDates, totals, transfers, amounts } = this.props
-    const index = monthDates.findIndex(date => date === this.state.selected)
-    const currency = instrument ? instrument.shortTitle : 'RUB'
-    return (
-      <div>
-        <Header />
-        <Wrap>
-          <LeftPanel>
-            <MonthSelector
-              months={monthDates}
-              current={index}
-              onSetCurrent={this.setCurrentMonth}
-              onChange={this.setMonth}
-            />
-            <StyledBudgetInfo month={totals[index]} currency={currency} />
-            <StyledAccountList />
-          </LeftPanel>
-          <Grow1>
-            <StyledTagTable
-              tags={amounts[index]}
-              currency={currency}
-              date={monthDates[index]}
-            />
-            <TransferTable transfers={transfers[index]} currency={currency} />
-          </Grow1>
-        </Wrap>
-      </div>
-    )
-  }
-}
-
-const mapStateToProps = (state, props) => {
-  return {
-    monthDates: getMonthDates(state),
-    totals: getTotalsByMonth(state),
-    transfers: getTransfersOutsideBudget(state),
-    amounts: getAmountsByTag(state),
-    instrument: getUserInstrument(state),
-  }
+  return (
+    <Box p={3}>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={3}>
+          <MonthSelector
+            months={monthDates}
+            current={index}
+            onSetCurrent={setCurrentMonth}
+            onChange={setMonthByIndex}
+          />
+          <Box component={BudgetInfo} index={index} mt={3} />
+          <Hidden smDown>
+            <Box component={AccountList} mt={3} />
+          </Hidden>
+        </Grid>
+        <Grid item xs={12} md={9}>
+          <TagTable index={index} date={monthDates[index]} />
+          <Box component={TransferTable} index={index} mt={3} />
+        </Grid>
+      </Grid>
+    </Box>
+  )
 }
 
 export default connect(
-  mapStateToProps,
+  state => ({ monthDates: getMonthDates(state) }),
   null
 )(Budgets)

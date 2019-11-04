@@ -28,7 +28,6 @@ export default reducer
 // SELECTORS
 export const getInstruments = state => state.data.instrument
 export const getInstrument = (state, id) => getInstruments(state)[id]
-export const getMainInstrument = (state, id) => getInstruments(state)[id]
 
 export const getInstrumentsToSave = createSelector(
   [getInstruments],
@@ -37,6 +36,9 @@ export const getInstrumentsToSave = createSelector(
 
 export const getUserInstrument = state =>
   getInstrument(state, getUserInstrumentId(state))
+
+export const getUserCurrencyCode = state =>
+  getUserInstrument(state) ? getUserInstrument(state).shortCode : 'RUB'
 
 export const convertCurrency = createSelector(
   [getInstruments, getUserInstrumentId],

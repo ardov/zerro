@@ -1,40 +1,39 @@
 import React from 'react'
-import styled from 'styled-components'
-import Transaction from './Transaction'
+import { withStyles } from '@material-ui/core/styles'
+import { Box, Paper, ListSubheader } from '@material-ui/core'
+import Transaction from './TransactionContainer'
 
-const GroupContainer = styled.div`
-  padding: 0 16px;
-`
-const Group = styled.div`
-  position: relative;
-  max-width: 560px;
-  margin: 0 auto;
-`
-const Title = styled.h3`
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  margin: 0;
-  padding: 16px 0 8px;
-  color: var(--text-secondary);
-  font-weight: 400;
-  background-color: #fff;
-`
+export default function TransactionGroup({
+  style,
+  name,
+  transactions,
+  topOffset = 0,
+  opened,
+  setOpened,
+}) {
+  const StyledSubheader = withStyles({ sticky: { top: topOffset } })(
+    ListSubheader
+  )
 
-export default class TransactionGroup extends React.PureComponent {
-  render() {
-    const { style, name, transactions, topOffset = 0 } = this.props
-    return (
-      <GroupContainer style={style}>
-        <Group>
-          <Title style={{ top: topOffset }}>{name}</Title>
-          <div>
-            {transactions.map(id => (
-              <Transaction key={id.id} id={id.id} />
-            ))}
-          </div>
-        </Group>
-      </GroupContainer>
-    )
-  }
+  return (
+    <Box px={2} style={style}>
+      <Box
+        position="relative"
+        maxWidth={560}
+        mx="auto"
+        py={1}
+        component={Paper}
+      >
+        <StyledSubheader>{name}</StyledSubheader>
+        {transactions.map(tr => (
+          <Transaction
+            key={tr.id}
+            id={tr.id}
+            isOpened={tr.id === opened}
+            onClick={() => setOpened(tr.id)}
+          />
+        ))}
+      </Box>
+    </Box>
+  )
 }

@@ -9,6 +9,7 @@ import {
   updateDataFunc,
 } from 'store/data/commonActions'
 import { convertDatesToMs } from 'helpers/converters'
+import hydrate from './hydrate'
 
 // INITIAL STATE
 const initialState = { server: {}, diff: {} }
@@ -35,7 +36,8 @@ const { reducer, actions } = createSlice({
       removeSyncedFunc(diff, payload)
     },
     [updateData]: ({ server }, { payload }) => {
-      updateDataFunc(server, payload, 'transaction', convertDatesToMs, null)
+      const converter = raw => convertDatesToMs(hydrate(raw))
+      updateDataFunc(server, payload, 'transaction', converter, null)
     },
   },
 })
@@ -56,6 +58,7 @@ export const {
   getPopulatedTransaction,
   getOpenedTransaction,
   getTransactionList,
+  getMainTransactionList,
 } = selectors
 
 // THUNKS

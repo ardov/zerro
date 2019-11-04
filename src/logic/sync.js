@@ -1,12 +1,12 @@
 import ZenApi from 'services/ZenApi'
 import { updateData } from 'store/data/commonActions'
-import { message } from 'antd'
 import { getChangedArrays } from '../store/data/dataSelectors'
 import { getToken } from 'store/token'
 import { removeSynced } from '../store/data/commonActions'
 import { setPending } from 'store/isPending'
 import { saveDataLocally } from 'logic/localData'
 import { getServerTimestampToSave } from 'store/data/serverTimestamp'
+import { setMessage } from 'store/message'
 
 //All syncs with ZM goes through this thunk
 export const syncData = () => (dispatch, getState) => {
@@ -27,15 +27,18 @@ export const syncData = () => (dispatch, getState) => {
       dispatch(setPending(false))
       dispatch(updateData(json))
       dispatch(removeSynced(syncBegin))
-      dispatch(saveDataLocally())
-      if (Object.keys(json).length > 1) {
-        message.success(successMessage)
+
+      const changedDomains = Object.keys(json)
+      dispatch(saveDataLocally(changedDomains))
+
+      if (changedDomains.length > 1) {
+        dispatch(setMessage(successMessage))
       }
       console.log('✅ Данные обновлены', new Date())
     },
     err => {
       dispatch(setPending(false))
-      message.error(failMessage)
+      dispatch(setMessage(failMessage))
       console.warn('Syncing failed', err)
     }
   )

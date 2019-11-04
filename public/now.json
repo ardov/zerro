@@ -1,6 +1,5 @@
 {
-  "name": "MoreMoney",
-  "alias": "moremoney",
+  "name": "Zerro",
   "version": 2,
   "routes": [
     {
@@ -30,6 +29,10 @@
     {
       "src": "^/safari-pinned-tab.svg",
       "dest": "/safari-pinned-tab.svg"
+    },
+    {
+      "src": "^/social-preview.png",
+      "dest": "/social-preview.png"
     },
     {
       "src": "^/(.*)",

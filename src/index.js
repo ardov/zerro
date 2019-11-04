@@ -4,16 +4,10 @@ import { Provider } from 'react-redux'
 
 import 'normalize.css'
 import './index.scss'
-import 'antd/dist/antd.css'
 
 import App from './App'
 import * as serviceWorker from './serviceWorker'
 import { store } from './store'
-
-// if (process.env.NODE_ENV !== 'production') {
-//   const { whyDidYouUpdate } = require('why-did-you-update')
-//   whyDidYouUpdate(React)
-// }
 
 ReactDOM.render(
   <Provider store={store}>
