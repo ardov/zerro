@@ -41,15 +41,15 @@ function TransferTable({ transfers, currency, ...rest }) {
     <Paper className={classes.root}>
       <Box p={2} clone>
         <Typography variant="h6" id="tableTitle">
-          Переводы с бюджета
+          Переводы из бюджета
         </Typography>
       </Box>
       <Table className={classes.table} stickyHeader>
         <TableHead>
           <TableRow>
             <TableCell>Счёт</TableCell>
-            <TableCell align="right">Ушло на счёт</TableCell>
-            <TableCell align="right">Вернулось со счёта</TableCell>
+            <TableCell align="right">Ушло из бюджета</TableCell>
+            <TableCell align="right">Вернулось в бюджет</TableCell>
             <TableCell align="right">Итого</TableCell>
           </TableRow>
         </TableHead>
