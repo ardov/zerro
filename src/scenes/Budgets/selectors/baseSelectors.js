@@ -9,7 +9,7 @@ export const getAccountsInBudget = createSelector(
   [getAccounts],
   accounts =>
     Object.values(accounts).filter(
-      a => !a.archive && !a.savings && a.type !== 'debt'
+      a => !a.archive && !a.savings && a.type !== 'debt' && a.type !== 'deposit'
     )
 )
 
