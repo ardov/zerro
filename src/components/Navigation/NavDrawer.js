@@ -29,7 +29,7 @@ const NavigationDrawer = ({
         alignItems="center"
         minHeight="100vh"
       >
-        <Box py={3}>
+        <Box py={3} px={2}>
           <Logo width="120" fill={theme.palette.text.secondary} />
         </Box>
 
@@ -58,7 +58,7 @@ const NavigationDrawer = ({
           </Tabs>
         </Box>
 
-        <Box mt="auto" py={3} display="flex" flexDirection="column">
+        <Box mt="auto" pt={3} pb={5} display="flex" flexDirection="column">
           <RefreshButton />
           <MenuButton />
         </Box>
