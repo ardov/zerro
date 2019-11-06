@@ -6,7 +6,7 @@ import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 
 const getMonthName = date =>
-  format(date, 'MMMM yyyy', { locale: ru }).toUpperCase()
+  format(date, 'LLLL yyyy', { locale: ru }).toUpperCase()
 
 export default function MonthSelect({
   months,
