@@ -30,6 +30,7 @@ export default function AmountInput({
 
   const calc = str => {
     try {
+      // eslint-disable-next-line no-eval
       let computed = eval(str.replace(/[-+*/]*$/g, '').replace(/^[+*/]*/g, ''))
       return computed || computed === 0 ? computed : ''
     } catch (error) {
