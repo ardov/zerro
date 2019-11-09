@@ -31,6 +31,7 @@ export default function MonthSelect({
         />
 
         <IconButton
+          edge="end"
           children={<ChevronRightIcon />}
           onClick={() => onChange(++current)}
           disabled={current >= months.length - 1}
