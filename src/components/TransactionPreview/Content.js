@@ -30,10 +30,10 @@ export default function DetailsDrawer({
   hold,
   qrCode,
   income,
-  incomeAccountTitle, // TODO
-  outcomeAccountTitle, // TODO
-  incomeCurrency, // TODO
-  outcomeCurrency, // TODO
+  incomeAccountTitle,
+  outcomeAccountTitle,
+  incomeCurrency,
+  outcomeCurrency,
   incomeInstrument, //: instruments[raw.incomeInstrument],
   incomeAccount, //: accounts[raw.incomeAccount],
   opIncome,
