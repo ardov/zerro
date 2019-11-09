@@ -1,5 +1,6 @@
 import startOfMonth from 'date-fns/startOfMonth'
 import isSameMonth from 'date-fns/isSameMonth'
+import addMonths from 'date-fns/addMonths'
 import createSelector from 'selectorator'
 import { getTransactionsInBudget } from './baseSelectors'
 import { getBudgetsByMonthAndTag } from 'store/data/budgets'
@@ -23,12 +24,14 @@ const getLastMonth = createSelector(
       .sort((a, b) => a - b)
       .pop()
 
+    const afterLastBudget = +addMonths(new Date(lastBudget), 1)
+
     const nextMonth = +new Date(
       new Date().getFullYear(),
       new Date().getMonth() + 1,
       1
     )
-    return lastBudget > nextMonth ? lastBudget : nextMonth
+    return afterLastBudget > nextMonth ? afterLastBudget : nextMonth
   }
 )
 
