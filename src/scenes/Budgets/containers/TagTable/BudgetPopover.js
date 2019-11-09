@@ -4,13 +4,13 @@ import {
   List,
   ListItem,
   ListItemText,
-  TextField,
   InputAdornment,
   Popover,
   IconButton,
 } from '@material-ui/core'
 import CheckCircleIcon from '@material-ui/icons/CheckCircle'
 import { formatMoney } from 'helpers/format'
+import AmountInput from 'components/AmountInput'
 
 export default function BudgetPopover({
   id,
@@ -24,21 +24,15 @@ export default function BudgetPopover({
 }) {
   const [value, setValue] = React.useState(budgeted)
 
-  const handleChange = e => setValue(e.target.value)
-  const handleKeyDown = e => (e.keyCode === 13 ? onChange(+value) : false)
-
   return (
     <Popover disableRestoreFocus onClose={() => onChange(+value)} {...rest}>
       <Box p={2} pb={0}>
-        <TextField
+        <AmountInput
           autoFocus
           value={value}
-          variant="outlined"
-          type="number"
           fullWidth
-          onFocus={e => e.target.select()}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
+          onChange={value => setValue(+value)}
+          onEnter={value => onChange(+value)}
           helperText={`Остаток категории ${formatMoney(
             available + +value - budgeted,
             currency

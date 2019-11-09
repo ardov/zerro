@@ -6,15 +6,18 @@ export default function AmountInput({
   currency,
   value,
   onChange,
-  label,
+  onEnter,
+  onBlur,
+  onFocus,
+  onKeyDown,
   ...rest
 }) {
-  const [val, setVal] = useState(value || '')
+  const [expression, setExpression] = useState(value || '')
   const [focused, setFocused] = useState(false)
 
   useEffect(() => {
-    setVal(value)
-  }, [value])
+    if (!focused) setExpression(value)
+  }, [value, focused])
 
   const sym = currency ? getCurrencySymbol(currency) : null
 
@@ -27,37 +30,44 @@ export default function AmountInput({
 
   const calc = str => {
     try {
-      return eval(str.replace(/[-+*/]*$/g, '').replace(/^[+*/]*/g, ''))
+      let computed = eval(str.replace(/[-+*/]*$/g, '').replace(/^[+*/]*/g, ''))
+      return computed || computed === 0 ? computed : ''
     } catch (error) {
       return value
     }
   }
 
-  const handleChange = e =>
-    setVal(e.target.value.replace(/[^0-9,.+\-/*]/g, '').replace(/,/g, '.'))
-
-  const handleBlur = () => {
-    setFocused(false)
-    onChange(calc(val))
+  const actions = {
+    onChange: e => {
+      const cleaned = e.target.value
+        .replace(/[^0-9,.+\-/*]/g, '')
+        .replace(/,/g, '.')
+      setExpression(cleaned)
+      if (calc(cleaned) !== value) onChange(calc(cleaned))
+    },
+    onFocus: e => {
+      setFocused(true)
+      if (onFocus) onFocus(e)
+    },
+    onBlur: e => {
+      setFocused(false)
+      if (onBlur) onBlur(e)
+    },
+    onKeyDown: e => {
+      if (onEnter && e.keyCode === 13) onEnter(calc(expression))
+      if (onKeyDown) onKeyDown(e)
+    },
   }
-  const handleKeyDown = e => (e.keyCode === 13 ? onChange(calc(val)) : false)
 
   return (
     <TextField
-      value={focused ? val : formattedValue}
-      onChange={handleChange}
-      onFocus={() => setFocused(true)}
-      onBlur={handleBlur}
-      onKeyDown={handleKeyDown}
-      label={label}
-      helperText=""
+      value={focused ? expression : formattedValue}
       variant="outlined"
-      inputProps={{
-        type: 'tel',
-      }}
+      inputProps={{ type: 'tel' }}
       InputProps={{
         endAdornment: sym && <InputAdornment position="end" children={sym} />,
       }}
+      {...actions}
       {...rest}
     />
   )
