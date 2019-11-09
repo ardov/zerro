@@ -31,7 +31,13 @@ export default function AmountInput({
   const calc = str => {
     try {
       // eslint-disable-next-line no-eval
-      let computed = eval(str.replace(/[-+*/]*$/g, '').replace(/^[+*/]*/g, ''))
+      let computed = +eval(
+        str
+          .replace(/^0*(?=0|0.|[1-9])/g, '') // remove leading zeroes
+          .replace(/[-+*/]*$/g, '') // trim symbols in the end
+          .replace(/^[+*/]*/g, '') // trim symbols at the beginning
+      )
+
       return computed || computed === 0 ? computed : ''
     } catch (error) {
       return value
@@ -44,7 +50,8 @@ export default function AmountInput({
         .replace(/[^0-9,.+\-/*]/g, '')
         .replace(/,/g, '.')
       setExpression(cleaned)
-      if (calc(cleaned) !== value) onChange(calc(cleaned))
+      const computed = calc(cleaned)
+      if (computed !== value) onChange(computed)
     },
     onFocus: e => {
       setFocused(true)
