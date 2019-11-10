@@ -60,6 +60,11 @@ const getOpenedTransaction = createSelector(
   (transactions, openedId) => transactions[openedId]
 )
 
+const getSortedTransactions = createSelector(
+  [getTransactions],
+  transactions => Object.values(transactions).sort(sortBy())
+)
+
 const getTransactionList = (state, options = {}) => {
   const { ids, conditions, groupBy, sortType, ascending } = options
   const transactions = getPopulatedTransactions(state)
@@ -93,5 +98,6 @@ export default {
   getPopulatedTransaction,
   getOpenedTransaction,
   getTransactionList,
+  getSortedTransactions,
   getMainTransactionList,
 }
