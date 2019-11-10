@@ -64,7 +64,7 @@ export function TransactionList({
           minDate={minDate}
           variant="static"
           openTo="date"
-          value={new Date(clickedDate)}
+          value={clickedDate}
           onChange={date => {
             setShowClickedDate(null)
             scrollToDate(date)
