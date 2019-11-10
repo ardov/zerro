@@ -119,7 +119,7 @@ export const check = conditions => tr => {
   )
 }
 
-export const checkRaw = conditions => tr => {
+export const checkRaw = (conditions = {}) => tr => {
   const mergedConditions = { initialState, ...conditions }
   const {
     search,
