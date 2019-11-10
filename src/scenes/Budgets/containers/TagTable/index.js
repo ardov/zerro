@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 
 import { Paper, Box } from '@material-ui/core'
@@ -9,12 +9,17 @@ import Row from './Row'
 import TagTableHeader from './TagTableHeader'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 import { endOfMonth } from 'date-fns'
+import sendEvent from 'helpers/sendEvent'
 
 function TagTable({ tags, currency, date, updateBudget, ...rest }) {
   const [selected, setSelected] = useState(null)
   const filtered = tags
     .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailable)
     .sort((a, b) => a.name.localeCompare(b.name))
+
+  useEffect(() => {
+    if (selected) sendEvent('Budgets: see transactions')
+  }, [selected])
 
   const filterConditions = {
     type: 'outcome',
