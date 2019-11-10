@@ -2,14 +2,16 @@ import React from 'react'
 import { withStyles } from '@material-ui/core/styles'
 import { Box, ListSubheader } from '@material-ui/core'
 import Transaction from './TransactionContainer'
+import formatDate from './formatDate'
 
 export default function TransactionGroup({
   style,
-  name,
+  date,
   transactions,
   topOffset = 0,
   opened,
   setOpened,
+  onSelectDate,
 }) {
   const StyledSubheader = withStyles(theme => ({
     root: { backgroundColor: theme.palette.background.paper },
@@ -19,7 +21,9 @@ export default function TransactionGroup({
   return (
     <Box style={style}>
       <Box position="relative" maxWidth={560} mx="auto">
-        <StyledSubheader>{name}</StyledSubheader>
+        <StyledSubheader onClick={() => onSelectDate(date)}>
+          {formatDate(date)}
+        </StyledSubheader>
         {transactions.map(id => (
           <Transaction
             key={id}

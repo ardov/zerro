@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useMemo } from 'react'
-import { Box } from '@material-ui/core'
+import React, { useEffect, useRef, useMemo, useState } from 'react'
+import { Box, Dialog } from '@material-ui/core'
 import { VariableSizeList as List } from 'react-window'
+import { DatePicker } from '@material-ui/pickers'
 // import { areEqual } from 'react-window'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
@@ -8,7 +9,6 @@ import { connect } from 'react-redux'
 import TransactionGroup from './TransactionGroup'
 import TopBar from './TopBar'
 import { getSortedTransactions } from 'store/data/transactions'
-import formatDate from './formatDate'
 import { checkRaw, getFilterConditions } from 'store/filterConditions'
 import { groupTransactionsBy } from 'store/data/transactions/helpers'
 
@@ -23,6 +23,7 @@ export function TransactionList({
   ...rest
 }) {
   const listRef = useRef(null)
+  const [clickedDate, setShowClickedDate] = useState(null)
 
   useEffect(() => {
     if (listRef.current) listRef.current.resetAfterIndex(0)
@@ -39,6 +40,14 @@ export function TransactionList({
     }))
   }, [transactions, filterConditions])
 
+  const scrollToDate = date => {
+    if (listRef.current)
+      listRef.current.scrollToItem(findDateIndex(groups, date), 'start')
+  }
+
+  const minDate = groups.length ? groups[groups.length - 1].date : 0
+  const maxDate = groups.length ? groups[0].date : 0
+
   const getItemKey = i => +groups[i].date
 
   const getItemSize = i =>
@@ -47,6 +56,23 @@ export function TransactionList({
   return (
     <Box display="flex" flexDirection="column" {...rest}>
       <TopBar />
+
+      <Dialog open={!!clickedDate} onClose={() => setShowClickedDate(null)}>
+        <DatePicker
+          autoOk
+          maxDate={maxDate}
+          minDate={minDate}
+          orientation="landscape"
+          variant="static"
+          openTo="date"
+          value={new Date(clickedDate)}
+          onChange={date => {
+            setShowClickedDate(null)
+            scrollToDate(date)
+          }}
+        />
+      </Dialog>
+
       <Box flex="1 1 auto">
         <AutoSizer disableWidth>
           {({ height }) => (
@@ -63,8 +89,9 @@ export function TransactionList({
               {({ index, style }) => (
                 <TransactionGroup
                   style={style}
-                  name={formatDate(groups[index].date)}
+                  date={groups[index].date}
                   transactions={groups[index].transactions}
+                  onSelectDate={date => setShowClickedDate(date)}
                   {...{ opened, setOpened }}
                 />
               )}
@@ -85,6 +112,8 @@ export default connect(
 )(TransactionList)
 
 const findDateIndex = (groups, date) => {
-  // groups.forEach((group, index) => {})
-  return 5
+  for (let i = 0; i < groups.length; i++) {
+    if (groups[i].date <= date) return i
+  }
+  return groups.length - 1
 }
