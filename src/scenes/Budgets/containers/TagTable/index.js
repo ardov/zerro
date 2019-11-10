@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { Paper, Typography, Box } from '@material-ui/core'
+import { Paper, Box } from '@material-ui/core'
 import { setOutcomeBudget } from '../../thunks'
 import { getAmountsByTag } from '../../selectors/getAmountsByTag'
 import { getUserCurrencyCode } from 'store/data/instruments'
@@ -16,9 +16,6 @@ function TagTable({ tags, currency, date, updateBudget, ...rest }) {
   return (
     <Box position="relative" py={1} clone>
       <Paper>
-        <Box p={2} clone>
-          <Typography variant="h6">Бюджеты</Typography>
-        </Box>
         <TagTableHeader
           position="sticky"
           top={0}
