@@ -1,7 +1,14 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import TransactionList from 'components/TransactionList'
+
 import AccountList from 'components/AccountList'
-import { Box, Drawer, useMediaQuery, Typography } from '@material-ui/core'
+import {
+  Box,
+  Drawer,
+  useMediaQuery,
+  Typography,
+  Paper,
+} from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import TransactionPreview from 'components/TransactionPreview'
 import sendEvent from 'helpers/sendEvent'
@@ -10,21 +17,15 @@ const useStyles = makeStyles(theme => ({
   drawerWidth: { width: 360 },
 }))
 
-const StyledTransactionList = props => (
-  <Box flexGrow={1} height="100vh" minWidth={0} clone>
-    <TransactionList groupBy="DAY" {...props} />
-  </Box>
-)
-
 export default function TransactionsView() {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const [opened, setOpened] = useState(null)
   const c = useStyles()
 
-  const onOpenTransaction = id => {
-    setOpened(id)
-    sendEvent('Transaction: see details')
-  }
+  // send analytics
+  useEffect(() => {
+    if (opened) sendEvent('Transaction: see details')
+  }, [opened])
 
   return (
     <Box display="flex">
@@ -38,7 +39,26 @@ export default function TransactionsView() {
         <AccountList />
       </Box>
 
-      <StyledTransactionList {...{ opened, setOpened: onOpenTransaction }} />
+      <Box
+        p={isMobile ? 0 : 2}
+        height="100vh"
+        flexGrow={1}
+        minWidth={0}
+        display="flex"
+        justifyContent="center"
+      >
+        <Box
+          flex="1 1 auto"
+          display="flex"
+          overflow="hidden"
+          maxWidth={560}
+          component={Paper}
+        >
+          <Box flex="1 1 auto" clone>
+            <TransactionList {...{ opened, setOpened }} />
+          </Box>
+        </Box>
+      </Box>
 
       <Drawer
         classes={

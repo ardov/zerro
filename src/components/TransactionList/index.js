@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useMemo } from 'react'
 import { Box } from '@material-ui/core'
 import { VariableSizeList as List } from 'react-window'
 // import { areEqual } from 'react-window'
@@ -7,80 +7,84 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 import { connect } from 'react-redux'
 import TransactionGroup from './TransactionGroup'
 import TopBar from './TopBar'
-import { getMainTransactionList } from 'store/data/transactions'
+import { getSortedTransactions } from 'store/data/transactions'
 import formatDate from './formatDate'
+import { checkRaw, getFilterConditions } from 'store/filterConditions'
+import { groupTransactionsBy } from 'store/data/transactions/helpers'
 
-const GROUP_HEADER_HEIGHT = 48
+const HEADER_HEIGHT = 48
 const TRANSACTION_HEIGHT = 72
-const PADDINGS = 16
 
-const SEARCH_HEIGHT = 72
-const PADDING_BOTTOM = 40
-
-function TransactionList({ groups, className, opened, setOpened }) {
-  const listRef = useRef()
+export function TransactionList({
+  transactions,
+  filterConditions,
+  opened,
+  setOpened,
+  ...rest
+}) {
+  const listRef = useRef(null)
 
   useEffect(() => {
     if (listRef.current) listRef.current.resetAfterIndex(0)
-  }, [listRef, groups])
+  }, [listRef, transactions, filterConditions])
+
+  const groups = useMemo(() => {
+    const groupped = groupTransactionsBy(
+      'DAY',
+      transactions.filter(checkRaw(filterConditions))
+    )
+    return groupped.map(group => ({
+      ...group,
+      transactions: group.transactions.map(tr => tr.id),
+    }))
+  }, [transactions, filterConditions])
 
   const getItemKey = i => +groups[i].date
 
-  const getItemSize = (i, d) =>
-    GROUP_HEADER_HEIGHT +
-    TRANSACTION_HEIGHT * groups[i].transactions.length +
-    PADDINGS +
-    16
-
-  const innerElementType = forwardRef(({ children, style, ...rest }, ref) => (
-    <div
-      ref={ref}
-      style={{
-        ...style,
-        height: style.height + SEARCH_HEIGHT + PADDING_BOTTOM,
-        scrollbarWidth: 0,
-      }}
-      {...rest}
-    >
-      {children}
-    </div>
-  ))
-
-  const Row = ({ index, style }) => (
-    <TransactionGroup
-      style={{ ...style, top: style.top + SEARCH_HEIGHT + 16 }}
-      topOffset={SEARCH_HEIGHT}
-      name={formatDate(groups[index].date)}
-      transactions={groups[index].transactions}
-      {...{ opened, setOpened }}
-    />
-  )
+  const getItemSize = i =>
+    HEADER_HEIGHT + TRANSACTION_HEIGHT * groups[i].transactions.length
 
   return (
-    <Box position="relative" className={className}>
+    <Box display="flex" flexDirection="column" {...rest}>
       <TopBar />
-      <AutoSizer disableWidth>
-        {({ height }) => (
-          <List
-            className="hidden-scroll"
-            ref={listRef}
-            innerElementType={innerElementType}
-            height={height}
-            itemCount={groups.length}
-            itemSize={getItemSize}
-            width="100%"
-            itemKey={getItemKey}
-            itemData={groups}
-          >
-            {Row}
-          </List>
-        )}
-      </AutoSizer>
+      <Box flex="1 1 auto">
+        <AutoSizer disableWidth>
+          {({ height }) => (
+            <List
+              className="hidden-scroll"
+              ref={listRef}
+              height={height}
+              itemCount={groups.length}
+              itemSize={getItemSize}
+              width="100%"
+              itemKey={getItemKey}
+              itemData={groups}
+            >
+              {({ index, style }) => (
+                <TransactionGroup
+                  style={style}
+                  name={formatDate(groups[index].date)}
+                  transactions={groups[index].transactions}
+                  {...{ opened, setOpened }}
+                />
+              )}
+            </List>
+          )}
+        </AutoSizer>
+      </Box>
     </Box>
   )
 }
 
 export default connect(
-  state => ({ groups: getMainTransactionList(state) }),
-  null
+  state => ({
+    transactions: getSortedTransactions(state),
+    filterConditions: getFilterConditions(state),
+  }),
+  () => ({})
 )(TransactionList)
+
+const findDateIndex = (groups, date) => {
+  // groups.forEach((group, index) => {})
+  return 5
+}

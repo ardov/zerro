@@ -39,7 +39,7 @@ function Filter({
 
   return (
     <Box display="flex" alignItems="center" pl={2} pr={1} {...rest} clone>
-      <Paper elevation={4}>
+      <Paper elevation={10}>
         <Box flexGrow={1} clone>
           {selectedIds.length ? (
             <Actions
