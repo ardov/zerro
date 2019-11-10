@@ -62,7 +62,6 @@ export function TransactionList({
           autoOk
           maxDate={maxDate}
           minDate={minDate}
-          orientation="landscape"
           variant="static"
           openTo="date"
           value={new Date(clickedDate)}
