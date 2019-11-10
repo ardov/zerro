@@ -51,6 +51,7 @@ export function TagRow(props) {
     hasOverspent,
     setBudget,
     date,
+    onSelect,
   } = props
   const c = useStyles({ isChild })
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -121,7 +122,7 @@ export function TagRow(props) {
         className={c.outcome}
         clone
       >
-        <Typography variant="body1" align="right">
+        <Typography variant="body1" align="right" onClick={() => onSelect(id)}>
           {formatMoney(outcome ? -outcome : 0)}
         </Typography>
       </Box>

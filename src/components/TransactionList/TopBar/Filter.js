@@ -38,7 +38,7 @@ function Filter({
   const toggleDrawer = () => setDrawerVisible(!isDrawerVisible)
 
   return (
-    <Box display="flex" alignItems="center" pl={2} pr={1} {...rest} clone>
+    <Box display="flex" alignItems="center" px={2} {...rest} clone>
       <Paper elevation={10}>
         <Box flexGrow={1} clone>
           {selectedIds.length ? (
@@ -70,7 +70,11 @@ function Filter({
         )}
 
         <Tooltip title="Расширенные фильтры">
-          <IconButton onClick={toggleDrawer} children={<FilterListIcon />} />
+          <IconButton
+            edge="end"
+            onClick={toggleDrawer}
+            children={<FilterListIcon />}
+          />
         </Tooltip>
 
         <FilterDrawer
