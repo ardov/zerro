@@ -1,4 +1,4 @@
-import LocalStorage from 'services/localstorage'
+import StorageFactory from 'services/storage'
 import { updateData } from 'store/data/commonActions'
 import { getDataToSave } from 'store/data/dataSelectors'
 
@@ -17,28 +17,37 @@ const LOCAL_KEYS = [
   'transaction',
 ]
 
+const storage = StorageFactory.create()
+
 export const saveDataLocally = changedDomains => (dispatch, getState) => {
   const state = getState()
   const data = getDataToSave(state)
-  changedDomains.forEach(key => LocalStorage.set(key, data[key]))
+  changedDomains.forEach(key => storage.set(key, data[key]))
 }
 
 export const loadLocalData = () => (dispatch, getState) =>
   new Promise(resolve => {
-    const data = LOCAL_KEYS.reduce((data, key) => {
-      data[key] = LocalStorage.get(key)
-      return data
-    }, {})
-    if (data) dispatch(updateData(data))
+    let promises = []
+    let data = []
+
+    LOCAL_KEYS.forEach(name => {
+      promises.push(new Promise((resolve, reject) => {
+          data[name] = storage.get(name)
+      }))
+    })
+
+    Promise.all(promises).then(values => {
+      if (data) dispatch(updateData(data))
+    });
 
     resolve()
   })
 
 export const clearLocalData = () => (dispatch, getState) => {
   LOCAL_KEYS.forEach(key => {
-    LocalStorage.remove(key)
+    storage.remove(key)
   })
 
   // for old versions
-  LocalStorage.remove('data')
+  storage.remove('data')
 }
