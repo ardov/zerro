@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import Account from './Account'
 import styled from 'styled-components'
-import { getAccountsInBudget, getSavingAccounts } from 'store/data/accounts'
+import { getAccountsInBudget, getSavingAccounts, getLoansAccounts } from 'store/data/accounts'
 import { getUserInstrument, getInstruments } from 'store/data/instruments'
 
 const Heading = styled(Account)`
@@ -22,6 +22,7 @@ const getTotalBalance = (accs, targetInstrument, instruments) =>
 const AccountList = ({
   inBudget,
   savings,
+  loans,
   userInstrument,
   instruments,
   className,
@@ -31,6 +32,7 @@ const AccountList = ({
 
   const inBudgetSum = getTotalBalance(inBudget, userInstrument, instruments)
   const savingsSum = getTotalBalance(savings, userInstrument, instruments)
+  const loansSum = getTotalBalance(loans, userInstrument, instruments)
 
   return (
     <div className={className}>
@@ -60,6 +62,19 @@ const AccountList = ({
           currency={instruments[acc.instrument].shortTitle}
         />
       ))}
+
+      <Heading
+        title="Кредиты"
+        balance={loansSum}
+        currency={userInstrument.shortTitle}
+      />
+      {loans.map(acc => (
+        <Account
+          key={acc.id}
+          {...acc}
+          currency={instruments[acc.instrument].shortTitle}
+        />
+      ))}
     </div>
   )
 }
@@ -68,6 +83,7 @@ const mapStateToProps = (state, props) => ({
   instruments: getInstruments(state),
   inBudget: getAccountsInBudget(state),
   savings: getSavingAccounts(state),
+  loans: getLoansAccounts(state),
   userInstrument: getUserInstrument(state),
 })
 

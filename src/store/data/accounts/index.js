@@ -64,5 +64,11 @@ export const getAccountsInBudget = createSelector(
 export const getSavingAccounts = createSelector(
   [getAccountList],
   accounts =>
-    accounts.filter(a => !a.archive && !a.inBalance && a.type !== 'debt')
+    accounts.filter(a => !a.archive && !a.inBalance && a.type !== 'debt' && a.type !== 'loan')
+)
+
+export const getLoansAccounts = createSelector(
+  [getAccountList],
+  accounts =>
+    accounts.filter(a => !a.archive && !a.inBalance && a.type !== 'debt' && a.type === 'loan')
 )
