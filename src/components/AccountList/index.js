@@ -49,7 +49,7 @@ const AccountList = ({
       ))}
 
       <Heading
-        title="Сбережения"
+        title="Прочее"
         balance={savingsSum}
         currency={userInstrument.shortTitle}
       />
