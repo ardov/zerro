@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter, Route, Redirect, Switch } from 'react-router-dom'
+import { Router, Route, Redirect, Switch } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { IntlProvider, addLocaleData } from 'react-intl'
 import ru from 'react-intl/locale-data/ru'
@@ -19,8 +19,18 @@ import { getTheme } from 'store/theme'
 import { MuiPickersUtilsProvider } from '@material-ui/pickers'
 import DateFnsUtils from '@date-io/date-fns'
 import ruDateLocale from 'date-fns/locale/ru'
+import { createBrowserHistory } from 'history'
+import ReactGA from 'react-ga'
 
 addLocaleData(ru)
+ReactGA.initialize('UA-72832368-2')
+
+const history = createBrowserHistory()
+
+history.listen(location => {
+  ReactGA.set({ page: location.pathname }) // Update the user's current page
+  ReactGA.pageview(location.pathname) // Record a pageview for the given page
+})
 
 const App = ({ isLoggedIn, themeType }) => (
   <ThemeProvider theme={createTheme(themeType)}>
@@ -28,9 +38,9 @@ const App = ({ isLoggedIn, themeType }) => (
       <CssBaseline />
       <IntlProvider locale="ru">
         <MuiPickersUtilsProvider utils={DateFnsUtils} locale={ruDateLocale}>
-          <BrowserRouter>
+          <Router history={history}>
             {isLoggedIn ? <PrivateApp /> : <Auth />}
-          </BrowserRouter>
+          </Router>
         </MuiPickersUtilsProvider>
       </IntlProvider>
     </>
