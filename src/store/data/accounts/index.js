@@ -29,9 +29,8 @@ export default reducer
 // SELECTORS
 export const getAccounts = state => state.data.account
 
-export const getAccountsToSave = createSelector(
-  [getAccounts],
-  accounts => convertToSyncArray(accounts)
+export const getAccountsToSave = createSelector([getAccounts], accounts =>
+  convertToSyncArray(accounts)
 )
 
 export const getAccount = (state, id) => getAccounts(state)[id]
@@ -50,19 +49,20 @@ export const getPopulatedAccounts = createSelector(
 export const getPopulatedAccount = (state, id) =>
   getPopulatedAccounts(state)[id]
 
-export const getAccountList = createSelector(
-  [getAccounts],
-  accounts => Object.values(accounts).sort((a, b) => b.balance - a.balance)
+export const getAccountList = createSelector([getAccounts], accounts =>
+  Object.values(accounts).sort((a, b) => b.balance - a.balance)
 )
 
-export const getAccountsInBudget = createSelector(
-  [getAccountList],
-  accounts =>
-    accounts.filter(a => !a.archive && a.inBalance && a.type !== 'debt')
+export const getAccountsInBudget = createSelector([getAccountList], accounts =>
+  accounts.filter(
+    a =>
+      a.title.endsWith('📍') || (!a.archive && a.inBalance && a.type !== 'debt')
+  )
 )
 
-export const getSavingAccounts = createSelector(
-  [getAccountList],
-  accounts =>
-    accounts.filter(a => !a.archive && !a.inBalance && a.type !== 'debt')
+export const getSavingAccounts = createSelector([getAccountList], accounts =>
+  accounts.filter(
+    a =>
+      !a.title.endsWith('📍') && !a.archive && !a.inBalance && a.type !== 'debt'
+  )
 )
