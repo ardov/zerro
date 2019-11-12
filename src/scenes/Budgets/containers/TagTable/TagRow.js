@@ -6,6 +6,7 @@ import { formatMoney } from 'helpers/format'
 import WarningIcon from '@material-ui/icons/Warning'
 import AddIcon from '@material-ui/icons/Add'
 import BudgetPopover from './BudgetPopover'
+
 export const useStyles = makeStyles(theme => ({
   row: {
     paddingTop: ({ isChild }) => theme.spacing(isChild ? 0.5 : 1),
@@ -46,6 +47,7 @@ export function TagRow(props) {
     budgeted,
     outcome,
     available,
+    colorRGB,
     isChild,
 
     hasOverspent,
@@ -73,7 +75,7 @@ export function TagRow(props) {
   return (
     <div className={c.row}>
       <div className={c.name}>
-        <EmojiIcon symbol={symbol} mr={1.5} flexShrink={0} />
+        <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} flexShrink={0} />
         <Typography variant="body1" color="textPrimary" noWrap>
           {name}
         </Typography>

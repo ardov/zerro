@@ -50,6 +50,7 @@ export default function Row(props) {
     id,
     // showOutcome,
     symbol,
+    colorRGB,
     name,
     overspent,
     totalBudgeted,
@@ -92,6 +93,7 @@ export default function Row(props) {
           {...{
             id,
             symbol,
+            colorRGB,
             name,
             budgeted: totalBudgeted,
             outcome: totalOutcome,

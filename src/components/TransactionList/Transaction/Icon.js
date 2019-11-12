@@ -32,8 +32,6 @@ export default function Icon({
   color,
   onToggle,
 }) {
-  if (color) console.log(color)
-
   const [hover, setHover] = React.useState(false)
   const c = useStyles({ hover, isInSelectionMode, color })
 
