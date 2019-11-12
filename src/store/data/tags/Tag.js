@@ -1,5 +1,6 @@
 import { unsignedToRGB } from 'helpers/convertColor'
 import toArray from 'lodash/toArray'
+import iconsMap from './iconsMap'
 
 export default class Tag {
   constructor(raw) {
@@ -20,7 +21,7 @@ export default class Tag {
     // COMPUTED
     this.goal = getGoal(raw.title)
     this.name = getName(raw.title)
-    this.symbol = raw.title.slice(0, 2)
+    this.symbol = iconsMap[raw.icon] || raw.title.slice(0, 2)
     this.colorRGB = raw.color ? unsignedToRGB(raw.color) : null
   }
 
