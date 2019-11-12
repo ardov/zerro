@@ -18,6 +18,7 @@ const useStyles = makeStyles(theme => ({
     lineHeight: '40px',
     textAlign: 'center',
     borderRadius: 20,
+    border: ({ color }) => (color ? `1px solid ${color}` : 'none'),
     backgroundColor: theme.palette.action.hover,
     opacity: props => (props.hover || props.isInSelectionMode ? 0 : 1),
     transition: '.2s',
@@ -31,6 +32,8 @@ export default function Icon({
   color,
   onToggle,
 }) {
+  if (color) console.log(color)
+
   const [hover, setHover] = React.useState(false)
   const c = useStyles({ hover, isInSelectionMode, color })
 
