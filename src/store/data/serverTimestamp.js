@@ -12,7 +12,9 @@ const { reducer } = createSlice({
   extraReducers: {
     [wipeData]: () => initialState,
     [updateData]: (state, { payload }) =>
-      payload ? payload.serverTimestamp * 1000 : state,
+      payload && payload.serverTimestamp
+        ? payload.serverTimestamp * 1000
+        : state,
   },
 })
 
