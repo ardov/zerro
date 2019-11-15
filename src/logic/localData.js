@@ -1,4 +1,4 @@
-import LocalStorage from 'services/localstorage'
+import storage from 'services/storage'
 import { updateData } from 'store/data/commonActions'
 import { getDataToSave } from 'store/data/dataSelectors'
 
@@ -20,25 +20,19 @@ const LOCAL_KEYS = [
 export const saveDataLocally = changedDomains => (dispatch, getState) => {
   const state = getState()
   const data = getDataToSave(state)
-  changedDomains.forEach(key => LocalStorage.set(key, data[key]))
+  changedDomains.forEach(key => storage.set(key, data[key]))
 }
 
-export const loadLocalData = () => (dispatch, getState) =>
-  new Promise(resolve => {
-    const data = LOCAL_KEYS.reduce((data, key) => {
-      data[key] = LocalStorage.get(key)
-      return data
-    }, {})
-    if (data) dispatch(updateData(data))
-
-    resolve()
-  })
+export const loadLocalData = () => async (dispatch, getState) => {
+  let data = {}
+  for (let i = 0; i < LOCAL_KEYS.length; i++) {
+    const key = LOCAL_KEYS[i]
+    data[key] = await storage.get(key)
+  }
+  dispatch(updateData(data))
+  return data
+}
 
 export const clearLocalData = () => (dispatch, getState) => {
-  LOCAL_KEYS.forEach(key => {
-    LocalStorage.remove(key)
-  })
-
-  // for old versions
-  LocalStorage.remove('data')
+  storage.clear()
 }
