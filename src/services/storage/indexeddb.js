@@ -8,7 +8,7 @@ async function getDB() {
   return await openDB(baseName, version, {
     upgrade: db => db.createObjectStore(storeName),
     blocked: () => console.log('DB blocked'),
-    blocking: () => console.log('DB blocking'),
+    blocking: e => e.currentTarget.close(),
   })
 }
 
@@ -23,7 +23,8 @@ const indexedDB = {
     return db.get(storeName, key)
   },
 
-  clear: () => deleteDB(baseName),
+  clear: () =>
+    deleteDB(baseName, { blocked: () => console.log('DB not deleted') }),
 }
 
 export default indexedDB
