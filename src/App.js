@@ -20,16 +20,16 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers'
 import DateFnsUtils from '@date-io/date-fns'
 import ruDateLocale from 'date-fns/locale/ru'
 import { createBrowserHistory } from 'history'
-import ReactGA from 'react-ga'
+import reactGA from 'react-ga'
 
 addLocaleData(ru)
-ReactGA.initialize('UA-72832368-2')
+reactGA.initialize('UA-72832368-2')
 
 const history = createBrowserHistory()
 
 history.listen(location => {
-  ReactGA.set({ page: location.pathname }) // Update the user's current page
-  ReactGA.pageview(location.pathname) // Record a pageview for the given page
+  reactGA.set({ page: location.pathname }) // Update the user's current page
+  reactGA.pageview(location.pathname) // Record a pageview for the given page
 })
 
 const App = ({ isLoggedIn, themeType }) => (
