@@ -1,24 +1,41 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 
-import { Paper, Typography, Box } from '@material-ui/core'
+import { Paper, Box } from '@material-ui/core'
 import { setOutcomeBudget } from '../../thunks'
 import { getAmountsByTag } from '../../selectors/getAmountsByTag'
 import { getUserCurrencyCode } from 'store/data/instruments'
 import Row from './Row'
 import TagTableHeader from './TagTableHeader'
+import TransactionsDrawer from 'components/TransactionsDrawer'
+import { endOfMonth } from 'date-fns'
+import sendEvent from 'helpers/sendEvent'
 
 function TagTable({ tags, currency, date, updateBudget, ...rest }) {
+  const [selected, setSelected] = useState(null)
   const filtered = tags
     .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailable)
     .sort((a, b) => a.name.localeCompare(b.name))
 
+  useEffect(() => {
+    if (selected) sendEvent('Budgets: see transactions')
+  }, [selected])
+
+  const filterConditions = {
+    type: 'outcome',
+    dateFrom: date,
+    dateTo: endOfMonth(date),
+    tags: [selected],
+  }
+
   return (
     <Box position="relative" py={1} clone>
       <Paper>
-        <Box p={2} clone>
-          <Typography variant="h6">Бюджеты</Typography>
-        </Box>
+        <TransactionsDrawer
+          filterConditions={filterConditions}
+          open={!!selected}
+          onClose={() => setSelected(null)}
+        />
         <TagTableHeader
           position="sticky"
           top={0}
@@ -26,7 +43,13 @@ function TagTable({ tags, currency, date, updateBudget, ...rest }) {
           bgcolor="background.paper"
         />
         {filtered.map(tag => (
-          <Row key={tag.id} {...tag} setBudget={updateBudget} date={date}></Row>
+          <Row
+            key={tag.id}
+            {...tag}
+            setBudget={updateBudget}
+            onSelect={id => setSelected(id)}
+            date={date}
+          ></Row>
         ))}
       </Paper>
     </Box>

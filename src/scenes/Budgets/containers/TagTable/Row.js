@@ -50,6 +50,7 @@ export default function Row(props) {
     id,
     // showOutcome,
     symbol,
+    colorRGB,
     name,
     overspent,
     totalBudgeted,
@@ -61,6 +62,7 @@ export default function Row(props) {
     // available,
     setBudget,
     date,
+    onSelect,
   } = props
   const [expanded, setExpanded] = React.useState(false)
   const toggle = () => setExpanded(!expanded)
@@ -91,6 +93,7 @@ export default function Row(props) {
           {...{
             id,
             symbol,
+            colorRGB,
             name,
             budgeted: totalBudgeted,
             outcome: totalOutcome,
@@ -98,6 +101,7 @@ export default function Row(props) {
             hasOverspent,
             setBudget,
             date,
+            onSelect,
           }}
         />
       </ExpansionPanelSummary>
@@ -109,7 +113,9 @@ export default function Row(props) {
             date,
             setBudget,
             hasOverspent,
-          }).map(data => <TagRow key={data.id} {...data} />)}
+          }).map(data => (
+            <TagRow key={data.id} {...data} onSelect={onSelect} />
+          ))}
       </ExpansionPanelDetails>
     </ExpansionPanel>
   )

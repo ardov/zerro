@@ -13,6 +13,7 @@ const useStyles = makeStyles(theme => ({
     height: ({ size }) => sizes[size],
     color: ({ color }) => (color ? color : theme.palette.text.primary),
     borderRadius: '50%',
+    border: ({ color }) => (color ? `1px solid ${color}` : 'none'),
     backgroundColor: theme.palette.action.hover,
   },
 

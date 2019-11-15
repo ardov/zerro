@@ -29,7 +29,7 @@ export default function TransactionGroup({
             key={id}
             id={id}
             isOpened={id === opened}
-            onClick={() => setOpened(id)}
+            onClick={() => setOpened && setOpened(id)}
           />
         ))}
       </Box>

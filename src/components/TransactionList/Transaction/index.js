@@ -66,7 +66,7 @@ export default function Transaction({
   const handleSelectSimilar = () => onSelectChanged(changed)
 
   const symbol = tag ? tag[0].symbol : type === 'transfer' ? '→' : '?'
-  const color = tag ? tag[0].color : null
+  const color = tag ? tag[0].colorRGB : null
   const mainAccountTitle =
     type === 'income'
       ? incomeAccountTitle

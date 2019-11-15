@@ -8,7 +8,11 @@ import {
   MenuItem,
   Switch,
   Grid,
+  Tooltip,
+  Typography,
+  IconButton,
 } from '@material-ui/core'
+import CloseIcon from '@material-ui/icons/Close'
 
 export default function FilterDrawer({
   conditions = {},
@@ -25,7 +29,18 @@ export default function FilterDrawer({
 
   return (
     <Drawer anchor="right" onClose={onClose} open={open} {...rest}>
-      <Box p={5}>
+      <Box py={1} px={2} display="flex" alignItems="center">
+        <Box flexGrow={1}>
+          <Typography variant="h6" noWrap>
+            Фильтр
+          </Typography>
+        </Box>
+
+        <Tooltip title="Закрыть">
+          <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
+        </Tooltip>
+      </Box>
+      <Box px={2}>
         <TextField
           id="search-input"
           label="Поиск по комментариям"

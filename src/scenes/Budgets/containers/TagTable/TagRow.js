@@ -6,6 +6,7 @@ import { formatMoney } from 'helpers/format'
 import WarningIcon from '@material-ui/icons/Warning'
 import AddIcon from '@material-ui/icons/Add'
 import BudgetPopover from './BudgetPopover'
+
 export const useStyles = makeStyles(theme => ({
   row: {
     paddingTop: ({ isChild }) => theme.spacing(isChild ? 0.5 : 1),
@@ -46,11 +47,13 @@ export function TagRow(props) {
     budgeted,
     outcome,
     available,
+    colorRGB,
     isChild,
 
     hasOverspent,
     setBudget,
     date,
+    onSelect,
   } = props
   const c = useStyles({ isChild })
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -72,7 +75,7 @@ export function TagRow(props) {
   return (
     <div className={c.row}>
       <div className={c.name}>
-        <EmojiIcon symbol={symbol} mr={1.5} flexShrink={0} />
+        <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} flexShrink={0} />
         <Typography variant="body1" color="textPrimary" noWrap>
           {name}
         </Typography>
@@ -121,7 +124,7 @@ export function TagRow(props) {
         className={c.outcome}
         clone
       >
-        <Typography variant="body1" align="right">
+        <Typography variant="body1" align="right" onClick={() => onSelect(id)}>
           {formatMoney(outcome ? -outcome : 0)}
         </Typography>
       </Box>

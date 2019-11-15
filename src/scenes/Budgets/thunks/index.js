@@ -11,7 +11,7 @@ export const setOutcomeBudget = (targetOutcome, monthDate, tagId) => (
   dispatch,
   getState
 ) => {
-  sendEvent('Set Budget')
+  sendEvent('Budgets: set budget')
   const state = getState()
   const created = selectors.getBudget(state, tagId, monthDate)
   const tags = getAmountsByTag(state)
