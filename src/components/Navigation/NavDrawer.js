@@ -3,8 +3,9 @@ import { withRouter } from 'react-router'
 import { Link } from 'react-router-dom'
 import RefreshButton from './containers/RefreshButton'
 import MenuButton from './containers/MenuButton'
-import { Tabs, Tab, Box, Drawer } from '@material-ui/core'
+import { Tabs, Tab, Box, Drawer, IconButton, Tooltip } from '@material-ui/core'
 import { withStyles, useTheme } from '@material-ui/styles'
+import AttachMoneyIcon from '@material-ui/icons/AttachMoney'
 import Logo from 'components/Logo'
 
 const routes = [
@@ -59,6 +60,16 @@ const NavigationDrawer = ({
         </Box>
 
         <Box mt="auto" pt={3} pb={5} display="flex" flexDirection="column">
+          <Tooltip title="Поддержать проект">
+            <IconButton
+              component="a"
+              href="https://money.yandex.ru/to/4100110993756505/200"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <AttachMoneyIcon />
+            </IconButton>
+          </Tooltip>
           <RefreshButton />
           <MenuButton />
         </Box>
