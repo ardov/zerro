@@ -12,7 +12,7 @@ import { endOfMonth } from 'date-fns'
 import sendEvent from 'helpers/sendEvent'
 
 function TagTable({ tags, currency, date, updateBudget, ...rest }) {
-  const [selected, setSelected] = useState(null)
+  const [selected, setSelected] = useState()
   const filtered = tags
     .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailable)
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -33,8 +33,8 @@ function TagTable({ tags, currency, date, updateBudget, ...rest }) {
       <Paper>
         <TransactionsDrawer
           filterConditions={filterConditions}
-          open={!!selected}
-          onClose={() => setSelected(null)}
+          open={!!selected || selected === null}
+          onClose={() => setSelected(undefined)}
         />
         <TagTableHeader
           position="sticky"
@@ -66,7 +66,4 @@ const mapDispatchToProps = dispatch => ({
     dispatch(setOutcomeBudget(outcome, month, tagId)),
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TagTable)
+export default connect(mapStateToProps, mapDispatchToProps)(TagTable)
