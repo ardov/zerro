@@ -73,6 +73,9 @@ export function TagRow(props) {
   )
   const hasInnerOverspent = isChild && hasOverspent && available >= 0
 
+  const isUnderfunded =
+    goal && goal.type === 'monthly' && goal.amount > budgeted
+
   return (
     <div className={c.row}>
       <div className={c.name}>
@@ -94,6 +97,7 @@ export function TagRow(props) {
             component="button"
             onClick={e => setAnchorEl(e.currentTarget)}
           >
+            {isUnderfunded && '⚠️'}
             {formatMoney(budgeted)}
           </Link>
         </Box>
