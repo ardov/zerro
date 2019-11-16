@@ -103,6 +103,7 @@ export function TagRow(props) {
         </Box>
       ) : (
         <Box display="flex" justifyContent="flex-end" className={c.budget}>
+          {isUnderfunded && '⚠️'}
           <Tooltip title="Добавить бюджет">
             <IconButton
               size="small"
