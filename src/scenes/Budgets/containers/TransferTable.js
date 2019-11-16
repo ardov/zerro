@@ -44,7 +44,7 @@ function TransferTable({ transfers, currency, ...rest }) {
           Переводы из бюджета
         </Typography>
       </Box>
-      <Table className={classes.table} stickyHeader>
+      <Table className={classes.table}>
         <TableHead>
           <TableRow>
             <TableCell>Счёт</TableCell>
@@ -76,7 +76,4 @@ const mapStateToProps = (state, { index }) => ({
   currency: getUserCurrencyCode(state),
 })
 
-export default connect(
-  mapStateToProps,
-  null
-)(TransferTable)
+export default connect(mapStateToProps, null)(TransferTable)
