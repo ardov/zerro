@@ -63,52 +63,63 @@ function isEmoji(str) {
 }
 
 function getGoal(str) {
-  const DIVIDER = '•'
-  const monthly = str.match(/[[]+\d+(\/мес)+[\]]+$/)
-  const target = str.match(/[[]+\d+[\]]+$/)
-  const targetByDate = str.match(
-    new RegExp(`[[]+\\d+${DIVIDER}+\\d+.+\\d+[\\]]+$`)
-  )
+  const regexes = {
+    // Авто |5000/м
+    monthly: {
+      main: s => s.match(/\|\d*\/м$/),
+      amount: s => +s.match(/(?<=\|)\d*/)[0], // "|5000/м" -> 5000
+    },
+
+    // Новый компьютер |5000
+    target: {
+      main: s => s.match(/\|\d*$/),
+      amount: s => +s.match(/(?<=\|)\d*/)[0], // "|5000" -> 5000
+    },
+
+    // Отпуск |5000-11.19
+    targetByDate: {
+      main: s => s.match(/\|\d*-\d*.\d*$/),
+      amount: s => +s.match(/(?<=\|)\d*/)[0], // "|5000-11.19" -> 5000
+      date: s =>
+        new Date(
+          +s.match(/(?<=.)\d*/)[0] + 2000, // "|5000-11.19" -> 2019
+          +s.match(/(?<=-)\d*/)[0] - 1 // "|5000-11.19" -> 10
+        ),
+    },
+  }
 
   // Monthly
-  if (monthly) {
+  if (regexes.monthly.main(str)) {
     return {
       type: 'monthly',
-      amount: +monthly[0].match(/\d+\d/)[0],
-      match: monthly[0],
+      amount: regexes.monthly.amount(str),
+      match: regexes.monthly.main(str)[0],
     }
   }
 
   // Target
-  if (target) {
+  if (regexes.target.main(str)) {
     return {
       type: 'target',
-      amount: +target[0].match(/\d+\d/)[0],
-      match: target[0],
+      amount: regexes.target.amount(str),
+      match: regexes.target.main(str)[0],
     }
   }
 
   // Target by date
-  if (targetByDate) {
-    const getDate = goal => {
-      const month = +goal
-        .match(new RegExp(`${DIVIDER}+\\d+\\.`))[0]
-        .slice(1)
-        .slice(0, -1)
-      const year =
-        +goal
-          .match(/\.+\d+\]/)[0]
-          .slice(1)
-          .slice(0, -1) + 2000
-      return new Date(year, month - 1)
-    }
+  if (regexes.targetByDate.main(str)) {
     return {
       type: 'targetByDate',
-      amount: +targetByDate[0].match(/\d+\d/)[0],
-      date: getDate(targetByDate[0]),
-      match: targetByDate[0],
+      amount: regexes.targetByDate.amount(str),
+      date: regexes.targetByDate.date(str),
+      match: regexes.targetByDate.main(str)[0],
     }
   }
 
   return null
 }
+
+// Goal tests
+// console.log('Авто |5000/м ->', getGoal('Авто |5000/м'))
+// console.log('Новый компьютер |5000 ->', getGoal('Новый компьютер |5000'))
+// console.log('Отпуск |5000-11.19 ->', getGoal('Отпуск |5000-11.19'))

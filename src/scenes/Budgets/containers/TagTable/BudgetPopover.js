@@ -19,6 +19,8 @@ export default function BudgetPopover({
   prevBudgeted,
   prevSpend,
   currency,
+  goal,
+  needForGoal,
   onChange,
   ...rest
 }) {
@@ -51,6 +53,19 @@ export default function BudgetPopover({
       </Box>
 
       <List>
+        {!!goal && !!needForGoal && (
+          <ListItem
+            button
+            selected={+value === +needForGoal}
+            onClick={() => onChange(+needForGoal)}
+          >
+            <ListItemText
+              primary="Цель"
+              secondary={formatMoney(needForGoal, currency)}
+            />
+          </ListItem>
+        )}
+
         {!!prevBudgeted && (
           <ListItem
             button

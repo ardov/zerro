@@ -49,6 +49,7 @@ export function TagRow(props) {
     available,
     colorRGB,
     isChild,
+    goal,
 
     hasOverspent,
     setBudget,
@@ -115,6 +116,8 @@ export function TagRow(props) {
         available={available}
         prevBudgeted={0}
         anchorEl={anchorEl}
+        goal={goal}
+        needForGoal={goal && goal.amount}
         open={!!anchorEl}
         onChange={handleBudgetChange}
       />
