@@ -23,10 +23,10 @@ export const getTotalsByMonth = createSelector(
     getTransfersOutsideBudget,
     getTotalBudgetedByMonth,
   ],
-  (moths, startFunds, tags, transferFees, transfersOutside, budgets) => {
+  (months, startFunds, tags, transferFees, transfersOutside, budgets) => {
     let prevFunds = startFunds
     let prevOverspent = 0
-    return moths.map((date, i) => {
+    return months.map((date, i) => {
       const result = {
         date,
         prevFunds,
