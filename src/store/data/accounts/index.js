@@ -55,8 +55,7 @@ export const getAccountList = createSelector([getAccounts], accounts =>
 
 export const getAccountsInBudget = createSelector([getAccountList], accounts =>
   accounts.filter(
-    a =>
-      a.title.endsWith('📍') || (!a.archive && a.inBalance && a.type !== 'debt')
+    a => a.title.endsWith('📍') || (a.inBalance && a.type !== 'debt')
   )
 )
 

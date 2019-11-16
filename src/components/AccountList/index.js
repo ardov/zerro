@@ -4,11 +4,15 @@ import Account from './Account'
 import styled from 'styled-components'
 import { getAccountsInBudget, getSavingAccounts } from 'store/data/accounts'
 import { getUserInstrument, getInstruments } from 'store/data/instruments'
+import pluralize from 'helpers/pluralize'
 
 const Heading = styled(Account)`
   margin-top: 16px;
   font-weight: 700;
   font-size: 14px;
+`
+const Archived = styled(Account)`
+  opacity: 0.5;
 `
 
 const getTotalBalance = (accs, targetInstrument, instruments) =>
@@ -29,17 +33,29 @@ const AccountList = ({
 }) => {
   if (!userInstrument) return null
 
-  const inBudgetSum = getTotalBalance(inBudget, userInstrument, instruments)
+  const archivedInBudget = inBudget.filter(a => a.archive)
+  const activeInBudget = inBudget.filter(a => !a.archive)
+
+  const archivedInBudgetSum = getTotalBalance(
+    archivedInBudget,
+    userInstrument,
+    instruments
+  )
+  const activeInBudgetSum = getTotalBalance(
+    activeInBudget,
+    userInstrument,
+    instruments
+  )
   const savingsSum = getTotalBalance(savings, userInstrument, instruments)
 
   return (
     <div className={className}>
       <Heading
         title="В бюджете"
-        balance={inBudgetSum}
+        balance={activeInBudgetSum + archivedInBudgetSum}
         currency={userInstrument.shortTitle}
       />
-      {inBudget.map(acc => (
+      {activeInBudget.map(acc => (
         <Account
           key={acc.id}
           {...acc}
@@ -47,6 +63,19 @@ const AccountList = ({
           onClick={() => onAccountClick(acc.id)}
         />
       ))}
+      {!!archivedInBudgetSum && (
+        <Archived
+          title={`${
+            archivedInBudget.length
+          } ${pluralize(archivedInBudget.length, [
+            'архивный счёт',
+            'архивных счёта',
+            'архивных счётов',
+          ])}`}
+          balance={archivedInBudgetSum}
+          currency={userInstrument.shortTitle}
+        />
+      )}
 
       <Heading
         title="Прочее"
@@ -73,7 +102,4 @@ const mapStateToProps = (state, props) => ({
 
 const mapDispatchToProps = (dispatch, props) => ({})
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(AccountList)
+export default connect(mapStateToProps, mapDispatchToProps)(AccountList)
