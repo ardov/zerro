@@ -25,6 +25,7 @@ const mapStateToProps = (state, { id }) => {
   return {
     id: tr.id,
     changed: tr.changed,
+    qrCode: tr.qrCode,
     type: getType(tr),
 
     incomeAccountTitle: incomeAccount && incomeAccount.title,
@@ -58,7 +59,4 @@ const mapDispatchToProps = (dispatch, { id }) => ({
   onFilterByPayee: payee => dispatch(setCondition({ search: payee })),
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Transaction)
+export default connect(mapStateToProps, mapDispatchToProps)(Transaction)

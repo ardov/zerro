@@ -44,6 +44,7 @@ export default function Transaction({
   payee,
   tag,
   comment,
+  qrCode,
 
   income,
   incomeCurrency,
@@ -123,6 +124,7 @@ export default function Transaction({
               color="textSecondary"
             >
               {deleted && <DeletedLabel />}
+              {qrCode && <QRLabel />}
               {payee && (
                 <Typography
                   noWrap
@@ -150,6 +152,18 @@ export default function Transaction({
         }
       />
     </ListItem>
+  )
+}
+
+const QRLabel = () => {
+  const Label = withStyles(theme => ({
+    root: { marginRight: theme.spacing(1) },
+  }))(Typography)
+  return (
+    // eslint-disable-next-line jsx-a11y/accessible-emoji
+    <Label variant="body2" component="span" role="img" aria-label="чек">
+      🧾
+    </Label>
   )
 }
 

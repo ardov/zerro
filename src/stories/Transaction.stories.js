@@ -9,6 +9,7 @@ const transfer = {
   id: 'testId',
   changed: 0,
   type: 'transfer',
+  qrCode: '34r',
 
   incomeAccountTitle: 'Income Account',
   outcomeAccountTitle: 'Outcome Account',
