@@ -1,6 +1,6 @@
 {
-  "short_name": "ZERRO",
-  "name": "ZERRO",
+  "short_name": "Zerro",
+  "name": "Zerro",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,6 +10,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#212121",
-  "background_color": "#212121"
+  "theme_color": "#000000",
+  "background_color": "#000000"
 }
