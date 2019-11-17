@@ -21,6 +21,7 @@ import DateFnsUtils from '@date-io/date-fns'
 import ruDateLocale from 'date-fns/locale/ru'
 import { createBrowserHistory } from 'history'
 import reactGA from 'react-ga'
+import ErrorBoundary from 'components/ErrorBoundary'
 
 addLocaleData(ru)
 reactGA.initialize('UA-72832368-2')
@@ -58,12 +59,14 @@ const PrivateApp = () => (
     <SnackbarHandler />
     <RegularSyncHandler />
     <Box height="100vh" overflow="auto" flexGrow={1}>
-      <Switch>
-        <Route path="/transactions" component={Transactions} />
-        <Route path="/tags" component={Tags} />
-        <Route path="/budget" component={Budgets} />
-        <Redirect to="/transactions" />
-      </Switch>
+      <ErrorBoundary>
+        <Switch>
+          <Route path="/transactions" component={Transactions} />
+          <Route path="/tags" component={Tags} />
+          <Route path="/budget" component={Budgets} />
+          <Redirect to="/transactions" />
+        </Switch>
+      </ErrorBoundary>
     </Box>
   </Box>
 )
