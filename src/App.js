@@ -37,13 +37,15 @@ const App = ({ isLoggedIn, themeType }) => (
   <ThemeProvider theme={createTheme(themeType)}>
     <>
       <CssBaseline />
-      <IntlProvider locale="ru">
-        <MuiPickersUtilsProvider utils={DateFnsUtils} locale={ruDateLocale}>
-          <Router history={history}>
-            {isLoggedIn ? <PrivateApp /> : <Auth />}
-          </Router>
-        </MuiPickersUtilsProvider>
-      </IntlProvider>
+      <ErrorBoundary>
+        <IntlProvider locale="ru">
+          <MuiPickersUtilsProvider utils={DateFnsUtils} locale={ruDateLocale}>
+            <Router history={history}>
+              {isLoggedIn ? <PrivateApp /> : <Auth />}
+            </Router>
+          </MuiPickersUtilsProvider>
+        </IntlProvider>
+      </ErrorBoundary>
     </>
   </ThemeProvider>
 )
