@@ -8,11 +8,14 @@ import './index.scss'
 import App from './App'
 import * as serviceWorker from './serviceWorker'
 import { store } from './store'
+import GlobalErrorBoundary from 'components/GlobalErrorBoundary'
 
 ReactDOM.render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
+  <GlobalErrorBoundary>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </GlobalErrorBoundary>,
   document.getElementById('root')
 )
 
