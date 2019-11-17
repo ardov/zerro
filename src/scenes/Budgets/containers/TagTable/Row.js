@@ -47,6 +47,8 @@ export const useStyles = makeStyles(theme => ({
 
 export default function Row(props) {
   const {
+    metric,
+
     id,
     // showOutcome,
     symbol,
@@ -92,6 +94,7 @@ export default function Row(props) {
         )}
         <TagRow
           {...{
+            metric,
             id,
             symbol,
             colorRGB,
@@ -116,7 +119,12 @@ export default function Row(props) {
             setBudget,
             hasOverspent,
           }).map(data => (
-            <TagRow key={data.id} {...data} onSelect={onSelect} />
+            <TagRow
+              key={data.id}
+              {...data}
+              metric={metric}
+              onSelect={onSelect}
+            />
           ))}
       </ExpansionPanelDetails>
     </ExpansionPanel>

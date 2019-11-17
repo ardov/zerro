@@ -11,8 +11,11 @@ import TransactionsDrawer from 'components/TransactionsDrawer'
 import { endOfMonth } from 'date-fns'
 import sendEvent from 'helpers/sendEvent'
 
+const metrics = ['available', 'budgeted', 'outcome']
+
 function TagTable({ tags, currency, date, updateBudget, ...rest }) {
   const [selected, setSelected] = useState()
+  const [metricIndex, setMetricIndex] = useState(0)
   const filtered = tags
     .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailable)
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -20,6 +23,9 @@ function TagTable({ tags, currency, date, updateBudget, ...rest }) {
   useEffect(() => {
     if (selected) sendEvent('Budgets: see transactions')
   }, [selected])
+
+  const toggleMetric = () =>
+    setMetricIndex(metricIndex === 2 ? 0 : metricIndex + 1)
 
   const filterConditions = {
     type: 'outcome',
@@ -37,6 +43,8 @@ function TagTable({ tags, currency, date, updateBudget, ...rest }) {
           onClose={() => setSelected(undefined)}
         />
         <TagTableHeader
+          metric={metrics[metricIndex]}
+          onToggleMetric={toggleMetric}
           position="sticky"
           top={0}
           zIndex={2}
@@ -45,6 +53,7 @@ function TagTable({ tags, currency, date, updateBudget, ...rest }) {
         {filtered.map(tag => (
           <Row
             key={tag.id}
+            metric={metrics[metricIndex]}
             {...tag}
             setBudget={updateBudget}
             onSelect={id => setSelected(id)}
@@ -57,6 +66,7 @@ function TagTable({ tags, currency, date, updateBudget, ...rest }) {
 }
 
 const mapStateToProps = (state, { index }) => ({
+  prevTags: getAmountsByTag(state)[index - 1],
   tags: getAmountsByTag(state)[index],
   currency: getUserCurrencyCode(state),
 })

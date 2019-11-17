@@ -1,5 +1,12 @@
 import React from 'react'
-import { Typography, Box, Link, IconButton, Tooltip } from '@material-ui/core'
+import {
+  Typography,
+  Box,
+  Link,
+  IconButton,
+  Tooltip,
+  useMediaQuery,
+} from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import EmojiIcon from 'components/EmojiIcon'
 import { formatMoney } from 'helpers/format'
@@ -15,8 +22,8 @@ export const useStyles = makeStyles(theme => ({
     paddingRight: theme.spacing(2),
     display: 'grid',
     width: '100%',
-    gridTemplateColumns: 'auto 120px 120px 120px',
-    gridTemplateAreas: `"name budget outcome available"`,
+    gridTemplateColumns: ({ isMobile }) =>
+      isMobile ? 'auto 120px' : 'auto 120px 120px 120px',
     alignItems: 'center',
     gridColumnGap: theme.spacing(4),
 
@@ -25,14 +32,10 @@ export const useStyles = makeStyles(theme => ({
     },
   },
   name: {
-    gridArea: 'name',
     display: 'flex',
     alignItems: 'center',
     minWidth: 0,
   },
-  budget: { gridArea: 'budget' },
-  outcome: { gridArea: 'outcome' },
-  available: { gridArea: 'available' },
   warning: {
     transform: 'translateY(4px)',
     marginRight: theme.spacing(0.5),
@@ -41,6 +44,7 @@ export const useStyles = makeStyles(theme => ({
 
 export function TagRow(props) {
   const {
+    metric,
     id,
     symbol,
     name,
@@ -56,7 +60,8 @@ export function TagRow(props) {
     date,
     onSelect,
   } = props
-  const c = useStyles({ isChild })
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
+  const c = useStyles({ isChild, isMobile })
   const [anchorEl, setAnchorEl] = React.useState(null)
   const showBudget = isChild ? !!budgeted : true
 
@@ -85,35 +90,33 @@ export function TagRow(props) {
         </Typography>
       </div>
 
-      {showBudget ? (
-        <Box
-          color={budgeted ? 'text.primary' : 'text.hint'}
-          className={c.budget}
-          clone
-        >
-          <Link
-            variant="body1"
-            align="right"
-            component="button"
-            onClick={e => setAnchorEl(e.currentTarget)}
-          >
-            {isUnderfunded && '⚠️'}
-            {formatMoney(budgeted)}
-          </Link>
-        </Box>
-      ) : (
-        <Box display="flex" justifyContent="flex-end" className={c.budget}>
-          {isUnderfunded && '⚠️'}
-          <Tooltip title="Добавить бюджет">
-            <IconButton
-              size="small"
-              edge="end"
-              children={<AddIcon />}
+      {/* BUDGET */}
+      {(metric === 'budgeted' || !isMobile) &&
+        (showBudget ? (
+          <Box color={budgeted ? 'text.primary' : 'text.hint'} clone>
+            <Link
+              variant="body1"
+              align="right"
+              component="button"
               onClick={e => setAnchorEl(e.currentTarget)}
-            />
-          </Tooltip>
-        </Box>
-      )}
+            >
+              {isUnderfunded && '⚠️'}
+              {formatMoney(budgeted)}
+            </Link>
+          </Box>
+        ) : (
+          <Box display="flex" justifyContent="flex-end">
+            {isUnderfunded && '⚠️'}
+            <Tooltip title="Добавить бюджет">
+              <IconButton
+                size="small"
+                edge="end"
+                children={<AddIcon />}
+                onClick={e => setAnchorEl(e.currentTarget)}
+              />
+            </Tooltip>
+          </Box>
+        ))}
 
       <BudgetPopover
         key={`${id}${budgeted}`}
@@ -127,24 +130,34 @@ export function TagRow(props) {
         onChange={handleBudgetChange}
       />
 
-      <Box
-        color={outcome ? 'text.primary' : 'text.hint'}
-        className={c.outcome}
-        clone
-      >
-        <Typography variant="body1" align="right" onClick={() => onSelect(id)}>
-          {formatMoney(outcome ? -outcome : 0)}
-        </Typography>
-      </Box>
+      {/* OUTCOME */}
+      {(metric === 'outcome' || !isMobile) && (
+        <Box color={outcome ? 'text.primary' : 'text.hint'} clone>
+          <Typography
+            variant="body1"
+            align="right"
+            onClick={() => onSelect(id)}
+          >
+            {formatMoney(outcome ? -outcome : 0)}
+          </Typography>
+        </Box>
+      )}
 
-      <Box color={availableColor} className={c.available}>
-        <Typography variant="body1" align="right">
-          {hasInnerOverspent && (
-            <WarningIcon color="error" fontSize="small" className={c.warning} />
-          )}
-          {formatMoney(available)}
-        </Typography>
-      </Box>
+      {/* AVAILABLE */}
+      {(metric === 'available' || !isMobile) && (
+        <Box color={availableColor}>
+          <Typography variant="body1" align="right">
+            {hasInnerOverspent && (
+              <WarningIcon
+                color="error"
+                fontSize="small"
+                className={c.warning}
+              />
+            )}
+            {formatMoney(available)}
+          </Typography>
+        </Box>
+      )}
     </div>
   )
 }

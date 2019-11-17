@@ -7,10 +7,11 @@ import TransferTable from './containers/TransferTable'
 import BudgetInfo from './containers/BudgetInfo'
 import MonthSelector from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
-import { Box, Hidden } from '@material-ui/core'
+import { Box, Hidden, useMediaQuery } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid'
 
 const Budgets = ({ monthDates }) => {
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
   const [month, setMonth] = React.useState(+startOfMonth(new Date()))
 
   const setCurrentMonth = () => setMonth(+startOfMonth(new Date()))
@@ -18,7 +19,7 @@ const Budgets = ({ monthDates }) => {
   const index = monthDates.findIndex(date => date === month)
 
   return (
-    <Box p={3}>
+    <Box p={isMobile ? 1 : 3}>
       <Grid container spacing={3}>
         <Grid item xs={12} md={3}>
           <MonthSelector
