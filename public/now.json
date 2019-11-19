@@ -35,6 +35,18 @@
       "dest": "/social-preview.png"
     },
     {
+      "src": "^/service-worker.js",
+      "dest": "/service-worker.js"
+    },
+    {
+      "src": "^/android-chrome-512x512.png",
+      "dest": "/android-chrome-512x512.png"
+    },
+    {
+      "src": "^/android-chrome-192x192.png",
+      "dest": "/android-chrome-192x192.png"
+    },
+    {
       "src": "^/(.*)",
       "dest": "/index.html"
     }
