@@ -47,6 +47,10 @@
       "dest": "/android-chrome-192x192.png"
     },
     {
+      "src": "^/precache-manifest(.*).js",
+      "dest": "/precache-manifest$1.js"
+    },
+    {
       "src": "^/(.*)",
       "dest": "/index.html"
     }
