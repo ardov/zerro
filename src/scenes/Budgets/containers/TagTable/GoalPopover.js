@@ -1,37 +1,35 @@
-import React from 'react'
-import {
-  Box,
-  List,
-  ListItem,
-  ListItemText,
-  InputAdornment,
-  Popover,
-  IconButton,
-  TextField,
-  MenuItem,
-} from '@material-ui/core'
-import CheckCircleIcon from '@material-ui/icons/CheckCircle'
+import React, { useState } from 'react'
+import { connect } from 'react-redux'
+import { Box, Popover, TextField, MenuItem } from '@material-ui/core'
 import { formatMoney } from 'helpers/format'
 import AmountInput from 'components/AmountInput'
+import { getGoals } from 'store/data/budgets'
+import { setGoal } from 'store/data/budgets/thunks'
 
-export default function BudgetPopover({
+export function GoalPopover({
   currency,
   type = 'monthly',
-  amount,
+  amount = 0,
   date,
   onChange,
+  onClose,
   ...rest
 }) {
-  const [value, setValue] = React.useState(amount)
-  const [vType, setVType] = React.useState(type)
-  const [vDate, setVDate] = React.useState(date)
+  const [value, setValue] = useState(amount)
+  const [vType, setVType] = useState(type)
+  const [vDate, setVDate] = useState(date)
 
   const handleTypeChange = e => setVType(e.target.value)
-  const save = () => onChange({ type: vType, amount: value, date: vDate })
+  const save = () => {
+    if (value !== amount || vType !== type || vDate !== date) {
+      onChange({ type: vType, amount: value, date: vDate })
+    }
+    onClose()
+  }
 
   return (
     <Popover disableRestoreFocus onClose={save} {...rest}>
-      <Box p={2} pb={0}>
+      <Box m={2}>
         <TextField
           select
           variant="outlined"
@@ -40,15 +38,16 @@ export default function BudgetPopover({
           label="Хочу"
           fullWidth
         >
-          <MenuItem value="monthly">Откладывать каждый месяц</MenuItem>
+          <MenuItem value="monthly">Откладывать ежемесячно</MenuItem>
           <MenuItem value="target">Накопить сумму</MenuItem>
-          <MenuItem value="targetByDate">Накопить сумму до...</MenuItem>
+          {/* <MenuItem value="targetByDate">Накопить сумму к...</MenuItem> */}
         </TextField>
       </Box>
 
-      <Box p={2} pb={0}>
+      <Box m={2}>
         <AmountInput
           autoFocus
+          onFocus={e => e.target.select()}
           value={value}
           fullWidth
           onChange={value => setValue(+value)}
@@ -58,32 +57,16 @@ export default function BudgetPopover({
           }}
           helperText={`Остаток категории ${formatMoney(10000, currency)}`}
           placeholder="0"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton edge="end" onClick={save}>
-                  <CheckCircleIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
         />
       </Box>
-
-      <List>
-        {/* {!!prevBudgeted && (
-          <ListItem
-            button
-            selected={+value === +prevBudgeted}
-            onClick={() => onChange(+prevBudgeted)}
-          >
-            <ListItemText
-              primary="Бюджет в прошлом месяце"
-              secondary={formatMoney(prevBudgeted, currency)}
-            />
-          </ListItem>
-        )} */}
-      </List>
     </Popover>
   )
 }
+
+const mapStateToProps = (state, { tag }) => getGoals(state)[tag] || {}
+
+const mapDispatchToProps = (dispatch, { tag }) => ({
+  onChange: goal => dispatch(setGoal({ ...goal, tag })),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(GoalPopover)

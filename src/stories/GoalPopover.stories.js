@@ -1,7 +1,7 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 import { action } from '@storybook/addon-actions'
-import GoalPopover from 'scenes/Budgets/containers/TagTable/GoalPopover'
+import { GoalPopover } from 'scenes/Budgets/containers/TagTable/GoalPopover'
 import decorator from 'helpers/storybookDecorator'
 
 const data = {
