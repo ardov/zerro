@@ -6,6 +6,7 @@ import { getLastSyncTime } from 'store/data/serverTimestamp'
 import { getPendingState } from 'store/isPending'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import RefreshIcon from '@material-ui/icons/Refresh'
+import BackupIcon from '@material-ui/icons/Backup'
 import Badge from '@material-ui/core/Badge'
 import IconButton from '@material-ui/core/IconButton'
 import { withStyles } from '@material-ui/core/styles'
@@ -30,10 +31,16 @@ const RefreshButton = ({
       <StyledBadge badgeContent={changedNum}>
         <IconButton
           onClick={syncData}
-          variant={changedNum ? 'contained' : 'outlined'}
+          color={changedNum ? 'primary' : ''}
           {...rest}
         >
-          {isPending ? <CircularProgress size={24} /> : <RefreshIcon />}
+          {isPending ? (
+            <CircularProgress size={24} />
+          ) : changedNum ? (
+            <BackupIcon />
+          ) : (
+            <RefreshIcon />
+          )}
         </IconButton>
       </StyledBadge>
     </Tooltip>
@@ -50,7 +57,4 @@ const mapDispatchToProps = dispatch => ({
   syncData: () => dispatch(syncData()),
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(RefreshButton)
+export default connect(mapStateToProps, mapDispatchToProps)(RefreshButton)
