@@ -18,8 +18,11 @@ export default function AmountInput({
 
   useEffect(() => {
     if (!focused) setExpression(value)
-    if (focused && ref) ref.current.select()
   }, [value, focused])
+
+  useEffect(() => {
+    if (focused && ref) ref.current.select()
+  }, [focused])
 
   const sym = currency ? getCurrencySymbol(currency) : null
 
