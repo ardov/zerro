@@ -48,6 +48,7 @@ export const useStyles = makeStyles(theme => ({
 export default function Row(props) {
   const {
     metric,
+    goals,
 
     id,
     // showOutcome,
@@ -59,7 +60,6 @@ export default function Row(props) {
     totalAvailable,
     totalOutcome,
     children,
-    goal,
     // budgeted,
     outcome,
     // available,
@@ -99,7 +99,7 @@ export default function Row(props) {
             symbol,
             colorRGB,
             name,
-            goal,
+            goal: goals[id],
             budgeted: totalBudgeted,
             outcome: totalOutcome,
             available: totalAvailable,
@@ -122,6 +122,7 @@ export default function Row(props) {
             <TagRow
               key={data.id}
               {...data}
+              goal={goals[data.id]}
               metric={metric}
               onSelect={onSelect}
             />

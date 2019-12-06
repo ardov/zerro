@@ -12,6 +12,7 @@ import EmojiIcon from 'components/EmojiIcon'
 import { formatMoney } from 'helpers/format'
 import WarningIcon from '@material-ui/icons/Warning'
 import AddIcon from '@material-ui/icons/Add'
+import EmojiFlagsIcon from '@material-ui/icons/EmojiFlags'
 import BudgetPopover from './BudgetPopover'
 import GoalPopover from './GoalPopover'
 
@@ -30,6 +31,13 @@ export const useStyles = makeStyles(theme => ({
 
     '&:hover': {
       background: theme.palette.action.hover,
+    },
+    '&:hover .addGoal': {
+      opacity: 1,
+      transition: '.3s',
+    },
+    '&:not(:hover) .addGoal': {
+      opacity: 0,
     },
   },
   name: {
@@ -71,9 +79,6 @@ export function TagRow(props) {
     setBudgetAnchorEl(null)
     if (amount !== budgeted) setBudget(amount, date, id)
   }
-  const handleGoalChange = () => {
-    setGoalAnchorEl(null)
-  }
 
   const availableColor = getAvailableColor(
     available,
@@ -92,7 +97,16 @@ export function TagRow(props) {
         <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} flexShrink={0} />
         <Typography variant="body1" color="textPrimary" noWrap>
           {name}
-          <span onClick={e => setGoalAnchorEl(e.currentTarget)}>+++</span>
+
+          <Box component="span" className="addGoal">
+            <Tooltip title="Добавить цель">
+              <IconButton
+                onClick={e => setGoalAnchorEl(e.currentTarget)}
+                size="small"
+                children={<EmojiFlagsIcon />}
+              />
+            </Tooltip>
+          </Box>
         </Typography>
       </div>
 

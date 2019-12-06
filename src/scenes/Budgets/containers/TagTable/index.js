@@ -10,10 +10,11 @@ import TagTableHeader from './TagTableHeader'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 import { endOfMonth } from 'date-fns'
 import sendEvent from 'helpers/sendEvent'
+import { getGoals } from 'store/data/budgets'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
-function TagTable({ tags, currency, date, updateBudget, ...rest }) {
+function TagTable({ tags, goals, currency, date, updateBudget, ...rest }) {
   const [selected, setSelected] = useState()
   const [metricIndex, setMetricIndex] = useState(0)
   const filtered = tags
@@ -53,6 +54,7 @@ function TagTable({ tags, currency, date, updateBudget, ...rest }) {
         {filtered.map(tag => (
           <Row
             key={tag.id}
+            goals={goals}
             metric={metrics[metricIndex]}
             {...tag}
             setBudget={updateBudget}
@@ -68,6 +70,7 @@ function TagTable({ tags, currency, date, updateBudget, ...rest }) {
 const mapStateToProps = (state, { index }) => ({
   prevTags: getAmountsByTag(state)[index - 1],
   tags: getAmountsByTag(state)[index],
+  goals: getGoals(state),
   currency: getUserCurrencyCode(state),
 })
 
