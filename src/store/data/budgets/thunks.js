@@ -1,8 +1,7 @@
 import { getRootUser } from 'store/data/users'
-import slice from './slice'
+import { setBudget } from './index'
 import { goalDates, goalTypes } from './constants'
 import { createBudget } from './createBudget'
-const { setBudget } = slice.actions
 
 export const setGoal = ({ type, amount, date, tag }) => (
   dispatch,
@@ -35,9 +34,7 @@ export const setGoal = ({ type, amount, date, tag }) => (
     outcome: date,
   })
 
-  dispatch(setBudget(typeBudget))
-  dispatch(setBudget(amountBudget))
-  dispatch(setBudget(dateBudget))
+  dispatch(setBudget([typeBudget, amountBudget, dateBudget]))
 }
 
 export const deleteGoal = tag => (dispatch, getState) => {
@@ -49,7 +46,5 @@ export const deleteGoal = tag => (dispatch, getState) => {
   const amountBudget = createBudget({ user, tag, date: goalDates.amount })
   const dateBudget = createBudget({ user, tag, date: goalDates.date })
 
-  dispatch(setBudget(typeBudget))
-  dispatch(setBudget(amountBudget))
-  dispatch(setBudget(dateBudget))
+  dispatch(setBudget([typeBudget, amountBudget, dateBudget]))
 }
