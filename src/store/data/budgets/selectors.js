@@ -61,8 +61,6 @@ const getGoals = createSelector([getBudgets], budgets => {
       if (goalsByTag[tag]) goalsByTag[tag].date = outcome
     })
 
-  console.log('goalsByTag', goalsByTag)
-
   return goalsByTag
 })
 
