@@ -13,6 +13,7 @@ import { formatMoney } from 'helpers/format'
 import WarningIcon from '@material-ui/icons/Warning'
 import AddIcon from '@material-ui/icons/Add'
 import BudgetPopover from './BudgetPopover'
+import GoalPopover from './GoalPopover'
 
 export const useStyles = makeStyles(theme => ({
   row: {
@@ -62,12 +63,16 @@ export function TagRow(props) {
   } = props
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
   const c = useStyles({ isChild, isMobile })
-  const [anchorEl, setAnchorEl] = React.useState(null)
+  const [budgetAnchorEl, setBudgetAnchorEl] = React.useState(null)
+  const [goalAnchorEl, setGoalAnchorEl] = React.useState(null)
   const showBudget = isChild ? !!budgeted : true
 
   const handleBudgetChange = amount => {
-    setAnchorEl(null)
+    setBudgetAnchorEl(null)
     if (amount !== budgeted) setBudget(amount, date, id)
+  }
+  const handleGoalChange = () => {
+    setGoalAnchorEl(null)
   }
 
   const availableColor = getAvailableColor(
@@ -87,6 +92,7 @@ export function TagRow(props) {
         <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} flexShrink={0} />
         <Typography variant="body1" color="textPrimary" noWrap>
           {name}
+          <span onClick={e => setGoalAnchorEl(e.currentTarget)}>+++</span>
         </Typography>
       </div>
 
@@ -98,7 +104,7 @@ export function TagRow(props) {
               variant="body1"
               align="right"
               component="button"
-              onClick={e => setAnchorEl(e.currentTarget)}
+              onClick={e => setBudgetAnchorEl(e.currentTarget)}
             >
               {isUnderfunded && '⚠️'}
               {formatMoney(budgeted)}
@@ -112,7 +118,7 @@ export function TagRow(props) {
                 size="small"
                 edge="end"
                 children={<AddIcon />}
-                onClick={e => setAnchorEl(e.currentTarget)}
+                onClick={e => setBudgetAnchorEl(e.currentTarget)}
               />
             </Tooltip>
           </Box>
@@ -123,11 +129,18 @@ export function TagRow(props) {
         budgeted={budgeted}
         available={available}
         prevBudgeted={0}
-        anchorEl={anchorEl}
+        anchorEl={budgetAnchorEl}
         goal={goal}
         needForGoal={goal && goal.amount}
-        open={!!anchorEl}
+        open={!!budgetAnchorEl}
         onChange={handleBudgetChange}
+      />
+
+      <GoalPopover
+        tag={id}
+        anchorEl={goalAnchorEl}
+        open={!!goalAnchorEl}
+        onClose={() => setGoalAnchorEl(null)}
       />
 
       {/* OUTCOME */}
