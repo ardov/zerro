@@ -1,6 +1,5 @@
 import selectors from './selectors'
 import slice from './slice'
-// import thunks from './thunks'
 
 // REDUCER
 export default slice.reducer
@@ -14,7 +13,5 @@ export const {
   getBudgetsToSync,
   getBudgetsByMonthAndTag,
   getBudget,
+  getGoals,
 } = selectors
-
-// THUNKS
-// export const { setOutcomeBudget } = thunks
