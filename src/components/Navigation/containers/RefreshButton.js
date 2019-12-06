@@ -31,7 +31,7 @@ const RefreshButton = ({
       <StyledBadge badgeContent={changedNum}>
         <IconButton
           onClick={syncData}
-          color={changedNum ? 'primary' : ''}
+          color={changedNum ? 'primary' : 'default'}
           {...rest}
         >
           {isPending ? (
