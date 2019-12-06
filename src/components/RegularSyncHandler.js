@@ -13,7 +13,6 @@ let timer = null
 
 class RegularSyncHandler extends React.Component {
   componentDidMount = () => {
-    console.log('regular sync started')
     this.props.loadLocalData().then(this.checkSync)
     window.addEventListener('beforeunload', this.beforeUnload)
   }
@@ -34,6 +33,8 @@ class RegularSyncHandler extends React.Component {
   checkSync = () => {
     const checkSync = this.checkSync
     const { lastSync, sync, isLoggedIn, lastChange, isPending } = this.props
+    const isOnline = window.navigator.onLine
+
     // Regular sync conditions
     const needRegularSync = Date.now() - lastSync > SYNC_DELAY
     const hasUnsavedChanges = !!lastChange
@@ -41,6 +42,7 @@ class RegularSyncHandler extends React.Component {
     if (
       isLoggedIn &&
       !isPending &&
+      isOnline &&
       (needRegularSync || (hasUnsavedChanges && itsTimeToSyncChanges))
     ) {
       console.log(`${needRegularSync ? 'regular' : ''}`)
@@ -66,7 +68,4 @@ const mapDispatchToProps = dispatch => ({
   loadLocalData: () => dispatch(loadLocalData()),
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(RegularSyncHandler)
+export default connect(mapStateToProps, mapDispatchToProps)(RegularSyncHandler)
