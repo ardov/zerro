@@ -1,6 +1,6 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/core/styles'
-import { Box } from '@material-ui/core'
+import { Box, Checkbox } from '@material-ui/core'
 
 const sizes = {
   s: 32,
@@ -15,13 +15,49 @@ const useStyles = makeStyles(theme => ({
     borderRadius: '50%',
     border: ({ color }) => (color ? `1px solid ${color}` : 'none'),
     backgroundColor: theme.palette.action.hover,
+
+    '&:hover .checkbox': {
+      opacity: ({ isInteractive }) => (isInteractive ? 1 : 0),
+      transition: '.2s',
+    },
+    '&:not(:hover) .checkbox': {
+      opacity: ({ showCheckBox, checked }) => (showCheckBox || checked ? 1 : 0),
+      transition: '.2s',
+    },
+    '&:hover .emoji': {
+      opacity: ({ isInteractive }) => (isInteractive ? 0 : 1),
+      transition: '.2s',
+    },
+    '&:not(:hover) .emoji': {
+      opacity: ({ showCheckBox, checked }) => (showCheckBox || checked ? 0 : 1),
+      transition: '.2s',
+    },
   },
 
-  emoji: { fontSize: '4em', transform: 'scale(.25)', textAlign: 'center' },
+  emoji: {
+    position: 'absolute',
+    fontSize: '4em',
+    transform: 'scale(.25)',
+    textAlign: 'center',
+  },
 }))
 
-export default function EmojiIcon({ symbol, color, size = 's', ...rest }) {
-  const c = useStyles({ color, size })
+export default function EmojiIcon({
+  symbol,
+  color,
+  size = 's',
+  onChange,
+  checked,
+  showCheckBox,
+  ...rest
+}) {
+  const c = useStyles({
+    color,
+    size,
+    isInteractive: !!onChange,
+    showCheckBox,
+    checked,
+  })
 
   return (
     <Box
@@ -29,9 +65,18 @@ export default function EmojiIcon({ symbol, color, size = 's', ...rest }) {
       display="flex"
       alignItems="center"
       justifyContent="center"
+      position="relative"
       {...rest}
     >
-      <span className={c.emoji}>{symbol}</span>
+      {onChange && (
+        <Checkbox
+          className="checkbox"
+          checked={checked}
+          onChange={onChange}
+          color="primary"
+        />
+      )}
+      <span className={c.emoji + ' emoji'}>{symbol}</span>
     </Box>
   )
 }

@@ -8,9 +8,9 @@ import {
   ListItemAvatar,
   ListItemText,
 } from '@material-ui/core'
+import EmojiIcon from 'components/EmojiIcon'
 import { MainLine } from './MainLine'
 import { Amount } from './Amount'
-import Icon from './Icon'
 
 const useStyles = makeStyles(theme => ({
   listItem: { borderRadius: theme.shape.borderRadius },
@@ -84,14 +84,13 @@ export default function Transaction({
       onDoubleClick={handleSelectSimilar}
     >
       <ListItemAvatar>
-        <Icon
-          {...{
-            isChecked,
-            isInSelectionMode,
-            symbol,
-            onToggle,
-            color,
-          }}
+        <EmojiIcon
+          symbol={symbol}
+          showCheckBox={isInSelectionMode}
+          checked={isChecked}
+          onChange={onToggle}
+          color={color}
+          size="m"
         />
       </ListItemAvatar>
       <ListItemText

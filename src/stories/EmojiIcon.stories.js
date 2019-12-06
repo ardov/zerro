@@ -4,7 +4,7 @@ import { action } from '@storybook/addon-actions'
 import EmojiIcon from 'components/EmojiIcon'
 import decorator from 'helpers/storybookDecorator'
 
-const symbol = 'Hj'
+const symbol = '💩'
 
 export const actions = {
   onClick: action('onClick'),
@@ -13,4 +13,15 @@ export const actions = {
 storiesOf('EmojiIcon', module)
   .addDecorator(decorator())
   .add('default', () => <EmojiIcon symbol={symbol} {...actions} />)
-  .add('m', () => <EmojiIcon symbol={symbol} {...actions} size="m" />)
+  .add('interactive', () => (
+    <EmojiIcon checked onChange={() => {}} symbol={symbol} {...actions} />
+  ))
+  .add('m', () => (
+    <EmojiIcon
+      symbol={symbol}
+      showCheckBox
+      onChange={() => {}}
+      {...actions}
+      size="m"
+    />
+  ))
