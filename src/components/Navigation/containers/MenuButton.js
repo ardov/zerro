@@ -25,12 +25,18 @@ const useStyles = makeStyles(({ spacing }) => ({
 function MenuButton({ exportCsv, exportJSON, logOut, toggleTheme, ...rest }) {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const classes = useStyles()
+  const localTheme = localStorage.getItem('theme')
 
   const handleClick = event => setAnchorEl(event.currentTarget)
   const handleClose = () => setAnchorEl(null)
   const handleThemeChange = () => {
     handleClose()
+    localStorage.setItem('theme', localTheme === 'dark' ? 'light' : 'dark')
     toggleTheme()
+  }
+  const setAutoTheme = () => {
+    handleClose()
+    localStorage.removeItem('theme')
   }
 
   return (
@@ -50,20 +56,22 @@ function MenuButton({ exportCsv, exportJSON, logOut, toggleTheme, ...rest }) {
           <SaveAltIcon className={classes.menuIcon} color="action" />
           Полный бэкап
         </MenuItem>
-
         <Box my={1}>
           <Divider light />
         </Box>
-
         <MenuItem onClick={handleThemeChange}>
           <InvertColorsIcon className={classes.menuIcon} color="action" />
           Изменить тему
         </MenuItem>
-
+        {localTheme && (
+          <MenuItem onClick={setAutoTheme}>
+            <InvertColorsIcon className={classes.menuIcon} color="action" />
+            Менять тему автоматически
+          </MenuItem>
+        )}
         <Box my={1}>
           <Divider light />
         </Box>
-
         <MenuItem onClick={logOut}>
           <ExitToAppIcon className={classes.menuIcon} color="action" />
           Выйти
@@ -80,7 +88,4 @@ const mapDispatchToProps = dispatch => ({
   toggleTheme: () => dispatch(toggle()),
 })
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(MenuButton)
+export default connect(null, mapDispatchToProps)(MenuButton)
