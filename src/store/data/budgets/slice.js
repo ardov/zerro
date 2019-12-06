@@ -17,9 +17,11 @@ export default createSlice({
   initialState,
   reducers: {
     setBudget: ({ diff }, { payload }) => {
-      const budget = payload
-      const id = `${budget.tag},${format(budget.date, 'yyyy-MM-dd')}`
-      diff[id] = budget
+      const budgets = Array.isArray(payload) ? payload : [payload]
+      budgets.forEach(budget => {
+        const id = `${budget.tag},${format(budget.date, 'yyyy-MM-dd')}`
+        diff[id] = budget
+      })
     },
   },
   extraReducers: {
