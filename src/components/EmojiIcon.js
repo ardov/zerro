@@ -67,6 +67,7 @@ export default function EmojiIcon({
       position="relative"
       {...rest}
     >
+      <span className={c.emoji + ' emoji'}>{symbol}</span>
       {onChange && (
         <Checkbox
           className="checkbox"
@@ -76,7 +77,6 @@ export default function EmojiIcon({
           {...checkboxProps}
         />
       )}
-      <span className={c.emoji + ' emoji'}>{symbol}</span>
     </Box>
   )
 }
