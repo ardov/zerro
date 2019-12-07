@@ -2,11 +2,13 @@ import { getRootUser } from 'store/data/users'
 import { setBudget } from './index'
 import { goalBudgetDate } from './constants'
 import { createGoal, createBudget } from './helpers'
+import sendEvent from 'helpers/sendEvent'
 
 export const setGoal = ({ type, amount, date, tag }) => (
   dispatch,
   getState
 ) => {
+  sendEvent(`Goals: set ${type} goal`)
   const state = getState()
   const user = getRootUser(state).id
   const goal = createGoal({ user, tag, type, amount, date })
