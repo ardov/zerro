@@ -20,7 +20,7 @@ const getBudgetsToSync = state => convertToSyncArray(state.data.budget.diff)
 
 const getBudgetsByMonthAndTag = createSelector([getBudgets], budgets =>
   Object.values(budgets)
-    .filter(budget => budget.date !== goalBudgetDate)
+    .filter(budget => budget.date !== goalBudgetDate && budget.outcome)
     .reduce((result, budget) => {
       const { date, tag } = budget
       if (!result[date]) result[date] = {}
