@@ -1,4 +1,5 @@
 import { goalBudgetDate, goalTypes } from './constants'
+import { formatMoney } from 'helpers/format'
 
 export const createBudget = ({
   // required fields
@@ -42,6 +43,23 @@ export const createGoal = ({
 
 export const parseGoal = ({ income, outcome }) =>
   outcome ? { amount: outcome, ...decodeGoal(income) } : null
+
+export const goalToWords = ({ type, amount, date }) => {
+  const formattedSum = formatMoney(amount, null, 0)
+  switch (type) {
+    case 'monthly':
+      return `${formattedSum} каждый месяц`
+
+    case 'target':
+      return `Накопить ${formattedSum}`
+
+    case 'targetByDate':
+      return `Накопить ${formattedSum} к ${new Date(date).toLocaleDateString()}`
+
+    default:
+      return `Что-то непонятное`
+  }
+}
 
 const encodeGoal = (type, date) => {
   const typeId = goalTypes.findIndex(goalType => goalType === type)

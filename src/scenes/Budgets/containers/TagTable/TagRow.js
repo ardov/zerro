@@ -15,6 +15,7 @@ import AddIcon from '@material-ui/icons/Add'
 import EmojiFlagsIcon from '@material-ui/icons/EmojiFlags'
 import BudgetPopover from './BudgetPopover'
 import GoalPopover from './GoalPopover'
+import { goalToWords } from 'store/data/budgets/helpers'
 
 export const useStyles = makeStyles(theme => ({
   row: {
@@ -97,16 +98,25 @@ export function TagRow(props) {
         <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} flexShrink={0} />
         <Typography variant="body1" color="textPrimary" noWrap>
           {name}
-
-          <Box component="span" className="addGoal">
-            <Tooltip title="Добавить цель">
-              <IconButton
-                onClick={e => setGoalAnchorEl(e.currentTarget)}
-                size="small"
-                children={<EmojiFlagsIcon />}
-              />
+          {goal && (
+            <Tooltip title={goalToWords(goal)}>
+              <span role="img" aria-label={goalToWords(goal)}>
+                {' '}
+                🚩
+              </span>
             </Tooltip>
-          </Box>
+          )}
+          {!isMobile && (
+            <Box component="span" className="addGoal">
+              <Tooltip title={goal ? 'Изменить цель' : 'Добавить цель'}>
+                <IconButton
+                  onClick={e => setGoalAnchorEl(e.currentTarget)}
+                  size="small"
+                  children={<EmojiFlagsIcon />}
+                />
+              </Tooltip>
+            </Box>
+          )}{' '}
         </Typography>
       </div>
 
