@@ -1,7 +1,7 @@
 import { getRootUser } from 'store/data/users'
 import { setBudget } from './index'
-import { goalDates, goalTypes } from './constants'
-import { createBudget } from './createBudget'
+import { goalBudgetDate } from './constants'
+import { createGoal, createBudget } from './helpers'
 
 export const setGoal = ({ type, amount, date, tag }) => (
   dispatch,
@@ -9,42 +9,15 @@ export const setGoal = ({ type, amount, date, tag }) => (
 ) => {
   const state = getState()
   const user = getRootUser(state).id
-
-  // create type budget
-  const typeBudget = createBudget({
-    user,
-    tag,
-    date: goalDates.type,
-    outcome: goalTypes.findIndex(goalType => goalType === type),
-  })
-
-  // create amount budget
-  const amountBudget = createBudget({
-    user,
-    tag,
-    date: goalDates.amount,
-    outcome: amount,
-  })
-
-  // create date budget
-  const dateBudget = createBudget({
-    user,
-    tag,
-    date: goalDates.date,
-    outcome: date,
-  })
-
-  dispatch(setBudget([typeBudget, amountBudget, dateBudget]))
+  const goal = createGoal({ user, tag, type, amount, date })
+  dispatch(setBudget(goal))
 }
 
 export const deleteGoal = tag => (dispatch, getState) => {
   const state = getState()
   const user = getRootUser(state).id
 
-  // create empty goal budgets
-  const typeBudget = createBudget({ user, tag, date: goalDates.type })
-  const amountBudget = createBudget({ user, tag, date: goalDates.amount })
-  const dateBudget = createBudget({ user, tag, date: goalDates.date })
-
-  dispatch(setBudget([typeBudget, amountBudget, dateBudget]))
+  // create empty goal budget
+  const typeBudget = createBudget({ user, tag, date: goalBudgetDate })
+  dispatch(setBudget(typeBudget))
 }

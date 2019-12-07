@@ -5,7 +5,7 @@ import { getPopulatedTag } from 'store/data/tags'
 import getMonthDates from '../selectors/getMonthDates'
 import { getAmountsByTag } from '../selectors/getAmountsByTag'
 import sendEvent from 'helpers/sendEvent'
-import { createBudget } from 'store/data/budgets/createBudget'
+import { createBudget } from 'store/data/budgets/helpers'
 const { setBudget } = slice.actions
 
 export const setOutcomeBudget = (targetOutcome, monthDate, tagId) => (
