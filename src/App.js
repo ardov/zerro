@@ -66,7 +66,7 @@ const PrivateApp = () => (
           <Route path="/transactions" component={Transactions} />
           <Route path="/tags" component={Tags} />
           <Route path="/budget" component={Budgets} />
-          <Redirect to="/transactions" />
+          <Redirect to="/budget" />
         </Switch>
       </ErrorBoundary>
     </Box>

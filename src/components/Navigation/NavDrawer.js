@@ -9,8 +9,8 @@ import AttachMoneyIcon from '@material-ui/icons/AttachMoney'
 import Logo from 'components/Logo'
 
 const routes = [
-  { path: '/transactions', label: 'История' },
   { path: '/budget', label: 'Бюджет' },
+  { path: '/transactions', label: 'История' },
 ]
 
 const NavigationDrawer = ({
