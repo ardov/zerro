@@ -55,7 +55,6 @@ export function GoalPopover({
             setValue(+value)
             save()
           }}
-          helperText={`Остаток категории ${formatMoney(10000, currency)}`}
           placeholder="0"
         />
       </Box>
