@@ -17,11 +17,14 @@ storiesOf('EmojiIcon', module)
     <EmojiIcon checked onChange={() => {}} symbol={symbol} {...actions} />
   ))
   .add('m', () => (
-    <EmojiIcon
-      symbol={symbol}
-      showCheckBox
-      onChange={() => {}}
-      {...actions}
-      size="m"
-    />
+    <div>
+      <EmojiIcon
+        symbol={symbol}
+        showCheckBox
+        onChange={() => {}}
+        {...actions}
+        size="m"
+      />
+      <EmojiIcon symbol={symbol} {...actions} size="m" />
+    </div>
   ))

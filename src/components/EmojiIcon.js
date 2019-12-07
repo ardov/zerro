@@ -2,10 +2,8 @@ import React from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { Box, Checkbox } from '@material-ui/core'
 
-const sizes = {
-  s: 32,
-  m: 40,
-}
+const sizes = { s: 32, m: 40 }
+const fonts = { s: '4em', m: '6em' }
 
 const useStyles = makeStyles(theme => ({
   symbol: {
@@ -36,7 +34,7 @@ const useStyles = makeStyles(theme => ({
 
   emoji: {
     position: 'absolute',
-    fontSize: '4em',
+    fontSize: ({ size }) => fonts[size],
     transform: 'scale(.25)',
     textAlign: 'center',
   },
@@ -49,6 +47,7 @@ export default function EmojiIcon({
   onChange,
   checked,
   showCheckBox,
+  checkboxProps,
   ...rest
 }) {
   const c = useStyles({
@@ -74,6 +73,7 @@ export default function EmojiIcon({
           checked={checked}
           onChange={onChange}
           color="primary"
+          {...checkboxProps}
         />
       )}
       <span className={c.emoji + ' emoji'}>{symbol}</span>
