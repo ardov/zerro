@@ -39,8 +39,12 @@ export function GoalPopover({
           fullWidth
         >
           <MenuItem value="monthly">Откладывать каждый месяц</MenuItem>
-          <MenuItem value="target">Накопить сумму</MenuItem>
-          {/* <MenuItem value="targetByDate">Накопить сумму к...</MenuItem> */}
+          <MenuItem disabled value="target">
+            Накопить сумму
+          </MenuItem>
+          <MenuItem disabled value="targetByDate">
+            Накопить сумму к дате
+          </MenuItem>
         </TextField>
       </Box>
 
