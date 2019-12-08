@@ -27,7 +27,7 @@ export default function BudgetPopover({
   const [value, setValue] = React.useState(budgeted)
 
   return (
-    <Popover disableRestoreFocus onClose={() => onChange(+value)} {...rest}>
+    <Popover onClose={() => onChange(+value)} {...rest}>
       <Box p={2} pb={0}>
         <AmountInput
           autoFocus

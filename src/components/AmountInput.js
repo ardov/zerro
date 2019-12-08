@@ -67,7 +67,10 @@ export default function AmountInput({
       if (onBlur) onBlur(e)
     },
     onKeyDown: e => {
-      if (onEnter && e.keyCode === 13) onEnter(calc(expression))
+      if (onEnter && e.keyCode === 13) {
+        e.preventDefault()
+        onEnter(calc(expression))
+      }
       if (onKeyDown) onKeyDown(e)
     },
   }
