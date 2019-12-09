@@ -8,7 +8,7 @@ import { getMerchantsToSave } from 'store/data/merchants'
 import { getUsersToSave } from 'store/data/users'
 import { getServerTimestampToSave } from 'store/data/serverTimestamp'
 import { getAccountsToSave } from 'store/data/accounts'
-import { getTagsToSave } from 'store/data/tags'
+import { getTagsToSave, getTagsToSync } from 'store/data/tags'
 import { getCountriesToSave } from 'store/data/_countries'
 import { getCompaniesToSave } from 'store/data/_companies'
 import { getRemindersToSave } from 'store/data/_reminders'
@@ -32,8 +32,9 @@ export const getDataToSave = state => ({
 })
 
 export const getChangedArrays = state => ({
-  transaction: getTransactionsToSync(state),
+  tag: getTagsToSync(state),
   budget: getBudgetsToSync(state),
+  transaction: getTransactionsToSync(state),
 })
 
 export const getChangedNum = state => {
