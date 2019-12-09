@@ -45,9 +45,9 @@ class RegularSyncHandler extends React.Component {
       isOnline &&
       (needRegularSync || (hasUnsavedChanges && itsTimeToSyncChanges))
     ) {
-      console.log(`${needRegularSync ? 'regular' : ''}`)
       sync()
     }
+
     timer = setTimeout(checkSync, CHECK_DELAY)
   }
 
