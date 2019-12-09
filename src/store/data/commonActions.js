@@ -26,15 +26,14 @@ export const updateDataFunc = (
   getId
 ) => {
   if (payload[domain]) {
-    // just to support old format
-    // if it's server data it's alvays array
-    const toUpdate = payload[domain].forEach
-      ? payload[domain]
-      : Object.values(payload[domain])
-
-    toUpdate.forEach(item => {
+    payload[domain].forEach(item => {
       const id = getId ? getId(item) : item.id
       state[id] = converter ? converter(item) : convertDatesToMs(item)
+    })
+  }
+  if (payload.deletion) {
+    payload.deletion.forEach(item => {
+      if (item.object === domain) delete state[item.id]
     })
   }
 }
