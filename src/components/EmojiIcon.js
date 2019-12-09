@@ -72,6 +72,7 @@ export default function EmojiIcon({
         <Checkbox
           className="checkbox"
           checked={checked}
+          onClick={e => e.stopPropagation()}
           onChange={onChange}
           color="primary"
           {...checkboxProps}
