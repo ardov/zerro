@@ -1,4 +1,4 @@
-import { unsignedToRGB } from 'helpers/convertColor'
+import { intToRGB } from 'helpers/convertColor'
 import toArray from 'lodash/toArray'
 import iconsMap from './iconsMap'
 
@@ -21,7 +21,7 @@ export default class Tag {
     // COMPUTED
     this.name = getName(raw.title)
     this.symbol = iconsMap[raw.icon] || raw.title.slice(0, 2)
-    this.colorRGB = raw.color ? unsignedToRGB(raw.color) : null
+    this.colorRGB = raw.color ? intToRGB(raw.color) : null
   }
 
   static nullTag = new Tag({
