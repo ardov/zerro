@@ -15,6 +15,7 @@ import AddIcon from '@material-ui/icons/Add'
 import EmojiFlagsIcon from '@material-ui/icons/EmojiFlags'
 import BudgetPopover from './BudgetPopover'
 import GoalPopover from './GoalPopover'
+import NamePopover from './NamePopover'
 import { goalToWords } from 'store/data/budgets/helpers'
 
 export const useStyles = makeStyles(theme => ({
@@ -74,6 +75,7 @@ export function TagRow(props) {
   const c = useStyles({ isChild, isMobile })
   const [budgetAnchorEl, setBudgetAnchorEl] = React.useState(null)
   const [goalAnchorEl, setGoalAnchorEl] = React.useState(null)
+  const [nameAnchorEl, setNameAnchorEl] = React.useState(null)
   const showBudget = isChild ? !!budgeted : true
 
   const handleBudgetChange = amount => {
@@ -96,7 +98,12 @@ export function TagRow(props) {
     <div className={c.row}>
       <div className={c.name}>
         <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} flexShrink={0} />
-        <Typography variant="body1" color="textPrimary" noWrap>
+        <Typography
+          variant="body1"
+          color="textPrimary"
+          noWrap
+          onClick={e => setNameAnchorEl(e.currentTarget)}
+        >
           {name}
           {goal && (
             <Tooltip title={goalToWords(goal)}>
@@ -165,6 +172,13 @@ export function TagRow(props) {
         anchorEl={goalAnchorEl}
         open={!!goalAnchorEl}
         onClose={() => setGoalAnchorEl(null)}
+      />
+
+      <NamePopover
+        tag={id}
+        anchorEl={nameAnchorEl}
+        open={!!nameAnchorEl}
+        onClose={() => setNameAnchorEl(null)}
       />
 
       {/* OUTCOME */}

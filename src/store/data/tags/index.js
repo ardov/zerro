@@ -55,8 +55,7 @@ export const getTagsToSave = createSelector(['data.tag.server'], tags =>
   convertToSyncArray(tags)
 )
 
-export const getTagsToSync = state =>
-  convertToSyncArray(state.data.transaction.diff)
+export const getTagsToSync = state => convertToSyncArray(state.data.tag.diff)
 
 export const getTag = (state, id) => getTags(state)[id]
 
