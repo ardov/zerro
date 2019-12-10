@@ -24,7 +24,7 @@ export function NamePopover({
       onClose={save}
       open={open}
       anchorEl={anchorEl}
-      style={{ transform: 'translate(-14px, -14px)' }}
+      style={{ transform: 'translate(-14px, -15px)' }}
     >
       <Box m={0}>
         <TextField
