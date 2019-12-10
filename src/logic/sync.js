@@ -28,7 +28,19 @@ export const syncData = () => (dispatch, getState) => {
       dispatch(updateData(json))
       dispatch(removeSynced(syncBegin))
 
-      const changedDomains = Object.keys(json)
+      // Тут точно надо по-нормальному формировать список изменённых
+      // объектов, чтобы без дублирования и deletion туда не попадал
+      const deletionDomains = json.deletion
+        ? json.deletion.reduce((obj, item) => {
+            obj[item.object] = 1
+            return obj
+          }, {})
+        : {}
+
+      const changedDomains = [
+        ...Object.keys(json),
+        ...Object.keys(deletionDomains),
+      ]
       dispatch(saveDataLocally(changedDomains))
 
       if (changedDomains.length > 1) {
