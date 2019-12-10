@@ -98,13 +98,8 @@ export function TagRow(props) {
     <div className={c.row}>
       <div className={c.name}>
         <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} flexShrink={0} />
-        <Typography
-          variant="body1"
-          color="textPrimary"
-          noWrap
-          onClick={e => setNameAnchorEl(e.currentTarget)}
-        >
-          {name}
+        <Typography variant="body1" color="textPrimary" noWrap>
+          <span onClick={e => setNameAnchorEl(e.currentTarget)}>{name}</span>
           {goal && (
             <Tooltip title={goalToWords(goal)}>
               <span role="img" aria-label={goalToWords(goal)}>
