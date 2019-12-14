@@ -36,6 +36,9 @@ export default function TagTableHeader({
         <Typography variant="body2" color="textSecondary" align="right" noWrap>
           <Link color="textSecondary" onClick={onToggleMetric}>
             {metrics[metric]}
+            {metric === 'available' && (
+              <Box component="span" minWidth={24} display="inline-block" />
+            )}
           </Link>
         </Typography>
       ) : (
