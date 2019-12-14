@@ -109,7 +109,11 @@ export function TagRow(props) {
       {/* BUDGET */}
       {(metric === 'budgeted' || !isMobile) &&
         (showBudget ? (
-          <Box color={budgeted ? 'text.primary' : 'text.hint'} clone>
+          <Box
+            color={budgeted ? 'text.primary' : 'text.hint'}
+            display="flex"
+            justifyContent="flex-end"
+          >
             <Link
               variant="body1"
               align="right"
@@ -139,6 +143,7 @@ export function TagRow(props) {
         budgeted={budgeted}
         available={available}
         prevBudgeted={0}
+        style={{ transform: 'translate(-14px, -16px)' }}
         anchorEl={budgetAnchorEl}
         goal={goal}
         needForGoal={goal && goal.amount}
@@ -157,6 +162,7 @@ export function TagRow(props) {
         tag={id}
         anchorEl={nameAnchorEl}
         open={!!nameAnchorEl}
+        style={{ transform: 'translate(-14px, -18px)' }}
         onClose={() => setNameAnchorEl(null)}
       />
 

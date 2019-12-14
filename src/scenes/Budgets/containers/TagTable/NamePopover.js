@@ -20,12 +20,7 @@ export function NamePopover({
   }
 
   return (
-    <Popover
-      onClose={save}
-      open={open}
-      anchorEl={anchorEl}
-      style={{ transform: 'translate(-14px, -18px)' }}
-    >
+    <Popover onClose={save} open={open} anchorEl={anchorEl} {...rest}>
       <Box m={0}>
         <TextField
           autoFocus
