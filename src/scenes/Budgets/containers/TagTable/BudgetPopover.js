@@ -28,29 +28,27 @@ export default function BudgetPopover({
 
   return (
     <Popover onClose={() => onChange(+value)} {...rest}>
-      <Box p={2} pb={0}>
-        <AmountInput
-          autoFocus
-          value={value}
-          fullWidth
-          onChange={value => setValue(+value)}
-          onEnter={value => onChange(+value)}
-          helperText={`Остаток категории ${formatMoney(
-            available + +value - budgeted,
-            currency
-          )}`}
-          placeholder="0"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton edge="end" onClick={() => onChange(+value)}>
-                  <CheckCircleIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Box>
+      <AmountInput
+        autoFocus
+        value={value}
+        fullWidth
+        onChange={value => setValue(+value)}
+        onEnter={value => onChange(+value)}
+        helperText={`Остаток категории ${formatMoney(
+          available + +value - budgeted,
+          currency
+        )}`}
+        placeholder="0"
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton edge="end" onClick={() => onChange(+value)}>
+                <CheckCircleIcon />
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+      />
 
       <List>
         {!!goal && !!needForGoal && (
