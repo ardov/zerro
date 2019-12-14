@@ -17,6 +17,7 @@ import BudgetPopover from './BudgetPopover'
 import GoalPopover from './GoalPopover'
 import NamePopover from './NamePopover'
 import { goalToWords } from 'store/data/budgets/helpers'
+import GoalProgress from 'components/GoalProgress'
 
 export const useStyles = makeStyles(theme => ({
   row: {
@@ -77,6 +78,8 @@ export function TagRow(props) {
   const [goalAnchorEl, setGoalAnchorEl] = React.useState(null)
   const [nameAnchorEl, setNameAnchorEl] = React.useState(null)
   const showBudget = isChild ? !!budgeted : true
+  const goalProgress =
+    goal && goal.type === 'monthly' ? budgeted / goal.amount : 0
 
   const handleBudgetChange = amount => {
     setBudgetAnchorEl(null)
@@ -100,25 +103,6 @@ export function TagRow(props) {
         <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} flexShrink={0} />
         <Typography variant="body1" color="textPrimary" noWrap>
           <span onClick={e => setNameAnchorEl(e.currentTarget)}>{name}</span>
-          {goal && (
-            <Tooltip title={goalToWords(goal)}>
-              <span role="img" aria-label={goalToWords(goal)}>
-                {' '}
-                🚩
-              </span>
-            </Tooltip>
-          )}
-          {!isMobile && (
-            <Box component="span" className="addGoal">
-              <Tooltip title={goal ? 'Изменить цель' : 'Добавить цель'}>
-                <IconButton
-                  onClick={e => setGoalAnchorEl(e.currentTarget)}
-                  size="small"
-                  children={<EmojiFlagsIcon />}
-                />
-              </Tooltip>
-            </Box>
-          )}{' '}
         </Typography>
       </div>
 
@@ -201,6 +185,29 @@ export function TagRow(props) {
               />
             )}
             {formatMoney(available)}
+            <Box component="span" display="inline-block" ml={1} maxWidth={16}>
+              {goal ? (
+                <Tooltip title={goalToWords(goal)}>
+                  <IconButton
+                    size="small"
+                    onClick={e => setGoalAnchorEl(e.currentTarget)}
+                    edge="start"
+                    children={<GoalProgress value={goalProgress} />}
+                  />
+                </Tooltip>
+              ) : (
+                <Box component="span" className="addGoal">
+                  <Tooltip title="Добавить цель">
+                    <IconButton
+                      size="small"
+                      onClick={e => setGoalAnchorEl(e.currentTarget)}
+                      edge="start"
+                      children={<EmojiFlagsIcon fontSize="small" />}
+                    />
+                  </Tooltip>
+                </Box>
+              )}
+            </Box>
           </Typography>
         </Box>
       )}

@@ -4,10 +4,10 @@ import { useTheme } from '@material-ui/styles'
 
 const useStyles = makeStyles({
   check: {
-    transition: ({ completed }) => `0.3s ease-out ${completed ? 0.3 : 0}s`,
+    transition: ({ completed }) => `0.3s ease-out ${completed ? 0.4 : 0}s`,
   },
-  inner: { transition: '0.3s ease-out 0.1s' },
-  outter: { transition: '0.3s ease-out 0.1s' },
+  inner: { transition: '0.5s ease-out' },
+  outter: { transition: '0.5s ease-out 0.1s' },
 })
 
 export default function GoalProgress({ size = 16, value, ...rest }) {

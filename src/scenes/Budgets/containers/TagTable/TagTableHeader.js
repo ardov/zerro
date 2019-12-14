@@ -60,8 +60,10 @@ export default function TagTableHeader({
             color="textSecondary"
             align="right"
             noWrap
-            children="Остаток"
-          />
+          >
+            Остаток
+            <Box component="span" minWidth={24} display="inline-block" />
+          </Typography>
         </>
       )}
     </Box>
