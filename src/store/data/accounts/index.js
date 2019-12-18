@@ -35,6 +35,8 @@ export const getAccountsToSave = createSelector([getAccounts], accounts =>
 
 export const getAccount = (state, id) => getAccounts(state)[id]
 
+// Used only for CSV
+// TODO: remove
 export const getPopulatedAccounts = createSelector(
   [getInstruments, getAccounts],
   (instruments, accounts) => {
@@ -46,11 +48,12 @@ export const getPopulatedAccounts = createSelector(
   }
 )
 
-export const getPopulatedAccount = (state, id) =>
-  getPopulatedAccounts(state)[id]
-
 export const getAccountList = createSelector([getAccounts], accounts =>
   Object.values(accounts).sort((a, b) => b.balance - a.balance)
+)
+
+export const getCredits = createSelector([getAccountList], list =>
+  list.filter(a => !a.archive && a.balance < 0)
 )
 
 export const getAccountsInBudget = createSelector([getAccountList], accounts =>

@@ -5,10 +5,11 @@ import { convertCurrency } from 'store/data/instruments'
 import { getBudgetsByMonthAndTag } from 'store/data/budgets'
 import { round } from 'helpers/currencyHelpers'
 import { getTransactionsByMonthAndType } from './getTransactionsByMonthAndType'
+import { getCredits } from 'store/data/accounts'
 
-export const getIncomeOutcomeByTag = createSelector(
-  [getTransactionsByMonthAndType, convertCurrency],
-  (transactionsByMonth, convert) =>
+const getIncomeOutcomeByTag = createSelector(
+  [getTransactionsByMonthAndType, convertCurrency, getCredits],
+  (transactionsByMonth, convert, credits) =>
     transactionsByMonth.map(month => {
       const income = month.income.reduce((byTag, tr) => {
         const tag = getMainTag(tr)
@@ -16,6 +17,7 @@ export const getIncomeOutcomeByTag = createSelector(
         byTag[tag] = byTag[tag] ? round(byTag[tag] + amount) : amount
         return byTag
       }, {})
+
       const outcome = month.outcome.reduce((byTag, tr) => {
         const tag = getMainTag(tr)
         const amount = convert(tr.outcome, tr.outcomeInstrument)
