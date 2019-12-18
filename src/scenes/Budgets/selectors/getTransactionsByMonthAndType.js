@@ -4,6 +4,18 @@ import { getType } from 'store/data/transactions/helpers'
 import getMonthDates from './getMonthDates'
 import { getTransactionsInBudget } from './baseSelectors'
 
+/**
+ * @typedef {Object} Transactions something
+ * @property {number} date Start of month in ms
+ * @property {Array} income Array of transactions
+ * @property {Array} outcome Array of transactions
+ * @property {Array} transfer Array of transactions
+ */
+
+/**
+ * Group transactions in budget by type for each month
+ * @returns {Transactions} transactions by type
+ */
 export const getTransactionsByMonthAndType = createSelector(
   [getMonthDates, getTransactionsInBudget],
   (monthDates, transactions) =>
