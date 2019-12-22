@@ -5,7 +5,7 @@ import {
   restoreTransaction,
   applyChangesToTransaction,
   splitTransfer,
-} from 'store/data/transactions'
+} from 'store/data/transactions/thunks'
 import DetailsPanel from './DetailsPanel'
 
 const mapStateToProps = (state, ownProps) => ({
@@ -21,7 +21,4 @@ const mapDispatchToProps = dispatch => ({
   },
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(DetailsPanel)
+export default connect(mapStateToProps, mapDispatchToProps)(DetailsPanel)

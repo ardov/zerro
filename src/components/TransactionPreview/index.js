@@ -5,7 +5,7 @@ import {
   restoreTransaction,
   applyChangesToTransaction,
   // splitTransfer,
-} from 'store/data/transactions'
+} from 'store/data/transactions/thunks'
 import { selectTransactionsByChangedDate } from 'store/selectedTransactions'
 import Content from './Content'
 import { getInstrument } from 'store/data/serverData'
@@ -56,7 +56,4 @@ const mapDispatchToProps = (dispatch, { id }) => ({
   // onSplit: id => dispatch(splitTransfer(id)), // does not work
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Content)
+export default connect(mapStateToProps, mapDispatchToProps)(Content)

@@ -3,7 +3,7 @@ import { getTransaction } from 'store/data/transactions'
 import { setTransaction } from 'store/data/transactions'
 import sendEvent from 'helpers/sendEvent'
 
-const deleteTransactions = ids => (dispatch, getState) => {
+export const deleteTransactions = ids => (dispatch, getState) => {
   sendEvent('Transaction: delete')
   const array = ids.map ? ids : [ids]
   const deleted = array.map(id => ({
@@ -14,7 +14,7 @@ const deleteTransactions = ids => (dispatch, getState) => {
   dispatch(setTransaction(deleted))
 }
 
-const restoreTransaction = id => (dispatch, getState) => {
+export const restoreTransaction = id => (dispatch, getState) => {
   sendEvent('Transaction: restore')
   dispatch(
     setTransaction({
@@ -26,13 +26,13 @@ const restoreTransaction = id => (dispatch, getState) => {
   )
 }
 
-const splitTransfer = id => (dispatch, getState) => {
+export const splitTransfer = id => (dispatch, getState) => {
   const state = getState()
   const tr = getTransaction(state, id)
   dispatch(setTransaction(split(tr)))
 }
 
-const applyChangesToTransaction = tr => (dispatch, getState) => {
+export const applyChangesToTransaction = tr => (dispatch, getState) => {
   sendEvent('Transaction: edit')
   dispatch(
     setTransaction({
@@ -43,7 +43,7 @@ const applyChangesToTransaction = tr => (dispatch, getState) => {
   )
 }
 
-const setMainTagToTransactions = (transactions, tagId) => (
+export const setMainTagToTransactions = (transactions, tagId) => (
   dispatch,
   getState
 ) => {
@@ -59,14 +59,6 @@ const setMainTagToTransactions = (transactions, tagId) => (
     }
   })
   dispatch(setTransaction(result))
-}
-
-export default {
-  deleteTransactions,
-  restoreTransaction,
-  splitTransfer,
-  applyChangesToTransaction,
-  setMainTagToTransactions,
 }
 
 // function setTags(raw, tags) {

@@ -1,15 +1,10 @@
 import selectors from './selectors'
-import thunks from './thunks'
 import { createSlice } from 'redux-starter-kit'
 import {
   wipeData,
-  updateData,
   removeSynced,
   removeSyncedFunc,
-  updateDataFunc,
 } from 'store/data/commonActions'
-import { convertDatesToMs } from 'helpers/converters'
-import hydrate from './hydrate'
 
 // INITIAL STATE
 const initialState = {}
@@ -56,12 +51,3 @@ export const {
   getSortedTransactions,
   getMainTransactionList,
 } = selectors
-
-// THUNKS
-export const {
-  deleteTransactions,
-  restoreTransaction,
-  splitTransfer,
-  applyChangesToTransaction,
-  setMainTagToTransactions,
-} = thunks
