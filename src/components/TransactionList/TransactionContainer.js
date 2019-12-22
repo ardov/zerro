@@ -5,7 +5,7 @@ import {
   toggleTransaction,
   selectTransactionsByChangedDate,
 } from 'store/selectedTransactions'
-import { getInstrument } from 'store/data/instruments'
+import { getInstrument } from 'store/data/serverData'
 import { getAccount } from 'store/data/accounts'
 import { getPopulatedTag } from 'store/data/tags'
 import Transaction from './Transaction'

@@ -1,5 +1,5 @@
 import createSelector from 'selectorator'
-import { getInstruments } from 'store/data/instruments'
+import { getInstruments } from 'store/data/serverData'
 import { getPopulatedAccounts } from 'store/data/accounts'
 import { getPopulatedTags } from 'store/data/tags'
 import { getMerchants } from 'store/data/merchants'
@@ -8,26 +8,19 @@ import { getFilterConditions, check, checkRaw } from 'store/filterConditions'
 import { convertToSyncArray } from 'helpers/converters'
 import { populate } from './populate'
 
-function removeFalseKeys(object) {
-  let newObject = {}
-  Object.keys(object).forEach(key => {
-    if (object[key]) newObject[key] = object[key]
-  })
-  return newObject
-}
+// function removeFalseKeys(object) {
+//   let newObject = {}
+//   Object.keys(object).forEach(key => {
+//     if (object[key]) newObject[key] = object[key]
+//   })
+//   return newObject
+// }
 
-const getTransactionsToSave = createSelector(
-  ['data.transaction.server'],
-  transactions =>
-    convertToSyncArray(transactions)
-      .filter(tr => !tr.deleted)
-      .map(removeFalseKeys)
-)
 const getTransactionsToSync = state =>
-  convertToSyncArray(state.data.transaction.diff)
+  convertToSyncArray(state.data.transaction)
 
 const getTransactions = createSelector(
-  ['data.transaction.server', 'data.transaction.diff'],
+  ['data.serverData.transaction', 'data.transaction'],
   (transactions, diff) => ({ ...transactions, ...diff })
 )
 const getTransaction = (state, id) => getTransactions(state)[id]
@@ -60,9 +53,8 @@ const getOpenedTransaction = createSelector(
   (transactions, openedId) => transactions[openedId]
 )
 
-const getSortedTransactions = createSelector(
-  [getTransactions],
-  transactions => Object.values(transactions).sort(sortBy())
+const getSortedTransactions = createSelector([getTransactions], transactions =>
+  Object.values(transactions).sort(sortBy())
 )
 
 const getTransactionList = (state, options = {}) => {
@@ -90,7 +82,6 @@ const getMainTransactionList = createSelector(
 )
 
 export default {
-  getTransactionsToSave,
   getTransactionsToSync,
   getPopulatedTransactions,
   getTransactions,

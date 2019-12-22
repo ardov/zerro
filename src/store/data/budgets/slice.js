@@ -1,36 +1,27 @@
 import { createSlice } from 'redux-starter-kit'
 import { format } from 'date-fns'
-import {
-  wipeData,
-  updateData,
-  removeSynced,
-  removeSyncedFunc,
-  updateDataFunc,
-} from '../commonActions'
+import { wipeData, removeSynced, removeSyncedFunc } from '../commonActions'
 
 // INITIAL STATE
-const initialState = { server: {}, diff: {} }
+const initialState = {}
 
 // SLICE
 export default createSlice({
   slice: 'budget',
   initialState,
   reducers: {
-    setBudget: ({ diff }, { payload }) => {
+    setBudget: (state, { payload }) => {
       const budgets = Array.isArray(payload) ? payload : [payload]
       budgets.forEach(budget => {
         const id = `${budget.tag},${format(budget.date, 'yyyy-MM-dd')}`
-        diff[id] = budget
+        state[id] = budget
       })
     },
   },
   extraReducers: {
     [wipeData]: () => initialState,
-    [removeSynced]: ({ diff }, { payload }) => {
-      removeSyncedFunc(diff, payload)
-    },
-    [updateData]: ({ server }, { payload }) => {
-      updateDataFunc(server, payload, 'budget', null, b => `${b.tag},${b.date}`)
+    [removeSynced]: (state, { payload }) => {
+      removeSyncedFunc(state, payload)
     },
   },
 })

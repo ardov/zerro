@@ -1,6 +1,6 @@
 import createSelector from 'selectorator'
 import { getAccountsInBudget } from 'store/data/accounts'
-import { convertCurrency } from 'store/data/instruments'
+import { convertCurrency } from 'store/data/serverData'
 import { round } from 'helpers/currencyHelpers'
 import { getTransactions } from 'store/data/transactions'
 import { checkRaw } from 'store/filterConditions'

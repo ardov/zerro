@@ -1,4 +1,4 @@
-import { getRootUser } from 'store/data/users'
+import { getRootUser } from 'store/data/serverData'
 import slice from 'store/data/budgets/slice'
 import selectors from 'store/data/budgets/selectors'
 import { getPopulatedTag } from 'store/data/tags'

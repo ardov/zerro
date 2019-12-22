@@ -8,7 +8,7 @@ import {
 } from 'store/data/transactions'
 import { selectTransactionsByChangedDate } from 'store/selectedTransactions'
 import Content from './Content'
-import { getInstrument } from 'store/data/instruments'
+import { getInstrument } from 'store/data/serverData'
 import { getAccount } from 'store/data/accounts'
 import { getType } from 'store/data/transactions/helpers'
 

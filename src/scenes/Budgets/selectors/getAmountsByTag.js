@@ -1,7 +1,7 @@
 import createSelector from 'selectorator'
 import { getMainTag } from 'store/data/transactions/helpers'
 import { getTagsTree } from 'store/data/tags'
-import { convertCurrency } from 'store/data/instruments'
+import { convertCurrency } from 'store/data/serverData'
 import { getBudgetsByMonthAndTag } from 'store/data/budgets'
 import { round } from 'helpers/currencyHelpers'
 import { getTransactionsByMonthAndType } from './getTransactionsByMonthAndType'
@@ -11,6 +11,8 @@ const getIncomeOutcomeByTag = createSelector(
   [getTransactionsByMonthAndType, convertCurrency, getCredits],
   (transactionsByMonth, convert, credits) =>
     transactionsByMonth.map(month => {
+      const creditIds = credits.map(account => account.id)
+
       const income = month.income.reduce((byTag, tr) => {
         const tag = getMainTag(tr)
         const amount = convert(tr.income, tr.incomeInstrument)
@@ -25,7 +27,16 @@ const getIncomeOutcomeByTag = createSelector(
         return byTag
       }, {})
 
-      return { date: month.date, income, outcome }
+      const creditOutcome = month.outcome.reduce((byTag, tr) => {
+        if (creditIds.includes(tr.outcomeAccount)) {
+          const tag = getMainTag(tr)
+          const amount = convert(tr.outcome, tr.outcomeInstrument)
+          byTag[tag] = byTag[tag] ? round(byTag[tag] + amount) : amount
+        }
+        return byTag
+      }, {})
+
+      return { date: month.date, income, outcome, creditOutcome }
     })
 )
 
@@ -39,8 +50,9 @@ export const getAmountsByTag = createSelector(
         ...parent,
 
         // From getIncomeOutcomeByTag selector
-        outcome: month.outcome[parent.id] || 0,
         income: month.income[parent.id] || 0,
+        outcome: month.outcome[parent.id] || 0,
+        creditOutcome: month.creditOutcome[parent.id] || 0,
 
         // From budgets
         budgeted:
@@ -104,8 +116,9 @@ export const getAmountsByTag = createSelector(
         // Children
         children: parent.children.map((child, i) => ({
           ...child,
-          outcome: month.outcome[child.id] || 0,
           income: month.income[child.id] || 0,
+          outcome: month.outcome[child.id] || 0,
+          creditOutcome: month.creditOutcome[child.id] || 0,
           budgeted:
             (budgets[month.date] &&
               budgets[month.date][child.id] &&

@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { getTransfersOutsideBudget } from '../selectors/getTransfersOutsideBudget'
-import { getUserCurrencyCode } from 'store/data/instruments'
+import { getUserCurrencyCode } from 'store/data/serverData'
 import { makeStyles } from '@material-ui/core/styles'
 import {
   Box,

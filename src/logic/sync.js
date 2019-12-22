@@ -1,11 +1,10 @@
 import ZenApi from 'services/ZenApi'
-import { updateData } from 'store/data/commonActions'
+import { updateData, getLastSyncTime } from 'store/data/serverData'
 import { getChangedArrays } from '../store/data/dataSelectors'
 import { getToken } from 'store/token'
 import { removeSynced } from '../store/data/commonActions'
 import { setPending } from 'store/isPending'
 import { saveDataLocally } from 'logic/localData'
-import { getServerTimestampToSave } from 'store/data/serverTimestamp'
 import { setMessage } from 'store/message'
 
 //All syncs with ZM goes through this thunk
@@ -13,7 +12,7 @@ export const syncData = () => (dispatch, getState) => {
   const state = getState()
   const changed = getChangedArrays(state)
   const token = getToken(state)
-  const serverTimestamp = getServerTimestampToSave(state) || 0
+  const serverTimestamp = getLastSyncTime(state) / 1000 || 0
 
   // MESSAGES
   const successMessage = 'Данные обновлены'

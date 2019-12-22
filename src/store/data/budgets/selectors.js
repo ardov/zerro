@@ -5,18 +5,14 @@ import { goalBudgetDate } from './constants'
 import { parseGoal } from './helpers'
 
 const getBudgets = createSelector(
-  ['data.budget.server', 'data.budget.diff'],
+  ['data.serverData.budget', 'data.budget'],
   (serverBudgets, diffBudgets) => ({ ...serverBudgets, ...diffBudgets })
 )
 
 const getBudget = (state, tag, month) =>
   getBudgets(state)[`${tag},${format(month, 'yyyy-MM-dd')}`]
 
-const getBudgetsToSave = createSelector(['data.budget.server'], budgets =>
-  convertToSyncArray(budgets)
-)
-
-const getBudgetsToSync = state => convertToSyncArray(state.data.budget.diff)
+const getBudgetsToSync = state => convertToSyncArray(state.data.budget)
 
 const getBudgetsByMonthAndTag = createSelector([getBudgets], budgets =>
   Object.values(budgets)
@@ -39,7 +35,6 @@ const getGoals = createSelector([getBudgets], budgets =>
 )
 
 export default {
-  getBudgetsToSave,
   getBudgetsToSync,
   getBudgetsByMonthAndTag,
   getBudget,

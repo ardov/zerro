@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import Account from './Account'
 import styled from 'styled-components'
 import { getAccountsInBudget, getSavingAccounts } from 'store/data/accounts'
-import { getUserInstrument, getInstruments } from 'store/data/instruments'
+import { getUserInstrument, getInstruments } from 'store/data/serverData'
 import pluralize from 'helpers/pluralize'
 
 const Heading = styled(Account)`

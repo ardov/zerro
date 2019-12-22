@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import styled, { css } from 'styled-components'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
-import { getUserCurrencyCode } from 'store/data/instruments'
+import { getUserCurrencyCode } from 'store/data/serverData'
 
 const getMonthName = date => format(date, 'MMM', { locale: ru }).toLowerCase()
 

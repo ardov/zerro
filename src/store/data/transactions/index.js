@@ -12,32 +12,28 @@ import { convertDatesToMs } from 'helpers/converters'
 import hydrate from './hydrate'
 
 // INITIAL STATE
-const initialState = { server: {}, diff: {} }
+const initialState = {}
 
 // SLICE
 const { reducer, actions } = createSlice({
   slice: 'transaction',
   initialState,
   reducers: {
-    setTransaction: ({ diff }, { payload }) => {
+    setTransaction: (state, { payload }) => {
       if (Array.isArray(payload)) {
-        payload.forEach(tr => (diff[tr.id] = tr))
+        payload.forEach(tr => (state[tr.id] = tr))
       } else {
-        diff[payload.id] = payload
+        state[payload.id] = payload
       }
     },
-    // removeTransaction: ({ diff }, { payload }) => {
-    //   delete diff[payload]
+    // removeTransaction: (state, { payload }) => {
+    //   delete state[payload]
     // },
   },
   extraReducers: {
     [wipeData]: () => initialState,
-    [removeSynced]: ({ diff }, { payload }) => {
-      removeSyncedFunc(diff, payload)
-    },
-    [updateData]: ({ server }, { payload }) => {
-      const converter = raw => convertDatesToMs(hydrate(raw))
-      updateDataFunc(server, payload, 'transaction', converter, null)
+    [removeSynced]: (state, { payload }) => {
+      removeSyncedFunc(state, payload)
     },
   },
 })
@@ -50,7 +46,6 @@ export const { setTransaction, removeTransaction } = actions
 
 // SELECTORS
 export const {
-  getTransactionsToSave,
   getTransactionsToSync,
   getPopulatedTransactions,
   getTransactions,

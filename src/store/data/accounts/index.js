@@ -1,37 +1,9 @@
-import { createSlice, createSelector } from 'redux-starter-kit'
+import { createSelector } from 'redux-starter-kit'
 import populate from './populate'
-import { getInstruments } from 'store/data/instruments'
-import { wipeData, updateData, updateDataFunc } from 'store/data/commonActions'
-import { convertToSyncArray } from 'helpers/converters'
-
-// INITIAL STATE
-const initialState = {}
-
-// SLICE
-const { reducer } = createSlice({
-  slice: 'account',
-  initialState,
-  reducers: {},
-  extraReducers: {
-    [wipeData]: () => initialState,
-    [updateData]: (state, { payload }) => {
-      updateDataFunc(state, payload, 'account')
-    },
-  },
-})
-
-// REDUCER
-export default reducer
-
-// ACTIONS
-// ...
+import { getInstruments } from 'store/data/serverData'
 
 // SELECTORS
-export const getAccounts = state => state.data.account
-
-export const getAccountsToSave = createSelector([getAccounts], accounts =>
-  convertToSyncArray(accounts)
-)
+export const getAccounts = state => state.data.serverData.account
 
 export const getAccount = (state, id) => getAccounts(state)[id]
 

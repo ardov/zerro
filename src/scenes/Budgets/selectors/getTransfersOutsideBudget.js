@@ -1,6 +1,6 @@
 import createSelector from 'selectorator'
 import { getTransactionsByMonthAndType } from './getTransactionsByMonthAndType'
-import { convertCurrency } from 'store/data/instruments'
+import { convertCurrency } from 'store/data/serverData'
 import { getAccounts, getAccountsInBudget } from 'store/data/accounts'
 
 export const getTransfersOutsideBudget = createSelector(
@@ -48,6 +48,9 @@ export const getTransfersOutsideBudget = createSelector(
           tr.incomeInstrument
         )
       })
+
+      console.log(accsById)
+
       return Object.keys(accsById).map(id => accsById[id])
     })
 )

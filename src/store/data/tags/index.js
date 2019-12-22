@@ -1,40 +1,35 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
 import {
   wipeData,
-  updateData,
   removeSynced,
   removeSyncedFunc,
-  updateDataFunc,
 } from 'store/data/commonActions'
 import { convertToSyncArray } from 'helpers/converters'
 import Tag from './Tag'
 
 // INITIAL STATE
-const initialState = { server: {}, diff: {} }
+const initialState = {}
 
 // SLICE
 const { reducer, actions } = createSlice({
   slice: 'tag',
   initialState,
   reducers: {
-    setTag: ({ diff }, { payload }) => {
+    setTag: (state, { payload }) => {
       if (Array.isArray(payload)) {
-        payload.forEach(tr => (diff[tr.id] = tr))
+        payload.forEach(tr => (state[tr.id] = tr))
       } else {
-        diff[payload.id] = payload
+        state[payload.id] = payload
       }
     },
-    // removeTag: ({ diff }, { payload }) => {
-    //   delete diff[payload]
+    // removeTag: (state, { payload }) => {
+    //   delete state[payload]
     // },
   },
   extraReducers: {
     [wipeData]: () => initialState,
-    [removeSynced]: ({ diff }, { payload }) => {
-      removeSyncedFunc(diff, payload)
-    },
-    [updateData]: ({ server }, { payload }) => {
-      updateDataFunc(server, payload, 'tag')
+    [removeSynced]: (state, { payload }) => {
+      removeSyncedFunc(state, payload)
     },
   },
 })
@@ -47,15 +42,11 @@ export const { setTag, removeTag } = actions
 
 // SELECTORS
 export const getTags = createSelector(
-  ['data.tag.server', 'data.tag.diff'],
+  ['data.serverData.tag', 'data.tag'],
   (tags, diff) => ({ ...tags, ...diff })
 )
 
-export const getTagsToSave = createSelector(['data.tag.server'], tags =>
-  convertToSyncArray(tags)
-)
-
-export const getTagsToSync = state => convertToSyncArray(state.data.tag.diff)
+export const getTagsToSync = state => convertToSyncArray(state.data.tag)
 
 export const getTag = (state, id) => getTags(state)[id]
 

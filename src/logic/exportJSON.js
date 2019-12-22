@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { getDataToSave } from 'store/data/dataSelectors'
+import { getDataToSave } from 'store/data/serverData'
 
 export default function exportJSON(_, getState) {
   const state = getState()
