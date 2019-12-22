@@ -1,14 +1,10 @@
 import uuidv1 from 'uuid/v1'
 
-/**
- * Hydrates transaction
- * @param {Object: raw} transaction to hydrate
- */
-export default function hydrateTransaction(raw) {
+export default function createTransaction(raw) {
   return {
     id: raw.id || uuidv1(),
-    changed: raw.changed,
-    created: raw.created,
+    changed: raw.changed || Date.now(),
+    created: raw.created || Date.now(),
     user: raw.user,
     deleted: raw.deleted || false,
     hold: raw.hold || false,
