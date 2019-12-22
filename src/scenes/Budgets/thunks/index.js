@@ -1,12 +1,11 @@
 import { getRootUser } from 'store/data/serverData'
-import slice from 'store/data/budgets/slice'
+import { setBudget } from 'store/data/budgets'
 import selectors from 'store/data/budgets/selectors'
 import { getPopulatedTag } from 'store/data/tags'
 import getMonthDates from '../selectors/getMonthDates'
 import { getAmountsByTag } from '../selectors/getAmountsByTag'
 import sendEvent from 'helpers/sendEvent'
 import { createBudget } from 'store/data/budgets/helpers'
-const { setBudget } = slice.actions
 
 export const setOutcomeBudget = (targetOutcome, monthDate, tagId) => (
   dispatch,
