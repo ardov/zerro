@@ -46,7 +46,6 @@ export const {
   getTransactions,
   getTransaction,
   getPopulatedTransaction,
-  getOpenedTransaction,
   getTransactionList,
   getSortedTransactions,
   getMainTransactionList,
