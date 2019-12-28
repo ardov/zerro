@@ -2,7 +2,6 @@ import createSelector from 'selectorator'
 import { getInstruments } from 'store/data/serverData'
 import { getPopulatedAccounts } from 'store/data/accounts'
 import { getPopulatedTags } from 'store/data/tags'
-import { getMerchants } from 'store/data/merchants'
 import { groupTransactionsBy, sortBy } from './helpers'
 import { getFilterConditions, check, checkRaw } from 'store/filterConditions'
 import { convertToSyncArray } from 'helpers/converters'
@@ -26,20 +25,11 @@ const getTransactions = createSelector(
 const getTransaction = (state, id) => getTransactions(state)[id]
 
 const getPopulatedTransactions = createSelector(
-  [
-    getInstruments,
-    getPopulatedAccounts,
-    getPopulatedTags,
-    getMerchants,
-    getTransactions,
-  ],
-  (instruments, accounts, tags, merchants, transactions) => {
+  [getInstruments, getPopulatedAccounts, getPopulatedTags, getTransactions],
+  (instruments, accounts, tags, transactions) => {
     const result = {}
     for (const id in transactions) {
-      result[id] = populate(
-        { instruments, accounts, tags, merchants },
-        transactions[id]
-      )
+      result[id] = populate({ instruments, accounts, tags }, transactions[id])
     }
     return result
   }

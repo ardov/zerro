@@ -1,6 +1,6 @@
 import { mapTags, getType } from './helpers'
 
-export const populate = ({ instruments, accounts, tags, merchants }, raw) => ({
+export const populate = ({ instruments, accounts, tags }, raw) => ({
   id: raw.id,
   user: raw.user,
   date: raw.date,
@@ -25,7 +25,7 @@ export const populate = ({ instruments, accounts, tags, merchants }, raw) => ({
   comment: raw.comment,
   payee: raw.payee,
   originalPayee: raw.originalPayee,
-  merchant: merchants[raw.merchant],
+  merchant: raw.merchant,
   latitude: raw.latitude,
   longitude: raw.longitude,
   reminderMarker: raw.reminderMarker,
