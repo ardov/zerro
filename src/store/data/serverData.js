@@ -88,7 +88,7 @@ export const getDataToSave = state => {
 }
 
 // SYNC TIME
-export const getLastSyncTime = state => state.data.serverTimestamp
+export const getLastSyncTime = state => state.data.serverData.serverTimestamp
 
 // USERS
 export const getUsers = state => state.data.serverData.user
