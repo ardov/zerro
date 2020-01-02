@@ -3,6 +3,7 @@ import React from 'react'
 import sendEvent from 'helpers/sendEvent'
 import Cookies from 'cookies-js'
 import storage from 'services/storage'
+import * as Sentry from '@sentry/browser'
 
 const buttonStyle = {
   border: '1px solid #ccc',
@@ -20,6 +21,11 @@ export default class GlobalErrorBoundary extends React.Component {
 
   componentDidCatch = (error, errorInfo) => {
     sendEvent(`GlobalError: ${error.message}`)
+    Sentry.withScope(scope => {
+      scope.setExtras(errorInfo)
+      const eventId = Sentry.captureException(error)
+      this.setState({ eventId })
+    })
   }
 
   fullRefresh = () => {
