@@ -6,6 +6,8 @@ import { removeSynced } from '../store/data/commonActions'
 import { setPending } from 'store/isPending'
 import { saveDataLocally } from 'logic/localData'
 import { setMessage } from 'store/message'
+import sendEvent from 'helpers/sendEvent'
+import * as Sentry from '@sentry/browser'
 
 //All syncs with ZM goes through this thunk
 export const syncData = () => (dispatch, getState) => {
@@ -23,6 +25,9 @@ export const syncData = () => (dispatch, getState) => {
 
   return ZenApi.getData(token, { serverTimestamp, changed }).then(
     json => {
+      sendEvent(
+        `Sync: ${serverTimestamp ? 'Successful update' : 'Successful first'}`
+      )
       dispatch(setPending(false))
       dispatch(updateData(json))
       dispatch(removeSynced(syncBegin))
@@ -50,7 +55,10 @@ export const syncData = () => (dispatch, getState) => {
     err => {
       dispatch(setPending(false))
       dispatch(setMessage(failMessage))
+
       console.warn('Syncing failed', err)
+      sendEvent(`Error: ${err.message}`)
+      Sentry.captureException(err)
     }
   )
 }

@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
+import * as Sentry from '@sentry/browser'
 
 import 'normalize.css'
 import './index.scss'
@@ -9,6 +10,10 @@ import App from './App'
 import * as serviceWorker from './serviceWorker'
 import { store } from './store'
 import GlobalErrorBoundary from 'components/GlobalErrorBoundary'
+
+Sentry.init({
+  dsn: 'https://2e8d2396a5a94b289b7a0f50b0df69f5@sentry.io/1869871',
+})
 
 ReactDOM.render(
   <GlobalErrorBoundary>

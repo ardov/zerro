@@ -22,8 +22,8 @@ export default function TagTableHeader({
   const c = useStyles({ isMobile })
   const metrics = {
     budgeted: 'Бюджет',
-    outcome: 'Потрачено',
-    available: 'Остаток',
+    outcome: 'Расход',
+    available: 'Доступно',
   }
 
   return (
@@ -55,7 +55,7 @@ export default function TagTableHeader({
             color="textSecondary"
             align="right"
             noWrap
-            children="Потрачено"
+            children="Расход"
           />
 
           <Typography
@@ -64,7 +64,7 @@ export default function TagTableHeader({
             align="right"
             noWrap
           >
-            Остаток
+            Доступно
             <Box component="span" minWidth={24} display="inline-block" />
           </Typography>
         </>
