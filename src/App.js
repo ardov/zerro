@@ -12,7 +12,7 @@ import RegularSyncHandler from 'components/RegularSyncHandler'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import SnackbarHandler from 'components/SnackbarHandler'
 import Nav from 'components/Navigation'
-import { Box } from '@material-ui/core'
+import { Box, CircularProgress, Typography } from '@material-ui/core'
 import { ThemeProvider } from '@material-ui/styles'
 import createTheme from 'helpers/createTheme'
 import { getTheme } from 'store/theme'
@@ -22,6 +22,7 @@ import ruDateLocale from 'date-fns/locale/ru'
 import { createBrowserHistory } from 'history'
 import reactGA from 'react-ga'
 import ErrorBoundary from 'components/ErrorBoundary'
+import { getLastSyncTime } from 'store/serverData'
 
 addLocaleData(ru)
 reactGA.initialize('UA-72832368-2')
@@ -33,7 +34,7 @@ history.listen(location => {
   reactGA.pageview(location.pathname) // Record a pageview for the given page
 })
 
-const App = ({ isLoggedIn, themeType }) => (
+const App = ({ isLoggedIn, themeType, hasData }) => (
   <ThemeProvider theme={createTheme(themeType)}>
     <>
       <CssBaseline />
@@ -41,7 +42,7 @@ const App = ({ isLoggedIn, themeType }) => (
         <IntlProvider locale="ru">
           <MuiPickersUtilsProvider utils={DateFnsUtils} locale={ruDateLocale}>
             <Router history={history}>
-              {isLoggedIn ? <PrivateApp /> : <Auth />}
+              {isLoggedIn ? <PrivateApp hasData={hasData} /> : <Auth />}
             </Router>
           </MuiPickersUtilsProvider>
         </IntlProvider>
@@ -51,23 +52,44 @@ const App = ({ isLoggedIn, themeType }) => (
 )
 
 export default connect(
-  state => ({ isLoggedIn: getLoginState(state), themeType: getTheme(state) }),
+  state => ({
+    isLoggedIn: getLoginState(state),
+    themeType: getTheme(state),
+    hasData: !!getLastSyncTime(state),
+  }),
   null
 )(App)
 
-const PrivateApp = () => (
+const PrivateApp = ({ hasData }) => (
   <Box display="flex">
     <Nav />
     <SnackbarHandler />
     <RegularSyncHandler />
     <Box height="100vh" overflow="auto" flexGrow={1}>
       <ErrorBoundary>
-        <Switch>
-          <Route path="/transactions" component={Transactions} />
-          <Route path="/tags" component={Tags} />
-          <Route path="/budget" component={Budgets} />
-          <Redirect to="/budget" />
-        </Switch>
+        {hasData ? (
+          <Switch>
+            <Route path="/transactions" component={Transactions} />
+            <Route path="/tags" component={Tags} />
+            <Route path="/budget" component={Budgets} />
+            <Redirect to="/budget" />
+          </Switch>
+        ) : (
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            height="100%"
+          >
+            <CircularProgress />
+            {/* <Box mt={4}>
+              <Typography align="center">
+                Загружаю операции
+              </Typography>
+            </Box> */}
+          </Box>
+        )}
       </ErrorBoundary>
     </Box>
   </Box>
