@@ -39,7 +39,6 @@ export default class Tag {
     showOutcome: false,
     parent: null,
     title: 'Без категории',
-    goal: null,
   })
 }
 
