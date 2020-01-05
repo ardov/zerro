@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { getLoginState } from 'store/token'
 import { syncData } from 'logic/sync'
 import { getLastSyncTime } from 'store/serverData'
-import { getLastChangeTime } from 'store/localData/dataSelectors'
+import { getLastChangeTime } from 'store/localData'
 import { getPendingState } from 'store/isPending'
 import { loadLocalData } from 'logic/localData'
 
