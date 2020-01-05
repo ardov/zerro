@@ -53,9 +53,10 @@ export const getTag = (state, id) => getTags(state)[id]
 export const getPopulatedTags = createSelector([getTags], tags => {
   const result = {}
   for (const id in tags) {
-    result[id] = new Tag(tags[id])
+    result[id] = new Tag(tags[id], tags)
   }
   result[null] = Tag.nullTag
+
   return result
 })
 
