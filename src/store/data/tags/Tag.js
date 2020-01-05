@@ -1,6 +1,6 @@
 import { intToRGB } from 'helpers/convertColor'
 import toArray from 'lodash/toArray'
-import iconsMap from './iconsMap'
+import iconsMap from './iconsMap.json'
 
 export default class Tag {
   constructor(raw) {
