@@ -1,6 +1,6 @@
 import createSelector from 'selectorator'
 import startOfMonth from 'date-fns/startOfMonth'
-import { getType } from 'store/data/transactions/helpers'
+import { getType } from 'store/localData/transactions/helpers'
 import getMonthDates from './getMonthDates'
 import { getTransactionsInBudget } from './baseSelectors'
 

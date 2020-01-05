@@ -1,5 +1,5 @@
 import sendEvent from 'helpers/sendEvent'
-import { setTag, getTag } from '.'
+import { setTag, getTag } from 'store/localData/tags'
 
 export const patchTag = tag => (dispatch, getState) => {
   sendEvent('Tag: edit')

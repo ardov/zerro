@@ -1,11 +1,11 @@
 import createSelector from 'selectorator'
-import { getMainTag } from 'store/data/transactions/helpers'
-import { getTagsTree } from 'store/data/tags'
-import { convertCurrency } from 'store/data/serverData'
-import { getBudgetsByMonthAndTag } from 'store/data/budgets'
+import { getMainTag } from 'store/localData/transactions/helpers'
+import { getTagsTree } from 'store/localData/tags'
+import { convertCurrency } from 'store/serverData'
+import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
 import { round } from 'helpers/currencyHelpers'
 import { getTransactionsByMonthAndType } from './getTransactionsByMonthAndType'
-import { getCredits } from 'store/data/accounts'
+import { getCredits } from 'store/localData/accounts'
 
 const getIncomeOutcomeByTag = createSelector(
   [getTransactionsByMonthAndType, convertCurrency, getCredits],

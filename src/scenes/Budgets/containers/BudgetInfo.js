@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import styled, { css } from 'styled-components'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
-import { getUserCurrencyCode } from 'store/data/serverData'
+import { getUserCurrencyCode } from 'store/serverData'
 
 const getMonthName = date => format(date, 'MMM', { locale: ru }).toLowerCase()
 
@@ -116,10 +116,7 @@ const mapStateToProps = (state, { index }) => ({
   currency: getUserCurrencyCode(state),
 })
 
-export default connect(
-  mapStateToProps,
-  null
-)(BudgetInfo)
+export default connect(mapStateToProps, null)(BudgetInfo)
 
 function Line({ name, amount, currency }) {
   return (

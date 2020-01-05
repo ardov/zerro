@@ -4,13 +4,13 @@ import { connect } from 'react-redux'
 import { Paper, Box } from '@material-ui/core'
 import { setOutcomeBudget } from '../../thunks'
 import { getAmountsByTag } from '../../selectors/getAmountsByTag'
-import { getUserCurrencyCode } from 'store/data/serverData'
+import { getUserCurrencyCode } from 'store/serverData'
 import Row from './Row'
 import TagTableHeader from './TagTableHeader'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 import { endOfMonth } from 'date-fns'
 import sendEvent from 'helpers/sendEvent'
-import { getGoals } from 'store/data/budgets'
+import { getGoals } from 'store/localData/budgets'
 
 const metrics = ['available', 'budgeted', 'outcome']
 

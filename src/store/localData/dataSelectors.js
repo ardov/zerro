@@ -1,6 +1,6 @@
-import { getBudgetsToSync } from 'store/data/budgets'
-import { getTransactionsToSync } from 'store/data/transactions'
-import { getTagsToSync } from 'store/data/tags'
+import { getBudgetsToSync } from './budgets'
+import { getTransactionsToSync } from './transactions'
+import { getTagsToSync } from './tags'
 
 // SELECTOR
 

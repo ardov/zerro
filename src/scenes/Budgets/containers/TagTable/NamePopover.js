@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { connect } from 'react-redux'
 import { Box, Popover, TextField } from '@material-ui/core'
-import { getTag } from 'store/data/tags'
-import { patchTag } from 'store/data/tags/thunks'
+import { getTag } from 'store/localData/tags'
+import { patchTag } from 'store/localData/tags/thunks'
 
 export function NamePopover({
   title,

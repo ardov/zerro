@@ -1,11 +1,11 @@
-import { getRootUser } from 'store/data/serverData'
-import { setBudget } from 'store/data/budgets'
-import selectors from 'store/data/budgets/selectors'
-import { getPopulatedTag } from 'store/data/tags'
+import { getRootUser } from 'store/serverData'
+import { setBudget } from 'store/localData/budgets'
+import selectors from 'store/localData/budgets/selectors'
+import { getPopulatedTag } from 'store/localData/tags'
 import getMonthDates from '../selectors/getMonthDates'
 import { getAmountsByTag } from '../selectors/getAmountsByTag'
 import sendEvent from 'helpers/sendEvent'
-import { createBudget } from 'store/data/budgets/helpers'
+import { createBudget } from 'store/localData/budgets/helpers'
 
 export const setOutcomeBudget = (targetOutcome, monthDate, tagId) => (
   dispatch,

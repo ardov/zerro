@@ -1,16 +1,16 @@
 import { connect } from 'react-redux'
-import { getTransaction } from 'store/data/transactions'
+import { getTransaction } from 'store/localData/transactions'
 import {
   deleteTransactions,
   restoreTransaction,
   applyChangesToTransaction,
   // splitTransfer,
-} from 'store/data/transactions/thunks'
+} from 'store/localData/transactions/thunks'
 import { selectTransactionsByChangedDate } from 'store/selectedTransactions'
 import Content from './Content'
-import { getInstrument } from 'store/data/serverData'
-import { getAccount } from 'store/data/accounts'
-import { getType } from 'store/data/transactions/helpers'
+import { getInstrument } from 'store/serverData'
+import { getAccount } from 'store/localData/accounts'
+import { getType } from 'store/localData/transactions/helpers'
 
 const mapStateToProps = (state, { id }) => {
   const tr = getTransaction(state, id)

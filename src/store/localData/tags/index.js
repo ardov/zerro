@@ -1,9 +1,5 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
-import {
-  wipeData,
-  removeSynced,
-  removeSyncedFunc,
-} from 'store/data/commonActions'
+import { wipeData, removeSynced, removeSyncedFunc } from 'store/commonActions'
 import { convertToSyncArray } from 'helpers/converters'
 import Tag from './Tag'
 
@@ -42,11 +38,11 @@ export const { setTag, removeTag } = actions
 
 // SELECTORS
 export const getTags = createSelector(
-  ['data.serverData.tag', 'data.tag'],
+  ['serverData.tag', 'localData.tag'],
   (tags, diff) => ({ ...tags, ...diff })
 )
 
-export const getTagsToSync = state => convertToSyncArray(state.data.tag)
+export const getTagsToSync = state => convertToSyncArray(state.localData.tag)
 
 export const getTag = (state, id) => getTags(state)[id]
 

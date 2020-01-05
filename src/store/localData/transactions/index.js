@@ -1,10 +1,6 @@
 import selectors from './selectors'
 import { createSlice } from 'redux-starter-kit'
-import {
-  wipeData,
-  removeSynced,
-  removeSyncedFunc,
-} from 'store/data/commonActions'
+import { wipeData, removeSynced, removeSyncedFunc } from 'store/commonActions'
 
 // INITIAL STATE
 const initialState = {}

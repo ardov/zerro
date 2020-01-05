@@ -1,7 +1,8 @@
 import { configureStore } from 'redux-starter-kit'
 import ZenApi from 'services/ZenApi'
 
-import data from './data'
+import localData from './localData'
+import serverData from './serverData'
 import filterConditions from './filterConditions'
 import token from './token'
 import selectedTransactions from './selectedTransactions'
@@ -11,7 +12,8 @@ import theme from './theme'
 
 export const store = configureStore({
   reducer: {
-    data,
+    localData,
+    serverData,
     isPending,
     filterConditions,
     selectedTransactions,

@@ -1,8 +1,8 @@
 import createSelector from 'selectorator'
 import { getTransactionsByMonthAndType } from './getTransactionsByMonthAndType'
-import { convertCurrency } from 'store/data/serverData'
+import { convertCurrency } from 'store/serverData'
 import { round } from 'helpers/currencyHelpers'
-import { getAccountsInBudget } from 'store/data/accounts'
+import { getAccountsInBudget } from 'store/localData/accounts'
 
 export const getTransferFeesByMonth = createSelector(
   [getTransactionsByMonthAndType, getAccountsInBudget, convertCurrency],

@@ -1,7 +1,7 @@
 import createSelector from 'selectorator'
-import { getInstruments } from 'store/data/serverData'
-import { getPopulatedAccounts } from 'store/data/accounts'
-import { getPopulatedTags } from 'store/data/tags'
+import { getInstruments } from 'store/serverData'
+import { getPopulatedAccounts } from 'store/localData/accounts'
+import { getPopulatedTags } from 'store/localData/tags'
 import { groupTransactionsBy, sortBy } from './helpers'
 import { getFilterConditions, check, checkRaw } from 'store/filterConditions'
 import { convertToSyncArray } from 'helpers/converters'
@@ -16,10 +16,10 @@ import { populate } from './populate'
 // }
 
 const getTransactionsToSync = state =>
-  convertToSyncArray(state.data.transaction)
+  convertToSyncArray(state.localData.transaction)
 
 const getTransactions = createSelector(
-  ['data.serverData.transaction', 'data.transaction'],
+  ['serverData.transaction', 'localData.transaction'],
   (transactions, diff) => ({ ...transactions, ...diff })
 )
 const getTransaction = (state, id) => getTransactions(state)[id]

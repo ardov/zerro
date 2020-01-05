@@ -1,7 +1,7 @@
 import Cookies from 'cookies-js'
 import ZenApi from 'services/ZenApi'
 import { setToken } from 'store/token'
-import { wipeData } from 'store/data/commonActions'
+import { wipeData } from 'store/commonActions'
 import { syncData } from 'logic/sync'
 import { clearLocalData } from './localData'
 

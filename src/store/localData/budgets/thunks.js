@@ -1,4 +1,4 @@
-import { getRootUser } from 'store/data/serverData'
+import { getRootUser } from 'store/serverData'
 import { setBudget } from './index'
 import { goalBudgetDate } from './constants'
 import { createGoal, createBudget } from './helpers'

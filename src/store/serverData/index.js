@@ -1,5 +1,5 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
-import { wipeData } from 'store/data/commonActions'
+import { wipeData } from 'store/commonActions'
 import {
   convertDatesToMs,
   convertDatesToServerFormat,
@@ -73,7 +73,7 @@ export const { updateData } = actions
  */
 
 export const getDataToSave = state => {
-  const data = state.data.serverData
+  const data = state.serverData
   const result = {
     serverTimestamp: data.serverTimestamp / 1000,
   }
@@ -88,10 +88,10 @@ export const getDataToSave = state => {
 }
 
 // SYNC TIME
-export const getLastSyncTime = state => state.data.serverData.serverTimestamp
+export const getLastSyncTime = state => state.serverData.serverTimestamp
 
 // USERS
-export const getUsers = state => state.data.serverData.user
+export const getUsers = state => state.serverData.user
 
 export const getRootUser = state => {
   const users = getUsers(state)
@@ -104,7 +104,7 @@ export const getRootUser = state => {
 export const getUserInstrumentId = state => getRootUser(state).currency
 
 // INSTRUMENTS
-export const getInstruments = state => state.data.serverData.instrument
+export const getInstruments = state => state.serverData.instrument
 export const getInstrument = (state, id) => getInstruments(state)[id]
 
 export const getUserInstrument = state =>

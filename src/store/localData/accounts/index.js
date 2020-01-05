@@ -1,9 +1,9 @@
 import { createSelector } from 'redux-starter-kit'
 import populate from './populate'
-import { getInstruments } from 'store/data/serverData'
+import { getInstruments } from 'store/serverData'
 
 // SELECTORS
-export const getAccounts = state => state.data.serverData.account
+export const getAccounts = state => state.serverData.account
 
 export const getAccount = (state, id) => getAccounts(state)[id]
 

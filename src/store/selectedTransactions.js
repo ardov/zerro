@@ -1,5 +1,5 @@
 import { createSlice } from 'redux-starter-kit'
-import { getTransactions } from './data/transactions'
+import { getTransactions } from './localData/transactions'
 import sendEvent from 'helpers/sendEvent'
 
 const { reducer, actions, selectors } = createSlice({

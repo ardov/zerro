@@ -1,6 +1,6 @@
 import { createSlice } from 'redux-starter-kit'
 import { format } from 'date-fns'
-import { wipeData, removeSynced, removeSyncedFunc } from '../commonActions'
+import { wipeData, removeSynced, removeSyncedFunc } from 'store/commonActions'
 import selectors from './selectors'
 
 // INITIAL STATE

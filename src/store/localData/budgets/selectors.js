@@ -4,8 +4,8 @@ import { convertToSyncArray } from 'helpers/converters'
 import { goalBudgetDate } from './constants'
 import { parseGoal } from './helpers'
 
-const getServerBudgets = state => state.data.serverData.budget
-const getChangedBudgets = state => state.data.budget
+const getServerBudgets = state => state.serverData.budget
+const getChangedBudgets = state => state.localData.budget
 
 const getBudgets = createSelector(
   [getServerBudgets, getChangedBudgets],
