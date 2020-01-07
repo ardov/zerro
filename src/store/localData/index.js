@@ -1,16 +1,15 @@
 import { combineReducers } from 'redux-starter-kit'
 
-import tag from './tags'
-import budget from './budgets'
-import transaction from './transactions'
-import { getBudgetsToSync } from './budgets'
-import { getTransactionsToSync } from './transactions'
-import { getTagsToSync } from './tags'
+import tag, { getTagsToSync } from './tags'
+import budget, { getBudgetsToSync } from './budgets'
+import account, { getAccountsToSync } from './accounts'
+import transaction, { getTransactionsToSync } from './transactions'
 
 // REDUCER
 export default combineReducers({
   tag,
   budget,
+  account,
   transaction,
 })
 
@@ -18,6 +17,7 @@ export default combineReducers({
 export const getChangedArrays = state => ({
   tag: getTagsToSync(state),
   budget: getBudgetsToSync(state),
+  account: getAccountsToSync(state),
   transaction: getTransactionsToSync(state),
 })
 
