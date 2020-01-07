@@ -3,6 +3,7 @@ import { combineReducers } from 'redux-starter-kit'
 import tag, { getTagsToSync } from './tags'
 import budget, { getBudgetsToSync } from './budgets'
 import account, { getAccountsToSync } from './accounts'
+import reminder, { getRemindersToSync } from './reminders'
 import transaction, { getTransactionsToSync } from './transactions'
 
 // REDUCER
@@ -10,6 +11,7 @@ export default combineReducers({
   tag,
   budget,
   account,
+  reminder,
   transaction,
 })
 
@@ -18,6 +20,7 @@ export const getChangedArrays = state => ({
   tag: getTagsToSync(state),
   budget: getBudgetsToSync(state),
   account: getAccountsToSync(state),
+  reminder: getRemindersToSync(state),
   transaction: getTransactionsToSync(state),
 })
 
