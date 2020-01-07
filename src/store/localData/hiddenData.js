@@ -8,48 +8,40 @@ import sendEvent from 'helpers/sendEvent'
 
 const DATA_ACC_NAME = '🤖 [Zerro Data]'
 
-export const createDataAcc = () => (dispatch, getState) => {
-  sendEvent(`Accounts: Create data account`)
-  const state = getState()
-  const user = getRootUser(state).id
-  const acc = makeDataAcc(user)
-  dispatch(setAccount(acc))
-}
-
-export const checkDataAcc = () => (dispatch, getState) => {
-  const state = getState()
-  if (!getDataAccountId(state)) {
-    console.log('no data acc. Create!')
-    dispatch(createDataAcc())
-  }
-}
-
 export const setData = data => (dispatch, getState) => {
   const state = getState()
   const user = getRootUser(state).id
-  let dataAcc = getDataAccountId(state)
 
+  // Need account to create reminder
+  let dataAcc = getDataAccountId(state)
   if (!dataAcc) {
-    console.log('no data acc. Create!')
     const acc = makeDataAcc(user)
     dispatch(setAccount(acc))
     dataAcc = acc.id
   }
 
+  // All data stored in reminder.comment
   let dataReminder = getDataReminder(state)
-
   if (!dataReminder) {
-    console.log('no data reminder. Create!')
     const reminder = makeDataReminder(user, dataAcc)
     dispatch(setReminder(reminder))
     dataReminder = reminder
   }
 
-  const newReminder = {
-    ...dataReminder,
-    comment: JSON.stringify(data),
-  }
+  const newReminder = { ...dataReminder, comment: JSON.stringify(data) }
   dispatch(setReminder(newReminder))
+}
+
+export const setDataByKey = (key, keyData) => (dispatch, getState) => {
+  const state = getState()
+  const data = getHiddenData(state)
+  dispatch(setData({ ...data, [key]: keyData }))
+}
+
+export const addConnection = (account, tag) => (dispatch, getState) => {
+  const state = getState()
+  const accTagMap = getAccTagMap(state)
+  dispatch(setDataByKey('accTagMap', { ...accTagMap, [account]: tag }))
 }
 
 // DATA ACCOUNT
@@ -86,6 +78,11 @@ const getDataReminder = createSelector([getReminders], reminders =>
   Object.values(reminders).find(reminder => reminder.payee === DATA_ACC_NAME)
 )
 
-const getData = createSelector([getDataReminder], reminder =>
-  reminder ? JSON.parse(reminder.comment) : null
+const getHiddenData = createSelector([getDataReminder], reminder =>
+  reminder ? JSON.parse(reminder.comment) : {}
+)
+
+const getAccTagMap = createSelector(
+  [getHiddenData],
+  data => data.accTagMap || {}
 )
