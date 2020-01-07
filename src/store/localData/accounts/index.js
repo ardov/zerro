@@ -2,7 +2,6 @@ import { createSlice, createSelector } from 'redux-starter-kit'
 import populate from './populate'
 import { getInstruments } from 'store/serverData'
 import { wipeData, removeSynced, removeSyncedFunc } from 'store/commonActions'
-import { DATA_ACC_NAME } from './constants'
 import { convertToSyncArray } from 'helpers/converters'
 
 // INITIAL STATE
@@ -67,11 +66,6 @@ export const getPopulatedAccounts = createSelector(
 export const getAccountList = createSelector([getAccounts], accounts =>
   Object.values(accounts).sort((a, b) => b.balance - a.balance)
 )
-
-export const getDataAccountId = state => {
-  const dataAcc = getAccountList(state).find(acc => acc.title === DATA_ACC_NAME)
-  return dataAcc ? dataAcc.id : null
-}
 
 export const getCredits = createSelector([getAccountList], list =>
   list.filter(a => !a.archive && a.balance < 0)

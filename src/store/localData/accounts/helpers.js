@@ -1,5 +1,4 @@
 import uuidv1 from 'uuid/v1'
-import { DATA_ACC_NAME } from './constants'
 
 export const makeAccount = raw => ({
   // Required
@@ -35,11 +34,3 @@ export const makeAccount = raw => ({
   payoffStep: raw.payoffStep || null,
   payoffInterval: raw.payoffInterval || null,
 })
-
-export const makeDataAcc = user =>
-  makeAccount({
-    user,
-    instrument: 2,
-    title: DATA_ACC_NAME,
-    archive: true,
-  })
