@@ -1,7 +1,7 @@
 import uuidv1 from 'uuid/v1'
 import { DATA_ACC_NAME } from './constants'
 
-export const createAccount = raw => ({
+export const makeAccount = raw => ({
   // Required
   user: raw.user,
   instrument: raw.instrument,
@@ -37,7 +37,7 @@ export const createAccount = raw => ({
 })
 
 export const makeDataAcc = user =>
-  createAccount({
+  makeAccount({
     user,
     instrument: 2,
     title: DATA_ACC_NAME,
