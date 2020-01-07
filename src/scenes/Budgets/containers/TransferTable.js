@@ -14,6 +14,8 @@ import {
   TableHead,
   TableRow,
 } from '@material-ui/core'
+import TagSelect2 from 'components/TagSelect2'
+import { addConnection, getAccTagMap } from 'store/localData/hiddenData'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -25,7 +27,13 @@ const useStyles = makeStyles(theme => ({
   head: { position: 'sticky', top: 0 },
 }))
 
-function TransferTable({ transfers, currency, ...rest }) {
+function TransferTable({
+  transfers,
+  currency,
+  accTagMap,
+  connectToTag,
+  ...rest
+}) {
   const classes = useStyles()
   const formatSum = sum => formatMoney(sum, currency)
 
@@ -58,7 +66,15 @@ function TransferTable({ transfers, currency, ...rest }) {
           {rows.map(row => (
             <TableRow key={row.id} hover>
               <TableCell component="th" scope="row">
-                {row.name}
+                <TagSelect2
+                  trigger={
+                    <span>
+                      {row.name}
+                      {accTagMap[row.id] ? ' 🔗' : ''}
+                    </span>
+                  }
+                  onChange={id => connectToTag(row.id, id)}
+                />
               </TableCell>
               <TableCell align="right">{row.fromBudget}</TableCell>
               <TableCell align="right">{row.toBudget}</TableCell>
@@ -74,6 +90,11 @@ function TransferTable({ transfers, currency, ...rest }) {
 const mapStateToProps = (state, { index }) => ({
   transfers: getTransfersOutsideBudget(state)[index],
   currency: getUserCurrencyCode(state),
+  accTagMap: getAccTagMap(state),
 })
 
-export default connect(mapStateToProps, null)(TransferTable)
+const mapDispatchToProps = dispatch => ({
+  connectToTag: (account, tag) => dispatch(addConnection(account, tag)),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(TransferTable)

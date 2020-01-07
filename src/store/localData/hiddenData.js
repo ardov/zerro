@@ -8,7 +8,7 @@ import sendEvent from 'helpers/sendEvent'
 
 const DATA_ACC_NAME = '🤖 [Zerro Data]'
 
-export const setData = data => (dispatch, getState) => {
+const setData = data => (dispatch, getState) => {
   const state = getState()
   const user = getRootUser(state).id
 
@@ -82,7 +82,7 @@ const getHiddenData = createSelector([getDataReminder], reminder =>
   reminder ? JSON.parse(reminder.comment) : {}
 )
 
-const getAccTagMap = createSelector(
+export const getAccTagMap = createSelector(
   [getHiddenData],
   data => data.accTagMap || {}
 )
