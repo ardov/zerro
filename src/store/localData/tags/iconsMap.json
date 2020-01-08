@@ -76,11 +76,12 @@
   "8501_factory": "🏭",
   "8502_training": "🧑🏻‍🏫",
   "8503_handshake": "🤝",
-  "9001_cash_receiving": "💸",
+  "9001_cash_receiving": "🤑",
   "9002_money_bag": "💰",
   "9003_banknotes": "💵",
   "9004_wallet": "👛",
   "9005_gold_bars": "🛢",
   "9006_safe": "🔐",
-  "9007_tax": "🧾"
+  "9007_tax": "🧾",
+  "9008_give_money": "💸"
 }
