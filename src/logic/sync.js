@@ -58,7 +58,9 @@ export const syncData = () => (dispatch, getState) => {
 
       console.warn('Syncing failed', err)
       sendEvent(`Error: ${err.message}`)
-      Sentry.captureException(err)
+      if (process.env.NODE_ENV === 'production') {
+        Sentry.captureException(err)
+      }
     }
   )
 }

@@ -21,11 +21,13 @@ export default class GlobalErrorBoundary extends React.Component {
 
   componentDidCatch = (error, errorInfo) => {
     sendEvent(`GlobalError: ${error.message}`)
-    Sentry.withScope(scope => {
-      scope.setExtras(errorInfo)
-      const eventId = Sentry.captureException(error)
-      this.setState({ eventId })
-    })
+    if (process.env.NODE_ENV === 'production') {
+      Sentry.withScope(scope => {
+        scope.setExtras(errorInfo)
+        const eventId = Sentry.captureException(error)
+        this.setState({ eventId })
+      })
+    }
   }
 
   fullRefresh = () => {
