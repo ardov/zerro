@@ -39,6 +39,7 @@ export const setDataByKey = (key, keyData) => (dispatch, getState) => {
 }
 
 export const addConnection = (account, tag) => (dispatch, getState) => {
+  sendEvent('Connection: Add')
   const state = getState()
   const accTagMap = getAccTagMap(state)
   dispatch(setDataByKey('accTagMap', { ...accTagMap, [account]: tag }))
@@ -79,7 +80,7 @@ const getDataReminder = createSelector([getReminders], reminders =>
 )
 
 const getHiddenData = createSelector([getDataReminder], reminder =>
-  reminder ? JSON.parse(reminder.comment) : {}
+  reminder && reminder.comment ? JSON.parse(reminder.comment) : {}
 )
 
 export const getAccTagMap = createSelector(
