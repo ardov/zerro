@@ -69,6 +69,7 @@ function BudgetInfo({
   prevFunds,
   transferIncome,
   transferOutcome,
+  transferFees,
   budgeted,
   budgetedInFuture,
   currency,
@@ -99,7 +100,7 @@ function BudgetInfo({
       />
       <Line
         name={`Переводы`}
-        amount={transferIncome - transferOutcome}
+        amount={transferIncome - transferOutcome - transferFees}
         currency={currency}
       />
       <Line
