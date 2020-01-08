@@ -14,7 +14,7 @@ export const setOutcomeBudget = (targetOutcome, monthDate, tagId) => (
   sendEvent('Budgets: set budget')
   const state = getState()
   const created = selectors.getBudget(state, tagId, monthDate)
-  const tags = getAmountsByTag(state)
+  const amounts = getAmountsByTag(state)
   const user = getRootUser(state).id
   const parentTagId = getPopulatedTag(state, tagId).parent
   const i = getMonthDates(state).findIndex(date => +date === +monthDate)
@@ -23,7 +23,9 @@ export const setOutcomeBudget = (targetOutcome, monthDate, tagId) => (
 
   if (!parentTagId) {
     // if it's top level category
-    const { budgeted, totalBudgeted } = tags[i].find(({ id }) => id === tagId)
+    const { budgeted, totalBudgeted } = amounts[i].tags.find(
+      ({ id }) => id === tagId
+    )
     const childrenBudgets = totalBudgeted - budgeted
     outcome = targetOutcome - childrenBudgets
   }

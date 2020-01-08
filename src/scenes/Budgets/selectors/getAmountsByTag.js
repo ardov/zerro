@@ -4,61 +4,134 @@ import { getTagsTree } from 'store/localData/tags'
 import { convertCurrency } from 'store/serverData'
 import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
 import { round } from 'helpers/currencyHelpers'
-import { getTransactionsByMonthAndType } from './getTransactionsByMonthAndType'
-import { getCredits } from 'store/localData/accounts'
+import { getAccTagMap } from 'store/localData/hiddenData'
 
-const getIncomeOutcomeByTag = createSelector(
-  [getTransactionsByMonthAndType, convertCurrency, getCredits],
-  (transactionsByMonth, convert, credits) =>
-    transactionsByMonth.map(month => {
-      const creditIds = credits.map(account => account.id)
+import startOfMonth from 'date-fns/startOfMonth'
+import { getType } from 'store/localData/transactions/helpers'
+import getMonthDates from './getMonthDates'
+import { getTransactionsInBudget } from './baseSelectors'
+import { getAccountsInBudget } from 'store/localData/accounts'
 
-      const income = month.income.reduce((byTag, tr) => {
-        const tag = getMainTag(tr)
-        const amount = convert(tr.income, tr.incomeInstrument)
-        byTag[tag] = byTag[tag] ? round(byTag[tag] + amount) : amount
-        return byTag
-      }, {})
+const getAmountsByMonth = createSelector(
+  [getTransactionsInBudget, convertCurrency, getAccountsInBudget],
+  (transactions, convert, accountsInBudget) => {
+    const budgetAccs = accountsInBudget.map(acc => acc.id)
+    const result = {}
 
-      const outcome = month.outcome.reduce((byTag, tr) => {
-        const tag = getMainTag(tr)
-        const amount = convert(tr.outcome, tr.outcomeInstrument)
-        byTag[tag] = byTag[tag] ? round(byTag[tag] + amount) : amount
-        return byTag
-      }, {})
-
-      const creditOutcome = month.outcome.reduce((byTag, tr) => {
-        if (creditIds.includes(tr.outcomeAccount)) {
-          const tag = getMainTag(tr)
-          const amount = convert(tr.outcome, tr.outcomeInstrument)
-          byTag[tag] = byTag[tag] ? round(byTag[tag] + amount) : amount
+    transactions.forEach(tr => {
+      const date = +startOfMonth(tr.date)
+      if (!result[date]) {
+        result[date] = {
+          income: {}, // amounts by tags
+          outcome: {}, // amounts by tags
+          transfers: {}, // amounts by accounts
+          transferFees: 0,
         }
-        return byTag
-      }, {})
+      }
+      result[date].date = new Date(date).toLocaleString()
 
-      return { date: month.date, income, outcome, creditOutcome }
+      const type = getType(tr)
+      const tag = getMainTag(tr)
+
+      // INCOME
+      if (type === 'income') {
+        const amount = convert(tr.income, tr.incomeInstrument)
+        result[date].income[tag] = result[date].income[tag]
+          ? round(result[date].income[tag] + amount)
+          : amount
+      }
+      // OUTCOME
+      else if (type === 'outcome') {
+        const amount = convert(tr.outcome, tr.outcomeInstrument)
+        result[date].outcome[tag] = result[date].outcome[tag]
+          ? round(result[date].outcome[tag] + amount)
+          : amount
+      }
+      // TRANSFER BETWEEN BUDGET ACCOUNTS
+      else if (
+        type === 'transfer' &&
+        budgetAccs.includes(tr.incomeAccount) &&
+        budgetAccs.includes(tr.outcomeAccount)
+      ) {
+        result[date].transferFees = round(
+          result[date].transferFees +
+            convert(tr.outcome, tr.outcomeInstrument) -
+            convert(tr.income, tr.incomeInstrument)
+        )
+      }
+      // TRANSFER TO BUDGET
+      else if (type === 'transfer' && budgetAccs.includes(tr.incomeAccount)) {
+        result[date].transfers[tr.outcomeAccount] = result[date].transfers[
+          tr.outcomeAccount
+        ]
+          ? round(
+              result[date].transfers[tr.outcomeAccount] -
+                convert(tr.income, tr.incomeInstrument)
+            )
+          : -convert(tr.income, tr.incomeInstrument)
+      }
+      // TRANSFER FROM BUDGET
+      else if (type === 'transfer' && budgetAccs.includes(tr.outcomeAccount)) {
+        result[date].transfers[tr.incomeAccount] = result[date].transfers[
+          tr.incomeAccount
+        ]
+          ? round(
+              result[date].transfers[tr.incomeAccount] +
+                convert(tr.outcome, tr.outcomeInstrument)
+            )
+          : convert(tr.outcome, tr.outcomeInstrument)
+      }
     })
+
+    return result
+  }
 )
 
 export const getAmountsByTag = createSelector(
-  [getIncomeOutcomeByTag, getBudgetsByMonthAndTag, getTagsTree],
-  (months, budgets, tags) => {
+  [
+    getMonthDates,
+    getAmountsByMonth,
+    getBudgetsByMonthAndTag,
+    getTagsTree,
+    getAccTagMap,
+  ],
+  (dates, amounts, budgets, tagsTree, accTagMap) => {
     let prevMonth = null
-    return months.map(month => {
-      const result = tags.map((parent, pIndex) => ({
+
+    return dates.map(date => {
+      const { income = {}, outcome = {}, transfers = {}, transferFees = 0 } =
+        amounts[date] || {}
+
+      let transfersAmount = 0
+      let connectedTransfers = {}
+      for (const accId in transfers) {
+        if (accTagMap[accId]) {
+          const tagId = accTagMap[accId]
+          connectedTransfers[tagId] = transfers[accId]
+        } else {
+          // possible problem with deleted tags
+          transfersAmount = round(transfersAmount + transfers[accId])
+        }
+      }
+
+      // TAGS COMPUTATIONS
+      const tags = tagsTree.map((parent, pIndex) => ({
         // Tag data
         ...parent,
 
         // From getIncomeOutcomeByTag selector
-        income: month.income[parent.id] || 0,
-        outcome: month.outcome[parent.id] || 0,
-        creditOutcome: month.creditOutcome[parent.id] || 0,
+        income: income[parent.id] || 0,
+        get outcome() {
+          return this.tagOutcome + this.transferOutcome
+        },
+        tagOutcome: outcome[parent.id] || 0,
+        transferOutcome: connectedTransfers[parent.id] || 0,
 
         // From budgets
         budgeted:
-          (budgets[month.date] &&
-            budgets[month.date][parent.id] &&
-            budgets[month.date][parent.id].outcome) ||
+          (budgets[date] &&
+            budgets[date][parent.id] &&
+            budgets[date][parent.id].outcome) ||
           0,
         prevAvailable:
           (prevMonth &&
@@ -116,13 +189,12 @@ export const getAmountsByTag = createSelector(
         // Children
         children: parent.children.map((child, i) => ({
           ...child,
-          income: month.income[child.id] || 0,
-          outcome: month.outcome[child.id] || 0,
-          creditOutcome: month.creditOutcome[child.id] || 0,
+          income: income[child.id] || 0,
+          outcome: outcome[child.id] || 0,
           budgeted:
-            (budgets[month.date] &&
-              budgets[month.date][child.id] &&
-              budgets[month.date][child.id].outcome) ||
+            (budgets[date] &&
+              budgets[date][child.id] &&
+              budgets[date][child.id].outcome) ||
             0,
           prevAvailable:
             (prevMonth &&
@@ -134,8 +206,18 @@ export const getAmountsByTag = createSelector(
           },
         })),
       }))
-      prevMonth = result
-      return result
+      prevMonth = tags
+
+      //
+      //
+      //
+      return {
+        date,
+        tags,
+        transferFees,
+        transferOutcome: transfersAmount,
+        transfers,
+      }
     })
   }
 )
