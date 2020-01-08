@@ -3,7 +3,7 @@ import isSameMonth from 'date-fns/isSameMonth'
 import addMonths from 'date-fns/addMonths'
 import createSelector from 'selectorator'
 import { getTransactionsInBudget } from './baseSelectors'
-import { getBudgetsByMonthAndTag } from 'store/data/budgets'
+import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
 
 const getFirstMonth = createSelector(
   [getTransactionsInBudget],
@@ -16,24 +16,21 @@ const getFirstMonth = createSelector(
   }
 )
 
-const getLastMonth = createSelector(
-  [getBudgetsByMonthAndTag],
-  budgets => {
-    const lastBudget = Object.keys(budgets)
-      .map(s => parseInt(s))
-      .sort((a, b) => a - b)
-      .pop()
+const getLastMonth = createSelector([getBudgetsByMonthAndTag], budgets => {
+  const lastBudget = Object.keys(budgets)
+    .map(s => parseInt(s))
+    .sort((a, b) => a - b)
+    .pop()
 
-    const afterLastBudget = +addMonths(new Date(lastBudget), 1)
+  const afterLastBudget = +addMonths(new Date(lastBudget), 1)
 
-    const nextMonth = +new Date(
-      new Date().getFullYear(),
-      new Date().getMonth() + 1,
-      1
-    )
-    return afterLastBudget > nextMonth ? afterLastBudget : nextMonth
-  }
-)
+  const nextMonth = +new Date(
+    new Date().getFullYear(),
+    new Date().getMonth() + 1,
+    1
+  )
+  return afterLastBudget > nextMonth ? afterLastBudget : nextMonth
+})
 
 const getMonthDates = createSelector(
   [getFirstMonth, getLastMonth],

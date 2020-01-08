@@ -8,9 +8,9 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 import { connect } from 'react-redux'
 import TransactionGroup from './TransactionGroup'
 import TopBar from './TopBar'
-import { getSortedTransactions } from 'store/data/transactions'
+import { getSortedTransactions } from 'store/localData/transactions'
 import { checkRaw, getFilterConditions } from 'store/filterConditions'
-import { groupTransactionsBy } from 'store/data/transactions/helpers'
+import { groupTransactionsBy } from 'store/localData/transactions/helpers'
 
 const HEADER_HEIGHT = 48
 const TRANSACTION_HEIGHT = 72

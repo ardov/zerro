@@ -1,7 +1,7 @@
 import React from 'react'
 import { TransactionList } from './TransactionList'
 import { Drawer, Box, Typography, Tooltip, IconButton } from '@material-ui/core'
-import { getSortedTransactions } from 'store/data/transactions'
+import { getSortedTransactions } from 'store/localData/transactions'
 import CloseIcon from '@material-ui/icons/Close'
 import { connect } from 'react-redux'
 

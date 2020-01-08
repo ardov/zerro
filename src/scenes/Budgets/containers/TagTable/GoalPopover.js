@@ -3,8 +3,8 @@ import { connect } from 'react-redux'
 import { Box, Popover, TextField, MenuItem } from '@material-ui/core'
 import { formatMoney } from 'helpers/format'
 import AmountInput from 'components/AmountInput'
-import { getGoals } from 'store/data/budgets'
-import { setGoal } from 'store/data/budgets/thunks'
+import { getGoals } from 'store/localData/budgets'
+import { setGoal } from 'store/localData/budgets/thunks'
 
 export function GoalPopover({
   currency,

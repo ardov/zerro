@@ -5,12 +5,12 @@ import {
   toggleTransaction,
   selectTransactionsByChangedDate,
 } from 'store/selectedTransactions'
-import { getInstrument } from 'store/data/instruments'
-import { getAccount } from 'store/data/accounts'
-import { getPopulatedTag } from 'store/data/tags'
+import { getInstrument } from 'store/serverData'
+import { getAccount } from 'store/localData/accounts'
+import { getPopulatedTag } from 'store/localData/tags'
 import Transaction from './Transaction'
-import { getTransaction } from 'store/data/transactions'
-import { getType } from 'store/data/transactions/helpers'
+import { getTransaction } from 'store/localData/transactions'
+import { getType } from 'store/localData/transactions/helpers'
 
 const mapStateToProps = (state, { id }) => {
   const tr = getTransaction(state, id)

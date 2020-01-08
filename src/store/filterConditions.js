@@ -1,6 +1,6 @@
 import { createSlice } from 'redux-starter-kit'
 import concat from 'lodash/concat'
-import { getType } from './data/transactions/helpers'
+import { getType } from './localData/transactions/helpers'
 
 // INITIAL STATE
 const initialState = {

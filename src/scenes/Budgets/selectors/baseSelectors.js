@@ -1,8 +1,8 @@
 import createSelector from 'selectorator'
-import { getAccountsInBudget } from 'store/data/accounts'
-import { convertCurrency } from 'store/data/instruments'
+import { getAccountsInBudget } from 'store/localData/accounts'
+import { convertCurrency } from 'store/serverData'
 import { round } from 'helpers/currencyHelpers'
-import { getTransactions } from 'store/data/transactions'
+import { getTransactions } from 'store/localData/transactions'
 import { checkRaw } from 'store/filterConditions'
 
 export const getStartFunds = createSelector(

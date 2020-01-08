@@ -16,7 +16,7 @@ import EmojiFlagsIcon from '@material-ui/icons/EmojiFlags'
 import BudgetPopover from './BudgetPopover'
 import GoalPopover from './GoalPopover'
 import NamePopover from './NamePopover'
-import { goalToWords } from 'store/data/budgets/helpers'
+import { goalToWords } from 'store/localData/budgets/helpers'
 import GoalProgress from 'components/GoalProgress'
 
 export const useStyles = makeStyles(theme => ({

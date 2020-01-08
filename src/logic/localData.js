@@ -1,6 +1,6 @@
 import storage from 'services/storage'
-import { updateData } from 'store/data/commonActions'
-import { getDataToSave } from 'store/data/dataSelectors'
+import { updateData } from 'store/serverData'
+import { getDataToSave } from 'store/serverData'
 
 const LOCAL_KEYS = [
   'serverTimestamp',

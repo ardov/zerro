@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { getTagsTree, getPopulatedTags } from 'store/data/tags'
+import { getTagsTree, getPopulatedTags } from 'store/localData/tags'
 import { Box, Select, OutlinedInput, Chip, MenuItem } from '@material-ui/core'
 import EmojiIcon from 'components/EmojiIcon'
 

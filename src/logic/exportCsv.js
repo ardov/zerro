@@ -1,4 +1,4 @@
-import { getPopulatedTransactions } from 'store/data/transactions'
+import { getPopulatedTransactions } from 'store/localData/transactions'
 import { format } from 'date-fns'
 
 export default function exportCsv(_, getState) {

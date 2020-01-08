@@ -4,17 +4,26 @@ import { connect } from 'react-redux'
 import { Paper, Box } from '@material-ui/core'
 import { setOutcomeBudget } from '../../thunks'
 import { getAmountsByTag } from '../../selectors/getAmountsByTag'
-import { getUserCurrencyCode } from 'store/data/instruments'
+import { getUserCurrencyCode } from 'store/serverData'
 import Row from './Row'
 import TagTableHeader from './TagTableHeader'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 import { endOfMonth } from 'date-fns'
 import sendEvent from 'helpers/sendEvent'
-import { getGoals } from 'store/data/budgets'
+import { getGoals } from 'store/localData/budgets'
+import { getTagsTree } from 'store/localData/tags'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
-function TagTable({ tags, goals, currency, date, updateBudget, ...rest }) {
+function TagTable({
+  tags,
+  tagsTree,
+  goals,
+  currency,
+  date,
+  updateBudget,
+  ...rest
+}) {
   const [selected, setSelected] = useState()
   const [metricIndex, setMetricIndex] = useState(0)
   const filtered = tags
@@ -26,7 +35,7 @@ function TagTable({ tags, goals, currency, date, updateBudget, ...rest }) {
   }, [selected])
 
   const toggleMetric = () =>
-    setMetricIndex(metricIndex === 2 ? 0 : metricIndex + 1)
+    setMetricIndex(metricIndex === 2 ? 0 : metricIndex + 1) // metricIndex + 1 % 3
 
   const filterConditions = {
     type: 'outcome',
@@ -68,8 +77,9 @@ function TagTable({ tags, goals, currency, date, updateBudget, ...rest }) {
 }
 
 const mapStateToProps = (state, { index }) => ({
-  prevTags: getAmountsByTag(state)[index - 1],
-  tags: getAmountsByTag(state)[index],
+  prevTags: getAmountsByTag(state)[index - 1].tags,
+  tags: getAmountsByTag(state)[index].tags,
+  tagsTree: getTagsTree(state),
   goals: getGoals(state),
   currency: getUserCurrencyCode(state),
 })

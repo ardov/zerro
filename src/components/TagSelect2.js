@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { getTagsTree } from 'store/data/tags'
+import { getTagsTree } from 'store/localData/tags'
 import {
   Popover,
   Paper,
@@ -50,10 +50,7 @@ function TagSelect({
   )
 }
 
-export default connect(
-  state => ({ tags: getTagsTree(state) }),
-  null
-)(TagSelect)
+export default connect(state => ({ tags: getTagsTree(state) }), null)(TagSelect)
 
 // WIP
 function TagSelectPopover({

@@ -12,7 +12,7 @@ import {
 import {
   setMainTagToTransactions,
   deleteTransactions,
-} from 'store/data/transactions'
+} from 'store/localData/transactions/thunks'
 import Paper from '@material-ui/core/Paper'
 import InputBase from '@material-ui/core/InputBase'
 import IconButton from '@material-ui/core/IconButton'
@@ -107,7 +107,4 @@ const mapDispatchToProps = dispatch => ({
   uncheckAll: () => dispatch(uncheckAllTransactions()),
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Filter)
+export default connect(mapStateToProps, mapDispatchToProps)(Filter)

@@ -1,11 +1,10 @@
 import ZenApi from 'services/ZenApi'
-import { updateData } from 'store/data/commonActions'
-import { getChangedArrays } from '../store/data/dataSelectors'
+import { updateData, getLastSyncTime } from 'store/serverData'
+import { getChangedArrays } from 'store/localData'
 import { getToken } from 'store/token'
-import { removeSynced } from '../store/data/commonActions'
+import { removeSynced } from 'store/commonActions'
 import { setPending } from 'store/isPending'
 import { saveDataLocally } from 'logic/localData'
-import { getServerTimestampToSave } from 'store/data/serverTimestamp'
 import { setMessage } from 'store/message'
 import sendEvent from 'helpers/sendEvent'
 import * as Sentry from '@sentry/browser'
@@ -15,7 +14,7 @@ export const syncData = () => (dispatch, getState) => {
   const state = getState()
   const changed = getChangedArrays(state)
   const token = getToken(state)
-  const serverTimestamp = getServerTimestampToSave(state) || 0
+  const serverTimestamp = getLastSyncTime(state) / 1000 || 0
 
   // MESSAGES
   const successMessage = 'Данные обновлены'
@@ -59,7 +58,9 @@ export const syncData = () => (dispatch, getState) => {
 
       console.warn('Syncing failed', err)
       sendEvent(`Error: ${err.message}`)
-      Sentry.captureException(err)
+      if (process.env.NODE_ENV === 'production') {
+        Sentry.captureException(err)
+      }
     }
   )
 }
