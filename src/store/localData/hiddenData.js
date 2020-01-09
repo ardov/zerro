@@ -28,7 +28,11 @@ const setData = data => (dispatch, getState) => {
     dataReminder = reminder
   }
 
-  const newReminder = { ...dataReminder, comment: JSON.stringify(data) }
+  const newReminder = {
+    ...dataReminder,
+    comment: JSON.stringify(data),
+    changed: Date.now(),
+  }
   dispatch(setReminder(newReminder))
 }
 

@@ -3,15 +3,7 @@ import { withRouter } from 'react-router'
 import { Link } from 'react-router-dom'
 import RefreshButton from './containers/RefreshButton'
 import MenuButton from './containers/MenuButton'
-import {
-  Tabs,
-  Tab,
-  Box,
-  Drawer,
-  IconButton,
-  Tooltip,
-  Typography,
-} from '@material-ui/core'
+import { Tabs, Tab, Box, Drawer, IconButton, Tooltip } from '@material-ui/core'
 import { withStyles, useTheme } from '@material-ui/styles'
 import AttachMoneyIcon from '@material-ui/icons/AttachMoney'
 import Logo from 'components/Logo'
@@ -80,9 +72,6 @@ const NavigationDrawer = ({
           </Tooltip>
           <RefreshButton />
           <MenuButton />
-          <Typography variant="overline" color="textSecondary" align="center">
-            0.1.1
-          </Typography>
         </Box>
       </Box>
     </Drawer>

@@ -16,6 +16,7 @@ import {
   Tooltip,
   Menu,
   MenuItem,
+  Typography,
 } from '@material-ui/core'
 
 const useStyles = makeStyles(({ spacing }) => ({
@@ -76,6 +77,11 @@ function MenuButton({ exportCsv, exportJSON, logOut, toggleTheme, ...rest }) {
           <ExitToAppIcon className={classes.menuIcon} color="action" />
           Выйти
         </MenuItem>
+        <Box pl={6} pr={2} py={0.5}>
+          <Typography variant="overline" color="textSecondary" align="center">
+            0.1.2
+          </Typography>
+        </Box>
       </Menu>
     </React.Fragment>
   )
