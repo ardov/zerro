@@ -77,7 +77,6 @@ function TagTable({
 }
 
 const mapStateToProps = (state, { index }) => ({
-  prevTags: getAmountsByTag(state)[index - 1].tags,
   tags: getAmountsByTag(state)[index].tags,
   tagsTree: getTagsTree(state),
   goals: getGoals(state),
