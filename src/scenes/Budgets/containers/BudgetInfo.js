@@ -6,6 +6,7 @@ import ru from 'date-fns/locale/ru'
 import styled, { css } from 'styled-components'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
+import { Tooltip } from '@material-ui/core'
 
 const getMonthName = date => format(date, 'MMM', { locale: ru }).toLowerCase()
 
@@ -63,6 +64,7 @@ const Text = styled.div`
 `
 function BudgetInfo({
   date,
+  available,
   prevOverspent,
   toBeBudgeted,
   income,
@@ -81,7 +83,18 @@ function BudgetInfo({
     <Body {...rest}>
       <ToBeBudgeted positive={toBeBudgeted >= 0}>
         <Amount>{formatSum(toBeBudgeted)}</Amount>
-        <Text>Осталось запланировать</Text>
+        <Tooltip
+          title={
+            <span>
+              Не распределено {formatMoney(toBeBudgeted, currency)} <br />
+              Распределено {formatMoney(available, currency)}
+              <br />
+              Итого в бюджете {formatMoney(available + toBeBudgeted, currency)}
+            </span>
+          }
+        >
+          <Text>Осталось запланировать</Text>
+        </Tooltip>
       </ToBeBudgeted>
       <Line
         name={`Доход за ${getMonthName(date)}`}
