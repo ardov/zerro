@@ -192,7 +192,11 @@ export const getAmountsByTag = createSelector(
         children: parent.children.map((child, i) => ({
           ...child,
           income: income[child.id] || 0,
-          outcome: outcome[child.id] || 0,
+          get outcome() {
+            return this.tagOutcome + this.transferOutcome
+          },
+          tagOutcome: outcome[child.id] || 0,
+          transferOutcome: connectedTransfers[child.id] || 0,
           budgeted:
             (budgets[date] &&
               budgets[date][child.id] &&
