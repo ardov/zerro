@@ -107,7 +107,9 @@ export const getAmountsByTag = createSelector(
       for (const accId in transfers) {
         if (accTagMap[accId]) {
           const tagId = accTagMap[accId]
-          connectedTransfers[tagId] = transfers[accId]
+          connectedTransfers[tagId] = round(
+            transfers[accId] + (connectedTransfers[tagId] || 0)
+          )
         } else {
           // possible problem with deleted tags
           transfersAmount = round(transfersAmount + transfers[accId])
