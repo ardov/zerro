@@ -28,7 +28,7 @@ function Auth(props) {
           color="primary"
           size="large"
           onClick={props.logIn}
-          children="Войти через ДзенМани"
+          children="Войти через Дзен-мани"
         />
       </Fade>
 
@@ -51,7 +51,4 @@ const mapDispatchToProps = dispatch => ({
   logIn: () => dispatch(logIn()),
 })
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(Auth)
+export default connect(null, mapDispatchToProps)(Auth)
