@@ -107,7 +107,9 @@ export const getAmountsByTag = createSelector(
       for (const accId in transfers) {
         if (accTagMap[accId]) {
           const tagId = accTagMap[accId]
-          connectedTransfers[tagId] = transfers[accId]
+          connectedTransfers[tagId] = round(
+            transfers[accId] + (connectedTransfers[tagId] || 0)
+          )
         } else {
           // possible problem with deleted tags
           transfersAmount = round(transfersAmount + transfers[accId])
@@ -190,7 +192,11 @@ export const getAmountsByTag = createSelector(
         children: parent.children.map((child, i) => ({
           ...child,
           income: income[child.id] || 0,
-          outcome: outcome[child.id] || 0,
+          get outcome() {
+            return this.tagOutcome + this.transferOutcome
+          },
+          tagOutcome: outcome[child.id] || 0,
+          transferOutcome: connectedTransfers[child.id] || 0,
           budgeted:
             (budgets[date] &&
               budgets[date][child.id] &&

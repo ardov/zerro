@@ -78,8 +78,13 @@ function MenuButton({ exportCsv, exportJSON, logOut, toggleTheme, ...rest }) {
           Выйти
         </MenuItem>
         <Box pl={6} pr={2} py={0.5}>
-          <Typography variant="overline" color="textSecondary" align="center">
-            0.1.3
+          <Typography
+            variant="overline"
+            color="textSecondary"
+            align="center"
+            onClick={() => window.location.reload(true)}
+          >
+            0.1.6
           </Typography>
         </Box>
       </Menu>
