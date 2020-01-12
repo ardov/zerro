@@ -27,18 +27,16 @@ export const getTotalsByMonth = createSelector(
         get toBeBudgeted() {
           return this.funds - this.budgetedInFuture
         },
-
-        // TO CHECK
-        get moneyInBudget() {
-          return this.funds + this.available
-        },
-
-        // TO DISPLAY
         // cannot be negative or greater than funds
         get budgetedInFuture() {
           const { funds, realBudgetedInFuture } = this
           if (realBudgetedInFuture <= 0 || funds <= 0) return 0
           return realBudgetedInFuture > funds ? funds : realBudgetedInFuture
+        },
+
+        // TO CHECK
+        get moneyInBudget() {
+          return this.funds + this.available
         },
 
         realBudgetedInFuture: budgets
