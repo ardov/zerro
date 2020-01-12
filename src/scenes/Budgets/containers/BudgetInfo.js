@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { connect } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { format } from 'date-fns'
@@ -6,7 +6,6 @@ import ru from 'date-fns/locale/ru'
 import styled, { css } from 'styled-components'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
-import { Tooltip } from '@material-ui/core'
 
 const getMonthName = date => format(date, 'MMM', { locale: ru }).toLowerCase()
 
@@ -67,34 +66,28 @@ function BudgetInfo({
   available,
   prevOverspent,
   toBeBudgeted,
+  funds,
+  overspent,
   income,
   prevFunds,
   transferIncome,
   transferOutcome,
   transferFees,
+  realBudgetedInFuture,
   budgeted,
+  moneyInBudget,
   budgetedInFuture,
   currency,
   ...rest
 }) {
+  const [opened, setOpened] = useState(false)
   const formatSum = sum => formatMoney(sum, currency)
 
   return (
     <Body {...rest}>
       <ToBeBudgeted positive={toBeBudgeted >= 0}>
         <Amount>{formatSum(toBeBudgeted)}</Amount>
-        <Tooltip
-          title={
-            <span>
-              Не распределено {formatMoney(toBeBudgeted, currency)} <br />
-              Распределено {formatMoney(available, currency)}
-              <br />
-              Итого в бюджете {formatMoney(available + toBeBudgeted, currency)}
-            </span>
-          }
-        >
-          <Text>Осталось запланировать</Text>
-        </Tooltip>
+        <Text onClick={() => setOpened(!opened)}>Осталось запланировать</Text>
       </ToBeBudgeted>
       <Line
         name={`Доход за ${getMonthName(date)}`}
@@ -103,7 +96,12 @@ function BudgetInfo({
       />
       <Line
         name={`Остаток с прошлого`}
-        amount={prevFunds - prevOverspent}
+        amount={prevFunds}
+        currency={currency}
+      />
+      <Line
+        name={`Перерасход в прошлом`}
+        amount={-prevOverspent}
         currency={currency}
       />
       <Line
@@ -113,7 +111,7 @@ function BudgetInfo({
       />
       <Line
         name={`Переводы`}
-        amount={transferIncome - transferOutcome - transferFees}
+        amount={-transferOutcome - transferFees}
         currency={currency}
       />
       <Line
@@ -121,6 +119,32 @@ function BudgetInfo({
         amount={-budgetedInFuture}
         currency={currency}
       />
+      {opened && (
+        <>
+          <Line
+            name={`transferOutcome`}
+            amount={-transferOutcome}
+            currency={currency}
+          />
+          <Line
+            name={`transferFees`}
+            amount={-transferFees}
+            currency={currency}
+          />
+          <Line
+            name={`realBudgetedInFuture`}
+            amount={realBudgetedInFuture}
+            currency={currency}
+          />
+          <Line name={`available`} amount={available} currency={currency} />
+          <Line name={`overspent`} amount={overspent} currency={currency} />
+          <Line
+            name={`moneyInBudget`}
+            amount={moneyInBudget}
+            currency={currency}
+          />
+        </>
+      )}
     </Body>
   )
 }
