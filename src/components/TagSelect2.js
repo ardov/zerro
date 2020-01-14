@@ -69,11 +69,14 @@ function TagSelectPopover({
   }
 
   const checkTag = tag =>
-    checkSearch(tag, search) &&
-    (localTagType !== 'income' ||
-      (localTagType === 'income' && tag.showIncome)) &&
-    (localTagType !== 'outcome' ||
-      (localTagType === 'outcome' && tag.showOutcome)) &&
+    // if there is search do not apply rules for tag type
+    (search
+      ? checkSearch(tag, search)
+      : (localTagType !== 'income' ||
+          (localTagType === 'income' && tag.showIncome)) &&
+        (localTagType !== 'outcome' ||
+          (localTagType === 'outcome' && tag.showOutcome))) &&
+    // if there is exclude remove those tags from list
     (!(exclude && exclude.length) || !exclude.includes(tag.id))
 
   const filtered = tags
