@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import TagSelect from 'components/TagSelect'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import Reciept from './Reciept'
@@ -13,12 +12,15 @@ import {
   Tooltip,
   Link,
 } from '@material-ui/core'
+import AddIcon from '@material-ui/icons/Add'
 import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash'
 import CloseIcon from '@material-ui/icons/Close'
 import DeleteIcon from '@material-ui/icons/Delete'
 import { DatePicker } from '@material-ui/pickers'
 import Map from './Map'
 import AmountInput from 'components/AmountInput'
+import TagChip from 'components/TagChip'
+import TagSelect2 from 'components/TagSelect2'
 
 export default function DetailsDrawer({
   id,
@@ -98,6 +100,14 @@ export default function DetailsDrawer({
       tag: localTag,
     })
 
+  const removeTag = removeId =>
+    setLocalTag(localTag && localTag.filter(id => id !== removeId))
+
+  const replaceTag = (oldId, newId) =>
+    setLocalTag(localTag && localTag.map(id => (id === oldId ? newId : id)))
+
+  const addTag = id => setLocalTag(localTag ? [...localTag, id] : [id])
+
   return (
     <Box minWidth={320} position="relative">
       <Head
@@ -109,8 +119,33 @@ export default function DetailsDrawer({
       />
 
       {type !== 'transfer' && (
-        <Box p={3} bgcolor="background.default">
-          <TagSelect value={localTag} onChange={setLocalTag} />
+        <Box px={3} py={2} bgcolor="background.default">
+          {localTag &&
+            localTag.map(id => (
+              <TagSelect2
+                key={id}
+                onChange={newId => replaceTag(id, newId)}
+                exclude={localTag}
+                tagType={type}
+                trigger={
+                  <Box mr={1} my={0.5} clone>
+                    <TagChip id={id} onDelete={() => removeTag(id)} />
+                  </Box>
+                }
+              />
+            ))}
+          <TagSelect2
+            onChange={id => addTag(id)}
+            exclude={localTag}
+            tagType={type}
+            trigger={
+              <Box my={0.5} clone>
+                <Tooltip title="Добавить категорию">
+                  <IconButton edge="end" size="small" children={<AddIcon />} />
+                </Tooltip>
+              </Box>
+            }
+          />
         </Box>
       )}
 
