@@ -128,7 +128,7 @@ export default function DetailsDrawer({
                 exclude={localTag}
                 tagType={type}
                 trigger={
-                  <Box mr={1} my={0.5} clone>
+                  <Box mr={1} my={0.5} display="inline-block">
                     <TagChip id={id} onDelete={() => removeTag(id)} />
                   </Box>
                 }
@@ -139,7 +139,7 @@ export default function DetailsDrawer({
             exclude={localTag}
             tagType={type}
             trigger={
-              <Box my={0.5} clone>
+              <Box my={0.5} display="inline-block">
                 <Tooltip title="Добавить категорию">
                   <IconButton edge="end" size="small" children={<AddIcon />} />
                 </Tooltip>
