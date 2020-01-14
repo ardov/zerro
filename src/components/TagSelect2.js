@@ -133,7 +133,7 @@ function TagSelectPopover({
               ))}
           </React.Fragment>
         ))}
-        {localTagType && (
+        {localTagType && !search && (
           <ListItem button onClick={() => setLocalTagType(null)}>
             Показать все категории
           </ListItem>
