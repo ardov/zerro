@@ -195,6 +195,10 @@ export function TagRow(props) {
               <Draggable draggableId={id ? id : 'null'} index={0}>
                 {(provided, snapshot) => (
                   <Box
+                    p={0.5}
+                    m={-0.5}
+                    borderRadius={16}
+                    bgcolor={snapshot.isDragging ? 'background.paper' : ''}
                     color={availableColor}
                     ref={provided.innerRef}
                     {...provided.draggableProps}
@@ -220,27 +224,30 @@ export function TagRow(props) {
                         ml={1}
                         maxWidth={16}
                       >
-                        {goal ? (
-                          <Tooltip title={goalToWords(goal)}>
-                            <IconButton
-                              size="small"
-                              onClick={e => setGoalAnchorEl(e.currentTarget)}
-                              edge="start"
-                              children={<GoalProgress value={goalProgress} />}
-                            />
-                          </Tooltip>
-                        ) : (
-                          <Box component="span" className="addGoal">
-                            <Tooltip title="Добавить цель">
+                        {!snapshot.isDragging &&
+                          (goal ? (
+                            <Tooltip title={goalToWords(goal)}>
                               <IconButton
                                 size="small"
                                 onClick={e => setGoalAnchorEl(e.currentTarget)}
                                 edge="start"
-                                children={<EmojiFlagsIcon fontSize="small" />}
+                                children={<GoalProgress value={goalProgress} />}
                               />
                             </Tooltip>
-                          </Box>
-                        )}
+                          ) : (
+                            <Box component="span" className="addGoal">
+                              <Tooltip title="Добавить цель">
+                                <IconButton
+                                  size="small"
+                                  onClick={e =>
+                                    setGoalAnchorEl(e.currentTarget)
+                                  }
+                                  edge="start"
+                                  children={<EmojiFlagsIcon fontSize="small" />}
+                                />
+                              </Tooltip>
+                            </Box>
+                          ))}
                       </Box>
                     </Typography>
                   </Box>
