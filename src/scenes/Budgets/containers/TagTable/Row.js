@@ -88,6 +88,7 @@ export default function Row(props) {
             }).map(data => (
               <TagRow
                 key={data.id}
+                isHidden={!expanded}
                 {...data}
                 goal={goals[data.id]}
                 metric={metric}
