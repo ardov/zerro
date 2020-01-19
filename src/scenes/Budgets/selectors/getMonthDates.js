@@ -17,19 +17,20 @@ const getFirstMonth = createSelector(
 )
 
 const getLastMonth = createSelector([getBudgetsByMonthAndTag], budgets => {
-  const lastBudget = Object.keys(budgets)
+  const lastBudgetDate = Object.keys(budgets)
     .map(s => parseInt(s))
     .sort((a, b) => a - b)
     .pop()
 
-  const afterLastBudget = +addMonths(new Date(lastBudget), 1)
+  const afterLastBudget = +addMonths(new Date(lastBudgetDate), 1)
 
   const nextMonth = +new Date(
     new Date().getFullYear(),
     new Date().getMonth() + 1,
     1
   )
-  return afterLastBudget > nextMonth ? afterLastBudget : nextMonth
+
+  return Math.max(afterLastBudget, nextMonth)
 })
 
 const getMonthDates = createSelector(
