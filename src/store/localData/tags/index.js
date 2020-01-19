@@ -59,10 +59,7 @@ export const getPopulatedTags = createSelector([getTags], tags => {
 export const getPopulatedTag = (state, id) => getPopulatedTags(state)[id]
 
 export const getTagsTree = createSelector([getPopulatedTags], tags => {
-  const list = []
-  for (const id in tags) {
-    list.push(tags[id])
-  }
+  const list = Object.values(tags).sort((a, b) => a.name.localeCompare(b.name))
   const topLevel = list
     .filter(tag => !tag.parent)
     .map(parent => ({ ...parent, children: [] }))

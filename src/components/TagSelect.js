@@ -48,10 +48,7 @@ function TagSelect({
           <Box display="flex" flexWrap="wrap">
             {selected.map(id => (
               <Box m={0.25} key={id} clone>
-                <Chip
-                  label={tagList[id] && tagList[id].title}
-                  onDelete={removeTag(id)}
-                />
+                <Chip label={tagList[id] && tagList[id].title} />
               </Box>
             ))}
           </Box>

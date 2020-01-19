@@ -7,6 +7,58 @@ import { getAmountsByTag } from '../selectors/getAmountsByTag'
 import sendEvent from 'helpers/sendEvent'
 import { createBudget } from 'store/localData/budgets/helpers'
 
+export const moveFunds = (amount, source, destination, monthDate) => (
+  dispatch,
+  getState
+) => {
+  if (!source || !amount || !destination || source === destination) return
+  sendEvent('Budgets: move funds')
+  const state = getState()
+  const user = getRootUser(state).id
+
+  let resultBudgets = []
+
+  // replace null id
+  source = source === 'null' ? null : source
+  destination = destination === 'null' ? null : destination
+
+  if (source !== 'toBeBudgeted') {
+    const sourceBudget =
+      selectors.getBudget(state, source, monthDate) ||
+      createBudget({ user, date: +monthDate, tag: source })
+
+    console.log(
+      `${source}  ${sourceBudget.outcome} --> ${sourceBudget.outcome - amount}`
+    )
+
+    resultBudgets.push({
+      ...sourceBudget,
+      outcome: sourceBudget.outcome - amount,
+      changed: Date.now(),
+    })
+  }
+
+  if (destination !== 'toBeBudgeted') {
+    const destinationBudget =
+      selectors.getBudget(state, destination, monthDate) ||
+      createBudget({ user, date: +monthDate, tag: destination })
+
+    console.log(
+      `${destination}  ${
+        destinationBudget.outcome
+      } --> ${destinationBudget.outcome + amount}`
+    )
+
+    resultBudgets.push({
+      ...destinationBudget,
+      outcome: destinationBudget.outcome + amount,
+      changed: Date.now(),
+    })
+  }
+
+  dispatch(setBudget(resultBudgets))
+}
+
 export const setOutcomeBudget = (targetOutcome, monthDate, tagId) => (
   dispatch,
   getState

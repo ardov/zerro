@@ -84,7 +84,7 @@ function MenuButton({ exportCsv, exportJSON, logOut, toggleTheme, ...rest }) {
             align="center"
             onClick={() => window.location.reload(true)}
           >
-            0.1.6
+            {process.env.REACT_APP_VERSION}
           </Typography>
         </Box>
       </Menu>

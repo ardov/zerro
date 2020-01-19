@@ -6,6 +6,7 @@ import ru from 'date-fns/locale/ru'
 import styled, { css } from 'styled-components'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
+import { Droppable, Draggable } from 'react-beautiful-dnd'
 
 const getMonthName = date => format(date, 'MMM', { locale: ru }).toLowerCase()
 
@@ -85,10 +86,18 @@ function BudgetInfo({
 
   return (
     <Body {...rest}>
-      <ToBeBudgeted positive={toBeBudgeted >= 0}>
-        <Amount>{formatSum(toBeBudgeted)}</Amount>
-        <Text onClick={() => setOpened(!opened)}>Осталось запланировать</Text>
-      </ToBeBudgeted>
+      <Droppable droppableId="toBeBudgeted" type="FUNDS">
+        {({ innerRef, placeholder }) => (
+          <ToBeBudgeted positive={toBeBudgeted >= 0} ref={innerRef}>
+            <span style={{ display: 'none' }}>{placeholder}</span>
+
+            <Amount>{formatSum(toBeBudgeted)}</Amount>
+            <Text onClick={() => setOpened(!opened)}>
+              Осталось распределить
+            </Text>
+          </ToBeBudgeted>
+        )}
+      </Droppable>
       <Line
         name={`Доход за ${getMonthName(date)}`}
         amount={income}

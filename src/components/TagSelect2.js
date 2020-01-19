@@ -14,14 +14,7 @@ import {
 import AddIcon from '@material-ui/icons/Add'
 import EmojiIcon from 'components/EmojiIcon'
 
-function TagSelect({
-  tags,
-  onChange,
-  trigger,
-  incomeOnly,
-  outcomeOnly,
-  value,
-}) {
+function TagSelect({ tags, onChange, trigger, value, exclude, tagType }) {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const handleClick = e => setAnchorEl(e.currentTarget)
   const handleClose = () => setAnchorEl(null)
@@ -41,7 +34,7 @@ function TagSelect({
         </IconButton>
       )}
       <TagSelectPopover
-        {...{ tags, open, anchorEl, incomeOnly, outcomeOnly }}
+        {...{ tags, open, anchorEl, exclude, tagType }}
         onClose={handleClose}
         onTagSelect={handleTagSelect}
         selectedIds={value}
@@ -57,13 +50,14 @@ function TagSelectPopover({
   tags,
   open,
   anchorEl,
-  incomeOnly,
-  outcomeOnly,
+  exclude,
+  tagType,
   selectedIds,
   onTagSelect,
   onClose,
 }) {
   const [search, setSearch] = React.useState('')
+  const [localTagType, setLocalTagType] = React.useState(tagType)
 
   const checkSearch = (tag, search) => {
     const includes = (title, search) =>
@@ -75,9 +69,15 @@ function TagSelectPopover({
   }
 
   const checkTag = tag =>
-    checkSearch(tag, search) &&
-    (!incomeOnly || tag.showIncome) &&
-    (!outcomeOnly || tag.showOutcome)
+    // if there is search do not apply rules for tag type
+    (search
+      ? checkSearch(tag, search)
+      : (localTagType !== 'income' ||
+          (localTagType === 'income' && tag.showIncome)) &&
+        (localTagType !== 'outcome' ||
+          (localTagType === 'outcome' && tag.showOutcome))) &&
+    // if there is exclude remove those tags from list
+    (!(exclude && exclude.length) || !exclude.includes(tag.id))
 
   const filtered = tags
     .filter(checkTag)
@@ -133,6 +133,11 @@ function TagSelectPopover({
               ))}
           </React.Fragment>
         ))}
+        {localTagType && !search && (
+          <ListItem button onClick={() => setLocalTagType(null)}>
+            Показать все категории
+          </ListItem>
+        )}
       </List>
     </Popover>
   )

@@ -11,6 +11,7 @@ const useStyles = makeStyles({
 })
 
 export default function GoalProgress({ size = 16, value, ...rest }) {
+  value = value < 0 ? 0 : value
   const completed = value >= 1
   const c = useStyles({ completed })
   const theme = useTheme()
