@@ -11,10 +11,12 @@ import { Box, Hidden, useMediaQuery } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid'
 import { DragDropContext } from 'react-beautiful-dnd'
 import { moveFunds } from './thunks'
+import MoveMoneyModal from './containers/MoveMoneyModal'
 
 const Budgets = ({ monthDates, dispatch }) => {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
   const [month, setMonth] = React.useState(+startOfMonth(new Date()))
+  const [moneyModalProps, setMoneyModalProps] = React.useState({ open: false })
 
   const setCurrentMonth = () => setMonth(+startOfMonth(new Date()))
   const setMonthByIndex = i => setMonth(monthDates[i])
@@ -28,9 +30,18 @@ const Budgets = ({ monthDates, dispatch }) => {
       e.destination &&
       e.source.droppableId !== e.destination.droppableId
     ) {
-      dispatch(
-        moveFunds(1000, e.source.droppableId, e.destination.droppableId, month)
-      )
+      const source = e.source.droppableId
+      const destination = e.destination.droppableId
+
+      setMoneyModalProps({
+        open: true,
+        source,
+        destination,
+        onMoneyMove: amount => {
+          if (amount) dispatch(moveFunds(amount, source, destination, month))
+          setMoneyModalProps({ open: false })
+        },
+      })
     }
   }
 
@@ -44,6 +55,11 @@ const Budgets = ({ monthDates, dispatch }) => {
       }}
     >
       <Box p={isMobile ? 1 : 3}>
+        <MoveMoneyModal
+          {...moneyModalProps}
+          onClose={() => setMoneyModalProps({ open: false })}
+        />
+
         <Grid container spacing={3}>
           <Grid item xs={12} md={3}>
             <MonthSelector
