@@ -101,6 +101,7 @@ export const getRootUser = state => {
   )
 }
 
+export const getRootUserId = state => getRootUser(state).id
 export const getUserInstrumentId = state => getRootUser(state).currency
 
 // INSTRUMENTS

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Router, Route, Redirect, Switch } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { IntlProvider, addLocaleData } from 'react-intl'
@@ -22,40 +22,48 @@ import ruDateLocale from 'date-fns/locale/ru'
 import { createBrowserHistory } from 'history'
 import reactGA from 'react-ga'
 import ErrorBoundary from 'components/ErrorBoundary'
-import { getLastSyncTime } from 'store/serverData'
+import { getLastSyncTime, getRootUserId } from 'store/serverData'
 
 addLocaleData(ru)
-reactGA.initialize('UA-72832368-2')
 
 const history = createBrowserHistory()
 
-history.listen(location => {
-  reactGA.set({ page: location.pathname }) // Update the user's current page
-  reactGA.pageview(location.pathname) // Record a pageview for the given page
-})
+if (process.env.NODE_ENV === 'production') {
+  reactGA.initialize('UA-72832368-2')
+  history.listen(location => {
+    reactGA.set({ page: location.pathname }) // Update the user's current page
+    reactGA.pageview(location.pathname) // Record a pageview for the given page
+  })
+}
 
-const App = ({ isLoggedIn, themeType, hasData }) => (
-  <ThemeProvider theme={createTheme(themeType)}>
-    <>
-      <CssBaseline />
-      <ErrorBoundary>
-        <IntlProvider locale="ru">
-          <MuiPickersUtilsProvider utils={DateFnsUtils} locale={ruDateLocale}>
-            <Router history={history}>
-              {isLoggedIn ? <PrivateApp hasData={hasData} /> : <Auth />}
-            </Router>
-          </MuiPickersUtilsProvider>
-        </IntlProvider>
-      </ErrorBoundary>
-    </>
-  </ThemeProvider>
-)
+function App({ isLoggedIn, themeType, hasData, userId }) {
+  useEffect(() => {
+    if (userId) reactGA.set({ userId })
+  }, [userId])
+  return (
+    <ThemeProvider theme={createTheme(themeType)}>
+      <>
+        <CssBaseline />
+        <ErrorBoundary>
+          <IntlProvider locale="ru">
+            <MuiPickersUtilsProvider utils={DateFnsUtils} locale={ruDateLocale}>
+              <Router history={history}>
+                {isLoggedIn ? <PrivateApp hasData={hasData} /> : <Auth />}
+              </Router>
+            </MuiPickersUtilsProvider>
+          </IntlProvider>
+        </ErrorBoundary>
+      </>
+    </ThemeProvider>
+  )
+}
 
 export default connect(
   state => ({
     isLoggedIn: getLoginState(state),
     themeType: getTheme(state),
     hasData: !!getLastSyncTime(state),
+    userId: getRootUserId(state),
   }),
   null
 )(App)

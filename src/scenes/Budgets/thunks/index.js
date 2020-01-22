@@ -27,10 +27,6 @@ export const moveFunds = (amount, source, destination, monthDate) => (
       selectors.getBudget(state, source, monthDate) ||
       createBudget({ user, date: +monthDate, tag: source })
 
-    console.log(
-      `${source}  ${sourceBudget.outcome} --> ${sourceBudget.outcome - amount}`
-    )
-
     resultBudgets.push({
       ...sourceBudget,
       outcome: sourceBudget.outcome - amount,
@@ -42,12 +38,6 @@ export const moveFunds = (amount, source, destination, monthDate) => (
     const destinationBudget =
       selectors.getBudget(state, destination, monthDate) ||
       createBudget({ user, date: +monthDate, tag: destination })
-
-    console.log(
-      `${destination}  ${
-        destinationBudget.outcome
-      } --> ${destinationBudget.outcome + amount}`
-    )
 
     resultBudgets.push({
       ...destinationBudget,
