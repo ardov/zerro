@@ -48,16 +48,18 @@ ZenApi.checkCode = function() {
   const parsedUrl = new URL(window.location.href)
   const code = parsedUrl.searchParams.get('code')
   const error = parsedUrl.searchParams.get('error')
-  if (code) {
-    window.localStorage.setItem(CODE_DATA_KEY, code)
-    window.close()
-  } else if (error) {
-    window.alert('Неверный логин или пароль')
-    window.close()
-  }
+
+  if (code) window.localStorage.setItem(CODE_DATA_KEY, code)
+  else if (error) window.alert('Неверный логин или пароль')
+
+  window.close()
 }
 
-ZenApi.getLocalToken = () => Cookies.get(TOKEN_KEY)
+ZenApi.getLocalToken = () => {
+  const token = Cookies.get(TOKEN_KEY)
+  if (token && token !== 'null') return token
+  else return null
+}
 
 ZenApi.getToken = function() {
   /* if a token exists and hasn't expired, re-use it */
@@ -106,8 +108,10 @@ ZenApi.getToken = function() {
   }
 
   function storeAccessTokenData({ access_token, expires_in }) {
-    Cookies.set(TOKEN_KEY, access_token, { expires: expires_in })
-    return access_token
+    if (access_token && access_token !== 'null') {
+      Cookies.set(TOKEN_KEY, access_token, { expires: expires_in })
+      return access_token
+    } else return null
   }
 
   function openPopupWindow(url, title, win, w, h) {
