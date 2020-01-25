@@ -7,8 +7,13 @@ import { makeReminder } from 'store/localData/reminders/helpers'
 import sendEvent from 'helpers/sendEvent'
 
 const DATA_ACC_NAME = '🤖 [Zerro Data]'
+const GOALS = 'goals'
+const ACC_LINKS = 'accLinks'
 
-const setData = data => (dispatch, getState) => {
+const setData = (type, data) => (dispatch, getState) => {
+  // Upgrade from previous data scheme
+  dispatch(updateReminderTypes())
+
   const state = getState()
   const user = getRootUser(state).id
 
@@ -21,32 +26,50 @@ const setData = data => (dispatch, getState) => {
   }
 
   // All data stored in reminder.comment
-  let dataReminder = getDataReminder(state)
-  if (!dataReminder) {
-    const reminder = makeDataReminder(user, dataAcc)
-    dispatch(setReminder(reminder))
-    dataReminder = reminder
+  const dataReminders = {
+    [ACC_LINKS]:
+      getAccLinksReminder(state) || makeDataReminder(user, dataAcc, ACC_LINKS),
+    [GOALS]: getGoalsReminder(state) || makeDataReminder(user, dataAcc, GOALS),
   }
 
+  const reminder = dataReminders[type]
+
   const newReminder = {
-    ...dataReminder,
+    ...reminder,
     comment: JSON.stringify(data),
     changed: Date.now(),
   }
   dispatch(setReminder(newReminder))
 }
 
-export const setDataByKey = (key, keyData) => (dispatch, getState) => {
+const updateReminderTypes = () => (dispatch, getState) => {
   const state = getState()
-  const data = getHiddenData(state)
-  dispatch(setData({ ...data, [key]: keyData }))
+  const oldReminder = getOldAccLinksReminder(state)
+  if (oldReminder) {
+    sendEvent('Upgrade: updateReminderTypes')
+    const oldData = JSON.parse(oldReminder.comment) || {}
+    const newReminder = {
+      ...oldReminder,
+      payee: ACC_LINKS,
+      changed: Date.now(),
+      comment: JSON.stringify(oldData.accTagMap),
+    }
+    dispatch(setReminder(newReminder))
+  }
 }
 
 export const addConnection = (account, tag) => (dispatch, getState) => {
-  sendEvent('Connection: Add')
   const state = getState()
   const accTagMap = getAccTagMap(state)
-  dispatch(setDataByKey('accTagMap', { ...accTagMap, [account]: tag }))
+  const newLinks = { ...accTagMap }
+  if (tag) {
+    sendEvent('Connection: Add')
+    newLinks[account] = tag
+  } else {
+    sendEvent('Connection: Remove')
+    delete newLinks[account]
+  }
+  dispatch(setData(ACC_LINKS, newLinks))
 }
 
 // DATA ACCOUNT
@@ -60,7 +83,7 @@ function makeDataAcc(user) {
 }
 
 // DATA REMINDER
-function makeDataReminder(user, account, data = '') {
+function makeDataReminder(user, account, type = DATA_ACC_NAME, data = '') {
   return makeReminder({
     user,
     incomeAccount: account,
@@ -68,7 +91,7 @@ function makeDataReminder(user, account, data = '') {
     income: 1,
     startDate: +new Date(2020, 0, 1),
     endDate: +new Date(2020, 0, 1),
-    payee: DATA_ACC_NAME,
+    payee: type,
     comment: JSON.stringify(data),
   })
 }
@@ -78,16 +101,26 @@ function getDataAccountId(state) {
   const dataAcc = getAccountList(state).find(acc => acc.title === DATA_ACC_NAME)
   return dataAcc ? dataAcc.id : null
 }
-
-const getDataReminder = createSelector([getReminders], reminders =>
+const getOldAccLinksReminder = createSelector([getReminders], reminders =>
   Object.values(reminders).find(reminder => reminder.payee === DATA_ACC_NAME)
 )
-
-const getHiddenData = createSelector([getDataReminder], reminder =>
-  reminder && reminder.comment ? JSON.parse(reminder.comment) : {}
+const getAccLinksReminder = createSelector([getReminders], reminders =>
+  Object.values(reminders).find(reminder => reminder.payee === ACC_LINKS)
+)
+const getGoalsReminder = createSelector([getReminders], reminders =>
+  Object.values(reminders).find(reminder => reminder.payee === GOALS)
 )
 
 export const getAccTagMap = createSelector(
-  [getHiddenData],
-  data => data.accTagMap || {}
+  [getOldAccLinksReminder, getAccLinksReminder],
+  (oldReminder, newReminder) => {
+    if (oldReminder) {
+      const data = oldReminder.comment ? JSON.parse(oldReminder.comment) : {}
+      return data.accTagMap || {}
+    }
+    if (newReminder) {
+      return JSON.parse(newReminder.comment) || {}
+    }
+    return {}
+  }
 )
