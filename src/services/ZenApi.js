@@ -13,10 +13,12 @@ const redirectUri = process.env.REACT_APP_REDIRECT_URI
 
 const ZenApi = {}
 
-ZenApi.getData = function(
+ZenApi.getData = async function(
   token,
   payload = { serverTimestamp: 0, changed: {} }
 ) {
+  if (!token) throw Error('No token')
+
   const body = {
     currentClientTimestamp: Math.round(Date.now() / 1000),
     lastServerTimestamp: payload.serverTimestamp,
@@ -27,21 +29,13 @@ ZenApi.getData = function(
     method: 'POST',
     body: JSON.stringify(body),
   }
-  return fetch(`${diffEndpoint}/?token=${token}`, options)
-    .then(res => {
-      if (res.ok) {
-        return res.json()
-      } else {
-        throw new Error('Сайт вернул не ОК')
-      }
-    })
-    .then(json => {
-      if (json.error) {
-        throw new Error(json.error.message)
-      } else {
-        return json
-      }
-    })
+
+  const response = await fetch(`${diffEndpoint}/?token=${token}`, options)
+  if (!response.ok) throw Error('Сайт вернул не ОК')
+  const json = await response.json()
+  if (json.error) throw Error(JSON.stringify(json.error))
+
+  return json
 }
 
 ZenApi.checkCode = function() {
