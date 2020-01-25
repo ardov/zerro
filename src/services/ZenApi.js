@@ -49,10 +49,13 @@ ZenApi.checkCode = function() {
   const code = parsedUrl.searchParams.get('code')
   const error = parsedUrl.searchParams.get('error')
 
-  if (code) window.localStorage.setItem(CODE_DATA_KEY, code)
-  else if (error) window.alert('Неверный логин или пароль')
-
-  window.close()
+  if (code) {
+    window.localStorage.setItem(CODE_DATA_KEY, code)
+    window.close()
+  } else if (error) {
+    window.alert('Неверный логин или пароль')
+    window.close()
+  }
 }
 
 ZenApi.getLocalToken = () => {
