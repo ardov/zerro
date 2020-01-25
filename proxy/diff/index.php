@@ -30,7 +30,9 @@ $err = curl_error($curl);
 curl_close($curl);
 
 if ($err) {
-  echo "cURL Error #:" . $err;
+  echo '{ "error": "cURL Error #:' . $err . '"}';
+} else if ($response === "Unauthorized") {
+  echo '{ "error": "Unauthorized" }';
 } else {
   echo $response;
 }
