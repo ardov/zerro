@@ -1,22 +1,13 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import Account from './Account'
-import styled from 'styled-components'
 import {
   getAccountsInBudget,
   getSavingAccounts,
 } from 'store/localData/accounts'
 import { getUserInstrument, getInstruments } from 'store/serverData'
 import pluralize from 'helpers/pluralize'
-
-const Heading = styled(Account)`
-  margin-top: 16px;
-  font-weight: 700;
-  font-size: 14px;
-`
-const Archived = styled(Account)`
-  opacity: 0.5;
-`
+import { List } from '@material-ui/core'
+import { Account, Subheader } from './components'
 
 const getTotalBalance = (accs, targetInstrument, instruments) =>
   accs.reduce((sum, acc) => {
@@ -53,45 +44,52 @@ const AccountList = ({
 
   return (
     <div className={className}>
-      <Heading
-        title="В бюджете"
-        balance={activeInBudgetSum + archivedInBudgetSum}
-        currency={userInstrument.shortTitle}
-      />
-      {activeInBudget.map(acc => (
-        <Account
-          key={acc.id}
-          {...acc}
-          currency={instruments[acc.instrument].shortTitle}
-          onClick={() => onAccountClick(acc.id)}
-        />
-      ))}
-      {!!archivedInBudgetSum && (
-        <Archived
-          title={`${
-            archivedInBudget.length
-          } ${pluralize(archivedInBudget.length, [
-            'архивный счёт',
-            'архивных счёта',
-            'архивных счётов',
-          ])}`}
-          balance={archivedInBudgetSum}
+      <List dense>
+        <Subheader
+          title="В бюджете"
+          amount={activeInBudgetSum + archivedInBudgetSum}
           currency={userInstrument.shortTitle}
         />
-      )}
+        {activeInBudget.map(acc => (
+          <Account
+            key={acc.id}
+            button
+            title={acc.title}
+            amount={acc.balance}
+            currency={instruments[acc.instrument].shortTitle}
+          />
+        ))}
+        {!!archivedInBudgetSum && (
+          <Account
+            title={`${
+              archivedInBudget.length
+            } ${pluralize(archivedInBudget.length, [
+              'архивный счёт',
+              'архивных счёта',
+              'архивных счётов',
+            ])}`}
+            amount={archivedInBudgetSum}
+            currency={userInstrument.shortTitle}
+          />
+        )}
+      </List>
 
-      <Heading
-        title="Прочее"
-        balance={savingsSum}
-        currency={userInstrument.shortTitle}
-      />
-      {savings.map(acc => (
-        <Account
-          key={acc.id}
-          {...acc}
-          currency={instruments[acc.instrument].shortTitle}
+      <List dense>
+        <Subheader
+          title="Прочее"
+          amount={savingsSum}
+          currency={userInstrument.shortTitle}
         />
-      ))}
+        {savings.map(acc => (
+          <Account
+            key={acc.id}
+            button
+            title={acc.title}
+            amount={acc.balance}
+            currency={instruments[acc.instrument].shortTitle}
+          />
+        ))}
+      </List>
     </div>
   )
 }
