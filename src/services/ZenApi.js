@@ -13,10 +13,12 @@ const redirectUri = process.env.REACT_APP_REDIRECT_URI
 
 const ZenApi = {}
 
-ZenApi.getData = function(
+ZenApi.getData = async function(
   token,
   payload = { serverTimestamp: 0, changed: {} }
 ) {
+  if (!token) throw Error('No token')
+
   const body = {
     currentClientTimestamp: Math.round(Date.now() / 1000),
     lastServerTimestamp: payload.serverTimestamp,
@@ -27,27 +29,20 @@ ZenApi.getData = function(
     method: 'POST',
     body: JSON.stringify(body),
   }
-  return fetch(`${diffEndpoint}/?token=${token}`, options)
-    .then(res => {
-      if (res.ok) {
-        return res.json()
-      } else {
-        throw new Error('Сайт вернул не ОК')
-      }
-    })
-    .then(json => {
-      if (json.error) {
-        throw new Error(json.error.message)
-      } else {
-        return json
-      }
-    })
+
+  const response = await fetch(`${diffEndpoint}/?token=${token}`, options)
+  if (!response.ok) throw Error('Сайт вернул не ОК')
+  const json = await response.json()
+  if (json.error) throw Error(JSON.stringify(json.error))
+
+  return json
 }
 
 ZenApi.checkCode = function() {
   const parsedUrl = new URL(window.location.href)
   const code = parsedUrl.searchParams.get('code')
   const error = parsedUrl.searchParams.get('error')
+
   if (code) {
     window.localStorage.setItem(CODE_DATA_KEY, code)
     window.close()
@@ -57,7 +52,11 @@ ZenApi.checkCode = function() {
   }
 }
 
-ZenApi.getLocalToken = () => Cookies.get(TOKEN_KEY)
+ZenApi.getLocalToken = () => {
+  const token = Cookies.get(TOKEN_KEY)
+  if (token && token !== 'null') return token
+  else return null
+}
 
 ZenApi.getToken = function() {
   /* if a token exists and hasn't expired, re-use it */
@@ -106,8 +105,10 @@ ZenApi.getToken = function() {
   }
 
   function storeAccessTokenData({ access_token, expires_in }) {
-    Cookies.set(TOKEN_KEY, access_token, { expires: expires_in })
-    return access_token
+    if (access_token && access_token !== 'null') {
+      Cookies.set(TOKEN_KEY, access_token, { expires: expires_in })
+      return access_token
+    } else return null
   }
 
   function openPopupWindow(url, title, win, w, h) {

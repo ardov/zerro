@@ -26,6 +26,8 @@ export const restoreTransaction = id => (dispatch, getState) => {
   )
 }
 
+// Не работает
+// TODO: Надо для новых транзакций сразу проставлять категорию. Иначе они обратно схлопываются
 export const splitTransfer = id => (dispatch, getState) => {
   const state = getState()
   const tr = getTransaction(state, id)

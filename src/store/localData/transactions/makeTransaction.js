@@ -1,6 +1,6 @@
 import uuidv1 from 'uuid/v1'
 
-export default function createTransaction(raw) {
+export default function makeTransaction(raw) {
   return {
     id: raw.id || uuidv1(),
     changed: raw.changed || Date.now(),

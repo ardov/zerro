@@ -27,32 +27,38 @@ const { reducer, actions } = createSlice({
   initialState,
   reducers: {
     updateData: (state, { payload }) => {
-      if (!payload) return
+      if (!payload) return state
       Object.keys(payload).forEach(key => {
-        switch (key) {
-          case 'serverTimestamp':
-            state[key] = payload[key] * 1000
-            break
+        if (payload[key]) {
+          switch (key) {
+            case 'serverTimestamp':
+              state[key] = payload[key] * 1000
+              break
 
-          case 'budget':
-            if (payload[key] && payload[key].forEach) {
-              payload[key].forEach(item => {
-                state[key][`${item.tag},${item.date}`] = convertDatesToMs(item)
-              })
-            }
-            break
+            case 'budget':
+              if (payload[key] && payload[key].forEach) {
+                payload[key].forEach(item => {
+                  state[key][`${item.tag},${item.date}`] = convertDatesToMs(
+                    item
+                  )
+                })
+              }
+              break
 
-          case 'deletion':
-            payload.deletion.forEach(item => delete state[item.object][item.id])
-            break
+            case 'deletion':
+              payload.deletion.forEach(
+                item => delete state[item.object][item.id]
+              )
+              break
 
-          default:
-            if (payload[key] && payload[key].forEach) {
-              payload[key].forEach(item => {
-                state[key][item.id] = convertDatesToMs(item)
-              })
-            }
-            break
+            default:
+              if (payload[key] && payload[key].forEach) {
+                payload[key].forEach(item => {
+                  state[key][item.id] = convertDatesToMs(item)
+                })
+              }
+              break
+          }
         }
       })
     },
@@ -75,7 +81,7 @@ export const { updateData } = actions
 export const getDataToSave = state => {
   const data = state.serverData
   const result = {
-    serverTimestamp: data.serverTimestamp / 1000,
+    serverTimestamp: +data.serverTimestamp / 1000,
   }
   for (const key in data) {
     if (key !== 'serverTimestamp') {
@@ -101,6 +107,7 @@ export const getRootUser = state => {
   )
 }
 
+export const getRootUserId = state => getRootUser(state).id
 export const getUserInstrumentId = state => getRootUser(state).currency
 
 // INSTRUMENTS

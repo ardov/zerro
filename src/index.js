@@ -3,13 +3,14 @@ import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 import * as Sentry from '@sentry/browser'
 
-import 'normalize.css'
+// import 'normalize.css'
 import './index.scss'
 
 import App from './App'
 import * as serviceWorker from './serviceWorker'
 import { store } from './store'
 import GlobalErrorBoundary from 'components/GlobalErrorBoundary'
+import sendEvent from 'helpers/sendEvent'
 
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
@@ -35,7 +36,9 @@ const swConfig = {
       window.location.reload()
     })
   },
-  onSuccess: registration => {},
+  onSuccess: registration => {
+    sendEvent('Version Update: ' + process.env.REACT_APP_VERSION)
+  },
 }
 
 serviceWorker.register(swConfig)

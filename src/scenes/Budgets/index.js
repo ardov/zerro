@@ -36,8 +36,6 @@ const Budgets = ({ monthDates, dispatch }) => {
   const index = monthDates.findIndex(date => date === month)
 
   const moveMoney = e => {
-    console.log(e)
-
     if (
       e.source &&
       e.destination &&

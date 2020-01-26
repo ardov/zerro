@@ -7,7 +7,7 @@ import { getLastChangeTime } from 'store/localData'
 import { getPendingState } from 'store/isPending'
 import { loadLocalData } from 'logic/localData'
 
-const SYNC_DELAY = 10 * 60 * 1000 // 10min
+const SYNC_DELAY = 20 * 60 * 1000 // 20min
 const CHECK_DELAY = 20 * 1000 // 20sec
 let timer = null
 
@@ -34,6 +34,7 @@ class RegularSyncHandler extends React.Component {
     const checkSync = this.checkSync
     const { lastSync, sync, isLoggedIn, lastChange, isPending } = this.props
     const isOnline = window.navigator.onLine
+    const isTabActive = !document.hidden
 
     // Regular sync conditions
     const needRegularSync = Date.now() - lastSync > SYNC_DELAY
@@ -43,7 +44,8 @@ class RegularSyncHandler extends React.Component {
       isLoggedIn &&
       !isPending &&
       isOnline &&
-      (needRegularSync || (hasUnsavedChanges && itsTimeToSyncChanges))
+      ((isTabActive && needRegularSync) ||
+        (hasUnsavedChanges && itsTimeToSyncChanges))
     ) {
       sync()
     }

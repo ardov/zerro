@@ -15,6 +15,6 @@ export default function sendEvent(event) {
       label: eventArr[2] || '',
     })
   } else {
-    console.log('send', event)
+    console.log('📫', event)
   }
 }
