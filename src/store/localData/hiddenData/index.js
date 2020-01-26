@@ -1,63 +1,33 @@
 import { createSelector } from 'redux-starter-kit'
 import { getRootUser } from 'store/serverData'
-import { setAccount, getAccountList } from 'store/localData/accounts'
-import { makeAccount } from 'store/localData/accounts/helpers'
+import { getAccountList } from 'store/localData/accounts'
 import { setReminder, getReminders } from 'store/localData/reminders'
-import { makeReminder } from 'store/localData/reminders/helpers'
+import { getGoals as getOldGoals } from 'store/localData/budgets'
 import sendEvent from 'helpers/sendEvent'
-
-const DATA_ACC_NAME = '🤖 [Zerro Data]'
-const GOALS = 'goals'
-const ACC_LINKS = 'accLinks'
+import { ACC_LINKS, GOALS, DATA_ACC_NAME } from './constants'
+import { makeDataReminder } from './helpers'
+import { prepareData } from './prepareData'
 
 const setData = (type, data) => (dispatch, getState) => {
-  // Upgrade from previous data scheme
-  dispatch(updateReminderTypes())
-
+  dispatch(prepareData())
   const state = getState()
   const user = getRootUser(state).id
-
-  // Need account to create reminder
-  let dataAcc = getDataAccountId(state)
-  if (!dataAcc) {
-    const acc = makeDataAcc(user)
-    dispatch(setAccount(acc))
-    dataAcc = acc.id
-  }
-
-  // All data stored in reminder.comment
+  const dataAcc = getDataAccountId(state)
   const dataReminders = {
     [ACC_LINKS]:
       getAccLinksReminder(state) || makeDataReminder(user, dataAcc, ACC_LINKS),
     [GOALS]: getGoalsReminder(state) || makeDataReminder(user, dataAcc, GOALS),
   }
-
-  const reminder = dataReminders[type]
-
-  const newReminder = {
-    ...reminder,
-    comment: JSON.stringify(data),
-    changed: Date.now(),
-  }
-  dispatch(setReminder(newReminder))
-}
-
-const updateReminderTypes = () => (dispatch, getState) => {
-  const state = getState()
-  const oldReminder = getOldAccLinksReminder(state)
-  if (oldReminder) {
-    sendEvent('Upgrade: updateReminderTypes')
-    const oldData = JSON.parse(oldReminder.comment) || {}
-    const newReminder = {
-      ...oldReminder,
-      payee: ACC_LINKS,
+  dispatch(
+    setReminder({
+      ...dataReminders[type],
+      comment: JSON.stringify(data),
       changed: Date.now(),
-      comment: JSON.stringify(oldData.accTagMap),
-    }
-    dispatch(setReminder(newReminder))
-  }
+    })
+  )
 }
 
+// ACCOUNT LINK THUNK
 export const addConnection = (account, tag) => (dispatch, getState) => {
   const state = getState()
   const accTagMap = getAccTagMap(state)
@@ -72,42 +42,39 @@ export const addConnection = (account, tag) => (dispatch, getState) => {
   dispatch(setData(ACC_LINKS, newLinks))
 }
 
-// DATA ACCOUNT
-function makeDataAcc(user) {
-  return makeAccount({
-    user,
-    instrument: 2,
-    title: DATA_ACC_NAME,
-    archive: true,
-  })
+// GOAL THUNKS
+export const setGoal = ({ type, amount, start, end, tag }) => (
+  dispatch,
+  getState
+) => {
+  sendEvent(`Goals: set ${type} goal`)
+  const goals = getGoals(getState())
+  const newGoal = { type, amount, start, end }
+  dispatch(setData(GOALS, { ...goals, [tag]: newGoal }))
+}
+export const deleteGoal = tag => (dispatch, getState) => {
+  const goals = getGoals(getState())
+  const newGoals = { ...goals }
+  delete newGoals[tag]
+  dispatch(setData(GOALS, newGoals))
 }
 
-// DATA REMINDER
-function makeDataReminder(user, account, type = DATA_ACC_NAME, data = '') {
-  return makeReminder({
-    user,
-    incomeAccount: account,
-    outcomeAccount: account,
-    income: 1,
-    startDate: +new Date(2020, 0, 1),
-    endDate: +new Date(2020, 0, 1),
-    payee: type,
-    comment: JSON.stringify(data),
-  })
-}
-
-// SELECTORS
-function getDataAccountId(state) {
+// DATA ACCOUNT SELECTOR
+export function getDataAccountId(state) {
   const dataAcc = getAccountList(state).find(acc => acc.title === DATA_ACC_NAME)
   return dataAcc ? dataAcc.id : null
 }
-const getOldAccLinksReminder = createSelector([getReminders], reminders =>
-  Object.values(reminders).find(reminder => reminder.payee === DATA_ACC_NAME)
+
+// REMINDER SELECTORS
+export const getOldAccLinksReminder = createSelector(
+  [getReminders],
+  reminders =>
+    Object.values(reminders).find(reminder => reminder.payee === DATA_ACC_NAME)
 )
 const getAccLinksReminder = createSelector([getReminders], reminders =>
   Object.values(reminders).find(reminder => reminder.payee === ACC_LINKS)
 )
-const getGoalsReminder = createSelector([getReminders], reminders =>
+export const getGoalsReminder = createSelector([getReminders], reminders =>
   Object.values(reminders).find(reminder => reminder.payee === GOALS)
 )
 
@@ -121,6 +88,15 @@ export const getAccTagMap = createSelector(
     if (newReminder) {
       return JSON.parse(newReminder.comment) || {}
     }
+    return {}
+  }
+)
+
+export const getGoals = createSelector(
+  [getOldGoals, getGoalsReminder],
+  (oldGoals, goalsReminder) => {
+    if (goalsReminder) return JSON.parse(goalsReminder.comment) || {}
+    if (Object.values(oldGoals).length) return oldGoals
     return {}
   }
 )

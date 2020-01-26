@@ -10,7 +10,7 @@ import TagTableHeader from './TagTableHeader'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 import { endOfMonth } from 'date-fns'
 import sendEvent from 'helpers/sendEvent'
-import { getGoals } from 'store/localData/budgets'
+import { getGoals } from 'store/localData/hiddenData'
 import { getTagsTree } from 'store/localData/tags'
 
 const metrics = ['available', 'budgeted', 'outcome']
