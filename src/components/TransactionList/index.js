@@ -54,7 +54,7 @@ export function TransactionList({
     HEADER_HEIGHT + TRANSACTION_HEIGHT * groups[i].transactions.length
 
   return (
-    <Box display="flex" flexDirection="column" {...rest}>
+    <Box display="flex" flexDirection="column" p={1} {...rest}>
       <TopBar />
 
       <Dialog open={!!clickedDate} onClose={() => setShowClickedDate(null)}>
