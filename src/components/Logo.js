@@ -52,8 +52,6 @@ export default function Logo({ fill = '#000', visible = true, ...rest }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="512"
-      height="132"
       fill="none"
       viewBox="0 0 512 132"
       {...rest}
