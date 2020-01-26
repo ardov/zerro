@@ -5,10 +5,9 @@ const primary = { dark: blueGrey[100], light: blueGrey[800] }
 const secondary = { dark: blue[200], light: blue[700] }
 const success = { dark: green['A400'], light: green[800] }
 const background = {
-  dark: { paper: '#303030', default: '#212121' },
+  dark: { paper: '#212121', default: '#121212' },
   light: { paper: '#ffffff', default: grey[50] },
 }
-
 const hoverOpacity = 0.04
 const hover = {
   dark: `rgba(255, 255, 255, ${hoverOpacity})`,
@@ -29,9 +28,10 @@ export default function createTheme(type = 'light') {
       background: background[type],
     },
     shape: { borderRadius: 8 },
-    typography: { fontFamily: "'IBM Plex Sans', sans-serif" },
+    typography: {
+      fontFamily: "'IBM Plex Sans', sans-serif",
+      button: { textTransform: 'none' },
+    },
   })
-  console.log(theme)
-
   return theme
 }
