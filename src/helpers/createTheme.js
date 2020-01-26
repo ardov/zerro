@@ -1,30 +1,27 @@
 import { createMuiTheme } from '@material-ui/core/styles'
 
-const PRIMARY = isDark => (isDark ? '#cfd8dc' : '#455a64')
-const SECONDARY = isDark => '#ff5722'
-const SUCCESS = isDark => (isDark ? '#45d980' : '#21a355')
+const primary = { dark: '#cfd8dc', light: '#455a64' }
+const secondary = { dark: '#ff5722', light: '#ff5722' }
+const success = { dark: '#45d980', light: '#21a355' }
+const hoverOpacity = 0.04
+const hover = {
+  dark: `rgba(255, 255, 255, ${hoverOpacity})`,
+  light: `rgba(0, 0, 0, ${hoverOpacity})`,
+}
 
 export default function createTheme(type = 'light') {
-  const isDark = type === 'dark'
-
-  const donorTheme = createMuiTheme({
-    palette: { primary: { main: SUCCESS(isDark) } },
-  })
-
   return createMuiTheme({
     palette: {
-      primary: { main: PRIMARY(isDark) },
-      secondary: { main: SECONDARY(isDark) },
-      success: donorTheme.palette.primary,
+      primary: { main: primary[type] },
+      secondary: { main: secondary[type] },
+      success: { main: success[type] },
       action: {
-        hover: isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.04)',
-        hoverOpacity: 0.04,
+        hover: hover[type],
+        hoverOpacity,
       },
       type,
     },
-
-    shape: { borderRadius: 6 },
-
+    shape: { borderRadius: 8 },
     typography: { fontFamily: "'IBM Plex Sans', sans-serif" },
   })
 }
