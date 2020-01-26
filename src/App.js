@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Router, Route, Redirect, Switch } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { IntlProvider, addLocaleData } from 'react-intl'
@@ -68,37 +68,48 @@ export default connect(
   null
 )(App)
 
-const PrivateApp = ({ hasData }) => (
-  <Box display="flex">
-    <Nav />
-    <SnackbarHandler />
-    <RegularSyncHandler />
-    <Box height="100vh" overflow="auto" flexGrow={1}>
-      <ErrorBoundary>
-        {hasData ? (
-          <Switch>
-            <Route path="/transactions" component={Transactions} />
-            <Route path="/tags" component={Tags} />
-            <Route path="/budget" component={Budgets} />
-            <Redirect to="/budget" />
-          </Switch>
-        ) : (
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-            height="100%"
-          >
-            <CircularProgress />
-            {/* <Box mt={4}>
-              <Typography align="center">
-                Загружаю операции
-              </Typography>
-            </Box> */}
-          </Box>
-        )}
-      </ErrorBoundary>
+const PrivateApp = ({ hasData }) => {
+  const [hint, setHint] = useState('Загружаемся... 🖤')
+  setTimeout(() => setHint('Первая загрузка самая долгая 😅'), 5000)
+  setTimeout(
+    () => setHint('Всё зависит от интернета и количества операций 🤞'),
+    15000
+  )
+  setTimeout(() => setHint('Может всё-таки загрузится? 🤔'), 30000)
+  setTimeout(
+    () => setHint('Что-то долго, попробуйте перезагрузить страницу 🤪'),
+    45000
+  )
+  return (
+    <Box display="flex">
+      <Nav />
+      <SnackbarHandler />
+      <RegularSyncHandler />
+      <Box height="100vh" overflow="auto" flexGrow={1}>
+        <ErrorBoundary>
+          {hasData ? (
+            <Switch>
+              <Route path="/transactions" component={Transactions} />
+              <Route path="/tags" component={Tags} />
+              <Route path="/budget" component={Budgets} />
+              <Redirect to="/budget" />
+            </Switch>
+          ) : (
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              height="100%"
+            >
+              <CircularProgress />
+              <Box mt={4} width="200">
+                <Typography align="center">{hint}</Typography>
+              </Box>
+            </Box>
+          )}
+        </ErrorBoundary>
+      </Box>
     </Box>
-  </Box>
-)
+  )
+}
