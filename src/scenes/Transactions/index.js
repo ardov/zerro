@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import TransactionList from 'components/TransactionList'
-
-import AccountList from 'components/AccountList'
 import {
   Box,
   Drawer,
@@ -29,16 +27,6 @@ export default function TransactionsView() {
 
   return (
     <Box display="flex">
-      <Box
-        p={3}
-        width={280}
-        height="100vh"
-        overflow="auto"
-        display={{ xs: 'none', md: 'block' }}
-      >
-        <AccountList />
-      </Box>
-
       <Box
         p={isMobile ? 0 : 2}
         height="100vh"
