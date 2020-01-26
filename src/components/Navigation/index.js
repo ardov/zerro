@@ -11,7 +11,12 @@ const useStyles = makeStyles(theme => ({
     left: theme.spacing(2),
     zIndex: 5,
   },
-  drawerWidth: { width: 160 },
+  drawerWidth: {
+    width: 280,
+    scrollbarWidth: 'none',
+    overflow: '-moz-scrollbars-none',
+    '&::-webkit-scrollbar': { display: 'none' },
+  },
 }))
 
 export default function Header() {
@@ -43,6 +48,7 @@ export default function Header() {
         anchor="left"
         open={menuOpen}
         onClose={hideDrawer}
+        onNavigate={() => isMobile && hideDrawer()}
       />
     </>
   )
