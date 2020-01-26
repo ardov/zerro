@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { connect } from 'react-redux'
 import { Box, Button, Link, Fade } from '@material-ui/core'
 import { logIn } from 'logic/authorization'
@@ -9,6 +9,8 @@ ZenApi.checkCode()
 
 function Auth(props) {
   const theme = useTheme()
+  const [logoIn, setLogoIn] = useState(false)
+  setTimeout(() => setLogoIn(true), 300)
   return (
     <Box
       display="flex"
@@ -17,11 +19,10 @@ function Auth(props) {
       justifyContent="center"
       minHeight="100vh"
     >
-      <Fade in timeout={5000}>
-        <Box mb={5}>
-          <Logo width="200" fill={theme.palette.divider} />
-        </Box>
-      </Fade>
+      <Box mb={5}>
+        <Logo width="200" fill={theme.palette.primary.main} visible={logoIn} />
+      </Box>
+
       <Fade in timeout={1000}>
         <Button
           variant="contained"
