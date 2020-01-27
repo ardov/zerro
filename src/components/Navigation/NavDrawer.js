@@ -13,13 +13,13 @@ import {
   ListItemIcon,
 } from '@material-ui/core'
 import { useTheme } from '@material-ui/styles'
-import AttachMoneyIcon from '@material-ui/icons/AttachMoney'
 import Logo from 'components/Logo'
 import AccountList from 'components/AccountList'
 import { makeStyles } from '@material-ui/styles'
 import ViewAgendaIcon from '@material-ui/icons/ViewAgenda'
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance'
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
+import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
 
 const routes = [
   { path: '/budget', label: 'Бюджет', icon: <AccountBalanceIcon /> },
@@ -88,7 +88,7 @@ const NavigationDrawer = ({
               rel="noopener noreferrer"
             >
               <ListItemIcon>
-                <AttachMoneyIcon />
+                <FavoriteBorderIcon />
               </ListItemIcon>
               <ListItemText primary="Поддержать проект" />
             </ListItem>
