@@ -69,17 +69,6 @@ export default connect(
 )(App)
 
 const PrivateApp = ({ hasData }) => {
-  const [hint, setHint] = useState('Загружаемся... 🖤')
-  setTimeout(() => setHint('Первая загрузка самая долгая 😅'), 5000)
-  setTimeout(
-    () => setHint('Всё зависит от интернета и количества операций 🤞'),
-    15000
-  )
-  setTimeout(() => setHint('Может всё-таки загрузится? 🤔'), 30000)
-  setTimeout(
-    () => setHint('Что-то долго, попробуйте перезагрузить страницу 🤪'),
-    45000
-  )
   return (
     <Box display="flex">
       <Nav />
@@ -95,20 +84,43 @@ const PrivateApp = ({ hasData }) => {
               <Redirect to="/budget" />
             </Switch>
           ) : (
-            <Box
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              justifyContent="center"
-              height="100%"
-            >
-              <CircularProgress />
-              <Box mt={4} width="200">
-                <Typography align="center">{hint}</Typography>
-              </Box>
-            </Box>
+            <MainLoader />
           )}
         </ErrorBoundary>
+      </Box>
+    </Box>
+  )
+}
+
+const hints = [
+  { hint: 'Первая загрузка самая долгая 😅', delay: 5000 },
+  { hint: 'Всё зависит от интернета и количества операций 🤞', delay: 10000 },
+  { hint: 'Может всё-таки загрузится? 🤔', delay: 30000 },
+  { hint: 'Что-то долго, попробуйте перезагрузить страницу 🤪', delay: 45000 },
+]
+
+function MainLoader() {
+  const [hint, setHint] = useState('Загружаемся... 🖤')
+
+  useEffect(() => {
+    const timers = hints.map(({ hint, delay }) =>
+      setTimeout(() => setHint(hint), delay)
+    )
+    return () => {
+      timers.forEach(timer => clearTimeout(timer))
+    }
+  }, [])
+  return (
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      height="100%"
+    >
+      <CircularProgress />
+      <Box mt={4} width="200">
+        <Typography align="center">{hint}</Typography>
       </Box>
     </Box>
   )
