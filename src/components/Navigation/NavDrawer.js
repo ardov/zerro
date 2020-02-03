@@ -16,14 +16,14 @@ import { useTheme } from '@material-ui/styles'
 import Logo from 'components/Logo'
 import AccountList from 'components/AccountList'
 import { makeStyles } from '@material-ui/styles'
-import ViewAgendaIcon from '@material-ui/icons/ViewAgenda'
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance'
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
+import SyncAltIcon from '@material-ui/icons/SyncAlt'
 
 const routes = [
   { path: '/budget', label: 'Бюджет', icon: <AccountBalanceIcon /> },
-  { path: '/transactions', label: 'История', icon: <ViewAgendaIcon /> },
+  { path: '/transactions', label: 'Операции', icon: <SyncAltIcon /> },
 ]
 
 const useStyles = makeStyles(theme => ({
