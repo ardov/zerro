@@ -24,7 +24,6 @@ const useStyles = makeStyles(theme => ({
     marginTop: theme.spacing(3),
     overflowX: 'auto',
   },
-  table: { minWidth: 600 },
   head: { position: 'sticky', top: 0 },
 }))
 
@@ -56,7 +55,7 @@ function TransferTable({
           Переводы из бюджета
         </Typography>
       </Box>
-      <Table className={classes.table}>
+      <Table>
         <TableHead>
           <TableRow>
             <TableCell>Счёт</TableCell>
