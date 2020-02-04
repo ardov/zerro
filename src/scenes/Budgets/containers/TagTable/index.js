@@ -22,12 +22,16 @@ function TagTable({
   currency,
   date,
   updateBudget,
+  required = false,
   ...rest
 }) {
   const [selected, setSelected] = useState()
   const [metricIndex, setMetricIndex] = useState(0)
+  console.table(tags)
+
   const filtered = tags
     .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailable)
+    .filter(tag => tag.required === required)
     .sort((a, b) => a.name.localeCompare(b.name))
 
   useEffect(() => {
@@ -59,6 +63,7 @@ function TagTable({
           top={0}
           zIndex={2}
           bgcolor="background.paper"
+          title={required ? 'Обязательные расходы' : 'Необязательные расходы'}
         />
         {filtered.map(tag => (
           <Row

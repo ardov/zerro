@@ -16,6 +16,7 @@ const useStyles = makeStyles(theme => ({
 export default function TagTableHeader({
   metric = 'available',
   onToggleMetric,
+  title = 'Категория',
   ...rest
 }) {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
@@ -29,7 +30,7 @@ export default function TagTableHeader({
   return (
     <Box p={2} pl={9.5} width="100%" className={c.row} {...rest}>
       <Typography variant="body2" color="textSecondary" noWrap>
-        Категория
+        {title}
       </Typography>
 
       {isMobile ? (

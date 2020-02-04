@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { connect } from 'react-redux'
 import startOfMonth from 'date-fns/startOfMonth'
-import AccountList from 'components/AccountList'
 import TagTable from './containers/TagTable'
 import TransferTable from './containers/TransferTable'
 import BudgetInfo from './containers/BudgetInfo'
@@ -9,27 +8,27 @@ import MonthSelector from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
 import {
   Box,
-  Hidden,
-  Drawer,
-  Typography,
+  // Hidden,
+  // Drawer,
+  // Typography,
   useMediaQuery,
 } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid'
-import { makeStyles } from '@material-ui/core/styles'
+// import { makeStyles } from '@material-ui/core/styles'
 import { DragDropContext } from 'react-beautiful-dnd'
 import { moveFunds } from './thunks'
 import MoveMoneyModal from './containers/MoveMoneyModal'
 
-const useStyles = makeStyles(theme => ({
-  drawerWidth: { width: 360 },
-}))
+// const useStyles = makeStyles(theme => ({
+//   drawerWidth: { width: 360 },
+// }))
 
 const Budgets = ({ monthDates, dispatch }) => {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
   const [month, setMonth] = useState(+startOfMonth(new Date()))
-  const [openDrawer, setOpenDrawer] = useState(false)
+  // const [openDrawer, setOpenDrawer] = useState(false)
   const [moneyModalProps, setMoneyModalProps] = useState({ open: false })
-  const c = useStyles()
+  // const c = useStyles()
 
   const setCurrentMonth = () => setMonth(+startOfMonth(new Date()))
   const setMonthByIndex = i => setMonth(monthDates[i])
@@ -72,28 +71,34 @@ const Budgets = ({ monthDates, dispatch }) => {
         />
         <Box flexGrow="1">
           <Grid container spacing={3}>
-            {/*
-          <Grid item xs={12} md={3}>
-            <MonthSelector
-              months={monthDates}
-              current={index}
-              onSetCurrent={setCurrentMonth}
-              onChange={setMonthByIndex}
-            />
-          </Grid> */}
-            {/* <Grid item xs={12} md={4}>
-            <Box component={BudgetInfo} index={index} mt={3} />
-          </Grid> */}
-            {/* <Hidden smDown>
-            <Box component={AccountList} mt={3} />
-          </Hidden> */}
-            <Grid item xs={12} md={12}>
-              <TagTable index={index} date={monthDates[index]} />
-              <Box component={TransferTable} index={index} mt={3} />
+            <Grid item xs={12} md={3}>
+              <Box position="sticky" top="16px">
+                <MonthSelector
+                  months={monthDates}
+                  current={index}
+                  onSetCurrent={setCurrentMonth}
+                  onChange={setMonthByIndex}
+                />
+                <Box component={BudgetInfo} index={index} mt={3} />
+              </Box>
+            </Grid>
+
+            <Grid item xs={12} md={9}>
+              <TagTable
+                index={index}
+                date={monthDates[index]}
+                required={true}
+              />
+              <Box mt={3}>
+                <TagTable index={index} date={monthDates[index]} />
+              </Box>
+              <Box mt={3}>
+                <TransferTable index={index} />
+              </Box>
             </Grid>
           </Grid>
         </Box>
-        <Drawer
+        {/* <Drawer
           classes={
             isMobile ? null : { paper: c.drawerWidth, root: c.drawerWidth }
           }
@@ -113,7 +118,7 @@ const Budgets = ({ monthDates, dispatch }) => {
             <BudgetInfo index={index} />
             <Box pt={2} />
           </Box>
-        </Drawer>
+        </Drawer> */}
       </Box>
     </DragDropContext>
   )
