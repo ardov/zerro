@@ -43,7 +43,8 @@ export default function Row(props) {
     date,
     onSelect,
   } = props
-  const [expanded, setExpanded] = React.useState(false)
+  const isExpanded = !!children.filter(child => child.available > 0).length
+  const [expanded, setExpanded] = React.useState(isExpanded)
   const toggle = () => setExpanded(!expanded)
   const hasChildren = Boolean(children && children.length)
   const c = useStyles({ expanded })
