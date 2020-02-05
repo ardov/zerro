@@ -95,6 +95,9 @@ const Budgets = ({ monthDates, dispatch }) => {
               <Box mt={3}>
                 <TransferTable index={index} />
               </Box>
+
+              {/* TODO make bottom navigation and remove this placeholder */}
+              <Box height={48} />
             </Grid>
           </Grid>
         </Box>
