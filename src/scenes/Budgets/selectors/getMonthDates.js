@@ -22,7 +22,7 @@ const getLastMonth = createSelector([getBudgetsByMonthAndTag], budgets => {
     .sort((a, b) => a - b)
     .pop()
 
-  const afterLastBudget = +addMonths(new Date(lastBudgetDate), 1)
+  const afterLastBudget = +addMonths(new Date(lastBudgetDate || 0), 1)
 
   const nextMonth = +new Date(
     new Date().getFullYear(),
