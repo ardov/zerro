@@ -27,7 +27,6 @@ function TagTable({
 }) {
   const [selected, setSelected] = useState()
   const [metricIndex, setMetricIndex] = useState(0)
-  console.table(tags)
 
   const filtered = tags
     .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailable)
