@@ -31,7 +31,8 @@ export const useStyles = makeStyles(theme => ({
     gridTemplateColumns: ({ isMobile }) =>
       isMobile ? 'auto 120px' : 'auto 120px 120px 120px',
     alignItems: 'center',
-    gridColumnGap: theme.spacing(4),
+    gridColumnGap: ({ isMobile }) =>
+      isMobile ? theme.spacing(0.5) : theme.spacing(3),
 
     '&:hover': {
       background: theme.palette.action.hover,
@@ -94,7 +95,7 @@ export function TagRow(props) {
     isChild,
     !!budgeted
   )
-  const hasInnerOverspent = isChild && hasOverspent && available >= 0
+  const hasInnerOverspent = !isChild && hasOverspent //&& available >= 0
 
   const isUnderfunded =
     goal && goal.type === 'monthly' && goal.amount > budgeted

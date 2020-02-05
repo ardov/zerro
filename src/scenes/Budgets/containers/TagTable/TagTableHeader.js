@@ -9,7 +9,8 @@ const useStyles = makeStyles(theme => ({
     gridTemplateColumns: ({ isMobile }) =>
       isMobile ? 'auto 120px' : 'auto 120px 120px 120px',
     alignItems: 'center',
-    gridColumnGap: theme.spacing(4),
+    gridColumnGap: ({ isMobile }) =>
+      isMobile ? theme.spacing(0.5) : theme.spacing(3),
   },
 }))
 
