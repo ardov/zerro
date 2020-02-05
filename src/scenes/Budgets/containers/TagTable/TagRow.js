@@ -122,13 +122,11 @@ export function TagRow(props) {
               component="button"
               onClick={e => setBudgetAnchorEl(e.currentTarget)}
             >
-              {isUnderfunded && '⚠️'}
               {formatMoney(budgeted)}
             </Link>
           </Box>
         ) : (
           <Box display="flex" justifyContent="flex-end">
-            {isUnderfunded && '⚠️'}
             <Tooltip title="Добавить бюджет">
               <IconButton
                 size="small"
