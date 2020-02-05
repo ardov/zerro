@@ -47,12 +47,17 @@ export const setGoal = ({ type, amount, start, end, tag }) => (
   dispatch,
   getState
 ) => {
+  if (!amount) {
+    dispatch(deleteGoal(tag))
+    return
+  }
   sendEvent(`Goals: set ${type} goal`)
   const goals = getGoals(getState())
   const newGoal = { type, amount, start, end }
   dispatch(setData(GOALS, { ...goals, [tag]: newGoal }))
 }
 export const deleteGoal = tag => (dispatch, getState) => {
+  sendEvent(`Goals: delete goal`)
   const goals = getGoals(getState())
   const newGoals = { ...goals }
   delete newGoals[tag]
