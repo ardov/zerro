@@ -41,9 +41,7 @@ export default function Header() {
       )}
 
       <NavDrawer
-        classes={
-          isMobile ? null : { paper: c.drawerWidth, root: c.drawerWidth }
-        }
+        classes={{ paper: c.drawerWidth, root: c.drawerWidth }}
         variant={isMobile ? 'temporary' : 'persistent'}
         anchor="left"
         open={menuOpen}

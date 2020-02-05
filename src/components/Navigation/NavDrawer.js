@@ -47,7 +47,7 @@ const NavigationDrawer = ({
         position="relative"
         flexDirection="column"
         alignItems="center"
-        minHeight="100vh"
+        height="100%"
       >
         <Box width="100%" px={1} pt={2}>
           <List>
@@ -103,7 +103,8 @@ const NavigationDrawer = ({
           <AccountList />
         </Box>
 
-        <Box py={4} />
+        <Box height={64} width="100%" flexShrink="0" />
+
         <Box
           bgcolor="background.paper"
           width="100%"
@@ -116,7 +117,9 @@ const NavigationDrawer = ({
           left="0"
           right="0"
           zIndex="5"
+          flexShrink="0"
           display="flex"
+          alignItems="center"
           flexDirection="row"
         >
           <Logo fill={theme.palette.primary.main} width="100" />
