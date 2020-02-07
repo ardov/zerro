@@ -12,7 +12,13 @@ import RegularSyncHandler from 'components/RegularSyncHandler'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import SnackbarHandler from 'components/SnackbarHandler'
 import Nav from 'components/Navigation'
-import { Box, CircularProgress, Typography } from '@material-ui/core'
+import MobileNav from 'components/MobileNav'
+import {
+  Box,
+  CircularProgress,
+  Typography,
+  useMediaQuery,
+} from '@material-ui/core'
 import { ThemeProvider } from '@material-ui/styles'
 import createTheme from 'helpers/createTheme'
 import { getTheme } from 'store/theme'
@@ -69,9 +75,11 @@ export default connect(
 )(App)
 
 const PrivateApp = ({ hasData }) => {
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   return (
     <Box display="flex">
-      <Nav />
+      {isMobile ? <MobileNav /> : <Nav />}
+
       <SnackbarHandler />
       <RegularSyncHandler />
       <Box height="100vh" overflow="auto" flexGrow={1}>

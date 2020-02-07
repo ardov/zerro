@@ -7,6 +7,9 @@ import { getMessage, removeMessage } from 'store/message'
 
 const useStyles = makeStyles(theme => ({
   close: { padding: theme.spacing(0.5) },
+  snackbar: {
+    [theme.breakpoints.down('sm')]: { bottom: 64 },
+  },
 }))
 
 function SnackbarHandler({ text, removeMessage, children }) {
@@ -20,6 +23,7 @@ function SnackbarHandler({ text, removeMessage, children }) {
     <>
       {children}
       <Snackbar
+        className={classes.snackbar}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'left',

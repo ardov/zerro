@@ -8,9 +8,8 @@ import CircularProgress from '@material-ui/core/CircularProgress'
 import RefreshIcon from '@material-ui/icons/Refresh'
 import BackupIcon from '@material-ui/icons/Backup'
 import Badge from '@material-ui/core/Badge'
-import IconButton from '@material-ui/core/IconButton'
+import { BottomNavigationAction } from '@material-ui/core'
 import { withStyles } from '@material-ui/core/styles'
-import Tooltip from '@material-ui/core/Tooltip'
 
 const StyledBadge = withStyles(theme => ({
   badge: {
@@ -27,13 +26,11 @@ const RefreshButton = ({
   ...rest
 }) => {
   return (
-    <Tooltip title="Обновить данные">
-      <StyledBadge badgeContent={changedNum}>
-        <IconButton
-          onClick={syncData}
-          color={changedNum ? 'primary' : 'default'}
-          {...rest}
-        >
+    <BottomNavigationAction
+      label="Обновить данные"
+      value="refresh"
+      icon={
+        <StyledBadge badgeContent={changedNum}>
           {isPending ? (
             <CircularProgress size={24} />
           ) : changedNum ? (
@@ -41,9 +38,10 @@ const RefreshButton = ({
           ) : (
             <RefreshIcon />
           )}
-        </IconButton>
-      </StyledBadge>
-    </Tooltip>
+        </StyledBadge>
+      }
+      onClick={syncData}
+    />
   )
 }
 
