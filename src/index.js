@@ -14,6 +14,7 @@ import sendEvent from 'helpers/sendEvent'
 
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
+    release: 'zerro@' + process.env.REACT_APP_VERSION,
     dsn: 'https://2e8d2396a5a94b289b7a0f50b0df69f5@sentry.io/1869871',
   })
 }

@@ -8,10 +8,13 @@ import { checkRaw } from 'store/filterConditions'
 export const getStartFunds = createSelector(
   [getAccountsInBudget, convertCurrency],
   (accounts, convert) =>
-    accounts.reduce(
-      (sum, acc) => round(sum + convert(acc.startBalance, acc.instrument)),
-      0
-    )
+    accounts
+      //  Для deposit и loan поле startBalance имеет смысл начального взноса/тела кредита
+      .filter(acc => acc.type !== 'deposit' && acc.type !== 'loan')
+      .reduce(
+        (sum, acc) => round(sum + convert(acc.startBalance, acc.instrument)),
+        0
+      )
 )
 
 export const getTransactionsInBudget = createSelector(
