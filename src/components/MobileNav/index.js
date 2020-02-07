@@ -12,11 +12,13 @@ import {
   Divider,
 } from '@material-ui/core'
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance'
+import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet'
 import SyncAltIcon from '@material-ui/icons/SyncAlt'
 
 const routes = [
   { path: '/budget', label: 'Бюджет', icon: <AccountBalanceIcon /> },
   { path: '/transactions', label: 'Операции', icon: <SyncAltIcon /> },
+  { path: '/accounts', label: 'Счета', icon: <AccountBalanceWalletIcon /> },
 ]
 
 const MobileNav = ({ location, ...rest }) => {

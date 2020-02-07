@@ -29,6 +29,7 @@ import { createBrowserHistory } from 'history'
 import reactGA from 'react-ga'
 import ErrorBoundary from 'components/ErrorBoundary'
 import { getLastSyncTime, getRootUserId } from 'store/serverData'
+import Accounts from 'scenes/Accounts'
 
 addLocaleData(ru)
 
@@ -88,6 +89,7 @@ const PrivateApp = ({ hasData }) => {
             <Switch>
               <Route path="/transactions" component={Transactions} />
               <Route path="/tags" component={Tags} />
+              <Route path="/accounts" component={Accounts} />
               <Route path="/budget" component={Budgets} />
               <Redirect to="/budget" />
             </Switch>
