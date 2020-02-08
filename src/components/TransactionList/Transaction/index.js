@@ -121,6 +121,7 @@ export default function Transaction({
               variant="body2"
               component="span"
               color="textSecondary"
+              minWidth={40}
             >
               {deleted && <DeletedLabel />}
               {qrCode && <QRLabel />}
@@ -138,11 +139,12 @@ export default function Transaction({
               {comment}
             </Typography>
 
-            <Box flexShrink="0" ml="auto" clone>
+            <Box minWidth={56} ml="auto" clone>
               <Typography
                 variant="body2"
                 component="span"
                 color="textSecondary"
+                noWrap
               >
                 {mainAccountTitle}
               </Typography>

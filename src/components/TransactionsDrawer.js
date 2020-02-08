@@ -20,7 +20,7 @@ function TransactionsDrawer({
         height="100vh"
         display="flex"
         flexDirection="column"
-        minWidth={400}
+        minWidth={320}
       >
         <Box py={1} px={2} display="flex" alignItems="center">
           <Box flexGrow={1}>
