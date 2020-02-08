@@ -27,7 +27,7 @@ const RefreshButton = ({
 }) => {
   return (
     <BottomNavigationAction
-      label="Обновить данные"
+      label="Обновить"
       value="refresh"
       icon={
         <StyledBadge badgeContent={changedNum}>
@@ -41,6 +41,7 @@ const RefreshButton = ({
         </StyledBadge>
       }
       onClick={syncData}
+      {...rest}
     />
   )
 }
