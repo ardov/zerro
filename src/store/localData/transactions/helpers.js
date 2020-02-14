@@ -1,7 +1,6 @@
 import startOfMonth from 'date-fns/startOfMonth'
 import startOfDay from 'date-fns/startOfDay'
 import startOfWeek from 'date-fns/startOfWeek'
-import { convertAmount } from 'helpers/currencyHelpers'
 import { checkRaw } from 'store/filterConditions'
 
 /**
@@ -37,47 +36,6 @@ export function groupTransactionsBy(
   return Object.values(groups)
 }
 
-/**
- * Accumulates data about transaction array
- * @param {Array of Transaction} group type
- * @return {Object} results partitioned by income and outcome
- */
-export function calcMetrics(arr, instrumentRate = 1) {
-  const startObject = {
-    total: {
-      income: 0,
-      outcome: 0,
-      transactions: [],
-    },
-    byTag: {},
-  }
-
-  const reducer = (acc, tr) => {
-    const type = tr.type
-    if (type !== 'transfer' && !tr.deleted) {
-      const amount = +(
-        (tr[type] * tr[type + 'Instrument'].rate) /
-        instrumentRate
-      ).toFixed(2)
-      const mainTagId = tr.tag ? tr.tag[0].id : null
-
-      // Add to total
-      acc.total[type] += amount
-      acc.total.transactions.push(tr)
-
-      // Add to tag
-      if (!acc.byTag[mainTagId]) {
-        acc.byTag[mainTagId] = { income: 0, outcome: 0, transactions: [] }
-      }
-      acc.byTag[mainTagId][type] += amount
-      acc.byTag[mainTagId].transactions.push(tr)
-    }
-    return acc
-  }
-
-  return arr.reduce(reducer, startObject)
-}
-
 export function sortBy(sortType = 'DATE', ascending = false) {
   const sortFuncs = {
     DATE: (tr1, tr2) => {
@@ -103,24 +61,4 @@ export function getType(tr) {
 
 export function getMainTag(tr) {
   return tr.tag && tr.tag.length ? tr.tag[0] : null
-}
-
-export function calcMetricsByTag(
-  transactions,
-  targetInstrumentId,
-  instruments
-) {
-  const convert = (amount, instrumentId) =>
-    convertAmount(amount, instrumentId, targetInstrumentId, instruments, 2)
-
-  return transactions.reduce((acc, tr) => {
-    const type = getType(tr)
-    if (type !== 'transfer') {
-      const amount = convert(tr[type], tr[type + 'Instrument'])
-      const mainTagId = tr.tag ? tr.tag[0] : null
-      if (!acc[mainTagId]) acc[mainTagId] = { income: 0, outcome: 0 }
-      acc[mainTagId][type] += amount
-    }
-    return acc
-  }, {})
 }
