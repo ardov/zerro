@@ -31,14 +31,13 @@ export const getChangedNum = state => {
 
 export const getLastChangeTime = state => {
   const arrays = getChangedArrays(state)
-  const lastChange = Object.values(arrays).reduce(
-    (lastChange, array) =>
-      array.reduce(
-        (lastChange, item) =>
-          item.changed > lastChange ? item.changed : lastChange,
-        lastChange
-      ),
-    0
-  )
+  let lastChange = 0
+  for (const key in arrays) {
+    // eslint-disable-next-line no-loop-func
+    arrays[key].forEach(item => {
+      lastChange = Math.max(item.changed, lastChange)
+    })
+  }
+
   return lastChange * 1000
 }
