@@ -121,7 +121,6 @@ export default function Transaction({
               variant="body2"
               component="span"
               color="textSecondary"
-              minWidth={40}
             >
               {deleted && <DeletedLabel />}
               {qrCode && <QRLabel />}

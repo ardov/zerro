@@ -6,14 +6,6 @@ import { sortBy } from './helpers'
 import { convertToSyncArray } from 'helpers/converters'
 import { populate } from './populate'
 
-// function removeFalseKeys(object) {
-//   let newObject = {}
-//   Object.keys(object).forEach(key => {
-//     if (object[key]) newObject[key] = object[key]
-//   })
-//   return newObject
-// }
-
 const getTransactionsToSync = state =>
   convertToSyncArray(state.localData.transaction)
 
@@ -23,6 +15,7 @@ const getTransactions = createSelector(
 )
 const getTransaction = (state, id) => getTransactions(state)[id]
 
+// Only for CSV
 const getPopulatedTransactions = createSelector(
   [getInstruments, getPopulatedAccounts, getPopulatedTags, getTransactions],
   (instruments, accounts, tags, transactions) => {

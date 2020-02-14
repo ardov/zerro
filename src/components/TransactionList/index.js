@@ -2,14 +2,12 @@ import React, { useEffect, useRef, useMemo, useState } from 'react'
 import { Box, Dialog } from '@material-ui/core'
 import { VariableSizeList as List } from 'react-window'
 import { DatePicker } from '@material-ui/pickers'
-// import { areEqual } from 'react-window'
 import AutoSizer from 'react-virtualized-auto-sizer'
-
 import { connect } from 'react-redux'
 import TransactionGroup from './TransactionGroup'
 import TopBar from './TopBar'
 import { getSortedTransactions } from 'store/localData/transactions'
-import { checkRaw, getFilterConditions } from 'store/filterConditions'
+import { getFilterConditions } from 'store/filterConditions'
 import { groupTransactionsBy } from 'store/localData/transactions/helpers'
 
 const HEADER_HEIGHT = 48
@@ -29,16 +27,10 @@ export function TransactionList({
     if (listRef.current) listRef.current.resetAfterIndex(0)
   }, [listRef, transactions, filterConditions])
 
-  const groups = useMemo(() => {
-    const groupped = groupTransactionsBy(
-      'DAY',
-      transactions.filter(checkRaw(filterConditions))
-    )
-    return groupped.map(group => ({
-      ...group,
-      transactions: group.transactions.map(tr => tr.id),
-    }))
-  }, [transactions, filterConditions])
+  const groups = useMemo(
+    () => groupTransactionsBy('DAY', transactions, filterConditions),
+    [transactions, filterConditions]
+  )
 
   const scrollToDate = date => {
     if (listRef.current)

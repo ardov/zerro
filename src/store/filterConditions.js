@@ -119,8 +119,8 @@ export const check = conditions => tr => {
   )
 }
 
-export const checkRaw = (conditions = {}) => tr => {
-  const mergedConditions = { initialState, ...conditions }
+export const checkRaw = conditions => tr => {
+  if (!conditions) return true
   const {
     search,
     type,
@@ -133,7 +133,7 @@ export const checkRaw = (conditions = {}) => tr => {
 
     amountFrom,
     amountTo,
-  } = mergedConditions
+  } = conditions
 
   const checkSearch = (tr, search) =>
     !search ||

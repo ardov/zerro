@@ -2,6 +2,7 @@ import startOfMonth from 'date-fns/startOfMonth'
 import startOfDay from 'date-fns/startOfDay'
 import startOfWeek from 'date-fns/startOfWeek'
 import { convertAmount } from 'helpers/currencyHelpers'
+import { checkRaw } from 'store/filterConditions'
 
 /**
  * Groups array of transactions
@@ -9,7 +10,11 @@ import { convertAmount } from 'helpers/currencyHelpers'
  * @param {Array: arr} Array of Transaction
  * @return {Array} of objects {date, transactions}
  */
-export function groupTransactionsBy(groupType = 'DAY', arr) {
+export function groupTransactionsBy(
+  groupType = 'DAY',
+  arr = [],
+  filterConditions = {}
+) {
   if (!arr) return []
   const groupTypes = {
     DAY: tr => startOfDay(tr.date),
@@ -17,18 +22,19 @@ export function groupTransactionsBy(groupType = 'DAY', arr) {
     MONTH: tr => startOfMonth(tr.date),
     CHANGED: tr => tr.changed,
   }
+  const converter = groupTypes[groupType]
+  const checker = checkRaw(filterConditions)
+  let groups = {}
 
-  const groupCollection = arr.reduce((obj, tr) => {
-    const group = +groupTypes[groupType](tr)
-    obj[group] = obj[group] || []
-    obj[group].push(tr)
-    return obj
-  }, {})
+  arr.forEach(tr => {
+    if (checker(tr)) {
+      const date = +converter(tr)
+      if (groups[date]) groups[date].transactions.push(tr.id)
+      else groups[date] = { date, transactions: [tr.id] }
+    }
+  })
 
-  return Object.keys(groupCollection).map(date => ({
-    date: +date,
-    transactions: groupCollection[date],
-  }))
+  return Object.values(groups)
 }
 
 /**
