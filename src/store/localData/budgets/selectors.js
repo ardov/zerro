@@ -17,16 +17,18 @@ const getBudget = (state, tag, month) =>
 
 const getBudgetsToSync = state => convertToSyncArray(getChangedBudgets(state))
 
-const getBudgetsByMonthAndTag = createSelector([getBudgets], budgets =>
-  Object.values(budgets)
-    .filter(budget => budget.date !== goalBudgetDate && budget.outcome)
-    .reduce((result, budget) => {
-      const { date, tag } = budget
+const getBudgetsByMonthAndTag = createSelector([getBudgets], budgets => {
+  let result = {}
+  for (const key in budgets) {
+    const { date, tag, outcome } = budgets[key]
+    // skip goals
+    if (date !== goalBudgetDate && outcome) {
       if (!result[date]) result[date] = {}
-      result[date][tag] = budget
-      return result
-    }, {})
-)
+      result[date][tag] = budgets[key]
+    }
+  }
+  return result
+})
 
 const getGoals = createSelector([getBudgets], budgets =>
   Object.values(budgets)

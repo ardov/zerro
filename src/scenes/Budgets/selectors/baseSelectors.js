@@ -2,8 +2,7 @@ import createSelector from 'selectorator'
 import { getAccountsInBudget } from 'store/localData/accounts'
 import { convertCurrency } from 'store/serverData'
 import { round } from 'helpers/currencyHelpers'
-import { getTransactions } from 'store/localData/transactions'
-import { checkRaw } from 'store/filterConditions'
+import { getSortedTransactions } from 'store/localData/transactions'
 
 export const getStartFunds = createSelector(
   [getAccountsInBudget, convertCurrency],
@@ -18,14 +17,14 @@ export const getStartFunds = createSelector(
 )
 
 export const getTransactionsInBudget = createSelector(
-  [getTransactions, getAccountsInBudget],
+  [getSortedTransactions, getAccountsInBudget],
   (transactions, accounts) => {
     const accIds = accounts.map(acc => acc.id)
-    return Object.values(transactions).filter(
-      checkRaw({
-        deleted: false,
-        accounts: accIds,
-      })
+    return transactions.filter(
+      tr =>
+        !tr.deleted &&
+        (accIds.includes(tr.incomeAccount) ||
+          accIds.includes(tr.outcomeAccount))
     )
   }
 )

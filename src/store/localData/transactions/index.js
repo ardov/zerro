@@ -45,5 +45,4 @@ export const {
   getPopulatedTransaction,
   getTransactionList,
   getSortedTransactions,
-  getMainTransactionList,
 } = selectors

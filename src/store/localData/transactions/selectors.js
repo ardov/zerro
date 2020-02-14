@@ -39,7 +39,7 @@ const getPopulatedTransaction = (state, id) =>
   getPopulatedTransactions(state)[id]
 
 const getSortedTransactions = createSelector([getTransactions], transactions =>
-  Object.values(transactions).sort(sortBy())
+  Object.values(transactions).sort(sortBy('DATE'))
 )
 
 const getTransactionList = (state, options = {}) => {
@@ -56,16 +56,6 @@ const getTransactionList = (state, options = {}) => {
   return groupBy ? groupTransactionsBy(groupBy, filtered) : filtered
 }
 
-const getMainTransactionList = createSelector(
-  [getTransactions, getFilterConditions],
-  (transactions, filterConditions) => {
-    const list = Object.values(transactions)
-      .filter(checkRaw(filterConditions))
-      .sort(sortBy())
-    return groupTransactionsBy('DAY', list)
-  }
-)
-
 export default {
   getTransactionsToSync,
   getPopulatedTransactions,
@@ -74,5 +64,4 @@ export default {
   getPopulatedTransaction,
   getTransactionList,
   getSortedTransactions,
-  getMainTransactionList,
 }

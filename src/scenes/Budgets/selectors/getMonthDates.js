@@ -7,13 +7,12 @@ import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
 
 const getFirstMonth = createSelector(
   [getTransactionsInBudget],
-  transactions => {
-    if (transactions && transactions.length) {
-      return +startOfMonth(transactions.sort((a, b) => a.date - b.date)[0].date)
-    } else {
-      return +startOfMonth(new Date())
-    }
-  }
+  transactions =>
+    +startOfMonth(
+      transactions.length
+        ? transactions[transactions.length - 1].date
+        : Date.now()
+    )
 )
 
 const getLastMonth = createSelector([getBudgetsByMonthAndTag], budgets => {
