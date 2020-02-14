@@ -29,7 +29,7 @@ export const convertDatesToServerFormat = item =>
       case 'changed':
       case 'created':
       case 'paidTill':
-        obj[key] = +(item[key] / 1000).toFixed(0)
+        obj[key] = Math.round(item[key] / 1000)
         break
 
       case 'date':

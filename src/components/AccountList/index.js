@@ -8,13 +8,14 @@ import { getUserInstrument, getInstruments } from 'store/serverData'
 import pluralize from 'helpers/pluralize'
 import { List } from '@material-ui/core'
 import { Account, Subheader } from './components'
+import { round } from 'helpers/currencyHelpers'
 
 const getTotalBalance = (accs, targetInstrument, instruments) =>
   accs.reduce((sum, acc) => {
     const balance = acc.balance
     const accRate = instruments[acc.instrument].rate
     const targetRate = targetInstrument.rate
-    return +(sum += (balance * accRate) / targetRate).toFixed(2)
+    return round((sum += (balance * accRate) / targetRate))
   }, 0)
 
 const AccountList = ({
