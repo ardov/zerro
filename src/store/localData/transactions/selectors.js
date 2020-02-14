@@ -2,8 +2,7 @@ import createSelector from 'selectorator'
 import { getInstruments } from 'store/serverData'
 import { getPopulatedAccounts } from 'store/localData/accounts'
 import { getPopulatedTags } from 'store/localData/tags'
-import { groupTransactionsBy, sortBy } from './helpers'
-import { getFilterConditions, check, checkRaw } from 'store/filterConditions'
+import { sortBy } from './helpers'
 import { convertToSyncArray } from 'helpers/converters'
 import { populate } from './populate'
 
@@ -35,33 +34,14 @@ const getPopulatedTransactions = createSelector(
   }
 )
 
-const getPopulatedTransaction = (state, id) =>
-  getPopulatedTransactions(state)[id]
-
 const getSortedTransactions = createSelector([getTransactions], transactions =>
   Object.values(transactions).sort(sortBy('DATE'))
 )
-
-const getTransactionList = (state, options = {}) => {
-  const { ids, conditions, groupBy, sortType, ascending } = options
-  const transactions = getPopulatedTransactions(state)
-  const filterConditions =
-    conditions || conditions === null ? null : getFilterConditions(state)
-  const list = ids
-    ? ids.map(id => transactions[id])
-    : Object.values(transactions)
-  const filtered = list
-    .filter(check(filterConditions))
-    .sort(sortBy(sortType, ascending))
-  return groupBy ? groupTransactionsBy(groupBy, filtered) : filtered
-}
 
 export default {
   getTransactionsToSync,
   getPopulatedTransactions,
   getTransactions,
   getTransaction,
-  getPopulatedTransaction,
-  getTransactionList,
   getSortedTransactions,
 }

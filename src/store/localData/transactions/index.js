@@ -42,7 +42,5 @@ export const {
   getPopulatedTransactions,
   getTransactions,
   getTransaction,
-  getPopulatedTransaction,
-  getTransactionList,
   getSortedTransactions,
 } = selectors

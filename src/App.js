@@ -4,7 +4,6 @@ import { connect } from 'react-redux'
 import { IntlProvider, addLocaleData } from 'react-intl'
 import ru from 'react-intl/locale-data/ru'
 import Transactions from 'scenes/Transactions'
-import Tags from 'scenes/Tags'
 import Auth from 'scenes/Auth'
 import Budgets from 'scenes/Budgets'
 import { getLoginState } from 'store/token'
@@ -88,7 +87,6 @@ const PrivateApp = ({ hasData }) => {
           {hasData ? (
             <Switch>
               <Route path="/transactions" component={Transactions} />
-              <Route path="/tags" component={Tags} />
               <Route path="/accounts" component={Accounts} />
               <Route path="/budget" component={Budgets} />
               <Redirect to="/budget" />
