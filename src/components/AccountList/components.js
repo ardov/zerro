@@ -1,6 +1,6 @@
 import React from 'react'
 import { formatMoney } from 'helpers/format'
-import { ListItem, ListSubheader, ListItemText, Box } from '@material-ui/core'
+import { ListItem, ListSubheader, Box } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 
 const useStyles = makeStyles(theme => ({

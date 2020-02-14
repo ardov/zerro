@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-  Box,
   List,
   ListItem,
   ListItemText,

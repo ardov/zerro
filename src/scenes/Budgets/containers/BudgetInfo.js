@@ -6,7 +6,7 @@ import ru from 'date-fns/locale/ru'
 import styled, { css } from 'styled-components'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
-import { Droppable, Draggable } from 'react-beautiful-dnd'
+import { Droppable } from 'react-beautiful-dnd'
 
 const getMonthName = date => format(date, 'MMM', { locale: ru }).toLowerCase()
 

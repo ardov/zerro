@@ -15,12 +15,12 @@ export function GoalPopover({
 }) {
   const [value, setValue] = useState(amount)
   const [vType, setVType] = useState(type)
-  const [vDate, setVDate] = useState(date)
+  // const [vDate, setVDate] = useState(date)
 
   const handleTypeChange = e => setVType(e.target.value)
   const save = () => {
-    if (value !== amount || vType !== type || vDate !== date) {
-      onChange({ type: vType, amount: value, date: vDate })
+    if (value !== amount || vType !== type) {
+      onChange({ type: vType, amount: value, date })
     }
     onClose()
   }

@@ -22,8 +22,8 @@ function TagSelect({
   }
   const handleClose = () => setOpen(false)
   const handleOpen = () => setOpen(true)
-  const removeTag = idToRemove => () =>
-    onChange(value.filter(id => id !== idToRemove))
+  // const removeTag = idToRemove => () =>
+  //   onChange(value.filter(id => id !== idToRemove))
 
   const checkTag = tag =>
     (!incomeOnly || tag.showIncome) && (!outcomeOnly || tag.showOutcome)
