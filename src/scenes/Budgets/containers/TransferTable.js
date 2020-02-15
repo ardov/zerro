@@ -17,6 +17,7 @@ import TagSelect2 from 'components/TagSelect2'
 import { addConnection, getAccTagMap } from 'store/localData/hiddenData'
 import { getAmountsByTag } from '../selectors/getAmountsByTag'
 import { getAccounts } from 'store/localData/accounts'
+import TagChip from 'components/TagChip'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -70,8 +71,15 @@ function TransferTable({
                 <TagSelect2
                   trigger={
                     <span>
-                      {accTagMap[row.id] ? '🔗 ' : ''}
                       {row.name}
+                      {accTagMap[row.id] && (
+                        <Box ml={1} clone>
+                          <TagChip
+                            id={accTagMap[row.id]}
+                            onDelete={() => connectToTag(row.id, null)}
+                          />
+                        </Box>
+                      )}
                     </span>
                   }
                   onChange={id => connectToTag(row.id, id)}
