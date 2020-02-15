@@ -28,39 +28,33 @@ const { reducer, actions } = createSlice({
   reducers: {
     updateData: (state, { payload }) => {
       if (!payload) return state
-      Object.keys(payload).forEach(key => {
-        if (payload[key]) {
-          switch (key) {
-            case 'serverTimestamp':
-              state[key] = payload[key] * 1000
-              break
 
-            case 'budget':
-              if (payload[key] && payload[key].forEach) {
-                payload[key].forEach(item => {
-                  state[key][`${item.tag},${item.date}`] = convertDatesToMs(
-                    item
-                  )
-                })
-              }
-              break
+      for (const key in payload) {
+        if (!payload[key]) continue
+        switch (key) {
+          case 'serverTimestamp':
+            state[key] = payload[key] * 1000
+            break
 
-            case 'deletion':
-              payload.deletion.forEach(
-                item => delete state[item.object][item.id]
-              )
-              break
+          case 'budget':
+            for (const item of payload[key]) {
+              state[key][`${item.tag},${item.date}`] = convertDatesToMs(item)
+            }
+            break
 
-            default:
-              if (payload[key] && payload[key].forEach) {
-                payload[key].forEach(item => {
-                  state[key][item.id] = convertDatesToMs(item)
-                })
-              }
-              break
-          }
+          case 'deletion':
+            for (const item of payload[key]) {
+              delete state[item.object][item.id]
+            }
+            break
+
+          default:
+            for (const item of payload[key]) {
+              state[key][item.id] = convertDatesToMs(item)
+            }
+            break
         }
-      })
+      }
     },
   },
   extraReducers: {

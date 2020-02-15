@@ -1,49 +1,27 @@
 import parseDate from 'date-fns/parseISO'
 import { format } from 'date-fns'
 
-export const convertDatesToMs = item =>
-  Object.keys(item).reduce((obj, key) => {
-    switch (key) {
-      case 'changed':
-      case 'created':
-      case 'paidTill':
-        obj[key] = item[key] * 1000
-        break
+export const convertDatesToMs = item => {
+  const copy = Object.assign({}, item)
+  if (copy.changed) copy.changed = copy.changed * 1000
+  if (copy.created) copy.created = copy.created * 1000
+  if (copy.paidTill) copy.paidTill = copy.paidTill * 1000
+  if (copy.date) copy.date = +parseDate(copy.date)
+  if (copy.startDate) copy.startDate = +parseDate(copy.startDate)
+  if (copy.endDate) copy.endDate = +parseDate(copy.endDate)
+  return copy
+}
 
-      case 'date':
-      case 'startDate':
-      case 'endDate':
-        obj[key] = item[key] ? +parseDate(item[key]) : null
-        break
-
-      default:
-        obj[key] = item[key]
-        break
-    }
-    return obj
-  }, {})
-
-export const convertDatesToServerFormat = item =>
-  Object.keys(item).reduce((obj, key) => {
-    switch (key) {
-      case 'changed':
-      case 'created':
-      case 'paidTill':
-        obj[key] = Math.round(item[key] / 1000)
-        break
-
-      case 'date':
-      case 'startDate':
-      case 'endDate':
-        obj[key] = item[key] ? format(item[key], 'yyyy-MM-dd') : null
-        break
-
-      default:
-        obj[key] = item[key]
-        break
-    }
-    return obj
-  }, {})
+export const convertDatesToServerFormat = item => {
+  const copy = Object.assign({}, item)
+  if (copy.changed) copy.changed = Math.round(copy.changed / 1000)
+  if (copy.created) copy.created = Math.round(copy.created / 1000)
+  if (copy.paidTill) copy.paidTill = Math.round(copy.paidTill / 1000)
+  if (copy.date) copy.date = format(copy.date, 'yyyy-MM-dd')
+  if (copy.startDate) copy.startDate = format(copy.startDate, 'yyyy-MM-dd')
+  if (copy.endDate) copy.endDate = format(copy.endDate, 'yyyy-MM-dd')
+  return copy
+}
 
 export const convertToSyncArray = diffObj =>
   Object.values(diffObj).map(item => convertDatesToServerFormat(item))
