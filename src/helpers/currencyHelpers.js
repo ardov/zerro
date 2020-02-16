@@ -1,1 +1,1 @@
-export const round = amount => Math.floor(amount * 1000) / 1000
+export const round = amount => Math.floor(amount * 100) / 100
