@@ -14,24 +14,22 @@ export function groupTransactionsBy(
   arr = [],
   filterConditions = {}
 ) {
-  if (!arr) return []
   const groupTypes = {
-    DAY: tr => startOfDay(tr.date),
-    WEEK: tr => startOfWeek(tr.date, { weekStartsOn: 1 }),
-    MONTH: tr => startOfMonth(tr.date),
-    CHANGED: tr => tr.changed,
+    DAY: date => startOfDay(date),
+    WEEK: date => startOfWeek(date, { weekStartsOn: 1 }),
+    MONTH: date => startOfMonth(date),
   }
   const converter = groupTypes[groupType]
   const checker = checkRaw(filterConditions)
   let groups = {}
 
-  arr.forEach(tr => {
+  for (const tr of arr) {
     if (checker(tr)) {
-      const date = +converter(tr)
+      const date = +converter(tr.date)
       if (groups[date]) groups[date].transactions.push(tr.id)
       else groups[date] = { date, transactions: [tr.id] }
     }
-  })
+  }
 
   return Object.values(groups)
 }
