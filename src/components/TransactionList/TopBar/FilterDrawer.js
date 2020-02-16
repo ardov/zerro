@@ -17,7 +17,6 @@ import CloseIcon from '@material-ui/icons/Close'
 export default function FilterDrawer({
   conditions = {},
   setCondition,
-  setTags,
   onClose,
   open,
   ...rest
@@ -88,7 +87,10 @@ export default function FilterDrawer({
         </Box>
 
         <Box mt={3}>
-          <TagSelect value={conditions.tags} onChange={setTags} />
+          <TagSelect
+            value={conditions.tags}
+            onChange={tags => setCondition({ tags })}
+          />
         </Box>
 
         <Box mt={3}>

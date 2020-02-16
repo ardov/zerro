@@ -46,14 +46,10 @@ const mapStateToProps = (state, { id }) => {
       tr.tag && tr.tag.length
         ? tr.tag.map(id => getPopulatedTag(state, id))
         : null,
-
-    isChecked: getSelectedIds(state).includes(id),
-    isInSelectionMode: !!getSelectedIds(state).length,
   }
 }
 
 const mapDispatchToProps = (dispatch, { id }) => ({
-  onToggle: () => dispatch(toggleTransaction(id)),
   onSelectChanged: changed =>
     dispatch(selectTransactionsByChangedDate(changed)),
   onFilterByPayee: payee => dispatch(setCondition({ search: payee })),

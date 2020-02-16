@@ -1,39 +1,15 @@
 import React from 'react'
-import { connect } from 'react-redux'
-import {
-  setCondition,
-  setTags,
-  getFilterConditions,
-} from 'store/filterConditions'
-import {
-  getSelectedIds,
-  uncheckAllTransactions,
-} from 'store/selectedTransactions'
-import {
-  setMainTagToTransactions,
-  deleteTransactions,
-} from 'store/localData/transactions/thunks'
 import Paper from '@material-ui/core/Paper'
 import InputBase from '@material-ui/core/InputBase'
 import IconButton from '@material-ui/core/IconButton'
 import FilterListIcon from '@material-ui/icons/FilterList'
 import Tooltip from '@material-ui/core/Tooltip'
 import Box from '@material-ui/core/Box'
-import Actions from './Actions.js'
 import CloseIcon from '@material-ui/icons/Close'
 
 import FilterDrawer from './FilterDrawer.js'
 
-function Filter({
-  setCondition,
-  conditions = {},
-  setTags,
-  setTag,
-  selectedIds,
-  uncheckAll,
-  deleteTransactions,
-  ...rest
-}) {
+export default function Filter({ setCondition, conditions = {}, ...rest }) {
   const [isDrawerVisible, setDrawerVisible] = React.useState(false)
   const toggleDrawer = () => setDrawerVisible(!isDrawerVisible)
 
@@ -41,23 +17,11 @@ function Filter({
     <Box display="flex" alignItems="center" px={2} {...rest} clone>
       <Paper elevation={10}>
         <Box flexGrow={1} clone>
-          {selectedIds.length ? (
-            <Actions
-              {...{
-                selectedIds,
-                setTags,
-                uncheckAll,
-                onSetTag: tagId => setTag(selectedIds, tagId),
-                onDelete: () => deleteTransactions(selectedIds),
-              }}
-            />
-          ) : (
-            <InputBase
-              value={conditions.search || ''}
-              placeholder="Поиск по комментариям"
-              onChange={e => setCondition({ search: e.target.value })}
-            />
-          )}
+          <InputBase
+            value={conditions.search || ''}
+            placeholder="Поиск по комментариям"
+            onChange={e => setCondition({ search: e.target.value })}
+          />
         </Box>
 
         {!!conditions.search && (
@@ -80,31 +44,9 @@ function Filter({
         <FilterDrawer
           onClose={toggleDrawer}
           open={isDrawerVisible}
-          {...{ conditions, setCondition, setTags }}
+          {...{ conditions, setCondition }}
         />
       </Paper>
     </Box>
   )
 }
-
-const mapStateToProps = state => ({
-  conditions: getFilterConditions(state),
-
-  // For BulkActions
-  selectedIds: getSelectedIds(state),
-})
-
-const mapDispatchToProps = dispatch => ({
-  setCondition: condition => dispatch(setCondition(condition)),
-  setTags: tags => dispatch(setTags(tags)),
-
-  // For BulkActions
-  setTag: (ids, tagId) => dispatch(setMainTagToTransactions(ids, tagId)),
-  deleteTransactions: ids => {
-    dispatch(deleteTransactions(ids))
-    dispatch(uncheckAllTransactions())
-  },
-  uncheckAll: () => dispatch(uncheckAllTransactions()),
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(Filter)

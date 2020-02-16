@@ -1,110 +1,62 @@
-import React, { useEffect, useRef, useMemo, useState } from 'react'
-import { Box, Dialog } from '@material-ui/core'
-import { VariableSizeList as List } from 'react-window'
-import { DatePicker } from '@material-ui/pickers'
-import AutoSizer from 'react-virtualized-auto-sizer'
+import React, { useMemo, useState } from 'react'
+import { Collapse, Box } from '@material-ui/core'
 import { connect } from 'react-redux'
-import TransactionGroup from './TransactionGroup'
-import TopBar from './TopBar'
 import { getSortedTransactions } from 'store/localData/transactions'
-import { getFilterConditions } from 'store/filterConditions'
 import { groupTransactionsBy } from 'store/localData/transactions/helpers'
-
-const HEADER_HEIGHT = 48
-const TRANSACTION_HEIGHT = 72
+import { GrouppedList } from './GrouppedList'
+import Filter from './TopBar/Filter'
+import Actions from './TopBar/Actions'
 
 export function TransactionList({
-  transactions,
-  filterConditions,
+  transactions = [],
+  filterConditions = {},
+  hideFilter = false,
   opened,
   setOpened,
   ...rest
 }) {
-  const listRef = useRef(null)
-  const [clickedDate, setShowClickedDate] = useState(null)
-
-  useEffect(() => {
-    if (listRef.current) listRef.current.resetAfterIndex(0)
-  }, [listRef, transactions, filterConditions])
-
+  const [filter, setFilter] = useState(filterConditions)
   const groups = useMemo(
-    () => groupTransactionsBy('DAY', transactions, filterConditions),
-    [transactions, filterConditions]
+    () => groupTransactionsBy('DAY', transactions, filter),
+    [transactions, filter]
   )
+  const setCondition = condition => setFilter({ ...filter, ...condition })
 
-  const scrollToDate = date => {
-    if (listRef.current)
-      listRef.current.scrollToItem(findDateIndex(groups, date), 'start')
-  }
-
-  const minDate = groups.length ? groups[groups.length - 1].date : 0
-  const maxDate = groups.length ? groups[0].date : 0
-
-  const getItemKey = i => +groups[i].date
-
-  const getItemSize = i =>
-    HEADER_HEIGHT + TRANSACTION_HEIGHT * groups[i].transactions.length
+  const [checked, setChecked] = useState([])
+  const toggleTransaction = id =>
+    checked.includes(id)
+      ? setChecked(checked.filter(checked => id !== checked))
+      : setChecked([...checked, id])
 
   return (
     <Box display="flex" flexDirection="column" p={1} {...rest}>
-      <TopBar />
-
-      <Dialog open={!!clickedDate} onClose={() => setShowClickedDate(null)}>
-        <DatePicker
-          autoOk
-          maxDate={maxDate}
-          minDate={minDate}
-          variant="static"
-          openTo="date"
-          value={clickedDate}
-          onChange={date => {
-            setShowClickedDate(null)
-            scrollToDate(date)
-          }}
-        />
-      </Dialog>
+      {!hideFilter && (
+        <Box
+          position="relative"
+          zIndex={10}
+          maxWidth={560}
+          width="100%"
+          mx="auto"
+        >
+          <Filter conditions={filter} setCondition={setCondition} />
+        </Box>
+      )}
+      {!!checked.length && (
+        <Box p={2}>
+          <Actions checkedIds={checked} onUncheckAll={() => setChecked([])} />
+        </Box>
+      )}
 
       <Box flex="1 1 auto">
-        <AutoSizer disableWidth>
-          {({ height }) => (
-            <List
-              className="hidden-scroll"
-              ref={listRef}
-              height={height}
-              itemCount={groups.length}
-              itemSize={getItemSize}
-              width="100%"
-              itemKey={getItemKey}
-              itemData={groups}
-            >
-              {({ index, style }) => (
-                <TransactionGroup
-                  style={style}
-                  date={groups[index].date}
-                  transactions={groups[index].transactions}
-                  onSelectDate={date => setShowClickedDate(date)}
-                  {...{ opened, setOpened }}
-                />
-              )}
-            </List>
-          )}
-        </AutoSizer>
+        <GrouppedList
+          {...{ groups, opened, setOpened, checked, toggleTransaction }}
+        />
       </Box>
     </Box>
   )
 }
 
 export default connect(
-  state => ({
-    transactions: getSortedTransactions(state),
-    filterConditions: getFilterConditions(state),
-  }),
+  state => ({ transactions: getSortedTransactions(state) }),
   () => ({})
 )(TransactionList)
-
-const findDateIndex = (groups, date) => {
-  for (let i = 0; i < groups.length; i++) {
-    if (groups[i].date <= date) return i
-  }
-  return groups.length - 1
-}
