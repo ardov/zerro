@@ -1,10 +1,5 @@
 import { connect } from 'react-redux'
 import { setCondition } from 'store/filterConditions'
-import {
-  getSelectedIds,
-  toggleTransaction,
-  selectTransactionsByChangedDate,
-} from 'store/selectedTransactions'
 import { getInstrument } from 'store/serverData'
 import { getAccount } from 'store/localData/accounts'
 import { getPopulatedTag } from 'store/localData/tags'
@@ -42,6 +37,8 @@ const mapStateToProps = (state, { id }) => {
     opOutcome: tr.opOutcome,
     opOutcomeCurrency: opOutcomeInstrument && opOutcomeInstrument.shortTitle,
 
+    // TODO: вызывает постоянные ререндеры, т.к. каждый раз новый объект.
+    //       можно попробовать подключать теги уже на месте в <MainLine/>
     tag:
       tr.tag && tr.tag.length
         ? tr.tag.map(id => getPopulatedTag(state, id))
@@ -50,8 +47,6 @@ const mapStateToProps = (state, { id }) => {
 }
 
 const mapDispatchToProps = (dispatch, { id }) => ({
-  onSelectChanged: changed =>
-    dispatch(selectTransactionsByChangedDate(changed)),
   onFilterByPayee: payee => dispatch(setCondition({ search: payee })),
 })
 
