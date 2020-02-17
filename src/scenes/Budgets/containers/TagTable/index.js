@@ -28,6 +28,12 @@ function TagTable({
   const [selected, setSelected] = useState()
   const [metricIndex, setMetricIndex] = useState(0)
 
+  const selectTag = id => {
+    const parent = tagsTree.find(tag => tag.id === id)
+    if (parent) setSelected([id, ...parent.children.map(tag => tag.id)])
+    else setSelected([id])
+  }
+
   const filtered = tags
     .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailable)
     .filter(tag => tag.required === required)
@@ -44,7 +50,7 @@ function TagTable({
     type: 'outcome',
     dateFrom: date,
     dateTo: endOfMonth(date),
-    tags: [selected],
+    tags: selected,
   }
 
   return (
@@ -52,7 +58,7 @@ function TagTable({
       <Paper>
         <TransactionsDrawer
           filterConditions={filterConditions}
-          open={!!selected || selected === null}
+          open={!!selected}
           onClose={() => setSelected(undefined)}
         />
         <TagTableHeader
@@ -71,7 +77,7 @@ function TagTable({
             metric={metrics[metricIndex]}
             {...tag}
             setBudget={updateBudget}
-            onSelect={id => setSelected(id)}
+            onSelect={id => selectTag(id)}
             date={date}
           ></Row>
         ))}
