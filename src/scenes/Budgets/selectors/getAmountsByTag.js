@@ -227,3 +227,17 @@ export const getAmountsByTag = createSelector(
     })
   }
 )
+
+export const getTagAmounts = (state, month, id) => {
+  const amountsByDate = getAmountsByTag(state)
+  const dataForDate = amountsByDate.find(data => data.date === month)
+  if (!dataForDate) return null
+
+  const { tags } = dataForDate
+  for (const parent of tags) {
+    if (parent.id === id) return parent
+    for (const child of parent.children) {
+      if (child.id === id) return child
+    }
+  }
+}
