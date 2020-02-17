@@ -1,11 +1,12 @@
-import React, { useMemo, useState } from 'react'
-import { Collapse, Box } from '@material-ui/core'
+import React, { useMemo, useState, useCallback } from 'react'
+import { Box } from '@material-ui/core'
 import { connect } from 'react-redux'
 import { getSortedTransactions } from 'store/localData/transactions'
 import { groupTransactionsBy } from 'store/localData/transactions/helpers'
 import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
+import sendEvent from 'helpers/sendEvent'
 
 export function TransactionList({
   transactions = [],
@@ -16,17 +17,34 @@ export function TransactionList({
   ...rest
 }) {
   const [filter, setFilter] = useState(filterConditions)
+  const setCondition = condition => setFilter({ ...filter, ...condition })
+
   const groups = useMemo(
     () => groupTransactionsBy('DAY', transactions, filter),
     [transactions, filter]
   )
-  const setCondition = condition => setFilter({ ...filter, ...condition })
 
+  // TODO: позволить контроллировать значения извне чтобы выбирать
+  //       операции изменённые в то же время
   const [checked, setChecked] = useState([])
-  const toggleTransaction = id =>
-    checked.includes(id)
-      ? setChecked(checked.filter(checked => id !== checked))
-      : setChecked([...checked, id])
+  const toggleTransaction = useCallback(
+    id =>
+      checked.includes(id)
+        ? setChecked(checked.filter(checked => id !== checked))
+        : setChecked([...checked, id]),
+    [checked]
+  )
+
+  const checkByChangedDate = useCallback(
+    date => {
+      sendEvent('Transaction: select similar')
+      const ids = transactions
+        .filter(tr => tr.changed === +date)
+        .map(tr => tr.id)
+      setChecked(ids)
+    },
+    [transactions]
+  )
 
   return (
     <Box display="flex" flexDirection="column" p={1} {...rest}>
@@ -49,7 +67,14 @@ export function TransactionList({
 
       <Box flex="1 1 auto">
         <GrouppedList
-          {...{ groups, opened, setOpened, checked, toggleTransaction }}
+          {...{
+            groups,
+            opened,
+            setOpened,
+            checked,
+            toggleTransaction,
+            checkByChangedDate,
+          }}
         />
       </Box>
     </Box>

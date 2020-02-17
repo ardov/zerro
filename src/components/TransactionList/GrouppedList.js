@@ -29,6 +29,7 @@ export function GrouppedList({
   setOpened,
   checked,
   toggleTransaction,
+  checkByChangedDate,
 }) {
   const listRef = useRef(null)
   const [clickedDate, setClickedDate] = useState(null)
@@ -93,6 +94,7 @@ export function GrouppedList({
                     isInSelectionMode={!!checked.length}
                     onToggle={() => toggleTransaction(id)}
                     onClick={() => setOpened && setOpened(id)}
+                    onSelectChanged={checkByChangedDate}
                   />
                 ))}
               </Box>
