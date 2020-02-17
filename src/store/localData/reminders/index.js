@@ -1,5 +1,5 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
-import { wipeData, removeSynced, removeSyncedFunc } from 'store/commonActions'
+import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
 import { convertToSyncArray } from 'helpers/converters'
 
 // INITIAL STATE
@@ -19,8 +19,8 @@ const slice = createSlice({
   },
   extraReducers: {
     [wipeData]: () => initialState,
-    [removeSynced]: (state, { payload }) => {
-      removeSyncedFunc(state, payload)
+    [updateData]: (state, { payload }) => {
+      removeSyncedFunc(state, payload.syncStartTime)
     },
   },
 })

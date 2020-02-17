@@ -1,6 +1,6 @@
 import selectors from './selectors'
 import { createSlice } from 'redux-starter-kit'
-import { wipeData, removeSynced, removeSyncedFunc } from 'store/commonActions'
+import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
 import makeTransaction from './makeTransaction'
 
 // INITIAL STATE
@@ -18,14 +18,11 @@ const { reducer, actions } = createSlice({
         })
       else state[payload.id] = makeTransaction(payload)
     },
-    // removeTransaction: (state, { payload }) => {
-    //   delete state[payload]
-    // },
   },
   extraReducers: {
     [wipeData]: () => initialState,
-    [removeSynced]: (state, { payload }) => {
-      removeSyncedFunc(state, payload)
+    [updateData]: (state, { payload }) => {
+      removeSyncedFunc(state, payload.syncStartTime)
     },
   },
 })

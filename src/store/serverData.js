@@ -1,5 +1,5 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
-import { wipeData } from 'store/commonActions'
+import { wipeData, updateData } from 'store/commonActions'
 import {
   convertDatesToMs,
   convertDatesToServerFormat,
@@ -22,56 +22,51 @@ const initialState = {
 }
 
 // SLICE
-const { reducer, actions } = createSlice({
+const { reducer } = createSlice({
   slice: 'serverData',
   initialState,
-  reducers: {
-    updateData: (state, { payload }) => {
-      if (!payload) return state
+  extraReducers: {
+    [wipeData]: () => initialState,
+    [updateData]: (state, { payload }) => {
+      const { data } = payload
+      if (!data) return state
 
-      for (const key in payload) {
-        if (!payload[key]) continue
-        switch (key) {
+      for (const type in data) {
+        if (!data[type]) continue
+        switch (type) {
           case 'serverTimestamp':
-            state[key] = payload[key] * 1000
+            state[type] = data[type] * 1000
             break
 
           case 'budget':
-            for (const item of payload[key]) {
-              state[key][`${item.tag},${item.date}`] = convertDatesToMs(item)
+            for (const item of data[type]) {
+              state[type][`${item.tag},${item.date}`] = convertDatesToMs(item)
             }
             break
 
           case 'deletion':
-            for (const item of payload[key]) {
+            for (const item of data[type]) {
               delete state[item.object][item.id]
             }
             break
 
           default:
-            for (const item of payload[key]) {
-              state[key][item.id] = convertDatesToMs(item)
+            for (const item of data[type]) {
+              state[type][item.id] = convertDatesToMs(item)
             }
             break
         }
       }
     },
   },
-  extraReducers: {
-    [wipeData]: () => initialState,
-  },
 })
 
 // REDUCER
 export default reducer
 
-// ACTIONS
-export const { updateData } = actions
-
 /*
  *  SELECTORS
  */
-
 export const getDataToSave = state => {
   const data = state.serverData
   const result = {

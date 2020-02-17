@@ -1,5 +1,5 @@
 import storage from 'services/storage'
-import { updateData } from 'store/serverData'
+import { updateData } from 'store/commonActions'
 import { getDataToSave } from 'store/serverData'
 
 const LOCAL_KEYS = [
@@ -25,11 +25,10 @@ export const saveDataLocally = changedDomains => (dispatch, getState) => {
 
 export const loadLocalData = () => async (dispatch, getState) => {
   let data = {}
-  for (let i = 0; i < LOCAL_KEYS.length; i++) {
-    const key = LOCAL_KEYS[i]
+  for (const key of LOCAL_KEYS) {
     data[key] = await storage.get(key)
   }
-  dispatch(updateData(data))
+  dispatch(updateData({ data }))
   return data
 }
 

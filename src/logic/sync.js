@@ -1,13 +1,13 @@
 import ZenApi from 'services/ZenApi'
-import { updateData, getLastSyncTime } from 'store/serverData'
+import { getLastSyncTime } from 'store/serverData'
 import { getChangedArrays } from 'store/localData'
 import { getToken } from 'store/token'
-import { removeSynced } from 'store/commonActions'
 import { setPending } from 'store/isPending'
 import { saveDataLocally } from 'logic/localData'
 import { setMessage } from 'store/message'
 import sendEvent from 'helpers/sendEvent'
 import * as Sentry from '@sentry/browser'
+import { updateData } from 'store/commonActions'
 
 //All syncs with ZM goes through this thunk
 export const syncData = () => (dispatch, getState) => {
@@ -20,29 +20,28 @@ export const syncData = () => (dispatch, getState) => {
   const successMessage = 'Данные обновлены'
   const failMessage = 'Синхронизация не удалась'
 
-  const syncBegin = Date.now()
+  const syncStartTime = Date.now()
   dispatch(setPending(true))
 
   return ZenApi.getData(token, { serverTimestamp, changed }).then(
-    json => {
+    data => {
       sendEvent(
         `Sync: ${serverTimestamp ? 'Successful update' : 'Successful first'}`
       )
       dispatch(setPending(false))
-      dispatch(updateData(json))
-      dispatch(removeSynced(syncBegin))
+      dispatch(updateData({ data, syncStartTime }))
 
       // Тут точно надо по-нормальному формировать список изменённых
       // объектов, чтобы без дублирования и deletion туда не попадал
-      const deletionDomains = json.deletion
-        ? json.deletion.reduce((obj, item) => {
+      const deletionDomains = data.deletion
+        ? data.deletion.reduce((obj, item) => {
             obj[item.object] = 1
             return obj
           }, {})
         : {}
 
       const changedDomains = [
-        ...Object.keys(json),
+        ...Object.keys(data),
         ...Object.keys(deletionDomains),
       ]
       dispatch(saveDataLocally(changedDomains))
