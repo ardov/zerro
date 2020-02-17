@@ -47,6 +47,8 @@ const Budgets = ({ monthDates, dispatch }) => {
         open: true,
         source,
         destination,
+        month,
+        key: source + destination + month,
         onMoneyMove: amount => {
           if (amount) dispatch(moveFunds(amount, source, destination, month))
           setMoneyModalProps({ open: false })
