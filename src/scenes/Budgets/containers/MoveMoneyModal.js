@@ -60,11 +60,13 @@ export function MoveMoneyModal({
 const mapStateToProps = (state, { source, destination, month }) => ({
   sourceAvailable:
     source && source !== 'toBeBudgeted'
-      ? getTagAmounts(state, month, source)?.available
+      ? getTagAmounts(state, month, source === 'null' ? null : source)
+          ?.available
       : 0,
   destinationAvailable:
     destination && destination !== 'toBeBudgeted'
-      ? getTagAmounts(state, month, destination)?.available
+      ? getTagAmounts(state, month, destination === 'null' ? null : destination)
+          ?.available
       : 0,
 })
 
