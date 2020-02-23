@@ -1,7 +1,7 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
 import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
 import { convertToSyncArray } from 'helpers/converters'
-import Tag from './Tag'
+import { populateTags } from './Tag'
 
 // INITIAL STATE
 const initialState = {}
@@ -46,29 +46,26 @@ export const getTagsToSync = state => convertToSyncArray(state.localData.tag)
 
 export const getTag = (state, id) => getTags(state)[id]
 
-export const getPopulatedTags = createSelector([getTags], tags => {
-  const result = {}
-  for (const id in tags) {
-    result[id] = new Tag(tags[id], tags)
-  }
-  result[null] = Tag.nullTag
-
-  return result
-})
+export const getPopulatedTags = createSelector([getTags], populateTags)
 
 export const getPopulatedTag = (state, id) => getPopulatedTags(state)[id]
 
 export const getTagsTree = createSelector([getPopulatedTags], tags => {
-  const list = Object.values(tags).sort((a, b) => a.name.localeCompare(b.name))
-  const topLevel = list
-    .filter(tag => !tag.parent)
-    .map(parent => ({ ...parent, children: [] }))
-  list
-    .filter(tag => tag.parent)
-    .forEach(tag => {
-      const parent = topLevel.find(topTag => topTag.id === tag.parent)
-      parent.children.push(tag)
-    })
+  let result = []
+  for (const id in tags) {
+    if (tags[id].parent) continue
+    const tag = { ...tags[id] }
+    tag.children = tag.children ? tag.children.map(id => tags[id]) : []
+    result.push(tag)
+  }
+  return result
+})
 
-  return topLevel
+export const getTagLinks = createSelector([getPopulatedTags], tags => {
+  let links = {}
+  for (const id in tags) {
+    if (tags[id].parent) continue
+    links[id] = tags[id].children || []
+  }
+  return links
 })
