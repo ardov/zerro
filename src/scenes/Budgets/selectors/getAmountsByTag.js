@@ -20,66 +20,61 @@ const getAmountsByMonth = createSelector(
 
     transactions.forEach(tr => {
       const date = +startOfMonth(tr.date)
-      if (!result[date]) {
-        result[date] = {
-          income: {}, // amounts by tags
-          outcome: {}, // amounts by tags
-          transfers: {}, // amounts by accounts
-          transferFees: 0,
-        }
-      }
-      result[date].date = new Date(date).toLocaleString()
-
       const type = getType(tr)
       const tag = getMainTag(tr)
+      const income = convert(tr.income, tr.incomeInstrument)
+      const outcome = convert(tr.outcome, tr.outcomeInstrument)
 
-      // INCOME
-      if (type === 'income') {
-        const amount = convert(tr.income, tr.incomeInstrument)
-        result[date].income[tag] = result[date].income[tag]
-          ? round(result[date].income[tag] + amount)
-          : amount
+      result[date] = result[date] || {
+        income: {}, // amounts by tags
+        outcome: {}, // amounts by tags
+        transfers: {}, // amounts by accounts
+        transferFees: 0,
       }
-      // OUTCOME
-      else if (type === 'outcome') {
-        const amount = convert(tr.outcome, tr.outcomeInstrument)
-        result[date].outcome[tag] = result[date].outcome[tag]
-          ? round(result[date].outcome[tag] + amount)
-          : amount
-      }
-      // TRANSFER BETWEEN BUDGET ACCOUNTS
-      else if (
-        type === 'transfer' &&
-        budgetAccs.includes(tr.incomeAccount) &&
-        budgetAccs.includes(tr.outcomeAccount)
-      ) {
-        result[date].transferFees = round(
-          result[date].transferFees +
-            convert(tr.outcome, tr.outcomeInstrument) -
-            convert(tr.income, tr.incomeInstrument)
-        )
-      }
-      // TRANSFER TO BUDGET
-      else if (type === 'transfer' && budgetAccs.includes(tr.incomeAccount)) {
-        result[date].transfers[tr.outcomeAccount] = result[date].transfers[
-          tr.outcomeAccount
-        ]
-          ? round(
-              result[date].transfers[tr.outcomeAccount] -
-                convert(tr.income, tr.incomeInstrument)
+
+      switch (type) {
+        case 'income':
+          result[date].income[tag] = result[date].income[tag]
+            ? round(result[date].income[tag] + income)
+            : income
+          break
+
+        case 'outcome':
+          result[date].outcome[tag] = result[date].outcome[tag]
+            ? round(result[date].outcome[tag] + outcome)
+            : outcome
+          break
+
+        case 'transfer':
+          // TRANSFER BETWEEN BUDGET ACCOUNTS
+          if (
+            budgetAccs.includes(tr.incomeAccount) &&
+            budgetAccs.includes(tr.outcomeAccount)
+          ) {
+            result[date].transferFees = round(
+              result[date].transferFees + outcome - income
             )
-          : -convert(tr.income, tr.incomeInstrument)
-      }
-      // TRANSFER FROM BUDGET
-      else if (type === 'transfer' && budgetAccs.includes(tr.outcomeAccount)) {
-        result[date].transfers[tr.incomeAccount] = result[date].transfers[
-          tr.incomeAccount
-        ]
-          ? round(
-              result[date].transfers[tr.incomeAccount] +
-                convert(tr.outcome, tr.outcomeInstrument)
-            )
-          : convert(tr.outcome, tr.outcomeInstrument)
+          }
+          // TRANSFER TO BUDGET
+          else if (budgetAccs.includes(tr.incomeAccount)) {
+            result[date].transfers[tr.outcomeAccount] = result[date].transfers[
+              tr.outcomeAccount
+            ]
+              ? round(result[date].transfers[tr.outcomeAccount] - income)
+              : -income
+          }
+          // TRANSFER FROM BUDGET
+          else if (budgetAccs.includes(tr.outcomeAccount)) {
+            result[date].transfers[tr.incomeAccount] = result[date].transfers[
+              tr.incomeAccount
+            ]
+              ? round(result[date].transfers[tr.incomeAccount] + outcome)
+              : outcome
+          }
+          break
+
+        default:
+          break
       }
     })
 
