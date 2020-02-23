@@ -57,6 +57,16 @@ export function getType(tr) {
   return tr.income && tr.outcome ? 'transfer' : tr.income ? 'income' : 'outcome'
 }
 
+export function getTime(tr) {
+  const creationDate = new Date(tr.created)
+  const hours = creationDate.getHours()
+  const minutes = creationDate.getMinutes()
+  const seconds = creationDate.getSeconds()
+  const trTime = new Date(tr.date)
+  trTime.setHours(hours, minutes, seconds)
+  return +trTime
+}
+
 export function getMainTag(tr) {
   return tr.tag && tr.tag.length ? tr.tag[0] : null
 }
