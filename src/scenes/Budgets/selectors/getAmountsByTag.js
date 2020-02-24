@@ -135,31 +135,31 @@ const getTransferFees = createSelector([getAmountsByMonth], amounts => {
 export const getAmountsByTag = createSelector(
   [
     getMonthDates,
-    getAmountsByMonth,
     getBudgetsByMonthAndTag,
     getTagsTree,
-    getAccTagMap,
+    getLinkedTransfers,
+    getIncomes,
+    getOutcomes,
+    getTransfers,
+    getTransferFees,
   ],
-  (dates, amounts, budgets, tagsTree, accTagMap) => {
+  (
+    dates,
+    budgets,
+    tagsTree,
+    linkedTransfers,
+    incomes,
+    outcomes,
+    transfersByDate,
+    transferFees
+  ) => {
     let prevMonth = null
 
     return dates.map(date => {
-      const { income = {}, outcome = {}, transfers = {}, transferFees = 0 } =
-        amounts[date] || {}
-
-      let transfersAmount = 0
-      let connectedTransfers = {}
-      for (const accId in transfers) {
-        if (accTagMap[accId]) {
-          const tagId = accTagMap[accId]
-          connectedTransfers[tagId] = round(
-            transfers[accId] + (connectedTransfers[tagId] || 0)
-          )
-        } else {
-          // possible problem with deleted tags
-          transfersAmount = round(transfersAmount + transfers[accId])
-        }
-      }
+      const connectedTransfers = linkedTransfers[date] || {}
+      const income = incomes[date] || {}
+      const outcome = outcomes[date] || {}
+      const transfers = transfersByDate[date] || {}
 
       // TAGS COMPUTATIONS
       const tags = tagsTree.map((parent, pIndex) => ({
@@ -172,7 +172,7 @@ export const getAmountsByTag = createSelector(
           return this.tagOutcome + this.transferOutcome
         },
         tagOutcome: outcome[parent.id] || 0,
-        transferOutcome: connectedTransfers[parent.id] || 0,
+        transferOutcome: (parent.id && connectedTransfers[parent.id]) || 0,
 
         // From budgets
         budgeted:
@@ -265,9 +265,9 @@ export const getAmountsByTag = createSelector(
       return {
         date,
         tags,
-        transferFees,
-        transferOutcome: transfersAmount,
-        transfers,
+        transferFees: transferFees[date] || 0,
+        transferOutcome: connectedTransfers.null || 0,
+        transfers: transfers[date] || {},
       }
     })
   }
@@ -356,17 +356,17 @@ function calcTagGroup({
       },
       tagOutcome: outcomes[childId] || 0,
       transferOutcome: linkedTransfers[childId] || 0,
-      budget: budgets[childId]?.outcome || 0,
+      budgeted: budgets[childId]?.outcome || 0,
       prevAvailable:
         (prevMonth.children?.[childId]?.available > 0 &&
           prevMonth.children[childId].available) ||
         0,
       get available() {
-        return round(this.prevAvailable + this.budget - this.outcome)
+        return round(this.prevAvailable + this.budgeted - this.outcome)
       },
     }
 
-    childrenBudgeted = round(childrenBudgeted + subTags[childId].budget)
+    childrenBudgeted = round(childrenBudgeted + subTags[childId].budgeted)
     childrenOutcome = round(childrenOutcome + subTags[childId].outcome)
     childrenIncome = round(childrenIncome + subTags[childId].income)
     if (subTags[childId].available > 0)
@@ -376,26 +376,18 @@ function calcTagGroup({
   }
 
   return {
-    // tag budget || sum of children budgets
-    get totalBudget() {
-      return round(this.budget + childrenBudgeted)
+    get totalBudgeted() {
+      return round(this.budgeted + childrenBudgeted)
     },
-
-    // sum of all children outcome + parent outcome
     get totalOutcome() {
       return round(this.outcome + childrenOutcome)
     },
-
-    // sum of all children income + parent income
     get totalIncome() {
       return round(this.income + childrenIncome)
     },
-
-    // sum of all children available without overspent + parent available
     get totalAvailable() {
       return round(this.available + childrenAvailable)
     },
-
     get totalOverspent() {
       return this.available < 0 ? -this.available : 0
     },
@@ -408,13 +400,13 @@ function calcTagGroup({
       return this.tagOutcome + this.transferOutcome
     },
 
-    budget: budgets[id]?.outcome || 0,
+    budgeted: budgets[id]?.outcome || 0,
 
     prevAvailable: prevMonth.available > 0 ? prevMonth.available : 0,
 
     get available() {
-      const { prevAvailable, budget, outcome } = this
-      return round(prevAvailable + budget - outcome - childrenOverspent)
+      const { prevAvailable, budgeted, outcome } = this
+      return round(prevAvailable + budgeted - outcome - childrenOverspent)
     },
 
     children: subTags,
