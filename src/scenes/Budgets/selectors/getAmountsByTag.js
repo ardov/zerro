@@ -1,6 +1,6 @@
 import createSelector from 'selectorator'
 import { getMainTag } from 'store/localData/transactions/helpers'
-import { getTagsTree } from 'store/localData/tags'
+import { getTagsTree, getTagLinks } from 'store/localData/tags'
 import { convertCurrency } from 'store/serverData'
 import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
 import { round } from 'helpers/currencyHelpers'
@@ -81,6 +81,56 @@ const getAmountsByMonth = createSelector(
     return result
   }
 )
+
+const getIncomes = createSelector([getAmountsByMonth], amounts => {
+  let result = {}
+  for (const date in amounts) {
+    result[date] = amounts[date].income
+  }
+  return result
+})
+
+const getOutcomes = createSelector([getAmountsByMonth], amounts => {
+  let result = {}
+  for (const date in amounts) {
+    result[date] = amounts[date].outcome
+  }
+  return result
+})
+
+const getTransfers = createSelector([getAmountsByMonth], amounts => {
+  let result = {}
+  for (const date in amounts) {
+    result[date] = amounts[date].transfers
+  }
+  return result
+})
+
+const getLinkedTransfers = createSelector(
+  [getTransfers, getAccTagMap],
+  (transfers, accTagMap) => {
+    let result = {}
+    for (const date in transfers) {
+      result[date] = {}
+      for (const accountId in transfers[date]) {
+        // possible problem with deleted tags
+        const linkedTag = accTagMap[accountId] || null
+        result[date][linkedTag] = round(
+          transfers[date][accountId] + (result[date][linkedTag] || 0)
+        )
+      }
+    }
+    return result
+  }
+)
+
+const getTransferFees = createSelector([getAmountsByMonth], amounts => {
+  let result = {}
+  for (const date in amounts) {
+    result[date] = amounts[date].transferFees
+  }
+  return result
+})
 
 export const getAmountsByTag = createSelector(
   [
@@ -234,5 +284,139 @@ export const getTagAmounts = (state, month, id) => {
     for (const child of parent.children) {
       if (child.id === id) return child
     }
+  }
+}
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+export const getAmountsByTag2 = createSelector(
+  [
+    getMonthDates,
+    getBudgetsByMonthAndTag,
+    getTagLinks,
+    getIncomes,
+    getOutcomes,
+    getLinkedTransfers,
+  ],
+  (dates, budgets, tagLinks, incomes, outcomes, linkedTransfers) => {
+    let prevMonth = null
+    const result = {}
+
+    for (const date of dates) {
+      result[date] = {}
+      for (const id in tagLinks) {
+        result[date][id] = calcTagGroup({
+          id,
+          children: tagLinks[id],
+          incomes: incomes[date],
+          outcomes: outcomes[date],
+          budgets: budgets[date],
+          linkedTransfers: linkedTransfers[date],
+          prevMonth: prevMonth?.[id],
+        })
+      }
+      prevMonth = result[date]
+    }
+
+    return result
+  }
+)
+
+function calcTagGroup({
+  id,
+  children,
+
+  incomes = {},
+  outcomes = {},
+  budgets = {},
+  linkedTransfers = {},
+
+  prevMonth = {},
+}) {
+  const subTags = {}
+  let childrenBudgeted = 0
+  let childrenOutcome = 0
+  let childrenIncome = 0
+  let childrenAvailable = 0
+  let childrenOverspent = 0
+
+  for (const childId of children) {
+    subTags[childId] = {
+      income: incomes[childId] || 0,
+      get outcome() {
+        return this.tagOutcome + this.transferOutcome
+      },
+      tagOutcome: outcomes[childId] || 0,
+      transferOutcome: linkedTransfers[childId] || 0,
+      budget: budgets[childId]?.outcome || 0,
+      prevAvailable:
+        (prevMonth.children?.[childId]?.available > 0 &&
+          prevMonth.children[childId].available) ||
+        0,
+      get available() {
+        return round(this.prevAvailable + this.budget - this.outcome)
+      },
+    }
+
+    childrenBudgeted = round(childrenBudgeted + subTags[childId].budget)
+    childrenOutcome = round(childrenOutcome + subTags[childId].outcome)
+    childrenIncome = round(childrenIncome + subTags[childId].income)
+    if (subTags[childId].available > 0)
+      childrenAvailable = round(childrenAvailable + subTags[childId].available)
+    if (subTags[childId].available < 0)
+      childrenOverspent = round(childrenAvailable - subTags[childId].available)
+  }
+
+  return {
+    // tag budget || sum of children budgets
+    get totalBudget() {
+      return round(this.budget + childrenBudgeted)
+    },
+
+    // sum of all children outcome + parent outcome
+    get totalOutcome() {
+      return round(this.outcome + childrenOutcome)
+    },
+
+    // sum of all children income + parent income
+    get totalIncome() {
+      return round(this.income + childrenIncome)
+    },
+
+    // sum of all children available without overspent + parent available
+    get totalAvailable() {
+      return round(this.available + childrenAvailable)
+    },
+
+    get totalOverspent() {
+      return this.available < 0 ? -this.available : 0
+    },
+
+    income: incomes[id] || 0,
+
+    tagOutcome: outcomes[id] || 0,
+    transferOutcome: linkedTransfers[id] || 0, //null
+    get outcome() {
+      return this.tagOutcome + this.transferOutcome
+    },
+
+    budget: budgets[id]?.outcome || 0,
+
+    prevAvailable: prevMonth.available > 0 ? prevMonth.available : 0,
+
+    get available() {
+      const { prevAvailable, budget, outcome } = this
+      return round(prevAvailable + budget - outcome - childrenOverspent)
+    },
+
+    children: subTags,
   }
 }
