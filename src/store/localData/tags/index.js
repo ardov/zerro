@@ -1,7 +1,7 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
 import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
 import { convertToSyncArray } from 'helpers/converters'
-import { populateTags } from './Tag'
+import populateTags from './populateTags'
 
 // INITIAL STATE
 const initialState = {}
