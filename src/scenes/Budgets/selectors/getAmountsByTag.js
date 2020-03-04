@@ -296,6 +296,7 @@ export const getTagAmounts = (state, month, id) => {
 //
 //
 //
+// TODO: start using this function it's 2-4x faster
 
 export const getAmountsByTag2 = createSelector(
   [
