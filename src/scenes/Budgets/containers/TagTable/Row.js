@@ -79,24 +79,26 @@ export default function Row(props) {
 
       {hasChildren && (
         <Collapse in={expanded}>
-          <Box pb={1}>
-            {getChildrenData({
-              children,
-              parentOutcome: outcome,
-              date,
-              setBudget,
-              hasOverspent,
-            }).map(data => (
-              <TagRow
-                key={data.id}
-                isHidden={!expanded}
-                {...data}
-                goal={goals[data.id]}
-                metric={metric}
-                onSelect={onSelect}
-              />
-            ))}
-          </Box>
+          {expanded && (
+            <Box pb={1}>
+              {getChildrenData({
+                children,
+                parentOutcome: outcome,
+                date,
+                setBudget,
+                hasOverspent,
+              }).map(data => (
+                <TagRow
+                  key={data.id}
+                  isHidden={!expanded}
+                  {...data}
+                  goal={goals[data.id]}
+                  metric={metric}
+                  onSelect={onSelect}
+                />
+              ))}
+            </Box>
+          )}
         </Collapse>
       )}
     </div>
