@@ -6,7 +6,6 @@ import {
   applyChangesToTransaction,
   // splitTransfer,
 } from 'store/localData/transactions/thunks'
-import { selectTransactionsByChangedDate } from 'store/selectedTransactions'
 import Content from './Content'
 import { getInstrument } from 'store/serverData'
 import { getAccount } from 'store/localData/accounts'
@@ -51,8 +50,6 @@ const mapDispatchToProps = (dispatch, { id }) => ({
   onChange: changes => dispatch(applyChangesToTransaction(changes)),
   onDelete: () => dispatch(deleteTransactions([id])),
   onRestore: () => dispatch(restoreTransaction(id)),
-  onSelectSimilar: changed =>
-    dispatch(selectTransactionsByChangedDate(changed)),
   // onSplit: id => dispatch(splitTransfer(id)), // does not work
 })
 

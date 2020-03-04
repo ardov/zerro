@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from 'react'
+import React, { useMemo, useState, useCallback, useEffect } from 'react'
 import { Box } from '@material-ui/core'
 import { connect } from 'react-redux'
 import { getSortedTransactions } from 'store/localData/transactions'
@@ -8,14 +8,17 @@ import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
 import sendEvent from 'helpers/sendEvent'
 
-export function TransactionList({
-  transactions = [],
-  filterConditions = {},
-  hideFilter = false,
-  opened,
-  setOpened,
-  ...rest
-}) {
+export function TransactionList(props) {
+  const {
+    transactions = [],
+    filterConditions = {},
+    hideFilter = false,
+    opened,
+    checkedDate,
+    setOpened,
+    ...rest
+  } = props
+
   const [filter, setFilter] = useState(filterConditions)
   const setCondition = condition => setFilter({ ...filter, ...condition })
 
@@ -24,9 +27,8 @@ export function TransactionList({
     [transactions, filter]
   )
 
-  // TODO: позволить контроллировать значения извне чтобы выбирать
-  //       операции изменённые в то же время
   const [checked, setChecked] = useState([])
+
   const toggleTransaction = useCallback(
     id =>
       checked.includes(id)
@@ -45,6 +47,10 @@ export function TransactionList({
     },
     [transactions]
   )
+
+  useEffect(() => {
+    if (checkedDate) checkByChangedDate(checkedDate)
+  }, [checkByChangedDate, checkedDate])
 
   return (
     <Box display="flex" flexDirection="column" p={1} {...rest}>

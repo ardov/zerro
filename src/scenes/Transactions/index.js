@@ -18,6 +18,7 @@ const useStyles = makeStyles(theme => ({
 export default function TransactionsView() {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const [opened, setOpened] = useState(null)
+  const [checkedDate, setCheckedDate] = useState(null)
   const c = useStyles()
 
   // send analytics
@@ -43,7 +44,7 @@ export default function TransactionsView() {
           component={Paper}
         >
           <Box flex="1 1 auto" clone>
-            <TransactionList {...{ opened, setOpened }} />
+            <TransactionList {...{ opened, setOpened, checkedDate }} />
           </Box>
         </Box>
       </Box>
@@ -62,6 +63,7 @@ export default function TransactionsView() {
             id={opened}
             key={opened}
             onClose={() => setOpened(null)}
+            onSelectSimilar={date => setCheckedDate(new Date(date))}
           />
         ) : (
           <Box
