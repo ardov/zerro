@@ -74,11 +74,12 @@ export function TagRow(props) {
     setBudget,
     date,
     onSelect,
+
+    openGoalPopover,
   } = props
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
   const c = useStyles({ isChild, isMobile })
   const [budgetAnchorEl, setBudgetAnchorEl] = React.useState(null)
-  const [goalAnchorEl, setGoalAnchorEl] = React.useState(null)
   const [nameAnchorEl, setNameAnchorEl] = React.useState(null)
   const showBudget = isChild ? !!budgeted : true
   const goalProgress =
@@ -136,33 +137,30 @@ export function TagRow(props) {
           </Box>
         ))}
 
-      <BudgetPopover
-        key={`${id}${budgeted}`}
-        budgeted={budgeted}
-        available={available}
-        prevBudgeted={0}
-        style={{ transform: 'translate(-14px, -16px)' }}
-        anchorEl={budgetAnchorEl}
-        goal={goal}
-        needForGoal={goal && goal.amount}
-        open={!!budgetAnchorEl}
-        onChange={handleBudgetChange}
-      />
+      {!!budgetAnchorEl && (
+        <BudgetPopover
+          key={`${id}${budgeted}`}
+          budgeted={budgeted}
+          available={available}
+          prevBudgeted={0}
+          style={{ transform: 'translate(-14px, -16px)' }}
+          anchorEl={budgetAnchorEl}
+          goal={goal}
+          needForGoal={goal && goal.amount}
+          open={!!budgetAnchorEl}
+          onChange={handleBudgetChange}
+        />
+      )}
 
-      <GoalPopover
-        tag={id}
-        anchorEl={goalAnchorEl}
-        open={!!goalAnchorEl}
-        onClose={() => setGoalAnchorEl(null)}
-      />
-
-      <NamePopover
-        tag={id}
-        anchorEl={nameAnchorEl}
-        open={!!nameAnchorEl}
-        style={{ transform: 'translate(-14px, -18px)' }}
-        onClose={() => setNameAnchorEl(null)}
-      />
+      {!!nameAnchorEl && (
+        <NamePopover
+          tag={id}
+          anchorEl={nameAnchorEl}
+          open={!!nameAnchorEl}
+          style={{ transform: 'translate(-14px, -18px)' }}
+          onClose={() => setNameAnchorEl(null)}
+        />
+      )}
 
       {/* OUTCOME */}
       {(metric === 'outcome' || !isMobile) && (
@@ -225,7 +223,9 @@ export function TagRow(props) {
                             <Tooltip title={goalToWords(goal)}>
                               <IconButton
                                 size="small"
-                                onClick={e => setGoalAnchorEl(e.currentTarget)}
+                                onClick={e =>
+                                  openGoalPopover(id, e.currentTarget)
+                                }
                                 edge="start"
                                 children={<GoalProgress value={goalProgress} />}
                               />
@@ -236,7 +236,7 @@ export function TagRow(props) {
                                 <IconButton
                                   size="small"
                                   onClick={e =>
-                                    setGoalAnchorEl(e.currentTarget)
+                                    openGoalPopover(id, e.currentTarget)
                                   }
                                   edge="start"
                                   children={<EmojiFlagsIcon fontSize="small" />}

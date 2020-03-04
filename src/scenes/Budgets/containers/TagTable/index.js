@@ -12,6 +12,7 @@ import { endOfMonth } from 'date-fns'
 import sendEvent from 'helpers/sendEvent'
 import { getGoals } from 'store/localData/hiddenData'
 import { getTagsTree } from 'store/localData/tags'
+import GoalPopover from './GoalPopover'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
@@ -27,6 +28,7 @@ function TagTable({
 }) {
   const [selected, setSelected] = useState()
   const [metricIndex, setMetricIndex] = useState(0)
+  const [goalPopoverData, setGoalPopoverData] = useState({})
 
   const selectTag = id => {
     const parent = tagsTree.find(tag => tag.id === id)
@@ -54,35 +56,47 @@ function TagTable({
   }
 
   return (
-    <Box position="relative" py={1} clone>
-      <Paper>
-        <TransactionsDrawer
-          filterConditions={filterConditions}
-          open={!!selected}
-          onClose={() => setSelected(undefined)}
-        />
-        <TagTableHeader
-          metric={metrics[metricIndex]}
-          onToggleMetric={toggleMetric}
-          position="sticky"
-          top={0}
-          zIndex={2}
-          bgcolor="background.paper"
-          title={required ? 'Обязательные расходы' : 'Необязательные расходы'}
-        />
-        {filtered.map(tag => (
-          <Row
-            key={tag.id}
-            goals={goals}
+    <>
+      <Box position="relative" py={1} clone>
+        <Paper>
+          <TransactionsDrawer
+            filterConditions={filterConditions}
+            open={!!selected}
+            onClose={() => setSelected(undefined)}
+          />
+          <TagTableHeader
             metric={metrics[metricIndex]}
-            {...tag}
-            setBudget={updateBudget}
-            onSelect={id => selectTag(id)}
-            date={date}
-          ></Row>
-        ))}
-      </Paper>
-    </Box>
+            onToggleMetric={toggleMetric}
+            position="sticky"
+            top={0}
+            zIndex={2}
+            bgcolor="background.paper"
+            title={required ? 'Обязательные расходы' : 'Необязательные расходы'}
+          />
+          {filtered.map(tag => (
+            <Row
+              key={tag.id}
+              goals={goals}
+              metric={metrics[metricIndex]}
+              {...tag}
+              setBudget={updateBudget}
+              onSelect={id => selectTag(id)}
+              date={date}
+              openGoalPopover={(id, anchor) =>
+                setGoalPopoverData({ id, anchor })
+              }
+            ></Row>
+          ))}
+        </Paper>
+      </Box>
+
+      <GoalPopover
+        tag={goalPopoverData.id}
+        anchorEl={goalPopoverData.anchor}
+        open={!!goalPopoverData.anchor}
+        onClose={() => setGoalPopoverData({})}
+      />
+    </>
   )
 }
 

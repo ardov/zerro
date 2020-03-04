@@ -42,6 +42,7 @@ export default function Row(props) {
     setBudget,
     date,
     onSelect,
+    openGoalPopover,
   } = props
   const isExpanded = !!children.filter(child => child.available > 0).length
   const [expanded, setExpanded] = React.useState(isExpanded)
@@ -74,6 +75,7 @@ export default function Row(props) {
           setBudget,
           date,
           onSelect,
+          openGoalPopover,
         }}
       />
 
