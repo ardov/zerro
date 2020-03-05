@@ -74,7 +74,7 @@ const Budgets = ({ monthDates, dispatch }) => {
         <Box flexGrow="1">
           <Grid container spacing={3}>
             <Grid item xs={12} md={3}>
-              <Box position="sticky" top="16px">
+              <Box position="sticky" top="24px">
                 <MonthSelector
                   months={monthDates}
                   current={index}
