@@ -38,7 +38,7 @@ function TagTable({
 
   const filtered = tags
     .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailable)
-    .filter(tag => tag.required === required)
+    .filter(tag => !!tag.required === !!required)
     .sort((a, b) => a.name.localeCompare(b.name))
 
   useEffect(() => {
