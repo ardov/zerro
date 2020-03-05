@@ -4,17 +4,30 @@ import iconsMap from './iconsMap.json'
 import { nullTag } from './makeTag.js'
 
 export default function populateTags(rawTags) {
-  let tags = { ...rawTags, null: nullTag }
-  for (const id in tags) {
-    const tag = tags[id]
-    tags[id].name = getName(tag.title)
-    tags[id].symbol = iconsMap[tag.icon] || tag.title.slice(0, 2)
-    tags[id].colorRGB = tag.color ? intToRGB(tag.color) : null
-    if (tag.parent)
-      if (tags[tag.parent].children) tags[tag.parent].children.push(id)
-      else tags[tag.parent].children = [id]
+  let tags = { null: makePopulatedTag(nullTag) }
+
+  for (const id in rawTags) {
+    // Add name, symbol and colorRGB
+    tags[id] = makePopulatedTag(rawTags[id])
+    tags[id].children = []
   }
+
+  // Populate children array with ids
+  for (const id in tags) {
+    const parentId = tags[id].parent
+    if (parentId) tags[parentId].children.push(id)
+  }
+
   return tags
+}
+
+function makePopulatedTag(tag) {
+  return {
+    ...tag,
+    name: getName(tag.title),
+    symbol: iconsMap[tag.icon] || tag.title.slice(0, 2),
+    colorRGB: tag.color ? intToRGB(tag.color) : null,
+  }
 }
 
 function getName(title) {
