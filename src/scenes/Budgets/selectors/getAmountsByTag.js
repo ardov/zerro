@@ -159,7 +159,6 @@ export const getAmountsByTag = createSelector(
       const connectedTransfers = linkedTransfers[date] || {}
       const income = incomes[date] || {}
       const outcome = outcomes[date] || {}
-      const transfers = transfersByDate[date] || {}
 
       // TAGS COMPUTATIONS
       const tags = tagsTree.map((parent, pIndex) => ({
@@ -267,7 +266,7 @@ export const getAmountsByTag = createSelector(
         tags,
         transferFees: transferFees[date] || 0,
         transferOutcome: connectedTransfers.null || 0,
-        transfers: transfers[date] || {},
+        transfers: transfersByDate[date] || {},
       }
     })
   }
