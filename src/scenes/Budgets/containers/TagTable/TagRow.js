@@ -125,13 +125,22 @@ export function TagRow(props) {
           </Box>
         ) : (
           <Box display="flex" justifyContent="flex-end">
-            <Tooltip title="Добавить бюджет">
-              <IconButton
-                size="small"
-                edge="end"
-                children={<AddIcon />}
-                onClick={e => setBudgetAnchorEl(e.currentTarget)}
-              />
+            <Tooltip
+              title={
+                id === 'unsorted'
+                  ? 'Просто увеличьте бюджет всей группы 😉'
+                  : 'Добавить бюджет'
+              }
+            >
+              <span>
+                <IconButton
+                  size="small"
+                  edge="end"
+                  children={<AddIcon />}
+                  onClick={e => setBudgetAnchorEl(e.currentTarget)}
+                  disabled={id === 'unsorted'}
+                />
+              </span>
             </Tooltip>
           </Box>
         ))}
