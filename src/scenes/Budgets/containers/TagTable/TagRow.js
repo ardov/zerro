@@ -57,19 +57,22 @@ export const useStyles = makeStyles(theme => ({
 
 export function TagRow(props) {
   const {
-    metric,
+    // from tag
     id,
     symbol,
     name,
+    colorRGB,
+    isChild,
+    // trom amounts
     budgeted,
     outcome,
     available,
-    colorRGB,
-    isChild,
+    // from goals
     goal,
-    isHidden,
 
-    hasOverspent,
+    isHidden,
+    metric,
+
     setBudget,
     date,
     onSelect,
@@ -89,13 +92,7 @@ export function TagRow(props) {
     if (amount !== budgeted) setBudget(amount, date, id)
   }
 
-  const availableColor = getAvailableColor(
-    available,
-    hasOverspent,
-    isChild,
-    !!budgeted
-  )
-  const hasInnerOverspent = !isChild && hasOverspent //&& available >= 0
+  const availableColor = getAvailableColor(available, isChild, !!budgeted)
 
   return (
     <div className={c.row}>
@@ -212,13 +209,6 @@ export function TagRow(props) {
                     }
                   >
                     <Typography variant="body1" align="right">
-                      {hasInnerOverspent && (
-                        <WarningIcon
-                          color="error"
-                          fontSize="small"
-                          className={c.warning}
-                        />
-                      )}
                       {formatMoney(available)}
                       <Box
                         component="span"
@@ -275,21 +265,17 @@ function getDroppableStyle(snapshot) {
   }
 }
 
-function getAvailableColor(available, hasOverspent, isChild, hasBudget) {
-  const positive = 'success.main',
-    negative = 'error.main',
-    neutral = 'text.hint'
+function getAvailableColor(available, isChild, hasBudget) {
+  const positive = 'success.main'
+  const negative = 'error.main'
+  const neutral = 'text.hint'
 
-  if (!isChild || hasBudget) {
-    return available === 0 ? neutral : available < 0 ? negative : positive
-  } else {
-    // child tag without budget
-    return available > 0
-      ? positive
-      : available === 0
-      ? neutral
-      : hasOverspent
-      ? negative
-      : neutral
-  }
+  if (available === 0) return neutral
+  if (available > 0) return positive
+
+  // available < 0
+  // main tag or child with budget
+  if (!isChild || hasBudget) return negative
+  // child tag without budget
+  else return neutral
 }

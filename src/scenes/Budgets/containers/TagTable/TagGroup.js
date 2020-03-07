@@ -49,6 +49,7 @@ export default function TagGroup(props) {
   const toggle = () => setExpanded(!expanded)
   const hasChildren = Boolean(children && children.length)
   const c = useStyles({ expanded })
+  console.log(overspent)
 
   const hasOverspent = !!overspent
 

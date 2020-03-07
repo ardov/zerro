@@ -55,6 +55,7 @@ function TagTable({
     dateTo: endOfMonth(date),
     tags: selected,
   }
+  console.log(tags)
 
   return (
     <>
