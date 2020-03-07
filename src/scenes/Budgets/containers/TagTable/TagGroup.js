@@ -21,7 +21,7 @@ export const useStyles = makeStyles(theme => ({
   },
 }))
 
-export default function Row(props) {
+export default function TagGroup(props) {
   const {
     metric,
     goals,

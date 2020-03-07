@@ -5,7 +5,7 @@ import { Paper, Box } from '@material-ui/core'
 import { setOutcomeBudget } from '../../thunks'
 import { getAmountsByTag } from '../../selectors/getAmountsByTag'
 import { getUserCurrencyCode } from 'store/serverData'
-import Row from './Row'
+import TagGroup from './TagGroup'
 import TagTableHeader from './TagTableHeader'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 import { endOfMonth } from 'date-fns'
@@ -27,6 +27,7 @@ function TagTable({
   ...rest
 }) {
   const [selected, setSelected] = useState()
+  const [showAll, setShowAll] = useState(false)
   const [metricIndex, setMetricIndex] = useState(0)
   const [goalPopoverData, setGoalPopoverData] = useState({})
 
@@ -37,7 +38,7 @@ function TagTable({
   }
 
   const filtered = tags
-    .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailable)
+    // .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailable)
     .filter(tag => !!tag.required === !!required)
     .sort((a, b) => a.name.localeCompare(b.name))
 
@@ -59,11 +60,6 @@ function TagTable({
     <>
       <Box position="relative" py={1} clone>
         <Paper>
-          <TransactionsDrawer
-            filterConditions={filterConditions}
-            open={!!selected}
-            onClose={() => setSelected(undefined)}
-          />
           <TagTableHeader
             metric={metrics[metricIndex]}
             onToggleMetric={toggleMetric}
@@ -74,7 +70,7 @@ function TagTable({
             title={required ? 'Обязательные расходы' : 'Необязательные расходы'}
           />
           {filtered.map(tag => (
-            <Row
+            <TagGroup
               key={tag.id}
               goals={goals}
               metric={metrics[metricIndex]}
@@ -85,10 +81,16 @@ function TagTable({
               openGoalPopover={(id, anchor) =>
                 setGoalPopoverData({ id, anchor })
               }
-            ></Row>
+            ></TagGroup>
           ))}
         </Paper>
       </Box>
+
+      <TransactionsDrawer
+        filterConditions={filterConditions}
+        open={!!selected}
+        onClose={() => setSelected(undefined)}
+      />
 
       <GoalPopover
         tag={goalPopoverData.id}
