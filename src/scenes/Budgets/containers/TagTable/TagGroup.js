@@ -31,7 +31,6 @@ export default function TagGroup(props) {
     symbol,
     colorRGB,
     name,
-    overspent,
     totalBudgeted,
     totalAvailable,
     totalOutcome,
@@ -49,9 +48,6 @@ export default function TagGroup(props) {
   const toggle = () => setExpanded(!expanded)
   const hasChildren = Boolean(children && children.length)
   const c = useStyles({ expanded })
-  console.log(overspent)
-
-  const hasOverspent = !!overspent
 
   return (
     <div className={c.panelRoot}>
@@ -72,7 +68,6 @@ export default function TagGroup(props) {
           budgeted: totalBudgeted,
           outcome: totalOutcome,
           available: totalAvailable,
-          hasOverspent,
           setBudget,
           date,
           onSelect,
@@ -89,7 +84,6 @@ export default function TagGroup(props) {
                 parentOutcome: outcome,
                 date,
                 setBudget,
-                hasOverspent,
               }).map(data => (
                 <TagRow
                   key={data.id}
