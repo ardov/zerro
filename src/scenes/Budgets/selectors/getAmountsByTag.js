@@ -179,19 +179,19 @@ export const getAmountsByTag = createSelector(
             budgets[date][parent.id] &&
             budgets[date][parent.id].outcome) ||
           0,
-        prevAvailable:
+        leftover:
           (prevMonth &&
             prevMonth[pIndex].available > 0 &&
             prevMonth[pIndex].available) ||
           0,
         get available() {
-          const { prevAvailable, budgeted, outcome, children } = this
+          const { leftover, budgeted, outcome, children } = this
           const childrenOverspent = children.reduce(
             (sum, child) =>
               child.available < 0 ? round(sum - child.available) : sum,
             0
           )
-          return round(prevAvailable + budgeted - outcome - childrenOverspent)
+          return round(leftover + budgeted - outcome - childrenOverspent)
         },
 
         // tag budget || sum of children budgets
@@ -246,13 +246,13 @@ export const getAmountsByTag = createSelector(
               budgets[date][child.id] &&
               budgets[date][child.id].outcome) ||
             0,
-          prevAvailable:
+          leftover:
             (prevMonth &&
               prevMonth[pIndex].children[i].available > 0 &&
               prevMonth[pIndex].children[i].available) ||
             0,
           get available() {
-            return round(this.prevAvailable + this.budgeted - this.outcome)
+            return round(this.leftover + this.budgeted - this.outcome)
           },
         })),
       }))
@@ -296,6 +296,8 @@ export const getTagAmounts = (state, month, id) => {
 //
 //
 // TODO: start using this function it's 2-4x faster
+export const getAmountsForTag = state => (date, id) =>
+  getAmountsByTag2(state)[date][id]
 
 export const getAmountsByTag2 = createSelector(
   [
@@ -313,7 +315,7 @@ export const getAmountsByTag2 = createSelector(
     for (const date of dates) {
       result[date] = {}
       for (const id in tagLinks) {
-        result[date][id] = calcTagGroup({
+        result[date][id] = calcTagGroupAmounts({
           id,
           children: tagLinks[id],
           incomes: incomes[date],
@@ -330,18 +332,18 @@ export const getAmountsByTag2 = createSelector(
   }
 )
 
-function calcTagGroup({
+function calcTagGroupAmounts({
   id,
   children,
-
   incomes = {},
   outcomes = {},
   budgets = {},
   linkedTransfers = {},
-
   prevMonth = {},
 }) {
   const subTags = {}
+
+  // Children totals
   let childrenBudgeted = 0
   let childrenOutcome = 0
   let childrenIncome = 0
@@ -349,65 +351,68 @@ function calcTagGroup({
   let childrenOverspent = 0
 
   for (const childId of children) {
+    // Child tag amounts
+    const budgeted = budgets[childId]?.outcome || 0
+    const income = incomes[childId] || 0
+    const tagOutcome = outcomes[childId] || 0
+    const transferOutcome = linkedTransfers[id] || 0
+    const outcome = round(tagOutcome + transferOutcome)
+    const leftover =
+      (prevMonth.children?.[childId]?.available > 0 &&
+        prevMonth.children[childId].available) ||
+      0
+    const available = round(leftover + budgeted - outcome)
+
     subTags[childId] = {
-      income: incomes[childId] || 0,
-      get outcome() {
-        return this.tagOutcome + this.transferOutcome
-      },
-      tagOutcome: outcomes[childId] || 0,
-      transferOutcome: linkedTransfers[childId] || 0,
-      budgeted: budgets[childId]?.outcome || 0,
-      prevAvailable:
-        (prevMonth.children?.[childId]?.available > 0 &&
-          prevMonth.children[childId].available) ||
-        0,
-      get available() {
-        return round(this.prevAvailable + this.budgeted - this.outcome)
-      },
+      income,
+      outcome,
+      tagOutcome,
+      transferOutcome,
+      budgeted,
+      leftover,
+      available,
     }
 
-    childrenBudgeted = round(childrenBudgeted + subTags[childId].budgeted)
-    childrenOutcome = round(childrenOutcome + subTags[childId].outcome)
-    childrenIncome = round(childrenIncome + subTags[childId].income)
-    if (subTags[childId].available > 0)
-      childrenAvailable = round(childrenAvailable + subTags[childId].available)
-    if (subTags[childId].available < 0)
-      childrenOverspent = round(childrenAvailable - subTags[childId].available)
+    // Update children totals
+    childrenBudgeted = round(childrenBudgeted + budgeted)
+    childrenOutcome = round(childrenOutcome + outcome)
+    childrenIncome = round(childrenIncome + income)
+    if (available > 0) childrenAvailable = round(childrenAvailable + available)
+    if (available < 0) childrenOverspent = round(childrenAvailable - available)
   }
 
+  // Main tag amounts
+  const budgeted = budgets[id]?.outcome || 0
+  const income = incomes[id] || 0
+  const tagOutcome = outcomes[id] || 0
+  const transferOutcome = linkedTransfers[id] || 0 // все переводы идут в null
+  const outcome = round(tagOutcome + transferOutcome)
+  const leftover = prevMonth.available > 0 ? prevMonth.available : 0
+  const available = round(leftover + budgeted - outcome - childrenOverspent)
+
   return {
-    get totalBudgeted() {
-      return round(this.budgeted + childrenBudgeted)
-    },
-    get totalOutcome() {
-      return round(this.outcome + childrenOutcome)
-    },
-    get totalIncome() {
-      return round(this.income + childrenIncome)
-    },
-    get totalAvailable() {
-      return round(this.available + childrenAvailable)
-    },
-    get totalOverspent() {
-      return this.available < 0 ? -this.available : 0
-    },
+    // Group totals
+    totalBudgeted: round(budgeted + childrenBudgeted),
+    totalOutcome: round(outcome + childrenOutcome),
+    totalIncome: round(income + childrenIncome),
+    totalAvailable: round(available + childrenAvailable),
+    totalOverspent: available < 0 ? -available : 0,
 
-    income: incomes[id] || 0,
+    // Main tag amounts
+    budgeted,
+    income,
+    tagOutcome,
+    transferOutcome,
+    outcome,
+    leftover,
+    available,
 
-    tagOutcome: outcomes[id] || 0,
-    transferOutcome: linkedTransfers[id] || 0, //null
-    get outcome() {
-      return this.tagOutcome + this.transferOutcome
-    },
-
-    budgeted: budgets[id]?.outcome || 0,
-
-    prevAvailable: prevMonth.available > 0 ? prevMonth.available : 0,
-
-    get available() {
-      const { prevAvailable, budgeted, outcome } = this
-      return round(prevAvailable + budgeted - outcome - childrenOverspent)
-    },
+    // Children totals
+    childrenBudgeted,
+    childrenOutcome,
+    childrenIncome,
+    childrenAvailable,
+    childrenOverspent,
 
     children: subTags,
   }
