@@ -48,6 +48,9 @@ function TagGroup(props) {
     childrenAvailable,
   } = amounts
 
+  let hiddenOverspend = 0
+  if (totalAvailable >= 0 && available < 0) hiddenOverspend = -available
+
   const [expanded, setExpanded] = React.useState(childrenAvailable > 0)
   const toggle = () => setExpanded(expanded => !expanded)
 
@@ -80,8 +83,9 @@ function TagGroup(props) {
         budgeted={totalBudgeted}
         outcome={totalOutcome}
         available={totalAvailable}
+        hiddenOverspend={hiddenOverspend}
       />
-      {/* {available < 0 && '!!!'} */}
+
       {hasChildren && (
         <Collapse in={expanded}>
           {expanded && (
