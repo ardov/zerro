@@ -10,7 +10,7 @@ import {
 import { makeStyles } from '@material-ui/styles'
 import EmojiIcon from 'components/EmojiIcon'
 import { formatMoney } from 'helpers/format'
-// import WarningIcon from '@material-ui/icons/Warning'
+import WarningIcon from '@material-ui/icons/Warning'
 import AddIcon from '@material-ui/icons/Add'
 import EmojiFlagsIcon from '@material-ui/icons/EmojiFlags'
 import NamePopover from './NamePopover'
@@ -61,21 +61,17 @@ export function TagRow(props) {
     symbol,
     name,
     colorRGB,
-    parent,
     showOutcome,
     isChild,
+    hiddenOverspend,
     // trom amounts
     budgeted = 0,
     outcome = 0,
     available = 0,
     // from goals
     goal,
-
-    isHidden,
     showAll,
     metric,
-
-    date,
 
     openGoalPopover,
     openBudgetPopover,
@@ -166,11 +162,7 @@ export function TagRow(props) {
 
       {/* AVAILABLE */}
       {(metric === 'available' || !isMobile) && (
-        <Droppable
-          droppableId={id ? id : 'null'}
-          isDropDisabled={isHidden}
-          type="FUNDS"
-        >
+        <Droppable droppableId={id ? id : 'null'} type="FUNDS">
           {({ innerRef, placeholder }, snapshot) => (
             <div ref={innerRef} style={getDroppableStyle(snapshot)}>
               <span style={{ display: 'none' }}>{placeholder}</span>
@@ -193,6 +185,15 @@ export function TagRow(props) {
                     }
                   >
                     <Typography variant="body1" align="right">
+                      {!!hiddenOverspend && (
+                        <Tooltip
+                          title={`Перерасход в категории. Увеличьте бюджет на ${formatMoney(
+                            hiddenOverspend
+                          )}`}
+                        >
+                          <WarningIcon fontSize="small" color="error" />
+                        </Tooltip>
+                      )}
                       {formatMoney(available)}
                       <Box
                         component="span"
