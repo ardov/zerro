@@ -97,11 +97,7 @@ export const getAccTagMap = createSelector(
   }
 )
 
-export const getGoals = createSelector(
-  [getOldGoals, getGoalsReminder],
-  (oldGoals, goalsReminder) => {
-    if (goalsReminder) return JSON.parse(goalsReminder.comment) || {}
-    if (Object.values(oldGoals).length) return oldGoals
-    return {}
-  }
-)
+export const getGoals = createSelector([getGoalsReminder], goalsReminder => {
+  if (goalsReminder) return JSON.parse(goalsReminder.comment) || {}
+  return {}
+})
