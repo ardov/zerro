@@ -64,10 +64,10 @@ export function GoalPopover({
   )
 }
 
-const mapStateToProps = (state, { tag }) => getGoals(state)[tag] || {}
+const mapStateToProps = (state, { id }) => getGoals(state)[id] || {}
 
-const mapDispatchToProps = (dispatch, { tag }) => ({
-  onChange: goal => dispatch(setGoal({ ...goal, tag })),
+const mapDispatchToProps = (dispatch, { id }) => ({
+  onChange: goal => dispatch(setGoal({ ...goal, tag: id })),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(GoalPopover)
