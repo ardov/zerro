@@ -3,8 +3,6 @@ import { connect } from 'react-redux'
 
 import { Paper, Box } from '@material-ui/core'
 import { setOutcomeBudget } from '../../thunks'
-import { getAmountsByTag } from '../../selectors/getAmountsByTag'
-import { getUserCurrencyCode } from 'store/serverData'
 import TagGroup from './TagGroup'
 import TagTableHeader from './TagTableHeader'
 import TransactionsDrawer from 'components/TransactionsDrawer'
@@ -12,33 +10,28 @@ import { endOfMonth } from 'date-fns'
 import sendEvent from 'helpers/sendEvent'
 import { getTagsTree } from 'store/localData/tags'
 import GoalPopover from './GoalPopover'
+import { useCallback } from 'react'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
-function TagTable({
-  tags,
-  tagsTree,
-  currency,
-  date,
-  updateBudget,
-  required = false,
-  ...rest
-}) {
+function TagTable({ tagsTree, date, updateBudget, required = false, ...rest }) {
   const [selected, setSelected] = useState()
   // const [showAll, setShowAll] = useState(false)
   const [metricIndex, setMetricIndex] = useState(0)
   const [goalPopoverData, setGoalPopoverData] = useState({})
 
-  const selectTag = id => {
-    const parent = tagsTree.find(tag => tag.id === id)
-    if (parent) setSelected([id, ...parent.children.map(tag => tag.id)])
-    else setSelected([id])
-  }
+  const onSelect = useCallback(
+    id => {
+      const parent = tagsTree.find(tag => tag.id === id)
+      if (parent) setSelected([id, ...parent.children.map(tag => tag.id)])
+      else setSelected([id])
+    },
+    [tagsTree]
+  )
 
-  const filtered = tags
-    // .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailable)
+  const tagIds = tagsTree
     .filter(tag => !!tag.required === !!required)
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(tag => tag.id)
 
   useEffect(() => {
     if (selected) sendEvent('Budgets: see transactions')
@@ -53,7 +46,11 @@ function TagTable({
     dateTo: endOfMonth(date),
     tags: selected,
   }
-  console.log(tags)
+
+  const openGoalPopover = useCallback(
+    (id, anchor) => setGoalPopoverData({ id, anchor }),
+    []
+  )
 
   return (
     <>
@@ -68,17 +65,15 @@ function TagTable({
             bgcolor="background.paper"
             title={required ? 'Обязательные расходы' : 'Необязательные расходы'}
           />
-          {filtered.map(tag => (
+          {tagIds.map(id => (
             <TagGroup
-              key={tag.id}
+              key={id}
+              id={id}
               metric={metrics[metricIndex]}
-              {...tag}
               setBudget={updateBudget}
-              onSelect={id => selectTag(id)}
+              onSelect={onSelect}
               date={date}
-              openGoalPopover={(id, anchor) =>
-                setGoalPopoverData({ id, anchor })
-              }
+              openGoalPopover={openGoalPopover}
             ></TagGroup>
           ))}
         </Paper>
@@ -101,9 +96,7 @@ function TagTable({
 }
 
 const mapStateToProps = (state, { index }) => ({
-  tags: getAmountsByTag(state)[index].tags,
   tagsTree: getTagsTree(state),
-  currency: getUserCurrencyCode(state),
 })
 
 const mapDispatchToProps = dispatch => ({

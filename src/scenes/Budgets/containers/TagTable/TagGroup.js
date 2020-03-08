@@ -1,9 +1,13 @@
 import React from 'react'
+import { connect } from 'react-redux'
 import { Collapse, Box } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import IconButton from '@material-ui/core/IconButton'
 import ArrowRightIcon from '@material-ui/icons/ArrowRight'
 import { TagRow } from './TagRow'
+import { getGoals } from 'store/localData/hiddenData'
+import { getTagsTree } from 'store/localData/tags'
+import { getAmountsForTag } from 'scenes/Budgets/selectors/getAmountsByTag'
 
 export const useStyles = makeStyles(theme => ({
   panelRoot: {
@@ -11,7 +15,6 @@ export const useStyles = makeStyles(theme => ({
     borderTop: '1px solid',
     borderColor: theme.palette.divider,
   },
-
   expandIcon: {
     position: 'absolute',
     left: 0,
@@ -21,33 +24,40 @@ export const useStyles = makeStyles(theme => ({
   },
 }))
 
-export default function TagGroup(props) {
+function TagGroup(props) {
   const {
-    metric,
-    goals,
-
     id,
-    // showOutcome,
-    symbol,
-    colorRGB,
-    name,
-    totalBudgeted,
-    totalAvailable,
-    totalOutcome,
-    children,
-    // budgeted,
-    outcome,
-    // available,
-    setBudget,
+    metric,
     date,
+    showAll,
+
+    tag,
+    goals,
+    amounts,
+
+    setBudget,
     onSelect,
     openGoalPopover,
   } = props
-  const isExpanded = !!children.filter(child => child.available > 0).length
-  const [expanded, setExpanded] = React.useState(isExpanded)
-  const toggle = () => setExpanded(!expanded)
-  const hasChildren = Boolean(children && children.length)
+
+  const {
+    totalBudgeted,
+    totalAvailable,
+    totalOutcome,
+    outcome,
+    childrenAvailable,
+  } = amounts
+
+  const [expanded, setExpanded] = React.useState(childrenAvailable > 0)
+  const toggle = () => setExpanded(expanded => !expanded)
+
+  const hasChildren = !!tag?.children?.length
   const c = useStyles({ expanded })
+
+  console.log(props)
+
+  if (!tag.showOutcome && !totalOutcome && !totalAvailable && !showAll)
+    return null
 
   return (
     <div className={c.panelRoot}>
@@ -59,39 +69,57 @@ export default function TagGroup(props) {
 
       <TagRow
         {...{
-          metric,
-          id,
-          symbol,
-          colorRGB,
-          name,
-          goal: goals[id],
-          budgeted: totalBudgeted,
-          outcome: totalOutcome,
-          available: totalAvailable,
+          ...withoutChildren(tag),
+
           setBudget,
-          date,
           onSelect,
           openGoalPopover,
         }}
+        date={date}
+        metric={metric}
+        goal={goals[id]}
+        budgeted={totalBudgeted}
+        outcome={totalOutcome}
+        available={totalAvailable}
       />
 
       {hasChildren && (
         <Collapse in={expanded}>
           {expanded && (
             <Box pb={1}>
-              {getChildrenData({
-                children,
-                parentOutcome: outcome,
-                date,
-                setBudget,
-              }).map(data => (
+              {!!outcome && (
                 <TagRow
-                  key={data.id}
-                  isHidden={!expanded}
-                  {...data}
-                  goal={goals[data.id]}
+                  {...{
+                    isChild: true,
+                    id: 'unsorted',
+                    symbol: '-',
+                    name: 'Без подкатегории',
+                    budgeted: 0,
+                    outcome,
+                    available: 0,
+                    setBudget,
+                    date,
+                  }}
+                />
+              )}
+
+              {tag.children.map(child => (
+                <TagRow
+                  {...{
+                    ...withoutChildren(child),
+
+                    setBudget,
+                    onSelect,
+                    openGoalPopover,
+                  }}
+                  key={child.id}
+                  isChild={true}
+                  date={date}
                   metric={metric}
-                  onSelect={onSelect}
+                  goal={goals[child.id]}
+                  budgeted={amounts.children[child.id].budgeted}
+                  outcome={amounts.children[child.id].outcome}
+                  available={amounts.children[child.id].available}
                 />
               ))}
             </Box>
@@ -102,51 +130,18 @@ export default function TagGroup(props) {
   )
 }
 
-function getChildrenData({
-  children,
-  parentOutcome,
-  date,
-  setBudget,
-  hasOverspent,
-}) {
-  const childrenData = children.length
-    ? children
-        .filter(
-          child =>
-            child.showOutcome || child.totalOutcome || child.totalAvailable
-        )
-        .map(child => ({
-          isChild: true,
-          id: child.id,
-          symbol: child.symbol,
-          name: child.name,
-          goal: child.goal,
-          budgeted: child.budgeted,
-          outcome: child.outcome,
-          available: child.available,
-          hasOverspent,
-          setBudget,
-          date,
-        }))
-    : null
-
-  const additionalRows =
-    childrenData && parentOutcome
-      ? [
-          {
-            isChild: true,
-            id: 'unsorted',
-            symbol: '-',
-            name: 'Без подкатегории',
-            budgeted: 0,
-            outcome: parentOutcome,
-            available: 0,
-            hasOverspent,
-            setBudget,
-            date,
-          },
-        ]
-      : []
-
-  return [...additionalRows, ...childrenData]
+function withoutChildren(tag) {
+  const newTag = { ...tag }
+  delete newTag.children
+  return newTag
 }
+
+const mapStateToProps = (state, { id, date }) => ({
+  goals: getGoals(state),
+  tag: getTagsTree(state).find(tag => tag.id === id),
+  amounts: getAmountsForTag(state)(date, id),
+})
+
+const mapDispatchToProps = dispatch => ({})
+
+export default connect(mapStateToProps, mapDispatchToProps)(TagGroup)
