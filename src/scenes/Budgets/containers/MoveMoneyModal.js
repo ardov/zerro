@@ -6,7 +6,7 @@ import ArrowForwardIcon from '@material-ui/icons/ArrowForward'
 import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt'
 import { Box, InputAdornment, IconButton } from '@material-ui/core'
 import { connect } from 'react-redux'
-import { getTagAmounts } from '../selectors/getAmountsByTag'
+import { getAmountsForTag } from '../selectors/getAmountsByTag'
 
 export function MoveMoneyModal({
   open,
@@ -57,18 +57,22 @@ export function MoveMoneyModal({
   )
 }
 
-const mapStateToProps = (state, { source, destination, month }) => ({
-  sourceAvailable:
-    source && source !== 'toBeBudgeted'
-      ? getTagAmounts(state, month, source === 'null' ? null : source)
-          ?.available
-      : 0,
-  destinationAvailable:
-    destination && destination !== 'toBeBudgeted'
-      ? getTagAmounts(state, month, destination === 'null' ? null : destination)
-          ?.available
-      : 0,
-})
+const mapStateToProps = (state, { source, destination, month }) => {
+  return {
+    sourceAvailable:
+      source && source !== 'toBeBudgeted'
+        ? getAmountsForTag(state)(month, source === 'null' ? null : source)
+            ?.available
+        : 0,
+    destinationAvailable:
+      destination && destination !== 'toBeBudgeted'
+        ? getAmountsForTag(state)(
+            month,
+            destination === 'null' ? null : destination
+          )?.available
+        : 0,
+  }
+}
 
 export default connect(mapStateToProps, null)(MoveMoneyModal)
 
