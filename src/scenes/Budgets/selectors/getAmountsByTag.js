@@ -296,8 +296,16 @@ export const getTagAmounts = (state, month, id) => {
 //
 //
 // TODO: start using this function it's 2-4x faster
-export const getAmountsForTag = state => (date, id) =>
-  getAmountsByTag2(state)[date][id]
+export const getAmountsForTag = state => (date, id) => {
+  const amounts = getAmountsByTag2(state)[date]
+  if (amounts[id]) return amounts[id]
+  else {
+    for (const parent in amounts) {
+      if (amounts[parent].children[id]) return amounts[parent].children[id]
+    }
+  }
+  return null
+}
 
 export const getAmountsByTag2 = createSelector(
   [
