@@ -10,10 +10,9 @@ import {
 import { makeStyles } from '@material-ui/styles'
 import EmojiIcon from 'components/EmojiIcon'
 import { formatMoney } from 'helpers/format'
-import WarningIcon from '@material-ui/icons/Warning'
+// import WarningIcon from '@material-ui/icons/Warning'
 import AddIcon from '@material-ui/icons/Add'
 import EmojiFlagsIcon from '@material-ui/icons/EmojiFlags'
-import BudgetPopover from './BudgetPopover'
 import NamePopover from './NamePopover'
 import { goalToWords } from 'store/localData/budgets/helpers'
 import GoalProgress from 'components/GoalProgress'
@@ -62,35 +61,35 @@ export function TagRow(props) {
     symbol,
     name,
     colorRGB,
+    parent,
+    showOutcome,
     isChild,
     // trom amounts
-    budgeted,
-    outcome,
-    available,
+    budgeted = 0,
+    outcome = 0,
+    available = 0,
     // from goals
     goal,
 
     isHidden,
+    showAll,
     metric,
 
-    setBudget,
     date,
-    onSelect,
 
     openGoalPopover,
+    openBudgetPopover,
+    openTransactionsPopover,
   } = props
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
   const c = useStyles({ isChild, isMobile })
-  const [budgetAnchorEl, setBudgetAnchorEl] = React.useState(null)
   const [nameAnchorEl, setNameAnchorEl] = React.useState(null)
+
+  if (!showOutcome && !outcome && !available && !showAll) return null
+
   const showBudget = isChild ? !!budgeted : true
   const goalProgress =
     goal && goal.type === 'monthly' ? budgeted / goal.amount : 0
-
-  const handleBudgetChange = amount => {
-    setBudgetAnchorEl(null)
-    if (amount !== budgeted) setBudget(amount, date, id)
-  }
 
   const availableColor = getAvailableColor(available, isChild, !!budgeted)
 
@@ -115,7 +114,7 @@ export function TagRow(props) {
               variant="body1"
               align="right"
               component="button"
-              onClick={e => setBudgetAnchorEl(e.currentTarget)}
+              onClick={e => openBudgetPopover(id, e.currentTarget)}
             >
               {formatMoney(budgeted)}
             </Link>
@@ -134,28 +133,13 @@ export function TagRow(props) {
                   size="small"
                   edge="end"
                   children={<AddIcon />}
-                  onClick={e => setBudgetAnchorEl(e.currentTarget)}
+                  onClick={e => openBudgetPopover(id, e.currentTarget)}
                   disabled={id === 'unsorted'}
                 />
               </span>
             </Tooltip>
           </Box>
         ))}
-
-      {!!budgetAnchorEl && (
-        <BudgetPopover
-          key={`${id}${budgeted}`}
-          budgeted={budgeted}
-          available={available}
-          prevBudgeted={0}
-          style={{ transform: 'translate(-14px, -16px)' }}
-          anchorEl={budgetAnchorEl}
-          goal={goal}
-          needForGoal={goal && goal.amount}
-          open={!!budgetAnchorEl}
-          onChange={handleBudgetChange}
-        />
-      )}
 
       {!!nameAnchorEl && (
         <NamePopover
@@ -173,7 +157,7 @@ export function TagRow(props) {
           <Typography
             variant="body1"
             align="right"
-            onClick={() => onSelect(id)}
+            onClick={() => openTransactionsPopover(id)}
           >
             {formatMoney(outcome ? -outcome : 0)}
           </Typography>

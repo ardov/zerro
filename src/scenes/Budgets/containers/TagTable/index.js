@@ -11,6 +11,7 @@ import sendEvent from 'helpers/sendEvent'
 import { getTagsTree } from 'store/localData/tags'
 import GoalPopover from './GoalPopover'
 import { useCallback } from 'react'
+import BudgetPopover from './BudgetPopover'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
@@ -19,9 +20,11 @@ function TagTable({ tagsTree, date, updateBudget, required = false, ...rest }) {
   // const [showAll, setShowAll] = useState(false)
   const [metricIndex, setMetricIndex] = useState(0)
   const [goalPopoverData, setGoalPopoverData] = useState({})
+  const [budgetPopoverData, setBudgetPopoverData] = useState({})
 
   const onSelect = useCallback(
     id => {
+      sendEvent('Budgets: see transactions')
       const parent = tagsTree.find(tag => tag.id === id)
       if (parent) setSelected([id, ...parent.children.map(tag => tag.id)])
       else setSelected([id])
@@ -29,13 +32,18 @@ function TagTable({ tagsTree, date, updateBudget, required = false, ...rest }) {
     [tagsTree]
   )
 
+  const openBudgetPopover = useCallback(
+    (id, anchor) => setBudgetPopoverData({ id, anchor }),
+    []
+  )
+  const openGoalPopover = useCallback(
+    (id, anchor) => setGoalPopoverData({ id, anchor }),
+    []
+  )
+
   const tagIds = tagsTree
     .filter(tag => !!tag.required === !!required)
     .map(tag => tag.id)
-
-  useEffect(() => {
-    if (selected) sendEvent('Budgets: see transactions')
-  }, [selected])
 
   const toggleMetric = () =>
     setMetricIndex(metricIndex === 2 ? 0 : metricIndex + 1) // metricIndex + 1 % 3
@@ -46,11 +54,6 @@ function TagTable({ tagsTree, date, updateBudget, required = false, ...rest }) {
     dateTo: endOfMonth(date),
     tags: selected,
   }
-
-  const openGoalPopover = useCallback(
-    (id, anchor) => setGoalPopoverData({ id, anchor }),
-    []
-  )
 
   return (
     <>
@@ -71,10 +74,11 @@ function TagTable({ tagsTree, date, updateBudget, required = false, ...rest }) {
               id={id}
               metric={metrics[metricIndex]}
               setBudget={updateBudget}
-              onSelect={onSelect}
               date={date}
+              openTransactionsPopover={onSelect}
+              openBudgetPopover={openBudgetPopover}
               openGoalPopover={openGoalPopover}
-            ></TagGroup>
+            />
           ))}
         </Paper>
       </Box>
@@ -85,8 +89,19 @@ function TagTable({ tagsTree, date, updateBudget, required = false, ...rest }) {
         onClose={() => setSelected(undefined)}
       />
 
+      <BudgetPopover
+        key={budgetPopoverData.id}
+        id={budgetPopoverData.id}
+        anchorEl={budgetPopoverData.anchor}
+        open={!!budgetPopoverData.anchor}
+        month={date}
+        onClose={() => setBudgetPopoverData({})}
+        style={{ transform: 'translate(-14px, -16px)' }}
+      />
+
       <GoalPopover
-        tag={goalPopoverData.id}
+        key={goalPopoverData.id}
+        id={goalPopoverData.id}
         anchorEl={goalPopoverData.anchor}
         open={!!goalPopoverData.anchor}
         onClose={() => setGoalPopoverData({})}

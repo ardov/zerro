@@ -1,8 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Collapse, Box } from '@material-ui/core'
+import { Collapse, Box, IconButton } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
-import IconButton from '@material-ui/core/IconButton'
 import ArrowRightIcon from '@material-ui/icons/ArrowRight'
 import { TagRow } from './TagRow'
 import { getGoals } from 'store/localData/hiddenData'
@@ -35,8 +34,8 @@ function TagGroup(props) {
     goals,
     amounts,
 
-    setBudget,
-    onSelect,
+    openTransactionsPopover,
+    openBudgetPopover,
     openGoalPopover,
   } = props
 
@@ -45,6 +44,7 @@ function TagGroup(props) {
     totalAvailable,
     totalOutcome,
     outcome,
+    available,
     childrenAvailable,
   } = amounts
 
@@ -54,7 +54,13 @@ function TagGroup(props) {
   const hasChildren = !!tag?.children?.length
   const c = useStyles({ expanded })
 
-  console.log(props)
+  const rowProps = {
+    date,
+    metric,
+    openGoalPopover,
+    openBudgetPopover,
+    openTransactionsPopover,
+  }
 
   if (!tag.showOutcome && !totalOutcome && !totalAvailable && !showAll)
     return null
@@ -68,54 +74,35 @@ function TagGroup(props) {
       )}
 
       <TagRow
-        {...{
-          ...withoutChildren(tag),
-
-          setBudget,
-          onSelect,
-          openGoalPopover,
-        }}
-        date={date}
-        metric={metric}
+        {...withoutChildren(tag)}
+        {...rowProps}
         goal={goals[id]}
         budgeted={totalBudgeted}
         outcome={totalOutcome}
         available={totalAvailable}
       />
-
+      {/* {available < 0 && '!!!'} */}
       {hasChildren && (
         <Collapse in={expanded}>
           {expanded && (
             <Box pb={1}>
               {!!outcome && (
                 <TagRow
-                  {...{
-                    isChild: true,
-                    id: 'unsorted',
-                    symbol: '-',
-                    name: 'Без подкатегории',
-                    budgeted: 0,
-                    outcome,
-                    available: 0,
-                    setBudget,
-                    date,
-                  }}
+                  id="unsorted"
+                  name="Без подкатегории"
+                  symbol="-"
+                  isChild={true}
+                  outcome={outcome}
+                  {...rowProps}
                 />
               )}
 
               {tag.children.map(child => (
                 <TagRow
-                  {...{
-                    ...withoutChildren(child),
-
-                    setBudget,
-                    onSelect,
-                    openGoalPopover,
-                  }}
                   key={child.id}
+                  {...withoutChildren(child)}
+                  {...rowProps}
                   isChild={true}
-                  date={date}
-                  metric={metric}
                   goal={goals[child.id]}
                   budgeted={amounts.children[child.id].budgeted}
                   outcome={amounts.children[child.id].outcome}
