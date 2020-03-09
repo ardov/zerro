@@ -98,7 +98,7 @@ const getOutcomes = createSelector([getAmountsByMonth], amounts => {
   return result
 })
 
-const getTransfers = createSelector([getAmountsByMonth], amounts => {
+export const getTransfers = createSelector([getAmountsByMonth], amounts => {
   let result = {}
   for (const date in amounts) {
     result[date] = amounts[date].transfers
@@ -106,7 +106,7 @@ const getTransfers = createSelector([getAmountsByMonth], amounts => {
   return result
 })
 
-const getLinkedTransfers = createSelector(
+export const getLinkedTransfers = createSelector(
   [getTransfers, getAccTagMap],
   (transfers, accTagMap) => {
     let result = {}
@@ -124,7 +124,7 @@ const getLinkedTransfers = createSelector(
   }
 )
 
-const getTransferFees = createSelector([getAmountsByMonth], amounts => {
+export const getTransferFees = createSelector([getAmountsByMonth], amounts => {
   let result = {}
   for (const date in amounts) {
     result[date] = amounts[date].transferFees
@@ -132,158 +132,8 @@ const getTransferFees = createSelector([getAmountsByMonth], amounts => {
   return result
 })
 
-export const getAmountsByTag = createSelector(
-  [
-    getMonthDates,
-    getBudgetsByMonthAndTag,
-    getTagsTree,
-    getLinkedTransfers,
-    getIncomes,
-    getOutcomes,
-    getTransfers,
-    getTransferFees,
-  ],
-  (
-    dates,
-    budgets,
-    tagsTree,
-    linkedTransfers,
-    incomes,
-    outcomes,
-    transfersByDate,
-    transferFees
-  ) => {
-    let prevMonth = null
-
-    return dates.map(date => {
-      const connectedTransfers = linkedTransfers[date] || {}
-      const income = incomes[date] || {}
-      const outcome = outcomes[date] || {}
-
-      // TAGS COMPUTATIONS
-      const tags = tagsTree.map((parent, pIndex) => ({
-        // Tag data
-        ...parent,
-
-        // From getIncomeOutcomeByTag selector
-        income: income[parent.id] || 0,
-        get outcome() {
-          return this.tagOutcome + this.transferOutcome
-        },
-        tagOutcome: outcome[parent.id] || 0,
-        transferOutcome: (parent.id && connectedTransfers[parent.id]) || 0,
-
-        // From budgets
-        budgeted:
-          (budgets[date] &&
-            budgets[date][parent.id] &&
-            budgets[date][parent.id].outcome) ||
-          0,
-        leftover:
-          (prevMonth &&
-            prevMonth[pIndex].available > 0 &&
-            prevMonth[pIndex].available) ||
-          0,
-        get available() {
-          const { leftover, budgeted, outcome, children } = this
-          const childrenOverspent = children.reduce(
-            (sum, child) =>
-              child.available < 0 ? round(sum - child.available) : sum,
-            0
-          )
-          return round(leftover + budgeted - outcome - childrenOverspent)
-        },
-
-        // tag budget || sum of children budgets
-        get totalBudgeted() {
-          return round(
-            this.budgeted +
-              this.children.reduce((sum, child) => sum + child.budgeted, 0)
-          )
-        },
-
-        // sum of all children outcome + parent outcome
-        get totalOutcome() {
-          return round(
-            this.outcome +
-              this.children.reduce((sum, child) => sum + child.outcome, 0)
-          )
-        },
-
-        // sum of all children income + parent income
-        get totalIncome() {
-          return round(
-            this.income +
-              this.children.reduce((sum, child) => sum + child.income, 0)
-          )
-        },
-
-        // sum of all children available without overspent + parent available
-        get totalAvailable() {
-          return round(
-            this.available +
-              this.children.reduce((sum, child) => {
-                return child.available > 0 ? sum + child.available : sum
-              }, 0)
-          )
-        },
-
-        get totalOverspent() {
-          return this.available < 0 ? -this.available : 0
-        },
-
-        // Children
-        children: parent.children.map((child, i) => ({
-          ...child,
-          income: income[child.id] || 0,
-          get outcome() {
-            return this.tagOutcome + this.transferOutcome
-          },
-          tagOutcome: outcome[child.id] || 0,
-          transferOutcome: connectedTransfers[child.id] || 0,
-          budgeted:
-            (budgets[date] &&
-              budgets[date][child.id] &&
-              budgets[date][child.id].outcome) ||
-            0,
-          leftover:
-            (prevMonth &&
-              prevMonth[pIndex].children[i].available > 0 &&
-              prevMonth[pIndex].children[i].available) ||
-            0,
-          get available() {
-            return round(this.leftover + this.budgeted - this.outcome)
-          },
-        })),
-      }))
-      prevMonth = tags
-
-      //
-      //
-      //
-      return {
-        date,
-        tags,
-        transferFees: transferFees[date] || 0,
-        transferOutcome: connectedTransfers.null || 0,
-        transfers: transfersByDate[date] || {},
-      }
-    })
-  }
-)
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-// TODO: start using this function it's 2-4x faster
 export const getAmountsForTag = state => (month, id) => {
-  const amounts = getAmountsByTag2(state)[month]
+  const amounts = getAmountsByTag(state)[month]
   if (amounts[id]) return amounts[id]
   else {
     for (const parent in amounts) {
@@ -293,7 +143,7 @@ export const getAmountsForTag = state => (month, id) => {
   return null
 }
 
-export const getAmountsByTag2 = createSelector(
+export const getAmountsByTag = createSelector(
   [
     getMonthDates,
     getBudgetsByMonthAndTag,
@@ -372,14 +222,15 @@ function calcTagGroupAmounts({
     childrenOutcome = round(childrenOutcome + outcome)
     childrenIncome = round(childrenIncome + income)
     if (available > 0) childrenAvailable = round(childrenAvailable + available)
-    if (available < 0) childrenOverspent = round(childrenAvailable - available)
+    if (available < 0) childrenOverspent = round(childrenOverspent - available)
   }
 
   // Main tag amounts
   const budgeted = budgets[id]?.outcome || 0
   const income = incomes[id] || 0
   const tagOutcome = outcomes[id] || 0
-  const transferOutcome = linkedTransfers[id] || 0 // все переводы идут в null
+  let transferOutcome = linkedTransfers[id] || 0 // все переводы идут в null
+  if (id === 'null') transferOutcome = 0
   const outcome = round(tagOutcome + transferOutcome)
   const leftover = prevMonth.available > 0 ? prevMonth.available : 0
   const available = round(leftover + budgeted - outcome - childrenOverspent)
