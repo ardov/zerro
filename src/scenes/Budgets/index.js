@@ -95,7 +95,7 @@ const Budgets = ({ monthDates, dispatch }) => {
                 <TagTable index={index} date={monthDates[index]} />
               </Box>
               <Box mt={3}>
-                <TransferTable index={index} />
+                <TransferTable month={monthDates[index]} />
               </Box>
 
               {/* TODO make bottom navigation and remove this placeholder */}
