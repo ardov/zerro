@@ -1,16 +1,16 @@
 import React from 'react'
-import { connect } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { getPopulatedTag } from 'store/localData/tags'
 import { Chip } from '@material-ui/core'
 
-const TagChip = ({ id, label, ...rest }) => <Chip label={label} {...rest} />
+function getTagLabel(state, id) {
+  const tag = getPopulatedTag(state, id)
+  if (!tag) return null
+  if (tag.icon) return `${tag.symbol} ${tag.name}`
+  return tag.title
+}
 
-export default connect(
-  (state, { id }) => {
-    const tag = getPopulatedTag(state, id)
-    if (tag)
-      return { label: tag.icon ? `${tag.symbol} ${tag.name}` : tag.title }
-    else return null
-  },
-  () => ({})
-)(TagChip)
+export default function TagChip({ id, ...rest }) {
+  const label = useSelector(state => getTagLabel(state, id))
+  return <Chip label={label} {...rest} />
+}
