@@ -17,6 +17,9 @@ import NamePopover from './NamePopover'
 import { goalToWords } from 'store/localData/budgets/helpers'
 import GoalProgress from 'components/GoalProgress'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
+import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
+
+const { MONTHLY } = GOAL_TYPES
 
 export const useStyles = makeStyles(theme => ({
   row: {
@@ -85,7 +88,7 @@ export function TagRow(props) {
 
   const showBudget = isChild ? !!budgeted : true
   const goalProgress =
-    goal && goal.type === 'monthly' ? budgeted / goal.amount : 0
+    goal && goal.type === MONTHLY ? budgeted / goal.amount : 0
 
   const availableColor = getAvailableColor(available, isChild, !!budgeted)
 

@@ -3,10 +3,13 @@ import { connect } from 'react-redux'
 import { Box, Popover, TextField, MenuItem } from '@material-ui/core'
 import AmountInput from 'components/AmountInput'
 import { getGoals, setGoal } from 'store/localData/hiddenData'
+import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
+
+const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = GOAL_TYPES
 
 export function GoalPopover({
   currency,
-  type = 'monthly',
+  type = MONTHLY,
   amount = 0,
   date,
   onChange,
@@ -36,12 +39,12 @@ export function GoalPopover({
           label="Хочу"
           fullWidth
         >
-          <MenuItem value="monthly">Откладывать каждый месяц</MenuItem>
-          <MenuItem disabled value="target">
-            Накопить сумму
+          <MenuItem value={MONTHLY}>Откладывать каждый месяц</MenuItem>
+          <MenuItem disabled value={MONTHLY_SPEND}>
+            Тратить каждый месяц
           </MenuItem>
-          <MenuItem disabled value="targetByDate">
-            Накопить сумму к дате
+          <MenuItem disabled value={TARGET_BALANCE}>
+            Накопить сумму
           </MenuItem>
         </TextField>
       </Box>
