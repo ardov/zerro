@@ -4,7 +4,6 @@ import { Collapse, Box, IconButton } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import ArrowRightIcon from '@material-ui/icons/ArrowRight'
 import { TagRow } from './TagRow'
-import { getGoals } from 'store/localData/hiddenData'
 import { getTagsTree } from 'store/localData/tags'
 import { getAmountsForTag } from 'scenes/Budgets/selectors/getAmountsByTag'
 
@@ -31,7 +30,6 @@ function TagGroup(props) {
     showAll,
 
     tag,
-    goals,
     amounts,
 
     openTransactionsPopover,
@@ -79,7 +77,6 @@ function TagGroup(props) {
       <TagRow
         {...withoutChildren(tag)}
         {...rowProps}
-        goal={goals[id]}
         budgeted={totalBudgeted}
         outcome={totalOutcome}
         available={totalAvailable}
@@ -107,7 +104,6 @@ function TagGroup(props) {
                   {...withoutChildren(child)}
                   {...rowProps}
                   isChild={true}
-                  goal={goals[child.id]}
                   budgeted={amounts.children[child.id].budgeted}
                   outcome={amounts.children[child.id].outcome}
                   available={amounts.children[child.id].available}
@@ -128,7 +124,6 @@ function withoutChildren(tag) {
 }
 
 const mapStateToProps = (state, { id, date }) => ({
-  goals: getGoals(state),
   tag: getTagsTree(state).find(tag => tag.id === id),
   amounts: getAmountsForTag(state)(date, id),
 })

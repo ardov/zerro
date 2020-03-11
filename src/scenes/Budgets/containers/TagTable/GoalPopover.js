@@ -40,9 +40,7 @@ export function GoalPopover({
           fullWidth
         >
           <MenuItem value={MONTHLY}>Откладывать каждый месяц</MenuItem>
-          <MenuItem disabled value={MONTHLY_SPEND}>
-            Тратить каждый месяц
-          </MenuItem>
+          <MenuItem value={MONTHLY_SPEND}>Тратить каждый месяц</MenuItem>
           <MenuItem disabled value={TARGET_BALANCE}>
             Накопить сумму
           </MenuItem>

@@ -14,12 +14,12 @@ import WarningIcon from '@material-ui/icons/Warning'
 import AddIcon from '@material-ui/icons/Add'
 import EmojiFlagsIcon from '@material-ui/icons/EmojiFlags'
 import NamePopover from './NamePopover'
-import { goalToWords } from 'store/localData/budgets/helpers'
+import { goalToWords } from 'store/localData/hiddenData/goals'
 import GoalProgress from 'components/GoalProgress'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
-
-const { MONTHLY } = GOAL_TYPES
+import { getGoal } from 'store/localData/hiddenData'
+import { useSelector, shallowEqual } from 'react-redux'
+import { getGoalProgress } from 'scenes/Budgets/selectors/goalsProgress'
 
 export const useStyles = makeStyles(theme => ({
   row: {
@@ -59,7 +59,6 @@ export const useStyles = makeStyles(theme => ({
 
 export function TagRow(props) {
   const {
-    // from tag
     id,
     symbol,
     name,
@@ -67,12 +66,12 @@ export function TagRow(props) {
     showOutcome,
     isChild,
     hiddenOverspend,
-    // trom amounts
+    date,
+
     budgeted = 0,
     outcome = 0,
     available = 0,
-    // from goals
-    goal,
+
     showAll,
     metric,
 
@@ -80,6 +79,11 @@ export function TagRow(props) {
     openBudgetPopover,
     openTransactionsPopover,
   } = props
+  const goal = useSelector(state => getGoal(state, id), shallowEqual)
+  const goalProgress = useSelector(
+    state => getGoalProgress(state, date, id),
+    shallowEqual
+  )
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
   const c = useStyles({ isChild, isMobile })
   const [nameAnchorEl, setNameAnchorEl] = React.useState(null)
@@ -87,8 +91,6 @@ export function TagRow(props) {
   if (!showOutcome && !outcome && !available && !showAll) return null
 
   const showBudget = isChild ? !!budgeted : true
-  const goalProgress =
-    goal && goal.type === MONTHLY ? budgeted / goal.amount : 0
 
   const availableColor = getAvailableColor(available, isChild, !!budgeted)
 
@@ -213,7 +215,9 @@ export function TagRow(props) {
                                   openGoalPopover(id, e.currentTarget)
                                 }
                                 edge="start"
-                                children={<GoalProgress value={goalProgress} />}
+                                children={
+                                  <GoalProgress value={goalProgress.progress} />
+                                }
                               />
                             </Tooltip>
                           ) : (
