@@ -193,6 +193,7 @@ function calcTagGroupAmounts({
   let childrenIncome = 0
   let childrenAvailable = 0
   let childrenOverspent = 0
+  let childrenLeftover = 0
 
   for (const childId of children) {
     // Child tag amounts
@@ -221,6 +222,7 @@ function calcTagGroupAmounts({
     childrenBudgeted = round(childrenBudgeted + budgeted)
     childrenOutcome = round(childrenOutcome + outcome)
     childrenIncome = round(childrenIncome + income)
+    childrenLeftover = round(childrenLeftover + leftover)
     if (available > 0) childrenAvailable = round(childrenAvailable + available)
     if (available < 0) childrenOverspent = round(childrenOverspent - available)
   }
@@ -240,6 +242,7 @@ function calcTagGroupAmounts({
     totalBudgeted: round(budgeted + childrenBudgeted),
     totalOutcome: round(outcome + childrenOutcome),
     totalIncome: round(income + childrenIncome),
+    totalLeftover: round(leftover + childrenLeftover),
     totalAvailable: round(available + childrenAvailable),
     totalOverspent: available < 0 ? -available : 0,
 
@@ -258,6 +261,7 @@ function calcTagGroupAmounts({
     childrenIncome,
     childrenAvailable,
     childrenOverspent,
+    childrenLeftover,
 
     children: subTags,
   }
