@@ -101,3 +101,5 @@ export const getGoals = createSelector([getGoalsReminder], goalsReminder => {
   if (goalsReminder) return JSON.parse(goalsReminder.comment) || {}
   return {}
 })
+
+export const getGoal = (state, id) => getGoals(state)[id]

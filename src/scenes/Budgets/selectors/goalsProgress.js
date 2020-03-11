@@ -9,6 +9,9 @@ import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = GOAL_TYPES
 const startForOldGoals = +new Date(2020, 1, 1)
 
+export const getGoalProgress = (state, month, id) =>
+  getGoalsProgress(state)?.[month]?.[id]
+
 export const getGoalsProgress = createSelector(
   [getGoals, getAmountsForTag, getMonthDates],
   (goals, getAmounts, monthList) => {
