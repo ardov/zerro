@@ -15,6 +15,7 @@ import { getAmountsForTag } from 'scenes/Budgets/selectors/getAmountsByTag'
 import { getUserCurrencyCode } from 'store/serverData'
 import { setOutcomeBudget } from 'scenes/Budgets/thunks'
 import { getGoals } from 'store/localData/hiddenData'
+import { getGoalProgress } from 'scenes/Budgets/selectors/goalsProgress'
 
 function BudgetPopover({
   id,
@@ -123,12 +124,13 @@ const mapStateToProps = (state, { month, id }) => {
   const amounts = getAmountsForTag(state)(month, id)
   if (!amounts) return {}
   const goal = getGoals(state)[id]
+  const goalProgress = getGoalProgress(state, month, id)
   const isChild = !amounts.children
   return {
     budgeted: isChild ? amounts.budgeted : amounts.totalBudgeted,
     available: isChild ? amounts.available : amounts.totalAvailable,
     goal,
-    needForGoal: goal?.amount,
+    needForGoal: goalProgress?.target,
     currency: getUserCurrencyCode(state),
   }
 }
