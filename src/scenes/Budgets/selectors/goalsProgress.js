@@ -7,7 +7,7 @@ import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths'
 import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = GOAL_TYPES
-const startForOldGoals = +new Date(2020, 1, 1)
+const startForOldGoals = +new Date(2019, 1, 1)
 
 export const getGoalProgress = (state, month, id) =>
   getGoalsProgress(state)?.[month]?.[id]
@@ -77,6 +77,7 @@ function calcMonthlyProgress({ amount, budgeted }) {
 
 function calcMonthlySpendProgress({ amount, budgeted, leftover }) {
   const target = amount - leftover
+  if (target <= 0) return { progress: 1, need: 0, target: 0 }
   if (budgeted <= 0) return { progress: 0, need: target, target }
   if (budgeted >= target) return { progress: 1, need: 0, target }
 

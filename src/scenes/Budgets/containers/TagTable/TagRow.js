@@ -207,7 +207,7 @@ export function TagRow(props) {
                         maxWidth={16}
                       >
                         {!snapshot.isDragging &&
-                          (goal ? (
+                          (goalProgress ? (
                             <Tooltip title={goalToWords(goal)}>
                               <IconButton
                                 size="small"
