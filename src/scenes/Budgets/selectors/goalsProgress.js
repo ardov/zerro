@@ -21,6 +21,7 @@ export const getGoalsProgress = createSelector(
       result[month] = {}
 
       for (const id in goals) {
+        if (!goals[id]) continue
         const { type, amount, start = startForOldGoals, end } = goals[id]
         if (start && start > month) continue
         if (end && end < month) continue
