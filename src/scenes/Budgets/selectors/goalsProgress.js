@@ -98,9 +98,10 @@ function calcTargetProgress({
 }) {
   if (!endMonth) {
     // No end date
-    const target = amount
+    const target = round(amount - available + budgeted)
+
+    if (target <= 0) return { progress: 1, need: 0, target: 0 }
     if (available <= 0) return { progress: 0, need: target, target }
-    if (available >= target) return { progress: 1, need: 0, target }
     return {
       progress: available / target,
       need: round(target - available),
