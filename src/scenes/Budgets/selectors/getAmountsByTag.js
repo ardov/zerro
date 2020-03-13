@@ -1,6 +1,6 @@
 import createSelector from 'selectorator'
 import { getMainTag } from 'store/localData/transactions/helpers'
-import { getTagsTree, getTagLinks } from 'store/localData/tags'
+import { getTagLinks } from 'store/localData/tags'
 import { convertCurrency } from 'store/serverData'
 import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
 import { round } from 'helpers/currencyHelpers'
@@ -200,7 +200,7 @@ function calcTagGroupAmounts({
     const budgeted = budgets[childId]?.outcome || 0
     const income = incomes[childId] || 0
     const tagOutcome = outcomes[childId] || 0
-    const transferOutcome = linkedTransfers[id] || 0
+    const transferOutcome = linkedTransfers[childId] || 0
     const outcome = round(tagOutcome + transferOutcome)
     const leftover =
       (prevMonth.children?.[childId]?.available > 0 &&
