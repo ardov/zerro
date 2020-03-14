@@ -114,7 +114,8 @@ function calcTargetProgress({
     const startMonthAvailable = available - budgeted
     const monthsLeft = differenceInCalendarMonths(endMonth, currentMonth) + 1
     const totalNeed = amount - startMonthAvailable
-    const target = totalNeed / monthsLeft
+    if (totalNeed <= 0) return { progress: 1, need: 0, target: 0 }
+    const target = Math.round(totalNeed / monthsLeft)
     if (budgeted <= 0) return { progress: 0, need: target, target }
     if (budgeted >= target) return { progress: 1, need: 0, target }
 

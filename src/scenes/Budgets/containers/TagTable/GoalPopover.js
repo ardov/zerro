@@ -29,9 +29,9 @@ export default function GoalPopover({ id, currency, onClose, ...rest }) {
   const dispatch = useDispatch()
   const goal = useSelector(state => getGoals(state)[id] || {})
 
-  const [amount, setAmount] = useState(goal.amount)
+  const [amount, setAmount] = useState(goal.amount || '')
   const [type, setType] = useState(goal.type || MONTHLY_SPEND)
-  const [endDate, setEndDate] = useState(goal.end)
+  const [endDate, setEndDate] = useState(goal.end || null)
   const popoverRef = useRef()
   const [monthPopoverAnchor, setMonthPopoverAnchor] = useState(null)
 
