@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import startOfMonth from 'date-fns/startOfMonth'
+import { withStyles } from '@material-ui/core/styles'
 import {
   Box,
   IconButton,
@@ -12,6 +13,14 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
+
+const StyledListItem = withStyles(theme => ({
+  root: {
+    borderRadius: theme.shape.borderRadius,
+    border: ({ isCurrent }) =>
+      isCurrent ? `1px solid ${theme.palette.primary.main}` : '',
+  },
+}))(({ isCurrent, ...rest }) => <ListItem {...rest} />)
 
 export default function MonthSelectPopover(props) {
   const { minMonth, maxMonth, onChange, disablePast, ...rest } = props
@@ -52,26 +61,20 @@ export default function MonthSelectPopover(props) {
         <Box display="grid" gridTemplateColumns="1fr 1fr 1fr" clone>
           <List>
             {months.map(month => (
-              <Box
+              <StyledListItem
                 key={+month}
-                borderRadius="borderRadius"
-                border={month === curMonth ? 1 : 0}
-                borderColor={month === curMonth ? 'primary.main' : ''}
-                clone
+                isCurrent={month === curMonth}
+                disabled={isMonthDisabled(month)}
+                selected={month === value}
+                onClick={() => onChange(month)}
+                button
               >
-                <ListItem
-                  disabled={isMonthDisabled(month)}
-                  selected={month === value}
-                  onClick={() => onChange(month)}
-                  button
-                >
-                  <Box textAlign="center" clone>
-                    <ListItemText>
-                      {format(month, 'LLL', { locale: ru }).toUpperCase()}
-                    </ListItemText>
-                  </Box>
-                </ListItem>
-              </Box>
+                <Box textAlign="center" clone>
+                  <ListItemText>
+                    {format(month, 'LLL', { locale: ru }).toUpperCase()}
+                  </ListItemText>
+                </Box>
+              </StyledListItem>
             ))}
           </List>
         </Box>

@@ -13,7 +13,22 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
+import { withStyles } from '@material-ui/core/styles'
 import MonthSelectPopover from './MonthSelectPopover'
+
+const MonthButton = withStyles(theme => ({
+  root: {
+    borderRadius: theme.shape.borderRadius,
+    flexGrow: '1',
+    flexShrink: '1',
+    minWidth: '0',
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(1),
+    paddingTop: theme.spacing(0.5),
+    paddingBottom: theme.spacing(0.5),
+    justifyContent: 'flex-start',
+  },
+}))(ButtonBase)
 
 export default function MonthSelect({ onChange, minMonth, maxMonth, value }) {
   const paperRef = useRef()
@@ -37,23 +52,11 @@ export default function MonthSelect({ onChange, minMonth, maxMonth, value }) {
     <>
       <Box display="flex" pr={2} clone>
         <Paper ref={paperRef}>
-          <Box
-            flexGrow="1"
-            flexShrink="1"
-            minWidth="0"
-            pl={2}
-            pr={1}
-            py={0.5}
-            justifyContent="flex-start"
-            borderRadius="borderRadius"
-            clone
-          >
-            <ButtonBase onClick={openPopover}>
-              <Typography variant="body1" noWrap>
-                {getMonthName(value)}
-              </Typography>
-            </ButtonBase>
-          </Box>
+          <MonthButton onClick={openPopover}>
+            <Typography variant="body1" noWrap>
+              {getMonthName(value)}
+            </Typography>
+          </MonthButton>
 
           <Box py={0.5} flexShrink="0">
             <IconButton
