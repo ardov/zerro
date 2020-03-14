@@ -14,7 +14,7 @@ import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 
 export default function MonthSelectPopover(props) {
-  const { minMonth, maxMonth, onChange, ...rest } = props
+  const { minMonth, maxMonth, onChange, disablePast, ...rest } = props
   const value = props.value ? +startOfMonth(props.value) : null
   const [year, setYear] = useState(
     value ? new Date(value).getFullYear() : new Date().getFullYear()
@@ -25,6 +25,7 @@ export default function MonthSelectPopover(props) {
   }
   const curMonth = +startOfMonth(new Date())
   const isMonthDisabled = month => {
+    if (disablePast && month < curMonth) return true
     if (minMonth && month < minMonth) return true
     if (maxMonth && month > maxMonth) return true
     return false
