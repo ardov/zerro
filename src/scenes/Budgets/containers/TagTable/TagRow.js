@@ -192,9 +192,15 @@ export function TagRow(props) {
                     <Typography variant="body1" align="right">
                       {!!hiddenOverspend && (
                         <Tooltip
-                          title={`Перерасход в категории. Увеличьте бюджет на ${formatMoney(
-                            hiddenOverspend
-                          )}`}
+                          title={
+                            <span>
+                              Перерасход в родительской категории.
+                              <br />
+                              {`Увеличьте бюджет на ${formatMoney(
+                                hiddenOverspend
+                              )}`}
+                            </span>
+                          }
                         >
                           <WarningIcon fontSize="small" color="error" />
                         </Tooltip>
