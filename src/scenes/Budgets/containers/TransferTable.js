@@ -15,7 +15,7 @@ import {
 } from '@material-ui/core'
 import TagSelect2 from 'components/TagSelect2'
 import { addConnection, getAccTagMap } from 'store/localData/hiddenData'
-import { getAmountsByTag } from '../selectors/getAmountsByTag'
+import { getTransfers } from '../selectors/getAmountsByTag'
 import { getAccounts } from 'store/localData/accounts'
 import TagChip from 'components/TagChip'
 
@@ -94,8 +94,8 @@ function TransferTable({
   ) : null
 }
 
-const mapStateToProps = (state, { index }) => ({
-  transfers: getAmountsByTag(state)[index].transfers,
+const mapStateToProps = (state, { month }) => ({
+  transfers: getTransfers(state)[month],
   accounts: getAccounts(state),
   currency: getUserCurrencyCode(state),
   accTagMap: getAccTagMap(state),

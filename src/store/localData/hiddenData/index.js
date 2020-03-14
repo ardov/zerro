@@ -2,11 +2,11 @@ import { createSelector } from 'redux-starter-kit'
 import { getRootUser } from 'store/serverData'
 import { getAccountList } from 'store/localData/accounts'
 import { setReminder, getReminders } from 'store/localData/reminders'
-import { getGoals as getOldGoals } from 'store/localData/budgets'
 import sendEvent from 'helpers/sendEvent'
 import { ACC_LINKS, GOALS, DATA_ACC_NAME } from './constants'
 import { makeDataReminder } from './helpers'
 import { prepareData } from './prepareData'
+import { makeGoal, parseGoal } from './goals'
 
 const setData = (type, data) => (dispatch, getState) => {
   dispatch(prepareData())
@@ -53,7 +53,7 @@ export const setGoal = ({ type, amount, start, end, tag }) => (
   }
   sendEvent(`Goals: set ${type} goal`)
   const goals = getGoals(getState())
-  const newGoal = { type, amount, start, end }
+  const newGoal = makeGoal({ type, amount, start, end })
   dispatch(setData(GOALS, { ...goals, [tag]: newGoal }))
 }
 export const deleteGoal = tag => (dispatch, getState) => {
@@ -97,11 +97,17 @@ export const getAccTagMap = createSelector(
   }
 )
 
-export const getGoals = createSelector(
-  [getOldGoals, getGoalsReminder],
-  (oldGoals, goalsReminder) => {
-    if (goalsReminder) return JSON.parse(goalsReminder.comment) || {}
-    if (Object.values(oldGoals).length) return oldGoals
+export const getGoals = createSelector([getGoalsReminder], goalsReminder => {
+  if (!goalsReminder || !goalsReminder.comment) return {}
+  try {
+    const goals = JSON.parse(goalsReminder.comment) || {}
+    for (const tag in goals) {
+      goals[tag] = parseGoal(goals[tag])
+    }
+    return goals
+  } catch (error) {
     return {}
   }
-)
+})
+
+export const getGoal = (state, id) => getGoals(state)[id]

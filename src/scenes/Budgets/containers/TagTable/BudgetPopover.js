@@ -1,4 +1,5 @@
 import React from 'react'
+import { connect } from 'react-redux'
 import {
   List,
   ListItem,
@@ -10,8 +11,13 @@ import {
 import CheckCircleIcon from '@material-ui/icons/CheckCircle'
 import { formatMoney } from 'helpers/format'
 import AmountInput from 'components/AmountInput'
+import { getAmountsForTag } from 'scenes/Budgets/selectors/getAmountsByTag'
+import { getUserCurrencyCode } from 'store/serverData'
+import { setOutcomeBudget } from 'scenes/Budgets/thunks'
+import { getGoals } from 'store/localData/hiddenData'
+import { getGoalProgress } from 'scenes/Budgets/selectors/goalsProgress'
 
-export default function BudgetPopover({
+function BudgetPopover({
   id,
   budgeted,
   available,
@@ -21,18 +27,23 @@ export default function BudgetPopover({
   goal,
   needForGoal,
   onChange,
+  onClose,
   ...rest
 }) {
   const [value, setValue] = React.useState(budgeted)
+  const changeAndCLose = value => {
+    onClose()
+    if (value !== budgeted) onChange(value)
+  }
 
   return (
-    <Popover onClose={() => onChange(+value)} {...rest}>
+    <Popover onClose={() => changeAndCLose(+value)} {...rest}>
       <AmountInput
         autoFocus
         value={value}
         fullWidth
         onChange={value => setValue(+value)}
-        onEnter={value => onChange(+value)}
+        onEnter={value => changeAndCLose(+value)}
         helperText={`Остаток категории ${formatMoney(
           available + +value - budgeted,
           currency
@@ -41,7 +52,7 @@ export default function BudgetPopover({
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              <IconButton edge="end" onClick={() => onChange(+value)}>
+              <IconButton edge="end" onClick={() => changeAndCLose(+value)}>
                 <CheckCircleIcon />
               </IconButton>
             </InputAdornment>
@@ -54,7 +65,7 @@ export default function BudgetPopover({
           <ListItem
             button
             selected={+value === +needForGoal}
-            onClick={() => onChange(+needForGoal)}
+            onClick={() => changeAndCLose(+needForGoal)}
           >
             <ListItemText
               primary="Цель"
@@ -67,7 +78,7 @@ export default function BudgetPopover({
           <ListItem
             button
             selected={+value === +prevBudgeted}
-            onClick={() => onChange(+prevBudgeted)}
+            onClick={() => changeAndCLose(+prevBudgeted)}
           >
             <ListItemText
               primary="Бюджет в прошлом месяце"
@@ -80,7 +91,7 @@ export default function BudgetPopover({
           <ListItem
             button
             selected={+value === +prevSpend}
-            onClick={() => onChange(+prevSpend)}
+            onClick={() => changeAndCLose(+prevSpend)}
           >
             <ListItemText
               primary="Расход в прошлом месяце"
@@ -93,7 +104,7 @@ export default function BudgetPopover({
           <ListItem
             button
             selected={+value === +prevSpend}
-            onClick={() => onChange(+budgeted - available)}
+            onClick={() => changeAndCLose(+budgeted - available)}
           >
             <ListItemText
               primary={
@@ -107,3 +118,25 @@ export default function BudgetPopover({
     </Popover>
   )
 }
+
+const mapStateToProps = (state, { month, id }) => {
+  // TODO: add prevBudgeted and prevSpend
+  const amounts = getAmountsForTag(state)(month, id)
+  if (!amounts) return {}
+  const goal = getGoals(state)[id]
+  const goalProgress = getGoalProgress(state, month, id)
+  const isChild = !amounts.children
+  return {
+    budgeted: isChild ? amounts.budgeted : amounts.totalBudgeted,
+    available: isChild ? amounts.available : amounts.totalAvailable,
+    goal,
+    needForGoal: goalProgress?.target,
+    currency: getUserCurrencyCode(state),
+  }
+}
+
+const mapDispatchToProps = (dispatch, { id, month }) => ({
+  onChange: outcome => dispatch(setOutcomeBudget(outcome, month, id)),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(BudgetPopover)

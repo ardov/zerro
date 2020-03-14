@@ -1,49 +1,49 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { connect } from 'react-redux'
 
 import { Paper, Box } from '@material-ui/core'
 import { setOutcomeBudget } from '../../thunks'
-import { getAmountsByTag } from '../../selectors/getAmountsByTag'
-import { getUserCurrencyCode } from 'store/serverData'
-import Row from './Row'
+import TagGroup from './TagGroup'
 import TagTableHeader from './TagTableHeader'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 import { endOfMonth } from 'date-fns'
 import sendEvent from 'helpers/sendEvent'
-import { getGoals } from 'store/localData/hiddenData'
 import { getTagsTree } from 'store/localData/tags'
 import GoalPopover from './GoalPopover'
+import { useCallback } from 'react'
+import BudgetPopover from './BudgetPopover'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
-function TagTable({
-  tags,
-  tagsTree,
-  goals,
-  currency,
-  date,
-  updateBudget,
-  required = false,
-  ...rest
-}) {
+function TagTable({ tagsTree, date, updateBudget, required = false, ...rest }) {
   const [selected, setSelected] = useState()
+  // const [showAll, setShowAll] = useState(false)
   const [metricIndex, setMetricIndex] = useState(0)
   const [goalPopoverData, setGoalPopoverData] = useState({})
+  const [budgetPopoverData, setBudgetPopoverData] = useState({})
 
-  const selectTag = id => {
-    const parent = tagsTree.find(tag => tag.id === id)
-    if (parent) setSelected([id, ...parent.children.map(tag => tag.id)])
-    else setSelected([id])
-  }
+  const onSelect = useCallback(
+    id => {
+      sendEvent('Budgets: see transactions')
+      const parent = tagsTree.find(tag => tag.id === id)
+      if (parent) setSelected([id, ...parent.children.map(tag => tag.id)])
+      else setSelected([id])
+    },
+    [tagsTree]
+  )
 
-  const filtered = tags
-    .filter(tag => tag.showOutcome || tag.totalOutcome || tag.totalAvailable)
+  const openBudgetPopover = useCallback(
+    (id, anchor) => setBudgetPopoverData({ id, anchor }),
+    []
+  )
+  const openGoalPopover = useCallback(
+    (id, anchor) => setGoalPopoverData({ id, anchor }),
+    []
+  )
+
+  const tagIds = tagsTree
     .filter(tag => !!tag.required === !!required)
-    .sort((a, b) => a.name.localeCompare(b.name))
-
-  useEffect(() => {
-    if (selected) sendEvent('Budgets: see transactions')
-  }, [selected])
+    .map(tag => tag.id)
 
   const toggleMetric = () =>
     setMetricIndex(metricIndex === 2 ? 0 : metricIndex + 1) // metricIndex + 1 % 3
@@ -59,11 +59,6 @@ function TagTable({
     <>
       <Box position="relative" py={1} clone>
         <Paper>
-          <TransactionsDrawer
-            filterConditions={filterConditions}
-            open={!!selected}
-            onClose={() => setSelected(undefined)}
-          />
           <TagTableHeader
             metric={metrics[metricIndex]}
             onToggleMetric={toggleMetric}
@@ -73,25 +68,40 @@ function TagTable({
             bgcolor="background.paper"
             title={required ? 'Обязательные расходы' : 'Необязательные расходы'}
           />
-          {filtered.map(tag => (
-            <Row
-              key={tag.id}
-              goals={goals}
+          {tagIds.map(id => (
+            <TagGroup
+              key={id}
+              id={id}
               metric={metrics[metricIndex]}
-              {...tag}
               setBudget={updateBudget}
-              onSelect={id => selectTag(id)}
               date={date}
-              openGoalPopover={(id, anchor) =>
-                setGoalPopoverData({ id, anchor })
-              }
-            ></Row>
+              openTransactionsPopover={onSelect}
+              openBudgetPopover={openBudgetPopover}
+              openGoalPopover={openGoalPopover}
+            />
           ))}
         </Paper>
       </Box>
 
+      <TransactionsDrawer
+        filterConditions={filterConditions}
+        open={!!selected}
+        onClose={() => setSelected(undefined)}
+      />
+
+      <BudgetPopover
+        key={budgetPopoverData.id}
+        id={budgetPopoverData.id}
+        anchorEl={budgetPopoverData.anchor}
+        open={!!budgetPopoverData.anchor}
+        month={date}
+        onClose={() => setBudgetPopoverData({})}
+        style={{ transform: 'translate(-14px, -16px)' }}
+      />
+
       <GoalPopover
-        tag={goalPopoverData.id}
+        key={goalPopoverData.id}
+        id={goalPopoverData.id}
         anchorEl={goalPopoverData.anchor}
         open={!!goalPopoverData.anchor}
         onClose={() => setGoalPopoverData({})}
@@ -101,10 +111,7 @@ function TagTable({
 }
 
 const mapStateToProps = (state, { index }) => ({
-  tags: getAmountsByTag(state)[index].tags,
   tagsTree: getTagsTree(state),
-  goals: getGoals(state),
-  currency: getUserCurrencyCode(state),
 })
 
 const mapDispatchToProps = dispatch => ({

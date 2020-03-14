@@ -1,23 +1,55 @@
 import createSelector from 'selectorator'
 import { getStartFunds } from './baseSelectors'
-import { getAmountsByTag } from './getAmountsByTag'
+import {
+  getAmountsByTag,
+  getLinkedTransfers,
+  getTransferFees,
+} from './getAmountsByTag'
 import { round } from 'helpers/currencyHelpers'
 import getMonthDates from './getMonthDates'
 
-export const getTotalBudgetedByMonth = createSelector(
-  [getAmountsByTag],
-  tagsByMonth =>
-    tagsByMonth.map(({ tags }) =>
-      tags.reduce((sum, tag) => round(sum + tag.totalBudgeted), 0)
-    )
+export const getTagTotals = createSelector(
+  [getMonthDates, getAmountsByTag],
+  (months, amounts) =>
+    months.map(month => {
+      const totals = {
+        budgeted: 0,
+        income: 0,
+        outcome: 0,
+        overspent: 0,
+        available: 0,
+      }
+
+      for (const id in amounts[month]) {
+        totals.budgeted = round(
+          totals.budgeted + amounts[month][id].totalBudgeted
+        )
+        totals.income = round(totals.income + amounts[month][id].totalIncome)
+        totals.outcome = round(totals.outcome + amounts[month][id].totalOutcome)
+        totals.overspent = round(
+          totals.overspent + amounts[month][id].totalOverspent
+        )
+        totals.available = round(
+          totals.available + amounts[month][id].totalAvailable
+        )
+      }
+      return totals
+    })
 )
 
 export const getTotalsByMonth = createSelector(
-  [getMonthDates, getStartFunds, getAmountsByTag, getTotalBudgetedByMonth],
-  (months, startFunds, tags, budgets) => {
+  [
+    getMonthDates,
+    getStartFunds,
+    getLinkedTransfers,
+    getTransferFees,
+    getTagTotals,
+  ],
+  (months, startFunds, linkedTransfers, transferFees, tagTotals) => {
     let prevFunds = startFunds
     let prevOverspent = 0
-    return months.map((date, i) => {
+
+    const totalsByMonth = months.map((date, i) => {
       const result = {
         date,
         prevFunds,
@@ -39,47 +71,37 @@ export const getTotalsByMonth = createSelector(
           return this.funds + this.available
         },
 
-        realBudgetedInFuture: budgets
+        realBudgetedInFuture: tagTotals
           .slice(i + 1)
-          .reduce((sum, budgeted) => round(sum + budgeted), 0),
+          .reduce((sum, totals) => round(sum + totals.budgeted), 0),
 
         get funds() {
           return round(
             this.prevFunds -
               this.prevOverspent -
               this.budgeted +
-              this.income +
-              this.transferIncome -
+              this.income -
               this.transferOutcome -
               this.transferFees
           )
         },
 
-        // BUDGETS
-        budgeted: budgets[i],
-
         // TAGS
-        income: tags[i].tags.reduce(
-          (sum, tag) => round(sum + tag.totalIncome),
-          0
-        ),
-        overspent: tags[i].tags.reduce(
-          (sum, tag) => round(sum + tag.totalOverspent),
-          0
-        ),
-        available: tags[i].tags.reduce(
-          (sum, tag) => round(sum + tag.totalAvailable),
-          0
-        ),
+        budgeted: tagTotals[i].budgeted,
+        income: tagTotals[i].income,
+        overspent: tagTotals[i].overspent,
+        available: tagTotals[i].available,
 
         // TRANSFERS
-        transferOutcome: tags[i].transferOutcome,
-        transferIncome: 0,
-        transferFees: tags[i].transferFees,
+        transferOutcome: linkedTransfers[date]?.null || 0,
+        transferFees: transferFees[date] || 0,
       }
+
       prevFunds = result.funds
       prevOverspent = result.overspent
       return result
     })
+
+    return totalsByMonth
   }
 )

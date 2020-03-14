@@ -58,6 +58,9 @@ export const getTagsTree = createSelector([getPopulatedTags], tags => {
     tag.children = tag.children ? tag.children.map(id => tags[id]) : []
     result.push(tag)
   }
+  const sortFunc = (tag1, tag2) => tag1.name.localeCompare(tag2.name)
+  result.sort(sortFunc)
+  result.forEach(tag => tag.children.sort(sortFunc))
   return result
 })
 

@@ -13,11 +13,13 @@ import { formatMoney } from 'helpers/format'
 import WarningIcon from '@material-ui/icons/Warning'
 import AddIcon from '@material-ui/icons/Add'
 import EmojiFlagsIcon from '@material-ui/icons/EmojiFlags'
-import BudgetPopover from './BudgetPopover'
 import NamePopover from './NamePopover'
-import { goalToWords } from 'store/localData/budgets/helpers'
+import { goalToWords } from 'store/localData/hiddenData/goals'
 import GoalProgress from 'components/GoalProgress'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
+import { getGoal } from 'store/localData/hiddenData'
+import { useSelector, shallowEqual } from 'react-redux'
+import { getGoalProgress } from 'scenes/Budgets/selectors/goalsProgress'
 
 export const useStyles = makeStyles(theme => ({
   row: {
@@ -57,45 +59,40 @@ export const useStyles = makeStyles(theme => ({
 
 export function TagRow(props) {
   const {
-    metric,
     id,
     symbol,
     name,
-    budgeted,
-    outcome,
-    available,
     colorRGB,
+    showOutcome,
     isChild,
-    goal,
-    isHidden,
-
-    hasOverspent,
-    setBudget,
+    hiddenOverspend,
     date,
-    onSelect,
+
+    budgeted = 0,
+    outcome = 0,
+    available = 0,
+
+    showAll,
+    metric,
 
     openGoalPopover,
+    openBudgetPopover,
+    openTransactionsPopover,
   } = props
+  const goal = useSelector(state => getGoal(state, id), shallowEqual)
+  const goalProgress = useSelector(
+    state => getGoalProgress(state, date, id),
+    shallowEqual
+  )
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
   const c = useStyles({ isChild, isMobile })
-  const [budgetAnchorEl, setBudgetAnchorEl] = React.useState(null)
   const [nameAnchorEl, setNameAnchorEl] = React.useState(null)
+
+  if (!showOutcome && !outcome && !available && !showAll) return null
+
   const showBudget = isChild ? !!budgeted : true
-  const goalProgress =
-    goal && goal.type === 'monthly' ? budgeted / goal.amount : 0
 
-  const handleBudgetChange = amount => {
-    setBudgetAnchorEl(null)
-    if (amount !== budgeted) setBudget(amount, date, id)
-  }
-
-  const availableColor = getAvailableColor(
-    available,
-    hasOverspent,
-    isChild,
-    !!budgeted
-  )
-  const hasInnerOverspent = !isChild && hasOverspent //&& available >= 0
+  const availableColor = getAvailableColor(available, isChild, !!budgeted)
 
   return (
     <div className={c.row}>
@@ -118,7 +115,7 @@ export function TagRow(props) {
               variant="body1"
               align="right"
               component="button"
-              onClick={e => setBudgetAnchorEl(e.currentTarget)}
+              onClick={e => openBudgetPopover(id, e.currentTarget)}
             >
               {formatMoney(budgeted)}
             </Link>
@@ -137,28 +134,13 @@ export function TagRow(props) {
                   size="small"
                   edge="end"
                   children={<AddIcon />}
-                  onClick={e => setBudgetAnchorEl(e.currentTarget)}
+                  onClick={e => openBudgetPopover(id, e.currentTarget)}
                   disabled={id === 'unsorted'}
                 />
               </span>
             </Tooltip>
           </Box>
         ))}
-
-      {!!budgetAnchorEl && (
-        <BudgetPopover
-          key={`${id}${budgeted}`}
-          budgeted={budgeted}
-          available={available}
-          prevBudgeted={0}
-          style={{ transform: 'translate(-14px, -16px)' }}
-          anchorEl={budgetAnchorEl}
-          goal={goal}
-          needForGoal={goal && goal.amount}
-          open={!!budgetAnchorEl}
-          onChange={handleBudgetChange}
-        />
-      )}
 
       {!!nameAnchorEl && (
         <NamePopover
@@ -176,7 +158,7 @@ export function TagRow(props) {
           <Typography
             variant="body1"
             align="right"
-            onClick={() => onSelect(id)}
+            onClick={() => openTransactionsPopover(id)}
           >
             {formatMoney(outcome ? -outcome : 0)}
           </Typography>
@@ -185,11 +167,7 @@ export function TagRow(props) {
 
       {/* AVAILABLE */}
       {(metric === 'available' || !isMobile) && (
-        <Droppable
-          droppableId={id ? id : 'null'}
-          isDropDisabled={isHidden}
-          type="FUNDS"
-        >
+        <Droppable droppableId={id ? id : 'null'} type="FUNDS">
           {({ innerRef, placeholder }, snapshot) => (
             <div ref={innerRef} style={getDroppableStyle(snapshot)}>
               <span style={{ display: 'none' }}>{placeholder}</span>
@@ -212,12 +190,20 @@ export function TagRow(props) {
                     }
                   >
                     <Typography variant="body1" align="right">
-                      {hasInnerOverspent && (
-                        <WarningIcon
-                          color="error"
-                          fontSize="small"
-                          className={c.warning}
-                        />
+                      {!!hiddenOverspend && (
+                        <Tooltip
+                          title={
+                            <span>
+                              Перерасход в родительской категории.
+                              <br />
+                              {`Увеличьте бюджет на ${formatMoney(
+                                hiddenOverspend
+                              )}`}
+                            </span>
+                          }
+                        >
+                          <WarningIcon fontSize="small" color="error" />
+                        </Tooltip>
                       )}
                       {formatMoney(available)}
                       <Box
@@ -227,7 +213,7 @@ export function TagRow(props) {
                         maxWidth={16}
                       >
                         {!snapshot.isDragging &&
-                          (goal ? (
+                          (goalProgress ? (
                             <Tooltip title={goalToWords(goal)}>
                               <IconButton
                                 size="small"
@@ -235,7 +221,9 @@ export function TagRow(props) {
                                   openGoalPopover(id, e.currentTarget)
                                 }
                                 edge="start"
-                                children={<GoalProgress value={goalProgress} />}
+                                children={
+                                  <GoalProgress value={goalProgress.progress} />
+                                }
                               />
                             </Tooltip>
                           ) : (
@@ -275,21 +263,17 @@ function getDroppableStyle(snapshot) {
   }
 }
 
-function getAvailableColor(available, hasOverspent, isChild, hasBudget) {
-  const positive = 'success.main',
-    negative = 'error.main',
-    neutral = 'text.hint'
+function getAvailableColor(available, isChild, hasBudget) {
+  const positive = 'success.main'
+  const negative = 'error.main'
+  const neutral = 'text.hint'
 
-  if (!isChild || hasBudget) {
-    return available === 0 ? neutral : available < 0 ? negative : positive
-  } else {
-    // child tag without budget
-    return available > 0
-      ? positive
-      : available === 0
-      ? neutral
-      : hasOverspent
-      ? negative
-      : neutral
-  }
+  if (available === 0) return neutral
+  if (available > 0) return positive
+
+  // available < 0
+  // main tag or child with budget
+  if (!isChild || hasBudget) return negative
+  // child tag without budget
+  else return neutral
 }
