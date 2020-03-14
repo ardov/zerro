@@ -50,7 +50,7 @@ export const makeGoal = ({ type, amount, start, end }) => {
   goal.type = type
   goal.amount = amount
   if (start) goal.start = format(start, 'yyyy-MM')
-  if (end) goal.end = format(end, 'yyyy-MM')
+  if (end && type === TARGET_BALANCE) goal.end = format(end, 'yyyy-MM')
   return goal
 }
 
