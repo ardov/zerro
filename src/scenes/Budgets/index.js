@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { connect } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import startOfMonth from 'date-fns/startOfMonth'
 import TagTable from './containers/TagTable'
 import TransferTable from './containers/TransferTable'
@@ -23,16 +23,21 @@ import MoveMoneyModal from './containers/MoveMoneyModal'
 //   drawerWidth: { width: 360 },
 // }))
 
-const Budgets = ({ monthDates, dispatch }) => {
+export default function Budgets() {
+  const monthList = useSelector(getMonthDates)
+  const dispatch = useDispatch()
+
+  const minMonth = monthList[0]
+  const maxMonth = monthList[monthList.length - 1]
+  const curMonth = +startOfMonth(new Date())
+
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
-  const [month, setMonth] = useState(+startOfMonth(new Date()))
+  const [month, setMonth] = useState(curMonth)
   // const [openDrawer, setOpenDrawer] = useState(false)
   const [moneyModalProps, setMoneyModalProps] = useState({ open: false })
   // const c = useStyles()
 
-  const setCurrentMonth = () => setMonth(+startOfMonth(new Date()))
-  const setMonthByIndex = i => setMonth(monthDates[i])
-  const index = monthDates.findIndex(date => date === month)
+  const index = monthList.findIndex(date => date === month)
 
   const moveMoney = e => {
     if (
@@ -76,26 +81,20 @@ const Budgets = ({ monthDates, dispatch }) => {
             <Grid item xs={12} md={3}>
               <Box position="sticky" top="24px">
                 <MonthSelector
-                  months={monthDates}
-                  current={index}
-                  onSetCurrent={setCurrentMonth}
-                  onChange={setMonthByIndex}
+                  onChange={setMonth}
+                  {...{ minMonth, maxMonth, value: month }}
                 />
                 <Box component={BudgetInfo} index={index} mt={3} />
               </Box>
             </Grid>
 
             <Grid item xs={12} md={9}>
-              <TagTable
-                index={index}
-                date={monthDates[index]}
-                required={true}
-              />
+              <TagTable index={index} date={monthList[index]} required={true} />
               <Box mt={3}>
-                <TagTable index={index} date={monthDates[index]} />
+                <TagTable index={index} date={monthList[index]} />
               </Box>
               <Box mt={3}>
-                <TransferTable month={monthDates[index]} />
+                <TransferTable month={monthList[index]} />
               </Box>
 
               {/* TODO make bottom navigation and remove this placeholder */}
@@ -114,7 +113,7 @@ const Budgets = ({ monthDates, dispatch }) => {
         >
           <Box display="flex" flexDirection="column" minHeight="100vh" p={3}>
             <MonthSelector
-              months={monthDates}
+              months={monthList}
               current={index}
               onSetCurrent={setCurrentMonth}
               onChange={setMonthByIndex}
@@ -128,8 +127,3 @@ const Budgets = ({ monthDates, dispatch }) => {
     </DragDropContext>
   )
 }
-
-export default connect(
-  state => ({ monthDates: getMonthDates(state) }),
-  null
-)(Budgets)
