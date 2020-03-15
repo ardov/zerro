@@ -26,11 +26,17 @@ export const getGoalsProgress = createSelector(
         if (start && start > month) continue
         if (end && end < month) continue
         if (!amount) continue
-        const tag = getAmounts(month, id)
-        const hasChildren = !!tag.children
-        const budgeted = hasChildren ? tag.totalBudgeted : tag.budgeted
-        const leftover = hasChildren ? tag.totalLeftover : tag.leftover
-        const available = hasChildren ? tag.totalAvailable : tag.available
+        const tag = getAmounts(month, id) || {}
+
+        const budgeted = tag.children
+          ? tag.totalBudgeted || 0
+          : tag.budgeted || 0
+        const leftover = tag.children
+          ? tag.totalLeftover || 0
+          : tag.leftover || 0
+        const available = tag.children
+          ? tag.totalAvailable || 0
+          : tag.available || 0
 
         switch (type) {
           case MONTHLY:
