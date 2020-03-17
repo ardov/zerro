@@ -1,5 +1,5 @@
 import React from 'react'
-import { connect } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   List,
   ListItem,
@@ -17,19 +17,26 @@ import { setOutcomeBudget } from 'scenes/Budgets/thunks'
 import { getGoals } from 'store/localData/hiddenData'
 import { getGoalProgress } from 'scenes/Budgets/selectors/goalsProgress'
 
-function BudgetPopover({
+export default function BudgetPopover({
   id,
-  budgeted,
-  available,
+  month,
   prevBudgeted,
   prevSpend,
-  currency,
-  goal,
-  needForGoal,
-  onChange,
   onClose,
   ...rest
 }) {
+  const goal = useSelector(state => getGoals(state)[id] || {})
+  const goalProgress = useSelector(state => getGoalProgress(state, month, id))
+  const needForGoal = goalProgress?.target
+  const currency = useSelector(getUserCurrencyCode)
+  const amounts = useSelector(state => getAmountsForTag(state)(month, id) || {})
+  const dispatch = useDispatch()
+  const onChange = outcome => dispatch(setOutcomeBudget(outcome, month, id))
+
+  const isChild = !amounts.children
+  const budgeted = isChild ? amounts.budgeted : amounts.totalBudgeted
+  const available = isChild ? amounts.available : amounts.totalAvailable
+
   const [value, setValue] = React.useState(budgeted)
   const changeAndCLose = value => {
     onClose()
@@ -118,25 +125,3 @@ function BudgetPopover({
     </Popover>
   )
 }
-
-const mapStateToProps = (state, { month, id }) => {
-  // TODO: add prevBudgeted and prevSpend
-  const amounts = getAmountsForTag(state)(month, id)
-  if (!amounts) return {}
-  const goal = getGoals(state)[id]
-  const goalProgress = getGoalProgress(state, month, id)
-  const isChild = !amounts.children
-  return {
-    budgeted: isChild ? amounts.budgeted : amounts.totalBudgeted,
-    available: isChild ? amounts.available : amounts.totalAvailable,
-    goal,
-    needForGoal: goalProgress?.target,
-    currency: getUserCurrencyCode(state),
-  }
-}
-
-const mapDispatchToProps = (dispatch, { id, month }) => ({
-  onChange: outcome => dispatch(setOutcomeBudget(outcome, month, id)),
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(BudgetPopover)
