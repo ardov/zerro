@@ -109,7 +109,7 @@ function calcTargetProgress({
     if (target <= 0) return { progress: 1, need: 0, target: 0 }
     if (available <= 0) return { progress: 0, need: target, target }
     return {
-      progress: available / target,
+      progress: available / amount,
       need: round(target - available),
       target,
     }
