@@ -17,25 +17,28 @@ import { setOutcomeBudget } from 'scenes/Budgets/thunks'
 import { getGoals } from 'store/localData/hiddenData'
 import { getGoalProgress } from 'scenes/Budgets/selectors/goalsProgress'
 
-export default function BudgetPopover({
-  id,
-  month,
-  prevBudgeted,
-  prevSpend,
-  onClose,
-  ...rest
-}) {
+export default function BudgetPopover({ id, month, onClose, ...rest }) {
+  const prevMonth = getPrevMonthMs(month)
+
   const goal = useSelector(state => getGoals(state)[id] || {})
   const goalProgress = useSelector(state => getGoalProgress(state, month, id))
   const needForGoal = goalProgress?.target
+
   const currency = useSelector(getUserCurrencyCode)
   const amounts = useSelector(state => getAmountsForTag(state)(month, id) || {})
+  const prevAmounts = useSelector(
+    state => getAmountsForTag(state)(prevMonth, id) || {}
+  )
   const dispatch = useDispatch()
   const onChange = outcome => dispatch(setOutcomeBudget(outcome, month, id))
 
   const isChild = !amounts.children
   const budgeted = isChild ? amounts.budgeted : amounts.totalBudgeted
   const available = isChild ? amounts.available : amounts.totalAvailable
+  const prevBudgeted = isChild
+    ? prevAmounts.budgeted
+    : prevAmounts.totalBudgeted
+  const prevOutcome = isChild ? prevAmounts.outcome : prevAmounts.totalOutcome
 
   const [value, setValue] = React.useState(budgeted)
   const changeAndCLose = value => {
@@ -94,15 +97,15 @@ export default function BudgetPopover({
           </ListItem>
         )}
 
-        {!!prevSpend && (
+        {!!prevOutcome && (
           <ListItem
             button
-            selected={+value === +prevSpend}
-            onClick={() => changeAndCLose(+prevSpend)}
+            selected={+value === +prevOutcome}
+            onClick={() => changeAndCLose(+prevOutcome)}
           >
             <ListItemText
               primary="Расход в прошлом месяце"
-              secondary={formatMoney(prevSpend, currency)}
+              secondary={formatMoney(prevOutcome, currency)}
             />
           </ListItem>
         )}
@@ -110,7 +113,7 @@ export default function BudgetPopover({
         {available !== 0 && (
           <ListItem
             button
-            selected={+value === +prevSpend}
+            selected={+value === +prevOutcome}
             onClick={() => changeAndCLose(+budgeted - available)}
           >
             <ListItemText
@@ -124,4 +127,11 @@ export default function BudgetPopover({
       </List>
     </Popover>
   )
+}
+
+function getPrevMonthMs(date) {
+  const current = new Date(date)
+  const yyyy = current.getFullYear()
+  const mm = current.getMonth() - 1
+  return +new Date(yyyy, mm)
 }
