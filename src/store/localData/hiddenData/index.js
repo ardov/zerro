@@ -52,13 +52,13 @@ export const setGoal = ({ type, amount, start, end, tag }) => (
     return
   }
   sendEvent(`Goals: set ${type} goal`)
-  const goals = getGoals(getState())
+  const goals = getRawGoals(getState())
   const newGoal = makeGoal({ type, amount, start, end })
   dispatch(setData(GOALS, { ...goals, [tag]: newGoal }))
 }
 export const deleteGoal = tag => (dispatch, getState) => {
   sendEvent(`Goals: delete goal`)
-  const goals = getGoals(getState())
+  const goals = getRawGoals(getState())
   const newGoals = { ...goals }
   delete newGoals[tag]
   dispatch(setData(GOALS, newGoals))
@@ -97,17 +97,20 @@ export const getAccTagMap = createSelector(
   }
 )
 
-export const getGoals = createSelector([getGoalsReminder], goalsReminder => {
-  if (!goalsReminder || !goalsReminder.comment) return {}
+const getRawGoals = createSelector([getGoalsReminder], goalsReminder => {
+  if (!goalsReminder?.comment) return {}
   try {
-    const goals = JSON.parse(goalsReminder.comment) || {}
-    for (const tag in goals) {
-      goals[tag] = parseGoal(goals[tag])
-    }
-    return goals
+    return JSON.parse(goalsReminder.comment) || {}
   } catch (error) {
     return {}
   }
+})
+export const getGoals = createSelector([getRawGoals], rawGoals => {
+  let goals = {}
+  for (const tag in rawGoals) {
+    goals[tag] = parseGoal(rawGoals[tag])
+  }
+  return goals
 })
 
 export const getGoal = (state, id) => getGoals(state)[id]
