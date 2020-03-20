@@ -143,6 +143,7 @@ export const getAmountsForTag = state => (month, id) => {
         const eventId = Sentry.captureException(error)
         this.setState({ eventId })
       })
+    }
     return null
   }
 
