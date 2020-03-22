@@ -1,6 +1,6 @@
 import React from 'react'
 import { withRouter } from 'react-router'
-import RefreshButton from './RefreshButton'
+import RefreshButton from 'components/RefreshButton'
 import SettingsMenu from './SettingsMenu'
 import SettingsIcon from '@material-ui/icons/Settings'
 import {
@@ -55,7 +55,7 @@ const MobileNav = ({ location, history, ...rest }) => {
             icon={<SettingsIcon />}
             onClick={handleMenuClick}
           />
-          <RefreshButton className={c.action} />
+          <RefreshButton isMobile={true} className={c.action} />
         </BottomNavigation>
 
         <SettingsMenu

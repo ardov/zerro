@@ -4,10 +4,10 @@ import { getChangedArrays } from 'store/localData'
 import { getToken } from 'store/token'
 import { setPending } from 'store/isPending'
 import { saveDataLocally } from 'logic/localData'
-import { setMessage } from 'store/message'
 import sendEvent from 'helpers/sendEvent'
 import * as Sentry from '@sentry/browser'
 import { updateData } from 'store/commonActions'
+import { setSyncData } from 'store/lastSync'
 
 //All syncs with ZM goes through this thunk
 export const syncData = () => (dispatch, getState) => {
@@ -15,10 +15,6 @@ export const syncData = () => (dispatch, getState) => {
   const changed = getChangedArrays(state)
   const token = getToken(state)
   const serverTimestamp = getLastSyncTime(state) / 1000 || 0
-
-  // MESSAGES
-  const successMessage = 'Данные обновлены'
-  const failMessage = 'Синхронизация не удалась'
 
   const syncStartTime = Date.now()
   dispatch(setPending(true))
@@ -29,6 +25,13 @@ export const syncData = () => (dispatch, getState) => {
         `Sync: ${serverTimestamp ? 'Successful update' : 'Successful first'}`
       )
       dispatch(setPending(false))
+      dispatch(
+        setSyncData({
+          isSuccessful: true,
+          finishedAt: Date.now(),
+          errorMessage: null,
+        })
+      )
       dispatch(updateData({ data, syncStartTime }))
 
       // Тут точно надо по-нормальному формировать список изменённых
@@ -46,14 +49,17 @@ export const syncData = () => (dispatch, getState) => {
       ]
       dispatch(saveDataLocally(changedDomains))
 
-      if (changedDomains.length > 1) {
-        dispatch(setMessage(successMessage))
-      }
       console.log('✅ Данные обновлены', new Date())
     },
     err => {
       dispatch(setPending(false))
-      dispatch(setMessage(failMessage))
+      dispatch(
+        setSyncData({
+          isSuccessful: false,
+          finishedAt: Date.now(),
+          errorMessage: err?.message,
+        })
+      )
 
       console.warn('Syncing failed', err)
       sendEvent(`Error: ${err.message}`)

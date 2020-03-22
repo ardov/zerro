@@ -1,7 +1,7 @@
 import React from 'react'
 import { withRouter } from 'react-router'
 import { Link } from 'react-router-dom'
-import RefreshButton from './containers/RefreshButton'
+import RefreshButton from 'components/RefreshButton'
 import MenuButton from './containers/MenuButton'
 import {
   Box,

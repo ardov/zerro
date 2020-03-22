@@ -6,6 +6,7 @@ import serverData from './serverData'
 import filterConditions from './filterConditions'
 import token from './token'
 import isPending from './isPending'
+import lastSync from './lastSync'
 import message from './message'
 import theme from './theme'
 
@@ -14,6 +15,7 @@ export const store = configureStore({
     localData,
     serverData,
     isPending,
+    lastSync,
     filterConditions,
     token,
     message,
