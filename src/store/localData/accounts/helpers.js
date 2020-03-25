@@ -34,3 +34,9 @@ export const makeAccount = raw => ({
   payoffStep: raw.payoffStep || null,
   payoffInterval: raw.payoffInterval || null,
 })
+
+export function getStartBalance(acc) {
+  //  Для deposit и loan поле startBalance имеет смысл начального взноса/тела кредита
+  if (acc.type === 'deposit' && acc.type === 'loan') return 0
+  return acc.startBalance
+}
