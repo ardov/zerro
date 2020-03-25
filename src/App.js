@@ -29,6 +29,7 @@ import reactGA from 'react-ga'
 import ErrorBoundary from 'components/ErrorBoundary'
 import { getLastSyncTime, getRootUserId } from 'store/serverData'
 import Accounts from 'scenes/Accounts'
+import Stats from 'scenes/Stats'
 
 addLocaleData(ru)
 
@@ -89,6 +90,7 @@ const PrivateApp = ({ hasData }) => {
               <Route path="/transactions" component={Transactions} />
               <Route path="/accounts" component={Accounts} />
               <Route path="/budget" component={Budgets} />
+              <Route path="/stats" component={Stats} />
               <Redirect to="/budget" />
             </Switch>
           ) : (
