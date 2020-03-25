@@ -89,6 +89,7 @@ export const getTotalsByMonth = createSelector(
         // TAGS
         budgeted: tagTotals[i].budgeted,
         income: tagTotals[i].income,
+        outcome: tagTotals[i].outcome,
         overspent: tagTotals[i].overspent,
         available: tagTotals[i].available,
 
