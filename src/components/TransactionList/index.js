@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react'
 import { Box } from '@material-ui/core'
-import { connect } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { getSortedTransactions } from 'store/localData/transactions'
 import { groupTransactionsBy } from 'store/localData/transactions/helpers'
 import { GrouppedList } from './GrouppedList'
@@ -8,9 +8,8 @@ import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
 import sendEvent from 'helpers/sendEvent'
 
-export function TransactionList(props) {
+export default function TransactionList(props) {
   const {
-    transactions = [],
     filterConditions = {},
     hideFilter = false,
     opened,
@@ -19,6 +18,7 @@ export function TransactionList(props) {
     ...rest
   } = props
 
+  const transactions = useSelector(getSortedTransactions)
   const [filter, setFilter] = useState(filterConditions)
   const setCondition = condition => setFilter({ ...filter, ...condition })
 
@@ -86,8 +86,3 @@ export function TransactionList(props) {
     </Box>
   )
 }
-
-export default connect(
-  state => ({ transactions: getSortedTransactions(state) }),
-  () => ({})
-)(TransactionList)
