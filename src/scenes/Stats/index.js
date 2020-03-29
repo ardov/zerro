@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import TransactionList from 'components/TransactionList'
 import {
   Box,
@@ -22,8 +22,10 @@ import { getTotalsByMonth } from 'scenes/Budgets/selectors/getTotalsByMonth'
 import { getAmountsByTag } from 'scenes/Budgets/selectors/getAmountsByTag'
 import { format } from 'date-fns'
 import { getAccountsHistory } from './selectors'
-import { getAccounts } from 'store/localData/accounts'
+import { getAccounts, getAccountList } from 'store/localData/accounts'
 import { formatMoney } from 'helpers/format'
+import Rhythm from 'components/Rhythm'
+import TransactionsDrawer from 'components/TransactionsDrawer'
 
 const getMonthDatesFrom = (date = new Date(), num = 6) => {
   let month = date.getMonth()
@@ -38,7 +40,8 @@ const getMonthDatesFrom = (date = new Date(), num = 6) => {
 export default function Stats() {
   const rawData = useSelector(getTotalsByMonth)
   const accountsHistory = useSelector(getAccountsHistory)
-  const accs = useSelector(getAccounts)
+  const accs = useSelector(getAccountList)
+  const [selected, setSelected] = useState({})
 
   const tagData = useSelector(getAmountsByTag)
   const data = rawData.map(obj => ({
@@ -49,11 +52,23 @@ export default function Stats() {
   console.log(accountsHistory)
   // console.log(tagData)
   // console.log(getMonthDatesFrom())
-  const accIds = Object.keys(accs)
+  const startDate = +new Date(2020, 0)
+  const accIds = accs.filter(acc => !acc.archive).map(acc => acc.id)
+
+  const onSelect = useCallback((id, date) => {
+    setSelected({ id, date })
+  }, [])
+
+  const filterConditions = {
+    accounts: [selected.id],
+    dateFrom: selected.date,
+    dateTo: selected.date,
+  }
 
   return (
-    <Box display="flex" flexDirection="column">
-      <div style={{ width: '100%', height: 300 }}>
+    <>
+      <Box display="flex" flexDirection="column">
+        {/* <div style={{ width: '100%', height: 300 }}>
         <ResponsiveContainer>
           <AreaChart data={data}>
             <XAxis dataKey="date" />
@@ -73,28 +88,49 @@ export default function Stats() {
             <Area type="monotone" dataKey="outcome" />
           </AreaChart>
         </ResponsiveContainer>
-      </div>
-      {accIds.map(id => (
-        <Box p={3} key={id}>
-          <AccHist key={id} id={id} />
-        </Box>
-      ))}
-    </Box>
+      </div> */}
+        <Rhythm gap={2} axis="y" p={3}>
+          {accIds.map(id => (
+            <AccHist
+              key={id}
+              id={id}
+              startDate={startDate}
+              onClick={onSelect}
+            />
+          ))}
+        </Rhythm>
+      </Box>
+
+      <TransactionsDrawer
+        filterConditions={filterConditions}
+        open={!!selected.date && !!selected.id}
+        onClose={() => setSelected({})}
+      />
+    </>
   )
 }
 
-const AccHist = ({ id }) => {
+const AccHist = ({ id, startDate = 0, endDate, onClick }) => {
   const history = useSelector(getAccountsHistory)[id]
   const acc = useSelector(getAccounts)[id]
+  console.log(startDate)
+
+  const data = history.filter(({ date }) => date >= startDate)
 
   return (
-    <Paper>
-      <Box p={3}>{acc.title}</Box>
-      <div style={{ width: '100%', height: 300 }}>
+    <Paper style={{ overflow: 'hidden' }}>
+      <Box pt={2} px={2}>
+        <Typography variant="h5">{acc.title}</Typography>
+      </Box>
+      <div style={{ width: '100%', height: 80 }}>
         <ResponsiveContainer>
           <AreaChart
-            data={history}
+            data={data}
             margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+            onClick={e => {
+              const date = data[e.activeLabel].date
+              onClick(id, date)
+            }}
           >
             {/* <XAxis
               dataKey="date"
@@ -102,7 +138,7 @@ const AccHist = ({ id }) => {
             />
             <YAxis /> */}
             <Tooltip
-              labelFormatter={date => format(date, 'dd-MM-yyyy')}
+              labelFormatter={idx => format(data[idx].date, 'dd-MM-yyyy')}
               formatter={val => formatMoney(val)}
             />
             <Area type="monotone" dataKey="balance" />
