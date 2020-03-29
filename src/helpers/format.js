@@ -33,9 +33,7 @@ export function getCurrencySymbol(currency) {
 
 export function formatDate(date, template) {
   const opts = { locale: ru }
-
   if (template) return format(date, template, opts)
-
   if (isToday(date)) return format(date, 'Сегодня, d MMMM, EEEEEE', opts)
   if (isYesterday(date)) return format(date, 'Вчера, d MMMM, EEEEEE', opts)
   if (isThisYear(date)) return format(date, 'd MMMM, EEEEEE', opts)

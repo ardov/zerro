@@ -6,7 +6,7 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 import { withStyles } from '@material-ui/core/styles'
 import { Box, ListSubheader } from '@material-ui/core'
 import Transaction from './TransactionContainer'
-import formatDate from './formatDate'
+import { formatDate } from 'helpers/format'
 
 const HEADER_HEIGHT = 48
 const TRANSACTION_HEIGHT = 72
