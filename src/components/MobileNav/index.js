@@ -59,7 +59,7 @@ const MobileNav = ({ location, history, ...rest }) => {
   const isiPhoneWithHomeBar =
     useMediaQuery(`${iPhoneXXS11ProMediaQuery}, ${iPhoneXR11MediaQuery}, ${iPhoneXSMax11ProMaxMediaQuery}`)
 
-  // I don't know why, but for iPhone 8 Plus media query above is met.
+  // I don't know why, but for iPhone 8 Plus media query above is also met, so I had to use this workaround.
   const isiPhone8Plus = (window.screen.height / window.screen.width === 736 / 414) && (window.devicePixelRatio === 3)
 
   let paddingBottom = 0
