@@ -28,9 +28,13 @@ ZenApi.getData = async function(
   const options = {
     method: 'POST',
     body: JSON.stringify(body),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
   }
 
-  const response = await fetch(`${diffEndpoint}/?token=${token}`, options)
+  const response = await fetch(diffEndpoint, options)
   if (!response.ok) throw Error('Сайт вернул не ОК')
   const json = await response.json()
   if (json.error) throw Error(JSON.stringify(json.error))
@@ -101,6 +105,7 @@ ZenApi.getToken = function() {
         code: authorizationCode,
         grant_type: 'authorization_code',
       }),
+      headers: { 'Content-Type': 'application/json' },
     }).then(response => response.json())
   }
 
