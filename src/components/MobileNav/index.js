@@ -14,6 +14,7 @@ import AccountBalanceIcon from '@material-ui/icons/AccountBalance'
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet'
 import SyncAltIcon from '@material-ui/icons/SyncAlt'
 import { makeStyles } from '@material-ui/styles'
+import { useHomeBar } from 'helpers/useHomeBar'
 
 const useStyles = makeStyles(theme => ({ action: { minWidth: 32 } }))
 
@@ -33,8 +34,18 @@ const MobileNav = ({ location, history, ...rest }) => {
     if (newValue[0] === '/') history.push(newValue)
   }
 
+  const hasHomeBar = useHomeBar()
+  const paddingBottom = hasHomeBar ? '20px' : '0px'
+
   return (
-    <Box position="fixed" width="100%" bottom="0" zIndex="5" clone>
+    <Box
+      position="fixed"
+      width="100%"
+      bottom="0"
+      paddingBottom={paddingBottom}
+      zIndex="5"
+      clone
+    >
       <Paper>
         <Divider light />
 
