@@ -108,7 +108,7 @@ const getRawGoals = createSelector([getGoalsReminder], goalsReminder => {
 export const getGoals = createSelector([getRawGoals], rawGoals => {
   let goals = {}
   for (const tag in rawGoals) {
-    goals[tag] = parseGoal(rawGoals[tag])
+    if (rawGoals[tag]) goals[tag] = parseGoal(rawGoals[tag])
   }
   return goals
 })
