@@ -140,8 +140,7 @@ export const getAmountsForTag = state => (month, id) => {
     if (process.env.NODE_ENV === 'production') {
       Sentry.withScope(scope => {
         const error = new Error(`No amounts found for month:"${month}"`)
-        const eventId = Sentry.captureException(error)
-        this.setState({ eventId })
+        Sentry.captureException(error)
       })
     }
     return null
