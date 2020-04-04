@@ -7,11 +7,14 @@ import { getStartBalance } from 'store/localData/accounts/helpers'
 
 export const getStartFunds = createSelector(
   [getAccountsInBudget, convertCurrency],
-  (accounts, convert) =>
-    accounts.reduce(
-      (sum, acc) => round(sum + convert(getStartBalance(acc), acc.instrument)),
-      0
-    )
+  (accounts, convert) => {
+    let sum = 0
+    for (const acc of accounts) {
+      const startBalance = convert(getStartBalance(acc), acc.instrument)
+      sum = round(sum + startBalance)
+    }
+    return sum
+  }
 )
 
 export const getTransactionsInBudget = createSelector(
