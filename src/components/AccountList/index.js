@@ -1,5 +1,5 @@
 import React from 'react'
-import { connect } from 'react-redux'
+import { connect, useSelector } from 'react-redux'
 import {
   getAccountsInBudget,
   getSavingAccounts,
@@ -9,6 +9,7 @@ import pluralize from 'helpers/pluralize'
 import { List } from '@material-ui/core'
 import { Account, Subheader } from './components'
 import { round } from 'helpers/currencyHelpers'
+import { useState } from 'react'
 
 const getTotalBalance = (accs, targetInstrument, instruments) =>
   accs.reduce((sum, acc) => {
@@ -18,15 +19,11 @@ const getTotalBalance = (accs, targetInstrument, instruments) =>
     return round((sum += (balance * accRate) / targetRate))
   }, 0)
 
-const AccountList = ({
-  inBudget,
-  savings,
-  userInstrument,
-  instruments,
-  className,
-  onAccountClick,
-}) => {
-  if (!userInstrument) return null
+export default function AccountList({ className, onAccountClick }) {
+  const instruments = useSelector(getInstruments)
+  const inBudget = useSelector(getAccountsInBudget)
+  const savings = useSelector(getSavingAccounts)
+  const userInstrument = useSelector(getUserInstrument)
 
   const archivedInBudget = inBudget.filter(a => a.archive)
   const activeInBudget = inBudget.filter(a => !a.archive)
@@ -42,7 +39,9 @@ const AccountList = ({
     instruments
   )
   const savingsSum = getTotalBalance(savings, userInstrument, instruments)
+  const [showArchived, setShowArchived] = useState(!!archivedInBudgetSum)
 
+  if (!userInstrument) return null
   return (
     <div className={className}>
       <List dense>
@@ -50,6 +49,7 @@ const AccountList = ({
           title="В бюджете"
           amount={activeInBudgetSum + archivedInBudgetSum}
           currency={userInstrument.shortTitle}
+          onClick={() => setShowArchived(a => !a)}
         />
         {activeInBudget.map(acc => (
           <Account
@@ -58,9 +58,10 @@ const AccountList = ({
             title={acc.title}
             amount={acc.balance}
             currency={instruments[acc.instrument].shortTitle}
+            onClick={() => console.log(acc)}
           />
         ))}
-        {!!archivedInBudgetSum && (
+        {showArchived && (
           <Account
             title={`${
               archivedInBudget.length
@@ -94,14 +95,3 @@ const AccountList = ({
     </div>
   )
 }
-
-const mapStateToProps = (state, props) => ({
-  instruments: getInstruments(state),
-  inBudget: getAccountsInBudget(state),
-  savings: getSavingAccounts(state),
-  userInstrument: getUserInstrument(state),
-})
-
-const mapDispatchToProps = (dispatch, props) => ({})
-
-export default connect(mapStateToProps, mapDispatchToProps)(AccountList)
