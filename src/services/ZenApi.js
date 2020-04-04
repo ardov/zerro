@@ -18,6 +18,8 @@ ZenApi.getData = async function(
   payload = { serverTimestamp: 0, changed: {} }
 ) {
   if (!token) throw Error('No token')
+  if (token === 'fakeToken')
+    return { serverTimestamp: Date.now() / 1000, ...payload.changed }
 
   const body = {
     currentClientTimestamp: Math.round(Date.now() / 1000),

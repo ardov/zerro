@@ -1,16 +1,22 @@
 import React, { useState } from 'react'
-import { connect } from 'react-redux'
+import Cookies from 'cookies-js'
+import { useDispatch } from 'react-redux'
 import { Box, Button, Link, Fade } from '@material-ui/core'
 import { logIn } from 'logic/authorization'
 import ZenApi from 'services/ZenApi'
 import { useTheme } from '@material-ui/styles'
 import Logo from '../../components/Logo'
+import { updateData } from 'store/commonActions'
+import { setToken } from 'store/token'
+import { saveDataLocally } from 'logic/localData'
 ZenApi.checkCode()
 
-function Auth(props) {
+export default function Auth(props) {
+  const dispatch = useDispatch()
   const theme = useTheme()
   const [logoIn, setLogoIn] = useState(false)
   setTimeout(() => setLogoIn(true), 300)
+  const parseFiles = fileList => dispatch(loadFromFile(fileList[0]))
   return (
     <Box
       display="flex"
@@ -18,6 +24,19 @@ function Auth(props) {
       alignItems="center"
       justifyContent="center"
       minHeight="100vh"
+      onDragOver={e => {
+        e.stopPropagation()
+        e.preventDefault()
+      }}
+      onDragEnter={e => {
+        e.stopPropagation()
+        e.preventDefault()
+      }}
+      onDrop={e => {
+        e.stopPropagation()
+        e.preventDefault()
+        parseFiles(e?.dataTransfer?.files)
+      }}
     >
       <Box mb={5}>
         <Logo width="200" fill={theme.palette.primary.main} visible={logoIn} />
@@ -28,7 +47,7 @@ function Auth(props) {
           variant="contained"
           color="primary"
           size="large"
-          onClick={props.logIn}
+          onClick={() => dispatch(logIn())}
           children="Войти через Дзен-мани"
         />
       </Fade>
@@ -48,8 +67,18 @@ function Auth(props) {
   )
 }
 
-const mapDispatchToProps = dispatch => ({
-  logIn: () => dispatch(logIn()),
-})
-
-export default connect(null, mapDispatchToProps)(Auth)
+const loadFromFile = file => async (dispatch, getState) => {
+  if (!file) return
+  let data = {}
+  try {
+    const txt = await file.text()
+    data = JSON.parse(txt)
+  } catch (error) {
+    console.log(error)
+    return
+  }
+  dispatch(setToken('fakeToken'))
+  dispatch(updateData({ data }))
+  dispatch(saveDataLocally())
+  Cookies.set('token', 'fakeToken', { expires: new Date(2030, 1) })
+}
