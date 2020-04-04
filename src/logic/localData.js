@@ -17,7 +17,10 @@ const LOCAL_KEYS = [
   'transaction',
 ]
 
-export const saveDataLocally = changedDomains => (dispatch, getState) => {
+export const saveDataLocally = (changedDomains = LOCAL_KEYS) => (
+  dispatch,
+  getState
+) => {
   const state = getState()
   const data = getDataToSave(state)
   changedDomains.forEach(key => storage.set(key, data[key]))
