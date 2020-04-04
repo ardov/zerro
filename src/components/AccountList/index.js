@@ -1,5 +1,5 @@
 import React from 'react'
-import { connect, useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import {
   getAccountsInBudget,
   getSavingAccounts,
@@ -10,6 +10,7 @@ import { List } from '@material-ui/core'
 import { Account, Subheader } from './components'
 import { round } from 'helpers/currencyHelpers'
 import { useState } from 'react'
+import { setInBudget } from 'store/localData/accounts/thunks'
 
 const getTotalBalance = (accs, targetInstrument, instruments) =>
   accs.reduce((sum, acc) => {
@@ -20,6 +21,7 @@ const getTotalBalance = (accs, targetInstrument, instruments) =>
   }, 0)
 
 export default function AccountList({ className, onAccountClick }) {
+  const dispatch = useDispatch()
   const instruments = useSelector(getInstruments)
   const inBudget = useSelector(getAccountsInBudget)
   const savings = useSelector(getSavingAccounts)
@@ -59,6 +61,7 @@ export default function AccountList({ className, onAccountClick }) {
             amount={acc.balance}
             currency={instruments[acc.instrument].shortTitle}
             onClick={() => console.log(acc)}
+            onDoubleClick={() => dispatch(setInBudget(acc.id, false))}
           />
         ))}
         {showArchived && (
@@ -89,6 +92,7 @@ export default function AccountList({ className, onAccountClick }) {
             title={acc.title}
             amount={acc.balance}
             currency={instruments[acc.instrument].shortTitle}
+            onDoubleClick={() => dispatch(setInBudget(acc.id, true))}
           />
         ))}
       </List>
