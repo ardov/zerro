@@ -95,6 +95,8 @@ const loadFromFile = file => async (dispatch, getState) => {
     console.log(error)
     return
   }
+
+  // TODO: maybe later make more elegant solution for local data
   dispatch(setToken('fakeToken'))
   dispatch(updateData({ data }))
   dispatch(saveDataLocally())
