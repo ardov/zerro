@@ -1,7 +1,9 @@
 import { getRootUser } from 'store/serverData'
-import { setAccount, getDataAccountId } from './index'
-import { makeDataAcc } from './helpers'
+import { setAccount, getAccounts } from './index'
+
 import sendEvent from 'helpers/sendEvent'
+import { getDataAccountId } from '../hiddenData'
+import { makeDataAcc } from '../hiddenData/helpers'
 
 export const createDataAcc = () => (dispatch, getState) => {
   sendEvent(`Accounts: Create data accaunt`)
@@ -17,4 +19,16 @@ export const checkDataAcc = () => (dispatch, getState) => {
     console.log('no data acc. Create!')
     dispatch(createDataAcc())
   }
+}
+
+export const setInBudget = (id, inBalance) => (dispatch, getState) => {
+  sendEvent(`Accounts: Set in budget`)
+  const state = getState()
+  const account = getAccounts(state)[id]
+  if (!account) {
+    console.warn('No accoun found')
+    return
+  }
+  const newAcc = { ...account, inBalance: !!inBalance, changed: Date.now() }
+  dispatch(setAccount(newAcc))
 }

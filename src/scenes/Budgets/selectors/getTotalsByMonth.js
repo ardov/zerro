@@ -68,7 +68,7 @@ export const getTotalsByMonth = createSelector(
 
         // TO CHECK
         get moneyInBudget() {
-          return this.funds + this.available
+          return round(this.funds + this.available)
         },
 
         realBudgetedInFuture: tagTotals

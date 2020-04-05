@@ -18,6 +18,7 @@ import Grid from '@material-ui/core/Grid'
 import { DragDropContext } from 'react-beautiful-dnd'
 import { moveFunds } from './thunks'
 import MoveMoneyModal from './containers/MoveMoneyModal'
+import WarningSign from './containers/WarningSign'
 
 // const useStyles = makeStyles(theme => ({
 //   drawerWidth: { width: 360 },
@@ -102,6 +103,7 @@ export default function Budgets() {
             </Grid>
           </Grid>
         </Box>
+        <WarningSign />
         {/* <Drawer
           classes={
             isMobile ? null : { paper: c.drawerWidth, root: c.drawerWidth }
