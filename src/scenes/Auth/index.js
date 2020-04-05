@@ -15,8 +15,19 @@ export default function Auth(props) {
   const dispatch = useDispatch()
   const theme = useTheme()
   const [logoIn, setLogoIn] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
   setTimeout(() => setLogoIn(true), 300)
   const parseFiles = fileList => dispatch(loadFromFile(fileList[0]))
+
+  const dragOverStyle = {
+    background: theme.palette.action.focus,
+    transform: 'scale(1.1)',
+    transition: `300ms ${theme.transitions.easing.easeInOut}`,
+  }
+  const defaultStyle = {
+    transform: 'scale(1)',
+    transition: `300ms ${theme.transitions.easing.easeInOut}`,
+  }
   return (
     <Box
       display="flex"
@@ -24,6 +35,7 @@ export default function Auth(props) {
       alignItems="center"
       justifyContent="center"
       minHeight="100vh"
+      style={isDragging ? dragOverStyle : defaultStyle}
       onDragOver={e => {
         e.stopPropagation()
         e.preventDefault()
@@ -31,6 +43,12 @@ export default function Auth(props) {
       onDragEnter={e => {
         e.stopPropagation()
         e.preventDefault()
+        setIsDragging(true)
+      }}
+      onDragLeave={e => {
+        e.stopPropagation()
+        e.preventDefault()
+        setIsDragging(false)
       }}
       onDrop={e => {
         e.stopPropagation()
