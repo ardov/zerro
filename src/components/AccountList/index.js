@@ -64,7 +64,7 @@ export default function AccountList({ className, onAccountClick }) {
             onDoubleClick={() => dispatch(setInBudget(acc.id, false))}
           />
         ))}
-        {showArchived && (
+        {!!archivedInBudgetSum && !showArchived && (
           <Account
             title={`${
               archivedInBudget.length
@@ -77,6 +77,18 @@ export default function AccountList({ className, onAccountClick }) {
             currency={userInstrument.shortTitle}
           />
         )}
+        {showArchived &&
+          archivedInBudget.map(acc => (
+            <Account
+              key={acc.id}
+              button
+              title={acc.title}
+              amount={acc.balance}
+              currency={instruments[acc.instrument].shortTitle}
+              onClick={() => console.log(acc)}
+              onDoubleClick={() => dispatch(setInBudget(acc.id, false))}
+            />
+          ))}
       </List>
 
       <List dense>
