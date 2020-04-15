@@ -8,7 +8,7 @@ import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
 import { Droppable } from 'react-beautiful-dnd'
 
-const getMonthName = date => format(date, 'MMM', { locale: ru }).toLowerCase()
+const getMonthName = date => format(date, 'LLL', { locale: ru }).toLowerCase()
 
 const Body = styled.div`
   position: relative;
