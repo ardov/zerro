@@ -24,6 +24,8 @@ import WarningSign from './containers/WarningSign'
 //   drawerWidth: { width: 360 },
 // }))
 
+const parentStyle = { overflowX: 'hidden' } // need this to prevent horizontal scrolling on mobile
+
 export default function Budgets() {
   const monthList = useSelector(getMonthDates)
   const dispatch = useDispatch()
@@ -72,7 +74,7 @@ export default function Budgets() {
         }
       }}
     >
-      <Box p={isMobile ? 1 : 3} display="flex">
+      <Box p={isMobile ? 1 : 3} display="flex" style={parentStyle}>
         <MoveMoneyModal
           {...moneyModalProps}
           onClose={() => setMoneyModalProps({ open: false })}
