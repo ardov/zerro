@@ -79,6 +79,7 @@ function BudgetInfo({
   moneyInBudget,
   budgetedInFuture,
   currency,
+  outcome,
   ...rest
 }) {
   const [opened, setOpened] = useState(false)
@@ -130,13 +131,17 @@ function BudgetInfo({
       />
       {opened && (
         <>
+          <Line name={realBudgetedInFuture > budgetedInFuture ? `🎃` : `🤓`} />
+          <Line name={`Распределено`} amount={available} currency={currency} />
+          <Line name={`Перерасход`} amount={overspent} currency={currency} />
+          <Line name={`Расход`} amount={outcome} currency={currency} />
           <Line
-            name={`transferOutcome`}
+            name={`Все переводы`}
             amount={-transferOutcome}
             currency={currency}
           />
           <Line
-            name={`transferFees`}
+            name={`Потери на переводах`}
             amount={-transferFees}
             currency={currency}
           />
@@ -145,13 +150,7 @@ function BudgetInfo({
             amount={realBudgetedInFuture}
             currency={currency}
           />
-          <Line name={`available`} amount={available} currency={currency} />
-          <Line name={`overspent`} amount={overspent} currency={currency} />
-          <Line
-            name={`moneyInBudget`}
-            amount={moneyInBudget}
-            currency={currency}
-          />
+          <Line name={`В бюджете`} amount={moneyInBudget} currency={currency} />
         </>
       )}
     </Body>
@@ -169,7 +168,7 @@ function Line({ name, amount, currency }) {
   return (
     <LineBody>
       <LineName>{name}</LineName>
-      <div>{formatMoney(amount, currency)}</div>
+      {(amount || amount === 0) && <div>{formatMoney(amount, currency)}</div>}
     </LineBody>
   )
 }
