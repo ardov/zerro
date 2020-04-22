@@ -5,6 +5,10 @@ import { getPopulatedTag } from 'store/localData/tags'
 import { getAmountsByTag } from '../selectors/getAmountsByTag'
 import sendEvent from 'helpers/sendEvent'
 import { createBudget } from 'store/localData/budgets/helpers'
+import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
+import { getTags } from 'store/localData/tags'
+import { subMonths } from 'date-fns/esm'
+import { getGoalsProgress } from '../selectors/goalsProgress'
 
 export const moveFunds = (amount, source, destination, monthDate) => (
   dispatch,
@@ -74,3 +78,52 @@ export const setOutcomeBudget = (targetOutcome, month, tagId) => (
 }
 
 export default { setOutcomeBudget }
+
+export const copyPreviousBudget = month => (dispatch, getState) => {
+  sendEvent('Budgets: copy previous')
+  const state = getState()
+  const tags = getTags(state)
+  const user = getRootUser(state).id
+  const prevMonth = +subMonths(month, 1)
+  const budgets = getBudgetsByMonthAndTag(state)
+  const currentBudgets = budgets[month]
+  const prevBudgets = budgets[prevMonth]
+  if (!prevBudgets || !tags || !budgets) return
+
+  const changedArr = []
+  for (const id in tags) {
+    const prevValue = prevBudgets[id]?.outcome || 0
+    const currentValue = currentBudgets[id]?.outcome || 0
+    if (prevValue !== currentValue) {
+      changedArr.push(
+        createBudget({ user, date: +month, tag: id, outcome: prevValue })
+      )
+    }
+  }
+
+  dispatch(setBudget(changedArr))
+}
+
+export const fillGoals = month => (dispatch, getState) => {
+  sendEvent('Budgets: fill goals')
+  const state = getState()
+  const goalsProgress = getGoalsProgress(state)?.[month]
+  const tags = getTags(state)
+  const user = getRootUser(state).id
+  const budgets = getBudgetsByMonthAndTag(state)?.[month]
+
+  if (!goalsProgress || !tags) return
+
+  const changedArr = []
+  for (const tag in goalsProgress) {
+    const target = goalsProgress[tag]?.target || 0
+    const currentBudget = budgets[tag]?.outcome || 0
+    if (currentBudget < target) {
+      changedArr.push(
+        createBudget({ user, date: +month, tag, outcome: target })
+      )
+    }
+  }
+
+  dispatch(setBudget(changedArr))
+}
