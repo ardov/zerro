@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { connect } from 'react-redux'
+import { connect, useDispatch } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
@@ -7,12 +7,14 @@ import styled, { css } from 'styled-components'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
 import { Droppable } from 'react-beautiful-dnd'
+import { copyPreviousBudget, fillGoals } from '../thunks'
 
 const getMonthName = date => format(date, 'LLL', { locale: ru }).toLowerCase()
 
 const Body = styled.div`
   position: relative;
   min-width: 0;
+  max-height: 90vh;
   padding: 112px 16px 16px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 6px;
@@ -84,6 +86,7 @@ function BudgetInfo({
 }) {
   const [opened, setOpened] = useState(false)
   const formatSum = sum => formatMoney(sum, currency)
+  const dispatch = useDispatch()
 
   return (
     <Body {...rest}>
@@ -132,6 +135,14 @@ function BudgetInfo({
       {opened && (
         <>
           <Line name={realBudgetedInFuture > budgetedInFuture ? `🎃` : `🤓`} />
+          <Line
+            onClick={() => dispatch(copyPreviousBudget(date))}
+            name="▶️ Копировать бюджеты с прошлого месяца"
+          />
+          <Line
+            onClick={() => dispatch(fillGoals(date))}
+            name="▶️ Пополнить цели"
+          />
           <Line name={`Распределено`} amount={available} currency={currency} />
           <Line name={`Перерасход`} amount={overspent} currency={currency} />
           <Line name={`Расход`} amount={outcome} currency={currency} />
@@ -164,9 +175,9 @@ const mapStateToProps = (state, { index }) => ({
 
 export default connect(mapStateToProps, null)(BudgetInfo)
 
-function Line({ name, amount, currency }) {
+function Line({ name, amount, currency, onClick }) {
   return (
-    <LineBody>
+    <LineBody onClick={onClick}>
       <LineName>{name}</LineName>
       {(amount || amount === 0) && <div>{formatMoney(amount, currency)}</div>}
     </LineBody>
