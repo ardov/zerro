@@ -7,7 +7,12 @@ import styled, { css } from 'styled-components'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
 import { Droppable } from 'react-beautiful-dnd'
-import { copyPreviousBudget, fillGoals } from '../thunks'
+import {
+  copyPreviousBudget,
+  fillGoals,
+  startFresh,
+  fixOverspends,
+} from '../thunks'
 
 const getMonthName = date => format(date, 'LLL', { locale: ru }).toLowerCase()
 
@@ -142,6 +147,14 @@ function BudgetInfo({
           <Line
             onClick={() => dispatch(fillGoals(date))}
             name="▶️ Пополнить цели"
+          />
+          <Line
+            onClick={() => dispatch(startFresh(date))}
+            name="▶️ Начать всё заново"
+          />
+          <Line
+            onClick={() => dispatch(fixOverspends(date))}
+            name="▶️ Покрыть перерасходы"
           />
           <Line name={`Распределено`} amount={available} currency={currency} />
           <Line name={`Перерасход`} amount={overspent} currency={currency} />
