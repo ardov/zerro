@@ -7,6 +7,7 @@ import styled, { css } from 'styled-components'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
 import { Droppable } from 'react-beautiful-dnd'
+import Confirm from 'components/Confirm'
 import {
   copyPreviousBudget,
   fillGoals,
@@ -141,22 +142,46 @@ export default function BudgetInfo({ index, ...rest }) {
       {opened && (
         <>
           <Line name={realBudgetedInFuture > budgetedInFuture ? `🎃` : `🤓`} />
-          <Line
-            onClick={() => dispatch(copyPreviousBudget(date))}
-            name="▶️ Копировать бюджеты с прошлого месяца"
-          />
-          <Line
-            onClick={() => dispatch(fillGoals(date))}
-            name="▶️ Пополнить цели"
-          />
-          <Line
-            onClick={() => dispatch(startFresh(date))}
-            name="▶️ Начать всё заново"
-          />
-          <Line
-            onClick={() => dispatch(fixOverspends(date))}
-            name="▶️ Покрыть перерасходы"
-          />
+          <Confirm
+            title="Скопировать все бюджеты?"
+            description="Бюджеты будут точно такими же, как в предыдущем месяце."
+            onOk={() => dispatch(copyPreviousBudget(date))}
+            okText="Скопировать"
+            cancelText="Отмена"
+          >
+            <Line name="▶️ Копировать бюджеты с прошлого месяца..." />
+          </Confirm>
+
+          <Confirm
+            title="Выполнить все цели?"
+            description="Бюджеты будут выставлены так, чтобы цели в этом месяце выполнились."
+            onOk={() => dispatch(fillGoals(date))}
+            okText="Выполнить цели"
+            cancelText="Отмена"
+          >
+            <Line name="▶️ Выполнить цели на месяц..." />
+          </Confirm>
+
+          <Confirm
+            title="Хотите начать всё заново?"
+            description="Остатки во всех категориях сбросятся, а бюджеты в будущем удалятся. Вы сможете начать распределять деньги с чистого листа. Меняются только бюджеты, все остальные данные останутся как есть."
+            onOk={() => dispatch(startFresh(date))}
+            okText="Сбросить остатки"
+            cancelText="Отмена"
+          >
+            <Line name="▶️ Начать всё заново..." />
+          </Confirm>
+
+          {!!overspent && (
+            <Confirm
+              title="Избавиться от перерасходов?"
+              onOk={() => dispatch(fixOverspends(date))}
+              okText="Покрыть перерасходы"
+              cancelText="Отмена"
+            >
+              <Line name="▶️ Покрыть перерасходы..." />
+            </Confirm>
+          )}
           <Line name={`Распределено`} amount={available} currency={currency} />
           <Line name={`Перерасход`} amount={overspent} currency={currency} />
           <Line name={`Расход`} amount={outcome} currency={currency} />
