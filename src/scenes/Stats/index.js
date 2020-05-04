@@ -1,42 +1,32 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { Box, Typography, Paper } from '@material-ui/core'
-import sendEvent from 'helpers/sendEvent'
+// import sendEvent from 'helpers/sendEvent'
 import { useSelector } from 'react-redux'
-import { AreaChart, Area, Tooltip, ResponsiveContainer, Brush } from 'recharts'
-import { getTotalsByMonth } from 'scenes/Budgets/selectors/getTotalsByMonth'
-import { getAmountsByTag } from 'scenes/Budgets/selectors/getAmountsByTag'
-import { format } from 'date-fns'
+import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts'
+// import { getTotalsByMonth } from 'scenes/Budgets/selectors/getTotalsByMonth'
+// import { getAmountsByTag } from 'scenes/Budgets/selectors/getAmountsByTag'
+// import { format } from 'date-fns'
 import { getAccountsHistory } from './selectors'
 import { getAccounts, getAccountList } from 'store/localData/accounts'
 import { formatMoney, formatDate } from 'helpers/format'
 import Rhythm from 'components/Rhythm'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 
-const getMonthDatesFrom = (date = new Date(), num = 6) => {
-  let month = date.getMonth()
-  const year = date.getFullYear()
-  const arr = []
-  for (let mm = month; mm > month - num; mm--) {
-    arr.push(+new Date(year, mm))
-  }
-  return arr.reverse()
-}
-
 export default function Stats() {
-  const rawData = useSelector(getTotalsByMonth)
+  // const rawData = useSelector(getTotalsByMonth)
   const accountsHistory = useSelector(getAccountsHistory)
   const accs = useSelector(getAccountList)
   const [selected, setSelected] = useState({})
 
-  const tagData = useSelector(getAmountsByTag)
-  const data = rawData.map(obj => ({
-    ...obj,
-    date: format(obj.date, 'MM-yyyy'),
-  }))
+  // const tagData = useSelector(getAmountsByTag)
+  // const data = rawData.map(obj => ({
+  //   ...obj,
+  //   date: format(obj.date, 'MM-yyyy'),
+  // }))
   // console.log(data)
   console.log(accountsHistory)
   // console.log(tagData)
-  // console.log(getMonthDatesFrom())
+
   const startDate = +new Date(2019, 0)
   const accIds = accs.filter(acc => !acc.archive).map(acc => acc.id)
 
