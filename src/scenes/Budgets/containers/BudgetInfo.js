@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { connect, useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
@@ -69,26 +69,27 @@ const Amount = styled.div`
 const Text = styled.div`
   color: #fff;
 `
-function BudgetInfo({
-  date,
-  available,
-  prevOverspent,
-  toBeBudgeted,
-  funds,
-  overspent,
-  income,
-  prevFunds,
-  transferIncome,
-  transferOutcome,
-  transferFees,
-  realBudgetedInFuture,
-  budgeted,
-  moneyInBudget,
-  budgetedInFuture,
-  currency,
-  outcome,
-  ...rest
-}) {
+export default function BudgetInfo({ index, ...rest }) {
+  const currency = useSelector(getUserCurrencyCode)
+  const totals = useSelector(state => getTotalsByMonth(state)[index])
+  const {
+    date,
+    available,
+    prevOverspent,
+    toBeBudgeted,
+    funds,
+    overspent,
+    income,
+    prevFunds,
+    transferOutcome,
+    transferFees,
+    realBudgetedInFuture,
+    budgeted,
+    moneyInBudget,
+    budgetedInFuture,
+    outcome,
+  } = totals
+
   const [opened, setOpened] = useState(false)
   const formatSum = sum => formatMoney(sum, currency)
   const dispatch = useDispatch()
@@ -180,13 +181,6 @@ function BudgetInfo({
     </Body>
   )
 }
-
-const mapStateToProps = (state, { index }) => ({
-  ...getTotalsByMonth(state)[index],
-  currency: getUserCurrencyCode(state),
-})
-
-export default connect(mapStateToProps, null)(BudgetInfo)
 
 function Line({ name, amount, currency, onClick }) {
   return (
