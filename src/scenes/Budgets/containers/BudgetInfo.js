@@ -78,7 +78,6 @@ export default function BudgetInfo({ index, ...rest }) {
     available,
     prevOverspent,
     toBeBudgeted,
-    funds,
     overspent,
     income,
     prevFunds,

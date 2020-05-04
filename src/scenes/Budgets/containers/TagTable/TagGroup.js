@@ -24,7 +24,7 @@ export const useStyles = makeStyles(theme => ({
 
 function TagGroup(props) {
   const {
-    id,
+    // id,
     metric,
     date,
     showAll,
