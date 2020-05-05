@@ -27,11 +27,14 @@ const MonthButton = withStyles(theme => ({
     paddingTop: theme.spacing(0.5),
     paddingBottom: theme.spacing(0.5),
     justifyContent: 'flex-start',
+    display: 'flex',
+    flexDirection: 'column',
   },
 }))(ButtonBase)
 
 export default function MonthSelect({ onChange, minMonth, maxMonth, value }) {
   const paperRef = useRef()
+  const year = new Date(value).getFullYear()
   const [anchorEl, setAnchorEl] = useState(null)
   const prevMonth = value > minMonth ? +sub(value, { months: 1 }) : null
   const nextMonth = value < maxMonth ? +add(value, { months: 1 }) : null
@@ -50,29 +53,34 @@ export default function MonthSelect({ onChange, minMonth, maxMonth, value }) {
 
   return (
     <>
-      <Box display="flex" pr={2} clone>
-        <Paper ref={paperRef}>
-          <MonthButton onClick={openPopover}>
-            <Typography variant="body1" noWrap>
-              {getMonthName(value)}
-            </Typography>
-          </MonthButton>
-
-          <Box py={0.5} flexShrink="0">
+      <Paper ref={paperRef}>
+        <Box display="flex" px={0.5} py={1}>
+          <Box alignSelf="center" flexShrink="0">
             <IconButton
               children={<ChevronLeftIcon />}
               onClick={() => onChange(prevMonth)}
               disabled={!prevMonth}
             />
+          </Box>
+
+          <MonthButton onClick={openPopover}>
+            <Typography variant="h5" noWrap>
+              {getMonthName(value)}
+            </Typography>
+            <Typography variant="body2" color="textSecondary" noWrap>
+              {year}
+            </Typography>
+          </MonthButton>
+
+          <Box alignSelf="center" flexShrink="0">
             <IconButton
-              edge="end"
               children={<ChevronRightIcon />}
               onClick={() => onChange(nextMonth)}
               disabled={!nextMonth}
             />
           </Box>
-        </Paper>
-      </Box>
+        </Box>
+      </Paper>
 
       <MonthSelectPopover
         open={!!anchorEl}
@@ -88,8 +96,9 @@ export default function MonthSelect({ onChange, minMonth, maxMonth, value }) {
 }
 
 function getMonthName(month) {
-  const isCurrentYear =
-    new Date().getFullYear() === new Date(month).getFullYear()
-  const pattern = isCurrentYear ? 'LLLL' : 'LLLL yyyy'
-  return format(month, pattern, { locale: ru }).toUpperCase()
+  // const isCurrentYear =
+  //   new Date().getFullYear() === new Date(month).getFullYear()
+  // const pattern = isCurrentYear ? 'LLLL' : 'LLLL yyyy'
+  // return format(month, pattern, { locale: ru }).toUpperCase()
+  return format(month, 'LLLL', { locale: ru }).toUpperCase()
 }

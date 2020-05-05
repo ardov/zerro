@@ -4,25 +4,21 @@ import startOfMonth from 'date-fns/startOfMonth'
 import TagTable from './containers/TagTable'
 import TransferTable from './containers/TransferTable'
 import BudgetInfo from './containers/BudgetInfo'
+import ToBeBudgeted from './containers/ToBeBudgeted'
 import MonthSelector from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
-import {
-  Box,
-  // Hidden,
-  // Drawer,
-  // Typography,
-  useMediaQuery,
-} from '@material-ui/core'
+import { Box, Drawer, useMediaQuery } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid'
-// import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/core/styles'
 import { DragDropContext } from 'react-beautiful-dnd'
 import { moveFunds } from './thunks'
 import MoveMoneyModal from './containers/MoveMoneyModal'
 import WarningSign from './containers/WarningSign'
+import GoalsProgressWidget from './containers/GoalsProgressWidget'
 
-// const useStyles = makeStyles(theme => ({
-//   drawerWidth: { width: 360 },
-// }))
+const useStyles = makeStyles(theme => ({
+  drawerWidth: { width: 360 },
+}))
 
 export default function Budgets() {
   const monthList = useSelector(getMonthDates)
@@ -32,11 +28,12 @@ export default function Budgets() {
   const maxMonth = monthList[monthList.length - 1]
   const curMonth = +startOfMonth(new Date())
 
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const [month, setMonth] = useState(curMonth)
-  // const [openDrawer, setOpenDrawer] = useState(false)
+  const [openDrawer, setOpenDrawer] = useState(false)
+  const [selectedTag, setSelectedTag] = useState(null)
   const [moneyModalProps, setMoneyModalProps] = useState({ open: false })
-  // const c = useStyles()
+  const c = useStyles()
 
   const index = monthList.findIndex(date => date === month)
 
@@ -79,17 +76,22 @@ export default function Budgets() {
         />
         <Box flexGrow="1">
           <Grid container spacing={3}>
-            <Grid item xs={12} md={3}>
-              <Box position="sticky" top="24px">
-                <MonthSelector
-                  onChange={setMonth}
-                  {...{ minMonth, maxMonth, value: month }}
-                />
-                <Box component={BudgetInfo} index={index} mt={3} />
-              </Box>
+            <Grid item xs={12} md={4}>
+              <MonthSelector
+                onChange={setMonth}
+                {...{ minMonth, maxMonth, value: month }}
+              />
             </Grid>
 
-            <Grid item xs={12} md={9}>
+            <Grid item xs={12} md={4}>
+              <GoalsProgressWidget month={month} />
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <ToBeBudgeted index={index} />
+            </Grid>
+
+            <Grid item xs={12} md={12}>
               <TagTable index={index} date={monthList[index]} required={true} />
               <Box mt={3}>
                 <TagTable index={index} date={monthList[index]} />
@@ -104,7 +106,7 @@ export default function Budgets() {
           </Grid>
         </Box>
         <WarningSign />
-        {/* <Drawer
+        <Drawer
           classes={
             isMobile ? null : { paper: c.drawerWidth, root: c.drawerWidth }
           }
@@ -115,16 +117,14 @@ export default function Budgets() {
         >
           <Box display="flex" flexDirection="column" minHeight="100vh" p={3}>
             <MonthSelector
-              months={monthList}
-              current={index}
-              onSetCurrent={setCurrentMonth}
-              onChange={setMonthByIndex}
+              onChange={setMonth}
+              {...{ minMonth, maxMonth, value: month }}
             />
             <Box pt={2} />
             <BudgetInfo index={index} />
             <Box pt={2} />
           </Box>
-        </Drawer> */}
+        </Drawer>
       </Box>
     </DragDropContext>
   )
