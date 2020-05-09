@@ -83,10 +83,9 @@ function calcMonthlySpendProgress({ amount, budgeted, leftover }) {
   const target = round(amount - leftover)
   const need = round(target - budgeted)
 
-  if (target <= 0) return { progress: 1, need: 0, target: 0 }
-  if (budgeted <= 0) return { progress: 0, need, target }
-  if (budgeted >= target) return { progress: 1, need: 0, target }
-  return { progress: budgeted / target, need, target }
+  if (budgeted + leftover <= 0) return { progress: 0, need, target }
+  if (budgeted + leftover >= amount) return { progress: 1, need: 0, target }
+  return { progress: (budgeted + leftover) / amount, need, target }
 }
 
 function calcTargetProgress({
