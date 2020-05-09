@@ -3,27 +3,52 @@ import { useSelector } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
-import { Paper, Box, Typography } from '@material-ui/core'
+import { Typography, ButtonBase, makeStyles, Tooltip } from '@material-ui/core'
+
+const useStyles = makeStyles(({ shape, spacing, palette }) => ({
+  base: {
+    display: 'block',
+    width: '100%',
+    borderRadius: shape.borderRadius,
+    padding: spacing(1.5, 1),
+    background: ({ color }) =>
+      `linear-gradient(105deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 100%
+        ),${palette[color].main}`,
+    boxShadow: ({ color }) => `0 8px 20px -12px ${palette[color].main}`,
+    transition: '0.4s',
+    color: ({ color }) => palette.getContrastText(palette[color].main),
+  },
+}))
 
 export default function ToBeBudgeted({ index, ...rest }) {
   const currency = useSelector(getUserCurrencyCode)
-  const toBeBudgeted = useSelector(
-    state => getTotalsByMonth(state)?.[index]?.toBeBudgeted
-  )
+  const totals = useSelector(state => getTotalsByMonth(state)?.[index])
+  const toBeBudgeted = totals?.toBeBudgeted || 0
+  const overspent = totals?.overspent || 0
+  const color = toBeBudgeted < 0 ? 'error' : overspent ? 'warning' : 'success'
+
+  const c = useStyles({ color })
 
   const formatSum = sum => formatMoney(sum, currency)
-  const color = toBeBudgeted < 0 ? 'error' : 'textPrimary'
+
+  const messages = {
+    success: 'Все деньги распределены по категориям, так держать 🥳',
+    warning: `Перерасход в категориях ${formatSum(
+      overspent
+    )}. Добавьте денег в категории с перерасходом.`,
+    error: `Вы распределили больше денег, чем у вас есть. Из каких-то категорий придётся забрать деньги.`,
+  }
 
   return (
-    <Paper {...rest}>
-      <Box py={1.5}>
-        <Typography noWrap align="center" variant="h5" color={color}>
+    <Tooltip title={messages[color]}>
+      <ButtonBase className={c.base} {...rest}>
+        <Typography noWrap align="center" variant="h5">
           {toBeBudgeted ? formatSum(toBeBudgeted) : '👍'}
         </Typography>
-        <Typography noWrap align="center" variant="body2" color="textSecondary">
+        <Typography noWrap align="center" variant="body2">
           {toBeBudgeted ? 'Осталось распределить' : 'Деньги распределены'}
         </Typography>
-      </Box>
-    </Paper>
+      </ButtonBase>
+    </Tooltip>
   )
 }
