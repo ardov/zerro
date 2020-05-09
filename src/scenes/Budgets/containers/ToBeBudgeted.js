@@ -40,7 +40,7 @@ export default function ToBeBudgeted({ index, ...rest }) {
   }
 
   return (
-    <Tooltip title={messages[color]}>
+    <Tooltip arrow title={messages[color]}>
       <ButtonBase className={c.base} {...rest}>
         <Typography noWrap align="center" variant="h5">
           {toBeBudgeted ? formatSum(toBeBudgeted) : '👍'}
