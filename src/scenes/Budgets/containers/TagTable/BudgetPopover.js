@@ -16,6 +16,8 @@ import { getUserCurrencyCode } from 'store/serverData'
 import { setOutcomeBudget } from 'scenes/Budgets/thunks'
 import { getGoals } from 'store/localData/hiddenData'
 import { getGoalProgress } from 'scenes/Budgets/selectors/goalsProgress'
+import { round } from 'helpers/currencyHelpers'
+import sendEvent from 'helpers/sendEvent'
 
 export default function BudgetPopover({ id, month, onClose, ...rest }) {
   const prevMonth = getPrevMonthMs(month)
@@ -46,6 +48,48 @@ export default function BudgetPopover({ id, month, onClose, ...rest }) {
     if (value !== budgeted) onChange(value)
   }
 
+  const quickActions = [
+    {
+      text: 'Покрыть перерасход',
+      amount: round(+budgeted - available),
+      selected: false,
+      condition: available < 0,
+    },
+    {
+      text: 'Цель',
+      amount: +needForGoal,
+      selected: +value === +needForGoal,
+      condition: !!goal && !!needForGoal,
+    },
+    {
+      text: 'Бюджет в прошлом месяце',
+      amount: +prevBudgeted,
+      selected: +value === +prevBudgeted,
+      condition: !!prevBudgeted,
+    },
+    {
+      text: 'Расход в прошлом месяце',
+      amount: +prevOutcome,
+      selected: +value === +prevOutcome,
+      condition: !!prevOutcome,
+    },
+    {
+      text: 'Сбросить остаток',
+      amount: round(+budgeted - available),
+      selected: false,
+      condition: available > 0,
+    },
+    {
+      text: 'Сумма дочерних категорий',
+      amount: round(amounts.totalBudgeted - amounts.budgeted),
+      selected: false,
+      condition:
+        !isChild &&
+        amounts.budgeted &&
+        amounts.budgeted !== amounts.totalBudgeted,
+    },
+  ]
+
   return (
     <Popover onClose={() => changeAndCLose(+value)} {...rest}>
       <AmountInput
@@ -71,58 +115,23 @@ export default function BudgetPopover({ id, month, onClose, ...rest }) {
       />
 
       <List>
-        {!!goal && !!needForGoal && (
-          <ListItem
-            button
-            selected={+value === +needForGoal}
-            onClick={() => changeAndCLose(+needForGoal)}
-          >
-            <ListItemText
-              primary="Цель"
-              secondary={formatMoney(needForGoal, currency)}
-            />
-          </ListItem>
-        )}
-
-        {!!prevBudgeted && (
-          <ListItem
-            button
-            selected={+value === +prevBudgeted}
-            onClick={() => changeAndCLose(+prevBudgeted)}
-          >
-            <ListItemText
-              primary="Бюджет в прошлом месяце"
-              secondary={formatMoney(prevBudgeted, currency)}
-            />
-          </ListItem>
-        )}
-
-        {!!prevOutcome && (
-          <ListItem
-            button
-            selected={+value === +prevOutcome}
-            onClick={() => changeAndCLose(+prevOutcome)}
-          >
-            <ListItemText
-              primary="Расход в прошлом месяце"
-              secondary={formatMoney(prevOutcome, currency)}
-            />
-          </ListItem>
-        )}
-
-        {available !== 0 && (
-          <ListItem
-            button
-            selected={+value === +prevOutcome}
-            onClick={() => changeAndCLose(+budgeted - available)}
-          >
-            <ListItemText
-              primary={
-                available < 0 ? 'Покрыть перерасход' : 'Сбросить остаток'
-              }
-              secondary={formatMoney(+budgeted - available, currency)}
-            />
-          </ListItem>
+        {quickActions.map(({ text, amount, selected, condition }) =>
+          condition ? (
+            <ListItem
+              button
+              key={text}
+              selected={selected}
+              onClick={() => {
+                sendEvent('Budgets: quick budget: ' + text)
+                changeAndCLose(amount)
+              }}
+            >
+              <ListItemText
+                primary={text}
+                secondary={formatMoney(amount, currency)}
+              />
+            </ListItem>
+          ) : null
         )}
       </List>
     </Popover>
