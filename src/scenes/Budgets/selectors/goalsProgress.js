@@ -72,27 +72,21 @@ export const getGoalsProgress = createSelector(
 
 function calcMonthlyProgress({ amount, budgeted }) {
   const target = amount
-  if (budgeted <= 0) return { progress: 0, need: target, target }
-  if (budgeted >= target) return { progress: 1, need: 0, target }
+  const need = round(target - budgeted)
 
-  return {
-    progress: budgeted / target,
-    need: round(target - budgeted),
-    target,
-  }
+  if (budgeted <= 0) return { progress: 0, need, target }
+  if (budgeted >= target) return { progress: 1, need: 0, target }
+  return { progress: budgeted / target, need, target }
 }
 
 function calcMonthlySpendProgress({ amount, budgeted, leftover }) {
-  const target = amount - leftover
-  if (target <= 0) return { progress: 1, need: 0, target: 0 }
-  if (budgeted <= 0) return { progress: 0, need: target, target }
-  if (budgeted >= target) return { progress: 1, need: 0, target }
+  const target = round(amount - leftover)
+  const need = round(target - budgeted)
 
-  return {
-    progress: budgeted / target,
-    need: round(target - budgeted),
-    target,
-  }
+  if (target <= 0) return { progress: 1, need: 0, target: 0 }
+  if (budgeted <= 0) return { progress: 0, need, target }
+  if (budgeted >= target) return { progress: 1, need: 0, target }
+  return { progress: budgeted / target, need, target }
 }
 
 function calcTargetProgress({
@@ -122,7 +116,12 @@ function calcTargetProgress({
     const totalNeed = amount - startMonthAvailable
     if (totalNeed <= 0) return { progress: 1, need: 0, target: 0 }
     const target = Math.round(totalNeed / monthsLeft)
-    if (budgeted <= 0) return { progress: 0, need: target, target }
+    if (budgeted <= 0)
+      return {
+        progress: 0,
+        need: round(target - budgeted),
+        target,
+      }
     if (budgeted >= target) return { progress: 1, need: 0, target }
 
     return {
