@@ -3,7 +3,8 @@ import { useSelector } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
-import { Typography, ButtonBase, makeStyles, Tooltip } from '@material-ui/core'
+import { Typography, ButtonBase, makeStyles } from '@material-ui/core'
+import { Tooltip } from 'components/Tooltip'
 
 const useStyles = makeStyles(({ shape, spacing, palette }) => ({
   base: {

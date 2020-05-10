@@ -4,9 +4,9 @@ import {
   Box,
   Link,
   IconButton,
-  Tooltip,
   useMediaQuery,
 } from '@material-ui/core'
+import { Tooltip } from 'components/Tooltip'
 import { makeStyles } from '@material-ui/styles'
 import EmojiIcon from 'components/EmojiIcon'
 import { formatMoney } from 'helpers/format'
