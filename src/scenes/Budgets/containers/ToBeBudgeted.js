@@ -29,7 +29,6 @@ export default function ToBeBudgeted({ index, ...rest }) {
   const realBudgetedInFuture = totals?.realBudgetedInFuture || 0
   const budgetedInFuture = totals?.budgetedInFuture || 0
   const color = toBeBudgeted < 0 ? 'error' : overspent ? 'warning' : 'success'
-
   const hasFutureOverspend = realBudgetedInFuture > budgetedInFuture
 
   const c = useStyles({ color })

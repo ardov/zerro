@@ -16,9 +16,7 @@ import MoveMoneyModal from './containers/MoveMoneyModal'
 import WarningSign from './containers/WarningSign'
 import GoalsProgressWidget from './containers/GoalsProgressWidget'
 
-const useStyles = makeStyles(theme => ({
-  drawerWidth: { width: 360 },
-}))
+const useStyles = makeStyles(theme => ({ drawerWidth: { width: 360 } }))
 
 export default function Budgets() {
   const monthList = useSelector(getMonthDates)
@@ -30,12 +28,19 @@ export default function Budgets() {
 
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const [month, setMonth] = useState(curMonth)
-  const [openDrawer, setOpenDrawer] = useState(false)
+  const [showDrawer, setShowDrawer] = useState(false)
   const [selectedTag, setSelectedTag] = useState(null)
   const [moneyModalProps, setMoneyModalProps] = useState({ open: false })
   const c = useStyles()
 
   const index = monthList.findIndex(date => date === month)
+
+  const drawerVisibility = !isMobile || !!showDrawer
+  const closeDrawer = () => setShowDrawer(false)
+  const openDrawer = (id = null) => {
+    setSelectedTag(id)
+    setShowDrawer(true)
+  }
 
   const moveMoney = e => {
     if (
@@ -88,13 +93,22 @@ export default function Budgets() {
             </Grid>
 
             <Grid item xs={12} md={4}>
-              <ToBeBudgeted index={index} />
+              <ToBeBudgeted index={index} onClick={() => openDrawer(null)} />
             </Grid>
 
             <Grid item xs={12} md={12}>
-              <TagTable index={index} date={monthList[index]} required={true} />
+              <TagTable
+                index={index}
+                date={monthList[index]}
+                required={true}
+                openDetails={openDrawer}
+              />
               <Box mt={3}>
-                <TagTable index={index} date={monthList[index]} />
+                <TagTable
+                  index={index}
+                  date={monthList[index]}
+                  openDetails={openDrawer}
+                />
               </Box>
               <Box mt={3}>
                 <TransferTable month={monthList[index]} />
@@ -105,27 +119,34 @@ export default function Budgets() {
             </Grid>
           </Grid>
         </Box>
+
         <WarningSign />
+
         <Drawer
           classes={
             isMobile ? null : { paper: c.drawerWidth, root: c.drawerWidth }
           }
           variant={isMobile ? 'temporary' : 'persistent'}
           anchor="right"
-          open={!isMobile || !!openDrawer}
-          onClose={() => setOpenDrawer(false)}
+          open={drawerVisibility}
+          onClose={closeDrawer}
         >
-          <Box display="flex" flexDirection="column" minHeight="100vh" p={3}>
-            <MonthSelector
-              onChange={setMonth}
-              {...{ minMonth, maxMonth, value: month }}
+          {selectedTag ? (
+            <TagPreview
+              month={month}
+              index={index}
+              onClose={closeDrawer}
+              id={selectedTag}
             />
-            <Box pt={2} />
-            <BudgetInfo index={index} />
-            <Box pt={2} />
-          </Box>
+          ) : (
+            <BudgetInfo month={month} index={index} onClose={closeDrawer} />
+          )}
         </Drawer>
       </Box>
     </DragDropContext>
   )
+}
+
+function TagPreview({ month, index, onClose, id }) {
+  return <Box>Tag preview {id}</Box>
 }

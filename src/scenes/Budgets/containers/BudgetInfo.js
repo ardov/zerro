@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
-import styled, { css } from 'styled-components'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
 import { Droppable } from 'react-beautiful-dnd'
@@ -14,63 +13,12 @@ import {
   startFresh,
   fixOverspends,
 } from '../thunks'
+import { Box, Typography, Button } from '@material-ui/core'
+import Rhythm from 'components/Rhythm'
 
 const getMonthName = date => format(date, 'LLL', { locale: ru }).toLowerCase()
 
-const Body = styled.div`
-  position: relative;
-  min-width: 0;
-  max-height: 90vh;
-  padding: 112px 16px 16px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 6px;
-`
-
-const ToBeBudgeted = styled.div`
-  position: absolute;
-  top: -1px;
-  right: -1px;
-  left: -1px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 104px;
-  padding: 16px;
-  background: linear-gradient(
-      105.52deg,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.3) 100%
-    ),
-    #cc1414;
-  border-radius: 6px;
-  box-shadow: 0 8px 16px rgba(204, 20, 20, 0.3);
-  transition: 0.4s;
-
-  ${props =>
-    props.positive &&
-    css`
-      background: linear-gradient(
-          105.67deg,
-          rgba(255, 255, 255, 0) 0%,
-          rgba(255, 255, 255, 0.3) 100%
-        ),
-        #21a355;
-      box-shadow: 0 8px 16px rgba(33, 163, 85, 0.3);
-    `}
-`
-
-const Amount = styled.div`
-  color: #fff;
-  font-weight: normal;
-  font-size: 32px;
-  line-height: 40px;
-`
-
-const Text = styled.div`
-  color: #fff;
-`
-export default function BudgetInfo({ index, ...rest }) {
+export default function BudgetInfo({ month, index, onClose, ...rest }) {
   const currency = useSelector(getUserCurrencyCode)
   const totals = useSelector(state => getTotalsByMonth(state)[index])
   const {
@@ -90,24 +38,12 @@ export default function BudgetInfo({ index, ...rest }) {
     outcome,
   } = totals
 
-  const [opened, setOpened] = useState(false)
+  const [opened, setOpened] = useState(true)
   const formatSum = sum => formatMoney(sum, currency)
   const dispatch = useDispatch()
 
   return (
-    <Body {...rest}>
-      <Droppable droppableId="toBeBudgeted" type="FUNDS">
-        {({ innerRef, placeholder }) => (
-          <ToBeBudgeted positive={toBeBudgeted >= 0} ref={innerRef}>
-            <span style={{ display: 'none' }}>{placeholder}</span>
-
-            <Amount>{formatSum(toBeBudgeted)}</Amount>
-            <Text onClick={() => setOpened(!opened)}>
-              Осталось распределить
-            </Text>
-          </ToBeBudgeted>
-        )}
-      </Droppable>
+    <Box {...rest} p={3}>
       <Line
         name={`Доход за ${getMonthName(date)}`}
         amount={income}
@@ -138,94 +74,86 @@ export default function BudgetInfo({ index, ...rest }) {
         amount={-budgetedInFuture}
         currency={currency}
       />
-      {opened && (
-        <>
-          <Line name={realBudgetedInFuture > budgetedInFuture ? `🎃` : `🤓`} />
+
+      <Rhythm gap={1}>
+        <Typography align="center" variant="h5">
+          Быстрые бюджеты
+        </Typography>
+        <Confirm
+          title="Скопировать все бюджеты?"
+          description="Бюджеты будут точно такими же, как в предыдущем месяце."
+          onOk={() => dispatch(copyPreviousBudget(date))}
+          okText="Скопировать"
+          cancelText="Отмена"
+        >
+          <Button fullWidth>Копировать с прошлого месяца...</Button>
+        </Confirm>
+
+        <Confirm
+          title="Выполнить все цели?"
+          description="Бюджеты будут выставлены так, чтобы цели в этом месяце выполнились."
+          onOk={() => dispatch(fillGoals(date))}
+          okText="Выполнить цели"
+          cancelText="Отмена"
+        >
+          <Button fullWidth>Выполнить цели на месяц</Button>
+        </Confirm>
+
+        <Confirm
+          title="Хотите начать всё заново?"
+          description="Остатки во всех категориях сбросятся, а бюджеты в будущем удалятся. Вы сможете начать распределять деньги с чистого листа. Меняются только бюджеты, все остальные данные останутся как есть."
+          onOk={() => dispatch(startFresh(date))}
+          okText="Сбросить остатки"
+          cancelText="Отмена"
+        >
+          <Button fullWidth>Начать всё заново</Button>
+        </Confirm>
+
+        {!!overspent && (
           <Confirm
-            title="Скопировать все бюджеты?"
-            description="Бюджеты будут точно такими же, как в предыдущем месяце."
-            onOk={() => dispatch(copyPreviousBudget(date))}
-            okText="Скопировать"
+            title="Избавиться от перерасходов?"
+            onOk={() => dispatch(fixOverspends(date))}
+            okText="Покрыть перерасходы"
             cancelText="Отмена"
           >
-            <Line name="▶️ Копировать бюджеты с прошлого месяца..." />
+            <Button fullWidth>Покрыть перерасходы</Button>
           </Confirm>
+        )}
+      </Rhythm>
 
-          <Confirm
-            title="Выполнить все цели?"
-            description="Бюджеты будут выставлены так, чтобы цели в этом месяце выполнились."
-            onOk={() => dispatch(fillGoals(date))}
-            okText="Выполнить цели"
-            cancelText="Отмена"
-          >
-            <Line name="▶️ Выполнить цели на месяц..." />
-          </Confirm>
-
-          <Confirm
-            title="Хотите начать всё заново?"
-            description="Остатки во всех категориях сбросятся, а бюджеты в будущем удалятся. Вы сможете начать распределять деньги с чистого листа. Меняются только бюджеты, все остальные данные останутся как есть."
-            onOk={() => dispatch(startFresh(date))}
-            okText="Сбросить остатки"
-            cancelText="Отмена"
-          >
-            <Line name="▶️ Начать всё заново..." />
-          </Confirm>
-
-          {!!overspent && (
-            <Confirm
-              title="Избавиться от перерасходов?"
-              onOk={() => dispatch(fixOverspends(date))}
-              okText="Покрыть перерасходы"
-              cancelText="Отмена"
-            >
-              <Line name="▶️ Покрыть перерасходы..." />
-            </Confirm>
-          )}
-          <Line name={`Распределено`} amount={available} currency={currency} />
-          <Line name={`Перерасход`} amount={overspent} currency={currency} />
-          <Line name={`Расход`} amount={outcome} currency={currency} />
-          <Line
-            name={`Все переводы`}
-            amount={-transferOutcome}
-            currency={currency}
-          />
-          <Line
-            name={`Потери на переводах`}
-            amount={-transferFees}
-            currency={currency}
-          />
-          <Line
-            name={`realBudgetedInFuture`}
-            amount={realBudgetedInFuture}
-            currency={currency}
-          />
-          <Line name={`В бюджете`} amount={moneyInBudget} currency={currency} />
-        </>
-      )}
-    </Body>
+      <Line name={`Распределено`} amount={available} currency={currency} />
+      <Line name={`Перерасход`} amount={overspent} currency={currency} />
+      <Line name={`Расход`} amount={outcome} currency={currency} />
+      <Line
+        name={`Все переводы`}
+        amount={-transferOutcome}
+        currency={currency}
+      />
+      <Line
+        name={`Потери на переводах`}
+        amount={-transferFees}
+        currency={currency}
+      />
+      <Line
+        name={`realBudgetedInFuture`}
+        amount={realBudgetedInFuture}
+        currency={currency}
+      />
+      <Line name={`В бюджете`} amount={moneyInBudget} currency={currency} />
+    </Box>
   )
 }
 
 function Line({ name, amount, currency, onClick }) {
   return (
-    <LineBody onClick={onClick}>
-      <LineName>{name}</LineName>
-      {(amount || amount === 0) && <div>{formatMoney(amount, currency)}</div>}
-    </LineBody>
+    <Box display="flex" flexDirection="row" mt={1} onClick={onClick}>
+      <Box flexGrow="1" mr={1} minWidth={0}>
+        <Typography noWrap>{name}</Typography>
+      </Box>
+
+      {(amount || amount === 0) && (
+        <Typography>{formatMoney(amount, currency)}</Typography>
+      )}
+    </Box>
   )
 }
-const LineBody = styled.div`
-  display: flex;
-  flex-direction: row;
-  min-width: 0;
-  margin-top: 8px;
-  color: var(--text-secondary);
-`
-const LineName = styled.div`
-  flex-grow: 1;
-  min-width: 0;
-  margin-right: 8px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-`
