@@ -26,7 +26,11 @@ export default function ToBeBudgeted({ index, ...rest }) {
   const totals = useSelector(state => getTotalsByMonth(state)?.[index])
   const toBeBudgeted = totals?.toBeBudgeted || 0
   const overspent = totals?.overspent || 0
+  const realBudgetedInFuture = totals?.realBudgetedInFuture || 0
+  const budgetedInFuture = totals?.budgetedInFuture || 0
   const color = toBeBudgeted < 0 ? 'error' : overspent ? 'warning' : 'success'
+
+  const hasFutureOverspend = realBudgetedInFuture > budgetedInFuture
 
   const c = useStyles({ color })
 
@@ -44,7 +48,11 @@ export default function ToBeBudgeted({ index, ...rest }) {
     <Tooltip arrow title={messages[color]}>
       <ButtonBase className={c.base} {...rest}>
         <Typography noWrap align="center" variant="h5">
-          {toBeBudgeted ? formatSum(toBeBudgeted) : '👍'}
+          {toBeBudgeted
+            ? formatSum(toBeBudgeted)
+            : hasFutureOverspend
+            ? '👍'
+            : '👌'}
         </Typography>
         <Typography noWrap align="center" variant="body2">
           {toBeBudgeted ? 'Осталось распределить' : 'Деньги распределены'}
