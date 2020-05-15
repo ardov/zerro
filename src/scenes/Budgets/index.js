@@ -7,7 +7,13 @@ import BudgetInfo from './containers/BudgetInfo'
 import ToBeBudgeted from './containers/ToBeBudgeted'
 import MonthSelector from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
-import { Box, Drawer, useMediaQuery } from '@material-ui/core'
+import {
+  Box,
+  Drawer,
+  useMediaQuery,
+  Typography,
+  IconButton,
+} from '@material-ui/core'
 import Grid from '@material-ui/core/Grid'
 import { makeStyles } from '@material-ui/core/styles'
 import { DragDropContext } from 'react-beautiful-dnd'
@@ -15,6 +21,9 @@ import { moveFunds } from './thunks'
 import MoveMoneyModal from './containers/MoveMoneyModal'
 import WarningSign from './containers/WarningSign'
 import GoalsProgressWidget from './containers/GoalsProgressWidget'
+import { Tooltip } from 'components/Tooltip'
+import CloseIcon from '@material-ui/icons/Close'
+import { getTags } from 'store/localData/tags'
 
 const useStyles = makeStyles(theme => ({ drawerWidth: { width: 360 } }))
 
@@ -36,7 +45,10 @@ export default function Budgets() {
   const index = monthList.findIndex(date => date === month)
 
   const drawerVisibility = !isMobile || !!showDrawer
-  const closeDrawer = () => setShowDrawer(false)
+  const closeDrawer = () => {
+    setSelectedTag(null)
+    setShowDrawer(false)
+  }
   const openDrawer = (id = null) => {
     setSelectedTag(id)
     setShowDrawer(true)
@@ -148,5 +160,20 @@ export default function Budgets() {
 }
 
 function TagPreview({ month, index, onClose, id }) {
-  return <Box>Tag preview {id}</Box>
+  const tag = useSelector(getTags)[id]
+  return (
+    <Box>
+      <Box py={1} px={3} display="flex" alignItems="center">
+        <Box flexGrow={1}>
+          <Typography variant="h6" noWrap>
+            {tag.title}
+          </Typography>
+        </Box>
+
+        <Tooltip title="Закрыть">
+          <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
+        </Tooltip>
+      </Box>
+    </Box>
+  )
 }

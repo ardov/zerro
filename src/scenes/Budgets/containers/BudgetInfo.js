@@ -13,14 +13,24 @@ import {
   startFresh,
   fixOverspends,
 } from '../thunks'
-import { Box, Typography, Button } from '@material-ui/core'
+import {
+  Box,
+  Typography,
+  Button,
+  Divider,
+  IconButton,
+  useMediaQuery,
+} from '@material-ui/core'
+import CloseIcon from '@material-ui/icons/Close'
 import Rhythm from 'components/Rhythm'
+import { Tooltip } from 'components/Tooltip'
 
 const getMonthName = date => format(date, 'LLL', { locale: ru }).toLowerCase()
 
 export default function BudgetInfo({ month, index, onClose, ...rest }) {
   const currency = useSelector(getUserCurrencyCode)
   const totals = useSelector(state => getTotalsByMonth(state)[index])
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const {
     date,
     available,
@@ -38,122 +48,116 @@ export default function BudgetInfo({ month, index, onClose, ...rest }) {
     outcome,
   } = totals
 
-  const [opened, setOpened] = useState(true)
   const formatSum = sum => formatMoney(sum, currency)
   const dispatch = useDispatch()
 
+  function Line({ name, amount }) {
+    return (
+      <Box display="flex" flexDirection="row">
+        <Box flexGrow="1" mr={1} minWidth={0}>
+          <Typography noWrap variant="body2">
+            {name}
+          </Typography>
+        </Box>
+
+        <Typography variant="body2">{formatSum(amount)}</Typography>
+      </Box>
+    )
+  }
+
   return (
-    <Box {...rest} p={3}>
-      <Line
-        name={`Доход за ${getMonthName(date)}`}
-        amount={income}
-        currency={currency}
-      />
-      <Line
-        name={`Остаток с прошлого`}
-        amount={prevFunds}
-        currency={currency}
-      />
-      <Line
-        name={`Перерасход в прошлом`}
-        amount={-prevOverspent}
-        currency={currency}
-      />
-      <Line
-        name={`План на ${getMonthName(date)}`}
-        amount={-budgeted}
-        currency={currency}
-      />
-      <Line
-        name={`Переводы`}
-        amount={-transferOutcome - transferFees}
-        currency={currency}
-      />
-      <Line
-        name={`Запланировано в будущем`}
-        amount={-budgetedInFuture}
-        currency={currency}
-      />
+    <Box {...rest} minHeight="100vh">
+      {isMobile && (
+        <Box py={1} px={3} display="flex" alignItems="center">
+          <Box flexGrow={1}>
+            <Typography variant="h6" noWrap>
+              {getMonthName(month)}
+            </Typography>
+          </Box>
 
-      <Rhythm gap={1}>
-        <Typography align="center" variant="h5">
-          Быстрые бюджеты
-        </Typography>
-        <Confirm
-          title="Скопировать все бюджеты?"
-          description="Бюджеты будут точно такими же, как в предыдущем месяце."
-          onOk={() => dispatch(copyPreviousBudget(date))}
-          okText="Скопировать"
-          cancelText="Отмена"
-        >
-          <Button fullWidth>Копировать с прошлого месяца...</Button>
-        </Confirm>
+          <Tooltip title="Закрыть">
+            <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
+          </Tooltip>
+        </Box>
+      )}
 
-        <Confirm
-          title="Выполнить все цели?"
-          description="Бюджеты будут выставлены так, чтобы цели в этом месяце выполнились."
-          onOk={() => dispatch(fillGoals(date))}
-          okText="Выполнить цели"
-          cancelText="Отмена"
-        >
-          <Button fullWidth>Выполнить цели на месяц</Button>
-        </Confirm>
+      <Rhythm gap={5} p={3}>
+        <Box>
+          <Typography
+            align="center"
+            variant="body2"
+            color="textSecondary"
+            children="Доход"
+          />
+          <Typography
+            align="center"
+            variant="h5"
+            children={'+' + formatSum(income)}
+          />
+        </Box>
 
-        <Confirm
-          title="Хотите начать всё заново?"
-          description="Остатки во всех категориях сбросятся, а бюджеты в будущем удалятся. Вы сможете начать распределять деньги с чистого листа. Меняются только бюджеты, все остальные данные останутся как есть."
-          onOk={() => dispatch(startFresh(date))}
-          okText="Сбросить остатки"
-          cancelText="Отмена"
-        >
-          <Button fullWidth>Начать всё заново</Button>
-        </Confirm>
+        <Box>
+          <Typography
+            align="center"
+            variant="body2"
+            color="textSecondary"
+            children="Расход"
+          />
+          <Typography
+            align="center"
+            variant="h5"
+            children={formatSum(-outcome)}
+          />
+        </Box>
 
-        {!!overspent && (
+        <Box>
           <Confirm
-            title="Избавиться от перерасходов?"
-            onOk={() => dispatch(fixOverspends(date))}
-            okText="Покрыть перерасходы"
+            title="Скопировать все бюджеты?"
+            description="Бюджеты будут точно такими же, как в предыдущем месяце."
+            onOk={() => dispatch(copyPreviousBudget(date))}
+            okText="Скопировать"
             cancelText="Отмена"
           >
-            <Button fullWidth>Покрыть перерасходы</Button>
+            <Button fullWidth color="secondary">
+              Копировать бюджеты с прошлого месяца
+            </Button>
           </Confirm>
-        )}
+
+          {!!overspent && (
+            <Confirm
+              title="Избавиться от перерасходов?"
+              onOk={() => dispatch(fixOverspends(date))}
+              okText="Покрыть перерасходы"
+              cancelText="Отмена"
+            >
+              <Button fullWidth color="secondary">
+                Покрыть перерасходы ({formatMoney(overspent, currency)})
+              </Button>
+            </Confirm>
+          )}
+
+          <Confirm
+            title="Хотите начать всё заново?"
+            description="Остатки во всех категориях сбросятся, а бюджеты в будущем удалятся. Вы сможете начать распределять деньги с чистого листа. Меняются только бюджеты, все остальные данные останутся как есть."
+            onOk={() => dispatch(startFresh(date))}
+            okText="Сбросить остатки"
+            cancelText="Отмена"
+          >
+            <Button fullWidth color="secondary">
+              Сбросить все остатки
+            </Button>
+          </Confirm>
+        </Box>
       </Rhythm>
 
-      <Line name={`Распределено`} amount={available} currency={currency} />
-      <Line name={`Перерасход`} amount={overspent} currency={currency} />
-      <Line name={`Расход`} amount={outcome} currency={currency} />
-      <Line
-        name={`Все переводы`}
-        amount={-transferOutcome}
-        currency={currency}
-      />
-      <Line
-        name={`Потери на переводах`}
-        amount={-transferFees}
-        currency={currency}
-      />
-      <Line
-        name={`realBudgetedInFuture`}
-        amount={realBudgetedInFuture}
-        currency={currency}
-      />
-      <Line name={`В бюджете`} amount={moneyInBudget} currency={currency} />
-    </Box>
-  )
-}
+      {/* <Line name={`Распределено`} amount={available}  /> */}
 
-function Line({ name, amount, currency, onClick }) {
-  return (
-    <Box display="flex" flexDirection="row" mt={1} onClick={onClick}>
-      <Box flexGrow="1" mr={1} minWidth={0}>
-        <Typography noWrap>{name}</Typography>
-      </Box>
-
-      {(amount || amount === 0) && (
-        <Typography>{formatMoney(amount, currency)}</Typography>
-      )}
+      <Rhythm gap={1} py={2} px={3}>
+        <Line name={`Все переводы`} amount={-transferOutcome} />
+        <Line name={`Потери на переводах`} amount={-transferFees} />
+        <Line name={`realBudgetedInFuture`} amount={realBudgetedInFuture} />
+        <Line name={`В бюджете`} amount={moneyInBudget} />
+      </Rhythm>
     </Box>
   )
 }
