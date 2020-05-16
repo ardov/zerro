@@ -107,7 +107,7 @@ export const getUserInstrument = state =>
   getInstrument(state, getUserInstrumentId(state))
 
 export const getUserCurrencyCode = state =>
-  getUserInstrument(state) ? getUserInstrument(state).shortTitle : 'RUB'
+  getUserInstrument(state)?.shortTitle || 'RUB'
 
 export const convertCurrency = createSelector(
   [getInstruments, getUserInstrumentId],
