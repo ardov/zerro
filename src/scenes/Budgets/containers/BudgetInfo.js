@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { formatMoney } from 'helpers/format'
+import { formatMoney, getCurrencySymbol } from 'helpers/format'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
@@ -24,46 +24,36 @@ import {
 import CloseIcon from '@material-ui/icons/Close'
 import Rhythm from 'components/Rhythm'
 import { Tooltip } from 'components/Tooltip'
+import { Total, Line } from './components'
+import { getAmountsByTag } from '../selectors/getAmountsByTag'
+import { getTagsTree } from 'store/localData/tags'
 
 const getMonthName = date => format(date, 'LLL', { locale: ru }).toLowerCase()
 
 export default function BudgetInfo({ month, index, onClose, ...rest }) {
   const currency = useSelector(getUserCurrencyCode)
   const totals = useSelector(state => getTotalsByMonth(state)[index])
+  const amounts = useSelector(getAmountsByTag)?.[month]
+  const tags = useSelector(getTagsTree)
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const {
     date,
-    available,
-    prevOverspent,
-    toBeBudgeted,
     overspent,
     income,
-    prevFunds,
     transferOutcome,
     transferFees,
     realBudgetedInFuture,
-    budgeted,
     moneyInBudget,
-    budgetedInFuture,
     outcome,
+    // available,
+    // prevOverspent,
+    // toBeBudgeted,
+    // prevFunds,
+    // budgeted,
+    // budgetedInFuture,
   } = totals
 
-  const formatSum = sum => formatMoney(sum, currency)
   const dispatch = useDispatch()
-
-  function Line({ name, amount }) {
-    return (
-      <Box display="flex" flexDirection="row">
-        <Box flexGrow="1" mr={1} minWidth={0}>
-          <Typography noWrap variant="body2">
-            {name}
-          </Typography>
-        </Box>
-
-        <Typography variant="body2">{formatSum(amount)}</Typography>
-      </Box>
-    )
-  }
 
   return (
     <Box {...rest} minHeight="100vh">
@@ -82,33 +72,28 @@ export default function BudgetInfo({ month, index, onClose, ...rest }) {
       )}
 
       <Rhythm gap={5} p={3}>
-        <Box>
-          <Typography
-            align="center"
-            variant="body2"
-            color="textSecondary"
-            children="Доход"
-          />
-          <Typography
-            align="center"
-            variant="h5"
-            children={'+' + formatSum(income)}
-          />
-        </Box>
+        <div>
+          <Total name="Доход" value={income} currency={currency} sign />
+          <Rhythm gap={1} py={2} px={3}>
+            {tags.map(tag => {
+              const info = amounts[tag.id]
+              if (!info) return null
+              const income = info.children ? info.totalIncome : info.income
+              if (income)
+                return (
+                  <Line
+                    key={tag.id}
+                    name={tag.title}
+                    amount={income}
+                    currency={currency}
+                  />
+                )
+              return null
+            })}
+          </Rhythm>
+        </div>
 
-        <Box>
-          <Typography
-            align="center"
-            variant="body2"
-            color="textSecondary"
-            children="Расход"
-          />
-          <Typography
-            align="center"
-            variant="h5"
-            children={formatSum(-outcome)}
-          />
-        </Box>
+        <Total name="Расход" value={-outcome} currency={currency} sign />
 
         <Box>
           <Confirm
@@ -153,10 +138,22 @@ export default function BudgetInfo({ month, index, onClose, ...rest }) {
       {/* <Line name={`Распределено`} amount={available}  /> */}
 
       <Rhythm gap={1} py={2} px={3}>
-        <Line name={`Все переводы`} amount={-transferOutcome} />
-        <Line name={`Потери на переводах`} amount={-transferFees} />
-        <Line name={`realBudgetedInFuture`} amount={realBudgetedInFuture} />
-        <Line name={`В бюджете`} amount={moneyInBudget} />
+        <Line
+          name={`Все переводы`}
+          amount={-transferOutcome}
+          currency={currency}
+        />
+        <Line
+          name={`Потери на переводах`}
+          amount={-transferFees}
+          currency={currency}
+        />
+        <Line
+          name={`realBudgetedInFuture`}
+          amount={realBudgetedInFuture}
+          currency={currency}
+        />
+        <Line name={`В бюджете`} amount={moneyInBudget} currency={currency} />
       </Rhythm>
     </Box>
   )
