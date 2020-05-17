@@ -30,9 +30,9 @@ const useStyles = makeStyles(({ shape, spacing, palette }) => ({
   },
 }))
 
-export default function ToBeBudgeted({ index, ...rest }) {
+export default function ToBeBudgeted({ index, month, ...rest }) {
   const currency = useSelector(getUserCurrencyCode)
-  const totals = useSelector(state => getTotalsByMonth(state)?.[index])
+  const totals = useSelector(getTotalsByMonth)[month]
   const {
     date,
     prevOverspent,

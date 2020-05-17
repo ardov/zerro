@@ -1,6 +1,6 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
-import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
+import { getTotalsArray } from '../selectors/getTotalsByMonth'
 import { convertCurrency } from 'store/serverData'
 import { Box } from '@material-ui/core'
 import { getAccountsInBudget } from 'store/localData/accounts'
@@ -9,7 +9,7 @@ import { useDevMode } from 'helpers/useDevMode'
 
 export default function WarningSign({ ...rest }) {
   const [devMode] = useDevMode()
-  const totalsArray = useSelector(getTotalsByMonth)
+  const totalsArray = useSelector(getTotalsArray)
   const { moneyInBudget } = totalsArray[totalsArray.length - 1]
 
   const accsInBudget = useSelector(getAccountsInBudget)

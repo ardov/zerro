@@ -23,9 +23,58 @@ import { getTagsTree } from 'store/localData/tags'
 
 const getMonthName = date => format(date, 'LLL', { locale: ru }).toLowerCase()
 
+function IncomeData(month) {
+  const currency = useSelector(getUserCurrencyCode)
+  const tags = useSelector(getTagsTree)
+  const amounts = useSelector(getAmountsByTag)?.[month]
+  const income = useSelector(getTotalsByMonth)?.[month]?.income
+  const incomeTags = tags.filter(tag => amounts[tag.id]?.totalIncome)
+  const incomeData = incomeTags
+    .map(tag => {
+      return {
+        id: tag.id,
+        color: tag.colorGenerated,
+        name: tag.title,
+        amount: amounts[tag.id].totalIncome,
+      }
+    })
+    .sort((a, b) => b.amount - a.amount)
+
+  return (
+    <div>
+      <Rhythm gap={1}>
+        <Total name="Доход" value={income} currency={currency} sign />
+        <PercentBar data={incomeData} />
+        {incomeData.map(tag => (
+          <Line
+            key={tag.id}
+            name={
+              <>
+                <span
+                  style={{
+                    width: 12,
+                    height: 12,
+                    background: tag.color,
+                    display: 'inline-block',
+                    marginRight: 8,
+                    borderRadius: '50%',
+                  }}
+                />
+                {tag.name}
+              </>
+            }
+            amount={tag.amount}
+            currency={currency}
+          />
+        ))}
+      </Rhythm>
+    </div>
+  )
+}
+
 export default function BudgetInfo({ month, index, onClose, ...rest }) {
   const currency = useSelector(getUserCurrencyCode)
-  const totals = useSelector(state => getTotalsByMonth(state)[index])
+  const totals = useSelector(getTotalsByMonth)[month]
   const amounts = useSelector(getAmountsByTag)?.[month]
   const tags = useSelector(getTagsTree)
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))

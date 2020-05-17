@@ -109,7 +109,11 @@ export default function Budgets() {
             </Grid>
 
             <Grid item xs={12} md={4}>
-              <ToBeBudgeted index={index} onClick={() => openDrawer(null)} />
+              <ToBeBudgeted
+                index={index}
+                month={monthList[index]}
+                onClick={() => openDrawer(null)}
+              />
             </Grid>
 
             <Grid item xs={12} md={12}>
