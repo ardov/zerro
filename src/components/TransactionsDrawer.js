@@ -2,12 +2,9 @@ import React from 'react'
 import TransactionList from './TransactionList'
 import { Drawer, Box, Typography, IconButton } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
-import { getSortedTransactions } from 'store/localData/transactions'
 import CloseIcon from '@material-ui/icons/Close'
-import { connect } from 'react-redux'
 
-function TransactionsDrawer({
-  transactions,
+export default function TransactionsDrawer({
   filterConditions,
   title,
   onClose,
@@ -35,8 +32,3 @@ function TransactionsDrawer({
     </Drawer>
   )
 }
-
-export default connect(
-  state => ({ transactions: getSortedTransactions(state) }),
-  () => ({})
-)(TransactionsDrawer)
