@@ -3,10 +3,11 @@ import { useDispatch, useSelector } from 'react-redux'
 import { formatMoney, getCurrencySymbol } from 'helpers/format'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
-import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
+import { getTotalsByMonth } from '../../selectors/getTotalsByMonth'
+import { getAmountsByTag } from '../../selectors/getAmountsByTag'
 import { getUserCurrencyCode } from 'store/serverData'
 import Confirm from 'components/Confirm'
-import { copyPreviousBudget, startFresh, fixOverspends } from '../thunks'
+import { copyPreviousBudget, startFresh, fixOverspends } from '../../thunks'
 import {
   Box,
   Typography,
@@ -17,8 +18,7 @@ import {
 import CloseIcon from '@material-ui/icons/Close'
 import Rhythm from 'components/Rhythm'
 import { Tooltip } from 'components/Tooltip'
-import { Total, Line } from './components'
-import { getAmountsByTag } from '../selectors/getAmountsByTag'
+import { Total, Line } from '../components'
 import { getTagsTree } from 'store/localData/tags'
 
 const getMonthName = date => format(date, 'LLL', { locale: ru }).toLowerCase()
