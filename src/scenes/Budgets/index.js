@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import startOfMonth from 'date-fns/startOfMonth'
 import TagTable from './containers/TagTable'
 import TransferTable from './containers/TransferTable'
-import BudgetInfo from './containers/BudgetInfo'
+import MonthInfo from './containers/MonthInfo'
 import ToBeBudgeted from './containers/ToBeBudgeted'
 import MonthSelector from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
@@ -155,7 +155,7 @@ export default function Budgets() {
               id={selectedTag}
             />
           ) : (
-            <BudgetInfo month={month} index={index} onClose={closeDrawer} />
+            <MonthInfo month={month} index={index} onClose={closeDrawer} />
           )}
         </Drawer>
       </Box>

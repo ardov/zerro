@@ -5,19 +5,12 @@ import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
-import { Droppable } from 'react-beautiful-dnd'
 import Confirm from 'components/Confirm'
-import {
-  copyPreviousBudget,
-  fillGoals,
-  startFresh,
-  fixOverspends,
-} from '../thunks'
+import { copyPreviousBudget, startFresh, fixOverspends } from '../thunks'
 import {
   Box,
   Typography,
   Button,
-  Divider,
   IconButton,
   useMediaQuery,
 } from '@material-ui/core'
@@ -53,6 +46,18 @@ export default function BudgetInfo({ month, index, onClose, ...rest }) {
     // budgetedInFuture,
   } = totals
 
+  const incomeTags = tags.filter(tag => amounts[tag.id]?.totalIncome)
+
+  const incomeData = incomeTags
+    .map(tag => {
+      return {
+        id: tag.id,
+        color: tag.colorGenerated,
+        name: tag.title,
+        amount: amounts[tag.id].totalIncome,
+      }
+    })
+    .sort((a, b) => b.amount - a.amount)
   const dispatch = useDispatch()
 
   return (
@@ -72,24 +77,41 @@ export default function BudgetInfo({ month, index, onClose, ...rest }) {
       )}
 
       <Rhythm gap={5} p={3}>
+        {!!overspent && (
+          <Box p={2} bgcolor="warning.light" color="">
+            <Typography>
+              В некоторых категориях отрицательный баланс. Добавьте туда денег.
+            </Typography>
+            <Button>Исправить автоматически</Button>
+          </Box>
+        )}
+
         <div>
-          <Total name="Доход" value={income} currency={currency} sign />
-          <Rhythm gap={1} py={2} px={3}>
-            {tags.map(tag => {
-              const info = amounts[tag.id]
-              if (!info) return null
-              const income = info.children ? info.totalIncome : info.income
-              if (income)
-                return (
-                  <Line
-                    key={tag.id}
-                    name={tag.title}
-                    amount={income}
-                    currency={currency}
-                  />
-                )
-              return null
-            })}
+          <Rhythm gap={1}>
+            <Total name="Доход" value={income} currency={currency} sign />
+            <PercentBar data={incomeData} />
+            {incomeData.map(tag => (
+              <Line
+                key={tag.id}
+                name={
+                  <>
+                    <span
+                      style={{
+                        width: 12,
+                        height: 12,
+                        background: tag.color,
+                        display: 'inline-block',
+                        marginRight: 8,
+                        borderRadius: '50%',
+                      }}
+                    />
+                    {tag.name}
+                  </>
+                }
+                amount={tag.amount}
+                currency={currency}
+              />
+            ))}
           </Rhythm>
         </div>
 
@@ -155,6 +177,30 @@ export default function BudgetInfo({ month, index, onClose, ...rest }) {
         />
         <Line name={`В бюджете`} amount={moneyInBudget} currency={currency} />
       </Rhythm>
+    </Box>
+  )
+}
+
+function PercentBar({ data }) {
+  return (
+    <Box
+      display="flex"
+      width="100%"
+      height="12px"
+      borderRadius="6px"
+      overflow="hidden"
+    >
+      {data.map((bar, i) => (
+        <Tooltip title={bar.name} key={bar.id}>
+          <Box
+            flexBasis={bar.amount + '%'}
+            minWidth="2px"
+            pl={i === 0 ? 0 : '1px'}
+          >
+            <Box bgcolor={bar.color} height="100%" />
+          </Box>
+        </Tooltip>
+      ))}
     </Box>
   )
 }
