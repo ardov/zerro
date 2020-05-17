@@ -59,6 +59,7 @@ export function WidgetIncome(props) {
       color: tag.colorGenerated,
       name: tag.title,
       amount: amounts[tag.id].totalIncome,
+      filter: [tag.id, ...tag.children.map(child => child.id)],
     }))
     .sort((a, b) => b.amount - a.amount)
 
@@ -68,7 +69,7 @@ export function WidgetIncome(props) {
     type: 'income',
     dateFrom: month,
     dateTo: endOfMonth(month),
-    tags: [selected],
+    tags: selected,
   }
 
   return (
@@ -93,7 +94,7 @@ export function WidgetIncome(props) {
                     onClick={e => {
                       e.stopPropagation()
                       e.preventDefault()
-                      setSelected(tag.id)
+                      setSelected(tag.filter)
                     }}
                     name={
                       <>
