@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useContext } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { formatMoney, getCurrencySymbol } from 'helpers/format'
+import { formatMoney } from 'helpers/format'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
+import { MonthContext } from 'scenes/Budgets'
 import { getTotalsByMonth } from '../../selectors/getTotalsByMonth'
-import { getAmountsByTag } from '../../selectors/getAmountsByTag'
+// import { getAmountsByTag } from '../../selectors/getAmountsByTag'
 import { getUserCurrencyCode } from 'store/serverData'
 import Confirm from 'components/Confirm'
 import { copyPreviousBudget, startFresh, fixOverspends } from '../../thunks'
@@ -19,69 +20,20 @@ import CloseIcon from '@material-ui/icons/Close'
 import Rhythm from 'components/Rhythm'
 import { Tooltip } from 'components/Tooltip'
 import { Total, Line } from '../components'
-import { getTagsTree } from 'store/localData/tags'
+import { WidgetIncome } from './WidgetIncome'
 
-const getMonthName = date => format(date, 'LLL', { locale: ru }).toLowerCase()
+const getMonthName = date => format(date, 'LLL', { locale: ru }).toUpperCase()
 
-function IncomeData(month) {
-  const currency = useSelector(getUserCurrencyCode)
-  const tags = useSelector(getTagsTree)
-  const amounts = useSelector(getAmountsByTag)?.[month]
-  const income = useSelector(getTotalsByMonth)?.[month]?.income
-  const incomeTags = tags.filter(tag => amounts[tag.id]?.totalIncome)
-  const incomeData = incomeTags
-    .map(tag => {
-      return {
-        id: tag.id,
-        color: tag.colorGenerated,
-        name: tag.title,
-        amount: amounts[tag.id].totalIncome,
-      }
-    })
-    .sort((a, b) => b.amount - a.amount)
-
-  return (
-    <div>
-      <Rhythm gap={1}>
-        <Total name="Доход" value={income} currency={currency} sign />
-        <PercentBar data={incomeData} />
-        {incomeData.map(tag => (
-          <Line
-            key={tag.id}
-            name={
-              <>
-                <span
-                  style={{
-                    width: 12,
-                    height: 12,
-                    background: tag.color,
-                    display: 'inline-block',
-                    marginRight: 8,
-                    borderRadius: '50%',
-                  }}
-                />
-                {tag.name}
-              </>
-            }
-            amount={tag.amount}
-            currency={currency}
-          />
-        ))}
-      </Rhythm>
-    </div>
-  )
-}
-
-export default function BudgetInfo({ month, index, onClose, ...rest }) {
+export default function BudgetInfo({ onClose, ...rest }) {
+  const month = useContext(MonthContext)
   const currency = useSelector(getUserCurrencyCode)
   const totals = useSelector(getTotalsByMonth)[month]
-  const amounts = useSelector(getAmountsByTag)?.[month]
-  const tags = useSelector(getTagsTree)
+  // const amounts = useSelector(getAmountsByTag)?.[month]
+  // const tags = useSelector(getTagsTree)
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const {
     date,
     overspent,
-    income,
     transferOutcome,
     transferFees,
     realBudgetedInFuture,
@@ -95,18 +47,6 @@ export default function BudgetInfo({ month, index, onClose, ...rest }) {
     // budgetedInFuture,
   } = totals
 
-  const incomeTags = tags.filter(tag => amounts[tag.id]?.totalIncome)
-
-  const incomeData = incomeTags
-    .map(tag => {
-      return {
-        id: tag.id,
-        color: tag.colorGenerated,
-        name: tag.title,
-        amount: amounts[tag.id].totalIncome,
-      }
-    })
-    .sort((a, b) => b.amount - a.amount)
   const dispatch = useDispatch()
 
   return (
@@ -134,38 +74,8 @@ export default function BudgetInfo({ month, index, onClose, ...rest }) {
             <Button>Исправить автоматически</Button>
           </Box>
         )}
-
-        <div>
-          <Rhythm gap={1}>
-            <Total name="Доход" value={income} currency={currency} sign />
-            <PercentBar data={incomeData} />
-            {incomeData.map(tag => (
-              <Line
-                key={tag.id}
-                name={
-                  <>
-                    <span
-                      style={{
-                        width: 12,
-                        height: 12,
-                        background: tag.color,
-                        display: 'inline-block',
-                        marginRight: 8,
-                        borderRadius: '50%',
-                      }}
-                    />
-                    {tag.name}
-                  </>
-                }
-                amount={tag.amount}
-                currency={currency}
-              />
-            ))}
-          </Rhythm>
-        </div>
-
+        <WidgetIncome />
         <Total name="Расход" value={-outcome} currency={currency} sign />
-
         <Box>
           <Confirm
             title="Скопировать все бюджеты?"
@@ -226,30 +136,6 @@ export default function BudgetInfo({ month, index, onClose, ...rest }) {
         />
         <Line name={`В бюджете`} amount={moneyInBudget} currency={currency} />
       </Rhythm>
-    </Box>
-  )
-}
-
-function PercentBar({ data }) {
-  return (
-    <Box
-      display="flex"
-      width="100%"
-      height="12px"
-      borderRadius="6px"
-      overflow="hidden"
-    >
-      {data.map((bar, i) => (
-        <Tooltip title={bar.name} key={bar.id}>
-          <Box
-            flexBasis={bar.amount + '%'}
-            minWidth="2px"
-            pl={i === 0 ? 0 : '1px'}
-          >
-            <Box bgcolor={bar.color} height="100%" />
-          </Box>
-        </Tooltip>
-      ))}
     </Box>
   )
 }

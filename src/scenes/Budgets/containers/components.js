@@ -2,7 +2,7 @@ import React from 'react'
 import { formatMoney } from 'helpers/format'
 import { Box, Typography } from '@material-ui/core'
 
-function Amount({
+export function Amount({
   value = 0,
   currency,
   sign = false,
@@ -55,9 +55,9 @@ export function Total({
   )
 }
 
-export function Line({ name, amount, currency }) {
+export function Line({ name, amount, currency, ...rest }) {
   return (
-    <Box display="flex" flexDirection="row">
+    <Box display="flex" flexDirection="row" {...rest}>
       <Box flexGrow="1" mr={1} minWidth={0}>
         <Typography noWrap variant="body2">
           {name}
