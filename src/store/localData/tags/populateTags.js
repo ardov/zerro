@@ -1,4 +1,4 @@
-import { intToRGB } from 'helpers/convertColor'
+import { intToRGB, getColorForString } from 'helpers/convertColor'
 import toArray from 'lodash/toArray'
 import iconsMap from './iconsMap.json'
 import { nullTag } from './makeTag.js'
@@ -27,6 +27,7 @@ function makePopulatedTag(tag) {
     name: getName(tag.title),
     symbol: iconsMap[tag.icon] || tag.title.slice(0, 2),
     colorRGB: tag.color ? intToRGB(tag.color) : null,
+    colorGenerated: getColorForString(tag.title),
   }
 }
 
