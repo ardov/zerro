@@ -2,10 +2,13 @@ import React from 'react'
 import { formatMoney } from 'helpers/format'
 import { Box, Typography } from '@material-ui/core'
 
+const decStyle = { opacity: 0.5 }
+
 export function Amount({
   value = 0,
   currency,
   sign = false,
+  noShade = false,
   decimals,
   intProps,
   decProps,
@@ -20,7 +23,7 @@ export function Amount({
     return (
       <>
         <span {...intProps}>{arr[0]},</span>
-        <span style={{ opacity: 0.5 }} {...decProps}>
+        <span style={noShade ? null : decStyle} {...decProps}>
           {arr[1]}
         </span>
       </>
@@ -63,7 +66,6 @@ export function Line({ name, amount, currency, ...rest }) {
           {name}
         </Typography>
       </Box>
-
       <Typography variant="body2">{formatMoney(amount, currency)}</Typography>
     </Box>
   )

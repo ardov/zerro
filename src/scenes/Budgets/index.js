@@ -24,7 +24,7 @@ import WarningSign from './containers/WarningSign'
 import GoalsProgressWidget from './containers/GoalsProgressWidget'
 import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@material-ui/icons/Close'
-import { getTags, getPopulatedTag } from 'store/localData/tags'
+import { getPopulatedTag } from 'store/localData/tags'
 import { Total, Line } from './containers/components'
 import { getAmountsForTag } from './selectors/getAmountsByTag'
 import Rhythm from 'components/Rhythm'
@@ -98,49 +98,48 @@ export default function Budgets() {
             {...moneyModalProps}
             onClose={() => setMoneyModalProps({ open: false })}
           />
-          <Box flexGrow="1">
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={4}>
-                <MonthSelector
-                  onChange={setMonth}
-                  {...{ minMonth, maxMonth, value: month }}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={4}>
-                <GoalsProgressWidget month={month} />
-              </Grid>
-
-              <Grid item xs={12} md={4}>
-                <ToBeBudgeted
-                  index={index}
-                  month={monthList[index]}
-                  onClick={() => openDrawer(null)}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={12}>
-                <TagTable
-                  index={index}
-                  date={monthList[index]}
-                  required={true}
-                  openDetails={openDrawer}
-                />
-                <Box mt={3}>
-                  <TagTable
-                    index={index}
-                    date={monthList[index]}
-                    openDetails={openDrawer}
+          <Box flexGrow="1" display="flex" justifyContent="center">
+            <Box maxWidth="800px">
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={4}>
+                  <MonthSelector
+                    onChange={setMonth}
+                    {...{ minMonth, maxMonth, value: month }}
                   />
-                </Box>
-                <Box mt={3}>
-                  <TransferTable month={monthList[index]} />
-                </Box>
+                </Grid>
 
-                {/* TODO make bottom navigation and remove this placeholder */}
-                <Box height={48} />
+                <Grid item xs={12} md={4}>
+                  <GoalsProgressWidget month={month} />
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                  <ToBeBudgeted
+                    index={index}
+                    month={monthList[index]}
+                    onClick={() => openDrawer(null)}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={12}>
+                  <Rhythm gap={3} pb={6}>
+                    <TagTable
+                      index={index}
+                      date={monthList[index]}
+                      openDetails={openDrawer}
+                      required={true}
+                    />
+
+                    <TagTable
+                      index={index}
+                      date={monthList[index]}
+                      openDetails={openDrawer}
+                    />
+
+                    <TransferTable month={monthList[index]} />
+                  </Rhythm>
+                </Grid>
               </Grid>
-            </Grid>
+            </Box>
           </Box>
 
           <WarningSign />
