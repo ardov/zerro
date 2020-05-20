@@ -1,5 +1,5 @@
 import React from 'react'
-import { withRouter } from 'react-router'
+import { useLocation, useHistory } from 'react-router'
 import RefreshButton from 'components/RefreshButton'
 import SettingsMenu from './SettingsMenu'
 import SettingsIcon from '@material-ui/icons/Settings'
@@ -24,7 +24,9 @@ const routes = [
   { path: '/accounts', label: 'Счета', icon: <AccountBalanceWalletIcon /> },
 ]
 
-const MobileNav = ({ location, history, ...rest }) => {
+export default function MobileNav(props) {
+  const path = useLocation().pathname
+  const history = useHistory()
   const [anchorEl, setAnchorEl] = React.useState(null)
   const c = useStyles()
 
@@ -36,6 +38,7 @@ const MobileNav = ({ location, history, ...rest }) => {
 
   const hasHomeBar = useHomeBar()
   const paddingBottom = hasHomeBar ? '20px' : '0px'
+  const currentRoute = routes.find(route => path.startsWith(route.path))
 
   return (
     <Box
@@ -49,7 +52,7 @@ const MobileNav = ({ location, history, ...rest }) => {
       <Paper>
         <Divider light />
 
-        <BottomNavigation value={location.pathname} onChange={handleChange}>
+        <BottomNavigation value={currentRoute?.path} onChange={handleChange}>
           {routes.map(route => (
             <BottomNavigationAction
               className={c.action}
@@ -78,5 +81,3 @@ const MobileNav = ({ location, history, ...rest }) => {
     </Box>
   )
 }
-
-export default withRouter(MobileNav)

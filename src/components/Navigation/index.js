@@ -46,7 +46,6 @@ export default function Header() {
         anchor="left"
         open={menuOpen}
         onClose={hideDrawer}
-        onNavigate={() => isMobile && hideDrawer()}
       />
     </>
   )

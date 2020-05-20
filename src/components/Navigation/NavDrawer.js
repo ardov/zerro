@@ -1,5 +1,5 @@
 import React from 'react'
-import { withRouter } from 'react-router'
+import { withRouter, useLocation } from 'react-router'
 import { Link } from 'react-router-dom'
 import RefreshButton from 'components/RefreshButton'
 import MenuButton from './containers/MenuButton'
@@ -30,18 +30,12 @@ const useStyles = makeStyles(theme => ({
   listItem: { borderRadius: theme.shape.borderRadius },
 }))
 
-const NavigationDrawer = ({
-  location,
-  match,
-  history,
-  staticContext,
-  onNavigate,
-  ...rest
-}) => {
+export default function NavigationDrawer(props) {
   const c = useStyles()
   const theme = useTheme()
+  const path = useLocation().pathname
   return (
-    <Drawer {...rest}>
+    <Drawer {...props}>
       <Box
         display="flex"
         position="relative"
@@ -55,11 +49,10 @@ const NavigationDrawer = ({
               <ListItem
                 className={c.listItem}
                 button
-                selected={route.path === location.pathname}
+                selected={path.startsWith(route.path)}
                 key={route.path}
                 component={Link}
                 to={route.path}
-                onClick={onNavigate}
               >
                 <ListItemIcon>{route.icon}</ListItemIcon>
                 <ListItemText primary={route.label} />
@@ -132,5 +125,3 @@ const NavigationDrawer = ({
     </Drawer>
   )
 }
-
-export default withRouter(NavigationDrawer)
