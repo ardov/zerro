@@ -37,7 +37,7 @@ export const getTagTotals = createSelector(
     })
 )
 
-export const getTotalsByMonth = createSelector(
+export const getTotalsArray = createSelector(
   [
     getMonthDates,
     getStartFunds,
@@ -106,3 +106,11 @@ export const getTotalsByMonth = createSelector(
     return totalsByMonth
   }
 )
+
+export const getTotalsByMonth = createSelector([getTotalsArray], totals => {
+  let result = {}
+  for (const monthData of totals) {
+    result[monthData.date] = monthData
+  }
+  return result
+})

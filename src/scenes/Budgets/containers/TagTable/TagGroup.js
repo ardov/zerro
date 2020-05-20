@@ -35,6 +35,7 @@ function TagGroup(props) {
     openTransactionsPopover,
     openBudgetPopover,
     openGoalPopover,
+    openDetails,
   } = props
 
   const {
@@ -61,6 +62,7 @@ function TagGroup(props) {
     openGoalPopover,
     openBudgetPopover,
     openTransactionsPopover,
+    openDetails,
   }
 
   if (!tag.showOutcome && !totalOutcome && !totalAvailable && !showAll)

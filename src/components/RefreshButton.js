@@ -12,7 +12,7 @@ import BackupIcon from '@material-ui/icons/Backup'
 import Badge from '@material-ui/core/Badge'
 import IconButton from '@material-ui/core/IconButton'
 import { withStyles, useTheme } from '@material-ui/core/styles'
-import Tooltip from '@material-ui/core/Tooltip'
+import { Tooltip } from 'components/Tooltip'
 import { getLastSyncInfo } from 'store/lastSync'
 
 const StyledBadge = withStyles({ badge: { top: '50%', right: 4 } })(Badge)

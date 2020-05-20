@@ -9,6 +9,9 @@ import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
 import { getTags } from 'store/localData/tags'
 import { subMonths } from 'date-fns/esm'
 import { getGoalsProgress } from '../selectors/goalsProgress'
+import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
+import { getGoals } from 'store/localData/hiddenData'
+const { TARGET_BALANCE } = GOAL_TYPES
 
 export const moveFunds = (amount, source, destination, monthDate) => (
   dispatch,
@@ -111,11 +114,13 @@ export const fillGoals = month => (dispatch, getState) => {
   const tags = getTags(state)
   const user = getRootUser(state).id
   const budgets = getBudgetsByMonthAndTag(state)?.[month]
+  const goals = getGoals(state)
 
   if (!goalsProgress || !tags) return
 
   const changedArr = []
   for (const tag in goalsProgress) {
+    if (goals[tag].type === TARGET_BALANCE && !goals[tag].end) continue
     const target = goalsProgress[tag]?.target || 0
     const currentBudget = budgets?.[tag]?.outcome || 0
     if (currentBudget < target) {

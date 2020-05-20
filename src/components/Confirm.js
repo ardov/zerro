@@ -30,7 +30,7 @@ export default function Confirm({ onOk, children, ...rest }) {
   )
 }
 
-function ConfirmModal({
+export function ConfirmModal({
   title = 'Вы уверены?',
   description = null,
   open = false,
@@ -40,9 +40,10 @@ function ConfirmModal({
   okText = 'OK',
   okColor = 'primary',
   okVariant = 'contained',
+  ...rest
 }) {
   return (
-    <Dialog open={open} onClose={onCancel}>
+    <Dialog open={open} onClose={onCancel} {...rest}>
       <DialogTitle>{title}</DialogTitle>
 
       {!!description && (

@@ -8,10 +8,10 @@ import {
   MenuItem,
   Switch,
   Grid,
-  Tooltip,
   Typography,
   IconButton,
 } from '@material-ui/core'
+import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@material-ui/icons/Close'
 
 export default function FilterDrawer({

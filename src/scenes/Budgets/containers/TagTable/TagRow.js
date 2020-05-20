@@ -4,9 +4,9 @@ import {
   Box,
   Link,
   IconButton,
-  Tooltip,
   useMediaQuery,
 } from '@material-ui/core'
+import { Tooltip } from 'components/Tooltip'
 import { makeStyles } from '@material-ui/styles'
 import EmojiIcon from 'components/EmojiIcon'
 import { formatMoney } from 'helpers/format'
@@ -21,7 +21,7 @@ import { getGoal } from 'store/localData/hiddenData'
 import { useSelector, shallowEqual } from 'react-redux'
 import { getGoalProgress } from 'scenes/Budgets/selectors/goalsProgress'
 
-export const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(theme => ({
   row: {
     paddingTop: ({ isChild }) => theme.spacing(isChild ? 0.5 : 1),
     paddingBottom: props => theme.spacing(props.isChild ? 0.5 : 1),
@@ -78,6 +78,7 @@ export function TagRow(props) {
     openGoalPopover,
     openBudgetPopover,
     openTransactionsPopover,
+    openDetails,
   } = props
   const goal = useSelector(state => getGoal(state, id), shallowEqual)
   const goalProgress = useSelector(
@@ -97,7 +98,13 @@ export function TagRow(props) {
   return (
     <div className={c.row}>
       <div className={c.name}>
-        <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} flexShrink={0} />
+        <EmojiIcon
+          symbol={symbol}
+          mr={1.5}
+          color={colorRGB}
+          flexShrink={0}
+          onClick={() => openDetails(id)}
+        />
         <Typography variant="body1" color="textPrimary" noWrap>
           <span onClick={e => setNameAnchorEl(e.currentTarget)}>{name}</span>
         </Typography>

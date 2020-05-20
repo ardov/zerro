@@ -3,7 +3,7 @@ import Paper from '@material-ui/core/Paper'
 import InputBase from '@material-ui/core/InputBase'
 import IconButton from '@material-ui/core/IconButton'
 import FilterListIcon from '@material-ui/icons/FilterList'
-import Tooltip from '@material-ui/core/Tooltip'
+import { Tooltip } from 'components/Tooltip'
 import Box from '@material-ui/core/Box'
 import CloseIcon from '@material-ui/icons/Close'
 

@@ -13,11 +13,11 @@ import {
   Box,
   Divider,
   IconButton,
-  Tooltip,
   Menu,
   MenuItem,
   Typography,
 } from '@material-ui/core'
+import { Tooltip } from 'components/Tooltip'
 
 const useStyles = makeStyles(({ spacing }) => ({
   menuIcon: { marginRight: spacing(1) },

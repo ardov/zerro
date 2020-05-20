@@ -2,8 +2,9 @@ import React, { useState, useCallback } from 'react'
 import { Box, Typography, Paper } from '@material-ui/core'
 // import sendEvent from 'helpers/sendEvent'
 import { useSelector } from 'react-redux'
-import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts'
-// import { getTotalsByMonth } from 'scenes/Budgets/selectors/getTotalsByMonth'
+import { AreaChart, Area, ResponsiveContainer } from 'recharts'
+import { Tooltip } from 'components/Tooltip'
+// import { getTotalsArray } from 'scenes/Budgets/selectors/getTotalsArray'
 // import { getAmountsByTag } from 'scenes/Budgets/selectors/getAmountsByTag'
 // import { format } from 'date-fns'
 import { getAccountsHistory } from './selectors'
@@ -13,7 +14,7 @@ import Rhythm from 'components/Rhythm'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 
 export default function Stats() {
-  // const rawData = useSelector(getTotalsByMonth)
+  // const rawData = useSelector(getTotalsArray)
   const accountsHistory = useSelector(getAccountsHistory)
   const accs = useSelector(getAccountList)
   const [selected, setSelected] = useState({})

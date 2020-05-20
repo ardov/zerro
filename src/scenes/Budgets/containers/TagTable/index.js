@@ -15,7 +15,14 @@ import BudgetPopover from './BudgetPopover'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
-function TagTable({ tagsTree, date, updateBudget, required = false, ...rest }) {
+function TagTable({
+  tagsTree,
+  date,
+  updateBudget,
+  openDetails,
+  required = false,
+  ...rest
+}) {
   const [selected, setSelected] = useState()
   // const [showAll, setShowAll] = useState(false)
   const [metricIndex, setMetricIndex] = useState(0)
@@ -78,6 +85,7 @@ function TagTable({ tagsTree, date, updateBudget, required = false, ...rest }) {
               openTransactionsPopover={onSelect}
               openBudgetPopover={openBudgetPopover}
               openGoalPopover={openGoalPopover}
+              openDetails={openDetails}
             />
           ))}
         </Paper>

@@ -1,44 +1,80 @@
 import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import startOfMonth from 'date-fns/startOfMonth'
+
+import { Redirect } from 'react-router-dom'
+import { format } from 'date-fns'
 import TagTable from './containers/TagTable'
 import TransferTable from './containers/TransferTable'
-import BudgetInfo from './containers/BudgetInfo'
+import MonthInfo from './containers/MonthInfo'
+import ToBeBudgeted from './containers/ToBeBudgeted'
 import MonthSelector from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
+import EmojiIcon from 'components/EmojiIcon'
 import {
   Box,
-  // Hidden,
-  // Drawer,
-  // Typography,
+  Drawer,
   useMediaQuery,
+  Typography,
+  IconButton,
 } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid'
-// import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/core/styles'
 import { DragDropContext } from 'react-beautiful-dnd'
 import { moveFunds } from './thunks'
 import MoveMoneyModal from './containers/MoveMoneyModal'
 import WarningSign from './containers/WarningSign'
+import GoalsProgressWidget from './containers/GoalsProgressWidget'
+import { Tooltip } from 'components/Tooltip'
+import CloseIcon from '@material-ui/icons/Close'
+import { getPopulatedTag } from 'store/localData/tags'
+import { Total, Line } from './containers/components'
+import { getAmountsForTag } from './selectors/getAmountsByTag'
+import Rhythm from 'components/Rhythm'
+import { useMonth } from './useMonth'
 
-// const useStyles = makeStyles(theme => ({
-//   drawerWidth: { width: 360 },
-// }))
+const useStyles = makeStyles(theme => ({ drawerWidth: { width: 360 } }))
 
-export default function Budgets() {
+export default function BudgetsRouter() {
+  const [month] = useMonth()
   const monthList = useSelector(getMonthDates)
-  const dispatch = useDispatch()
-
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
-  const curMonth = +startOfMonth(new Date())
 
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
-  const [month, setMonth] = useState(curMonth)
-  // const [openDrawer, setOpenDrawer] = useState(false)
+  if (month && month < minMonth)
+    return <Redirect to={`/budget/${format(minMonth, 'yyyy-MM')}`} />
+
+  if (month && month > maxMonth)
+    return <Redirect to={`/budget/${format(maxMonth, 'yyyy-MM')}`} />
+
+  if (month) return <Budgets />
+  return <Redirect to={`/budget/${format(new Date(), 'yyyy-MM')}`} />
+}
+
+function Budgets() {
+  const dispatch = useDispatch()
+  const monthList = useSelector(getMonthDates)
+  const minMonth = monthList[0]
+  const maxMonth = monthList[monthList.length - 1]
+
+  const [month, setMonth] = useMonth()
+
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
+  const [showDrawer, setShowDrawer] = useState(false)
+  const [selectedTag, setSelectedTag] = useState(null)
   const [moneyModalProps, setMoneyModalProps] = useState({ open: false })
-  // const c = useStyles()
+  const c = useStyles()
 
   const index = monthList.findIndex(date => date === month)
+
+  const drawerVisibility = !isMobile || !!showDrawer
+  const closeDrawer = () => {
+    setSelectedTag(null)
+    setShowDrawer(false)
+  }
+  const openDrawer = (id = null) => {
+    setSelectedTag(id)
+    setShowDrawer(true)
+  }
 
   const moveMoney = e => {
     if (
@@ -77,55 +113,137 @@ export default function Budgets() {
           {...moneyModalProps}
           onClose={() => setMoneyModalProps({ open: false })}
         />
-        <Box flexGrow="1">
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={3}>
-              <Box position="sticky" top="24px">
+        <Box flexGrow="1" display="flex" justifyContent="center">
+          <Box maxWidth="800px">
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={4}>
                 <MonthSelector
                   onChange={setMonth}
                   {...{ minMonth, maxMonth, value: month }}
                 />
-                <Box component={BudgetInfo} index={index} mt={3} />
-              </Box>
-            </Grid>
+              </Grid>
 
-            <Grid item xs={12} md={9}>
-              <TagTable index={index} date={monthList[index]} required={true} />
-              <Box mt={3}>
-                <TagTable index={index} date={monthList[index]} />
-              </Box>
-              <Box mt={3}>
-                <TransferTable month={monthList[index]} />
-              </Box>
+              <Grid item xs={12} md={4}>
+                <GoalsProgressWidget month={month} />
+              </Grid>
 
-              {/* TODO make bottom navigation and remove this placeholder */}
-              <Box height={48} />
+              <Grid item xs={12} md={4}>
+                <ToBeBudgeted
+                  index={index}
+                  month={monthList[index]}
+                  onClick={() => openDrawer(null)}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={12}>
+                <Rhythm gap={3} pb={6}>
+                  <TagTable
+                    index={index}
+                    date={monthList[index]}
+                    openDetails={openDrawer}
+                    required={true}
+                  />
+
+                  <TagTable
+                    index={index}
+                    date={monthList[index]}
+                    openDetails={openDrawer}
+                  />
+
+                  <TransferTable month={monthList[index]} />
+                </Rhythm>
+              </Grid>
             </Grid>
-          </Grid>
+          </Box>
         </Box>
+
         <WarningSign />
-        {/* <Drawer
+
+        <Drawer
           classes={
             isMobile ? null : { paper: c.drawerWidth, root: c.drawerWidth }
           }
           variant={isMobile ? 'temporary' : 'persistent'}
           anchor="right"
-          open={!isMobile || !!openDrawer}
-          onClose={() => setOpenDrawer(false)}
+          open={drawerVisibility}
+          onClose={closeDrawer}
         >
-          <Box display="flex" flexDirection="column" minHeight="100vh" p={3}>
-            <MonthSelector
-              months={monthList}
-              current={index}
-              onSetCurrent={setCurrentMonth}
-              onChange={setMonthByIndex}
+          {selectedTag ? (
+            <TagPreview
+              month={month}
+              index={index}
+              onClose={closeDrawer}
+              id={selectedTag}
             />
-            <Box pt={2} />
-            <BudgetInfo index={index} />
-            <Box pt={2} />
-          </Box>
-        </Drawer> */}
+          ) : (
+            <MonthInfo month={month} index={index} onClose={closeDrawer} />
+          )}
+        </Drawer>
       </Box>
     </DragDropContext>
+  )
+}
+
+function TagPreview({ month, index, onClose, id }) {
+  const tag = useSelector(state => getPopulatedTag(state, id))
+  const amounts = useSelector(getAmountsForTag)(month, id)
+  if (!amounts) return null
+
+  const {
+    // available,
+    // totalAvailable,
+    leftover,
+    totalLeftover,
+    budgeted,
+    totalBudgeted,
+    // children,
+    // childrenAvailable,
+    // childrenBudgeted,
+    // childrenIncome,
+    // childrenLeftover,
+    // childrenOutcome,
+    // childrenOverspent,
+    // income,
+    outcome,
+    // tagOutcome,
+    // totalIncome,
+    totalOutcome,
+    // totalOverspent,
+    transferOutcome,
+  } = amounts
+  const isParent = !!amounts.children
+
+  const available = amounts.totalAvailable || amounts.available
+
+  return (
+    <Box>
+      <Box py={1} px={3} display="flex" alignItems="center">
+        <Box flexGrow={1} display="flex" minWidth={0} alignItems="center">
+          <EmojiIcon size="m" symbol={tag.symbol} mr={2} flexShrink={0} />
+          <Typography variant="h6" component="span" noWrap>
+            {tag.name}
+          </Typography>
+        </Box>
+
+        <Tooltip title="Закрыть">
+          <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
+        </Tooltip>
+      </Box>
+      <Total name="Доступно" value={available} />
+
+      <Rhythm gap={1} p={3}>
+        <Line
+          name="Остаток с прошлого месяца"
+          amount={isParent ? totalLeftover : leftover}
+        />
+        <Line name="Бюджет" amount={isParent ? totalBudgeted : budgeted} />
+        <Line name="Расход" amount={isParent ? totalOutcome : outcome} />
+        <Line
+          name="— Переводы"
+          amount={isParent ? transferOutcome : transferOutcome}
+        />
+      </Rhythm>
+      {tag.id}
+    </Box>
   )
 }

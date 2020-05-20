@@ -9,9 +9,9 @@ import {
   TextField,
   Fab,
   Zoom,
-  Tooltip,
   Link,
 } from '@material-ui/core'
+import { Tooltip } from 'components/Tooltip'
 import AddIcon from '@material-ui/icons/Add'
 import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash'
 import CloseIcon from '@material-ui/icons/Close'
