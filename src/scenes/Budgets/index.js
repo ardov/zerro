@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import startOfMonth from 'date-fns/startOfMonth'
+
+import { Redirect } from 'react-router-dom'
+import { format } from 'date-fns'
 import TagTable from './containers/TagTable'
 import TransferTable from './containers/TransferTable'
 import MonthInfo from './containers/MonthInfo'
@@ -28,21 +30,35 @@ import { getPopulatedTag } from 'store/localData/tags'
 import { Total, Line } from './containers/components'
 import { getAmountsForTag } from './selectors/getAmountsByTag'
 import Rhythm from 'components/Rhythm'
-import { createContext } from 'react'
+import { useMonth } from './useMonth'
 
 const useStyles = makeStyles(theme => ({ drawerWidth: { width: 360 } }))
-export const MonthContext = createContext()
 
-export default function Budgets() {
+export default function BudgetsRouter() {
+  const [month] = useMonth()
   const monthList = useSelector(getMonthDates)
-  const dispatch = useDispatch()
-
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
-  const curMonth = +startOfMonth(new Date())
+
+  if (month && month < minMonth)
+    return <Redirect to={`/budget/${format(minMonth, 'yyyy-MM')}`} />
+
+  if (month && month > maxMonth)
+    return <Redirect to={`/budget/${format(maxMonth, 'yyyy-MM')}`} />
+
+  if (month) return <Budgets />
+  return <Redirect to={`/budget/${format(new Date(), 'yyyy-MM')}`} />
+}
+
+function Budgets() {
+  const dispatch = useDispatch()
+  const monthList = useSelector(getMonthDates)
+  const minMonth = monthList[0]
+  const maxMonth = monthList[monthList.length - 1]
+
+  const [month, setMonth] = useMonth()
 
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
-  const [month, setMonth] = useState(curMonth)
   const [showDrawer, setShowDrawer] = useState(false)
   const [selectedTag, setSelectedTag] = useState(null)
   const [moneyModalProps, setMoneyModalProps] = useState({ open: false })
@@ -84,89 +100,87 @@ export default function Budgets() {
   }
 
   return (
-    <MonthContext.Provider value={month}>
-      <DragDropContext
-        onDragEnd={moveMoney}
-        onDragStart={() => {
-          if (window.navigator.vibrate) {
-            window.navigator.vibrate(100)
-          }
-        }}
-      >
-        <Box p={isMobile ? 1.5 : 3} display="flex">
-          <MoveMoneyModal
-            {...moneyModalProps}
-            onClose={() => setMoneyModalProps({ open: false })}
-          />
-          <Box flexGrow="1" display="flex" justifyContent="center">
-            <Box maxWidth="800px">
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={4}>
-                  <MonthSelector
-                    onChange={setMonth}
-                    {...{ minMonth, maxMonth, value: month }}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={4}>
-                  <GoalsProgressWidget month={month} />
-                </Grid>
-
-                <Grid item xs={12} md={4}>
-                  <ToBeBudgeted
-                    index={index}
-                    month={monthList[index]}
-                    onClick={() => openDrawer(null)}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={12}>
-                  <Rhythm gap={3} pb={6}>
-                    <TagTable
-                      index={index}
-                      date={monthList[index]}
-                      openDetails={openDrawer}
-                      required={true}
-                    />
-
-                    <TagTable
-                      index={index}
-                      date={monthList[index]}
-                      openDetails={openDrawer}
-                    />
-
-                    <TransferTable month={monthList[index]} />
-                  </Rhythm>
-                </Grid>
+    <DragDropContext
+      onDragEnd={moveMoney}
+      onDragStart={() => {
+        if (window.navigator.vibrate) {
+          window.navigator.vibrate(100)
+        }
+      }}
+    >
+      <Box p={isMobile ? 1.5 : 3} display="flex">
+        <MoveMoneyModal
+          {...moneyModalProps}
+          onClose={() => setMoneyModalProps({ open: false })}
+        />
+        <Box flexGrow="1" display="flex" justifyContent="center">
+          <Box maxWidth="800px">
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={4}>
+                <MonthSelector
+                  onChange={setMonth}
+                  {...{ minMonth, maxMonth, value: month }}
+                />
               </Grid>
-            </Box>
+
+              <Grid item xs={12} md={4}>
+                <GoalsProgressWidget month={month} />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <ToBeBudgeted
+                  index={index}
+                  month={monthList[index]}
+                  onClick={() => openDrawer(null)}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={12}>
+                <Rhythm gap={3} pb={6}>
+                  <TagTable
+                    index={index}
+                    date={monthList[index]}
+                    openDetails={openDrawer}
+                    required={true}
+                  />
+
+                  <TagTable
+                    index={index}
+                    date={monthList[index]}
+                    openDetails={openDrawer}
+                  />
+
+                  <TransferTable month={monthList[index]} />
+                </Rhythm>
+              </Grid>
+            </Grid>
           </Box>
-
-          <WarningSign />
-
-          <Drawer
-            classes={
-              isMobile ? null : { paper: c.drawerWidth, root: c.drawerWidth }
-            }
-            variant={isMobile ? 'temporary' : 'persistent'}
-            anchor="right"
-            open={drawerVisibility}
-            onClose={closeDrawer}
-          >
-            {selectedTag ? (
-              <TagPreview
-                month={month}
-                index={index}
-                onClose={closeDrawer}
-                id={selectedTag}
-              />
-            ) : (
-              <MonthInfo month={month} index={index} onClose={closeDrawer} />
-            )}
-          </Drawer>
         </Box>
-      </DragDropContext>
-    </MonthContext.Provider>
+
+        <WarningSign />
+
+        <Drawer
+          classes={
+            isMobile ? null : { paper: c.drawerWidth, root: c.drawerWidth }
+          }
+          variant={isMobile ? 'temporary' : 'persistent'}
+          anchor="right"
+          open={drawerVisibility}
+          onClose={closeDrawer}
+        >
+          {selectedTag ? (
+            <TagPreview
+              month={month}
+              index={index}
+              onClose={closeDrawer}
+              id={selectedTag}
+            />
+          ) : (
+            <MonthInfo month={month} index={index} onClose={closeDrawer} />
+          )}
+        </Drawer>
+      </Box>
+    </DragDropContext>
   )
 }
 

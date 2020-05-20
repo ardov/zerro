@@ -1,8 +1,7 @@
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { format, endOfMonth } from 'date-fns'
 import ru from 'date-fns/locale/ru'
-import { MonthContext } from 'scenes/Budgets'
 import { getTotalsByMonth } from '../../selectors/getTotalsByMonth'
 import { getAmountsByTag } from '../../selectors/getAmountsByTag'
 import { getUserCurrencyCode } from 'store/serverData'
@@ -18,6 +17,7 @@ import { Tooltip } from 'components/Tooltip'
 import { Line, Amount } from '../components'
 import { getTagsTree } from 'store/localData/tags'
 import TransactionsDrawer from 'components/TransactionsDrawer'
+import { useMonth } from 'scenes/Budgets/useMonth'
 
 const Base = withStyles(theme => ({
   root: {
@@ -43,7 +43,7 @@ const Dot = ({ color }) => (
 )
 
 export function WidgetIncome(props) {
-  const month = useContext(MonthContext)
+  const [month] = useMonth()
   const currency = useSelector(getUserCurrencyCode)
   const tags = useSelector(getTagsTree)
   const amounts = useSelector(getAmountsByTag)?.[month]

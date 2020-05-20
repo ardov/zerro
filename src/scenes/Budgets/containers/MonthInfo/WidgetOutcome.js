@@ -1,13 +1,13 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { useSelector } from 'react-redux'
-import { MonthContext } from 'scenes/Budgets'
 import { getTotalsByMonth } from '../../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
 import { Box } from '@material-ui/core'
 import { Total } from '../components'
+import { useMonth } from 'scenes/Budgets/useMonth'
 
 export function WidgetOutcome() {
-  const month = useContext(MonthContext)
+  const [month] = useMonth()
   const outcome = useSelector(getTotalsByMonth)?.[month]?.outcome
   const currency = useSelector(getUserCurrencyCode)
 

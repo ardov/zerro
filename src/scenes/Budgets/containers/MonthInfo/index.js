@@ -1,9 +1,8 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
-import { MonthContext } from 'scenes/Budgets'
 import { getTotalsByMonth } from '../../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
 import Confirm from 'components/Confirm'
@@ -24,11 +23,12 @@ import { WidgetIncome } from './WidgetIncome'
 import { OverspentNotice } from './OverspentNotice'
 import { WidgetOutcome } from './WidgetOutcome'
 import { useState } from 'react'
+import { useMonth } from 'scenes/Budgets/useMonth'
 
 const getMonthName = date => format(date, 'LLLL', { locale: ru }).toUpperCase()
 
 export default function BudgetInfo({ onClose, ...rest }) {
-  const month = useContext(MonthContext)
+  const [month] = useMonth()
   const currency = useSelector(getUserCurrencyCode)
   const totals = useSelector(getTotalsByMonth)[month]
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
