@@ -7,6 +7,7 @@ import { ACC_LINKS, GOALS, DATA_ACC_NAME } from './constants'
 import { makeDataReminder } from './helpers'
 import { prepareData } from './prepareData'
 import { makeGoal, parseGoal } from './goals'
+import { getTags } from '../tags'
 
 const setData = (type, data) => (dispatch, getState) => {
   dispatch(prepareData())
@@ -47,20 +48,23 @@ export const setGoal = ({ type, amount, start, end, tag }) => (
   dispatch,
   getState
 ) => {
-  if (!amount) {
-    dispatch(deleteGoal(tag))
-    return
+  const state = getState()
+  const goals = getRawGoals(state)
+  const tags = getTags(state)
+  let newGoals = { ...goals }
+
+  // remove goals for deleted tags
+  for (const tagId in newGoals) {
+    if (!tags[tagId]) delete newGoals[tagId]
   }
-  sendEvent(`Goals: set ${type} goal`)
-  const goals = getRawGoals(getState())
-  const newGoal = makeGoal({ type, amount, start, end })
-  dispatch(setData(GOALS, { ...goals, [tag]: newGoal }))
-}
-export const deleteGoal = tag => (dispatch, getState) => {
-  sendEvent(`Goals: delete goal`)
-  const goals = getRawGoals(getState())
-  const newGoals = { ...goals }
-  delete newGoals[tag]
+
+  if (!amount) {
+    sendEvent(`Goals: delete goal`)
+    delete newGoals[tag]
+  } else {
+    sendEvent(`Goals: set ${type} goal`)
+    newGoals[tag] = makeGoal({ type, amount, start, end })
+  }
   dispatch(setData(GOALS, newGoals))
 }
 
@@ -105,12 +109,15 @@ const getRawGoals = createSelector([getGoalsReminder], goalsReminder => {
     return {}
   }
 })
-export const getGoals = createSelector([getRawGoals], rawGoals => {
-  let goals = {}
-  for (const tag in rawGoals) {
-    if (rawGoals[tag]) goals[tag] = parseGoal(rawGoals[tag])
+export const getGoals = createSelector(
+  [getRawGoals, getTags],
+  (rawGoals, tags) => {
+    let goals = {}
+    for (const tag in rawGoals) {
+      if (rawGoals[tag] && tags[tag]) goals[tag] = parseGoal(rawGoals[tag])
+    }
+    return goals
   }
-  return goals
-})
+)
 
 export const getGoal = (state, id) => getGoals(state)[id]
