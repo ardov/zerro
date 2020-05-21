@@ -191,12 +191,14 @@ function resetCurrentMonth(date, amounts, user) {
   const changedArr = []
   for (const id in amounts) {
     const tag = amounts[id]
-    if (tag.outcome !== 0) changedArr.push(resetTag(id, tag))
+    if (tag.outcome !== 0 && tag.outcome !== tag.budgeted)
+      changedArr.push(resetTag(id, tag))
 
     if (tag.children) {
       for (const id in tag.children) {
         const child = tag.children[id]
-        if (child.outcome !== 0) changedArr.push(resetTag(id, child))
+        if (child.outcome !== 0 && child.outcome !== child.budgeted)
+          changedArr.push(resetTag(id, child))
       }
     }
   }

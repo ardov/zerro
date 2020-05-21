@@ -14,7 +14,7 @@ export const createBudget = ({
 }) => ({
   user,
   date,
-  tag,
+  tag: tag === 'null' ? null : tag,
   changed,
   income,
   incomeLock,
