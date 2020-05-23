@@ -13,7 +13,7 @@ const redirectUri = process.env.REACT_APP_REDIRECT_URI
 
 const ZenApi = {}
 
-ZenApi.getData = async function(
+ZenApi.getData = async function (
   token,
   payload = { serverTimestamp: 0, changed: {} }
 ) {
@@ -37,14 +37,13 @@ ZenApi.getData = async function(
   }
 
   const response = await fetch(diffEndpoint, options)
-  if (!response.ok) throw Error('Сайт вернул не ОК')
   const json = await response.json()
   if (json.error) throw Error(JSON.stringify(json.error))
 
   return json
 }
 
-ZenApi.checkCode = function() {
+ZenApi.checkCode = function () {
   const parsedUrl = new URL(window.location.href)
   const code = parsedUrl.searchParams.get('code')
   const error = parsedUrl.searchParams.get('error')
@@ -64,7 +63,7 @@ ZenApi.getLocalToken = () => {
   else return null
 }
 
-ZenApi.getToken = function() {
+ZenApi.getToken = function () {
   /* if a token exists and hasn't expired, re-use it */
   if (this.getLocalToken()) {
     return this.getLocalToken()
