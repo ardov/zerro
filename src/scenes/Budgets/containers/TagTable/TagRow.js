@@ -20,6 +20,9 @@ import { Droppable, Draggable } from 'react-beautiful-dnd'
 import { getGoal } from 'store/localData/hiddenData'
 import { useSelector, shallowEqual } from 'react-redux'
 import { getGoalProgress } from 'scenes/Budgets/selectors/goalsProgress'
+import { Amount } from '../components'
+import { useContext } from 'react'
+import { IsDraggingContext } from '../DnDContext'
 
 const useStyles = makeStyles(theme => ({
   row: {
@@ -36,7 +39,8 @@ const useStyles = makeStyles(theme => ({
       isMobile ? theme.spacing(0.5) : theme.spacing(3),
 
     '&:hover': {
-      background: theme.palette.action.hover,
+      background: ({ isDragging }) =>
+        isDragging ? 'none' : theme.palette.action.hover,
     },
     '&:hover .addGoal': {
       opacity: 1,
@@ -54,6 +58,11 @@ const useStyles = makeStyles(theme => ({
   warning: {
     transform: 'translateY(4px)',
     marginRight: theme.spacing(0.5),
+  },
+  dropZone: {
+    background: theme.palette.action.selected,
+    transition: '0.1s',
+    borderRadius: theme.shape.borderRadius,
   },
 }))
 
@@ -80,13 +89,14 @@ export function TagRow(props) {
     openTransactionsPopover,
     openDetails,
   } = props
+  const isDragging = useContext(IsDraggingContext)
   const goal = useSelector(state => getGoal(state, id), shallowEqual)
   const goalProgress = useSelector(
     state => getGoalProgress(state, date, id),
     shallowEqual
   )
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
-  const c = useStyles({ isChild, isMobile })
+  const c = useStyles({ isChild, isMobile, isDragging })
   const [nameAnchorEl, setNameAnchorEl] = React.useState(null)
 
   if (!showOutcome && !outcome && !available && !showAll) return null
@@ -174,85 +184,93 @@ export function TagRow(props) {
 
       {/* AVAILABLE */}
       {(metric === 'available' || !isMobile) && (
-        <Droppable droppableId={id ? id : 'null'} type="FUNDS">
+        <Droppable
+          droppableId={id ? id : 'null'}
+          type="FUNDS"
+          // direction="horizontal"
+        >
           {({ innerRef, placeholder }, snapshot) => (
-            <div ref={innerRef} style={getDroppableStyle(snapshot)}>
-              <span style={{ display: 'none' }}>{placeholder}</span>
-
-              <Draggable draggableId={id ? id : 'null'} index={0}>
-                {(provided, snapshot) => (
-                  <Box
-                    p={0.5}
-                    m={-0.5}
-                    borderRadius={16}
-                    bgcolor={snapshot.isDragging ? 'background.paper' : ''}
-                    color={availableColor}
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    style={
-                      snapshot.isDragging
-                        ? { ...provided.draggableProps.style }
-                        : {}
+            <Box
+              ref={innerRef}
+              m={-1}
+              p={1}
+              className={snapshot.isDraggingOver ? c.dropZone : null}
+            >
+              <Typography variant="body1" align="right">
+                {!!hiddenOverspend && (
+                  <Tooltip
+                    title={
+                      <span>
+                        Перерасход в родительской категории.
+                        <br />
+                        {`Увеличьте бюджет на ${formatMoney(hiddenOverspend)}`}
+                      </span>
                     }
                   >
-                    <Typography variant="body1" align="right">
-                      {!!hiddenOverspend && (
-                        <Tooltip
-                          title={
-                            <span>
-                              Перерасход в родительской категории.
-                              <br />
-                              {`Увеличьте бюджет на ${formatMoney(
-                                hiddenOverspend
-                              )}`}
-                            </span>
-                          }
-                        >
-                          <WarningIcon fontSize="small" color="error" />
-                        </Tooltip>
-                      )}
-                      {formatMoney(available)}
-                      <Box
-                        component="span"
-                        display="inline-block"
-                        ml={1}
-                        maxWidth={16}
-                      >
-                        {!snapshot.isDragging &&
-                          (goalProgress ? (
-                            <Tooltip title={goalToWords(goal)}>
-                              <IconButton
-                                size="small"
-                                onClick={e =>
-                                  openGoalPopover(id, e.currentTarget)
-                                }
-                                edge="start"
-                                children={
-                                  <GoalProgress value={goalProgress.progress} />
-                                }
-                              />
-                            </Tooltip>
-                          ) : (
-                            <Box component="span" className="addGoal">
-                              <Tooltip title="Добавить цель">
-                                <IconButton
-                                  size="small"
-                                  onClick={e =>
-                                    openGoalPopover(id, e.currentTarget)
-                                  }
-                                  edge="start"
-                                  children={<EmojiFlagsIcon fontSize="small" />}
-                                />
-                              </Tooltip>
-                            </Box>
-                          ))}
-                      </Box>
-                    </Typography>
-                  </Box>
+                    <WarningIcon fontSize="small" color="error" />
+                  </Tooltip>
                 )}
-              </Draggable>
-            </div>
+
+                <span style={{ display: 'none' }}>{placeholder}</span>
+                <Draggable draggableId={id ? id : 'null'} index={0}>
+                  {(provided, snapshot) => (
+                    <Box
+                      borderRadius={16}
+                      bgcolor={
+                        snapshot.isDragging ? 'background.paper' : 'grey'
+                      }
+                      px={1}
+                      mx={-1}
+                      component="span"
+                      display="inline-block"
+                      color={availableColor}
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      style={
+                        snapshot.isDragging
+                          ? provided.draggableProps.style
+                          : null
+                      }
+                    >
+                      <Amount value={available} />
+                    </Box>
+                  )}
+                </Draggable>
+
+                <Box
+                  component="span"
+                  display="inline-block"
+                  ml={1}
+                  maxWidth={16}
+                >
+                  {!snapshot.isDragging &&
+                    (goalProgress ? (
+                      <Tooltip title={goalToWords(goal)}>
+                        <IconButton
+                          size="small"
+                          onClick={e => openGoalPopover(id, e.currentTarget)}
+                          edge="start"
+                          children={
+                            <GoalProgress value={goalProgress.progress} />
+                          }
+                        />
+                      </Tooltip>
+                    ) : (
+                      <Box component="span" className="addGoal">
+                        <Tooltip title="Добавить цель">
+                          <IconButton
+                            size="small"
+                            onClick={e => openGoalPopover(id, e.currentTarget)}
+                            edge="start"
+                            children={<EmojiFlagsIcon fontSize="small" />}
+                          />
+                        </Tooltip>
+                      </Box>
+                    ))}
+                </Box>
+              </Typography>
+            </Box>
           )}
         </Droppable>
       )}
@@ -261,14 +279,6 @@ export function TagRow(props) {
 }
 
 // helpers
-
-function getDroppableStyle(snapshot) {
-  return {
-    opacity: snapshot.isDraggingOver ? 0.5 : 1,
-    // transform: `scale(${snapshot.isDraggingOver ? 1.1 : 1})`,
-    transitionDuration: `0.2s`,
-  }
-}
 
 function getAvailableColor(available, isChild, hasBudget) {
   const positive = 'success.main'
