@@ -19,9 +19,6 @@ import {
 } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid'
 import { makeStyles } from '@material-ui/core/styles'
-import { DragDropContext } from 'react-beautiful-dnd'
-import { moveFunds } from './thunks'
-import MoveMoneyModal from './containers/MoveMoneyModal'
 import WarningSign from './containers/WarningSign'
 import GoalsProgressWidget from './containers/GoalsProgressWidget'
 import { Tooltip } from 'components/Tooltip'
@@ -31,6 +28,7 @@ import { Total, Line } from './containers/components'
 import { getAmountsForTag } from './selectors/getAmountsByTag'
 import Rhythm from 'components/Rhythm'
 import { useMonth } from './useMonth'
+import { DnDContext } from './containers/DnDContext'
 
 const useStyles = makeStyles(theme => ({ drawerWidth: { width: 360 } }))
 
@@ -51,19 +49,14 @@ export default function BudgetsRouter() {
 }
 
 function Budgets() {
-  const dispatch = useDispatch()
   const monthList = useSelector(getMonthDates)
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
-
   const [month, setMonth] = useMonth()
-
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const [showDrawer, setShowDrawer] = useState(false)
   const [selectedTag, setSelectedTag] = useState(null)
-  const [moneyModalProps, setMoneyModalProps] = useState({ open: false })
   const c = useStyles()
-
   const index = monthList.findIndex(date => date === month)
 
   const drawerVisibility = !isMobile || !!showDrawer
@@ -76,43 +69,9 @@ function Budgets() {
     setShowDrawer(true)
   }
 
-  const moveMoney = e => {
-    if (
-      e.source &&
-      e.destination &&
-      e.source.droppableId !== e.destination.droppableId
-    ) {
-      const source = e.source.droppableId
-      const destination = e.destination.droppableId
-
-      setMoneyModalProps({
-        open: true,
-        source,
-        destination,
-        month,
-        key: source + destination + month,
-        onMoneyMove: amount => {
-          if (amount) dispatch(moveFunds(amount, source, destination, month))
-          setMoneyModalProps({ open: false })
-        },
-      })
-    }
-  }
-
   return (
-    <DragDropContext
-      onDragEnd={moveMoney}
-      onDragStart={() => {
-        if (window.navigator.vibrate) {
-          window.navigator.vibrate(100)
-        }
-      }}
-    >
+    <DnDContext>
       <Box p={isMobile ? 1.5 : 3} display="flex">
-        <MoveMoneyModal
-          {...moneyModalProps}
-          onClose={() => setMoneyModalProps({ open: false })}
-        />
         <Box flexGrow="1" display="flex" justifyContent="center">
           <Box maxWidth="800px">
             <Grid container spacing={3}>
@@ -180,7 +139,7 @@ function Budgets() {
           )}
         </Drawer>
       </Box>
-    </DragDropContext>
+    </DnDContext>
   )
 }
 
