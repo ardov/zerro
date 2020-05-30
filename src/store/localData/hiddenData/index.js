@@ -87,7 +87,7 @@ export const getGoalsReminder = createSelector([getReminders], reminders =>
   Object.values(reminders).find(reminder => reminder.payee === GOALS)
 )
 
-export const getAccTagMap = createSelector(
+const getRawAccTagMap = createSelector(
   [getOldAccLinksReminder, getAccLinksReminder],
   (oldReminder, newReminder) => {
     if (oldReminder) {
@@ -98,6 +98,21 @@ export const getAccTagMap = createSelector(
       return JSON.parse(newReminder.comment) || {}
     }
     return {}
+  }
+)
+
+// Account-Tag connections without broken links
+export const getAccTagMap = createSelector(
+  [getRawAccTagMap, getTags],
+  (rawAccTagMap, tags) => {
+    const newMap = { ...rawAccTagMap }
+
+    // ignore connections for deleted tags
+    for (const accId in newMap) {
+      const tagId = newMap[accId]
+      if (!tags[tagId]) delete newMap[accId]
+    }
+    return newMap
   }
 )
 
