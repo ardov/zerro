@@ -5,8 +5,6 @@ import { convertCurrency } from 'store/serverData'
 import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
 import { round } from 'helpers/currencyHelpers'
 import { getAccTagMap } from 'store/localData/hiddenData'
-import * as Sentry from '@sentry/browser'
-
 import startOfMonth from 'date-fns/startOfMonth'
 import { getType } from 'store/localData/transactions/helpers'
 import getMonthDates from './getMonthDates'
@@ -135,16 +133,7 @@ export const getTransferFees = createSelector([getAmountsByMonth], amounts => {
 
 export const getAmountsForTag = state => (month, id) => {
   const amounts = getAmountsByTag(state)[month]
-
-  if (!amounts) {
-    if (process.env.NODE_ENV === 'production') {
-      Sentry.withScope(scope => {
-        const error = new Error(`No amounts found for month:"${month}"`)
-        Sentry.captureException(error)
-      })
-    }
-    return null
-  }
+  if (!amounts) return null
 
   if (amounts[id]) return amounts[id]
   else {
