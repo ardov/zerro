@@ -144,7 +144,6 @@ export const startFresh = month => (dispatch, getState) => {
   const removedBudgets = removeFutureBudgets(budgets, month - 1)
   const resetSavingsArr = clearAvailable(prevMonth, prevAmounts, user)
   const currentMonth = resetCurrentMonth(month, currentAmounts, user)
-  // console.log(fixedOverspends)
 
   dispatch(setBudget([...removedBudgets, ...resetSavingsArr, ...currentMonth]))
 }
@@ -187,51 +186,57 @@ function clearAvailable(date, amounts, user) {
 
 function resetCurrentMonth(date, amounts, user) {
   const changedArr = []
-  for (const id in amounts) {
-    const tag = amounts[id]
-    if (tag.outcome !== 0 && tag.outcome !== tag.budgeted)
-      changedArr.push(resetTag(id, tag))
+  const resetTag = (id, { outcome, budgeted }) => {
+    if (outcome && outcome !== budgeted)
+      changedArr.push(makeBudget({ user, date, outcome, tag: id }))
+  }
 
-    if (tag.children) {
-      for (const id in tag.children) {
-        const child = tag.children[id]
-        if (child.outcome !== 0 && child.outcome !== child.budgeted)
-          changedArr.push(resetTag(id, child))
-      }
+  for (const parentId in amounts) {
+    const tag = amounts[parentId]
+    resetTag(parentId, tag)
+
+    for (const childId in tag.children) {
+      const child = tag.children[childId]
+      resetTag(childId, child)
     }
   }
   return changedArr
-
-  function resetTag(id, tag) {
-    return makeBudget({
-      user,
-      date,
-      outcome: tag.outcome,
-      tag: id,
-    })
-  }
 }
 
 export const fixOverspends = month => (dispatch, getState) => {
   sendEvent('Budgets: fix overspends')
   const state = getState()
   const user = getRootUser(state).id
-  const amounts = getAmountsByTag(state)
-  const currentAmounts = amounts[month]
-  const changedArr = []
+  const amounts = getAmountsByTag(state)?.[month]
+  const changedBudgets = []
 
-  for (const id in currentAmounts) {
-    const tag = currentAmounts[id]
-    if (tag.available < 0) {
-      const budget = makeBudget({
-        user,
-        date: month,
-        outcome: tag.budgeted - tag.available,
-        tag: id,
-      })
-      changedArr.push(budget)
+  const addChanges = (tag, outcome) =>
+    changedBudgets.push(makeBudget({ user, date: month, outcome, tag }))
+
+  for (const parentId in amounts) {
+    const parent = amounts[parentId]
+    if (parent.available < 0) {
+      let coveredOverspent = 0
+
+      //  Cover overspends only for children with budgets
+      if (parent.childrenOverspent) {
+        for (const childId in parent.children) {
+          const { available, budgeted } = parent.children[childId]
+          if (available < 0 && budgeted) {
+            coveredOverspent -= available
+            const newBudget = budgeted - available
+            addChanges(childId, newBudget)
+          }
+        }
+      }
+
+      // Cover left overspend for parent tag
+      if (-parent.available !== coveredOverspent) {
+        const newBudget = parent.budgeted - parent.available - coveredOverspent
+        addChanges(parentId, newBudget)
+      }
     }
   }
 
-  dispatch(setBudget(changedArr))
+  dispatch(setBudget(changedBudgets))
 }
