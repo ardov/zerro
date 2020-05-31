@@ -75,11 +75,6 @@ export function getDataAccountId(state) {
 }
 
 // REMINDER SELECTORS
-export const getOldAccLinksReminder = createSelector(
-  [getReminders],
-  reminders =>
-    Object.values(reminders).find(reminder => reminder.payee === DATA_ACC_NAME)
-)
 const getAccLinksReminder = createSelector([getReminders], reminders =>
   Object.values(reminders).find(reminder => reminder.payee === ACC_LINKS)
 )
@@ -87,25 +82,16 @@ export const getGoalsReminder = createSelector([getReminders], reminders =>
   Object.values(reminders).find(reminder => reminder.payee === GOALS)
 )
 
-const getRawAccTagMap = createSelector(
-  [getOldAccLinksReminder, getAccLinksReminder],
-  (oldReminder, newReminder) => {
-    if (oldReminder) {
-      const data = oldReminder.comment ? JSON.parse(oldReminder.comment) : {}
-      return data.accTagMap || {}
-    }
-    if (newReminder) {
-      return JSON.parse(newReminder.comment) || {}
-    }
-    return {}
-  }
-)
+const getRawAccTagMap = createSelector([getAccLinksReminder], newReminder => {
+  if (newReminder) return JSON.parse(newReminder.comment) || {}
+  return {}
+})
 
 // Account-Tag connections without broken links
 export const getAccTagMap = createSelector(
   [getRawAccTagMap, getTags],
   (rawAccTagMap, tags) => {
-    const newMap = { ...rawAccTagMap }
+    let newMap = { ...rawAccTagMap }
 
     // ignore connections for deleted tags
     for (const accId in newMap) {

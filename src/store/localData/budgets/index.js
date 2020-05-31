@@ -38,5 +38,4 @@ export const {
   getBudgetsToSync,
   getBudgetsByMonthAndTag,
   getBudget,
-  getGoals,
 } = selectors
