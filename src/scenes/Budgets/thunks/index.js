@@ -4,7 +4,7 @@ import selectors from 'store/localData/budgets/selectors'
 import { getPopulatedTag } from 'store/localData/tags'
 import { getAmountsByTag } from '../selectors/getAmountsByTag'
 import sendEvent from 'helpers/sendEvent'
-import { createBudget } from 'store/localData/budgets/helpers'
+import { makeBudget } from 'store/localData/budgets/helpers'
 import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
 import { getTags } from 'store/localData/tags'
 import { subMonths } from 'date-fns/esm'
@@ -31,7 +31,7 @@ export const moveFunds = (amount, source, destination, monthDate) => (
   if (source !== 'toBeBudgeted') {
     const sourceBudget =
       selectors.getBudget(state, source, monthDate) ||
-      createBudget({ user, date: +monthDate, tag: source })
+      makeBudget({ user, date: +monthDate, tag: source })
 
     resultBudgets.push({
       ...sourceBudget,
@@ -43,7 +43,7 @@ export const moveFunds = (amount, source, destination, monthDate) => (
   if (destination !== 'toBeBudgeted') {
     const destinationBudget =
       selectors.getBudget(state, destination, monthDate) ||
-      createBudget({ user, date: +monthDate, tag: destination })
+      makeBudget({ user, date: +monthDate, tag: destination })
 
     resultBudgets.push({
       ...destinationBudget,
@@ -75,7 +75,7 @@ export const setOutcomeBudget = (targetOutcome, month, tagId) => (
     outcome = targetOutcome - childrenBudgets
   }
 
-  const budget = created || createBudget({ user, date: +month, tag: tagId })
+  const budget = created || makeBudget({ user, date: +month, tag: tagId })
   const changed = { ...budget, outcome, changed: Date.now() }
   dispatch(setBudget(changed))
 }
@@ -99,7 +99,7 @@ export const copyPreviousBudget = month => (dispatch, getState) => {
     const currentValue = currentBudgets?.[id]?.outcome || 0
     if (prevValue !== currentValue) {
       changedArr.push(
-        createBudget({ user, date: +month, tag: id, outcome: prevValue })
+        makeBudget({ user, date: +month, tag: id, outcome: prevValue })
       )
     }
   }
@@ -124,9 +124,7 @@ export const fillGoals = month => (dispatch, getState) => {
     const target = goalsProgress[tag]?.target || 0
     const currentBudget = budgets?.[tag]?.outcome || 0
     if (currentBudget < target) {
-      changedArr.push(
-        createBudget({ user, date: +month, tag, outcome: target })
-      )
+      changedArr.push(makeBudget({ user, date: +month, tag, outcome: target }))
     }
   }
 
@@ -157,7 +155,7 @@ function removeFutureBudgets(budgets, startDate) {
     if (month > startDate) {
       Object.values(budgets[month]).forEach(budget => {
         changedArr.push(
-          createBudget({ ...budget, outcome: 0, changed: Date.now() })
+          makeBudget({ ...budget, outcome: 0, changed: Date.now() })
         )
       })
     }
@@ -174,7 +172,7 @@ function clearAvailable(date, amounts, user) {
     for (const id in amounts) {
       const tag = amounts[id]
       if (tag.available > 0) {
-        const budget = createBudget({
+        const budget = makeBudget({
           user,
           date,
           outcome: tag.budgeted - tag.available,
@@ -205,7 +203,7 @@ function resetCurrentMonth(date, amounts, user) {
   return changedArr
 
   function resetTag(id, tag) {
-    return createBudget({
+    return makeBudget({
       user,
       date,
       outcome: tag.outcome,
@@ -225,7 +223,7 @@ export const fixOverspends = month => (dispatch, getState) => {
   for (const id in currentAmounts) {
     const tag = currentAmounts[id]
     if (tag.available < 0) {
-      const budget = createBudget({
+      const budget = makeBudget({
         user,
         date: month,
         outcome: tag.budgeted - tag.available,

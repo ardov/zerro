@@ -1,4 +1,4 @@
-export const createBudget = ({
+export const makeBudget = ({
   // required fields
   user,
   date,
