@@ -1,7 +1,5 @@
 import React, { useState } from 'react'
-import { useDispatch } from 'react-redux'
 import { DragDropContext } from 'react-beautiful-dnd'
-import { moveFunds } from '../thunks'
 import { useMonth } from '../useMonth'
 import { useCallback } from 'react'
 import { MoveMoneyModal } from './MoveMoneyModal'
@@ -9,8 +7,6 @@ import { MoveMoneyModal } from './MoveMoneyModal'
 export const IsDraggingContext = React.createContext(false)
 
 export function DnDContext({ children }) {
-  const dispatch = useDispatch()
-
   const [month] = useMonth()
   const [isDragging, setIsDragging] = useState()
   const [moneyModalProps, setMoneyModalProps] = useState({ open: false })
@@ -32,14 +28,10 @@ export function DnDContext({ children }) {
           destination,
           month,
           key: source + destination + month,
-          onMoneyMove: amount => {
-            if (amount) dispatch(moveFunds(amount, source, destination, month))
-            setMoneyModalProps({ open: false })
-          },
         })
       }
     },
-    [dispatch, month]
+    [month]
   )
   const onDragStart = useCallback(e => {
     setIsDragging(true)
