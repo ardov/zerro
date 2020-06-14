@@ -17,7 +17,7 @@ import {
   useMediaQuery,
 } from '@material-ui/core'
 import { ThemeProvider } from '@material-ui/styles'
-import createTheme from 'helpers/createTheme'
+import { createTheme } from 'helpers/createTheme'
 import { getTheme } from 'store/theme'
 
 import { createBrowserHistory } from 'history'
@@ -53,7 +53,8 @@ export default function App() {
         <ErrorBoundary>
           <Router history={history}>
             <Switch>
-              <Route path="/about*" component={About} />
+              <Route path="/about" component={About} />
+              <Route path="/about/*" component={About} />
               <Route path="/*" component={isLoggedIn ? PrivateApp : Auth} />
             </Switch>
           </Router>
@@ -62,8 +63,6 @@ export default function App() {
     </ThemeProvider>
   )
 }
-
-// const PrivateAppRouter = () => {}
 
 const PrivateApp = () => {
   const hasData = useSelector(state => !!getLastSyncTime(state))

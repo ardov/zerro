@@ -6,7 +6,7 @@ const secondary = { dark: blue[200], light: blue[700] }
 const success = { dark: green['A400'], light: green[800] }
 const background = {
   dark: { paper: '#212121', default: '#121212' },
-  light: { paper: '#ffffff', default: grey[50] },
+  light: { paper: '#ffffff', default: grey[100] },
 }
 const hoverOpacity = 0.04
 const hover = {
@@ -14,7 +14,7 @@ const hover = {
   light: `rgba(0, 0, 0, ${hoverOpacity})`,
 }
 
-export default function createTheme(type = 'light') {
+export function createTheme(type = 'light') {
   const theme = createMuiTheme({
     palette: {
       primary: { main: primary[type] },

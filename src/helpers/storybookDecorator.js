@@ -7,7 +7,7 @@ import ru from 'date-fns/locale/ru'
 import { Provider } from 'react-redux'
 import { store } from 'store'
 
-import createTheme from 'helpers/createTheme'
+import { createTheme } from 'helpers/createTheme'
 
 const decorator = boxProps => story => (
   <Provider store={store}>
