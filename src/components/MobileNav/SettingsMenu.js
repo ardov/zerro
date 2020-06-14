@@ -11,6 +11,7 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp'
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
 import { Box, Divider, Menu, MenuItem, Typography } from '@material-ui/core'
+import { useHistory } from 'react-router'
 
 const useStyles = makeStyles(({ spacing }) => ({
   menuIcon: { marginRight: spacing(1) },
@@ -26,6 +27,7 @@ function SettingsMenu({
   open,
   ...rest
 }) {
+  const history = useHistory()
   const classes = useStyles()
   const localTheme = localStorage.getItem('theme')
 
@@ -56,13 +58,16 @@ function SettingsMenu({
 
       <MenuItem
         component="a"
-        href="https://www.notion.so/ZERRO-a943f930d0a64d008712e20ecd299dbd"
-        target="_blank"
-        rel="noopener noreferrer"
+        href="/about"
+        onClick={e => {
+          e.preventDefault()
+          history.push('/about')
+        }}
       >
         <HelpOutlineIcon className={classes.menuIcon} color="action" />
         Как пользоваться
       </MenuItem>
+
       <MenuItem
         component="a"
         href="https://money.yandex.ru/to/4100110993756505/200"
