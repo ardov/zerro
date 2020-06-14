@@ -23,6 +23,7 @@
     "react-beautiful-dnd": "^12.2.0",
     "react-dom": "^16.7.0",
     "react-ga": "^2.7.0",
+    "react-helmet": "^6.1.0",
     "react-intl": "^2.7.2",
     "react-redux": "^7.1.0",
     "react-router": "^5.0.1",
@@ -68,7 +69,6 @@
     "stylelint-config-styled-components": "^0.1.1",
     "stylelint-order": "^3.0.0",
     "stylelint-processor-styled-components": "^1.5.1",
-    "stylelint-scss": "^3.8.0",
-    "why-did-you-update": "^1.0.6"
+    "stylelint-scss": "^3.8.0"
   }
 }
