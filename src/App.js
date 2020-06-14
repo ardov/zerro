@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Router, Route, Redirect, Switch } from 'react-router-dom'
-import { connect } from 'react-redux'
-import { IntlProvider, addLocaleData } from 'react-intl'
-import ru from 'react-intl/locale-data/ru'
+import { useSelector } from 'react-redux'
 import Transactions from 'scenes/Transactions'
 import Auth from 'scenes/Auth'
 import Budgets from 'scenes/Budgets'
@@ -19,19 +17,16 @@ import {
   useMediaQuery,
 } from '@material-ui/core'
 import { ThemeProvider } from '@material-ui/styles'
-import createTheme from 'helpers/createTheme'
+import { createTheme } from 'helpers/createTheme'
 import { getTheme } from 'store/theme'
-import { MuiPickersUtilsProvider } from '@material-ui/pickers'
-import DateFnsUtils from '@date-io/date-fns'
-import ruDateLocale from 'date-fns/locale/ru'
+
 import { createBrowserHistory } from 'history'
 import reactGA from 'react-ga'
 import ErrorBoundary from 'components/ErrorBoundary'
 import { getLastSyncTime, getRootUserId } from 'store/serverData'
 import Accounts from 'scenes/Accounts'
 import Stats from 'scenes/Stats'
-
-addLocaleData(ru)
+import About from 'scenes/About'
 
 const history = createBrowserHistory()
 
@@ -43,39 +38,34 @@ if (process.env.NODE_ENV === 'production') {
   })
 }
 
-function App({ isLoggedIn, themeType, hasData, userId }) {
+export default function App() {
+  const isLoggedIn = useSelector(getLoginState)
+  const themeType = useSelector(getTheme)
+  const userId = useSelector(getRootUserId)
   useEffect(() => {
     if (userId) reactGA.set({ userId })
   }, [userId])
+
   return (
     <ThemeProvider theme={createTheme(themeType)}>
       <>
         <CssBaseline />
         <ErrorBoundary>
-          <IntlProvider locale="ru">
-            <MuiPickersUtilsProvider utils={DateFnsUtils} locale={ruDateLocale}>
-              <Router history={history}>
-                {isLoggedIn ? <PrivateApp hasData={hasData} /> : <Auth />}
-              </Router>
-            </MuiPickersUtilsProvider>
-          </IntlProvider>
+          <Router history={history}>
+            <Switch>
+              <Route path="/about" component={About} />
+              <Route path="/about/*" component={About} />
+              <Route path="/*" component={isLoggedIn ? PrivateApp : Auth} />
+            </Switch>
+          </Router>
         </ErrorBoundary>
       </>
     </ThemeProvider>
   )
 }
 
-export default connect(
-  state => ({
-    isLoggedIn: getLoginState(state),
-    themeType: getTheme(state),
-    hasData: !!getLastSyncTime(state),
-    userId: getRootUserId(state),
-  }),
-  null
-)(App)
-
-const PrivateApp = ({ hasData }) => {
+const PrivateApp = () => {
+  const hasData = useSelector(state => !!getLastSyncTime(state))
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   return (
     <Box display="flex">

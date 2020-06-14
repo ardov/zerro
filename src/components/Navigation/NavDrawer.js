@@ -24,6 +24,7 @@ import SyncAltIcon from '@material-ui/icons/SyncAlt'
 const routes = [
   { path: '/budget', label: 'Бюджет', icon: <AccountBalanceIcon /> },
   { path: '/transactions', label: 'Операции', icon: <SyncAltIcon /> },
+  { path: '/about', label: 'Как пользоваться', icon: <HelpOutlineIcon /> },
 ]
 
 const useStyles = makeStyles(theme => ({
@@ -58,19 +59,6 @@ export default function NavigationDrawer(props) {
                 <ListItemText primary={route.label} />
               </ListItem>
             ))}
-            <ListItem
-              className={c.listItem}
-              button
-              component="a"
-              href="https://www.notion.so/ZERRO-a943f930d0a64d008712e20ecd299dbd"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <ListItemIcon>
-                <HelpOutlineIcon />
-              </ListItemIcon>
-              <ListItemText primary="Как пользоваться" />
-            </ListItem>
 
             <ListItem
               className={c.listItem}

@@ -9,6 +9,7 @@ import Logo from '../../components/Logo'
 import { updateData } from 'store/commonActions'
 import { setToken } from 'store/token'
 import { saveDataLocally } from 'logic/localData'
+import { Link as RouterLink } from 'react-router-dom'
 ZenApi.checkCode()
 
 export default function Auth(props) {
@@ -72,13 +73,9 @@ export default function Auth(props) {
 
       <Fade in timeout={3000}>
         <Box mt={2}>
-          <Link
-            href="https://www.notion.so/ZERRO-a943f930d0a64d008712e20ecd299dbd"
-            target="_blank"
-            rel="noopener noreferrer"
-            variant="body1"
-            children="Что это такое?"
-          />
+          <RouterLink to="/about" component={Link} variant="body1">
+            Что это такое?
+          </RouterLink>
         </Box>
       </Fade>
     </Box>
