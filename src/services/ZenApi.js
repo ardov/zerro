@@ -75,7 +75,7 @@ ZenApi.getToken = function () {
     'ZenMoney Login',
     window,
     480,
-    480
+    640
   )
 
   return getAuthorizationCode()
