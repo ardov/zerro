@@ -43,8 +43,7 @@ export function TagTable({ date, openDetails, required = false, ...rest }) {
     .filter(tag => !!tag.required === !!required)
     .map(tag => tag.id)
 
-  const toggleMetric = () =>
-    setMetricIndex(metricIndex === 2 ? 0 : metricIndex + 1) // metricIndex + 1 % 3
+  const toggleMetric = () => setMetricIndex((metricIndex + 1) % 3)
 
   const filterConditions = {
     type: 'outcome',

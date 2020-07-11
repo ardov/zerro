@@ -1,6 +1,38 @@
-import uuidv1 from 'uuid/v1'
+import { v1 as uuidv1 } from 'uuid'
 
-export const makeReminder = raw => ({
+interface Reminder {
+  user: number
+  incomeAccount: string
+  outcomeAccount: string
+
+  id: string
+  changed: number
+
+  incomeInstrument: number
+  income: number
+  outcomeInstrument: number
+  outcome: number
+
+  tag: string | string[] | null
+  merchant: string | null
+  payee: string | null
+  comment: string | null
+
+  interval: 'day' | 'week' | 'month' | 'year' | null
+  step: number
+  points: number[]
+  startDate: number
+  endDate: number
+  notify: boolean
+}
+
+export const makeReminder = (
+  raw: Partial<Reminder> & {
+    user: number
+    incomeAccount: string
+    outcomeAccount: string
+  }
+): Reminder => ({
   // Required
   user: raw.user,
   incomeAccount: raw.incomeAccount,

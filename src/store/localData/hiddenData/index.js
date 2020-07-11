@@ -3,7 +3,7 @@ import { getRootUser } from 'store/serverData'
 import { getAccountList } from 'store/localData/accounts'
 import { setReminder, getReminders } from 'store/localData/reminders'
 import sendEvent from 'helpers/sendEvent'
-import { ACC_LINKS, GOALS, DATA_ACC_NAME } from './constants'
+import { ACC_LINKS, TAG_ORDER, GOALS, DATA_ACC_NAME } from './constants'
 import { makeDataReminder } from './helpers'
 import { prepareData } from './prepareData'
 import { makeGoal, parseGoal } from './goals'
@@ -14,14 +14,11 @@ const setData = (type, data) => (dispatch, getState) => {
   const state = getState()
   const user = getRootUser(state).id
   const dataAcc = getDataAccountId(state)
-  const dataReminders = {
-    [ACC_LINKS]:
-      getAccLinksReminder(state) || makeDataReminder(user, dataAcc, ACC_LINKS),
-    [GOALS]: getGoalsReminder(state) || makeDataReminder(user, dataAcc, GOALS),
-  }
+  const reminder =
+    getDataReminders(state)[type] || makeDataReminder(user, dataAcc, type)
   dispatch(
     setReminder({
-      ...dataReminders[type],
+      ...reminder,
       comment: JSON.stringify(data),
       changed: Date.now(),
     })
@@ -44,10 +41,7 @@ export const addConnection = (account, tag) => (dispatch, getState) => {
 }
 
 // GOAL THUNKS
-export const setGoal = ({ type, amount, start, end, tag }) => (
-  dispatch,
-  getState
-) => {
+export const setGoal = ({ type, amount, end, tag }) => (dispatch, getState) => {
   const state = getState()
   const goals = getRawGoals(state)
   const tags = getTags(state)
@@ -63,7 +57,7 @@ export const setGoal = ({ type, amount, start, end, tag }) => (
     delete newGoals[tag]
   } else {
     sendEvent(`Goals: set ${type} goal`)
-    newGoals[tag] = makeGoal({ type, amount, start, end })
+    newGoals[tag] = makeGoal({ type, amount, end })
   }
   dispatch(setData(GOALS, newGoals))
 }
@@ -75,30 +69,50 @@ export function getDataAccountId(state) {
 }
 
 // REMINDER SELECTORS
-const getAccLinksReminder = createSelector([getReminders], reminders =>
-  Object.values(reminders).find(reminder => reminder.payee === ACC_LINKS)
+
+// Get all data-reminders
+const getDataReminders = createSelector([getReminders], reminders => {
+  const array = Object.values(reminders)
+  return {
+    [ACC_LINKS]: array.find(reminder => reminder.payee === ACC_LINKS),
+    [TAG_ORDER]: array.find(reminder => reminder.payee === TAG_ORDER),
+    [GOALS]: array.find(reminder => reminder.payee === GOALS),
+  }
+})
+
+// Get concreet reminders
+const getAccLinksReminder = createSelector(
+  [getDataReminders],
+  reminders => reminders[ACC_LINKS]
 )
-export const getGoalsReminder = createSelector([getReminders], reminders =>
-  Object.values(reminders).find(reminder => reminder.payee === GOALS)
+const getGoalsReminder = createSelector(
+  [getDataReminders],
+  reminders => reminders[GOALS]
+)
+const getTagOrderReminder = createSelector(
+  [getDataReminders],
+  reminders => reminders[TAG_ORDER]
 )
 
-const getRawAccTagMap = createSelector([getAccLinksReminder], newReminder => {
-  if (newReminder) return JSON.parse(newReminder.comment) || {}
-  return {}
-})
+function parseDataFromReminder(reminder) {
+  try {
+    return JSON.parse(reminder.comment)
+  } catch (error) {
+    return null
+  }
+}
 
 // Account-Tag connections without broken links
 export const getAccTagMap = createSelector(
-  [getRawAccTagMap, getTags],
-  (rawAccTagMap, tags) => {
-    let newMap = { ...rawAccTagMap }
-
+  [getAccLinksReminder, getTags],
+  (dataReminder, tags) => {
+    let links = parseDataFromReminder(dataReminder) || {}
     // ignore connections for deleted tags
-    for (const accId in newMap) {
-      const tagId = newMap[accId]
-      if (!tags[tagId]) delete newMap[accId]
+    for (const accId in links) {
+      const tagId = links[accId]
+      if (!tags[tagId]) delete links[accId]
     }
-    return newMap
+    return links
   }
 )
 
