@@ -1,8 +1,6 @@
 import React, { useState } from 'react'
-import { connect } from 'react-redux'
-
 import { Paper, Box } from '@material-ui/core'
-import { setOutcomeBudget } from '../../thunks'
+import { useSelector } from 'react-redux'
 import TagGroup from './TagGroup'
 import TagTableHeader from './TagTableHeader'
 import TransactionsDrawer from 'components/TransactionsDrawer'
@@ -15,16 +13,9 @@ import BudgetPopover from './BudgetPopover'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
-function TagTable({
-  tagsTree,
-  date,
-  updateBudget,
-  openDetails,
-  required = false,
-  ...rest
-}) {
+export function TagTable({ date, openDetails, required = false, ...rest }) {
+  const tagsTree = useSelector(getTagsTree)
   const [selected, setSelected] = useState()
-  // const [showAll, setShowAll] = useState(false)
   const [metricIndex, setMetricIndex] = useState(0)
   const [goalPopoverData, setGoalPopoverData] = useState({})
   const [budgetPopoverData, setBudgetPopoverData] = useState({})
@@ -80,7 +71,6 @@ function TagTable({
               key={id}
               id={id}
               metric={metrics[metricIndex]}
-              setBudget={updateBudget}
               date={date}
               openTransactionsPopover={onSelect}
               openBudgetPopover={openBudgetPopover}
@@ -117,14 +107,3 @@ function TagTable({
     </>
   )
 }
-
-const mapStateToProps = (state, { index }) => ({
-  tagsTree: getTagsTree(state),
-})
-
-const mapDispatchToProps = dispatch => ({
-  updateBudget: (outcome, month, tagId) =>
-    dispatch(setOutcomeBudget(outcome, month, tagId)),
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(TagTable)

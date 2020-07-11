@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 
 import { Redirect } from 'react-router-dom'
 import { format } from 'date-fns'
-import TagTable from './containers/TagTable'
+import { TagTable } from './containers/TagTable'
 import TransferTable from './containers/TransferTable'
 import MonthInfo from './containers/MonthInfo'
 import ToBeBudgeted from './containers/ToBeBudgeted'
