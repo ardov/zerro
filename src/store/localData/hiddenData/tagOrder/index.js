@@ -1,0 +1,25 @@
+import { createSelector } from 'redux-starter-kit'
+import { getRawTagOrder } from '../selectors'
+import sendEvent from 'helpers/sendEvent'
+import { setHiddenData } from '../thunks'
+import { TAG_ORDER } from '../constants'
+
+// THUNKS
+export const setTagOrder = order => (dispatch, getState) => {
+  sendEvent(`Tag: sort`)
+  dispatch(setHiddenData(TAG_ORDER, order))
+}
+
+export const compareTags = createSelector(
+  [getRawTagOrder],
+  tagOrder => (tag1, tag2) => {
+    if (!tagOrder) return tag1.name.localeCompare(tag2.name)
+
+    const i1 = tagOrder.findIndex(id => id === tag1.id)
+    const i2 = tagOrder.findIndex(id => id === tag2.id)
+    if (i1 === i2) return tag1.name.localeCompare(tag2.name)
+    else if (i1 === -1) return 1
+    else if (i2 === -1) return -1
+    else return i1 - i2
+  }
+)

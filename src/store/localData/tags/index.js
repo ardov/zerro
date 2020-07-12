@@ -1,7 +1,10 @@
 import { createSlice, createSelector } from 'redux-starter-kit'
 import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
 import { convertToSyncArray } from 'helpers/converters'
+import { compareTags } from 'store/localData/hiddenData/tagOrder'
 import populateTags from './populateTags'
+// import { getTagsTree } from './getTagsTree'
+// import { getRawTagOrder } from '../hiddenData'
 
 // INITIAL STATE
 const initialState = {}
@@ -50,19 +53,21 @@ export const getPopulatedTags = createSelector([getTags], populateTags)
 
 export const getPopulatedTag = (state, id) => getPopulatedTags(state)[id]
 
-export const getTagsTree = createSelector([getPopulatedTags], tags => {
-  let result = []
-  for (const id in tags) {
-    if (tags[id].parent) continue
-    const tag = { ...tags[id] }
-    tag.children = tag.children ? tag.children.map(id => tags[id]) : []
-    result.push(tag)
+export const getTagsTree = createSelector(
+  [getPopulatedTags, compareTags],
+  (tags, compare) => {
+    let result = []
+    for (const id in tags) {
+      if (tags[id].parent) continue
+      const tag = { ...tags[id] }
+      tag.children = tag.children ? tag.children.map(id => tags[id]) : []
+      result.push(tag)
+    }
+    result.sort(compare)
+    result.forEach(tag => tag.children.sort(compare))
+    return result
   }
-  const sortFunc = (tag1, tag2) => tag1.name.localeCompare(tag2.name)
-  result.sort(sortFunc)
-  result.forEach(tag => tag.children.sort(sortFunc))
-  return result
-})
+)
 
 export const getTagLinks = createSelector([getPopulatedTags], tags => {
   let links = {}

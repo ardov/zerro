@@ -10,7 +10,7 @@ import { getTags } from 'store/localData/tags'
 import { subMonths } from 'date-fns/esm'
 import { getGoalsProgress } from '../selectors/goalsProgress'
 import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
-import { getGoals } from 'store/localData/hiddenData'
+import { getGoals } from 'store/localData/hiddenData/goals'
 const { TARGET_BALANCE } = GOAL_TYPES
 
 export const moveFunds = (amount, source, destination, monthDate) => (

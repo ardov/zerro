@@ -1,4 +1,4 @@
-import { GOAL_TYPES, GoalType } from './constants'
+import { GOAL_TYPES, GoalType } from '../constants'
 import { formatMoney } from 'helpers/format'
 import parseDate from 'date-fns/parseISO'
 import { format } from 'date-fns'

@@ -14,7 +14,10 @@ import {
   TableRow,
 } from '@material-ui/core'
 import TagSelect2 from 'components/TagSelect2'
-import { addConnection, getAccTagMap } from 'store/localData/hiddenData'
+import {
+  addConnection,
+  getAccTagMap,
+} from 'store/localData/hiddenData/accTagMap'
 import { getTransfers } from '../selectors/getAmountsByTag'
 import { getAccounts } from 'store/localData/accounts'
 import TagChip from 'components/TagChip'

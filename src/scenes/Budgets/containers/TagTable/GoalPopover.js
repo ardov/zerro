@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@material-ui/core'
 import AmountInput from 'components/AmountInput'
-import { getGoals, setGoal } from 'store/localData/hiddenData'
+import { getGoals, setGoal } from 'store/localData/hiddenData/goals'
 import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
 import CloseIcon from '@material-ui/icons/Close'
 import MonthSelectPopover from 'scenes/Budgets/MonthSelectPopover'

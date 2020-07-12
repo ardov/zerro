@@ -7,7 +7,7 @@ import { Tooltip } from 'components/Tooltip'
 import WithConfirm from 'components/Confirm'
 import { getGoalsProgress } from '../selectors/goalsProgress'
 import { round } from 'helpers/currencyHelpers'
-import { getGoals } from 'store/localData/hiddenData'
+import { getGoals } from 'store/localData/hiddenData/goals'
 import { fillGoals } from '../thunks'
 import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
 
