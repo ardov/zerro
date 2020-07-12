@@ -1,14 +1,14 @@
-type Modify<T, R> = Omit<T, keyof R> & R
+export type Modify<T, R> = Omit<T, keyof R> & R
 
-type UserId = number
-type InstrumentId = number
-type CompanyId = number
-type TagId = string
-type MerchantId = string
-type ReminderId = string
-type ReminderMarkerId = string
-type TransactionId = string
-type AccountId = string
+export type UserId = number
+export type InstrumentId = number
+export type CompanyId = number
+export type TagId = string
+export type MerchantId = string
+export type ReminderId = string
+export type ReminderMarkerId = string
+export type TransactionId = string
+export type AccountId = string
 
 export type TransactionType = 'transfer' | 'income' | 'outcome'
 export type GoalType = 'monthly' | 'monthlySpend' | 'targetBalance'

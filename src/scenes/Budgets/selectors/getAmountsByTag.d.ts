@@ -1,4 +1,4 @@
-interface ChildAmounts {
+interface TagAmounts {
   income: number
   outcome: number
   tagOutcome: number
@@ -8,7 +8,7 @@ interface ChildAmounts {
   available: number
 }
 
-interface TagAmounts {
+interface TagGroupAmounts extends TagAmounts {
   // Group totals
   totalBudgeted: number
   totalOutcome: number
@@ -16,15 +16,6 @@ interface TagAmounts {
   totalLeftover: number
   totalAvailable: number
   totalOverspent: number
-
-  // Main tag amounts
-  budgeted: number
-  income: number
-  tagOutcome: number
-  transferOutcome: number
-  outcome: number
-  leftover: number
-  available: number
 
   // Children totals
   childrenBudgeted: number
@@ -35,7 +26,7 @@ interface TagAmounts {
   childrenLeftover: number
 
   children: {
-    [childId: string]: ChildAmounts
+    [childId: string]: TagAmounts
   }
 }
 
@@ -59,7 +50,7 @@ export function getTransferFees(state: any): { [month: number]: number }
 
 export function getAmountsForTag(
   state: any
-): (month: number, tagId: string) => TagAmounts | ChildAmounts | null
+): (month: number, tagId: string) => TagAmounts | TagGroupAmounts | null
 
 export function getAmountsByTag(
   state: any
