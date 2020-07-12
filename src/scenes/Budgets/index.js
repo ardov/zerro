@@ -100,13 +100,6 @@ function Budgets() {
                     index={index}
                     date={monthList[index]}
                     openDetails={openDrawer}
-                    required={true}
-                  />
-
-                  <TagTable
-                    index={index}
-                    date={monthList[index]}
-                    openDetails={openDrawer}
                   />
 
                   <TransferTable month={monthList[index]} />

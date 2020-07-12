@@ -14,7 +14,7 @@ import BudgetPopover from './BudgetPopover'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
-export function TagTable({ date, openDetails, required = false, ...rest }) {
+export function TagTable({ date, openDetails, ...rest }) {
   const tagsTree = useSelector(getTagsTree)
   const [selected, setSelected] = useState()
   const [metricIndex, setMetricIndex] = useState(0)
@@ -40,9 +40,7 @@ export function TagTable({ date, openDetails, required = false, ...rest }) {
     []
   )
 
-  const tagIds = tagsTree
-    .filter(tag => !!tag.required === !!required)
-    .map(tag => tag.id)
+  const tagIds = tagsTree.map(tag => tag.id)
 
   const toggleMetric = () => setMetricIndex((metricIndex + 1) % 3)
 
@@ -64,7 +62,7 @@ export function TagTable({ date, openDetails, required = false, ...rest }) {
             top={0}
             zIndex={2}
             bgcolor="background.paper"
-            title={required ? 'Обязательные расходы' : 'Необязательные расходы'}
+            title={'Расходы'}
           />
           {tagIds.map(id => (
             <TagGroup
