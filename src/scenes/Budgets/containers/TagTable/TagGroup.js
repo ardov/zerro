@@ -1,11 +1,11 @@
 import React from 'react'
-import { connect } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { Collapse, Box, IconButton } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import ArrowRightIcon from '@material-ui/icons/ArrowRight'
 import { TagRow } from './TagRow'
-import { getTagsTree } from 'store/localData/tags'
 import { getAmountsForTag } from 'scenes/Budgets/selectors/getAmountsByTag'
+import { getPopulatedTag } from 'store/localData/tags'
 
 export const useStyles = makeStyles(theme => ({
   panelRoot: {
@@ -22,21 +22,22 @@ export const useStyles = makeStyles(theme => ({
   },
 }))
 
-function TagGroup(props) {
+export function TagGroup(props) {
   const {
-    // id,
+    id,
     metric,
     date,
     showAll,
-
-    tag,
-    amounts,
 
     openTransactionsPopover,
     openBudgetPopover,
     openGoalPopover,
     openDetails,
+    onClick,
   } = props
+
+  const tag = useSelector(state => getPopulatedTag(state, id))
+  const amounts = useSelector(state => getAmountsForTag(state)(date, id))
 
   const {
     totalBudgeted,
@@ -69,7 +70,7 @@ function TagGroup(props) {
     return null
 
   return (
-    <div className={c.panelRoot}>
+    <div className={c.panelRoot} onDoubleClick={onClick}>
       {hasChildren && (
         <IconButton size="small" className={c.expandIcon} onClick={toggle}>
           <ArrowRightIcon />
@@ -124,12 +125,3 @@ function withoutChildren(tag) {
   delete newTag.children
   return newTag
 }
-
-const mapStateToProps = (state, { id, date }) => ({
-  tag: getTagsTree(state).find(tag => tag.id === id),
-  amounts: getAmountsForTag(state)(date, id),
-})
-
-const mapDispatchToProps = dispatch => ({})
-
-export default connect(mapStateToProps, mapDispatchToProps)(TagGroup)

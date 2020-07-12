@@ -23,6 +23,7 @@ import { getGoalProgress } from 'scenes/Budgets/selectors/goalsProgress'
 import { Amount } from '../components'
 import { useContext } from 'react'
 import { IsDraggingContext } from '../DnDContext'
+import { getPopulatedTag } from 'store/localData/tags'
 
 const useStyles = makeStyles(theme => ({
   row: {
@@ -33,10 +34,10 @@ const useStyles = makeStyles(theme => ({
     display: 'grid',
     width: '100%',
     gridTemplateColumns: ({ isMobile }) =>
-      isMobile ? 'auto 120px' : 'auto 120px 120px 120px',
+      isMobile ? 'auto 90px 16px' : 'auto 90px 90px 90px 16px',
     alignItems: 'center',
     gridColumnGap: ({ isMobile }) =>
-      isMobile ? theme.spacing(0.5) : theme.spacing(3),
+      isMobile ? theme.spacing(0.5) : theme.spacing(2),
 
     '&:hover': {
       background: ({ isDragging }) =>
@@ -50,11 +51,7 @@ const useStyles = makeStyles(theme => ({
       opacity: 0,
     },
   },
-  name: {
-    display: 'flex',
-    alignItems: 'center',
-    minWidth: 0,
-  },
+
   warning: {
     transform: 'translateY(4px)',
     marginRight: theme.spacing(0.5),
@@ -103,61 +100,54 @@ export function TagRow(props) {
 
   const showBudget = isChild ? !!budgeted : true
 
-  const availableColor = getAvailableColor(available, isChild, !!budgeted)
-
   return (
-    <div className={c.row}>
-      <div className={c.name}>
-        <EmojiIcon
-          symbol={symbol}
-          mr={1.5}
-          color={colorRGB}
-          flexShrink={0}
-          onClick={() => openDetails(id)}
+    <>
+      <div className={c.row}>
+        <NameCell
+          id={id}
+          onOpenDetails={() => openDetails(id)}
+          onEditName={e => setNameAnchorEl(e.currentTarget)}
         />
-        <Typography variant="body1" color="textPrimary" noWrap>
-          <span onClick={e => setNameAnchorEl(e.currentTarget)}>{name}</span>
-        </Typography>
-      </div>
 
-      {/* BUDGET */}
-      {(metric === 'budgeted' || !isMobile) &&
-        (showBudget ? (
-          <Box
-            color={budgeted ? 'text.primary' : 'text.hint'}
-            display="flex"
-            justifyContent="flex-end"
-          >
-            <Link
-              variant="body1"
-              align="right"
-              component="button"
-              onClick={e => openBudgetPopover(id, e.currentTarget)}
-            >
-              {formatMoney(budgeted)}
-            </Link>
-          </Box>
-        ) : (
-          <Box display="flex" justifyContent="flex-end">
-            <Tooltip
-              title={
-                id === 'unsorted'
-                  ? 'Просто увеличьте бюджет всей группы 😉'
-                  : 'Добавить бюджет'
-              }
-            >
-              <span>
-                <IconButton
-                  size="small"
-                  edge="end"
-                  children={<AddIcon />}
-                  onClick={e => openBudgetPopover(id, e.currentTarget)}
-                  disabled={id === 'unsorted'}
-                />
-              </span>
-            </Tooltip>
-          </Box>
-        ))}
+        {(metric === 'budgeted' || !isMobile) && (
+          <BudgetCell
+            id={id}
+            budgeted={budgeted}
+            showBudget={showBudget}
+            onBudgetClick={e => openBudgetPopover(id, e.currentTarget)}
+          />
+        )}
+
+        {(metric === 'outcome' || !isMobile) && (
+          <OutcomeCell
+            outcome={outcome}
+            onClick={() => openTransactionsPopover(id)}
+          />
+        )}
+
+        {(metric === 'available' || !isMobile) && (
+          <Droppable droppableId={id ? id : 'null'} type="FUNDS">
+            {({ innerRef, placeholder }, snapshot) => (
+              <AvailableCell
+                innerRef={innerRef}
+                placeholder={placeholder}
+                snapshot={snapshot}
+                hiddenOverspend={hiddenOverspend}
+                id={id}
+                available={available}
+                isChild={isChild}
+                budgeted={budgeted}
+              />
+            )}
+          </Droppable>
+        )}
+
+        <GoalButton
+          goal={goal}
+          goalProgress={goalProgress}
+          onClick={e => openGoalPopover(id, e.currentTarget)}
+        />
+      </div>
 
       {!!nameAnchorEl && (
         <NamePopover
@@ -168,113 +158,165 @@ export function TagRow(props) {
           onClose={() => setNameAnchorEl(null)}
         />
       )}
+    </>
+  )
+}
 
-      {/* OUTCOME */}
-      {(metric === 'outcome' || !isMobile) && (
-        <Box color={outcome ? 'text.primary' : 'text.hint'} clone>
-          <Typography
-            variant="body1"
-            align="right"
-            onClick={() => openTransactionsPopover(id)}
+function NameCell(props) {
+  const { id, onOpenDetails, onEditName } = props
+  const tag = useSelector(state => getPopulatedTag(state, id))
+  const { symbol, colorRGB, name } = tag
+  return (
+    <Box display="flex" alignItems="center" minWidth={0}>
+      <EmojiIcon
+        symbol={symbol}
+        mr={1.5}
+        color={colorRGB}
+        flexShrink={0}
+        onClick={onOpenDetails}
+      />
+      <Typography variant="body1" color="textPrimary" noWrap>
+        <span onClick={onEditName}>{name}</span>
+      </Typography>
+    </Box>
+  )
+}
+
+function BudgetCell(props) {
+  const { id, budgeted, showBudget, onBudgetClick } = props
+  return showBudget ? (
+    <Box
+      color={budgeted ? 'text.primary' : 'text.hint'}
+      display="flex"
+      justifyContent="flex-end"
+    >
+      <Link
+        variant="body1"
+        align="right"
+        component="button"
+        onClick={onBudgetClick}
+      >
+        <Amount value={budgeted} />
+      </Link>
+    </Box>
+  ) : (
+    <Box display="flex" justifyContent="flex-end">
+      <Tooltip
+        title={
+          id === 'unsorted'
+            ? 'Просто увеличьте бюджет всей группы 😉'
+            : 'Добавить бюджет'
+        }
+      >
+        <span>
+          <IconButton
+            size="small"
+            edge="end"
+            children={<AddIcon />}
+            onClick={onBudgetClick}
+            disabled={id === 'unsorted'}
+          />
+        </span>
+      </Tooltip>
+    </Box>
+  )
+}
+
+function OutcomeCell(props) {
+  const { outcome, onClick } = props
+  return (
+    <Box color={outcome ? 'text.primary' : 'text.hint'} clone>
+      <Typography variant="body1" align="right" onClick={onClick}>
+        <Amount value={-outcome} />
+      </Typography>
+    </Box>
+  )
+}
+
+const useAvailableStyles = makeStyles(theme => ({
+  dropZone: {
+    background: theme.palette.action.selected,
+    transition: '0.1s',
+    borderRadius: theme.shape.borderRadius,
+  },
+}))
+
+function AvailableCell(props) {
+  const c = useAvailableStyles()
+  const {
+    innerRef,
+    placeholder,
+    snapshot,
+    hiddenOverspend,
+    id,
+    available,
+    isChild,
+    budgeted,
+  } = props
+
+  const availableColor = getAvailableColor(available, isChild, !!budgeted)
+  return (
+    <Box
+      ref={innerRef}
+      m={-1}
+      p={1}
+      className={snapshot.isDraggingOver ? c.dropZone : null}
+    >
+      <Typography variant="body1" align="right">
+        {!!hiddenOverspend && (
+          <Tooltip
+            title={
+              <span>
+                Перерасход в родительской категории.
+                <br />
+                {`Увеличьте бюджет на ${formatMoney(hiddenOverspend)}`}
+              </span>
+            }
           >
-            {formatMoney(outcome ? -outcome : 0)}
-          </Typography>
-        </Box>
-      )}
+            <WarningIcon fontSize="small" color="error" />
+          </Tooltip>
+        )}
 
-      {/* AVAILABLE */}
-      {(metric === 'available' || !isMobile) && (
-        <Droppable
-          droppableId={id ? id : 'null'}
-          type="FUNDS"
-          // direction="horizontal"
-        >
-          {({ innerRef, placeholder }, snapshot) => (
+        <span style={{ display: 'none' }}>{placeholder}</span>
+        <Draggable draggableId={id ? id : 'null'} index={0}>
+          {(provided, snapshot) => (
             <Box
-              ref={innerRef}
-              m={-1}
-              p={1}
-              className={snapshot.isDraggingOver ? c.dropZone : null}
+              borderRadius={16}
+              bgcolor={snapshot.isDragging ? 'background.paper' : 'grey'}
+              px={1}
+              mx={-1}
+              component="span"
+              display="inline-block"
+              color={availableColor}
+              ref={provided.innerRef}
+              {...provided.draggableProps}
+              {...provided.dragHandleProps}
+              style={snapshot.isDragging ? provided.draggableProps.style : null}
             >
-              <Typography variant="body1" align="right">
-                {!!hiddenOverspend && (
-                  <Tooltip
-                    title={
-                      <span>
-                        Перерасход в родительской категории.
-                        <br />
-                        {`Увеличьте бюджет на ${formatMoney(hiddenOverspend)}`}
-                      </span>
-                    }
-                  >
-                    <WarningIcon fontSize="small" color="error" />
-                  </Tooltip>
-                )}
-
-                <span style={{ display: 'none' }}>{placeholder}</span>
-                <Draggable draggableId={id ? id : 'null'} index={0}>
-                  {(provided, snapshot) => (
-                    <Box
-                      borderRadius={16}
-                      bgcolor={
-                        snapshot.isDragging ? 'background.paper' : 'grey'
-                      }
-                      px={1}
-                      mx={-1}
-                      component="span"
-                      display="inline-block"
-                      color={availableColor}
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      style={
-                        snapshot.isDragging
-                          ? provided.draggableProps.style
-                          : null
-                      }
-                    >
-                      <Amount value={available} />
-                    </Box>
-                  )}
-                </Draggable>
-
-                <Box
-                  component="span"
-                  display="inline-block"
-                  ml={1}
-                  maxWidth={16}
-                >
-                  {!snapshot.isDragging &&
-                    (goalProgress ? (
-                      <Tooltip title={goalToWords(goal)}>
-                        <IconButton
-                          size="small"
-                          onClick={e => openGoalPopover(id, e.currentTarget)}
-                          edge="start"
-                          children={
-                            <GoalProgress value={goalProgress.progress} />
-                          }
-                        />
-                      </Tooltip>
-                    ) : (
-                      <Box component="span" className="addGoal">
-                        <Tooltip title="Добавить цель">
-                          <IconButton
-                            size="small"
-                            onClick={e => openGoalPopover(id, e.currentTarget)}
-                            edge="start"
-                            children={<EmojiFlagsIcon fontSize="small" />}
-                          />
-                        </Tooltip>
-                      </Box>
-                    ))}
-                </Box>
-              </Typography>
+              <Amount value={available} />
             </Box>
           )}
-        </Droppable>
-      )}
-    </div>
+        </Draggable>
+      </Typography>
+    </Box>
+  )
+}
+
+function GoalButton(props) {
+  const { goal, goalProgress, onClick } = props
+  const hasGoal = !!goalProgress
+  return (
+    <Box component="span" className={hasGoal ? '' : 'addGoal'}>
+      <Tooltip title={hasGoal ? goalToWords(goal) : 'Добавить цель'}>
+        <IconButton size="small" onClick={onClick}>
+          {hasGoal ? (
+            <GoalProgress value={goalProgress.progress} />
+          ) : (
+            <EmojiFlagsIcon fontSize="small" />
+          )}
+        </IconButton>
+      </Tooltip>
+    </Box>
   )
 }
 

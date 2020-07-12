@@ -1,20 +1,21 @@
 import React, { useState } from 'react'
 import { Paper, Box } from '@material-ui/core'
-import { useSelector } from 'react-redux'
-import TagGroup from './TagGroup'
+import { useSelector, useDispatch } from 'react-redux'
+import { TagGroup } from './TagGroup'
 import TagTableHeader from './TagTableHeader'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 import { endOfMonth } from 'date-fns'
 import sendEvent from 'helpers/sendEvent'
 import { getTagsTree } from 'store/localData/tags'
-// import { getSortedTagsTree } from 'store/localData/tags/getSortedTagsTree'
 import GoalPopover from './GoalPopover'
 import { useCallback } from 'react'
 import BudgetPopover from './BudgetPopover'
+import { setTagOrder } from 'store/localData/hiddenData/tagOrder'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
 export function TagTable({ date, openDetails, ...rest }) {
+  const dispatch = useDispatch()
   const tagsTree = useSelector(getTagsTree)
   const [selected, setSelected] = useState()
   const [metricIndex, setMetricIndex] = useState(0)
@@ -29,6 +30,31 @@ export function TagTable({ date, openDetails, ...rest }) {
       else setSelected([id])
     },
     [tagsTree]
+  )
+
+  const moveUp = useCallback(
+    id => {
+      let parents = tagsTree.map(tag => tag.id)
+      if (!parents.find(tagId => tagId === id)) return
+
+      let oldIndex = parents.findIndex(tagId => tagId === id)
+      if (oldIndex === 0) return
+      const newIndex = oldIndex - 1
+      parents.splice(newIndex, 0, parents.splice(oldIndex, 1)[0])
+
+      let flatList = []
+      parents.forEach(id => {
+        flatList.push(id)
+
+        // if (tag.children) {
+        //   tag.children.forEach(tag => {
+        //     flatList.push(tag.id)
+        //   })
+        // }
+      })
+      dispatch(setTagOrder(flatList))
+    },
+    [tagsTree, dispatch]
   )
 
   const openBudgetPopover = useCallback(
@@ -74,6 +100,7 @@ export function TagTable({ date, openDetails, ...rest }) {
               openBudgetPopover={openBudgetPopover}
               openGoalPopover={openGoalPopover}
               openDetails={openDetails}
+              onClick={() => moveUp(id)}
             />
           ))}
         </Paper>

@@ -7,10 +7,10 @@ const useStyles = makeStyles(theme => ({
     display: 'grid',
     width: '100%',
     gridTemplateColumns: ({ isMobile }) =>
-      isMobile ? 'auto 120px' : 'auto 120px 120px 120px',
+      isMobile ? 'auto 90px 16px' : 'auto 90px 90px 90px 16px',
     alignItems: 'center',
     gridColumnGap: ({ isMobile }) =>
-      isMobile ? theme.spacing(0.5) : theme.spacing(3),
+      isMobile ? theme.spacing(0.5) : theme.spacing(2),
   },
 }))
 
@@ -38,9 +38,6 @@ export default function TagTableHeader({
         <Typography variant="body2" color="textSecondary" align="right" noWrap>
           <Link color="textSecondary" onClick={onToggleMetric}>
             {metrics[metric]}
-            {metric === 'available' && (
-              <Box component="span" minWidth={24} display="inline-block" />
-            )}
           </Link>
         </Typography>
       ) : (
@@ -65,10 +62,8 @@ export default function TagTableHeader({
             color="textSecondary"
             align="right"
             noWrap
-          >
-            Доступно
-            <Box component="span" minWidth={24} display="inline-block" />
-          </Typography>
+            children="Доступно"
+          />
         </>
       )}
     </Box>
