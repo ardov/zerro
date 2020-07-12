@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid'
-import { Account } from 'store/types'
+import { Account } from 'types'
 
 export const makeAccount = (
   raw: Partial<Account> & {

@@ -1,30 +1,5 @@
 import { v1 as uuidv1 } from 'uuid'
-
-interface Reminder {
-  user: number
-  incomeAccount: string
-  outcomeAccount: string
-
-  id: string
-  changed: number
-
-  incomeInstrument: number
-  income: number
-  outcomeInstrument: number
-  outcome: number
-
-  tag: string | string[] | null
-  merchant: string | null
-  payee: string | null
-  comment: string | null
-
-  interval: 'day' | 'week' | 'month' | 'year' | null
-  step: number
-  points: number[]
-  startDate: number
-  endDate: number
-  notify: boolean
-}
+import { Reminder } from 'types'
 
 export const makeReminder = (
   raw: Partial<Reminder> & {

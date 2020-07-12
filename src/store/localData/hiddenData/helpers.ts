@@ -1,7 +1,7 @@
 import { makeAccount } from 'store/localData/accounts/helpers'
 import { makeReminder } from 'store/localData/reminders/helpers'
 import { DATA_ACC_NAME } from './constants'
-import { Account } from 'store/types'
+import { Account } from 'types'
 
 // DATA ACCOUNT
 export function makeDataAcc(user: number): Account {
