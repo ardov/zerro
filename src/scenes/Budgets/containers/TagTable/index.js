@@ -35,23 +35,14 @@ export function TagTable({ date, openDetails, ...rest }) {
   const moveUp = useCallback(
     id => {
       let parents = tagsTree.map(tag => tag.id)
-      if (!parents.find(tagId => tagId === id)) return
 
-      let oldIndex = parents.findIndex(tagId => tagId === id)
-      if (oldIndex === 0) return
+      let oldIndex = tagsTree.findIndex(tag => tag.id === id)
+      if (oldIndex === -1 || oldIndex === 0) return
       const newIndex = oldIndex - 1
       parents.splice(newIndex, 0, parents.splice(oldIndex, 1)[0])
 
       let flatList = []
-      parents.forEach(id => {
-        flatList.push(id)
-
-        // if (tag.children) {
-        //   tag.children.forEach(tag => {
-        //     flatList.push(tag.id)
-        //   })
-        // }
-      })
+      parents.forEach(id => flatList.push(id))
       dispatch(setTagOrder(flatList))
     },
     [tagsTree, dispatch]
@@ -68,7 +59,10 @@ export function TagTable({ date, openDetails, ...rest }) {
 
   const tagIds = tagsTree.map(tag => tag.id)
 
-  const toggleMetric = () => setMetricIndex((metricIndex + 1) % 3)
+  const toggleMetric = useCallback(
+    () => setMetricIndex((metricIndex + 1) % 3),
+    [metricIndex]
+  )
 
   const filterConditions = {
     type: 'outcome',

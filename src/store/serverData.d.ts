@@ -1,4 +1,4 @@
-import { User, UserId, Instrument } from 'types'
+import { User, UserId, Instrument, InstrumentId } from 'types'
 
 export function getDataToSave(state: any): any
 export function getLastSyncTime(state: any): number

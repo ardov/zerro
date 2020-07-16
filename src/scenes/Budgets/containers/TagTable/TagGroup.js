@@ -27,7 +27,6 @@ export function TagGroup(props) {
     id,
     metric,
     date,
-    showAll,
 
     openTransactionsPopover,
     openBudgetPopover,
@@ -40,7 +39,6 @@ export function TagGroup(props) {
   const amounts = useSelector(state => getAmountsForTag(state)(date, id))
 
   const {
-    totalBudgeted,
     totalAvailable,
     totalOutcome,
     outcome,
@@ -66,8 +64,7 @@ export function TagGroup(props) {
     openDetails,
   }
 
-  if (!tag.showOutcome && !totalOutcome && !totalAvailable && !showAll)
-    return null
+  if (!tag.showOutcome && !totalOutcome && !totalAvailable) return null
 
   return (
     <div className={c.panelRoot} onDoubleClick={onClick}>
@@ -77,40 +74,16 @@ export function TagGroup(props) {
         </IconButton>
       )}
 
-      <TagRow
-        {...withoutChildren(tag)}
-        {...rowProps}
-        budgeted={totalBudgeted}
-        outcome={totalOutcome}
-        available={totalAvailable}
-        hiddenOverspend={hiddenOverspend}
-      />
+      <TagRow id={tag.id} {...rowProps} hiddenOverspend={hiddenOverspend} />
 
       {hasChildren && (
         <Collapse in={expanded}>
           {expanded && (
             <Box pb={1}>
-              {!!outcome && (
-                <TagRow
-                  id="unsorted"
-                  name="Без подкатегории"
-                  symbol="-"
-                  isChild={true}
-                  outcome={outcome}
-                  {...rowProps}
-                />
-              )}
+              {!!outcome && <TagRow id={tag.id} isChild {...rowProps} />}
 
-              {tag.children.map(child => (
-                <TagRow
-                  key={child.id}
-                  {...withoutChildren(child)}
-                  {...rowProps}
-                  isChild={true}
-                  budgeted={amounts.children[child.id].budgeted}
-                  outcome={amounts.children[child.id].outcome}
-                  available={amounts.children[child.id].available}
-                />
+              {tag.children.map(id => (
+                <TagRow key={id} id={id} isChild {...rowProps} />
               ))}
             </Box>
           )}
@@ -118,10 +91,4 @@ export function TagGroup(props) {
       )}
     </div>
   )
-}
-
-function withoutChildren(tag) {
-  const newTag = { ...tag }
-  delete newTag.children
-  return newTag
 }
