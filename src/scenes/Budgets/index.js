@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
-
 import { Redirect } from 'react-router-dom'
 import { format } from 'date-fns'
 import { TagTable } from './containers/TagTable'
@@ -57,6 +56,7 @@ const useStyles = makeStyles(theme => ({
       'month-select   goals     to-be-budgeted'
       'tags           tags      tags'
       'transfers      transfers transfers'`,
+    width: '100%',
     maxWidth: 800,
     [theme.breakpoints.down('xs')]: {
       gridTemplateColumns: '1fr',
@@ -94,22 +94,20 @@ function Budgets() {
   return (
     <DnDContext>
       <Box p={isMobile ? 1.5 : 3} display="flex">
-        <Box flexGrow="1" display="flex" justifyContent="center">
-          <Box className={c.grid}>
-            <MonthSelector
-              onChange={setMonth}
-              className={c.monthSelect}
-              {...{ minMonth, maxMonth, value: month }}
-            />
-            <GoalsProgressWidget className={c.goals} month={month} />
-            <ToBeBudgeted
-              className={c.toBeBudgeted}
-              index={index}
-              onClick={() => openDrawer(null)}
-            />
-            <TagTable className={c.tags} openDetails={openDrawer} />
-            <TransferTable className={c.transfers} month={monthList[index]} />
-          </Box>
+        <Box className={c.grid}>
+          <MonthSelector
+            onChange={setMonth}
+            className={c.monthSelect}
+            {...{ minMonth, maxMonth, value: month }}
+          />
+          <GoalsProgressWidget className={c.goals} month={month} />
+          <ToBeBudgeted
+            className={c.toBeBudgeted}
+            index={index}
+            onClick={() => openDrawer(null)}
+          />
+          <TagTable className={c.tags} openDetails={openDrawer} />
+          <TransferTable className={c.transfers} month={monthList[index]} />
         </Box>
 
         <WarningSign />

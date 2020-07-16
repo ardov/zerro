@@ -73,7 +73,12 @@ const PrivateApp = () => {
 
       <SnackbarHandler />
       <RegularSyncHandler />
-      <Box height="100vh" overflow="auto" flexGrow={1}>
+      <Box
+        height="100vh"
+        overflow="auto"
+        flexGrow={1}
+        className="hidden-scroll"
+      >
         <ErrorBoundary>
           {hasData ? (
             <Switch>
