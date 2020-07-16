@@ -11,12 +11,14 @@ import GoalPopover from './GoalPopover'
 import { useCallback } from 'react'
 import BudgetPopover from './BudgetPopover'
 import { setTagOrder } from 'store/localData/hiddenData/tagOrder'
+import { useMonth } from 'scenes/Budgets/useMonth'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
-export function TagTable({ date, openDetails, ...rest }) {
+export function TagTable({ openDetails, ...rest }) {
   const dispatch = useDispatch()
   const tagsTree = useSelector(getTagsTree)
+  const [month] = useMonth()
   const [selected, setSelected] = useState()
   const [metricIndex, setMetricIndex] = useState(0)
   const [goalPopoverData, setGoalPopoverData] = useState({})
@@ -66,14 +68,14 @@ export function TagTable({ date, openDetails, ...rest }) {
 
   const filterConditions = {
     type: 'outcome',
-    dateFrom: date,
-    dateTo: endOfMonth(date),
+    dateFrom: month,
+    dateTo: endOfMonth(month),
     tags: selected,
   }
 
   return (
     <>
-      <Box position="relative" py={1} clone>
+      <Box position="relative" py={1} {...rest} clone>
         <Paper>
           <TagTableHeader
             metric={metrics[metricIndex]}
@@ -89,7 +91,7 @@ export function TagTable({ date, openDetails, ...rest }) {
               key={id}
               id={id}
               metric={metrics[metricIndex]}
-              date={date}
+              date={month}
               openTransactionsPopover={onSelect}
               openBudgetPopover={openBudgetPopover}
               openGoalPopover={openGoalPopover}
@@ -111,7 +113,7 @@ export function TagTable({ date, openDetails, ...rest }) {
         id={budgetPopoverData.id}
         anchorEl={budgetPopoverData.anchor}
         open={!!budgetPopoverData.anchor}
-        month={date}
+        month={month}
         onClose={() => setBudgetPopoverData({})}
         style={{ transform: 'translate(-14px, -16px)' }}
       />

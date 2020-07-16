@@ -43,7 +43,7 @@ const useStyles = makeStyles(({ palette, spacing, shape, shadows }) => ({
   },
 }))
 
-export default function GoalsProgressWidget({ month, ...rest }) {
+export default function GoalsProgressWidget({ month, className, ...rest }) {
   const dispatch = useDispatch()
   const currency = useSelector(getUserCurrencyCode)
   const formatSum = sum => formatMoney(sum, currency)
@@ -81,7 +81,7 @@ export default function GoalsProgressWidget({ month, ...rest }) {
             : `Всего нужно было ${formatSum(targetSum)}`
         }
       >
-        <ButtonBase {...rest} className={c.base}>
+        <ButtonBase {...rest} className={`${c.base} ${className}`}>
           <div className={c.progress} />
           {targetSum ? (
             <>

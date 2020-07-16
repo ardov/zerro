@@ -14,6 +14,7 @@ import { Tooltip } from 'components/Tooltip'
 import Rhythm from 'components/Rhythm'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
+import { useMonth } from '../useMonth'
 
 const useStyles = makeStyles(({ shape, spacing, palette }) => ({
   base: {
@@ -30,7 +31,8 @@ const useStyles = makeStyles(({ shape, spacing, palette }) => ({
   },
 }))
 
-export default function ToBeBudgeted({ index, month, ...rest }) {
+export default function ToBeBudgeted({ index, className, ...rest }) {
+  const [month] = useMonth()
   const currency = useSelector(getUserCurrencyCode)
   const totals = useSelector(getTotalsByMonth)[month]
   const {
@@ -114,7 +116,7 @@ export default function ToBeBudgeted({ index, month, ...rest }) {
         </Rhythm>
       }
     >
-      <ButtonBase className={c.base} {...rest}>
+      <ButtonBase className={`${c.base} ${className}`} {...rest}>
         <Typography noWrap align="center" variant="h5">
           {toBeBudgeted
             ? formatSum(toBeBudgeted)

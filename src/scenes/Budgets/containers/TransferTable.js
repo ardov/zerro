@@ -37,6 +37,7 @@ function TransferTable({
   currency,
   accTagMap,
   connectToTag,
+  className,
   ...rest
 }) {
   const classes = useStyles()
@@ -53,7 +54,7 @@ function TransferTable({
   }
 
   return rows.length ? (
-    <Paper className={classes.root}>
+    <Paper className={`${classes.root} ${className}`}>
       <Box p={2} clone>
         <Typography variant="h6" id="tableTitle">
           Переводы из бюджета
