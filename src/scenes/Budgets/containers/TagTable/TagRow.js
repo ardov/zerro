@@ -34,11 +34,14 @@ const useStyles = makeStyles(theme => ({
     paddingRight: theme.spacing(2),
     display: 'grid',
     width: '100%',
-    gridTemplateColumns: ({ isMobile }) =>
-      isMobile ? 'auto 90px 16px' : 'auto 90px 90px 90px 16px',
+    gridTemplateColumns: 'auto 90px 90px 90px 16px',
     alignItems: 'center',
-    gridColumnGap: ({ isMobile }) =>
-      isMobile ? theme.spacing(0.5) : theme.spacing(2),
+    gridColumnGap: theme.spacing(2),
+
+    [theme.breakpoints.down('xs')]: {
+      gridTemplateColumns: 'auto 90px 16px',
+      gridColumnGap: theme.spacing(0.5),
+    },
 
     '&:hover': {
       background: ({ isDragging }) =>
@@ -97,7 +100,7 @@ export function TagRow(props) {
     shallowEqual
   )
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
-  const c = useStyles({ isChild, isMobile, isDragging })
+  const c = useStyles({ isChild, isDragging })
   const [nameAnchorEl, setNameAnchorEl] = React.useState(null)
 
   if (!showOutcome && !outcome && !available && !showAll) return null
@@ -203,7 +206,7 @@ function BudgetCell(props) {
         component="button"
         onClick={onBudgetClick}
       >
-        <Amount value={budgeted} />
+        <Amount value={budgeted} decimals={0} />
       </Link>
     </Box>
   ) : (
@@ -234,7 +237,7 @@ function OutcomeCell(props) {
   return (
     <Box color={outcome ? 'text.primary' : 'text.hint'} clone>
       <Typography variant="body1" align="right" onClick={onClick}>
-        <Amount value={-outcome} />
+        <Amount value={-outcome} decimals={0} />
       </Typography>
     </Box>
   )
@@ -275,7 +278,7 @@ function AvailableCell(props) {
       {...provided.dragHandleProps}
       style={snapshot.isDragging ? provided.draggableProps.style : null}
     >
-      <Amount value={available} />
+      <Amount value={available} decimals={0} />
     </Box>
   )
 

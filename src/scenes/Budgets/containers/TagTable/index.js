@@ -15,7 +15,7 @@ import { useMonth } from 'scenes/Budgets/useMonth'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
-export function TagTable({ openDetails, ...rest }) {
+export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
   const dispatch = useDispatch()
   const tagsTree = useSelector(getTagsTree)
   const [month] = useMonth()
@@ -80,11 +80,8 @@ export function TagTable({ openDetails, ...rest }) {
           <TagTableHeader
             metric={metrics[metricIndex]}
             onToggleMetric={toggleMetric}
-            position="sticky"
-            top={0}
-            zIndex={2}
-            bgcolor="background.paper"
             title={'Расходы'}
+            onOpenMonthDrawer={onOpenMonthDrawer}
           />
           {tagIds.map(id => (
             <TagGroup

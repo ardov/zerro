@@ -2,7 +2,12 @@ import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { getUserCurrencyCode } from 'store/serverData'
-import { Typography, makeStyles, ButtonBase } from '@material-ui/core'
+import {
+  Typography,
+  makeStyles,
+  ButtonBase,
+  useMediaQuery,
+} from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import WithConfirm from 'components/Confirm'
 import { getGoalsProgress } from '../selectors/goalsProgress'
@@ -13,35 +18,43 @@ import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
 
 const { TARGET_BALANCE } = GOAL_TYPES
 
-const useStyles = makeStyles(({ palette, spacing, shape, shadows }) => ({
-  base: {
-    display: 'block',
-    width: '100%',
-    borderRadius: shape.borderRadius,
-    padding: spacing(1.5, 1),
-    background: palette.background.paper,
-    boxShadow: shadows[2],
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  paper: {
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  progress: {
-    position: 'absolute',
-    width: '100%',
+const useStyles = makeStyles(
+  ({ palette, spacing, shape, shadows, breakpoints }) => ({
+    base: {
+      display: 'flex',
+      flexDirection: 'column',
+      width: '100%',
+      borderRadius: shape.borderRadius,
+      padding: spacing(1.5, 2),
+      background: palette.background.paper,
+      boxShadow: shadows[2],
+      position: 'relative',
+      overflow: 'hidden',
 
-    transform: ({ progress }) => `scaleX(${1 - progress})`,
-    transformOrigin: 'right',
-    top: 0,
-    bottom: 0,
-    right: -1,
-    backgroundColor: palette.action.selected,
-    willChange: 'transform',
-    transition: '0.4s ease-in-out',
-  },
-}))
+      [breakpoints.down('xs')]: {
+        flexDirection: 'row-reverse',
+        justifyContent: 'space-between',
+      },
+    },
+    paper: {
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    progress: {
+      position: 'absolute',
+      width: '100%',
+
+      transform: ({ progress }) => `scaleX(${1 - progress})`,
+      transformOrigin: 'right',
+      top: 0,
+      bottom: 0,
+      right: -1,
+      backgroundColor: palette.action.selected,
+      willChange: 'transform',
+      transition: '0.4s ease-in-out',
+    },
+  })
+)
 
 export default function GoalsProgressWidget({ month, className, ...rest }) {
   const dispatch = useDispatch()
@@ -63,6 +76,7 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
 
   const progress = targetSum ? (targetSum - needSum) / targetSum : 0
   const c = useStyles({ progress })
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
 
   return (
     <WithConfirm
@@ -88,7 +102,7 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
               <Typography
                 noWrap
                 align="center"
-                variant="h5"
+                variant={isMobile ? 'body1' : 'h5'}
                 color="textPrimary"
               >
                 {needSum > 0 ? formatSum(needSum) : '🥳'}
@@ -96,7 +110,7 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
               <Typography
                 noWrap
                 align="center"
-                variant="body2"
+                variant={isMobile ? 'body1' : 'body2'}
                 color="textSecondary"
               >
                 {needSum > 0 ? 'Ещё нужно на цели' : 'Цели выполнены'}

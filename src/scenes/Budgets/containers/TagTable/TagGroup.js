@@ -10,8 +10,8 @@ import { getPopulatedTag } from 'store/localData/tags'
 export const useStyles = makeStyles(theme => ({
   panelRoot: {
     position: 'relative',
-    borderTop: '1px solid',
-    borderColor: theme.palette.divider,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    '&:last-child': { border: 0 },
   },
   expandIcon: {
     position: 'absolute',

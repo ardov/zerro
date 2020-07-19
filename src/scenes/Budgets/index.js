@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import { TagTable } from './containers/TagTable'
 import TransferTable from './containers/TransferTable'
 import MonthInfo from './containers/MonthInfo'
-import ToBeBudgeted from './containers/ToBeBudgeted'
+import { ToBeBudgeted } from './containers/ToBeBudgeted'
 import MonthSelector from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
 import EmojiIcon from 'components/EmojiIcon'
@@ -50,6 +50,7 @@ const useStyles = makeStyles(theme => ({
   drawerWidth: { width: 360 },
   grid: {
     display: 'grid',
+    padding: theme.spacing(3),
     gap: `${theme.spacing(3)}px`,
     gridTemplateColumns: '1fr 1fr 1fr',
     gridTemplateAreas: `
@@ -59,6 +60,8 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
     maxWidth: 800,
     [theme.breakpoints.down('xs')]: {
+      gap: `${theme.spacing(2)}px`,
+      padding: theme.spacing(1, 1, 6),
       gridTemplateColumns: '1fr',
       gridTemplateAreas: `'month-select' 'goals' 'to-be-budgeted' 'tags' 'transfers'`,
     },
@@ -93,7 +96,7 @@ function Budgets() {
 
   return (
     <DnDContext>
-      <Box p={isMobile ? 1.5 : 3} display="flex">
+      <Box display="flex" justifyContent="center" position="relative">
         <Box className={c.grid}>
           <MonthSelector
             onChange={setMonth}
@@ -106,7 +109,11 @@ function Budgets() {
             index={index}
             onClick={() => openDrawer(null)}
           />
-          <TagTable className={c.tags} openDetails={openDrawer} />
+          <TagTable
+            className={c.tags}
+            openDetails={openDrawer}
+            onOpenMonthDrawer={() => openDrawer(null)}
+          />
           <TransferTable className={c.transfers} month={monthList[index]} />
         </Box>
 
