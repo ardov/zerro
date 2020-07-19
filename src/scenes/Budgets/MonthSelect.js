@@ -32,7 +32,13 @@ const MonthButton = withStyles(theme => ({
   },
 }))(ButtonBase)
 
-export default function MonthSelect({ onChange, minMonth, maxMonth, value }) {
+export default function MonthSelect({
+  onChange,
+  minMonth,
+  maxMonth,
+  value,
+  className,
+}) {
   const paperRef = useRef()
   const year = new Date(value).getFullYear()
   const [anchorEl, setAnchorEl] = useState(null)
@@ -53,7 +59,7 @@ export default function MonthSelect({ onChange, minMonth, maxMonth, value }) {
 
   return (
     <>
-      <Paper ref={paperRef}>
+      <Paper ref={paperRef} className={className}>
         <Box display="flex" px={0.5} py={1}>
           <Box alignSelf="center" flexShrink="0">
             <IconButton

@@ -1,17 +1,17 @@
 import React from 'react'
-import { connect } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { Collapse, Box, IconButton } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import ArrowRightIcon from '@material-ui/icons/ArrowRight'
 import { TagRow } from './TagRow'
-import { getTagsTree } from 'store/localData/tags'
 import { getAmountsForTag } from 'scenes/Budgets/selectors/getAmountsByTag'
+import { getPopulatedTag } from 'store/localData/tags'
 
 export const useStyles = makeStyles(theme => ({
   panelRoot: {
     position: 'relative',
-    borderTop: '1px solid',
-    borderColor: theme.palette.divider,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    '&:last-child': { border: 0 },
   },
   expandIcon: {
     position: 'absolute',
@@ -22,24 +22,23 @@ export const useStyles = makeStyles(theme => ({
   },
 }))
 
-function TagGroup(props) {
+export function TagGroup(props) {
   const {
-    // id,
+    id,
     metric,
     date,
-    showAll,
-
-    tag,
-    amounts,
 
     openTransactionsPopover,
     openBudgetPopover,
     openGoalPopover,
     openDetails,
+    onClick,
   } = props
 
+  const tag = useSelector(state => getPopulatedTag(state, id))
+  const amounts = useSelector(state => getAmountsForTag(state)(date, id))
+
   const {
-    totalBudgeted,
     totalAvailable,
     totalOutcome,
     outcome,
@@ -65,51 +64,26 @@ function TagGroup(props) {
     openDetails,
   }
 
-  if (!tag.showOutcome && !totalOutcome && !totalAvailable && !showAll)
-    return null
+  if (!tag.showOutcome && !totalOutcome && !totalAvailable) return null
 
   return (
-    <div className={c.panelRoot}>
+    <div className={c.panelRoot} onDoubleClick={onClick}>
       {hasChildren && (
         <IconButton size="small" className={c.expandIcon} onClick={toggle}>
           <ArrowRightIcon />
         </IconButton>
       )}
 
-      <TagRow
-        {...withoutChildren(tag)}
-        {...rowProps}
-        budgeted={totalBudgeted}
-        outcome={totalOutcome}
-        available={totalAvailable}
-        hiddenOverspend={hiddenOverspend}
-      />
+      <TagRow id={tag.id} {...rowProps} hiddenOverspend={hiddenOverspend} />
 
       {hasChildren && (
         <Collapse in={expanded}>
           {expanded && (
             <Box pb={1}>
-              {!!outcome && (
-                <TagRow
-                  id="unsorted"
-                  name="Без подкатегории"
-                  symbol="-"
-                  isChild={true}
-                  outcome={outcome}
-                  {...rowProps}
-                />
-              )}
+              {!!outcome && <TagRow id={tag.id} isChild {...rowProps} />}
 
-              {tag.children.map(child => (
-                <TagRow
-                  key={child.id}
-                  {...withoutChildren(child)}
-                  {...rowProps}
-                  isChild={true}
-                  budgeted={amounts.children[child.id].budgeted}
-                  outcome={amounts.children[child.id].outcome}
-                  available={amounts.children[child.id].available}
-                />
+              {tag.children.map(id => (
+                <TagRow key={id} id={id} isChild {...rowProps} />
               ))}
             </Box>
           )}
@@ -118,18 +92,3 @@ function TagGroup(props) {
     </div>
   )
 }
-
-function withoutChildren(tag) {
-  const newTag = { ...tag }
-  delete newTag.children
-  return newTag
-}
-
-const mapStateToProps = (state, { id, date }) => ({
-  tag: getTagsTree(state).find(tag => tag.id === id),
-  amounts: getAmountsForTag(state)(date, id),
-})
-
-const mapDispatchToProps = dispatch => ({})
-
-export default connect(mapStateToProps, mapDispatchToProps)(TagGroup)

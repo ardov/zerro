@@ -1,9 +1,7 @@
 import React, { useState } from 'react'
-import { connect } from 'react-redux'
-
 import { Paper, Box } from '@material-ui/core'
-import { setOutcomeBudget } from '../../thunks'
-import TagGroup from './TagGroup'
+import { useSelector, useDispatch } from 'react-redux'
+import { TagGroup } from './TagGroup'
 import TagTableHeader from './TagTableHeader'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 import { endOfMonth } from 'date-fns'
@@ -12,19 +10,16 @@ import { getTagsTree } from 'store/localData/tags'
 import GoalPopover from './GoalPopover'
 import { useCallback } from 'react'
 import BudgetPopover from './BudgetPopover'
+import { setTagOrder } from 'store/localData/hiddenData/tagOrder'
+import { useMonth } from 'scenes/Budgets/useMonth'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
-function TagTable({
-  tagsTree,
-  date,
-  updateBudget,
-  openDetails,
-  required = false,
-  ...rest
-}) {
+export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
+  const dispatch = useDispatch()
+  const tagsTree = useSelector(getTagsTree)
+  const [month] = useMonth()
   const [selected, setSelected] = useState()
-  // const [showAll, setShowAll] = useState(false)
   const [metricIndex, setMetricIndex] = useState(0)
   const [goalPopoverData, setGoalPopoverData] = useState({})
   const [budgetPopoverData, setBudgetPopoverData] = useState({})
@@ -39,6 +34,22 @@ function TagTable({
     [tagsTree]
   )
 
+  const moveUp = useCallback(
+    id => {
+      let parents = tagsTree.map(tag => tag.id)
+
+      let oldIndex = tagsTree.findIndex(tag => tag.id === id)
+      if (oldIndex === -1 || oldIndex === 0) return
+      const newIndex = oldIndex - 1
+      parents.splice(newIndex, 0, parents.splice(oldIndex, 1)[0])
+
+      let flatList = []
+      parents.forEach(id => flatList.push(id))
+      dispatch(setTagOrder(flatList))
+    },
+    [tagsTree, dispatch]
+  )
+
   const openBudgetPopover = useCallback(
     (id, anchor) => setBudgetPopoverData({ id, anchor }),
     []
@@ -48,44 +59,41 @@ function TagTable({
     []
   )
 
-  const tagIds = tagsTree
-    .filter(tag => !!tag.required === !!required)
-    .map(tag => tag.id)
+  const tagIds = tagsTree.map(tag => tag.id)
 
-  const toggleMetric = () =>
-    setMetricIndex(metricIndex === 2 ? 0 : metricIndex + 1) // metricIndex + 1 % 3
+  const toggleMetric = useCallback(
+    () => setMetricIndex((metricIndex + 1) % 3),
+    [metricIndex]
+  )
 
   const filterConditions = {
     type: 'outcome',
-    dateFrom: date,
-    dateTo: endOfMonth(date),
+    dateFrom: month,
+    dateTo: endOfMonth(month),
     tags: selected,
   }
 
   return (
     <>
-      <Box position="relative" py={1} clone>
+      <Box position="relative" py={1} {...rest} clone>
         <Paper>
           <TagTableHeader
             metric={metrics[metricIndex]}
             onToggleMetric={toggleMetric}
-            position="sticky"
-            top={0}
-            zIndex={2}
-            bgcolor="background.paper"
-            title={required ? 'Обязательные расходы' : 'Необязательные расходы'}
+            title={'Расходы'}
+            onOpenMonthDrawer={onOpenMonthDrawer}
           />
           {tagIds.map(id => (
             <TagGroup
               key={id}
               id={id}
               metric={metrics[metricIndex]}
-              setBudget={updateBudget}
-              date={date}
+              date={month}
               openTransactionsPopover={onSelect}
               openBudgetPopover={openBudgetPopover}
               openGoalPopover={openGoalPopover}
               openDetails={openDetails}
+              onClick={() => moveUp(id)}
             />
           ))}
         </Paper>
@@ -102,7 +110,7 @@ function TagTable({
         id={budgetPopoverData.id}
         anchorEl={budgetPopoverData.anchor}
         open={!!budgetPopoverData.anchor}
-        month={date}
+        month={month}
         onClose={() => setBudgetPopoverData({})}
         style={{ transform: 'translate(-14px, -16px)' }}
       />
@@ -117,14 +125,3 @@ function TagTable({
     </>
   )
 }
-
-const mapStateToProps = (state, { index }) => ({
-  tagsTree: getTagsTree(state),
-})
-
-const mapDispatchToProps = dispatch => ({
-  updateBudget: (outcome, month, tagId) =>
-    dispatch(setOutcomeBudget(outcome, month, tagId)),
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(TagTable)

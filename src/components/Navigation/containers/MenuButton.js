@@ -70,6 +70,16 @@ function MenuButton({ exportCsv, exportJSON, logOut, toggleTheme, ...rest }) {
             Менять тему автоматически
           </MenuItem>
         )}
+
+        <Box my={1}>
+          <Divider light />
+        </Box>
+
+        <MenuItem component="a" href="/settings">
+          <SettingsIcon className={classes.menuIcon} color="action" />
+          Порядок категорий
+        </MenuItem>
+
         <Box my={1}>
           <Divider light />
         </Box>

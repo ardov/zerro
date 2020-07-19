@@ -14,7 +14,10 @@ import {
   TableRow,
 } from '@material-ui/core'
 import TagSelect2 from 'components/TagSelect2'
-import { addConnection, getAccTagMap } from 'store/localData/hiddenData'
+import {
+  addConnection,
+  getAccTagMap,
+} from 'store/localData/hiddenData/accTagMap'
 import { getTransfers } from '../selectors/getAmountsByTag'
 import { getAccounts } from 'store/localData/accounts'
 import TagChip from 'components/TagChip'
@@ -22,7 +25,6 @@ import TagChip from 'components/TagChip'
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
-    marginTop: theme.spacing(3),
     overflowX: 'auto',
   },
   head: { position: 'sticky', top: 0 },
@@ -34,6 +36,7 @@ function TransferTable({
   currency,
   accTagMap,
   connectToTag,
+  className,
   ...rest
 }) {
   const classes = useStyles()
@@ -50,7 +53,7 @@ function TransferTable({
   }
 
   return rows.length ? (
-    <Paper className={classes.root}>
+    <Paper className={`${classes.root} ${className}`}>
       <Box p={2} clone>
         <Typography variant="h6" id="tableTitle">
           Переводы из бюджета

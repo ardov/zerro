@@ -1,7 +1,11 @@
 import { format, isToday, isYesterday, isThisYear } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 
-export function formatMoney(amount, shortCode, decimals = 2) {
+export function formatMoney(
+  amount: number,
+  shortCode?: string | null,
+  decimals = 2
+): string {
   try {
     return new Intl.NumberFormat('ru', {
       style: shortCode ? 'currency' : 'decimal',
@@ -22,7 +26,7 @@ export function formatMoney(amount, shortCode, decimals = 2) {
   }
 }
 
-export function getCurrencySymbol(currency) {
+export function getCurrencySymbol(currency: string): string {
   return Intl.NumberFormat('ru-RU', {
     style: 'currency',
     currency,
@@ -31,7 +35,7 @@ export function getCurrencySymbol(currency) {
     .slice(5)
 }
 
-export function formatDate(date, template) {
+export function formatDate(date: number | Date, template?: string): string {
   const opts = { locale: ru }
   if (template) return format(date, template, opts)
   if (isToday(date)) return format(date, 'Сегодня, d MMMM, EEEEEE', opts)

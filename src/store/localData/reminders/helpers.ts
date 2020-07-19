@@ -1,6 +1,13 @@
-import uuidv1 from 'uuid/v1'
+import { v1 as uuidv1 } from 'uuid'
+import { Reminder } from 'types'
 
-export const makeReminder = raw => ({
+export const makeReminder = (
+  raw: Partial<Reminder> & {
+    user: number
+    incomeAccount: string
+    outcomeAccount: string
+  }
+): Reminder => ({
   // Required
   user: raw.user,
   incomeAccount: raw.incomeAccount,

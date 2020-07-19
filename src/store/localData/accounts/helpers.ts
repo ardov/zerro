@@ -1,6 +1,13 @@
-import uuidv1 from 'uuid/v1'
+import { v1 as uuidv1 } from 'uuid'
+import { Account } from 'types'
 
-export const makeAccount = raw => ({
+export const makeAccount = (
+  raw: Partial<Account> & {
+    user: number
+    instrument: number
+    title: string
+  }
+): Account => ({
   // Required
   user: raw.user,
   instrument: raw.instrument,
@@ -35,7 +42,7 @@ export const makeAccount = raw => ({
   payoffInterval: raw.payoffInterval || null,
 })
 
-export function getStartBalance(acc) {
+export function getStartBalance(acc: Account): number {
   //  Для deposit и loan поле startBalance имеет смысл начального взноса/тела кредита
   if (acc.type === 'deposit' || acc.type === 'loan') return 0
   return acc.startBalance

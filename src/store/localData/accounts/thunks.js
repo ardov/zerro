@@ -2,7 +2,7 @@ import { getRootUser } from 'store/serverData'
 import { setAccount, getAccounts } from './index'
 
 import sendEvent from 'helpers/sendEvent'
-import { getDataAccountId } from '../hiddenData'
+import { getDataAccountId } from '../hiddenData/selectors'
 import { makeDataAcc } from '../hiddenData/helpers'
 
 export const createDataAcc = () => (dispatch, getState) => {

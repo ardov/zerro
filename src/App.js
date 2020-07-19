@@ -27,6 +27,7 @@ import { getLastSyncTime, getRootUserId } from 'store/serverData'
 import Accounts from 'scenes/Accounts'
 import Stats from 'scenes/Stats'
 import About from 'scenes/About'
+import { Settings } from 'scenes/Settings'
 
 const history = createBrowserHistory()
 
@@ -73,7 +74,7 @@ const PrivateApp = () => {
 
       <SnackbarHandler />
       <RegularSyncHandler />
-      <Box height="100vh" overflow="auto" flexGrow={1}>
+      <Box minHeight="100vh" flexGrow={1}>
         <ErrorBoundary>
           {hasData ? (
             <Switch>
@@ -82,6 +83,7 @@ const PrivateApp = () => {
               <Route path="/budget/:month" component={Budgets} />
               <Route path="/budget" component={Budgets} />
               <Route path="/stats" component={Stats} />
+              <Route path="/settings" component={Settings} />
               <Redirect to="/budget" />
             </Switch>
           ) : (

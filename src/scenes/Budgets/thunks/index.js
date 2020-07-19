@@ -4,13 +4,13 @@ import selectors from 'store/localData/budgets/selectors'
 import { getPopulatedTag } from 'store/localData/tags'
 import { getAmountsByTag } from '../selectors/getAmountsByTag'
 import sendEvent from 'helpers/sendEvent'
-import { makeBudget } from 'store/localData/budgets/helpers'
+import { makeBudget } from 'store/localData/budgets/makeBudget'
 import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
 import { getTags } from 'store/localData/tags'
 import { subMonths } from 'date-fns/esm'
 import { getGoalsProgress } from '../selectors/goalsProgress'
 import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
-import { getGoals } from 'store/localData/hiddenData'
+import { getGoals } from 'store/localData/hiddenData/goals'
 const { TARGET_BALANCE } = GOAL_TYPES
 
 export const moveFunds = (amount, source, destination, monthDate) => (

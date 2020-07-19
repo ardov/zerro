@@ -1,6 +1,6 @@
 import createSelector from 'selectorator'
 import { round } from 'helpers/currencyHelpers'
-import { getGoals } from 'store/localData/hiddenData'
+import { getGoals } from 'store/localData/hiddenData/goals'
 import { getAmountsForTag } from './getAmountsByTag'
 import getMonthDates from './getMonthDates'
 import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths'
