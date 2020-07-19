@@ -25,7 +25,6 @@ import TagChip from 'components/TagChip'
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
-    marginTop: theme.spacing(3),
     overflowX: 'auto',
   },
   head: { position: 'sticky', top: 0 },

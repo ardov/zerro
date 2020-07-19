@@ -198,12 +198,8 @@ function TagPreview({ month, index, onClose, id }) {
         />
         <Line name="Бюджет" amount={isParent ? totalBudgeted : budgeted} />
         <Line name="Расход" amount={isParent ? totalOutcome : outcome} />
-        <Line
-          name="— Переводы"
-          amount={isParent ? transferOutcome : transferOutcome}
-        />
+        <Line name="— Переводы" amount={transferOutcome} />
       </Rhythm>
-      {tag.id}
     </Box>
   )
 }
