@@ -82,40 +82,37 @@ export default function ToBeBudgeted({ index, className, ...rest }) {
     )
   }
 
+  function TooltipContent() {
+    return (
+      <Rhythm gap={1}>
+        <Typography variant="body2" align="center">
+          {messages[color]}
+        </Typography>
+
+        <Divider />
+
+        {index ? (
+          <>
+            <Line name="Остаток с прошлого месяца" amount={prevFunds} />
+            <Line name="Перерасход в прошлом месяце" amount={-prevOverspent} />
+          </>
+        ) : (
+          <Line name="Начальный остаток на счетах" amount={prevFunds} />
+        )}
+
+        <Line name={`Доход за ${getMonthName(date)}`} amount={income} />
+        <Line name={`Бюджеты на ${getMonthName(date)}`} amount={-budgeted} />
+        <Line
+          name="Переводы без категории"
+          amount={-transferOutcome - transferFees}
+        />
+        <Line name="Распределено в будущем" amount={-budgetedInFuture} />
+      </Rhythm>
+    )
+  }
+
   return (
-    <Tooltip
-      arrow
-      interactive
-      title={
-        <Rhythm gap={1}>
-          <Typography variant="body2" align="center">
-            {messages[color]}
-          </Typography>
-
-          <Divider />
-
-          {index ? (
-            <>
-              <Line name="Остаток с прошлого месяца" amount={prevFunds} />
-              <Line
-                name="Перерасход в прошлом месяце"
-                amount={-prevOverspent}
-              />
-            </>
-          ) : (
-            <Line name="Начальный остаток на счетах" amount={prevFunds} />
-          )}
-
-          <Line name={`Доход за ${getMonthName(date)}`} amount={income} />
-          <Line name={`Бюджеты на ${getMonthName(date)}`} amount={-budgeted} />
-          <Line
-            name="Переводы без категории"
-            amount={-transferOutcome - transferFees}
-          />
-          <Line name="Распределено в будущем" amount={-budgetedInFuture} />
-        </Rhythm>
-      }
-    >
+    <Tooltip arrow interactive title={<TooltipContent />}>
       <ButtonBase className={`${c.base} ${className}`} {...rest}>
         <Typography noWrap align="center" variant="h5">
           {toBeBudgeted
