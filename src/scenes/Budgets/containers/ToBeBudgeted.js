@@ -71,7 +71,7 @@ export function ToBeBudgeted({ index, className, small, ...rest }) {
         variant={isMobile ? 'body1' : 'body2'}
         className={c.label}
       >
-        {toBeBudgeted ? 'Не распредено' : 'Деньги распределены'}
+        {toBeBudgeted ? 'Не распределено' : 'Деньги распределены'}
       </Typography>
     </ButtonBase>
   )
