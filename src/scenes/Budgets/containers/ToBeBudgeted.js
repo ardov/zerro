@@ -16,6 +16,7 @@ import Rhythm from 'components/Rhythm'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
 import { useMonth } from '../useMonth'
+import { Amount } from './components'
 
 const useStyles = makeStyles(({ shape, spacing, palette, breakpoints }) => ({
   base: {
@@ -59,11 +60,18 @@ export function ToBeBudgeted({ index, className, small, ...rest }) {
   const BigWidget = (
     <ButtonBase className={`${c.base} ${className}`} {...rest}>
       <Typography noWrap align="center" variant={isMobile ? 'body1' : 'h5'}>
-        {toBeBudgeted
-          ? formatMoney(toBeBudgeted, currency)
-          : hasFutureOverspend
-          ? '👍'
-          : '👌'}
+        {toBeBudgeted ? (
+          <Amount
+            value={toBeBudgeted}
+            currency={currency}
+            decimals="ifAny"
+            noShade
+          />
+        ) : hasFutureOverspend ? (
+          '👍'
+        ) : (
+          '👌'
+        )}
       </Typography>
       <Typography
         noWrap
@@ -79,11 +87,18 @@ export function ToBeBudgeted({ index, className, small, ...rest }) {
   const SmallWidget = (
     <ButtonBase className={`${c.base} ${c.small} ${className}`} {...rest}>
       <Typography noWrap align="center" variant="body1">
-        {toBeBudgeted
-          ? formatMoney(toBeBudgeted, currency)
-          : hasFutureOverspend
-          ? '👍'
-          : '👌'}
+        {toBeBudgeted ? (
+          <Amount
+            value={toBeBudgeted}
+            currency={currency}
+            decimals="ifAny"
+            noShade
+          />
+        ) : hasFutureOverspend ? (
+          '👍'
+        ) : (
+          '👌'
+        )}
       </Typography>
     </ButtonBase>
   )

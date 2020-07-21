@@ -13,11 +13,16 @@ export function Amount({
   intProps,
   decProps,
 }) {
+  let dec = decimals
+  if (decimals === 'ifOnly')
+    dec = value !== 0 && value < 1 && value > -1 ? 2 : 0
+  else if (decimals === 'ifAny') dec = value % 1 ? 2 : 0
+  else dec = decimals
+
   let str = ''
-  if (value === 0) str = formatMoney(0, currency, decimals)
-  if (value < 0) str = '−' + formatMoney(-value, currency, decimals)
-  if (value > 0)
-    str = (sign ? '+' : '') + formatMoney(value, currency, decimals)
+  if (value === 0) str = formatMoney(0, currency, dec)
+  if (value < 0) str = '−' + formatMoney(-value, currency, dec)
+  if (value > 0) str = (sign ? '+' : '') + formatMoney(value, currency, dec)
   const arr = str.split(',')
   if (arr.length === 2) {
     return (
