@@ -60,11 +60,11 @@ export const getTagsTree = createSelector(
     for (const id in tags) {
       if (tags[id].parent) continue
       const tag = { ...tags[id] }
-      tag.children = tag.children ? tag.children.map(id => tags[id]) : []
+      if (tag.children)
+        tag.children = tag.children.map(id => tags[id]).sort(compare)
       result.push(tag)
     }
     result.sort(compare)
-    result.forEach(tag => tag.children.sort(compare))
     return result
   }
 )

@@ -27,12 +27,12 @@ export function TagGroup(props) {
     id,
     metric,
     date,
+    children,
 
     openTransactionsPopover,
     openBudgetPopover,
     openGoalPopover,
     openDetails,
-    onClick,
   } = props
 
   const tag = useSelector(state => getPopulatedTag(state, id))
@@ -52,7 +52,7 @@ export function TagGroup(props) {
   const [expanded, setExpanded] = React.useState(childrenAvailable > 0)
   const toggle = () => setExpanded(expanded => !expanded)
 
-  const hasChildren = !!tag?.children?.length
+  const hasChildren = !!children?.length
   const c = useStyles({ expanded })
 
   const rowProps = {
@@ -67,7 +67,7 @@ export function TagGroup(props) {
   if (!tag.showOutcome && !totalOutcome && !totalAvailable) return null
 
   return (
-    <div className={c.panelRoot} onDoubleClick={onClick}>
+    <div className={c.panelRoot}>
       {hasChildren && (
         <IconButton size="small" className={c.expandIcon} onClick={toggle}>
           <ArrowRightIcon />
@@ -82,7 +82,7 @@ export function TagGroup(props) {
             <Box pb={1}>
               {!!outcome && <TagRow id={tag.id} isChild {...rowProps} />}
 
-              {tag.children.map(id => (
+              {children.map(({ id }) => (
                 <TagRow key={id} id={id} isChild {...rowProps} />
               ))}
             </Box>

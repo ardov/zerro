@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Paper, Box } from '@material-ui/core'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { TagGroup } from './TagGroup'
 import TagTableHeader from './TagTableHeader'
 import TransactionsDrawer from 'components/TransactionsDrawer'
@@ -10,13 +10,11 @@ import { getTagsTree } from 'store/localData/tags'
 import GoalPopover from './GoalPopover'
 import { useCallback } from 'react'
 import BudgetPopover from './BudgetPopover'
-import { setTagOrder } from 'store/localData/hiddenData/tagOrder'
 import { useMonth } from 'scenes/Budgets/useMonth'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
 export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
-  const dispatch = useDispatch()
   const tagsTree = useSelector(getTagsTree)
   const [month] = useMonth()
   const [selected, setSelected] = useState()
@@ -33,23 +31,6 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
     },
     [tagsTree]
   )
-
-  const moveUp = useCallback(
-    id => {
-      let parents = tagsTree.map(tag => tag.id)
-
-      let oldIndex = tagsTree.findIndex(tag => tag.id === id)
-      if (oldIndex === -1 || oldIndex === 0) return
-      const newIndex = oldIndex - 1
-      parents.splice(newIndex, 0, parents.splice(oldIndex, 1)[0])
-
-      let flatList = []
-      parents.forEach(id => flatList.push(id))
-      dispatch(setTagOrder(flatList))
-    },
-    [tagsTree, dispatch]
-  )
-
   const openBudgetPopover = useCallback(
     (id, anchor) => setBudgetPopoverData({ id, anchor }),
     []
@@ -58,9 +39,6 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
     (id, anchor) => setGoalPopoverData({ id, anchor }),
     []
   )
-
-  const tagIds = tagsTree.map(tag => tag.id)
-
   const toggleMetric = useCallback(
     () => setMetricIndex((metricIndex + 1) % 3),
     [metricIndex]
@@ -83,17 +61,17 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
             title={'Расходы'}
             onOpenMonthDrawer={onOpenMonthDrawer}
           />
-          {tagIds.map(id => (
+          {tagsTree.map(tag => (
             <TagGroup
-              key={id}
-              id={id}
+              key={tag.id}
+              id={tag.id}
+              children={tag.children}
               metric={metrics[metricIndex]}
               date={month}
               openTransactionsPopover={onSelect}
               openBudgetPopover={openBudgetPopover}
               openGoalPopover={openGoalPopover}
               openDetails={openDetails}
-              onClick={() => moveUp(id)}
             />
           ))}
         </Paper>
@@ -104,7 +82,6 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
         open={!!selected}
         onClose={() => setSelected(undefined)}
       />
-
       <BudgetPopover
         key={budgetPopoverData.id}
         id={budgetPopoverData.id}
@@ -114,7 +91,6 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
         onClose={() => setBudgetPopoverData({})}
         style={{ transform: 'translate(-14px, -16px)' }}
       />
-
       <GoalPopover
         key={goalPopoverData.id}
         id={goalPopoverData.id}
