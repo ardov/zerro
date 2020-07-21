@@ -20,4 +20,4 @@ export function getGoalsProgress(
 
 export function getTotalGoalsProgress(
   state: any
-): { [month: number]: GoalsProgress }
+): { [month: number]: GoalsProgress | null }

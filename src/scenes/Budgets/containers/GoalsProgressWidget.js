@@ -55,12 +55,25 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
   const dispatch = useDispatch()
   const currency = useSelector(getUserCurrencyCode)
   const formatSum = sum => formatMoney(sum, currency)
-  const { need, target, progress } = useSelector(
-    state => getTotalGoalsProgress(state)?.[month]
-  )
+  const totals = useSelector(state => getTotalGoalsProgress(state)?.[month])
+  const { need, target, progress } = totals || {}
   const onOk = () => dispatch(fillGoals(month))
   const c = useStyles({ progress })
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
+
+  console.log({ need, target, progress })
+
+  if (!totals)
+    return (
+      <ButtonBase {...rest} className={`${c.base} ${className}`}>
+        <Typography noWrap align="center" variant="h5" color="textPrimary">
+          🏔
+        </Typography>
+        <Typography noWrap align="center" variant="body2" color="textSecondary">
+          Пока целей нет
+        </Typography>
+      </ButtonBase>
+    )
 
   return (
     <WithConfirm
@@ -81,45 +94,22 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
       >
         <ButtonBase {...rest} className={`${c.base} ${className}`}>
           <div className={c.progress} />
-          {target ? (
-            <>
-              <Typography
-                noWrap
-                align="center"
-                variant={isMobile ? 'body1' : 'h5'}
-                color="textPrimary"
-              >
-                {need > 0 ? formatSum(need) : '🥳'}
-              </Typography>
-              <Typography
-                noWrap
-                align="center"
-                variant={isMobile ? 'body1' : 'body2'}
-                color="textSecondary"
-              >
-                {need > 0 ? 'Ещё нужно на цели' : 'Цели выполнены'}
-              </Typography>
-            </>
-          ) : (
-            <>
-              <Typography
-                noWrap
-                align="center"
-                variant="h5"
-                color="textPrimary"
-              >
-                🏔
-              </Typography>
-              <Typography
-                noWrap
-                align="center"
-                variant="body2"
-                color="textSecondary"
-              >
-                Пока целей нет
-              </Typography>
-            </>
-          )}
+          <Typography
+            noWrap
+            align="center"
+            variant={isMobile ? 'body1' : 'h5'}
+            color="textPrimary"
+          >
+            {need > 0 ? formatSum(need) : '🥳'}
+          </Typography>
+          <Typography
+            noWrap
+            align="center"
+            variant={isMobile ? 'body1' : 'body2'}
+            color="textSecondary"
+          >
+            {need > 0 ? 'Ещё нужно на цели' : 'Цели выполнены'}
+          </Typography>
         </ButtonBase>
       </Tooltip>
     </WithConfirm>

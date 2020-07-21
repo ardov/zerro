@@ -1,4 +1,7 @@
 import React from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { getUserCurrencyCode } from 'store/serverData'
+import { formatMoney } from 'helpers/format'
 import {
   Typography,
   Box,
@@ -6,8 +9,12 @@ import {
   Link,
   IconButton,
 } from '@material-ui/core'
+import { Tooltip } from 'components/Tooltip'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
+import { fillGoals } from '../../thunks'
+import WithConfirm from 'components/Confirm'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
+import GoalProgress from 'components/GoalProgress'
 import { makeStyles } from '@material-ui/styles'
 import { ToBeBudgeted } from '../../containers/ToBeBudgeted'
 import useScrollPosition from '@react-hook/window-scroll'
@@ -16,6 +23,7 @@ import ru from 'date-fns/locale/ru'
 import { useMonth } from 'scenes/Budgets/useMonth'
 import add from 'date-fns/add'
 import sub from 'date-fns/sub'
+import { getTotalGoalsProgress } from 'scenes/Budgets/selectors/goalsProgress'
 
 const useStyles = makeStyles(theme => ({
   row: {
@@ -155,6 +163,62 @@ export default function TagTableHeader({
           />
         </>
       )}
+
+      <GoalMonthProgress />
+    </Box>
+  )
+}
+
+function GoalMonthProgress() {
+  const dispatch = useDispatch()
+  const currency = useSelector(getUserCurrencyCode)
+  const [month] = useMonth()
+  const totals = useSelector(state => getTotalGoalsProgress(state)?.[month])
+
+  if (!totals)
+    return (
+      <Box component="span">
+        <Tooltip
+          arrow
+          interactive
+          title="Установите цели, чтобы следить за их прогрессом 😉"
+        >
+          <IconButton size="small">
+            <GoalProgress value={0} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    )
+
+  const { need, target, progress } = totals
+  const onOk = () => dispatch(fillGoals(month))
+  const formatSum = sum => formatMoney(sum, currency)
+
+  return (
+    <Box component="span">
+      <WithConfirm
+        title="Выполнить все цели?"
+        description={`${formatSum(
+          need
+        )} будут распределены по категориям, чтобы выполнить цели в этом месяце.`}
+        onOk={onOk}
+        okText="Выполнить цели"
+        cancelText="Отмена"
+      >
+        <Tooltip
+          arrow
+          interactive
+          title={
+            need
+              ? `${formatSum(target - need)} из ${formatSum(target)}`
+              : `Всего нужно было ${formatSum(target)}`
+          }
+        >
+          <IconButton size="small">
+            <GoalProgress value={progress} />
+          </IconButton>
+        </Tooltip>
+      </WithConfirm>
     </Box>
   )
 }

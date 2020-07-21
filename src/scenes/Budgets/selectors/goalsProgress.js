@@ -75,23 +75,39 @@ export const getTotalGoalsProgress = createSelector(
   (goals, goalsProgress) => {
     let result = {}
 
+    const isCounted = goal => goal.type !== TARGET_BALANCE || goal.end
+    let countedGoals = {}
+    let hasCountedGoals = false
+    for (const id in goals) {
+      if (isCounted(goals[id])) {
+        countedGoals[id] = goals[id]
+        hasCountedGoals = true
+      }
+    }
+
     for (const month in goalsProgress) {
+      if (!hasCountedGoals) {
+        result[month] = null
+        continue
+      }
+
       let needSum = 0
       let targetSum = 0
-
-      for (const tag in goalsProgress[month]) {
-        if (goals[tag].type === TARGET_BALANCE && !goals[tag].end) continue
+      let totalProgress = 0
+      for (const tag in countedGoals) {
         const { target = 0, need = 0 } = goalsProgress[month][tag]
         if (need > 0) needSum = round(needSum + need)
         if (target > 0) targetSum = round(targetSum + target)
       }
 
-      const progress = targetSum ? (targetSum - needSum) / targetSum : 0
+      if (targetSum > 0) totalProgress = (targetSum - needSum) / targetSum
+      else if (targetSum === 0 && needSum > 0) totalProgress = 0
+      else totalProgress = 1
 
       result[month] = {
         need: needSum,
         target: targetSum,
-        progress,
+        progress: totalProgress,
       }
     }
 
