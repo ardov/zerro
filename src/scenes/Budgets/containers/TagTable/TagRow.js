@@ -206,7 +206,7 @@ function BudgetCell(props) {
         component="button"
         onClick={onBudgetClick}
       >
-        <Amount value={budgeted} decimals="ifOnly" />
+        <Amount value={budgeted} decMode="ifOnly" />
       </Link>
     </Box>
   ) : (
@@ -237,7 +237,7 @@ function OutcomeCell(props) {
   return (
     <Box color={outcome ? 'text.primary' : 'text.hint'} clone>
       <Typography variant="body1" align="right" onClick={onClick}>
-        <Amount value={-outcome} decimals="ifOnly" />
+        <Amount value={-outcome} decMode="ifOnly" />
       </Typography>
     </Box>
   )
@@ -278,7 +278,7 @@ function AvailableCell(props) {
       {...provided.dragHandleProps}
       style={snapshot.isDragging ? provided.draggableProps.style : null}
     >
-      <Amount value={available} decimals="ifOnly" />
+      <Amount value={available} decMode="ifOnly" />
     </Box>
   )
 

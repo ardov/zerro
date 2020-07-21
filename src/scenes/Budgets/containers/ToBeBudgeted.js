@@ -64,7 +64,7 @@ export function ToBeBudgeted({ index, className, small, ...rest }) {
           <Amount
             value={toBeBudgeted}
             currency={currency}
-            decimals="ifAny"
+            decMode="ifAny"
             noShade
           />
         ) : hasFutureOverspend ? (

@@ -9,15 +9,17 @@ export function Amount({
   currency,
   sign = false,
   noShade = false,
-  decimals,
+  decimals = 2,
+  decMode = 'always',
   intProps,
   decProps,
 }) {
   let dec = decimals
-  if (decimals === 'ifOnly')
-    dec = value !== 0 && value < 1 && value > -1 ? 2 : 0
-  else if (decimals === 'ifAny') dec = value % 1 ? 2 : 0
-  else dec = decimals
+  if (decMode === 'always') dec = decimals
+  else if (decMode === 'ifOnly')
+    dec = value !== 0 && value < 1 && value > -1 ? decimals : 0
+  else if (decMode === 'ifAny') dec = value % 1 ? decimals : 0
+  else throw Error('Unknown decMode ' + decMode)
 
   let str = ''
   if (value === 0) str = formatMoney(0, currency, dec)
