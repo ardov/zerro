@@ -10,13 +10,8 @@ import {
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import WithConfirm from 'components/Confirm'
-import { getGoalsProgress } from '../selectors/goalsProgress'
-import { round } from 'helpers/currencyHelpers'
-import { getGoals } from 'store/localData/hiddenData/goals'
 import { fillGoals } from '../thunks'
-import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
-
-const { TARGET_BALANCE } = GOAL_TYPES
+import { getTotalGoalsProgress } from '../selectors/goalsProgress'
 
 const useStyles = makeStyles(
   ({ palette, spacing, shape, shadows, breakpoints }) => ({
@@ -60,21 +55,10 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
   const dispatch = useDispatch()
   const currency = useSelector(getUserCurrencyCode)
   const formatSum = sum => formatMoney(sum, currency)
-  const goalProgress = useSelector(state => getGoalsProgress(state)?.[month])
-  const goals = useSelector(getGoals)
+  const { need, target, progress } = useSelector(
+    state => getTotalGoalsProgress(state)?.[month]
+  )
   const onOk = () => dispatch(fillGoals(month))
-
-  let needSum = 0
-  let targetSum = 0
-
-  for (const tag in goalProgress) {
-    if (goals[tag].type === TARGET_BALANCE && !goals[tag].end) continue
-    const { target = 0, need = 0 } = goalProgress[tag]
-    if (need > 0) needSum = round(needSum + need)
-    if (target > 0) targetSum = round(targetSum + target)
-  }
-
-  const progress = targetSum ? (targetSum - needSum) / targetSum : 0
   const c = useStyles({ progress })
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
 
@@ -90,14 +74,14 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
         arrow
         interactive
         title={
-          needSum
-            ? `${formatSum(targetSum - needSum)} из ${formatSum(targetSum)}`
-            : `Всего нужно было ${formatSum(targetSum)}`
+          need
+            ? `${formatSum(target - need)} из ${formatSum(target)}`
+            : `Всего нужно было ${formatSum(target)}`
         }
       >
         <ButtonBase {...rest} className={`${c.base} ${className}`}>
           <div className={c.progress} />
-          {targetSum ? (
+          {target ? (
             <>
               <Typography
                 noWrap
@@ -105,7 +89,7 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
                 variant={isMobile ? 'body1' : 'h5'}
                 color="textPrimary"
               >
-                {needSum > 0 ? formatSum(needSum) : '🥳'}
+                {need > 0 ? formatSum(need) : '🥳'}
               </Typography>
               <Typography
                 noWrap
@@ -113,7 +97,7 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
                 variant={isMobile ? 'body1' : 'body2'}
                 color="textSecondary"
               >
-                {needSum > 0 ? 'Ещё нужно на цели' : 'Цели выполнены'}
+                {need > 0 ? 'Ещё нужно на цели' : 'Цели выполнены'}
               </Typography>
             </>
           ) : (

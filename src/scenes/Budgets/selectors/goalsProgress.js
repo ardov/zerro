@@ -70,6 +70,35 @@ export const getGoalsProgress = createSelector(
   }
 )
 
+export const getTotalGoalsProgress = createSelector(
+  [getGoals, getGoalsProgress],
+  (goals, goalsProgress) => {
+    let result = {}
+
+    for (const month in goalsProgress) {
+      let needSum = 0
+      let targetSum = 0
+
+      for (const tag in goalsProgress[month]) {
+        if (goals[tag].type === TARGET_BALANCE && !goals[tag].end) continue
+        const { target = 0, need = 0 } = goalsProgress[month][tag]
+        if (need > 0) needSum = round(needSum + need)
+        if (target > 0) targetSum = round(targetSum + target)
+      }
+
+      const progress = targetSum ? (targetSum - needSum) / targetSum : 0
+
+      result[month] = {
+        need: needSum,
+        target: targetSum,
+        progress,
+      }
+    }
+
+    return result
+  }
+)
+
 function calcMonthlyProgress({ amount, budgeted }) {
   const target = amount
   const need = round(target - budgeted)

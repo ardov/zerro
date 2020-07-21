@@ -17,3 +17,7 @@ export function getGoalsProgress(
     [tagId: string]: GoalsProgress
   }
 }
+
+export function getTotalGoalsProgress(
+  state: any
+): { [month: number]: GoalsProgress }
