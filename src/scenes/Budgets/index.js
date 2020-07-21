@@ -59,9 +59,12 @@ const useStyles = makeStyles(theme => ({
       'transfers      transfers transfers'`,
     width: '100%',
     maxWidth: 800,
+    [theme.breakpoints.down('sm')]: {
+      padding: theme.spacing(1, 1, 10),
+    },
     [theme.breakpoints.down('xs')]: {
       gap: `${theme.spacing(2)}px`,
-      padding: theme.spacing(1, 1, 6),
+      padding: theme.spacing(1, 1, 10),
       gridTemplateColumns: '1fr',
       gridTemplateAreas: `'month-select' 'goals' 'to-be-budgeted' 'tags' 'transfers'`,
     },
