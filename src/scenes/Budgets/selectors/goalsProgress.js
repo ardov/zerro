@@ -95,7 +95,7 @@ export const getTotalGoalsProgress = createSelector(
       let targetSum = 0
       let totalProgress = 0
       for (const tag in countedGoals) {
-        const { target = 0, need = 0 } = goalsProgress[month][tag]
+        const { target = 0, need = 0 } = goalsProgress[month][tag] || {}
         if (need > 0) needSum = round(needSum + need)
         if (target > 0) targetSum = round(targetSum + target)
       }

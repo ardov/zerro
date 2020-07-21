@@ -9,7 +9,6 @@ export default function populateTags(rawTags) {
   for (const id in rawTags) {
     // Add name, symbol and colorRGB
     tags[id] = makePopulatedTag(rawTags[id])
-    tags[id].children = []
   }
 
   // Populate children array with ids
@@ -24,6 +23,7 @@ export default function populateTags(rawTags) {
 function makePopulatedTag(tag) {
   return {
     ...tag,
+    children: [],
     name: getName(tag.title),
     symbol: iconsMap[tag.icon] || tag.title.slice(0, 2),
     colorRGB: tag.color ? intToRGB(tag.color) : null,

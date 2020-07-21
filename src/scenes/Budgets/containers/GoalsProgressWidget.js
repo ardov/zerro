@@ -61,8 +61,6 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
   const c = useStyles({ progress })
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
 
-  console.log({ need, target, progress })
-
   if (!totals)
     return (
       <ButtonBase {...rest} className={`${c.base} ${className}`}>
