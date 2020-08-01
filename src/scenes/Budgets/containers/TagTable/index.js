@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { Paper, Box } from '@material-ui/core'
+import { Droppable, Draggable } from 'react-beautiful-dnd'
 import { useSelector } from 'react-redux'
 import { TagGroup } from './TagGroup'
 import TagTableHeader from './TagTableHeader'
@@ -11,6 +12,7 @@ import GoalPopover from './GoalPopover'
 import { useCallback } from 'react'
 import BudgetPopover from './BudgetPopover'
 import { useMonth } from 'scenes/Budgets/useMonth'
+import { DragModeContext } from '../DnDContext'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
@@ -21,6 +23,7 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
   const [metricIndex, setMetricIndex] = useState(0)
   const [goalPopoverData, setGoalPopoverData] = useState({})
   const [budgetPopoverData, setBudgetPopoverData] = useState({})
+  const { dragMode, setDragMode } = useContext(DragModeContext)
 
   const onSelect = useCallback(
     id => {
@@ -43,6 +46,10 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
     () => setMetricIndex((metricIndex + 1) % 3),
     [metricIndex]
   )
+  const toggleDragMode = useCallback(
+    () => setDragMode(mode => (mode === 'REORDER' ? 'FUNDS' : 'REORDER')),
+    [setDragMode]
+  )
 
   const filterConditions = {
     type: 'outcome',
@@ -58,22 +65,57 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
           <TagTableHeader
             metric={metrics[metricIndex]}
             onToggleMetric={toggleMetric}
-            title={'Расходы'}
             onOpenMonthDrawer={onOpenMonthDrawer}
+            onToggleDragMode={toggleDragMode}
           />
-          {tagsTree.map(tag => (
-            <TagGroup
-              key={tag.id}
-              id={tag.id}
-              children={tag.children}
-              metric={metrics[metricIndex]}
-              date={month}
-              openTransactionsPopover={onSelect}
-              openBudgetPopover={openBudgetPopover}
-              openGoalPopover={openGoalPopover}
-              openDetails={openDetails}
-            />
-          ))}
+          {dragMode === 'REORDER' ? (
+            <Droppable droppableId="tags" type="REORDER">
+              {provided => (
+                <div ref={provided.innerRef} {...provided.droppableProps}>
+                  {tagsTree.map((tag, index) => (
+                    <Draggable
+                      key={tag.id}
+                      draggableId={tag.id || 'null'}
+                      index={index}
+                    >
+                      {provided => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          <TagGroup
+                            id={tag.id}
+                            children={tag.children}
+                            metric={metrics[metricIndex]}
+                            openTransactionsPopover={onSelect}
+                            openBudgetPopover={openBudgetPopover}
+                            openGoalPopover={openGoalPopover}
+                            openDetails={openDetails}
+                          />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          ) : (
+            tagsTree.map(tag => (
+              <TagGroup
+                key={tag.id}
+                id={tag.id}
+                children={tag.children}
+                metric={metrics[metricIndex]}
+                openTransactionsPopover={onSelect}
+                openBudgetPopover={openBudgetPopover}
+                openGoalPopover={openGoalPopover}
+                openDetails={openDetails}
+              />
+            ))
+          )}
         </Paper>
       </Box>
 

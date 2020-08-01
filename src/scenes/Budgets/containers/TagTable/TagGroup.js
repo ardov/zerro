@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { useSelector } from 'react-redux'
 import { Collapse, Box, IconButton } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
@@ -6,6 +6,8 @@ import ArrowRightIcon from '@material-ui/icons/ArrowRight'
 import { TagRow } from './TagRow'
 import { getAmountsForTag } from 'scenes/Budgets/selectors/getAmountsByTag'
 import { getPopulatedTag } from 'store/localData/tags'
+import { useMonth } from 'scenes/Budgets/useMonth'
+import { DragModeContext } from '../DnDContext'
 
 export const useStyles = makeStyles(theme => ({
   panelRoot: {
@@ -26,7 +28,6 @@ export function TagGroup(props) {
   const {
     id,
     metric,
-    date,
     children,
 
     openTransactionsPopover,
@@ -35,8 +36,10 @@ export function TagGroup(props) {
     openDetails,
   } = props
 
+  const [month] = useMonth()
   const tag = useSelector(state => getPopulatedTag(state, id))
-  const amounts = useSelector(state => getAmountsForTag(state)(date, id))
+  const amounts = useSelector(state => getAmountsForTag(state)(month, id))
+  const { dragMode } = useContext(DragModeContext)
 
   const {
     totalAvailable,
@@ -56,7 +59,7 @@ export function TagGroup(props) {
   const c = useStyles({ expanded })
 
   const rowProps = {
-    date,
+    date: month,
     metric,
     openGoalPopover,
     openBudgetPopover,
@@ -64,11 +67,17 @@ export function TagGroup(props) {
     openDetails,
   }
 
-  if (!tag.showOutcome && !totalOutcome && !totalAvailable) return null
+  if (
+    !tag.showOutcome &&
+    !totalOutcome &&
+    !totalAvailable &&
+    dragMode !== 'REORDER'
+  )
+    return null
 
   return (
     <div className={c.panelRoot}>
-      {hasChildren && (
+      {hasChildren && dragMode !== 'REORDER' && (
         <IconButton size="small" className={c.expandIcon} onClick={toggle}>
           <ArrowRightIcon />
         </IconButton>
@@ -76,7 +85,7 @@ export function TagGroup(props) {
 
       <TagRow id={tag.id} {...rowProps} hiddenOverspend={hiddenOverspend} />
 
-      {hasChildren && (
+      {hasChildren && dragMode !== 'REORDER' && (
         <Collapse in={expanded}>
           {expanded && (
             <Box pb={1}>

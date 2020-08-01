@@ -3,11 +3,20 @@ import { getRawTagOrder } from '../selectors'
 import sendEvent from 'helpers/sendEvent'
 import { setHiddenData } from '../thunks'
 import { TAG_ORDER } from '../constants'
+import { getTagsTree } from 'store/localData/tags'
 
 // THUNKS
 export const setTagOrder = order => (dispatch, getState) => {
   sendEvent(`Tag: sort`)
   dispatch(setHiddenData(TAG_ORDER, order))
+}
+
+export const moveTag = (startIndex, endIndex) => (dispatch, getState) => {
+  const state = getState()
+  const list = getTagsTree(state).map(tag => tag.id)
+  const [removed] = list.splice(startIndex, 1)
+  list.splice(endIndex, 0, removed)
+  dispatch(setTagOrder(list))
 }
 
 export const compareTags = createSelector(

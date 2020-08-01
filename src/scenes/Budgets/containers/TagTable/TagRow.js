@@ -22,7 +22,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import { getGoalProgress } from 'scenes/Budgets/selectors/goalsProgress'
 import { Amount } from '../components'
 import { useContext } from 'react'
-import { IsDraggingContext } from '../DnDContext'
+import { IsDraggingContext, DragModeContext } from '../DnDContext'
 import { getPopulatedTag } from 'store/localData/tags'
 import { getAmountsForTag } from 'scenes/Budgets/selectors/getAmountsByTag'
 
@@ -94,6 +94,7 @@ export function TagRow(props) {
   }
 
   const isDragging = useContext(IsDraggingContext)
+  const { dragMode } = useContext(DragModeContext)
   const goal = useSelector(state => getGoal(state, id), shallowEqual)
   const goalProgress = useSelector(
     state => getGoalProgress(state, date, id),
@@ -103,63 +104,75 @@ export function TagRow(props) {
   const c = useStyles({ isChild, isDragging })
   const [nameAnchorEl, setNameAnchorEl] = React.useState(null)
 
-  if (!showOutcome && !outcome && !available && !showAll) return null
+  if (
+    !showOutcome &&
+    !outcome &&
+    !available &&
+    !showAll &&
+    dragMode !== 'REORDER'
+  )
+    return null
 
   const showBudget = isChild ? !!budgeted : true
+
+  const renderContent = (provided, snapshot) => (
+    <div className={c.row} ref={provided?.innerRef}>
+      <span style={{ display: 'none' }}>{provided?.placeholder}</span>
+      <NameCell
+        symbol={symbol}
+        colorRGB={colorRGB}
+        name={name}
+        onOpenDetails={() => openDetails(id)}
+        onEditName={e => setNameAnchorEl(e.currentTarget)}
+      />
+
+      {(metric === 'budgeted' || !isMobile) && (
+        <BudgetCell
+          isUnsorted={isUnsorted}
+          budgeted={budgeted}
+          showBudget={showBudget}
+          onBudgetClick={e => openBudgetPopover(id, e.currentTarget)}
+        />
+      )}
+
+      {(metric === 'outcome' || !isMobile) && (
+        <OutcomeCell
+          outcome={outcome}
+          onClick={() => openTransactionsPopover(id)}
+        />
+      )}
+
+      {(metric === 'available' || !isMobile) && (
+        <AvailableCell
+          snapshot={snapshot}
+          dragMode={dragMode}
+          hiddenOverspend={hiddenOverspend}
+          id={id}
+          available={available}
+          isChild={isChild}
+          budgeted={budgeted}
+          isUnsorted={isUnsorted}
+        />
+      )}
+
+      <GoalButton
+        goal={goal}
+        goalProgress={goalProgress}
+        onClick={e => openGoalPopover(id, e.currentTarget)}
+      />
+    </div>
+  )
+
+  if (dragMode === 'REORDER') return renderContent()
 
   return (
     <>
       <Droppable
-        droppableId={id ? id : 'null'}
+        droppableId={id || 'null'}
         type="FUNDS"
         isDropDisabled={isUnsorted}
       >
-        {({ innerRef, placeholder }, snapshot) => (
-          <div className={c.row} ref={innerRef}>
-            <span style={{ display: 'none' }}>{placeholder}</span>
-            <NameCell
-              symbol={symbol}
-              colorRGB={colorRGB}
-              name={name}
-              onOpenDetails={() => openDetails(id)}
-              onEditName={e => setNameAnchorEl(e.currentTarget)}
-            />
-
-            {(metric === 'budgeted' || !isMobile) && (
-              <BudgetCell
-                isUnsorted={isUnsorted}
-                budgeted={budgeted}
-                showBudget={showBudget}
-                onBudgetClick={e => openBudgetPopover(id, e.currentTarget)}
-              />
-            )}
-
-            {(metric === 'outcome' || !isMobile) && (
-              <OutcomeCell
-                outcome={outcome}
-                onClick={() => openTransactionsPopover(id)}
-              />
-            )}
-
-            {(metric === 'available' || !isMobile) && (
-              <AvailableCell
-                snapshot={snapshot}
-                hiddenOverspend={hiddenOverspend}
-                id={id}
-                available={available}
-                isChild={isChild}
-                budgeted={budgeted}
-                isUnsorted={isUnsorted}
-              />
-            )}
-
-            <GoalButton
-              goal={goal}
-              goalProgress={goalProgress}
-              onClick={e => openGoalPopover(id, e.currentTarget)}
-            />
-          </div>
-        )}
+        {renderContent}
       </Droppable>
 
       {!!nameAnchorEl && (
@@ -253,7 +266,8 @@ const useAvailableStyles = makeStyles(theme => ({
 
 function AvailableCell(props) {
   const {
-    snapshot,
+    snapshot = {},
+    dragMode,
     hiddenOverspend,
     id,
     available,
@@ -299,7 +313,7 @@ function AvailableCell(props) {
           </Tooltip>
         )}
 
-        {isUnsorted ? (
+        {isUnsorted || dragMode === 'REORDER' ? (
           renderCellContent()
         ) : (
           <Draggable draggableId={id ? id : 'null'} index={0}>

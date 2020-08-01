@@ -77,7 +77,7 @@ export default function TagTableHeader({
   metric = 'available',
   onToggleMetric,
   onOpenMonthDrawer,
-  title = 'Категория',
+  onToggleDragMode,
   ...rest
 }) {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
@@ -128,8 +128,9 @@ export default function TagTableHeader({
         variant="body2"
         color="textSecondary"
         noWrap
+        onClick={onToggleDragMode}
       >
-        {title}
+        Категории
       </Typography>
 
       {isMobile ? (
