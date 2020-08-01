@@ -79,21 +79,18 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
                       index={index}
                     >
                       {provided => (
-                        <div
+                        <TagGroup
+                          id={tag.id}
+                          children={tag.children}
+                          metric={metrics[metricIndex]}
+                          openTransactionsPopover={onSelect}
+                          openBudgetPopover={openBudgetPopover}
+                          openGoalPopover={openGoalPopover}
+                          openDetails={openDetails}
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                        >
-                          <TagGroup
-                            id={tag.id}
-                            children={tag.children}
-                            metric={metrics[metricIndex]}
-                            openTransactionsPopover={onSelect}
-                            openBudgetPopover={openBudgetPopover}
-                            openGoalPopover={openGoalPopover}
-                            openDetails={openDetails}
-                          />
-                        </div>
+                        />
                       )}
                     </Draggable>
                   ))}

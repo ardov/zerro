@@ -16,7 +16,7 @@ export function DnDContext({ children }) {
   const dispatch = useDispatch()
   const [month] = useMonth()
   const [isDragging, setIsDragging] = useState()
-  const [dragMode, setDragMode] = useState('FUNDS')
+  const [dragMode, setDragMode] = useState('REORDER')
   const [moneyModalProps, setMoneyModalProps] = useState({ open: false })
 
   const onDragEnd = useCallback(
@@ -51,16 +51,17 @@ export function DnDContext({ children }) {
     setIsDragging(true)
     if (window.navigator.vibrate) window.navigator.vibrate(100)
   }, [])
+  const closeMoveMoneyModal = useCallback(
+    () => setMoneyModalProps({ open: false }),
+    []
+  )
 
   return (
     <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
       <IsDraggingContext.Provider value={isDragging}>
         <DragModeContext.Provider value={{ dragMode, setDragMode }}>
           {children}
-          <MoveMoneyModal
-            {...moneyModalProps}
-            onClose={() => setMoneyModalProps({ open: false })}
-          />
+          <MoveMoneyModal {...moneyModalProps} onClose={closeMoveMoneyModal} />
         </DragModeContext.Provider>
       </IsDraggingContext.Provider>
     </DragDropContext>

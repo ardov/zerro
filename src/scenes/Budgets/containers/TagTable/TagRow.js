@@ -106,6 +106,7 @@ export function TagRow(props) {
 
   if (
     !showOutcome &&
+    !budgeted &&
     !outcome &&
     !available &&
     !showAll &&
