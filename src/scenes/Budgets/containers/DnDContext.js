@@ -39,7 +39,7 @@ export function DnDContext({ children }) {
         })
       }
 
-      if (dragMode === 'REORDER') {
+      if (dragMode === 'REORDER' && e.source.index !== e.destination.index) {
         const startIndex = e.source.index
         const endIndex = e.destination.index
         dispatch(moveTag(startIndex, endIndex))
