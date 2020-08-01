@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import { useSelector } from 'react-redux'
-import { Collapse, Box, IconButton, Fade } from '@material-ui/core'
+import { Collapse, Box, IconButton } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import ArrowRightIcon from '@material-ui/icons/ArrowRight'
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator'
@@ -75,45 +75,41 @@ export const TagGroup = React.forwardRef((props, ref) => {
     openDetails,
   }
 
+  const isVisible =
+    tag.showOutcome ||
+    totalBudgeted ||
+    totalOutcome ||
+    totalAvailable ||
+    dragMode === 'REORDER'
+
+  if (!isVisible) return null
+
   return (
-    <Collapse
-      in={
-        tag.showOutcome ||
-        totalBudgeted ||
-        totalOutcome ||
-        totalAvailable ||
-        dragMode === 'REORDER'
-      }
-      unmountOnExit
-    >
-      <div className={c.panelRoot} ref={ref} {...rest}>
-        <Fade in={dragMode === 'REORDER'}>
-          <DragIndicatorIcon
-            fontSize="small"
-            color="action"
-            className={c.dragIcon}
-          />
-        </Fade>
+    <div className={c.panelRoot} ref={ref} {...rest}>
+      {dragMode === 'REORDER' && (
+        <DragIndicatorIcon
+          fontSize="small"
+          color="action"
+          className={c.dragIcon}
+        />
+      )}
+      {hasChildren && dragMode !== 'REORDER' && (
+        <IconButton size="small" className={c.expandIcon} onClick={toggle}>
+          <ArrowRightIcon />
+        </IconButton>
+      )}
+      <TagRow id={tag.id} {...rowProps} hiddenOverspend={hiddenOverspend} />
 
-        <Fade in={hasChildren && dragMode !== 'REORDER'}>
-          <IconButton size="small" className={c.expandIcon} onClick={toggle}>
-            <ArrowRightIcon />
-          </IconButton>
-        </Fade>
-
-        <TagRow id={tag.id} {...rowProps} hiddenOverspend={hiddenOverspend} />
-
-        {hasChildren && dragMode !== 'REORDER' && (
-          <Collapse in={expanded} unmountOnExit>
-            <Box pb={1}>
-              {!!outcome && <TagRow id={tag.id} isChild {...rowProps} />}
-              {children.map(({ id }) => (
-                <TagRow key={id} id={id} isChild {...rowProps} />
-              ))}
-            </Box>
-          </Collapse>
-        )}
-      </div>
-    </Collapse>
+      {hasChildren && dragMode !== 'REORDER' && (
+        <Collapse in={expanded} unmountOnExit>
+          <Box pb={1}>
+            {!!outcome && <TagRow id={tag.id} isChild {...rowProps} />}
+            {children.map(({ id }) => (
+              <TagRow key={id} id={id} isChild {...rowProps} />
+            ))}
+          </Box>
+        </Collapse>
+      )}
+    </div>
   )
 })
