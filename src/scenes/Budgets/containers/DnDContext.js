@@ -16,7 +16,7 @@ export function DnDContext({ children }) {
   const dispatch = useDispatch()
   const [month] = useMonth()
   const [isDragging, setIsDragging] = useState()
-  const [dragMode, setDragMode] = useState('REORDER')
+  const [dragMode, setDragMode] = useState('FUNDS')
   const [moneyModalProps, setMoneyModalProps] = useState({ open: false })
 
   const onDragEnd = useCallback(
