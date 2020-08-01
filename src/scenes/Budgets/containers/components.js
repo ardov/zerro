@@ -1,6 +1,7 @@
 import React from 'react'
 import { formatMoney } from 'helpers/format'
 import { Box, Typography } from '@material-ui/core'
+import { Tooltip } from 'components/Tooltip'
 
 const decStyle = { opacity: 0.5 }
 
@@ -65,15 +66,21 @@ export function Total({
   )
 }
 
-export function Line({ name, amount, currency, ...rest }) {
+export function Line({ name, amount, description, currency, ...rest }) {
   return (
     <Box display="flex" flexDirection="row" {...rest}>
       <Box flexGrow="1" mr={1} minWidth={0}>
-        <Typography noWrap variant="body2">
-          {name}
-        </Typography>
+        {description ? (
+          <Tooltip title={description}>
+            <Typography noWrap variant="body2" children={name} />
+          </Tooltip>
+        ) : (
+          <Typography noWrap variant="body2" children={name} />
+        )}
       </Box>
-      <Typography variant="body2">{formatMoney(amount, currency)}</Typography>
+      <Typography variant="body2">
+        <Amount value={amount} currency={currency} />
+      </Typography>
     </Box>
   )
 }
