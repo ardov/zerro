@@ -114,22 +114,31 @@ export default function BudgetInfo({ onClose, ...rest }) {
           <Collapse in={showMore}>
             <Rhythm gap={1} width="100%" pb={1}>
               <Line
-                name={`Все переводы`}
-                amount={-transferOutcome}
+                name={
+                  transferOutcome > 0
+                    ? 'Переводы из бюджета'
+                    : 'Переводы в бюджет'
+                }
+                description="Сумма переводов между счетами в бюджете и остальными"
+                amount={
+                  transferOutcome < 0 ? -transferOutcome : transferOutcome
+                }
                 currency={currency}
               />
               <Line
-                name={`Потери на переводах`}
+                name={`${transferFees > 0 ? 'Потери' : 'Доходы'} на переводах`}
+                description="Здесь учитываются комиссии или переводы в валюту. Например, купили долларов, а потом они подорожали, разница будет тут."
                 amount={-transferFees}
                 currency={currency}
               />
               <Line
-                name={`realBudgetedInFuture`}
+                name={`Все будущие бюджеты`}
                 amount={realBudgetedInFuture}
                 currency={currency}
               />
               <Line
-                name={`Распределено`}
+                name={`Всего доступно`}
+                description="Сумма всех распределённых денег"
                 amount={available}
                 currency={currency}
               />
