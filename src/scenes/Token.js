@@ -1,7 +1,7 @@
 import React from 'react'
-import {Box, Button, Typography} from '@material-ui/core'
+import { Box, Button, Typography } from '@material-ui/core'
 import { getToken } from 'store/token'
-import { useSelector} from "react-redux";
+import { useSelector } from 'react-redux'
 
 export default function Token() {
   const token = useSelector(state => getToken(state))
@@ -16,13 +16,13 @@ export default function Token() {
     >
       <Box p={5} mx="auto" maxWidth={500}>
         <Typography variant="h4" paragraph>
-          Внимание!
+          ⚠️ Внимание
         </Typography>
 
         <Typography variant="body1" paragraph>
-          Токен нельзя сделать недействительным и никогда не устаревает!
-
-          Будьте аккуратны! )
+          Токен даёт бессрочный доступ к вашему аккаунту. Приложения используют
+          токен вместо логина и пароля, чтобы получать данные. Используйте его
+          аккуратно и храните в безопасном месте.
         </Typography>
 
         <Box mt={3}>
@@ -31,11 +31,11 @@ export default function Token() {
             color="primary"
             onClick={() => setTokenVisibility(!tokenIsVisible)}
           >
-            { tokenIsVisible ? "Скрыть токен" : "Показать токен" }
+            {tokenIsVisible ? 'Скрыть токен' : 'Показать токен'}
           </Button>
         </Box>
 
-        { tokenIsVisible ? <h3>{token}</h3> : null }
+        {tokenIsVisible ? <h3>{token}</h3> : null}
       </Box>
     </Box>
   )
