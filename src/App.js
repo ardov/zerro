@@ -27,6 +27,7 @@ import { getLastSyncTime, getRootUserId } from 'store/serverData'
 import Accounts from 'scenes/Accounts'
 import Stats from 'scenes/Stats'
 import About from 'scenes/About'
+import Token from 'scenes/Token'
 import { Settings } from 'scenes/Settings'
 
 const history = createBrowserHistory()
@@ -84,6 +85,7 @@ const PrivateApp = () => {
               <Route path="/budget" component={Budgets} />
               <Route path="/stats" component={Stats} />
               <Route path="/settings" component={Settings} />
+              <Route path="/token" component={Token} />
               <Redirect to="/budget" />
             </Switch>
           ) : (
