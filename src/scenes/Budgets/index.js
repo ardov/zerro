@@ -8,25 +8,13 @@ import MonthInfo from './containers/MonthInfo'
 import { ToBeBudgeted } from './containers/ToBeBudgeted'
 import MonthSelector from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
-import EmojiIcon from 'components/EmojiIcon'
-import {
-  Box,
-  Drawer,
-  useMediaQuery,
-  Typography,
-  IconButton,
-} from '@material-ui/core'
+import { Box, Drawer, useMediaQuery } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import WarningSign from './containers/WarningSign'
 import GoalsProgressWidget from './containers/GoalsProgressWidget'
-import { Tooltip } from 'components/Tooltip'
-import CloseIcon from '@material-ui/icons/Close'
-import { getPopulatedTag } from 'store/localData/tags'
-import { Total, Line } from './containers/components'
-import { getAmountsForTag } from './selectors/getAmountsByTag'
-import Rhythm from 'components/Rhythm'
 import { useMonth } from './useMonth'
 import { DnDContext } from './containers/DnDContext'
+import { TagPreview } from './TagPreview'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
@@ -132,77 +120,12 @@ function Budgets() {
           onClose={closeDrawer}
         >
           {selectedTag ? (
-            <TagPreview
-              month={month}
-              index={index}
-              onClose={closeDrawer}
-              id={selectedTag}
-            />
+            <TagPreview onClose={closeDrawer} id={selectedTag} />
           ) : (
             <MonthInfo month={month} index={index} onClose={closeDrawer} />
           )}
         </Drawer>
       </Box>
     </DnDContext>
-  )
-}
-
-function TagPreview({ month, index, onClose, id }) {
-  const tag = useSelector(state => getPopulatedTag(state, id))
-  const amounts = useSelector(getAmountsForTag)(month, id)
-  if (!amounts) return null
-
-  const {
-    // available,
-    // totalAvailable,
-    leftover,
-    totalLeftover,
-    budgeted,
-    totalBudgeted,
-    // children,
-    // childrenAvailable,
-    // childrenBudgeted,
-    // childrenIncome,
-    // childrenLeftover,
-    // childrenOutcome,
-    // childrenOverspent,
-    // income,
-    outcome,
-    // tagOutcome,
-    // totalIncome,
-    totalOutcome,
-    // totalOverspent,
-    transferOutcome,
-  } = amounts
-  const isParent = !!amounts.children
-
-  const available = amounts.totalAvailable || amounts.available
-
-  return (
-    <Box>
-      <Box py={1} px={3} display="flex" alignItems="center">
-        <Box flexGrow={1} display="flex" minWidth={0} alignItems="center">
-          <EmojiIcon size="m" symbol={tag.symbol} mr={2} flexShrink={0} />
-          <Typography variant="h6" component="span" noWrap>
-            {tag.name}
-          </Typography>
-        </Box>
-
-        <Tooltip title="Закрыть">
-          <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
-        </Tooltip>
-      </Box>
-      <Total name="Доступно" value={available} />
-
-      <Rhythm gap={1} p={3}>
-        <Line
-          name="Остаток с прошлого месяца"
-          amount={isParent ? totalLeftover : leftover}
-        />
-        <Line name="Бюджет" amount={isParent ? totalBudgeted : budgeted} />
-        <Line name="Расход" amount={isParent ? totalOutcome : outcome} />
-        <Line name="— Переводы" amount={transferOutcome} />
-      </Rhythm>
-    </Box>
   )
 }
