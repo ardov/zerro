@@ -37,3 +37,5 @@ export const intToRGB = int => {
 }
 
 export const RGBToInt = (r, g, b) => (r << 16) + (g << 8) + b
+
+export const getOpacity = opacity => Math.floor(opacity * 256).toString(16)
