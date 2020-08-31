@@ -19,6 +19,7 @@ import {
 import { ThemeProvider } from '@material-ui/styles'
 import { createTheme } from 'helpers/createTheme'
 import { getTheme } from 'store/theme'
+import { Helmet } from 'react-helmet'
 
 import { createBrowserHistory } from 'history'
 import reactGA from 'react-ga'
@@ -43,16 +44,20 @@ if (process.env.NODE_ENV === 'production') {
 export default function App() {
   const isLoggedIn = useSelector(getLoginState)
   const themeType = useSelector(getTheme)
+  const theme = createTheme(themeType)
   const userId = useSelector(getRootUserId)
   useEffect(() => {
     if (userId) reactGA.set({ userId })
   }, [userId])
 
   return (
-    <ThemeProvider theme={createTheme(themeType)}>
+    <ThemeProvider theme={theme}>
       <>
         <CssBaseline />
         <ErrorBoundary>
+          <Helmet>
+            <meta name="theme-color" content={theme.palette.background.paper} />
+          </Helmet>
           <Router history={history}>
             <Switch>
               <Route path="/about" component={About} />
