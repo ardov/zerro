@@ -6,17 +6,21 @@ import {
   ResponsiveContainer,
   Tooltip as ChartTooltip,
 } from 'recharts'
-import getMonthDates from './selectors/getMonthDates'
+import getMonthDates from 'scenes/Budgets/selectors/getMonthDates'
 import EmojiIcon from 'components/EmojiIcon'
 import { Box, Typography, IconButton, useTheme } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@material-ui/icons/Close'
 import { getPopulatedTag } from 'store/localData/tags'
-import { Total, Line } from './containers/components'
-import { getAmountsForTag, getAmountsByTag } from './selectors/getAmountsByTag'
+import { Total, Line } from '../components'
+import {
+  getAmountsForTag,
+  getAmountsByTag,
+} from 'scenes/Budgets/selectors/getAmountsByTag'
 import Rhythm from 'components/Rhythm'
 import { makeStyles } from '@material-ui/styles'
-import { useMonth } from './useMonth'
+import { useMonth } from 'scenes/Budgets/useMonth'
+import { LinkedAccs } from './LinkedAccs'
 
 const useStyles = makeStyles(theme => ({
   base: {
@@ -123,6 +127,8 @@ export function TagPreview({ onClose, id }) {
         <Line name="Бюджет" amount={isParent ? totalBudgeted : budgeted} />
         <Line name="Расход" amount={isParent ? totalOutcome : outcome} />
         <Line name="— Переводы" amount={transferOutcome} />
+
+        <LinkedAccs id={id} />
       </Rhythm>
     </Box>
   )

@@ -14,7 +14,7 @@ import WarningSign from './containers/WarningSign'
 import GoalsProgressWidget from './containers/GoalsProgressWidget'
 import { useMonth } from './useMonth'
 import { DnDContext } from './containers/DnDContext'
-import { TagPreview } from './TagPreview'
+import { TagPreview } from './containers/TagPreview'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
