@@ -33,3 +33,13 @@ export const getAccTagMap = createSelector(
     return links
   }
 )
+
+export const getTagAccMap = createSelector([getAccTagMap], links => {
+  let result = {}
+  Object.entries(links).forEach(([accId, tagId]) => {
+    if (result[tagId]) result[tagId].push(accId)
+    else result[tagId] = [accId]
+  })
+  console.log('getTagAccMap', result)
+  return result
+})
