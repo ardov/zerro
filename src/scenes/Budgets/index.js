@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 import { format } from 'date-fns'
+import ru from 'date-fns/locale/ru'
 import { TagTable } from './containers/TagTable'
 import TransferTable from './containers/TransferTable'
 import MonthInfo from './containers/MonthInfo'
@@ -15,6 +16,7 @@ import GoalsProgressWidget from './containers/GoalsProgressWidget'
 import { useMonth } from './useMonth'
 import { DnDContext } from './containers/DnDContext'
 import { TagPreview } from './containers/TagPreview'
+import { Helmet } from 'react-helmet'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
@@ -24,13 +26,10 @@ export default function BudgetsRouter() {
 
   if (!month)
     return <Redirect to={`/budget/${format(new Date(), 'yyyy-MM')}`} />
-
   if (month < minMonth)
     return <Redirect to={`/budget/${format(minMonth, 'yyyy-MM')}`} />
-
   if (month > maxMonth)
     return <Redirect to={`/budget/${format(maxMonth, 'yyyy-MM')}`} />
-
   return <Budgets />
 }
 
@@ -86,46 +85,56 @@ function Budgets() {
   }
 
   return (
-    <DnDContext>
-      <Box display="flex" justifyContent="center" position="relative">
-        <Box className={c.grid}>
-          <MonthSelector
-            onChange={setMonth}
-            className={c.monthSelect}
-            {...{ minMonth, maxMonth, value: month }}
-          />
-          <GoalsProgressWidget className={c.goals} month={month} />
-          <ToBeBudgeted
-            className={c.toBeBudgeted}
-            index={index}
-            onClick={() => openDrawer(null)}
-          />
-          <TagTable
-            className={c.tags}
-            openDetails={openDrawer}
-            onOpenMonthDrawer={() => openDrawer(null)}
-          />
-          <TransferTable className={c.transfers} month={monthList[index]} />
+    <>
+      <Helmet>
+        <title>
+          Бюджет на {format(month, 'LLLL yyyy', { locale: ru })} | Zerro
+        </title>
+        <meta name="description" content="" />
+        <link rel="canonical" href="https://zerro.app/budget" />
+      </Helmet>
+
+      <DnDContext>
+        <Box display="flex" justifyContent="center" position="relative">
+          <Box className={c.grid}>
+            <MonthSelector
+              onChange={setMonth}
+              className={c.monthSelect}
+              {...{ minMonth, maxMonth, value: month }}
+            />
+            <GoalsProgressWidget className={c.goals} month={month} />
+            <ToBeBudgeted
+              className={c.toBeBudgeted}
+              index={index}
+              onClick={() => openDrawer(null)}
+            />
+            <TagTable
+              className={c.tags}
+              openDetails={openDrawer}
+              onOpenMonthDrawer={() => openDrawer(null)}
+            />
+            <TransferTable className={c.transfers} month={monthList[index]} />
+          </Box>
+
+          <WarningSign />
+
+          <Drawer
+            classes={
+              isMobile ? null : { paper: c.drawerWidth, root: c.drawerWidth }
+            }
+            variant={isMobile ? 'temporary' : 'persistent'}
+            anchor="right"
+            open={drawerVisibility}
+            onClose={closeDrawer}
+          >
+            {selectedTag ? (
+              <TagPreview onClose={closeDrawer} id={selectedTag} />
+            ) : (
+              <MonthInfo month={month} index={index} onClose={closeDrawer} />
+            )}
+          </Drawer>
         </Box>
-
-        <WarningSign />
-
-        <Drawer
-          classes={
-            isMobile ? null : { paper: c.drawerWidth, root: c.drawerWidth }
-          }
-          variant={isMobile ? 'temporary' : 'persistent'}
-          anchor="right"
-          open={drawerVisibility}
-          onClose={closeDrawer}
-        >
-          {selectedTag ? (
-            <TagPreview onClose={closeDrawer} id={selectedTag} />
-          ) : (
-            <MonthInfo month={month} index={index} onClose={closeDrawer} />
-          )}
-        </Drawer>
-      </Box>
-    </DnDContext>
+      </DnDContext>
+    </>
   )
 }
