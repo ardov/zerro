@@ -1,5 +1,5 @@
 import React from 'react'
-import { Paper, Box, makeStyles, useTheme } from '@material-ui/core'
+import { Box, useTheme } from '@material-ui/core'
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
