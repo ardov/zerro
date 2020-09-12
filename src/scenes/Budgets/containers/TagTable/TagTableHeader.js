@@ -1,16 +1,18 @@
-import React from 'react'
+import React, { useContext, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { getUserCurrencyCode } from 'store/serverData'
-import { formatMoney } from 'helpers/format'
+import { formatDate, formatMoney } from 'helpers/format'
 import {
   Typography,
   Box,
   useMediaQuery,
-  Link,
   IconButton,
+  Menu,
+  MenuItem,
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import SettingsIcon from '@material-ui/icons/Settings'
+import CheckCircleIcon from '@material-ui/icons/CheckCircle'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import { fillGoals } from '../../thunks'
@@ -19,12 +21,11 @@ import GoalProgress from 'components/GoalProgress'
 import { makeStyles } from '@material-ui/styles'
 import { ToBeBudgeted } from '../../containers/ToBeBudgeted'
 import useScrollPosition from '@react-hook/window-scroll'
-import { format } from 'date-fns'
-import ru from 'date-fns/locale/ru'
 import { useMonth } from 'scenes/Budgets/useMonth'
 import add from 'date-fns/add'
 import sub from 'date-fns/sub'
 import { getTotalGoalsProgress } from 'scenes/Budgets/selectors/goalsProgress'
+import { DragModeContext } from '../DnDContext'
 
 const useStyles = makeStyles(theme => ({
   row: {
@@ -74,16 +75,62 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export default function TagTableHeader({
-  metric = 'available',
-  onToggleMetric,
-  onOpenMonthDrawer,
-  onToggleDragMode,
-  ...rest
-}) {
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
+const MonthInfo = ({ onOpenMonthDrawer }) => {
   const c = useStyles()
   const [month, setMonth] = useMonth()
+  const prevMonth = +sub(month, { months: 1 })
+  const nextMonth = +add(month, { months: 1 })
+  return (
+    <Box className={c.head}>
+      <Box className={c.month}>
+        <Typography noWrap variant="body1">
+          {formatDate(month, 'LLLL')}
+        </Typography>
+        <IconButton
+          children={<ChevronLeftIcon fontSize="inherit" />}
+          onClick={() => setMonth(prevMonth)}
+          size="small"
+          edge="start"
+        />
+        <IconButton
+          children={<ChevronRightIcon fontSize="inherit" />}
+          onClick={() => setMonth(nextMonth)}
+          size="small"
+          edge="end"
+        />
+      </Box>
+
+      <ToBeBudgeted small onClick={onOpenMonthDrawer} />
+    </Box>
+  )
+}
+
+const Cell = props => (
+  <Typography variant="body2" color="textSecondary" noWrap {...props} />
+)
+
+export default function TagTableHeader(props) {
+  const {
+    metric = 'available',
+    onToggleMetric,
+    onOpenMonthDrawer,
+    ...rest
+  } = props
+  const c = useStyles()
+  const [anchorEl, setAnchorEl] = useState(null)
+  const { dragMode, setDragMode } = useContext(DragModeContext)
+
+  const handleClick = e => setAnchorEl(e.currentTarget)
+  const handleClose = () => setAnchorEl(null)
+
+  const toggleDragMode = () =>
+    setDragMode(mode => (mode === 'REORDER' ? 'FUNDS' : 'REORDER'))
+  const handleChangeOrderClick = () => {
+    toggleDragMode()
+    handleClose()
+  }
+
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
   const scrollY = useScrollPosition(60 /*fps*/)
   const scrollOffset = isMobile ? 254 : 128
   const isVisibleHeader = scrollY > scrollOffset
@@ -93,84 +140,50 @@ export default function TagTableHeader({
     available: 'Доступно',
   }
 
-  const prevMonth = +sub(month, { months: 1 })
-  const nextMonth = +add(month, { months: 1 })
-
   return (
     <Box className={c.row} {...rest}>
-      {isVisibleHeader && (
-        <Box className={c.head}>
-          <Box className={c.month}>
-            <IconButton
-              children={<ChevronLeftIcon fontSize="inherit" />}
-              onClick={() => setMonth(prevMonth)}
-              size="small"
-              edge="start"
-            />
+      {isVisibleHeader && <MonthInfo {...onOpenMonthDrawer} />}
 
-            <Typography noWrap variant="body1">
-              {format(month, 'LLLL', { locale: ru })}
-            </Typography>
-
-            <IconButton
-              children={<ChevronRightIcon fontSize="inherit" />}
-              onClick={() => setMonth(nextMonth)}
-              size="small"
-              edge="end"
-            />
-          </Box>
-
-          <ToBeBudgeted small onClick={onOpenMonthDrawer} />
-        </Box>
+      {dragMode === 'REORDER' ? (
+        <Cell className={c.name} onClick={toggleDragMode}>
+          🖐 Хватай и тащи{' '}
+          <IconButton
+            children={<CheckCircleIcon fontSize="inherit" />}
+            size="small"
+          />
+        </Cell>
+      ) : (
+        <Cell className={c.name} onClick={handleClick}>
+          Категории{' '}
+          <IconButton
+            children={<SettingsIcon fontSize="inherit" />}
+            size="small"
+          />
+        </Cell>
       )}
 
-      <Typography
-        className={c.name}
-        variant="body2"
-        color="textSecondary"
-        noWrap
-      >
-        Категории{' '}
-        <IconButton
-          children={<SettingsIcon fontSize="inherit" />}
-          onClick={onToggleDragMode}
-          size="small"
-        />
-      </Typography>
-
       {isMobile ? (
-        <Typography variant="body2" color="textSecondary" align="right" noWrap>
-          <Link color="textSecondary" onClick={onToggleMetric}>
-            {metrics[metric]}
-          </Link>
-        </Typography>
+        <Cell align="right" onClick={onToggleMetric}>
+          {metrics[metric]}
+        </Cell>
       ) : (
         <>
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            align="right"
-            noWrap
-            children="Бюджет"
-          />
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            align="right"
-            noWrap
-            children="Расход"
-          />
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            align="right"
-            noWrap
-            children="Доступно"
-          />
+          <Cell align="right" children="Бюджет" />
+          <Cell align="right" children="Расход" />
+          <Cell align="right" children="Доступно" />
         </>
       )}
 
       <GoalMonthProgress />
+
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
+        <MenuItem onClick={handleChangeOrderClick}>
+          Изменить порядок категорий
+        </MenuItem>
+        <MenuItem disabled onClick={handleClose}>
+          Показать все
+        </MenuItem>
+      </Menu>
     </Box>
   )
 }
