@@ -98,15 +98,6 @@ function SettingsMenu({
         <Divider light />
       </Box>
 
-      <MenuItem component="a" href="/settings">
-        <SettingsIcon className={classes.menuIcon} color="action" />
-        Порядок категорий
-      </MenuItem>
-
-      <Box my={1}>
-        <Divider light />
-      </Box>
-
       <MenuItem onClick={logOut}>
         <ExitToAppIcon className={classes.menuIcon} color="action" />
         Выйти
