@@ -25,7 +25,7 @@ export const useStyles = makeStyles(theme => ({
   expandIcon: {
     position: 'absolute',
     left: 0,
-    top: 9,
+    top: 12,
     transform: props => (props.expanded ? 'rotate(90deg)' : 'rotate(0deg)'),
     transition: '.3s',
   },
@@ -95,7 +95,7 @@ export const TagGroup = React.forwardRef((props, ref) => {
       )}
       {hasChildren && dragMode !== 'REORDER' && (
         <IconButton size="small" className={c.expandIcon} onClick={toggle}>
-          <ChevronRightIcon />
+          <ChevronRightIcon fontSize="inherit" />
         </IconButton>
       )}
       <TagRow id={tag.id} {...rowProps} hiddenOverspend={hiddenOverspend} />

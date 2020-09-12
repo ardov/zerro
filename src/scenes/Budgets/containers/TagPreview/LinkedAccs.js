@@ -75,7 +75,7 @@ export function LinkedAccs({ id }) {
             onClick={handleClick}
             size="small"
           >
-            <AddIcon />
+            <AddIcon fontSize="inherit" />
           </IconButton>
         </div>
       </Box>

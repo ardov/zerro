@@ -141,7 +141,11 @@ export default function DetailsDrawer({
             trigger={
               <Box my={0.5} display="inline-block">
                 <Tooltip title="Добавить категорию">
-                  <IconButton edge="end" size="small" children={<AddIcon />} />
+                  <IconButton
+                    edge="end"
+                    size="small"
+                    children={<AddIcon fontSize="inherit" />}
+                  />
                 </Tooltip>
               </Box>
             }

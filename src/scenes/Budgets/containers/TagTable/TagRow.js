@@ -30,7 +30,7 @@ const useStyles = makeStyles(theme => ({
   row: {
     paddingTop: ({ isChild }) => theme.spacing(isChild ? 0.5 : 1),
     paddingBottom: props => theme.spacing(props.isChild ? 0.5 : 1),
-    paddingLeft: props => theme.spacing(props.isChild ? 9 : 4),
+    paddingLeft: props => theme.spacing(props.isChild ? 8 : 3),
     paddingRight: theme.spacing(2),
     display: 'grid',
     width: '100%',
@@ -236,7 +236,7 @@ function BudgetCell(props) {
           <IconButton
             size="small"
             edge="end"
-            children={<AddIcon />}
+            children={<AddIcon fontSize="inherit" />}
             onClick={onBudgetClick}
             disabled={isUnsorted}
           />
@@ -334,9 +334,9 @@ function GoalButton(props) {
       <Tooltip title={hasGoal ? goalToWords(goal) : 'Добавить цель'}>
         <IconButton size="small" onClick={onClick}>
           {hasGoal ? (
-            <GoalProgress value={goalProgress.progress} />
+            <GoalProgress value={goalProgress.progress} fontSize="inherit" />
           ) : (
-            <EmojiFlagsIcon fontSize="small" />
+            <EmojiFlagsIcon fontSize="inherit" />
           )}
         </IconButton>
       </Tooltip>

@@ -46,7 +46,7 @@ const useStyles = makeStyles(theme => ({
       gridColumnGap: theme.spacing(0.5),
     },
   },
-  name: { paddingLeft: theme.spacing(2) },
+  name: { paddingLeft: theme.spacing(1) },
   head: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -102,7 +102,7 @@ export default function TagTableHeader({
         <Box className={c.head}>
           <Box className={c.month}>
             <IconButton
-              children={<ChevronLeftIcon />}
+              children={<ChevronLeftIcon fontSize="inherit" />}
               onClick={() => setMonth(prevMonth)}
               size="small"
               edge="start"
@@ -113,7 +113,7 @@ export default function TagTableHeader({
             </Typography>
 
             <IconButton
-              children={<ChevronRightIcon />}
+              children={<ChevronRightIcon fontSize="inherit" />}
               onClick={() => setMonth(nextMonth)}
               size="small"
               edge="end"
@@ -132,7 +132,7 @@ export default function TagTableHeader({
       >
         Категории{' '}
         <IconButton
-          children={<SettingsIcon />}
+          children={<SettingsIcon fontSize="inherit" />}
           onClick={onToggleDragMode}
           size="small"
         />
@@ -190,7 +190,7 @@ function GoalMonthProgress() {
           title="Установите цели, чтобы следить за их прогрессом 😉"
         >
           <IconButton size="small">
-            <GoalProgress value={0} />
+            <GoalProgress value={0} fontSize="inherit" />
           </IconButton>
         </Tooltip>
       </Box>
@@ -221,7 +221,7 @@ function GoalMonthProgress() {
           }
         >
           <IconButton size="small">
-            <GoalProgress value={progress} />
+            <GoalProgress value={progress} fontSize="inherit" />
           </IconButton>
         </Tooltip>
       </WithConfirm>
