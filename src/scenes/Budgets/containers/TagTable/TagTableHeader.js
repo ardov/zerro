@@ -10,10 +10,11 @@ import {
   IconButton,
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
+import SettingsIcon from '@material-ui/icons/Settings'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
+import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import { fillGoals } from '../../thunks'
 import WithConfirm from 'components/Confirm'
-import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import GoalProgress from 'components/GoalProgress'
 import { makeStyles } from '@material-ui/styles'
 import { ToBeBudgeted } from '../../containers/ToBeBudgeted'
@@ -128,9 +129,13 @@ export default function TagTableHeader({
         variant="body2"
         color="textSecondary"
         noWrap
-        onClick={onToggleDragMode}
       >
-        Категории
+        Категории{' '}
+        <IconButton
+          children={<SettingsIcon />}
+          onClick={onToggleDragMode}
+          size="small"
+        />
       </Typography>
 
       {isMobile ? (
