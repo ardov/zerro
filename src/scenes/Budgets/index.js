@@ -9,7 +9,7 @@ import MonthInfo from './containers/MonthInfo'
 import { ToBeBudgeted } from './containers/ToBeBudgeted'
 import MonthSelector from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
-import { Box, Drawer, useMediaQuery } from '@material-ui/core'
+import { Box, Drawer, Paper, useMediaQuery } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import WarningSign from './containers/WarningSign'
 import GoalsProgressWidget from './containers/GoalsProgressWidget'
@@ -17,6 +17,7 @@ import { useMonth } from './useMonth'
 import { DnDContext } from './containers/DnDContext'
 import { TagPreview } from './containers/TagPreview'
 import { Helmet } from 'react-helmet'
+import { SankeyChart } from './SankeyChart'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
@@ -43,7 +44,8 @@ const useStyles = makeStyles(theme => ({
     gridTemplateAreas: `
       'month-select   goals     to-be-budgeted'
       'tags           tags      tags'
-      'transfers      transfers transfers'`,
+      'transfers      transfers transfers'
+      'chart          chart     chart'`,
     width: '100%',
     maxWidth: 800,
     [theme.breakpoints.down('sm')]: {
@@ -61,6 +63,7 @@ const useStyles = makeStyles(theme => ({
   toBeBudgeted: { gridArea: 'to-be-budgeted' },
   tags: { gridArea: 'tags' },
   transfers: { gridArea: 'transfers' },
+  chart: { gridArea: 'chart' },
 }))
 
 function Budgets() {
@@ -114,6 +117,9 @@ function Budgets() {
               onOpenMonthDrawer={() => openDrawer(null)}
             />
             <TransferTable className={c.transfers} month={monthList[index]} />
+            <Paper className={c.chart}>
+              <SankeyChart />
+            </Paper>
           </Box>
 
           <WarningSign />
