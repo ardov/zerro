@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { useSelector } from 'react-redux'
 import { Collapse, Box, IconButton } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
-import ArrowRightIcon from '@material-ui/icons/ArrowRight'
+import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator'
 import { TagRow } from './TagRow'
 import { getAmountsForTag } from 'scenes/Budgets/selectors/getAmountsByTag'
@@ -25,7 +25,7 @@ export const useStyles = makeStyles(theme => ({
   expandIcon: {
     position: 'absolute',
     left: 0,
-    top: 9,
+    top: 12,
     transform: props => (props.expanded ? 'rotate(90deg)' : 'rotate(0deg)'),
     transition: '.3s',
   },
@@ -95,7 +95,7 @@ export const TagGroup = React.forwardRef((props, ref) => {
       )}
       {hasChildren && dragMode !== 'REORDER' && (
         <IconButton size="small" className={c.expandIcon} onClick={toggle}>
-          <ArrowRightIcon />
+          <ChevronRightIcon fontSize="inherit" />
         </IconButton>
       )}
       <TagRow id={tag.id} {...rowProps} hiddenOverspend={hiddenOverspend} />

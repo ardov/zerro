@@ -19,6 +19,7 @@ import {
 import { ThemeProvider } from '@material-ui/styles'
 import { createTheme } from 'helpers/createTheme'
 import { getTheme } from 'store/theme'
+import { Helmet } from 'react-helmet'
 
 import { createBrowserHistory } from 'history'
 import reactGA from 'react-ga'
@@ -28,7 +29,6 @@ import Accounts from 'scenes/Accounts'
 import Stats from 'scenes/Stats'
 import About from 'scenes/About'
 import Token from 'scenes/Token'
-import { Settings } from 'scenes/Settings'
 
 const history = createBrowserHistory()
 
@@ -43,16 +43,20 @@ if (process.env.NODE_ENV === 'production') {
 export default function App() {
   const isLoggedIn = useSelector(getLoginState)
   const themeType = useSelector(getTheme)
+  const theme = createTheme(themeType)
   const userId = useSelector(getRootUserId)
   useEffect(() => {
     if (userId) reactGA.set({ userId })
   }, [userId])
 
   return (
-    <ThemeProvider theme={createTheme(themeType)}>
+    <ThemeProvider theme={theme}>
       <>
         <CssBaseline />
         <ErrorBoundary>
+          <Helmet>
+            <meta name="theme-color" content={theme.palette.background.paper} />
+          </Helmet>
           <Router history={history}>
             <Switch>
               <Route path="/about" component={About} />
@@ -84,7 +88,6 @@ const PrivateApp = () => {
               <Route path="/budget/:month" component={Budgets} />
               <Route path="/budget" component={Budgets} />
               <Route path="/stats" component={Stats} />
-              <Route path="/settings" component={Settings} />
               <Route path="/token" component={Token} />
               <Redirect to="/budget" />
             </Switch>

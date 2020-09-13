@@ -4,7 +4,12 @@ import {
   getAccountsInBudget,
   getSavingAccounts,
 } from 'store/localData/accounts'
-import { getUserInstrument, getInstruments } from 'store/serverData'
+import {
+  getUserInstrument,
+  getInstruments,
+  convertCurrency,
+  getUserInstrumentId,
+} from 'store/serverData'
 import pluralize from 'helpers/pluralize'
 import { List } from '@material-ui/core'
 import { Account, Subheader } from './components'
@@ -12,38 +17,36 @@ import { round } from 'helpers/currencyHelpers'
 import { useState } from 'react'
 import { setInBudget } from 'store/localData/accounts/thunks'
 
-const getTotalBalance = (accs, targetInstrument, instruments) =>
-  accs.reduce((sum, acc) => {
-    const balance = acc.balance
-    const accRate = instruments[acc.instrument].rate
-    const targetRate = targetInstrument.rate
-    return round((sum += (balance * accRate) / targetRate))
-  }, 0)
-
 export default function AccountList({ className, onAccountClick }) {
   const dispatch = useDispatch()
+  const convert = useSelector(convertCurrency)
   const instruments = useSelector(getInstruments)
-  const inBudget = useSelector(getAccountsInBudget)
-  const savings = useSelector(getSavingAccounts)
   const userInstrument = useSelector(getUserInstrument)
+  const userInstrumentId = useSelector(getUserInstrumentId)
+
+  const getTotalBalance = accs =>
+    accs.reduce((sum, acc) => {
+      let balance = convert(acc.balance, acc.instrument, userInstrumentId)
+      return round(sum + balance)
+    }, 0)
+  const compare = (a, b) => {
+    const aBalance = convert(a.balance, a.instrument, userInstrumentId)
+    const bBalance = convert(b.balance, b.instrument, userInstrumentId)
+    return bBalance - aBalance
+  }
+
+  const inBudget = useSelector(getAccountsInBudget).sort(compare)
+  const savings = useSelector(getSavingAccounts).sort(compare)
 
   const archivedInBudget = inBudget.filter(a => a.archive)
   const activeInBudget = inBudget.filter(a => !a.archive)
 
-  const archivedInBudgetSum = getTotalBalance(
-    archivedInBudget,
-    userInstrument,
-    instruments
-  )
-  const activeInBudgetSum = getTotalBalance(
-    activeInBudget,
-    userInstrument,
-    instruments
-  )
-  const savingsSum = getTotalBalance(savings, userInstrument, instruments)
+  const archivedInBudgetSum = getTotalBalance(archivedInBudget)
+  const activeInBudgetSum = getTotalBalance(activeInBudget)
+  const savingsSum = getTotalBalance(savings)
   const [showArchived, setShowArchived] = useState(!!archivedInBudgetSum)
 
-  if (!userInstrument) return null
+  if (!userInstrumentId) return null
   return (
     <div className={className}>
       <List dense>

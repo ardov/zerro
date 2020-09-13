@@ -2,8 +2,8 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 import * as Sentry from '@sentry/browser'
-import { IntlProvider, addLocaleData } from 'react-intl'
-import ru from 'react-intl/locale-data/ru'
+// import { IntlProvider, addLocaleData } from 'react-intl'
+// import ru from 'react-intl/locale-data/ru'
 import { MuiPickersUtilsProvider } from '@material-ui/pickers'
 import DateFnsUtils from '@date-io/date-fns'
 import ruDateLocale from 'date-fns/locale/ru'
@@ -15,7 +15,7 @@ import { store } from './store'
 import GlobalErrorBoundary from 'components/GlobalErrorBoundary'
 import sendEvent from 'helpers/sendEvent'
 
-addLocaleData(ru)
+// addLocaleData(ru)
 
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
@@ -27,11 +27,11 @@ if (process.env.NODE_ENV === 'production') {
 ReactDOM.render(
   <GlobalErrorBoundary>
     <Provider store={store}>
-      <IntlProvider locale="ru">
-        <MuiPickersUtilsProvider utils={DateFnsUtils} locale={ruDateLocale}>
-          <App />
-        </MuiPickersUtilsProvider>
-      </IntlProvider>
+      {/* <IntlProvider locale="ru"> */}
+      <MuiPickersUtilsProvider utils={DateFnsUtils} locale={ruDateLocale}>
+        <App />
+      </MuiPickersUtilsProvider>
+      {/* </IntlProvider> */}
     </Provider>
   </GlobalErrorBoundary>,
   document.getElementById('root')

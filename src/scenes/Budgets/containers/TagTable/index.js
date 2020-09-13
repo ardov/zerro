@@ -23,7 +23,7 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
   const [metricIndex, setMetricIndex] = useState(0)
   const [goalPopoverData, setGoalPopoverData] = useState({})
   const [budgetPopoverData, setBudgetPopoverData] = useState({})
-  const { dragMode, setDragMode } = useContext(DragModeContext)
+  const { dragMode } = useContext(DragModeContext)
 
   const onSelect = useCallback(
     id => {
@@ -46,10 +46,6 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
     () => setMetricIndex((metricIndex + 1) % 3),
     [metricIndex]
   )
-  const toggleDragMode = useCallback(
-    () => setDragMode(mode => (mode === 'REORDER' ? 'FUNDS' : 'REORDER')),
-    [setDragMode]
-  )
 
   const filterConditions = {
     type: 'outcome',
@@ -66,7 +62,6 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
             metric={metrics[metricIndex]}
             onToggleMetric={toggleMetric}
             onOpenMonthDrawer={onOpenMonthDrawer}
-            onToggleDragMode={toggleDragMode}
           />
           {dragMode === 'REORDER' ? (
             <Droppable droppableId="tags" type="REORDER">

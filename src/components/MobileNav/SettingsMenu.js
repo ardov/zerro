@@ -10,7 +10,6 @@ import InvertColorsIcon from '@material-ui/icons/InvertColors'
 import ExitToAppIcon from '@material-ui/icons/ExitToApp'
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
-import SettingsIcon from '@material-ui/icons/Settings'
 import { Box, Divider, Menu, MenuItem, Typography } from '@material-ui/core'
 import { useHistory } from 'react-router'
 
@@ -93,15 +92,6 @@ function SettingsMenu({
           Менять тему автоматически
         </MenuItem>
       )}
-
-      <Box my={1}>
-        <Divider light />
-      </Box>
-
-      <MenuItem component="a" href="/settings">
-        <SettingsIcon className={classes.menuIcon} color="action" />
-        Порядок категорий
-      </MenuItem>
 
       <Box my={1}>
         <Divider light />
