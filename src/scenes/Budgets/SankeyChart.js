@@ -34,12 +34,14 @@ export function SankeyChart(props) {
     value: monthTotals.funds - monthTotals.income + monthTotals.available,
   })
 
-  nodes.push({ name: 'Будущие бюджеты' })
-  links.push({
-    source: budgetId,
-    target: nodes.length - 1,
-    value: monthTotals.budgetedInFuture,
-  })
+  if (monthTotals.budgetedInFuture) {
+    nodes.push({ name: 'Будущие бюджеты' })
+    links.push({
+      source: budgetId,
+      target: nodes.length - 1,
+      value: monthTotals.budgetedInFuture,
+    })
+  }
 
   tags.forEach(({ id, title }) => {
     if (!amounts[id]) return
@@ -99,6 +101,7 @@ function DemoSankeyNode({
   payload,
   containerWidth,
 }) {
+  if (isNaN(y)) console.log('payload', payload)
   const isOut = x + width + 6 > containerWidth
   return (
     <Layer key={`CustomNode${index}`}>
