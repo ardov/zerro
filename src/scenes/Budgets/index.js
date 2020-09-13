@@ -71,13 +71,14 @@ function Budgets() {
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
   const [month, setMonth] = useMonth()
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('md'))
+  const isMD = useMediaQuery(theme => theme.breakpoints.down('md'))
+  const isSM = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const [showDrawer, setShowDrawer] = useState(false)
   const [selectedTag, setSelectedTag] = useState(null)
   const c = useStyles()
   const index = monthList.findIndex(date => date === month)
 
-  const drawerVisibility = !isMobile || !!showDrawer
+  const drawerVisibility = !isMD || !!showDrawer
   const closeDrawer = () => {
     setSelectedTag(null)
     setShowDrawer(false)
@@ -117,18 +118,20 @@ function Budgets() {
               onOpenMonthDrawer={() => openDrawer(null)}
             />
             <TransferTable className={c.transfers} month={monthList[index]} />
-            <Paper className={c.chart}>
-              <SankeyChart />
-            </Paper>
+            {!isSM && (
+              <Paper className={c.chart}>
+                <SankeyChart />
+              </Paper>
+            )}
           </Box>
 
           <WarningSign />
 
           <Drawer
             classes={
-              isMobile ? null : { paper: c.drawerWidth, root: c.drawerWidth }
+              isMD ? null : { paper: c.drawerWidth, root: c.drawerWidth }
             }
-            variant={isMobile ? 'temporary' : 'persistent'}
+            variant={isMD ? 'temporary' : 'persistent'}
             anchor="right"
             open={drawerVisibility}
             onClose={closeDrawer}
