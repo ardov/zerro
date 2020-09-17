@@ -43,8 +43,8 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
     []
   )
   const toggleMetric = useCallback(
-    () => setMetricIndex((metricIndex + 1) % 3),
-    [metricIndex]
+    () => setMetricIndex(metricIndex => (metricIndex + 1) % 3),
+    []
   )
 
   const filterConditions = {

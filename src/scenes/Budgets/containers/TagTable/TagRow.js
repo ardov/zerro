@@ -153,6 +153,7 @@ export function TagRow(props) {
           isChild={isChild}
           budgeted={budgeted}
           isUnsorted={isUnsorted}
+          c={c}
         />
       )}
 
@@ -257,14 +258,6 @@ function OutcomeCell(props) {
   )
 }
 
-const useAvailableStyles = makeStyles(theme => ({
-  dropZone: {
-    background: theme.palette.action.selected,
-    transition: '0.1s',
-    borderRadius: theme.shape.borderRadius,
-  },
-}))
-
 function AvailableCell(props) {
   const {
     snapshot = {},
@@ -275,8 +268,8 @@ function AvailableCell(props) {
     isChild,
     budgeted,
     isUnsorted,
+    c,
   } = props
-  const c = useAvailableStyles()
   const availableColor = getAvailableColor(available, isChild, !!budgeted)
 
   const renderCellContent = (provided = {}, snapshot = {}) => (

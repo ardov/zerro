@@ -66,15 +66,6 @@ export const TagGroup = React.forwardRef((props, ref) => {
   const hasChildren = !!children?.length
   const c = useStyles({ expanded })
 
-  const rowProps = {
-    date: month,
-    metric,
-    openGoalPopover,
-    openBudgetPopover,
-    openTransactionsPopover,
-    openDetails,
-  }
-
   const isVisible =
     tag.showOutcome ||
     totalBudgeted ||
@@ -83,6 +74,15 @@ export const TagGroup = React.forwardRef((props, ref) => {
     dragMode === 'REORDER'
 
   if (!isVisible) return null
+
+  const rowProps = {
+    date: month,
+    metric,
+    openGoalPopover,
+    openBudgetPopover,
+    openTransactionsPopover,
+    openDetails,
+  }
 
   return (
     <div className={c.panelRoot} ref={ref} {...rest}>
