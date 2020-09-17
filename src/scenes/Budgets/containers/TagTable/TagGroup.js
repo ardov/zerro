@@ -1,5 +1,8 @@
 import React, { useContext } from 'react'
 import { useSelector } from 'react-redux'
+import getMonth from 'date-fns/getMonth'
+import getDaysInMonth from 'date-fns/getDaysInMonth'
+import getDate from 'date-fns/getDate'
 import { Collapse, Box, IconButton } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
@@ -75,8 +78,16 @@ export const TagGroup = React.forwardRef((props, ref) => {
 
   if (!isVisible) return null
 
+  const currDate = Date.now()
+  const currMonthIndex = getMonth(currDate)
+  const monthIndex = getMonth(month)
+  const showOverspend = currMonthIndex === monthIndex
+
   const rowProps = {
     date: month,
+    showOverspend,
+    daysInMonth: showOverspend && getDaysInMonth(currDate),
+    currDay: showOverspend && getDate(currDate),
     metric,
     openGoalPopover,
     openBudgetPopover,
