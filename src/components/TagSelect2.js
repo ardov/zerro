@@ -160,9 +160,7 @@ function TagSelectPopover({
             key={tag.id}
             tag={tag}
             onClick={handleClick(tag.id)}
-            selected={
-              (selectedIds && selectedIds.find(tag.id)) || focused === idx
-            }
+            selected={selectedIds?.find(tag.id) || focused === idx}
             isChild={!!tag.parent}
           />
         ))}
