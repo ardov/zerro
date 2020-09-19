@@ -1,5 +1,5 @@
-import React from 'react'
-import { connect } from 'react-redux'
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
 import { getTagsTree } from 'store/localData/tags'
 import {
   Popover,
@@ -14,8 +14,14 @@ import {
 import AddIcon from '@material-ui/icons/Add'
 import EmojiIcon from 'components/EmojiIcon'
 
-function TagSelect({ tags, onChange, trigger, value, exclude, tagType }) {
-  const [anchorEl, setAnchorEl] = React.useState(null)
+export default function TagSelect({
+  onChange,
+  trigger,
+  value,
+  exclude,
+  tagType,
+}) {
+  const [anchorEl, setAnchorEl] = useState(null)
   const handleClick = e => setAnchorEl(e.currentTarget)
   const handleClose = () => setAnchorEl(null)
   const handleTagSelect = id => {
@@ -34,7 +40,7 @@ function TagSelect({ tags, onChange, trigger, value, exclude, tagType }) {
         </IconButton>
       )}
       <TagSelectPopover
-        {...{ tags, open, anchorEl, exclude, tagType }}
+        {...{ open, anchorEl, exclude, tagType }}
         onClose={handleClose}
         onTagSelect={handleTagSelect}
         selectedIds={value}
@@ -43,22 +49,7 @@ function TagSelect({ tags, onChange, trigger, value, exclude, tagType }) {
   )
 }
 
-export default connect(state => ({ tags: getTagsTree(state) }), null)(TagSelect)
-
-// WIP
-function TagSelectPopover({
-  tags,
-  open,
-  anchorEl,
-  exclude,
-  tagType,
-  selectedIds,
-  onTagSelect,
-  onClose,
-}) {
-  const [search, setSearch] = React.useState('')
-  const [localTagType, setLocalTagType] = React.useState(tagType)
-
+function makeTagChecker({ search = '', tagType = null, exclude = [] }) {
   const checkSearch = (tag, search) => {
     const includes = (title, search) =>
       title.toUpperCase().includes(search.toUpperCase())
@@ -68,24 +59,73 @@ function TagSelectPopover({
     )
   }
 
-  const checkTag = tag =>
-    // if there is search do not apply rules for tag type
-    (search
-      ? checkSearch(tag, search)
-      : (localTagType !== 'income' ||
-          (localTagType === 'income' && tag.showIncome)) &&
-        (localTagType !== 'outcome' ||
-          (localTagType === 'outcome' && tag.showOutcome))) &&
-    // if there is exclude remove those tags from list
-    (!(exclude && exclude.length) || !exclude.includes(tag.id))
+  return function (tag) {
+    // never show excluded tags
+    if (exclude?.includes(tag.id)) return false
+    if (search) return checkSearch(tag, search)
+    if (tagType === 'income') return tag.showIncome
+    if (tagType === 'outcome') return tag.showOutcome
+    return true
+  }
+}
 
-  const filtered = tags
-    .filter(checkTag)
-    .map(tag =>
-      tag.children ? { ...tag, children: tag.children.filter(checkTag) } : tag
-    )
+// WIP
+function TagSelectPopover({
+  open,
+  anchorEl,
+  exclude,
+  tagType,
+  selectedIds,
+  onTagSelect,
+  onClose,
+}) {
+  const tags = useSelector(getTagsTree)
+  const [search, setSearch] = useState('')
+  const [focused, setFocused] = useState(0)
+  const [localTagType, setLocalTagType] = useState(tagType)
+  const checkTag = makeTagChecker({ search, tagType: localTagType, exclude })
+
+  let flatList = []
+  tags.forEach(tag => {
+    if (checkTag(tag)) {
+      flatList.push(tag)
+      tag.children.forEach(child => {
+        if (checkTag(child)) flatList.push(child)
+      })
+    }
+  })
+
+  useEffect(() => {
+    if (open) {
+      setSearch('')
+      setLocalTagType(tagType)
+    }
+  }, [open, tagType])
+
+  useEffect(() => {
+    setFocused(0)
+  }, [search])
 
   const handleClick = id => () => onTagSelect(id)
+
+  const handleKeyDown = e => {
+    if (e.key === 'ArrowUp' || e.keyCode === 38) {
+      e.preventDefault()
+      if (focused > 0) setFocused(focused => focused - 1)
+    }
+    if (e.key === 'ArrowDown' || e.keyCode === 40) {
+      e.preventDefault()
+      if (focused < flatList.length - 1) setFocused(focused => focused + 1)
+    }
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      e.preventDefault()
+      if (flatList.length) onTagSelect(flatList[focused].id)
+    }
+    if (e.key === 'Escape' || e.keyCode === 27) {
+      e.preventDefault()
+      onClose()
+    }
+  }
 
   return (
     <Popover
@@ -106,6 +146,7 @@ function TagSelectPopover({
           <TextField
             value={search}
             onChange={e => setSearch(e.target.value)}
+            onKeyDown={handleKeyDown}
             variant="outlined"
             placeholder="Выберите категорию"
             fullWidth
@@ -114,24 +155,16 @@ function TagSelectPopover({
         </Paper>
       </Box>
       <List>
-        {filtered.map(tag => (
-          <React.Fragment key={tag.id + 'frag'}>
-            <TagOption
-              key={tag.id}
-              tag={tag}
-              onClick={handleClick(tag.id)}
-              selected={selectedIds && selectedIds.find(tag.id)}
-            />
-            {tag.children &&
-              tag.children.map(tag => (
-                <TagOption
-                  key={tag.id}
-                  tag={tag}
-                  onClick={handleClick(tag.id)}
-                  isChild
-                />
-              ))}
-          </React.Fragment>
+        {flatList.map((tag, idx) => (
+          <TagOption
+            key={tag.id}
+            tag={tag}
+            onClick={handleClick(tag.id)}
+            selected={
+              (selectedIds && selectedIds.find(tag.id)) || focused === idx
+            }
+            isChild={!!tag.parent}
+          />
         ))}
         {localTagType && !search && (
           <ListItem button onClick={() => setLocalTagType(null)}>
