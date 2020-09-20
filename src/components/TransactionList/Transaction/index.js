@@ -53,36 +53,37 @@ export default function Transaction({
   const c = useStyles()
 
   const tr = useSelector(state => getTransaction(state, id))
-  const incomeInstrument = useSelector(state =>
-    getInstrument(state, tr.incomeInstrument)
-  )
-  const incomeAccount = useSelector(state =>
-    getAccount(state, tr.incomeAccount)
-  )
-  const opIncomeInstrument = useSelector(state =>
-    getInstrument(state, tr.opIncomeInstrument)
-  )
-  const outcomeInstrument = useSelector(state =>
-    getInstrument(state, tr.outcomeInstrument)
-  )
-  const outcomeAccount = useSelector(state =>
-    getAccount(state, tr.outcomeAccount)
-  )
-  const opOutcomeInstrument = useSelector(state =>
-    getInstrument(state, tr.opOutcomeInstrument)
-  )
-
-  const changed = tr.changed
-  const qrCode = tr.qrCode
   const type = getType(tr)
+  const {
+    deleted,
+    payee,
+    comment,
+    income,
+    opIncome,
+    outcome,
+    opOutcome,
+    changed,
+    qrCode,
+  } = tr
 
-  const { deleted, payee, comment, income, opIncome, outcome, opOutcome } = tr
-  const incomeAccountTitle = incomeAccount?.title
-  const outcomeAccountTitle = outcomeAccount?.title
-  const incomeCurrency = incomeInstrument?.shortTitle
-  const opIncomeCurrency = opIncomeInstrument?.shortTitle
-  const outcomeCurrency = outcomeInstrument?.shortTitle
-  const opOutcomeCurrency = opOutcomeInstrument?.shortTitle
+  const incomeCurrency = useSelector(
+    state => getInstrument(state, tr.incomeInstrument)?.shortTitle
+  )
+  const incomeAccountTitle = useSelector(
+    state => getAccount(state, tr.incomeAccount)?.title
+  )
+  const opIncomeCurrency = useSelector(
+    state => getInstrument(state, tr.opIncomeInstrument)?.shortTitle
+  )
+  const outcomeCurrency = useSelector(
+    state => getInstrument(state, tr.outcomeInstrument)?.shortTitle
+  )
+  const outcomeAccountTitle = useSelector(
+    state => getAccount(state, tr.outcomeAccount)?.title
+  )
+  const opOutcomeCurrency = useSelector(
+    state => getInstrument(state, tr.opOutcomeInstrument)?.shortTitle
+  )
 
   // TODO: вызывает постоянные ререндеры, т.к. каждый раз новый объект.
   //       можно попробовать подключать теги уже на месте в <MainLine/>
@@ -100,7 +101,7 @@ export default function Transaction({
   const handleSelectSimilar = () => onSelectChanged(changed)
 
   const symbol = tag ? tag[0].symbol : type === 'transfer' ? '→' : '?'
-  const color = tag ? tag[0].colorRGB : null
+  const color = tag?.[0].colorRGB || null
   const mainAccountTitle =
     type === 'income'
       ? incomeAccountTitle
