@@ -21,6 +21,7 @@ export default function TransactionList(props) {
   const transactions = useSelector(getSortedTransactions)
   const [filter, setFilter] = useState(filterConditions)
   const setCondition = condition => setFilter({ ...filter, ...condition })
+  const onFilterByPayee = payee => setFilter({ search: payee })
 
   const groups = useMemo(
     () => groupTransactionsBy('DAY', transactions, filter),
@@ -80,6 +81,7 @@ export default function TransactionList(props) {
             checked,
             toggleTransaction,
             checkByChangedDate,
+            onFilterByPayee,
           }}
         />
       </Box>

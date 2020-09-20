@@ -1,4 +1,11 @@
 import React from 'react'
+import { useSelector } from 'react-redux'
+import { getInstrument } from 'store/serverData'
+import { getAccount } from 'store/localData/accounts'
+import { getPopulatedTag } from 'store/localData/tags'
+import { getTransaction } from 'store/localData/transactions'
+import { getType } from 'store/localData/transactions/helpers'
+
 import { makeStyles } from '@material-ui/styles'
 import { withStyles } from '@material-ui/core/styles'
 import {
@@ -33,27 +40,10 @@ const useStyles = makeStyles(theme => ({
 
 export default function Transaction({
   id,
-  changed,
-  type,
-  incomeAccountTitle,
-  outcomeAccountTitle,
-  deleted,
+
   isOpened,
   isInSelectionMode,
   isChecked,
-  payee,
-  tag,
-  comment,
-  qrCode,
-
-  income,
-  incomeCurrency,
-  opIncome,
-  opIncomeCurrency,
-  outcome,
-  outcomeCurrency,
-  opOutcome,
-  opOutcomeCurrency,
 
   onToggle,
   onClick,
@@ -62,8 +52,51 @@ export default function Transaction({
 }) {
   const c = useStyles()
 
+  const tr = useSelector(state => getTransaction(state, id))
+  const incomeInstrument = useSelector(state =>
+    getInstrument(state, tr.incomeInstrument)
+  )
+  const incomeAccount = useSelector(state =>
+    getAccount(state, tr.incomeAccount)
+  )
+  const opIncomeInstrument = useSelector(state =>
+    getInstrument(state, tr.opIncomeInstrument)
+  )
+  const outcomeInstrument = useSelector(state =>
+    getInstrument(state, tr.outcomeInstrument)
+  )
+  const outcomeAccount = useSelector(state =>
+    getAccount(state, tr.outcomeAccount)
+  )
+  const opOutcomeInstrument = useSelector(state =>
+    getInstrument(state, tr.opOutcomeInstrument)
+  )
+
+  const changed = tr.changed
+  const qrCode = tr.qrCode
+  const type = getType(tr)
+
+  const { deleted, payee, comment, income, opIncome, outcome, opOutcome } = tr
+  const incomeAccountTitle = incomeAccount?.title
+  const outcomeAccountTitle = outcomeAccount?.title
+  const incomeCurrency = incomeInstrument?.shortTitle
+  const opIncomeCurrency = opIncomeInstrument?.shortTitle
+  const outcomeCurrency = outcomeInstrument?.shortTitle
+  const opOutcomeCurrency = opOutcomeInstrument?.shortTitle
+
+  // TODO: вызывает постоянные ререндеры, т.к. каждый раз новый объект.
+  //       можно попробовать подключать теги уже на месте в <MainLine/>
+  const tag = useSelector(state => {
+    if (tr?.tag?.length) return tr.tag.map(id => getPopulatedTag(state, id))
+    else return null
+  })
+
   const handleOpen = () => onClick(id)
-  const handlePayeeClick = () => onFilterByPayee(payee)
+  const handlePayeeClick = e => {
+    e.preventDefault()
+    e.stopPropagation()
+    onFilterByPayee(payee)
+  }
   const handleSelectSimilar = () => onSelectChanged(changed)
 
   const symbol = tag ? tag[0].symbol : type === 'transfer' ? '→' : '?'
@@ -155,25 +188,19 @@ export default function Transaction({
   )
 }
 
-const QRLabel = () => {
-  const Label = withStyles(theme => ({
-    root: { marginRight: theme.spacing(1) },
-  }))(Typography)
-  return (
-    // eslint-disable-next-line jsx-a11y/accessible-emoji
-    <Label variant="body2" component="span" role="img" aria-label="чек">
-      🧾
-    </Label>
-  )
-}
+const Label = withStyles(theme => ({
+  root: { marginRight: theme.spacing(1) },
+}))(Typography)
 
-const DeletedLabel = () => {
-  const Label = withStyles(theme => ({
-    root: { marginRight: theme.spacing(1) },
-  }))(Typography)
-  return (
-    <Label color="error" variant="body2" component="span">
-      Удалена
-    </Label>
-  )
-}
+const QRLabel = () => (
+  // eslint-disable-next-line jsx-a11y/accessible-emoji
+  <Label variant="body2" component="span" role="img" aria-label="чек">
+    🧾
+  </Label>
+)
+
+const DeletedLabel = () => (
+  <Label color="error" variant="body2" component="span">
+    Удалена
+  </Label>
+)

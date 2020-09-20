@@ -5,7 +5,7 @@ import { DatePicker } from '@material-ui/pickers'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { withStyles } from '@material-ui/core/styles'
 import { Box, ListSubheader } from '@material-ui/core'
-import Transaction from './TransactionContainer'
+import Transaction from './Transaction'
 import { formatDate } from 'helpers/format'
 
 const HEADER_HEIGHT = 48
@@ -30,6 +30,7 @@ export function GrouppedList({
   checked,
   toggleTransaction,
   checkByChangedDate,
+  onFilterByPayee,
 }) {
   const listRef = useRef(null)
   const [clickedDate, setClickedDate] = useState(null)
@@ -95,6 +96,7 @@ export function GrouppedList({
                     onToggle={() => toggleTransaction(id)}
                     onClick={() => setOpened && setOpened(id)}
                     onSelectChanged={checkByChangedDate}
+                    onFilterByPayee={onFilterByPayee}
                   />
                 ))}
               </Box>
