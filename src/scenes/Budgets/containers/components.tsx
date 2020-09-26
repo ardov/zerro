@@ -5,6 +5,17 @@ import { Tooltip } from 'components/Tooltip'
 
 const decStyle = { opacity: 0.5 }
 
+type AmountProps = {
+  value: number
+  currency?: string
+  sign?: boolean
+  noShade?: boolean
+  decimals?: number
+  decMode?: 'always' | 'ifOnly' | 'ifAny'
+  intProps?: any
+  decProps?: any
+}
+
 export function Amount({
   value = 0,
   currency,
@@ -14,7 +25,7 @@ export function Amount({
   decMode = 'always',
   intProps,
   decProps,
-}) {
+}: AmountProps) {
   let dec = decimals
   if (decMode === 'always') dec = decimals
   else if (decMode === 'ifOnly')
@@ -37,26 +48,36 @@ export function Amount({
       </>
     )
   }
-  return str
+  return <>{str}</>
+}
+
+type TotalProps = {
+  name: string
+  value: number
+  align?: 'center' | 'right' | 'left'
+  currency?: string
+  sign?: boolean
+  [x: string]: any
 }
 
 export function Total({
+  align = 'center',
   name = '',
   value = 0,
   currency,
   sign = false,
   ...rest
-}) {
+}: TotalProps) {
   return (
     <Box {...rest}>
       <Typography
-        align="center"
+        align={align}
         variant="body2"
         color="textSecondary"
         children={name}
       />
       <Typography
-        align="center"
+        align={align}
         variant="h5"
         color={value ? 'textPrimary' : 'textSecondary'}
       >
@@ -66,7 +87,21 @@ export function Total({
   )
 }
 
-export function Line({ name, amount, description, currency, ...rest }) {
+type LineProps = {
+  name: string
+  amount: number
+  description: string
+  currency?: string
+  [x: string]: any
+}
+
+export function Line({
+  name,
+  amount,
+  description,
+  currency,
+  ...rest
+}: LineProps) {
   return (
     <Box display="flex" flexDirection="row" {...rest}>
       <Box flexGrow="1" mr={1} minWidth={0}>
