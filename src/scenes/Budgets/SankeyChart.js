@@ -13,6 +13,7 @@ import {
 } from 'recharts'
 import { formatMoney } from 'helpers/format'
 import { useTheme } from '@material-ui/core'
+import { round } from 'helpers/currencyHelpers'
 
 export function SankeyChart(props) {
   const theme = useTheme()
@@ -31,7 +32,9 @@ export function SankeyChart(props) {
   links.push({
     source: nodes.length - 1,
     target: budgetId,
-    value: monthTotals.funds - monthTotals.income + monthTotals.available,
+    value: round(
+      monthTotals.funds - monthTotals.income + monthTotals.available
+    ),
   })
 
   if (monthTotals.budgetedInFuture) {
