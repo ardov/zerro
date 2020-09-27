@@ -14,7 +14,7 @@ const hover = {
   light: `rgba(0, 0, 0, ${hoverOpacity})`,
 }
 
-export function createTheme(type = 'light') {
+export function createTheme(type: 'light' | 'dark' = 'light') {
   const theme = createMuiTheme({
     palette: {
       primary: { main: primary[type] },
