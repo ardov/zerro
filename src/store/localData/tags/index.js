@@ -3,8 +3,6 @@ import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
 import { convertToSyncArray } from 'helpers/converters'
 import { compareTags } from 'store/localData/hiddenData/tagOrder'
 import populateTags from './populateTags'
-// import { getTagsTree } from './getTagsTree'
-// import { getRawTagOrder } from '../hiddenData'
 
 // INITIAL STATE
 const initialState = {}
