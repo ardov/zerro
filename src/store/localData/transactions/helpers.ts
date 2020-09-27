@@ -4,11 +4,10 @@ import startOfWeek from 'date-fns/startOfWeek'
 import { AccountId, Tag, TagId, Transaction, TransactionId } from 'types'
 
 type TransactionType = 'income' | 'outcome' | 'transfer'
-type CompareType = 'greaterOrEqual' | 'lessOrEqual'
 
 interface FilerConditions {
   search?: null | string
-  type?: TransactionType | null
+  type?: null | TransactionType
   showDeleted?: boolean
   dateFrom?: null | number | Date
   dateTo?: null | number | Date
@@ -60,52 +59,35 @@ const checkTags = (tr: Transaction, tags?: FilerConditions['tags']) => {
   return result
 }
 
-const checkAmount: (
+const checkAmount = (
   tr: Transaction,
   amount?: FilerConditions['amountFrom'],
-  compareType?: CompareType
-) => boolean = (tr, amount, compareType = 'lessOrEqual') => {
+  compareType: 'greaterOrEqual' | 'lessOrEqual' = 'lessOrEqual'
+) => {
   if (!amount) return true
   const trAmount = getType(tr) === 'income' ? tr.income : tr.outcome
   return compareType === 'lessOrEqual' ? trAmount <= amount : trAmount >= amount
 }
 
-const checkRaw = (conditions: FilerConditions) => (tr: Transaction) => {
+const checkRaw = (conditions?: FilerConditions) => (tr: Transaction) => {
   if (!conditions) return true
-  const {
-    search,
-    type,
-    showDeleted,
-    tags,
-    accounts,
-    dateFrom,
-    dateTo,
-    amountFrom,
-    amountTo,
-  } = conditions
-
   return (
-    checkType(tr, type) &&
-    checkSearch(tr, search) &&
-    checkDeleted(tr, showDeleted) &&
-    checkDate(tr, dateFrom, dateTo) &&
-    checkTags(tr, tags) &&
-    checkAccounts(tr, accounts) &&
-    checkAmount(tr, amountFrom, 'greaterOrEqual') &&
-    checkAmount(tr, amountTo, 'lessOrEqual')
+    checkType(tr, conditions.type) &&
+    checkSearch(tr, conditions.search) &&
+    checkDeleted(tr, conditions.showDeleted) &&
+    checkDate(tr, conditions.dateFrom, conditions.dateTo) &&
+    checkTags(tr, conditions.tags) &&
+    checkAccounts(tr, conditions.accounts) &&
+    checkAmount(tr, conditions.amountFrom, 'greaterOrEqual') &&
+    checkAmount(tr, conditions.amountTo, 'lessOrEqual')
   )
 }
 
-type GroupType = 'DAY' | 'WEEK' | 'MONTH'
-
 /**
  * Groups array of transactions
- * @param {String: groupType} DAY | WEEK | MONTH
- * @param {Array: arr} Array of Transaction
- * @return {Array} of objects {date, transactions}
  */
 export function groupTransactionsBy(
-  groupType: GroupType = 'DAY',
+  groupType: 'DAY' | 'WEEK' | 'MONTH' = 'DAY',
   arr: Transaction[] = [],
   filterConditions: FilerConditions = {}
 ) {
