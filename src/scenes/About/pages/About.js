@@ -119,7 +119,7 @@ export function About() {
         <li>
           Исходный код открыт и{' '}
           <a
-            href="https://github.com/Alexeyun1k/zerro"
+            href="https://github.com/ardov/zerro"
             target="_blank"
             rel="noopener noreferrer"
           >
