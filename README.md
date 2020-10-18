@@ -16,6 +16,11 @@
 3. Запускаем `yarn start` и идём на [http://localhost:3000](http://localhost:3000/)
 4. Вы великолепны
 
+## Запуск локально в docker
+
+1. `docker build -t zerro:dev .`
+2. `docker run -it -d --rm -v ${PWD}:/app -v /app/node_modules -p 3000:3000 -e CHOKIDAR_USEPOLLING=true zerro:dev`
+
 ## Выкладка на сервер
 
 1. Получаем `Consumer Key` и `Consumer Secret` на [http://developers.zenmoney.ru](http://developers.zenmoney.ru/)
