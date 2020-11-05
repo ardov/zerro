@@ -40,7 +40,7 @@ const useStyles = makeStyles(theme => ({
     display: 'grid',
     padding: theme.spacing(3),
     gap: `${theme.spacing(3)}px`,
-    gridTemplateColumns: '1fr 1fr 1fr',
+    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
     gridTemplateAreas: `
       'month-select   goals     to-be-budgeted'
       'tags           tags      tags'

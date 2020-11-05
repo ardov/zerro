@@ -5,6 +5,8 @@ import {
   Link,
   IconButton,
   useMediaQuery,
+  ButtonBase,
+  withStyles,
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import { makeStyles } from '@material-ui/styles'
@@ -13,7 +15,6 @@ import { formatMoney } from 'helpers/format'
 import WarningIcon from '@material-ui/icons/Warning'
 import AddIcon from '@material-ui/icons/Add'
 import EmojiFlagsIcon from '@material-ui/icons/EmojiFlags'
-import NamePopover from './NamePopover'
 import { goalToWords } from 'store/localData/hiddenData/goals/helpers'
 import GoalProgress from 'components/GoalProgress'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
@@ -102,7 +103,6 @@ export function TagRow(props) {
   )
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
   const c = useStyles({ isChild, isDragging })
-  const [nameAnchorEl, setNameAnchorEl] = React.useState(null)
 
   if (
     !showOutcome &&
@@ -124,7 +124,6 @@ export function TagRow(props) {
         colorRGB={colorRGB}
         name={name}
         onOpenDetails={() => openDetails(id)}
-        onEditName={e => setNameAnchorEl(e.currentTarget)}
       />
 
       {(metric === 'budgeted' || !isMobile) && (
@@ -167,41 +166,34 @@ export function TagRow(props) {
   if (dragMode === 'REORDER') return renderContent()
 
   return (
-    <>
-      <Droppable
-        droppableId={id || 'null'}
-        type="FUNDS"
-        isDropDisabled={isUnsorted}
-      >
-        {renderContent}
-      </Droppable>
-
-      {!!nameAnchorEl && (
-        <NamePopover
-          tag={id}
-          anchorEl={nameAnchorEl}
-          open={!!nameAnchorEl}
-          style={{ transform: 'translate(-14px, -18px)' }}
-          onClose={() => setNameAnchorEl(null)}
-        />
-      )}
-    </>
+    <Droppable
+      droppableId={id || 'null'}
+      type="FUNDS"
+      isDropDisabled={isUnsorted}
+    >
+      {renderContent}
+    </Droppable>
   )
 }
+
+const NameButton = withStyles(theme => ({
+  root: {
+    padding: theme.spacing(0.5),
+    margin: theme.spacing(-0.5),
+    borderRadius: theme.shape.borderRadius,
+    minWidth: '0',
+  },
+}))(ButtonBase)
 
 function NameCell({ symbol, colorRGB, name, onOpenDetails, onEditName }) {
   return (
     <Box display="flex" alignItems="center" minWidth={0}>
-      <EmojiIcon
-        symbol={symbol}
-        mr={1.5}
-        color={colorRGB}
-        flexShrink={0}
-        onClick={onOpenDetails}
-      />
-      <Typography variant="body1" color="textPrimary" noWrap>
-        <span onClick={onEditName}>{name}</span>
-      </Typography>
+      <NameButton onClick={onOpenDetails}>
+        <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} flexShrink={0} />
+        <Typography variant="body1" color="textPrimary" noWrap>
+          {name}
+        </Typography>
+      </NameButton>
     </Box>
   )
 }

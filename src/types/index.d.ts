@@ -3,7 +3,7 @@ export type Modify<T, R> = Omit<T, keyof R> & R
 export type UserId = number
 export type InstrumentId = number
 export type CompanyId = number
-export type TagId = string
+export type TagId = string | null
 export type MerchantId = string
 export type ReminderId = string
 export type ReminderMarkerId = string
@@ -12,6 +12,17 @@ export type AccountId = string
 
 export type TransactionType = 'transfer' | 'income' | 'outcome'
 export type GoalType = 'monthly' | 'monthlySpend' | 'targetBalance'
+export type ObjectClass =
+  | 'instrument'
+  | 'company'
+  | 'user'
+  | 'account'
+  | 'tag'
+  | 'merchant'
+  | 'budget'
+  | 'reminder'
+  | 'reminderMarker'
+  | 'transaction'
 
 export interface Instrument {
   id: InstrumentId
@@ -46,7 +57,7 @@ export interface Account {
   id: AccountId
   changed: number
   role: number | null
-  company: number | null
+  company: CompanyId | null
   type: 'cash' | 'ccard' | 'checking' | 'loan' | 'deposit' | 'emoney' | 'debt'
   syncID: string[] | null
 
@@ -198,3 +209,29 @@ export interface Goal {
   end?: number
 }
 export interface ZmGoal extends Modify<Goal, { end?: string }> {}
+
+interface ZmDeletionObject {
+  id: string
+  object: ObjectClass
+  stamp: number
+  user: number
+}
+export interface ZmDiffObject {
+  currentClientTimestamp: number //Unix timestamp
+  serverTimestamp: number //Unix timestamp
+
+  forceFetch?: ObjectClass[]
+
+  instrument?: Instrument[]
+  company?: Company[]
+  user?: User[]
+  account?: Account[]
+  tag?: Tag[]
+  merchant?: Merchant[]
+  budget?: Budget[]
+  reminder?: Reminder[]
+  reminderMarker?: ReminderMarker[]
+  transaction?: Transaction[]
+
+  deletion?: ZmDeletionObject[]
+}
