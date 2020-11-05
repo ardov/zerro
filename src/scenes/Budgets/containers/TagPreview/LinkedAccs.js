@@ -8,6 +8,7 @@ import {
   Menu,
   MenuItem,
   makeStyles,
+  Button,
 } from '@material-ui/core'
 import AddIcon from '@material-ui/icons/Add'
 import {
@@ -16,6 +17,7 @@ import {
 } from 'store/localData/hiddenData/accTagMap'
 import { getAccounts, getSavingAccounts } from 'store/localData/accounts'
 import CloseIcon from '@material-ui/icons/Close'
+import { Tooltip } from 'components/Tooltip'
 
 const useStyles = makeStyles(({ shape, spacing, palette, breakpoints }) => ({
   chipContainer: {
@@ -46,52 +48,61 @@ export function LinkedAccs({ id }) {
   const handleClick = event => setAnchorEl(event.currentTarget)
   const handleClose = () => setAnchorEl(null)
 
-  const accsToAdd = savingAccs.filter(
-    acc => linkedAccs && !linkedAccs.includes(acc.id)
-  )
-
-  if (!linkedAccs) return null
+  const accsToAdd = savingAccs.filter(acc => {
+    if (!linkedAccs) return true
+    else return !linkedAccs.includes(acc.id)
+  })
 
   return (
     <>
-      <Box className={c.bg}>
-        <Box mb={1}>
-          <Typography variant="body2" noWrap>
-            Привязанные счета
-          </Typography>
+      {linkedAccs ? (
+        <Box className={c.bg}>
+          <Box mb={1}>
+            <Typography variant="body2" noWrap>
+              Привязанные счета
+            </Typography>
+          </Box>
+          <div className={c.chipContainer}>
+            {linkedAccs.map(accId => (
+              <Chip
+                key={accId}
+                className={c.chip}
+                label={accounts[accId].title}
+                deleteIcon={<CloseIcon />}
+                onDelete={() => removeConnection(accId)}
+              />
+            ))}
+            <IconButton
+              className={c.addButton + ' addButton'}
+              onClick={handleClick}
+              size="small"
+            >
+              <AddIcon fontSize="inherit" />
+            </IconButton>
+          </div>
         </Box>
-        <div className={c.chipContainer}>
-          {linkedAccs.map(accId => (
-            <Chip
-              key={accId}
-              className={c.chip}
-              label={accounts[accId].title}
-              deleteIcon={<CloseIcon />}
-              onDelete={() => removeConnection(accId)}
-            />
-          ))}
-          <IconButton
-            className={c.addButton + ' addButton'}
-            onClick={handleClick}
-            size="small"
-          >
-            <AddIcon fontSize="inherit" />
-          </IconButton>
-        </div>
-      </Box>
+      ) : (
+        <Tooltip title="К категории можно привязать внебалансовый счёт, тогда все переводы на него будут считаться, как расход по этой категории. Это удобно для планирования инвестиций или погашения кредита.">
+          <Button onClick={handleClick}>Привязать счёт</Button>
+        </Tooltip>
+      )}
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-        {accsToAdd.map(acc => (
-          <MenuItem
-            key={acc.id}
-            onClick={() => {
-              handleClose()
-              dispatch(addConnection(acc.id, id))
-            }}
-          >
-            {acc.title}
-          </MenuItem>
-        ))}
+        {accsToAdd.length ? (
+          accsToAdd.map(acc => (
+            <MenuItem
+              key={acc.id}
+              onClick={() => {
+                handleClose()
+                dispatch(addConnection(acc.id, id))
+              }}
+            >
+              {acc.title}
+            </MenuItem>
+          ))
+        ) : (
+          <MenuItem onClick={handleClose}>Нет счетов для добавления</MenuItem>
+        )}
       </Menu>
     </>
   )
