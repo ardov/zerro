@@ -4,6 +4,7 @@ import { Box, Popover, TextField } from '@material-ui/core'
 import { getTag } from 'store/localData/tags'
 import { patchTag } from 'store/localData/tags/thunks'
 
+// TODO: сделать редактирование категории
 export function NamePopover({
   title,
   onChange,

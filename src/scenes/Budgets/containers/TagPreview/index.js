@@ -95,7 +95,7 @@ export function TagPreview({ onClose, id }) {
         />
         <TextLine name="Бюджет" amount={isParent ? totalBudgeted : budgeted} />
         <TextLine name="Расход" amount={isParent ? totalOutcome : outcome} />
-        <TextLine name="— Переводы" amount={transferOutcome} />
+        <TextLine name="       Переводы" amount={transferOutcome} />
         <Box my={5}>
           <LinkedAccs id={id} />
         </Box>
