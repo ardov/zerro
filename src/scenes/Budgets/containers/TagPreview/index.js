@@ -13,20 +13,9 @@ import {
   getAmountsByTag,
 } from 'scenes/Budgets/selectors/getAmountsByTag'
 import Rhythm from 'components/Rhythm'
-import { makeStyles } from '@material-ui/styles'
 import { useMonth } from 'scenes/Budgets/useMonth'
 import { LinkedAccs } from './LinkedAccs'
 import { OutcomeWidget } from './OutcomeWidget'
-
-const useStyles = makeStyles(theme => ({
-  base: {
-    display: 'block',
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: theme.palette.background.default,
-    // padding: theme.spacing(2),
-    textAlign: 'left',
-  },
-}))
 
 const Header = ({ tag, onClose, onEdit }) => (
   <Box py={1} px={3} display="flex" alignItems="center">
@@ -44,7 +33,6 @@ const Header = ({ tag, onClose, onEdit }) => (
 )
 
 export function TagPreview({ onClose, id }) {
-  const c = useStyles()
   const [month] = useMonth()
   const tag = useSelector(state => getPopulatedTag(state, id))
   const amounts = useSelector(getAmountsForTag)(month, id)
