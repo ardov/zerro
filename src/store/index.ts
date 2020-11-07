@@ -3,7 +3,6 @@ import ZenApi from 'services/ZenApi'
 
 import localData from './localData'
 import serverData from './serverData'
-import filterConditions from './filterConditions'
 import token from './token'
 import isPending from './isPending'
 import lastSync from './lastSync'
@@ -16,7 +15,6 @@ export const store = configureStore({
     serverData,
     isPending,
     lastSync,
-    filterConditions,
     token,
     message,
     theme,
