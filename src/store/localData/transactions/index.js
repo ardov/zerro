@@ -1,4 +1,4 @@
-import selectors from './selectors'
+import { selectors } from './selectors'
 import { createSlice } from 'redux-starter-kit'
 import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
 import makeTransaction from './makeTransaction'

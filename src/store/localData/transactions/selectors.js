@@ -31,7 +31,7 @@ const getSortedTransactions = createSelector([getTransactions], transactions =>
   Object.values(transactions).sort(sortBy('DATE'))
 )
 
-export default {
+export const selectors = {
   getTransactionsToSync,
   getPopulatedTransactions,
   getTransactions,
