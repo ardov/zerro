@@ -1,4 +1,4 @@
-import { configureStore } from 'redux-starter-kit'
+import { configureStore } from '@reduxjs/toolkit'
 import ZenApi from 'services/ZenApi'
 
 import localData from './localData'
