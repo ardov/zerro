@@ -6,7 +6,6 @@ import serverData from './serverData'
 import token from './token'
 import isPending from './isPending'
 import lastSync from './lastSync'
-import message from './message'
 import theme from './theme'
 
 export const store = configureStore({
@@ -16,7 +15,6 @@ export const store = configureStore({
     isPending,
     lastSync,
     token,
-    message,
     theme,
   },
   preloadedState: { token: ZenApi.getLocalToken() },

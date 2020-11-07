@@ -7,7 +7,6 @@ import Budgets from 'scenes/Budgets'
 import { getLoginState } from 'store/token'
 import RegularSyncHandler from 'components/RegularSyncHandler'
 import CssBaseline from '@material-ui/core/CssBaseline'
-import SnackbarHandler from 'components/SnackbarHandler'
 import Nav from 'components/Navigation'
 import MobileNav from 'components/MobileNav'
 import {
@@ -76,8 +75,6 @@ const PrivateApp = () => {
   return (
     <Box display="flex">
       {isMobile ? <MobileNav /> : <Nav />}
-
-      <SnackbarHandler />
       <RegularSyncHandler />
       <Box minHeight="100vh" flexGrow={1}>
         <ErrorBoundary>
