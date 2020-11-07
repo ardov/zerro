@@ -23,3 +23,5 @@ export const store = configureStore({
   },
   preloadedState: { token: ZenApi.getLocalToken() },
 })
+
+export type RootState = ReturnType<typeof store.getState>
