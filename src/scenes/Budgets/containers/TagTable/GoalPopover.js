@@ -14,8 +14,6 @@ import { getGoals, setGoal } from 'store/localData/hiddenData/goals'
 import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
 import CloseIcon from '@material-ui/icons/Close'
 import MonthSelectPopover from 'scenes/Budgets/MonthSelectPopover'
-import { format } from 'date-fns'
-import ru from 'date-fns/locale/ru'
 import { formatDate } from 'helpers/format'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = GOAL_TYPES
