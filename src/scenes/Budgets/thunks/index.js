@@ -80,8 +80,6 @@ export const setOutcomeBudget = (targetOutcome, month, tagId) => (
   dispatch(setBudget(changed))
 }
 
-export default { setOutcomeBudget }
-
 export const copyPreviousBudget = month => (dispatch, getState) => {
   sendEvent('Budgets: copy previous')
   const state = getState()
