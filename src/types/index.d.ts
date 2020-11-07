@@ -1,6 +1,6 @@
 export type Modify<T, R> = Omit<T, keyof R> & R
 
-export type Token = string | undefined
+export type Token = string | null
 
 export type UserId = number
 export type InstrumentId = number

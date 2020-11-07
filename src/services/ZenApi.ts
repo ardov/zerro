@@ -62,7 +62,7 @@ function checkCode() {
 }
 
 function getLocalToken() {
-  return Cookies.get(TOKEN_KEY) || undefined
+  return Cookies.get(TOKEN_KEY) || null
 }
 
 function getToken() {
