@@ -1,5 +1,5 @@
 import { getPopulatedTransactions } from 'store/localData/transactions'
-import { format } from 'date-fns'
+import { formatDate } from 'helpers/format'
 
 export default function exportCsv(_, getState) {
   const tr = getPopulatedTransactions(getState())
@@ -11,7 +11,7 @@ export default function exportCsv(_, getState) {
   link.setAttribute('href', href)
   link.setAttribute(
     'download',
-    `transactions-${format(Date.now(), 'yyyyMMdd-HHmm')}.csv`
+    `transactions-${formatDate(Date.now(), 'yyyyMMdd-HHmm')}.csv`
   )
   document.body.appendChild(link) // Required for FF
 
@@ -53,8 +53,8 @@ const types = {
 }
 
 const transactionToRowObj = t => ({
-  Дата: format(t.date, 'yyyy-MM-dd'),
-  Создана: format(t.created, 'yyyy-MM-dd HH:mm'),
+  Дата: formatDate(t.date, 'yyyy-MM-dd'),
+  Создана: formatDate(t.created, 'yyyy-MM-dd HH:mm'),
   Тип: types[t.type],
   Категория: t.tag ? t.tag[0].title.replace(',', '') : '',
   'Доп категрии': '',

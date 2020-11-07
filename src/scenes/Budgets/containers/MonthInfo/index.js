@@ -1,8 +1,6 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { formatMoney } from 'helpers/format'
-import { format } from 'date-fns'
-import ru from 'date-fns/locale/ru'
+import { formatDate, formatMoney } from 'helpers/format'
 import { getTotalsByMonth } from '../../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
 import Confirm from 'components/Confirm'
@@ -25,7 +23,7 @@ import { WidgetOutcome } from './WidgetOutcome'
 import { useState } from 'react'
 import { useMonth } from 'scenes/Budgets/useMonth'
 
-const getMonthName = date => format(date, 'LLLL', { locale: ru }).toUpperCase()
+const getMonthName = date => formatDate(date, 'LLLL').toUpperCase()
 
 export default function BudgetInfo({ onClose, ...rest }) {
   const [month] = useMonth()

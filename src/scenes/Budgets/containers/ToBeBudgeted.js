@@ -1,6 +1,6 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
-import { formatMoney } from 'helpers/format'
+import { formatDate, formatMoney } from 'helpers/format'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
 import {
@@ -13,8 +13,6 @@ import {
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import Rhythm from 'components/Rhythm'
-import { format } from 'date-fns'
-import ru from 'date-fns/locale/ru'
 import { useMonth } from '../useMonth'
 import { Amount } from './components'
 
@@ -40,7 +38,7 @@ const useStyles = makeStyles(({ shape, spacing, palette, breakpoints }) => ({
   label: { minWidth: 0 },
 }))
 
-const getMonthName = date => format(date, 'LLL', { locale: ru }).toLowerCase()
+const getMonthName = date => formatDate(date, 'LLL').toLowerCase()
 
 export function ToBeBudgeted({ index, className, small, ...rest }) {
   const [month] = useMonth()

@@ -11,8 +11,7 @@ import {
 } from '@material-ui/core'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
-import { format } from 'date-fns'
-import ru from 'date-fns/locale/ru'
+import { formatDate } from 'helpers/format'
 
 const StyledListItem = withStyles(theme => ({
   root: {
@@ -71,7 +70,7 @@ export default function MonthSelectPopover(props) {
               >
                 <Box textAlign="center" clone>
                   <ListItemText>
-                    {format(month, 'LLL', { locale: ru }).toUpperCase()}
+                    {formatDate(month, 'LLL').toUpperCase()}
                   </ListItemText>
                 </Box>
               </StyledListItem>

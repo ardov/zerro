@@ -16,6 +16,7 @@ import CloseIcon from '@material-ui/icons/Close'
 import MonthSelectPopover from 'scenes/Budgets/MonthSelectPopover'
 import { format } from 'date-fns'
 import ru from 'date-fns/locale/ru'
+import { formatDate } from 'helpers/format'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = GOAL_TYPES
 
@@ -94,7 +95,7 @@ export default function GoalPopover({ id, currency, onClose, ...rest }) {
               <Button onClick={openMonthPopover}>
                 <Typography>
                   {endDate
-                    ? format(endDate, 'LLLL yyyy', { locale: ru }).toUpperCase()
+                    ? formatDate(endDate, 'LLLL yyyy').toUpperCase()
                     : 'Указать дату'}
                 </Typography>
               </Button>
