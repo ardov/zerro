@@ -31,7 +31,7 @@ const getBudgetsByMonthAndTag = createSelector([getBudgets], budgets => {
   return result
 })
 
-export default {
+export const selectors = {
   getBudgetsToSync,
   getBudgetsByMonthAndTag,
   getBudget,

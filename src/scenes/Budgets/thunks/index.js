@@ -1,6 +1,6 @@
 import { getRootUser } from 'store/serverData'
 import { setBudget } from 'store/localData/budgets'
-import selectors from 'store/localData/budgets/selectors'
+import { selectors } from 'store/localData/budgets/selectors'
 import { getPopulatedTag } from 'store/localData/tags'
 import { getAmountsByTag } from '../selectors/getAmountsByTag'
 import sendEvent from 'helpers/sendEvent'
