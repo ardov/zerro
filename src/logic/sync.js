@@ -7,6 +7,7 @@ import { saveDataLocally } from 'logic/localData'
 import { captureError, sendEvent } from 'helpers/tracking'
 import { updateData } from 'store/commonActions'
 import { setSyncData } from 'store/lastSync'
+import { formatDate } from 'helpers/format'
 
 //All syncs with ZM goes through this thunk
 export const syncData = () => (dispatch, getState) => {
@@ -48,7 +49,7 @@ export const syncData = () => (dispatch, getState) => {
       ]
       dispatch(saveDataLocally(changedDomains))
 
-      console.log('✅ Данные обновлены', new Date())
+      console.log(`✅ Данные обновлены ${formatDate(new Date(), 'HH:mm:ss')}`)
     },
     err => {
       dispatch(setPending(false))
