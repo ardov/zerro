@@ -1,6 +1,6 @@
 import { createSelector } from 'redux-starter-kit'
-import { format } from 'date-fns'
 import { convertToSyncArray } from 'helpers/converters'
+import { formatDate } from 'helpers/format'
 
 // Goal data was hidden in budgets for this date
 export const goalBudgetDate = +new Date(2000, 0)
@@ -14,7 +14,7 @@ const getBudgets = createSelector(
 )
 
 const getBudget = (state, tag, month) =>
-  getBudgets(state)[`${tag},${format(month, 'yyyy-MM-dd')}`]
+  getBudgets(state)[`${tag},${formatDate(month, 'yyyy-MM-dd')}`]
 
 const getBudgetsToSync = state => convertToSyncArray(getChangedBudgets(state))
 
@@ -31,7 +31,7 @@ const getBudgetsByMonthAndTag = createSelector([getBudgets], budgets => {
   return result
 })
 
-export default {
+export const selectors = {
   getBudgetsToSync,
   getBudgetsByMonthAndTag,
   getBudget,

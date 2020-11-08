@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
-import { format, endOfMonth } from 'date-fns'
-import ru from 'date-fns/locale/ru'
+import { endOfMonth } from 'date-fns'
 import { getTotalsByMonth } from '../../selectors/getTotalsByMonth'
 import { getAmountsByTag } from '../../selectors/getAmountsByTag'
 import { getUserCurrencyCode } from 'store/serverData'
@@ -18,6 +17,7 @@ import { Line, Amount } from '../components'
 import { getTagsTree } from 'store/localData/tags'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 import { useMonth } from 'scenes/Budgets/useMonth'
+import { formatDate } from 'helpers/format'
 
 const Base = withStyles(theme => ({
   root: {
@@ -50,7 +50,7 @@ export function WidgetIncome(props) {
   const income = useSelector(getTotalsByMonth)?.[month]?.income
   const [opened, setOpened] = useState(false)
   const [selected, setSelected] = useState()
-  const monthName = format(month, 'LLL', { locale: ru }).toLowerCase()
+  const monthName = formatDate(month, 'LLL').toLowerCase()
 
   const incomeData = tags
     .filter(tag => amounts[tag.id]?.totalIncome)

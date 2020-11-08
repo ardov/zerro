@@ -10,7 +10,7 @@ async function getDB() {
   return await openDB(BASE_NAME, VERSION, {
     upgrade: db => db.createObjectStore(STORE_NAME),
     blocked: () => console.log('DB blocked'),
-    blocking: e => e.currentTarget.close(),
+    blocking: () => console.log('This tab blocking update'),
   })
 }
 

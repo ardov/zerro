@@ -1,9 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { logOut } from 'logic/authorization'
-import sendEvent from 'helpers/sendEvent'
+import { captureError, sendEvent } from 'helpers/tracking'
 import ErrorMessage from './ErrorMessage'
-import * as Sentry from '@sentry/browser'
 
 class ErrorBoundary extends React.Component {
   state = { hasError: false }
@@ -12,12 +11,7 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch = (error, errorInfo) => {
     sendEvent(`Error: ${error.message}`)
-    if (process.env.NODE_ENV === 'production') {
-      Sentry.withScope(scope => {
-        scope.setExtras(errorInfo)
-        Sentry.captureException(error)
-      })
-    }
+    captureError(error, errorInfo)
   }
 
   render() {

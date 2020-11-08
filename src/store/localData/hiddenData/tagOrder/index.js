@@ -1,6 +1,6 @@
 import { createSelector } from 'redux-starter-kit'
 import { getRawTagOrder } from '../selectors'
-import sendEvent from 'helpers/sendEvent'
+import { sendEvent } from 'helpers/tracking'
 import { setHiddenData } from '../thunks'
 import { TAG_ORDER } from '../constants'
 import { getTagsTree } from 'store/localData/tags'

@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { format } from 'date-fns'
-import ru from 'date-fns/locale/ru'
 import Reciept from './Reciept'
 import {
   Box,
@@ -21,6 +19,7 @@ import Map from './Map'
 import AmountInput from 'components/AmountInput'
 import TagChip from 'components/TagChip'
 import TagSelect2 from 'components/TagSelect2'
+import { formatDate } from 'helpers/format'
 
 export default function DetailsDrawer({
   id,
@@ -230,11 +229,10 @@ export default function DetailsDrawer({
       </Box>
       <Box p={3}>
         <Typography variant="caption" color="textSecondary">
-          Операция создана &ndash;{' '}
-          {format(created, 'dd MMM yyyy, HH:mm', { locale: ru })}
+          Операция создана &ndash; {formatDate(created, 'dd MMM yyyy, HH:mm')}
           <br />
           Последнее изменение &ndash;{' '}
-          {format(changed, 'dd MMM yyyy, HH:mm', { locale: ru })}
+          {formatDate(changed, 'dd MMM yyyy, HH:mm')}
           <br />
           <Link
             component="button"

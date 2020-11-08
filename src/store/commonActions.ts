@@ -1,8 +1,14 @@
-import { createAction } from 'redux-starter-kit'
+import { createAction } from '@reduxjs/toolkit'
+import { ZmDiffObject } from 'types'
+
+interface DataToUpdate {
+  data: ZmDiffObject
+  syncStartTime?: number
+}
 
 // ACTIONS
 export const wipeData = createAction('data/wipeData')
-export const updateData = createAction('data/updateData')
+export const updateData = createAction<DataToUpdate>('data/updateData')
 
 interface Diff {
   [id: string]: {

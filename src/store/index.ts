@@ -1,13 +1,11 @@
-import { configureStore } from 'redux-starter-kit'
+import { configureStore } from '@reduxjs/toolkit'
 import ZenApi from 'services/ZenApi'
 
 import localData from './localData'
 import serverData from './serverData'
-import filterConditions from './filterConditions'
 import token from './token'
 import isPending from './isPending'
 import lastSync from './lastSync'
-import message from './message'
 import theme from './theme'
 
 export const store = configureStore({
@@ -16,10 +14,10 @@ export const store = configureStore({
     serverData,
     isPending,
     lastSync,
-    filterConditions,
     token,
-    message,
     theme,
   },
   preloadedState: { token: ZenApi.getLocalToken() },
 })
+
+export type RootState = ReturnType<typeof store.getState>

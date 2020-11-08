@@ -1,9 +1,8 @@
 /* eslint-disable jsx-a11y/accessible-emoji */
 import React from 'react'
-import sendEvent from 'helpers/sendEvent'
+import { captureError, sendEvent } from 'helpers/tracking'
 import Cookies from 'cookies-js'
 import storage from 'services/storage'
-import * as Sentry from '@sentry/browser'
 
 const buttonStyle = {
   border: '1px solid #ccc',
@@ -21,12 +20,7 @@ export default class GlobalErrorBoundary extends React.Component {
 
   componentDidCatch = (error, errorInfo) => {
     sendEvent(`GlobalError: ${error.message}`)
-    if (process.env.NODE_ENV === 'production') {
-      Sentry.withScope(scope => {
-        scope.setExtras(errorInfo)
-        Sentry.captureException(error)
-      })
-    }
+    captureError(error, errorInfo)
   }
 
   fullRefresh = () => {

@@ -11,10 +11,9 @@ import {
 } from '@material-ui/core'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
-import { format } from 'date-fns'
-import ru from 'date-fns/locale/ru'
 import { withStyles } from '@material-ui/core/styles'
 import MonthSelectPopover from './MonthSelectPopover'
+import { formatDate } from 'helpers/format'
 
 const MonthButton = withStyles(theme => ({
   root: {
@@ -102,6 +101,6 @@ function getMonthName(month) {
   // const isCurrentYear =
   //   new Date().getFullYear() === new Date(month).getFullYear()
   // const pattern = isCurrentYear ? 'LLLL' : 'LLLL yyyy'
-  // return format(month, pattern, { locale: ru }).toUpperCase()
-  return format(month, 'LLLL', { locale: ru }).toUpperCase()
+  // return formatDate(month, pattern).toUpperCase()
+  return formatDate(month, 'LLLL').toUpperCase()
 }

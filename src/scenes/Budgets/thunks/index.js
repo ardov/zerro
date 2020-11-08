@@ -1,9 +1,9 @@
 import { getRootUser } from 'store/serverData'
 import { setBudget } from 'store/localData/budgets'
-import selectors from 'store/localData/budgets/selectors'
+import { selectors } from 'store/localData/budgets/selectors'
 import { getPopulatedTag } from 'store/localData/tags'
 import { getAmountsByTag } from '../selectors/getAmountsByTag'
-import sendEvent from 'helpers/sendEvent'
+import { sendEvent } from 'helpers/tracking'
 import { makeBudget } from 'store/localData/budgets/makeBudget'
 import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
 import { getTags } from 'store/localData/tags'
@@ -79,8 +79,6 @@ export const setOutcomeBudget = (targetOutcome, month, tagId) => (
   const changed = { ...budget, outcome, changed: Date.now() }
   dispatch(setBudget(changed))
 }
-
-export default { setOutcomeBudget }
 
 export const copyPreviousBudget = month => (dispatch, getState) => {
   sendEvent('Budgets: copy previous')

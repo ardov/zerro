@@ -6,7 +6,6 @@ import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts'
 // import { Tooltip } from 'components/Tooltip'
 // import { getTotalsArray } from 'scenes/Budgets/selectors/getTotalsArray'
 // import { getAmountsByTag } from 'scenes/Budgets/selectors/getAmountsByTag'
-// import { format } from 'date-fns'
 import { getAccountsHistory } from './selectors'
 import { getAccounts, getAccountList } from 'store/localData/accounts'
 import { formatMoney, formatDate } from 'helpers/format'
@@ -22,7 +21,7 @@ export default function Stats() {
   // const tagData = useSelector(getAmountsByTag)
   // const data = rawData.map(obj => ({
   //   ...obj,
-  //   date: format(obj.date, 'MM-yyyy'),
+  //   date: formatDate(obj.date, 'MM-yyyy'),
   // }))
   // console.log(data)
   console.log(accountsHistory)
@@ -152,7 +151,7 @@ const AccHist = ({ id, startDate = 0, endDate, onClick }) => {
             </defs>
             {/* <XAxis
               dataKey="date"
-              tickFormatter={date => format(date, 'dd-MM-yyyy')}
+              tickFormatter={date => formatDate(date, 'dd-MM-yyyy')}
             />
             <YAxis /> */}
             <Tooltip

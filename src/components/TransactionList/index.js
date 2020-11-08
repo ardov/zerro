@@ -6,7 +6,7 @@ import { groupTransactionsBy } from 'store/localData/transactions/helpers'
 import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
-import sendEvent from 'helpers/sendEvent'
+import { sendEvent } from 'helpers/tracking'
 
 export default function TransactionList(props) {
   const {

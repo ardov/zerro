@@ -1,8 +1,11 @@
 export type Modify<T, R> = Omit<T, keyof R> & R
 
+export type Token = string | null
+
 export type UserId = number
 export type InstrumentId = number
 export type CompanyId = number
+export type CountryId = number
 export type TagId = string | null
 export type MerchantId = string
 export type ReminderId = string
@@ -39,7 +42,14 @@ export interface Company {
   title: string
   fullTitle: string
   www: string
-  country: string
+  country: CountryId
+}
+
+export interface Country {
+  id: CountryId
+  title: string
+  currency: InstrumentId
+  domain: string
 }
 
 export interface User {
@@ -210,8 +220,8 @@ export interface Goal {
 }
 export interface ZmGoal extends Modify<Goal, { end?: string }> {}
 
-interface ZmDeletionObject {
-  id: string
+export interface ZmDeletionObject {
+  id: string | number
   object: ObjectClass
   stamp: number
   user: number

@@ -1,4 +1,4 @@
-import { combineReducers } from 'redux-starter-kit'
+import { combineReducers } from '@reduxjs/toolkit'
 
 import tag, { getTagsToSync } from './tags'
 import budget, { getBudgetsToSync } from './budgets'

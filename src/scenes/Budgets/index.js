@@ -1,8 +1,6 @@
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Redirect } from 'react-router-dom'
-import { format } from 'date-fns'
-import ru from 'date-fns/locale/ru'
 import { TagTable } from './containers/TagTable'
 import TransferTable from './containers/TransferTable'
 import MonthInfo from './containers/MonthInfo'
@@ -18,6 +16,7 @@ import { DnDContext } from './containers/DnDContext'
 import { TagPreview } from './containers/TagPreview'
 import { Helmet } from 'react-helmet'
 import { SankeyChart } from './SankeyChart'
+import { formatDate } from 'helpers/format'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
@@ -26,11 +25,11 @@ export default function BudgetsRouter() {
   const maxMonth = monthList[monthList.length - 1]
 
   if (!month)
-    return <Redirect to={`/budget/${format(new Date(), 'yyyy-MM')}`} />
+    return <Redirect to={`/budget/${formatDate(new Date(), 'yyyy-MM')}`} />
   if (month < minMonth)
-    return <Redirect to={`/budget/${format(minMonth, 'yyyy-MM')}`} />
+    return <Redirect to={`/budget/${formatDate(minMonth, 'yyyy-MM')}`} />
   if (month > maxMonth)
-    return <Redirect to={`/budget/${format(maxMonth, 'yyyy-MM')}`} />
+    return <Redirect to={`/budget/${formatDate(maxMonth, 'yyyy-MM')}`} />
   return <Budgets />
 }
 
@@ -91,9 +90,7 @@ function Budgets() {
   return (
     <>
       <Helmet>
-        <title>
-          Бюджет на {format(month, 'LLLL yyyy', { locale: ru })} | Zerro
-        </title>
+        <title>Бюджет на {formatDate(month, 'LLLL yyyy')} | Zerro</title>
         <meta name="description" content="" />
         <link rel="canonical" href="https://zerro.app/budget" />
       </Helmet>

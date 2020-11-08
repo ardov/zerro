@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import startOfMonth from 'date-fns/startOfMonth'
 import parseDate from 'date-fns/parseISO'
-import { format } from 'date-fns'
 import { useParams, useHistory } from 'react-router'
+import { formatDate } from 'helpers/format'
 
 interface Params {
   month?: string
@@ -20,7 +20,7 @@ export function useMonth(): [
     const month =
       parsedMonth === +startOfMonth(parsedMonth) ? parsedMonth : null
     const setMonth = (date: string | number | Date = new Date()) => {
-      const month = format(new Date(date), 'yyyy-MM')
+      const month = formatDate(new Date(date), 'yyyy-MM')
       history.push(`/budget/${month}`)
     }
     return [month, setMonth]

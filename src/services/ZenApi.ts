@@ -11,11 +11,13 @@ const clientId = process.env.REACT_APP_CLIENT_ID
 const clientSecret = process.env.REACT_APP_CLIENT_SECRET
 const redirectUri = process.env.REACT_APP_REDIRECT_URI
 
-const ZenApi = {}
+const ZenApi = { getData, checkCode, getLocalToken, getToken }
+export default ZenApi
 
-ZenApi.getData = async function (
-  token,
-  payload = { serverTimestamp: 0, changed: {} }
+async function getData(
+  token: string,
+  // TODO: добавить тип для payload
+  payload: any = { serverTimestamp: 0, changed: {} }
 ) {
   if (!token) throw Error('No token')
   if (token === 'fakeToken')
@@ -36,6 +38,8 @@ ZenApi.getData = async function (
     },
   }
 
+  if (!diffEndpoint)
+    throw Error('Fill REACT_APP_DIFF_ENDPOINT in your .env file')
   const response = await fetch(diffEndpoint, options)
   const json = await response.json()
   if (json.error) throw Error(JSON.stringify(json.error))
@@ -43,7 +47,7 @@ ZenApi.getData = async function (
   return json
 }
 
-ZenApi.checkCode = function () {
+function checkCode() {
   const parsedUrl = new URL(window.location.href)
   const code = parsedUrl.searchParams.get('code')
   const error = parsedUrl.searchParams.get('error')
@@ -57,17 +61,13 @@ ZenApi.checkCode = function () {
   }
 }
 
-ZenApi.getLocalToken = () => {
-  const token = Cookies.get(TOKEN_KEY)
-  if (token && token !== 'null') return token
-  else return null
+function getLocalToken() {
+  return Cookies.get(TOKEN_KEY) || null
 }
 
-ZenApi.getToken = function () {
+function getToken() {
   /* if a token exists and hasn't expired, re-use it */
-  if (this.getLocalToken()) {
-    return this.getLocalToken()
-  }
+  if (getLocalToken()) return getLocalToken()
 
   /* if no token exists, request access code first */
   openPopupWindow(
@@ -84,19 +84,19 @@ ZenApi.getToken = function () {
     .catch(console.error)
 
   function getAuthorizationCode() {
-    return new Promise((resolve, reject) => {
-      function storageEventHandler(event) {
-        if (event.key === CODE_DATA_KEY) {
+    return new Promise((resolve: (s?: string) => void) => {
+      function storageEventHandler(e: StorageEvent) {
+        if (e.key === CODE_DATA_KEY && e.newValue) {
           window.removeEventListener('storage', storageEventHandler)
           window.localStorage.removeItem(CODE_DATA_KEY)
-          resolve(event.newValue)
+          resolve(e.newValue)
         }
       }
       window.addEventListener('storage', storageEventHandler)
     })
   }
 
-  function getAccessTokenData(authorizationCode) {
+  function getAccessTokenData(authorizationCode: string) {
     return fetch(`${tokenEndpoint}`, {
       method: 'POST',
       body: JSON.stringify({
@@ -110,14 +110,20 @@ ZenApi.getToken = function () {
     }).then(response => response.json())
   }
 
-  function storeAccessTokenData({ access_token, expires_in }) {
+  function storeAccessTokenData({ access_token, expires_in }: any) {
     if (access_token && access_token !== 'null') {
       Cookies.set(TOKEN_KEY, access_token, { expires: expires_in })
       return access_token
     } else return null
   }
 
-  function openPopupWindow(url, title, win, w, h) {
+  function openPopupWindow(
+    url: string,
+    title: string,
+    win: Window,
+    w: number,
+    h: number
+  ) {
     var y = win.top.outerHeight / 2 + win.top.screenY - h / 2
     var x = win.top.outerWidth / 2 + win.top.screenX - w / 2
     return win.open(
@@ -127,5 +133,3 @@ ZenApi.getToken = function () {
     )
   }
 }
-
-export default ZenApi

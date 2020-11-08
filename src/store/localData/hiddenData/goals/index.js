@@ -1,5 +1,5 @@
 import { createSelector } from 'redux-starter-kit'
-import sendEvent from 'helpers/sendEvent'
+import { sendEvent } from 'helpers/tracking'
 import { GOALS } from '../constants'
 import { makeGoal, parseGoal } from './helpers'
 import { getTags } from '../../tags'

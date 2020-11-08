@@ -1,5 +1,5 @@
 import parseDate from 'date-fns/parseISO'
-import { format } from 'date-fns'
+import { formatDate } from './format'
 
 export const convertDatesToMs = item => {
   const copy = Object.assign({}, item)
@@ -17,9 +17,9 @@ export const convertDatesToServerFormat = item => {
   if (copy.changed) copy.changed = Math.round(copy.changed / 1000)
   if (copy.created) copy.created = Math.round(copy.created / 1000)
   if (copy.paidTill) copy.paidTill = Math.round(copy.paidTill / 1000)
-  if (copy.date) copy.date = format(copy.date, 'yyyy-MM-dd')
-  if (copy.startDate) copy.startDate = format(copy.startDate, 'yyyy-MM-dd')
-  if (copy.endDate) copy.endDate = format(copy.endDate, 'yyyy-MM-dd')
+  if (copy.date) copy.date = formatDate(copy.date, 'yyyy-MM-dd')
+  if (copy.startDate) copy.startDate = formatDate(copy.startDate, 'yyyy-MM-dd')
+  if (copy.endDate) copy.endDate = formatDate(copy.endDate, 'yyyy-MM-dd')
   return copy
 }
 

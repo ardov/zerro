@@ -1,7 +1,8 @@
-import { createSlice } from 'redux-starter-kit'
+import { createSlice } from '@reduxjs/toolkit'
+import { RootState } from 'store'
 
-const { reducer, actions, selectors } = createSlice({
-  slice: 'isPending',
+const { reducer, actions } = createSlice({
+  name: 'isPending',
   initialState: false,
   reducers: {
     setPending: (state, action) => !!action.payload,
@@ -15,4 +16,4 @@ export default reducer
 export const { setPending } = actions
 
 // SELECTORS
-export const getPendingState = selectors.getIsPending
+export const getPendingState = (state: RootState) => state.isPending
