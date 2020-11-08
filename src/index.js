@@ -7,7 +7,7 @@ import ruDateLocale from 'date-fns/locale/ru'
 // import 'normalize.css'
 import './index.scss'
 import App from './App'
-import * as serviceWorker from './serviceWorker'
+import * as serviceWorkerRegistration from './serviceWorkerRegistration'
 import { store } from './store'
 import GlobalErrorBoundary from 'components/GlobalErrorBoundary'
 import { initSentry, sendEvent } from 'helpers/tracking'
@@ -39,4 +39,4 @@ const swConfig = {
   },
 }
 
-serviceWorker.register(swConfig)
+serviceWorkerRegistration.register(swConfig)
