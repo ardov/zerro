@@ -29,7 +29,7 @@ const Header = ({ tag, onClose, onEdit }) => (
 )
 
 export function TagPreview({ onClose, id }) {
-  const [month] = useMonth()
+  const [month, setMonth] = useMonth()
   const tag = useSelector(state => getPopulatedTag(state, id))
   const amounts = useSelector(getAmountsForTag)(month, id)
   if (!amounts) return null
@@ -70,7 +70,7 @@ export function TagPreview({ onClose, id }) {
       </Box>
 
       <Rhythm gap={1.5} px={3} mt={3}>
-        <OutcomeWidget tagId={id} month={month} />
+        <OutcomeWidget tagId={id} month={month} setMonth={setMonth} />
         <TextLine
           name="Остаток с прошлого месяца"
           amount={isParent ? totalLeftover : leftover}

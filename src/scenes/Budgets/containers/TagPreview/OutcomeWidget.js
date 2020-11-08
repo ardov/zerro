@@ -21,7 +21,7 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export function OutcomeWidget({ tagId, month, ...rest }) {
+export function OutcomeWidget({ tagId, month, setMonth }) {
   const c = useStyles()
   const [selected, setSelected] = useState(month)
 
@@ -34,14 +34,23 @@ export function OutcomeWidget({ tagId, month, ...rest }) {
 
   const dateRange = getDateRange(dates, 12, month)
 
-  const data = dateRange.map(month => {
-    let dataPoint = tag.parent
-      ? allAmounts[month][tag.parent].children[tagId]
-      : allAmounts[month][tagId]
-    let startingAmount = isParent
-      ? dataPoint.totalAvailable + dataPoint.totalOutcome
-      : dataPoint.available + dataPoint.outcome
-    return { ...dataPoint, date: month, startingAmount }
+  const data = dateRange.map(date => {
+    let tagData = isParent
+      ? allAmounts[date][tagId]
+      : allAmounts[date][tag.parent].children[tagId]
+    let outcome = tagData.totalOutcome ?? tagData.outcome
+    let leftover = tagData.totalLeftover ?? tagData.leftover
+    let budgeted = tagData.totalBudgeted ?? tagData.budgeted
+    let available = tagData.totalAvailable ?? tagData.available
+    let startingAmount = available + outcome
+
+    // Handle positive outcome. It's possible with income transfers
+    if (outcome < 0) {
+      outcome = 0
+      startingAmount = available
+    }
+
+    return { date, outcome, leftover, budgeted, available, startingAmount }
   })
 
   const selectedData = data.find(node => node.date === selected)
@@ -53,24 +62,13 @@ export function OutcomeWidget({ tagId, month, ...rest }) {
   const outcomeColor = theme.palette.info.main
   const budgetLineColor = theme.palette.background.default
   const startingAmountColor = theme.palette.primary.main
-  const outcomeKey = isParent ? 'totalOutcome' : 'outcome'
-  const leftoverKey = isParent ? 'totalLeftover' : 'leftover'
-  const budgetedKey = isParent ? 'totalBudgeted' : 'budgeted'
-  const startingAmountKey = 'startingAmount'
 
   const StartingAmountTooltip = (
     <Rhythm gap={0.5}>
-      <DataLine
-        name="Бюджет в этом месяце"
-        color={startingAmountColor}
-        colorOpacity={0}
-        amount={selectedData?.[budgetedKey]}
-      />
+      <DataLine name="Бюджет в этом месяце" amount={selectedData?.budgeted} />
       <DataLine
         name="Остаток с прошлого месяца"
-        color={startingAmountColor}
-        colorOpacity={0}
-        amount={selectedData?.[leftoverKey]}
+        amount={selectedData?.leftover}
       />
     </Rhythm>
   )
@@ -80,6 +78,11 @@ export function OutcomeWidget({ tagId, month, ...rest }) {
       setSelected(e.activeLabel)
     }
   }
+  const onClick = e => {
+    if (e?.activeLabel && e.activeLabel !== month) {
+      setMonth(e.activeLabel)
+    }
+  }
 
   return (
     <div className={c.base}>
@@ -87,13 +90,13 @@ export function OutcomeWidget({ tagId, month, ...rest }) {
         <DataLine
           name="Расход"
           color={outcomeColor}
-          amount={selectedData?.[outcomeKey]}
+          amount={selectedData?.outcome}
         />
         <DataLine
-          name="Доступно на месяц"
+          name={`Доступно на ${formatDate(selected, 'LLL')}`}
           color={startingAmountColor}
           colorOpacity={0.2}
-          amount={selectedData?.[startingAmountKey]}
+          amount={selectedData?.startingAmount}
           tooltip={StartingAmountTooltip}
         />
       </Rhythm>
@@ -105,20 +108,21 @@ export function OutcomeWidget({ tagId, month, ...rest }) {
             margin={{ top: 8, right: 8, left: 8, bottom: 0 }}
             barGap={0}
             onMouseMove={onMouseMove}
+            onClick={onClick}
             onMouseLeave={() => setSelected(month)}
           >
             <Bar
-              dataKey={startingAmountKey}
+              dataKey="startingAmount"
               fill={startingAmountColor}
               shape={<BudgetBar />}
             />
             <Bar
-              dataKey={outcomeKey}
+              dataKey="outcome"
               fill={outcomeColor}
               shape={<OutcomeBar current={selected} />}
             />
             <Bar
-              dataKey={startingAmountKey}
+              dataKey="startingAmount"
               fill={budgetLineColor}
               shape={<BudgetLine />}
             />
@@ -164,7 +168,7 @@ function DataLine({
   return (
     <Box display="flex" flexDirection="row" {...rest}>
       <Box flexGrow="1" mr={1} minWidth={0} display="flex" alignItems="center">
-        <Dot color={color} colorOpacity={colorOpacity} />
+        {!!color && <Dot color={color} colorOpacity={colorOpacity} />}
         {tooltip ? (
           <Tooltip title={tooltip}>
             <Typography noWrap variant="body2">
@@ -185,6 +189,7 @@ function DataLine({
 }
 
 const BudgetBar = ({ fill, x, y, width, height }) => {
+  if (height <= 0) return null
   return (
     <rect
       rx={4}
@@ -203,15 +208,17 @@ function OutcomeBar(props) {
   const { fill, x, y, width, height, date, current } = props
   return (
     <>
-      <rect
-        rx={4}
-        ry={4}
-        x={x - width}
-        y={y}
-        width={width * 3}
-        height={height}
-        fill={fill}
-      />
+      {height > 0 && (
+        <rect
+          rx={4}
+          ry={4}
+          x={x - width}
+          y={y}
+          width={width * 3}
+          height={height}
+          fill={fill}
+        />
+      )}
       {date === current && (
         <circle
           cx={x - width + (width * 3) / 2}
@@ -225,8 +232,8 @@ function OutcomeBar(props) {
 }
 
 const BudgetLine = props => {
-  const { fill, x, y, width, totalOutcome, startingAmount } = props
-  if (startingAmount >= totalOutcome) return null
+  const { fill, x, y, width, outcome, startingAmount } = props
+  if (startingAmount >= outcome || !outcome) return null
   return (
     <rect x={x - width * 2} y={y} width={width * 3} height={1} fill={fill} />
   )
