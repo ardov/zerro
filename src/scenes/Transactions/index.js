@@ -9,7 +9,7 @@ import {
 } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import TransactionPreview from 'components/TransactionPreview'
-import sendEvent from 'helpers/sendEvent'
+import { sendEvent } from 'helpers/tracking'
 import { Helmet } from 'react-helmet'
 
 const useStyles = makeStyles(theme => ({

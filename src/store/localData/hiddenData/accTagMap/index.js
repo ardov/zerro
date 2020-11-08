@@ -1,5 +1,5 @@
 import { createSelector } from 'redux-starter-kit'
-import sendEvent from 'helpers/sendEvent'
+import { sendEvent } from 'helpers/tracking'
 import { ACC_LINKS } from '../constants'
 import { setHiddenData } from '../thunks'
 import { getTags } from '../../tags'

@@ -1,7 +1,7 @@
 import { getRootUser } from 'store/serverData'
 import { setAccount, getAccounts } from './index'
 
-import sendEvent from 'helpers/sendEvent'
+import { sendEvent } from 'helpers/tracking'
 import { getDataAccountId } from '../hiddenData/selectors'
 import { makeDataAcc } from '../hiddenData/helpers'
 

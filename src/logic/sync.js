@@ -4,8 +4,7 @@ import { getChangedArrays } from 'store/localData'
 import { getToken } from 'store/token'
 import { setPending } from 'store/isPending'
 import { saveDataLocally } from 'logic/localData'
-import sendEvent from 'helpers/sendEvent'
-import * as Sentry from '@sentry/browser'
+import { captureError, sendEvent } from 'helpers/tracking'
 import { updateData } from 'store/commonActions'
 import { setSyncData } from 'store/lastSync'
 
@@ -63,9 +62,7 @@ export const syncData = () => (dispatch, getState) => {
 
       console.warn('Syncing failed', err)
       sendEvent(`Error: ${err.message}`)
-      if (process.env.NODE_ENV === 'production') {
-        Sentry.captureException(err)
-      }
+      captureError(err)
     }
   )
 }

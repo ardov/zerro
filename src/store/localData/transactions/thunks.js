@@ -1,7 +1,7 @@
 import { v1 as uuidv1 } from 'uuid'
 import { getTransaction } from 'store/localData/transactions'
 import { setTransaction } from 'store/localData/transactions'
-import sendEvent from 'helpers/sendEvent'
+import { sendEvent } from 'helpers/tracking'
 
 export const deleteTransactions = ids => (dispatch, getState) => {
   sendEvent('Transaction: delete')

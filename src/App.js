@@ -19,25 +19,17 @@ import { ThemeProvider } from '@material-ui/styles'
 import { createTheme } from 'helpers/createTheme'
 import { getTheme } from 'store/theme'
 import { Helmet } from 'react-helmet'
-
 import { createBrowserHistory } from 'history'
-import reactGA from 'react-ga'
 import ErrorBoundary from 'components/ErrorBoundary'
 import { getLastSyncTime, getRootUserId } from 'store/serverData'
 import Accounts from 'scenes/Accounts'
 import Stats from 'scenes/Stats'
 import About from 'scenes/About'
 import Token from 'scenes/Token'
+import { initTracking, setUserId } from 'helpers/tracking'
 
 const history = createBrowserHistory()
-
-if (process.env.NODE_ENV === 'production') {
-  reactGA.initialize('UA-72832368-2')
-  history.listen(location => {
-    reactGA.set({ page: location.pathname }) // Update the user's current page
-    reactGA.pageview(location.pathname) // Record a pageview for the given page
-  })
-}
+initTracking(history)
 
 export default function App() {
   const isLoggedIn = useSelector(getLoginState)
@@ -45,7 +37,7 @@ export default function App() {
   const theme = createTheme(themeType)
   const userId = useSelector(getRootUserId)
   useEffect(() => {
-    if (userId) reactGA.set({ userId })
+    setUserId(userId)
   }, [userId])
 
   return (

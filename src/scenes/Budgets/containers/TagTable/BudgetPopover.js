@@ -17,7 +17,7 @@ import { setOutcomeBudget } from 'scenes/Budgets/thunks'
 import { getGoals } from 'store/localData/hiddenData/goals'
 import { getGoalProgress } from 'scenes/Budgets/selectors/goalsProgress'
 import { round } from 'helpers/currencyHelpers'
-import sendEvent from 'helpers/sendEvent'
+import { sendEvent } from 'helpers/tracking'
 
 export default function BudgetPopover({ id, month, onClose, ...rest }) {
   const prevMonth = getPrevMonthMs(month)
