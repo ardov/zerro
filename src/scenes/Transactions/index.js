@@ -13,7 +13,12 @@ import { sendEvent } from 'helpers/tracking'
 import { Helmet } from 'react-helmet'
 
 const useStyles = makeStyles(theme => ({
-  drawerWidth: { width: 360 },
+  drawerWidth: {
+    width: 360,
+    [theme.breakpoints.down('xs')]: {
+      width: '100vw',
+    },
+  },
 }))
 
 export default function TransactionsView() {
@@ -58,9 +63,7 @@ export default function TransactionsView() {
         </Box>
 
         <Drawer
-          classes={
-            isMobile ? null : { paper: c.drawerWidth, root: c.drawerWidth }
-          }
+          classes={{ paper: c.drawerWidth, root: c.drawerWidth }}
           variant={isMobile ? 'temporary' : 'persistent'}
           anchor="right"
           open={!isMobile || !!opened}
