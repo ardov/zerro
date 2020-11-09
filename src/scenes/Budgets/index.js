@@ -34,7 +34,12 @@ export default function BudgetsRouter() {
 }
 
 const useStyles = makeStyles(theme => ({
-  drawerWidth: { width: 360 },
+  drawerWidth: {
+    width: 360,
+    [theme.breakpoints.down('xs')]: {
+      width: '100vw',
+    },
+  },
   grid: {
     display: 'grid',
     padding: theme.spacing(3),
@@ -125,9 +130,7 @@ function Budgets() {
           <WarningSign />
 
           <Drawer
-            classes={
-              isMD ? null : { paper: c.drawerWidth, root: c.drawerWidth }
-            }
+            classes={{ paper: c.drawerWidth, root: c.drawerWidth }}
             variant={isMD ? 'temporary' : 'persistent'}
             anchor="right"
             open={drawerVisibility}

@@ -10,9 +10,19 @@ import {
   Grid,
   Typography,
   IconButton,
+  makeStyles,
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@material-ui/icons/Close'
+
+const useStyles = makeStyles(theme => ({
+  drawerWidth: {
+    width: 360,
+    [theme.breakpoints.down('xs')]: {
+      width: '100vw',
+    },
+  },
+}))
 
 export default function FilterDrawer({
   conditions = {},
@@ -21,13 +31,20 @@ export default function FilterDrawer({
   open,
   ...rest
 }) {
+  const c = useStyles()
   const handleTypeChange = e => {
     const value = e.target.value
     setCondition({ type: value || null })
   }
 
   return (
-    <Drawer anchor="right" onClose={onClose} open={open} {...rest}>
+    <Drawer
+      anchor="right"
+      onClose={onClose}
+      open={open}
+      classes={{ paper: c.drawerWidth, root: c.drawerWidth }}
+      {...rest}
+    >
       <Box py={1} px={2} display="flex" alignItems="center">
         <Box flexGrow={1}>
           <Typography variant="h6" noWrap>

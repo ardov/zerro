@@ -35,6 +35,12 @@ export function getCurrencySymbol(currency: string): string {
     .slice(5)
 }
 
+/**
+ * Formats date.
+ * {@link https://date-fns.org/v2.16.1/docs/format|Templates doc}
+ * @param date
+ * @param template
+ */
 export function formatDate(date: number | Date, template?: string): string {
   const opts = { locale: ru }
   if (template) return format(date, template, opts)

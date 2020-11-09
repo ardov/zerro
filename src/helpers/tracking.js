@@ -9,8 +9,6 @@ const {
   REACT_APP_GAID,
 } = process.env
 
-console.log('12', process.env)
-
 const isProduction = NODE_ENV === 'production'
 
 export function initSentry() {
