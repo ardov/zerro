@@ -139,7 +139,7 @@ export const startFresh = month => (dispatch, getState) => {
   const prevAmounts = amounts[prevMonth]
   const currentAmounts = amounts[month]
 
-  const removedBudgets = removeFutureBudgets(budgets, month - 1)
+  const removedBudgets = removeFutureBudgets(budgets, month)
   const resetSavingsArr = clearAvailable(prevMonth, prevAmounts, user)
   const currentMonth = resetCurrentMonth(month, currentAmounts, user)
 
@@ -184,8 +184,8 @@ function clearAvailable(date, amounts, user) {
 
 function resetCurrentMonth(date, amounts, user) {
   const changedArr = []
-  const resetTag = (id, { outcome, budgeted }) => {
-    if (outcome && outcome !== budgeted)
+  const resetTag = (id, { outcome, budgeted, available }) => {
+    if ((budgeted || outcome) && outcome !== budgeted)
       changedArr.push(makeBudget({ user, date, outcome, tag: id }))
   }
 
