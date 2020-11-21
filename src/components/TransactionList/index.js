@@ -30,6 +30,8 @@ export default function TransactionList(props) {
 
   const [checked, setChecked] = useState([])
 
+  const uncheckAll = useCallback(() => setChecked([]), [setChecked])
+
   const toggleTransaction = useCallback(
     id =>
       checked.includes(id)
@@ -53,8 +55,17 @@ export default function TransactionList(props) {
     if (checkedDate) checkByChangedDate(checkedDate)
   }, [checkByChangedDate, checkedDate])
 
+  const showActions = Boolean(checked?.length)
+
   return (
-    <Box display="flex" flexDirection="column" p={1} {...rest}>
+    <Box
+      display="flex"
+      flexDirection="column"
+      px={1}
+      pt={1}
+      position="relative"
+      {...rest}
+    >
       {!hideFilter && (
         <Box
           position="relative"
@@ -66,11 +77,12 @@ export default function TransactionList(props) {
           <Filter conditions={filter} setCondition={setCondition} />
         </Box>
       )}
-      {!!checked.length && (
-        <Box p={2}>
-          <Actions checkedIds={checked} onUncheckAll={() => setChecked([])} />
-        </Box>
-      )}
+
+      <Actions
+        visible={showActions}
+        checkedIds={checked}
+        onUncheckAll={uncheckAll}
+      />
 
       <Box flex="1 1 auto">
         <GrouppedList

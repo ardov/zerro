@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Dialog } from '@material-ui/core'
 import { VariableSizeList as List } from 'react-window'
 import { DatePicker } from '@material-ui/pickers'
@@ -39,10 +39,11 @@ export function GrouppedList({
     if (listRef.current) listRef.current.resetAfterIndex(0)
   }, [listRef, groups])
 
-  const scrollToDate = date => {
-    if (listRef.current)
-      listRef.current.scrollToItem(findDateIndex(groups, date), 'start')
-  }
+  const scrollToDate = useCallback(
+    date =>
+      listRef?.current?.scrollToItem(findDateIndex(groups, date), 'start'),
+    [groups]
+  )
 
   const minDate = groups.length ? groups[groups.length - 1].date : 0
   const maxDate = groups.length ? groups[0].date : 0
@@ -93,8 +94,8 @@ export function GrouppedList({
                     isOpened={id === opened}
                     isChecked={checked.includes(id)}
                     isInSelectionMode={!!checked.length}
-                    onToggle={() => toggleTransaction(id)}
-                    onClick={() => setOpened && setOpened(id)}
+                    onToggle={toggleTransaction}
+                    onClick={setOpened}
                     onSelectChanged={checkByChangedDate}
                     onFilterByPayee={onFilterByPayee}
                   />

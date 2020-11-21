@@ -1,0 +1,20 @@
+.actions-transition-enter {
+  opacity: 0;
+  transform: translateY(16px);
+}
+.actions-transition-enter-done {
+  opacity: 1;
+  transform: translateY(0px);
+  transition: 200ms ease-out;
+  transition-property: opacity, transform;
+}
+.actions-transition-exit {
+  opacity: 1;
+  transform: translateY(0px);
+}
+.actions-transition-exit-done {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: 200ms ease-out;
+  transition-property: opacity, transform;
+}
