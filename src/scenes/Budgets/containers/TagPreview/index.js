@@ -70,7 +70,7 @@ export function TagPreview({ onClose, id }) {
       </Box>
 
       <Rhythm gap={1.5} px={3} mt={3}>
-        <OutcomeWidget tagId={id} month={month} setMonth={setMonth} />
+        <OutcomeWidget tagId={id} month={month} setMonth={setMonth} mx={-1} />
         <TextLine
           name="Остаток с прошлого месяца"
           amount={isParent ? totalLeftover : leftover}

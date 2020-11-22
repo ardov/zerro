@@ -123,7 +123,7 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
         open={!!budgetPopoverData.anchor}
         month={month}
         onClose={() => setBudgetPopoverData({})}
-        style={{ transform: 'translate(-14px, -16px)' }}
+        style={{ transform: 'translate(-10px, -12px)' }}
       />
       <GoalPopover
         key={goalPopoverData.id}
