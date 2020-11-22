@@ -45,40 +45,24 @@ export const applyChangesToTransaction = tr => (dispatch, getState) => {
   )
 }
 
-export const setMainTagToTransactions = (transactions, tagId) => (
+export const setTagsToTransactions = (transactions, tags) => (
   dispatch,
   getState
 ) => {
-  sendEvent('Bulk Actions: set main tag')
+  sendEvent('Bulk Actions: set new tags')
   const state = getState()
   const result = transactions.map(id => {
     const tr = getTransaction(state, id)
-    const newTags = tr.tag ? [tagId, ...tr.tag.splice(1)] : [tagId]
-    return {
-      ...tr,
-      tag: newTags,
-      changed: Date.now(),
-    }
+    const newTags = []
+    const addId = id => (newTags.includes(id) ? '' : newTags.push(id))
+    tags?.forEach(id => {
+      if (id === 'mixed' && tr.tag) tr.tag.forEach(addId)
+      else addId(id)
+    })
+    return { ...tr, tag: newTags, changed: Date.now() }
   })
   dispatch(setTransaction(result))
 }
-
-// function setTags(raw, tags) {
-//   return {
-//     ...raw,
-//     tag: tags,
-//     changed: Math.floor(Date.now() / 1000)
-//   }
-// }
-
-// function addMainTag(raw, tag) {
-//   const newTags = raw.tag ? [tag, ...raw.tag] : [tag]
-//   return {
-//     ...raw,
-//     tag: newTags,
-//     changed: Math.floor(Date.now() / 1000)
-//   }
-// }
 
 function split(raw) {
   if (!(raw.income && raw.outcome)) return null

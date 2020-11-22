@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import './transitions.css'
-import { useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import IconButton from '@material-ui/core/IconButton'
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline'
 import LocalOfferOutlinedIcon from '@material-ui/icons/LocalOfferOutlined'
@@ -11,10 +11,14 @@ import pluralize from 'helpers/pluralize'
 import Confirm from 'components/Confirm'
 import TagSelect2 from 'components/TagSelect2'
 import {
-  setMainTagToTransactions,
   deleteTransactions,
+  setTagsToTransactions,
 } from 'store/localData/transactions/thunks'
 import { CSSTransition } from 'react-transition-group'
+import { EditOutlined } from '@material-ui/icons'
+import BulkEditModal from './BulkEditModal'
+import { getType } from 'store/localData/transactions/helpers'
+import { getTransactions } from 'store/localData/transactions'
 
 export default function Actions({
   visible,
@@ -23,10 +27,15 @@ export default function Actions({
   onDelete,
 }) {
   const dispatch = useDispatch()
+  const allTransactions = useSelector(getTransactions)
+  const transactions = checkedIds?.map(id => allTransactions[id])
+  const actions = getAvailableActions(transactions)
   const length = checkedIds.length
 
+  const [editVisible, setEditVisible] = useState(false)
+
   const handleSetTag = id => {
-    dispatch(setMainTagToTransactions(checkedIds, id))
+    dispatch(setTagsToTransactions(checkedIds, [id]))
     onUncheckAll()
   }
 
@@ -47,50 +56,84 @@ export default function Actions({
   ])}?`
 
   return (
-    <Box
-      position="absolute"
-      bottom={16}
-      left="50%"
-      style={{ transform: 'translateX(-50%)' }}
-      zIndex={1000}
-    >
-      <CSSTransition
-        mountOnEnter
-        in={visible}
-        timeout={0}
-        classNames="actions-transition"
+    <>
+      <BulkEditModal
+        ids={checkedIds}
+        onClose={() => setEditVisible(false)}
+        open={editVisible}
+      />
+
+      <Box
+        position="absolute"
+        bottom={16}
+        left="50%"
+        style={{ transform: 'translateX(-50%)' }}
+        zIndex={1000}
       >
-        <Box
-          display="flex"
-          alignItems="center"
-          paddingLeft={1}
-          bgcolor="info.main"
-          boxShadow="4"
-          borderRadius="60px"
+        <CSSTransition
+          mountOnEnter
+          in={visible}
+          timeout={0}
+          classNames="actions-transition"
         >
-          <Chip label={chipText} onDelete={onUncheckAll} variant="outlined" />
-
-          <Confirm
-            title={deleteText}
-            onOk={handleDelete}
-            okText="Удалить"
-            cancelText="Оставить"
+          <Box
+            display="flex"
+            alignItems="center"
+            paddingLeft={1}
+            bgcolor="info.main"
+            boxShadow="4"
+            borderRadius="60px"
           >
-            <Tooltip title="Удалить выбранные">
-              <IconButton children={<DeleteOutlineIcon />} />
-            </Tooltip>
-          </Confirm>
+            <Chip label={chipText} onDelete={onUncheckAll} variant="outlined" />
 
-          <TagSelect2
-            onChange={handleSetTag}
-            trigger={
-              <Tooltip title="Выставить категорию">
-                <IconButton children={<LocalOfferOutlinedIcon />} />
+            <Confirm
+              title={deleteText}
+              onOk={handleDelete}
+              okText="Удалить"
+              cancelText="Оставить"
+            >
+              <Tooltip title="Удалить выбранные">
+                <IconButton children={<DeleteOutlineIcon />} />
               </Tooltip>
-            }
-          />
-        </Box>
-      </CSSTransition>
-    </Box>
+            </Confirm>
+
+            {actions.setMainTag && (
+              <TagSelect2
+                onChange={handleSetTag}
+                trigger={
+                  <Tooltip title="Выставить категорию">
+                    <IconButton children={<LocalOfferOutlinedIcon />} />
+                  </Tooltip>
+                }
+              />
+            )}
+
+            {actions.bulkEdit && (
+              <Tooltip title="Редактировать">
+                <IconButton
+                  children={<EditOutlined />}
+                  onClick={() => setEditVisible(true)}
+                />
+              </Tooltip>
+            )}
+          </Box>
+        </CSSTransition>
+      </Box>
+    </>
   )
+}
+
+function getAvailableActions(transactions) {
+  const { income, outcome, transfer } = getTypes(transactions)
+  return {
+    delete: true,
+    setMainTag: !transfer,
+    bulkEdit: !transfer,
+  }
+}
+
+function getTypes(list = []) {
+  let res = { income: 0, outcome: 0, transfer: 0 }
+  list?.forEach(tr => res[getType(tr)]++)
+  return res
 }

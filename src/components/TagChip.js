@@ -12,6 +12,7 @@ function getTagLabel(state, id) {
 }
 
 export default function TagChip({ id, ...rest }) {
-  const label = useSelector(state => getTagLabel(state, id))
+  let label = useSelector(state => getTagLabel(state, id))
+  if (id === 'mixed') label = 'Разные категории'
   return <Chip deleteIcon={<CloseIcon />} label={label} {...rest} />
 }
