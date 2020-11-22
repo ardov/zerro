@@ -1,24 +1,24 @@
 import React from 'react'
-import { Box, useTheme } from '@material-ui/core'
+import { Box, makeStyles } from '@material-ui/core'
 
-const directions = {
-  x: 'column',
-  y: 'row',
-}
+const useStyles = makeStyles(theme => ({
+  y: {
+    display: 'flex',
+    flexDirection: 'column',
+    '& > * + *': { marginTop: ({ gap }) => theme.spacing(gap) },
+  },
+  x: {
+    display: 'flex',
+    flexDirection: 'row',
+    '& > * + *': { marginLeft: ({ gap }) => theme.spacing(gap) },
+  },
+}))
 
 export default function Rhythm({ gap = 0, axis = 'y', children, ...rest }) {
-  const theme = useTheme()
-  const spacing = theme.spacing(gap)
-  const makeStyles = (spacing, axis) => {
-    const style = { display: 'grid' }
-    if (axis === 'y' && spacing) style.gridRowGap = spacing
-    if (axis === 'x' && spacing) style.gridColumnGap = spacing
-    style.gridAutoFlow = directions[axis]
-    return style
-  }
-
+  const classes = useStyles({ gap })
+  if (!rest) console.log(123)
   return (
-    <Box style={makeStyles(spacing, axis)} {...rest}>
+    <Box className={classes[axis]} {...rest}>
       {children}
     </Box>
   )

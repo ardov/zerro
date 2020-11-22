@@ -92,7 +92,7 @@ export default function Transaction({
     else return null
   })
 
-  const handleOpen = () => onClick(id)
+  const handleOpen = () => onClick && onClick(id)
   const handlePayeeClick = e => {
     e.preventDefault()
     e.stopPropagation()
@@ -122,7 +122,7 @@ export default function Transaction({
           symbol={symbol}
           showCheckBox={isInSelectionMode}
           checked={isChecked}
-          onChange={onToggle}
+          onChange={() => onToggle(id)}
           color={color}
           size="m"
         />
