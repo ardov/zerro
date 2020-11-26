@@ -35,13 +35,7 @@ export function About() {
       <ExampleBox symbol="🖤">
         <p>
           Zerro — бесплатное, но вы всегда можете{' '}
-          <a
-            href="https://money.yandex.ru/to/4100110993756505"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            купить мне кофе
-          </a>
+          <Link to="/donation">купить мне кофе</Link>
           .
           <br />
           <Muted>Обязательно напишите, что вам понравилось</Muted>

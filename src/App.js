@@ -26,6 +26,7 @@ import Accounts from 'scenes/Accounts'
 import Stats from 'scenes/Stats'
 import About from 'scenes/About'
 import Token from 'scenes/Token'
+import Donation from 'scenes/Donation'
 import { initTracking, setUserId } from 'helpers/tracking'
 
 const history = createBrowserHistory()
@@ -78,6 +79,7 @@ const PrivateApp = () => {
               <Route path="/budget" component={Budgets} />
               <Route path="/stats" component={Stats} />
               <Route path="/token" component={Token} />
+              <Route path="/donation" component={Donation} />
               <Redirect to="/budget" />
             </Switch>
           ) : (
