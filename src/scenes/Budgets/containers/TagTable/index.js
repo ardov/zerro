@@ -13,11 +13,17 @@ import { useCallback } from 'react'
 import BudgetPopover from './BudgetPopover'
 import { useMonth } from 'scenes/Budgets/useMonth'
 import { DragModeContext } from '../DnDContext'
+import { getTagAccMap } from 'store/localData/hiddenData/accTagMap'
+import { getAccountsInBudget } from 'store/localData/accounts'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
 export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
   const tagsTree = useSelector(getTagsTree)
+  const tagAccMap = useSelector(getTagAccMap)
+  const accountsInBudget = useSelector(state =>
+    getAccountsInBudget(state).map(acc => acc.id)
+  )
   const [month] = useMonth()
   const [selected, setSelected] = useState()
   const [metricIndex, setMetricIndex] = useState(0)
@@ -47,12 +53,32 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
     [metricIndex]
   )
 
-  const filterConditions = {
+  let prefilter = []
+  prefilter.push({
     type: 'outcome',
     dateFrom: month,
     dateTo: endOfMonth(month),
+    accountsFrom: accountsInBudget,
     tags: selected,
-  }
+  })
+  selected?.forEach(tagId => {
+    if (tagAccMap[tagId]) {
+      prefilter.push({
+        type: 'transfer',
+        dateFrom: month,
+        dateTo: endOfMonth(month),
+        accountsFrom: accountsInBudget,
+        accountsTo: tagAccMap[tagId],
+      })
+      prefilter.push({
+        type: 'transfer',
+        dateFrom: month,
+        dateTo: endOfMonth(month),
+        accountsFrom: tagAccMap[tagId],
+        accountsTo: accountsInBudget,
+      })
+    }
+  })
 
   return (
     <>
@@ -112,7 +138,7 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
       </Box>
 
       <TransactionsDrawer
-        filterConditions={filterConditions}
+        prefilter={prefilter}
         open={!!selected}
         onClose={() => setSelected(undefined)}
       />

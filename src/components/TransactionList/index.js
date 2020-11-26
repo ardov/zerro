@@ -2,7 +2,10 @@ import React, { useMemo, useState, useCallback, useEffect } from 'react'
 import { Box } from '@material-ui/core'
 import { useSelector } from 'react-redux'
 import { getSortedTransactions } from 'store/localData/transactions'
-import { groupTransactionsBy } from 'store/localData/transactions/helpers'
+import {
+  checkRaw,
+  groupTransactionsBy,
+} from 'store/localData/transactions/helpers'
 import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
@@ -10,7 +13,8 @@ import { sendEvent } from 'helpers/tracking'
 
 export default function TransactionList(props) {
   const {
-    filterConditions = {},
+    prefilter,
+    filterConditions,
     hideFilter = false,
     opened,
     checkedDate,
@@ -23,10 +27,16 @@ export default function TransactionList(props) {
   const setCondition = condition => setFilter({ ...filter, ...condition })
   const onFilterByPayee = payee => setFilter({ search: payee })
 
-  const groups = useMemo(
-    () => groupTransactionsBy('DAY', transactions, filter),
-    [transactions, filter]
-  )
+  const groups = useMemo(() => {
+    if (prefilter) {
+      return groupTransactionsBy(
+        'DAY',
+        transactions.filter(checkRaw(prefilter)),
+        filter
+      )
+    }
+    return groupTransactionsBy('DAY', transactions, filter)
+  }, [transactions, filter, prefilter])
 
   const [checked, setChecked] = useState([])
 
