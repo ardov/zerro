@@ -14,7 +14,7 @@ import TransactionsDrawer from 'components/TransactionsDrawer'
 
 export default function Stats() {
   // const rawData = useSelector(getTotalsArray)
-  const accountsHistory = useSelector(getAccountsHistory)
+  // const accountsHistory = useSelector(getAccountsHistory)
   const accs = useSelector(getAccountList)
   const [selected, setSelected] = useState({})
 
@@ -24,7 +24,7 @@ export default function Stats() {
   //   date: formatDate(obj.date, 'MM-yyyy'),
   // }))
   // console.log(data)
-  console.log(accountsHistory)
+  // console.log(accountsHistory)
   // console.log(tagData)
 
   const startDate = +new Date(2019, 0)

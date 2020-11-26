@@ -26,7 +26,7 @@ export const setInBudget = (id, inBalance) => (dispatch, getState) => {
   const state = getState()
   const account = getAccounts(state)[id]
   if (!account) {
-    console.warn('No accoun found')
+    console.warn('No account found')
     return
   }
   const newAcc = { ...account, inBalance: !!inBalance, changed: Date.now() }
