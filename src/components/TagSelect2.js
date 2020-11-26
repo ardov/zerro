@@ -44,12 +44,19 @@ export default function TagSelect({
         onClose={handleClose}
         onTagSelect={handleTagSelect}
         selectedIds={value}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
       />
     </>
   )
 }
 
-function makeTagChecker({ search = '', tagType = null, exclude = [] }) {
+function makeTagChecker({
+  search = '',
+  tagType = null,
+  exclude = [],
+  showNull = false,
+}) {
   const checkSearch = (tag, search) => {
     const includes = (title, search) =>
       title.toUpperCase().includes(search.toUpperCase())
@@ -58,10 +65,10 @@ function makeTagChecker({ search = '', tagType = null, exclude = [] }) {
       tag.children && tag.children.some(child => includes(child.title, search))
     )
   }
-
   return function (tag) {
     // never show excluded tags
     if (exclude?.includes(tag.id)) return false
+    if (!showNull && tag.id === null) return false
     if (search) return checkSearch(tag, search)
     if (tagType === 'income') return tag.showIncome
     if (tagType === 'outcome') return tag.showOutcome
@@ -76,14 +83,21 @@ function TagSelectPopover({
   exclude,
   tagType,
   selectedIds,
+  showNull = false,
   onTagSelect,
   onClose,
+  ...popoverProps
 }) {
   const tags = useSelector(getTagsTree)
   const [search, setSearch] = useState('')
   const [focused, setFocused] = useState(0)
   const [localTagType, setLocalTagType] = useState(tagType)
-  const checkTag = makeTagChecker({ search, tagType: localTagType, exclude })
+  const checkTag = makeTagChecker({
+    search,
+    tagType: localTagType,
+    exclude,
+    showNull,
+  })
 
   let flatList = []
   tags.forEach(tag => {
@@ -132,14 +146,7 @@ function TagSelectPopover({
       open={open}
       anchorEl={anchorEl}
       onClose={onClose}
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'center',
-      }}
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'center',
-      }}
+      {...popoverProps}
     >
       <Box pt={1} px={1} position="sticky" top={0} zIndex={10} clone>
         <Paper square elevation={0}>

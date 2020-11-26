@@ -127,8 +127,8 @@ function getAvailableActions(transactions) {
   const { income, outcome, transfer } = getTypes(transactions)
   return {
     delete: true,
-    setMainTag: !transfer,
-    bulkEdit: !transfer,
+    setMainTag: !transfer && (income || outcome),
+    bulkEdit: !transfer && (income || outcome),
   }
 }
 

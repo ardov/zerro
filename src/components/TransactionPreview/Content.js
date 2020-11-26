@@ -10,16 +10,14 @@ import {
   Link,
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
-import AddIcon from '@material-ui/icons/Add'
 import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash'
 import CloseIcon from '@material-ui/icons/Close'
 import DeleteIcon from '@material-ui/icons/Delete'
 import { DatePicker } from '@material-ui/pickers'
 import Map from './Map'
 import AmountInput from 'components/AmountInput'
-import TagChip from 'components/TagChip'
-import TagSelect2 from 'components/TagSelect2'
 import { formatDate } from 'helpers/format'
+import { TagList } from 'components/TagList'
 
 export default function DetailsDrawer({
   id,
@@ -99,14 +97,6 @@ export default function DetailsDrawer({
       tag: localTag,
     })
 
-  const removeTag = removeId =>
-    setLocalTag(localTag && localTag.filter(id => id !== removeId))
-
-  const replaceTag = (oldId, newId) =>
-    setLocalTag(localTag && localTag.map(id => (id === oldId ? newId : id)))
-
-  const addTag = id => setLocalTag(localTag ? [...localTag, id] : [id])
-
   return (
     <Box minWidth={320} position="relative">
       <Head
@@ -118,38 +108,14 @@ export default function DetailsDrawer({
       />
 
       {type !== 'transfer' && (
-        <Box px={3} py={2} bgcolor="background.default">
-          {localTag &&
-            localTag.map(id => (
-              <TagSelect2
-                key={id}
-                onChange={newId => replaceTag(id, newId)}
-                exclude={localTag}
-                tagType={type}
-                trigger={
-                  <Box mr={1} my={0.5} display="inline-block">
-                    <TagChip id={id} onDelete={() => removeTag(id)} />
-                  </Box>
-                }
-              />
-            ))}
-          <TagSelect2
-            onChange={id => addTag(id)}
-            exclude={localTag}
-            tagType={type}
-            trigger={
-              <Box my={0.5} display="inline-block">
-                <Tooltip title="Добавить категорию">
-                  <IconButton
-                    edge="end"
-                    size="small"
-                    children={<AddIcon fontSize="inherit" />}
-                  />
-                </Tooltip>
-              </Box>
-            }
-          />
-        </Box>
+        <TagList
+          tags={localTag}
+          onChange={setLocalTag}
+          tagType={type}
+          px={3}
+          py={2}
+          bgcolor="background.default"
+        />
       )}
 
       <Box px={3}>

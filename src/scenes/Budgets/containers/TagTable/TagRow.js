@@ -176,24 +176,31 @@ export function TagRow(props) {
   )
 }
 
-const NameButton = withStyles(theme => ({
+const InvisibleButton = withStyles(theme => ({
   root: {
     padding: theme.spacing(0.5),
     margin: theme.spacing(-0.5),
     borderRadius: theme.shape.borderRadius,
     minWidth: '0',
+    transition: '0.1s',
+    '&:hover': {
+      background: theme.palette.action.hover,
+    },
+    '&:focus': {
+      background: theme.palette.action.focus,
+    },
   },
 }))(ButtonBase)
 
 function NameCell({ symbol, colorRGB, name, onOpenDetails, onEditName }) {
   return (
     <Box display="flex" alignItems="center" minWidth={0}>
-      <NameButton onClick={onOpenDetails}>
+      <InvisibleButton onClick={onOpenDetails}>
         <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} flexShrink={0} />
         <Typography variant="body1" color="textPrimary" noWrap>
           {name}
         </Typography>
-      </NameButton>
+      </InvisibleButton>
     </Box>
   )
 }
@@ -206,14 +213,11 @@ function BudgetCell(props) {
       display="flex"
       justifyContent="flex-end"
     >
-      <Link
-        variant="body1"
-        align="right"
-        component="button"
-        onClick={onBudgetClick}
-      >
-        <Amount value={budgeted} decMode="ifOnly" />
-      </Link>
+      <InvisibleButton variant="body1" align="right" onClick={onBudgetClick}>
+        <Typography variant="body1" noWrap>
+          <Amount value={budgeted} decMode="ifOnly" />
+        </Typography>
+      </InvisibleButton>
     </Box>
   ) : (
     <Box display="flex" justifyContent="flex-end">
@@ -241,10 +245,16 @@ function BudgetCell(props) {
 function OutcomeCell(props) {
   const { outcome, onClick } = props
   return (
-    <Box color={outcome ? 'text.primary' : 'text.hint'} clone>
-      <Typography variant="body1" align="right" onClick={onClick}>
-        <Amount value={-outcome} decMode="ifOnly" />
-      </Typography>
+    <Box
+      display="flex"
+      justifyContent="flex-end"
+      color={outcome ? 'text.primary' : 'text.hint'}
+    >
+      <InvisibleButton onClick={onClick}>
+        <Typography variant="body1" align="right">
+          <Amount value={-outcome} decMode="ifOnly" />
+        </Typography>
+      </InvisibleButton>
     </Box>
   )
 }

@@ -12,6 +12,7 @@ import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
 import { Box, Divider, Menu, MenuItem, Typography } from '@material-ui/core'
 import { useHistory } from 'react-router'
+import { Link } from 'react-router-dom'
 
 const useStyles = makeStyles(({ spacing }) => ({
   menuIcon: { marginRight: spacing(1) },
@@ -68,12 +69,7 @@ function SettingsMenu({
         Как пользоваться
       </MenuItem>
 
-      <MenuItem
-        component="a"
-        href="https://money.yandex.ru/to/4100110993756505/200"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+      <MenuItem component={Link} to="/donation">
         <FavoriteBorderIcon className={classes.menuIcon} color="action" />
         Поддержать проект
       </MenuItem>

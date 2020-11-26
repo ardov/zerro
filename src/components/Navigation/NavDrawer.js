@@ -25,6 +25,11 @@ const routes = [
   { path: '/budget', label: 'Бюджет', icon: <AccountBalanceIcon /> },
   { path: '/transactions', label: 'Операции', icon: <SyncAltIcon /> },
   { path: '/about', label: 'Как пользоваться', icon: <HelpOutlineIcon /> },
+  {
+    path: '/donation',
+    label: 'Поддержать проект',
+    icon: <FavoriteBorderIcon />,
+  },
 ]
 
 const useStyles = makeStyles(theme => ({
@@ -59,20 +64,6 @@ export default function NavigationDrawer(props) {
                 <ListItemText primary={route.label} />
               </ListItem>
             ))}
-
-            <ListItem
-              className={c.listItem}
-              button
-              component="a"
-              href="https://money.yandex.ru/to/4100110993756505/200"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <ListItemIcon>
-                <FavoriteBorderIcon />
-              </ListItemIcon>
-              <ListItemText primary="Поддержать проект" />
-            </ListItem>
           </List>
         </Box>
 

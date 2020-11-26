@@ -4,7 +4,6 @@ import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { Box, Typography, useTheme } from '@material-ui/core'
 import { Amount } from '../components'
 import { formatDate } from 'helpers/format'
-import { makeStyles } from '@material-ui/styles'
 import { Tooltip } from 'components/Tooltip'
 import Rhythm from 'components/Rhythm'
 import {
@@ -14,24 +13,13 @@ import {
 import getMonthDates from 'scenes/Budgets/selectors/getMonthDates'
 import { getPopulatedTag } from 'store/localData/tags'
 
-const useStyles = makeStyles(theme => ({
-  base: {
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: theme.palette.background.default,
-  },
-}))
-
-export function OutcomeWidget({ tagId, month, setMonth }) {
-  const c = useStyles()
+export function OutcomeWidget({ tagId, month, setMonth, ...boxProps }) {
   const [selected, setSelected] = useState(month)
-
   const tag = useSelector(state => getPopulatedTag(state, tagId))
   const amounts = useSelector(getAmountsForTag)(month, tagId)
   const allAmounts = useSelector(getAmountsByTag)
   const dates = useSelector(getMonthDates)
-
   const isParent = !!amounts.children
-
   const dateRange = getDateRange(dates, 12, month)
 
   const data = dateRange.map(date => {
@@ -43,13 +31,11 @@ export function OutcomeWidget({ tagId, month, setMonth }) {
     let budgeted = tagData.totalBudgeted ?? tagData.budgeted
     let available = tagData.totalAvailable ?? tagData.available
     let startingAmount = available + outcome
-
-    // Handle positive outcome. It's possible with income transfers
     if (outcome < 0) {
+      // Handle positive outcome. It's possible with income transfers
       outcome = 0
       startingAmount = available
     }
-
     return { date, outcome, leftover, budgeted, available, startingAmount }
   })
 
@@ -85,8 +71,8 @@ export function OutcomeWidget({ tagId, month, setMonth }) {
   }
 
   return (
-    <div className={c.base}>
-      <Rhythm gap={0.5} pt={1} px={1}>
+    <Box borderRadius="borderRadius" bgcolor="background.default" {...boxProps}>
+      <Rhythm gap={0.5} pt={2} px={2}>
         <DataLine
           name="Расход"
           color={outcomeColor}
@@ -105,7 +91,7 @@ export function OutcomeWidget({ tagId, month, setMonth }) {
         <ResponsiveContainer>
           <BarChart
             data={data}
-            margin={{ top: 8, right: 8, left: 8, bottom: 0 }}
+            margin={{ top: 8, right: 16, left: 16, bottom: 0 }}
             barGap={0}
             onMouseMove={onMouseMove}
             onClick={onClick}
@@ -136,7 +122,7 @@ export function OutcomeWidget({ tagId, month, setMonth }) {
           </BarChart>
         </ResponsiveContainer>
       </Box>
-    </div>
+    </Box>
   )
 }
 

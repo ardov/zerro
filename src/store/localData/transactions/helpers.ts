@@ -4,6 +4,7 @@ import startOfWeek from 'date-fns/startOfWeek'
 import { AccountId, Tag, TagId, Transaction, TransactionId } from 'types'
 
 type TransactionType = 'income' | 'outcome' | 'transfer'
+type OperatorType = 'AND' | 'OR'
 
 interface FilerConditions {
   search?: null | string
@@ -12,7 +13,8 @@ interface FilerConditions {
   dateFrom?: null | number | Date
   dateTo?: null | number | Date
   tags?: null | TagId[]
-  accounts?: null | AccountId[]
+  accountsFrom?: null | AccountId[]
+  accountsTo?: null | AccountId[]
   amountFrom?: null | number
   amountTo?: null | number
 }
@@ -40,11 +42,14 @@ const checkDate = (
 
 const checkAccounts = (
   tr: Transaction,
-  accounts?: FilerConditions['accounts']
+  accountsFrom?: FilerConditions['accountsFrom'],
+  accountsTo?: FilerConditions['accountsTo']
 ) => {
-  if (!accounts) return true
+  const check = (current: AccountId, need?: null | AccountId[]) =>
+    need ? need.includes(current) : true
   return (
-    accounts.includes(tr.incomeAccount) || accounts.includes(tr.outcomeAccount)
+    check(tr.incomeAccount, accountsTo) &&
+    check(tr.outcomeAccount, accountsFrom)
   )
 }
 
@@ -69,18 +74,29 @@ const checkAmount = (
   return compareType === 'lessOrEqual' ? trAmount <= amount : trAmount >= amount
 }
 
-const checkRaw = (conditions?: FilerConditions) => (tr: Transaction) => {
+const checkConditions = (tr: Transaction, conditions: FilerConditions) => {
   if (!conditions) return true
   return (
     checkType(tr, conditions.type) &&
-    checkSearch(tr, conditions.search) &&
     checkDeleted(tr, conditions.showDeleted) &&
+    checkSearch(tr, conditions.search) &&
     checkDate(tr, conditions.dateFrom, conditions.dateTo) &&
     checkTags(tr, conditions.tags) &&
-    checkAccounts(tr, conditions.accounts) &&
     checkAmount(tr, conditions.amountFrom, 'greaterOrEqual') &&
-    checkAmount(tr, conditions.amountTo, 'lessOrEqual')
+    checkAmount(tr, conditions.amountTo, 'lessOrEqual') &&
+    checkAccounts(tr, conditions.accountsFrom, conditions.accountsTo)
   )
+}
+
+export const checkRaw = (
+  conditions: FilerConditions | FilerConditions[] = {},
+  operator: OperatorType = 'OR'
+) => (tr: Transaction) => {
+  if (Array.isArray(conditions)) {
+    const results = conditions.map(cond => checkConditions(tr, cond))
+    return operator === 'AND' ? results.every(Boolean) : results.some(Boolean)
+  }
+  return checkConditions(tr, conditions)
 }
 
 /**
@@ -89,7 +105,7 @@ const checkRaw = (conditions?: FilerConditions) => (tr: Transaction) => {
 export function groupTransactionsBy(
   groupType: 'DAY' | 'WEEK' | 'MONTH' = 'DAY',
   arr: Transaction[] = [],
-  filterConditions: FilerConditions = {}
+  filterConditions?: FilerConditions
 ) {
   const groupTypes = {
     DAY: (date: number | Date) => startOfDay(date),

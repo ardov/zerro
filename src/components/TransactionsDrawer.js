@@ -20,6 +20,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 export default function TransactionsDrawer({
+  prefilter,
   filterConditions,
   title,
   onClose,
@@ -48,7 +49,11 @@ export default function TransactionsDrawer({
           </Tooltip>
         </Box>
         <Box flex="1 1 auto" clone>
-          <TransactionList filterConditions={filterConditions} hideFilter />
+          <TransactionList
+            prefilter={prefilter}
+            filterConditions={filterConditions}
+            hideFilter
+          />
         </Box>
       </Box>
     </Drawer>

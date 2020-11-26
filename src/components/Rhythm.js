@@ -16,7 +16,6 @@ const useStyles = makeStyles(theme => ({
 
 export default function Rhythm({ gap = 0, axis = 'y', children, ...rest }) {
   const classes = useStyles({ gap })
-  if (!rest) console.log(123)
   return (
     <Box className={classes[axis]} {...rest}>
       {children}
