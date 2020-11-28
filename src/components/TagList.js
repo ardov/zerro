@@ -14,7 +14,7 @@ export function TagList({ tags = null, onChange, tagType, ...rest }) {
 
   return (
     <Box {...rest}>
-      {tags.map(id => (
+      {tags?.map(id => (
         <TagSelect2
           key={id}
           onChange={newId => replaceTag(id, newId)}
