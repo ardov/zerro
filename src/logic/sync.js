@@ -9,7 +9,7 @@ import { updateData } from 'store/commonActions'
 import { setSyncData } from 'store/lastSync'
 import { formatDate } from 'helpers/format'
 
-//All syncs with ZM goes through this thunk
+/** All syncs with zenmoney goes through this thunk */
 export const syncData = () => (dispatch, getState) => {
   const state = getState()
   const changed = getChangedArrays(state)
