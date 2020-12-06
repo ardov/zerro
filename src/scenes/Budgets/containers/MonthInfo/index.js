@@ -38,8 +38,6 @@ export default function BudgetInfo({ onClose, ...rest }) {
     transferOutcome,
     transferFees,
     realBudgetedInFuture,
-    moneyInBudget,
-    available,
   } = totals
 
   const dispatch = useDispatch()
