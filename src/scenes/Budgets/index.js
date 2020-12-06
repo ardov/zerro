@@ -9,7 +9,6 @@ import MonthSelector from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
 import { Box, Drawer, Paper, useMediaQuery } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
-import WarningSign from './containers/WarningSign'
 import GoalsProgressWidget from './containers/GoalsProgressWidget'
 import { useMonth } from './useMonth'
 import { DnDContext } from './containers/DnDContext'
@@ -126,8 +125,6 @@ function Budgets() {
               </Paper>
             )}
           </Box>
-
-          <WarningSign />
 
           <Drawer
             classes={{ paper: c.drawerWidth, root: c.drawerWidth }}

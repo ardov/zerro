@@ -19,6 +19,7 @@ import { Tooltip } from 'components/Tooltip'
 import { Line } from '../components'
 import { WidgetIncome } from './WidgetIncome'
 import { OverspentNotice } from './OverspentNotice'
+import { CalculationErrorNotice } from './CalculationErrorNotice'
 import { WidgetOutcome } from './WidgetOutcome'
 import { useState } from 'react'
 import { useMonth } from 'scenes/Budgets/useMonth'
@@ -60,6 +61,7 @@ export default function BudgetInfo({ onClose, ...rest }) {
       )}
 
       <Rhythm gap={2} p={3}>
+        <CalculationErrorNotice />
         {!!overspent && <OverspentNotice />}
         <WidgetIncome />
         <WidgetOutcome />
@@ -134,17 +136,11 @@ export default function BudgetInfo({ onClose, ...rest }) {
                 amount={realBudgetedInFuture}
                 currency={currency}
               />
-              <Line
-                name={`Всего доступно`}
-                description="Сумма всех распределённых денег"
-                amount={available}
-                currency={currency}
-              />
-              <Line
+              {/* <Line
                 name={`В бюджете`}
                 amount={moneyInBudget}
                 currency={currency}
-              />
+              /> */}
             </Rhythm>
           </Collapse>
 
