@@ -16,7 +16,6 @@ export const createDataAcc = () => (dispatch, getState) => {
 export const checkDataAcc = () => (dispatch, getState) => {
   const state = getState()
   if (!getDataAccountId(state)) {
-    console.log('no data acc. Create!')
     dispatch(createDataAcc())
   }
 }
