@@ -1,1 +1,3 @@
-export default function getMonthDates(state: any): number[]
+import { RootState } from 'store'
+
+export default function getMonthDates(state: RootState): number[]

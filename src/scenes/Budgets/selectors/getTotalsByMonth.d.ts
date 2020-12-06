@@ -1,3 +1,5 @@
+import { RootState } from 'store'
+
 interface TagTotals {
   budgeted: number
   income: number
@@ -26,6 +28,8 @@ interface MonthTotals {
   transferFees: number
 }
 
-export function getTagTotals(state: any): TagTotals[]
-export function getTotalsArray(state: any): MonthTotals[]
-export function getTotalsByMonth(state: any): { [key: number]: MonthTotals }
+export function getTagTotals(state: RootState): TagTotals[]
+export function getTotalsArray(state: RootState): MonthTotals[]
+export function getTotalsByMonth(
+  state: RootState
+): { [key: number]: MonthTotals }

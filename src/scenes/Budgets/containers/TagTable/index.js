@@ -4,6 +4,7 @@ import { Droppable, Draggable } from 'react-beautiful-dnd'
 import { useSelector } from 'react-redux'
 import { TagGroup } from './TagGroup'
 import TagTableHeader from './TagTableHeader'
+import { TagTableFooter } from './TagTableFooter'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 import { endOfMonth } from 'date-fns'
 import { sendEvent } from 'helpers/tracking'
@@ -134,6 +135,8 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
               />
             ))
           )}
+
+          <TagTableFooter metric={metrics[metricIndex]} />
         </Paper>
       </Box>
 

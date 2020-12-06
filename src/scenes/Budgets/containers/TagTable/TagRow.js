@@ -2,7 +2,6 @@ import React from 'react'
 import {
   Typography,
   Box,
-  Link,
   IconButton,
   useMediaQuery,
   ButtonBase,
@@ -281,19 +280,19 @@ function AvailableCell(props) {
   const c = useAvailableStyles()
   const availableColor = getAvailableColor(available, isChild, !!budgeted)
 
-  const renderCellContent = (provided = {}, snapshot = {}) => (
+  const renderCellContent = (provided, snapshot) => (
     <Box
       borderRadius={16}
-      bgcolor={snapshot.isDragging ? 'background.paper' : 'grey'}
+      bgcolor={!!provided ? 'background.paper' : ''}
       px={1}
       mx={-1}
       component="span"
       display="inline-block"
       color={availableColor}
-      ref={provided.innerRef}
-      {...provided.draggableProps}
-      {...provided.dragHandleProps}
-      style={snapshot.isDragging ? provided.draggableProps.style : null}
+      ref={provided?.innerRef}
+      {...provided?.draggableProps}
+      {...provided?.dragHandleProps}
+      style={snapshot?.isDragging ? provided?.draggableProps.style : null}
     >
       <Amount value={available} decMode="ifOnly" />
     </Box>

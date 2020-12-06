@@ -1,0 +1,103 @@
+import React, { useState } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { getTotalsArray } from '../../selectors/getTotalsByMonth'
+import { convertCurrency } from 'store/serverData'
+import { getAccountsInBudget } from 'store/localData/accounts'
+import { round } from 'helpers/currencyHelpers'
+import { getUserCurrencyCode } from 'store/serverData'
+import { Box, Typography, Button, Link } from '@material-ui/core'
+import WarningIcon from '@material-ui/icons/Warning'
+import { Amount } from '../components'
+import { wipeData } from 'store/commonActions'
+import { setToken } from 'store/token'
+import { clearLocalData } from 'logic/localData'
+import { captureError, sendEvent } from 'helpers/tracking'
+
+export function CalculationErrorNotice(props) {
+  const [hidden, setHidden] = useState(false)
+
+  const currency = useSelector(getUserCurrencyCode)
+  const dispatch = useDispatch()
+
+  const totalsArray = useSelector(getTotalsArray)
+  const { moneyInBudget } = totalsArray[totalsArray.length - 1]
+
+  const accsInBudget = useSelector(getAccountsInBudget)
+  const convert = useSelector(convertCurrency)
+  let inBudgetSum = 0
+  accsInBudget.forEach(acc => {
+    const balance = convert(acc.balance, acc.instrument)
+    inBudgetSum = round(inBudgetSum + balance)
+  })
+
+  const diff = round(Math.abs(moneyInBudget - inBudgetSum))
+  if (diff) {
+    console.log('🤨 Calc error:', diff)
+    captureError(new Error('Calculation Error'), { extra: diff })
+  }
+
+  if (diff < 1) return null
+  if (hidden) return null
+
+  sendEvent('Calculation Error: show message')
+
+  return null
+
+  const reloadData = () => {
+    sendEvent('Calculation Error: reload data')
+    dispatch(wipeData())
+    dispatch(setToken(null))
+    dispatch(clearLocalData())
+    window.location.reload(true)
+  }
+  const ignore = () => {
+    sendEvent('Calculation Error: click ignore')
+    setHidden(true)
+  }
+
+  return (
+    <Box
+      p={2}
+      bgcolor="error.main"
+      color="error.contrastText"
+      borderRadius={8}
+      display="flex"
+      flexDirection="row"
+    >
+      <Box pt="2px">
+        <WarningIcon />
+      </Box>
+      <Box ml={1.5}>
+        <Typography variant="subtitle1">
+          Ошибка в вычислениях на{' '}
+          <Amount value={diff} currency={currency} noShade />
+        </Typography>
+        <Box mt={1}>
+          <Typography variant="body2">
+            Попробуйте обновить данные. Если сообщение не пропадёт,{' '}
+            <Link
+              color="inherit"
+              href="http://t.me/ardov"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              напишите мне в телеграме (@ardov)
+            </Link>
+            , чтобы я помог разобраться с проблемой.
+          </Typography>
+        </Box>
+
+        <Box mt={2}>
+          <Button color="inherit" variant="outlined" onClick={reloadData}>
+            Обновить данные
+          </Button>
+        </Box>
+        <Box mt={2}>
+          <Button color="inherit" variant="outlined" onClick={ignore}>
+            Игнорировать
+          </Button>
+        </Box>
+      </Box>
+    </Box>
+  )
+}
