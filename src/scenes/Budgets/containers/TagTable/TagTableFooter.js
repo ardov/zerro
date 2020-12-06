@@ -42,7 +42,9 @@ export function TagTableFooter({ metric = 'available' }) {
       <Cell className={c.name}>Итого</Cell>
 
       {isMobile ? (
-        <Cell align="right">{metrics[metric]}</Cell>
+        <Cell align="right">
+          <Amount value={metrics[metric]} decMode="ifOnly" />
+        </Cell>
       ) : (
         <>
           <Cell align="right" title={budgeted}>
