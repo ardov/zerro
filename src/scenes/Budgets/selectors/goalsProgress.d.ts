@@ -1,3 +1,5 @@
+import { RootState } from 'store'
+
 interface GoalsProgress {
   progress: number
   need: number
@@ -5,13 +7,13 @@ interface GoalsProgress {
 }
 
 export function getGoalProgress(
-  state: any,
+  state: RootState,
   month: number,
   id: string
 ): GoalsProgress
 
 export function getGoalsProgress(
-  state: any
+  state: RootState
 ): {
   [month: number]: {
     [tagId: string]: GoalsProgress
@@ -19,5 +21,5 @@ export function getGoalsProgress(
 }
 
 export function getTotalGoalsProgress(
-  state: any
+  state: RootState
 ): { [month: number]: GoalsProgress | null }

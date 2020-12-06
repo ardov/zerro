@@ -5,8 +5,9 @@ import { round } from 'helpers/currencyHelpers'
 import { getSortedTransactions } from 'store/localData/transactions'
 import { getStartBalance } from 'store/localData/accounts/helpers'
 import { Transaction, Account } from 'types'
+import { RootState } from 'store'
 
-export const getStartFunds: (state: any) => number = createSelector(
+export const getStartFunds: (state: RootState) => number = createSelector(
   [getAccountsInBudget, convertCurrency],
   (accounts: Account[], convert) => {
     let sum = 0
@@ -19,7 +20,7 @@ export const getStartFunds: (state: any) => number = createSelector(
 )
 
 export const getTransactionsInBudget: (
-  state: any
+  state: RootState
 ) => Transaction[] = createSelector(
   [getSortedTransactions, getAccountsInBudget],
   (transactions: Transaction[], accounts: Account[]) => {

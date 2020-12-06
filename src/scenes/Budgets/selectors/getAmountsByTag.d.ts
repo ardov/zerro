@@ -1,3 +1,5 @@
+import { RootState } from 'store'
+
 interface TagAmounts {
   income: number
   outcome: number
@@ -31,7 +33,7 @@ interface TagGroupAmounts extends TagAmounts {
 }
 
 export function getTransfers(
-  state: any
+  state: RootState
 ): {
   [month: number]: {
     [accId: string]: number
@@ -39,21 +41,21 @@ export function getTransfers(
 }
 
 export function getLinkedTransfers(
-  state: any
+  state: RootState
 ): {
   [month: number]: {
     [tagId: string]: number
   }
 }
 
-export function getTransferFees(state: any): { [month: number]: number }
+export function getTransferFees(state: RootState): { [month: number]: number }
 
 export function getAmountsForTag(
-  state: any
+  state: RootState
 ): (month: number, tagId: string) => TagAmounts | TagGroupAmounts | null
 
 export function getAmountsByTag(
-  state: any
+  state: RootState
 ): {
   [month: number]: {
     [tagId: string]: TagAmounts
