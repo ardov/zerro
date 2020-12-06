@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { getTotalsArray } from '../../selectors/getTotalsByMonth'
 import { convertCurrency } from 'store/serverData'
@@ -31,15 +31,19 @@ export function CalculationErrorNotice(props) {
   })
 
   const diff = round(Math.abs(moneyInBudget - inBudgetSum))
-  if (diff) {
-    console.log('🤨 Calc error:', diff)
-    captureError(new Error('Calculation Error'), { extra: diff })
-  }
+
+  useEffect(() => {
+    if (diff) {
+      console.log('🤨 Calc error:', diff)
+      captureError(new Error('Calculation Error'), { extra: diff })
+    }
+    if (diff >= 1) {
+      sendEvent('Calculation Error: show message')
+    }
+  }, [diff])
 
   if (diff < 1) return null
   if (hidden) return null
-
-  sendEvent('Calculation Error: show message')
 
   return null
 
