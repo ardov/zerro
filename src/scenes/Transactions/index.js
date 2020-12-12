@@ -55,6 +55,7 @@ export default function TransactionsView() {
             overflow="hidden"
             maxWidth={560}
             component={Paper}
+            style={isMobile ? { paddingBottom: 56 } : null}
           >
             <Box flex="1 1 auto" clone>
               <TransactionList {...{ opened, setOpened, checkedDate }} />

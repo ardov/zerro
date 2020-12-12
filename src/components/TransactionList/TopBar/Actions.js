@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './transitions.css'
 import { useSelector, useDispatch } from 'react-redux'
 import IconButton from '@material-ui/core/IconButton'
@@ -28,11 +28,15 @@ export default function Actions({
 }) {
   const dispatch = useDispatch()
   const allTransactions = useSelector(getTransactions)
-  const transactions = checkedIds?.map(id => allTransactions[id])
+  const [ids, setIds] = useState(checkedIds)
+  const transactions = ids?.map(id => allTransactions[id])
   const actions = getAvailableActions(transactions)
-  const length = checkedIds.length
+  const length = ids.length
+  const [editModalVisible, setEditModalVisible] = useState(false)
 
-  const [editVisible, setEditVisible] = useState(false)
+  useEffect(() => {
+    if (visible) setIds(checkedIds)
+  }, [visible, checkedIds])
 
   const handleSetTag = id => {
     dispatch(setTagsToTransactions(checkedIds, [id]))
@@ -59,21 +63,26 @@ export default function Actions({
     <>
       <BulkEditModal
         ids={checkedIds}
-        onClose={() => setEditVisible(false)}
-        open={editVisible}
+        onClose={() => setEditModalVisible(false)}
+        onApply={() => {
+          setEditModalVisible(false)
+          onUncheckAll()
+        }}
+        open={editModalVisible}
       />
 
       <Box
         position="absolute"
-        bottom={16}
         left="50%"
+        bottom={16}
         style={{ transform: 'translateX(-50%)' }}
         zIndex={1000}
       >
         <CSSTransition
           mountOnEnter
+          unmountOnExit
           in={visible}
-          timeout={0}
+          timeout={200}
           classNames="actions-transition"
         >
           <Box
@@ -112,7 +121,7 @@ export default function Actions({
               <Tooltip title="Редактировать">
                 <IconButton
                   children={<EditOutlined />}
-                  onClick={() => setEditVisible(true)}
+                  onClick={() => setEditModalVisible(true)}
                 />
               </Tooltip>
             )}

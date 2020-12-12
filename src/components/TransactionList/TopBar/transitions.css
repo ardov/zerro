@@ -2,7 +2,7 @@
   opacity: 0;
   transform: translateY(16px);
 }
-.actions-transition-enter-done {
+.actions-transition-enter-active {
   opacity: 1;
   transform: translateY(0px);
   transition: 200ms ease-out;
@@ -12,9 +12,12 @@
   opacity: 1;
   transform: translateY(0px);
 }
-.actions-transition-exit-done {
+.actions-transition-exit-active {
   opacity: 0;
   transform: translateY(16px);
   transition: 200ms ease-out;
   transition-property: opacity, transform;
+}
+.actions-transition-exit-done {
+  display: none;
 }

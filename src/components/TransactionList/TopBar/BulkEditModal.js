@@ -30,6 +30,7 @@ function getTypes(list = []) {
 export default function BulkEditModal({
   ids,
   onClose,
+  onApply,
   open = false,
   keepMounted = false,
   ...rest
@@ -51,7 +52,7 @@ export default function BulkEditModal({
   const onSave = () => {
     if (!equalArrays(commonTags, tags))
       dispatch(setTagsToTransactions(ids, tags))
-    onClose()
+    onApply()
   }
 
   return (
