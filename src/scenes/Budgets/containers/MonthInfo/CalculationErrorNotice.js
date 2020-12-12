@@ -9,13 +9,16 @@ import { Box, Typography, Button, Link } from '@material-ui/core'
 import WarningIcon from '@material-ui/icons/Warning'
 import { Amount } from '../components'
 import { wipeData } from 'store/commonActions'
-import { setToken } from 'store/token'
 import { clearLocalData } from 'logic/localData'
 import { captureError, sendEvent } from 'helpers/tracking'
+import { getTransactionsToSync } from 'store/localData/transactions'
 
 export function CalculationErrorNotice(props) {
   const [hidden, setHidden] = useState(false)
 
+  const transactionsToSync = useSelector(
+    state => getTransactionsToSync(state).length
+  )
   const currency = useSelector(getUserCurrencyCode)
   const dispatch = useDispatch()
 
@@ -31,28 +34,25 @@ export function CalculationErrorNotice(props) {
   })
 
   const diff = round(Math.abs(moneyInBudget - inBudgetSum))
+  const hasError = diff >= 1 && !transactionsToSync
 
   useEffect(() => {
-    if (diff) {
+    if (hasError) {
       console.log('🤨 Calc error:', diff)
       captureError(new Error('Calculation Error'), { extra: diff })
-    }
-    if (diff >= 1) {
       sendEvent('Calculation Error: show message')
     }
-  }, [diff])
+  }, [diff, hasError])
 
-  if (diff < 1) return null
-  if (hidden) return null
+  if (!hasError || hidden) return null
 
   return null
 
   const reloadData = () => {
     sendEvent('Calculation Error: reload data')
     dispatch(wipeData())
-    dispatch(setToken(null))
     dispatch(clearLocalData())
-    window.location.reload(true)
+    window.location.reload()
   }
   const ignore = () => {
     sendEvent('Calculation Error: click ignore')
@@ -78,16 +78,18 @@ export function CalculationErrorNotice(props) {
         </Typography>
         <Box mt={1}>
           <Typography variant="body2">
-            Попробуйте обновить данные. Если сообщение не пропадёт,{' '}
+            Попробуйте обновить данные. Если сообщение не пропадёт, напишите мне
+            в телеграме (
             <Link
               color="inherit"
               href="http://t.me/ardov"
               target="_blank"
               rel="noopener noreferrer"
+              style={{ textDecoration: 'underline' }}
             >
-              напишите мне в телеграме (@ardov)
+              @ardov
             </Link>
-            , чтобы я помог разобраться с проблемой.
+            ), чтобы я помог разобраться с проблемой.
           </Typography>
         </Box>
 
