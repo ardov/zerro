@@ -38,15 +38,13 @@ export function CalculationErrorNotice(props) {
 
   useEffect(() => {
     if (hasError) {
-      console.log('🤨 Calc error:', diff)
+      console.log('🤨 Calc error:', diff, currency)
       captureError(new Error('Calculation Error'), { extra: diff })
       sendEvent('Calculation Error: show message')
     }
-  }, [diff, hasError])
+  }, [diff, hasError, currency])
 
   if (!hasError || hidden) return null
-
-  return null
 
   const reloadData = () => {
     sendEvent('Calculation Error: reload data')
