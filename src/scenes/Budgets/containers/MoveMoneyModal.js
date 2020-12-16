@@ -45,6 +45,7 @@ export function MoveMoneyModal(props) {
           onChange={setAmount}
           onEnter={handleSubmit}
           autoFocus
+          selectOnFocus
           fullWidth
           placeholder="0"
           InputProps={{

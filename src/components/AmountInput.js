@@ -4,16 +4,17 @@ import { getCurrencySymbol } from 'helpers/format'
 
 export default function AmountInput({
   currency,
-  value,
+  value = '',
   onChange,
   onEnter,
   onBlur,
   onFocus,
   onKeyDown,
+  selectOnFocus = false,
   ...rest
 }) {
   const ref = useRef()
-  const [expression, setExpression] = useState(value || '')
+  const [expression, setExpression] = useState(value)
   const [focused, setFocused] = useState(false)
 
   useEffect(() => {
@@ -21,8 +22,8 @@ export default function AmountInput({
   }, [value, focused])
 
   useEffect(() => {
-    if (focused && ref) ref.current.select()
-  }, [focused])
+    if (focused && ref && selectOnFocus) ref.current.select()
+  }, [focused, selectOnFocus])
 
   const sym = currency ? getCurrencySymbol(currency) : null
 

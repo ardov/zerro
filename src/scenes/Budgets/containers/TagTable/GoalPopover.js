@@ -77,6 +77,7 @@ export default function GoalPopover({ id, currency, onClose, ...rest }) {
           <AmountInput
             autoFocus
             onFocus={e => e.target.select()}
+            selectOnFocus
             value={amount}
             label={amountLabels[type]}
             fullWidth
