@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, Typography } from '@material-ui/core'
-import { formatMoney } from 'helpers/format'
+import { formatMoney, rateToWords } from 'helpers/format'
 import { withStyles } from '@material-ui/core/styles'
 
 const Body = props => <Box alignSelf="flex-end" textAlign="right" {...props} />
@@ -45,40 +45,68 @@ export function Amount({
   const formattedIncome = formatMoney(income, incomeCurrency)
   const formattedOutcome = formatMoney(outcome, outcomeCurrency)
 
-  switch (type) {
-    case 'transfer':
-      return formattedIncome === formattedOutcome ? (
-        <Body>
-          <PrimarySum type={type}>{formattedIncome}</PrimarySum>
-        </Body>
-      ) : (
-        <Body>
-          <PrimarySum type={type}>{formattedOutcome}</PrimarySum>
-          {' → '}
-          <PrimarySum type={type}>{formattedIncome}</PrimarySum>
-        </Body>
-      )
+  if (type === 'transfer') {
+    const equalCurrency = incomeCurrency === outcomeCurrency
+    return formattedIncome === formattedOutcome ? (
+      <Body>
+        <PrimarySum type={type}>{formattedIncome}</PrimarySum>
+      </Body>
+    ) : (
+      <Body
+        title={
+          equalCurrency
+            ? ''
+            : rateToWords(income, incomeCurrency, outcome, outcomeCurrency)
+        }
+      >
+        <PrimarySum type={type}>{formattedOutcome}</PrimarySum>
+        {' → '}
+        <PrimarySum type={type}>{formattedIncome}</PrimarySum>
+      </Body>
+    )
+  }
 
-    case 'income':
+  if (type === 'income') {
+    if (!opIncome) {
       return (
         <Body>
-          <SecondarySum amount={opIncome} currency={opIncomeCurrency} />
-          <PrimarySum type={type}>+{formattedIncome}</PrimarySum>
+          <PrimarySum type={type}>−{formattedIncome}</PrimarySum>
         </Body>
       )
+    }
+    return (
+      <Body
+        title={rateToWords(opIncome, opIncomeCurrency, income, incomeCurrency)}
+      >
+        <SecondarySum amount={opIncome} currency={opIncomeCurrency} />
+        <PrimarySum type={type}>+{formattedIncome}</PrimarySum>
+      </Body>
+    )
+  }
 
-    case 'outcome':
+  if (type === 'outcome') {
+    if (!opOutcome) {
       return (
         <Body>
-          <SecondarySum
-            amount={opOutcome && -opOutcome}
-            currency={opOutcomeCurrency}
-          />
           <PrimarySum type={type}>−{formattedOutcome}</PrimarySum>
         </Body>
       )
-
-    default:
-      break
+    }
+    return (
+      <Body
+        title={rateToWords(
+          opOutcome,
+          opOutcomeCurrency,
+          outcome,
+          outcomeCurrency
+        )}
+      >
+        <SecondarySum
+          amount={opOutcome && -opOutcome}
+          currency={opOutcomeCurrency}
+        />
+        <PrimarySum type={type}>−{formattedOutcome}</PrimarySum>
+      </Body>
+    )
   }
 }
