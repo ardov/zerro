@@ -177,6 +177,7 @@ export default function Transaction({
                 variant="body2"
                 component="span"
                 color="textSecondary"
+                align="right"
                 noWrap
               >
                 {mainAccountTitle}
