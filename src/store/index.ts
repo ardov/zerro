@@ -19,10 +19,7 @@ export const store = configureStore({
   },
   preloadedState: { token: ZenApi.getLocalToken() },
   middleware: getDefaultMiddleware =>
-    getDefaultMiddleware({
-      immutableCheck: false,
-      serializableCheck: false,
-    }),
+    getDefaultMiddleware({ immutableCheck: false, serializableCheck: false }),
 })
 
 export type RootState = ReturnType<typeof store.getState>
