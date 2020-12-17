@@ -49,3 +49,23 @@ export function formatDate(date: number | Date, template?: string): string {
   if (isThisYear(date)) return format(date, 'd MMMM, EEEEEE', opts)
   return format(date, 'd MMMM yyyy, EEEEEE', opts)
 }
+
+export function rateToWords(
+  sum1 = 0,
+  currency1: string,
+  sum2 = 0,
+  currency2: string
+): string {
+  if (!sum1 || !sum2) return ''
+  if (sum1 < sum2) {
+    return `${formatMoney(1, currency1, 0)} = ${formatMoney(
+      sum2 / sum1,
+      currency2
+    )}`
+  } else {
+    return `${formatMoney(1, currency2, 0)} = ${formatMoney(
+      sum1 / sum2,
+      currency1
+    )}`
+  }
+}

@@ -16,7 +16,7 @@ import DeleteIcon from '@material-ui/icons/Delete'
 import { DatePicker } from '@material-ui/pickers'
 import Map from './Map'
 import AmountInput from 'components/AmountInput'
-import { formatDate } from 'helpers/format'
+import { formatDate, rateToWords } from 'helpers/format'
 import { TagList } from 'components/TagList'
 
 export default function DetailsDrawer({
@@ -37,12 +37,14 @@ export default function DetailsDrawer({
   incomeAccount, //: accounts[raw.incomeAccount],
   opIncome,
   opIncomeInstrument, //: instruments[raw.opIncomeInstrument],
+  opIncomeCurrency,
   incomeBankID,
   outcome,
   outcomeInstrument, //: instruments[raw.outcomeInstrument],
   outcomeAccount, //: accounts[raw.outcomeAccount],
   opOutcome,
   opOutcomeInstrument, //: instruments[raw.opOutcomeInstrument],
+  opOutcomeCurrency,
   outcomeBankID,
   tag, //: mapTags(raw.tag, tags),
   comment,
@@ -126,6 +128,7 @@ export default function DetailsDrawer({
               currency={outcomeCurrency}
               value={localOutcome}
               onChange={setLocalOutcome}
+              selectOnFocus
               fullWidth
               margin="dense"
             />
@@ -139,6 +142,7 @@ export default function DetailsDrawer({
               currency={incomeCurrency}
               value={localIncome}
               onChange={setLocalIncome}
+              selectOnFocus
               fullWidth
               margin="dense"
             />
@@ -200,6 +204,29 @@ export default function DetailsDrawer({
           Последнее изменение &ndash;{' '}
           {formatDate(changed, 'dd MMM yyyy, HH:mm')}
           <br />
+          {type === 'income' && !!opIncome && (
+            <>
+              {rateToWords(income, incomeCurrency, opIncome, opIncomeCurrency)}
+              <br />
+            </>
+          )}
+          {type === 'outcome' && !!opOutcome && (
+            <>
+              {rateToWords(
+                outcome,
+                outcomeCurrency,
+                opOutcome,
+                opOutcomeCurrency
+              )}
+              <br />
+            </>
+          )}
+          {type === 'transfer' && incomeCurrency !== outcomeCurrency && (
+            <>
+              {rateToWords(outcome, outcomeCurrency, income, incomeCurrency)}
+              <br />
+            </>
+          )}
           <Link
             component="button"
             color="secondary"
