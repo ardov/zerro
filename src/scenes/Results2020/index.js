@@ -5,7 +5,7 @@ import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts'
 
 // import { getTotalsArray } from 'scenes/Budgets/selectors/getTotalsArray'
 // import { getAmountsByTag } from 'scenes/Budgets/selectors/getAmountsByTag'
-import { getAccountsHistory } from './selectors'
+import { getAccountsHistory, getYearStats } from './selectors'
 import { getAccounts, getAccountList } from 'store/localData/accounts'
 import { formatMoney, formatDate } from 'helpers/format'
 import Rhythm from 'components/Rhythm'
@@ -15,8 +15,10 @@ export default function Stats() {
   // const rawData = useSelector(getTotalsArray)
   // const accountsHistory = useSelector(getAccountsHistory)
   const accs = useSelector(getAccountList)
+  const yearStats = useSelector(getYearStats)
   const [selected, setSelected] = useState({})
 
+  console.log('yearStats', yearStats)
   // const tagData = useSelector(getAmountsByTag)
   // const data = rawData.map(obj => ({
   //   ...obj,
