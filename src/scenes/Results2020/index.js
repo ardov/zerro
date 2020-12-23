@@ -3,8 +3,6 @@ import { Box, Typography, Paper } from '@material-ui/core'
 import { useSelector } from 'react-redux'
 import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts'
 
-// import { getTotalsArray } from 'scenes/Budgets/selectors/getTotalsArray'
-// import { getAmountsByTag } from 'scenes/Budgets/selectors/getAmountsByTag'
 import { getAccountsHistory, getYearStats } from './selectors'
 import { getAccounts, getAccountList } from 'store/localData/accounts'
 import { formatMoney, formatDate } from 'helpers/format'
@@ -12,21 +10,11 @@ import Rhythm from 'components/Rhythm'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 
 export default function Stats() {
-  // const rawData = useSelector(getTotalsArray)
-  // const accountsHistory = useSelector(getAccountsHistory)
   const accs = useSelector(getAccountList)
   const yearStats = useSelector(getYearStats)
   const [selected, setSelected] = useState({})
 
   console.log('yearStats', yearStats)
-  // const tagData = useSelector(getAmountsByTag)
-  // const data = rawData.map(obj => ({
-  //   ...obj,
-  //   date: formatDate(obj.date, 'MM-yyyy'),
-  // }))
-  // console.log(data)
-  // console.log(accountsHistory)
-  // console.log(tagData)
 
   const startDate = +new Date(2019, 0)
   const accIds = accs.filter(acc => !acc.archive).map(acc => acc.id)
@@ -44,27 +32,6 @@ export default function Stats() {
   return (
     <>
       <Box display="flex" flexDirection="column">
-        {/* <div style={{ width: '100%', height: 300 }}>
-        <ResponsiveContainer>
-          <AreaChart data={data}>
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Area type="monotone" dataKey="income" />
-            <Area type="monotone" dataKey="outcome" fill="red" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-      <div style={{ width: '100%', height: 300 }}>
-        <ResponsiveContainer>
-          <AreaChart data={data}>
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Area type="monotone" dataKey="outcome" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div> */}
         <Rhythm gap={2} axis="y" p={3}>
           {accIds.map(id => (
             <AccHist
@@ -90,9 +57,6 @@ const AccHist = ({ id, startDate = 0, endDate, onClick }) => {
   const history = useSelector(getAccountsHistory)[id]
   const acc = useSelector(getAccounts)[id]
   const [hoverIdx, setHoverIdx] = useState(null)
-  // const [startIndex, setStartIndex] = useState(
-  //   history.findIndex(day => day.date === startDate) || 0
-  // )
 
   const data = history.filter(({ date }) => date >= startDate)
 
@@ -150,11 +114,6 @@ const AccHist = ({ id, startDate = 0, endDate, onClick }) => {
                 <stop offset={off} stopColor="#f00" stopOpacity={0.1} />
               </linearGradient>
             </defs>
-            {/* <XAxis
-              dataKey="date"
-              tickFormatter={date => formatDate(date, 'dd-MM-yyyy')}
-            />
-            <YAxis /> */}
             <Tooltip
               active={false}
               wrapperStyle={{ display: 'none' }}

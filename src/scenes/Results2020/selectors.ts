@@ -6,23 +6,34 @@ import { getSortedTransactions } from 'store/localData/transactions'
 import { getStartBalance } from 'store/localData/accounts/helpers'
 import { eachDayOfInterval, startOfDay } from 'date-fns'
 import { convertCurrency } from 'store/serverData'
+import { Transaction, Account, AccountId, InstrumentId } from 'types'
 
 export const getTransactionsHistory = createSelector(
   [getSortedTransactions],
-  transactions => transactions.filter(tr => !tr.deleted).reverse()
+  (transactions: Transaction[]) =>
+    transactions.filter(tr => !tr.deleted).reverse()
 )
+
+interface DayNode {
+  date: number
+  balance: number
+  transactions: number[]
+}
+interface History {
+  [id: string]: DayNode[]
+}
 
 export const getAccountsHistory = createSelector(
   [getTransactionsHistory, getAccounts],
-  (transactions, accounts) => {
+  (transactions: Transaction[], accounts: { [x: string]: Account }) => {
     if (!transactions?.length || !accounts) return {}
-    const changes = {}
-    const firstDate = new Date(transactions[0].date)
+    let historyById = {} as History
+    const firstDate = +new Date(transactions[0].date)
     const currentDate = startOfDay(new Date())
     const dateArray = eachDayOfInterval({ start: firstDate, end: currentDate })
 
     for (const id in accounts) {
-      changes[id] = [
+      historyById[id] = [
         {
           date: firstDate,
           balance: getStartBalance(accounts[id]),
@@ -31,8 +42,8 @@ export const getAccountsHistory = createSelector(
       ]
     }
 
-    const addAmount = (amount, acc, date) => {
-      const accHistory = changes[acc]
+    const addAmount = (amount: number, acc: AccountId, date: number) => {
+      const accHistory = historyById[acc]
       const lastPoint = accHistory[accHistory.length - 1]
       if (lastPoint.date === date) {
         lastPoint.balance = round(lastPoint.balance + amount)
@@ -69,11 +80,11 @@ export const getAccountsHistory = createSelector(
       }
     })
 
-    let result = {}
-    for (const id in changes) {
+    let result = {} as History
+    for (const id in historyById) {
       let lastValue = 0
-      const dateMap = {}
-      changes[id].forEach(obj => {
+      const dateMap = {} as { [x: number]: DayNode }
+      historyById[id].forEach(obj => {
         dateMap[obj.date] = obj
       })
 
@@ -95,12 +106,26 @@ export const getAccountsHistory = createSelector(
   }
 )
 
-const dateStart = new Date(2020, 0, 1)
-const dateEnd = new Date(2021, 0, 1)
+/**
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+
+const dateStart = +new Date(2020, 0, 1)
+const dateEnd = +new Date(2021, 0, 1)
 
 export const getYearStats = createSelector(
   [getSortedTransactions, getAccounts, convertCurrency],
-  (allTransactions, accounts, convert) => {
+  (
+    allTransactions: Transaction[],
+    accounts: { [x: string]: Account },
+    convert: (amount: number, id: InstrumentId) => number
+  ) => {
     if (!allTransactions?.length || !accounts) return null
 
     const transactions = allTransactions.filter(
@@ -118,14 +143,20 @@ export const getYearStats = createSelector(
   }
 )
 
-function splitByType(transactions) {
-  const result = { income: [], outcome: [], transfer: [] }
+function splitByType(transactions: Transaction[]) {
+  const result = {
+    income: [] as Transaction[],
+    outcome: [] as Transaction[],
+    transfer: [] as Transaction[],
+  }
   transactions.forEach(tr => result[getType(tr)].push(tr))
   return result
 }
 
-function compareByAmount(convert) {
-  return function (tr1, tr2) {
+function compareByAmount(
+  convert: (amount: number, id: InstrumentId) => number
+) {
+  return function (tr1: Transaction, tr2: Transaction) {
     const amount1 = Math.max(
       convert(tr1.income, tr1.incomeInstrument),
       convert(tr1.outcome, tr1.outcomeInstrument)
