@@ -1,11 +1,8 @@
 import React, { useState, useCallback } from 'react'
-import { Box, Typography, Paper } from '@material-ui/core'
-// import sendEvent from 'helpers/sendEvent'
+import { Box, Typography, Paper, useTheme } from '@material-ui/core'
 import { useSelector } from 'react-redux'
-import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts'
-// import { Tooltip } from 'components/Tooltip'
-// import { getTotalsArray } from 'scenes/Budgets/selectors/getTotalsArray'
-// import { getAmountsByTag } from 'scenes/Budgets/selectors/getAmountsByTag'
+import { AreaChart, Area, ResponsiveContainer } from 'recharts'
+import { Tooltip } from 'components/Tooltip'
 import { getAccountsHistory } from './selectors'
 import { getAccounts, getAccountList } from 'store/localData/accounts'
 import { formatMoney, formatDate } from 'helpers/format'
@@ -13,22 +10,18 @@ import Rhythm from 'components/Rhythm'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 
 export default function Stats() {
-  // const rawData = useSelector(getTotalsArray)
-  // const accountsHistory = useSelector(getAccountsHistory)
   const accs = useSelector(getAccountList)
   const [selected, setSelected] = useState({})
 
-  // const tagData = useSelector(getAmountsByTag)
-  // const data = rawData.map(obj => ({
-  //   ...obj,
-  //   date: formatDate(obj.date, 'MM-yyyy'),
-  // }))
-  // console.log(data)
-  // console.log(accountsHistory)
-  // console.log(tagData)
-
   const startDate = +new Date(2019, 0)
-  const accIds = accs.filter(acc => !acc.archive).map(acc => acc.id)
+  const accIds = accs
+    .sort((acc1, acc2) => {
+      if (acc1.archive && acc2.archive) return 0
+      if (acc1.archive) return 1
+      if (acc2.archive) return -1
+      return 0
+    })
+    .map(acc => acc.id)
 
   const onSelect = useCallback((id, date) => {
     setSelected({ id, date })
@@ -43,27 +36,6 @@ export default function Stats() {
   return (
     <>
       <Box display="flex" flexDirection="column">
-        {/* <div style={{ width: '100%', height: 300 }}>
-        <ResponsiveContainer>
-          <AreaChart data={data}>
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Area type="monotone" dataKey="income" />
-            <Area type="monotone" dataKey="outcome" fill="red" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-      <div style={{ width: '100%', height: 300 }}>
-        <ResponsiveContainer>
-          <AreaChart data={data}>
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Area type="monotone" dataKey="outcome" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div> */}
         <Rhythm gap={2} axis="y" p={3}>
           {accIds.map(id => (
             <AccHist
@@ -86,12 +58,13 @@ export default function Stats() {
 }
 
 const AccHist = ({ id, startDate = 0, endDate, onClick }) => {
+  const theme = useTheme()
   const history = useSelector(getAccountsHistory)[id]
   const acc = useSelector(getAccounts)[id]
   const [hoverIdx, setHoverIdx] = useState(null)
-  // const [startIndex, setStartIndex] = useState(
-  //   history.findIndex(day => day.date === startDate) || 0
-  // )
+
+  const diff = Math.abs(history[history.length - 1].balance - acc.balance)
+  const hasError = diff > 0.001
 
   const data = history.filter(({ date }) => date >= startDate)
 
@@ -114,17 +87,27 @@ const AccHist = ({ id, startDate = 0, endDate, onClick }) => {
 
   return (
     <Paper style={{ overflow: 'hidden', position: 'relative' }}>
-      <Box pt={2} px={2} minWidth={160}>
+      <Box p={2} minWidth={160}>
         <Typography variant="body2" onClick={() => console.log(acc)}>
-          {acc.title} {isHovering && formatDate(hoverDate)}
+          {hasError && (
+            <Tooltip title={'Ошибка на ' + formatMoney(diff)}>
+              <span>⚠️⚠️⚠️ </span>
+            </Tooltip>
+          )}
+          <span
+            style={{ textDecoration: acc.archive ? 'line-through' : 'none' }}
+          >
+            {acc.title}
+          </span>{' '}
+          {isHovering && formatDate(hoverDate)}
         </Typography>
         <Typography variant="h6">{formatMoney(balance)}</Typography>
       </Box>
+
       <div
         style={{
           width: '100%',
           position: 'absolute',
-          // height: 80,
           top: 0,
           left: 0,
           right: 0,
@@ -145,26 +128,18 @@ const AccHist = ({ id, startDate = 0, endDate, onClick }) => {
           >
             <defs>
               <linearGradient id={colorId} x1="0" y1="0" x2="0" y2="1">
-                <stop offset={off} stopColor="#000" stopOpacity={0.1} />
-                <stop offset={off} stopColor="#f00" stopOpacity={0.1} />
+                <stop
+                  offset={off}
+                  stopColor={theme.palette.primary.main}
+                  stopOpacity={0.2}
+                />
+                <stop
+                  offset={off}
+                  stopColor={theme.palette.error.main}
+                  stopOpacity={0.3}
+                />
               </linearGradient>
             </defs>
-            {/* <XAxis
-              dataKey="date"
-              tickFormatter={date => formatDate(date, 'dd-MM-yyyy')}
-            />
-            <YAxis /> */}
-            <Tooltip
-              active={false}
-              wrapperStyle={{ display: 'none' }}
-              labelFormatter={idx => {
-                const date = data?.[idx]?.date || 0
-                return formatDate(date)
-              }}
-              formatter={val => formatMoney(val)}
-              allowEscapeViewBox={{ x: false, y: true }}
-              cursor={false}
-            />
 
             <Area
               type="monotone"
