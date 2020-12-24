@@ -119,38 +119,114 @@ export const getAccountsHistory = createSelector(
 const dateStart = +new Date(2020, 0, 1)
 const dateEnd = +new Date(2021, 0, 1)
 
+interface InfoNode {
+  income: number
+  outcome: number
+  incomeTransactions: Transaction[]
+  outcomeTransactions: Transaction[]
+  transferTransactions: Transaction[]
+}
+
+interface Stats {
+  total: InfoNode
+  withQR: number
+  withGeo: number
+  byPayee: { [payee: string]: InfoNode }
+  byMerchant: { [merchantId: string]: InfoNode }
+  byBankID: { [companyId: number]: InfoNode }
+  byInstrument: { [instrumentId: number]: InfoNode }
+  byTag: { [tagId: string]: InfoNode }
+  byMonth: { [date: number]: InfoNode }
+  byWeekday: { [date: number]: InfoNode }
+}
+
+const createInfoNode = (): InfoNode => ({
+  income: 0,
+  outcome: 0,
+  incomeTransactions: [],
+  outcomeTransactions: [],
+  transferTransactions: [],
+})
+
 export const getYearStats = createSelector(
-  [getSortedTransactions, getAccounts, convertCurrency],
+  [getSortedTransactions, convertCurrency],
   (
     allTransactions: Transaction[],
-    accounts: { [x: string]: Account },
     convert: (amount: number, id: InstrumentId) => number
   ) => {
-    if (!allTransactions?.length || !accounts) return null
+    if (!allTransactions?.length) return null
+    const transactions = allTransactions
+      .filter(tr => !tr.deleted && tr.date >= dateStart && tr.date < dateEnd)
+      .sort(compareByAmount(convert))
 
-    const transactions = allTransactions.filter(
-      tr => !tr.deleted && tr.date >= dateStart && tr.date < dateEnd
-    )
-    const { income, outcome, transfer } = splitByType(transactions)
-    const byAmount = {
-      all: transactions.sort(compareByAmount(convert)),
-      income: income.sort(compareByAmount(convert)),
-      outcome: outcome.sort(compareByAmount(convert)),
-      transfer: transfer.sort(compareByAmount(convert)),
+    let stats = {
+      total: createInfoNode(),
+      withQR: 0,
+      withGeo: 0,
+      byPayee: {},
+      byMerchant: {},
+      byBankID: {},
+      byInstrument: {},
+      byTag: {},
+      byMonth: {},
+      byWeekday: {},
+    } as Stats
+
+    function addToNode(node: InfoNode, tr: Transaction) {
+      const type = getType(tr)
+      if (type === 'transfer') {
+        node.transferTransactions.push(tr)
+      }
+      if (type === 'income') {
+        node.income += convert(tr.income, tr.incomeInstrument)
+        node.incomeTransactions.push(tr)
+      }
+      if (type === 'outcome') {
+        node.outcome += convert(tr.outcome, tr.outcomeInstrument)
+        node.outcomeTransactions.push(tr)
+      }
     }
 
-    return { byAmount }
+    function groupBy(
+      field: keyof Transaction | Function,
+      object: any,
+      tr: Transaction
+    ) {
+      let key
+      if (typeof field === 'string') key = tr[field]
+      if (typeof field === 'function') key = field(tr)
+      if ((typeof key === 'string' || typeof key === 'number') && key) {
+        if (!object[key]) object[key] = createInfoNode()
+        addToNode(object[key], tr)
+      }
+    }
+
+    transactions.forEach(tr => {
+      addToNode(stats.total, tr)
+      if (tr.qrCode) stats.withQR++
+      if (tr.latitude) stats.withGeo++
+      groupBy('payee', stats.byPayee, tr)
+      groupBy('merchant', stats.byMerchant, tr)
+      groupBy('incomeBankID', stats.byBankID, tr)
+      groupBy('outcomeBankID', stats.byBankID, tr)
+      groupBy('incomeInstrument', stats.byInstrument, tr)
+      groupBy('outcomeInstrument', stats.byInstrument, tr)
+      groupBy(getMainTag, stats.byTag, tr)
+      groupBy(getMonth, stats.byMonth, tr)
+      groupBy(getWeekday, stats.byWeekday, tr)
+    })
+    return stats
   }
 )
 
-function splitByType(transactions: Transaction[]) {
-  const result = {
-    income: [] as Transaction[],
-    outcome: [] as Transaction[],
-    transfer: [] as Transaction[],
-  }
-  transactions.forEach(tr => result[getType(tr)].push(tr))
-  return result
+function getMainTag(tr: Transaction) {
+  return tr.tag?.[0] || 'null'
+}
+function getMonth(tr: Transaction) {
+  return new Date(tr.date).getMonth()
+}
+function getWeekday(tr: Transaction) {
+  return new Date(tr.date).getDay()
 }
 
 function compareByAmount(
