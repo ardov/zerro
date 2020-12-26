@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import { Box, Typography, Paper } from '@material-ui/core'
 import { useSelector } from 'react-redux'
-import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts'
+import { AreaChart, Area, ResponsiveContainer } from 'recharts'
 
 import { getAccountsHistory, getYearStats } from './selectors'
 import { getAccounts, getAccountList } from 'store/localData/accounts'
@@ -33,14 +33,7 @@ export default function Stats() {
     <>
       <Box display="flex" flexDirection="column">
         <Rhythm gap={2} axis="y" p={3}>
-          {accIds.map(id => (
-            <AccHist
-              key={id}
-              id={id}
-              startDate={startDate}
-              onClick={onSelect}
-            />
-          ))}
+          <OutcomeCard transaction={yearStats.total.outcomeTransactions[0]} />
         </Rhythm>
       </Box>
 
@@ -53,89 +46,22 @@ export default function Stats() {
   )
 }
 
-const AccHist = ({ id, startDate = 0, endDate, onClick }) => {
-  const history = useSelector(getAccountsHistory)[id]
-  const acc = useSelector(getAccounts)[id]
-  const [hoverIdx, setHoverIdx] = useState(null)
-
-  const data = history.filter(({ date }) => date >= startDate)
-
-  const isHovering = !!hoverIdx || hoverIdx === 0
-  const balance = isHovering ? data[hoverIdx].balance : acc.balance
-  const hoverDate = isHovering ? data[hoverIdx].date : null
-
-  const gradientOffset = () => {
-    const dataMax = Math.max(...data.map(i => i.balance))
-    const dataMin = Math.min(...data.map(i => i.balance))
-
-    if (dataMax <= 0) return 0
-    if (dataMin >= 0) return 1
-
-    return dataMax / (dataMax - dataMin)
-  }
-
-  const off = gradientOffset()
-  const colorId = 'gradient' + acc.id
-
+function OutcomeCard({ transaction }) {
   return (
-    <Paper style={{ overflow: 'hidden', position: 'relative' }}>
-      <Box pt={2} px={2} minWidth={160}>
-        <Typography variant="body2" onClick={() => console.log(acc)}>
-          {acc.title} {isHovering && formatDate(hoverDate)}
-        </Typography>
-        <Typography variant="h6">{formatMoney(balance)}</Typography>
-      </Box>
-      <div
-        style={{
-          width: '100%',
-          position: 'absolute',
-          // height: 80,
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }}
-      >
-        <ResponsiveContainer>
-          <AreaChart
-            data={data}
-            margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-            onClick={e => {
-              if (!e) return
-              const date = data[e.activeLabel].date
-              onClick(id, date)
-            }}
-            onMouseMove={e => e && setHoverIdx(e.activeLabel ?? null)}
-            onMouseLeave={() => setHoverIdx(null)}
-          >
-            <defs>
-              <linearGradient id={colorId} x1="0" y1="0" x2="0" y2="1">
-                <stop offset={off} stopColor="#000" stopOpacity={0.1} />
-                <stop offset={off} stopColor="#f00" stopOpacity={0.1} />
-              </linearGradient>
-            </defs>
-            <Tooltip
-              active={false}
-              wrapperStyle={{ display: 'none' }}
-              labelFormatter={idx => {
-                const date = data?.[idx]?.date || 0
-                return formatDate(date)
-              }}
-              formatter={val => formatMoney(val)}
-              allowEscapeViewBox={{ x: false, y: true }}
-              cursor={false}
-            />
-
-            <Area
-              type="monotone"
-              stroke="none"
-              fill={`url(#${colorId})`}
-              fillOpacity={1}
-              dataKey="balance"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-    </Paper>
+    <Box
+      bgcolor="background.paper"
+      maxWidth={480}
+      borderRadius={16}
+      p={3}
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+    >
+      <Typography variant="h5" align="center">
+        Самая крупная покупка этого года
+      </Typography>
+      {transaction.outcome}
+      Ghbdtn
+    </Box>
   )
 }
