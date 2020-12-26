@@ -14,7 +14,7 @@ import {
 import { Tooltip } from 'components/Tooltip'
 import Rhythm from 'components/Rhythm'
 import { useMonth } from '../useMonth'
-import { Amount } from './components'
+import { Amount } from 'components/Amount'
 
 const useStyles = makeStyles(({ shape, spacing, palette, breakpoints }) => ({
   base: {
