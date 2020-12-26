@@ -165,7 +165,6 @@ export const getYearStats = createSelector(
       withGeo: 0,
       byPayee: {},
       byMerchant: {},
-      byBankID: {},
       byInstrument: {},
       byTag: {},
       byMonth: {},
@@ -207,8 +206,6 @@ export const getYearStats = createSelector(
       if (tr.latitude) stats.withGeo++
       groupBy('payee', stats.byPayee, tr)
       groupBy('merchant', stats.byMerchant, tr)
-      groupBy('incomeBankID', stats.byBankID, tr)
-      groupBy('outcomeBankID', stats.byBankID, tr)
       groupBy('incomeInstrument', stats.byInstrument, tr)
       groupBy('outcomeInstrument', stats.byInstrument, tr)
       groupBy(getMainTag, stats.byTag, tr)
