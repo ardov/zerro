@@ -70,7 +70,7 @@ export function Amount({
     if (!opIncome) {
       return (
         <Body>
-          <PrimarySum type={type}>−{formattedIncome}</PrimarySum>
+          <PrimarySum type={type}>+{formattedIncome}</PrimarySum>
         </Body>
       )
     }
