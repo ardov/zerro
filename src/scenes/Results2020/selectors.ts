@@ -129,7 +129,7 @@ interface InfoNode {
 
 interface Stats {
   total: InfoNode
-  withQR: number
+  receipts: number
   withGeo: number
   byPayee: { [payee: string]: InfoNode }
   byMerchant: { [merchantId: string]: InfoNode }
@@ -159,9 +159,11 @@ export const getYearStats = createSelector(
       .filter(tr => !tr.deleted && tr.date >= dateStart && tr.date < dateEnd)
       .sort(compareByAmount(convert))
 
+    let receipts = {} as any
+
     let stats = {
       total: createInfoNode(),
-      withQR: 0,
+      receipts: 0,
       withGeo: 0,
       byPayee: {},
       byMerchant: {},
@@ -202,7 +204,7 @@ export const getYearStats = createSelector(
 
     transactions.forEach(tr => {
       addToNode(stats.total, tr)
-      if (tr.qrCode) stats.withQR++
+      if (tr.qrCode) receipts[tr.qrCode] = true
       if (tr.latitude) stats.withGeo++
       groupBy('payee', stats.byPayee, tr)
       groupBy('merchant', stats.byMerchant, tr)
@@ -212,6 +214,8 @@ export const getYearStats = createSelector(
       groupBy(getMonth, stats.byMonth, tr)
       groupBy(getWeekday, stats.byWeekday, tr)
     })
+
+    stats.receipts = Object.keys(receipts).length
     return stats
   }
 )
