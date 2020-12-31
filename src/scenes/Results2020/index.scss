@@ -41,7 +41,6 @@
 .year {
   z-index: 2;
   background-color: rgb(230, 35, 0);
-
   background-image: linear-gradient(
     106.35deg,
     #dfffc6 0%,
@@ -49,11 +48,12 @@
     #cf26eb 69.79%,
     #f88341 100%
   );
-  background-size: 100%;
+  background-size: 150%;
   background-repeat: repeat;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   -moz-text-fill-color: transparent;
+  animation: gradient-animation 10s infinite alternate ease-in-out;
 
   &.shadow {
     user-select: none;
@@ -62,5 +62,14 @@
     z-index: 1;
     opacity: 0.4;
     filter: blur(12px);
+  }
+}
+
+@keyframes gradient-animation {
+  0% {
+    background-position: top right;
+  }
+  100% {
+    background-position: top left;
   }
 }
