@@ -12,36 +12,35 @@ export function OutcomeCard({ transaction }) {
   const { outcome, outcomeInstrument, date, comment, payee, tag } = transaction
   const currency = useSelector(getInstruments)[outcomeInstrument].shortTitle
   const tagTitle = useSelector(getPopulatedTags)[tag?.[0] || 'null'].title
-  let additionalInfo = []
+  let additionalInfo = [formatDate(date)]
   if (tagTitle) additionalInfo.push(tagTitle)
   if (payee) additionalInfo.push(payee)
   return (
     <Card>
-      <Typography variant="h5" align="center">
-        Самая крупная покупка
+      <Typography variant="body1" align="center">
+        Покупка года
       </Typography>
-      <Rhythm gap={1} my={5}>
-        <Typography variant="body1" align="center" color="textSecondary">
-          {formatDate(date)}
-        </Typography>
-        <Typography variant="h4" align="center">
+      <Rhythm gap={1} my={3}>
+        <Typography variant="h4" align="center" className="outcome-amount">
           <Amount value={outcome} currency={currency} noShade decMode="ifAny" />
         </Typography>
         <Typography variant="body1" align="center" color="textSecondary">
           {additionalInfo.join('  •  ')}
         </Typography>
-        <Box
-          py={0.5}
-          px={2}
-          mt={1}
-          alignSelf="center"
-          bgcolor="background.default"
-          borderRadius="borderRadius"
-        >
-          <Typography variant="body1" align="center" color="textSecondary">
-            {comment}
-          </Typography>
-        </Box>
+        {comment && (
+          <Box
+            py={0.5}
+            px={2}
+            mt={1}
+            alignSelf="center"
+            bgcolor="background.default"
+            borderRadius="borderRadius"
+          >
+            <Typography variant="body1" align="center" color="textSecondary">
+              {comment}
+            </Typography>
+          </Box>
+        )}
       </Rhythm>
     </Card>
   )

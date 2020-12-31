@@ -18,6 +18,7 @@ export function PayeeByFrequencyCard({ byPayee }) {
   const transactions = byPayee[topPayee].outcomeTransactions.length
   const outcome = byPayee[topPayee].outcome
 
+  if (!outcome) return null
   return (
     <Card>
       <Rhythm gap={1}>

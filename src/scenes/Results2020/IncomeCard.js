@@ -67,6 +67,7 @@ export function IncomeCard({ byTag }) {
     </Card>
   )
 }
+
 function getPeopleArray(length) {
   const people = ['👩🏼', '👨🏼‍🦳', '👨🏻', '👨🏼‍🦲', '👦🏽', '👩🏻', '👵🏻', '👴🏼']
   let arr = []
@@ -75,11 +76,11 @@ function getPeopleArray(length) {
   }
   return arr
 }
+
 function NotFunFact({ income, currency }) {
   const AVG_MONTHLY_INCOME = 35000
   const monthlyIncome = income / 12
   const rate = (monthlyIncome / AVG_MONTHLY_INCOME).toFixed(0)
-
   return (
     <Typography variant="body1" align="center">
       Платили 13% подоходного налога?
