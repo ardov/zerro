@@ -1,23 +1,25 @@
-import React, { useState, useCallback } from 'react'
-import { Box, Typography, Paper, Chip } from '@material-ui/core'
+import React, { useState } from 'react'
+import { Box, Typography, Chip } from '@material-ui/core'
 import { useSelector } from 'react-redux'
-import { AreaChart, Area, ResponsiveContainer } from 'recharts'
-
+import './index.scss'
 import { getAccountsHistory, getYearStats } from './selectors'
 import { getAccounts, getAccountList } from 'store/localData/accounts'
-import { formatMoney, formatDate } from 'helpers/format'
+import { formatDate } from 'helpers/format'
 import Rhythm from 'components/Rhythm'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 import { Amount } from 'components/Amount'
 import { getInstruments, getUserCurrencyCode } from 'store/serverData'
 import { getPopulatedTags } from 'store/localData/tags'
 import pluralize from 'helpers/pluralize'
+import { Card } from './Card'
 
 export default function Stats() {
   const yearStats = useSelector(getYearStats)
   console.log('yearStats', yearStats)
   const [selected, setSelected] = useState({})
-  const { total, byTag, receipts } = yearStats
+
+  if (!yearStats) return null
+  const { total, byTag, receipts, byPayee } = yearStats
 
   const noCategoryValue =
     byTag.null.incomeTransactions.length + byTag.null.outcomeTransactions.length
@@ -30,9 +32,11 @@ export default function Stats() {
 
   return (
     <>
-      <Box display="flex" flexDirection="column">
+      <Box className="container">
         <Rhythm gap={2} axis="y" p={3}>
           <IncomeCard byTag={byTag} />
+          <PayeeByOutcomeCard byPayee={byPayee} />
+          <PayeeByFrequencyCard byPayee={byPayee} />
           <OutcomeCard transaction={total.outcomeTransactions[0]} />
           <QRCard value={receipts} />
           <NoCategoryCard value={noCategoryValue} />
@@ -56,16 +60,7 @@ function OutcomeCard({ transaction }) {
   if (tagTitle) additionalInfo.push(tagTitle)
   if (payee) additionalInfo.push(payee)
   return (
-    <Box
-      bgcolor="background.paper"
-      maxWidth={480}
-      borderRadius={16}
-      py={3}
-      px={2}
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-    >
+    <Card>
       <Typography variant="h5" align="center">
         Самая крупная покупка
       </Typography>
@@ -92,23 +87,14 @@ function OutcomeCard({ transaction }) {
           </Typography>
         </Box>
       </Rhythm>
-    </Box>
+    </Card>
   )
 }
 
 function NoCategoryCard({ value }) {
   return (
-    <Box
-      bgcolor="background.paper"
-      maxWidth={480}
-      borderRadius={16}
-      py={3}
-      px={2}
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-    >
-      <Rhythm gap={1} my={5}>
+    <Card>
+      <Rhythm gap={1}>
         {value ? (
           <>
             <Typography variant="h4" align="center">
@@ -130,22 +116,14 @@ function NoCategoryCard({ value }) {
           </>
         )}
       </Rhythm>
-    </Box>
+    </Card>
   )
 }
+
 function QRCard({ value }) {
   return (
-    <Box
-      bgcolor="background.paper"
-      maxWidth={480}
-      borderRadius={16}
-      py={3}
-      px={2}
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-    >
-      <Rhythm gap={1} my={5}>
+    <Card>
+      <Rhythm gap={1}>
         {value ? (
           <>
             <Typography variant="body1" align="center">
@@ -166,7 +144,79 @@ function QRCard({ value }) {
           </>
         )}
       </Rhythm>
-    </Box>
+    </Card>
+  )
+}
+
+function PayeeByOutcomeCard({ byPayee }) {
+  const currency = useSelector(getUserCurrencyCode)
+  const sortedPayees = Object.keys(byPayee).sort(
+    (a, b) => byPayee[b].outcome - byPayee[a].outcome
+  )
+  const topPayee = sortedPayees[0]
+  const transactions = byPayee[topPayee].outcomeTransactions.length
+  const outcome = byPayee[topPayee].outcome
+
+  return (
+    <Card>
+      <Rhythm gap={1}>
+        <Typography variant="h4" align="center">
+          {topPayee}
+        </Typography>
+        <Typography variant="body1" align="center">
+          Здесь вы оставили{' '}
+          <Amount
+            value={outcome}
+            currency={currency}
+            noShade
+            decMode="ifOnly"
+          />{' '}
+          ({transactions}
+          {' '}
+          {pluralize(transactions, ['покупка', 'покупки', 'покупок'])})
+        </Typography>
+      </Rhythm>
+    </Card>
+  )
+}
+
+function PayeeByFrequencyCard({ byPayee }) {
+  const currency = useSelector(getUserCurrencyCode)
+  const sortedPayees = Object.keys(byPayee).sort(
+    (a, b) =>
+      byPayee[b].outcomeTransactions.length -
+      byPayee[a].outcomeTransactions.length
+  )
+  const topPayee = sortedPayees[0]
+  const transactions = byPayee[topPayee].outcomeTransactions.length
+  const outcome = byPayee[topPayee].outcome
+
+  return (
+    <Card>
+      <Rhythm gap={1}>
+        <Typography variant="body1" align="center">
+          Любимое место
+        </Typography>
+        <Typography variant="h4" align="center">
+          {topPayee}
+        </Typography>
+        <Typography variant="body1" align="center">
+          {transactions}
+          {' '}
+          {pluralize(transactions, ['покупка', 'покупки', 'покупок'])} со
+          средним чеком{' '}
+          <Amount
+            value={outcome / transactions}
+            currency={currency}
+            noShade
+            decMode="ifOnly"
+          />
+          .
+          <br />А всего потратили{' '}
+          <Amount value={outcome} currency={currency} noShade decMode="ifAny" />
+        </Typography>
+      </Rhythm>
+    </Card>
   )
 }
 
@@ -187,31 +237,26 @@ function IncomeCard({ byTag }) {
       setChecked([...checked, id])
     }
   }
+
+  const isRussian = currency === 'RUB'
+
   return (
-    <Box
-      bgcolor="background.paper"
-      maxWidth={480}
-      borderRadius={16}
-      py={3}
-      px={2}
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-    >
+    <Card>
       <Rhythm gap={1}>
         <Typography variant="body1" align="center">
           Вы заработали
         </Typography>
-        <Typography variant="h4" align="center">
+        <Typography variant="h4" align="center" className="income-amount">
           <Amount value={total} currency={currency} noShade decMode="ifOnly" />
         </Typography>
+
+        {isRussian && <NotFunFact income={total} currency={currency} />}
       </Rhythm>
 
       <Box mt={3} textAlign="center">
         {incomeTags.map(id => (
           <Box m={0.5} display="inline-block" key={id}>
             <Chip
-              // color="primary"
               variant={checked.includes(id) ? 'default' : 'outlined'}
               clickable
               onClick={() => toggle(id)}
@@ -231,6 +276,51 @@ function IncomeCard({ byTag }) {
           </Box>
         ))}
       </Box>
-    </Box>
+    </Card>
+  )
+}
+
+function getPeopleArray(length) {
+  const people = ['👩🏼', '👨🏼‍🦳', '👨🏻', '👨🏼‍🦲', '👦🏽', '👩🏻', '👵🏻', '👴🏼']
+  let arr = []
+  for (let i = 0; i < length; i++) {
+    arr.push(people[i % (people.length - 1)])
+  }
+  return arr
+}
+
+function NotFunFact({ income, currency }) {
+  const AVG_MONTHLY_INCOME = 35000
+  const monthlyIncome = income / 12
+  const rate = (monthlyIncome / AVG_MONTHLY_INCOME).toFixed(0)
+
+  return (
+    <Typography variant="body1" align="center">
+      Платили 13% подоходного налога?
+      <br />
+      Значит ещё{' '}
+      <Amount
+        value={income * 0.13}
+        currency={currency}
+        noShade
+        decMode="ifOnly"
+      />{' '}
+      ушло в казну 🇷🇺
+      {rate > 1 && (
+        <>
+          <br />
+          <br />
+          {getPeopleArray(rate).join(' ')}
+          <br />
+          {`Это ${rate} ${pluralize(rate, [
+            'средний россиянин',
+            'средних россиянина',
+            'средних россиян',
+          ])}.`}
+          <br />
+          Если сложить их зарплаты — получится ваша.
+        </>
+      )}
+    </Typography>
   )
 }
