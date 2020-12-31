@@ -34,7 +34,7 @@ export function IncomeCard({ byTag }) {
         <Typography variant="body1" align="center">
           Вы заработали
         </Typography>
-        <Typography variant="h4" align="center" className="income-amount">
+        <Typography variant="h4" align="center" className="green-gradient">
           <Amount value={total} currency={currency} noShade decMode="ifOnly" />
         </Typography>
 

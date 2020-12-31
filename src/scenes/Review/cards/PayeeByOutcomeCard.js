@@ -21,7 +21,7 @@ export function PayeeByOutcomeCard({ byPayee }) {
   return (
     <Card>
       <Rhythm gap={1} alignItems="center">
-        <Typography variant="h4" align="center" className="outcome-amount">
+        <Typography variant="h4" align="center" className="red-gradient">
           {topPayee}
         </Typography>
         <Typography variant="body1" align="center">

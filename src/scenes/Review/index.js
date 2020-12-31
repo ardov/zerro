@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { Box, Typography } from '@material-ui/core'
+import { Box, Button, Typography } from '@material-ui/core'
 import { useSelector } from 'react-redux'
 import './index.scss'
-import { getAccountsHistory, getYearStats } from './selectors'
-import { getAccounts, getAccountList } from 'store/localData/accounts'
+import { getYearStats } from './selectors'
+// import { getAccounts, getAccountList } from 'store/localData/accounts'
 import Rhythm from 'components/Rhythm'
 import TransactionsDrawer from 'components/TransactionsDrawer'
 import { OutcomeCard } from './cards/OutcomeCard'
@@ -37,14 +37,17 @@ export default function Review() {
   return (
     <>
       <Box className="container">
-        <Rhythm gap={2} axis="y" p={3}>
-          <CardTitle year={year} setYear={setYear} />
+        <Rhythm gap={2} axis="y" p={3} pb={10}>
+          <CardTitle year={year} />
           <IncomeCard byTag={byTag} />
           <PayeeByOutcomeCard byPayee={byPayee} />
           <PayeeByFrequencyCard byPayee={byPayee} />
           <OutcomeCard transaction={total.outcomeTransactions[0]} />
           <QRCard value={receipts} />
           <NoCategoryCard value={noCategoryValue} />
+          <Button onClick={() => setYear(year - 1)}>
+            А что было в прошлом году?
+          </Button>
         </Rhythm>
       </Box>
 
@@ -57,9 +60,9 @@ export default function Review() {
   )
 }
 
-function CardTitle({ year, setYear }) {
+function CardTitle({ year }) {
   return (
-    <Card onClick={() => setYear(year - 1)}>
+    <Card>
       <Typography
         variant="body1"
         align="center"
