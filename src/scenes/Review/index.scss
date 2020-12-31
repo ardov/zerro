@@ -34,6 +34,22 @@
   -moz-text-fill-color: transparent;
 }
 
+.info-gradient {
+  background-color: #04aff9;
+  background-image: linear-gradient(
+    93.12deg,
+    #04f9ea 0%,
+    #04aff9 51.29%,
+    #262ee6 100%
+  );
+  background-size: 150%;
+  background-repeat: repeat;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+  animation: gradient-animation 10s infinite alternate ease-in-out;
+}
+
 .results {
   letter-spacing: 8px;
 }

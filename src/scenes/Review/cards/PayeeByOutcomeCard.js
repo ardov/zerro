@@ -20,8 +20,8 @@ export function PayeeByOutcomeCard({ byPayee }) {
   if (!outcome) return null
   return (
     <Card>
-      <Rhythm gap={1}>
-        <Typography variant="h4" align="center">
+      <Rhythm gap={1} alignItems="center">
+        <Typography variant="h4" align="center" className="outcome-amount">
           {topPayee}
         </Typography>
         <Typography variant="body1" align="center">

@@ -22,11 +22,11 @@ export function PayeeByFrequencyCard({ byPayee }) {
   if (!outcome) return null
   return (
     <Card>
-      <Rhythm gap={1}>
+      <Rhythm gap={1} alignItems="center">
         <Typography variant="body1" align="center">
           Любимое место
         </Typography>
-        <Typography variant="h4" align="center">
+        <Typography variant="h4" align="center" className="info-gradient">
           {topPayee}
         </Typography>
         <Typography variant="body1" align="center">
