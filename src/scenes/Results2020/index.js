@@ -6,12 +6,12 @@ import { getAccountsHistory, getYearStats } from './selectors'
 import { getAccounts, getAccountList } from 'store/localData/accounts'
 import Rhythm from 'components/Rhythm'
 import TransactionsDrawer from 'components/TransactionsDrawer'
-import { OutcomeCard } from './OutcomeCard'
-import { NoCategoryCard } from './NoCategoryCard'
-import { QRCard } from './QRCard'
-import { PayeeByOutcomeCard } from './PayeeByOutcomeCard'
-import { PayeeByFrequencyCard } from './PayeeByFrequencyCard'
-import { IncomeCard } from './IncomeCard'
+import { OutcomeCard } from './cards/OutcomeCard'
+import { NoCategoryCard } from './cards/NoCategoryCard'
+import { QRCard } from './cards/QRCard'
+import { PayeeByOutcomeCard } from './cards/PayeeByOutcomeCard'
+import { PayeeByFrequencyCard } from './cards/PayeeByFrequencyCard'
+import { IncomeCard } from './cards/IncomeCard'
 
 export default function Stats() {
   const yearStats = useSelector(getYearStats)
