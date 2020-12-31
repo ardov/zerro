@@ -56,10 +56,11 @@
   -moz-text-fill-color: transparent;
 
   &.shadow {
+    user-select: none;
     position: absolute;
     top: 8px;
     z-index: 1;
-    opacity: 0.3;
+    opacity: 0.4;
     filter: blur(12px);
   }
 }

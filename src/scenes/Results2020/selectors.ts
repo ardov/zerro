@@ -116,9 +116,6 @@ export const getAccountsHistory = createSelector(
  *
  */
 
-const dateStart = +new Date(2020, 0, 1)
-const dateEnd = +new Date(2021, 0, 1)
-
 interface InfoNode {
   income: number
   outcome: number
@@ -148,77 +145,80 @@ const createInfoNode = (): InfoNode => ({
   transferTransactions: [],
 })
 
-export const getYearStats = createSelector(
-  [getSortedTransactions, convertCurrency],
-  (
-    allTransactions: Transaction[],
-    convert: (amount: number, id: InstrumentId) => number
-  ) => {
-    if (!allTransactions?.length) return null
-    const transactions = allTransactions
-      .filter(tr => !tr.deleted && tr.date >= dateStart && tr.date < dateEnd)
-      .sort(compareByAmount(convert))
+export const getYearStats = (year: number) =>
+  createSelector(
+    [getSortedTransactions, convertCurrency],
+    (
+      allTransactions: Transaction[],
+      convert: (amount: number, id: InstrumentId) => number
+    ) => {
+      if (!allTransactions?.length) return null
+      const dateStart = +new Date(year, 0, 1)
+      const dateEnd = +new Date(year + 1, 0, 1)
+      const transactions = allTransactions
+        .filter(tr => !tr.deleted && tr.date >= dateStart && tr.date < dateEnd)
+        .sort(compareByAmount(convert))
+      if (!transactions?.length) return null
+      let receipts = {} as any
 
-    let receipts = {} as any
+      let stats = {
+        total: createInfoNode(),
+        receipts: 0,
+        withGeo: 0,
+        byPayee: {},
+        byMerchant: {},
+        byInstrument: {},
+        byTag: {},
+        byMonth: {},
+        byWeekday: {},
+      } as Stats
 
-    let stats = {
-      total: createInfoNode(),
-      receipts: 0,
-      withGeo: 0,
-      byPayee: {},
-      byMerchant: {},
-      byInstrument: {},
-      byTag: {},
-      byMonth: {},
-      byWeekday: {},
-    } as Stats
+      function addToNode(node: InfoNode, tr: Transaction) {
+        const type = getType(tr)
+        if (type === 'transfer') {
+          node.transferTransactions.push(tr)
+        }
+        if (type === 'income') {
+          node.income += convert(tr.income, tr.incomeInstrument)
+          node.incomeTransactions.push(tr)
+        }
+        if (type === 'outcome') {
+          node.outcome += convert(tr.outcome, tr.outcomeInstrument)
+          node.outcomeTransactions.push(tr)
+        }
+      }
 
-    function addToNode(node: InfoNode, tr: Transaction) {
-      const type = getType(tr)
-      if (type === 'transfer') {
-        node.transferTransactions.push(tr)
+      function groupBy(
+        field: keyof Transaction | Function,
+        object: any,
+        tr: Transaction
+      ) {
+        let key
+        if (typeof field === 'string') key = tr[field]
+        if (typeof field === 'function') key = field(tr)
+        if ((typeof key === 'string' || typeof key === 'number') && key) {
+          if (!object[key]) object[key] = createInfoNode()
+          addToNode(object[key], tr)
+        }
       }
-      if (type === 'income') {
-        node.income += convert(tr.income, tr.incomeInstrument)
-        node.incomeTransactions.push(tr)
-      }
-      if (type === 'outcome') {
-        node.outcome += convert(tr.outcome, tr.outcomeInstrument)
-        node.outcomeTransactions.push(tr)
-      }
+
+      transactions.forEach(tr => {
+        addToNode(stats.total, tr)
+        if (tr.qrCode) receipts[tr.qrCode] = true
+        if (tr.latitude) stats.withGeo++
+        groupBy('payee', stats.byPayee, tr)
+        groupBy('merchant', stats.byMerchant, tr)
+        groupBy('incomeInstrument', stats.byInstrument, tr)
+        groupBy('outcomeInstrument', stats.byInstrument, tr)
+        groupBy(getMainTag, stats.byTag, tr)
+        groupBy(getMonth, stats.byMonth, tr)
+        groupBy(getWeekday, stats.byWeekday, tr)
+      })
+
+      stats.receipts = Object.keys(receipts).length
+      return stats
     }
-
-    function groupBy(
-      field: keyof Transaction | Function,
-      object: any,
-      tr: Transaction
-    ) {
-      let key
-      if (typeof field === 'string') key = tr[field]
-      if (typeof field === 'function') key = field(tr)
-      if ((typeof key === 'string' || typeof key === 'number') && key) {
-        if (!object[key]) object[key] = createInfoNode()
-        addToNode(object[key], tr)
-      }
-    }
-
-    transactions.forEach(tr => {
-      addToNode(stats.total, tr)
-      if (tr.qrCode) receipts[tr.qrCode] = true
-      if (tr.latitude) stats.withGeo++
-      groupBy('payee', stats.byPayee, tr)
-      groupBy('merchant', stats.byMerchant, tr)
-      groupBy('incomeInstrument', stats.byInstrument, tr)
-      groupBy('outcomeInstrument', stats.byInstrument, tr)
-      groupBy(getMainTag, stats.byTag, tr)
-      groupBy(getMonth, stats.byMonth, tr)
-      groupBy(getWeekday, stats.byWeekday, tr)
-    })
-
-    stats.receipts = Object.keys(receipts).length
-    return stats
-  }
-)
+  )
 
 function getMainTag(tr: Transaction) {
   return tr.tag?.[0] || 'null'

@@ -16,7 +16,7 @@ export function IncomeCard({ byTag }) {
     .sort((a, b) => byTag[b].income - byTag[a].income)
 
   const [checked, setChecked] = useState(incomeTags)
-  const total = checked.reduce((sum, id) => (sum += byTag[id].income), 0)
+  const total = checked.reduce((sum, id) => (sum += byTag[id]?.income || 0), 0)
 
   const toggle = id => {
     if (checked.includes(id)) {

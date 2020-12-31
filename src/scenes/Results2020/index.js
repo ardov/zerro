@@ -15,7 +15,8 @@ import { IncomeCard } from './cards/IncomeCard'
 import { Card } from './cards/Card'
 
 export default function Stats() {
-  const yearStats = useSelector(getYearStats)
+  const [year, setYear] = useState(2020)
+  const yearStats = useSelector(getYearStats(year))
   console.log('yearStats', yearStats)
   const [selected, setSelected] = useState({})
 
@@ -35,7 +36,7 @@ export default function Stats() {
     <>
       <Box className="container">
         <Rhythm gap={2} axis="y" p={3}>
-          <CardTitle year={2020} />
+          <CardTitle year={year} setYear={setYear} />
           <IncomeCard byTag={byTag} />
           <PayeeByOutcomeCard byPayee={byPayee} />
           <PayeeByFrequencyCard byPayee={byPayee} />
@@ -54,9 +55,9 @@ export default function Stats() {
   )
 }
 
-function CardTitle({ year }) {
+function CardTitle({ year, setYear }) {
   return (
-    <Card>
+    <Card onClick={() => setYear(year - 1)}>
       <Typography
         variant="body1"
         align="center"
