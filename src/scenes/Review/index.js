@@ -14,7 +14,7 @@ import { PayeeByFrequencyCard } from './cards/PayeeByFrequencyCard'
 import { IncomeCard } from './cards/IncomeCard'
 import { Card } from './cards/Card'
 
-export default function Stats() {
+export default function Review() {
   const [year, setYear] = useState(2020)
   const yearStats = useSelector(getYearStats(year))
   console.log('yearStats', yearStats)
