@@ -30,6 +30,9 @@ export function createTheme(type: 'light' | 'dark' = 'light') {
     shape: { borderRadius: 8 },
     typography: {
       fontFamily: "'IBM Plex Sans', sans-serif",
+      h4: { fontWeight: 500 },
+      subtitle1: { fontWeight: 500 },
+      subtitle2: { fontWeight: 500 },
       button: { textTransform: 'none' },
     },
   })
