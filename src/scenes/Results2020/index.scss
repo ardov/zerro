@@ -1,7 +1,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  min-width: 100vh;
+  min-height: 100vh;
   align-items: center;
   width: 100%;
 }
@@ -32,4 +32,34 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
   -moz-text-fill-color: transparent;
+}
+
+.results {
+  letter-spacing: 8px;
+}
+
+.year {
+  z-index: 2;
+  background-color: rgb(230, 35, 0);
+
+  background-image: linear-gradient(
+    106.35deg,
+    #dfffc6 0%,
+    #135377 35.42%,
+    #cf26eb 69.79%,
+    #f88341 100%
+  );
+  background-size: 100%;
+  background-repeat: repeat;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+
+  &.shadow {
+    position: absolute;
+    top: 8px;
+    z-index: 1;
+    opacity: 0.3;
+    filter: blur(12px);
+  }
 }

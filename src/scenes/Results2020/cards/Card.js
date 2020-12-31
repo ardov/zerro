@@ -5,7 +5,7 @@ export const Card = props => (
   <Box
     bgcolor="background.paper"
     maxWidth={480}
-    minHeight={320}
+    minHeight={280}
     borderRadius={16}
     py={4}
     px={2}
