@@ -14,8 +14,7 @@ export function NoCategoryCard({ value }) {
               {value} {pluralize(value, ['операция', 'операции', 'операций'])}
             </Typography>
             <Typography variant="body1" align="center">
-              {pluralize(value, ['осталась', 'остались', 'остались'])} без
-              категории
+              не {pluralize(value, ['нашла', 'нашли', 'нашли'])} свою категорию
             </Typography>
           </>
         ) : (

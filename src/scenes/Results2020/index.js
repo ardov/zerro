@@ -23,8 +23,10 @@ export default function Stats() {
   if (!yearStats) return null
   const { total, byTag, receipts, byPayee } = yearStats
 
-  const noCategoryValue =
-    byTag.null.incomeTransactions.length + byTag.null.outcomeTransactions.length
+  const noCategoryValue = byTag.null
+    ? byTag.null.incomeTransactions.length +
+      byTag.null.outcomeTransactions.length
+    : 0
 
   const filterConditions = {
     accounts: [selected.id],

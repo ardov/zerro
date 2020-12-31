@@ -13,6 +13,7 @@ export function PayeeByOutcomeCard({ byPayee }) {
     (a, b) => byPayee[b].outcome - byPayee[a].outcome
   )
   const topPayee = sortedPayees[0]
+  if (!topPayee) return null
   const transactions = byPayee[topPayee].outcomeTransactions.length
   const outcome = byPayee[topPayee].outcome
 

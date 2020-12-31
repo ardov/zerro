@@ -15,6 +15,7 @@ export function PayeeByFrequencyCard({ byPayee }) {
       byPayee[a].outcomeTransactions.length
   )
   const topPayee = sortedPayees[0]
+  if (!topPayee) return null
   const transactions = byPayee[topPayee].outcomeTransactions.length
   const outcome = byPayee[topPayee].outcome
 
