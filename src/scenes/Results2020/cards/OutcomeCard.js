@@ -20,7 +20,7 @@ export function OutcomeCard({ transaction }) {
       <Typography variant="body1" align="center">
         Покупка года
       </Typography>
-      <Rhythm gap={1} my={3}>
+      <Rhythm gap={1} my={1} alignItems="center">
         <Typography variant="h4" align="center" className="outcome-amount">
           <Amount value={outcome} currency={currency} noShade decMode="ifAny" />
         </Typography>

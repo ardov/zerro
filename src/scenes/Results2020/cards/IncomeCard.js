@@ -30,7 +30,7 @@ export function IncomeCard({ byTag }) {
 
   return (
     <Card>
-      <Rhythm gap={1}>
+      <Rhythm gap={1} alignItems="center">
         <Typography variant="body1" align="center">
           Вы заработали
         </Typography>
