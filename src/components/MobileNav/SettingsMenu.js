@@ -13,6 +13,7 @@ import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
 import { Box, Divider, Menu, MenuItem, Typography } from '@material-ui/core'
 import { useHistory } from 'react-router'
 import { Link } from 'react-router-dom'
+import WhatshotIcon from '@material-ui/icons/Whatshot'
 
 const useStyles = makeStyles(({ spacing }) => ({
   menuIcon: { marginRight: spacing(1) },
@@ -72,6 +73,11 @@ function SettingsMenu({
       <MenuItem component={Link} to="/donation">
         <FavoriteBorderIcon className={classes.menuIcon} color="action" />
         Поддержать проект
+      </MenuItem>
+
+      <MenuItem component={Link} to="/review">
+        <WhatshotIcon className={classes.menuIcon} color="action" />
+        <span className="red-gradient">Итоги года</span>
       </MenuItem>
 
       <Box my={1}>

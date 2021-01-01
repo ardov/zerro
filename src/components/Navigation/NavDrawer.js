@@ -20,6 +20,7 @@ import AccountBalanceIcon from '@material-ui/icons/AccountBalance'
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
 import SyncAltIcon from '@material-ui/icons/SyncAlt'
+import WhatshotIcon from '@material-ui/icons/Whatshot'
 
 const routes = [
   { path: '/budget', label: 'Бюджет', icon: <AccountBalanceIcon /> },
@@ -64,6 +65,20 @@ export default function NavigationDrawer(props) {
                 <ListItemText primary={route.label} />
               </ListItem>
             ))}
+            <ListItem
+              className={c.listItem}
+              button
+              selected={path.startsWith('/review')}
+              component={Link}
+              to="/review"
+            >
+              <ListItemIcon>
+                <WhatshotIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary={<span className="red-gradient">Итоги года</span>}
+              />
+            </ListItem>
           </List>
         </Box>
 

@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import Transactions from 'scenes/Transactions'
 import Auth from 'scenes/Auth'
 import Budgets from 'scenes/Budgets'
+import Review from 'scenes/Review'
 import { getLoginState } from 'store/token'
 import RegularSyncHandler from 'components/RegularSyncHandler'
 import CssBaseline from '@material-ui/core/CssBaseline'
@@ -74,6 +75,7 @@ const PrivateApp = () => {
           {hasData ? (
             <Switch>
               <Route path="/transactions" component={Transactions} />
+              <Route path="/review" component={Review} />
               <Route path="/accounts" component={Accounts} />
               <Route path="/budget/:month" component={Budgets} />
               <Route path="/budget" component={Budgets} />
