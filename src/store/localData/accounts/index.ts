@@ -1,15 +1,19 @@
-import { createSlice, createSelector } from 'redux-starter-kit'
-import populate from './populate'
+import { createSlice, createSelector } from '@reduxjs/toolkit'
+import { populate, PopulatedAccount } from './populate'
 import { getInstruments } from 'store/serverData'
 import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
 import { convertToSyncArray } from 'helpers/converters'
+import { Account, AccountId } from 'types'
+import { RootState } from 'store'
 
 // INITIAL STATE
-const initialState = {}
+const initialState = {} as {
+  [key: string]: Account
+}
 
 // SLICE
 const slice = createSlice({
-  slice: 'account',
+  name: 'account',
   initialState,
   reducers: {
     setAccount: (state, { payload }) => {
@@ -19,11 +23,12 @@ const slice = createSlice({
       })
     },
   },
-  extraReducers: {
-    [wipeData]: () => initialState,
-    [updateData]: (state, { payload }) => {
-      removeSyncedFunc(state, payload.syncStartTime)
-    },
+  extraReducers: builder => {
+    builder
+      .addCase(wipeData, () => initialState)
+      .addCase(updateData, (state, { payload }) => {
+        removeSyncedFunc(state, payload.syncStartTime || 0)
+      })
   },
 })
 
@@ -34,8 +39,8 @@ export default slice.reducer
 export const { setAccount } = slice.actions
 
 // SELECTORS
-const getServerAccounts = state => state.serverData.account
-const getChangedAccounts = state => state.localData.account
+const getServerAccounts = (state: RootState) => state.serverData.account
+const getChangedAccounts = (state: RootState) => state.localData.account
 
 export const getAccounts = createSelector(
   [getServerAccounts, getChangedAccounts],
@@ -45,9 +50,10 @@ export const getAccounts = createSelector(
   })
 )
 
-export const getAccount = (state, id) => getAccounts(state)[id]
+export const getAccount = (state: RootState, id: AccountId) =>
+  getAccounts(state)[id]
 
-export const getAccountsToSync = state =>
+export const getAccountsToSync = (state: RootState) =>
   convertToSyncArray(getChangedAccounts(state))
 
 // Used only for CSV
@@ -55,7 +61,7 @@ export const getAccountsToSync = state =>
 export const getPopulatedAccounts = createSelector(
   [getInstruments, getAccounts],
   (instruments, accounts) => {
-    const result = {}
+    const result = {} as { [x: string]: PopulatedAccount }
     for (const id in accounts) {
       result[id] = populate({ instruments }, accounts[id])
     }

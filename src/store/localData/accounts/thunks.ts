@@ -1,26 +1,32 @@
 import { getRootUser } from 'store/serverData'
 import { setAccount, getAccounts } from './index'
+import { AppThunk } from 'store'
 
 import { sendEvent } from 'helpers/tracking'
 import { getDataAccountId } from '../hiddenData/selectors'
 import { makeDataAcc } from '../hiddenData/helpers'
+import { AccountId } from 'types'
 
-export const createDataAcc = () => (dispatch, getState) => {
+export const createDataAcc = (): AppThunk => (dispatch, getState) => {
   sendEvent(`Accounts: Create data accaunt`)
   const state = getState()
-  const user = getRootUser(state).id
-  const acc = makeDataAcc(user)
+  const user = getRootUser(state)
+  if (!user) return
+  const acc = makeDataAcc(user.id)
   dispatch(setAccount(acc))
 }
 
-export const checkDataAcc = () => (dispatch, getState) => {
+export const checkDataAcc = (): AppThunk => (dispatch, getState) => {
   const state = getState()
   if (!getDataAccountId(state)) {
     dispatch(createDataAcc())
   }
 }
 
-export const setInBudget = (id, inBalance) => (dispatch, getState) => {
+export const setInBudget = (id: AccountId, inBalance: boolean): AppThunk => (
+  dispatch,
+  getState
+) => {
   sendEvent(`Accounts: Set in budget`)
   const state = getState()
   const account = getAccounts(state)[id]
