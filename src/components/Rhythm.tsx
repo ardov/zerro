@@ -9,12 +9,12 @@ const useStyles = makeStyles(theme => ({
   y: {
     display: 'flex',
     flexDirection: 'column',
-    '& > * + *': { marginTop: ({ gap }:StylesProps) => theme.spacing(gap) },
+    '& > * + *': { marginTop: ({ gap }: StylesProps) => theme.spacing(gap) },
   },
   x: {
     display: 'flex',
     flexDirection: 'row',
-    '& > * + *': { marginLeft: ({ gap }:StylesProps) => theme.spacing(gap) },
+    '& > * + *': { marginLeft: ({ gap }: StylesProps) => theme.spacing(gap) },
   },
 }))
 
@@ -23,7 +23,12 @@ type RhythmProps = BoxProps & {
   axis?: 'y' | 'x'
 }
 
-export default function Rhythm({ gap = 0, axis = 'y', children, ...rest }:RhythmProps) {
+export default function Rhythm({
+  gap = 0,
+  axis = 'y',
+  children,
+  ...rest
+}: RhythmProps) {
   const classes = useStyles({ gap })
   return (
     <Box className={classes[axis]} {...rest}>
