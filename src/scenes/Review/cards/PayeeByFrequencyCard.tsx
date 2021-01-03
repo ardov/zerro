@@ -6,11 +6,18 @@ import { Amount } from 'components/Amount'
 import { getUserCurrencyCode } from 'store/serverData'
 import pluralize from 'helpers/pluralize'
 import { Card } from './Card'
+import { Stats } from '../selectors'
 
-export function PayeeByOutcomeCard({ byPayee }) {
+interface PayeeByFrequencyCardProps {
+  byPayee: Stats['byPayee']
+}
+
+export function PayeeByFrequencyCard({ byPayee }: PayeeByFrequencyCardProps) {
   const currency = useSelector(getUserCurrencyCode)
   const sortedPayees = Object.keys(byPayee).sort(
-    (a, b) => byPayee[b].outcome - byPayee[a].outcome
+    (a, b) =>
+      byPayee[b].outcomeTransactions.length -
+      byPayee[a].outcomeTransactions.length
   )
   const topPayee = sortedPayees[0]
   if (!topPayee) return null
@@ -21,20 +28,26 @@ export function PayeeByOutcomeCard({ byPayee }) {
   return (
     <Card>
       <Rhythm gap={1} alignItems="center">
-        <Typography variant="h4" align="center" className="red-gradient">
+        <Typography variant="body1" align="center">
+          Любимое место
+        </Typography>
+        <Typography variant="h4" align="center" className="info-gradient">
           {topPayee}
         </Typography>
         <Typography variant="body1" align="center">
-          Здесь вы оставили{' '}
+          {transactions}
+          {' '}
+          {pluralize(transactions, ['покупка', 'покупки', 'покупок'])} со
+          средним чеком{' '}
           <Amount
-            value={outcome}
+            value={outcome / transactions}
             currency={currency}
             noShade
             decMode="ifOnly"
-          />{' '}
-          ({transactions}
-          {' '}
-          {pluralize(transactions, ['покупка', 'покупки', 'покупок'])})
+          />
+          .
+          <br />А всего потратили{' '}
+          <Amount value={outcome} currency={currency} noShade decMode="ifAny" />
         </Typography>
       </Rhythm>
     </Card>

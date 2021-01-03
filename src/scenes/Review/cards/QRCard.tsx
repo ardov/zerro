@@ -4,26 +4,26 @@ import Rhythm from 'components/Rhythm'
 import pluralize from 'helpers/pluralize'
 import { Card } from './Card'
 
-export function NoCategoryCard({ value }) {
+export function QRCard({ value = 0 }) {
   return (
     <Card>
       <Rhythm gap={1}>
         {value ? (
           <>
-            <Typography variant="h4" align="center">
-              {value} {pluralize(value, ['операция', 'операции', 'операций'])}
-            </Typography>
             <Typography variant="body1" align="center">
-              не {pluralize(value, ['нашла', 'нашли', 'нашли'])} свою категорию
+              Вы прикрепили
+            </Typography>
+            <Typography variant="h4" align="center">
+              {value} {pluralize(value, ['чек', 'чека', 'чеков'])}
             </Typography>
           </>
         ) : (
           <>
             <Typography variant="h4" align="center">
-              👍
+              Ни одного чека
             </Typography>
             <Typography variant="body1" align="center">
-              Круто! Ни одной операции без категории!
+              Ну и фиг с ними
             </Typography>
           </>
         )}

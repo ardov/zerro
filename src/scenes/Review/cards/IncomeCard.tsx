@@ -7,8 +7,13 @@ import { getUserCurrencyCode } from 'store/serverData'
 import { getPopulatedTags } from 'store/localData/tags'
 import pluralize from 'helpers/pluralize'
 import { Card } from './Card'
+import { Stats } from '../selectors'
 
-export function IncomeCard({ byTag }) {
+interface IncomeCardProps {
+  byTag: Stats['byTag']
+}
+
+export function IncomeCard({ byTag }: IncomeCardProps) {
   const currency = useSelector(getUserCurrencyCode)
   const tags = useSelector(getPopulatedTags)
   const incomeTags = Object.keys(byTag)
@@ -18,7 +23,7 @@ export function IncomeCard({ byTag }) {
   const [checked, setChecked] = useState(incomeTags)
   const total = checked.reduce((sum, id) => (sum += byTag[id]?.income || 0), 0)
 
-  const toggle = id => {
+  const toggle = (id: string) => {
     if (checked.includes(id)) {
       setChecked(checked.filter(tagId => tagId !== id))
     } else {
@@ -68,7 +73,7 @@ export function IncomeCard({ byTag }) {
   )
 }
 
-function getPeopleArray(length) {
+function getPeopleArray(length: number) {
   const people = ['👩🏼', '👨🏼‍🦳', '👨🏻', '👨🏼‍🦲', '👦🏽', '👩🏻', '👵🏻', '👴🏼']
   let arr = []
   for (let i = 0; i < length; i++) {
@@ -77,10 +82,16 @@ function getPeopleArray(length) {
   return arr
 }
 
-function NotFunFact({ income, currency }) {
+function NotFunFact({
+  income,
+  currency,
+}: {
+  income: number
+  currency: string
+}) {
   const AVG_MONTHLY_INCOME = 35000
   const monthlyIncome = income / 12
-  const rate = (monthlyIncome / AVG_MONTHLY_INCOME).toFixed(0)
+  const rate = +(monthlyIncome / AVG_MONTHLY_INCOME).toFixed(0)
   return (
     <Typography variant="body1" align="center">
       Платили 13% подоходного налога?

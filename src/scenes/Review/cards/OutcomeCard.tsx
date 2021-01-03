@@ -7,8 +7,9 @@ import { Amount } from 'components/Amount'
 import { getInstruments } from 'store/serverData'
 import { getPopulatedTags } from 'store/localData/tags'
 import { Card } from './Card'
+import { Transaction } from 'types'
 
-export function OutcomeCard({ transaction }) {
+export function OutcomeCard({ transaction }: { transaction: Transaction }) {
   const { outcome, outcomeInstrument, date, comment, payee, tag } = transaction
   const currency = useSelector(getInstruments)[outcomeInstrument].shortTitle
   const tagTitle = useSelector(getPopulatedTags)[tag?.[0] || 'null'].title

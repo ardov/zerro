@@ -5,7 +5,6 @@ import './index.scss'
 import { getYearStats } from './selectors'
 // import { getAccounts, getAccountList } from 'store/localData/accounts'
 import Rhythm from 'components/Rhythm'
-import TransactionsDrawer from 'components/TransactionsDrawer'
 import { OutcomeCard } from './cards/OutcomeCard'
 import { NoCategoryCard } from './cards/NoCategoryCard'
 import { QRCard } from './cards/QRCard'
@@ -18,7 +17,6 @@ export default function Review() {
   const [year, setYear] = useState(2020)
   const yearStats = useSelector(getYearStats(year))
   console.log('yearStats', yearStats)
-  const [selected, setSelected] = useState({})
 
   if (!yearStats) return null
   const { total, byTag, receipts, byPayee } = yearStats
@@ -28,39 +26,25 @@ export default function Review() {
       byTag.null.outcomeTransactions.length
     : 0
 
-  const filterConditions = {
-    accounts: [selected.id],
-    dateFrom: selected.date,
-    dateTo: selected.date,
-  }
-
   return (
-    <>
-      <Box className="container">
-        <Rhythm gap={2} axis="y" p={3} pb={10}>
-          <CardTitle year={year} />
-          <IncomeCard byTag={byTag} />
-          <PayeeByOutcomeCard byPayee={byPayee} />
-          <PayeeByFrequencyCard byPayee={byPayee} />
-          <OutcomeCard transaction={total.outcomeTransactions[0]} />
-          <QRCard value={receipts} />
-          <NoCategoryCard value={noCategoryValue} />
-          <Button onClick={() => setYear(year - 1)}>
-            А что было в прошлом году?
-          </Button>
-        </Rhythm>
-      </Box>
-
-      <TransactionsDrawer
-        filterConditions={filterConditions}
-        open={!!selected.date && !!selected.id}
-        onClose={() => setSelected({})}
-      />
-    </>
+    <Box className="container">
+      <Rhythm gap={2} axis="y" p={3} pb={10}>
+        <CardTitle year={year} />
+        <IncomeCard byTag={byTag} />
+        <PayeeByOutcomeCard byPayee={byPayee} />
+        <PayeeByFrequencyCard byPayee={byPayee} />
+        <OutcomeCard transaction={total.outcomeTransactions[0]} />
+        <QRCard value={receipts} />
+        <NoCategoryCard value={noCategoryValue} />
+        <Button onClick={() => setYear(year - 1)}>
+          А что было в прошлом году?
+        </Button>
+      </Rhythm>
+    </Box>
   )
 }
 
-function CardTitle({ year }) {
+function CardTitle({ year }: { year: number }) {
   return (
     <Card>
       <Typography

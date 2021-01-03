@@ -1,7 +1,7 @@
 import React from 'react'
-import { Box } from '@material-ui/core'
+import { Box, BoxProps } from '@material-ui/core'
 
-export const Card = props => (
+export const Card = (props: BoxProps) => (
   <Box
     bgcolor="background.paper"
     maxWidth={480}

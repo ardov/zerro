@@ -124,7 +124,7 @@ interface InfoNode {
   transferTransactions: Transaction[]
 }
 
-interface Stats {
+export interface Stats {
   total: InfoNode
   receipts: number
   withGeo: number
