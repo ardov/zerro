@@ -1,15 +1,14 @@
 import React from 'react'
-import { Box, Typography } from '@material-ui/core'
+import { Box, BoxProps, Typography } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import { Amount } from '../../../components/Amount'
 
-type TotalProps = {
+interface TotalProps extends BoxProps {
   name: string
   value: number
   align?: 'center' | 'right' | 'left'
   currency?: string
   sign?: boolean
-  [x: string]: any
 }
 
 export function Total({
@@ -39,12 +38,11 @@ export function Total({
   )
 }
 
-type LineProps = {
+interface LineProps extends BoxProps {
   name: string
   amount: number
   description: string
   currency?: string
-  [x: string]: any
 }
 
 export function Line({

@@ -10,8 +10,8 @@ type AmountProps = {
   noShade?: boolean
   decimals?: number
   decMode?: 'always' | 'ifOnly' | 'ifAny'
-  intProps?: any
-  decProps?: any
+  intProps?: React.HTMLProps<HTMLSpanElement>
+  decProps?: React.HTMLProps<HTMLSpanElement>
 }
 
 export function Amount({
@@ -40,7 +40,7 @@ export function Amount({
     return (
       <>
         <span {...intProps}>{arr[0]},</span>
-        <span style={noShade ? null : decStyle} {...decProps}>
+        <span style={noShade ? undefined : decStyle} {...decProps}>
           {arr[1]}
         </span>
       </>
