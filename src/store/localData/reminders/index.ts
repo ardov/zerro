@@ -1,7 +1,7 @@
 import { createSlice, createSelector } from '@reduxjs/toolkit'
 import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
 import { convertToSyncArray } from 'helpers/converters'
-import { Reminder } from 'types'
+import { Reminder, ZmReminder } from 'types'
 import { RootState } from 'store'
 
 // INITIAL STATE
@@ -51,4 +51,4 @@ export const getReminders = createSelector(
 )
 
 export const getRemindersToSync = (state: RootState) =>
-  convertToSyncArray(getChangedReminders(state))
+  convertToSyncArray(getChangedReminders(state)) as ZmReminder[]

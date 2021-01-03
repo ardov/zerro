@@ -6,10 +6,10 @@ import { sortBy } from './helpers'
 import { convertToSyncArray } from 'helpers/converters'
 import { populate, PopulatedTransaction } from './populate'
 import { RootState } from 'store'
-import { TransactionId } from 'types'
+import { TransactionId, ZmTransaction } from 'types'
 
 const getTransactionsToSync = (state: RootState) =>
-  convertToSyncArray(state.localData.transaction)
+  convertToSyncArray(state.localData.transaction) as ZmTransaction[]
 
 const getServerTransactions = (state: RootState) => state.serverData.transaction
 const getLocalTransactions = (state: RootState) => state.localData.transaction

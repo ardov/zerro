@@ -3,7 +3,7 @@ import { populate, PopulatedAccount } from './populate'
 import { getInstruments } from 'store/serverData'
 import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
 import { convertToSyncArray } from 'helpers/converters'
-import { Account, AccountId } from 'types'
+import { Account, AccountId, ZmAccount } from 'types'
 import { RootState } from 'store'
 
 // INITIAL STATE
@@ -53,8 +53,8 @@ export const getAccounts = createSelector(
 export const getAccount = (state: RootState, id: AccountId) =>
   getAccounts(state)[id]
 
-export const getAccountsToSync = (state: RootState) =>
-  convertToSyncArray(getChangedAccounts(state))
+export const getAccountsToSync = (state: RootState): ZmAccount[] =>
+  convertToSyncArray(getChangedAccounts(state)) as ZmAccount[]
 
 // Used only for CSV
 // TODO: remove

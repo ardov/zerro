@@ -34,7 +34,7 @@ export const getLastChangeTime = (state: RootState) => {
   const arrays = getChangedArrays(state)
   let lastChange = 0
   Object.values(arrays).forEach(array =>
-    array.forEach(item => {
+    array.forEach((item: { changed: number; [x: string]: any }) => {
       lastChange = Math.max(item.changed, lastChange)
     })
   )

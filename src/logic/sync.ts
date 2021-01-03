@@ -8,12 +8,14 @@ import { captureError, sendEvent } from 'helpers/tracking'
 import { updateData } from 'store/commonActions'
 import { setSyncData } from 'store/lastSync'
 import { formatDate } from 'helpers/format'
+import { AppThunk } from 'store'
+import { ZmResponse, ObjectClass } from 'types'
 
 /** All syncs with zenmoney goes through this thunk */
-export const syncData = () => (dispatch, getState) => {
+export const syncData = (): AppThunk => (dispatch, getState) => {
   const state = getState()
   const changed = getChangedArrays(state)
-  const token = getToken(state)
+  const token = getToken(state) || ''
   const serverTimestamp = getLastSyncTime(state) / 1000 || 0
 
   const syncStartTime = Date.now()
@@ -34,19 +36,7 @@ export const syncData = () => (dispatch, getState) => {
       )
       dispatch(updateData({ data, syncStartTime }))
 
-      // Тут точно надо по-нормальному формировать список изменённых
-      // объектов, чтобы без дублирования и deletion туда не попадал
-      const deletionDomains = data.deletion
-        ? data.deletion.reduce((obj, item) => {
-            obj[item.object] = 1
-            return obj
-          }, {})
-        : {}
-
-      const changedDomains = [
-        ...Object.keys(data),
-        ...Object.keys(deletionDomains),
-      ]
+      const changedDomains = getChangedDomains(data)
       dispatch(saveDataLocally(changedDomains))
 
       console.log(`✅ Данные обновлены ${formatDate(new Date(), 'HH:mm:ss')}`)
@@ -66,4 +56,30 @@ export const syncData = () => (dispatch, getState) => {
       captureError(err)
     }
   )
+}
+
+const domains: ObjectClass[] = [
+  'instrument',
+  'company',
+  'user',
+  'account',
+  'tag',
+  'merchant',
+  'budget',
+  'reminder',
+  'reminderMarker',
+  'transaction',
+]
+
+function getChangedDomains(data: ZmResponse) {
+  let changedDomains: ObjectClass[] = []
+  function add(key: ObjectClass) {
+    if (changedDomains.includes(key)) return
+    changedDomains.push(key)
+  }
+  domains.forEach(key => {
+    if (data[key]) add(key)
+  })
+  if (data.deletion) data.deletion.forEach(item => add(item.object))
+  return changedDomains
 }

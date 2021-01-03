@@ -55,8 +55,8 @@ export const getTags = createSelector(
   })
 )
 
-export const getTagsToSync = (state: RootState) =>
-  convertToSyncArray(state.localData.tag)
+export const getTagsToSync = (state: RootState): Tag[] =>
+  convertToSyncArray(state.localData.tag) as Tag[]
 
 export const getTag = (state: RootState, id: string): Tag | undefined =>
   getTags(state)[id]

@@ -4,18 +4,16 @@ import { setToken } from 'store/token'
 import { wipeData } from 'store/commonActions'
 import { syncData } from 'logic/sync'
 import { clearLocalData } from './localData'
+import { AppThunk } from 'store'
 
-export const logIn = () => (dispatch, getState) => {
+export const logIn = (): AppThunk => async (dispatch, getState) => {
   dispatch(logOut())
-  ZenApi.getToken()
-    .then(token => {
-      dispatch(setToken(token))
-      dispatch(syncData())
-    })
-    .catch(err => console.warn('!!! Login failed', err))
+  const token = await ZenApi.getToken()
+  dispatch(setToken(token))
+  dispatch(syncData())
 }
 
-export const logOut = () => (dispatch, getState) => {
+export const logOut = (): AppThunk => (dispatch, getState) => {
   dispatch(wipeData())
   dispatch(setToken(null))
   dispatch(clearLocalData())

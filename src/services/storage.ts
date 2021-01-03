@@ -10,16 +10,16 @@ async function getDB() {
   return await openDB(BASE_NAME, VERSION, {
     upgrade: db => db.createObjectStore(STORE_NAME),
     blocked: () => console.log('DB blocked'),
-    blocking: e => e?.currentTarget?.close(),
+    blocking: () => console.log('DB blocking'),
   })
 }
 
 const storage = {
-  set: async (key, value) => {
+  set: async (key: string, value: any) => {
     const db = await getDB()
     return db.put(STORE_NAME, value, key)
   },
-  get: async key => {
+  get: async (key: string) => {
     const db = await getDB()
     return db.get(STORE_NAME, key)
   },
