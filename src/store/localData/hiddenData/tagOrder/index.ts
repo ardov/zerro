@@ -1,17 +1,25 @@
-import { createSelector } from 'redux-starter-kit'
+import { createSelector } from '@reduxjs/toolkit'
 import { getRawTagOrder } from '../selectors'
 import { sendEvent } from 'helpers/tracking'
 import { setHiddenData } from '../thunks'
 import { TAG_ORDER } from '../constants'
 import { getTagsTree } from 'store/localData/tags'
+import { PopulatedTag, TagId } from 'types'
+import { AppThunk } from 'store'
 
 // THUNKS
-export const setTagOrder = order => (dispatch, getState) => {
+export const setTagOrder = (order: TagId[]): AppThunk => (
+  dispatch,
+  getState
+) => {
   sendEvent(`Tag: sort`)
   dispatch(setHiddenData(TAG_ORDER, order))
 }
 
-export const moveTag = (startIndex, endIndex) => (dispatch, getState) => {
+export const moveTag = (startIndex: number, endIndex: number): AppThunk => (
+  dispatch,
+  getState
+) => {
   const state = getState()
   const list = getTagsTree(state).map(tag => tag.id)
   const [removed] = list.splice(startIndex, 1)
@@ -19,9 +27,12 @@ export const moveTag = (startIndex, endIndex) => (dispatch, getState) => {
   dispatch(setTagOrder(list))
 }
 
+type TagToCompare = Pick<PopulatedTag, 'id' | 'name'> & {
+  [x: string]: any
+}
 export const compareTags = createSelector(
   [getRawTagOrder],
-  tagOrder => (tag1, tag2) => {
+  tagOrder => (tag1: TagToCompare, tag2: TagToCompare) => {
     if (!tagOrder) return tag1.name.localeCompare(tag2.name)
 
     const i1 = tagOrder.findIndex(id => id === tag1.id)

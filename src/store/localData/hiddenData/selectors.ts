@@ -1,11 +1,13 @@
-import { createSelector } from 'redux-starter-kit'
+import { createSelector } from '@reduxjs/toolkit'
 import { getReminders } from 'store/localData/reminders'
 import { ACC_LINKS, TAG_ORDER, GOALS } from './constants'
 import { getAccountList } from 'store/localData/accounts'
 import { DATA_ACC_NAME } from './constants'
+import { RootState } from 'store'
+import { Reminder, TagId, ZmGoal } from 'types'
 
 // DATA ACCOUNT SELECTOR
-export function getDataAccountId(state) {
+export function getDataAccountId(state: RootState) {
   const dataAcc = getAccountList(state).find(acc => acc.title === DATA_ACC_NAME)
   return dataAcc ? dataAcc.id : null
 }
@@ -35,17 +37,29 @@ const getTagOrderReminder = createSelector(
 )
 
 // Get raw data from reminders
-export const getRawAccLinks = createSelector([getAccLinksReminder], reminder =>
-  parseDataFromReminder(reminder)
-)
-export const getRawGoals = createSelector([getGoalsReminder], reminder =>
-  parseDataFromReminder(reminder)
-)
-export const getRawTagOrder = createSelector([getTagOrderReminder], reminder =>
-  parseDataFromReminder(reminder)
+export interface AccLinks {
+  [accId: string]: TagId
+}
+export const getRawAccLinks = createSelector(
+  [getAccLinksReminder],
+  reminder => parseDataFromReminder(reminder) as AccLinks | null
 )
 
-function parseDataFromReminder(reminder) {
+export interface RawGoals {
+  [tagId: string]: ZmGoal
+}
+export const getRawGoals = createSelector(
+  [getGoalsReminder],
+  reminder => parseDataFromReminder(reminder) as RawGoals | null
+)
+
+export const getRawTagOrder = createSelector(
+  [getTagOrderReminder],
+  reminder => parseDataFromReminder(reminder) as TagId[] | null
+)
+
+function parseDataFromReminder(reminder?: Reminder) {
+  if (!reminder?.comment) return null
   try {
     return JSON.parse(reminder.comment)
   } catch (error) {

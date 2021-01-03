@@ -5,7 +5,7 @@ type TagDraft = OptionalExceptFor<Tag, 'user' | 'title'>
 
 export default function makeTag(raw: TagDraft): Tag {
   return {
-    id: raw.id === null ? null : raw.id || uuidv1(),
+    id: String(raw.id) || uuidv1(),
     changed: raw.changed || Date.now(),
     user: raw.user,
     title: raw.title,
@@ -24,7 +24,7 @@ export default function makeTag(raw: TagDraft): Tag {
 export const nullTag = makeTag({
   title: 'Без категории',
   user: 0,
-  id: null,
+  id: 'null',
   budgetIncome: true,
   budgetOutcome: true,
 })
