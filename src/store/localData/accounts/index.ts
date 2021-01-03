@@ -73,19 +73,26 @@ export const getAccountList = createSelector([getAccounts], accounts =>
   Object.values(accounts).sort((a, b) => b.balance - a.balance)
 )
 
+export const getDebtAccountId = createSelector([getAccountList], accounts => {
+  for (const acc of accounts) {
+    if (acc.type === 'debt') return acc.id
+  }
+})
+
 export const getCredits = createSelector([getAccountList], list =>
   list.filter(a => !a.archive && a.balance < 0)
 )
 
 export const getAccountsInBudget = createSelector([getAccountList], accounts =>
-  accounts.filter(
-    a => a.title.endsWith('📍') || (a.inBalance && a.type !== 'debt')
-  )
+  accounts.filter(isInBudget)
 )
 
 export const getSavingAccounts = createSelector([getAccountList], accounts =>
-  accounts.filter(
-    a =>
-      !a.title.endsWith('📍') && !a.archive && !a.inBalance && a.type !== 'debt'
-  )
+  accounts.filter(a => !isInBudget(a))
 )
+
+function isInBudget(a: Account) {
+  if (a.type === 'debt') return false
+  if (a.title.endsWith('📍')) return true
+  return a.inBalance
+}

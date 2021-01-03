@@ -19,7 +19,12 @@ export type ReminderMarkerId = string
 export type TransactionId = string
 export type AccountId = string
 
-export type TransactionType = 'transfer' | 'income' | 'outcome'
+export type TransactionType =
+  | 'income'
+  | 'outcome'
+  | 'transfer'
+  | 'incomeDebt'
+  | 'outcomeDebt'
 export type GoalType = 'monthly' | 'monthlySpend' | 'targetBalance'
 export type ObjectClass =
   | 'instrument'

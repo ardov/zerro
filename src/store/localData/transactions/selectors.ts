@@ -24,7 +24,7 @@ const getTransaction = (state: RootState, id: TransactionId) =>
 const getPopulatedTransactions = createSelector(
   [getInstruments, getPopulatedAccounts, getPopulatedTags, getTransactions],
   (instruments, accounts, tags, transactions) => {
-    const result = {} as { [id: string]: PopulatedTransaction }
+    const result: { [id: string]: PopulatedTransaction } = {}
     for (const id in transactions) {
       result[id] = populate({ instruments, accounts, tags }, transactions[id])
     }
@@ -36,10 +36,16 @@ const getSortedTransactions = createSelector([getTransactions], transactions =>
   Object.values(transactions).sort(sortBy('DATE'))
 )
 
+const getTransactionsHistory = createSelector(
+  [getSortedTransactions],
+  transactions => transactions.filter(tr => !tr.deleted).reverse()
+)
+
 export const selectors = {
   getTransactionsToSync,
   getPopulatedTransactions,
   getTransactions,
   getTransaction,
   getSortedTransactions,
+  getTransactionsHistory,
 }

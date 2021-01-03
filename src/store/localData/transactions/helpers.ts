@@ -1,9 +1,15 @@
 import startOfMonth from 'date-fns/startOfMonth'
 import startOfDay from 'date-fns/startOfDay'
 import startOfWeek from 'date-fns/startOfWeek'
-import { AccountId, Tag, TagId, Transaction, TransactionId } from 'types'
+import {
+  AccountId,
+  Tag,
+  TagId,
+  Transaction,
+  TransactionId,
+  TransactionType,
+} from 'types'
 
-type TransactionType = 'income' | 'outcome' | 'transfer'
 type OperatorType = 'AND' | 'OR'
 
 interface FilterConditions {
@@ -154,18 +160,19 @@ export function mapTags(ids: TagId[] | null, tags: TagsObj) {
   return ids && ids.length ? ids.map(id => tags[id + '']) : null
 }
 
-export function getType(tr: Transaction): TransactionType {
-  return tr.income && tr.outcome ? 'transfer' : tr.income ? 'income' : 'outcome'
+export function getType(tr: Transaction, debtId?: string): TransactionType {
+  if (debtId && tr.incomeAccount === debtId) return 'outcomeDebt'
+  if (debtId && tr.outcomeAccount === debtId) return 'incomeDebt'
+  if (tr.income && tr.outcome) return 'transfer'
+  if (tr.outcome) return 'outcome'
+  return 'income'
 }
 
 export function getTime(tr: Transaction) {
+  const date = new Date(tr.date)
   const creationDate = new Date(tr.created)
-  const hours = creationDate.getHours()
-  const minutes = creationDate.getMinutes()
-  const seconds = creationDate.getSeconds()
-  const trTime = new Date(tr.date)
-  trTime.setHours(hours, minutes, seconds)
-  return +trTime
+  creationDate.setFullYear(date.getFullYear(), date.getMonth(), date.getDate())
+  return +creationDate
 }
 
 export function getMainTag(tr: Transaction) {

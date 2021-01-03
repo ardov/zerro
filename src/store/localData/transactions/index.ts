@@ -47,4 +47,5 @@ export const {
   getTransactions,
   getTransaction,
   getSortedTransactions,
+  getTransactionsHistory,
 } = selectors
