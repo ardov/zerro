@@ -1,6 +1,7 @@
 import iconsMap from 'store/localData/tags/iconsMap.json'
 type IconsMap = typeof iconsMap
 
+export type ById<T> = { [id: string]: T }
 export type Modify<T, R> = Omit<T, keyof R> & R
 export type OptionalExceptFor<T, TRequired extends keyof T> = Partial<T> &
   Pick<T, TRequired>
@@ -235,11 +236,10 @@ export interface ZmDeletionObject {
 export interface ZmDiffObject {
   currentClientTimestamp: number //Unix timestamp
   serverTimestamp: number //Unix timestamp
-
   forceFetch?: ObjectClass[]
-
   instrument?: Instrument[]
   company?: Company[]
+  country?: Country[]
   user?: User[]
   account?: Account[]
   tag?: Tag[]
@@ -248,6 +248,11 @@ export interface ZmDiffObject {
   reminder?: Reminder[]
   reminderMarker?: ReminderMarker[]
   transaction?: Transaction[]
-
   deletion?: ZmDeletionObject[]
 }
+
+export type LocalData = Omit<
+  ZmDiffObject,
+  'currentClientTimestamp' | 'forceFetch' | 'deletion'
+>
+export type DataToUpdate = Partial<ZmDiffObject>

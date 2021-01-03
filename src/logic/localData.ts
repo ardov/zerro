@@ -1,6 +1,10 @@
 import storage from 'services/storage'
+import { AppThunk } from 'store'
 import { updateData } from 'store/commonActions'
 import { getDataToSave } from 'store/serverData'
+import { LocalData } from 'types'
+
+type LocalKey = keyof LocalData
 
 const LOCAL_KEYS = [
   'serverTimestamp',
@@ -15,9 +19,9 @@ const LOCAL_KEYS = [
   'tag',
   'budget',
   'transaction',
-]
+] as LocalKey[]
 
-export const saveDataLocally = (changedDomains = LOCAL_KEYS) => (
+export const saveDataLocally = (changedDomains = LOCAL_KEYS): AppThunk => (
   dispatch,
   getState
 ) => {
@@ -26,8 +30,8 @@ export const saveDataLocally = (changedDomains = LOCAL_KEYS) => (
   changedDomains.forEach(key => storage.set(key, data[key]))
 }
 
-export const loadLocalData = () => async (dispatch, getState) => {
-  let data = {}
+export const loadLocalData = (): AppThunk => async dispatch => {
+  let data = {} as LocalData
   for (const key of LOCAL_KEYS) {
     data[key] = await storage.get(key)
   }
@@ -35,6 +39,6 @@ export const loadLocalData = () => async (dispatch, getState) => {
   return data
 }
 
-export const clearLocalData = () => (dispatch, getState) => {
+export const clearLocalData = (): AppThunk => () => {
   storage.clear()
 }
