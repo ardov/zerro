@@ -1,13 +1,6 @@
-interface RawBudget {
-  user: number | string
-  date: number
-  tag: string | null
-  changed?: number
-  income?: number
-  incomeLock?: boolean
-  outcome?: number
-  outcomeLock?: boolean
-}
+import { Budget, OptionalExceptFor } from 'types'
+
+type BudgetDraft = OptionalExceptFor<Budget, 'user' | 'date' | 'tag'>
 
 export const makeBudget = ({
   user,
@@ -18,7 +11,7 @@ export const makeBudget = ({
   incomeLock = true,
   outcome = 0,
   outcomeLock = true,
-}: RawBudget): RawBudget => ({
+}: BudgetDraft): Budget => ({
   user,
   date,
   tag: tag === 'null' ? null : tag,

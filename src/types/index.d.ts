@@ -1,4 +1,9 @@
+import iconsMap from 'store/localData/tags/iconsMap.json'
+type IconsMap = typeof iconsMap
+
 export type Modify<T, R> = Omit<T, keyof R> & R
+export type OptionalExceptFor<T, TRequired extends keyof T> = Partial<T> &
+  Pick<T, TRequired>
 
 export type Token = string | null
 
@@ -99,7 +104,7 @@ export interface Tag {
 
   title: string
   parent: TagId | null
-  icon: string | null
+  icon: keyof IconsMap | null
   picture: string | null
   color: number | null
 
@@ -113,6 +118,7 @@ export interface Tag {
 export interface PopulatedTag extends Tag {
   name: string
   symbol: string
+  children: string[]
   colorRGB: string | null
   colorGenerated: string
 }
