@@ -1,14 +1,17 @@
-import { createSlice } from 'redux-starter-kit'
+import { createSlice } from '@reduxjs/toolkit'
 import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
 import { selectors } from './selectors'
 import { formatDate } from 'helpers/format'
+import { Budget } from 'types'
 
 // INITIAL STATE
-const initialState = {}
+const initialState = {} as {
+  [key: string]: Budget
+}
 
 // SLICE
 const slice = createSlice({
-  slice: 'budget',
+  name: 'budget',
   initialState,
   reducers: {
     setBudget: (state, { payload }) => {
@@ -19,11 +22,12 @@ const slice = createSlice({
       })
     },
   },
-  extraReducers: {
-    [wipeData]: () => initialState,
-    [updateData]: (state, { payload }) => {
-      removeSyncedFunc(state, payload.syncStartTime)
-    },
+  extraReducers: builder => {
+    builder
+      .addCase(wipeData, () => initialState)
+      .addCase(updateData, (state, { payload }) => {
+        removeSyncedFunc(state, payload.syncStartTime)
+      })
   },
 })
 

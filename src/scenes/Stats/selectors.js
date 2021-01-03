@@ -1,4 +1,4 @@
-import createSelector from 'selectorator'
+import { createSelector } from '@reduxjs/toolkit'
 import { round } from 'helpers/currencyHelpers'
 import { getType } from 'store/localData/transactions/helpers'
 import { getAccounts } from 'store/localData/accounts'

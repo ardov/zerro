@@ -1,7 +1,7 @@
 import startOfMonth from 'date-fns/startOfMonth'
 import isSameMonth from 'date-fns/isSameMonth'
 import addMonths from 'date-fns/addMonths'
-import createSelector from 'selectorator'
+import { createSelector } from '@reduxjs/toolkit'
 import { getTransactionsInBudget } from './baseSelectors'
 import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
 

@@ -1,4 +1,4 @@
-import createSelector from 'selectorator'
+import { createSelector } from '@reduxjs/toolkit'
 import { getStartFunds } from './baseSelectors'
 import {
   getAmountsByTag,

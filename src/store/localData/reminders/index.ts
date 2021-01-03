@@ -27,7 +27,7 @@ const slice = createSlice({
     builder
       .addCase(wipeData, () => initialState)
       .addCase(updateData, (state, { payload }) => {
-        removeSyncedFunc(state, payload.syncStartTime || 0)
+        removeSyncedFunc(state, payload.syncStartTime)
       })
   },
 })

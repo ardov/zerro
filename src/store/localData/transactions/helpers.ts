@@ -149,12 +149,12 @@ export function sortBy(sortType: SortType = 'DATE', ascending = false) {
 interface TagsObj {
   [tagId: string]: Tag
 }
-export function mapTags(ids: TagId[], tags: TagsObj) {
+export function mapTags(ids: TagId[] | null, tags: TagsObj) {
   // TODO: Надо что-то придумать с null тегом 🤔    ⤵
   return ids && ids.length ? ids.map(id => tags[id + '']) : null
 }
 
-export function getType(tr: Transaction) {
+export function getType(tr: Transaction): TransactionType {
   return tr.income && tr.outcome ? 'transfer' : tr.income ? 'income' : 'outcome'
 }
 

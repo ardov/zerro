@@ -1,4 +1,4 @@
-import createSelector from 'selectorator'
+import { createSelector } from '@reduxjs/toolkit'
 import { getMainTag } from 'store/localData/transactions/helpers'
 import { getTagLinks } from 'store/localData/tags'
 import { convertCurrency } from 'store/serverData'

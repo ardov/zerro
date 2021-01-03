@@ -1,6 +1,17 @@
+import { OptionalExceptFor, Transaction } from 'types'
 import { v1 as uuidv1 } from 'uuid'
 
-export default function makeTransaction(raw) {
+export type TransactionDraft = OptionalExceptFor<
+  Transaction,
+  | 'user'
+  | 'date'
+  | 'incomeInstrument'
+  | 'incomeAccount'
+  | 'outcomeInstrument'
+  | 'outcomeAccount'
+>
+
+export default function makeTransaction(raw: TransactionDraft): Transaction {
   return {
     id: raw.id || uuidv1(),
     changed: raw.changed || Date.now(),
@@ -13,13 +24,13 @@ export default function makeTransaction(raw) {
     qrCode: raw.qrCode || null,
 
     income: raw.income || 0,
-    incomeInstrument: raw.incomeInstrument || null,
-    incomeAccount: raw.incomeAccount || null,
+    incomeInstrument: raw.incomeInstrument,
+    incomeAccount: raw.incomeAccount,
     incomeBankID: raw.incomeBankID || null,
 
     outcome: raw.outcome || 0,
-    outcomeInstrument: raw.outcomeInstrument || null,
-    outcomeAccount: raw.outcomeAccount || null,
+    outcomeInstrument: raw.outcomeInstrument,
+    outcomeAccount: raw.outcomeAccount,
     outcomeBankID: raw.outcomeBankID || null,
 
     opIncome: raw.opIncome || 0,
@@ -29,6 +40,7 @@ export default function makeTransaction(raw) {
 
     tag: raw.tag || null,
     date: raw.date,
+    mcc: raw.mcc || null,
     comment: raw.comment || null,
     payee: raw.payee || null,
     originalPayee: raw.originalPayee || null,

@@ -2,10 +2,14 @@ import { v1 as uuidv1 } from 'uuid'
 import { getTransaction } from 'store/localData/transactions'
 import { setTransaction } from 'store/localData/transactions'
 import { sendEvent } from 'helpers/tracking'
+import { AppThunk } from 'store'
+import { OptionalExceptFor, TagId, Transaction, TransactionId } from 'types'
 
-export const deleteTransactions = ids => (dispatch, getState) => {
+export const deleteTransactions = (
+  ids: TransactionId | TransactionId[]
+): AppThunk => (dispatch, getState) => {
   sendEvent('Transaction: delete')
-  const array = ids.map ? ids : [ids]
+  const array = Array.isArray(ids) ? ids : [ids]
   const deleted = array.map(id => ({
     ...getTransaction(getState(), id),
     deleted: true,
@@ -14,7 +18,10 @@ export const deleteTransactions = ids => (dispatch, getState) => {
   dispatch(setTransaction(deleted))
 }
 
-export const restoreTransaction = id => (dispatch, getState) => {
+export const restoreTransaction = (id: TransactionId): AppThunk => (
+  dispatch,
+  getState
+) => {
   sendEvent('Transaction: restore')
   dispatch(
     setTransaction({
@@ -28,13 +35,20 @@ export const restoreTransaction = id => (dispatch, getState) => {
 
 // Не работает
 // TODO: Надо для новых транзакций сразу проставлять категорию. Иначе они обратно схлопываются
-export const splitTransfer = id => (dispatch, getState) => {
+export const splitTransfer = (id: TransactionId): AppThunk => (
+  dispatch,
+  getState
+) => {
   const state = getState()
   const tr = getTransaction(state, id)
   dispatch(setTransaction(split(tr)))
 }
 
-export const applyChangesToTransaction = tr => (dispatch, getState) => {
+type TransactionPatch = OptionalExceptFor<Transaction, 'id'>
+export const applyChangesToTransaction = (tr: TransactionPatch): AppThunk => (
+  dispatch,
+  getState
+) => {
   sendEvent('Transaction: edit')
   dispatch(
     setTransaction({
@@ -45,16 +59,16 @@ export const applyChangesToTransaction = tr => (dispatch, getState) => {
   )
 }
 
-export const setTagsToTransactions = (transactions, tags) => (
-  dispatch,
-  getState
-) => {
+export const setTagsToTransactions = (
+  transactions: TransactionId[],
+  tags: TagId[]
+): AppThunk => (dispatch, getState) => {
   sendEvent('Bulk Actions: set new tags')
   const state = getState()
   const result = transactions.map(id => {
     const tr = getTransaction(state, id)
-    const newTags = []
-    const addId = id => (newTags.includes(id) ? '' : newTags.push(id))
+    const newTags = [] as TagId[]
+    const addId = (id: string) => (newTags.includes(id) ? '' : newTags.push(id))
     tags?.forEach(id => {
       if (id === 'mixed' && tr.tag) tr.tag.forEach(addId)
       else addId(id)
@@ -64,7 +78,7 @@ export const setTagsToTransactions = (transactions, tags) => (
   dispatch(setTransaction(result))
 }
 
-function split(raw) {
+function split(raw: Transaction) {
   if (!(raw.income && raw.outcome)) return null
   const result = [
     {

@@ -1,4 +1,4 @@
-import createSelector from 'selectorator'
+import { createSelector } from '@reduxjs/toolkit'
 import { getAccountsInBudget } from 'store/localData/accounts'
 import { convertCurrency } from 'store/serverData'
 import { round } from 'helpers/currencyHelpers'
@@ -12,7 +12,7 @@ export const getStartFunds: (state: RootState) => number = createSelector(
   (accounts: Account[], convert) => {
     let sum = 0
     for (const acc of accounts) {
-      const startBalance = convert(getStartBalance(acc), acc.instrument)
+      const startBalance = convert(getStartBalance(acc), acc.instrument) || 0
       sum = round(sum + startBalance)
     }
     return sum
