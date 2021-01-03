@@ -1,4 +1,3 @@
-// import { createSlice, createSelector } from 'redux-starter-kit'
 import { createSlice, createSelector } from '@reduxjs/toolkit'
 import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
 import { convertToSyncArray } from 'helpers/converters'

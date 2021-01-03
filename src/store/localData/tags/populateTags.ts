@@ -3,7 +3,7 @@ import toArray from 'lodash/toArray'
 import { PopulatedTag, Tag } from 'types'
 import { Tags } from '.'
 import iconsMap from './iconsMap.json'
-import { nullTag } from './makeTag.js'
+import { nullTag } from './makeTag'
 
 export default function populateTags(rawTags: Tags) {
   let tags = { null: makePopulatedTag(nullTag) } as {
