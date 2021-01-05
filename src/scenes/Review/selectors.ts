@@ -4,15 +4,10 @@ import { getType } from 'store/localData/transactions/helpers'
 import { getAccounts } from 'store/localData/accounts'
 import { getSortedTransactions } from 'store/localData/transactions'
 import { getStartBalance } from 'store/localData/accounts/helpers'
+import { getTransactionsHistory } from 'store/localData/transactions'
 import { eachDayOfInterval, startOfDay } from 'date-fns'
 import { convertCurrency } from 'store/serverData'
 import { Transaction, Account, AccountId, InstrumentId } from 'types'
-
-export const getTransactionsHistory = createSelector(
-  [getSortedTransactions],
-  (transactions: Transaction[]) =>
-    transactions.filter(tr => !tr.deleted).reverse()
-)
 
 interface DayNode {
   date: number
