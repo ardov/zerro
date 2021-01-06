@@ -49,10 +49,7 @@ const getServerTags = (state: RootState) => state.serverData.tag
 const getLocalTags = (state: RootState) => state.localData.tag
 export const getTags = createSelector(
   [getServerTags, getLocalTags],
-  (tags, diff) => ({
-    ...tags,
-    ...diff,
-  })
+  (tags, diff) => ({ ...tags, ...diff })
 )
 
 export const getTagsToSync = (state: RootState): Tag[] =>
@@ -83,14 +80,13 @@ export const getTagsTree = createSelector(
   }
 )
 
-interface Links {
-  [tagId: string]: TagId[]
-}
 export const getTagLinks = createSelector([getPopulatedTags], tags => {
-  let links = {} as Links
+  let result: {
+    [tagId: string]: TagId[]
+  } = {}
   for (const id in tags) {
     if (tags[id].parent) continue
-    links[id] = tags[id].children || []
+    result[id] = tags[id].children || []
   }
-  return links
+  return result
 })

@@ -10,70 +10,74 @@ import { getType } from 'store/localData/transactions/helpers'
 import getMonthDates from './getMonthDates'
 import { getTransactionsInBudget } from './baseSelectors'
 import { getAccountsInBudget } from 'store/localData/accounts'
+import { RootState } from 'store'
+import { Budget } from 'types'
+
+interface DateNode {
+  income: { [tagId: string]: number }
+  outcome: { [tagId: string]: number }
+  transfers: { [accId: string]: number }
+  transferFees: number
+}
+const makeDateNode = (): DateNode => ({
+  income: {},
+  outcome: {},
+  transfers: {},
+  transferFees: 0,
+})
 
 const getAmountsByMonth = createSelector(
   [getTransactionsInBudget, convertCurrency, getAccountsInBudget],
   (transactions, convert, accountsInBudget) => {
+    const result: { [date: number]: DateNode } = {}
+
     const budgetAccs = accountsInBudget.map(acc => acc.id)
-    const result = {}
+    const inBudget = (accId: string) => budgetAccs.includes(accId)
 
     transactions.forEach(tr => {
       const date = +startOfMonth(tr.date)
       const type = getType(tr)
-      const tag = getMainTag(tr)
+      const tag = getMainTag(tr) || 'null'
       const income = convert(tr.income, tr.incomeInstrument)
       const outcome = convert(tr.outcome, tr.outcomeInstrument)
 
-      result[date] = result[date] || {
-        income: {}, // amounts by tags
-        outcome: {}, // amounts by tags
-        transfers: {}, // amounts by accounts
-        transferFees: 0,
+      result[date] ??= makeDateNode()
+
+      if (type === 'income') {
+        result[date].income[tag] = result[date].income[tag]
+          ? round(result[date].income[tag] + income)
+          : income
       }
 
-      switch (type) {
-        case 'income':
-          result[date].income[tag] = result[date].income[tag]
-            ? round(result[date].income[tag] + income)
-            : income
-          break
+      if (type === 'outcome') {
+        result[date].outcome[tag] = result[date].outcome[tag]
+          ? round(result[date].outcome[tag] + outcome)
+          : outcome
+      }
 
-        case 'outcome':
-          result[date].outcome[tag] = result[date].outcome[tag]
-            ? round(result[date].outcome[tag] + outcome)
+      if (type === 'transfer') {
+        // TRANSFER BETWEEN BUDGET ACCOUNTS
+        if (inBudget(tr.incomeAccount) && inBudget(tr.outcomeAccount)) {
+          result[date].transferFees = round(
+            result[date].transferFees + outcome - income
+          )
+        }
+        // TRANSFER TO BUDGET
+        else if (inBudget(tr.incomeAccount)) {
+          result[date].transfers[tr.outcomeAccount] = result[date].transfers[
+            tr.outcomeAccount
+          ]
+            ? round(result[date].transfers[tr.outcomeAccount] - income)
+            : -income
+        }
+        // TRANSFER FROM BUDGET
+        else if (inBudget(tr.outcomeAccount)) {
+          result[date].transfers[tr.incomeAccount] = result[date].transfers[
+            tr.incomeAccount
+          ]
+            ? round(result[date].transfers[tr.incomeAccount] + outcome)
             : outcome
-          break
-
-        case 'transfer':
-          // TRANSFER BETWEEN BUDGET ACCOUNTS
-          if (
-            budgetAccs.includes(tr.incomeAccount) &&
-            budgetAccs.includes(tr.outcomeAccount)
-          ) {
-            result[date].transferFees = round(
-              result[date].transferFees + outcome - income
-            )
-          }
-          // TRANSFER TO BUDGET
-          else if (budgetAccs.includes(tr.incomeAccount)) {
-            result[date].transfers[tr.outcomeAccount] = result[date].transfers[
-              tr.outcomeAccount
-            ]
-              ? round(result[date].transfers[tr.outcomeAccount] - income)
-              : -income
-          }
-          // TRANSFER FROM BUDGET
-          else if (budgetAccs.includes(tr.outcomeAccount)) {
-            result[date].transfers[tr.incomeAccount] = result[date].transfers[
-              tr.incomeAccount
-            ]
-              ? round(result[date].transfers[tr.incomeAccount] + outcome)
-              : outcome
-          }
-          break
-
-        default:
-          break
+        }
       }
     })
 
@@ -81,41 +85,27 @@ const getAmountsByMonth = createSelector(
   }
 )
 
-const getIncomes = createSelector([getAmountsByMonth], amounts => {
-  let result = {}
-  for (const date in amounts) {
-    result[date] = amounts[date].income
-  }
-  return result
-})
-
-const getOutcomes = createSelector([getAmountsByMonth], amounts => {
-  let result = {}
-  for (const date in amounts) {
-    result[date] = amounts[date].outcome
-  }
-  return result
-})
-
+interface AmountsByDate {
+  [date: string]: { [id: string]: number }
+}
 export const getTransfers = createSelector([getAmountsByMonth], amounts => {
-  let result = {}
+  let result: AmountsByDate = {}
   for (const date in amounts) {
     result[date] = amounts[date].transfers
   }
   return result
 })
-
 export const getLinkedTransfers = createSelector(
-  [getTransfers, getAccTagMap],
-  (transfers, accTagMap) => {
-    let result = {}
-    for (const date in transfers) {
+  [getAccTagMap, getAmountsByMonth],
+  (accTagMap, amounts) => {
+    let result: AmountsByDate = {}
+    for (const date in amounts) {
       result[date] = {}
-      for (const accountId in transfers[date]) {
+      for (const accountId in amounts[date].transfers) {
         // possible problem with deleted tags
-        const linkedTag = accTagMap[accountId] || null
+        const linkedTag = accTagMap[accountId] || 'null'
         result[date][linkedTag] = round(
-          transfers[date][accountId] + (result[date][linkedTag] || 0)
+          amounts[date].transfers[accountId] + (result[date][linkedTag] || 0)
         )
       }
     }
@@ -123,24 +113,57 @@ export const getLinkedTransfers = createSelector(
   }
 )
 
+interface TransferFeesByDate {
+  [date: string]: number
+}
 export const getTransferFees = createSelector([getAmountsByMonth], amounts => {
-  let result = {}
+  let result: TransferFeesByDate = {}
   for (const date in amounts) {
     result[date] = amounts[date].transferFees
   }
   return result
 })
 
-export const getAmountsForTag = state => (month, id) => {
+interface TagAmounts {
+  income: number
+  outcome: number
+  tagOutcome: number
+  transferOutcome: number
+  budgeted: number
+  leftover: number
+  available: number
+}
+interface TagGroupAmounts extends TagAmounts {
+  // Group totals
+  totalBudgeted: number
+  totalOutcome: number
+  totalIncome: number
+  totalLeftover: number
+  totalAvailable: number
+  totalOverspent: number
+  // Children totals
+  childrenBudgeted: number
+  childrenOutcome: number
+  childrenIncome: number
+  childrenAvailable: number
+  childrenOverspent: number
+  childrenLeftover: number
+  // Children amounts
+  children: { [childId: string]: TagAmounts }
+}
+
+export const getAmountsForTag = (state: RootState) => (
+  month: number,
+  id: string
+) => {
   const amounts = getAmountsByTag(state)[month]
   if (!amounts) return null
-
   if (amounts[id]) return amounts[id]
-  else {
-    for (const parent in amounts) {
-      if (amounts[parent].children[id]) return amounts[parent].children[id]
-    }
+
+  for (const parent in amounts) {
+    if (amounts[parent].children[id]) return amounts[parent].children[id]
   }
+
   return null
 }
 
@@ -149,13 +172,18 @@ export const getAmountsByTag = createSelector(
     getMonthDates,
     getBudgetsByMonthAndTag,
     getTagLinks,
-    getIncomes,
-    getOutcomes,
     getLinkedTransfers,
+    getAmountsByMonth,
   ],
-  (dates, budgets, tagLinks, incomes, outcomes, linkedTransfers) => {
-    let prevMonth = null
-    const result = {}
+  (dates, budgets, tagLinks, linkedTransfers, amounts) => {
+    const result: {
+      [month: string]: {
+        [tagId: string]: TagGroupAmounts
+      }
+    } = {}
+    let prevMonth: {
+      [tagId: string]: TagGroupAmounts
+    } = {}
 
     for (const date of dates) {
       result[date] = {}
@@ -163,8 +191,8 @@ export const getAmountsByTag = createSelector(
         result[date][id] = calcTagGroupAmounts({
           id,
           children: tagLinks[id],
-          incomes: incomes[date],
-          outcomes: outcomes[date],
+          incomes: amounts[date]?.income,
+          outcomes: amounts[date]?.outcome,
           budgets: budgets[date],
           linkedTransfers: linkedTransfers[date],
           prevMonth: prevMonth?.[id],
@@ -177,16 +205,25 @@ export const getAmountsByTag = createSelector(
   }
 )
 
-function calcTagGroupAmounts({
-  id,
-  children,
-  incomes = {},
-  outcomes = {},
-  budgets = {},
-  linkedTransfers = {},
-  prevMonth = {},
-}) {
-  const subTags = {}
+function calcTagGroupAmounts(data: {
+  id: string
+  children: string[]
+  incomes: { [id: string]: number }
+  outcomes: { [id: string]: number }
+  budgets: { [tagId: string]: Budget }
+  linkedTransfers: { [id: string]: number }
+  prevMonth?: TagGroupAmounts
+}): TagGroupAmounts {
+  const {
+    id,
+    children,
+    incomes = {},
+    outcomes = {},
+    budgets = {},
+    linkedTransfers = {},
+    prevMonth,
+  } = data
+  const subTags: { [childId: string]: TagAmounts } = {}
 
   // Children totals
   let childrenBudgeted = 0
@@ -204,8 +241,9 @@ function calcTagGroupAmounts({
     const transferOutcome = linkedTransfers[childId] || 0
     const outcome = round(tagOutcome + transferOutcome)
     const leftover =
-      (prevMonth.children?.[childId]?.available > 0 &&
-        prevMonth.children[childId].available) ||
+      (prevMonth &&
+        prevMonth?.children?.[childId]?.available > 0 &&
+        prevMonth?.children[childId].available) ||
       0
     const available = round(leftover + budgeted - outcome)
 
@@ -235,7 +273,8 @@ function calcTagGroupAmounts({
   let transferOutcome = linkedTransfers[id] || 0 // все переводы идут в null
   if (id === 'null') transferOutcome = 0
   const outcome = round(tagOutcome + transferOutcome)
-  const leftover = prevMonth.available > 0 ? prevMonth.available : 0
+  const leftover =
+    prevMonth && prevMonth.available > 0 ? prevMonth.available : 0
   const available = round(leftover + budgeted - outcome - childrenOverspent)
 
   return {
@@ -246,7 +285,6 @@ function calcTagGroupAmounts({
     totalLeftover: round(leftover + childrenLeftover),
     totalAvailable: round(available + childrenAvailable),
     totalOverspent: available < 0 ? -available : 0,
-
     // Main tag amounts
     budgeted,
     income,
@@ -255,7 +293,6 @@ function calcTagGroupAmounts({
     outcome,
     leftover,
     available,
-
     // Children totals
     childrenBudgeted,
     childrenOutcome,

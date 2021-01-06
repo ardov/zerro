@@ -22,11 +22,11 @@ const getBudgetsToSync = (state: RootState): ZmBudget[] =>
   convertToSyncArray(getChangedBudgets(state)) as ZmBudget[]
 
 const getBudgetsByMonthAndTag = createSelector([getBudgets], budgets => {
-  let result = {} as {
+  let result: {
     [month: number]: {
       [tagId: string]: Budget
     }
-  }
+  } = {}
   for (const key in budgets) {
     const { date, tag, outcome } = budgets[key]
     // skip old goals
