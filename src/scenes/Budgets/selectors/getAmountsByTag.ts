@@ -151,19 +151,22 @@ interface TagGroupAmounts extends TagAmounts {
   // Children amounts
   children: { [childId: string]: TagAmounts }
 }
+export function isGroup(
+  amounts: TagGroupAmounts | TagAmounts
+): amounts is TagGroupAmounts {
+  return (amounts as TagGroupAmounts).children !== undefined
+}
 
 export const getAmountsForTag = (state: RootState) => (
   month: number,
   id: string
-) => {
+): TagAmounts | TagGroupAmounts | null => {
   const amounts = getAmountsByTag(state)[month]
   if (!amounts) return null
   if (amounts[id]) return amounts[id]
-
   for (const parent in amounts) {
     if (amounts[parent].children[id]) return amounts[parent].children[id]
   }
-
   return null
 }
 

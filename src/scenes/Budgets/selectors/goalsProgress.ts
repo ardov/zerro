@@ -1,42 +1,51 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { round } from 'helpers/currencyHelpers'
 import { getGoals } from 'store/localData/hiddenData/goals'
-import { getAmountsForTag } from './getAmountsByTag'
+import { getAmountsForTag, isGroup } from './getAmountsByTag'
 import getMonthDates from './getMonthDates'
 import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths'
 import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
+import { Goal } from 'types'
+import { RootState } from 'store'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = GOAL_TYPES
-const startForOldGoals = +new Date(2019, 1, 1)
+// const startForOldGoals = +new Date(2019, 1, 1)
 
-export const getGoalProgress = (state, month, id) =>
+interface GoalsProgress {
+  progress: number
+  need: number
+  target: number
+}
+
+export const getGoalProgress = (state: RootState, month: number, id: string) =>
   getGoalsProgress(state)?.[month]?.[id]
 
 export const getGoalsProgress = createSelector(
   [getGoals, getAmountsForTag, getMonthDates],
   (goals, getAmounts, monthList) => {
-    const result = {}
+    const result: {
+      [month: number]: {
+        [tagId: string]: GoalsProgress | null
+      }
+    } = {}
 
     monthList.forEach((month, i) => {
       result[month] = {}
 
       for (const id in goals) {
         if (!goals[id]) continue
-        const { type, amount, start = startForOldGoals, end } = goals[id]
-        if (start && start > month) continue
+        const { type, amount, end } = goals[id]
         if (end && end < month) continue
         if (!amount) continue
-        const tag = getAmounts(month, id) || {}
+        const tag = getAmounts(month, id)
+        if (!tag) continue
 
-        const budgeted = tag.children
-          ? tag.totalBudgeted || 0
-          : tag.budgeted || 0
-        const leftover = tag.children
-          ? tag.totalLeftover || 0
-          : tag.leftover || 0
-        const available = tag.children
-          ? tag.totalAvailable || 0
-          : tag.available || 0
+        let { budgeted, leftover, available } = tag
+        if (isGroup(tag)) {
+          budgeted = tag.totalBudgeted
+          leftover = tag.totalLeftover
+          available = tag.totalAvailable
+        }
 
         switch (type) {
           case MONTHLY:
@@ -73,10 +82,10 @@ export const getGoalsProgress = createSelector(
 export const getTotalGoalsProgress = createSelector(
   [getGoals, getGoalsProgress],
   (goals, goalsProgress) => {
-    let result = {}
+    let result: { [month: number]: GoalsProgress | null } = {}
 
-    const isCounted = goal => goal.type !== TARGET_BALANCE || goal.end
-    let countedGoals = {}
+    const isCounted = (goal: Goal) => goal.type !== TARGET_BALANCE || goal.end
+    let countedGoals: { [id: string]: Goal } = {}
     let hasCountedGoals = false
     for (const id in goals) {
       if (isCounted(goals[id])) {
@@ -115,7 +124,8 @@ export const getTotalGoalsProgress = createSelector(
   }
 )
 
-function calcMonthlyProgress({ amount, budgeted }) {
+function calcMonthlyProgress(data: { amount: number; budgeted: number }) {
+  const { amount, budgeted } = data
   const target = amount
   const need = round(target - budgeted)
 
@@ -124,7 +134,12 @@ function calcMonthlyProgress({ amount, budgeted }) {
   return { progress: budgeted / target, need, target }
 }
 
-function calcMonthlySpendProgress({ amount, budgeted, leftover }) {
+function calcMonthlySpendProgress(data: {
+  amount: number
+  budgeted: number
+  leftover: number
+}) {
+  const { amount, budgeted, leftover } = data
   const target = round(amount - leftover)
   const need = round(target - budgeted)
 
@@ -133,13 +148,14 @@ function calcMonthlySpendProgress({ amount, budgeted, leftover }) {
   return { progress: (budgeted + leftover) / amount, need, target }
 }
 
-function calcTargetProgress({
-  amount,
-  budgeted,
-  available,
-  currentMonth,
-  endMonth,
+function calcTargetProgress(data: {
+  amount: number
+  budgeted: number
+  available: number
+  currentMonth: number
+  endMonth?: number
 }) {
+  const { amount, budgeted, available, currentMonth, endMonth } = data
   if (!endMonth) {
     // No end date
     const target = round(amount - available + budgeted)

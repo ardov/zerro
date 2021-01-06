@@ -8,9 +8,36 @@ import {
 import { round } from 'helpers/currencyHelpers'
 import getMonthDates from './getMonthDates'
 
+interface TagTotals {
+  budgeted: number
+  income: number
+  outcome: number
+  overspent: number
+  available: number
+}
+interface MonthTotals {
+  date: number
+  prevFunds: number
+  prevOverspent: number
+  toBeBudgeted: number
+  budgetedInFuture: number // cannot be negative or greater than funds
+  moneyInBudget: number // to check
+  realBudgetedInFuture: number
+  funds: number
+  // TAGS
+  budgeted: number
+  income: number
+  outcome: number
+  overspent: number
+  available: number
+  // TRANSFERS
+  transferOutcome: number
+  transferFees: number
+}
+
 export const getTagTotals = createSelector(
   [getMonthDates, getAmountsByTag],
-  (months, amounts) =>
+  (months, amounts): TagTotals[] =>
     months.map(month => {
       const totals = {
         budgeted: 0,
@@ -45,7 +72,13 @@ export const getTotalsArray = createSelector(
     getTransferFees,
     getTagTotals,
   ],
-  (months, startFunds, linkedTransfers, transferFees, tagTotals) => {
+  (
+    months,
+    startFunds,
+    linkedTransfers,
+    transferFees,
+    tagTotals
+  ): MonthTotals[] => {
     let prevFunds = startFunds
     let prevOverspent = 0
 
@@ -108,7 +141,7 @@ export const getTotalsArray = createSelector(
 )
 
 export const getTotalsByMonth = createSelector([getTotalsArray], totals => {
-  let result = {}
+  let result: { [key: number]: MonthTotals } = {}
   for (const monthData of totals) {
     result[monthData.date] = monthData
   }
