@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { FC, useState } from 'react'
 import startOfMonth from 'date-fns/startOfMonth'
 import { withStyles } from '@material-ui/core/styles'
 import {
@@ -8,20 +8,35 @@ import {
   List,
   ListItem,
   ListItemText,
+  PopoverProps,
+  ListItemProps,
 } from '@material-ui/core'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import { formatDate } from 'helpers/format'
 
-const StyledListItem = withStyles(theme => ({
+interface MonthItemItemProps extends ListItemProps {
+  isCurrent: boolean
+}
+
+const MonthItem = withStyles(theme => ({
   root: {
     borderRadius: theme.shape.borderRadius,
-    border: ({ isCurrent }) =>
+    border: ({ isCurrent }: MonthItemItemProps) =>
       isCurrent ? `1px solid ${theme.palette.primary.main}` : '',
   },
-}))(({ isCurrent, ...rest }) => <ListItem {...rest} />)
+  // Wrapper causes type error. Here is similar problem https://stackoverflow.com/questions/62223353/error-creating-wrapped-component-with-typescript-and-material-ui-listitem
+  // @ts-ignore
+}))(({ isCurrent, ...rest }: MonthItemItemProps) => <ListItem {...rest} />)
 
-export default function MonthSelectPopover(props) {
+interface MonthSelectPopoverProps extends Omit<PopoverProps, 'onChange'> {
+  minMonth: number
+  maxMonth: number
+  value: number
+  disablePast: boolean
+  onChange: (month: number) => void
+}
+export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
   const { minMonth, maxMonth, onChange, disablePast, ...rest } = props
   const value = props.value ? +startOfMonth(props.value) : null
   const [year, setYear] = useState(
@@ -32,14 +47,14 @@ export default function MonthSelectPopover(props) {
     months.push(+new Date(year, month))
   }
   const curMonth = +startOfMonth(new Date())
-  const isMonthDisabled = month => {
+  const isMonthDisabled = (month: number) => {
     if (disablePast && month < curMonth) return true
     if (minMonth && month < minMonth) return true
     if (maxMonth && month > maxMonth) return true
     return false
   }
-  const isNextYearDisabled = maxMonth && months[months.length - 1] >= maxMonth
-  const isPrevYearDisabled = minMonth && months[0] <= minMonth
+  const isNextYearDisabled = !!maxMonth && months[months.length - 1] >= maxMonth
+  const isPrevYearDisabled = !!minMonth && months[0] <= minMonth
   return (
     <Popover {...rest}>
       <Box pt={1} px={1}>
@@ -60,7 +75,7 @@ export default function MonthSelectPopover(props) {
         <Box display="grid" gridTemplateColumns="1fr 1fr 1fr" clone>
           <List>
             {months.map(month => (
-              <StyledListItem
+              <MonthItem
                 key={+month}
                 isCurrent={month === curMonth}
                 disabled={isMonthDisabled(month)}
@@ -73,7 +88,7 @@ export default function MonthSelectPopover(props) {
                     {formatDate(month, 'LLL').toUpperCase()}
                   </ListItemText>
                 </Box>
-              </StyledListItem>
+              </MonthItem>
             ))}
           </List>
         </Box>

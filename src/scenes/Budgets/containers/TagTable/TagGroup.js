@@ -45,7 +45,7 @@ export const TagGroup = React.forwardRef((props, ref) => {
 
   const [month] = useMonth()
   const tag = useSelector(state => getPopulatedTag(state, id))
-  const amounts = useSelector(state => getAmountsForTag(state)(month, id))
+  const amounts = useSelector(getAmountsForTag)(month, id) || {}
   const { dragMode } = useContext(DragModeContext)
 
   const {

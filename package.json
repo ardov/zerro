@@ -38,7 +38,7 @@
     "react-transition-group": "^4.4.1",
     "react-virtualized-auto-sizer": "^1.0.2",
     "react-window": "^1.8.1",
-    "recharts": "^1.8.5",
+    "recharts": "2.0.0-beta.8",
     "redux": "^4.0.1",
     "styled-components": "^5.2.1",
     "typescript": "^4.0.5",

@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { getMainTag } from 'store/localData/transactions/helpers'
-import { getTagLinks } from 'store/localData/tags'
+import { getTagLinks, getTags } from 'store/localData/tags'
 import { convertCurrency } from 'store/serverData'
 import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
 import { round } from 'helpers/currencyHelpers'
@@ -160,14 +160,14 @@ export function isGroup(
 export const getAmountsForTag = (state: RootState) => (
   month: number,
   id: string
-): TagAmounts | TagGroupAmounts | null => {
+): TagAmounts | TagGroupAmounts | void => {
+  if (id === undefined) return
   const amounts = getAmountsByTag(state)[month]
-  if (!amounts) return null
-  if (amounts[id]) return amounts[id]
-  for (const parent in amounts) {
-    if (amounts[parent].children[id]) return amounts[parent].children[id]
-  }
-  return null
+  if (!amounts) return
+  if (id === 'null') return amounts['null']
+  const tag = getTags(state)[id]
+  if (tag?.parent) return amounts[tag.parent].children[id]
+  return amounts[id]
 }
 
 export const getAmountsByTag = createSelector(
