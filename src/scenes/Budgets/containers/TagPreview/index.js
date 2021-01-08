@@ -15,11 +15,13 @@ import { OutcomeWidget } from './OutcomeWidget'
 import { ColorPicker } from 'components/ColorPickerPopover'
 import { HEXToInt } from 'helpers/convertColor'
 import { patchTag } from 'store/localData/tags/thunks'
+import { sendEvent } from 'helpers/tracking'
 
 const Header = ({ tag, onClose, onEdit }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const dispatch = useDispatch()
   const handleColorChange = hex => {
+    sendEvent('Tag: set color')
     dispatch(patchTag({ id: tag.id, color: HEXToInt(hex) }))
   }
   return (
