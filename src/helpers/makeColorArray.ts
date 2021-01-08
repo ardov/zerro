@@ -2,7 +2,6 @@ import * as materialColors from '@material-ui/core/colors'
 
 type Shade = keyof typeof materialColors['red']
 type ColorGroups = Exclude<keyof typeof materialColors, 'common'>
-type MakeColorArrayProps = { shades?: Shade[]; colors?: ColorGroups[] }
 const allColors: ColorGroups[] = [
   'red',
   'pink',
@@ -40,14 +39,28 @@ const allShades: Shade[] = [
   'A400',
   'A700',
 ]
+
+type MakeColorArrayProps = {
+  shades?: Shade[]
+  colors?: ColorGroups[]
+  byShades?: boolean
+}
 export function makeColorArray(props: MakeColorArrayProps = {}) {
-  const { shades = allShades, colors = allColors } = props
+  const { shades = allShades, colors = allColors, byShades } = props
   const colorArray: string[] = []
-  colors.forEach(color =>
-    shades.forEach(shade => {
-      const hex = materialColors[color][shade]
-      if (hex) colorArray.push(hex)
-    })
-  )
+  if (byShades)
+    shades.forEach(shade =>
+      colors.forEach(color => {
+        const hex = materialColors[color][shade]
+        if (hex) colorArray.push(hex)
+      })
+    )
+  else
+    colors.forEach(color =>
+      shades.forEach(shade => {
+        const hex = materialColors[color][shade]
+        if (hex) colorArray.push(hex)
+      })
+    )
   return colorArray
 }

@@ -45,8 +45,8 @@ const Header = ({ tag, onClose, onEdit }) => {
       <ColorPicker
         open={!!anchorEl}
         anchorEl={anchorEl}
-        onClose={() => setAnchorEl(null)}
         value={tag.colorHEX}
+        onClose={() => setAnchorEl(null)}
         onChange={handleColorChange}
       />
     </Box>

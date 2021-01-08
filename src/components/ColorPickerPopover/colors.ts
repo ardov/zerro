@@ -11,40 +11,22 @@ export const zmColors = [
 
 export const colors = makeColorArray({
   shades: [
-    // 50,
-    // 100,
-    // 200,
-    // 300,
-    // 400,
-    // 500,
-    // 600,
-    // 700,
-    // 800,
     // 900,
-    'A100',
-    // 'A200',
-    'A400',
     'A700',
+    'A400',
+    'A100',
   ],
-  colors: [
-    'red',
-    // 'pink',
-    'purple',
-    // 'deepPurple',
-    'indigo',
-    // 'blue',
-    'lightBlue',
-    // 'cyan',
-    'teal',
-    // 'green',
-    'lightGreen',
-    // 'lime',
-    'yellow',
-    // 'amber',
-    'orange',
-    // 'deepOrange',
-    'brown',
-    'grey',
-    'blueGrey',
-  ],
-})
+  colors: ['lightGreen', 'yellow', 'orange', 'red', 'pink', 'brown'],
+  byShades: true,
+}).concat(
+  makeColorArray({
+    shades: [
+      'A100',
+      'A400',
+      'A700',
+      // 900,
+    ],
+    colors: ['teal', 'lightBlue', 'indigo', 'purple', 'blueGrey', 'grey'],
+    byShades: true,
+  })
+)
