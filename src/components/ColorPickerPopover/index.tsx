@@ -104,7 +104,7 @@ export const ColorPicker: FC<ColorPickerProps> = ({
               <InputAdornment position="end">
                 <ColorCheck
                   hex={isHEX(custom) ? custom : value}
-                  checked={!isHEX(custom)}
+                  checked={isSameColor(value, custom)}
                   onChange={() => handleColorClick(custom)}
                 />
               </InputAdornment>
