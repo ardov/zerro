@@ -32,11 +32,15 @@ const useStyles = makeStyles(theme => ({
   symbol: {
     width: ({ size }: StylesProps) => sizes[size],
     height: ({ size }: StylesProps) => sizes[size],
-    color: ({ color }: StylesProps) =>
-      color ? color : theme.palette.text.primary,
+    color: ({ color }: StylesProps) => theme.palette.text.primary,
     borderRadius: '50%',
     border: ({ color }: StylesProps) => (color ? `1px solid ${color}` : 'none'),
-    backgroundColor: theme.palette.action.hover,
+    background: ({ color }: StylesProps) =>
+      color
+        ? 'linear-gradient(-30deg, rgba(255,255,255,0.2), transparent)'
+        : 'none',
+    backgroundColor: ({ color }: StylesProps) =>
+      color ? color : theme.palette.action.hover,
 
     '&:hover .checkbox': {
       opacity: ({ isInteractive }: StylesProps) => (isInteractive ? 1 : 0),
