@@ -1,6 +1,5 @@
-import * as materialColors from '@material-ui/core/colors'
+import { makeColorArray } from '../../helpers/makeColorArray'
 
-export const colors = makeColors()
 export const zmColors = [
   '#CC3077',
   '#FB8D01',
@@ -10,52 +9,42 @@ export const zmColors = [
   '#9C26B0',
 ]
 
-type Shade = keyof typeof materialColors['red']
-function makeColors() {
-  const colorArray: string[] = []
-  const shades: Shade[] = [
-    // '50',
-    // '100',
-    // '200',
-    // '300',
-    // '400',
-    // '500',
-    // '600',
-    // '700',
-    // '800',
-    // '900',
+export const colors = makeColorArray({
+  shades: [
+    // 50,
+    // 100,
+    // 200,
+    // 300,
+    // 400,
+    // 500,
+    // 600,
+    // 700,
+    // 800,
+    // 900,
     'A100',
     // 'A200',
     'A400',
     'A700',
-  ]
-  const colors = [
-    materialColors.red,
-    // materialColors.pink,
-    materialColors.purple,
-    // materialColors.deepPurple,
-    materialColors.indigo,
-    // materialColors.blue,
-    materialColors.lightBlue,
-    // materialColors.cyan,
-    materialColors.teal,
-    // materialColors.green,
-    materialColors.lightGreen,
-    // materialColors.lime,
-    materialColors.yellow,
-    // materialColors.amber,
-    materialColors.orange,
-    // materialColors.deepOrange,
-    materialColors.brown,
-    materialColors.grey,
-    materialColors.blueGrey,
-  ]
-  colors.forEach(color =>
-    shades.forEach(shade => {
-      if (color[shade]) {
-        colorArray.push(color[shade])
-      }
-    })
-  )
-  return colorArray
-}
+  ],
+  colors: [
+    'red',
+    // 'pink',
+    'purple',
+    // 'deepPurple',
+    'indigo',
+    // 'blue',
+    'lightBlue',
+    // 'cyan',
+    'teal',
+    // 'green',
+    'lightGreen',
+    // 'lime',
+    'yellow',
+    // 'amber',
+    'orange',
+    // 'deepOrange',
+    'brown',
+    'grey',
+    'blueGrey',
+  ],
+})
