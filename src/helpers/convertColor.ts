@@ -25,14 +25,16 @@ export const getColorForString = (str: string) => {
   return colorArray[idx]
 }
 
-export const intToRGB = (int: number) => {
+export const intToRGB = (int: number | null) => {
+  if (typeof int !== 'number') return null
   let r = (int >> 16) & 0xff
   let g = (int >> 8) & 0xff
   let b = int & 0xff
   return `rgb(${r},${g},${b})`
 }
 
-export const intToHEX = (int: number) => {
+export const intToHEX = (int: number | null) => {
+  if (typeof int !== 'number') return null
   let r = ((int >> 16) & 0xff).toString(16).padStart(2, '0')
   let g = ((int >> 8) & 0xff).toString(16).padStart(2, '0')
   let b = (int & 0xff).toString(16).padStart(2, '0')

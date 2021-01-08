@@ -21,7 +21,7 @@ const Header = ({ tag, onClose, onEdit }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const dispatch = useDispatch()
   const handleColorChange = hex => {
-    sendEvent('Tag: set color')
+    sendEvent('Tag: set color: ' + hex)
     dispatch(patchTag({ id: tag.id, color: HEXToInt(hex) }))
   }
   return (

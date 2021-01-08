@@ -52,7 +52,7 @@ export const ColorPicker: FC<ColorPickerProps> = ({
   onClose,
   ...rest
 }) => {
-  const [custom, setCustom] = useState(value)
+  const [custom, setCustom] = useState(value || '')
   const c = useStyles()
   const handleColorClick = (color?: string) => {
     if (isSameColor(value, color)) {
@@ -66,7 +66,7 @@ export const ColorPicker: FC<ColorPickerProps> = ({
     onClose()
   }
   useEffect(() => {
-    setCustom(value)
+    setCustom(value || '')
   }, [value])
 
   return (
@@ -101,14 +101,11 @@ export const ColorPicker: FC<ColorPickerProps> = ({
           placeholder="#000000"
           InputProps={{
             endAdornment: (
-              <InputAdornment
-                position="end"
-                onClick={() => handleColorClick(custom)}
-              >
+              <InputAdornment position="end">
                 <ColorCheck
                   hex={isHEX(custom) ? custom : value}
                   checked={!isHEX(custom)}
-                  onChange={() => {}}
+                  onChange={() => handleColorClick(custom)}
                 />
               </InputAdornment>
             ),

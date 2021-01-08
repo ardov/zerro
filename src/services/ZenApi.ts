@@ -1,5 +1,5 @@
 import Cookies from 'cookies-js'
-import { ZmDiffObject, DataToUpdate, ZmResponse } from 'types'
+import { DataToUpdate, ZmResponse } from 'types'
 
 const CODE_DATA_KEY = 'auth-code-data'
 const TOKEN_KEY = 'token'
