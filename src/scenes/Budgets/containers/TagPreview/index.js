@@ -32,6 +32,7 @@ const Header = ({ tag, onClose, onEdit }) => {
           flexShrink={0}
           color={tag.colorHEX}
           onClick={e => setAnchorEl(e.currentTarget)}
+          button
         />
         <Typography variant="h6" component="span" noWrap>
           {tag.name}

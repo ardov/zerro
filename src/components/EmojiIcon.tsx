@@ -16,6 +16,7 @@ type EmojiIconProps = Modify<
     checked: CheckboxProps['checked']
     showCheckBox: boolean
     checkboxProps: CheckboxProps
+    button: boolean
   }
 >
 
@@ -26,6 +27,7 @@ interface StylesProps {
   isInteractive: boolean
   checked: CheckboxProps['checked']
   showCheckBox: boolean
+  button: boolean
 }
 
 const useStyles = makeStyles(theme => ({
@@ -33,6 +35,7 @@ const useStyles = makeStyles(theme => ({
     width: ({ size }: StylesProps) => sizes[size],
     height: ({ size }: StylesProps) => sizes[size],
     color: ({ color }: StylesProps) => theme.palette.text.primary,
+    cursor: ({ button }: StylesProps) => (button ? 'pointer' : 'auto'),
     borderRadius: '50%',
     border: ({ color }: StylesProps) => (color ? `1px solid ${color}` : 'none'),
     background: ({ color }: StylesProps) =>
@@ -41,6 +44,15 @@ const useStyles = makeStyles(theme => ({
         : 'none',
     backgroundColor: ({ color }: StylesProps) =>
       color ? color : theme.palette.action.hover,
+    transition: '.2s ease-in-out',
+
+    '&:hover': {
+      transform: ({ button }: StylesProps) => (button ? 'scale(1.1)' : 'none'),
+    },
+    '&:active': {
+      transform: ({ button }: StylesProps) => (button ? 'scale(1)' : 'none'),
+      transition: '.1s ease-in-out',
+    },
 
     '&:hover .checkbox': {
       opacity: ({ isInteractive }: StylesProps) => (isInteractive ? 1 : 0),
@@ -79,12 +91,14 @@ export default function EmojiIcon(props: EmojiIconProps) {
     checked,
     showCheckBox,
     checkboxProps,
+    button = false,
     ...rest
   } = props
   const c = useStyles({
     color,
     size,
     isInteractive: !!onChange,
+    button,
     showCheckBox,
     checked,
   } as StylesProps)
