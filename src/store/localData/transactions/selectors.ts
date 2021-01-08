@@ -8,11 +8,11 @@ import { populate, PopulatedTransaction } from './populate'
 import { RootState } from 'store'
 import { TransactionId, ZmTransaction } from 'types'
 
+const getServerTransactions = (state: RootState) => state.serverData.transaction
+const getLocalTransactions = (state: RootState) => state.localData.transaction
 const getTransactionsToSync = (state: RootState) =>
   convertToSyncArray(state.localData.transaction) as ZmTransaction[]
 
-const getServerTransactions = (state: RootState) => state.serverData.transaction
-const getLocalTransactions = (state: RootState) => state.localData.transaction
 const getTransactions = createSelector(
   [getServerTransactions, getLocalTransactions],
   (transactions, diff) => ({ ...transactions, ...diff })

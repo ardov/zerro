@@ -1,28 +1,43 @@
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { DragDropContext } from 'react-beautiful-dnd'
+import { DragDropContext, DropResult } from 'react-beautiful-dnd'
 import { useMonth } from '../useMonth'
 import { useCallback } from 'react'
 import { MoveMoneyModal } from './MoveMoneyModal'
 import { moveTag } from 'store/localData/hiddenData/tagOrder'
 
+export type DragModeType = 'FUNDS' | 'REORDER'
+type DragModeContextType = {
+  dragMode: DragModeType
+  setDragMode: (mode: DragModeType) => void
+}
+interface IMoneyModalProps {
+  open: boolean
+  source?: string
+  destination?: string
+  month?: number
+  key?: string
+}
+
 export const IsDraggingContext = React.createContext(false)
 export const DragModeContext = React.createContext({
   dragMode: 'FUNDS',
   setDragMode: () => {},
-})
+} as DragModeContextType)
 
-export function DnDContext({ children }) {
+export const DnDContext: React.FC = ({ children }) => {
   const dispatch = useDispatch()
   const [month] = useMonth()
-  const [isDragging, setIsDragging] = useState()
-  const [dragMode, setDragMode] = useState('FUNDS')
-  const [moneyModalProps, setMoneyModalProps] = useState({ open: false })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragMode, setDragMode] = useState<DragModeType>('FUNDS')
+  const [moneyModalProps, setMoneyModalProps] = useState<IMoneyModalProps>({
+    open: false,
+  })
 
   const onDragEnd = useCallback(
-    e => {
+    (e: DropResult) => {
       setIsDragging(false)
-      if (!e.source || !e.destination) return
+      if (!e.source || !e.destination || !month) return
 
       if (
         dragMode === 'FUNDS' &&
