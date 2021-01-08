@@ -6,6 +6,9 @@ import { OptionalExceptFor, Tag } from 'types'
 type TagDraft = OptionalExceptFor<Tag, 'id'>
 
 export const patchTag = (tag: TagDraft): AppThunk => (dispatch, getState) => {
+  if (!tag.id) throw new Error('Trying to patch tag without id')
+  if (tag.id === 'null') throw new Error('Trying to patch null tag')
+
   sendEvent('Tag: edit')
   dispatch(
     setTag({

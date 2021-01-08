@@ -1,4 +1,4 @@
-import { intToRGB, getColorForString } from 'helpers/convertColor'
+import { intToRGB, intToHEX, getColorForString } from 'helpers/convertColor'
 import toArray from 'lodash/toArray'
 import { PopulatedTag, Tag } from 'types'
 import { Tags } from '.'
@@ -6,9 +6,9 @@ import iconsMap from './iconsMap.json'
 import { nullTag } from './makeTag'
 
 export default function populateTags(rawTags: Tags) {
-  let tags = { null: makePopulatedTag(nullTag) } as {
+  let tags: {
     [x: string]: PopulatedTag
-  }
+  } = { null: makePopulatedTag(nullTag) }
 
   for (const id in rawTags) {
     // Add name, symbol and colorRGB
@@ -31,6 +31,7 @@ function makePopulatedTag(tag: Tag): PopulatedTag {
     name: getName(tag.title),
     symbol: tag.icon ? iconsMap[tag.icon] : tag.title.slice(0, 2),
     colorRGB: tag.color ? intToRGB(tag.color) : null,
+    colorHEX: tag.color ? intToHEX(tag.color) : null,
     colorGenerated: getColorForString(tag.title),
   }
 }

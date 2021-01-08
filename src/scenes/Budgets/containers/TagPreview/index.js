@@ -1,5 +1,5 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 
 import EmojiIcon from 'components/EmojiIcon'
 import { Box, Typography, IconButton } from '@material-ui/core'
@@ -12,21 +12,46 @@ import Rhythm from 'components/Rhythm'
 import { useMonth } from 'scenes/Budgets/useMonth'
 import { LinkedAccs } from './LinkedAccs'
 import { OutcomeWidget } from './OutcomeWidget'
+import { ColorPicker } from 'components/ColorPickerPopover'
+import { HEXToInt } from 'helpers/convertColor'
+import { patchTag } from 'store/localData/tags/thunks'
 
-const Header = ({ tag, onClose, onEdit }) => (
-  <Box py={1} px={3} display="flex" alignItems="center">
-    <Box flexGrow={1} display="flex" minWidth={0} alignItems="center">
-      <EmojiIcon size="m" symbol={tag.symbol} mr={2} flexShrink={0} />
-      <Typography variant="h6" component="span" noWrap>
-        {tag.name}
-      </Typography>
+const Header = ({ tag, onClose, onEdit }) => {
+  const [anchorEl, setAnchorEl] = useState(null)
+  const dispatch = useDispatch()
+  const handleColorChange = hex => {
+    dispatch(patchTag({ id: tag.id, color: HEXToInt(hex) }))
+  }
+  return (
+    <Box py={1} px={3} display="flex" alignItems="center">
+      <Box flexGrow={1} display="flex" minWidth={0} alignItems="center">
+        <EmojiIcon
+          size="m"
+          symbol={tag.symbol}
+          mr={2}
+          flexShrink={0}
+          color={tag.colorHEX}
+          onClick={e => setAnchorEl(e.currentTarget)}
+        />
+        <Typography variant="h6" component="span" noWrap>
+          {tag.name}
+        </Typography>
+      </Box>
+
+      <Tooltip title="Закрыть">
+        <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
+      </Tooltip>
+
+      <ColorPicker
+        open={!!anchorEl}
+        anchorEl={anchorEl}
+        onClose={() => setAnchorEl(null)}
+        value={tag.colorHEX}
+        onChange={handleColorChange}
+      />
     </Box>
-
-    <Tooltip title="Закрыть">
-      <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
-    </Tooltip>
-  </Box>
-)
+  )
+}
 
 export function TagPreview({ onClose, id }) {
   const [month, setMonth] = useMonth()

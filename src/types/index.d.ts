@@ -130,6 +130,7 @@ export interface PopulatedTag extends Tag {
   symbol: string
   children: string[]
   colorRGB: string | null
+  colorHEX: string | null
   colorGenerated: string
 }
 
