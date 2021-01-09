@@ -9,7 +9,7 @@ import startOfMonth from 'date-fns/startOfMonth'
 import { getType } from 'store/localData/transactions/helpers'
 import getMonthDates from './getMonthDates'
 import { getTransactionsInBudget } from './baseSelectors'
-import { getAccountsInBudget } from 'store/localData/accounts'
+import { getInBudgetAccounts } from 'store/localData/accounts'
 import { RootState } from 'store'
 import { Budget } from 'types'
 
@@ -27,7 +27,7 @@ const makeDateNode = (): DateNode => ({
 })
 
 const getAmountsByMonth = createSelector(
-  [getTransactionsInBudget, convertCurrency, getAccountsInBudget],
+  [getTransactionsInBudget, convertCurrency, getInBudgetAccounts],
   (transactions, convert, accountsInBudget) => {
     const result: { [date: number]: DateNode } = {}
 

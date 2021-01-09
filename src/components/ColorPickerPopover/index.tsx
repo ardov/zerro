@@ -1,6 +1,7 @@
 import React, { ChangeEvent, FC, useEffect, useState } from 'react'
 import {
   Box,
+  Button,
   Divider,
   InputAdornment,
   Popover,
@@ -12,6 +13,7 @@ import { Modify } from 'types'
 import './styles.scss'
 import { zmColors, colors } from './colors'
 import { isHEX } from 'helpers/convertColor'
+import Rhythm from 'components/Rhythm'
 
 const useStyles = makeStyles(theme => ({
   grid: {
@@ -54,8 +56,8 @@ export const ColorPicker: FC<ColorPickerProps> = ({
 }) => {
   const [custom, setCustom] = useState(value || '')
   const c = useStyles()
-  const handleColorClick = (color?: string) => {
-    if (isSameColor(value, color)) {
+  const handleColorClick = (color?: string | null) => {
+    if (isSameColor(value, color) || color === null) {
       onChange(null)
       onClose()
       return
@@ -71,8 +73,8 @@ export const ColorPicker: FC<ColorPickerProps> = ({
 
   return (
     <Popover onClose={onClose} {...rest}>
-      <Box p={2}>
-        <Box mb={2} className={c.grid}>
+      <Rhythm gap={2} p={2}>
+        <Box className={c.grid}>
           {zmColors.map(color => (
             <ColorCheck
               key={color}
@@ -83,7 +85,7 @@ export const ColorPicker: FC<ColorPickerProps> = ({
           ))}
         </Box>
         <Divider />
-        <Box py={2} className={c.grid}>
+        <Box className={c.grid}>
           {colors.map(color => (
             <ColorCheck
               key={color}
@@ -111,7 +113,10 @@ export const ColorPicker: FC<ColorPickerProps> = ({
             ),
           }}
         />
-      </Box>
+        <Button fullWidth onClick={() => handleColorClick(null)}>
+          Убрать цвет
+        </Button>
+      </Rhythm>
     </Popover>
   )
 }

@@ -1,12 +1,12 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getAccountsInBudget } from 'store/localData/accounts'
+import { getInBudgetAccounts } from 'store/localData/accounts'
 import { convertCurrency } from 'store/serverData'
 import { round } from 'helpers/currencyHelpers'
 import { getSortedTransactions } from 'store/localData/transactions'
 import { getStartBalance } from 'store/localData/accounts/helpers'
 
 export const getStartFunds = createSelector(
-  [getAccountsInBudget, convertCurrency],
+  [getInBudgetAccounts, convertCurrency],
   (accounts, convert) => {
     let sum = 0
     for (const acc of accounts) {
@@ -18,7 +18,7 @@ export const getStartFunds = createSelector(
 )
 
 export const getTransactionsInBudget = createSelector(
-  [getSortedTransactions, getAccountsInBudget],
+  [getSortedTransactions, getInBudgetAccounts],
   (transactions, accounts) => {
     const accIds = accounts.map(acc => acc.id)
     return transactions.filter(

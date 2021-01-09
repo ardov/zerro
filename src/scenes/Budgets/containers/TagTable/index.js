@@ -15,7 +15,7 @@ import BudgetPopover from './BudgetPopover'
 import { useMonth } from 'scenes/Budgets/useMonth'
 import { DragModeContext } from '../DnDContext'
 import { getTagAccMap } from 'store/localData/hiddenData/accTagMap'
-import { getAccountsInBudget } from 'store/localData/accounts'
+import { getInBudgetAccounts } from 'store/localData/accounts'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
@@ -23,7 +23,7 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
   const tagsTree = useSelector(getTagsTree)
   const tagAccMap = useSelector(getTagAccMap)
   const accountsInBudget = useSelector(state =>
-    getAccountsInBudget(state).map(acc => acc.id)
+    getInBudgetAccounts(state).map(acc => acc.id)
   )
   const [month] = useMonth()
   const [selected, setSelected] = useState()
