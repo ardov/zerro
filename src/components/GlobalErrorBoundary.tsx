@@ -4,21 +4,15 @@ import { captureError, sendEvent } from 'helpers/tracking'
 import Cookies from 'cookies-js'
 import storage from 'services/storage'
 
-const buttonStyle = {
-  border: '1px solid #ccc',
-  padding: 16,
-}
-const wrapperStyle = {
-  margin: '0 auto',
-  padding: 40,
-}
+const buttonStyle = { border: '1px solid #ccc', padding: 16 }
+const wrapperStyle = { margin: '0 auto', padding: 40 }
 
 export default class GlobalErrorBoundary extends React.Component {
   state = { hasError: false }
 
-  static getDerivedStateFromError = error => ({ hasError: true })
+  static getDerivedStateFromError = (error: any) => ({ hasError: true })
 
-  componentDidCatch = (error, errorInfo) => {
+  componentDidCatch = (error: Error, errorInfo: React.ErrorInfo) => {
     sendEvent(`GlobalError: ${error.message}`)
     captureError(error, errorInfo)
   }

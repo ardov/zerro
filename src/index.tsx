@@ -28,12 +28,12 @@ ReactDOM.render(
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: http://bit.ly/CRA-PWA
 const swConfig = {
-  onUpdate: registration => {
+  onUpdate: (registration: ServiceWorkerRegistration) => {
     registration.unregister().then(() => {
       window.location.reload()
     })
   },
-  onSuccess: registration => {
+  onSuccess: (registration: ServiceWorkerRegistration) => {
     sendEvent('Version Update: ' + process.env.REACT_APP_VERSION)
   },
 }
