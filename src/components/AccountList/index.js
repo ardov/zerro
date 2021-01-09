@@ -38,13 +38,18 @@ export default function AccountList({ className, onAccountClick }) {
   const inBudget = useSelector(getInBudgetAccounts).sort(compare)
   const savings = useSelector(getSavingAccounts).sort(compare)
 
-  const archivedInBudget = inBudget.filter(a => a.archive)
-  const activeInBudget = inBudget.filter(a => !a.archive)
+  const inBudgetArchived = inBudget.filter(a => a.archive)
+  const inBudgetActive = inBudget.filter(a => !a.archive)
+  const inBudgetArchivedSum = getTotalBalance(inBudgetArchived)
+  const inBudgetActiveSum = getTotalBalance(inBudgetActive)
 
-  const archivedInBudgetSum = getTotalBalance(archivedInBudget)
-  const activeInBudgetSum = getTotalBalance(activeInBudget)
+  const savingsArchived = savings.filter(a => a.archive)
+  const savingsActive = savings.filter(a => !a.archive)
+  const savingsArchivedSum = getTotalBalance(savingsArchived)
+  const savingsActiveSum = getTotalBalance(savingsActive)
+
   const savingsSum = getTotalBalance(savings)
-  const [showArchived, setShowArchived] = useState(!!archivedInBudgetSum)
+  const [showArchived, setShowArchived] = useState(!!inBudgetArchivedSum)
 
   if (!userInstrumentId) return null
   return (
@@ -52,11 +57,11 @@ export default function AccountList({ className, onAccountClick }) {
       <List dense>
         <Subheader
           title="В бюджете"
-          amount={activeInBudgetSum + archivedInBudgetSum}
+          amount={inBudgetActiveSum + inBudgetArchivedSum}
           currency={userInstrument.shortTitle}
           onClick={() => setShowArchived(a => !a)}
         />
-        {activeInBudget.map(acc => (
+        {inBudgetActive.map(acc => (
           <Account
             key={acc.id}
             button
@@ -67,21 +72,21 @@ export default function AccountList({ className, onAccountClick }) {
             onDoubleClick={() => dispatch(setInBudget(acc.id, false))}
           />
         ))}
-        {!!archivedInBudgetSum && !showArchived && (
+        {!!inBudgetArchivedSum && !showArchived && (
           <Account
             title={`${
-              archivedInBudget.length
-            } ${pluralize(archivedInBudget.length, [
+              inBudgetArchived.length
+            } ${pluralize(inBudgetArchived.length, [
               'архивный счёт',
               'архивных счёта',
               'архивных счётов',
             ])}`}
-            amount={archivedInBudgetSum}
+            amount={inBudgetArchivedSum}
             currency={userInstrument.shortTitle}
           />
         )}
         {showArchived &&
-          archivedInBudget.map(acc => (
+          inBudgetArchived.map(acc => (
             <Account
               key={acc.id}
               button
@@ -100,7 +105,7 @@ export default function AccountList({ className, onAccountClick }) {
           amount={savingsSum}
           currency={userInstrument.shortTitle}
         />
-        {savings.map(acc => (
+        {savingsActive.map(acc => (
           <Account
             key={acc.id}
             button
