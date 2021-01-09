@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   getInBudgetAccounts,
@@ -14,22 +14,24 @@ import pluralize from 'helpers/pluralize'
 import { List } from '@material-ui/core'
 import { Account, Subheader } from './components'
 import { round } from 'helpers/currencyHelpers'
-import { useState } from 'react'
+import { Account as AccType } from 'types'
 import { setInBudget } from 'store/localData/accounts/thunks'
 
-export default function AccountList({ className, onAccountClick }) {
+export default function AccountList({ className = '' }) {
   const dispatch = useDispatch()
   const convert = useSelector(convertCurrency)
   const instruments = useSelector(getInstruments)
   const userInstrument = useSelector(getUserInstrument)
   const userInstrumentId = useSelector(getUserInstrumentId)
 
-  const getTotalBalance = accs =>
-    accs.reduce((sum, acc) => {
-      let balance = convert(acc.balance, acc.instrument, userInstrumentId)
-      return round(sum + balance)
-    }, 0)
-  const compare = (a, b) => {
+  const getTotalBalance = (accs: AccType[]) => {
+    let sum = 0
+    accs.forEach(
+      a => (sum += convert(a.balance, a.instrument, userInstrumentId))
+    )
+    return round(sum)
+  }
+  const compare = (a: AccType, b: AccType) => {
     const aBalance = convert(a.balance, a.instrument, userInstrumentId)
     const bBalance = convert(b.balance, b.instrument, userInstrumentId)
     return bBalance - aBalance
@@ -43,22 +45,22 @@ export default function AccountList({ className, onAccountClick }) {
   const inBudgetArchivedSum = getTotalBalance(inBudgetArchived)
   const inBudgetActiveSum = getTotalBalance(inBudgetActive)
 
-  const savingsArchived = savings.filter(a => a.archive)
+  // const savingsArchived = savings.filter(a => a.archive)
   const savingsActive = savings.filter(a => !a.archive)
-  const savingsArchivedSum = getTotalBalance(savingsArchived)
-  const savingsActiveSum = getTotalBalance(savingsActive)
+  // const savingsArchivedSum = getTotalBalance(savingsArchived)
+  // const savingsActiveSum = getTotalBalance(savingsActive)
 
-  const savingsSum = getTotalBalance(savings)
   const [showArchived, setShowArchived] = useState(!!inBudgetArchivedSum)
+  const savingsSum = getTotalBalance(savings)
 
-  if (!userInstrumentId) return null
+  if (!userInstrumentId || !userInstrument) return null
   return (
     <div className={className}>
       <List dense>
         <Subheader
           title="В бюджете"
           amount={inBudgetActiveSum + inBudgetArchivedSum}
-          currency={userInstrument.shortTitle}
+          currency={userInstrument?.shortTitle}
           onClick={() => setShowArchived(a => !a)}
         />
         {inBudgetActive.map(acc => (
