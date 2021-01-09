@@ -1,7 +1,7 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import {
-  getAccountsInBudget,
+  getInBudgetAccounts,
   getSavingAccounts,
 } from 'store/localData/accounts'
 import {
@@ -35,7 +35,7 @@ export default function AccountList({ className, onAccountClick }) {
     return bBalance - aBalance
   }
 
-  const inBudget = useSelector(getAccountsInBudget).sort(compare)
+  const inBudget = useSelector(getInBudgetAccounts).sort(compare)
   const savings = useSelector(getSavingAccounts).sort(compare)
 
   const archivedInBudget = inBudget.filter(a => a.archive)

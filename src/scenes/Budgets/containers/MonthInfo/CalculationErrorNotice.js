@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { getTotalsArray } from '../../selectors/getTotalsByMonth'
 import { convertCurrency } from 'store/serverData'
-import { getAccountsInBudget } from 'store/localData/accounts'
+import { getInBudgetAccounts } from 'store/localData/accounts'
 import { round } from 'helpers/currencyHelpers'
 import { getUserCurrencyCode } from 'store/serverData'
 import { Box, Typography, Button, Link } from '@material-ui/core'
@@ -25,7 +25,7 @@ export function CalculationErrorNotice(props) {
   const totalsArray = useSelector(getTotalsArray)
   const { moneyInBudget } = totalsArray[totalsArray.length - 1]
 
-  const accsInBudget = useSelector(getAccountsInBudget)
+  const accsInBudget = useSelector(getInBudgetAccounts)
   const convert = useSelector(convertCurrency)
   let inBudgetSum = 0
   accsInBudget.forEach(acc => {
