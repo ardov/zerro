@@ -15,22 +15,22 @@ import { getAmountsForTag } from 'scenes/Budgets/selectors/getAmountsByTag'
 import { getUserCurrencyCode } from 'store/serverData'
 import { setOutcomeBudget } from 'scenes/Budgets/thunks'
 import { getGoals } from 'store/localData/hiddenData/goals'
-import { getGoalProgress } from 'scenes/Budgets/selectors/goalsProgress'
+import { getGoalsProgress } from 'scenes/Budgets/selectors/goalsProgress'
 import { round } from 'helpers/currencyHelpers'
 import { sendEvent } from 'helpers/tracking'
 
 export default function BudgetPopover({ id, month, onClose, ...rest }) {
   const prevMonth = getPrevMonthMs(month)
 
-  const goal = useSelector(state => getGoals(state)[id] || {})
-  const goalProgress = useSelector(state => getGoalProgress(state, month, id))
+  const goal = useSelector(getGoals)?.[id]
+  const goalProgress = useSelector(getGoalsProgress)?.[month]?.[id]
   const needForGoal = goalProgress?.target
 
   const currency = useSelector(getUserCurrencyCode)
-  const amounts = useSelector(state => getAmountsForTag(state)(month, id) || {})
-  const prevAmounts = useSelector(
-    state => getAmountsForTag(state)(prevMonth, id) || {}
-  )
+  const amountsGetter = useSelector(getAmountsForTag)
+  const amounts = amountsGetter(month, id) || {}
+  const prevAmounts = amountsGetter(prevMonth, id) || {}
+
   const dispatch = useDispatch()
   const onChange = outcome => dispatch(setOutcomeBudget(outcome, month, id))
 

@@ -1,12 +1,18 @@
 import startOfMonth from 'date-fns/startOfMonth'
 import startOfDay from 'date-fns/startOfDay'
 import startOfWeek from 'date-fns/startOfWeek'
-import { AccountId, Tag, TagId, Transaction, TransactionId } from 'types'
+import {
+  AccountId,
+  Tag,
+  TagId,
+  Transaction,
+  TransactionId,
+  TransactionType,
+} from 'types'
 
-type TransactionType = 'income' | 'outcome' | 'transfer'
 type OperatorType = 'AND' | 'OR'
 
-interface FilerConditions {
+interface FilterConditions {
   search?: null | string
   type?: null | TransactionType
   showDeleted?: boolean
@@ -19,31 +25,31 @@ interface FilerConditions {
   amountTo?: null | number
 }
 
-const checkSearch = (tr: Transaction, search?: FilerConditions['search']) => {
+const checkSearch = (tr: Transaction, search?: FilterConditions['search']) => {
   if (!search) return true
   if (tr.comment?.toUpperCase().includes(search.toUpperCase())) return true
   if (tr.payee?.toUpperCase().includes(search.toUpperCase())) return true
   return false
 }
 
-const checkType = (tr: Transaction, type?: FilerConditions['type']) =>
+const checkType = (tr: Transaction, type?: FilterConditions['type']) =>
   !type || getType(tr) === type
 
 const checkDeleted = (
   tr: Transaction,
-  showDeleted?: FilerConditions['showDeleted']
+  showDeleted?: FilterConditions['showDeleted']
 ) => showDeleted || !tr.deleted
 
 const checkDate = (
   tr: Transaction,
-  dateFrom?: FilerConditions['dateFrom'],
-  dateTo?: FilerConditions['dateTo']
+  dateFrom?: FilterConditions['dateFrom'],
+  dateTo?: FilterConditions['dateTo']
 ) => (!dateFrom || +tr.date >= +dateFrom) && (!dateTo || +tr.date <= +dateTo)
 
 const checkAccounts = (
   tr: Transaction,
-  accountsFrom?: FilerConditions['accountsFrom'],
-  accountsTo?: FilerConditions['accountsTo']
+  accountsFrom?: FilterConditions['accountsFrom'],
+  accountsTo?: FilterConditions['accountsTo']
 ) => {
   const check = (current: AccountId, need?: null | AccountId[]) =>
     need ? need.includes(current) : true
@@ -53,9 +59,10 @@ const checkAccounts = (
   )
 }
 
-const checkTags = (tr: Transaction, tags?: FilerConditions['tags']) => {
+const checkTags = (tr: Transaction, tags?: FilterConditions['tags']) => {
   if (!tags || !tags.length) return true
-  if (!tr.tag && tags.includes(null) && getType(tr) !== 'transfer') return true
+  if (!tr.tag && tags.includes('null') && getType(tr) !== 'transfer')
+    return true
   if (!tr.tag) return false
   let result = false
   tr.tag.forEach(id => {
@@ -66,7 +73,7 @@ const checkTags = (tr: Transaction, tags?: FilerConditions['tags']) => {
 
 const checkAmount = (
   tr: Transaction,
-  amount?: FilerConditions['amountFrom'],
+  amount?: FilterConditions['amountFrom'],
   compareType: 'greaterOrEqual' | 'lessOrEqual' = 'lessOrEqual'
 ) => {
   if (!amount) return true
@@ -74,7 +81,7 @@ const checkAmount = (
   return compareType === 'lessOrEqual' ? trAmount <= amount : trAmount >= amount
 }
 
-const checkConditions = (tr: Transaction, conditions: FilerConditions) => {
+const checkConditions = (tr: Transaction, conditions: FilterConditions) => {
   if (!conditions) return true
   return (
     checkType(tr, conditions.type) &&
@@ -89,7 +96,7 @@ const checkConditions = (tr: Transaction, conditions: FilerConditions) => {
 }
 
 export const checkRaw = (
-  conditions: FilerConditions | FilerConditions[] = {},
+  conditions: FilterConditions | FilterConditions[] = {},
   operator: OperatorType = 'OR'
 ) => (tr: Transaction) => {
   if (Array.isArray(conditions)) {
@@ -105,7 +112,7 @@ export const checkRaw = (
 export function groupTransactionsBy(
   groupType: 'DAY' | 'WEEK' | 'MONTH' = 'DAY',
   arr: Transaction[] = [],
-  filterConditions?: FilerConditions
+  filterConditions?: FilterConditions
 ) {
   const groupTypes = {
     DAY: (date: number | Date) => startOfDay(date),
@@ -148,23 +155,24 @@ export function sortBy(sortType: SortType = 'DATE', ascending = false) {
 interface TagsObj {
   [tagId: string]: Tag
 }
-export function mapTags(ids: TagId[], tags: TagsObj) {
+export function mapTags(ids: TagId[] | null, tags: TagsObj) {
   // TODO: Надо что-то придумать с null тегом 🤔    ⤵
   return ids && ids.length ? ids.map(id => tags[id + '']) : null
 }
 
-export function getType(tr: Transaction) {
-  return tr.income && tr.outcome ? 'transfer' : tr.income ? 'income' : 'outcome'
+export function getType(tr: Transaction, debtId?: string): TransactionType {
+  if (debtId && tr.incomeAccount === debtId) return 'outcomeDebt'
+  if (debtId && tr.outcomeAccount === debtId) return 'incomeDebt'
+  if (tr.income && tr.outcome) return 'transfer'
+  if (tr.outcome) return 'outcome'
+  return 'income'
 }
 
 export function getTime(tr: Transaction) {
+  const date = new Date(tr.date)
   const creationDate = new Date(tr.created)
-  const hours = creationDate.getHours()
-  const minutes = creationDate.getMinutes()
-  const seconds = creationDate.getSeconds()
-  const trTime = new Date(tr.date)
-  trTime.setHours(hours, minutes, seconds)
-  return +trTime
+  creationDate.setFullYear(date.getFullYear(), date.getMonth(), date.getDate())
+  return +creationDate
 }
 
 export function getMainTag(tr: Transaction) {

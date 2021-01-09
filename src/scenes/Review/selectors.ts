@@ -1,18 +1,13 @@
-import createSelector from 'selectorator'
+import { createSelector } from '@reduxjs/toolkit'
 import { round } from 'helpers/currencyHelpers'
 import { getType } from 'store/localData/transactions/helpers'
 import { getAccounts } from 'store/localData/accounts'
 import { getSortedTransactions } from 'store/localData/transactions'
 import { getStartBalance } from 'store/localData/accounts/helpers'
+import { getTransactionsHistory } from 'store/localData/transactions'
 import { eachDayOfInterval, startOfDay } from 'date-fns'
 import { convertCurrency } from 'store/serverData'
 import { Transaction, Account, AccountId, InstrumentId } from 'types'
-
-export const getTransactionsHistory = createSelector(
-  [getSortedTransactions],
-  (transactions: Transaction[]) =>
-    transactions.filter(tr => !tr.deleted).reverse()
-)
 
 interface DayNode {
   date: number
@@ -124,7 +119,7 @@ interface InfoNode {
   transferTransactions: Transaction[]
 }
 
-interface Stats {
+export interface Stats {
   total: InfoNode
   receipts: number
   withGeo: number
@@ -148,10 +143,7 @@ const createInfoNode = (): InfoNode => ({
 export const getYearStats = (year: number) =>
   createSelector(
     [getSortedTransactions, convertCurrency],
-    (
-      allTransactions: Transaction[],
-      convert: (amount: number, id: InstrumentId) => number
-    ) => {
+    (allTransactions: Transaction[], convert) => {
       if (!allTransactions?.length) return null
       const dateStart = +new Date(year, 0, 1)
       const dateEnd = +new Date(year + 1, 0, 1)

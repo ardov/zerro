@@ -2,7 +2,6 @@ import React, { useState, useCallback } from 'react'
 import { Box, Typography, Paper, useTheme } from '@material-ui/core'
 import { useSelector } from 'react-redux'
 import { AreaChart, Area, ResponsiveContainer } from 'recharts'
-import { Tooltip } from 'components/Tooltip'
 import { getAccountsHistory } from './selectors'
 import { getAccounts, getAccountList } from 'store/localData/accounts'
 import { formatMoney, formatDate } from 'helpers/format'
@@ -89,11 +88,7 @@ const AccHist = ({ id, startDate = 0, endDate, onClick }) => {
     <Paper style={{ overflow: 'hidden', position: 'relative' }}>
       <Box p={2} minWidth={160}>
         <Typography variant="body2" onClick={() => console.log(acc)}>
-          {hasError && (
-            <Tooltip title={'Ошибка на ' + formatMoney(diff)}>
-              <span>⚠️⚠️⚠️ </span>
-            </Tooltip>
-          )}
+          {hasError && <span>⚠️ Ошибка на {formatMoney(diff)}⚠️ </span>}
           <span
             style={{ textDecoration: acc.archive ? 'line-through' : 'none' }}
           >

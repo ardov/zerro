@@ -1,4 +1,10 @@
+import iconsMap from 'store/localData/tags/iconsMap.json'
+type IconsMap = typeof iconsMap
+
+export type ById<T> = { [id: string]: T }
 export type Modify<T, R> = Omit<T, keyof R> & R
+export type OptionalExceptFor<T, TRequired extends keyof T> = Partial<T> &
+  Pick<T, TRequired>
 
 export type Token = string | null
 
@@ -6,14 +12,19 @@ export type UserId = number
 export type InstrumentId = number
 export type CompanyId = number
 export type CountryId = number
-export type TagId = string | null
+export type TagId = string
 export type MerchantId = string
 export type ReminderId = string
 export type ReminderMarkerId = string
 export type TransactionId = string
 export type AccountId = string
 
-export type TransactionType = 'transfer' | 'income' | 'outcome'
+export type TransactionType =
+  | 'income'
+  | 'outcome'
+  | 'transfer'
+  | 'incomeDebt'
+  | 'outcomeDebt'
 export type GoalType = 'monthly' | 'monthlySpend' | 'targetBalance'
 export type ObjectClass =
   | 'instrument'
@@ -40,9 +51,11 @@ export interface Company {
   id: CompanyId
   changed: number // Unix timestamp
   title: string
-  fullTitle: string
+  fullTitle: string | null
   www: string
   country: CountryId
+  countryCode: string
+  deleted: boolean
 }
 
 export interface Country {
@@ -58,6 +71,13 @@ export interface User {
   login: string | null
   currency: InstrumentId
   parent: UserId | null
+  country: CountryId
+  countryCode: string
+  email: string | null
+  login: string | null
+  monthStartDay: 1
+  paidTill: number // Unix timestamp
+  subscription: '10yearssubscription' | '1MonthSubscription' | string
 }
 
 export interface Account {
@@ -70,18 +90,15 @@ export interface Account {
   company: CompanyId | null
   type: 'cash' | 'ccard' | 'checking' | 'loan' | 'deposit' | 'emoney' | 'debt'
   syncID: string[] | null
-
   balance: number
   startBalance: number
   creditLimit: number
-
   inBalance: boolean
   savings: boolean
   enableCorrection: boolean
   enableSMS: boolean
   archive: boolean
   private: boolean
-
   // Для счетов с типом отличных от 'loan' и 'deposit' в  этих полях можно ставить null
   capitalization?: boolean | null
   percent?: number | null
@@ -91,29 +108,29 @@ export interface Account {
   payoffStep?: number | null
   payoffInterval?: 'month' | 'year' | null
 }
+export type ZmAccount = Modify<Account, { startDate: string }>
 
 export interface Tag {
   id: TagId // UUID
   changed: number // Unix timestamp
   user: UserId
-
   title: string
   parent: TagId | null
-  icon: string | null
+  icon: keyof IconsMap | null
   picture: string | null
   color: number | null
-
   showIncome: boolean
   showOutcome: boolean
   budgetIncome: boolean
   budgetOutcome: boolean
   required: boolean | null
 }
-
 export interface PopulatedTag extends Tag {
   name: string
   symbol: string
+  children: string[]
   colorRGB: string | null
+  colorHEX: string | null
   colorGenerated: string
 }
 
@@ -128,20 +145,16 @@ export interface ZmReminder {
   id: ReminderId
   changed: number
   user: UserId
-
   incomeInstrument: InstrumentId
   incomeAccount: string
   income: number
-
   outcomeInstrument: InstrumentId
   outcomeAccount: string
   outcome: number
-
   tag: string[] | null
   merchant: MerchantId | null
   payee: string | null
   comment: string | null
-
   interval: 'day' | 'week' | 'month' | 'year' | null
   step: number | null
   points: number[] | null
@@ -150,13 +163,7 @@ export interface ZmReminder {
   notify: boolean
 }
 export interface Reminder
-  extends Modify<
-    ZmReminder,
-    {
-      startDate: number
-      endDate: number
-    }
-  > {}
+  extends Modify<ZmReminder, { startDate: number; endDate: number }> {}
 
 export interface Transaction {
   id: TransactionId // UUID
@@ -167,7 +174,6 @@ export interface Transaction {
   hold: boolean | null
   viewed?: boolean
   qrCode: string | null
-
   incomeBankID: CompanyId | null
   incomeInstrument: InstrumentId
   incomeAccount: AccountId
@@ -176,24 +182,18 @@ export interface Transaction {
   outcomeInstrument: InstrumentId
   outcomeAccount: AccountId
   outcome: number
-
   tag: TagId[] | null
   merchant: MerchantId | null
   payee: string | null
   originalPayee: string | null
   comment: string | null
-
   date: number
-
   mcc: number | null
-
   reminderMarker: ReminderMarkerId | null
-
   opIncome: number | null
   opIncomeInstrument: InstrumentId | null
   opOutcome: number | null
   opOutcomeInstrument: InstrumentId | null
-
   latitude: number | null
   longitude: number | null
 }
@@ -202,10 +202,8 @@ export interface ZmTransaction extends Modify<Transaction, { date: string }> {}
 export interface Budget {
   changed: number
   user: UserId
-
   tag: TagId | '00000000-0000-0000-0000-000000000000' | null
   date: number
-
   income: number
   incomeLock: boolean
   outcome: number
@@ -227,21 +225,30 @@ export interface ZmDeletionObject {
   user: number
 }
 export interface ZmDiffObject {
-  currentClientTimestamp: number //Unix timestamp
   serverTimestamp: number //Unix timestamp
-
+  currentClientTimestamp: number //Unix timestamp
   forceFetch?: ObjectClass[]
-
+  deletion?: ZmDeletionObject[]
   instrument?: Instrument[]
   company?: Company[]
+  country?: Country[]
   user?: User[]
-  account?: Account[]
+  account?: ZmAccount[]
   tag?: Tag[]
   merchant?: Merchant[]
-  budget?: Budget[]
-  reminder?: Reminder[]
+  budget?: ZmBudget[]
+  reminder?: ZmReminder[]
   reminderMarker?: ReminderMarker[]
-  transaction?: Transaction[]
-
-  deletion?: ZmDeletionObject[]
+  transaction?: ZmTransaction[]
 }
+
+export type ZmResponse = Omit<
+  ZmDiffObject,
+  'currentClientTimestamp' | 'forceFetch'
+>
+
+export type LocalData = Omit<
+  ZmDiffObject,
+  'currentClientTimestamp' | 'forceFetch' | 'deletion'
+>
+export type DataToUpdate = Partial<ZmDiffObject>

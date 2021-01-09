@@ -55,7 +55,7 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
   const dispatch = useDispatch()
   const currency = useSelector(getUserCurrencyCode)
   const formatSum = sum => formatMoney(sum, currency)
-  const totals = useSelector(state => getTotalGoalsProgress(state)?.[month])
+  const totals = useSelector(getTotalGoalsProgress)?.[month]
   const { need, target, progress } = totals || {}
   const onOk = () => dispatch(fillGoals(month))
   const c = useStyles({ progress })

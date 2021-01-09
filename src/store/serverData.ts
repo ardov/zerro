@@ -6,11 +6,14 @@ import {
 } from 'helpers/converters'
 import { RootState } from 'store'
 import {
+  Account,
   Budget,
+  ById,
   Company,
   Country,
   Instrument,
   InstrumentId,
+  LocalData,
   Merchant,
   Reminder,
   ReminderMarkerId,
@@ -26,32 +29,17 @@ function keys<O>(o: O) {
 
 interface ServerData {
   serverTimestamp: number
-  instrument: { [key: number]: Instrument }
-  user: { [key: number]: User }
-  merchant: { [key: string]: Merchant }
-  country: { [key: number]: Country }
-  company: { [key: number]: Company }
-  reminder: { [key: string]: Reminder }
-  reminderMarker: { [key: string]: ReminderMarkerId }
-  account: { [key: string]: Account }
-  tag: { [key: string]: Tag }
-  budget: { [key: string]: Budget }
-  transaction: { [key: string]: Transaction }
-}
-
-interface DataToSave {
-  serverTimestamp: number
-  instrument?: Instrument[]
-  user?: User[]
-  merchant?: Merchant[]
-  country?: Country[]
-  company?: Company[]
-  reminder?: Reminder[]
-  reminderMarker?: ReminderMarkerId[]
-  account?: Account[]
-  tag?: Tag[]
-  budget?: Budget[]
-  transaction?: Transaction[]
+  instrument: ById<Instrument>
+  user: ById<User>
+  merchant: ById<Merchant>
+  country: ById<Country>
+  company: ById<Company>
+  reminder: ById<Reminder>
+  reminderMarker: ById<ReminderMarkerId>
+  account: ById<Account>
+  tag: ById<Tag>
+  budget: ById<Budget>
+  transaction: ById<Transaction>
 }
 
 // INITIAL STATE
@@ -83,9 +71,10 @@ const { reducer } = createSlice({
         if (!data) return state
 
         keys(data).forEach(key => {
-          if (!data[key]) return
+          if (data[key] === undefined) return
 
           if (key === 'serverTimestamp') {
+            // @ts-ignore
             state[key] = data[key] * 1000
             return
           }
@@ -101,7 +90,6 @@ const { reducer } = createSlice({
 
           if (key === 'deletion') {
             data[key]?.forEach(({ object, id }: ZmDeletionObject) => {
-              // @ts-ignore
               delete state[object][id]
             })
             return
@@ -125,7 +113,7 @@ export default reducer
  */
 export const getDataToSave = (state: RootState) => {
   const { serverData } = state
-  let result: DataToSave = { serverTimestamp: 0 }
+  let result: LocalData = { serverTimestamp: 0 }
   keys(serverData).forEach(key => {
     if (key === 'serverTimestamp') {
       result[key] = +serverData[key] / 1000
@@ -175,7 +163,7 @@ export const convertCurrency = createSelector(
     to?: InstrumentId
   ) => {
     to = to || userInstrument
-    if (!to) return undefined
+    if (!to) return amount
     return (amount * instruments[from].rate) / instruments[to].rate
   }
 )
