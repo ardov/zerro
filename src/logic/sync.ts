@@ -9,7 +9,7 @@ import { updateData } from 'store/commonActions'
 import { setSyncData } from 'store/lastSync'
 import { formatDate } from 'helpers/format'
 import { AppThunk } from 'store'
-import { ZmResponse, ObjectClass } from 'types'
+import { ZmResponse, LocalData } from 'types'
 
 /** All syncs with zenmoney goes through this thunk */
 export const syncData = (): AppThunk => (dispatch, getState) => {
@@ -57,8 +57,9 @@ export const syncData = (): AppThunk => (dispatch, getState) => {
     }
   )
 }
-
-const domains: ObjectClass[] = [
+type LocalKey = keyof LocalData
+const domains: LocalKey[] = [
+  'serverTimestamp',
   'instrument',
   'company',
   'user',
@@ -72,8 +73,8 @@ const domains: ObjectClass[] = [
 ]
 
 function getChangedDomains(data: ZmResponse) {
-  let changedDomains: ObjectClass[] = []
-  function add(key: ObjectClass) {
+  let changedDomains: LocalKey[] = []
+  function add(key: LocalKey) {
     if (changedDomains.includes(key)) return
     changedDomains.push(key)
   }
