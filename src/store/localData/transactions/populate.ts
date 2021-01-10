@@ -1,10 +1,16 @@
-import { Instrument, Modify, Tag, Transaction, TransactionType } from 'types'
-import { PopulatedAccount } from '../accounts/populate'
+import {
+  Instrument,
+  Modify,
+  Tag,
+  Transaction,
+  TransactionType,
+  Account,
+} from 'types'
 import { mapTags, getType } from './helpers'
 
 interface DataSources {
   instruments: { [id: number]: Instrument }
-  accounts: { [id: string]: PopulatedAccount }
+  accounts: { [id: string]: Account }
   tags: { [id: string]: Tag }
 }
 
@@ -12,10 +18,10 @@ export type PopulatedTransaction = Modify<
   Transaction,
   {
     incomeInstrument: Instrument
-    incomeAccount: PopulatedAccount
+    incomeAccount: Account
     opIncomeInstrument: Instrument
     outcomeInstrument: Instrument
-    outcomeAccount: PopulatedAccount
+    outcomeAccount: Account
     opOutcomeInstrument: Instrument
     tag: Tag[] | null
     type: TransactionType

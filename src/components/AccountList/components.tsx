@@ -1,5 +1,4 @@
 import React, { FC } from 'react'
-import { formatMoney } from 'helpers/format'
 import {
   ListItem,
   ListSubheader,
@@ -9,21 +8,15 @@ import {
   ListSubheaderProps,
 } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
+import { Amount } from 'components/Amount'
+import { PopulatedAccount } from 'types'
 
 const useStyles = makeStyles((theme: Theme) => ({
   listItem: { borderRadius: theme.shape.borderRadius },
 }))
 
-type AccProps = {
-  title: string
-  amount: number
-  currency: string
-}
-
-export const Account: FC<AccProps & ListItemProps> = ({
-  title,
-  amount,
-  currency,
+export const Account: FC<{ account: PopulatedAccount } & ListItemProps> = ({
+  account,
   ...rest
 }) => {
   const c = useStyles()
@@ -32,26 +25,31 @@ export const Account: FC<AccProps & ListItemProps> = ({
     <ListItem className={c.listItem} {...rest}>
       <Box component="span" display="flex" width="100%">
         <Box flexGrow="1" component="span" className="MuiTypography-noWrap">
-          {title}
+          {account.title}
         </Box>
         <Box
           component="span"
           ml={2}
-          color={amount < 0 ? 'error.main' : 'text.secondary'}
+          color={account.balance < 0 ? 'error.main' : 'text.secondary'}
         >
-          {formatMoney(amount, currency, 0)}
+          <Amount
+            value={account.balance}
+            instrument={account.instrument}
+            decMode="ifOnly"
+          />
         </Box>
       </Box>
     </ListItem>
   )
 }
 
-export const Subheader: FC<AccProps & ListSubheaderProps> = ({
-  title,
-  amount,
-  currency,
-  ...rest
-}) => {
+export const Subheader: FC<
+  {
+    title: string
+    amount: number
+    currency?: string
+  } & ListSubheaderProps
+> = ({ title, amount, currency, ...rest }) => {
   const c = useStyles()
   return (
     // @ts-ignore
@@ -65,7 +63,9 @@ export const Subheader: FC<AccProps & ListSubheaderProps> = ({
           ml={2}
           color={amount < 0 ? 'error.main' : 'text.secondary'}
         >
-          <b>{formatMoney(amount, currency, 0)}</b>
+          <b>
+            <Amount value={amount} currency={currency} decMode="ifOnly" />
+          </b>
         </Box>
       </Box>
     </ListSubheader>

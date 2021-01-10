@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/styles'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator'
 import { TagRow } from './TagRow'
-import { getAmountsForTag } from 'scenes/Budgets/selectors/getAmountsByTag'
+import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
 import { getPopulatedTag } from 'store/localData/tags'
 import { useMonth } from 'scenes/Budgets/useMonth'
 import { DragModeContext } from '../DnDContext'
@@ -45,7 +45,7 @@ export const TagGroup = React.forwardRef((props, ref) => {
 
   const [month] = useMonth()
   const tag = useSelector(state => getPopulatedTag(state, id))
-  const amounts = useSelector(getAmountsForTag)(month, id) || {}
+  const amounts = useSelector(getAmountsById)?.[month]?.[id] || {}
   const { dragMode } = useContext(DragModeContext)
 
   const {

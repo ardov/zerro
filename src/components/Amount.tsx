@@ -1,11 +1,15 @@
 import React from 'react'
 import { formatMoney } from 'helpers/format'
+import { InstrumentId, OptionalExceptFor } from 'types'
+import { getInstruments, getUserInstrumentId } from 'store/serverData'
+import { useSelector } from 'react-redux'
 
 const decStyle = { opacity: 0.5 }
 
 type AmountProps = {
   value: number
   currency?: string
+  instrument?: InstrumentId | 'user'
   sign?: boolean
   noShade?: boolean
   decimals?: number
@@ -14,7 +18,25 @@ type AmountProps = {
   decProps?: React.HTMLProps<HTMLSpanElement>
 }
 
-export function Amount({
+export const Amount = (props: AmountProps) => {
+  if (props.instrument !== undefined)
+    return <ConnectedAmount {...props} instrument={props.instrument} />
+  else return <SimpleAmount {...props} />
+}
+
+type ConnectedAmountProps = OptionalExceptFor<
+  Required<AmountProps>,
+  'value' | 'instrument'
+>
+function ConnectedAmount(props: ConnectedAmountProps) {
+  const userInstrumentId = useSelector(getUserInstrumentId)
+  const instruments = useSelector(getInstruments)
+  const id = props.instrument === 'user' ? userInstrumentId : props.instrument
+  const currency = id ? instruments?.[id]?.shortTitle : undefined
+  return <SimpleAmount {...props} currency={currency} />
+}
+
+function SimpleAmount({
   value = 0,
   currency,
   sign = false,

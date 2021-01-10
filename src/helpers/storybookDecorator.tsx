@@ -1,6 +1,6 @@
 import React from 'react'
 import { ThemeProvider } from '@material-ui/styles'
-import { Box } from '@material-ui/core'
+import { Box, BoxProps } from '@material-ui/core'
 import { MuiPickersUtilsProvider } from '@material-ui/pickers'
 import DateFnsUtils from '@date-io/date-fns'
 import ru from 'date-fns/locale/ru'
@@ -9,7 +9,7 @@ import { store } from 'store'
 
 import { createTheme } from 'helpers/createTheme'
 
-const decorator = boxProps => story => (
+const decorator = (boxProps: BoxProps) => (story: any) => (
   <Provider store={store}>
     <ThemeProvider theme={createTheme()}>
       <MuiPickersUtilsProvider utils={DateFnsUtils} locale={ru}>

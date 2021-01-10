@@ -7,7 +7,7 @@ import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@material-ui/icons/Close'
 import { getPopulatedTag } from 'store/localData/tags'
 import { Total, Line as TextLine } from '../components'
-import { getAmountsForTag } from 'scenes/Budgets/selectors/getAmountsByTag'
+import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
 import Rhythm from 'components/Rhythm'
 import { useMonth } from 'scenes/Budgets/useMonth'
 import { LinkedAccs } from './LinkedAccs'
@@ -59,7 +59,7 @@ const Header = ({ tag, onClose, onEdit }) => {
 export function TagPreview({ onClose, id }) {
   const [month, setMonth] = useMonth()
   const tag = useSelector(state => getPopulatedTag(state, id))
-  const amounts = useSelector(getAmountsForTag)(month, id)
+  const amounts = useSelector(getAmountsById)?.[month]?.[id]
   if (!amounts) return null
   const isParent = !!amounts.children
 

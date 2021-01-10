@@ -6,7 +6,7 @@ import ArrowForwardIcon from '@material-ui/icons/ArrowForward'
 import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt'
 import { Box, InputAdornment, IconButton } from '@material-ui/core'
 import { useSelector, useDispatch } from 'react-redux'
-import { getAmountsForTag } from '../selectors/getAmountsByTag'
+import { getAmountsById } from '../selectors/getAmountsByTag'
 import { moveFunds } from '../thunks'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
 
@@ -67,7 +67,7 @@ function getAvailableFor(state, month, id) {
   if (!id) return 0
   if (id === 'toBeBudgeted')
     return +getTotalsByMonth(state)?.[month]?.toBeBudgeted
-  return +getAmountsForTag(state)(month, id)?.available
+  return +getAmountsById(state)?.[month]?.[id]?.available
 }
 
 function suggestAmount(from = 0, to = 0, defaultAmount = 1000) {

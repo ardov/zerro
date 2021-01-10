@@ -24,7 +24,7 @@ import { Amount } from 'components/Amount'
 import { useContext } from 'react'
 import { IsDraggingContext, DragModeContext } from '../DnDContext'
 import { getPopulatedTag } from 'store/localData/tags'
-import { getAmountsForTag } from 'scenes/Budgets/selectors/getAmountsByTag'
+import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
 
 const useStyles = makeStyles(theme => ({
   row: {
@@ -77,7 +77,7 @@ export function TagRow(props) {
     openDetails,
   } = props
   const tag = useSelector(state => getPopulatedTag(state, id))
-  const amounts = useSelector(state => getAmountsForTag(state)(date, id))
+  const amounts = useSelector(getAmountsById)?.[date]?.[id]
 
   const isUnsorted = !tag.parent && isChild // реальная родительская категория
   let { showOutcome, symbol, colorRGB, name } = tag

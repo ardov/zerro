@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 import { TagTable } from './containers/TagTable'
@@ -7,7 +7,7 @@ import MonthInfo from './containers/MonthInfo'
 import { ToBeBudgeted } from './containers/ToBeBudgeted'
 import MonthSelector from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
-import { Box, Drawer, Paper, useMediaQuery } from '@material-ui/core'
+import { Box, Button, Drawer, Paper, useMediaQuery } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import GoalsProgressWidget from './containers/GoalsProgressWidget'
 import { useMonth } from './useMonth'
@@ -78,6 +78,7 @@ function Budgets() {
   const isSM = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const [showDrawer, setShowDrawer] = useState(false)
   const [selectedTag, setSelectedTag] = useState(null)
+  const [showSankey, setShowSankey] = useState(false)
   const c = useStyles()
   const index = monthList.findIndex(date => date === month)
 
@@ -86,10 +87,13 @@ function Budgets() {
     setSelectedTag(null)
     setShowDrawer(false)
   }
-  const openDrawer = (id = null) => {
-    setSelectedTag(id)
-    setShowDrawer(true)
-  }
+  const openDrawer = useCallback(
+    (id = null) => {
+      setSelectedTag(id)
+      setShowDrawer(true)
+    },
+    [setSelectedTag, setShowDrawer]
+  )
 
   return (
     <>
@@ -119,11 +123,20 @@ function Budgets() {
               onOpenMonthDrawer={() => openDrawer(null)}
             />
             <TransferTable className={c.transfers} month={monthList[index]} />
-            {!isSM && (
-              <Paper className={c.chart}>
-                <SankeyChart />
-              </Paper>
-            )}
+            {!isSM &&
+              (showSankey ? (
+                <Paper className={c.chart}>
+                  <SankeyChart />
+                </Paper>
+              ) : (
+                <Button
+                  className={c.chart}
+                  fullWidth
+                  onClick={() => setShowSankey(true)}
+                >
+                  Показать распределение денег
+                </Button>
+              ))}
           </Box>
 
           <Drawer
