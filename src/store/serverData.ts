@@ -22,6 +22,7 @@ import {
   User,
   ZmDeletionObject,
 } from 'types'
+import { withPerf } from 'helpers/performance'
 
 function keys<O>(o: O) {
   return Object.keys(o) as (keyof O)[]
@@ -66,42 +67,45 @@ const { reducer } = createSlice({
   extraReducers: builder => {
     builder
       .addCase(wipeData, () => initialState)
-      .addCase(updateData, (state, action) => {
-        const { data } = action.payload
-        if (!data) return state
+      .addCase(
+        updateData,
+        withPerf('updateData', (state, action) => {
+          const { data } = action.payload
+          if (!data) return state
 
-        keys(data).forEach(key => {
-          if (data[key] === undefined) return
+          keys(data).forEach(key => {
+            if (data[key] === undefined) return
 
-          if (key === 'serverTimestamp') {
+            if (key === 'serverTimestamp') {
+              // @ts-ignore
+              state[key] = data[key] * 1000
+              return
+            }
+
+            if (key === 'budget') {
+              data[key]?.forEach(budget => {
+                state[key][`${budget.tag},${budget.date}`] = convertDatesToMs(
+                  budget
+                )
+              })
+              return
+            }
+
+            if (key === 'deletion') {
+              data[key]?.forEach(({ object, id }: ZmDeletionObject) => {
+                delete state[object][id]
+              })
+              return
+            }
+
             // @ts-ignore
-            state[key] = data[key] * 1000
-            return
-          }
-
-          if (key === 'budget') {
-            data[key]?.forEach(budget => {
-              state[key][`${budget.tag},${budget.date}`] = convertDatesToMs(
-                budget
-              )
-            })
-            return
-          }
-
-          if (key === 'deletion') {
-            data[key]?.forEach(({ object, id }: ZmDeletionObject) => {
-              delete state[object][id]
-            })
-            return
-          }
-
-          // @ts-ignore
-          for (const item of data[key]) {
-            // @ts-ignore
-            state[key][item.id] = convertDatesToMs(item)
-          }
+            for (const item of data[key]) {
+              // @ts-ignore
+              state[key][item.id] = convertDatesToMs(item)
+            }
+          })
         })
-      })
+      )
   },
 })
 

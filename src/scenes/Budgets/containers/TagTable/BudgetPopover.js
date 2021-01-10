@@ -11,7 +11,7 @@ import {
 import CheckCircleIcon from '@material-ui/icons/CheckCircle'
 import { formatMoney } from 'helpers/format'
 import AmountInput from 'components/AmountInput'
-import { getAmountsForTag } from 'scenes/Budgets/selectors/getAmountsByTag'
+import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
 import { getUserCurrencyCode } from 'store/serverData'
 import { setOutcomeBudget } from 'scenes/Budgets/thunks'
 import { getGoals } from 'store/localData/hiddenData/goals'
@@ -27,9 +27,9 @@ export default function BudgetPopover({ id, month, onClose, ...rest }) {
   const needForGoal = goalProgress?.target
 
   const currency = useSelector(getUserCurrencyCode)
-  const amountsGetter = useSelector(getAmountsForTag)
-  const amounts = amountsGetter(month, id) || {}
-  const prevAmounts = amountsGetter(prevMonth, id) || {}
+  const amountsById = useSelector(getAmountsById)
+  const amounts = amountsById?.[month]?.[id] || {}
+  const prevAmounts = amountsById?.[prevMonth]?.[id] || {}
 
   const dispatch = useDispatch()
   const onChange = outcome => dispatch(setOutcomeBudget(outcome, month, id))

@@ -1,12 +1,13 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { round } from 'helpers/currencyHelpers'
 import { getGoals } from 'store/localData/hiddenData/goals'
-import { getAmountsForTag, isGroup } from './getAmountsByTag'
+import { getAmountsById, isGroup } from './getAmountsByTag'
 import getMonthDates from './getMonthDates'
 import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths'
 import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
 import { Goal } from 'types'
 import { RootState } from 'store'
+import { withPerf } from 'helpers/performance'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = GOAL_TYPES
 // const startForOldGoals = +new Date(2019, 1, 1)
@@ -21,8 +22,8 @@ export const getGoalProgress = (state: RootState, month: number, id: string) =>
   getGoalsProgress(state)?.[month]?.[id]
 
 export const getGoalsProgress = createSelector(
-  [getGoals, getAmountsForTag, getMonthDates],
-  (goals, getAmounts, monthList) => {
+  [getGoals, getAmountsById, getMonthDates],
+  withPerf('BUDGET: getGoalsProgress', (goals, amountsById, monthList) => {
     const result: {
       [month: number]: {
         [tagId: string]: GoalsProgress | null
@@ -37,7 +38,7 @@ export const getGoalsProgress = createSelector(
         const { type, amount, end } = goals[id]
         if (end && end < month) continue
         if (!amount) continue
-        const tag = getAmounts(month, id)
+        const tag = amountsById?.[month]?.[id]
         if (!tag) continue
 
         let { budgeted, leftover, available } = tag
@@ -76,12 +77,12 @@ export const getGoalsProgress = createSelector(
       }
     })
     return result
-  }
+  })
 )
 
 export const getTotalGoalsProgress = createSelector(
   [getGoals, getGoalsProgress],
-  (goals, goalsProgress) => {
+  withPerf('BUDGET: getTotalGoalsProgress', (goals, goalsProgress) => {
     let result: { [month: number]: GoalsProgress | null } = {}
 
     const isCounted = (goal: Goal) => goal.type !== TARGET_BALANCE || goal.end
@@ -121,7 +122,7 @@ export const getTotalGoalsProgress = createSelector(
     }
 
     return result
-  }
+  })
 )
 
 function calcMonthlyProgress(data: { amount: number; budgeted: number }) {

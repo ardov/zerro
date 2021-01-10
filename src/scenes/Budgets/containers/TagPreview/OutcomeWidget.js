@@ -8,7 +8,7 @@ import { Tooltip } from 'components/Tooltip'
 import Rhythm from 'components/Rhythm'
 import {
   getAmountsByTag,
-  getAmountsForTag,
+  getAmountsById,
 } from 'scenes/Budgets/selectors/getAmountsByTag'
 import getMonthDates from 'scenes/Budgets/selectors/getMonthDates'
 import { getPopulatedTag } from 'store/localData/tags'
@@ -16,7 +16,7 @@ import { getPopulatedTag } from 'store/localData/tags'
 export function OutcomeWidget({ tagId, month, setMonth, ...boxProps }) {
   const [selected, setSelected] = useState(month)
   const tag = useSelector(state => getPopulatedTag(state, tagId))
-  const amounts = useSelector(getAmountsForTag)(month, tagId)
+  const amounts = useSelector(getAmountsById)?.[month]?.[tagId]
   const allAmounts = useSelector(getAmountsByTag)
   const dates = useSelector(getMonthDates)
   const isParent = !!amounts.children

@@ -7,6 +7,7 @@ import { convertToSyncArray } from 'helpers/converters'
 import { populate, PopulatedTransaction } from './populate'
 import { RootState } from 'store'
 import { TransactionId, ZmTransaction } from 'types'
+import { withPerf } from 'helpers/performance'
 
 const getServerTransactions = (state: RootState) => state.serverData.transaction
 const getLocalTransactions = (state: RootState) => state.localData.transaction
@@ -32,13 +33,18 @@ const getPopulatedTransactions = createSelector(
   }
 )
 
-const getSortedTransactions = createSelector([getTransactions], transactions =>
-  Object.values(transactions).sort(sortBy('DATE'))
+const getSortedTransactions = createSelector(
+  [getTransactions],
+  withPerf('getSortedTransactions', transactions =>
+    Object.values(transactions).sort(sortBy('DATE'))
+  )
 )
 
 const getTransactionsHistory = createSelector(
   [getSortedTransactions],
-  transactions => transactions.filter(tr => !tr.deleted).reverse()
+  withPerf('getTransactionsHistory', transactions =>
+    transactions.filter(tr => !tr.deleted).reverse()
+  )
 )
 
 export const selectors = {
