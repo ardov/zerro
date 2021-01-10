@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { getInstruments } from 'store/serverData'
-import { getPopulatedAccounts } from 'store/localData/accounts'
+import { getAccounts } from 'store/localData/accounts'
 import { getPopulatedTags } from 'store/localData/tags'
 import { sortBy } from './helpers'
 import { convertToSyncArray } from 'helpers/converters'
@@ -23,7 +23,7 @@ const getTransaction = (state: RootState, id: TransactionId) =>
 
 // Only for CSV
 const getPopulatedTransactions = createSelector(
-  [getInstruments, getPopulatedAccounts, getPopulatedTags, getTransactions],
+  [getInstruments, getAccounts, getPopulatedTags, getTransactions],
   (instruments, accounts, tags, transactions) => {
     const result: { [id: string]: PopulatedTransaction } = {}
     for (const id in transactions) {

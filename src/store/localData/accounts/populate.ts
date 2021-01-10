@@ -1,16 +1,27 @@
-import { Account, Instrument, Modify } from 'types'
+import { Account, PopulatedAccount } from 'types'
+
 interface Options {
-  instruments: {
-    [key: number]: Instrument,
-  };
+  convert: (
+    amount: number | undefined,
+    from: number,
+    to?: number | undefined
+  ) => number
 }
 
-export type PopulatedAccount = Modify<Account, { instrument: Instrument }>
-
 export const populate = (
-  { instruments }: Options,
+  { convert }: Options,
   raw: Account
-): PopulatedAccount => ({
-  ...raw,
-  instrument: instruments[raw.instrument],
-})
+): PopulatedAccount => {
+  return {
+    ...raw,
+    convertedBalance: convert(raw.balance, raw.instrument),
+    convertedStartBalance: convert(raw.startBalance, raw.instrument),
+    inBudget: isInBudget(raw),
+  }
+}
+
+function isInBudget(a: Account) {
+  if (a.type === 'debt') return false
+  if (a.title.endsWith('📍')) return true
+  return a.inBalance
+}

@@ -108,6 +108,11 @@ export interface Account {
   payoffStep?: number | null
   payoffInterval?: 'month' | 'year' | null
 }
+export interface PopulatedAccount extends Account {
+  convertedBalance: number
+  convertedStartBalance: number
+  inBudget: boolean
+}
 export type ZmAccount = Modify<Account, { startDate: string }>
 
 export interface Tag {

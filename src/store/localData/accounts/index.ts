@@ -1,9 +1,9 @@
 import { createSlice, createSelector } from '@reduxjs/toolkit'
-import { populate, PopulatedAccount } from './populate'
-import { getInstruments } from 'store/serverData'
+import { populate } from './populate'
+import { convertCurrency } from 'store/serverData'
 import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
 import { convertToSyncArray } from 'helpers/converters'
-import { Account, AccountId, ZmAccount } from 'types'
+import { Account, AccountId, ZmAccount, PopulatedAccount } from 'types'
 import { RootState } from 'store'
 
 // INITIAL STATE
@@ -56,21 +56,21 @@ export const getAccount = (state: RootState, id: AccountId) =>
 export const getAccountsToSync = (state: RootState): ZmAccount[] =>
   convertToSyncArray(getChangedAccounts(state)) as ZmAccount[]
 
-// Used only for CSV
-// TODO: remove
 export const getPopulatedAccounts = createSelector(
-  [getInstruments, getAccounts],
-  (instruments, accounts) => {
+  [convertCurrency, getAccounts],
+  (convert, accounts) => {
     const result = {} as { [x: string]: PopulatedAccount }
     for (const id in accounts) {
-      result[id] = populate({ instruments }, accounts[id])
+      result[id] = populate({ convert }, accounts[id])
     }
     return result
   }
 )
 
-export const getAccountList = createSelector([getAccounts], accounts =>
-  Object.values(accounts).sort((a, b) => b.balance - a.balance)
+export const getAccountList = createSelector([getPopulatedAccounts], accounts =>
+  Object.values(accounts).sort(
+    (a, b) => b.convertedBalance - a.convertedBalance
+  )
 )
 
 export const getDebtAccountId = createSelector([getAccountList], accounts => {

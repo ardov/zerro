@@ -168,6 +168,6 @@ export const convertCurrency = createSelector(
   ) => {
     to = to || userInstrument
     if (!to) return amount
-    return (amount * instruments[from].rate) / instruments[to].rate
+    return amount * (instruments[from].rate / instruments[to].rate)
   }
 )
