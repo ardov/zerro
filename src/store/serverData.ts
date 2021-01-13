@@ -171,3 +171,6 @@ export const convertCurrency = createSelector(
     return amount * (instruments[from].rate / instruments[to].rate)
   }
 )
+
+// MERCHANTS
+export const getMerchants = (state: RootState) => state.serverData.merchant

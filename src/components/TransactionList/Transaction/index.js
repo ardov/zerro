@@ -1,6 +1,6 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
-import { getInstrument } from 'store/serverData'
+import { getInstrument, getMerchants } from 'store/serverData'
 import { getAccount } from 'store/localData/accounts'
 import { getPopulatedTag } from 'store/localData/tags'
 import { getTransaction } from 'store/localData/transactions'
@@ -52,11 +52,13 @@ export default function Transaction({
 }) {
   const c = useStyles()
 
+  const merchants = useSelector(getMerchants)
   const tr = useSelector(state => getTransaction(state, id))
   const type = getType(tr)
   const {
     deleted,
     payee,
+    merchant,
     comment,
     income,
     opIncome,
@@ -84,6 +86,9 @@ export default function Transaction({
   const opOutcomeCurrency = useSelector(
     state => getInstrument(state, tr.opOutcomeInstrument)?.shortTitle
   )
+
+  const merchantName =
+    merchant && merchants[merchant] ? merchants[merchant].title : payee
 
   // TODO: вызывает постоянные ререндеры, т.к. каждый раз новый объект.
   //       можно попробовать подключать теги уже на месте в <MainLine/>
@@ -158,7 +163,7 @@ export default function Transaction({
             >
               {deleted && <DeletedLabel />}
               {qrCode && <QRLabel />}
-              {payee && (
+              {!!merchantName && (
                 <Typography
                   noWrap
                   variant="body2"
@@ -166,7 +171,7 @@ export default function Transaction({
                   component="span"
                   onClick={handlePayeeClick}
                 >
-                  {payee}
+                  {merchantName}
                 </Typography>
               )}
               {comment}
