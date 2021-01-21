@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useMediaQuery, Fab } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import MenuIcon from '@material-ui/icons/Menu'
@@ -24,8 +24,8 @@ export default function Header() {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const c = useStyles()
 
-  const showDrawer = () => setOpen(true)
-  const hideDrawer = () => setOpen(false)
+  const showDrawer = useCallback(() => setOpen(true), [])
+  const hideDrawer = useCallback(() => setOpen(false), [])
 
   const menuOpen = !isMobile || open
 
