@@ -1,6 +1,6 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import { Redirect } from 'react-router-dom'
+import {Redirect, useLocation} from 'react-router-dom';
 import { TagTable } from './containers/TagTable'
 import TransferTable from './containers/TransferTable'
 import MonthInfo from './containers/MonthInfo'
@@ -16,6 +16,7 @@ import { TagPreview } from './containers/TagPreview'
 import { Helmet } from 'react-helmet'
 import { SankeyChart } from './SankeyChart'
 import { formatDate } from 'helpers/format'
+import {useHistory} from 'react-router';
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
@@ -70,6 +71,9 @@ const useStyles = makeStyles(theme => ({
 }))
 
 function Budgets() {
+  const history = useHistory()
+  const query = new URLSearchParams(useLocation().search)
+  const drawerId = query.get("drawer")
   const monthList = useSelector(getMonthDates)
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
@@ -83,17 +87,27 @@ function Budgets() {
   const index = monthList.findIndex(date => date === month)
 
   const drawerVisibility = !isMD || !!showDrawer
-  const closeDrawer = () => {
-    setSelectedTag(null)
-    setShowDrawer(false)
-  }
+
   const openDrawer = useCallback(
     (id = null) => {
-      setSelectedTag(id)
-      setShowDrawer(true)
-    },
-    [setSelectedTag, setShowDrawer]
+      history.push("?drawer="+id)
+    },[history]
   )
+  const closeDrawer = useCallback(
+    () => {
+      history.push("")
+    }, [history]
+  )
+
+  useEffect(()=>{
+    if (drawerId) {
+      setSelectedTag(drawerId)
+      setShowDrawer(true)
+    } else {
+      setSelectedTag(null)
+      setShowDrawer(false)
+    }
+  }, [drawerId, setSelectedTag, setShowDrawer, closeDrawer])
 
   return (
     <>
