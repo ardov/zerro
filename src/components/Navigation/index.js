@@ -1,7 +1,5 @@
-import React, { useCallback, useState } from 'react'
-import { useMediaQuery, Fab } from '@material-ui/core'
+import React from 'react'
 import { makeStyles } from '@material-ui/core/styles'
-import MenuIcon from '@material-ui/icons/Menu'
 import NavDrawer from './NavDrawer'
 
 const useStyles = makeStyles(theme => ({
@@ -20,33 +18,13 @@ const useStyles = makeStyles(theme => ({
 }))
 
 export default function Header() {
-  const [open, setOpen] = useState(false)
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const c = useStyles()
-
-  const showDrawer = useCallback(() => setOpen(true), [])
-  const hideDrawer = useCallback(() => setOpen(false), [])
-
-  const menuOpen = !isMobile || open
-
   return (
-    <>
-      {!menuOpen && (
-        <Fab
-          className={c.fab}
-          color="primary"
-          onClick={showDrawer}
-          children={<MenuIcon />}
-        />
-      )}
-
-      <NavDrawer
-        classes={{ paper: c.drawerWidth, root: c.drawerWidth }}
-        variant={isMobile ? 'temporary' : 'persistent'}
-        anchor="left"
-        open={menuOpen}
-        onClose={hideDrawer}
-      />
-    </>
+    <NavDrawer
+      classes={{ paper: c.drawerWidth, root: c.drawerWidth }}
+      variant="persistent"
+      anchor="left"
+      open={true}
+    />
   )
 }
