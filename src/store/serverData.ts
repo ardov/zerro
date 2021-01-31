@@ -23,10 +23,7 @@ import {
   ZmDeletionObject,
 } from 'types'
 import { withPerf } from 'helpers/performance'
-
-function keys<O>(o: O) {
-  return Object.keys(o) as (keyof O)[]
-}
+import { keys } from '../helpers/keys'
 
 interface ServerData {
   serverTimestamp: number
