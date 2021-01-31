@@ -2,7 +2,7 @@
 import React from 'react'
 import { captureError, sendEvent } from 'helpers/tracking'
 import Cookies from 'cookies-js'
-import storage from 'services/storage'
+import { clearStorage } from 'worker'
 
 const buttonStyle = { border: '1px solid #ccc', padding: 16 }
 const wrapperStyle = { margin: '0 auto', padding: 40 }
@@ -18,7 +18,7 @@ export default class GlobalErrorBoundary extends React.Component {
   }
 
   fullRefresh = () => {
-    storage.clear()
+    clearStorage()
     Cookies.expire('token')
     window.location.reload(true)
   }

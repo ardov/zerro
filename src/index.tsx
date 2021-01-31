@@ -10,8 +10,10 @@ import * as serviceWorkerRegistration from './serviceWorkerRegistration'
 import { store } from './store'
 import GlobalErrorBoundary from 'components/GlobalErrorBoundary'
 import { initSentry, sendEvent } from 'helpers/tracking'
+import { bindWorkerToStore } from 'worker'
 
 initSentry()
+bindWorkerToStore(store.dispatch)
 
 ReactDOM.render(
   <GlobalErrorBoundary>

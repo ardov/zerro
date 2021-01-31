@@ -229,10 +229,9 @@ export interface ZmDeletionObject {
   stamp: number
   user: number
 }
-export interface ZmDiffObject {
+
+export type ZmDiff = {
   serverTimestamp: number //Unix timestamp
-  currentClientTimestamp: number //Unix timestamp
-  forceFetch?: ObjectClass[]
   deletion?: ZmDeletionObject[]
   instrument?: Instrument[]
   company?: Company[]
@@ -246,14 +245,9 @@ export interface ZmDiffObject {
   reminderMarker?: ReminderMarker[]
   transaction?: ZmTransaction[]
 }
-
-export type ZmResponse = Omit<
-  ZmDiffObject,
-  'currentClientTimestamp' | 'forceFetch'
->
-
-export type LocalData = Omit<
-  ZmDiffObject,
-  'currentClientTimestamp' | 'forceFetch' | 'deletion'
->
-export type DataToUpdate = Partial<ZmDiffObject>
+export type ZmRequest = ZmDiff & {
+  currentClientTimestamp: number //Unix timestamp
+  forceFetch?: ObjectClass[]
+}
+export type LocalData = Omit<ZmDiff, 'deletion'>
+export type DataToUpdate = Partial<ZmDiff>

@@ -9,7 +9,7 @@ import { updateData } from 'store/commonActions'
 import { setSyncData } from 'store/lastSync'
 import { formatDate } from 'helpers/format'
 import { AppThunk } from 'store'
-import { ZmResponse, LocalData } from 'types'
+import { ZmDiff, LocalData } from 'types'
 
 /** All syncs with zenmoney goes through this thunk */
 export const syncData = (): AppThunk => (dispatch, getState) => {
@@ -21,7 +21,7 @@ export const syncData = (): AppThunk => (dispatch, getState) => {
   const syncStartTime = Date.now()
   dispatch(setPending(true))
 
-  return ZenApi.getData(token, { serverTimestamp, changed }).then(
+  return ZenApi.getData(token, { serverTimestamp, ...changed }).then(
     data => {
       sendEvent(
         `Sync: ${serverTimestamp ? 'Successful update' : 'Successful first'}`
@@ -72,7 +72,7 @@ const domains: LocalKey[] = [
   'transaction',
 ]
 
-function getChangedDomains(data: ZmResponse) {
+function getChangedDomains(data: ZmDiff) {
   let changedDomains: LocalKey[] = []
   function add(key: LocalKey) {
     if (changedDomains.includes(key)) return
