@@ -1,8 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
 import { selectors } from './selectors'
-import { formatDate } from 'helpers/format'
 import { Budget } from 'types'
+import { getBudgetId } from './getBudgetId'
 
 // INITIAL STATE
 const initialState = {} as {
@@ -17,7 +17,7 @@ const slice = createSlice({
     setBudget: (state, { payload }) => {
       const budgets = Array.isArray(payload) ? payload : [payload]
       budgets.forEach(budget => {
-        const id = `${budget.tag},${formatDate(budget.date, 'yyyy-MM-dd')}`
+        const id = getBudgetId(budget)
         state[id] = budget
       })
     },
