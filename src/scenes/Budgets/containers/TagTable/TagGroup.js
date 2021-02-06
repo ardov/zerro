@@ -7,7 +7,7 @@ import DragIndicatorIcon from '@material-ui/icons/DragIndicator'
 import { TagRow } from './TagRow'
 import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
 import { getPopulatedTag } from 'store/localData/tags'
-import { useMonth } from 'scenes/Budgets/useMonth'
+import { useMonth } from 'scenes/Budgets/pathHooks'
 import { DragModeContext } from '../DnDContext'
 
 export const useStyles = makeStyles(theme => ({

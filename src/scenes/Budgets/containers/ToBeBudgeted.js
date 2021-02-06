@@ -13,7 +13,7 @@ import {
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import Rhythm from 'components/Rhythm'
-import { useMonth } from '../useMonth'
+import { useMonth } from '../pathHooks'
 import { Amount } from 'components/Amount'
 
 const useStyles = makeStyles(({ shape, spacing, palette, breakpoints }) => ({

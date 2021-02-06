@@ -1,5 +1,5 @@
 import React from 'react'
-import { useLocation } from 'react-router'
+import { useRouteMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import RefreshButton from 'components/RefreshButton'
 import MenuButton from './containers/MenuButton'
@@ -22,25 +22,8 @@ import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
 import SyncAltIcon from '@material-ui/icons/SyncAlt'
 import WhatshotIcon from '@material-ui/icons/Whatshot'
 
-const routes = [
-  { path: '/budget', label: 'Бюджет', icon: <AccountBalanceIcon /> },
-  { path: '/transactions', label: 'Операции', icon: <SyncAltIcon /> },
-  { path: '/about', label: 'Как пользоваться', icon: <HelpOutlineIcon /> },
-  {
-    path: '/donation',
-    label: 'Поддержать проект',
-    icon: <FavoriteBorderIcon />,
-  },
-]
-
-const useStyles = makeStyles(theme => ({
-  listItem: { borderRadius: theme.shape.borderRadius },
-}))
-
 export default function NavigationDrawer(props) {
-  const c = useStyles()
   const theme = useTheme()
-  const path = useLocation().pathname
   return (
     <Drawer {...props}>
       <Box
@@ -51,35 +34,7 @@ export default function NavigationDrawer(props) {
         height="100%"
       >
         <Box width="100%" px={1} pt={2}>
-          <List>
-            {routes.map(route => (
-              <ListItem
-                className={c.listItem}
-                button
-                selected={path.startsWith(route.path)}
-                key={route.path}
-                component={Link}
-                to={route.path}
-              >
-                <ListItemIcon>{route.icon}</ListItemIcon>
-                <ListItemText primary={route.label} />
-              </ListItem>
-            ))}
-            <ListItem
-              className={c.listItem}
-              button
-              selected={path.startsWith('/review')}
-              component={Link}
-              to="/review"
-            >
-              <ListItemIcon>
-                <WhatshotIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary={<span className="red-gradient">Итоги года</span>}
-              />
-            </ListItem>
-          </List>
+          <Links />
         </Box>
 
         <Box width="100%" py={3}>
@@ -117,5 +72,57 @@ export default function NavigationDrawer(props) {
         </Box>
       </Box>
     </Drawer>
+  )
+}
+
+function Links() {
+  return (
+    <List>
+      <NavigationLink
+        text="Бюджет"
+        path="/budget"
+        icon={<AccountBalanceIcon />}
+      />
+      <NavigationLink
+        text="Операции"
+        path="/transactions"
+        icon={<SyncAltIcon />}
+      />
+      <NavigationLink
+        text="Как пользоваться"
+        path="/about"
+        icon={<HelpOutlineIcon />}
+      />
+      <NavigationLink
+        text="Поддержать проект"
+        path="/donation"
+        icon={<FavoriteBorderIcon />}
+      />
+      <NavigationLink
+        text={<span className="red-gradient">Итоги года</span>}
+        path="/review"
+        icon={<WhatshotIcon />}
+      />
+    </List>
+  )
+}
+
+const useStyles = makeStyles(theme => ({
+  listItem: { borderRadius: theme.shape.borderRadius },
+}))
+function NavigationLink({ icon, text, path }) {
+  const c = useStyles()
+  const match = useRouteMatch(path)
+  return (
+    <ListItem
+      className={c.listItem}
+      button
+      selected={!!match}
+      component={Link}
+      to={path}
+    >
+      <ListItemIcon>{icon}</ListItemIcon>
+      <ListItemText primary={text} />
+    </ListItem>
   )
 }

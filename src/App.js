@@ -77,7 +77,6 @@ const PrivateApp = () => {
               <Route path="/transactions" component={Transactions} />
               <Route path="/review" component={Review} />
               <Route path="/accounts" component={Accounts} />
-              <Route path="/budget/:month" component={Budgets} />
               <Route path="/budget" component={Budgets} />
               <Route path="/stats" component={Stats} />
               <Route path="/token" component={Token} />

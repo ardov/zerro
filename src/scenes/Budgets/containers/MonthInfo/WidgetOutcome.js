@@ -4,7 +4,7 @@ import { getTotalsByMonth } from '../../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/serverData'
 import { Box } from '@material-ui/core'
 import { Total } from '../components'
-import { useMonth } from 'scenes/Budgets/useMonth'
+import { useMonth } from 'scenes/Budgets/pathHooks'
 
 export function WidgetOutcome() {
   const [month] = useMonth()
