@@ -7,9 +7,7 @@ import { Account, AccountId, ZmAccount, PopulatedAccount } from 'types'
 import { RootState } from 'store'
 
 // INITIAL STATE
-const initialState = {} as {
-  [key: string]: Account
-}
+const initialState: { [key: string]: Account } = {}
 
 // SLICE
 const slice = createSlice({

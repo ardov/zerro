@@ -5,9 +5,7 @@ import { Budget } from 'types'
 import { getBudgetId } from './getBudgetId'
 
 // INITIAL STATE
-const initialState = {} as {
-  [key: string]: Budget
-}
+const initialState: { [key: string]: Budget } = {}
 
 // SLICE
 const slice = createSlice({

@@ -5,9 +5,7 @@ import { Reminder, ZmReminder } from 'types'
 import { RootState } from 'store'
 
 // INITIAL STATE
-const initialState = {} as {
-  [key: string]: Reminder
-}
+const initialState: { [key: string]: Reminder } = {}
 
 // SLICE
 const slice = createSlice({

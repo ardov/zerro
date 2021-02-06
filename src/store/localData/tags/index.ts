@@ -6,12 +6,8 @@ import populateTags from './populateTags'
 import { Modify, PopulatedTag, Tag, TagId } from 'types'
 import { RootState } from 'store'
 
-export interface Tags {
-  [key: string]: Tag
-}
-
 // INITIAL STATE
-const initialState: Tags = {}
+const initialState: { [key: string]: Tag } = {}
 
 // SLICE
 const { reducer, actions } = createSlice({
