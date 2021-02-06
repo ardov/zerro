@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import { Typography, Box, useMediaQuery } from '@material-ui/core'
 import { Amount } from 'components/Amount'
 import { makeStyles } from '@material-ui/styles'
-import { useMonth } from 'scenes/Budgets/useMonth'
+import { useMonth } from 'scenes/Budgets/pathHooks'
 import { getTotalsByMonth } from '../../selectors/getTotalsByMonth'
 
 const useStyles = makeStyles(theme => ({

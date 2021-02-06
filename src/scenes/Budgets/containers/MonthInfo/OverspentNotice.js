@@ -7,7 +7,7 @@ import { Amount } from 'components/Amount'
 import Confirm from 'components/Confirm'
 import { fixOverspends } from 'scenes/Budgets/thunks'
 import { getTotalsByMonth } from 'scenes/Budgets/selectors/getTotalsByMonth'
-import { useMonth } from 'scenes/Budgets/useMonth'
+import { useMonth } from 'scenes/Budgets/pathHooks'
 
 export function OverspentNotice(props) {
   const [month] = useMonth()

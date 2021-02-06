@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import { getTotalsByMonth } from './selectors/getTotalsByMonth'
 import { getAmountsByTag } from './selectors/getAmountsByTag'
 import { getTagsTree } from 'store/localData/tags'
-import { useMonth } from 'scenes/Budgets/useMonth'
+import { useMonth } from 'scenes/Budgets/pathHooks'
 import {
   Sankey,
   Tooltip,

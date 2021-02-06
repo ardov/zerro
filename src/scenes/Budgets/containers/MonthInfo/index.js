@@ -22,7 +22,7 @@ import { OverspentNotice } from './OverspentNotice'
 import { CalculationErrorNotice } from './CalculationErrorNotice'
 import { WidgetOutcome } from './WidgetOutcome'
 import { useState } from 'react'
-import { useMonth } from 'scenes/Budgets/useMonth'
+import { useMonth } from 'scenes/Budgets/pathHooks'
 
 const getMonthName = date => formatDate(date, 'LLLL').toUpperCase()
 

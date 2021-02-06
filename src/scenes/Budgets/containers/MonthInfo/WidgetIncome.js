@@ -17,7 +17,7 @@ import { Line } from '../components'
 import { Amount } from 'components/Amount'
 import { getTagsTree } from 'store/localData/tags'
 import TransactionsDrawer from 'components/TransactionsDrawer'
-import { useMonth } from 'scenes/Budgets/useMonth'
+import { useMonth } from 'scenes/Budgets/pathHooks'
 import { formatDate } from 'helpers/format'
 
 const Base = withStyles(theme => ({
