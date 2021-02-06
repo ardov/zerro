@@ -13,6 +13,8 @@ import { clearLocalData } from 'logic/localData'
 import { captureError, sendEvent } from 'helpers/tracking'
 import { getTransactionsToSync } from 'store/localData/transactions'
 
+const TOLERANCE = 2
+
 export function CalculationErrorNotice(props) {
   const [hidden, setHidden] = useState(false)
 
@@ -34,7 +36,7 @@ export function CalculationErrorNotice(props) {
   })
 
   const diff = round(Math.abs(moneyInBudget - inBudgetSum))
-  const hasError = diff >= 1 && !transactionsToSync
+  const hasError = diff >= TOLERANCE && !transactionsToSync
 
   useEffect(() => {
     if (hasError) {
