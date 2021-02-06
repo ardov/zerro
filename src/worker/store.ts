@@ -13,7 +13,7 @@ import {
   User,
 } from 'types'
 
-type WorkerStore = {
+export type WorkerStore = {
   currentUser?: number | string
   token?: string
   syncState: 'idle' | 'pending' | 'finished'

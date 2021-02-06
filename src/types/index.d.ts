@@ -38,7 +38,7 @@ export type ObjectClass =
   | 'reminderMarker'
   | 'transaction'
 
-export interface Instrument {
+export type Instrument = {
   id: InstrumentId
   changed: number // Unix timestamp
   title: string
@@ -47,7 +47,7 @@ export interface Instrument {
   rate: number
 }
 
-export interface Company {
+export type Company = {
   id: CompanyId
   changed: number // Unix timestamp
   title: string
@@ -58,17 +58,16 @@ export interface Company {
   deleted: boolean
 }
 
-export interface Country {
+export type Country = {
   id: CountryId
   title: string
   currency: InstrumentId
   domain: string
 }
 
-export interface User {
+export type User = {
   id: UserId
   changed: number // Unix timestamp
-  login: string | null
   currency: InstrumentId
   parent: UserId | null
   country: CountryId
@@ -80,7 +79,7 @@ export interface User {
   subscription: '10yearssubscription' | '1MonthSubscription' | string
 }
 
-export interface Account {
+export type Account = {
   user: UserId
   instrument: InstrumentId
   title: string
@@ -100,20 +99,20 @@ export interface Account {
   archive: boolean
   private: boolean
   // Для счетов с типом отличных от 'loan' и 'deposit' в  этих полях можно ставить null
-  capitalization?: boolean | null
-  percent?: number | null
-  startDate?: number | null
-  endDateOffset?: number | null
-  endDateOffsetInterval?: 'day' | 'week' | 'month' | 'year' | null
-  payoffStep?: number | null
-  payoffInterval?: 'month' | 'year' | null
+  capitalization: boolean | null
+  percent: number | null
+  startDate: number | null
+  endDateOffset: number | null
+  endDateOffsetInterval: 'day' | 'week' | 'month' | 'year' | null
+  payoffStep: number | null
+  payoffInterval: 'month' | 'year' | null
 }
 export interface PopulatedAccount extends Account {
   convertedBalance: number
   convertedStartBalance: number
   inBudget: boolean
 }
-export type ZmAccount = Modify<Account, { startDate: string }>
+export type ZmAccount = Modify<Account, { startDate: string | null }>
 
 export interface Tag {
   id: TagId // UUID
@@ -169,6 +168,27 @@ export interface ZmReminder {
 }
 export interface Reminder
   extends Modify<ZmReminder, { startDate: number; endDate: number }> {}
+
+export type ZmReminderMarker = {
+  id: string // UUID
+  changed: number // Unix timestamp
+  user: UserId
+  incomeInstrument: InstrumentId
+  incomeAccount: AccountId
+  income: number
+  outcomeInstrument: InstrumentId
+  outcomeAccount: AccountId
+  outcome: number
+  tag: TagId[] | null
+  merchant: MerchantId | null
+  payee: string | null
+  comment: string | null
+  date: string // 'yyyy-MM-dd'
+  reminder: ReminderId
+  state: 'planned' | 'processed' | 'deleted'
+  notify: boolean
+}
+export type ReminderMarker = Modify<ZmReminderMarker, { date: number }>
 
 export interface Transaction {
   id: TransactionId // UUID
@@ -229,8 +249,7 @@ export interface ZmDeletionObject {
   stamp: number
   user: number
 }
-
-export type ZmDiff = {
+export interface ZmDiff {
   serverTimestamp: number //Unix timestamp
   deletion?: ZmDeletionObject[]
   instrument?: Instrument[]
@@ -242,12 +261,31 @@ export type ZmDiff = {
   merchant?: Merchant[]
   budget?: ZmBudget[]
   reminder?: ZmReminder[]
-  reminderMarker?: ReminderMarker[]
+  reminderMarker?: ZmReminderMarker[]
   transaction?: ZmTransaction[]
 }
+
 export type ZmRequest = ZmDiff & {
   currentClientTimestamp: number //Unix timestamp
   forceFetch?: ObjectClass[]
 }
 export type LocalData = Omit<ZmDiff, 'deletion'>
 export type DataToUpdate = Partial<ZmDiff>
+
+export type DataStore = {
+  serverTimestamp: number
+  instrument: ById<Instrument>
+  user: ById<User>
+  country: ById<Country>
+  company: ById<Company>
+  merchant: ById<Merchant>
+  reminder: ById<Reminder>
+  reminderMarker: ById<ReminderMarkerId>
+  account: ById<Account>
+  tag: ById<Tag>
+  budget: ById<Budget>
+  transaction: ById<Transaction>
+}
+export type DataStorePatch = Partial<DataStore> & {
+  deletion?: ZmDeletionObject[]
+}
