@@ -4,6 +4,7 @@ import { keys } from 'helpers/keys'
 import { getIDBStorage } from 'services/storage'
 import { store } from './store'
 import ZenApi from 'services/ZenApi'
+import { applyServerPatch } from './applyServerPatch'
 
 // eslint-disable-next-line no-restricted-globals
 const ctx: Worker = self as any
@@ -36,13 +37,16 @@ function sync(diff?: ZmRequest) {}
 const db = getIDBStorage('serverData')
 
 async function initWithToken(token: string) {
+  console.log('initWithToken')
+
   store.syncState = 'pending'
-  ZenApi.getData(token).then(
+  ZenApi.getData(token, { serverTimestamp: store.data.serverTimestamp }).then(
     data => {
       store.token = token
       db.set('token', token)
       store.syncState = 'finished'
       store.lastSync = { finishedAt: Date.now(), isSuccessful: true }
+      applyServerPatch(data, store)
       // convert data
       // send to front
       // save locally
@@ -59,6 +63,7 @@ async function getLocalData() {
 }
 
 const obj = {
+  initWithToken,
   getLocalData,
   clearStorage: () => db.clear(),
   saveLocalData: (data: LocalData) => {

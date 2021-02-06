@@ -22,7 +22,7 @@ export type WorkerStore = {
     isSuccessful: boolean
     errorMessage?: string
   }
-  data?: {
+  data: {
     serverTimestamp: number
     instrument: ById<Instrument>
     user: ById<User>
@@ -47,4 +47,20 @@ export type WorkerStore = {
   }
 }
 
-export const store: WorkerStore = { syncState: 'idle' }
+export const store: WorkerStore = {
+  syncState: 'idle',
+  data: {
+    serverTimestamp: 0,
+    instrument: {},
+    user: {},
+    country: {},
+    company: {},
+    merchant: {},
+    reminder: {},
+    reminderMarker: {},
+    account: {},
+    tag: {},
+    budget: {},
+    transaction: {},
+  },
+}

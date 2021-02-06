@@ -28,6 +28,7 @@ export const bindWorkerToStore = (dispatch: AppDispatch) =>
 
 export const {
   getLocalData,
+  initWithToken,
   clearStorage,
   saveLocalData,
   sync,
