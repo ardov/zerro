@@ -3,11 +3,11 @@ import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
 import { convertToSyncArray } from 'helpers/converters'
 import { compareTags } from 'store/localData/hiddenData/tagOrder'
 import populateTags from './populateTags'
-import { Modify, PopulatedTag, Tag, TagId } from 'types'
+import { ById, Modify, PopulatedTag, Tag, TagId } from 'types'
 import { RootState } from 'store'
 
 // INITIAL STATE
-const initialState: { [key: string]: Tag } = {}
+const initialState: ById<Tag> = {}
 
 // SLICE
 const { reducer, actions } = createSlice({

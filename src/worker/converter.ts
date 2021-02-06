@@ -30,10 +30,7 @@ export function applyChanges(diff: ZmDiff, store: WorkerStore) {
         break
 
       default:
-        diff[key]?.forEach(el => {
-          const id = getId(key, el)
-          const converted = dataConverters[key].toLocal(el)
-        })
+        // diff[key]?.forEach()
         break
     }
   })

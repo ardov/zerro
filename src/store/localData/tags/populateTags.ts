@@ -1,11 +1,10 @@
 import { intToRGB, intToHEX, getColorForString } from 'helpers/convertColor'
 import toArray from 'lodash/toArray'
-import { PopulatedTag, Tag } from 'types'
-import { Tags } from '.'
+import { ById, PopulatedTag, Tag } from 'types'
 import iconsMap from './iconsMap.json'
 import { nullTag } from './makeTag'
 
-export default function populateTags(rawTags: Tags) {
+export default function populateTags(rawTags: ById<Tag>) {
   let tags: {
     [x: string]: PopulatedTag
   } = { null: makePopulatedTag(nullTag) }
