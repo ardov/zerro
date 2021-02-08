@@ -67,8 +67,9 @@ export const setTagsToTransactions = (
   const state = getState()
   const result = transactions.map(id => {
     const tr = getTransaction(state, id)
-    const newTags = [] as TagId[]
-    const addId = (id: string) => (newTags.includes(id) ? '' : newTags.push(id))
+    const newTags: TagId[] = []
+    const addId = (id: string) =>
+      newTags.includes(id) || id === 'null' ? '' : newTags.push(id)
     tags?.forEach(id => {
       if (id === 'mixed' && tr.tag) tr.tag.forEach(addId)
       else addId(id)

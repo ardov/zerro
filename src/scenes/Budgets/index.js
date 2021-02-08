@@ -22,7 +22,6 @@ export default function BudgetsRouter() {
   const monthList = useSelector(getMonthDates)
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
-  console.log(month)
   if (!month)
     return (
       <Redirect to={`/budget/?month=${formatDate(new Date(), 'yyyy-MM')}`} />

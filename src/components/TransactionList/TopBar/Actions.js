@@ -39,7 +39,8 @@ export default function Actions({
   }, [visible, checkedIds])
 
   const handleSetTag = id => {
-    dispatch(setTagsToTransactions(checkedIds, [id]))
+    if (!id || id === 'null') dispatch(setTagsToTransactions(checkedIds, []))
+    else dispatch(setTagsToTransactions(checkedIds, [id]))
     onUncheckAll()
   }
 
