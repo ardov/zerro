@@ -83,7 +83,7 @@ export default function BudgetPopover({ id, month, onClose, ...rest }) {
       text: getAvgMonthsOutcomeName(prevOutcomes.length),
       amount: +prevMonthsAvgOutcome,
       selected: +value === +prevMonthsAvgOutcome,
-      condition: !!prevMonthsAvgOutcome || prevOutcomes.length < 2,
+      condition: !!prevMonthsAvgOutcome && prevOutcomes.length > 1,
     },
     {
       text: 'Бюджет в прошлом месяце',
