@@ -83,9 +83,6 @@ const MonthInfo = ({ onOpenMonthDrawer }) => {
   return (
     <Box className={c.head}>
       <Box className={c.month}>
-        <Typography noWrap variant="body1">
-          {formatDate(month, 'LLLL')}
-        </Typography>
         <IconButton
           children={<ChevronLeftIcon fontSize="inherit" />}
           onClick={() => setMonth(prevMonth)}
@@ -98,6 +95,9 @@ const MonthInfo = ({ onOpenMonthDrawer }) => {
           size="small"
           edge="end"
         />
+        <Typography noWrap variant="body1">
+          {formatDate(month, 'LLLL')}
+        </Typography>
       </Box>
 
       <ToBeBudgeted small onClick={onOpenMonthDrawer} />
