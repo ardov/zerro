@@ -28,11 +28,12 @@ export type TransactionType =
 export type GoalType = 'monthly' | 'monthlySpend' | 'targetBalance'
 export type ObjectClass =
   | 'instrument'
+  | 'country'
   | 'company'
   | 'user'
   | 'account'
-  | 'tag'
   | 'merchant'
+  | 'tag'
   | 'budget'
   | 'reminder'
   | 'reminderMarker'
