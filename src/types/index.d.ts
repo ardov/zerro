@@ -8,16 +8,16 @@ export type OptionalExceptFor<T, TRequired extends keyof T> = Partial<T> &
 
 export type Token = string | null
 
-export type UserId = number
 export type InstrumentId = number
-export type CompanyId = number
 export type CountryId = number
-export type TagId = string
+export type CompanyId = number
+export type UserId = number
+export type AccountId = string
 export type MerchantId = string
+export type TagId = string
 export type ReminderId = string
 export type ReminderMarkerId = string
 export type TransactionId = string
-export type AccountId = string
 
 export type TransactionType =
   | 'income'
@@ -38,7 +38,7 @@ export type ObjectClass =
   | 'reminderMarker'
   | 'transaction'
 
-export type Instrument = {
+export type ZmInstrument = {
   id: InstrumentId
   changed: number // Unix timestamp
   title: string
@@ -46,8 +46,17 @@ export type Instrument = {
   symbol: string
   rate: number
 }
+export type Instrument = ZmInstrument
 
-export type Company = {
+export type ZmCountry = {
+  id: CountryId
+  title: string
+  currency: InstrumentId
+  domain: string
+}
+export type Country = ZmCountry
+
+export type ZmCompany = {
   id: CompanyId
   changed: number // Unix timestamp
   title: string
@@ -57,15 +66,9 @@ export type Company = {
   countryCode: string
   deleted: boolean
 }
+export type Company = ZmCompany
 
-export type Country = {
-  id: CountryId
-  title: string
-  currency: InstrumentId
-  domain: string
-}
-
-export type User = {
+export type ZmUser = {
   id: UserId
   changed: number // Unix timestamp
   currency: InstrumentId
@@ -78,8 +81,9 @@ export type User = {
   paidTill: number // Unix timestamp
   subscription: '10yearssubscription' | '1MonthSubscription' | string
 }
+export type User = ZmUser
 
-export type Account = {
+export type ZmAccount = {
   user: UserId
   instrument: InstrumentId
   title: string
@@ -101,20 +105,28 @@ export type Account = {
   // Для счетов с типом отличных от 'loan' и 'deposit' в  этих полях можно ставить null
   capitalization: boolean | null
   percent: number | null
-  startDate: number | null
+  startDate: string | null
   endDateOffset: number | null
   endDateOffsetInterval: 'day' | 'week' | 'month' | 'year' | null
   payoffStep: number | null
   payoffInterval: 'month' | 'year' | null
 }
+export type Account = Modify<ZmAccount, { startDate: string | null }>
 export interface PopulatedAccount extends Account {
   convertedBalance: number
   convertedStartBalance: number
   inBudget: boolean
 }
-export type ZmAccount = Modify<Account, { startDate: string | null }>
 
-export interface Tag {
+export type ZmMerchant = {
+  id: MerchantId // UUID
+  changed: number // Unix timestamp
+  user: UserId
+  title: string
+}
+export type Merchant = ZmMerchant
+
+export type ZmTag = {
   id: TagId // UUID
   changed: number // Unix timestamp
   user: UserId
@@ -129,6 +141,7 @@ export interface Tag {
   budgetOutcome: boolean
   required: boolean | null
 }
+export type Tag = ZmTag
 export interface PopulatedTag extends Tag {
   name: string
   symbol: string
@@ -138,12 +151,17 @@ export interface PopulatedTag extends Tag {
   colorGenerated: string
 }
 
-export interface Merchant {
-  id: MerchantId // UUID
-  changed: number // Unix timestamp
+export interface ZmBudget {
+  changed: number
   user: UserId
-  title: string
+  tag: TagId | '00000000-0000-0000-0000-000000000000' | null
+  date: string
+  income: number
+  incomeLock: boolean
+  outcome: number
+  outcomeLock: boolean
 }
+export interface Budget extends Modify<ZmBudget, { date: number }> {}
 
 export interface ZmReminder {
   id: ReminderId
@@ -190,7 +208,7 @@ export type ZmReminderMarker = {
 }
 export type ReminderMarker = Modify<ZmReminderMarker, { date: number }>
 
-export interface Transaction {
+export interface ZmTransaction {
   id: TransactionId // UUID
   changed: number
   created: number
@@ -212,7 +230,7 @@ export interface Transaction {
   payee: string | null
   originalPayee: string | null
   comment: string | null
-  date: number
+  date: string
   mcc: number | null
   reminderMarker: ReminderMarkerId | null
   opIncome: number | null
@@ -222,19 +240,7 @@ export interface Transaction {
   latitude: number | null
   longitude: number | null
 }
-export interface ZmTransaction extends Modify<Transaction, { date: string }> {}
-
-export interface Budget {
-  changed: number
-  user: UserId
-  tag: TagId | '00000000-0000-0000-0000-000000000000' | null
-  date: number
-  income: number
-  incomeLock: boolean
-  outcome: number
-  outcomeLock: boolean
-}
-export interface ZmBudget extends Modify<Budget, { date: string }> {}
+export interface Transaction extends Modify<ZmTransaction, { date: number }> {}
 
 export interface Goal {
   type: GoalType
@@ -250,15 +256,15 @@ export interface ZmDeletionObject {
   user: number
 }
 export interface ZmDiff {
-  serverTimestamp: number //Unix timestamp
+  serverTimestamp: number // Unix timestamp
   deletion?: ZmDeletionObject[]
-  instrument?: Instrument[]
-  company?: Company[]
-  country?: Country[]
-  user?: User[]
+  instrument?: ZmInstrument[]
+  country?: ZmCountry[]
+  company?: ZmCompany[]
+  user?: ZmUser[]
   account?: ZmAccount[]
-  tag?: Tag[]
-  merchant?: Merchant[]
+  merchant?: ZmMerchant[]
+  tag?: ZmTag[]
   budget?: ZmBudget[]
   reminder?: ZmReminder[]
   reminderMarker?: ZmReminderMarker[]
@@ -266,7 +272,7 @@ export interface ZmDiff {
 }
 
 export type ZmRequest = ZmDiff & {
-  currentClientTimestamp: number //Unix timestamp
+  currentClientTimestamp: number // Unix timestamp
   forceFetch?: ObjectClass[]
 }
 export type LocalData = Omit<ZmDiff, 'deletion'>
@@ -275,15 +281,15 @@ export type DataToUpdate = Partial<ZmDiff>
 export type DataStore = {
   serverTimestamp: number
   instrument: ById<Instrument>
-  user: ById<User>
   country: ById<Country>
   company: ById<Company>
-  merchant: ById<Merchant>
-  reminder: ById<Reminder>
-  reminderMarker: ById<ReminderMarkerId>
+  user: ById<User>
   account: ById<Account>
+  merchant: ById<Merchant>
   tag: ById<Tag>
   budget: ById<Budget>
+  reminder: ById<Reminder>
+  reminderMarker: ById<ReminderMarkerId>
   transaction: ById<Transaction>
 }
 export type DataStorePatch = Partial<DataStore> & {
