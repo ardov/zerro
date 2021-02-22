@@ -23,7 +23,7 @@ import {
   ZmDeletionObject,
 } from 'types'
 import { withPerf } from 'helpers/performance'
-import { keys } from '../helpers/keys'
+import { keys } from 'helpers/keys'
 
 interface ServerData {
   serverTimestamp: number
@@ -74,7 +74,6 @@ const { reducer } = createSlice({
             if (data[key] === undefined) return
 
             if (key === 'serverTimestamp') {
-              // @ts-ignore
               state[key] = data[key] * 1000
               return
             }

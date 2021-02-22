@@ -11,14 +11,14 @@ export function applyServerPatch(diff: ZmDiff, store: WorkerStore) {
 
   const addToStore = (key: keyof ZmDiff, id: string, element: any) => {
     if (key === 'serverTimestamp' || key === 'deletion') return
-    store.data[key][id] = element
+    store.serverData[key][id] = element
   }
 
   keys(diff).forEach(key => {
     switch (key) {
       case 'serverTimestamp':
         frontDiff[key] = diff[key]
-        store.data[key] = diff[key]
+        store.serverData[key] = diff[key]
         keysToSave.add(key)
         changedKeys.add(key)
         break

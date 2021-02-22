@@ -1,3 +1,5 @@
+import { createSelector } from '@reduxjs/toolkit'
+import { sortBy } from 'store/localData/transactions/helpers'
 import {
   ById,
   Account,
@@ -22,7 +24,7 @@ export type WorkerStore = {
     isSuccessful: boolean
     errorMessage?: string
   }
-  data: {
+  serverData: {
     serverTimestamp: number
     instrument: ById<Instrument>
     user: ById<User>
@@ -37,19 +39,19 @@ export type WorkerStore = {
     transaction: ById<Transaction>
   }
   localChanges?: {
-    merchant?: ById<Merchant>
-    reminder?: ById<Reminder>
-    reminderMarker?: ById<ReminderMarkerId>
     account?: ById<Account>
+    merchant?: ById<Merchant>
     tag?: ById<Tag>
     budget?: ById<Budget>
+    reminder?: ById<Reminder>
+    reminderMarker?: ById<ReminderMarkerId>
     transaction?: ById<Transaction>
   }
 }
 
 export const store: WorkerStore = {
   syncState: 'idle',
-  data: {
+  serverData: {
     serverTimestamp: 0,
     instrument: {},
     user: {},
@@ -64,3 +66,16 @@ export const store: WorkerStore = {
     transaction: {},
   },
 }
+
+const getServerTransactions = (state: WorkerStore) =>
+  state.serverData.transaction
+const getLocalTransactions = (state: WorkerStore) =>
+  state.localChanges?.transaction || {}
+const getTransactions = createSelector(
+  [getServerTransactions, getLocalTransactions],
+  (transactions, diff) => ({ ...transactions, ...diff })
+)
+export const getSortedTransactions = createSelector(
+  [getTransactions],
+  transactions => Object.values(transactions).sort(sortBy('DATE'))
+)

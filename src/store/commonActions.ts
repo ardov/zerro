@@ -1,8 +1,8 @@
 import { createAction } from '@reduxjs/toolkit'
-import { DataToUpdate } from 'types'
+import { ZmDiff } from 'types'
 
 interface UpdateData {
-  data: DataToUpdate
+  data: ZmDiff
   syncStartTime?: number
 }
 

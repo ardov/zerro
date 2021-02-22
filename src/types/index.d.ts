@@ -112,7 +112,7 @@ export type ZmAccount = {
   payoffStep: number | null
   payoffInterval: 'month' | 'year' | null
 }
-export type Account = Modify<ZmAccount, { startDate: string | null }>
+export type Account = Modify<ZmAccount, { startDate: number | null }>
 export interface PopulatedAccount extends Account {
   convertedBalance: number
   convertedStartBalance: number
@@ -277,7 +277,6 @@ export type ZmRequest = ZmDiff & {
   forceFetch?: ObjectClass[]
 }
 export type LocalData = Omit<ZmDiff, 'deletion'>
-export type DataToUpdate = Partial<ZmDiff>
 
 export type DataStore = {
   serverTimestamp: number
