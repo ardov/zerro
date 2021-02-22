@@ -26,6 +26,7 @@ import add from 'date-fns/add'
 import sub from 'date-fns/sub'
 import { getTotalGoalsProgress } from 'scenes/Budgets/selectors/goalsProgress'
 import { DragModeContext } from '../DnDContext'
+import getMonthDates from 'scenes/Budgets/selectors/getMonthDates'
 
 const useStyles = makeStyles(theme => ({
   row: {
@@ -78,26 +79,31 @@ const useStyles = makeStyles(theme => ({
 const MonthInfo = ({ onOpenMonthDrawer }) => {
   const c = useStyles()
   const [month, setMonth] = useMonth()
-  const prevMonth = +sub(month, { months: 1 })
-  const nextMonth = +add(month, { months: 1 })
+  const monthList = useSelector(getMonthDates)
+  const minMonth = monthList[0]
+  const maxMonth = monthList[monthList.length - 1]
+  const prevMonth = month > minMonth ? +sub(month, { months: 1 }) : null
+  const nextMonth = month < maxMonth ? +add(month, { months: 1 }) : null
   return (
     <Box className={c.head}>
       <Box className={c.month}>
-        <Typography noWrap variant="body1">
-          {formatDate(month, 'LLLL')}
-        </Typography>
         <IconButton
           children={<ChevronLeftIcon fontSize="inherit" />}
           onClick={() => setMonth(prevMonth)}
+          disabled={!prevMonth}
           size="small"
           edge="start"
         />
         <IconButton
           children={<ChevronRightIcon fontSize="inherit" />}
           onClick={() => setMonth(nextMonth)}
+          disabled={!nextMonth}
           size="small"
           edge="end"
         />
+        <Typography noWrap variant="body1">
+          {formatDate(month, 'LLLL')}
+        </Typography>
       </Box>
 
       <ToBeBudgeted small onClick={onOpenMonthDrawer} />

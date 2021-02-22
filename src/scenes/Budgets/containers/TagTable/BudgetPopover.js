@@ -18,10 +18,11 @@ import { getGoals } from 'store/localData/hiddenData/goals'
 import { getGoalsProgress } from 'scenes/Budgets/selectors/goalsProgress'
 import { round } from 'helpers/currencyHelpers'
 import { sendEvent } from 'helpers/tracking'
+import pluralize from 'helpers/pluralize'
 
 export default function BudgetPopover({ id, month, onClose, ...rest }) {
   const prevMonth = getPrevMonthMs(month)
-
+  const prev12Months = getPrev12MonthsMs(month)
   const goal = useSelector(getGoals)?.[id]
   const goalProgress = useSelector(getGoalsProgress)?.[month]?.[id]
   const needForGoal = goalProgress?.target
@@ -30,7 +31,6 @@ export default function BudgetPopover({ id, month, onClose, ...rest }) {
   const amountsById = useSelector(getAmountsById)
   const amounts = amountsById?.[month]?.[id] || {}
   const prevAmounts = amountsById?.[prevMonth]?.[id] || {}
-
   const dispatch = useDispatch()
   const onChange = outcome => dispatch(setOutcomeBudget(outcome, month, id))
 
@@ -41,6 +41,18 @@ export default function BudgetPopover({ id, month, onClose, ...rest }) {
     ? prevAmounts.budgeted
     : prevAmounts.totalBudgeted
   const prevOutcome = isChild ? prevAmounts.outcome : prevAmounts.totalOutcome
+
+  let prevOutcomes = []
+  prev12Months.forEach(month => {
+    const amounts = amountsById?.[month]
+    if (amounts) {
+      isChild
+        ? prevOutcomes.push(amounts?.[id]?.outcome || 0)
+        : prevOutcomes.push(amounts?.[id]?.totalOutcome || 0)
+    }
+  })
+
+  const prevMonthsAvgOutcome = getAvgMonthsOutcome(prevOutcomes)
 
   const [value, setValue] = React.useState(budgeted)
   const changeAndCLose = value => {
@@ -56,10 +68,22 @@ export default function BudgetPopover({ id, month, onClose, ...rest }) {
       condition: available < 0,
     },
     {
+      text: 'Сбросить остаток',
+      amount: round(+budgeted - available),
+      selected: false,
+      condition: available > 0,
+    },
+    {
       text: 'Цель',
       amount: +needForGoal,
       selected: +value === +needForGoal,
       condition: !!goal && !!needForGoal,
+    },
+    {
+      text: getAvgMonthsOutcomeName(prevOutcomes.length),
+      amount: +prevMonthsAvgOutcome,
+      selected: +value === +prevMonthsAvgOutcome,
+      condition: !!prevMonthsAvgOutcome && prevOutcomes.length > 1,
     },
     {
       text: 'Бюджет в прошлом месяце',
@@ -72,12 +96,6 @@ export default function BudgetPopover({ id, month, onClose, ...rest }) {
       amount: +prevOutcome,
       selected: +value === +prevOutcome,
       condition: !!prevOutcome,
-    },
-    {
-      text: 'Сбросить остаток',
-      amount: round(+budgeted - available),
-      selected: false,
-      condition: available > 0,
     },
     {
       text: 'Сумма дочерних категорий',
@@ -138,9 +156,33 @@ export default function BudgetPopover({ id, month, onClose, ...rest }) {
   )
 }
 
+function getPrev12MonthsMs(date) {
+  let prevMonths = []
+  let monthToAdd = date // current month won't be added; only use it to get previous month
+  for (let i = 0; i < 12; i++) {
+    monthToAdd = getPrevMonthMs(monthToAdd)
+    prevMonths.push(monthToAdd)
+  }
+  return prevMonths
+}
+
 function getPrevMonthMs(date) {
   const current = new Date(date)
   const yyyy = current.getFullYear()
   const mm = current.getMonth() - 1
   return +new Date(yyyy, mm)
+}
+
+function getAvgMonthsOutcome(outcomes) {
+  if (!outcomes.length) return 0
+  let sum = 0
+  outcomes.forEach(outcome => (sum += outcome))
+  return round(sum / outcomes.length)
+}
+
+function getAvgMonthsOutcomeName(number) {
+  const s = 'Средний расход за '
+  if (number === 12) return s + 'год'
+  if (number === 6) return s + 'полгода'
+  return s + number + ' ' + pluralize(number, ['месяц', 'месяца', 'месяцев'])
 }
