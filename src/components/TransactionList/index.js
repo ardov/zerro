@@ -10,6 +10,7 @@ import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
 import { sendEvent } from 'helpers/tracking'
+import { getGroupedTransactions } from 'worker'
 
 export default function TransactionList(props) {
   const {
@@ -27,16 +28,31 @@ export default function TransactionList(props) {
   const setCondition = condition => setFilter({ ...filter, ...condition })
   const onFilterByPayee = payee => setFilter({ search: payee })
 
-  const groups = useMemo(() => {
-    if (prefilter) {
-      return groupTransactionsBy(
+  // const groups = useMemo(() => {
+  //   if (prefilter) {
+  //     return groupTransactionsBy(
+  //       'DAY',
+  //       transactions.filter(checkRaw(prefilter)),
+  //       filter
+  //     )
+  //   }
+  //   return groupTransactionsBy('DAY', transactions, filter)
+  // }, [transactions, filter, prefilter])
+
+  const [groups, setGroups] = useState([])
+  useEffect(() => {
+    async function updateTransactions() {
+      const gr = await getGroupedTransactions(
         'DAY',
-        transactions.filter(checkRaw(prefilter)),
-        filter
+        transactions,
+        filter,
+        Date.now()
       )
+      console.log('upd', gr.length)
+      setGroups(gr)
     }
-    return groupTransactionsBy('DAY', transactions, filter)
-  }, [transactions, filter, prefilter])
+    updateTransactions()
+  }, [transactions, filter])
 
   const [checked, setChecked] = useState([])
 
