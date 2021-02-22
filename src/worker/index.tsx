@@ -27,6 +27,7 @@ export const bindWorkerToStore = (dispatch: AppDispatch) =>
   })
 
 export const {
+  convertZmToLocal,
   getLocalData,
   getGroupedTransactions,
   initWithToken,

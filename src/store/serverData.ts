@@ -24,6 +24,7 @@ import {
 } from 'types'
 import { withPerf } from 'helpers/performance'
 import { keys } from 'helpers/keys'
+import { getBudgetId } from './localData/budgets/getBudgetId'
 
 interface ServerData {
   serverTimestamp: number
@@ -74,15 +75,14 @@ const { reducer } = createSlice({
             if (data[key] === undefined) return
 
             if (key === 'serverTimestamp') {
-              state[key] = data[key] * 1000
+              state[key] = data[key] || 0
               return
             }
 
             if (key === 'budget') {
               data[key]?.forEach(budget => {
-                state[key][`${budget.tag},${budget.date}`] = convertDatesToMs(
-                  budget
-                )
+                const id = getBudgetId(budget)
+                state[key][id] = budget
               })
               return
             }
@@ -95,10 +95,9 @@ const { reducer } = createSlice({
             }
 
             // @ts-ignore
-            for (const item of data[key]) {
-              // @ts-ignore
-              state[key][item.id] = convertDatesToMs(item)
-            }
+            data[key]?.forEach(item => {
+              state[key][item.id] = item
+            })
           })
         })
       )

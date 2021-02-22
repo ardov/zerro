@@ -1,4 +1,4 @@
-import { LocalData, ZmRequest } from 'types'
+import { LocalData, ZmDiff, ZmRequest } from 'types'
 import * as Comlink from 'comlink'
 import { keys } from 'helpers/keys'
 import { getIDBStorage } from 'services/storage'
@@ -6,6 +6,7 @@ import { getSortedTransactions, store } from './store'
 import ZenApi from 'services/ZenApi'
 import { applyServerPatch } from './applyServerPatch'
 import { groupTransactionsBy } from 'store/localData/transactions/helpers'
+import { toLocal } from './zmAdapter'
 
 // eslint-disable-next-line no-restricted-globals
 const ctx: Worker = self as any
@@ -33,7 +34,18 @@ function getState() {
   return store
 }
 
-function sync(diff?: ZmRequest) {}
+function convertZmToLocal(diff: ZmDiff) {
+  return toLocal(diff)
+}
+
+async function sync(token: string, diff: ZmDiff) {
+  try {
+    let data = await ZenApi.getData(token, diff)
+    return { data: toLocal(data) }
+  } catch (error) {
+    return { error: error.message as string }
+  }
+}
 
 const db = getIDBStorage('serverData')
 
@@ -62,8 +74,8 @@ async function getLocalData() {
   let data = {} as LocalData
   let arr = await Promise.all(LOCAL_KEYS.map(key => db.get(key)))
   LOCAL_KEYS.forEach((key, i) => (data[key] = arr[i]))
-  applyServerPatch(data, store)
-  return data
+  // applyServerPatch(data, store)
+  return toLocal(data)
 }
 
 async function getGroupedTransactions(
@@ -79,6 +91,7 @@ async function getGroupedTransactions(
 }
 
 const obj = {
+  convertZmToLocal,
   initWithToken,
   getLocalData,
   getGroupedTransactions,
@@ -86,7 +99,7 @@ const obj = {
   saveLocalData: (data: LocalData) => {
     keys(data).forEach(key => db.set(key, data[key]))
   },
-  sync: (token: string) => {},
+  sync,
 }
 
 export type WorkerObj = typeof obj

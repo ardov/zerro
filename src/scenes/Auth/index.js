@@ -10,6 +10,7 @@ import { updateData } from 'store/commonActions'
 import { setToken } from 'store/token'
 import { saveDataLocally } from 'logic/localData'
 import { Link as RouterLink } from 'react-router-dom'
+import { convertZmToLocal } from 'worker'
 ZenApi.checkCode()
 
 export default function Auth(props) {
@@ -84,18 +85,18 @@ export default function Auth(props) {
 
 const loadFromFile = file => async (dispatch, getState) => {
   if (!file) return
-  let data = {}
+
   try {
     const txt = await file.text()
-    data = JSON.parse(txt)
+    const data = JSON.parse(txt)
+    const converted = await convertZmToLocal(data)
+    // TODO: maybe later make more elegant solution for local data
+    dispatch(setToken('fakeToken'))
+    dispatch(updateData({ converted }))
+    dispatch(saveDataLocally())
+    Cookies.set('token', 'fakeToken', { expires: new Date(2030, 1) })
   } catch (error) {
     console.log(error)
     return
   }
-
-  // TODO: maybe later make more elegant solution for local data
-  dispatch(setToken('fakeToken'))
-  dispatch(updateData({ data }))
-  dispatch(saveDataLocally())
-  Cookies.set('token', 'fakeToken', { expires: new Date(2030, 1) })
 }

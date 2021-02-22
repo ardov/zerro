@@ -1,8 +1,8 @@
 import { createAction } from '@reduxjs/toolkit'
-import { ZmDiff } from 'types'
+import { Diff } from 'types'
 
 interface UpdateData {
-  data: ZmDiff
+  data: Diff
   syncStartTime?: number
 }
 
@@ -10,7 +10,7 @@ interface UpdateData {
 export const wipeData = createAction('data/wipeData')
 export const updateData = createAction<UpdateData>('data/updateData')
 
-interface Diff {
+interface ElementsById {
   [id: string]: {
     changed: number
     [x: string]: any
@@ -18,7 +18,7 @@ interface Diff {
 }
 
 // REDUCER FUNCS
-export const removeSyncedFunc = (diff: Diff, syncStarted?: number) => {
+export const removeSyncedFunc = (diff: ElementsById, syncStarted?: number) => {
   if (!syncStarted) return
   for (const id in diff) {
     if (diff[id].changed < syncStarted) delete diff[id]

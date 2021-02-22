@@ -271,6 +271,21 @@ export interface ZmDiff {
   reminderMarker?: ZmReminderMarker[]
   transaction?: ZmTransaction[]
 }
+export interface Diff {
+  serverTimestamp?: number
+  deletion?: DeletionObject[]
+  instrument?: Instrument[]
+  country?: Country[]
+  company?: Company[]
+  user?: User[]
+  account?: Account[]
+  merchant?: Merchant[]
+  tag?: Tag[]
+  budget?: Budget[]
+  reminder?: Reminder[]
+  reminderMarker?: ReminderMarker[]
+  transaction?: Transaction[]
+}
 
 export type ZmRequest = ZmDiff & {
   currentClientTimestamp: number // Unix timestamp
