@@ -1,4 +1,4 @@
-import { LocalData, ZmDiff, ZmRequest } from 'types'
+import { LocalData, ZmDiff } from 'types'
 import * as Comlink from 'comlink'
 import { keys } from 'helpers/keys'
 import { getIDBStorage } from 'services/storage'
