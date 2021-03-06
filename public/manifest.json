@@ -1,20 +1,70 @@
 {
   "short_name": "Zerro",
   "name": "Zerro",
-  "icons": [
-    {
-      "src": "/android-chrome-512x512.png",
-      "type": "image/png",
-      "sizes": "512x512"
-    },
-    {
-      "src": "/android-chrome-192x192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    }
-  ],
   "start_url": "/?source=pwa",
   "display": "standalone",
-  "theme_color": "#000",
-  "background_color": "#000000"
+  "theme_color": "#00090F",
+  "background_color": "#00090F",
+  "icons": [
+    {
+      "src": "icons/192px.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/512px.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/192px-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Список счетов",
+      "short_name": "Счета",
+      "description": "Быстрый доступ к балансам на счетах",
+      "url": "/accounts?source=pwa",
+      "icons": [
+        {
+          "src": "icons/accounts-192px-maskable.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "maskable"
+        },
+        {
+          "src": "icons/accounts-192px.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "any"
+        }
+      ]
+    },
+    {
+      "name": "Список операций",
+      "short_name": "Операции",
+      "description": "Быстрый доступ к списку ваших операций",
+      "url": "/transactions?source=pwa",
+      "icons": [
+        {
+          "src": "icons/transactions-192px-maskable.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "maskable"
+        },
+        {
+          "src": "icons/transactions-192px.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "any"
+        }
+      ]
+    }
+  ]
 }
