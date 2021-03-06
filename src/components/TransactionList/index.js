@@ -47,12 +47,13 @@ export default function TransactionList(props) {
   const [groups, setGroups] = useState([])
   useEffect(() => {
     async function updateTransactions() {
+      const t0 = performance.now()
       const gr = await getGroupedTransactions(
         'DAY',
-        prefilter ? transactions.filter(checkRaw(prefilter)) : transactions,
-        debouncedFilter,
-        Date.now()
+        null, //prefilter ? transactions.filter(checkRaw(prefilter)) : transactions,
+        debouncedFilter
       )
+      console.log('GET groupped ', +(performance.now() - t0).toFixed(2))
       setGroups(gr)
     }
     updateTransactions()

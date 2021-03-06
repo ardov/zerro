@@ -74,20 +74,18 @@ async function getLocalData() {
   let data = {} as LocalData
   let arr = await Promise.all(LOCAL_KEYS.map(key => db.get(key)))
   LOCAL_KEYS.forEach((key, i) => (data[key] = arr[i]))
-  // applyServerPatch(data, store)
+  applyServerPatch(data, store)
   return toLocal(data)
 }
 
 async function getGroupedTransactions(
   groupType: 'DAY',
-  transactions: any,
+  transactions2: any,
   filter: any,
-  date: number
 ) {
-  console.log('It took', Date.now() - date)
-
-  // const transactions = getSortedTransactions(store)
-  return groupTransactionsBy(groupType, transactions, filter)
+  const transactions = getSortedTransactions(store)
+  const groupped = groupTransactionsBy(groupType, transactions, filter)
+  return groupped
 }
 
 const obj = {
