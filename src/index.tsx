@@ -15,6 +15,9 @@ import { bindWorkerToStore } from 'worker'
 initSentry()
 bindWorkerToStore(store.dispatch)
 
+// @ts-ignore
+window.env = process.env
+
 ReactDOM.render(
   <GlobalErrorBoundary>
     <Provider store={store}>

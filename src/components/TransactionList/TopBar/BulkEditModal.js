@@ -47,6 +47,7 @@ export default function BulkEditModal({
 
   useEffect(() => {
     if (open) setTags(commonTags)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setTags, ids, open])
 
   const onSave = () => {
