@@ -3,6 +3,7 @@ import { ThunkAction } from 'redux-thunk'
 import ZenApi from 'services/ZenApi'
 
 import localData from './localData'
+import data from './dataSlice'
 import serverData from './serverData'
 import token from './token'
 import isPending from './isPending'
@@ -13,6 +14,7 @@ export const store = configureStore({
   reducer: {
     localData,
     serverData,
+    data,
     isPending,
     lastSync,
     token,

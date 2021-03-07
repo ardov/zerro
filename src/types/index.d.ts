@@ -256,6 +256,8 @@ export interface ZmDeletionObject {
   stamp: number
   user: number
 }
+export type DeletionObject = ZmDeletionObject
+
 export interface ZmDiff {
   serverTimestamp: number // Unix timestamp
   deletion?: ZmDeletionObject[]
