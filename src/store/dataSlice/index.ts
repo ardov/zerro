@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { wipeData, updateData } from 'store/commonActions'
-
 import { DataStore, Diff } from 'types'
 import { applyDiff } from './applyDiff'
 import { mergeDiffs } from './mergeDiffs'
@@ -62,6 +61,7 @@ const { reducer, actions } = createSlice({
         state.server ??= makeDataStore()
         applyDiff(diff, state.server)
         state.current = state.server
+        // TODO: Тут хорошо бы не всё удалять, а только то что синхронизировалось (по времени старта). После этого надо ещё current пересобрать на основе серверных данных и диффа
         state.diff = undefined
       })
   },
