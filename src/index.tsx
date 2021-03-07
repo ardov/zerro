@@ -12,6 +12,8 @@ import GlobalErrorBoundary from 'components/GlobalErrorBoundary'
 import { initSentry, sendEvent } from 'helpers/tracking'
 
 initSentry()
+// @ts-ignore
+window.env = process.env
 
 ReactDOM.render(
   <GlobalErrorBoundary>
