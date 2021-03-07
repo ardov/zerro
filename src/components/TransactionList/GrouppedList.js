@@ -115,24 +115,24 @@ const Day = ({ index, style, data, isScrolling }) => {
   const [renderContent, setRenderContent] = useState(!isScrolling)
   useEffect(() => {
     if (!isScrolling) setRenderContent(true)
+    let timer = setTimeout(() => setRenderContent(true), 300)
+    return () => {
+      clearTimeout(timer)
+    }
   }, [isScrolling])
-  return (
-    <Box position="relative" maxWidth={560} mx="auto" style={style}>
-      <StyledSubheader onClick={() => onDateClick(groups[index].date)}>
-        {formatDate(groups[index].date)}
-      </StyledSubheader>
-      {!renderContent && (
-        <div
-          style={{
-            height: groups[index].transactions.length * TRANSACTION_HEIGHT,
-            background:
-              'radial-gradient(circle at 36px 36px, rgba(128,128,128,0.2) 20px,transparent 20px)',
-            backgroundSize: '100% 72px',
-          }}
-        />
-      )}
-      {renderContent &&
-        groups[index].transactions.map(id => (
+  const date = groups[index].date
+  const length = groups[index].transactions.length
+
+  if (!renderContent)
+    return <DaySkeleton date={date} style={style} length={length} />
+  else
+    return (
+      <Box position="relative" maxWidth={560} mx="auto" style={style}>
+        <StyledSubheader onClick={() => onDateClick(date)}>
+          {formatDate(date)}
+        </StyledSubheader>
+
+        {groups[index].transactions.map(id => (
           <Transaction
             key={id}
             id={id}
@@ -145,6 +145,20 @@ const Day = ({ index, style, data, isScrolling }) => {
             onFilterByPayee={onFilterByPayee}
           />
         ))}
-    </Box>
-  )
+      </Box>
+    )
 }
+
+const DaySkeleton = ({ date, style, length }) => (
+  <Box position="relative" maxWidth={560} mx="auto" style={style}>
+    <StyledSubheader>{formatDate(date)}</StyledSubheader>
+    <div
+      style={{
+        height: length * TRANSACTION_HEIGHT,
+        background:
+          'radial-gradient(circle at 36px 36px, rgba(128,128,128,0.2) 20px,transparent 20px)',
+        backgroundSize: '100% 72px',
+      }}
+    />
+  </Box>
+)
