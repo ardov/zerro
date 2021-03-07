@@ -9,7 +9,7 @@ import { groupTransactionsBy } from 'store/localData/transactions/helpers'
 import { toLocal } from './zmAdapter'
 
 // eslint-disable-next-line no-restricted-globals
-const ctx: Worker = self as any
+// const ctx: Worker = self as any
 type LocalKey = keyof LocalData
 const LOCAL_KEYS = [
   'serverTimestamp',
@@ -25,14 +25,14 @@ const LOCAL_KEYS = [
   'budget',
   'transaction',
 ] as LocalKey[]
-type Action = { payload: any; type: string }
-function dispatch(action: Action) {
-  ctx.postMessage(action)
-  // ctx.addEventListener('message', handleMessage)
-}
-function getState() {
-  return store
-}
+// type Action = { payload: any; type: string }
+// function dispatch(action: Action) {
+//   ctx.postMessage(action)
+//   // ctx.addEventListener('message', handleMessage)
+// }
+// function getState() {
+//   return store
+// }
 
 function convertZmToLocal(diff: ZmDiff) {
   return toLocal(diff)
@@ -81,7 +81,7 @@ async function getLocalData() {
 async function getGroupedTransactions(
   groupType: 'DAY',
   transactions2: any,
-  filter: any,
+  filter: any
 ) {
   const transactions = getSortedTransactions(store)
   const groupped = groupTransactionsBy(groupType, transactions, filter)

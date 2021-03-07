@@ -1,10 +1,13 @@
-import ZenApi from 'services/ZenApi'
+// import ZenApi from 'services/ZenApi'
 import { getLastSyncTime } from 'store/serverData'
 import { getChangedArrays } from 'store/localData'
 import { getToken } from 'store/token'
 import { setPending } from 'store/isPending'
 import { saveDataLocally } from 'logic/localData'
-import { captureError, sendEvent } from 'helpers/tracking'
+import {
+  // captureError,
+  sendEvent,
+} from 'helpers/tracking'
 import { updateData } from 'store/commonActions'
 import { setSyncData } from 'store/lastSync'
 import { formatDate } from 'helpers/format'
