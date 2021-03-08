@@ -1,7 +1,12 @@
-import React from 'react'
-import { Box, Paper } from '@material-ui/core'
+import React, { FC } from 'react'
+import { Box, BoxProps, Paper } from '@material-ui/core'
 
-export default function Map({ longitude, latitude, ...rest }) {
+interface MapProps extends BoxProps {
+  longitude?: number
+  latitude?: number
+}
+
+export const Map: FC<MapProps> = ({ longitude, latitude, ...rest }) => {
   if (!(longitude && latitude)) return null
 
   return (

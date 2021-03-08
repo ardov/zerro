@@ -1,10 +1,21 @@
-import React, { useState } from 'react'
-import { Box, Paper, Typography, Collapse, Link } from '@material-ui/core'
+import React, { FC, useState } from 'react'
+import {
+  Box,
+  Paper,
+  Typography,
+  Collapse,
+  Link,
+  BoxProps,
+} from '@material-ui/core'
 import parse from 'date-fns/parseISO'
 import QRCode from 'qrcode.react'
 import { formatMoney, formatDate } from 'helpers/format'
 
-export default function Reciept({ value, ...rest }) {
+interface RecieptProps extends BoxProps {
+  value?: string
+}
+
+export const Reciept: FC<RecieptProps> = ({ value, ...rest }) => {
   const [showMore, setShowMore] = useState(false)
   if (!value) return null
 
@@ -48,14 +59,26 @@ export default function Reciept({ value, ...rest }) {
   )
 }
 
-const parseReceipt = string =>
-  string.split('&').reduce((obj, str) => {
+interface RecieptData {
+  t: string
+  i: string
+  fn: string
+  fp: string
+}
+
+const parseReceipt = (string: string) =>
+  string.split('&').reduce((obj: any, str) => {
     const arr = str.split('=')
     obj[arr[0]] = arr[1]
-    return obj
+    return obj as RecieptData
   }, {})
 
-const Line = ({ name, value }) => (
+interface LineProps {
+  name: string
+  value: string
+}
+
+const Line: FC<LineProps> = ({ name, value }) => (
   <Box mb={1}>
     <Typography variant="caption" color="textSecondary" display="block">
       {name}

@@ -2,18 +2,26 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { logOut } from 'logic/authorization'
 import { captureError, sendEvent } from 'helpers/tracking'
-import ErrorMessage from './ErrorMessage'
+import { ErrorMessage } from './ErrorMessage'
+import { AppDispatch } from 'store'
 
-class ErrorBoundary extends React.Component {
+interface ErrorBoundaryProps {
+  logOut: () => void
+}
+interface ErrorBoundaryState {
+  hasError: boolean
+}
+
+class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   state = { hasError: false }
-
-  static getDerivedStateFromError = error => ({ hasError: true })
-
-  componentDidCatch = (error, errorInfo) => {
+  static getDerivedStateFromError = (error: Error) => ({ hasError: true })
+  componentDidCatch = (error: Error, errorInfo: React.ErrorInfo) => {
     sendEvent(`Error: ${error.message}`)
     captureError(error, errorInfo)
   }
-
   render() {
     return this.state.hasError ? (
       <ErrorMessage onLogOut={this.props.logOut} />
@@ -23,7 +31,7 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch: AppDispatch) => ({
   logOut: () => dispatch(logOut()),
 })
 

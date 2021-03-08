@@ -1,8 +1,12 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { Box, Typography, Button } from '@material-ui/core'
 import RefreshIcon from '@material-ui/icons/Refresh'
 
-const ErrorMessage = ({ onLogOut }) => (
+interface ErrorMessageProps {
+  onLogOut: () => void
+}
+
+export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut }) => (
   <Box
     display="flex"
     alignItems="center"
@@ -35,5 +39,3 @@ const ErrorMessage = ({ onLogOut }) => (
     </Box>
   </Box>
 )
-
-export default ErrorMessage
