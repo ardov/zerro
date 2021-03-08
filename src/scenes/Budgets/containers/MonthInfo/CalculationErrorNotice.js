@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { getTotalsArray } from '../../selectors/getTotalsByMonth'
-import { convertCurrency } from 'store/serverData'
+import { convertCurrency } from 'store/data/selectors'
 import { getInBudgetAccounts } from 'store/localData/accounts'
 import { round } from 'helpers/currencyHelpers'
-import { getUserCurrencyCode } from 'store/serverData'
+import { getUserCurrencyCode } from 'store/data/selectors'
 import { Box, Typography, Button, Link } from '@material-ui/core'
 import WarningIcon from '@material-ui/icons/Warning'
 import { Amount } from 'components/Amount'
-import { resetData } from 'store/dataSlice'
+import { resetData } from 'store/data'
 import { clearLocalData } from 'logic/localData'
 import { captureError, sendEvent } from 'helpers/tracking'
-import { getDiff } from 'store/dataSlice'
+import { getDiff } from 'store/data'
 
 const TOLERANCE = 2
 

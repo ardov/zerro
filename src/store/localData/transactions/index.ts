@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getInstruments } from 'store/serverData'
+import { getInstruments } from 'store/data/selectors'
 import { getAccounts } from 'store/localData/accounts'
 import { getPopulatedTags } from 'store/localData/tags'
 import { sortBy } from './helpers'

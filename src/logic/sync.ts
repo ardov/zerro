@@ -1,4 +1,4 @@
-import { getLastSyncTime } from 'store/serverData'
+import { getLastSyncTime } from 'store/data/selectors'
 import { getToken } from 'store/token'
 import { setPending } from 'store/isPending'
 import { saveDataLocally } from 'logic/localData'
@@ -8,7 +8,7 @@ import { formatDate } from 'helpers/format'
 import { AppThunk } from 'store'
 import { Diff, LocalData } from 'types'
 import { sync } from 'worker'
-import { getDiff, applyServerPatch } from 'store/dataSlice'
+import { getDiff, applyServerPatch } from 'store/data'
 import { keys } from 'helpers/keys'
 
 /** All syncs with zenmoney goes through this thunk */

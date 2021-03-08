@@ -1,7 +1,7 @@
 import React from 'react'
 import { formatMoney } from 'helpers/format'
 import { InstrumentId, OptionalExceptFor } from 'types'
-import { getInstruments, getUserInstrumentId } from 'store/serverData'
+import { getInstruments, getUserInstrumentId } from 'store/data/selectors'
 import { useSelector } from 'react-redux'
 
 const decStyle = { opacity: 0.5 }

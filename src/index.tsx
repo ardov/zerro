@@ -11,7 +11,7 @@ import { store } from './store'
 import GlobalErrorBoundary from 'components/GlobalErrorBoundary'
 import { initSentry, sendEvent } from 'helpers/tracking'
 import { bindWorkerToStore } from 'worker'
-import { applyClientPatch, resetData } from 'store/dataSlice'
+import { applyClientPatch, resetData } from 'store/data'
 import { Diff } from 'types'
 
 initSentry()

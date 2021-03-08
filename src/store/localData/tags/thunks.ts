@@ -1,6 +1,6 @@
 import { sendEvent } from 'helpers/tracking'
 import { AppThunk } from 'store'
-import { applyClientPatch } from 'store/dataSlice'
+import { applyClientPatch } from 'store/data'
 import { getTag } from 'store/localData/tags'
 import { OptionalExceptFor, Tag } from 'types'
 

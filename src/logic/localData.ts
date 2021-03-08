@@ -1,6 +1,6 @@
 import { AppThunk } from 'store'
-import { applyServerPatch } from 'store/dataSlice'
-import { getDataToSave } from 'store/serverData'
+import { applyServerPatch } from 'store/data'
+import { getDataToSave } from 'store/data/selectors'
 import { LocalData } from 'types'
 import { getLocalData, clearStorage, saveLocalData } from 'worker'
 

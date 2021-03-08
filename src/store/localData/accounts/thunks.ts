@@ -1,11 +1,11 @@
-import { getRootUser } from 'store/serverData'
+import { getRootUser } from 'store/data/selectors'
 import { getAccounts } from './index'
 import { AppThunk } from 'store'
 import { sendEvent } from 'helpers/tracking'
 import { getDataAccountId } from '../hiddenData/selectors'
 import { makeDataAcc } from '../hiddenData/helpers'
 import { AccountId } from 'types'
-import { applyClientPatch } from 'store/dataSlice'
+import { applyClientPatch } from 'store/data'
 
 export const createDataAcc = (): AppThunk => (dispatch, getState) => {
   sendEvent(`Accounts: Create data accaunt`)

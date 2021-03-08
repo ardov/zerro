@@ -2,7 +2,7 @@ import { configureStore, Action } from '@reduxjs/toolkit'
 import { ThunkAction } from 'redux-thunk'
 import ZenApi from 'services/ZenApi'
 
-import data from './dataSlice'
+import data from './data'
 import token from './token'
 import isPending from './isPending'
 import lastSync from './lastSync'

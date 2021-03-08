@@ -1,6 +1,6 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { getUserCurrencyCode } from 'store/serverData'
+import { getUserCurrencyCode } from 'store/data/selectors'
 import { Box, Typography, Button } from '@material-ui/core'
 import WarningIcon from '@material-ui/icons/Warning'
 import { Amount } from 'components/Amount'

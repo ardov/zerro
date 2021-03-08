@@ -1,7 +1,7 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 import { getTotalsByMonth } from '../../selectors/getTotalsByMonth'
-import { getUserCurrencyCode } from 'store/serverData'
+import { getUserCurrencyCode } from 'store/data/selectors'
 import { Box } from '@material-ui/core'
 import { Total } from '../components'
 import { useMonth } from 'scenes/Budgets/pathHooks'

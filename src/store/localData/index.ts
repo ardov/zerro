@@ -1,5 +1,5 @@
 import { RootState } from 'store'
-import { getDiff } from 'store/dataSlice'
+import { getDiff } from 'store/data'
 
 export const getChangedNum = (state: RootState) => {
   const diff = getDiff(state)

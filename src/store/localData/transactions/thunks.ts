@@ -3,7 +3,7 @@ import { getTransaction } from 'store/localData/transactions'
 import { sendEvent } from 'helpers/tracking'
 import { AppThunk } from 'store'
 import { OptionalExceptFor, TagId, Transaction, TransactionId } from 'types'
-import { applyClientPatch } from 'store/dataSlice'
+import { applyClientPatch } from 'store/data'
 
 export const deleteTransactions = (
   ids: TransactionId | TransactionId[]

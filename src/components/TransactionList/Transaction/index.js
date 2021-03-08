@@ -1,6 +1,6 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
-import { getInstrument, getMerchants } from 'store/serverData'
+import { getInstrument, getMerchants } from 'store/data/selectors'
 import { getAccount } from 'store/localData/accounts'
 import { getPopulatedTag } from 'store/localData/tags'
 import { getTransaction } from 'store/localData/transactions'
