@@ -11,7 +11,7 @@ import { store } from './store'
 import GlobalErrorBoundary from 'components/GlobalErrorBoundary'
 import { initSentry, sendEvent } from 'helpers/tracking'
 import { bindWorkerToStore } from 'worker'
-import { applyClientPatch, wipeData } from 'store/dataSlice'
+import { applyClientPatch, resetData } from 'store/dataSlice'
 import { Diff } from 'types'
 
 initSentry()
@@ -23,7 +23,7 @@ window.zerro = {
     return store.getState()
   },
   env: process.env,
-  wipeData: () => store.dispatch(wipeData()),
+  resetData: () => store.dispatch(resetData()),
   applyClientPatch: (patch: Diff) => store.dispatch(applyClientPatch(patch)),
 }
 

@@ -32,8 +32,7 @@ const initialState: DataSlice = {
   diff: undefined,
 }
 
-interface UpdateData {
-  data: Diff
+interface ExtendedDiff extends Diff {
   syncStartTime?: number
 }
 
@@ -42,11 +41,12 @@ const { reducer, actions } = createSlice({
   name: 'data',
   initialState,
   reducers: {
-    applyServerPatch: (state, { payload }: PayloadAction<Diff>) => {
+    applyServerPatch: (state, { payload }: PayloadAction<ExtendedDiff>) => {
       if (!payload) return
       state.server ??= makeDataStore()
       applyDiff(payload, state.server)
       state.current = state.server
+      // TODO: Тут хорошо бы не всё удалять, а только то что синхронизировалось (по времени старта). После этого надо ещё current пересобрать на основе серверных данных и диффа
       state.diff = undefined
     },
     applyClientPatch: (state, { payload }: PayloadAction<Diff>) => {
@@ -55,17 +55,7 @@ const { reducer, actions } = createSlice({
       if (!state.diff) state.diff = { ...payload }
       else mergeDiffs(state.diff, payload)
     },
-    wipeData: () => initialState,
-    updateData: (state, { payload }: PayloadAction<UpdateData>) => {
-      if (!payload) return
-      const diff = payload.data
-
-      state.server ??= makeDataStore()
-      applyDiff(diff, state.server)
-      state.current = state.server
-      // TODO: Тут хорошо бы не всё удалять, а только то что синхронизировалось (по времени старта). После этого надо ещё current пересобрать на основе серверных данных и диффа
-      state.diff = undefined
-    },
+    resetData: () => initialState,
   },
 })
 
@@ -73,12 +63,7 @@ const { reducer, actions } = createSlice({
 export default reducer
 
 // ACTIONS
-export const {
-  applyServerPatch,
-  applyClientPatch,
-  wipeData,
-  updateData,
-} = actions
+export const { applyServerPatch, applyClientPatch, resetData } = actions
 
 // SELECTORS
 export const getDiff = (state: RootState) => state.data.diff

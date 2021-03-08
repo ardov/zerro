@@ -8,7 +8,7 @@ import { formatDate } from 'helpers/format'
 import { AppThunk } from 'store'
 import { Diff, LocalData } from 'types'
 import { sync } from 'worker'
-import { getDiff, updateData } from 'store/dataSlice'
+import { getDiff, applyServerPatch } from 'store/dataSlice'
 import { keys } from 'helpers/keys'
 
 /** All syncs with zenmoney goes through this thunk */
@@ -37,7 +37,7 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
     else sendEvent(`Sync: Successful first`)
 
     const data = response.data
-    dispatch(updateData({ data, syncStartTime }))
+    dispatch(applyServerPatch({ ...data, syncStartTime }))
     const changedDomains = getChangedDomains(data)
     dispatch(saveDataLocally(changedDomains))
     console.log(`✅ Данные обновлены ${formatDate(new Date(), 'HH:mm:ss')}`)

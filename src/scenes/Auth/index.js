@@ -6,7 +6,7 @@ import { logIn } from 'logic/authorization'
 import ZenApi from 'services/ZenApi'
 import { useTheme } from '@material-ui/styles'
 import Logo from '../../components/Logo'
-import { updateData } from 'store/dataSlice'
+import { applyServerPatch } from 'store/dataSlice'
 import { setToken } from 'store/token'
 import { saveDataLocally } from 'logic/localData'
 import { Link as RouterLink } from 'react-router-dom'
@@ -92,7 +92,7 @@ const loadFromFile = file => async (dispatch, getState) => {
     const converted = await convertZmToLocal(data)
     // TODO: maybe later make more elegant solution for local data
     dispatch(setToken('fakeToken'))
-    dispatch(updateData({ converted }))
+    dispatch(applyServerPatch(converted))
     dispatch(saveDataLocally())
     Cookies.set('token', 'fakeToken', { expires: new Date(2030, 1) })
   } catch (error) {

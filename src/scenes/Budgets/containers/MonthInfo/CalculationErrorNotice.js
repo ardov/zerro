@@ -8,7 +8,7 @@ import { getUserCurrencyCode } from 'store/serverData'
 import { Box, Typography, Button, Link } from '@material-ui/core'
 import WarningIcon from '@material-ui/icons/Warning'
 import { Amount } from 'components/Amount'
-import { wipeData } from 'store/dataSlice'
+import { resetData } from 'store/dataSlice'
 import { clearLocalData } from 'logic/localData'
 import { captureError, sendEvent } from 'helpers/tracking'
 import { getDiff } from 'store/dataSlice'
@@ -50,7 +50,7 @@ export function CalculationErrorNotice(props) {
 
   const reloadData = () => {
     sendEvent('Calculation Error: reload data')
-    dispatch(wipeData())
+    dispatch(resetData())
     dispatch(clearLocalData())
     window.location.reload()
   }

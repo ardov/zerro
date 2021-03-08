@@ -1,5 +1,5 @@
 import { AppThunk } from 'store'
-import { updateData } from 'store/dataSlice'
+import { applyServerPatch } from 'store/dataSlice'
 import { getDataToSave } from 'store/serverData'
 import { LocalData } from 'types'
 import { getLocalData, clearStorage, saveLocalData } from 'worker'
@@ -38,7 +38,7 @@ export const saveDataLocally = (changedDomains = LOCAL_KEYS): AppThunk => (
 
 export const loadLocalData = (): AppThunk => async dispatch => {
   const data = await getLocalData()
-  dispatch(updateData({ data }))
+  dispatch(applyServerPatch(data))
   return data
 }
 
