@@ -11,12 +11,22 @@ import { store } from './store'
 import GlobalErrorBoundary from 'components/GlobalErrorBoundary'
 import { initSentry, sendEvent } from 'helpers/tracking'
 import { bindWorkerToStore } from 'worker'
+import { wipeData } from 'store/commonActions'
+import { applyLocalPatch } from 'store/dataSlice'
+import { Diff } from 'types'
 
 initSentry()
 bindWorkerToStore(store.dispatch)
 
 // @ts-ignore
-window.env = process.env
+window.zerro = {
+  get state() {
+    return store.getState()
+  },
+  env: process.env,
+  wipeData: () => store.dispatch(wipeData()),
+  applyLocalPatch: (patch: Diff) => store.dispatch(applyLocalPatch(patch)),
+}
 
 ReactDOM.render(
   <GlobalErrorBoundary>
