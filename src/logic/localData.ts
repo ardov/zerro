@@ -1,5 +1,5 @@
 import { AppThunk } from 'store'
-import { updateData } from 'store/commonActions'
+import { updateData } from 'store/dataSlice'
 import { getDataToSave } from 'store/serverData'
 import { LocalData } from 'types'
 import { getLocalData, clearStorage, saveLocalData } from 'worker'
@@ -31,6 +31,8 @@ export const saveDataLocally = (changedDomains = LOCAL_KEYS): AppThunk => (
     {},
     ...changedDomains.map(key => ({ [key]: data[key] }))
   )
+  console.log('💾 data saved:', changedDomains)
+
   saveLocalData(changed)
 }
 

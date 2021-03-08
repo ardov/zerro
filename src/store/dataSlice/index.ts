@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from 'store'
-import { wipeData, updateData } from 'store/commonActions'
 import { DataStore, Diff } from 'types'
 import { applyDiff } from './applyDiff'
 import { mergeDiffs } from './mergeDiffs'
@@ -33,6 +32,11 @@ const initialState: DataSlice = {
   diff: undefined,
 }
 
+interface UpdateData {
+  data: Diff
+  syncStartTime?: number
+}
+
 // SLICE
 const { reducer, actions } = createSlice({
   name: 'data',
@@ -51,20 +55,17 @@ const { reducer, actions } = createSlice({
       if (!state.diff) state.diff = { ...payload }
       else mergeDiffs(state.diff, payload)
     },
-  },
-  extraReducers: builder => {
-    builder
-      .addCase(wipeData, () => initialState)
-      .addCase(updateData, (state, { payload }) => {
-        if (!payload) return
-        const diff = payload.data
+    wipeData: () => initialState,
+    updateData: (state, { payload }: PayloadAction<UpdateData>) => {
+      if (!payload) return
+      const diff = payload.data
 
-        state.server ??= makeDataStore()
-        applyDiff(diff, state.server)
-        state.current = state.server
-        // TODO: Тут хорошо бы не всё удалять, а только то что синхронизировалось (по времени старта). После этого надо ещё current пересобрать на основе серверных данных и диффа
-        state.diff = undefined
-      })
+      state.server ??= makeDataStore()
+      applyDiff(diff, state.server)
+      state.current = state.server
+      // TODO: Тут хорошо бы не всё удалять, а только то что синхронизировалось (по времени старта). После этого надо ещё current пересобрать на основе серверных данных и диффа
+      state.diff = undefined
+    },
   },
 })
 
@@ -72,7 +73,12 @@ const { reducer, actions } = createSlice({
 export default reducer
 
 // ACTIONS
-export const { applyServerPatch, applyLocalPatch } = actions
+export const {
+  applyServerPatch,
+  applyLocalPatch,
+  wipeData,
+  updateData,
+} = actions
 
 // SELECTORS
 export const getDiff = (state: RootState) => state.data.diff

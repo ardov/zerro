@@ -1,7 +1,7 @@
 import Cookies from 'cookies-js'
 import ZenApi from 'services/ZenApi'
 import { setToken } from 'store/token'
-import { wipeData } from 'store/commonActions'
+import { wipeData } from 'store/dataSlice'
 import { syncData } from 'logic/sync'
 import { clearLocalData } from './localData'
 import { AppThunk } from 'store'
