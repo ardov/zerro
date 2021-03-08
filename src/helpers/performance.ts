@@ -8,7 +8,7 @@ export const withPerf = <T extends Array<any>, U>(
     const time = +(performance.now() - t0).toFixed(4)
     //@ts-ignore
     if (process.env.NODE_ENV === 'development' || window.logTimes)
-      console.log('⏱ ' + name, time)
+      console.log('⏱ ' + name.padEnd(32, ' '), time)
 
     //@ts-ignore
     window.logging ??= {}
