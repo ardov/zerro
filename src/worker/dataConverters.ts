@@ -28,12 +28,12 @@ const toISODate = (date: number) => format(date, 'yyyy-MM-dd')
 
 export const dataConverters = {
   serverTimestamp: {
-    toLocal: (time: number) => toMs(time),
+    toClient: (time: number) => toMs(time),
     toServer: (time: number) => toUnix(time),
   },
 
   instrument: {
-    toLocal: (el: Instrument): Instrument => {
+    toClient: (el: Instrument): Instrument => {
       return { ...el, changed: toMs(el.changed) }
     },
     toServer: (el: Instrument): Instrument => {
@@ -42,7 +42,7 @@ export const dataConverters = {
   },
 
   company: {
-    toLocal: (el: Company): Company => {
+    toClient: (el: Company): Company => {
       return { ...el, changed: toMs(el.changed) }
     },
     toServer: (el: Company): Company => {
@@ -51,12 +51,12 @@ export const dataConverters = {
   },
 
   country: {
-    toLocal: (el: Country): Country => el,
+    toClient: (el: Country): Country => el,
     toServer: (el: Country): Country => el,
   },
 
   user: {
-    toLocal: (el: User): User => {
+    toClient: (el: User): User => {
       return { ...el, changed: toMs(el.changed), paidTill: toMs(el.paidTill) }
     },
     toServer: (el: User): User => {
@@ -69,7 +69,7 @@ export const dataConverters = {
   },
 
   account: {
-    toLocal: (el: ZmAccount): Account => ({
+    toClient: (el: ZmAccount): Account => ({
       ...el,
       changed: toMs(el.changed),
       startDate:
@@ -83,7 +83,7 @@ export const dataConverters = {
   },
 
   tag: {
-    toLocal: (el: Tag): Tag => {
+    toClient: (el: Tag): Tag => {
       return { ...el, changed: toMs(el.changed) }
     },
     toServer: (el: Tag): Tag => {
@@ -92,7 +92,7 @@ export const dataConverters = {
   },
 
   merchant: {
-    toLocal: (el: Merchant): Merchant => {
+    toClient: (el: Merchant): Merchant => {
       return { ...el, changed: toMs(el.changed) }
     },
     toServer: (el: Merchant): Merchant => {
@@ -101,7 +101,7 @@ export const dataConverters = {
   },
 
   reminder: {
-    toLocal: (el: ZmReminder): Reminder => ({
+    toClient: (el: ZmReminder): Reminder => ({
       ...el,
       changed: toMs(el.changed),
       startDate: toMs(el.startDate),
@@ -116,7 +116,7 @@ export const dataConverters = {
   },
 
   reminderMarker: {
-    toLocal: (el: ZmReminderMarker): ReminderMarker => {
+    toClient: (el: ZmReminderMarker): ReminderMarker => {
       return { ...el, changed: toMs(el.changed), date: toMs(el.date) }
     },
     toServer: (el: ReminderMarker): ZmReminderMarker => {
@@ -125,7 +125,7 @@ export const dataConverters = {
   },
 
   transaction: {
-    toLocal: (el: ZmTransaction): Transaction => ({
+    toClient: (el: ZmTransaction): Transaction => ({
       ...el,
       changed: toMs(el.changed),
       created: toMs(el.created),
@@ -140,7 +140,7 @@ export const dataConverters = {
   },
 
   budget: {
-    toLocal: (el: ZmBudget): Budget => {
+    toClient: (el: ZmBudget): Budget => {
       return { ...el, changed: toMs(el.changed), date: toMs(el.date) }
     },
     toServer: (el: Budget): ZmBudget => {
@@ -149,7 +149,7 @@ export const dataConverters = {
   },
 
   deletion: {
-    toLocal: (el: ZmDeletionObject): DeletionObject => {
+    toClient: (el: ZmDeletionObject): DeletionObject => {
       return { ...el, stamp: toMs(el.stamp) }
     },
     toServer: (el: DeletionObject): ZmDeletionObject => {

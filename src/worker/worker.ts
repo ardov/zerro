@@ -6,7 +6,7 @@ import { getSortedTransactions, store } from './store'
 import ZenApi from 'services/ZenApi'
 import { applyServerPatch } from './applyServerPatch'
 import { groupTransactionsBy } from 'store/localData/transactions/helpers'
-import { toLocal, toServer } from './zmAdapter'
+import { toClient, toServer } from './zmAdapter'
 
 // eslint-disable-next-line no-restricted-globals
 // const ctx: Worker = self as any
@@ -35,14 +35,14 @@ const LOCAL_KEYS = [
 // }
 
 function convertZmToLocal(diff: ZmDiff) {
-  return toLocal(diff)
+  return toClient(diff)
 }
 
 async function sync(token: string, diff: Diff) {
   const zmDiff = toServer(diff)
   try {
     let data = await ZenApi.getData(token, zmDiff)
-    return { data: toLocal(data) }
+    return { data: toClient(data) }
   } catch (error) {
     return { error: error.message as string }
   }
@@ -76,7 +76,7 @@ async function getLocalData() {
   let arr = await Promise.all(LOCAL_KEYS.map(key => db.get(key)))
   LOCAL_KEYS.forEach((key, i) => (data[key] = arr[i]))
   applyServerPatch(data, store)
-  return toLocal(data)
+  return toClient(data)
 }
 
 async function getGroupedTransactions(

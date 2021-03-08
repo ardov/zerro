@@ -29,7 +29,7 @@ export function applyServerPatch(diff: ZmDiff, store: WorkerStore) {
 
       default:
         diff[key]?.forEach((el: any) => {
-          const converted = dataConverters[key].toLocal(el)
+          const converted = dataConverters[key].toClient(el)
           const id = getId(key, converted)
           const isApplied = isAlreadyApplied(key, converted, store)
 
@@ -52,7 +52,7 @@ export function applyServerPatch(diff: ZmDiff, store: WorkerStore) {
           keysToSave.add(key)
 
           // apply patch to server
-          addToStore(key, getId(key, el), dataConverters[key].toLocal(el))
+          addToStore(key, getId(key, el), dataConverters[key].toClient(el))
         })
         break
     }

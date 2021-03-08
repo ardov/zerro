@@ -22,23 +22,23 @@ export function toServer(d: Diff): ZmDiff {
   return r
 }
 
-export function toLocal(d: ZmDiff): Diff {
+export function toClient(d: ZmDiff): Diff {
   let r: Diff = { serverTimestamp: 0 }
   if (d.serverTimestamp)
-    r.serverTimestamp = convert.serverTimestamp.toLocal(d.serverTimestamp)
-  if (d.deletion) r.deletion = d.deletion.map(convert.deletion.toLocal)
-  if (d.instrument) r.instrument = d.instrument.map(convert.instrument.toLocal)
-  if (d.country) r.country = d.country.map(convert.country.toLocal)
-  if (d.company) r.company = d.company.map(convert.company.toLocal)
-  if (d.user) r.user = d.user.map(convert.user.toLocal)
-  if (d.account) r.account = d.account.map(convert.account.toLocal)
-  if (d.merchant) r.merchant = d.merchant.map(convert.merchant.toLocal)
-  if (d.tag) r.tag = d.tag.map(convert.tag.toLocal)
-  if (d.budget) r.budget = d.budget.map(convert.budget.toLocal)
-  if (d.reminder) r.reminder = d.reminder.map(convert.reminder.toLocal)
+    r.serverTimestamp = convert.serverTimestamp.toClient(d.serverTimestamp)
+  if (d.deletion) r.deletion = d.deletion.map(convert.deletion.toClient)
+  if (d.instrument) r.instrument = d.instrument.map(convert.instrument.toClient)
+  if (d.country) r.country = d.country.map(convert.country.toClient)
+  if (d.company) r.company = d.company.map(convert.company.toClient)
+  if (d.user) r.user = d.user.map(convert.user.toClient)
+  if (d.account) r.account = d.account.map(convert.account.toClient)
+  if (d.merchant) r.merchant = d.merchant.map(convert.merchant.toClient)
+  if (d.tag) r.tag = d.tag.map(convert.tag.toClient)
+  if (d.budget) r.budget = d.budget.map(convert.budget.toClient)
+  if (d.reminder) r.reminder = d.reminder.map(convert.reminder.toClient)
   if (d.reminderMarker)
-    r.reminderMarker = d.reminderMarker.map(convert.reminderMarker.toLocal)
+    r.reminderMarker = d.reminderMarker.map(convert.reminderMarker.toClient)
   if (d.transaction)
-    r.transaction = d.transaction.map(convert.transaction.toLocal)
+    r.transaction = d.transaction.map(convert.transaction.toClient)
   return r
 }
