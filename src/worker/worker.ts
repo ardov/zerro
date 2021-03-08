@@ -1,4 +1,4 @@
-import { LocalData, ZmDiff } from 'types'
+import { LocalData, ZmDiff, Diff } from 'types'
 import * as Comlink from 'comlink'
 import { keys } from 'helpers/keys'
 import { getIDBStorage } from 'services/storage'
@@ -6,7 +6,7 @@ import { getSortedTransactions, store } from './store'
 import ZenApi from 'services/ZenApi'
 import { applyServerPatch } from './applyServerPatch'
 import { groupTransactionsBy } from 'store/localData/transactions/helpers'
-import { toLocal } from './zmAdapter'
+import { toLocal, toServer } from './zmAdapter'
 
 // eslint-disable-next-line no-restricted-globals
 // const ctx: Worker = self as any
@@ -38,9 +38,10 @@ function convertZmToLocal(diff: ZmDiff) {
   return toLocal(diff)
 }
 
-async function sync(token: string, diff: ZmDiff) {
+async function sync(token: string, diff: Diff) {
+  const zmDiff = toServer(diff)
   try {
-    let data = await ZenApi.getData(token, diff)
+    let data = await ZenApi.getData(token, zmDiff)
     return { data: toLocal(data) }
   } catch (error) {
     return { error: error.message as string }
