@@ -1,29 +1,8 @@
-import { createSlice, createSelector } from '@reduxjs/toolkit'
+import { createSelector } from '@reduxjs/toolkit'
 import { populate } from './populate'
 import { convertCurrency } from 'store/serverData'
-import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
 import { Account, AccountId, PopulatedAccount } from 'types'
 import { RootState } from 'store'
-
-// INITIAL STATE
-const initialState: { [key: string]: Account } = {}
-
-// SLICE
-const slice = createSlice({
-  name: 'account',
-  initialState,
-  reducers: {},
-  extraReducers: builder => {
-    builder
-      .addCase(wipeData, () => initialState)
-      .addCase(updateData, (state, { payload }) => {
-        removeSyncedFunc(state, payload.syncStartTime)
-      })
-  },
-})
-
-// REDUCER
-export default slice.reducer
 
 // SELECTORS
 

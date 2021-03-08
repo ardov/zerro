@@ -1,55 +1,11 @@
-import { createSlice, createSelector } from '@reduxjs/toolkit'
-import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
-import { convertToSyncArray } from 'helpers/converters'
+import { createSelector } from '@reduxjs/toolkit'
 import { compareTags } from 'store/localData/hiddenData/tagOrder'
 import populateTags from './populateTags'
-import { ById, Modify, PopulatedTag, Tag, TagId } from 'types'
+import { Modify, PopulatedTag, Tag, TagId } from 'types'
 import { RootState } from 'store'
 
-// INITIAL STATE
-const initialState: ById<Tag> = {}
-
-// SLICE
-const { reducer, actions } = createSlice({
-  name: 'tag',
-  initialState,
-  reducers: {
-    setTag: (state, { payload }) => {
-      if (Array.isArray(payload)) {
-        payload.forEach(tr => (state[tr.id] = tr))
-      } else {
-        state[payload.id] = payload
-      }
-    },
-    removeTag: (state, { payload }) => {
-      delete state[payload]
-    },
-  },
-  extraReducers: builder => {
-    builder
-      .addCase(wipeData, () => initialState)
-      .addCase(updateData, (state, { payload }) => {
-        removeSyncedFunc(state, payload.syncStartTime)
-      })
-  },
-})
-
-// REDUCER
-export default reducer
-
-// ACTIONS
-export const { setTag, removeTag } = actions
-
 // SELECTORS
-const getServerTags = (state: RootState) => state.serverData.tag
-const getLocalTags = (state: RootState) => state.localData.tag
-export const getTags = createSelector(
-  [getServerTags, getLocalTags],
-  (tags, diff) => ({ ...tags, ...diff })
-)
-
-export const getTagsToSync = (state: RootState): Tag[] =>
-  convertToSyncArray(state.localData.tag) as Tag[]
+export const getTags = (state: RootState) => state.data.current.tag
 
 export const getTag = (state: RootState, id: string): Tag | undefined =>
   getTags(state)[id]
