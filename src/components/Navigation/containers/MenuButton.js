@@ -1,8 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { logOut } from 'logic/authorization'
-import exportCsv from 'logic/exportCsv'
-import exportJSON from 'logic/exportJSON'
+import { exportCSV } from 'logic/exportCSV'
+import { exportJSON } from 'logic/exportJSON'
 import { toggle } from 'store/theme'
 import { makeStyles } from '@material-ui/styles'
 import SettingsIcon from '@material-ui/icons/Settings'
@@ -23,7 +23,7 @@ const useStyles = makeStyles(({ spacing }) => ({
   menuIcon: { marginRight: spacing(1) },
 }))
 
-function MenuButton({ exportCsv, exportJSON, logOut, toggleTheme, ...rest }) {
+function MenuButton({ exportCSV, exportJSON, logOut, toggleTheme, ...rest }) {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const classes = useStyles()
   const localTheme = localStorage.getItem('theme')
@@ -49,7 +49,7 @@ function MenuButton({ exportCsv, exportJSON, logOut, toggleTheme, ...rest }) {
       </Tooltip>
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-        <MenuItem onClick={exportCsv}>
+        <MenuItem onClick={exportCSV}>
           <SaveAltIcon className={classes.menuIcon} color="action" />
           Скачать CSV
         </MenuItem>
@@ -96,7 +96,7 @@ function MenuButton({ exportCsv, exportJSON, logOut, toggleTheme, ...rest }) {
 
 const mapDispatchToProps = dispatch => ({
   logOut: () => dispatch(logOut()),
-  exportCsv: () => dispatch(exportCsv),
+  exportCSV: () => dispatch(exportCSV),
   exportJSON: () => dispatch(exportJSON),
   toggleTheme: () => dispatch(toggle()),
 })

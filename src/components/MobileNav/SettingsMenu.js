@@ -1,8 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { logOut } from 'logic/authorization'
-import exportCsv from 'logic/exportCsv'
-import exportJSON from 'logic/exportJSON'
+import { exportCSV } from 'logic/exportCSV'
+import { exportJSON } from 'logic/exportJSON'
 import { toggle } from 'store/theme'
 import { makeStyles } from '@material-ui/styles'
 import SaveAltIcon from '@material-ui/icons/SaveAlt'
@@ -20,7 +20,7 @@ const useStyles = makeStyles(({ spacing }) => ({
 }))
 
 function SettingsMenu({
-  exportCsv,
+  exportCSV,
   exportJSON,
   logOut,
   toggleTheme,
@@ -45,7 +45,7 @@ function SettingsMenu({
 
   return (
     <Menu {...rest} {...{ onClose, anchorEl, open }}>
-      <MenuItem onClick={exportCsv}>
+      <MenuItem onClick={exportCSV}>
         <SaveAltIcon className={classes.menuIcon} color="action" />
         Скачать CSV
       </MenuItem>
@@ -120,7 +120,7 @@ function SettingsMenu({
 
 const mapDispatchToProps = dispatch => ({
   logOut: () => dispatch(logOut()),
-  exportCsv: () => dispatch(exportCsv),
+  exportCSV: () => dispatch(exportCSV),
   exportJSON: () => dispatch(exportJSON),
   toggleTheme: () => dispatch(toggle()),
 })
