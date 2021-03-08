@@ -14,6 +14,7 @@ export default function Map({ longitude, latitude, ...rest }) {
             width="200"
             height="200"
             frameBorder="0"
+            loading="lazy"
             allowFullScreen
           />
         </Box>
