@@ -23,6 +23,8 @@ window.zerro = {
     return store.getState()
   },
   env: process.env,
+  logsShow: false,
+  logs: {},
   resetData: () => store.dispatch(resetData()),
   applyClientPatch: (patch: Diff) => store.dispatch(applyClientPatch(patch)),
 }
