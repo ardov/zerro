@@ -1,6 +1,6 @@
 import { keys } from 'helpers/keys'
 import { getBudgetId } from 'store/localData/budgets/getBudgetId'
-import { DataStore, ZmDeletionObject, ZmDiff } from 'types'
+import { ZmDiff } from 'types'
 import { dataConverters } from './dataConverters'
 import { WorkerStore } from './store'
 
@@ -81,12 +81,4 @@ function isAlreadyApplied(key: keyof ZmDiff, item: any, store: WorkerStore) {
 function getId(key: string, item: any) {
   if (key === 'budget') return getBudgetId(item)
   return item.id as string
-}
-
-function applyDeletion(data: DataStore, deletion: ZmDeletionObject[]) {
-  deletion.forEach(obj => {
-    // TODO
-    // Add timestamp check
-    delete data[obj.object][obj.id]
-  })
 }

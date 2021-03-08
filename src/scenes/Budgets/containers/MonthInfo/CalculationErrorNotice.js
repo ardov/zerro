@@ -11,7 +11,7 @@ import { Amount } from 'components/Amount'
 import { wipeData } from 'store/commonActions'
 import { clearLocalData } from 'logic/localData'
 import { captureError, sendEvent } from 'helpers/tracking'
-import { getTransactionsToSync } from 'store/localData/transactions'
+import { getDiff } from 'store/dataSlice'
 
 const TOLERANCE = 2
 
@@ -19,7 +19,7 @@ export function CalculationErrorNotice(props) {
   const [hidden, setHidden] = useState(false)
 
   const transactionsToSync = useSelector(
-    state => getTransactionsToSync(state).length
+    state => getDiff(state)?.transaction?.length || 0
   )
   const currency = useSelector(getUserCurrencyCode)
   const dispatch = useDispatch()

@@ -1,30 +1,26 @@
-// import ZenApi from 'services/ZenApi'
 import { getLastSyncTime } from 'store/serverData'
-import { getChangedArrays } from 'store/localData'
 import { getToken } from 'store/token'
 import { setPending } from 'store/isPending'
 import { saveDataLocally } from 'logic/localData'
-import {
-  // captureError,
-  sendEvent,
-} from 'helpers/tracking'
+import { sendEvent } from 'helpers/tracking'
 import { updateData } from 'store/commonActions'
 import { setSyncData } from 'store/lastSync'
 import { formatDate } from 'helpers/format'
 import { AppThunk } from 'store'
 import { Diff, LocalData } from 'types'
 import { sync } from 'worker'
+import { toServer } from 'worker/zmAdapter'
 
 /** All syncs with zenmoney goes through this thunk */
 export const syncData = (): AppThunk => async (dispatch, getState) => {
   const state = getState()
-  const changed = getChangedArrays(state)
+  const diff = toServer(state.data.diff || {})
+  diff.serverTimestamp = getLastSyncTime(state) / 1000 || 0
   const token = getToken(state) || ''
-  const serverTimestamp = getLastSyncTime(state) / 1000 || 0
 
   const syncStartTime = Date.now()
   dispatch(setPending(true))
-  const response = await sync(token, { serverTimestamp, ...changed })
+  const response = await sync(token, diff)
   dispatch(setPending(false))
   dispatch(
     setSyncData({
@@ -37,7 +33,7 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
   if (response.data) {
     const data = response.data as Diff
     sendEvent(
-      `Sync: ${serverTimestamp ? 'Successful update' : 'Successful first'}`
+      `Sync: ${data.serverTimestamp ? 'Successful update' : 'Successful first'}`
     )
     dispatch(updateData({ data, syncStartTime }))
     const changedDomains = getChangedDomains(data)

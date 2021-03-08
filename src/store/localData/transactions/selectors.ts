@@ -3,21 +3,12 @@ import { getInstruments } from 'store/serverData'
 import { getAccounts } from 'store/localData/accounts'
 import { getPopulatedTags } from 'store/localData/tags'
 import { sortBy } from './helpers'
-import { convertToSyncArray } from 'helpers/converters'
 import { populate, PopulatedTransaction } from './populate'
 import { RootState } from 'store'
-import { TransactionId, ZmTransaction } from 'types'
+import { TransactionId } from 'types'
 import { withPerf } from 'helpers/performance'
 
-const getServerTransactions = (state: RootState) => state.serverData.transaction
-const getLocalTransactions = (state: RootState) => state.localData.transaction
-const getTransactionsToSync = (state: RootState) =>
-  convertToSyncArray(state.localData.transaction) as ZmTransaction[]
-
-const getTransactions = createSelector(
-  [getServerTransactions, getLocalTransactions],
-  (transactions, diff) => ({ ...transactions, ...diff })
-)
+const getTransactions = (state: RootState) => state.data.current.transaction
 const getTransaction = (state: RootState, id: TransactionId) =>
   getTransactions(state)[id]
 
@@ -48,7 +39,6 @@ const getTransactionsHistory = createSelector(
 )
 
 export const selectors = {
-  getTransactionsToSync,
   getPopulatedTransactions,
   getTransactions,
   getTransaction,

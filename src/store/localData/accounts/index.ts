@@ -2,8 +2,7 @@ import { createSlice, createSelector } from '@reduxjs/toolkit'
 import { populate } from './populate'
 import { convertCurrency } from 'store/serverData'
 import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
-import { convertToSyncArray } from 'helpers/converters'
-import { Account, AccountId, ZmAccount, PopulatedAccount } from 'types'
+import { Account, AccountId, PopulatedAccount } from 'types'
 import { RootState } from 'store'
 
 // INITIAL STATE
@@ -13,14 +12,7 @@ const initialState: { [key: string]: Account } = {}
 const slice = createSlice({
   name: 'account',
   initialState,
-  reducers: {
-    setAccount: (state, { payload }) => {
-      const accounts = Array.isArray(payload) ? payload : [payload]
-      accounts.forEach(acc => {
-        state[acc.id] = acc
-      })
-    },
-  },
+  reducers: {},
   extraReducers: builder => {
     builder
       .addCase(wipeData, () => initialState)
@@ -33,26 +25,12 @@ const slice = createSlice({
 // REDUCER
 export default slice.reducer
 
-// ACTIONS
-export const { setAccount } = slice.actions
-
 // SELECTORS
-const getServerAccounts = (state: RootState) => state.serverData.account
-const getChangedAccounts = (state: RootState) => state.localData.account
 
-export const getAccounts = createSelector(
-  [getServerAccounts, getChangedAccounts],
-  (serverAccounts, changedAccounts) => ({
-    ...serverAccounts,
-    ...changedAccounts,
-  })
-)
+export const getAccounts = (state: RootState) => state.data.current.account
 
 export const getAccount = (state: RootState, id: AccountId) =>
   getAccounts(state)[id]
-
-export const getAccountsToSync = (state: RootState): ZmAccount[] =>
-  convertToSyncArray(getChangedAccounts(state)) as ZmAccount[]
 
 export const getPopulatedAccounts = createSelector(
   [convertCurrency, getAccounts],

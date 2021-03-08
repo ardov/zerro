@@ -42,7 +42,6 @@ export const { setTransaction } = actions
 
 // SELECTORS
 export const {
-  getTransactionsToSync,
   getPopulatedTransactions,
   getTransactions,
   getTransaction,

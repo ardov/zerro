@@ -17,6 +17,8 @@ import {
   ZmReminder,
   ZmTransaction,
   ZmBudget,
+  ZmDeletionObject,
+  DeletionObject,
 } from 'types'
 
 const toMs = (date: string | number) =>
@@ -31,25 +33,21 @@ export const dataConverters = {
   },
 
   instrument: {
-    toLocal: (el: Instrument): Instrument => ({
-      ...el,
-      changed: toMs(el.changed),
-    }),
-    toServer: (el: Instrument): Instrument => ({
-      ...el,
-      changed: toUnix(el.changed),
-    }),
+    toLocal: (el: Instrument): Instrument => {
+      return { ...el, changed: toMs(el.changed) }
+    },
+    toServer: (el: Instrument): Instrument => {
+      return { ...el, changed: toUnix(el.changed) }
+    },
   },
 
   company: {
-    toLocal: (el: Company): Company => ({
-      ...el,
-      changed: toMs(el.changed),
-    }),
-    toServer: (el: Company): Company => ({
-      ...el,
-      changed: toUnix(el.changed),
-    }),
+    toLocal: (el: Company): Company => {
+      return { ...el, changed: toMs(el.changed) }
+    },
+    toServer: (el: Company): Company => {
+      return { ...el, changed: toUnix(el.changed) }
+    },
   },
 
   country: {
@@ -58,16 +56,16 @@ export const dataConverters = {
   },
 
   user: {
-    toLocal: (el: User): User => ({
-      ...el,
-      changed: toMs(el.changed),
-      paidTill: toMs(el.paidTill),
-    }),
-    toServer: (el: User): User => ({
-      ...el,
-      changed: toUnix(el.changed),
-      paidTill: toUnix(el.paidTill),
-    }),
+    toLocal: (el: User): User => {
+      return { ...el, changed: toMs(el.changed), paidTill: toMs(el.paidTill) }
+    },
+    toServer: (el: User): User => {
+      return {
+        ...el,
+        changed: toUnix(el.changed),
+        paidTill: toUnix(el.paidTill),
+      }
+    },
   },
 
   account: {
@@ -85,25 +83,21 @@ export const dataConverters = {
   },
 
   tag: {
-    toLocal: (el: Tag): Tag => ({
-      ...el,
-      changed: toMs(el.changed),
-    }),
-    toServer: (el: Tag): Tag => ({
-      ...el,
-      changed: toUnix(el.changed),
-    }),
+    toLocal: (el: Tag): Tag => {
+      return { ...el, changed: toMs(el.changed) }
+    },
+    toServer: (el: Tag): Tag => {
+      return { ...el, changed: toUnix(el.changed) }
+    },
   },
 
   merchant: {
-    toLocal: (el: Merchant): Merchant => ({
-      ...el,
-      changed: toMs(el.changed),
-    }),
-    toServer: (el: Merchant): Merchant => ({
-      ...el,
-      changed: toUnix(el.changed),
-    }),
+    toLocal: (el: Merchant): Merchant => {
+      return { ...el, changed: toMs(el.changed) }
+    },
+    toServer: (el: Merchant): Merchant => {
+      return { ...el, changed: toUnix(el.changed) }
+    },
   },
 
   reminder: {
@@ -122,16 +116,12 @@ export const dataConverters = {
   },
 
   reminderMarker: {
-    toLocal: (el: ZmReminderMarker): ReminderMarker => ({
-      ...el,
-      changed: toMs(el.changed),
-      date: toMs(el.date),
-    }),
-    toServer: (el: ReminderMarker): ZmReminderMarker => ({
-      ...el,
-      changed: toUnix(el.changed),
-      date: toISODate(el.date),
-    }),
+    toLocal: (el: ZmReminderMarker): ReminderMarker => {
+      return { ...el, changed: toMs(el.changed), date: toMs(el.date) }
+    },
+    toServer: (el: ReminderMarker): ZmReminderMarker => {
+      return { ...el, changed: toUnix(el.changed), date: toISODate(el.date) }
+    },
   },
 
   transaction: {
@@ -150,15 +140,20 @@ export const dataConverters = {
   },
 
   budget: {
-    toLocal: (el: ZmBudget): Budget => ({
-      ...el,
-      changed: toMs(el.changed),
-      date: toMs(el.date),
-    }),
-    toServer: (el: Budget): ZmBudget => ({
-      ...el,
-      changed: toUnix(el.changed),
-      date: toISODate(el.date),
-    }),
+    toLocal: (el: ZmBudget): Budget => {
+      return { ...el, changed: toMs(el.changed), date: toMs(el.date) }
+    },
+    toServer: (el: Budget): ZmBudget => {
+      return { ...el, changed: toUnix(el.changed), date: toISODate(el.date) }
+    },
+  },
+
+  deletion: {
+    toLocal: (el: ZmDeletionObject): DeletionObject => {
+      return { ...el, stamp: toMs(el.stamp) }
+    },
+    toServer: (el: DeletionObject): ZmDeletionObject => {
+      return { ...el, stamp: toUnix(el.stamp) }
+    },
   },
 }

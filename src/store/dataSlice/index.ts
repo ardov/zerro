@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { RootState } from 'store'
 import { wipeData, updateData } from 'store/commonActions'
 import { DataStore, Diff } from 'types'
 import { applyDiff } from './applyDiff'
@@ -72,3 +73,6 @@ export default reducer
 
 // ACTIONS
 export const { applyServerPatch, applyLocalPatch } = actions
+
+// SELECTORS
+export const getDiff = (state: RootState) => state.data.diff
