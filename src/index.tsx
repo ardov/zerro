@@ -11,7 +11,7 @@ import { store } from './store'
 import GlobalErrorBoundary from 'components/GlobalErrorBoundary'
 import { initSentry, sendEvent } from 'helpers/tracking'
 import { bindWorkerToStore } from 'worker'
-import { applyLocalPatch, wipeData } from 'store/dataSlice'
+import { applyClientPatch, wipeData } from 'store/dataSlice'
 import { Diff } from 'types'
 
 initSentry()
@@ -24,7 +24,7 @@ window.zerro = {
   },
   env: process.env,
   wipeData: () => store.dispatch(wipeData()),
-  applyLocalPatch: (patch: Diff) => store.dispatch(applyLocalPatch(patch)),
+  applyClientPatch: (patch: Diff) => store.dispatch(applyClientPatch(patch)),
 }
 
 ReactDOM.render(

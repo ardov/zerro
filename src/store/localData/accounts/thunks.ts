@@ -5,7 +5,7 @@ import { sendEvent } from 'helpers/tracking'
 import { getDataAccountId } from '../hiddenData/selectors'
 import { makeDataAcc } from '../hiddenData/helpers'
 import { AccountId } from 'types'
-import { applyLocalPatch } from 'store/dataSlice'
+import { applyClientPatch } from 'store/dataSlice'
 
 export const createDataAcc = (): AppThunk => (dispatch, getState) => {
   sendEvent(`Accounts: Create data accaunt`)
@@ -13,7 +13,7 @@ export const createDataAcc = (): AppThunk => (dispatch, getState) => {
   const user = getRootUser(state)
   if (!user) return
   const acc = makeDataAcc(user.id)
-  dispatch(applyLocalPatch({ account: [acc] }))
+  dispatch(applyClientPatch({ account: [acc] }))
 }
 
 export const checkDataAcc = (): AppThunk => (dispatch, getState) => {
@@ -35,5 +35,5 @@ export const setInBudget = (id: AccountId, inBalance: boolean): AppThunk => (
     return
   }
   const newAcc = { ...account, inBalance: !!inBalance, changed: Date.now() }
-  dispatch(applyLocalPatch({ account: [newAcc] }))
+  dispatch(applyClientPatch({ account: [newAcc] }))
 }

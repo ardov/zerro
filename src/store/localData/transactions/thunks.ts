@@ -3,7 +3,7 @@ import { getTransaction } from 'store/localData/transactions'
 import { sendEvent } from 'helpers/tracking'
 import { AppThunk } from 'store'
 import { OptionalExceptFor, TagId, Transaction, TransactionId } from 'types'
-import { applyLocalPatch } from 'store/dataSlice'
+import { applyClientPatch } from 'store/dataSlice'
 
 export const deleteTransactions = (
   ids: TransactionId | TransactionId[]
@@ -15,7 +15,7 @@ export const deleteTransactions = (
     deleted: true,
     changed: Date.now(),
   }))
-  dispatch(applyLocalPatch({ transaction: deleted }))
+  dispatch(applyClientPatch({ transaction: deleted }))
 }
 
 export const restoreTransaction = (id: TransactionId): AppThunk => (
@@ -29,7 +29,7 @@ export const restoreTransaction = (id: TransactionId): AppThunk => (
     changed: Date.now(),
     id: uuidv1(),
   }
-  dispatch(applyLocalPatch({ transaction: [tr] }))
+  dispatch(applyClientPatch({ transaction: [tr] }))
 }
 
 // Не работает
@@ -41,7 +41,7 @@ export const splitTransfer = (id: TransactionId): AppThunk => (
   const state = getState()
   const tr = getTransaction(state, id)
   const list = split(tr)
-  if (list) dispatch(applyLocalPatch({ transaction: list }))
+  if (list) dispatch(applyClientPatch({ transaction: list }))
 }
 
 type TransactionPatch = OptionalExceptFor<Transaction, 'id'>
@@ -54,7 +54,7 @@ export const applyChangesToTransaction = (
     ...patch,
     changed: Date.now(),
   }
-  dispatch(applyLocalPatch({ transaction: [tr] }))
+  dispatch(applyClientPatch({ transaction: [tr] }))
 }
 
 export const setTagsToTransactions = (
@@ -75,7 +75,7 @@ export const setTagsToTransactions = (
     })
     return { ...tr, tag: newTags, changed: Date.now() }
   })
-  dispatch(applyLocalPatch({ transaction: result }))
+  dispatch(applyClientPatch({ transaction: result }))
 }
 
 function split(raw: Transaction) {

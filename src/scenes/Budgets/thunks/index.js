@@ -10,7 +10,7 @@ import { subMonths } from 'date-fns/esm'
 import { getGoalsProgress } from '../selectors/goalsProgress'
 import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
 import { getGoals } from 'store/localData/hiddenData/goals'
-import { applyLocalPatch } from 'store/dataSlice'
+import { applyClientPatch } from 'store/dataSlice'
 const { TARGET_BALANCE } = GOAL_TYPES
 
 export const moveFunds = (amount, source, destination, monthDate) => (
@@ -51,7 +51,7 @@ export const moveFunds = (amount, source, destination, monthDate) => (
       changed: Date.now(),
     })
   }
-  dispatch(applyLocalPatch({ budget: resultBudgets }))
+  dispatch(applyClientPatch({ budget: resultBudgets }))
 }
 
 export const setOutcomeBudget = (targetOutcome, month, tagId) => (
@@ -76,7 +76,7 @@ export const setOutcomeBudget = (targetOutcome, month, tagId) => (
 
   const budget = created || makeBudget({ user, date: +month, tag: tagId })
   const changed = { ...budget, outcome, changed: Date.now() }
-  dispatch(applyLocalPatch({ budget: [changed] }))
+  dispatch(applyClientPatch({ budget: [changed] }))
 }
 
 export const copyPreviousBudget = month => (dispatch, getState) => {
@@ -100,7 +100,7 @@ export const copyPreviousBudget = month => (dispatch, getState) => {
       )
     }
   }
-  dispatch(applyLocalPatch({ budget: changedArr }))
+  dispatch(applyClientPatch({ budget: changedArr }))
 }
 
 export const fillGoals = month => (dispatch, getState) => {
@@ -123,7 +123,7 @@ export const fillGoals = month => (dispatch, getState) => {
       changedArr.push(makeBudget({ user, date: +month, tag, outcome: target }))
     }
   }
-  dispatch(applyLocalPatch({ budget: changedArr }))
+  dispatch(applyClientPatch({ budget: changedArr }))
 }
 
 export const startFresh = month => (dispatch, getState) => {
@@ -140,7 +140,7 @@ export const startFresh = month => (dispatch, getState) => {
   const resetSavingsArr = clearAvailable(prevMonth, prevAmounts, user)
   const currentMonth = resetCurrentMonth(month, currentAmounts, user)
   dispatch(
-    applyLocalPatch({
+    applyClientPatch({
       budget: [...removedBudgets, ...resetSavingsArr, ...currentMonth],
     })
   )
@@ -235,5 +235,5 @@ export const fixOverspends = month => (dispatch, getState) => {
       }
     }
   }
-  dispatch(applyLocalPatch({ budget: changedBudgets }))
+  dispatch(applyClientPatch({ budget: changedBudgets }))
 }

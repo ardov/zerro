@@ -49,7 +49,7 @@ const { reducer, actions } = createSlice({
       state.current = state.server
       state.diff = undefined
     },
-    applyLocalPatch: (state, { payload }: PayloadAction<Diff>) => {
+    applyClientPatch: (state, { payload }: PayloadAction<Diff>) => {
       if (!payload) return
       applyDiff(payload, state.current)
       if (!state.diff) state.diff = { ...payload }
@@ -75,7 +75,7 @@ export default reducer
 // ACTIONS
 export const {
   applyServerPatch,
-  applyLocalPatch,
+  applyClientPatch,
   wipeData,
   updateData,
 } = actions

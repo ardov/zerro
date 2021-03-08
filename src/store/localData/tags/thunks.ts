@@ -1,6 +1,6 @@
 import { sendEvent } from 'helpers/tracking'
 import { AppThunk } from 'store'
-import { applyLocalPatch } from 'store/dataSlice'
+import { applyClientPatch } from 'store/dataSlice'
 import { getTag } from 'store/localData/tags'
 import { OptionalExceptFor, Tag } from 'types'
 
@@ -14,6 +14,6 @@ export const patchTag = (tag: TagDraft): AppThunk => (dispatch, getState) => {
 
   sendEvent('Tag: edit')
   dispatch(
-    applyLocalPatch({ tag: [{ ...current, ...tag, changed: Date.now() }] })
+    applyClientPatch({ tag: [{ ...current, ...tag, changed: Date.now() }] })
   )
 }
