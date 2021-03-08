@@ -1,21 +1,16 @@
-import React, {
-  // useMemo,
-  useState,
-  useCallback,
-  useEffect,
-} from 'react'
+import React, { useMemo, useState, useCallback, useEffect } from 'react'
 import { Box } from '@material-ui/core'
 import { useSelector } from 'react-redux'
 import { getSortedTransactions } from 'store/localData/transactions'
-// import {
-//   checkRaw,
-//   groupTransactionsBy,
-// } from 'store/localData/transactions/helpers'
+import {
+  checkRaw,
+  groupTransactionsBy,
+} from 'store/localData/transactions/helpers'
 import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
 import { sendEvent } from 'helpers/tracking'
-import { getGroupedTransactions } from 'worker'
+// import { getGroupedTransactions } from 'worker'
 import { useDebounce } from 'helpers/useDebounce'
 
 export default function TransactionList(props) {
@@ -38,31 +33,31 @@ export default function TransactionList(props) {
   )
   const onFilterByPayee = useCallback(payee => setFilter({ search: payee }), [])
 
-  // const groups = useMemo(() => {
-  //   if (prefilter) {
-  //     return groupTransactionsBy(
-  //       'DAY',
-  //       transactions.filter(checkRaw(prefilter)),
-  //       debouncedFilter
-  //     )
-  //   }
-  //   return groupTransactionsBy('DAY', transactions, debouncedFilter)
-  // }, [transactions, debouncedFilter, prefilter])
-
-  const [groups, setGroups] = useState([])
-  useEffect(() => {
-    async function updateTransactions() {
-      const t0 = performance.now()
-      const gr = await getGroupedTransactions(
+  const groups = useMemo(() => {
+    if (prefilter) {
+      return groupTransactionsBy(
         'DAY',
-        null, //prefilter ? transactions.filter(checkRaw(prefilter)) : transactions,
+        transactions.filter(checkRaw(prefilter)),
         debouncedFilter
       )
-      console.log('GET groupped ', +(performance.now() - t0).toFixed(2))
-      setGroups(gr)
     }
-    updateTransactions()
+    return groupTransactionsBy('DAY', transactions, debouncedFilter)
   }, [transactions, debouncedFilter, prefilter])
+
+  // const [groups, setGroups] = useState([])
+  // useEffect(() => {
+  //   async function updateTransactions() {
+  //     const t0 = performance.now()
+  //     const gr = await getGroupedTransactions(
+  //       'DAY',
+  //       null, //prefilter ? transactions.filter(checkRaw(prefilter)) : transactions,
+  //       debouncedFilter
+  //     )
+  //     console.log('GET groupped ', +(performance.now() - t0).toFixed(2))
+  //     setGroups(gr)
+  //   }
+  //   updateTransactions()
+  // }, [transactions, debouncedFilter, prefilter])
 
   const [checked, setChecked] = useState([])
 
