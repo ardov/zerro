@@ -135,7 +135,7 @@ export default function Transaction({
       <ListItemText
         primary={
           <Box display="flex" justifyContent="space-between">
-            <MainLine {...{ type, tag }} />
+            <MainLine type={type} tag={tr.tag} />
             <Amount
               {...{
                 type,
