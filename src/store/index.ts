@@ -6,7 +6,6 @@ import data from './data'
 import token from './token'
 import isPending from './isPending'
 import lastSync from './lastSync'
-import theme from './theme'
 
 export const store = configureStore({
   reducer: {
@@ -14,7 +13,6 @@ export const store = configureStore({
     isPending,
     lastSync,
     token,
-    theme,
   },
   preloadedState: { token: ZenApi.getLocalToken() },
   middleware: getDefaultMiddleware =>
