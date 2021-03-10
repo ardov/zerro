@@ -31,7 +31,6 @@ export const saveDataLocally = (changedDomains = LOCAL_KEYS): AppThunk => (
     {},
     ...changedDomains.map(key => ({ [key]: data[key] }))
   )
-  console.log('💾 data saved:', changedDomains)
 
   saveLocalData(changed)
 }
