@@ -18,9 +18,7 @@ export default function TransactionList(props) {
     prefilter,
     filterConditions,
     hideFilter = false,
-    opened,
     checkedDate,
-    setOpened,
     ...rest
   } = props
 
@@ -119,8 +117,6 @@ export default function TransactionList(props) {
         <GrouppedList
           {...{
             groups,
-            opened,
-            setOpened,
             checked,
             toggleTransaction,
             checkByChangedDate,

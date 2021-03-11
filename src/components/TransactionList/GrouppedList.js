@@ -5,7 +5,8 @@ import { DatePicker } from '@material-ui/pickers'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { withStyles } from '@material-ui/core/styles'
 import { Box, ListSubheader } from '@material-ui/core'
-import Transaction from './Transaction'
+import Transaction2 from './Transaction'
+import { Transaction } from './Transaction/Transaction'
 import { formatDate } from 'helpers/format'
 
 const HEADER_HEIGHT = 48
@@ -26,7 +27,6 @@ const StyledSubheader = withStyles(theme => ({
 export function GrouppedList({
   groups,
   opened,
-  setOpened,
   checked,
   toggleTransaction,
   checkByChangedDate,
@@ -54,8 +54,6 @@ export function GrouppedList({
   )
   const itemData = {
     groups,
-    opened,
-    setOpened,
     checked,
     toggleTransaction,
     checkByChangedDate,
@@ -104,8 +102,6 @@ export function GrouppedList({
 const Day = ({ index, style, data, isScrolling }) => {
   const {
     groups,
-    opened,
-    setOpened,
     checked,
     toggleTransaction,
     checkByChangedDate,
@@ -136,11 +132,10 @@ const Day = ({ index, style, data, isScrolling }) => {
           <Transaction
             key={id}
             id={id}
-            isOpened={id === opened}
+            // isOpened={id === opened}
             isChecked={checked.includes(id)}
             isInSelectionMode={!!checked.length}
             onToggle={toggleTransaction}
-            onClick={setOpened}
             onSelectChanged={checkByChangedDate}
             onFilterByPayee={onFilterByPayee}
           />
