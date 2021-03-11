@@ -53,10 +53,9 @@ export default function App() {
 
 const PrivateApp = () => {
   const hasData = useSelector(state => !!getLastSyncTime(state))
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   return (
     <Box display="flex">
-      {isMobile ? <MobileNav /> : <Nav />}
+      <Navigation />
       <RegularSyncHandler />
       <Box minHeight="100vh" flexGrow={1}>
         <ErrorBoundary>
@@ -79,6 +78,11 @@ const PrivateApp = () => {
     </Box>
   )
 }
+
+const Navigation = React.memo(() => {
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
+  return isMobile ? <MobileNav /> : <Nav />
+})
 
 const hints = [
   { hint: 'Первая загрузка самая долгая 😅', delay: 5000 },
