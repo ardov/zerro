@@ -5,8 +5,8 @@ import { DatePicker } from '@material-ui/pickers'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { withStyles } from '@material-ui/core/styles'
 import { Box, ListSubheader } from '@material-ui/core'
-import Transaction2 from './Transaction'
-import { Transaction } from './Transaction/Transaction'
+import Transaction from './Transaction'
+// import { Transaction } from './Transaction/TransactionNew'
 import { formatDate } from 'helpers/format'
 
 const HEADER_HEIGHT = 48

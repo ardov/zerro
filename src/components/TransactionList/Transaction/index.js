@@ -18,6 +18,8 @@ import {
 import EmojiIcon from 'components/EmojiIcon'
 import { MainLine } from './MainLine'
 import { Amount } from './Amount'
+import { useSearchParam } from 'helpers/useSearchParam'
+import { sendEvent } from 'helpers/tracking'
 
 const useStyles = makeStyles(theme => ({
   listItem: { borderRadius: theme.shape.borderRadius },
@@ -40,8 +42,6 @@ const useStyles = makeStyles(theme => ({
 
 export default function Transaction({
   id,
-
-  isOpened,
   isInSelectionMode,
   isChecked,
 
@@ -51,6 +51,8 @@ export default function Transaction({
   onSelectChanged,
 }) {
   const c = useStyles()
+  const [opened, setOpened] = useSearchParam('transaction')
+  const isOpened = opened === id
 
   const merchants = useSelector(getMerchants)
   const tr = useSelector(state => getTransaction(state, id))
@@ -97,7 +99,10 @@ export default function Transaction({
     else return null
   })
 
-  const handleOpen = () => onClick && onClick(id)
+  const handleOpen = () => {
+    sendEvent('Transaction: see details')
+    setOpened(id)
+  }
   const handlePayeeClick = e => {
     e.preventDefault()
     e.stopPropagation()

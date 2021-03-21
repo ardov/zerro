@@ -7,6 +7,15 @@ import { toClient, toServer } from './zmAdapter'
 
 // eslint-disable-next-line no-restricted-globals
 // const ctx: Worker = self as any
+// type Action = { payload: any; type: string }
+// function dispatch(action: Action) {
+//   ctx.postMessage(action)
+//   // ctx.addEventListener('message', handleMessage)
+// }
+// function getState() {
+//   return store
+// }
+
 type LocalKey = keyof LocalData
 const LOCAL_KEYS = [
   'serverTimestamp',
@@ -22,14 +31,6 @@ const LOCAL_KEYS = [
   'budget',
   'transaction',
 ] as LocalKey[]
-// type Action = { payload: any; type: string }
-// function dispatch(action: Action) {
-//   ctx.postMessage(action)
-//   // ctx.addEventListener('message', handleMessage)
-// }
-// function getState() {
-//   return store
-// }
 
 function convertZmToLocal(diff: ZmDiff) {
   return toClient(diff)
@@ -65,5 +66,4 @@ const obj = {
 }
 
 export type WorkerObj = typeof obj
-
 Comlink.expose(obj)

@@ -2,12 +2,12 @@
   --background: rgb(255, 255, 255);
   --c-text-primary: rgba(0, 0, 0, 0.8);
   --c-text-secondary: rgba(0, 0, 0, 0.5);
-  --text-body1: 16px/20px sans-serif;
-  --text-body2: 14px/16px sans-serif;
+  --text-body2: 14px/16px 'IBM Plex Sans', sans-serif;
   --transform: scale(1);
 
   position: relative;
-  font: var(--text-body1);
+  font-size: 16px;
+  line-height: 24px;
   display: flex;
   flex-direction: row;
   color: var(--c-text-primary);
