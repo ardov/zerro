@@ -2983,11 +2983,6 @@
     "@typescript-eslint/types" "4.12.0"
     eslint-visitor-keys "^2.0.0"
 
-"@use-it/event-listener@^0.1.2":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@use-it/event-listener/-/event-listener-0.1.6.tgz#5776274fec72f3f25af9ead1898e7f45bc435812"
-  integrity sha512-e6V7vbU8xpuqy4GZkTLExHffOFgxmGHo3kNWnlhzM/zcX2v+idbD/HaJ9sKdQMgTh+L7MIhdRDXGX3SdAViZzA==
-
 "@webassemblyjs/ast@1.9.0":
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.9.0.tgz#bd850604b4042459a5a41cd7d338cbed695ed964"
@@ -15543,17 +15538,15 @@ use-latest@^1.0.0:
   dependencies:
     use-isomorphic-layout-effect "^1.0.0"
 
+use-local-storage-state@^9.0.2:
+  version "9.0.2"
+  resolved "https://registry.yarnpkg.com/use-local-storage-state/-/use-local-storage-state-9.0.2.tgz#77ace2fd72c8d17d3da5be74cf6aa3e25b6e321c"
+  integrity sha512-loNVFqrzfsNoNVtM/3RJbjKVhSgTX15vPC5Tcuk7oflF0nonldRivMGAgFU3toi9v6hfTT/x8M+o6ifDN2n0OQ==
+
 use-memo-one@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/use-memo-one/-/use-memo-one-1.1.1.tgz#39e6f08fe27e422a7d7b234b5f9056af313bd22c"
   integrity sha512-oFfsyun+bP7RX8X2AskHNTxu+R3QdE/RC5IefMbqptmACAA/gfol1KDD5KRzPsGMa62sWxGZw+Ui43u6x4ddoQ==
-
-use-persisted-state@^0.3.3:
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/use-persisted-state/-/use-persisted-state-0.3.3.tgz#5e0f2236967cec7c34de33abc07ae6818e7c7451"
-  integrity sha512-pCNlvYC8+XjRxwnIut4teGC9f2p9aD88R8OGseQGZa2dvqG/h1vEGk1vRE1IZG0Vf161UDpn+NlW4+UGubQflQ==
-  dependencies:
-    "@use-it/event-listener" "^0.1.2"
 
 use@^3.1.0:
   version "3.1.1"

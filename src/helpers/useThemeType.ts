@@ -1,19 +1,20 @@
 import { useMediaQuery } from '@material-ui/core'
-import createPersistedState from 'use-persisted-state'
+import { createLocalStorageStateHook } from 'use-local-storage-state'
 
-const useUserTheme = createPersistedState('themeType')
+type UserTheme = 'light' | 'dark' | null
+const useUserTheme = createLocalStorageStateHook<UserTheme>('theme', null)
 
 export function useThemeType() {
   const prefersDark = useMediaQuery('(prefers-color-scheme: dark)')
-  const [userTheme, setUserTheme] = useUserTheme<'light' | 'dark' | null>(null)
   const systemTheme = prefersDark ? 'dark' : 'light'
-  const currentTheme = userTheme ? userTheme : systemTheme
+  const [userTheme, setUserTheme] = useUserTheme()
+  const currentTheme = userTheme || systemTheme
   return {
     type: currentTheme,
-    toggle: () =>
-      setUserTheme(() => {
-        if (currentTheme !== systemTheme) return null
-        else return currentTheme === 'dark' ? 'light' : 'dark'
-      }),
+    toggle: () => {
+      let newTheme: UserTheme = currentTheme === 'dark' ? 'light' : 'dark'
+      if (newTheme === systemTheme) newTheme = null
+      setUserTheme(newTheme)
+    },
   }
 }
