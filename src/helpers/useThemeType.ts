@@ -1,7 +1,7 @@
 import { useMediaQuery } from '@material-ui/core'
 import createPersistedState from 'use-persisted-state'
 
-const useUserTheme = createPersistedState('theme')
+const useUserTheme = createPersistedState('themeType')
 
 export function useThemeType() {
   const prefersDark = useMediaQuery('(prefers-color-scheme: dark)')
