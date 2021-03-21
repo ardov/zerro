@@ -7,7 +7,7 @@ import {
   // splitTransfer,
 } from 'store/localData/transactions/thunks'
 import Content from './Content'
-import { getInstrument } from 'store/serverData'
+import { getInstrument } from 'store/data/selectors'
 import { getAccount } from 'store/localData/accounts'
 import { getType } from 'store/localData/transactions/helpers'
 

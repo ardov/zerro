@@ -11,12 +11,12 @@ type EmojiIconProps = Modify<
   {
     symbol: string
     color?: string
-    size: 's' | 'm'
+    size?: 's' | 'm'
     onChange: CheckboxProps['onChange']
     checked: CheckboxProps['checked']
     showCheckBox: boolean
-    checkboxProps: CheckboxProps
-    button: boolean
+    checkboxProps?: CheckboxProps
+    button?: boolean
   }
 >
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import Reciept from './Reciept'
+import { Reciept } from './Reciept'
 import {
   Box,
   Typography,
@@ -14,7 +14,7 @@ import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash'
 import CloseIcon from '@material-ui/icons/Close'
 import DeleteIcon from '@material-ui/icons/Delete'
 import { DatePicker } from '@material-ui/pickers'
-import Map from './Map'
+import { Map } from './Map'
 import AmountInput from 'components/AmountInput'
 import { formatDate, rateToWords } from 'helpers/format'
 import { TagList } from 'components/TagList'

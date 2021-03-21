@@ -1,9 +1,9 @@
 import { v1 as uuidv1 } from 'uuid'
 import { getTransaction } from 'store/localData/transactions'
-import { setTransaction } from 'store/localData/transactions'
 import { sendEvent } from 'helpers/tracking'
 import { AppThunk } from 'store'
 import { OptionalExceptFor, TagId, Transaction, TransactionId } from 'types'
+import { applyClientPatch } from 'store/data'
 
 export const deleteTransactions = (
   ids: TransactionId | TransactionId[]
@@ -15,7 +15,7 @@ export const deleteTransactions = (
     deleted: true,
     changed: Date.now(),
   }))
-  dispatch(setTransaction(deleted))
+  dispatch(applyClientPatch({ transaction: deleted }))
 }
 
 export const restoreTransaction = (id: TransactionId): AppThunk => (
@@ -23,14 +23,13 @@ export const restoreTransaction = (id: TransactionId): AppThunk => (
   getState
 ) => {
   sendEvent('Transaction: restore')
-  dispatch(
-    setTransaction({
-      ...getTransaction(getState(), id),
-      deleted: false,
-      changed: Date.now(),
-      id: uuidv1(),
-    })
-  )
+  const tr = {
+    ...getTransaction(getState(), id),
+    deleted: false,
+    changed: Date.now(),
+    id: uuidv1(),
+  }
+  dispatch(applyClientPatch({ transaction: [tr] }))
 }
 
 // Не работает
@@ -41,31 +40,31 @@ export const splitTransfer = (id: TransactionId): AppThunk => (
 ) => {
   const state = getState()
   const tr = getTransaction(state, id)
-  dispatch(setTransaction(split(tr)))
+  const list = split(tr)
+  if (list) dispatch(applyClientPatch({ transaction: list }))
 }
 
 type TransactionPatch = OptionalExceptFor<Transaction, 'id'>
-export const applyChangesToTransaction = (tr: TransactionPatch): AppThunk => (
-  dispatch,
-  getState
-) => {
+export const applyChangesToTransaction = (
+  patch: TransactionPatch
+): AppThunk => (dispatch, getState) => {
   sendEvent('Transaction: edit')
-  dispatch(
-    setTransaction({
-      ...getTransaction(getState(), tr.id),
-      ...tr,
-      changed: Date.now(),
-    })
-  )
+  const tr = {
+    ...getTransaction(getState(), patch.id),
+    ...patch,
+    changed: Date.now(),
+  }
+  dispatch(applyClientPatch({ transaction: [tr] }))
 }
 
 export const setTagsToTransactions = (
-  transactions: TransactionId[],
+  ids: TransactionId[],
   tags: TagId[]
 ): AppThunk => (dispatch, getState) => {
   sendEvent('Bulk Actions: set new tags')
   const state = getState()
-  const result = transactions.map(id => {
+
+  const result = ids.map(id => {
     const tr = getTransaction(state, id)
     const newTags: TagId[] = []
     const addId = (id: string) =>
@@ -76,12 +75,12 @@ export const setTagsToTransactions = (
     })
     return { ...tr, tag: newTags, changed: Date.now() }
   })
-  dispatch(setTransaction(result))
+  dispatch(applyClientPatch({ transaction: result }))
 }
 
 function split(raw: Transaction) {
   if (!(raw.income && raw.outcome)) return null
-  const result = [
+  const result: Transaction[] = [
     {
       ...raw,
       changed: Date.now(),

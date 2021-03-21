@@ -10,10 +10,24 @@ import * as serviceWorkerRegistration from './serviceWorkerRegistration'
 import { store } from './store'
 import GlobalErrorBoundary from 'components/GlobalErrorBoundary'
 import { initSentry, sendEvent } from 'helpers/tracking'
+import { bindWorkerToStore } from 'worker'
+import { applyClientPatch, resetData } from 'store/data'
+import { Diff } from 'types'
 
 initSentry()
+bindWorkerToStore(store.dispatch)
+
 // @ts-ignore
-window.env = process.env
+window.zerro = {
+  get state() {
+    return store.getState()
+  },
+  env: process.env,
+  logsShow: false,
+  logs: {},
+  resetData: () => store.dispatch(resetData()),
+  applyClientPatch: (patch: Diff) => store.dispatch(applyClientPatch(patch)),
+}
 
 ReactDOM.render(
   <GlobalErrorBoundary>

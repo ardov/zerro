@@ -1,10 +1,9 @@
-import { getRootUser } from 'store/serverData'
-import { setAccount } from 'store/localData/accounts'
+import { getRootUser } from 'store/data/selectors'
 import { makeDataAcc, makeDataReminder } from './helpers'
 import { getDataReminders, getDataAccountId } from './selectors'
 import { DataRemindeType } from './constants'
-import { setReminder } from 'store/localData/reminders'
 import { AppDispatch, AppThunk, AppGetState } from 'store'
+import { applyClientPatch } from 'store/data'
 
 export const setHiddenData = (type: DataRemindeType, data: any): AppThunk => (
   dispatch,
@@ -18,10 +17,14 @@ export const setHiddenData = (type: DataRemindeType, data: any): AppThunk => (
   const reminder =
     getDataReminders(state)[type] || makeDataReminder(user, dataAcc, type)
   dispatch(
-    setReminder({
-      ...reminder,
-      comment: JSON.stringify(data),
-      changed: Date.now(),
+    applyClientPatch({
+      reminder: [
+        {
+          ...reminder,
+          comment: JSON.stringify(data),
+          changed: Date.now(),
+        },
+      ],
     })
   )
 }
@@ -34,7 +37,7 @@ function prepareData(dispatch: AppDispatch, getState: AppGetState) {
   let dataAccId = getDataAccountId(state)
   if (!dataAccId) {
     const acc = makeDataAcc(user)
-    dispatch(setAccount(acc))
+    dispatch(applyClientPatch({ account: [acc] }))
     dataAccId = acc.id
   }
 }

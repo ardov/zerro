@@ -10,45 +10,64 @@ import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
 import { sendEvent } from 'helpers/tracking'
+// import { getGroupedTransactions } from 'worker'
+import { useDebounce } from 'helpers/useDebounce'
 
 export default function TransactionList(props) {
   const {
     prefilter,
     filterConditions,
     hideFilter = false,
-    opened,
     checkedDate,
-    setOpened,
     ...rest
   } = props
 
   const transactions = useSelector(getSortedTransactions)
   const [filter, setFilter] = useState(filterConditions)
-  const setCondition = condition => setFilter({ ...filter, ...condition })
-  const onFilterByPayee = payee => setFilter({ search: payee })
+  const debouncedFilter = useDebounce(filter, 300)
+  const setCondition = useCallback(
+    condition => setFilter(filter => ({ ...filter, ...condition })),
+    []
+  )
+  const onFilterByPayee = useCallback(payee => setFilter({ search: payee }), [])
 
   const groups = useMemo(() => {
     if (prefilter) {
       return groupTransactionsBy(
         'DAY',
         transactions.filter(checkRaw(prefilter)),
-        filter
+        debouncedFilter
       )
     }
-    return groupTransactionsBy('DAY', transactions, filter)
-  }, [transactions, filter, prefilter])
+    return groupTransactionsBy('DAY', transactions, debouncedFilter)
+  }, [transactions, debouncedFilter, prefilter])
+
+  // const [groups, setGroups] = useState([])
+  // useEffect(() => {
+  //   async function updateTransactions() {
+  //     const t0 = performance.now()
+  //     const gr = await getGroupedTransactions(
+  //       'DAY',
+  //       null, //prefilter ? transactions.filter(checkRaw(prefilter)) : transactions,
+  //       debouncedFilter
+  //     )
+  //     console.log('GET groupped ', +(performance.now() - t0).toFixed(2))
+  //     setGroups(gr)
+  //   }
+  //   updateTransactions()
+  // }, [transactions, debouncedFilter, prefilter])
 
   const [checked, setChecked] = useState([])
 
-  const uncheckAll = useCallback(() => setChecked([]), [setChecked])
+  const uncheckAll = useCallback(() => setChecked([]), [])
 
-  const toggleTransaction = useCallback(
-    id =>
-      checked.includes(id)
-        ? setChecked(checked.filter(checked => id !== checked))
-        : setChecked([...checked, id]),
-    [checked]
-  )
+  const toggleTransaction = useCallback(id => {
+    setChecked(current => {
+      return current.includes(id)
+        ? current.filter(checked => id !== checked)
+        : [...current, id]
+    })
+  }, [])
 
   const checkByChangedDate = useCallback(
     date => {
@@ -98,8 +117,6 @@ export default function TransactionList(props) {
         <GrouppedList
           {...{
             groups,
-            opened,
-            setOpened,
             checked,
             toggleTransaction,
             checkByChangedDate,

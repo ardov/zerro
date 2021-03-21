@@ -1,12 +1,10 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { logOut } from 'logic/authorization'
-import exportCsv from 'logic/exportCsv'
-import exportJSON from 'logic/exportJSON'
-import { toggle } from 'store/theme'
+import { exportCSV } from 'logic/exportCSV'
+import { exportJSON } from 'logic/exportJSON'
 import { makeStyles } from '@material-ui/styles'
 import SaveAltIcon from '@material-ui/icons/SaveAlt'
-import InvertColorsIcon from '@material-ui/icons/InvertColors'
 import ExitToAppIcon from '@material-ui/icons/ExitToApp'
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
@@ -14,16 +12,18 @@ import { Box, Divider, Menu, MenuItem, Typography } from '@material-ui/core'
 import { useHistory } from 'react-router'
 import { Link } from 'react-router-dom'
 import WhatshotIcon from '@material-ui/icons/Whatshot'
+import WbSunnyIcon from '@material-ui/icons/WbSunny'
+import NightsStayIcon from '@material-ui/icons/NightsStay'
+import { useThemeType } from 'helpers/useThemeType'
 
 const useStyles = makeStyles(({ spacing }) => ({
   menuIcon: { marginRight: spacing(1) },
 }))
 
 function SettingsMenu({
-  exportCsv,
+  exportCSV,
   exportJSON,
   logOut,
-  toggleTheme,
   onClose,
   anchorEl,
   open,
@@ -31,21 +31,16 @@ function SettingsMenu({
 }) {
   const history = useHistory()
   const classes = useStyles()
-  const localTheme = localStorage.getItem('theme')
+  const theme = useThemeType()
 
   const handleThemeChange = () => {
     onClose()
-    localStorage.setItem('theme', localTheme === 'dark' ? 'light' : 'dark')
-    toggleTheme()
-  }
-  const setAutoTheme = () => {
-    onClose()
-    localStorage.removeItem('theme')
+    theme.toggle()
   }
 
   return (
     <Menu {...rest} {...{ onClose, anchorEl, open }}>
-      <MenuItem onClick={exportCsv}>
+      <MenuItem onClick={exportCSV}>
         <SaveAltIcon className={classes.menuIcon} color="action" />
         Скачать CSV
       </MenuItem>
@@ -85,15 +80,18 @@ function SettingsMenu({
       </Box>
 
       <MenuItem onClick={handleThemeChange}>
-        <InvertColorsIcon className={classes.menuIcon} color="action" />
-        Изменить тему
+        {theme.type === 'dark' ? (
+          <>
+            <WbSunnyIcon className={classes.menuIcon} color="action" />
+            Светлая тема
+          </>
+        ) : (
+          <>
+            <NightsStayIcon className={classes.menuIcon} color="action" />
+            Тёмная тема
+          </>
+        )}
       </MenuItem>
-      {localTheme && (
-        <MenuItem onClick={setAutoTheme}>
-          <InvertColorsIcon className={classes.menuIcon} color="action" />
-          Менять тему автоматически
-        </MenuItem>
-      )}
 
       <Box my={1}>
         <Divider light />
@@ -120,9 +118,8 @@ function SettingsMenu({
 
 const mapDispatchToProps = dispatch => ({
   logOut: () => dispatch(logOut()),
-  exportCsv: () => dispatch(exportCsv),
+  exportCSV: () => dispatch(exportCSV),
   exportJSON: () => dispatch(exportJSON),
-  toggleTheme: () => dispatch(toggle()),
 })
 
 export default connect(null, mapDispatchToProps)(SettingsMenu)

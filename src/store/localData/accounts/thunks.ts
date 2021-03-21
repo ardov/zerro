@@ -1,11 +1,11 @@
-import { getRootUser } from 'store/serverData'
-import { setAccount, getAccounts } from './index'
+import { getRootUser } from 'store/data/selectors'
+import { getAccounts } from './index'
 import { AppThunk } from 'store'
-
 import { sendEvent } from 'helpers/tracking'
 import { getDataAccountId } from '../hiddenData/selectors'
 import { makeDataAcc } from '../hiddenData/helpers'
 import { AccountId } from 'types'
+import { applyClientPatch } from 'store/data'
 
 export const createDataAcc = (): AppThunk => (dispatch, getState) => {
   sendEvent(`Accounts: Create data accaunt`)
@@ -13,7 +13,7 @@ export const createDataAcc = (): AppThunk => (dispatch, getState) => {
   const user = getRootUser(state)
   if (!user) return
   const acc = makeDataAcc(user.id)
-  dispatch(setAccount(acc))
+  dispatch(applyClientPatch({ account: [acc] }))
 }
 
 export const checkDataAcc = (): AppThunk => (dispatch, getState) => {
@@ -35,5 +35,5 @@ export const setInBudget = (id: AccountId, inBalance: boolean): AppThunk => (
     return
   }
   const newAcc = { ...account, inBalance: !!inBalance, changed: Date.now() }
-  dispatch(setAccount(newAcc))
+  dispatch(applyClientPatch({ account: [newAcc] }))
 }

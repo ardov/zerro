@@ -1,39 +1,17 @@
-import { combineReducers } from '@reduxjs/toolkit'
-
-import tag, { getTagsToSync } from './tags'
-import budget, { getBudgetsToSync } from './budgets'
-import account, { getAccountsToSync } from './accounts'
-import reminder, { getRemindersToSync } from './reminders'
-import transaction, { getTransactionsToSync } from './transactions'
 import { RootState } from 'store'
-
-// REDUCER
-export default combineReducers({
-  tag,
-  budget,
-  account,
-  reminder,
-  transaction,
-})
-
-// GLOBAL SELECTORS
-export const getChangedArrays = (state: RootState) => ({
-  tag: getTagsToSync(state),
-  budget: getBudgetsToSync(state),
-  account: getAccountsToSync(state),
-  reminder: getRemindersToSync(state),
-  transaction: getTransactionsToSync(state),
-})
+import { getDiff } from 'store/data'
 
 export const getChangedNum = (state: RootState) => {
-  const arrays = getChangedArrays(state)
-  return Object.values(arrays).reduce((sum, arr) => sum + arr.length, 0)
+  const diff = getDiff(state)
+  if (!diff) return 0
+  return Object.values(diff).reduce((sum, arr) => sum + arr.length, 0)
 }
 
 export const getLastChangeTime = (state: RootState) => {
-  const arrays = getChangedArrays(state)
+  const diff = getDiff(state)
+  if (!diff) return 0
   let lastChange = 0
-  Object.values(arrays).forEach(array =>
+  Object.values(diff).forEach(array =>
     array.forEach((item: { changed: number; [x: string]: any }) => {
       lastChange = Math.max(item.changed, lastChange)
     })

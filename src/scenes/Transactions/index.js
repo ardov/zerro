@@ -11,6 +11,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import TransactionPreview from 'components/TransactionPreview'
 import { sendEvent } from 'helpers/tracking'
 import { Helmet } from 'react-helmet'
+import { useSearchParam } from 'helpers/useSearchParam'
 
 const useStyles = makeStyles(theme => ({
   drawerWidth: {
@@ -23,7 +24,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function TransactionsView() {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
-  const [opened, setOpened] = useState(null)
+  const [opened, setOpened] = useSearchParam('transaction')
   const [checkedDate, setCheckedDate] = useState(null)
   const c = useStyles()
 
@@ -58,7 +59,7 @@ export default function TransactionsView() {
             style={isMobile ? { paddingBottom: 56 } : null}
           >
             <Box flex="1 1 auto" clone>
-              <TransactionList {...{ opened, setOpened, checkedDate }} />
+              <TransactionList {...{ checkedDate }} />
             </Box>
           </Box>
         </Box>

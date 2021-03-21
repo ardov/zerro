@@ -1,7 +1,8 @@
 import { formatDate } from 'helpers/format'
-import { getDataToSave } from 'store/serverData'
+import { AppThunk } from 'store'
+import { getDataToSave } from 'store/data/selectors'
 
-export default function exportJSON(_, getState) {
+export const exportJSON: AppThunk = (_, getState) => {
   const state = getState()
   const data = getDataToSave(state)
   const content = JSON.stringify(data, null, 2)

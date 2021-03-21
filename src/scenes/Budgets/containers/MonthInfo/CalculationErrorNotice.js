@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { getTotalsArray } from '../../selectors/getTotalsByMonth'
-import { convertCurrency } from 'store/serverData'
+import { convertCurrency } from 'store/data/selectors'
 import { getInBudgetAccounts } from 'store/localData/accounts'
 import { round } from 'helpers/currencyHelpers'
-import { getUserCurrencyCode } from 'store/serverData'
+import { getUserCurrencyCode } from 'store/data/selectors'
 import { Box, Typography, Button, Link } from '@material-ui/core'
 import WarningIcon from '@material-ui/icons/Warning'
 import { Amount } from 'components/Amount'
-import { wipeData } from 'store/commonActions'
+import { resetData } from 'store/data'
 import { clearLocalData } from 'logic/localData'
 import { captureError, sendEvent } from 'helpers/tracking'
-import { getTransactionsToSync } from 'store/localData/transactions'
+import { getDiff } from 'store/data'
 
 const TOLERANCE = 2
 
@@ -19,7 +19,7 @@ export function CalculationErrorNotice(props) {
   const [hidden, setHidden] = useState(false)
 
   const transactionsToSync = useSelector(
-    state => getTransactionsToSync(state).length
+    state => getDiff(state)?.transaction?.length || 0
   )
   const currency = useSelector(getUserCurrencyCode)
   const dispatch = useDispatch()
@@ -50,7 +50,7 @@ export function CalculationErrorNotice(props) {
 
   const reloadData = () => {
     sendEvent('Calculation Error: reload data')
-    dispatch(wipeData())
+    dispatch(resetData())
     dispatch(clearLocalData())
     window.location.reload()
   }

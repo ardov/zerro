@@ -38,3 +38,9 @@ export function createTheme(type: 'light' | 'dark' = 'light') {
   })
   return theme
 }
+
+const theme = createTheme()
+
+declare global {
+  type DefaultTheme = typeof theme
+}

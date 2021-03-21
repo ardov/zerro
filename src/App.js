@@ -7,7 +7,6 @@ import Budgets from 'scenes/Budgets'
 import Review from 'scenes/Review'
 import { getLoginState } from 'store/token'
 import RegularSyncHandler from 'components/RegularSyncHandler'
-import CssBaseline from '@material-ui/core/CssBaseline'
 import Nav from 'components/Navigation'
 import MobileNav from 'components/MobileNav'
 import {
@@ -16,13 +15,10 @@ import {
   Typography,
   useMediaQuery,
 } from '@material-ui/core'
-import { ThemeProvider } from '@material-ui/styles'
-import { createTheme } from 'helpers/createTheme'
-import { getTheme } from 'store/theme'
-import { Helmet } from 'react-helmet'
+import { AppThemeProvider } from 'AppThemeProvider'
 import { createBrowserHistory } from 'history'
 import ErrorBoundary from 'components/ErrorBoundary'
-import { getLastSyncTime, getRootUserId } from 'store/serverData'
+import { getLastSyncTime, getRootUserId } from 'store/data/selectors'
 import Accounts from 'scenes/Accounts'
 import Stats from 'scenes/Stats'
 import About from 'scenes/About'
@@ -35,40 +31,31 @@ initTracking(history)
 
 export default function App() {
   const isLoggedIn = useSelector(getLoginState)
-  const themeType = useSelector(getTheme)
-  const theme = createTheme(themeType)
   const userId = useSelector(getRootUserId)
   useEffect(() => {
     setUserId(userId)
   }, [userId])
 
   return (
-    <ThemeProvider theme={theme}>
-      <>
-        <CssBaseline />
-        <ErrorBoundary>
-          <Helmet>
-            <meta name="theme-color" content={theme.palette.background.paper} />
-          </Helmet>
-          <Router history={history}>
-            <Switch>
-              <Route path="/about" component={About} />
-              <Route path="/about/*" component={About} />
-              <Route path="/*" component={isLoggedIn ? PrivateApp : Auth} />
-            </Switch>
-          </Router>
-        </ErrorBoundary>
-      </>
-    </ThemeProvider>
+    <AppThemeProvider>
+      <ErrorBoundary>
+        <Router history={history}>
+          <Switch>
+            <Route path="/about" component={About} />
+            <Route path="/about/*" component={About} />
+            <Route path="/*" component={isLoggedIn ? PrivateApp : Auth} />
+          </Switch>
+        </Router>
+      </ErrorBoundary>
+    </AppThemeProvider>
   )
 }
 
 const PrivateApp = () => {
   const hasData = useSelector(state => !!getLastSyncTime(state))
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   return (
     <Box display="flex">
-      {isMobile ? <MobileNav /> : <Nav />}
+      <Navigation />
       <RegularSyncHandler />
       <Box minHeight="100vh" flexGrow={1}>
         <ErrorBoundary>
@@ -91,6 +78,11 @@ const PrivateApp = () => {
     </Box>
   )
 }
+
+const Navigation = React.memo(() => {
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
+  return isMobile ? <MobileNav /> : <Nav />
+})
 
 const hints = [
   { hint: 'Первая загрузка самая долгая 😅', delay: 5000 },

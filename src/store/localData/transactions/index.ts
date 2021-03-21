@@ -1,51 +1,40 @@
-import { selectors } from './selectors'
-import { createSlice } from '@reduxjs/toolkit'
-import { wipeData, updateData, removeSyncedFunc } from 'store/commonActions'
-import makeTransaction, { TransactionDraft } from './makeTransaction'
-import { Transaction } from 'types'
+import { createSelector } from '@reduxjs/toolkit'
+import { getInstruments } from 'store/data/selectors'
+import { getAccounts } from 'store/localData/accounts'
+import { getPopulatedTags } from 'store/localData/tags'
+import { sortBy } from './helpers'
+import { populate, PopulatedTransaction } from './populate'
+import { RootState } from 'store'
+import { TransactionId } from 'types'
+import { withPerf } from 'helpers/performance'
 
-// INITIAL STATE
-const initialState = {} as {
-  [key: string]: Transaction
-}
+export const getTransactions = (state: RootState) =>
+  state.data.current.transaction
+export const getTransaction = (state: RootState, id: TransactionId) =>
+  getTransactions(state)[id]
 
-// SLICE
-const { reducer, actions } = createSlice({
-  name: 'transaction',
-  initialState,
-  reducers: {
-    setTransaction: (state, { payload }) => {
-      const transactions = Array.isArray(payload)
-        ? (payload as TransactionDraft[])
-        : ([payload] as TransactionDraft[])
+// Only for CSV
+export const getPopulatedTransactions = createSelector(
+  [getInstruments, getAccounts, getPopulatedTags, getTransactions],
+  (instruments, accounts, tags, transactions) => {
+    const result: { [id: string]: PopulatedTransaction } = {}
+    for (const id in transactions) {
+      result[id] = populate({ instruments, accounts, tags }, transactions[id])
+    }
+    return result
+  }
+)
 
-      transactions.forEach(draft => {
-        const transaction = makeTransaction(draft)
-        state[transaction.id] = transaction
-      })
-    },
-  },
-  extraReducers: builder => {
-    builder
-      .addCase(wipeData, () => initialState)
-      .addCase(updateData, (state, { payload }) => {
-        removeSyncedFunc(state, payload.syncStartTime)
-      })
-  },
-})
+export const getSortedTransactions = createSelector(
+  [getTransactions],
+  withPerf('getSortedTransactions', transactions =>
+    Object.values(transactions).sort(sortBy('DATE'))
+  )
+)
 
-// REDUCER
-export default reducer
-
-// ACTIONS
-export const { setTransaction } = actions
-
-// SELECTORS
-export const {
-  getTransactionsToSync,
-  getPopulatedTransactions,
-  getTransactions,
-  getTransaction,
-  getSortedTransactions,
-  getTransactionsHistory,
-} = selectors
+export const getTransactionsHistory = createSelector(
+  [getSortedTransactions],
+  withPerf('getTransactionsHistory', transactions =>
+    transactions.filter(tr => !tr.deleted).reverse()
+  )
+)

@@ -7,15 +7,17 @@ export const withPerf = <T extends Array<any>, U>(
     const res = fn(...args)
     const time = +(performance.now() - t0).toFixed(4)
     //@ts-ignore
-    if (process.env.NODE_ENV === 'development' || window.logTimes)
-      console.log('⏱ ' + name, time)
+    if (window.zerro.logsShow) console.log('⏱ ' + name.padEnd(32, ' '), time)
 
     //@ts-ignore
-    window.logging ??= {}
-    //@ts-ignore
-    window.logging[name] ??= []
-    //@ts-ignore
-    window.logging[name].push(time)
+    if (window.zerro) {
+      //@ts-ignore
+      window.zerro.logs ??= {}
+      //@ts-ignore
+      window.zerro.logs[name] ??= []
+      //@ts-ignore
+      window.zerro.logs[name].push(time)
+    }
     return res
   }
 }

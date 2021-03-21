@@ -6,6 +6,7 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 import { withStyles } from '@material-ui/core/styles'
 import { Box, ListSubheader } from '@material-ui/core'
 import Transaction from './Transaction'
+// import { Transaction } from './Transaction/TransactionNew'
 import { formatDate } from 'helpers/format'
 
 const HEADER_HEIGHT = 48
@@ -26,7 +27,6 @@ const StyledSubheader = withStyles(theme => ({
 export function GrouppedList({
   groups,
   opened,
-  setOpened,
   checked,
   toggleTransaction,
   checkByChangedDate,
@@ -47,9 +47,19 @@ export function GrouppedList({
 
   const minDate = groups.length ? groups[groups.length - 1].date : 0
   const maxDate = groups.length ? groups[0].date : 0
-  const getItemKey = i => +groups[i].date
-  const getItemSize = i =>
-    HEADER_HEIGHT + TRANSACTION_HEIGHT * groups[i].transactions.length
+  const getItemKey = useCallback(i => +groups[i].date, [groups])
+  const getItemSize = useCallback(
+    i => HEADER_HEIGHT + TRANSACTION_HEIGHT * groups[i].transactions.length,
+    [groups]
+  )
+  const itemData = {
+    groups,
+    checked,
+    toggleTransaction,
+    checkByChangedDate,
+    onFilterByPayee,
+    onDateClick: date => setClickedDate(date),
+  }
 
   return (
     <>
@@ -78,33 +88,72 @@ export function GrouppedList({
             itemSize={getItemSize}
             width="100%"
             itemKey={getItemKey}
-            itemData={groups}
+            itemData={itemData}
+            useIsScrolling
           >
-            {({ index, style }) => (
-              <Box position="relative" maxWidth={560} mx="auto" style={style}>
-                <StyledSubheader
-                  onClick={() => setClickedDate(groups[index].date)}
-                >
-                  {formatDate(groups[index].date)}
-                </StyledSubheader>
-                {groups[index].transactions.map(id => (
-                  <Transaction
-                    key={id}
-                    id={id}
-                    isOpened={id === opened}
-                    isChecked={checked.includes(id)}
-                    isInSelectionMode={!!checked.length}
-                    onToggle={toggleTransaction}
-                    onClick={setOpened}
-                    onSelectChanged={checkByChangedDate}
-                    onFilterByPayee={onFilterByPayee}
-                  />
-                ))}
-              </Box>
-            )}
+            {Day}
           </List>
         )}
       </AutoSizer>
     </>
   )
 }
+
+const Day = ({ index, style, data, isScrolling }) => {
+  const {
+    groups,
+    checked,
+    toggleTransaction,
+    checkByChangedDate,
+    onFilterByPayee,
+    onDateClick,
+  } = data
+  const [renderContent, setRenderContent] = useState(!isScrolling)
+  useEffect(() => {
+    if (!isScrolling) setRenderContent(true)
+    let timer = setTimeout(() => setRenderContent(true), 300)
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [isScrolling])
+  const date = groups[index].date
+  const length = groups[index].transactions.length
+
+  if (!renderContent)
+    return <DaySkeleton date={date} style={style} length={length} />
+  else
+    return (
+      <Box position="relative" maxWidth={560} mx="auto" style={style}>
+        <StyledSubheader onClick={() => onDateClick(date)}>
+          {formatDate(date)}
+        </StyledSubheader>
+
+        {groups[index].transactions.map(id => (
+          <Transaction
+            key={id}
+            id={id}
+            // isOpened={id === opened}
+            isChecked={checked.includes(id)}
+            isInSelectionMode={!!checked.length}
+            onToggle={toggleTransaction}
+            onSelectChanged={checkByChangedDate}
+            onFilterByPayee={onFilterByPayee}
+          />
+        ))}
+      </Box>
+    )
+}
+
+const DaySkeleton = ({ date, style, length }) => (
+  <Box position="relative" maxWidth={560} mx="auto" style={style}>
+    <StyledSubheader>{formatDate(date)}</StyledSubheader>
+    <div
+      style={{
+        height: length * TRANSACTION_HEIGHT,
+        background:
+          'radial-gradient(circle at 36px 36px, rgba(128,128,128,0.2) 20px,transparent 20px)',
+        backgroundSize: '100% 72px',
+      }}
+    />
+  </Box>
+)

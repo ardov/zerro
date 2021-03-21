@@ -1,7 +1,7 @@
 import Cookies from 'cookies-js'
 import ZenApi from 'services/ZenApi'
 import { setToken } from 'store/token'
-import { wipeData } from 'store/commonActions'
+import { resetData } from 'store/data'
 import { syncData } from 'logic/sync'
 import { clearLocalData } from './localData'
 import { AppThunk } from 'store'
@@ -14,7 +14,7 @@ export const logIn = (): AppThunk => async (dispatch, getState) => {
 }
 
 export const logOut = (): AppThunk => (dispatch, getState) => {
-  dispatch(wipeData())
+  dispatch(resetData())
   dispatch(setToken(null))
   dispatch(clearLocalData())
   Cookies.expire('token')

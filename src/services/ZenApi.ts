@@ -1,5 +1,5 @@
 import Cookies from 'cookies-js'
-import { DataToUpdate, ZmResponse } from 'types'
+import { ZmRequest, ZmDiff } from 'types'
 
 const CODE_DATA_KEY = 'auth-code-data'
 const TOKEN_KEY = 'token'
@@ -15,26 +15,16 @@ const redirectUri = process.env.REACT_APP_REDIRECT_URI
 const ZenApi = { getData, checkCode, getLocalToken, getToken }
 export default ZenApi
 
-interface SyncObject {
-  serverTimestamp: number
-  changed?: DataToUpdate
-}
-
-async function getData(
-  token: string,
-  // TODO: добавить тип для payload
-  payload: SyncObject = { serverTimestamp: 0, changed: {} }
-) {
+async function getData(token: string, diff: ZmDiff = { serverTimestamp: 0 }) {
   if (!token) throw Error('No token')
   if (!diffEndpoint)
     throw Error('Fill REACT_APP_DIFF_ENDPOINT in your .env file')
   if (token === 'fakeToken')
-    return { serverTimestamp: Date.now() / 1000, ...payload.changed }
+    return { ...diff, serverTimestamp: Date.now() / 1000 }
 
-  const body = {
+  const body: ZmRequest = {
     currentClientTimestamp: Math.round(Date.now() / 1000),
-    serverTimestamp: payload.serverTimestamp,
-    ...payload.changed,
+    ...diff,
   }
 
   const options = {
@@ -50,7 +40,7 @@ async function getData(
   const json = await response.json()
   if (json.error) throw Error(JSON.stringify(json.error))
 
-  return json as ZmResponse
+  return json as ZmDiff
 }
 
 function checkCode() {
@@ -72,7 +62,7 @@ function getLocalToken() {
 
 async function getToken() {
   /* if a token exists and hasn't expired, re-use it */
-  const localToken = getLocalToken()
+  const localToken = await getLocalToken()
   if (localToken) return localToken
 
   /* if no token exists, request access code first */

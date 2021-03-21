@@ -2,6 +2,7 @@ import React from 'react'
 import { Box, Typography } from '@material-ui/core'
 import { formatMoney, rateToWords } from 'helpers/format'
 import { withStyles } from '@material-ui/core/styles'
+// import { Tooltip } from 'components/Tooltip'
 
 const Body = props => <Box alignSelf="flex-end" textAlign="right" {...props} />
 
@@ -87,6 +88,10 @@ export function Amount({
   if (type === 'outcome') {
     if (!opOutcome) {
       return (
+        // <Tooltip title="123" PopperProps={{ disablePortal: true }}>
+        //   <span>
+        //   </span>
+        // </Tooltip>
         <Body>
           <PrimarySum type={type}>−{formattedOutcome}</PrimarySum>
         </Body>

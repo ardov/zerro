@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { getAccountList } from 'store/localData/accounts'
-import { getUserInstrument } from 'store/serverData'
+import { getUserInstrument } from 'store/data/selectors'
 import pluralize from 'helpers/pluralize'
 import { List, ListItem } from '@material-ui/core'
 import { Account, Subheader } from './components'

@@ -1,5 +1,4 @@
-import { getRootUser } from 'store/serverData'
-import { setBudget } from 'store/localData/budgets'
+import { getRootUser } from 'store/data/selectors'
 import { selectors } from 'store/localData/budgets/selectors'
 import { getPopulatedTag } from 'store/localData/tags'
 import { getAmountsByTag } from '../selectors/getAmountsByTag'
@@ -11,6 +10,7 @@ import { subMonths } from 'date-fns/esm'
 import { getGoalsProgress } from '../selectors/goalsProgress'
 import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
 import { getGoals } from 'store/localData/hiddenData/goals'
+import { applyClientPatch } from 'store/data'
 const { TARGET_BALANCE } = GOAL_TYPES
 
 export const moveFunds = (amount, source, destination, monthDate) => (
@@ -51,8 +51,7 @@ export const moveFunds = (amount, source, destination, monthDate) => (
       changed: Date.now(),
     })
   }
-
-  dispatch(setBudget(resultBudgets))
+  dispatch(applyClientPatch({ budget: resultBudgets }))
 }
 
 export const setOutcomeBudget = (targetOutcome, month, tagId) => (
@@ -77,7 +76,7 @@ export const setOutcomeBudget = (targetOutcome, month, tagId) => (
 
   const budget = created || makeBudget({ user, date: +month, tag: tagId })
   const changed = { ...budget, outcome, changed: Date.now() }
-  dispatch(setBudget(changed))
+  dispatch(applyClientPatch({ budget: [changed] }))
 }
 
 export const copyPreviousBudget = month => (dispatch, getState) => {
@@ -101,8 +100,7 @@ export const copyPreviousBudget = month => (dispatch, getState) => {
       )
     }
   }
-
-  dispatch(setBudget(changedArr))
+  dispatch(applyClientPatch({ budget: changedArr }))
 }
 
 export const fillGoals = month => (dispatch, getState) => {
@@ -125,8 +123,7 @@ export const fillGoals = month => (dispatch, getState) => {
       changedArr.push(makeBudget({ user, date: +month, tag, outcome: target }))
     }
   }
-
-  dispatch(setBudget(changedArr))
+  dispatch(applyClientPatch({ budget: changedArr }))
 }
 
 export const startFresh = month => (dispatch, getState) => {
@@ -142,8 +139,11 @@ export const startFresh = month => (dispatch, getState) => {
   const removedBudgets = removeFutureBudgets(budgets, month)
   const resetSavingsArr = clearAvailable(prevMonth, prevAmounts, user)
   const currentMonth = resetCurrentMonth(month, currentAmounts, user)
-
-  dispatch(setBudget([...removedBudgets, ...resetSavingsArr, ...currentMonth]))
+  dispatch(
+    applyClientPatch({
+      budget: [...removedBudgets, ...resetSavingsArr, ...currentMonth],
+    })
+  )
 }
 
 function removeFutureBudgets(budgets, startDate) {
@@ -235,6 +235,5 @@ export const fixOverspends = month => (dispatch, getState) => {
       }
     }
   }
-
-  dispatch(setBudget(changedBudgets))
+  dispatch(applyClientPatch({ budget: changedBudgets }))
 }

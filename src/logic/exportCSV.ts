@@ -1,7 +1,10 @@
 import { getPopulatedTransactions } from 'store/localData/transactions'
 import { formatDate } from 'helpers/format'
+import { AppThunk } from 'store'
+import { PopulatedTransaction } from 'store/localData/transactions/populate'
+import { ById } from 'types'
 
-export default function exportCsv(_, getState) {
+export const exportCSV: AppThunk = (_, getState) => {
   const tr = getPopulatedTransactions(getState())
   const csvContent = transactionsToCsvContent(tr)
   const blob = new Blob([csvContent], { type: 'text/csv' })
@@ -18,22 +21,40 @@ export default function exportCsv(_, getState) {
   link.click()
 }
 
-function transactionsToCsvContent(tr) {
-  const head = [
-    'Дата',
-    'Создана',
-    'Тип',
-    'Категория',
-    'Доп категрии',
-    'Со счёта',
-    'Расход',
-    'Валюта -',
-    'На счёт',
-    'Доход',
-    'Валюта +',
-    'Плательщик',
-    'Комментарий',
-  ]
+interface RowObj {
+  Дата: string
+  Создана: string
+  Тип: string
+  Категория: string
+  'Доп категрии': string
+  'Со счёта': string
+  Расход: string | number
+  'Валюта -': string
+  'На счёт': string
+  Доход: string | number
+  'Валюта +': string
+  Плательщик: string
+  Комментарий: string
+}
+type Column = keyof RowObj
+
+const head: Column[] = [
+  'Дата',
+  'Создана',
+  'Тип',
+  'Категория',
+  'Доп категрии',
+  'Со счёта',
+  'Расход',
+  'Валюта -',
+  'На счёт',
+  'Доход',
+  'Валюта +',
+  'Плательщик',
+  'Комментарий',
+]
+
+function transactionsToCsvContent(tr: ById<PopulatedTransaction>) {
   let csvContent = head.join(',') + '\r\n'
 
   for (const id in tr) {
@@ -50,9 +71,11 @@ const types = {
   income: 'Доход',
   outcome: 'Расход',
   transfer: 'Перевод',
+  outcomeDebt: '',
+  incomeDebt: '',
 }
 
-const transactionToRowObj = t => ({
+const transactionToRowObj = (t: PopulatedTransaction): RowObj => ({
   Дата: formatDate(t.date, 'yyyy-MM-dd'),
   Создана: formatDate(t.created, 'yyyy-MM-dd HH:mm'),
   Тип: types[t.type],
@@ -64,6 +87,6 @@ const transactionToRowObj = t => ({
   'На счёт': t.incomeAccount ? t.incomeAccount.title : '',
   Доход: !!t.income ? t.income : '',
   'Валюта +': t.incomeInstrument ? t.incomeInstrument.shortTitle : '',
-  Плательщик: t.payee,
-  Комментарий: t.comment,
+  Плательщик: t.payee || '',
+  Комментарий: t.comment || '',
 })
