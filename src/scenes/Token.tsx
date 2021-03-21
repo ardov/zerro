@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux'
 import { Helmet } from 'react-helmet'
 
 export default function Token() {
-  const token = useSelector(state => getToken(state))
+  const token = useSelector(getToken)
   const [tokenIsVisible, setTokenVisibility] = React.useState(false)
 
   return (
