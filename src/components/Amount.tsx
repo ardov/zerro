@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { formatMoney } from 'helpers/format'
 import { InstrumentId, OptionalExceptFor } from 'types'
 import { getInstruments, getUserInstrumentId } from 'store/data/selectors'
@@ -6,7 +6,10 @@ import { useSelector } from 'react-redux'
 
 const decStyle = { opacity: 0.5 }
 
-type AmountProps = {
+type AmountProps = React.DetailedHTMLProps<
+  React.HTMLAttributes<HTMLSpanElement>,
+  HTMLSpanElement
+> & {
   value: number
   currency?: string
   instrument?: InstrumentId | 'user'
@@ -18,7 +21,7 @@ type AmountProps = {
   decProps?: React.HTMLProps<HTMLSpanElement>
 }
 
-export const Amount = (props: AmountProps) => {
+export const Amount: FC<AmountProps> = props => {
   if (props.instrument !== undefined)
     return <ConnectedAmount {...props} instrument={props.instrument} />
   else return <SimpleAmount {...props} />
@@ -45,6 +48,7 @@ function SimpleAmount({
   decMode = 'always',
   intProps,
   decProps,
+  ...rest
 }: AmountProps) {
   let dec = decimals
   if (decMode === 'always') dec = decimals
@@ -60,13 +64,13 @@ function SimpleAmount({
   const arr = str.split(',')
   if (arr.length === 2) {
     return (
-      <>
+      <span {...rest}>
         <span {...intProps}>{arr[0]},</span>
         <span style={noShade ? undefined : decStyle} {...decProps}>
           {arr[1]}
         </span>
-      </>
+      </span>
     )
   }
-  return <>{str}</>
+  return <span {...rest}>{str}</span>
 }

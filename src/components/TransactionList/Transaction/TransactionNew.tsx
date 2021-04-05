@@ -14,50 +14,34 @@ import {
   getPopulatedAccounts,
 } from 'store/localData/accounts'
 import { Transaction as ITransaction, TransactionType } from 'types'
+import { getPopulatedTags, getTags } from 'store/localData/tags'
 
 /**TODO: Доделать новый компонент и перевести список на него. */
 
 type TransactionProps = {
   id: string
-  isOpened: boolean
   isChecked: boolean
   isInSelectionMode: boolean
   onToggle: (id: string) => void
-  onClick?: (id: string) => void
   onSelectChanged: (date: number) => void
   onFilterByPayee: (date: string) => void
 }
 
-export const Transaction: FC<TransactionProps> = ({
-  id,
-  // isOpened,
-  isInSelectionMode,
-  isChecked,
-  onToggle,
-  onClick,
-  onFilterByPayee,
-  onSelectChanged,
-}) => {
+export const Transaction: FC<TransactionProps> = props => {
+  const {
+    id,
+    isInSelectionMode,
+    isChecked,
+    onToggle,
+    onFilterByPayee,
+    onSelectChanged,
+  } = props
   const [opened, setOpened] = useSearchParam('transaction')
   const isOpened = opened === id
   const tr = useSelector((state: RootState) => getTransactions(state)[id])
   const debtId = useSelector(getDebtAccountId)
-  const {
-    deleted,
-    payee,
-    merchant,
-    comment,
-    income,
-    opIncome,
-    opOutcomeInstrument,
-    outcome,
-    outcomeInstrument,
-    opOutcome,
-    changed,
-    qrCode,
-    viewed,
-  } = tr
   const trType = getType(tr, debtId)
+  const { deleted, payee, merchant, comment, changed, qrCode, viewed } = tr
 
   const handleOpen = () => {
     // sendEvent('Transaction: see details')
@@ -73,7 +57,6 @@ export const Transaction: FC<TransactionProps> = ({
         deleted ? 'deleted' : '',
       ].join(' ')}
       onClick={handleOpen}
-      // selected={isOpened}
       onDoubleClick={handleSelectSimilar}
     >
       <div className="symbol">
@@ -88,37 +71,11 @@ export const Transaction: FC<TransactionProps> = ({
         {!viewed && <span className="new" />}
         {!!qrCode && <Reciept />}
       </div>
+
       <div className="content">
         <div className="main-line">
-          <span className="tags">
-            <Tags tr={tr} trType={trType} />
-          </span>
-
-          <div className="amounts">
-            {(trType === 'income' || trType === 'incomeDebt') && (
-              <>
-                {!!opOutcome && !!opOutcomeInstrument && (
-                  <span className="secondary-sum">
-                    <Amount
-                      value={opOutcome}
-                      instrument={opOutcomeInstrument}
-                    />
-                  </span>
-                )}
-                <span className="primary-sum">
-                  <Amount value={outcome} instrument={outcomeInstrument} />
-                </span>
-              </>
-            )}
-            {!!opOutcome && !!opOutcomeInstrument && (
-              <span className="secondary-sum">
-                <Amount value={opOutcome} instrument={opOutcomeInstrument} />
-              </span>
-            )}
-            <span className="primary-sum">
-              <Amount value={outcome} instrument={outcomeInstrument} />
-            </span>
-          </div>
+          <Tags className="tags" tr={tr} trType={trType} />
+          <Amounts className="amounts" tr={tr} trType={trType} />
         </div>
 
         <div className="secondary-line">
@@ -126,61 +83,128 @@ export const Transaction: FC<TransactionProps> = ({
             {!!payee && <Payee payee={payee} merchant={merchant} />}
             {!!comment && <span className="comment">{comment}</span>}
           </div>
-
-          <div className="accounts">
-            <Accounts tr={tr} trType={trType} />
-          </div>
+          <Accounts className="accounts" tr={tr} trType={trType} />
         </div>
       </div>
     </div>
   )
 }
 
-interface TrElementProps {
+type TrElementProps = React.DetailedHTMLProps<
+  React.HTMLAttributes<HTMLDivElement>,
+  HTMLDivElement
+> & {
   tr: ITransaction
   trType: TransactionType
 }
-const Accounts: FC<TrElementProps> = ({ tr, trType }) => {
+
+const Accounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
   if (trType === 'income') return <Account id={tr.incomeAccount} />
   if (trType === 'outcome') return <Account id={tr.outcomeAccount} />
   if (trType === 'transfer')
     return (
-      <>
+      <div {...rest}>
         <Account id={tr.outcomeAccount} />
         <Account id={tr.incomeAccount} />
-      </>
+      </div>
     )
   if (trType === 'outcomeDebt')
     return (
-      <>
+      <div {...rest}>
         <Account id={tr.outcomeAccount} />
         <Payee payee={tr.payee} merchant={tr.merchant} />
-      </>
+      </div>
     )
   if (trType === 'incomeDebt')
     return (
-      <>
+      <div {...rest}>
         <Payee payee={tr.payee} merchant={tr.merchant} />
         <Account id={tr.incomeAccount} />
-      </>
+      </div>
     )
   return null
 }
-const Tags: FC<TrElementProps> = ({ tr, trType }) => {
+
+const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
+  if (trType === 'outcome' || trType === 'outcomeDebt') {
+    return (
+      <div {...rest}>
+        {!!tr.opOutcome && !!tr.opOutcomeInstrument && (
+          <Amount
+            className="secondary-sum"
+            value={tr.opOutcome}
+            instrument={tr.opOutcomeInstrument}
+          />
+        )}
+        <Amount
+          className="primary-sum"
+          value={tr.outcome}
+          instrument={tr.outcomeInstrument}
+        />
+      </div>
+    )
+  }
+  if (trType === 'income' || trType === 'incomeDebt') {
+    return (
+      <div {...rest}>
+        {!!tr.opIncome && !!tr.opIncomeInstrument && (
+          <Amount
+            className="secondary-sum"
+            value={tr.opIncome}
+            instrument={tr.opIncomeInstrument}
+            sign
+          />
+        )}
+        <Amount
+          className="primary-sum"
+          value={tr.income}
+          instrument={tr.incomeInstrument}
+          sign
+        />
+      </div>
+    )
+  }
+  if (trType === 'transfer') {
+    const notEqual =
+      tr.income !== tr.outcome || tr.incomeInstrument !== tr.outcomeInstrument
+    return (
+      <div {...rest}>
+        {notEqual && (
+          <Amount
+            className="primary-sum"
+            value={tr.outcome}
+            instrument={tr.outcomeInstrument}
+            sign
+          />
+        )}
+        <Amount
+          className="primary-sum"
+          value={tr.income}
+          instrument={tr.incomeInstrument}
+          sign
+        />
+      </div>
+    )
+  }
+  return null
+}
+
+const Tags: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
+  const tags = useSelector(getPopulatedTags)
   if (trType === 'income' || trType === 'outcome') {
-    if (!tr.tag) return <>Без категории</>
+    if (!tr.tag) return <div {...rest}>Без категории</div>
     else
       return (
-        <>
-          {tr.tag.map(tagId => (
-            <span>123</span>
+        <div {...rest}>
+          {tr.tag.map(id => (
+            <span>{tags[id]?.name}</span>
           ))}
-        </>
+        </div>
       )
   }
-  if (trType === 'transfer') return <>Перевод</>
-  if (trType === 'outcomeDebt') return <>Долг</>
-  if (trType === 'incomeDebt') return <>Долг</>
+  if (trType === 'transfer') return <div {...rest}>Перевод</div>
+  if (trType === 'outcomeDebt') return <div {...rest}>Долг</div>
+  if (trType === 'incomeDebt') return <div {...rest}>Долг</div>
   return null
 }
 
