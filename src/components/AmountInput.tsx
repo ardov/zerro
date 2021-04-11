@@ -26,7 +26,7 @@ export const AmountInput: FC<AmountInputProps> = ({
   const [focused, setFocused] = useState(false)
 
   useEffect(() => {
-    if (!focused) setExpression(value.toString())
+    if (!focused) setExpression(value === 0 ? '' : value.toString())
   }, [value, focused])
 
   useEffect(() => {
