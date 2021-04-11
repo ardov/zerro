@@ -40,18 +40,10 @@ export function Muted({ children, ...rest }) {
   )
 }
 
-export function Link({ to, children, ...rest }) {
-  if (!to) return <>{children}</>
-  if (to?.startsWith('/')) {
-    return (
-      <RouterLink to={to} {...rest}>
-        {children}
-      </RouterLink>
-    )
+export function TextLink({ href, ...rest }) {
+  if (href?.startsWith('/')) {
+    return <RouterLink to={href} {...rest} />
   }
-  return (
-    <a href={to} target="_blank" rel="noopener noreferrer" {...rest}>
-      {children}
-    </a>
-  )
+  // eslint-disable-next-line jsx-a11y/anchor-has-content
+  return <a href={href} target="_blank" rel="noopener noreferrer" {...rest} />
 }
