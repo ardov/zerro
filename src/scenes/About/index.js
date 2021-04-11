@@ -3,12 +3,14 @@ import { Box } from '@material-ui/core'
 import { useTheme } from '@material-ui/styles'
 import { Link } from 'react-router-dom'
 import './index.scss'
-import { Method } from './pages/Method'
 import Logo from 'components/Logo'
 import { Switch, Route } from 'react-router'
-import { About } from './pages/About'
 import { ScrollToTop } from './Components'
-import { QuickStart } from './pages/QuickStart'
+
+/* eslint-disable import/no-webpack-loader-syntax */
+import Method from '!babel-loader!@mdx-js/loader!./pages/Method.mdx'
+import About from '!babel-loader!@mdx-js/loader!./pages/About.mdx'
+import QuickStart from '!babel-loader!@mdx-js/loader!./pages/QuickStart.mdx'
 
 export default function Main() {
   return (
