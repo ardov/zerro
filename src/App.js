@@ -15,7 +15,6 @@ import {
   Typography,
   useMediaQuery,
 } from '@material-ui/core'
-import { AppThemeProvider } from 'AppThemeProvider'
 import { createBrowserHistory } from 'history'
 import ErrorBoundary from 'components/ErrorBoundary'
 import { getLastSyncTime, getRootUserId } from 'store/data/selectors'
@@ -37,17 +36,15 @@ export default function App() {
   }, [userId])
 
   return (
-    <AppThemeProvider>
-      <ErrorBoundary>
-        <Router history={history}>
-          <Switch>
-            <Route path="/about" component={About} />
-            <Route path="/about/*" component={About} />
-            <Route path="/*" component={isLoggedIn ? PrivateApp : Auth} />
-          </Switch>
-        </Router>
-      </ErrorBoundary>
-    </AppThemeProvider>
+    <ErrorBoundary>
+      <Router history={history}>
+        <Switch>
+          <Route path="/about" component={About} />
+          <Route path="/about/*" component={About} />
+          <Route path="/*" component={isLoggedIn ? PrivateApp : Auth} />
+        </Switch>
+      </Router>
+    </ErrorBoundary>
   )
 }
 

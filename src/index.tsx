@@ -13,6 +13,7 @@ import { initSentry, sendEvent } from 'helpers/tracking'
 import { bindWorkerToStore } from 'worker'
 import { applyClientPatch, resetData } from 'store/data'
 import { Diff } from 'types'
+import { AppThemeProvider } from 'AppThemeProvider'
 
 initSentry()
 bindWorkerToStore(store.dispatch)
@@ -33,7 +34,9 @@ ReactDOM.render(
   <GlobalErrorBoundary>
     <Provider store={store}>
       <MuiPickersUtilsProvider utils={DateFnsUtils} locale={ruDateLocale}>
-        <App />
+        <AppThemeProvider>
+          <App />
+        </AppThemeProvider>
       </MuiPickersUtilsProvider>
     </Provider>
   </GlobalErrorBoundary>,

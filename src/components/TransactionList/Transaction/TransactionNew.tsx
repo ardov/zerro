@@ -6,6 +6,7 @@ import { RootState } from 'store'
 import { getMerchants } from 'store/data/selectors'
 import { getTransactions } from 'store/localData/transactions'
 import { getType } from 'store/localData/transactions/helpers'
+import styled from '@emotion/styled'
 import './styles.scss'
 import { Amount } from 'components/Amount'
 import {
@@ -197,7 +198,7 @@ const Tags: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
       return (
         <div {...rest}>
           {tr.tag.map(id => (
-            <span>{tags[id]?.name}</span>
+            <span key={id}>{tags[id]?.name}</span>
           ))}
         </div>
       )
@@ -235,8 +236,15 @@ interface AccountProps {
 const Account: FC<AccountProps> = ({ id, ...rest }) => {
   const account = useSelector(getAccounts)[id]
   return (
-    <span className="account" {...rest}>
-      {account.title}
-    </span>
+    <Acc>
+      <span className="account" {...rest}>
+        {account.title}
+      </span>
+    </Acc>
   )
 }
+
+const Acc = styled('span')<{ hello?: boolean }>`
+  color: red;
+  outline: 2px solid red;
+`
