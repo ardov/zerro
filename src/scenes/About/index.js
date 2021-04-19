@@ -14,6 +14,7 @@ import About from '!babel-loader!@mdx-js/loader!./pages/About.mdx'
 import QuickStart from '!babel-loader!@mdx-js/loader!./pages/QuickStart.mdx'
 
 export default function Main() {
+  /* TODO: починить Helmet */
   const [components] = useState({ a: TextLink })
   return (
     <MDXProvider components={components}>
