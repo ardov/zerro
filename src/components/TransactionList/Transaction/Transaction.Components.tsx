@@ -288,6 +288,7 @@ const Payee: FC<{
     <PayeeWrapper
       onClick={e => {
         e.preventDefault()
+        e.stopPropagation()
         onClick(payee || '')
       }}
       {...rest}
