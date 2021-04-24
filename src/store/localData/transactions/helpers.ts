@@ -178,3 +178,12 @@ export function getTime(tr: Transaction) {
 export function getMainTag(tr: Transaction) {
   return tr.tag && tr.tag.length ? tr.tag[0] : null
 }
+
+const DAY = 1000 * 60 * 60 * 24
+
+export function isNew(tr: Transaction) {
+  if (tr.deleted) return false
+  if (tr.viewed) return false
+  if (Date.now() - +new Date(tr.changed) > 31 * DAY) return false
+  return true
+}

@@ -22,25 +22,14 @@ const mapStateToProps = (state, { id }) => {
   const opOutcomeInstrument = getInstrument(state, tr.opOutcomeInstrument)
 
   return {
-    id: tr.id,
-    changed: tr.changed,
     type: getType(tr),
 
-    incomeAccountTitle: incomeAccount && incomeAccount.title,
-    outcomeAccountTitle: outcomeAccount && outcomeAccount.title,
-    deleted: tr.deleted,
-    payee: tr.payee,
-    comment: tr.comment,
-    income: tr.income,
-    incomeCurrency: incomeInstrument && incomeInstrument.shortTitle,
-    opIncome: tr.opIncome,
-    opIncomeCurrency: opIncomeInstrument && opIncomeInstrument.shortTitle,
-    outcome: tr.outcome,
-    outcomeCurrency: outcomeInstrument && outcomeInstrument.shortTitle,
-    opOutcome: tr.opOutcome,
-    opOutcomeCurrency: opOutcomeInstrument && opOutcomeInstrument.shortTitle,
-
-    tag: tr.tag,
+    incomeAccountTitle: incomeAccount?.title,
+    outcomeAccountTitle: outcomeAccount?.title,
+    incomeCurrency: incomeInstrument?.shortTitle,
+    opIncomeCurrency: opIncomeInstrument?.shortTitle,
+    outcomeCurrency: outcomeInstrument?.shortTitle,
+    opOutcomeCurrency: opOutcomeInstrument?.shortTitle,
 
     ...tr,
   }

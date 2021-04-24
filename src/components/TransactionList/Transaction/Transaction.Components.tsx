@@ -9,6 +9,7 @@ import { Transaction as ITransaction, TransactionType } from 'types'
 import { getPopulatedTags } from 'store/localData/tags'
 import { Typography } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
+import { isNew } from 'store/localData/transactions/helpers'
 
 type HTMLDivProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLDivElement>,
@@ -57,7 +58,7 @@ export const Symbol: FC<SymbolProps> = ({
             color={tag.colorHEX}
             size="m"
           />
-          <NewIndicator viewed={tr.viewed} />
+          <NewIndicator isNew={isNew(tr)} />
           {tr.qrCode && <Reciept>🧾</Reciept>}
         </SymbolWrapper>
       )
@@ -73,7 +74,7 @@ export const Symbol: FC<SymbolProps> = ({
             onChange={() => onToggle(tr.id)}
             size="m"
           />
-          <NewIndicator viewed={tr.viewed} />
+          <NewIndicator isNew={isNew(tr)} />
           {tr.qrCode && <Reciept>🧾</Reciept>}
         </SymbolWrapper>
       )
@@ -305,7 +306,7 @@ const SymbolWrapper = styled.div`
   position: relative;
   align-self: center;
 `
-const NewIndicator = styled.div<{ viewed?: boolean }>`
+const NewIndicator = styled.div<{ isNew?: boolean }>`
   position: absolute;
   left: 1px;
   top: 2px;
@@ -314,8 +315,8 @@ const NewIndicator = styled.div<{ viewed?: boolean }>`
   border-radius: 50%;
   background-color: ${p => p.theme.palette.info.light};
   border: solid 2px ${p => p.theme.palette.background.paper};
-  transform: scale(${p => (p.viewed ? 0 : 1)});
-  opacity: ${p => (p.viewed ? 0 : 1)};
+  transform: scale(${p => (p.isNew ? 1 : 0)});
+  opacity: ${p => (p.isNew ? 1 : 0)};
   transition: 200ms;
 `
 const Reciept = styled.div`

@@ -18,53 +18,44 @@ import { Map } from './Map'
 import AmountInput from 'components/AmountInput'
 import { formatDate, rateToWords } from 'helpers/format'
 import { TagList } from 'components/TagList'
+import { useSelector } from 'react-redux'
+import { getTransactions } from 'store/localData/transactions'
+import { isNew } from 'store/localData/transactions/helpers'
 
-export default function DetailsDrawer({
-  id,
-  // user,
-  date,
-  changed,
-  created,
-  deleted,
-  hold,
-  qrCode,
-  income,
-  incomeAccountTitle,
-  outcomeAccountTitle,
-  incomeCurrency,
-  outcomeCurrency,
-  incomeInstrument, //: instruments[raw.incomeInstrument],
-  incomeAccount, //: accounts[raw.incomeAccount],
-  opIncome,
-  opIncomeInstrument, //: instruments[raw.opIncomeInstrument],
-  opIncomeCurrency,
-  incomeBankID,
-  outcome,
-  outcomeInstrument, //: instruments[raw.outcomeInstrument],
-  outcomeAccount, //: accounts[raw.outcomeAccount],
-  opOutcome,
-  opOutcomeInstrument, //: instruments[raw.opOutcomeInstrument],
-  opOutcomeCurrency,
-  outcomeBankID,
-  tag, //: mapTags(raw.tag, tags),
-  comment,
-  payee,
-  originalPayee,
-  merchant, //: merchants[raw.merchant],
-  latitude,
-  longitude,
-  reminderMarker,
-  type,
-  viewed,
+export default function DetailsDrawer(props) {
+  const {
+    id,
+    date,
+    changed,
+    created,
+    deleted,
+    qrCode,
+    income,
+    incomeAccountTitle,
+    outcomeAccountTitle,
+    incomeCurrency,
+    outcomeCurrency,
+    opIncome,
+    opIncomeCurrency,
+    outcome,
+    opOutcome,
+    opOutcomeCurrency,
+    tag,
+    comment,
+    payee,
+    latitude,
+    longitude,
+    type,
+    viewed,
 
-  onClose,
-  onChange,
-  onDelete,
-  onRestore,
-  onSelectSimilar,
-
-  ...rest
-}) {
+    onClose,
+    onChange,
+    onDelete,
+    onRestore,
+    onSelectSimilar,
+  } = props
+  const tr = useSelector(getTransactions)[id]
+  const notSeen = isNew(tr)
   const [localComment, setLocalComment] = useState(comment)
   const [localOutcome, setLocalOutcome] = useState(outcome)
   const [localIncome, setLocalIncome] = useState(income)
@@ -84,7 +75,7 @@ export default function DetailsDrawer({
   useEffect(
     () => {
       const timer = setTimeout(() => {
-        if (!viewed) {
+        if (notSeen) {
           console.log('on change', { id, viewed: true })
           onChange({ id, viewed: true })
         }
@@ -249,7 +240,7 @@ export default function DetailsDrawer({
         <Button onClick={() => onSelectSimilar(changed)}>
           Найти другие из этой синхронизации
         </Button>
-        {viewed && (
+        {!notSeen && (
           <Button onClick={() => onChange({ id, viewed: false })}>
             Сделать непросмотренной
           </Button>
