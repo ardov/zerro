@@ -46,7 +46,6 @@ export default function DetailsDrawer(props) {
     latitude,
     longitude,
     type,
-    viewed,
 
     onClose,
     onChange,
