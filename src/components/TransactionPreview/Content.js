@@ -7,7 +7,7 @@ import {
   TextField,
   Fab,
   Zoom,
-  Link,
+  Button,
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash'
@@ -18,52 +18,43 @@ import { Map } from './Map'
 import AmountInput from 'components/AmountInput'
 import { formatDate, rateToWords } from 'helpers/format'
 import { TagList } from 'components/TagList'
+import { useSelector } from 'react-redux'
+import { getTransactions } from 'store/localData/transactions'
+import { isNew } from 'store/localData/transactions/helpers'
 
-export default function DetailsDrawer({
-  id,
-  // user,
-  date,
-  changed,
-  created,
-  deleted,
-  hold,
-  qrCode,
-  income,
-  incomeAccountTitle,
-  outcomeAccountTitle,
-  incomeCurrency,
-  outcomeCurrency,
-  incomeInstrument, //: instruments[raw.incomeInstrument],
-  incomeAccount, //: accounts[raw.incomeAccount],
-  opIncome,
-  opIncomeInstrument, //: instruments[raw.opIncomeInstrument],
-  opIncomeCurrency,
-  incomeBankID,
-  outcome,
-  outcomeInstrument, //: instruments[raw.outcomeInstrument],
-  outcomeAccount, //: accounts[raw.outcomeAccount],
-  opOutcome,
-  opOutcomeInstrument, //: instruments[raw.opOutcomeInstrument],
-  opOutcomeCurrency,
-  outcomeBankID,
-  tag, //: mapTags(raw.tag, tags),
-  comment,
-  payee,
-  originalPayee,
-  merchant, //: merchants[raw.merchant],
-  latitude,
-  longitude,
-  reminderMarker,
-  type,
+export default function DetailsDrawer(props) {
+  const {
+    id,
+    date,
+    changed,
+    created,
+    deleted,
+    qrCode,
+    income,
+    incomeAccountTitle,
+    outcomeAccountTitle,
+    incomeCurrency,
+    outcomeCurrency,
+    opIncome,
+    opIncomeCurrency,
+    outcome,
+    opOutcome,
+    opOutcomeCurrency,
+    tag,
+    comment,
+    payee,
+    latitude,
+    longitude,
+    type,
 
-  onClose,
-  onChange,
-  onDelete,
-  onRestore,
-  onSelectSimilar,
-
-  ...rest
-}) {
+    onClose,
+    onChange,
+    onDelete,
+    onRestore,
+    onSelectSimilar,
+  } = props
+  const tr = useSelector(getTransactions)[id]
+  const notSeen = isNew(tr)
   const [localComment, setLocalComment] = useState(comment)
   const [localOutcome, setLocalOutcome] = useState(outcome)
   const [localIncome, setLocalIncome] = useState(income)
@@ -79,6 +70,21 @@ export default function DetailsDrawer({
     setLocalDate(date)
     setLocalTag(tag)
   }, [id, changed, comment, outcome, income, payee, date, tag])
+
+  useEffect(
+    () => {
+      const timer = setTimeout(() => {
+        if (notSeen) {
+          onChange({ id, viewed: true })
+        }
+      }, 2000)
+
+      return () => clearTimeout(timer)
+    },
+    // prop 'viewed' ignored to prevent of changing it when we mark transaction as unread
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [id, onChange]
+  )
 
   const hasChanges =
     comment !== localComment ||
@@ -199,10 +205,9 @@ export default function DetailsDrawer({
       </Box>
       <Box p={3}>
         <Typography variant="caption" color="textSecondary">
-          Операция создана &ndash; {formatDate(created, 'dd MMM yyyy, HH:mm')}
+          Операция создана – {formatDate(created, 'dd MMM yyyy, HH:mm')}
           <br />
-          Последнее изменение &ndash;{' '}
-          {formatDate(changed, 'dd MMM yyyy, HH:mm')}
+          Последнее изменение – {formatDate(changed, 'dd MMM yyyy, HH:mm')}
           <br />
           {type === 'income' && !!opIncome && (
             <>
@@ -227,14 +232,17 @@ export default function DetailsDrawer({
               <br />
             </>
           )}
-          <Link
-            component="button"
-            color="secondary"
-            onClick={() => onSelectSimilar(changed)}
-          >
-            Выделить операции, изменённые в это же время
-          </Link>
         </Typography>
+      </Box>
+      <Box p={2}>
+        <Button onClick={() => onSelectSimilar(changed)}>
+          Найти другие из этой синхронизации
+        </Button>
+        {!notSeen && (
+          <Button onClick={() => onChange({ id, viewed: false })}>
+            Сделать непросмотренной
+          </Button>
+        )}
       </Box>
 
       <SaveButton visible={hasChanges} onSave={onSave} />

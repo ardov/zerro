@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { Box, Link, Typography, useTheme } from '@material-ui/core'
 import { Helmet } from 'react-helmet'
 import Rhythm from 'components/Rhythm'
@@ -58,7 +58,14 @@ export default function Donation() {
   )
 }
 
-function LinkCard({ icon, primary, secondary, href }) {
+interface LinkCardProps {
+  icon: JSX.Element
+  primary: JSX.Element | string
+  secondary: JSX.Element | string
+  href: string
+}
+const LinkCard: FC<LinkCardProps> = props => {
+  const { icon, primary, secondary, href } = props
   return (
     <Box
       p={3}

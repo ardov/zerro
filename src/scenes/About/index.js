@@ -1,38 +1,45 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { MDXProvider } from '@mdx-js/react'
 import { Box } from '@material-ui/core'
 import { useTheme } from '@material-ui/styles'
 import { Link } from 'react-router-dom'
 import './index.scss'
-import { Method } from './pages/Method'
 import Logo from 'components/Logo'
 import { Switch, Route } from 'react-router'
-import { About } from './pages/About'
-import { ScrollToTop } from './Components'
-import { QuickStart } from './pages/QuickStart'
+import { ScrollToTop, TextLink } from './Components'
+
+/* eslint-disable import/no-webpack-loader-syntax */
+import Method from '!babel-loader!@mdx-js/loader!./pages/Method.mdx'
+import About from '!babel-loader!@mdx-js/loader!./pages/About.mdx'
+import QuickStart from '!babel-loader!@mdx-js/loader!./pages/QuickStart.mdx'
 
 export default function Main() {
+  /* TODO: починить Helmet */
+  const [components] = useState({ a: TextLink })
   return (
-    <Box width="100%" bgcolor="background.paper">
-      <ScrollToTop />
-      <Header />
+    <MDXProvider components={components}>
+      <Box width="100%" bgcolor="background.paper">
+        <ScrollToTop />
+        <Header />
 
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        px={2}
-        pt={8}
-        pb={8}
-      >
-        <Box width="100%" maxWidth={680} minWidth={100} className="article">
-          <Switch>
-            <Route path="/about/method" component={Method} />
-            <Route path="/about/quick-start" component={QuickStart} />
-            <Route path="/about" component={About} />
-          </Switch>
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          px={2}
+          pt={8}
+          pb={8}
+        >
+          <Box width="100%" maxWidth={680} minWidth={100} className="article">
+            <Switch>
+              <Route path="/about/method" component={Method} />
+              <Route path="/about/quick-start" component={QuickStart} />
+              <Route path="/about" component={About} />
+            </Switch>
+          </Box>
         </Box>
       </Box>
-    </Box>
+    </MDXProvider>
   )
 }
 

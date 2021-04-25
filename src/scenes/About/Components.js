@@ -1,7 +1,7 @@
 import React from 'react'
 import { Box, useTheme } from '@material-ui/core'
 import { useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, Link as RouterLink } from 'react-router-dom'
 
 export function ScrollToTop() {
   const { pathname } = useLocation()
@@ -38,4 +38,12 @@ export function Muted({ children, ...rest }) {
       {children}
     </Box>
   )
+}
+
+export function TextLink({ href, ...rest }) {
+  if (href?.startsWith('/')) {
+    return <RouterLink to={href} {...rest} />
+  }
+  // eslint-disable-next-line jsx-a11y/anchor-has-content
+  return <a href={href} target="_blank" rel="noopener noreferrer" {...rest} />
 }

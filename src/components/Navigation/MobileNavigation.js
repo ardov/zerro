@@ -1,7 +1,7 @@
 import React from 'react'
 import { useLocation, useHistory } from 'react-router'
 import RefreshButton from 'components/RefreshButton'
-import SettingsMenu from './SettingsMenu'
+import { SettingsMenu } from './MenuButton'
 import SettingsIcon from '@material-ui/icons/Settings'
 import {
   Box,
@@ -24,7 +24,7 @@ const routes = [
   { path: '/accounts', label: 'Счета', icon: <AccountBalanceWalletIcon /> },
 ]
 
-export default function MobileNav(props) {
+export function MobileNavigation(props) {
   const path = useLocation().pathname
   const history = useHistory()
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -72,11 +72,7 @@ export default function MobileNav(props) {
           <RefreshButton isMobile={true} className={c.action} />
         </BottomNavigation>
 
-        <SettingsMenu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
-        />
+        <SettingsMenu anchorEl={anchorEl} onClose={handleMenuClose} showLinks />
       </Paper>
     </Box>
   )

@@ -8,14 +8,13 @@ import Review from 'scenes/Review'
 import { getLoginState } from 'store/token'
 import RegularSyncHandler from 'components/RegularSyncHandler'
 import Nav from 'components/Navigation'
-import MobileNav from 'components/MobileNav'
+import { MobileNavigation } from 'components/Navigation'
 import {
   Box,
   CircularProgress,
   Typography,
   useMediaQuery,
 } from '@material-ui/core'
-import { AppThemeProvider } from 'AppThemeProvider'
 import { createBrowserHistory } from 'history'
 import ErrorBoundary from 'components/ErrorBoundary'
 import { getLastSyncTime, getRootUserId } from 'store/data/selectors'
@@ -37,17 +36,15 @@ export default function App() {
   }, [userId])
 
   return (
-    <AppThemeProvider>
-      <ErrorBoundary>
-        <Router history={history}>
-          <Switch>
-            <Route path="/about" component={About} />
-            <Route path="/about/*" component={About} />
-            <Route path="/*" component={isLoggedIn ? PrivateApp : Auth} />
-          </Switch>
-        </Router>
-      </ErrorBoundary>
-    </AppThemeProvider>
+    <ErrorBoundary>
+      <Router history={history}>
+        <Switch>
+          <Route path="/about" component={About} />
+          <Route path="/about/*" component={About} />
+          <Route path="/*" component={isLoggedIn ? PrivateApp : Auth} />
+        </Switch>
+      </Router>
+    </ErrorBoundary>
   )
 }
 
@@ -81,7 +78,7 @@ const PrivateApp = () => {
 
 const Navigation = React.memo(() => {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
-  return isMobile ? <MobileNav /> : <Nav />
+  return isMobile ? <MobileNavigation /> : <Nav />
 })
 
 const hints = [

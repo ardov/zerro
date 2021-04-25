@@ -17,5 +17,5 @@ export const getLastChangeTime = (state: RootState) => {
     })
   )
 
-  return lastChange * 1000
+  return lastChange
 }

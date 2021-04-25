@@ -2,7 +2,7 @@ import React from 'react'
 import { useRouteMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import RefreshButton from 'components/RefreshButton'
-import MenuButton from './containers/MenuButton'
+import { MenuButton } from './MenuButton'
 import {
   Box,
   Drawer,

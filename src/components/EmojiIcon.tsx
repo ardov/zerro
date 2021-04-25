@@ -10,7 +10,7 @@ type EmojiIconProps = Modify<
   BoxProps,
   {
     symbol: string
-    color?: string
+    color?: string | null
     size?: 's' | 'm'
     onChange: CheckboxProps['onChange']
     checked: CheckboxProps['checked']
@@ -34,7 +34,8 @@ const useStyles = makeStyles(theme => ({
   symbol: {
     width: ({ size }: StylesProps) => sizes[size],
     height: ({ size }: StylesProps) => sizes[size],
-    color: ({ color }: StylesProps) => theme.palette.text.primary,
+    color: ({ color }: StylesProps) =>
+      theme.palette.getContrastText(color || theme.palette.background.paper),
     cursor: ({ button }: StylesProps) => (button ? 'pointer' : 'auto'),
     borderRadius: '50%',
     border: ({ color }: StylesProps) => (color ? `1px solid ${color}` : 'none'),

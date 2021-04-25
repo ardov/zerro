@@ -19,8 +19,9 @@ export default class GlobalErrorBoundary extends React.Component {
 
   fullRefresh = () => {
     clearStorage()
+    localStorage.clear()
     Cookies.expire('token')
-    window.location.reload(true)
+    window.location.reload()
   }
 
   render() {

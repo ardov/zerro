@@ -28,7 +28,11 @@ function makePopulatedTag(tag: Tag): PopulatedTag {
     ...tag,
     children: [],
     name: getName(tag.title),
-    symbol: tag.icon ? iconsMap[tag.icon] : tag.title.slice(0, 2),
+    symbol: tag.icon
+      ? iconsMap[tag.icon]
+      : tag.id === 'null'
+      ? '?'
+      : tag.title.slice(0, 2),
     colorRGB: intToRGB(tag.color),
     colorHEX: intToHEX(tag.color),
     colorGenerated: getColorForString(tag.title),
