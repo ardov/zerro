@@ -1,6 +1,7 @@
 import React from 'react'
 import { withStyles } from '@material-ui/core/styles'
 import NavDrawer from './NavDrawer'
+import { MobileNavigation } from './MobileNavigation'
 
 const style = {
   width: 280,
@@ -17,3 +18,5 @@ const StyledNav = withStyles({
 export default function Header() {
   return <StyledNav variant="persistent" anchor="left" open={true} />
 }
+
+export { MobileNavigation }

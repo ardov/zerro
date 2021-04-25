@@ -8,7 +8,7 @@ import Review from 'scenes/Review'
 import { getLoginState } from 'store/token'
 import RegularSyncHandler from 'components/RegularSyncHandler'
 import Nav from 'components/Navigation'
-import MobileNav from 'components/MobileNav'
+import { MobileNavigation } from 'components/Navigation'
 import {
   Box,
   CircularProgress,
@@ -78,7 +78,7 @@ const PrivateApp = () => {
 
 const Navigation = React.memo(() => {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
-  return isMobile ? <MobileNav /> : <Nav />
+  return isMobile ? <MobileNavigation /> : <Nav />
 })
 
 const hints = [

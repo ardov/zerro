@@ -59,7 +59,6 @@ const globalStyles = css`
 export const AppThemeProvider: FC = props => {
   const themeType = useThemeType()
   const theme = createTheme(themeType.type)
-  console.log('🦄 Theme', theme)
 
   return (
     <ThemeProvider theme={theme}>

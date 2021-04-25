@@ -75,7 +75,6 @@ export default function DetailsDrawer(props) {
     () => {
       const timer = setTimeout(() => {
         if (notSeen) {
-          console.log('on change', { id, viewed: true })
           onChange({ id, viewed: true })
         }
       }, 2000)
