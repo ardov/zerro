@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import IconButton from '@material-ui/core/IconButton'
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline'
 import LocalOfferOutlinedIcon from '@material-ui/icons/LocalOfferOutlined'
+import DoneAllIcon from '@material-ui/icons/DoneAll'
 import { Tooltip } from 'components/Tooltip'
 import Chip from '@material-ui/core/Chip'
 import Box from '@material-ui/core/Box'
@@ -12,12 +13,13 @@ import Confirm from 'components/Confirm'
 import TagSelect2 from 'components/TagSelect2'
 import {
   deleteTransactions,
+  markViewed,
   setTagsToTransactions,
 } from 'store/localData/transactions/thunks'
 import { CSSTransition } from 'react-transition-group'
 import { EditOutlined } from '@material-ui/icons'
 import BulkEditModal from './BulkEditModal'
-import { getType } from 'store/localData/transactions/helpers'
+import { getType, isNew } from 'store/localData/transactions/helpers'
 import { getTransactions } from 'store/localData/transactions'
 
 export default function Actions({
@@ -46,6 +48,11 @@ export default function Actions({
 
   const handleDelete = () => {
     dispatch(deleteTransactions(checkedIds))
+    onUncheckAll()
+  }
+
+  const handleMarkViewed = () => {
+    dispatch(markViewed(checkedIds, true))
     onUncheckAll()
   }
 
@@ -118,6 +125,15 @@ export default function Actions({
               />
             )}
 
+            {actions.markViewed && (
+              <Tooltip title="Сделать просмотренными">
+                <IconButton
+                  children={<DoneAllIcon />}
+                  onClick={handleMarkViewed}
+                />
+              </Tooltip>
+            )}
+
             {actions.bulkEdit && (
               <Tooltip title="Редактировать">
                 <IconButton
@@ -139,6 +155,7 @@ function getAvailableActions(transactions) {
     delete: true,
     setMainTag: !transfer && (income || outcome),
     bulkEdit: !transfer && (income || outcome),
+    markViewed: transactions.some(isNew),
   }
 }
 

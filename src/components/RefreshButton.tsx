@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { FC, useCallback, useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { syncData } from 'logic/sync'
 import { getChangedNum } from 'store/localData'
@@ -15,9 +15,10 @@ import { withStyles, useTheme } from '@material-ui/core/styles'
 import { Tooltip } from 'components/Tooltip'
 import { getLastSyncInfo } from 'store/lastSync'
 
+type ButtonState = 'idle' | 'hasDataToSync' | 'pending' | 'success' | 'fail'
 const StyledBadge = withStyles({ badge: { top: '50%', right: 4 } })(Badge)
 
-export default function RefreshButton({ isMobile, ...rest }) {
+const RefreshButton: FC<{ isMobile?: boolean }> = ({ isMobile, ...rest }) => {
   const theme = useTheme()
   const dispatch = useDispatch()
   const handleClick = useCallback(() => dispatch(syncData()), [dispatch])
@@ -25,11 +26,11 @@ export default function RefreshButton({ isMobile, ...rest }) {
   const isPending = useSelector(getPendingState)
   const { isSuccessful, finishedAt } = useSelector(getLastSyncInfo)
 
-  let buttonState = 'idle'
+  let buttonState: ButtonState = 'idle'
   if (!!changedNum) buttonState = 'hasDataToSync'
   if (isPending) buttonState = 'pending'
 
-  const [notification, setNotification] = useState(null)
+  const [notification, setNotification] = useState<ButtonState | null>(null)
 
   useEffect(() => {
     if (!finishedAt) return
@@ -38,7 +39,7 @@ export default function RefreshButton({ isMobile, ...rest }) {
     return () => clearTimeout(timer1)
   }, [isSuccessful, finishedAt])
 
-  const state = notification || buttonState
+  const state: ButtonState = notification || buttonState
 
   const components = {
     idle: <RefreshIcon />,
@@ -69,10 +70,16 @@ export default function RefreshButton({ isMobile, ...rest }) {
   ) : (
     <Tooltip title="Обновить данные">
       <StyledBadge badgeContent={changedNum}>
-        <IconButton onClick={handleClick} color={colors[state]} {...rest}>
+        <IconButton
+          onClick={handleClick}
+          color={colors[state] as 'default' | 'primary'}
+          {...rest}
+        >
           {components[state]}
         </IconButton>
       </StyledBadge>
     </Tooltip>
   )
 }
+
+export default RefreshButton

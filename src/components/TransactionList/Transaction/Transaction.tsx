@@ -3,6 +3,7 @@ import styled from '@emotion/styled'
 import { Transaction as ITransaction, TransactionType } from 'types'
 import { Theme, TypographyVariant } from '@material-ui/core'
 import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'
+import { sendEvent } from 'helpers/tracking'
 
 type TransactionProps = {
   id: string
@@ -11,8 +12,9 @@ type TransactionProps = {
   isInSelectionMode: boolean
   isChecked: boolean
   isOpened: boolean
-  onClick: (id: string) => void
+  onClick?: (id: string) => void
   onToggle: (id: string) => void
+  onContextMenu?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
   onSelectChanged: (date: number) => void
   onFilterByPayee: (payee: string) => void
 }
@@ -27,6 +29,7 @@ export const Transaction: FC<TransactionProps> = props => {
     isOpened,
     onClick,
     onToggle,
+    onContextMenu,
     onFilterByPayee,
     onSelectChanged,
   } = props
@@ -36,9 +39,9 @@ export const Transaction: FC<TransactionProps> = props => {
   const { deleted, changed } = tr
 
   const handleOpen = () => {
-    // sendEvent('Transaction: see details')
-    onClick(id)
+    onClick?.(id)
   }
+
   const handleSelectSimilar = () => onSelectChanged(changed)
 
   return (
@@ -46,6 +49,10 @@ export const Transaction: FC<TransactionProps> = props => {
       opened={isOpened}
       deleted={deleted}
       onClick={handleOpen}
+      onContextMenu={e => {
+        sendEvent('Transaction: open context menu')
+        onContextMenu?.(e)
+      }}
       onDoubleClick={handleSelectSimilar}
     >
       <Symbol {...{ tr, trType, isChecked, isInSelectionMode, onToggle }} />

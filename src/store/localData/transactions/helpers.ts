@@ -23,6 +23,7 @@ interface FilterConditions {
   accountsTo?: null | AccountId[]
   amountFrom?: null | number
   amountTo?: null | number
+  isNew?: boolean
 }
 
 const checkSearch = (tr: Transaction, search?: FilterConditions['search']) => {
@@ -81,6 +82,12 @@ const checkAmount = (
   return compareType === 'lessOrEqual' ? trAmount <= amount : trAmount >= amount
 }
 
+const checkIsNew = (tr: Transaction, condition?: FilterConditions['isNew']) => {
+  if (condition === undefined) return true
+  const isNewTransaction = isNew(tr)
+  return isNewTransaction === condition
+}
+
 const checkConditions = (tr: Transaction, conditions: FilterConditions) => {
   if (!conditions) return true
   return (
@@ -91,7 +98,8 @@ const checkConditions = (tr: Transaction, conditions: FilterConditions) => {
     checkTags(tr, conditions.tags) &&
     checkAmount(tr, conditions.amountFrom, 'greaterOrEqual') &&
     checkAmount(tr, conditions.amountTo, 'lessOrEqual') &&
-    checkAccounts(tr, conditions.accountsFrom, conditions.accountsTo)
+    checkAccounts(tr, conditions.accountsFrom, conditions.accountsTo) &&
+    checkIsNew(tr, conditions.isNew)
   )
 }
 

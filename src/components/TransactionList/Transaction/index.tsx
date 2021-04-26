@@ -6,6 +6,7 @@ import { getTransactions } from 'store/localData/transactions'
 import { getType } from 'store/localData/transactions/helpers'
 import { getDebtAccountId } from 'store/localData/accounts'
 import { Transaction } from './Transaction'
+import { useContextMenu, TransactionMenu } from './ContextMenu'
 
 export type WrapperProps = {
   id: string
@@ -25,6 +26,7 @@ const TransactionWrapper: FC<WrapperProps> = props => {
     onFilterByPayee,
     onSelectChanged,
   } = props
+  const [onContextMenu, bind] = useContextMenu()
   const [opened, setOpened] = useSearchParam('transaction')
   const isOpened = opened === id
   const transaction = useSelector(
@@ -35,22 +37,26 @@ const TransactionWrapper: FC<WrapperProps> = props => {
   const onClick = useCallback(() => setOpened(id), [id, setOpened])
 
   return (
-    <Transaction
-      {...{
-        // Data
-        id,
-        transaction,
-        type,
-        isInSelectionMode,
-        isChecked,
-        isOpened,
-        // Actions
-        onClick,
-        onToggle,
-        onFilterByPayee,
-        onSelectChanged,
-      }}
-    />
+    <>
+      <Transaction
+        {...{
+          // Data
+          id,
+          transaction,
+          type,
+          isInSelectionMode,
+          isChecked,
+          isOpened,
+          // Actions
+          onClick,
+          onToggle,
+          onFilterByPayee,
+          onSelectChanged,
+          onContextMenu,
+        }}
+      />
+      <TransactionMenu id={id} transaction={transaction} {...bind} />
+    </>
   )
 }
 

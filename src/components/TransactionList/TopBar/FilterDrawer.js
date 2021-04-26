@@ -105,7 +105,7 @@ export default function FilterDrawer({
 
         <Box mt={3}>
           <TagSelect
-            value={conditions.tags}
+            value={conditions.tags || false}
             onChange={tags => setCondition({ tags })}
           />
         </Box>
@@ -114,8 +114,25 @@ export default function FilterDrawer({
           <FormControlLabel
             control={
               <Switch
-                checked={conditions.showDeleted}
-                onChange={e => setCondition({ showDeleted: e.target.checked })}
+                checked={Boolean(conditions.isNew)}
+                onChange={e =>
+                  setCondition({ isNew: e.target.checked || undefined })
+                }
+                color="primary"
+              />
+            }
+            label="Только новые"
+          />
+        </Box>
+
+        <Box mt={3}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={Boolean(conditions.showDeleted)}
+                onChange={e =>
+                  setCondition({ showDeleted: e.target.checked || undefined })
+                }
                 color="primary"
               />
             }
