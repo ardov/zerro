@@ -129,6 +129,7 @@
     "@types/react-helmet": "^6.1.0",
     "@types/react-redux": "^7.1.15",
     "@types/react-router": "^5.1.8",
+    "@types/react-router-dom": "^5.1.7",
     "@types/uuid": "^8.3.0",
     "babel-loader": "8.1.0",
     "stylelint": "^13.7.2",

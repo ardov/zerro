@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FC, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { logOut } from 'logic/authorization'
 import { exportCSV } from 'logic/exportCSV'
@@ -17,6 +17,7 @@ import {
   Box,
   Divider,
   IconButton,
+  IconButtonProps,
   Menu,
   MenuItem,
   Typography,
@@ -31,8 +32,12 @@ import Confirm from 'components/Confirm'
 const useStyles = makeStyles(({ spacing }) => ({
   menuIcon: { marginRight: spacing(1) },
 }))
-
-export const SettingsMenu = props => {
+type SettingsMenuProps = {
+  showLinks?: boolean
+  anchorEl: Element | null
+  onClose: () => void
+}
+export const SettingsMenu: FC<SettingsMenuProps> = props => {
   const { anchorEl, onClose, showLinks } = props
   const dispatch = useDispatch()
   const classes = useStyles()
@@ -138,15 +143,17 @@ export const SettingsMenu = props => {
   )
 }
 
-export function MenuButton({ showLinks, ...rest }) {
-  const [anchorEl, setAnchorEl] = React.useState(null)
-  const handleClick = event => setAnchorEl(event.currentTarget)
-  const handleClose = () => setAnchorEl(null)
+interface MenuButtonProps extends IconButtonProps {
+  showLinks?: boolean
+}
 
+export const MenuButton: FC<MenuButtonProps> = ({ showLinks, ...rest }) => {
+  const [anchorEl, setAnchorEl] = useState<Element | null>(null)
+  const handleClose = () => setAnchorEl(null)
   return (
     <>
       <Tooltip title="Настройки">
-        <IconButton onClick={handleClick} {...rest}>
+        <IconButton onClick={e => setAnchorEl(e.currentTarget)} {...rest}>
           <SettingsIcon />
         </IconButton>
       </Tooltip>

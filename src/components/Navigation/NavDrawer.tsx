@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { useRouteMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import RefreshButton from 'components/RefreshButton'
@@ -11,6 +11,7 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
+  DrawerProps,
 } from '@material-ui/core'
 import { useTheme } from '@material-ui/styles'
 import Logo from 'components/Logo'
@@ -22,7 +23,7 @@ import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
 import SyncAltIcon from '@material-ui/icons/SyncAlt'
 import WhatshotIcon from '@material-ui/icons/Whatshot'
 
-export default function NavigationDrawer(props) {
+export default function NavigationDrawer(props: DrawerProps) {
   const theme = useTheme()
   return (
     <Drawer {...props}>
@@ -110,7 +111,12 @@ function Links() {
 const useStyles = makeStyles(theme => ({
   listItem: { borderRadius: theme.shape.borderRadius },
 }))
-function NavigationLink({ icon, text, path }) {
+
+const NavigationLink: FC<{
+  icon: React.ReactNode
+  text: React.ReactNode
+  path: string
+}> = ({ icon, text, path }) => {
   const c = useStyles()
   const match = useRouteMatch(path)
   return (
