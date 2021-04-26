@@ -18,9 +18,10 @@ import { Map } from './Map'
 import AmountInput from 'components/AmountInput'
 import { formatDate, rateToWords } from 'helpers/format'
 import { TagList } from 'components/TagList'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { getTransactions } from 'store/localData/transactions'
 import { isNew } from 'store/localData/transactions/helpers'
+import { markViewed } from 'store/localData/transactions/thunks'
 
 export default function DetailsDrawer(props) {
   const {
@@ -53,6 +54,7 @@ export default function DetailsDrawer(props) {
     onRestore,
     onSelectSimilar,
   } = props
+  const dispatch = useDispatch()
   const tr = useSelector(getTransactions)[id]
   const notSeen = isNew(tr)
   const [localComment, setLocalComment] = useState(comment)
@@ -74,9 +76,7 @@ export default function DetailsDrawer(props) {
   useEffect(
     () => {
       const timer = setTimeout(() => {
-        if (notSeen) {
-          onChange({ id, viewed: true })
-        }
+        if (notSeen) dispatch(markViewed(id, true))
       }, 2000)
 
       return () => clearTimeout(timer)

@@ -18,6 +18,21 @@ export const deleteTransactions = (
   dispatch(applyClientPatch({ transaction: deleted }))
 }
 
+export const markViewed = (
+  ids: TransactionId | TransactionId[],
+  viewed: boolean
+): AppThunk => (dispatch, getState) => {
+  sendEvent(`Transaction: mark viewed: ${viewed}`)
+  const array = Array.isArray(ids) ? ids : [ids]
+  const state = getState()
+  const result = array.map(id => ({
+    ...getTransaction(state, id),
+    viewed,
+    changed: Date.now(),
+  }))
+  dispatch(applyClientPatch({ transaction: result }))
+}
+
 export const restoreTransaction = (id: TransactionId): AppThunk => (
   dispatch,
   getState
