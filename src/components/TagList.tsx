@@ -1,16 +1,22 @@
-import React from 'react'
-import { Box, IconButton } from '@material-ui/core'
+import React, { FC } from 'react'
+import { Box, BoxProps, IconButton } from '@material-ui/core'
 import TagSelect2 from 'components/TagSelect2'
 import TagChip from 'components/TagChip'
 import { Tooltip } from 'components/Tooltip'
 import AddIcon from '@material-ui/icons/Add'
 
-export function TagList({ tags = null, onChange, tagType, ...rest }) {
-  const removeTag = removeId =>
+type TagListProps = BoxProps & {
+  tags: string[] | null
+  onChange: (tags: string[] | null) => void
+  tagType: 'income' | 'outcome' | null
+}
+export const TagList: FC<TagListProps> = props => {
+  const { tags = null, onChange, tagType, ...rest } = props
+  const removeTag = (removeId: string) =>
     tags && onChange(tags.filter(id => id !== removeId))
-  const replaceTag = (oldId, newId) =>
+  const replaceTag = (oldId: string, newId: string) =>
     tags && onChange(tags.map(id => (id === oldId ? newId : id)))
-  const addTag = id => onChange(tags ? [...tags, id] : [id])
+  const addTag = (id: string) => onChange(tags ? [...tags, id] : [id])
 
   return (
     <Box {...rest}>

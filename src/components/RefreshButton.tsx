@@ -18,7 +18,10 @@ import { getLastSyncInfo } from 'store/lastSync'
 type ButtonState = 'idle' | 'hasDataToSync' | 'pending' | 'success' | 'fail'
 const StyledBadge = withStyles({ badge: { top: '50%', right: 4 } })(Badge)
 
-const RefreshButton: FC<{ isMobile?: boolean }> = ({ isMobile, ...rest }) => {
+const RefreshButton: FC<{ isMobile?: boolean; className?: string }> = ({
+  isMobile,
+  ...rest
+}) => {
   const theme = useTheme()
   const dispatch = useDispatch()
   const handleClick = useCallback(() => dispatch(syncData()), [dispatch])

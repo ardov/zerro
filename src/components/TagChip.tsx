@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { useSelector } from 'react-redux'
 import { getPopulatedTags } from 'store/localData/tags'
-import { Chip, ChipTypeMap } from '@material-ui/core'
+import { Chip, ChipProps } from '@material-ui/core'
 import CloseIcon from '@material-ui/icons/Close'
 import { PopulatedTag, TagId } from 'types'
 
@@ -11,13 +11,15 @@ function getTagLabel(tag?: PopulatedTag) {
   return tag.title
 }
 
-interface TagChipProps extends ChipTypeMap {
+interface TagChipProps extends ChipProps {
   id: TagId
 }
 
-export default function TagChip({ id, ...rest }: TagChipProps) {
+const TagChip: FC<TagChipProps> = ({ id, ...rest }) => {
   let tag = useSelector(getPopulatedTags)[id]
   let label = getTagLabel(tag)
   if (id === 'mixed') label = 'Разные категории'
   return <Chip deleteIcon={<CloseIcon />} label={label} {...rest} />
 }
+
+export default TagChip

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { useLocation, useHistory } from 'react-router'
 import RefreshButton from 'components/RefreshButton'
 import { SettingsMenu } from './MenuButton'
@@ -24,18 +24,12 @@ const routes = [
   { path: '/accounts', label: 'Счета', icon: <AccountBalanceWalletIcon /> },
 ]
 
-export function MobileNavigation(props) {
+export const MobileNavigation: FC = props => {
   const path = useLocation().pathname
   const history = useHistory()
   const [anchorEl, setAnchorEl] = React.useState(null)
   const c = useStyles()
-
-  const handleMenuClick = event => setAnchorEl(event.currentTarget)
   const handleMenuClose = () => setAnchorEl(null)
-  const handleChange = (e, newValue) => {
-    if (newValue[0] === '/') history.push(newValue)
-  }
-
   const hasHomeBar = useHomeBar()
   const paddingBottom = hasHomeBar ? '20px' : '0px'
   const currentRoute = routes.find(route => path.startsWith(route.path))
@@ -52,7 +46,12 @@ export function MobileNavigation(props) {
       <Paper>
         <Divider light />
 
-        <BottomNavigation value={currentRoute?.path} onChange={handleChange}>
+        <BottomNavigation
+          value={currentRoute?.path}
+          onChange={(e, newValue) => {
+            if (newValue[0] === '/') history.push(newValue)
+          }}
+        >
           {routes.map(route => (
             <BottomNavigationAction
               className={c.action}
@@ -67,7 +66,7 @@ export function MobileNavigation(props) {
             className={c.action}
             value="menu"
             icon={<SettingsIcon />}
-            onClick={handleMenuClick}
+            onClick={e => setAnchorEl(e.currentTarget)}
           />
           <RefreshButton isMobile={true} className={c.action} />
         </BottomNavigation>

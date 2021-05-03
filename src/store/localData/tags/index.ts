@@ -15,7 +15,7 @@ export const getPopulatedTags = createSelector([getTags], populateTags)
 export const getPopulatedTag = (state: RootState, id: string) =>
   getPopulatedTags(state)[id]
 
-type TagTreeNode = Modify<PopulatedTag, { children: PopulatedTag[] }>
+export type TagTreeNode = Modify<PopulatedTag, { children: PopulatedTag[] }>
 export const getTagsTree = createSelector(
   [getPopulatedTags, compareTags],
   (tags, compare) => {

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { FC, KeyboardEventHandler, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { getTagsTree } from 'store/localData/tags'
+import { getTagsTree, TagTreeNode } from 'store/localData/tags'
 import {
   Popover,
   Paper,
@@ -10,21 +10,29 @@ import {
   ListItem,
   ListItemText,
   TextField,
+  PopoverProps,
+  ListItemProps,
 } from '@material-ui/core'
 import AddIcon from '@material-ui/icons/Add'
 import EmojiIcon from 'components/EmojiIcon'
+import { PopulatedTag } from 'types'
 
-export default function TagSelect({
-  onChange,
-  trigger,
-  value,
-  exclude,
-  tagType,
-}) {
-  const [anchorEl, setAnchorEl] = useState(null)
-  const handleClick = e => setAnchorEl(e.currentTarget)
+type TagType = 'income' | 'outcome' | undefined | null
+type TagNode = TagTreeNode | PopulatedTag
+type TagSelectProps = {
+  onChange: (id: string) => void
+  trigger?: React.ReactElement
+  value?: string[] | null
+  exclude?: string[] | null
+  tagType?: TagType
+}
+
+export const TagSelect: FC<TagSelectProps> = props => {
+  const { onChange, trigger, value, exclude, tagType } = props
+  const [anchorEl, setAnchorEl] = useState<Element | null>(null)
+  const handleClick: React.MouseEventHandler = e => setAnchorEl(e.currentTarget)
   const handleClose = () => setAnchorEl(null)
-  const handleTagSelect = id => {
+  const handleTagSelect = (id: string) => {
     setAnchorEl(null)
     onChange(id)
   }
@@ -50,34 +58,17 @@ export default function TagSelect({
     </>
   )
 }
+export default TagSelect
 
-function makeTagChecker({
-  search = '',
-  tagType = null,
-  exclude = [],
-  showNull = false,
-}) {
-  const checkSearch = (tag, search) => {
-    const includes = (title, search) =>
-      title.toUpperCase().includes(search.toUpperCase())
-    if (includes(tag.title, search)) return true
-    return (
-      tag.children && tag.children.some(child => includes(child.title, search))
-    )
-  }
-  return function (tag) {
-    // never show excluded tags
-    if (exclude?.includes(tag.id)) return false
-    if (!showNull && tag.id === null) return false
-    if (search) return checkSearch(tag, search)
-    if (tagType === 'income') return tag.showIncome
-    if (tagType === 'outcome') return tag.showOutcome
-    return true
-  }
+type TagSelectPopoverProps = PopoverProps & {
+  exclude?: string[] | null
+  tagType?: TagType
+  selectedIds?: string[] | null
+  onTagSelect: (id: string) => void
+  showNull?: boolean
 }
 
-// WIP
-function TagSelectPopover({
+const TagSelectPopover: FC<TagSelectPopoverProps> = ({
   open,
   anchorEl,
   exclude,
@@ -87,7 +78,7 @@ function TagSelectPopover({
   onTagSelect,
   onClose,
   ...popoverProps
-}) {
+}) => {
   const tags = useSelector(getTagsTree)
   const [search, setSearch] = useState('')
   const [focused, setFocused] = useState(0)
@@ -99,7 +90,7 @@ function TagSelectPopover({
     showNull,
   })
 
-  let flatList = []
+  let flatList: TagNode[] = []
   tags.forEach(tag => {
     if (checkTag(tag)) {
       flatList.push(tag)
@@ -120,9 +111,9 @@ function TagSelectPopover({
     setFocused(0)
   }, [search])
 
-  const handleClick = id => () => onTagSelect(id)
+  const handleClick = (id: string) => () => onTagSelect(id)
 
-  const handleKeyDown = e => {
+  const handleKeyDown: KeyboardEventHandler = e => {
     if (e.key === 'ArrowUp' || e.keyCode === 38) {
       e.preventDefault()
       if (focused > 0) setFocused(focused => focused - 1)
@@ -137,7 +128,7 @@ function TagSelectPopover({
     }
     if (e.key === 'Escape' || e.keyCode === 27) {
       e.preventDefault()
-      onClose()
+      onClose?.(e, 'escapeKeyDown')
     }
   }
 
@@ -167,7 +158,7 @@ function TagSelectPopover({
             key={tag.id}
             tag={tag}
             onClick={handleClick(tag.id)}
-            selected={selectedIds?.find(tag.id) || focused === idx}
+            selected={selectedIds?.includes(tag.id) || focused === idx}
             isChild={!!tag.parent}
           />
         ))}
@@ -181,11 +172,43 @@ function TagSelectPopover({
   )
 }
 
-function TagOption({ tag, isChild, ...rest }) {
+type TagOptionProps = ListItemProps & {
+  tag: TagNode
+  isChild?: boolean
+}
+const TagOption: FC<TagOptionProps> = props => {
+  const { tag, isChild, ...rest } = props
+  const button = true as any // need any due to https://github.com/mui-org/material-ui/issues/14971
   return (
-    <ListItem button {...rest}>
+    <ListItem button={button} {...rest}>
       <EmojiIcon symbol={tag.symbol} mr={2} ml={isChild ? 5 : 0} />
       <ListItemText primary={tag.name}></ListItemText>
     </ListItem>
   )
 }
+
+const makeTagChecker = (props: {
+  search?: string
+  tagType?: TagType
+  exclude?: string[] | null
+  showNull?: boolean
+}) => {
+  const { search = '', tagType = null, exclude = [], showNull = false } = props
+  const checkSearch = (tag: TagNode, search: string) => {
+    if (includes(tag.title, search)) return true
+    const children = tag.children as PopulatedTag[]
+    return children?.some(child => includes(child.title, search))
+  }
+  return function (tag: TagNode) {
+    // never show excluded tags
+    if (exclude?.includes(tag.id)) return false
+    if (!showNull && tag.id === null) return false
+    if (search) return checkSearch(tag, search)
+    if (tagType === 'income') return !!tag.showIncome
+    if (tagType === 'outcome') return !!tag.showOutcome
+    return true
+  }
+}
+
+const includes = (str: string, search: string) =>
+  str.toUpperCase().includes(search.toUpperCase())

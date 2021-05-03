@@ -2,8 +2,9 @@ import React from 'react'
 import { withStyles } from '@material-ui/core/styles'
 import NavDrawer from './NavDrawer'
 import { MobileNavigation } from './MobileNavigation'
+import { CSSProperties } from '@material-ui/styles'
 
-const style = {
+const style: CSSProperties = {
   width: 280,
   scrollbarWidth: 'none',
   overflow: '-moz-scrollbars-none',
