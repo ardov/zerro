@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { MDXProvider } from '@mdx-js/react'
 import { Box } from '@material-ui/core'
 import { useTheme } from '@material-ui/styles'
@@ -13,9 +13,9 @@ import Method from '!babel-loader!@mdx-js/loader!./pages/Method.mdx'
 import About from '!babel-loader!@mdx-js/loader!./pages/About.mdx'
 import QuickStart from '!babel-loader!@mdx-js/loader!./pages/QuickStart.mdx'
 
+const components = { a: TextLink }
+
 export default function Main() {
-  /* TODO: починить Helmet */
-  const [components] = useState({ a: TextLink })
   return (
     <MDXProvider components={components}>
       <Box width="100%" bgcolor="background.paper">
