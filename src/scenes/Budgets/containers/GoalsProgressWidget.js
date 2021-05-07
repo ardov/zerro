@@ -9,7 +9,7 @@ import {
   useMediaQuery,
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
-import WithConfirm from 'components/Confirm'
+import { Confirm } from 'components/Confirm'
 import { fillGoals } from '../thunks'
 import { getTotalGoalsProgress } from '../selectors/goalsProgress'
 
@@ -74,7 +74,7 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
     )
 
   return (
-    <WithConfirm
+    <Confirm
       title="Выполнить все цели?"
       description="Бюджеты будут выставлены так, чтобы цели в этом месяце выполнились."
       onOk={onOk}
@@ -110,6 +110,6 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
           </Typography>
         </ButtonBase>
       </Tooltip>
-    </WithConfirm>
+    </Confirm>
   )
 }

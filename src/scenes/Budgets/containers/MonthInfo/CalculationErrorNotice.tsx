@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { getTotalsArray } from '../../selectors/getTotalsByMonth'
 import { convertCurrency } from 'store/data/selectors'
@@ -15,7 +15,7 @@ import { getDiff } from 'store/data'
 
 const TOLERANCE = 2
 
-export function CalculationErrorNotice(props) {
+export const CalculationErrorNotice: FC = () => {
   const [hidden, setHidden] = useState(false)
 
   const transactionsToSync = useSelector(
@@ -41,7 +41,7 @@ export function CalculationErrorNotice(props) {
   useEffect(() => {
     if (hasError) {
       console.log('🤨 Calc error:', diff, currency)
-      captureError(new Error('Calculation Error'), { extra: diff })
+      captureError(new Error('Calculation Error'), { extra: diff } as any)
       sendEvent('Calculation Error: show message')
     }
   }, [diff, hasError, currency])

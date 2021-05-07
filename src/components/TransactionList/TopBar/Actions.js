@@ -9,7 +9,7 @@ import { Tooltip } from 'components/Tooltip'
 import Chip from '@material-ui/core/Chip'
 import Box from '@material-ui/core/Box'
 import pluralize from 'helpers/pluralize'
-import Confirm from 'components/Confirm'
+import { Confirm } from 'components/Confirm'
 import TagSelect2 from 'components/TagSelect2'
 import {
   deleteTransactions,

@@ -1,12 +1,26 @@
-import React from 'react'
-import Button from '@material-ui/core/Button'
-import Dialog from '@material-ui/core/Dialog'
+import React, { FC, ReactElement } from 'react'
+import Button, { ButtonProps } from '@material-ui/core/Button'
+import Dialog, { DialogProps } from '@material-ui/core/Dialog'
 import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
 import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
+import { Modify } from 'types'
 
-export default function Confirm({ onOk, children, ...rest }) {
+type ConfirmCommonProps = {
+  onOk: () => void
+  title?: string
+  description?: string
+  cancelText?: string
+  okText?: string
+  okColor?: ButtonProps['color']
+  okVariant?: ButtonProps['variant']
+}
+type ConfirmProps = Modify<
+  ConfirmCommonProps & Omit<DialogProps, 'open'>,
+  { children: ReactElement }
+>
+export const Confirm: FC<ConfirmProps> = ({ onOk, children, ...rest }) => {
   const [open, setOpen] = React.useState(false)
   const openConfirm = () => setOpen(true)
   const closeConfirm = () => setOpen(false)
@@ -30,18 +44,21 @@ export default function Confirm({ onOk, children, ...rest }) {
   )
 }
 
-export function ConfirmModal({
-  title = 'Вы уверены?',
-  description = null,
-  open = false,
-  onCancel,
-  onOk,
-  cancelText = 'Отменить',
-  okText = 'OK',
-  okColor = 'primary',
-  okVariant = 'contained',
-  ...rest
-}) {
+type ConfirmModalProps = ConfirmCommonProps &
+  DialogProps & { onCancel: () => void }
+export const ConfirmModal: FC<ConfirmModalProps> = props => {
+  const {
+    onCancel,
+    onOk,
+    title = 'Вы уверены?',
+    description,
+    open,
+    cancelText = 'Отменить',
+    okText = 'OK',
+    okColor = 'primary',
+    okVariant = 'contained',
+    ...rest
+  } = props
   return (
     <Dialog open={open} onClose={onCancel} {...rest}>
       <DialogTitle>{title}</DialogTitle>

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { formatDate, formatMoney } from 'helpers/format'
 import { getTotalsByMonth } from '../../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/data/selectors'
-import Confirm from 'components/Confirm'
+import { Confirm } from 'components/Confirm'
 import { copyPreviousBudget, startFresh, fixOverspends } from '../../thunks'
 import {
   Box,

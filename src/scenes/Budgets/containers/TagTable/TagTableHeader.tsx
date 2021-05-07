@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { FC, useContext, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { getUserCurrencyCode } from 'store/data/selectors'
 import { formatDate, formatMoney } from 'helpers/format'
@@ -9,6 +9,9 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  TypographyProps,
+  BoxProps,
+  Theme,
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import SettingsIcon from '@material-ui/icons/Settings'
@@ -16,10 +19,10 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import { fillGoals } from '../../thunks'
-import WithConfirm from 'components/Confirm'
+import { Confirm } from 'components/Confirm'
 import GoalProgress from 'components/GoalProgress'
 import { makeStyles } from '@material-ui/styles'
-import { ToBeBudgeted } from '../../containers/ToBeBudgeted'
+import { ToBeBudgeted } from '../ToBeBudgeted'
 import useScrollPosition from '@react-hook/window-scroll'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import add from 'date-fns/add'
@@ -76,7 +79,8 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-const MonthInfo = ({ onOpenMonthDrawer }) => {
+type MonthInfoProps = { onOpenMonthDrawer: () => void }
+const MonthInfo: FC<MonthInfoProps> = ({ onOpenMonthDrawer }) => {
   const c = useStyles()
   const [month, setMonth] = useMonth()
   const monthList = useSelector(getMonthDates)
@@ -89,14 +93,14 @@ const MonthInfo = ({ onOpenMonthDrawer }) => {
       <Box className={c.month}>
         <IconButton
           children={<ChevronLeftIcon fontSize="inherit" />}
-          onClick={() => setMonth(prevMonth)}
+          onClick={() => prevMonth && setMonth(prevMonth)}
           disabled={!prevMonth}
           size="small"
           edge="start"
         />
         <IconButton
           children={<ChevronRightIcon fontSize="inherit" />}
-          onClick={() => setMonth(nextMonth)}
+          onClick={() => nextMonth && setMonth(nextMonth)}
           disabled={!nextMonth}
           size="small"
           edge="end"
@@ -111,11 +115,17 @@ const MonthInfo = ({ onOpenMonthDrawer }) => {
   )
 }
 
-const Cell = props => (
+const Cell: FC<TypographyProps> = props => (
   <Typography variant="body2" color="textSecondary" noWrap {...props} />
 )
 
-export default function TagTableHeader(props) {
+type TagTableHeaderProps = BoxProps & {
+  metric?: 'budgeted' | 'outcome' | 'available'
+  onToggleMetric: () => void
+  onOpenMonthDrawer: () => void
+}
+
+export const TagTableHeader: FC<TagTableHeaderProps> = props => {
   const {
     metric = 'available',
     onToggleMetric,
@@ -123,20 +133,20 @@ export default function TagTableHeader(props) {
     ...rest
   } = props
   const c = useStyles()
-  const [anchorEl, setAnchorEl] = useState(null)
+  const [anchorEl, setAnchorEl] = useState<Element | null>(null)
   const { dragMode, setDragMode } = useContext(DragModeContext)
 
-  const handleClick = e => setAnchorEl(e.currentTarget)
+  const handleClick: React.MouseEventHandler = e => setAnchorEl(e.currentTarget)
   const handleClose = () => setAnchorEl(null)
 
   const toggleDragMode = () =>
-    setDragMode(mode => (mode === 'REORDER' ? 'FUNDS' : 'REORDER'))
+    setDragMode(dragMode === 'REORDER' ? 'FUNDS' : 'REORDER')
   const handleChangeOrderClick = () => {
     toggleDragMode()
     handleClose()
   }
 
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
+  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('xs'))
   const scrollY = useScrollPosition(60 /*fps*/)
   const scrollOffset = isMobile ? 254 : 128
   const isVisibleHeader = scrollY > scrollOffset
@@ -148,7 +158,7 @@ export default function TagTableHeader(props) {
 
   return (
     <Box className={c.row} {...rest}>
-      {isVisibleHeader && <MonthInfo {...onOpenMonthDrawer} />}
+      {isVisibleHeader && <MonthInfo onOpenMonthDrawer={onOpenMonthDrawer} />}
 
       {dragMode === 'REORDER' ? (
         <Cell className={c.name} onClick={toggleDragMode}>
@@ -198,7 +208,7 @@ function GoalMonthProgress() {
   const dispatch = useDispatch()
   const currency = useSelector(getUserCurrencyCode)
   const [month] = useMonth()
-  const totals = useSelector(state => getTotalGoalsProgress(state)?.[month])
+  const totals = useSelector(getTotalGoalsProgress)?.[month]
 
   if (!totals)
     return (
@@ -217,11 +227,11 @@ function GoalMonthProgress() {
 
   const { need, target, progress } = totals
   const onOk = () => dispatch(fillGoals(month))
-  const formatSum = sum => formatMoney(sum, currency)
+  const formatSum = (sum: number) => formatMoney(sum, currency)
 
   return (
     <Box component="span">
-      <WithConfirm
+      <Confirm
         title="Выполнить все цели?"
         description={`${formatSum(
           need
@@ -243,7 +253,7 @@ function GoalMonthProgress() {
             <GoalProgress value={progress} fontSize="inherit" />
           </IconButton>
         </Tooltip>
-      </WithConfirm>
+      </Confirm>
     </Box>
   )
 }

@@ -104,11 +104,7 @@ function Budgets() {
               {...{ minMonth, maxMonth, value: month }}
             />
             <GoalsProgressWidget className={c.goals} month={month} />
-            <ToBeBudgeted
-              className={c.toBeBudgeted}
-              index={index}
-              onClick={openOverview}
-            />
+            <ToBeBudgeted className={c.toBeBudgeted} onClick={openOverview} />
             <TagTable
               className={c.tags}
               openDetails={setDrawer}

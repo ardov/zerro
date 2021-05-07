@@ -16,7 +16,7 @@ interface TagTotals {
   overspent: number
   available: number
 }
-interface MonthTotals {
+export interface MonthTotals {
   date: number
   prevFunds: number
   prevOverspent: number

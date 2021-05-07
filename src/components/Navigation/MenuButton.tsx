@@ -27,7 +27,7 @@ import { useThemeType } from 'helpers/useThemeType'
 import { sendEvent } from 'helpers/tracking'
 import { resetData } from 'store/data'
 import { clearLocalData } from 'logic/localData'
-import Confirm from 'components/Confirm'
+import { Confirm } from 'components/Confirm'
 
 const useStyles = makeStyles(({ spacing }) => ({
   menuIcon: { marginRight: spacing(1) },

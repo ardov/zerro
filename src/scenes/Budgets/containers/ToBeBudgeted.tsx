@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { FC, ReactElement } from 'react'
 import { useSelector } from 'react-redux'
 import { formatDate, formatMoney } from 'helpers/format'
-import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
+import { getTotalsByMonth, MonthTotals } from '../selectors/getTotalsByMonth'
 import { getUserCurrencyCode } from 'store/data/selectors'
 import {
   Typography,
@@ -10,50 +10,67 @@ import {
   makeStyles,
   Divider,
   useMediaQuery,
+  ButtonBaseProps,
+  Theme,
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import Rhythm from 'components/Rhythm'
 import { useMonth } from '../pathHooks'
 import { Amount } from 'components/Amount'
 
-const useStyles = makeStyles(({ shape, spacing, palette, breakpoints }) => ({
-  base: {
-    display: 'flex',
-    flexDirection: 'column',
-    borderRadius: shape.borderRadius,
-    padding: spacing(1.5, 2),
-    background: ({ color }) =>
-      `linear-gradient(105deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 100%
+type TColor = 'error' | 'warning' | 'success'
+
+const useStyles = makeStyles<Theme, { color: TColor }>(
+  ({ shape, spacing, palette, breakpoints }) => ({
+    base: {
+      display: 'flex',
+      flexDirection: 'column',
+      borderRadius: shape.borderRadius,
+      padding: spacing(1.5, 2),
+      background: ({ color }) =>
+        `linear-gradient(105deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 100%
         ),${palette[color].main}`,
-    boxShadow: ({ color }) => `0 8px 20px -12px ${palette[color].main}`,
-    transition: '0.4s',
-    color: ({ color }) => palette.getContrastText(palette[color].main),
+      boxShadow: ({ color }) => `0 8px 20px -12px ${palette[color].main}`,
+      transition: '0.4s',
+      color: ({ color }) => palette.getContrastText(palette[color].main),
 
-    [breakpoints.down('xs')]: {
-      flexDirection: 'row-reverse',
-      justifyContent: 'space-between',
+      [breakpoints.down('xs')]: {
+        flexDirection: 'row-reverse',
+        justifyContent: 'space-between',
+      },
     },
-  },
-  small: { padding: spacing(1, 2) },
-  label: { minWidth: 0 },
-}))
+    small: { padding: spacing(1, 2) },
+    label: { minWidth: 0 },
+  })
+)
 
-const getMonthName = date => formatDate(date, 'LLL').toLowerCase()
+const getMonthName = (date: number | Date) =>
+  formatDate(date, 'LLL').toLowerCase()
 
-export function ToBeBudgeted({ index, className, small, ...rest }) {
+type ToBeBudgetedProps = ButtonBaseProps & {
+  small?: boolean
+}
+export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
+  const { small, className, ...rest } = props
   const [month] = useMonth()
   const currency = useSelector(getUserCurrencyCode)
-  const totals = useSelector(getTotalsByMonth)[month]
+  const totalsByMonth = useSelector(getTotalsByMonth)
+  const firstMonth = Object.keys(totalsByMonth)
+    .map(s => +s)
+    .sort((a, b) => a - b)[0]
+  const isFirstMonth = month === firstMonth
+  const totals = totalsByMonth[month]
   const {
     toBeBudgeted,
     overspent,
     realBudgetedInFuture,
     budgetedInFuture,
   } = totals
-  const color = toBeBudgeted < 0 ? 'error' : overspent ? 'warning' : 'success'
+  const color: TColor =
+    toBeBudgeted < 0 ? 'error' : overspent ? 'warning' : 'success'
   const hasFutureOverspend = realBudgetedInFuture > budgetedInFuture
   const c = useStyles({ color })
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
+  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('xs'))
 
   const BigWidget = (
     <ButtonBase className={`${c.base} ${className}`} {...rest}>
@@ -102,13 +119,26 @@ export function ToBeBudgeted({ index, className, small, ...rest }) {
   )
 
   return (
-    <TotalsTooltip color={color} {...{ currency, totals, index }}>
+    <TotalsTooltip color={color} {...{ currency, totals, isFirstMonth }}>
       {small ? SmallWidget : BigWidget}
     </TotalsTooltip>
   )
 }
 
-function TotalsTooltip({ currency, color, totals, index, children }) {
+type TotalsTooltipProps = {
+  currency: string
+  color: TColor
+  totals: MonthTotals
+  isFirstMonth: boolean
+  children: ReactElement
+}
+const TotalsTooltip: FC<TotalsTooltipProps> = ({
+  currency,
+  color,
+  totals,
+  isFirstMonth,
+  children,
+}) => {
   const {
     date,
     prevOverspent,
@@ -122,7 +152,7 @@ function TotalsTooltip({ currency, color, totals, index, children }) {
     budgeted,
     budgetedInFuture,
   } = totals
-  const formatSum = sum => formatMoney(sum, currency)
+  const formatSum = (sum: number) => formatMoney(sum, currency)
 
   const messages = {
     success: toBeBudgeted
@@ -134,7 +164,8 @@ function TotalsTooltip({ currency, color, totals, index, children }) {
     error: `Вы распределили больше денег, чем у вас есть. Из каких-то категорий придётся забрать деньги.`,
   }
 
-  function Line({ name, amount }) {
+  const Line: FC<{ name: string; amount: number }> = props => {
+    const { name, amount } = props
     return (
       <Box display="flex" flexDirection="row">
         <Box flexGrow="1" mr={1} minWidth={0}>
@@ -158,13 +189,13 @@ function TotalsTooltip({ currency, color, totals, index, children }) {
           {messages[color]}
         </Typography>
         <Divider />
-        {index ? (
+        {isFirstMonth ? (
+          <Line name="Начальный остаток на счетах" amount={prevFunds} />
+        ) : (
           <>
             <Line name="Остаток с прошлого месяца" amount={prevFunds} />
             <Line name="Перерасход в прошлом месяце" amount={-prevOverspent} />
           </>
-        ) : (
-          <Line name="Начальный остаток на счетах" amount={prevFunds} />
         )}
         <Line name={`Доход за ${getMonthName(date)}`} amount={income} />
         <Line name={`Бюджеты на ${getMonthName(date)}`} amount={-budgeted} />

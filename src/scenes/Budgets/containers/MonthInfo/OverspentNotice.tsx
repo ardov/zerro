@@ -1,15 +1,15 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { getUserCurrencyCode } from 'store/data/selectors'
 import { Box, Typography, Button } from '@material-ui/core'
 import WarningIcon from '@material-ui/icons/Warning'
 import { Amount } from 'components/Amount'
-import Confirm from 'components/Confirm'
+import { Confirm } from 'components/Confirm'
 import { fixOverspends } from 'scenes/Budgets/thunks'
 import { getTotalsByMonth } from 'scenes/Budgets/selectors/getTotalsByMonth'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 
-export function OverspentNotice(props) {
+export const OverspentNotice: FC = () => {
   const [month] = useMonth()
   const overspent = useSelector(getTotalsByMonth)?.[month]?.overspent
   const currency = useSelector(getUserCurrencyCode)
