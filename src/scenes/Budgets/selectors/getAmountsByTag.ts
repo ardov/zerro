@@ -127,7 +127,7 @@ export const getTransferFees = createSelector([getAmountsByMonth], amounts => {
   return result
 })
 
-interface TagAmounts {
+export interface TagAmounts {
   income: number
   outcome: number
   tagOutcome: number
@@ -136,7 +136,7 @@ interface TagAmounts {
   leftover: number
   available: number
 }
-interface TagGroupAmounts extends TagAmounts {
+export interface TagGroupAmounts extends TagAmounts {
   // Group totals
   totalBudgeted: number
   totalOutcome: number

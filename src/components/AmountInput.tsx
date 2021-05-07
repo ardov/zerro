@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useRef, FC } from 'react'
 import { TextField, InputAdornment, TextFieldProps } from '@material-ui/core'
 import { getCurrencySymbol } from 'helpers/format'
+import { Modify } from 'types'
 
-type AmountInputProps = TextFieldProps & {
-  value: number
-  currency?: string
-  selectOnFocus?: boolean
-  onChange: (n: number) => void
-  onEnter?: (n: number) => void
-}
+type AmountInputProps = Modify<
+  TextFieldProps,
+  {
+    value: number
+    currency?: string
+    selectOnFocus?: boolean
+    onChange: (n: number) => void
+    onEnter?: (n: number) => void
+  }
+>
 
 export const AmountInput: FC<AmountInputProps> = ({
   value = 0,

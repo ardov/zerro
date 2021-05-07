@@ -6,7 +6,7 @@ import { getTags } from '../../tags'
 import { getRawGoals } from '../selectors'
 import { setHiddenData } from '../thunks'
 import { AppThunk, RootState } from 'store'
-import { Goal, TagId } from 'types'
+import { ById, Goal, TagId } from 'types'
 
 // THUNKS
 export const setGoal = ({
@@ -39,7 +39,7 @@ export const setGoal = ({
 export const getGoals = createSelector(
   [getRawGoals, getTags],
   (rawGoals, tags) => {
-    let goals = {} as { [tagId: string]: Goal }
+    let goals: ById<Goal> = {}
     for (const tag in rawGoals) {
       if (rawGoals[tag] && tags[tag]) goals[tag] = parseGoal(rawGoals[tag])
     }

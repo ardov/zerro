@@ -20,10 +20,10 @@ interface IMoneyModalProps {
 }
 
 export const IsDraggingContext = React.createContext(false)
-export const DragModeContext = React.createContext({
+export const DragModeContext = React.createContext<DragModeContextType>({
   dragMode: 'FUNDS',
   setDragMode: () => {},
-} as DragModeContextType)
+})
 
 export const DnDContext: React.FC = ({ children }) => {
   const dispatch = useDispatch()
@@ -64,7 +64,7 @@ export const DnDContext: React.FC = ({ children }) => {
   )
   const onDragStart = useCallback(e => {
     setIsDragging(true)
-    if (window.navigator.vibrate) window.navigator.vibrate(100)
+    window.navigator?.vibrate(100)
   }, [])
   const closeMoveMoneyModal = useCallback(
     () => setMoneyModalProps({ open: false }),

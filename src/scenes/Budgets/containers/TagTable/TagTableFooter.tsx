@@ -1,6 +1,12 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { useSelector } from 'react-redux'
-import { Typography, Box, useMediaQuery } from '@material-ui/core'
+import {
+  Typography,
+  Box,
+  useMediaQuery,
+  TypographyProps,
+  Theme,
+} from '@material-ui/core'
 import { Amount } from 'components/Amount'
 import { makeStyles } from '@material-ui/styles'
 import { useMonth } from 'scenes/Budgets/pathHooks'
@@ -25,16 +31,19 @@ const useStyles = makeStyles(theme => ({
   name: { paddingLeft: theme.spacing(1) },
 }))
 
-const Cell = props => (
+const Cell: FC<TypographyProps> = props => (
   <Typography variant="body2" color="textSecondary" noWrap {...props} />
 )
 
-export function TagTableFooter({ metric = 'available' }) {
+export const TagTableFooter: FC<{
+  metric: 'available' | 'budgeted' | 'outcome'
+}> = props => {
+  const { metric = 'available' } = props
   const [month] = useMonth()
   const totalsByMonth = useSelector(getTotalsByMonth)
   const { budgeted, outcome, available } = totalsByMonth[month]
   const c = useStyles()
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
+  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('xs'))
   const metrics = { budgeted, outcome, available }
 
   return (
@@ -47,13 +56,13 @@ export function TagTableFooter({ metric = 'available' }) {
         </Cell>
       ) : (
         <>
-          <Cell align="right" title={budgeted}>
+          <Cell align="right" title={budgeted.toString()}>
             <Amount value={budgeted} decMode="ifOnly" />
           </Cell>
-          <Cell align="right" title={outcome}>
+          <Cell align="right" title={outcome.toString()}>
             <Amount value={-outcome} decMode="ifOnly" />
           </Cell>
-          <Cell align="right" title={available}>
+          <Cell align="right" title={available.toString()}>
             <Amount value={available} decMode="ifOnly" />
           </Cell>
         </>

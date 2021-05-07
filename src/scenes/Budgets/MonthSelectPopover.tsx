@@ -30,11 +30,11 @@ const MonthItem = withStyles(theme => ({
 }))(({ isCurrent, ...rest }: MonthItemItemProps) => <ListItem {...rest} />)
 
 interface MonthSelectPopoverProps extends Omit<PopoverProps, 'onChange'> {
-  minMonth: number
-  maxMonth: number
-  value: number
-  disablePast: boolean
   onChange: (month: number) => void
+  value?: number
+  minMonth?: number
+  maxMonth?: number
+  disablePast?: boolean
 }
 export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
   const { minMonth, maxMonth, onChange, disablePast, ...rest } = props
