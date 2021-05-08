@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { FC, useState } from 'react'
 import Cookies from 'cookies-js'
 import { useDispatch } from 'react-redux'
-import { Box, Button, Link, Fade } from '@material-ui/core'
+import { Box, Button, Link, Fade, LinkProps } from '@material-ui/core'
 import { logIn } from 'logic/authorization'
 import ZenApi from 'services/ZenApi'
 import { useTheme } from '@material-ui/styles'
@@ -11,15 +11,16 @@ import { setToken } from 'store/token'
 import { saveDataLocally } from 'logic/localData'
 import { Link as RouterLink } from 'react-router-dom'
 import { convertZmToLocal } from 'worker'
+import { AppThunk } from 'store'
 ZenApi.checkCode()
 
-export default function Auth(props) {
+export default function Auth() {
   const dispatch = useDispatch()
   const theme = useTheme()
   const [logoIn, setLogoIn] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   setTimeout(() => setLogoIn(true), 300)
-  const parseFiles = fileList => dispatch(loadFromFile(fileList[0]))
+  const parseFiles = (fileList: FileList) => dispatch(loadFromFile(fileList[0]))
 
   const dragOverStyle = {
     background: theme.palette.action.focus,
@@ -74,7 +75,7 @@ export default function Auth(props) {
 
       <Fade in timeout={3000}>
         <Box mt={2}>
-          <RouterLink to="/about" component={Link} variant="body1">
+          <RouterLink to="/about" component={SecondaryLink}>
             Что это такое?
           </RouterLink>
         </Box>
@@ -83,7 +84,11 @@ export default function Auth(props) {
   )
 }
 
-const loadFromFile = file => async (dispatch, getState) => {
+const SecondaryLink: FC<LinkProps> = props => (
+  <Link variant="body1" {...props} />
+)
+
+const loadFromFile = (file: File): AppThunk => async (dispatch, getState) => {
   if (!file) return
 
   try {

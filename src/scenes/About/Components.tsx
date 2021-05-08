@@ -1,5 +1,5 @@
-import React from 'react'
-import { Box, useTheme } from '@material-ui/core'
+import React, { FC, ReactNode } from 'react'
+import { Box, BoxProps, useTheme } from '@material-ui/core'
 import { useEffect } from 'react'
 import { useLocation, Link as RouterLink } from 'react-router-dom'
 
@@ -11,7 +11,12 @@ export function ScrollToTop() {
   return null
 }
 
-export function ExampleBox({ children, symbol, ...rest }) {
+type ExampleBoxProps = BoxProps & { symbol: string }
+export const ExampleBox: FC<ExampleBoxProps> = ({
+  children,
+  symbol,
+  ...rest
+}) => {
   const theme = useTheme()
   return (
     <Box
@@ -32,7 +37,7 @@ export function ExampleBox({ children, symbol, ...rest }) {
   )
 }
 
-export function Muted({ children, ...rest }) {
+export const Muted: FC<BoxProps> = ({ children, ...rest }) => {
   return (
     <Box color="text.secondary" component="span" {...rest}>
       {children}
@@ -40,7 +45,8 @@ export function Muted({ children, ...rest }) {
   )
 }
 
-export function TextLink({ href, ...rest }) {
+type TextLinkProps = { href: string; children: ReactNode }
+export const TextLink: FC<TextLinkProps> = ({ href, ...rest }) => {
   if (href?.startsWith('/')) {
     return <RouterLink to={href} {...rest} />
   }
