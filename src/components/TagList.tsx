@@ -4,12 +4,16 @@ import TagSelect2 from 'components/TagSelect2'
 import TagChip from 'components/TagChip'
 import { Tooltip } from 'components/Tooltip'
 import AddIcon from '@material-ui/icons/Add'
+import { Modify } from 'types'
 
-type TagListProps = BoxProps & {
-  tags: string[] | null
-  onChange: (tags: string[] | null) => void
-  tagType: 'income' | 'outcome' | null
-}
+type TagListProps = Modify<
+  BoxProps,
+  {
+    tags: string[] | null
+    onChange: (tags: string[]) => void
+    tagType: 'income' | 'outcome' | null
+  }
+>
 export const TagList: FC<TagListProps> = props => {
   const { tags = null, onChange, tagType, ...rest } = props
   const removeTag = (removeId: string) =>

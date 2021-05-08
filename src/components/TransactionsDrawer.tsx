@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FC } from 'react'
 import TransactionList from './TransactionList'
 import {
   Drawer,
@@ -6,27 +6,26 @@ import {
   Typography,
   IconButton,
   makeStyles,
+  DrawerProps,
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@material-ui/icons/Close'
+import { FilterConditions } from 'store/localData/transactions/helpers'
+import { Modify } from 'types'
 
-const useStyles = makeStyles(theme => ({
-  drawerWidth: {
-    width: 360,
-    [theme.breakpoints.down('xs')]: {
-      width: '100vw',
-    },
-  },
-}))
+type TransactionsDrawerProps = Modify<DrawerProps, { onClose: () => void }> & {
+  prefilter?: FilterConditions | FilterConditions[]
+  filterConditions: FilterConditions
+}
 
-export default function TransactionsDrawer({
+export const TransactionsDrawer: FC<TransactionsDrawerProps> = ({
   prefilter,
   filterConditions,
   title,
   onClose,
   open,
   ...rest
-}) {
+}) => {
   const c = useStyles()
   return (
     <Drawer
@@ -59,3 +58,12 @@ export default function TransactionsDrawer({
     </Drawer>
   )
 }
+
+const useStyles = makeStyles(theme => ({
+  drawerWidth: {
+    width: 360,
+    [theme.breakpoints.down('xs')]: {
+      width: '100vw',
+    },
+  },
+}))

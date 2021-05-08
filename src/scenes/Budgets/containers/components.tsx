@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 import { Box, BoxProps, Typography } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import { Amount } from '../../../components/Amount'
@@ -39,9 +39,9 @@ export function Total({
 }
 
 interface LineProps extends BoxProps {
-  name: string
+  name: ReactNode
   amount: number
-  description: string
+  description?: string
   currency?: string
 }
 

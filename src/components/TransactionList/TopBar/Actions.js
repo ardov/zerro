@@ -18,7 +18,7 @@ import {
 } from 'store/localData/transactions/thunks'
 import { CSSTransition } from 'react-transition-group'
 import { EditOutlined } from '@material-ui/icons'
-import BulkEditModal from './BulkEditModal'
+import { BulkEditModal } from './BulkEditModal'
 import { getType, isNew } from 'store/localData/transactions/helpers'
 import { getTransactions } from 'store/localData/transactions'
 

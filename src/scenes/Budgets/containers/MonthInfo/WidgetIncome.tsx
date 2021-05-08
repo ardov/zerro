@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { FC, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { endOfMonth } from 'date-fns'
 import { getTotalsByMonth } from '../../selectors/getTotalsByMonth'
@@ -10,27 +10,27 @@ import {
   ButtonBase,
   withStyles,
   Collapse,
+  BoxProps,
 } from '@material-ui/core'
 import Rhythm from 'components/Rhythm'
 import { Tooltip } from 'components/Tooltip'
 import { Line } from '../components'
 import { Amount } from 'components/Amount'
 import { getTagsTree } from 'store/localData/tags'
-import TransactionsDrawer from 'components/TransactionsDrawer'
+import { TransactionsDrawer } from 'components/TransactionsDrawer'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import { formatDate } from 'helpers/format'
+import { FilterConditions } from 'store/localData/transactions/helpers'
 
-const Base = withStyles(theme => ({
-  root: {
-    display: 'block',
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: theme.palette.background.default,
-    padding: theme.spacing(2),
-    textAlign: 'left',
-  },
-}))(ButtonBase)
+type IncomeDataPoint = {
+  id: string
+  color: string
+  name: string
+  amount: number
+  filter: string[]
+}
 
-const Dot = ({ color }) => (
+const Dot: FC<{ color: string }> = ({ color }) => (
   <span
     style={{
       width: 12,
@@ -43,17 +43,17 @@ const Dot = ({ color }) => (
   />
 )
 
-export function WidgetIncome(props) {
+export function WidgetIncome() {
   const [month] = useMonth()
   const currency = useSelector(getUserCurrencyCode)
   const tags = useSelector(getTagsTree)
   const amounts = useSelector(getAmountsByTag)?.[month]
   const income = useSelector(getTotalsByMonth)?.[month]?.income
   const [opened, setOpened] = useState(false)
-  const [selected, setSelected] = useState()
+  const [selected, setSelected] = useState<string[]>()
   const monthName = formatDate(month, 'LLL').toLowerCase()
 
-  const incomeData = tags
+  const incomeData: IncomeDataPoint[] = tags
     .filter(tag => amounts[tag.id]?.totalIncome)
     .map(tag => ({
       id: tag.id,
@@ -66,7 +66,7 @@ export function WidgetIncome(props) {
 
   const toggleOpened = () => setOpened(opened => !opened)
 
-  const filterConditions = {
+  const filterConditions: FilterConditions = {
     type: 'income',
     dateFrom: month,
     dateTo: endOfMonth(month),
@@ -122,7 +122,18 @@ export function WidgetIncome(props) {
   )
 }
 
-function PercentBar({ data, ...rest }) {
+const Base = withStyles(theme => ({
+  root: {
+    display: 'block',
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: theme.palette.background.default,
+    padding: theme.spacing(2),
+    textAlign: 'left',
+  },
+}))(ButtonBase)
+
+const PercentBar: FC<BoxProps & { data: IncomeDataPoint[] }> = props => {
+  const { data, ...rest } = props
   return (
     <Box
       display="flex"

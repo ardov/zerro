@@ -12,7 +12,7 @@ import {
 
 type OperatorType = 'AND' | 'OR'
 
-interface FilterConditions {
+export interface FilterConditions {
   search?: null | string
   type?: null | TransactionType
   showDeleted?: boolean

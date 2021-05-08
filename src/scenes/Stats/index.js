@@ -6,7 +6,7 @@ import { getAccountsHistory } from './selectors'
 import { getAccounts, getAccountList } from 'store/localData/accounts'
 import { formatMoney, formatDate } from 'helpers/format'
 import Rhythm from 'components/Rhythm'
-import TransactionsDrawer from 'components/TransactionsDrawer'
+import { TransactionsDrawer } from 'components/TransactionsDrawer'
 
 export default function Stats() {
   const accs = useSelector(getAccountList)

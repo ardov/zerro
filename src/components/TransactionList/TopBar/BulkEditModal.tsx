@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import Button from '@material-ui/core/Button'
-import Dialog from '@material-ui/core/Dialog'
+import Dialog, { DialogProps } from '@material-ui/core/Dialog'
 import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
 import DialogContentText from '@material-ui/core/DialogContentText'
@@ -10,37 +10,27 @@ import { getTransactions } from 'store/localData/transactions'
 import { getType } from 'store/localData/transactions/helpers'
 import { setTagsToTransactions } from 'store/localData/transactions/thunks'
 import { TagList } from 'components/TagList'
+import { Modify, Transaction } from 'types'
 
-function isSameTags(list = []) {
-  return list
-    .map(tr => JSON.stringify(tr.tag))
-    .every((tags, i, arr) => tags === arr[0])
+type BulkEditModalProps = Modify<DialogProps, { onClose: () => void }> & {
+  ids: string[]
+  onApply: () => void
 }
 
-function equalArrays(a, b) {
-  return JSON.stringify(a) === JSON.stringify(b)
-}
-
-function getTypes(list = []) {
-  let res = { income: 0, outcome: 0, transfer: 0 }
-  list.forEach(tr => res[getType(tr)]++)
-  return res
-}
-
-export default function BulkEditModal({
+export const BulkEditModal: FC<BulkEditModalProps> = ({
   ids,
   onClose,
   onApply,
   open = false,
   keepMounted = false,
   ...rest
-}) {
+}) => {
   const dispatch = useDispatch()
   const allTransactions = useSelector(getTransactions)
   const transactions = ids.map(id => allTransactions[id]).filter(Boolean)
   const sameTags = isSameTags(transactions)
   const types = getTypes(transactions)
-  const tagType = types.income ? (types.outcome ? false : 'income') : 'outcome'
+  const tagType = types.income ? (types.outcome ? null : 'income') : 'outcome'
   const commonTags = sameTags ? transactions[0]?.tag || [] : ['mixed']
 
   const [tags, setTags] = useState(commonTags)
@@ -89,4 +79,20 @@ export default function BulkEditModal({
       </DialogActions>
     </Dialog>
   )
+}
+
+function isSameTags(list: Transaction[] = []) {
+  return list
+    .map(tr => JSON.stringify(tr.tag))
+    .every((tags, i, arr) => tags === arr[0])
+}
+
+function equalArrays(a: string[], b: string[]) {
+  return JSON.stringify(a) === JSON.stringify(b)
+}
+
+function getTypes(list: Transaction[] = []) {
+  let res = { income: 0, outcome: 0, transfer: 0 }
+  list.forEach(tr => res[getType(tr) as 'income' | 'outcome' | 'transfer']++)
+  return res
 }

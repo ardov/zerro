@@ -1,6 +1,13 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, {
+  CSSProperties,
+  FC,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { Dialog } from '@material-ui/core'
-import { VariableSizeList as List } from 'react-window'
+import { ListChildComponentProps, VariableSizeList as List } from 'react-window'
 import { DatePicker } from '@material-ui/pickers'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { withStyles } from '@material-ui/core/styles'
@@ -8,10 +15,15 @@ import { Box, ListSubheader } from '@material-ui/core'
 import Transaction from './Transaction'
 import { formatDate } from 'helpers/format'
 
+type GroupNode = {
+  date: number
+  transactions: string[]
+}
+
 const HEADER_HEIGHT = 48
 const TRANSACTION_HEIGHT = 72
 
-const findDateIndex = (groups, date) => {
+const findDateIndex = (groups: GroupNode[], date: GroupNode['date']) => {
   for (let i = 0; i < groups.length; i++) {
     if (groups[i].date <= date) return i
   }
@@ -23,19 +35,29 @@ const StyledSubheader = withStyles(theme => ({
   sticky: { top: 0 },
 }))(ListSubheader)
 
-export function GrouppedList({
+type GrouppedListProps = {
+  groups: GroupNode[]
+  checked: string[]
+  toggleTransaction: (id: string) => void
+  checkByChangedDate: (date: number) => void
+  onFilterByPayee: (payee: string) => void
+}
+type DayData = GrouppedListProps & {
+  onDateClick: (date: Date | number | null) => void
+}
+
+export const GrouppedList: FC<GrouppedListProps> = ({
   groups,
-  opened,
   checked,
   toggleTransaction,
   checkByChangedDate,
   onFilterByPayee,
-}) {
-  const listRef = useRef(null)
-  const [clickedDate, setClickedDate] = useState(null)
+}) => {
+  const listRef = useRef<List>(null)
+  const [clickedDate, setClickedDate] = useState<Date | number | null>(null)
 
   useEffect(() => {
-    if (listRef.current) listRef.current.resetAfterIndex(0)
+    listRef?.current?.resetAfterIndex?.(0)
   }, [listRef, groups])
 
   const scrollToDate = useCallback(
@@ -51,13 +73,13 @@ export function GrouppedList({
     i => HEADER_HEIGHT + TRANSACTION_HEIGHT * groups[i].transactions.length,
     [groups]
   )
-  const itemData = {
+  const itemData: DayData = {
     groups,
     checked,
     toggleTransaction,
     checkByChangedDate,
     onFilterByPayee,
-    onDateClick: date => setClickedDate(date),
+    onDateClick: (date: Date | number | null) => setClickedDate(date),
   }
 
   return (
@@ -98,7 +120,12 @@ export function GrouppedList({
   )
 }
 
-const Day = ({ index, style, data, isScrolling }) => {
+const Day: FC<ListChildComponentProps> = ({
+  index,
+  style,
+  data,
+  isScrolling,
+}) => {
   const {
     groups,
     checked,
@@ -106,7 +133,7 @@ const Day = ({ index, style, data, isScrolling }) => {
     checkByChangedDate,
     onFilterByPayee,
     onDateClick,
-  } = data
+  } = data as DayData
   const [renderContent, setRenderContent] = useState(!isScrolling)
   useEffect(() => {
     if (!isScrolling) setRenderContent(true)
@@ -143,7 +170,11 @@ const Day = ({ index, style, data, isScrolling }) => {
     )
 }
 
-const DaySkeleton = ({ date, style, length }) => (
+const DaySkeleton: FC<{
+  date: number | Date
+  length: number
+  style: CSSProperties
+}> = ({ date, style, length }) => (
   <Box position="relative" maxWidth={560} mx="auto" style={style}>
     <StyledSubheader>{formatDate(date)}</StyledSubheader>
     <div
