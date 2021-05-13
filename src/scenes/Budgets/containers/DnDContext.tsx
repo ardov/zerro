@@ -64,7 +64,7 @@ export const DnDContext: React.FC = ({ children }) => {
   )
   const onDragStart = useCallback(e => {
     setIsDragging(true)
-    window.navigator?.vibrate(100)
+    if (window.navigator.vibrate) window.navigator.vibrate(100)
   }, [])
   const closeMoveMoneyModal = useCallback(
     () => setMoneyModalProps({ open: false }),
