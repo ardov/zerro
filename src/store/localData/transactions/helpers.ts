@@ -26,6 +26,32 @@ export interface FilterConditions {
   isNew?: boolean
 }
 
+export const checkRaw = (
+  conditions: FilterConditions | FilterConditions[] = {},
+  operator: OperatorType = 'OR'
+) => (tr: Transaction) => {
+  if (Array.isArray(conditions)) {
+    const results = conditions.map(cond => checkConditions(tr, cond))
+    return operator === 'AND' ? results.every(Boolean) : results.some(Boolean)
+  }
+  return checkConditions(tr, conditions)
+}
+
+const checkConditions = (tr: Transaction, conditions: FilterConditions) => {
+  if (!conditions) return true
+  return (
+    checkType(tr, conditions.type) &&
+    checkDeleted(tr, conditions.showDeleted) &&
+    checkSearch(tr, conditions.search) &&
+    checkDate(tr, conditions.dateFrom, conditions.dateTo) &&
+    checkTags(tr, conditions.tags) &&
+    checkAmount(tr, conditions.amountFrom, 'greaterOrEqual') &&
+    checkAmount(tr, conditions.amountTo, 'lessOrEqual') &&
+    checkAccounts(tr, conditions.accountsFrom, conditions.accountsTo) &&
+    checkIsNew(tr, conditions.isNew)
+  )
+}
+
 const checkSearch = (tr: Transaction, search?: FilterConditions['search']) => {
   if (!search) return true
   if (tr.comment?.toUpperCase().includes(search.toUpperCase())) return true
@@ -86,32 +112,6 @@ const checkIsNew = (tr: Transaction, condition?: FilterConditions['isNew']) => {
   if (condition === undefined) return true
   const isNewTransaction = isNew(tr)
   return isNewTransaction === condition
-}
-
-const checkConditions = (tr: Transaction, conditions: FilterConditions) => {
-  if (!conditions) return true
-  return (
-    checkType(tr, conditions.type) &&
-    checkDeleted(tr, conditions.showDeleted) &&
-    checkSearch(tr, conditions.search) &&
-    checkDate(tr, conditions.dateFrom, conditions.dateTo) &&
-    checkTags(tr, conditions.tags) &&
-    checkAmount(tr, conditions.amountFrom, 'greaterOrEqual') &&
-    checkAmount(tr, conditions.amountTo, 'lessOrEqual') &&
-    checkAccounts(tr, conditions.accountsFrom, conditions.accountsTo) &&
-    checkIsNew(tr, conditions.isNew)
-  )
-}
-
-export const checkRaw = (
-  conditions: FilterConditions | FilterConditions[] = {},
-  operator: OperatorType = 'OR'
-) => (tr: Transaction) => {
-  if (Array.isArray(conditions)) {
-    const results = conditions.map(cond => checkConditions(tr, cond))
-    return operator === 'AND' ? results.every(Boolean) : results.some(Boolean)
-  }
-  return checkConditions(tr, conditions)
 }
 
 /**
