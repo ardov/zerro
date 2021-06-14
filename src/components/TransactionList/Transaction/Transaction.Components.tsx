@@ -9,7 +9,7 @@ import { Transaction as ITransaction, TransactionType } from 'types'
 import { getPopulatedTags } from 'store/localData/tags'
 import { Typography } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
-import { isNew } from 'store/localData/transactions/helpers'
+// import { isNew } from 'store/localData/transactions/helpers'
 
 type HTMLDivProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLDivElement>,
@@ -58,7 +58,8 @@ export const Symbol: FC<SymbolProps> = ({
             color={tag.colorHEX}
             size="m"
           />
-          <NewIndicator isNew={isNew(tr)} />
+          {/* Disable new indicator it doesn't work as expected */}
+          {/* <NewIndicator isNew={isNew(tr)} /> */}
           {tr.qrCode && <Reciept>🧾</Reciept>}
         </SymbolWrapper>
       )
@@ -74,7 +75,7 @@ export const Symbol: FC<SymbolProps> = ({
             onChange={() => onToggle(tr.id)}
             size="m"
           />
-          <NewIndicator isNew={isNew(tr)} />
+          {/* <NewIndicator isNew={isNew(tr)} /> */}
           {tr.qrCode && <Reciept>🧾</Reciept>}
         </SymbolWrapper>
       )
@@ -306,7 +307,7 @@ const SymbolWrapper = styled.div`
   position: relative;
   align-self: center;
 `
-const NewIndicator = styled.div<{ isNew?: boolean }>`
+/* const NewIndicator = styled.div<{ isNew?: boolean }>`
   position: absolute;
   left: 1px;
   top: 2px;
@@ -318,7 +319,7 @@ const NewIndicator = styled.div<{ isNew?: boolean }>`
   transform: scale(${p => (p.isNew ? 1 : 0)});
   opacity: ${p => (p.isNew ? 1 : 0)};
   transition: 200ms;
-`
+` */
 const Reciept = styled.div`
   font-size: ${16 / 16}rem;
   text-shadow: 0 0 2px ${p => p.theme.palette.background.paper};

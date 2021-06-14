@@ -8,9 +8,10 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import { useSelector, useDispatch } from 'react-redux'
 import { getTransactions } from 'store/localData/transactions'
 import { getType } from 'store/localData/transactions/helpers'
-import { setTagsToTransactions } from 'store/localData/transactions/thunks'
+import { bulkEditTransactions } from 'store/localData/transactions/thunks'
 import { TagList } from 'components/TagList'
 import { Modify, Transaction } from 'types'
+import { Box, TextField } from '@material-ui/core'
 
 type BulkEditModalProps = Modify<DialogProps, { onClose: () => void }> & {
   ids: string[]
@@ -29,11 +30,15 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   const allTransactions = useSelector(getTransactions)
   const transactions = ids.map(id => allTransactions[id]).filter(Boolean)
   const sameTags = isSameTags(transactions)
+  const sameComments = isSameComments(transactions)
   const types = getTypes(transactions)
   const tagType = types.income ? (types.outcome ? null : 'income') : 'outcome'
   const commonTags = sameTags ? transactions[0]?.tag || [] : ['mixed']
 
   const [tags, setTags] = useState(commonTags)
+  const [comment, setComment] = useState(
+    sameComments ? transactions[0]?.comment || '' : ''
+  )
 
   useEffect(() => {
     if (open) setTags(commonTags)
@@ -41,8 +46,13 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   }, [setTags, ids, open])
 
   const onSave = () => {
-    if (!equalArrays(commonTags, tags))
-      dispatch(setTagsToTransactions(ids, tags))
+    const opts = {
+      tags: equalArrays(commonTags, tags) ? undefined : tags,
+      comment,
+    }
+    if (opts.tags || opts.comment) {
+      dispatch(bulkEditTransactions(ids, opts))
+    }
     onApply()
   }
 
@@ -51,22 +61,33 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
       <DialogTitle>Редактирование операций</DialogTitle>
 
       <DialogContent>
-        <DialogContentText>
-          {types.transfer === 0
-            ? 'Категории'
-            : 'Пока здесь переводы не поддерживаются'}
-        </DialogContentText>
-
         {types.transfer === 0 && (
-          <TagList
-            tags={tags}
-            tagType={tagType}
-            onChange={setTags}
-            p={2}
-            bgcolor="background.default"
-            borderRadius="borderRadius"
-          />
+          <>
+            <DialogContentText>Категории</DialogContentText>
+            <TagList
+              tags={tags}
+              tagType={tagType}
+              onChange={setTags}
+              p={2}
+              bgcolor="background.default"
+              borderRadius="borderRadius"
+            />
+          </>
         )}
+
+        <Box pt={2}>
+          <TextField
+            value={comment}
+            onChange={e => setComment(e.target.value)}
+            label="Комментарий"
+            multiline
+            rowsMax="4"
+            fullWidth
+            helperText=""
+            variant="outlined"
+            margin="dense"
+          />
+        </Box>
       </DialogContent>
 
       <DialogActions>
@@ -85,6 +106,11 @@ function isSameTags(list: Transaction[] = []) {
   return list
     .map(tr => JSON.stringify(tr.tag))
     .every((tags, i, arr) => tags === arr[0])
+}
+function isSameComments(list: Transaction[] = []) {
+  return list
+    .map(tr => tr.comment)
+    .every((comment, i, arr) => comment === arr[0])
 }
 
 function equalArrays(a: string[], b: string[]) {

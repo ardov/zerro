@@ -61,6 +61,14 @@ export default function TransactionList(props) {
 
   const uncheckAll = useCallback(() => setChecked([]), [])
 
+  const checkAll = () => {
+    let ids: string[] = []
+    Object.values(groups).forEach(day => {
+      ids = ids.concat(day.transactions)
+    })
+    setChecked(ids)
+  }
+
   const toggleTransaction = useCallback(id => {
     setChecked(current => {
       return current.includes(id)
@@ -111,6 +119,7 @@ export default function TransactionList(props) {
         visible={showActions}
         checkedIds={checked}
         onUncheckAll={uncheckAll}
+        onCheckAll={checkAll}
       />
 
       <Box flex="1 1 auto">

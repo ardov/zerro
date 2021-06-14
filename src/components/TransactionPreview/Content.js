@@ -18,10 +18,6 @@ import { Map } from './Map'
 import AmountInput from 'components/AmountInput'
 import { formatDate, rateToWords } from 'helpers/format'
 import { TagList } from 'components/TagList'
-import { useDispatch, useSelector } from 'react-redux'
-import { getTransactions } from 'store/localData/transactions'
-import { isNew } from 'store/localData/transactions/helpers'
-import { markViewed } from 'store/localData/transactions/thunks'
 
 export default function DetailsDrawer(props) {
   const {
@@ -54,9 +50,6 @@ export default function DetailsDrawer(props) {
     onRestore,
     onSelectSimilar,
   } = props
-  const dispatch = useDispatch()
-  const tr = useSelector(getTransactions)[id]
-  const notSeen = isNew(tr)
   const [localComment, setLocalComment] = useState(comment)
   const [localOutcome, setLocalOutcome] = useState(outcome)
   const [localIncome, setLocalIncome] = useState(income)
@@ -73,7 +66,8 @@ export default function DetailsDrawer(props) {
     setLocalTag(tag)
   }, [id, changed, comment, outcome, income, payee, date, tag])
 
-  useEffect(
+  // Disabled autoviewing. It breaks search for transactions from the same sync.
+  /*   useEffect(
     () => {
       const timer = setTimeout(() => {
         if (notSeen) dispatch(markViewed(id, true))
@@ -84,7 +78,7 @@ export default function DetailsDrawer(props) {
     // prop 'viewed' ignored to prevent of changing it when we mark transaction as unread
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [id, onChange]
-  )
+  ) */
 
   const hasChanges =
     comment !== localComment ||
@@ -238,11 +232,6 @@ export default function DetailsDrawer(props) {
         <Button onClick={() => onSelectSimilar(changed)}>
           Найти другие из этой синхронизации
         </Button>
-        {!notSeen && (
-          <Button onClick={() => onChange({ id, viewed: false })}>
-            Сделать непросмотренной
-          </Button>
-        )}
       </Box>
 
       <SaveButton visible={hasChanges} onSave={onSave} />

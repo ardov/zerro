@@ -6,29 +6,37 @@ import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline'
 import LocalOfferOutlinedIcon from '@material-ui/icons/LocalOfferOutlined'
 import DoneAllIcon from '@material-ui/icons/DoneAll'
 import { Tooltip } from 'components/Tooltip'
+import { makeStyles } from '@material-ui/styles'
 import Chip from '@material-ui/core/Chip'
 import Box from '@material-ui/core/Box'
+import Menu from '@material-ui/core/Menu'
+import MenuItem from '@material-ui/core/MenuItem'
+import MoreVertIcon from '@material-ui/icons/MoreVert'
+import VisibilityIcon from '@material-ui/icons/Visibility'
 import pluralize from 'helpers/pluralize'
 import { Confirm } from 'components/Confirm'
 import TagSelect2 from 'components/TagSelect2'
 import {
   deleteTransactions,
   markViewed,
-  setTagsToTransactions,
+  bulkEditTransactions,
 } from 'store/localData/transactions/thunks'
 import { CSSTransition } from 'react-transition-group'
 import { EditOutlined } from '@material-ui/icons'
 import { BulkEditModal } from './BulkEditModal'
 import { getType, isNew } from 'store/localData/transactions/helpers'
 import { getTransactions } from 'store/localData/transactions'
+import { Divider } from '@material-ui/core'
 
 export default function Actions({
   visible,
   checkedIds,
   onUncheckAll,
+  onCheckAll,
   onDelete,
 }) {
   const dispatch = useDispatch()
+  const classes = useStyles()
   const allTransactions = useSelector(getTransactions)
   const [ids, setIds] = useState(checkedIds)
   const transactions = ids?.map(id => allTransactions[id])
@@ -36,23 +44,36 @@ export default function Actions({
   const length = ids.length
   const [editModalVisible, setEditModalVisible] = useState(false)
 
+  const [anchorEl, setAnchorEl] = useState(null)
+  const handleClick = event => setAnchorEl(event.currentTarget)
+  const closeMenu = () => setAnchorEl(null)
+
   useEffect(() => {
     if (visible) setIds(checkedIds)
   }, [visible, checkedIds])
 
   const handleSetTag = id => {
-    if (!id || id === 'null') dispatch(setTagsToTransactions(checkedIds, []))
-    else dispatch(setTagsToTransactions(checkedIds, [id]))
+    if (!id || id === 'null')
+      dispatch(bulkEditTransactions(checkedIds, { tags: [] }))
+    else dispatch(bulkEditTransactions(checkedIds, { tags: [id] }))
+    closeMenu()
     onUncheckAll()
   }
 
   const handleDelete = () => {
     dispatch(deleteTransactions(checkedIds))
+    closeMenu()
     onUncheckAll()
+  }
+
+  const handleCheckAll = () => {
+    onCheckAll()
+    closeMenu()
   }
 
   const handleMarkViewed = () => {
     dispatch(markViewed(checkedIds, true))
+    closeMenu()
     onUncheckAll()
   }
 
@@ -74,6 +95,7 @@ export default function Actions({
         onClose={() => setEditModalVisible(false)}
         onApply={() => {
           setEditModalVisible(false)
+          closeMenu()
           onUncheckAll()
         }}
         open={editModalVisible}
@@ -125,23 +147,44 @@ export default function Actions({
               />
             )}
 
-            {actions.markViewed && (
-              <Tooltip title="Сделать просмотренными">
-                <IconButton
-                  children={<DoneAllIcon />}
-                  onClick={handleMarkViewed}
-                />
-              </Tooltip>
-            )}
+            <Tooltip title="Действия">
+              <IconButton
+                children={<MoreVertIcon />}
+                aria-controls="actions-menu"
+                aria-haspopup="true"
+                onClick={handleClick}
+              />
+            </Tooltip>
 
-            {actions.bulkEdit && (
-              <Tooltip title="Редактировать">
-                <IconButton
-                  children={<EditOutlined />}
-                  onClick={() => setEditModalVisible(true)}
-                />
-              </Tooltip>
-            )}
+            <Menu
+              id="actions-menu"
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={closeMenu}
+            >
+              {actions.markViewed && (
+                <MenuItem onClick={handleMarkViewed}>
+                  <VisibilityIcon className={classes.menuIcon} color="action" />
+                  Сделать просмотренными
+                </MenuItem>
+              )}
+
+              {actions.bulkEdit && (
+                <MenuItem onClick={() => setEditModalVisible(true)}>
+                  <EditOutlined className={classes.menuIcon} color="action" />
+                  Редактировать
+                </MenuItem>
+              )}
+
+              <Box my={1}>
+                <Divider />
+              </Box>
+
+              <MenuItem onClick={handleCheckAll}>
+                <DoneAllIcon className={classes.menuIcon} color="action" />
+                Выбрать все
+              </MenuItem>
+            </Menu>
           </Box>
         </CSSTransition>
       </Box>
@@ -149,12 +192,16 @@ export default function Actions({
   )
 }
 
+const useStyles = makeStyles(({ spacing }) => ({
+  menuIcon: { marginRight: spacing(1) },
+}))
+
 function getAvailableActions(transactions) {
   const { income, outcome, transfer } = getTypes(transactions)
   return {
     delete: true,
     setMainTag: !transfer && (income || outcome),
-    bulkEdit: !transfer && (income || outcome),
+    bulkEdit: true,
     markViewed: transactions.some(isNew),
   }
 }

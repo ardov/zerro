@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid'
-import { getTransaction } from 'store/localData/transactions'
+import { getTransaction, getTransactions } from 'store/localData/transactions'
 import { sendEvent } from 'helpers/tracking'
 import { AppThunk } from 'store'
 import { OptionalExceptFor, TagId, Transaction, TransactionId } from 'types'
@@ -72,25 +72,37 @@ export const applyChangesToTransaction = (
   dispatch(applyClientPatch({ transaction: [tr] }))
 }
 
-export const setTagsToTransactions = (
+export const bulkEditTransactions = (
   ids: TransactionId[],
-  tags: TagId[]
+  opts: { tags?: TagId[]; comment?: string }
 ): AppThunk => (dispatch, getState) => {
   sendEvent('Bulk Actions: set new tags')
   const state = getState()
+  const allTransactions = getTransactions(state)
 
   const result = ids.map(id => {
-    const tr = getTransaction(state, id)
-    const newTags: TagId[] = []
-    const addId = (id: string) =>
-      newTags.includes(id) || id === 'null' ? '' : newTags.push(id)
-    tags?.forEach(id => {
-      if (id === 'mixed' && tr.tag) tr.tag.forEach(addId)
-      else addId(id)
-    })
-    return { ...tr, tag: newTags, changed: Date.now() }
+    const tr = allTransactions[id]
+    const tag = modifyTags(tr.tag, opts.tags)
+    const comment = modifyComment(tr.comment, opts.comment)
+    return { ...tr, tag, comment, changed: Date.now() }
   })
   dispatch(applyClientPatch({ transaction: result }))
+}
+
+const modifyTags = (prevTags: string[] | null, newTags?: string[]) => {
+  if (!newTags) return prevTags
+  let result: TagId[] = []
+  newTags?.forEach(id => {
+    if (id === 'mixed' && prevTags) prevTags.forEach(addId)
+    else addId(id)
+  })
+  const addId = (id: string) =>
+    result.includes(id) || id === 'null' ? '' : result.push(id)
+  return result
+}
+const modifyComment = (prevComment: string | null, newComment?: string) => {
+  if (!newComment) return prevComment
+  return newComment.replaceAll('$&', prevComment || '')
 }
 
 function split(raw: Transaction) {
