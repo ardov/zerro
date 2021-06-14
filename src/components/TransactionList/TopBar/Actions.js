@@ -201,7 +201,7 @@ function getAvailableActions(transactions) {
   return {
     delete: true,
     setMainTag: !transfer && (income || outcome),
-    bulkEdit: !transfer && (income || outcome),
+    bulkEdit: true,
     markViewed: transactions.some(isNew),
   }
 }

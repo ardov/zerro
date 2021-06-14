@@ -30,12 +30,15 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   const allTransactions = useSelector(getTransactions)
   const transactions = ids.map(id => allTransactions[id]).filter(Boolean)
   const sameTags = isSameTags(transactions)
+  const sameComments = isSameComments(transactions)
   const types = getTypes(transactions)
   const tagType = types.income ? (types.outcome ? null : 'income') : 'outcome'
   const commonTags = sameTags ? transactions[0]?.tag || [] : ['mixed']
 
   const [tags, setTags] = useState(commonTags)
-  const [comment, setComment] = useState('')
+  const [comment, setComment] = useState(
+    sameComments ? transactions[0]?.comment || '' : ''
+  )
 
   useEffect(() => {
     if (open) setTags(commonTags)
@@ -50,7 +53,6 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
     if (opts.tags || opts.comment) {
       dispatch(bulkEditTransactions(ids, opts))
     }
-
     onApply()
   }
 
@@ -107,6 +109,11 @@ function isSameTags(list: Transaction[] = []) {
   return list
     .map(tr => JSON.stringify(tr.tag))
     .every((tags, i, arr) => tags === arr[0])
+}
+function isSameComments(list: Transaction[] = []) {
+  return list
+    .map(tr => tr.comment)
+    .every((comment, i, arr) => comment === arr[0])
 }
 
 function equalArrays(a: string[], b: string[]) {
