@@ -8,9 +8,10 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import { useSelector, useDispatch } from 'react-redux'
 import { getTransactions } from 'store/localData/transactions'
 import { getType } from 'store/localData/transactions/helpers'
-import { setTagsToTransactions } from 'store/localData/transactions/thunks'
+import { bulkEditTransactions } from 'store/localData/transactions/thunks'
 import { TagList } from 'components/TagList'
 import { Modify, Transaction } from 'types'
+import { Box, TextField } from '@material-ui/core'
 
 type BulkEditModalProps = Modify<DialogProps, { onClose: () => void }> & {
   ids: string[]
@@ -34,6 +35,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   const commonTags = sameTags ? transactions[0]?.tag || [] : ['mixed']
 
   const [tags, setTags] = useState(commonTags)
+  const [comment, setComment] = useState('')
 
   useEffect(() => {
     if (open) setTags(commonTags)
@@ -41,8 +43,14 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   }, [setTags, ids, open])
 
   const onSave = () => {
-    if (!equalArrays(commonTags, tags))
-      dispatch(setTagsToTransactions(ids, tags))
+    const opts = {
+      tags: equalArrays(commonTags, tags) ? undefined : tags,
+      comment,
+    }
+    if (opts.tags || opts.comment) {
+      dispatch(bulkEditTransactions(ids, opts))
+    }
+
     onApply()
   }
 
@@ -67,6 +75,20 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
             borderRadius="borderRadius"
           />
         )}
+
+        <Box p={2}>
+          <TextField
+            value={comment}
+            onChange={e => setComment(e.target.value)}
+            label="Комментарий"
+            multiline
+            rowsMax="4"
+            fullWidth
+            helperText=""
+            variant="outlined"
+            margin="dense"
+          />
+        </Box>
       </DialogContent>
 
       <DialogActions>
