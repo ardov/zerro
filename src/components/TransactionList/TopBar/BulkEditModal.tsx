@@ -61,24 +61,21 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
       <DialogTitle>Редактирование операций</DialogTitle>
 
       <DialogContent>
-        <DialogContentText>
-          {types.transfer === 0
-            ? 'Категории'
-            : 'Пока здесь переводы не поддерживаются'}
-        </DialogContentText>
-
         {types.transfer === 0 && (
-          <TagList
-            tags={tags}
-            tagType={tagType}
-            onChange={setTags}
-            p={2}
-            bgcolor="background.default"
-            borderRadius="borderRadius"
-          />
+          <>
+            <DialogContentText>Категории</DialogContentText>
+            <TagList
+              tags={tags}
+              tagType={tagType}
+              onChange={setTags}
+              p={2}
+              bgcolor="background.default"
+              borderRadius="borderRadius"
+            />
+          </>
         )}
 
-        <Box p={2}>
+        <Box pt={2}>
           <TextField
             value={comment}
             onChange={e => setComment(e.target.value)}
