@@ -92,12 +92,12 @@ export const bulkEditTransactions = (
 const modifyTags = (prevTags: string[] | null, newTags?: string[]) => {
   if (!newTags) return prevTags
   let result: TagId[] = []
+  const addId = (id: string) =>
+    result.includes(id) || id === 'null' ? '' : result.push(id)
   newTags?.forEach(id => {
     if (id === 'mixed' && prevTags) prevTags.forEach(addId)
     else addId(id)
   })
-  const addId = (id: string) =>
-    result.includes(id) || id === 'null' ? '' : result.push(id)
   return result
 }
 const modifyComment = (prevComment: string | null, newComment?: string) => {
