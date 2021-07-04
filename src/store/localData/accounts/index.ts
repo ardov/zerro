@@ -3,6 +3,7 @@ import { populate } from './populate'
 import { convertCurrency } from 'store/data/selectors'
 import { Account, AccountId, PopulatedAccount } from 'types'
 import { RootState } from 'store'
+import { DATA_ACC_NAME } from '../hiddenData/constants'
 
 // SELECTORS
 
@@ -39,7 +40,10 @@ export const getInBudgetAccounts = createSelector([getAccountList], accounts =>
 )
 
 export const getSavingAccounts = createSelector([getAccountList], accounts =>
-  accounts.filter(a => !isInBudget(a) && a.type !== 'debt')
+  accounts.filter(
+    acc =>
+      !isInBudget(acc) && acc.type !== 'debt' && acc.title !== DATA_ACC_NAME
+  )
 )
 
 function isInBudget(a: Account) {
