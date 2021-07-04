@@ -63,7 +63,7 @@ const AccHist = ({ id, startDate = 0, endDate, onClick }) => {
   const [hoverIdx, setHoverIdx] = useState(null)
 
   const diff = Math.abs(history[history.length - 1].balance - acc.balance)
-  const hasError = diff > 0.001
+  const hasError = diff > 0.001 && acc.type !== 'debt'
 
   const data = history.filter(({ date }) => date >= startDate)
 
@@ -116,6 +116,7 @@ const AccHist = ({ id, startDate = 0, endDate, onClick }) => {
             onClick={e => {
               if (!e) return
               const date = data[e.activeLabel].date
+              console.log({ history, acc })
               onClick(id, date)
             }}
             onMouseMove={e => e && setHoverIdx(e.activeLabel ?? null)}

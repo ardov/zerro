@@ -161,6 +161,8 @@ export default function Actions({
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
               onClose={closeMenu}
+              anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+              transformOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
               {actions.markViewed && (
                 <MenuItem onClick={handleMarkViewed}>
