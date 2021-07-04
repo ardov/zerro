@@ -215,7 +215,7 @@ export const Info: FC<InfoProps> = ({
           onClick={onFilterByPayee}
         />
       )}
-      {!!tr.comment && <span>{tr.comment}</span>}
+      {!!tr.comment && <span title={tr.comment}>{tr.comment}</span>}
     </InfoWrapper>
   )
 }
