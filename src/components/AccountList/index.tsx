@@ -8,6 +8,7 @@ import { Account, Subheader } from './components'
 import { PopulatedAccount } from 'types'
 import { setInBudget } from 'store/localData/accounts/thunks'
 import { Amount } from 'components/Amount'
+import { Tooltip } from 'components/Tooltip'
 
 export default function AccountList({ className = '' }) {
   const dispatch = useDispatch()
@@ -40,7 +41,11 @@ export default function AccountList({ className = '' }) {
     <div className={className}>
       <List dense>
         <Subheader
-          title="В бюджете"
+          name={
+            <Tooltip title="Эти счета учитываются в бюджете">
+              <span>В балансе</span>
+            </Tooltip>
+          }
           amount={inBudgetActiveSum + inBudgetArchivedSum}
           currency={userInstrument?.shortTitle}
           onClick={() => setShowArchived(a => !a)}
@@ -76,7 +81,11 @@ export default function AccountList({ className = '' }) {
 
       <List dense>
         <Subheader
-          title="Прочее"
+          name={
+            <Tooltip title="Эти счета не учитываются в бюджете, переводы на них отражаются как расходы. Сюда удобно выносить инвестиционные счета, ипотеку, кредиты и долгосрочные накопления.">
+              <span>Прочее</span>
+            </Tooltip>
+          }
           amount={savingsSum}
           currency={userInstrument?.shortTitle}
         />

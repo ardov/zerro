@@ -12,6 +12,8 @@ import { resetData } from 'store/data'
 import { clearLocalData } from 'logic/localData'
 import { captureError, sendEvent } from 'helpers/tracking'
 import { getDiff } from 'store/data'
+import { getAccountsHistory } from 'scenes/Stats/selectors'
+import { PopulatedAccount } from 'types'
 
 const TOLERANCE = 2
 
@@ -91,6 +93,7 @@ export const CalculationErrorNotice: FC = () => {
             </Link>
             ), чтобы я помог разобраться с проблемой.
           </Typography>
+          <CorruptedAccounts />
         </Box>
 
         <Box mt={2}>
@@ -105,5 +108,51 @@ export const CalculationErrorNotice: FC = () => {
         </Box>
       </Box>
     </Box>
+  )
+}
+
+const CorruptedAccounts = () => {
+  const histories = useSelector(getAccountsHistory)
+  const accounts = useSelector(getInBudgetAccounts)
+  const corrupted: { acc: PopulatedAccount; diff: number }[] = []
+  accounts.forEach(acc => {
+    const history = histories[acc.id]
+    const lastPoint = history.length - 1
+    const diff = Math.abs(history[lastPoint].balance - acc.balance)
+    if (diff > 0.001) {
+      corrupted.push({ acc, diff })
+    }
+  })
+
+  console.log(
+    'Corrupted accounts:',
+    corrupted.map(({ acc, diff }) => ({
+      acc: acc.title,
+      diff,
+    }))
+  )
+  if (corrupted.length === 0) {
+    return null
+  }
+  return (
+    <div>
+      <Box component="p" mb={0}>
+        Счета с ошибками:
+      </Box>
+      <Box component="ul" mt={0}>
+        {corrupted.map(({ acc, diff }) => (
+          <li>
+            {acc.title} (
+            <Amount
+              value={diff}
+              instrument={acc.instrument}
+              decMode="ifAny"
+              noShade
+            />
+            )
+          </li>
+        ))}
+      </Box>
+    </div>
   )
 }

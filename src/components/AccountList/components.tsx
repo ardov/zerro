@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, ReactChild } from 'react'
 import {
   ListItem,
   ListSubheader,
@@ -45,18 +45,18 @@ export const Account: FC<{ account: PopulatedAccount } & ListItemProps> = ({
 
 export const Subheader: FC<
   {
-    title: string
+    name: ReactChild //string | JSX.Element
     amount: number
     currency?: string
   } & ListSubheaderProps
-> = ({ title, amount, currency, ...rest }) => {
+> = ({ name, amount, currency, ...rest }) => {
   const c = useStyles()
   return (
     // @ts-ignore
     <ListSubheader className={c.listItem} {...rest}>
       <Box component="span" display="flex" width="100%">
         <Box flexGrow="1" component="span" className="MuiTypography-noWrap">
-          <b>{title}</b>
+          <b>{name}</b>
         </Box>
         <Box
           component="span"

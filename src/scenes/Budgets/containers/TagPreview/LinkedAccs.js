@@ -18,6 +18,7 @@ import {
 import { getAccounts, getSavingAccounts } from 'store/localData/accounts'
 import CloseIcon from '@material-ui/icons/Close'
 import { Tooltip } from 'components/Tooltip'
+import { useEffect } from 'react'
 
 const useStyles = makeStyles(({ shape, spacing, palette, breakpoints }) => ({
   chipContainer: {
@@ -39,6 +40,7 @@ const useStyles = makeStyles(({ shape, spacing, palette, breakpoints }) => ({
 export function LinkedAccs({ id }) {
   const c = useStyles()
   const [anchorEl, setAnchorEl] = React.useState(null)
+  const [hideArchived, setHideArchived] = React.useState(true)
   const linkedAccs = useSelector(state => getTagAccMap(state)[id])
   const accounts = useSelector(getAccounts)
   const savingAccs = useSelector(getSavingAccounts)
@@ -48,10 +50,19 @@ export function LinkedAccs({ id }) {
   const handleClick = event => setAnchorEl(event.currentTarget)
   const handleClose = () => setAnchorEl(null)
 
+  // Hide archived on every open
+  useEffect(() => {
+    if (anchorEl) setHideArchived(true)
+  }, [anchorEl])
+
   const accsToAdd = savingAccs.filter(acc => {
-    if (!linkedAccs) return true
-    else return !linkedAccs.includes(acc.id)
+    // Hide already linked accounts
+    if (linkedAccs?.includes(acc.id)) return false
+    if (hideArchived) return !acc.archive
+    return true
   })
+  const archivedAmount = savingAccs.filter(acc => acc.archive).length
+  const canShowArchived = hideArchived && !!archivedAmount
 
   return (
     <>
@@ -102,6 +113,13 @@ export function LinkedAccs({ id }) {
           ))
         ) : (
           <MenuItem onClick={handleClose}>Нет счетов для добавления</MenuItem>
+        )}
+        {canShowArchived && (
+          <Box color="info.main" clone>
+            <MenuItem onClick={() => setHideArchived(false)}>
+              Показать архивные ({archivedAmount})
+            </MenuItem>
+          </Box>
         )}
       </Menu>
     </>

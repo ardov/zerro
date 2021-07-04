@@ -2,10 +2,8 @@ import React, { useMemo, useState, useCallback, useEffect } from 'react'
 import { Box } from '@material-ui/core'
 import { useSelector } from 'react-redux'
 import { getSortedTransactions } from 'store/localData/transactions'
-import {
-  checkRaw,
-  groupTransactionsBy,
-} from 'store/localData/transactions/helpers'
+import { groupTransactionsBy } from 'store/localData/transactions/helpers'
+import { checkRaw } from 'store/localData/transactions/filtering'
 import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
