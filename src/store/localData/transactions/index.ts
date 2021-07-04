@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { getInstruments } from 'store/data/selectors'
 import { getAccounts } from 'store/localData/accounts'
 import { getPopulatedTags } from 'store/localData/tags'
-import { sortBy } from './helpers'
+import { compareDates } from './helpers'
 import { populate, PopulatedTransaction } from './populate'
 import { RootState } from 'store'
 import { TransactionId } from 'types'
@@ -28,7 +28,7 @@ export const getPopulatedTransactions = createSelector(
 export const getSortedTransactions = createSelector(
   [getTransactions],
   withPerf('getSortedTransactions', transactions =>
-    Object.values(transactions).sort(sortBy('DATE'))
+    Object.values(transactions).sort(compareDates)
   )
 )
 

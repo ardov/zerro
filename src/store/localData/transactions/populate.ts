@@ -5,8 +5,10 @@ import {
   Transaction,
   TransactionType,
   Account,
+  TagId,
+  ById,
 } from 'types'
-import { mapTags, getType } from './helpers'
+import { getType } from './helpers'
 
 interface DataSources {
   instruments: { [id: number]: Instrument }
@@ -43,3 +45,8 @@ export const populate = (
   //COMPUTED PROPERTIES
   type: getType(raw),
 })
+
+function mapTags(ids: TagId[] | null, tags: ById<Tag>) {
+  // TODO: Надо что-то придумать с null тегом 🤔    ⤵
+  return ids && ids.length ? ids.map(id => tags[id + '']) : null
+}
