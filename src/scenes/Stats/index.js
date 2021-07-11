@@ -7,6 +7,7 @@ import { getAccounts, getAccountList } from 'store/localData/accounts'
 import { formatMoney, formatDate } from 'helpers/format'
 import Rhythm from 'components/Rhythm'
 import { TransactionsDrawer } from 'components/TransactionsDrawer'
+import { NetWorth } from './NetWorth'
 
 export default function Stats() {
   const accs = useSelector(getAccountList)
@@ -36,6 +37,7 @@ export default function Stats() {
     <>
       <Box display="flex" flexDirection="column">
         <Rhythm gap={2} axis="y" p={3}>
+          <NetWorth />
           {accIds.map(id => (
             <AccHist
               key={id}
