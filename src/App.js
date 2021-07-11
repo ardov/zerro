@@ -14,6 +14,7 @@ import {
   CircularProgress,
   Typography,
   useMediaQuery,
+  useTheme,
 } from '@material-ui/core'
 import { createBrowserHistory } from 'history'
 import ErrorBoundary from 'components/ErrorBoundary'
@@ -77,7 +78,12 @@ const PrivateApp = () => {
 }
 
 const Navigation = React.memo(() => {
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
+  const theme = useTheme()
+  console.warn('Theme', { theme })
+  const isMobile = useMediaQuery(theme => {
+    console.warn({ theme })
+    return theme.breakpoints.down('sm')
+  })
   return isMobile ? <MobileNavigation /> : <Nav />
 })
 

@@ -7,12 +7,12 @@ import {
   Typography,
   ButtonBase,
   Box,
-  makeStyles,
   Divider,
   useMediaQuery,
   ButtonBaseProps,
   Theme,
 } from '@material-ui/core'
+import { makeStyles } from '@material-ui/styles'
 import { Tooltip } from 'components/Tooltip'
 import Rhythm from 'components/Rhythm'
 import { useMonth } from '../pathHooks'
@@ -168,11 +168,13 @@ const TotalsTooltip: FC<TotalsTooltipProps> = ({
     const { name, amount } = props
     return (
       <Box display="flex" flexDirection="row">
-        <Box flexGrow="1" mr={1} minWidth={0}>
-          <Typography noWrap variant="caption">
-            {name}
-          </Typography>
-        </Box>
+        <Typography
+          noWrap
+          variant="caption"
+          sx={{ flexGrow: 1, mr: 1, minWidth: 0 }}
+        >
+          {name}
+        </Typography>
 
         <Typography variant="caption">
           {amount > 0 && '+'}
@@ -209,7 +211,7 @@ const TotalsTooltip: FC<TotalsTooltipProps> = ({
   }
 
   return (
-    <Tooltip arrow interactive title={<TooltipContent />}>
+    <Tooltip arrow title={<TooltipContent />}>
       {children}
     </Tooltip>
   )

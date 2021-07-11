@@ -60,6 +60,8 @@ export const AppThemeProvider: FC = props => {
   const themeType = useThemeType()
   const theme = createTheme(themeType.type)
 
+  console.log('theme rendered')
+
   return (
     <ThemeProvider theme={theme}>
       <EmotionThemeProvider theme={theme}>

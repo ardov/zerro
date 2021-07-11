@@ -10,8 +10,8 @@ import {
   Grid,
   Typography,
   IconButton,
-  makeStyles,
 } from '@material-ui/core'
+import { makeStyles } from '@material-ui/styles'
 import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@material-ui/icons/Close'
 

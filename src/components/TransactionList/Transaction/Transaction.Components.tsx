@@ -332,7 +332,7 @@ const Reciept = styled.div`
 const TagsWrapper = styled.div`
   > :not(:first-of-type) {
     margin-left: 8px;
-    color: ${p => p.theme.palette.text.hint};
+    color: ${p => p.theme.palette.text.disabled};
   }
 `
 const NoCategory = styled.span`

@@ -11,7 +11,7 @@ import {
 } from '@material-ui/core'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
-import { withStyles } from '@material-ui/core/styles'
+import { withStyles } from '@material-ui/styles'
 import MonthSelectPopover from './MonthSelectPopover'
 import { formatDate } from 'helpers/format'
 

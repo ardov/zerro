@@ -5,8 +5,8 @@ import {
   IconButton,
   useMediaQuery,
   ButtonBase,
-  withStyles,
 } from '@material-ui/core'
+import { withStyles } from '@material-ui/styles'
 import { Tooltip } from 'components/Tooltip'
 import { makeStyles } from '@material-ui/styles'
 import EmojiIcon from 'components/EmojiIcon'

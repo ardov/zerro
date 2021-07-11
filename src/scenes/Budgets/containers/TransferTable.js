@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { getUserCurrencyCode } from 'store/data/selectors'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 import {
   Box,
   Paper,

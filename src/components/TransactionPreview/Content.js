@@ -13,7 +13,7 @@ import { Tooltip } from 'components/Tooltip'
 import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash'
 import CloseIcon from '@material-ui/icons/Close'
 import DeleteIcon from '@material-ui/icons/Delete'
-import { DatePicker } from '@material-ui/pickers'
+// import { DatePicker } from '@material-ui/pickers'
 import { Map } from './Map'
 import AmountInput from 'components/AmountInput'
 import { formatDate, rateToWords } from 'helpers/format'
@@ -149,7 +149,8 @@ export default function DetailsDrawer(props) {
           </Box>
         )}
 
-        <Box mt={2}>
+        {/* TODO!!! */}
+        {/* <Box mt={2}>
           <DatePicker
             value={localDate}
             onChange={date => setLocalDate(+date)}
@@ -163,7 +164,7 @@ export default function DetailsDrawer(props) {
             inputVariant="outlined"
             margin="dense"
           />
-        </Box>
+        </Box> */}
 
         <Box mt={2}>
           <TextField
@@ -171,7 +172,7 @@ export default function DetailsDrawer(props) {
             onChange={e => setLocalPayee(e.target.value)}
             label="Место платежа"
             multiline
-            rowsMax="4"
+            maxRows="4"
             fullWidth
             helperText=""
             variant="outlined"
@@ -185,7 +186,7 @@ export default function DetailsDrawer(props) {
             onChange={e => setLocalComment(e.target.value)}
             label="Комментарий"
             multiline
-            rowsMax="4"
+            maxRows="4"
             fullWidth
             helperText=""
             variant="outlined"

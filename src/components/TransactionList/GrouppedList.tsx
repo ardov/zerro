@@ -8,9 +8,10 @@ import React, {
 } from 'react'
 import { Dialog } from '@material-ui/core'
 import { ListChildComponentProps, VariableSizeList as List } from 'react-window'
-import { DatePicker } from '@material-ui/pickers'
+import StaticDatePicker from '@material-ui/lab/StaticDatePicker'
+import TextField from '@material-ui/core/TextField'
 import AutoSizer from 'react-virtualized-auto-sizer'
-import { withStyles } from '@material-ui/core/styles'
+import { withStyles } from '@material-ui/styles'
 import { Box, ListSubheader } from '@material-ui/core'
 import Transaction from './Transaction'
 import { formatDate } from 'helpers/format'
@@ -85,17 +86,16 @@ export const GrouppedList: FC<GrouppedListProps> = ({
   return (
     <>
       <Dialog open={!!clickedDate} onClose={() => setClickedDate(null)}>
-        <DatePicker
-          autoOk
+        <StaticDatePicker
           maxDate={maxDate}
           minDate={minDate}
-          variant="static"
-          openTo="date"
+          openTo="day"
           value={clickedDate}
           onChange={date => {
             setClickedDate(null)
             scrollToDate(date)
           }}
+          renderInput={params => <TextField {...params} />}
         />
       </Dialog>
 

@@ -1,5 +1,6 @@
 import React from 'react'
-import { Box, BoxProps, makeStyles } from '@material-ui/core'
+import { Box, BoxProps } from '@material-ui/core'
+import { makeStyles } from '@material-ui/styles'
 
 interface StylesProps {
   gap: number

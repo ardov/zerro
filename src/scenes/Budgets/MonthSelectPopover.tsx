@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import startOfMonth from 'date-fns/startOfMonth'
-import { withStyles } from '@material-ui/core/styles'
+import { withStyles } from '@material-ui/styles'
 import {
   Box,
   IconButton,
@@ -72,26 +72,23 @@ export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
           />
         </Box>
 
-        <Box display="grid" gridTemplateColumns="1fr 1fr 1fr" clone>
-          <List>
-            {months.map(month => (
-              <MonthItem
-                key={+month}
-                isCurrent={month === curMonth}
-                disabled={isMonthDisabled(month)}
-                selected={month === value}
-                onClick={() => onChange(month)}
-                button
-              >
-                <Box textAlign="center" clone>
-                  <ListItemText>
-                    {formatDate(month, 'LLL').toUpperCase()}
-                  </ListItemText>
-                </Box>
-              </MonthItem>
-            ))}
-          </List>
-        </Box>
+        <List sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr' }}>
+          {months.map(month => (
+            <MonthItem
+              key={+month}
+              isCurrent={month === curMonth}
+              disabled={isMonthDisabled(month)}
+              selected={month === value}
+              onClick={() => onChange(month)}
+              // TODO!!!
+              // button
+            >
+              <ListItemText sx={{ textAlign: 'center' }}>
+                {formatDate(month, 'LLL').toUpperCase()}
+              </ListItemText>
+            </MonthItem>
+          ))}
+        </List>
       </Box>
     </Popover>
   )

@@ -2,12 +2,8 @@ import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { getUserCurrencyCode } from 'store/data/selectors'
-import {
-  Typography,
-  makeStyles,
-  ButtonBase,
-  useMediaQuery,
-} from '@material-ui/core'
+import { Typography, ButtonBase, useMediaQuery } from '@material-ui/core'
+import { makeStyles } from '@material-ui/styles'
 import { Tooltip } from 'components/Tooltip'
 import { Confirm } from 'components/Confirm'
 import { fillGoals } from '../thunks'

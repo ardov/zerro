@@ -8,10 +8,10 @@ import {
   Box,
   Typography,
   ButtonBase,
-  withStyles,
   Collapse,
   BoxProps,
 } from '@material-ui/core'
+import { withStyles } from '@material-ui/styles'
 import Rhythm from 'components/Rhythm'
 import { Tooltip } from 'components/Tooltip'
 import { Line } from '../components'
@@ -20,7 +20,7 @@ import { getTagsTree } from 'store/localData/tags'
 import { TransactionsDrawer } from 'components/TransactionsDrawer'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import { formatDate } from 'helpers/format'
-import { FilterConditions } from 'store/localData/transactions/helpers'
+import { FilterConditions } from 'store/localData/transactions/filtering'
 
 type IncomeDataPoint = {
   id: string
