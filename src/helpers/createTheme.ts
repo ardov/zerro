@@ -1,4 +1,4 @@
-import { createMuiTheme } from '@material-ui/core/styles'
+import { createTheme as createMuiTheme } from '@material-ui/core/styles'
 import { blueGrey, blue, green, grey } from '@material-ui/core/colors'
 
 const primary = { dark: blueGrey[100], light: blueGrey[800] }
