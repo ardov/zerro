@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React from 'react'
 import { Box, Typography, Paper, useTheme } from '@material-ui/core'
 import { useSelector } from 'react-redux'
 import {
@@ -7,81 +7,105 @@ import {
   ComposedChart,
   YAxis,
   Tooltip,
-  Legend,
   CartesianGrid,
   Bar,
 } from 'recharts'
-import { getAccountsHistory } from './selectors'
 import {
   getInBudgetAccounts,
   getSavingAccounts,
 } from 'store/localData/accounts'
-import { formatMoney, formatDate } from 'helpers/format'
-import Rhythm from 'components/Rhythm'
-import { TransactionsDrawer } from 'components/TransactionsDrawer'
 import { convertCurrency } from 'store/data/selectors'
-
-type DataPoint = {
-  date: number
-  positive: number
-  negative: number
-  total: number
-}
+import { getAvailableMonths } from './availablePeriod'
+import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 
 export function NetWorth() {
   const theme = useTheme()
+  const months = useSelector(getAvailableMonths)
+  const balanceChanges = useSelector(getBalanceChanges)
   const accsInBudget = useSelector(getInBudgetAccounts)
   const accsSaving = useSelector(getSavingAccounts)
-  const balanceHistory = useSelector(getAccountsHistory)
   const convert = useSelector(convertCurrency)
 
-  let data: DataPoint[] = []
+  const balances = months.map(date => getBalancesOnDate(balanceChanges, +date))
+  console.log({ balances })
 
-  accsInBudget.concat(accsSaving).forEach(acc => {
-    let history = balanceHistory[acc.id]
-    const byMonth = history.filter((point, i, arr) => {
-      const currentDate = new Date(point.date)
-      const nextDate = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        currentDate.getDate() + 1
-      )
-      const isLast = i === arr.length - 1
-      const isLastOfMonth = currentDate.getMonth() !== nextDate.getMonth()
-      return isLast || isLastOfMonth
-    })
-    if (!data.length) {
-      data = byMonth.map(point => ({
-        date: point.date,
-        positive: 0,
-        negative: 0,
-        total: 0,
-      }))
+  const points = balances.map((b, i) => {
+    let point = {
+      date: months[i],
+
+      positiveInBudget: 0,
+      positiveSaving: 0,
+
+      positivePotential: 0,
+
+      negativeDebts: 0,
+      negativeLoans: 0,
+      negativeCredits: 0,
+
+      get positiveTotal(): number {
+        return this.positiveInBudget + this.positiveSaving
+      },
+      get negativeTotal(): number {
+        return this.negativeDebts + this.negativeLoans + this.negativeCredits
+      },
+      get total(): number {
+        return this.positiveTotal + this.negativeTotal
+      },
     }
-    byMonth.forEach((point, i) => {
-      let convertedBalance = convert(point.balance, acc.instrument)
+    accsInBudget.concat(accsSaving).forEach(acc => {
+      const accBalance = b?.accounts?.[acc.id] || 0
+      const convertedBalance = convert(accBalance, acc.instrument)
       if (convertedBalance > 0) {
-        data[i].positive += convertedBalance
+        if (acc.inBudget) point.positiveInBudget += convertedBalance
+        else point.positiveSaving += convertedBalance
       }
       if (convertedBalance < 0) {
-        data[i].negative += convertedBalance
+        if (acc.type === 'loan') point.negativeLoans += convertedBalance
+        else point.negativeCredits += convertedBalance
       }
-      data[i].total += convertedBalance
     })
-  })
+    Object.values(b?.merchants || {}).forEach(byInst => {
+      Object.entries(byInst).forEach(([instrument, balance]) => {
+        const convertedBalance = convert(balance, instrument)
+        if (convertedBalance > 0) {
+          point.positivePotential += convertedBalance
+        }
+        if (convertedBalance < 0) {
+          point.negativeDebts += convertedBalance
+        }
+      })
+    })
+    Object.values(b?.payees || {}).forEach(byInst => {
+      Object.entries(byInst).forEach(([instrument, balance]) => {
+        const convertedBalance = convert(balance, instrument)
+        if (convertedBalance > 0) {
+          point.positivePotential += convertedBalance
+        }
+        if (convertedBalance < 0) {
+          point.negativeDebts += convertedBalance
+        }
+      })
+    })
 
-  console.log(data)
+    return point
+  })
 
   return (
     <Paper>
+      <Box p={2} minWidth="100%">
+        <Typography variant="h5">Мой капитал</Typography>
+      </Box>
       <Box p={2} minWidth="100%" height={300}>
         <ResponsiveContainer>
-          <ComposedChart data={data} stackOffset="sign">
-            {/* <XAxis dataKey="name" /> */}
-            <YAxis />
+          <ComposedChart
+            data={points}
+            stackOffset="sign"
+            margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+          >
+            <YAxis type="number" domain={['dataMin', 'dataMax']} hide />
             <Tooltip />
-            <Legend />
             <CartesianGrid stroke={theme.palette.divider} />
+
             <Area
               type="monotone"
               dataKey="total"
@@ -89,15 +113,18 @@ export function NetWorth() {
               stroke={theme.palette.info.dark}
             />
             <Bar
-              dataKey="positive"
+              dataKey="positiveInBudget"
               stackId="a"
-              barSize={8}
               fill={theme.palette.success.main}
             />
             <Bar
-              dataKey="negative"
+              dataKey="positiveSaving"
               stackId="a"
-              barSize={8}
+              fill={theme.palette.success.dark}
+            />
+            <Bar
+              dataKey="negativeTotal"
+              stackId="b"
               fill={theme.palette.error.main}
             />
           </ComposedChart>
