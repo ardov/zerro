@@ -36,18 +36,11 @@ export const getDebtAccountId = createSelector([getAccountList], accounts => {
 })
 
 export const getInBudgetAccounts = createSelector([getAccountList], accounts =>
-  accounts.filter(isInBudget)
+  accounts.filter(a => a.inBudget)
 )
 
 export const getSavingAccounts = createSelector([getAccountList], accounts =>
   accounts.filter(
-    acc =>
-      !isInBudget(acc) && acc.type !== 'debt' && acc.title !== DATA_ACC_NAME
+    acc => !acc.inBudget && acc.type !== 'debt' && acc.title !== DATA_ACC_NAME
   )
 )
-
-function isInBudget(a: Account) {
-  if (a.type === 'debt') return false
-  if (a.title.endsWith('📍')) return true
-  return a.inBalance
-}
