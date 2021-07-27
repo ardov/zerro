@@ -10,12 +10,10 @@ import {
 } from '@material-ui/core'
 import { useSelector } from 'react-redux'
 import {
-  Area,
   ResponsiveContainer,
   ComposedChart,
   YAxis,
   Tooltip,
-  CartesianGrid,
   Bar,
   Line,
   ReferenceLine,
