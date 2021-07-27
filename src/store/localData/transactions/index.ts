@@ -1,11 +1,11 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getInstruments } from 'store/data/selectors'
+import { getInstruments, getMerchants } from 'store/data/selectors'
 import { getAccounts } from 'store/localData/accounts'
 import { getPopulatedTags } from 'store/localData/tags'
 import { compareDates, getTime } from './helpers'
 import { populate, PopulatedTransaction } from './populate'
 import { RootState } from 'store'
-import { TransactionId } from 'types'
+import { Transaction, TransactionId } from 'types'
 import { withPerf } from 'helpers/performance'
 
 export const getTransactions = (state: RootState) =>
@@ -46,3 +46,14 @@ export const getHistoryStart = createSelector(
     return +getTime(transactions[0])
   }
 )
+
+export const debtorGetter = createSelector(
+  [getMerchants],
+  merchants => (tr: Transaction) => {
+    const instrument = tr.incomeInstrument || tr.outcomeInstrument
+    const merchantTitle = tr.merchant && merchants[tr.merchant]?.title
+    return clean(merchantTitle || tr.payee || '') + '-' + instrument
+  }
+)
+
+const clean = (s: string) => s.toLowerCase().replace(/[\s/|{}\\-]/gm, '')

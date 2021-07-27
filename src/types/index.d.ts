@@ -95,6 +95,7 @@ export type ZmAccount = {
   type: 'cash' | 'ccard' | 'checking' | 'loan' | 'deposit' | 'emoney' | 'debt'
   syncID: string[] | null
   balance: number
+  // Для deposit и loan поле startBalance имеет смысл начального взноса/тела кредита
   startBalance: number
   creditLimit: number
   inBalance: boolean
