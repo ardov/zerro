@@ -1,7 +1,7 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 import { action } from '@storybook/addon-actions'
-import Content from 'components/TransactionPreview/Content'
+import Content from 'components/TransactionPreview'
 import decorator from 'helpers/storybookDecorator'
 
 const transfer = {

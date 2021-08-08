@@ -17,7 +17,7 @@ export default function TransactionList(props) {
     filterConditions,
     hideFilter = false,
     checkedDate,
-    ...rest
+    sx,
   } = props
 
   const transactions = useSelector(getSortedTransactions)
@@ -94,12 +94,14 @@ export default function TransactionList(props) {
 
   return (
     <Box
-      display="flex"
-      flexDirection="column"
-      px={1}
-      pt={1}
-      position="relative"
-      {...rest}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        px: 1,
+        pt: 1,
+        position: 'relative',
+        ...sx,
+      }}
     >
       {!hideFilter && (
         <Box

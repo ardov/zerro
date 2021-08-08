@@ -6,7 +6,7 @@ import {
 } from 'store/localData/accounts'
 import { getUserInstrument } from 'store/data/selectors'
 import pluralize from 'helpers/pluralize'
-import { List, ListItem } from '@material-ui/core'
+import { Box, List, ListItem } from '@material-ui/core'
 import { Account, Subheader } from './components'
 import { PopulatedAccount } from 'types'
 import { setInBudget } from 'store/localData/accounts/thunks'
@@ -55,7 +55,6 @@ export default function AccountList({ className = '' }) {
           <Account
             key={acc.id}
             account={acc}
-            button
             onDoubleClick={toggleInBalance(acc.id, false)}
           />
         ))}
@@ -75,7 +74,6 @@ export default function AccountList({ className = '' }) {
             <Account
               key={acc.id}
               account={acc}
-              button
               onDoubleClick={toggleInBalance(acc.id, false)}
             />
           ))}
@@ -96,20 +94,27 @@ export default function AccountList({ className = '' }) {
           <Account
             key={acc.id}
             account={acc}
-            button
             onDoubleClick={toggleInBalance(acc.id, true)}
           />
         ))}
         {!!savingsArchivedSum && !showSavingsArchived && (
           <ListItem>
-            <span>
-              {`${savingsArchived.length} ${pluralize(savingsArchived.length, [
-                'архивный счёт',
-                'архивных счёта',
-                'архивных счётов',
-              ])} на `}
+            <Box
+              component="span"
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                width: '100%',
+              }}
+            >
+              <span>
+                {`${savingsArchived.length} ${pluralize(
+                  savingsArchived.length,
+                  ['архивный счёт', 'архивных счёта', 'архивных счётов']
+                )} на `}
+              </span>
               <Amount value={savingsArchivedSum} instrument="user" />
-            </span>
+            </Box>
           </ListItem>
         )}
         {showSavingsArchived &&
@@ -117,7 +122,6 @@ export default function AccountList({ className = '' }) {
             <Account
               key={acc.id}
               account={acc}
-              button
               onDoubleClick={toggleInBalance(acc.id, false)}
             />
           ))}

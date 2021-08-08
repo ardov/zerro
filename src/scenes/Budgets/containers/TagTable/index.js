@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react'
-import { Paper, Box } from '@material-ui/core'
+import { Paper } from '@material-ui/core'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
 import { useSelector } from 'react-redux'
 import { TagGroup } from './TagGroup'
@@ -19,7 +19,7 @@ import { getInBudgetAccounts } from 'store/localData/accounts'
 
 const metrics = ['available', 'budgeted', 'outcome']
 
-export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
+export function TagTable({ openDetails, onOpenMonthDrawer, sx, className }) {
   const tagsTree = useSelector(getTagsTree)
   const tagAccMap = useSelector(getTagAccMap)
   const accountsInBudget = useSelector(state =>
@@ -83,62 +83,60 @@ export function TagTable({ openDetails, onOpenMonthDrawer, ...rest }) {
 
   return (
     <>
-      <Box position="relative" py={1} {...rest} clone>
-        <Paper>
-          <TagTableHeader
-            metric={metrics[metricIndex]}
-            onToggleMetric={toggleMetric}
-            onOpenMonthDrawer={onOpenMonthDrawer}
-          />
-          {dragMode === 'REORDER' ? (
-            <Droppable droppableId="tags" type="REORDER">
-              {provided => (
-                <div ref={provided.innerRef} {...provided.droppableProps}>
-                  {tagsTree.map((tag, index) => (
-                    <Draggable
-                      key={tag.id}
-                      draggableId={tag.id || 'null'}
-                      index={index}
-                    >
-                      {provided => (
-                        <TagGroup
-                          id={tag.id}
-                          children={tag.children}
-                          metric={metrics[metricIndex]}
-                          openTransactionsPopover={onSelect}
-                          openBudgetPopover={openBudgetPopover}
-                          openGoalPopover={openGoalPopover}
-                          openDetails={openDetails}
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                        />
-                      )}
-                    </Draggable>
-                  ))}
+      <Paper sx={{ position: 'relative', py: 1, ...sx }} className={className}>
+        <TagTableHeader
+          metric={metrics[metricIndex]}
+          onToggleMetric={toggleMetric}
+          onOpenMonthDrawer={onOpenMonthDrawer}
+        />
+        {dragMode === 'REORDER' ? (
+          <Droppable droppableId="tags" type="REORDER">
+            {provided => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {tagsTree.map((tag, index) => (
+                  <Draggable
+                    key={tag.id}
+                    draggableId={tag.id || 'null'}
+                    index={index}
+                  >
+                    {provided => (
+                      <TagGroup
+                        id={tag.id}
+                        children={tag.children}
+                        metric={metrics[metricIndex]}
+                        openTransactionsPopover={onSelect}
+                        openBudgetPopover={openBudgetPopover}
+                        openGoalPopover={openGoalPopover}
+                        openDetails={openDetails}
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                      />
+                    )}
+                  </Draggable>
+                ))}
 
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          ) : (
-            tagsTree.map(tag => (
-              <TagGroup
-                key={tag.id}
-                id={tag.id}
-                children={tag.children}
-                metric={metrics[metricIndex]}
-                openTransactionsPopover={onSelect}
-                openBudgetPopover={openBudgetPopover}
-                openGoalPopover={openGoalPopover}
-                openDetails={openDetails}
-              />
-            ))
-          )}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        ) : (
+          tagsTree.map(tag => (
+            <TagGroup
+              key={tag.id}
+              id={tag.id}
+              children={tag.children}
+              metric={metrics[metricIndex]}
+              openTransactionsPopover={onSelect}
+              openBudgetPopover={openBudgetPopover}
+              openGoalPopover={openGoalPopover}
+              openDetails={openDetails}
+            />
+          ))
+        )}
 
-          <TagTableFooter metric={metrics[metricIndex]} />
-        </Paper>
-      </Box>
+        <TagTableFooter metric={metrics[metricIndex]} />
+      </Paper>
 
       <TransactionsDrawer
         prefilter={prefilter}

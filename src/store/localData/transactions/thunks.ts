@@ -59,7 +59,7 @@ export const splitTransfer = (id: TransactionId): AppThunk => (
   if (list) dispatch(applyClientPatch({ transaction: list }))
 }
 
-type TransactionPatch = OptionalExceptFor<Transaction, 'id'>
+export type TransactionPatch = OptionalExceptFor<Transaction, 'id'>
 export const applyChangesToTransaction = (
   patch: TransactionPatch
 ): AppThunk => (dispatch, getState) => {

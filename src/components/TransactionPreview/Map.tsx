@@ -3,8 +3,8 @@ import { BoxProps, Paper } from '@material-ui/core'
 import styled from '@emotion/styled'
 
 interface MapProps {
-  longitude?: number
-  latitude?: number
+  longitude?: number | null
+  latitude?: number | null
   sx?: BoxProps['sx']
 }
 

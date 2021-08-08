@@ -115,11 +115,12 @@ export function LinkedAccs({ id }) {
           <MenuItem onClick={handleClose}>Нет счетов для добавления</MenuItem>
         )}
         {canShowArchived && (
-          <Box color="info.main" clone>
-            <MenuItem onClick={() => setHideArchived(false)}>
-              Показать архивные ({archivedAmount})
-            </MenuItem>
-          </Box>
+          <MenuItem
+            onClick={() => setHideArchived(false)}
+            sx={{ color: 'info.main' }}
+          >
+            Показать архивные ({archivedAmount})
+          </MenuItem>
         )}
       </Menu>
     </>

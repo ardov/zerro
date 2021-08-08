@@ -47,9 +47,11 @@ function TagSelect({
         selected.map ? (
           <Box display="flex" flexWrap="wrap">
             {selected.map(id => (
-              <Box m={0.25} key={id} clone>
-                <Chip label={tagList[id] && tagList[id].title} />
-              </Box>
+              <Chip
+                key={id}
+                label={tagList[id] && tagList[id].title}
+                sx={{ m: 0.25 }}
+              />
             ))}
           </Box>
         ) : (

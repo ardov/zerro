@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, FC } from 'react'
 import { Reciept } from './Reciept'
 import {
   Box,
@@ -18,67 +18,76 @@ import { Map } from './Map'
 import AmountInput from 'components/AmountInput'
 import { formatDate, rateToWords } from 'helpers/format'
 import { TagList } from 'components/TagList'
+import { useDispatch, useSelector } from 'react-redux'
+import { getTransactions } from 'store/localData/transactions'
+import { getType } from 'store/localData/transactions/helpers'
+import { getPopulatedAccounts } from 'store/localData/accounts'
+import { getInstruments } from 'store/data/selectors'
+import {
+  applyChangesToTransaction,
+  deleteTransactions,
+  restoreTransaction,
+  TransactionPatch,
+} from 'store/localData/transactions/thunks'
 
-export default function DetailsDrawer(props) {
+type TransactionPreviewProps = {
+  id: string
+  onClose: () => void
+  onSelectSimilar: (date: number) => void
+}
+
+export const TransactionPreview: FC<TransactionPreviewProps> = props => {
+  const { id, onClose, onSelectSimilar } = props
+  const dispatch = useDispatch()
+  const onChange = (changes: TransactionPatch) =>
+    dispatch(applyChangesToTransaction(changes))
+  const onDelete = () => dispatch(deleteTransactions([id]))
+  const onRestore = () => dispatch(restoreTransaction(id))
+  // onSplit: id => dispatch(splitTransfer(id)), // does not work
+
+  const tr = useSelector(getTransactions)[id]
+  const trType = getType(tr)
+  const incomeAccount = useSelector(getPopulatedAccounts)[tr.incomeAccount]
+  const outcomeAccount = useSelector(getPopulatedAccounts)[tr.outcomeAccount]
+  const instruments = useSelector(getInstruments)
+  const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
+  const opIncomeCurrency =
+    tr.opIncomeInstrument && instruments[tr.opIncomeInstrument]?.shortTitle
+  const outcomeCurrency = instruments[tr.outcomeInstrument]?.shortTitle
+  const opOutcomeCurrency =
+    tr.opOutcomeInstrument && instruments[tr.opOutcomeInstrument]?.shortTitle
   const {
-    id,
     date,
     changed,
     created,
     deleted,
     qrCode,
     income,
-    incomeAccountTitle,
-    outcomeAccountTitle,
-    incomeCurrency,
-    outcomeCurrency,
     opIncome,
-    opIncomeCurrency,
     outcome,
     opOutcome,
-    opOutcomeCurrency,
     tag,
     comment,
     payee,
     latitude,
     longitude,
-    type,
+  } = tr
 
-    onClose,
-    onChange,
-    onDelete,
-    onRestore,
-    onSelectSimilar,
-  } = props
-  const [localComment, setLocalComment] = useState(comment)
-  const [localOutcome, setLocalOutcome] = useState(outcome)
-  const [localIncome, setLocalIncome] = useState(income)
-  const [localPayee, setLocalPayee] = useState(payee)
-  const [localDate, setLocalDate] = useState(date)
-  const [localTag, setLocalTag] = useState(tag)
+  const [localComment, setLocalComment] = useState(tr.comment)
+  const [localOutcome, setLocalOutcome] = useState(tr.outcome)
+  const [localIncome, setLocalIncome] = useState(tr.income)
+  const [localPayee, setLocalPayee] = useState(tr.payee)
+  const [localDate, setLocalDate] = useState(tr.date)
+  const [localTag, setLocalTag] = useState(tr.tag)
 
   useEffect(() => {
-    setLocalComment(comment)
-    setLocalOutcome(outcome)
-    setLocalIncome(income)
-    setLocalPayee(payee)
-    setLocalDate(date)
-    setLocalTag(tag)
-  }, [id, changed, comment, outcome, income, payee, date, tag])
-
-  // Disabled autoviewing. It breaks search for transactions from the same sync.
-  /*   useEffect(
-    () => {
-      const timer = setTimeout(() => {
-        if (notSeen) dispatch(markViewed(id, true))
-      }, 2000)
-
-      return () => clearTimeout(timer)
-    },
-    // prop 'viewed' ignored to prevent of changing it when we mark transaction as unread
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [id, onChange]
-  ) */
+    setLocalComment(tr.comment)
+    setLocalOutcome(tr.outcome)
+    setLocalIncome(tr.income)
+    setLocalPayee(tr.payee)
+    setLocalDate(tr.date)
+    setLocalTag(tr.tag)
+  }, [tr])
 
   const hasChanges =
     comment !== localComment ||
@@ -102,18 +111,18 @@ export default function DetailsDrawer(props) {
   return (
     <Box minWidth={320} position="relative">
       <Head
-        title={titles[type]}
+        title={titles[trType]}
         onClose={onClose}
         onDelete={onDelete}
         onRestore={onRestore}
         deleted={deleted}
       />
 
-      {type !== 'transfer' && (
+      {(trType === 'income' || trType === 'outcome') && (
         <TagList
           tags={localTag}
           onChange={setLocalTag}
-          tagType={type}
+          tagType={trType}
           px={3}
           py={2}
           bgcolor="background.default"
@@ -121,10 +130,10 @@ export default function DetailsDrawer(props) {
       )}
 
       <Box px={3}>
-        {type !== 'income' && (
+        {trType !== 'income' && (
           <Box mt={2}>
             <AmountInput
-              label={`Расход с ${outcomeAccountTitle}`}
+              label={`Расход с ${outcomeAccount.title}`}
               currency={outcomeCurrency}
               value={localOutcome}
               onChange={setLocalOutcome}
@@ -135,10 +144,10 @@ export default function DetailsDrawer(props) {
           </Box>
         )}
 
-        {type !== 'outcome' && (
+        {trType !== 'outcome' && (
           <Box mt={2}>
             <AmountInput
-              label={`Доход на ${incomeAccountTitle}`}
+              label={`Доход на ${incomeAccount.title}`}
               currency={incomeCurrency}
               value={localIncome}
               onChange={setLocalIncome}
@@ -166,37 +175,35 @@ export default function DetailsDrawer(props) {
           />
         </Box> */}
 
-        <Box mt={2}>
-          <TextField
-            value={localPayee || ''}
-            onChange={e => setLocalPayee(e.target.value)}
-            label="Место платежа"
-            multiline
-            maxRows="4"
-            fullWidth
-            helperText=""
-            variant="outlined"
-            margin="dense"
-          />
-        </Box>
+        <TextField
+          value={localPayee || ''}
+          onChange={e => setLocalPayee(e.target.value)}
+          label="Место платежа"
+          multiline
+          maxRows="4"
+          fullWidth
+          helperText=""
+          variant="outlined"
+          margin="dense"
+          sx={{ mt: 2 }}
+        />
 
-        <Box mt={2}>
-          <TextField
-            value={localComment || ''}
-            onChange={e => setLocalComment(e.target.value)}
-            label="Комментарий"
-            multiline
-            maxRows="4"
-            fullWidth
-            helperText=""
-            variant="outlined"
-            margin="dense"
-          />
-        </Box>
+        <TextField
+          value={localComment || ''}
+          onChange={e => setLocalComment(e.target.value)}
+          label="Комментарий"
+          multiline
+          maxRows="4"
+          fullWidth
+          helperText=""
+          variant="outlined"
+          margin="dense"
+          sx={{ mt: 2 }}
+        />
 
-        <Reciept mt={2} value={qrCode} />
+        <Reciept sx={{ mt: 2 }} value={qrCode} />
 
-        <Map mt={2} longitude={longitude} latitude={latitude} />
+        <Map sx={{ mt: 2 }} longitude={longitude} latitude={latitude} />
       </Box>
       <Box p={3}>
         <Typography variant="caption" color="textSecondary">
@@ -204,13 +211,13 @@ export default function DetailsDrawer(props) {
           <br />
           Последнее изменение – {formatDate(changed, 'dd MMM yyyy, HH:mm')}
           <br />
-          {type === 'income' && !!opIncome && (
+          {trType === 'income' && !!opIncome && opIncomeCurrency && (
             <>
               {rateToWords(income, incomeCurrency, opIncome, opIncomeCurrency)}
               <br />
             </>
           )}
-          {type === 'outcome' && !!opOutcome && (
+          {trType === 'outcome' && !!opOutcome && opOutcomeCurrency && (
             <>
               {rateToWords(
                 outcome,
@@ -221,7 +228,7 @@ export default function DetailsDrawer(props) {
               <br />
             </>
           )}
-          {type === 'transfer' && incomeCurrency !== outcomeCurrency && (
+          {trType === 'transfer' && incomeCurrency !== outcomeCurrency && (
             <>
               {rateToWords(outcome, outcomeCurrency, income, incomeCurrency)}
               <br />
@@ -244,9 +251,24 @@ const titles = {
   income: 'Доход',
   outcome: 'Расход',
   transfer: 'Перевод',
+  incomeDebt: 'Долг',
+  outcomeDebt: 'Долг',
 }
 
-const Head = ({ title, onClose, onDelete, onRestore, deleted }) => (
+type HeadProps = {
+  title: string
+  deleted: boolean
+  onClose: () => void
+  onDelete: () => void
+  onRestore: () => void
+}
+const Head: FC<HeadProps> = ({
+  title,
+  deleted,
+  onClose,
+  onDelete,
+  onRestore,
+}) => (
   <Box py={1} px={3} display="flex" alignItems="center">
     <Box flexGrow={1}>
       {deleted && (
@@ -275,7 +297,10 @@ const Head = ({ title, onClose, onDelete, onRestore, deleted }) => (
   </Box>
 )
 
-const SaveButton = ({ visible, onSave }) => (
+const SaveButton: FC<{ visible: boolean; onSave: () => void }> = ({
+  visible,
+  onSave,
+}) => (
   <Box
     mt={4}
     zIndex={200}

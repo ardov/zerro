@@ -6,7 +6,6 @@ import { createTheme } from 'helpers/createTheme'
 import { useThemeType } from 'helpers/useThemeType'
 import { Helmet } from 'react-helmet'
 import { Global, css } from '@emotion/react'
-import { ThemeProvider as EmotionThemeProvider } from '@emotion/react'
 
 const globalStyles = css`
   html {
@@ -47,13 +46,9 @@ const globalStyles = css`
 export const AppThemeProvider: FC = props => {
   const themeType = useThemeType()
   const theme = createTheme(themeType.type)
-
-  console.log('theme rendered', themeType, theme)
-
   return (
     <JSSThemeProvider theme={theme}>
       <ThemeProvider theme={theme}>
-        {/* <EmotionThemeProvider theme={theme}> */}
         <>
           <Helmet>
             <meta name="theme-color" content={theme.palette.background.paper} />
@@ -62,7 +57,6 @@ export const AppThemeProvider: FC = props => {
           <Global styles={globalStyles} />
           {props.children}
         </>
-        {/* </EmotionThemeProvider> */}
       </ThemeProvider>
     </JSSThemeProvider>
   )

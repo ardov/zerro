@@ -1,32 +1,29 @@
 import React, { FC, ReactChild } from 'react'
 import {
-  ListItem,
   ListSubheader,
   Box,
-  ListItemProps,
-  Theme,
+  ListItemButtonProps,
   ListSubheaderProps,
+  Typography,
+  ListItemButton,
 } from '@material-ui/core'
-import { makeStyles } from '@material-ui/styles'
 import { Amount } from 'components/Amount'
 import { PopulatedAccount } from 'types'
 
-const useStyles = makeStyles((theme: Theme) => ({
-  listItem: { borderRadius: theme.shape.borderRadius },
-}))
-
-export const Account: FC<{ account: PopulatedAccount } & ListItemProps> = ({
-  account,
-  ...rest
-}) => {
-  const c = useStyles()
+export const Account: FC<
+  { account: PopulatedAccount } & ListItemButtonProps
+> = ({ account, sx, ...rest }) => {
   return (
-    // @ts-ignore
-    <ListItem className={c.listItem} {...rest}>
+    <ListItemButton sx={{ borderRadius: 1, ...sx }} {...rest}>
       <Box component="span" display="flex" width="100%">
-        <Box flexGrow={1} component="span" className="MuiTypography-noWrap">
+        <Typography
+          component="span"
+          noWrap
+          sx={{ flexGrow: 1, lineHeight: 'inherit' }}
+        >
           {account.title}
-        </Box>
+        </Typography>
+
         <Box
           component="span"
           ml={2}
@@ -39,25 +36,28 @@ export const Account: FC<{ account: PopulatedAccount } & ListItemProps> = ({
           />
         </Box>
       </Box>
-    </ListItem>
+    </ListItemButton>
   )
 }
 
 export const Subheader: FC<
   {
-    name: ReactChild //string | JSX.Element
+    name: ReactChild
     amount: number
     currency?: string
   } & ListSubheaderProps
-> = ({ name, amount, currency, ...rest }) => {
-  const c = useStyles()
+> = ({ name, amount, currency, sx, ...rest }) => {
   return (
-    // @ts-ignore
-    <ListSubheader className={c.listItem} {...rest}>
+    <ListSubheader sx={{ borderRadius: 1, ...sx }} {...rest}>
       <Box component="span" display="flex" width="100%">
-        <Box flexGrow={1} component="span" className="MuiTypography-noWrap">
+        <Typography
+          component="span"
+          noWrap
+          sx={{ flexGrow: 1, lineHeight: 'inherit' }}
+        >
           <b>{name}</b>
-        </Box>
+        </Typography>
+
         <Box
           component="span"
           ml={2}

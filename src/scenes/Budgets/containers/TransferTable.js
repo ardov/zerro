@@ -4,7 +4,6 @@ import { formatMoney } from 'helpers/format'
 import { getUserCurrencyCode } from 'store/data/selectors'
 import { makeStyles } from '@material-ui/styles'
 import {
-  Box,
   Paper,
   Typography,
   Table,
@@ -54,11 +53,10 @@ function TransferTable({
 
   return rows.length ? (
     <Paper className={`${classes.root} ${className}`}>
-      <Box p={2} clone>
-        <Typography variant="h6" id="tableTitle">
-          Переводы из бюджета
-        </Typography>
-      </Box>
+      <Typography sx={{ p: 2 }} variant="h6" id="tableTitle">
+        Переводы из бюджета
+      </Typography>
+
       <Table>
         <TableHead>
           <TableRow>
@@ -76,12 +74,11 @@ function TransferTable({
                     <span>
                       {row.name}
                       {accTagMap[row.id] && (
-                        <Box ml={1} clone>
-                          <TagChip
-                            id={accTagMap[row.id]}
-                            onDelete={() => connectToTag(row.id, null)}
-                          />
-                        </Box>
+                        <TagChip
+                          id={accTagMap[row.id]}
+                          onDelete={() => connectToTag(row.id, null)}
+                          sx={{ ml: 1 }}
+                        />
                       )}
                     </span>
                   }

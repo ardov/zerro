@@ -6,9 +6,10 @@ import {
   useMediaQuery,
   Typography,
   Paper,
+  Theme,
 } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
-import TransactionPreview from 'components/TransactionPreview'
+import { TransactionPreview } from 'components/TransactionPreview'
 import { sendEvent } from 'helpers/tracking'
 import { Helmet } from 'react-helmet'
 import { useSearchParam } from 'helpers/useSearchParam'
@@ -21,9 +22,9 @@ const useStyles = makeStyles(theme => ({
 }))
 
 export default function TransactionsView() {
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('md'))
+  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const [opened, setOpened] = useSearchParam('transaction')
-  const [checkedDate, setCheckedDate] = useState(null)
+  const [checkedDate, setCheckedDate] = useState<Date | null>(null)
   const c = useStyles()
 
   // send analytics
@@ -48,18 +49,20 @@ export default function TransactionsView() {
           display="flex"
           justifyContent="center"
         >
-          <Box
-            flex="1 1 auto"
-            display="flex"
-            overflow="hidden"
-            maxWidth={560}
-            component={Paper}
-            style={isMobile ? { paddingBottom: 56 } : null}
+          <Paper
+            sx={{
+              flex: '1 1 auto',
+              display: 'flex',
+              overflow: 'hidden',
+              maxWidth: 560,
+              paddingBottom: isMobile ? 56 : 0,
+            }}
           >
-            <Box flex="1 1 auto" clone>
-              <TransactionList {...{ checkedDate }} />
-            </Box>
-          </Box>
+            <TransactionList
+              checkedDate={checkedDate}
+              sx={{ flex: '1 1 auto' }}
+            />
+          </Paper>
         </Box>
 
         <Drawer
