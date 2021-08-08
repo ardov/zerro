@@ -50,7 +50,7 @@ const useStyles = makeStyles(theme => ({
   grid: {
     display: 'grid',
     padding: theme.spacing(3),
-    gap: `${theme.spacing(3)}px`,
+    gap: theme.spacing(3),
     gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
     gridTemplateAreas: `
       'month-select   goals     to-be-budgeted'
@@ -63,7 +63,7 @@ const useStyles = makeStyles(theme => ({
       padding: theme.spacing(1, 1, 10),
     },
     [theme.breakpoints.down('sm')]: {
-      gap: `${theme.spacing(2)}px`,
+      gap: theme.spacing(2),
       padding: theme.spacing(1, 1, 10),
       gridTemplateColumns: '1fr',
       gridTemplateAreas: `'month-select' 'goals' 'to-be-budgeted' 'tags' 'transfers'`,
