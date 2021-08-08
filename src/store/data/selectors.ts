@@ -55,8 +55,8 @@ export const convertCurrency = createSelector(
   [getInstruments, getUserInstrumentId],
   (instruments, userInstrument) => (
     amount = 0,
-    from: InstrumentId,
-    to?: InstrumentId
+    from: InstrumentId | string,
+    to?: InstrumentId | string
   ) => {
     to = to || userInstrument
     if (!to) return amount
