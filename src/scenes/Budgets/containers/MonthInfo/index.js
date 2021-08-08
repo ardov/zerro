@@ -12,6 +12,7 @@ import {
   IconButton,
   useMediaQuery,
   Collapse,
+  useTheme,
 } from '@material-ui/core'
 import CloseIcon from '@material-ui/icons/Close'
 import Rhythm from 'components/Rhythm'
@@ -30,7 +31,8 @@ export default function BudgetInfo({ onClose, ...rest }) {
   const [month] = useMonth()
   const currency = useSelector(getUserCurrencyCode)
   const totals = useSelector(getTotalsByMonth)[month]
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [showMore, setShowMore] = useState(false)
   const toggleMore = () => setShowMore(state => !state)
   const {

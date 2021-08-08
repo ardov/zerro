@@ -46,7 +46,7 @@ export default function NavigationDrawer(props: DrawerProps) {
           <AccountList />
         </Box>
 
-        <Box height={64} width="100%" flexShrink="0" />
+        <Box height={64} width="100%" flexShrink={0} />
 
         <Box
           bgcolor="background.paper"
@@ -60,7 +60,7 @@ export default function NavigationDrawer(props: DrawerProps) {
           left="0"
           right="0"
           zIndex="5"
-          flexShrink="0"
+          flexShrink={0}
           display="flex"
           alignItems="center"
           flexDirection="row"

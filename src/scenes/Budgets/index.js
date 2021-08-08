@@ -7,7 +7,14 @@ import MonthInfo from './containers/MonthInfo'
 import { ToBeBudgeted } from './containers/ToBeBudgeted'
 import MonthSelector from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
-import { Box, Button, Drawer, Paper, useMediaQuery } from '@material-ui/core'
+import {
+  Box,
+  Button,
+  Drawer,
+  Paper,
+  useMediaQuery,
+  useTheme,
+} from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import GoalsProgressWidget from './containers/GoalsProgressWidget'
 import { useMonth, useDrawerId } from './pathHooks'
@@ -76,8 +83,9 @@ function Budgets() {
   const maxMonth = monthList[monthList.length - 1]
   const [month, setMonth] = useMonth()
   const [drawerId, setDrawerId] = useDrawerId()
-  const isMD = useMediaQuery(theme => theme.breakpoints.down('md'))
-  const isSM = useMediaQuery(theme => theme.breakpoints.down('sm'))
+  const theme = useTheme()
+  const isMD = useMediaQuery(theme.breakpoints.down('md'))
+  const isSM = useMediaQuery(theme.breakpoints.down('sm'))
   const [showSankey, setShowSankey] = useState(false)
   const c = useStyles()
   const index = monthList.findIndex(date => date === month)

@@ -11,7 +11,7 @@ import {
   MenuItem,
   TypographyProps,
   BoxProps,
-  Theme,
+  useTheme,
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import SettingsIcon from '@material-ui/icons/Settings'
@@ -146,7 +146,8 @@ export const TagTableHeader: FC<TagTableHeaderProps> = props => {
     handleClose()
   }
 
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('xs'))
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('xs'))
   const scrollY = useScrollPosition(60 /*fps*/)
   const scrollOffset = isMobile ? 254 : 128
   const isVisibleHeader = scrollY > scrollOffset
@@ -215,7 +216,6 @@ function GoalMonthProgress() {
       <Box component="span">
         <Tooltip
           arrow
-          interactive
           title="Установите цели, чтобы следить за их прогрессом 😉"
         >
           <IconButton size="small">
@@ -242,7 +242,6 @@ function GoalMonthProgress() {
       >
         <Tooltip
           arrow
-          interactive
           title={
             need
               ? `${formatSum(target - need)} из ${formatSum(target)}`

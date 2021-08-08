@@ -19,19 +19,6 @@ const globalStyles = css`
     box-sizing: inherit;
   }
 
-  :root {
-    /* TEXT */
-    --text-primary: #333;
-    --text-secondary: #999;
-    --text-placeholder: #aaa;
-    --text-success: #21a355;
-    /* COLORS */
-    --color-danger: #f00;
-    --color-accent: #1890ff;
-    /* BG */
-    --bg-hover: rgba(0, 0, 0, 0.04);
-  }
-
   .hidden-scroll {
     scrollbar-width: none;
     overflow: -moz-scrollbars-none;
@@ -60,7 +47,7 @@ export const AppThemeProvider: FC = props => {
   const themeType = useThemeType()
   const theme = createTheme(themeType.type)
 
-  console.log('theme rendered')
+  console.log('theme rendered', themeType, theme)
 
   return (
     <ThemeProvider theme={theme}>

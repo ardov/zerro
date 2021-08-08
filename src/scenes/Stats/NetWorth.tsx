@@ -5,9 +5,9 @@ import {
   Paper,
   useTheme,
   Checkbox,
-  withStyles,
   FormControlLabel,
 } from '@material-ui/core'
+import { withStyles } from '@material-ui/styles'
 import { useSelector } from 'react-redux'
 import {
   ResponsiveContainer,

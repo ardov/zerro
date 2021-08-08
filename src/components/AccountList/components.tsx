@@ -24,7 +24,7 @@ export const Account: FC<{ account: PopulatedAccount } & ListItemProps> = ({
     // @ts-ignore
     <ListItem className={c.listItem} {...rest}>
       <Box component="span" display="flex" width="100%">
-        <Box flexGrow="1" component="span" className="MuiTypography-noWrap">
+        <Box flexGrow={1} component="span" className="MuiTypography-noWrap">
           {account.title}
         </Box>
         <Box
@@ -55,7 +55,7 @@ export const Subheader: FC<
     // @ts-ignore
     <ListSubheader className={c.listItem} {...rest}>
       <Box component="span" display="flex" width="100%">
-        <Box flexGrow="1" component="span" className="MuiTypography-noWrap">
+        <Box flexGrow={1} component="span" className="MuiTypography-noWrap">
           <b>{name}</b>
         </Box>
         <Box

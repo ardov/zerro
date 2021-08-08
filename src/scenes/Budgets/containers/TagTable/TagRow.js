@@ -5,6 +5,7 @@ import {
   IconButton,
   useMediaQuery,
   ButtonBase,
+  useTheme,
 } from '@material-ui/core'
 import { withStyles } from '@material-ui/styles'
 import { Tooltip } from 'components/Tooltip'
@@ -100,7 +101,8 @@ export function TagRow(props) {
     state => getGoalProgress(state, date, id),
     shallowEqual
   )
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('xs'))
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('xs'))
   const c = useStyles({ isChild, isDragging })
 
   if (

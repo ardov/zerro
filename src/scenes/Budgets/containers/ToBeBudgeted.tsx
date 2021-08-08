@@ -11,6 +11,7 @@ import {
   useMediaQuery,
   ButtonBaseProps,
   Theme,
+  useTheme,
 } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import { Tooltip } from 'components/Tooltip'
@@ -70,7 +71,8 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
     toBeBudgeted < 0 ? 'error' : overspent ? 'warning' : 'success'
   const hasFutureOverspend = realBudgetedInFuture > budgetedInFuture
   const c = useStyles({ color })
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('xs'))
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('xs'))
 
   const BigWidget = (
     <ButtonBase className={`${c.base} ${className}`} {...rest}>
