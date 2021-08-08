@@ -1,7 +1,4 @@
-import {
-  createTheme as createMuiTheme,
-  adaptV4Theme,
-} from '@material-ui/core/styles'
+import { createTheme as createMuiTheme } from '@material-ui/core/styles'
 import { blueGrey, blue, green, grey } from '@material-ui/core/colors'
 
 const primary = { dark: blueGrey[100], light: blueGrey[800] }
@@ -16,31 +13,35 @@ const hover = {
   dark: `rgba(255, 255, 255, ${hoverOpacity})`,
   light: `rgba(0, 0, 0, ${hoverOpacity})`,
 }
+const hint = {
+  dark: `rgba(255, 255, 255, 0.38)`,
+  light: `rgba(0, 0, 0, 0.38)`,
+}
 
 export function createTheme(mode: 'light' | 'dark' = 'light') {
-  const theme = createMuiTheme(
-    adaptV4Theme({
-      palette: {
-        primary: { main: primary[mode] },
-        secondary: { main: secondary[mode] },
-        success: { main: success[mode] },
-        action: {
-          hover: hover[mode],
-          hoverOpacity,
-        },
-        mode,
-        background: background[mode],
+  const theme = createMuiTheme({
+    palette: {
+      mode,
+      primary: { main: primary[mode] },
+      secondary: { main: secondary[mode] },
+      success: { main: success[mode] },
+      action: {
+        hover: hover[mode],
+        hoverOpacity,
       },
-      shape: { borderRadius: 8 },
-      typography: {
-        fontFamily: "'IBM Plex Sans', sans-serif",
-        h4: { fontWeight: 500 },
-        subtitle1: { fontWeight: 500 },
-        subtitle2: { fontWeight: 500 },
-        button: { textTransform: 'none' },
-      },
-    })
-  )
+      // @ts-ignore
+      text: { hint: hint[mode] },
+      background: background[mode],
+    },
+    shape: { borderRadius: 8 },
+    typography: {
+      fontFamily: "'IBM Plex Sans', sans-serif",
+      h4: { fontWeight: 500 },
+      subtitle1: { fontWeight: 500 },
+      subtitle2: { fontWeight: 500 },
+      button: { textTransform: 'none' },
+    },
+  })
   return theme
 }
 

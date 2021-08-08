@@ -1,6 +1,7 @@
 import React, { FC } from 'react'
 import CssBaseline from '@material-ui/core/CssBaseline'
-import { ThemeProvider } from '@material-ui/styles'
+import { ThemeProvider as JSSThemeProvider } from '@material-ui/styles'
+import { ThemeProvider } from '@material-ui/core/styles'
 import { createTheme } from 'helpers/createTheme'
 import { useThemeType } from 'helpers/useThemeType'
 import { Helmet } from 'react-helmet'
@@ -50,8 +51,9 @@ export const AppThemeProvider: FC = props => {
   console.log('theme rendered', themeType, theme)
 
   return (
-    <ThemeProvider theme={theme}>
-      <EmotionThemeProvider theme={theme}>
+    <JSSThemeProvider theme={theme}>
+      <ThemeProvider theme={theme}>
+        {/* <EmotionThemeProvider theme={theme}> */}
         <>
           <Helmet>
             <meta name="theme-color" content={theme.palette.background.paper} />
@@ -60,7 +62,8 @@ export const AppThemeProvider: FC = props => {
           <Global styles={globalStyles} />
           {props.children}
         </>
-      </EmotionThemeProvider>
-    </ThemeProvider>
+        {/* </EmotionThemeProvider> */}
+      </ThemeProvider>
+    </JSSThemeProvider>
   )
 }

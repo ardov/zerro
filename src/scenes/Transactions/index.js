@@ -6,7 +6,6 @@ import {
   useMediaQuery,
   Typography,
   Paper,
-  useTheme,
 } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import TransactionPreview from 'components/TransactionPreview'
@@ -17,15 +16,12 @@ import { useSearchParam } from 'helpers/useSearchParam'
 const useStyles = makeStyles(theme => ({
   drawerWidth: {
     width: 360,
-    [theme.breakpoints.down('sm')]: {
-      width: '100vw',
-    },
+    [theme.breakpoints.down('sm')]: { width: '100vw' },
   },
 }))
 
 export default function TransactionsView() {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('md'))
   const [opened, setOpened] = useSearchParam('transaction')
   const [checkedDate, setCheckedDate] = useState(null)
   const c = useStyles()

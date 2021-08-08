@@ -5,7 +5,6 @@ import {
   IconButton,
   useMediaQuery,
   ButtonBase,
-  useTheme,
 } from '@material-ui/core'
 import { withStyles } from '@material-ui/styles'
 import { Tooltip } from 'components/Tooltip'
@@ -101,8 +100,7 @@ export function TagRow(props) {
     state => getGoalProgress(state, date, id),
     shallowEqual
   )
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const c = useStyles({ isChild, isDragging })
 
   if (
@@ -284,13 +282,15 @@ function AvailableCell(props) {
 
   const renderCellContent = (provided, snapshot) => (
     <Box
-      borderRadius={16}
-      bgcolor={!!provided ? 'background.paper' : ''}
-      px={1}
-      mx={-1}
-      component="span"
-      display="inline-block"
-      color={availableColor}
+      sx={{
+        borderRadius: 2,
+        bgcolor: !!provided ? 'background.paper' : '',
+        px: 1,
+        mx: -1,
+        component: 'span',
+        display: 'inline-block',
+        color: availableColor,
+      }}
       ref={provided?.innerRef}
       {...provided?.draggableProps}
       {...provided?.dragHandleProps}

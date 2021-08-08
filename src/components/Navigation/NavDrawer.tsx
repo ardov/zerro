@@ -13,7 +13,7 @@ import {
   ListItemIcon,
   DrawerProps,
 } from '@material-ui/core'
-import { useTheme } from '@material-ui/styles'
+import { useTheme } from '@material-ui/core'
 import Logo from 'components/Logo'
 import AccountList from 'components/AccountList'
 import { makeStyles } from '@material-ui/styles'
@@ -25,6 +25,7 @@ import WhatshotIcon from '@material-ui/icons/Whatshot'
 
 export default function NavigationDrawer(props: DrawerProps) {
   const theme = useTheme()
+
   return (
     <Drawer {...props}>
       <Box

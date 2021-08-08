@@ -13,11 +13,13 @@ export function WidgetOutcome() {
 
   return (
     <Box
-      p={2}
-      bgcolor="background.default"
-      borderRadius={8}
-      display="flex"
-      justifyContent="center"
+      sx={{
+        p: 2,
+        bgcolor: 'background.default',
+        borderRadius: 1,
+        display: 'flex',
+        justifyContent: 'center',
+      }}
     >
       <Total name="Расход" value={-outcome} currency={currency} sign />
     </Box>

@@ -63,12 +63,14 @@ export const CalculationErrorNotice: FC = () => {
 
   return (
     <Box
-      p={2}
-      bgcolor="error.main"
-      color="error.contrastText"
-      borderRadius={8}
-      display="flex"
-      flexDirection="row"
+      sx={{
+        p: 2,
+        bgcolor: 'error.main',
+        color: 'error.contrastText',
+        borderRadius: 1,
+        display: 'flex',
+        flexDirection: 'row',
+      }}
     >
       <Box pt="2px">
         <WarningIcon />

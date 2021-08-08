@@ -12,7 +12,6 @@ import {
   IconButton,
   useMediaQuery,
   Collapse,
-  useTheme,
 } from '@material-ui/core'
 import CloseIcon from '@material-ui/icons/Close'
 import Rhythm from 'components/Rhythm'
@@ -31,8 +30,7 @@ export default function BudgetInfo({ onClose, ...rest }) {
   const [month] = useMonth()
   const currency = useSelector(getUserCurrencyCode)
   const totals = useSelector(getTotalsByMonth)[month]
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('md'))
   const [showMore, setShowMore] = useState(false)
   const toggleMore = () => setShowMore(state => !state)
   const {
@@ -66,7 +64,7 @@ export default function BudgetInfo({ onClose, ...rest }) {
         <WidgetIncome />
         <WidgetOutcome />
 
-        <Box p={2} bgcolor="background.default" borderRadius={8}>
+        <Box p={2} bgcolor="background.default" borderRadius={1}>
           <Box mb={1}>
             <Typography variant="body1" color="textSecondary" align="center">
               Быстрые бюджеты

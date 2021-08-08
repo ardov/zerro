@@ -2,12 +2,7 @@ import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { getUserCurrencyCode } from 'store/data/selectors'
-import {
-  Typography,
-  ButtonBase,
-  useMediaQuery,
-  useTheme,
-} from '@material-ui/core'
+import { Typography, ButtonBase, useMediaQuery } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import { Tooltip } from 'components/Tooltip'
 import { Confirm } from 'components/Confirm'
@@ -60,8 +55,7 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
   const { need, target, progress } = totals || {}
   const onOk = () => dispatch(fillGoals(month))
   const c = useStyles({ progress })
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
 
   if (!totals)
     return (

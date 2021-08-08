@@ -68,9 +68,11 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
               tags={tags}
               tagType={tagType}
               onChange={setTags}
-              p={2}
-              bgcolor="background.default"
-              borderRadius="borderRadius"
+              sx={{
+                p: 2,
+                bgcolor: 'background.default',
+                borderRadius: 1,
+              }}
             />
           </>
         )}

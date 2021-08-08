@@ -5,7 +5,7 @@ import {
   Box,
   useMediaQuery,
   TypographyProps,
-  useTheme,
+  Theme,
 } from '@material-ui/core'
 import { Amount } from 'components/Amount'
 import { makeStyles } from '@material-ui/styles'
@@ -43,8 +43,7 @@ export const TagTableFooter: FC<{
   const totalsByMonth = useSelector(getTotalsByMonth)
   const { budgeted, outcome, available } = totalsByMonth[month]
   const c = useStyles()
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
   const metrics = { budgeted, outcome, available }
 
   return (

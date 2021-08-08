@@ -11,7 +11,7 @@ import {
   MenuItem,
   TypographyProps,
   BoxProps,
-  useTheme,
+  Theme,
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import SettingsIcon from '@material-ui/icons/Settings'
@@ -146,8 +146,7 @@ export const TagTableHeader: FC<TagTableHeaderProps> = props => {
     handleClose()
   }
 
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
   const scrollY = useScrollPosition(60 /*fps*/)
   const scrollOffset = isMobile ? 254 : 128
   const isVisibleHeader = scrollY > scrollOffset

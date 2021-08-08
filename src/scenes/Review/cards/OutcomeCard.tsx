@@ -35,7 +35,7 @@ export function OutcomeCard({ transaction }: { transaction: Transaction }) {
             mt={1}
             alignSelf="center"
             bgcolor="background.default"
-            borderRadius="borderRadius"
+            borderRadius={1}
           >
             <Typography variant="body1" align="center" color="textSecondary">
               {comment}

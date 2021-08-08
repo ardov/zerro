@@ -6,7 +6,7 @@ export const Card = (props: BoxProps) => (
     bgcolor="background.paper"
     maxWidth={480}
     minHeight={280}
-    borderRadius={16}
+    borderRadius={1}
     py={4}
     px={2}
     display="flex"
