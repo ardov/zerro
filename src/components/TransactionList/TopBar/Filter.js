@@ -6,12 +6,11 @@ import FilterListIcon from '@material-ui/icons/FilterList'
 import { Tooltip } from 'components/Tooltip'
 import Box from '@material-ui/core/Box'
 import CloseIcon from '@material-ui/icons/Close'
-
-import FilterDrawer from './FilterDrawer.js'
+import FilterDrawer from './FilterDrawer'
+import { useToggle } from 'helpers/useToggle'
 
 export default function Filter({ setCondition, conditions = {}, ...rest }) {
-  const [isDrawerVisible, setDrawerVisible] = React.useState(false)
-  const toggleDrawer = () => setDrawerVisible(!isDrawerVisible)
+  const [isDrawerVisible, toggleDrawer] = useToggle(false)
 
   return (
     <Box display="flex" alignItems="center" px={2} {...rest} clone>

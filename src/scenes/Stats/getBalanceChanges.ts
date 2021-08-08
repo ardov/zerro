@@ -54,13 +54,10 @@ export const getBalanceChanges = createSelector(
           addToAccount(-outcome, outcomeAccount)
           break
         case 'incomeDebt':
-          console.log('incomeDebt', transaction)
           addToAccount(income, incomeAccount)
           addDebt(-outcome, getDebtorId(transaction))
           break
         case 'outcomeDebt':
-          console.log('outcomeDebt', transaction)
-
           addDebt(income, getDebtorId(transaction))
           addToAccount(-outcome, outcomeAccount)
           break

@@ -9,6 +9,7 @@ import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
 import { getPopulatedTag } from 'store/localData/tags'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import { DragModeContext } from '../DnDContext'
+import { useToggle } from 'helpers/useToggle'
 
 export const useStyles = makeStyles(theme => ({
   panelRoot: {
@@ -60,8 +61,7 @@ export const TagGroup = React.forwardRef((props, ref) => {
   let hiddenOverspend = 0
   if (totalAvailable >= 0 && available < 0) hiddenOverspend = -available
 
-  const [expanded, setExpanded] = React.useState(childrenAvailable > 0)
-  const toggle = () => setExpanded(expanded => !expanded)
+  const [expanded, toggle] = useToggle(childrenAvailable > 0)
 
   const hasChildren = !!children?.length
   const c = useStyles({ expanded })

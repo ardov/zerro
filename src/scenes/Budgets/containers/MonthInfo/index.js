@@ -21,8 +21,8 @@ import { WidgetIncome } from './WidgetIncome'
 import { OverspentNotice } from './OverspentNotice'
 import { CalculationErrorNotice } from './CalculationErrorNotice'
 import { WidgetOutcome } from './WidgetOutcome'
-import { useState } from 'react'
 import { useMonth } from 'scenes/Budgets/pathHooks'
+import { useToggle } from 'helpers/useToggle'
 
 const getMonthName = date => formatDate(date, 'LLLL').toUpperCase()
 
@@ -31,8 +31,8 @@ export default function BudgetInfo({ onClose, ...rest }) {
   const currency = useSelector(getUserCurrencyCode)
   const totals = useSelector(getTotalsByMonth)[month]
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('md'))
-  const [showMore, setShowMore] = useState(false)
-  const toggleMore = () => setShowMore(state => !state)
+  const [showMore, toggleMore] = useToggle(false)
+
   const {
     overspent,
     transferOutcome,

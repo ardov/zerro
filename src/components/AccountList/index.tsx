@@ -1,6 +1,9 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { getAccountList } from 'store/localData/accounts'
+import {
+  getInBudgetAccounts,
+  getSavingAccounts,
+} from 'store/localData/accounts'
 import { getUserInstrument } from 'store/data/selectors'
 import pluralize from 'helpers/pluralize'
 import { List, ListItem } from '@material-ui/core'
@@ -9,26 +12,24 @@ import { PopulatedAccount } from 'types'
 import { setInBudget } from 'store/localData/accounts/thunks'
 import { Amount } from 'components/Amount'
 import { Tooltip } from 'components/Tooltip'
+import { useToggle } from 'helpers/useToggle'
 
 export default function AccountList({ className = '' }) {
   const dispatch = useDispatch()
-  const accounts = useSelector(getAccountList)
+  const inBudget = useSelector(getInBudgetAccounts)
+  const savings = useSelector(getSavingAccounts)
   const userInstrument = useSelector(getUserInstrument)
 
-  const getTotalBalance = (accs: PopulatedAccount[]) =>
-    accs.reduce((sum, a) => sum + a.convertedBalance, 0)
-
-  const inBudget = accounts.filter(a => a.inBudget)
-  const savings = accounts.filter(a => !a.inBudget && a.type !== 'debt')
-
-  const inBudgetArchived = inBudget.filter(a => a.archive)
   const inBudgetActive = inBudget.filter(a => !a.archive)
-  const inBudgetArchivedSum = getTotalBalance(inBudgetArchived)
-  const inBudgetActiveSum = getTotalBalance(inBudgetActive)
-  const savingsActive = savings.filter(a => !a.archive)
+  const inBudgetArchived = inBudget.filter(a => a.archive)
+  const inBudgetArchivedSum = getTotal(inBudgetArchived)
 
-  const [showArchived, setShowArchived] = useState(!!inBudgetArchivedSum)
-  const savingsSum = getTotalBalance(savings)
+  const savingsActive = savings.filter(a => !a.archive)
+  const savingsArchived = savings.filter(a => a.archive)
+  const savingsArchivedSum = getTotal(savingsArchived)
+
+  const [showInBudgetArchived, toggleInBudgetArchived] = useToggle()
+  const [showSavingsArchived, toggleSavingsArchived] = useToggle()
 
   const toggleInBalance = useCallback(
     (id: string, inBalance: boolean) => () =>
@@ -46,9 +47,9 @@ export default function AccountList({ className = '' }) {
               <span>В балансе</span>
             </Tooltip>
           }
-          amount={inBudgetActiveSum + inBudgetArchivedSum}
+          amount={getTotal(inBudget)}
           currency={userInstrument?.shortTitle}
-          onClick={() => setShowArchived(a => !a)}
+          onClick={toggleInBudgetArchived}
         />
         {inBudgetActive.map(acc => (
           <Account
@@ -58,17 +59,18 @@ export default function AccountList({ className = '' }) {
             onDoubleClick={toggleInBalance(acc.id, false)}
           />
         ))}
-        {!!inBudgetArchivedSum && !showArchived && (
+        {!!inBudgetArchivedSum && !showInBudgetArchived && (
           <ListItem>
-            {`${inBudgetArchived.length} ${pluralize(inBudgetArchived.length, [
-              'архивный счёт',
-              'архивных счёта',
-              'архивных счётов',
-            ])} на `}
-            <Amount value={inBudgetArchivedSum} instrument="user" />
+            <span>
+              {`${inBudgetArchived.length} ${pluralize(
+                inBudgetArchived.length,
+                ['архивный счёт', 'архивных счёта', 'архивных счётов']
+              )} на `}
+              <Amount value={inBudgetArchivedSum} instrument="user" />
+            </span>
           </ListItem>
         )}
-        {showArchived &&
+        {showInBudgetArchived &&
           inBudgetArchived.map(acc => (
             <Account
               key={acc.id}
@@ -86,8 +88,9 @@ export default function AccountList({ className = '' }) {
               <span>Прочее</span>
             </Tooltip>
           }
-          amount={savingsSum}
+          amount={getTotal(savings)}
           currency={userInstrument?.shortTitle}
+          onClick={toggleSavingsArchived}
         />
         {savingsActive.map(acc => (
           <Account
@@ -97,7 +100,32 @@ export default function AccountList({ className = '' }) {
             onDoubleClick={toggleInBalance(acc.id, true)}
           />
         ))}
+        {!!savingsArchivedSum && !showSavingsArchived && (
+          <ListItem>
+            <span>
+              {`${savingsArchived.length} ${pluralize(savingsArchived.length, [
+                'архивный счёт',
+                'архивных счёта',
+                'архивных счётов',
+              ])} на `}
+              <Amount value={savingsArchivedSum} instrument="user" />
+            </span>
+          </ListItem>
+        )}
+        {showSavingsArchived &&
+          savingsArchived.map(acc => (
+            <Account
+              key={acc.id}
+              account={acc}
+              button
+              onDoubleClick={toggleInBalance(acc.id, false)}
+            />
+          ))}
       </List>
     </div>
   )
+}
+
+function getTotal(accs: PopulatedAccount[]) {
+  return accs.reduce((sum, a) => sum + a.convertedBalance, 0)
 }
