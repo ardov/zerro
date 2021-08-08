@@ -43,7 +43,7 @@ export default function BudgetsRouter() {
 const useStyles = makeStyles(theme => ({
   drawerWidth: {
     width: 360,
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       width: '100vw',
     },
   },
@@ -59,10 +59,10 @@ const useStyles = makeStyles(theme => ({
       'chart          chart     chart'`,
     width: '100%',
     maxWidth: 800,
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       padding: theme.spacing(1, 1, 10),
     },
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       gap: `${theme.spacing(2)}px`,
       padding: theme.spacing(1, 1, 10),
       gridTemplateColumns: '1fr',
@@ -84,8 +84,8 @@ function Budgets() {
   const [month, setMonth] = useMonth()
   const [drawerId, setDrawerId] = useDrawerId()
   const theme = useTheme()
-  const isMD = useMediaQuery(theme.breakpoints.down('md'))
-  const isSM = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMD = useMediaQuery(theme.breakpoints.down('lg'))
+  const isSM = useMediaQuery(theme.breakpoints.down('md'))
   const [showSankey, setShowSankey] = useState(false)
   const c = useStyles()
   const index = monthList.findIndex(date => date === month)

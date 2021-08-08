@@ -23,7 +23,7 @@ const useStyles = makeStyles(theme => ({
     gridColumnGap: theme.spacing(2),
     gridRowGap: theme.spacing(1),
 
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       gridTemplateColumns: 'auto 90px 16px',
       gridColumnGap: theme.spacing(0.5),
     },
@@ -44,7 +44,7 @@ export const TagTableFooter: FC<{
   const { budgeted, outcome, available } = totalsByMonth[month]
   const c = useStyles()
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('xs'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const metrics = { budgeted, outcome, available }
 
   return (

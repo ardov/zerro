@@ -46,7 +46,7 @@ const useStyles = makeStyles(theme => ({
     gridColumnGap: theme.spacing(2),
     gridRowGap: theme.spacing(1),
 
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       gridTemplateColumns: 'auto 90px 16px',
       gridColumnGap: theme.spacing(0.5),
     },
@@ -59,7 +59,7 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
     gridColumnStart: 1,
     gridColumnEnd: 6,
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       gridColumnEnd: 4,
     },
   },
@@ -147,7 +147,7 @@ export const TagTableHeader: FC<TagTableHeaderProps> = props => {
   }
 
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('xs'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const scrollY = useScrollPosition(60 /*fps*/)
   const scrollOffset = isMobile ? 254 : 128
   const isVisibleHeader = scrollY > scrollOffset

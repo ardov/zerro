@@ -32,7 +32,7 @@ export default function BudgetInfo({ onClose, ...rest }) {
   const currency = useSelector(getUserCurrencyCode)
   const totals = useSelector(getTotalsByMonth)[month]
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [showMore, setShowMore] = useState(false)
   const toggleMore = () => setShowMore(state => !state)
   const {

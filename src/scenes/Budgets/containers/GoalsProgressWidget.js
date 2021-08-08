@@ -61,7 +61,7 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
   const onOk = () => dispatch(fillGoals(month))
   const c = useStyles({ progress })
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('xs'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   if (!totals)
     return (

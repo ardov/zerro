@@ -17,7 +17,7 @@ import { useSearchParam } from 'helpers/useSearchParam'
 const useStyles = makeStyles(theme => ({
   drawerWidth: {
     width: 360,
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       width: '100vw',
     },
   },
@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function TransactionsView() {
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [opened, setOpened] = useSearchParam('transaction')
   const [checkedDate, setCheckedDate] = useState(null)
   const c = useStyles()

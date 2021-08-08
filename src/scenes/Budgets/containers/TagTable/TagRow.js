@@ -39,7 +39,7 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     gridColumnGap: theme.spacing(2),
 
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       gridTemplateColumns: 'auto 90px 16px',
       gridColumnGap: theme.spacing(0.5),
     },
@@ -102,7 +102,7 @@ export function TagRow(props) {
     shallowEqual
   )
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('xs'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const c = useStyles({ isChild, isDragging })
 
   if (

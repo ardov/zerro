@@ -72,7 +72,7 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
   const hasFutureOverspend = realBudgetedInFuture > budgetedInFuture
   const c = useStyles({ color })
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('xs'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const BigWidget = (
     <ButtonBase className={`${c.base} ${className}`} {...rest}>
