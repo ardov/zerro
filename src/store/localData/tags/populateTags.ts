@@ -1,4 +1,5 @@
 import { intToRGB, intToHEX, getColorForString } from 'helpers/convertColor'
+import { sendEvent } from 'helpers/tracking'
 import toArray from 'lodash/toArray'
 import { ById, PopulatedTag, Tag } from 'types'
 import iconsMap from './iconsMap.json'
@@ -28,11 +29,7 @@ function makePopulatedTag(tag: Tag): PopulatedTag {
     ...tag,
     children: [],
     name: getName(tag.title),
-    symbol: tag.icon
-      ? iconsMap[tag.icon]
-      : tag.id === 'null'
-      ? '?'
-      : tag.title.slice(0, 2),
+    symbol: getSymbol(tag),
     colorRGB: intToRGB(tag.color),
     colorHEX: intToHEX(tag.color),
     colorGenerated: getColorForString(tag.title),
@@ -41,13 +38,23 @@ function makePopulatedTag(tag: Tag): PopulatedTag {
 
 function getName(title: string) {
   const titleArr = toArray(title)
-
   if (isEmoji(titleArr[0])) {
     titleArr.shift()
     return titleArr.join('').trim()
   } else {
     return title
   }
+}
+function getSymbol(tag: Tag) {
+  if (tag.id === 'null') return '?'
+  if (tag.icon) {
+    if (iconsMap[tag.icon]) {
+      return iconsMap[tag.icon]
+    } else {
+      sendEvent('Tags: UnknownNames: ' + tag.icon)
+    }
+  }
+  return tag.title.slice(0, 2)
 }
 
 function isEmoji(str: string) {
