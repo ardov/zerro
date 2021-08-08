@@ -20,7 +20,8 @@ import { getTagsTree } from 'store/localData/tags'
 import { TransactionsDrawer } from 'components/TransactionsDrawer'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import { formatDate } from 'helpers/format'
-import { FilterConditions } from 'store/localData/transactions/helpers'
+import { FilterConditions } from 'store/localData/transactions/filtering'
+import { useToggle } from 'helpers/useToggle'
 
 type IncomeDataPoint = {
   id: string
@@ -49,7 +50,7 @@ export function WidgetIncome() {
   const tags = useSelector(getTagsTree)
   const amounts = useSelector(getAmountsByTag)?.[month]
   const income = useSelector(getTotalsByMonth)?.[month]?.income
-  const [opened, setOpened] = useState(false)
+  const [opened, toggleOpened] = useToggle(false)
   const [selected, setSelected] = useState<string[]>()
   const monthName = formatDate(month, 'LLL').toLowerCase()
 
@@ -63,8 +64,6 @@ export function WidgetIncome() {
       filter: [tag.id, ...tag.children.map(child => child.id)],
     }))
     .sort((a, b) => b.amount - a.amount)
-
-  const toggleOpened = () => setOpened(opened => !opened)
 
   const filterConditions: FilterConditions = {
     type: 'income',
