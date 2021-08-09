@@ -14,7 +14,7 @@ import {
   DrawerProps,
 } from '@material-ui/core'
 import { useTheme } from '@material-ui/core'
-import Logo from 'components/Logo'
+import { Logo } from 'components/Logo'
 import AccountList from 'components/AccountList'
 import { makeStyles } from '@material-ui/styles'
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance'

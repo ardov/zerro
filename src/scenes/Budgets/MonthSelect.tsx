@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useRef, useCallback, FC } from 'react'
 import startOfMonth from 'date-fns/startOfMonth'
 import add from 'date-fns/add'
 import sub from 'date-fns/sub'
@@ -8,34 +8,24 @@ import {
   Typography,
   IconButton,
   ButtonBase,
+  PaperProps,
 } from '@material-ui/core'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
-import { withStyles } from '@material-ui/styles'
+import { styled } from '@material-ui/styles'
 import MonthSelectPopover from './MonthSelectPopover'
 import { formatDate } from 'helpers/format'
 
-const MonthButton = withStyles(theme => ({
-  root: {
-    borderRadius: theme.shape.borderRadius,
-    flexGrow: '1',
-    flexShrink: '1',
-    minWidth: '0',
-    padding: theme.spacing(0.5, 1),
-    justifyContent: 'flex-start',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-}))(ButtonBase)
+type MonthSelectProps = PaperProps & {
+  onChange: (month: number) => void
+  minMonth: number
+  maxMonth: number
+  value: number
+}
 
-export default function MonthSelect({
-  onChange,
-  minMonth,
-  maxMonth,
-  value,
-  className,
-}) {
-  const paperRef = useRef()
+export const MonthSelect: FC<MonthSelectProps> = props => {
+  const { onChange, minMonth, maxMonth, value, ...rest } = props
+  const paperRef = useRef(null)
   const year = new Date(value).getFullYear()
   const [anchorEl, setAnchorEl] = useState(null)
   const prevMonth = value > minMonth ? +sub(value, { months: 1 }) : null
@@ -55,12 +45,12 @@ export default function MonthSelect({
 
   return (
     <>
-      <Paper ref={paperRef} className={className}>
+      <Paper ref={paperRef} {...rest}>
         <Box display="flex" px={0.5} py={1}>
-          <Box alignSelf="center" flexShrink="0">
+          <Box alignSelf="center" flexShrink={0}>
             <IconButton
               children={<ChevronLeftIcon />}
-              onClick={() => onChange(prevMonth)}
+              onClick={() => prevMonth && onChange(prevMonth)}
               disabled={!prevMonth}
             />
           </Box>
@@ -74,10 +64,10 @@ export default function MonthSelect({
             </Typography>
           </MonthButton>
 
-          <Box alignSelf="center" flexShrink="0">
+          <Box alignSelf="center" flexShrink={0}>
             <IconButton
               children={<ChevronRightIcon />}
-              onClick={() => onChange(nextMonth)}
+              onClick={() => nextMonth && onChange(nextMonth)}
               disabled={!nextMonth}
             />
           </Box>
@@ -97,7 +87,18 @@ export default function MonthSelect({
   )
 }
 
-function getMonthName(month) {
+const MonthButton = styled(ButtonBase)(({ theme }) => ({
+  borderRadius: theme.shape.borderRadius,
+  flexGrow: 1,
+  flexShrink: 1,
+  minWidth: 0,
+  padding: theme.spacing(0.5, 1),
+  justifyContent: 'flex-start',
+  display: 'flex',
+  flexDirection: 'column',
+}))
+
+function getMonthName(month: number | Date) {
   // const isCurrentYear =
   //   new Date().getFullYear() === new Date(month).getFullYear()
   // const pattern = isCurrentYear ? 'LLLL' : 'LLLL yyyy'

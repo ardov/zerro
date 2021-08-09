@@ -1,19 +1,7 @@
 import React from 'react'
 
-const makeLetterStyles = num => visible =>
-  visible
-    ? {
-        opacity: 1,
-        transition: '1.5s cubic-bezier(0.6, 0, 0.8, 1)',
-        transitionDelay: 0.4 + num * 0.3 + 's',
-      }
-    : {
-        opacity: 0,
-        transition: '1s cubic-bezier(0.6, 0, 0.8, 1)',
-      }
-
 const styles = {
-  circle: visible =>
+  circle: (visible: boolean) =>
     visible
       ? {
           // strokeDasharray: '400,400',
@@ -26,7 +14,7 @@ const styles = {
           opacity: 0,
           transition: '1s cubic-bezier(0, 0, 0.8, 1)',
         },
-  line: visible =>
+  line: (visible: boolean) =>
     visible
       ? {
           strokeDasharray: '100,100',
@@ -37,7 +25,7 @@ const styles = {
           strokeDasharray: '0,100',
           transition: '.1s ease-in',
         },
-  zero: visible =>
+  zero: (visible: boolean) =>
     visible
       ? { opacity: 1, transition: '1.5s ease-in-out' }
       : { opacity: 0, transition: '1.5s ease-in' },
@@ -48,7 +36,7 @@ const styles = {
   o: makeLetterStyles(5),
 }
 
-export default function Logo({ fill = '#000', visible = true, ...rest }) {
+export function Logo({ fill = '#000', visible = true, ...rest }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -103,4 +91,18 @@ export default function Logo({ fill = '#000', visible = true, ...rest }) {
       </g>
     </svg>
   )
+}
+
+function makeLetterStyles(num: number) {
+  return (visible: boolean) =>
+    visible
+      ? {
+          opacity: 1,
+          transition: '1.5s cubic-bezier(0.6, 0, 0.8, 1)',
+          transitionDelay: 0.4 + num * 0.3 + 's',
+        }
+      : {
+          opacity: 0,
+          transition: '1s cubic-bezier(0.6, 0, 0.8, 1)',
+        }
 }

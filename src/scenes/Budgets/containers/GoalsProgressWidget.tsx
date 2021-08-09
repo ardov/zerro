@@ -1,73 +1,45 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { getUserCurrencyCode } from 'store/data/selectors'
-import { Typography, ButtonBase, useMediaQuery } from '@material-ui/core'
-import { makeStyles } from '@material-ui/styles'
+import {
+  Typography,
+  ButtonBase,
+  useMediaQuery,
+  ButtonBaseProps,
+  Theme,
+  Box,
+} from '@material-ui/core'
+import { styled } from '@material-ui/styles'
 import { Tooltip } from 'components/Tooltip'
 import { Confirm } from 'components/Confirm'
 import { fillGoals } from '../thunks'
 import { getTotalGoalsProgress } from '../selectors/goalsProgress'
+import { useMonth } from '../pathHooks'
 
-const useStyles = makeStyles(
-  ({ palette, spacing, shape, shadows, breakpoints }) => ({
-    base: {
-      display: 'flex',
-      flexDirection: 'column',
-      width: '100%',
-      borderRadius: shape.borderRadius,
-      padding: spacing(1.5, 2),
-      background: palette.background.paper,
-      boxShadow: shadows[2],
-      position: 'relative',
-      overflow: 'hidden',
-
-      [breakpoints.down('xs')]: {
-        flexDirection: 'row-reverse',
-        justifyContent: 'space-between',
-      },
-    },
-    paper: {
-      position: 'relative',
-      overflow: 'hidden',
-    },
-    progress: {
-      position: 'absolute',
-      width: '100%',
-
-      transform: ({ progress }) => `scaleX(${1 - progress})`,
-      transformOrigin: 'right',
-      top: 0,
-      bottom: 0,
-      right: -1,
-      backgroundColor: palette.action.selected,
-      willChange: 'transform',
-      transition: '0.4s ease-in-out',
-    },
-  })
-)
-
-export default function GoalsProgressWidget({ month, className, ...rest }) {
+export const GoalsProgressWidget: FC<ButtonBaseProps> = props => {
   const dispatch = useDispatch()
+  const [month] = useMonth()
   const currency = useSelector(getUserCurrencyCode)
-  const formatSum = sum => formatMoney(sum, currency)
+  const formatSum = (sum: number) => formatMoney(sum, currency)
   const totals = useSelector(getTotalGoalsProgress)?.[month]
-  const { need, target, progress } = totals || {}
   const onOk = () => dispatch(fillGoals(month))
-  const c = useStyles({ progress })
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
+  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
-  if (!totals)
+  if (!totals) {
     return (
-      <ButtonBase {...rest} className={`${c.base} ${className}`}>
+      <StyledBase {...props}>
         <Typography noWrap align="center" variant="h5" color="textPrimary">
-          🏔
+          🚩
         </Typography>
         <Typography noWrap align="center" variant="body2" color="textSecondary">
           Пока целей нет
         </Typography>
-      </ButtonBase>
+      </StyledBase>
     )
+  }
+
+  const { need, target, progress } = totals
 
   return (
     <Confirm
@@ -85,8 +57,8 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
             : `Всего нужно было ${formatSum(target)}`
         }
       >
-        <ButtonBase {...rest} className={`${c.base} ${className}`}>
-          <div className={c.progress} />
+        <StyledBase {...props}>
+          <Bar style={{ transform: `scaleX(${1 - progress})` }} />
           <Typography
             noWrap
             align="center"
@@ -103,8 +75,37 @@ export default function GoalsProgressWidget({ month, className, ...rest }) {
           >
             {need > 0 ? 'Ещё нужно на цели' : 'Цели выполнены'}
           </Typography>
-        </ButtonBase>
+        </StyledBase>
       </Tooltip>
     </Confirm>
   )
 }
+
+const StyledBase = styled(ButtonBase)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  width: '100%',
+  borderRadius: theme.shape.borderRadius,
+  padding: theme.spacing(1.5, 2),
+  background: theme.palette.background.paper,
+  boxShadow: theme.shadows[2],
+  position: 'relative',
+  overflow: 'hidden',
+
+  [theme.breakpoints.down('xs')]: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+  },
+}))
+
+const Bar = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  width: '100%',
+  transformOrigin: 'right',
+  top: 0,
+  bottom: 0,
+  right: -1,
+  backgroundColor: theme.palette.action.selected,
+  willChange: 'transform',
+  transition: '0.4s ease-in-out',
+}))

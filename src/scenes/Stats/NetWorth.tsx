@@ -27,6 +27,7 @@ import { getAvailableMonths } from './availablePeriod'
 import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 import { round } from 'helpers/currencyHelpers'
 import { useState } from 'react'
+import { formatMoney } from 'helpers/format'
 
 export function NetWorth() {
   const theme = useTheme()
@@ -109,7 +110,20 @@ export function NetWorth() {
             margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
           >
             <YAxis type="number" domain={['dataMin', 'dataMax']} hide />
-            <Tooltip />
+            <Tooltip
+              formatter={(v: number) => formatMoney(v)}
+              contentStyle={{
+                borderRadius: theme.shape.borderRadius,
+                background: theme.palette.background.paper,
+                color: theme.palette.text.primary,
+                padding: theme.spacing(1),
+                border: 0,
+                boxShadow: theme.shadows[10],
+              }}
+              itemStyle={{
+                color: theme.palette.text.primary,
+              }}
+            />
             {/* <CartesianGrid stroke={theme.palette.divider} /> */}
             <ReferenceLine y={0} stroke={theme.palette.divider} />
 

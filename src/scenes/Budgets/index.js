@@ -5,11 +5,11 @@ import { TagTable } from './containers/TagTable'
 import TransferTable from './containers/TransferTable'
 import MonthInfo from './containers/MonthInfo'
 import { ToBeBudgeted } from './containers/ToBeBudgeted'
-import MonthSelector from './MonthSelect'
+import { MonthSelect } from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
 import { Box, Button, Drawer, Paper, useMediaQuery } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
-import GoalsProgressWidget from './containers/GoalsProgressWidget'
+import { GoalsProgressWidget } from './containers/GoalsProgressWidget'
 import { useMonth, useDrawerId } from './pathHooks'
 import { DnDContext } from './containers/DnDContext'
 import { TagPreview } from './containers/TagPreview'
@@ -98,12 +98,12 @@ function Budgets() {
       <DnDContext>
         <Box display="flex" justifyContent="center" position="relative">
           <Box className={c.grid}>
-            <MonthSelector
+            <MonthSelect
               onChange={setMonth}
               className={c.monthSelect}
               {...{ minMonth, maxMonth, value: month }}
             />
-            <GoalsProgressWidget className={c.goals} month={month} />
+            <GoalsProgressWidget className={c.goals} />
             <ToBeBudgeted className={c.toBeBudgeted} onClick={openOverview} />
             <TagTable
               className={c.tags}

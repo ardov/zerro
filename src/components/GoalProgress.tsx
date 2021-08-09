@@ -1,19 +1,18 @@
-import React from 'react'
-import { makeStyles } from '@material-ui/styles'
+import React, { FC } from 'react'
 import { useTheme } from '@material-ui/core'
 
-const useStyles = makeStyles({
-  check: {
-    transition: ({ completed }) => `0.3s ease-out ${completed ? 0.4 : 0}s`,
-  },
-  inner: { transition: '0.5s ease-out' },
-  outter: { transition: '0.5s ease-out 0.1s' },
-})
+type GoalProgressProps = React.SVGProps<SVGSVGElement> & {
+  size?: number
+  value: number
+}
 
-export default function GoalProgress({ size = 16, value, ...rest }) {
+export const GoalProgress: FC<GoalProgressProps> = ({
+  size = 16,
+  value,
+  ...rest
+}) => {
   value = value < 0 ? 0 : value
   const completed = value >= 1
-  const c = useStyles({ completed })
   const theme = useTheme()
   const colorSuccess = theme.palette.success.main
   const colorMain = theme.palette.text.secondary
@@ -23,7 +22,6 @@ export default function GoalProgress({ size = 16, value, ...rest }) {
   return (
     <svg height={size} width={size} viewBox="0 0 64 64" {...rest}>
       <circle
-        className={c.outter}
         r="30"
         cx="32"
         cy="32"
@@ -31,11 +29,11 @@ export default function GoalProgress({ size = 16, value, ...rest }) {
         strokeWidth={2}
         opacity={completed ? 0.15 : 1}
         fill={completed ? colorSuccess : 'transparent'}
+        style={{ transition: '0.5s ease-out 0.1s' }}
       />
 
       <g transform="">
         <circle
-          className={c.inner}
           r={r}
           cx="32"
           cy="32"
@@ -45,16 +43,17 @@ export default function GoalProgress({ size = 16, value, ...rest }) {
           strokeWidth={completed ? 0 : r * 2}
           strokeDasharray={`${value * length} ${length}`}
           transform={`rotate(${completed ? 0 : -90}, 32, 32)`}
+          style={{ transition: '0.5s ease-out' }}
         />
       </g>
 
       <path
-        className={c.check}
         d="M16.5 30L28 41.5L47.5 22"
         strokeWidth="6"
         strokeDasharray={completed ? '60 60' : '0 60'}
         stroke={colorSuccess}
         fill="none"
+        style={{ transition: `0.3s ease-out ${completed ? 0.4 : 0}s` }}
       />
     </svg>
   )

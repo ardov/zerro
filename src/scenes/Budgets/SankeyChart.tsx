@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { useSelector } from 'react-redux'
 import { getTotalsByMonth } from './selectors/getTotalsByMonth'
 import { getAmountsByTag } from './selectors/getAmountsByTag'
@@ -15,7 +15,7 @@ import { formatMoney } from 'helpers/format'
 import { useTheme } from '@material-ui/core'
 import { round } from 'helpers/currencyHelpers'
 
-export function SankeyChart(props) {
+export function SankeyChart() {
   const theme = useTheme()
   const [month] = useMonth()
   const tags = useSelector(getTagsTree)
@@ -73,13 +73,10 @@ export function SankeyChart(props) {
     <ResponsiveContainer minHeight={600}>
       <Sankey
         data={data}
-        margin={{
-          left: theme.spacing(2),
-          right: theme.spacing(2),
-          top: theme.spacing(2),
-          bottom: theme.spacing(2),
-        }}
+        margin={{ left: 16, right: 16, top: 16, bottom: 16 }}
         node={
+          // Sankey chart inject needed props but types don't know about it
+          // @ts-ignore
           <DemoSankeyNode
             fill={theme.palette.primary.main}
             containerWidth={600}
@@ -88,13 +85,36 @@ export function SankeyChart(props) {
         nodeWidth={4}
         link={{ stroke: theme.palette.action.active }}
       >
-        <Tooltip />
+        <Tooltip
+          formatter={(v: number) => formatMoney(v)}
+          contentStyle={{
+            borderRadius: theme.shape.borderRadius,
+            background: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+            padding: theme.spacing(1),
+            border: 0,
+            boxShadow: theme.shadows[10],
+          }}
+          itemStyle={{
+            color: theme.palette.text.primary,
+          }}
+        />
       </Sankey>
     </ResponsiveContainer>
   )
 }
 
-function DemoSankeyNode({
+type SankeyNodeProps = {
+  x: number
+  y: number
+  width: number
+  height: number
+  index: number
+  fill: string
+  payload: any
+  containerWidth: number
+}
+const DemoSankeyNode: FC<SankeyNodeProps> = ({
   x,
   y,
   width,
@@ -103,7 +123,7 @@ function DemoSankeyNode({
   fill,
   payload,
   containerWidth,
-}) {
+}) => {
   if (isNaN(y)) console.log('payload', payload)
   const isOut = x + width + 6 > containerWidth
   return (
