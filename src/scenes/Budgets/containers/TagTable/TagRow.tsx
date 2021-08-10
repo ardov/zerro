@@ -1,12 +1,14 @@
-import React from 'react'
+import React, { FC } from 'react'
 import {
   Typography,
   Box,
   IconButton,
   useMediaQuery,
   ButtonBase,
+  Theme,
+  IconButtonProps,
+  styled,
 } from '@material-ui/core'
-import { withStyles } from '@material-ui/styles'
 import { Tooltip } from 'components/Tooltip'
 import { makeStyles } from '@material-ui/styles'
 import EmojiIcon from 'components/EmojiIcon'
@@ -19,18 +21,25 @@ import { GoalProgress } from 'components/GoalProgress'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
 import { getGoal } from 'store/localData/hiddenData/goals'
 import { useSelector, shallowEqual } from 'react-redux'
-import { getGoalProgress } from 'scenes/Budgets/selectors/goalsProgress'
+import {
+  getGoalProgress,
+  GoalProgress as GoalProgressType,
+} from 'scenes/Budgets/selectors/goalsProgress'
 import { Amount } from 'components/Amount'
 import { useContext } from 'react'
-import { IsDraggingContext, DragModeContext } from '../DnDContext'
+import { IsDraggingContext, DragModeContext, DragModeType } from '../DnDContext'
 import { getPopulatedTag } from 'store/localData/tags'
-import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
+import {
+  getAmountsById,
+  TagGroupAmounts,
+} from 'scenes/Budgets/selectors/getAmountsByTag'
+import { Goal } from 'types'
 
 const useStyles = makeStyles(theme => ({
   row: {
-    paddingTop: ({ isChild }) => theme.spacing(isChild ? 0.5 : 1),
-    paddingBottom: props => theme.spacing(props.isChild ? 0.5 : 1),
-    paddingLeft: props => theme.spacing(props.isChild ? 8 : 3),
+    paddingTop: (p: any) => theme.spacing(p.isChild ? 0.5 : 1),
+    paddingBottom: (p: any) => theme.spacing(p.isChild ? 0.5 : 1),
+    paddingLeft: (p: any) => theme.spacing(p.isChild ? 8 : 3),
     paddingRight: theme.spacing(2),
     display: 'grid',
     width: '100%',
@@ -44,25 +53,28 @@ const useStyles = makeStyles(theme => ({
     },
 
     '&:hover': {
-      background: ({ isDragging }) =>
-        isDragging ? 'none' : theme.palette.action.hover,
+      background: (p: any) =>
+        p.isDragging ? 'none' : theme.palette.action.hover,
     },
     '&:hover .addGoal': { opacity: 1, transition: '.3s' },
     '&:not(:hover) .addGoal': { opacity: 0 },
   },
-
-  warning: {
-    transform: 'translateY(4px)',
-    marginRight: theme.spacing(0.5),
-  },
-  dropZone: {
-    background: theme.palette.action.selected,
-    transition: '0.1s',
-    borderRadius: theme.shape.borderRadius,
-  },
 }))
 
-export function TagRow(props) {
+type TagRowProps = {
+  id: string
+  isChild: boolean
+  hiddenOverspend: number
+  date: number
+  showAll: boolean
+  metric: 'available' | 'budgeted' | 'outcome'
+  openGoalPopover: (id: string, target: Element) => void
+  openBudgetPopover: (id: string, target: Element) => void
+  openTransactionsPopover: (id: string) => void
+  openDetails: (id: string) => void
+}
+
+export const TagRow: FC<TagRowProps> = props => {
   const {
     id,
     isChild,
@@ -70,7 +82,6 @@ export function TagRow(props) {
     date,
     showAll,
     metric,
-
     openGoalPopover,
     openBudgetPopover,
     openTransactionsPopover,
@@ -81,9 +92,15 @@ export function TagRow(props) {
 
   const isUnsorted = !tag.parent && isChild // реальная родительская категория
   let { showOutcome, symbol, colorRGB, name } = tag
-  let budgeted = isChild ? amounts.budgeted : amounts.totalBudgeted
-  let outcome = isChild ? amounts.outcome : amounts.totalOutcome
-  let available = isChild ? amounts.available : amounts.totalAvailable
+  let budgeted = isChild
+    ? amounts.budgeted
+    : (amounts as TagGroupAmounts).totalBudgeted
+  let outcome = isChild
+    ? amounts.outcome
+    : (amounts as TagGroupAmounts).totalOutcome
+  let available = isChild
+    ? amounts.available
+    : (amounts as TagGroupAmounts).totalAvailable
 
   if (isUnsorted) {
     symbol = '-'
@@ -100,7 +117,7 @@ export function TagRow(props) {
     state => getGoalProgress(state, date, id),
     shallowEqual
   )
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
+  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
   const c = useStyles({ isChild, isDragging })
 
   if (
@@ -115,7 +132,7 @@ export function TagRow(props) {
 
   const showBudget = isChild ? !!budgeted : true
 
-  const renderContent = (provided, snapshot) => (
+  const renderContent = (provided?: any, snapshot?: any) => (
     <div className={c.row} ref={provided?.innerRef}>
       <span style={{ display: 'none' }}>{provided?.placeholder}</span>
       <NameCell
@@ -175,23 +192,32 @@ export function TagRow(props) {
   )
 }
 
-const InvisibleButton = withStyles(theme => ({
-  root: {
-    padding: theme.spacing(0.5),
-    margin: theme.spacing(-0.5),
-    borderRadius: theme.shape.borderRadius,
-    minWidth: '0',
-    transition: '0.1s',
-    '&:hover': {
-      background: theme.palette.action.hover,
-    },
-    '&:focus': {
-      background: theme.palette.action.focus,
-    },
+const InvisibleButton = styled(ButtonBase)(({ theme }) => ({
+  padding: theme.spacing(0.5),
+  margin: theme.spacing(-0.5),
+  borderRadius: theme.shape.borderRadius,
+  minWidth: 0,
+  transition: '0.1s',
+  '&:hover': {
+    background: theme.palette.action.hover,
   },
-}))(ButtonBase)
+  '&:focus': {
+    background: theme.palette.action.focus,
+  },
+}))
 
-function NameCell({ symbol, colorRGB, name, onOpenDetails, onEditName }) {
+type NameCellProps = {
+  symbol: string
+  colorRGB: string | null
+  name: string
+  onOpenDetails: () => void
+}
+const NameCell: FC<NameCellProps> = ({
+  symbol,
+  colorRGB,
+  name,
+  onOpenDetails,
+}) => {
   return (
     <Box display="flex" alignItems="center" minWidth={0}>
       <InvisibleButton onClick={onOpenDetails}>
@@ -204,7 +230,13 @@ function NameCell({ symbol, colorRGB, name, onOpenDetails, onEditName }) {
   )
 }
 
-function BudgetCell(props) {
+type BudgetCellProps = {
+  budgeted: number
+  showBudget: boolean
+  isUnsorted: boolean
+  onBudgetClick: React.MouseEventHandler<HTMLButtonElement>
+}
+const BudgetCell: FC<BudgetCellProps> = props => {
   const { budgeted, showBudget, onBudgetClick, isUnsorted } = props
   return showBudget ? (
     <Box
@@ -212,8 +244,8 @@ function BudgetCell(props) {
       display="flex"
       justifyContent="flex-end"
     >
-      <InvisibleButton variant="body1" align="right" onClick={onBudgetClick}>
-        <Typography variant="body1" noWrap>
+      <InvisibleButton onClick={onBudgetClick}>
+        <Typography variant="body1" align="right" noWrap>
           <Amount value={budgeted} decMode="ifOnly" />
         </Typography>
       </InvisibleButton>
@@ -241,7 +273,11 @@ function BudgetCell(props) {
   )
 }
 
-function OutcomeCell(props) {
+type OutcomeCellProps = {
+  outcome: number
+  onClick: () => void
+}
+const OutcomeCell: FC<OutcomeCellProps> = props => {
   const { outcome, onClick } = props
   return (
     <Box
@@ -258,15 +294,17 @@ function OutcomeCell(props) {
   )
 }
 
-const useAvailableStyles = makeStyles(theme => ({
-  dropZone: {
-    background: theme.palette.action.selected,
-    transition: '0.1s',
-    borderRadius: theme.shape.borderRadius,
-  },
-}))
-
-function AvailableCell(props) {
+type AvailableCellProps = {
+  snapshot?: any
+  dragMode: DragModeType
+  hiddenOverspend: number
+  id: string
+  available: number
+  isChild: boolean
+  budgeted: number
+  isUnsorted: boolean
+}
+const AvailableCell: FC<AvailableCellProps> = props => {
   const {
     snapshot = {},
     dragMode,
@@ -277,10 +315,9 @@ function AvailableCell(props) {
     budgeted,
     isUnsorted,
   } = props
-  const c = useAvailableStyles()
   const availableColor = getAvailableColor(available, isChild, !!budgeted)
 
-  const renderCellContent = (provided, snapshot) => (
+  const renderCellContent = (provided?: any, snapshot?: any) => (
     <Box
       sx={{
         borderRadius: 2,
@@ -301,7 +338,15 @@ function AvailableCell(props) {
   )
 
   return (
-    <Box m={-1} p={1} className={snapshot.isDraggingOver ? c.dropZone : null}>
+    <Box
+      sx={{
+        bgcolor: snapshot.isDraggingOver ? 'action.selected' : 'transparent',
+        transition: '0.1s',
+        borderRadius: 1,
+        m: -1,
+        p: 1,
+      }}
+    >
       <Typography variant="body1" align="right">
         {!!hiddenOverspend && (
           <Tooltip
@@ -320,7 +365,7 @@ function AvailableCell(props) {
         {isUnsorted || dragMode === 'REORDER' ? (
           renderCellContent()
         ) : (
-          <Draggable draggableId={id ? id : 'null'} index={0}>
+          <Draggable draggableId={id || 'null'} index={0}>
             {renderCellContent}
           </Draggable>
         )}
@@ -329,27 +374,45 @@ function AvailableCell(props) {
   )
 }
 
-function GoalButton(props) {
+type GoalButtonProps = {
+  goal: Goal
+  goalProgress?: GoalProgressType | null
+  onClick: IconButtonProps['onClick']
+}
+
+const GoalButton: FC<GoalButtonProps> = props => {
   const { goal, goalProgress, onClick } = props
-  const hasGoal = !!goalProgress
-  return (
-    <Box component="span" className={hasGoal ? '' : 'addGoal'}>
-      <Tooltip title={hasGoal ? goalToWords(goal) : 'Добавить цель'}>
-        <IconButton size="small" onClick={onClick}>
-          {hasGoal ? (
-            <GoalProgress value={goalProgress.progress} fontSize="inherit" />
-          ) : (
+
+  if (!goalProgress) {
+    return (
+      <span className={'addGoal'}>
+        <Tooltip title={'Добавить цель'}>
+          <IconButton size="small" onClick={onClick}>
             <EmojiFlagsIcon fontSize="inherit" />
-          )}
+          </IconButton>
+        </Tooltip>
+      </span>
+    )
+  }
+
+  return (
+    <span>
+      <Tooltip title={goalToWords(goal)}>
+        <IconButton size="small" onClick={onClick}>
+          <GoalProgress value={goalProgress.progress} fontSize="inherit" />
         </IconButton>
       </Tooltip>
-    </Box>
+    </span>
   )
 }
 
 // helpers
 
-function getAvailableColor(available, isChild, hasBudget) {
+function getAvailableColor(
+  available: number,
+  isChild: boolean,
+  hasBudget: boolean
+) {
   const positive = 'success.main'
   const negative = 'error.main'
   const neutral = 'text.hint'

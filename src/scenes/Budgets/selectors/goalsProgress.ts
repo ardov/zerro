@@ -12,7 +12,7 @@ import { withPerf } from 'helpers/performance'
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = GOAL_TYPES
 // const startForOldGoals = +new Date(2019, 1, 1)
 
-interface GoalsProgress {
+export type GoalProgress = {
   progress: number
   need: number
   target: number
@@ -26,7 +26,7 @@ export const getGoalsProgress = createSelector(
   withPerf('BUDGET: getGoalsProgress', (goals, amountsById, monthList) => {
     const result: {
       [month: number]: {
-        [tagId: string]: GoalsProgress | null
+        [tagId: string]: GoalProgress | null
       }
     } = {}
 
@@ -83,7 +83,7 @@ export const getGoalsProgress = createSelector(
 export const getTotalGoalsProgress = createSelector(
   [getGoals, getGoalsProgress],
   withPerf('BUDGET: getTotalGoalsProgress', (goals, goalsProgress) => {
-    let result: { [month: number]: GoalsProgress | null } = {}
+    let result: { [month: number]: GoalProgress | null } = {}
 
     const isCounted = (goal: Goal) => goal.type !== TARGET_BALANCE || goal.end
     let countedGoals: { [id: string]: Goal } = {}
