@@ -8,6 +8,7 @@ import {
   Theme,
   IconButtonProps,
   styled,
+  ButtonBaseProps,
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import { makeStyles } from '@material-ui/styles'
@@ -63,15 +64,15 @@ const useStyles = makeStyles(theme => ({
 
 type TagRowProps = {
   id: string
-  isChild: boolean
-  hiddenOverspend: number
+  isChild?: boolean
+  hiddenOverspend?: number
   date: number
-  showAll: boolean
+  showAll?: boolean
   metric: 'available' | 'budgeted' | 'outcome'
+  openDetails: (id: string) => void
   openGoalPopover: (id: string, target: Element) => void
   openBudgetPopover: (id: string, target: Element) => void
   openTransactionsPopover: (id: string) => void
-  openDetails: (id: string) => void
 }
 
 export const TagRow: FC<TagRowProps> = props => {
@@ -192,19 +193,22 @@ export const TagRow: FC<TagRowProps> = props => {
   )
 }
 
-const InvisibleButton = styled(ButtonBase)(({ theme }) => ({
-  padding: theme.spacing(0.5),
-  margin: theme.spacing(-0.5),
-  borderRadius: theme.shape.borderRadius,
-  minWidth: 0,
-  transition: '0.1s',
-  '&:hover': {
-    background: theme.palette.action.hover,
-  },
-  '&:focus': {
-    background: theme.palette.action.focus,
-  },
-}))
+const Btn: FC<ButtonBaseProps> = props => (
+  <ButtonBase
+    sx={{
+      p: 0.5,
+      m: -0.5,
+      borderRadius: 1,
+      minWidth: 0,
+      transition: '0.1s',
+      textAlign: 'right',
+      typography: 'body1',
+      '&:hover': { bgcolor: 'action.hover' },
+      '&:focus': { bgcolor: 'action.focus' },
+    }}
+    {...props}
+  />
+)
 
 type NameCellProps = {
   symbol: string
@@ -220,20 +224,20 @@ const NameCell: FC<NameCellProps> = ({
 }) => {
   return (
     <Box display="flex" alignItems="center" minWidth={0}>
-      <InvisibleButton onClick={onOpenDetails}>
-        <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} flexShrink={0} />
-        <Typography variant="body1" color="textPrimary" noWrap>
+      <Btn onClick={onOpenDetails}>
+        <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} />
+        <Typography variant="body1" noWrap>
           {name}
         </Typography>
-      </InvisibleButton>
+      </Btn>
     </Box>
   )
 }
 
 type BudgetCellProps = {
   budgeted: number
-  showBudget: boolean
-  isUnsorted: boolean
+  showBudget?: boolean
+  isUnsorted?: boolean
   onBudgetClick: React.MouseEventHandler<HTMLButtonElement>
 }
 const BudgetCell: FC<BudgetCellProps> = props => {
@@ -244,11 +248,9 @@ const BudgetCell: FC<BudgetCellProps> = props => {
       display="flex"
       justifyContent="flex-end"
     >
-      <InvisibleButton onClick={onBudgetClick}>
-        <Typography variant="body1" align="right" noWrap>
-          <Amount value={budgeted} decMode="ifOnly" />
-        </Typography>
-      </InvisibleButton>
+      <Btn onClick={onBudgetClick}>
+        <Amount value={budgeted} decMode="ifOnly" />
+      </Btn>
     </Box>
   ) : (
     <Box display="flex" justifyContent="flex-end">
@@ -285,11 +287,11 @@ const OutcomeCell: FC<OutcomeCellProps> = props => {
       justifyContent="flex-end"
       color={outcome ? 'text.primary' : 'text.hint'}
     >
-      <InvisibleButton onClick={onClick}>
+      <Btn onClick={onClick}>
         <Typography variant="body1" align="right">
           <Amount value={-outcome} decMode="ifOnly" />
         </Typography>
-      </InvisibleButton>
+      </Btn>
     </Box>
   )
 }
@@ -297,12 +299,12 @@ const OutcomeCell: FC<OutcomeCellProps> = props => {
 type AvailableCellProps = {
   snapshot?: any
   dragMode: DragModeType
-  hiddenOverspend: number
+  hiddenOverspend?: number
   id: string
   available: number
-  isChild: boolean
+  isChild?: boolean
   budgeted: number
-  isUnsorted: boolean
+  isUnsorted?: boolean
 }
 const AvailableCell: FC<AvailableCellProps> = props => {
   const {
@@ -410,8 +412,8 @@ const GoalButton: FC<GoalButtonProps> = props => {
 
 function getAvailableColor(
   available: number,
-  isChild: boolean,
-  hasBudget: boolean
+  isChild?: boolean,
+  hasBudget?: boolean
 ) {
   const positive = 'success.main'
   const negative = 'error.main'

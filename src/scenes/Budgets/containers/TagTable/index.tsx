@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react'
-import { Paper } from '@material-ui/core'
+import React, { useState, useContext, FC } from 'react'
+import { BoxProps, Paper } from '@material-ui/core'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
 import { useSelector } from 'react-redux'
 import { TagGroup } from './TagGroup'
@@ -16,24 +16,45 @@ import { useMonth } from 'scenes/Budgets/pathHooks'
 import { DragModeContext } from '../DnDContext'
 import { getTagAccMap } from 'store/localData/hiddenData/accTagMap'
 import { getInBudgetAccounts } from 'store/localData/accounts'
+import { FilterConditions } from 'store/localData/transactions/filtering'
 
-const metrics = ['available', 'budgeted', 'outcome']
+export type MetricType = 'outcome' | 'available' | 'budgeted'
 
-export function TagTable({ openDetails, onOpenMonthDrawer, sx, className }) {
+const metrics: MetricType[] = ['available', 'budgeted', 'outcome']
+
+type TagTableProps = {
+  openDetails: (id: string) => void
+  onOpenMonthDrawer: () => void
+  sx?: BoxProps['sx']
+  className: string
+}
+
+export const TagTable: FC<TagTableProps> = ({
+  openDetails,
+  onOpenMonthDrawer,
+  sx,
+  className,
+}) => {
   const tagsTree = useSelector(getTagsTree)
   const tagAccMap = useSelector(getTagAccMap)
   const accountsInBudget = useSelector(state =>
     getInBudgetAccounts(state).map(acc => acc.id)
   )
   const [month] = useMonth()
-  const [selected, setSelected] = useState()
+  const [selected, setSelected] = useState<string[]>()
   const [metricIndex, setMetricIndex] = useState(0)
-  const [goalPopoverData, setGoalPopoverData] = useState({})
-  const [budgetPopoverData, setBudgetPopoverData] = useState({})
+  const [goalPopoverData, setGoalPopoverData] = useState<{
+    id?: string
+    anchor?: Element
+  }>({})
+  const [budgetPopoverData, setBudgetPopoverData] = useState<{
+    id?: string
+    anchor?: Element
+  }>({})
   const { dragMode } = useContext(DragModeContext)
 
   const onSelect = useCallback(
-    id => {
+    (id: string) => {
       sendEvent('Budgets: see transactions')
       const parent = tagsTree.find(tag => tag.id === id)
       if (parent) setSelected([id, ...parent.children.map(tag => tag.id)])
@@ -54,7 +75,7 @@ export function TagTable({ openDetails, onOpenMonthDrawer, sx, className }) {
     [metricIndex]
   )
 
-  let prefilter = []
+  let prefilter: FilterConditions[] = []
   prefilter.push({
     type: 'outcome',
     dateFrom: month,
@@ -102,7 +123,7 @@ export function TagTable({ openDetails, onOpenMonthDrawer, sx, className }) {
                     {provided => (
                       <TagGroup
                         id={tag.id}
-                        children={tag.children}
+                        tagChildren={tag.children}
                         metric={metrics[metricIndex]}
                         openTransactionsPopover={onSelect}
                         openBudgetPopover={openBudgetPopover}
@@ -125,7 +146,7 @@ export function TagTable({ openDetails, onOpenMonthDrawer, sx, className }) {
             <TagGroup
               key={tag.id}
               id={tag.id}
-              children={tag.children}
+              tagChildren={tag.children}
               metric={metrics[metricIndex]}
               openTransactionsPopover={onSelect}
               openBudgetPopover={openBudgetPopover}
@@ -145,7 +166,7 @@ export function TagTable({ openDetails, onOpenMonthDrawer, sx, className }) {
       />
       <BudgetPopover
         key={budgetPopoverData.id}
-        id={budgetPopoverData.id}
+        id={budgetPopoverData.id || ''}
         anchorEl={budgetPopoverData.anchor}
         open={!!budgetPopoverData.anchor}
         month={month}
@@ -154,7 +175,7 @@ export function TagTable({ openDetails, onOpenMonthDrawer, sx, className }) {
       />
       <GoalPopover
         key={goalPopoverData.id}
-        id={goalPopoverData.id}
+        id={goalPopoverData.id || ''}
         anchorEl={goalPopoverData.anchor}
         open={!!goalPopoverData.anchor}
         onClose={() => setGoalPopoverData({})}

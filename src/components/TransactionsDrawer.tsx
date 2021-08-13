@@ -15,7 +15,7 @@ import { Modify } from 'types'
 
 type TransactionsDrawerProps = Modify<DrawerProps, { onClose: () => void }> & {
   prefilter?: FilterConditions | FilterConditions[]
-  filterConditions: FilterConditions
+  filterConditions?: FilterConditions
 }
 
 export const TransactionsDrawer: FC<TransactionsDrawerProps> = ({
