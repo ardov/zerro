@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { formatDate, formatMoney } from 'helpers/format'
 import { getTotalsByMonth } from '../../selectors/getTotalsByMonth'
@@ -12,6 +12,8 @@ import {
   IconButton,
   useMediaQuery,
   Collapse,
+  Theme,
+  BoxProps,
 } from '@material-ui/core'
 import CloseIcon from '@material-ui/icons/Close'
 import Rhythm from 'components/Rhythm'
@@ -24,13 +26,15 @@ import { WidgetOutcome } from './WidgetOutcome'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import { useToggle } from 'helpers/useToggle'
 
-const getMonthName = date => formatDate(date, 'LLLL').toUpperCase()
+type MonthInfoProps = BoxProps & {
+  onClose: () => void
+}
 
-export default function BudgetInfo({ onClose, ...rest }) {
+export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
   const [month] = useMonth()
   const currency = useSelector(getUserCurrencyCode)
   const totals = useSelector(getTotalsByMonth)[month]
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('md'))
+  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const [showMore, toggleMore] = useToggle(false)
 
   const {
@@ -150,3 +154,6 @@ export default function BudgetInfo({ onClose, ...rest }) {
     </Box>
   )
 }
+
+const getMonthName = (date: number | Date) =>
+  formatDate(date, 'LLLL').toUpperCase()

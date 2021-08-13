@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import Dialog from '@material-ui/core/Dialog'
+import React, { FC, useState } from 'react'
+import Dialog, { DialogProps } from '@material-ui/core/Dialog'
 import TagChip from 'components/TagChip'
 import AmountInput from 'components/AmountInput'
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward'
@@ -9,8 +9,20 @@ import { useSelector, useDispatch } from 'react-redux'
 import { getAmountsById } from '../selectors/getAmountsByTag'
 import { moveFunds } from '../thunks'
 import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
+import { RootState } from 'store'
+import { Modify } from 'types'
 
-export function MoveMoneyModal(props) {
+type MoveMoneyModalProps = Modify<
+  DialogProps,
+  {
+    month: number
+    source: string
+    destination: string
+    onClose: () => void
+  }
+>
+
+export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   const dispatch = useDispatch()
   const { open, onClose, source, month, destination } = props
   const sourceAvailable = useSelector(state =>
@@ -63,7 +75,7 @@ export function MoveMoneyModal(props) {
   )
 }
 
-function getAvailableFor(state, month, id) {
+function getAvailableFor(state: RootState, month: number, id: string) {
   if (!id) return 0
   if (id === 'toBeBudgeted')
     return +getTotalsByMonth(state)?.[month]?.toBeBudgeted

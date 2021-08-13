@@ -7,7 +7,6 @@ import {
   ButtonBase,
   Theme,
   IconButtonProps,
-  styled,
   ButtonBaseProps,
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'

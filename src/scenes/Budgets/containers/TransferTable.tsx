@@ -1,5 +1,5 @@
-import React from 'react'
-import { connect } from 'react-redux'
+import React, { FC } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { getUserCurrencyCode } from 'store/data/selectors'
 import { makeStyles } from '@material-ui/styles'
@@ -11,6 +11,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  PaperProps,
 } from '@material-ui/core'
 import TagSelect2 from 'components/TagSelect2'
 import {
@@ -20,6 +21,7 @@ import {
 import { getTransfers } from '../selectors/getAmountsByTag'
 import { getAccounts } from 'store/localData/accounts'
 import TagChip from 'components/TagChip'
+import { useMonth } from '../pathHooks'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -29,17 +31,19 @@ const useStyles = makeStyles(theme => ({
   head: { position: 'sticky', top: 0 },
 }))
 
-function TransferTable({
-  transfers,
-  accounts,
-  currency,
-  accTagMap,
-  connectToTag,
-  className,
-  ...rest
-}) {
+export const TransferTable: FC<PaperProps> = ({ className, ...rest }) => {
+  const [month] = useMonth()
+  const transfers = useSelector(getTransfers)[month]
+  const accounts = useSelector(getAccounts)
+  const currency = useSelector(getUserCurrencyCode)
+  const accTagMap = useSelector(getAccTagMap)
+  const dispatch = useDispatch()
+
+  const connectToTag = (account: string, tag: string | null) =>
+    dispatch(addConnection(account, tag))
+
   const classes = useStyles()
-  const formatSum = sum =>
+  const formatSum = (sum: number) =>
     sum > 0 ? '+' + formatMoney(sum, currency) : formatMoney(sum, currency)
 
   const rows = []
@@ -93,16 +97,3 @@ function TransferTable({
     </Paper>
   ) : null
 }
-
-const mapStateToProps = (state, { month }) => ({
-  transfers: getTransfers(state)[month],
-  accounts: getAccounts(state),
-  currency: getUserCurrencyCode(state),
-  accTagMap: getAccTagMap(state),
-})
-
-const mapDispatchToProps = dispatch => ({
-  connectToTag: (account, tag) => dispatch(addConnection(account, tag)),
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(TransferTable)
