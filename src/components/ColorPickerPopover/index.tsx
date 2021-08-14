@@ -43,7 +43,7 @@ const ColorCheck: FC<ColorCheckProps> = ({ hex, checked, onChange }) => {
 type ColorPickerProps = Modify<
   PopoverProps,
   {
-    value?: string
+    value?: string | null
     onChange: (value: string | null) => void
     onClose: () => void
   }

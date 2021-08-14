@@ -7,7 +7,14 @@ import { MonthInfo } from './containers/MonthInfo'
 import { ToBeBudgeted } from './containers/ToBeBudgeted'
 import { MonthSelect } from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
-import { Box, Button, Drawer, Paper, useMediaQuery } from '@material-ui/core'
+import {
+  Box,
+  Button,
+  Drawer,
+  Paper,
+  Theme,
+  useMediaQuery,
+} from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
 import { GoalsProgressWidget } from './containers/GoalsProgressWidget'
 import { useMonth, useDrawerId } from './pathHooks'
@@ -76,11 +83,10 @@ function Budgets() {
   const maxMonth = monthList[monthList.length - 1]
   const [month, setMonth] = useMonth()
   const [drawerId, setDrawerId] = useDrawerId()
-  const isMD = useMediaQuery(theme => theme.breakpoints.down('lg'))
-  const isSM = useMediaQuery(theme => theme.breakpoints.down('md'))
+  const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))
+  const isSM = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const [showSankey, setShowSankey] = useState(false)
   const c = useStyles()
-  const index = monthList.findIndex(date => date === month)
   const drawerVisibility = !isMD || !!drawerId
 
   const openOverview = useCallback(() => setDrawerId('overview'), [setDrawerId])
@@ -99,8 +105,8 @@ function Budgets() {
         <Box display="flex" justifyContent="center" position="relative">
           <Box className={c.grid}>
             <MonthSelect
-              onChange={setMonth}
               className={c.monthSelect}
+              onChange={setMonth}
               {...{ minMonth, maxMonth, value: month }}
             />
             <GoalsProgressWidget className={c.goals} />
@@ -110,7 +116,7 @@ function Budgets() {
               openDetails={setDrawer}
               onOpenMonthDrawer={openOverview}
             />
-            <TransferTable className={c.transfers} month={monthList[index]} />
+            <TransferTable className={c.transfers} />
             {!isSM &&
               (showSankey ? (
                 <Paper className={c.chart}>
@@ -134,14 +140,10 @@ function Budgets() {
             open={drawerVisibility}
             onClose={closeDrawer}
           >
-            {drawerId === 'overview' && (
-              <MonthInfo month={month} index={index} onClose={closeDrawer} />
+            {(!drawerId || drawerId === 'overview') && (
+              <MonthInfo onClose={closeDrawer} />
             )}
-            {drawerId ? (
-              <TagPreview onClose={closeDrawer} id={drawerId} />
-            ) : (
-              <MonthInfo month={month} index={index} onClose={closeDrawer} />
-            )}
+            {drawerId && <TagPreview onClose={closeDrawer} id={drawerId} />}
           </Drawer>
         </Box>
       </DnDContext>

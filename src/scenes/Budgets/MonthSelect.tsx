@@ -15,13 +15,17 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import { styled } from '@material-ui/styles'
 import MonthSelectPopover from './MonthSelectPopover'
 import { formatDate } from 'helpers/format'
+import { Modify } from 'types'
 
-type MonthSelectProps = PaperProps & {
-  onChange: (month: number) => void
-  minMonth: number
-  maxMonth: number
-  value: number
-}
+type MonthSelectProps = Modify<
+  PaperProps,
+  {
+    onChange: (month: number) => void
+    minMonth: number
+    maxMonth: number
+    value: number
+  }
+>
 
 export const MonthSelect: FC<MonthSelectProps> = props => {
   const { onChange, minMonth, maxMonth, value, ...rest } = props
