@@ -13,7 +13,7 @@ import { Tooltip } from 'components/Tooltip'
 import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash'
 import CloseIcon from '@material-ui/icons/Close'
 import DeleteIcon from '@material-ui/icons/Delete'
-// import { DatePicker } from '@material-ui/pickers'
+import DatePicker from '@material-ui/lab/DatePicker'
 import { Map } from './Map'
 import AmountInput from 'components/AmountInput'
 import { formatDate, rateToWords } from 'helpers/format'
@@ -131,7 +131,7 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
 
       <Box px={3}>
         {trType !== 'income' && (
-          <Box mt={2}>
+          <Box mt={4}>
             <AmountInput
               label={`Расход с ${outcomeAccount.title}`}
               currency={outcomeCurrency}
@@ -139,13 +139,13 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
               onChange={setLocalOutcome}
               selectOnFocus
               fullWidth
-              margin="dense"
+              size="small"
             />
           </Box>
         )}
 
         {trType !== 'outcome' && (
-          <Box mt={2}>
+          <Box mt={4}>
             <AmountInput
               label={`Доход на ${incomeAccount.title}`}
               currency={incomeCurrency}
@@ -153,27 +153,25 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
               onChange={setLocalIncome}
               selectOnFocus
               fullWidth
-              margin="dense"
+              size="small"
             />
           </Box>
         )}
 
-        {/* TODO!!! */}
-        {/* <Box mt={2}>
+        <Box mt={4}>
           <DatePicker
             value={localDate}
-            onChange={date => setLocalDate(+date)}
+            onChange={date => date && setLocalDate(+date)}
             label="Дата"
-            fullWidth
-            autoOk
-            cancelLabel="Отмена"
-            okLabel="Ок"
-            format="dd MMMM yyyy, EEEEEE"
-            variant="dialog"
-            inputVariant="outlined"
-            margin="dense"
+            cancelText="Отмена"
+            okText="Ок"
+            // format="dd MMMM yyyy, EEEEEE"
+            // variant="dialog"
+            renderInput={params => (
+              <TextField size="small" fullWidth {...params} />
+            )}
           />
-        </Box> */}
+        </Box>
 
         <TextField
           value={localPayee || ''}
@@ -184,7 +182,7 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
           fullWidth
           helperText=""
           variant="outlined"
-          margin="dense"
+          size="small"
           sx={{ mt: 2 }}
         />
 
@@ -197,7 +195,7 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
           fullWidth
           helperText=""
           variant="outlined"
-          margin="dense"
+          size="small"
           sx={{ mt: 2 }}
         />
 
