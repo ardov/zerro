@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   Box,
@@ -37,17 +37,22 @@ const useStyles = makeStyles(({ shape, spacing, palette, breakpoints }) => ({
   },
 }))
 
-export function LinkedAccs({ id }) {
+type LinkedAccsProps = {
+  id: string
+}
+
+export const LinkedAccs: FC<LinkedAccsProps> = ({ id }) => {
   const c = useStyles()
-  const [anchorEl, setAnchorEl] = React.useState(null)
+  const [anchorEl, setAnchorEl] = React.useState<Element | null>(null)
   const [hideArchived, setHideArchived] = React.useState(true)
   const linkedAccs = useSelector(state => getTagAccMap(state)[id])
   const accounts = useSelector(getAccounts)
   const savingAccs = useSelector(getSavingAccounts)
   const dispatch = useDispatch()
-  const removeConnection = id => dispatch(addConnection(id, null))
+  const removeConnection = (id: string) => dispatch(addConnection(id, null))
 
-  const handleClick = event => setAnchorEl(event.currentTarget)
+  const handleClick: React.MouseEventHandler<HTMLButtonElement> = event =>
+    setAnchorEl(event.currentTarget)
   const handleClose = () => setAnchorEl(null)
 
   // Hide archived on every open

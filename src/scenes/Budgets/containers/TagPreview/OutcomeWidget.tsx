@@ -1,35 +1,41 @@
-import React, { useEffect, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
-import { Box, Typography, useTheme } from '@material-ui/core'
+import {
+  Box,
+  BoxProps,
+  TooltipProps,
+  Typography,
+  useTheme,
+} from '@material-ui/core'
 import { Amount } from 'components/Amount'
 import { formatDate } from 'helpers/format'
 import { Tooltip } from 'components/Tooltip'
 import Rhythm from 'components/Rhythm'
-import {
-  getAmountsByTag,
-  getAmountsById,
-} from 'scenes/Budgets/selectors/getAmountsByTag'
+import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
 import getMonthDates from 'scenes/Budgets/selectors/getMonthDates'
-import { getPopulatedTag } from 'store/localData/tags'
+import { useMonth } from 'scenes/Budgets/pathHooks'
 
-export function OutcomeWidget({ tagId, month, setMonth, ...boxProps }) {
+type OutcomWidgetProps = BoxProps & {
+  tagId: string
+}
+
+export const OutcomeWidget: FC<OutcomWidgetProps> = ({
+  tagId,
+  ...boxProps
+}) => {
+  const [month, setMonth] = useMonth()
   const [selected, setSelected] = useState(month)
-  const tag = useSelector(state => getPopulatedTag(state, tagId))
-  const amounts = useSelector(getAmountsById)?.[month]?.[tagId]
-  const allAmounts = useSelector(getAmountsByTag)
+  const allAmounts = useSelector(getAmountsById)
   const dates = useSelector(getMonthDates)
-  const isParent = !!amounts.children
   const dateRange = getDateRange(dates, 12, month)
 
   const data = dateRange.map(date => {
-    let tagData = isParent
-      ? allAmounts[date][tagId]
-      : allAmounts[date][tag.parent].children[tagId]
-    let outcome = tagData.totalOutcome ?? tagData.outcome
-    let leftover = tagData.totalLeftover ?? tagData.leftover
-    let budgeted = tagData.totalBudgeted ?? tagData.budgeted
-    let available = tagData.totalAvailable ?? tagData.available
+    const tagData = allAmounts[date][tagId]
+    let outcome = tagData.totalOutcome
+    let leftover = tagData.totalLeftover
+    let budgeted = tagData.totalBudgeted
+    let available = tagData.totalAvailable
     let startingAmount = available + outcome
     if (outcome < 0) {
       // Handle positive outcome. It's possible with income transfers
@@ -59,19 +65,19 @@ export function OutcomeWidget({ tagId, month, setMonth, ...boxProps }) {
     </Rhythm>
   )
 
-  const onMouseMove = e => {
+  const onMouseMove = (e: any) => {
     if (e?.activeLabel && e.activeLabel !== selected) {
       setSelected(e.activeLabel)
     }
   }
-  const onClick = e => {
+  const onClick = (e: any) => {
     if (e?.activeLabel && e.activeLabel !== month) {
       setMonth(e.activeLabel)
     }
   }
 
   return (
-    <Box borderRadius="borderRadius" bgcolor="background.default" {...boxProps}>
+    <Box borderRadius={1} bgcolor="background.default" {...boxProps}>
       <Rhythm gap={0.5} pt={2} px={2}>
         <DataLine
           name="Расход"
@@ -100,17 +106,26 @@ export function OutcomeWidget({ tagId, month, setMonth, ...boxProps }) {
             <Bar
               dataKey="startingAmount"
               fill={startingAmountColor}
-              shape={<BudgetBar />}
+              shape={
+                // @ts-ignore
+                <BudgetBar />
+              }
             />
             <Bar
               dataKey="outcome"
               fill={outcomeColor}
-              shape={<OutcomeBar current={selected} />}
+              shape={
+                // @ts-ignore
+                <OutcomeBar current={selected} />
+              }
             />
             <Bar
               dataKey="startingAmount"
               fill={budgetLineColor}
-              shape={<BudgetLine />}
+              shape={
+                // @ts-ignore
+                <BudgetLine />
+              }
             />
             <XAxis
               dataKey="date"
@@ -125,24 +140,32 @@ export function OutcomeWidget({ tagId, month, setMonth, ...boxProps }) {
     </Box>
   )
 }
+type DotProps = { color: string; colorOpacity?: number }
 
-function Dot({ color, colorOpacity = 1 }) {
-  return (
-    <span
-      style={{
-        width: 8,
-        height: 8,
-        background: color,
-        display: 'inline-block',
-        marginRight: 8,
-        borderRadius: '50%',
-        opacity: colorOpacity,
-      }}
-    />
-  )
+const Dot: FC<DotProps> = ({ color, colorOpacity = 1 }) => (
+  <span
+    style={{
+      width: 8,
+      height: 8,
+      background: color,
+      display: 'inline-block',
+      marginRight: 8,
+      borderRadius: '50%',
+      opacity: colorOpacity,
+    }}
+  />
+)
+
+type DataLineProps = BoxProps & {
+  name: string
+  amount?: number
+  currency?: string
+  color?: string
+  colorOpacity?: number
+  tooltip?: TooltipProps['title']
 }
 
-function DataLine({
+const DataLine: FC<DataLineProps> = ({
   name,
   amount,
   currency,
@@ -150,10 +173,10 @@ function DataLine({
   colorOpacity = 1,
   tooltip,
   ...rest
-}) {
+}) => {
   return (
     <Box display="flex" flexDirection="row" {...rest}>
-      <Box flexGrow="1" mr={1} minWidth={0} display="flex" alignItems="center">
+      <Box flexGrow={1} mr={1} minWidth={0} display="flex" alignItems="center">
         {!!color && <Dot color={color} colorOpacity={colorOpacity} />}
         {tooltip ? (
           <Tooltip title={tooltip}>
@@ -167,14 +190,24 @@ function DataLine({
           </Typography>
         )}
       </Box>
-      <Typography variant="body2">
-        <Amount value={amount} currency={currency} />
-      </Typography>
+      {amount !== undefined && (
+        <Typography variant="body2">
+          <Amount value={amount} currency={currency} />
+        </Typography>
+      )}
     </Box>
   )
 }
 
-const BudgetBar = ({ fill, x, y, width, height }) => {
+type BarProps = {
+  fill?: string
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+const BudgetBar: FC<BarProps> = ({ fill, x, y, width, height }) => {
   if (height <= 0) return null
   return (
     <rect
@@ -190,7 +223,12 @@ const BudgetBar = ({ fill, x, y, width, height }) => {
   )
 }
 
-function OutcomeBar(props) {
+type OutcomeBarProps = BarProps & {
+  date: number
+  current: number
+}
+
+const OutcomeBar: FC<OutcomeBarProps> = props => {
   const { fill, x, y, width, height, date, current } = props
   return (
     <>
@@ -217,7 +255,12 @@ function OutcomeBar(props) {
   )
 }
 
-const BudgetLine = props => {
+type BudgetLineProps = BarProps & {
+  outcome: number
+  startingAmount: number
+}
+
+const BudgetLine: FC<BudgetLineProps> = props => {
   const { fill, x, y, width, outcome, startingAmount } = props
   if (startingAmount >= outcome || !outcome) return null
   return (
@@ -225,7 +268,7 @@ const BudgetLine = props => {
   )
 }
 
-function getDateRange(dates, range, targetMonth) {
+function getDateRange(dates: number[], range: number, targetMonth: number) {
   const idx = dates.findIndex(d => d === targetMonth)
   const arrayToTrim =
     idx === dates.length - 1 ? dates : dates.slice(0, dates.length - 1)
@@ -234,7 +277,7 @@ function getDateRange(dates, range, targetMonth) {
 }
 
 /** Cuts out a range with target index in center */
-function trimArray(arr = [], range = 1, targetIdx) {
+function trimArray(arr: number[] = [], range = 1, targetIdx?: number) {
   if (arr.length <= range) return arr
   if (targetIdx === undefined) return arr.slice(-range)
 
