@@ -41,6 +41,12 @@ export function createTheme(mode: 'light' | 'dark' = 'light') {
       subtitle2: { fontWeight: 500 },
       button: { textTransform: 'none' },
     },
+    components: {
+      MuiPaper: {
+        // Disable elevation brightness change
+        styleOverrides: { root: { backgroundImage: 'unset' } },
+      },
+    },
   })
   return theme
 }
