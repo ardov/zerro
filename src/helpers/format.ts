@@ -27,12 +27,16 @@ export function formatMoney(
 }
 
 export function getCurrencySymbol(currency: string): string {
-  return Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency,
-  })
-    .format(0)
-    .slice(5)
+  try {
+    return Intl.NumberFormat('ru-RU', {
+      style: 'currency',
+      currency,
+    })
+      .format(0)
+      .slice(5)
+  } catch (error) {
+    return currency
+  }
 }
 
 /**
