@@ -11,7 +11,6 @@ import { ListChildComponentProps, VariableSizeList as List } from 'react-window'
 import StaticDatePicker from '@material-ui/lab/StaticDatePicker'
 import TextField from '@material-ui/core/TextField'
 import AutoSizer from 'react-virtualized-auto-sizer'
-import { withStyles } from '@material-ui/styles'
 import { Box, ListSubheader } from '@material-ui/core'
 import Transaction from './Transaction'
 import { formatDate } from 'helpers/format'
@@ -30,11 +29,6 @@ const findDateIndex = (groups: GroupNode[], date: GroupNode['date']) => {
   }
   return groups.length - 1
 }
-
-const StyledSubheader = withStyles(theme => ({
-  root: { backgroundColor: theme.palette.background.paper },
-  sticky: { top: 0 },
-}))(ListSubheader)
 
 type GrouppedListProps = {
   groups: GroupNode[]
@@ -120,7 +114,7 @@ export const GrouppedList: FC<GrouppedListProps> = ({
   )
 }
 
-const Day: FC<ListChildComponentProps> = ({
+const Day: FC<ListChildComponentProps<DayData>> = ({
   index,
   style,
   data,
@@ -133,7 +127,7 @@ const Day: FC<ListChildComponentProps> = ({
     checkByChangedDate,
     onFilterByPayee,
     onDateClick,
-  } = data as DayData
+  } = data
   const [renderContent, setRenderContent] = useState(!isScrolling)
   useEffect(() => {
     if (!isScrolling) setRenderContent(true)
@@ -150,9 +144,9 @@ const Day: FC<ListChildComponentProps> = ({
   else
     return (
       <Box position="relative" maxWidth={560} mx="auto" style={style}>
-        <StyledSubheader onClick={() => onDateClick(date)}>
+        <ListSubheader onClick={() => onDateClick(date)}>
           {formatDate(date)}
-        </StyledSubheader>
+        </ListSubheader>
 
         {groups[index].transactions.map(id => (
           <Transaction
@@ -176,7 +170,7 @@ const DaySkeleton: FC<{
   style: CSSProperties
 }> = ({ date, style, length }) => (
   <Box position="relative" maxWidth={560} mx="auto" style={style}>
-    <StyledSubheader>{formatDate(date)}</StyledSubheader>
+    <ListSubheader>{formatDate(date)}</ListSubheader>
     <div
       style={{
         height: length * TRANSACTION_HEIGHT,

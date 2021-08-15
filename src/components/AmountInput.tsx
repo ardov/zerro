@@ -3,7 +3,7 @@ import { TextField, InputAdornment, TextFieldProps } from '@material-ui/core'
 import { getCurrencySymbol } from 'helpers/format'
 import { Modify } from 'types'
 
-type AmountInputProps = Modify<
+export type AmountInputProps = Modify<
   TextFieldProps,
   {
     value: number
@@ -93,7 +93,9 @@ export const AmountInput: FC<AmountInputProps> = ({
       inputRef={ref}
       inputProps={{ type: 'tel' }}
       InputProps={{
-        endAdornment: sym && <InputAdornment position="end" children={sym} />,
+        endAdornment: sym && (
+          <InputAdornment position="end" disableTypography children={sym} />
+        ),
       }}
       onChange={changeHandler}
       onFocus={focusHandler}
