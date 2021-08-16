@@ -1,10 +1,9 @@
 import React from 'react'
-import { Provider } from 'react-redux'
-import { store } from '../src/store'
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider'
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns'
 import ruDateLocale from 'date-fns/locale/ru'
 import { AppThemeProvider } from '../src/AppThemeProvider'
+import { DemoStoreProvider } from '../src/demoData/DemoStoreProvider'
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
@@ -18,12 +17,12 @@ export const parameters = {
 
 export const decorators = [
   Story => (
-    <Provider store={store}>
+    <DemoStoreProvider>
       <LocalizationProvider dateAdapter={AdapterDateFns} locale={ruDateLocale}>
         <AppThemeProvider>
           <Story />
         </AppThemeProvider>
       </LocalizationProvider>
-    </Provider>
+    </DemoStoreProvider>
   ),
 ]
