@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { useTheme } from '@material-ui/core'
 
-type GoalProgressProps = React.SVGProps<SVGSVGElement> & {
+export type GoalProgressProps = React.SVGProps<SVGSVGElement> & {
   size?: number
   value: number
 }
@@ -42,7 +42,7 @@ export const GoalProgress: FC<GoalProgressProps> = ({
           stroke={completed ? colorSuccess : colorMain}
           strokeWidth={completed ? 0 : r * 2}
           strokeDasharray={`${value * length} ${length}`}
-          transform={`rotate(${completed ? 0 : -90}, 32, 32)`}
+          transform={`rotate(-90, 32, 32)`}
           style={{ transition: '0.5s ease-out' }}
         />
       </g>
