@@ -320,6 +320,7 @@ const AvailableCell: FC<AvailableCellProps> = props => {
 
   const renderCellContent = (provided?: any, snapshot?: any) => (
     <Box
+      component="span"
       sx={{
         borderRadius: 2,
         bgcolor: !!provided ? 'background.paper' : '',

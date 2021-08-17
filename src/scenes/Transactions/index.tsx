@@ -13,6 +13,8 @@ import { TransactionPreview } from 'components/TransactionPreview'
 import { sendEvent } from 'helpers/tracking'
 import { Helmet } from 'react-helmet'
 import { useSearchParam } from 'helpers/useSearchParam'
+import { useSelector } from 'react-redux'
+import { getTransactions } from 'store/localData/transactions'
 
 const useStyles = makeStyles(theme => ({
   drawerWidth: {
@@ -24,13 +26,15 @@ const useStyles = makeStyles(theme => ({
 export default function TransactionsView() {
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const [opened, setOpened] = useSearchParam('transaction')
+  const openedTransaction = useSelector(getTransactions)[opened || '']
   const [checkedDate, setCheckedDate] = useState<Date | null>(null)
   const c = useStyles()
 
   // send analytics
   useEffect(() => {
-    if (opened) sendEvent('Transaction: see details')
-  }, [opened])
+    if (openedTransaction) sendEvent('Transaction: see details')
+    if (opened && !openedTransaction) setOpened(null)
+  }, [opened, openedTransaction, setOpened])
 
   return (
     <>
@@ -72,11 +76,12 @@ export default function TransactionsView() {
           open={!isMobile || !!opened}
           onClose={() => setOpened(null)}
         >
-          {opened ? (
+          {openedTransaction && opened ? (
             <TransactionPreview
               id={opened}
               key={opened}
               onClose={() => setOpened(null)}
+              onOpenOther={setOpened}
               onSelectSimilar={date => setCheckedDate(new Date(date))}
             />
           ) : (

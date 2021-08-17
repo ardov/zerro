@@ -71,6 +71,27 @@ export const applyChangesToTransaction = (
   }
   dispatch(applyClientPatch({ transaction: [tr] }))
 }
+export const recreateTransaction = (patch: TransactionPatch): AppThunk => (
+  dispatch,
+  getState
+) => {
+  sendEvent('Transaction: recreate')
+  const tr = getTransaction(getState(), patch.id)
+  const oldTr = {
+    ...tr,
+    outcome: 0.00001,
+    income: 0.00001,
+    changed: Date.now(),
+  }
+  const newTr = {
+    ...getTransaction(getState(), patch.id),
+    ...patch,
+    id: uuidv1(),
+    changed: Date.now(),
+  }
+  dispatch(applyClientPatch({ transaction: [oldTr, newTr] }))
+  return newTr.id
+}
 
 export const bulkEditTransactions = (
   ids: TransactionId[],

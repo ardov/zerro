@@ -65,7 +65,7 @@ export const GoalPopover: FC<BudgetPopoverProps> = props => {
   return (
     <>
       <Popover disableRestoreFocus onClose={onClose} {...rest}>
-        <Box display="grid" rowGap={16} p={2} minWidth={320}>
+        <Box display="grid" rowGap={2} p={2} minWidth={320}>
           <TextField
             select
             variant="outlined"

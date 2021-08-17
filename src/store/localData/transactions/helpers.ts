@@ -38,6 +38,12 @@ export function compareDates(tr1: Transaction, tr2: Transaction) {
   return tr2.date === tr1.date ? tr2.created - tr1.created : tr2.date - tr1.date
 }
 
+export const isDeleted = (tr: Transaction) => {
+  if (tr.deleted) return true
+  if (tr.income < 0.0001 && tr.outcome < 0.0001) return true
+  return false
+}
+
 export function getType(tr: Transaction, debtId?: string): TransactionType {
   if (debtId && tr.incomeAccount === debtId) return 'outcomeDebt'
   if (debtId && tr.outcomeAccount === debtId) return 'incomeDebt'

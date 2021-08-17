@@ -8,6 +8,7 @@ import {
   Fab,
   Zoom,
   Button,
+  Stack,
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash'
@@ -26,21 +27,21 @@ import { getInstruments } from 'store/data/selectors'
 import {
   applyChangesToTransaction,
   deleteTransactions,
+  recreateTransaction,
   restoreTransaction,
-  TransactionPatch,
 } from 'store/localData/transactions/thunks'
+import { Transaction } from 'types'
 
 type TransactionPreviewProps = {
   id: string
   onClose: () => void
+  onOpenOther: (id: string) => void
   onSelectSimilar: (date: number) => void
 }
 
 export const TransactionPreview: FC<TransactionPreviewProps> = props => {
-  const { id, onClose, onSelectSimilar } = props
+  const { id, onClose, onOpenOther, onSelectSimilar } = props
   const dispatch = useDispatch()
-  const onChange = (changes: TransactionPatch) =>
-    dispatch(applyChangesToTransaction(changes))
   const onDelete = () => dispatch(deleteTransactions([id]))
   const onRestore = () => dispatch(restoreTransaction(id))
   // onSplit: id => dispatch(splitTransfer(id)), // does not work
@@ -51,11 +52,8 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
   const outcomeAccount = useSelector(getPopulatedAccounts)[tr.outcomeAccount]
   const instruments = useSelector(getInstruments)
   const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
-  const opIncomeCurrency =
-    tr.opIncomeInstrument && instruments[tr.opIncomeInstrument]?.shortTitle
   const outcomeCurrency = instruments[tr.outcomeInstrument]?.shortTitle
-  const opOutcomeCurrency =
-    tr.opOutcomeInstrument && instruments[tr.opOutcomeInstrument]?.shortTitle
+
   const {
     date,
     changed,
@@ -63,9 +61,7 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
     deleted,
     qrCode,
     income,
-    opIncome,
     outcome,
-    opOutcome,
     tag,
     comment,
     payee,
@@ -78,6 +74,7 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
   const [localIncome, setLocalIncome] = useState(tr.income)
   const [localPayee, setLocalPayee] = useState(tr.payee)
   const [localDate, setLocalDate] = useState(tr.date)
+  const [localTime, setLocalTime] = useState(formatDate(tr.created, 'HH:mm'))
   const [localTag, setLocalTag] = useState(tr.tag)
 
   useEffect(() => {
@@ -86,8 +83,11 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
     setLocalIncome(tr.income)
     setLocalPayee(tr.payee)
     setLocalDate(tr.date)
+    setLocalTime(formatDate(tr.created, 'HH:mm'))
     setLocalTag(tr.tag)
   }, [tr])
+
+  const timeChanged = formatDate(tr.created, 'HH:mm') !== localTime
 
   const hasChanges =
     comment !== localComment ||
@@ -95,18 +95,43 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
     income !== localIncome ||
     payee !== localPayee ||
     date !== localDate ||
-    localTag !== tag
+    localTag !== tag ||
+    timeChanged
 
-  const onSave = () =>
-    onChange({
-      id,
-      comment: localComment,
-      outcome: localOutcome,
-      income: localIncome,
-      payee: localPayee,
-      date: localDate,
-      tag: localTag,
-    })
+  const onSave = () => {
+    if (timeChanged) {
+      const hh = +localTime.split(':')[0]
+      const mm = +localTime.split(':')[1]
+      let createdDate = new Date(tr.date)
+      createdDate.setHours(hh)
+      createdDate.setMinutes(mm)
+      let newId = dispatch(
+        recreateTransaction({
+          id,
+          created: +createdDate,
+          comment: localComment,
+          outcome: localOutcome,
+          income: localIncome,
+          payee: localPayee,
+          date: localDate,
+          tag: localTag,
+        })
+      ) as unknown
+      onOpenOther(newId as string)
+    } else if (hasChanges) {
+      dispatch(
+        applyChangesToTransaction({
+          id,
+          comment: localComment,
+          outcome: localOutcome,
+          income: localIncome,
+          payee: localPayee,
+          date: localDate,
+          tag: localTag,
+        })
+      )
+    }
+  }
 
   return (
     <Box minWidth={320} position="relative">
@@ -129,36 +154,30 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
         />
       )}
 
-      <Box px={3}>
+      <Stack spacing={4} p={3}>
         {trType !== 'income' && (
-          <Box mt={4}>
-            <AmountInput
-              label={`Расход с ${outcomeAccount.title}`}
-              currency={outcomeCurrency}
-              value={localOutcome}
-              onChange={setLocalOutcome}
-              selectOnFocus
-              fullWidth
-              size="small"
-            />
-          </Box>
+          <AmountInput
+            label={`Расход с ${outcomeAccount.title}`}
+            currency={outcomeCurrency}
+            value={localOutcome}
+            onChange={setLocalOutcome}
+            selectOnFocus
+            fullWidth
+            size="small"
+          />
         )}
-
         {trType !== 'outcome' && (
-          <Box mt={4}>
-            <AmountInput
-              label={`Доход на ${incomeAccount.title}`}
-              currency={incomeCurrency}
-              value={localIncome}
-              onChange={setLocalIncome}
-              selectOnFocus
-              fullWidth
-              size="small"
-            />
-          </Box>
+          <AmountInput
+            label={`Доход на ${incomeAccount.title}`}
+            currency={incomeCurrency}
+            value={localIncome}
+            onChange={setLocalIncome}
+            selectOnFocus
+            fullWidth
+            size="small"
+          />
         )}
-
-        <Box mt={4}>
+        <Stack direction="row" spacing={2}>
           <DatePicker
             value={localDate}
             onChange={date => date && setLocalDate(+date)}
@@ -166,13 +185,25 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
             cancelText="Отмена"
             okText="Ок"
             // format="dd MMMM yyyy, EEEEEE"
-            // variant="dialog"
             renderInput={params => (
               <TextField size="small" fullWidth {...params} />
             )}
           />
-        </Box>
-
+          <TextField
+            value={localTime}
+            onChange={e => setLocalTime(e.target.value)}
+            type="time"
+            label="Время"
+            size="small"
+            inputProps={{
+              sx: {
+                appearance: 'none',
+                '::-webkit-calendar-picker-indicator': { display: 'none' },
+              },
+            }}
+            sx={{ minWidth: 88 }}
+          />
+        </Stack>
         <TextField
           value={localPayee || ''}
           onChange={e => setLocalPayee(e.target.value)}
@@ -181,11 +212,8 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
           maxRows="4"
           fullWidth
           helperText=""
-          variant="outlined"
           size="small"
-          sx={{ mt: 2 }}
         />
-
         <TextField
           value={localComment || ''}
           onChange={e => setLocalComment(e.target.value)}
@@ -194,51 +222,28 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
           maxRows="4"
           fullWidth
           helperText=""
-          variant="outlined"
           size="small"
-          sx={{ mt: 2 }}
         />
+        <Reciept value={qrCode} />
+        <Map longitude={longitude} latitude={latitude} />
 
-        <Reciept sx={{ mt: 2 }} value={qrCode} />
+        <Stack
+          spacing={1}
+          sx={{ typography: 'caption', color: 'text.secondary' }}
+        >
+          <span>
+            Операция создана – {formatDate(created, 'dd MMM yyyy, HH:mm')}
+          </span>
+          <span>
+            Операция изменена – {formatDate(changed, 'dd MMM yyyy, HH:mm')}
+          </span>
+          <RateToWords tr={tr} />
+        </Stack>
 
-        <Map sx={{ mt: 2 }} longitude={longitude} latitude={latitude} />
-      </Box>
-      <Box p={3}>
-        <Typography variant="caption" color="textSecondary">
-          Операция создана – {formatDate(created, 'dd MMM yyyy, HH:mm')}
-          <br />
-          Последнее изменение – {formatDate(changed, 'dd MMM yyyy, HH:mm')}
-          <br />
-          {trType === 'income' && !!opIncome && opIncomeCurrency && (
-            <>
-              {rateToWords(income, incomeCurrency, opIncome, opIncomeCurrency)}
-              <br />
-            </>
-          )}
-          {trType === 'outcome' && !!opOutcome && opOutcomeCurrency && (
-            <>
-              {rateToWords(
-                outcome,
-                outcomeCurrency,
-                opOutcome,
-                opOutcomeCurrency
-              )}
-              <br />
-            </>
-          )}
-          {trType === 'transfer' && incomeCurrency !== outcomeCurrency && (
-            <>
-              {rateToWords(outcome, outcomeCurrency, income, incomeCurrency)}
-              <br />
-            </>
-          )}
-        </Typography>
-      </Box>
-      <Box p={2}>
         <Button onClick={() => onSelectSimilar(changed)}>
-          Найти другие из этой синхронизации
+          Другие из этой синхронизации
         </Button>
-      </Box>
+      </Stack>
 
       <SaveButton visible={hasChanges} onSave={onSave} />
     </Box>
@@ -315,3 +320,32 @@ const SaveButton: FC<{ visible: boolean; onSave: () => void }> = ({
     </Zoom>
   </Box>
 )
+
+const RateToWords: FC<{ tr: Transaction }> = ({ tr }) => {
+  const trType = getType(tr)
+  const { income, opIncome, outcome, opOutcome } = tr
+  const instruments = useSelector(getInstruments)
+  const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
+  const opIncomeCurrency =
+    tr.opIncomeInstrument && instruments[tr.opIncomeInstrument]?.shortTitle
+  const outcomeCurrency = instruments[tr.outcomeInstrument]?.shortTitle
+  const opOutcomeCurrency =
+    tr.opOutcomeInstrument && instruments[tr.opOutcomeInstrument]?.shortTitle
+
+  let rate = ''
+
+  if (trType === 'income' && opIncome && opIncomeCurrency) {
+    rate = rateToWords(income, incomeCurrency, opIncome, opIncomeCurrency)
+  }
+  if (trType === 'outcome' && opOutcome && opOutcomeCurrency) {
+    rate = rateToWords(outcome, outcomeCurrency, opOutcome, opOutcomeCurrency)
+  }
+  if (trType === 'transfer' && incomeCurrency !== outcomeCurrency) {
+    rate = rateToWords(outcome, outcomeCurrency, income, incomeCurrency)
+  }
+
+  if (rate) {
+    return <span>Курс – {rate}</span>
+  }
+  return null
+}
