@@ -12,6 +12,7 @@ import WbSunnyIcon from '@material-ui/icons/WbSunny'
 import NightsStayIcon from '@material-ui/icons/NightsStay'
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
+import BarChartIcon from '@material-ui/icons/BarChart'
 import { Link } from 'react-router-dom'
 import {
   Box,
@@ -71,16 +72,13 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
         <SaveAltIcon className={classes.menuIcon} color="action" />
         Скачать CSV
       </MenuItem>
-
       <MenuItem onClick={handleExportJSON}>
         <SaveAltIcon className={classes.menuIcon} color="action" />
         Полный бэкап
       </MenuItem>
-
       <Box my={1}>
         <Divider light />
       </Box>
-
       <MenuItem onClick={handleThemeChange}>
         {theme.type === 'dark' ? (
           <>
@@ -94,10 +92,13 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
           </>
         )}
       </MenuItem>
-
       <Box my={1}>
         <Divider light />
       </Box>
+      <MenuItem component={Link} to="/stats" key="/stats">
+        <BarChartIcon className={classes.menuIcon} color="action" />
+        Статистика (beta 😬)
+      </MenuItem>
 
       {showLinks && [
         <MenuItem component={Link} to="/about" key="/about">
@@ -112,23 +113,20 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
           <WhatshotIcon className={classes.menuIcon} color="action" />
           Итоги года
         </MenuItem>,
-        <Box my={1} key="divider">
-          <Divider light />
-        </Box>,
       ]}
-
+      <Box my={1} key="divider">
+        <Divider light />
+      </Box>
       <MenuItem onClick={handleLogOut}>
         <ExitToAppIcon className={classes.menuIcon} color="action" />
         Выйти
       </MenuItem>
-
       <Confirm onOk={reloadData}>
         <MenuItem>
           <ExitToAppIcon className={classes.menuIcon} color="action" />
           Перезагрузить данные
         </MenuItem>
       </Confirm>
-
       <Box pl={6} pr={2} py={0.5}>
         <Typography
           variant="overline"
