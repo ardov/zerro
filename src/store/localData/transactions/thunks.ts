@@ -18,6 +18,20 @@ export const deleteTransactions = (
   dispatch(applyClientPatch({ transaction: deleted }))
 }
 
+export const deleteTransactionsPermanently = (
+  ids: TransactionId | TransactionId[]
+): AppThunk => (dispatch, getState) => {
+  sendEvent('Transaction: delete permanently')
+  const array = Array.isArray(ids) ? ids : [ids]
+  const deleted = array.map(id => ({
+    ...getTransaction(getState(), id),
+    outcome: 0.00001,
+    income: 0.00001,
+    changed: Date.now(),
+  }))
+  dispatch(applyClientPatch({ transaction: deleted }))
+}
+
 export const markViewed = (
   ids: TransactionId | TransactionId[],
   viewed: boolean
@@ -71,6 +85,7 @@ export const applyChangesToTransaction = (
   }
   dispatch(applyClientPatch({ transaction: [tr] }))
 }
+
 export const recreateTransaction = (patch: TransactionPatch): AppThunk => (
   dispatch,
   getState

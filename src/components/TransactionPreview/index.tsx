@@ -27,6 +27,7 @@ import { getInstruments } from 'store/data/selectors'
 import {
   applyChangesToTransaction,
   deleteTransactions,
+  deleteTransactionsPermanently,
   recreateTransaction,
   restoreTransaction,
 } from 'store/localData/transactions/thunks'
@@ -43,6 +44,8 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
   const { id, onClose, onOpenOther, onSelectSimilar } = props
   const dispatch = useDispatch()
   const onDelete = () => dispatch(deleteTransactions([id]))
+  const onDeletePermanently = () =>
+    dispatch(deleteTransactionsPermanently([id]))
   const onRestore = () => dispatch(restoreTransaction(id))
   // onSplit: id => dispatch(splitTransfer(id)), // does not work
 
@@ -139,6 +142,7 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
         title={titles[trType]}
         onClose={onClose}
         onDelete={onDelete}
+        onDeletePermanently={onDeletePermanently}
         onRestore={onRestore}
         deleted={deleted}
       />
@@ -263,6 +267,7 @@ type HeadProps = {
   deleted: boolean
   onClose: () => void
   onDelete: () => void
+  onDeletePermanently: () => void
   onRestore: () => void
 }
 const Head: FC<HeadProps> = ({
@@ -270,6 +275,7 @@ const Head: FC<HeadProps> = ({
   deleted,
   onClose,
   onDelete,
+  onDeletePermanently,
   onRestore,
 }) => (
   <Box py={1} px={3} display="flex" alignItems="center">
@@ -290,7 +296,10 @@ const Head: FC<HeadProps> = ({
       </Tooltip>
     ) : (
       <Tooltip title="Удалить">
-        <IconButton onClick={onDelete} children={<DeleteIcon />} />
+        <IconButton
+          onClick={e => (e.shiftKey ? onDeletePermanently() : onDelete())}
+          children={<DeleteIcon />}
+        />
       </Tooltip>
     )}
 
