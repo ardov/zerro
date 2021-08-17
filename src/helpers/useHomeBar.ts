@@ -28,9 +28,7 @@ export function useHomeBar() {
     window.screen.height / window.screen.width === 736 / 414 &&
     window.devicePixelRatio === 3
   const hasHomeBar =
-    'standalone' in window.navigator &&
-    window.navigator['standalone'] &&
-    isiPhoneWithHomeBar &&
-    !isiPhone8Plus
+    // @ts-ignore
+    window.navigator.standalone && isiPhoneWithHomeBar && !isiPhone8Plus
   return hasHomeBar
 }

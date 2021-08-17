@@ -67,37 +67,35 @@ interface LinkCardProps {
 const LinkCard: FC<LinkCardProps> = props => {
   const { icon, primary, secondary, href } = props
   return (
-    <Box
-      p={3}
-      borderRadius="borderRadius"
-      bgcolor="background.paper"
-      display="flex"
-      boxShadow={2}
-      clone
+    <Link
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      underline="none"
+      sx={{
+        p: 3,
+        borderRadius: 1,
+        bgcolor: 'background.paper',
+        display: 'flex',
+        boxShadow: 2,
+      }}
     >
-      <Link
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        underline="none"
-      >
-        <Box maxWidth={48}>{icon}</Box>
-        <Box ml={2}>
-          <Typography variant="h6" color="textPrimary">
-            {primary}
-          </Typography>
-          <Typography variant="body2" color="textSecondary">
-            {secondary}
-          </Typography>
-        </Box>
-      </Link>
-    </Box>
+      <Box maxWidth={48}>{icon}</Box>
+      <Box ml={2}>
+        <Typography variant="h6" color="textPrimary">
+          {primary}
+        </Typography>
+        <Typography variant="body2" color="textSecondary">
+          {secondary}
+        </Typography>
+      </Box>
+    </Link>
   )
 }
 
 function PatreonLogo() {
   const theme = useTheme()
-  const isDark = theme.palette.type === 'dark'
+  const isDark = theme.palette.mode === 'dark'
   return (
     <svg
       width="48"

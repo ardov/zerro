@@ -5,9 +5,9 @@ import {
   Paper,
   useTheme,
   Checkbox,
-  withStyles,
   FormControlLabel,
 } from '@material-ui/core'
+import { withStyles } from '@material-ui/styles'
 import { useSelector } from 'react-redux'
 import {
   ResponsiveContainer,
@@ -27,6 +27,7 @@ import { getAvailableMonths } from './availablePeriod'
 import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 import { round } from 'helpers/currencyHelpers'
 import { useState } from 'react'
+import { formatMoney } from 'helpers/format'
 
 export function NetWorth() {
   const theme = useTheme()
@@ -95,6 +96,15 @@ export function NetWorth() {
     return point
   })
 
+  // Remove disabled to show correct total
+  points.forEach(p => {
+    if (!inBudget) p.positiveInBudget = 0
+    if (!savings) p.positiveSaving = 0
+    if (!debts) p.negativeDebts = 0
+    if (!loans) p.negativeLoans = 0
+    if (!credits) p.negativeCredits = 0
+  })
+
   return (
     <Paper>
       <Box p={2} minWidth="100%">
@@ -109,7 +119,20 @@ export function NetWorth() {
             margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
           >
             <YAxis type="number" domain={['dataMin', 'dataMax']} hide />
-            <Tooltip />
+            <Tooltip
+              formatter={(v: number) => formatMoney(v)}
+              contentStyle={{
+                borderRadius: theme.shape.borderRadius,
+                background: theme.palette.background.paper,
+                color: theme.palette.text.primary,
+                padding: theme.spacing(1),
+                border: 0,
+                boxShadow: theme.shadows[10],
+              }}
+              itemStyle={{
+                color: theme.palette.text.primary,
+              }}
+            />
             {/* <CartesianGrid stroke={theme.palette.divider} /> */}
             <ReferenceLine y={0} stroke={theme.palette.divider} />
 

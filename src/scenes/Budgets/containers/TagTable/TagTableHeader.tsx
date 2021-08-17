@@ -20,7 +20,7 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import { fillGoals } from '../../thunks'
 import { Confirm } from 'components/Confirm'
-import GoalProgress from 'components/GoalProgress'
+import { GoalProgress } from 'components/GoalProgress'
 import { makeStyles } from '@material-ui/styles'
 import { ToBeBudgeted } from '../ToBeBudgeted'
 import useScrollPosition from '@react-hook/window-scroll'
@@ -46,7 +46,7 @@ const useStyles = makeStyles(theme => ({
     gridColumnGap: theme.spacing(2),
     gridRowGap: theme.spacing(1),
 
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       gridTemplateColumns: 'auto 90px 16px',
       gridColumnGap: theme.spacing(0.5),
     },
@@ -59,7 +59,7 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
     gridColumnStart: 1,
     gridColumnEnd: 6,
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       gridColumnEnd: 4,
     },
   },
@@ -146,7 +146,7 @@ export const TagTableHeader: FC<TagTableHeaderProps> = props => {
     handleClose()
   }
 
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('xs'))
+  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
   const scrollY = useScrollPosition(60 /*fps*/)
   const scrollOffset = isMobile ? 254 : 128
   const isVisibleHeader = scrollY > scrollOffset
@@ -215,7 +215,6 @@ function GoalMonthProgress() {
       <Box component="span">
         <Tooltip
           arrow
-          interactive
           title="Установите цели, чтобы следить за их прогрессом 😉"
         >
           <IconButton size="small">
@@ -242,7 +241,6 @@ function GoalMonthProgress() {
       >
         <Tooltip
           arrow
-          interactive
           title={
             need
               ? `${formatSum(target - need)} из ${formatSum(target)}`

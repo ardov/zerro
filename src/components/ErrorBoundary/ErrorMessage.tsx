@@ -32,9 +32,10 @@ export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut }) => (
         >
           Обновить
         </Button>
-        <Box ml={2} clone>
-          <Button onClick={onLogOut}>Выйти</Button>
-        </Box>
+
+        <Button onClick={onLogOut} sx={{ ml: 2 }}>
+          Выйти
+        </Button>
       </Box>
     </Box>
   </Box>

@@ -8,7 +8,7 @@ import {
   PopoverProps,
   TextField,
 } from '@material-ui/core'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 import { Modify } from 'types'
 import './styles.scss'
 import { zmColors, colors } from './colors'
@@ -43,7 +43,7 @@ const ColorCheck: FC<ColorCheckProps> = ({ hex, checked, onChange }) => {
 type ColorPickerProps = Modify<
   PopoverProps,
   {
-    value?: string
+    value?: string | null
     onChange: (value: string | null) => void
     onClose: () => void
   }

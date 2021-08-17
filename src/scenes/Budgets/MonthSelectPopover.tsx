@@ -1,21 +1,21 @@
 import React, { useState } from 'react'
 import startOfMonth from 'date-fns/startOfMonth'
-import { withStyles } from '@material-ui/core/styles'
+import { withStyles } from '@material-ui/styles'
 import {
   Box,
   IconButton,
   Popover,
   List,
-  ListItem,
   ListItemText,
   PopoverProps,
-  ListItemProps,
+  ListItemButton,
+  ListItemButtonProps,
 } from '@material-ui/core'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import { formatDate } from 'helpers/format'
 
-interface MonthItemItemProps extends ListItemProps {
+interface MonthItemItemProps extends ListItemButtonProps {
   isCurrent: boolean
 }
 
@@ -27,7 +27,9 @@ const MonthItem = withStyles(theme => ({
   },
   // Wrapper causes type error. Here is similar problem https://stackoverflow.com/questions/62223353/error-creating-wrapped-component-with-typescript-and-material-ui-listitem
   // @ts-ignore
-}))(({ isCurrent, ...rest }: MonthItemItemProps) => <ListItem {...rest} />)
+}))(({ isCurrent, ...rest }: MonthItemItemProps) => (
+  <ListItemButton {...rest} />
+))
 
 interface MonthSelectPopoverProps extends Omit<PopoverProps, 'onChange'> {
   onChange: (month: number) => void
@@ -72,26 +74,21 @@ export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
           />
         </Box>
 
-        <Box display="grid" gridTemplateColumns="1fr 1fr 1fr" clone>
-          <List>
-            {months.map(month => (
-              <MonthItem
-                key={+month}
-                isCurrent={month === curMonth}
-                disabled={isMonthDisabled(month)}
-                selected={month === value}
-                onClick={() => onChange(month)}
-                button
-              >
-                <Box textAlign="center" clone>
-                  <ListItemText>
-                    {formatDate(month, 'LLL').toUpperCase()}
-                  </ListItemText>
-                </Box>
-              </MonthItem>
-            ))}
-          </List>
-        </Box>
+        <List sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr' }}>
+          {months.map(month => (
+            <MonthItem
+              key={+month}
+              isCurrent={month === curMonth}
+              disabled={isMonthDisabled(month)}
+              selected={month === value}
+              onClick={() => onChange(month)}
+            >
+              <ListItemText sx={{ textAlign: 'center' }}>
+                {formatDate(month, 'LLL').toUpperCase()}
+              </ListItemText>
+            </MonthItem>
+          ))}
+        </List>
       </Box>
     </Popover>
   )

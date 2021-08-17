@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { getInstruments, getMerchants } from 'store/data/selectors'
 import { getAccounts } from 'store/localData/accounts'
 import { getPopulatedTags } from 'store/localData/tags'
-import { compareDates, getTime } from './helpers'
+import { compareDates, getTime, isDeleted } from './helpers'
 import { populate, PopulatedTransaction } from './populate'
 import { RootState } from 'store'
 import { Transaction, TransactionId } from 'types'
@@ -35,7 +35,7 @@ export const getSortedTransactions = createSelector(
 export const getTransactionsHistory = createSelector(
   [getSortedTransactions],
   withPerf('getTransactionsHistory', transactions =>
-    transactions.filter(tr => !tr.deleted).reverse()
+    transactions.filter(tr => !isDeleted(tr)).reverse()
   )
 )
 

@@ -41,7 +41,7 @@ export const intToHEX = (int: number | null) => {
   return `#${r}${g}${b}`
 }
 
-export const HEXToInt = (hex?: string) => {
+export const HEXToInt = (hex?: string | null) => {
   if (!isHEX(hex)) return null
   let r = parseInt(hex.slice(1, 3), 16)
   let g = parseInt(hex.slice(3, 5), 16)

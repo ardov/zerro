@@ -62,7 +62,7 @@ export const DnDContext: React.FC = ({ children }) => {
     },
     [dispatch, dragMode, month]
   )
-  const onDragStart = useCallback(e => {
+  const onBeforeCapture = useCallback(e => {
     setIsDragging(true)
     if (window.navigator.vibrate) window.navigator.vibrate(100)
   }, [])
@@ -72,7 +72,7 @@ export const DnDContext: React.FC = ({ children }) => {
   )
 
   return (
-    <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
+    <DragDropContext onDragEnd={onDragEnd} onBeforeCapture={onBeforeCapture}>
       <IsDraggingContext.Provider value={isDragging}>
         <DragModeContext.Provider value={{ dragMode, setDragMode }}>
           {children}

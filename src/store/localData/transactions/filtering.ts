@@ -1,6 +1,6 @@
 import { AccountId, TagId, Transaction, TransactionType } from 'types'
 import { keys } from 'helpers/keys'
-import { getType, isNew } from './helpers'
+import { getType, isDeleted, isNew } from './helpers'
 
 type OperatorType = 'AND' | 'OR'
 
@@ -146,7 +146,7 @@ const checkType = (tr: Transaction, type?: FilterConditions['type']) =>
 const checkDeleted = (
   tr: Transaction,
   showDeleted?: FilterConditions['showDeleted']
-) => showDeleted || !tr.deleted
+) => showDeleted || !isDeleted(tr)
 
 const checkDate = (
   tr: Transaction,

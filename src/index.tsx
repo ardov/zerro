@@ -1,10 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
-import { MuiPickersUtilsProvider } from '@material-ui/pickers'
-import DateFnsUtils from '@date-io/date-fns'
+import AdapterDateFns from '@material-ui/lab/AdapterDateFns'
+import LocalizationProvider from '@material-ui/lab/LocalizationProvider'
 import ruDateLocale from 'date-fns/locale/ru'
-import './index.scss'
 import App from './App'
 import * as serviceWorkerRegistration from './serviceWorkerRegistration'
 import { store } from './store'
@@ -33,11 +32,11 @@ window.zerro = {
 ReactDOM.render(
   <GlobalErrorBoundary>
     <Provider store={store}>
-      <MuiPickersUtilsProvider utils={DateFnsUtils} locale={ruDateLocale}>
+      <LocalizationProvider dateAdapter={AdapterDateFns} locale={ruDateLocale}>
         <AppThemeProvider>
           <App />
         </AppThemeProvider>
-      </MuiPickersUtilsProvider>
+      </LocalizationProvider>
     </Provider>
   </GlobalErrorBoundary>,
   document.getElementById('root')

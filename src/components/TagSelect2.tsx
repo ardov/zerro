@@ -5,7 +5,6 @@ import {
   Popover,
   Paper,
   IconButton,
-  Box,
   List,
   ListItem,
   ListItemText,
@@ -139,19 +138,22 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
       onClose={onClose}
       {...popoverProps}
     >
-      <Box pt={1} px={1} position="sticky" top={0} zIndex={10} clone>
-        <Paper square elevation={0}>
-          <TextField
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            onKeyDown={handleKeyDown}
-            variant="outlined"
-            placeholder="Выберите категорию"
-            fullWidth
-            autoFocus
-          />
-        </Paper>
-      </Box>
+      <Paper
+        square
+        elevation={0}
+        sx={{ pt: 1, px: 1, position: 'sticky', top: 0, zIndex: 10 }}
+      >
+        <TextField
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          onKeyDown={handleKeyDown}
+          variant="outlined"
+          placeholder="Выберите категорию"
+          fullWidth
+          autoFocus
+        />
+      </Paper>
+
       <List>
         {flatList.map((tag, idx) => (
           <TagOption

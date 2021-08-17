@@ -10,15 +10,15 @@ import {
   Grid,
   Typography,
   IconButton,
-  makeStyles,
 } from '@material-ui/core'
+import { makeStyles } from '@material-ui/styles'
 import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@material-ui/icons/Close'
 
 const useStyles = makeStyles(theme => ({
   drawerWidth: {
     width: 360,
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       width: '100vw',
     },
   },

@@ -127,7 +127,7 @@ export const getTransferFees = createSelector([getAmountsByMonth], amounts => {
   return result
 })
 
-export interface TagAmounts {
+export type TagAmounts = {
   income: number
   outcome: number
   tagOutcome: number
@@ -135,8 +135,6 @@ export interface TagAmounts {
   budgeted: number
   leftover: number
   available: number
-}
-export interface TagGroupAmounts extends TagAmounts {
   // Group totals
   totalBudgeted: number
   totalOutcome: number
@@ -152,8 +150,10 @@ export interface TagGroupAmounts extends TagAmounts {
   childrenOverspent: number
   childrenLeftover: number
   // Children amounts
-  children: { [childId: string]: TagAmounts }
+  children?: { [childId: string]: TagAmounts }
 }
+export type TagGroupAmounts = TagAmounts
+
 export function isGroup(
   amounts: TagGroupAmounts | TagAmounts
 ): amounts is TagGroupAmounts {
@@ -211,8 +211,9 @@ export const getAmountsById = createSelector([getAmountsByTag], amounts => {
   for (const month in amounts) {
     result[month] = { ...amounts[month] }
     for (const parent in amounts[month]) {
-      for (const child in amounts[month][parent].children) {
-        result[month][child] = amounts[month][parent].children[child]
+      const children = amounts[month][parent].children
+      for (const child in children) {
+        result[month][child] = children[child]
       }
     }
   }
@@ -256,19 +257,35 @@ function calcTagGroupAmounts(data: {
     const outcome = round(tagOutcome + transferOutcome)
     const leftover =
       (prevMonth &&
+        prevMonth.children &&
         prevMonth?.children?.[childId]?.available > 0 &&
         prevMonth?.children[childId].available) ||
       0
     const available = round(leftover + budgeted - outcome)
 
     subTags[childId] = {
+      // Main tag amounts
+      budgeted,
       income,
-      outcome,
       tagOutcome,
       transferOutcome,
-      budgeted,
+      outcome,
       leftover,
       available,
+      // Group totals
+      totalBudgeted: budgeted,
+      totalOutcome: outcome,
+      totalIncome: income,
+      totalLeftover: leftover,
+      totalAvailable: available,
+      totalOverspent: available < 0 ? -available : 0,
+      // Children totals
+      childrenBudgeted: 0,
+      childrenOutcome: 0,
+      childrenIncome: 0,
+      childrenAvailable: 0,
+      childrenOverspent: 0,
+      childrenLeftover: 0,
     }
 
     // Update children totals

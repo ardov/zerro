@@ -77,7 +77,7 @@ const PrivateApp = () => {
 }
 
 const Navigation = React.memo(() => {
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('md'))
   return isMobile ? <MobileNavigation /> : <Nav />
 })
 

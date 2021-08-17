@@ -1,5 +1,5 @@
 import React from 'react'
-import { withStyles } from '@material-ui/core/styles'
+import { withStyles } from '@material-ui/styles'
 import NavDrawer from './NavDrawer'
 import { MobileNavigation } from './MobileNavigation'
 import { CSSProperties } from '@material-ui/styles'

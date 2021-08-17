@@ -1,11 +1,11 @@
 import React, { FC } from 'react'
 import CssBaseline from '@material-ui/core/CssBaseline'
-import { ThemeProvider } from '@material-ui/styles'
+import { ThemeProvider as JSSThemeProvider } from '@material-ui/styles'
+import { ThemeProvider } from '@material-ui/core/styles'
 import { createTheme } from 'helpers/createTheme'
 import { useThemeType } from 'helpers/useThemeType'
 import { Helmet } from 'react-helmet'
 import { Global, css } from '@emotion/react'
-import { ThemeProvider as EmotionThemeProvider } from '@emotion/react'
 
 const globalStyles = css`
   html {
@@ -17,19 +17,6 @@ const globalStyles = css`
   *::before,
   *::after {
     box-sizing: inherit;
-  }
-
-  :root {
-    /* TEXT */
-    --text-primary: #333;
-    --text-secondary: #999;
-    --text-placeholder: #aaa;
-    --text-success: #21a355;
-    /* COLORS */
-    --color-danger: #f00;
-    --color-accent: #1890ff;
-    /* BG */
-    --bg-hover: rgba(0, 0, 0, 0.04);
   }
 
   .hidden-scroll {
@@ -59,10 +46,9 @@ const globalStyles = css`
 export const AppThemeProvider: FC = props => {
   const themeType = useThemeType()
   const theme = createTheme(themeType.type)
-
   return (
-    <ThemeProvider theme={theme}>
-      <EmotionThemeProvider theme={theme}>
+    <JSSThemeProvider theme={theme}>
+      <ThemeProvider theme={theme}>
         <>
           <Helmet>
             <meta name="theme-color" content={theme.palette.background.paper} />
@@ -71,7 +57,7 @@ export const AppThemeProvider: FC = props => {
           <Global styles={globalStyles} />
           {props.children}
         </>
-      </EmotionThemeProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </JSSThemeProvider>
   )
 }

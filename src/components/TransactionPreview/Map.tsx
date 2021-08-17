@@ -1,29 +1,32 @@
 import React, { FC } from 'react'
-import { Box, BoxProps, Paper } from '@material-ui/core'
+import { BoxProps, Paper } from '@material-ui/core'
+import styled from '@emotion/styled'
 
-interface MapProps extends BoxProps {
-  longitude?: number
-  latitude?: number
+interface MapProps {
+  longitude?: number | null
+  latitude?: number | null
+  sx?: BoxProps['sx']
 }
 
-export const Map: FC<MapProps> = ({ longitude, latitude, ...rest }) => {
+export const Map: FC<MapProps> = ({ longitude, latitude, sx }) => {
   if (!(longitude && latitude)) return null
 
   return (
-    <Box overflow="hidden" {...rest} clone>
-      <Paper>
-        <Box width="100%" marginBottom="-4px" clone>
-          <iframe
-            title="geo"
-            src={`https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d1040.2885062361672!2d${longitude}!3d${latitude}!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sru!2sru!4v1546784599411`}
-            width="200"
-            height="200"
-            frameBorder="0"
-            loading="lazy"
-            allowFullScreen
-          />
-        </Box>
-      </Paper>
-    </Box>
+    <Paper sx={{ overflow: 'hidden', ...sx }}>
+      <StyledIframe
+        title="geo"
+        src={`https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d1040.2885062361672!2d${longitude}!3d${latitude}!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sru!2sru!4v1546784599411`}
+        width="200"
+        height="200"
+        frameBorder="0"
+        loading="lazy"
+        allowFullScreen
+      />
+    </Paper>
   )
 }
+
+const StyledIframe = styled.iframe`
+  width: 100%;
+  margin-bottom: -4px;
+`

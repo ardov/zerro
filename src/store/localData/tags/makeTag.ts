@@ -3,7 +3,7 @@ import { v1 as uuidv1 } from 'uuid'
 
 type TagDraft = OptionalExceptFor<Tag, 'user' | 'title'>
 
-export default function makeTag(raw: TagDraft): Tag {
+export function makeTag(raw: TagDraft): Tag {
   return {
     id: String(raw.id) || uuidv1(),
     changed: raw.changed || Date.now(),

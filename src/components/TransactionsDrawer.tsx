@@ -5,17 +5,17 @@ import {
   Box,
   Typography,
   IconButton,
-  makeStyles,
   DrawerProps,
 } from '@material-ui/core'
+import { makeStyles } from '@material-ui/styles'
 import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@material-ui/icons/Close'
-import { FilterConditions } from 'store/localData/transactions/helpers'
+import { FilterConditions } from 'store/localData/transactions/filtering'
 import { Modify } from 'types'
 
 type TransactionsDrawerProps = Modify<DrawerProps, { onClose: () => void }> & {
   prefilter?: FilterConditions | FilterConditions[]
-  filterConditions: FilterConditions
+  filterConditions?: FilterConditions
 }
 
 export const TransactionsDrawer: FC<TransactionsDrawerProps> = ({
@@ -47,13 +47,13 @@ export const TransactionsDrawer: FC<TransactionsDrawerProps> = ({
             <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
           </Tooltip>
         </Box>
-        <Box flex="1 1 auto" clone>
-          <TransactionList
-            prefilter={prefilter}
-            filterConditions={filterConditions}
-            hideFilter
-          />
-        </Box>
+
+        <TransactionList
+          prefilter={prefilter}
+          filterConditions={filterConditions}
+          hideFilter
+          sx={{ flex: '1 1 auto' }}
+        />
       </Box>
     </Drawer>
   )
@@ -62,7 +62,7 @@ export const TransactionsDrawer: FC<TransactionsDrawerProps> = ({
 const useStyles = makeStyles(theme => ({
   drawerWidth: {
     width: 360,
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       width: '100vw',
     },
   },

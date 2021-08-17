@@ -17,11 +17,13 @@ export const OverspentNotice: FC = () => {
 
   return (
     <Box
-      p={2}
-      bgcolor="background.default"
-      borderRadius={8}
-      display="flex"
-      flexDirection="row"
+      sx={{
+        p: 2,
+        bgcolor: 'background.default',
+        borderRadius: 1,
+        display: 'flex',
+        flexDirection: 'row',
+      }}
     >
       <Box color="warning.main" pt="2px">
         <WarningIcon />

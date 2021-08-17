@@ -11,11 +11,12 @@ import parse from 'date-fns/parseISO'
 import QRCode from 'qrcode.react'
 import { formatMoney, formatDate } from 'helpers/format'
 
-interface RecieptProps extends BoxProps {
-  value?: string
+interface RecieptProps {
+  value?: string | null
+  sx?: BoxProps['sx']
 }
 
-export const Reciept: FC<RecieptProps> = ({ value, ...rest }) => {
+export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
   const [showMore, setShowMore] = useState(false)
   if (!value) return null
 
@@ -23,39 +24,37 @@ export const Reciept: FC<RecieptProps> = ({ value, ...rest }) => {
   parsed.t = parse(parsed.t)
 
   return (
-    <Box p={2} display="flex" {...rest} clone>
-      <Paper>
-        <Box display="flex" flexDirection="column">
-          <Line name="Сумма" value={formatMoney(parsed.s, 'RUB')} />
-          <Line name="Дата" value={formatDate(parsed.t, 'dd.MM.yyyy, HH:mm')} />
+    <Paper sx={{ p: 2, display: 'flex', ...sx }}>
+      <Box display="flex" flexDirection="column">
+        <Line name="Сумма" value={formatMoney(parsed.s, 'RUB')} />
+        <Line name="Дата" value={formatDate(parsed.t, 'dd.MM.yyyy, HH:mm')} />
 
-          <Box mt="auto">
-            <Collapse in={!showMore}>
-              <Link
-                component="button"
-                variant="caption"
-                color="primary"
-                onClick={() => setShowMore(true)}
-              >
-                Показать больше
-              </Link>
-            </Collapse>
-          </Box>
-
-          <Collapse in={showMore}>
-            <div>
-              <Line name="ФН" value={parsed.fn} />
-              <Line name="ФД" value={parsed.i} />
-              <Line name="ФП" value={parsed.fp} />
-            </div>
+        <Box mt="auto">
+          <Collapse in={!showMore}>
+            <Link
+              component="button"
+              variant="caption"
+              color="primary"
+              onClick={() => setShowMore(true)}
+            >
+              Показать больше
+            </Link>
           </Collapse>
         </Box>
 
-        <Box ml="auto" clone>
-          <QRCode value={value} />
-        </Box>
-      </Paper>
-    </Box>
+        <Collapse in={showMore}>
+          <div>
+            <Line name="ФН" value={parsed.fn} />
+            <Line name="ФД" value={parsed.i} />
+            <Line name="ФП" value={parsed.fp} />
+          </div>
+        </Collapse>
+      </Box>
+
+      <Box ml="auto">
+        <QRCode value={value} />
+      </Box>
+    </Paper>
   )
 }
 

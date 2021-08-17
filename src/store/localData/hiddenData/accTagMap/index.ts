@@ -8,10 +8,10 @@ import { AppThunk } from 'store'
 import { AccountId, TagId } from 'types'
 
 // THUNK
-export const addConnection = (account: AccountId, tag: TagId): AppThunk => (
-  dispatch,
-  getState
-) => {
+export const addConnection = (
+  account: AccountId,
+  tag?: TagId | null
+): AppThunk => (dispatch, getState) => {
   const state = getState()
   const accTagMap = getAccTagMap(state)
   const newLinks = { ...accTagMap }

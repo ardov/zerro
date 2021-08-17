@@ -13,8 +13,8 @@ import {
   ListItemIcon,
   DrawerProps,
 } from '@material-ui/core'
-import { useTheme } from '@material-ui/styles'
-import Logo from 'components/Logo'
+import { useTheme } from '@material-ui/core'
+import { Logo } from 'components/Logo'
 import AccountList from 'components/AccountList'
 import { makeStyles } from '@material-ui/styles'
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance'
@@ -25,6 +25,7 @@ import WhatshotIcon from '@material-ui/icons/Whatshot'
 
 export default function NavigationDrawer(props: DrawerProps) {
   const theme = useTheme()
+
   return (
     <Drawer {...props}>
       <Box
@@ -46,7 +47,7 @@ export default function NavigationDrawer(props: DrawerProps) {
           <AccountList />
         </Box>
 
-        <Box height={64} width="100%" flexShrink="0" />
+        <Box height={64} width="100%" flexShrink={0} />
 
         <Box
           bgcolor="background.paper"
@@ -60,7 +61,7 @@ export default function NavigationDrawer(props: DrawerProps) {
           left="0"
           right="0"
           zIndex="5"
-          flexShrink="0"
+          flexShrink={0}
           display="flex"
           alignItems="center"
           flexDirection="row"

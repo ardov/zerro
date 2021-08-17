@@ -1,70 +1,93 @@
-import React, { FC, ReactChild } from 'react'
+import React, { FC, ReactChild, useCallback } from 'react'
 import {
-  ListItem,
   ListSubheader,
   Box,
-  ListItemProps,
-  Theme,
+  ListItemButtonProps,
   ListSubheaderProps,
+  Typography,
+  ListItemButton,
 } from '@material-ui/core'
-import { makeStyles } from '@material-ui/styles'
 import { Amount } from 'components/Amount'
 import { PopulatedAccount } from 'types'
+import { useDispatch } from 'react-redux'
+import { setInBudget } from 'store/localData/accounts/thunks'
 
-const useStyles = makeStyles((theme: Theme) => ({
-  listItem: { borderRadius: theme.shape.borderRadius },
-}))
-
-export const Account: FC<{ account: PopulatedAccount } & ListItemProps> = ({
-  account,
-  ...rest
-}) => {
-  const c = useStyles()
+export const Account: FC<
+  { account: PopulatedAccount } & ListItemButtonProps
+> = ({ account, sx, ...rest }) => {
+  const dispatch = useDispatch()
+  const toggleInBalance = useCallback(
+    () => dispatch(setInBudget(account.id, !account.inBalance)),
+    [account.id, account.inBalance, dispatch]
+  )
   return (
-    // @ts-ignore
-    <ListItem className={c.listItem} {...rest}>
-      <Box component="span" display="flex" width="100%">
-        <Box flexGrow="1" component="span" className="MuiTypography-noWrap">
-          {account.title}
-        </Box>
-        <Box
-          component="span"
-          ml={2}
-          color={account.balance < 0 ? 'error.main' : 'text.secondary'}
-        >
-          <Amount
-            value={account.balance}
-            instrument={account.instrument}
-            decMode="ifOnly"
-          />
-        </Box>
+    <ListItemButton
+      sx={{
+        typography: 'body2',
+        borderRadius: 1,
+        display: 'flex',
+        ...sx,
+      }}
+      onDoubleClick={toggleInBalance}
+      {...rest}
+    >
+      <Box
+        sx={{
+          textDecoration: account.archive ? 'line-through' : 'none',
+          flexGrow: 1,
+          minWidth: 0,
+          position: 'relative',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          maskImage: 'linear-gradient(to left, transparent, black 40px)',
+        }}
+        title={account.title}
+      >
+        {account.title}
       </Box>
-    </ListItem>
+
+      <Box
+        component="span"
+        sx={{
+          ml: 1,
+          flexShrink: 0,
+          color: account.balance < 0 ? 'error.main' : 'text.secondary',
+        }}
+      >
+        <Amount
+          value={account.balance}
+          instrument={account.instrument}
+          decMode="ifOnly"
+        />
+      </Box>
+    </ListItemButton>
   )
 }
 
 export const Subheader: FC<
   {
-    name: ReactChild //string | JSX.Element
+    name: ReactChild
     amount: number
-    currency?: string
   } & ListSubheaderProps
-> = ({ name, amount, currency, ...rest }) => {
-  const c = useStyles()
+> = ({ name, amount, sx, ...rest }) => {
   return (
-    // @ts-ignore
-    <ListSubheader className={c.listItem} {...rest}>
+    <ListSubheader sx={{ borderRadius: 1, ...sx }} {...rest}>
       <Box component="span" display="flex" width="100%">
-        <Box flexGrow="1" component="span" className="MuiTypography-noWrap">
+        <Typography
+          component="span"
+          noWrap
+          sx={{ flexGrow: 1, lineHeight: 'inherit' }}
+        >
           <b>{name}</b>
-        </Box>
+        </Typography>
+
         <Box
           component="span"
           ml={2}
           color={amount < 0 ? 'error.main' : 'text.secondary'}
         >
           <b>
-            <Amount value={amount} currency={currency} decMode="ifOnly" />
+            <Amount value={amount} instrument="user" decMode="ifOnly" />
           </b>
         </Box>
       </Box>

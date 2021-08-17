@@ -1,42 +1,27 @@
-import React, { useCallback, useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { getAccountList } from 'store/localData/accounts'
-import { getUserInstrument } from 'store/data/selectors'
+import React, { FC } from 'react'
+import { useSelector } from 'react-redux'
+import {
+  getInBudgetAccounts,
+  getSavingAccounts,
+} from 'store/localData/accounts'
 import pluralize from 'helpers/pluralize'
-import { List, ListItem } from '@material-ui/core'
+import { Collapse, List, ListItemButton } from '@material-ui/core'
 import { Account, Subheader } from './components'
 import { PopulatedAccount } from 'types'
-import { setInBudget } from 'store/localData/accounts/thunks'
 import { Amount } from 'components/Amount'
 import { Tooltip } from 'components/Tooltip'
+import { useToggle } from 'helpers/useToggle'
 
 export default function AccountList({ className = '' }) {
-  const dispatch = useDispatch()
-  const accounts = useSelector(getAccountList)
-  const userInstrument = useSelector(getUserInstrument)
+  const inBudget = useSelector(getInBudgetAccounts)
+  const savings = useSelector(getSavingAccounts)
 
-  const getTotalBalance = (accs: PopulatedAccount[]) =>
-    accs.reduce((sum, a) => sum + a.convertedBalance, 0)
-
-  const inBudget = accounts.filter(a => a.inBudget)
-  const savings = accounts.filter(a => !a.inBudget && a.type !== 'debt')
-
-  const inBudgetArchived = inBudget.filter(a => a.archive)
   const inBudgetActive = inBudget.filter(a => !a.archive)
-  const inBudgetArchivedSum = getTotalBalance(inBudgetArchived)
-  const inBudgetActiveSum = getTotalBalance(inBudgetActive)
+  const inBudgetArchived = inBudget.filter(a => a.archive)
+
   const savingsActive = savings.filter(a => !a.archive)
+  const savingsArchived = savings.filter(a => a.archive)
 
-  const [showArchived, setShowArchived] = useState(!!inBudgetArchivedSum)
-  const savingsSum = getTotalBalance(savings)
-
-  const toggleInBalance = useCallback(
-    (id: string, inBalance: boolean) => () =>
-      dispatch(setInBudget(id, inBalance)),
-    [dispatch]
-  )
-
-  // if (!userInstrumentId || !userInstrument) return null
   return (
     <div className={className}>
       <List dense>
@@ -46,37 +31,12 @@ export default function AccountList({ className = '' }) {
               <span>В балансе</span>
             </Tooltip>
           }
-          amount={inBudgetActiveSum + inBudgetArchivedSum}
-          currency={userInstrument?.shortTitle}
-          onClick={() => setShowArchived(a => !a)}
+          amount={getTotal(inBudget)}
         />
         {inBudgetActive.map(acc => (
-          <Account
-            key={acc.id}
-            account={acc}
-            button
-            onDoubleClick={toggleInBalance(acc.id, false)}
-          />
+          <Account key={acc.id} account={acc} />
         ))}
-        {!!inBudgetArchivedSum && !showArchived && (
-          <ListItem>
-            {`${inBudgetArchived.length} ${pluralize(inBudgetArchived.length, [
-              'архивный счёт',
-              'архивных счёта',
-              'архивных счётов',
-            ])} на `}
-            <Amount value={inBudgetArchivedSum} instrument="user" />
-          </ListItem>
-        )}
-        {showArchived &&
-          inBudgetArchived.map(acc => (
-            <Account
-              key={acc.id}
-              account={acc}
-              button
-              onDoubleClick={toggleInBalance(acc.id, false)}
-            />
-          ))}
+        <ArchivedList accs={inBudgetArchived} />
       </List>
 
       <List dense>
@@ -86,18 +46,63 @@ export default function AccountList({ className = '' }) {
               <span>Прочее</span>
             </Tooltip>
           }
-          amount={savingsSum}
-          currency={userInstrument?.shortTitle}
+          amount={getTotal(savings)}
         />
         {savingsActive.map(acc => (
-          <Account
-            key={acc.id}
-            account={acc}
-            button
-            onDoubleClick={toggleInBalance(acc.id, true)}
-          />
+          <Account key={acc.id} account={acc} />
         ))}
+        <ArchivedList accs={savingsArchived} />
       </List>
     </div>
   )
+}
+
+const ArchivedList: FC<{ accs: PopulatedAccount[] }> = props => {
+  const { accs } = props
+  const [visible, toggleVisibility] = useToggle()
+  if (!accs.length) return null
+  const sum = getTotal(accs)
+  return (
+    <>
+      <Collapse in={visible}>
+        <List dense>
+          {accs.map(acc => (
+            <Account key={acc.id} account={acc} />
+          ))}
+        </List>
+      </Collapse>
+      <ListItemButton
+        sx={{ typography: 'body2', borderRadius: 1, color: 'info.main' }}
+        onClick={toggleVisibility}
+      >
+        {visible ? (
+          <span>Скрыть архивные</span>
+        ) : (
+          <span>
+            {`+${accs.length} ${pluralize(accs.length, [
+              'архивный счёт',
+              'архивных счёта',
+              'архивных счётов',
+            ])} `}
+            {!!sum && (
+              <>
+                (
+                <Amount
+                  value={sum}
+                  instrument="user"
+                  decMode="ifOnly"
+                  noShade
+                />
+                )
+              </>
+            )}
+          </span>
+        )}
+      </ListItemButton>
+    </>
+  )
+}
+
+function getTotal(accs: PopulatedAccount[]) {
+  return accs.reduce((sum, a) => sum + a.convertedBalance, 0)
 }

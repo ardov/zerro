@@ -1,5 +1,5 @@
 import React, { FC, ReactNode } from 'react'
-import { Box, BoxProps, useTheme } from '@material-ui/core'
+import { Box, BoxProps } from '@material-ui/core'
 import { useEffect } from 'react'
 import { useLocation, Link as RouterLink } from 'react-router-dom'
 
@@ -17,14 +17,15 @@ export const ExampleBox: FC<ExampleBoxProps> = ({
   symbol,
   ...rest
 }) => {
-  const theme = useTheme()
   return (
     <Box
-      my={2}
-      p={3}
-      bgcolor="background.default"
-      borderRadius={theme.shape.borderRadius}
-      display="flex"
+      sx={{
+        bgcolor: 'background.default',
+        my: 2,
+        p: 3,
+        borderRadius: 1,
+        display: 'flex',
+      }}
       {...rest}
     >
       {symbol && (
