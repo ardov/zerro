@@ -59,7 +59,7 @@ export default function TransactionsView() {
               display: 'flex',
               overflow: 'hidden',
               maxWidth: 560,
-              paddingBottom: isMobile ? 56 : 0,
+              pb: isMobile ? 7 : 0,
             }}
           >
             <TransactionList
