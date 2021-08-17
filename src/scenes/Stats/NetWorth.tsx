@@ -96,6 +96,15 @@ export function NetWorth() {
     return point
   })
 
+  // Remove disabled to show correct total
+  points.forEach(p => {
+    if (!inBudget) p.positiveInBudget = 0
+    if (!savings) p.positiveSaving = 0
+    if (!debts) p.negativeDebts = 0
+    if (!loans) p.negativeLoans = 0
+    if (!credits) p.negativeCredits = 0
+  })
+
   return (
     <Paper>
       <Box p={2} minWidth="100%">
