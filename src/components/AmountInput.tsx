@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useRef, FC } from 'react'
-import { TextField, InputAdornment, TextFieldProps } from '@material-ui/core'
+import {
+  TextField,
+  InputAdornment,
+  TextFieldProps,
+  Button,
+  Stack,
+} from '@material-ui/core'
 import { getCurrencySymbol } from 'helpers/format'
 import { Modify } from 'types'
 
@@ -9,6 +15,7 @@ export type AmountInputProps = Modify<
     value: number
     currency?: string
     selectOnFocus?: boolean
+    signButtons?: boolean | 'auto'
     onChange: (n: number) => void
     onEnter?: (n: number) => void
   }
@@ -18,6 +25,7 @@ export const AmountInput: FC<AmountInputProps> = ({
   value = 0,
   currency,
   selectOnFocus = false,
+  signButtons,
   onChange,
   onEnter,
   onBlur,
@@ -86,7 +94,7 @@ export const AmountInput: FC<AmountInputProps> = ({
     if (onKeyDown) onKeyDown(e)
   }
 
-  return (
+  const Field = (
     <TextField
       value={focused ? expression || '' : formattedValue || ''}
       variant="outlined"
@@ -104,6 +112,66 @@ export const AmountInput: FC<AmountInputProps> = ({
       {...rest}
     />
   )
+
+  if (!signButtons) {
+    return Field
+  }
+  if (signButtons === 'auto' && !iOS()) {
+    return Field
+  }
+  return (
+    <div>
+      {Field}
+
+      <Stack direction="row" width="100%">
+        <Button
+          onClick={() => {
+            ref.current?.focus()
+            setExpression(e => e + '+')
+          }}
+        >
+          +
+        </Button>
+        <Button
+          onClick={() => {
+            ref.current?.focus()
+            setExpression(e => e + '-')
+          }}
+        >
+          -
+        </Button>
+        <Button
+          onClick={() => {
+            ref.current?.focus()
+            setExpression(e => e + '*')
+          }}
+        >
+          ×
+        </Button>
+        <Button
+          onClick={() => {
+            ref.current?.focus()
+            setExpression(e => e + '/')
+          }}
+        >
+          ÷
+        </Button>
+      </Stack>
+    </div>
+  )
 }
 
-export default AmountInput
+function iOS() {
+  return (
+    [
+      'iPad Simulator',
+      'iPhone Simulator',
+      'iPod Simulator',
+      'iPad',
+      'iPhone',
+      'iPod',
+    ].includes(navigator.platform) ||
+    // iPad on iOS 13 detection
+    (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
+  )
+}

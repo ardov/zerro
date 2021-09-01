@@ -11,7 +11,7 @@ import {
 } from '@material-ui/core'
 import CheckCircleIcon from '@material-ui/icons/CheckCircle'
 import { formatMoney } from 'helpers/format'
-import AmountInput from 'components/AmountInput'
+import { AmountInput } from 'components/AmountInput'
 import {
   getAmountsById,
   TagAmounts,
@@ -129,6 +129,7 @@ export const BudgetPopover: FC<BudgetPopoverProps> = props => {
           available + +value - budgeted,
           currency
         )}`}
+        signButtons="auto"
         placeholder="0"
         InputProps={{
           endAdornment: (
@@ -199,14 +200,12 @@ function getAvgMonthsOutcomeName(number: number) {
 function isGroup(
   amounts: TagGroupAmounts | TagAmounts
 ): amounts is TagGroupAmounts {
-  return (amounts as TagGroupAmounts).children !== undefined
+  return amounts.children !== undefined
 }
 
 function getDisplayAmounts(amounts: TagGroupAmounts | TagAmounts) {
-  const budgeted = isGroup(amounts) ? amounts.totalBudgeted : amounts.budgeted
-  const available = isGroup(amounts)
-    ? amounts.totalAvailable
-    : amounts.available
-  const outcome = isGroup(amounts) ? amounts.totalOutcome : amounts.outcome
+  const budgeted = amounts.totalBudgeted
+  const available = amounts.totalAvailable
+  const outcome = amounts.totalOutcome
   return { budgeted, available, outcome }
 }

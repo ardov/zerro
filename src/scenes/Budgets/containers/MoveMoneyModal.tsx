@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react'
 import Dialog, { DialogProps } from '@material-ui/core/Dialog'
 import TagChip from 'components/TagChip'
-import AmountInput from 'components/AmountInput'
+import { AmountInput } from 'components/AmountInput'
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward'
 import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt'
 import { Box, InputAdornment, IconButton } from '@material-ui/core'

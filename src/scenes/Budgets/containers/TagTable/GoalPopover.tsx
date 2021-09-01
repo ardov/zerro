@@ -11,7 +11,7 @@ import {
   PopoverProps,
   OutlinedTextFieldProps,
 } from '@material-ui/core'
-import AmountInput from 'components/AmountInput'
+import { AmountInput } from 'components/AmountInput'
 import { getGoals, setGoal } from 'store/localData/hiddenData/goals'
 import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
 import CloseIcon from '@material-ui/icons/Close'
