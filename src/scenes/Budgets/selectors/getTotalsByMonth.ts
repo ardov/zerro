@@ -9,6 +9,8 @@ import { round } from 'helpers/currencyHelpers'
 import getMonthDates from './getMonthDates'
 import { withPerf } from 'helpers/performance'
 
+const CARRY_NEGATIVES = !!localStorage.getItem('CARRY_NEGATIVES')
+
 interface TagTotals {
   budgeted: number
   income: number
@@ -136,7 +138,7 @@ export const getTotalsArray = createSelector(
         }
 
         prevFunds = result.funds
-        prevOverspent = result.overspent
+        prevOverspent = CARRY_NEGATIVES ? 0 : result.overspent
         return result
       })
 

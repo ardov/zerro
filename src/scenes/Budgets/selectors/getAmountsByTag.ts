@@ -330,6 +330,9 @@ function calcTagGroupAmounts(data: {
   }
 }
 
+const CARRY_NEGATIVES = !!localStorage.getItem('CARRY_NEGATIVES')
+
 function clampAvailable(available = 0) {
+  if (CARRY_NEGATIVES) return available
   return available > 0 ? available : 0
 }
