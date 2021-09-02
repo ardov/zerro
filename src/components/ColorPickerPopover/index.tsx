@@ -23,7 +23,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 type ColorCheckProps = {
-  hex?: string
+  hex?: string | null
   checked: boolean
   onChange: (e: ChangeEvent<HTMLInputElement>) => void
 }

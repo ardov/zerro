@@ -76,6 +76,7 @@ export const DnDContext: React.FC = ({ children }) => {
       <IsDraggingContext.Provider value={isDragging}>
         <DragModeContext.Provider value={{ dragMode, setDragMode }}>
           {children}
+          {/*// @ts-ignore*/}
           <MoveMoneyModal {...moneyModalProps} onClose={closeMoveMoneyModal} />
         </DragModeContext.Provider>
       </IsDraggingContext.Provider>

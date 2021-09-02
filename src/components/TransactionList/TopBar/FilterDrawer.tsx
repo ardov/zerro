@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FC } from 'react'
 import TagSelect from 'components/TagSelect'
 import {
   Drawer,
@@ -11,9 +11,19 @@ import {
   Typography,
   IconButton,
 } from '@material-ui/core'
+import { DateRangePicker } from '@material-ui/lab'
+import startOfDay from 'date-fns/startOfDay'
+import endOfDay from 'date-fns/endOfDay'
+import subMonths from 'date-fns/subMonths'
+
 import { makeStyles } from '@material-ui/styles'
 import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@material-ui/icons/Close'
+import Button from '@material-ui/core/Button'
+
+import { formatDate } from 'helpers/format'
+import { FilterConditions } from 'store/localData/transactions/filtering'
+import { TransactionType } from 'types'
 
 const useStyles = makeStyles(theme => ({
   drawerWidth: {
@@ -24,16 +34,25 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export default function FilterDrawer({
+type FilterDrawerProps = {
+  setCondition: (c: FilterConditions) => void
+  conditions: FilterConditions
+  clearFilter: () => void
+  onClose: () => void
+  open: boolean
+}
+
+const FilterDrawer: FC<FilterDrawerProps> = ({
   conditions = {},
   setCondition,
+  clearFilter,
   onClose,
   open,
   ...rest
-}) {
+}) => {
   const c = useStyles()
-  const handleTypeChange = e => {
-    const value = e.target.value
+  const handleTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value as TransactionType
     setCondition({ type: value || null })
   }
 
@@ -56,7 +75,7 @@ export default function FilterDrawer({
           <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
         </Tooltip>
       </Box>
-      <Box px={2}>
+      <Box px={2} flex="1" display="flex" flexDirection="column">
         <TextField
           id="search-input"
           label="Поиск по комментариям"
@@ -87,6 +106,38 @@ export default function FilterDrawer({
           </Grid>
         </Box>
 
+        <Box mt={3} display="flex">
+          <DateRangePicker
+            startText="Дата от"
+            endText="Дата до"
+            mask="__.__.____"
+            value={[conditions.dateFrom || null, conditions.dateTo || null]}
+            maxDate={endOfDay(new Date())}
+            defaultCalendarMonth={subMonths(new Date(), 1)}
+            onChange={([dateFrom, dateTo]) => {
+              setCondition({
+                dateFrom: dateFrom && +startOfDay(dateFrom),
+                dateTo: dateTo && +endOfDay(dateTo),
+              })
+            }}
+            renderInput={(startProps, endProps) => (
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <TextField {...startProps} />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    {...endProps}
+                    inputProps={{
+                      ...endProps.inputProps,
+                      placeholder: formatDate(new Date(), 'dd.MM.yyyy'),
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            )}
+          />
+        </Box>
         <Box mt={3}>
           <TextField
             select
@@ -105,8 +156,10 @@ export default function FilterDrawer({
 
         <Box mt={3}>
           <TagSelect
-            value={conditions.tags || false}
-            onChange={tags => setCondition({ tags })}
+            value={conditions.tags || null}
+            onChange={tags =>
+              setCondition({ tags: tags as FilterConditions['tags'] })
+            }
           />
         </Box>
 
@@ -139,7 +192,19 @@ export default function FilterDrawer({
             label="Показывать удалённые"
           />
         </Box>
+        <Box mt="auto" mb={3}>
+          <Button
+            onClick={clearFilter}
+            variant="contained"
+            fullWidth
+            color="primary"
+          >
+            Очистить фильтры
+          </Button>
+        </Box>
       </Box>
     </Drawer>
   )
 }
+
+export default FilterDrawer

@@ -1,9 +1,14 @@
-import React, { useMemo, useState, useCallback, useEffect } from 'react'
+import React, { useMemo, useState, useCallback, useEffect, FC } from 'react'
 import { Box } from '@material-ui/core'
+import { SxProps } from '@material-ui/system'
+import { Theme } from '@material-ui/core/styles'
 import { useSelector } from 'react-redux'
 import { getSortedTransactions } from 'store/localData/transactions'
 import { groupTransactionsBy } from 'store/localData/transactions/helpers'
-import { checkRaw } from 'store/localData/transactions/filtering'
+import {
+  checkRaw,
+  FilterConditions,
+} from 'store/localData/transactions/filtering'
 import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
@@ -11,7 +16,15 @@ import { sendEvent } from 'helpers/tracking'
 // import { getGroupedTransactions } from 'worker'
 import { useDebounce } from 'helpers/useDebounce'
 
-export default function TransactionList(props) {
+type TransactionListProps = {
+  prefilter?: FilterConditions | FilterConditions[]
+  filterConditions?: FilterConditions
+  hideFilter?: boolean
+  checkedDate?: Date | null
+  sx?: SxProps<Theme>
+}
+
+const TransactionList: FC<TransactionListProps> = props => {
   const {
     prefilter,
     filterConditions,
@@ -27,6 +40,9 @@ export default function TransactionList(props) {
     condition => setFilter(filter => ({ ...filter, ...condition })),
     []
   )
+  const handleClearFilter = useCallback(() => {
+    setFilter(filterConditions)
+  }, [filterConditions])
   const onFilterByPayee = useCallback(payee => setFilter({ search: payee }), [])
 
   const groups = useMemo(() => {
@@ -55,7 +71,7 @@ export default function TransactionList(props) {
   //   updateTransactions()
   // }, [transactions, debouncedFilter, prefilter])
 
-  const [checked, setChecked] = useState([])
+  const [checked, setChecked] = useState<string[]>([])
 
   const uncheckAll = useCallback(() => setChecked([]), [])
 
@@ -111,7 +127,11 @@ export default function TransactionList(props) {
           width="100%"
           mx="auto"
         >
-          <Filter conditions={filter} setCondition={setCondition} />
+          <Filter
+            conditions={filter}
+            setCondition={setCondition}
+            clearFilter={handleClearFilter}
+          />
         </Box>
       )}
 
@@ -136,3 +156,5 @@ export default function TransactionList(props) {
     </Box>
   )
 }
+
+export default TransactionList

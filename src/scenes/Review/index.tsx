@@ -13,7 +13,7 @@ import { IncomeCard } from './cards/IncomeCard'
 import { Card } from './cards/Card'
 
 export default function Review() {
-  const [year, setYear] = useState(2020)
+  const [year, setYear] = useState(new Date().getFullYear())
   const yearStats = useSelector(getYearStats(year))
 
   if (!yearStats) return null

@@ -188,7 +188,7 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
             label="Дата"
             cancelText="Отмена"
             okText="Ок"
-            // format="dd MMMM yyyy, EEEEEE"
+            mask="__.__.____"
             renderInput={params => (
               <TextField size="small" fullWidth {...params} />
             )}
