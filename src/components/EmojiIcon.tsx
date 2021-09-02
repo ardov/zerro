@@ -34,6 +34,7 @@ const useStyles = makeStyles(theme => ({
   symbol: {
     width: ({ size }: StylesProps) => sizes[size],
     height: ({ size }: StylesProps) => sizes[size],
+    flexShrink: 0,
     color: ({ color }: StylesProps) =>
       theme.palette.getContrastText(color || theme.palette.background.paper),
     cursor: ({ button }: StylesProps) => (button ? 'pointer' : 'auto'),

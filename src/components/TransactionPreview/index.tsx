@@ -205,7 +205,7 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
                 '::-webkit-calendar-picker-indicator': { display: 'none' },
               },
             }}
-            sx={{ minWidth: 88 }}
+            sx={{ minWidth: 104 }}
           />
         </Stack>
         <TextField

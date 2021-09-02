@@ -255,12 +255,7 @@ function calcTagGroupAmounts(data: {
     const tagOutcome = outcomes[childId] || 0
     const transferOutcome = linkedTransfers[childId] || 0
     const outcome = round(tagOutcome + transferOutcome)
-    const leftover =
-      (prevMonth &&
-        prevMonth.children &&
-        prevMonth?.children?.[childId]?.available > 0 &&
-        prevMonth?.children[childId].available) ||
-      0
+    const leftover = clampAvailable(prevMonth?.children?.[childId]?.available)
     const available = round(leftover + budgeted - outcome)
 
     subTags[childId] = {
@@ -304,8 +299,7 @@ function calcTagGroupAmounts(data: {
   let transferOutcome = linkedTransfers[id] || 0 // все переводы идут в null
   if (id === 'null') transferOutcome = 0
   const outcome = round(tagOutcome + transferOutcome)
-  const leftover =
-    prevMonth && prevMonth.available > 0 ? prevMonth.available : 0
+  const leftover = clampAvailable(prevMonth?.available)
   const available = round(leftover + budgeted - outcome - childrenOverspent)
 
   return {
@@ -334,4 +328,8 @@ function calcTagGroupAmounts(data: {
 
     children: subTags,
   }
+}
+
+function clampAvailable(available = 0) {
+  return available > 0 ? available : 0
 }
