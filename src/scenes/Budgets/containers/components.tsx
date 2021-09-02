@@ -54,7 +54,7 @@ export function Line({
 }: LineProps) {
   return (
     <Box display="flex" flexDirection="row" {...rest}>
-      <Box flexGrow="1" mr={1} minWidth={0}>
+      <Box flexGrow={1} mr={1} minWidth={0}>
         {description ? (
           <Tooltip title={description}>
             <Typography noWrap variant="body2" children={name} />

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FC } from 'react'
 import Paper from '@material-ui/core/Paper'
 import InputBase from '@material-ui/core/InputBase'
 import IconButton from '@material-ui/core/IconButton'
@@ -7,9 +7,24 @@ import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@material-ui/icons/Close'
 import FilterDrawer from './FilterDrawer'
 import { useToggle } from 'helpers/useToggle'
+import { FilterConditions } from 'store/localData/transactions/filtering'
+import { SxProps } from '@material-ui/system'
+import { Theme } from '@material-ui/core/styles'
 
-export default function Filter({ setCondition, conditions = {}, sx }) {
+type FilterProps = {
+  setCondition: (c: FilterConditions) => void
+  conditions?: FilterConditions
+  clearFilter: () => void
+  sx?: SxProps<Theme>
+}
+const Filter: FC<FilterProps> = ({
+  setCondition,
+  conditions = {},
+  clearFilter,
+  sx,
+}) => {
   const [isDrawerVisible, toggleDrawer] = useToggle(false)
+  const isFiltered = Object.values(conditions).filter(Boolean).length > 0
 
   return (
     <Paper
@@ -35,6 +50,7 @@ export default function Filter({ setCondition, conditions = {}, sx }) {
       <Tooltip title="Расширенные фильтры">
         <IconButton
           edge="end"
+          color={isFiltered ? 'secondary' : 'primary'}
           onClick={toggleDrawer}
           children={<FilterListIcon />}
         />
@@ -43,8 +59,10 @@ export default function Filter({ setCondition, conditions = {}, sx }) {
       <FilterDrawer
         onClose={toggleDrawer}
         open={isDrawerVisible}
-        {...{ conditions, setCondition }}
+        {...{ conditions, setCondition, clearFilter }}
       />
     </Paper>
   )
 }
+
+export default Filter

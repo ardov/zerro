@@ -50,7 +50,7 @@ export function IncomeCard({ byTag }: IncomeCardProps) {
         {incomeTags.map(id => (
           <Box m={0.5} display="inline-block" key={id}>
             <Chip
-              variant={checked.includes(id) ? 'default' : 'outlined'}
+              variant={checked.includes(id) ? 'filled' : 'outlined'}
               clickable
               onClick={() => toggle(id)}
               label={

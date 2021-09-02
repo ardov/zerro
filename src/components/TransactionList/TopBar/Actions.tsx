@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import './transitions.css'
 import { useSelector, useDispatch } from 'react-redux'
 import IconButton from '@material-ui/core/IconButton'
@@ -27,14 +27,21 @@ import { BulkEditModal } from './BulkEditModal'
 import { getType, isNew } from 'store/localData/transactions/helpers'
 import { getTransactions } from 'store/localData/transactions'
 import { Divider } from '@material-ui/core'
+import { Transaction } from 'types'
 
-export default function Actions({
+type ActionsProps = {
+  visible: boolean
+  checkedIds: string[]
+  onUncheckAll: () => void
+  onCheckAll: () => void
+}
+
+const Actions: FC<ActionsProps> = ({
   visible,
   checkedIds,
   onUncheckAll,
   onCheckAll,
-  onDelete,
-}) {
+}) => {
   const dispatch = useDispatch()
   const classes = useStyles()
   const allTransactions = useSelector(getTransactions)
@@ -44,15 +51,16 @@ export default function Actions({
   const length = ids.length
   const [editModalVisible, setEditModalVisible] = useState(false)
 
-  const [anchorEl, setAnchorEl] = useState(null)
-  const handleClick = event => setAnchorEl(event.currentTarget)
+  const [anchorEl, setAnchorEl] = useState<Element | null>(null)
+  const handleClick: React.MouseEventHandler = event =>
+    setAnchorEl(event.currentTarget)
   const closeMenu = () => setAnchorEl(null)
 
   useEffect(() => {
     if (visible) setIds(checkedIds)
   }, [visible, checkedIds])
 
-  const handleSetTag = id => {
+  const handleSetTag = (id: string) => {
     if (!id || id === 'null')
       dispatch(bulkEditTransactions(checkedIds, { tags: [] }))
     else dispatch(bulkEditTransactions(checkedIds, { tags: [id] }))
@@ -198,7 +206,7 @@ const useStyles = makeStyles(({ spacing }) => ({
   menuIcon: { marginRight: spacing(1) },
 }))
 
-function getAvailableActions(transactions) {
+function getAvailableActions(transactions: Transaction[]) {
   const { income, outcome, transfer } = getTypes(transactions)
   return {
     delete: true,
@@ -208,8 +216,10 @@ function getAvailableActions(transactions) {
   }
 }
 
-function getTypes(list = []) {
+function getTypes(list: Transaction[] = []) {
   let res = { income: 0, outcome: 0, transfer: 0 }
-  list?.forEach(tr => res[getType(tr)]++)
+  list?.forEach(tr => res[getType(tr) as keyof typeof res]++)
   return res
 }
+
+export default Actions

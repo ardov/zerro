@@ -28,7 +28,7 @@ type CustomConditions = {
   type?: null | TransactionType
   showDeleted?: boolean
   isNew?: boolean
-  dateFrom?: ConditionRule
+  dateFrom?: null | number | Date
   dateTo?: null | number | Date
   tags?: null | TagId[]
   accountsFrom?: null | AccountId[]

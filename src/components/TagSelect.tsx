@@ -1,31 +1,52 @@
-import React from 'react'
-import { connect } from 'react-redux'
-import { getTagsTree, getPopulatedTags } from 'store/localData/tags'
-import { Box, Select, OutlinedInput, Chip, MenuItem } from '@material-ui/core'
+import React, { FC } from 'react'
+import { useSelector } from 'react-redux'
+import {
+  getTagsTree,
+  getPopulatedTags,
+  TagTreeNode,
+} from 'store/localData/tags'
+import {
+  Box,
+  Select,
+  OutlinedInput,
+  Chip,
+  MenuItem,
+  SelectChangeEvent,
+} from '@material-ui/core'
 import EmojiIcon from 'components/EmojiIcon'
+import { PopulatedTag, TagId } from '../types'
 
-function TagSelect({
-  tags,
-  tagList,
+type TagSelectValueType = TagId | TagId[]
+
+type TagSelectProps = {
+  value: TagSelectValueType | null
+  onChange: (v: TagSelectValueType) => void
+  incomeOnly?: boolean
+  outcomeOnly?: boolean
+  single?: boolean
+}
+
+const TagSelect: FC<TagSelectProps> = ({
   onChange,
   incomeOnly,
   outcomeOnly,
   value,
   single,
-  dispatch,
   ...rest
-}) {
+}) => {
+  const tags = useSelector(getTagsTree)
+  const tagList = useSelector(getPopulatedTags)
   const [open, setOpen] = React.useState(false)
-  const handleTagSelect = e => {
-    handleClose()
+  const handleTagSelect = (e: SelectChangeEvent<TagSelectValueType>) => {
     onChange(e.target.value)
+    handleClose()
   }
   const handleClose = () => setOpen(false)
   const handleOpen = () => setOpen(true)
   // const removeTag = idToRemove => () =>
   //   onChange(value.filter(id => id !== idToRemove))
 
-  const checkTag = tag =>
+  const checkTag = (tag: PopulatedTag | TagTreeNode) =>
     (!incomeOnly || tag.showIncome) && (!outcomeOnly || tag.showOutcome)
 
   const filtered = tags
@@ -35,16 +56,16 @@ function TagSelect({
     )
 
   return (
-    <Select
+    <Select<TagSelectValueType>
       multiple={!single}
       open={open}
       onClose={handleClose}
       onOpen={handleOpen}
       value={value || []}
       onChange={handleTagSelect}
-      input={<OutlinedInput fullWidth variant="outlined" />}
+      input={<OutlinedInput fullWidth />}
       renderValue={selected =>
-        selected.map ? (
+        Array.isArray(selected) ? (
           <Box display="flex" flexWrap="wrap">
             {selected.map(id => (
               <Chip
@@ -81,10 +102,4 @@ function TagSelect({
   )
 }
 
-export default connect(
-  state => ({
-    tags: getTagsTree(state),
-    tagList: getPopulatedTags(state),
-  }),
-  null
-)(TagSelect)
+export default TagSelect
