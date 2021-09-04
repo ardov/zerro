@@ -11,7 +11,7 @@ import {
 } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import { makeStyles } from '@material-ui/styles'
-import EmojiIcon from 'components/EmojiIcon'
+import { EmojiIcon } from 'components/EmojiIcon'
 import { formatMoney } from 'helpers/format'
 import WarningIcon from '@material-ui/icons/Warning'
 import AddIcon from '@material-ui/icons/Add'

@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import styled from '@emotion/styled'
-import EmojiIcon from 'components/EmojiIcon'
+import { EmojiIcon } from 'components/EmojiIcon'
 import { useSelector } from 'react-redux'
 import { getMerchants } from 'store/data/selectors'
 import { Amount } from 'components/Amount'
@@ -393,7 +393,7 @@ const ExchangeRate: FC<ExchangeRateProps> = props => {
   if (sum1 < sum2) {
     return (
       <span {...rest}>
-        <Amount value={1} instrument={inst1} decMode="ifAny" noShade /> = 
+        <Amount value={1} instrument={inst1} decMode="ifAny" noShade /> =
         <Amount
           value={sum2 / sum1}
           instrument={inst2}
@@ -405,7 +405,7 @@ const ExchangeRate: FC<ExchangeRateProps> = props => {
   } else {
     return (
       <span {...rest}>
-        <Amount value={1} instrument={inst2} decMode="ifAny" noShade /> = 
+        <Amount value={1} instrument={inst2} decMode="ifAny" noShade /> =
         <Amount
           value={sum1 / sum2}
           instrument={inst1}

@@ -6,7 +6,7 @@ import { Modify } from 'types'
 const sizes = { s: 32, m: 40 }
 const fonts = { s: '4em', m: '6em' }
 
-type EmojiIconProps = Modify<
+export type EmojiIconProps = Modify<
   BoxProps,
   {
     symbol: string
@@ -84,7 +84,7 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export default function EmojiIcon(props: EmojiIconProps) {
+export function EmojiIcon(props: EmojiIconProps) {
   const {
     symbol,
     color,

@@ -13,7 +13,7 @@ import {
   MenuItem,
   SelectChangeEvent,
 } from '@material-ui/core'
-import EmojiIcon from 'components/EmojiIcon'
+import { EmojiIcon } from 'components/EmojiIcon'
 import { PopulatedTag, TagId } from '../types'
 
 type TagSelectValueType = TagId | TagId[]

@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import EmojiIcon from 'components/EmojiIcon'
+import { EmojiIcon } from 'components/EmojiIcon'
 import { Box, Typography, IconButton } from '@material-ui/core'
 import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@material-ui/icons/Close'
