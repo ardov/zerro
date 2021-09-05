@@ -7,7 +7,7 @@ import { Amount } from 'components/Amount'
 import { getAccounts } from 'store/localData/accounts'
 import { Transaction as ITransaction, TransactionType } from 'types'
 import { getPopulatedTags } from 'store/localData/tags'
-import { Typography } from '@material-ui/core'
+import { Typography } from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
 // import { isNew } from 'store/localData/transactions/helpers'
 

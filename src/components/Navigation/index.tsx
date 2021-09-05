@@ -1,8 +1,8 @@
 import React from 'react'
-import { withStyles } from '@material-ui/styles'
+import { withStyles } from '@mui/styles'
 import NavDrawer from './NavDrawer'
 import { MobileNavigation } from './MobileNavigation'
-import { CSSProperties } from '@material-ui/styles'
+import { CSSProperties } from '@mui/styles'
 
 const style: CSSProperties = {
   width: 280,

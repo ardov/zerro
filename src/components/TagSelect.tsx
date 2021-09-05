@@ -12,7 +12,7 @@ import {
   Chip,
   MenuItem,
   SelectChangeEvent,
-} from '@material-ui/core'
+} from '@mui/material'
 import { EmojiIcon } from 'components/EmojiIcon'
 import { PopulatedTag, TagId } from '../types'
 

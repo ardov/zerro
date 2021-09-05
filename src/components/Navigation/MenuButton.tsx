@@ -3,16 +3,16 @@ import { useDispatch } from 'react-redux'
 import { logOut } from 'logic/authorization'
 import { exportCSV } from 'logic/exportCSV'
 import { exportJSON } from 'logic/exportJSON'
-import { makeStyles } from '@material-ui/styles'
-import SettingsIcon from '@material-ui/icons/Settings'
-import SaveAltIcon from '@material-ui/icons/SaveAlt'
-import ExitToAppIcon from '@material-ui/icons/ExitToApp'
-import WhatshotIcon from '@material-ui/icons/Whatshot'
-import WbSunnyIcon from '@material-ui/icons/WbSunny'
-import NightsStayIcon from '@material-ui/icons/NightsStay'
-import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
-import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
-import BarChartIcon from '@material-ui/icons/BarChart'
+import { makeStyles } from '@mui/styles'
+import SettingsIcon from '@mui/icons-material/Settings'
+import SaveAltIcon from '@mui/icons-material/SaveAlt'
+import ExitToAppIcon from '@mui/icons-material/ExitToApp'
+import WhatshotIcon from '@mui/icons-material/Whatshot'
+import WbSunnyIcon from '@mui/icons-material/WbSunny'
+import NightsStayIcon from '@mui/icons-material/NightsStay'
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
+import BarChartIcon from '@mui/icons-material/BarChart'
 import { Link } from 'react-router-dom'
 import {
   Box,
@@ -22,7 +22,7 @@ import {
   Menu,
   MenuItem,
   Typography,
-} from '@material-ui/core'
+} from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
 import { useThemeType } from 'helpers/useThemeType'
 import { sendEvent } from 'helpers/tracking'
@@ -132,7 +132,7 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
           variant="overline"
           color="textSecondary"
           align="center"
-          onClick={() => window.location.reload(true)}
+          onClick={() => window.location.reload()}
         >
           {process.env.REACT_APP_VERSION}
         </Typography>

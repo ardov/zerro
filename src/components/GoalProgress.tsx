@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useTheme } from '@material-ui/core'
+import { useTheme } from '@mui/material'
 
 export type GoalProgressProps = React.SVGProps<SVGSVGElement> & {
   size?: number

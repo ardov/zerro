@@ -1,5 +1,5 @@
 import React, { useState, useContext, FC } from 'react'
-import { BoxProps, Paper } from '@material-ui/core'
+import { BoxProps, Paper } from '@mui/material'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
 import { useSelector } from 'react-redux'
 import { TagGroup } from './TagGroup'

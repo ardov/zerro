@@ -1,6 +1,6 @@
 import React from 'react'
-import { makeStyles } from '@material-ui/styles'
-import { Box, BoxProps, Checkbox, CheckboxProps } from '@material-ui/core'
+import { makeStyles } from '@mui/styles'
+import { Box, BoxProps, Checkbox, CheckboxProps } from '@mui/material'
 import { Modify } from 'types'
 
 const sizes = { s: 32, m: 40 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Box, Typography, Chip } from '@material-ui/core'
+import { Box, Typography, Chip } from '@mui/material'
 import { useSelector } from 'react-redux'
 import Rhythm from 'components/Rhythm'
 import { Amount } from 'components/Amount'

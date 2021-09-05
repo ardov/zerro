@@ -2,17 +2,17 @@ import React, { FC } from 'react'
 import { useLocation, useHistory } from 'react-router'
 import RefreshButton from 'components/RefreshButton'
 import { SettingsMenu } from './MenuButton'
-import SettingsIcon from '@material-ui/icons/Settings'
+import SettingsIcon from '@mui/icons-material/Settings'
 import {
   BottomNavigation,
   BottomNavigationAction,
   Paper,
   Divider,
-} from '@material-ui/core'
-import AccountBalanceIcon from '@material-ui/icons/AccountBalance'
-import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet'
-import SyncAltIcon from '@material-ui/icons/SyncAlt'
-import { makeStyles } from '@material-ui/styles'
+} from '@mui/material'
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
+import SyncAltIcon from '@mui/icons-material/SyncAlt'
+import { makeStyles } from '@mui/styles'
 import { useHomeBar } from 'helpers/useHomeBar'
 
 const useStyles = makeStyles(theme => ({ action: { minWidth: 32 } }))

@@ -6,7 +6,7 @@ import {
   Collapse,
   Link,
   BoxProps,
-} from '@material-ui/core'
+} from '@mui/material'
 import parse from 'date-fns/parseISO'
 import QRCode from 'qrcode.react'
 import { formatMoney, formatDate } from 'helpers/format'

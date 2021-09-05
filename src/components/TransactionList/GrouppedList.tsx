@@ -6,12 +6,12 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import { Dialog } from '@material-ui/core'
+import { Dialog } from '@mui/material'
 import { ListChildComponentProps, VariableSizeList as List } from 'react-window'
-import StaticDatePicker from '@material-ui/lab/StaticDatePicker'
-import TextField from '@material-ui/core/TextField'
+import StaticDatePicker from '@mui/lab/StaticDatePicker'
+import TextField from '@mui/material/TextField'
 import AutoSizer from 'react-virtualized-auto-sizer'
-import { Box, ListSubheader } from '@material-ui/core'
+import { Box, ListSubheader } from '@mui/material'
 import Transaction from './Transaction'
 import { formatDate } from 'helpers/format'
 

@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { formatMoney } from 'helpers/format'
-import { useTheme } from '@material-ui/core'
+import { useTheme } from '@mui/material'
 import { round } from 'helpers/currencyHelpers'
 
 export function SankeyChart() {

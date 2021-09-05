@@ -5,7 +5,7 @@ import {
   getSavingAccounts,
 } from 'store/localData/accounts'
 import pluralize from 'helpers/pluralize'
-import { Collapse, List, ListItemButton } from '@material-ui/core'
+import { Collapse, List, ListItemButton } from '@mui/material'
 import { Account, Subheader } from './components'
 import { PopulatedAccount } from 'types'
 import { Amount } from 'components/Amount'

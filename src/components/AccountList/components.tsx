@@ -6,7 +6,7 @@ import {
   ListSubheaderProps,
   Typography,
   ListItemButton,
-} from '@material-ui/core'
+} from '@mui/material'
 import { Amount } from 'components/Amount'
 import { PopulatedAccount } from 'types'
 import { useDispatch } from 'react-redux'

@@ -2,7 +2,7 @@ import React, { FC } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { getUserCurrencyCode } from 'store/data/selectors'
-import { makeStyles } from '@material-ui/styles'
+import { makeStyles } from '@mui/styles'
 import {
   Paper,
   Typography,
@@ -12,7 +12,7 @@ import {
   TableHead,
   TableRow,
   PaperProps,
-} from '@material-ui/core'
+} from '@mui/material'
 import TagSelect2 from 'components/TagSelect2'
 import {
   addConnection,

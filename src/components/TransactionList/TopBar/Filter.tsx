@@ -1,15 +1,15 @@
 import React, { FC } from 'react'
-import Paper from '@material-ui/core/Paper'
-import InputBase from '@material-ui/core/InputBase'
-import IconButton from '@material-ui/core/IconButton'
-import FilterListIcon from '@material-ui/icons/FilterList'
+import Paper from '@mui/material/Paper'
+import InputBase from '@mui/material/InputBase'
+import IconButton from '@mui/material/IconButton'
+import FilterListIcon from '@mui/icons-material/FilterList'
 import { Tooltip } from 'components/Tooltip'
-import CloseIcon from '@material-ui/icons/Close'
+import CloseIcon from '@mui/icons-material/Close'
 import FilterDrawer from './FilterDrawer'
 import { useToggle } from 'helpers/useToggle'
 import { FilterConditions } from 'store/localData/transactions/filtering'
-import { SxProps } from '@material-ui/system'
-import { Theme } from '@material-ui/core/styles'
+import { SxProps } from '@mui/system'
+import { Theme } from '@mui/material/styles'
 
 type FilterProps = {
   setCondition: (c: FilterConditions) => void

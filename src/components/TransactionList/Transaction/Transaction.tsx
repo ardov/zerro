@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import styled from '@emotion/styled'
 import { Transaction as ITransaction, TransactionType } from 'types'
-import { Theme, TypographyVariant } from '@material-ui/core'
+import { Theme, TypographyVariant } from '@mui/material'
 import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'
 import { sendEvent } from 'helpers/tracking'
 

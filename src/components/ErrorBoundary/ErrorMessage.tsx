@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
-import { Box, Typography, Button } from '@material-ui/core'
-import RefreshIcon from '@material-ui/icons/Refresh'
+import { Box, Typography, Button } from '@mui/material'
+import RefreshIcon from '@mui/icons-material/Refresh'
 
 interface ErrorMessageProps {
   onLogOut: () => void
@@ -28,7 +28,7 @@ export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut }) => (
           variant="contained"
           color="primary"
           startIcon={<RefreshIcon />}
-          onClick={() => window.location.reload(true)}
+          onClick={() => window.location.reload()}
         >
           Обновить
         </Button>

@@ -10,11 +10,11 @@ import {
   Typography,
   PopoverProps,
   OutlinedTextFieldProps,
-} from '@material-ui/core'
+} from '@mui/material'
 import { AmountInput } from 'components/AmountInput'
 import { getGoals, setGoal } from 'store/localData/hiddenData/goals'
 import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
-import CloseIcon from '@material-ui/icons/Close'
+import CloseIcon from '@mui/icons-material/Close'
 import MonthSelectPopover from 'scenes/Budgets/MonthSelectPopover'
 import { formatDate } from 'helpers/format'
 import { GoalType } from 'types'

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Typography } from '@material-ui/core'
+import { Typography } from '@mui/material'
 import Rhythm from 'components/Rhythm'
 import pluralize from 'helpers/pluralize'
 import { Card } from './Card'

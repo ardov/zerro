@@ -14,7 +14,7 @@ import {
   CircularProgress,
   Typography,
   useMediaQuery,
-} from '@material-ui/core'
+} from '@mui/material'
 import { createBrowserHistory } from 'history'
 import ErrorBoundary from 'components/ErrorBoundary'
 import { getLastSyncTime, getRootUserId } from 'store/data/selectors'

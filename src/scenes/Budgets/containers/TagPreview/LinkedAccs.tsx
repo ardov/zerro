@@ -8,15 +8,15 @@ import {
   Menu,
   MenuItem,
   Button,
-} from '@material-ui/core'
-import { makeStyles } from '@material-ui/styles'
-import AddIcon from '@material-ui/icons/Add'
+} from '@mui/material'
+import { makeStyles } from '@mui/styles'
+import AddIcon from '@mui/icons-material/Add'
 import {
   getTagAccMap,
   addConnection,
 } from 'store/localData/hiddenData/accTagMap'
 import { getAccounts, getSavingAccounts } from 'store/localData/accounts'
-import CloseIcon from '@material-ui/icons/Close'
+import CloseIcon from '@mui/icons-material/Close'
 import { Tooltip } from 'components/Tooltip'
 import { useEffect } from 'react'
 

@@ -41,7 +41,7 @@ async function sync(token: string, diff: Diff) {
   try {
     let data = await ZenApi.getData(token, zmDiff)
     return { data: toClient(data) }
-  } catch (error) {
+  } catch (error: any) {
     return { error: error.message as string }
   }
 }

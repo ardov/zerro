@@ -1,5 +1,5 @@
 import React, { FC, ReactNode } from 'react'
-import { Box, BoxProps } from '@material-ui/core'
+import { Box, BoxProps } from '@mui/material'
 import { useEffect } from 'react'
 import { useLocation, Link as RouterLink } from 'react-router-dom'
 

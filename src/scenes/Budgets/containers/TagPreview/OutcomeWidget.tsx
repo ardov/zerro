@@ -7,7 +7,7 @@ import {
   TooltipProps,
   Typography,
   useTheme,
-} from '@material-ui/core'
+} from '@mui/material'
 import { Amount } from 'components/Amount'
 import { formatDate } from 'helpers/format'
 import { Tooltip } from 'components/Tooltip'

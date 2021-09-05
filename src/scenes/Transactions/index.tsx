@@ -7,8 +7,8 @@ import {
   Typography,
   Paper,
   Theme,
-} from '@material-ui/core'
-import { makeStyles } from '@material-ui/styles'
+} from '@mui/material'
+import { makeStyles } from '@mui/styles'
 import { TransactionPreview } from 'components/TransactionPreview'
 import { sendEvent } from 'helpers/tracking'
 import { Helmet } from 'react-helmet'

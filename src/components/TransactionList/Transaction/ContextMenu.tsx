@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react'
-import { Menu, MenuItem, MenuProps, PopoverPosition } from '@material-ui/core'
+import { Menu, MenuItem, MenuProps, PopoverPosition } from '@mui/material'
 import { Transaction } from 'types'
 import { isNew } from 'store/localData/transactions/helpers'
 import { useDispatch } from 'react-redux'

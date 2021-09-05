@@ -14,8 +14,8 @@ import {
   Paper,
   Theme,
   useMediaQuery,
-} from '@material-ui/core'
-import { makeStyles } from '@material-ui/styles'
+} from '@mui/material'
+import { makeStyles } from '@mui/styles'
 import { GoalsProgressWidget } from './containers/GoalsProgressWidget'
 import { useMonth, useDrawerId } from './pathHooks'
 import { DnDContext } from './containers/DnDContext'

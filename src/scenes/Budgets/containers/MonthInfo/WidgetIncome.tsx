@@ -10,8 +10,8 @@ import {
   ButtonBase,
   Collapse,
   BoxProps,
-} from '@material-ui/core'
-import { withStyles } from '@material-ui/styles'
+} from '@mui/material'
+import { withStyles } from '@mui/styles'
 import Rhythm from 'components/Rhythm'
 import { Tooltip } from 'components/Tooltip'
 import { Line } from '../components'

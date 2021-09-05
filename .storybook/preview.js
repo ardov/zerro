@@ -1,6 +1,6 @@
 import React from 'react'
-import LocalizationProvider from '@material-ui/lab/LocalizationProvider'
-import AdapterDateFns from '@material-ui/lab/AdapterDateFns'
+import LocalizationProvider from '@mui/lab/LocalizationProvider'
+import AdapterDateFns from '@mui/lab/AdapterDateFns'
 import ruDateLocale from 'date-fns/locale/ru'
 import { AppThemeProvider } from '../src/AppThemeProvider'
 import { DemoStoreProvider } from '../src/demoData/DemoStoreProvider'

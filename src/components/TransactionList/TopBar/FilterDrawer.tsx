@@ -10,16 +10,16 @@ import {
   Grid,
   Typography,
   IconButton,
-} from '@material-ui/core'
-import { DateRangePicker } from '@material-ui/lab'
+} from '@mui/material'
+import { DateRangePicker } from '@mui/lab'
 import startOfDay from 'date-fns/startOfDay'
 import endOfDay from 'date-fns/endOfDay'
 import subMonths from 'date-fns/subMonths'
 
-import { makeStyles } from '@material-ui/styles'
+import { makeStyles } from '@mui/styles'
 import { Tooltip } from 'components/Tooltip'
-import CloseIcon from '@material-ui/icons/Close'
-import Button from '@material-ui/core/Button'
+import CloseIcon from '@mui/icons-material/Close'
+import Button from '@mui/material/Button'
 
 import { formatDate } from 'helpers/format'
 import { FilterConditions } from 'store/localData/transactions/filtering'
