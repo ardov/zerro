@@ -1,5 +1,5 @@
 import React, { FC, ReactNode } from 'react'
-import { Box, BoxProps, ButtonBase, IconButton } from '@mui/material'
+import { Box, BoxProps, ButtonBase } from '@mui/material'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useEffect } from 'react'
 import { useLocation, Link as RouterLink } from 'react-router-dom'
@@ -64,6 +64,8 @@ export const DetailsBox: FC<DetailsBoxProps> = props => {
           m: -2,
           borderRadius: 1,
           textAlign: 'left',
+          width: '100%',
+          justifyContent: 'flex-start',
           ':hover': { textDecoration: 'underline' },
         }}
       >
@@ -72,13 +74,14 @@ export const DetailsBox: FC<DetailsBoxProps> = props => {
             mr: 1,
             transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
             transition: '200ms ease-in-out',
+            color: 'secondary.main',
           }}
         />
-        {title}
+        <strong>{title}</strong>
       </ButtonBase>
 
       {isOpen && (
-        <Box className="slide-down" mt={2} pl={4}>
+        <Box component="aside" className="slide-down" mt={2} pl={4}>
           {children}
         </Box>
       )}

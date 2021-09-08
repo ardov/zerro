@@ -23,7 +23,7 @@ export default function Main() {
     <MDXProvider components={components}>
       <Box
         width="100%"
-        sx={{ bgcolor: 'background.default' }}
+        sx={{ bgcolor: 'background.paper' }}
         // bgcolor="background.paper"
       >
         <ScrollToTop />
