@@ -1,9 +1,9 @@
 import React, { useContext } from 'react'
 import { useSelector } from 'react-redux'
-import { Collapse, Box, IconButton } from '@material-ui/core'
-import { makeStyles } from '@material-ui/styles'
-import ChevronRightIcon from '@material-ui/icons/ChevronRight'
-import DragIndicatorIcon from '@material-ui/icons/DragIndicator'
+import { Collapse, Box, IconButton } from '@mui/material'
+import { makeStyles } from '@mui/styles'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator'
 import { TagRow } from './TagRow'
 import {
   getAmountsById,

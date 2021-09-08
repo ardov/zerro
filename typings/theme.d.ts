@@ -1,7 +1,7 @@
-import { Theme as MaterialTheme } from '@material-ui/core'
+import { Theme as MaterialTheme } from '@mui/material'
 import { RootState } from 'store'
 
-declare module '@material-ui/styles/defaultTheme' {
+declare module '@mui/styles/defaultTheme' {
   interface DefaultTheme extends MaterialTheme {}
 }
 

@@ -7,8 +7,8 @@ import {
   Popover,
   PopoverProps,
   TextField,
-} from '@material-ui/core'
-import { makeStyles } from '@material-ui/styles'
+} from '@mui/material'
+import { makeStyles } from '@mui/styles'
 import { Modify } from 'types'
 import './styles.scss'
 import { zmColors, colors } from './colors'

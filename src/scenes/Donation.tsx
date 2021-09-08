@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { Box, Link, Typography, useTheme } from '@material-ui/core'
+import { Box, Link, Typography, useTheme } from '@mui/material'
 import { Helmet } from 'react-helmet'
 import Rhythm from 'components/Rhythm'
 

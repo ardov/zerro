@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Box, Button, Typography } from '@material-ui/core'
+import { Box, Button, Typography } from '@mui/material'
 import { useSelector } from 'react-redux'
 import './index.scss'
 import { getYearStats } from './selectors'

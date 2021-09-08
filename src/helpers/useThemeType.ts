@@ -1,4 +1,4 @@
-import { useMediaQuery } from '@material-ui/core'
+import { useMediaQuery } from '@mui/material'
 import { createLocalStorageStateHook } from 'use-local-storage-state'
 
 type UserTheme = 'light' | 'dark' | null

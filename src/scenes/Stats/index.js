@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react'
-import { Box, Typography, Paper, useTheme } from '@material-ui/core'
+import { Box, Typography, Paper, useTheme } from '@mui/material'
 import { useSelector } from 'react-redux'
 import { AreaChart, Area, ResponsiveContainer } from 'recharts'
 import { getAccountsHistory } from './selectors'

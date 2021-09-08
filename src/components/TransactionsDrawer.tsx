@@ -6,10 +6,10 @@ import {
   Typography,
   IconButton,
   DrawerProps,
-} from '@material-ui/core'
-import { makeStyles } from '@material-ui/styles'
+} from '@mui/material'
+import { makeStyles } from '@mui/styles'
 import { Tooltip } from 'components/Tooltip'
-import CloseIcon from '@material-ui/icons/Close'
+import CloseIcon from '@mui/icons-material/Close'
 import { FilterConditions } from 'store/localData/transactions/filtering'
 import { Modify } from 'types'
 

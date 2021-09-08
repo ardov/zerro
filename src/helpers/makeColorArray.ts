@@ -1,4 +1,4 @@
-import * as materialColors from '@material-ui/core/colors'
+import * as materialColors from '@mui/material/colors'
 
 type Shade = keyof typeof materialColors['red']
 type ColorGroups = Exclude<keyof typeof materialColors, 'common'>

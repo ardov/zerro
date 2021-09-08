@@ -1,9 +1,9 @@
 import React, { FC } from 'react'
-import { Box, BoxProps, IconButton } from '@material-ui/core'
+import { Box, BoxProps, IconButton } from '@mui/material'
 import TagSelect2 from 'components/TagSelect2'
 import TagChip from 'components/TagChip'
 import { Tooltip } from 'components/Tooltip'
-import AddIcon from '@material-ui/icons/Add'
+import AddIcon from '@mui/icons-material/Add'
 import { Modify } from 'types'
 
 type TagListProps = Modify<

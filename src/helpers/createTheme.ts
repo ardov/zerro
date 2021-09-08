@@ -1,5 +1,5 @@
-import { createTheme as createMuiTheme } from '@material-ui/core/styles'
-import { blueGrey, blue, green, grey } from '@material-ui/core/colors'
+import { createTheme as createMuiTheme } from '@mui/material/styles'
+import { blueGrey, blue, green, grey } from '@mui/material/colors'
 
 const primary = { dark: blueGrey[100], light: blueGrey[800] }
 const secondary = { dark: blue[200], light: blue[700] }

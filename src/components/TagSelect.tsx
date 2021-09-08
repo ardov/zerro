@@ -12,8 +12,8 @@ import {
   Chip,
   MenuItem,
   SelectChangeEvent,
-} from '@material-ui/core'
-import EmojiIcon from 'components/EmojiIcon'
+} from '@mui/material'
+import { EmojiIcon } from 'components/EmojiIcon'
 import { PopulatedTag, TagId } from '../types'
 
 type TagSelectValueType = TagId | TagId[]

@@ -9,12 +9,12 @@ import {
   Zoom,
   Button,
   Stack,
-} from '@material-ui/core'
+} from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
-import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash'
-import CloseIcon from '@material-ui/icons/Close'
-import DeleteIcon from '@material-ui/icons/Delete'
-import DatePicker from '@material-ui/lab/DatePicker'
+import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash'
+import CloseIcon from '@mui/icons-material/Close'
+import DeleteIcon from '@mui/icons-material/Delete'
+import DatePicker from '@mui/lab/DatePicker'
 import { Map } from './Map'
 import { AmountInput } from 'components/AmountInput'
 import { formatDate, rateToWords } from 'helpers/format'

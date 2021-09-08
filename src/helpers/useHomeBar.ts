@@ -1,5 +1,5 @@
 import json2mq from 'json2mq'
-import useMediaQuery from '@material-ui/core/useMediaQuery'
+import useMediaQuery from '@mui/material/useMediaQuery'
 
 export function useHomeBar() {
   const iPhoneXXS11ProMediaQuery = json2mq({

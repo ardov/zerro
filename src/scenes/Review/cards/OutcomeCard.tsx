@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Typography } from '@material-ui/core'
+import { Box, Typography } from '@mui/material'
 import { useSelector } from 'react-redux'
 import { formatDate } from 'helpers/format'
 import Rhythm from 'components/Rhythm'

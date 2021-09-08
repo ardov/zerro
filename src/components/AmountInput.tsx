@@ -5,7 +5,7 @@ import {
   TextFieldProps,
   Button,
   Stack,
-} from '@material-ui/core'
+} from '@mui/material'
 import { getCurrencySymbol } from 'helpers/format'
 import { Modify } from 'types'
 

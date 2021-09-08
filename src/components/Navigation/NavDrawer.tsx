@@ -12,16 +12,16 @@ import {
   ListItemText,
   ListItemIcon,
   DrawerProps,
-} from '@material-ui/core'
-import { useTheme } from '@material-ui/core'
+} from '@mui/material'
+import { useTheme } from '@mui/material'
 import { Logo } from 'components/Logo'
 import AccountList from 'components/AccountList'
-import { makeStyles } from '@material-ui/styles'
-import AccountBalanceIcon from '@material-ui/icons/AccountBalance'
-import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
-import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
-import SyncAltIcon from '@material-ui/icons/SyncAlt'
-import WhatshotIcon from '@material-ui/icons/Whatshot'
+import { makeStyles } from '@mui/styles'
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
+import SyncAltIcon from '@mui/icons-material/SyncAlt'
+import WhatshotIcon from '@mui/icons-material/Whatshot'
 
 export default function NavigationDrawer(props: DrawerProps) {
   const theme = useTheme()

@@ -9,8 +9,8 @@ import {
   ButtonBaseProps,
   Theme,
   Box,
-} from '@material-ui/core'
-import { styled } from '@material-ui/styles'
+} from '@mui/material'
+import { styled } from '@mui/styles'
 import { Tooltip } from 'components/Tooltip'
 import { Confirm } from 'components/Confirm'
 import { fillGoals } from '../thunks'

@@ -132,8 +132,12 @@ function openPopupWindow(
   w: number,
   h: number
 ) {
-  var y = win.top.outerHeight / 2 + win.top.screenY - h / 2
-  var x = win.top.outerWidth / 2 + win.top.screenX - w / 2
+  let y = 0
+  let x = 0
+  if (win.top) {
+    y = win.top.outerHeight / 2 + win.top.screenY - h / 2
+    x = win.top.outerWidth / 2 + win.top.screenX - w / 2
+  }
   return win.open(
     url,
     title,

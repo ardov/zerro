@@ -6,9 +6,9 @@ import {
   useMediaQuery,
   TypographyProps,
   Theme,
-} from '@material-ui/core'
+} from '@mui/material'
 import { Amount } from 'components/Amount'
-import { makeStyles } from '@material-ui/styles'
+import { makeStyles } from '@mui/styles'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import { getTotalsByMonth } from '../../selectors/getTotalsByMonth'
 

@@ -81,11 +81,30 @@ html {
   border-bottom-color: inherit;
   border-bottom-width: 1px;
   border-bottom-style: solid;
-  opacity: 0.2;
+  opacity: 0.3;
   content: '';
 }
 
 .article a:hover::after {
   opacity: 0.8;
   transition: 0.2s;
+}
+
+.slide-down {
+  opacity: 1;
+  animation-name: slideDown;
+  animation-duration: 200ms;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-out;
+}
+
+@keyframes slideDown {
+  0% {
+    transform: translateY(-24px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }

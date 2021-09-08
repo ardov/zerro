@@ -8,8 +8,8 @@ import {
   Popover,
   IconButton,
   PopoverProps,
-} from '@material-ui/core'
-import CheckCircleIcon from '@material-ui/icons/CheckCircle'
+} from '@mui/material'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { formatMoney } from 'helpers/format'
 import { AmountInput } from 'components/AmountInput'
 import {

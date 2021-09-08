@@ -1,6 +1,6 @@
 import React from 'react'
-import { withStyles } from '@material-ui/styles'
-import { Tooltip as MaterialTooltip, TooltipProps } from '@material-ui/core'
+import { withStyles } from '@mui/styles'
+import { Tooltip as MaterialTooltip, TooltipProps } from '@mui/material'
 
 const StyledTooltip = withStyles(theme => ({
   tooltip: { fontSize: theme.typography.fontSize },

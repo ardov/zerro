@@ -8,14 +8,14 @@ import {
   Theme,
   IconButtonProps,
   ButtonBaseProps,
-} from '@material-ui/core'
+} from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
-import { makeStyles } from '@material-ui/styles'
-import EmojiIcon from 'components/EmojiIcon'
+import { makeStyles } from '@mui/styles'
+import { EmojiIcon } from 'components/EmojiIcon'
 import { formatMoney } from 'helpers/format'
-import WarningIcon from '@material-ui/icons/Warning'
-import AddIcon from '@material-ui/icons/Add'
-import EmojiFlagsIcon from '@material-ui/icons/EmojiFlags'
+import WarningIcon from '@mui/icons-material/Warning'
+import AddIcon from '@mui/icons-material/Add'
+import EmojiFlagsIcon from '@mui/icons-material/EmojiFlags'
 import { goalToWords } from 'store/localData/hiddenData/goals/helpers'
 import { GoalProgress } from 'components/GoalProgress'
 import { Droppable, Draggable } from 'react-beautiful-dnd'

@@ -12,16 +12,16 @@ import {
   TypographyProps,
   BoxProps,
   Theme,
-} from '@material-ui/core'
+} from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
-import SettingsIcon from '@material-ui/icons/Settings'
-import CheckCircleIcon from '@material-ui/icons/CheckCircle'
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
-import ChevronRightIcon from '@material-ui/icons/ChevronRight'
+import SettingsIcon from '@mui/icons-material/Settings'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { fillGoals } from '../../thunks'
 import { Confirm } from 'components/Confirm'
 import { GoalProgress } from 'components/GoalProgress'
-import { makeStyles } from '@material-ui/styles'
+import { makeStyles } from '@mui/styles'
 import { ToBeBudgeted } from '../ToBeBudgeted'
 import useScrollPosition from '@react-hook/window-scroll'
 import { useMonth } from 'scenes/Budgets/pathHooks'

@@ -1,7 +1,7 @@
 import React from 'react'
 import { MDXProvider } from '@mdx-js/react'
-import { Box } from '@material-ui/core'
-import { useTheme } from '@material-ui/core'
+import { Box } from '@mui/material'
+import { useTheme } from '@mui/material'
 import { Link } from 'react-router-dom'
 import './index.scss'
 import { Logo } from 'components/Logo'
@@ -21,11 +21,7 @@ const components = { a: TextLink }
 export default function Main() {
   return (
     <MDXProvider components={components}>
-      <Box
-        width="100%"
-        sx={{ bgcolor: 'background.default' }}
-        // bgcolor="background.paper"
-      >
+      <Box width="100%" sx={{ bgcolor: 'background.paper' }}>
         <ScrollToTop />
         <Header />
 

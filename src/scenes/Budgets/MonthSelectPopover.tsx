@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import startOfMonth from 'date-fns/startOfMonth'
-import { withStyles } from '@material-ui/styles'
+import { withStyles } from '@mui/styles'
 import {
   Box,
   IconButton,
@@ -10,9 +10,9 @@ import {
   PopoverProps,
   ListItemButton,
   ListItemButtonProps,
-} from '@material-ui/core'
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
-import ChevronRightIcon from '@material-ui/icons/ChevronRight'
+} from '@mui/material'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { formatDate } from 'helpers/format'
 
 interface MonthItemItemProps extends ListItemButtonProps {

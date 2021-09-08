@@ -11,8 +11,8 @@ import {
   useMediaQuery,
   ButtonBaseProps,
   Theme,
-} from '@material-ui/core'
-import { makeStyles } from '@material-ui/styles'
+} from '@mui/material'
+import { makeStyles } from '@mui/styles'
 import { Tooltip } from 'components/Tooltip'
 import Rhythm from 'components/Rhythm'
 import { useMonth } from '../pathHooks'
