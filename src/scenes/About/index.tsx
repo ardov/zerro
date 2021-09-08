@@ -21,11 +21,7 @@ const components = { a: TextLink }
 export default function Main() {
   return (
     <MDXProvider components={components}>
-      <Box
-        width="100%"
-        sx={{ bgcolor: 'background.paper' }}
-        // bgcolor="background.paper"
-      >
+      <Box width="100%" sx={{ bgcolor: 'background.paper' }}>
         <ScrollToTop />
         <Header />
 
