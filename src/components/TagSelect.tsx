@@ -29,7 +29,7 @@ export type TagSelectProps = {
 type TagOption = PopulatedTag | TagTreeNode
 
 export const TagSelect: FC<TagSelectProps> = props => {
-  const { onChange, tagFilters, multiple, value, ...rest } = props
+  const { onChange, tagFilters, multiple, value, label, ...rest } = props
   const tagsTree = useSelector(getTagsTree)
   const tags = useSelector(getPopulatedTags)
   const options = getMatchedTags(tagsTree, tagFilters)
@@ -72,7 +72,7 @@ export const TagSelect: FC<TagSelectProps> = props => {
       renderInput={params => (
         <TextField
           {...params}
-          label="Категория"
+          label={label}
           inputProps={{
             ...params.inputProps,
             autoComplete: 'new-password', // disable autocomplete and autofill
