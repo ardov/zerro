@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import TagSelect from 'components/TagSelect'
+import { TagSelect } from 'components/TagSelect'
 import {
   Drawer,
   Box,
@@ -156,7 +156,9 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
 
         <Box mt={3}>
           <TagSelect
-            value={conditions.tags || null}
+            multiple
+            tagFilters={{ includeNull: true }}
+            value={conditions.tags || []}
             onChange={tags =>
               setCondition({ tags: tags as FilterConditions['tags'] })
             }
