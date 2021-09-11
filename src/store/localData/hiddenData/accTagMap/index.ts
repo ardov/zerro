@@ -3,7 +3,7 @@ import { sendEvent } from 'helpers/tracking'
 import { ACC_LINKS } from '../constants'
 import { setHiddenData } from '../thunks'
 import { getTags } from '../../tags'
-import { getRawAccLinks } from '../selectors'
+import { getAccLinks } from '../selectors'
 import { AppThunk } from 'store'
 import { AccountId, TagId } from 'types'
 
@@ -27,7 +27,7 @@ export const addConnection = (
 
 // SELECTORS
 export const getAccTagMap = createSelector(
-  [getRawAccLinks, getTags],
+  [getAccLinks, getTags],
   (links, tags) => {
     if (!links) return {}
     let filtered = { ...links }

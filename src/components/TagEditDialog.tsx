@@ -13,6 +13,8 @@ import {
 import { TagSelect } from './TagSelect'
 import { Box } from '@mui/system'
 
+// TODO: Доделать модалку для редактирования и создания категорий
+
 export type TagEditDialogProps = {}
 
 export const TagEditDialog: FC<TagEditDialogProps> = props => {

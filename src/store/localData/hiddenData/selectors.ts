@@ -6,13 +6,20 @@ import { DATA_ACC_NAME } from './constants'
 import { RootState } from 'store'
 import { Reminder, TagId, ZmGoal } from 'types'
 
-// DATA ACCOUNT SELECTOR
+/**
+ * Returns id of special account to store data
+ */
 export function getDataAccountId(state: RootState) {
   const dataAcc = getAccountList(state).find(acc => acc.title === DATA_ACC_NAME)
   return dataAcc ? dataAcc.id : null
 }
 
-// Get all data-reminders
+/**
+ * Returns all reminders with data by data type
+ * - connections between account and tag
+ * - order of tags
+ * - goals associated with tags
+ */
 export const getDataReminders = createSelector([getReminders], reminders => {
   const array = Object.values(reminders)
   return {
@@ -22,43 +29,22 @@ export const getDataReminders = createSelector([getReminders], reminders => {
   }
 })
 
-// Get concreet reminders
-const getAccLinksReminder = createSelector(
-  [getDataReminders],
-  reminders => reminders[ACC_LINKS]
-)
-const getGoalsReminder = createSelector(
-  [getDataReminders],
-  reminders => reminders[GOALS]
-)
-const getTagOrderReminder = createSelector(
-  [getDataReminders],
-  reminders => reminders[TAG_ORDER]
-)
+export type AccLinks = { [accId: string]: TagId }
+export type RawGoals = { [tagId: string]: ZmGoal }
+const getHiddenData = createSelector([getDataReminders], reminders => ({
+  [ACC_LINKS]: parseComment<AccLinks>(reminders[ACC_LINKS]),
+  [TAG_ORDER]: parseComment<TagId[]>(reminders[TAG_ORDER]),
+  [GOALS]: parseComment<RawGoals>(reminders[GOALS]),
+}))
 
-// Get raw data from reminders
-export interface AccLinks {
-  [accId: string]: TagId
-}
-export const getRawAccLinks = createSelector(
-  [getAccLinksReminder],
-  reminder => parseDataFromReminder(reminder) as AccLinks | null
-)
+export const getAccLinks = createSelector([getHiddenData], d => d[ACC_LINKS])
+export const getTagOrder = createSelector([getHiddenData], d => d[TAG_ORDER])
+export const getRawGoals = createSelector([getHiddenData], d => d[GOALS])
 
-export interface RawGoals {
-  [tagId: string]: ZmGoal
-}
-export const getRawGoals = createSelector(
-  [getGoalsReminder],
-  reminder => parseDataFromReminder(reminder) as RawGoals | null
-)
-
-export const getRawTagOrder = createSelector(
-  [getTagOrderReminder],
-  reminder => parseDataFromReminder(reminder) as TagId[] | null
-)
-
-function parseDataFromReminder(reminder?: Reminder) {
+/**
+ * Parses comment in reminder and returns parsed JSON or null
+ */
+function parseComment<OutcomeType>(reminder?: Reminder): OutcomeType | null {
   if (!reminder?.comment) return null
   try {
     return JSON.parse(reminder.comment)

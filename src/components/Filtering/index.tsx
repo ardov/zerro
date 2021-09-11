@@ -5,7 +5,7 @@ import IconButton from '@mui/material/IconButton'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@mui/icons-material/Close'
-import { useToggle } from 'helpers/useToggle'
+// import { useToggle } from 'helpers/useToggle'
 import { FilterConditions } from 'store/localData/transactions/filtering'
 import { Box, SxProps } from '@mui/system'
 import { Theme } from '@mui/material/styles'
@@ -19,6 +19,8 @@ import {
   TextField,
 } from '@mui/material'
 import { isNull } from 'lodash'
+
+// TODO: Доделать новый фильтр
 
 type FilterRuleProps = {
   condition?: FilterConditions

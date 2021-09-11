@@ -1,11 +1,11 @@
 import { getRootUser } from 'store/data/selectors'
 import { makeDataAcc, makeDataReminder } from './helpers'
 import { getDataReminders, getDataAccountId } from './selectors'
-import { DataRemindeType } from './constants'
+import { DataReminderType } from './constants'
 import { AppDispatch, AppThunk, AppGetState } from 'store'
 import { applyClientPatch } from 'store/data'
 
-export const setHiddenData = (type: DataRemindeType, data: any): AppThunk => (
+export const setHiddenData = (type: DataReminderType, data: any): AppThunk => (
   dispatch,
   getState
 ) => {
