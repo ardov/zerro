@@ -1,4 +1,4 @@
-import { intToRGB, intToHEX, getColorForString } from 'helpers/convertColor'
+import { intToRgb, intToHex, getColorForString } from 'helpers/convertColor'
 import { sendEvent } from 'helpers/tracking'
 import toArray from 'lodash/toArray'
 import { ById, PopulatedTag, Tag } from 'types'
@@ -30,8 +30,8 @@ function makePopulatedTag(tag: Tag): PopulatedTag {
     children: [],
     name: getName(tag.title),
     symbol: getSymbol(tag),
-    colorRGB: intToRGB(tag.color),
-    colorHEX: intToHEX(tag.color),
+    colorRGB: intToRgb(tag.color),
+    colorHEX: intToHex(tag.color),
     colorGenerated: getColorForString(tag.title),
   }
 }

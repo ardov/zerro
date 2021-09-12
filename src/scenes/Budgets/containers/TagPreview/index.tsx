@@ -12,7 +12,7 @@ import { useMonth } from 'scenes/Budgets/pathHooks'
 import { LinkedAccs } from './LinkedAccs'
 import { OutcomeWidget } from './OutcomeWidget'
 import { ColorPicker } from 'components/ColorPickerPopover'
-import { HEXToInt } from 'helpers/convertColor'
+import { hexToInt } from 'helpers/convertColor'
 import { patchTag } from 'store/localData/tags/thunks'
 import { sendEvent } from 'helpers/tracking'
 import { PopulatedTag } from 'types'
@@ -90,7 +90,7 @@ const Header: FC<HeaderProps> = ({ tag, onClose }) => {
   const dispatch = useDispatch()
   const handleColorChange = (hex?: string | null) => {
     sendEvent('Tag: set color: ' + hex)
-    dispatch(patchTag({ id: tag.id, color: HEXToInt(hex) }))
+    dispatch(patchTag({ id: tag.id, color: hexToInt(hex) }))
   }
   return (
     <Box py={1} px={3} display="flex" alignItems="center">
