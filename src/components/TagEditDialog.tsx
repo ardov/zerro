@@ -80,7 +80,7 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
             helperText={errors.title}
             autoFocus
             name="title"
-            inputProps={{ autocomplete: 'off' }}
+            inputProps={{ autoComplete: 'off' }}
             value={values.title}
             onChange={handleChange}
             InputProps={{
