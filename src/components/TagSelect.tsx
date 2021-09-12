@@ -15,14 +15,23 @@ type TagFilters = {
   tagType?: 'income' | 'outcome'
   includeNull?: boolean
   topLevel?: boolean
+  exclude?: string[]
 }
 
-export type TagSelectProps = {
-  onChange: (v: string[] | null) => void
-  tagFilters?: TagFilters
+type BaseTagSelectProps =
+  | {
+      multiple?: false
+      onChange: (v: string | null) => void
+      value?: string | null
+    }
+  | {
+      multiple: true
+      onChange: (v: string[] | null) => void
+      value?: string[]
+    }
 
-  multiple?: boolean
-  value?: string[]
+export type TagSelectProps = BaseTagSelectProps & {
+  tagFilters?: TagFilters
   label?: string
 }
 
@@ -35,17 +44,15 @@ export const TagSelect: FC<TagSelectProps> = props => {
   const options = getMatchedTags(tagsTree, tagFilters)
 
   return (
-    <Autocomplete
+    <Autocomplete<string, typeof multiple>
       multiple={multiple}
       value={value}
       onChange={(e, value) => {
         if (!onChange) return
         if (!value) return onChange(null)
-        if (Array.isArray(value)) {
-          return onChange(value)
-        } else {
-          return onChange([value])
-        }
+        // Хз как заставить его нормально работать
+        // @ts-ignore
+        return onChange(value)
       }}
       openOnFocus
       options={options}
@@ -103,8 +110,9 @@ const getMatchedTags = (
 }
 
 const makeChecker = (search = '', filters?: TagFilters) => (tag: TagOption) => {
-  const { tagType, includeNull, topLevel } = filters || {}
+  const { tagType, includeNull, topLevel, exclude } = filters || {}
   if (tag.id === 'null') return includeNull ? true : false
+  if (exclude?.includes(tag.id)) return false
   if (topLevel && tag.parent) return false
   if (search) return matchString(tag.name, search)
   if (tagType === 'income') return tag.showIncome

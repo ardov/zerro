@@ -9,4 +9,4 @@ export default {
 
 const Template: Story<TagEditDialogProps> = args => <TagEditDialog {...args} />
 export const Dialog = Template.bind({})
-Dialog.args = { symbol: '💩' }
+Dialog.args = { open: true }
