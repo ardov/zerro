@@ -73,7 +73,6 @@
     "browserslist": "4.16.5",
     "comlink": "^4.3.0",
     "cookies-js": "^1.2.3",
-    "dart-sass": "^1.25.0",
     "date-fns": "^2.21.1",
     "history": "^4.10.1",
     "idb": "^6.0.0",
