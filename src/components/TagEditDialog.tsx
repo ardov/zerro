@@ -55,7 +55,7 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
       }
     },
     onSubmit: values => {
-      const newTag = dispatch(createTag(values))
+      const newTag = dispatch(createTag({ ...values, id }))
       onClose()
       console.log(newTag)
     },
@@ -103,14 +103,14 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
           <FormGroup>
             <FormControlLabel
               name="showIncome"
-              value={values.showIncome}
+              checked={values.showIncome}
               onChange={handleChange}
               control={<Checkbox />}
               label="Доходная"
             />
             <FormControlLabel
               name="showOutcome"
-              value={values.showOutcome}
+              checked={values.showOutcome}
               onChange={handleChange}
               control={<Checkbox />}
               label="Расходная"

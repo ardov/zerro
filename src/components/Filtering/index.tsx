@@ -1,3 +1,6 @@
+// Экспериментальный фильтр, пока не готов и нигде не используется
+// TODO: Доделать новый фильтр
+
 import React, { FC, useState } from 'react'
 import Paper from '@mui/material/Paper'
 import InputBase from '@mui/material/InputBase'
@@ -19,8 +22,6 @@ import {
   TextField,
 } from '@mui/material'
 import { isNull } from 'lodash'
-
-// TODO: Доделать новый фильтр
 
 type FilterRuleProps = {
   condition?: FilterConditions
