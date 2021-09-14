@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getRawTagOrder } from '../selectors'
+import { getTagOrder } from '../selectors'
 import { sendEvent } from 'helpers/tracking'
 import { setHiddenData } from '../thunks'
 import { TAG_ORDER } from '../constants'
@@ -31,7 +31,7 @@ type TagToCompare = Pick<PopulatedTag, 'id' | 'name'> & {
   [x: string]: any
 }
 export const compareTags = createSelector(
-  [getRawTagOrder],
+  [getTagOrder],
   tagOrder => (tag1: TagToCompare, tag2: TagToCompare) => {
     if (!tagOrder) return tag1.name.localeCompare(tag2.name)
 

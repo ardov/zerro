@@ -1,105 +1,127 @@
 import React, { FC } from 'react'
 import { useSelector } from 'react-redux'
 import {
-  getTagsTree,
   getPopulatedTags,
+  getTagsTree,
   TagTreeNode,
 } from 'store/localData/tags'
-import {
-  Box,
-  Select,
-  OutlinedInput,
-  Chip,
-  MenuItem,
-  SelectChangeEvent,
-} from '@mui/material'
+import { Box, Autocomplete, TextField } from '@mui/material'
 import { EmojiIcon } from 'components/EmojiIcon'
-import { PopulatedTag, TagId } from '../types'
+import { PopulatedTag } from '../types'
+import TagChip from './TagChip'
+import ru from 'convert-layout/ru'
 
-type TagSelectValueType = TagId | TagId[]
-
-type TagSelectProps = {
-  value: TagSelectValueType | null
-  onChange: (v: TagSelectValueType) => void
-  incomeOnly?: boolean
-  outcomeOnly?: boolean
-  single?: boolean
+type TagFilters = {
+  tagType?: 'income' | 'outcome'
+  includeNull?: boolean
+  topLevel?: boolean
+  exclude?: string[]
 }
 
-const TagSelect: FC<TagSelectProps> = ({
-  onChange,
-  incomeOnly,
-  outcomeOnly,
-  value,
-  single,
-  ...rest
-}) => {
-  const tags = useSelector(getTagsTree)
-  const tagList = useSelector(getPopulatedTags)
-  const [open, setOpen] = React.useState(false)
-  const handleTagSelect = (e: SelectChangeEvent<TagSelectValueType>) => {
-    onChange(e.target.value)
-    handleClose()
-  }
-  const handleClose = () => setOpen(false)
-  const handleOpen = () => setOpen(true)
-  // const removeTag = idToRemove => () =>
-  //   onChange(value.filter(id => id !== idToRemove))
+type BaseTagSelectProps =
+  | {
+      multiple?: false
+      onChange: (v: string | null) => void
+      value?: string | null
+    }
+  | {
+      multiple: true
+      onChange: (v: string[] | null) => void
+      value?: string[]
+    }
 
-  const checkTag = (tag: PopulatedTag | TagTreeNode) =>
-    (!incomeOnly || tag.showIncome) && (!outcomeOnly || tag.showOutcome)
+export type TagSelectProps = BaseTagSelectProps & {
+  tagFilters?: TagFilters
+  label?: string
+}
 
-  const filtered = tags
-    .filter(checkTag)
-    .map(tag =>
-      tag.children ? { ...tag, children: tag.children.filter(checkTag) } : tag
-    )
+type TagOption = PopulatedTag | TagTreeNode
+
+export const TagSelect: FC<TagSelectProps> = props => {
+  const { onChange, tagFilters, multiple, value, label, ...rest } = props
+  const tagsTree = useSelector(getTagsTree)
+  const tags = useSelector(getPopulatedTags)
+  const options = getMatchedTags(tagsTree, tagFilters)
 
   return (
-    <Select<TagSelectValueType>
-      multiple={!single}
-      open={open}
-      onClose={handleClose}
-      onOpen={handleOpen}
-      value={value || []}
-      onChange={handleTagSelect}
-      input={<OutlinedInput fullWidth />}
-      renderValue={selected =>
-        Array.isArray(selected) ? (
-          <Box display="flex" flexWrap="wrap">
-            {selected.map(id => (
-              <Chip
-                key={id}
-                label={tagList[id] && tagList[id].title}
-                sx={{ m: 0.25 }}
-              />
-            ))}
-          </Box>
-        ) : (
-          tagList[selected] && tagList[selected].title
-        )
+    <Autocomplete<string, typeof multiple>
+      multiple={multiple}
+      value={value}
+      onChange={(e, value) => {
+        if (!onChange) return
+        if (!value) return onChange(null)
+        // Хз как заставить его нормально работать
+        // @ts-ignore
+        return onChange(value)
+      }}
+      openOnFocus
+      options={options}
+      autoHighlight
+      filterOptions={(_, state) =>
+        getMatchedTags(tagsTree, tagFilters, state.inputValue)
       }
+      getOptionLabel={tag => tags[tag].name}
+      renderOption={(props, tag) => (
+        <Box component="li" {...props}>
+          <EmojiIcon
+            symbol={tags[tag].symbol}
+            mr={2}
+            ml={tags[tag].parent ? 5 : 0}
+          />
+          {tags[tag].name}
+        </Box>
+      )}
+      renderTags={(tags, getTagProps) =>
+        tags.map((tag, index) => (
+          <TagChip id={tag} {...getTagProps({ index })} />
+        ))
+      }
+      renderInput={params => (
+        <TextField
+          {...params}
+          label={label}
+          inputProps={{
+            ...params.inputProps,
+            autoComplete: 'new-password', // disable autocomplete and autofill
+          }}
+        />
+      )}
       {...rest}
-    >
-      {filtered.map(tag => {
-        const children = tag.children
-          ? tag.children.map(tag => (
-              <MenuItem key={tag.id} value={tag.id}>
-                <EmojiIcon symbol={tag.symbol} mr={2} ml={5} />
-                {tag.name}
-              </MenuItem>
-            ))
-          : []
-        return [
-          <MenuItem key={tag.id} value={tag.id}>
-            <EmojiIcon symbol={tag.symbol} mr={2} />
-            {tag.name}
-          </MenuItem>,
-          ...children,
-        ]
-      })}
-    </Select>
+    />
   )
 }
 
-export default TagSelect
+const getMatchedTags = (
+  tags: TagTreeNode[],
+  filters?: TagFilters,
+  search = ''
+) => {
+  const check = makeChecker(search, filters)
+  let list: TagOption[] = []
+  tags.forEach(parent => {
+    const filteredCildren = parent.children.filter(check)
+    if (filteredCildren.length) {
+      list = [...list, parent, ...filteredCildren]
+    } else if (check(parent)) {
+      list.push(parent)
+    }
+  })
+  return list.map(t => t.id)
+}
+
+const makeChecker = (search = '', filters?: TagFilters) => (tag: TagOption) => {
+  const { tagType, includeNull, topLevel, exclude } = filters || {}
+  if (tag.id === 'null') return includeNull ? true : false
+  if (exclude?.includes(tag.id)) return false
+  if (topLevel && tag.parent) return false
+  if (search) return matchString(tag.name, search)
+  if (tagType === 'income') return tag.showIncome
+  if (tagType === 'outcome') return tag.showOutcome
+  return true
+}
+
+const matchString = (name: string, search: string) => {
+  const n = name.toLowerCase()
+  const s = search.toLowerCase()
+  return n.includes(s) || n.includes(ru.toEn(s)) || n.includes(ru.fromEn(s))
+}

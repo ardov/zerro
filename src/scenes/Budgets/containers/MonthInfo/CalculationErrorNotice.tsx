@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from 'react-redux'
 import { getTotalsArray } from '../../selectors/getTotalsByMonth'
 import { convertCurrency } from 'store/data/selectors'
 import { getInBudgetAccounts } from 'store/localData/accounts'
-import { round } from 'helpers/currencyHelpers'
 import { getUserCurrencyCode } from 'store/data/selectors'
 import { Box, Typography, Button, Link } from '@mui/material'
 import WarningIcon from '@mui/icons-material/Warning'
@@ -15,7 +14,8 @@ import { getDiff } from 'store/data'
 import { getAccountsHistory } from 'scenes/Stats/selectors'
 import { PopulatedAccount } from 'types'
 
-const TOLERANCE = 2
+// accaptable error due to roundings in calculations
+const TOLERANCE = 1
 
 export const CalculationErrorNotice: FC = () => {
   const [hidden, setHidden] = useState(false)
@@ -34,10 +34,10 @@ export const CalculationErrorNotice: FC = () => {
   let inBudgetSum = 0
   accsInBudget.forEach(acc => {
     const balance = convert(acc.balance, acc.instrument)
-    inBudgetSum = round(inBudgetSum + balance)
+    inBudgetSum = inBudgetSum + balance
   })
 
-  const diff = round(Math.abs(moneyInBudget - inBudgetSum))
+  const diff = Math.abs(moneyInBudget - inBudgetSum)
   const hasError = diff >= TOLERANCE && !transactionsToSync
 
   useEffect(() => {

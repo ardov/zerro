@@ -5,7 +5,7 @@ type TagDraft = OptionalExceptFor<Tag, 'user' | 'title'>
 
 export function makeTag(raw: TagDraft): Tag {
   return {
-    id: String(raw.id) || uuidv1(),
+    id: raw.id || uuidv1(),
     changed: raw.changed || Date.now(),
     user: raw.user,
     title: raw.title,

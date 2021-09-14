@@ -6,9 +6,6 @@ import { makeAccount } from 'store/localData/accounts/helpers'
 import { makeTag } from 'store/localData/tags/makeTag'
 import makeTransaction from 'store/localData/transactions/makeTransaction'
 
-export const RUB = 2
-export const RU = 1
-
 const NOW = Date.now()
 const DAY = 1000 * 60 * 60 * 24
 
@@ -17,7 +14,7 @@ const USER: User = {
   changed: NOW,
   currency: 2, // RUB
   parent: null,
-  country: RU,
+  country: 1, // Russia
   countryCode: 'RU',
   email: null,
   login: 'demoAccount',
@@ -26,6 +23,7 @@ const USER: User = {
   subscription: '10yearssubscription',
 }
 
+// ACCOUNTS
 const DEBT_ACC = makeAccount({
   id: 'DEBT_ACC',
   user: USER.id,
@@ -41,20 +39,31 @@ const CASH_ACC = makeAccount({
   title: 'Наличка',
   startBalance: 0,
 })
+const account = [DEBT_ACC, CASH_ACC]
 
+// TAGS
+const FOOD_TAG = makeTag({
+  id: 'FOOD_TAG',
+  user: USER.id,
+  title: 'Еда',
+  showOutcome: true,
+})
 const CAFE_TAG = makeTag({
   id: 'CAFE_TAG',
   user: USER.id,
   title: 'Кафе',
+  parent: FOOD_TAG.id,
   showOutcome: true,
 })
 const SALARY_TAG = makeTag({
   id: 'SALARY_TAG',
   user: USER.id,
-  title: 'Кафе',
+  title: 'Зарплата',
   showIncome: true,
 })
+const tag = [FOOD_TAG, CAFE_TAG, SALARY_TAG]
 
+// TRANSACTIONS
 const TR1 = makeTransaction({
   id: 'income',
   user: USER.id,
@@ -84,9 +93,9 @@ export const getDemoData = (): Diff => {
     instrument: instruments as ZmInstrument[],
 
     user: [USER],
-    account: [DEBT_ACC, CASH_ACC],
+    account,
     merchant: [],
-    tag: [CAFE_TAG, SALARY_TAG],
+    tag,
     budget: [],
     reminder: [],
     reminderMarker: [],

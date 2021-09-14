@@ -4,6 +4,7 @@ import { EmojiIcon } from 'components/EmojiIcon'
 import { Box, Typography, IconButton } from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@mui/icons-material/Close'
+import EditIcon from '@mui/icons-material/Edit'
 import { getPopulatedTag } from 'store/localData/tags'
 import { Total, Line as TextLine } from '../components'
 import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
@@ -12,10 +13,12 @@ import { useMonth } from 'scenes/Budgets/pathHooks'
 import { LinkedAccs } from './LinkedAccs'
 import { OutcomeWidget } from './OutcomeWidget'
 import { ColorPicker } from 'components/ColorPickerPopover'
-import { HEXToInt } from 'helpers/convertColor'
+import { hexToInt } from 'helpers/convertColor'
 import { patchTag } from 'store/localData/tags/thunks'
 import { sendEvent } from 'helpers/tracking'
 import { PopulatedTag } from 'types'
+import { TagEditDialog } from 'components/TagEditDialog'
+import { useToggle } from 'helpers/useToggle'
 
 type TagPreviewProps = {
   id: string
@@ -87,10 +90,11 @@ type HeaderProps = {
 
 const Header: FC<HeaderProps> = ({ tag, onClose }) => {
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
+  const [showEditor, toggleEditor] = useToggle()
   const dispatch = useDispatch()
   const handleColorChange = (hex?: string | null) => {
     sendEvent('Tag: set color: ' + hex)
-    dispatch(patchTag({ id: tag.id, color: HEXToInt(hex) }))
+    dispatch(patchTag({ id: tag.id, color: hexToInt(hex) }))
   }
   return (
     <Box py={1} px={3} display="flex" alignItems="center">
@@ -109,6 +113,9 @@ const Header: FC<HeaderProps> = ({ tag, onClose }) => {
         </Typography>
       </Box>
 
+      <Tooltip title="Изменить">
+        <IconButton onClick={toggleEditor} children={<EditIcon />} />
+      </Tooltip>
       <Tooltip title="Закрыть">
         <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
       </Tooltip>
@@ -119,6 +126,13 @@ const Header: FC<HeaderProps> = ({ tag, onClose }) => {
         value={tag.colorHEX}
         onClose={() => setAnchorEl(null)}
         onChange={handleColorChange}
+      />
+
+      <TagEditDialog
+        key={tag.id}
+        open={showEditor}
+        onClose={toggleEditor}
+        tag={tag}
       />
     </Box>
   )

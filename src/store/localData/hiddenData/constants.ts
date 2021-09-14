@@ -5,7 +5,7 @@ export const DATA_ACC_NAME = '🤖 [Zerro Data]'
 export const GOALS = 'goals'
 export const ACC_LINKS = 'accLinks'
 export const TAG_ORDER = 'tagOrder'
-export type DataRemindeType = 'goals' | 'accLinks' | 'tagOrder'
+export type DataReminderType = 'goals' | 'accLinks' | 'tagOrder'
 
 export const GOAL_TYPES = {
   MONTHLY: 'monthly', // monthly contribution
