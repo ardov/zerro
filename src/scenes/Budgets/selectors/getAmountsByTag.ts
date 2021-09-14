@@ -3,6 +3,7 @@ import { getMainTag } from 'store/localData/transactions/helpers'
 import { getTagLinks } from 'store/localData/tags'
 import { convertCurrency } from 'store/data/selectors'
 import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
+import { round } from 'helpers/currencyHelpers'
 import { getAccTagMap } from 'store/localData/hiddenData/accTagMap'
 import startOfMonth from 'date-fns/startOfMonth'
 import { getType } from 'store/localData/transactions/helpers'
@@ -46,28 +47,29 @@ const getAmountsByMonth = createSelector(
 
         if (type === 'income') {
           result[date].income[tag] = result[date].income[tag]
-            ? result[date].income[tag] + income
+            ? round(result[date].income[tag] + income)
             : income
         }
 
         if (type === 'outcome') {
           result[date].outcome[tag] = result[date].outcome[tag]
-            ? result[date].outcome[tag] + outcome
+            ? round(result[date].outcome[tag] + outcome)
             : outcome
         }
 
         if (type === 'transfer') {
           // TRANSFER BETWEEN BUDGET ACCOUNTS
           if (inBudget(tr.incomeAccount) && inBudget(tr.outcomeAccount)) {
-            result[date].transferFees =
+            result[date].transferFees = round(
               result[date].transferFees + outcome - income
+            )
           }
           // TRANSFER TO BUDGET
           else if (inBudget(tr.incomeAccount)) {
             result[date].transfers[tr.outcomeAccount] = result[date].transfers[
               tr.outcomeAccount
             ]
-              ? result[date].transfers[tr.outcomeAccount] - income
+              ? round(result[date].transfers[tr.outcomeAccount] - income)
               : -income
           }
           // TRANSFER FROM BUDGET
@@ -75,7 +77,7 @@ const getAmountsByMonth = createSelector(
             result[date].transfers[tr.incomeAccount] = result[date].transfers[
               tr.incomeAccount
             ]
-              ? result[date].transfers[tr.incomeAccount] + outcome
+              ? round(result[date].transfers[tr.incomeAccount] + outcome)
               : outcome
           }
         }
@@ -105,8 +107,9 @@ export const getLinkedTransfers = createSelector(
       for (const accountId in amounts[date].transfers) {
         // possible problem with deleted tags
         const linkedTag = accTagMap[accountId] || 'null'
-        result[date][linkedTag] =
+        result[date][linkedTag] = round(
           amounts[date].transfers[accountId] + (result[date][linkedTag] || 0)
+        )
       }
     }
     return result
@@ -251,9 +254,9 @@ function calcTagGroupAmounts(data: {
     const income = incomes[childId] || 0
     const tagOutcome = outcomes[childId] || 0
     const transferOutcome = linkedTransfers[childId] || 0
-    const outcome = tagOutcome + transferOutcome
+    const outcome = round(tagOutcome + transferOutcome)
     const leftover = clampAvailable(prevMonth?.children?.[childId]?.available)
-    const available = leftover + budgeted - outcome
+    const available = round(leftover + budgeted - outcome)
 
     subTags[childId] = {
       // Main tag amounts
@@ -281,12 +284,12 @@ function calcTagGroupAmounts(data: {
     }
 
     // Update children totals
-    childrenBudgeted = childrenBudgeted + budgeted
-    childrenOutcome = childrenOutcome + outcome
-    childrenIncome = childrenIncome + income
-    childrenLeftover = childrenLeftover + leftover
-    if (available > 0) childrenAvailable = childrenAvailable + available
-    if (available < 0) childrenOverspent = childrenOverspent - available
+    childrenBudgeted = round(childrenBudgeted + budgeted)
+    childrenOutcome = round(childrenOutcome + outcome)
+    childrenIncome = round(childrenIncome + income)
+    childrenLeftover = round(childrenLeftover + leftover)
+    if (available > 0) childrenAvailable = round(childrenAvailable + available)
+    if (available < 0) childrenOverspent = round(childrenOverspent - available)
   }
 
   // Main tag amounts
@@ -295,17 +298,17 @@ function calcTagGroupAmounts(data: {
   const tagOutcome = outcomes[id] || 0
   let transferOutcome = linkedTransfers[id] || 0 // все переводы идут в null
   if (id === 'null') transferOutcome = 0
-  const outcome = tagOutcome + transferOutcome
+  const outcome = round(tagOutcome + transferOutcome)
   const leftover = clampAvailable(prevMonth?.available)
-  const available = leftover + budgeted - outcome - childrenOverspent
+  const available = round(leftover + budgeted - outcome - childrenOverspent)
 
   return {
     // Group totals
-    totalBudgeted: budgeted + childrenBudgeted,
-    totalOutcome: outcome + childrenOutcome,
-    totalIncome: income + childrenIncome,
-    totalLeftover: leftover + childrenLeftover,
-    totalAvailable: available + childrenAvailable,
+    totalBudgeted: round(budgeted + childrenBudgeted),
+    totalOutcome: round(outcome + childrenOutcome),
+    totalIncome: round(income + childrenIncome),
+    totalLeftover: round(leftover + childrenLeftover),
+    totalAvailable: round(available + childrenAvailable),
     totalOverspent: available < 0 ? -available : 0,
     // Main tag amounts
     budgeted,
