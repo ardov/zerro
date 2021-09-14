@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { getTotalsArray } from '../../selectors/getTotalsByMonth'
 import { convertCurrency } from 'store/data/selectors'
 import { getInBudgetAccounts } from 'store/localData/accounts'
+import { round } from 'helpers/currencyHelpers'
 import { getUserCurrencyCode } from 'store/data/selectors'
 import { Box, Typography, Button, Link } from '@mui/material'
 import WarningIcon from '@mui/icons-material/Warning'
@@ -12,37 +13,38 @@ import { clearLocalData } from 'logic/localData'
 import { captureError, sendEvent } from 'helpers/tracking'
 import { getDiff } from 'store/data'
 import { getAccountsHistory } from 'scenes/Stats/selectors'
-import { PopulatedAccount } from 'types'
 
-// accaptable error due to roundings in calculations
-const TOLERANCE = 1
+// TODO: Надо бы как-то округлять все цифры только в конце. Иначе из-за валют копится ошибка.
+const TOLERANCE = 3
 
+/**
+ * Shows error message if sum of accounts in balance is not equal to calculated amount of money in balance. There are 3 main reasons for this:
+ * - Corrupted accounts. For some old acoounts `balance !== startBalance + transactions`. It's known ZM bug.
+ * - Rounding of numbers during the calculations. Numbers are rounded on the each step so it's getting worse with long history and transactions in different currencies. That's why we need some.
+ * - Errors during the calculations.
+ */
 export const CalculationErrorNotice: FC = () => {
   const [hidden, setHidden] = useState(false)
 
-  const transactionsToSync = useSelector(
-    state => getDiff(state)?.transaction?.length || 0
-  )
+  const synced = useSelector(state => !getDiff(state)?.transaction?.length)
   const currency = useSelector(getUserCurrencyCode)
   const dispatch = useDispatch()
 
   const totalsArray = useSelector(getTotalsArray)
   const { moneyInBudget } = totalsArray[totalsArray.length - 1]
 
-  const accsInBudget = useSelector(getInBudgetAccounts)
   const convert = useSelector(convertCurrency)
-  let inBudgetSum = 0
-  accsInBudget.forEach(acc => {
-    const balance = convert(acc.balance, acc.instrument)
-    inBudgetSum = inBudgetSum + balance
-  })
+  const inBudgetSum = useSelector(getInBudgetAccounts).reduce(
+    (sum, acc) => sum + convert(acc.balance, acc.instrument),
+    0
+  )
 
-  const diff = Math.abs(moneyInBudget - inBudgetSum)
-  const hasError = diff >= TOLERANCE && !transactionsToSync
+  const diff = round(Math.abs(moneyInBudget - inBudgetSum))
+  const hasError = diff >= TOLERANCE && synced
 
   useEffect(() => {
     if (hasError) {
-      console.log('🤨 Calc error:', diff, currency)
+      console.warn('🤨 Calc error:', diff, currency)
       captureError(new Error('Calculation Error'), { extra: diff } as any)
       sendEvent('Calculation Error: show message')
     }
@@ -116,17 +118,17 @@ export const CalculationErrorNotice: FC = () => {
 const CorruptedAccounts = () => {
   const histories = useSelector(getAccountsHistory)
   const accounts = useSelector(getInBudgetAccounts)
-  const corrupted: { acc: PopulatedAccount; diff: number }[] = []
-  accounts.forEach(acc => {
-    const history = histories[acc.id]
-    const lastPoint = history.length - 1
-    const diff = Math.abs(history[lastPoint].balance - acc.balance)
-    if (diff > 0.001) {
-      corrupted.push({ acc, diff })
-    }
-  })
+  const corrupted = accounts
+    .map(acc => {
+      const history = histories[acc.id]
+      const lastPoint = history.length - 1
+      const calculatedBalance = history[lastPoint].balance
+      const diff = Math.abs(calculatedBalance - acc.balance)
+      return { acc, diff }
+    })
+    .filter(({ diff }) => diff > 0.001)
 
-  console.log(
+  console.warn(
     'Corrupted accounts:',
     corrupted.map(({ acc, diff }) => ({
       acc: acc.title,

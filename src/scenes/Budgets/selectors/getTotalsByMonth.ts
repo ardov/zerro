@@ -5,6 +5,7 @@ import {
   getLinkedTransfers,
   getTransferFees,
 } from './getAmountsByTag'
+import { round } from 'helpers/currencyHelpers'
 import getMonthDates from './getMonthDates'
 import { withPerf } from 'helpers/performance'
 
@@ -50,11 +51,17 @@ export const getTagTotals = createSelector(
       }
 
       for (const id in amounts[month]) {
-        totals.budgeted = totals.budgeted + amounts[month][id].totalBudgeted
-        totals.income = totals.income + amounts[month][id].totalIncome
-        totals.outcome = totals.outcome + amounts[month][id].totalOutcome
-        totals.overspent = totals.overspent + amounts[month][id].totalOverspent
-        totals.available = totals.available + amounts[month][id].totalAvailable
+        totals.budgeted = round(
+          totals.budgeted + amounts[month][id].totalBudgeted
+        )
+        totals.income = round(totals.income + amounts[month][id].totalIncome)
+        totals.outcome = round(totals.outcome + amounts[month][id].totalOutcome)
+        totals.overspent = round(
+          totals.overspent + amounts[month][id].totalOverspent
+        )
+        totals.available = round(
+          totals.available + amounts[month][id].totalAvailable
+        )
       }
       return totals
     })
@@ -100,21 +107,21 @@ export const getTotalsArray = createSelector(
 
           // TO CHECK
           get moneyInBudget() {
-            return this.funds + this.available
+            return round(this.funds + this.available)
           },
 
           realBudgetedInFuture: tagTotals
             .slice(i + 1)
-            .reduce((sum, totals) => sum + totals.budgeted, 0),
+            .reduce((sum, totals) => round(sum + totals.budgeted), 0),
 
           get funds() {
-            return (
+            return round(
               this.prevFunds -
-              this.prevOverspent -
-              this.budgeted +
-              this.income -
-              this.transferOutcome -
-              this.transferFees
+                this.prevOverspent -
+                this.budgeted +
+                this.income -
+                this.transferOutcome -
+                this.transferFees
             )
           },
 
