@@ -8,20 +8,31 @@ import { markViewed } from 'store/localData/transactions/thunks'
 interface TransactionMenuProps extends MenuProps {
   id: string
   transaction: Transaction
+  onSelectChanged: (date: number) => void
 }
 
 export const TransactionMenu: FC<TransactionMenuProps> = ({
   id,
   transaction,
+  onSelectChanged,
   ...rest
 }) => {
   const dispatch = useDispatch()
+  const close = () => rest.onClose?.({}, 'escapeKeyDown')
   return (
     <Menu {...rest}>
       <MenuItem
         onClick={e => {
+          onSelectChanged(transaction.changed)
+          close()
+        }}
+      >
+        Выбрать изменённые в это же время
+      </MenuItem>
+      <MenuItem
+        onClick={e => {
           dispatch(markViewed(id, isNew(transaction)))
-          rest.onClose?.(e, 'escapeKeyDown')
+          close()
         }}
       >
         Сделать {isNew(transaction) ? 'просмотренной' : 'непросмотренной'}

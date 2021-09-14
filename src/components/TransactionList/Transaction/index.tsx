@@ -51,11 +51,15 @@ const TransactionWrapper: FC<WrapperProps> = props => {
           onClick,
           onToggle,
           onFilterByPayee,
-          onSelectChanged,
           onContextMenu,
         }}
       />
-      <TransactionMenu id={id} transaction={transaction} {...bind} />
+      <TransactionMenu
+        id={id}
+        transaction={transaction}
+        onSelectChanged={onSelectChanged}
+        {...bind}
+      />
     </>
   )
 }
