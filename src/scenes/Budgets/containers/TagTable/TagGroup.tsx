@@ -5,14 +5,10 @@ import { makeStyles } from '@mui/styles'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator'
 import { TagRow } from './TagRow'
-import {
-  getAmountsById,
-  TagGroupAmounts,
-} from 'scenes/Budgets/selectors/getAmountsByTag'
-import { getPopulatedTag } from 'store/localData/tags'
+import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import { DragModeContext } from '../DnDContext'
-import { useToggle } from 'helpers/useToggle'
+
 import { PopulatedTag } from 'types'
 
 export const useStyles = makeStyles(theme => ({
@@ -31,7 +27,7 @@ export const useStyles = makeStyles(theme => ({
     position: 'absolute',
     left: 0,
     top: 12,
-    transform: (p: any) => (p.expanded ? 'rotate(90deg)' : 'rotate(0deg)'),
+    transform: (p: any) => (p.isExpanded ? 'rotate(90deg)' : 'rotate(0deg)'),
     transition: '.3s',
   },
 }))
@@ -39,7 +35,11 @@ export const useStyles = makeStyles(theme => ({
 type TagGroupProps = {
   id: string
   metric: 'available' | 'budgeted' | 'outcome'
+  isVisible: boolean
+  isExpanded: boolean
   tagChildren: PopulatedTag[]
+  onExpand: (id: string, state: boolean) => void
+  onExpandAll: (state: boolean) => void
   openDetails: (id: string) => void
   openGoalPopover: (id: string, target: Element) => void
   openBudgetPopover: (id: string, target: Element) => void
@@ -52,6 +52,10 @@ export const TagGroup = React.forwardRef<HTMLDivElement, TagGroupProps>(
       id,
       metric,
       tagChildren,
+      isVisible,
+      isExpanded,
+      onExpand,
+      onExpandAll,
       openTransactionsPopover,
       openBudgetPopover,
       openGoalPopover,
@@ -60,26 +64,16 @@ export const TagGroup = React.forwardRef<HTMLDivElement, TagGroupProps>(
     } = props
 
     const [month] = useMonth()
-    const tag = useSelector(state => getPopulatedTag(state, id))
     const amounts = useSelector(getAmountsById)?.[month]?.[id] || {}
     const { dragMode } = useContext(DragModeContext)
 
-    const {
-      totalAvailable,
-      totalOutcome,
-      totalBudgeted,
-      outcome,
-      available,
-      childrenAvailable,
-    } = amounts as TagGroupAmounts
+    const { totalAvailable, outcome, available } = amounts
 
     let hiddenOverspend = 0
     if (totalAvailable >= 0 && available < 0) hiddenOverspend = -available
 
-    const [expanded, toggle] = useToggle(childrenAvailable > 0)
-
     const hasChildren = !!tagChildren?.length
-    const c = useStyles({ expanded })
+    const c = useStyles({ isExpanded })
 
     const rowProps = {
       date: month,
@@ -89,13 +83,6 @@ export const TagGroup = React.forwardRef<HTMLDivElement, TagGroupProps>(
       openTransactionsPopover,
       openDetails,
     }
-
-    const isVisible =
-      tag.showOutcome ||
-      totalBudgeted ||
-      totalOutcome ||
-      totalAvailable ||
-      dragMode === 'REORDER'
 
     if (!isVisible) return null
 
@@ -109,16 +96,23 @@ export const TagGroup = React.forwardRef<HTMLDivElement, TagGroupProps>(
           />
         )}
         {hasChildren && dragMode !== 'REORDER' && (
-          <IconButton size="small" className={c.expandIcon} onClick={toggle}>
+          <IconButton
+            size="small"
+            className={c.expandIcon}
+            onClick={e => {
+              if (e.altKey) onExpandAll(!isExpanded)
+              else onExpand(id, !isExpanded)
+            }}
+          >
             <ChevronRightIcon fontSize="inherit" />
           </IconButton>
         )}
-        <TagRow id={tag.id} {...rowProps} hiddenOverspend={hiddenOverspend} />
+        <TagRow id={id} {...rowProps} hiddenOverspend={hiddenOverspend} />
 
         {hasChildren && dragMode !== 'REORDER' && (
-          <Collapse in={expanded} unmountOnExit>
+          <Collapse in={isExpanded} unmountOnExit>
             <Box pb={1}>
-              {!!outcome && <TagRow id={tag.id} isChild {...rowProps} />}
+              {!!outcome && <TagRow id={id} isChild {...rowProps} />}
               {tagChildren.map(({ id }) => (
                 <TagRow key={id} id={id} isChild {...rowProps} />
               ))}

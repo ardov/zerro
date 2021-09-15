@@ -7,14 +7,7 @@ import { MonthInfo } from './containers/MonthInfo'
 import { ToBeBudgeted } from './containers/ToBeBudgeted'
 import { MonthSelect } from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
-import {
-  Box,
-  Button,
-  Drawer,
-  Paper,
-  Theme,
-  useMediaQuery,
-} from '@mui/material'
+import { Box, Button, Drawer, Paper, Theme, useMediaQuery } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { GoalsProgressWidget } from './containers/GoalsProgressWidget'
 import { useMonth, useDrawerId } from './pathHooks'
@@ -23,6 +16,9 @@ import { TagPreview } from './containers/TagPreview'
 import { Helmet } from 'react-helmet'
 import { SankeyChart } from './SankeyChart'
 import { formatDate } from 'helpers/format'
+import { useHotkeys } from 'react-hotkeys-hook'
+import add from 'date-fns/add'
+import sub from 'date-fns/sub'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
@@ -88,6 +84,9 @@ function Budgets() {
   const [showSankey, setShowSankey] = useState(false)
   const c = useStyles()
   const drawerVisibility = !isMD || !!drawerId
+
+  useHotkeys('left', () => setMonth(+sub(month, { months: 1 })), [month])
+  useHotkeys('right', () => setMonth(+add(month, { months: 1 })), [month])
 
   const openOverview = useCallback(() => setDrawerId('overview'), [setDrawerId])
   const setDrawer = useCallback(id => setDrawerId(id), [setDrawerId])

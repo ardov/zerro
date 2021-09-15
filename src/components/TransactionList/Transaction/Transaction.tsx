@@ -15,7 +15,6 @@ type TransactionProps = {
   onClick?: (id: string) => void
   onToggle: (id: string) => void
   onContextMenu?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
-  onSelectChanged: (date: number) => void
   onFilterByPayee: (payee: string) => void
 }
 
@@ -31,18 +30,15 @@ export const Transaction: FC<TransactionProps> = props => {
     onToggle,
     onContextMenu,
     onFilterByPayee,
-    onSelectChanged,
   } = props
 
   const tr = transaction
   const trType = type
-  const { deleted, changed } = tr
+  const { deleted } = tr
 
   const handleOpen = () => {
     onClick?.(id)
   }
-
-  const handleSelectSimilar = () => onSelectChanged(changed)
 
   return (
     <Wrapper
@@ -53,7 +49,7 @@ export const Transaction: FC<TransactionProps> = props => {
         sendEvent('Transaction: open context menu')
         onContextMenu?.(e)
       }}
-      onDoubleClick={handleSelectSimilar}
+      onDoubleClick={() => onToggle(id)}
     >
       <Symbol {...{ tr, trType, isChecked, isInSelectionMode, onToggle }} />
       <Content>

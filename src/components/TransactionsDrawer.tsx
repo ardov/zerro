@@ -1,19 +1,16 @@
 import React, { FC } from 'react'
 import TransactionList from './TransactionList'
-import {
-  Drawer,
-  Box,
-  Typography,
-  IconButton,
-  DrawerProps,
-} from '@mui/material'
+import { Drawer, Box, Typography, IconButton, DrawerProps } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@mui/icons-material/Close'
 import { FilterConditions } from 'store/localData/transactions/filtering'
 import { Modify } from 'types'
 
-type TransactionsDrawerProps = Modify<DrawerProps, { onClose: () => void }> & {
+export type TransactionsDrawerProps = Modify<
+  DrawerProps,
+  { onClose: () => void }
+> & {
   prefilter?: FilterConditions | FilterConditions[]
   filterConditions?: FilterConditions
 }

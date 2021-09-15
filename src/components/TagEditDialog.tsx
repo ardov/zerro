@@ -59,6 +59,7 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
       onClose()
       console.log(newTag)
     },
+    enableReinitialize: true,
   })
 
   return (
