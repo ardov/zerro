@@ -55,6 +55,23 @@ export const TagTable: FC<TagTableProps> = props => {
     [tagsTree]
   )
 
+  const onSelect = useCallback((id: string) => {
+    sendEvent('Budgets: see transactions')
+    setSelected(id)
+  }, [])
+  const openBudgetPopover = useCallback(
+    (id, anchor) => setBudgetPopoverData({ id, anchor }),
+    []
+  )
+  const openGoalPopover = useCallback(
+    (id, anchor) => setGoalPopoverData({ id, anchor }),
+    []
+  )
+  const toggleMetric = useCallback(
+    () => setMetricIndex((metricIndex + 1) % 3),
+    [metricIndex]
+  )
+
   const tagGroupProps = tagsTree.map(tag => {
     const { id } = tag
     const {
@@ -90,23 +107,6 @@ export const TagTable: FC<TagTableProps> = props => {
       openDetails: openDetails,
     }
   })
-
-  const onSelect = useCallback((id: string) => {
-    sendEvent('Budgets: see transactions')
-    setSelected(id)
-  }, [])
-  const openBudgetPopover = useCallback(
-    (id, anchor) => setBudgetPopoverData({ id, anchor }),
-    []
-  )
-  const openGoalPopover = useCallback(
-    (id, anchor) => setGoalPopoverData({ id, anchor }),
-    []
-  )
-  const toggleMetric = useCallback(
-    () => setMetricIndex((metricIndex + 1) % 3),
-    [metricIndex]
-  )
 
   return (
     <>
