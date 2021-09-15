@@ -11,19 +11,15 @@ import WarningIcon from '@mui/icons-material/Warning'
 import BackupIcon from '@mui/icons-material/Backup'
 import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
-import { useTheme } from '@mui/material'
-import { withStyles } from '@mui/styles'
 import { Tooltip } from 'components/Tooltip'
 import { getLastSyncInfo } from 'store/lastSync'
 
 type ButtonState = 'idle' | 'hasDataToSync' | 'pending' | 'success' | 'fail'
-const StyledBadge = withStyles({ badge: { top: '50%', right: 4 } })(Badge)
 
 const RefreshButton: FC<{ isMobile?: boolean; className?: string }> = ({
   isMobile,
   ...rest
 }) => {
-  const theme = useTheme()
   const dispatch = useDispatch()
   const handleClick = useCallback(() => dispatch(syncData()), [dispatch])
   const changedNum = useSelector(getChangedNum)
@@ -49,16 +45,8 @@ const RefreshButton: FC<{ isMobile?: boolean; className?: string }> = ({
     idle: <RefreshIcon />,
     hasDataToSync: <BackupIcon />,
     pending: <CircularProgress size={24} />,
-    success: <DoneIcon htmlColor={theme.palette.success.main} />,
+    success: <DoneIcon color="success" />,
     fail: <WarningIcon color="error" />,
-  }
-
-  const colors = {
-    idle: 'default',
-    hasDataToSync: 'primary',
-    pending: 'default',
-    success: 'default',
-    fail: 'default',
   }
 
   return isMobile ? (
@@ -66,22 +54,20 @@ const RefreshButton: FC<{ isMobile?: boolean; className?: string }> = ({
       label="Обновить"
       value="refresh"
       icon={
-        <StyledBadge badgeContent={changedNum}>{components[state]}</StyledBadge>
+        <Badge color="info" overlap="rectangular" badgeContent={changedNum}>
+          {components[state]}
+        </Badge>
       }
       onClick={handleClick}
       {...rest}
     />
   ) : (
     <Tooltip title="Обновить данные">
-      <StyledBadge badgeContent={changedNum}>
-        <IconButton
-          onClick={handleClick}
-          color={colors[state] as 'default' | 'primary'}
-          {...rest}
-        >
+      <Badge color="info" overlap="circular" badgeContent={changedNum}>
+        <IconButton onClick={handleClick} {...rest}>
           {components[state]}
         </IconButton>
-      </StyledBadge>
+      </Badge>
     </Tooltip>
   )
 }
