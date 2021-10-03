@@ -6,6 +6,7 @@ export enum DataReminderType {
   GOALS = 'goals',
   ACC_LINKS = 'accLinks',
   TAG_ORDER = 'tagOrder',
+  TAG_META = 'tagMeta',
 }
 
 export enum goalType {
@@ -13,4 +14,3 @@ export enum goalType {
   MONTHLY_SPEND = 'monthlySpend', // monthly spend
   TARGET_BALANCE = 'targetBalance', //
 }
-// export type GoalType = GOAL_TYPES

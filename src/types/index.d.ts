@@ -144,13 +144,19 @@ export type ZmTag = {
   required: boolean | null
 }
 export type Tag = ZmTag
-export interface PopulatedTag extends Tag {
-  name: string
-  symbol: string
-  children: string[]
-  colorRGB: string | null
-  colorHEX: string | null
-  colorGenerated: string
+export type PopulatedTag = Tag &
+  TagMeta & {
+    name: string
+    symbol: string
+    children: string[]
+    colorRGB: string | null
+    colorHEX: string | null
+    colorGenerated: string
+  }
+
+export type TagMeta = {
+  comment?: string
+  currency?: InstrumentId
 }
 
 export interface ZmBudget {

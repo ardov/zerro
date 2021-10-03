@@ -4,9 +4,9 @@ import { DataReminderType } from './constants'
 import { getAccountList } from 'store/localData/accounts'
 import { DATA_ACC_NAME } from './constants'
 import { RootState } from 'store'
-import { Reminder, TagId, ZmGoal } from 'types'
+import { Reminder, TagId, TagMeta, ZmGoal } from 'types'
 
-const { ACC_LINKS, TAG_ORDER, GOALS } = DataReminderType
+const { ACC_LINKS, TAG_ORDER, GOALS, TAG_META } = DataReminderType
 
 /**
  * Returns id of special account to store data
@@ -27,21 +27,29 @@ export const getDataReminders = createSelector([getReminders], reminders => {
   return {
     [ACC_LINKS]: array.find(reminder => reminder.payee === ACC_LINKS),
     [TAG_ORDER]: array.find(reminder => reminder.payee === TAG_ORDER),
+    [TAG_META]: array.find(reminder => reminder.payee === TAG_META),
     [GOALS]: array.find(reminder => reminder.payee === GOALS),
   }
 })
 
 export type AccLinks = { [accId: string]: TagId }
+export type TagMetaById = { [tagId: TagId]: TagMeta }
 export type RawGoals = { [tagId: string]: ZmGoal }
-const getHiddenData = createSelector([getDataReminders], reminders => ({
+
+export const getHiddenData = createSelector([getDataReminders], reminders => ({
   [ACC_LINKS]: parseComment<AccLinks>(reminders[ACC_LINKS]),
   [TAG_ORDER]: parseComment<TagId[]>(reminders[TAG_ORDER]),
+  [TAG_META]: parseComment<TagMetaById>(reminders[TAG_META]),
   [GOALS]: parseComment<RawGoals>(reminders[GOALS]),
 }))
 
 export const getAccLinks = createSelector([getHiddenData], d => d[ACC_LINKS])
 export const getTagOrder = createSelector([getHiddenData], d => d[TAG_ORDER])
 export const getRawGoals = createSelector([getHiddenData], d => d[GOALS])
+export const getTagMeta = createSelector(
+  [getHiddenData],
+  d => d[TAG_META] || {}
+)
 
 /**
  * Parses comment in reminder and returns parsed JSON or null
