@@ -13,13 +13,12 @@ import {
 } from '@mui/material'
 import { AmountInput } from 'components/AmountInput'
 import { getGoals, setGoal } from 'store/localData/hiddenData/goals'
-import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
+import { goalType } from 'store/localData/hiddenData/constants'
 import CloseIcon from '@mui/icons-material/Close'
 import MonthSelectPopover from 'scenes/Budgets/MonthSelectPopover'
 import { formatDate } from 'helpers/format'
-import { GoalType } from 'types'
 
-const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = GOAL_TYPES
+const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 
 const amountLabels = {
   [MONTHLY]: 'Откладывать каждый месяц',
@@ -45,7 +44,7 @@ export const GoalPopover: FC<BudgetPopoverProps> = props => {
   >(null)
 
   const handleTypeChange: OutlinedTextFieldProps['onChange'] = e =>
-    setType(e.target.value as GoalType)
+    setType(e.target.value as goalType)
   const openMonthPopover = () => setMonthPopoverAnchor(props.anchorEl)
   const closeMonthPopover = () => setMonthPopoverAnchor(null)
   const handleDateChange = (date?: number) => {

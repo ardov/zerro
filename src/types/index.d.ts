@@ -1,3 +1,4 @@
+import { goalType } from 'store/localData/hiddenData/constants'
 import iconsMap from 'store/localData/tags/iconsMap.json'
 type IconsMap = typeof iconsMap
 
@@ -25,7 +26,6 @@ export type TransactionType =
   | 'transfer'
   | 'incomeDebt'
   | 'outcomeDebt'
-export type GoalType = 'monthly' | 'monthlySpend' | 'targetBalance'
 export type ObjectClass =
   | 'instrument'
   | 'country'
@@ -245,7 +245,7 @@ export interface ZmTransaction {
 export interface Transaction extends Modify<ZmTransaction, { date: number }> {}
 
 export interface Goal {
-  type: GoalType
+  type: goalType
   amount: number
   end?: number
 }

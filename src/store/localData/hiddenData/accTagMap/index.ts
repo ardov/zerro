@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { sendEvent } from 'helpers/tracking'
-import { ACC_LINKS } from '../constants'
+import { DataReminderType } from '../constants'
 import { setHiddenData } from '../thunks'
 import { getTags } from '../../tags'
 import { getAccLinks } from '../selectors'
@@ -22,7 +22,7 @@ export const addConnection = (
     sendEvent('Connection: Remove')
     delete newLinks[account]
   }
-  dispatch(setHiddenData(ACC_LINKS, newLinks))
+  dispatch(setHiddenData(DataReminderType.ACC_LINKS, newLinks))
 }
 
 // SELECTORS

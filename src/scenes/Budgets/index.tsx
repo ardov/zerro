@@ -85,8 +85,22 @@ function Budgets() {
   const c = useStyles()
   const drawerVisibility = !isMD || !!drawerId
 
-  useHotkeys('left', () => setMonth(+sub(month, { months: 1 })), [month])
-  useHotkeys('right', () => setMonth(+add(month, { months: 1 })), [month])
+  useHotkeys(
+    'left',
+    () => {
+      const prevMonth = +sub(month, { months: 1 })
+      if (minMonth <= prevMonth) setMonth(prevMonth)
+    },
+    [month, minMonth]
+  )
+  useHotkeys(
+    'right',
+    () => {
+      const nextMonth = +add(month, { months: 1 })
+      if (nextMonth <= maxMonth) setMonth(nextMonth)
+    },
+    [month, maxMonth]
+  )
 
   const openOverview = useCallback(() => setDrawerId('overview'), [setDrawerId])
   const setDrawer = useCallback(id => setDrawerId(id), [setDrawerId])

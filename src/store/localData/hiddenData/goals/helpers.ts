@@ -1,9 +1,9 @@
-import { GOAL_TYPES, GoalType } from '../constants'
+import { goalType } from '../constants'
 import { formatDate, formatMoney } from 'helpers/format'
 import parseDate from 'date-fns/parseISO'
 import { ZmGoal, Goal } from 'types'
 
-const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = GOAL_TYPES
+const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 
 const formatMonth = (monthDate: number | Date): string => {
   if (!monthDate) return ''
@@ -34,7 +34,7 @@ export const goalToWords = ({
   amount,
   end,
 }: {
-  type: GoalType
+  type: goalType
   amount: number
   end?: number | Date
 }) => {

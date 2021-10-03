@@ -1,10 +1,12 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { getReminders } from 'store/localData/reminders'
-import { ACC_LINKS, TAG_ORDER, GOALS } from './constants'
+import { DataReminderType } from './constants'
 import { getAccountList } from 'store/localData/accounts'
 import { DATA_ACC_NAME } from './constants'
 import { RootState } from 'store'
 import { Reminder, TagId, ZmGoal } from 'types'
+
+const { ACC_LINKS, TAG_ORDER, GOALS } = DataReminderType
 
 /**
  * Returns id of special account to store data

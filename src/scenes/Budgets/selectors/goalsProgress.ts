@@ -4,12 +4,12 @@ import { getGoals } from 'store/localData/hiddenData/goals'
 import { getAmountsById, isGroup } from './getAmountsByTag'
 import getMonthDates from './getMonthDates'
 import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths'
-import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
+import { goalType } from 'store/localData/hiddenData/constants'
 import { Goal } from 'types'
 import { RootState } from 'store'
 import { withPerf } from 'helpers/performance'
 
-const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = GOAL_TYPES
+const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 // const startForOldGoals = +new Date(2019, 1, 1)
 
 export type GoalProgress = {
