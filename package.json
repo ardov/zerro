@@ -1,6 +1,6 @@
 {
   "name": "zerro",
-  "version": "0.8.10",
+  "version": "0.8.12",
   "private": true,
   "scripts": {
     "start": "react-scripts start",
