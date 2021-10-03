@@ -6,6 +6,7 @@ import { getTags } from '../../tags'
 import { getAccLinks } from '../selectors'
 import { AppThunk } from 'store'
 import { AccountId, TagId } from 'types'
+import { getAccounts } from 'store/localData/accounts'
 
 // THUNK
 export const addConnection = (
@@ -26,20 +27,27 @@ export const addConnection = (
 }
 
 // SELECTORS
+
+/**
+ * Returns connections between tags and accounts. Is used to link transfers to tags
+ * - One account -> One tag
+ */
 export const getAccTagMap = createSelector(
-  [getAccLinks, getTags],
-  (links, tags) => {
+  [getAccLinks, getTags, getAccounts],
+  (links, tags, accounts) => {
     if (!links) return {}
-    let filtered = { ...links }
-    // ignore connections for deleted tags
-    for (const accId in filtered) {
-      const tagId = filtered[accId]
-      if (!tags[tagId]) delete filtered[accId]
-    }
-    return filtered
+    const filtered = Object.entries(links).filter(
+      // ignore connections for deleted tags
+      ([accId, tagId]) => tags[tagId] && accounts[accId]
+    )
+    return Object.fromEntries(filtered)
   }
 )
 
+/**
+ * Returns connections between tags and accounts. Is used to link transfers to tags
+ * - One tag -> Several accounts
+ */
 export const getTagAccMap = createSelector([getAccTagMap], links => {
   let result = {} as { [tagId: string]: AccountId[] }
   Object.entries(links).forEach(([accId, tagId]) => {
