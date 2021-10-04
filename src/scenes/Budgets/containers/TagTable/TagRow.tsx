@@ -29,10 +29,7 @@ import { Amount } from 'components/Amount'
 import { useContext } from 'react'
 import { IsDraggingContext, DragModeContext, DragModeType } from '../DnDContext'
 import { getPopulatedTag } from 'store/localData/tags'
-import {
-  getAmountsById,
-  TagGroupAmounts,
-} from 'scenes/Budgets/selectors/getAmountsByTag'
+import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
 import { Goal } from 'types'
 
 const useStyles = makeStyles(theme => ({
@@ -92,15 +89,9 @@ export const TagRow: FC<TagRowProps> = props => {
 
   const isUnsorted = !tag.parent && isChild // реальная родительская категория
   let { showOutcome, symbol, colorRGB, name } = tag
-  let budgeted = isChild
-    ? amounts.budgeted
-    : (amounts as TagGroupAmounts).totalBudgeted
-  let outcome = isChild
-    ? amounts.outcome
-    : (amounts as TagGroupAmounts).totalOutcome
-  let available = isChild
-    ? amounts.available
-    : (amounts as TagGroupAmounts).totalAvailable
+  let budgeted = amounts.totalBudgeted
+  let outcome = amounts.totalOutcome
+  let available = amounts.totalAvailable
 
   if (isUnsorted) {
     symbol = '-'
