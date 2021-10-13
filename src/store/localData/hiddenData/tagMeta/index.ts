@@ -1,7 +1,8 @@
+import { createSelector } from '@reduxjs/toolkit'
 import { sendEvent } from 'helpers/tracking'
 import { DataReminderType } from '../constants'
 import { setHiddenData } from '../thunks'
-import { getTagMeta } from '../selectors'
+import { getRawTagMeta } from '../selectors'
 import { AppThunk } from 'store'
 import { TagMeta, TagId } from 'types'
 
@@ -11,7 +12,7 @@ export const setTagMeta = (tag: TagId | null, meta?: TagMeta): AppThunk => (
   getState
 ) => {
   const state = getState()
-  const metaByTags = getTagMeta(state)
+  const metaByTags = getRawTagMeta(state)
   const data = { ...metaByTags }
   let tagId = tag || 'null'
   if (meta) {
@@ -23,3 +24,8 @@ export const setTagMeta = (tag: TagId | null, meta?: TagMeta): AppThunk => (
   }
   dispatch(setHiddenData(DataReminderType.TAG_META, data))
 }
+
+// SELECTORS
+export const getTagMeta = createSelector([getRawTagMeta], raw => raw || {})
+export const getMetaForTag = (id: TagId) =>
+  createSelector([getTagMeta], meta => meta[id] || {})

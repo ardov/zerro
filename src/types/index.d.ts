@@ -170,6 +170,10 @@ export interface ZmBudget {
   outcomeLock: boolean
 }
 export interface Budget extends Modify<ZmBudget, { date: number }> {}
+interface PopulatedBudget extends Budget {
+  convertedOutcome: number
+  instrument: InstrumentId | null
+}
 
 export interface ZmReminder {
   id: ReminderId

@@ -46,10 +46,7 @@ export const getHiddenData = createSelector([getDataReminders], reminders => ({
 export const getAccLinks = createSelector([getHiddenData], d => d[ACC_LINKS])
 export const getTagOrder = createSelector([getHiddenData], d => d[TAG_ORDER])
 export const getRawGoals = createSelector([getHiddenData], d => d[GOALS])
-export const getTagMeta = createSelector(
-  [getHiddenData],
-  d => d[TAG_META] || {}
-)
+export const getRawTagMeta = createSelector([getHiddenData], d => d[TAG_META])
 
 /**
  * Parses comment in reminder and returns parsed JSON or null
