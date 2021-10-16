@@ -5,16 +5,17 @@ import { getChangedNum } from 'store/localData'
 import { getPendingState } from 'store/isPending'
 import CircularProgress from '@mui/material/CircularProgress'
 import { BottomNavigationAction } from '@mui/material'
-import RefreshIcon from '@mui/icons-material/Refresh'
+import SyncIcon from '@mui/icons-material/Sync'
+import SyncDisabledIcon from '@mui/icons-material/SyncDisabled'
 import DoneIcon from '@mui/icons-material/Done'
 import WarningIcon from '@mui/icons-material/Warning'
-import BackupIcon from '@mui/icons-material/Backup'
 import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
 import { Tooltip } from 'components/Tooltip'
 import { getLastSyncInfo } from 'store/lastSync'
+import { useRegularSync } from 'components/RegularSyncHandler'
 
-type ButtonState = 'idle' | 'hasDataToSync' | 'pending' | 'success' | 'fail'
+type ButtonState = 'idle' | 'pending' | 'success' | 'fail'
 
 const RefreshButton: FC<{ isMobile?: boolean; className?: string }> = ({
   isMobile,
@@ -25,9 +26,9 @@ const RefreshButton: FC<{ isMobile?: boolean; className?: string }> = ({
   const changedNum = useSelector(getChangedNum)
   const isPending = useSelector(getPendingState)
   const { isSuccessful, finishedAt } = useSelector(getLastSyncInfo)
+  const [regular] = useRegularSync()
 
   let buttonState: ButtonState = 'idle'
-  if (!!changedNum) buttonState = 'hasDataToSync'
   if (isPending) buttonState = 'pending'
 
   const [notification, setNotification] = useState<ButtonState | null>(null)
@@ -42,8 +43,7 @@ const RefreshButton: FC<{ isMobile?: boolean; className?: string }> = ({
   const state: ButtonState = notification || buttonState
 
   const components = {
-    idle: <RefreshIcon />,
-    hasDataToSync: <BackupIcon />,
+    idle: regular ? <SyncIcon /> : <SyncDisabledIcon />,
     pending: <CircularProgress size={24} />,
     success: <DoneIcon color="success" />,
     fail: <WarningIcon color="error" />,
