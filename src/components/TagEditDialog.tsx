@@ -14,12 +14,16 @@ import {
   TextField,
 } from '@mui/material'
 import { TagSelect } from './TagSelect'
-import { Modify, Tag } from 'types'
-import { useDispatch } from 'react-redux'
+import { Modify, Tag, TagMeta } from 'types'
+import { useDispatch, useSelector } from 'react-redux'
 import { createTag } from 'store/localData/tags/thunks'
 import { useFormik } from 'formik'
 import { hexToInt, intToHex } from 'helpers/convertColor'
 import { ColorPicker } from './ColorPickerPopover'
+import { v1 as uuidv1 } from 'uuid'
+import { setTagMeta, getTagMeta } from 'store/localData/hiddenData/tagMeta'
+import { getUserInstrumentId } from 'store/data/selectors'
+import { CurrencySelect } from './CurrencySelect'
 
 // TODO: Доделать модалку для редактирования и создания категорий
 
@@ -34,7 +38,10 @@ export type TagEditDialogProps = Modify<
 export const TagEditDialog: FC<TagEditDialogProps> = props => {
   const { tag, onClose, ...dialogProps } = props
   const dispatch = useDispatch()
-  const id = tag?.id
+  const isNew = !tag?.id
+  const id = tag?.id || uuidv1()
+  const meta = useSelector(getTagMeta)[id]
+  const userInstrument = useSelector(getUserInstrumentId)
   const {
     values,
     handleSubmit,
@@ -47,17 +54,25 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
       parent: tag?.parent || null,
       showIncome: tag?.showIncome || false,
       showOutcome: tag?.showOutcome || false,
+      budgetOutcome: tag?.budgetOutcome || false,
       color: tag?.color || null,
+      comment: meta?.comment || '',
+      currency: meta?.currency || userInstrument,
     },
     validate: values => {
       if (!values.title) {
         return { title: 'Название категории точно пригодится 😉' }
       }
     },
-    onSubmit: values => {
+    onSubmit: (values, helpers) => {
       const newTag = dispatch(createTag({ ...values, id }))
-      onClose()
       console.log(newTag)
+
+      let meta: TagMeta = {}
+      if (values.comment) meta.comment = values.comment
+      if (values.currency !== userInstrument) meta.currency = values.currency
+      dispatch(setTagMeta(id, meta))
+      onClose()
     },
     enableReinitialize: true,
   })
@@ -65,7 +80,7 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
   return (
     <Dialog {...dialogProps}>
       <DialogTitle>
-        {id ? 'Редактирование категории' : 'Новая категория'}
+        {isNew ? 'Новая категория' : 'Редактирование категории'}
       </DialogTitle>
       <DialogContent>
         <Stack
@@ -95,11 +110,26 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
               ),
             }}
           />
+
           <TagSelect
             label="Родительская категория"
             tagFilters={{ topLevel: true, exclude: id ? [id] : undefined }}
             value={values.parent}
             onChange={v => setFieldValue('parent', v)}
+          />
+          <TextField
+            label="Комментарий"
+            name="comment"
+            multiline
+            inputProps={{ autoComplete: 'off' }}
+            value={values.comment}
+            onChange={handleChange}
+          />
+          <CurrencySelect
+            label="Валюта"
+            name="currency"
+            value={values.currency}
+            onChange={handleChange}
           />
           <FormGroup>
             <FormControlLabel
@@ -115,6 +145,13 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
               onChange={handleChange}
               control={<Checkbox />}
               label="Расходная"
+            />
+            <FormControlLabel
+              name="budgetOutcome"
+              checked={values.budgetOutcome}
+              onChange={handleChange}
+              control={<Checkbox />}
+              label="Показывать в бюджете"
             />
           </FormGroup>
 

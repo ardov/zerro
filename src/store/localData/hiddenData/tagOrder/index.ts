@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { getTagOrder } from '../selectors'
 import { sendEvent } from 'helpers/tracking'
 import { setHiddenData } from '../thunks'
-import { TAG_ORDER } from '../constants'
+import { DataReminderType } from '../constants'
 import { getTagsTree } from 'store/localData/tags'
 import { PopulatedTag, TagId } from 'types'
 import { AppThunk } from 'store'
@@ -13,7 +13,7 @@ export const setTagOrder = (order: TagId[]): AppThunk => (
   getState
 ) => {
   sendEvent(`Tag: sort`)
-  dispatch(setHiddenData(TAG_ORDER, order))
+  dispatch(setHiddenData(DataReminderType.TAG_ORDER, order))
 }
 
 export const moveTag = (startIndex: number, endIndex: number): AppThunk => (

@@ -4,12 +4,14 @@ import { getGoals } from 'store/localData/hiddenData/goals'
 import { getAmountsById, isGroup } from './getAmountsByTag'
 import getMonthDates from './getMonthDates'
 import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths'
-import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
+import { goalType } from 'store/localData/hiddenData/constants'
 import { Goal } from 'types'
 import { RootState } from 'store'
 import { withPerf } from 'helpers/performance'
+import { getTagMeta } from 'store/localData/hiddenData/tagMeta'
+import { convertCurrency } from 'store/data/selectors'
 
-const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = GOAL_TYPES
+const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 // const startForOldGoals = +new Date(2019, 1, 1)
 
 export type GoalProgress = {
@@ -22,62 +24,69 @@ export const getGoalProgress = (state: RootState, month: number, id: string) =>
   getGoalsProgress(state)?.[month]?.[id]
 
 export const getGoalsProgress = createSelector(
-  [getGoals, getAmountsById, getMonthDates],
-  withPerf('BUDGET: getGoalsProgress', (goals, amountsById, monthList) => {
-    const result: {
-      [month: number]: {
-        [tagId: string]: GoalProgress | null
-      }
-    } = {}
-
-    monthList.forEach((month, i) => {
-      result[month] = {}
-
-      for (const id in goals) {
-        if (!goals[id]) continue
-        const { type, amount, end } = goals[id]
-        if (end && end < month) continue
-        if (!amount) continue
-        const tag = amountsById?.[month]?.[id]
-        if (!tag) continue
-
-        let { budgeted, leftover, available } = tag
-        if (isGroup(tag)) {
-          budgeted = tag.totalBudgeted
-          leftover = tag.totalLeftover
-          available = tag.totalAvailable
+  [getGoals, getAmountsById, getMonthDates, getTagMeta, convertCurrency],
+  withPerf(
+    'BUDGET: getGoalsProgress',
+    (goals, amountsById, monthList, tagMeta, convert) => {
+      const result: {
+        [month: number]: {
+          [tagId: string]: GoalProgress | null
         }
+      } = {}
 
-        switch (type) {
-          case MONTHLY:
-            result[month][id] = calcMonthlyProgress({ amount, budgeted })
-            break
+      monthList.forEach((month, i) => {
+        result[month] = {}
 
-          case MONTHLY_SPEND:
-            result[month][id] = calcMonthlySpendProgress({
-              amount,
-              budgeted,
-              leftover,
-            })
-            break
+        for (const id in goals) {
+          if (!goals[id]) continue
+          const { currency } = tagMeta[id] || {}
+          const amount = currency
+            ? round(convert(goals[id].amount, currency))
+            : goals[id].amount
+          const { type, end } = goals[id]
+          if (end && end < month) continue
+          if (!amount) continue
+          const tag = amountsById?.[month]?.[id]
+          if (!tag) continue
 
-          case TARGET_BALANCE:
-            result[month][id] = calcTargetProgress({
-              amount,
-              budgeted,
-              available,
-              currentMonth: month,
-              endMonth: end,
-            })
-            break
+          let { budgeted, leftover, available } = tag
+          if (isGroup(tag)) {
+            budgeted = tag.totalBudgeted
+            leftover = tag.totalLeftover
+            available = tag.totalAvailable
+          }
 
-          default:
-            throw Error(`Unknown goal type: ${type}`)
+          switch (type) {
+            case MONTHLY:
+              result[month][id] = calcMonthlyProgress({ amount, budgeted })
+              break
+
+            case MONTHLY_SPEND:
+              result[month][id] = calcMonthlySpendProgress({
+                amount,
+                budgeted,
+                leftover,
+              })
+              break
+
+            case TARGET_BALANCE:
+              result[month][id] = calcTargetProgress({
+                amount,
+                budgeted,
+                available,
+                currentMonth: month,
+                endMonth: end,
+              })
+              break
+
+            default:
+              throw Error(`Unknown goal type: ${type}`)
+          }
         }
-      }
-    })
-    return result
-  })
+      })
+      return result
+    }
+  )
 )
 
 export const getTotalGoalsProgress = createSelector(

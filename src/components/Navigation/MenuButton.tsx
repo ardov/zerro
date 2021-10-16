@@ -13,14 +13,18 @@ import NightsStayIcon from '@mui/icons-material/NightsStay'
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import BarChartIcon from '@mui/icons-material/BarChart'
+import SyncIcon from '@mui/icons-material/Sync'
+import SyncDisabledIcon from '@mui/icons-material/SyncDisabled'
 import { Link } from 'react-router-dom'
 import {
   Box,
   Divider,
   IconButton,
   IconButtonProps,
+  ListItemText,
   Menu,
   MenuItem,
+  Switch,
   Typography,
 } from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
@@ -29,6 +33,7 @@ import { sendEvent } from 'helpers/tracking'
 import { resetData } from 'store/data'
 import { clearLocalData } from 'logic/localData'
 import { Confirm } from 'components/Confirm'
+import { useRegularSync } from 'components/RegularSyncHandler'
 
 const useStyles = makeStyles(({ spacing }) => ({
   menuIcon: { marginRight: spacing(1) },
@@ -42,6 +47,7 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
   const { anchorEl, onClose, showLinks } = props
   const dispatch = useDispatch()
   const classes = useStyles()
+  const [regular, setRegular] = useRegularSync()
   const theme = useThemeType()
   const handleThemeChange = () => {
     sendEvent('Settings: toggle theme')
@@ -117,16 +123,28 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
       <Box my={1} key="divider">
         <Divider light />
       </Box>
+      <Confirm onOk={reloadData}>
+        <MenuItem>
+          <SyncIcon className={classes.menuIcon} color="action" />
+          Перезагрузить данные
+        </MenuItem>
+      </Confirm>
+      <MenuItem onClick={() => setRegular(c => !c)}>
+        {regular ? (
+          <SyncIcon className={classes.menuIcon} color="action" />
+        ) : (
+          <SyncDisabledIcon className={classes.menuIcon} color="action" />
+        )}
+        <ListItemText>Автосинхронизация</ListItemText>
+        <Switch edge="end" checked={regular} />
+      </MenuItem>
+      <Box my={1} key="divider">
+        <Divider light />
+      </Box>
       <MenuItem onClick={handleLogOut}>
         <ExitToAppIcon className={classes.menuIcon} color="action" />
         Выйти
       </MenuItem>
-      <Confirm onOk={reloadData}>
-        <MenuItem>
-          <ExitToAppIcon className={classes.menuIcon} color="action" />
-          Перезагрузить данные
-        </MenuItem>
-      </Confirm>
       <Box pl={6} pr={2} py={0.5}>
         <Typography
           variant="overline"

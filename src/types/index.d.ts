@@ -1,3 +1,4 @@
+import { goalType } from 'store/localData/hiddenData/constants'
 import iconsMap from 'store/localData/tags/iconsMap.json'
 type IconsMap = typeof iconsMap
 
@@ -25,7 +26,6 @@ export type TransactionType =
   | 'transfer'
   | 'incomeDebt'
   | 'outcomeDebt'
-export type GoalType = 'monthly' | 'monthlySpend' | 'targetBalance'
 export type ObjectClass =
   | 'instrument'
   | 'country'
@@ -144,13 +144,19 @@ export type ZmTag = {
   required: boolean | null
 }
 export type Tag = ZmTag
-export interface PopulatedTag extends Tag {
-  name: string
-  symbol: string
-  children: string[]
-  colorRGB: string | null
-  colorHEX: string | null
-  colorGenerated: string
+export type PopulatedTag = Tag &
+  TagMeta & {
+    name: string
+    symbol: string
+    children: string[]
+    colorRGB: string | null
+    colorHEX: string | null
+    colorGenerated: string
+  }
+
+export type TagMeta = {
+  comment?: string
+  currency?: InstrumentId
 }
 
 export interface ZmBudget {
@@ -164,6 +170,10 @@ export interface ZmBudget {
   outcomeLock: boolean
 }
 export interface Budget extends Modify<ZmBudget, { date: number }> {}
+interface PopulatedBudget extends Budget {
+  convertedOutcome: number
+  instrument: InstrumentId | null
+}
 
 export interface ZmReminder {
   id: ReminderId
@@ -245,7 +255,7 @@ export interface ZmTransaction {
 export interface Transaction extends Modify<ZmTransaction, { date: number }> {}
 
 export interface Goal {
-  type: GoalType
+  type: goalType
   amount: number
   end?: number
 }

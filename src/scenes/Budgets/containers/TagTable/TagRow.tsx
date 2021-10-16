@@ -8,6 +8,7 @@ import {
   Theme,
   IconButtonProps,
   ButtonBaseProps,
+  Chip,
 } from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
 import { makeStyles } from '@mui/styles'
@@ -29,11 +30,11 @@ import { Amount } from 'components/Amount'
 import { useContext } from 'react'
 import { IsDraggingContext, DragModeContext, DragModeType } from '../DnDContext'
 import { getPopulatedTag } from 'store/localData/tags'
-import {
-  getAmountsById,
-  TagGroupAmounts,
-} from 'scenes/Budgets/selectors/getAmountsByTag'
+import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
 import { Goal } from 'types'
+import { getTagMeta } from 'store/localData/hiddenData/tagMeta'
+import SmsIcon from '@mui/icons-material/Sms'
+import { getInstruments } from 'store/data/selectors'
 
 const useStyles = makeStyles(theme => ({
   row: {
@@ -88,19 +89,14 @@ export const TagRow: FC<TagRowProps> = props => {
     openDetails,
   } = props
   const tag = useSelector(state => getPopulatedTag(state, id))
+  const { comment, currency } = useSelector(getTagMeta)?.[id] || {}
   const amounts = useSelector(getAmountsById)?.[date]?.[id]
 
   const isUnsorted = !tag.parent && isChild // реальная родительская категория
   let { showOutcome, symbol, colorRGB, name } = tag
-  let budgeted = isChild
-    ? amounts.budgeted
-    : (amounts as TagGroupAmounts).totalBudgeted
-  let outcome = isChild
-    ? amounts.outcome
-    : (amounts as TagGroupAmounts).totalOutcome
-  let available = isChild
-    ? amounts.available
-    : (amounts as TagGroupAmounts).totalAvailable
+  let budgeted = amounts.totalBudgeted
+  let outcome = amounts.totalOutcome
+  let available = amounts.totalAvailable
 
   if (isUnsorted) {
     symbol = '-'
@@ -139,6 +135,8 @@ export const TagRow: FC<TagRowProps> = props => {
         symbol={symbol}
         colorRGB={colorRGB}
         name={name}
+        comment={comment}
+        currency={currency}
         onOpenDetails={() => openDetails(id)}
       />
 
@@ -213,23 +211,50 @@ type NameCellProps = {
   symbol: string
   colorRGB: string | null
   name: string
+  comment?: string
+  currency?: number
   onOpenDetails: () => void
 }
 const NameCell: FC<NameCellProps> = ({
   symbol,
   colorRGB,
   name,
+  comment,
+  currency,
   onOpenDetails,
 }) => {
   return (
     <Box display="flex" alignItems="center" minWidth={0}>
       <Btn onClick={onOpenDetails}>
         <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} />
-        <Typography variant="body1" noWrap>
+        <Typography component="span" variant="body1" title={name} noWrap>
           {name}
         </Typography>
+        <CurrencyTag currency={currency} />
+        {!!comment && (
+          <Tooltip title={comment}>
+            <SmsIcon sx={{ ml: 1, color: 'text.secondary' }} fontSize="small" />
+          </Tooltip>
+        )}
       </Btn>
     </Box>
+  )
+}
+
+type CurrencyTagProps = {
+  currency?: number
+}
+const CurrencyTag: FC<CurrencyTagProps> = ({ currency }) => {
+  const instruments = useSelector(getInstruments)
+  if (!currency) return null
+  const instrument = instruments[currency]
+  const currCode = instrument?.symbol
+  return (
+    <Tooltip
+      title={`Бюджет этой категории задаётся в ${instrument.shortTitle}. Он будет пересчитываться автоматически по текущему курсу.`}
+    >
+      <Chip label={currCode} sx={{ ml: 1 }} size="small" />
+    </Tooltip>
   )
 }
 

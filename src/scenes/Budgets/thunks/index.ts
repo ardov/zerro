@@ -11,12 +11,11 @@ import { getBudgetsByMonthAndTag, getBudget } from 'store/localData/budgets'
 import { getTags } from 'store/localData/tags'
 import { subMonths } from 'date-fns/esm'
 import { getGoalsProgress } from '../selectors/goalsProgress'
-import { GOAL_TYPES } from 'store/localData/hiddenData/constants'
+import { goalType } from 'store/localData/hiddenData/constants'
 import { getGoals } from 'store/localData/hiddenData/goals'
 import { applyClientPatch } from 'store/data'
 import { AppThunk } from 'store'
 import { Budget, ById } from 'types'
-const { TARGET_BALANCE } = GOAL_TYPES
 
 export const moveFunds = (
   amount: number,
@@ -121,7 +120,7 @@ export const fillGoals = (month: number): AppThunk => (dispatch, getState) => {
 
   const changedArr = []
   for (const tag in goalsProgress) {
-    if (goals[tag].type === TARGET_BALANCE && !goals[tag].end) continue
+    if (goals[tag].type === goalType.TARGET_BALANCE && !goals[tag].end) continue
     const target = goalsProgress[tag]?.target || 0
     const currentBudget = budgets?.[tag]?.outcome || 0
     if (currentBudget < target) {

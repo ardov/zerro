@@ -1,11 +1,12 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { sendEvent } from 'helpers/tracking'
-import { ACC_LINKS } from '../constants'
+import { DataReminderType } from '../constants'
 import { setHiddenData } from '../thunks'
 import { getTags } from '../../tags'
 import { getAccLinks } from '../selectors'
 import { AppThunk } from 'store'
 import { AccountId, TagId } from 'types'
+import { getAccounts } from 'store/localData/accounts'
 
 // THUNK
 export const addConnection = (
@@ -22,24 +23,31 @@ export const addConnection = (
     sendEvent('Connection: Remove')
     delete newLinks[account]
   }
-  dispatch(setHiddenData(ACC_LINKS, newLinks))
+  dispatch(setHiddenData(DataReminderType.ACC_LINKS, newLinks))
 }
 
 // SELECTORS
+
+/**
+ * Returns connections between tags and accounts. Is used to link transfers to tags
+ * - One account -> One tag
+ */
 export const getAccTagMap = createSelector(
-  [getAccLinks, getTags],
-  (links, tags) => {
+  [getAccLinks, getTags, getAccounts],
+  (links, tags, accounts) => {
     if (!links) return {}
-    let filtered = { ...links }
-    // ignore connections for deleted tags
-    for (const accId in filtered) {
-      const tagId = filtered[accId]
-      if (!tags[tagId]) delete filtered[accId]
-    }
-    return filtered
+    const filtered = Object.entries(links).filter(
+      // ignore connections for deleted tags
+      ([accId, tagId]) => tags[tagId] && accounts[accId]
+    )
+    return Object.fromEntries(filtered)
   }
 )
 
+/**
+ * Returns connections between tags and accounts. Is used to link transfers to tags
+ * - One tag -> Several accounts
+ */
 export const getTagAccMap = createSelector([getAccTagMap], links => {
   let result = {} as { [tagId: string]: AccountId[] }
   Object.entries(links).forEach(([accId, tagId]) => {

@@ -6,15 +6,10 @@ import Auth from 'scenes/Auth'
 import Budgets from 'scenes/Budgets'
 import Review from 'scenes/Review'
 import { getLoginState } from 'store/token'
-import RegularSyncHandler from 'components/RegularSyncHandler'
+import { RegularSyncHandler } from 'components/RegularSyncHandler'
 import Nav from 'components/Navigation'
 import { MobileNavigation } from 'components/Navigation'
-import {
-  Box,
-  CircularProgress,
-  Typography,
-  useMediaQuery,
-} from '@mui/material'
+import { Box, CircularProgress, Typography, useMediaQuery } from '@mui/material'
 import { createBrowserHistory } from 'history'
 import ErrorBoundary from 'components/ErrorBoundary'
 import { getLastSyncTime, getRootUserId } from 'store/data/selectors'
@@ -37,6 +32,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
+      <RegularSyncHandler />
       <Router history={history}>
         <Switch>
           <Route path="/about" component={About} />
@@ -53,7 +49,6 @@ const PrivateApp = () => {
   return (
     <Box display="flex">
       <Navigation />
-      <RegularSyncHandler />
       <Box minHeight="100vh" flexGrow={1}>
         <ErrorBoundary>
           {hasData ? (

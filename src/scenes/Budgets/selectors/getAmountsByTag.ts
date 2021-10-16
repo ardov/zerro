@@ -10,7 +10,7 @@ import { getType } from 'store/localData/transactions/helpers'
 import getMonthDates from './getMonthDates'
 import { getTransactionsInBudget } from './baseSelectors'
 import { getInBudgetAccounts } from 'store/localData/accounts'
-import { Budget } from 'types'
+import { PopulatedBudget } from 'types'
 import { withPerf } from 'helpers/performance'
 
 interface DateNode {
@@ -225,7 +225,7 @@ function calcTagGroupAmounts(data: {
   children: string[]
   incomes: { [id: string]: number }
   outcomes: { [id: string]: number }
-  budgets: { [tagId: string]: Budget }
+  budgets: { [tagId: string]: PopulatedBudget }
   linkedTransfers: { [id: string]: number }
   prevMonth?: TagGroupAmounts
 }): TagGroupAmounts {
@@ -250,7 +250,7 @@ function calcTagGroupAmounts(data: {
 
   for (const childId of children) {
     // Child tag amounts
-    const budgeted = budgets[childId]?.outcome || 0
+    const budgeted = budgets[childId]?.convertedOutcome || 0
     const income = incomes[childId] || 0
     const tagOutcome = outcomes[childId] || 0
     const transferOutcome = linkedTransfers[childId] || 0
@@ -293,7 +293,7 @@ function calcTagGroupAmounts(data: {
   }
 
   // Main tag amounts
-  const budgeted = budgets[id]?.outcome || 0
+  const budgeted = budgets[id]?.convertedOutcome || 0
   const income = incomes[id] || 0
   const tagOutcome = outcomes[id] || 0
   let transferOutcome = linkedTransfers[id] || 0 // все переводы идут в null

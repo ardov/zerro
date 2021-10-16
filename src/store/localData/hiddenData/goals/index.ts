@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { sendEvent } from 'helpers/tracking'
-import { GOALS } from '../constants'
+import { DataReminderType } from '../constants'
 import { makeGoal, parseGoal } from './helpers'
 import { getTags } from '../../tags'
 import { getRawGoals } from '../selectors'
@@ -32,7 +32,7 @@ export const setGoal = ({
     sendEvent(`Goals: set ${type} goal`)
     newGoals[tag] = makeGoal({ type, amount, end })
   }
-  dispatch(setHiddenData(GOALS, newGoals))
+  dispatch(setHiddenData(DataReminderType.GOALS, newGoals))
 }
 
 // SELECTORS
