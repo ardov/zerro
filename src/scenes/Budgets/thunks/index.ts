@@ -1,4 +1,9 @@
-import { getRootUser } from 'store/data/selectors'
+import {
+  convertCurrency,
+  getInstruments,
+  getRootUser,
+  getUserInstrument,
+} from 'store/data/selectors'
 import { getPopulatedTag } from 'store/localData/tags'
 import {
   getAmountsByTag,
@@ -16,6 +21,8 @@ import { getGoals } from 'store/localData/hiddenData/goals'
 import { applyClientPatch } from 'store/data'
 import { AppThunk } from 'store'
 import { Budget, ById } from 'types'
+import { getMetaForTag } from 'store/localData/hiddenData/tagMeta'
+import { round } from 'helpers/currencyHelpers'
 
 export const moveFunds = (
   amount: number,
@@ -64,13 +71,27 @@ export const setOutcomeBudget = (
   const amounts = getAmountsByTag(state)[month]
   const parentTagId = getPopulatedTag(state, tagId).parent
 
+  // ------------------------------------------------------------------
+  // Currency part. Refactor me, pls 🥺
+  const currConverter = convertCurrency(state)
+  const { currency } = getMetaForTag(tagId)(state)
+  const instruments = getInstruments(state)
+  const userInstrument = getUserInstrument(state)
+  const tagInstrument = currency ? instruments[currency] : userInstrument
+  const toTagCurrency = (v: number) =>
+    v && tagInstrument && userInstrument
+      ? round(currConverter(v, userInstrument.id, tagInstrument.id))
+      : v
+  // End of currency part
+  // ------------------------------------------------------------------
+
   let outcome = targetOutcome
 
   if (!parentTagId) {
     // if it's top level category
     const { budgeted, totalBudgeted } = amounts[tagId]
     const childrenBudgets = totalBudgeted - budgeted
-    outcome = targetOutcome - childrenBudgets
+    outcome = targetOutcome - toTagCurrency(childrenBudgets)
   }
 
   const budget = created || makeBudget({ user, date: +month, tag: tagId })
