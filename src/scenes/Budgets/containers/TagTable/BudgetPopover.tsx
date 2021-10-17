@@ -29,7 +29,6 @@ import { round } from 'helpers/currencyHelpers'
 import { sendEvent } from 'helpers/tracking'
 import pluralize from 'helpers/pluralize'
 import { getMetaForTag } from 'store/localData/hiddenData/tagMeta'
-import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
 
 type BudgetPopoverProps = PopoverProps & {
   id: string
@@ -62,7 +61,6 @@ export const BudgetPopover: FC<BudgetPopoverProps> = props => {
   const prevMonth = getPrevMonthMs(month)
   const goal = useSelector(getGoals)?.[id]
   const goalProgress = useSelector(getGoalsProgress)?.[month]?.[id]
-  const budget = useSelector(getBudgetsByMonthAndTag)?.[month]?.[id]
 
   const needForGoal = convert.toTag(goalProgress?.target || 0)
 
@@ -73,12 +71,11 @@ export const BudgetPopover: FC<BudgetPopoverProps> = props => {
   const onChange = (outcome: number) =>
     dispatch(setOutcomeBudget(outcome, month, id))
 
-  const budgeted = tagAmounts.totalBudgeted
-  const available = tagAmounts.totalAvailable
-  const prevBudgeted = tagPrevAmounts.totalBudgeted
-  const prevOutcome = tagPrevAmounts.totalOutcome
-
-  const oBudgeted = budget?.outcome || 0
+  const totalBudgeted = convert.toTag(tagAmounts.totalBudgeted)
+  const budgeted = convert.toTag(tagAmounts.budgeted)
+  const available = convert.toTag(tagAmounts.totalAvailable)
+  const prevBudgeted = convert.toTag(tagPrevAmounts.totalBudgeted)
+  const prevOutcome = convert.toTag(tagPrevAmounts.totalOutcome)
 
   let prevOutcomes: number[] = getPrev12MonthsMs(month)
     .map(month => amountsById?.[month]?.[id]?.totalOutcome)
@@ -86,23 +83,22 @@ export const BudgetPopover: FC<BudgetPopoverProps> = props => {
 
   const avgOutcome = getAverage(prevOutcomes)
 
-  const [value, setValue] = React.useState<number>(oBudgeted)
+  const [value, setValue] = React.useState<number>(totalBudgeted)
   const changeAndClose = (value: number) => {
     onClose?.({}, 'escapeKeyDown')
-    console.log(value)
-    if (value !== budgeted) onChange(value)
+    if (value !== totalBudgeted) onChange(value)
   }
 
   const quickActions = [
     {
       text: 'Покрыть перерасход',
-      amount: convert.toTag(+budgeted - available),
+      amount: round(+totalBudgeted - available),
       selected: false,
       condition: available < 0,
     },
     {
       text: 'Сбросить остаток',
-      amount: convert.toTag(+budgeted - available),
+      amount: round(+totalBudgeted - available),
       selected: false,
       condition: available > 0,
     },
@@ -114,51 +110,47 @@ export const BudgetPopover: FC<BudgetPopoverProps> = props => {
     },
     {
       text: getAvgOutcomeName(prevOutcomes.length),
-      amount: convert.toTag(avgOutcome),
-      selected: +value === convert.toTag(avgOutcome),
+      amount: avgOutcome,
+      selected: +value === avgOutcome,
       condition: !!avgOutcome && prevOutcomes.length > 1,
     },
     {
       text: 'Бюджет в прошлом месяце',
-      amount: convert.toTag(prevBudgeted),
-      selected: +value === convert.toTag(prevBudgeted),
+      amount: prevBudgeted,
+      selected: +value === prevBudgeted,
       condition: !!prevBudgeted,
     },
     {
       text: 'Расход в прошлом месяце',
-      amount: convert.toTag(prevOutcome),
-      selected: +value === convert.toTag(prevOutcome),
+      amount: prevOutcome,
+      selected: +value === prevOutcome,
       condition: !!prevOutcome,
     },
     {
       text: 'Сумма дочерних категорий',
-      amount: convert.toTag(tagAmounts.totalBudgeted - tagAmounts.budgeted),
+      amount: round(totalBudgeted - budgeted),
       selected: false,
       condition:
         isGroup(tagAmounts) &&
-        tagAmounts.budgeted &&
-        tagAmounts.totalBudgeted &&
-        tagAmounts.budgeted !== tagAmounts.totalBudgeted,
+        budgeted &&
+        totalBudgeted &&
+        budgeted !== totalBudgeted,
     },
   ]
 
-  const convertedValue = convert.toMain(value)
-  const availableAfter = {
-    tag: convert.toTag(available + convertedValue - budgeted),
-    get main() {
-      return convert.toMain(this.tag)
-    },
-  }
+  const availableAfter = round(available + value - totalBudgeted)
+  const valueInMain = convert.toMain(value)
+  const availableAfterInMain = convert.toMain(availableAfter)
 
   const helperText = currency ? (
     <>
-      {format.main(convertedValue)}
+      {format.main(valueInMain)}
       <br />
-      Остаток категории {format.tag(availableAfter.tag)} (
-      {format.main(availableAfter.main)})
+      Остаток категории {format.tag(availableAfter)} (
+      {format.main(availableAfterInMain)})
     </>
   ) : (
-    `Остаток категории ${format.main(available + value - budgeted)}`
+    `Остаток категории ${format.main(availableAfterInMain)}`
   )
 
   return (

@@ -33,7 +33,6 @@ export const RegularSyncHandler: FC<{}> = props => {
   useEffect(() => {
     let timer: NodeJS.Timeout
     async function init() {
-      console.log('Load local data')
       await dispatch(loadLocalData())
       syncRef.current()
       timer = setInterval(() => syncRef.current(), CHECK_DELAY)
@@ -76,17 +75,6 @@ function useConditionalSync() {
     // Regular sync condition
     const sinceLastSync = Date.now() - lastSync
     const sinceLastChange = Date.now() - lastChange
-    const sngStr = !!lastChange
-      ? ` | ${Math.round(sinceLastChange / 1000)}s since last change ${
-          sinceLastChange > CHECK_DELAY ? '🟢' : ''
-        }`
-      : ''
-    console.log(
-      `[Check] ${Math.round(sinceLastSync / 1000)}s since last sync${
-        sinceLastSync > SYNC_DELAY ? ' 🟢' : ''
-      }` + sngStr
-    )
-    regular && console.log('sync works')
 
     if (!document.hidden && sinceLastSync > SYNC_DELAY) {
       return true
