@@ -42,6 +42,10 @@ export const OutcomeWidget: FC<OutcomWidgetProps> = ({
       outcome = 0
       startingAmount = available
     }
+
+    // Prevent chart going weird
+    if (startingAmount < 0) startingAmount = 0
+
     return { date, outcome, leftover, budgeted, available, startingAmount }
   })
 
