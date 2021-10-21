@@ -27,7 +27,7 @@ import { getAvailableMonths } from './availablePeriod'
 import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 import { round } from 'helpers/currencyHelpers'
 import { useState } from 'react'
-import { formatMoney } from 'helpers/format'
+import { formatMoney, formatDate } from 'helpers/format'
 
 export function NetWorth() {
   const theme = useTheme()
@@ -47,9 +47,14 @@ export function NetWorth() {
   const balances = months.map(date => getBalancesOnDate(balanceChanges, +date))
   console.log({ balances })
 
-  const points = balances.map((b, i) => {
+  var startDate = +new Date(2019, 0)
+  const balancesFilter = balances.filter(row => {if(row){return (row.date >= startDate);} return false;});
+  const points = balancesFilter.map((b, i) => {
+    let d;
+    if(b) d = new Date(b.date);
     let point = {
-      date: months[i],
+      //date: months[i],
+      date: d,
       positiveInBudget: 0,
       positiveSaving: 0,
       positivePotential: 0,
@@ -105,6 +110,35 @@ export function NetWorth() {
     if (!credits) p.negativeCredits = 0
   })
 
+  const tooltipPStyle = {
+    padding:0,
+    margin:0,
+    lineheight:1
+  }
+const CustomToolTip = ({active, payload, label}: any) => {
+  if(payload[0]) {
+     console.log(payload[0].payload.date);
+     console.log(payload);
+     return (<div style={{
+      borderRadius: theme.shape.borderRadius,
+      background: theme.palette.background.paper,
+      color: theme.palette.text.primary,
+      padding: theme.spacing(1),
+      border: 0,
+      boxShadow: theme.shadows[10],
+    }}>
+        <p style={tooltipPStyle}>{formatDate(payload[0].payload.date)}</p>
+        <p style={tooltipPStyle}>Бюджет: {formatMoney(payload[0].value)}</p>
+        <p style={tooltipPStyle}>Сбережения: {formatMoney(payload[1].value)}</p>
+        <p style={tooltipPStyle}>Долги: {formatMoney(payload[2].value)}</p>
+        <p style={tooltipPStyle}>Кредиты: {formatMoney(payload[3].value)}</p>
+        <p style={tooltipPStyle}>Карты: {formatMoney(payload[4].value)}</p>
+        <p style={tooltipPStyle}>Всего: {formatMoney(payload[5].value)}</p>
+      </div>);
+    }
+  return null;
+}
+
   return (
     <Paper>
       <Box p={2} minWidth="100%">
@@ -132,6 +166,7 @@ export function NetWorth() {
               itemStyle={{
                 color: theme.palette.text.primary,
               }}
+              content = {<CustomToolTip />}
             />
             {/* <CartesianGrid stroke={theme.palette.divider} /> */}
             <ReferenceLine y={0} stroke={theme.palette.divider} />
