@@ -43,7 +43,12 @@ export const getHistoryStart = createSelector(
   [getTransactionsHistory],
   transactions => {
     if (!transactions.length) return Date.now()
-    return +getTime(transactions[0])
+    const historyBeginning = +new Date('2000-01-01')
+    for (const tr of transactions) {
+      const trTime = getTime(tr)
+      if (trTime >= historyBeginning) return trTime
+    }
+    return Date.now()
   }
 )
 

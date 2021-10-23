@@ -19,6 +19,7 @@ export const getBalancesOnDate = (nodes: HistoryPoint[], date: number) => {
   for (let i = nodes.length - 1; i >= 0; i--) {
     if (nodes[i].date <= date) return nodes[i]
   }
+  return nodes[0]
 }
 
 /**

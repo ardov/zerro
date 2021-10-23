@@ -28,6 +28,7 @@ import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 import { round } from 'helpers/currencyHelpers'
 import { useState } from 'react'
 import { formatMoney, formatDate } from 'helpers/format'
+import { Amount } from 'components/Amount'
 
 export function NetWorth() {
   const theme = useTheme()
@@ -44,17 +45,20 @@ export function NetWorth() {
   const [credits, setCredits] = useState(true)
   const [total, setTotal] = useState(true)
 
-  const balances = months.map(date => getBalancesOnDate(balanceChanges, +date))
-  console.log({ balances })
+  const [filterMode, setFilterMode] = useState<'lastYear' | 'all'>('lastYear')
+  const startDate = filterMode === 'lastYear' ? months.slice(-12)[0] : months[0]
 
-  var startDate = +new Date(2019, 0)
-  const balancesFilter = balances.filter(row => {if(row){return (row.date >= startDate);} return false;});
-  const points = balancesFilter.map((b, i) => {
-    let d;
-    if(b) d = new Date(b.date);
+  const balances = months
+    .filter(month => +month >= +startDate)
+    .map(date => ({
+      ...getBalancesOnDate(balanceChanges, +date),
+      // Set date as start of the month
+      date: new Date(date.getFullYear(), date.getMonth(), 1),
+    }))
+
+  const points = balances.map((b, i) => {
     let point = {
-      //date: months[i],
-      date: d,
+      date: new Date(b.date),
       positiveInBudget: 0,
       positiveSaving: 0,
       positivePotential: 0,
@@ -110,39 +114,71 @@ export function NetWorth() {
     if (!credits) p.negativeCredits = 0
   })
 
-  const tooltipPStyle = {
-    padding:0,
-    margin:0,
-    lineheight:1
+  const tooltipStyle = {
+    padding: 0,
+    margin: 0,
+    lineheight: 1,
   }
-const CustomToolTip = ({active, payload, label}: any) => {
-  if(payload[0]) {
-     console.log(payload[0].payload.date);
-     console.log(payload);
-     return (<div style={{
-      borderRadius: theme.shape.borderRadius,
-      background: theme.palette.background.paper,
-      color: theme.palette.text.primary,
-      padding: theme.spacing(1),
-      border: 0,
-      boxShadow: theme.shadows[10],
-    }}>
-        <p style={tooltipPStyle}>{formatDate(payload[0].payload.date)}</p>
-        <p style={tooltipPStyle}>Бюджет: {formatMoney(payload[0].value)}</p>
-        <p style={tooltipPStyle}>Сбережения: {formatMoney(payload[1].value)}</p>
-        <p style={tooltipPStyle}>Долги: {formatMoney(payload[2].value)}</p>
-        <p style={tooltipPStyle}>Кредиты: {formatMoney(payload[3].value)}</p>
-        <p style={tooltipPStyle}>Карты: {formatMoney(payload[4].value)}</p>
-        <p style={tooltipPStyle}>Всего: {formatMoney(payload[5].value)}</p>
-      </div>);
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (payload[0]) {
+      console.log(payload)
+      const date = payload[0]?.payload?.date
+      const values = [
+        { name: 'Всего', value: payload?.[5]?.value },
+        { name: 'Бюджет', value: payload?.[0]?.value },
+        { name: 'Сбережения', value: payload?.[1]?.value },
+        { name: 'Долги', value: payload?.[2]?.value },
+        { name: 'Кредиты', value: payload?.[3]?.value },
+        { name: 'Карты', value: payload?.[4]?.value },
+      ].filter(v => v.value)
+      return (
+        <div
+          style={{
+            borderRadius: theme.shape.borderRadius,
+            background: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+            padding: theme.spacing(1),
+            border: 0,
+            boxShadow: theme.shadows[10],
+          }}
+        >
+          <p style={tooltipStyle}>
+            {capitalize(formatDate(date, 'LLLL yyyy'))}
+          </p>
+          {values.map(v => (
+            <p key={v.name} style={tooltipStyle}>
+              {v.name}:{' '}
+              <Amount
+                style={{
+                  color: v.value < 0 ? theme.palette.error.main : 'inherit',
+                }}
+                value={v.value}
+                instrument="user"
+                decMode="ifAny"
+                noShade
+              />
+            </p>
+          ))}
+        </div>
+      )
     }
-  return null;
-}
+    return null
+  }
 
   return (
     <Paper>
       <Box p={2} minWidth="100%">
-        <Typography variant="h5">Мой капитал</Typography>
+        <Typography variant="h5">
+          Рост капитала{' '}
+          <span
+            style={{ color: theme.palette.secondary.main, cursor: 'pointer' }}
+            onClick={() => {
+              setFilterMode(mode => (mode === 'all' ? 'lastYear' : 'all'))
+            }}
+          >
+            {filterMode === 'all' ? 'за всё время' : 'за год'}
+          </span>
+        </Typography>
       </Box>
 
       <Box p={2} minWidth="100%" height={300}>
@@ -166,7 +202,7 @@ const CustomToolTip = ({active, payload, label}: any) => {
               itemStyle={{
                 color: theme.palette.text.primary,
               }}
-              content = {<CustomToolTip />}
+              content={<CustomTooltip />}
             />
             {/* <CartesianGrid stroke={theme.palette.divider} /> */}
             <ReferenceLine y={0} stroke={theme.palette.divider} />
@@ -324,3 +360,7 @@ const CheckboxTotal = withStyles(theme => ({
   },
   checked: {},
 }))(Checkbox)
+
+function capitalize(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1)
+}

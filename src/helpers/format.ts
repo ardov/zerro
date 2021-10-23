@@ -41,7 +41,7 @@ export function getCurrencySymbol(currency: string): string {
 
 /**
  * Formats date.
- * {@link https://date-fns.org/v2.16.1/docs/format|Templates doc}
+ * @link https://date-fns.org/v2.25.0/docs/format doc
  * @param date
  * @param template
  */
