@@ -120,49 +120,44 @@ export function NetWorth() {
     lineheight: 1,
   }
   const CustomTooltip = ({ active, payload, label }: any) => {
-    if (payload[0]) {
-      console.log(payload)
-      const date = payload[0]?.payload?.date
-      const values = [
-        { name: 'Всего', value: payload?.[5]?.value },
-        { name: 'Бюджет', value: payload?.[0]?.value },
-        { name: 'Сбережения', value: payload?.[1]?.value },
-        { name: 'Долги', value: payload?.[2]?.value },
-        { name: 'Кредиты', value: payload?.[3]?.value },
-        { name: 'Карты', value: payload?.[4]?.value },
-      ].filter(v => v.value)
-      return (
-        <div
-          style={{
-            borderRadius: theme.shape.borderRadius,
-            background: theme.palette.background.paper,
-            color: theme.palette.text.primary,
-            padding: theme.spacing(1),
-            border: 0,
-            boxShadow: theme.shadows[10],
-          }}
-        >
-          <p style={tooltipStyle}>
-            {capitalize(formatDate(date, 'LLLL yyyy'))}
+    if (!payload?.[0]) return null
+    const date = payload[0]?.payload?.date
+    const values = [
+      { name: 'Всего', value: payload?.[5]?.value },
+      { name: 'Бюджет', value: payload?.[0]?.value },
+      { name: 'Сбережения', value: payload?.[1]?.value },
+      { name: 'Долги', value: payload?.[2]?.value },
+      { name: 'Кредиты', value: payload?.[3]?.value },
+      { name: 'Карты', value: payload?.[4]?.value },
+    ].filter(v => v.value)
+    return (
+      <div
+        style={{
+          borderRadius: theme.shape.borderRadius,
+          background: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+          padding: theme.spacing(1),
+          border: 0,
+          boxShadow: theme.shadows[10],
+        }}
+      >
+        <p style={tooltipStyle}>{capitalize(formatDate(date, 'LLLL yyyy'))}</p>
+        {values.map(v => (
+          <p key={v.name} style={tooltipStyle}>
+            {v.name}:{' '}
+            <Amount
+              style={{
+                color: v.value < 0 ? theme.palette.error.main : 'inherit',
+              }}
+              value={v.value}
+              instrument="user"
+              decMode="ifAny"
+              noShade
+            />
           </p>
-          {values.map(v => (
-            <p key={v.name} style={tooltipStyle}>
-              {v.name}:{' '}
-              <Amount
-                style={{
-                  color: v.value < 0 ? theme.palette.error.main : 'inherit',
-                }}
-                value={v.value}
-                instrument="user"
-                decMode="ifAny"
-                noShade
-              />
-            </p>
-          ))}
-        </div>
-      )
-    }
-    return null
+        ))}
+      </div>
+    )
   }
 
   return (
