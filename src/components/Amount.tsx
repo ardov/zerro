@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux'
 
 const decStyle = { opacity: 0.5 }
 
-type AmountProps = React.DetailedHTMLProps<
+export type AmountProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLSpanElement>,
   HTMLSpanElement
 > & {

@@ -101,7 +101,7 @@ function Links() {
         icon={<FavoriteBorderIcon />}
       />
       <NavigationLink
-        text={<span className="red-gradient">Итоги года</span>}
+        text="Итоги года"
         path="/review"
         icon={<WhatshotIcon />}
       />
