@@ -120,7 +120,7 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
           Итоги года
         </MenuItem>,
       ]}
-      <Box my={1} key="divider">
+      <Box my={1}>
         <Divider light />
       </Box>
       <Confirm onOk={reloadData}>
@@ -138,7 +138,7 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
         <ListItemText>Автосинхронизация</ListItemText>
         <Switch edge="end" checked={regular} />
       </MenuItem>
-      <Box my={1} key="divider">
+      <Box my={1}>
         <Divider light />
       </Box>
       <MenuItem onClick={handleLogOut}>

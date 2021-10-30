@@ -6,6 +6,7 @@ import {
   useTheme,
   Checkbox,
   FormControlLabel,
+  Card,
 } from '@mui/material'
 import { withStyles } from '@mui/styles'
 import { useSelector } from 'react-redux'
@@ -27,8 +28,21 @@ import { getAvailableMonths } from './availablePeriod'
 import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 import { round } from 'helpers/currencyHelpers'
 import { useState } from 'react'
-import { formatMoney, formatDate } from 'helpers/format'
-import { Amount } from 'components/Amount'
+import { formatDate } from 'helpers/format'
+import { DataLine } from 'components/DataLine'
+
+type Point = {
+  date: Date
+  positiveInBudget: number
+  positiveSaving: number
+  positivePotential: number
+  negativeDebts: number
+  negativeLoans: number
+  negativeCredits: number
+  readonly positiveTotal: number
+  readonly negativeTotal: number
+  readonly total: number
+}
 
 export function NetWorth() {
   const theme = useTheme()
@@ -184,27 +198,13 @@ export function NetWorth() {
             margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
           >
             <YAxis type="number" domain={['dataMin', 'dataMax']} hide />
-            <Tooltip
-              formatter={(v: number) => formatMoney(v)}
-              contentStyle={{
-                borderRadius: theme.shape.borderRadius,
-                background: theme.palette.background.paper,
-                color: theme.palette.text.primary,
-                padding: theme.spacing(1),
-                border: 0,
-                boxShadow: theme.shadows[10],
-              }}
-              itemStyle={{
-                color: theme.palette.text.primary,
-              }}
-              content={<CustomTooltip />}
-            />
-            {/* <CartesianGrid stroke={theme.palette.divider} /> */}
+            <Tooltip content={<CustomTooltip />} />
             <ReferenceLine y={0} stroke={theme.palette.divider} />
 
             {inBudget && (
               <Bar
                 dataKey="positiveInBudget"
+                name="В бюджете"
                 stackId="a"
                 fill={theme.palette.primary.dark}
                 isAnimationActive={false}
@@ -213,6 +213,7 @@ export function NetWorth() {
             {savings && (
               <Bar
                 dataKey="positiveSaving"
+                name="Сбережения"
                 stackId="a"
                 fill={theme.palette.primary.light}
                 isAnimationActive={false}
@@ -221,6 +222,7 @@ export function NetWorth() {
             {debts && (
               <Bar
                 dataKey="negativeDebts"
+                name="Долги"
                 stackId="a"
                 fill={theme.palette.error.dark}
                 isAnimationActive={false}
@@ -229,6 +231,7 @@ export function NetWorth() {
             {credits && (
               <Bar
                 dataKey="negativeCredits"
+                name="Долги по счетам"
                 stackId="a"
                 fill={theme.palette.error.main}
                 isAnimationActive={false}
@@ -237,6 +240,7 @@ export function NetWorth() {
             {loans && (
               <Bar
                 dataKey="negativeLoans"
+                name="Кредиты и ипотеки"
                 stackId="a"
                 fill={theme.palette.error.light}
                 isAnimationActive={false}
@@ -246,6 +250,7 @@ export function NetWorth() {
               <Line
                 type="monotone"
                 dataKey="total"
+                name="Итого"
                 stroke={theme.palette.info.main}
                 isAnimationActive={false}
                 dot={false}
@@ -355,6 +360,43 @@ const CheckboxTotal = withStyles(theme => ({
   },
   checked: {},
 }))(Checkbox)
+
+type TPayload = {
+  // chartType: undefined
+  color: string
+  dataKey: string
+  fill: string
+  // formatter: undefined
+  name: string
+  payload: Point
+  // type: undefined
+  // unit: undefined
+  value: number
+}
+
+const CustomTooltip = (props: any) => {
+  const payload = props.payload as TPayload[]
+  const active = props.active as boolean
+  if (!active || !payload?.length) return null
+  const date = payload[0]?.payload?.date
+  const values = payload.filter(v => v.value)
+  return (
+    <Card elevation={10} sx={{ p: 2 }}>
+      <Typography variant="h6">
+        {capitalize(formatDate(date, 'LLLL yyyy'))}
+      </Typography>
+      {values.map(v => (
+        <DataLine
+          color={v.color}
+          key={v.dataKey}
+          name={v.name}
+          amount={v.value}
+          instrument="user"
+        />
+      ))}
+    </Card>
+  )
+}
 
 function capitalize(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1)

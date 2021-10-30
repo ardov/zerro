@@ -1,20 +1,13 @@
 import React, { FC, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
-import {
-  Box,
-  BoxProps,
-  TooltipProps,
-  Typography,
-  useTheme,
-} from '@mui/material'
-import { Amount } from 'components/Amount'
+import { Box, BoxProps, useTheme } from '@mui/material'
 import { formatDate } from 'helpers/format'
-import { Tooltip } from 'components/Tooltip'
 import Rhythm from 'components/Rhythm'
 import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
 import getMonthDates from 'scenes/Budgets/selectors/getMonthDates'
 import { useMonth } from 'scenes/Budgets/pathHooks'
+import { DataLine } from '../../../../components/DataLine'
 
 type OutcomWidgetProps = BoxProps & {
   tagId: string
@@ -141,64 +134,6 @@ export const OutcomeWidget: FC<OutcomWidgetProps> = ({
           </BarChart>
         </ResponsiveContainer>
       </Box>
-    </Box>
-  )
-}
-type DotProps = { color: string; colorOpacity?: number }
-
-const Dot: FC<DotProps> = ({ color, colorOpacity = 1 }) => (
-  <span
-    style={{
-      width: 8,
-      height: 8,
-      background: color,
-      display: 'inline-block',
-      marginRight: 8,
-      borderRadius: '50%',
-      opacity: colorOpacity,
-    }}
-  />
-)
-
-type DataLineProps = BoxProps & {
-  name: string
-  amount?: number
-  currency?: string
-  color?: string
-  colorOpacity?: number
-  tooltip?: TooltipProps['title']
-}
-
-const DataLine: FC<DataLineProps> = ({
-  name,
-  amount,
-  currency,
-  color,
-  colorOpacity = 1,
-  tooltip,
-  ...rest
-}) => {
-  return (
-    <Box display="flex" flexDirection="row" {...rest}>
-      <Box flexGrow={1} mr={1} minWidth={0} display="flex" alignItems="center">
-        {!!color && <Dot color={color} colorOpacity={colorOpacity} />}
-        {tooltip ? (
-          <Tooltip title={tooltip}>
-            <Typography noWrap variant="body2">
-              {name}
-            </Typography>
-          </Tooltip>
-        ) : (
-          <Typography noWrap variant="body2">
-            {name}
-          </Typography>
-        )}
-      </Box>
-      {amount !== undefined && (
-        <Typography variant="body2">
-          <Amount value={amount} currency={currency} />
-        </Typography>
-      )}
     </Box>
   )
 }
