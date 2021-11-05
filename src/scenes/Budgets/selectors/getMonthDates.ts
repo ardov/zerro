@@ -1,14 +1,15 @@
+import startOfMonth from 'date-fns/startOfMonth'
+import isSameMonth from 'date-fns/isSameMonth'
 import addMonths from 'date-fns/addMonths'
 import { createSelector } from '@reduxjs/toolkit'
 import { getTransactionsInBudget } from './baseSelectors'
 import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
 import { withPerf } from 'helpers/performance'
-import { makeDateArray, monthStart } from 'helpers/dateHelpers'
 
 const getFirstMonth = createSelector(
   [getTransactionsInBudget],
   transactions =>
-    +monthStart(
+    +startOfMonth(
       transactions.length
         ? transactions[transactions.length - 1].date
         : Date.now()
@@ -38,7 +39,15 @@ const getLastMonth = createSelector(
 const getMonthDates = createSelector(
   [getFirstMonth, getLastMonth],
   withPerf('BUDGET: getMonthDates', (firstMs, lastMs) => {
-    return makeDateArray(firstMs, lastMs).map(d => +d)
+    const firstDate = new Date(firstMs)
+    const lastDate = new Date(lastMs)
+    const result = []
+    let current = new Date(firstDate.getFullYear(), firstDate.getMonth() - 1, 1)
+    do {
+      current = new Date(current.getFullYear(), current.getMonth() + 1, 1)
+      result.push(+current)
+    } while (!isSameMonth(current, lastDate))
+    return result
   })
 )
 
