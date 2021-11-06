@@ -92,18 +92,14 @@ function NotFunFact({
   const AVG_MONTHLY_INCOME = 35000
   const monthlyIncome = income / 12
   const rate = +(monthlyIncome / AVG_MONTHLY_INCOME).toFixed(0)
+  const vat = income * (13 / 87)
   return (
     <Typography variant="body1" align="center">
       Платили 13% подоходного налога?
       <br />
       Значит ещё{' '}
-      <Amount
-        value={income * 0.13}
-        currency={currency}
-        noShade
-        decMode="ifOnly"
-      />{' '}
-      ушло в казну 🇷🇺
+      <Amount value={vat} currency={currency} noShade decMode="ifOnly" /> ушло в
+      казну 🇷🇺
       {rate > 1 && (
         <>
           <br />
