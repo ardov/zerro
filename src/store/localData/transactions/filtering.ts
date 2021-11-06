@@ -33,6 +33,7 @@ type CustomConditions = {
   tags?: null | TagId[]
   accountsFrom?: null | AccountId[]
   accountsTo?: null | AccountId[]
+  accounts?: null | AccountId[]
   amountFrom?: null | number
   amountTo?: null | number
 }
@@ -76,6 +77,11 @@ const checkConditions = (tr: Transaction, conditions: FilterConditions) => {
               tr,
               conditions.accountsFrom,
               conditions.accountsTo
+            )
+          case 'accounts':
+            return (
+              checkAccounts(tr, undefined, conditions.accounts) ||
+              checkAccounts(tr, conditions.accounts)
             )
           case 'amountFrom':
             return checkAmount(tr, conditions.amountFrom, 'greaterOrEqual')
