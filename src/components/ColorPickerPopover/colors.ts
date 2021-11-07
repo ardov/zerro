@@ -1,4 +1,4 @@
-import { makeColorArray } from '../../helpers/makeColorArray'
+import { makeColorArray } from '../../helpers/color/makeColorArray'
 
 export const zmColors = [
   '#CC3077',

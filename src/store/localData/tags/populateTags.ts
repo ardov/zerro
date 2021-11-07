@@ -1,4 +1,4 @@
-import { intToRgb, intToHex, getColorForString } from 'helpers/convertColor'
+import { intToRgb, intToHex, getColorForString } from 'helpers/color'
 import { sendEvent } from 'helpers/tracking'
 import toArray from 'lodash/toArray'
 import { ById, PopulatedTag, Tag } from 'types'
