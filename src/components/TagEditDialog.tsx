@@ -18,7 +18,7 @@ import { Modify, Tag, TagMeta } from 'types'
 import { useDispatch, useSelector } from 'react-redux'
 import { createTag } from 'store/localData/tags/thunks'
 import { useFormik } from 'formik'
-import { hexToInt, intToHex } from 'helpers/color'
+import { hex2int, int2hex } from 'helpers/color'
 import { ColorPicker } from './ColorPickerPopover'
 import { v1 as uuidv1 } from 'uuid'
 import { setTagMeta, getTagMeta } from 'store/localData/hiddenData/tagMeta'
@@ -174,9 +174,9 @@ type ColorProps = {
 
 const Color: FC<ColorProps> = ({ value, onChange }) => {
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
-  const hexColor = intToHex(value)
+  const hexColor = int2hex(value)
   const handleColorChange = (hex?: string | null) => {
-    onChange(hexToInt(hex))
+    onChange(hex2int(hex))
   }
   return (
     <>
