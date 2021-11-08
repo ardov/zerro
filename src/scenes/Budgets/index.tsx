@@ -1,4 +1,7 @@
-import React, { useCallback, useState } from 'react'
+import React, {
+  useCallback,
+  // useState
+} from 'react'
 import { useSelector } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 import { TagTable } from './containers/TagTable'
@@ -7,18 +10,26 @@ import { MonthInfo } from './containers/MonthInfo'
 import { ToBeBudgeted } from './containers/ToBeBudgeted'
 import { MonthSelect } from './MonthSelect'
 import getMonthDates from './selectors/getMonthDates'
-import { Box, Button, Drawer, Paper, Theme, useMediaQuery } from '@mui/material'
+import {
+  // Button,
+  // Paper,
+  Box,
+  Drawer,
+  Theme,
+  useMediaQuery,
+} from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { GoalsProgressWidget } from './containers/GoalsProgressWidget'
 import { useMonth, useDrawerId } from './pathHooks'
 import { DnDContext } from './containers/DnDContext'
 import { TagPreview } from './containers/TagPreview'
 import { Helmet } from 'react-helmet'
-import { SankeyChart } from './SankeyChart'
+// import { SankeyChart } from './SankeyChart'
 import { formatDate } from 'helpers/format'
 import { useHotkeys } from 'react-hotkeys-hook'
 import add from 'date-fns/add'
 import sub from 'date-fns/sub'
+import { MapWidget } from './MapWidget'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
@@ -52,7 +63,9 @@ const useStyles = makeStyles(theme => ({
       'month-select   goals     to-be-budgeted'
       'tags           tags      tags'
       'transfers      transfers transfers'
-      'chart          chart     chart'`,
+      'chart          chart     chart'
+      'treemap        treemap   treemap'
+    `,
     width: '100%',
     maxWidth: 800,
     [theme.breakpoints.down('md')]: {
@@ -62,7 +75,7 @@ const useStyles = makeStyles(theme => ({
       gap: theme.spacing(2),
       padding: theme.spacing(1, 1, 10),
       gridTemplateColumns: '1fr',
-      gridTemplateAreas: `'month-select' 'goals' 'to-be-budgeted' 'tags' 'transfers'`,
+      gridTemplateAreas: `'month-select' 'goals' 'to-be-budgeted' 'tags' 'transfers' 'treemap'`,
     },
   },
   monthSelect: { gridArea: 'month-select' },
@@ -71,6 +84,7 @@ const useStyles = makeStyles(theme => ({
   tags: { gridArea: 'tags' },
   transfers: { gridArea: 'transfers' },
   chart: { gridArea: 'chart' },
+  treemap: { gridArea: 'treemap' },
 }))
 
 function Budgets() {
@@ -80,8 +94,8 @@ function Budgets() {
   const [month, setMonth] = useMonth()
   const [drawerId, setDrawerId] = useDrawerId()
   const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))
-  const isSM = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
-  const [showSankey, setShowSankey] = useState(false)
+  // const isSM = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
+  // const [showSankey, setShowSankey] = useState(false)
   const c = useStyles()
   const drawerVisibility = !isMD || !!drawerId
 
@@ -130,7 +144,8 @@ function Budgets() {
               onOpenMonthDrawer={openOverview}
             />
             <TransferTable className={c.transfers} />
-            {!isSM &&
+
+            {/* {!isSM &&
               (showSankey ? (
                 <Paper className={c.chart}>
                   <SankeyChart />
@@ -143,7 +158,9 @@ function Budgets() {
                 >
                   Показать распределение денег
                 </Button>
-              ))}
+              ))} */}
+
+            <MapWidget className={c.treemap} onSelectTag={setDrawer} />
           </Box>
 
           <Drawer
