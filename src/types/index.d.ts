@@ -147,6 +147,7 @@ export type Tag = ZmTag
 export type PopulatedTag = Tag &
   TagMeta & {
     name: string
+    uniqueName: string
     symbol: string
     children: string[]
     colorRGB: string | null
