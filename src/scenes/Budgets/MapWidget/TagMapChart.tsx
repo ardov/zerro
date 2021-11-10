@@ -54,7 +54,13 @@ export function TagMapChart(props: TagMapChartProps) {
 
       node.children = []
       if (available) {
-        node.children?.push({ name: 'Без подкатегории', id, amount: available })
+        node.children?.push({
+          name: 'Без подкатегории',
+          id,
+          amount: available,
+          symbol,
+          color: colorHEX || colorGenerated,
+        })
       }
       children.forEach(child => {
         const { name, symbol, colorGenerated } = child
