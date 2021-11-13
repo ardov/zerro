@@ -9,16 +9,26 @@ export default function populateTags(rawTags: ById<Tag>) {
   let tags: {
     [x: string]: PopulatedTag
   } = { null: makePopulatedTag(nullTag) }
+  let names: { [key: string]: number } = {}
 
   for (const id in rawTags) {
     // Add name, symbol and colorRGB
-    tags[id] = makePopulatedTag(rawTags[id])
+    const populated = makePopulatedTag(rawTags[id])
+    tags[id] = populated
+    let name = populated.name
+    names[name] = names[name] ? names[name] + 1 : 1
   }
 
-  // Populate children array with ids
   for (const id in tags) {
     const parentId = tags[id].parent
-    if (parentId) tags[parentId].children.push(id)
+    if (parentId) {
+      // Populate children array with ids
+      tags[parentId].children.push(id)
+      // Populate uniqueName if name is not unique
+      if (names[tags[id].name] > 1) {
+        tags[id].uniqueName = tags[parentId].name + ' / ' + tags[id].name
+      }
+    }
   }
 
   return tags
@@ -29,6 +39,7 @@ function makePopulatedTag(tag: Tag): PopulatedTag {
     ...tag,
     children: [],
     name: getName(tag.title),
+    uniqueName: getName(tag.title),
     symbol: getSymbol(tag),
     colorRGB: int2rgb(tag.color),
     colorHEX: int2hex(tag.color),
