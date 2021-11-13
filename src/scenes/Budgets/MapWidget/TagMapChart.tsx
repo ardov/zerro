@@ -41,7 +41,11 @@ export function TagMapChart(props: TagMapChartProps) {
       if (!totalAvailable || totalAvailable <= 0) return
       const node: TTreeNode = {
         id,
+<<<<<<< HEAD
         name: uniqueName,
+=======
+        name,
+>>>>>>> master
         symbol,
         color: colorHEX || colorGenerated,
       }
@@ -54,6 +58,7 @@ export function TagMapChart(props: TagMapChartProps) {
 
       node.children = []
       if (available) {
+<<<<<<< HEAD
         node.children?.push({
           name: uniqueName + ' (основная)',
           id,
@@ -64,11 +69,21 @@ export function TagMapChart(props: TagMapChartProps) {
       }
       children.forEach(child => {
         const { uniqueName, symbol, colorGenerated } = child
+=======
+        node.children?.push({ name: 'Без подкатегории', id, amount: available })
+      }
+      children.forEach(child => {
+        const { name, symbol, colorGenerated } = child
+>>>>>>> master
         const childId = child.id
         const { available } = amounts?.[id]?.children?.[childId] || {}
         if (!available || available <= 0) return
         node.children?.push({
+<<<<<<< HEAD
           name: uniqueName,
+=======
+          name,
+>>>>>>> master
           symbol,
           id: childId,
           amount: available,
