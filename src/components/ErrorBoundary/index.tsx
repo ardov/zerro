@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 import { connect } from 'react-redux'
 import { logOut } from 'logic/authorization'
 import { captureError, sendEvent } from 'helpers/tracking'
@@ -7,6 +7,7 @@ import { AppDispatch } from 'store'
 
 interface ErrorBoundaryProps {
   logOut: () => void
+  children: ReactNode
 }
 interface ErrorBoundaryState {
   hasError: boolean
