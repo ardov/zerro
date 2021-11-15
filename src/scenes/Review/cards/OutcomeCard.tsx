@@ -5,7 +5,7 @@ import { formatDate } from 'helpers/format'
 import Rhythm from 'components/Rhythm'
 import { Amount } from 'components/Amount'
 import { getInstruments } from 'store/data/selectors'
-import { getPopulatedTags } from 'store/localData/tags'
+import { getPopulatedTags } from 'store/data/tags'
 import { Card } from './Card'
 import { Transaction } from 'types'
 

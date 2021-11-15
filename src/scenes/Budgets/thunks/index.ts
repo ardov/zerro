@@ -4,24 +4,24 @@ import {
   getRootUser,
   getUserInstrument,
 } from 'store/data/selectors'
-import { getPopulatedTag } from 'store/localData/tags'
+import { getPopulatedTag } from 'store/data/tags'
 import {
   getAmountsByTag,
   TagGroupAmounts,
   TagAmounts,
 } from '../selectors/getAmountsByTag'
 import { sendEvent } from 'helpers/tracking'
-import { makeBudget } from 'store/localData/budgets/makeBudget'
-import { getBudgetsByMonthAndTag, getBudget } from 'store/localData/budgets'
-import { getTags } from 'store/localData/tags'
+import { makeBudget } from 'store/data/budgets'
+import { getBudgetsByMonthAndTag, getBudget } from 'store/data/budgets'
+import { getTags } from 'store/data/tags'
 import { subMonths } from 'date-fns/esm'
 import { getGoalsProgress } from '../selectors/goalsProgress'
-import { goalType } from 'store/localData/hiddenData/constants'
-import { getGoals } from 'store/localData/hiddenData/goals'
+import { goalType } from 'store/data/hiddenData/constants'
+import { getGoals } from 'store/data/hiddenData/goals'
 import { applyClientPatch } from 'store/data'
 import { AppThunk } from 'store'
 import { Budget, ById } from 'types'
-import { getMetaForTag } from 'store/localData/hiddenData/tagMeta'
+import { getMetaForTag } from 'store/data/hiddenData/tagMeta'
 import { round } from 'helpers/currencyHelpers'
 
 export const moveFunds = (

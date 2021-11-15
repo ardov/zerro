@@ -7,7 +7,7 @@ import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@mui/icons-material/Close'
 import FilterDrawer from './FilterDrawer'
 import { useToggle } from 'helpers/useToggle'
-import { FilterConditions } from 'store/localData/transactions/filtering'
+import { FilterConditions } from 'store/data/transactions/filtering'
 import { SxProps } from '@mui/system'
 import { Theme } from '@mui/material/styles'
 

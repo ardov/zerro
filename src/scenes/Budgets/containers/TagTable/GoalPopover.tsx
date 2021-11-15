@@ -12,8 +12,8 @@ import {
   OutlinedTextFieldProps,
 } from '@mui/material'
 import { AmountInput } from 'components/AmountInput'
-import { getGoals, setGoal } from 'store/localData/hiddenData/goals'
-import { goalType } from 'store/localData/hiddenData/constants'
+import { getGoals, setGoal } from 'store/data/hiddenData/goals'
+import { goalType } from 'store/data/hiddenData/constants'
 import CloseIcon from '@mui/icons-material/Close'
 import MonthSelectPopover from 'scenes/Budgets/MonthSelectPopover'
 import { formatDate } from 'helpers/format'

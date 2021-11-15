@@ -2,9 +2,9 @@ import { Diff, User, ZmCompany, ZmCountry, ZmInstrument } from 'types'
 import countries from './countries.json'
 import companies from './companies.json'
 import instruments from './instruments.json'
-import { makeAccount } from 'store/localData/accounts/helpers'
-import { makeTag } from 'store/localData/tags/makeTag'
-import makeTransaction from 'store/localData/transactions/makeTransaction'
+import { makeAccount } from 'store/data/accounts'
+import { makeTag } from 'store/data/tags/makeTag'
+import makeTransaction from 'store/data/transactions/makeTransaction'
 
 const NOW = Date.now()
 const DAY = 1000 * 60 * 60 * 24

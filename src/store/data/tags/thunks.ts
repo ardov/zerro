@@ -2,7 +2,7 @@ import { sendEvent } from 'helpers/tracking'
 import { AppThunk } from 'store'
 import { applyClientPatch } from 'store/data'
 import { getRootUserId } from 'store/data/selectors'
-import { getTag } from 'store/localData/tags'
+import { getTag } from 'store/data/tags'
 import { OptionalExceptFor, Tag, ZmTag } from 'types'
 import { makeTag } from './makeTag'
 

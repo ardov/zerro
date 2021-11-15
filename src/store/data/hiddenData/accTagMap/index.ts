@@ -6,7 +6,7 @@ import { getTags } from '../../tags'
 import { getAccLinks } from '../selectors'
 import { AppThunk } from 'store'
 import { AccountId, TagId } from 'types'
-import { getAccounts } from 'store/localData/accounts'
+import { getAccounts } from 'store/data/accounts'
 
 // THUNK
 export const addConnection = (

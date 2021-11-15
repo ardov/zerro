@@ -14,12 +14,12 @@ import { DataLine } from 'components/DataLine'
 import {
   getHistoryStart,
   getTransactionsHistory,
-} from 'store/localData/transactions'
+} from 'store/data/transactions'
 import { formatDate, formatMoney } from 'helpers/format'
 import { makeDateArray, monthStart } from 'helpers/dateHelpers'
 import { convertCurrency } from 'store/data/selectors'
 import { round } from 'helpers/currencyHelpers'
-import { getType } from 'store/localData/transactions/helpers'
+import { getType } from 'store/data/transactions/helpers'
 
 type Point = {
   date: Date

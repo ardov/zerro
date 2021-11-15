@@ -4,7 +4,7 @@ import { Drawer, Box, Typography, IconButton, DrawerProps } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@mui/icons-material/Close'
-import { FilterConditions } from 'store/localData/transactions/filtering'
+import { FilterConditions } from 'store/data/transactions/filtering'
 import { Modify } from 'types'
 
 export type TransactionsDrawerProps = Modify<

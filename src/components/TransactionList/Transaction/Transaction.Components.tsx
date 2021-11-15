@@ -4,12 +4,12 @@ import { EmojiIcon } from 'components/EmojiIcon'
 import { useSelector } from 'react-redux'
 import { getMerchants } from 'store/data/selectors'
 import { Amount } from 'components/Amount'
-import { getAccounts } from 'store/localData/accounts'
+import { getAccounts } from 'store/data/accounts'
 import { Transaction as ITransaction, TransactionType } from 'types'
-import { getPopulatedTags } from 'store/localData/tags'
+import { getPopulatedTags } from 'store/data/tags'
 import { Typography } from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
-// import { isNew } from 'store/localData/transactions/helpers'
+// import { isNew } from 'store/data/transactions/helpers'
 
 type HTMLDivProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLDivElement>,

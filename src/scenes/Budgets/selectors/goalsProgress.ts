@@ -1,14 +1,14 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { round } from 'helpers/currencyHelpers'
-import { getGoals } from 'store/localData/hiddenData/goals'
+import { getGoals } from 'store/data/hiddenData/goals'
 import { getAmountsById, isGroup } from './getAmountsByTag'
 import getMonthDates from './getMonthDates'
 import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths'
-import { goalType } from 'store/localData/hiddenData/constants'
+import { goalType } from 'store/data/hiddenData/constants'
 import { Goal } from 'types'
 import { RootState } from 'store'
 import { withPerf } from 'helpers/performance'
-import { getTagMeta } from 'store/localData/hiddenData/tagMeta'
+import { getTagMeta } from 'store/data/hiddenData/tagMeta'
 import { convertCurrency } from 'store/data/selectors'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType

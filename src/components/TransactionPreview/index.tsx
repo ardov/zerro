@@ -20,9 +20,9 @@ import { AmountInput } from 'components/AmountInput'
 import { formatDate, rateToWords } from 'helpers/format'
 import { TagList } from 'components/TagList'
 import { useDispatch, useSelector } from 'react-redux'
-import { getTransactions } from 'store/localData/transactions'
-import { getType } from 'store/localData/transactions/helpers'
-import { getPopulatedAccounts } from 'store/localData/accounts'
+import { getTransactions } from 'store/data/transactions'
+import { getType } from 'store/data/transactions/helpers'
+import { getPopulatedAccounts } from 'store/data/accounts'
 import { getInstruments } from 'store/data/selectors'
 import {
   applyChangesToTransaction,
@@ -30,7 +30,7 @@ import {
   deleteTransactionsPermanently,
   recreateTransaction,
   restoreTransaction,
-} from 'store/localData/transactions/thunks'
+} from 'store/data/transactions/thunks'
 import { Transaction } from 'types'
 
 type TransactionPreviewProps = {

@@ -4,23 +4,17 @@ import { endOfMonth } from 'date-fns'
 import { getTotalsByMonth } from '../../selectors/getTotalsByMonth'
 import { getAmountsByTag } from '../../selectors/getAmountsByTag'
 import { getUserCurrencyCode } from 'store/data/selectors'
-import {
-  Box,
-  Typography,
-  ButtonBase,
-  Collapse,
-  BoxProps,
-} from '@mui/material'
+import { Box, Typography, ButtonBase, Collapse, BoxProps } from '@mui/material'
 import { withStyles } from '@mui/styles'
 import Rhythm from 'components/Rhythm'
 import { Tooltip } from 'components/Tooltip'
 import { Line } from '../components'
 import { Amount } from 'components/Amount'
-import { getTagsTree } from 'store/localData/tags'
+import { getTagsTree } from 'store/data/tags'
 import { TransactionsDrawer } from 'components/TransactionsDrawer'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import { formatDate } from 'helpers/format'
-import { FilterConditions } from 'store/localData/transactions/filtering'
+import { FilterConditions } from 'store/data/transactions/filtering'
 import { useToggle } from 'helpers/useToggle'
 
 type IncomeDataPoint = {

@@ -1,4 +1,4 @@
-import { getBudgetId } from 'store/localData/budgets/getBudgetId'
+import { getBudgetId } from 'store/data/budgets'
 import { Diff } from 'types'
 
 /**

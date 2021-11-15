@@ -23,12 +23,12 @@ import {
   getUserInstrument,
 } from 'store/data/selectors'
 import { setOutcomeBudget } from 'scenes/Budgets/thunks'
-import { getGoals } from 'store/localData/hiddenData/goals'
+import { getGoals } from 'store/data/hiddenData/goals'
 import { getGoalsProgress } from 'scenes/Budgets/selectors/goalsProgress'
 import { round } from 'helpers/currencyHelpers'
 import { sendEvent } from 'helpers/tracking'
 import pluralize from 'helpers/pluralize'
-import { getMetaForTag } from 'store/localData/hiddenData/tagMeta'
+import { getMetaForTag } from 'store/data/hiddenData/tagMeta'
 
 type BudgetPopoverProps = PopoverProps & {
   id: string

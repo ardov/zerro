@@ -3,7 +3,7 @@ import { getTagOrder } from '../selectors'
 import { sendEvent } from 'helpers/tracking'
 import { setHiddenData } from '../thunks'
 import { DataReminderType } from '../constants'
-import { getTagsTree } from 'store/localData/tags'
+import { getTagsTree } from 'store/data/tags'
 import { PopulatedTag, TagId } from 'types'
 import { AppThunk } from 'store'
 

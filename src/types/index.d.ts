@@ -1,5 +1,5 @@
-import { goalType } from 'store/localData/hiddenData/constants'
-import iconsMap from 'store/localData/tags/iconsMap.json'
+import { goalType } from 'store/data/hiddenData/constants'
+import iconsMap from 'store/data/tags/iconsMap.json'
 type IconsMap = typeof iconsMap
 
 export type ById<T> = { [id: string]: T }

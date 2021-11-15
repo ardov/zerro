@@ -7,7 +7,7 @@ import { makeDataAcc } from '../hiddenData/helpers'
 import { AccountId } from 'types'
 import { applyClientPatch } from 'store/data'
 
-export const createDataAcc = (): AppThunk => (dispatch, getState) => {
+const createDataAcc = (): AppThunk => (dispatch, getState) => {
   sendEvent(`Accounts: Create data accaunt`)
   const state = getState()
   const user = getRootUser(state)

@@ -3,7 +3,7 @@ import isSameMonth from 'date-fns/isSameMonth'
 import addMonths from 'date-fns/addMonths'
 import { createSelector } from '@reduxjs/toolkit'
 import { getTransactionsInBudget } from './baseSelectors'
-import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
+import { getBudgetsByMonthAndTag } from 'store/data/budgets'
 import { withPerf } from 'helpers/performance'
 
 const getFirstMonth = createSelector(

@@ -22,7 +22,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import Button from '@mui/material/Button'
 
 import { formatDate } from 'helpers/format'
-import { FilterConditions } from 'store/localData/transactions/filtering'
+import { FilterConditions } from 'store/data/transactions/filtering'
 import { TransactionType } from 'types'
 
 const useStyles = makeStyles(theme => ({
