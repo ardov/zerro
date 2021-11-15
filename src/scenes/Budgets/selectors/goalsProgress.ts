@@ -23,7 +23,11 @@ export type GoalProgress = {
 export const getGoalProgress = (state: RootState, month: number, id: string) =>
   getGoalsProgress(state)?.[month]?.[id]
 
-export const getGoalsProgress = createSelector(
+export const getGoalsProgress: (
+  state: RootState
+) => {
+  [month: number]: { [tagId: string]: GoalProgress | null }
+} = createSelector(
   [getGoals, getAmountsById, getMonthDates, getTagMeta, convertCurrency],
   withPerf(
     'BUDGET: getGoalsProgress',

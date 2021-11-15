@@ -8,6 +8,7 @@ import {
 import { round } from 'helpers/currencyHelpers'
 import getMonthDates from './getMonthDates'
 import { withPerf } from 'helpers/performance'
+import { RootState } from 'store'
 
 const CARRY_NEGATIVES = !!localStorage.getItem('CARRY_NEGATIVES')
 
@@ -38,9 +39,9 @@ export interface MonthTotals {
   transferFees: number
 }
 
-export const getTagTotals = createSelector(
+export const getTagTotals: (state: RootState) => TagTotals[] = createSelector(
   [getMonthDates, getAmountsByTag],
-  withPerf('BUDGET: getTagTotals', (months, amounts): TagTotals[] =>
+  (months, amounts): TagTotals[] =>
     months.map(month => {
       const totals = {
         budgeted: 0,
@@ -65,10 +66,11 @@ export const getTagTotals = createSelector(
       }
       return totals
     })
-  )
 )
 
-export const getTotalsArray = createSelector(
+export const getTotalsArray: (
+  state: RootState
+) => MonthTotals[] = createSelector(
   [
     getMonthDates,
     getStartFunds,

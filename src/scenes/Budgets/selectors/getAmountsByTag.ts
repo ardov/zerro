@@ -12,6 +12,7 @@ import { getTransactionsInBudget } from './baseSelectors'
 import { getInBudgetAccounts } from 'store/localData/accounts'
 import { PopulatedBudget } from 'types'
 import { withPerf } from 'helpers/performance'
+import { RootState } from 'store'
 
 interface DateNode {
   income: { [tagId: string]: number }
@@ -160,7 +161,13 @@ export function isGroup(
   return (amounts as TagGroupAmounts).children !== undefined
 }
 
-export const getAmountsByTag = createSelector(
+export const getAmountsByTag: (
+  state: RootState
+) => {
+  [month: string]: {
+    [tagId: string]: TagGroupAmounts
+  }
+} = createSelector(
   [
     getMonthDates,
     getBudgetsByMonthAndTag,
