@@ -22,7 +22,7 @@ import { hex2int, int2hex } from 'helpers/color'
 import { ColorPicker } from './ColorPickerPopover'
 import { v1 as uuidv1 } from 'uuid'
 import { setTagMeta, getTagMeta } from 'store/data/hiddenData/tagMeta'
-import { getUserInstrumentId } from 'store/data/selectors'
+import { getUserInstrumentId } from 'store/data/instruments'
 import { CurrencySelect } from './CurrencySelect'
 
 // TODO: Доделать модалку для редактирования и создания категорий

@@ -5,7 +5,7 @@ import { getAccounts, getStartBalance } from 'store/data/accounts'
 import { getSortedTransactions } from 'store/data/transactions'
 import { getTransactionsHistory } from 'store/data/transactions'
 import { eachDayOfInterval, startOfDay } from 'date-fns'
-import { convertCurrency } from 'store/data/selectors'
+import { convertCurrency } from 'store/data/instruments'
 import { Transaction, Account, AccountId, InstrumentId } from 'types'
 
 interface DayNode {

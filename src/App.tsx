@@ -14,7 +14,8 @@ import {
 } from '@mui/material'
 import { createBrowserHistory } from 'history'
 import ErrorBoundary from 'components/ErrorBoundary'
-import { getLastSyncTime, getRootUserId } from 'store/data/selectors'
+import { getLastSyncTime } from 'store/data/selectors'
+import { getRootUser } from 'store/data/users'
 import { initTracking, setUserId } from 'helpers/tracking'
 import Transactions from 'scenes/Transactions'
 import Auth from 'scenes/Auth'
@@ -31,7 +32,7 @@ initTracking(history)
 
 export default function App() {
   const isLoggedIn = useSelector(getLoginState)
-  const userId = useSelector(getRootUserId)
+  const userId = useSelector(state => getRootUser(state)?.id)
   useEffect(() => {
     if (typeof userId === 'number') setUserId(userId)
   }, [userId])

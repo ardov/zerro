@@ -1,4 +1,4 @@
-import { getRootUser } from 'store/data/selectors'
+import { getRootUser } from 'store/data/users'
 import { getAccounts } from './index'
 import { AppThunk } from 'store'
 import { sendEvent } from 'helpers/tracking'

@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { getUserCurrencyCode } from 'store/data/selectors'
+import { getUserCurrencyCode } from 'store/data/instruments'
 import { Box, Typography, Button } from '@mui/material'
 import WarningIcon from '@mui/icons-material/Warning'
 import { Amount } from 'components/Amount'

@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { getMainTag } from 'store/data/transactions/helpers'
 import { getTagLinks } from 'store/data/tags'
-import { convertCurrency } from 'store/data/selectors'
+import { convertCurrency } from 'store/data/instruments'
 import { getBudgetsByMonthAndTag } from 'store/data/budgets'
 import { round } from 'helpers/currencyHelpers'
 import { getAccTagMap } from 'store/data/hiddenData/accTagMap'

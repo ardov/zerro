@@ -2,7 +2,7 @@ import React, { FC, ReactElement } from 'react'
 import { useSelector } from 'react-redux'
 import { formatDate, formatMoney } from 'helpers/format'
 import { getTotalsByMonth, MonthTotals } from '../selectors/getTotalsByMonth'
-import { getUserCurrencyCode } from 'store/data/selectors'
+import { getUserCurrencyCode } from 'store/data/instruments'
 import {
   Typography,
   ButtonBase,

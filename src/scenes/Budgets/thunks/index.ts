@@ -1,9 +1,9 @@
 import {
   convertCurrency,
   getInstruments,
-  getRootUser,
   getUserInstrument,
-} from 'store/data/selectors'
+} from 'store/data/instruments'
+import { getRootUser } from 'store/data/users'
 import { getPopulatedTag } from 'store/data/tags'
 import {
   getAmountsByTag,

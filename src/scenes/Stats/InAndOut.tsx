@@ -17,7 +17,7 @@ import {
 } from 'store/data/transactions'
 import { formatDate, formatMoney } from 'helpers/format'
 import { makeDateArray, monthStart } from 'helpers/dateHelpers'
-import { convertCurrency } from 'store/data/selectors'
+import { convertCurrency } from 'store/data/instruments'
 import { round } from 'helpers/currencyHelpers'
 import { getType } from 'store/data/transactions/helpers'
 

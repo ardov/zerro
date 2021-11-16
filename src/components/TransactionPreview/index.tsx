@@ -23,7 +23,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { getTransactions } from 'store/data/transactions'
 import { getType } from 'store/data/transactions/helpers'
 import { getPopulatedAccounts } from 'store/data/accounts'
-import { getInstruments } from 'store/data/selectors'
+import { getInstruments } from 'store/data/instruments'
 import {
   applyChangesToTransaction,
   deleteTransactions,

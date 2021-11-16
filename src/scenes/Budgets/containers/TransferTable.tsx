@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { formatMoney } from 'helpers/format'
-import { getUserCurrencyCode } from 'store/data/selectors'
+import { getUserCurrencyCode } from 'store/data/instruments'
 import { makeStyles } from '@mui/styles'
 import {
   Paper,

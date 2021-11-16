@@ -34,7 +34,7 @@ import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
 import { Goal } from 'types'
 import { getTagMeta } from 'store/data/hiddenData/tagMeta'
 import SmsIcon from '@mui/icons-material/Sms'
-import { getInstruments } from 'store/data/selectors'
+import { getInstruments } from 'store/data/instruments'
 
 const useStyles = makeStyles(theme => ({
   row: {

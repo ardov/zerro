@@ -1,5 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getInstruments, getMerchants } from 'store/data/selectors'
+import { getInstruments } from 'store/data/instruments'
+import { getMerchants } from 'store/data/selectors'
 import { getAccounts } from 'store/data/accounts'
 import { getPopulatedTags } from 'store/data/tags'
 import { compareDates, getTime, isDeleted } from './helpers'

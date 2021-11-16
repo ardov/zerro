@@ -1,6 +1,6 @@
 import React, { FC, useContext, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { getUserCurrencyCode } from 'store/data/selectors'
+import { getUserCurrencyCode } from 'store/data/instruments'
 import { formatDate, formatMoney } from 'helpers/format'
 import {
   Typography,

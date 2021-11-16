@@ -21,7 +21,7 @@ import {
   convertCurrency,
   getInstruments,
   getUserInstrument,
-} from 'store/data/selectors'
+} from 'store/data/instruments'
 import { setOutcomeBudget } from 'scenes/Budgets/thunks'
 import { getGoals } from 'store/data/hiddenData/goals'
 import { getGoalsProgress } from 'scenes/Budgets/selectors/goalsProgress'

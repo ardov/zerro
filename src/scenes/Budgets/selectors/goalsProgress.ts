@@ -9,7 +9,7 @@ import { Goal } from 'types'
 import { RootState } from 'store'
 import { withPerf } from 'helpers/performance'
 import { getTagMeta } from 'store/data/hiddenData/tagMeta'
-import { convertCurrency } from 'store/data/selectors'
+import { convertCurrency } from 'store/data/instruments'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 // const startForOldGoals = +new Date(2019, 1, 1)

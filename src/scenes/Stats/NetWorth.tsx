@@ -20,7 +20,7 @@ import {
   ReferenceLine,
 } from 'recharts'
 import { getInBudgetAccounts, getSavingAccounts } from 'store/data/accounts'
-import { convertCurrency } from 'store/data/selectors'
+import { convertCurrency } from 'store/data/instruments'
 import { getAvailableMonths } from './availablePeriod'
 import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 import { round } from 'helpers/currencyHelpers'

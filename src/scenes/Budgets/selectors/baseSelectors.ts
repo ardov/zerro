@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { getInBudgetAccounts, getStartBalance } from 'store/data/accounts'
-import { convertCurrency } from 'store/data/selectors'
+import { convertCurrency } from 'store/data/instruments'
 import { round } from 'helpers/currencyHelpers'
 import { getSortedTransactions } from 'store/data/transactions'
 import { withPerf } from 'helpers/performance'
