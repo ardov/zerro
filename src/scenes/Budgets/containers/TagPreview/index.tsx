@@ -70,7 +70,7 @@ export const TagPreview: FC<TagPreviewProps> = ({ onClose, id }) => {
         <TextLine name="Остаток с прошлого месяца" amount={totalLeftover} />
         <TextLine name="Бюджет" amount={totalBudgeted} />
         <TextLine name="Расход" amount={totalOutcome} />
-        {transferOutcome && (
+        {!!transferOutcome && (
           <TextLine name="       Переводы" amount={transferOutcome} />
         )}
         <Box my={5}>

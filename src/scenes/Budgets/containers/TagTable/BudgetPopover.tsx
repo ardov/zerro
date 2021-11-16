@@ -73,7 +73,8 @@ export const BudgetPopover: FC<BudgetPopoverProps> = props => {
 
   const totalBudgeted = convert.toTag(tagAmounts.totalBudgeted)
   const budgeted = convert.toTag(tagAmounts.budgeted)
-  const available = convert.toTag(tagAmounts.totalAvailable)
+  const available = convert.toTag(tagAmounts.available)
+  const totalAvailable = convert.toTag(tagAmounts.totalAvailable)
   const prevBudgeted = convert.toTag(tagPrevAmounts.totalBudgeted)
   const prevOutcome = convert.toTag(tagPrevAmounts.totalOutcome)
 
@@ -94,13 +95,19 @@ export const BudgetPopover: FC<BudgetPopoverProps> = props => {
       text: 'Покрыть перерасход',
       amount: round(+totalBudgeted - available),
       selected: false,
-      condition: available < 0,
+      condition: isGroup(tagAmounts) && available < 0 && totalAvailable >= 0,
+    },
+    {
+      text: 'Покрыть перерасход',
+      amount: round(+totalBudgeted - totalAvailable),
+      selected: false,
+      condition: totalAvailable < 0,
     },
     {
       text: 'Сбросить остаток',
-      amount: round(+totalBudgeted - available),
+      amount: round(+totalBudgeted - totalAvailable),
       selected: false,
-      condition: available > 0,
+      condition: totalAvailable > 0,
     },
     {
       text: 'Цель',
@@ -136,9 +143,9 @@ export const BudgetPopover: FC<BudgetPopoverProps> = props => {
         totalBudgeted &&
         budgeted !== totalBudgeted,
     },
-  ]
+  ].filter(action => action.condition)
 
-  const availableAfter = round(available + value - totalBudgeted)
+  const availableAfter = round(totalAvailable + value - totalBudgeted)
   const valueInMain = convert.toMain(value)
   const availableAfterInMain = convert.toMain(availableAfter)
 
@@ -181,21 +188,19 @@ export const BudgetPopover: FC<BudgetPopoverProps> = props => {
       />
 
       <List>
-        {quickActions.map(({ text, amount, selected, condition }) =>
-          condition ? (
-            <ListItem
-              button
-              key={text}
-              selected={selected}
-              onClick={() => {
-                sendEvent('Budgets: quick budget: ' + text)
-                changeAndClose(amount)
-              }}
-            >
-              <ListItemText primary={text} secondary={format.tag(amount)} />
-            </ListItem>
-          ) : null
-        )}
+        {quickActions.map(({ text, amount, selected, condition }) => (
+          <ListItem
+            button
+            key={text}
+            selected={selected}
+            onClick={() => {
+              sendEvent('Budgets: quick budget: ' + text)
+              changeAndClose(amount)
+            }}
+          >
+            <ListItemText primary={text} secondary={format.tag(amount)} />
+          </ListItem>
+        ))}
       </List>
     </Popover>
   )
