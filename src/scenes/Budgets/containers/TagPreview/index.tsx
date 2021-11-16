@@ -30,14 +30,13 @@ export const TagPreview: FC<TagPreviewProps> = ({ onClose, id }) => {
   const tag = useSelector(state => getPopulatedTag(state, id))
   const amounts = useSelector(getAmountsById)?.[month]?.[id]
   if (!amounts) return null
-  const isParent = !!amounts.children
 
   const {
     // available,
     // totalAvailable,
-    leftover,
+    // leftover,
     totalLeftover,
-    budgeted,
+    // budgeted,
     totalBudgeted,
     // children,
     // childrenAvailable,
@@ -47,7 +46,7 @@ export const TagPreview: FC<TagPreviewProps> = ({ onClose, id }) => {
     // childrenOutcome,
     // childrenOverspent,
     // income,
-    outcome,
+    // outcome,
     // tagOutcome,
     // totalIncome,
     totalOutcome,
@@ -63,18 +62,17 @@ export const TagPreview: FC<TagPreviewProps> = ({ onClose, id }) => {
 
       <Box px={3} mt={3} display="flex" justifyContent="space-around">
         <Total name="Доступно" value={available} />
-        <Total name="Расход" value={isParent ? totalOutcome : outcome} />
+        <Total name="Расход" value={totalOutcome} />
       </Box>
 
       <Rhythm gap={1.5} px={3} mt={3}>
         <OutcomeWidget tagId={id} mx={-1} />
-        <TextLine
-          name="Остаток с прошлого месяца"
-          amount={isParent ? totalLeftover : leftover}
-        />
-        <TextLine name="Бюджет" amount={isParent ? totalBudgeted : budgeted} />
-        <TextLine name="Расход" amount={isParent ? totalOutcome : outcome} />
-        <TextLine name="       Переводы" amount={transferOutcome} />
+        <TextLine name="Остаток с прошлого месяца" amount={totalLeftover} />
+        <TextLine name="Бюджет" amount={totalBudgeted} />
+        <TextLine name="Расход" amount={totalOutcome} />
+        {transferOutcome && (
+          <TextLine name="       Переводы" amount={transferOutcome} />
+        )}
         <Box my={5}>
           <LinkedAccs id={id} />
         </Box>
