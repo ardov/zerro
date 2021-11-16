@@ -28,18 +28,3 @@ export function useMonth(): [number, (date: string | number | Date) => void] {
     : +startOfMonth(new Date())
   return [month, setMonth]
 }
-
-export function useDrawerId(): [
-  string | null,
-  (id?: string | 'overview' | null) => void
-] {
-  const history = useHistory()
-  const location = useLocation()
-  const drawer = new URLSearchParams(location.search).get('drawer')
-  const setDrawer = useMemo(() => {
-    return (id?: string | 'overview' | null) => {
-      history.push(getModifiedPath('drawer', id))
-    }
-  }, [history])
-  return [drawer, setDrawer]
-}

@@ -20,7 +20,7 @@ import {
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { GoalsProgressWidget } from './containers/GoalsProgressWidget'
-import { useMonth, useDrawerId } from './pathHooks'
+import { useMonth } from './pathHooks'
 import { DnDContext } from './containers/DnDContext'
 import { TagPreview } from './containers/TagPreview'
 import { Helmet } from 'react-helmet'
@@ -30,6 +30,7 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import add from 'date-fns/add'
 import sub from 'date-fns/sub'
 import { MapWidget } from './MapWidget'
+import { useSearchParam } from 'helpers/useSearchParam'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
@@ -92,7 +93,7 @@ function Budgets() {
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
   const [month, setMonth] = useMonth()
-  const [drawerId, setDrawerId] = useDrawerId()
+  const [drawerId, setDrawerId] = useSearchParam('drawer')
   const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))
   // const isSM = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   // const [showSankey, setShowSankey] = useState(false)
@@ -117,7 +118,7 @@ function Budgets() {
   )
 
   const openOverview = useCallback(() => setDrawerId('overview'), [setDrawerId])
-  const setDrawer = useCallback(id => setDrawerId(id), [setDrawerId])
+  const openTagInfo = useCallback(id => setDrawerId(id), [setDrawerId])
   const closeDrawer = useCallback(() => setDrawerId(), [setDrawerId])
 
   return (
@@ -140,7 +141,7 @@ function Budgets() {
             <ToBeBudgeted className={c.toBeBudgeted} onClick={openOverview} />
             <TagTable
               className={c.tags}
-              openDetails={setDrawer}
+              openDetails={openTagInfo}
               onOpenMonthDrawer={openOverview}
             />
             <TransferTable className={c.transfers} />
@@ -160,7 +161,7 @@ function Budgets() {
                 </Button>
               ))} */}
 
-            <MapWidget className={c.treemap} onSelectTag={setDrawer} />
+            <MapWidget className={c.treemap} onSelectTag={openTagInfo} />
           </Box>
 
           <Drawer
