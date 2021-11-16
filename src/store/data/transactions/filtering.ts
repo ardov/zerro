@@ -31,6 +31,7 @@ type CustomConditions = {
   dateFrom?: null | number | Date
   dateTo?: null | number | Date
   tags?: null | TagId[]
+  mainTags?: null | TagId[]
   accountsFrom?: null | AccountId[]
   accountsTo?: null | AccountId[]
   accounts?: null | AccountId[]
@@ -70,7 +71,9 @@ const checkConditions = (tr: Transaction, conditions: FilterConditions) => {
           case 'dateTo':
             return checkDate(tr, conditions.dateFrom, conditions.dateTo)
           case 'tags':
-            return checkTags(tr, conditions.tags)
+            return checkTags(tr, conditions.tags, 'any')
+          case 'mainTags':
+            return checkTags(tr, conditions.mainTags, 'main')
           case 'accountsFrom':
           case 'accountsTo':
             return checkAccounts(
@@ -173,16 +176,17 @@ const checkAccounts = (
   )
 }
 
-const checkTags = (tr: Transaction, tags?: FilterConditions['tags']) => {
+const checkTags = (
+  tr: Transaction,
+  tags?: FilterConditions['mainTags'],
+  matchType: 'main' | 'any' = 'any'
+) => {
   if (!tags || !tags.length) return true
-  if (!tr.tag && tags.includes('null') && getType(tr) !== 'transfer')
-    return true
-  if (!tr.tag) return false
-  let result = false
-  tr.tag.forEach(id => {
-    if (tags.includes(id)) result = true
-  })
-  return result
+  if (getType(tr) === 'transfer') return false
+  if (!tr.tag) return tags.includes('null')
+
+  if (matchType === 'main') return tags.includes(tr.tag[0])
+  return tr.tag.some(tags.includes)
 }
 
 const checkAmount = (

@@ -195,7 +195,7 @@ const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
     dateFrom: month,
     dateTo: endOfMonth(month),
     accountsFrom: accountsInBudget,
-    tags: tagIds,
+    mainTags: tagIds,
   })
   tagIds.forEach(id => {
     if (tagAccMap[id]) {
