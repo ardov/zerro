@@ -77,6 +77,7 @@ export function InAndOut() {
 
   const colorIncome = theme.palette.success.main
   const colorOutcome = theme.palette.error.main
+  const colorAxisText = theme.palette.text.disabled
 
   return (
     <Paper>
@@ -121,12 +122,21 @@ export function InAndOut() {
           <XAxis
             dataKey="date"
             tickFormatter={tickFormatter}
-            style={{ fontSize: '0.7rem' }}
+            axisLine={false}
+            tickLine={false}
+            tickMargin={2}
+            stroke={colorAxisText}
+            style={{ fontSize: '12px' }}
           />
           <YAxis
-            dataKey="in"
+            type="number"
+            domain={['dataMin', 'dataMax']}
             tickFormatter={number => formatMoney(number, undefined, 0)}
-            style={{ fontSize: '0.7rem' }}
+            axisLine={false}
+            tickLine={false}
+            tickMargin={2}
+            stroke={colorAxisText}
+            style={{ fontSize: '12px' }}
           />
           <Tooltip content={<CustomTooltip />} />
           <CartesianGrid opacity={0.5} vertical={false} />
@@ -175,11 +185,6 @@ const CustomTooltip = (props: any) => {
         amount={payload[0].payload.in - payload[0].payload.out}
         instrument="user"
       />
-      {/* <Typography>
-        {'Расход '}{' '}
-        {formatMoney((payload[0].payload.out / payload[0].payload.in) * 100)}
-        {'%'}
-      </Typography> */}
     </Card>
   )
 }
