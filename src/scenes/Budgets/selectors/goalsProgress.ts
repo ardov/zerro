@@ -5,9 +5,8 @@ import { getAmountsById } from './getAmountsByTag'
 import { getMonthDates } from './getMonthDates'
 import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths'
 import { goalType } from 'store/data/hiddenData/constants'
-import { Goal } from 'types'
+import { Goal, Selector } from 'types'
 import { RootState } from 'store'
-import { withPerf } from 'helpers/performance'
 import { getTagMeta } from 'store/data/hiddenData/tagMeta'
 import { convertCurrency } from 'store/data/instruments'
 
@@ -22,117 +21,114 @@ export type GoalProgress = {
 export const getGoalProgress = (state: RootState, month: number, id: string) =>
   getGoalsProgress(state)?.[month]?.[id]
 
-export const getGoalsProgress: (
-  state: RootState
-) => {
-  [month: number]: { [tagId: string]: GoalProgress | null }
-} = createSelector(
+export const getGoalsProgress: Selector<{
+  [month: number]: {
+    [tagId: string]: GoalProgress | null
+  }
+}> = createSelector(
   [getGoals, getAmountsById, getMonthDates, getTagMeta, convertCurrency],
-  withPerf(
-    'BUDGET: getGoalsProgress',
-    (goals, amountsById, monthList, tagMeta, convert) => {
-      const result: {
-        [month: number]: {
-          [tagId: string]: GoalProgress | null
+
+  (goals, amountsById, monthList, tagMeta, convert) => {
+    const result: {
+      [month: number]: {
+        [tagId: string]: GoalProgress | null
+      }
+    } = {}
+
+    monthList.forEach((month, i) => {
+      result[month] = {}
+
+      for (const id in goals) {
+        if (!goals[id]) continue
+        const { currency } = tagMeta[id] || {}
+        const amount = currency
+          ? round(convert(goals[id].amount, currency))
+          : goals[id].amount
+        const { type, end } = goals[id]
+        if (end && end < month) continue
+        if (!amount) continue
+        const tag = amountsById?.[month]?.[id]
+        if (!tag) continue
+
+        const budgeted = tag.totalBudgeted
+        const leftover = tag.totalLeftover
+        const available = tag.totalAvailable
+
+        switch (type) {
+          case MONTHLY:
+            result[month][id] = calcMonthlyProgress({ amount, budgeted })
+            break
+
+          case MONTHLY_SPEND:
+            result[month][id] = calcMonthlySpendProgress({
+              amount,
+              budgeted,
+              leftover,
+            })
+            break
+
+          case TARGET_BALANCE:
+            result[month][id] = calcTargetProgress({
+              amount,
+              budgeted,
+              available,
+              currentMonth: month,
+              endMonth: end,
+            })
+            break
+
+          default:
+            throw Error(`Unknown goal type: ${type}`)
         }
-      } = {}
-
-      monthList.forEach((month, i) => {
-        result[month] = {}
-
-        for (const id in goals) {
-          if (!goals[id]) continue
-          const { currency } = tagMeta[id] || {}
-          const amount = currency
-            ? round(convert(goals[id].amount, currency))
-            : goals[id].amount
-          const { type, end } = goals[id]
-          if (end && end < month) continue
-          if (!amount) continue
-          const tag = amountsById?.[month]?.[id]
-          if (!tag) continue
-
-          const budgeted = tag.totalBudgeted
-          const leftover = tag.totalLeftover
-          const available = tag.totalAvailable
-
-          switch (type) {
-            case MONTHLY:
-              result[month][id] = calcMonthlyProgress({ amount, budgeted })
-              break
-
-            case MONTHLY_SPEND:
-              result[month][id] = calcMonthlySpendProgress({
-                amount,
-                budgeted,
-                leftover,
-              })
-              break
-
-            case TARGET_BALANCE:
-              result[month][id] = calcTargetProgress({
-                amount,
-                budgeted,
-                available,
-                currentMonth: month,
-                endMonth: end,
-              })
-              break
-
-            default:
-              throw Error(`Unknown goal type: ${type}`)
-          }
-        }
-      })
-      return result
-    }
-  )
-)
-
-export const getTotalGoalsProgress = createSelector(
-  [getGoals, getGoalsProgress],
-  withPerf('BUDGET: getTotalGoalsProgress', (goals, goalsProgress) => {
-    let result: { [month: number]: GoalProgress | null } = {}
-
-    const isCounted = (goal: Goal) => goal.type !== TARGET_BALANCE || goal.end
-    let countedGoals: { [id: string]: Goal } = {}
-    let hasCountedGoals = false
-    for (const id in goals) {
-      if (isCounted(goals[id])) {
-        countedGoals[id] = goals[id]
-        hasCountedGoals = true
       }
-    }
-
-    for (const month in goalsProgress) {
-      if (!hasCountedGoals) {
-        result[month] = null
-        continue
-      }
-
-      let needSum = 0
-      let targetSum = 0
-      let totalProgress = 0
-      for (const tag in countedGoals) {
-        const { target = 0, need = 0 } = goalsProgress[month][tag] || {}
-        if (need > 0) needSum = round(needSum + need)
-        if (target > 0) targetSum = round(targetSum + target)
-      }
-
-      if (targetSum > 0) totalProgress = (targetSum - needSum) / targetSum
-      else if (targetSum === 0 && needSum > 0) totalProgress = 0
-      else totalProgress = 1
-
-      result[month] = {
-        need: needSum,
-        target: targetSum,
-        progress: totalProgress,
-      }
-    }
-
+    })
     return result
-  })
+  }
 )
+
+export const getTotalGoalsProgress: Selector<{
+  [month: number]: GoalProgress | null
+}> = createSelector([getGoals, getGoalsProgress], (goals, goalsProgress) => {
+  let result: { [month: number]: GoalProgress | null } = {}
+
+  const isCounted = (goal: Goal) => goal.type !== TARGET_BALANCE || goal.end
+  let countedGoals: { [id: string]: Goal } = {}
+  let hasCountedGoals = false
+  for (const id in goals) {
+    if (isCounted(goals[id])) {
+      countedGoals[id] = goals[id]
+      hasCountedGoals = true
+    }
+  }
+
+  for (const month in goalsProgress) {
+    if (!hasCountedGoals) {
+      result[month] = null
+      continue
+    }
+
+    let needSum = 0
+    let targetSum = 0
+    let totalProgress = 0
+    for (const tag in countedGoals) {
+      const { target = 0, need = 0 } = goalsProgress[month][tag] || {}
+      if (need > 0) needSum = round(needSum + need)
+      if (target > 0) targetSum = round(targetSum + target)
+    }
+
+    if (targetSum > 0) totalProgress = (targetSum - needSum) / targetSum
+    else if (targetSum === 0 && needSum > 0) totalProgress = 0
+    else totalProgress = 1
+
+    result[month] = {
+      need: needSum,
+      target: targetSum,
+      progress: totalProgress,
+    }
+  }
+
+  return result
+})
 
 function calcMonthlyProgress(data: { amount: number; budgeted: number }) {
   const { amount, budgeted } = data

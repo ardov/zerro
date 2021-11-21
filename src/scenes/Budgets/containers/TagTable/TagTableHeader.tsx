@@ -27,9 +27,8 @@ import useScrollPosition from '@react-hook/window-scroll'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import add from 'date-fns/add'
 import sub from 'date-fns/sub'
-import { getTotalGoalsProgress } from 'scenes/Budgets/selectors/goalsProgress'
 import { DragModeContext } from '../DnDContext'
-import { getMonthDates } from 'scenes/Budgets/selectors'
+import { getMonthDates, getTotalGoalsProgress } from 'scenes/Budgets/selectors'
 
 const useStyles = makeStyles(theme => ({
   row: {

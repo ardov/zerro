@@ -25,7 +25,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import {
   getGoalProgress,
   GoalProgress as GoalProgressType,
-} from 'scenes/Budgets/selectors/goalsProgress'
+} from 'scenes/Budgets/selectors'
 import { Amount } from 'components/Amount'
 import { useContext } from 'react'
 import { IsDraggingContext, DragModeContext, DragModeType } from '../DnDContext'

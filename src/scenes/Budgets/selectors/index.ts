@@ -9,3 +9,8 @@ export { getTransfers } from './getAmountsByTag'
 export type { MonthTotals } from './getTotalsByMonth'
 export { getTotalsByMonth } from './getTotalsByMonth'
 export { getTotalsArray } from './getTotalsByMonth'
+
+export type { GoalProgress } from './goalsProgress'
+export { getTotalGoalsProgress } from './goalsProgress'
+export { getGoalsProgress } from './goalsProgress'
+export { getGoalProgress } from './goalsProgress'

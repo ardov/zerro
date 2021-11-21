@@ -20,7 +20,7 @@ import {
 } from 'store/data/instruments'
 import { setOutcomeBudget } from 'scenes/Budgets/thunks'
 import { getGoals } from 'store/data/hiddenData/goals'
-import { getGoalsProgress } from 'scenes/Budgets/selectors/goalsProgress'
+import { getGoalsProgress } from 'scenes/Budgets/selectors'
 import { round } from 'helpers/currencyHelpers'
 import { sendEvent } from 'helpers/tracking'
 import pluralize from 'helpers/pluralize'

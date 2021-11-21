@@ -14,7 +14,7 @@ import { styled } from '@mui/styles'
 import { Tooltip } from 'components/Tooltip'
 import { Confirm } from 'components/Confirm'
 import { fillGoals } from '../thunks'
-import { getTotalGoalsProgress } from '../selectors/goalsProgress'
+import { getTotalGoalsProgress } from '../selectors'
 import { useMonth } from '../pathHooks'
 
 export const GoalsProgressWidget: FC<ButtonBaseProps> = props => {
