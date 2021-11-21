@@ -11,7 +11,6 @@ import {
   Chip,
 } from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
-import { makeStyles } from '@mui/styles'
 import { EmojiIcon } from 'components/EmojiIcon'
 import { formatMoney } from 'helpers/format'
 import WarningIcon from '@mui/icons-material/Warning'
@@ -35,32 +34,6 @@ import { Goal } from 'types'
 import { getTagMeta } from 'store/data/hiddenData/tagMeta'
 import SmsIcon from '@mui/icons-material/Sms'
 import { getInstruments } from 'store/data/instruments'
-
-const useStyles = makeStyles(theme => ({
-  row: {
-    paddingTop: (p: any) => theme.spacing(p.isChild ? 0.5 : 1),
-    paddingBottom: (p: any) => theme.spacing(p.isChild ? 0.5 : 1),
-    paddingLeft: (p: any) => theme.spacing(p.isChild ? 8 : 3),
-    paddingRight: theme.spacing(2),
-    display: 'grid',
-    width: '100%',
-    gridTemplateColumns: 'auto 90px 90px 90px 16px',
-    alignItems: 'center',
-    gridColumnGap: theme.spacing(2),
-
-    [theme.breakpoints.down('sm')]: {
-      gridTemplateColumns: 'auto 90px 16px',
-      gridColumnGap: theme.spacing(0.5),
-    },
-
-    '&:hover': {
-      background: (p: any) =>
-        p.isDragging ? 'none' : theme.palette.action.hover,
-    },
-    '&:hover .addGoal': { opacity: 1, transition: '.3s' },
-    '&:not(:hover) .addGoal': { opacity: 0 },
-  },
-}))
 
 type TagRowProps = {
   id: string
@@ -114,7 +87,6 @@ export const TagRow: FC<TagRowProps> = props => {
     shallowEqual
   )
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
-  const c = useStyles({ isChild, isDragging })
 
   if (
     !showOutcome &&
@@ -129,7 +101,12 @@ export const TagRow: FC<TagRowProps> = props => {
   const showBudget = isChild ? !!budgeted : true
 
   const renderContent = (provided?: any, snapshot?: any) => (
-    <div className={c.row} ref={provided?.innerRef}>
+    <Wrapper
+      isChild={!!isChild}
+      isDragging={isDragging}
+      ref={provided?.innerRef}
+      onClick={() => openDetails(id)}
+    >
       <span style={{ display: 'none' }}>{provided?.placeholder}</span>
       <NameCell
         symbol={symbol}
@@ -137,7 +114,6 @@ export const TagRow: FC<TagRowProps> = props => {
         name={name}
         comment={comment}
         currency={currency}
-        onOpenDetails={() => openDetails(id)}
       />
 
       {(metric === 'budgeted' || !isMobile) && (
@@ -145,14 +121,20 @@ export const TagRow: FC<TagRowProps> = props => {
           isUnsorted={isUnsorted}
           budgeted={budgeted}
           showBudget={showBudget}
-          onBudgetClick={e => openBudgetPopover(id, e.currentTarget)}
+          onBudgetClick={e => {
+            e.stopPropagation()
+            openBudgetPopover(id, e.currentTarget)
+          }}
         />
       )}
 
       {(metric === 'outcome' || !isMobile) && (
         <OutcomeCell
           outcome={outcome}
-          onClick={() => openTransactionsPopover(id)}
+          onClick={e => {
+            e.stopPropagation()
+            openTransactionsPopover(id)
+          }}
         />
       )}
 
@@ -172,9 +154,12 @@ export const TagRow: FC<TagRowProps> = props => {
       <GoalButton
         goal={goal}
         goalProgress={goalProgress}
-        onClick={e => openGoalPopover(id, e.currentTarget)}
+        onClick={e => {
+          e.stopPropagation()
+          openGoalPopover(id, e.currentTarget)
+        }}
       />
-    </div>
+    </Wrapper>
   )
 
   if (dragMode === 'REORDER') return renderContent()
@@ -187,6 +172,40 @@ export const TagRow: FC<TagRowProps> = props => {
     >
       {renderContent}
     </Droppable>
+  )
+}
+
+const Wrapper: FC<
+  ButtonBaseProps & { isChild: boolean; isDragging: boolean }
+> = props => {
+  const { isChild, isDragging, ...rest } = props
+  return (
+    <ButtonBase
+      sx={{
+        paddingTop: isChild ? 0.5 : 1,
+        paddingBottom: isChild ? 0.5 : 1,
+        paddingLeft: isChild ? 8 : 3,
+        paddingRight: 2,
+        display: 'grid',
+        width: '100%',
+        gridTemplateColumns: {
+          xs: 'auto 90px 16px',
+          sm: 'auto 90px 90px 90px 16px',
+        },
+        alignItems: 'center',
+        justifyContent: 'initial',
+        gridColumnGap: {
+          xs: 0.5,
+          sm: 2,
+        },
+
+        '&:focus': { backgroundColor: isDragging ? 'none' : 'action.hover' },
+        '&:hover': { backgroundColor: isDragging ? 'none' : 'action.focus' },
+        '&:hover .addGoal': { opacity: 1, transition: '.3s' },
+        '&:not(:hover) .addGoal': { opacity: 0 },
+      }}
+      {...rest}
+    />
   )
 }
 
@@ -213,7 +232,6 @@ type NameCellProps = {
   name: string
   comment?: string
   currency?: number
-  onOpenDetails: () => void
 }
 const NameCell: FC<NameCellProps> = ({
   symbol,
@@ -221,22 +239,19 @@ const NameCell: FC<NameCellProps> = ({
   name,
   comment,
   currency,
-  onOpenDetails,
 }) => {
   return (
     <Box display="flex" alignItems="center" minWidth={0}>
-      <Btn onClick={onOpenDetails}>
-        <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} />
-        <Typography component="span" variant="body1" title={name} noWrap>
-          {name}
-        </Typography>
-        <CurrencyTag currency={currency} />
-        {!!comment && (
-          <Tooltip title={comment}>
-            <SmsIcon sx={{ ml: 1, color: 'text.secondary' }} fontSize="small" />
-          </Tooltip>
-        )}
-      </Btn>
+      <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} />
+      <Typography component="span" variant="body1" title={name} noWrap>
+        {name}
+      </Typography>
+      <CurrencyTag currency={currency} />
+      {!!comment && (
+        <Tooltip title={comment}>
+          <SmsIcon sx={{ ml: 1, color: 'text.secondary' }} fontSize="small" />
+        </Tooltip>
+      )}
     </Box>
   )
 }
@@ -301,7 +316,7 @@ const BudgetCell: FC<BudgetCellProps> = props => {
 
 type OutcomeCellProps = {
   outcome: number
-  onClick: () => void
+  onClick: React.MouseEventHandler<HTMLButtonElement>
 }
 const OutcomeCell: FC<OutcomeCellProps> = props => {
   const { outcome, onClick } = props
