@@ -29,7 +29,7 @@ import add from 'date-fns/add'
 import sub from 'date-fns/sub'
 import { getTotalGoalsProgress } from 'scenes/Budgets/selectors/goalsProgress'
 import { DragModeContext } from '../DnDContext'
-import getMonthDates from 'scenes/Budgets/selectors/getMonthDates'
+import { getMonthDates } from 'scenes/Budgets/selectors'
 
 const useStyles = makeStyles(theme => ({
   row: {

@@ -12,11 +12,7 @@ import {
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { formatMoney } from 'helpers/format'
 import { AmountInput } from 'components/AmountInput'
-import {
-  getAmountsById,
-  TagAmounts,
-  TagGroupAmounts,
-} from 'scenes/Budgets/selectors/getAmountsByTag'
+import { getAmountsById } from 'scenes/Budgets/selectors'
 import {
   convertCurrency,
   getInstruments,
@@ -95,7 +91,7 @@ export const BudgetPopover: FC<BudgetPopoverProps> = props => {
       text: 'Покрыть перерасход',
       amount: round(+totalBudgeted - available),
       selected: false,
-      condition: isGroup(tagAmounts) && available < 0 && totalAvailable >= 0,
+      condition: tagAmounts.children && available < 0 && totalAvailable >= 0,
     },
     {
       text: 'Покрыть перерасход',
@@ -138,7 +134,7 @@ export const BudgetPopover: FC<BudgetPopoverProps> = props => {
       amount: round(totalBudgeted - budgeted),
       selected: false,
       condition:
-        isGroup(tagAmounts) &&
+        tagAmounts.children &&
         budgeted &&
         totalBudgeted &&
         budgeted !== totalBudgeted,
@@ -235,10 +231,4 @@ function getAvgOutcomeName(number: number) {
   if (number === 12) return s + 'год'
   if (number === 6) return s + 'полгода'
   return s + number + ' ' + pluralize(number, ['месяц', 'месяца', 'месяцев'])
-}
-
-function isGroup(
-  amounts: TagGroupAmounts | TagAmounts
-): amounts is TagGroupAmounts {
-  return amounts.children !== undefined
 }

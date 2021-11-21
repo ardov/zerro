@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { getTotalsArray } from '../../selectors/getTotalsByMonth'
+import { getTotalsArray } from '../../selectors'
 import { convertCurrency, getUserCurrencyCode } from 'store/data/instruments'
 import { getInBudgetAccounts } from 'store/data/accounts'
 import { round } from 'helpers/currencyHelpers'

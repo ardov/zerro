@@ -1,3 +1,4 @@
+import { RootState } from 'store'
 import { goalType } from 'store/data/hiddenData/constants'
 import iconsMap from 'store/data/tags/iconsMap.json'
 type IconsMap = typeof iconsMap
@@ -6,6 +7,8 @@ export type ById<T> = { [id: string]: T }
 export type Modify<T, R> = Omit<T, keyof R> & R
 export type OptionalExceptFor<T, TRequired extends keyof T> = Partial<T> &
   Pick<T, TRequired>
+
+export type Selector<T> = (state: RootState) => T
 
 export type Token = string | null
 

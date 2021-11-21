@@ -15,7 +15,7 @@ import {
 } from '@mui/material'
 import TagSelect2 from 'components/TagSelect2'
 import { addConnection, getAccTagMap } from 'store/data/hiddenData/accTagMap'
-import { getTransfers } from '../selectors/getAmountsByTag'
+import { getTransfers } from '../selectors'
 import { getAccounts } from 'store/data/accounts'
 import TagChip from 'components/TagChip'
 import { useMonth } from '../pathHooks'

@@ -6,7 +6,7 @@ import WarningIcon from '@mui/icons-material/Warning'
 import { Amount } from 'components/Amount'
 import { Confirm } from 'components/Confirm'
 import { fixOverspends } from 'scenes/Budgets/thunks'
-import { getTotalsByMonth } from 'scenes/Budgets/selectors/getTotalsByMonth'
+import { getTotalsByMonth } from 'scenes/Budgets/selectors'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 
 export const OverspentNotice: FC = () => {

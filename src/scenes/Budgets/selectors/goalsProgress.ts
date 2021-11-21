@@ -1,8 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { round } from 'helpers/currencyHelpers'
 import { getGoals } from 'store/data/hiddenData/goals'
-import { getAmountsById, isGroup } from './getAmountsByTag'
-import getMonthDates from './getMonthDates'
+import { getAmountsById } from './getAmountsByTag'
+import { getMonthDates } from './getMonthDates'
 import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths'
 import { goalType } from 'store/data/hiddenData/constants'
 import { Goal } from 'types'
@@ -12,7 +12,6 @@ import { getTagMeta } from 'store/data/hiddenData/tagMeta'
 import { convertCurrency } from 'store/data/instruments'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
-// const startForOldGoals = +new Date(2019, 1, 1)
 
 export type GoalProgress = {
   progress: number
@@ -53,12 +52,9 @@ export const getGoalsProgress: (
           const tag = amountsById?.[month]?.[id]
           if (!tag) continue
 
-          let { budgeted, leftover, available } = tag
-          if (isGroup(tag)) {
-            budgeted = tag.totalBudgeted
-            leftover = tag.totalLeftover
-            available = tag.totalAvailable
-          }
+          const budgeted = tag.totalBudgeted
+          const leftover = tag.totalLeftover
+          const available = tag.totalAvailable
 
           switch (type) {
             case MONTHLY:

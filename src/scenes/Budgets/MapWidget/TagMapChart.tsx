@@ -1,7 +1,6 @@
 import React, { useCallback } from 'react'
 import { useSelector } from 'react-redux'
-import { getTotalsByMonth } from '../selectors/getTotalsByMonth'
-import { getAmountsByTag } from '../selectors/getAmountsByTag'
+import { getAmountsByTag, getTotalsByMonth } from '../selectors'
 import { getTagsTree } from 'store/data/tags'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import { Tooltip, Treemap, ResponsiveContainer } from 'recharts'

@@ -5,11 +5,7 @@ import {
 } from 'store/data/instruments'
 import { getRootUser } from 'store/data/users'
 import { getPopulatedTag } from 'store/data/tags'
-import {
-  getAmountsByTag,
-  TagGroupAmounts,
-  TagAmounts,
-} from '../selectors/getAmountsByTag'
+import { getAmountsByTag, TagAmounts } from '../selectors'
 import { sendEvent } from 'helpers/tracking'
 import { makeBudget } from 'store/data/budgets'
 import { getBudgetsByMonthAndTag, getBudget } from 'store/data/budgets'
@@ -189,16 +185,12 @@ function removeFutureBudgets(
   return changedArr
 }
 
-function clearAvailable(
-  date: number,
-  amounts: ById<TagGroupAmounts>,
-  user: number
-) {
+function clearAvailable(date: number, amounts: ById<TagAmounts>, user: number) {
   const changedBudgets: Budget[] = []
   fillArray(amounts)
   return changedBudgets
 
-  function fillArray(amounts: ById<TagGroupAmounts>) {
+  function fillArray(amounts: ById<TagAmounts>) {
     for (const id in amounts) {
       const tag = amounts[id]
       if (tag.available > 0) {
@@ -210,14 +202,14 @@ function clearAvailable(
         })
         changedBudgets.push(budget)
       }
-      if (tag.children) fillArray(tag.children as ById<TagGroupAmounts>)
+      if (tag.children) fillArray(tag.children as ById<TagAmounts>)
     }
   }
 }
 
 function resetCurrentMonth(
   date: number,
-  amounts: ById<TagGroupAmounts>,
+  amounts: ById<TagAmounts>,
   user: number
 ) {
   const changedBudgets: Budget[] = []
@@ -231,7 +223,7 @@ function resetCurrentMonth(
   }
   return changedBudgets
 
-  function resetTag(id: string, tagAmounts: TagAmounts | TagGroupAmounts) {
+  function resetTag(id: string, tagAmounts: TagAmounts) {
     const { outcome, budgeted } = tagAmounts
     if ((budgeted || outcome) && outcome !== budgeted)
       changedBudgets.push(makeBudget({ user, date, outcome, tag: id }))

@@ -1,12 +1,12 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { getStartFunds } from './baseSelectors'
+import { getMonthDates } from './getMonthDates'
 import {
   getAmountsByTag,
   getLinkedTransfers,
   getTransferFees,
 } from './getAmountsByTag'
 import { round } from 'helpers/currencyHelpers'
-import getMonthDates from './getMonthDates'
 import { withPerf } from 'helpers/performance'
 import { RootState } from 'store'
 
@@ -39,7 +39,7 @@ export interface MonthTotals {
   transferFees: number
 }
 
-export const getTagTotals: (state: RootState) => TagTotals[] = createSelector(
+const getTagTotals: (state: RootState) => TagTotals[] = createSelector(
   [getMonthDates, getAmountsByTag],
   (months, amounts): TagTotals[] =>
     months.map(month => {

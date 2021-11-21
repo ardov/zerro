@@ -9,7 +9,7 @@ import { TransferTable } from './containers/TransferTable'
 import { MonthInfo } from './containers/MonthInfo'
 import { ToBeBudgeted } from './containers/ToBeBudgeted'
 import { MonthSelect } from './MonthSelect'
-import getMonthDates from './selectors/getMonthDates'
+import { getMonthDates } from './selectors'
 import {
   // Button,
   // Paper,

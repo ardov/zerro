@@ -5,7 +5,7 @@ import { makeStyles } from '@mui/styles'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator'
 import { TagRow } from './TagRow'
-import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
+import { getAmountsById } from 'scenes/Budgets/selectors'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import { DragModeContext } from '../DnDContext'
 
