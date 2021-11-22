@@ -59,6 +59,9 @@ export const TagTable: FC<TagTableProps> = props => {
     sendEvent('Budgets: see transactions')
     setSelected(id)
   }, [])
+  const onCloseTrDrawer = useCallback(() => {
+    setSelected(undefined)
+  }, [])
   const openBudgetPopover = useCallback(
     (id, anchor) => setBudgetPopoverData({ id, anchor }),
     []
@@ -148,10 +151,7 @@ export const TagTable: FC<TagTableProps> = props => {
         <TagTableFooter metric={metrics[metricIndex]} />
       </Paper>
 
-      <TransactionsDrawer
-        id={selected}
-        onClose={() => setSelected(undefined)}
-      />
+      <TransactionsDrawer id={selected} onClose={onCloseTrDrawer} />
       <BudgetPopover
         key={budgetPopoverData.id}
         id={budgetPopoverData.id || ''}
@@ -159,7 +159,7 @@ export const TagTable: FC<TagTableProps> = props => {
         open={!!budgetPopoverData.anchor}
         month={month}
         onClose={() => setBudgetPopoverData({})}
-        style={{ transform: 'translate(-10px, -12px)' }}
+        style={{ transform: 'translate(-12px, -6px)' }}
       />
       <GoalPopover
         key={goalPopoverData.id}
