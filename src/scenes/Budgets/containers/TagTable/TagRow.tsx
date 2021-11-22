@@ -16,6 +16,7 @@ import { formatMoney } from 'helpers/format'
 import WarningIcon from '@mui/icons-material/Warning'
 import AddIcon from '@mui/icons-material/Add'
 import EmojiFlagsIcon from '@mui/icons-material/EmojiFlags'
+import SmsIcon from '@mui/icons-material/Sms'
 import { goalToWords } from 'store/data/hiddenData/goals/helpers'
 import { GoalProgress } from 'components/GoalProgress'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
@@ -32,8 +33,8 @@ import { getPopulatedTag } from 'store/data/tags'
 import { getAmountsById } from 'scenes/Budgets/selectors'
 import { Goal } from 'types'
 import { getTagMeta } from 'store/data/hiddenData/tagMeta'
-import SmsIcon from '@mui/icons-material/Sms'
 import { getInstruments } from 'store/data/instruments'
+import { SxProps } from '@mui/system'
 
 type TagRowProps = {
   id: string
@@ -74,12 +75,11 @@ export const TagRow: FC<TagRowProps> = props => {
   if (isUnsorted) {
     symbol = '-'
     colorRGB = null
-    name = 'Без подкатегории'
+    name = tag.name + ' (основная)'
     budgeted = 0
     available = 0
   }
 
-  const isDragging = useContext(IsDraggingContext)
   const { dragMode } = useContext(DragModeContext)
   const goal = useSelector(state => getGoal(state, id), shallowEqual)
   const goalProgress = useSelector(
@@ -100,20 +100,19 @@ export const TagRow: FC<TagRowProps> = props => {
 
   const showBudget = isChild ? !!budgeted : true
 
-  const renderContent = (provided?: any, snapshot?: any) => (
+  return (
     <Wrapper
+      id={id}
       isChild={!!isChild}
-      isDragging={isDragging}
-      ref={provided?.innerRef}
-      onClick={() => openDetails(id)}
+      enableDrop={dragMode === 'FUNDS' && !isUnsorted}
     >
-      <span style={{ display: 'none' }}>{provided?.placeholder}</span>
       <NameCell
         symbol={symbol}
         colorRGB={colorRGB}
         name={name}
         comment={comment}
         currency={currency}
+        onClick={() => openDetails(id)}
       />
 
       {(metric === 'budgeted' || !isMobile) && (
@@ -121,26 +120,19 @@ export const TagRow: FC<TagRowProps> = props => {
           isUnsorted={isUnsorted}
           budgeted={budgeted}
           showBudget={showBudget}
-          onBudgetClick={e => {
-            e.stopPropagation()
-            openBudgetPopover(id, e.currentTarget)
-          }}
+          onBudgetClick={e => openBudgetPopover(id, e.currentTarget)}
         />
       )}
 
       {(metric === 'outcome' || !isMobile) && (
         <OutcomeCell
           outcome={outcome}
-          onClick={e => {
-            e.stopPropagation()
-            openTransactionsPopover(id)
-          }}
+          onClick={e => openTransactionsPopover(id)}
         />
       )}
 
       {(metric === 'available' || !isMobile) && (
         <AvailableCell
-          snapshot={snapshot}
           dragMode={dragMode}
           hiddenOverspend={hiddenOverspend}
           id={id}
@@ -154,66 +146,70 @@ export const TagRow: FC<TagRowProps> = props => {
       <GoalButton
         goal={goal}
         goalProgress={goalProgress}
-        onClick={e => {
-          e.stopPropagation()
-          openGoalPopover(id, e.currentTarget)
-        }}
+        onClick={e => openGoalPopover(id, e.currentTarget)}
       />
     </Wrapper>
   )
-
-  if (dragMode === 'REORDER') return renderContent()
-
-  return (
-    <Droppable
-      droppableId={id || 'null'}
-      type="FUNDS"
-      isDropDisabled={isUnsorted}
-    >
-      {renderContent}
-    </Droppable>
-  )
 }
 
-const Wrapper: FC<
-  ButtonBaseProps & { isChild: boolean; isDragging: boolean }
-> = props => {
-  const { isChild, isDragging, ...rest } = props
+const Wrapper: FC<{
+  id: string
+  enableDrop: boolean
+  isChild: boolean
+}> = props => {
+  const { id, enableDrop, isChild, children } = props
+  const isDragging = useContext(IsDraggingContext)
+  const style: SxProps = {
+    paddingLeft: isChild ? 8 : 3,
+    paddingRight: 2,
+    display: 'grid',
+    width: '100%',
+    gridTemplateColumns: {
+      xs: 'auto 90px 16px',
+      sm: 'auto 90px 90px 90px 16px',
+    },
+    transition: '0.1s',
+    alignItems: 'center',
+    justifyContent: 'initial',
+    gridColumnGap: {
+      xs: '4px',
+      sm: '16px',
+    },
+    '&:hover': { bgcolor: isDragging ? 'none' : 'action.hover' },
+    '&:hover .addGoal': { opacity: 1, transition: '.3s' },
+    '&:not(:hover) .addGoal': { opacity: 0 },
+    '& > *': { py: isChild ? 0.5 : 1 },
+  }
+  if (!enableDrop) {
+    return <Box sx={style}>{children}</Box>
+  }
   return (
-    <ButtonBase
-      sx={{
-        paddingTop: isChild ? 0.5 : 1,
-        paddingBottom: isChild ? 0.5 : 1,
-        paddingLeft: isChild ? 8 : 3,
-        paddingRight: 2,
-        display: 'grid',
-        width: '100%',
-        gridTemplateColumns: {
-          xs: 'auto 90px 16px',
-          sm: 'auto 90px 90px 90px 16px',
-        },
-        alignItems: 'center',
-        justifyContent: 'initial',
-        gridColumnGap: {
-          xs: 0.5,
-          sm: 2,
-        },
-
-        '&:focus': { backgroundColor: isDragging ? 'none' : 'action.hover' },
-        '&:hover': { backgroundColor: isDragging ? 'none' : 'action.focus' },
-        '&:hover .addGoal': { opacity: 1, transition: '.3s' },
-        '&:not(:hover) .addGoal': { opacity: 0 },
-      }}
-      {...rest}
-    />
+    <Droppable type="FUNDS" droppableId={id}>
+      {(provided, snapshot) => (
+        <Box
+          ref={provided.innerRef}
+          sx={{
+            ...style,
+            bgcolor: snapshot.isDraggingOver
+              ? 'action.selected'
+              : 'transparent',
+          }}
+        >
+          <span style={{ display: 'none' }}>{provided.placeholder}</span>
+          {children}
+        </Box>
+      )}
+    </Droppable>
   )
 }
 
 const Btn: FC<ButtonBaseProps> = props => (
   <ButtonBase
     sx={{
-      p: 0.5,
-      m: -0.5,
+      py: 1,
+      px: 1.5,
+      my: -1,
+      mx: -1.5,
       borderRadius: 1,
       minWidth: 0,
       transition: '0.1s',
@@ -232,6 +228,7 @@ type NameCellProps = {
   name: string
   comment?: string
   currency?: number
+  onClick: () => void
 }
 const NameCell: FC<NameCellProps> = ({
   symbol,
@@ -239,9 +236,10 @@ const NameCell: FC<NameCellProps> = ({
   name,
   comment,
   currency,
+  onClick,
 }) => {
   return (
-    <Box display="flex" alignItems="center" minWidth={0}>
+    <Box display="flex" alignItems="center" minWidth={0} onClick={onClick}>
       <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} />
       <Typography component="span" variant="body1" title={name} noWrap>
         {name}
@@ -256,10 +254,7 @@ const NameCell: FC<NameCellProps> = ({
   )
 }
 
-type CurrencyTagProps = {
-  currency?: number
-}
-const CurrencyTag: FC<CurrencyTagProps> = ({ currency }) => {
+const CurrencyTag: FC<{ currency?: number }> = ({ currency }) => {
   const instruments = useSelector(getInstruments)
   if (!currency) return null
   const instrument = instruments[currency]
@@ -336,7 +331,6 @@ const OutcomeCell: FC<OutcomeCellProps> = props => {
 }
 
 type AvailableCellProps = {
-  snapshot?: any
   dragMode: DragModeType
   hiddenOverspend?: number
   id: string
@@ -347,7 +341,6 @@ type AvailableCellProps = {
 }
 const AvailableCell: FC<AvailableCellProps> = props => {
   const {
-    snapshot = {},
     dragMode,
     hiddenOverspend,
     id,
@@ -380,15 +373,7 @@ const AvailableCell: FC<AvailableCellProps> = props => {
   )
 
   return (
-    <Box
-      sx={{
-        bgcolor: snapshot.isDraggingOver ? 'action.selected' : 'transparent',
-        transition: '0.1s',
-        borderRadius: 1,
-        m: -1,
-        p: 1,
-      }}
-    >
+    <Box>
       <Typography variant="body1" align="right">
         {!!hiddenOverspend && (
           <Tooltip
@@ -400,7 +385,11 @@ const AvailableCell: FC<AvailableCellProps> = props => {
               </span>
             }
           >
-            <WarningIcon fontSize="small" color="error" />
+            <WarningIcon
+              fontSize="small"
+              color="warning"
+              sx={{ transform: 'translate(-6px, 4px)' }}
+            />
           </Tooltip>
         )}
 
@@ -415,6 +404,12 @@ const AvailableCell: FC<AvailableCellProps> = props => {
     </Box>
   )
 }
+
+// const AvailableCellWrapper: FC<{
+//   id: string
+//   enableDrag: boolean
+//   isChild: boolean
+// }> = props => {}
 
 type GoalButtonProps = {
   goal: Goal
