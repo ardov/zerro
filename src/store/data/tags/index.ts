@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { compareTags } from 'store/localData/hiddenData/tagOrder'
+import { compareTags } from 'store/data/hiddenData/tagOrder'
 import populateTags from './populateTags'
 import { Modify, PopulatedTag, Tag, TagId } from 'types'
 import { RootState } from 'store'

@@ -10,7 +10,7 @@ interface DataSlice {
   diff?: Diff
 }
 
-const makeDataStore = () => ({
+const makeDataStore = (): DataStore => ({
   serverTimestamp: 0,
   instrument: {},
   user: {},

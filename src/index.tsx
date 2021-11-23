@@ -16,18 +16,7 @@ import { AppThemeProvider } from 'AppThemeProvider'
 
 initSentry()
 bindWorkerToStore(store.dispatch)
-
-// @ts-ignore
-window.zerro = {
-  get state() {
-    return store.getState()
-  },
-  env: process.env,
-  logsShow: false,
-  logs: {},
-  resetData: () => store.dispatch(resetData()),
-  applyClientPatch: (patch: Diff) => store.dispatch(applyClientPatch(patch)),
-}
+createZerroInstance(store)
 
 ReactDOM.render(
   <GlobalErrorBoundary>
@@ -42,10 +31,9 @@ ReactDOM.render(
   document.getElementById('root')
 )
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: http://bit.ly/CRA-PWA
-const swConfig = {
+// Register service worker fot app to work offline.
+// Learn more here http://bit.ly/CRA-PWA
+serviceWorkerRegistration.register({
   onUpdate: (registration: ServiceWorkerRegistration) => {
     registration.unregister().then(() => {
       window.location.reload()
@@ -54,6 +42,19 @@ const swConfig = {
   onSuccess: (registration: ServiceWorkerRegistration) => {
     sendEvent('Version Update: ' + process.env.REACT_APP_VERSION)
   },
-}
+})
 
-serviceWorkerRegistration.register(swConfig)
+/** `zerro` can be used in console to access state and modify data */
+function createZerroInstance(s: typeof store) {
+  // @ts-ignore
+  window.zerro = {
+    get state() {
+      return s.getState()
+    },
+    env: process.env,
+    logsShow: false,
+    logs: {},
+    resetData: () => s.dispatch(resetData()),
+    applyClientPatch: (patch: Diff) => s.dispatch(applyClientPatch(patch)),
+  }
+}

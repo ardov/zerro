@@ -5,16 +5,16 @@ import { Box, Typography, IconButton } from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@mui/icons-material/Close'
 import EditIcon from '@mui/icons-material/Edit'
-import { getPopulatedTag } from 'store/localData/tags'
+import { getPopulatedTag } from 'store/data/tags'
 import { Total, Line as TextLine } from '../components'
-import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
+import { getAmountsById } from 'scenes/Budgets/selectors'
 import Rhythm from 'components/Rhythm'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import { LinkedAccs } from './LinkedAccs'
 import { OutcomeWidget } from './OutcomeWidget'
 import { ColorPicker } from 'components/ColorPickerPopover'
 import { hex2int } from 'helpers/color'
-import { patchTag } from 'store/localData/tags/thunks'
+import { patchTag } from 'store/data/tags/thunks'
 import { sendEvent } from 'helpers/tracking'
 import { PopulatedTag } from 'types'
 import { TagEditDialog } from 'components/TagEditDialog'
@@ -30,14 +30,13 @@ export const TagPreview: FC<TagPreviewProps> = ({ onClose, id }) => {
   const tag = useSelector(state => getPopulatedTag(state, id))
   const amounts = useSelector(getAmountsById)?.[month]?.[id]
   if (!amounts) return null
-  const isParent = !!amounts.children
 
   const {
     // available,
     // totalAvailable,
-    leftover,
+    // leftover,
     totalLeftover,
-    budgeted,
+    // budgeted,
     totalBudgeted,
     // children,
     // childrenAvailable,
@@ -47,7 +46,7 @@ export const TagPreview: FC<TagPreviewProps> = ({ onClose, id }) => {
     // childrenOutcome,
     // childrenOverspent,
     // income,
-    outcome,
+    // outcome,
     // tagOutcome,
     // totalIncome,
     totalOutcome,
@@ -63,18 +62,17 @@ export const TagPreview: FC<TagPreviewProps> = ({ onClose, id }) => {
 
       <Box px={3} mt={3} display="flex" justifyContent="space-around">
         <Total name="Доступно" value={available} />
-        <Total name="Расход" value={isParent ? totalOutcome : outcome} />
+        <Total name="Расход" value={totalOutcome} />
       </Box>
 
       <Rhythm gap={1.5} px={3} mt={3}>
         <OutcomeWidget tagId={id} mx={-1} />
-        <TextLine
-          name="Остаток с прошлого месяца"
-          amount={isParent ? totalLeftover : leftover}
-        />
-        <TextLine name="Бюджет" amount={isParent ? totalBudgeted : budgeted} />
-        <TextLine name="Расход" amount={isParent ? totalOutcome : outcome} />
-        <TextLine name="       Переводы" amount={transferOutcome} />
+        <TextLine name="Остаток с прошлого месяца" amount={totalLeftover} />
+        <TextLine name="Бюджет" amount={totalBudgeted} />
+        <TextLine name="Расход" amount={totalOutcome} />
+        {!!transferOutcome && (
+          <TextLine name="       Переводы" amount={transferOutcome} />
+        )}
         <Box my={5}>
           <LinkedAccs id={id} />
         </Box>

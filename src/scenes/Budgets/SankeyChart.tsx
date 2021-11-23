@@ -1,8 +1,8 @@
 import React, { FC } from 'react'
 import { useSelector } from 'react-redux'
-import { getTotalsByMonth } from './selectors/getTotalsByMonth'
-import { getAmountsByTag } from './selectors/getAmountsByTag'
-import { getTagsTree } from 'store/localData/tags'
+import { getTotalsByMonth } from './selectors'
+import { getAmountsByTag } from './selectors'
+import { getTagsTree } from 'store/data/tags'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import {
   Sankey,

@@ -3,12 +3,9 @@ import { Box } from '@mui/material'
 import { SxProps } from '@mui/system'
 import { Theme } from '@mui/material/styles'
 import { useSelector } from 'react-redux'
-import { getSortedTransactions } from 'store/localData/transactions'
-import { groupTransactionsBy } from 'store/localData/transactions/helpers'
-import {
-  checkRaw,
-  FilterConditions,
-} from 'store/localData/transactions/filtering'
+import { getSortedTransactions } from 'store/data/transactions'
+import { groupTransactionsBy } from 'store/data/transactions/helpers'
+import { checkRaw, FilterConditions } from 'store/data/transactions/filtering'
 import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'

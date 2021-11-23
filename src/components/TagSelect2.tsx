@@ -1,6 +1,6 @@
 import React, { FC, KeyboardEventHandler, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { getTagsTree, TagTreeNode } from 'store/localData/tags'
+import { getTagsTree, TagTreeNode } from 'store/data/tags'
 import {
   Popover,
   Paper,

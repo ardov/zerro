@@ -1,8 +1,8 @@
 import { sendEvent } from 'helpers/tracking'
 import { AppThunk } from 'store'
 import { applyClientPatch } from 'store/data'
-import { getRootUserId } from 'store/data/selectors'
-import { getTag } from 'store/localData/tags'
+import { getRootUser } from 'store/data/users'
+import { getTag } from 'store/data/tags'
 import { OptionalExceptFor, Tag, ZmTag } from 'types'
 import { makeTag } from './makeTag'
 
@@ -30,7 +30,7 @@ export const createTag = (tag: OptionalExceptFor<Tag, 'title'>): AppThunk => (
   if (hasId(tag)) return dispatch(patchTag(tag))
   if (!tag.title) throw new Error('Trying to create tag without title')
   const state = getState()
-  let user = getRootUserId(state)
+  let user = getRootUser(state)?.id
   if (!user) throw new Error('No user')
   const newTag = makeTag({ ...tag, user })
 

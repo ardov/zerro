@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { formatMoney } from 'helpers/format'
-import { getUserCurrencyCode } from 'store/data/selectors'
+import { getUserCurrencyCode } from 'store/data/instruments'
 import {
   Typography,
   ButtonBase,
@@ -14,7 +14,7 @@ import { styled } from '@mui/styles'
 import { Tooltip } from 'components/Tooltip'
 import { Confirm } from 'components/Confirm'
 import { fillGoals } from '../thunks'
-import { getTotalGoalsProgress } from '../selectors/goalsProgress'
+import { getTotalGoalsProgress } from '../selectors'
 import { useMonth } from '../pathHooks'
 
 export const GoalsProgressWidget: FC<ButtonBaseProps> = props => {

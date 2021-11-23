@@ -1,17 +1,18 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getMainTag } from 'store/localData/transactions/helpers'
-import { getTagLinks } from 'store/localData/tags'
-import { convertCurrency } from 'store/data/selectors'
-import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
+import { getMainTag } from 'store/data/transactions/helpers'
+import { getTagLinks } from 'store/data/tags'
+import { convertCurrency } from 'store/data/instruments'
+import { getBudgetsByMonthAndTag } from 'store/data/budgets'
 import { round } from 'helpers/currencyHelpers'
-import { getAccTagMap } from 'store/localData/hiddenData/accTagMap'
+import { getAccTagMap } from 'store/data/hiddenData/accTagMap'
 import startOfMonth from 'date-fns/startOfMonth'
-import { getType } from 'store/localData/transactions/helpers'
-import getMonthDates from './getMonthDates'
-import { getTransactionsInBudget } from './baseSelectors'
-import { getInBudgetAccounts } from 'store/localData/accounts'
-import { PopulatedBudget } from 'types'
+import { getType } from 'store/data/transactions/helpers'
+import { getMonthDates } from './getMonthDates'
+import { getInBudgetAccounts } from 'store/data/accounts'
+import { PopulatedBudget, Selector } from 'types'
 import { withPerf } from 'helpers/performance'
+import { RootState } from 'store'
+import { getTransactionsHistory } from 'store/data/transactions'
 
 interface DateNode {
   income: { [tagId: string]: number }
@@ -26,71 +27,79 @@ const makeDateNode = (): DateNode => ({
   transferFees: 0,
 })
 
-const getAmountsByMonth = createSelector(
-  [getTransactionsInBudget, convertCurrency, getInBudgetAccounts],
-  withPerf(
-    'BUDGET: getAmountsByMonth',
-    (transactions, convert, accountsInBudget) => {
-      const result: { [date: number]: DateNode } = {}
+const getAmountsByMonth: Selector<{
+  [month: number]: DateNode
+}> = createSelector(
+  [getTransactionsHistory, convertCurrency, getInBudgetAccounts],
+  (transactions, convert, accountsInBudget) => {
+    const result: { [date: number]: DateNode } = {}
 
-      const budgetAccs = accountsInBudget.map(acc => acc.id)
-      const inBudget = (accId: string) => budgetAccs.includes(accId)
+    const budgetAccs = accountsInBudget.map(acc => acc.id)
+    const inBudget = (accId: string) => budgetAccs.includes(accId)
 
-      transactions.forEach(tr => {
-        const date = +startOfMonth(tr.date)
-        const type = getType(tr)
-        const tag = getMainTag(tr) || 'null'
-        const income = convert(tr.income, tr.incomeInstrument)
-        const outcome = convert(tr.outcome, tr.outcomeInstrument)
+    transactions.forEach(tr => {
+      // Skip transactions outside budget
+      if (!inBudget(tr.incomeAccount) && !inBudget(tr.outcomeAccount)) return
 
-        result[date] ??= makeDateNode()
+      const month = +startOfMonth(tr.date)
+      const type = getType(tr)
+      const tag = getMainTag(tr) || 'null'
+      const income = convert(tr.income, tr.incomeInstrument)
+      const outcome = convert(tr.outcome, tr.outcomeInstrument)
 
-        if (type === 'income') {
-          result[date].income[tag] = result[date].income[tag]
-            ? round(result[date].income[tag] + income)
-            : income
-        }
+      result[month] ??= makeDateNode()
+      const node = result[month]
 
-        if (type === 'outcome') {
-          result[date].outcome[tag] = result[date].outcome[tag]
-            ? round(result[date].outcome[tag] + outcome)
-            : outcome
-        }
+      switch (type) {
+        case 'income':
+          node.income[tag] ??= 0
+          node.income[tag] = round(node.income[tag] + income)
+          return
 
-        if (type === 'transfer') {
+        case 'outcome':
+          node.outcome[tag] ??= 0
+          node.outcome[tag] = round(node.outcome[tag] + outcome)
+          return
+
+        case 'transfer':
           // TRANSFER BETWEEN BUDGET ACCOUNTS
           if (inBudget(tr.incomeAccount) && inBudget(tr.outcomeAccount)) {
-            result[date].transferFees = round(
-              result[date].transferFees + outcome - income
-            )
+            const fee = outcome - income
+            node.transferFees = round(node.transferFees + fee)
+            return
           }
           // TRANSFER TO BUDGET
           else if (inBudget(tr.incomeAccount)) {
-            result[date].transfers[tr.outcomeAccount] = result[date].transfers[
-              tr.outcomeAccount
-            ]
-              ? round(result[date].transfers[tr.outcomeAccount] - income)
-              : -income
+            node.transfers[tr.outcomeAccount] ??= 0
+            node.transfers[tr.outcomeAccount] = round(
+              node.transfers[tr.outcomeAccount] - income
+            )
+            return
           }
           // TRANSFER FROM BUDGET
           else if (inBudget(tr.outcomeAccount)) {
-            result[date].transfers[tr.incomeAccount] = result[date].transfers[
-              tr.incomeAccount
-            ]
-              ? round(result[date].transfers[tr.incomeAccount] + outcome)
-              : outcome
+            node.transfers[tr.incomeAccount] ??= 0
+            node.transfers[tr.incomeAccount] = round(
+              node.transfers[tr.incomeAccount] + outcome
+            )
+            return
           }
-        }
-      })
+          break
 
-      return result
-    }
-  )
+        default:
+          throw new Error('Unknown transaction type: ' + type)
+      }
+    })
+
+    return result
+  }
 )
 
 interface AmountsByDate {
   [date: string]: { [id: string]: number }
 }
+
+// Used only for TransferTable
 export const getTransfers = createSelector([getAmountsByMonth], amounts => {
   let result: AmountsByDate = {}
   for (const date in amounts) {
@@ -98,6 +107,7 @@ export const getTransfers = createSelector([getAmountsByMonth], amounts => {
   }
   return result
 })
+
 export const getLinkedTransfers = createSelector(
   [getAccTagMap, getAmountsByMonth],
   (accTagMap, amounts) => {
@@ -154,13 +164,13 @@ export type TagAmounts = {
 }
 export type TagGroupAmounts = TagAmounts
 
-export function isGroup(
-  amounts: TagGroupAmounts | TagAmounts
-): amounts is TagGroupAmounts {
-  return (amounts as TagGroupAmounts).children !== undefined
-}
-
-export const getAmountsByTag = createSelector(
+export const getAmountsByTag: (
+  state: RootState
+) => {
+  [month: string]: {
+    [tagId: string]: TagGroupAmounts
+  }
+} = createSelector(
   [
     getMonthDates,
     getBudgetsByMonthAndTag,

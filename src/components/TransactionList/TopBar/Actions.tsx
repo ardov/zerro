@@ -20,12 +20,12 @@ import {
   deleteTransactions,
   markViewed,
   bulkEditTransactions,
-} from 'store/localData/transactions/thunks'
+} from 'store/data/transactions/thunks'
 import { CSSTransition } from 'react-transition-group'
 import { EditOutlined } from '@mui/icons-material'
 import { BulkEditModal } from './BulkEditModal'
-import { getType, isNew } from 'store/localData/transactions/helpers'
-import { getTransactions } from 'store/localData/transactions'
+import { getType, isNew } from 'store/data/transactions/helpers'
+import { getTransactions } from 'store/data/transactions'
 import { Divider } from '@mui/material'
 import { Transaction } from 'types'
 

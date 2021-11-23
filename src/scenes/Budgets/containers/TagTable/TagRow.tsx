@@ -11,56 +11,30 @@ import {
   Chip,
 } from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
-import { makeStyles } from '@mui/styles'
 import { EmojiIcon } from 'components/EmojiIcon'
 import { formatMoney } from 'helpers/format'
 import WarningIcon from '@mui/icons-material/Warning'
 import AddIcon from '@mui/icons-material/Add'
 import EmojiFlagsIcon from '@mui/icons-material/EmojiFlags'
-import { goalToWords } from 'store/localData/hiddenData/goals/helpers'
+import SmsIcon from '@mui/icons-material/Sms'
+import { goalToWords } from 'store/data/hiddenData/goals/helpers'
 import { GoalProgress } from 'components/GoalProgress'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import { getGoal } from 'store/localData/hiddenData/goals'
+import { getGoal } from 'store/data/hiddenData/goals'
 import { useSelector, shallowEqual } from 'react-redux'
 import {
   getGoalProgress,
   GoalProgress as GoalProgressType,
-} from 'scenes/Budgets/selectors/goalsProgress'
+} from 'scenes/Budgets/selectors'
 import { Amount } from 'components/Amount'
 import { useContext } from 'react'
 import { IsDraggingContext, DragModeContext, DragModeType } from '../DnDContext'
-import { getPopulatedTag } from 'store/localData/tags'
-import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
+import { getPopulatedTag } from 'store/data/tags'
+import { getAmountsById } from 'scenes/Budgets/selectors'
 import { Goal } from 'types'
-import { getTagMeta } from 'store/localData/hiddenData/tagMeta'
-import SmsIcon from '@mui/icons-material/Sms'
-import { getInstruments } from 'store/data/selectors'
-
-const useStyles = makeStyles(theme => ({
-  row: {
-    paddingTop: (p: any) => theme.spacing(p.isChild ? 0.5 : 1),
-    paddingBottom: (p: any) => theme.spacing(p.isChild ? 0.5 : 1),
-    paddingLeft: (p: any) => theme.spacing(p.isChild ? 8 : 3),
-    paddingRight: theme.spacing(2),
-    display: 'grid',
-    width: '100%',
-    gridTemplateColumns: 'auto 90px 90px 90px 16px',
-    alignItems: 'center',
-    gridColumnGap: theme.spacing(2),
-
-    [theme.breakpoints.down('sm')]: {
-      gridTemplateColumns: 'auto 90px 16px',
-      gridColumnGap: theme.spacing(0.5),
-    },
-
-    '&:hover': {
-      background: (p: any) =>
-        p.isDragging ? 'none' : theme.palette.action.hover,
-    },
-    '&:hover .addGoal': { opacity: 1, transition: '.3s' },
-    '&:not(:hover) .addGoal': { opacity: 0 },
-  },
-}))
+import { getTagMeta } from 'store/data/hiddenData/tagMeta'
+import { getInstruments } from 'store/data/instruments'
+import { SxProps } from '@mui/system'
 
 type TagRowProps = {
   id: string
@@ -101,12 +75,11 @@ export const TagRow: FC<TagRowProps> = props => {
   if (isUnsorted) {
     symbol = '-'
     colorRGB = null
-    name = 'Без подкатегории'
+    name = tag.name + ' (основная)'
     budgeted = 0
     available = 0
   }
 
-  const isDragging = useContext(IsDraggingContext)
   const { dragMode } = useContext(DragModeContext)
   const goal = useSelector(state => getGoal(state, id), shallowEqual)
   const goalProgress = useSelector(
@@ -114,7 +87,6 @@ export const TagRow: FC<TagRowProps> = props => {
     shallowEqual
   )
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
-  const c = useStyles({ isChild, isDragging })
 
   if (
     !showOutcome &&
@@ -128,16 +100,19 @@ export const TagRow: FC<TagRowProps> = props => {
 
   const showBudget = isChild ? !!budgeted : true
 
-  const renderContent = (provided?: any, snapshot?: any) => (
-    <div className={c.row} ref={provided?.innerRef}>
-      <span style={{ display: 'none' }}>{provided?.placeholder}</span>
+  return (
+    <Wrapper
+      id={id}
+      isChild={!!isChild}
+      enableDrop={dragMode === 'FUNDS' && !isUnsorted}
+    >
       <NameCell
         symbol={symbol}
         colorRGB={colorRGB}
         name={name}
         comment={comment}
         currency={currency}
-        onOpenDetails={() => openDetails(id)}
+        onClick={() => openDetails(id)}
       />
 
       {(metric === 'budgeted' || !isMobile) && (
@@ -152,13 +127,12 @@ export const TagRow: FC<TagRowProps> = props => {
       {(metric === 'outcome' || !isMobile) && (
         <OutcomeCell
           outcome={outcome}
-          onClick={() => openTransactionsPopover(id)}
+          onClick={e => openTransactionsPopover(id)}
         />
       )}
 
       {(metric === 'available' || !isMobile) && (
         <AvailableCell
-          snapshot={snapshot}
           dragMode={dragMode}
           hiddenOverspend={hiddenOverspend}
           id={id}
@@ -174,18 +148,57 @@ export const TagRow: FC<TagRowProps> = props => {
         goalProgress={goalProgress}
         onClick={e => openGoalPopover(id, e.currentTarget)}
       />
-    </div>
+    </Wrapper>
   )
+}
 
-  if (dragMode === 'REORDER') return renderContent()
-
+const Wrapper: FC<{
+  id: string
+  enableDrop: boolean
+  isChild: boolean
+}> = props => {
+  const { id, enableDrop, isChild, children } = props
+  const isDragging = useContext(IsDraggingContext)
+  const style: SxProps = {
+    paddingLeft: isChild ? 8 : 3,
+    paddingRight: 2,
+    display: 'grid',
+    width: '100%',
+    gridTemplateColumns: {
+      xs: 'auto 90px 16px',
+      sm: 'auto 90px 90px 90px 16px',
+    },
+    transition: '0.1s',
+    alignItems: 'center',
+    justifyContent: 'initial',
+    gridColumnGap: {
+      xs: '4px',
+      sm: '16px',
+    },
+    '&:hover': { bgcolor: isDragging ? 'none' : 'action.hover' },
+    '&:hover .addGoal': { opacity: 1, transition: '.3s' },
+    '&:not(:hover) .addGoal': { opacity: 0 },
+    '& > *': { py: isChild ? 0.5 : 1 },
+  }
+  if (!enableDrop) {
+    return <Box sx={style}>{children}</Box>
+  }
   return (
-    <Droppable
-      droppableId={id || 'null'}
-      type="FUNDS"
-      isDropDisabled={isUnsorted}
-    >
-      {renderContent}
+    <Droppable type="FUNDS" droppableId={id}>
+      {(provided, snapshot) => (
+        <Box
+          ref={provided.innerRef}
+          sx={{
+            ...style,
+            bgcolor: snapshot.isDraggingOver
+              ? 'action.selected'
+              : 'transparent',
+          }}
+        >
+          <span style={{ display: 'none' }}>{provided.placeholder}</span>
+          {children}
+        </Box>
+      )}
     </Droppable>
   )
 }
@@ -193,8 +206,10 @@ export const TagRow: FC<TagRowProps> = props => {
 const Btn: FC<ButtonBaseProps> = props => (
   <ButtonBase
     sx={{
-      p: 0.5,
-      m: -0.5,
+      py: 1,
+      px: 1.5,
+      my: -1,
+      mx: -1.5,
       borderRadius: 1,
       minWidth: 0,
       transition: '0.1s',
@@ -213,7 +228,7 @@ type NameCellProps = {
   name: string
   comment?: string
   currency?: number
-  onOpenDetails: () => void
+  onClick: () => void
 }
 const NameCell: FC<NameCellProps> = ({
   symbol,
@@ -221,30 +236,25 @@ const NameCell: FC<NameCellProps> = ({
   name,
   comment,
   currency,
-  onOpenDetails,
+  onClick,
 }) => {
   return (
-    <Box display="flex" alignItems="center" minWidth={0}>
-      <Btn onClick={onOpenDetails}>
-        <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} />
-        <Typography component="span" variant="body1" title={name} noWrap>
-          {name}
-        </Typography>
-        <CurrencyTag currency={currency} />
-        {!!comment && (
-          <Tooltip title={comment}>
-            <SmsIcon sx={{ ml: 1, color: 'text.secondary' }} fontSize="small" />
-          </Tooltip>
-        )}
-      </Btn>
+    <Box display="flex" alignItems="center" minWidth={0} onClick={onClick}>
+      <EmojiIcon symbol={symbol} mr={1.5} color={colorRGB} />
+      <Typography component="span" variant="body1" title={name} noWrap>
+        {name}
+      </Typography>
+      <CurrencyTag currency={currency} />
+      {!!comment && (
+        <Tooltip title={comment}>
+          <SmsIcon sx={{ ml: 1, color: 'text.secondary' }} fontSize="small" />
+        </Tooltip>
+      )}
     </Box>
   )
 }
 
-type CurrencyTagProps = {
-  currency?: number
-}
-const CurrencyTag: FC<CurrencyTagProps> = ({ currency }) => {
+const CurrencyTag: FC<{ currency?: number }> = ({ currency }) => {
   const instruments = useSelector(getInstruments)
   if (!currency) return null
   const instrument = instruments[currency]
@@ -301,7 +311,7 @@ const BudgetCell: FC<BudgetCellProps> = props => {
 
 type OutcomeCellProps = {
   outcome: number
-  onClick: () => void
+  onClick: React.MouseEventHandler<HTMLButtonElement>
 }
 const OutcomeCell: FC<OutcomeCellProps> = props => {
   const { outcome, onClick } = props
@@ -321,7 +331,6 @@ const OutcomeCell: FC<OutcomeCellProps> = props => {
 }
 
 type AvailableCellProps = {
-  snapshot?: any
   dragMode: DragModeType
   hiddenOverspend?: number
   id: string
@@ -332,7 +341,6 @@ type AvailableCellProps = {
 }
 const AvailableCell: FC<AvailableCellProps> = props => {
   const {
-    snapshot = {},
     dragMode,
     hiddenOverspend,
     id,
@@ -365,15 +373,7 @@ const AvailableCell: FC<AvailableCellProps> = props => {
   )
 
   return (
-    <Box
-      sx={{
-        bgcolor: snapshot.isDraggingOver ? 'action.selected' : 'transparent',
-        transition: '0.1s',
-        borderRadius: 1,
-        m: -1,
-        p: 1,
-      }}
-    >
+    <Box>
       <Typography variant="body1" align="right">
         {!!hiddenOverspend && (
           <Tooltip
@@ -385,7 +385,11 @@ const AvailableCell: FC<AvailableCellProps> = props => {
               </span>
             }
           >
-            <WarningIcon fontSize="small" color="error" />
+            <WarningIcon
+              fontSize="small"
+              color="warning"
+              sx={{ transform: 'translate(-6px, 4px)' }}
+            />
           </Tooltip>
         )}
 
@@ -400,6 +404,12 @@ const AvailableCell: FC<AvailableCellProps> = props => {
     </Box>
   )
 }
+
+// const AvailableCellWrapper: FC<{
+//   id: string
+//   enableDrag: boolean
+//   isChild: boolean
+// }> = props => {}
 
 type GoalButtonProps = {
   goal: Goal

@@ -1,24 +1,27 @@
+import { createSelector } from '@reduxjs/toolkit'
 import startOfMonth from 'date-fns/startOfMonth'
 import isSameMonth from 'date-fns/isSameMonth'
 import addMonths from 'date-fns/addMonths'
-import { createSelector } from '@reduxjs/toolkit'
-import { getTransactionsInBudget } from './baseSelectors'
-import { getBudgetsByMonthAndTag } from 'store/localData/budgets'
-import { withPerf } from 'helpers/performance'
+import { getBudgetsByMonthAndTag } from 'store/data/budgets'
+import { getTransactionsHistory } from 'store/data/transactions'
+import { Selector } from 'types'
 
-const getFirstMonth = createSelector(
-  [getTransactionsInBudget],
-  transactions =>
-    +startOfMonth(
-      transactions.length
-        ? transactions[transactions.length - 1].date
-        : Date.now()
-    )
+const getFirstMonth: Selector<number> = createSelector(
+  [getTransactionsHistory],
+  transactions => {
+    const START = +new Date(2010, 0, 1)
+    for (const tr of transactions) {
+      if (tr.date >= START) {
+        return +startOfMonth(tr.date)
+      }
+    }
+    return +startOfMonth(Date.now())
+  }
 )
 
-const getLastMonth = createSelector(
+const getLastMonth: Selector<number> = createSelector(
   [getBudgetsByMonthAndTag],
-  withPerf('BUDGET: getLastMonth', budgets => {
+  budgets => {
     const lastBudgetDate = Object.keys(budgets)
       .map(s => parseInt(s))
       .sort((a, b) => a - b)
@@ -33,12 +36,12 @@ const getLastMonth = createSelector(
     )
 
     return Math.max(afterLastBudget, nextMonth)
-  })
+  }
 )
 
-const getMonthDates = createSelector(
+export const getMonthDates: Selector<number[]> = createSelector(
   [getFirstMonth, getLastMonth],
-  withPerf('BUDGET: getMonthDates', (firstMs, lastMs) => {
+  (firstMs, lastMs) => {
     const firstDate = new Date(firstMs)
     const lastDate = new Date(lastMs)
     const result = []
@@ -48,7 +51,5 @@ const getMonthDates = createSelector(
       result.push(+current)
     } while (!isSameMonth(current, lastDate))
     return result
-  })
+  }
 )
-
-export default getMonthDates

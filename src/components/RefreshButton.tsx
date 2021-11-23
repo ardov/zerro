@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { syncData } from 'logic/sync'
-import { getChangedNum } from 'store/localData'
+import { getChangedNum } from 'store/data/selectors'
 import { getPendingState } from 'store/isPending'
 import CircularProgress from '@mui/material/CircularProgress'
 import { BottomNavigationAction } from '@mui/material'

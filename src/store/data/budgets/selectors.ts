@@ -2,16 +2,16 @@ import { createSelector } from '@reduxjs/toolkit'
 import { round } from 'helpers/currencyHelpers'
 import { formatDate } from 'helpers/format'
 import { RootState } from 'store'
-import { convertCurrency } from 'store/data/selectors'
+import { convertCurrency } from 'store/data/instruments'
 import { ById, PopulatedBudget, TagId } from 'types'
 import { getTagMeta } from '../hiddenData/tagMeta'
 
-// Goal data was hidden in budgets for this date
+// Goal data was hidden in budgets for this date in early versions
 const goalBudgetDate = +new Date(2000, 0)
 
 const getBudgets = (state: RootState) => state.data.current.budget
 
-const getBudget = (state: RootState, tag: TagId, month: Date | number) =>
+export const getBudget = (state: RootState, tag: TagId, month: Date | number) =>
   getBudgets(state)[`${tag},${formatDate(month, 'yyyy-MM-dd')}`]
 
 const getPopulatedBudgets = createSelector(
@@ -35,7 +35,7 @@ const getPopulatedBudgets = createSelector(
   }
 )
 
-const getBudgetsByMonthAndTag = createSelector(
+export const getBudgetsByMonthAndTag = createSelector(
   [getPopulatedBudgets],
   budgets => {
     let result: { [month: number]: ById<PopulatedBudget> } = {}
@@ -50,8 +50,3 @@ const getBudgetsByMonthAndTag = createSelector(
     return result
   }
 )
-
-export const selectors = {
-  getBudgetsByMonthAndTag,
-  getBudget,
-}

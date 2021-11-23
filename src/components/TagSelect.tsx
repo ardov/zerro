@@ -1,10 +1,6 @@
 import React, { FC } from 'react'
 import { useSelector } from 'react-redux'
-import {
-  getPopulatedTags,
-  getTagsTree,
-  TagTreeNode,
-} from 'store/localData/tags'
+import { getPopulatedTags, getTagsTree, TagTreeNode } from 'store/data/tags'
 import { Box, Autocomplete, TextField } from '@mui/material'
 import { EmojiIcon } from 'components/EmojiIcon'
 import { PopulatedTag } from '../types'

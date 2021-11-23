@@ -8,16 +8,16 @@ import { TagTableFooter } from './TagTableFooter'
 import { TransactionsDrawer as TrDrawer } from 'components/TransactionsDrawer'
 import { endOfMonth } from 'date-fns'
 import { sendEvent } from 'helpers/tracking'
-import { getPopulatedTags, getTagsTree } from 'store/localData/tags'
 import { GoalPopover } from './GoalPopover'
 import { useCallback } from 'react'
 import { BudgetPopover } from './BudgetPopover'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import { DragModeContext } from '../DnDContext'
-import { getTagAccMap } from 'store/localData/hiddenData/accTagMap'
-import { getInBudgetAccounts } from 'store/localData/accounts'
-import { FilterConditions } from 'store/localData/transactions/filtering'
-import { getAmountsById } from 'scenes/Budgets/selectors/getAmountsByTag'
+import { getPopulatedTags, getTagsTree } from 'store/data/tags'
+import { getTagAccMap } from 'store/data/hiddenData/accTagMap'
+import { getInBudgetAccounts } from 'store/data/accounts'
+import { FilterConditions } from 'store/data/transactions/filtering'
+import { getAmountsById } from 'scenes/Budgets/selectors'
 
 export type MetricType = 'outcome' | 'available' | 'budgeted'
 
@@ -58,6 +58,9 @@ export const TagTable: FC<TagTableProps> = props => {
   const onSelect = useCallback((id: string) => {
     sendEvent('Budgets: see transactions')
     setSelected(id)
+  }, [])
+  const onCloseTrDrawer = useCallback(() => {
+    setSelected(undefined)
   }, [])
   const openBudgetPopover = useCallback(
     (id, anchor) => setBudgetPopoverData({ id, anchor }),
@@ -148,10 +151,7 @@ export const TagTable: FC<TagTableProps> = props => {
         <TagTableFooter metric={metrics[metricIndex]} />
       </Paper>
 
-      <TransactionsDrawer
-        id={selected}
-        onClose={() => setSelected(undefined)}
-      />
+      <TransactionsDrawer id={selected} onClose={onCloseTrDrawer} />
       <BudgetPopover
         key={budgetPopoverData.id}
         id={budgetPopoverData.id || ''}
@@ -159,7 +159,7 @@ export const TagTable: FC<TagTableProps> = props => {
         open={!!budgetPopoverData.anchor}
         month={month}
         onClose={() => setBudgetPopoverData({})}
-        style={{ transform: 'translate(-10px, -12px)' }}
+        style={{ transform: 'translate(-12px, -6px)' }}
       />
       <GoalPopover
         key={goalPopoverData.id}
@@ -195,7 +195,7 @@ const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
     dateFrom: month,
     dateTo: endOfMonth(month),
     accountsFrom: accountsInBudget,
-    tags: tagIds,
+    mainTags: tagIds,
   })
   tagIds.forEach(id => {
     if (tagAccMap[id]) {

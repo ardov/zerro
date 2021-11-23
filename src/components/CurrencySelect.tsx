@@ -1,8 +1,8 @@
 import React, { FC } from 'react'
 import { useSelector } from 'react-redux'
 import { Select, MenuItem, SelectProps } from '@mui/material'
-import { getInstruments } from 'store/data/selectors'
-import { getAccountList } from 'store/localData/accounts'
+import { getInstruments } from 'store/data/instruments'
+import { getAccountList } from 'store/data/accounts'
 
 export const CurrencySelect: FC<SelectProps<number>> = props => {
   const instruments = useSelector(getInstruments)

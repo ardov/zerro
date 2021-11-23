@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { formatMoney } from 'helpers/format'
-import { getUserCurrencyCode } from 'store/data/selectors'
+import { getUserCurrencyCode } from 'store/data/instruments'
 import { makeStyles } from '@mui/styles'
 import {
   Paper,
@@ -14,12 +14,9 @@ import {
   PaperProps,
 } from '@mui/material'
 import TagSelect2 from 'components/TagSelect2'
-import {
-  addConnection,
-  getAccTagMap,
-} from 'store/localData/hiddenData/accTagMap'
-import { getTransfers } from '../selectors/getAmountsByTag'
-import { getAccounts } from 'store/localData/accounts'
+import { addConnection, getAccTagMap } from 'store/data/hiddenData/accTagMap'
+import { getTransfers } from '../selectors'
+import { getAccounts } from 'store/data/accounts'
 import TagChip from 'components/TagChip'
 import { useMonth } from '../pathHooks'
 

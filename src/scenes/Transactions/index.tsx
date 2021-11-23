@@ -14,7 +14,7 @@ import { sendEvent } from 'helpers/tracking'
 import { Helmet } from 'react-helmet'
 import { useSearchParam } from 'helpers/useSearchParam'
 import { useSelector } from 'react-redux'
-import { getTransactions } from 'store/localData/transactions'
+import { getTransactions } from 'store/data/transactions'
 
 const useStyles = makeStyles(theme => ({
   drawerWidth: {

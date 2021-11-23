@@ -9,7 +9,7 @@ import FilterListIcon from '@mui/icons-material/FilterList'
 import { Tooltip } from 'components/Tooltip'
 import CloseIcon from '@mui/icons-material/Close'
 // import { useToggle } from 'helpers/useToggle'
-import { FilterConditions } from 'store/localData/transactions/filtering'
+import { FilterConditions } from 'store/data/transactions/filtering'
 import { Box, SxProps } from '@mui/system'
 import { Theme } from '@mui/material/styles'
 import {

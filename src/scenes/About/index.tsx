@@ -66,7 +66,7 @@ const Header = () => {
             py: 1,
             px: 3,
             bgcolor: 'background.default',
-            borderRadius: 2,
+            borderRadius: 3,
             lineHeight: 0,
           }}
         >

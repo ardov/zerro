@@ -1,33 +1,40 @@
 import React, { useEffect, useState } from 'react'
 import { Router, Route, Redirect, Switch } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import Transactions from 'scenes/Transactions'
-import Auth from 'scenes/Auth'
-import Budgets from 'scenes/Budgets'
-import Review from 'scenes/Review'
 import { getLoginState } from 'store/token'
 import { RegularSyncHandler } from 'components/RegularSyncHandler'
 import Nav from 'components/Navigation'
 import { MobileNavigation } from 'components/Navigation'
-import { Box, CircularProgress, Typography, useMediaQuery } from '@mui/material'
+import {
+  Box,
+  CircularProgress,
+  Typography,
+  useMediaQuery,
+  Theme,
+} from '@mui/material'
 import { createBrowserHistory } from 'history'
 import ErrorBoundary from 'components/ErrorBoundary'
-import { getLastSyncTime, getRootUserId } from 'store/data/selectors'
+import { getLastSyncTime } from 'store/data/selectors'
+import { getRootUser } from 'store/data/users'
+import { initTracking, setUserId } from 'helpers/tracking'
+import Transactions from 'scenes/Transactions'
+import Auth from 'scenes/Auth'
+import Budgets from 'scenes/Budgets'
+import Review from 'scenes/Review'
 import Accounts from 'scenes/Accounts'
 import Stats from 'scenes/Stats'
 import About from 'scenes/About'
 import Token from 'scenes/Token'
 import Donation from 'scenes/Donation'
-import { initTracking, setUserId } from 'helpers/tracking'
 
 const history = createBrowserHistory()
 initTracking(history)
 
 export default function App() {
   const isLoggedIn = useSelector(getLoginState)
-  const userId = useSelector(getRootUserId)
+  const userId = useSelector(state => getRootUser(state)?.id)
   useEffect(() => {
-    setUserId(userId)
+    if (typeof userId === 'number') setUserId(userId)
   }, [userId])
 
   return (
@@ -72,7 +79,7 @@ const PrivateApp = () => {
 }
 
 const Navigation = React.memo(() => {
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('md'))
+  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   return isMobile ? <MobileNavigation /> : <Nav />
 })
 

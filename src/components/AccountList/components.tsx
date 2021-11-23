@@ -10,7 +10,7 @@ import {
 import { Amount } from 'components/Amount'
 import { PopulatedAccount } from 'types'
 import { useDispatch } from 'react-redux'
-import { setInBudget } from 'store/localData/accounts/thunks'
+import { setInBudget } from 'store/data/accounts'
 
 export const Account: FC<
   { account: PopulatedAccount } & ListItemButtonProps

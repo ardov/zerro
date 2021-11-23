@@ -1,9 +1,6 @@
 import React, { FC } from 'react'
 import { useSelector } from 'react-redux'
-import {
-  getInBudgetAccounts,
-  getSavingAccounts,
-} from 'store/localData/accounts'
+import { getInBudgetAccounts, getSavingAccounts } from 'store/data/accounts'
 import pluralize from 'helpers/pluralize'
 import { Collapse, List, ListItemButton } from '@mui/material'
 import { Account, Subheader } from './components'

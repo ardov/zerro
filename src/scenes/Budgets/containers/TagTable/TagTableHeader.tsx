@@ -1,6 +1,6 @@
 import React, { FC, useContext, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { getUserCurrencyCode } from 'store/data/selectors'
+import { getUserCurrencyCode } from 'store/data/instruments'
 import { formatDate, formatMoney } from 'helpers/format'
 import {
   Typography,
@@ -27,9 +27,8 @@ import useScrollPosition from '@react-hook/window-scroll'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import add from 'date-fns/add'
 import sub from 'date-fns/sub'
-import { getTotalGoalsProgress } from 'scenes/Budgets/selectors/goalsProgress'
 import { DragModeContext } from '../DnDContext'
-import getMonthDates from 'scenes/Budgets/selectors/getMonthDates'
+import { getMonthDates, getTotalGoalsProgress } from 'scenes/Budgets/selectors'
 
 const useStyles = makeStyles(theme => ({
   row: {

@@ -2,7 +2,7 @@ import React, { FC } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   List,
-  ListItem,
+  ListItemButton,
   ListItemText,
   InputAdornment,
   Popover,
@@ -12,30 +12,27 @@ import {
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { formatMoney } from 'helpers/format'
 import { AmountInput } from 'components/AmountInput'
-import {
-  getAmountsById,
-  TagAmounts,
-  TagGroupAmounts,
-} from 'scenes/Budgets/selectors/getAmountsByTag'
+import { getAmountsById } from 'scenes/Budgets/selectors'
 import {
   convertCurrency,
   getInstruments,
   getUserInstrument,
-} from 'store/data/selectors'
+} from 'store/data/instruments'
 import { setOutcomeBudget } from 'scenes/Budgets/thunks'
-import { getGoals } from 'store/localData/hiddenData/goals'
-import { getGoalsProgress } from 'scenes/Budgets/selectors/goalsProgress'
+import { getGoals } from 'store/data/hiddenData/goals'
+import { getGoalsProgress } from 'scenes/Budgets/selectors'
 import { round } from 'helpers/currencyHelpers'
 import { sendEvent } from 'helpers/tracking'
 import pluralize from 'helpers/pluralize'
-import { getMetaForTag } from 'store/localData/hiddenData/tagMeta'
+import { getMetaForTag } from 'store/data/hiddenData/tagMeta'
+import { Box, BoxProps } from '@mui/system'
 
-type BudgetPopoverProps = PopoverProps & {
-  id: string
-  month: number
-}
-
-export const BudgetPopover: FC<BudgetPopoverProps> = props => {
+export const BudgetPopover: FC<
+  PopoverProps & {
+    id: string
+    month: number
+  }
+> = props => {
   const { id, month, onClose, ...rest } = props
 
   const currConverter = useSelector(convertCurrency)
@@ -62,8 +59,6 @@ export const BudgetPopover: FC<BudgetPopoverProps> = props => {
   const goal = useSelector(getGoals)?.[id]
   const goalProgress = useSelector(getGoalsProgress)?.[month]?.[id]
 
-  const needForGoal = convert.toTag(goalProgress?.target || 0)
-
   const amountsById = useSelector(getAmountsById)
   const tagAmounts = amountsById?.[month]?.[id] || {}
   const tagPrevAmounts = amountsById?.[prevMonth]?.[id] || {}
@@ -72,16 +67,11 @@ export const BudgetPopover: FC<BudgetPopoverProps> = props => {
     dispatch(setOutcomeBudget(outcome, month, id))
 
   const totalBudgeted = convert.toTag(tagAmounts.totalBudgeted)
-  const budgeted = convert.toTag(tagAmounts.budgeted)
-  const available = convert.toTag(tagAmounts.totalAvailable)
-  const prevBudgeted = convert.toTag(tagPrevAmounts.totalBudgeted)
-  const prevOutcome = convert.toTag(tagPrevAmounts.totalOutcome)
+  const totalAvailable = convert.toTag(tagAmounts.totalAvailable)
 
   let prevOutcomes: number[] = getPrev12MonthsMs(month)
     .map(month => amountsById?.[month]?.[id]?.totalOutcome)
     .filter(outcome => outcome !== undefined)
-
-  const avgOutcome = getAverage(prevOutcomes)
 
   const [value, setValue] = React.useState<number>(totalBudgeted)
   const changeAndClose = (value: number) => {
@@ -89,56 +79,21 @@ export const BudgetPopover: FC<BudgetPopoverProps> = props => {
     if (value !== totalBudgeted) onChange(value)
   }
 
-  const quickActions = [
-    {
-      text: 'Покрыть перерасход',
-      amount: round(+totalBudgeted - available),
-      selected: false,
-      condition: available < 0,
-    },
-    {
-      text: 'Сбросить остаток',
-      amount: round(+totalBudgeted - available),
-      selected: false,
-      condition: available > 0,
-    },
-    {
-      text: 'Цель',
-      amount: needForGoal,
-      selected: +value === needForGoal,
-      condition: !!goal && !!needForGoal,
-    },
-    {
-      text: getAvgOutcomeName(prevOutcomes.length),
-      amount: avgOutcome,
-      selected: +value === avgOutcome,
-      condition: !!avgOutcome && prevOutcomes.length > 1,
-    },
-    {
-      text: 'Бюджет в прошлом месяце',
-      amount: prevBudgeted,
-      selected: +value === prevBudgeted,
-      condition: !!prevBudgeted,
-    },
-    {
-      text: 'Расход в прошлом месяце',
-      amount: prevOutcome,
-      selected: +value === prevOutcome,
-      condition: !!prevOutcome,
-    },
-    {
-      text: 'Сумма дочерних категорий',
-      amount: round(totalBudgeted - budgeted),
-      selected: false,
-      condition:
-        isGroup(tagAmounts) &&
-        budgeted &&
-        totalBudgeted &&
-        budgeted !== totalBudgeted,
-    },
-  ]
+  const quickActions = getQuickActions({
+    hasChildren: !!tagAmounts.children,
+    budgeted: convert.toTag(tagAmounts.budgeted),
+    totalBudgeted: convert.toTag(tagAmounts.totalBudgeted),
+    available: convert.toTag(tagAmounts.available),
+    totalAvailable: convert.toTag(tagAmounts.totalAvailable),
+    hasGoal: !!goal,
+    needForGoal: convert.toTag(goalProgress?.target || 0),
+    prevOutcomesLength: prevOutcomes.length,
+    avgOutcome: getAverage(prevOutcomes),
+    prevBudgeted: convert.toTag(tagPrevAmounts.totalBudgeted),
+    prevOutcome: convert.toTag(tagPrevAmounts.totalOutcome),
+  })
 
-  const availableAfter = round(available + value - totalBudgeted)
+  const availableAfter = round(totalAvailable + value - totalBudgeted)
   const valueInMain = convert.toMain(value)
   const availableAfterInMain = convert.toMain(availableAfter)
 
@@ -181,24 +136,97 @@ export const BudgetPopover: FC<BudgetPopoverProps> = props => {
       />
 
       <List>
-        {quickActions.map(({ text, amount, selected, condition }) =>
-          condition ? (
-            <ListItem
-              button
-              key={text}
-              selected={selected}
-              onClick={() => {
-                sendEvent('Budgets: quick budget: ' + text)
-                changeAndClose(amount)
-              }}
-            >
-              <ListItemText primary={text} secondary={format.tag(amount)} />
-            </ListItem>
-          ) : null
-        )}
+        {quickActions.map(({ text, amount }) => (
+          <ListItemButton
+            key={text}
+            selected={value === amount}
+            onClick={() => {
+              sendEvent('Budgets: quick budget: ' + text)
+              changeAndClose(amount)
+            }}
+          >
+            <ListItemText
+              primary={<NameValueRow name={text} value={format.tag(amount)} />}
+            />
+            {/* <ListItemText primary={format.tag(amount)} /> */}
+          </ListItemButton>
+        ))}
       </List>
     </Popover>
   )
+}
+
+function getQuickActions({
+  hasChildren,
+  budgeted,
+  totalBudgeted,
+  available,
+  totalAvailable,
+  hasGoal,
+  needForGoal,
+  prevOutcomesLength,
+  avgOutcome,
+  prevBudgeted,
+  prevOutcome,
+}: {
+  hasChildren: boolean
+  budgeted: number
+  totalBudgeted: number
+  available: number
+  totalAvailable: number
+  hasGoal: boolean
+  needForGoal: number
+  prevOutcomesLength: number
+  avgOutcome: number
+  prevBudgeted: number
+  prevOutcome: number
+}) {
+  return [
+    {
+      text: 'Покрыть перерасход',
+      amount: round(+totalBudgeted - available),
+      condition: hasChildren && available < 0 && totalAvailable >= 0,
+    },
+    {
+      text: 'Покрыть перерасход',
+      amount: round(+totalBudgeted - totalAvailable),
+      condition: totalAvailable < 0,
+    },
+    {
+      text: 'Сбросить остаток',
+      amount: round(+totalBudgeted - totalAvailable),
+      condition: totalAvailable > 0,
+    },
+    {
+      text: 'Цель',
+      amount: needForGoal,
+      condition: hasGoal && !!needForGoal,
+    },
+    {
+      text: getAvgOutcomeName(prevOutcomesLength),
+      amount: avgOutcome,
+      condition: !!avgOutcome && prevOutcomesLength > 1,
+    },
+    {
+      text: 'Прошлый бюджет',
+      amount: prevBudgeted,
+      condition: !!prevBudgeted,
+    },
+    {
+      text: 'Прошлый расход',
+      amount: prevOutcome,
+      condition: !!prevOutcome,
+    },
+    {
+      text: 'Сумма дочерних категорий',
+      amount: round(totalBudgeted - budgeted),
+      condition:
+        hasChildren &&
+        !!budgeted &&
+        !!totalBudgeted &&
+        budgeted !== totalBudgeted,
+    },
+  ].filter(action => action.condition)
 }
 
 function getPrev12MonthsMs(date: string | number | Date) {
@@ -226,14 +254,30 @@ function getAverage(outcomes: number[]) {
 }
 
 function getAvgOutcomeName(number: number) {
-  const s = 'Средний расход за '
+  const s = 'Средний расход за '
   if (number === 12) return s + 'год'
   if (number === 6) return s + 'полгода'
   return s + number + ' ' + pluralize(number, ['месяц', 'месяца', 'месяцев'])
 }
 
-function isGroup(
-  amounts: TagGroupAmounts | TagAmounts
-): amounts is TagGroupAmounts {
-  return amounts.children !== undefined
+const NameValueRow: FC<BoxProps & { name: string; value: string }> = ({
+  name,
+  value,
+  ...rest
+}) => {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        width: '100%',
+        gap: 2,
+        '& > :first-child': { flexGrow: 1 },
+        '& > :last-child': { color: 'text.secondary' },
+      }}
+      {...rest}
+    >
+      <span>{name}</span>
+      <span>{value}</span>
+    </Box>
+  )
 }

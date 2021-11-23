@@ -1,8 +1,8 @@
 import React, { FC } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { formatDate, formatMoney } from 'helpers/format'
-import { getTotalsByMonth } from '../../selectors/getTotalsByMonth'
-import { getUserCurrencyCode } from 'store/data/selectors'
+import { getTotalsByMonth } from '../../selectors'
+import { getUserCurrencyCode } from 'store/data/instruments'
 import { Confirm } from 'components/Confirm'
 import { copyPreviousBudget, startFresh, fixOverspends } from '../../thunks'
 import {

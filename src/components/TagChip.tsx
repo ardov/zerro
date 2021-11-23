@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { useSelector } from 'react-redux'
-import { getPopulatedTags } from 'store/localData/tags'
+import { getPopulatedTags } from 'store/data/tags'
 import { Chip, ChipProps } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { PopulatedTag, TagId } from 'types'
