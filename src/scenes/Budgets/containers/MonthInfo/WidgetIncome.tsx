@@ -62,7 +62,7 @@ export function WidgetIncome() {
     type: 'income',
     dateFrom: month,
     dateTo: endOfMonth(month),
-    tags: selected,
+    mainTags: selected,
   }
 
   return (

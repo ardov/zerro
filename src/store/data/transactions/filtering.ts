@@ -186,7 +186,7 @@ const checkTags = (
   if (!tr.tag) return tags.includes('null')
 
   if (matchType === 'main') return tags.includes(tr.tag[0])
-  return tr.tag.some(tags.includes)
+  return tr.tag.some(id => tags.includes(id))
 }
 
 const checkAmount = (
