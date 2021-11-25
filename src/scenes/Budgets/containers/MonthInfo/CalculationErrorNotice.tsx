@@ -12,6 +12,7 @@ import { clearLocalData } from 'logic/localData'
 import { captureError, sendEvent } from 'helpers/tracking'
 import { getDiff } from 'store/data'
 import { getAccountsHistory } from 'scenes/Stats/selectors'
+import { PopulatedAccount } from 'types'
 
 // TODO: Надо бы как-то округлять все цифры только в конце. Иначе из-за валют копится ошибка.
 const TOLERANCE = 3
@@ -24,6 +25,17 @@ const TOLERANCE = 3
  */
 export const CalculationErrorNotice: FC = () => {
   const [hidden, setHidden] = useState(false)
+
+  const histories = useSelector(getAccountsHistory)
+  const corrupted = useSelector(getInBudgetAccounts)
+    .map(acc => {
+      const history = histories[acc.id]
+      const lastPoint = history.length - 1
+      const calculatedBalance = history[lastPoint].balance
+      const diff = Math.abs(calculatedBalance - acc.balance)
+      return { acc, diff }
+    })
+    .filter(({ diff }) => diff > 0.001)
 
   const synced = useSelector(state => !getDiff(state)?.transaction?.length)
   const currency = useSelector(getUserCurrencyCode)
@@ -43,11 +55,20 @@ export const CalculationErrorNotice: FC = () => {
 
   useEffect(() => {
     if (hasError) {
-      console.warn('🤨 Calc error:', diff, currency)
-      captureError(new Error('Calculation Error'), { extra: diff } as any)
+      if (corrupted.length) {
+        console.warn('🤨 Corrupted accounts:', diff, currency, corrupted)
+        captureError(new Error('Corrupted Accounts Error'), {
+          diff,
+          currency,
+          accs: corrupted.length,
+        } as any)
+      } else {
+        console.warn('🤨 Calc error:', diff, currency)
+        captureError(new Error('Calculation Error'), { diff, currency } as any)
+      }
       sendEvent('Calculation Error: show message')
     }
-  }, [diff, hasError, currency])
+  }, [diff, hasError, currency, corrupted])
 
   if (!hasError || hidden) return null
 
@@ -96,7 +117,7 @@ export const CalculationErrorNotice: FC = () => {
             </Link>
             ), чтобы я помог разобраться с проблемой.
           </Typography>
-          <CorruptedAccounts />
+          <CorruptedAccounts corrupted={corrupted} />
         </Box>
 
         <Box mt={2}>
@@ -114,18 +135,13 @@ export const CalculationErrorNotice: FC = () => {
   )
 }
 
-const CorruptedAccounts = () => {
-  const histories = useSelector(getAccountsHistory)
-  const accounts = useSelector(getInBudgetAccounts)
-  const corrupted = accounts
-    .map(acc => {
-      const history = histories[acc.id]
-      const lastPoint = history.length - 1
-      const calculatedBalance = history[lastPoint].balance
-      const diff = Math.abs(calculatedBalance - acc.balance)
-      return { acc, diff }
-    })
-    .filter(({ diff }) => diff > 0.001)
+const CorruptedAccounts: FC<{
+  corrupted: {
+    acc: PopulatedAccount
+    diff: number
+  }[]
+}> = props => {
+  const corrupted = props.corrupted
 
   console.warn(
     'Corrupted accounts:',
