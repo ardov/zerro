@@ -6,36 +6,30 @@ import { getBudgetsByMonthAndTag } from 'store/data/budgets'
 import { getTransactionsHistory } from 'store/data/transactions'
 import { Selector } from 'types'
 
+/** Returns the date of first month in ms.
+ *  To have correct result we should include all transactions
+ *  in our calculations. Otherwise calculated balance will be wrong.
+ */
 const getFirstMonth: Selector<number> = createSelector(
   [getTransactionsHistory],
   transactions => {
-    const START = +new Date(2010, 0, 1)
-    for (const tr of transactions) {
-      if (tr.date >= START) {
-        return +startOfMonth(tr.date)
-      }
-    }
-    return +startOfMonth(Date.now())
+    let firstDate = transactions[0]?.date
+    firstDate ??= Date.now()
+    return +startOfMonth(firstDate)
   }
 )
 
+/** Returns the last available month to budget. */
 const getLastMonth: Selector<number> = createSelector(
   [getBudgetsByMonthAndTag],
   budgets => {
-    const lastBudgetDate = Object.keys(budgets)
-      .map(s => parseInt(s))
-      .sort((a, b) => a - b)
-      .pop()
-
-    const afterLastBudget = +addMonths(new Date(lastBudgetDate || 0), 1)
-
-    const nextMonth = +new Date(
-      new Date().getFullYear(),
-      new Date().getMonth() + 1,
-      1
-    )
-
-    return Math.max(afterLastBudget, nextMonth)
+    const lastBudgetDate =
+      Object.keys(budgets)
+        .map(s => parseInt(s))
+        .sort((a, b) => a - b)
+        .pop() || 0
+    const maxDate = Math.max(lastBudgetDate, Date.now())
+    return +addMonths(startOfMonth(maxDate), 1)
   }
 )
 
