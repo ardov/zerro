@@ -12,6 +12,12 @@ import { convertCurrency } from 'store/data/instruments'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 
+/**
+ * Goal progress per month
+ * - `progress` — number from 0 to 1. It is goal completion progress for month or overall (for TARGET_BALANCE without end date)
+ * - `need` — amount of money you should add to your budget to complete the goal
+ * - `target` — budget needed to complete the goal in current
+ */
 export type GoalProgress = {
   progress: number
   need: number
@@ -71,6 +77,7 @@ export const getGoalsProgress: Selector<{
             result[month][id] = calcTargetProgress({
               amount,
               budgeted,
+              leftover,
               available,
               currentMonth: month,
               endMonth: end,
@@ -130,7 +137,10 @@ export const getTotalGoalsProgress: Selector<{
   return result
 })
 
-function calcMonthlyProgress(data: { amount: number; budgeted: number }) {
+function calcMonthlyProgress(data: {
+  amount: number
+  budgeted: number
+}): GoalProgress {
   const { amount, budgeted } = data
   const target = amount
   const need = round(target - budgeted)
@@ -144,7 +154,7 @@ function calcMonthlySpendProgress(data: {
   amount: number
   budgeted: number
   leftover: number
-}) {
+}): GoalProgress {
   const { amount, budgeted, leftover } = data
   const target = round(amount - leftover)
   const need = round(target - budgeted)
@@ -157,29 +167,27 @@ function calcMonthlySpendProgress(data: {
 function calcTargetProgress(data: {
   amount: number
   budgeted: number
+  leftover: number
   available: number
   currentMonth: number
   endMonth?: number
-}) {
-  const { amount, budgeted, available, currentMonth, endMonth } = data
+}): GoalProgress | null {
+  const { amount, budgeted, leftover, available, currentMonth, endMonth } = data
   if (!endMonth) {
     // No end date
     const target = round(amount - available + budgeted)
-
-    if (target <= 0) return { progress: 1, need: 0, target: 0 }
-    if (available <= 0) return { progress: 0, need: target, target }
+    if (available >= amount) return { progress: 1, need: 0, target }
     return {
-      progress: available / amount,
-      need: round(target - available),
-      target,
+      progress: available < 0 ? 0 : available / amount,
+      need: round(target - budgeted),
+      target: target < 0 ? 0 : target,
     }
   } else {
     // Goal has end date
     if (currentMonth > endMonth) return null
 
-    const startMonthAvailable = available - budgeted
     const monthsLeft = differenceInCalendarMonths(endMonth, currentMonth) + 1
-    const totalNeed = amount - startMonthAvailable
+    const totalNeed = amount - leftover
     if (totalNeed <= 0) return { progress: 1, need: 0, target: 0 }
     const target = Math.round(totalNeed / monthsLeft)
     if (budgeted <= 0)

@@ -86,7 +86,7 @@ export const BudgetPopover: FC<
     available: convert.toTag(tagAmounts.available),
     totalAvailable: convert.toTag(tagAmounts.totalAvailable),
     hasGoal: !!goal,
-    needForGoal: convert.toTag(goalProgress?.target || 0),
+    goalTarget: convert.toTag(goalProgress?.target || 0),
     prevOutcomesLength: prevOutcomes.length,
     avgOutcome: getAverage(prevOutcomes),
     prevBudgeted: convert.toTag(tagPrevAmounts.totalBudgeted),
@@ -163,7 +163,7 @@ function getQuickActions({
   available,
   totalAvailable,
   hasGoal,
-  needForGoal,
+  goalTarget,
   prevOutcomesLength,
   avgOutcome,
   prevBudgeted,
@@ -175,7 +175,7 @@ function getQuickActions({
   available: number
   totalAvailable: number
   hasGoal: boolean
-  needForGoal: number
+  goalTarget: number
   prevOutcomesLength: number
   avgOutcome: number
   prevBudgeted: number
@@ -199,8 +199,8 @@ function getQuickActions({
     },
     {
       text: 'Цель',
-      amount: needForGoal,
-      condition: hasGoal && !!needForGoal,
+      amount: goalTarget,
+      condition: hasGoal && !!goalTarget,
     },
     {
       text: getAvgOutcomeName(prevOutcomesLength),
