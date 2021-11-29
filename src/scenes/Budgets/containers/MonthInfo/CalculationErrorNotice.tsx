@@ -12,67 +12,45 @@ import { clearLocalData } from 'logic/localData'
 import { captureError, sendEvent } from 'helpers/tracking'
 import { getDiff } from 'store/data'
 import { getAccountsHistory } from 'scenes/Stats/selectors'
-import { PopulatedAccount } from 'types'
+import { PopulatedAccount, Selector } from 'types'
+import { createSelector } from 'reselect'
 
 // TODO: Надо бы как-то округлять все цифры только в конце. Иначе из-за валют копится ошибка.
 const TOLERANCE = 3
 
 /**
  * Shows error message if sum of accounts in balance is not equal to calculated amount of money in balance. There are 3 main reasons for this:
- * - Corrupted accounts. For some old acoounts `balance !== startBalance + transactions`. It's known ZM bug.
+ * - Corrupted accounts. For some old acoounts `balance !== startBalance + transactions`. It's known ZenMoney bug.
  * - Rounding of numbers during the calculations. Numbers are rounded on the each step so it's getting worse with long history and transactions in different currencies. That's why we need some.
  * - Errors during the calculations.
  */
 export const CalculationErrorNotice: FC = () => {
   const [hidden, setHidden] = useState(false)
-
-  const histories = useSelector(getAccountsHistory)
-  const corrupted = useSelector(getInBudgetAccounts)
-    .map(acc => {
-      const history = histories[acc.id]
-      if (!history) {
-        console.warn('Empty history for account ' + acc.id, acc)
-        return { acc, diff: 0 }
-      }
-      const lastPoint = history.length - 1
-      const calculatedBalance = history[lastPoint].balance
-      const diff = Math.abs(calculatedBalance - acc.balance)
-      return { acc, diff }
-    })
-    .filter(({ diff }) => diff > 0.001)
-
-  const synced = useSelector(state => !getDiff(state)?.transaction?.length)
-  const currency = useSelector(getUserCurrencyCode)
   const dispatch = useDispatch()
-
-  const totalsArray = useSelector(getTotalsArray)
-  const { moneyInBudget } = totalsArray[totalsArray.length - 1]
-
-  const convert = useSelector(convertCurrency)
-  const inBudgetSum = useSelector(getInBudgetAccounts).reduce(
-    (sum, acc) => sum + convert(acc.balance, acc.instrument),
-    0
-  )
-
-  const diff = round(Math.abs(moneyInBudget - inBudgetSum))
-  const hasError = diff >= TOLERANCE && synced
+  const isSynced = useSelector(state => !getDiff(state)?.transaction?.length)
+  const corruptedAccounts = useSelector(getCorruptedAccounts)
+  const diff = useSelector(getTotalDiff)
+  const currency = useSelector(getUserCurrencyCode)
+  const hasError = diff >= TOLERANCE && isSynced
+  const hasCorruptedAccs = !!corruptedAccounts.length
 
   useEffect(() => {
     if (hasError) {
-      if (corrupted.length) {
-        console.warn('🤨 Corrupted accounts:', diff, currency, corrupted)
-        captureError(new Error('Corrupted Accounts Error'), {
+      if (corruptedAccounts.length) {
+        console.warn(
+          '🤨 Corrupted accounts:',
           diff,
           currency,
-          accs: corrupted.length,
-        } as any)
+          corruptedAccounts
+        )
+        sendEvent('Corrupted accounts: show message')
       } else {
         console.warn('🤨 Calc error:', diff, currency)
         captureError(new Error('Calculation Error'), { diff, currency } as any)
+        sendEvent('Calculation Error: show message')
       }
-      sendEvent('Calculation Error: show message')
     }
-  }, [diff, hasError, currency, corrupted])
+  }, [diff, hasError, currency, corruptedAccounts])
 
   if (!hasError || hidden) return null
 
@@ -98,31 +76,47 @@ export const CalculationErrorNotice: FC = () => {
         flexDirection: 'row',
       }}
     >
-      <Box pt="2px">
+      <Box pt="4px">
         <WarningIcon />
       </Box>
       <Box ml={1.5}>
-        <Typography variant="subtitle1">
-          Ошибка в вычислениях на{' '}
-          <Amount value={diff} currency={currency} noShade />
-        </Typography>
-        <Box mt={1}>
-          <Typography variant="body2">
-            Попробуйте обновить данные. Если сообщение не пропадёт, напишите мне
-            в телеграме (
-            <Link
-              color="inherit"
-              href="http://t.me/ardov"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ textDecoration: 'underline' }}
-            >
-              @ardov
-            </Link>
-            ), чтобы я помог разобраться с проблемой.
-          </Typography>
-          <CorruptedAccounts corrupted={corrupted} />
-        </Box>
+        {hasCorruptedAccs ? (
+          <>
+            <Typography variant="h6">
+              Нашлись счета с ошибками на{' '}
+              <Amount value={diff} currency={currency} noShade />
+            </Typography>
+            <Box mt={1}>
+              <Typography variant="body1">
+                Ничего страшного, просто нажмите «Обновить данные» внизу.
+                <br />
+                Не помогло? Тогда в{' '}
+                <A href="https://zenmoney.ru/a/#accounts">Дзен-мани</A> обновите
+                начальный остаток у счетов из списка ниже. Поменяйте его,
+                сохраните, и верните обратно.
+                <br />
+                Опять не помогло? Тогда смело пишите мне в телеграме (
+                <A href="https://t.me/ardov">@ardov</A>
+                ), чтобы я помог разобраться с проблемой.
+              </Typography>
+              <CorruptedAccounts corrupted={corruptedAccounts} />
+            </Box>
+          </>
+        ) : (
+          <>
+            <Typography variant="h6">
+              Ошибка в вычислениях на{' '}
+              <Amount value={diff} currency={currency} noShade />
+            </Typography>
+            <Box mt={1}>
+              <Typography variant="body1">
+                Попробуйте обновить данные. Если сообщение не пропадёт, напишите
+                мне в телеграме (<A href="https://t.me/ardov">@ardov</A>
+                ), чтобы я помог разобраться с проблемой.
+              </Typography>
+            </Box>
+          </>
+        )}
 
         <Box mt={2}>
           <Button color="inherit" variant="outlined" onClick={reloadData}>
@@ -139,24 +133,25 @@ export const CalculationErrorNotice: FC = () => {
   )
 }
 
+const A: FC<{ href: string }> = props => (
+  <Link
+    color="inherit"
+    href={props.href}
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{ textDecoration: 'underline' }}
+  >
+    {props.children}
+  </Link>
+)
+
 const CorruptedAccounts: FC<{
   corrupted: {
     acc: PopulatedAccount
     diff: number
   }[]
-}> = props => {
-  const corrupted = props.corrupted
-
-  console.warn(
-    'Corrupted accounts:',
-    corrupted.map(({ acc, diff }) => ({
-      acc: acc.title,
-      diff,
-    }))
-  )
-  if (corrupted.length === 0) {
-    return null
-  }
+}> = ({ corrupted }) => {
+  if (!corrupted?.length) return null
   return (
     <div>
       <Box component="p" mb={0}>
@@ -164,7 +159,7 @@ const CorruptedAccounts: FC<{
       </Box>
       <Box component="ul" mt={0}>
         {corrupted.map(({ acc, diff }) => (
-          <li>
+          <li key={acc.id}>
             {acc.title} (
             <Amount
               value={diff}
@@ -179,3 +174,34 @@ const CorruptedAccounts: FC<{
     </div>
   )
 }
+
+const getCorruptedAccounts: Selector<
+  { acc: PopulatedAccount; diff: number }[]
+> = createSelector(
+  [getAccountsHistory, getInBudgetAccounts],
+  (histories, accounts) =>
+    accounts
+      .map(acc => {
+        const history = histories[acc.id]
+        if (!history) {
+          console.warn('Empty history for account ' + acc.id, acc)
+          return { acc, diff: 0 }
+        }
+        const lastPoint = history.length - 1
+        const calculatedBalance = history[lastPoint].balance
+        const diff = Math.abs(calculatedBalance - acc.balance)
+        return { acc, diff }
+      })
+      .filter(({ diff }) => diff > 0.001)
+)
+
+const getTotalDiff: Selector<number> = createSelector(
+  [getTotalsArray, getInBudgetAccounts, convertCurrency],
+  (totalsArray, accounts, convert) => {
+    const { moneyInBudget } = totalsArray[totalsArray.length - 1]
+    const inBudgetSum = accounts
+      .map(acc => convert(acc.balance, acc.instrument))
+      .reduce((sum, value) => sum + value, 0)
+    return Math.abs(round(moneyInBudget - inBudgetSum))
+  }
+)
