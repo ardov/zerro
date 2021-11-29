@@ -14,8 +14,10 @@ type Point = {
 export const getAccountsHistory = createSelector(
   [getTransactionsHistory, getAccounts],
   (transactions, accounts) => {
-    if (!transactions?.length || !accounts) return {}
-    const firstDate = new Date(transactions[0].date)
+    if (!accounts) return {}
+    const firstDate = transactions[0]
+      ? new Date(transactions[0].date)
+      : startOfDay(new Date())
     const currentDate = startOfDay(new Date())
     const dateArray = eachDayOfInterval({ start: firstDate, end: currentDate })
 

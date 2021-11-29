@@ -30,6 +30,10 @@ export const CalculationErrorNotice: FC = () => {
   const corrupted = useSelector(getInBudgetAccounts)
     .map(acc => {
       const history = histories[acc.id]
+      if (!history) {
+        console.warn('Empty history for account ' + acc.id, acc)
+        return { acc, diff: 0 }
+      }
       const lastPoint = history.length - 1
       const calculatedBalance = history[lastPoint].balance
       const diff = Math.abs(calculatedBalance - acc.balance)
