@@ -12,7 +12,7 @@ import {
   OutlinedTextFieldProps,
 } from '@mui/material'
 import { AmountInput } from 'components/AmountInput'
-import { getGoals, setGoal } from 'store/data/hiddenData/goals'
+import { getGoals, setGoal, deleteGoal } from 'store/data/hiddenData/goals'
 import { goalType } from 'store/data/hiddenData/constants'
 import CloseIcon from '@mui/icons-material/Close'
 import MonthSelectPopover from 'scenes/Budgets/MonthSelectPopover'
@@ -56,6 +56,10 @@ export const GoalPopover: FC<BudgetPopoverProps> = props => {
     if (amount !== goal.amount || type !== goal.type || endDate !== goal.end) {
       dispatch(setGoal({ type, amount, end: endDate, tag: id }))
     }
+    onClose?.({}, 'escapeKeyDown')
+  }
+  const removeGoal = () => {
+    dispatch(deleteGoal(id))
     onClose?.({}, 'escapeKeyDown')
   }
 
@@ -111,6 +115,11 @@ export const GoalPopover: FC<BudgetPopoverProps> = props => {
           <Button onClick={save} variant="contained" color="primary">
             Сохранить цель
           </Button>
+          {!!goal.amount && (
+            <Button onClick={removeGoal} variant="outlined" color="error">
+              Удалить цель
+            </Button>
+          )}
         </Box>
       </Popover>
 

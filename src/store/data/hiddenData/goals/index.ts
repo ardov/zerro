@@ -35,6 +35,23 @@ export const setGoal = ({
   dispatch(setHiddenData(DataReminderType.GOALS, newGoals))
 }
 
+export const deleteGoal = (tag: TagId): AppThunk => (dispatch, getState) => {
+  const state = getState()
+  const goals = getRawGoals(state)
+  const tags = getTags(state)
+  let newGoals = goals ? { ...goals } : {}
+
+  // remove goals for deleted tags
+  for (const tagId in newGoals) {
+    if (!tags[tagId]) delete newGoals[tagId]
+  }
+
+  sendEvent(`Goals: delete goal`)
+  delete newGoals[tag]
+
+  dispatch(setHiddenData(DataReminderType.GOALS, newGoals))
+}
+
 // SELECTORS
 export const getGoals = createSelector(
   [getRawGoals, getTags],
