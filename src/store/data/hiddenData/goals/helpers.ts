@@ -43,7 +43,7 @@ export const goalToWords = ({
     case MONTHLY:
       return `Откладываю ${formattedSum} каждый месяц`
     case MONTHLY_SPEND:
-      return `Планирую тратить ${formattedSum} в месяц`
+      return `Нужно ${formattedSum} на месяц`
     case TARGET_BALANCE:
       if (end) return `Хочу накопить ${formattedSum} к ${formatMonth(end)}`
       else return `Хочу накопить ${formattedSum}`
