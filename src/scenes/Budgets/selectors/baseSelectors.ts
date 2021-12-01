@@ -9,6 +9,6 @@ export const getStartFunds: Selector<number> = createSelector(
   (accounts, convert) => {
     return accounts
       .map(acc => convert(getStartBalance(acc), acc.instrument))
-      .reduce((sum, balance) => round(sum + balance))
+      .reduce((sum, balance) => round(sum + balance), 0)
   }
 )
