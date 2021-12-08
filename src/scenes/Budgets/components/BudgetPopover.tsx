@@ -69,6 +69,10 @@ export const BudgetPopover: FC<
   const totalBudgeted = convert.toTag(tagAmounts.totalBudgeted)
   const totalAvailable = convert.toTag(tagAmounts.totalAvailable)
 
+  useEffect(() => {
+    setValue(totalBudgeted)
+  }, [totalBudgeted])
+
   let prevOutcomes: number[] = getPrev12MonthsMs(month)
     .map(month => amountsById?.[month]?.[id]?.totalOutcome)
     .filter(outcome => outcome !== undefined)
