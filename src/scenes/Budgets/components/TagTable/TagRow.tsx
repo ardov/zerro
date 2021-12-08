@@ -13,7 +13,12 @@ import {
 import { Tooltip } from 'components/Tooltip'
 import { EmojiIcon } from 'components/EmojiIcon'
 import { formatMoney } from 'helpers/format'
-import { WarningIcon, AddIcon, EmojiFlagsIcon, SmsIcon } from 'components/Icons'
+import {
+  WarningIcon,
+  AddIcon,
+  EmojiFlagsIcon,
+  NotesIcon,
+} from 'components/Icons'
 import { goalToWords } from 'store/data/hiddenData/goals/helpers'
 import { GoalProgress } from 'components/GoalProgress'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
@@ -244,7 +249,7 @@ const NameCell: FC<NameCellProps> = ({
       <CurrencyTag currency={currency} />
       {!!comment && (
         <Tooltip title={comment}>
-          <SmsIcon sx={{ ml: 1, color: 'text.secondary' }} fontSize="small" />
+          <NotesIcon sx={{ ml: 1, color: 'text.secondary' }} fontSize="small" />
         </Tooltip>
       )}
     </Box>
