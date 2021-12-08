@@ -14,7 +14,7 @@ import {
 import { AmountInput } from 'components/AmountInput'
 import { getGoals, setGoal, deleteGoal } from 'store/data/hiddenData/goals'
 import { goalType } from 'store/data/hiddenData/constants'
-import CloseIcon from '@mui/icons-material/Close'
+import { CloseIcon } from 'components/Icons'
 import MonthSelectPopover from 'scenes/Budgets/MonthSelectPopover'
 import { formatDate } from 'helpers/format'
 

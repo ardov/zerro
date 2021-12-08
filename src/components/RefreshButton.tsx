@@ -5,10 +5,12 @@ import { getChangedNum } from 'store/data/selectors'
 import { getPendingState } from 'store/isPending'
 import CircularProgress from '@mui/material/CircularProgress'
 import { BottomNavigationAction } from '@mui/material'
-import SyncIcon from '@mui/icons-material/Sync'
-import SyncDisabledIcon from '@mui/icons-material/SyncDisabled'
-import DoneIcon from '@mui/icons-material/Done'
-import WarningIcon from '@mui/icons-material/Warning'
+import {
+  SyncIcon,
+  SyncDisabledIcon,
+  DoneIcon,
+  WarningIcon,
+} from 'components/Icons'
 import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
 import { Tooltip } from 'components/Tooltip'

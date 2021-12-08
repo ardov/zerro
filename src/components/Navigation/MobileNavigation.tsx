@@ -9,9 +9,11 @@ import {
   Paper,
   Divider,
 } from '@mui/material'
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
-import SyncAltIcon from '@mui/icons-material/SyncAlt'
+import {
+  AccountBalanceIcon,
+  AccountBalanceWalletIcon,
+  SyncAltIcon,
+} from 'components/Icons'
 import { makeStyles } from '@mui/styles'
 import { useHomeBar } from 'helpers/useHomeBar'
 

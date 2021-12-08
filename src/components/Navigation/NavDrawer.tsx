@@ -17,11 +17,13 @@ import { useTheme } from '@mui/material'
 import { Logo } from 'components/Logo'
 import AccountList from 'components/AccountList'
 import { makeStyles } from '@mui/styles'
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
-import SyncAltIcon from '@mui/icons-material/SyncAlt'
-import WhatshotIcon from '@mui/icons-material/Whatshot'
+import {
+  AccountBalanceIcon,
+  HelpOutlineIcon,
+  FavoriteBorderIcon,
+  SyncAltIcon,
+  WhatshotIcon,
+} from 'components/Icons'
 
 export default function NavigationDrawer(props: DrawerProps) {
   const theme = useTheme()

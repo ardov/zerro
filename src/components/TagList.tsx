@@ -3,7 +3,7 @@ import { Box, BoxProps, IconButton } from '@mui/material'
 import TagSelect2 from 'components/TagSelect2'
 import TagChip from 'components/TagChip'
 import { Tooltip } from 'components/Tooltip'
-import AddIcon from '@mui/icons-material/Add'
+import { AddIcon } from 'components/Icons'
 import { Modify } from 'types'
 
 type TagListProps = Modify<

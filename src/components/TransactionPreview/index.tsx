@@ -11,9 +11,7 @@ import {
   Stack,
 } from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
-import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash'
-import CloseIcon from '@mui/icons-material/Close'
-import DeleteIcon from '@mui/icons-material/Delete'
+import { DeleteIcon, CloseIcon, RestoreFromTrashIcon } from 'components/Icons'
 import DatePicker from '@mui/lab/DatePicker'
 import { Map } from './Map'
 import { AmountInput } from 'components/AmountInput'

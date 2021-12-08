@@ -2,17 +2,19 @@ import React, { FC, useEffect, useState } from 'react'
 import './transitions.css'
 import { useSelector, useDispatch } from 'react-redux'
 import IconButton from '@mui/material/IconButton'
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
-import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined'
-import DoneAllIcon from '@mui/icons-material/DoneAll'
+import {
+  DeleteOutlineIcon,
+  LocalOfferOutlinedIcon,
+  DoneAllIcon,
+  MoreVertIcon,
+  VisibilityIcon,
+} from 'components/Icons'
 import { Tooltip } from 'components/Tooltip'
 import { makeStyles } from '@mui/styles'
 import Chip from '@mui/material/Chip'
 import Box from '@mui/material/Box'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import VisibilityIcon from '@mui/icons-material/Visibility'
 import pluralize from 'helpers/pluralize'
 import { Confirm } from 'components/Confirm'
 import TagSelect2 from 'components/TagSelect2'

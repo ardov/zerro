@@ -10,10 +10,9 @@ import {
   Button,
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import AddIcon from '@mui/icons-material/Add'
+import { AddIcon, CloseIcon } from 'components/Icons'
 import { getTagAccMap, addConnection } from 'store/data/hiddenData/accTagMap'
 import { getAccounts, getSavingAccounts } from 'store/data/accounts'
-import CloseIcon from '@mui/icons-material/Close'
 import { Tooltip } from 'components/Tooltip'
 import { useEffect } from 'react'
 

@@ -18,7 +18,7 @@ import subMonths from 'date-fns/subMonths'
 
 import { makeStyles } from '@mui/styles'
 import { Tooltip } from 'components/Tooltip'
-import CloseIcon from '@mui/icons-material/Close'
+import { CloseIcon } from 'components/Icons'
 import Button from '@mui/material/Button'
 
 import { formatDate } from 'helpers/format'

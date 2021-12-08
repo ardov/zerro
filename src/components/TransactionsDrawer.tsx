@@ -3,7 +3,7 @@ import TransactionList from './TransactionList'
 import { Drawer, Box, Typography, IconButton, DrawerProps } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { Tooltip } from 'components/Tooltip'
-import CloseIcon from '@mui/icons-material/Close'
+import { CloseIcon } from 'components/Icons'
 import { FilterConditions } from 'store/data/transactions/filtering'
 import { Modify } from 'types'
 

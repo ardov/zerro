@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   List,
@@ -9,7 +9,7 @@ import {
   IconButton,
   PopoverProps,
 } from '@mui/material'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import { CheckCircleIcon } from 'components/Icons'
 import { formatMoney } from 'helpers/format'
 import { AmountInput } from 'components/AmountInput'
 import { getAmountsById } from 'scenes/Budgets/selectors'

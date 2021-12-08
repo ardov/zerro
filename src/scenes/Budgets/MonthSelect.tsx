@@ -10,8 +10,7 @@ import {
   ButtonBase,
   PaperProps,
 } from '@mui/material'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import { ChevronRightIcon, ChevronLeftIcon } from 'components/Icons'
 import { styled } from '@mui/styles'
 import MonthSelectPopover from './MonthSelectPopover'
 import { formatDate } from 'helpers/format'
