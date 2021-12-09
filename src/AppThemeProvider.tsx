@@ -7,6 +7,16 @@ import { useThemeType } from 'helpers/useThemeType'
 import { Helmet } from 'react-helmet'
 import { Global, css } from '@emotion/react'
 
+const GlobalVaribles = (props: { theme: DefaultTheme }) => {
+  const styles = css`
+    :root {
+      --c-bg: ${props.theme.palette.background.default};
+      --c-scrollbar: ${props.theme.palette.divider};
+    }
+  `
+  return <Global styles={styles} />
+}
+
 const globalStyles = css`
   html {
     box-sizing: border-box;
@@ -17,6 +27,21 @@ const globalStyles = css`
   *::before,
   *::after {
     box-sizing: inherit;
+  }
+
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: var(--c-bg);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--c-scrollbar);
+    border-radius: 6px;
+    border: 2px solid var(--c-bg);
   }
 
   .hidden-scroll {
@@ -54,6 +79,7 @@ export const AppThemeProvider: FC = props => {
             <meta name="theme-color" content={theme.palette.background.paper} />
           </Helmet>
           <CssBaseline />
+          <GlobalVaribles theme={theme} />
           <Global styles={globalStyles} />
           {props.children}
         </>
