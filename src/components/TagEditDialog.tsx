@@ -14,14 +14,18 @@ import {
   TextField,
 } from '@mui/material'
 import { TagSelect } from './TagSelect'
-import { Modify, Tag, TagMeta } from 'types'
+import { Modify, Tag } from 'types'
 import { useDispatch, useSelector } from 'react-redux'
 import { createTag } from 'store/data/tags/thunks'
 import { useFormik } from 'formik'
 import { hex2int, int2hex } from 'helpers/color'
 import { ColorPicker } from './ColorPickerPopover'
 import { v1 as uuidv1 } from 'uuid'
-import { setTagMeta, getTagMeta } from 'store/data/hiddenData/tagMeta'
+import {
+  getTagMeta,
+  setTagComment,
+  setTagCurrency,
+} from 'store/data/hiddenData/tagMeta'
 import { getUserInstrumentId } from 'store/data/instruments'
 import { CurrencySelect } from './CurrencySelect'
 
@@ -67,11 +71,13 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
     onSubmit: (values, helpers) => {
       const newTag = dispatch(createTag({ ...values, id }))
       console.log(newTag)
-
-      let meta: TagMeta = {}
-      if (values.comment) meta.comment = values.comment
-      if (values.currency !== userInstrument) meta.currency = values.currency
-      dispatch(setTagMeta(id, meta))
+      dispatch(setTagComment(id, values.comment))
+      dispatch(
+        setTagCurrency(
+          id,
+          values.currency !== userInstrument ? undefined : values.currency
+        )
+      )
       onClose()
     },
     enableReinitialize: true,

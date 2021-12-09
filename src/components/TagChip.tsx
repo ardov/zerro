@@ -2,7 +2,7 @@ import React, { FC } from 'react'
 import { useSelector } from 'react-redux'
 import { getPopulatedTags } from 'store/data/tags'
 import { Chip, ChipProps } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
+import { CloseIcon } from 'components/Icons'
 import { PopulatedTag, TagId } from 'types'
 
 function getTagLabel(tag?: PopulatedTag) {

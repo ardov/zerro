@@ -25,7 +25,33 @@ export const setTagMeta = (tag: TagId | null, meta?: TagMeta): AppThunk => (
   dispatch(setHiddenData(DataReminderType.TAG_META, data))
 }
 
+export const setTagComment = (
+  tagId: TagId | null,
+  comment: TagMeta['comment']
+): AppThunk => (dispatch, getState) => {
+  let id = String(tagId)
+  const state = getState()
+  const meta = getMetaForTag(id)(state)
+  const newMeta = { ...meta, comment }
+  sendEvent('Tag: Set comment')
+  dispatch(setTagMeta(id, newMeta))
+}
+
+export const setTagCurrency = (
+  tagId: TagId | null,
+  currency: TagMeta['currency']
+): AppThunk => (dispatch, getState) => {
+  let id = String(tagId)
+  const state = getState()
+  const meta = getMetaForTag(id)(state)
+  const newMeta = { ...meta, currency }
+  sendEvent('Tag: Set currency')
+  dispatch(setTagMeta(id, newMeta))
+}
+
 // SELECTORS
 export const getTagMeta = createSelector([getRawTagMeta], raw => raw || {})
 export const getMetaForTag = (id: TagId) =>
   createSelector([getTagMeta], meta => meta[id] || {})
+export const getTagComment = (id: TagId) =>
+  createSelector([getTagMeta], meta => meta?.[id]?.comment || '')

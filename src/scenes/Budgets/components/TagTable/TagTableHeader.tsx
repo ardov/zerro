@@ -14,10 +14,12 @@ import {
   Theme,
 } from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
-import SettingsIcon from '@mui/icons-material/Settings'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import {
+  SettingsIcon,
+  CheckCircleIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from 'components/Icons'
 import { fillGoals } from '../../thunks'
 import { Confirm } from 'components/Confirm'
 import { GoalProgress } from 'components/GoalProgress'

@@ -7,14 +7,13 @@ import {
   MenuItem,
   Button,
   IconButton,
-  Typography,
   PopoverProps,
   OutlinedTextFieldProps,
 } from '@mui/material'
 import { AmountInput } from 'components/AmountInput'
-import { getGoals, setGoal } from 'store/data/hiddenData/goals'
+import { getGoals, setGoal, deleteGoal } from 'store/data/hiddenData/goals'
 import { goalType } from 'store/data/hiddenData/constants'
-import CloseIcon from '@mui/icons-material/Close'
+import { CloseIcon } from 'components/Icons'
 import MonthSelectPopover from 'scenes/Budgets/MonthSelectPopover'
 import { formatDate } from 'helpers/format'
 
@@ -26,11 +25,7 @@ const amountLabels = {
   [TARGET_BALANCE]: 'Хочу накопить',
 }
 
-type BudgetPopoverProps = PopoverProps & {
-  id: string
-}
-
-export const GoalPopover: FC<BudgetPopoverProps> = props => {
+export const GoalPopover: FC<PopoverProps & { id: string }> = props => {
   const { id, onClose, ...rest } = props
   const dispatch = useDispatch()
   const goal = useSelector(getGoals)[id] || {}
@@ -58,6 +53,10 @@ export const GoalPopover: FC<BudgetPopoverProps> = props => {
     }
     onClose?.({}, 'escapeKeyDown')
   }
+  const removeGoal = () => {
+    dispatch(deleteGoal(id))
+    onClose?.({}, 'escapeKeyDown')
+  }
 
   const showDateBlock = type === TARGET_BALANCE
 
@@ -74,7 +73,7 @@ export const GoalPopover: FC<BudgetPopoverProps> = props => {
             fullWidth
           >
             <MenuItem value={MONTHLY}>Регулярные сбережения</MenuItem>
-            <MenuItem value={MONTHLY_SPEND}>Регулярные траты</MenuItem>
+            <MenuItem value={MONTHLY_SPEND}>Сумма на месяц</MenuItem>
             <MenuItem value={TARGET_BALANCE}>Накопить сумму</MenuItem>
           </TextField>
 
@@ -94,13 +93,15 @@ export const GoalPopover: FC<BudgetPopoverProps> = props => {
           />
 
           {showDateBlock && (
-            <Box>
-              <Button onClick={openMonthPopover}>
-                <Typography>
-                  {endDate
-                    ? formatDate(endDate, 'LLLL yyyy').toUpperCase()
-                    : 'Указать дату'}
-                </Typography>
+            <Box display="flex">
+              <Button
+                size="large"
+                onClick={openMonthPopover}
+                fullWidth={!endDate}
+              >
+                {endDate
+                  ? formatDate(endDate, 'LLLL yyyy').toUpperCase()
+                  : 'К определённой дате'}
               </Button>
               {endDate && (
                 <IconButton onClick={removeDate} children={<CloseIcon />} />
@@ -111,6 +112,11 @@ export const GoalPopover: FC<BudgetPopoverProps> = props => {
           <Button onClick={save} variant="contained" color="primary">
             Сохранить цель
           </Button>
+          {!!goal.amount && (
+            <Button onClick={removeGoal} variant="outlined" color="error">
+              Удалить цель
+            </Button>
+          )}
         </Box>
       </Popover>
 

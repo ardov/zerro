@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { Box, Typography, Button } from '@mui/material'
-import RefreshIcon from '@mui/icons-material/Refresh'
+import { RefreshIcon } from 'components/Icons'
 
 interface ErrorMessageProps {
   onLogOut: () => void

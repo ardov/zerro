@@ -15,7 +15,7 @@ import {
   Theme,
   BoxProps,
 } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
+import { CloseIcon } from 'components/Icons'
 import Rhythm from 'components/Rhythm'
 import { Tooltip } from 'components/Tooltip'
 import { Line } from '../components'

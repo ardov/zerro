@@ -12,7 +12,7 @@ import {
   PopoverProps,
   ListItemProps,
 } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
+import { AddIcon } from 'components/Icons'
 import { EmojiIcon } from 'components/EmojiIcon'
 import { PopulatedTag } from 'types'
 

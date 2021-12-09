@@ -4,17 +4,19 @@ import { logOut } from 'logic/authorization'
 import { exportCSV } from 'logic/exportCSV'
 import { exportJSON } from 'logic/exportJSON'
 import { makeStyles } from '@mui/styles'
-import SettingsIcon from '@mui/icons-material/Settings'
-import SaveAltIcon from '@mui/icons-material/SaveAlt'
-import ExitToAppIcon from '@mui/icons-material/ExitToApp'
-import WhatshotIcon from '@mui/icons-material/Whatshot'
-import WbSunnyIcon from '@mui/icons-material/WbSunny'
-import NightsStayIcon from '@mui/icons-material/NightsStay'
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
-import BarChartIcon from '@mui/icons-material/BarChart'
-import SyncIcon from '@mui/icons-material/Sync'
-import SyncDisabledIcon from '@mui/icons-material/SyncDisabled'
+import {
+  SettingsIcon,
+  SaveAltIcon,
+  ExitToAppIcon,
+  WhatshotIcon,
+  WbSunnyIcon,
+  NightsStayIcon,
+  FavoriteBorderIcon,
+  HelpOutlineIcon,
+  BarChartIcon,
+  SyncIcon,
+  SyncDisabledIcon,
+} from 'components/Icons'
 import { Link } from 'react-router-dom'
 import {
   Box,
