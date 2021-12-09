@@ -240,8 +240,10 @@ const CommentWidget: FC<{ id: string | null }> = props => {
 
   // Update comment only when debounced value updated
   useEffect(() => {
-    dispatch(setTagComment(id, debouncedValue))
-  }, [debouncedValue, dispatch, id])
+    if (comment !== debouncedValue) {
+      dispatch(setTagComment(id, debouncedValue))
+    }
+  }, [debouncedValue, dispatch, id, comment])
 
   return (
     <InputBase
