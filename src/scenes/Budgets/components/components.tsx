@@ -1,14 +1,15 @@
 import React, { ReactNode } from 'react'
 import { Box, BoxProps, Typography } from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
-import { Amount } from '../../../components/Amount'
+import { Amount, AmountProps } from '../../../components/Amount'
 
 interface TotalProps extends BoxProps {
   name: string
-  value: number
   align?: 'center' | 'right' | 'left'
-  currency?: string
-  sign?: boolean
+  value: AmountProps['value']
+  currency?: AmountProps['currency']
+  sign?: AmountProps['sign']
+  decMode?: AmountProps['decMode']
 }
 
 export function Total({
@@ -17,6 +18,7 @@ export function Total({
   value = 0,
   currency,
   sign = false,
+  decMode,
   ...rest
 }: TotalProps) {
   return (
@@ -32,7 +34,12 @@ export function Total({
         variant="h5"
         color={value ? 'textPrimary' : 'textSecondary'}
       >
-        <Amount value={value} currency={currency} sign={sign} />
+        <Amount
+          value={value}
+          currency={currency}
+          sign={sign}
+          decMode={decMode}
+        />
       </Typography>
     </Box>
   )

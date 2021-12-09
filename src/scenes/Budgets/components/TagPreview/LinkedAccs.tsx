@@ -95,7 +95,9 @@ export const LinkedAccs: FC<LinkedAccsProps> = ({ id }) => {
         </Box>
       ) : (
         <Tooltip title="Переводы на привязанные счета будут считаться, как расход по этой категории. Это удобно для планирования инвестиций или погашения кредита.">
-          <Button onClick={handleClick}>Привязать счёт</Button>
+          <Button onClick={handleClick} fullWidth>
+            Привязать счёт
+          </Button>
         </Tooltip>
       )}
 
