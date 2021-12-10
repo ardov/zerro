@@ -11,7 +11,6 @@ import {
   MergeTypeIcon,
 } from 'components/Icons'
 import { Tooltip } from 'components/Tooltip'
-import { makeStyles } from '@mui/styles'
 import Chip from '@mui/material/Chip'
 import Box from '@mui/material/Box'
 import Menu from '@mui/material/Menu'
@@ -49,7 +48,6 @@ const Actions: FC<ActionsProps> = ({
   onCheckAll,
 }) => {
   const dispatch = useDispatch()
-  const classes = useStyles()
   const allTransactions = useSelector(getTransactions)
   const [ids, setIds] = useState(checkedIds)
   const transactions = ids?.map(id => allTransactions[id])
@@ -235,10 +233,6 @@ const Actions: FC<ActionsProps> = ({
     </>
   )
 }
-
-const useStyles = makeStyles(({ spacing }) => ({
-  menuIcon: { marginRight: spacing(1) },
-}))
 
 function getAvailableActions(transactions: Transaction[]) {
   const { incomes, outcomes, transfers } = getTypes(transactions)
