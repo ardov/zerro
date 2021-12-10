@@ -8,6 +8,7 @@ import {
   DoneAllIcon,
   MoreVertIcon,
   VisibilityIcon,
+  MergeTypeIcon,
 } from 'components/Icons'
 import { Tooltip } from 'components/Tooltip'
 import { makeStyles } from '@mui/styles'
@@ -28,8 +29,11 @@ import { EditOutlined } from '@mui/icons-material'
 import { BulkEditModal } from './BulkEditModal'
 import { getType, isNew } from 'store/data/transactions/helpers'
 import { getTransactions } from 'store/data/transactions'
-import { Divider } from '@mui/material'
+import { Divider, ListItemIcon, ListItemText } from '@mui/material'
 import { Transaction } from 'types'
+import { round } from 'helpers/currencyHelpers'
+import { applyClientPatch } from 'store/data'
+import { sendEvent } from 'helpers/tracking'
 
 type ActionsProps = {
   visible: boolean
@@ -176,15 +180,41 @@ const Actions: FC<ActionsProps> = ({
             >
               {actions.markViewed && (
                 <MenuItem onClick={handleMarkViewed}>
-                  <VisibilityIcon className={classes.menuIcon} color="action" />
-                  Сделать просмотренными
+                  <ListItemIcon>
+                    <VisibilityIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Сделать просмотренными" />
                 </MenuItem>
               )}
 
               {actions.bulkEdit && (
                 <MenuItem onClick={() => setEditModalVisible(true)}>
-                  <EditOutlined className={classes.menuIcon} color="action" />
-                  Редактировать
+                  <ListItemIcon>
+                    <EditOutlined />
+                  </ListItemIcon>
+                  <ListItemText primary="Редактировать" />
+                </MenuItem>
+              )}
+
+              {actions.combineReturns && (
+                <MenuItem
+                  onClick={() => {
+                    sendEvent('Transaction: combine to outcome')
+                    dispatch(
+                      applyClientPatch({
+                        transaction: combineToOutcome(transactions),
+                      })
+                    )
+                    onUncheckAll()
+                  }}
+                >
+                  <ListItemIcon>
+                    <MergeTypeIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Объединить в расход"
+                    secondary="Возвраты станут переводами или удалятся"
+                  />
                 </MenuItem>
               )}
 
@@ -193,8 +223,10 @@ const Actions: FC<ActionsProps> = ({
               </Box>
 
               <MenuItem onClick={handleCheckAll}>
-                <DoneAllIcon className={classes.menuIcon} color="action" />
-                Выбрать все
+                <ListItemIcon>
+                  <DoneAllIcon />
+                </ListItemIcon>
+                <ListItemText primary="Выбрать все" />
               </MenuItem>
             </Menu>
           </Box>
@@ -209,19 +241,79 @@ const useStyles = makeStyles(({ spacing }) => ({
 }))
 
 function getAvailableActions(transactions: Transaction[]) {
-  const { income, outcome, transfer } = getTypes(transactions)
+  const { incomes, outcomes, transfers } = getTypes(transactions)
   return {
     delete: true,
-    setMainTag: !transfer && (income || outcome),
+    setMainTag: !transfers.length && (incomes.length || outcomes.length),
     bulkEdit: true,
     markViewed: transactions.some(isNew),
+    combineReturns: showCombineReturns(),
+  }
+
+  function showCombineReturns(): boolean {
+    if (outcomes.length !== 1) return false
+    if (incomes.length === 0) return false
+    if (transfers.length > 0) return false
+
+    const instrument = outcomes[0].outcomeInstrument
+    if (incomes.some(tr => tr.incomeInstrument !== instrument)) return false
+
+    const totalOutcome = outcomes[0].outcome
+    const totalIncome = incomes
+      .map(tr => tr.income)
+      .reduce((sum, v) => round(sum + v), 0)
+    if (totalOutcome <= totalIncome) return false
+    return true
   }
 }
 
+function combineToOutcome(transactions: Transaction[]) {
+  const { incomes, outcomes } = getTypes(transactions)
+  const outcome = outcomes[0]
+  const outcomeInstrument = outcome.outcomeInstrument
+  let outcomeSum = outcome.outcome
+  const outcomeAccount = outcome.outcomeAccount
+  const modifiedIncomes: Transaction[] = incomes.map(tr => {
+    outcomeSum = round(outcomeSum - tr.income)
+    if (tr.incomeAccount === outcomeAccount) {
+      // Same account -> just delete income
+      return {
+        ...tr,
+        changed: Date.now(),
+        deleted: true,
+      }
+    } else {
+      // Other account -> convert to transfer
+      return {
+        ...tr,
+        changed: Date.now(),
+        outcomeAccount,
+        outcome: tr.income,
+        outcomeInstrument,
+      }
+    }
+  })
+  modifiedIncomes.push({
+    ...outcome,
+    outcome: outcomeSum,
+    changed: Date.now(),
+  })
+  return modifiedIncomes
+}
+
 function getTypes(list: Transaction[] = []) {
-  let res = { income: 0, outcome: 0, transfer: 0 }
-  list?.forEach(tr => res[getType(tr) as keyof typeof res]++)
-  return res
+  let incomes: Transaction[] = []
+  let outcomes: Transaction[] = []
+  let transfers: Transaction[] = []
+
+  list?.forEach(tr => {
+    let trType = getType(tr)
+    if (trType === 'income') incomes.push(tr)
+    if (trType === 'outcome') outcomes.push(tr)
+    if (trType === 'transfer') transfers.push(tr)
+  })
+
+  return { incomes, outcomes, transfers }
 }
 
 export default Actions
