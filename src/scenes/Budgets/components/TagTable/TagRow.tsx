@@ -35,7 +35,7 @@ import { getPopulatedTag } from 'store/data/tags'
 import { getAmountsById } from 'scenes/Budgets/selectors'
 import { Goal } from 'types'
 import { getTagMeta } from 'store/data/hiddenData/tagMeta'
-import { getInstruments } from 'store/data/instruments'
+import { getInstruments, getUserInstrumentId } from 'store/data/instruments'
 import { SxProps } from '@mui/system'
 
 type TagRowProps = {
@@ -66,8 +66,10 @@ export const TagRow: FC<TagRowProps> = props => {
   } = props
   const tag = useSelector(state => getPopulatedTag(state, id))
   const { comment, currency } = useSelector(getTagMeta)?.[id] || {}
+  const userCurrency = useSelector(getUserInstrumentId)
   const amounts = useSelector(getAmountsById)?.[date]?.[id]
 
+  const showCurrency = !!currency && currency !== userCurrency
   const isUnsorted = !tag.parent && isChild // реальная родительская категория
   let { showOutcome, symbol, colorRGB, name } = tag
   let budgeted = amounts.totalBudgeted
@@ -114,6 +116,7 @@ export const TagRow: FC<TagRowProps> = props => {
         name={name}
         comment={comment}
         currency={currency}
+        showCurrency={showCurrency}
         onClick={() => openDetails(id)}
       />
 
@@ -230,6 +233,7 @@ type NameCellProps = {
   name: string
   comment?: string
   currency?: number
+  showCurrency?: boolean
   onClick: () => void
 }
 const NameCell: FC<NameCellProps> = ({
@@ -238,6 +242,7 @@ const NameCell: FC<NameCellProps> = ({
   name,
   comment,
   currency,
+  showCurrency,
   onClick,
 }) => {
   return (
@@ -246,7 +251,7 @@ const NameCell: FC<NameCellProps> = ({
       <Typography component="span" variant="body1" title={name} noWrap>
         {name}
       </Typography>
-      <CurrencyTag currency={currency} />
+      {showCurrency && <CurrencyTag currency={currency} />}
       {!!comment && (
         <Tooltip title={comment}>
           <NotesIcon sx={{ ml: 1, color: 'text.secondary' }} fontSize="small" />

@@ -15,7 +15,7 @@ import {
 } from '@mui/material'
 import { TagSelect } from './TagSelect'
 import { Modify, Tag } from 'types'
-import { useDispatch, useSelector } from 'react-redux'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { createTag } from 'store/data/tags/thunks'
 import { useFormik } from 'formik'
 import { hex2int, int2hex } from 'helpers/color'
@@ -48,6 +48,7 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
   const userInstrument = useSelector(getUserInstrumentId)
   const {
     values,
+    initialValues,
     handleSubmit,
     errors,
     handleChange,
@@ -64,27 +65,28 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
       currency: meta?.currency || userInstrument,
     },
     validate: values => {
-      if (!values.title) {
+      if (!values.title.trim()) {
         return { title: 'Название категории точно пригодится 😉' }
       }
     },
     onSubmit: (values, helpers) => {
-      const newTag = dispatch(createTag({ ...values, id }))
-      console.log(newTag)
-      dispatch(setTagComment(id, values.comment))
-      dispatch(
-        setTagCurrency(
-          id,
-          values.currency !== userInstrument ? undefined : values.currency
-        )
-      )
+      const { comment, currency, ...tagData } = values
+      const newTag = dispatch(createTag({ ...tagData, id }))
+      console.log('newTag', newTag)
+      dispatch(setTagComment(id, comment))
+      dispatch(setTagCurrency(id, currency))
       onClose()
     },
     enableReinitialize: true,
   })
 
   return (
-    <Dialog {...dialogProps}>
+    <Dialog
+      {...dialogProps}
+      onClose={() => {
+        if (shallowEqual(values, initialValues)) onClose()
+      }}
+    >
       <DialogTitle>
         {isNew ? 'Новая категория' : 'Редактирование категории'}
       </DialogTitle>

@@ -30,8 +30,8 @@ export const setTagComment = (
   comment: TagMeta['comment']
 ): AppThunk => (dispatch, getState) => {
   let id = String(tagId)
-  const state = getState()
-  const meta = getMetaForTag(id)(state)
+  const meta = getMetaForTag(id)(getState())
+  if (meta.comment === comment) return
   const newMeta = { ...meta, comment }
   sendEvent('Tag: Set comment')
   dispatch(setTagMeta(id, newMeta))
@@ -42,8 +42,8 @@ export const setTagCurrency = (
   currency: TagMeta['currency']
 ): AppThunk => (dispatch, getState) => {
   let id = String(tagId)
-  const state = getState()
-  const meta = getMetaForTag(id)(state)
+  const meta = getMetaForTag(id)(getState())
+  if (meta.currency === currency) return
   const newMeta = { ...meta, currency }
   sendEvent('Tag: Set currency')
   dispatch(setTagMeta(id, newMeta))
