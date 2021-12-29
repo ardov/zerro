@@ -58,6 +58,7 @@ export const Account: FC<
           value={account.balance}
           instrument={account.instrument}
           decMode="ifOnly"
+          noShade
         />
       </Box>
     </ListItemButton>
@@ -87,7 +88,7 @@ export const Subheader: FC<
           color={amount < 0 ? 'error.main' : 'text.secondary'}
         >
           <b>
-            <Amount value={amount} instrument="user" decMode="ifOnly" />
+            <Amount value={amount} instrument="user" decMode="ifOnly" noShade />
           </b>
         </Box>
       </Box>
