@@ -194,7 +194,7 @@ const Actions: FC<ActionsProps> = ({
                 </MenuItem>
               )}
 
-              {actions.combineReturns && (
+              {actions.combineToOutcome && (
                 <MenuItem
                   onClick={() => {
                     sendEvent('Transaction: combine to outcome')
@@ -211,9 +211,50 @@ const Actions: FC<ActionsProps> = ({
                   </ListItemIcon>
                   <ListItemText
                     primary="Объединить в расход"
-                    secondary="Возвраты станут переводами или удалятся"
+                    secondary="Возвраты удалятся или станут переводами"
                   />
                 </MenuItem>
+              )}
+
+              {actions.combineToIncome && (
+                <MenuItem
+                  onClick={() => {
+                    sendEvent('Transaction: combine to income')
+                    dispatch(
+                      applyClientPatch({
+                        transaction: combineToIncome(transactions),
+                      })
+                    )
+                    onUncheckAll()
+                  }}
+                >
+                  <ListItemIcon>
+                    <MergeTypeIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Объединить в доход"
+                    secondary="Расходы удалятся или станут переводами"
+                  />
+                </MenuItem>
+              )}
+
+              {actions.collapseTransactionsEasy && (
+                <Confirm
+                  title={deleteText}
+                  onOk={handleDelete}
+                  okText="Удалить"
+                  cancelText="Оставить"
+                >
+                  <MenuItem>
+                    <ListItemIcon>
+                      <MergeTypeIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Схлопнуть операции"
+                      secondary="Они просто удалятся 😉"
+                    />
+                  </MenuItem>
+                </Confirm>
               )}
 
               <Box my={1}>
@@ -236,28 +277,62 @@ const Actions: FC<ActionsProps> = ({
 
 function getAvailableActions(transactions: Transaction[]) {
   const { incomes, outcomes, transfers } = getTypes(transactions)
+  const totalOutcome = outcomes.reduce((sum, tr) => round(sum + tr.outcome), 0)
+  const totalIncome = incomes.reduce((sum, tr) => round(sum + tr.income), 0)
+  const sameInstruments = hasSameInOutInstruments()
+  const sameAccounts = hasSameInOutAccounts()
+
   return {
     delete: true,
     setMainTag: !transfers.length && (incomes.length || outcomes.length),
     bulkEdit: true,
     markViewed: transactions.some(isNew),
-    combineReturns: showCombineReturns(),
+    combineToOutcome: canCombineToOutcome(),
+    combineToIncome: canCombineToIncome(),
+    collapseTransactionsEasy: canCollapseTransactionsEasy(),
   }
 
-  function showCombineReturns(): boolean {
-    if (outcomes.length !== 1) return false
-    if (incomes.length === 0) return false
-    if (transfers.length > 0) return false
+  function hasSameInOutInstruments() {
+    const instruments = new Set<number>()
+    outcomes.forEach(tr => instruments.add(tr.outcomeInstrument))
+    incomes.forEach(tr => instruments.add(tr.incomeInstrument))
+    return instruments.size === 1
+  }
+  function hasSameInOutAccounts() {
+    const accounts = new Set<string>()
+    outcomes.forEach(tr => accounts.add(tr.outcomeAccount))
+    incomes.forEach(tr => accounts.add(tr.incomeAccount))
+    return accounts.size === 1
+  }
 
-    const instrument = outcomes[0].outcomeInstrument
-    if (incomes.some(tr => tr.incomeInstrument !== instrument)) return false
-
-    const totalOutcome = outcomes[0].outcome
-    const totalIncome = incomes
-      .map(tr => tr.income)
-      .reduce((sum, v) => round(sum + v), 0)
-    if (totalOutcome <= totalIncome) return false
-    return true
+  // TODO: add function to delete transactions and convert some of them to transfers
+  function canCollapseTransactionsEasy(): boolean {
+    return (
+      transfers.length === 0 &&
+      outcomes.length > 0 &&
+      incomes.length > 0 &&
+      sameInstruments &&
+      sameAccounts &&
+      totalOutcome === totalIncome
+    )
+  }
+  function canCombineToOutcome(): boolean {
+    return (
+      transfers.length === 0 &&
+      outcomes.length === 1 &&
+      incomes.length > 0 &&
+      sameInstruments &&
+      totalOutcome > totalIncome
+    )
+  }
+  function canCombineToIncome(): boolean {
+    return (
+      transfers.length === 0 &&
+      outcomes.length > 0 &&
+      incomes.length === 1 &&
+      sameInstruments &&
+      totalOutcome < totalIncome
+    )
   }
 }
 
@@ -293,6 +368,40 @@ function combineToOutcome(transactions: Transaction[]) {
     changed: Date.now(),
   })
   return modifiedIncomes
+}
+
+function combineToIncome(transactions: Transaction[]) {
+  const { incomes, outcomes } = getTypes(transactions)
+  const income = incomes[0]
+  const incomeInstrument = income.incomeInstrument
+  let incomeSum = income.income
+  const incomeAccount = income.incomeAccount
+  const modifiedOutcomes: Transaction[] = outcomes.map(tr => {
+    incomeSum = round(incomeSum - tr.outcome)
+    if (tr.outcomeAccount === incomeAccount) {
+      // Same account -> just delete outcome
+      return {
+        ...tr,
+        changed: Date.now(),
+        deleted: true,
+      }
+    } else {
+      // Other account -> convert to transfer
+      return {
+        ...tr,
+        changed: Date.now(),
+        incomeAccount,
+        income: tr.outcome,
+        incomeInstrument,
+      }
+    }
+  })
+  modifiedOutcomes.push({
+    ...income,
+    income: incomeSum,
+    changed: Date.now(),
+  })
+  return modifiedOutcomes
 }
 
 function getTypes(list: Transaction[] = []) {
