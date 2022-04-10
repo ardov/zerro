@@ -115,7 +115,7 @@ const useStyles = makeStyles(theme => ({
   listItem: { borderRadius: theme.shape.borderRadius },
 }))
 
-const NavigationLink: FC<{
+export const NavigationLink: FC<{
   icon: React.ReactNode
   text: React.ReactNode
   path: string

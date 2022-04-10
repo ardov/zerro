@@ -16,6 +16,7 @@ import {
   EditIcon,
   EmojiFlagsIcon,
   NotesIcon,
+  SyncAltIcon,
 } from 'components/Icons'
 import { getPopulatedTag } from 'store/data/tags'
 import { Total, Line as TextLine } from '../components'
@@ -40,6 +41,7 @@ import { getGoals } from 'store/data/hiddenData/goals'
 import { goalToWords } from 'store/data/hiddenData/goals/helpers'
 import { useDebounce } from 'helpers/useDebounce'
 import { GoalPopover } from '../GoalPopover'
+import { NavigationLink } from 'components/Navigation/NavDrawer';
 
 type TagPreviewProps = {
   id: string
@@ -144,8 +146,15 @@ export const TagPreview: FC<TagPreviewProps> = ({ onClose, id }) => {
           <TextLine name="Бюджет" amount={totalBudgeted} />
           <TextLine name="Расход" amount={totalOutcome} />
           {!!transferOutcome && (
-            <TextLine name="       Переводы" amount={transferOutcome} />
+            <TextLine name="Переводы" amount={transferOutcome} />
           )}
+          <Box>
+            <NavigationLink
+              text="Перейти к операциям"
+              path={`/transactions/?month=${month}&tag=${tag.id}`}
+              icon={<SyncAltIcon />}
+            />
+          </Box>
           <Box my={5}>
             <LinkedAccs id={id} />
           </Box>
