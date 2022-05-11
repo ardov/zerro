@@ -31,6 +31,7 @@ import add from 'date-fns/add'
 import sub from 'date-fns/sub'
 import { MapWidget } from './MapWidget'
 import { useSearchParam } from 'helpers/useSearchParam'
+import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
@@ -176,6 +177,8 @@ function Budgets() {
             )}
             {drawerId && <TagPreview onClose={closeDrawer} id={drawerId} />}
           </Drawer>
+
+          <BudgetTransactionsDrawer />
         </Box>
       </DnDContext>
     </>

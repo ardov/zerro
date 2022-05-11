@@ -6,10 +6,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import {
-  Dialog,
-  Typography
-} from '@mui/material'
+import { Dialog, Typography } from '@mui/material'
 import { ListChildComponentProps, VariableSizeList as List } from 'react-window'
 import StaticDatePicker from '@mui/lab/StaticDatePicker'
 import TextField from '@mui/material/TextField'
@@ -97,8 +94,8 @@ export const GrouppedList: FC<GrouppedListProps> = ({
       </Dialog>
 
       <AutoSizer disableWidth>
-        {({ height }) => groups.length
-          ? (
+        {({ height }) =>
+          groups.length ? (
             <List
               className="hidden-scroll"
               ref={listRef}
@@ -112,15 +109,12 @@ export const GrouppedList: FC<GrouppedListProps> = ({
             >
               {Day}
             </List>
-          )
-          : (
+          ) : (
             <Box p={5}>
-              <Typography
-                variant="body1"
-                align="center"
-                paragraph
-              >
-                Транзакции не найдены. Попробуйте изменить параметры фильтрации.
+              <Typography variant="body1" align="center" paragraph>
+                Таких операций нет.
+                <br />
+                Возможно, дело в фильтрах.
               </Typography>
             </Box>
           )

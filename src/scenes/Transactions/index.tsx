@@ -14,13 +14,7 @@ import { sendEvent } from 'helpers/tracking'
 import { Helmet } from 'react-helmet'
 import { useSearchParam } from 'helpers/useSearchParam'
 import { useSelector } from 'react-redux'
-import { useLocation } from 'react-router';
-import {
-  startOfMonth,
-  endOfMonth,
-} from 'date-fns';
 import { getTransactions } from 'store/data/transactions'
-import { FilterConditions } from 'store/data/transactions/filtering';
 
 const useStyles = makeStyles(theme => ({
   drawerWidth: {
@@ -32,28 +26,15 @@ const useStyles = makeStyles(theme => ({
 export default function TransactionsView() {
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const [opened, setOpened] = useSearchParam('transaction')
-  const [monthString] = useSearchParam('month')
-  const [tag] = useSearchParam('tag')
   const openedTransaction = useSelector(getTransactions)[opened || '']
   const [checkedDate, setCheckedDate] = useState<Date | null>(null)
   const c = useStyles()
-  const isNeedFilter = useLocation().search
-
 
   // send analytics
   useEffect(() => {
     if (openedTransaction) sendEvent('Transaction: see details')
     if (opened && !openedTransaction) setOpened(null)
   }, [opened, openedTransaction, setOpened])
-
-  const month = Number(monthString)
-  const filterConditions: FilterConditions | undefined = isNeedFilter
-    ? {
-      dateFrom: startOfMonth(month),
-      dateTo: endOfMonth(month),
-      tags: [tag as string],
-    }
-    : undefined;
 
   return (
     <>
@@ -83,7 +64,6 @@ export default function TransactionsView() {
           >
             <TransactionList
               checkedDate={checkedDate}
-              filterConditions={filterConditions}
               sx={{ flex: '1 1 auto' }}
             />
           </Paper>
