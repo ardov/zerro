@@ -18,6 +18,7 @@ import { getTagAccMap } from 'store/data/hiddenData/accTagMap'
 import { getInBudgetAccounts } from 'store/data/accounts'
 import { FilterConditions } from 'store/data/transactions/filtering'
 import { getAmountsById } from 'scenes/Budgets/selectors'
+import { useSearchParam } from 'helpers/useSearchParam'
 
 export type MetricType = 'outcome' | 'available' | 'budgeted'
 
@@ -44,6 +45,8 @@ export const TagTable: FC<TagTableProps> = props => {
   const [budgetPopoverData, setBudgetPopoverData] = useState<PopoverData>({})
   const { dragMode } = useContext(DragModeContext)
 
+  const [, setId] = useSearchParam('transactions')
+
   const setTagExpanded = useCallback((id: string, state: boolean) => {
     setExpanded(obj => ({ ...obj, [id]: state }))
   }, [])
@@ -55,10 +58,13 @@ export const TagTable: FC<TagTableProps> = props => {
     [tagsTree]
   )
 
-  const onSelect = useCallback((id: string) => {
-    sendEvent('Budgets: see transactions')
-    setSelected(id)
-  }, [])
+  const onSelect = useCallback(
+    (id: string) => {
+      sendEvent('Budgets: see transactions')
+      setId(id)
+    },
+    [setId]
+  )
   const onCloseTrDrawer = useCallback(() => {
     setSelected(undefined)
   }, [])
@@ -77,12 +83,8 @@ export const TagTable: FC<TagTableProps> = props => {
 
   const tagGroupProps = tagsTree.map(tag => {
     const { id } = tag
-    const {
-      totalAvailable,
-      totalOutcome,
-      totalBudgeted,
-      childrenAvailable,
-    } = amounts[id]
+    const { totalAvailable, totalOutcome, totalBudgeted, childrenAvailable } =
+      amounts[id]
 
     const isVisible = Boolean(
       tag.showOutcome ||

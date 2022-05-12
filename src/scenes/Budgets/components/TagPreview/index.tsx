@@ -9,6 +9,7 @@ import {
   ButtonBase,
   InputBase,
   InputAdornment,
+  Button,
 } from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
 import {
@@ -40,6 +41,7 @@ import { getGoals } from 'store/data/hiddenData/goals'
 import { goalToWords } from 'store/data/hiddenData/goals/helpers'
 import { useDebounce } from 'helpers/useDebounce'
 import { GoalPopover } from '../GoalPopover'
+import { useSearchParam } from 'helpers/useSearchParam'
 
 type TagPreviewProps = {
   id: string
@@ -56,6 +58,7 @@ const cardStyle = {
 
 export const TagPreview: FC<TagPreviewProps> = ({ onClose, id }) => {
   const [month] = useMonth()
+  const [, setId] = useSearchParam('transactions')
   const tag = useSelector(state => getPopulatedTag(state, id))
   const goal = useSelector(getGoals)[id]
   // const goalProgress = useSelector(getGoalsProgress)?.[month]?.[id]
@@ -144,8 +147,13 @@ export const TagPreview: FC<TagPreviewProps> = ({ onClose, id }) => {
           <TextLine name="Бюджет" amount={totalBudgeted} />
           <TextLine name="Расход" amount={totalOutcome} />
           {!!transferOutcome && (
-            <TextLine name="       Переводы" amount={transferOutcome} />
+            <TextLine name="Переводы" amount={transferOutcome} />
           )}
+          <Box>
+            <Button onClick={() => setId(id)} fullWidth>
+              Показать операции
+            </Button>
+          </Box>
           <Box my={5}>
             <LinkedAccs id={id} />
           </Box>
