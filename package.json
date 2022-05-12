@@ -1,9 +1,9 @@
 {
   "name": "zerro",
-  "version": "0.10.5",
+  "version": "0.10.6",
   "private": true,
   "scripts": {
-    "start": "react-scripts start",
+    "start": "react-scripts --openssl-legacy-provider start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "deploy": "react-scripts build && cd ./build && now --prod",
