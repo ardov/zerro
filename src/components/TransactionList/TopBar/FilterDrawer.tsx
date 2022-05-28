@@ -10,6 +10,7 @@ import {
   Grid,
   Typography,
   IconButton,
+  TextFieldProps,
 } from '@mui/material'
 import { DateRangePicker } from '@mui/lab'
 import startOfDay from 'date-fns/startOfDay'
@@ -114,13 +115,19 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
             value={[conditions.dateFrom || null, conditions.dateTo || null]}
             maxDate={endOfDay(new Date())}
             defaultCalendarMonth={subMonths(new Date(), 1)}
-            onChange={([dateFrom, dateTo]) => {
+            onChange={([dateFrom, dateTo]: [
+              number | Date | undefined,
+              number | Date | undefined
+            ]) => {
               setCondition({
                 dateFrom: dateFrom && +startOfDay(dateFrom),
                 dateTo: dateTo && +endOfDay(dateTo),
               })
             }}
-            renderInput={(startProps, endProps) => (
+            renderInput={(
+              startProps: TextFieldProps,
+              endProps: TextFieldProps
+            ) => (
               <Grid container spacing={3}>
                 <Grid item xs={6}>
                   <TextField {...startProps} />

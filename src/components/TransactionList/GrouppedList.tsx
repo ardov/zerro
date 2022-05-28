@@ -56,16 +56,17 @@ export const GrouppedList: FC<GrouppedListProps> = ({
   }, [listRef, groups])
 
   const scrollToDate = useCallback(
-    date =>
+    (date: number) =>
       listRef?.current?.scrollToItem(findDateIndex(groups, date), 'start'),
     [groups]
   )
 
   const minDate = groups.length ? groups[groups.length - 1].date : 0
   const maxDate = groups.length ? groups[0].date : 0
-  const getItemKey = useCallback(i => +groups[i].date, [groups])
+  const getItemKey = useCallback((i: number) => +groups[i].date, [groups])
   const getItemSize = useCallback(
-    i => HEADER_HEIGHT + TRANSACTION_HEIGHT * groups[i].transactions.length,
+    (i: number) =>
+      HEADER_HEIGHT + TRANSACTION_HEIGHT * groups[i].transactions.length,
     [groups]
   )
   const itemData: DayData = {
@@ -87,7 +88,7 @@ export const GrouppedList: FC<GrouppedListProps> = ({
           value={clickedDate}
           onChange={date => {
             setClickedDate(null)
-            scrollToDate(date)
+            if (date) scrollToDate(date)
           }}
           renderInput={params => <TextField {...params} />}
         />

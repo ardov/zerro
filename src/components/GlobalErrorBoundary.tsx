@@ -7,7 +7,9 @@ import { clearStorage } from 'worker'
 const buttonStyle = { border: '1px solid #ccc', padding: 16 }
 const wrapperStyle = { margin: '0 auto', padding: 40 }
 
-export default class GlobalErrorBoundary extends React.Component {
+export default class GlobalErrorBoundary extends React.Component<{
+  children: React.ReactNode
+}> {
   state = { hasError: false }
 
   static getDerivedStateFromError = (error: any) => ({ hasError: true })

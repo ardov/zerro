@@ -6,6 +6,6 @@ import { applyServerPatch } from '../store/data'
 
 store.dispatch(applyServerPatch(getDemoData()))
 
-export const DemoStoreProvider: FC<{}> = props => {
+export const DemoStoreProvider: FC<{ children?: React.ReactNode }> = props => {
   return <Provider store={store}>{props.children}</Provider>
 }

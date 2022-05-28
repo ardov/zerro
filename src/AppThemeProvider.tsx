@@ -68,7 +68,7 @@ const globalStyles = css`
   }
 `
 
-export const AppThemeProvider: FC = props => {
+export const AppThemeProvider: FC<{ children?: React.ReactNode }> = props => {
   const themeType = useThemeType()
   const theme = createTheme(themeType.type)
   return (

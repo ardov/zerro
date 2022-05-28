@@ -107,7 +107,7 @@ export function TagMapChart(props: TagMapChartProps) {
   }
 
   const handleClick = useCallback(
-    obj => {
+    (obj: any) => {
       const id = obj?.id
       if (!id) return
       if (!onSelect) return

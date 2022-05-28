@@ -39,7 +39,7 @@ export const MonthSelect: FC<MonthSelectProps> = props => {
   ])
   const closePopover = useCallback(() => setAnchorEl(null), [setAnchorEl])
   const handleChange = useCallback(
-    date => {
+    (date: number | Date) => {
       closePopover()
       onChange(+startOfMonth(date))
     },

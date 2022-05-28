@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react'
+import React, { FC, ReactNode, useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { getTotalsArray } from '../../selectors'
 import { convertCurrency, getUserCurrencyCode } from 'store/data/instruments'
@@ -133,7 +133,7 @@ export const CalculationErrorNotice: FC = () => {
   )
 }
 
-const A: FC<{ href: string }> = props => (
+const A: FC<{ children?: ReactNode; href: string }> = props => (
   <Link
     color="inherit"
     href={props.href}

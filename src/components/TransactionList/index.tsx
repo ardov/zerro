@@ -12,6 +12,7 @@ import Actions from './TopBar/Actions'
 import { sendEvent } from 'helpers/tracking'
 // import { getGroupedTransactions } from 'worker'
 import { useDebounce } from 'helpers/useDebounce'
+import { TransactionId } from 'types'
 
 type TransactionListProps = {
   prefilter?: FilterConditions | FilterConditions[]
@@ -34,13 +35,17 @@ const TransactionList: FC<TransactionListProps> = props => {
   const [filter, setFilter] = useState(filterConditions)
   const debouncedFilter = useDebounce(filter, 300)
   const setCondition = useCallback(
-    condition => setFilter(filter => ({ ...filter, ...condition })),
+    (condition?: FilterConditions) =>
+      setFilter(filter => ({ ...filter, ...condition })),
     []
   )
   const handleClearFilter = useCallback(() => {
     setFilter(filterConditions)
   }, [filterConditions])
-  const onFilterByPayee = useCallback(payee => setFilter({ search: payee }), [])
+  const onFilterByPayee = useCallback(
+    (payee?: string) => setFilter({ search: payee }),
+    []
+  )
 
   const groups = useMemo(() => {
     if (prefilter) {
@@ -80,7 +85,7 @@ const TransactionList: FC<TransactionListProps> = props => {
     setChecked(ids)
   }
 
-  const toggleTransaction = useCallback(id => {
+  const toggleTransaction = useCallback((id: TransactionId) => {
     setChecked(current => {
       return current.includes(id)
         ? current.filter(checked => id !== checked)
@@ -89,7 +94,7 @@ const TransactionList: FC<TransactionListProps> = props => {
   }, [])
 
   const checkByChangedDate = useCallback(
-    date => {
+    (date: Date | number) => {
       sendEvent('Transaction: select similar')
       const ids = transactions
         .filter(tr => tr.changed === +date)

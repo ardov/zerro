@@ -69,11 +69,13 @@ export const TagTable: FC<TagTableProps> = props => {
     setSelected(undefined)
   }, [])
   const openBudgetPopover = useCallback(
-    (id, anchor) => setBudgetPopoverData({ id, anchor }),
+    (id: PopoverData['id'], anchor: PopoverData['anchor']) =>
+      setBudgetPopoverData({ id, anchor }),
     []
   )
   const openGoalPopover = useCallback(
-    (id, anchor) => setGoalPopoverData({ id, anchor }),
+    (id: PopoverData['id'], anchor: PopoverData['anchor']) =>
+      setGoalPopoverData({ id, anchor }),
     []
   )
   const toggleMetric = useCallback(
@@ -83,8 +85,12 @@ export const TagTable: FC<TagTableProps> = props => {
 
   const tagGroupProps = tagsTree.map(tag => {
     const { id } = tag
-    const { totalAvailable, totalOutcome, totalBudgeted, childrenAvailable } =
-      amounts[id]
+    const {
+      totalAvailable,
+      totalOutcome,
+      totalBudgeted,
+      childrenAvailable,
+    } = amounts[id]
 
     const isVisible = Boolean(
       tag.showOutcome ||

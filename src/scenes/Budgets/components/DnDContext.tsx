@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { FC, ReactNode, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { DragDropContext, DropResult } from 'react-beautiful-dnd'
 import { useMonth } from '../pathHooks'
@@ -25,7 +25,7 @@ export const DragModeContext = React.createContext<DragModeContextType>({
   setDragMode: () => {},
 })
 
-export const DnDContext: React.FC = ({ children }) => {
+export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
   const dispatch = useDispatch()
   const [month] = useMonth()
   const [isDragging, setIsDragging] = useState(false)
@@ -62,7 +62,7 @@ export const DnDContext: React.FC = ({ children }) => {
     },
     [dispatch, dragMode, month]
   )
-  const onBeforeCapture = useCallback(e => {
+  const onBeforeCapture = useCallback(() => {
     setIsDragging(true)
     if (window.navigator.vibrate) window.navigator.vibrate(100)
   }, [])

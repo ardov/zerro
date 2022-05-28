@@ -119,7 +119,10 @@ function Budgets() {
   )
 
   const openOverview = useCallback(() => setDrawerId('overview'), [setDrawerId])
-  const openTagInfo = useCallback(id => setDrawerId(id), [setDrawerId])
+  const openTagInfo = useCallback(
+    (id: string | null | undefined) => setDrawerId(id),
+    [setDrawerId]
+  )
   const closeDrawer = useCallback(() => setDrawerId(), [setDrawerId])
 
   return (

@@ -158,6 +158,7 @@ export const TagRow: FC<TagRowProps> = props => {
 }
 
 const Wrapper: FC<{
+  children?: React.ReactNode
   id: string
   enableDrop: boolean
   isChild: boolean
