@@ -1,13 +1,14 @@
-import { combine, createEvent, createStore } from 'effector'
+import { combine } from 'effector'
 import { $fxIdMap } from './instrument'
-import { AccountId, ById, TAccount, TFxIdMap, ZmAccount } from '../types'
+import { ById, TAccount, TFxIdMap, ZmAccount } from '../types'
 import { unitsToMilliunits, unixToISO } from './utils'
+import { dataDomain } from './domain'
 
 // Events
-export const setRawAccounts = createEvent<ZmAccount[]>()
+export const setRawAccounts = dataDomain.createEvent<ZmAccount[]>()
 
 // Store
-export const $rawAccounts = createStore<ZmAccount[]>([])
+export const $rawAccounts = dataDomain.createStore<ZmAccount[]>([])
 $rawAccounts.on(setRawAccounts, (_, rawAccounts) => rawAccounts)
 
 // Derivatives

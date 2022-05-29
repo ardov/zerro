@@ -1,12 +1,12 @@
-import { combine, createEvent, createStore } from 'effector'
 import { unixToISO } from './utils'
 import { ById, TFxIdMap, TInstrument, ZmInstrument } from '../types'
+import { dataDomain } from './domain'
 
 // Events
-export const setRawInstruments = createEvent<ZmInstrument[]>()
+export const setRawInstruments = dataDomain.createEvent<ZmInstrument[]>()
 
 // Store
-export const $rawInstruments = createStore<ZmInstrument[]>([])
+export const $rawInstruments = dataDomain.createStore<ZmInstrument[]>([])
 $rawInstruments.on(setRawInstruments, (_, rawInstruments) => rawInstruments)
 
 // Derivatives

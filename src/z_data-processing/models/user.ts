@@ -1,13 +1,16 @@
-import { combine, createEvent, createStore } from 'effector'
+import { combine } from 'effector'
 import { unixToISO } from './utils'
 import { ById, TFxIdMap, TUser, ZmUser } from '../types'
 import { $fxIdMap } from './instrument'
+import { dataDomain } from './domain'
 
 // Events
-export const setRawUsers = createEvent<ZmUser[]>()
+export const setRawUsers = dataDomain.createEvent<ZmUser[]>('setRawUsers')
 
 // Store
-export const $rawUsers = createStore<ZmUser[]>([])
+export const $rawUsers = dataDomain.createStore<ZmUser[]>([], {
+  name: '$rawUsers',
+})
 $rawUsers.on(setRawUsers, (_, rawUsers) => rawUsers)
 
 // Derivatives
@@ -22,13 +25,17 @@ export const $users = combine($rawUsers, $fxIdMap, (users, fxIdMap) => {
 
 export const $mainUser = $users.map(users => {
   let mainUser = Object.values(users).find(({ parent }) => parent === null)
-  if (!mainUser) throw new Error('No main user found')
+  if (!mainUser) return null // throw new Error('No main user found')
   return mainUser
 })
 
-export const $mainUserId = $mainUser.map(user => user.id)
+export const $mainUserId = $mainUser.map(user => user?.id)
 
-export const $mainUserCurrency = $mainUser.map(user => user.fxCode)
+export const $mainUserCurrency = $mainUser.map(user => user?.fxCode)
+
+$mainUserCurrency.watch(currency => {
+  console.log('main user currency changed to', currency)
+})
 
 // -----------------------------------------------------------------------------
 // Functions

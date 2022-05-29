@@ -1,13 +1,14 @@
-import { combine, createEvent, createStore } from 'effector'
+import { combine } from 'effector'
 import { ById, TFxIdMap, TReminder, ZmReminder } from '../types'
+import { dataDomain } from './domain'
 import { $fxIdMap } from './instrument'
 import { unitsToMilliunits, unixToISO } from './utils'
 
 // Events
-export const setRawReminders = createEvent<ZmReminder[]>()
+export const setRawReminders = dataDomain.createEvent<ZmReminder[]>()
 
 // Store
-export const $rawReminders = createStore<ZmReminder[]>([])
+export const $rawReminders = dataDomain.createStore<ZmReminder[]>([])
 $rawReminders.on(setRawReminders, (_, rawReminders) => rawReminders)
 
 // Derivatives
