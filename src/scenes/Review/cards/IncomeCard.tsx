@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Box, Typography, Chip } from '@mui/material'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import Rhythm from 'components/Rhythm'
 import { Amount } from 'components/Amount'
 import { getUserCurrencyCode } from 'store/data/instruments'
@@ -14,8 +14,8 @@ interface IncomeCardProps {
 }
 
 export function IncomeCard({ byTag }: IncomeCardProps) {
-  const currency = useSelector(getUserCurrencyCode)
-  const tags = useSelector(getPopulatedTags)
+  const currency = useAppSelector(getUserCurrencyCode)
+  const tags = useAppSelector(getPopulatedTags)
   const incomeTags = Object.keys(byTag)
     .filter(id => byTag[id].income > 0)
     .sort((a, b) => byTag[b].income - byTag[a].income)

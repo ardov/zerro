@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { useMonth } from '../pathHooks'
 import { useSearchParam } from 'helpers/useSearchParam'
 import { TransactionsDrawer } from 'components/TransactionsDrawer'
@@ -12,9 +12,9 @@ import endOfMonth from 'date-fns/endOfMonth'
 export const BudgetTransactionsDrawer: FC = () => {
   const [month] = useMonth()
   const [id, setId] = useSearchParam('transactions')
-  const accountsInBudget = useSelector(getInBudgetAccounts).map(a => a.id)
-  const tagAccMap = useSelector(getTagAccMap)
-  const tagsById = useSelector(getPopulatedTags)
+  const accountsInBudget = useAppSelector(getInBudgetAccounts).map(a => a.id)
+  const tagAccMap = useAppSelector(getTagAccMap)
+  const tagsById = useAppSelector(getPopulatedTags)
 
   const onClose = () => setId(undefined)
 

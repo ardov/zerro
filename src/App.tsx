@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Router, Route, Redirect, Switch } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+
 import { getLoginState } from 'store/token'
 import { RegularSyncHandler } from 'components/RegularSyncHandler'
 import Nav from 'components/Navigation'
@@ -26,13 +26,14 @@ import Stats from 'scenes/Stats'
 import About from 'scenes/About'
 import Token from 'scenes/Token'
 import Donation from 'scenes/Donation'
+import { useAppSelector } from 'store'
 
 const history = createBrowserHistory()
 initTracking(history)
 
 export default function App() {
-  const isLoggedIn = useSelector(getLoginState)
-  const userId = useSelector(state => getRootUser(state)?.id)
+  const isLoggedIn = useAppSelector(getLoginState)
+  const userId = useAppSelector(state => getRootUser(state)?.id)
   useEffect(() => {
     if (typeof userId === 'number') setUserId(userId)
   }, [userId])
@@ -52,7 +53,7 @@ export default function App() {
 }
 
 const PrivateApp = () => {
-  const hasData = useSelector(state => !!getLastSyncTime(state))
+  const hasData = useAppSelector(state => !!getLastSyncTime(state))
   return (
     <Box display="flex">
       <Navigation />

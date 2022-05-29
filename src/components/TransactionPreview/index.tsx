@@ -17,7 +17,7 @@ import { Map } from './Map'
 import { AmountInput } from 'components/AmountInput'
 import { formatDate, rateToWords } from 'helpers/format'
 import { TagList } from 'components/TagList'
-import { useDispatch, useSelector } from 'react-redux'
+import { useAppDispatch, useAppSelector } from 'store'
 import { getTransactions } from 'store/data/transactions'
 import { getType } from 'store/data/transactions/helpers'
 import { getPopulatedAccounts } from 'store/data/accounts'
@@ -40,18 +40,18 @@ type TransactionPreviewProps = {
 
 export const TransactionPreview: FC<TransactionPreviewProps> = props => {
   const { id, onClose, onOpenOther, onSelectSimilar } = props
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const onDelete = () => dispatch(deleteTransactions([id]))
   const onDeletePermanently = () =>
     dispatch(deleteTransactionsPermanently([id]))
   const onRestore = () => dispatch(restoreTransaction(id))
   // onSplit: id => dispatch(splitTransfer(id)), // does not work
 
-  const tr = useSelector(getTransactions)[id]
+  const tr = useAppSelector(getTransactions)[id]
   const trType = getType(tr)
-  const incomeAccount = useSelector(getPopulatedAccounts)[tr.incomeAccount]
-  const outcomeAccount = useSelector(getPopulatedAccounts)[tr.outcomeAccount]
-  const instruments = useSelector(getInstruments)
+  const incomeAccount = useAppSelector(getPopulatedAccounts)[tr.incomeAccount]
+  const outcomeAccount = useAppSelector(getPopulatedAccounts)[tr.outcomeAccount]
+  const instruments = useAppSelector(getInstruments)
   const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
   const outcomeCurrency = instruments[tr.outcomeInstrument]?.shortTitle
 
@@ -331,7 +331,7 @@ const SaveButton: FC<{ visible: boolean; onSave: () => void }> = ({
 const RateToWords: FC<{ tr: Transaction }> = ({ tr }) => {
   const trType = getType(tr)
   const { income, opIncome, outcome, opOutcome } = tr
-  const instruments = useSelector(getInstruments)
+  const instruments = useAppSelector(getInstruments)
   const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
   const opIncomeCurrency =
     tr.opIncomeInstrument && instruments[tr.opIncomeInstrument]?.shortTitle

@@ -1,5 +1,5 @@
 import React, { useState, FC } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useAppDispatch, useAppSelector } from 'store'
 import {
   Box,
   Popover,
@@ -27,8 +27,8 @@ const amountLabels = {
 
 export const GoalPopover: FC<PopoverProps & { id: string }> = props => {
   const { id, onClose, ...rest } = props
-  const dispatch = useDispatch()
-  const goal = useSelector(getGoals)[id] || {}
+  const dispatch = useAppDispatch()
+  const goal = useAppSelector(getGoals)[id] || {}
 
   const [amount, setAmount] = useState(goal.amount || 0)
   const [type, setType] = useState(goal.type || MONTHLY_SPEND)

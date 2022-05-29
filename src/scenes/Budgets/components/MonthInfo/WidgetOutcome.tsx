@@ -1,5 +1,5 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { getTotalsByMonth } from '../../selectors'
 import { getUserCurrencyCode } from 'store/data/instruments'
 import { Box } from '@mui/material'
@@ -8,8 +8,8 @@ import { useMonth } from 'scenes/Budgets/pathHooks'
 
 export function WidgetOutcome() {
   const [month] = useMonth()
-  const outcome = useSelector(getTotalsByMonth)?.[month]?.outcome
-  const currency = useSelector(getUserCurrencyCode)
+  const outcome = useAppSelector(getTotalsByMonth)?.[month]?.outcome
+  const currency = useAppSelector(getUserCurrencyCode)
 
   return (
     <Box

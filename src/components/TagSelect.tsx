@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { getPopulatedTags, getTagsTree, TagTreeNode } from 'store/data/tags'
 import { Box, Autocomplete, TextField } from '@mui/material'
 import { EmojiIcon } from 'components/EmojiIcon'
@@ -35,8 +35,8 @@ type TagOption = PopulatedTag | TagTreeNode
 
 export const TagSelect: FC<TagSelectProps> = props => {
   const { onChange, tagFilters, multiple, value, label, ...rest } = props
-  const tagsTree = useSelector(getTagsTree)
-  const tags = useSelector(getPopulatedTags)
+  const tagsTree = useAppSelector(getTagsTree)
+  const tags = useAppSelector(getPopulatedTags)
   const options = getMatchedTags(tagsTree, tagFilters)
 
   return (

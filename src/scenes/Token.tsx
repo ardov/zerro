@@ -1,11 +1,11 @@
 import React from 'react'
 import { Box, Button, Typography } from '@mui/material'
 import { getToken } from 'store/token'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { Helmet } from 'react-helmet'
 
 export default function Token() {
-  const token = useSelector(getToken)
+  const token = useAppSelector(getToken)
   const [tokenIsVisible, setTokenVisibility] = React.useState(false)
 
   return (

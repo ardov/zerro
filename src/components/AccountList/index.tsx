@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { getInBudgetAccounts, getSavingAccounts } from 'store/data/accounts'
 import pluralize from 'helpers/pluralize'
 import { Collapse, List, ListItemButton } from '@mui/material'
@@ -10,8 +10,8 @@ import { Tooltip } from 'components/Tooltip'
 import { useToggle } from 'helpers/useToggle'
 
 export default function AccountList({ className = '' }) {
-  const inBudget = useSelector(getInBudgetAccounts)
-  const savings = useSelector(getSavingAccounts)
+  const inBudget = useAppSelector(getInBudgetAccounts)
+  const savings = useAppSelector(getSavingAccounts)
 
   const inBudgetActive = inBudget.filter(a => !a.archive)
   const inBudgetArchived = inBudget.filter(a => a.archive)

@@ -9,13 +9,13 @@ import {
 } from '@mui/material'
 import { Amount } from 'components/Amount'
 import { PopulatedAccount } from 'types'
-import { useDispatch } from 'react-redux'
+import { useAppDispatch } from 'store'
 import { setInBudget } from 'store/data/accounts'
 
 export const Account: FC<
   { account: PopulatedAccount } & ListItemButtonProps
 > = ({ account, sx, ...rest }) => {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const toggleInBalance = useCallback(
     () => dispatch(setInBudget(account.id, !account.inBalance)),
     [account.id, account.inBalance, dispatch]

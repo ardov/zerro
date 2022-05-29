@@ -2,7 +2,7 @@ import React, { FC } from 'react'
 import { formatMoney } from 'helpers/format'
 import { InstrumentId, OptionalExceptFor } from 'types'
 import { getInstruments, getUserInstrumentId } from 'store/data/instruments'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 
 const decStyle = { opacity: 0.5 }
 
@@ -32,8 +32,8 @@ type ConnectedAmountProps = OptionalExceptFor<
   'value' | 'instrument'
 >
 function ConnectedAmount(props: ConnectedAmountProps) {
-  const userInstrumentId = useSelector(getUserInstrumentId)
-  const instruments = useSelector(getInstruments)
+  const userInstrumentId = useAppSelector(getUserInstrumentId)
+  const instruments = useAppSelector(getInstruments)
   const id = props.instrument === 'user' ? userInstrumentId : props.instrument
   const currency = id ? instruments?.[id]?.shortTitle : undefined
   return <SimpleAmount {...props} currency={currency} />

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, Typography } from '@mui/material'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { formatDate } from 'helpers/format'
 import Rhythm from 'components/Rhythm'
 import { Amount } from 'components/Amount'
@@ -11,8 +11,8 @@ import { Transaction } from 'types'
 
 export function OutcomeCard({ transaction }: { transaction: Transaction }) {
   const { outcome, outcomeInstrument, date, comment, payee, tag } = transaction
-  const currency = useSelector(getInstruments)[outcomeInstrument].shortTitle
-  const tagTitle = useSelector(getPopulatedTags)[tag?.[0] || 'null'].title
+  const currency = useAppSelector(getInstruments)[outcomeInstrument].shortTitle
+  const tagTitle = useAppSelector(getPopulatedTags)[tag?.[0] || 'null'].title
   let additionalInfo = [formatDate(date)]
   if (tagTitle) additionalInfo.push(tagTitle)
   if (payee) additionalInfo.push(payee)

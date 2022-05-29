@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react'
 import './transitions.css'
-import { useSelector, useDispatch } from 'react-redux'
+import { useAppDispatch, useAppSelector } from 'store'
 import IconButton from '@mui/material/IconButton'
 import {
   DeleteOutlineIcon,
@@ -47,8 +47,8 @@ const Actions: FC<ActionsProps> = ({
   onUncheckAll,
   onCheckAll,
 }) => {
-  const dispatch = useDispatch()
-  const allTransactions = useSelector(getTransactions)
+  const dispatch = useAppDispatch()
+  const allTransactions = useAppSelector(getTransactions)
   const [ids, setIds] = useState(checkedIds)
   const transactions = ids?.map(id => allTransactions[id])
   const actions = getAvailableActions(transactions)

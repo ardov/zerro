@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useAppDispatch, useAppSelector } from 'store'
 import { EmojiIcon } from 'components/EmojiIcon'
 import {
   Box,
@@ -59,10 +59,10 @@ const cardStyle = {
 export const TagPreview: FC<TagPreviewProps> = ({ onClose, id }) => {
   const [month] = useMonth()
   const [, setId] = useSearchParam('transactions')
-  const tag = useSelector(state => getPopulatedTag(state, id))
-  const goal = useSelector(getGoals)[id]
-  // const goalProgress = useSelector(getGoalsProgress)?.[month]?.[id]
-  const amounts = useSelector(getAmountsById)?.[month]?.[id]
+  const tag = useAppSelector(state => getPopulatedTag(state, id))
+  const goal = useAppSelector(getGoals)[id]
+  // const goalProgress = useAppSelector(getGoalsProgress)?.[month]?.[id]
+  const amounts = useAppSelector(getAmountsById)?.[month]?.[id]
   const [budgetPopoverAnchor, setBudgetPopoverAnchor] = useState<Element>()
   const [goalPopoverAnchor, setGoalPopoverAnchor] = useState<Element>()
   if (!amounts) return null
@@ -183,7 +183,7 @@ const Header: FC<{
 }> = ({ tag, onClose }) => {
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
   const [showEditor, toggleEditor] = useToggle()
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const handleColorChange = (hex?: string | null) => {
     sendEvent('Tag: set color: ' + hex)
     dispatch(patchTag({ id: tag.id, color: hex2int(hex) }))
@@ -241,8 +241,8 @@ const Header: FC<{
 
 const CommentWidget: FC<{ id: string | null }> = props => {
   const id = String(props.id)
-  const dispatch = useDispatch()
-  const comment = useSelector(getTagComment(id))
+  const dispatch = useAppDispatch()
+  const comment = useAppSelector(getTagComment(id))
   const [value, setValue] = useState(comment)
   const debouncedValue = useDebounce(value, 300)
 

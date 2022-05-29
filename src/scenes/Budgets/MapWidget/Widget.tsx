@@ -4,7 +4,7 @@ import { TagMapChart } from './TagMapChart'
 import { sendEvent } from 'helpers/tracking'
 import { getTotalsByMonth } from '../selectors'
 import { useMonth } from '../pathHooks'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 
 type WidgetProps = PaperProps & {
   onSelectTag: (id: string) => void
@@ -49,7 +49,7 @@ export const Widget = (props: WidgetProps) => {
 
 function OverspentNotice() {
   const [month] = useMonth()
-  const totals = useSelector(getTotalsByMonth)?.[month]
+  const totals = useAppSelector(getTotalsByMonth)?.[month]
   const overspent = totals?.overspent
   const toBeBudgeted = totals?.toBeBudgeted
   if (!overspent && toBeBudgeted >= 0) return null

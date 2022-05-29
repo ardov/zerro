@@ -1,6 +1,6 @@
 import React from 'react'
 import { Typography } from '@mui/material'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import Rhythm from 'components/Rhythm'
 import { Amount } from 'components/Amount'
 import { getUserCurrencyCode } from 'store/data/instruments'
@@ -13,7 +13,7 @@ interface PayeeByOutcomeCardProps {
 }
 
 export function PayeeByOutcomeCard({ byPayee }: PayeeByOutcomeCardProps) {
-  const currency = useSelector(getUserCurrencyCode)
+  const currency = useAppSelector(getUserCurrencyCode)
   const sortedPayees = Object.keys(byPayee).sort(
     (a, b) => byPayee[b].outcome - byPayee[a].outcome
   )

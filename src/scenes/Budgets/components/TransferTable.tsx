@@ -1,5 +1,4 @@
 import React, { FC } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import { formatMoney } from 'helpers/format'
 import { getUserCurrencyCode } from 'store/data/instruments'
 import { makeStyles } from '@mui/styles'
@@ -19,6 +18,7 @@ import { getTransfers } from '../selectors'
 import { getAccounts } from 'store/data/accounts'
 import TagChip from 'components/TagChip'
 import { useMonth } from '../pathHooks'
+import { useAppDispatch, useAppSelector } from 'store'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -30,11 +30,11 @@ const useStyles = makeStyles(theme => ({
 
 export const TransferTable: FC<PaperProps> = ({ className, ...rest }) => {
   const [month] = useMonth()
-  const transfers = useSelector(getTransfers)[month]
-  const accounts = useSelector(getAccounts)
-  const currency = useSelector(getUserCurrencyCode)
-  const accTagMap = useSelector(getAccTagMap)
-  const dispatch = useDispatch()
+  const transfers = useAppSelector(getTransfers)[month]
+  const accounts = useAppSelector(getAccounts)
+  const currency = useAppSelector(getUserCurrencyCode)
+  const accTagMap = useAppSelector(getAccTagMap)
+  const dispatch = useAppDispatch()
 
   const connectToTag = (account: string, tag: string | null) =>
     dispatch(addConnection(account, tag))

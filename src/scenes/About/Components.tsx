@@ -97,7 +97,7 @@ export const Muted: FC<BoxProps> = ({ children, ...rest }) => {
   )
 }
 
-type TextLinkProps = { href: string; children: ReactNode }
+type TextLinkProps = { href?: string; children?: ReactNode }
 export const TextLink: FC<TextLinkProps> = ({ href, ...rest }) => {
   if (href?.startsWith('/')) {
     return <RouterLink to={href} {...rest} />

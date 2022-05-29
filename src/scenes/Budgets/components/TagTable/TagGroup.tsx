@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { Collapse, Box, IconButton } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { ChevronRightIcon, DragIndicatorIcon } from 'components/Icons'
@@ -63,7 +63,7 @@ export const TagGroup = React.forwardRef<HTMLDivElement, TagGroupProps>(
     } = props
 
     const [month] = useMonth()
-    const amounts = useSelector(getAmountsById)?.[month]?.[id] || {}
+    const amounts = useAppSelector(getAmountsById)?.[month]?.[id] || {}
     const { dragMode } = useContext(DragModeContext)
 
     const { totalAvailable, outcome, available } = amounts

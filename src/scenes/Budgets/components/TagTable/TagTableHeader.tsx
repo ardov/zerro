@@ -1,5 +1,5 @@
 import React, { FC, useContext, useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useAppDispatch, useAppSelector } from 'store'
 import { getUserCurrencyCode } from 'store/data/instruments'
 import { formatDate, formatMoney } from 'helpers/format'
 import {
@@ -84,7 +84,7 @@ type MonthInfoProps = { onOpenMonthDrawer: () => void }
 const MonthInfo: FC<MonthInfoProps> = ({ onOpenMonthDrawer }) => {
   const c = useStyles()
   const [month, setMonth] = useMonth()
-  const monthList = useSelector(getMonthDates)
+  const monthList = useAppSelector(getMonthDates)
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
   const prevMonth = month > minMonth ? +sub(month, { months: 1 }) : null
@@ -206,10 +206,10 @@ export const TagTableHeader: FC<TagTableHeaderProps> = props => {
 }
 
 function GoalMonthProgress() {
-  const dispatch = useDispatch()
-  const currency = useSelector(getUserCurrencyCode)
+  const dispatch = useAppDispatch()
+  const currency = useAppSelector(getUserCurrencyCode)
   const [month] = useMonth()
-  const totals = useSelector(getTotalGoalsProgress)?.[month]
+  const totals = useAppSelector(getTotalGoalsProgress)?.[month]
 
   if (!totals)
     return (

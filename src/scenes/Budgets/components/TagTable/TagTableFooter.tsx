@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import {
   Typography,
   Box,
@@ -40,7 +40,7 @@ export const TagTableFooter: FC<{
 }> = props => {
   const { metric = 'available' } = props
   const [month] = useMonth()
-  const totalsByMonth = useSelector(getTotalsByMonth)
+  const totalsByMonth = useAppSelector(getTotalsByMonth)
   const { budgeted, outcome, available } = totalsByMonth[month]
   const c = useStyles()
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))

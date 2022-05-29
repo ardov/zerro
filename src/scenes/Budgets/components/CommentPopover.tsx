@@ -1,5 +1,5 @@
 import React, { useState, FC } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useAppDispatch, useAppSelector } from 'store'
 import { Box, Popover, TextField, PopoverProps } from '@mui/material'
 import { getTagComment, setTagComment } from 'store/data/hiddenData/tagMeta'
 
@@ -7,8 +7,8 @@ import { getTagComment, setTagComment } from 'store/data/hiddenData/tagMeta'
 
 export const CommentPopover: FC<PopoverProps & { id: string }> = props => {
   const { id, onClose, ...rest } = props
-  const dispatch = useDispatch()
-  const currentComment = useSelector(getTagComment(id))
+  const dispatch = useAppDispatch()
+  const currentComment = useAppSelector(getTagComment(id))
   const [comment, setComment] = useState(currentComment)
 
   const save = () => {

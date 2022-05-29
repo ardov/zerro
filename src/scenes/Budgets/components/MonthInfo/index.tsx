@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useAppDispatch, useAppSelector } from 'store'
 import { formatDate, formatMoney } from 'helpers/format'
 import { getTotalsByMonth } from '../../selectors'
 import { getUserCurrencyCode } from 'store/data/instruments'
@@ -32,8 +32,8 @@ type MonthInfoProps = BoxProps & {
 
 export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
   const [month] = useMonth()
-  const currency = useSelector(getUserCurrencyCode)
-  const totals = useSelector(getTotalsByMonth)[month]
+  const currency = useAppSelector(getUserCurrencyCode)
+  const totals = useAppSelector(getTotalsByMonth)[month]
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const [showMore, toggleMore] = useToggle(false)
 
@@ -44,7 +44,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
     realBudgetedInFuture,
   } = totals
 
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
 
   return (
     <Box {...rest} minHeight="100vh">

@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { endOfMonth } from 'date-fns'
 import { getAmountsByTag, getTotalsByMonth } from '../../selectors'
 import { getUserCurrencyCode } from 'store/data/instruments'
@@ -39,10 +39,10 @@ const Dot: FC<{ color: string }> = ({ color }) => (
 
 export function WidgetIncome() {
   const [month] = useMonth()
-  const currency = useSelector(getUserCurrencyCode)
-  const tags = useSelector(getTagsTree)
-  const amounts = useSelector(getAmountsByTag)?.[month]
-  const income = useSelector(getTotalsByMonth)?.[month]?.income
+  const currency = useAppSelector(getUserCurrencyCode)
+  const tags = useAppSelector(getTagsTree)
+  const amounts = useAppSelector(getAmountsByTag)?.[month]
+  const income = useAppSelector(getTotalsByMonth)?.[month]?.income
   const [opened, toggleOpened] = useToggle(false)
   const [selected, setSelected] = useState<string[]>()
   const monthName = formatDate(month, 'LLL').toLowerCase()

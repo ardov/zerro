@@ -1,7 +1,7 @@
 import React, { useState, useContext, FC } from 'react'
 import { BoxProps, Paper } from '@mui/material'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { TagGroup } from './TagGroup'
 import { TagTableHeader } from './TagTableHeader'
 import { TagTableFooter } from './TagTableFooter'
@@ -35,9 +35,9 @@ type TagTableProps = {
 
 export const TagTable: FC<TagTableProps> = props => {
   const { openDetails, onOpenMonthDrawer, sx, className } = props
-  const tagsTree = useSelector(getTagsTree)
+  const tagsTree = useAppSelector(getTagsTree)
   const [month] = useMonth()
-  const amounts = useSelector(getAmountsById)?.[month]
+  const amounts = useAppSelector(getAmountsById)?.[month]
   const [expanded, setExpanded] = useState<{ [id: string]: boolean }>({})
   const [selected, setSelected] = useState<string>()
   const [metricIndex, setMetricIndex] = useState(0)
@@ -188,9 +188,9 @@ type TransactionsDrawerProps = {
 const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
   const { id, onClose } = props
   const [month] = useMonth()
-  const accountsInBudget = useSelector(getInBudgetAccounts).map(a => a.id)
-  const tagAccMap = useSelector(getTagAccMap)
-  const tagsById = useSelector(getPopulatedTags)
+  const accountsInBudget = useAppSelector(getInBudgetAccounts).map(a => a.id)
+  const tagAccMap = useAppSelector(getTagAccMap)
+  const tagsById = useAppSelector(getPopulatedTags)
 
   if (!id) return <TrDrawer open={false} onClose={onClose} />
 

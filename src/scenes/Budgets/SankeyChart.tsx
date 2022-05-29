@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { getTotalsByMonth } from './selectors'
 import { getAmountsByTag } from './selectors'
 import { getTagsTree } from 'store/data/tags'
@@ -18,9 +18,9 @@ import { round } from 'helpers/currencyHelpers'
 export function SankeyChart() {
   const theme = useTheme()
   const [month] = useMonth()
-  const tags = useSelector(getTagsTree)
-  const amounts = useSelector(getAmountsByTag)?.[month]
-  const monthTotals = useSelector(getTotalsByMonth)?.[month]
+  const tags = useAppSelector(getTagsTree)
+  const amounts = useAppSelector(getAmountsByTag)?.[month]
+  const monthTotals = useAppSelector(getTotalsByMonth)?.[month]
 
   let links = []
   let nodes = []

@@ -1,5 +1,5 @@
 import React, { FC, ReactElement } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { formatDate, formatMoney } from 'helpers/format'
 import { getTotalsByMonth, MonthTotals } from '../selectors'
 import { getUserCurrencyCode } from 'store/data/instruments'
@@ -53,8 +53,8 @@ type ToBeBudgetedProps = ButtonBaseProps & {
 export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
   const { small, className, ...rest } = props
   const [month] = useMonth()
-  const currency = useSelector(getUserCurrencyCode)
-  const totalsByMonth = useSelector(getTotalsByMonth)
+  const currency = useAppSelector(getUserCurrencyCode)
+  const totalsByMonth = useAppSelector(getTotalsByMonth)
   const firstMonth = Object.keys(totalsByMonth)
     .map(s => +s)
     .sort((a, b) => a - b)[0]

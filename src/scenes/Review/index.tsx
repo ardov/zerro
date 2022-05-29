@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Box, Button, Typography } from '@mui/material'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import './index.scss'
 import { getYearStats } from './selectors'
 import Rhythm from 'components/Rhythm'
@@ -14,7 +14,7 @@ import { Card } from './cards/Card'
 
 export default function Review() {
   const [year, setYear] = useState(new Date().getFullYear())
-  const yearStats = useSelector(getYearStats(year))
+  const yearStats = useAppSelector(getYearStats(year))
 
   if (!yearStats) return null
   const { total, byTag, receipts, byPayee } = yearStats

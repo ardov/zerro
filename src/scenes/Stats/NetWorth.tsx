@@ -9,7 +9,7 @@ import {
   Card,
 } from '@mui/material'
 import { withStyles } from '@mui/styles'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -43,11 +43,11 @@ type Point = {
 
 export function NetWorth() {
   const theme = useTheme()
-  const months = useSelector(getAvailableMonths)
-  const balanceChanges = useSelector(getBalanceChanges)
-  const accsInBudget = useSelector(getInBudgetAccounts)
-  const accsSaving = useSelector(getSavingAccounts)
-  const convert = useSelector(convertCurrency)
+  const months = useAppSelector(getAvailableMonths)
+  const balanceChanges = useAppSelector(getBalanceChanges)
+  const accsInBudget = useAppSelector(getInBudgetAccounts)
+  const accsSaving = useAppSelector(getSavingAccounts)
+  const convert = useAppSelector(convertCurrency)
 
   const [inBudget, setInBudget] = useState(true)
   const [savings, setSavings] = useState(true)

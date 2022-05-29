@@ -2,7 +2,7 @@ import React, { FC, useState } from 'react'
 import { Menu, MenuItem, MenuProps, PopoverPosition } from '@mui/material'
 import { Transaction } from 'types'
 import { isNew } from 'store/data/transactions/helpers'
-import { useDispatch } from 'react-redux'
+import { useAppDispatch } from 'store'
 import { markViewed } from 'store/data/transactions/thunks'
 
 interface TransactionMenuProps extends MenuProps {
@@ -17,7 +17,7 @@ export const TransactionMenu: FC<TransactionMenuProps> = ({
   onSelectChanged,
   ...rest
 }) => {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const close = () => rest.onClose?.({}, 'escapeKeyDown')
   return (
     <Menu {...rest}>

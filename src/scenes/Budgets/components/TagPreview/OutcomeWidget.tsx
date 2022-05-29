@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { Box, BoxProps, useTheme } from '@mui/material'
 import { formatDate } from 'helpers/format'
@@ -19,8 +19,8 @@ export const OutcomeWidget: FC<OutcomWidgetProps> = ({
 }) => {
   const [month, setMonth] = useMonth()
   const [selected, setSelected] = useState(month)
-  const allAmounts = useSelector(getAmountsById)
-  const dates = useSelector(getMonthDates)
+  const allAmounts = useAppSelector(getAmountsById)
+  const dates = useAppSelector(getMonthDates)
   const dateRange = getDateRange(dates, 12, month)
 
   const data = dateRange.map(date => {

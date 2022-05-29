@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { getPopulatedTags } from 'store/data/tags'
 import { Chip, ChipProps } from '@mui/material'
 import { CloseIcon } from 'components/Icons'
@@ -16,7 +16,7 @@ interface TagChipProps extends ChipProps {
 }
 
 const TagChip: FC<TagChipProps> = ({ id, ...rest }) => {
-  let tag = useSelector(getPopulatedTags)[id]
+  let tag = useAppSelector(getPopulatedTags)[id]
   let label = getTagLabel(tag)
   if (id === 'mixed') label = 'Разные категории'
   return <Chip deleteIcon={<CloseIcon />} label={label} {...rest} />

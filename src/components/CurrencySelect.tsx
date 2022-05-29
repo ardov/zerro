@@ -1,12 +1,12 @@
 import React, { FC } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { Select, MenuItem, SelectProps } from '@mui/material'
 import { getInstruments } from 'store/data/instruments'
 import { getAccountList } from 'store/data/accounts'
 
 export const CurrencySelect: FC<SelectProps<number>> = props => {
-  const instruments = useSelector(getInstruments)
-  const accounts = useSelector(getAccountList)
+  const instruments = useAppSelector(getInstruments)
+  const accounts = useAppSelector(getAccountList)
   const shortList = accounts
     .map(a => a.instrument)
     .filter((v, i, a) => a.indexOf(v) === i) // unique instruments

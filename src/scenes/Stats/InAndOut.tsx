@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { Paper, Card, Typography, Box, useTheme } from '@mui/material'
 import {
   ResponsiveContainer,
@@ -29,9 +29,9 @@ type Point = {
 
 export function InAndOut() {
   const theme = useTheme()
-  const transactions = useSelector(getTransactionsHistory)
-  const convert = useSelector(convertCurrency)
-  const historyStart = useSelector(getHistoryStart)
+  const transactions = useAppSelector(getTransactionsHistory)
+  const convert = useAppSelector(convertCurrency)
+  const historyStart = useAppSelector(getHistoryStart)
   const [filterMode, setFilterMode] = useState<'lastYear' | 'all'>('lastYear')
 
   let points: Point[] = makeDateArray(historyStart).map(date => ({

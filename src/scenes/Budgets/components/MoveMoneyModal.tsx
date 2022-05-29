@@ -4,11 +4,10 @@ import TagChip from 'components/TagChip'
 import { AmountInput } from 'components/AmountInput'
 import { ArrowForwardIcon, ArrowRightAltIcon } from 'components/Icons'
 import { Box, InputAdornment, IconButton } from '@mui/material'
-import { useSelector, useDispatch } from 'react-redux'
 import { getAmountsById } from '../selectors'
 import { moveFunds } from '../thunks'
 import { getTotalsByMonth } from '../selectors'
-import { RootState } from 'store'
+import { RootState, useAppDispatch, useAppSelector } from 'store'
 import { Modify } from 'types'
 
 type MoveMoneyModalProps = Modify<
@@ -22,12 +21,12 @@ type MoveMoneyModalProps = Modify<
 >
 
 export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const { open, onClose, source, month, destination } = props
-  const sourceAvailable = useSelector(state =>
+  const sourceAvailable = useAppSelector(state =>
     getAvailableFor(state, month, source)
   )
-  const destinationAvailable = useSelector(state =>
+  const destinationAvailable = useAppSelector(state =>
     getAvailableFor(state, month, destination)
   )
   const suggestedAmount = suggestAmount(

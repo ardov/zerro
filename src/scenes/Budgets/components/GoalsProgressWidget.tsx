@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useAppDispatch, useAppSelector } from 'store'
 import { formatMoney } from 'helpers/format'
 import { getUserCurrencyCode } from 'store/data/instruments'
 import {
@@ -18,11 +18,11 @@ import { getTotalGoalsProgress } from '../selectors'
 import { useMonth } from '../pathHooks'
 
 export const GoalsProgressWidget: FC<ButtonBaseProps> = props => {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const [month] = useMonth()
-  const currency = useSelector(getUserCurrencyCode)
+  const currency = useAppSelector(getUserCurrencyCode)
   const formatSum = (sum: number) => formatMoney(sum, currency)
-  const totals = useSelector(getTotalGoalsProgress)?.[month]
+  const totals = useAppSelector(getTotalGoalsProgress)?.[month]
   const onOk = () => dispatch(fillGoals(month))
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 

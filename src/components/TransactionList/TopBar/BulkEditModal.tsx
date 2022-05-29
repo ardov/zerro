@@ -5,7 +5,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
-import { useSelector, useDispatch } from 'react-redux'
+import { useAppDispatch, useAppSelector } from 'store'
 import { getTransactions } from 'store/data/transactions'
 import { getType } from 'store/data/transactions/helpers'
 import { bulkEditTransactions } from 'store/data/transactions/thunks'
@@ -26,8 +26,8 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   keepMounted = false,
   ...rest
 }) => {
-  const dispatch = useDispatch()
-  const allTransactions = useSelector(getTransactions)
+  const dispatch = useAppDispatch()
+  const allTransactions = useAppSelector(getTransactions)
   const transactions = ids.map(id => allTransactions[id]).filter(Boolean)
   const sameTags = isSameTags(transactions)
   const sameComments = isSameComments(transactions)

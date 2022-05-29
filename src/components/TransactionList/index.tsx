@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback, useEffect, FC } from 'react'
 import { Box } from '@mui/material'
 import { SxProps } from '@mui/system'
 import { Theme } from '@mui/material/styles'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { getSortedTransactions } from 'store/data/transactions'
 import { groupTransactionsBy } from 'store/data/transactions/helpers'
 import { checkRaw, FilterConditions } from 'store/data/transactions/filtering'
@@ -31,7 +31,7 @@ const TransactionList: FC<TransactionListProps> = props => {
     sx,
   } = props
 
-  const transactions = useSelector(getSortedTransactions)
+  const transactions = useAppSelector(getSortedTransactions)
   const [filter, setFilter] = useState(filterConditions)
   const debouncedFilter = useDebounce(filter, 300)
   const setCondition = useCallback(

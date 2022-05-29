@@ -1,11 +1,11 @@
 import { FC, useCallback, useEffect, useRef } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import { getLoginState } from 'store/token'
 import { syncData } from 'logic/sync'
 import { getLastSyncTime, getLastChangeTime } from 'store/data/selectors'
 import { getPendingState } from 'store/isPending'
 import { loadLocalData } from 'logic/localData'
 import { createLocalStorageStateHook } from 'use-local-storage-state'
+import { useAppDispatch, useAppSelector } from 'store'
 
 export const useRegularSync = createLocalStorageStateHook<boolean>(
   'regularSync',
@@ -16,8 +16,8 @@ const SYNC_DELAY = 20 * 60 * 1000 // 20min
 const CHECK_DELAY = 20 * 1000 // 20sec
 
 export const RegularSyncHandler: FC<{}> = props => {
-  const dispatch = useDispatch()
-  const lastChange = useSelector(getLastChangeTime)
+  const dispatch = useAppDispatch()
+  const lastChange = useAppSelector(getLastChangeTime)
   const sync = useConditionalSync()
 
   // We need ref to pass useEffect equality checks
@@ -59,12 +59,12 @@ export const RegularSyncHandler: FC<{}> = props => {
 }
 
 function useConditionalSync() {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const [regular] = useRegularSync()
-  const isLoggedIn = useSelector(getLoginState)
-  const lastSync = useSelector(getLastSyncTime)
-  const lastChange = useSelector(getLastChangeTime)
-  const isPending = useSelector(getPendingState)
+  const isLoggedIn = useAppSelector(getLoginState)
+  const lastSync = useAppSelector(getLastSyncTime)
+  const lastChange = useAppSelector(getLastChangeTime)
+  const isPending = useAppSelector(getPendingState)
 
   const needSync = useCallback(() => {
     if (!window.navigator.onLine) return false

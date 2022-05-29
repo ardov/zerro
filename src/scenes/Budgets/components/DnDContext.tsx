@@ -1,5 +1,5 @@
 import React, { FC, ReactNode, useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useAppDispatch } from 'store'
 import { DragDropContext, DropResult } from 'react-beautiful-dnd'
 import { useMonth } from '../pathHooks'
 import { useCallback } from 'react'
@@ -26,7 +26,7 @@ export const DragModeContext = React.createContext<DragModeContextType>({
 })
 
 export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const [month] = useMonth()
   const [isDragging, setIsDragging] = useState(false)
   const [dragMode, setDragMode] = useState<DragModeType>('FUNDS')

@@ -13,7 +13,7 @@ import { TransactionPreview } from 'components/TransactionPreview'
 import { sendEvent } from 'helpers/tracking'
 import { Helmet } from 'react-helmet'
 import { useSearchParam } from 'helpers/useSearchParam'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { getTransactions } from 'store/data/transactions'
 
 const useStyles = makeStyles(theme => ({
@@ -26,7 +26,7 @@ const useStyles = makeStyles(theme => ({
 export default function TransactionsView() {
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const [opened, setOpened] = useSearchParam('transaction')
-  const openedTransaction = useSelector(getTransactions)[opened || '']
+  const openedTransaction = useAppSelector(getTransactions)[opened || '']
   const [checkedDate, setCheckedDate] = useState<Date | null>(null)
   const c = useStyles()
 

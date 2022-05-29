@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { getAmountsByTag, getTotalsByMonth } from '../selectors'
 import { getTagsTree } from 'store/data/tags'
 import { useMonth } from 'scenes/Budgets/pathHooks'
@@ -26,9 +26,9 @@ export function TagMapChart(props: TagMapChartProps) {
   const { onSelect } = props
   const theme = useTheme()
   const [month] = useMonth()
-  const tags = useSelector(getTagsTree)
-  const amounts = useSelector(getAmountsByTag)?.[month]
-  const monthTotals = useSelector(getTotalsByMonth)?.[month]
+  const tags = useAppSelector(getTagsTree)
+  const amounts = useAppSelector(getAmountsByTag)?.[month]
+  const monthTotals = useAppSelector(getTotalsByMonth)?.[month]
 
   const { toBeBudgeted, budgetedInFuture } = monthTotals
 

@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useAppDispatch } from 'store'
 import { logOut } from 'logic/authorization'
 import { exportCSV } from 'logic/exportCSV'
 import { exportJSON } from 'logic/exportJSON'
@@ -47,7 +47,7 @@ type SettingsMenuProps = {
 }
 export const SettingsMenu: FC<SettingsMenuProps> = props => {
   const { anchorEl, onClose, showLinks } = props
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const classes = useStyles()
   const [regular, setRegular] = useRegularSync()
   const theme = useThemeType()

@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useAppDispatch, useAppSelector } from 'store'
 import {
   Box,
   Typography,
@@ -41,10 +41,10 @@ export const LinkedAccs: FC<LinkedAccsProps> = ({ id }) => {
   const c = useStyles()
   const [anchorEl, setAnchorEl] = React.useState<Element | null>(null)
   const [hideArchived, setHideArchived] = React.useState(true)
-  const linkedAccs = useSelector(state => getTagAccMap(state)[id])
-  const accounts = useSelector(getAccounts)
-  const savingAccs = useSelector(getSavingAccounts)
-  const dispatch = useDispatch()
+  const linkedAccs = useAppSelector(state => getTagAccMap(state)[id])
+  const accounts = useAppSelector(getAccounts)
+  const savingAccs = useAppSelector(getSavingAccounts)
+  const dispatch = useAppDispatch()
   const removeConnection = (id: string) => dispatch(addConnection(id, null))
 
   const handleClick: React.MouseEventHandler<HTMLButtonElement> = event =>

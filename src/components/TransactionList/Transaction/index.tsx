@@ -1,6 +1,6 @@
 import React, { FC, useCallback } from 'react'
 import { useSearchParam } from 'helpers/useSearchParam'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { RootState } from 'store'
 import { getTransactions } from 'store/data/transactions'
 import { getType } from 'store/data/transactions/helpers'
@@ -29,10 +29,10 @@ const TransactionWrapper: FC<WrapperProps> = props => {
   const [onContextMenu, bind] = useContextMenu()
   const [opened, setOpened] = useSearchParam('transaction')
   const isOpened = opened === id
-  const transaction = useSelector(
+  const transaction = useAppSelector(
     (state: RootState) => getTransactions(state)[id]
   )
-  const debtId = useSelector(getDebtAccountId)
+  const debtId = useAppSelector(getDebtAccountId)
   const type = getType(transaction, debtId)
   const onClick = useCallback(() => setOpened(id), [id, setOpened])
 

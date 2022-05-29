@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import styled from '@emotion/styled'
 import { EmojiIcon } from 'components/EmojiIcon'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { getMerchants } from 'store/data/selectors'
 import { Amount } from 'components/Amount'
 import { getAccounts } from 'store/data/accounts'
@@ -42,7 +42,7 @@ export const Symbol: FC<SymbolProps> = ({
   onToggle,
   ...rest
 }) => {
-  const tags = useSelector(getPopulatedTags)
+  const tags = useAppSelector(getPopulatedTags)
   const mainTagId = tr.tag ? tr.tag[0] : 'null'
   const tag = tags[mainTagId]
   switch (trType) {
@@ -85,7 +85,7 @@ export const Symbol: FC<SymbolProps> = ({
 }
 
 export const Tags: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
-  const tags = useSelector(getPopulatedTags)
+  const tags = useAppSelector(getPopulatedTags)
   switch (trType) {
     case 'income':
     case 'outcome':
@@ -274,7 +274,7 @@ export const Accounts: FC<InfoProps> = ({
 }
 
 const Account: FC<{ id: string }> = ({ id, ...rest }) => {
-  const account = useSelector(getAccounts)[id]
+  const account = useAppSelector(getAccounts)[id]
   return <span {...rest}>{account.title}</span>
 }
 
@@ -283,7 +283,7 @@ const Payee: FC<{
   merchant: string | null
   onClick: (payee: string) => void
 }> = ({ payee, merchant, onClick, ...rest }) => {
-  const merchants = useSelector(getMerchants)
+  const merchants = useAppSelector(getMerchants)
   if (!payee && !merchant) return null
   let name = merchant ? merchants[merchant]?.title : payee
   return (

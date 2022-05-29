@@ -15,7 +15,7 @@ import {
 } from '@mui/material'
 import { TagSelect } from './TagSelect'
 import { Modify, Tag } from 'types'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { shallowEqual } from 'react-redux'
 import { createTag } from 'store/data/tags/thunks'
 import { useFormik } from 'formik'
 import { hex2int, int2hex } from 'helpers/color'
@@ -28,6 +28,7 @@ import {
 } from 'store/data/hiddenData/tagMeta'
 import { getUserInstrumentId } from 'store/data/instruments'
 import { CurrencySelect } from './CurrencySelect'
+import { useAppDispatch, useAppSelector } from 'store'
 
 // TODO: Доделать модалку для редактирования и создания категорий
 
@@ -41,11 +42,11 @@ export type TagEditDialogProps = Modify<
 
 export const TagEditDialog: FC<TagEditDialogProps> = props => {
   const { tag, onClose, ...dialogProps } = props
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const isNew = !tag?.id
   const id = tag?.id || uuidv1()
-  const meta = useSelector(getTagMeta)[id]
-  const userInstrument = useSelector(getUserInstrumentId)
+  const meta = useAppSelector(getTagMeta)[id]
+  const userInstrument = useAppSelector(getUserInstrumentId)
   const {
     values,
     initialValues,

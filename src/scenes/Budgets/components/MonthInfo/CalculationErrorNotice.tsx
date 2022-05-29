@@ -1,5 +1,5 @@
 import React, { FC, ReactNode, useEffect, useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useAppDispatch, useAppSelector } from 'store'
 import { getTotalsArray } from '../../selectors'
 import { convertCurrency, getUserCurrencyCode } from 'store/data/instruments'
 import { getInBudgetAccounts } from 'store/data/accounts'
@@ -13,7 +13,7 @@ import { captureError, sendEvent } from 'helpers/tracking'
 import { getDiff } from 'store/data'
 import { getAccountsHistory } from 'scenes/Stats/selectors'
 import { PopulatedAccount, Selector } from 'types'
-import { createSelector } from 'reselect'
+import { createSelector } from '@reduxjs/toolkit'
 
 // TODO: Надо бы как-то округлять все цифры только в конце. Иначе из-за валют копится ошибка.
 const TOLERANCE = 3
@@ -26,11 +26,11 @@ const TOLERANCE = 3
  */
 export const CalculationErrorNotice: FC = () => {
   const [hidden, setHidden] = useState(false)
-  const dispatch = useDispatch()
-  const isSynced = useSelector(state => !getDiff(state)?.transaction?.length)
-  const corruptedAccounts = useSelector(getCorruptedAccounts)
-  const diff = useSelector(getTotalDiff)
-  const currency = useSelector(getUserCurrencyCode)
+  const dispatch = useAppDispatch()
+  const isSynced = useAppSelector(state => !getDiff(state)?.transaction?.length)
+  const corruptedAccounts = useAppSelector(getCorruptedAccounts)
+  const diff = useAppSelector(getTotalDiff)
+  const currency = useAppSelector(getUserCurrencyCode)
   const hasError = diff >= TOLERANCE && isSynced
   const hasCorruptedAccs = !!corruptedAccounts.length
 

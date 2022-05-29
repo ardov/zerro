@@ -23,7 +23,7 @@ import { goalToWords } from 'store/data/hiddenData/goals/helpers'
 import { GoalProgress } from 'components/GoalProgress'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
 import { getGoal } from 'store/data/hiddenData/goals'
-import { useSelector, shallowEqual } from 'react-redux'
+import { shallowEqual } from 'react-redux'
 import {
   getGoalProgress,
   GoalProgress as GoalProgressType,
@@ -37,6 +37,7 @@ import { Goal } from 'types'
 import { getTagMeta } from 'store/data/hiddenData/tagMeta'
 import { getInstruments, getUserInstrumentId } from 'store/data/instruments'
 import { SxProps } from '@mui/system'
+import { useAppSelector } from 'store'
 
 type TagRowProps = {
   id: string
@@ -64,10 +65,10 @@ export const TagRow: FC<TagRowProps> = props => {
     openTransactionsPopover,
     openDetails,
   } = props
-  const tag = useSelector(state => getPopulatedTag(state, id))
-  const { comment, currency } = useSelector(getTagMeta)?.[id] || {}
-  const userCurrency = useSelector(getUserInstrumentId)
-  const amounts = useSelector(getAmountsById)?.[date]?.[id]
+  const tag = useAppSelector(state => getPopulatedTag(state, id))
+  const { comment, currency } = useAppSelector(getTagMeta)?.[id] || {}
+  const userCurrency = useAppSelector(getUserInstrumentId)
+  const amounts = useAppSelector(getAmountsById)?.[date]?.[id]
 
   const showCurrency = !!currency && currency !== userCurrency
   const isUnsorted = !tag.parent && isChild // реальная родительская категория
@@ -85,8 +86,8 @@ export const TagRow: FC<TagRowProps> = props => {
   }
 
   const { dragMode } = useContext(DragModeContext)
-  const goal = useSelector(state => getGoal(state, id), shallowEqual)
-  const goalProgress = useSelector(
+  const goal = useAppSelector(state => getGoal(state, id), shallowEqual)
+  const goalProgress = useAppSelector(
     state => getGoalProgress(state, date, id),
     shallowEqual
   )
@@ -263,7 +264,7 @@ const NameCell: FC<NameCellProps> = ({
 }
 
 const CurrencyTag: FC<{ currency?: number }> = ({ currency }) => {
-  const instruments = useSelector(getInstruments)
+  const instruments = useAppSelector(getInstruments)
   if (!currency) return null
   const instrument = instruments[currency]
   const currCode = instrument?.symbol

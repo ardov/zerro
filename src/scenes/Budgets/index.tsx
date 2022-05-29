@@ -2,7 +2,7 @@ import React, {
   useCallback,
   // useState
 } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { Redirect } from 'react-router-dom'
 import { TagTable } from './components/TagTable'
 import { TransferTable } from './components/TransferTable'
@@ -35,7 +35,7 @@ import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
-  const monthList = useSelector(getMonthDates)
+  const monthList = useAppSelector(getMonthDates)
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
   if (!month)
@@ -90,7 +90,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 function Budgets() {
-  const monthList = useSelector(getMonthDates)
+  const monthList = useAppSelector(getMonthDates)
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
   const [month, setMonth] = useMonth()

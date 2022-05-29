@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useAppDispatch, useAppSelector } from 'store'
 import { getUserCurrencyCode } from 'store/data/instruments'
 import { Box, Typography, Button } from '@mui/material'
 import { WarningIcon } from 'components/Icons'
@@ -11,9 +11,9 @@ import { useMonth } from 'scenes/Budgets/pathHooks'
 
 export const OverspentNotice: FC = () => {
   const [month] = useMonth()
-  const overspent = useSelector(getTotalsByMonth)?.[month]?.overspent
-  const currency = useSelector(getUserCurrencyCode)
-  const dispatch = useDispatch()
+  const overspent = useAppSelector(getTotalsByMonth)?.[month]?.overspent
+  const currency = useAppSelector(getUserCurrencyCode)
+  const dispatch = useAppDispatch()
 
   return (
     <Box

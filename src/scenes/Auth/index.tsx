@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react'
 import Cookies from 'cookies-js'
-import { useDispatch } from 'react-redux'
+import { useAppDispatch } from 'store'
 import { Box, Button, Link, Fade, LinkProps } from '@mui/material'
 import { logIn } from 'logic/authorization'
 import ZenApi from 'services/ZenApi'
@@ -15,7 +15,7 @@ import { AppThunk } from 'store'
 ZenApi.checkCode()
 
 export default function Auth() {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const theme = useTheme()
   const [logoIn, setLogoIn] = useState(false)
   const [isDragging, setIsDragging] = useState(false)

@@ -1,5 +1,4 @@
 import React, { FC, useCallback, useEffect, useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
 import { syncData } from 'logic/sync'
 import { getChangedNum } from 'store/data/selectors'
 import { getPendingState } from 'store/isPending'
@@ -16,6 +15,7 @@ import IconButton from '@mui/material/IconButton'
 import { Tooltip } from 'components/Tooltip'
 import { getLastSyncInfo } from 'store/lastSync'
 import { useRegularSync } from 'components/RegularSyncHandler'
+import { useAppDispatch, useAppSelector } from 'store'
 
 type ButtonState = 'idle' | 'pending' | 'success' | 'fail'
 
@@ -23,11 +23,11 @@ const RefreshButton: FC<{ isMobile?: boolean; className?: string }> = ({
   isMobile,
   ...rest
 }) => {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const handleClick = useCallback(() => dispatch(syncData()), [dispatch])
-  const changedNum = useSelector(getChangedNum)
-  const isPending = useSelector(getPendingState)
-  const { isSuccessful, finishedAt } = useSelector(getLastSyncInfo)
+  const changedNum = useAppSelector(getChangedNum)
+  const isPending = useAppSelector(getPendingState)
+  const { isSuccessful, finishedAt } = useAppSelector(getLastSyncInfo)
   const [regular] = useRegularSync()
 
   let buttonState: ButtonState = 'idle'

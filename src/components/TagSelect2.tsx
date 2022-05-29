@@ -1,5 +1,5 @@
 import React, { FC, KeyboardEventHandler, useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from 'store'
 import { getTagsTree, TagTreeNode } from 'store/data/tags'
 import {
   Popover,
@@ -78,7 +78,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
   onClose,
   ...popoverProps
 }) => {
-  const tags = useSelector(getTagsTree)
+  const tags = useAppSelector(getTagsTree)
   const [search, setSearch] = useState('')
   const [focused, setFocused] = useState(0)
   const [localTagType, setLocalTagType] = useState(tagType)

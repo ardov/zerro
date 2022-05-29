@@ -1,5 +1,5 @@
 import React, { FC, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useAppDispatch, useAppSelector } from 'store'
 import {
   List,
   ListItemButton,
@@ -35,10 +35,10 @@ export const BudgetPopover: FC<
 > = props => {
   const { id, month, onClose, ...rest } = props
 
-  const currConverter = useSelector(convertCurrency)
-  const { currency } = useSelector(getMetaForTag(id))
-  const instruments = useSelector(getInstruments)
-  const userInstrument = useSelector(getUserInstrument)
+  const currConverter = useAppSelector(convertCurrency)
+  const { currency } = useAppSelector(getMetaForTag(id))
+  const instruments = useAppSelector(getInstruments)
+  const userInstrument = useAppSelector(getUserInstrument)
   const tagInstrument = currency ? instruments[currency] : userInstrument
   const convert = {
     toMain: (v: number) =>
@@ -56,13 +56,13 @@ export const BudgetPopover: FC<
   }
 
   const prevMonth = getPrevMonthMs(month)
-  const goal = useSelector(getGoals)?.[id]
-  const goalProgress = useSelector(getGoalsProgress)?.[month]?.[id]
+  const goal = useAppSelector(getGoals)?.[id]
+  const goalProgress = useAppSelector(getGoalsProgress)?.[month]?.[id]
 
-  const amountsById = useSelector(getAmountsById)
+  const amountsById = useAppSelector(getAmountsById)
   const tagAmounts = amountsById?.[month]?.[id] || {}
   const tagPrevAmounts = amountsById?.[prevMonth]?.[id] || {}
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const onChange = (outcome: number) =>
     dispatch(setOutcomeBudget(outcome, month, id))
 
