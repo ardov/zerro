@@ -10,14 +10,14 @@ export const $rawInstruments = createStore<ZmInstrument[]>([])
 $rawInstruments.on(setRawInstruments, (_, rawInstruments) => rawInstruments)
 
 // Derivatives
-export const $instruments = combine($rawInstruments, processInstruments)
-export const $fxIdMap = combine($rawInstruments, getFxIdMap)
+export const $instruments = $rawInstruments.map(processInstruments)
+export const $fxIdMap = $rawInstruments.map(getFxIdMap)
 
+// -----------------------------------------------------------------------------
 // Functions
+// -----------------------------------------------------------------------------
 
-/**
- * Converts instruments to mapping which is used by other converters
- */
+/** Converts instruments to mapping which is used by other converters */
 function getFxIdMap(instruments: ZmInstrument[]): TFxIdMap {
   let result: TFxIdMap = {}
   instruments.forEach(({ id, shortTitle }) => {
@@ -26,14 +26,12 @@ function getFxIdMap(instruments: ZmInstrument[]): TFxIdMap {
   return result
 }
 
-//** Converts Zm format to local */
+/** Converts Zm format to local */
 function convertInstrument(raw: ZmInstrument): TInstrument {
   return { ...raw, changed: unixToISO(raw.changed) }
 }
 
-/**
- * Converts collection of instruments
- */
+/** Converts collection of instruments */
 function processInstruments(instruments: ZmInstrument[]): ById<TInstrument> {
   let result: ById<TInstrument> = {}
   instruments.forEach(raw => {
