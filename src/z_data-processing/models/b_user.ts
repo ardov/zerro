@@ -1,7 +1,7 @@
 import { combine, createEvent, createStore } from 'effector'
 import { unixToISO } from './utils'
-import { ById, TFxIdMap, TUser, UserId, ZmUser } from '../types'
-import { $fxIdMap } from './instrument'
+import { ById, TFxIdMap, TUser, ZmUser } from '../types'
+import { $fxIdMap } from './a_instrument'
 
 // Events
 export const setRawUsers = createEvent<ZmUser[]>()
@@ -20,17 +20,19 @@ export const $users = combine($rawUsers, $fxIdMap, (users, fxIdMap) => {
   return result
 })
 
-export const $mainUser = combine($users, users => {
+export const $mainUser = $users.map(users => {
   let mainUser = Object.values(users).find(({ parent }) => parent === null)
   if (!mainUser) throw new Error('No main user found')
   return mainUser
 })
 
-export const $mainUserId = combine($mainUser, user => user.id)
+export const $mainUserId = $mainUser.map(user => user.id)
 
-export const $mainUserCurrency = combine($mainUser, user => user.fxCode)
+export const $mainUserCurrency = $mainUser.map(user => user.fxCode)
 
+// -----------------------------------------------------------------------------
 // Functions
+// -----------------------------------------------------------------------------
 
 //** Converts Zm format to local */
 function convertUser(raw: ZmUser, fxIdMap: TFxIdMap): TUser {
