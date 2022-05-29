@@ -1,0 +1,2 @@
+- Data converted and populated for more convinient usage.
+- All converted data is revertable (only new fields added).
