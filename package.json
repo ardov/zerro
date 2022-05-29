@@ -75,6 +75,7 @@
     "convert-layout": "^0.11.1",
     "cookies-js": "^1.2.3",
     "date-fns": "^2.21.1",
+    "effector": "^22.3.0",
     "formik": "^2.2.9",
     "history": "^4.10.1",
     "idb": "^6.0.0",
