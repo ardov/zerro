@@ -1,5 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
 import AdapterDateFns from '@mui/lab/AdapterDateFns'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
@@ -12,23 +13,32 @@ import { initSentry, sendEvent } from 'helpers/tracking'
 import { bindWorkerToStore } from 'worker'
 import { applyClientPatch, resetData } from 'store/data'
 import { Diff } from 'types'
-import { AppThemeProvider } from 'AppThemeProvider'
+import { AppThemeProvider } from './AppThemeProvider'
+import { StyledEngineProvider } from '@mui/material/styles'
 
 initSentry()
 bindWorkerToStore(store.dispatch)
 createZerroInstance(store)
 
-ReactDOM.render(
+const container = document.getElementById('root')
+if (!container) throw new Error('No root container')
+const root = createRoot(container)
+
+root.render(
   <GlobalErrorBoundary>
-    <Provider store={store}>
-      <LocalizationProvider dateAdapter={AdapterDateFns} locale={ruDateLocale}>
-        <AppThemeProvider>
-          <App />
-        </AppThemeProvider>
-      </LocalizationProvider>
-    </Provider>
-  </GlobalErrorBoundary>,
-  document.getElementById('root')
+    <StyledEngineProvider injectFirst>
+      <Provider store={store}>
+        <LocalizationProvider
+          dateAdapter={AdapterDateFns}
+          locale={ruDateLocale}
+        >
+          <AppThemeProvider>
+            <App />
+          </AppThemeProvider>
+        </LocalizationProvider>
+      </Provider>
+    </StyledEngineProvider>
+  </GlobalErrorBoundary>
 )
 
 // Register service worker fot app to work offline.
