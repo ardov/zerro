@@ -1,4 +1,4 @@
-import { InstrumentId } from './Instrument'
+import { InstrumentId, TFxCode } from './Instrument'
 import { UserId } from './User'
 import { MerchantId } from './Merchant'
 import {
@@ -40,7 +40,9 @@ export type TReminder = Modify<
     changed: TISOTimestamp
     income: TMilliUnits
     outcome: TMilliUnits
-    // SHould we change this to TISOTimestamp?
+    incomeFxCode: TFxCode
+    outcomeFxCode: TFxCode
+    // Should we change this to TISOTimestamp?
     // startDate: TISODate
     // endDate: TISODate
   }
