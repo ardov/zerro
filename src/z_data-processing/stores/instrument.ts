@@ -4,17 +4,10 @@ import { ById, TFxIdMap, TInstrument, ZmInstrument } from '../types'
 
 // Events
 export const setRawInstruments = createEvent<ZmInstrument[]>()
-export const resetInstruments = createEvent()
 
 // Store
 export const $rawInstruments = createStore<ZmInstrument[]>([])
-
-$rawInstruments
-  .on(setRawInstruments, (_, rawInstruments) => rawInstruments)
-  .on(resetInstruments, () => [])
-  .watch(state => {
-    console.log('instruments created')
-  })
+$rawInstruments.on(setRawInstruments, (_, rawInstruments) => rawInstruments)
 
 // Derivatives
 export const $instruments = combine($rawInstruments, processInstruments)
@@ -33,9 +26,7 @@ function getFxIdMap(instruments: ZmInstrument[]): TFxIdMap {
   return result
 }
 
-/**
- * Converts ZmInstrument to TInstrument
- */
+//** Converts Zm format to local */
 function convertInstrument(raw: ZmInstrument): TInstrument {
   return { ...raw, changed: unixToISO(raw.changed) }
 }
