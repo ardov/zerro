@@ -1,7 +1,7 @@
 import { combine, createEvent, createStore } from 'effector'
 import { unixToISO } from './utils'
 import { ById, TFxIdMap, TUser, ZmUser } from '../types'
-import { $fxIdMap } from './a_instrument'
+import { $fxIdMap } from './instrument'
 
 // Events
 export const setRawUsers = createEvent<ZmUser[]>()

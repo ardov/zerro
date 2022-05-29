@@ -1,5 +1,5 @@
 import { combine, createEvent, createStore } from 'effector'
-import { $fxIdMap } from './a_instrument'
+import { $fxIdMap } from './instrument'
 import { AccountId, ById, TAccount, TFxIdMap, ZmAccount } from '../types'
 import { unitsToMilliunits, unixToISO } from './utils'
 
