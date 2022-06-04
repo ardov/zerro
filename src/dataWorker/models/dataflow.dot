@@ -15,21 +15,21 @@ node [
   width=2
 ]
 
-{
-  node [color="#c4e5fe"]
-  rank=same;
-  rawInstruments
-  rawCountries
-  rawUsers
-  rawAccounts
-  rawReminders
-  rawReminderMarkers
-  rawTransactions
-  rawMerchants
-  rawTags
-  rawCompanies
-  rawBudgets_zm
-}
+// {
+//   node [color="#c4e5fe"]
+//   rank=same;
+//   rawInstruments
+//   rawCountries
+//   rawUsers
+//   rawAccounts
+//   rawReminders
+//   rawReminderMarkers
+//   rawTransactions
+//   rawMerchants
+//   rawTags
+//   rawCompanies
+//   rawBudgets_zm
+// }
 
 
 subgraph cluster_INSTRUMENTS {

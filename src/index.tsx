@@ -14,10 +14,14 @@ import { applyClientPatch, resetData } from 'store/data'
 import { Diff } from 'types'
 import { AppThemeProvider } from './AppThemeProvider'
 import { StyledEngineProvider } from '@mui/material/styles'
+import { testNewFLow } from 'dataWorker/testing'
 
 initSentry()
 bindWorkerToStore(store.dispatch)
 createZerroInstance(store)
+
+// @ts-ignore
+window.tst = testNewFLow
 
 const container = document.getElementById('root')
 if (!container) throw new Error('No root container')
