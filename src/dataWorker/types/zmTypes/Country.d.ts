@@ -1,4 +1,3 @@
-import { Modify } from '../ts-utils'
 import { InstrumentId, TFxCode } from './Instrument'
 
 export type CountryId = number
@@ -10,10 +9,7 @@ export type ZmCountry = {
   domain: string
 }
 
-export type TCountry = Modify<
-  ZmCountry,
-  {
-    // Custom fields
-    fxCode: TFxCode
-  }
->
+export type TCountry = ZmCountry & {
+  // Custom fields
+  fxCode: TFxCode
+}

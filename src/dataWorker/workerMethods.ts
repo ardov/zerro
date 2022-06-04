@@ -5,7 +5,7 @@ import { TWorkerMethods } from './worker'
 
 const worker = new Worker()
 
-export const dataMethods = comlinkWrap<TWorkerMethods>(worker)
+export const workerMetods = comlinkWrap<TWorkerMethods>(worker)
 
 // type Message = {
 //   action: string

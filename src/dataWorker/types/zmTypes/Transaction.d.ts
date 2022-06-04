@@ -72,6 +72,7 @@ export type TTransaction = Modify<
     outcomeFxCode: TFxCode
     opIncomeFxCode: TFxCode | null
     opOutcomeFxCode: TFxCode | null
+    time: TISOTimestamp
     type: TransactionType
     mainTag: TagId | null
 

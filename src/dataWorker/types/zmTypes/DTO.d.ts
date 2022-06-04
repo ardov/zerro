@@ -1,5 +1,7 @@
+import { Modify } from '..'
 import { ZmAccount } from './Account'
 import { ZmBudget } from './Budget'
+import { TISODate, TUnixTime } from './common'
 import { ZmCompany } from './Company'
 import { ZmCountry } from './Country'
 import { ZmInstrument } from './Instrument'
@@ -8,7 +10,7 @@ import { ZmReminder } from './Reminder'
 import { ZmReminderMarker } from './ReminderMarker'
 import { ZmTag } from './Tag'
 import { ZmTransaction } from './Transaction'
-import { ZmUser } from './User'
+import { UserId, ZmUser } from './User'
 
 export type ObjectClass =
   | 'instrument'
@@ -23,12 +25,14 @@ export type ObjectClass =
   | 'reminderMarker'
   | 'transaction'
 
-export interface ZmDeletionObject {
+export type ZmDeletionObject = {
   id: string | number
   object: ObjectClass
-  stamp: number
-  user: number
+  stamp: TUnixTime
+  user: UserId
 }
+
+export type TDeletionObject = Modify<ZmDeletionObject, { stamp: TISODate }>
 
 export interface ZmDiff {
   serverTimestamp: number // Unix timestamp
