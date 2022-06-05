@@ -2,7 +2,7 @@ import * as Comlink from 'comlink'
 import { TAccount, TMerchant, TReminder } from './types'
 
 // Outlining external interface of the data worker
-const workerMethods = {
+export const dataWorkerMethods = {
   applyPatch: () => console.log('applyPatch'),
   setMerchants: (merchants: TMerchant[]) =>
     console.log('setMerchants', merchants),
@@ -12,10 +12,10 @@ const workerMethods = {
   loadJSON: () => console.log('loadJSON'),
   loadLocalData: () => console.log('loadLocalData'),
   reloadData: () => console.log('reloadData'),
-  logIn: () => console.log('logIn'),
+  logIn: (token: string) => console.log('logIn', token),
   logOut: () => console.log('logOut'),
-  sync: () => console.log('sync'),
+  syncData: (token: string) => console.log('syncData', token),
 }
 
-export type TWorkerMethods = typeof workerMethods
-Comlink.expose(workerMethods)
+export type TWorkerMethods = typeof dataWorkerMethods
+Comlink.expose(dataWorkerMethods)

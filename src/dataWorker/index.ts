@@ -1,11 +1,11 @@
 // eslint-disable-next-line import/no-webpack-loader-syntax
-import Worker from 'worker-loader!./worker'
+import Worker from 'worker-loader!./dataWorker?name=DataWorker'
 import { wrap as comlinkWrap } from 'comlink'
-import { TWorkerMethods } from './worker'
+import { TWorkerMethods } from './dataWorker'
 
-const worker = new Worker()
+const dataWorker = new Worker()
 
-export const workerMetods = comlinkWrap<TWorkerMethods>(worker)
+export const worker = comlinkWrap<TWorkerMethods>(dataWorker)
 
 // type Message = {
 //   action: string
