@@ -1,4 +1,4 @@
-import { getIDBStorage } from 'services/storage'
+import { storage } from 'services/storage'
 import { LocalData } from 'types'
 
 export async function getLocalData() {
@@ -16,9 +16,9 @@ export async function getLocalData() {
     'budget',
     'transaction',
   ]
-  const db = getIDBStorage('serverData')
+
   let data: LocalData = { serverTimestamp: 0 }
-  let arr = await Promise.all(LOCAL_KEYS.map(key => db.get(key)))
+  let arr = await Promise.all(LOCAL_KEYS.map(key => storage.get(key)))
   LOCAL_KEYS.forEach((key, i) => (data[key] = arr[i]))
   return data
 }

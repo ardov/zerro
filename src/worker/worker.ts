@@ -1,7 +1,7 @@
 import { LocalData, ZmDiff, Diff } from 'types'
 import * as Comlink from 'comlink'
 import { keys } from 'helpers/keys'
-import { getIDBStorage } from 'services/storage'
+import { storage } from 'services/storage'
 import ZenApi from 'services/ZenApi'
 import { toClient, toServer } from './zmAdapter'
 import { dataWorkerMethods } from 'dataWorker/dataWorker'
@@ -47,11 +47,9 @@ async function sync(token: string, diff: Diff) {
   }
 }
 
-const db = getIDBStorage('serverData')
-
 async function getLocalData() {
   let data = {} as LocalData
-  let arr = await Promise.all(LOCAL_KEYS.map(key => db.get(key)))
+  let arr = await Promise.all(LOCAL_KEYS.map(key => storage.get(key)))
   LOCAL_KEYS.forEach((key, i) => (data[key] = arr[i]))
   return toClient(data)
 }
@@ -59,9 +57,9 @@ async function getLocalData() {
 const obj = {
   convertZmToLocal,
   getLocalData,
-  clearStorage: () => db.clear(),
+  clearStorage: () => storage.clear(),
   saveLocalData: (data: LocalData) => {
-    keys(data).forEach(key => db.set(key, data[key]))
+    keys(data).forEach(key => storage.set(key, data[key]))
   },
   sync,
   ...dataWorkerMethods,
