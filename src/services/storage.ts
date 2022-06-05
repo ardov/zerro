@@ -28,3 +28,4 @@ function getIDBStorage(storeName: string) {
 }
 
 export const storage = getIDBStorage(STORE_NAME)
+export const dataStorage = getIDBStorage('dataStorage')

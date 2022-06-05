@@ -14,7 +14,6 @@ import { applyClientPatch, resetData } from 'store/data'
 import { Diff } from 'types'
 import { AppThemeProvider } from './AppThemeProvider'
 import { StyledEngineProvider } from '@mui/material/styles'
-import { testNewFLow } from 'dataWorker/testing'
 
 initSentry()
 bindWorkerToStore(store.dispatch)

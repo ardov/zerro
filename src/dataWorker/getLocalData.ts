@@ -1,4 +1,4 @@
-import { storage } from 'services/storage'
+import { dataStorage } from 'services/storage'
 import { LocalData } from 'types'
 
 export async function getLocalData() {
@@ -18,7 +18,7 @@ export async function getLocalData() {
   ]
 
   let data: LocalData = { serverTimestamp: 0 }
-  let arr = await Promise.all(LOCAL_KEYS.map(key => storage.get(key)))
+  let arr = await Promise.all(LOCAL_KEYS.map(key => dataStorage.get(key)))
   LOCAL_KEYS.forEach((key, i) => (data[key] = arr[i]))
   return data
 }
