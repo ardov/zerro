@@ -152,6 +152,6 @@
     "stylelint-order": "^5.0.0",
     "stylelint-processor-styled-components": "^1.10.0",
     "stylelint-scss": "^4.0.0",
-    "worker-loader": "^3.0.7"
+    "worker-loader": "^3.0.8"
   }
 }
