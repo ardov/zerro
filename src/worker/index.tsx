@@ -26,10 +26,12 @@ export const bindWorkerToStore = (dispatch: AppDispatch) =>
     }
   })
 
+export const workerMethods = Comlink.wrap<WorkerObj>(worker)
+
 export const {
   convertZmToLocal,
   getLocalData,
   clearStorage,
   saveLocalData,
   sync,
-} = Comlink.wrap<WorkerObj>(worker)
+} = workerMethods

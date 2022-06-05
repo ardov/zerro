@@ -1,4 +1,4 @@
-import * as Comlink from 'comlink'
+// import * as Comlink from 'comlink'
 import { TAccount, TMerchant, TReminder } from './types'
 
 // Outlining external interface of the data worker
@@ -18,4 +18,4 @@ export const dataWorkerMethods = {
 }
 
 export type TWorkerMethods = typeof dataWorkerMethods
-Comlink.expose(dataWorkerMethods)
+// Comlink.expose(dataWorkerMethods)

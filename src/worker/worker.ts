@@ -4,6 +4,7 @@ import { keys } from 'helpers/keys'
 import { getIDBStorage } from 'services/storage'
 import ZenApi from 'services/ZenApi'
 import { toClient, toServer } from './zmAdapter'
+import { dataWorkerMethods } from 'dataWorker/dataWorker'
 
 // eslint-disable-next-line no-restricted-globals
 // const ctx: Worker = self as any
@@ -63,6 +64,7 @@ const obj = {
     keys(data).forEach(key => db.set(key, data[key]))
   },
   sync,
+  ...dataWorkerMethods,
 }
 
 export type WorkerObj = typeof obj

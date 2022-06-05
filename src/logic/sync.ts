@@ -7,7 +7,7 @@ import { setSyncData } from 'store/lastSync'
 import { formatDate } from 'helpers/format'
 import { AppThunk } from 'store'
 import { Diff, LocalData } from 'types'
-import { sync } from 'worker'
+import { sync, workerMethods } from 'worker'
 import { getDiff, applyServerPatch } from 'store/data'
 import { keys } from 'helpers/keys'
 
@@ -22,6 +22,8 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
 
   const syncStartTime = Date.now()
   dispatch(setPending(true))
+
+  workerMethods.syncData(token)
   const response = await sync(token, diff)
   dispatch(setPending(false))
   dispatch(
