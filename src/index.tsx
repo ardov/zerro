@@ -19,9 +19,6 @@ initSentry()
 bindWorkerToStore(store.dispatch)
 createZerroInstance(store)
 
-// @ts-ignore
-window.tst = testNewFLow
-
 const container = document.getElementById('root')
 if (!container) throw new Error('No root container')
 const root = createRoot(container)
