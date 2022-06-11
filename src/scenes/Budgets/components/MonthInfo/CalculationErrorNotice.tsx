@@ -12,7 +12,7 @@ import { clearLocalData } from 'logic/localData'
 import { captureError, sendEvent } from 'helpers/tracking'
 import { getDiff } from 'store/data'
 import { getAccountsHistory } from 'scenes/Stats/selectors'
-import { PopulatedAccount, Selector } from 'types'
+import { TPopulatedAccount, TSelector } from 'types'
 import { createSelector } from '@reduxjs/toolkit'
 
 // TODO: Надо бы как-то округлять все цифры только в конце. Иначе из-за валют копится ошибка.
@@ -147,7 +147,7 @@ const A: FC<{ children?: ReactNode; href: string }> = props => (
 
 const CorruptedAccounts: FC<{
   corrupted: {
-    acc: PopulatedAccount
+    acc: TPopulatedAccount
     diff: number
   }[]
 }> = ({ corrupted }) => {
@@ -175,8 +175,8 @@ const CorruptedAccounts: FC<{
   )
 }
 
-const getCorruptedAccounts: Selector<
-  { acc: PopulatedAccount; diff: number }[]
+const getCorruptedAccounts: TSelector<
+  { acc: TPopulatedAccount; diff: number }[]
 > = createSelector(
   [getAccountsHistory, getInBudgetAccounts],
   (histories, accounts) =>
@@ -195,7 +195,7 @@ const getCorruptedAccounts: Selector<
       .filter(({ diff }) => diff > 0.001)
 )
 
-const getTotalDiff: Selector<number> = createSelector(
+const getTotalDiff: TSelector<number> = createSelector(
   [getTotalsArray, getInBudgetAccounts, convertCurrency],
   (totalsArray, accounts, convert) => {
     const { moneyInBudget } = totalsArray[totalsArray.length - 1]

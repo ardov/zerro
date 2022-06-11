@@ -4,13 +4,13 @@ import isSameMonth from 'date-fns/isSameMonth'
 import addMonths from 'date-fns/addMonths'
 import { getBudgetsByMonthAndTag } from 'store/data/budgets'
 import { getTransactionsHistory } from 'store/data/transactions'
-import { Selector } from 'types'
+import { TSelector } from 'types'
 
 /** Returns the date of first month in ms.
  *  To have correct result we should include all transactions
  *  in our calculations. Otherwise calculated balance will be wrong.
  */
-const getFirstMonth: Selector<number> = createSelector(
+const getFirstMonth: TSelector<number> = createSelector(
   [getTransactionsHistory],
   transactions => {
     let firstDate = transactions[0]?.date
@@ -20,7 +20,7 @@ const getFirstMonth: Selector<number> = createSelector(
 )
 
 /** Returns the last available month to budget. */
-const getLastMonth: Selector<number> = createSelector(
+const getLastMonth: TSelector<number> = createSelector(
   [getBudgetsByMonthAndTag],
   budgets => {
     const lastBudgetDate =
@@ -33,7 +33,7 @@ const getLastMonth: Selector<number> = createSelector(
   }
 )
 
-export const getMonthDates: Selector<number[]> = createSelector(
+export const getMonthDates: TSelector<number[]> = createSelector(
   [getFirstMonth, getLastMonth],
   (firstMs, lastMs) => {
     const firstDate = new Date(firstMs)

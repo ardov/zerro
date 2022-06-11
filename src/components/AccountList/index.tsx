@@ -4,7 +4,7 @@ import { getInBudgetAccounts, getSavingAccounts } from 'store/data/accounts'
 import pluralize from 'helpers/pluralize'
 import { Collapse, List, ListItemButton } from '@mui/material'
 import { Account, Subheader } from './components'
-import { PopulatedAccount } from 'types'
+import { TPopulatedAccount } from 'types'
 import { Amount } from 'components/Amount'
 import { Tooltip } from 'components/Tooltip'
 import { useToggle } from 'helpers/useToggle'
@@ -54,7 +54,7 @@ export default function AccountList({ className = '' }) {
   )
 }
 
-const ArchivedList: FC<{ accs: PopulatedAccount[] }> = props => {
+const ArchivedList: FC<{ accs: TPopulatedAccount[] }> = props => {
   const { accs } = props
   const [visible, toggleVisibility] = useToggle()
   if (!accs.length) return null
@@ -100,6 +100,6 @@ const ArchivedList: FC<{ accs: PopulatedAccount[] }> = props => {
   )
 }
 
-function getTotal(accs: PopulatedAccount[]) {
+function getTotal(accs: TPopulatedAccount[]) {
   return accs.reduce((sum, a) => sum + a.convertedBalance, 0)
 }

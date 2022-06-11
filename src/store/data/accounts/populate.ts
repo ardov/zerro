@@ -1,4 +1,4 @@
-import { TRawAccount, PopulatedAccount } from 'types'
+import { TRawAccount, TPopulatedAccount } from 'types'
 
 interface Options {
   convert: (
@@ -11,7 +11,7 @@ interface Options {
 export const populate = (
   { convert }: Options,
   raw: TRawAccount
-): PopulatedAccount => {
+): TPopulatedAccount => {
   return {
     ...raw,
     convertedBalance: convert(raw.balance, raw.instrument),

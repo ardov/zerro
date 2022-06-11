@@ -1,12 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from 'store'
-import { Token } from 'types'
+import { TToken } from 'types'
 
 const { reducer, actions } = createSlice({
   name: 'token',
-  initialState: null as Token,
+  initialState: null as TToken,
   reducers: {
-    setToken: (_, action: PayloadAction<Token>) => action.payload,
+    setToken: (_, action: PayloadAction<TToken>) => action.payload,
   },
 })
 

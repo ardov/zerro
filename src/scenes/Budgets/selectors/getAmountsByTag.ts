@@ -9,7 +9,7 @@ import startOfMonth from 'date-fns/startOfMonth'
 import { getType } from 'store/data/transactions/helpers'
 import { getMonthDates } from './getMonthDates'
 import { getInBudgetAccounts } from 'store/data/accounts'
-import { PopulatedBudget, Selector } from 'types'
+import { PopulatedBudget, TSelector } from 'types'
 import { withPerf } from 'helpers/performance'
 import { RootState } from 'store'
 import { getTransactionsHistory } from 'store/data/transactions'
@@ -27,7 +27,7 @@ const makeDateNode = (): DateNode => ({
   transferFees: 0,
 })
 
-const getAmountsByMonth: Selector<{
+const getAmountsByMonth: TSelector<{
   [month: number]: DateNode
 }> = createSelector(
   [getTransactionsHistory, convertCurrency, getInBudgetAccounts],
@@ -164,9 +164,7 @@ export type TagAmounts = {
 }
 export type TagGroupAmounts = TagAmounts
 
-export const getAmountsByTag: (
-  state: RootState
-) => {
+export const getAmountsByTag: (state: RootState) => {
   [month: string]: {
     [tagId: string]: TagGroupAmounts
   }

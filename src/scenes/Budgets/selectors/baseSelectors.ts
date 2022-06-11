@@ -2,9 +2,9 @@ import { createSelector } from '@reduxjs/toolkit'
 import { getInBudgetAccounts, getStartBalance } from 'store/data/accounts'
 import { convertCurrency } from 'store/data/instruments'
 import { round } from 'helpers/currencyHelpers'
-import { Selector } from 'types'
+import { TSelector } from 'types'
 
-export const getStartFunds: Selector<number> = createSelector(
+export const getStartFunds: TSelector<number> = createSelector(
   [getInBudgetAccounts, convertCurrency],
   (accounts, convert) => {
     return accounts

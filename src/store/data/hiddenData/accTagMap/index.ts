@@ -5,7 +5,7 @@ import { setHiddenData } from '../thunks'
 import { getTags } from '../../tags'
 import { getAccLinks } from '../selectors'
 import { AppThunk } from 'store'
-import { TAccountId, Selector, TTagId } from 'types'
+import { TAccountId, TSelector, TTagId } from 'types'
 import { getAccounts } from 'store/data/accounts'
 
 // THUNK
@@ -31,7 +31,7 @@ export const addConnection =
  * Returns connections between tags and accounts. Is used to link transfers to tags
  * - One account -> One tag
  */
-export const getAccTagMap: Selector<{
+export const getAccTagMap: TSelector<{
   [accId: TAccountId]: TTagId
 }> = createSelector(
   [getAccLinks, getTags, getAccounts],

@@ -11,9 +11,9 @@ export type TISODate = string // 2000-01-01
 export type TUnits = number
 export type TMilliUnits = number
 
-export type Selector<T> = (state: RootState) => T
+export type TSelector<T> = (state: RootState) => T
 
-export type Token = string | null
+export type TToken = string | null
 
 export type TObjectClass =
   | 'instrument'
@@ -162,7 +162,7 @@ export type TRawAccount = Modify<
   }
 >
 
-export interface PopulatedAccount extends TRawAccount {
+export type TPopulatedAccount = TRawAccount & {
   convertedBalance: number
   convertedStartBalance: number
   inBudget: boolean

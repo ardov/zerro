@@ -8,62 +8,61 @@ import {
   ListItemButton,
 } from '@mui/material'
 import { Amount } from 'components/Amount'
-import { PopulatedAccount } from 'types'
+import { TPopulatedAccount } from 'types'
 import { useAppDispatch } from 'store'
 import { setInBudget } from 'store/data/accounts'
 
-export const Account: FC<
-  { account: PopulatedAccount } & ListItemButtonProps
-> = ({ account, sx, ...rest }) => {
-  const dispatch = useAppDispatch()
-  const toggleInBalance = useCallback(
-    () => dispatch(setInBudget(account.id, !account.inBalance)),
-    [account.id, account.inBalance, dispatch]
-  )
-  return (
-    <ListItemButton
-      sx={{
-        typography: 'body2',
-        borderRadius: 1,
-        display: 'flex',
-        ...sx,
-      }}
-      onDoubleClick={toggleInBalance}
-      {...rest}
-    >
-      <Box
+export const Account: FC<{ account: TPopulatedAccount } & ListItemButtonProps> =
+  ({ account, sx, ...rest }) => {
+    const dispatch = useAppDispatch()
+    const toggleInBalance = useCallback(
+      () => dispatch(setInBudget(account.id, !account.inBalance)),
+      [account.id, account.inBalance, dispatch]
+    )
+    return (
+      <ListItemButton
         sx={{
-          textDecoration: account.archive ? 'line-through' : 'none',
-          flexGrow: 1,
-          minWidth: 0,
-          position: 'relative',
-          overflow: 'hidden',
-          whiteSpace: 'nowrap',
-          maskImage: 'linear-gradient(to left, transparent, black 40px)',
+          typography: 'body2',
+          borderRadius: 1,
+          display: 'flex',
+          ...sx,
         }}
-        title={account.title}
+        onDoubleClick={toggleInBalance}
+        {...rest}
       >
-        {account.title}
-      </Box>
+        <Box
+          sx={{
+            textDecoration: account.archive ? 'line-through' : 'none',
+            flexGrow: 1,
+            minWidth: 0,
+            position: 'relative',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            maskImage: 'linear-gradient(to left, transparent, black 40px)',
+          }}
+          title={account.title}
+        >
+          {account.title}
+        </Box>
 
-      <Box
-        component="span"
-        sx={{
-          ml: 1,
-          flexShrink: 0,
-          color: account.balance < 0 ? 'error.main' : 'text.secondary',
-        }}
-      >
-        <Amount
-          value={account.balance}
-          instrument={account.instrument}
-          decMode="ifOnly"
-          noShade
-        />
-      </Box>
-    </ListItemButton>
-  )
-}
+        <Box
+          component="span"
+          sx={{
+            ml: 1,
+            flexShrink: 0,
+            color: account.balance < 0 ? 'error.main' : 'text.secondary',
+          }}
+        >
+          <Amount
+            value={account.balance}
+            instrument={account.instrument}
+            decMode="ifOnly"
+            noShade
+          />
+        </Box>
+      </ListItemButton>
+    )
+  }
 
 export const Subheader: FC<
   {
