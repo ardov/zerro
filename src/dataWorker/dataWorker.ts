@@ -8,7 +8,7 @@ import {
   TISOTimestamp,
   TMerchant,
   TReminder,
-} from './types'
+} from 'types'
 
 // Outlining external interface of the data worker
 export const dataWorkerMethods = {

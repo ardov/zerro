@@ -1,55 +1,44 @@
-import { combine } from 'effector'
-import {
-  AccountId,
-  Goal,
-  TagId,
-  TFxCode,
-  TReminder,
-  TTagMetaData,
-  TTagTree,
-} from '../../types'
-import { $reminders } from '../reminders'
-import { $dataAccountId } from './dataAccountId'
+import { TAccountId, TGoal, TTagId, TFxCode, TReminder, TTagMeta } from 'types'
 import { TRecord } from './record-types'
 
-const $dataReminderList = combine(
-  {
-    dataAccId: $dataAccountId,
-    reminders: $reminders,
-  },
-  ({ dataAccId, reminders }) => {
-    if (!dataAccId) return [] as TReminder[]
-    return Object.values(reminders).filter(
-      reminder =>
-        parseComment(reminder.comment) &&
-        (reminder.incomeAccount === dataAccId ||
-          reminder.outcomeAccount === dataAccId)
-    )
-  }
-)
+// const $dataReminderList = combine(
+//   {
+//     dataAccId: $dataAccountId,
+//     reminders: $reminders,
+//   },
+//   ({ dataAccId, reminders }) => {
+//     if (!dataAccId) return [] as TReminder[]
+//     return Object.values(reminders).filter(
+//       reminder =>
+//         parseComment(reminder.comment) &&
+//         (reminder.incomeAccount === dataAccId ||
+//           reminder.outcomeAccount === dataAccId)
+//     )
+//   }
+// )
 
-const $parsedData = $dataReminderList.map(aggregateHiddenData)
-export const $goals = $parsedData.map(s => s.goals)
-export const $fxRates = $parsedData.map(s => s.fxRates)
-export const $budgets = $parsedData.map(s => s.budgets)
-export const $linkedAccounts = $parsedData.map(s => s.linkedAccounts)
-export const $linkedDebtors = $parsedData.map(s => s.linkedDebtors)
-export const $tagMeta = $parsedData.map(s => s.tagMeta)
-export const $tagOrder = $parsedData.map(s => s.tagOrder)
-export const $dataReminders = $parsedData.map(s => s.dataReminders)
+// const $parsedData = $dataReminderList.map(aggregateHiddenData)
+// export const $goals = $parsedData.map(s => s.goals)
+// export const $fxRates = $parsedData.map(s => s.fxRates)
+// export const $budgets = $parsedData.map(s => s.budgets)
+// export const $linkedAccounts = $parsedData.map(s => s.linkedAccounts)
+// export const $linkedDebtors = $parsedData.map(s => s.linkedDebtors)
+// export const $tagMeta = $parsedData.map(s => s.tagMeta)
+// export const $tagOrder = $parsedData.map(s => s.tagOrder)
+// export const $dataReminders = $parsedData.map(s => s.dataReminders)
 
 // -----------------------------------------------------------------------------
 // Functions
 // -----------------------------------------------------------------------------
 
 type TAggregatedResult = {
-  goals: { [month: string]: { [id: TagId]: Goal } }
+  goals: { [month: string]: { [id: TTagId]: TGoal } }
   fxRates: { [month: string]: { [id: TFxCode]: number } }
-  budgets: { [month: string]: { [id: TagId]: number } }
-  linkedAccounts: { [id: AccountId]: TagId }
-  linkedDebtors: { [id: string]: TagId }
-  tagMeta: { [id: TagId]: TTagMetaData }
-  tagOrder: TTagTree
+  budgets: { [month: string]: { [id: TTagId]: number } }
+  linkedAccounts: { [id: TAccountId]: TTagId }
+  linkedDebtors: { [id: string]: TTagId }
+  tagMeta: { [id: TTagId]: TTagMeta }
+  // tagOrder: TTagTree
   dataReminders: { [dataId: string]: TReminder }
 }
 
@@ -61,7 +50,7 @@ function aggregateHiddenData(reminders: TReminder[]): TAggregatedResult {
     linkedAccounts: {},
     linkedDebtors: {},
     tagMeta: {},
-    tagOrder: [],
+    // tagOrder: [],
     dataReminders: {},
   }
 
@@ -70,7 +59,7 @@ function aggregateHiddenData(reminders: TReminder[]): TAggregatedResult {
     if (!rec) return
     switch (rec.type) {
       case 'goals':
-        res.goals[rec.date] = rec.payload
+        // res.goals[rec.date] = rec.payload
         res.dataReminders[getRecordId(rec.type, rec.date)] = reminder
         break
       case 'fxRates':
@@ -90,11 +79,11 @@ function aggregateHiddenData(reminders: TReminder[]): TAggregatedResult {
         res.dataReminders[getRecordId(rec.type)] = reminder
         break
       case 'tagMeta':
-        res.tagMeta = rec.payload
+        // res.tagMeta = rec.payload
         res.dataReminders[getRecordId(rec.type)] = reminder
         break
       case 'tagOrder':
-        res.tagOrder = rec.payload
+        // res.tagOrder = rec.payload
         res.dataReminders[getRecordId(rec.type)] = reminder
         break
     }

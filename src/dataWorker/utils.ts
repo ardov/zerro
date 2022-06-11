@@ -1,4 +1,4 @@
-import { TISOTimestamp, TMilliUnits, TUnits, TUnixTime } from '../types'
+import { TISOTimestamp, TMilliUnits, TUnits, TUnixTime } from 'types'
 
 export function unixToISO(unix: TUnixTime): TISOTimestamp {
   return new Date(unix * 1000).toISOString()

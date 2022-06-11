@@ -6,7 +6,7 @@ import iconsMap from 'store/data/tags/iconsMap.json'
 export type TUnixTime = number
 export type TMsTime = number
 export type TISODate = string // 2000-01-01
-// export type TISOTimestamp = string // 2000-01-01T00:00:00.000Z
+export type TISOTimestamp = string // 2000-01-01T00:00:00.000Z
 
 export type TUnits = number
 export type TMilliUnits = number
@@ -168,10 +168,10 @@ export type TPopulatedAccount = TRawAccount & {
   inBudget: boolean
 }
 
-// export type TAccount = TRawAccount & {
-//   inBudget: boolean
-//   fxCode: TFxCode
-// }
+export type TAccount = TRawAccount & {
+  inBudget: boolean
+  fxCode: TFxCode
+}
 
 // ---------------------------------------------------------------------
 // MERCHANT
@@ -294,10 +294,10 @@ export type TRawReminder = Modify<
   }
 >
 
-// export type TReminder = TRawReminder & {
-//   incomeFxCode: TFxCode
-//   outcomeFxCode: TFxCode
-// }
+export type TReminder = TRawReminder & {
+  incomeFxCode: TFxCode
+  outcomeFxCode: TFxCode
+}
 
 // ---------------------------------------------------------------------
 // REMINDER_MARKER
@@ -334,10 +334,10 @@ export type TRawReminderMarker = Modify<
   }
 >
 
-// export type TReminderMarker = TRawReminderMarker & {
-//   incomeFxCode: TFxCode
-//   outcomeFxCode: TFxCode
-// }
+export type TReminderMarker = TRawReminderMarker & {
+  incomeFxCode: TFxCode
+  outcomeFxCode: TFxCode
+}
 
 // ---------------------------------------------------------------------
 // TRANSACTION
@@ -398,17 +398,17 @@ export type TRawransaction = Modify<
   }
 >
 
-// export type TTransaction = TRawransaction & {
-//   incomeFxCode: TFxCode
-//   outcomeFxCode: TFxCode
-//   opIncomeFxCode: TFxCode | null
-//   opOutcomeFxCode: TFxCode | null
-//   time: TMsTime
-//   type: TTransactionType
-//   mainTag: TTagId | null
-//   incomeBalanceBefore: TMilliUnits
-//   outcomeBalanceBefore: TMilliUnits
-// }
+export type TTransaction = TRawransaction & {
+  incomeFxCode: TFxCode
+  outcomeFxCode: TFxCode
+  opIncomeFxCode: TFxCode | null
+  opOutcomeFxCode: TFxCode | null
+  time: TMsTime
+  type: TTransactionType
+  mainTag: TTagId | null
+  incomeBalanceBefore: TMilliUnits
+  outcomeBalanceBefore: TMilliUnits
+}
 
 // ---------------------------------------------------------------------
 // DELETION
