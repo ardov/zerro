@@ -1,4 +1,4 @@
-import { LocalData, ZmDiff, Diff } from 'types'
+import { TLocalData, TZmDiff, TDiff } from 'types'
 import * as Comlink from 'comlink'
 import { keys } from 'helpers/keys'
 import { storage } from 'services/storage'
@@ -17,7 +17,7 @@ import { dataWorkerMethods } from 'dataWorker/dataWorker'
 //   return store
 // }
 
-type LocalKey = keyof LocalData
+type LocalKey = keyof TLocalData
 const LOCAL_KEYS = [
   'serverTimestamp',
   'instrument',
@@ -33,11 +33,11 @@ const LOCAL_KEYS = [
   'transaction',
 ] as LocalKey[]
 
-function convertZmToLocal(diff: ZmDiff) {
+function convertZmToLocal(diff: TZmDiff) {
   return toClient(diff)
 }
 
-async function sync(token: string, diff: Diff) {
+async function sync(token: string, diff: TDiff) {
   const zmDiff = toServer(diff)
   try {
     let data = await ZenApi.getData(token, zmDiff)
@@ -48,7 +48,7 @@ async function sync(token: string, diff: Diff) {
 }
 
 async function getLocalData() {
-  let data = {} as LocalData
+  let data = {} as TLocalData
   let arr = await Promise.all(LOCAL_KEYS.map(key => storage.get(key)))
   LOCAL_KEYS.forEach((key, i) => (data[key] = arr[i]))
   return toClient(data)
@@ -58,7 +58,7 @@ const obj = {
   convertZmToLocal,
   getLocalData,
   clearStorage: () => storage.clear(),
-  saveLocalData: (data: LocalData) => {
+  saveLocalData: (data: TLocalData) => {
     keys(data).forEach(key => storage.set(key, data[key]))
   },
   sync,

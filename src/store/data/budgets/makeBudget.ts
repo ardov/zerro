@@ -1,6 +1,6 @@
-import { Budget, OptionalExceptFor } from 'types'
+import { TBudget, OptionalExceptFor } from 'types'
 
-type BudgetDraft = OptionalExceptFor<Budget, 'user' | 'date' | 'tag'>
+type BudgetDraft = OptionalExceptFor<TBudget, 'user' | 'date' | 'tag'>
 
 export const makeBudget = ({
   user,
@@ -11,7 +11,7 @@ export const makeBudget = ({
   incomeLock = true,
   outcome = 0,
   outcomeLock = true,
-}: BudgetDraft): Budget => ({
+}: BudgetDraft): TBudget => ({
   user,
   date,
   tag: tag === 'null' ? null : tag,

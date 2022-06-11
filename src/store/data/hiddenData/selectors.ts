@@ -4,7 +4,7 @@ import { DataReminderType } from './constants'
 import { getAccountList } from 'store/data/accounts'
 import { DATA_ACC_NAME } from './constants'
 import { RootState } from 'store'
-import { Reminder, TTagId, TagMeta, ZmGoal } from 'types'
+import { TRawReminder, TTagId, TTagMeta, TZmGoal } from 'types'
 
 const { ACC_LINKS, TAG_ORDER, GOALS, TAG_META } = DataReminderType
 
@@ -33,8 +33,8 @@ export const getDataReminders = createSelector([getReminders], reminders => {
 })
 
 export type AccLinks = { [accId: string]: TTagId }
-export type TagMetaById = { [tagId: TTagId]: TagMeta }
-export type RawGoals = { [tagId: string]: ZmGoal }
+export type TagMetaById = { [tagId: TTagId]: TTagMeta }
+export type RawGoals = { [tagId: string]: TZmGoal }
 
 export const getHiddenData = createSelector([getDataReminders], reminders => ({
   [ACC_LINKS]: parseComment<AccLinks>(reminders[ACC_LINKS]),
@@ -51,7 +51,9 @@ export const getRawTagMeta = createSelector([getHiddenData], d => d[TAG_META])
 /**
  * Parses comment in reminder and returns parsed JSON or null
  */
-function parseComment<OutcomeType>(reminder?: Reminder): OutcomeType | null {
+function parseComment<OutcomeType>(
+  reminder?: TRawReminder
+): OutcomeType | null {
   if (!reminder?.comment) return null
   try {
     return JSON.parse(reminder.comment)

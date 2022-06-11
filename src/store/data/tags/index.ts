@@ -1,13 +1,13 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { compareTags } from 'store/data/hiddenData/tagOrder'
 import populateTags from './populateTags'
-import { Modify, PopulatedTag, Tag, TTagId } from 'types'
+import { Modify, TTag, TRawTag, TTagId } from 'types'
 import { RootState } from 'store'
 
 // SELECTORS
 export const getTags = (state: RootState) => state.data.current.tag
 
-export const getTag = (state: RootState, id: string): Tag | undefined =>
+export const getTag = (state: RootState, id: string): TRawTag | undefined =>
   getTags(state)[id]
 
 export const getPopulatedTags = createSelector([getTags], populateTags)
@@ -15,7 +15,7 @@ export const getPopulatedTags = createSelector([getTags], populateTags)
 export const getPopulatedTag = (state: RootState, id: string) =>
   getPopulatedTags(state)[id]
 
-export type TagTreeNode = Modify<PopulatedTag, { children: PopulatedTag[] }>
+export type TagTreeNode = Modify<TTag, { children: TTag[] }>
 export const getTagsTree = createSelector(
   [getPopulatedTags, compareTags],
   (tags, compare) => {

@@ -1,12 +1,12 @@
 import { getBudgetId } from 'store/data/budgets'
-import { DataStore, Diff } from 'types'
+import { TDataStore, TDiff } from 'types'
 
 /**
  * Mutable method
  * @param diff
  * @param store
  */
-export function applyDiff(diff: Diff, store: DataStore) {
+export function applyDiff(diff: TDiff, store: TDataStore) {
   const {
     serverTimestamp,
     deletion,
@@ -23,7 +23,7 @@ export function applyDiff(diff: Diff, store: DataStore) {
     transaction,
   } = diff
 
-  const addToStore = (key: keyof Diff) => (el: any) => {
+  const addToStore = (key: keyof TDiff) => (el: any) => {
     if (key === 'serverTimestamp' || key === 'deletion') return
     const id = key === 'budget' ? getBudgetId(el) : el.id
     store[key][id] = el

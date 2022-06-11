@@ -1,5 +1,5 @@
 import Cookies from 'cookies-js'
-import { ZmRequest, ZmDiff } from 'types'
+import { TZmRequest, TZmDiff } from 'types'
 
 const CODE_DATA_KEY = 'auth-code-data'
 const TOKEN_KEY = 'token'
@@ -15,14 +15,14 @@ const redirectUri = process.env.REACT_APP_REDIRECT_URI
 const ZenApi = { getData, checkCode, getLocalToken, getToken }
 export default ZenApi
 
-async function getData(token: string, diff: ZmDiff = { serverTimestamp: 0 }) {
+async function getData(token: string, diff: TZmDiff = { serverTimestamp: 0 }) {
   if (!token) throw Error('No token')
   if (!diffEndpoint)
     throw Error('Fill REACT_APP_DIFF_ENDPOINT in your .env file')
   if (token === 'fakeToken')
     return { ...diff, serverTimestamp: Date.now() / 1000 }
 
-  const body: ZmRequest = {
+  const body: TZmRequest = {
     currentClientTimestamp: Math.round(Date.now() / 1000),
     ...diff,
   }
@@ -40,7 +40,7 @@ async function getData(token: string, diff: ZmDiff = { serverTimestamp: 0 }) {
   const json = await response.json()
   if (json.error) throw Error(JSON.stringify(json.error))
 
-  return json as ZmDiff
+  return json as TZmDiff
 }
 
 function checkCode() {

@@ -1,4 +1,4 @@
-import { Account, PopulatedAccount } from 'types'
+import { TRawAccount, PopulatedAccount } from 'types'
 
 interface Options {
   convert: (
@@ -10,7 +10,7 @@ interface Options {
 
 export const populate = (
   { convert }: Options,
-  raw: Account
+  raw: TRawAccount
 ): PopulatedAccount => {
   return {
     ...raw,
@@ -20,7 +20,7 @@ export const populate = (
   }
 }
 
-function isInBudget(a: Account) {
+function isInBudget(a: TRawAccount) {
   if (a.type === 'debt') return false
   if (a.title.endsWith('📍')) return true
   return a.inBalance

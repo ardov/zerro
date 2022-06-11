@@ -1,8 +1,8 @@
-import { OptionalExceptFor, Transaction } from 'types'
+import { OptionalExceptFor, TRawransaction } from 'types'
 import { v1 as uuidv1 } from 'uuid'
 
 export type TransactionDraft = OptionalExceptFor<
-  Transaction,
+  TRawransaction,
   | 'user'
   | 'date'
   | 'incomeInstrument'
@@ -11,7 +11,7 @@ export type TransactionDraft = OptionalExceptFor<
   | 'outcomeAccount'
 >
 
-export default function makeTransaction(raw: TransactionDraft): Transaction {
+export default function makeTransaction(raw: TransactionDraft): TRawransaction {
   return {
     id: raw.id || uuidv1(),
     changed: raw.changed || Date.now(),

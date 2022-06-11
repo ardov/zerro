@@ -1,8 +1,8 @@
 import { dataStorage } from 'services/storage'
-import { LocalData } from 'types'
+import { TLocalData } from 'types'
 
 export async function getLocalData() {
-  const LOCAL_KEYS: (keyof LocalData)[] = [
+  const LOCAL_KEYS: (keyof TLocalData)[] = [
     'serverTimestamp',
     'instrument',
     'user',
@@ -17,7 +17,7 @@ export async function getLocalData() {
     'transaction',
   ]
 
-  let data: LocalData = { serverTimestamp: 0 }
+  let data: TLocalData = { serverTimestamp: 0 }
   let arr = await Promise.all(LOCAL_KEYS.map(key => dataStorage.get(key)))
   LOCAL_KEYS.forEach((key, i) => (data[key] = arr[i]))
   return data

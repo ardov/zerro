@@ -1,11 +1,11 @@
 import { getBudgetId } from 'store/data/budgets'
-import { Diff } from 'types'
+import { TDiff } from 'types'
 
 /**
  * Mutates first diff
  */
-export function mergeDiffs(d1: Diff, d2: Diff) {
-  const merge = (key: keyof Diff) => {
+export function mergeDiffs(d1: TDiff, d2: TDiff) {
+  const merge = (key: keyof TDiff) => {
     if (key === 'serverTimestamp' || key === 'deletion') return
     if (!d2[key]) return
     if (d1[key]) {

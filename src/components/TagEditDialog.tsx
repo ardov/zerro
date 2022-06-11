@@ -14,7 +14,7 @@ import {
   TextField,
 } from '@mui/material'
 import { TagSelect } from './TagSelect'
-import { Modify, Tag } from 'types'
+import { Modify, TRawTag } from 'types'
 import { shallowEqual } from 'react-redux'
 import { createTag } from 'store/data/tags/thunks'
 import { useFormik } from 'formik'
@@ -36,7 +36,7 @@ export type TagEditDialogProps = Modify<
   DialogProps,
   {
     onClose: () => void
-    tag?: Partial<Tag>
+    tag?: Partial<TRawTag>
   }
 >
 

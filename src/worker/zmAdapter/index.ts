@@ -1,8 +1,8 @@
-import { ZmDiff, Diff } from 'types'
+import { TZmDiff, TDiff } from 'types'
 import { dataConverters as convert } from './dataConverters'
 
-export function toServer(d: Diff): ZmDiff {
-  let r: ZmDiff = { serverTimestamp: 0 }
+export function toServer(d: TDiff): TZmDiff {
+  let r: TZmDiff = { serverTimestamp: 0 }
   if (d.serverTimestamp)
     r.serverTimestamp = convert.serverTimestamp.toServer(d.serverTimestamp)
   if (d.deletion) r.deletion = d.deletion.map(convert.deletion.toServer)
@@ -22,8 +22,8 @@ export function toServer(d: Diff): ZmDiff {
   return r
 }
 
-export function toClient(d: ZmDiff): Diff {
-  let r: Diff = { serverTimestamp: 0 }
+export function toClient(d: TZmDiff): TDiff {
+  let r: TDiff = { serverTimestamp: 0 }
   if (d.serverTimestamp)
     r.serverTimestamp = convert.serverTimestamp.toClient(d.serverTimestamp)
   if (d.deletion) r.deletion = d.deletion.map(convert.deletion.toClient)

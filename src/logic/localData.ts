@@ -1,10 +1,10 @@
 import { AppThunk } from 'store'
 import { applyServerPatch } from 'store/data'
 import { getDataToSave } from 'store/data/selectors'
-import { LocalData } from 'types'
+import { TLocalData } from 'types'
 import { getLocalData, clearStorage, saveLocalData } from 'worker'
 
-type LocalKey = keyof LocalData
+type LocalKey = keyof TLocalData
 
 const LOCAL_KEYS = [
   'serverTimestamp',
@@ -21,19 +21,18 @@ const LOCAL_KEYS = [
   'transaction',
 ] as LocalKey[]
 
-export const saveDataLocally = (changedDomains = LOCAL_KEYS): AppThunk => (
-  dispatch,
-  getState
-) => {
-  const state = getState()
-  const data = getDataToSave(state)
-  const changed = Object.assign(
-    {},
-    ...changedDomains.map(key => ({ [key]: data[key] }))
-  )
+export const saveDataLocally =
+  (changedDomains = LOCAL_KEYS): AppThunk =>
+  (dispatch, getState) => {
+    const state = getState()
+    const data = getDataToSave(state)
+    const changed = Object.assign(
+      {},
+      ...changedDomains.map(key => ({ [key]: data[key] }))
+    )
 
-  saveLocalData(changed)
-}
+    saveLocalData(changed)
+  }
 
 export const loadLocalData = (): AppThunk => async dispatch => {
   const data = await getLocalData()

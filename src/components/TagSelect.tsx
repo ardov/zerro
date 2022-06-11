@@ -3,7 +3,7 @@ import { useAppSelector } from 'store'
 import { getPopulatedTags, getTagsTree, TagTreeNode } from 'store/data/tags'
 import { Box, Autocomplete, TextField } from '@mui/material'
 import { EmojiIcon } from 'components/EmojiIcon'
-import { PopulatedTag } from '../types'
+import { TTag } from '../types'
 import TagChip from './TagChip'
 import ru from 'convert-layout/ru'
 
@@ -31,7 +31,7 @@ export type TagSelectProps = BaseTagSelectProps & {
   label?: string
 }
 
-type TagOption = PopulatedTag | TagTreeNode
+type TagOption = TTag | TagTreeNode
 
 export const TagSelect: FC<TagSelectProps> = props => {
   const { onChange, tagFilters, multiple, value, label, ...rest } = props
@@ -105,16 +105,18 @@ const getMatchedTags = (
   return list.map(t => t.id)
 }
 
-const makeChecker = (search = '', filters?: TagFilters) => (tag: TagOption) => {
-  const { tagType, includeNull, topLevel, exclude } = filters || {}
-  if (tag.id === 'null') return includeNull ? true : false
-  if (exclude?.includes(tag.id)) return false
-  if (topLevel && tag.parent) return false
-  if (search) return matchString(tag.name, search)
-  if (tagType === 'income') return tag.showIncome
-  if (tagType === 'outcome') return tag.showOutcome
-  return true
-}
+const makeChecker =
+  (search = '', filters?: TagFilters) =>
+  (tag: TagOption) => {
+    const { tagType, includeNull, topLevel, exclude } = filters || {}
+    if (tag.id === 'null') return includeNull ? true : false
+    if (exclude?.includes(tag.id)) return false
+    if (topLevel && tag.parent) return false
+    if (search) return matchString(tag.name, search)
+    if (tagType === 'income') return tag.showIncome
+    if (tagType === 'outcome') return tag.showOutcome
+    return true
+  }
 
 const matchString = (name: string, search: string) => {
   const n = name.toLowerCase()

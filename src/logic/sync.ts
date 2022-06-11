@@ -6,7 +6,7 @@ import { sendEvent } from 'helpers/tracking'
 import { setSyncData } from 'store/lastSync'
 import { formatDate } from 'helpers/format'
 import { AppThunk } from 'store'
-import { Diff, LocalData } from 'types'
+import { TDiff, TLocalData } from 'types'
 import { sync, workerMethods } from 'worker'
 import { getDiff, applyServerPatch } from 'store/data'
 import { keys } from 'helpers/keys'
@@ -14,7 +14,7 @@ import { keys } from 'helpers/keys'
 /** All syncs with zenmoney goes through this thunk */
 export const syncData = (): AppThunk => async (dispatch, getState) => {
   const state = getState()
-  const diff: Diff = {
+  const diff: TDiff = {
     ...(getDiff(state) || {}),
     serverTimestamp: getLastSyncTime(state),
   }
@@ -50,8 +50,8 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
   }
 }
 
-function getChangedDomains(data: Diff) {
-  let domains: Set<keyof LocalData> = new Set()
+function getChangedDomains(data: TDiff) {
+  let domains: Set<keyof TLocalData> = new Set()
   keys(data).forEach(key => {
     if (key === 'deletion') data[key]?.forEach(item => domains.add(item.object))
     else domains.add(key)

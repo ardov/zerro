@@ -1,12 +1,12 @@
 import { v1 as uuidv1 } from 'uuid'
-import { OptionalExceptFor, Reminder } from 'types'
+import { OptionalExceptFor, TRawReminder } from 'types'
 
 type ReminderDraft = OptionalExceptFor<
-  Reminder,
+  TRawReminder,
   'user' | 'incomeAccount' | 'outcomeAccount'
 >
 
-export const makeReminder = (raw: ReminderDraft): Reminder => ({
+export const makeReminder = (raw: ReminderDraft): TRawReminder => ({
   // Required
   user: raw.user,
   incomeAccount: raw.incomeAccount,

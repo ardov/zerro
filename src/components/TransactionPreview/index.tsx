@@ -29,7 +29,7 @@ import {
   recreateTransaction,
   restoreTransaction,
 } from 'store/data/transactions/thunks'
-import { Transaction } from 'types'
+import { TRawransaction } from 'types'
 
 type TransactionPreviewProps = {
   id: string
@@ -328,7 +328,7 @@ const SaveButton: FC<{ visible: boolean; onSave: () => void }> = ({
   </Box>
 )
 
-const RateToWords: FC<{ tr: Transaction }> = ({ tr }) => {
+const RateToWords: FC<{ tr: TRawransaction }> = ({ tr }) => {
   const trType = getType(tr)
   const { income, opIncome, outcome, opOutcome } = tr
   const instruments = useAppSelector(getInstruments)

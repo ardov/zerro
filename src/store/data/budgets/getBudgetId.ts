@@ -1,6 +1,6 @@
 import { formatDate } from 'helpers/format'
-import { Budget, ZmBudget } from 'types'
+import { TBudget, TZmBudget } from 'types'
 
-export function getBudgetId(budget: ZmBudget | Budget) {
+export function getBudgetId(budget: TZmBudget | TBudget) {
   return `${budget.tag},${formatDate(new Date(budget.date), 'yyyy-MM-dd')}`
 }

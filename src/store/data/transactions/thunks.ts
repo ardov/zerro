@@ -2,7 +2,12 @@ import { v1 as uuidv1 } from 'uuid'
 import { getTransaction, getTransactions } from 'store/data/transactions'
 import { sendEvent } from 'helpers/tracking'
 import { AppThunk } from 'store'
-import { OptionalExceptFor, TTagId, Transaction, TTransactionId } from 'types'
+import {
+  OptionalExceptFor,
+  TTagId,
+  TRawransaction,
+  TTransactionId,
+} from 'types'
 import { applyClientPatch } from 'store/data'
 
 export const deleteTransactions =
@@ -70,7 +75,7 @@ export const splitTransfer =
     if (list) dispatch(applyClientPatch({ transaction: list }))
   }
 
-export type TransactionPatch = OptionalExceptFor<Transaction, 'id'>
+export type TransactionPatch = OptionalExceptFor<TRawransaction, 'id'>
 export const applyChangesToTransaction =
   (patch: TransactionPatch): AppThunk =>
   (dispatch, getState) => {
@@ -139,9 +144,9 @@ const modifyComment = (prevComment: string | null, newComment?: string) => {
   return newComment.replaceAll('$&', prevComment || '')
 }
 
-function split(raw: Transaction) {
+function split(raw: TRawransaction) {
   if (!(raw.income && raw.outcome)) return null
-  const result: Transaction[] = [
+  const result: TRawransaction[] = [
     {
       ...raw,
       changed: Date.now(),

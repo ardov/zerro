@@ -1,13 +1,13 @@
 import { keys } from 'helpers/keys'
 import { RootState } from 'store'
-import { Diff, LocalData } from 'types'
+import { TDiff, TLocalData } from 'types'
 import { toServer } from 'worker/zmAdapter'
 import { getDiff } from './index'
 
-export const getDataToSave = (state: RootState): LocalData => {
+export const getDataToSave = (state: RootState): TLocalData => {
   const data = state.data.server
   if (!data) return { serverTimestamp: 0 }
-  let result: Diff = { serverTimestamp: 0 }
+  let result: TDiff = { serverTimestamp: 0 }
   keys(data).forEach(key => {
     if (key === 'serverTimestamp') {
       result[key] = data[key]

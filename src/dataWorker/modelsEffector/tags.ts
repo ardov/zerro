@@ -1,4 +1,4 @@
-import { TTagId, ZmTag } from 'types'
+import { TTagId, TZmTag } from 'types'
 import { ById, TTag } from '../types'
 import { unixToISO } from './utils'
 import iconsMap from './iconsMap.json'
@@ -8,10 +8,10 @@ import { getColorForString, int2hex, int2rgb } from 'helpers/color'
 import { dataDomain } from './domain'
 
 // Events
-export const setRawTags = dataDomain.createEvent<ZmTag[]>()
+export const setRawTags = dataDomain.createEvent<TZmTag[]>()
 
 // Store
-export const $rawTags = dataDomain.createStore<ZmTag[]>([], {
+export const $rawTags = dataDomain.createStore<TZmTag[]>([], {
   name: '$rawTags',
 })
 $rawTags.on(setRawTags, (_, rawTags) => rawTags)
@@ -54,7 +54,7 @@ export const $tags = $rawTags.map(tags => {
 // -----------------------------------------------------------------------------
 
 //** Converts Zm format to local */
-function convertTag(raw: ZmTag): TTag {
+function convertTag(raw: TZmTag): TTag {
   return {
     ...raw,
     changed: unixToISO(raw.changed),
@@ -85,7 +85,7 @@ function getName(title: string) {
   }
 }
 
-function getSymbol(tag: ZmTag) {
+function getSymbol(tag: TZmTag) {
   if (tag.id === 'null') return '?'
   if (tag.icon) {
     if (iconsMap[tag.icon]) {

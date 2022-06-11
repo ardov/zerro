@@ -1,10 +1,10 @@
 import { makeAccount } from 'store/data/accounts/helpers'
 import { makeReminder } from 'store/data/reminders/helpers'
 import { DataReminderType, DATA_ACC_NAME } from './constants'
-import { Account } from 'types'
+import { TRawAccount } from 'types'
 
 // DATA ACCOUNT
-export function makeDataAcc(user: number): Account {
+export function makeDataAcc(user: number): TRawAccount {
   return makeAccount({
     user,
     instrument: 2,

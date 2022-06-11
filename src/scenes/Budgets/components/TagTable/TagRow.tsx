@@ -33,7 +33,7 @@ import { useContext } from 'react'
 import { IsDraggingContext, DragModeContext, DragModeType } from '../DnDContext'
 import { getPopulatedTag } from 'store/data/tags'
 import { getAmountsById } from 'scenes/Budgets/selectors'
-import { Goal } from 'types'
+import { TGoal } from 'types'
 import { getTagMeta } from 'store/data/hiddenData/tagMeta'
 import { getInstruments, getUserInstrumentId } from 'store/data/instruments'
 import { SxProps } from '@mui/system'
@@ -421,7 +421,7 @@ const AvailableCell: FC<AvailableCellProps> = props => {
 // }> = props => {}
 
 type GoalButtonProps = {
-  goal: Goal
+  goal: TGoal
   goalProgress?: GoalProgressType | null
   onClick: IconButtonProps['onClick']
 }

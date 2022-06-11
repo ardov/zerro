@@ -2,23 +2,23 @@ import parseDate from 'date-fns/parseISO'
 import format from 'date-fns/format'
 import {
   TInstrument,
-  User,
-  Country,
-  Company,
-  Merchant,
-  Reminder,
-  ZmReminderMarker,
-  ReminderMarker,
-  Account,
-  Tag,
-  Budget,
-  Transaction,
-  ZmAccount,
-  ZmReminder,
-  ZmTransaction,
-  ZmBudget,
-  ZmDeletionObject,
-  DeletionObject,
+  TRawUser,
+  TRawCountry,
+  TCompany,
+  TMerchant,
+  TRawReminder,
+  TZmReminderMarker,
+  TRawReminderMarker,
+  TRawAccount,
+  TRawTag,
+  TBudget,
+  TRawransaction,
+  TZmAccount,
+  TZmReminder,
+  TZmTransaction,
+  TZmBudget,
+  TZmDeletionObject,
+  TDeletionObject,
 } from 'types'
 
 const toMs = (date: string | number) =>
@@ -42,24 +42,24 @@ export const dataConverters = {
   },
 
   company: {
-    toClient: (el: Company): Company => {
+    toClient: (el: TCompany): TCompany => {
       return { ...el, changed: toMs(el.changed) }
     },
-    toServer: (el: Company): Company => {
+    toServer: (el: TCompany): TCompany => {
       return { ...el, changed: toUnix(el.changed) }
     },
   },
 
   country: {
-    toClient: (el: Country): Country => el,
-    toServer: (el: Country): Country => el,
+    toClient: (el: TRawCountry): TRawCountry => el,
+    toServer: (el: TRawCountry): TRawCountry => el,
   },
 
   user: {
-    toClient: (el: User): User => {
+    toClient: (el: TRawUser): TRawUser => {
       return { ...el, changed: toMs(el.changed), paidTill: toMs(el.paidTill) }
     },
-    toServer: (el: User): User => {
+    toServer: (el: TRawUser): TRawUser => {
       return {
         ...el,
         changed: toUnix(el.changed),
@@ -69,13 +69,13 @@ export const dataConverters = {
   },
 
   account: {
-    toClient: (el: ZmAccount): Account => ({
+    toClient: (el: TZmAccount): TRawAccount => ({
       ...el,
       changed: toMs(el.changed),
       startDate:
         typeof el.startDate === 'string' ? toMs(el.startDate) : el.startDate,
     }),
-    toServer: (el: Account): ZmAccount => ({
+    toServer: (el: TRawAccount): TZmAccount => ({
       ...el,
       changed: toUnix(el.changed),
       startDate: el.startDate !== null ? toISODate(el.startDate) : null,
@@ -83,31 +83,31 @@ export const dataConverters = {
   },
 
   tag: {
-    toClient: (el: Tag): Tag => {
+    toClient: (el: TRawTag): TRawTag => {
       return { ...el, changed: toMs(el.changed) }
     },
-    toServer: (el: Tag): Tag => {
+    toServer: (el: TRawTag): TRawTag => {
       return { ...el, changed: toUnix(el.changed) }
     },
   },
 
   merchant: {
-    toClient: (el: Merchant): Merchant => {
+    toClient: (el: TMerchant): TMerchant => {
       return { ...el, changed: toMs(el.changed) }
     },
-    toServer: (el: Merchant): Merchant => {
+    toServer: (el: TMerchant): TMerchant => {
       return { ...el, changed: toUnix(el.changed) }
     },
   },
 
   reminder: {
-    toClient: (el: ZmReminder): Reminder => ({
+    toClient: (el: TZmReminder): TRawReminder => ({
       ...el,
       changed: toMs(el.changed),
       startDate: toMs(el.startDate),
       endDate: toMs(el.endDate),
     }),
-    toServer: (el: Reminder): ZmReminder => ({
+    toServer: (el: TRawReminder): TZmReminder => ({
       ...el,
       changed: toUnix(el.changed),
       startDate: toISODate(el.startDate),
@@ -116,22 +116,22 @@ export const dataConverters = {
   },
 
   reminderMarker: {
-    toClient: (el: ZmReminderMarker): ReminderMarker => {
+    toClient: (el: TZmReminderMarker): TRawReminderMarker => {
       return { ...el, changed: toMs(el.changed), date: toMs(el.date) }
     },
-    toServer: (el: ReminderMarker): ZmReminderMarker => {
+    toServer: (el: TRawReminderMarker): TZmReminderMarker => {
       return { ...el, changed: toUnix(el.changed), date: toISODate(el.date) }
     },
   },
 
   transaction: {
-    toClient: (el: ZmTransaction): Transaction => ({
+    toClient: (el: TZmTransaction): TRawransaction => ({
       ...el,
       changed: toMs(el.changed),
       created: toMs(el.created),
       date: toMs(el.date),
     }),
-    toServer: (el: Transaction): ZmTransaction => ({
+    toServer: (el: TRawransaction): TZmTransaction => ({
       ...el,
       changed: toUnix(el.changed),
       created: toUnix(el.created),
@@ -140,19 +140,19 @@ export const dataConverters = {
   },
 
   budget: {
-    toClient: (el: ZmBudget): Budget => {
+    toClient: (el: TZmBudget): TBudget => {
       return { ...el, changed: toMs(el.changed), date: toMs(el.date) }
     },
-    toServer: (el: Budget): ZmBudget => {
+    toServer: (el: TBudget): TZmBudget => {
       return { ...el, changed: toUnix(el.changed), date: toISODate(el.date) }
     },
   },
 
   deletion: {
-    toClient: (el: ZmDeletionObject): DeletionObject => {
+    toClient: (el: TZmDeletionObject): TDeletionObject => {
       return { ...el, stamp: toMs(el.stamp) }
     },
-    toServer: (el: DeletionObject): ZmDeletionObject => {
+    toServer: (el: TDeletionObject): TZmDeletionObject => {
       return { ...el, stamp: toUnix(el.stamp) }
     },
   },

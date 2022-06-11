@@ -4,7 +4,7 @@ import { sendEvent } from 'helpers/tracking'
 import { setHiddenData } from '../thunks'
 import { DataReminderType } from '../constants'
 import { getTagsTree } from 'store/data/tags'
-import { PopulatedTag, TTagId } from 'types'
+import { TTag, TTagId } from 'types'
 import { AppThunk } from 'store'
 
 // THUNKS
@@ -25,7 +25,7 @@ export const moveTag =
     dispatch(setTagOrder(list))
   }
 
-type TagToCompare = Pick<PopulatedTag, 'id' | 'name'> & {
+type TagToCompare = Pick<TTag, 'id' | 'name'> & {
   [x: string]: any
 }
 export const compareTags = createSelector(

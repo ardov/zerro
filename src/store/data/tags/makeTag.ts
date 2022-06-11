@@ -1,9 +1,9 @@
-import { OptionalExceptFor, Tag } from 'types'
+import { OptionalExceptFor, TRawTag } from 'types'
 import { v1 as uuidv1 } from 'uuid'
 
-type TagDraft = OptionalExceptFor<Tag, 'user' | 'title'>
+type TagDraft = OptionalExceptFor<TRawTag, 'user' | 'title'>
 
-export function makeTag(raw: TagDraft): Tag {
+export function makeTag(raw: TagDraft): TRawTag {
   return {
     id: raw.id || uuidv1(),
     changed: raw.changed || Date.now(),

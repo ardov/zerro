@@ -2,12 +2,11 @@ import { Modify, ById } from './ts-utils'
 import { RootState } from 'store'
 import { goalType } from 'store/data/hiddenData/constants'
 import iconsMap from 'store/data/tags/iconsMap.json'
-type IconsMap = typeof iconsMap
 
 export type TUnixTime = number
 export type TMsTime = number
 export type TISODate = string // 2000-01-01
-export type TISOTimestamp = string // 2000-01-01T00:00:00.000Z
+// export type TISOTimestamp = string // 2000-01-01T00:00:00.000Z
 
 export type TUnits = number
 export type TMilliUnits = number
@@ -15,22 +14,6 @@ export type TMilliUnits = number
 export type Selector<T> = (state: RootState) => T
 
 export type Token = string | null
-
-export type TCompanyId = number
-export type TUserId = number
-export type TAccountId = string
-export type TMerchantId = string
-export type TTagId = string
-export type TReminderId = string
-export type TReminderMarkerId = string
-export type TTransactionId = string
-
-export type TTransactionType =
-  | 'income'
-  | 'outcome'
-  | 'transfer'
-  | 'incomeDebt'
-  | 'outcomeDebt'
 
 export type TObjectClass =
   | 'instrument'
@@ -78,16 +61,24 @@ export type TFxIdMap = {
 
 export type TCountryId = number
 
-export type ZmCountry = {
+export type TZmCountry = {
   id: TCountryId
   title: string
   currency: TInstrumentId
   domain: string
 }
 
-export type Country = ZmCountry
+export type TRawCountry = TZmCountry
 
-export type ZmCompany = {
+// export type TCountry = TZmCountry & { fxCode: TFxCode }
+
+// ---------------------------------------------------------------------
+// COMPANY
+// ---------------------------------------------------------------------
+
+export type TCompanyId = number
+
+export type TZmCompany = {
   id: TCompanyId
   changed: TUnixTime
   title: string
@@ -97,9 +88,16 @@ export type ZmCompany = {
   countryCode: string
   deleted: boolean
 }
-export type Company = ZmCompany
 
-export type ZmUser = {
+export type TCompany = Modify<TZmCompany, { changed: TMsTime }>
+
+// ---------------------------------------------------------------------
+// USER
+// ---------------------------------------------------------------------
+
+export type TUserId = number
+
+export type TZmUser = {
   id: TUserId
   changed: TUnixTime
   currency: TInstrumentId
@@ -112,22 +110,31 @@ export type ZmUser = {
   paidTill: TUnixTime
   subscription: '10yearssubscription' | '1MonthSubscription' | string
 }
-export type User = ZmUser
 
-export type ZmAccount = {
+export type TRawUser = Modify<TZmUser, { changed: TMsTime; paidTill: TMsTime }>
+
+// export type TUser = TRawUser & { fxCode: TFxCode}
+
+// ---------------------------------------------------------------------
+// ACCOUNT
+// ---------------------------------------------------------------------
+
+export type TAccountId = string
+
+export type TZmAccount = {
+  id: TAccountId
+  changed: TUnixTime
   user: TUserId
   instrument: TInstrumentId
   title: string
-  id: TAccountId
-  changed: number
   role: number | null
   company: TCompanyId | null
   type: 'cash' | 'ccard' | 'checking' | 'loan' | 'deposit' | 'emoney' | 'debt'
   syncID: string[] | null
-  balance: number
+  balance: TUnits
   // Для deposit и loan поле startBalance имеет смысл начального взноса/тела кредита
-  startBalance: number
-  creditLimit: number
+  startBalance: TUnits
+  creditLimit: TUnits
   inBalance: boolean
   savings: boolean
   enableCorrection: boolean
@@ -137,34 +144,64 @@ export type ZmAccount = {
   // Для счетов с типом отличных от 'loan' и 'deposit' в  этих полях можно ставить null
   capitalization: boolean | null
   percent: number | null
-  startDate: string | null
+  startDate: TISODate | null
   endDateOffset: number | null
   endDateOffsetInterval: 'day' | 'week' | 'month' | 'year' | null
   payoffStep: number | null
   payoffInterval: 'month' | 'year' | null
 }
-export type Account = Modify<ZmAccount, { startDate: number | null }>
-export interface PopulatedAccount extends Account {
+
+export type TRawAccount = Modify<
+  TZmAccount,
+  {
+    changed: TMsTime
+    startDate: TMsTime | null
+    balance: TMilliUnits
+    startBalance: TMilliUnits
+    creditLimit: TMilliUnits
+  }
+>
+
+export interface PopulatedAccount extends TRawAccount {
   convertedBalance: number
   convertedStartBalance: number
   inBudget: boolean
 }
 
-export type ZmMerchant = {
-  id: TMerchantId // UUID
+// export type TAccount = TRawAccount & {
+//   inBudget: boolean
+//   fxCode: TFxCode
+// }
+
+// ---------------------------------------------------------------------
+// MERCHANT
+// ---------------------------------------------------------------------
+
+export type TMerchantId = string
+
+export type TZmMerchant = {
+  id: TMerchantId
   changed: TUnixTime
   user: TUserId
   title: string
 }
-export type Merchant = ZmMerchant
 
-export type ZmTag = {
-  id: TTagId // UUID
+export type TMerchant = Modify<TZmMerchant, { changed: TMsTime }>
+
+// ---------------------------------------------------------------------
+// TAG
+// ---------------------------------------------------------------------
+
+export type TTagId = string
+type TIconName = keyof typeof iconsMap
+
+export type TZmTag = {
+  id: TTagId
   changed: TUnixTime
   user: TUserId
   title: string
   parent: TTagId | null
-  icon: keyof IconsMap | null
+  icon: TIconName | null
   picture: string | null
   color: number | null
   showIncome: boolean
@@ -173,49 +210,69 @@ export type ZmTag = {
   budgetOutcome: boolean
   required: boolean | null
 }
-export type Tag = ZmTag
-export type PopulatedTag = Tag &
-  TagMeta & {
-    name: string
-    uniqueName: string
-    symbol: string
-    children: string[]
-    colorRGB: string | null
-    colorHEX: string | null
-    colorGenerated: string
-  }
 
-export type TagMeta = {
-  comment?: string
-  currency?: TInstrumentId
+export type TRawTag = Modify<TZmTag, { changed: TMsTime }>
+
+export type TTag = TRawTag & {
+  name: string // Tag name without emoji
+  uniqueName: string // If name not unique adds parent name
+  symbol: string // Emoji
+  children: string[]
+  colorRGB: string | null
+  colorHEX: string | null
+  colorGenerated: string // Color generated from name
+  // From hidden data
+  comment?: string | null
+  currencyCode?: TFxCode | null
+  group?: string | null
 }
 
-export interface ZmBudget {
-  changed: number
+// ---------------------------------------------------------------------
+// BUDGET
+// ---------------------------------------------------------------------
+
+export type TZmBudget = {
+  changed: TUnixTime
   user: TUserId
   tag: TTagId | '00000000-0000-0000-0000-000000000000' | null
-  date: string
-  income: number
+  date: TISODate
+  income: TUnits
   incomeLock: boolean
-  outcome: number
+  outcome: TUnits
   outcomeLock: boolean
 }
-export interface Budget extends Modify<ZmBudget, { date: number }> {}
-export interface PopulatedBudget extends Budget {
+
+export type TBudget = Modify<
+  TZmBudget,
+  {
+    changed: TMsTime
+    date: TMsTime
+    income: TMilliUnits
+    outcome: TMilliUnits
+  }
+>
+
+export type PopulatedBudget = TBudget & {
   convertedOutcome: number
   instrument: TInstrumentId | null
 }
 
-export interface ZmReminder {
+// ---------------------------------------------------------------------
+// REMINDER
+// ---------------------------------------------------------------------
+
+export type TReminderId = string
+
+export interface TZmReminder {
   id: TReminderId
-  changed: number
+  changed: TUnixTime
   user: TUserId
   incomeInstrument: TInstrumentId
   incomeAccount: string
-  income: number
+  income: TUnits
   outcomeInstrument: TInstrumentId
   outcomeAccount: string
-  outcome: number
+  outcome: TUnits
   tag: string[] | null
   merchant: TMerchantId | null
   payee: string | null
@@ -223,38 +280,82 @@ export interface ZmReminder {
   interval: 'day' | 'week' | 'month' | 'year' | null
   step: number | null
   points: number[] | null
-  startDate: string
-  endDate: string
+  startDate: TISODate
+  endDate: TISODate
   notify: boolean
 }
-export interface Reminder
-  extends Modify<ZmReminder, { startDate: number; endDate: number }> {}
 
-export type ZmReminderMarker = {
-  id: string // UUID
+export type TRawReminder = Modify<
+  TZmReminder,
+  {
+    changed: TMsTime
+    startDate: TMsTime
+    endDate: TMsTime
+  }
+>
+
+// export type TReminder = TRawReminder & {
+//   incomeFxCode: TFxCode
+//   outcomeFxCode: TFxCode
+// }
+
+// ---------------------------------------------------------------------
+// REMINDER_MARKER
+// ---------------------------------------------------------------------
+
+export type TReminderMarkerId = string
+
+export type TZmReminderMarker = {
+  id: TReminderMarkerId // UUID
   changed: TUnixTime
   user: TUserId
   incomeInstrument: TInstrumentId
   incomeAccount: TAccountId
-  income: number
+  income: TUnits
   outcomeInstrument: TInstrumentId
   outcomeAccount: TAccountId
-  outcome: number
+  outcome: TUnits
   tag: TTagId[] | null
   merchant: TMerchantId | null
   payee: string | null
   comment: string | null
-  date: string // 'yyyy-MM-dd'
+  date: TISODate
   reminder: TReminderId
   state: 'planned' | 'processed' | 'deleted'
   notify: boolean
 }
-export type ReminderMarker = Modify<ZmReminderMarker, { date: number }>
+export type TRawReminderMarker = Modify<
+  TZmReminderMarker,
+  {
+    changed: TMsTime
+    date: TMsTime
+    income: TMilliUnits
+    outcome: TMilliUnits
+  }
+>
 
-export interface ZmTransaction {
-  id: TTransactionId // UUID
-  changed: number
-  created: number
+// export type TReminderMarker = TRawReminderMarker & {
+//   incomeFxCode: TFxCode
+//   outcomeFxCode: TFxCode
+// }
+
+// ---------------------------------------------------------------------
+// TRANSACTION
+// ---------------------------------------------------------------------
+
+export type TTransactionId = string
+
+export type TTransactionType =
+  | 'income'
+  | 'outcome'
+  | 'transfer'
+  | 'incomeDebt'
+  | 'outcomeDebt'
+
+export type TZmTransaction = {
+  id: TTransactionId
+  changed: TUnixTime
+  created: TUnixTime
   user: TUserId
   deleted: boolean
   hold: boolean | null
@@ -263,94 +364,139 @@ export interface ZmTransaction {
   incomeBankID: TCompanyId | null
   incomeInstrument: TInstrumentId
   incomeAccount: TAccountId
-  income: number
+  income: TUnits
   outcomeBankID: TCompanyId | null
   outcomeInstrument: TInstrumentId
   outcomeAccount: TAccountId
-  outcome: number
+  outcome: TUnits
   tag: TTagId[] | null
   merchant: TMerchantId | null
   payee: string | null
   originalPayee: string | null
   comment: string | null
-  date: string
+  date: TISODate
   mcc: number | null
   reminderMarker: TReminderMarkerId | null
-  opIncome: number | null
+  opIncome: TUnits | null
   opIncomeInstrument: TInstrumentId | null
-  opOutcome: number | null
+  opOutcome: TUnits | null
   opOutcomeInstrument: TInstrumentId | null
   latitude: number | null
   longitude: number | null
 }
-export interface Transaction extends Modify<ZmTransaction, { date: number }> {}
 
-export interface Goal {
+export type TRawransaction = Modify<
+  TZmTransaction,
+  {
+    changed: TMsTime
+    created: TMsTime
+    date: TMsTime
+    income: TMilliUnits
+    outcome: TMilliUnits
+    opIncome: TMilliUnits | null
+    opOutcome: TMilliUnits | null
+  }
+>
+
+// export type TTransaction = TRawransaction & {
+//   incomeFxCode: TFxCode
+//   outcomeFxCode: TFxCode
+//   opIncomeFxCode: TFxCode | null
+//   opOutcomeFxCode: TFxCode | null
+//   time: TMsTime
+//   type: TTransactionType
+//   mainTag: TTagId | null
+//   incomeBalanceBefore: TMilliUnits
+//   outcomeBalanceBefore: TMilliUnits
+// }
+
+// ---------------------------------------------------------------------
+// DELETION
+// ---------------------------------------------------------------------
+
+export type TZmDeletionObject = {
+  id: string | number
+  object: TObjectClass
+  stamp: TUnixTime
+  user: TUserId
+}
+
+export type TDeletionObject = Modify<TZmDeletionObject, { stamp: TMsTime }>
+
+// ---------------------------------------------------------------------
+// DIFF
+// ---------------------------------------------------------------------
+
+export interface TZmDiff {
+  serverTimestamp: TUnixTime
+  deletion?: TZmDeletionObject[]
+  instrument?: TZmInstrument[]
+  country?: TZmCountry[]
+  company?: TZmCompany[]
+  user?: TZmUser[]
+  account?: TZmAccount[]
+  merchant?: TZmMerchant[]
+  tag?: TZmTag[]
+  budget?: TZmBudget[]
+  reminder?: TZmReminder[]
+  reminderMarker?: TZmReminderMarker[]
+  transaction?: TZmTransaction[]
+}
+
+export interface TDiff {
+  serverTimestamp?: number
+  deletion?: TDeletionObject[]
+  instrument?: TInstrument[]
+  country?: TRawCountry[]
+  company?: TCompany[]
+  user?: TRawUser[]
+  account?: TRawAccount[]
+  merchant?: TMerchant[]
+  tag?: TRawTag[]
+  budget?: TBudget[]
+  reminder?: TRawReminder[]
+  reminderMarker?: TRawReminderMarker[]
+  transaction?: TRawransaction[]
+}
+
+export type TZmRequest = TZmDiff & {
+  currentClientTimestamp: TUnixTime
+  forceFetch?: TObjectClass[]
+}
+
+// ---------------------------------------------------------------------
+// Other
+// ---------------------------------------------------------------------
+
+export type TTagMeta = {
+  comment?: string
+  currency?: TInstrumentId
+}
+
+export type TGoal = {
   type: goalType
   amount: number
   end?: number
 }
-export interface ZmGoal extends Modify<Goal, { end?: string }> {}
 
-export interface ZmDeletionObject {
-  id: string | number
-  object: TObjectClass
-  stamp: number
-  user: number
-}
-export type DeletionObject = ZmDeletionObject
+export type TZmGoal = Modify<TGoal, { end?: string }>
 
-export interface ZmDiff {
-  serverTimestamp: TUnixTime
-  deletion?: ZmDeletionObject[]
-  instrument?: TZmInstrument[]
-  country?: ZmCountry[]
-  company?: ZmCompany[]
-  user?: ZmUser[]
-  account?: ZmAccount[]
-  merchant?: ZmMerchant[]
-  tag?: ZmTag[]
-  budget?: ZmBudget[]
-  reminder?: ZmReminder[]
-  reminderMarker?: ZmReminderMarker[]
-  transaction?: ZmTransaction[]
-}
-export interface Diff {
-  serverTimestamp?: number
-  deletion?: DeletionObject[]
-  instrument?: TInstrument[]
-  country?: Country[]
-  company?: Company[]
-  user?: User[]
-  account?: Account[]
-  merchant?: Merchant[]
-  tag?: Tag[]
-  budget?: Budget[]
-  reminder?: Reminder[]
-  reminderMarker?: ReminderMarker[]
-  transaction?: Transaction[]
-}
+export type TLocalData = Omit<TZmDiff, 'deletion'>
 
-export type ZmRequest = ZmDiff & {
-  currentClientTimestamp: TUnixTime
-  forceFetch?: TObjectClass[]
-}
-export type LocalData = Omit<ZmDiff, 'deletion'>
-
-export type DataStore = {
+export type TDataStore = {
   serverTimestamp: number
   instrument: ById<TInstrument>
-  country: ById<Country>
-  company: ById<Company>
-  user: ById<User>
-  account: ById<Account>
-  merchant: ById<Merchant>
-  tag: ById<Tag>
-  budget: ById<Budget>
-  reminder: ById<Reminder>
+  country: ById<TRawCountry>
+  company: ById<TCompany>
+  user: ById<TRawUser>
+  account: ById<TRawAccount>
+  merchant: ById<TMerchant>
+  tag: ById<TRawTag>
+  budget: ById<TBudget>
+  reminder: ById<TRawReminder>
   reminderMarker: ById<TReminderMarkerId>
-  transaction: ById<Transaction>
+  transaction: ById<TRawransaction>
 }
-export type DataStorePatch = Partial<DataStore> & {
-  deletion?: ZmDeletionObject[]
+export type TDataStorePatch = Partial<TDataStore> & {
+  deletion?: TZmDeletionObject[]
 }

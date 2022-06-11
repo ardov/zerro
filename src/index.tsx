@@ -11,7 +11,7 @@ import GlobalErrorBoundary from 'components/GlobalErrorBoundary'
 import { initSentry, sendEvent } from 'helpers/tracking'
 import { bindWorkerToStore } from 'worker'
 import { applyClientPatch, resetData } from 'store/data'
-import { Diff } from 'types'
+import { TDiff } from 'types'
 import { AppThemeProvider } from './AppThemeProvider'
 import { StyledEngineProvider } from '@mui/material/styles'
 
@@ -64,6 +64,6 @@ function createZerroInstance(s: typeof store) {
     logsShow: false,
     logs: {},
     resetData: () => s.dispatch(resetData()),
-    applyClientPatch: (patch: Diff) => s.dispatch(applyClientPatch(patch)),
+    applyClientPatch: (patch: TDiff) => s.dispatch(applyClientPatch(patch)),
   }
 }

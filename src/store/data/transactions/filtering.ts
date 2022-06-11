@@ -1,4 +1,4 @@
-import { TAccountId, TTagId, Transaction, TTransactionType } from 'types'
+import { TAccountId, TTagId, TRawransaction, TTransactionType } from 'types'
 import { keys } from 'helpers/keys'
 import { getType, isDeleted, isNew } from './helpers'
 
@@ -20,7 +20,7 @@ type ConditionRule =
     }
 
 type DefaultConditions = {
-  [key in keyof Transaction]?: ConditionRule
+  [key in keyof TRawransaction]?: ConditionRule
 }
 
 type CustomConditions = {
@@ -46,7 +46,7 @@ export const checkRaw =
     conditions: FilterConditions | FilterConditions[] = {},
     operator: OperatorType = 'OR'
   ) =>
-  (tr: Transaction) => {
+  (tr: TRawransaction) => {
     if (Array.isArray(conditions)) {
       const results = conditions.map(cond => checkConditions(tr, cond))
       return operator === 'AND' ? results.every(Boolean) : results.some(Boolean)
@@ -54,7 +54,7 @@ export const checkRaw =
     return checkConditions(tr, conditions)
   }
 
-const checkConditions = (tr: Transaction, conditions: FilterConditions) => {
+const checkConditions = (tr: TRawransaction, conditions: FilterConditions) => {
   return (
     // Always check is transaction deleted or not (usually we don't want deleted transactions)
     checkDeleted(tr, conditions.showDeleted) &&
@@ -144,29 +144,32 @@ const checkRule = (value: any, rule?: ConditionRule) => {
   return true
 }
 
-const checkSearch = (tr: Transaction, search?: FilterConditions['search']) => {
+const checkSearch = (
+  tr: TRawransaction,
+  search?: FilterConditions['search']
+) => {
   if (!search) return true
   if (tr.comment?.toUpperCase().includes(search.toUpperCase())) return true
   if (tr.payee?.toUpperCase().includes(search.toUpperCase())) return true
   return false
 }
 
-const checkType = (tr: Transaction, type?: FilterConditions['type']) =>
+const checkType = (tr: TRawransaction, type?: FilterConditions['type']) =>
   !type || getType(tr) === type
 
 const checkDeleted = (
-  tr: Transaction,
+  tr: TRawransaction,
   showDeleted?: FilterConditions['showDeleted']
 ) => showDeleted || !isDeleted(tr)
 
 const checkDate = (
-  tr: Transaction,
+  tr: TRawransaction,
   dateFrom?: FilterConditions['dateFrom'],
   dateTo?: FilterConditions['dateTo']
 ) => (!dateFrom || +tr.date >= +dateFrom) && (!dateTo || +tr.date <= +dateTo)
 
 const checkAccounts = (
-  tr: Transaction,
+  tr: TRawransaction,
   accountsFrom?: FilterConditions['accountsFrom'],
   accountsTo?: FilterConditions['accountsTo']
 ) => {
@@ -179,7 +182,7 @@ const checkAccounts = (
 }
 
 const checkTags = (
-  tr: Transaction,
+  tr: TRawransaction,
   tags?: FilterConditions['mainTags'],
   matchType: 'main' | 'any' = 'any'
 ) => {
@@ -192,7 +195,7 @@ const checkTags = (
 }
 
 const checkAmount = (
-  tr: Transaction,
+  tr: TRawransaction,
   amount?: FilterConditions['amountFrom'],
   compareType: 'greaterOrEqual' | 'lessOrEqual' = 'lessOrEqual'
 ) => {
@@ -201,7 +204,10 @@ const checkAmount = (
   return compareType === 'lessOrEqual' ? trAmount <= amount : trAmount >= amount
 }
 
-const checkIsNew = (tr: Transaction, condition?: FilterConditions['isNew']) => {
+const checkIsNew = (
+  tr: TRawransaction,
+  condition?: FilterConditions['isNew']
+) => {
   if (condition === undefined) return true
   const isNewTransaction = isNew(tr)
   return isNewTransaction === condition

@@ -1,4 +1,4 @@
-import { Diff, User, ZmCompany, ZmCountry, TZmInstrument } from 'types'
+import { TDiff, TRawUser, TZmCompany, TZmCountry, TZmInstrument } from 'types'
 import countries from './countries.json'
 import companies from './companies.json'
 import instruments from './instruments.json'
@@ -9,7 +9,7 @@ import makeTransaction from 'store/data/transactions/makeTransaction'
 const NOW = Date.now()
 const DAY = 1000 * 60 * 60 * 24
 
-const USER: User = {
+const USER: TRawUser = {
   id: 777,
   changed: NOW,
   currency: 2, // RUB
@@ -85,11 +85,11 @@ const TR1 = makeTransaction({
   comment: 'Зарплата',
 })
 
-export const getDemoData = (): Diff => {
+export const getDemoData = (): TDiff => {
   return {
     serverTimestamp: NOW,
-    country: countries as ZmCountry[],
-    company: companies as ZmCompany[],
+    country: countries as TZmCountry[],
+    company: companies as TZmCompany[],
     instrument: instruments as TZmInstrument[],
 
     user: [USER],

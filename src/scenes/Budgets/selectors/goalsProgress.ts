@@ -5,7 +5,7 @@ import { getAmountsById } from './getAmountsByTag'
 import { getMonthDates } from './getMonthDates'
 import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths'
 import { goalType } from 'store/data/hiddenData/constants'
-import { Goal, Selector } from 'types'
+import { TGoal, Selector } from 'types'
 import { RootState } from 'store'
 import { getTagMeta } from 'store/data/hiddenData/tagMeta'
 import { convertCurrency } from 'store/data/instruments'
@@ -98,8 +98,8 @@ export const getTotalGoalsProgress: Selector<{
 }> = createSelector([getGoals, getGoalsProgress], (goals, goalsProgress) => {
   let result: { [month: number]: GoalProgress | null } = {}
 
-  const isCounted = (goal: Goal) => goal.type !== TARGET_BALANCE || goal.end
-  let countedGoals: { [id: string]: Goal } = {}
+  const isCounted = (goal: TGoal) => goal.type !== TARGET_BALANCE || goal.end
+  let countedGoals: { [id: string]: TGoal } = {}
   let hasCountedGoals = false
   for (const id in goals) {
     if (isCounted(goals[id])) {

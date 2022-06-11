@@ -32,7 +32,7 @@ import { ColorPicker } from 'components/ColorPickerPopover'
 import { hex2int } from 'helpers/color'
 import { patchTag } from 'store/data/tags/thunks'
 import { sendEvent } from 'helpers/tracking'
-import { PopulatedTag } from 'types'
+import { TTag } from 'types'
 import { TagEditDialog } from 'components/TagEditDialog'
 import { useToggle } from 'helpers/useToggle'
 import { getTagComment, setTagComment } from 'store/data/hiddenData/tagMeta'
@@ -178,7 +178,7 @@ export const TagPreview: FC<TagPreviewProps> = ({ onClose, id }) => {
 }
 
 const Header: FC<{
-  tag: PopulatedTag
+  tag: TTag
   onClose: () => void
 }> = ({ tag, onClose }) => {
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)

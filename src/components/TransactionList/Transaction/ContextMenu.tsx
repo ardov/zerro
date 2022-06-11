@@ -1,13 +1,13 @@
 import React, { FC, useState } from 'react'
 import { Menu, MenuItem, MenuProps, PopoverPosition } from '@mui/material'
-import { Transaction } from 'types'
+import { TRawransaction } from 'types'
 import { isNew } from 'store/data/transactions/helpers'
 import { useAppDispatch } from 'store'
 import { markViewed } from 'store/data/transactions/thunks'
 
 interface TransactionMenuProps extends MenuProps {
   id: string
-  transaction: Transaction
+  transaction: TRawransaction
   onSelectChanged: (date: number) => void
 }
 

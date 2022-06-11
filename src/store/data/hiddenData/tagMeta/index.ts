@@ -4,11 +4,11 @@ import { DataReminderType } from '../constants'
 import { setHiddenData } from '../thunks'
 import { getRawTagMeta } from '../selectors'
 import { AppThunk } from 'store'
-import { TagMeta, TTagId } from 'types'
+import { TTagMeta, TTagId } from 'types'
 
 // THUNK
 export const setTagMeta =
-  (tag: TTagId | null, meta?: TagMeta): AppThunk =>
+  (tag: TTagId | null, meta?: TTagMeta): AppThunk =>
   (dispatch, getState) => {
     const state = getState()
     const metaByTags = getRawTagMeta(state)
@@ -25,7 +25,7 @@ export const setTagMeta =
   }
 
 export const setTagComment =
-  (tagId: TTagId | null, comment: TagMeta['comment']): AppThunk =>
+  (tagId: TTagId | null, comment: TTagMeta['comment']): AppThunk =>
   (dispatch, getState) => {
     let id = String(tagId)
     const meta = getMetaForTag(id)(getState())
@@ -36,7 +36,7 @@ export const setTagComment =
   }
 
 export const setTagCurrency =
-  (tagId: TTagId | null, currency: TagMeta['currency']): AppThunk =>
+  (tagId: TTagId | null, currency: TTagMeta['currency']): AppThunk =>
   (dispatch, getState) => {
     let id = String(tagId)
     const meta = getMetaForTag(id)(getState())
