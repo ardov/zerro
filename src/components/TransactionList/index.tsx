@@ -12,7 +12,7 @@ import Actions from './TopBar/Actions'
 import { sendEvent } from 'helpers/tracking'
 // import { getGroupedTransactions } from 'worker'
 import { useDebounce } from 'helpers/useDebounce'
-import { TransactionId } from 'types'
+import { TTransactionId } from 'types'
 
 type TransactionListProps = {
   prefilter?: FilterConditions | FilterConditions[]
@@ -85,7 +85,7 @@ const TransactionList: FC<TransactionListProps> = props => {
     setChecked(ids)
   }
 
-  const toggleTransaction = useCallback((id: TransactionId) => {
+  const toggleTransaction = useCallback((id: TTransactionId) => {
     setChecked(current => {
       return current.includes(id)
         ? current.filter(checked => id !== checked)

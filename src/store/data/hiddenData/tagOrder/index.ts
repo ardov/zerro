@@ -4,28 +4,26 @@ import { sendEvent } from 'helpers/tracking'
 import { setHiddenData } from '../thunks'
 import { DataReminderType } from '../constants'
 import { getTagsTree } from 'store/data/tags'
-import { PopulatedTag, TagId } from 'types'
+import { PopulatedTag, TTagId } from 'types'
 import { AppThunk } from 'store'
 
 // THUNKS
-export const setTagOrder = (order: TagId[]): AppThunk => (
-  dispatch,
-  getState
-) => {
-  sendEvent(`Tag: sort`)
-  dispatch(setHiddenData(DataReminderType.TAG_ORDER, order))
-}
+export const setTagOrder =
+  (order: TTagId[]): AppThunk =>
+  (dispatch, getState) => {
+    sendEvent(`Tag: sort`)
+    dispatch(setHiddenData(DataReminderType.TAG_ORDER, order))
+  }
 
-export const moveTag = (startIndex: number, endIndex: number): AppThunk => (
-  dispatch,
-  getState
-) => {
-  const state = getState()
-  const list = getTagsTree(state).map(tag => tag.id)
-  const [removed] = list.splice(startIndex, 1)
-  list.splice(endIndex, 0, removed)
-  dispatch(setTagOrder(list))
-}
+export const moveTag =
+  (startIndex: number, endIndex: number): AppThunk =>
+  (dispatch, getState) => {
+    const state = getState()
+    const list = getTagsTree(state).map(tag => tag.id)
+    const [removed] = list.splice(startIndex, 1)
+    list.splice(endIndex, 0, removed)
+    dispatch(setTagOrder(list))
+  }
 
 type TagToCompare = Pick<PopulatedTag, 'id' | 'name'> & {
   [x: string]: any

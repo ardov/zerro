@@ -32,7 +32,12 @@ export type ZmDeletionObject = {
   user: UserId
 }
 
-export type TDeletionObject = Modify<ZmDeletionObject, { stamp: TISODate }>
+export type TDeletionObject = Modify<
+  ZmDeletionObject,
+  {
+    stamp: TISODate
+  }
+>
 
 export interface ZmDiff {
   serverTimestamp: number // Unix timestamp

@@ -2,7 +2,7 @@ import startOfMonth from 'date-fns/startOfMonth'
 import startOfDay from 'date-fns/startOfDay'
 import startOfWeek from 'date-fns/startOfWeek'
 import { checkRaw, FilterConditions } from './filtering'
-import { Transaction, TransactionId, TransactionType } from 'types'
+import { Transaction, TTransactionId, TTransactionType } from 'types'
 
 /**
  * Groups array of transactions
@@ -20,7 +20,7 @@ export function groupTransactionsBy(
   const converter = groupTypes[groupType]
   const checker = checkRaw(filterConditions)
   let groups: {
-    [k: string]: { date: number; transactions: TransactionId[] }
+    [k: string]: { date: number; transactions: TTransactionId[] }
   } = {}
 
   for (const tr of arr) {
@@ -44,7 +44,7 @@ export const isDeleted = (tr: Transaction) => {
   return false
 }
 
-export function getType(tr: Transaction, debtId?: string): TransactionType {
+export function getType(tr: Transaction, debtId?: string): TTransactionType {
   if (debtId && tr.incomeAccount === debtId) return 'outcomeDebt'
   if (debtId && tr.outcomeAccount === debtId) return 'incomeDebt'
   if (tr.income && tr.outcome) return 'transfer'

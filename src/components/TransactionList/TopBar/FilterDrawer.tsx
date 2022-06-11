@@ -24,7 +24,7 @@ import Button from '@mui/material/Button'
 
 import { formatDate } from 'helpers/format'
 import { FilterConditions } from 'store/data/transactions/filtering'
-import { TransactionType } from 'types'
+import { TTransactionType } from 'types'
 
 const useStyles = makeStyles(theme => ({
   drawerWidth: {
@@ -53,7 +53,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
 }) => {
   const c = useStyles()
   const handleTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value as TransactionType
+    const value = e.target.value as TTransactionType
     setCondition({ type: value || null })
   }
 

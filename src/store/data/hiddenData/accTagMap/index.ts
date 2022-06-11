@@ -5,26 +5,25 @@ import { setHiddenData } from '../thunks'
 import { getTags } from '../../tags'
 import { getAccLinks } from '../selectors'
 import { AppThunk } from 'store'
-import { AccountId, Selector, TagId } from 'types'
+import { TAccountId, Selector, TTagId } from 'types'
 import { getAccounts } from 'store/data/accounts'
 
 // THUNK
-export const addConnection = (
-  account: AccountId,
-  tag?: TagId | null
-): AppThunk => (dispatch, getState) => {
-  const state = getState()
-  const accTagMap = getAccTagMap(state)
-  const newLinks = { ...accTagMap }
-  if (tag) {
-    sendEvent('Connection: Add')
-    newLinks[account] = tag
-  } else {
-    sendEvent('Connection: Remove')
-    delete newLinks[account]
+export const addConnection =
+  (account: TAccountId, tag?: TTagId | null): AppThunk =>
+  (dispatch, getState) => {
+    const state = getState()
+    const accTagMap = getAccTagMap(state)
+    const newLinks = { ...accTagMap }
+    if (tag) {
+      sendEvent('Connection: Add')
+      newLinks[account] = tag
+    } else {
+      sendEvent('Connection: Remove')
+      delete newLinks[account]
+    }
+    dispatch(setHiddenData(DataReminderType.ACC_LINKS, newLinks))
   }
-  dispatch(setHiddenData(DataReminderType.ACC_LINKS, newLinks))
-}
 
 // SELECTORS
 
@@ -33,7 +32,7 @@ export const addConnection = (
  * - One account -> One tag
  */
 export const getAccTagMap: Selector<{
-  [accId: AccountId]: TagId
+  [accId: TAccountId]: TTagId
 }> = createSelector(
   [getAccLinks, getTags, getAccounts],
   (links, tags, accounts) => {
@@ -51,7 +50,7 @@ export const getAccTagMap: Selector<{
  * - One tag -> Several accounts
  */
 export const getTagAccMap = createSelector([getAccTagMap], links => {
-  let result = {} as { [tagId: string]: AccountId[] }
+  let result = {} as { [tagId: string]: TAccountId[] }
   Object.entries(links).forEach(([accId, tagId]) => {
     if (result[tagId]) result[tagId].push(accId)
     else result[tagId] = [accId]

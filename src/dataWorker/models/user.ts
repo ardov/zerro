@@ -1,52 +1,51 @@
-import { combine } from 'effector'
-import { unixToISO } from './utils'
-import { ById, TFxIdMap, TUser, ZmUser } from '../types'
-import { $fxIdMap } from './instrument'
-import { dataDomain } from './domain'
+import { TFxCode, TFxIdMap, TInstrumentId } from './instrument'
+import { TCountryId } from './country'
+import { isoToUnix, TISOTimestamp, TUnixTime, unixToISO } from './common'
+import { Modify } from 'types'
 
-// Events
-export const setRawUsers = dataDomain.createEvent<ZmUser[]>('setRawUsers')
+export type TUserId = number
 
-// Store
-export const $rawUsers = dataDomain.createStore<ZmUser[]>([], {
-  name: '$rawUsers',
-})
-$rawUsers.on(setRawUsers, (_, rawUsers) => rawUsers)
+export type TZmUser = {
+  id: TUserId
+  changed: TUnixTime
+  currency: TInstrumentId
+  parent: TUserId | null
+  country: TCountryId
+  countryCode: string
+  email: string | null
+  login: string | null
+  monthStartDay: 1
+  paidTill: TUnixTime
+  subscription: '10yearssubscription' | '1MonthSubscription' | string
+}
 
-// Derivatives
-
-export const $users = combine($rawUsers, $fxIdMap, (users, fxIdMap) => {
-  let result: ById<TUser> = {}
-  users.forEach(raw => {
-    result[raw.id] = convertUser(raw, fxIdMap)
-  })
-  return result
-})
-
-export const $mainUser = $users.map(users => {
-  let mainUser = Object.values(users).find(({ parent }) => parent === null)
-  if (!mainUser) return null // throw new Error('No main user found')
-  return mainUser
-})
-
-export const $mainUserId = $mainUser.map(user => user?.id)
-
-export const $mainUserCurrency = $mainUser.map(user => user?.fxCode)
-
-$mainUserCurrency.watch(currency => {
-  console.log('main user currency changed to', currency)
-})
-
-// -----------------------------------------------------------------------------
-// Functions
-// -----------------------------------------------------------------------------
-
-//** Converts Zm format to local */
-function convertUser(raw: ZmUser, fxIdMap: TFxIdMap): TUser {
-  return {
-    ...raw,
-    changed: unixToISO(raw.changed),
-    paidTill: unixToISO(raw.paidTill),
-    fxCode: fxIdMap[raw.currency],
+export type TUser = Modify<
+  TZmUser,
+  {
+    // Converted
+    changed: TISOTimestamp
+    paidTill: TISOTimestamp
+    // Custom fields
+    fxCode: TFxCode
   }
+>
+
+// Converter
+export const convertUser = {
+  toClient: (el: TZmUser, fxIdMap: TFxIdMap): TUser => ({
+    ...el,
+    changed: unixToISO(el.changed),
+    paidTill: unixToISO(el.paidTill),
+    fxCode: fxIdMap[el.currency],
+  }),
+  toServer: (el: TUser): TZmUser => {
+    const res = {
+      ...el,
+      changed: isoToUnix(el.changed),
+      paidTill: isoToUnix(el.paidTill),
+      fxCode: undefined,
+    }
+    delete res.fxCode
+    return res
+  },
 }

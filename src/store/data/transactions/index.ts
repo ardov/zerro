@@ -6,12 +6,12 @@ import { getPopulatedTags } from 'store/data/tags'
 import { compareDates, getTime, isDeleted } from './helpers'
 import { populate, PopulatedTransaction } from './populate'
 import { RootState } from 'store'
-import { Transaction, TransactionId } from 'types'
+import { Transaction, TTransactionId } from 'types'
 import { withPerf } from 'helpers/performance'
 
 export const getTransactions = (state: RootState) =>
   state.data.current.transaction
-export const getTransaction = (state: RootState, id: TransactionId) =>
+export const getTransaction = (state: RootState, id: TTransactionId) =>
   getTransactions(state)[id]
 
 // Only for CSV

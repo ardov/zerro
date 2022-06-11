@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { formatMoney } from 'helpers/format'
-import { InstrumentId, OptionalExceptFor } from 'types'
+import { TInstrumentId, OptionalExceptFor } from 'types'
 import { getInstruments, getUserInstrumentId } from 'store/data/instruments'
 import { useAppSelector } from 'store'
 
@@ -12,7 +12,7 @@ export type AmountProps = React.DetailedHTMLProps<
 > & {
   value: number
   currency?: string
-  instrument?: InstrumentId | 'user'
+  instrument?: TInstrumentId | 'user'
   sign?: boolean
   noShade?: boolean
   decimals?: number

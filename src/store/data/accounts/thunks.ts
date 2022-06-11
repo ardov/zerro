@@ -4,7 +4,7 @@ import { AppThunk } from 'store'
 import { sendEvent } from 'helpers/tracking'
 import { getDataAccountId } from '../hiddenData/selectors'
 import { makeDataAcc } from '../hiddenData/helpers'
-import { AccountId } from 'types'
+import { TAccountId } from 'types'
 import { applyClientPatch } from 'store/data'
 
 const createDataAcc = (): AppThunk => (dispatch, getState) => {
@@ -23,17 +23,16 @@ export const checkDataAcc = (): AppThunk => (dispatch, getState) => {
   }
 }
 
-export const setInBudget = (id: AccountId, inBalance: boolean): AppThunk => (
-  dispatch,
-  getState
-) => {
-  sendEvent(`Accounts: Set in budget`)
-  const state = getState()
-  const account = getAccounts(state)[id]
-  if (!account) {
-    console.warn('No account found')
-    return
+export const setInBudget =
+  (id: TAccountId, inBalance: boolean): AppThunk =>
+  (dispatch, getState) => {
+    sendEvent(`Accounts: Set in budget`)
+    const state = getState()
+    const account = getAccounts(state)[id]
+    if (!account) {
+      console.warn('No account found')
+      return
+    }
+    const newAcc = { ...account, inBalance: !!inBalance, changed: Date.now() }
+    dispatch(applyClientPatch({ account: [newAcc] }))
   }
-  const newAcc = { ...account, inBalance: !!inBalance, changed: Date.now() }
-  dispatch(applyClientPatch({ account: [newAcc] }))
-}

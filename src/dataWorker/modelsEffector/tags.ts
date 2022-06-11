@@ -1,4 +1,4 @@
-import { TagId, ZmTag } from 'types'
+import { TTagId, ZmTag } from 'types'
 import { ById, TTag } from '../types'
 import { unixToISO } from './utils'
 import iconsMap from './iconsMap.json'
@@ -18,7 +18,7 @@ $rawTags.on(setRawTags, (_, rawTags) => rawTags)
 
 // Derivatives
 export const $tags = $rawTags.map(tags => {
-  let childrenMap: { [key: TagId]: TagId[] } = {}
+  let childrenMap: { [key: TTagId]: TTagId[] } = {}
   let names: { [key: string]: number } = {}
   let result: ById<TTag> = {}
 

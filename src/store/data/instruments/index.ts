@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { RootState } from 'store'
-import { InstrumentId } from 'types'
+import { TInstrumentId } from 'types'
 import { getRootUser } from '../users'
 
 export const getInstruments = (state: RootState) =>
@@ -19,13 +19,10 @@ export const getUserCurrencyCode = (state: RootState) =>
 
 export const convertCurrency = createSelector(
   [getInstruments, getUserInstrumentId],
-  (instruments, userInstrument) => (
-    amount = 0,
-    from: InstrumentId | string,
-    to?: InstrumentId | string
-  ) => {
-    to = to || userInstrument
-    if (!to) return amount
-    return amount * (instruments[from].rate / instruments[to].rate)
-  }
+  (instruments, userInstrument) =>
+    (amount = 0, from: TInstrumentId | string, to?: TInstrumentId | string) => {
+      to = to || userInstrument
+      if (!to) return amount
+      return amount * (instruments[from].rate / instruments[to].rate)
+    }
 )

@@ -3,7 +3,7 @@ import { round } from 'helpers/currencyHelpers'
 import { formatDate } from 'helpers/format'
 import { RootState } from 'store'
 import { convertCurrency } from 'store/data/instruments'
-import { ById, PopulatedBudget, TagId } from 'types'
+import { ById, PopulatedBudget, TTagId } from 'types'
 import { getTagMeta } from '../hiddenData/tagMeta'
 
 // Goal data was hidden in budgets for this date in early versions
@@ -11,8 +11,11 @@ const goalBudgetDate = +new Date(2000, 0)
 
 const getBudgets = (state: RootState) => state.data.current.budget
 
-export const getBudget = (state: RootState, tag: TagId, month: Date | number) =>
-  getBudgets(state)[`${tag},${formatDate(month, 'yyyy-MM-dd')}`]
+export const getBudget = (
+  state: RootState,
+  tag: TTagId,
+  month: Date | number
+) => getBudgets(state)[`${tag},${formatDate(month, 'yyyy-MM-dd')}`]
 
 const getPopulatedBudgets = createSelector(
   [getBudgets, getTagMeta, convertCurrency],

@@ -1,4 +1,4 @@
-import { Diff, User, ZmCompany, ZmCountry, ZmInstrument } from 'types'
+import { Diff, User, ZmCompany, ZmCountry, TZmInstrument } from 'types'
 import countries from './countries.json'
 import companies from './companies.json'
 import instruments from './instruments.json'
@@ -90,7 +90,7 @@ export const getDemoData = (): Diff => {
     serverTimestamp: NOW,
     country: countries as ZmCountry[],
     company: companies as ZmCompany[],
-    instrument: instruments as ZmInstrument[],
+    instrument: instruments as TZmInstrument[],
 
     user: [USER],
     account,

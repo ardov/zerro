@@ -1,20 +1,31 @@
-import { ById, TCountry, TFxIdMap, ZmCountry } from '../types'
+import { TInstrumentId, TFxCode, TFxIdMap } from './instrument'
 
-function convertCountry(raw: ZmCountry, fxIdMap: TFxIdMap): TCountry {
-  return {
-    ...raw,
-    fxCode: fxIdMap[raw.currency],
-  }
+export type TCountryId = number
+
+export type TZmCountry = {
+  id: TCountryId
+  title: string
+  currency: TInstrumentId
+  domain: string
 }
 
-export function processCountries(
-  countries: ById<ZmCountry>,
-  fxIdMap: TFxIdMap
-): ById<TCountry> {
-  return Object.fromEntries(
-    Object.entries(countries).map(([id, raw]) => [
-      id,
-      convertCountry(raw, fxIdMap),
-    ])
-  )
+export type TCountry = TZmCountry & {
+  // Custom fields
+  fxCode: TFxCode
+}
+
+// Converter
+export const convertCountry = {
+  toClient: (el: TZmCountry, fxIdMap: TFxIdMap): TCountry => ({
+    ...el,
+    fxCode: fxIdMap[el.currency],
+  }),
+  toServer: (el: TCountry): TZmCountry => {
+    const res = {
+      ...el,
+      fxCode: undefined,
+    }
+    delete res.fxCode
+    return res
+  },
 }

@@ -1,15 +1,35 @@
-import { ById, TCompany, ZmCompany } from '../types'
-import { unixToISO } from './utils'
+import { Modify } from 'types'
+import { isoToUnix, TISOTimestamp, TUnixTime, unixToISO } from './common'
+import { TCountryId } from './country'
 
-function convertCompany(raw: ZmCompany): TCompany {
-  return {
-    ...raw,
-    changed: unixToISO(raw.changed),
-  }
+export type TCompanyId = number
+
+export type TZmCompany = {
+  id: TCompanyId
+  changed: TUnixTime
+  title: string
+  fullTitle: string | null
+  www: string
+  country: TCountryId
+  countryCode: string
+  deleted: boolean
 }
 
-export function processCompanies(companies: ById<ZmCompany>): ById<TCompany> {
-  return Object.fromEntries(
-    Object.entries(companies).map(([id, raw]) => [id, convertCompany(raw)])
-  )
+export type TCompany = Modify<
+  TZmCompany,
+  {
+    changed: TISOTimestamp
+  }
+>
+
+// Converter
+export const convertCompany = {
+  toClient: (el: TZmCompany): TCompany => ({
+    ...el,
+    changed: unixToISO(el.changed),
+  }),
+  toServer: (el: TCompany): TZmCompany => ({
+    ...el,
+    changed: isoToUnix(el.changed),
+  }),
 }

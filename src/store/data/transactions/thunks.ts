@@ -2,132 +2,130 @@ import { v1 as uuidv1 } from 'uuid'
 import { getTransaction, getTransactions } from 'store/data/transactions'
 import { sendEvent } from 'helpers/tracking'
 import { AppThunk } from 'store'
-import { OptionalExceptFor, TagId, Transaction, TransactionId } from 'types'
+import { OptionalExceptFor, TTagId, Transaction, TTransactionId } from 'types'
 import { applyClientPatch } from 'store/data'
 
-export const deleteTransactions = (
-  ids: TransactionId | TransactionId[]
-): AppThunk => (dispatch, getState) => {
-  sendEvent('Transaction: delete')
-  const array = Array.isArray(ids) ? ids : [ids]
-  const deleted = array.map(id => ({
-    ...getTransaction(getState(), id),
-    deleted: true,
-    changed: Date.now(),
-  }))
-  dispatch(applyClientPatch({ transaction: deleted }))
-}
-
-export const deleteTransactionsPermanently = (
-  ids: TransactionId | TransactionId[]
-): AppThunk => (dispatch, getState) => {
-  sendEvent('Transaction: delete permanently')
-  const array = Array.isArray(ids) ? ids : [ids]
-  const deleted = array.map(id => ({
-    ...getTransaction(getState(), id),
-    outcome: 0.00001,
-    income: 0.00001,
-    changed: Date.now(),
-  }))
-  dispatch(applyClientPatch({ transaction: deleted }))
-}
-
-export const markViewed = (
-  ids: TransactionId | TransactionId[],
-  viewed: boolean
-): AppThunk => (dispatch, getState) => {
-  sendEvent(`Transaction: mark viewed: ${viewed}`)
-  const array = Array.isArray(ids) ? ids : [ids]
-  const state = getState()
-  const result = array.map(id => ({
-    ...getTransaction(state, id),
-    viewed,
-    changed: Date.now(),
-  }))
-  dispatch(applyClientPatch({ transaction: result }))
-}
-
-export const restoreTransaction = (id: TransactionId): AppThunk => (
-  dispatch,
-  getState
-) => {
-  sendEvent('Transaction: restore')
-  const tr = {
-    ...getTransaction(getState(), id),
-    deleted: false,
-    changed: Date.now(),
-    id: uuidv1(),
+export const deleteTransactions =
+  (ids: TTransactionId | TTransactionId[]): AppThunk =>
+  (dispatch, getState) => {
+    sendEvent('Transaction: delete')
+    const array = Array.isArray(ids) ? ids : [ids]
+    const deleted = array.map(id => ({
+      ...getTransaction(getState(), id),
+      deleted: true,
+      changed: Date.now(),
+    }))
+    dispatch(applyClientPatch({ transaction: deleted }))
   }
-  dispatch(applyClientPatch({ transaction: [tr] }))
-}
+
+export const deleteTransactionsPermanently =
+  (ids: TTransactionId | TTransactionId[]): AppThunk =>
+  (dispatch, getState) => {
+    sendEvent('Transaction: delete permanently')
+    const array = Array.isArray(ids) ? ids : [ids]
+    const deleted = array.map(id => ({
+      ...getTransaction(getState(), id),
+      outcome: 0.00001,
+      income: 0.00001,
+      changed: Date.now(),
+    }))
+    dispatch(applyClientPatch({ transaction: deleted }))
+  }
+
+export const markViewed =
+  (ids: TTransactionId | TTransactionId[], viewed: boolean): AppThunk =>
+  (dispatch, getState) => {
+    sendEvent(`Transaction: mark viewed: ${viewed}`)
+    const array = Array.isArray(ids) ? ids : [ids]
+    const state = getState()
+    const result = array.map(id => ({
+      ...getTransaction(state, id),
+      viewed,
+      changed: Date.now(),
+    }))
+    dispatch(applyClientPatch({ transaction: result }))
+  }
+
+export const restoreTransaction =
+  (id: TTransactionId): AppThunk =>
+  (dispatch, getState) => {
+    sendEvent('Transaction: restore')
+    const tr = {
+      ...getTransaction(getState(), id),
+      deleted: false,
+      changed: Date.now(),
+      id: uuidv1(),
+    }
+    dispatch(applyClientPatch({ transaction: [tr] }))
+  }
 
 // Не работает
 // TODO: Надо для новых транзакций сразу проставлять категорию. Иначе они обратно схлопываются
-export const splitTransfer = (id: TransactionId): AppThunk => (
-  dispatch,
-  getState
-) => {
-  const state = getState()
-  const tr = getTransaction(state, id)
-  const list = split(tr)
-  if (list) dispatch(applyClientPatch({ transaction: list }))
-}
+export const splitTransfer =
+  (id: TTransactionId): AppThunk =>
+  (dispatch, getState) => {
+    const state = getState()
+    const tr = getTransaction(state, id)
+    const list = split(tr)
+    if (list) dispatch(applyClientPatch({ transaction: list }))
+  }
 
 export type TransactionPatch = OptionalExceptFor<Transaction, 'id'>
-export const applyChangesToTransaction = (
-  patch: TransactionPatch
-): AppThunk => (dispatch, getState) => {
-  sendEvent('Transaction: edit')
-  const tr = {
-    ...getTransaction(getState(), patch.id),
-    ...patch,
-    changed: Date.now(),
+export const applyChangesToTransaction =
+  (patch: TransactionPatch): AppThunk =>
+  (dispatch, getState) => {
+    sendEvent('Transaction: edit')
+    const tr = {
+      ...getTransaction(getState(), patch.id),
+      ...patch,
+      changed: Date.now(),
+    }
+    dispatch(applyClientPatch({ transaction: [tr] }))
   }
-  dispatch(applyClientPatch({ transaction: [tr] }))
-}
 
-export const recreateTransaction = (patch: TransactionPatch): AppThunk => (
-  dispatch,
-  getState
-) => {
-  sendEvent('Transaction: recreate')
-  const tr = getTransaction(getState(), patch.id)
-  const oldTr = {
-    ...tr,
-    outcome: 0.00001,
-    income: 0.00001,
-    changed: Date.now(),
+export const recreateTransaction =
+  (patch: TransactionPatch): AppThunk =>
+  (dispatch, getState) => {
+    sendEvent('Transaction: recreate')
+    const tr = getTransaction(getState(), patch.id)
+    const oldTr = {
+      ...tr,
+      outcome: 0.00001,
+      income: 0.00001,
+      changed: Date.now(),
+    }
+    const newTr = {
+      ...getTransaction(getState(), patch.id),
+      ...patch,
+      id: uuidv1(),
+      changed: Date.now(),
+    }
+    dispatch(applyClientPatch({ transaction: [oldTr, newTr] }))
+    return newTr.id
   }
-  const newTr = {
-    ...getTransaction(getState(), patch.id),
-    ...patch,
-    id: uuidv1(),
-    changed: Date.now(),
+
+export const bulkEditTransactions =
+  (
+    ids: TTransactionId[],
+    opts: { tags?: TTagId[]; comment?: string }
+  ): AppThunk =>
+  (dispatch, getState) => {
+    sendEvent('Bulk Actions: set new tags')
+    const state = getState()
+    const allTransactions = getTransactions(state)
+
+    const result = ids.map(id => {
+      const tr = allTransactions[id]
+      const tag = modifyTags(tr.tag, opts.tags)
+      const comment = modifyComment(tr.comment, opts.comment)
+      return { ...tr, tag, comment, changed: Date.now() }
+    })
+    dispatch(applyClientPatch({ transaction: result }))
   }
-  dispatch(applyClientPatch({ transaction: [oldTr, newTr] }))
-  return newTr.id
-}
-
-export const bulkEditTransactions = (
-  ids: TransactionId[],
-  opts: { tags?: TagId[]; comment?: string }
-): AppThunk => (dispatch, getState) => {
-  sendEvent('Bulk Actions: set new tags')
-  const state = getState()
-  const allTransactions = getTransactions(state)
-
-  const result = ids.map(id => {
-    const tr = allTransactions[id]
-    const tag = modifyTags(tr.tag, opts.tags)
-    const comment = modifyComment(tr.comment, opts.comment)
-    return { ...tr, tag, comment, changed: Date.now() }
-  })
-  dispatch(applyClientPatch({ transaction: result }))
-}
 
 const modifyTags = (prevTags: string[] | null, newTags?: string[]) => {
   if (!newTags) return prevTags
-  let result: TagId[] = []
+  let result: TTagId[] = []
   const addId = (id: string) =>
     result.includes(id) || id === 'null' ? '' : result.push(id)
   newTags?.forEach(id => {

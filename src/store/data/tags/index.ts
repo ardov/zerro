@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { compareTags } from 'store/data/hiddenData/tagOrder'
 import populateTags from './populateTags'
-import { Modify, PopulatedTag, Tag, TagId } from 'types'
+import { Modify, PopulatedTag, Tag, TTagId } from 'types'
 import { RootState } from 'store'
 
 // SELECTORS
@@ -34,7 +34,7 @@ export const getTagsTree = createSelector(
 
 export const getTagLinks = createSelector([getPopulatedTags], tags => {
   let result: {
-    [tagId: string]: TagId[]
+    [tagId: string]: TTagId[]
   } = {}
   for (const id in tags) {
     if (tags[id].parent) continue

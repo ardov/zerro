@@ -3,7 +3,7 @@ import { useAppSelector } from 'store'
 import { getPopulatedTags } from 'store/data/tags'
 import { Chip, ChipProps } from '@mui/material'
 import { CloseIcon } from 'components/Icons'
-import { PopulatedTag, TagId } from 'types'
+import { PopulatedTag, TTagId } from 'types'
 
 function getTagLabel(tag?: PopulatedTag) {
   if (!tag) return null
@@ -12,7 +12,7 @@ function getTagLabel(tag?: PopulatedTag) {
 }
 
 interface TagChipProps extends ChipProps {
-  id: TagId
+  id: TTagId
 }
 
 const TagChip: FC<TagChipProps> = ({ id, ...rest }) => {

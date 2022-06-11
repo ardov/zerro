@@ -1,7 +1,7 @@
 import parseDate from 'date-fns/parseISO'
 import format from 'date-fns/format'
 import {
-  Instrument,
+  TInstrument,
   User,
   Country,
   Company,
@@ -33,10 +33,10 @@ export const dataConverters = {
   },
 
   instrument: {
-    toClient: (el: Instrument): Instrument => {
+    toClient: (el: TInstrument): TInstrument => {
       return { ...el, changed: toMs(el.changed) }
     },
-    toServer: (el: Instrument): Instrument => {
+    toServer: (el: TInstrument): TInstrument => {
       return { ...el, changed: toUnix(el.changed) }
     },
   },

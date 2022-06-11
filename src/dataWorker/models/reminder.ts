@@ -1,9 +1,6 @@
-import { TUserId } from './user'
 import { TInstrumentId, TFxCode, TFxIdMap } from './instrument'
-import { TAccountId } from './account'
-import { TTagId } from './tag'
+import { TUserId } from './user'
 import { TMerchantId } from './merchant'
-import { TReminderId } from './reminder'
 import {
   isoToUnix,
   milliunitsToUnits,
@@ -17,43 +14,47 @@ import {
 } from './common'
 import { Modify } from 'types'
 
-export type TReminderMarkerId = string
+export type TReminderId = string
 
-export type TZmReminderMarker = {
-  id: TReminderMarkerId // UUID
+export interface TZmReminder {
+  id: TReminderId
   changed: TUnixTime
   user: TUserId
   incomeInstrument: TInstrumentId
-  incomeAccount: TAccountId
+  incomeAccount: string
   income: TUnits
   outcomeInstrument: TInstrumentId
-  outcomeAccount: TAccountId
+  outcomeAccount: string
   outcome: TUnits
-  tag: TTagId[] | null
+  tag: string[] | null
   merchant: TMerchantId | null
   payee: string | null
   comment: string | null
-  date: TISODate
-  reminder: TReminderId
-  state: 'planned' | 'processed' | 'deleted'
+  interval: 'day' | 'week' | 'month' | 'year' | null
+  step: number | null
+  points: number[] | null
+  startDate: TISODate
+  endDate: TISODate
   notify: boolean
 }
 
-export type TReminderMarker = Modify<
-  TZmReminderMarker,
+export type TReminder = Modify<
+  TZmReminder,
   {
     changed: TISOTimestamp
     income: TMilliUnits
     outcome: TMilliUnits
-    // Custom
     incomeFxCode: TFxCode
     outcomeFxCode: TFxCode
+    // Should we change this to TISOTimestamp?
+    // startDate: TISODate
+    // endDate: TISODate
   }
 >
 
 // Converter
-export const convertReminderMarker = {
-  toClient: (el: TZmReminderMarker, fxIdMap: TFxIdMap): TReminderMarker => ({
+export const convertReminder = {
+  toClient: (el: TZmReminder, fxIdMap: TFxIdMap): TReminder => ({
     ...el,
     changed: unixToISO(el.changed),
     income: unitsToMilliunits(el.income),
@@ -61,7 +62,7 @@ export const convertReminderMarker = {
     incomeFxCode: fxIdMap[el.incomeInstrument],
     outcomeFxCode: fxIdMap[el.outcomeInstrument],
   }),
-  toServer: (el: TReminderMarker): TZmReminderMarker => {
+  toServer: (el: TReminder): TZmReminder => {
     const res = {
       ...el,
       changed: isoToUnix(el.changed),

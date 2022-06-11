@@ -6,7 +6,7 @@ import { getSortedTransactions } from 'store/data/transactions'
 import { getTransactionsHistory } from 'store/data/transactions'
 import { eachDayOfInterval, startOfDay } from 'date-fns'
 import { convertCurrency } from 'store/data/instruments'
-import { Transaction, Account, AccountId, InstrumentId } from 'types'
+import { Transaction, Account, TAccountId, TInstrumentId } from 'types'
 
 interface DayNode {
   date: number
@@ -36,7 +36,7 @@ export const getAccountsHistory = createSelector(
       ]
     }
 
-    const addAmount = (amount: number, acc: AccountId, date: number) => {
+    const addAmount = (amount: number, acc: TAccountId, date: number) => {
       const accHistory = historyById[acc]
       const lastPoint = accHistory[accHistory.length - 1]
       if (lastPoint.date === date) {
@@ -222,7 +222,7 @@ function getWeekday(tr: Transaction) {
 }
 
 function compareByAmount(
-  convert: (amount: number, id: InstrumentId) => number
+  convert: (amount: number, id: TInstrumentId) => number
 ) {
   return function (tr1: Transaction, tr2: Transaction) {
     const amount1 = Math.max(

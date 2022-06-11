@@ -12,7 +12,10 @@ import {
 
 // Outlining external interface of the data worker
 export const dataWorkerMethods = {
+  // Initiate first data loading with token
   logIn: (token: string) => console.log('logIn', token),
+
+  /** Update data and then send */
   syncData: (token: string) => console.log('syncData', token),
   applyPatch: () => console.log('applyPatch'),
   setMerchants: (merchants: TMerchant[]) =>

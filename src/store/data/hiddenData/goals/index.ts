@@ -6,51 +6,50 @@ import { getTags } from '../../tags'
 import { getRawGoals } from '../selectors'
 import { setHiddenData } from '../thunks'
 import { AppThunk, RootState } from 'store'
-import { ById, Goal, TagId } from 'types'
+import { ById, Goal, TTagId } from 'types'
 
 // THUNKS
-export const setGoal = ({
-  type,
-  amount,
-  end,
-  tag,
-}: Goal & { tag: TagId }): AppThunk => (dispatch, getState) => {
-  const state = getState()
-  const goals = getRawGoals(state)
-  const tags = getTags(state)
-  let newGoals = goals ? { ...goals } : {}
+export const setGoal =
+  ({ type, amount, end, tag }: Goal & { tag: TTagId }): AppThunk =>
+  (dispatch, getState) => {
+    const state = getState()
+    const goals = getRawGoals(state)
+    const tags = getTags(state)
+    let newGoals = goals ? { ...goals } : {}
 
-  // remove goals for deleted tags
-  for (const tagId in newGoals) {
-    if (!tags[tagId]) delete newGoals[tagId]
+    // remove goals for deleted tags
+    for (const tagId in newGoals) {
+      if (!tags[tagId]) delete newGoals[tagId]
+    }
+
+    if (!amount) {
+      sendEvent(`Goals: delete goal`)
+      delete newGoals[tag]
+    } else {
+      sendEvent(`Goals: set ${type} goal`)
+      newGoals[tag] = makeGoal({ type, amount, end })
+    }
+    dispatch(setHiddenData(DataReminderType.GOALS, newGoals))
   }
 
-  if (!amount) {
+export const deleteGoal =
+  (tag: TTagId): AppThunk =>
+  (dispatch, getState) => {
+    const state = getState()
+    const goals = getRawGoals(state)
+    const tags = getTags(state)
+    let newGoals = goals ? { ...goals } : {}
+
+    // remove goals for deleted tags
+    for (const tagId in newGoals) {
+      if (!tags[tagId]) delete newGoals[tagId]
+    }
+
     sendEvent(`Goals: delete goal`)
     delete newGoals[tag]
-  } else {
-    sendEvent(`Goals: set ${type} goal`)
-    newGoals[tag] = makeGoal({ type, amount, end })
+
+    dispatch(setHiddenData(DataReminderType.GOALS, newGoals))
   }
-  dispatch(setHiddenData(DataReminderType.GOALS, newGoals))
-}
-
-export const deleteGoal = (tag: TagId): AppThunk => (dispatch, getState) => {
-  const state = getState()
-  const goals = getRawGoals(state)
-  const tags = getTags(state)
-  let newGoals = goals ? { ...goals } : {}
-
-  // remove goals for deleted tags
-  for (const tagId in newGoals) {
-    if (!tags[tagId]) delete newGoals[tagId]
-  }
-
-  sendEvent(`Goals: delete goal`)
-  delete newGoals[tag]
-
-  dispatch(setHiddenData(DataReminderType.GOALS, newGoals))
-}
 
 // SELECTORS
 export const getGoals = createSelector(
@@ -64,4 +63,4 @@ export const getGoals = createSelector(
   }
 )
 
-export const getGoal = (state: RootState, id: TagId) => getGoals(state)[id]
+export const getGoal = (state: RootState, id: TTagId) => getGoals(state)[id]

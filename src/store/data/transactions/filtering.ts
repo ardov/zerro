@@ -1,4 +1,4 @@
-import { AccountId, TagId, Transaction, TransactionType } from 'types'
+import { TAccountId, TTagId, Transaction, TTransactionType } from 'types'
 import { keys } from 'helpers/keys'
 import { getType, isDeleted, isNew } from './helpers'
 
@@ -25,32 +25,34 @@ type DefaultConditions = {
 
 type CustomConditions = {
   search?: null | string
-  type?: null | TransactionType
+  type?: null | TTransactionType
   showDeleted?: boolean
   isNew?: boolean
   dateFrom?: null | number | Date
   dateTo?: null | number | Date
-  tags?: null | TagId[]
-  mainTags?: null | TagId[]
-  accountsFrom?: null | AccountId[]
-  accountsTo?: null | AccountId[]
-  accounts?: null | AccountId[]
+  tags?: null | TTagId[]
+  mainTags?: null | TTagId[]
+  accountsFrom?: null | TAccountId[]
+  accountsTo?: null | TAccountId[]
+  accounts?: null | TAccountId[]
   amountFrom?: null | number
   amountTo?: null | number
 }
 
 export type FilterConditions = DefaultConditions & CustomConditions
 
-export const checkRaw = (
-  conditions: FilterConditions | FilterConditions[] = {},
-  operator: OperatorType = 'OR'
-) => (tr: Transaction) => {
-  if (Array.isArray(conditions)) {
-    const results = conditions.map(cond => checkConditions(tr, cond))
-    return operator === 'AND' ? results.every(Boolean) : results.some(Boolean)
+export const checkRaw =
+  (
+    conditions: FilterConditions | FilterConditions[] = {},
+    operator: OperatorType = 'OR'
+  ) =>
+  (tr: Transaction) => {
+    if (Array.isArray(conditions)) {
+      const results = conditions.map(cond => checkConditions(tr, cond))
+      return operator === 'AND' ? results.every(Boolean) : results.some(Boolean)
+    }
+    return checkConditions(tr, conditions)
   }
-  return checkConditions(tr, conditions)
-}
 
 const checkConditions = (tr: Transaction, conditions: FilterConditions) => {
   return (
@@ -168,7 +170,7 @@ const checkAccounts = (
   accountsFrom?: FilterConditions['accountsFrom'],
   accountsTo?: FilterConditions['accountsTo']
 ) => {
-  const check = (current: AccountId, need?: null | AccountId[]) =>
+  const check = (current: TAccountId, need?: null | TAccountId[]) =>
     need ? need.includes(current) : true
   return (
     check(tr.incomeAccount, accountsTo) &&

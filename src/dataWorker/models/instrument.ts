@@ -1,41 +1,44 @@
-import { unixToISO } from './utils'
-import { ById, TFxIdMap, TInstrument, ZmInstrument } from '../types'
-import { dataDomain } from './domain'
+import type { Modify } from 'types'
+import { isoToUnix, TISOTimestamp, TUnixTime, unixToISO } from './common'
 
-// Events
-export const setRawInstruments = dataDomain.createEvent<ZmInstrument[]>()
+export type TInstrumentId = number
+export type TFxCode = string
 
-// Store
-export const $rawInstruments = dataDomain.createStore<ZmInstrument[]>([])
-$rawInstruments.on(setRawInstruments, (_, rawInstruments) => rawInstruments)
-
-// Derivatives
-export const $instruments = $rawInstruments.map(processInstruments)
-export const $fxIdMap = $rawInstruments.map(getFxIdMap)
-
-// -----------------------------------------------------------------------------
-// Functions
-// -----------------------------------------------------------------------------
-
-/** Converts instruments to mapping which is used by other converters */
-function getFxIdMap(instruments: ZmInstrument[]): TFxIdMap {
-  let result: TFxIdMap = {}
-  instruments.forEach(({ id, shortTitle }) => {
-    result[id] = shortTitle
-  })
-  return result
+export type TZmInstrument = {
+  id: TInstrumentId
+  changed: TUnixTime
+  title: string
+  shortTitle: TFxCode
+  symbol: string
+  rate: number
 }
 
-/** Converts Zm format to local */
-function convertInstrument(raw: ZmInstrument): TInstrument {
-  return { ...raw, changed: unixToISO(raw.changed) }
+export type TInstrument = Modify<
+  TZmInstrument,
+  {
+    changed: TISOTimestamp
+  }
+>
+
+export type TFxIdMap = {
+  [id: TInstrumentId]: TFxCode
 }
 
-/** Converts collection of instruments */
-function processInstruments(instruments: ZmInstrument[]): ById<TInstrument> {
-  let result: ById<TInstrument> = {}
-  instruments.forEach(raw => {
-    result[raw.shortTitle] = convertInstrument(raw)
-  })
-  return result
+// Converter
+export const convertInstrument = {
+  toClient: (el: TZmInstrument): TInstrument => ({
+    ...el,
+    changed: unixToISO(el.changed),
+  }),
+  toServer: (el: TInstrument): TZmInstrument => ({
+    ...el,
+    changed: isoToUnix(el.changed),
+  }),
 }
+
+// Extract FX to InstrumentId map
+export const extractFxIdMap = (instruments: TInstrument[]): TFxIdMap =>
+  instruments.reduce(
+    (acc, curr) => ({ ...acc, [curr.id]: curr.shortTitle }),
+    {} as TFxIdMap
+  )
