@@ -44,12 +44,7 @@ export type TZmInstrument = {
   rate: number
 }
 
-export type TInstrument = Modify<
-  TZmInstrument,
-  {
-    changed: TMsTime
-  }
->
+export type TInstrument = Modify<TZmInstrument, { changed: TMsTime }>
 
 export type TFxIdMap = {
   [id: TInstrumentId]: TFxCode
@@ -113,7 +108,7 @@ export type TZmUser = {
 
 export type TRawUser = Modify<TZmUser, { changed: TMsTime; paidTill: TMsTime }>
 
-// export type TUser = TRawUser & { fxCode: TFxCode}
+export type TUser = TRawUser & { fxCode: TFxCode }
 
 // ---------------------------------------------------------------------
 // ACCOUNT
@@ -494,7 +489,7 @@ export type TDataStore = {
   tag: ById<TRawTag>
   budget: ById<TBudget>
   reminder: ById<TRawReminder>
-  reminderMarker: ById<TReminderMarkerId>
+  reminderMarker: ById<TRawReminderMarker>
   transaction: ById<TRawransaction>
 }
 export type TDataStorePatch = Partial<TDataStore> & {
