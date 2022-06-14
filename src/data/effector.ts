@@ -1,21 +1,66 @@
-import { createEvent, createStore } from 'effector'
-import { TDataStore, TDiff, TZmDiff } from 'types'
+import { createDomain, forward, sample } from 'effector'
+import { dataStorage } from 'services/storage'
+import ZenApi from 'services/ZenApi'
+import { TDataStore, TDiff, TToken, TZmDiff } from 'types'
 import { getBudgetId } from './converters/budget'
 import { convertDiff } from './converters/diff'
 
-// Events
-const rawDataSynced = createEvent<TZmDiff>()
-const dataSynced = rawDataSynced.map<TDiff>(convertDiff.toClient)
-const resetData = createEvent()
+const workerData = createDomain('workerData')
 
-// Store
-const $serverData = createStore<TDataStore>(makeDataStore())
+// External events
+export const syncInitiated = workerData.createEvent()
+export const logInInitiated = workerData.createEvent<TToken>()
+export const logOutInitiated = workerData.createEvent()
 
-// Event bindings
-$serverData.on(dataSynced, applyServerDiff)
-$serverData.on(resetData, makeDataStore)
+// Internal events
+const dataSyncedRaw = workerData.createEvent<TZmDiff>()
+const dataSynced = dataSyncedRaw.map<TDiff>(convertDiff.toClient)
+const resetData = workerData.createEvent()
+const tokenSet = workerData.createEvent<TToken>()
 
-// HELPERS
+// Token store
+const $token = workerData.store<TToken>(null)
+$token.on(tokenSet, (_, token) => token)
+$token.watch(token => dataStorage.set('token', token))
+
+// Server data store
+const $serverData = workerData.createStore<TDataStore>(makeDataStore())
+$serverData
+  .on(dataSynced, applyServerDiff)
+  .on(resetData, makeDataStore)
+  .watch(state => console.log('☄️ Data updated', state))
+
+// Sync effect
+const syncFx = workerData.createEffect(async (token: TToken) => {
+  if (!token) throw new Error('No token provided')
+  return ZenApi.getData(token)
+})
+syncFx.done.watch(({ result }) => dataSyncedRaw(result))
+
+// Init effect
+const initFx = workerData.createEffect(async () => {
+  const token = await dataStorage.get('token')
+  if (token) tokenSet(token)
+})
+
+// Log in effect
+export const logInFx = workerData.createEffect(async (token: TToken) => {
+  if (!token) throw new Error('No token provided')
+  console.log('☄️ Log in')
+  tokenSet(token)
+  syncFx(token)
+})
+forward({ from: logInInitiated, to: logInFx })
+
+sample({
+  clock: syncInitiated,
+  source: $token,
+  target: syncFx,
+})
+
+// ---------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------
 
 /** Returns initial store state */
 function makeDataStore(): TDataStore {
