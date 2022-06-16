@@ -4,28 +4,28 @@ const BASE_NAME = 'zerro_data'
 const STORE_NAME = 'serverData'
 const VERSION = 1
 
-function getIDBStorage(storeName: string) {
+export function getIDBStorage(base: string, store: string) {
   async function getDB() {
-    return await openDB(BASE_NAME, VERSION, {
-      upgrade: db => db.createObjectStore(storeName),
+    return await openDB(base, VERSION, {
+      upgrade: db => db.createObjectStore(store),
     })
   }
   return {
     set: async (key: string, value: any) => {
       const db = await getDB()
-      return db.put(storeName, value, key)
+      return db.put(store, value, key)
     },
     get: async (key: string) => {
       const db = await getDB()
-      return db.get(storeName, key)
+      return db.get(store, key)
     },
     clear: () => {
-      deleteDB(BASE_NAME, {
+      deleteDB(base, {
         blocked: () => console.log('DB not deleted'),
       })
     },
   }
 }
 
-export const storage = getIDBStorage(STORE_NAME)
-export const dataStorage = getIDBStorage('dataStorage')
+export const storage = getIDBStorage(BASE_NAME, STORE_NAME)
+export const dataStorage = getIDBStorage(BASE_NAME, 'dataStorage')

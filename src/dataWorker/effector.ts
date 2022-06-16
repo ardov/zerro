@@ -1,9 +1,17 @@
 import { createDomain, forward, sample } from 'effector'
-import { dataStorage } from 'services/storage'
 import ZenApi from 'services/ZenApi'
-import { TDataStore, TDiff, TToken, TZmDiff } from 'types'
+import {
+  TAccount,
+  TDataStore,
+  TDiff,
+  TMerchant,
+  TReminder,
+  TToken,
+  TZmDiff,
+} from 'types'
 import { getBudgetId } from './converters/budget'
 import { convertDiff } from './converters/diff'
+import { getLocalData, setLocalKey } from './storageMethods'
 
 const workerData = createDomain('workerData')
 
@@ -21,7 +29,7 @@ const tokenSet = workerData.createEvent<TToken>()
 // Token store
 const $token = workerData.store<TToken>(null)
 $token.on(tokenSet, (_, token) => token)
-$token.watch(token => dataStorage.set('token', token))
+$token.watch(token => setLocalKey('token', token))
 
 // Server data store
 const $serverData = workerData.createStore<TDataStore>(makeDataStore())
@@ -37,12 +45,6 @@ const syncFx = workerData.createEffect(async (token: TToken) => {
 })
 syncFx.done.watch(({ result }) => dataSyncedRaw(result))
 
-// Init effect
-const initFx = workerData.createEffect(async () => {
-  const token = await dataStorage.get('token')
-  if (token) tokenSet(token)
-})
-
 // Log in effect
 export const logInFx = workerData.createEffect(async (token: TToken) => {
   if (!token) throw new Error('No token provided')
@@ -56,6 +58,16 @@ sample({
   clock: syncInitiated,
   source: $token,
   target: syncFx,
+})
+
+/**
+ * Load data from indexedDB
+ */
+export const loadLocalDataFx = workerData.createEffect(async () => {
+  const { token, ...data } = await getLocalData()
+  tokenSet(token || null)
+  dataSyncedRaw(data)
+  return data
 })
 
 // ---------------------------------------------------------------------
