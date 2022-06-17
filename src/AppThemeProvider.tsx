@@ -29,21 +29,6 @@ const globalStyles = css`
     box-sizing: inherit;
   }
 
-  ::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
-  }
-
-  ::-webkit-scrollbar-corner {
-    background: var(--c-bg);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background-color: var(--c-scrollbar);
-    border-radius: 6px;
-    border: 2px solid var(--c-bg);
-  }
-
   .hidden-scroll {
     scrollbar-width: none;
     overflow: -moz-scrollbars-none;
