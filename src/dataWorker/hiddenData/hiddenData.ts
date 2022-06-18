@@ -1,5 +1,5 @@
 import { TAccountId, TGoal, TTagId, TFxCode, TReminder, TTagMeta } from 'types'
-import { TRecord } from './record-types'
+import { TRecord, recordType } from './record-types'
 
 // const $dataReminderList = combine(
 //   {
@@ -58,31 +58,31 @@ function aggregateHiddenData(reminders: TReminder[]): TAggregatedResult {
     const rec = parseComment(reminder.comment) as TRecord
     if (!rec) return
     switch (rec.type) {
-      case 'goals':
+      case recordType.goals:
         // res.goals[rec.date] = rec.payload
         res.dataReminders[getRecordId(rec.type, rec.date)] = reminder
         break
-      case 'fxRates':
+      case recordType.fxRates:
         res.fxRates[rec.date] = rec.payload
         res.dataReminders[getRecordId(rec.type, rec.date)] = reminder
         break
-      case 'budgets':
+      case recordType.budgets:
         res.budgets[rec.date] = rec.payload
         res.dataReminders[getRecordId(rec.type, rec.date)] = reminder
         break
-      case 'linkedAccounts':
+      case recordType.linkedAccounts:
         res.linkedAccounts = rec.payload
         res.dataReminders[getRecordId(rec.type)] = reminder
         break
-      case 'linkedDebtors':
+      case recordType.linkedDebtors:
         res.linkedDebtors = rec.payload
         res.dataReminders[getRecordId(rec.type)] = reminder
         break
-      case 'tagMeta':
+      case recordType.tagMeta:
         // res.tagMeta = rec.payload
         res.dataReminders[getRecordId(rec.type)] = reminder
         break
-      case 'tagOrder':
+      case recordType.tagOrder:
         // res.tagOrder = rec.payload
         res.dataReminders[getRecordId(rec.type)] = reminder
         break
