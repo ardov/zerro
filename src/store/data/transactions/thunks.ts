@@ -5,7 +5,7 @@ import { AppThunk } from 'store'
 import {
   OptionalExceptFor,
   TTagId,
-  TRawransaction,
+  TRawTransaction,
   TTransactionId,
 } from 'types'
 import { applyClientPatch } from 'store/data'
@@ -75,7 +75,7 @@ export const splitTransfer =
     if (list) dispatch(applyClientPatch({ transaction: list }))
   }
 
-export type TransactionPatch = OptionalExceptFor<TRawransaction, 'id'>
+export type TransactionPatch = OptionalExceptFor<TRawTransaction, 'id'>
 export const applyChangesToTransaction =
   (patch: TransactionPatch): AppThunk =>
   (dispatch, getState) => {
@@ -144,9 +144,9 @@ const modifyComment = (prevComment: string | null, newComment?: string) => {
   return newComment.replaceAll('$&', prevComment || '')
 }
 
-function split(raw: TRawransaction) {
+function split(raw: TRawTransaction) {
   if (!(raw.income && raw.outcome)) return null
-  const result: TRawransaction[] = [
+  const result: TRawTransaction[] = [
     {
       ...raw,
       changed: Date.now(),

@@ -381,7 +381,7 @@ export type TZmTransaction = {
   longitude: number | null
 }
 
-export type TRawransaction = Modify<
+export type TRawTransaction = Modify<
   TZmTransaction,
   {
     changed: TMsTime
@@ -394,7 +394,7 @@ export type TRawransaction = Modify<
   }
 >
 
-export type TTransaction = TRawransaction & {
+export type TTransaction = TRawTransaction & {
   incomeFxCode: TFxCode
   outcomeFxCode: TFxCode
   opIncomeFxCode: TFxCode | null
@@ -452,7 +452,7 @@ export interface TDiff {
   budget?: TBudget[]
   reminder?: TRawReminder[]
   reminderMarker?: TRawReminderMarker[]
-  transaction?: TRawransaction[]
+  transaction?: TRawTransaction[]
 }
 
 export type TZmRequest = TZmDiff & {
@@ -491,7 +491,7 @@ export type TDataStore = {
   budget: ById<TBudget>
   reminder: ById<TRawReminder>
   reminderMarker: ById<TRawReminderMarker>
-  transaction: ById<TRawransaction>
+  transaction: ById<TRawTransaction>
 }
 export type TDataStorePatch = Partial<TDataStore> & {
   deletion?: TZmDeletionObject[]

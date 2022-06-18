@@ -6,7 +6,7 @@ import { getSortedTransactions } from 'store/data/transactions'
 import { getTransactionsHistory } from 'store/data/transactions'
 import { eachDayOfInterval, startOfDay } from 'date-fns'
 import { convertCurrency } from 'store/data/instruments'
-import { TRawransaction, TRawAccount, TAccountId, TInstrumentId } from 'types'
+import { TRawTransaction, TRawAccount, TAccountId, TInstrumentId } from 'types'
 
 interface DayNode {
   date: number
@@ -19,7 +19,7 @@ interface History {
 
 export const getAccountsHistory = createSelector(
   [getTransactionsHistory, getAccounts],
-  (transactions: TRawransaction[], accounts: { [x: string]: TRawAccount }) => {
+  (transactions: TRawTransaction[], accounts: { [x: string]: TRawAccount }) => {
     if (!transactions?.length || !accounts) return {}
     let historyById = {} as History
     const firstDate = +new Date(transactions[0].date)
@@ -113,9 +113,9 @@ export const getAccountsHistory = createSelector(
 interface InfoNode {
   income: number
   outcome: number
-  incomeTransactions: TRawransaction[]
-  outcomeTransactions: TRawransaction[]
-  transferTransactions: TRawransaction[]
+  incomeTransactions: TRawTransaction[]
+  outcomeTransactions: TRawTransaction[]
+  transferTransactions: TRawTransaction[]
 }
 
 export interface Stats {
@@ -142,7 +142,7 @@ const createInfoNode = (): InfoNode => ({
 export const getYearStats = (year: number) =>
   createSelector(
     [getSortedTransactions, convertCurrency],
-    (allTransactions: TRawransaction[], convert) => {
+    (allTransactions: TRawTransaction[], convert) => {
       if (!allTransactions?.length) return null
       const dateStart = +new Date(year, 0, 1)
       const dateEnd = +new Date(year + 1, 0, 1)
@@ -164,7 +164,7 @@ export const getYearStats = (year: number) =>
         byWeekday: {},
       } as Stats
 
-      function addToNode(node: InfoNode, tr: TRawransaction) {
+      function addToNode(node: InfoNode, tr: TRawTransaction) {
         const type = getType(tr)
         if (type === 'transfer') {
           node.transferTransactions.push(tr)
@@ -180,9 +180,9 @@ export const getYearStats = (year: number) =>
       }
 
       function groupBy(
-        field: keyof TRawransaction | Function,
+        field: keyof TRawTransaction | Function,
         object: any,
-        tr: TRawransaction
+        tr: TRawTransaction
       ) {
         let key
         if (typeof field === 'string') key = tr[field]
@@ -211,20 +211,20 @@ export const getYearStats = (year: number) =>
     }
   )
 
-function getMainTag(tr: TRawransaction) {
+function getMainTag(tr: TRawTransaction) {
   return tr.tag?.[0] || 'null'
 }
-function getMonth(tr: TRawransaction) {
+function getMonth(tr: TRawTransaction) {
   return new Date(tr.date).getMonth()
 }
-function getWeekday(tr: TRawransaction) {
+function getWeekday(tr: TRawTransaction) {
   return new Date(tr.date).getDay()
 }
 
 function compareByAmount(
   convert: (amount: number, id: TInstrumentId) => number
 ) {
-  return function (tr1: TRawransaction, tr2: TRawransaction) {
+  return function (tr1: TRawTransaction, tr2: TRawTransaction) {
     const amount1 = Math.max(
       convert(tr1.income, tr1.incomeInstrument),
       convert(tr1.outcome, tr1.outcomeInstrument)

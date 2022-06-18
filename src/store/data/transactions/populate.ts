@@ -2,7 +2,7 @@ import {
   TInstrument,
   Modify,
   TRawTag,
-  TRawransaction,
+  TRawTransaction,
   TrType,
   TRawAccount,
   TTagId,
@@ -17,7 +17,7 @@ interface DataSources {
 }
 
 export type PopulatedTransaction = Modify<
-  TRawransaction,
+  TRawTransaction,
   {
     incomeInstrument: TInstrument
     incomeAccount: TRawAccount
@@ -32,7 +32,7 @@ export type PopulatedTransaction = Modify<
 
 export const populate = (
   { instruments, accounts, tags }: DataSources,
-  raw: TRawransaction
+  raw: TRawTransaction
 ) => ({
   ...raw,
   incomeInstrument: instruments[raw.incomeInstrument],

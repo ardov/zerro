@@ -1,10 +1,11 @@
 import { add, sub } from 'helpers/currencyHelpers'
+import { getType } from 'store/data/transactions/helpers'
 import {
   TAccountId,
   TInstrumentId,
   TMerchantId,
   TTagId,
-  TTransaction,
+  TRawTransaction,
   TrType,
 } from 'types'
 
@@ -14,7 +15,7 @@ type TFxAmount = {
 
 type TAccumulated = {
   amount: TFxAmount
-  transactions: TTransaction[]
+  transactions: TRawTransaction[]
 }
 
 type TMonthInfo = {
@@ -59,15 +60,16 @@ const makeMonthInfo = (date: TMonthInfo['date']): TMonthInfo => ({
 })
 
 export function getRealMoneyFlow(
-  transactions: TTransaction[],
-  inBudgetAccIds: TAccountId[]
+  transactions: TRawTransaction[],
+  inBudgetAccIds: TAccountId[],
+  debtAccId: TAccountId
 ): TMoneyFlowByMonth {
   const result: TMoneyFlowByMonth = {}
 
   transactions.forEach(tr => {
     if (!isInBudget(tr, inBudgetAccIds)) return
     const date = getTrMonth(tr)
-    const type = getTrType(tr)
+    const type = getType(tr, debtAccId)
     const mainTag = getMainTag(tr) || 'null'
     result[date] ??= makeMonthInfo(date)
     addToTotal(result[date], tr, inBudgetAccIds)
@@ -98,7 +100,7 @@ export function getRealMoneyFlow(
 
   function addToTotal(
     acc: TMonthInfo,
-    tr: TTransaction,
+    tr: TRawTransaction,
     inBudgetAccs: TAccountId[]
   ): void {
     if (inBudgetAccs.includes(tr.incomeAccount)) {
@@ -120,19 +122,15 @@ export function getRealMoneyFlow(
   return result
 }
 
-function getTrMonth(tr: TTransaction): TMonthInfo['date'] {
+function getTrMonth(tr: TRawTransaction): TMonthInfo['date'] {
   return new Date(tr.date).toISOString().slice(0, 7)
 }
 
-function getTrType(tr: TTransaction): TrType {
-  return tr.type
-}
-
-function getMainTag(tr: TTransaction): TTagId | null {
+function getMainTag(tr: TRawTransaction): TTagId | null {
   return tr.tag?.[0] || null
 }
 
-function isInBudget(tr: TTransaction, inBudgetAccs: TAccountId[]): boolean {
+function isInBudget(tr: TRawTransaction, inBudgetAccs: TAccountId[]): boolean {
   return (
     inBudgetAccs.includes(tr.incomeAccount) ||
     inBudgetAccs.includes(tr.outcomeAccount)

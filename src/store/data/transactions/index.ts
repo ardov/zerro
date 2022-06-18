@@ -6,7 +6,7 @@ import { getPopulatedTags } from 'store/data/tags'
 import { compareDates, getTime, isDeleted } from './helpers'
 import { populate, PopulatedTransaction } from './populate'
 import { RootState } from 'store'
-import { TRawransaction, TTransactionId } from 'types'
+import { TRawTransaction, TTransactionId } from 'types'
 import { withPerf } from 'helpers/performance'
 
 export const getTransactions = (state: RootState) =>
@@ -55,7 +55,7 @@ export const getHistoryStart = createSelector(
 
 export const debtorGetter = createSelector(
   [getMerchants],
-  merchants => (tr: TRawransaction) => {
+  merchants => (tr: TRawTransaction) => {
     const instrument = tr.incomeInstrument || tr.outcomeInstrument
     const merchantTitle = tr.merchant && merchants[tr.merchant]?.title
     return clean(merchantTitle || tr.payee || '') + '-' + instrument

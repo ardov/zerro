@@ -12,7 +12,7 @@ import {
   TRawAccount,
   TRawTag,
   TBudget,
-  TRawransaction,
+  TRawTransaction,
   TZmAccount,
   TZmReminder,
   TZmTransaction,
@@ -125,13 +125,13 @@ export const dataConverters = {
   },
 
   transaction: {
-    toClient: (el: TZmTransaction): TRawransaction => ({
+    toClient: (el: TZmTransaction): TRawTransaction => ({
       ...el,
       changed: toMs(el.changed),
       created: toMs(el.created),
       date: toMs(el.date),
     }),
-    toServer: (el: TRawransaction): TZmTransaction => ({
+    toServer: (el: TRawTransaction): TZmTransaction => ({
       ...el,
       changed: toUnix(el.changed),
       created: toUnix(el.created),
