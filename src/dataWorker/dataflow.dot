@@ -54,7 +54,7 @@ subgraph cluster_COUNTRIES {
   combineCountries
 
   node [color="#ffcccc", fontcolor="black", shape="box"] // Results
-  fxIdMap -> combineCountries [color="#dd0044"]
+  // fxIdMap -> combineCountries [color="#dd0044"]
   rawCountries -> combineCountries -> countries
 }
 
@@ -80,7 +80,7 @@ subgraph cluster_USERS {
   combineUsers
 
   node [color="#ffcccc", fontcolor="black", shape="box"] // Results
-  fxIdMap -> combineUsers [color="#dd0044"]
+  // fxIdMap -> combineUsers [color="#dd0044"]
   rawUsers -> combineUsers -> users
 
   users -> mainUser
@@ -99,7 +99,7 @@ subgraph cluster_ACCOUNTS {
   combineAccounts
 
   node [color="#ffcccc", fontcolor="black", shape="box"] // Results
-  fxIdMap -> combineAccounts [color="#dd0044"]
+  // fxIdMap -> combineAccounts [color="#dd0044"]
   rawAccounts -> combineAccounts -> accounts
 
   rawAccounts -> debtAccountId
@@ -138,7 +138,7 @@ subgraph cluster_BUDGETS_ZM {
   combineBudgets_zm
 
   node [color="#ffcccc", fontcolor="black", shape="box"] // Results
-  fxIdMap -> combineBudgets_zm [color="#dd0044"]
+  // fxIdMap -> combineBudgets_zm [color="#dd0044"]
   rawBudgets_zm -> combineBudgets_zm -> budgets_zm
 }
 
@@ -153,7 +153,7 @@ subgraph cluster_REMINDERS {
   combineReminders
 
   node [color="#ffcccc", fontcolor="black", shape="box"] // Results
-  fxIdMap -> combineReminders [color="#dd0044"]
+  // fxIdMap -> combineReminders [color="#dd0044"]
   rawReminders -> combineReminders -> reminders
 }
 
@@ -168,7 +168,7 @@ subgraph cluster_REMINDER_MARKERS {
   combineReminderMarkers
 
   node [color="#ffcccc", fontcolor="black", shape="box"] // Results
-  fxIdMap -> combineReminderMarkers [color="#dd0044"]
+  // fxIdMap -> combineReminderMarkers [color="#dd0044"]
   rawReminderMarkers -> combineReminderMarkers -> reminderMarkers
 }
 
@@ -183,7 +183,7 @@ subgraph cluster_TRANSACTIONS {
   combineTransactions
 
   node [color="#ffcccc", fontcolor="black", shape="box"] // Results
-  fxIdMap -> combineTransactions [color="#dd0044"]
+  // fxIdMap -> combineTransactions [color="#dd0044"]
   debtAccountId -> combineTransactions [color="#dd0044"]
   rawTransactions -> combineTransactions -> transactions
 }

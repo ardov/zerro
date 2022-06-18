@@ -10,13 +10,12 @@ import { workerMethods } from 'worker'
 export const logIn = (): AppThunk => async (dispatch, getState) => {
   dispatch(logOut())
   const token = await ZenApi.getToken()
-  workerMethods.logIn(token)
   dispatch(setToken(token))
   dispatch(syncData())
 }
 
 export const logOut = (): AppThunk => (dispatch, getState) => {
-  workerMethods.logOut()
+  workerMethods.clearStorage()
   dispatch(resetData())
   dispatch(setToken(null))
   dispatch(clearLocalData())

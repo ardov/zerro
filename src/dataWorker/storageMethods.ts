@@ -50,7 +50,7 @@ const localKeys: TLocalDataKey[] = [
 ]
 
 const BASE_NAME = 'zerro_data'
-const STORE_NAME = 'data'
+const STORE_NAME = 'serverData'
 
 const storage = getIDBStorage(BASE_NAME, STORE_NAME)
 

@@ -7,7 +7,7 @@ import { setSyncData } from 'store/lastSync'
 import { formatDate } from 'helpers/format'
 import { AppThunk } from 'store'
 import { TDiff, TLocalData } from 'types'
-import { sync, workerMethods } from 'worker'
+import { sync } from 'worker'
 import { getDiff, applyServerPatch } from 'store/data'
 import { keys } from 'helpers/keys'
 
@@ -23,7 +23,6 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
   const syncStartTime = Date.now()
   dispatch(setPending(true))
 
-  workerMethods.syncData(token)
   const response = await sync(token, diff)
   dispatch(setPending(false))
   dispatch(
@@ -44,7 +43,7 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
     dispatch(saveDataLocally(changedDomains))
     console.log(`✅ Данные обновлены ${formatDate(new Date(), 'HH:mm:ss')}`)
   } else {
-    console.warn('Syncing failed', response.error)
+    console.warn('Syncing failed', response)
     sendEvent(`Error: ${response.error}`)
     // captureError(err)
   }

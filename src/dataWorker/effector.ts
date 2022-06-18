@@ -1,24 +1,29 @@
 import { createDomain, forward, sample } from 'effector'
+import { keys } from 'helpers/keys'
 import ZenApi from 'services/ZenApi'
-import {
-  TAccount,
-  TDataStore,
-  TDiff,
-  TMerchant,
-  TReminder,
-  TToken,
-  TZmDiff,
-} from 'types'
-import { getBudgetId } from './converters/budget'
+import { TDataStore, TDiff, TToken, TZmDiff } from 'types'
+import { convertAccount } from './converters/account'
+import { convertBudget, getBudgetId } from './converters/budget'
+import { convertCompany } from './converters/company'
+import { convertCountry } from './converters/country'
 import { convertDiff } from './converters/diff'
-import { getLocalData, setLocalKey } from './storageMethods'
+import { convertInstrument } from './converters/instrument'
+import { convertMerchant } from './converters/merchant'
+import { convertReminder } from './converters/reminder'
+import { convertReminderMarker } from './converters/reminderMarker'
+import { convertTag } from './converters/tag'
+import { convertTransaction } from './converters/transaction'
+import { convertUser } from './converters/user'
+import { msToUnix } from './converters/utils'
+import { clearStorage, getLocalData, setLocalKey } from './storageMethods'
 
 const workerData = createDomain('workerData')
 
 // External events
-export const syncInitiated = workerData.createEvent()
-export const logInInitiated = workerData.createEvent<TToken>()
-export const logOutInitiated = workerData.createEvent()
+export const initTriggered = workerData.createEvent()
+export const syncTriggered = workerData.createEvent<TDiff>()
+export const loggedIn = workerData.createEvent<TToken>()
+export const logOutTriggered = workerData.createEvent()
 
 // Internal events
 const dataSyncedRaw = workerData.createEvent<TZmDiff>()
@@ -38,36 +43,98 @@ $serverData
   .on(resetData, makeDataStore)
   .watch(state => console.log('☄️ Data updated', state))
 
-// Sync effect
-const syncFx = workerData.createEffect(async (token: TToken) => {
-  if (!token) throw new Error('No token provided')
-  return ZenApi.getData(token)
-})
-syncFx.done.watch(({ result }) => dataSyncedRaw(result))
+// Derivative stores
+const $serverTimestamp = $serverData.map(state => state.serverTimestamp)
+const $instrument = $serverData.map(d => d.instrument)
+const $country = $serverData.map(d => d.country)
+const $company = $serverData.map(d => d.company)
+const $user = $serverData.map(d => d.user)
+const $account = $serverData.map(d => d.account)
+const $merchant = $serverData.map(d => d.merchant)
+const $tag = $serverData.map(d => d.tag)
+const $budget = $serverData.map(d => d.budget)
+const $reminder = $serverData.map(d => d.reminder)
+const $reminderMarker = $serverData.map(d => d.reminderMarker)
+const $transaction = $serverData.map(d => d.transaction)
 
-// Log in effect
-export const logInFx = workerData.createEffect(async (token: TToken) => {
+/**
+ * Sync effect
+ */
+export const syncFx = workerData.createEffect(
+  async (props: { token: TToken; diff?: TDiff }) => {
+    const { token, diff } = props
+
+    try {
+      if (!token) return { error: 'No token' }
+      let zmDiff = diff && convertDiff.toServer(diff)
+      let data = await ZenApi.getData(token, zmDiff)
+      dataSyncedRaw(data)
+      return { data: convertDiff.toClient(data) }
+    } catch (error: any) {
+      return { error: error.message as string }
+    }
+  }
+)
+
+/**
+ * Log in effect
+ */
+const logInFx = workerData.createEffect(async (token: TToken) => {
   if (!token) throw new Error('No token provided')
   console.log('☄️ Log in')
   tokenSet(token)
-  syncFx(token)
+  syncFx({ token })
 })
-forward({ from: logInInitiated, to: logInFx })
-
-sample({
-  clock: syncInitiated,
-  source: $token,
-  target: syncFx,
-})
+forward({ from: loggedIn, to: logInFx })
 
 /**
  * Load data from indexedDB
  */
-export const loadLocalDataFx = workerData.createEffect(async () => {
+export const getLocalDataFx = workerData.createEffect(async () => {
+  console.log('☄️ Get local data')
   const { token, ...data } = await getLocalData()
   tokenSet(token || null)
   dataSyncedRaw(data)
-  return data
+  return convertDiff.toClient(data)
+})
+
+/**
+ * Clear storage effect
+ */
+const clearStorageFx = workerData.createEffect(async () => {
+  console.log('☄️ Clear storage')
+  return clearStorage()
+})
+
+/**
+ * Save data locally effect
+ */
+// const saveDataLocally = workerData.createEffect(async (dataToSave: TZmDiff) => {
+//   keys(dataToSave).forEach(key => {
+//     setLocalKey(key, dataToSave[key])
+//   })
+// })
+
+// LOGIC
+
+// Sync when syncTriggered
+sample({
+  clock: syncTriggered,
+  source: $token,
+  fn: (token, diff) => ({ token, diff }),
+  target: syncFx,
+})
+
+// Fire dataSyncedRaw when syncFx is done
+// sample({
+//   clock: syncFx.done,
+//   fn: syncResult => syncResult.result,
+//   target: dataSyncedRaw,
+// })
+
+sample({
+  clock: logOutTriggered,
+  target: [clearStorageFx, resetData],
 })
 
 // ---------------------------------------------------------------------

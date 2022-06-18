@@ -1,7 +1,4 @@
-import { TAccountId } from '../models/account'
-import { TISODate, TUnits } from '../models/common'
-import { TFxCode } from '../models/instrument'
-import { TTagId } from '../models/tag'
+import { TAccountId, TFxCode, TISODate, TTagId, TUnits } from 'types'
 
 // GOALS
 export enum goalType {

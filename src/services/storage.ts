@@ -1,28 +1,24 @@
-import { openDB, deleteDB } from 'idb'
+import { openDB } from 'idb'
 
 const BASE_NAME = 'zerro_data'
 const STORE_NAME = 'serverData'
 const VERSION = 1
 
 export function getIDBStorage(base: string, store: string) {
-  async function getDB() {
-    return await openDB(base, VERSION, {
-      upgrade: db => db.createObjectStore(store),
-    })
-  }
+  const dbPromise = openDB(base, VERSION, {
+    upgrade(db) {
+      db.createObjectStore(store)
+    },
+  })
   return {
     set: async (key: string, value: any) => {
-      const db = await getDB()
-      return db.put(store, value, key)
+      return (await dbPromise).put(store, value, key)
     },
     get: async (key: string) => {
-      const db = await getDB()
-      return db.get(store, key)
+      return (await dbPromise).get(store, key)
     },
-    clear: () => {
-      deleteDB(base, {
-        blocked: () => console.log('DB not deleted'),
-      })
+    clear: async () => {
+      return (await dbPromise).clear(store)
     },
   }
 }

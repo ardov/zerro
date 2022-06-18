@@ -1,22 +1,36 @@
-import { loadLocalDataFx, logInFx } from './effector'
+import {
+  getLocalDataFx,
+  initTriggered,
+  loggedIn,
+  logOutTriggered,
+  syncFx,
+  syncTriggered,
+} from './effector'
+import { TLocalData } from 'types'
+import { convertDiff } from './converters/diff'
 
-// Outlining external interface of the data worker
-export const dataWorkerMethods = {
-  loadLocalData: loadLocalDataFx,
-  init: () => console.log('init'),
-  // Initiate first data loading with token
-  logIn: logInFx,
+// eslint-disable-next-line no-restricted-globals
+// const ctx: Worker = self as any
+// type Action = { payload: any; type: string }
+// function dispatch(action: Action) {
+//   ctx.postMessage(action)
+//   // ctx.addEventListener('message', handleMessage)
+// }
+// function getState() {
+//   return store
+// }
 
-  /** Update data and then send */
-  syncData: (token: string) => console.log('syncData', token),
-  applyPatch: () => console.log('applyPatch'),
-  loadJSON: () => console.log('loadJSON'),
-  reloadData: () => console.log('reloadData'),
-  logOut: () => console.log('logOut'),
-
-  // setMerchants: (merchants: TMerchant[]) =>
-  //   console.log('setMerchants', merchants),
-  // setReminders: (reminders: TReminder[]) =>
-  //   console.log('setReminders', reminders),
-  // setAccounts: (accounts: TAccount[]) => console.log('setAccounts', accounts),
+export const workerMethods = {
+  logIn: loggedIn,
+  convertZmToLocal: convertDiff.toClient,
+  getLocalData: () => {
+    initTriggered()
+    return getLocalDataFx()
+  },
+  clearStorage: logOutTriggered,
+  saveLocalData: (data: TLocalData) => {
+    console.log('saveLocalData', data)
+    // keys(data).forEach(key => storage.set(key, data[key]))
+  },
+  sync: syncFx,
 }
