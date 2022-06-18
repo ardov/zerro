@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import styled from '@emotion/styled'
-import { TRawransaction as ITransaction, TTransactionType } from 'types'
+import { TRawransaction as ITransaction, TrType } from 'types'
 import { Theme, TypographyVariant } from '@mui/material'
 import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'
 import { sendEvent } from 'helpers/tracking'
@@ -8,7 +8,7 @@ import { sendEvent } from 'helpers/tracking'
 type TransactionProps = {
   id: string
   transaction: ITransaction
-  type: TTransactionType
+  type: TrType
   isInSelectionMode: boolean
   isChecked: boolean
   isOpened: boolean

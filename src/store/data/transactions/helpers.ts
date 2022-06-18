@@ -2,7 +2,7 @@ import startOfMonth from 'date-fns/startOfMonth'
 import startOfDay from 'date-fns/startOfDay'
 import startOfWeek from 'date-fns/startOfWeek'
 import { checkRaw, FilterConditions } from './filtering'
-import { TRawransaction, TTransactionId, TTransactionType } from 'types'
+import { TRawransaction, TTransactionId, TrType } from 'types'
 
 /**
  * Groups array of transactions
@@ -44,12 +44,12 @@ export const isDeleted = (tr: TRawransaction) => {
   return false
 }
 
-export function getType(tr: TRawransaction, debtId?: string): TTransactionType {
-  if (debtId && tr.incomeAccount === debtId) return 'outcomeDebt'
-  if (debtId && tr.outcomeAccount === debtId) return 'incomeDebt'
-  if (tr.income && tr.outcome) return 'transfer'
-  if (tr.outcome) return 'outcome'
-  return 'income'
+export function getType(tr: TRawransaction, debtId?: string): TrType {
+  if (debtId && tr.incomeAccount === debtId) return TrType.outcomeDebt
+  if (debtId && tr.outcomeAccount === debtId) return TrType.incomeDebt
+  if (tr.income && tr.outcome) return TrType.transfer
+  if (tr.outcome) return TrType.outcome
+  return TrType.income
 }
 
 export function getTime(tr: TRawransaction) {

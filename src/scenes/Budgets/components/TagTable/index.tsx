@@ -19,6 +19,7 @@ import { getInBudgetAccounts } from 'store/data/accounts'
 import { FilterConditions } from 'store/data/transactions/filtering'
 import { getAmountsById } from 'scenes/Budgets/selectors'
 import { useSearchParam } from 'helpers/useSearchParam'
+import { TrType } from 'types'
 
 export type MetricType = 'outcome' | 'available' | 'budgeted'
 
@@ -85,12 +86,8 @@ export const TagTable: FC<TagTableProps> = props => {
 
   const tagGroupProps = tagsTree.map(tag => {
     const { id } = tag
-    const {
-      totalAvailable,
-      totalOutcome,
-      totalBudgeted,
-      childrenAvailable,
-    } = amounts[id]
+    const { totalAvailable, totalOutcome, totalBudgeted, childrenAvailable } =
+      amounts[id]
 
     const isVisible = Boolean(
       tag.showOutcome ||
@@ -199,7 +196,7 @@ const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
 
   let prefilter: FilterConditions[] = []
   prefilter.push({
-    type: 'outcome',
+    type: TrType.outcome,
     dateFrom: month,
     dateTo: endOfMonth(month),
     accountsFrom: accountsInBudget,
@@ -208,14 +205,14 @@ const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
   tagIds.forEach(id => {
     if (tagAccMap[id]) {
       prefilter.push({
-        type: 'transfer',
+        type: TrType.transfer,
         dateFrom: month,
         dateTo: endOfMonth(month),
         accountsFrom: accountsInBudget,
         accountsTo: tagAccMap[id],
       })
       prefilter.push({
-        type: 'transfer',
+        type: TrType.transfer,
         dateFrom: month,
         dateTo: endOfMonth(month),
         accountsFrom: tagAccMap[id],

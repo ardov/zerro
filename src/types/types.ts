@@ -340,12 +340,13 @@ export type TReminderMarker = TRawReminderMarker & {
 
 export type TTransactionId = string
 
-export type TTransactionType =
-  | 'income'
-  | 'outcome'
-  | 'transfer'
-  | 'incomeDebt'
-  | 'outcomeDebt'
+export enum TrType {
+  income = 'income',
+  outcome = 'outcome',
+  transfer = 'transfer',
+  incomeDebt = 'incomeDebt',
+  outcomeDebt = 'outcomeDebt',
+}
 
 export type TZmTransaction = {
   id: TTransactionId
@@ -399,7 +400,7 @@ export type TTransaction = TRawransaction & {
   opIncomeFxCode: TFxCode | null
   opOutcomeFxCode: TFxCode | null
   time: TMsTime
-  type: TTransactionType
+  type: TrType
   mainTag: TTagId | null
   incomeBalanceBefore: TMilliUnits
   outcomeBalanceBefore: TMilliUnits

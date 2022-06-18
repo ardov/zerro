@@ -1,4 +1,4 @@
-import { TAccountId, TTagId, TRawransaction, TTransactionType } from 'types'
+import { TAccountId, TTagId, TRawransaction, TrType } from 'types'
 import { keys } from 'helpers/keys'
 import { getType, isDeleted, isNew } from './helpers'
 
@@ -25,7 +25,7 @@ type DefaultConditions = {
 
 type CustomConditions = {
   search?: null | string
-  type?: null | TTransactionType
+  type?: null | TrType
   showDeleted?: boolean
   isNew?: boolean
   dateFrom?: null | number | Date

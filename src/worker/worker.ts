@@ -66,5 +66,3 @@ const obj = {
 
 export type WorkerObj = typeof obj
 Comlink.expose(obj)
-// export type WorkerObj = typeof workerMethods
-// Comlink.expose(workerMethods)

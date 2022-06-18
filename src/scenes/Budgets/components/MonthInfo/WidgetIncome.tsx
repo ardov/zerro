@@ -15,6 +15,7 @@ import { useMonth } from 'scenes/Budgets/pathHooks'
 import { formatDate } from 'helpers/format'
 import { FilterConditions } from 'store/data/transactions/filtering'
 import { useToggle } from 'helpers/useToggle'
+import { TrType } from 'types'
 
 type IncomeDataPoint = {
   id: string
@@ -59,7 +60,7 @@ export function WidgetIncome() {
     .sort((a, b) => b.amount - a.amount)
 
   const filterConditions: FilterConditions = {
-    type: 'income',
+    type: TrType.income,
     dateFrom: month,
     dateTo: endOfMonth(month),
     mainTags: selected,

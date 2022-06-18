@@ -3,7 +3,7 @@ import {
   Modify,
   TRawTag,
   TRawransaction,
-  TTransactionType,
+  TrType,
   TRawAccount,
   TTagId,
   ById,
@@ -26,7 +26,7 @@ export type PopulatedTransaction = Modify<
     outcomeAccount: TRawAccount
     opOutcomeInstrument: TInstrument
     tag: TRawTag[] | null
-    type: TTransactionType
+    type: TrType
   }
 >
 

@@ -5,7 +5,7 @@ import { useAppSelector } from 'store'
 import { getMerchants } from 'store/data/selectors'
 import { Amount } from 'components/Amount'
 import { getAccounts } from 'store/data/accounts'
-import { TRawransaction as ITransaction, TTransactionType } from 'types'
+import { TRawransaction, TrType } from 'types'
 import { getPopulatedTags } from 'store/data/tags'
 import { Typography } from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
@@ -16,8 +16,8 @@ type HTMLDivProps = React.DetailedHTMLProps<
   HTMLDivElement
 >
 type TrElementProps = HTMLDivProps & {
-  tr: ITransaction
-  trType: TTransactionType
+  tr: TRawransaction
+  trType: TrType
 }
 
 type SymbolProps = TrElementProps & {
