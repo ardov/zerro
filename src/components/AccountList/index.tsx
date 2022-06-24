@@ -7,7 +7,7 @@ import { Account, Subheader } from './components'
 import { TPopulatedAccount } from 'types'
 import { Amount } from 'components/Amount'
 import { Tooltip } from 'components/Tooltip'
-import { useToggle } from 'helpers/useToggle'
+import { useToggle } from 'shared/hooks/useToggle'
 
 export default function AccountList({ className = '' }) {
   const inBudget = useAppSelector(getInBudgetAccounts)

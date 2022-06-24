@@ -18,7 +18,7 @@ import { getTagAccMap } from 'store/data/hiddenData/accTagMap'
 import { getInBudgetAccounts } from 'store/data/accounts'
 import { FilterConditions } from 'store/data/transactions/filtering'
 import { getAmountsById } from 'scenes/Budgets/selectors'
-import { useSearchParam } from 'helpers/useSearchParam'
+import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { TrType } from 'types'
 
 export type MetricType = 'outcome' | 'available' | 'budgeted'

@@ -34,14 +34,14 @@ import { patchTag } from 'store/data/tags/thunks'
 import { sendEvent } from 'helpers/tracking'
 import { TTag } from 'types'
 import { TagEditDialog } from 'components/TagEditDialog'
-import { useToggle } from 'helpers/useToggle'
+import { useToggle } from 'shared/hooks/useToggle'
 import { getTagComment, setTagComment } from 'store/data/hiddenData/tagMeta'
 import { BudgetPopover } from '../BudgetPopover'
 import { getGoals } from 'store/data/hiddenData/goals'
 import { goalToWords } from 'store/data/hiddenData/goals/helpers'
-import { useDebounce } from 'helpers/useDebounce'
+import { useDebounce } from 'shared/hooks/useDebounce'
 import { GoalPopover } from '../GoalPopover'
-import { useSearchParam } from 'helpers/useSearchParam'
+import { useSearchParam } from 'shared/hooks/useSearchParam'
 
 type TagPreviewProps = {
   id: string

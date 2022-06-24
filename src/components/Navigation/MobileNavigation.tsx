@@ -15,7 +15,7 @@ import {
   SyncAltIcon,
 } from 'components/Icons'
 import { makeStyles } from '@mui/styles'
-import { useHomeBar } from 'helpers/useHomeBar'
+import { useHomeBar } from 'shared/hooks/useHomeBar'
 
 const useStyles = makeStyles(theme => ({ action: { minWidth: 32 } }))
 

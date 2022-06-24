@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { useAppSelector } from 'store'
 import { useMonth } from '../pathHooks'
-import { useSearchParam } from 'helpers/useSearchParam'
+import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { TransactionsDrawer } from 'components/TransactionsDrawer'
 import { getInBudgetAccounts } from 'store/data/accounts'
 import { getTagAccMap } from 'store/data/hiddenData/accTagMap'

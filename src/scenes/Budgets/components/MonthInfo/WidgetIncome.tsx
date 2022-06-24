@@ -14,7 +14,7 @@ import { TransactionsDrawer } from 'components/TransactionsDrawer'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import { formatDate } from 'helpers/format'
 import { FilterConditions } from 'store/data/transactions/filtering'
-import { useToggle } from 'helpers/useToggle'
+import { useToggle } from 'shared/hooks/useToggle'
 import { TrType } from 'types'
 
 type IncomeDataPoint = {

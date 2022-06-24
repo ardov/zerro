@@ -1,5 +1,5 @@
 import React, { FC, useCallback } from 'react'
-import { useSearchParam } from 'helpers/useSearchParam'
+import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { useAppSelector } from 'store'
 import { RootState } from 'store'
 import { getTransactions } from 'store/data/transactions'

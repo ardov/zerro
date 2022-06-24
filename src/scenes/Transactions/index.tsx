@@ -12,7 +12,7 @@ import { makeStyles } from '@mui/styles'
 import { TransactionPreview } from 'components/TransactionPreview'
 import { sendEvent } from 'helpers/tracking'
 import { Helmet } from 'react-helmet'
-import { useSearchParam } from 'helpers/useSearchParam'
+import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { useAppSelector } from 'store'
 import { getTransactions } from 'store/data/transactions'
 

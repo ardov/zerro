@@ -30,10 +30,14 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import add from 'date-fns/add'
 import sub from 'date-fns/sub'
 import { MapWidget } from './MapWidget'
-import { useSearchParam } from 'helpers/useSearchParam'
+import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
+import { getAggregatedTransactions } from 'entities/selector'
+import { getDebtors } from 'entities/debtors/collectDebtors'
 
 export default function BudgetsRouter() {
+  const t1 = useAppSelector(getAggregatedTransactions)
+  const t2 = useAppSelector(getDebtors)
   const [month] = useMonth()
   const monthList = useAppSelector(getMonthDates)
   const minMonth = monthList[0]

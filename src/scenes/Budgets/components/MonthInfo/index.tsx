@@ -24,7 +24,7 @@ import { OverspentNotice } from './OverspentNotice'
 import { CalculationErrorNotice } from './CalculationErrorNotice'
 import { WidgetOutcome } from './WidgetOutcome'
 import { useMonth } from 'scenes/Budgets/pathHooks'
-import { useToggle } from 'helpers/useToggle'
+import { useToggle } from 'shared/hooks/useToggle'
 
 type MonthInfoProps = BoxProps & {
   onClose: () => void
@@ -37,12 +37,8 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const [showMore, toggleMore] = useToggle(false)
 
-  const {
-    overspent,
-    transferOutcome,
-    transferFees,
-    realBudgetedInFuture,
-  } = totals
+  const { overspent, transferOutcome, transferFees, realBudgetedInFuture } =
+    totals
 
   const dispatch = useAppDispatch()
 

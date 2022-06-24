@@ -11,7 +11,7 @@ import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
 import { sendEvent } from 'helpers/tracking'
 // import { getGroupedTransactions } from 'worker'
-import { useDebounce } from 'helpers/useDebounce'
+import { useDebounce } from 'shared/hooks/useDebounce'
 import { TTransactionId } from 'types'
 
 type TransactionListProps = {

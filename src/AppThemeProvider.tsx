@@ -3,7 +3,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider as JSSThemeProvider } from '@mui/styles'
 import { ThemeProvider } from '@mui/material/styles'
 import { createTheme } from 'helpers/createTheme'
-import { useThemeType } from 'helpers/useThemeType'
+import { useThemeType } from 'shared/hooks/useThemeType'
 import { Helmet } from 'react-helmet'
 import { Global, css } from '@emotion/react'
 
