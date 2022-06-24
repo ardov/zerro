@@ -6,7 +6,7 @@ import {
 import { getRootUser } from 'store/data/users'
 import { getPopulatedTag } from 'store/data/tags'
 import { getAmountsByTag, TagAmounts } from '../selectors'
-import { sendEvent } from 'helpers/tracking'
+import { sendEvent } from 'shared/helpers/tracking'
 import { makeBudget } from 'store/data/budgets'
 import { getBudgetsByMonthAndTag, getBudget } from 'store/data/budgets'
 import { getTags } from 'store/data/tags'
@@ -18,7 +18,7 @@ import { applyClientPatch } from 'store/data'
 import { AppThunk } from 'store'
 import { TBudget, ById } from 'types'
 import { getMetaForTag } from 'store/data/hiddenData/tagMeta'
-import { round } from 'helpers/currencyHelpers'
+import { round } from 'shared/helpers/currencyHelpers'
 
 export const moveFunds =
   (

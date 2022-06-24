@@ -15,7 +15,7 @@ import { getGoals, setGoal, deleteGoal } from 'store/data/hiddenData/goals'
 import { goalType } from 'store/data/hiddenData/constants'
 import { CloseIcon } from 'components/Icons'
 import MonthSelectPopover from 'scenes/Budgets/MonthSelectPopover'
-import { formatDate } from 'helpers/format'
+import { formatDate } from 'shared/helpers/format'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 
@@ -34,9 +34,8 @@ export const GoalPopover: FC<PopoverProps & { id: string }> = props => {
   const [type, setType] = useState(goal.type || MONTHLY_SPEND)
   const [endDate, setEndDate] = useState(goal.end)
 
-  const [monthPopoverAnchor, setMonthPopoverAnchor] = useState<
-    typeof props['anchorEl']
-  >(null)
+  const [monthPopoverAnchor, setMonthPopoverAnchor] =
+    useState<typeof props['anchorEl']>(null)
 
   const handleTypeChange: OutlinedTextFieldProps['onChange'] = e =>
     setType(e.target.value as goalType)

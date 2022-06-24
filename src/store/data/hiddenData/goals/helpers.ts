@@ -1,5 +1,5 @@
 import { goalType } from '../constants'
-import { formatDate, formatMoney } from 'helpers/format'
+import { formatDate, formatMoney } from 'shared/helpers/format'
 import parseDate from 'date-fns/parseISO'
 import { TZmGoal, TGoal } from 'types'
 

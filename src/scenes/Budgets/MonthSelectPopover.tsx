@@ -12,7 +12,7 @@ import {
   ListItemButtonProps,
 } from '@mui/material'
 import { ChevronRightIcon, ChevronLeftIcon } from 'components/Icons'
-import { formatDate } from 'helpers/format'
+import { formatDate } from 'shared/helpers/format'
 
 interface MonthItemItemProps extends ListItemButtonProps {
   isCurrent: boolean

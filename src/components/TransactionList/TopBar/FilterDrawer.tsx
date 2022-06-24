@@ -22,7 +22,7 @@ import { Tooltip } from 'components/Tooltip'
 import { CloseIcon } from 'components/Icons'
 import Button from '@mui/material/Button'
 
-import { formatDate } from 'helpers/format'
+import { formatDate } from 'shared/helpers/format'
 import { FilterConditions } from 'store/data/transactions/filtering'
 import { TrType } from 'types'
 

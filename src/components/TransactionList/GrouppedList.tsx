@@ -13,7 +13,7 @@ import TextField from '@mui/material/TextField'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { Box, ListSubheader } from '@mui/material'
 import Transaction from './Transaction'
-import { formatDate } from 'helpers/format'
+import { formatDate } from 'shared/helpers/format'
 
 type GroupNode = {
   date: number

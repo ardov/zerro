@@ -1,7 +1,7 @@
 import React from 'react'
 import { Box, Typography } from '@mui/material'
 import { useAppSelector } from 'store'
-import { formatDate } from 'helpers/format'
+import { formatDate } from 'shared/helpers/format'
 import Rhythm from 'components/Rhythm'
 import { Amount } from 'components/Amount'
 import { getInstruments } from 'store/data/instruments'

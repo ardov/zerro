@@ -23,9 +23,9 @@ import { getInBudgetAccounts, getSavingAccounts } from 'store/data/accounts'
 import { convertCurrency } from 'store/data/instruments'
 import { getAvailableMonths } from './availablePeriod'
 import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
-import { round } from 'helpers/currencyHelpers'
+import { round } from 'shared/helpers/currencyHelpers'
 import { useState } from 'react'
-import { formatDate } from 'helpers/format'
+import { formatDate } from 'shared/helpers/format'
 import { DataLine } from 'components/DataLine'
 
 type Point = {

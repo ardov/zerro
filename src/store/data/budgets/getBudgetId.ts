@@ -1,4 +1,4 @@
-import { formatDate } from 'helpers/format'
+import { formatDate } from 'shared/helpers/format'
 import { TBudget, TZmBudget } from 'types'
 
 export function getBudgetId(budget: TZmBudget | TBudget) {

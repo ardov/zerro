@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { formatMoney } from 'helpers/format'
+import { formatMoney } from 'shared/helpers/format'
 import { getUserCurrencyCode } from 'store/data/instruments'
 import { makeStyles } from '@mui/styles'
 import {

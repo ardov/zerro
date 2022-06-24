@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Box, Button, Paper, PaperProps, Typography } from '@mui/material'
 import { TagMapChart } from './TagMapChart'
-import { sendEvent } from 'helpers/tracking'
+import { sendEvent } from 'shared/helpers/tracking'
 import { getTotalsByMonth } from '../selectors'
 import { useMonth } from '../pathHooks'
 import { useAppSelector } from 'store'

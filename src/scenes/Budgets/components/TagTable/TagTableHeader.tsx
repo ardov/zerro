@@ -1,7 +1,7 @@
 import React, { FC, useContext, useState } from 'react'
 import { useAppDispatch, useAppSelector } from 'store'
 import { getUserCurrencyCode } from 'store/data/instruments'
-import { formatDate, formatMoney } from 'helpers/format'
+import { formatDate, formatMoney } from 'shared/helpers/format'
 import {
   Typography,
   Box,

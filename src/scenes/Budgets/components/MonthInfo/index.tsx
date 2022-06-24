@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { useAppDispatch, useAppSelector } from 'store'
-import { formatDate, formatMoney } from 'helpers/format'
+import { formatDate, formatMoney } from 'shared/helpers/format'
 import { getTotalsByMonth } from '../../selectors'
 import { getUserCurrencyCode } from 'store/data/instruments'
 import { Confirm } from 'components/Confirm'

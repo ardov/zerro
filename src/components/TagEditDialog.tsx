@@ -18,7 +18,7 @@ import { Modify, TRawTag } from 'types'
 import { shallowEqual } from 'react-redux'
 import { createTag } from 'store/data/tags/thunks'
 import { useFormik } from 'formik'
-import { hex2int, int2hex } from 'helpers/color'
+import { hex2int, int2hex } from 'shared/helpers/color'
 import { ColorPicker } from './ColorPickerPopover'
 import { v1 as uuidv1 } from 'uuid'
 import {

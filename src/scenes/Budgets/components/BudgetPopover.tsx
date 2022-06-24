@@ -10,7 +10,7 @@ import {
   PopoverProps,
 } from '@mui/material'
 import { CheckCircleIcon } from 'components/Icons'
-import { formatMoney } from 'helpers/format'
+import { formatMoney } from 'shared/helpers/format'
 import { AmountInput } from 'components/AmountInput'
 import { getAmountsById } from 'scenes/Budgets/selectors'
 import {
@@ -21,9 +21,9 @@ import {
 import { setOutcomeBudget } from 'scenes/Budgets/thunks'
 import { getGoals } from 'store/data/hiddenData/goals'
 import { getGoalsProgress } from 'scenes/Budgets/selectors'
-import { round } from 'helpers/currencyHelpers'
-import { sendEvent } from 'helpers/tracking'
-import pluralize from 'helpers/pluralize'
+import { round } from 'shared/helpers/currencyHelpers'
+import { sendEvent } from 'shared/helpers/tracking'
+import pluralize from 'shared/helpers/pluralize'
 import { getMetaForTag } from 'store/data/hiddenData/tagMeta'
 import { Box, BoxProps } from '@mui/system'
 

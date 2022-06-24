@@ -1,5 +1,5 @@
-import { int2rgb, int2hex, getColorForString } from 'helpers/color'
-import { sendEvent } from 'helpers/tracking'
+import { int2rgb, int2hex, getColorForString } from 'shared/helpers/color'
+import { sendEvent } from 'shared/helpers/tracking'
 import toArray from 'lodash/toArray'
 import { ById, TTag, TRawTag } from 'types'
 import iconsMap from './iconsMap.json'

@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { sendEvent } from 'helpers/tracking'
+import { sendEvent } from 'shared/helpers/tracking'
 import { DataReminderType } from '../constants'
 import { setHiddenData } from '../thunks'
 import { getRawTagMeta } from '../selectors'

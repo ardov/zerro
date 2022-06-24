@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { useAppDispatch, useAppSelector } from 'store'
-import { formatMoney } from 'helpers/format'
+import { formatMoney } from 'shared/helpers/format'
 import { getUserCurrencyCode } from 'store/data/instruments'
 import {
   Typography,

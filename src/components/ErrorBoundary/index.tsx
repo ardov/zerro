@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react'
 import { connect } from 'react-redux'
 import { logOut } from 'logic/authorization'
-import { captureError, sendEvent } from 'helpers/tracking'
+import { captureError, sendEvent } from 'shared/helpers/tracking'
 import { ErrorMessage } from './ErrorMessage'
 import { AppDispatch } from 'store'
 

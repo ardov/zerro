@@ -12,7 +12,7 @@ import { makeStyles } from '@mui/styles'
 import { Modify } from 'types'
 import './styles.scss'
 import { zmColors, colors } from './colors'
-import { isHEX } from 'helpers/color'
+import { isHEX } from 'shared/helpers/color'
 import Rhythm from 'components/Rhythm'
 
 const useStyles = makeStyles(theme => ({

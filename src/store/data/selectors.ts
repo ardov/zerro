@@ -1,4 +1,4 @@
-import { keys } from 'helpers/keys'
+import { keys } from 'shared/helpers/keys'
 import { RootState } from 'store'
 import { TDiff, TLocalData } from 'types'
 import { toServer } from 'worker/zmAdapter'

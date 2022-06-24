@@ -3,7 +3,7 @@ import styled from '@emotion/styled'
 import { TRawTransaction as ITransaction, TrType } from 'types'
 import { Theme, TypographyVariant } from '@mui/material'
 import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'
-import { sendEvent } from 'helpers/tracking'
+import { sendEvent } from 'shared/helpers/tracking'
 
 type TransactionProps = {
   id: string

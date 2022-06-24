@@ -31,7 +31,7 @@ import {
 } from '@mui/material'
 import { Tooltip } from 'components/Tooltip'
 import { useThemeType } from 'shared/hooks/useThemeType'
-import { sendEvent } from 'helpers/tracking'
+import { sendEvent } from 'shared/helpers/tracking'
 import { resetData } from 'store/data'
 import { clearLocalData } from 'logic/localData'
 import { Confirm } from 'components/Confirm'

@@ -1,6 +1,6 @@
 import React, { FC, ReactElement } from 'react'
 import { useAppSelector } from 'store'
-import { formatDate, formatMoney } from 'helpers/format'
+import { formatDate, formatMoney } from 'shared/helpers/format'
 import { getTotalsByMonth, MonthTotals } from '../selectors'
 import { getUserCurrencyCode } from 'store/data/instruments'
 import {
@@ -60,12 +60,8 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
     .sort((a, b) => a - b)[0]
   const isFirstMonth = month === firstMonth
   const totals = totalsByMonth[month]
-  const {
-    toBeBudgeted,
-    overspent,
-    realBudgetedInFuture,
-    budgetedInFuture,
-  } = totals
+  const { toBeBudgeted, overspent, realBudgetedInFuture, budgetedInFuture } =
+    totals
   const color: TColor =
     toBeBudgeted < 0 ? 'error' : overspent ? 'warning' : 'success'
   const hasFutureOverspend = realBudgetedInFuture > budgetedInFuture

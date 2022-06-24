@@ -15,10 +15,10 @@ import {
   getHistoryStart,
   getTransactionsHistory,
 } from 'store/data/transactions'
-import { formatDate, formatMoney } from 'helpers/format'
-import { makeDateArray, monthStart } from 'helpers/dateHelpers'
+import { formatDate, formatMoney } from 'shared/helpers/format'
+import { makeDateArray, monthStart } from 'shared/helpers/dateHelpers'
 import { convertCurrency } from 'store/data/instruments'
-import { round } from 'helpers/currencyHelpers'
+import { round } from 'shared/helpers/currencyHelpers'
 import { getType } from 'store/data/transactions/helpers'
 
 type Point = {

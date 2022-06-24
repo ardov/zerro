@@ -1,5 +1,5 @@
 import { getPopulatedTransactions } from 'store/data/transactions'
-import { formatDate } from 'helpers/format'
+import { formatDate } from 'shared/helpers/format'
 import { AppThunk } from 'store'
 import { PopulatedTransaction } from 'store/data/transactions/populate'
 import { ById } from 'types'

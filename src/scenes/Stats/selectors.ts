@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { round } from 'helpers/currencyHelpers'
+import { round } from 'shared/helpers/currencyHelpers'
 import { getAccounts, getStartBalance } from 'store/data/accounts'
 import { getTransactionsHistory } from 'store/data/transactions'
 import { eachDayOfInterval, startOfDay } from 'date-fns'

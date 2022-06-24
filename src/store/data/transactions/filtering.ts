@@ -1,5 +1,5 @@
 import { TAccountId, TTagId, TRawTransaction, TrType } from 'types'
-import { keys } from 'helpers/keys'
+import { keys } from 'shared/helpers/keys'
 import { getType, isDeleted, isNew } from './helpers'
 
 type OperatorType = 'AND' | 'OR'

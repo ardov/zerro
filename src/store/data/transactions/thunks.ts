@@ -1,6 +1,6 @@
 import { v1 as uuidv1 } from 'uuid'
 import { getTransaction, getTransactions } from 'store/data/transactions'
-import { sendEvent } from 'helpers/tracking'
+import { sendEvent } from 'shared/helpers/tracking'
 import { AppThunk } from 'store'
 import {
   OptionalExceptFor,

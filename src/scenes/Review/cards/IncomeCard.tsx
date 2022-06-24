@@ -5,7 +5,7 @@ import Rhythm from 'components/Rhythm'
 import { Amount } from 'components/Amount'
 import { getUserCurrencyCode } from 'store/data/instruments'
 import { getPopulatedTags } from 'store/data/tags'
-import pluralize from 'helpers/pluralize'
+import pluralize from 'shared/helpers/pluralize'
 import { Card } from './Card'
 import { Stats } from '../selectors'
 

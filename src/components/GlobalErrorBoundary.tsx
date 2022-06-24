@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/accessible-emoji */
 import React from 'react'
-import { captureError, sendEvent } from 'helpers/tracking'
+import { captureError, sendEvent } from 'shared/helpers/tracking'
 import Cookies from 'cookies-js'
 import { clearStorage } from 'worker'
 

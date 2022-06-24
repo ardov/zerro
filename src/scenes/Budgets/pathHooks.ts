@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import startOfMonth from 'date-fns/startOfMonth'
 import parseDate from 'date-fns/parseISO'
 import { useHistory, useLocation } from 'react-router'
-import { formatDate } from 'helpers/format'
+import { formatDate } from 'shared/helpers/format'
 
 function getModifiedPath(key: string, value?: string | null) {
   const url = new URL(window.location.href)

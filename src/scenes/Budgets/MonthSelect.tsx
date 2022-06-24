@@ -13,7 +13,7 @@ import {
 import { ChevronRightIcon, ChevronLeftIcon } from 'components/Icons'
 import { styled } from '@mui/styles'
 import MonthSelectPopover from './MonthSelectPopover'
-import { formatDate } from 'helpers/format'
+import { formatDate } from 'shared/helpers/format'
 import { Modify } from 'types'
 
 type MonthSelectProps = Modify<
@@ -34,9 +34,10 @@ export const MonthSelect: FC<MonthSelectProps> = props => {
   const prevMonth = value > minMonth ? +sub(value, { months: 1 }) : null
   const nextMonth = value < maxMonth ? +add(value, { months: 1 }) : null
 
-  const openPopover = useCallback(() => setAnchorEl(paperRef.current), [
-    setAnchorEl,
-  ])
+  const openPopover = useCallback(
+    () => setAnchorEl(paperRef.current),
+    [setAnchorEl]
+  )
   const closePopover = useCallback(() => setAnchorEl(null), [setAnchorEl])
   const handleChange = useCallback(
     (date: number | Date) => {

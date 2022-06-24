@@ -1,6 +1,6 @@
 import { TLocalData, TZmDiff, TDiff } from 'types'
 import * as Comlink from 'comlink'
-import { keys } from 'helpers/keys'
+import { keys } from 'shared/helpers/keys'
 import { storage } from 'services/storage'
 import ZenApi from 'services/ZenApi'
 import { toClient, toServer } from './zmAdapter'

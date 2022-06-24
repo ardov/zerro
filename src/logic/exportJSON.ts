@@ -1,4 +1,4 @@
-import { formatDate } from 'helpers/format'
+import { formatDate } from 'shared/helpers/format'
 import { AppThunk } from 'store'
 import { getDataToSave } from 'store/data/selectors'
 

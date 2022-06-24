@@ -1,4 +1,4 @@
-import { sendEvent } from 'helpers/tracking'
+import { sendEvent } from 'shared/helpers/tracking'
 import { AppThunk } from 'store'
 import { applyClientPatch } from 'store/data'
 import { getRootUser } from 'store/data/users'

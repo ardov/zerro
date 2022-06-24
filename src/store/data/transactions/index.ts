@@ -7,7 +7,7 @@ import { compareDates, getTime, isDeleted } from './helpers'
 import { populate, PopulatedTransaction } from './populate'
 import { RootState } from 'store'
 import { TRawTransaction, TTransactionId } from 'types'
-import { withPerf } from 'helpers/performance'
+import { withPerf } from 'shared/helpers/performance'
 
 export const getTransactions = (state: RootState) =>
   state.data.current.transaction

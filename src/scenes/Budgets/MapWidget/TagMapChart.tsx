@@ -4,10 +4,10 @@ import { getAmountsByTag, getTotalsByMonth } from '../selectors'
 import { getTagsTree } from 'store/data/tags'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import { Tooltip, Treemap, ResponsiveContainer } from 'recharts'
-import { formatMoney } from 'helpers/format'
+import { formatMoney } from 'shared/helpers/format'
 import { Card, Typography, useTheme } from '@mui/material'
 import { Amount } from 'components/Amount'
-import { getMostContrast } from 'helpers/color'
+import { getMostContrast } from 'shared/helpers/color'
 
 type TTreeNode = {
   id: string

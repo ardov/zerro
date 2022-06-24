@@ -6,8 +6,8 @@ import {
   getLinkedTransfers,
   getTransferFees,
 } from './getAmountsByTag'
-import { round } from 'helpers/currencyHelpers'
-import { withPerf } from 'helpers/performance'
+import { round } from 'shared/helpers/currencyHelpers'
+import { withPerf } from 'shared/helpers/performance'
 import { RootState } from 'store'
 
 const CARRY_NEGATIVES = !!localStorage.getItem('CARRY_NEGATIVES')
@@ -68,86 +68,85 @@ const getTagTotals: (state: RootState) => TagTotals[] = createSelector(
     })
 )
 
-export const getTotalsArray: (
-  state: RootState
-) => MonthTotals[] = createSelector(
-  [
-    getMonthDates,
-    getStartFunds,
-    getLinkedTransfers,
-    getTransferFees,
-    getTagTotals,
-  ],
-  withPerf(
-    'BUDGET: getTotalsArray',
-    (
-      months,
-      startFunds,
-      linkedTransfers,
-      transferFees,
-      tagTotals
-    ): MonthTotals[] => {
-      let prevFunds = startFunds
-      let prevOverspent = 0
+export const getTotalsArray: (state: RootState) => MonthTotals[] =
+  createSelector(
+    [
+      getMonthDates,
+      getStartFunds,
+      getLinkedTransfers,
+      getTransferFees,
+      getTagTotals,
+    ],
+    withPerf(
+      'BUDGET: getTotalsArray',
+      (
+        months,
+        startFunds,
+        linkedTransfers,
+        transferFees,
+        tagTotals
+      ): MonthTotals[] => {
+        let prevFunds = startFunds
+        let prevOverspent = 0
 
-      const totalsByMonth = months.map((date, i) => {
-        const result = {
-          date,
-          prevFunds,
-          prevOverspent,
+        const totalsByMonth = months.map((date, i) => {
+          const result = {
+            date,
+            prevFunds,
+            prevOverspent,
 
-          // TO DISPLAY
-          get toBeBudgeted() {
-            return this.funds - this.budgetedInFuture
-          },
-          // cannot be negative or greater than funds
-          get budgetedInFuture() {
-            const { funds, realBudgetedInFuture } = this
-            if (realBudgetedInFuture <= 0 || funds <= 0) return 0
-            return realBudgetedInFuture > funds ? funds : realBudgetedInFuture
-          },
+            // TO DISPLAY
+            get toBeBudgeted() {
+              return this.funds - this.budgetedInFuture
+            },
+            // cannot be negative or greater than funds
+            get budgetedInFuture() {
+              const { funds, realBudgetedInFuture } = this
+              if (realBudgetedInFuture <= 0 || funds <= 0) return 0
+              return realBudgetedInFuture > funds ? funds : realBudgetedInFuture
+            },
 
-          // TO CHECK
-          get moneyInBudget() {
-            return round(this.funds + this.available)
-          },
+            // TO CHECK
+            get moneyInBudget() {
+              return round(this.funds + this.available)
+            },
 
-          realBudgetedInFuture: tagTotals
-            .slice(i + 1)
-            .reduce((sum, totals) => round(sum + totals.budgeted), 0),
+            realBudgetedInFuture: tagTotals
+              .slice(i + 1)
+              .reduce((sum, totals) => round(sum + totals.budgeted), 0),
 
-          get funds() {
-            return round(
-              this.prevFunds -
-                this.prevOverspent -
-                this.budgeted +
-                this.income -
-                this.transferOutcome -
-                this.transferFees
-            )
-          },
+            get funds() {
+              return round(
+                this.prevFunds -
+                  this.prevOverspent -
+                  this.budgeted +
+                  this.income -
+                  this.transferOutcome -
+                  this.transferFees
+              )
+            },
 
-          // TAGS
-          budgeted: tagTotals[i].budgeted,
-          income: tagTotals[i].income,
-          outcome: tagTotals[i].outcome,
-          overspent: tagTotals[i].overspent,
-          available: tagTotals[i].available,
+            // TAGS
+            budgeted: tagTotals[i].budgeted,
+            income: tagTotals[i].income,
+            outcome: tagTotals[i].outcome,
+            overspent: tagTotals[i].overspent,
+            available: tagTotals[i].available,
 
-          // TRANSFERS
-          transferOutcome: linkedTransfers[date]?.null || 0,
-          transferFees: transferFees[date] || 0,
-        }
+            // TRANSFERS
+            transferOutcome: linkedTransfers[date]?.null || 0,
+            transferFees: transferFees[date] || 0,
+          }
 
-        prevFunds = result.funds
-        prevOverspent = CARRY_NEGATIVES ? 0 : result.overspent
-        return result
-      })
+          prevFunds = result.funds
+          prevOverspent = CARRY_NEGATIVES ? 0 : result.overspent
+          return result
+        })
 
-      return totalsByMonth
-    }
+        return totalsByMonth
+      }
+    )
   )
-)
 
 export const getTotalsByMonth = createSelector([getTotalsArray], totals => {
   let result: { [key: number]: MonthTotals } = {}

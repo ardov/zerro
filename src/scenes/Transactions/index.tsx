@@ -10,7 +10,7 @@ import {
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { TransactionPreview } from 'components/TransactionPreview'
-import { sendEvent } from 'helpers/tracking'
+import { sendEvent } from 'shared/helpers/tracking'
 import { Helmet } from 'react-helmet'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { useAppSelector } from 'store'

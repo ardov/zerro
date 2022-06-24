@@ -1,15 +1,8 @@
 import React, { FC, useState } from 'react'
-import {
-  Box,
-  Paper,
-  Typography,
-  Collapse,
-  Link,
-  BoxProps,
-} from '@mui/material'
+import { Box, Paper, Typography, Collapse, Link, BoxProps } from '@mui/material'
 import parse from 'date-fns/parseISO'
 import QRCode from 'qrcode.react'
-import { formatMoney, formatDate } from 'helpers/format'
+import { formatMoney, formatDate } from 'shared/helpers/format'
 
 interface RecieptProps {
   value?: string | null

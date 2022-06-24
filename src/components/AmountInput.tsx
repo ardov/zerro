@@ -6,7 +6,7 @@ import {
   Button,
   Stack,
 } from '@mui/material'
-import { getCurrencySymbol } from 'helpers/format'
+import { getCurrencySymbol } from 'shared/helpers/format'
 import { Modify } from 'types'
 
 export type AmountInputProps = Modify<

@@ -11,9 +11,9 @@ import {
   Layer,
   ResponsiveContainer,
 } from 'recharts'
-import { formatMoney } from 'helpers/format'
+import { formatMoney } from 'shared/helpers/format'
 import { useTheme } from '@mui/material'
-import { round } from 'helpers/currencyHelpers'
+import { round } from 'shared/helpers/currencyHelpers'
 
 export function SankeyChart() {
   const theme = useTheme()

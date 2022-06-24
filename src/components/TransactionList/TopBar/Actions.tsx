@@ -15,7 +15,7 @@ import Chip from '@mui/material/Chip'
 import Box from '@mui/material/Box'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-import pluralize from 'helpers/pluralize'
+import pluralize from 'shared/helpers/pluralize'
 import { Confirm } from 'components/Confirm'
 import TagSelect2 from 'components/TagSelect2'
 import {
@@ -30,9 +30,9 @@ import { getType, isNew } from 'store/data/transactions/helpers'
 import { getTransactions } from 'store/data/transactions'
 import { Divider, ListItemIcon, ListItemText } from '@mui/material'
 import { TRawTransaction } from 'types'
-import { round } from 'helpers/currencyHelpers'
+import { round } from 'shared/helpers/currencyHelpers'
 import { applyClientPatch } from 'store/data'
-import { sendEvent } from 'helpers/tracking'
+import { sendEvent } from 'shared/helpers/tracking'
 
 type ActionsProps = {
   visible: boolean
