@@ -2,20 +2,11 @@ import reactGA from 'react-ga'
 import * as Sentry from '@sentry/browser'
 import { ErrorInfo } from 'react'
 import { History } from 'history'
-
-const {
-  NODE_ENV,
-  REACT_APP_SENTRY_DSN,
-  REACT_APP_VERSION,
-  REACT_APP_YMID,
-  REACT_APP_GAID,
-} = process.env
-
-const isProduction = NODE_ENV === 'production'
+import { appVersion, gaid, isProduction, sentryDSN, ymid } from 'shared/config'
 
 export function initSentry() {
-  if (isProduction && REACT_APP_SENTRY_DSN) {
-    Sentry.init({ release: REACT_APP_VERSION, dsn: REACT_APP_SENTRY_DSN })
+  if (isProduction && sentryDSN) {
+    Sentry.init({ release: appVersion, dsn: sentryDSN })
   }
 }
 
@@ -35,8 +26,8 @@ export function captureError(error: Error, errorInfo?: ErrorInfo) {
 }
 
 export function initTracking(history: History) {
-  if (isProduction && REACT_APP_GAID) {
-    reactGA.initialize(REACT_APP_GAID)
+  if (isProduction && gaid) {
+    reactGA.initialize(gaid)
     history.listen(location => {
       reactGA.set({ page: location.pathname }) // Update the user's current page
       reactGA.pageview(location.pathname) // Record a pageview for the given page
@@ -53,9 +44,9 @@ export function setUserId(userId: number) {
 export function sendEvent(event: string) {
   if (event && isProduction) {
     // @ts-ignore
-    if (window.ym && REACT_APP_YMID) {
+    if (window.ym && ymid) {
       // @ts-ignore
-      window.ym(REACT_APP_YMID, 'reachGoal', event)
+      window.ym(ymid, 'reachGoal', event)
     }
 
     const eventArr = event.split(': ')

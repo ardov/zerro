@@ -11,7 +11,7 @@ import {
   ListItemButton,
   ListItemButtonProps,
 } from '@mui/material'
-import { ChevronRightIcon, ChevronLeftIcon } from 'components/Icons'
+import { ChevronRightIcon, ChevronLeftIcon } from 'shared/ui/Icons'
 import { formatDate } from 'shared/helpers/format'
 
 interface MonthItemItemProps extends ListItemButtonProps {

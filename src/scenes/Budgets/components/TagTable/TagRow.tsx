@@ -10,17 +10,17 @@ import {
   ButtonBaseProps,
   Chip,
 } from '@mui/material'
-import { Tooltip } from 'components/Tooltip'
-import { EmojiIcon } from 'components/EmojiIcon'
+import { Tooltip } from 'shared/ui/Tooltip'
+import { EmojiIcon } from 'shared/ui/EmojiIcon'
 import { formatMoney } from 'shared/helpers/format'
 import {
   WarningIcon,
   AddIcon,
   EmojiFlagsIcon,
   NotesIcon,
-} from 'components/Icons'
+} from 'shared/ui/Icons'
 import { goalToWords } from 'store/data/hiddenData/goals/helpers'
-import { GoalProgress } from 'components/GoalProgress'
+import { RadialProgress } from 'shared/ui/RadialProgress'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
 import { getGoal } from 'store/data/hiddenData/goals'
 import { shallowEqual } from 'react-redux'
@@ -445,7 +445,7 @@ const GoalButton: FC<GoalButtonProps> = props => {
     <span>
       <Tooltip title={goalToWords(goal)}>
         <IconButton size="small" onClick={onClick}>
-          <GoalProgress value={goalProgress.progress} fontSize="inherit" />
+          <RadialProgress value={goalProgress.progress} fontSize="inherit" />
         </IconButton>
       </Tooltip>
     </span>

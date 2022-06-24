@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Box, Typography, Chip } from '@mui/material'
 import { useAppSelector } from 'store'
-import Rhythm from 'components/Rhythm'
+import Rhythm from 'shared/ui/Rhythm'
 import { Amount } from 'components/Amount'
 import { getUserCurrencyCode } from 'store/data/instruments'
 import { getPopulatedTags } from 'store/data/tags'

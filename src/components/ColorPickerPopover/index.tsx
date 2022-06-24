@@ -13,7 +13,7 @@ import { Modify } from 'types'
 import './styles.scss'
 import { zmColors, colors } from './colors'
 import { isHEX } from 'shared/helpers/color'
-import Rhythm from 'components/Rhythm'
+import Rhythm from 'shared/ui/Rhythm'
 
 const useStyles = makeStyles(theme => ({
   grid: {

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Typography } from '@mui/material'
-import Rhythm from 'components/Rhythm'
+import Rhythm from 'shared/ui/Rhythm'
 import pluralize from 'shared/helpers/pluralize'
 import { Card } from './Card'
 

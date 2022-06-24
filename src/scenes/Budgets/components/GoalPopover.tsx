@@ -10,10 +10,10 @@ import {
   PopoverProps,
   OutlinedTextFieldProps,
 } from '@mui/material'
-import { AmountInput } from 'components/AmountInput'
+import { AmountInput } from 'shared/ui/AmountInput'
 import { getGoals, setGoal, deleteGoal } from 'store/data/hiddenData/goals'
 import { goalType } from 'store/data/hiddenData/constants'
-import { CloseIcon } from 'components/Icons'
+import { CloseIcon } from 'shared/ui/Icons'
 import MonthSelectPopover from 'scenes/Budgets/MonthSelectPopover'
 import { formatDate } from 'shared/helpers/format'
 

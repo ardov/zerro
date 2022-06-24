@@ -2,7 +2,7 @@ import React, { FC } from 'react'
 import { useAppSelector } from 'store'
 import { getPopulatedTags } from 'store/data/tags'
 import { Chip, ChipProps } from '@mui/material'
-import { CloseIcon } from 'components/Icons'
+import { CloseIcon } from 'shared/ui/Icons'
 import { TTag, TTagId } from 'types'
 
 function getTagLabel(tag?: TTag) {

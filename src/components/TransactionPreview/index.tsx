@@ -10,11 +10,11 @@ import {
   Button,
   Stack,
 } from '@mui/material'
-import { Tooltip } from 'components/Tooltip'
-import { DeleteIcon, CloseIcon, RestoreFromTrashIcon } from 'components/Icons'
+import { Tooltip } from 'shared/ui/Tooltip'
+import { DeleteIcon, CloseIcon, RestoreFromTrashIcon } from 'shared/ui/Icons'
 import DatePicker from '@mui/lab/DatePicker'
 import { Map } from './Map'
-import { AmountInput } from 'components/AmountInput'
+import { AmountInput } from 'shared/ui/AmountInput'
 import { formatDate, rateToWords } from 'shared/helpers/format'
 import { TagList } from 'components/TagList'
 import { useAppDispatch, useAppSelector } from 'store'

@@ -13,16 +13,16 @@ import {
   BoxProps,
   Theme,
 } from '@mui/material'
-import { Tooltip } from 'components/Tooltip'
+import { Tooltip } from 'shared/ui/Tooltip'
 import {
   SettingsIcon,
   CheckCircleIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-} from 'components/Icons'
+} from 'shared/ui/Icons'
 import { fillGoals } from '../../thunks'
-import { Confirm } from 'components/Confirm'
-import { GoalProgress } from 'components/GoalProgress'
+import { Confirm } from 'shared/ui/Confirm'
+import { RadialProgress } from 'shared/ui/RadialProgress'
 import { makeStyles } from '@mui/styles'
 import { ToBeBudgeted } from '../ToBeBudgeted'
 import useScrollPosition from '@react-hook/window-scroll'
@@ -219,7 +219,7 @@ function GoalMonthProgress() {
           title="Установите цели, чтобы следить за их прогрессом 😉"
         >
           <IconButton size="small">
-            <GoalProgress value={0} fontSize="inherit" />
+            <RadialProgress value={0} fontSize="inherit" />
           </IconButton>
         </Tooltip>
       </Box>
@@ -249,7 +249,7 @@ function GoalMonthProgress() {
           }
         >
           <IconButton size="small">
-            <GoalProgress value={progress} fontSize="inherit" />
+            <RadialProgress value={progress} fontSize="inherit" />
           </IconButton>
         </Tooltip>
       </Confirm>

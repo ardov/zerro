@@ -3,11 +3,11 @@ import { useAppSelector } from 'store'
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { Box, BoxProps, useTheme } from '@mui/material'
 import { formatDate } from 'shared/helpers/format'
-import Rhythm from 'components/Rhythm'
+import Rhythm from 'shared/ui/Rhythm'
 import { getAmountsById } from 'scenes/Budgets/selectors'
 import { getMonthDates } from 'scenes/Budgets/selectors'
 import { useMonth } from 'scenes/Budgets/pathHooks'
-import { DataLine } from '../../../../components/DataLine'
+import { DataLine } from '../../../../shared/ui/DataLine'
 
 type OutcomWidgetProps = BoxProps & {
   tagId: string

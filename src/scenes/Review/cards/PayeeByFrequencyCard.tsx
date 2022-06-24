@@ -1,7 +1,7 @@
 import React from 'react'
 import { Typography } from '@mui/material'
 import { useAppSelector } from 'store'
-import Rhythm from 'components/Rhythm'
+import Rhythm from 'shared/ui/Rhythm'
 import { Amount } from 'components/Amount'
 import { getUserCurrencyCode } from 'store/data/instruments'
 import pluralize from 'shared/helpers/pluralize'

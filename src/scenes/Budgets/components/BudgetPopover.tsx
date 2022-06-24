@@ -9,9 +9,9 @@ import {
   IconButton,
   PopoverProps,
 } from '@mui/material'
-import { CheckCircleIcon } from 'components/Icons'
+import { CheckCircleIcon } from 'shared/ui/Icons'
 import { formatMoney } from 'shared/helpers/format'
-import { AmountInput } from 'components/AmountInput'
+import { AmountInput } from 'shared/ui/AmountInput'
 import { getAmountsById } from 'scenes/Budgets/selectors'
 import {
   convertCurrency,

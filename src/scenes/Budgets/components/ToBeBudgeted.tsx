@@ -13,8 +13,8 @@ import {
   Theme,
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { Tooltip } from 'components/Tooltip'
-import Rhythm from 'components/Rhythm'
+import { Tooltip } from 'shared/ui/Tooltip'
+import Rhythm from 'shared/ui/Rhythm'
 import { useMonth } from '../pathHooks'
 import { Amount } from 'components/Amount'
 

@@ -6,7 +6,7 @@ import { Collapse, List, ListItemButton } from '@mui/material'
 import { Account, Subheader } from './components'
 import { TPopulatedAccount } from 'types'
 import { Amount } from 'components/Amount'
-import { Tooltip } from 'components/Tooltip'
+import { Tooltip } from 'shared/ui/Tooltip'
 import { useToggle } from 'shared/hooks/useToggle'
 
 export default function AccountList({ className = '' }) {

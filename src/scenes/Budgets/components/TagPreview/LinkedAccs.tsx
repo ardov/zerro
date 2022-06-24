@@ -10,10 +10,10 @@ import {
   Button,
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { AddIcon, CloseIcon } from 'components/Icons'
+import { AddIcon, CloseIcon } from 'shared/ui/Icons'
 import { getTagAccMap, addConnection } from 'store/data/hiddenData/accTagMap'
 import { getAccounts, getSavingAccounts } from 'store/data/accounts'
-import { Tooltip } from 'components/Tooltip'
+import { Tooltip } from 'shared/ui/Tooltip'
 import { useEffect } from 'react'
 
 const useStyles = makeStyles(({ shape, spacing, palette, breakpoints }) => ({

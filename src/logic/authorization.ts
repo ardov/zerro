@@ -1,5 +1,5 @@
 import Cookies from 'cookies-js'
-import ZenApi from 'services/ZenApi'
+import ZenApi from 'shared/api/ZenApi'
 import { setToken } from 'store/token'
 import { resetData } from 'store/data'
 import { syncData } from 'logic/sync'

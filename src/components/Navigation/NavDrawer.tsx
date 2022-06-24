@@ -14,7 +14,7 @@ import {
   DrawerProps,
 } from '@mui/material'
 import { useTheme } from '@mui/material'
-import { Logo } from 'components/Logo'
+import { Logo } from 'shared/ui/Logo'
 import AccountList from 'components/AccountList'
 import { makeStyles } from '@mui/styles'
 import {
@@ -23,7 +23,7 @@ import {
   FavoriteBorderIcon,
   SyncAltIcon,
   WhatshotIcon,
-} from 'components/Icons'
+} from 'shared/ui/Icons'
 
 export default function NavigationDrawer(props: DrawerProps) {
   const theme = useTheme()

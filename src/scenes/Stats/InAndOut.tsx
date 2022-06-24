@@ -10,7 +10,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts'
-import { DataLine } from 'components/DataLine'
+import { DataLine } from 'shared/ui/DataLine'
 import {
   getHistoryStart,
   getTransactionsHistory,

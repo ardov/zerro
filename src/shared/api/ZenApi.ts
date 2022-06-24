@@ -1,16 +1,16 @@
 import Cookies from 'cookies-js'
+import {
+  authEndpoint,
+  clientId,
+  clientSecret,
+  diffEndpoint,
+  redirectUri,
+  tokenEndpoint,
+} from 'shared/config'
 import { TZmRequest, TZmDiff } from 'types'
 
 const CODE_DATA_KEY = 'auth-code-data'
 const TOKEN_KEY = 'token'
-
-const authEndpoint = process.env.REACT_APP_AUTH_ENDPOINT
-const tokenEndpoint = process.env.REACT_APP_TOKEN_ENDPOINT
-const diffEndpoint = process.env.REACT_APP_DIFF_ENDPOINT
-
-const clientId = process.env.REACT_APP_CLIENT_ID
-const clientSecret = process.env.REACT_APP_CLIENT_SECRET
-const redirectUri = process.env.REACT_APP_REDIRECT_URI
 
 const ZenApi = { getData, checkCode, getLocalToken, getToken }
 export default ZenApi

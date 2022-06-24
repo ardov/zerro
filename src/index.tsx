@@ -14,6 +14,7 @@ import { applyClientPatch, resetData } from 'store/data'
 import { TDiff } from 'types'
 import { AppThemeProvider } from './AppThemeProvider'
 import { StyledEngineProvider } from '@mui/material/styles'
+import { appVersion } from 'shared/config'
 
 initSentry()
 bindWorkerToStore(store.dispatch)
@@ -49,7 +50,7 @@ serviceWorkerRegistration.register({
     })
   },
   onSuccess: (registration: ServiceWorkerRegistration) => {
-    sendEvent('Version Update: ' + process.env.REACT_APP_VERSION)
+    sendEvent('Version Update: ' + appVersion)
   },
 })
 

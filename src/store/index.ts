@@ -1,7 +1,7 @@
 import { configureStore, Action } from '@reduxjs/toolkit'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 import { ThunkAction } from 'redux-thunk'
-import ZenApi from 'services/ZenApi'
+import ZenApi from 'shared/api/ZenApi'
 
 import data from './data'
 import token from './token'

@@ -1,12 +1,12 @@
 import React, { FC } from 'react'
 import { useTheme } from '@mui/material'
 
-export type GoalProgressProps = React.SVGProps<SVGSVGElement> & {
+export type RadialProgressProps = React.SVGProps<SVGSVGElement> & {
   size?: number
   value: number
 }
 
-export const GoalProgress: FC<GoalProgressProps> = ({
+export const RadialProgress: FC<RadialProgressProps> = ({
   size = 16,
   value,
   ...rest

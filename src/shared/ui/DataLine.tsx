@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { Box, BoxProps, TooltipProps, Typography } from '@mui/material'
 import { Amount, AmountProps } from 'components/Amount'
-import { Tooltip } from 'components/Tooltip'
+import { Tooltip } from 'shared/ui/Tooltip'
 
 type DataLineProps = BoxProps & {
   name: string

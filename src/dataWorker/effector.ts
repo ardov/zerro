@@ -1,6 +1,6 @@
 import { createDomain, forward, sample } from 'effector'
 import { keys } from 'shared/helpers/keys'
-import ZenApi from 'services/ZenApi'
+import ZenApi from 'shared/api/ZenApi'
 import { TDataStore, TDiff, TToken, TZmDiff } from 'types'
 import { convertAccount } from './converters/account'
 import { convertBudget, getBudgetId } from './converters/budget'

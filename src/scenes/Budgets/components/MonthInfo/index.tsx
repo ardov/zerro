@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from 'store'
 import { formatDate, formatMoney } from 'shared/helpers/format'
 import { getTotalsByMonth } from '../../selectors'
 import { getUserCurrencyCode } from 'store/data/instruments'
-import { Confirm } from 'components/Confirm'
+import { Confirm } from 'shared/ui/Confirm'
 import { copyPreviousBudget, startFresh, fixOverspends } from '../../thunks'
 import {
   Box,
@@ -15,9 +15,9 @@ import {
   Theme,
   BoxProps,
 } from '@mui/material'
-import { CloseIcon } from 'components/Icons'
-import Rhythm from 'components/Rhythm'
-import { Tooltip } from 'components/Tooltip'
+import { CloseIcon } from 'shared/ui/Icons'
+import Rhythm from 'shared/ui/Rhythm'
+import { Tooltip } from 'shared/ui/Tooltip'
 import { Line } from '../components'
 import { WidgetIncome } from './WidgetIncome'
 import { OverspentNotice } from './OverspentNotice'

@@ -3,9 +3,9 @@ import Cookies from 'cookies-js'
 import { useAppDispatch } from 'store'
 import { Box, Button, Link, Fade, LinkProps } from '@mui/material'
 import { logIn } from 'logic/authorization'
-import ZenApi from 'services/ZenApi'
+import ZenApi from 'shared/api/ZenApi'
 import { useTheme } from '@mui/material'
-import { Logo } from '../../components/Logo'
+import { Logo } from '../../shared/ui/Logo'
 import { applyServerPatch } from 'store/data'
 import { setToken } from 'store/token'
 import { saveDataLocally } from 'logic/localData'
@@ -88,20 +88,22 @@ const SecondaryLink: FC<LinkProps> = props => (
   <Link variant="body1" {...props} />
 )
 
-const loadFromFile = (file: File): AppThunk => async (dispatch, getState) => {
-  if (!file) return
+const loadFromFile =
+  (file: File): AppThunk =>
+  async (dispatch, getState) => {
+    if (!file) return
 
-  try {
-    const txt = await file.text()
-    const data = JSON.parse(txt)
-    const converted = await convertZmToLocal(data)
-    // TODO: maybe later make more elegant solution for local data
-    dispatch(setToken('fakeToken'))
-    dispatch(applyServerPatch(converted))
-    dispatch(saveDataLocally())
-    Cookies.set('token', 'fakeToken', { expires: new Date(2030, 1) })
-  } catch (error) {
-    console.log(error)
-    return
+    try {
+      const txt = await file.text()
+      const data = JSON.parse(txt)
+      const converted = await convertZmToLocal(data)
+      // TODO: maybe later make more elegant solution for local data
+      dispatch(setToken('fakeToken'))
+      dispatch(applyServerPatch(converted))
+      dispatch(saveDataLocally())
+      Cookies.set('token', 'fakeToken', { expires: new Date(2030, 1) })
+    } catch (error) {
+      console.log(error)
+      return
+    }
   }
-}

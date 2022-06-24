@@ -1,4 +1,4 @@
-import { getIDBStorage } from 'services/storage'
+import { getIDBStorage } from 'shared/api/storage'
 import {
   TToken,
   TUnixTime,

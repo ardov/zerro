@@ -4,7 +4,7 @@ import { Box } from '@mui/material'
 import { useTheme } from '@mui/material'
 import { Link } from 'react-router-dom'
 import './index.scss'
-import { Logo } from 'components/Logo'
+import { Logo } from 'shared/ui/Logo'
 import { Switch, Route } from 'react-router'
 import { ScrollToTop, TextLink } from './Components'
 

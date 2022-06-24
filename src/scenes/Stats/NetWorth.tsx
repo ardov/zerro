@@ -26,7 +26,7 @@ import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 import { round } from 'shared/helpers/currencyHelpers'
 import { useState } from 'react'
 import { formatDate } from 'shared/helpers/format'
-import { DataLine } from 'components/DataLine'
+import { DataLine } from 'shared/ui/DataLine'
 
 type Point = {
   date: Date

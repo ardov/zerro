@@ -1,7 +1,6 @@
 import { openDB } from 'idb'
+import { idbBaseName, idbStoreName } from 'shared/config'
 
-const BASE_NAME = 'zerro_data'
-const STORE_NAME = 'serverData'
 const VERSION = 1
 
 export function getIDBStorage(base: string, store: string) {
@@ -23,5 +22,5 @@ export function getIDBStorage(base: string, store: string) {
   }
 }
 
-export const storage = getIDBStorage(BASE_NAME, STORE_NAME)
-export const dataStorage = getIDBStorage(BASE_NAME, 'dataStorage')
+export const storage = getIDBStorage(idbBaseName, idbStoreName)
+export const dataStorage = getIDBStorage(idbBaseName, 'dataStorage')

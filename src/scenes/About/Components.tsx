@@ -1,6 +1,6 @@
 import React, { FC, ReactNode } from 'react'
 import { Box, BoxProps, ButtonBase } from '@mui/material'
-import { ChevronRightIcon } from 'components/Icons'
+import { ChevronRightIcon } from 'shared/ui/Icons'
 import { useEffect } from 'react'
 import { useLocation, Link as RouterLink } from 'react-router-dom'
 import { useToggle } from 'shared/hooks/useToggle'

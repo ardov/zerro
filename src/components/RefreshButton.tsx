@@ -9,10 +9,10 @@ import {
   SyncDisabledIcon,
   DoneIcon,
   WarningIcon,
-} from 'components/Icons'
+} from 'shared/ui/Icons'
 import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
-import { Tooltip } from 'components/Tooltip'
+import { Tooltip } from 'shared/ui/Tooltip'
 import { getLastSyncInfo } from 'store/lastSync'
 import { useRegularSync } from 'components/RegularSyncHandler'
 import { useAppDispatch, useAppSelector } from 'store'

@@ -12,8 +12,8 @@ import {
   PopoverProps,
   ListItemProps,
 } from '@mui/material'
-import { AddIcon } from 'components/Icons'
-import { EmojiIcon } from 'components/EmojiIcon'
+import { AddIcon } from 'shared/ui/Icons'
+import { EmojiIcon } from 'shared/ui/EmojiIcon'
 import { TTag } from 'types'
 
 type TagType = 'income' | 'outcome' | undefined | null

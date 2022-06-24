@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from 'store'
-import { EmojiIcon } from 'components/EmojiIcon'
+import { EmojiIcon } from 'shared/ui/EmojiIcon'
 import {
   Box,
   Typography,
@@ -11,20 +11,15 @@ import {
   InputAdornment,
   Button,
 } from '@mui/material'
-import { Tooltip } from 'components/Tooltip'
-import {
-  CloseIcon,
-  EditIcon,
-  EmojiFlagsIcon,
-  NotesIcon,
-} from 'components/Icons'
+import { Tooltip } from 'shared/ui/Tooltip'
+import { CloseIcon, EditIcon, EmojiFlagsIcon, NotesIcon } from 'shared/ui/Icons'
 import { getPopulatedTag } from 'store/data/tags'
 import { Total, Line as TextLine } from '../components'
 import {
   getAmountsById,
   // getGoalsProgress
 } from 'scenes/Budgets/selectors'
-import Rhythm from 'components/Rhythm'
+import Rhythm from 'shared/ui/Rhythm'
 import { useMonth } from 'scenes/Budgets/pathHooks'
 import { LinkedAccs } from './LinkedAccs'
 import { OutcomeWidget } from './OutcomeWidget'

@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import styled from '@emotion/styled'
-import { EmojiIcon } from 'components/EmojiIcon'
+import { EmojiIcon } from 'shared/ui/EmojiIcon'
 import { useAppSelector } from 'store'
 import { getMerchants } from 'store/data/selectors'
 import { Amount } from 'components/Amount'
@@ -8,7 +8,7 @@ import { getAccounts } from 'store/data/accounts'
 import { TRawTransaction, TrType } from 'types'
 import { getPopulatedTags } from 'store/data/tags'
 import { Typography } from '@mui/material'
-import { Tooltip } from 'components/Tooltip'
+import { Tooltip } from 'shared/ui/Tooltip'
 // import { isNew } from 'store/data/transactions/helpers'
 
 type HTMLDivProps = React.DetailedHTMLProps<

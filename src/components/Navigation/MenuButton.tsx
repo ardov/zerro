@@ -16,7 +16,7 @@ import {
   BarChartIcon,
   SyncIcon,
   SyncDisabledIcon,
-} from 'components/Icons'
+} from 'shared/ui/Icons'
 import { Link } from 'react-router-dom'
 import {
   Box,
@@ -29,13 +29,14 @@ import {
   Switch,
   Typography,
 } from '@mui/material'
-import { Tooltip } from 'components/Tooltip'
+import { Tooltip } from 'shared/ui/Tooltip'
 import { useThemeType } from 'shared/hooks/useThemeType'
 import { sendEvent } from 'shared/helpers/tracking'
 import { resetData } from 'store/data'
 import { clearLocalData } from 'logic/localData'
-import { Confirm } from 'components/Confirm'
+import { Confirm } from 'shared/ui/Confirm'
 import { useRegularSync } from 'components/RegularSyncHandler'
+import { appVersion } from 'shared/config'
 
 const useStyles = makeStyles(({ spacing }) => ({
   menuIcon: { marginRight: spacing(1) },
@@ -154,7 +155,7 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
           align="center"
           onClick={() => window.location.reload()}
         >
-          {process.env.REACT_APP_VERSION}
+          {appVersion}
         </Typography>
       </Box>
     </Menu>

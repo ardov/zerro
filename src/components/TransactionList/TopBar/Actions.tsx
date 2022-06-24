@@ -9,14 +9,14 @@ import {
   MoreVertIcon,
   VisibilityIcon,
   MergeTypeIcon,
-} from 'components/Icons'
-import { Tooltip } from 'components/Tooltip'
+} from 'shared/ui/Icons'
+import { Tooltip } from 'shared/ui/Tooltip'
 import Chip from '@mui/material/Chip'
 import Box from '@mui/material/Box'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import pluralize from 'shared/helpers/pluralize'
-import { Confirm } from 'components/Confirm'
+import { Confirm } from 'shared/ui/Confirm'
 import TagSelect2 from 'components/TagSelect2'
 import {
   deleteTransactions,

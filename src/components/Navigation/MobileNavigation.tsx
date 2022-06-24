@@ -13,7 +13,7 @@ import {
   AccountBalanceIcon,
   AccountBalanceWalletIcon,
   SyncAltIcon,
-} from 'components/Icons'
+} from 'shared/ui/Icons'
 import { makeStyles } from '@mui/styles'
 import { useHomeBar } from 'shared/hooks/useHomeBar'
 

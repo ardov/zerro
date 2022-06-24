@@ -18,8 +18,8 @@ import endOfDay from 'date-fns/endOfDay'
 import subMonths from 'date-fns/subMonths'
 
 import { makeStyles } from '@mui/styles'
-import { Tooltip } from 'components/Tooltip'
-import { CloseIcon } from 'components/Icons'
+import { Tooltip } from 'shared/ui/Tooltip'
+import { CloseIcon } from 'shared/ui/Icons'
 import Button from '@mui/material/Button'
 
 import { formatDate } from 'shared/helpers/format'

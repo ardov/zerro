@@ -11,8 +11,8 @@ import {
   Box,
 } from '@mui/material'
 import { styled } from '@mui/styles'
-import { Tooltip } from 'components/Tooltip'
-import { Confirm } from 'components/Confirm'
+import { Tooltip } from 'shared/ui/Tooltip'
+import { Confirm } from 'shared/ui/Confirm'
 import { fillGoals } from '../thunks'
 import { getTotalGoalsProgress } from '../selectors'
 import { useMonth } from '../pathHooks'
