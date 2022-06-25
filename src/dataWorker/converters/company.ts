@@ -1,5 +1,5 @@
 import { TCompany, TZmCompany } from 'shared/types'
-import { msToUnix, TZmAdapter, zmDateToMs } from './utils'
+import { msToUnix, TZmAdapter, zmDateToMs } from 'shared/helpers/adapterUtils'
 
 export const convertCompany: TZmAdapter<TZmCompany, TCompany> = {
   toClient: el => {

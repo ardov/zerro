@@ -1,5 +1,10 @@
 import { TRawTransaction, TZmTransaction } from 'shared/types'
-import { msToISODate, msToUnix, TZmAdapter, zmDateToMs } from './utils'
+import {
+  msToISODate,
+  msToUnix,
+  TZmAdapter,
+  zmDateToMs,
+} from 'shared/helpers/adapterUtils'
 
 export const convertTransaction: TZmAdapter<TZmTransaction, TRawTransaction> = {
   toClient: (el: TZmTransaction): TRawTransaction => ({

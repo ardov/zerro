@@ -3,7 +3,7 @@ import { useAppSelector } from 'models'
 import { getPopulatedTags, getTagsTree, TagTreeNode } from 'models/tags'
 import { Box, Autocomplete, TextField } from '@mui/material'
 import { EmojiIcon } from 'shared/ui/EmojiIcon'
-import { TTag } from '../shared/types'
+import { TTag } from 'shared/types'
 import TagChip from './TagChip'
 import ru from 'convert-layout/ru'
 

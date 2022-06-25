@@ -11,7 +11,7 @@ import { convertReminderMarker } from './reminderMarker'
 import { convertTag } from './tag'
 import { convertTransaction } from './transaction'
 import { convertUser } from './user'
-import { msToUnix, TZmAdapter, zmDateToMs } from './utils'
+import { msToUnix, TZmAdapter, zmDateToMs } from 'shared/helpers/adapterUtils'
 
 export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
   toClient: d => {

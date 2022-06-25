@@ -141,10 +141,22 @@ export const dataConverters = {
 
   budget: {
     toClient: (el: TZmBudget): TBudget => {
-      return { ...el, changed: toMs(el.changed), date: toMs(el.date) }
+      return {
+        ...el,
+        changed: toMs(el.changed),
+        date: toMs(el.date),
+        id: `${el.date}#${el.tag}`,
+      }
     },
     toServer: (el: TBudget): TZmBudget => {
-      return { ...el, changed: toUnix(el.changed), date: toISODate(el.date) }
+      let converted = {
+        ...el,
+        changed: toUnix(el.changed),
+        date: toISODate(el.date),
+        id: undefined,
+      }
+      delete converted.id
+      return converted
     },
   },
 

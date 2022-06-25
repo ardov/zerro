@@ -245,7 +245,9 @@ export type TBudget = Modify<
     income: TMilliUnits
     outcome: TMilliUnits
   }
->
+> & {
+  id: `${TZmBudget['date']}#${TZmBudget['tag']}`
+}
 
 export type PopulatedBudget = TBudget & {
   convertedOutcome: number

@@ -1,5 +1,5 @@
 import { TFxIdMap, TRawUser, TUser, TZmUser } from 'shared/types'
-import { msToUnix, TZmAdapter, zmDateToMs } from './utils'
+import { msToUnix, TZmAdapter, zmDateToMs } from 'shared/helpers/adapterUtils'
 
 export const convertUser: TZmAdapter<TZmUser, TRawUser> = {
   toClient: el => {

@@ -3,7 +3,7 @@ import { keys } from 'shared/helpers/keys'
 import ZenApi from 'shared/api/ZenApi'
 import { TDataStore, TDiff, TToken, TZmDiff } from 'shared/types'
 import { convertAccount } from './converters/account'
-import { convertBudget, getBudgetId } from './converters/budget'
+import { convertBudget } from './converters/budget'
 import { convertCompany } from './converters/company'
 import { convertCountry } from './converters/country'
 import { convertDiff } from './converters/diff'
@@ -14,7 +14,7 @@ import { convertReminderMarker } from './converters/reminderMarker'
 import { convertTag } from './converters/tag'
 import { convertTransaction } from './converters/transaction'
 import { convertUser } from './converters/user'
-import { msToUnix } from './converters/utils'
+import { msToUnix } from 'shared/helpers/adapterUtils'
 import { clearStorage, getLocalData, setLocalKey } from './storageMethods'
 
 const workerData = createDomain('workerData')
@@ -229,8 +229,7 @@ function applyServerDiff(state: TDataStore, diff: TDiff): TDataStore {
   if (diff.budget) {
     copy.budget = { ...copy.budget }
     diff.budget.forEach(el => {
-      let id = getBudgetId(el)
-      copy.budget[id] = el
+      copy.budget[el.id] = el
     })
   }
   if (diff.transaction) {

@@ -1,5 +1,10 @@
 import { TBudget, TZmBudget } from 'shared/types'
-import { msToISODate, msToUnix, TZmAdapter, zmDateToMs } from './utils'
+import {
+  msToISODate,
+  msToUnix,
+  TZmAdapter,
+  zmDateToMs,
+} from 'shared/helpers/adapterUtils'
 
 export const convertBudget: TZmAdapter<TZmBudget, TBudget> = {
   toClient: (el: TZmBudget): TBudget => {
@@ -7,17 +12,19 @@ export const convertBudget: TZmAdapter<TZmBudget, TBudget> = {
       ...el,
       changed: zmDateToMs(el.changed),
       date: zmDateToMs(el.date),
+      id: `${el.date}#${el.tag}`,
     }
   },
   toServer: (el: TBudget): TZmBudget => {
     return {
-      ...el,
       changed: msToUnix(el.changed),
+      user: el.user,
+      tag: el.tag,
       date: msToISODate(el.date),
+      income: el.income,
+      incomeLock: el.incomeLock,
+      outcome: el.outcome,
+      outcomeLock: el.outcomeLock,
     }
   },
-}
-
-export function getBudgetId(budget: TBudget) {
-  return `${budget.tag},${msToISODate(budget.date)}`
 }

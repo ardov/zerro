@@ -1,42 +1,46 @@
-import { getBudgetId } from 'models/budgets'
 import { TDiff } from 'shared/types'
 
 /**
- * Mutates first diff
+ * Adds changes from the second diff to the first diff
+ * ⚠️ Mutable method
+ * @param target - target object will be mutated
+ * @param diff - object with changes
  */
-export function mergeDiffs(d1: TDiff, d2: TDiff) {
-  const merge = (key: keyof TDiff) => {
+export function mergeDiffs(target: TDiff, diff: TDiff) {
+  if (diff.serverTimestamp) target.serverTimestamp = diff.serverTimestamp
+  if (diff.deletion) {
+    if (target.deletion) target.deletion = target.deletion.concat(diff.deletion)
+    else target.deletion = diff.deletion
+  }
+  merge('instrument')
+  merge('country')
+  merge('company')
+  merge('user')
+  merge('account')
+  merge('merchant')
+  merge('tag')
+  merge('budget')
+  merge('reminder')
+  merge('reminderMarker')
+  merge('transaction')
+
+  /**
+   * Merges all objects from diff key into target key
+   * @param key - all diff keys except serverTimestamp and deletion
+   */
+  function merge(key: keyof TDiff) {
     if (key === 'serverTimestamp' || key === 'deletion') return
-    if (!d2[key]) return
-    if (d1[key]) {
-      d2[key]?.forEach((el: any) => {
-        const id = getId(el)
+    if (!diff[key]) return
+    if (target[key]) {
+      diff[key]?.forEach((el: any) => {
+        const id = el.id
         // @ts-ignore
-        const filtered = d1[key]?.filter((el: any) => id !== getId(el))
-        d1[key] = [...filtered, el]
+        const filtered = target[key]?.filter((el: any) => id !== el.id)
+        target[key] = [...filtered, el]
       })
     } else {
       // @ts-ignore
-      d1[key] = d2[key]
+      target[key] = diff[key]
     }
   }
-
-  if (d2.serverTimestamp) d1.serverTimestamp = d2.serverTimestamp
-  if (d2.deletion) {
-    if (d1.deletion) d1.deletion = d1.deletion.concat(d2.deletion)
-    else d1.deletion = d2.deletion
-  }
-  if (d2.instrument) merge('instrument')
-  if (d2.country) merge('country')
-  if (d2.company) merge('company')
-  if (d2.user) merge('user')
-  if (d2.account) merge('account')
-  if (d2.merchant) merge('merchant')
-  if (d2.tag) merge('tag')
-  if (d2.budget) merge('budget')
-  if (d2.reminder) merge('reminder')
-  if (d2.reminderMarker) merge('reminderMarker')
-  if (d2.transaction) merge('transaction')
 }
-
-const getId = (el: any): string => el.id || getBudgetId(el)

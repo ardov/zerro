@@ -1,4 +1,3 @@
-import { getBudgetId } from 'models/budgets'
 import { TDataStore, TDiff } from 'shared/types'
 
 /**
@@ -7,39 +6,22 @@ import { TDataStore, TDiff } from 'shared/types'
  * @param store
  */
 export function applyDiff(diff: TDiff, store: TDataStore) {
-  const {
-    serverTimestamp,
-    deletion,
-    instrument,
-    country,
-    company,
-    user,
-    account,
-    merchant,
-    tag,
-    budget,
-    reminder,
-    reminderMarker,
-    transaction,
-  } = diff
-
-  const addToStore = (key: keyof TDiff) => (el: any) => {
+  const processKey = (key: keyof TDiff) => {
     if (key === 'serverTimestamp' || key === 'deletion') return
-    const id = key === 'budget' ? getBudgetId(el) : el.id
-    store[key][id] = el
+    if (diff[key]) diff[key]?.forEach(el => (store[key][el.id] = el))
   }
 
-  if (serverTimestamp) store.serverTimestamp = serverTimestamp
-  deletion?.forEach(obj => delete store[obj.object][obj.id])
-  instrument?.forEach(addToStore('instrument'))
-  country?.forEach(addToStore('country'))
-  company?.forEach(addToStore('company'))
-  user?.forEach(addToStore('user'))
-  account?.forEach(addToStore('account'))
-  merchant?.forEach(addToStore('merchant'))
-  tag?.forEach(addToStore('tag'))
-  budget?.forEach(addToStore('budget'))
-  reminder?.forEach(addToStore('reminder'))
-  reminderMarker?.forEach(addToStore('reminderMarker'))
-  transaction?.forEach(addToStore('transaction'))
+  if (diff.serverTimestamp) store.serverTimestamp = diff.serverTimestamp
+  diff.deletion?.forEach(obj => delete store[obj.object][obj.id])
+  processKey('instrument')
+  processKey('country')
+  processKey('company')
+  processKey('user')
+  processKey('account')
+  processKey('merchant')
+  processKey('tag')
+  processKey('budget')
+  processKey('reminder')
+  processKey('reminderMarker')
+  processKey('transaction')
 }

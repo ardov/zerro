@@ -1,5 +1,10 @@
 import { TRawReminder, TZmReminder } from 'shared/types'
-import { msToISODate, msToUnix, TZmAdapter, zmDateToMs } from './utils'
+import {
+  msToISODate,
+  msToUnix,
+  TZmAdapter,
+  zmDateToMs,
+} from 'shared/helpers/adapterUtils'
 
 export const convertReminder: TZmAdapter<TZmReminder, TRawReminder> = {
   toClient: (el: TZmReminder): TRawReminder => ({

@@ -1,5 +1,5 @@
 import { ById, TFxIdMap, TInstrument, TZmInstrument } from 'shared/types'
-import { msToUnix, TZmAdapter, zmDateToMs } from './utils'
+import { msToUnix, TZmAdapter, zmDateToMs } from 'shared/helpers/adapterUtils'
 
 export const convertInstrument: TZmAdapter<TZmInstrument, TInstrument> = {
   toClient: (el: TZmInstrument): TInstrument => {
