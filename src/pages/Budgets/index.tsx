@@ -32,8 +32,8 @@ import sub from 'date-fns/sub'
 import { MapWidget } from './MapWidget'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
-import { getAggregatedTransactions } from 'entities/selector'
-import { getDebtors } from 'entities/debtors/collectDebtors'
+import { getAggregatedTransactions } from 'store/envelopes/selector'
+import { getDebtors } from 'store/debtors/collectDebtors'
 
 export default function BudgetsRouter() {
   const t1 = useAppSelector(getAggregatedTransactions)
