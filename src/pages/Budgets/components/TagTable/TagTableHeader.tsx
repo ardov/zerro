@@ -26,11 +26,11 @@ import { RadialProgress } from 'shared/ui/RadialProgress'
 import { makeStyles } from '@mui/styles'
 import { ToBeBudgeted } from '../ToBeBudgeted'
 import useScrollPosition from '@react-hook/window-scroll'
-import { useMonth } from 'scenes/Budgets/pathHooks'
+import { useMonth } from 'pages/Budgets/pathHooks'
 import add from 'date-fns/add'
 import sub from 'date-fns/sub'
 import { DragModeContext } from '../DnDContext'
-import { getMonthDates, getTotalGoalsProgress } from 'scenes/Budgets/selectors'
+import { getMonthDates, getTotalGoalsProgress } from 'pages/Budgets/selectors'
 
 const useStyles = makeStyles(theme => ({
   row: {

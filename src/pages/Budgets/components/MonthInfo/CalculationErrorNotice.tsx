@@ -11,7 +11,7 @@ import { resetData } from 'store/data'
 import { clearLocalData } from 'logic/localData'
 import { captureError, sendEvent } from 'shared/helpers/tracking'
 import { getDiff } from 'store/data'
-import { getAccountsHistory } from 'scenes/Stats/selectors'
+import { getAccountsHistory } from 'pages/Stats/selectors'
 import { TPopulatedAccount, TSelector } from 'types'
 import { createSelector } from '@reduxjs/toolkit'
 

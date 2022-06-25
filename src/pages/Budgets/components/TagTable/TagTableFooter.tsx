@@ -9,7 +9,7 @@ import {
 } from '@mui/material'
 import { Amount } from 'components/Amount'
 import { makeStyles } from '@mui/styles'
-import { useMonth } from 'scenes/Budgets/pathHooks'
+import { useMonth } from 'pages/Budgets/pathHooks'
 import { getTotalsByMonth } from '../../selectors'
 
 const useStyles = makeStyles(theme => ({

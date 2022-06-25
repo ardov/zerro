@@ -4,9 +4,9 @@ import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { Box, BoxProps, useTheme } from '@mui/material'
 import { formatDate } from 'shared/helpers/format'
 import Rhythm from 'shared/ui/Rhythm'
-import { getAmountsById } from 'scenes/Budgets/selectors'
-import { getMonthDates } from 'scenes/Budgets/selectors'
-import { useMonth } from 'scenes/Budgets/pathHooks'
+import { getAmountsById } from 'pages/Budgets/selectors'
+import { getMonthDates } from 'pages/Budgets/selectors'
+import { useMonth } from 'pages/Budgets/pathHooks'
 import { DataLine } from '../../../../shared/ui/DataLine'
 
 type OutcomWidgetProps = BoxProps & {

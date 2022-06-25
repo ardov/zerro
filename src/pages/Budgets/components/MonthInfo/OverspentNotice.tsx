@@ -5,9 +5,9 @@ import { Box, Typography, Button } from '@mui/material'
 import { WarningIcon } from 'shared/ui/Icons'
 import { Amount } from 'components/Amount'
 import { Confirm } from 'shared/ui/Confirm'
-import { fixOverspends } from 'scenes/Budgets/thunks'
-import { getTotalsByMonth } from 'scenes/Budgets/selectors'
-import { useMonth } from 'scenes/Budgets/pathHooks'
+import { fixOverspends } from 'pages/Budgets/thunks'
+import { getTotalsByMonth } from 'pages/Budgets/selectors'
+import { useMonth } from 'pages/Budgets/pathHooks'
 
 export const OverspentNotice: FC = () => {
   const [month] = useMonth()

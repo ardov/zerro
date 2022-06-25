@@ -12,15 +12,15 @@ import {
 import { CheckCircleIcon } from 'shared/ui/Icons'
 import { formatMoney } from 'shared/helpers/format'
 import { AmountInput } from 'shared/ui/AmountInput'
-import { getAmountsById } from 'scenes/Budgets/selectors'
+import { getAmountsById } from 'pages/Budgets/selectors'
 import {
   convertCurrency,
   getInstruments,
   getUserInstrument,
 } from 'store/data/instruments'
-import { setOutcomeBudget } from 'scenes/Budgets/thunks'
+import { setOutcomeBudget } from 'pages/Budgets/thunks'
 import { getGoals } from 'store/data/hiddenData/goals'
-import { getGoalsProgress } from 'scenes/Budgets/selectors'
+import { getGoalsProgress } from 'pages/Budgets/selectors'
 import { round } from 'shared/helpers/currencyHelpers'
 import { sendEvent } from 'shared/helpers/tracking'
 import pluralize from 'shared/helpers/pluralize'

@@ -23,7 +23,7 @@ import { WidgetIncome } from './WidgetIncome'
 import { OverspentNotice } from './OverspentNotice'
 import { CalculationErrorNotice } from './CalculationErrorNotice'
 import { WidgetOutcome } from './WidgetOutcome'
-import { useMonth } from 'scenes/Budgets/pathHooks'
+import { useMonth } from 'pages/Budgets/pathHooks'
 import { useToggle } from 'shared/hooks/useToggle'
 
 type MonthInfoProps = BoxProps & {

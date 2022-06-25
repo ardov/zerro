@@ -23,4 +23,3 @@ export function getIDBStorage(base: string, store: string) {
 }
 
 export const storage = getIDBStorage(idbBaseName, idbStoreName)
-export const dataStorage = getIDBStorage(idbBaseName, 'dataStorage')

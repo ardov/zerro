@@ -3,7 +3,7 @@ import { useAppSelector } from 'store'
 import { getTotalsByMonth } from './selectors'
 import { getAmountsByTag } from './selectors'
 import { getTagsTree } from 'store/data/tags'
-import { useMonth } from 'scenes/Budgets/pathHooks'
+import { useMonth } from 'pages/Budgets/pathHooks'
 import {
   Sankey,
   Tooltip,

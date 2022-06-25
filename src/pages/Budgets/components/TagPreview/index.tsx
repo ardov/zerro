@@ -18,9 +18,9 @@ import { Total, Line as TextLine } from '../components'
 import {
   getAmountsById,
   // getGoalsProgress
-} from 'scenes/Budgets/selectors'
+} from 'pages/Budgets/selectors'
 import Rhythm from 'shared/ui/Rhythm'
-import { useMonth } from 'scenes/Budgets/pathHooks'
+import { useMonth } from 'pages/Budgets/pathHooks'
 import { LinkedAccs } from './LinkedAccs'
 import { OutcomeWidget } from './OutcomeWidget'
 import { ColorPicker } from 'components/ColorPickerPopover'

@@ -14,7 +14,7 @@ import { AmountInput } from 'shared/ui/AmountInput'
 import { getGoals, setGoal, deleteGoal } from 'store/data/hiddenData/goals'
 import { goalType } from 'store/data/hiddenData/constants'
 import { CloseIcon } from 'shared/ui/Icons'
-import MonthSelectPopover from 'scenes/Budgets/MonthSelectPopover'
+import MonthSelectPopover from 'pages/Budgets/MonthSelectPopover'
 import { formatDate } from 'shared/helpers/format'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType

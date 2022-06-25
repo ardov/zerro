@@ -27,12 +27,12 @@ import { shallowEqual } from 'react-redux'
 import {
   getGoalProgress,
   GoalProgress as GoalProgressType,
-} from 'scenes/Budgets/selectors'
+} from 'pages/Budgets/selectors'
 import { Amount } from 'components/Amount'
 import { useContext } from 'react'
 import { IsDraggingContext, DragModeContext, DragModeType } from '../DnDContext'
 import { getPopulatedTag } from 'store/data/tags'
-import { getAmountsById } from 'scenes/Budgets/selectors'
+import { getAmountsById } from 'pages/Budgets/selectors'
 import { TGoal } from 'types'
 import { getTagMeta } from 'store/data/hiddenData/tagMeta'
 import { getInstruments, getUserInstrumentId } from 'store/data/instruments'
