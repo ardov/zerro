@@ -1,4 +1,4 @@
-import { DATA_ACC_NAME } from 'store/data/hiddenData/constants'
+import { DATA_ACC_NAME } from 'models/data/hiddenData/constants'
 import { ById, TRawAccount } from 'shared/types'
 
 /**

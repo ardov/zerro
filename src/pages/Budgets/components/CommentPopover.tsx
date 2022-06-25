@@ -1,7 +1,7 @@
 import React, { useState, FC } from 'react'
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch, useAppSelector } from 'models'
 import { Box, Popover, TextField, PopoverProps } from '@mui/material'
-import { getTagComment, setTagComment } from 'store/data/hiddenData/tagMeta'
+import { getTagComment, setTagComment } from 'models/data/hiddenData/tagMeta'
 
 // TODO: Unused component. Maybe delete later
 

@@ -1,17 +1,17 @@
 import React, { FC, useState } from 'react'
 import Cookies from 'cookies-js'
-import { useAppDispatch } from 'store'
+import { useAppDispatch } from 'models'
 import { Box, Button, Link, Fade, LinkProps } from '@mui/material'
 import { logIn } from 'features/authorization'
 import ZenApi from 'shared/api/ZenApi'
 import { useTheme } from '@mui/material'
 import { Logo } from '../../shared/ui/Logo'
-import { applyServerPatch } from 'store/data'
-import { setToken } from 'store/token'
+import { applyServerPatch } from 'models/data'
+import { setToken } from 'models/token'
 import { saveDataLocally } from 'features/localData'
 import { Link as RouterLink } from 'react-router-dom'
 import { convertZmToLocal } from 'worker'
-import { AppThunk } from 'store'
+import { AppThunk } from 'models'
 ZenApi.checkCode()
 
 export default function Auth() {

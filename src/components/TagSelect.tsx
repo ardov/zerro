@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
-import { useAppSelector } from 'store'
-import { getPopulatedTags, getTagsTree, TagTreeNode } from 'store/data/tags'
+import { useAppSelector } from 'models'
+import { getPopulatedTags, getTagsTree, TagTreeNode } from 'models/data/tags'
 import { Box, Autocomplete, TextField } from '@mui/material'
 import { EmojiIcon } from 'shared/ui/EmojiIcon'
 import { TTag } from '../shared/types'

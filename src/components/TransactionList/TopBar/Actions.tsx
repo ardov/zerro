@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react'
 import './transitions.css'
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch, useAppSelector } from 'models'
 import IconButton from '@mui/material/IconButton'
 import {
   DeleteOutlineIcon,
@@ -22,16 +22,16 @@ import {
   deleteTransactions,
   markViewed,
   bulkEditTransactions,
-} from 'store/data/transactions/thunks'
+} from 'models/data/transactions/thunks'
 import { CSSTransition } from 'react-transition-group'
 import { EditOutlined } from '@mui/icons-material'
 import { BulkEditModal } from './BulkEditModal'
-import { getType, isNew } from 'store/data/transactions/helpers'
-import { getTransactions } from 'store/data/transactions'
+import { getType, isNew } from 'models/data/transactions/helpers'
+import { getTransactions } from 'models/data/transactions'
 import { Divider, ListItemIcon, ListItemText } from '@mui/material'
 import { TRawTransaction } from 'shared/types'
 import { round } from 'shared/helpers/currencyHelpers'
-import { applyClientPatch } from 'store/data'
+import { applyClientPatch } from 'models/data'
 import { sendEvent } from 'shared/helpers/tracking'
 
 type ActionsProps = {

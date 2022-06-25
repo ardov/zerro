@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useAppSelector } from 'store'
+import { useAppSelector } from 'models'
 import { Paper, Card, Typography, Box, useTheme } from '@mui/material'
 import {
   ResponsiveContainer,
@@ -14,12 +14,12 @@ import { DataLine } from 'shared/ui/DataLine'
 import {
   getHistoryStart,
   getTransactionsHistory,
-} from 'store/data/transactions'
+} from 'models/data/transactions'
 import { formatDate, formatMoney } from 'shared/helpers/format'
 import { makeDateArray, monthStart } from 'shared/helpers/dateHelpers'
-import { convertCurrency } from 'store/data/instruments'
+import { convertCurrency } from 'models/data/instruments'
 import { round } from 'shared/helpers/currencyHelpers'
-import { getType } from 'store/data/transactions/helpers'
+import { getType } from 'models/data/transactions/helpers'
 
 type Point = {
   date: Date

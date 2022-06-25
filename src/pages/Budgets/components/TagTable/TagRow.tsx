@@ -19,10 +19,10 @@ import {
   EmojiFlagsIcon,
   NotesIcon,
 } from 'shared/ui/Icons'
-import { goalToWords } from 'store/data/hiddenData/goals/helpers'
+import { goalToWords } from 'models/data/hiddenData/goals/helpers'
 import { RadialProgress } from 'shared/ui/RadialProgress'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import { getGoal } from 'store/data/hiddenData/goals'
+import { getGoal } from 'models/data/hiddenData/goals'
 import { shallowEqual } from 'react-redux'
 import {
   getGoalProgress,
@@ -31,13 +31,13 @@ import {
 import { Amount } from 'components/Amount'
 import { useContext } from 'react'
 import { IsDraggingContext, DragModeContext, DragModeType } from '../DnDContext'
-import { getPopulatedTag } from 'store/data/tags'
+import { getPopulatedTag } from 'models/data/tags'
 import { getAmountsById } from 'pages/Budgets/selectors'
 import { TGoal } from 'shared/types'
-import { getTagMeta } from 'store/data/hiddenData/tagMeta'
-import { getInstruments, getUserInstrumentId } from 'store/data/instruments'
+import { getTagMeta } from 'models/data/hiddenData/tagMeta'
+import { getInstruments, getUserInstrumentId } from 'models/data/instruments'
 import { SxProps } from '@mui/system'
-import { useAppSelector } from 'store'
+import { useAppSelector } from 'models'
 
 type TagRowProps = {
   id: string

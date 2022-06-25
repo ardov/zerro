@@ -2,22 +2,22 @@ import {
   convertCurrency,
   getInstruments,
   getUserInstrument,
-} from 'store/data/instruments'
-import { getRootUser } from 'store/data/users'
-import { getPopulatedTag } from 'store/data/tags'
+} from 'models/data/instruments'
+import { getRootUser } from 'models/data/users'
+import { getPopulatedTag } from 'models/data/tags'
 import { getAmountsByTag, TagAmounts } from '../selectors'
 import { sendEvent } from 'shared/helpers/tracking'
-import { makeBudget } from 'store/data/budgets'
-import { getBudgetsByMonthAndTag, getBudget } from 'store/data/budgets'
-import { getTags } from 'store/data/tags'
+import { makeBudget } from 'models/data/budgets'
+import { getBudgetsByMonthAndTag, getBudget } from 'models/data/budgets'
+import { getTags } from 'models/data/tags'
 import { subMonths } from 'date-fns/esm'
 import { getGoalsProgress } from '../selectors'
-import { goalType } from 'store/data/hiddenData/constants'
-import { getGoals } from 'store/data/hiddenData/goals'
-import { applyClientPatch } from 'store/data'
-import { AppThunk } from 'store'
+import { goalType } from 'models/data/hiddenData/constants'
+import { getGoals } from 'models/data/hiddenData/goals'
+import { applyClientPatch } from 'models/data'
+import { AppThunk } from 'models'
 import { TBudget, ById } from 'shared/types'
-import { getMetaForTag } from 'store/data/hiddenData/tagMeta'
+import { getMetaForTag } from 'models/data/hiddenData/tagMeta'
 import { round } from 'shared/helpers/currencyHelpers'
 
 export const moveFunds =

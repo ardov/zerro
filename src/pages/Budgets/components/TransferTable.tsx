@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { formatMoney } from 'shared/helpers/format'
-import { getUserCurrencyCode } from 'store/data/instruments'
+import { getUserCurrencyCode } from 'models/data/instruments'
 import { makeStyles } from '@mui/styles'
 import {
   Paper,
@@ -13,12 +13,12 @@ import {
   PaperProps,
 } from '@mui/material'
 import TagSelect2 from 'components/TagSelect2'
-import { addConnection, getAccTagMap } from 'store/data/hiddenData/accTagMap'
+import { addConnection, getAccTagMap } from 'models/data/hiddenData/accTagMap'
 import { getTransfers } from '../selectors'
-import { getAccounts } from 'store/data/accounts'
+import { getAccounts } from 'models/data/accounts'
 import TagChip from 'components/TagChip'
 import { useMonth } from '../pathHooks'
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch, useAppSelector } from 'models'
 
 const useStyles = makeStyles(theme => ({
   root: {

@@ -1,5 +1,5 @@
 import React, { useState, FC } from 'react'
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch, useAppSelector } from 'models'
 import {
   Box,
   Popover,
@@ -11,8 +11,8 @@ import {
   OutlinedTextFieldProps,
 } from '@mui/material'
 import { AmountInput } from 'shared/ui/AmountInput'
-import { getGoals, setGoal, deleteGoal } from 'store/data/hiddenData/goals'
-import { goalType } from 'store/data/hiddenData/constants'
+import { getGoals, setGoal, deleteGoal } from 'models/data/hiddenData/goals'
+import { goalType } from 'models/data/hiddenData/constants'
 import { CloseIcon } from 'shared/ui/Icons'
 import MonthSelectPopover from 'pages/Budgets/MonthSelectPopover'
 import { formatDate } from 'shared/helpers/format'

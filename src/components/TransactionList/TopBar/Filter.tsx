@@ -6,7 +6,7 @@ import { FilterListIcon, CloseIcon } from 'shared/ui/Icons'
 import { Tooltip } from 'shared/ui/Tooltip'
 import FilterDrawer from './FilterDrawer'
 import { useToggle } from 'shared/hooks/useToggle'
-import { FilterConditions } from 'store/data/transactions/filtering'
+import { FilterConditions } from 'models/data/transactions/filtering'
 import { SxProps } from '@mui/system'
 import { Theme } from '@mui/material/styles'
 

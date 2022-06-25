@@ -4,7 +4,7 @@ import { TagMapChart } from './TagMapChart'
 import { sendEvent } from 'shared/helpers/tracking'
 import { getTotalsByMonth } from '../selectors'
 import { useMonth } from '../pathHooks'
-import { useAppSelector } from 'store'
+import { useAppSelector } from 'models'
 
 type WidgetProps = PaperProps & {
   onSelectTag: (id: string) => void

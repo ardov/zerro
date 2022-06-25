@@ -9,8 +9,8 @@ import {
 } from '@mui/material'
 import { Amount } from 'components/Amount'
 import { TPopulatedAccount } from 'shared/types'
-import { useAppDispatch } from 'store'
-import { setInBudget } from 'store/data/accounts'
+import { useAppDispatch } from 'models'
+import { setInBudget } from 'models/data/accounts'
 
 export const Account: FC<{ account: TPopulatedAccount } & ListItemButtonProps> =
   ({ account, sx, ...rest }) => {

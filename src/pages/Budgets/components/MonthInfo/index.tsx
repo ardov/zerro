@@ -1,8 +1,8 @@
 import React, { FC } from 'react'
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch, useAppSelector } from 'models'
 import { formatDate, formatMoney } from 'shared/helpers/format'
 import { getTotalsByMonth } from '../../selectors'
-import { getUserCurrencyCode } from 'store/data/instruments'
+import { getUserCurrencyCode } from 'models/data/instruments'
 import { Confirm } from 'shared/ui/Confirm'
 import { copyPreviousBudget, startFresh, fixOverspends } from '../../thunks'
 import {

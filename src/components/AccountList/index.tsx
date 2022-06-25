@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
-import { useAppSelector } from 'store'
-import { getInBudgetAccounts, getSavingAccounts } from 'store/data/accounts'
+import { useAppSelector } from 'models'
+import { getInBudgetAccounts, getSavingAccounts } from 'models/data/accounts'
 import pluralize from 'shared/helpers/pluralize'
 import { Collapse, List, ListItemButton } from '@mui/material'
 import { Account, Subheader } from './components'

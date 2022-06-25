@@ -1,7 +1,7 @@
-import { getPopulatedTransactions } from 'store/data/transactions'
+import { getPopulatedTransactions } from 'models/data/transactions'
 import { formatDate } from 'shared/helpers/format'
-import { AppThunk } from 'store'
-import { PopulatedTransaction } from 'store/data/transactions/populate'
+import { AppThunk } from 'models'
+import { PopulatedTransaction } from 'models/data/transactions/populate'
 import { ById } from 'shared/types'
 
 export const exportCSV: AppThunk = (_, getState) => {

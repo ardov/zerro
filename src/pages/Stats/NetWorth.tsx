@@ -9,7 +9,7 @@ import {
   Card,
 } from '@mui/material'
 import { withStyles } from '@mui/styles'
-import { useAppSelector } from 'store'
+import { useAppSelector } from 'models'
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -19,8 +19,8 @@ import {
   Line,
   ReferenceLine,
 } from 'recharts'
-import { getInBudgetAccounts, getSavingAccounts } from 'store/data/accounts'
-import { convertCurrency } from 'store/data/instruments'
+import { getInBudgetAccounts, getSavingAccounts } from 'models/data/accounts'
+import { convertCurrency } from 'models/data/instruments'
 import { getAvailableMonths } from './availablePeriod'
 import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 import { round } from 'shared/helpers/currencyHelpers'

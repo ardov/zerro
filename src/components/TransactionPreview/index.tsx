@@ -17,18 +17,18 @@ import { Map } from './Map'
 import { AmountInput } from 'shared/ui/AmountInput'
 import { formatDate, rateToWords } from 'shared/helpers/format'
 import { TagList } from 'components/TagList'
-import { useAppDispatch, useAppSelector } from 'store'
-import { getTransactions } from 'store/data/transactions'
-import { getType } from 'store/data/transactions/helpers'
-import { getPopulatedAccounts } from 'store/data/accounts'
-import { getInstruments } from 'store/data/instruments'
+import { useAppDispatch, useAppSelector } from 'models'
+import { getTransactions } from 'models/data/transactions'
+import { getType } from 'models/data/transactions/helpers'
+import { getPopulatedAccounts } from 'models/data/accounts'
+import { getInstruments } from 'models/data/instruments'
 import {
   applyChangesToTransaction,
   deleteTransactions,
   deleteTransactionsPermanently,
   recreateTransaction,
   restoreTransaction,
-} from 'store/data/transactions/thunks'
+} from 'models/data/transactions/thunks'
 import { TRawTransaction } from 'shared/types'
 
 type TransactionPreviewProps = {

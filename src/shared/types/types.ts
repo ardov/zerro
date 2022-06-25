@@ -1,7 +1,7 @@
 import { Modify, ById } from './ts-utils'
-import { RootState } from 'store'
-import { goalType } from 'store/data/hiddenData/constants'
-import iconsMap from 'store/data/tags/iconsMap.json'
+import { RootState } from 'models'
+import { goalType } from 'models/data/hiddenData/constants'
+import iconsMap from 'models/data/tags/iconsMap.json'
 
 export type TUnixTime = number
 export type TMsTime = number

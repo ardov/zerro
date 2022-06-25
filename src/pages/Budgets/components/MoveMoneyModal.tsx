@@ -7,7 +7,7 @@ import { Box, InputAdornment, IconButton } from '@mui/material'
 import { getAmountsById } from '../selectors'
 import { moveFunds } from '../thunks'
 import { getTotalsByMonth } from '../selectors'
-import { RootState, useAppDispatch, useAppSelector } from 'store'
+import { RootState, useAppDispatch, useAppSelector } from 'models'
 import { Modify } from 'shared/types'
 
 type MoveMoneyModalProps = Modify<

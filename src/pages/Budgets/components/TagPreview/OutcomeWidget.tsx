@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react'
-import { useAppSelector } from 'store'
+import { useAppSelector } from 'models'
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { Box, BoxProps, useTheme } from '@mui/material'
 import { formatDate } from 'shared/helpers/format'

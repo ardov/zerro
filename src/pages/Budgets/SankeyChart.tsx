@@ -1,8 +1,8 @@
 import React, { FC } from 'react'
-import { useAppSelector } from 'store'
+import { useAppSelector } from 'models'
 import { getTotalsByMonth } from './selectors'
 import { getAmountsByTag } from './selectors'
-import { getTagsTree } from 'store/data/tags'
+import { getTagsTree } from 'models/data/tags'
 import { useMonth } from 'pages/Budgets/pathHooks'
 import {
   Sankey,

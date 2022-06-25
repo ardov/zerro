@@ -2,7 +2,7 @@ import React, {
   useCallback,
   // useState
 } from 'react'
-import { useAppSelector } from 'store'
+import { useAppSelector } from 'models'
 import { Redirect } from 'react-router-dom'
 import { TagTable } from './components/TagTable'
 import { TransferTable } from './components/TransferTable'
@@ -32,8 +32,8 @@ import sub from 'date-fns/sub'
 import { MapWidget } from './MapWidget'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
-import { getAggregatedTransactions } from 'store/envelopes/selector'
-import { getDebtors } from 'store/debtors/collectDebtors'
+import { getAggregatedTransactions } from 'models/envelopes/selector'
+import { getDebtors } from 'models/debtors/collectDebtors'
 
 export default function BudgetsRouter() {
   const t1 = useAppSelector(getAggregatedTransactions)

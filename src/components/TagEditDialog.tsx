@@ -16,7 +16,7 @@ import {
 import { TagSelect } from './TagSelect'
 import { Modify, TRawTag } from 'shared/types'
 import { shallowEqual } from 'react-redux'
-import { createTag } from 'store/data/tags/thunks'
+import { createTag } from 'models/data/tags/thunks'
 import { useFormik } from 'formik'
 import { hex2int, int2hex } from 'shared/helpers/color'
 import { ColorPicker } from './ColorPickerPopover'
@@ -25,10 +25,10 @@ import {
   getTagMeta,
   setTagComment,
   setTagCurrency,
-} from 'store/data/hiddenData/tagMeta'
-import { getUserInstrumentId } from 'store/data/instruments'
+} from 'models/data/hiddenData/tagMeta'
+import { getUserInstrumentId } from 'models/data/instruments'
 import { CurrencySelect } from './CurrencySelect'
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch, useAppSelector } from 'models'
 
 // TODO: Доделать модалку для редактирования и создания категорий
 

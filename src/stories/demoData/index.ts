@@ -8,9 +8,9 @@ import {
 import countries from './countries.json'
 import companies from './companies.json'
 import instruments from './instruments.json'
-import { makeAccount } from 'store/data/accounts'
-import { makeTag } from 'store/data/tags/makeTag'
-import makeTransaction from 'store/data/transactions/makeTransaction'
+import { makeAccount } from 'models/data/accounts'
+import { makeTag } from 'models/data/tags/makeTag'
+import makeTransaction from 'models/data/transactions/makeTransaction'
 
 const NOW = Date.now()
 const DAY = 1000 * 60 * 60 * 24

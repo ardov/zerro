@@ -2,8 +2,8 @@ import { createSelector } from '@reduxjs/toolkit'
 import startOfMonth from 'date-fns/startOfMonth'
 import isSameMonth from 'date-fns/isSameMonth'
 import addMonths from 'date-fns/addMonths'
-import { getBudgetsByMonthAndTag } from 'store/data/budgets'
-import { getTransactionsHistory } from 'store/data/transactions'
+import { getBudgetsByMonthAndTag } from 'models/data/budgets'
+import { getTransactionsHistory } from 'models/data/transactions'
 import { TSelector } from 'shared/types'
 
 /** Returns the date of first month in ms.

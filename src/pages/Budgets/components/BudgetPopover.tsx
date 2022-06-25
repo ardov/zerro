@@ -1,5 +1,5 @@
 import React, { FC, useEffect } from 'react'
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch, useAppSelector } from 'models'
 import {
   List,
   ListItemButton,
@@ -17,14 +17,14 @@ import {
   convertCurrency,
   getInstruments,
   getUserInstrument,
-} from 'store/data/instruments'
+} from 'models/data/instruments'
 import { setOutcomeBudget } from 'pages/Budgets/thunks'
-import { getGoals } from 'store/data/hiddenData/goals'
+import { getGoals } from 'models/data/hiddenData/goals'
 import { getGoalsProgress } from 'pages/Budgets/selectors'
 import { round } from 'shared/helpers/currencyHelpers'
 import { sendEvent } from 'shared/helpers/tracking'
 import pluralize from 'shared/helpers/pluralize'
-import { getMetaForTag } from 'store/data/hiddenData/tagMeta'
+import { getMetaForTag } from 'models/data/hiddenData/tagMeta'
 import { Box, BoxProps } from '@mui/system'
 
 export const BudgetPopover: FC<

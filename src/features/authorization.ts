@@ -1,10 +1,10 @@
 import Cookies from 'cookies-js'
 import ZenApi from 'shared/api/ZenApi'
-import { setToken } from 'store/token'
-import { resetData } from 'store/data'
+import { setToken } from 'models/token'
+import { resetData } from 'models/data'
 import { syncData } from 'features/sync'
 import { clearLocalData } from './localData'
-import { AppThunk } from 'store'
+import { AppThunk } from 'models'
 import { workerMethods } from 'worker'
 
 export const logIn = (): AppThunk => async (dispatch, getState) => {

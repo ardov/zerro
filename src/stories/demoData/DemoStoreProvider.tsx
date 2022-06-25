@@ -1,8 +1,8 @@
 import { getDemoData } from 'stories/demoData'
 import React, { FC } from 'react'
 import { Provider } from 'react-redux'
-import { store } from '../../store'
-import { applyServerPatch } from '../../store/data'
+import { store } from '../../models'
+import { applyServerPatch } from '../../models/data'
 
 store.dispatch(applyServerPatch(getDemoData()))
 
