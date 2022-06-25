@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react'
 import { Menu, MenuItem, MenuProps, PopoverPosition } from '@mui/material'
-import { TRawTransaction } from 'types'
+import { TRawTransaction } from 'shared/types'
 import { isNew } from 'store/data/transactions/helpers'
 import { useAppDispatch } from 'store'
 import { markViewed } from 'store/data/transactions/thunks'

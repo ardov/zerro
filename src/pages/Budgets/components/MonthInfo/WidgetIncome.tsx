@@ -15,7 +15,7 @@ import { useMonth } from 'pages/Budgets/pathHooks'
 import { formatDate } from 'shared/helpers/format'
 import { FilterConditions } from 'store/data/transactions/filtering'
 import { useToggle } from 'shared/hooks/useToggle'
-import { TrType } from 'types'
+import { TrType } from 'shared/types'
 
 type IncomeDataPoint = {
   id: string

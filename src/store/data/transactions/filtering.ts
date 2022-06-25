@@ -1,4 +1,4 @@
-import { TAccountId, TTagId, TRawTransaction, TrType } from 'types'
+import { TAccountId, TTagId, TRawTransaction, TrType } from 'shared/types'
 import { keys } from 'shared/helpers/keys'
 import { getType, isDeleted, isNew } from './helpers'
 

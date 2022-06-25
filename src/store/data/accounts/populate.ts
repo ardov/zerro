@@ -1,4 +1,4 @@
-import { TRawAccount, TPopulatedAccount } from 'types'
+import { TRawAccount, TPopulatedAccount } from 'shared/types'
 
 interface Options {
   convert: (

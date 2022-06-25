@@ -5,7 +5,7 @@ import {
   TMsTime,
   TUnits,
   TUnixTime,
-} from 'types'
+} from 'shared/types'
 
 export type TZmAdapter<ZmType, ClientType> = {
   toClient: (el: ZmType) => ClientType

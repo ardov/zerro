@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid'
-import { TRawAccount } from 'types'
+import { TRawAccount } from 'shared/types'
 
 export const makeAccount = (
   raw: Partial<TRawAccount> & {

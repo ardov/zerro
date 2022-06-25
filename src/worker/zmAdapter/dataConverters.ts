@@ -19,7 +19,7 @@ import {
   TZmBudget,
   TZmDeletionObject,
   TDeletionObject,
-} from 'types'
+} from 'shared/types'
 
 const toMs = (date: string | number) =>
   typeof date === 'string' ? +parseDate(date) : date * 1000

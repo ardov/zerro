@@ -3,7 +3,7 @@ import { useAppSelector } from 'store'
 import { getPopulatedTags } from 'store/data/tags'
 import { Chip, ChipProps } from '@mui/material'
 import { CloseIcon } from 'shared/ui/Icons'
-import { TTag, TTagId } from 'types'
+import { TTag, TTagId } from 'shared/types'
 
 function getTagLabel(tag?: TTag) {
   if (!tag) return null

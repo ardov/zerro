@@ -1,4 +1,11 @@
-import { TAccountId, TGoal, TTagId, TFxCode, TReminder, TTagMeta } from 'types'
+import {
+  TAccountId,
+  TGoal,
+  TTagId,
+  TFxCode,
+  TReminder,
+  TTagMeta,
+} from 'shared/types'
 import { TRecord, recordType } from './record-types'
 
 // const $dataReminderList = combine(

@@ -1,7 +1,7 @@
 import { int2rgb, int2hex, getColorForString } from 'shared/helpers/color'
 import { sendEvent } from 'shared/helpers/tracking'
 import toArray from 'lodash/toArray'
-import { ById, TTag, TRawTag } from 'types'
+import { ById, TTag, TRawTag } from 'shared/types'
 import iconsMap from './iconsMap.json'
 import { nullTag } from './makeTag'
 

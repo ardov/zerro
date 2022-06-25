@@ -14,7 +14,7 @@ import { ChevronRightIcon, ChevronLeftIcon } from 'shared/ui/Icons'
 import { styled } from '@mui/styles'
 import MonthSelectPopover from './MonthSelectPopover'
 import { formatDate } from 'shared/helpers/format'
-import { Modify } from 'types'
+import { Modify } from 'shared/types'
 
 type MonthSelectProps = Modify<
   PaperProps,

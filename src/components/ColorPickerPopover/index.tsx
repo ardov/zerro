@@ -9,7 +9,7 @@ import {
   TextField,
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { Modify } from 'types'
+import { Modify } from 'shared/types'
 import './styles.scss'
 import { zmColors, colors } from './colors'
 import { isHEX } from 'shared/helpers/color'

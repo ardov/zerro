@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { formatMoney } from 'shared/helpers/format'
-import { TInstrumentId, OptionalExceptFor } from 'types'
+import { TInstrumentId, OptionalExceptFor } from 'shared/types'
 import { getInstruments, getUserInstrumentId } from 'store/data/instruments'
 import { useAppSelector } from 'store'
 

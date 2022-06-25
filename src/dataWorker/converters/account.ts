@@ -1,4 +1,4 @@
-import { TRawAccount, TZmAccount } from 'types'
+import { TRawAccount, TZmAccount } from 'shared/types'
 import { msToISODate, msToUnix, TZmAdapter, zmDateToMs } from './utils'
 
 export const convertAccount: TZmAdapter<TZmAccount, TRawAccount> = {

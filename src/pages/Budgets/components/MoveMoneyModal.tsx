@@ -8,7 +8,7 @@ import { getAmountsById } from '../selectors'
 import { moveFunds } from '../thunks'
 import { getTotalsByMonth } from '../selectors'
 import { RootState, useAppDispatch, useAppSelector } from 'store'
-import { Modify } from 'types'
+import { Modify } from 'shared/types'
 
 type MoveMoneyModalProps = Modify<
   DialogProps,

@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid'
-import { OptionalExceptFor, TRawReminder } from 'types'
+import { OptionalExceptFor, TRawReminder } from 'shared/types'
 
 type ReminderDraft = OptionalExceptFor<
   TRawReminder,

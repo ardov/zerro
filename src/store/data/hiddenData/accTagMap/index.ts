@@ -5,7 +5,7 @@ import { setHiddenData } from '../thunks'
 import { getTags } from '../../tags'
 import { getAccLinks } from '../selectors'
 import { AppThunk } from 'store'
-import { TAccountId, TSelector, TTagId } from 'types'
+import { TAccountId, TSelector, TTagId } from 'shared/types'
 import { getAccounts } from 'store/data/accounts'
 
 // THUNK

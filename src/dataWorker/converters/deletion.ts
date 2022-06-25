@@ -1,4 +1,4 @@
-import { TDeletionObject, TZmDeletionObject } from 'types'
+import { TDeletionObject, TZmDeletionObject } from 'shared/types'
 import { msToUnix, TZmAdapter, zmDateToMs } from './utils'
 
 export const convertDeletion: TZmAdapter<TZmDeletionObject, TDeletionObject> = {

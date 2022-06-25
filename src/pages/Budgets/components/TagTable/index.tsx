@@ -19,7 +19,7 @@ import { getInBudgetAccounts } from 'store/data/accounts'
 import { FilterConditions } from 'store/data/transactions/filtering'
 import { getAmountsById } from 'pages/Budgets/selectors'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
-import { TrType } from 'types'
+import { TrType } from 'shared/types'
 
 export type MetricType = 'outcome' | 'available' | 'budgeted'
 

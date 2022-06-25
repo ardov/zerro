@@ -8,7 +8,7 @@ import {
   ListItemButton,
 } from '@mui/material'
 import { Amount } from 'components/Amount'
-import { TPopulatedAccount } from 'types'
+import { TPopulatedAccount } from 'shared/types'
 import { useAppDispatch } from 'store'
 import { setInBudget } from 'store/data/accounts'
 

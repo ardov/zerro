@@ -10,7 +10,7 @@ import { getTransactions } from 'store/data/transactions'
 import { getType } from 'store/data/transactions/helpers'
 import { bulkEditTransactions } from 'store/data/transactions/thunks'
 import { TagList } from 'components/TagList'
-import { Modify, TRawTransaction } from 'types'
+import { Modify, TRawTransaction } from 'shared/types'
 import { Box, TextField } from '@mui/material'
 
 type BulkEditModalProps = Modify<DialogProps, { onClose: () => void }> & {

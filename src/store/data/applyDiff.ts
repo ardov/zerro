@@ -1,5 +1,5 @@
 import { getBudgetId } from 'store/data/budgets'
-import { TDataStore, TDiff } from 'types'
+import { TDataStore, TDiff } from 'shared/types'
 
 /**
  * Mutable method

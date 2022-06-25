@@ -8,7 +8,7 @@ import { getAmountsById } from 'pages/Budgets/selectors'
 import { useMonth } from 'pages/Budgets/pathHooks'
 import { DragModeContext } from '../DnDContext'
 
-import { TTag } from 'types'
+import { TTag } from 'shared/types'
 
 export const useStyles = makeStyles(theme => ({
   panelRoot: {

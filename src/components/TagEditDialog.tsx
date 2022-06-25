@@ -14,7 +14,7 @@ import {
   TextField,
 } from '@mui/material'
 import { TagSelect } from './TagSelect'
-import { Modify, TRawTag } from 'types'
+import { Modify, TRawTag } from 'shared/types'
 import { shallowEqual } from 'react-redux'
 import { createTag } from 'store/data/tags/thunks'
 import { useFormik } from 'formik'

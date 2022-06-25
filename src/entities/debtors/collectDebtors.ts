@@ -13,7 +13,7 @@ import {
   TRawTransaction,
   TrType,
   TSelector,
-} from 'types'
+} from 'shared/types'
 
 type TFxAmount = {
   [currency: TInstrumentId]: number

@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { compareTags } from 'store/data/hiddenData/tagOrder'
 import populateTags from './populateTags'
-import { Modify, TTag, TRawTag, TTagId } from 'types'
+import { Modify, TTag, TRawTag, TTagId } from 'shared/types'
 import { RootState } from 'store'
 
 // SELECTORS

@@ -7,7 +7,7 @@ import {
   TRawAccount,
   TTagId,
   ById,
-} from 'types'
+} from 'shared/types'
 import { getType } from './helpers'
 
 interface DataSources {

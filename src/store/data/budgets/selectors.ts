@@ -3,7 +3,7 @@ import { round } from 'shared/helpers/currencyHelpers'
 import { formatDate } from 'shared/helpers/format'
 import { RootState } from 'store'
 import { convertCurrency } from 'store/data/instruments'
-import { ById, PopulatedBudget, TTagId } from 'types'
+import { ById, PopulatedBudget, TTagId } from 'shared/types'
 import { getTagMeta } from '../hiddenData/tagMeta'
 
 // Goal data was hidden in budgets for this date in early versions

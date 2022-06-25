@@ -7,7 +7,7 @@ import {
   TTagId,
   TRawTransaction,
   TrType,
-} from 'types'
+} from 'shared/types'
 
 type TFxAmount = {
   [currency: TInstrumentId]: number

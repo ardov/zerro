@@ -1,4 +1,4 @@
-import { TCompany, TZmCompany } from 'types'
+import { TCompany, TZmCompany } from 'shared/types'
 import { msToUnix, TZmAdapter, zmDateToMs } from './utils'
 
 export const convertCompany: TZmAdapter<TZmCompany, TCompany> = {

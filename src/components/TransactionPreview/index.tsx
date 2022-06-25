@@ -29,7 +29,7 @@ import {
   recreateTransaction,
   restoreTransaction,
 } from 'store/data/transactions/thunks'
-import { TRawTransaction } from 'types'
+import { TRawTransaction } from 'shared/types'
 
 type TransactionPreviewProps = {
   id: string

@@ -2,7 +2,7 @@ import startOfMonth from 'date-fns/startOfMonth'
 import startOfDay from 'date-fns/startOfDay'
 import startOfWeek from 'date-fns/startOfWeek'
 import { checkRaw, FilterConditions } from './filtering'
-import { TRawTransaction, TTransactionId, TrType } from 'types'
+import { TRawTransaction, TTransactionId, TrType } from 'shared/types'
 
 /**
  * Groups array of transactions

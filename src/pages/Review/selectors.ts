@@ -6,7 +6,12 @@ import { getSortedTransactions } from 'store/data/transactions'
 import { getTransactionsHistory } from 'store/data/transactions'
 import { eachDayOfInterval, startOfDay } from 'date-fns'
 import { convertCurrency } from 'store/data/instruments'
-import { TRawTransaction, TRawAccount, TAccountId, TInstrumentId } from 'types'
+import {
+  TRawTransaction,
+  TRawAccount,
+  TAccountId,
+  TInstrumentId,
+} from 'shared/types'
 
 interface DayNode {
   date: number

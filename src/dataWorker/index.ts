@@ -6,7 +6,7 @@ import {
   syncFx,
   syncTriggered,
 } from './effector'
-import { TLocalData } from 'types'
+import { TLocalData } from 'shared/types'
 import { convertDiff } from './converters/diff'
 
 // eslint-disable-next-line no-restricted-globals

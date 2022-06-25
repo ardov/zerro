@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { RootState } from 'store'
-import { TInstrumentId } from 'types'
+import { TInstrumentId } from 'shared/types'
 import { getRootUser } from '../users'
 
 export const getInstruments = (state: RootState) =>

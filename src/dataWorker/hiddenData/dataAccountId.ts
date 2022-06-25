@@ -1,5 +1,5 @@
 import { DATA_ACC_NAME } from 'store/data/hiddenData/constants'
-import { ById, TRawAccount } from 'types'
+import { ById, TRawAccount } from 'shared/types'
 
 /**
  *  This is helper account which is used to store reminders with hidden data.

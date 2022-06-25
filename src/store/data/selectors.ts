@@ -1,6 +1,6 @@
 import { keys } from 'shared/helpers/keys'
 import { RootState } from 'store'
-import { TDiff, TLocalData } from 'types'
+import { TDiff, TLocalData } from 'shared/types'
 import { toServer } from 'worker/zmAdapter'
 import { getDiff } from './index'
 

@@ -7,7 +7,7 @@ import {
   Stack,
 } from '@mui/material'
 import { getCurrencySymbol } from 'shared/helpers/format'
-import { Modify } from 'types'
+import { Modify } from 'shared/types'
 
 export type AmountInputProps = Modify<
   TextFieldProps,

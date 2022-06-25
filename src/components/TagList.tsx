@@ -4,7 +4,7 @@ import TagSelect2 from 'components/TagSelect2'
 import TagChip from 'components/TagChip'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { AddIcon } from 'shared/ui/Icons'
-import { Modify } from 'types'
+import { Modify } from 'shared/types'
 
 type TagListProps = Modify<
   BoxProps,

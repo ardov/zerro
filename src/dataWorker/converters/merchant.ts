@@ -1,4 +1,4 @@
-import { TMerchant, TZmMerchant } from 'types'
+import { TMerchant, TZmMerchant } from 'shared/types'
 import { msToUnix, TZmAdapter, zmDateToMs } from './utils'
 
 export const convertMerchant: TZmAdapter<TZmMerchant, TMerchant> = {

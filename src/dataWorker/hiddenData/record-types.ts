@@ -1,4 +1,4 @@
-import { TAccountId, TFxCode, TISODate, TTagId, TUnits } from 'types'
+import { TAccountId, TFxCode, TISODate, TTagId, TUnits } from 'shared/types'
 
 // GOALS
 export enum goalType {

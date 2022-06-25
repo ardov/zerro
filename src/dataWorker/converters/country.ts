@@ -1,4 +1,4 @@
-import { TRawCountry, TZmCountry } from 'types'
+import { TRawCountry, TZmCountry } from 'shared/types'
 import { TZmAdapter } from './utils'
 
 export const convertCountry: TZmAdapter<TZmCountry, TRawCountry> = {

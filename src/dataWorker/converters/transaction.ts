@@ -1,4 +1,4 @@
-import { TRawTransaction, TZmTransaction } from 'types'
+import { TRawTransaction, TZmTransaction } from 'shared/types'
 import { msToISODate, msToUnix, TZmAdapter, zmDateToMs } from './utils'
 
 export const convertTransaction: TZmAdapter<TZmTransaction, TRawTransaction> = {

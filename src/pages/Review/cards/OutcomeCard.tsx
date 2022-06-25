@@ -7,7 +7,7 @@ import { Amount } from 'components/Amount'
 import { getInstruments } from 'store/data/instruments'
 import { getPopulatedTags } from 'store/data/tags'
 import { Card } from './Card'
-import { TRawTransaction } from 'types'
+import { TRawTransaction } from 'shared/types'
 
 export function OutcomeCard({ transaction }: { transaction: TRawTransaction }) {
   const { outcome, outcomeInstrument, date, comment, payee, tag } = transaction

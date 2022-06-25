@@ -1,4 +1,4 @@
-import { TFxIdMap, TRawUser, TUser, TZmUser } from 'types'
+import { TFxIdMap, TRawUser, TUser, TZmUser } from 'shared/types'
 import { msToUnix, TZmAdapter, zmDateToMs } from './utils'
 
 export const convertUser: TZmAdapter<TZmUser, TRawUser> = {

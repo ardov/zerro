@@ -7,7 +7,7 @@ import {
   redirectUri,
   tokenEndpoint,
 } from 'shared/config'
-import { TZmRequest, TZmDiff } from 'types'
+import { TZmRequest, TZmDiff } from 'shared/types'
 
 const CODE_DATA_KEY = 'auth-code-data'
 const TOKEN_KEY = 'token'

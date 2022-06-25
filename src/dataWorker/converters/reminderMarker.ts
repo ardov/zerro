@@ -1,4 +1,4 @@
-import { TRawReminderMarker, TZmReminderMarker } from 'types'
+import { TRawReminderMarker, TZmReminderMarker } from 'shared/types'
 import { msToISODate, msToUnix, TZmAdapter, zmDateToMs } from './utils'
 
 export const convertReminderMarker: TZmAdapter<

@@ -1,4 +1,4 @@
-import { TLocalData, TZmDiff, TDiff } from 'types'
+import { TLocalData, TZmDiff, TDiff } from 'shared/types'
 import * as Comlink from 'comlink'
 import { keys } from 'shared/helpers/keys'
 import { storage } from 'shared/api/storage'

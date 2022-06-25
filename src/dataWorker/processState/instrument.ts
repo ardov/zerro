@@ -1,6 +1,12 @@
 import { convertInstrument, getFxIdMap } from 'dataWorker/converters/instrument'
 import { createStore } from 'effector'
-import { ById, TFxCode, TInstrument, TInstrumentId, TZmInstrument } from 'types'
+import {
+  ById,
+  TFxCode,
+  TInstrument,
+  TInstrumentId,
+  TZmInstrument,
+} from 'shared/types'
 
 const $zmInstruments = createStore<ById<TZmInstrument>>({})
 

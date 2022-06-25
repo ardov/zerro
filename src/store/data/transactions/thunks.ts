@@ -7,7 +7,7 @@ import {
   TTagId,
   TRawTransaction,
   TTransactionId,
-} from 'types'
+} from 'shared/types'
 import { applyClientPatch } from 'store/data'
 
 export const deleteTransactions =

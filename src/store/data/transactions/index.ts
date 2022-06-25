@@ -6,7 +6,7 @@ import { getPopulatedTags } from 'store/data/tags'
 import { compareDates, getTime, isDeleted } from './helpers'
 import { populate, PopulatedTransaction } from './populate'
 import { RootState } from 'store'
-import { TRawTransaction, TTransactionId } from 'types'
+import { TRawTransaction, TTransactionId } from 'shared/types'
 import { withPerf } from 'shared/helpers/performance'
 
 export const getTransactions = (state: RootState) =>

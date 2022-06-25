@@ -1,5 +1,5 @@
 import { getBudgetId } from 'store/data/budgets'
-import { TDiff } from 'types'
+import { TDiff } from 'shared/types'
 
 /**
  * Mutates first diff

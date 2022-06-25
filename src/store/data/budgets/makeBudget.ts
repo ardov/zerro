@@ -1,4 +1,4 @@
-import { TBudget, OptionalExceptFor } from 'types'
+import { TBudget, OptionalExceptFor } from 'shared/types'
 
 type BudgetDraft = OptionalExceptFor<TBudget, 'user' | 'date' | 'tag'>
 

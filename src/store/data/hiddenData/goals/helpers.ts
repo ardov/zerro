@@ -1,7 +1,7 @@
 import { goalType } from '../constants'
 import { formatDate, formatMoney } from 'shared/helpers/format'
 import parseDate from 'date-fns/parseISO'
-import { TZmGoal, TGoal } from 'types'
+import { TZmGoal, TGoal } from 'shared/types'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 

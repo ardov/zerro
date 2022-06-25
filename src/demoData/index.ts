@@ -1,4 +1,10 @@
-import { TDiff, TRawUser, TZmCompany, TZmCountry, TZmInstrument } from 'types'
+import {
+  TDiff,
+  TRawUser,
+  TZmCompany,
+  TZmCountry,
+  TZmInstrument,
+} from 'shared/types'
 import countries from './countries.json'
 import companies from './companies.json'
 import instruments from './instruments.json'

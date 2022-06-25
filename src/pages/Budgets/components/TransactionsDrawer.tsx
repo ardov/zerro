@@ -8,7 +8,7 @@ import { getTagAccMap } from 'store/data/hiddenData/accTagMap'
 import { getPopulatedTags } from 'store/data/tags'
 import { FilterConditions } from 'store/data/transactions/filtering'
 import endOfMonth from 'date-fns/endOfMonth'
-import { TrType } from 'types'
+import { TrType } from 'shared/types'
 
 export const BudgetTransactionsDrawer: FC = () => {
   const [month] = useMonth()

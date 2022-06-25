@@ -3,7 +3,7 @@ import { round } from 'shared/helpers/currencyHelpers'
 import { getAccounts, getStartBalance } from 'store/data/accounts'
 import { getTransactionsHistory } from 'store/data/transactions'
 import { eachDayOfInterval, startOfDay } from 'date-fns'
-import { ById } from 'types'
+import { ById } from 'shared/types'
 
 type Point = {
   date: number

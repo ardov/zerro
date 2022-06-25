@@ -1,4 +1,4 @@
-import { TBudget, TZmBudget } from 'types'
+import { TBudget, TZmBudget } from 'shared/types'
 import { msToISODate, msToUnix, TZmAdapter, zmDateToMs } from './utils'
 
 export const convertBudget: TZmAdapter<TZmBudget, TBudget> = {

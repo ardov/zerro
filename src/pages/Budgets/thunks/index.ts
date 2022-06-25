@@ -16,7 +16,7 @@ import { goalType } from 'store/data/hiddenData/constants'
 import { getGoals } from 'store/data/hiddenData/goals'
 import { applyClientPatch } from 'store/data'
 import { AppThunk } from 'store'
-import { TBudget, ById } from 'types'
+import { TBudget, ById } from 'shared/types'
 import { getMetaForTag } from 'store/data/hiddenData/tagMeta'
 import { round } from 'shared/helpers/currencyHelpers'
 

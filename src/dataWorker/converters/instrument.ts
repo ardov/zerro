@@ -1,4 +1,4 @@
-import { ById, TFxIdMap, TInstrument, TZmInstrument } from 'types'
+import { ById, TFxIdMap, TInstrument, TZmInstrument } from 'shared/types'
 import { msToUnix, TZmAdapter, zmDateToMs } from './utils'
 
 export const convertInstrument: TZmAdapter<TZmInstrument, TInstrument> = {

@@ -6,7 +6,7 @@ import { getTags } from '../../tags'
 import { getRawGoals } from '../selectors'
 import { setHiddenData } from '../thunks'
 import { AppThunk, RootState } from 'store'
-import { ById, TGoal, TTagId } from 'types'
+import { ById, TGoal, TTagId } from 'shared/types'
 
 // THUNKS
 export const setGoal =

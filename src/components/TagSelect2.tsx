@@ -14,7 +14,7 @@ import {
 } from '@mui/material'
 import { AddIcon } from 'shared/ui/Icons'
 import { EmojiIcon } from 'shared/ui/EmojiIcon'
-import { TTag } from 'types'
+import { TTag } from 'shared/types'
 
 type TagType = 'income' | 'outcome' | undefined | null
 type TagNode = TagTreeNode | TTag

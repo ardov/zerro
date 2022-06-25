@@ -4,7 +4,7 @@ import { DataReminderType } from './constants'
 import { getAccountList } from 'store/data/accounts'
 import { DATA_ACC_NAME } from './constants'
 import { RootState } from 'store'
-import { TRawReminder, TTagId, TTagMeta, TZmGoal } from 'types'
+import { TRawReminder, TTagId, TTagMeta, TZmGoal } from 'shared/types'
 
 const { ACC_LINKS, TAG_ORDER, GOALS, TAG_META } = DataReminderType
 

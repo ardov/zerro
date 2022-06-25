@@ -1,4 +1,4 @@
-import { TZmDiff, TDiff } from 'types'
+import { TZmDiff, TDiff } from 'shared/types'
 import { dataConverters as convert } from './dataConverters'
 
 export function toServer(d: TDiff): TZmDiff {

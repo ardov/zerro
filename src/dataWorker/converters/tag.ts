@@ -1,4 +1,4 @@
-import { TRawTag, TZmTag } from 'types'
+import { TRawTag, TZmTag } from 'shared/types'
 import { msToUnix, TZmAdapter, zmDateToMs } from './utils'
 
 export const convertTag: TZmAdapter<TZmTag, TRawTag> = {

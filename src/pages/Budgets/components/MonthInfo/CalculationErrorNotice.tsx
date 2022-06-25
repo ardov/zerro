@@ -12,7 +12,7 @@ import { clearLocalData } from 'logic/localData'
 import { captureError, sendEvent } from 'shared/helpers/tracking'
 import { getDiff } from 'store/data'
 import { getAccountsHistory } from 'pages/Stats/selectors'
-import { TPopulatedAccount, TSelector } from 'types'
+import { TPopulatedAccount, TSelector } from 'shared/types'
 import { createSelector } from '@reduxjs/toolkit'
 
 // TODO: Надо бы как-то округлять все цифры только в конце. Иначе из-за валют копится ошибка.

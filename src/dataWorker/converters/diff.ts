@@ -1,4 +1,4 @@
-import { TDiff, TZmDiff } from 'types'
+import { TDiff, TZmDiff } from 'shared/types'
 import { convertAccount } from './account'
 import { convertBudget } from './budget'
 import { convertCompany } from './company'

@@ -3,7 +3,7 @@ import { AppThunk } from 'store'
 import { applyClientPatch } from 'store/data'
 import { getRootUser } from 'store/data/users'
 import { getTag } from 'store/data/tags'
-import { OptionalExceptFor, TRawTag, TZmTag } from 'types'
+import { OptionalExceptFor, TRawTag, TZmTag } from 'shared/types'
 import { makeTag } from './makeTag'
 
 type TagDraft = OptionalExceptFor<TRawTag, 'id'>

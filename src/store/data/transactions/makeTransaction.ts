@@ -1,4 +1,4 @@
-import { OptionalExceptFor, TRawTransaction } from 'types'
+import { OptionalExceptFor, TRawTransaction } from 'shared/types'
 import { v1 as uuidv1 } from 'uuid'
 
 export type TransactionDraft = OptionalExceptFor<

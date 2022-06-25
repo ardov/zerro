@@ -4,7 +4,7 @@ import { DataReminderType } from '../constants'
 import { setHiddenData } from '../thunks'
 import { getRawTagMeta } from '../selectors'
 import { AppThunk } from 'store'
-import { TTagMeta, TTagId } from 'types'
+import { TTagMeta, TTagId } from 'shared/types'
 
 // THUNK
 export const setTagMeta =

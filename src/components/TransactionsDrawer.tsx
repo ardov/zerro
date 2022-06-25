@@ -5,7 +5,7 @@ import { makeStyles } from '@mui/styles'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { CloseIcon } from 'shared/ui/Icons'
 import { FilterConditions } from 'store/data/transactions/filtering'
-import { Modify } from 'types'
+import { Modify } from 'shared/types'
 
 export type TransactionsDrawerProps = Modify<
   DrawerProps,

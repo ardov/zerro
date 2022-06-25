@@ -13,7 +13,7 @@ import {
   TZmTag,
   TZmTransaction,
   TZmUser,
-} from 'types'
+} from 'shared/types'
 
 export type TLocalData = {
   token: TToken
