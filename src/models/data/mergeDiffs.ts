@@ -1,4 +1,4 @@
-import { getBudgetId } from 'models/data/budgets'
+import { getBudgetId } from 'models/budgets'
 import { TDiff } from 'shared/types'
 
 /**

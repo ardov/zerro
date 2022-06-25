@@ -1,5 +1,5 @@
 import { add, sub } from 'shared/helpers/currencyHelpers'
-import { getType } from 'models/data/transactions/helpers'
+import { getType } from 'models/transactions/helpers'
 import {
   TAccountId,
   TInstrumentId,

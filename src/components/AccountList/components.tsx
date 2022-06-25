@@ -10,7 +10,7 @@ import {
 import { Amount } from 'components/Amount'
 import { TPopulatedAccount } from 'shared/types'
 import { useAppDispatch } from 'models'
-import { setInBudget } from 'models/data/accounts'
+import { setInBudget } from 'models/accounts'
 
 export const Account: FC<{ account: TPopulatedAccount } & ListItemButtonProps> =
   ({ account, sx, ...rest }) => {

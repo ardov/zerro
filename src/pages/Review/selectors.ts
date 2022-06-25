@@ -1,11 +1,11 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { round } from 'shared/helpers/currencyHelpers'
-import { getType } from 'models/data/transactions/helpers'
-import { getAccounts, getStartBalance } from 'models/data/accounts'
-import { getSortedTransactions } from 'models/data/transactions'
-import { getTransactionsHistory } from 'models/data/transactions'
+import { getType } from 'models/transactions/helpers'
+import { getAccounts, getStartBalance } from 'models/accounts'
+import { getSortedTransactions } from 'models/transactions'
+import { getTransactionsHistory } from 'models/transactions'
 import { eachDayOfInterval, startOfDay } from 'date-fns'
-import { convertCurrency } from 'models/data/instruments'
+import { convertCurrency } from 'models/instruments'
 import {
   TRawTransaction,
   TRawAccount,

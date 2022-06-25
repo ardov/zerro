@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { useAppDispatch, useAppSelector } from 'models'
 import { formatMoney } from 'shared/helpers/format'
-import { getUserCurrencyCode } from 'models/data/instruments'
+import { getUserCurrencyCode } from 'models/instruments'
 import {
   Typography,
   ButtonBase,

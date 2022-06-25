@@ -1,5 +1,5 @@
-import { makeAccount } from 'models/data/accounts/helpers'
-import { makeReminder } from 'models/data/reminders/helpers'
+import { makeAccount } from 'models/accounts/helpers'
+import { makeReminder } from 'models/reminders/helpers'
 import { DataReminderType, DATA_ACC_NAME } from './constants'
 import { TRawAccount } from 'shared/types'
 

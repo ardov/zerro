@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { formatMoney } from 'shared/helpers/format'
 import { TInstrumentId, OptionalExceptFor } from 'shared/types'
-import { getInstruments, getUserInstrumentId } from 'models/data/instruments'
+import { getInstruments, getUserInstrumentId } from 'models/instruments'
 import { useAppSelector } from 'models'
 
 const decStyle = { opacity: 0.5 }

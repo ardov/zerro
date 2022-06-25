@@ -2,7 +2,7 @@ import React, { FC, ReactElement } from 'react'
 import { useAppSelector } from 'models'
 import { formatDate, formatMoney } from 'shared/helpers/format'
 import { getTotalsByMonth, MonthTotals } from '../selectors'
-import { getUserCurrencyCode } from 'models/data/instruments'
+import { getUserCurrencyCode } from 'models/instruments'
 import {
   Typography,
   ButtonBase,

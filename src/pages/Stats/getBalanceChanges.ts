@@ -1,12 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { round } from 'shared/helpers/currencyHelpers'
-import { getTime, getType } from 'models/data/transactions/helpers'
-import {
-  getAccounts,
-  getDebtAccountId,
-  getStartBalance,
-} from 'models/data/accounts'
-import { debtorGetter, getTransactionsHistory } from 'models/data/transactions'
+import { getTime, getType } from 'models/transactions/helpers'
+import { getAccounts, getDebtAccountId, getStartBalance } from 'models/accounts'
+import { debtorGetter, getTransactionsHistory } from 'models/transactions'
 
 type HistoryPoint = {
   date: number

@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { round } from 'shared/helpers/currencyHelpers'
 import { formatDate } from 'shared/helpers/format'
 import { RootState } from 'models'
-import { convertCurrency } from 'models/data/instruments'
+import { convertCurrency } from 'models/instruments'
 import { ById, PopulatedBudget, TTagId } from 'shared/types'
 import { getTagMeta } from '../hiddenData/tagMeta'
 

@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid'
-import { getTransaction, getTransactions } from 'models/data/transactions'
+import { getTransaction, getTransactions } from 'models/transactions'
 import { sendEvent } from 'shared/helpers/tracking'
 import { AppThunk } from 'models'
 import {

@@ -11,8 +11,8 @@ import {
   OutlinedTextFieldProps,
 } from '@mui/material'
 import { AmountInput } from 'shared/ui/AmountInput'
-import { getGoals, setGoal, deleteGoal } from 'models/data/hiddenData/goals'
-import { goalType } from 'models/data/hiddenData/constants'
+import { getGoals, setGoal, deleteGoal } from 'models/hiddenData/goals'
+import { goalType } from 'models/hiddenData/constants'
 import { CloseIcon } from 'shared/ui/Icons'
 import MonthSelectPopover from 'pages/Budgets/MonthSelectPopover'
 import { formatDate } from 'shared/helpers/format'

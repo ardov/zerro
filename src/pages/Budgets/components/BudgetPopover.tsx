@@ -17,14 +17,14 @@ import {
   convertCurrency,
   getInstruments,
   getUserInstrument,
-} from 'models/data/instruments'
+} from 'models/instruments'
 import { setOutcomeBudget } from 'pages/Budgets/thunks'
-import { getGoals } from 'models/data/hiddenData/goals'
+import { getGoals } from 'models/hiddenData/goals'
 import { getGoalsProgress } from 'pages/Budgets/selectors'
 import { round } from 'shared/helpers/currencyHelpers'
 import { sendEvent } from 'shared/helpers/tracking'
 import pluralize from 'shared/helpers/pluralize'
-import { getMetaForTag } from 'models/data/hiddenData/tagMeta'
+import { getMetaForTag } from 'models/hiddenData/tagMeta'
 import { Box, BoxProps } from '@mui/system'
 
 export const BudgetPopover: FC<
