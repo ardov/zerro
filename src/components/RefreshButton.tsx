@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useState } from 'react'
-import { syncData } from 'logic/sync'
+import { syncData } from 'features/sync'
 import { getChangedNum } from 'store/data/selectors'
 import { getPendingState } from 'store/isPending'
 import CircularProgress from '@mui/material/CircularProgress'

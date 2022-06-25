@@ -1,7 +1,7 @@
 import { getLastSyncTime } from 'store/data/selectors'
 import { getToken } from 'store/token'
 import { setPending } from 'store/isPending'
-import { saveDataLocally } from 'logic/localData'
+import { saveDataLocally } from 'features/localData'
 import { sendEvent } from 'shared/helpers/tracking'
 import { setSyncData } from 'store/lastSync'
 import { formatDate } from 'shared/helpers/format'

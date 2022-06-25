@@ -1,9 +1,9 @@
 import { FC, useCallback, useEffect, useRef } from 'react'
 import { getLoginState } from 'store/token'
-import { syncData } from 'logic/sync'
+import { syncData } from 'features/sync'
 import { getLastSyncTime, getLastChangeTime } from 'store/data/selectors'
 import { getPendingState } from 'store/isPending'
-import { loadLocalData } from 'logic/localData'
+import { loadLocalData } from 'features/localData'
 import { createLocalStorageStateHook } from 'use-local-storage-state'
 import { useAppDispatch, useAppSelector } from 'store'
 
