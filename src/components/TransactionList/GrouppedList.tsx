@@ -68,7 +68,7 @@ export const GrouppedList: FC<GrouppedListProps> = ({
 
   const minDate = groups.length ? groups[groups.length - 1].date : 0
   const maxDate = groups.length ? groups[0].date : 0
-  const getItemKey = useCallback((i: number) => +groups[i].date, [groups])
+  const getItemKey = useCallback((i: number) => groups[i].date, [groups])
   const getItemSize = useCallback(
     (i: number) =>
       HEADER_HEIGHT + TRANSACTION_HEIGHT * groups[i].transactions.length,

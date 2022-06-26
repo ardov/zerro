@@ -33,7 +33,6 @@ export const getDebtors: TSelector<ById<TDebtor>> = createSelector(
   [getTransactionsHistory, getMerchants, getDebtAccountId],
   (transactions, merchants, debtAccId) => {
     let res = collectDebtors(transactions, merchants, debtAccId)
-    console.log('collectDebtors', res)
     return res
   }
 )
