@@ -5,7 +5,7 @@ import {
   TDateDraft,
   TRawReminder,
 } from 'shared/types'
-import { toISODate } from 'shared/helpers/adapterUtils'
+import { toISODate } from 'shared/helpers/date'
 
 type ReminderDraft = Modify<
   OptionalExceptFor<TRawReminder, 'user' | 'incomeAccount' | 'outcomeAccount'>,

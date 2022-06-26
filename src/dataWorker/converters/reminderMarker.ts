@@ -1,10 +1,6 @@
 import { TRawReminderMarker, TZmReminderMarker } from 'shared/types'
-import {
-  toISODate,
-  msToUnix,
-  TZmAdapter,
-  zmDateToMs,
-} from 'shared/helpers/adapterUtils'
+import { TZmAdapter } from 'shared/helpers/adapterUtils'
+import { msToUnix, unixToMs } from 'shared/helpers/date'
 
 export const convertReminderMarker: TZmAdapter<
   TZmReminderMarker,
@@ -13,7 +9,7 @@ export const convertReminderMarker: TZmAdapter<
   toClient: (el: TZmReminderMarker): TRawReminderMarker => {
     return {
       ...el,
-      changed: zmDateToMs(el.changed),
+      changed: unixToMs(el.changed),
     }
   },
   toServer: (el: TRawReminderMarker): TZmReminderMarker => {

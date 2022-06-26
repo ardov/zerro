@@ -4,7 +4,7 @@ import { getType } from 'models/transactions/helpers'
 import { getAccounts, getStartBalance } from 'models/accounts'
 import { getSortedTransactions } from 'models/transactions'
 import { getTransactionsHistory } from 'models/transactions'
-import { eachDayOfInterval, startOfDay } from 'date-fns'
+import { eachDayOfInterval } from 'date-fns'
 import { convertCurrency } from 'models/instruments'
 import {
   TRawTransaction,
@@ -13,7 +13,7 @@ import {
   TInstrumentId,
   TISODate,
 } from 'shared/types'
-import { toISODate } from 'shared/helpers/adapterUtils'
+import { toISODate } from 'shared/helpers/date'
 
 interface DayNode {
   date: TISODate

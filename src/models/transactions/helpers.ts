@@ -1,7 +1,7 @@
 import startOfWeek from 'date-fns/startOfWeek'
 import { checkRaw, FilterConditions } from './filtering'
 import { TRawTransaction, TTransactionId, TrType, TISODate } from 'shared/types'
-import { toISODate, toISOMonth } from 'shared/helpers/adapterUtils'
+import { toISODate, toISOMonth } from 'shared/helpers/date'
 
 /**
  * Groups array of transactions
@@ -35,8 +35,8 @@ export function groupTransactionsBy(
 }
 
 export function compareDates(tr1: TRawTransaction, tr2: TRawTransaction) {
-  if (tr1.date < tr2.date) return -1
-  if (tr1.date > tr2.date) return 1
+  if (tr1.date < tr2.date) return 1
+  if (tr1.date > tr2.date) return -1
   return tr2.created - tr1.created
 }
 

@@ -33,7 +33,7 @@ import { useContext } from 'react'
 import { IsDraggingContext, DragModeContext, DragModeType } from '../DnDContext'
 import { getPopulatedTag } from 'models/tags'
 import { getAmountsById } from 'pages/Budgets/selectors'
-import { TGoal } from 'shared/types'
+import { TGoal, TISOMonth } from 'shared/types'
 import { getTagMeta } from 'models/hiddenData/tagMeta'
 import { getInstruments, getUserInstrumentId } from 'models/instruments'
 import { SxProps } from '@mui/system'
@@ -43,7 +43,7 @@ type TagRowProps = {
   id: string
   isChild?: boolean
   hiddenOverspend?: number
-  date: number
+  month: TISOMonth
   showAll?: boolean
   metric: 'available' | 'budgeted' | 'outcome'
   openDetails: (id: string) => void
@@ -57,7 +57,7 @@ export const TagRow: FC<TagRowProps> = props => {
     id,
     isChild,
     hiddenOverspend,
-    date,
+    month,
     showAll,
     metric,
     openGoalPopover,
@@ -68,7 +68,7 @@ export const TagRow: FC<TagRowProps> = props => {
   const tag = useAppSelector(state => getPopulatedTag(state, id))
   const { comment, currency } = useAppSelector(getTagMeta)?.[id] || {}
   const userCurrency = useAppSelector(getUserInstrumentId)
-  const amounts = useAppSelector(getAmountsById)?.[date]?.[id]
+  const amounts = useAppSelector(getAmountsById)?.[month]?.[id]
 
   const showCurrency = !!currency && currency !== userCurrency
   const isUnsorted = !tag.parent && isChild // реальная родительская категория
@@ -88,7 +88,7 @@ export const TagRow: FC<TagRowProps> = props => {
   const { dragMode } = useContext(DragModeContext)
   const goal = useAppSelector(state => getGoal(state, id), shallowEqual)
   const goalProgress = useAppSelector(
-    state => getGoalProgress(state, date, id),
+    state => getGoalProgress(state, month, id),
     shallowEqual
   )
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))

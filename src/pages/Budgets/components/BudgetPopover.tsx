@@ -27,7 +27,7 @@ import pluralize from 'shared/helpers/pluralize'
 import { getMetaForTag } from 'models/hiddenData/tagMeta'
 import { Box, BoxProps } from '@mui/system'
 import { TDateDraft, TISOMonth } from 'shared/types'
-import { toISOMonth } from 'shared/helpers/adapterUtils'
+import { toISOMonth } from 'shared/helpers/date'
 
 export const BudgetPopover: FC<
   PopoverProps & {

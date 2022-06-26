@@ -1,8 +1,10 @@
+import { TDateDraft } from 'shared/types'
+
 export function makeDateArray(
-  from: number | string | Date,
-  to: number | string | Date = new Date(),
+  from: TDateDraft,
+  to: TDateDraft = new Date(),
   aggregation: 'day' | 'month' | 'year' = 'month'
-) {
+): Array<Date> {
   let current = getDate(from, aggregation)
   let last = getDate(to, aggregation)
   const months = [current]
@@ -16,19 +18,8 @@ export function makeDateArray(
   return months
 }
 
-export function monthEnd(d: number | Date) {
-  const date = new Date(d)
-  const nextMonthStart = new Date(date.getFullYear(), date.getMonth() + 1, 1)
-  return new Date(+nextMonthStart - 1)
-}
-
-export function monthStart(d: number | Date) {
-  const date = new Date(d)
-  return new Date(date.getFullYear(), date.getMonth(), 1)
-}
-
 function getDate(
-  d: number | string | Date,
+  d: TDateDraft,
   aggregation: 'day' | 'month' | 'year' = 'month'
 ) {
   const date = new Date(d)

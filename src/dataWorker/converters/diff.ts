@@ -1,3 +1,5 @@
+import { TZmAdapter } from 'shared/helpers/adapterUtils'
+import { msToUnix, unixToMs } from 'shared/helpers/date'
 import { TDiff, TZmDiff } from 'shared/types'
 import { convertAccount } from './account'
 import { convertBudget } from './budget'
@@ -11,12 +13,11 @@ import { convertReminderMarker } from './reminderMarker'
 import { convertTag } from './tag'
 import { convertTransaction } from './transaction'
 import { convertUser } from './user'
-import { msToUnix, TZmAdapter, zmDateToMs } from 'shared/helpers/adapterUtils'
 
 export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
   toClient: d => {
     let r: TDiff = { serverTimestamp: 0 }
-    if (d.serverTimestamp) r.serverTimestamp = zmDateToMs(d.serverTimestamp)
+    if (d.serverTimestamp) r.serverTimestamp = unixToMs(d.serverTimestamp)
     if (d.deletion) r.deletion = d.deletion.map(convertDeletion.toClient)
     if (d.instrument)
       r.instrument = d.instrument.map(convertInstrument.toClient)

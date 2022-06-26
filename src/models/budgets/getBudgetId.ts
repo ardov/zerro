@@ -1,4 +1,4 @@
-import { toISODate } from 'shared/helpers/adapterUtils'
+import { toISODate } from 'shared/helpers/date'
 import { TBudgetId, TDateDraft, TISOMonth, TTagId } from 'shared/types'
 
 export function getBudgetId(date: TDateDraft, tag: TTagId | null): TBudgetId {

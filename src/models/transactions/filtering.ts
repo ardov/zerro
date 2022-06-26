@@ -7,7 +7,7 @@ import {
 } from 'shared/types'
 import { keys } from 'shared/helpers/keys'
 import { getType, isDeleted, isNew } from './helpers'
-import { toISODate } from 'shared/helpers/adapterUtils'
+import { toISODate } from 'shared/helpers/date'
 
 type OperatorType = 'AND' | 'OR'
 

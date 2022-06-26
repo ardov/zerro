@@ -12,7 +12,7 @@ import instruments from './instruments.json'
 import { makeAccount } from 'models/accounts'
 import { makeTag } from 'models/tags/makeTag'
 import { makeTransaction } from 'models/transactions/makeTransaction'
-import { toISODate } from 'shared/helpers/adapterUtils'
+import { toISODate } from 'shared/helpers/date'
 
 const NOW = Date.now()
 const DAY = 1000 * 60 * 60 * 24

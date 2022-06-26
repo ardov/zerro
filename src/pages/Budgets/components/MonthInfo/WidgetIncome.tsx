@@ -62,7 +62,7 @@ export function WidgetIncome() {
   const filterConditions: FilterConditions = {
     type: TrType.income,
     dateFrom: month,
-    dateTo: endOfMonth(month),
+    dateTo: endOfMonth(new Date(month)),
     mainTags: selected,
   }
 

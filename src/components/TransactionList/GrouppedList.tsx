@@ -15,7 +15,7 @@ import { Box, ListSubheader } from '@mui/material'
 import Transaction from './Transaction'
 import { formatDate } from 'shared/helpers/format'
 import { TDateDraft, TISODate, TTransactionId } from 'shared/types'
-import { toISODate } from 'shared/helpers/adapterUtils'
+import { toISODate } from 'shared/helpers/date'
 
 type GroupNode = {
   date: TISODate

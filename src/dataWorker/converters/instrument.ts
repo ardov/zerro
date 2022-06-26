@@ -1,9 +1,10 @@
+import { TZmAdapter } from 'shared/helpers/adapterUtils'
+import { msToUnix, unixToMs } from 'shared/helpers/date'
 import { ById, TFxIdMap, TInstrument, TZmInstrument } from 'shared/types'
-import { msToUnix, TZmAdapter, zmDateToMs } from 'shared/helpers/adapterUtils'
 
 export const convertInstrument: TZmAdapter<TZmInstrument, TInstrument> = {
   toClient: (el: TZmInstrument): TInstrument => {
-    return { ...el, changed: zmDateToMs(el.changed) }
+    return { ...el, changed: unixToMs(el.changed) }
   },
   toServer: (el: TInstrument): TZmInstrument => {
     return { ...el, changed: msToUnix(el.changed) }

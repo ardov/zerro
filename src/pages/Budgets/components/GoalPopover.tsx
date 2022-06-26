@@ -17,7 +17,7 @@ import { CloseIcon } from 'shared/ui/Icons'
 import MonthSelectPopover from 'pages/Budgets/MonthSelectPopover'
 import { formatDate } from 'shared/helpers/format'
 import { TDateDraft, TGoal } from 'shared/types'
-import { toISODate } from 'shared/helpers/adapterUtils'
+import { toISODate } from 'shared/helpers/date'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 

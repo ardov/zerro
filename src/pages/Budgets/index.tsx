@@ -32,13 +32,9 @@ import sub from 'date-fns/sub'
 import { MapWidget } from './MapWidget'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
-import { getAggregatedTransactions } from 'models/envelopes/selector'
-import { getDebtors } from 'models/debtors/collectDebtors'
-import { toISOMonth } from 'shared/helpers/adapterUtils'
+import { toISOMonth } from 'shared/helpers/date'
 
 export default function BudgetsRouter() {
-  const t1 = useAppSelector(getAggregatedTransactions)
-  const t2 = useAppSelector(getDebtors)
   const [month] = useMonth()
   const monthList = useAppSelector(getMonthDates)
   const minMonth = monthList[0]

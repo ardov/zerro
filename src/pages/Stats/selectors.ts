@@ -5,7 +5,7 @@ import { getTransactionsHistory } from 'models/transactions'
 import { eachDayOfInterval, startOfDay } from 'date-fns'
 import { ById, TAccountId, TISODate } from 'shared/types'
 import { keys } from 'shared/helpers/keys'
-import { toISODate } from 'shared/helpers/adapterUtils'
+import { toISODate } from 'shared/helpers/date'
 
 type Point = {
   date: TISODate

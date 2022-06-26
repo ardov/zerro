@@ -13,7 +13,7 @@ import {
 import { ChevronRightIcon, ChevronLeftIcon } from 'shared/ui/Icons'
 import { formatDate } from 'shared/helpers/format'
 import { TDateDraft, TISOMonth } from 'shared/types'
-import { toISOMonth } from 'shared/helpers/adapterUtils'
+import { toISOMonth } from 'shared/helpers/date'
 
 interface MonthItemItemProps extends ListItemButtonProps {
   isCurrent: boolean

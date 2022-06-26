@@ -13,7 +13,7 @@ import {
 import { DataLine } from 'shared/ui/DataLine'
 import { getHistoryStart, getTransactionsHistory } from 'models/transactions'
 import { formatDate, formatMoney } from 'shared/helpers/format'
-import { makeDateArray, monthStart } from 'shared/helpers/dateHelpers'
+import { makeDateArray, monthStart } from 'shared/helpers/date'
 import { convertCurrency } from 'models/instruments'
 import { round } from 'shared/helpers/currencyHelpers'
 import { getType } from 'models/transactions/helpers'

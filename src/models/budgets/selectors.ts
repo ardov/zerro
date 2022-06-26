@@ -11,7 +11,7 @@ import {
 } from 'shared/types'
 import { getTagMeta } from '../hiddenData/tagMeta'
 import { getBudgetId } from './getBudgetId'
-import { toISOMonth } from 'shared/helpers/adapterUtils'
+import { toISOMonth } from 'shared/helpers/date'
 import { keys } from 'shared/helpers/keys'
 
 export const getBudgets = (state: RootState) => state.data.current.budget

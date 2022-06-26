@@ -19,7 +19,7 @@ import { AppThunk } from 'models'
 import { TBudget, ById, TDateDraft, TBudgetId } from 'shared/types'
 import { getMetaForTag } from 'models/hiddenData/tagMeta'
 import { round } from 'shared/helpers/currencyHelpers'
-import { toISODate, toISOMonth } from 'shared/helpers/adapterUtils'
+import { toISODate, toISOMonth } from 'shared/helpers/date'
 import { keys } from 'shared/helpers/keys'
 
 export const moveFunds =

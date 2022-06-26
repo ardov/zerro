@@ -75,7 +75,7 @@ export const TagGroup = React.forwardRef<HTMLDivElement, TagGroupProps>(
     const c = useStyles({ isExpanded })
 
     const rowProps = {
-      date: month,
+      month,
       metric,
       openGoalPopover,
       openBudgetPopover,

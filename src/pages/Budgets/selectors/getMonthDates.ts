@@ -3,7 +3,7 @@ import isSameMonth from 'date-fns/isSameMonth'
 import addMonths from 'date-fns/addMonths'
 import { getTransactionsHistory } from 'models/transactions'
 import { TISOMonth, TSelector } from 'shared/types'
-import { toISOMonth } from 'shared/helpers/adapterUtils'
+import { toISOMonth } from 'shared/helpers/date'
 import { getBudgets, getISOMonthFromBudgetId } from 'models/budgets'
 import { keys } from 'shared/helpers/keys'
 

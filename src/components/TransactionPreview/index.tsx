@@ -30,7 +30,7 @@ import {
   restoreTransaction,
 } from 'models/transactions/thunks'
 import { TRawTransaction } from 'shared/types'
-import { toISODate } from 'shared/helpers/adapterUtils'
+import { toISODate } from 'shared/helpers/date'
 
 type TransactionPreviewProps = {
   id: string

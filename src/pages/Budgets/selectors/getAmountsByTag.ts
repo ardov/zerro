@@ -12,7 +12,7 @@ import { PopulatedBudget, TISOMonth, TSelector, TTagId } from 'shared/types'
 import { withPerf } from 'shared/helpers/performance'
 import { RootState } from 'models'
 import { getTransactionsHistory } from 'models/transactions'
-import { toISOMonth } from 'shared/helpers/adapterUtils'
+import { toISOMonth } from 'shared/helpers/date'
 import { keys } from 'shared/helpers/keys'
 
 interface DateNode {

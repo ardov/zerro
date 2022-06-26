@@ -31,7 +31,7 @@ import add from 'date-fns/add'
 import sub from 'date-fns/sub'
 import { DragModeContext } from '../DnDContext'
 import { getMonthDates, getTotalGoalsProgress } from 'pages/Budgets/selectors'
-import { toISOMonth } from 'shared/helpers/adapterUtils'
+import { toISOMonth } from 'shared/helpers/date'
 
 const useStyles = makeStyles(theme => ({
   row: {

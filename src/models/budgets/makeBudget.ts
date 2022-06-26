@@ -1,4 +1,4 @@
-import { toISODate } from 'shared/helpers/adapterUtils'
+import { toISODate } from 'shared/helpers/date'
 import { TBudget, OptionalExceptFor, Modify, TDateDraft } from 'shared/types'
 import { getBudgetId } from './getBudgetId'
 

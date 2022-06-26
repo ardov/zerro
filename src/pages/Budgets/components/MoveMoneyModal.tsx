@@ -8,12 +8,12 @@ import { getAmountsById } from '../selectors'
 import { moveFunds } from '../thunks'
 import { getTotalsByMonth } from '../selectors'
 import { RootState, useAppDispatch, useAppSelector } from 'models'
-import { Modify } from 'shared/types'
+import { Modify, TISOMonth } from 'shared/types'
 
 type MoveMoneyModalProps = Modify<
   DialogProps,
   {
-    month: number
+    month: TISOMonth
     source: string
     destination: string
     onClose: () => void
@@ -73,7 +73,7 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   )
 }
 
-function getAvailableFor(state: RootState, month: number, id: string) {
+function getAvailableFor(state: RootState, month: TISOMonth, id: string) {
   if (!id) return 0
   if (id === 'toBeBudgeted')
     return +getTotalsByMonth(state)?.[month]?.toBeBudgeted

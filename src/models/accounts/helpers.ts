@@ -7,7 +7,7 @@ import {
   TDateDraft,
   TRawAccount,
 } from 'shared/types'
-import { toISODate } from 'shared/helpers/adapterUtils'
+import { toISODate } from 'shared/helpers/date'
 
 type TAccountDraft = Modify<
   OptionalExceptFor<TRawAccount, 'user' | 'instrument' | 'title'>,

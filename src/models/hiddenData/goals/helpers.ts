@@ -1,10 +1,10 @@
 import { goalType } from '../constants'
-import { TGoal } from 'shared/types'
+import { TDateDraft, TGoal } from 'shared/types'
 import { formatMoney } from 'shared/helpers/format'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 
-const formatMonth = (monthDate: number | Date): string => {
+const formatMonth = (monthDate: TDateDraft): string => {
   if (!monthDate) return ''
   const date = new Date(monthDate)
   const MM = date.getMonth()
@@ -28,15 +28,7 @@ const formatMonth = (monthDate: number | Date): string => {
   return `${months[MM]} ${isSameYear ? 'этого года' : YYYY}`
 }
 
-export const goalToWords = ({
-  type,
-  amount,
-  end,
-}: {
-  type: goalType
-  amount: number
-  end?: number | Date
-}) => {
+export const goalToWords = ({ type, amount, end }: TGoal): string => {
   const formattedSum = formatMoney(amount, null, 0)
   switch (type) {
     case MONTHLY:

@@ -8,6 +8,7 @@ import { getAmountsById } from 'pages/Budgets/selectors'
 import { getMonthDates } from 'pages/Budgets/selectors'
 import { useMonth } from 'pages/Budgets/pathHooks'
 import { DataLine } from '../../../../shared/ui/DataLine'
+import { TISOMonth } from 'shared/types'
 
 type OutcomWidgetProps = BoxProps & {
   tagId: string
@@ -207,7 +208,11 @@ const BudgetLine: FC<BudgetLineProps> = props => {
   )
 }
 
-function getDateRange(dates: number[], range: number, targetMonth: number) {
+function getDateRange(
+  dates: TISOMonth[],
+  range: number,
+  targetMonth: TISOMonth
+) {
   const idx = dates.findIndex(d => d === targetMonth)
   const arrayToTrim =
     idx === dates.length - 1 ? dates : dates.slice(0, dates.length - 1)
@@ -216,7 +221,11 @@ function getDateRange(dates: number[], range: number, targetMonth: number) {
 }
 
 /** Cuts out a range with target index in center */
-function trimArray(arr: number[] = [], range = 1, targetIdx?: number) {
+function trimArray<T>(
+  arr: Array<T> = [],
+  range = 1,
+  targetIdx?: number
+): Array<T> {
   if (arr.length <= range) return arr
   if (targetIdx === undefined) return arr.slice(-range)
 

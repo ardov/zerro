@@ -15,7 +15,7 @@ import { styled } from '@mui/styles'
 import MonthSelectPopover from './MonthSelectPopover'
 import { formatDate } from 'shared/helpers/format'
 import { Modify, TDateDraft, TISOMonth } from 'shared/types'
-import { toISOMonth } from 'shared/helpers/adapterUtils'
+import { toISOMonth } from 'shared/helpers/date'
 
 type MonthSelectProps = Modify<
   PaperProps,

@@ -1,12 +1,13 @@
 import { TFxIdMap, TRawUser, TUser, TZmUser } from 'shared/types'
-import { msToUnix, TZmAdapter, zmDateToMs } from 'shared/helpers/adapterUtils'
+import { TZmAdapter } from 'shared/helpers/adapterUtils'
+import { msToUnix, unixToMs } from 'shared/helpers/date'
 
 export const convertUser: TZmAdapter<TZmUser, TRawUser> = {
   toClient: el => {
     return {
       ...el,
-      changed: zmDateToMs(el.changed),
-      paidTill: zmDateToMs(el.paidTill),
+      changed: unixToMs(el.changed),
+      paidTill: unixToMs(el.paidTill),
     }
   },
   toServer: el => {
