@@ -1,7 +1,8 @@
 import React, { FC, useContext, useState } from 'react'
 import { useAppDispatch, useAppSelector } from 'models'
 import { getUserCurrencyCode } from 'models/instruments'
-import { formatDate, formatMoney } from 'shared/helpers/format'
+import { formatMoney } from 'shared/helpers/format'
+import { formatDate } from 'shared/helpers/date'
 import {
   Typography,
   Box,
@@ -27,11 +28,9 @@ import { makeStyles } from '@mui/styles'
 import { ToBeBudgeted } from '../ToBeBudgeted'
 import useScrollPosition from '@react-hook/window-scroll'
 import { useMonth } from 'pages/Budgets/pathHooks'
-import add from 'date-fns/add'
-import sub from 'date-fns/sub'
 import { DragModeContext } from '../DnDContext'
 import { getMonthDates, getTotalGoalsProgress } from 'pages/Budgets/selectors'
-import { toISOMonth } from 'shared/helpers/date'
+import { nextMonth, prevMonth, toISOMonth } from 'shared/helpers/date'
 
 const useStyles = makeStyles(theme => ({
   row: {
@@ -88,24 +87,22 @@ const MonthInfo: FC<MonthInfoProps> = ({ onOpenMonthDrawer }) => {
   const monthList = useAppSelector(getMonthDates)
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
-  const prevMonth =
-    month > minMonth ? toISOMonth(sub(new Date(month), { months: 1 })) : null
-  const nextMonth =
-    month < maxMonth ? toISOMonth(add(new Date(month), { months: 1 })) : null
+  const prevMonthISO = month > minMonth ? toISOMonth(prevMonth(month)) : null
+  const nextMonthISO = month < maxMonth ? toISOMonth(nextMonth(month)) : null
   return (
     <Box className={c.head}>
       <Box className={c.month}>
         <IconButton
           children={<ChevronLeftIcon fontSize="inherit" />}
-          onClick={() => prevMonth && setMonth(prevMonth)}
-          disabled={!prevMonth}
+          onClick={() => prevMonthISO && setMonth(prevMonthISO)}
+          disabled={!prevMonthISO}
           size="small"
           edge="start"
         />
         <IconButton
           children={<ChevronRightIcon fontSize="inherit" />}
-          onClick={() => nextMonth && setMonth(nextMonth)}
-          disabled={!nextMonth}
+          onClick={() => nextMonthISO && setMonth(nextMonthISO)}
+          disabled={!nextMonthISO}
           size="small"
           edge="end"
         />

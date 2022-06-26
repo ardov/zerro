@@ -25,7 +25,7 @@ import { getAvailableMonths } from './availablePeriod'
 import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 import { round } from 'shared/helpers/currencyHelpers'
 import { useState } from 'react'
-import { formatDate } from 'shared/helpers/format'
+import { formatDate } from 'shared/helpers/date'
 import { DataLine } from 'shared/ui/DataLine'
 
 type Point = {

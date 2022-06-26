@@ -1,4 +1,4 @@
-import { toISODate } from 'shared/helpers/date'
+import { parseDate, toISODate } from 'shared/helpers/date'
 import { TBudget, OptionalExceptFor, Modify, TDateDraft } from 'shared/types'
 import { getBudgetId } from './getBudgetId'
 
@@ -10,7 +10,7 @@ type BudgetDraft = Modify<
 export const makeBudget = (draft: BudgetDraft): TBudget => ({
   id: getBudgetId(draft.date, draft.tag),
   user: draft.user,
-  date: toISODate(draft.date),
+  date: toISODate(parseDate(draft.date)),
   tag: draft.tag || null,
   changed: draft.changed || Date.now(),
   income: draft.income || 0,

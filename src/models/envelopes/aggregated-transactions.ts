@@ -8,6 +8,7 @@ import {
   TRawTransaction,
   TrType,
 } from 'shared/types'
+import { toISOMonth } from 'shared/helpers/date'
 
 type TFxAmount = {
   [currency: TInstrumentId]: number
@@ -151,7 +152,7 @@ export function getRealMoneyFlow(
 }
 
 function getTrMonth(tr: TRawTransaction): TMonthInfo['date'] {
-  return new Date(tr.date).toISOString().slice(0, 7)
+  return toISOMonth(tr.date)
 }
 
 function getMainTag(tr: TRawTransaction): TTagId | null {

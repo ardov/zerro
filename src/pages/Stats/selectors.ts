@@ -2,10 +2,14 @@ import { createSelector } from '@reduxjs/toolkit'
 import { round } from 'shared/helpers/currencyHelpers'
 import { getAccounts, getStartBalance } from 'models/accounts'
 import { getTransactionsHistory } from 'models/transactions'
-import { eachDayOfInterval, startOfDay } from 'date-fns'
 import { ById, TAccountId, TISODate } from 'shared/types'
 import { keys } from 'shared/helpers/keys'
-import { toISODate } from 'shared/helpers/date'
+import {
+  eachDayOfInterval,
+  parseDate,
+  startOfDay,
+  toISODate,
+} from 'shared/helpers/date'
 
 type Point = {
   date: TISODate
@@ -18,7 +22,7 @@ export const getAccountsHistory = createSelector(
   (transactions, accounts) => {
     if (!accounts) return {}
     const firstDate = transactions[0]
-      ? new Date(transactions[0].date)
+      ? parseDate(transactions[0].date)
       : startOfDay(new Date())
 
     // Make array of balance changes by day (from transactions)
@@ -40,10 +44,9 @@ export const getAccountsHistory = createSelector(
     })
 
     // Make date points for each day from the first transaction till now
-    const dateArray = eachDayOfInterval({
-      start: firstDate,
-      end: startOfDay(new Date()),
-    }).map(toISODate)
+    const dateArray = eachDayOfInterval(firstDate, startOfDay(new Date())).map(
+      toISODate
+    )
 
     // Fill the missing dates so all accounts have eual number of points
     let result: Record<TAccountId, Point[]> = {}

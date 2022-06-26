@@ -12,9 +12,6 @@ export const getAggregatedTransactions: TSelector<TMoneyFlowByMonth> =
     [getTransactionsHistory, getInBudgetAccIds, getDebtAccountId],
     (transactions, inBudgetAccIds, debtAccId) => {
       let res = getRealMoneyFlow(transactions, inBudgetAccIds, debtAccId)
-      console.log({ res })
-
       return res
     }
-    // getRealMoneyFlow
   )

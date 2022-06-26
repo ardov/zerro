@@ -4,7 +4,6 @@ import { getType } from 'models/transactions/helpers'
 import { getAccounts, getStartBalance } from 'models/accounts'
 import { getSortedTransactions } from 'models/transactions'
 import { getTransactionsHistory } from 'models/transactions'
-import { eachDayOfInterval } from 'date-fns'
 import { convertCurrency } from 'models/instruments'
 import {
   TRawTransaction,
@@ -13,7 +12,7 @@ import {
   TInstrumentId,
   TISODate,
 } from 'shared/types'
-import { toISODate } from 'shared/helpers/date'
+import { eachDayOfInterval, parseDate, toISODate } from 'shared/helpers/date'
 
 interface DayNode {
   date: TISODate
@@ -30,10 +29,7 @@ export const getAccountsHistory = createSelector(
     if (!transactions?.length || !accounts) return {}
     let historyById: History = {}
     const firstDate = transactions[0].date
-    const dateArray = eachDayOfInterval({
-      start: new Date(firstDate),
-      end: new Date(),
-    }).map(toISODate)
+    const dateArray = eachDayOfInterval(firstDate, new Date()).map(toISODate)
 
     for (const id in accounts) {
       historyById[id] = [
@@ -224,10 +220,10 @@ function getMainTag(tr: TRawTransaction) {
   return tr.tag?.[0] || 'null'
 }
 function getMonth(tr: TRawTransaction) {
-  return new Date(tr.date).getMonth()
+  return parseDate(tr.date).getMonth()
 }
 function getWeekday(tr: TRawTransaction) {
-  return new Date(tr.date).getDay()
+  return parseDate(tr.date).getDay()
 }
 
 function compareByAmount(

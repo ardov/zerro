@@ -11,7 +11,7 @@ import {
   ListItemButtonProps,
 } from '@mui/material'
 import { ChevronRightIcon, ChevronLeftIcon } from 'shared/ui/Icons'
-import { formatDate } from 'shared/helpers/format'
+import { formatDate } from 'shared/helpers/date'
 import { TDateDraft, TISOMonth } from 'shared/types'
 import { toISOMonth } from 'shared/helpers/date'
 
@@ -84,7 +84,7 @@ export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
               onClick={() => onChange(month)}
             >
               <ListItemText sx={{ textAlign: 'center' }}>
-                {formatDate(new Date(month), 'LLL').toUpperCase()}
+                {formatDate(month, 'LLL').toUpperCase()}
               </ListItemText>
             </MonthItem>
           ))}

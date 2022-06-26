@@ -25,14 +25,12 @@ import { DnDContext } from './components/DnDContext'
 import { TagPreview } from './components/TagPreview'
 import { Helmet } from 'react-helmet'
 // import { SankeyChart } from './SankeyChart'
-import { formatDate } from 'shared/helpers/format'
+import { formatDate } from 'shared/helpers/date'
 import { useHotkeys } from 'react-hotkeys-hook'
-import add from 'date-fns/add'
-import sub from 'date-fns/sub'
 import { MapWidget } from './MapWidget'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
-import { toISOMonth } from 'shared/helpers/date'
+import { nextMonth, prevMonth, toISOMonth } from 'shared/helpers/date'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
@@ -91,7 +89,6 @@ function Budgets() {
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
   const [month, setMonth] = useMonth()
-  const monthDate = new Date(month)
   const [drawerId, setDrawerId] = useSearchParam('drawer')
   const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))
   // const isSM = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
@@ -102,16 +99,16 @@ function Budgets() {
   useHotkeys(
     'left',
     () => {
-      const prevMonth = toISOMonth(sub(monthDate, { months: 1 }))
-      if (minMonth <= prevMonth) setMonth(prevMonth)
+      const prevMonthISO = toISOMonth(prevMonth(month))
+      if (minMonth <= prevMonthISO) setMonth(prevMonthISO)
     },
     [month, minMonth]
   )
   useHotkeys(
     'right',
     () => {
-      const nextMonth = toISOMonth(add(monthDate, { months: 1 }))
-      if (nextMonth <= maxMonth) setMonth(nextMonth)
+      const nextMonthISO = toISOMonth(nextMonth(month))
+      if (nextMonthISO <= maxMonth) setMonth(nextMonthISO)
     },
     [month, maxMonth]
   )
@@ -126,7 +123,7 @@ function Budgets() {
   return (
     <>
       <Helmet>
-        <title>Бюджет на {formatDate(monthDate, 'LLLL yyyy')} | Zerro</title>
+        <title>Бюджет на {formatDate(month, 'LLLL yyyy')} | Zerro</title>
         <meta name="description" content="" />
         <link rel="canonical" href="https://zerro.app/budget" />
       </Helmet>

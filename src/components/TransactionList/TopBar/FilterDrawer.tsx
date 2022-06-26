@@ -13,18 +13,14 @@ import {
   TextFieldProps,
 } from '@mui/material'
 import { DateRangePicker } from '@mui/lab'
-import startOfDay from 'date-fns/startOfDay'
-import endOfDay from 'date-fns/endOfDay'
-import subMonths from 'date-fns/subMonths'
-
 import { makeStyles } from '@mui/styles'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { CloseIcon } from 'shared/ui/Icons'
 import Button from '@mui/material/Button'
-
-import { formatDate } from 'shared/helpers/format'
+import { formatDate } from 'shared/helpers/date'
 import { FilterConditions } from 'models/transactions/filtering'
 import { TrType } from 'shared/types'
+import { endOfDay, prevMonth, startOfDay } from 'shared/helpers/date'
 
 const useStyles = makeStyles(theme => ({
   drawerWidth: {
@@ -114,7 +110,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
             mask="__.__.____"
             value={[conditions.dateFrom || null, conditions.dateTo || null]}
             maxDate={endOfDay(new Date())}
-            defaultCalendarMonth={subMonths(new Date(), 1)}
+            defaultCalendarMonth={prevMonth(new Date())}
             onChange={([dateFrom, dateTo]: [
               number | Date | undefined,
               number | Date | undefined

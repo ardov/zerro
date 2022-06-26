@@ -3,7 +3,7 @@ import {
   PopulatedTransaction,
   populateTransaction,
 } from './populateTransaction'
-import { formatDate } from 'shared/helpers/format'
+import { formatDate } from 'shared/helpers/date'
 import { ById } from 'shared/types'
 import { AppThunk } from 'models'
 import { getTransactions } from 'models/transactions'

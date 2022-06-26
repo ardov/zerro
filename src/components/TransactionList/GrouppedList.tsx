@@ -13,7 +13,7 @@ import TextField from '@mui/material/TextField'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { Box, ListSubheader } from '@mui/material'
 import Transaction from './Transaction'
-import { formatDate } from 'shared/helpers/format'
+import { formatDate } from 'shared/helpers/date'
 import { TDateDraft, TISODate, TTransactionId } from 'shared/types'
 import { toISODate } from 'shared/helpers/date'
 

@@ -10,16 +10,15 @@ import { sendEvent } from 'shared/helpers/tracking'
 import { getBudgets, getISOMonthFromBudgetId, makeBudget } from 'models/budgets'
 import { getBudgetsByMonthAndTag, getBudget } from 'models/budgets'
 import { getTags } from 'models/tags'
-import { subMonths } from 'date-fns/esm'
 import { getGoalsProgress } from '../selectors'
 import { goalType } from 'models/hiddenData/constants'
 import { getGoals } from 'models/hiddenData/goals'
 import { applyClientPatch } from 'models/data'
 import { AppThunk } from 'models'
-import { TBudget, ById, TDateDraft, TBudgetId } from 'shared/types'
+import { TBudget, ById, TDateDraft, TBudgetId, TISOMonth } from 'shared/types'
 import { getMetaForTag } from 'models/hiddenData/tagMeta'
 import { round } from 'shared/helpers/currencyHelpers'
-import { toISODate, toISOMonth } from 'shared/helpers/date'
+import { prevMonth, toISODate, toISOMonth } from 'shared/helpers/date'
 import { keys } from 'shared/helpers/keys'
 
 export const moveFunds =
@@ -27,7 +26,7 @@ export const moveFunds =
     amount: number,
     source: string,
     destination: string,
-    monthDate: TDateDraft
+    month: TISOMonth
   ): AppThunk =>
   (dispatch, getState) => {
     if (!source || !amount || !destination || source === destination) return
@@ -48,8 +47,8 @@ export const moveFunds =
     function getUpdatedBudget(id: string, outcomeDiff: number) {
       const tag = id === 'null' ? null : id
       const budget =
-        getBudget(state, id, monthDate) ||
-        makeBudget({ user: user as number, date: toISODate(monthDate), tag })
+        getBudget(state, id, month) ||
+        makeBudget({ user: user as number, date: month, tag })
       return {
         ...budget,
         outcome: budget.outcome + outcomeDiff,
@@ -59,16 +58,14 @@ export const moveFunds =
   }
 
 export const setOutcomeBudget =
-  (targetOutcome: number, month: TDateDraft, tagId: string): AppThunk =>
+  (targetOutcome: number, month: TISOMonth, tagId: string): AppThunk =>
   (dispatch, getState) => {
     sendEvent('Budgets: set budget')
     const state = getState()
     const user = getRootUser(state)?.id
     if (!user) return
     const created = getBudget(state, tagId, month)
-    // TODO: DATE FORMAT
-    const monthISO = toISOMonth(month)
-    const amounts = getAmountsByTag(state)[monthISO]
+    const amounts = getAmountsByTag(state)[month]
     const parentTagId = getPopulatedTag(state, tagId).parent
 
     // ------------------------------------------------------------------
@@ -94,26 +91,23 @@ export const setOutcomeBudget =
       outcome = targetOutcome - toTagCurrency(childrenBudgets)
     }
 
-    const budget =
-      created || makeBudget({ user, date: toISODate(month), tag: tagId })
+    const budget = created || makeBudget({ user, date: month, tag: tagId })
     const changed = { ...budget, outcome, changed: Date.now() }
     dispatch(applyClientPatch({ budget: [changed] }))
   }
 
 export const copyPreviousBudget =
-  (month: TDateDraft): AppThunk =>
+  (month: TISOMonth): AppThunk =>
   (dispatch, getState) => {
     sendEvent('Budgets: copy previous')
     const state = getState()
     const user = getRootUser(state)?.id
     if (!user) return
-    const monthDate = new Date(month)
-    const monthISO = toISOMonth(month)
-    const prevMonth = toISOMonth(subMonths(monthDate, 1))
+    const prevMonthISO = toISOMonth(prevMonth(month))
     const tags = getTags(state)
     const budgets = getBudgetsByMonthAndTag(state)
-    const currentBudgets = budgets[monthISO]
-    const prevBudgets = budgets[prevMonth]
+    const currentBudgets = budgets[month]
+    const prevBudgets = budgets[prevMonthISO]
     if (!prevBudgets || !tags || !budgets) return
 
     const changedArr = []
@@ -122,7 +116,12 @@ export const copyPreviousBudget =
       const currentValue = currentBudgets?.[id]?.outcome || 0
       if (prevValue !== currentValue) {
         changedArr.push(
-          makeBudget({ user, date: monthISO, tag: id, outcome: prevValue })
+          makeBudget({
+            user,
+            date: month,
+            tag: id,
+            outcome: prevValue,
+          })
         )
       }
     }
@@ -130,16 +129,15 @@ export const copyPreviousBudget =
   }
 
 export const fillGoals =
-  (month: TDateDraft): AppThunk =>
+  (month: TISOMonth): AppThunk =>
   (dispatch, getState) => {
     sendEvent('Budgets: fill goals')
     const state = getState()
     const user = getRootUser(state)?.id
     if (!user) return
-    const monthISO = toISOMonth(month)
-    const goalsProgress = getGoalsProgress(state)?.[monthISO]
+    const goalsProgress = getGoalsProgress(state)?.[month]
     const tags = getTags(state)
-    const budgets = getBudgetsByMonthAndTag(state)?.[monthISO]
+    const budgets = getBudgetsByMonthAndTag(state)?.[month]
     const goals = getGoals(state)
 
     if (!goalsProgress || !tags) return
@@ -151,30 +149,27 @@ export const fillGoals =
       const target = goalsProgress[tag]?.target || 0
       const currentBudget = budgets?.[tag]?.outcome || 0
       if (currentBudget < target) {
-        changedArr.push(
-          makeBudget({ user, date: monthISO, tag, outcome: target })
-        )
+        changedArr.push(makeBudget({ user, date: month, tag, outcome: target }))
       }
     }
     dispatch(applyClientPatch({ budget: changedArr }))
   }
 
 export const startFresh =
-  (month: TDateDraft): AppThunk =>
+  (month: TISOMonth): AppThunk =>
   (dispatch, getState) => {
     sendEvent('Budgets: start fresh')
     const state = getState()
     const user = getRootUser(state)?.id
     if (!user) return
-    const monthISO = toISOMonth(month)
-    const prevMonth = toISOMonth(subMonths(new Date(monthISO), 1))
+    const prevMonthISO = toISOMonth(prevMonth(month))
     const budgets = getBudgets(state)
     const amounts = getAmountsByTag(state)
-    const prevAmounts = amounts[prevMonth]
-    const currentAmounts = amounts[monthISO]
+    const prevAmounts = amounts[prevMonthISO]
+    const currentAmounts = amounts[month]
 
-    const removedBudgets = removeFutureBudgets(budgets, monthISO)
-    const resetSavingsArr = clearAvailable(prevMonth, prevAmounts, user)
+    const removedBudgets = removeFutureBudgets(budgets, month)
+    const resetSavingsArr = clearAvailable(prevMonthISO, prevAmounts, user)
     const currentMonth = resetCurrentMonth(month, currentAmounts, user)
     dispatch(
       applyClientPatch({
@@ -185,9 +180,8 @@ export const startFresh =
 
 function removeFutureBudgets(
   budgets: Record<TBudgetId, TBudget>,
-  startDate: TDateDraft
+  startMonth: TISOMonth
 ): Array<TBudget> {
-  const startMonth = toISOMonth(startDate)
   const changed = Date.now()
   return keys(budgets)
     .filter(id => getISOMonthFromBudgetId(id) > startMonth)
@@ -196,7 +190,7 @@ function removeFutureBudgets(
 }
 
 function clearAvailable(
-  date: TDateDraft,
+  month: TISOMonth,
   amounts: ById<TagAmounts>,
   user: number
 ) {
@@ -210,7 +204,7 @@ function clearAvailable(
       if (tag.available > 0) {
         const budget = makeBudget({
           user,
-          date: toISODate(date),
+          date: toISODate(month),
           outcome: tag.budgeted - tag.available,
           tag: id,
         })
@@ -222,7 +216,7 @@ function clearAvailable(
 }
 
 function resetCurrentMonth(
-  date: TDateDraft,
+  month: TISOMonth,
   amounts: ById<TagAmounts>,
   user: number
 ) {
@@ -241,7 +235,7 @@ function resetCurrentMonth(
     const { outcome, budgeted } = tagAmounts
     if ((budgeted || outcome) && outcome !== budgeted)
       changedBudgets.push(
-        makeBudget({ user, date: toISODate(date), outcome, tag: id })
+        makeBudget({ user, date: toISODate(month), outcome, tag: id })
       )
   }
 }

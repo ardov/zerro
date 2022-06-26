@@ -1,8 +1,9 @@
 import React, { FC, useState } from 'react'
 import { Box, Paper, Typography, Collapse, Link, BoxProps } from '@mui/material'
-import parse from 'date-fns/parseISO'
 import QRCode from 'qrcode.react'
-import { formatMoney, formatDate } from 'shared/helpers/format'
+import { formatMoney } from 'shared/helpers/format'
+import { formatDate } from 'shared/helpers/date'
+import { parseDate } from 'shared/helpers/date'
 
 interface RecieptProps {
   value?: string | null
@@ -14,7 +15,7 @@ export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
   if (!value) return null
 
   const parsed = parseReceipt(value)
-  parsed.t = parse(parsed.t)
+  parsed.t = parseDate(parsed.t)
 
   return (
     <Paper sx={{ p: 2, display: 'flex', ...sx }}>

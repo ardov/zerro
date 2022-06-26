@@ -1,5 +1,5 @@
-import parseDate from 'date-fns/parseISO'
 import { getBudgetId } from 'models/budgets'
+import { msToUnix, unixToMs } from 'shared/helpers/date'
 import {
   TInstrument,
   TRawUser,
@@ -21,31 +21,27 @@ import {
   TDeletionObject,
 } from 'shared/types'
 
-const toMs = (date: string | number) =>
-  typeof date === 'string' ? +parseDate(date) : date * 1000
-const toUnix = (date: number) => date / 1000
-
 export const dataConverters = {
   serverTimestamp: {
-    toClient: (time: number) => toMs(time),
-    toServer: (time: number) => toUnix(time),
+    toClient: (time: number) => unixToMs(time),
+    toServer: (time: number) => msToUnix(time),
   },
 
   instrument: {
     toClient: (el: TInstrument): TInstrument => {
-      return { ...el, changed: toMs(el.changed) }
+      return { ...el, changed: unixToMs(el.changed) }
     },
     toServer: (el: TInstrument): TInstrument => {
-      return { ...el, changed: toUnix(el.changed) }
+      return { ...el, changed: msToUnix(el.changed) }
     },
   },
 
   company: {
     toClient: (el: TCompany): TCompany => {
-      return { ...el, changed: toMs(el.changed) }
+      return { ...el, changed: unixToMs(el.changed) }
     },
     toServer: (el: TCompany): TCompany => {
-      return { ...el, changed: toUnix(el.changed) }
+      return { ...el, changed: msToUnix(el.changed) }
     },
   },
 
@@ -56,13 +52,17 @@ export const dataConverters = {
 
   user: {
     toClient: (el: TRawUser): TRawUser => {
-      return { ...el, changed: toMs(el.changed), paidTill: toMs(el.paidTill) }
+      return {
+        ...el,
+        changed: unixToMs(el.changed),
+        paidTill: unixToMs(el.paidTill),
+      }
     },
     toServer: (el: TRawUser): TRawUser => {
       return {
         ...el,
-        changed: toUnix(el.changed),
-        paidTill: toUnix(el.paidTill),
+        changed: msToUnix(el.changed),
+        paidTill: msToUnix(el.paidTill),
       }
     },
   },
@@ -70,44 +70,40 @@ export const dataConverters = {
   account: {
     toClient: (el: TZmAccount): TRawAccount => ({
       ...el,
-      changed: toMs(el.changed),
+      changed: unixToMs(el.changed),
     }),
     toServer: (el: TRawAccount): TZmAccount => ({
       ...el,
-      changed: toUnix(el.changed),
+      changed: msToUnix(el.changed),
     }),
   },
 
   tag: {
     toClient: (el: TRawTag): TRawTag => {
-      return { ...el, changed: toMs(el.changed) }
+      return { ...el, changed: unixToMs(el.changed) }
     },
     toServer: (el: TRawTag): TRawTag => {
-      return { ...el, changed: toUnix(el.changed) }
+      return { ...el, changed: msToUnix(el.changed) }
     },
   },
 
   merchant: {
     toClient: (el: TMerchant): TMerchant => {
-      return { ...el, changed: toMs(el.changed) }
+      return { ...el, changed: unixToMs(el.changed) }
     },
     toServer: (el: TMerchant): TMerchant => {
-      return { ...el, changed: toUnix(el.changed) }
+      return { ...el, changed: msToUnix(el.changed) }
     },
   },
 
   reminder: {
     toClient: (el: TZmReminder): TRawReminder => ({
       ...el,
-      changed: toMs(el.changed),
-      // startDate: toMs(el.startDate),
-      // endDate: toMs(el.endDate),
+      changed: unixToMs(el.changed),
     }),
     toServer: (el: TRawReminder): TZmReminder => ({
       ...el,
-      changed: toUnix(el.changed),
-      // startDate: toISODate(el.startDate),
-      // endDate: toISODate(el.endDate),
+      changed: msToUnix(el.changed),
     }),
   },
 
@@ -115,13 +111,13 @@ export const dataConverters = {
     toClient: (el: TZmReminderMarker): TRawReminderMarker => {
       return {
         ...el,
-        changed: toMs(el.changed),
+        changed: unixToMs(el.changed),
       }
     },
     toServer: (el: TRawReminderMarker): TZmReminderMarker => {
       return {
         ...el,
-        changed: toUnix(el.changed),
+        changed: msToUnix(el.changed),
       }
     },
   },
@@ -129,13 +125,13 @@ export const dataConverters = {
   transaction: {
     toClient: (el: TZmTransaction): TRawTransaction => ({
       ...el,
-      changed: toMs(el.changed),
-      created: toMs(el.created),
+      changed: unixToMs(el.changed),
+      created: unixToMs(el.created),
     }),
     toServer: (el: TRawTransaction): TZmTransaction => ({
       ...el,
-      changed: toUnix(el.changed),
-      created: toUnix(el.created),
+      changed: msToUnix(el.changed),
+      created: msToUnix(el.created),
     }),
   },
 
@@ -143,14 +139,14 @@ export const dataConverters = {
     toClient: (el: TZmBudget): TBudget => {
       return {
         ...el,
-        changed: toMs(el.changed),
+        changed: unixToMs(el.changed),
         id: getBudgetId(el.date, el.tag),
       }
     },
     toServer: (el: TBudget): TZmBudget => {
       let converted = {
         ...el,
-        changed: toUnix(el.changed),
+        changed: msToUnix(el.changed),
         id: undefined,
       }
       delete converted.id
@@ -160,10 +156,10 @@ export const dataConverters = {
 
   deletion: {
     toClient: (el: TZmDeletionObject): TDeletionObject => {
-      return { ...el, stamp: toMs(el.stamp) }
+      return { ...el, stamp: unixToMs(el.stamp) }
     },
     toServer: (el: TDeletionObject): TZmDeletionObject => {
-      return { ...el, stamp: toUnix(el.stamp) }
+      return { ...el, stamp: msToUnix(el.stamp) }
     },
   },
 }

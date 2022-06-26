@@ -1,7 +1,11 @@
-import startOfWeek from 'date-fns/startOfWeek'
 import { checkRaw, FilterConditions } from './filtering'
 import { TRawTransaction, TTransactionId, TrType, TISODate } from 'shared/types'
-import { toISODate, toISOMonth } from 'shared/helpers/date'
+import {
+  parseDate,
+  startOfMonth,
+  startOfWeek,
+  toISODate,
+} from 'shared/helpers/date'
 
 /**
  * Groups array of transactions
@@ -13,9 +17,8 @@ export function groupTransactionsBy(
 ) {
   const groupTypes = {
     DAY: (date: TRawTransaction['date']) => date,
-    WEEK: (date: TRawTransaction['date']) =>
-      toISODate(startOfWeek(new Date(date), { weekStartsOn: 1 })),
-    MONTH: (date: TRawTransaction['date']) => toISODate(toISOMonth(date)),
+    WEEK: (date: TRawTransaction['date']) => toISODate(startOfWeek(date)),
+    MONTH: (date: TRawTransaction['date']) => toISODate(startOfMonth(date)),
   }
   const converter = groupTypes[groupType]
   const checker = checkRaw(filterConditions)
@@ -55,10 +58,10 @@ export function getType(tr: TRawTransaction, debtId?: string): TrType {
 }
 
 export function getTime(tr: TRawTransaction) {
-  const date = new Date(tr.date)
-  const creationDate = new Date(tr.created)
+  const date = parseDate(tr.date)
+  const creationDate = parseDate(tr.created)
   creationDate.setFullYear(date.getFullYear(), date.getMonth(), date.getDate())
-  return +creationDate
+  return creationDate
 }
 
 export function getMainTag(tr: TRawTransaction) {
@@ -70,6 +73,6 @@ export function isNew(tr: TRawTransaction) {
   if (tr.deleted) return false
   if (tr.viewed) return false
   const DAY = 1000 * 60 * 60 * 24
-  if (Date.now() - +new Date(tr.changed) > 31 * DAY) return false
+  if (Date.now() - tr.changed > 31 * DAY) return false
   return true
 }

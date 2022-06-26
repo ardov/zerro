@@ -6,7 +6,6 @@ import { TagGroup } from './TagGroup'
 import { TagTableHeader } from './TagTableHeader'
 import { TagTableFooter } from './TagTableFooter'
 import { TransactionsDrawer as TrDrawer } from 'components/TransactionsDrawer'
-import { endOfMonth } from 'date-fns'
 import { sendEvent } from 'shared/helpers/tracking'
 import { GoalPopover } from '../GoalPopover'
 import { useCallback } from 'react'
@@ -20,6 +19,7 @@ import { FilterConditions } from 'models/transactions/filtering'
 import { getAmountsById } from 'pages/Budgets/selectors'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { TrType } from 'shared/types'
+import { endOfMonth } from 'shared/helpers/date'
 
 export type MetricType = 'outcome' | 'available' | 'budgeted'
 
@@ -198,7 +198,7 @@ const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
   prefilter.push({
     type: TrType.outcome,
     dateFrom: month,
-    dateTo: endOfMonth(new Date(month)),
+    dateTo: endOfMonth(month),
     accountsFrom: accountsInBudget,
     mainTags: tagIds,
   })
@@ -207,14 +207,14 @@ const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
       prefilter.push({
         type: TrType.transfer,
         dateFrom: month,
-        dateTo: endOfMonth(new Date(month)),
+        dateTo: endOfMonth(month),
         accountsFrom: accountsInBudget,
         accountsTo: tagAccMap[id],
       })
       prefilter.push({
         type: TrType.transfer,
         dateFrom: month,
-        dateTo: endOfMonth(new Date(month)),
+        dateTo: endOfMonth(month),
         accountsFrom: tagAccMap[id],
         accountsTo: accountsInBudget,
       })

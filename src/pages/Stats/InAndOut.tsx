@@ -12,8 +12,8 @@ import {
 } from 'recharts'
 import { DataLine } from 'shared/ui/DataLine'
 import { getHistoryStart, getTransactionsHistory } from 'models/transactions'
-import { formatDate, formatMoney } from 'shared/helpers/format'
-import { makeDateArray, monthStart } from 'shared/helpers/date'
+import { formatMoney } from 'shared/helpers/format'
+import { makeDateArray, startOfMonth, formatDate } from 'shared/helpers/date'
 import { convertCurrency } from 'models/instruments'
 import { round } from 'shared/helpers/currencyHelpers'
 import { getType } from 'models/transactions/helpers'
@@ -40,8 +40,7 @@ export function InAndOut() {
   transactions.forEach(tr => {
     const trType = getType(tr)
     if (trType === 'transfer') return
-    const date = new Date(tr.date)
-    const monthDate = monthStart(date)
+    const monthDate = startOfMonth(tr.date)
     const monthNode = points.find(node => +node.date === +monthDate)
     if (!monthNode) return
     if (trType === 'income') {

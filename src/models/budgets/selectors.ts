@@ -54,8 +54,6 @@ export const getBudgetsByMonthAndTag = createSelector(
       result[month] ??= {}
       result[month][String(tag)] = budgets[id]
     })
-    console.log('getBudgetsByMonthAndTag', result)
-
     return result
   }
 )

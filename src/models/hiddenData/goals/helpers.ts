@@ -1,12 +1,13 @@
 import { goalType } from '../constants'
 import { TDateDraft, TGoal } from 'shared/types'
 import { formatMoney } from 'shared/helpers/format'
+import { parseDate } from 'shared/helpers/date'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 
 const formatMonth = (monthDate: TDateDraft): string => {
   if (!monthDate) return ''
-  const date = new Date(monthDate)
+  const date = parseDate(monthDate)
   const MM = date.getMonth()
   const YYYY = date.getFullYear()
   const isSameYear = new Date().getFullYear() === YYYY

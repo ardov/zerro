@@ -15,7 +15,8 @@ import { DeleteIcon, CloseIcon, RestoreFromTrashIcon } from 'shared/ui/Icons'
 import DatePicker from '@mui/lab/DatePicker'
 import { Map } from './Map'
 import { AmountInput } from 'shared/ui/AmountInput'
-import { formatDate, rateToWords } from 'shared/helpers/format'
+import { rateToWords } from 'shared/helpers/format'
+import { formatDate, parseDate } from 'shared/helpers/date'
 import { TagList } from 'components/TagList'
 import { useAppDispatch, useAppSelector } from 'models'
 import { getTransactions } from 'models/transactions'
@@ -104,7 +105,7 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
     if (timeChanged) {
       const hh = +localTime.split(':')[0]
       const mm = +localTime.split(':')[1]
-      let createdDate = new Date(tr.date)
+      let createdDate = parseDate(tr.date)
       createdDate.setHours(hh)
       createdDate.setMinutes(mm)
       let newId = dispatch(

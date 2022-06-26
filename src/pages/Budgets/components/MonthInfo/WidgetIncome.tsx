@@ -1,6 +1,5 @@
 import React, { FC, useState } from 'react'
 import { useAppSelector } from 'models'
-import { endOfMonth } from 'date-fns'
 import { getAmountsByTag, getTotalsByMonth } from '../../selectors'
 import { getUserCurrencyCode } from 'models/instruments'
 import { Box, Typography, ButtonBase, Collapse, BoxProps } from '@mui/material'
@@ -12,10 +11,11 @@ import { Amount } from 'components/Amount'
 import { getTagsTree } from 'models/tags'
 import { TransactionsDrawer } from 'components/TransactionsDrawer'
 import { useMonth } from 'pages/Budgets/pathHooks'
-import { formatDate } from 'shared/helpers/format'
+import { formatDate } from 'shared/helpers/date'
 import { FilterConditions } from 'models/transactions/filtering'
 import { useToggle } from 'shared/hooks/useToggle'
 import { TrType } from 'shared/types'
+import { endOfMonth } from 'shared/helpers/date'
 
 type IncomeDataPoint = {
   id: string
@@ -62,7 +62,7 @@ export function WidgetIncome() {
   const filterConditions: FilterConditions = {
     type: TrType.income,
     dateFrom: month,
-    dateTo: endOfMonth(new Date(month)),
+    dateTo: endOfMonth(month),
     mainTags: selected,
   }
 

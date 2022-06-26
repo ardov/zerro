@@ -3,13 +3,13 @@ import { round } from 'shared/helpers/currencyHelpers'
 import { getGoals } from 'models/hiddenData/goals'
 import { getAmountsById } from './getAmountsByTag'
 import { getMonthDates } from './getMonthDates'
-import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths'
 import { goalType } from 'models/hiddenData/constants'
-import { TDateDraft, TGoal, TISOMonth, TSelector, TTagId } from 'shared/types'
+import { TGoal, TISODate, TISOMonth, TSelector, TTagId } from 'shared/types'
 import { RootState } from 'models'
 import { getTagMeta } from 'models/hiddenData/tagMeta'
 import { convertCurrency } from 'models/instruments'
 import { keys } from 'shared/helpers/keys'
+import { differenceInCalendarMonths } from 'shared/helpers/date'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 
@@ -168,8 +168,8 @@ function calcTargetProgress(data: {
   budgeted: number
   leftover: number
   available: number
-  currentMonth: TDateDraft
-  endMonth?: TDateDraft
+  currentMonth: TISOMonth | TISODate
+  endMonth?: TISOMonth | TISODate
 }): GoalProgress | null {
   const { amount, budgeted, leftover, available, currentMonth, endMonth } = data
   if (!endMonth) {
@@ -183,12 +183,8 @@ function calcTargetProgress(data: {
     }
   } else {
     // Goal has end date
-    let curMonthDate = new Date(currentMonth)
-    let endMonthDate = new Date(endMonth)
-    if (curMonthDate > endMonthDate) return null
-
-    const monthsLeft =
-      differenceInCalendarMonths(endMonthDate, curMonthDate) + 1
+    if (currentMonth > endMonth) return null
+    const monthsLeft = differenceInCalendarMonths(endMonth, currentMonth) + 1
     const totalNeed = amount - leftover
     if (totalNeed <= 0) return { progress: 1, need: 0, target: 0 }
     const target = Math.round(totalNeed / monthsLeft)
