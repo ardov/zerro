@@ -13,7 +13,7 @@ import TextField from '@mui/material/TextField'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { Box, ListSubheader } from '@mui/material'
 import Transaction from './Transaction'
-import { formatDate } from 'shared/helpers/date'
+import { formatDate, parseDate } from 'shared/helpers/date'
 import { TDateDraft, TISODate, TTransactionId } from 'shared/types'
 import { toISODate } from 'shared/helpers/date'
 
@@ -89,10 +89,10 @@ export const GrouppedList: FC<GrouppedListProps> = ({
     <>
       <Dialog open={!!clickedDate} onClose={() => setClickedDate(null)}>
         <StaticDatePicker
-          maxDate={maxDate}
-          minDate={minDate}
+          value={clickedDate && parseDate(clickedDate)}
+          maxDate={parseDate(maxDate)}
+          minDate={parseDate(minDate)}
           openTo="day"
-          value={clickedDate}
           onChange={date => {
             setClickedDate(null)
             if (date) scrollToDate(date)
