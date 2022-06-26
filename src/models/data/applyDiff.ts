@@ -8,11 +8,20 @@ import { TDataStore, TDiff } from 'shared/types'
 export function applyDiff(diff: TDiff, store: TDataStore) {
   const processKey = (key: keyof TDiff) => {
     if (key === 'serverTimestamp' || key === 'deletion') return
-    if (diff[key]) diff[key]?.forEach(el => (store[key][el.id] = el))
+    if (diff[key])
+      diff[key]?.forEach(el => {
+        // @ts-ignore
+        // TODO: Need some TS magic to use correct id type here
+        store[key][el.id] = el
+      })
   }
 
   if (diff.serverTimestamp) store.serverTimestamp = diff.serverTimestamp
-  diff.deletion?.forEach(obj => delete store[obj.object][obj.id])
+  diff.deletion?.forEach(obj => {
+    // @ts-ignore
+    // TODO: Need some TS magic to use correct id type here
+    delete store[obj.object][obj.id]
+  })
   processKey('instrument')
   processKey('country')
   processKey('company')

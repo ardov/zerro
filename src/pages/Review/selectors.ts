@@ -11,25 +11,29 @@ import {
   TRawAccount,
   TAccountId,
   TInstrumentId,
+  TISODate,
 } from 'shared/types'
+import { toISODate } from 'shared/helpers/adapterUtils'
 
 interface DayNode {
-  date: number
+  date: TISODate
   balance: number
   transactions: number[]
 }
 interface History {
-  [id: string]: DayNode[]
+  [id: TAccountId]: DayNode[]
 }
 
 export const getAccountsHistory = createSelector(
   [getTransactionsHistory, getAccounts],
   (transactions: TRawTransaction[], accounts: { [x: string]: TRawAccount }) => {
     if (!transactions?.length || !accounts) return {}
-    let historyById = {} as History
-    const firstDate = +new Date(transactions[0].date)
-    const currentDate = startOfDay(new Date())
-    const dateArray = eachDayOfInterval({ start: firstDate, end: currentDate })
+    let historyById: History = {}
+    const firstDate = transactions[0].date
+    const dateArray = eachDayOfInterval({
+      start: new Date(firstDate),
+      end: new Date(),
+    }).map(toISODate)
 
     for (const id in accounts) {
       historyById[id] = [
@@ -41,7 +45,7 @@ export const getAccountsHistory = createSelector(
       ]
     }
 
-    const addAmount = (amount: number, acc: TAccountId, date: number) => {
+    const addAmount = (amount: number, acc: TAccountId, date: TISODate) => {
       const accHistory = historyById[acc]
       const lastPoint = accHistory[accHistory.length - 1]
       if (lastPoint.date === date) {
@@ -79,22 +83,22 @@ export const getAccountsHistory = createSelector(
       }
     })
 
-    let result = {} as History
+    let result: History = {}
     for (const id in historyById) {
       let lastValue = 0
-      const dateMap = {} as { [x: number]: DayNode }
+      const dateMap: Record<TISODate, DayNode> = {}
       historyById[id].forEach(obj => {
         dateMap[obj.date] = obj
       })
 
       result[id] = dateArray.map(date => {
-        const change = dateMap[+date]
+        const change = dateMap[date]
         if (change) {
           lastValue = change.balance
           return change
         }
         return {
-          date: +date,
+          date,
           balance: lastValue,
           transactions: [],
         }
@@ -149,8 +153,8 @@ export const getYearStats = (year: number) =>
     [getSortedTransactions, convertCurrency],
     (allTransactions: TRawTransaction[], convert) => {
       if (!allTransactions?.length) return null
-      const dateStart = +new Date(year, 0, 1)
-      const dateEnd = +new Date(year + 1, 0, 1)
+      const dateStart = toISODate(new Date(year, 0, 1))
+      const dateEnd = toISODate(new Date(year + 1, 0, 1))
       const transactions = allTransactions
         .filter(tr => !tr.deleted && tr.date >= dateStart && tr.date < dateEnd)
         .sort(compareByAmount(convert))

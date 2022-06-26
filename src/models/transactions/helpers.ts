@@ -1,41 +1,43 @@
-import startOfMonth from 'date-fns/startOfMonth'
-import startOfDay from 'date-fns/startOfDay'
 import startOfWeek from 'date-fns/startOfWeek'
 import { checkRaw, FilterConditions } from './filtering'
-import { TRawTransaction, TTransactionId, TrType } from 'shared/types'
+import { TRawTransaction, TTransactionId, TrType, TISODate } from 'shared/types'
+import { toISODate, toISOMonth } from 'shared/helpers/adapterUtils'
 
 /**
  * Groups array of transactions
  */
 export function groupTransactionsBy(
   groupType: 'DAY' | 'WEEK' | 'MONTH' = 'DAY',
-  arr: TRawTransaction[] = [],
+  transactions: TRawTransaction[] = [],
   filterConditions?: FilterConditions
 ) {
   const groupTypes = {
-    DAY: (date: number | Date) => startOfDay(date),
-    WEEK: (date: number | Date) => startOfWeek(date, { weekStartsOn: 1 }),
-    MONTH: (date: number | Date) => startOfMonth(date),
+    DAY: (date: TRawTransaction['date']) => date,
+    WEEK: (date: TRawTransaction['date']) =>
+      toISODate(startOfWeek(new Date(date), { weekStartsOn: 1 })),
+    MONTH: (date: TRawTransaction['date']) => toISODate(toISOMonth(date)),
   }
   const converter = groupTypes[groupType]
   const checker = checkRaw(filterConditions)
   let groups: {
-    [k: string]: { date: number; transactions: TTransactionId[] }
+    [k: string]: { date: TISODate; transactions: TTransactionId[] }
   } = {}
 
-  for (const tr of arr) {
+  transactions.forEach(tr => {
     if (checker(tr)) {
-      const date = +converter(tr.date)
-      if (groups[date]) groups[date].transactions.push(tr.id)
-      else groups[date] = { date, transactions: [tr.id] }
+      const date = converter(tr.date)
+      groups[date] ??= { date, transactions: [] }
+      groups[date].transactions.push(tr.id)
     }
-  }
+  })
 
   return Object.values(groups)
 }
 
 export function compareDates(tr1: TRawTransaction, tr2: TRawTransaction) {
-  return tr2.date === tr1.date ? tr2.created - tr1.created : tr2.date - tr1.date
+  if (tr1.date < tr2.date) return -1
+  if (tr1.date > tr2.date) return 1
+  return tr2.created - tr1.created
 }
 
 export const isDeleted = (tr: TRawTransaction) => {

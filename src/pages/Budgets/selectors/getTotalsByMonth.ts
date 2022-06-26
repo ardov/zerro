@@ -9,6 +9,7 @@ import {
 import { round } from 'shared/helpers/currencyHelpers'
 import { withPerf } from 'shared/helpers/performance'
 import { RootState } from 'models'
+import { TISOMonth } from 'shared/types'
 
 const CARRY_NEGATIVES = !!localStorage.getItem('CARRY_NEGATIVES')
 
@@ -20,7 +21,7 @@ interface TagTotals {
   available: number
 }
 export interface MonthTotals {
-  date: number
+  date: TISOMonth
   prevFunds: number
   prevOverspent: number
   toBeBudgeted: number
@@ -149,9 +150,7 @@ export const getTotalsArray: (state: RootState) => MonthTotals[] =
   )
 
 export const getTotalsByMonth = createSelector([getTotalsArray], totals => {
-  let result: { [key: number]: MonthTotals } = {}
-  for (const monthData of totals) {
-    result[monthData.date] = monthData
-  }
+  let result: Record<TISOMonth, MonthTotals> = {}
+  totals.forEach(monthData => (result[monthData.date] = monthData))
   return result
 })

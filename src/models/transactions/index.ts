@@ -1,10 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getInstruments } from 'models/instruments'
 import { getMerchants } from 'models/data/selectors'
-import { getAccounts } from 'models/accounts'
-import { getPopulatedTags } from 'models/tags'
 import { compareDates, getTime, isDeleted } from './helpers'
-import { populate, PopulatedTransaction } from './populate'
 import { RootState } from 'models'
 import { TRawTransaction, TTransactionId } from 'shared/types'
 import { withPerf } from 'shared/helpers/performance'
@@ -13,18 +9,6 @@ export const getTransactions = (state: RootState) =>
   state.data.current.transaction
 export const getTransaction = (state: RootState, id: TTransactionId) =>
   getTransactions(state)[id]
-
-// Only for CSV
-export const getPopulatedTransactions = createSelector(
-  [getInstruments, getAccounts, getPopulatedTags, getTransactions],
-  (instruments, accounts, tags, transactions) => {
-    const result: { [id: string]: PopulatedTransaction } = {}
-    for (const id in transactions) {
-      result[id] = populate({ instruments, accounts, tags }, transactions[id])
-    }
-    return result
-  }
-)
 
 export const getSortedTransactions = createSelector(
   [getTransactions],

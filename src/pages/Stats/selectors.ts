@@ -3,10 +3,12 @@ import { round } from 'shared/helpers/currencyHelpers'
 import { getAccounts, getStartBalance } from 'models/accounts'
 import { getTransactionsHistory } from 'models/transactions'
 import { eachDayOfInterval, startOfDay } from 'date-fns'
-import { ById } from 'shared/types'
+import { ById, TAccountId, TISODate } from 'shared/types'
+import { keys } from 'shared/helpers/keys'
+import { toISODate } from 'shared/helpers/adapterUtils'
 
 type Point = {
-  date: number
+  date: TISODate
   balance: number
   transactions: number[]
 }
@@ -18,14 +20,13 @@ export const getAccountsHistory = createSelector(
     const firstDate = transactions[0]
       ? new Date(transactions[0].date)
       : startOfDay(new Date())
-    const currentDate = startOfDay(new Date())
-    const dateArray = eachDayOfInterval({ start: firstDate, end: currentDate })
 
-    const changes: ById<Point[]> = {}
-    Object.keys(accounts).forEach(id => {
+    // Make array of balance changes by day (from transactions)
+    const changes: Record<TAccountId, Point[]> = {}
+    keys(accounts).forEach(id => {
       changes[id] = [
         {
-          date: +firstDate,
+          date: toISODate(firstDate),
           balance: getStartBalance(accounts[id]),
           transactions: [],
         },
@@ -38,11 +39,18 @@ export const getAccountsHistory = createSelector(
       if (outcomeAccount) addAmount(-outcome, outcomeAccount, date)
     })
 
-    let result: ById<Point[]> = {}
+    // Make date points for each day from the first transaction till now
+    const dateArray = eachDayOfInterval({
+      start: firstDate,
+      end: startOfDay(new Date()),
+    }).map(toISODate)
+
+    // Fill the missing dates so all accounts have eual number of points
+    let result: Record<TAccountId, Point[]> = {}
     for (const id in changes) {
       let lastValue = 0
       const dateMap: ById<{
-        date: number
+        date: TISODate
         balance: number
         transactions: number[]
       }> = {}
@@ -51,13 +59,13 @@ export const getAccountsHistory = createSelector(
       })
 
       result[id] = dateArray.map(date => {
-        const change = dateMap[+date]
+        const change = dateMap[date]
         if (change) {
           lastValue = change.balance
           return change
         }
         return {
-          date: +date,
+          date,
           balance: lastValue,
           transactions: [],
         }
@@ -66,19 +74,21 @@ export const getAccountsHistory = createSelector(
 
     return result
 
-    function addAmount(amount: number, acc: string, date: number) {
+    function addAmount(amount: number, acc: string, date: TISODate) {
       const accChanges = changes[acc]
       const lastPoint = accChanges[accChanges.length - 1]
+
       if (lastPoint.date === date) {
         lastPoint.balance = round(lastPoint.balance + amount)
         lastPoint.transactions.push(amount)
-      } else {
-        accChanges.push({
-          date,
-          balance: round(lastPoint.balance + amount),
-          transactions: [amount],
-        })
+        return
       }
+
+      accChanges.push({
+        date,
+        balance: round(lastPoint.balance + amount),
+        transactions: [amount],
+      })
     }
   }
 )

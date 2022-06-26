@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, FC } from 'react'
-import startOfMonth from 'date-fns/startOfMonth'
+
 import add from 'date-fns/add'
 import sub from 'date-fns/sub'
 import {
@@ -14,25 +14,29 @@ import { ChevronRightIcon, ChevronLeftIcon } from 'shared/ui/Icons'
 import { styled } from '@mui/styles'
 import MonthSelectPopover from './MonthSelectPopover'
 import { formatDate } from 'shared/helpers/format'
-import { Modify } from 'shared/types'
+import { Modify, TDateDraft, TISOMonth } from 'shared/types'
+import { toISOMonth } from 'shared/helpers/adapterUtils'
 
 type MonthSelectProps = Modify<
   PaperProps,
   {
-    onChange: (month: number) => void
-    minMonth: number
-    maxMonth: number
-    value: number
+    onChange: (month: TISOMonth) => void
+    minMonth: TDateDraft
+    maxMonth: TDateDraft
+    value: TDateDraft
   }
 >
 
 export const MonthSelect: FC<MonthSelectProps> = props => {
   const { onChange, minMonth, maxMonth, value, ...rest } = props
+  const currDate = new Date(value)
+  const minDate = new Date(minMonth)
+  const maxDate = new Date(maxMonth)
   const paperRef = useRef(null)
-  const year = new Date(value).getFullYear()
+  const year = currDate.getFullYear()
   const [anchorEl, setAnchorEl] = useState(null)
-  const prevMonth = value > minMonth ? +sub(value, { months: 1 }) : null
-  const nextMonth = value < maxMonth ? +add(value, { months: 1 }) : null
+  const prevMonth = currDate > minDate ? sub(currDate, { months: 1 }) : null
+  const nextMonth = currDate < maxDate ? add(currDate, { months: 1 }) : null
 
   const openPopover = useCallback(
     () => setAnchorEl(paperRef.current),
@@ -40,9 +44,9 @@ export const MonthSelect: FC<MonthSelectProps> = props => {
   )
   const closePopover = useCallback(() => setAnchorEl(null), [setAnchorEl])
   const handleChange = useCallback(
-    (date: number | Date) => {
+    (date: TISOMonth) => {
       closePopover()
-      onChange(+startOfMonth(date))
+      onChange(date)
     },
     [closePopover, onChange]
   )
@@ -54,14 +58,14 @@ export const MonthSelect: FC<MonthSelectProps> = props => {
           <Box alignSelf="center" flexShrink={0}>
             <IconButton
               children={<ChevronLeftIcon />}
-              onClick={() => prevMonth && onChange(prevMonth)}
+              onClick={() => prevMonth && onChange(toISOMonth(prevMonth))}
               disabled={!prevMonth}
             />
           </Box>
 
           <MonthButton onClick={openPopover}>
             <Typography variant="h5" noWrap>
-              {getMonthName(value)}
+              {getMonthName(currDate)}
             </Typography>
             <Typography variant="body2" color="textSecondary" noWrap>
               {year}
@@ -71,7 +75,7 @@ export const MonthSelect: FC<MonthSelectProps> = props => {
           <Box alignSelf="center" flexShrink={0}>
             <IconButton
               children={<ChevronRightIcon />}
-              onClick={() => nextMonth && onChange(nextMonth)}
+              onClick={() => nextMonth && onChange(toISOMonth(nextMonth))}
               disabled={!nextMonth}
             />
           </Box>

@@ -1,5 +1,5 @@
 import parseDate from 'date-fns/parseISO'
-import format from 'date-fns/format'
+import { getBudgetId } from 'models/budgets'
 import {
   TInstrument,
   TRawUser,
@@ -24,7 +24,6 @@ import {
 const toMs = (date: string | number) =>
   typeof date === 'string' ? +parseDate(date) : date * 1000
 const toUnix = (date: number) => date / 1000
-const toISODate = (date: number) => format(date, 'yyyy-MM-dd')
 
 export const dataConverters = {
   serverTimestamp: {
@@ -72,13 +71,10 @@ export const dataConverters = {
     toClient: (el: TZmAccount): TRawAccount => ({
       ...el,
       changed: toMs(el.changed),
-      startDate:
-        typeof el.startDate === 'string' ? toMs(el.startDate) : el.startDate,
     }),
     toServer: (el: TRawAccount): TZmAccount => ({
       ...el,
       changed: toUnix(el.changed),
-      startDate: el.startDate !== null ? toISODate(el.startDate) : null,
     }),
   },
 
@@ -104,23 +100,29 @@ export const dataConverters = {
     toClient: (el: TZmReminder): TRawReminder => ({
       ...el,
       changed: toMs(el.changed),
-      startDate: toMs(el.startDate),
-      endDate: toMs(el.endDate),
+      // startDate: toMs(el.startDate),
+      // endDate: toMs(el.endDate),
     }),
     toServer: (el: TRawReminder): TZmReminder => ({
       ...el,
       changed: toUnix(el.changed),
-      startDate: toISODate(el.startDate),
-      endDate: toISODate(el.endDate),
+      // startDate: toISODate(el.startDate),
+      // endDate: toISODate(el.endDate),
     }),
   },
 
   reminderMarker: {
     toClient: (el: TZmReminderMarker): TRawReminderMarker => {
-      return { ...el, changed: toMs(el.changed), date: toMs(el.date) }
+      return {
+        ...el,
+        changed: toMs(el.changed),
+      }
     },
     toServer: (el: TRawReminderMarker): TZmReminderMarker => {
-      return { ...el, changed: toUnix(el.changed), date: toISODate(el.date) }
+      return {
+        ...el,
+        changed: toUnix(el.changed),
+      }
     },
   },
 
@@ -129,13 +131,11 @@ export const dataConverters = {
       ...el,
       changed: toMs(el.changed),
       created: toMs(el.created),
-      date: toMs(el.date),
     }),
     toServer: (el: TRawTransaction): TZmTransaction => ({
       ...el,
       changed: toUnix(el.changed),
       created: toUnix(el.created),
-      date: toISODate(el.date),
     }),
   },
 
@@ -144,15 +144,13 @@ export const dataConverters = {
       return {
         ...el,
         changed: toMs(el.changed),
-        date: toMs(el.date),
-        id: `${el.date}#${el.tag}`,
+        id: getBudgetId(el.date, el.tag),
       }
     },
     toServer: (el: TBudget): TZmBudget => {
       let converted = {
         ...el,
         changed: toUnix(el.changed),
-        date: toISODate(el.date),
         id: undefined,
       }
       delete converted.id

@@ -14,10 +14,12 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 import { Box, ListSubheader } from '@mui/material'
 import Transaction from './Transaction'
 import { formatDate } from 'shared/helpers/format'
+import { TDateDraft, TISODate, TTransactionId } from 'shared/types'
+import { toISODate } from 'shared/helpers/adapterUtils'
 
 type GroupNode = {
-  date: number
-  transactions: string[]
+  date: TISODate
+  transactions: TTransactionId[]
 }
 
 const HEADER_HEIGHT = 48
@@ -38,7 +40,7 @@ type GrouppedListProps = {
   onFilterByPayee: (payee: string) => void
 }
 type DayData = GrouppedListProps & {
-  onDateClick: (date: Date | number | null) => void
+  onDateClick: (date: TDateDraft | null) => void
 }
 
 export const GrouppedList: FC<GrouppedListProps> = ({
@@ -49,15 +51,18 @@ export const GrouppedList: FC<GrouppedListProps> = ({
   onFilterByPayee,
 }) => {
   const listRef = useRef<List>(null)
-  const [clickedDate, setClickedDate] = useState<Date | number | null>(null)
+  const [clickedDate, setClickedDate] = useState<TISODate | null>(null)
 
   useEffect(() => {
     listRef?.current?.resetAfterIndex?.(0)
   }, [listRef, groups])
 
   const scrollToDate = useCallback(
-    (date: number) =>
-      listRef?.current?.scrollToItem(findDateIndex(groups, date), 'start'),
+    (date: TDateDraft) =>
+      listRef?.current?.scrollToItem(
+        findDateIndex(groups, toISODate(date)),
+        'start'
+      ),
     [groups]
   )
 
@@ -75,7 +80,9 @@ export const GrouppedList: FC<GrouppedListProps> = ({
     toggleTransaction,
     checkByChangedDate,
     onFilterByPayee,
-    onDateClick: (date: Date | number | null) => setClickedDate(date),
+    onDateClick: (date: TDateDraft | null) => {
+      setClickedDate(date ? toISODate(date) : null)
+    },
   }
 
   return (
@@ -176,7 +183,7 @@ const Day: FC<ListChildComponentProps<DayData>> = ({
 }
 
 const DaySkeleton: FC<{
-  date: number | Date
+  date: TDateDraft
   length: number
   style: CSSProperties
 }> = ({ date, style, length }) => (

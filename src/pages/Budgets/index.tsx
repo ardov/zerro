@@ -34,6 +34,7 @@ import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
 import { getAggregatedTransactions } from 'models/envelopes/selector'
 import { getDebtors } from 'models/debtors/collectDebtors'
+import { toISOMonth } from 'shared/helpers/adapterUtils'
 
 export default function BudgetsRouter() {
   const t1 = useAppSelector(getAggregatedTransactions)
@@ -43,13 +44,9 @@ export default function BudgetsRouter() {
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
   if (!month)
-    return (
-      <Redirect to={`/budget/?month=${formatDate(new Date(), 'yyyy-MM')}`} />
-    )
-  if (month < minMonth)
-    return <Redirect to={`/budget/?month=${formatDate(minMonth, 'yyyy-MM')}`} />
-  if (month > maxMonth)
-    return <Redirect to={`/budget/?month=${formatDate(maxMonth, 'yyyy-MM')}`} />
+    return <Redirect to={`/budget/?month=${toISOMonth(new Date())}`} />
+  if (month < minMonth) return <Redirect to={`/budget/?month=${minMonth}`} />
+  if (month > maxMonth) return <Redirect to={`/budget/?month=${maxMonth}`} />
   return <Budgets />
 }
 
@@ -98,6 +95,7 @@ function Budgets() {
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
   const [month, setMonth] = useMonth()
+  const monthDate = new Date(month)
   const [drawerId, setDrawerId] = useSearchParam('drawer')
   const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))
   // const isSM = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
@@ -108,7 +106,7 @@ function Budgets() {
   useHotkeys(
     'left',
     () => {
-      const prevMonth = +sub(month, { months: 1 })
+      const prevMonth = toISOMonth(sub(monthDate, { months: 1 }))
       if (minMonth <= prevMonth) setMonth(prevMonth)
     },
     [month, minMonth]
@@ -116,7 +114,7 @@ function Budgets() {
   useHotkeys(
     'right',
     () => {
-      const nextMonth = +add(month, { months: 1 })
+      const nextMonth = toISOMonth(add(monthDate, { months: 1 }))
       if (nextMonth <= maxMonth) setMonth(nextMonth)
     },
     [month, maxMonth]
@@ -132,7 +130,7 @@ function Budgets() {
   return (
     <>
       <Helmet>
-        <title>Бюджет на {formatDate(month, 'LLLL yyyy')} | Zerro</title>
+        <title>Бюджет на {formatDate(monthDate, 'LLLL yyyy')} | Zerro</title>
         <meta name="description" content="" />
         <link rel="canonical" href="https://zerro.app/budget" />
       </Helmet>

@@ -242,6 +242,7 @@ function applyServerDiff(state: TDataStore, diff: TDiff): TDataStore {
     diff.deletion.forEach(el => {
       // @ts-ignore
       copy[el.object] = { ...copy[el.object] }
+      // @ts-ignore
       delete copy[el.object][el.id]
     })
   }

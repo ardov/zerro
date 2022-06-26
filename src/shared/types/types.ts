@@ -3,10 +3,17 @@ import { RootState } from 'models'
 import { goalType } from 'models/hiddenData/constants'
 import iconsMap from 'models/tags/iconsMap.json'
 
+type TYear = `${number}${number}${number}${number}`
+type TMonth = `${number}${number}`
+type TDate = `${number}${number}`
+export type TISOMonth = `${TYear}-${TMonth}` // 2000-01
+export type TISODate = `${TYear}-${TMonth}-${TDate}` // 2000-01-01
+
 export type TUnixTime = number
 export type TMsTime = number
-export type TISODate = string // 2000-01-01
 export type TISOTimestamp = string // 2000-01-01T00:00:00.000Z
+
+export type TDateDraft = number | TISOMonth | TISODate | Date
 
 export type TUnits = number
 export type TMilliUnits = number
@@ -116,6 +123,16 @@ export type TUser = TRawUser & { fxCode: TFxCode }
 
 export type TAccountId = string
 
+export enum accountType {
+  cash = 'cash',
+  ccard = 'ccard',
+  checking = 'checking',
+  loan = 'loan',
+  deposit = 'deposit',
+  emoney = 'emoney',
+  debt = 'debt',
+}
+
 export type TZmAccount = {
   id: TAccountId
   changed: TUnixTime
@@ -124,7 +141,7 @@ export type TZmAccount = {
   title: string
   role: number | null
   company: TCompanyId | null
-  type: 'cash' | 'ccard' | 'checking' | 'loan' | 'deposit' | 'emoney' | 'debt'
+  type: accountType
   syncID: string[] | null
   balance: TUnits
   // Для deposit и loan поле startBalance имеет смысл начального взноса/тела кредита
@@ -150,7 +167,6 @@ export type TRawAccount = Modify<
   TZmAccount,
   {
     changed: TMsTime
-    startDate: TMsTime | null
     balance: TMilliUnits
     startBalance: TMilliUnits
     creditLimit: TMilliUnits
@@ -226,6 +242,8 @@ export type TTag = TRawTag & {
 // BUDGET
 // ---------------------------------------------------------------------
 
+export type TBudgetId = `${TISODate}#${TTagId}`
+
 export type TZmBudget = {
   changed: TUnixTime
   user: TUserId
@@ -241,12 +259,11 @@ export type TBudget = Modify<
   TZmBudget,
   {
     changed: TMsTime
-    date: TMsTime
     income: TMilliUnits
     outcome: TMilliUnits
   }
 > & {
-  id: `${TZmBudget['date']}#${TZmBudget['tag']}`
+  id: TBudgetId
 }
 
 export type PopulatedBudget = TBudget & {
@@ -286,8 +303,6 @@ export type TRawReminder = Modify<
   TZmReminder,
   {
     changed: TMsTime
-    startDate: TMsTime
-    endDate: TMsTime
   }
 >
 
@@ -325,7 +340,6 @@ export type TRawReminderMarker = Modify<
   TZmReminderMarker,
   {
     changed: TMsTime
-    date: TMsTime
     income: TMilliUnits
     outcome: TMilliUnits
   }
@@ -388,7 +402,6 @@ export type TRawTransaction = Modify<
   {
     changed: TMsTime
     created: TMsTime
-    date: TMsTime
     income: TMilliUnits
     outcome: TMilliUnits
     opIncome: TMilliUnits | null
@@ -474,27 +487,27 @@ export type TTagMeta = {
 export type TGoal = {
   type: goalType
   amount: number
-  end?: number
+  end?: TISODate
 }
-
-export type TZmGoal = Modify<TGoal, { end?: string }>
 
 export type TLocalData = Omit<TZmDiff, 'deletion'>
 
+// prettier-ignore
 export type TDataStore = {
-  serverTimestamp: number
-  instrument: ById<TInstrument>
-  country: ById<TRawCountry>
-  company: ById<TCompany>
-  user: ById<TRawUser>
-  account: ById<TRawAccount>
-  merchant: ById<TMerchant>
-  tag: ById<TRawTag>
-  budget: ById<TBudget>
-  reminder: ById<TRawReminder>
-  reminderMarker: ById<TRawReminderMarker>
-  transaction: ById<TRawTransaction>
+  serverTimestamp:  number
+  instrument:       ById<                       TInstrument>
+  country:          ById<                       TRawCountry>
+  company:          ById<                       TCompany>
+  user:             ById<                       TRawUser>
+  account:          Record< TAccountId,         TRawAccount>
+  merchant:         Record< TMerchantId,        TMerchant>
+  tag:              Record< TTagId,             TRawTag>
+  budget:           Record< TBudgetId,          TBudget>
+  reminder:         Record< TReminderId,        TRawReminder>
+  reminderMarker:   Record< TReminderMarkerId,  TRawReminderMarker>
+  transaction:      Record< TTransactionId,     TRawTransaction>
 }
+
 export type TDataStorePatch = Partial<TDataStore> & {
   deletion?: TZmDeletionObject[]
 }

@@ -1,54 +1,65 @@
-import { OptionalExceptFor, TRawTransaction } from 'shared/types'
+import { toISODate } from 'shared/helpers/adapterUtils'
+import {
+  Modify,
+  OptionalExceptFor,
+  TDateDraft,
+  TRawTransaction,
+} from 'shared/types'
 import { v1 as uuidv1 } from 'uuid'
 
-export type TransactionDraft = OptionalExceptFor<
-  TRawTransaction,
-  | 'user'
-  | 'date'
-  | 'incomeInstrument'
-  | 'incomeAccount'
-  | 'outcomeInstrument'
-  | 'outcomeAccount'
+type TransactionDraft = Modify<
+  OptionalExceptFor<
+    TRawTransaction,
+    | 'user'
+    | 'date'
+    | 'incomeInstrument'
+    | 'incomeAccount'
+    | 'outcomeInstrument'
+    | 'outcomeAccount'
+  >,
+  {
+    date: TDateDraft
+    changed?: TDateDraft
+    created?: TDateDraft
+  }
 >
 
-export default function makeTransaction(
-  raw: TransactionDraft
-): TRawTransaction {
+export function makeTransaction(draft: TransactionDraft): TRawTransaction {
   return {
-    id: raw.id || uuidv1(),
-    changed: raw.changed || Date.now(),
-    created: raw.created || Date.now(),
-    user: raw.user,
-    deleted: raw.deleted || false,
-    hold: raw.hold || false,
-    viewed: raw.viewed || false,
+    id: draft.id || uuidv1(),
+    changed: +new Date(draft.changed || Date.now()),
+    created: +new Date(draft.created || Date.now()),
+    user: draft.user,
+    deleted: draft.deleted || false,
+    hold: draft.hold || false,
+    viewed: draft.viewed || false,
 
-    qrCode: raw.qrCode || null,
+    qrCode: draft.qrCode || null,
 
-    income: raw.income || 0,
-    incomeInstrument: raw.incomeInstrument,
-    incomeAccount: raw.incomeAccount,
-    incomeBankID: raw.incomeBankID || null,
+    income: draft.income || 0,
+    incomeInstrument: draft.incomeInstrument,
+    incomeAccount: draft.incomeAccount,
+    incomeBankID: draft.incomeBankID || null,
 
-    outcome: raw.outcome || 0,
-    outcomeInstrument: raw.outcomeInstrument,
-    outcomeAccount: raw.outcomeAccount,
-    outcomeBankID: raw.outcomeBankID || null,
+    outcome: draft.outcome || 0,
+    outcomeInstrument: draft.outcomeInstrument,
+    outcomeAccount: draft.outcomeAccount,
+    outcomeBankID: draft.outcomeBankID || null,
 
-    opIncome: raw.opIncome || 0,
-    opIncomeInstrument: raw.opIncomeInstrument || null,
-    opOutcome: raw.opOutcome || 0,
-    opOutcomeInstrument: raw.opOutcomeInstrument || null,
+    opIncome: draft.opIncome || 0,
+    opIncomeInstrument: draft.opIncomeInstrument || null,
+    opOutcome: draft.opOutcome || 0,
+    opOutcomeInstrument: draft.opOutcomeInstrument || null,
 
-    tag: raw.tag || null,
-    date: raw.date,
-    mcc: raw.mcc || null,
-    comment: raw.comment || null,
-    payee: raw.payee || null,
-    originalPayee: raw.originalPayee || null,
-    merchant: raw.merchant || null,
-    latitude: raw.latitude || null,
-    longitude: raw.longitude || null,
-    reminderMarker: raw.reminderMarker || null,
+    tag: draft.tag || null,
+    date: toISODate(draft.date),
+    mcc: draft.mcc || null,
+    comment: draft.comment || null,
+    payee: draft.payee || null,
+    originalPayee: draft.originalPayee || null,
+    merchant: draft.merchant || null,
+    latitude: draft.latitude || null,
+    longitude: draft.longitude || null,
+    reminderMarker: draft.reminderMarker || null,
   }
 }

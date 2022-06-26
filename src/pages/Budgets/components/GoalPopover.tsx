@@ -16,6 +16,8 @@ import { goalType } from 'models/hiddenData/constants'
 import { CloseIcon } from 'shared/ui/Icons'
 import MonthSelectPopover from 'pages/Budgets/MonthSelectPopover'
 import { formatDate } from 'shared/helpers/format'
+import { TDateDraft, TGoal } from 'shared/types'
+import { toISODate } from 'shared/helpers/adapterUtils'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 
@@ -32,7 +34,7 @@ export const GoalPopover: FC<PopoverProps & { id: string }> = props => {
 
   const [amount, setAmount] = useState(goal.amount || 0)
   const [type, setType] = useState(goal.type || MONTHLY_SPEND)
-  const [endDate, setEndDate] = useState(goal.end)
+  const [endDate, setEndDate] = useState<TGoal['end']>(goal.end)
 
   const [monthPopoverAnchor, setMonthPopoverAnchor] =
     useState<typeof props['anchorEl']>(null)
@@ -41,9 +43,9 @@ export const GoalPopover: FC<PopoverProps & { id: string }> = props => {
     setType(e.target.value as goalType)
   const openMonthPopover = () => setMonthPopoverAnchor(props.anchorEl)
   const closeMonthPopover = () => setMonthPopoverAnchor(null)
-  const handleDateChange = (date?: number) => {
+  const handleDateChange = (date?: TDateDraft) => {
     closeMonthPopover()
-    setEndDate(date)
+    setEndDate(date ? toISODate(date) : undefined)
   }
   const removeDate = () => handleDateChange(undefined)
   const save = () => {

@@ -31,6 +31,7 @@ import add from 'date-fns/add'
 import sub from 'date-fns/sub'
 import { DragModeContext } from '../DnDContext'
 import { getMonthDates, getTotalGoalsProgress } from 'pages/Budgets/selectors'
+import { toISOMonth } from 'shared/helpers/adapterUtils'
 
 const useStyles = makeStyles(theme => ({
   row: {
@@ -87,8 +88,10 @@ const MonthInfo: FC<MonthInfoProps> = ({ onOpenMonthDrawer }) => {
   const monthList = useAppSelector(getMonthDates)
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
-  const prevMonth = month > minMonth ? +sub(month, { months: 1 }) : null
-  const nextMonth = month < maxMonth ? +add(month, { months: 1 }) : null
+  const prevMonth =
+    month > minMonth ? toISOMonth(sub(new Date(month), { months: 1 })) : null
+  const nextMonth =
+    month < maxMonth ? toISOMonth(add(new Date(month), { months: 1 })) : null
   return (
     <Box className={c.head}>
       <Box className={c.month}>

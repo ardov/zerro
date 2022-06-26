@@ -26,11 +26,13 @@ import { sendEvent } from 'shared/helpers/tracking'
 import pluralize from 'shared/helpers/pluralize'
 import { getMetaForTag } from 'models/hiddenData/tagMeta'
 import { Box, BoxProps } from '@mui/system'
+import { TDateDraft, TISOMonth } from 'shared/types'
+import { toISOMonth } from 'shared/helpers/adapterUtils'
 
 export const BudgetPopover: FC<
   PopoverProps & {
     id: string
-    month: number
+    month: TISOMonth
   }
 > = props => {
   const { id, month, onClose, ...rest } = props
@@ -55,7 +57,7 @@ export const BudgetPopover: FC<
     tag: (v: number) => formatMoney(v, tagInstrument?.shortTitle),
   }
 
-  const prevMonth = getPrevMonthMs(month)
+  const prevMonth = getPrevMonth(month)
   const goal = useAppSelector(getGoals)?.[id]
   const goalProgress = useAppSelector(getGoalsProgress)?.[month]?.[id]
 
@@ -73,7 +75,7 @@ export const BudgetPopover: FC<
     setValue(totalBudgeted)
   }, [totalBudgeted])
 
-  let prevOutcomes: number[] = getPrev12MonthsMs(month)
+  let prevOutcomes: number[] = getPrev12MonthsISO(month)
     .map(month => amountsById?.[month]?.[id]?.totalOutcome)
     .filter(outcome => outcome !== undefined)
 
@@ -233,21 +235,21 @@ function getQuickActions({
   ].filter(action => action.condition)
 }
 
-function getPrev12MonthsMs(date: string | number | Date) {
-  let prevMonths = []
-  let monthToAdd = date // current month won't be added; only use it to get previous month
+function getPrev12MonthsISO(date: TDateDraft): TISOMonth[] {
+  let prevMonths: TISOMonth[] = []
+  let monthToAdd = toISOMonth(date) // current month won't be added; only use it to get previous month
   for (let i = 0; i < 12; i++) {
-    monthToAdd = getPrevMonthMs(monthToAdd)
+    monthToAdd = getPrevMonth(monthToAdd)
     prevMonths.push(monthToAdd)
   }
   return prevMonths
 }
 
-function getPrevMonthMs(date: string | number | Date) {
+function getPrevMonth(date: TDateDraft): TISOMonth {
   const current = new Date(date)
   const yyyy = current.getFullYear()
   const mm = current.getMonth() - 1
-  return +new Date(yyyy, mm)
+  return toISOMonth(new Date(yyyy, mm))
 }
 
 function getAverage(outcomes: number[]) {

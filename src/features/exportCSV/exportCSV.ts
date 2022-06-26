@@ -1,8 +1,30 @@
-import { getPopulatedTransactions } from 'models/transactions'
+import { createSelector } from '@reduxjs/toolkit'
+import {
+  PopulatedTransaction,
+  populateTransaction,
+} from './populateTransaction'
 import { formatDate } from 'shared/helpers/format'
-import { AppThunk } from 'models'
-import { PopulatedTransaction } from 'models/transactions/populate'
 import { ById } from 'shared/types'
+import { AppThunk } from 'models'
+import { getTransactions } from 'models/transactions'
+import { getInstruments } from 'models/instruments'
+import { getAccounts } from 'models/accounts'
+import { getPopulatedTags } from 'models/tags'
+
+// Only for CSV
+const getPopulatedTransactions = createSelector(
+  [getInstruments, getAccounts, getPopulatedTags, getTransactions],
+  (instruments, accounts, tags, transactions) => {
+    const result: { [id: string]: PopulatedTransaction } = {}
+    for (const id in transactions) {
+      result[id] = populateTransaction(
+        { instruments, accounts, tags },
+        transactions[id]
+      )
+    }
+    return result
+  }
+)
 
 export const exportCSV: AppThunk = (_, getState) => {
   const tr = getPopulatedTransactions(getState())
@@ -76,7 +98,7 @@ const types = {
 }
 
 const transactionToRowObj = (t: PopulatedTransaction): RowObj => ({
-  Дата: formatDate(t.date, 'yyyy-MM-dd'),
+  Дата: t.date,
   Создана: formatDate(t.created, 'yyyy-MM-dd HH:mm'),
   Тип: types[t.type],
   Категория: t.tag ? t.tag[0].title.replace(',', '') : '',

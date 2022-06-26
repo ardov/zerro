@@ -25,8 +25,8 @@ export function makeDataReminder(
     incomeAccount: account,
     outcomeAccount: account,
     income: 1,
-    startDate: +new Date(2020, 0, 1),
-    endDate: +new Date(2020, 0, 1),
+    startDate: '2020-01-01',
+    endDate: '2020-01-01',
     payee: type,
     comment: JSON.stringify(data),
   })

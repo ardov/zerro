@@ -1,5 +1,7 @@
 import {
+  TDateDraft,
   TISODate,
+  TISOMonth,
   TISOTimestamp,
   TMilliUnits,
   TMsTime,
@@ -20,8 +22,11 @@ export function zmDateToMs(date: TUnixTime | TISODate): TMsTime {
 export function msToUnix(date: TMsTime): TUnixTime {
   return date / 1000
 }
-export function msToISODate(date: TMsTime): TISODate {
-  return new Date(date).toISOString().slice(0, 10)
+export function toISODate(date: TDateDraft): TISODate {
+  return new Date(date).toISOString().slice(0, 10) as TISODate
+}
+export function toISOMonth(date: TDateDraft): TISOMonth {
+  return new Date(date).toISOString().slice(0, 7) as TISOMonth
 }
 export function unixToISO(unix: TUnixTime): TISOTimestamp {
   return new Date(unix * 1000).toISOString()

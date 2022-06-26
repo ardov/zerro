@@ -1,6 +1,13 @@
-import { TAccountId, TTagId, TRawTransaction, TrType } from 'shared/types'
+import {
+  TAccountId,
+  TTagId,
+  TRawTransaction,
+  TrType,
+  TDateDraft,
+} from 'shared/types'
 import { keys } from 'shared/helpers/keys'
 import { getType, isDeleted, isNew } from './helpers'
+import { toISODate } from 'shared/helpers/adapterUtils'
 
 type OperatorType = 'AND' | 'OR'
 
@@ -28,8 +35,8 @@ type CustomConditions = {
   type?: null | TrType
   showDeleted?: boolean
   isNew?: boolean
-  dateFrom?: null | number | Date
-  dateTo?: null | number | Date
+  dateFrom?: null | TDateDraft
+  dateTo?: null | TDateDraft
   tags?: null | TTagId[]
   mainTags?: null | TTagId[]
   accountsFrom?: null | TAccountId[]
@@ -166,7 +173,11 @@ const checkDate = (
   tr: TRawTransaction,
   dateFrom?: FilterConditions['dateFrom'],
   dateTo?: FilterConditions['dateTo']
-) => (!dateFrom || +tr.date >= +dateFrom) && (!dateTo || +tr.date <= +dateTo)
+) => {
+  if (dateFrom && tr.date < toISODate(dateFrom)) return false
+  if (dateTo && tr.date > toISODate(dateTo)) return false
+  return true
+}
 
 const checkAccounts = (
   tr: TRawTransaction,

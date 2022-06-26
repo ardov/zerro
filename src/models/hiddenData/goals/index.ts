@@ -1,12 +1,12 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { sendEvent } from 'shared/helpers/tracking'
 import { DataReminderType } from '../constants'
-import { makeGoal, parseGoal } from './helpers'
-import { getTags } from '../../tags'
+import { makeGoal } from './helpers'
 import { getRawGoals } from '../selectors'
 import { setHiddenData } from '../thunks'
 import { AppThunk, RootState } from 'models'
 import { ById, TGoal, TTagId } from 'shared/types'
+import { getTags } from 'models/tags'
 
 // THUNKS
 export const setGoal =
@@ -57,7 +57,7 @@ export const getGoals = createSelector(
   (rawGoals, tags) => {
     let goals: ById<TGoal> = {}
     for (const tag in rawGoals) {
-      if (rawGoals[tag] && tags[tag]) goals[tag] = parseGoal(rawGoals[tag])
+      if (rawGoals[tag] && tags[tag]) goals[tag] = rawGoals[tag]
     }
     return goals
   }

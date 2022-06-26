@@ -4,7 +4,7 @@ import { DataReminderType } from './constants'
 import { getAccountList } from 'models/accounts'
 import { DATA_ACC_NAME } from './constants'
 import { RootState } from 'models'
-import { TRawReminder, TTagId, TTagMeta, TZmGoal } from 'shared/types'
+import { TGoal, TRawReminder, TTagId, TTagMeta } from 'shared/types'
 
 const { ACC_LINKS, TAG_ORDER, GOALS, TAG_META } = DataReminderType
 
@@ -34,7 +34,7 @@ export const getDataReminders = createSelector([getReminders], reminders => {
 
 export type AccLinks = { [accId: string]: TTagId }
 export type TagMetaById = { [tagId: TTagId]: TTagMeta }
-export type RawGoals = { [tagId: string]: TZmGoal }
+export type RawGoals = { [tagId: string]: TGoal }
 
 export const getHiddenData = createSelector([getDataReminders], reminders => ({
   [ACC_LINKS]: parseComment<AccLinks>(reminders[ACC_LINKS]),

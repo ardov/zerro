@@ -28,7 +28,7 @@ export const BudgetTransactionsDrawer: FC = () => {
   prefilter.push({
     type: TrType.outcome,
     dateFrom: month,
-    dateTo: endOfMonth(month),
+    dateTo: endOfMonth(new Date(month)),
     accountsFrom: accountsInBudget,
     mainTags: tagIds,
   })
@@ -37,14 +37,14 @@ export const BudgetTransactionsDrawer: FC = () => {
       prefilter.push({
         type: TrType.transfer,
         dateFrom: month,
-        dateTo: endOfMonth(month),
+        dateTo: endOfMonth(new Date(month)),
         accountsFrom: accountsInBudget,
         accountsTo: tagAccMap[id],
       })
       prefilter.push({
         type: TrType.transfer,
         dateFrom: month,
-        dateTo: endOfMonth(month),
+        dateTo: endOfMonth(new Date(month)),
         accountsFrom: tagAccMap[id],
         accountsTo: accountsInBudget,
       })

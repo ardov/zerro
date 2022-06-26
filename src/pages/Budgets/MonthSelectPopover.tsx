@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import startOfMonth from 'date-fns/startOfMonth'
 import { withStyles } from '@mui/styles'
 import {
   Box,
@@ -13,6 +12,8 @@ import {
 } from '@mui/material'
 import { ChevronRightIcon, ChevronLeftIcon } from 'shared/ui/Icons'
 import { formatDate } from 'shared/helpers/format'
+import { TDateDraft, TISOMonth } from 'shared/types'
+import { toISOMonth } from 'shared/helpers/adapterUtils'
 
 interface MonthItemItemProps extends ListItemButtonProps {
   isCurrent: boolean
@@ -31,24 +32,24 @@ const MonthItem = withStyles(theme => ({
 ))
 
 interface MonthSelectPopoverProps extends Omit<PopoverProps, 'onChange'> {
-  onChange: (month: number) => void
-  value?: number
-  minMonth?: number
-  maxMonth?: number
+  onChange: (month: TISOMonth) => void
+  value?: TDateDraft
+  minMonth?: TDateDraft
+  maxMonth?: TDateDraft
   disablePast?: boolean
 }
 export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
-  const { minMonth, maxMonth, onChange, disablePast, ...rest } = props
-  const value = props.value ? +startOfMonth(props.value) : null
-  const [year, setYear] = useState(
-    value ? new Date(value).getFullYear() : new Date().getFullYear()
-  )
-  const months = []
+  const { onChange, disablePast, ...rest } = props
+  const value = props.value ? toISOMonth(props.value) : null
+  const minMonth = props.minMonth ? toISOMonth(props.minMonth) : null
+  const maxMonth = props.maxMonth ? toISOMonth(props.maxMonth) : null
+  const [year, setYear] = useState(new Date(value || Date.now()).getFullYear())
+  const months: TISOMonth[] = []
   for (let month = 0; month < 12; month++) {
-    months.push(+new Date(year, month))
+    months.push(toISOMonth(new Date(year, month)))
   }
-  const curMonth = +startOfMonth(new Date())
-  const isMonthDisabled = (month: number) => {
+  const curMonth = toISOMonth(new Date())
+  const isMonthDisabled = (month: TISOMonth) => {
     if (disablePast && month < curMonth) return true
     if (minMonth && month < minMonth) return true
     if (maxMonth && month > maxMonth) return true
@@ -76,14 +77,14 @@ export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
         <List sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr' }}>
           {months.map(month => (
             <MonthItem
-              key={+month}
+              key={month}
               isCurrent={month === curMonth}
               disabled={isMonthDisabled(month)}
               selected={month === value}
               onClick={() => onChange(month)}
             >
               <ListItemText sx={{ textAlign: 'center' }}>
-                {formatDate(month, 'LLL').toUpperCase()}
+                {formatDate(new Date(month), 'LLL').toUpperCase()}
               </ListItemText>
             </MonthItem>
           ))}

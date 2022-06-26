@@ -1,4 +1,5 @@
 import {
+  accountType,
   TDiff,
   TRawUser,
   TZmCompany,
@@ -10,7 +11,8 @@ import companies from './companies.json'
 import instruments from './instruments.json'
 import { makeAccount } from 'models/accounts'
 import { makeTag } from 'models/tags/makeTag'
-import makeTransaction from 'models/transactions/makeTransaction'
+import { makeTransaction } from 'models/transactions/makeTransaction'
+import { toISODate } from 'shared/helpers/adapterUtils'
 
 const NOW = Date.now()
 const DAY = 1000 * 60 * 60 * 24
@@ -34,14 +36,14 @@ const DEBT_ACC = makeAccount({
   id: 'DEBT_ACC',
   user: USER.id,
   instrument: USER.currency,
-  type: 'debt',
+  type: accountType.debt,
   title: 'Долги',
 })
 const CASH_ACC = makeAccount({
   id: 'CASH_ACC',
   user: USER.id,
   instrument: USER.currency,
-  type: 'cash',
+  type: accountType.cash,
   title: 'Наличка',
   startBalance: 0,
 })
@@ -73,7 +75,7 @@ const tag = [FOOD_TAG, CAFE_TAG, SALARY_TAG]
 const TR1 = makeTransaction({
   id: 'income',
   user: USER.id,
-  date: NOW,
+  date: toISODate(NOW),
   created: NOW - DAY,
   viewed: true,
   qrCode: null,

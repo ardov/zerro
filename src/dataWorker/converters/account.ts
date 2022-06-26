@@ -1,6 +1,6 @@
 import { TRawAccount, TZmAccount } from 'shared/types'
 import {
-  msToISODate,
+  toISODate,
   msToUnix,
   TZmAdapter,
   zmDateToMs,
@@ -11,14 +11,14 @@ export const convertAccount: TZmAdapter<TZmAccount, TRawAccount> = {
     return {
       ...el,
       changed: zmDateToMs(el.changed),
-      startDate: el.startDate === null ? null : zmDateToMs(el.startDate),
+      // startDate: el.startDate === null ? null : zmDateToMs(el.startDate),
     }
   },
   toServer: el => {
     return {
       ...el,
       changed: msToUnix(el.changed),
-      startDate: el.startDate === null ? null : msToISODate(el.startDate),
+      // startDate: el.startDate === null ? null : msToISODate(el.startDate),
     }
   },
 }

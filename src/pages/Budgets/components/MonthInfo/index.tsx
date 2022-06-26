@@ -25,6 +25,7 @@ import { CalculationErrorNotice } from './CalculationErrorNotice'
 import { WidgetOutcome } from './WidgetOutcome'
 import { useMonth } from 'pages/Budgets/pathHooks'
 import { useToggle } from 'shared/hooks/useToggle'
+import { TDateDraft } from 'shared/types'
 
 type MonthInfoProps = BoxProps & {
   onClose: () => void
@@ -151,5 +152,5 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
   )
 }
 
-const getMonthName = (date: number | Date) =>
-  formatDate(date, 'LLLL').toUpperCase()
+const getMonthName = (date: TDateDraft) =>
+  formatDate(new Date(date), 'LLLL').toUpperCase()

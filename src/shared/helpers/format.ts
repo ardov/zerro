@@ -1,5 +1,6 @@
 import { format, isToday, isYesterday, isThisYear } from 'date-fns'
 import ru from 'date-fns/locale/ru'
+import { TDateDraft } from 'shared/types'
 
 export function formatMoney(
   amount: number,
@@ -45,13 +46,14 @@ export function getCurrencySymbol(currency: string): string {
  * @param date
  * @param template
  */
-export function formatDate(date: number | Date, template?: string): string {
+export function formatDate(date: TDateDraft, template?: string): string {
   const opts = { locale: ru }
-  if (template) return format(date, template, opts)
-  if (isToday(date)) return format(date, 'Сегодня, d MMMM, EEEEEE', opts)
-  if (isYesterday(date)) return format(date, 'Вчера, d MMMM, EEEEEE', opts)
-  if (isThisYear(date)) return format(date, 'd MMMM, EEEEEE', opts)
-  return format(date, 'd MMMM yyyy, EEEEEE', opts)
+  const d = new Date(date)
+  if (template) return format(d, template, opts)
+  if (isToday(d)) return format(d, 'Сегодня, d MMMM, EEEEEE', opts)
+  if (isYesterday(d)) return format(d, 'Вчера, d MMMM, EEEEEE', opts)
+  if (isThisYear(d)) return format(d, 'd MMMM, EEEEEE', opts)
+  return format(d, 'd MMMM yyyy, EEEEEE', opts)
 }
 
 export function rateToWords(

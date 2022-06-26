@@ -8,7 +8,7 @@ import {
   TTagId,
   ById,
 } from 'shared/types'
-import { getType } from './helpers'
+import { getType } from 'models/transactions/helpers'
 
 interface DataSources {
   instruments: { [id: number]: TInstrument }
@@ -30,7 +30,7 @@ export type PopulatedTransaction = Modify<
   }
 >
 
-export const populate = (
+export const populateTransaction = (
   { instruments, accounts, tags }: DataSources,
   raw: TRawTransaction
 ) => ({

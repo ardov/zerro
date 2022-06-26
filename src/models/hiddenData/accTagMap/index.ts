@@ -31,26 +31,25 @@ export const addConnection =
  * Returns connections between tags and accounts. Is used to link transfers to tags
  * - One account -> One tag
  */
-export const getAccTagMap: TSelector<{
-  [accId: TAccountId]: TTagId
-}> = createSelector(
-  [getAccLinks, getTags, getAccounts],
-  (links, tags, accounts) => {
-    if (!links) return {}
-    const filtered = Object.entries(links).filter(
-      // ignore connections for deleted tags
-      ([accId, tagId]) => tags[tagId] && accounts[accId]
-    )
-    return Object.fromEntries(filtered)
-  }
-)
+export const getAccTagMap: TSelector<Record<TAccountId, TTagId>> =
+  createSelector(
+    [getAccLinks, getTags, getAccounts],
+    (links, tags, accounts) => {
+      if (!links) return {}
+      const filtered = Object.entries(links).filter(
+        // ignore connections for deleted tags
+        ([accId, tagId]) => tags[tagId] && accounts[accId]
+      )
+      return Object.fromEntries(filtered)
+    }
+  )
 
 /**
  * Returns connections between tags and accounts. Is used to link transfers to tags
  * - One tag -> Several accounts
  */
 export const getTagAccMap = createSelector([getAccTagMap], links => {
-  let result = {} as { [tagId: string]: TAccountId[] }
+  let result: Record<TTagId, TAccountId[]> = {}
   Object.entries(links).forEach(([accId, tagId]) => {
     if (result[tagId]) result[tagId].push(accId)
     else result[tagId] = [accId]

@@ -5,10 +5,11 @@ import { getAmountsById } from './getAmountsByTag'
 import { getMonthDates } from './getMonthDates'
 import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths'
 import { goalType } from 'models/hiddenData/constants'
-import { TGoal, TSelector } from 'shared/types'
+import { TDateDraft, TGoal, TISOMonth, TSelector, TTagId } from 'shared/types'
 import { RootState } from 'models'
 import { getTagMeta } from 'models/hiddenData/tagMeta'
 import { convertCurrency } from 'models/instruments'
+import { keys } from 'shared/helpers/keys'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 
@@ -24,21 +25,20 @@ export type GoalProgress = {
   target: number
 }
 
-export const getGoalProgress = (state: RootState, month: number, id: string) =>
-  getGoalsProgress(state)?.[month]?.[id]
+export const getGoalProgress = (
+  state: RootState,
+  month: TISOMonth,
+  id: TTagId
+) => getGoalsProgress(state)?.[month]?.[id]
 
 export const getGoalsProgress: TSelector<{
-  [month: number]: {
-    [tagId: string]: GoalProgress | null
-  }
+  [month: TISOMonth]: Record<TTagId, GoalProgress | null>
 }> = createSelector(
   [getGoals, getAmountsById, getMonthDates, getTagMeta, convertCurrency],
 
   (goals, amountsById, monthList, tagMeta, convert) => {
     const result: {
-      [month: number]: {
-        [tagId: string]: GoalProgress | null
-      }
+      [month: TISOMonth]: Record<TTagId, GoalProgress | null>
     } = {}
 
     monthList.forEach((month, i) => {
@@ -93,10 +93,10 @@ export const getGoalsProgress: TSelector<{
   }
 )
 
-export const getTotalGoalsProgress: TSelector<{
-  [month: number]: GoalProgress | null
-}> = createSelector([getGoals, getGoalsProgress], (goals, goalsProgress) => {
-  let result: { [month: number]: GoalProgress | null } = {}
+export const getTotalGoalsProgress: TSelector<
+  Record<TISOMonth, GoalProgress | null>
+> = createSelector([getGoals, getGoalsProgress], (goals, goalsProgress) => {
+  let result: Record<TISOMonth, GoalProgress | null> = {}
 
   const isCounted = (goal: TGoal) => goal.type !== TARGET_BALANCE || goal.end
   let countedGoals: { [id: string]: TGoal } = {}
@@ -107,11 +107,10 @@ export const getTotalGoalsProgress: TSelector<{
       hasCountedGoals = true
     }
   }
-
-  for (const month in goalsProgress) {
+  keys(goalsProgress).forEach(month => {
     if (!hasCountedGoals) {
       result[month] = null
-      continue
+      return
     }
 
     let needSum = 0
@@ -132,7 +131,7 @@ export const getTotalGoalsProgress: TSelector<{
       target: targetSum,
       progress: totalProgress,
     }
-  }
+  })
 
   return result
 })
@@ -169,8 +168,8 @@ function calcTargetProgress(data: {
   budgeted: number
   leftover: number
   available: number
-  currentMonth: number
-  endMonth?: number
+  currentMonth: TDateDraft
+  endMonth?: TDateDraft
 }): GoalProgress | null {
   const { amount, budgeted, leftover, available, currentMonth, endMonth } = data
   if (!endMonth) {
@@ -184,9 +183,12 @@ function calcTargetProgress(data: {
     }
   } else {
     // Goal has end date
-    if (currentMonth > endMonth) return null
+    let curMonthDate = new Date(currentMonth)
+    let endMonthDate = new Date(endMonth)
+    if (curMonthDate > endMonthDate) return null
 
-    const monthsLeft = differenceInCalendarMonths(endMonth, currentMonth) + 1
+    const monthsLeft =
+      differenceInCalendarMonths(endMonthDate, curMonthDate) + 1
     const totalNeed = amount - leftover
     if (totalNeed <= 0) return { progress: 1, need: 0, target: 0 }
     const target = Math.round(totalNeed / monthsLeft)

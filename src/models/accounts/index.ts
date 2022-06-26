@@ -1,10 +1,12 @@
 // Selectors
-export { getAccounts } from './selectors'
-export { getPopulatedAccounts } from './selectors'
-export { getAccountList } from './selectors'
-export { getDebtAccountId } from './selectors'
-export { getInBudgetAccounts } from './selectors'
-export { getSavingAccounts } from './selectors'
+export {
+  getAccounts,
+  getPopulatedAccounts,
+  getAccountList,
+  getDebtAccountId,
+  getInBudgetAccounts,
+  getSavingAccounts,
+} from './selectors'
 
 // Thunks
 export { checkDataAcc } from './thunks'

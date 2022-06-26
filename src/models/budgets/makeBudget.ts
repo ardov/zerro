@@ -1,26 +1,20 @@
-import { msToISODate } from 'shared/helpers/adapterUtils'
-import { TBudget, OptionalExceptFor } from 'shared/types'
+import { toISODate } from 'shared/helpers/adapterUtils'
+import { TBudget, OptionalExceptFor, Modify, TDateDraft } from 'shared/types'
+import { getBudgetId } from './getBudgetId'
 
-type BudgetDraft = OptionalExceptFor<TBudget, 'user' | 'date' | 'tag'>
+type BudgetDraft = Modify<
+  OptionalExceptFor<TBudget, 'user' | 'date' | 'tag'>,
+  { date: TDateDraft }
+>
 
-export const makeBudget = ({
-  user,
-  date,
-  tag = null,
-  changed = Date.now(),
-  income = 0,
-  incomeLock = true,
-  outcome = 0,
-  outcomeLock = true,
-}: BudgetDraft): TBudget => ({
-  user,
-  date,
-  tag,
-  changed,
-  income,
-  incomeLock,
-  outcome,
-  outcomeLock,
-  // TODO: decouple this logic
-  id: `${msToISODate(date)}#${tag}`,
+export const makeBudget = (draft: BudgetDraft): TBudget => ({
+  id: getBudgetId(draft.date, draft.tag),
+  user: draft.user,
+  date: toISODate(draft.date),
+  tag: draft.tag || null,
+  changed: draft.changed || Date.now(),
+  income: draft.income || 0,
+  incomeLock: draft.incomeLock || true,
+  outcome: draft.outcome || 0,
+  outcomeLock: draft.outcomeLock || true,
 })

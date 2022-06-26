@@ -5,6 +5,7 @@ import { useMonth } from '../pathHooks'
 import { useCallback } from 'react'
 import { MoveMoneyModal } from './MoveMoneyModal'
 import { moveTag } from 'models/hiddenData/tagOrder'
+import { TISOMonth } from 'shared/types'
 
 export type DragModeType = 'FUNDS' | 'REORDER'
 type DragModeContextType = {
@@ -15,7 +16,7 @@ interface IMoneyModalProps {
   open: boolean
   source?: string
   destination?: string
-  month?: number
+  month?: TISOMonth
   key?: string
 }
 

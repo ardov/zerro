@@ -17,6 +17,8 @@ import { Tooltip } from 'shared/ui/Tooltip'
 import Rhythm from 'shared/ui/Rhythm'
 import { useMonth } from '../pathHooks'
 import { Amount } from 'components/Amount'
+import { TDateDraft } from 'shared/types'
+import { keys } from 'shared/helpers/keys'
 
 type TColor = 'error' | 'warning' | 'success'
 
@@ -44,8 +46,8 @@ const useStyles = makeStyles<Theme, { color: TColor }>(
   })
 )
 
-const getMonthName = (date: number | Date) =>
-  formatDate(date, 'LLL').toLowerCase()
+const getMonthName = (date: TDateDraft) =>
+  formatDate(new Date(date), 'LLL').toLowerCase()
 
 type ToBeBudgetedProps = ButtonBaseProps & {
   small?: boolean
@@ -55,9 +57,7 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
   const [month] = useMonth()
   const currency = useAppSelector(getUserCurrencyCode)
   const totalsByMonth = useAppSelector(getTotalsByMonth)
-  const firstMonth = Object.keys(totalsByMonth)
-    .map(s => +s)
-    .sort((a, b) => a - b)[0]
+  const firstMonth = keys(totalsByMonth).sort()[0]
   const isFirstMonth = month === firstMonth
   const totals = totalsByMonth[month]
   const { toBeBudgeted, overspent, realBudgetedInFuture, budgetedInFuture } =

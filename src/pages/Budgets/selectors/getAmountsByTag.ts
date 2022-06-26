@@ -5,14 +5,15 @@ import { convertCurrency } from 'models/instruments'
 import { getBudgetsByMonthAndTag } from 'models/budgets'
 import { round } from 'shared/helpers/currencyHelpers'
 import { getAccTagMap } from 'models/hiddenData/accTagMap'
-import startOfMonth from 'date-fns/startOfMonth'
 import { getType } from 'models/transactions/helpers'
 import { getMonthDates } from './getMonthDates'
 import { getInBudgetAccounts } from 'models/accounts'
-import { PopulatedBudget, TSelector } from 'shared/types'
+import { PopulatedBudget, TISOMonth, TSelector, TTagId } from 'shared/types'
 import { withPerf } from 'shared/helpers/performance'
 import { RootState } from 'models'
 import { getTransactionsHistory } from 'models/transactions'
+import { toISOMonth } from 'shared/helpers/adapterUtils'
+import { keys } from 'shared/helpers/keys'
 
 interface DateNode {
   income: { [tagId: string]: number }
@@ -27,84 +28,83 @@ const makeDateNode = (): DateNode => ({
   transferFees: 0,
 })
 
-const getAmountsByMonth: TSelector<{
-  [month: number]: DateNode
-}> = createSelector(
-  [getTransactionsHistory, convertCurrency, getInBudgetAccounts],
-  (transactions, convert, accountsInBudget) => {
-    const result: { [date: number]: DateNode } = {}
+const getAmountsByMonth: TSelector<Record<TISOMonth, DateNode>> =
+  createSelector(
+    [getTransactionsHistory, convertCurrency, getInBudgetAccounts],
+    (transactions, convert, accountsInBudget) => {
+      const result: Record<TISOMonth, DateNode> = {}
 
-    const budgetAccs = accountsInBudget.map(acc => acc.id)
-    const inBudget = (accId: string) => budgetAccs.includes(accId)
+      const budgetAccs = accountsInBudget.map(acc => acc.id)
+      const inBudget = (accId: string) => budgetAccs.includes(accId)
 
-    transactions.forEach(tr => {
-      // Skip transactions outside budget
-      if (!inBudget(tr.incomeAccount) && !inBudget(tr.outcomeAccount)) return
+      transactions.forEach(tr => {
+        // Skip transactions outside budget
+        if (!inBudget(tr.incomeAccount) && !inBudget(tr.outcomeAccount)) return
 
-      const month = +startOfMonth(tr.date)
-      const type = getType(tr)
-      const tag = getMainTag(tr) || 'null'
-      const income = convert(tr.income, tr.incomeInstrument)
-      const outcome = convert(tr.outcome, tr.outcomeInstrument)
+        const month = toISOMonth(tr.date)
+        const type = getType(tr)
+        const tag = getMainTag(tr) || 'null'
+        const income = convert(tr.income, tr.incomeInstrument)
+        const outcome = convert(tr.outcome, tr.outcomeInstrument)
 
-      result[month] ??= makeDateNode()
-      const node = result[month]
+        result[month] ??= makeDateNode()
+        const node = result[month]
 
-      switch (type) {
-        case 'income':
-          node.income[tag] ??= 0
-          node.income[tag] = round(node.income[tag] + income)
-          return
-
-        case 'outcome':
-          node.outcome[tag] ??= 0
-          node.outcome[tag] = round(node.outcome[tag] + outcome)
-          return
-
-        case 'transfer':
-          // TRANSFER BETWEEN BUDGET ACCOUNTS
-          if (inBudget(tr.incomeAccount) && inBudget(tr.outcomeAccount)) {
-            const fee = outcome - income
-            node.transferFees = round(node.transferFees + fee)
+        switch (type) {
+          case 'income':
+            node.income[tag] ??= 0
+            node.income[tag] = round(node.income[tag] + income)
             return
-          }
-          // TRANSFER TO BUDGET
-          else if (inBudget(tr.incomeAccount)) {
-            node.transfers[tr.outcomeAccount] ??= 0
-            node.transfers[tr.outcomeAccount] = round(
-              node.transfers[tr.outcomeAccount] - income
-            )
-            return
-          }
-          // TRANSFER FROM BUDGET
-          else if (inBudget(tr.outcomeAccount)) {
-            node.transfers[tr.incomeAccount] ??= 0
-            node.transfers[tr.incomeAccount] = round(
-              node.transfers[tr.incomeAccount] + outcome
-            )
-            return
-          }
-          break
 
-        default:
-          throw new Error('Unknown transaction type: ' + type)
-      }
-    })
+          case 'outcome':
+            node.outcome[tag] ??= 0
+            node.outcome[tag] = round(node.outcome[tag] + outcome)
+            return
 
-    return result
-  }
-)
+          case 'transfer':
+            // TRANSFER BETWEEN BUDGET ACCOUNTS
+            if (inBudget(tr.incomeAccount) && inBudget(tr.outcomeAccount)) {
+              const fee = outcome - income
+              node.transferFees = round(node.transferFees + fee)
+              return
+            }
+            // TRANSFER TO BUDGET
+            else if (inBudget(tr.incomeAccount)) {
+              node.transfers[tr.outcomeAccount] ??= 0
+              node.transfers[tr.outcomeAccount] = round(
+                node.transfers[tr.outcomeAccount] - income
+              )
+              return
+            }
+            // TRANSFER FROM BUDGET
+            else if (inBudget(tr.outcomeAccount)) {
+              node.transfers[tr.incomeAccount] ??= 0
+              node.transfers[tr.incomeAccount] = round(
+                node.transfers[tr.incomeAccount] + outcome
+              )
+              return
+            }
+            break
+
+          default:
+            throw new Error('Unknown transaction type: ' + type)
+        }
+      })
+
+      return result
+    }
+  )
 
 interface AmountsByDate {
-  [date: string]: { [id: string]: number }
+  [date: TISOMonth]: { [id: string]: number }
 }
 
 // Used only for TransferTable
 export const getTransfers = createSelector([getAmountsByMonth], amounts => {
   let result: AmountsByDate = {}
-  for (const date in amounts) {
-    result[date] = amounts[date].transfers
-  }
+  keys(amounts).forEach(month => {
+    result[month] = amounts[month].transfers
+  })
   return result
 })
 
@@ -112,28 +112,25 @@ export const getLinkedTransfers = createSelector(
   [getAccTagMap, getAmountsByMonth],
   (accTagMap, amounts) => {
     let result: AmountsByDate = {}
-    for (const date in amounts) {
-      result[date] = {}
-      for (const accountId in amounts[date].transfers) {
+    keys(amounts).forEach(month => {
+      result[month] = {}
+      for (const accountId in amounts[month].transfers) {
         // possible problem with deleted tags
         const linkedTag = accTagMap[accountId] || 'null'
-        result[date][linkedTag] = round(
-          amounts[date].transfers[accountId] + (result[date][linkedTag] || 0)
+        result[month][linkedTag] = round(
+          amounts[month].transfers[accountId] + (result[month][linkedTag] || 0)
         )
       }
-    }
+    })
     return result
   }
 )
 
-interface TransferFeesByDate {
-  [date: string]: number
-}
 export const getTransferFees = createSelector([getAmountsByMonth], amounts => {
-  let result: TransferFeesByDate = {}
-  for (const date in amounts) {
+  let result: Record<TISOMonth, number> = {}
+  keys(amounts).forEach(date => {
     result[date] = amounts[date].transferFees
-  }
+  })
   return result
 })
 
@@ -165,9 +162,7 @@ export type TagAmounts = {
 export type TagGroupAmounts = TagAmounts
 
 export const getAmountsByTag: (state: RootState) => {
-  [month: string]: {
-    [tagId: string]: TagGroupAmounts
-  }
+  [month: TISOMonth]: Record<TTagId, TagGroupAmounts>
 } = createSelector(
   [
     getMonthDates,
@@ -188,7 +183,7 @@ export const getAmountsByTag: (state: RootState) => {
         [tagId: string]: TagGroupAmounts
       } = {}
 
-      for (const date of dates) {
+      dates.forEach(date => {
         result[date] = {}
         for (const id in tagLinks) {
           result[date][id] = calcTagGroupAmounts({
@@ -202,7 +197,7 @@ export const getAmountsByTag: (state: RootState) => {
           })
         }
         prevMonth = result[date]
-      }
+      })
 
       return result
     }
@@ -211,12 +206,9 @@ export const getAmountsByTag: (state: RootState) => {
 
 export const getAmountsById = createSelector([getAmountsByTag], amounts => {
   let result: {
-    [month: string]: {
-      [tagId: string]: TagGroupAmounts | TagAmounts
-    }
+    [month: TISOMonth]: Record<TTagId, TagGroupAmounts | TagAmounts>
   } = {}
-
-  for (const month in amounts) {
+  keys(amounts).forEach(month => {
     result[month] = { ...amounts[month] }
     for (const parent in amounts[month]) {
       const children = amounts[month][parent].children
@@ -224,17 +216,17 @@ export const getAmountsById = createSelector([getAmountsByTag], amounts => {
         result[month][child] = children[child]
       }
     }
-  }
+  })
   return result
 })
 
 function calcTagGroupAmounts(data: {
-  id: string
-  children: string[]
-  incomes: { [id: string]: number }
-  outcomes: { [id: string]: number }
-  budgets: { [tagId: string]: PopulatedBudget }
-  linkedTransfers: { [id: string]: number }
+  id: TTagId
+  children: TTagId[]
+  incomes: Record<TTagId, number>
+  outcomes: Record<TTagId, number>
+  budgets: Record<TTagId, PopulatedBudget>
+  linkedTransfers: Record<TTagId, number>
   prevMonth?: TagGroupAmounts
 }): TagGroupAmounts {
   const {

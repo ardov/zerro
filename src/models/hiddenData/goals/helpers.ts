@@ -1,7 +1,6 @@
 import { goalType } from '../constants'
-import { formatDate, formatMoney } from 'shared/helpers/format'
-import parseDate from 'date-fns/parseISO'
-import { TZmGoal, TGoal } from 'shared/types'
+import { TGoal } from 'shared/types'
+import { formatMoney } from 'shared/helpers/format'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 
@@ -52,14 +51,6 @@ export const goalToWords = ({
   }
 }
 
-export const makeGoal = ({ type, amount, end }: TGoal): TZmGoal => {
-  let goal: TZmGoal = { type, amount }
-  if (end && type === TARGET_BALANCE) goal.end = formatDate(end, 'yyyy-MM')
-  return goal
-}
-
-export const parseGoal = ({ type, amount, end }: TZmGoal): TGoal => {
-  let goal: TGoal = { type, amount }
-  if (end) goal.end = +parseDate(end)
-  return goal
+export const makeGoal = ({ type, amount, end }: TGoal): TGoal => {
+  return { type, amount, end }
 }

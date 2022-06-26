@@ -1,4 +1,4 @@
-import { TRawAccount, TPopulatedAccount } from 'shared/types'
+import { TRawAccount, TPopulatedAccount, accountType } from 'shared/types'
 
 interface Options {
   convert: (
@@ -21,7 +21,7 @@ export const populate = (
 }
 
 function isInBudget(a: TRawAccount) {
-  if (a.type === 'debt') return false
+  if (a.type === accountType.debt) return false
   if (a.title.endsWith('📍')) return true
   return a.inBalance
 }

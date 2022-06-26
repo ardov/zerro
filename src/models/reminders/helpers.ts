@@ -1,35 +1,46 @@
 import { v1 as uuidv1 } from 'uuid'
-import { OptionalExceptFor, TRawReminder } from 'shared/types'
-
-type ReminderDraft = OptionalExceptFor<
+import {
+  Modify,
+  OptionalExceptFor,
+  TDateDraft,
   TRawReminder,
-  'user' | 'incomeAccount' | 'outcomeAccount'
+} from 'shared/types'
+import { toISODate } from 'shared/helpers/adapterUtils'
+
+type ReminderDraft = Modify<
+  OptionalExceptFor<TRawReminder, 'user' | 'incomeAccount' | 'outcomeAccount'>,
+  {
+    startDate?: TDateDraft
+    endDate?: TDateDraft
+  }
 >
 
-export const makeReminder = (raw: ReminderDraft): TRawReminder => ({
-  // Required
-  user: raw.user,
-  incomeAccount: raw.incomeAccount,
-  outcomeAccount: raw.outcomeAccount,
+export function makeReminder(draft: ReminderDraft): TRawReminder {
+  return {
+    // Required
+    user: draft.user,
+    incomeAccount: draft.incomeAccount,
+    outcomeAccount: draft.outcomeAccount,
 
-  // Optional
-  id: raw.id || uuidv1(),
-  changed: raw.changed || Date.now(),
+    // Optional
+    id: draft.id || uuidv1(),
+    changed: draft.changed || Date.now(),
 
-  incomeInstrument: raw.incomeInstrument || 2,
-  income: raw.income || 0,
-  outcomeInstrument: raw.outcomeInstrument || 2,
-  outcome: raw.outcome || 0,
+    incomeInstrument: draft.incomeInstrument || 2,
+    income: draft.income || 0,
+    outcomeInstrument: draft.outcomeInstrument || 2,
+    outcome: draft.outcome || 0,
 
-  tag: raw.tag || null,
-  merchant: raw.merchant || null,
-  payee: raw.payee || null,
-  comment: raw.comment || null,
+    tag: draft.tag || null,
+    merchant: draft.merchant || null,
+    payee: draft.payee || null,
+    comment: draft.comment || null,
 
-  interval: raw.interval || null,
-  step: raw.step || 0,
-  points: raw.points || [0],
-  startDate: raw.startDate || Date.now(),
-  endDate: raw.endDate || Date.now(),
-  notify: raw.notify || false,
-})
+    interval: draft.interval || null,
+    step: draft.step || 0,
+    points: draft.points || [0],
+    startDate: toISODate(draft.startDate || Date.now()),
+    endDate: toISODate(draft.endDate || Date.now()),
+    notify: draft.notify || false,
+  }
+}

@@ -1,6 +1,6 @@
 import { TRawTransaction, TZmTransaction } from 'shared/types'
 import {
-  msToISODate,
+  toISODate,
   msToUnix,
   TZmAdapter,
   zmDateToMs,
@@ -11,12 +11,10 @@ export const convertTransaction: TZmAdapter<TZmTransaction, TRawTransaction> = {
     ...el,
     changed: zmDateToMs(el.changed),
     created: zmDateToMs(el.created),
-    date: zmDateToMs(el.date),
   }),
   toServer: (el: TRawTransaction): TZmTransaction => ({
     ...el,
     changed: msToUnix(el.changed),
     created: msToUnix(el.created),
-    date: msToISODate(el.date),
   }),
 }

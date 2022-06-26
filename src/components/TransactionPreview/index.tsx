@@ -30,6 +30,7 @@ import {
   restoreTransaction,
 } from 'models/transactions/thunks'
 import { TRawTransaction } from 'shared/types'
+import { toISODate } from 'shared/helpers/adapterUtils'
 
 type TransactionPreviewProps = {
   id: string
@@ -182,7 +183,7 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
         <Stack direction="row" spacing={2}>
           <DatePicker
             value={localDate}
-            onChange={date => date && setLocalDate(+date)}
+            onChange={date => date && setLocalDate(toISODate(date))}
             label="Дата"
             cancelText="Отмена"
             okText="Ок"
