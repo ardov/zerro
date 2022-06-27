@@ -55,7 +55,11 @@ export type TBudget = {
 type TRecordGoals = {
   type: recordType.goals
   date: TISODate
-  payload: Record<TTagId, TGoal>
+  payload: {
+    tags?: Record<TTagId, TGoal>
+    accounts?: Record<TAccountId, TGoal>
+    merchants?: Record<TMerchantId, TGoal>
+  }
 }
 type TRecordFxRates = {
   type: recordType.fxRates

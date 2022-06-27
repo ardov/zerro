@@ -26,7 +26,7 @@ import {
   setTagComment,
   setTagCurrency,
 } from 'models/hiddenData/tagMeta'
-import { getUserInstrumentId } from 'models/instruments'
+import { getUserInstrumentId } from 'models/users'
 import { CurrencySelect } from './CurrencySelect'
 import { useAppDispatch, useAppSelector } from 'models'
 

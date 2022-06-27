@@ -2,17 +2,14 @@ import { add, sub } from 'shared/helpers/currencyHelpers'
 import { getType } from 'models/transactions/helpers'
 import {
   TAccountId,
-  TInstrumentId,
   TMerchantId,
   TTagId,
   TRawTransaction,
   TrType,
+  TISOMonth,
 } from 'shared/types'
 import { toISOMonth } from 'shared/helpers/date'
-
-type TFxAmount = {
-  [currency: TInstrumentId]: number
-}
+import { TFxAmount } from './helpers/fxAmount'
 
 type TAccumulated = {
   amount: TFxAmount
@@ -20,7 +17,7 @@ type TAccumulated = {
 }
 
 type TMonthInfo = {
-  date: string // YYYY-MM
+  date: TISOMonth
   total: TFxAmount
   incomes: Record<TTagId, TAccumulated>
   outcomes: Record<TTagId, TAccumulated>
@@ -31,7 +28,7 @@ type TMonthInfo = {
 }
 
 export type TMoneyFlowByMonth = {
-  [month: string]: TMonthInfo
+  [month: TISOMonth]: TMonthInfo
 }
 
 const makeAccumulatedNode = (): TAccumulated => ({

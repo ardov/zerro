@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { Router, Route, Redirect, Switch } from 'react-router-dom'
-
 import { getLoginState } from 'models/token'
 import { RegularSyncHandler } from 'components/RegularSyncHandler'
 import Nav from 'components/Navigation'

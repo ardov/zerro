@@ -17,8 +17,14 @@ import {
 } from './types'
 
 export type TAggregatedResult = {
-  goals: { [month: TISODate]: Record<TTagId, TGoal> }
   fxRates: { [month: TISODate]: Record<TFxCode, number> }
+  goals: {
+    [month: TISODate]: {
+      tags?: Record<TTagId, TGoal>
+      accounts?: Record<TAccountId, TGoal>
+      merchants?: Record<TMerchantId, TGoal>
+    }
+  }
   budgets: {
     [month: TISODate]: {
       tags?: Record<TTagId, TBudget>

@@ -13,5 +13,5 @@ export { checkDataAcc } from './thunks'
 export { setInBudget } from './thunks'
 
 // Helpers
-export { makeAccount } from './helpers'
+export { makeAccount } from './makeAccount'
 export { getStartBalance } from './helpers'

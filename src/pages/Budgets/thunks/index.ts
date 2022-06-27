@@ -1,8 +1,4 @@
-import {
-  convertCurrency,
-  getInstruments,
-  getUserInstrument,
-} from 'models/instruments'
+import { convertCurrency, getInstruments } from 'models/instruments'
 import { getRootUser } from 'models/users'
 import { getPopulatedTag } from 'models/tags'
 import { getAmountsByTag, TagAmounts } from '../selectors'
@@ -20,6 +16,7 @@ import { getMetaForTag } from 'models/hiddenData/tagMeta'
 import { round } from 'shared/helpers/currencyHelpers'
 import { prevMonth, toISODate, toISOMonth } from 'shared/helpers/date'
 import { keys } from 'shared/helpers/keys'
+import { getUserInstrumentId } from 'models/users/model'
 
 export const moveFunds =
   (
@@ -73,7 +70,9 @@ export const setOutcomeBudget =
     const currConverter = convertCurrency(state)
     const { currency } = getMetaForTag(tagId)(state)
     const instruments = getInstruments(state)
-    const userInstrument = getUserInstrument(state)
+    const userInstrumentId = getUserInstrumentId(state)
+    if (!userInstrumentId) return
+    const userInstrument = instruments[userInstrumentId]
     const tagInstrument = currency ? instruments[currency] : userInstrument
     const toTagCurrency = (v: number) =>
       v && tagInstrument && userInstrument

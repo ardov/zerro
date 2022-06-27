@@ -1,4 +1,5 @@
-import { TRawAccount, TPopulatedAccount, accountType } from 'shared/types'
+import { TRawAccount, TPopulatedAccount } from 'shared/types'
+import { isInBudget } from './helpers'
 
 interface Options {
   convert: (
@@ -18,10 +19,4 @@ export const populate = (
     convertedStartBalance: convert(raw.startBalance, raw.instrument),
     inBudget: isInBudget(raw),
   }
-}
-
-function isInBudget(a: TRawAccount) {
-  if (a.type === accountType.debt) return false
-  if (a.title.endsWith('📍')) return true
-  return a.inBalance
 }
