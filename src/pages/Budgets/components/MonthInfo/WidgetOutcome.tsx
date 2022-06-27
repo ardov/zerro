@@ -1,7 +1,7 @@
 import React from 'react'
 import { useAppSelector } from 'models'
 import { getTotalsByMonth } from '../../selectors'
-import { getUserCurrencyCode } from 'models/instruments'
+import { getUserCurrencyCode } from 'models/instrument'
 import { Box } from '@mui/material'
 import { Total } from '../components'
 import { useMonth } from 'pages/Budgets/pathHooks'

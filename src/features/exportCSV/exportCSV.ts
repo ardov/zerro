@@ -6,10 +6,10 @@ import {
 import { formatDate } from 'shared/helpers/date'
 import { ById } from 'shared/types'
 import { AppThunk } from 'models'
-import { getTransactions } from 'models/transactions'
-import { getInstruments } from 'models/instruments'
-import { getAccounts } from 'models/accounts'
-import { getPopulatedTags } from 'models/tags'
+import { getTransactions } from 'models/transaction'
+import { getInstruments } from 'models/instrument'
+import { getAccounts } from 'models/account'
+import { getPopulatedTags } from 'models/tag'
 
 // Only for CSV
 const getPopulatedTransactions = createSelector(

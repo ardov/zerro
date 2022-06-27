@@ -13,15 +13,15 @@ interface DataSlice {
 const makeDataStore = (): TDataStore => ({
   serverTimestamp: 0,
   instrument: {},
-  user: {},
-  merchant: {},
   country: {},
   company: {},
-  reminder: {},
-  reminderMarker: {},
+  user: {},
+  merchant: {},
   account: {},
   tag: {},
   budget: {},
+  reminder: {},
+  reminderMarker: {},
   transaction: {},
 })
 

@@ -1,4 +1,4 @@
-import { getRootUser } from 'models/users'
+import { getRootUser } from 'models/user'
 import { getAccounts } from './index'
 import { AppThunk } from 'models'
 import { sendEvent } from 'shared/helpers/tracking'

@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { formatMoney } from 'shared/helpers/format'
-import { getUserCurrencyCode } from 'models/instruments'
+import { getUserCurrencyCode } from 'models/instrument'
 import { makeStyles } from '@mui/styles'
 import {
   Paper,
@@ -15,7 +15,7 @@ import {
 import TagSelect2 from 'components/TagSelect2'
 import { addConnection, getAccTagMap } from 'models/hiddenData/accTagMap'
 import { getTransfers } from '../selectors'
-import { getAccounts } from 'models/accounts'
+import { getAccounts } from 'models/account'
 import TagChip from 'components/TagChip'
 import { useMonth } from '../pathHooks'
 import { useAppDispatch, useAppSelector } from 'models'

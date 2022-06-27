@@ -1,8 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getTransactionsHistory } from 'models/transactions'
+import { getTransactionsHistory } from 'models/transaction'
 import { TISOMonth, TSelector } from 'shared/types'
 import { nextMonth, toISOMonth } from 'shared/helpers/date'
-import { getBudgets, getISOMonthFromBudgetId } from 'models/budgets'
+import { getBudgets, getISOMonthFromBudgetId } from 'models/budget'
 import { keys } from 'shared/helpers/keys'
 
 /**

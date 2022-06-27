@@ -12,7 +12,7 @@ import {
 import { makeStyles } from '@mui/styles'
 import { AddIcon, CloseIcon } from 'shared/ui/Icons'
 import { getTagAccMap, addConnection } from 'models/hiddenData/accTagMap'
-import { getAccounts, getSavingAccounts } from 'models/accounts'
+import { getAccounts, getSavingAccounts } from 'models/account'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { useEffect } from 'react'
 

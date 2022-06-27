@@ -1,8 +1,8 @@
 import { sendEvent } from 'shared/helpers/tracking'
 import { AppThunk } from 'models'
 import { applyClientPatch } from 'models/data'
-import { getRootUser } from 'models/users'
-import { getTag } from 'models/tags'
+import { getRootUser } from 'models/user'
+import { getTag } from 'models/tag'
 import { OptionalExceptFor, TTag, TZmTag } from 'shared/types'
 import { makeTag } from './makeTag'
 

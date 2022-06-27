@@ -1,7 +1,7 @@
 import { Modify, ById } from './ts-utils'
 import { RootState } from 'models'
 import { goalType } from 'models/hiddenData/constants'
-import iconsMap from 'models/tags/iconsMap.json'
+import iconsMap from 'models/tag/iconsMap.json'
 
 type TYear = `${number}${number}${number}${number}`
 type TMonth = `${number}${number}`

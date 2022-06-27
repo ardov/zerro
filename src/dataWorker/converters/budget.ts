@@ -1,6 +1,6 @@
 import { TBudget, TZmBudget } from 'shared/types'
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
-import { getBudgetId } from 'models/budgets'
+import { getBudgetId } from 'models/budget'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 
 export const convertBudget: TZmAdapter<TZmBudget, TBudget> = {

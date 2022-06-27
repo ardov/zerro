@@ -1,4 +1,4 @@
-import { getBudgetId } from 'models/budgets'
+import { getBudgetId } from 'models/budget'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 import {
   TInstrument,

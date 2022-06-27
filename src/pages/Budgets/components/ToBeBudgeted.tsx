@@ -3,7 +3,7 @@ import { useAppSelector } from 'models'
 import { formatMoney } from 'shared/helpers/format'
 import { formatDate } from 'shared/helpers/date'
 import { getTotalsByMonth, MonthTotals } from '../selectors'
-import { getUserCurrencyCode } from 'models/instruments'
+import { getUserCurrencyCode } from 'models/instrument'
 import {
   Typography,
   ButtonBase,

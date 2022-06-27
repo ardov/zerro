@@ -7,7 +7,7 @@ import { goalType } from 'models/hiddenData/constants'
 import { TGoal, TISODate, TISOMonth, TSelector, TTagId } from 'shared/types'
 import { RootState } from 'models'
 import { getTagMeta } from 'models/hiddenData/tagMeta'
-import { convertCurrency } from 'models/instruments'
+import { convertCurrency } from 'models/instrument'
 import { keys } from 'shared/helpers/keys'
 import { differenceInCalendarMonths } from 'shared/helpers/date'
 

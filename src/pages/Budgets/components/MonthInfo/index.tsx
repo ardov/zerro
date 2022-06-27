@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from 'models'
 import { formatMoney } from 'shared/helpers/format'
 import { formatDate } from 'shared/helpers/date'
 import { getTotalsByMonth } from '../../selectors'
-import { getUserCurrencyCode } from 'models/instruments'
+import { getUserCurrencyCode } from 'models/instrument'
 import { Confirm } from 'shared/ui/Confirm'
 import { copyPreviousBudget, startFresh, fixOverspends } from '../../thunks'
 import {

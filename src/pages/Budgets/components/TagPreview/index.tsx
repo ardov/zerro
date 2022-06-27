@@ -13,7 +13,7 @@ import {
 } from '@mui/material'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { CloseIcon, EditIcon, EmojiFlagsIcon, NotesIcon } from 'shared/ui/Icons'
-import { getPopulatedTag } from 'models/tags'
+import { getPopulatedTag } from 'models/tag'
 import { Total, Line as TextLine } from '../components'
 import {
   getAmountsById,
@@ -25,7 +25,7 @@ import { LinkedAccs } from './LinkedAccs'
 import { OutcomeWidget } from './OutcomeWidget'
 import { ColorPicker } from 'components/ColorPickerPopover'
 import { hex2int } from 'shared/helpers/color'
-import { patchTag } from 'models/tags/thunks'
+import { patchTag } from 'models/tag/thunks'
 import { sendEvent } from 'shared/helpers/tracking'
 import { TTagPopulated } from 'shared/types'
 import { TagEditDialog } from 'components/TagEditDialog'

@@ -18,7 +18,7 @@ import { Tooltip } from 'shared/ui/Tooltip'
 import { CloseIcon } from 'shared/ui/Icons'
 import Button from '@mui/material/Button'
 import { formatDate } from 'shared/helpers/date'
-import { FilterConditions } from 'models/transactions/filtering'
+import { FilterConditions } from 'models/transaction/filtering'
 import { TrType } from 'shared/types'
 import { endOfDay, prevMonth, startOfDay } from 'shared/helpers/date'
 

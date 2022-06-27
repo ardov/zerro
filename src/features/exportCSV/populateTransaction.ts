@@ -8,7 +8,7 @@ import {
   TTagId,
   ById,
 } from 'shared/types'
-import { getType } from 'models/transactions/helpers'
+import { getType } from 'models/transaction/helpers'
 
 interface DataSources {
   instruments: { [id: number]: TInstrument }

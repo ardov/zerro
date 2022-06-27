@@ -17,7 +17,7 @@ import {
   convertCurrency,
   getInstruments,
   getUserInstrument,
-} from 'models/instruments'
+} from 'models/instrument'
 import { setOutcomeBudget } from 'pages/Budgets/thunks'
 import { getGoals } from 'models/hiddenData/goals'
 import { getGoalsProgress } from 'pages/Budgets/selectors'

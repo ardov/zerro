@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 import { useAppSelector } from 'models'
 import { getAmountsByTag, getTotalsByMonth } from '../selectors'
-import { getTagsTree } from 'models/tags'
+import { getTagsTree } from 'models/tag'
 import { useMonth } from 'pages/Budgets/pathHooks'
 import { Tooltip, Treemap, ResponsiveContainer } from 'recharts'
 import { formatMoney } from 'shared/helpers/format'

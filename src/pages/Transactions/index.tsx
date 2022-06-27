@@ -14,7 +14,7 @@ import { sendEvent } from 'shared/helpers/tracking'
 import { Helmet } from 'react-helmet'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { useAppSelector } from 'models'
-import { getTransactions } from 'models/transactions'
+import { getTransactions } from 'models/transaction'
 
 const useStyles = makeStyles(theme => ({
   drawerWidth: {

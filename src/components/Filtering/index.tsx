@@ -8,7 +8,7 @@ import IconButton from '@mui/material/IconButton'
 import { FilterListIcon, CloseIcon } from 'shared/ui/Icons'
 import { Tooltip } from 'shared/ui/Tooltip'
 // import { useToggle } from 'shared/hooks/useToggle'
-import { FilterConditions } from 'models/transactions/filtering'
+import { FilterConditions } from 'models/transaction/filtering'
 import { Box, SxProps } from '@mui/system'
 import { Theme } from '@mui/material/styles'
 import {

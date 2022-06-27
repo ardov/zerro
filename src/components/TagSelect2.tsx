@@ -1,6 +1,6 @@
 import React, { FC, KeyboardEventHandler, useEffect, useState } from 'react'
 import { useAppSelector } from 'models'
-import { getTagsTree, TagTreeNode } from 'models/tags'
+import { getTagsTree, TagTreeNode } from 'models/tag'
 import {
   Popover,
   Paper,

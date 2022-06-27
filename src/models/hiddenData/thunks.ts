@@ -1,4 +1,4 @@
-import { getRootUser } from '../users'
+import { getRootUser } from '../user'
 import { makeDataAcc, makeDataReminder } from './helpers'
 import { getDataReminders, getDataAccountId } from './selectors'
 import { DataReminderType } from './constants'

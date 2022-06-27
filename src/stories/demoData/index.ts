@@ -9,9 +9,9 @@ import {
 import countries from './countries.json'
 import companies from './companies.json'
 import instruments from './instruments.json'
-import { makeAccount } from 'models/accounts'
-import { makeTag } from 'models/tags/makeTag'
-import { makeTransaction } from 'models/transactions/makeTransaction'
+import { makeAccount } from 'models/account'
+import { makeTag } from 'models/tag/makeTag'
+import { makeTransaction } from 'models/transaction/makeTransaction'
 import { toISODate } from 'shared/helpers/date'
 
 const NOW = Date.now()

@@ -1,9 +1,9 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { add, sub } from 'shared/helpers/currencyHelpers'
-import { getDebtAccountId } from 'models/accounts'
+import { getDebtAccountId } from 'models/account'
 import { getMerchants } from 'models/data/selectors'
-import { getTransactionsHistory } from 'models/transactions'
-import { getType } from 'models/transactions/helpers'
+import { getTransactionsHistory } from 'models/transaction'
+import { getType } from 'models/transaction/helpers'
 import {
   ById,
   TAccountId,

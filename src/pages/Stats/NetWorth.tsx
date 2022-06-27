@@ -19,8 +19,8 @@ import {
   Line,
   ReferenceLine,
 } from 'recharts'
-import { getInBudgetAccounts, getSavingAccounts } from 'models/accounts'
-import { convertCurrency } from 'models/instruments'
+import { getInBudgetAccounts, getSavingAccounts } from 'models/account'
+import { convertCurrency } from 'models/instrument'
 import { getAvailableMonths } from './availablePeriod'
 import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 import { round } from 'shared/helpers/currencyHelpers'
