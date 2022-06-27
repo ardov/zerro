@@ -1,4 +1,11 @@
-import { TAccountId, TFxCode, TISODate, TTagId, TUnits } from 'shared/types'
+import {
+  TAccountId,
+  TFxCode,
+  TISODate,
+  TMerchantId,
+  TTagId,
+  TUnits,
+} from 'shared/types'
 
 // GOALS
 export enum goalType {
@@ -17,7 +24,7 @@ export enum recordType {
   tagOrder = 'tagOrder',
 }
 
-export type Goal = {
+export type TGoal = {
   type: goalType
   amount: TUnits
   end?: TISODate
@@ -27,31 +34,42 @@ export type Goal = {
 export type TTagMetaData = {
   comment?: string
   currency?: TFxCode
+  carryNegatives?: boolean
+  keepIncome?: boolean
 }
 
 // TAG TREE
-export type TTagTree = {
+export type TTagTree = Array<{
   groupName: string
-  tags: {
+  tags: Array<{
     id: TTagId
     children?: TTagId[]
-  }[]
-}[]
+  }>
+}>
+
+export type TBudget = {
+  value: TUnits
+  fx: TFxCode
+}
 
 type TRecordGoals = {
   type: recordType.goals
-  date: string // YYYY-MM-DD
-  payload: { [tagId: TTagId]: Goal }
+  date: TISODate
+  payload: Record<TTagId, TGoal>
 }
 type TRecordFxRates = {
   type: recordType.fxRates
-  date: string // YYYY-MM-DD
-  payload: { [id: TFxCode]: number }
+  date: TISODate
+  payload: Record<TFxCode, number>
 }
 type TRecordBudgets = {
   type: recordType.budgets
-  date: string // YYYY-MM-DD
-  payload: { [id: TTagId]: number } // Save currency? Budgets for accounts
+  date: TISODate
+  payload: {
+    tags?: Record<TTagId, TBudget>
+    accounts?: Record<TAccountId, TBudget>
+    merchants?: Record<TMerchantId, TBudget>
+  }
 }
 type TRecordLinkedAccounts = {
   type: recordType.linkedAccounts
