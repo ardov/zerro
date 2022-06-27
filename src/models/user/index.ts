@@ -1,3 +1,4 @@
-export { getUsers } from './model'
-export { getRootUser } from './model'
-export { getUserInstrumentId } from './model'
+export { convertUser } from './zm-adapter'
+export * from './model'
+
+export type { TUser, TUserId, TZmUser } from 'shared/types'

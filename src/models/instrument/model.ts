@@ -1,22 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit'
-import {
-  TFxIdMap,
-  TInstrument,
-  TInstrumentId,
-  TZmInstrument,
-} from 'shared/types'
+import { TFxIdMap, TInstrumentId } from 'shared/types'
 import { RootState } from 'models'
 import { getUserInstrumentId } from 'models/user'
-import { msToUnix, unixToMs } from 'shared/helpers/date'
-
-export const convertInstrument = {
-  toClient: (el: TZmInstrument): TInstrument => {
-    return { ...el, changed: unixToMs(el.changed) }
-  },
-  toServer: (el: TInstrument): TZmInstrument => {
-    return { ...el, changed: msToUnix(el.changed) }
-  },
-}
 
 export const getInstruments = (state: RootState) =>
   state.data.current.instrument

@@ -113,8 +113,6 @@ export type TZmUser = {
 
 export type TUser = Modify<TZmUser, { changed: TMsTime; paidTill: TMsTime }>
 
-export type TUserPopulated = TUser & { fxCode: TFxCode }
-
 // ---------------------------------------------------------------------
 // ACCOUNT
 // ---------------------------------------------------------------------

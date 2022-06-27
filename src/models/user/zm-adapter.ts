@@ -1,5 +1,5 @@
-import { TUser, TZmUser } from 'shared/types'
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
+import { TUser, TZmUser } from 'shared/types'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 
 export const convertUser: TZmAdapter<TZmUser, TUser> = {
@@ -18,13 +18,3 @@ export const convertUser: TZmAdapter<TZmUser, TUser> = {
     }
   },
 }
-
-// export const populateUser = (
-//   user: TUser,
-//   fxIdMap: TFxIdMap
-// ): TUserPopulated => {
-//   return {
-//     ...user,
-//     fxCode: fxIdMap[user.currency],
-//   }
-// }
