@@ -1,18 +1,18 @@
-import { TRawReminderMarker, TZmReminderMarker } from 'shared/types'
+import { TReminderMarker, TZmReminderMarker } from 'shared/types'
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 
 export const convertReminderMarker: TZmAdapter<
   TZmReminderMarker,
-  TRawReminderMarker
+  TReminderMarker
 > = {
-  toClient: (el: TZmReminderMarker): TRawReminderMarker => {
+  toClient: (el: TZmReminderMarker): TReminderMarker => {
     return {
       ...el,
       changed: unixToMs(el.changed),
     }
   },
-  toServer: (el: TRawReminderMarker): TZmReminderMarker => {
+  toServer: (el: TReminderMarker): TZmReminderMarker => {
     return {
       ...el,
       changed: msToUnix(el.changed),

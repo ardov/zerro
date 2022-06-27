@@ -3,7 +3,7 @@ import { useAppSelector } from 'models'
 import { getPopulatedTags, getTagsTree, TagTreeNode } from 'models/tags'
 import { Box, Autocomplete, TextField } from '@mui/material'
 import { EmojiIcon } from 'shared/ui/EmojiIcon'
-import { TTag } from 'shared/types'
+import { TTagPopulated } from 'shared/types'
 import TagChip from './TagChip'
 import ru from 'convert-layout/ru'
 
@@ -31,7 +31,7 @@ export type TagSelectProps = BaseTagSelectProps & {
   label?: string
 }
 
-type TagOption = TTag | TagTreeNode
+type TagOption = TTagPopulated | TagTreeNode
 
 export const TagSelect: FC<TagSelectProps> = props => {
   const { onChange, tagFilters, multiple, value, label, ...rest } = props

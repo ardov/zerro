@@ -5,16 +5,16 @@ import {
   OptionalExceptFor,
   TAccountId,
   TDateDraft,
-  TRawAccount,
+  TAccount,
 } from 'shared/types'
 import { toISODate } from 'shared/helpers/date'
 
 type TAccountDraft = Modify<
-  OptionalExceptFor<TRawAccount, 'user' | 'instrument' | 'title'>,
+  OptionalExceptFor<TAccount, 'user' | 'instrument' | 'title'>,
   { startDate?: TDateDraft }
 >
 
-export function makeAccount(draft: TAccountDraft): TRawAccount {
+export function makeAccount(draft: TAccountDraft): TAccount {
   return {
     // Required
     user: draft.user,

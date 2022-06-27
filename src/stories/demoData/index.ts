@@ -1,7 +1,7 @@
 import {
   accountType,
   TDiff,
-  TRawUser,
+  TUser,
   TZmCompany,
   TZmCountry,
   TZmInstrument,
@@ -17,7 +17,7 @@ import { toISODate } from 'shared/helpers/date'
 const NOW = Date.now()
 const DAY = 1000 * 60 * 60 * 24
 
-const USER: TRawUser = {
+const USER: TUser = {
   id: 777,
   changed: NOW,
   currency: 2, // RUB

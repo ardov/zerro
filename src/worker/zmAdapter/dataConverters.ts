@@ -2,17 +2,17 @@ import { getBudgetId } from 'models/budgets'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 import {
   TInstrument,
-  TRawUser,
-  TRawCountry,
+  TUser,
+  TCountry,
   TCompany,
   TMerchant,
-  TRawReminder,
+  TReminder,
   TZmReminderMarker,
-  TRawReminderMarker,
-  TRawAccount,
-  TRawTag,
+  TReminderMarker,
+  TAccount,
+  TTag,
   TBudget,
-  TRawTransaction,
+  TTransaction,
   TZmAccount,
   TZmReminder,
   TZmTransaction,
@@ -46,19 +46,19 @@ export const dataConverters = {
   },
 
   country: {
-    toClient: (el: TRawCountry): TRawCountry => el,
-    toServer: (el: TRawCountry): TRawCountry => el,
+    toClient: (el: TCountry): TCountry => el,
+    toServer: (el: TCountry): TCountry => el,
   },
 
   user: {
-    toClient: (el: TRawUser): TRawUser => {
+    toClient: (el: TUser): TUser => {
       return {
         ...el,
         changed: unixToMs(el.changed),
         paidTill: unixToMs(el.paidTill),
       }
     },
-    toServer: (el: TRawUser): TRawUser => {
+    toServer: (el: TUser): TUser => {
       return {
         ...el,
         changed: msToUnix(el.changed),
@@ -68,21 +68,21 @@ export const dataConverters = {
   },
 
   account: {
-    toClient: (el: TZmAccount): TRawAccount => ({
+    toClient: (el: TZmAccount): TAccount => ({
       ...el,
       changed: unixToMs(el.changed),
     }),
-    toServer: (el: TRawAccount): TZmAccount => ({
+    toServer: (el: TAccount): TZmAccount => ({
       ...el,
       changed: msToUnix(el.changed),
     }),
   },
 
   tag: {
-    toClient: (el: TRawTag): TRawTag => {
+    toClient: (el: TTag): TTag => {
       return { ...el, changed: unixToMs(el.changed) }
     },
-    toServer: (el: TRawTag): TRawTag => {
+    toServer: (el: TTag): TTag => {
       return { ...el, changed: msToUnix(el.changed) }
     },
   },
@@ -97,24 +97,24 @@ export const dataConverters = {
   },
 
   reminder: {
-    toClient: (el: TZmReminder): TRawReminder => ({
+    toClient: (el: TZmReminder): TReminder => ({
       ...el,
       changed: unixToMs(el.changed),
     }),
-    toServer: (el: TRawReminder): TZmReminder => ({
+    toServer: (el: TReminder): TZmReminder => ({
       ...el,
       changed: msToUnix(el.changed),
     }),
   },
 
   reminderMarker: {
-    toClient: (el: TZmReminderMarker): TRawReminderMarker => {
+    toClient: (el: TZmReminderMarker): TReminderMarker => {
       return {
         ...el,
         changed: unixToMs(el.changed),
       }
     },
-    toServer: (el: TRawReminderMarker): TZmReminderMarker => {
+    toServer: (el: TReminderMarker): TZmReminderMarker => {
       return {
         ...el,
         changed: msToUnix(el.changed),
@@ -123,12 +123,12 @@ export const dataConverters = {
   },
 
   transaction: {
-    toClient: (el: TZmTransaction): TRawTransaction => ({
+    toClient: (el: TZmTransaction): TTransaction => ({
       ...el,
       changed: unixToMs(el.changed),
       created: unixToMs(el.created),
     }),
-    toServer: (el: TRawTransaction): TZmTransaction => ({
+    toServer: (el: TTransaction): TZmTransaction => ({
       ...el,
       changed: msToUnix(el.changed),
       created: msToUnix(el.created),

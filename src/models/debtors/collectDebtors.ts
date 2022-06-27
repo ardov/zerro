@@ -10,7 +10,7 @@ import {
   TInstrumentId,
   TMerchant,
   TMerchantId,
-  TRawTransaction,
+  TTransaction,
   TrType,
   TSelector,
 } from 'shared/types'
@@ -25,7 +25,7 @@ type TDebtor = {
   merchantId?: TMerchantId
   merchantName?: string
   payeeNames: string[]
-  transactions: TRawTransaction[]
+  transactions: TTransaction[]
   balance: TFxAmount
 }
 
@@ -38,7 +38,7 @@ export const getDebtors: TSelector<ById<TDebtor>> = createSelector(
 )
 
 function collectDebtors(
-  trList: TRawTransaction[],
+  trList: TTransaction[],
   merchants: ById<TMerchant>,
   debtAccId?: TAccountId
 ): ById<TDebtor> {

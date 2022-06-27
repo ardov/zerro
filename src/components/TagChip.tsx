@@ -3,9 +3,9 @@ import { useAppSelector } from 'models'
 import { getPopulatedTags } from 'models/tags'
 import { Chip, ChipProps } from '@mui/material'
 import { CloseIcon } from 'shared/ui/Icons'
-import { TTag, TTagId } from 'shared/types'
+import { TTagPopulated, TTagId } from 'shared/types'
 
-function getTagLabel(tag?: TTag) {
+function getTagLabel(tag?: TTagPopulated) {
   if (!tag) return null
   if (tag.icon) return `${tag.symbol} ${tag.name}`
   return tag.title

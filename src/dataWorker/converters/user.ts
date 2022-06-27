@@ -1,8 +1,8 @@
-import { TFxIdMap, TRawUser, TUser, TZmUser } from 'shared/types'
+import { TFxIdMap, TUser, TUserPopulated, TZmUser } from 'shared/types'
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 
-export const convertUser: TZmAdapter<TZmUser, TRawUser> = {
+export const convertUser: TZmAdapter<TZmUser, TUser> = {
   toClient: el => {
     return {
       ...el,
@@ -19,7 +19,10 @@ export const convertUser: TZmAdapter<TZmUser, TRawUser> = {
   },
 }
 
-export const populateUser = (user: TRawUser, fxIdMap: TFxIdMap): TUser => {
+export const populateUser = (
+  user: TUser,
+  fxIdMap: TFxIdMap
+): TUserPopulated => {
   return {
     ...user,
     fxCode: fxIdMap[user.currency],

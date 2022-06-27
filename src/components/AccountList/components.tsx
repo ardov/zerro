@@ -8,11 +8,11 @@ import {
   ListItemButton,
 } from '@mui/material'
 import { Amount } from 'components/Amount'
-import { TPopulatedAccount } from 'shared/types'
+import { TAccountPopulated } from 'shared/types'
 import { useAppDispatch } from 'models'
 import { setInBudget } from 'models/accounts'
 
-export const Account: FC<{ account: TPopulatedAccount } & ListItemButtonProps> =
+export const Account: FC<{ account: TAccountPopulated } & ListItemButtonProps> =
   ({ account, sx, ...rest }) => {
     const dispatch = useAppDispatch()
     const toggleInBalance = useCallback(

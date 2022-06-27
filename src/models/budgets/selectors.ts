@@ -3,7 +3,7 @@ import { round } from 'shared/helpers/currencyHelpers'
 import { RootState } from 'models'
 import { convertCurrency } from 'models/instruments'
 import {
-  PopulatedBudget,
+  TPopulatedBudget,
   TBudgetId,
   TDateDraft,
   TISOMonth,
@@ -22,7 +22,7 @@ export const getBudget = (state: RootState, tag: TTagId, month: TDateDraft) =>
 const getPopulatedBudgets = createSelector(
   [getBudgets, getTagMeta, convertCurrency],
   (budgets, meta, convert) => {
-    let result: Record<TBudgetId, PopulatedBudget> = {}
+    let result: Record<TBudgetId, TPopulatedBudget> = {}
     keys(budgets).forEach(id => {
       const budget = budgets[id]
       const { tag, outcome } = budget
@@ -44,7 +44,7 @@ export const getBudgetsByMonthAndTag = createSelector(
   [getPopulatedBudgets],
   budgets => {
     // TODO: DATE FORMAT
-    let result: { [month: TISOMonth]: Record<TTagId, PopulatedBudget> } = {}
+    let result: { [month: TISOMonth]: Record<TTagId, TPopulatedBudget> } = {}
     keys(budgets).forEach(id => {
       const { date, tag, outcome } = budgets[id]
       // skip old goals

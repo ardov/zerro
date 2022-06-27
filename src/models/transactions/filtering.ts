@@ -1,7 +1,7 @@
 import {
   TAccountId,
   TTagId,
-  TRawTransaction,
+  TTransaction,
   TrType,
   TDateDraft,
 } from 'shared/types'
@@ -27,7 +27,7 @@ type ConditionRule =
     }
 
 type DefaultConditions = {
-  [key in keyof TRawTransaction]?: ConditionRule
+  [key in keyof TTransaction]?: ConditionRule
 }
 
 type CustomConditions = {
@@ -53,7 +53,7 @@ export const checkRaw =
     conditions: FilterConditions | FilterConditions[] = {},
     operator: OperatorType = 'OR'
   ) =>
-  (tr: TRawTransaction) => {
+  (tr: TTransaction) => {
     if (Array.isArray(conditions)) {
       const results = conditions.map(cond => checkConditions(tr, cond))
       return operator === 'AND' ? results.every(Boolean) : results.some(Boolean)
@@ -61,7 +61,7 @@ export const checkRaw =
     return checkConditions(tr, conditions)
   }
 
-const checkConditions = (tr: TRawTransaction, conditions: FilterConditions) => {
+const checkConditions = (tr: TTransaction, conditions: FilterConditions) => {
   return (
     // Always check is transaction deleted or not (usually we don't want deleted transactions)
     checkDeleted(tr, conditions.showDeleted) &&
@@ -151,26 +151,23 @@ const checkRule = (value: any, rule?: ConditionRule) => {
   return true
 }
 
-const checkSearch = (
-  tr: TRawTransaction,
-  search?: FilterConditions['search']
-) => {
+const checkSearch = (tr: TTransaction, search?: FilterConditions['search']) => {
   if (!search) return true
   if (tr.comment?.toUpperCase().includes(search.toUpperCase())) return true
   if (tr.payee?.toUpperCase().includes(search.toUpperCase())) return true
   return false
 }
 
-const checkType = (tr: TRawTransaction, type?: FilterConditions['type']) =>
+const checkType = (tr: TTransaction, type?: FilterConditions['type']) =>
   !type || getType(tr) === type
 
 const checkDeleted = (
-  tr: TRawTransaction,
+  tr: TTransaction,
   showDeleted?: FilterConditions['showDeleted']
 ) => showDeleted || !isDeleted(tr)
 
 const checkDate = (
-  tr: TRawTransaction,
+  tr: TTransaction,
   dateFrom?: FilterConditions['dateFrom'],
   dateTo?: FilterConditions['dateTo']
 ) => {
@@ -180,7 +177,7 @@ const checkDate = (
 }
 
 const checkAccounts = (
-  tr: TRawTransaction,
+  tr: TTransaction,
   accountsFrom?: FilterConditions['accountsFrom'],
   accountsTo?: FilterConditions['accountsTo']
 ) => {
@@ -193,7 +190,7 @@ const checkAccounts = (
 }
 
 const checkTags = (
-  tr: TRawTransaction,
+  tr: TTransaction,
   tags?: FilterConditions['mainTags'],
   matchType: 'main' | 'any' = 'any'
 ) => {
@@ -206,7 +203,7 @@ const checkTags = (
 }
 
 const checkAmount = (
-  tr: TRawTransaction,
+  tr: TTransaction,
   amount?: FilterConditions['amountFrom'],
   compareType: 'greaterOrEqual' | 'lessOrEqual' = 'lessOrEqual'
 ) => {
@@ -216,7 +213,7 @@ const checkAmount = (
 }
 
 const checkIsNew = (
-  tr: TRawTransaction,
+  tr: TTransaction,
   condition?: FilterConditions['isNew']
 ) => {
   if (condition === undefined) return true

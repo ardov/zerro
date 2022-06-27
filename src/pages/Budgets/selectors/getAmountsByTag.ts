@@ -8,7 +8,7 @@ import { getAccTagMap } from 'models/hiddenData/accTagMap'
 import { getType } from 'models/transactions/helpers'
 import { getMonthDates } from './getMonthDates'
 import { getInBudgetAccounts } from 'models/accounts'
-import { PopulatedBudget, TISOMonth, TSelector, TTagId } from 'shared/types'
+import { TPopulatedBudget, TISOMonth, TSelector, TTagId } from 'shared/types'
 import { withPerf } from 'shared/helpers/performance'
 import { RootState } from 'models'
 import { getTransactionsHistory } from 'models/transactions'
@@ -225,7 +225,7 @@ function calcTagGroupAmounts(data: {
   children: TTagId[]
   incomes: Record<TTagId, number>
   outcomes: Record<TTagId, number>
-  budgets: Record<TTagId, PopulatedBudget>
+  budgets: Record<TTagId, TPopulatedBudget>
   linkedTransfers: Record<TTagId, number>
   prevMonth?: TagGroupAmounts
 }): TagGroupAmounts {

@@ -4,7 +4,7 @@ import {
   TAccountId,
   TMerchantId,
   TTagId,
-  TRawTransaction,
+  TTransaction,
   TrType,
   TISOMonth,
 } from 'shared/types'
@@ -13,7 +13,7 @@ import { TFxAmount } from './helpers/fxAmount'
 
 type TAccumulated = {
   amount: TFxAmount
-  transactions: TRawTransaction[]
+  transactions: TTransaction[]
 }
 
 type TMonthInfo = {
@@ -48,7 +48,7 @@ const makeMonthInfo = (date: TMonthInfo['date']): TMonthInfo => ({
 })
 
 export function getRealMoneyFlow(
-  transactions: TRawTransaction[],
+  transactions: TTransaction[],
   inBudgetAccIds: TAccountId[],
   debtAccId?: TAccountId
 ): TMoneyFlowByMonth {
@@ -114,7 +114,7 @@ export function getRealMoneyFlow(
 
   function addToTotal(
     acc: TMonthInfo,
-    tr: TRawTransaction,
+    tr: TTransaction,
     inBudgetAccs: TAccountId[]
   ): void {
     if (inBudgetAccs.includes(tr.incomeAccount)) {
@@ -135,7 +135,7 @@ export function getRealMoneyFlow(
 
   function addToAccumulated(
     acc: TAccumulated,
-    tr: TRawTransaction,
+    tr: TTransaction,
     mode: 'income' | 'outcome'
   ) {
     const instrument = tr[`${mode}Instrument`]
@@ -148,15 +148,15 @@ export function getRealMoneyFlow(
   return result
 }
 
-function getTrMonth(tr: TRawTransaction): TMonthInfo['date'] {
+function getTrMonth(tr: TTransaction): TMonthInfo['date'] {
   return toISOMonth(tr.date)
 }
 
-function getMainTag(tr: TRawTransaction): TTagId | null {
+function getMainTag(tr: TTransaction): TTagId | null {
   return tr.tag?.[0] || null
 }
 
-function isInBudget(tr: TRawTransaction, inBudgetAccs: TAccountId[]): boolean {
+function isInBudget(tr: TTransaction, inBudgetAccs: TAccountId[]): boolean {
   return (
     inBudgetAccs.includes(tr.incomeAccount) ||
     inBudgetAccs.includes(tr.outcomeAccount)

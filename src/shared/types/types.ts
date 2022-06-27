@@ -70,9 +70,7 @@ export type TZmCountry = {
   domain: string
 }
 
-export type TRawCountry = TZmCountry
-
-// export type TCountry = TZmCountry & { fxCode: TFxCode }
+export type TCountry = TZmCountry
 
 // ---------------------------------------------------------------------
 // COMPANY
@@ -113,9 +111,9 @@ export type TZmUser = {
   subscription: '10yearssubscription' | '1MonthSubscription' | string
 }
 
-export type TRawUser = Modify<TZmUser, { changed: TMsTime; paidTill: TMsTime }>
+export type TUser = Modify<TZmUser, { changed: TMsTime; paidTill: TMsTime }>
 
-export type TUser = TRawUser & { fxCode: TFxCode }
+export type TUserPopulated = TUser & { fxCode: TFxCode }
 
 // ---------------------------------------------------------------------
 // ACCOUNT
@@ -163,25 +161,20 @@ export type TZmAccount = {
   payoffInterval: 'month' | 'year' | null
 }
 
-export type TRawAccount = Modify<
+export type TAccount = Modify<
   TZmAccount,
   {
     changed: TMsTime
-    balance: TMilliUnits
-    startBalance: TMilliUnits
-    creditLimit: TMilliUnits
+    // balance: TMilliUnits
+    // startBalance: TMilliUnits
+    // creditLimit: TMilliUnits
   }
 >
 
-export type TPopulatedAccount = TRawAccount & {
+export type TAccountPopulated = TAccount & {
   convertedBalance: number
   convertedStartBalance: number
   inBudget: boolean
-}
-
-export type TAccount = TRawAccount & {
-  inBudget: boolean
-  fxCode: TFxCode
 }
 
 // ---------------------------------------------------------------------
@@ -222,9 +215,9 @@ export type TZmTag = {
   required: boolean | null
 }
 
-export type TRawTag = Modify<TZmTag, { changed: TMsTime }>
+export type TTag = Modify<TZmTag, { changed: TMsTime }>
 
-export type TTag = TRawTag & {
+export type TTagPopulated = TTag & {
   name: string // Tag name without emoji
   uniqueName: string // If name not unique adds parent name
   symbol: string // Emoji
@@ -266,7 +259,7 @@ export type TBudget = Modify<
   id: TBudgetId
 }
 
-export type PopulatedBudget = TBudget & {
+export type TPopulatedBudget = TBudget & {
   convertedOutcome: number
   instrument: TInstrumentId | null
 }
@@ -299,17 +292,7 @@ export interface TZmReminder {
   notify: boolean
 }
 
-export type TRawReminder = Modify<
-  TZmReminder,
-  {
-    changed: TMsTime
-  }
->
-
-export type TReminder = TRawReminder & {
-  incomeFxCode: TFxCode
-  outcomeFxCode: TFxCode
-}
+export type TReminder = Modify<TZmReminder, { changed: TMsTime }>
 
 // ---------------------------------------------------------------------
 // REMINDER_MARKER
@@ -336,7 +319,7 @@ export type TZmReminderMarker = {
   state: 'planned' | 'processed' | 'deleted'
   notify: boolean
 }
-export type TRawReminderMarker = Modify<
+export type TReminderMarker = Modify<
   TZmReminderMarker,
   {
     changed: TMsTime
@@ -344,11 +327,6 @@ export type TRawReminderMarker = Modify<
     outcome: TMilliUnits
   }
 >
-
-export type TReminderMarker = TRawReminderMarker & {
-  incomeFxCode: TFxCode
-  outcomeFxCode: TFxCode
-}
 
 // ---------------------------------------------------------------------
 // TRANSACTION
@@ -397,7 +375,7 @@ export type TZmTransaction = {
   longitude: number | null
 }
 
-export type TRawTransaction = Modify<
+export type TTransaction = Modify<
   TZmTransaction,
   {
     changed: TMsTime
@@ -406,20 +384,13 @@ export type TRawTransaction = Modify<
     outcome: TMilliUnits
     opIncome: TMilliUnits | null
     opOutcome: TMilliUnits | null
+    //   time: TMsTime
+    //   type: TrType
+    //   mainTag: TTagId | null
+    //   incomeBalanceBefore: TMilliUnits
+    //   outcomeBalanceBefore: TMilliUnits
   }
 >
-
-export type TTransaction = TRawTransaction & {
-  incomeFxCode: TFxCode
-  outcomeFxCode: TFxCode
-  opIncomeFxCode: TFxCode | null
-  opOutcomeFxCode: TFxCode | null
-  time: TMsTime
-  type: TrType
-  mainTag: TTagId | null
-  incomeBalanceBefore: TMilliUnits
-  outcomeBalanceBefore: TMilliUnits
-}
 
 // ---------------------------------------------------------------------
 // DELETION
@@ -458,16 +429,16 @@ export interface TDiff {
   serverTimestamp?: number
   deletion?: TDeletionObject[]
   instrument?: TInstrument[]
-  country?: TRawCountry[]
+  country?: TCountry[]
   company?: TCompany[]
-  user?: TRawUser[]
-  account?: TRawAccount[]
+  user?: TUser[]
+  account?: TAccount[]
   merchant?: TMerchant[]
-  tag?: TRawTag[]
+  tag?: TTag[]
   budget?: TBudget[]
-  reminder?: TRawReminder[]
-  reminderMarker?: TRawReminderMarker[]
-  transaction?: TRawTransaction[]
+  reminder?: TReminder[]
+  reminderMarker?: TReminderMarker[]
+  transaction?: TTransaction[]
 }
 
 export type TZmRequest = TZmDiff & {
@@ -496,16 +467,16 @@ export type TLocalData = Omit<TZmDiff, 'deletion'>
 export type TDataStore = {
   serverTimestamp:  number
   instrument:       ById<                       TInstrument>
-  country:          ById<                       TRawCountry>
+  country:          ById<                       TCountry>
   company:          ById<                       TCompany>
-  user:             ById<                       TRawUser>
-  account:          Record< TAccountId,         TRawAccount>
+  user:             ById<                       TUser>
+  account:          Record< TAccountId,         TAccount>
   merchant:         Record< TMerchantId,        TMerchant>
-  tag:              Record< TTagId,             TRawTag>
+  tag:              Record< TTagId,             TTag>
   budget:           Record< TBudgetId,          TBudget>
-  reminder:         Record< TReminderId,        TRawReminder>
-  reminderMarker:   Record< TReminderMarkerId,  TRawReminderMarker>
-  transaction:      Record< TTransactionId,     TRawTransaction>
+  reminder:         Record< TReminderId,        TReminder>
+  reminderMarker:   Record< TReminderMarkerId,  TReminderMarker>
+  transaction:      Record< TTransactionId,     TTransaction>
 }
 
 export type TDataStorePatch = Partial<TDataStore> & {

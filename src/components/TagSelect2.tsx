@@ -14,10 +14,10 @@ import {
 } from '@mui/material'
 import { AddIcon } from 'shared/ui/Icons'
 import { EmojiIcon } from 'shared/ui/EmojiIcon'
-import { TTag } from 'shared/types'
+import { TTagPopulated } from 'shared/types'
 
 type TagType = 'income' | 'outcome' | undefined | null
-type TagNode = TagTreeNode | TTag
+type TagNode = TagTreeNode | TTagPopulated
 type TagSelectProps = {
   onChange: (id: string) => void
   trigger?: React.ReactElement
@@ -198,7 +198,7 @@ const makeTagChecker = (props: {
   const { search = '', tagType = null, exclude = [], showNull = false } = props
   const checkSearch = (tag: TagNode, search: string) => {
     if (includes(tag.title, search)) return true
-    const children = tag.children as TTag[]
+    const children = tag.children as TTagPopulated[]
     return children?.some(child => includes(child.title, search))
   }
   return function (tag: TagNode) {

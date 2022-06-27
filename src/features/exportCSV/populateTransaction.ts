@@ -1,10 +1,10 @@
 import {
   TInstrument,
   Modify,
-  TRawTag,
-  TRawTransaction,
+  TTag,
+  TTransaction,
   TrType,
-  TRawAccount,
+  TAccount,
   TTagId,
   ById,
 } from 'shared/types'
@@ -12,27 +12,27 @@ import { getType } from 'models/transactions/helpers'
 
 interface DataSources {
   instruments: { [id: number]: TInstrument }
-  accounts: { [id: string]: TRawAccount }
-  tags: { [id: string]: TRawTag }
+  accounts: { [id: string]: TAccount }
+  tags: { [id: string]: TTag }
 }
 
 export type PopulatedTransaction = Modify<
-  TRawTransaction,
+  TTransaction,
   {
     incomeInstrument: TInstrument
-    incomeAccount: TRawAccount
+    incomeAccount: TAccount
     opIncomeInstrument: TInstrument
     outcomeInstrument: TInstrument
-    outcomeAccount: TRawAccount
+    outcomeAccount: TAccount
     opOutcomeInstrument: TInstrument
-    tag: TRawTag[] | null
+    tag: TTag[] | null
     type: TrType
   }
 >
 
 export const populateTransaction = (
   { instruments, accounts, tags }: DataSources,
-  raw: TRawTransaction
+  raw: TTransaction
 ) => ({
   ...raw,
   incomeInstrument: instruments[raw.incomeInstrument],
@@ -46,7 +46,7 @@ export const populateTransaction = (
   type: getType(raw),
 })
 
-function mapTags(ids: TTagId[] | null, tags: ById<TRawTag>) {
+function mapTags(ids: TTagId[] | null, tags: ById<TTag>) {
   // TODO: Надо что-то придумать с null тегом 🤔    ⤵
   return ids && ids.length ? ids.map(id => tags[id + '']) : null
 }

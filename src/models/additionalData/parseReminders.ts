@@ -2,7 +2,7 @@ import {
   TAccountId,
   TTagId,
   TFxCode,
-  TRawReminder,
+  TReminder,
   TReminderId,
   TISODate,
   TMerchantId,
@@ -36,11 +36,11 @@ export type TAggregatedResult = {
   linkedDebtors: Record<TMerchantId, TTagId>
   tagMeta: Record<TTagId, TTagMetaData>
   tagOrder: TTagTree
-  dataReminders: { [dataId: string]: TRawReminder }
+  dataReminders: { [dataId: string]: TReminder }
 }
 
 export function parseReminders(
-  reminders: Record<TReminderId, TRawReminder>
+  reminders: Record<TReminderId, TReminder>
 ): TAggregatedResult {
   let res: TAggregatedResult = {
     goals: {},

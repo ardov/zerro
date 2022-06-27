@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import styled from '@emotion/styled'
-import { TRawTransaction as ITransaction, TrType } from 'shared/types'
+import { TTransaction as ITransaction, TrType } from 'shared/types'
 import { Theme, TypographyVariant } from '@mui/material'
 import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'
 import { sendEvent } from 'shared/helpers/tracking'

@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { populate } from './populate'
 import { convertCurrency } from 'models/instruments'
-import { TPopulatedAccount } from 'shared/types'
+import { TAccountPopulated } from 'shared/types'
 import { RootState } from 'models'
 import { DATA_ACC_NAME } from '../hiddenData/constants'
 
@@ -12,7 +12,7 @@ export const getAccounts = (state: RootState) => state.data.current.account
 export const getPopulatedAccounts = createSelector(
   [convertCurrency, getAccounts],
   (convert, accounts) => {
-    const result = {} as { [x: string]: TPopulatedAccount }
+    const result = {} as { [x: string]: TAccountPopulated }
     for (const id in accounts) {
       result[id] = populate({ convert }, accounts[id])
     }

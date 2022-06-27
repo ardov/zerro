@@ -8,7 +8,7 @@ import { getAmountsById } from 'pages/Budgets/selectors'
 import { useMonth } from 'pages/Budgets/pathHooks'
 import { DragModeContext } from '../DnDContext'
 
-import { TTag } from 'shared/types'
+import { TTagPopulated } from 'shared/types'
 
 export const useStyles = makeStyles(theme => ({
   panelRoot: {
@@ -36,7 +36,7 @@ type TagGroupProps = {
   metric: 'available' | 'budgeted' | 'outcome'
   isVisible: boolean
   isExpanded: boolean
-  tagChildren: TTag[]
+  tagChildren: TTagPopulated[]
   onExpand: (id: string, state: boolean) => void
   onExpandAll: (state: boolean) => void
   openDetails: (id: string) => void

@@ -1,13 +1,13 @@
 import { int2rgb, int2hex, getColorForString } from 'shared/helpers/color'
 import { sendEvent } from 'shared/helpers/tracking'
 import toArray from 'lodash/toArray'
-import { ById, TTag, TRawTag } from 'shared/types'
+import { ById, TTagPopulated, TTag } from 'shared/types'
 import iconsMap from './iconsMap.json'
 import { nullTag } from './makeTag'
 
-export default function populateTags(rawTags: ById<TRawTag>) {
+export default function populateTags(rawTags: ById<TTag>) {
   let tags: {
-    [x: string]: TTag
+    [x: string]: TTagPopulated
   } = { null: makePopulatedTag(nullTag) }
   let names: { [key: string]: number } = {}
 
@@ -34,7 +34,7 @@ export default function populateTags(rawTags: ById<TRawTag>) {
   return tags
 }
 
-function makePopulatedTag(tag: TRawTag): TTag {
+function makePopulatedTag(tag: TTag): TTagPopulated {
   return {
     ...tag,
     children: [],
@@ -56,7 +56,7 @@ function getName(title: string) {
     return title
   }
 }
-function getSymbol(tag: TRawTag) {
+function getSymbol(tag: TTag) {
   if (tag.id === 'null') return '?'
   if (tag.icon) {
     if (iconsMap[tag.icon]) {

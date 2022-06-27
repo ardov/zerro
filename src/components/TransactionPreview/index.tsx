@@ -30,7 +30,7 @@ import {
   recreateTransaction,
   restoreTransaction,
 } from 'models/transactions/thunks'
-import { TRawTransaction } from 'shared/types'
+import { TTransaction } from 'shared/types'
 import { toISODate } from 'shared/helpers/date'
 
 type TransactionPreviewProps = {
@@ -330,7 +330,7 @@ const SaveButton: FC<{ visible: boolean; onSave: () => void }> = ({
   </Box>
 )
 
-const RateToWords: FC<{ tr: TRawTransaction }> = ({ tr }) => {
+const RateToWords: FC<{ tr: TTransaction }> = ({ tr }) => {
   const trType = getType(tr)
   const { income, opIncome, outcome, opOutcome } = tr
   const instruments = useAppSelector(getInstruments)

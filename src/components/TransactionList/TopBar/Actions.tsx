@@ -29,7 +29,7 @@ import { BulkEditModal } from './BulkEditModal'
 import { getType, isNew } from 'models/transactions/helpers'
 import { getTransactions } from 'models/transactions'
 import { Divider, ListItemIcon, ListItemText } from '@mui/material'
-import { TRawTransaction } from 'shared/types'
+import { TTransaction } from 'shared/types'
 import { round } from 'shared/helpers/currencyHelpers'
 import { applyClientPatch } from 'models/data'
 import { sendEvent } from 'shared/helpers/tracking'
@@ -275,7 +275,7 @@ const Actions: FC<ActionsProps> = ({
   )
 }
 
-function getAvailableActions(transactions: TRawTransaction[]) {
+function getAvailableActions(transactions: TTransaction[]) {
   const { incomes, outcomes, transfers } = getTypes(transactions)
   const totalOutcome = outcomes.reduce((sum, tr) => round(sum + tr.outcome), 0)
   const totalIncome = incomes.reduce((sum, tr) => round(sum + tr.income), 0)
@@ -336,13 +336,13 @@ function getAvailableActions(transactions: TRawTransaction[]) {
   }
 }
 
-function combineToOutcome(transactions: TRawTransaction[]) {
+function combineToOutcome(transactions: TTransaction[]) {
   const { incomes, outcomes } = getTypes(transactions)
   const outcome = outcomes[0]
   const outcomeInstrument = outcome.outcomeInstrument
   let outcomeSum = outcome.outcome
   const outcomeAccount = outcome.outcomeAccount
-  const modifiedIncomes: TRawTransaction[] = incomes.map(tr => {
+  const modifiedIncomes: TTransaction[] = incomes.map(tr => {
     outcomeSum = round(outcomeSum - tr.income)
     if (tr.incomeAccount === outcomeAccount) {
       // Same account -> just delete income
@@ -370,13 +370,13 @@ function combineToOutcome(transactions: TRawTransaction[]) {
   return modifiedIncomes
 }
 
-function combineToIncome(transactions: TRawTransaction[]) {
+function combineToIncome(transactions: TTransaction[]) {
   const { incomes, outcomes } = getTypes(transactions)
   const income = incomes[0]
   const incomeInstrument = income.incomeInstrument
   let incomeSum = income.income
   const incomeAccount = income.incomeAccount
-  const modifiedOutcomes: TRawTransaction[] = outcomes.map(tr => {
+  const modifiedOutcomes: TTransaction[] = outcomes.map(tr => {
     incomeSum = round(incomeSum - tr.outcome)
     if (tr.outcomeAccount === incomeAccount) {
       // Same account -> just delete outcome
@@ -404,10 +404,10 @@ function combineToIncome(transactions: TRawTransaction[]) {
   return modifiedOutcomes
 }
 
-function getTypes(list: TRawTransaction[] = []) {
-  let incomes: TRawTransaction[] = []
-  let outcomes: TRawTransaction[] = []
-  let transfers: TRawTransaction[] = []
+function getTypes(list: TTransaction[] = []) {
+  let incomes: TTransaction[] = []
+  let outcomes: TTransaction[] = []
+  let transfers: TTransaction[] = []
 
   list?.forEach(tr => {
     let trType = getType(tr)

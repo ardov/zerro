@@ -3,10 +3,10 @@ import { AppThunk } from 'models'
 import { applyClientPatch } from 'models/data'
 import { getRootUser } from 'models/users'
 import { getTag } from 'models/tags'
-import { OptionalExceptFor, TRawTag, TZmTag } from 'shared/types'
+import { OptionalExceptFor, TTag, TZmTag } from 'shared/types'
 import { makeTag } from './makeTag'
 
-type TagDraft = OptionalExceptFor<TRawTag, 'id'>
+type TagDraft = OptionalExceptFor<TTag, 'id'>
 
 export const patchTag =
   (tag: TagDraft): AppThunk =>
@@ -23,7 +23,7 @@ export const patchTag =
   }
 
 export const createTag =
-  (tag: OptionalExceptFor<TRawTag, 'title'>): AppThunk =>
+  (tag: OptionalExceptFor<TTag, 'title'>): AppThunk =>
   (dispatch, getState) => {
     if (hasId(tag)) return dispatch(patchTag(tag))
     if (!tag.title) throw new Error('Trying to create tag without title')
@@ -37,4 +37,4 @@ export const createTag =
     return newTag
   }
 
-const hasId = (tag: Partial<TRawTag>): tag is TagDraft => !!tag.id
+const hasId = (tag: Partial<TTag>): tag is TagDraft => !!tag.id
