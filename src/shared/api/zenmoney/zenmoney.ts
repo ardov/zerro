@@ -7,24 +7,30 @@ import {
   redirectUri,
   tokenEndpoint,
 } from 'shared/config'
-import { TZmRequest, TZmDiff } from 'shared/types'
+import { TZmRequest, TZmDiff } from './types'
+import { TAccessToken } from './types'
 
 const CODE_DATA_KEY = 'auth-code-data'
 const TOKEN_KEY = 'token'
+const FAKE_TOKEN = 'fakeToken'
 
-const ZenApi = { getData, checkCode, getLocalToken, getToken }
-export default ZenApi
+export const zenmoney = { getData, checkCode, getLocalToken, getToken }
 
 async function getData(token: string, diff: TZmDiff = { serverTimestamp: 0 }) {
-  if (!token) throw Error('No token')
-  if (!diffEndpoint)
+  if (!token) {
+    throw Error('No token')
+  }
+  if (!diffEndpoint) {
     throw Error('Fill REACT_APP_DIFF_ENDPOINT in your .env file')
-  if (token === 'fakeToken')
+  }
+  if (token === FAKE_TOKEN) {
+    // If token is fake, pretend we got data from server
     return { ...diff, serverTimestamp: Date.now() / 1000 }
+  }
 
   const body: TZmRequest = {
-    currentClientTimestamp: Math.round(Date.now() / 1000),
     ...diff,
+    currentClientTimestamp: Math.round(Date.now() / 1000),
   }
 
   const options = {
@@ -87,14 +93,7 @@ function getAuthorizationCode() {
   })
 }
 
-interface AccessToken {
-  access_token: string
-  token_type: string
-  expires_in: number
-  refresh_token: string
-}
-
-function getAccessTokenData(authorizationCode: string): Promise<AccessToken> {
+function getAccessTokenData(authorizationCode: string): Promise<TAccessToken> {
   return fetch(`${tokenEndpoint}`, {
     method: 'POST',
     body: JSON.stringify({
@@ -108,7 +107,7 @@ function getAccessTokenData(authorizationCode: string): Promise<AccessToken> {
   }).then(response => response.json())
 }
 
-function storeAccessTokenData({ access_token, expires_in }: AccessToken) {
+function storeAccessTokenData({ access_token, expires_in }: TAccessToken) {
   if (access_token && access_token !== 'null') {
     Cookies.set(TOKEN_KEY, access_token, { expires: expires_in })
     return access_token

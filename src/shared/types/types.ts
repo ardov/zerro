@@ -2,6 +2,7 @@ import { Modify, ById } from './ts-utils'
 import { RootState } from 'models'
 import { goalType } from 'models/hiddenData/constants'
 import iconsMap from 'models/tag/iconsMap.json'
+import { TZmDiff } from 'shared/api/zenmoney'
 
 type TYear = `${number}${number}${number}${number}`
 type TMonth = `${number}${number}`
@@ -404,47 +405,6 @@ export type TZmDeletionObject = {
 export type TDeletionObject = Modify<TZmDeletionObject, { stamp: TMsTime }>
 
 // ---------------------------------------------------------------------
-// DIFF
-// ---------------------------------------------------------------------
-
-export interface TZmDiff {
-  serverTimestamp: TUnixTime
-  deletion?: TZmDeletionObject[]
-  instrument?: TZmInstrument[]
-  country?: TZmCountry[]
-  company?: TZmCompany[]
-  user?: TZmUser[]
-  account?: TZmAccount[]
-  merchant?: TZmMerchant[]
-  tag?: TZmTag[]
-  budget?: TZmBudget[]
-  reminder?: TZmReminder[]
-  reminderMarker?: TZmReminderMarker[]
-  transaction?: TZmTransaction[]
-}
-
-// export interface TDiff {
-//   serverTimestamp?: number
-//   deletion?: TDeletionObject[]
-//   instrument?: TInstrument[]
-//   country?: TCountry[]
-//   company?: TCompany[]
-//   user?: TUser[]
-//   account?: TAccount[]
-//   merchant?: TMerchant[]
-//   tag?: TTag[]
-//   budget?: TBudget[]
-//   reminder?: TReminder[]
-//   reminderMarker?: TReminderMarker[]
-//   transaction?: TTransaction[]
-// }
-
-export type TZmRequest = TZmDiff & {
-  currentClientTimestamp: TUnixTime
-  forceFetch?: TObjectClass[]
-}
-
-// ---------------------------------------------------------------------
 // Other
 // ---------------------------------------------------------------------
 
@@ -468,8 +428,8 @@ export type TDataStore = {
   country:          ById<                       TCountry>
   company:          ById<                       TCompany>
   user:             ById<                       TUser>
-  account:          Record< TAccountId,         TAccount>
   merchant:         Record< TMerchantId,        TMerchant>
+  account:          Record< TAccountId,         TAccount>
   tag:              Record< TTagId,             TTag>
   budget:           Record< TBudgetId,          TBudget>
   reminder:         Record< TReminderId,        TReminder>

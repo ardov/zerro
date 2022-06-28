@@ -1,5 +1,5 @@
 import Cookies from 'cookies-js'
-import ZenApi from 'shared/api/ZenApi'
+import { zenmoney } from 'shared/api/zenmoney'
 import { setToken } from 'models/token'
 import { resetData } from 'models/data'
 import { syncData } from 'features/sync'
@@ -9,7 +9,7 @@ import { workerMethods } from 'worker'
 
 export const logIn = (): AppThunk => async (dispatch, getState) => {
   dispatch(logOut())
-  const token = await ZenApi.getToken()
+  const token = await zenmoney.getToken()
   dispatch(setToken(token))
   dispatch(syncData())
 }

@@ -1,9 +1,9 @@
-import { TLocalData, TZmDiff } from 'shared/types'
+import { TLocalData } from 'shared/types'
 import * as Comlink from 'comlink'
 import { keys } from 'shared/helpers/keys'
 import { storage } from 'shared/api/storage'
-import ZenApi from 'shared/api/ZenApi'
-import { convertDiff, TDiff } from 'models/diff'
+import { zenmoney } from 'shared/api/zenmoney'
+import { convertDiff, TDiff, TZmDiff } from 'models/diff'
 // import { workerMethods } from 'dataWorker'
 
 // eslint-disable-next-line no-restricted-globals
@@ -40,7 +40,7 @@ function convertZmToLocal(diff: TZmDiff) {
 async function sync(token: string, diff: TDiff) {
   const zmDiff = convertDiff.toServer(diff)
   try {
-    let data = await ZenApi.getData(token, zmDiff)
+    let data = await zenmoney.getData(token, zmDiff)
     return { data: convertDiff.toClient(data) }
   } catch (error: any) {
     return { error: error.message as string }

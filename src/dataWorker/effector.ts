@@ -1,6 +1,6 @@
 import { createDomain, forward, sample } from 'effector'
 import { convertDiff, TDiff, TZmDiff } from 'models/diff'
-import ZenApi from 'shared/api/ZenApi'
+import { zenmoney } from 'shared/api/zenmoney'
 import { TDataStore, TToken } from 'shared/types'
 
 import { clearStorage, getLocalData, setLocalKey } from './storageMethods'
@@ -55,7 +55,7 @@ export const syncFx = workerData.createEffect(
     try {
       if (!token) return { error: 'No token' }
       let zmDiff = diff && convertDiff.toServer(diff)
-      let data = await ZenApi.getData(token, zmDiff)
+      let data = await zenmoney.getData(token, zmDiff)
       dataSyncedRaw(data)
       return { data: convertDiff.toClient(data) }
     } catch (error: any) {

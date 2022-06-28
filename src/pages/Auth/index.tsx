@@ -3,7 +3,7 @@ import Cookies from 'cookies-js'
 import { useAppDispatch } from 'models'
 import { Box, Button, Link, Fade, LinkProps } from '@mui/material'
 import { logIn } from 'features/authorization'
-import ZenApi from 'shared/api/ZenApi'
+import { zenmoney } from 'shared/api/zenmoney'
 import { useTheme } from '@mui/material'
 import { Logo } from 'shared/ui/Logo'
 import { applyServerPatch } from 'models/data'
@@ -12,7 +12,7 @@ import { saveDataLocally } from 'features/localData'
 import { Link as RouterLink } from 'react-router-dom'
 import { convertZmToLocal } from 'worker'
 import { AppThunk } from 'models'
-ZenApi.checkCode()
+zenmoney.checkCode()
 
 export default function Auth() {
   const dispatch = useAppDispatch()

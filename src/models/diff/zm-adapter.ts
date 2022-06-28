@@ -35,6 +35,7 @@ export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
       r.transaction = d.transaction.map(convertTransaction.toClient)
     return r
   },
+
   toServer: d => {
     let r: TZmDiff = { serverTimestamp: 0 }
     if (d.serverTimestamp) r.serverTimestamp = msToUnix(d.serverTimestamp)
