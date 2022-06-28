@@ -19,7 +19,7 @@ import { CloseIcon } from 'shared/ui/Icons'
 import Button from '@mui/material/Button'
 import { formatDate } from 'shared/helpers/date'
 import { FilterConditions } from 'models/transaction/filtering'
-import { TrType } from 'shared/types'
+import { TrType } from 'models/transaction'
 import { endOfDay, prevMonth, startOfDay } from 'shared/helpers/date'
 
 const useStyles = makeStyles(theme => ({

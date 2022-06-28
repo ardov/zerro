@@ -1,19 +1,16 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { add, sub } from 'shared/helpers/currencyHelpers'
-import { getDebtAccountId } from 'models/account'
+import { getDebtAccountId, TAccountId } from 'models/account'
 import { getMerchants } from 'models/data/selectors'
-import { getTransactionsHistory } from 'models/transaction'
-import { getType } from 'models/transaction/helpers'
 import {
-  ById,
-  TAccountId,
-  TInstrumentId,
-  TMerchant,
-  TMerchantId,
-  TTransaction,
+  getTransactionsHistory,
   TrType,
-  TSelector,
-} from 'shared/types'
+  TTransaction,
+} from 'models/transaction'
+import { getType } from 'models/transaction/helpers'
+import { ById, TSelector } from 'shared/types'
+import { TInstrumentId } from 'models/instrument'
+import { TMerchant, TMerchantId } from 'models/merchant'
 
 type TFxAmount = {
   [currency: TInstrumentId]: number
@@ -45,7 +42,7 @@ function collectDebtors(
   const debtors: ById<TDebtor> = {}
   trList.forEach(tr => {
     const trType = getType(tr, debtAccId)
-    if (trType !== TrType.incomeDebt && trType !== TrType.outcomeDebt) {
+    if (trType !== TrType.IncomeDebt && trType !== TrType.OutcomeDebt) {
       // Not debt transaction
       return
     }
@@ -67,7 +64,7 @@ function collectDebtors(
       debtor.transactions.push(tr)
     }
     if (!debtor) return
-    if (trType === TrType.incomeDebt) {
+    if (trType === TrType.IncomeDebt) {
       debtor.balance[tr.incomeInstrument] ??= 0
       debtor.balance[tr.incomeInstrument] = sub(
         debtor.balance[tr.incomeInstrument],

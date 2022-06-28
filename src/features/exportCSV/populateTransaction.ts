@@ -1,14 +1,9 @@
-import {
-  TInstrument,
-  Modify,
-  TTag,
-  TTransaction,
-  TrType,
-  TAccount,
-  TTagId,
-  ById,
-} from 'shared/types'
+import { TAccount } from 'models/account'
+import { TInstrument } from 'models/instrument'
+import { TTag, TTagId } from 'models/tag'
+import { TrType, TTransaction } from 'models/transaction'
 import { getType } from 'models/transaction/helpers'
+import { ById, Modify } from 'shared/types'
 
 interface DataSources {
   instruments: { [id: number]: TInstrument }

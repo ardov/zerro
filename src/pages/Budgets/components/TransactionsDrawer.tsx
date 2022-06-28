@@ -7,8 +7,8 @@ import { getInBudgetAccounts } from 'models/account'
 import { getTagAccMap } from 'models/hiddenData/accTagMap'
 import { getPopulatedTags } from 'models/tag'
 import { FilterConditions } from 'models/transaction/filtering'
-import { TrType } from 'shared/types'
 import { endOfMonth } from 'shared/helpers/date'
+import { TrType } from 'models/transaction'
 
 export const BudgetTransactionsDrawer: FC = () => {
   const [month] = useMonth()
@@ -26,7 +26,7 @@ export const BudgetTransactionsDrawer: FC = () => {
 
   let prefilter: FilterConditions[] = []
   prefilter.push({
-    type: TrType.outcome,
+    type: TrType.Outcome,
     dateFrom: month,
     dateTo: endOfMonth(month),
     accountsFrom: accountsInBudget,
@@ -35,14 +35,14 @@ export const BudgetTransactionsDrawer: FC = () => {
   tagIds.forEach(id => {
     if (tagAccMap[id]) {
       prefilter.push({
-        type: TrType.transfer,
+        type: TrType.Transfer,
         dateFrom: month,
         dateTo: endOfMonth(month),
         accountsFrom: accountsInBudget,
         accountsTo: tagAccMap[id],
       })
       prefilter.push({
-        type: TrType.transfer,
+        type: TrType.Transfer,
         dateFrom: month,
         dateTo: endOfMonth(month),
         accountsFrom: tagAccMap[id],

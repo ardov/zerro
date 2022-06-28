@@ -14,8 +14,9 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 import { Box, ListSubheader } from '@mui/material'
 import Transaction from './Transaction'
 import { formatDate, parseDate } from 'shared/helpers/date'
-import { TDateDraft, TISODate, TTransactionId } from 'shared/types'
+import { TDateDraft, TISODate } from 'shared/types'
 import { toISODate } from 'shared/helpers/date'
+import { TTransactionId } from 'models/transaction'
 
 type GroupNode = {
   date: TISODate

@@ -6,7 +6,7 @@ import {
 import { formatDate } from 'shared/helpers/date'
 import { ById } from 'shared/types'
 import { AppThunk } from 'models'
-import { getTransactions } from 'models/transaction'
+import { getTransactions, TrType } from 'models/transaction'
 import { getInstruments } from 'models/instrument'
 import { getAccounts } from 'models/account'
 import { getPopulatedTags } from 'models/tag'
@@ -90,17 +90,17 @@ function transactionsToCsvContent(tr: ById<PopulatedTransaction>) {
 }
 
 const types = {
-  income: 'Доход',
-  outcome: 'Расход',
-  transfer: 'Перевод',
-  outcomeDebt: '',
-  incomeDebt: '',
+  [TrType.Income]: 'Доход',
+  [TrType.Outcome]: 'Расход',
+  [TrType.Transfer]: 'Перевод',
+  [TrType.OutcomeDebt]: '',
+  [TrType.IncomeDebt]: '',
 }
 
 const transactionToRowObj = (t: PopulatedTransaction): RowObj => ({
   Дата: t.date,
   Создана: formatDate(t.created, 'yyyy-MM-dd HH:mm'),
-  Тип: types[t.type],
+  Тип: types[t.type as TrType],
   Категория: t.tag ? t.tag[0].title.replace(',', '') : '',
   'Доп категрии': '',
   'Со счёта': t.outcomeAccount ? t.outcomeAccount.title : '',

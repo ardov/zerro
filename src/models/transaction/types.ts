@@ -17,11 +17,11 @@ import {
 export type TTransactionId = string
 
 export enum TrType {
-  income = 'income',
-  outcome = 'outcome',
-  transfer = 'transfer',
-  incomeDebt = 'incomeDebt',
-  outcomeDebt = 'outcomeDebt',
+  Income = 'income',
+  Outcome = 'outcome',
+  Transfer = 'transfer',
+  IncomeDebt = 'incomeDebt',
+  OutcomeDebt = 'outcomeDebt',
 }
 
 export type TZmTransaction = {

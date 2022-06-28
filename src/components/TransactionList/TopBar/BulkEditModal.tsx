@@ -6,11 +6,11 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import { useAppDispatch, useAppSelector } from 'models'
-import { getTransactions } from 'models/transaction'
+import { getTransactions, TTransaction } from 'models/transaction'
 import { getType } from 'models/transaction/helpers'
 import { bulkEditTransactions } from 'models/transaction/thunks'
 import { TagList } from 'components/TagList'
-import { Modify, TTransaction } from 'shared/types'
+import { Modify } from 'shared/types'
 import { Box, TextField } from '@mui/material'
 
 type BulkEditModalProps = Modify<DialogProps, { onClose: () => void }> & {

@@ -51,11 +51,11 @@ export const isDeleted = (tr: TTransaction) => {
 }
 
 export function getType(tr: TTransaction, debtId?: string): TrType {
-  if (debtId && tr.incomeAccount === debtId) return TrType.outcomeDebt
-  if (debtId && tr.outcomeAccount === debtId) return TrType.incomeDebt
-  if (tr.income && tr.outcome) return TrType.transfer
-  if (tr.outcome) return TrType.outcome
-  return TrType.income
+  if (debtId && tr.incomeAccount === debtId) return TrType.OutcomeDebt
+  if (debtId && tr.outcomeAccount === debtId) return TrType.IncomeDebt
+  if (tr.income && tr.outcome) return TrType.Transfer
+  if (tr.outcome) return TrType.Outcome
+  return TrType.Income
 }
 
 export function getTime(tr: TTransaction) {

@@ -1,15 +1,12 @@
 import { add, sub } from 'shared/helpers/currencyHelpers'
 import { getType } from 'models/transaction/helpers'
-import {
-  TAccountId,
-  TMerchantId,
-  TTagId,
-  TTransaction,
-  TrType,
-  TISOMonth,
-} from 'shared/types'
+import { TISOMonth } from 'shared/types'
 import { toISOMonth } from 'shared/helpers/date'
 import { TFxAmount } from './helpers/fxAmount'
+import { TrType, TTransaction } from 'models/transaction'
+import { TTagId } from 'models/tag'
+import { TMerchantId } from 'models/merchant'
+import { TAccountId } from 'models/account'
 
 type TAccumulated = {
   amount: TFxAmount
@@ -62,15 +59,15 @@ export function getRealMoneyFlow(
     let month = (result[date] ??= makeMonthInfo(date))
     addToTotal(month, tr, inBudgetAccIds)
 
-    if (type === TrType.income) {
+    if (type === TrType.Income) {
       let acc = (month.incomes[mainTag] ??= makeAccumulatedNode())
       addToAccumulated(acc, tr, 'income')
     }
-    if (type === TrType.outcome) {
+    if (type === TrType.Outcome) {
       let acc = (month.outcomes[mainTag] ??= makeAccumulatedNode())
       addToAccumulated(acc, tr, 'outcome')
     }
-    if (type === TrType.incomeDebt) {
+    if (type === TrType.IncomeDebt) {
       if (tr.merchant) {
         let acc = (month.merchantDebts[tr.merchant] ??= makeAccumulatedNode())
         addToAccumulated(acc, tr, 'income')
@@ -81,7 +78,7 @@ export function getRealMoneyFlow(
         throw new Error("Transaction doesn't have payee or merchant")
       }
     }
-    if (type === TrType.outcomeDebt) {
+    if (type === TrType.OutcomeDebt) {
       if (tr.merchant) {
         let acc = (month.merchantDebts[tr.merchant] ??= makeAccumulatedNode())
         addToAccumulated(acc, tr, 'outcome')
@@ -92,7 +89,7 @@ export function getRealMoneyFlow(
         throw new Error("Transaction doesn't have payee or merchant")
       }
     }
-    if (type === TrType.transfer) {
+    if (type === TrType.Transfer) {
       if (
         inBudgetAccIds.includes(tr.incomeAccount) &&
         inBudgetAccIds.includes(tr.outcomeAccount)

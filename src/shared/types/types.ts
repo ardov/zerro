@@ -3,6 +3,8 @@ import { RootState } from 'models'
 import { goalType } from 'models/hiddenData/constants'
 import iconsMap from 'models/tag/iconsMap.json'
 import { TZmDiff } from 'shared/api/zenmoney'
+import { TZmDeletionObject } from 'models/deletion'
+import { TTransaction, TTransactionId } from 'models/transaction'
 
 type TYear = `${number}${number}${number}${number}`
 type TMonth = `${number}${number}`
@@ -326,83 +328,6 @@ export type TReminderMarker = Modify<
     outcome: TMilliUnits
   }
 >
-
-// ---------------------------------------------------------------------
-// TRANSACTION
-// ---------------------------------------------------------------------
-
-export type TTransactionId = string
-
-export enum TrType {
-  income = 'income',
-  outcome = 'outcome',
-  transfer = 'transfer',
-  incomeDebt = 'incomeDebt',
-  outcomeDebt = 'outcomeDebt',
-}
-
-export type TZmTransaction = {
-  id: TTransactionId
-  changed: TUnixTime
-  created: TUnixTime
-  user: TUserId
-  deleted: boolean
-  hold: boolean | null
-  viewed?: boolean
-  qrCode: string | null
-  incomeBankID: TCompanyId | null
-  incomeInstrument: TInstrumentId
-  incomeAccount: TAccountId
-  income: TUnits
-  outcomeBankID: TCompanyId | null
-  outcomeInstrument: TInstrumentId
-  outcomeAccount: TAccountId
-  outcome: TUnits
-  tag: TTagId[] | null
-  merchant: TMerchantId | null
-  payee: string | null
-  originalPayee: string | null
-  comment: string | null
-  date: TISODate
-  mcc: number | null
-  reminderMarker: TReminderMarkerId | null
-  opIncome: TUnits | null
-  opIncomeInstrument: TInstrumentId | null
-  opOutcome: TUnits | null
-  opOutcomeInstrument: TInstrumentId | null
-  latitude: number | null
-  longitude: number | null
-}
-
-export type TTransaction = Modify<
-  TZmTransaction,
-  {
-    changed: TMsTime
-    created: TMsTime
-    income: TMilliUnits
-    outcome: TMilliUnits
-    opIncome: TMilliUnits | null
-    opOutcome: TMilliUnits | null
-    //   time: TMsTime
-    //   type: TrType
-    //   mainTag: TTagId | null
-    //   incomeBalanceBefore: TMilliUnits
-    //   outcomeBalanceBefore: TMilliUnits
-  }
->
-
-// ---------------------------------------------------------------------
-// DELETION
-// ---------------------------------------------------------------------
-
-export type TZmDeletionObject = {
-  id: string | number
-  object: TObjectClass
-  stamp: TUnixTime
-  user: TUserId
-}
-
-export type TDeletionObject = Modify<TZmDeletionObject, { stamp: TMsTime }>
 
 // ---------------------------------------------------------------------
 // Other

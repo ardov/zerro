@@ -19,7 +19,7 @@ import { rateToWords } from 'shared/helpers/format'
 import { formatDate, parseDate } from 'shared/helpers/date'
 import { TagList } from 'components/TagList'
 import { useAppDispatch, useAppSelector } from 'models'
-import { getTransactions } from 'models/transaction'
+import { getTransactions, TTransaction } from 'models/transaction'
 import { getType } from 'models/transaction/helpers'
 import { getPopulatedAccounts } from 'models/account'
 import { getInstruments } from 'models/instrument'
@@ -30,7 +30,6 @@ import {
   recreateTransaction,
   restoreTransaction,
 } from 'models/transaction/thunks'
-import { TTransaction } from 'shared/types'
 import { toISODate } from 'shared/helpers/date'
 
 type TransactionPreviewProps = {

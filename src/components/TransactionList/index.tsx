@@ -12,7 +12,7 @@ import Actions from './TopBar/Actions'
 import { sendEvent } from 'shared/helpers/tracking'
 // import { getGroupedTransactions } from 'worker'
 import { useDebounce } from 'shared/hooks/useDebounce'
-import { TTransactionId } from 'shared/types'
+import { TTransactionId } from 'models/transaction'
 
 type TransactionListProps = {
   prefilter?: FilterConditions | FilterConditions[]

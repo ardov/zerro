@@ -18,8 +18,8 @@ import { getInBudgetAccounts } from 'models/account'
 import { FilterConditions } from 'models/transaction/filtering'
 import { getAmountsById } from 'pages/Budgets/selectors'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
-import { TrType } from 'shared/types'
 import { endOfMonth } from 'shared/helpers/date'
+import { TrType } from 'models/transaction'
 
 export type MetricType = 'outcome' | 'available' | 'budgeted'
 
@@ -196,7 +196,7 @@ const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
 
   let prefilter: FilterConditions[] = []
   prefilter.push({
-    type: TrType.outcome,
+    type: TrType.Outcome,
     dateFrom: month,
     dateTo: endOfMonth(month),
     accountsFrom: accountsInBudget,
@@ -205,14 +205,14 @@ const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
   tagIds.forEach(id => {
     if (tagAccMap[id]) {
       prefilter.push({
-        type: TrType.transfer,
+        type: TrType.Transfer,
         dateFrom: month,
         dateTo: endOfMonth(month),
         accountsFrom: accountsInBudget,
         accountsTo: tagAccMap[id],
       })
       prefilter.push({
-        type: TrType.transfer,
+        type: TrType.Transfer,
         dateFrom: month,
         dateTo: endOfMonth(month),
         accountsFrom: tagAccMap[id],
