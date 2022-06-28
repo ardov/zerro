@@ -18,9 +18,4 @@ export { setInBudget } from './thunks'
 export { makeAccount } from './makeAccount'
 export { getStartBalance } from './helpers'
 
-export type {
-  TAccount,
-  TAccountId,
-  TZmAccount,
-  TAccountPopulated,
-} from 'shared/types'
+export * from './types'
