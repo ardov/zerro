@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit'
+import { TSelector } from 'models'
 import { getDebtAccountId, getInBudgetAccounts } from 'models/account'
 import { getTransactionsHistory } from 'models/transaction'
-import { TSelector } from 'shared/types'
 import { getRealMoneyFlow, TMoneyFlowByMonth } from './aggregated-transactions'
 
 const getInBudgetAccIds = createSelector([getInBudgetAccounts], accounts =>

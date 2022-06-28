@@ -1,6 +1,6 @@
 import React, { FC, KeyboardEventHandler, useEffect, useState } from 'react'
 import { useAppSelector } from 'models'
-import { getTagsTree, TagTreeNode } from 'models/tag'
+import { getTagsTree, TagTreeNode, TTagPopulated } from 'models/tag'
 import {
   Popover,
   Paper,
@@ -14,7 +14,6 @@ import {
 } from '@mui/material'
 import { AddIcon } from 'shared/ui/Icons'
 import { EmojiIcon } from 'shared/ui/EmojiIcon'
-import { TTagPopulated } from 'shared/types'
 
 type TagType = 'income' | 'outcome' | undefined | null
 type TagNode = TagTreeNode | TTagPopulated

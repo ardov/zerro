@@ -2,7 +2,7 @@ import { TAccount, TZmAccount } from 'models/account'
 import { TBudget, TZmBudget } from 'models/budget'
 import { TCompany, TZmCompany } from 'models/company'
 import { TCountry, TZmCountry } from 'models/country'
-import { TDeletionObject, TZmDeletionObject } from 'models/deletion'
+import { EntityType, TDeletionObject, TZmDeletionObject } from 'models/deletion'
 import { TInstrument, TZmInstrument } from 'models/instrument'
 import { TMerchant, TZmMerchant } from 'models/merchant'
 import { TReminder, TZmReminder } from 'models/reminder'
@@ -10,7 +10,7 @@ import { TReminderMarker, TZmReminderMarker } from 'models/reminderMarker'
 import { TTag, TZmTag } from 'models/tag'
 import { TTransaction, TZmTransaction } from 'models/transaction'
 import { TUser, TZmUser } from 'models/user'
-import { TMsTime, TObjectClass, TUnixTime } from 'shared/types'
+import { TMsTime, TUnixTime } from 'shared/types'
 
 export interface TZmDiff {
   serverTimestamp: TUnixTime
@@ -46,5 +46,5 @@ export interface TDiff {
 
 export type TZmRequest = TZmDiff & {
   currentClientTimestamp: TUnixTime
-  forceFetch?: TObjectClass[]
+  forceFetch?: EntityType[]
 }

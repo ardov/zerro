@@ -1,10 +1,13 @@
 import React, { FC } from 'react'
 import { useAppSelector } from 'models'
-import { getInBudgetAccounts, getSavingAccounts } from 'models/account'
+import {
+  getInBudgetAccounts,
+  getSavingAccounts,
+  TAccountPopulated,
+} from 'models/account'
 import pluralize from 'shared/helpers/pluralize'
 import { Collapse, List, ListItemButton } from '@mui/material'
 import { Account, Subheader } from './components'
-import { TAccountPopulated } from 'shared/types'
 import { Amount } from 'components/Amount'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { useToggle } from 'shared/hooks/useToggle'

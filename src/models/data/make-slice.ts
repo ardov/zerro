@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { TDeletionObject } from 'models/deletion'
+import { EntityType, TDeletionObject } from 'models/deletion'
 import { TDiff } from 'models/diff'
-import { ById, TObjectClass } from 'shared/types'
+import { ById } from 'shared/types'
 
 type TSlice<T> = {
   server: ById<T>
@@ -14,7 +14,7 @@ interface ExtendedDiff extends TDiff {
 }
 
 export function makeSlice<ObjType>(
-  objType: TObjectClass,
+  objType: EntityType,
   getId: (obj: ObjType) => string
 ) {
   const initialState: TSlice<ObjType> = {

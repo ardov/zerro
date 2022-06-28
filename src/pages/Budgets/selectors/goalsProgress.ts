@@ -4,12 +4,13 @@ import { getGoals } from 'models/hiddenData/goals'
 import { getAmountsById } from './getAmountsByTag'
 import { getMonthDates } from './getMonthDates'
 import { goalType } from 'models/hiddenData/constants'
-import { TGoal, TISODate, TISOMonth, TSelector, TTagId } from 'shared/types'
-import { RootState } from 'models'
+import { TGoal, TISODate, TISOMonth } from 'shared/types'
+import { RootState, TSelector } from 'models'
 import { getTagMeta } from 'models/hiddenData/tagMeta'
 import { convertCurrency } from 'models/instrument'
 import { keys } from 'shared/helpers/keys'
 import { differenceInCalendarMonths } from 'shared/helpers/date'
+import { TTagId } from 'models/tag'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 

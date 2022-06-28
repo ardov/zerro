@@ -1,9 +1,23 @@
 import { TUserId } from 'models/user'
-import { Modify, TMsTime, TObjectClass, TUnixTime } from 'shared/types'
+import { Modify, TMsTime, TUnixTime } from 'shared/types'
+
+export enum EntityType {
+  Instrument = 'instrument',
+  Country = 'country',
+  Company = 'company',
+  User = 'user',
+  Account = 'account',
+  Merchant = 'merchant',
+  Tag = 'tag',
+  Budget = 'budget',
+  Reminder = 'reminder',
+  ReminderMarker = 'reminderMarker',
+  Transaction = 'transaction',
+}
 
 export type TZmDeletionObject = {
   id: string | number
-  object: TObjectClass
+  object: EntityType
   stamp: TUnixTime
   user: TUserId
 }

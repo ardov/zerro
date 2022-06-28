@@ -14,7 +14,7 @@ import {
   TextField,
 } from '@mui/material'
 import { TagSelect } from './TagSelect'
-import { Modify, TTag } from 'shared/types'
+import { Modify } from 'shared/types'
 import { shallowEqual } from 'react-redux'
 import { createTag } from 'models/tag/thunks'
 import { useFormik } from 'formik'
@@ -29,6 +29,7 @@ import {
 import { getUserInstrumentId } from 'models/user'
 import { CurrencySelect } from './CurrencySelect'
 import { useAppDispatch, useAppSelector } from 'models'
+import { TTag } from 'models/tag'
 
 // TODO: Доделать модалку для редактирования и создания категорий
 

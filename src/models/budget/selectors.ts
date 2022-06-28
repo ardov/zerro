@@ -3,11 +3,12 @@ import { round } from 'shared/helpers/currencyHelpers'
 import { RootState } from 'models'
 import { convertCurrency } from 'models/instrument'
 import { TPopulatedBudget, TBudgetId } from './types'
-import { TDateDraft, TISOMonth, TTagId } from 'shared/types'
+import { TDateDraft, TISOMonth } from 'shared/types'
 import { getTagMeta } from '../hiddenData/tagMeta'
 import { getBudgetId } from './getBudgetId'
 import { toISOMonth } from 'shared/helpers/date'
 import { keys } from 'shared/helpers/keys'
+import { TTagId } from 'models/tag'
 
 export const getBudgets = (state: RootState) => state.data.current.budget
 

@@ -1,11 +1,8 @@
-import {
-  TAccountId,
-  TFxCode,
-  TISODate,
-  TMerchantId,
-  TTagId,
-  TUnits,
-} from 'shared/types'
+import { TAccountId } from 'models/account'
+import { TFxCode } from 'models/instrument'
+import { TMerchantId } from 'models/merchant'
+import { TTagId } from 'models/tag'
+import { TISODate, TUnits } from 'shared/types'
 
 // GOALS
 export enum goalType {

@@ -1,13 +1,7 @@
 import { TInstrumentId } from 'models/instrument'
 import { TMerchantId } from 'models/merchant'
-import {
-  Modify,
-  TISODate,
-  TMsTime,
-  TUnits,
-  TUnixTime,
-  TUserId,
-} from 'shared/types'
+import { TUserId } from 'models/user'
+import { Modify, TISODate, TMsTime, TUnits, TUnixTime } from 'shared/types'
 
 export type TReminderId = string
 

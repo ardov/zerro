@@ -8,9 +8,10 @@ import {
   TTransaction,
 } from 'models/transaction'
 import { getType } from 'models/transaction/helpers'
-import { ById, TSelector } from 'shared/types'
+import { ById } from 'shared/types'
 import { TInstrumentId } from 'models/instrument'
 import { TMerchant, TMerchantId } from 'models/merchant'
+import { TSelector } from 'models'
 
 type TFxAmount = {
   [currency: TInstrumentId]: number

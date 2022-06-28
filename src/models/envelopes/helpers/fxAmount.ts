@@ -1,6 +1,6 @@
+import { TInstrumentId } from 'models/instrument'
 import { add, sub } from 'shared/helpers/currencyHelpers'
 import { keys } from 'shared/helpers/keys'
-import { TInstrumentId } from 'shared/types'
 
 export type TFxAmount = Record<TInstrumentId, number>
 

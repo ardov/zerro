@@ -1,9 +1,13 @@
 import React, { FC } from 'react'
 import { useAppSelector } from 'models'
-import { getPopulatedTags, getTagsTree, TagTreeNode } from 'models/tag'
+import {
+  getPopulatedTags,
+  getTagsTree,
+  TagTreeNode,
+  TTagPopulated,
+} from 'models/tag'
 import { Box, Autocomplete, TextField } from '@mui/material'
 import { EmojiIcon } from 'shared/ui/EmojiIcon'
-import { TTagPopulated } from 'shared/types'
 import TagChip from './TagChip'
 import ru from 'convert-layout/ru'
 

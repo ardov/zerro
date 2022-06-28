@@ -1,8 +1,8 @@
 import React, { FC, ReactNode, useEffect, useState } from 'react'
-import { useAppDispatch, useAppSelector } from 'models'
+import { TSelector, useAppDispatch, useAppSelector } from 'models'
 import { getTotalsArray } from '../../selectors'
 import { convertCurrency, getUserCurrencyCode } from 'models/instrument'
-import { getInBudgetAccounts } from 'models/account'
+import { getInBudgetAccounts, TAccountPopulated } from 'models/account'
 import { round } from 'shared/helpers/currencyHelpers'
 import { Box, Typography, Button, Link } from '@mui/material'
 import { WarningIcon } from 'shared/ui/Icons'
@@ -12,7 +12,6 @@ import { clearLocalData } from 'features/localData'
 import { captureError, sendEvent } from 'shared/helpers/tracking'
 import { getDiff } from 'models/data'
 import { getAccountsHistory } from 'pages/Stats/selectors'
-import { TAccountPopulated, TSelector } from 'shared/types'
 import { createSelector } from '@reduxjs/toolkit'
 
 // TODO: Надо бы как-то округлять все цифры только в конце. Иначе из-за валют копится ошибка.

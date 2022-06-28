@@ -1,12 +1,9 @@
-import {
-  TAccountId,
-  TTagId,
-  TFxCode,
-  TReminder,
-  TReminderId,
-  TISODate,
-  TMerchantId,
-} from 'shared/types'
+import { TAccountId } from 'models/account'
+import { TFxCode } from 'models/instrument'
+import { TMerchantId } from 'models/merchant'
+import { TReminder, TReminderId } from 'models/reminder'
+import { TTagId } from 'models/tag'
+import { TISODate } from 'shared/types'
 import {
   TRecord,
   recordType,

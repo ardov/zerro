@@ -1,5 +1,6 @@
+import { TInstrument, TInstrumentId } from 'models/instrument'
 import { keys } from 'shared/helpers/keys'
-import { TDateDraft, TInstrument, TInstrumentId } from 'shared/types'
+import { TDateDraft } from 'shared/types'
 
 export function makeFxRatesGetter(
   instruments: Record<TInstrumentId, TInstrument>
