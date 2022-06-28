@@ -1,4 +1,4 @@
-import { TAccount, TAccountPopulated } from 'shared/types'
+import { TAccount, TAccountPopulated } from './types'
 import { isInBudget } from './helpers'
 
 interface Options {

@@ -1,4 +1,4 @@
-import { accountType, TAccount } from 'shared/types'
+import { accountType, TAccount } from './types'
 
 export function getStartBalance(acc: TAccount): number {
   //  Для deposit и loan поле startBalance имеет смысл начального взноса/тела кредита

@@ -11,9 +11,9 @@ import {
   TZmReminder,
   TZmReminderMarker,
   TZmTag,
-  TZmTransaction,
   TZmUser,
 } from 'shared/types'
+import { TZmTransaction } from 'models/transaction'
 
 export type TLocalData = {
   token: TToken

@@ -4,7 +4,7 @@ import { AppThunk } from 'models'
 import { sendEvent } from 'shared/helpers/tracking'
 import { getDataAccountId } from '../hiddenData/selectors'
 import { makeDataAcc } from '../hiddenData/helpers'
-import { TAccountId } from 'shared/types'
+import { TAccountId } from './types'
 import { applyClientPatch } from 'models/data'
 
 const createDataAcc = (): AppThunk => (dispatch, getState) => {
