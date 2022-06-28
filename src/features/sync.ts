@@ -6,10 +6,11 @@ import { sendEvent } from 'shared/helpers/tracking'
 import { setSyncData } from 'models/lastSync'
 import { formatDate } from 'shared/helpers/date'
 import { AppThunk } from 'models'
-import { TDiff, TLocalData } from 'shared/types'
+import { TLocalData } from 'shared/types'
 import { sync } from 'worker'
 import { getDiff, applyServerPatch } from 'models/data'
 import { keys } from 'shared/helpers/keys'
+import { TDiff } from 'models/diff'
 
 /** All syncs with zenmoney goes through this thunk */
 export const syncData = (): AppThunk => async (dispatch, getState) => {

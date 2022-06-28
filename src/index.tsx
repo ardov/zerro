@@ -11,10 +11,10 @@ import GlobalErrorBoundary from 'components/GlobalErrorBoundary'
 import { initSentry, sendEvent } from 'shared/helpers/tracking'
 import { bindWorkerToStore } from 'worker'
 import { applyClientPatch, resetData } from 'models/data'
-import { TDiff } from 'shared/types'
 import { AppThemeProvider } from './AppThemeProvider'
 import { StyledEngineProvider } from '@mui/material/styles'
 import { appVersion } from 'shared/config'
+import { TDiff } from 'models/diff'
 
 initSentry()
 bindWorkerToStore(store.dispatch)

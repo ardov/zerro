@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from 'models'
-import { TDataStore, TDiff } from 'shared/types'
+import { TDiff } from 'models/diff'
+import { TDataStore } from 'shared/types'
 import { applyDiff } from './applyDiff'
 import { mergeDiffs } from './mergeDiffs'
 

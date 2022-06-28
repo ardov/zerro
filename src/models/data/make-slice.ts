@@ -1,5 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { ById, TDeletionObject, TDiff, TObjectClass } from 'shared/types'
+import { TDeletionObject } from 'models/deletion'
+import { TDiff } from 'models/diff'
+import { ById, TObjectClass } from 'shared/types'
 
 type TSlice<T> = {
   server: ById<T>

@@ -1,8 +1,8 @@
 import { keys } from 'shared/helpers/keys'
 import { RootState } from 'models'
-import { TDiff, TLocalData } from 'shared/types'
+import { TLocalData } from 'shared/types'
 import { getDiff } from './index'
-import { convertDiff } from 'worker/convertDiff'
+import { convertDiff, TDiff } from 'models/diff'
 
 export const getDataToSave = (state: RootState): TLocalData => {
   const data = state.data.server

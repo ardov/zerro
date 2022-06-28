@@ -1,7 +1,7 @@
 import { createDomain, forward, sample } from 'effector'
+import { convertDiff, TDiff, TZmDiff } from 'models/diff'
 import ZenApi from 'shared/api/ZenApi'
-import { TDataStore, TDiff, TToken, TZmDiff } from 'shared/types'
-import { convertDiff } from 'worker/convertDiff'
+import { TDataStore, TToken } from 'shared/types'
 
 import { clearStorage, getLocalData, setLocalKey } from './storageMethods'
 

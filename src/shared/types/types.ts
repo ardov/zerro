@@ -423,21 +423,21 @@ export interface TZmDiff {
   transaction?: TZmTransaction[]
 }
 
-export interface TDiff {
-  serverTimestamp?: number
-  deletion?: TDeletionObject[]
-  instrument?: TInstrument[]
-  country?: TCountry[]
-  company?: TCompany[]
-  user?: TUser[]
-  account?: TAccount[]
-  merchant?: TMerchant[]
-  tag?: TTag[]
-  budget?: TBudget[]
-  reminder?: TReminder[]
-  reminderMarker?: TReminderMarker[]
-  transaction?: TTransaction[]
-}
+// export interface TDiff {
+//   serverTimestamp?: number
+//   deletion?: TDeletionObject[]
+//   instrument?: TInstrument[]
+//   country?: TCountry[]
+//   company?: TCompany[]
+//   user?: TUser[]
+//   account?: TAccount[]
+//   merchant?: TMerchant[]
+//   tag?: TTag[]
+//   budget?: TBudget[]
+//   reminder?: TReminder[]
+//   reminderMarker?: TReminderMarker[]
+//   transaction?: TTransaction[]
+// }
 
 export type TZmRequest = TZmDiff & {
   currentClientTimestamp: TUnixTime

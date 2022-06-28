@@ -1,9 +1,9 @@
-import { TLocalData, TZmDiff, TDiff } from 'shared/types'
+import { TLocalData, TZmDiff } from 'shared/types'
 import * as Comlink from 'comlink'
 import { keys } from 'shared/helpers/keys'
 import { storage } from 'shared/api/storage'
 import ZenApi from 'shared/api/ZenApi'
-import { convertDiff } from './convertDiff'
+import { convertDiff, TDiff } from 'models/diff'
 // import { workerMethods } from 'dataWorker'
 
 // eslint-disable-next-line no-restricted-globals

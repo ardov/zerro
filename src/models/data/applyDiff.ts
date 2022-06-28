@@ -1,4 +1,5 @@
-import { TDataStore, TDiff } from 'shared/types'
+import { TDiff } from 'models/diff'
+import { TDataStore } from 'shared/types'
 
 /**
  * Mutable method
