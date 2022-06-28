@@ -1,4 +1,4 @@
-import { TReminder, TZmReminder } from 'shared/types'
+import { TReminder, TZmReminder } from './types'
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 

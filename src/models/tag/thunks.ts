@@ -3,7 +3,8 @@ import { AppThunk } from 'models'
 import { applyClientPatch } from 'models/data'
 import { getRootUser } from 'models/user'
 import { getTag } from 'models/tag'
-import { OptionalExceptFor, TTag, TZmTag } from 'shared/types'
+import { OptionalExceptFor } from 'shared/types'
+import { TTag, TZmTag } from './types'
 import { makeTag } from './makeTag'
 
 type TagDraft = OptionalExceptFor<TTag, 'id'>

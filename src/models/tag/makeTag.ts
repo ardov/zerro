@@ -1,4 +1,5 @@
-import { OptionalExceptFor, TTag } from 'shared/types'
+import { OptionalExceptFor } from 'shared/types'
+import { TTag } from './types'
 import { v1 as uuidv1 } from 'uuid'
 
 type TagDraft = OptionalExceptFor<TTag, 'user' | 'title'>

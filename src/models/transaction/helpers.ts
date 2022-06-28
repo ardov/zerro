@@ -1,11 +1,12 @@
 import { checkRaw, FilterConditions } from './filtering'
-import { TTransaction, TTransactionId, TrType, TISODate } from 'shared/types'
+import { TISODate } from 'shared/types'
 import {
   parseDate,
   startOfMonth,
   startOfWeek,
   toISODate,
 } from 'shared/helpers/date'
+import { TrType, TTransaction, TTransactionId } from './types'
 
 /**
  * Groups array of transactions

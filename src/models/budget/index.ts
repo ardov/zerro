@@ -7,9 +7,4 @@ export { getBudgets, getBudget, getBudgetsByMonthAndTag } from './selectors'
 export { makeBudget } from './makeBudget'
 export { getBudgetId, getISOMonthFromBudgetId } from './getBudgetId'
 
-export type {
-  TBudget,
-  TBudgetId,
-  TZmBudget,
-  TPopulatedBudget,
-} from 'shared/types'
+export * from './types'

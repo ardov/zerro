@@ -1,13 +1,10 @@
-import {
-  TAccountId,
-  TTagId,
-  TTransaction,
-  TrType,
-  TDateDraft,
-} from 'shared/types'
+import { TDateDraft } from 'shared/types'
 import { keys } from 'shared/helpers/keys'
 import { getType, isDeleted, isNew } from './helpers'
 import { toISODate } from 'shared/helpers/date'
+import { TrType, TTransaction } from './types'
+import { TTagId } from 'models/tag'
+import { TAccountId } from 'models/account'
 
 type OperatorType = 'AND' | 'OR'
 

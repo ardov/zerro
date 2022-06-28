@@ -1,4 +1,4 @@
-import { TTransaction, TZmTransaction } from 'shared/types'
+import { TTransaction, TZmTransaction } from './types'
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 

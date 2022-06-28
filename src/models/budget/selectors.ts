@@ -2,13 +2,8 @@ import { createSelector } from '@reduxjs/toolkit'
 import { round } from 'shared/helpers/currencyHelpers'
 import { RootState } from 'models'
 import { convertCurrency } from 'models/instrument'
-import {
-  TPopulatedBudget,
-  TBudgetId,
-  TDateDraft,
-  TISOMonth,
-  TTagId,
-} from 'shared/types'
+import { TPopulatedBudget, TBudgetId } from './types'
+import { TDateDraft, TISOMonth, TTagId } from 'shared/types'
 import { getTagMeta } from '../hiddenData/tagMeta'
 import { getBudgetId } from './getBudgetId'
 import { toISOMonth } from 'shared/helpers/date'

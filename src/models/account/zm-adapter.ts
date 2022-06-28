@@ -1,4 +1,4 @@
-import { TAccount, TZmAccount } from 'shared/types'
+import { TAccount, TZmAccount } from './types'
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 

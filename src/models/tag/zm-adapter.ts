@@ -1,4 +1,4 @@
-import { TTag, TZmTag } from 'shared/types'
+import { TTag, TZmTag } from './types'
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 

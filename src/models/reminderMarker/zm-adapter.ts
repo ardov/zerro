@@ -1,4 +1,4 @@
-import { TReminderMarker, TZmReminderMarker } from 'shared/types'
+import { TReminderMarker, TZmReminderMarker } from './types'
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 

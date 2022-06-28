@@ -1,5 +1,5 @@
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
-import { TBudget, TZmBudget } from 'shared/types'
+import { TBudget, TZmBudget } from './types'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 import { getBudgetId } from './getBudgetId'
 
