@@ -1,4 +1,6 @@
-import { RootState } from 'models'
+export { convertReminder } from './zm-adapter'
 
-// SELECTORS
-export const getReminders = (state: RootState) => state.data.current.reminder
+export * from './model'
+export { makeReminder } from './makeReminder'
+
+export type { TReminder, TReminderId, TZmReminder } from 'shared/types'

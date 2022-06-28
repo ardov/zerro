@@ -1,8 +1,8 @@
 import { keys } from 'shared/helpers/keys'
 import { RootState } from 'models'
 import { TDiff, TLocalData } from 'shared/types'
-import { toServer } from 'worker/zmAdapter'
 import { getDiff } from './index'
+import { convertDiff } from 'worker/convertDiff'
 
 export const getDataToSave = (state: RootState): TLocalData => {
   const data = state.data.server
@@ -15,7 +15,7 @@ export const getDataToSave = (state: RootState): TLocalData => {
       result[key] = Object.values(data[key])
     }
   })
-  return toServer(result)
+  return convertDiff.toServer(result)
 }
 
 export const getChangedNum = (state: RootState) => {

@@ -1,7 +1,8 @@
 import { createDomain, forward, sample } from 'effector'
 import ZenApi from 'shared/api/ZenApi'
 import { TDataStore, TDiff, TToken, TZmDiff } from 'shared/types'
-import { convertDiff } from './converters/diff'
+import { convertDiff } from 'worker/convertDiff'
+
 import { clearStorage, getLocalData, setLocalKey } from './storageMethods'
 
 const workerData = createDomain('workerData')

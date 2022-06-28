@@ -7,15 +7,9 @@ export const convertReminderMarker: TZmAdapter<
   TReminderMarker
 > = {
   toClient: (el: TZmReminderMarker): TReminderMarker => {
-    return {
-      ...el,
-      changed: unixToMs(el.changed),
-    }
+    return { ...el, changed: unixToMs(el.changed) }
   },
   toServer: (el: TReminderMarker): TZmReminderMarker => {
-    return {
-      ...el,
-      changed: msToUnix(el.changed),
-    }
+    return { ...el, changed: msToUnix(el.changed) }
   },
 }

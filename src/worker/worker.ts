@@ -3,7 +3,7 @@ import * as Comlink from 'comlink'
 import { keys } from 'shared/helpers/keys'
 import { storage } from 'shared/api/storage'
 import ZenApi from 'shared/api/ZenApi'
-import { toClient, toServer } from './zmAdapter'
+import { convertDiff } from './convertDiff'
 // import { workerMethods } from 'dataWorker'
 
 // eslint-disable-next-line no-restricted-globals
@@ -34,14 +34,14 @@ const LOCAL_KEYS = [
 ] as LocalKey[]
 
 function convertZmToLocal(diff: TZmDiff) {
-  return toClient(diff)
+  return convertDiff.toClient(diff)
 }
 
 async function sync(token: string, diff: TDiff) {
-  const zmDiff = toServer(diff)
+  const zmDiff = convertDiff.toServer(diff)
   try {
     let data = await ZenApi.getData(token, zmDiff)
-    return { data: toClient(data) }
+    return { data: convertDiff.toClient(data) }
   } catch (error: any) {
     return { error: error.message as string }
   }
@@ -51,7 +51,7 @@ async function getLocalData() {
   let data = {} as TLocalData
   let arr = await Promise.all(LOCAL_KEYS.map(key => storage.get(key)))
   LOCAL_KEYS.forEach((key, i) => (data[key] = arr[i]))
-  return toClient(data)
+  return convertDiff.toClient(data)
 }
 
 const obj = {

@@ -7,7 +7,7 @@ import {
   syncTriggered,
 } from './effector'
 import { TLocalData } from 'shared/types'
-import { convertDiff } from './converters/diff'
+import { convertDiff } from 'worker/convertDiff'
 
 // eslint-disable-next-line no-restricted-globals
 // const ctx: Worker = self as any
