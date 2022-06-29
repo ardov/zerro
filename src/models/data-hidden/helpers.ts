@@ -1,5 +1,4 @@
-import { TISODate } from 'shared/types'
-import { RecordType } from './types'
+import { TRecord } from './types'
 
 export function parseComment(comment: string | null) {
   if (!comment) return null
@@ -9,6 +8,10 @@ export function parseComment(comment: string | null) {
     return null
   }
 }
-export function getRecordId(type: RecordType, date?: TISODate) {
-  return date ? `${type}#${date}` : type
+
+export function getRecordId(record: TRecord) {
+  if ('date' in record) {
+    return `${record.type}#${record.date}`
+  }
+  return record.type
 }

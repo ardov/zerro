@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { AppThunk } from 'models'
-import { getAccounts, makeAccount } from 'models/account'
+import { getAccounts, makeAccount, TAccountId } from 'models/account'
 import { applyClientPatch } from 'models/data'
 import { getRootUser } from 'models/user'
 
@@ -12,23 +12,27 @@ export const DATA_ACC_NAME = '🤖 [Zerro Data]'
  * */
 export const getDataAccountId = createSelector([getAccounts], accounts => {
   for (const id in accounts) {
-    if (accounts[id].title === DATA_ACC_NAME) return id
+    if (accounts[id].title === DATA_ACC_NAME) return id as TAccountId
   }
 })
 
-export const prepareDataAccount: AppThunk = (dispatch, getState) => {
-  let state = getState()
-  const user = getRootUser(state)
-  if (!user) return
-  // If no data account create one
-  let dataAccId = getDataAccountId(state)
-  if (!dataAccId) {
+export function prepareDataAccount(): AppThunk<TAccountId> {
+  return (dispatch, getState) => {
+    let state = getState()
+    const user = getRootUser(state)
+    if (!user) {
+      throw new Error('No root user')
+    }
+    let dataAccId = getDataAccountId(state)
+    if (dataAccId) return dataAccId
+
+    // If no data account create one
     const acc = makeAccount({
       title: DATA_ACC_NAME,
       user: user.id,
       instrument: user.currency,
     })
     dispatch(applyClientPatch({ account: [acc] }))
-    dataAccId = acc.id
+    return acc.id
   }
 }

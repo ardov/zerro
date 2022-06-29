@@ -1,15 +1,9 @@
 import { TAccountId } from 'models/account'
+import { EntityType } from 'models/deletion'
 import { TFxCode } from 'models/instrument'
 import { TMerchantId } from 'models/merchant'
 import { TTagId } from 'models/tag'
 import { TISODate, TUnits } from 'shared/types'
-
-// GOALS
-export enum GoalType {
-  Monthly = 'monthly', // monthly contribution
-  MonthlySpend = 'monthlySpend', // monthly spend
-  TargetBalance = 'targetBalance', //
-}
 
 export enum RecordType {
   Goals = 'goals',
@@ -21,13 +15,36 @@ export enum RecordType {
   TagOrder = 'tagOrder',
 }
 
+// —————————————————————————————————————————————————————————————————————————————
+// GOALS
+// —————————————————————————————————————————————————————————————————————————————
+
+export enum GoalType {
+  Monthly = 'monthly', // monthly contribution
+  MonthlySpend = 'monthlySpend', // monthly spend
+  TargetBalance = 'targetBalance', //
+}
+
 export type TGoal = {
   type: GoalType
   amount: TUnits
   end?: TISODate
 }
 
+export type TRecordGoals = {
+  type: RecordType.Goals
+  date: TISODate
+  payload: {
+    [EntityType.Tag]?: Record<TTagId, TGoal>
+    [EntityType.Account]?: Record<TAccountId, TGoal>
+    [EntityType.Merchant]?: Record<TMerchantId, TGoal>
+  }
+}
+
+// —————————————————————————————————————————————————————————————————————————————
 // TAG META
+// —————————————————————————————————————————————————————————————————————————————
+
 export type TTagMetaData = {
   comment?: string
   currency?: TFxCode
@@ -35,7 +52,15 @@ export type TTagMetaData = {
   carryNegatives?: boolean
 }
 
+export type TRecordTagMeta = {
+  type: RecordType.TagMeta
+  payload: { [id: TTagId]: TTagMetaData } // Only merchants?
+}
+
+// —————————————————————————————————————————————————————————————————————————————
 // TAG TREE
+// —————————————————————————————————————————————————————————————————————————————
+
 export type TTagTree = Array<{
   groupName: string
   tags: Array<{
@@ -44,55 +69,67 @@ export type TTagTree = Array<{
   }>
 }>
 
+export type TRecordTagOrder = {
+  type: RecordType.TagOrder
+  payload: TTagTree
+}
+
+// —————————————————————————————————————————————————————————————————————————————
+// FX RATES
+// —————————————————————————————————————————————————————————————————————————————
+
+export type TRecordFxRates = {
+  type: RecordType.FxRates
+  date: TISODate
+  payload: Record<TFxCode, number>
+}
+
+// —————————————————————————————————————————————————————————————————————————————
+// BUDGETS
+// —————————————————————————————————————————————————————————————————————————————
+
 export type TBudget = {
   value: TUnits
   fx: TFxCode
 }
 
-type TRecordGoals = {
-  type: RecordType.Goals
-  date: TISODate
-  payload: {
-    tags?: Record<TTagId, TGoal>
-    accounts?: Record<TAccountId, TGoal>
-    merchants?: Record<TMerchantId, TGoal>
-  }
-}
-type TRecordFxRates = {
-  type: RecordType.FxRates
-  date: TISODate
-  payload: Record<TFxCode, number>
-}
-type TRecordBudgets = {
+export type TRecordBudgets = {
   type: RecordType.Budgets
   date: TISODate
   payload: {
-    tags?: Record<TTagId, TBudget>
-    accounts?: Record<TAccountId, TBudget>
-    merchants?: Record<TMerchantId, TBudget>
+    [EntityType.Tag]?: Record<TTagId, TBudget>
+    [EntityType.Account]?: Record<TAccountId, TBudget>
+    [EntityType.Merchant]?: Record<TMerchantId, TBudget>
   }
 }
-type TRecordLinkedAccounts = {
+
+// —————————————————————————————————————————————————————————————————————————————
+// LINKED ACCOUNTS
+// —————————————————————————————————————————————————————————————————————————————
+
+export type TRecordLinkedAccounts = {
   type: RecordType.LinkedAccounts
-  payload: { [id: TAccountId]: TTagId }
+  payload: Record<TAccountId, TTagId>
 }
-type TRecordLinkedDebtors = {
+
+// —————————————————————————————————————————————————————————————————————————————
+// LINKED MERCHANTS
+// —————————————————————————————————————————————————————————————————————————————
+
+export type TRecordLinkedMerchants = {
   type: RecordType.LinkedDebtors
-  payload: { [id: TAccountId]: TTagId } // Only merchants?
+  payload: Record<TMerchantId, TTagId>
 }
-type TRecordTagMeta = {
-  type: RecordType.TagMeta
-  payload: { [id: TTagId]: TTagMetaData } // Only merchants?
-}
-type TRecordTagOrder = {
-  type: RecordType.TagOrder
-  payload: TTagTree
-}
+
+// —————————————————————————————————————————————————————————————————————————————
+// RECORD
+// —————————————————————————————————————————————————————————————————————————————
+
 export type TRecord =
   | TRecordGoals
   | TRecordFxRates
   | TRecordBudgets
   | TRecordLinkedAccounts
-  | TRecordLinkedDebtors
+  | TRecordLinkedMerchants
   | TRecordTagMeta
   | TRecordTagOrder

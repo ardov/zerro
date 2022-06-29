@@ -12,7 +12,7 @@ import { applyClientPatch } from 'models/data'
 import { TTagId } from 'models/tag'
 
 export const deleteTransactions =
-  (ids: TTransactionId | TTransactionId[]): AppThunk =>
+  (ids: TTransactionId | TTransactionId[]): AppThunk<void> =>
   (dispatch, getState) => {
     sendEvent('Transaction: delete')
     const array = Array.isArray(ids) ? ids : [ids]
@@ -25,7 +25,7 @@ export const deleteTransactions =
   }
 
 export const deleteTransactionsPermanently =
-  (ids: TTransactionId | TTransactionId[]): AppThunk =>
+  (ids: TTransactionId | TTransactionId[]): AppThunk<void> =>
   (dispatch, getState) => {
     sendEvent('Transaction: delete permanently')
     const array = Array.isArray(ids) ? ids : [ids]
@@ -39,7 +39,7 @@ export const deleteTransactionsPermanently =
   }
 
 export const markViewed =
-  (ids: TTransactionId | TTransactionId[], viewed: boolean): AppThunk =>
+  (ids: TTransactionId | TTransactionId[], viewed: boolean): AppThunk<void> =>
   (dispatch, getState) => {
     sendEvent(`Transaction: mark viewed: ${viewed}`)
     const array = Array.isArray(ids) ? ids : [ids]
@@ -53,7 +53,7 @@ export const markViewed =
   }
 
 export const restoreTransaction =
-  (id: TTransactionId): AppThunk =>
+  (id: TTransactionId): AppThunk<void> =>
   (dispatch, getState) => {
     sendEvent('Transaction: restore')
     const tr = {
@@ -68,7 +68,7 @@ export const restoreTransaction =
 // Не работает
 // TODO: Надо для новых транзакций сразу проставлять категорию. Иначе они обратно схлопываются
 export const splitTransfer =
-  (id: TTransactionId): AppThunk =>
+  (id: TTransactionId): AppThunk<void> =>
   (dispatch, getState) => {
     const state = getState()
     const tr = getTransaction(state, id)
@@ -78,7 +78,7 @@ export const splitTransfer =
 
 export type TransactionPatch = OptionalExceptFor<TTransaction, 'id'>
 export const applyChangesToTransaction =
-  (patch: TransactionPatch): AppThunk =>
+  (patch: TransactionPatch): AppThunk<void> =>
   (dispatch, getState) => {
     sendEvent('Transaction: edit')
     const tr = {
@@ -90,7 +90,7 @@ export const applyChangesToTransaction =
   }
 
 export const recreateTransaction =
-  (patch: TransactionPatch): AppThunk =>
+  (patch: TransactionPatch): AppThunk<string> =>
   (dispatch, getState) => {
     sendEvent('Transaction: recreate')
     const tr = getTransaction(getState(), patch.id)
@@ -114,7 +114,7 @@ export const bulkEditTransactions =
   (
     ids: TTransactionId[],
     opts: { tags?: TTagId[]; comment?: string }
-  ): AppThunk =>
+  ): AppThunk<void> =>
   (dispatch, getState) => {
     sendEvent('Bulk Actions: set new tags')
     const state = getState()

@@ -89,7 +89,7 @@ const SecondaryLink: FC<LinkProps> = props => (
 )
 
 const loadFromFile =
-  (file: File): AppThunk =>
+  (file: File): AppThunk<void> =>
   async (dispatch, getState) => {
     if (!file) return
 

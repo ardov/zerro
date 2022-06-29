@@ -30,7 +30,7 @@ export const moveFunds =
     source: string,
     destination: string,
     month: TISOMonth
-  ): AppThunk =>
+  ): AppThunk<void> =>
   (dispatch, getState) => {
     if (!source || !amount || !destination || source === destination) return
     sendEvent('Budgets: move funds')
@@ -61,7 +61,7 @@ export const moveFunds =
   }
 
 export const setOutcomeBudget =
-  (targetOutcome: number, month: TISOMonth, tagId: string): AppThunk =>
+  (targetOutcome: number, month: TISOMonth, tagId: string): AppThunk<void> =>
   (dispatch, getState) => {
     sendEvent('Budgets: set budget')
     const state = getState()
@@ -102,7 +102,7 @@ export const setOutcomeBudget =
   }
 
 export const copyPreviousBudget =
-  (month: TISOMonth): AppThunk =>
+  (month: TISOMonth): AppThunk<void> =>
   (dispatch, getState) => {
     sendEvent('Budgets: copy previous')
     const state = getState()
@@ -134,7 +134,7 @@ export const copyPreviousBudget =
   }
 
 export const fillGoals =
-  (month: TISOMonth): AppThunk =>
+  (month: TISOMonth): AppThunk<void> =>
   (dispatch, getState) => {
     sendEvent('Budgets: fill goals')
     const state = getState()
@@ -161,7 +161,7 @@ export const fillGoals =
   }
 
 export const startFresh =
-  (month: TISOMonth): AppThunk =>
+  (month: TISOMonth): AppThunk<void> =>
   (dispatch, getState) => {
     sendEvent('Budgets: start fresh')
     const state = getState()
@@ -246,7 +246,7 @@ function resetCurrentMonth(
 }
 
 export const fixOverspends =
-  (month: TDateDraft): AppThunk =>
+  (month: TDateDraft): AppThunk<void> =>
   (dispatch, getState) => {
     sendEvent('Budgets: fix overspends')
     const state = getState()

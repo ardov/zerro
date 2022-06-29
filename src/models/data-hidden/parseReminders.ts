@@ -1,40 +1,32 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { TAccountId } from 'models/account'
-import { TFxCode } from 'models/instrument'
-import { TMerchantId } from 'models/merchant'
 import { getReminders, TReminder, TReminderId } from 'models/reminder'
-import { TTagId } from 'models/tag'
-import { TISODate } from 'shared/types'
 import { parseComment, getRecordId } from './helpers'
 import {
   TRecord,
   RecordType,
-  TBudget,
-  TTagMetaData,
-  TTagTree,
-  TGoal,
+  TRecordBudgets,
+  TRecordFxRates,
+  TRecordGoals,
+  TRecordLinkedAccounts,
+  TRecordLinkedMerchants,
+  TRecordTagMeta,
+  TRecordTagOrder,
 } from './types'
 
 export type TAggregatedResult = {
-  fxRates: { [month: TISODate]: Record<TFxCode, number> }
-  goals: {
-    [month: TISODate]: {
-      tags?: Record<TTagId, TGoal>
-      accounts?: Record<TAccountId, TGoal>
-      merchants?: Record<TMerchantId, TGoal>
-    }
-  }
-  budgets: {
-    [month: TISODate]: {
-      tags?: Record<TTagId, TBudget>
-      accounts?: Record<TAccountId, TBudget>
-      merchants?: Record<TMerchantId, TBudget>
-    }
-  }
-  linkedAccounts: Record<TAccountId, TTagId>
-  linkedDebtors: Record<TMerchantId, TTagId>
-  tagMeta: Record<TTagId, TTagMetaData>
-  tagOrder: TTagTree
+  [RecordType.Budgets]: Record<
+    TRecordBudgets['date'],
+    TRecordBudgets['payload']
+  >
+  [RecordType.FxRates]: Record<
+    TRecordFxRates['date'],
+    TRecordFxRates['payload']
+  >
+  [RecordType.Goals]: Record<TRecordGoals['date'], TRecordGoals['payload']>
+  [RecordType.LinkedAccounts]: TRecordLinkedAccounts['payload']
+  [RecordType.LinkedDebtors]: TRecordLinkedMerchants['payload']
+  [RecordType.TagMeta]: TRecordTagMeta['payload']
+  [RecordType.TagOrder]: TRecordTagOrder['payload']
   dataReminders: { [dataId: string]: TReminder }
 }
 
@@ -52,7 +44,7 @@ function parseReminders(
   reminders: Record<TReminderId, TReminder>
 ): TAggregatedResult {
   let res: TAggregatedResult = {
-    goals: {},
+    [RecordType.Goals]: {},
     fxRates: {},
     budgets: {},
     linkedAccounts: {},
@@ -68,31 +60,31 @@ function parseReminders(
     switch (rec.type) {
       case RecordType.Goals:
         res.goals[rec.date] = rec.payload
-        res.dataReminders[getRecordId(rec.type, rec.date)] = reminder
+        res.dataReminders[getRecordId(rec)] = reminder
         break
       case RecordType.FxRates:
         res.fxRates[rec.date] = rec.payload
-        res.dataReminders[getRecordId(rec.type, rec.date)] = reminder
+        res.dataReminders[getRecordId(rec)] = reminder
         break
       case RecordType.Budgets:
         res.budgets[rec.date] = rec.payload
-        res.dataReminders[getRecordId(rec.type, rec.date)] = reminder
+        res.dataReminders[getRecordId(rec)] = reminder
         break
       case RecordType.LinkedAccounts:
         res.linkedAccounts = rec.payload
-        res.dataReminders[getRecordId(rec.type)] = reminder
+        res.dataReminders[getRecordId(rec)] = reminder
         break
       case RecordType.LinkedDebtors:
         res.linkedDebtors = rec.payload
-        res.dataReminders[getRecordId(rec.type)] = reminder
+        res.dataReminders[getRecordId(rec)] = reminder
         break
       case RecordType.TagMeta:
         res.tagMeta = rec.payload
-        res.dataReminders[getRecordId(rec.type)] = reminder
+        res.dataReminders[getRecordId(rec)] = reminder
         break
       case RecordType.TagOrder:
         res.tagOrder = rec.payload
-        res.dataReminders[getRecordId(rec.type)] = reminder
+        res.dataReminders[getRecordId(rec)] = reminder
         break
     }
   })
