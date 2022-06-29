@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { round } from 'shared/helpers/currencyHelpers'
 import { getAccounts, getStartBalance, TAccountId } from 'models/account'
 import { getTransactionsHistory } from 'models/transaction'
-import { ById, TISODate } from 'shared/types'
+import { TISODate } from 'shared/types'
 import { keys } from 'shared/helpers/keys'
 import {
   eachDayOfInterval,
@@ -52,11 +52,14 @@ export const getAccountsHistory = createSelector(
     let result: Record<TAccountId, Point[]> = {}
     for (const id in changes) {
       let lastValue = 0
-      const dateMap: ById<{
-        date: TISODate
-        balance: number
-        transactions: number[]
-      }> = {}
+      const dateMap: Record<
+        TAccountId,
+        {
+          date: TISODate
+          balance: number
+          transactions: number[]
+        }
+      > = {}
       changes[id].forEach(obj => {
         dateMap[obj.date] = obj
       })

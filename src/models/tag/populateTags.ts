@@ -1,12 +1,12 @@
 import { int2rgb, int2hex, getColorForString } from 'shared/helpers/color'
 import { sendEvent } from 'shared/helpers/tracking'
 import toArray from 'lodash/toArray'
-import { ById } from 'shared/types'
+import { ByIdOld } from 'shared/types'
 import { TTagPopulated, TTag } from './types'
 import iconsMap from './iconsMap.json'
 import { nullTag } from './makeTag'
 
-export default function populateTags(rawTags: ById<TTag>) {
+export default function populateTags(rawTags: ByIdOld<TTag>) {
   let tags: {
     [x: string]: TTagPopulated
   } = { null: makePopulatedTag(nullTag) }

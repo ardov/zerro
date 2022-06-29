@@ -1,13 +1,19 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { populate } from './populate'
 import { convertCurrency } from 'models/instrument'
-import { TAccountPopulated } from './types'
+import { accountType, TAccountPopulated } from './types'
 import { RootState } from 'models'
 import { DATA_ACC_NAME } from '../hiddenData/constants'
 
 // SELECTORS
 
 export const getAccounts = (state: RootState) => state.data.current.account
+
+export const getDebtAccountId = createSelector([getAccounts], accounts => {
+  for (const id in accounts) {
+    if (accounts[id].type === accountType.debt) return id
+  }
+})
 
 export const getPopulatedAccounts = createSelector(
   [convertCurrency, getAccounts],
@@ -25,12 +31,6 @@ export const getAccountList = createSelector([getPopulatedAccounts], accounts =>
     (a, b) => b.convertedBalance - a.convertedBalance
   )
 )
-
-export const getDebtAccountId = createSelector([getAccountList], accounts => {
-  for (const acc of accounts) {
-    if (acc.type === 'debt') return acc.id
-  }
-})
 
 export const getInBudgetAccounts = createSelector([getAccountList], accounts =>
   accounts.filter(a => a.inBudget)

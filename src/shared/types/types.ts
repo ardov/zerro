@@ -2,17 +2,17 @@ import { ById } from './ts-utils'
 import { goalType } from 'models/hiddenData/constants'
 import { TZmDiff } from 'shared/api/zenmoney'
 import { TZmDeletionObject } from 'models/deletion'
-import { TTransaction, TTransactionId } from 'models/transaction'
-import { TReminder, TReminderId } from 'models/reminder'
-import { TReminderMarker, TReminderMarkerId } from 'models/reminderMarker'
+import { TTransaction } from 'models/transaction'
+import { TReminder } from 'models/reminder'
+import { TReminderMarker } from 'models/reminderMarker'
 import { TInstrument, TInstrumentId } from 'models/instrument'
 import { TCountry } from 'models/country'
 import { TCompany } from 'models/company'
 import { TUser } from 'models/user'
-import { TMerchant, TMerchantId } from 'models/merchant'
-import { TAccount, TAccountId } from 'models/account'
-import { TTag, TTagId } from 'models/tag'
-import { TBudget, TBudgetId } from 'models/budget'
+import { TMerchant } from 'models/merchant'
+import { TAccount } from 'models/account'
+import { TTag } from 'models/tag'
+import { TBudget } from 'models/budget'
 
 type TYear = `${number}${number}${number}${number}`
 type TMonth = `${number}${number}`
@@ -50,18 +50,18 @@ export type TLocalData = Omit<TZmDiff, 'deletion'>
 
 // prettier-ignore
 export type TDataStore = {
-  serverTimestamp:  number
-  instrument:       ById<                       TInstrument>
-  country:          ById<                       TCountry>
-  company:          ById<                       TCompany>
-  user:             ById<                       TUser>
-  merchant:         Record< TMerchantId,        TMerchant>
-  account:          Record< TAccountId,         TAccount>
-  tag:              Record< TTagId,             TTag>
-  budget:           Record< TBudgetId,          TBudget>
-  reminder:         Record< TReminderId,        TReminder>
-  reminderMarker:   Record< TReminderMarkerId,  TReminderMarker>
-  transaction:      Record< TTransactionId,     TTransaction>
+  serverTimestamp:  TMsTime
+  instrument:       ById<TInstrument>
+  country:          ById<TCountry>
+  company:          ById<TCompany>
+  user:             ById<TUser>
+  merchant:         ById<TMerchant>
+  account:          ById<TAccount>
+  tag:              ById<TTag>
+  budget:           ById<TBudget>
+  reminder:         ById<TReminder>
+  reminderMarker:   ById<TReminderMarker>
+  transaction:      ById<TTransaction>
 }
 
 export type TDataStorePatch = Partial<TDataStore> & {

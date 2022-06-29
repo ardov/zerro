@@ -5,24 +5,24 @@ import { TTagId } from 'models/tag'
 import { TISODate, TUnits } from 'shared/types'
 
 // GOALS
-export enum goalType {
-  monthly = 'monthly', // monthly contribution
-  monthlySpend = 'monthlySpend', // monthly spend
-  targetBalance = 'targetBalance', //
+export enum GoalType {
+  Monthly = 'monthly', // monthly contribution
+  MonthlySpend = 'monthlySpend', // monthly spend
+  TargetBalance = 'targetBalance', //
 }
 
-export enum recordType {
-  goals = 'goals',
-  fxRates = 'fxRates',
-  budgets = 'budgets',
-  linkedAccounts = 'linkedAccounts',
-  linkedDebtors = 'linkedDebtors',
-  tagMeta = 'tagMeta',
-  tagOrder = 'tagOrder',
+export enum RecordType {
+  Goals = 'goals',
+  FxRates = 'fxRates',
+  Budgets = 'budgets',
+  LinkedAccounts = 'linkedAccounts',
+  LinkedDebtors = 'linkedDebtors',
+  TagMeta = 'tagMeta',
+  TagOrder = 'tagOrder',
 }
 
 export type TGoal = {
-  type: goalType
+  type: GoalType
   amount: TUnits
   end?: TISODate
 }
@@ -31,8 +31,8 @@ export type TGoal = {
 export type TTagMetaData = {
   comment?: string
   currency?: TFxCode
-  carryNegatives?: boolean
   keepIncome?: boolean
+  carryNegatives?: boolean
 }
 
 // TAG TREE
@@ -50,7 +50,7 @@ export type TBudget = {
 }
 
 type TRecordGoals = {
-  type: recordType.goals
+  type: RecordType.Goals
   date: TISODate
   payload: {
     tags?: Record<TTagId, TGoal>
@@ -59,12 +59,12 @@ type TRecordGoals = {
   }
 }
 type TRecordFxRates = {
-  type: recordType.fxRates
+  type: RecordType.FxRates
   date: TISODate
   payload: Record<TFxCode, number>
 }
 type TRecordBudgets = {
-  type: recordType.budgets
+  type: RecordType.Budgets
   date: TISODate
   payload: {
     tags?: Record<TTagId, TBudget>
@@ -73,19 +73,19 @@ type TRecordBudgets = {
   }
 }
 type TRecordLinkedAccounts = {
-  type: recordType.linkedAccounts
+  type: RecordType.LinkedAccounts
   payload: { [id: TAccountId]: TTagId }
 }
 type TRecordLinkedDebtors = {
-  type: recordType.linkedDebtors
+  type: RecordType.LinkedDebtors
   payload: { [id: TAccountId]: TTagId } // Only merchants?
 }
 type TRecordTagMeta = {
-  type: recordType.tagMeta
+  type: RecordType.TagMeta
   payload: { [id: TTagId]: TTagMetaData } // Only merchants?
 }
 type TRecordTagOrder = {
-  type: recordType.tagOrder
+  type: RecordType.TagOrder
   payload: TTagTree
 }
 export type TRecord =

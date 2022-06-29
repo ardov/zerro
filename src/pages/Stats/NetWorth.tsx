@@ -20,7 +20,7 @@ import {
   ReferenceLine,
 } from 'recharts'
 import { getInBudgetAccounts, getSavingAccounts } from 'models/account'
-import { convertCurrency } from 'models/instrument'
+import { convertCurrency, TInstrumentId } from 'models/instrument'
 import { getAvailableMonths } from './availablePeriod'
 import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 import { round } from 'shared/helpers/currencyHelpers'
@@ -101,7 +101,7 @@ export function NetWorth() {
       }
     })
     Object.entries(b?.debtors || {}).forEach(([debtorId, balance]) => {
-      const instrument = debtorId.split('-')[1]
+      const instrument = +debtorId.split('-')[1] as TInstrumentId
       const debtorBalance = convert(balance, instrument)
       if (debtorBalance > 0) {
         // He owes me

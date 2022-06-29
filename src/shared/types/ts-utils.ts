@@ -1,5 +1,6 @@
 /** Objects stored in collection by id */
-export type ById<T> = { [id: string]: T }
+export type ByIdOld<T> = { [id: string]: T }
+export type ById<T extends { id: string | number }> = Record<T['id'], T>
 
 /** Edit type */
 export type Modify<T, R> = Omit<T, keyof R> & R

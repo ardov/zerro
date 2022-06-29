@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { EntityType, TDeletionObject } from 'models/deletion'
 import { TDiff } from 'models/diff'
-import { ById } from 'shared/types'
+import { ByIdOld } from 'shared/types'
 
 type TSlice<T> = {
-  server: ById<T>
-  localDiff: ById<T>
+  server: ByIdOld<T>
+  localDiff: ByIdOld<T>
   localDeletion?: TDeletionObject[]
 }
 

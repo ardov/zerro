@@ -26,7 +26,7 @@ export const getFxIdMap = createSelector([getInstruments], instruments => {
 export const convertCurrency = createSelector(
   [getInstruments, getUserInstrumentId],
   (instruments, userInstrument) =>
-    (amount = 0, from: TInstrumentId | string, to?: TInstrumentId | string) => {
+    (amount = 0, from: TInstrumentId, to?: TInstrumentId) => {
       to = to || userInstrument
       if (!to) return amount
       return amount * (instruments[from].rate / instruments[to].rate)

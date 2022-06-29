@@ -17,7 +17,7 @@ import { goalType } from 'models/hiddenData/constants'
 import { getGoals } from 'models/hiddenData/goals'
 import { applyClientPatch } from 'models/data'
 import { AppThunk } from 'models'
-import { ById, TDateDraft, TISOMonth } from 'shared/types'
+import { ByIdOld, TDateDraft, TISOMonth } from 'shared/types'
 import { getMetaForTag } from 'models/hiddenData/tagMeta'
 import { round } from 'shared/helpers/currencyHelpers'
 import { prevMonth, toISODate, toISOMonth } from 'shared/helpers/date'
@@ -196,14 +196,14 @@ function removeFutureBudgets(
 
 function clearAvailable(
   month: TISOMonth,
-  amounts: ById<TagAmounts>,
+  amounts: ByIdOld<TagAmounts>,
   user: number
 ) {
   const changedBudgets: TBudget[] = []
   fillArray(amounts)
   return changedBudgets
 
-  function fillArray(amounts: ById<TagAmounts>) {
+  function fillArray(amounts: ByIdOld<TagAmounts>) {
     for (const id in amounts) {
       const tag = amounts[id]
       if (tag.available > 0) {
@@ -215,14 +215,14 @@ function clearAvailable(
         })
         changedBudgets.push(budget)
       }
-      if (tag.children) fillArray(tag.children as ById<TagAmounts>)
+      if (tag.children) fillArray(tag.children as ByIdOld<TagAmounts>)
     }
   }
 }
 
 function resetCurrentMonth(
   month: TISOMonth,
-  amounts: ById<TagAmounts>,
+  amounts: ByIdOld<TagAmounts>,
   user: number
 ) {
   const changedBudgets: TBudget[] = []

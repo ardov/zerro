@@ -1,12 +1,14 @@
+import { createSelector } from '@reduxjs/toolkit'
 import { TAccountId } from 'models/account'
 import { TFxCode } from 'models/instrument'
 import { TMerchantId } from 'models/merchant'
-import { TReminder, TReminderId } from 'models/reminder'
+import { getReminders, TReminder, TReminderId } from 'models/reminder'
 import { TTagId } from 'models/tag'
 import { TISODate } from 'shared/types'
+import { parseComment, getRecordId } from './helpers'
 import {
   TRecord,
-  recordType,
+  RecordType,
   TBudget,
   TTagMetaData,
   TTagTree,
@@ -36,7 +38,17 @@ export type TAggregatedResult = {
   dataReminders: { [dataId: string]: TReminder }
 }
 
-export function parseReminders(
+export const getRawHiddenData = createSelector([getReminders], parseReminders)
+export const getBudgets = createSelector(
+  [getRawHiddenData],
+  data => data.budgets
+)
+export const getDataReminders = createSelector(
+  [getRawHiddenData],
+  data => data.dataReminders
+)
+
+function parseReminders(
   reminders: Record<TReminderId, TReminder>
 ): TAggregatedResult {
   let res: TAggregatedResult = {
@@ -54,31 +66,31 @@ export function parseReminders(
     const rec = parseComment(reminder.comment) as TRecord
     if (!rec) return
     switch (rec.type) {
-      case recordType.goals:
+      case RecordType.Goals:
         res.goals[rec.date] = rec.payload
         res.dataReminders[getRecordId(rec.type, rec.date)] = reminder
         break
-      case recordType.fxRates:
+      case RecordType.FxRates:
         res.fxRates[rec.date] = rec.payload
         res.dataReminders[getRecordId(rec.type, rec.date)] = reminder
         break
-      case recordType.budgets:
+      case RecordType.Budgets:
         res.budgets[rec.date] = rec.payload
         res.dataReminders[getRecordId(rec.type, rec.date)] = reminder
         break
-      case recordType.linkedAccounts:
+      case RecordType.LinkedAccounts:
         res.linkedAccounts = rec.payload
         res.dataReminders[getRecordId(rec.type)] = reminder
         break
-      case recordType.linkedDebtors:
+      case RecordType.LinkedDebtors:
         res.linkedDebtors = rec.payload
         res.dataReminders[getRecordId(rec.type)] = reminder
         break
-      case recordType.tagMeta:
+      case RecordType.TagMeta:
         res.tagMeta = rec.payload
         res.dataReminders[getRecordId(rec.type)] = reminder
         break
-      case recordType.tagOrder:
+      case RecordType.TagOrder:
         res.tagOrder = rec.payload
         res.dataReminders[getRecordId(rec.type)] = reminder
         break
@@ -86,17 +98,4 @@ export function parseReminders(
   })
 
   return res
-}
-
-function parseComment(comment: string | null) {
-  if (!comment) return null
-  try {
-    return JSON.parse(comment)
-  } catch {
-    return null
-  }
-}
-
-function getRecordId(type: recordType, date?: TISODate) {
-  return date ? `${type}#${date}` : type
 }

@@ -3,7 +3,7 @@ import { TInstrument } from 'models/instrument'
 import { TTag, TTagId } from 'models/tag'
 import { TrType, TTransaction } from 'models/transaction'
 import { getType } from 'models/transaction/helpers'
-import { ById, Modify } from 'shared/types'
+import { ByIdOld, Modify } from 'shared/types'
 
 interface DataSources {
   instruments: { [id: number]: TInstrument }
@@ -41,7 +41,7 @@ export const populateTransaction = (
   type: getType(raw),
 })
 
-function mapTags(ids: TTagId[] | null, tags: ById<TTag>) {
+function mapTags(ids: TTagId[] | null, tags: ByIdOld<TTag>) {
   // TODO: Надо что-то придумать с null тегом 🤔    ⤵
   return ids && ids.length ? ids.map(id => tags[id + '']) : null
 }
