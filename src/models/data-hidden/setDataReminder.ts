@@ -20,7 +20,7 @@ export function setHiddenDataPiece(record: TRecord): AppThunk<TReminder> {
 
     return dispatch(
       setReminder({
-        id: reminders[recordId].id,
+        id: reminders[recordId]?.id,
         incomeAccount: dataAccId,
         outcomeAccount: dataAccId,
         income: 1,

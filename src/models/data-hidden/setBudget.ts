@@ -4,10 +4,16 @@ import { EntityType } from 'models/deletion'
 import { TFxCode } from 'models/instrument'
 import { TMerchantId } from 'models/merchant'
 import { TTagId } from 'models/tag'
+import { toISODate } from 'shared/helpers/date'
+import { TDateDraft } from 'shared/types'
+import { getEnvelopeId } from './helpers'
+import { getRawHiddenData } from './parseReminders'
 import { setHiddenDataPiece } from './setDataReminder'
+import { RecordType, TBudget, TRecordBudgets } from './types'
 
 type TBudgetDraft = {
-  target: EntityType.Tag | EntityType.Account | EntityType.Merchant
+  date: TDateDraft
+  type: EntityType.Tag | EntityType.Account | EntityType.Merchant
   id: TTagId | TAccountId | TMerchantId
   value: number
   fx: TFxCode
@@ -15,8 +21,23 @@ type TBudgetDraft = {
 
 export function setBudget(draft: TBudgetDraft): AppThunk {
   return (dispatch, getState) => {
-    // dispatch(setHiddenDataPiece())
+    const dateISO = toISODate(draft.date)
+    const currentData =
+      getRawHiddenData(getState())[RecordType.Budgets][dateISO] ||
+      ({} as TRecordBudgets['payload'])
 
-    const state = getState()
+    const envelopeId = getEnvelopeId(draft.type, draft.id)
+    const newData: TRecordBudgets['payload'] = { ...currentData }
+    if (draft.value) newData[envelopeId] = { value: draft.value, fx: draft.fx }
+    else delete newData[envelopeId]
+
+    dispatch(
+      setHiddenDataPiece({
+        type: RecordType.Budgets,
+        date: dateISO,
+        payload: newData,
+      })
+    )
+    console.log('🎉 currentData', getRawHiddenData(getState()))
   }
 }

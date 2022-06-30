@@ -5,6 +5,14 @@ import { TMerchantId } from 'models/merchant'
 import { TTagId } from 'models/tag'
 import { TISODate, TUnits } from 'shared/types'
 
+export type TTagEnvelopeId = `${EntityType.Tag}#${TTagId}`
+export type TAccountEnvelopeId = `${EntityType.Account}#${TAccountId}`
+export type TMerchantEnvelopeId = `${EntityType.Merchant}#${TMerchantId}`
+export type TEnvelopeId =
+  | TTagEnvelopeId
+  | TAccountEnvelopeId
+  | TMerchantEnvelopeId
+
 export enum RecordType {
   Goals = 'goals',
   FxRates = 'fxRates',
@@ -34,11 +42,7 @@ export type TGoal = {
 export type TRecordGoals = {
   type: RecordType.Goals
   date: TISODate
-  payload: {
-    [EntityType.Tag]?: Record<TTagId, TGoal>
-    [EntityType.Account]?: Record<TAccountId, TGoal>
-    [EntityType.Merchant]?: Record<TMerchantId, TGoal>
-  }
+  payload: Record<TEnvelopeId, TGoal>
 }
 
 // —————————————————————————————————————————————————————————————————————————————
@@ -96,11 +100,7 @@ export type TBudget = {
 export type TRecordBudgets = {
   type: RecordType.Budgets
   date: TISODate
-  payload: {
-    [EntityType.Tag]?: Record<TTagId, TBudget>
-    [EntityType.Account]?: Record<TAccountId, TBudget>
-    [EntityType.Merchant]?: Record<TMerchantId, TBudget>
-  }
+  payload: Record<TEnvelopeId, TBudget>
 }
 
 // —————————————————————————————————————————————————————————————————————————————

@@ -1,4 +1,4 @@
-import { TRecord } from './types'
+import { TEnvelopeId, TRecord } from './types'
 
 export function parseComment(comment: string | null) {
   if (!comment) return null
@@ -14,4 +14,14 @@ export function getRecordId(record: TRecord) {
     return `${record.type}#${record.date}`
   }
   return record.type
+}
+
+export function parseEnvelopeId(id: TEnvelopeId) {
+  return {
+    type: id.split('#')[0],
+    id: id.split('#')[1],
+  }
+}
+export function getEnvelopeId(type: string, id: string) {
+  return `${type}#${id}` as TEnvelopeId
 }
