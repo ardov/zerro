@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import { Collapse, Box, IconButton } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { ChevronRightIcon, DragIndicatorIcon } from 'shared/ui/Icons'

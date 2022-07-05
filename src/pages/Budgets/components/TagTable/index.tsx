@@ -1,7 +1,7 @@
 import React, { useState, useContext, FC } from 'react'
 import { BoxProps, Paper } from '@mui/material'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import { TagGroup } from './TagGroup'
 import { TagTableHeader } from './TagTableHeader'
 import { TagTableFooter } from './TagTableFooter'

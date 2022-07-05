@@ -4,7 +4,7 @@ import { DataReminderType } from '../constants'
 import { setHiddenData } from '../thunks'
 import { getTags } from 'models/tag'
 import { getAccLinks } from '../selectors'
-import { AppThunk, TSelector } from 'models'
+import { AppThunk, TSelector } from 'store'
 import { getAccounts } from 'models/account'
 import { TAccountId, TTagId } from 'shared/types'
 

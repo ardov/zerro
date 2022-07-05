@@ -4,7 +4,7 @@ import { sendEvent } from 'shared/helpers/tracking'
 import { setHiddenData } from '../thunks'
 import { DataReminderType } from '../constants'
 import { getTagsTree, TTagPopulated } from 'models/tag'
-import { AppThunk } from 'models'
+import { AppThunk } from 'store'
 import { TTagId } from 'shared/types'
 
 // THUNKS

@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { round } from 'shared/helpers/currencyHelpers'
-import { RootState } from 'models'
+import { RootState } from 'store'
 import { convertCurrency } from 'models/instrument'
 import { TPopulatedBudget } from './types'
 import { TBudgetId, TDateDraft, TISOMonth } from 'shared/types'

@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { TFxIdMap } from './types'
-import { RootState } from 'models'
+import { RootState } from 'store'
 import { getUserInstrumentId } from 'models/user'
 import { TInstrumentId } from 'shared/types'
 

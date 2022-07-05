@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import {
   getPopulatedTags,
   getTagsTree,

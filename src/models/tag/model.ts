@@ -3,7 +3,7 @@ import { compareTags } from 'models/hiddenData/tagOrder'
 import populateTags from './populateTags'
 import { Modify, TTag, TTagId } from 'shared/types'
 import { TTagPopulated } from './types'
-import { RootState } from 'models'
+import { RootState } from 'store'
 
 // SELECTORS
 export const getTags = (state: RootState) => state.data.current.tag

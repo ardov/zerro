@@ -1,5 +1,5 @@
 import React, { FC, KeyboardEventHandler, useEffect, useState } from 'react'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import { getTagsTree, TagTreeNode, TTagPopulated } from 'models/tag'
 import {
   Popover,

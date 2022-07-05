@@ -1,5 +1,5 @@
 import React, { FC, useContext, useState } from 'react'
-import { useAppDispatch, useAppSelector } from 'models'
+import { useAppDispatch, useAppSelector } from 'store'
 import { getUserCurrencyCode } from 'models/instrument'
 import { formatMoney } from 'shared/helpers/format'
 import { formatDate } from 'shared/helpers/date'

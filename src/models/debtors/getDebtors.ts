@@ -1,7 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { add, sub } from 'shared/helpers/currencyHelpers'
 import { getDebtAccountId } from 'models/account'
-import { getMerchants } from 'models/data/selectors'
 import { getTransactionsHistory, TrType } from 'models/transaction'
 import { getType } from 'models/transaction/helpers'
 import {
@@ -12,8 +11,9 @@ import {
   TMerchant,
   TMerchantId,
 } from 'shared/types'
-import { TSelector } from 'models'
+import { TSelector } from 'store'
 import { cleanPayee } from 'models/shared/cleanPayee'
+import { getMerchants } from 'models/merchant'
 
 type TFxAmount = {
   [currency: TInstrumentId]: number

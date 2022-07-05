@@ -3,7 +3,7 @@ import { sendEvent } from 'shared/helpers/tracking'
 import { DataReminderType } from '../constants'
 import { setHiddenData } from '../thunks'
 import { getRawTagMeta } from '../selectors'
-import { AppThunk } from 'models'
+import { AppThunk } from 'store'
 import { TTagMeta } from 'shared/types'
 import { TTagId } from 'shared/types'
 

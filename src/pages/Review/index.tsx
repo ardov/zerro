@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Box, Button, Typography } from '@mui/material'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import './index.scss'
 import { getYearStats } from './selectors'
 import Rhythm from 'shared/ui/Rhythm'

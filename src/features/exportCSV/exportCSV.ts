@@ -5,7 +5,7 @@ import {
 } from './populateTransaction'
 import { formatDate } from 'shared/helpers/date'
 import { ById } from 'shared/types'
-import { AppThunk } from 'models'
+import { AppThunk } from 'store'
 import { getTransactions, TrType } from 'models/transaction'
 import { getInstruments } from 'models/instrument'
 import { getAccounts } from 'models/account'

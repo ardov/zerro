@@ -1,4 +1,4 @@
-import { AppThunk } from 'models'
+import { AppThunk } from 'store'
 import { setReminder } from 'models/reminder'
 import { getRootUser } from 'models/user'
 import { TReminder } from 'shared/types'

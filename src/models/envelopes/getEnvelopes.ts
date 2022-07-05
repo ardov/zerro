@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { TSelector } from 'models'
+import { TSelector } from 'store'
 import { getSavingAccounts } from 'models/account'
 import { getDebtors } from 'models/debtors'
 import { getUserCurrencyCode } from 'models/instrument'

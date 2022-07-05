@@ -15,7 +15,7 @@ import { getDebtAccountId, getInBudgetAccounts } from 'models/account'
 import { getEnvelopeId, TEnvelopeId } from 'models/shared/envelopeHelpers'
 import { cleanPayee } from 'models/shared/cleanPayee'
 import { createSelector } from '@reduxjs/toolkit'
-import { TSelector } from 'models'
+import { TSelector } from 'store'
 import { keys } from 'shared/helpers/keys'
 
 type TEnvelopeNode = {

@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import { getAmountsByTag, getTotalsByMonth } from '../../selectors'
 import { getUserCurrencyCode } from 'models/instrument'
 import { Box, Typography, ButtonBase, Collapse, BoxProps } from '@mui/material'

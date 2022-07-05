@@ -8,7 +8,7 @@ import {
 } from './getAmountsByTag'
 import { round } from 'shared/helpers/currencyHelpers'
 import { withPerf } from 'shared/helpers/performance'
-import { RootState } from 'models'
+import { RootState } from 'store'
 import { TISOMonth } from 'shared/types'
 
 const CARRY_NEGATIVES = !!localStorage.getItem('CARRY_NEGATIVES')

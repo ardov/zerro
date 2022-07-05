@@ -4,7 +4,7 @@ import { DataReminderType } from '../constants'
 import { makeGoal } from './helpers'
 import { getRawGoals } from '../selectors'
 import { setHiddenData } from '../thunks'
-import { AppThunk, RootState } from 'models'
+import { AppThunk, RootState } from 'store'
 import { TGoal, TTagId } from 'shared/types'
 import { getTags } from 'models/tag'
 

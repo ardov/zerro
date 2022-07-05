@@ -1,4 +1,4 @@
-import { RootState } from 'models'
+import { RootState } from 'store'
 
 export const getUsers = (state: RootState) => state.data.current.user
 

@@ -1,14 +1,14 @@
 import { v1 as uuidv1 } from 'uuid'
 import { getTransaction, getTransactions } from 'models/transaction'
 import { sendEvent } from 'shared/helpers/tracking'
-import { AppThunk } from 'models'
+import { AppThunk } from 'store'
 import {
   OptionalExceptFor,
   TTagId,
   TTransaction,
   TTransactionId,
 } from 'shared/types'
-import { applyClientPatch } from 'models/data'
+import { applyClientPatch } from 'store/data'
 
 export const deleteTransactions =
   (ids: TTransactionId | TTransactionId[]): AppThunk<void> =>

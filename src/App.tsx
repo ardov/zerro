@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Router, Route, Redirect, Switch } from 'react-router-dom'
-import { getLoginState } from 'models/token'
+import { getLoginState } from 'store/token'
 import { RegularSyncHandler } from 'components/RegularSyncHandler'
 import Nav from 'components/Navigation'
 import { MobileNavigation } from 'components/Navigation'
@@ -13,7 +13,7 @@ import {
 } from '@mui/material'
 import { createBrowserHistory } from 'history'
 import ErrorBoundary from 'components/ErrorBoundary'
-import { getLastSyncTime } from 'models/data/selectors'
+import { getLastSyncTime } from 'store/data/selectors'
 import { getRootUser } from 'models/user'
 import { initTracking, setUserId } from 'shared/helpers/tracking'
 import Transactions from 'pages/Transactions'
@@ -25,7 +25,7 @@ import Stats from 'pages/Stats'
 import About from 'pages/About'
 import Token from 'pages/Token'
 import Donation from 'pages/Donation'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 
 const history = createBrowserHistory()
 initTracking(history)

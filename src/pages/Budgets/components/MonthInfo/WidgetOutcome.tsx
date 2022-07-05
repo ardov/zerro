@@ -1,5 +1,5 @@
 import React from 'react'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import { getTotalsByMonth } from '../../selectors'
 import { getUserCurrencyCode } from 'models/instrument'
 import { Box } from '@mui/material'

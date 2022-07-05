@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import { Select, MenuItem, SelectProps } from '@mui/material'
 import { getInstruments } from 'models/instrument'
 import { getAccountList } from 'models/account'

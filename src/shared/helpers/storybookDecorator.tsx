@@ -5,7 +5,7 @@ import AdapterDateFns from '@mui/lab/AdapterDateFns'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import ruDateLocale from 'date-fns/locale/ru'
 import { Provider } from 'react-redux'
-import { store } from 'models'
+import { store } from 'store'
 
 import { createTheme } from 'shared/helpers/createTheme'
 

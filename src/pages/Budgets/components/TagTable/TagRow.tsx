@@ -38,7 +38,7 @@ import { getTagMeta } from 'models/hiddenData/tagMeta'
 import { getInstruments } from 'models/instrument'
 import { getUserInstrumentId } from 'models/user'
 import { SxProps } from '@mui/system'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 
 type TagRowProps = {
   id: string

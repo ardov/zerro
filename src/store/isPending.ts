@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { RootState } from 'models'
+import { RootState } from 'store'
 
 const { reducer, actions } = createSlice({
   name: 'isPending',

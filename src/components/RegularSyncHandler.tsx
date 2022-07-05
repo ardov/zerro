@@ -1,11 +1,11 @@
 import { FC, useCallback, useEffect, useRef } from 'react'
-import { getLoginState } from 'models/token'
+import { getLoginState } from 'store/token'
 import { syncData } from 'features/sync'
-import { getLastSyncTime, getLastChangeTime } from 'models/data/selectors'
-import { getPendingState } from 'models/isPending'
+import { getLastSyncTime, getLastChangeTime } from 'store/data'
+import { getPendingState } from 'store/isPending'
 import { loadLocalData } from 'features/localData'
 import { createLocalStorageStateHook } from 'use-local-storage-state'
-import { useAppDispatch, useAppSelector } from 'models'
+import { useAppDispatch, useAppSelector } from 'store'
 
 export const useRegularSync = createLocalStorageStateHook<boolean>(
   'regularSync',

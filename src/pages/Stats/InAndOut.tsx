@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import { Paper, Card, Typography, Box, useTheme } from '@mui/material'
 import {
   ResponsiveContainer,

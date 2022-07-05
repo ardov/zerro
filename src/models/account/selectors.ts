@@ -3,7 +3,7 @@ import { populate } from './populate'
 import { convertCurrency } from 'models/instrument'
 import { TAccountPopulated } from './types'
 import { accountType, TAccountId } from 'shared/types'
-import { RootState } from 'models'
+import { RootState } from 'store'
 import { DATA_ACC_NAME } from '../hiddenData/constants'
 
 // SELECTORS

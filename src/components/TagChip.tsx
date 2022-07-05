@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import { getPopulatedTags, TTagPopulated } from 'models/tag'
 import { Chip, ChipProps } from '@mui/material'
 import { CloseIcon } from 'shared/ui/Icons'

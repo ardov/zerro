@@ -28,7 +28,7 @@ import {
 } from 'models/hiddenData/tagMeta'
 import { getUserInstrumentId } from 'models/user'
 import { CurrencySelect } from './CurrencySelect'
-import { useAppDispatch, useAppSelector } from 'models'
+import { useAppDispatch, useAppSelector } from 'store'
 import { TTag } from 'shared/types'
 
 // TODO: Доделать модалку для редактирования и создания категорий

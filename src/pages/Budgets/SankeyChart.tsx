@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import { getTotalsByMonth } from './selectors'
 import { getAmountsByTag } from './selectors'
 import { getTagsTree } from 'models/tag'

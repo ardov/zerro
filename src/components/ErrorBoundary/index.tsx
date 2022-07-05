@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { logOut } from 'features/authorization'
 import { captureError, sendEvent } from 'shared/helpers/tracking'
 import { ErrorMessage } from './ErrorMessage'
-import { AppDispatch } from 'models'
+import { AppDispatch } from 'store'
 
 interface ErrorBoundaryProps {
   logOut: () => void

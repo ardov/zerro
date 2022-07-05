@@ -1,7 +1,7 @@
 import type { TTransaction } from 'shared/types'
 import React, { FC, useEffect, useState } from 'react'
 import './transitions.css'
-import { useAppDispatch, useAppSelector } from 'models'
+import { useAppDispatch, useAppSelector } from 'store'
 import IconButton from '@mui/material/IconButton'
 import {
   DeleteOutlineIcon,
@@ -31,7 +31,7 @@ import { getType, isNew } from 'models/transaction/helpers'
 import { getTransactions } from 'models/transaction'
 import { Divider, ListItemIcon, ListItemText } from '@mui/material'
 import { round } from 'shared/helpers/currencyHelpers'
-import { applyClientPatch } from 'models/data'
+import { applyClientPatch } from 'store/data'
 import { sendEvent } from 'shared/helpers/tracking'
 
 type ActionsProps = {

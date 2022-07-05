@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Box, Typography, Chip } from '@mui/material'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import Rhythm from 'shared/ui/Rhythm'
 import { Amount } from 'components/Amount'
 import { getUserCurrencyCode } from 'models/instrument'

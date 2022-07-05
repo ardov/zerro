@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import { Box, Typography, Paper, useTheme } from '@mui/material'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import { AreaChart, Area, ResponsiveContainer } from 'recharts'
 import { getAccountsHistory } from './selectors'
 import { getAccounts, getAccountList } from 'models/account'

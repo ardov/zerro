@@ -1,4 +1,4 @@
-import { AppThunk } from 'models'
+import { AppThunk } from 'store'
 import { getEnvelopeId } from 'models/shared/envelopeHelpers'
 import { toISODate } from 'shared/helpers/date'
 import {

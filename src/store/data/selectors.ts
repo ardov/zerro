@@ -1,7 +1,7 @@
 import { keys } from 'shared/helpers/keys'
-import { RootState } from 'models'
+import { RootState } from 'store'
 import { TDiff, TLocalData } from 'shared/types'
-import { getDiff } from './index'
+import { getDiff } from './slice'
 import { convertDiff } from 'models/diff'
 
 export const getDataToSave = (state: RootState): TLocalData => {
@@ -39,6 +39,3 @@ export const getLastChangeTime = (state: RootState) => {
 // SYNC TIME
 export const getLastSyncTime = (state: RootState) =>
   state.data.current.serverTimestamp
-
-// MERCHANTS
-export const getMerchants = (state: RootState) => state.data.current.merchant

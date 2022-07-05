@@ -3,7 +3,7 @@ import { getReminders } from 'models/reminder'
 import { DataReminderType } from './constants'
 import { getAccountList } from 'models/account'
 import { DATA_ACC_NAME } from './constants'
-import { RootState } from 'models'
+import { RootState } from 'store'
 import { TGoal, TReminder, TTagMeta } from 'shared/types'
 import { TTagId } from 'shared/types'
 

@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useAppDispatch, useAppSelector } from 'models'
+import { useAppDispatch, useAppSelector } from 'store'
 import {
   Box,
   Typography,

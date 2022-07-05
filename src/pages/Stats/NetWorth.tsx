@@ -9,7 +9,7 @@ import {
   Card,
 } from '@mui/material'
 import { withStyles } from '@mui/styles'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import {
   ResponsiveContainer,
   ComposedChart,

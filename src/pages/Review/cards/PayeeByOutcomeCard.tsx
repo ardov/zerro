@@ -1,6 +1,6 @@
 import React from 'react'
 import { Typography } from '@mui/material'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import Rhythm from 'shared/ui/Rhythm'
 import { Amount } from 'components/Amount'
 import { getUserCurrencyCode } from 'models/instrument'

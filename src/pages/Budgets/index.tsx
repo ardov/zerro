@@ -2,7 +2,7 @@ import React, {
   useCallback,
   // useState
 } from 'react'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import { Redirect } from 'react-router-dom'
 import { TagTable } from './components/TagTable'
 import { TransferTable } from './components/TransferTable'

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Box, Button, Typography } from '@mui/material'
-import { getToken } from 'models/token'
-import { useAppSelector } from 'models'
+import { getToken } from 'store/token'
+import { useAppSelector } from 'store'
 import { Helmet } from 'react-helmet'
 
 export default function Token() {

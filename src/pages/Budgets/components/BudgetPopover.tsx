@@ -1,5 +1,5 @@
 import React, { FC, useEffect } from 'react'
-import { useAppDispatch, useAppSelector } from 'models'
+import { useAppDispatch, useAppSelector } from 'store'
 import {
   List,
   ListItemButton,

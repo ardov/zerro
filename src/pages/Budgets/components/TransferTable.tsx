@@ -18,7 +18,7 @@ import { getTransfers } from '../selectors'
 import { getAccounts } from 'models/account'
 import TagChip from 'components/TagChip'
 import { useMonth } from '../pathHooks'
-import { useAppDispatch, useAppSelector } from 'models'
+import { useAppDispatch, useAppSelector } from 'store'
 
 const useStyles = makeStyles(theme => ({
   root: {

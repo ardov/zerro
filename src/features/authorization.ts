@@ -1,10 +1,10 @@
 import Cookies from 'cookies-js'
 import { zenmoney } from 'shared/api/zenmoney'
-import { setToken } from 'models/token'
-import { resetData } from 'models/data'
+import { setToken } from 'store/token'
+import { resetData } from 'store/data'
 import { syncData } from 'features/sync'
 import { clearLocalData } from './localData'
-import { AppThunk } from 'models'
+import { AppThunk } from 'store'
 import { workerMethods } from 'worker'
 
 export const logIn = (): AppThunk => async (dispatch, getState) => {

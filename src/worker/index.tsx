@@ -2,7 +2,7 @@
 import Worker from 'worker-loader!./worker'
 import * as Comlink from 'comlink'
 import { WorkerObj } from './worker'
-import { AppDispatch } from 'models'
+import { AppDispatch } from 'store'
 
 type Message = { action: string; payload?: any }
 

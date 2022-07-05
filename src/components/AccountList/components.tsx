@@ -8,7 +8,7 @@ import {
   ListItemButton,
 } from '@mui/material'
 import { Amount } from 'components/Amount'
-import { useAppDispatch } from 'models'
+import { useAppDispatch } from 'store'
 import { setInBudget, TAccountPopulated } from 'models/account'
 
 export const Account: FC<{ account: TAccountPopulated } & ListItemButtonProps> =

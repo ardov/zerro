@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react'
-import { useAppDispatch, useAppSelector } from 'models'
+import { useAppDispatch, useAppSelector } from 'store'
 import { EmojiIcon } from 'shared/ui/EmojiIcon'
 import {
   Box,

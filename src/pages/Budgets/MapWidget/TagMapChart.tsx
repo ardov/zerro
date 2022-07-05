@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { useAppSelector } from 'models'
+import { useAppSelector } from 'store'
 import { getAmountsByTag, getTotalsByMonth } from '../selectors'
 import { getTagsTree } from 'models/tag'
 import { useMonth } from 'pages/Budgets/pathHooks'

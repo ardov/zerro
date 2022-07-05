@@ -1,5 +1,5 @@
 import React, { FC, ReactNode, useState } from 'react'
-import { useAppDispatch } from 'models'
+import { useAppDispatch } from 'store'
 import { DragDropContext, DropResult } from 'react-beautiful-dnd'
 import { useMonth } from '../pathHooks'
 import { useCallback } from 'react'

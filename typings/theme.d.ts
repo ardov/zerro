@@ -1,5 +1,5 @@
 import { Theme as MaterialTheme } from '@mui/material'
-import { RootState } from 'models'
+import { RootState } from 'store'
 
 declare module '@mui/styles/defaultTheme' {
   interface DefaultTheme extends MaterialTheme {}

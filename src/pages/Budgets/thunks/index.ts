@@ -9,8 +9,8 @@ import { getTags } from 'models/tag'
 import { getGoalsProgress } from '../selectors'
 import { goalType } from 'models/hiddenData/constants'
 import { getGoals } from 'models/hiddenData/goals'
-import { applyClientPatch } from 'models/data'
-import { AppThunk } from 'models'
+import { applyClientPatch } from 'store/data'
+import { AppThunk } from 'store'
 import {
   ByIdOld,
   TBudget,

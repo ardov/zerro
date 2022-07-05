@@ -1,5 +1,5 @@
-import { AppThunk } from 'models'
-import { applyClientPatch } from 'models/data'
+import { AppThunk } from 'store'
+import { applyClientPatch } from 'store/data'
 import { getRootUser } from 'models/user'
 import { Modify, OptionalExceptFor, TDateDraft } from 'shared/types'
 import { makeReminder } from './makeReminder'
