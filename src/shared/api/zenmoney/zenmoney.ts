@@ -25,24 +25,22 @@ async function getData(token: string, diff: TZmDiff = { serverTimestamp: 0 }) {
   }
   if (token === FAKE_TOKEN) {
     // If token is fake, pretend we got data from server
-    return { ...diff, serverTimestamp: Date.now() / 1000 }
+    return { ...diff, serverTimestamp: Math.ceil(Date.now() / 1000) }
   }
 
   const body: TZmRequest = {
     ...diff,
-    currentClientTimestamp: Math.round(Date.now() / 1000),
+    currentClientTimestamp: Math.floor(Date.now() / 1000),
   }
 
-  const options = {
+  const response = await fetch(diffEndpoint, {
     method: 'POST',
     body: JSON.stringify(body),
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-  }
-
-  const response = await fetch(diffEndpoint, options)
+  })
   const json = await response.json()
   if (json.error) throw Error(JSON.stringify(json.error))
 

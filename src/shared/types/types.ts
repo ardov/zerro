@@ -22,7 +22,6 @@ export type TISODate = `${TYear}-${TMonth}-${TDate}` // 2000-01-01
 
 export type TUnixTime = number
 export type TMsTime = number
-export type TISOTimestamp = string // 2000-01-01T00:00:00.000Z
 
 export type TDateDraft = number | TISOMonth | TISODate | Date
 
