@@ -12,12 +12,13 @@ import { ById } from 'shared/types'
 import { TInstrumentId } from 'models/instrument'
 import { TMerchant, TMerchantId } from 'models/merchant'
 import { TSelector } from 'models'
+import { cleanPayee } from 'models/shared/cleanPayee'
 
 type TFxAmount = {
   [currency: TInstrumentId]: number
 }
 
-type TDebtor = {
+export type TDebtor = {
   id: string
   name: string
   merchantId?: TMerchantId
@@ -29,10 +30,7 @@ type TDebtor = {
 
 export const getDebtors: TSelector<ById<TDebtor>> = createSelector(
   [getTransactionsHistory, getMerchants, getDebtAccountId],
-  (transactions, merchants, debtAccId) => {
-    let res = collectDebtors(transactions, merchants, debtAccId)
-    return res
-  }
+  collectDebtors
 )
 
 function collectDebtors(
@@ -104,12 +102,4 @@ function makeDebtorFromPayee(payee: string): TDebtor {
     transactions: [],
     balance: {},
   }
-}
-
-/**
- * Cleans name from whitespaces and punctuation marks.
- * Leaves only digits and latin and cyrillic letters.
- */
-function cleanPayee(name: string) {
-  return name.replace(/[^\d\wа-яА-ЯёЁ]/g, '').toLowerCase()
 }

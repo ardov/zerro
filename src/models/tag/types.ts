@@ -28,7 +28,7 @@ export type TTagPopulated = TTag & {
   name: string // Tag name without emoji
   uniqueName: string // If name not unique adds parent name
   symbol: string // Emoji
-  children: string[]
+  children: TTagId[]
   colorRGB: string | null
   colorHEX: string | null
   colorGenerated: string // Color generated from name

@@ -3,13 +3,13 @@ import { TAccountId } from 'models/account'
 import { EntityType } from 'models/deletion'
 import { TFxCode } from 'models/instrument'
 import { TMerchantId } from 'models/merchant'
+import { getEnvelopeId } from 'models/shared/envelopeHelpers'
 import { TTagId } from 'models/tag'
 import { toISODate } from 'shared/helpers/date'
 import { TDateDraft } from 'shared/types'
-import { getEnvelopeId } from './helpers'
 import { getRawHiddenData } from './parseReminders'
 import { setHiddenDataPiece } from './setDataReminder'
-import { RecordType, TBudget, TRecordBudgets } from './types'
+import { RecordType, TRecordBudgets } from './types'
 
 type TBudgetDraft = {
   date: TDateDraft

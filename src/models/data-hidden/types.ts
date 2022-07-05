@@ -1,17 +1,9 @@
 import { TAccountId } from 'models/account'
-import { EntityType } from 'models/deletion'
 import { TFxCode } from 'models/instrument'
 import { TMerchantId } from 'models/merchant'
+import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 import { TTagId } from 'models/tag'
 import { TISODate, TUnits } from 'shared/types'
-
-export type TTagEnvelopeId = `${EntityType.Tag}#${TTagId}`
-export type TAccountEnvelopeId = `${EntityType.Account}#${TAccountId}`
-export type TMerchantEnvelopeId = `${EntityType.Merchant}#${TMerchantId}`
-export type TEnvelopeId =
-  | TTagEnvelopeId
-  | TAccountEnvelopeId
-  | TMerchantEnvelopeId
 
 export enum RecordType {
   Goals = 'goals',
