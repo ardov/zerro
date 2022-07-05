@@ -38,10 +38,6 @@ type TMonthInfo = {
   envelopes: Record<TEnvelopeId, TEnvelopeNode>
 }
 
-type TMoneyFlowByMonth = {
-  [month: TISOMonth]: TMonthInfo
-}
-
 const getCurrentBalance = createSelector([getInBudgetAccounts], accounts =>
   accounts.reduce((total, account) => {
     total[account.instrument] ??= 0
@@ -50,109 +46,117 @@ const getCurrentBalance = createSelector([getInBudgetAccounts], accounts =>
   }, {} as TFxAmount)
 )
 
-export const getMoneyFlow: TSelector<TMoneyFlowByMonth> = createSelector(
-  [getTransactionsHistory, getInBudgetAccounts, getDebtAccountId],
-  (transactions, accountsInBudget, debtAccId): TMoneyFlowByMonth => {
-    const result: TMoneyFlowByMonth = {}
-    const inBudgetAccIds = accountsInBudget.map(acc => acc.id)
+export const getMoneyFlow: TSelector<Record<TISOMonth, TMonthInfo>> =
+  createSelector(
+    [getTransactionsHistory, getInBudgetAccounts, getDebtAccountId],
+    (
+      transactions,
+      accountsInBudget,
+      debtAccId
+    ): Record<TISOMonth, TMonthInfo> => {
+      const result: Record<TISOMonth, TMonthInfo> = {}
+      const inBudgetAccIds = accountsInBudget.map(acc => acc.id)
 
-    transactions.forEach(tr => {
-      if (!isInBudget(tr, inBudgetAccIds)) return
-      const date = getTrMonth(tr)
-      const type = getType(tr, debtAccId)
-      let month = (result[date] ??= makeMonthInfo(date))
+      transactions.forEach(tr => {
+        if (!isInBudget(tr, inBudgetAccIds)) return
+        const date = getTrMonth(tr)
+        const type = getType(tr, debtAccId)
+        let month = (result[date] ??= makeMonthInfo(date))
 
-      // TAG INCOME
-      if (type === TrType.Income) {
-        let envelopeId = getEnvelopeId(EntityType.Tag, getMainTag(tr))
-        addToMonth(month, envelopeId, tr, 'income')
-        return
-      }
-
-      // TAG OUTCOME
-      if (type === TrType.Outcome) {
-        let envelopeId = getEnvelopeId(EntityType.Tag, getMainTag(tr))
-        addToMonth(month, envelopeId, tr, 'outcome')
-        return
-      }
-
-      if (type === TrType.IncomeDebt) {
-        // MERCHANT INCOME
-        if (tr.merchant) {
-          let envelopeId = getEnvelopeId(EntityType.Merchant, tr.merchant)
+        // TAG INCOME
+        if (type === TrType.Income) {
+          let envelopeId = getEnvelopeId(EntityType.Tag, getMainTag(tr))
           addToMonth(month, envelopeId, tr, 'income')
           return
         }
 
-        // PAYEE INCOME
-        if (tr.payee) {
-          let envelopeId = getEnvelopeId('payee', cleanPayee(tr.payee))
-          addToMonth(month, envelopeId, tr, 'income')
-          return
-        }
-
-        throw new Error("Transaction doesn't have payee or merchant")
-      }
-
-      if (type === TrType.OutcomeDebt) {
-        // MERCHANT OUTCOME
-        if (tr.merchant) {
-          let envelopeId = getEnvelopeId(EntityType.Merchant, tr.merchant)
+        // TAG OUTCOME
+        if (type === TrType.Outcome) {
+          let envelopeId = getEnvelopeId(EntityType.Tag, getMainTag(tr))
           addToMonth(month, envelopeId, tr, 'outcome')
           return
         }
 
-        // PAYEE OUTCOME
-        if (tr.payee) {
-          let envelopeId = getEnvelopeId('payee', cleanPayee(tr.payee))
-          addToMonth(month, envelopeId, tr, 'outcome')
-          return
+        if (type === TrType.IncomeDebt) {
+          // MERCHANT INCOME
+          if (tr.merchant) {
+            let envelopeId = getEnvelopeId(EntityType.Merchant, tr.merchant)
+            addToMonth(month, envelopeId, tr, 'income')
+            return
+          }
+
+          // PAYEE INCOME
+          if (tr.payee) {
+            let envelopeId = getEnvelopeId('payee', cleanPayee(tr.payee))
+            addToMonth(month, envelopeId, tr, 'income')
+            return
+          }
+
+          throw new Error("Transaction doesn't have payee or merchant")
         }
 
-        throw new Error("Transaction doesn't have payee or merchant")
-      }
+        if (type === TrType.OutcomeDebt) {
+          // MERCHANT OUTCOME
+          if (tr.merchant) {
+            let envelopeId = getEnvelopeId(EntityType.Merchant, tr.merchant)
+            addToMonth(month, envelopeId, tr, 'outcome')
+            return
+          }
 
-      if (type === TrType.Transfer) {
-        // INNER TRANSFER (check for fees)
-        if (isTransferInsideBudget(tr, inBudgetAccIds)) {
-          // Skip transactions that doesn't affect budget
-          if (sameAmountAndCurrency(tr)) return
+          // PAYEE OUTCOME
+          if (tr.payee) {
+            let envelopeId = getEnvelopeId('payee', cleanPayee(tr.payee))
+            addToMonth(month, envelopeId, tr, 'outcome')
+            return
+          }
 
-          month.transferFees[tr.incomeInstrument] ??= 0
-          month.transferFees[tr.incomeInstrument] = add(
-            month.transferFees[tr.incomeInstrument],
-            tr.income
-          )
-          month.transferFees[tr.outcomeInstrument] ??= 0
-          month.transferFees[tr.outcomeInstrument] = sub(
-            month.transferFees[tr.outcomeInstrument],
-            tr.outcome
-          )
-          month.transferFeesTransactions.push(tr)
-          return
+          throw new Error("Transaction doesn't have payee or merchant")
         }
 
-        // ACCOUNT INCOME
-        if (inBudgetAccIds.includes(tr.incomeAccount)) {
-          let envelopeId = getEnvelopeId(EntityType.Account, tr.incomeAccount)
-          addToMonth(month, envelopeId, tr, 'income')
-          return
+        if (type === TrType.Transfer) {
+          // INNER TRANSFER (check for fees)
+          if (isTransferInsideBudget(tr, inBudgetAccIds)) {
+            // Skip transactions that doesn't affect budget
+            if (sameAmountAndCurrency(tr)) return
+
+            month.transferFees[tr.incomeInstrument] ??= 0
+            month.transferFees[tr.incomeInstrument] = add(
+              month.transferFees[tr.incomeInstrument],
+              tr.income
+            )
+            month.transferFees[tr.outcomeInstrument] ??= 0
+            month.transferFees[tr.outcomeInstrument] = sub(
+              month.transferFees[tr.outcomeInstrument],
+              tr.outcome
+            )
+            month.transferFeesTransactions.push(tr)
+            return
+          }
+
+          // ACCOUNT INCOME
+          if (inBudgetAccIds.includes(tr.incomeAccount)) {
+            let envelopeId = getEnvelopeId(EntityType.Account, tr.incomeAccount)
+            addToMonth(month, envelopeId, tr, 'income')
+            return
+          }
+
+          // ACCOUNT OUTCOME
+          if (inBudgetAccIds.includes(tr.outcomeAccount)) {
+            let envelopeId = getEnvelopeId(
+              EntityType.Account,
+              tr.outcomeAccount
+            )
+            addToMonth(month, envelopeId, tr, 'outcome')
+            return
+          }
         }
+      })
 
-        // ACCOUNT OUTCOME
-        if (inBudgetAccIds.includes(tr.outcomeAccount)) {
-          let envelopeId = getEnvelopeId(EntityType.Account, tr.outcomeAccount)
-          addToMonth(month, envelopeId, tr, 'outcome')
-          return
-        }
-      }
-    })
+      console.log('Sorted keys', keys(result).sort())
 
-    console.log('Sorted keys', keys(result).sort())
-
-    return result
-  }
-)
+      return result
+    }
+  )
 
 function addToMonth(
   month: TMonthInfo,
