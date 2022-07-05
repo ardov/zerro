@@ -1,11 +1,8 @@
-import { TUnixTime, TUnits, TISODate } from 'shared/types'
+import { Modify } from './ts-utils'
+import { TUnixTime, TUnits, TISODate, TMsTime } from './types'
+import tagIcons from 'shared/tagIcons.json'
 
-export type TAccessToken = {
-  access_token: string
-  token_type: string
-  expires_in: number
-  refresh_token: string
-}
+type TIconName = keyof typeof tagIcons
 
 // export type TToken = TAccessToken['access_token']
 
@@ -40,6 +37,8 @@ export type TZmInstrument = {
   rate: number
 }
 
+export type TInstrument = Modify<TZmInstrument, { changed: TMsTime }>
+
 // ---------------------------------------------------------------------
 // COUNTRY
 // ---------------------------------------------------------------------
@@ -52,6 +51,8 @@ export type TZmCountry = {
   currency: TInstrumentId
   domain: string
 }
+
+export type TCountry = TZmCountry
 
 // ---------------------------------------------------------------------
 // COMPANY
@@ -69,6 +70,8 @@ export type TZmCompany = {
   countryCode: string
   deleted: boolean
 }
+
+export type TCompany = Modify<TZmCompany, { changed: TMsTime }>
 
 // ---------------------------------------------------------------------
 // USER
@@ -89,6 +92,14 @@ export type TZmUser = {
   paidTill: TUnixTime
   subscription: '10yearssubscription' | '1MonthSubscription' | string
 }
+
+export type TUser = Modify<
+  TZmUser,
+  {
+    changed: TMsTime
+    paidTill: TMsTime
+  }
+>
 
 // ---------------------------------------------------------------------
 // ACCOUNT
@@ -136,6 +147,10 @@ export type TZmAccount = {
   payoffInterval: 'month' | 'year' | null
 }
 
+export interface TAccount extends TZmAccount {
+  changed: TMsTime
+}
+
 // ---------------------------------------------------------------------
 // MERCHANT
 // ---------------------------------------------------------------------
@@ -149,6 +164,13 @@ export type TZmMerchant = {
   title: string
 }
 
+export type TMerchant = Modify<
+  TZmMerchant,
+  {
+    changed: TMsTime
+  }
+>
+
 // ---------------------------------------------------------------------
 // TAG
 // ---------------------------------------------------------------------
@@ -161,7 +183,7 @@ export type TZmTag = {
   user: TUserId
   title: string
   parent: TTagId | null
-  icon: string | null
+  icon: TIconName | null
   picture: string | null
   color: number | null
   showIncome: boolean
@@ -171,11 +193,13 @@ export type TZmTag = {
   required: boolean | null
 }
 
+export type TTag = Modify<TZmTag, { changed: TMsTime }>
+
 // ---------------------------------------------------------------------
 // BUDGET
 // ---------------------------------------------------------------------
 
-// export type TBudgetId = `${TISODate}#${TTagId}`
+export type TBudgetId = `${TISODate}#${TTagId}`
 
 export type TZmBudget = {
   changed: TUnixTime
@@ -186,6 +210,17 @@ export type TZmBudget = {
   incomeLock: boolean
   outcome: TUnits
   outcomeLock: boolean
+}
+
+export type TBudget = Modify<
+  TZmBudget,
+  {
+    changed: TMsTime
+    // income: TMilliUnits
+    // outcome: TMilliUnits
+  }
+> & {
+  id: TBudgetId
 }
 
 // ---------------------------------------------------------------------
@@ -216,6 +251,8 @@ export interface TZmReminder {
   notify: boolean
 }
 
+export type TReminder = Modify<TZmReminder, { changed: TMsTime }>
+
 // ---------------------------------------------------------------------
 // REMINDER_MARKER
 // ---------------------------------------------------------------------
@@ -242,19 +279,20 @@ export type TZmReminderMarker = {
   notify: boolean
 }
 
+export type TReminderMarker = Modify<
+  TZmReminderMarker,
+  {
+    changed: TMsTime
+    // income: TMilliUnits
+    // outcome: TMilliUnits
+  }
+>
+
 // ---------------------------------------------------------------------
 // TRANSACTION
 // ---------------------------------------------------------------------
 
 export type TTransactionId = string
-
-// export enum TrType {
-//   Income = 'income',
-//   Outcome = 'outcome',
-//   Transfer = 'transfer',
-//   IncomeDebt = 'incomeDebt',
-//   OutcomeDebt = 'outcomeDebt',
-// }
 
 export type TZmTransaction = {
   id: TTransactionId
@@ -289,6 +327,23 @@ export type TZmTransaction = {
   longitude: number | null
 }
 
+export type TTransaction = Modify<
+  TZmTransaction,
+  {
+    changed: TMsTime
+    created: TMsTime
+    // income: TMilliUnits
+    // outcome: TMilliUnits
+    // opIncome: TMilliUnits | null
+    // opOutcome: TMilliUnits | null
+    // time: TMsTime
+    // type: TrType
+    // mainTag: TTagId | null
+    // incomeBalanceBefore: TMilliUnits
+    // outcomeBalanceBefore: TMilliUnits
+  }
+>
+
 // ---------------------------------------------------------------------
 // DELETION
 // ---------------------------------------------------------------------
@@ -299,6 +354,8 @@ export type TZmDeletionObject = {
   stamp: TUnixTime
   user: TUserId
 }
+
+export type TDeletionObject = Modify<TZmDeletionObject, { stamp: TMsTime }>
 
 // ---------------------------------------------------------------------
 // DIFF
@@ -318,6 +375,22 @@ export interface TZmDiff {
   reminder?: TZmReminder[]
   reminderMarker?: TZmReminderMarker[]
   transaction?: TZmTransaction[]
+}
+
+export interface TDiff {
+  serverTimestamp?: TMsTime
+  deletion?: TDeletionObject[]
+  instrument?: TInstrument[]
+  country?: TCountry[]
+  company?: TCompany[]
+  user?: TUser[]
+  account?: TAccount[]
+  merchant?: TMerchant[]
+  tag?: TTag[]
+  budget?: TBudget[]
+  reminder?: TReminder[]
+  reminderMarker?: TReminderMarker[]
+  transaction?: TTransaction[]
 }
 
 export interface TZmRequest extends TZmDiff {

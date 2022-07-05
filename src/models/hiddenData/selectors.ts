@@ -1,11 +1,11 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getReminders, TReminder } from 'models/reminder'
+import { getReminders } from 'models/reminder'
 import { DataReminderType } from './constants'
 import { getAccountList } from 'models/account'
 import { DATA_ACC_NAME } from './constants'
 import { RootState } from 'models'
-import { TGoal, TTagMeta } from 'shared/types'
-import { TTagId } from 'models/tag'
+import { TGoal, TReminder, TTagMeta } from 'shared/types'
+import { TTagId } from 'shared/types'
 
 const { ACC_LINKS, TAG_ORDER, GOALS, TAG_META } = DataReminderType
 

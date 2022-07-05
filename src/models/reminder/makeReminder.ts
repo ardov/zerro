@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid'
-import { TReminder } from './types'
+import { TReminder } from 'shared/types'
 import { toISODate } from 'shared/helpers/date'
 import { Modify, OptionalExceptFor, TDateDraft } from 'shared/types'
 

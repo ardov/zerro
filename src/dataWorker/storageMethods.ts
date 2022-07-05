@@ -1,16 +1,18 @@
 import { getIDBStorage } from 'shared/api/storage'
 import { TToken, TUnixTime } from 'shared/types'
-import { TZmTransaction } from 'models/transaction'
-import { TZmInstrument } from 'models/instrument'
-import { TZmCountry } from 'models/country'
-import { TZmCompany } from 'models/company'
-import { TZmUser } from 'models/user'
-import { TZmAccount } from 'models/account'
-import { TZmMerchant } from 'models/merchant'
-import { TZmTag } from 'models/tag'
-import { TZmBudget } from 'models/budget'
-import { TZmReminder } from 'models/reminder'
-import { TZmReminderMarker } from 'models/reminderMarker'
+import {
+  TZmTransaction,
+  TZmInstrument,
+  TZmCountry,
+  TZmCompany,
+  TZmUser,
+  TZmAccount,
+  TZmMerchant,
+  TZmTag,
+  TZmBudget,
+  TZmReminder,
+  TZmReminderMarker,
+} from 'shared/types'
 
 export type TLocalData = {
   token: TToken

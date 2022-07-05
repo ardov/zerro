@@ -3,8 +3,9 @@ import { getTagOrder } from '../selectors'
 import { sendEvent } from 'shared/helpers/tracking'
 import { setHiddenData } from '../thunks'
 import { DataReminderType } from '../constants'
-import { getTagsTree, TTagId, TTagPopulated } from 'models/tag'
+import { getTagsTree, TTagPopulated } from 'models/tag'
 import { AppThunk } from 'models'
+import { TTagId } from 'shared/types'
 
 // THUNKS
 export const setTagOrder =

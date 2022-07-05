@@ -1,6 +1,6 @@
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
-import { TDeletionObject, TZmDeletionObject } from './types'
+import { TDeletionObject, TZmDeletionObject } from 'shared/types'
 
 export const convertDeletion: TZmAdapter<TZmDeletionObject, TDeletionObject> = {
   toClient: (el: TZmDeletionObject): TDeletionObject => {

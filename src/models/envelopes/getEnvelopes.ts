@@ -2,15 +2,14 @@ import { createSelector } from '@reduxjs/toolkit'
 import { TSelector } from 'models'
 import { getSavingAccounts } from 'models/account'
 import { getDebtors } from 'models/debtors'
-import { EntityType } from 'models/deletion'
-import { getUserCurrencyCode, TFxCode } from 'models/instrument'
+import { getUserCurrencyCode } from 'models/instrument'
 import {
   getEnvelopeId,
   TEnvelopeId,
   TEnvelopeType,
 } from 'models/shared/envelopeHelpers'
 import { getPopulatedTags } from 'models/tag'
-import { ById } from 'shared/types'
+import { ById, DataEntity, TFxCode } from 'shared/types'
 
 type TEnvelope = {
   // Used to connect with ZM entity
@@ -59,18 +58,18 @@ export const getEnvelopes: TSelector<ById<TEnvelope>> = createSelector(
 
     // Convert tags to envelopes
     Object.values(tags).forEach(tag => {
-      const id = getEnvelopeId(EntityType.Tag, tag.id)
+      const id = getEnvelopeId(DataEntity.Tag, tag.id)
       result[id] = {
         id,
-        type: EntityType.Tag,
+        type: DataEntity.Tag,
         entityId: tag.id,
         name: tag.name,
         symbol: tag.symbol,
         color: tag.colorHEX,
         showInBudget: tag.showOutcome,
-        parent: tag.parent ? getEnvelopeId(EntityType.Tag, tag.parent) : null,
+        parent: tag.parent ? getEnvelopeId(DataEntity.Tag, tag.parent) : null,
         children: tag.children.map(childId =>
-          getEnvelopeId(EntityType.Tag, childId)
+          getEnvelopeId(DataEntity.Tag, childId)
         ),
         comment: envelopeInfo[id]?.comment || '',
         currency: envelopeInfo[id]?.currency || userCurrency,
@@ -81,10 +80,10 @@ export const getEnvelopes: TSelector<ById<TEnvelope>> = createSelector(
 
     // Convert accounts to envelopes
     savingAccounts.forEach(account => {
-      const id = getEnvelopeId(EntityType.Account, account.id)
+      const id = getEnvelopeId(DataEntity.Account, account.id)
       result[id] = {
         id,
-        type: EntityType.Account,
+        type: DataEntity.Account,
         entityId: account.id,
         name: account.title,
         symbol: '🏦',
@@ -102,10 +101,10 @@ export const getEnvelopes: TSelector<ById<TEnvelope>> = createSelector(
     // Convert debtors to envelopes
     Object.values(debtors).forEach(debtor => {
       if (debtor.merchantId) {
-        const id = getEnvelopeId(EntityType.Merchant, debtor.merchantId)
+        const id = getEnvelopeId(DataEntity.Merchant, debtor.merchantId)
         result[id] = {
           id,
-          type: EntityType.Merchant,
+          type: DataEntity.Merchant,
           entityId: debtor.merchantId,
           name: debtor.name,
           symbol: '👤',

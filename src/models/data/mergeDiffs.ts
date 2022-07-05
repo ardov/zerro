@@ -1,4 +1,4 @@
-import { TDiff } from 'models/diff'
+import { TDiff } from 'shared/types'
 
 /**
  * Adds changes from the second diff to the first diff

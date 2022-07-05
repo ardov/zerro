@@ -1,12 +1,11 @@
 import { checkRaw, FilterConditions } from './filtering'
-import { TISODate } from 'shared/types'
+import { TISODate, TTransaction, TTransactionId } from 'shared/types'
 import {
   parseDate,
   startOfMonth,
   startOfWeek,
   toISODate,
 } from 'shared/helpers/date'
-import { TrType, TTransaction, TTransactionId } from './types'
 
 /**
  * Groups array of transactions
@@ -48,6 +47,14 @@ export const isDeleted = (tr: TTransaction) => {
   if (tr.deleted) return true
   if (tr.income < 0.0001 && tr.outcome < 0.0001) return true
   return false
+}
+
+export enum TrType {
+  Income = 'income',
+  Outcome = 'outcome',
+  Transfer = 'transfer',
+  IncomeDebt = 'incomeDebt',
+  OutcomeDebt = 'outcomeDebt',
 }
 
 export function getType(tr: TTransaction, debtId?: string): TrType {

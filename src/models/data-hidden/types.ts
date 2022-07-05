@@ -1,9 +1,12 @@
-import { TAccountId } from 'models/account'
-import { TFxCode } from 'models/instrument'
-import { TMerchantId } from 'models/merchant'
 import { TEnvelopeId } from 'models/shared/envelopeHelpers'
-import { TTagId } from 'models/tag'
-import { TISODate, TUnits } from 'shared/types'
+import {
+  TAccountId,
+  TFxCode,
+  TISODate,
+  TMerchantId,
+  TTagId,
+  TUnits,
+} from 'shared/types'
 
 export enum RecordType {
   Goals = 'goals',

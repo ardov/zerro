@@ -1,15 +1,17 @@
-import { TAccountId } from 'models/account'
-import { EntityType } from 'models/deletion'
-import { TFxCode } from 'models/instrument'
-import { TMerchantId } from 'models/merchant'
 import { TEnvelopeId, TEnvelopeType } from 'models/shared/envelopeHelpers'
-import { TTagId } from 'models/tag'
-import { TTransaction } from 'models/transaction'
-import { TISOMonth } from 'shared/types'
+import {
+  DataEntity,
+  TAccountId,
+  TFxCode,
+  TISOMonth,
+  TMerchantId,
+  TTagId,
+  TTransaction,
+} from 'shared/types'
 import { TFxAmount } from './helpers/fxAmount'
 
 interface IEnvelopeBase {
-  type: EntityType.Account | EntityType.Merchant | EntityType.Tag
+  type: DataEntity.Account | DataEntity.Merchant | DataEntity.Tag
   id: TAccountId | TMerchantId | TTagId
   name: string
   symbol: string
@@ -25,15 +27,15 @@ interface IEnvelopeBase {
 }
 
 interface IEnvelopeAccount extends IEnvelopeBase {
-  type: EntityType.Account
+  type: DataEntity.Account
   id: TAccountId
 }
 interface IEnvelopeMercant extends IEnvelopeBase {
-  type: EntityType.Merchant
+  type: DataEntity.Merchant
   id: TMerchantId
 }
 interface IEnvelopeTag extends IEnvelopeBase {
-  type: EntityType.Tag
+  type: DataEntity.Tag
   id: TTagId
   children: TEnvelope[]
 }
@@ -51,7 +53,7 @@ export type TMonthNode = {
     activityTotal: TFxAmount
     availableTotal: TFxAmount
     children: Array<{
-      type: EntityType.Account | EntityType.Merchant | EntityType.Tag
+      type: DataEntity.Account | DataEntity.Merchant | DataEntity.Tag
       symbol: string
       color: string
     }>

@@ -1,4 +1,4 @@
-import { TMerchant, TZmMerchant } from './types'
+import { TMerchant, TZmMerchant } from 'shared/types'
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 

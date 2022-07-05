@@ -1,15 +1,18 @@
 import countries from './countries.json'
 import companies from './companies.json'
 import instruments from './instruments.json'
-import { accountType, makeAccount } from 'models/account'
+import { makeAccount } from 'models/account'
 import { makeTag } from 'models/tag/makeTag'
 import { makeTransaction } from 'models/transaction/makeTransaction'
 import { toISODate } from 'shared/helpers/date'
-import { TUser } from 'models/user'
-import { TDiff } from 'models/diff'
-import { TZmCountry } from 'models/country'
-import { TZmCompany } from 'models/company'
-import { TZmInstrument } from 'models/instrument'
+import {
+  accountType,
+  TDiff,
+  TUser,
+  TZmCompany,
+  TZmCountry,
+  TZmInstrument,
+} from 'shared/types'
 
 const NOW = Date.now()
 const DAY = 1000 * 60 * 60 * 24

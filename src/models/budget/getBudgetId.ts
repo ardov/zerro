@@ -1,7 +1,7 @@
-import { TTagId } from 'models/tag'
+import { TTagId } from 'shared/types'
+import { TBudgetId } from 'shared/types'
 import { toISODate } from 'shared/helpers/date'
 import { TDateDraft, TISOMonth } from 'shared/types'
-import { TBudgetId } from './types'
 
 export function getBudgetId(date: TDateDraft, tag: TTagId | null): TBudgetId {
   return `${toISODate(date)}#${tag}`

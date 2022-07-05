@@ -14,7 +14,7 @@ import { applyClientPatch, resetData } from 'models/data'
 import { AppThemeProvider } from './AppThemeProvider'
 import { StyledEngineProvider } from '@mui/material/styles'
 import { appVersion } from 'shared/config'
-import { TDiff } from 'models/diff'
+import { TDiff } from 'shared/types'
 
 initSentry()
 bindWorkerToStore(store.dispatch)

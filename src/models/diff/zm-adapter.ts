@@ -12,7 +12,7 @@ import { convertTransaction } from 'models/transaction'
 import { convertUser } from 'models/user'
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
-import { TDiff, TZmDiff } from './types'
+import { TDiff, TZmDiff } from 'shared/types'
 
 export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
   toClient: d => {

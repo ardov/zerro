@@ -5,10 +5,11 @@ import { useAppSelector } from 'models'
 import { getMerchants } from 'models/data/selectors'
 import { Amount } from 'components/Amount'
 import { getAccounts } from 'models/account'
-import { TTransaction, TrType } from 'models/transaction'
+import { TrType } from 'models/transaction'
 import { getPopulatedTags } from 'models/tag'
 import { Typography } from '@mui/material'
 import { Tooltip } from 'shared/ui/Tooltip'
+import { TTransaction } from 'shared/types'
 // import { isNew } from 'store/data/transactions/helpers'
 
 type HTMLDivProps = React.DetailedHTMLProps<

@@ -16,7 +16,7 @@ import Transaction from './Transaction'
 import { formatDate, parseDate } from 'shared/helpers/date'
 import { TDateDraft, TISODate } from 'shared/types'
 import { toISODate } from 'shared/helpers/date'
-import { TTransactionId } from 'models/transaction'
+import { TTransactionId } from 'shared/types'
 
 type GroupNode = {
   date: TISODate

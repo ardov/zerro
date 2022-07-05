@@ -1,7 +1,7 @@
 import { createDomain, forward, sample } from 'effector'
-import { convertDiff, TDiff, TZmDiff } from 'models/diff'
+import { convertDiff } from 'models/diff'
 import { zenmoney } from 'shared/api/zenmoney'
-import { TDataStore, TToken } from 'shared/types'
+import { TDataStore, TDiff, TToken, TZmDiff } from 'shared/types'
 
 import { clearStorage, getLocalData, setLocalKey } from './storageMethods'
 

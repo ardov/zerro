@@ -1,8 +1,9 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { AppThunk } from 'models'
-import { getAccounts, makeAccount, TAccountId } from 'models/account'
+import { getAccounts, makeAccount } from 'models/account'
 import { applyClientPatch } from 'models/data'
 import { getRootUser } from 'models/user'
+import { TAccountId } from 'shared/types'
 
 export const DATA_ACC_NAME = '🤖 [Zerro Data]'
 

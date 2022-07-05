@@ -1,6 +1,7 @@
 import { AppThunk } from 'models'
-import { setReminder, TReminder } from 'models/reminder'
+import { setReminder } from 'models/reminder'
 import { getRootUser } from 'models/user'
+import { TReminder } from 'shared/types'
 import { prepareDataAccount } from './dataAccount'
 import { getRecordId } from './helpers'
 import { getDataReminders } from './parseReminders'

@@ -5,7 +5,7 @@ import { setHiddenData } from '../thunks'
 import { getRawTagMeta } from '../selectors'
 import { AppThunk } from 'models'
 import { TTagMeta } from 'shared/types'
-import { TTagId } from 'models/tag'
+import { TTagId } from 'shared/types'
 
 // THUNK
 export const setTagMeta =

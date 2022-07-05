@@ -1,18 +1,15 @@
-import { TAccountId } from 'models/account'
-import { EntityType } from 'models/deletion'
-import { TMerchantId } from 'models/merchant'
-import { TTagId } from 'models/tag'
+import { DataEntity, TAccountId, TMerchantId, TTagId } from 'shared/types'
 
 export type TEnvelopeType =
-  | EntityType.Account
-  | EntityType.Merchant
-  | EntityType.Tag
+  | DataEntity.Account
+  | DataEntity.Merchant
+  | DataEntity.Tag
   | 'payee'
 
 export type TEnvelopeId =
-  | `${EntityType.Account}#${TAccountId}`
-  | `${EntityType.Merchant}#${TMerchantId}`
-  | `${EntityType.Tag}#${TTagId}`
+  | `${DataEntity.Account}#${TAccountId}`
+  | `${DataEntity.Merchant}#${TMerchantId}`
+  | `${DataEntity.Tag}#${TTagId}`
   | `payee#${string}`
 
 export function parseEnvelopeId(id: TEnvelopeId) {

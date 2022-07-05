@@ -1,5 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getReminders, TReminder, TReminderId } from 'models/reminder'
+import { getReminders } from 'models/reminder'
+import { TReminder, TReminderId } from 'shared/types'
 import { parseComment, getRecordId } from './helpers'
 import {
   TRecord,

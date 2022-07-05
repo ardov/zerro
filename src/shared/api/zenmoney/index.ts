@@ -1,2 +1,2 @@
 export { zenmoney } from './zenmoney'
-export * from './types'
+export type { TAccessToken } from './zenmoney'

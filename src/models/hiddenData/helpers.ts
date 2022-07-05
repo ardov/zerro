@@ -1,5 +1,6 @@
-import { makeAccount, TAccount } from 'models/account'
+import { makeAccount } from 'models/account'
 import { makeReminder } from 'models/reminder'
+import { TAccount } from 'shared/types'
 import { DataReminderType, DATA_ACC_NAME } from './constants'
 
 // DATA ACCOUNT

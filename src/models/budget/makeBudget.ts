@@ -1,5 +1,5 @@
 import { parseDate, toISODate } from 'shared/helpers/date'
-import { TBudget } from './types'
+import { TBudget } from 'shared/types'
 import { OptionalExceptFor, Modify, TDateDraft } from 'shared/types'
 import { getBudgetId } from './getBudgetId'
 

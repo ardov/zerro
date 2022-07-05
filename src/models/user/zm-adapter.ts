@@ -1,6 +1,6 @@
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
-import { TUser, TZmUser } from './types'
+import { TUser, TZmUser } from 'shared/types'
 
 export const convertUser: TZmAdapter<TZmUser, TUser> = {
   toClient: el => {

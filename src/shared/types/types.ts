@@ -1,18 +1,21 @@
 import { ById } from './ts-utils'
 import { goalType } from 'models/hiddenData/constants'
-import { TZmDiff } from 'shared/api/zenmoney'
-import { TZmDeletionObject } from 'models/deletion'
-import { TTransaction } from 'models/transaction'
-import { TReminder } from 'models/reminder'
-import { TReminderMarker } from 'models/reminderMarker'
-import { TInstrument, TInstrumentId } from 'models/instrument'
-import { TCountry } from 'models/country'
-import { TCompany } from 'models/company'
-import { TUser } from 'models/user'
-import { TMerchant } from 'models/merchant'
-import { TAccount } from 'models/account'
-import { TTag } from 'models/tag'
-import { TBudget } from 'models/budget'
+import {
+  TZmDiff,
+  TZmDeletionObject,
+  TTransaction,
+  TReminder,
+  TReminderMarker,
+  TInstrument,
+  TCountry,
+  TCompany,
+  TUser,
+  TMerchant,
+  TAccount,
+  TTag,
+  TBudget,
+  TInstrumentId,
+} from './data-entities'
 
 type TYear = `${number}${number}${number}${number}`
 type TMonth = `${number}${number}`

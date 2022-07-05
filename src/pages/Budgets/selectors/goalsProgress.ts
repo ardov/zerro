@@ -10,7 +10,7 @@ import { getTagMeta } from 'models/hiddenData/tagMeta'
 import { convertCurrency } from 'models/instrument'
 import { keys } from 'shared/helpers/keys'
 import { differenceInCalendarMonths } from 'shared/helpers/date'
-import { TTagId } from 'models/tag'
+import { TTagId } from 'shared/types'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 

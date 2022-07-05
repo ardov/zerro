@@ -1,7 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { populate } from './populate'
 import { convertCurrency } from 'models/instrument'
-import { accountType, TAccountId, TAccountPopulated } from './types'
+import { TAccountPopulated } from './types'
+import { accountType, TAccountId } from 'shared/types'
 import { RootState } from 'models'
 import { DATA_ACC_NAME } from '../hiddenData/constants'
 

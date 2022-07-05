@@ -1,16 +1,17 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { round } from 'shared/helpers/currencyHelpers'
 import { getType } from 'models/transaction/helpers'
+import { getAccounts, getStartBalance } from 'models/account'
+import { getSortedTransactions } from 'models/transaction'
+import { getTransactionsHistory } from 'models/transaction'
+import { convertCurrency } from 'models/instrument'
 import {
-  getAccounts,
-  getStartBalance,
   TAccount,
   TAccountId,
-} from 'models/account'
-import { getSortedTransactions, TTransaction } from 'models/transaction'
-import { getTransactionsHistory } from 'models/transaction'
-import { convertCurrency, TInstrumentId } from 'models/instrument'
-import { TISODate } from 'shared/types'
+  TInstrumentId,
+  TISODate,
+  TTransaction,
+} from 'shared/types'
 import { eachDayOfInterval, parseDate, toISODate } from 'shared/helpers/date'
 
 interface DayNode {

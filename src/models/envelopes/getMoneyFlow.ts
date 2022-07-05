@@ -1,21 +1,18 @@
 import { add, sub } from 'shared/helpers/currencyHelpers'
 import { getType } from 'models/transaction/helpers'
-import { TISOMonth } from 'shared/types'
+import {
+  DataEntity,
+  TAccountId,
+  TISOMonth,
+  TTagId,
+  TTransaction,
+} from 'shared/types'
 import { toISOMonth } from 'shared/helpers/date'
 import { TFxAmount } from './helpers/fxAmount'
-import {
-  getTransactionsHistory,
-  TrType,
-  TTransaction,
-} from 'models/transaction'
-import { TTagId } from 'models/tag'
-import {
-  getDebtAccountId,
-  getInBudgetAccounts,
-  TAccountId,
-} from 'models/account'
+import { getTransactionsHistory, TrType } from 'models/transaction'
+
+import { getDebtAccountId, getInBudgetAccounts } from 'models/account'
 import { getEnvelopeId, TEnvelopeId } from 'models/shared/envelopeHelpers'
-import { EntityType } from 'models/deletion'
 import { cleanPayee } from 'models/shared/cleanPayee'
 import { createSelector } from '@reduxjs/toolkit'
 import { TSelector } from 'models'
@@ -65,14 +62,14 @@ export const getMoneyFlow: TSelector<Record<TISOMonth, TMonthInfo>> =
 
         // TAG INCOME
         if (type === TrType.Income) {
-          let envelopeId = getEnvelopeId(EntityType.Tag, getMainTag(tr))
+          let envelopeId = getEnvelopeId(DataEntity.Tag, getMainTag(tr))
           addToMonth(month, envelopeId, tr, 'income')
           return
         }
 
         // TAG OUTCOME
         if (type === TrType.Outcome) {
-          let envelopeId = getEnvelopeId(EntityType.Tag, getMainTag(tr))
+          let envelopeId = getEnvelopeId(DataEntity.Tag, getMainTag(tr))
           addToMonth(month, envelopeId, tr, 'outcome')
           return
         }
@@ -80,7 +77,7 @@ export const getMoneyFlow: TSelector<Record<TISOMonth, TMonthInfo>> =
         if (type === TrType.IncomeDebt) {
           // MERCHANT INCOME
           if (tr.merchant) {
-            let envelopeId = getEnvelopeId(EntityType.Merchant, tr.merchant)
+            let envelopeId = getEnvelopeId(DataEntity.Merchant, tr.merchant)
             addToMonth(month, envelopeId, tr, 'income')
             return
           }
@@ -98,7 +95,7 @@ export const getMoneyFlow: TSelector<Record<TISOMonth, TMonthInfo>> =
         if (type === TrType.OutcomeDebt) {
           // MERCHANT OUTCOME
           if (tr.merchant) {
-            let envelopeId = getEnvelopeId(EntityType.Merchant, tr.merchant)
+            let envelopeId = getEnvelopeId(DataEntity.Merchant, tr.merchant)
             addToMonth(month, envelopeId, tr, 'outcome')
             return
           }
@@ -135,7 +132,7 @@ export const getMoneyFlow: TSelector<Record<TISOMonth, TMonthInfo>> =
 
           // ACCOUNT INCOME
           if (inBudgetAccIds.includes(tr.incomeAccount)) {
-            let envelopeId = getEnvelopeId(EntityType.Account, tr.incomeAccount)
+            let envelopeId = getEnvelopeId(DataEntity.Account, tr.incomeAccount)
             addToMonth(month, envelopeId, tr, 'income')
             return
           }
@@ -143,7 +140,7 @@ export const getMoneyFlow: TSelector<Record<TISOMonth, TMonthInfo>> =
           // ACCOUNT OUTCOME
           if (inBudgetAccIds.includes(tr.outcomeAccount)) {
             let envelopeId = getEnvelopeId(
-              EntityType.Account,
+              DataEntity.Account,
               tr.outcomeAccount
             )
             addToMonth(month, envelopeId, tr, 'outcome')

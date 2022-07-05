@@ -1,28 +1,4 @@
-import { TFxCode } from 'models/instrument'
-import { TUserId } from 'models/user'
-import { Modify, TMsTime, TUnixTime } from 'shared/types'
-import iconsMap from './iconsMap.json'
-
-export type TTagId = string
-type TIconName = keyof typeof iconsMap
-
-export type TZmTag = {
-  id: TTagId
-  changed: TUnixTime
-  user: TUserId
-  title: string
-  parent: TTagId | null
-  icon: TIconName | null
-  picture: string | null
-  color: number | null
-  showIncome: boolean
-  showOutcome: boolean
-  budgetIncome: boolean
-  budgetOutcome: boolean
-  required: boolean | null
-}
-
-export type TTag = Modify<TZmTag, { changed: TMsTime }>
+import { TFxCode, TTag, TTagId } from 'shared/types'
 
 export type TTagPopulated = TTag & {
   name: string // Tag name without emoji

@@ -1,19 +1,21 @@
 import { AppThunk } from 'models'
-import { TAccountId } from 'models/account'
-import { EntityType } from 'models/deletion'
-import { TFxCode } from 'models/instrument'
-import { TMerchantId } from 'models/merchant'
 import { getEnvelopeId } from 'models/shared/envelopeHelpers'
-import { TTagId } from 'models/tag'
 import { toISODate } from 'shared/helpers/date'
-import { TDateDraft } from 'shared/types'
+import {
+  DataEntity,
+  TAccountId,
+  TDateDraft,
+  TFxCode,
+  TMerchantId,
+  TTagId,
+} from 'shared/types'
 import { getRawHiddenData } from './parseReminders'
 import { setHiddenDataPiece } from './setDataReminder'
 import { RecordType, TRecordBudgets } from './types'
 
 type TBudgetDraft = {
   date: TDateDraft
-  type: EntityType.Tag | EntityType.Account | EntityType.Merchant
+  type: DataEntity.Tag | DataEntity.Account | DataEntity.Merchant
   id: TTagId | TAccountId | TMerchantId
   value: number
   fx: TFxCode

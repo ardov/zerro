@@ -1,9 +1,10 @@
 import React, { FC } from 'react'
 import styled from '@emotion/styled'
-import { TTransaction, TrType } from 'models/transaction'
+import { TrType } from 'models/transaction'
 import { Theme, TypographyVariant } from '@mui/material'
 import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'
 import { sendEvent } from 'shared/helpers/tracking'
+import { TTransaction } from 'shared/types'
 
 type TransactionProps = {
   id: string

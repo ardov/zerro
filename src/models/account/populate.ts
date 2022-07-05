@@ -1,5 +1,6 @@
-import { TAccount, TAccountPopulated } from './types'
+import { TAccountPopulated } from './types'
 import { isInBudget } from './helpers'
+import { TAccount } from 'shared/types'
 
 interface Options {
   convert: (

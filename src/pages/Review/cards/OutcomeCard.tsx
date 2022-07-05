@@ -7,7 +7,7 @@ import { Amount } from 'components/Amount'
 import { getInstruments } from 'models/instrument'
 import { getPopulatedTags } from 'models/tag'
 import { Card } from './Card'
-import { TTransaction } from 'models/transaction'
+import { TTransaction } from 'shared/types'
 
 export function OutcomeCard({ transaction }: { transaction: TTransaction }) {
   const { outcome, outcomeInstrument, date, comment, payee, tag } = transaction

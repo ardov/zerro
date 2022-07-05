@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { formatMoney } from 'shared/helpers/format'
-import { OptionalExceptFor } from 'shared/types'
-import { getInstruments, TInstrumentId } from 'models/instrument'
+import { OptionalExceptFor, TInstrumentId } from 'shared/types'
+import { getInstruments } from 'models/instrument'
 import { useAppSelector } from 'models'
 import { getUserInstrumentId } from 'models/user'
 

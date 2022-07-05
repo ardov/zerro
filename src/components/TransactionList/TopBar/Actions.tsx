@@ -1,4 +1,4 @@
-import type { TTransaction } from 'models/transaction'
+import type { TTransaction } from 'shared/types'
 import React, { FC, useEffect, useState } from 'react'
 import './transitions.css'
 import { useAppDispatch, useAppSelector } from 'models'

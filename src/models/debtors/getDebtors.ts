@@ -1,16 +1,17 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { add, sub } from 'shared/helpers/currencyHelpers'
-import { getDebtAccountId, TAccountId } from 'models/account'
+import { getDebtAccountId } from 'models/account'
 import { getMerchants } from 'models/data/selectors'
-import {
-  getTransactionsHistory,
-  TrType,
-  TTransaction,
-} from 'models/transaction'
+import { getTransactionsHistory, TrType } from 'models/transaction'
 import { getType } from 'models/transaction/helpers'
-import { ById } from 'shared/types'
-import { TInstrumentId } from 'models/instrument'
-import { TMerchant, TMerchantId } from 'models/merchant'
+import {
+  ById,
+  TAccountId,
+  TTransaction,
+  TInstrumentId,
+  TMerchant,
+  TMerchantId,
+} from 'shared/types'
 import { TSelector } from 'models'
 import { cleanPayee } from 'models/shared/cleanPayee'
 

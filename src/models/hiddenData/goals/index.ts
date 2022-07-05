@@ -5,8 +5,8 @@ import { makeGoal } from './helpers'
 import { getRawGoals } from '../selectors'
 import { setHiddenData } from '../thunks'
 import { AppThunk, RootState } from 'models'
-import { TGoal } from 'shared/types'
-import { getTags, TTagId } from 'models/tag'
+import { TGoal, TTagId } from 'shared/types'
+import { getTags } from 'models/tag'
 
 // THUNKS
 export const setGoal =

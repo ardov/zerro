@@ -7,8 +7,14 @@ import {
   redirectUri,
   tokenEndpoint,
 } from 'shared/config'
-import { TZmRequest, TZmDiff } from './types'
-import { TAccessToken } from './types'
+import { TZmDiff, TZmRequest } from 'shared/types'
+
+export type TAccessToken = {
+  access_token: string
+  token_type: string
+  expires_in: number
+  refresh_token: string
+}
 
 const CODE_DATA_KEY = 'auth-code-data'
 const TOKEN_KEY = 'token'

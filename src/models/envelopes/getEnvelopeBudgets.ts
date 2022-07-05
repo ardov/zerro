@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { TInstrumentId } from 'models/instrument'
+import { TInstrumentId } from 'shared/types'
 import { TEnvelopeId, TEnvelopeType } from 'models/shared/envelopeHelpers'
 import { getMonthDates } from 'pages/Budgets/selectors'
 import { TISOMonth } from 'shared/types'

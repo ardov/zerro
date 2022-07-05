@@ -1,4 +1,4 @@
-import { TInstrument, TInstrumentId } from 'models/instrument'
+import { TInstrument, TInstrumentId } from 'shared/types'
 import { keys } from 'shared/helpers/keys'
 import { TDateDraft } from 'shared/types'
 

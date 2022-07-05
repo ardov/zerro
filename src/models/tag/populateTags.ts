@@ -1,10 +1,10 @@
 import { int2rgb, int2hex, getColorForString } from 'shared/helpers/color'
 import { sendEvent } from 'shared/helpers/tracking'
 import toArray from 'lodash/toArray'
-import { ByIdOld } from 'shared/types'
-import { TTagPopulated, TTag } from './types'
-import iconsMap from './iconsMap.json'
+import { ByIdOld, TTag } from 'shared/types'
+import { TTagPopulated } from './types'
 import { nullTag } from './makeTag'
+import tagIcons from 'shared/tagIcons.json'
 
 export default function populateTags(rawTags: ByIdOld<TTag>) {
   let tags: {
@@ -60,8 +60,8 @@ function getName(title: string) {
 function getSymbol(tag: TTag) {
   if (tag.id === 'null') return '?'
   if (tag.icon) {
-    if (iconsMap[tag.icon]) {
-      return iconsMap[tag.icon]
+    if (tagIcons[tag.icon]) {
+      return tagIcons[tag.icon]
     } else {
       sendEvent('Tags: UnknownNames: ' + tag.icon)
     }

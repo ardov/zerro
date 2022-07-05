@@ -10,7 +10,7 @@ import { TLocalData } from 'shared/types'
 import { sync } from 'worker'
 import { getDiff, applyServerPatch } from 'models/data'
 import { keys } from 'shared/helpers/keys'
-import { TDiff } from 'models/diff'
+import { TDiff } from 'shared/types'
 
 /** All syncs with zenmoney goes through this thunk */
 export const syncData = (): AppThunk => async (dispatch, getState) => {

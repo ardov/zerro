@@ -2,18 +2,20 @@
 // TODO: use or remove
 
 import { createAction, createSlice } from '@reduxjs/toolkit'
-import { TAccount } from 'models/account'
-import { TBudget } from 'models/budget'
-import { TCompany } from 'models/company'
-import { TCountry } from 'models/country'
-import { EntityType } from 'models/deletion'
-import { TDiff } from 'models/diff'
-import { TInstrument } from 'models/instrument'
-import { TMerchant } from 'models/merchant'
-import { TReminder } from 'models/reminder'
-import { TReminderMarker } from 'models/reminderMarker'
-import { TTag } from 'models/tag'
-import { TUser } from 'models/user'
+import {
+  DataEntity,
+  TAccount,
+  TBudget,
+  TCompany,
+  TCountry,
+  TDiff,
+  TInstrument,
+  TMerchant,
+  TReminder,
+  TReminderMarker,
+  TTag,
+  TUser,
+} from 'shared/types'
 
 const applyServerPatch = createAction<TDiff>('data/applyServerPatch')
 const applyClientPatch = createAction<TDiff>('data/applyClientPatch')
@@ -30,7 +32,7 @@ export function makeDataSlice<
     | TTag
     | TReminder
     | TReminderMarker
->(name: EntityType) {
+>(name: DataEntity) {
   type Id = Obj['id']
 
   type Slice = {

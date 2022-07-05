@@ -1,9 +1,9 @@
-import { TLocalData } from 'shared/types'
+import { TDiff, TLocalData, TZmDiff } from 'shared/types'
 import * as Comlink from 'comlink'
 import { keys } from 'shared/helpers/keys'
 import { storage } from 'shared/api/storage'
 import { zenmoney } from 'shared/api/zenmoney'
-import { convertDiff, TDiff, TZmDiff } from 'models/diff'
+import { convertDiff } from 'models/diff'
 // import { workerMethods } from 'dataWorker'
 
 // eslint-disable-next-line no-restricted-globals

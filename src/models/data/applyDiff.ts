@@ -1,4 +1,4 @@
-import { TDiff } from 'models/diff'
+import { TDiff } from 'shared/types'
 import { TDataStore } from 'shared/types'
 
 /**

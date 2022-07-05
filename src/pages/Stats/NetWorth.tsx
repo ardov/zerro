@@ -20,13 +20,14 @@ import {
   ReferenceLine,
 } from 'recharts'
 import { getInBudgetAccounts, getSavingAccounts } from 'models/account'
-import { convertCurrency, TInstrumentId } from 'models/instrument'
+import { convertCurrency } from 'models/instrument'
 import { getAvailableMonths } from './availablePeriod'
 import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 import { round } from 'shared/helpers/currencyHelpers'
 import { useState } from 'react'
 import { formatDate } from 'shared/helpers/date'
 import { DataLine } from 'shared/ui/DataLine'
+import { TInstrumentId } from 'shared/types'
 
 type Point = {
   date: Date

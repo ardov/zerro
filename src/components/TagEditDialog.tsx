@@ -29,7 +29,7 @@ import {
 import { getUserInstrumentId } from 'models/user'
 import { CurrencySelect } from './CurrencySelect'
 import { useAppDispatch, useAppSelector } from 'models'
-import { TTag } from 'models/tag'
+import { TTag } from 'shared/types'
 
 // TODO: Доделать модалку для редактирования и создания категорий
 

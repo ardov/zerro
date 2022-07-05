@@ -1,4 +1,4 @@
-import { TInstrumentId } from 'models/instrument'
+import { TInstrumentId } from 'shared/types'
 import { add, sub } from 'shared/helpers/currencyHelpers'
 import { keys } from 'shared/helpers/keys'
 

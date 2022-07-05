@@ -1,32 +1,34 @@
-import { TAccount } from 'models/account'
-import { TBudget } from 'models/budget'
-import { TCompany } from 'models/company'
-import { TCountry } from 'models/country'
-import { EntityType } from 'models/deletion'
-import { TInstrument } from 'models/instrument'
-import { TMerchant } from 'models/merchant'
-import { TReminder } from 'models/reminder'
-import { TReminderMarker } from 'models/reminderMarker'
-import { TTag } from 'models/tag'
-import { TTransaction } from 'models/transaction'
-import { TUser } from 'models/user'
+import {
+  TAccount,
+  TBudget,
+  TCompany,
+  TCountry,
+  DataEntity,
+  TInstrument,
+  TMerchant,
+  TReminder,
+  TReminderMarker,
+  TTag,
+  TTransaction,
+  TUser,
+} from 'shared/types'
 
 // prettier-ignore
 export type TEntities = {
-  [EntityType.Instrument]:      TInstrument
-  [EntityType.Country]:         TCountry
-  [EntityType.Company]:         TCompany
-  [EntityType.User]:            TUser
-  [EntityType.Merchant]:        TMerchant
-  [EntityType.Account]:         TAccount
-  [EntityType.Tag]:             TTag
-  [EntityType.Budget]:          TBudget
-  [EntityType.Reminder]:        TReminder
-  [EntityType.ReminderMarker]:  TReminderMarker
-  [EntityType.Transaction]:     TTransaction
+  [DataEntity.Instrument]:      TInstrument
+  [DataEntity.Country]:         TCountry
+  [DataEntity.Company]:         TCompany
+  [DataEntity.User]:            TUser
+  [DataEntity.Merchant]:        TMerchant
+  [DataEntity.Account]:         TAccount
+  [DataEntity.Tag]:             TTag
+  [DataEntity.Budget]:          TBudget
+  [DataEntity.Reminder]:        TReminder
+  [DataEntity.ReminderMarker]:  TReminderMarker
+  [DataEntity.Transaction]:     TTransaction
 }
 
-export function createEntitySetter(entityType: EntityType) {
+export function createEntitySetter(entityType: DataEntity) {
   return (entity: any) => ({
     type: `SET_${entityType}`,
     payload: entity,

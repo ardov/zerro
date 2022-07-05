@@ -1,4 +1,4 @@
-import { TInstrument, TZmInstrument } from './types'
+import { TInstrument, TZmInstrument } from 'shared/types'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
 
