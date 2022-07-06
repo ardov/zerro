@@ -8,7 +8,7 @@ import { TrType } from 'models/transaction'
 import { getPopulatedTags } from 'models/tag'
 import { Typography } from '@mui/material'
 import { Tooltip } from 'shared/ui/Tooltip'
-import { TTransaction } from 'shared/types'
+import { ITransaction } from 'shared/types'
 import { getMerchants } from 'models/merchant'
 // import { isNew } from 'store/data/transactions/helpers'
 
@@ -17,7 +17,7 @@ type HTMLDivProps = React.DetailedHTMLProps<
   HTMLDivElement
 >
 type TrElementProps = HTMLDivProps & {
-  tr: TTransaction
+  tr: ITransaction
   trType: TrType
 }
 

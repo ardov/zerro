@@ -13,7 +13,7 @@ import { applyClientPatch } from 'store/data'
 import { AppThunk } from 'store'
 import {
   ByIdOld,
-  TBudget,
+  IBudget,
   TBudgetId,
   TDateDraft,
   TISOMonth,
@@ -38,7 +38,7 @@ export const moveFunds =
     const user = getRootUser(state)?.id
     if (!user) return
 
-    const resultBudgets: TBudget[] = []
+    const resultBudgets: IBudget[] = []
     if (source !== 'toBeBudgeted') {
       resultBudgets.push(getUpdatedBudget(source, -amount))
     }
@@ -184,9 +184,9 @@ export const startFresh =
   }
 
 function removeFutureBudgets(
-  budgets: Record<TBudgetId, TBudget>,
+  budgets: Record<TBudgetId, IBudget>,
   startMonth: TISOMonth
-): Array<TBudget> {
+): Array<IBudget> {
   const changed = Date.now()
   return keys(budgets)
     .filter(id => getISOMonthFromBudgetId(id) > startMonth)
@@ -199,7 +199,7 @@ function clearAvailable(
   amounts: ByIdOld<TagAmounts>,
   user: number
 ) {
-  const changedBudgets: TBudget[] = []
+  const changedBudgets: IBudget[] = []
   fillArray(amounts)
   return changedBudgets
 
@@ -225,7 +225,7 @@ function resetCurrentMonth(
   amounts: ByIdOld<TagAmounts>,
   user: number
 ) {
-  const changedBudgets: TBudget[] = []
+  const changedBudgets: IBudget[] = []
   for (const parentId in amounts) {
     const tag = amounts[parentId]
     resetTag(parentId, tag)
@@ -254,7 +254,7 @@ export const fixOverspends =
     if (!user) return
     const monthISO = toISOMonth(month)
     const amounts = getAmountsByTag(state)?.[monthISO]
-    const changedBudgets: TBudget[] = []
+    const changedBudgets: IBudget[] = []
 
     const addChanges = (tag: string, outcome: number) =>
       changedBudgets.push(

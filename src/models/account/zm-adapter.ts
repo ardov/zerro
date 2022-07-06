@@ -1,8 +1,8 @@
-import { TAccount, TZmAccount } from 'shared/types'
+import { IAccount, IZmAccount } from 'shared/types'
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 
-export const convertAccount: TZmAdapter<TZmAccount, TAccount> = {
+export const convertAccount: TZmAdapter<IZmAccount, IAccount> = {
   toClient: el => {
     return { ...el, changed: unixToMs(el.changed) }
   },

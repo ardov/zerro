@@ -1,13 +1,13 @@
 import { AppThunk } from 'store'
 import { setReminder } from 'models/reminder'
 import { getRootUser } from 'models/user'
-import { TReminder } from 'shared/types'
+import { IReminder } from 'shared/types'
 import { prepareDataAccount } from './dataAccount'
 import { getRecordId } from './helpers'
 import { getDataReminders } from './parseReminders'
 import { TRecord } from './types'
 
-export function setHiddenDataPiece(record: TRecord): AppThunk<TReminder> {
+export function setHiddenDataPiece(record: TRecord): AppThunk<IReminder> {
   return (dispatch, getState) => {
     const dataAccId = dispatch(prepareDataAccount())
 

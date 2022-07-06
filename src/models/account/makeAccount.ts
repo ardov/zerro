@@ -1,14 +1,14 @@
 import { v1 as uuidv1 } from 'uuid'
 import { toISODate } from 'shared/helpers/date'
 import { Modify, OptionalExceptFor, TDateDraft } from 'shared/types'
-import { TAccount, TAccountId, accountType } from 'shared/types'
+import { IAccount, TAccountId, AccountType } from 'shared/types'
 
 type TAccountDraft = Modify<
-  OptionalExceptFor<TAccount, 'user' | 'instrument' | 'title'>,
+  OptionalExceptFor<IAccount, 'user' | 'instrument' | 'title'>,
   { startDate?: TDateDraft }
 >
 
-export function makeAccount(draft: TAccountDraft): TAccount {
+export function makeAccount(draft: TAccountDraft): IAccount {
   return {
     // Required
     user: draft.user,
@@ -20,7 +20,7 @@ export function makeAccount(draft: TAccountDraft): TAccount {
     changed: draft.changed || Date.now(),
     role: draft.role || null,
     company: draft.company || null,
-    type: draft.type || accountType.cash,
+    type: draft.type || AccountType.Cash,
     syncID: draft.syncID || null,
 
     balance: draft.balance || 0,

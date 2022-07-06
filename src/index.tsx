@@ -14,7 +14,7 @@ import { applyClientPatch, resetData } from 'store/data'
 import { AppThemeProvider } from './AppThemeProvider'
 import { StyledEngineProvider } from '@mui/material/styles'
 import { appVersion } from 'shared/config'
-import { TDiff } from 'shared/types'
+import { IDiff } from 'shared/types'
 
 initSentry()
 bindWorkerToStore(store.dispatch)
@@ -65,6 +65,6 @@ function createZerroInstance(s: typeof store) {
     logsShow: false,
     logs: {},
     resetData: () => s.dispatch(resetData()),
-    applyClientPatch: (patch: TDiff) => s.dispatch(applyClientPatch(patch)),
+    applyClientPatch: (patch: IDiff) => s.dispatch(applyClientPatch(patch)),
   }
 }

@@ -1,6 +1,6 @@
 import { AppThunk } from 'store'
 import { applyServerPatch } from 'store/data'
-import { getDataToSave } from 'store/data/selectors'
+import { getDataToSave } from 'features/shared/getDataToSave'
 import { TLocalData } from 'shared/types'
 import { getLocalData, clearStorage, saveLocalData } from 'worker'
 

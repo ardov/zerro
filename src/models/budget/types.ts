@@ -1,6 +1,6 @@
-import { TBudget, TInstrumentId } from 'shared/types'
+import { IBudget, TInstrumentId } from 'shared/types'
 
-export type TPopulatedBudget = TBudget & {
+export type TPopulatedBudget = IBudget & {
   convertedOutcome: number
   instrument: TInstrumentId | null
 }

@@ -2,7 +2,6 @@ import { convertAccount } from 'models/account'
 import { convertBudget } from 'models/budget'
 import { convertCompany } from 'models/company'
 import { convertCountry } from 'models/country'
-import { convertDeletion } from 'models/deletion'
 import { convertInstrument } from 'models/instrument'
 import { convertMerchant } from 'models/merchant'
 import { convertReminder } from 'models/reminder'
@@ -12,11 +11,21 @@ import { convertTransaction } from 'models/transaction'
 import { convertUser } from 'models/user'
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
-import { TDiff, TZmDiff } from 'shared/types'
+import { IDiff, IZmDiff } from 'shared/types'
+import { IDeletionObject, IZmDeletionObject } from 'shared/types'
 
-export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
+const convertDeletion: TZmAdapter<IZmDeletionObject, IDeletionObject> = {
+  toClient: (el: IZmDeletionObject): IDeletionObject => {
+    return { ...el, stamp: unixToMs(el.stamp) }
+  },
+  toServer: (el: IDeletionObject): IZmDeletionObject => {
+    return { ...el, stamp: msToUnix(el.stamp) }
+  },
+}
+
+export const convertDiff: TZmAdapter<IZmDiff, IDiff> = {
   toClient: d => {
-    let r: TDiff = { serverTimestamp: 0 }
+    let r: IDiff = { serverTimestamp: 0 }
     if (d.serverTimestamp) r.serverTimestamp = unixToMs(d.serverTimestamp)
     if (d.deletion) r.deletion = d.deletion.map(convertDeletion.toClient)
     if (d.instrument)
@@ -37,7 +46,7 @@ export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
   },
 
   toServer: d => {
-    let r: TZmDiff = { serverTimestamp: 0 }
+    let r: IZmDiff = { serverTimestamp: 0 }
     if (d.serverTimestamp) r.serverTimestamp = msToUnix(d.serverTimestamp)
     if (d.deletion) r.deletion = d.deletion.map(convertDeletion.toServer)
     if (d.instrument)

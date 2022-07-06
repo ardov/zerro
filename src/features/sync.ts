@@ -10,12 +10,12 @@ import { TLocalData } from 'shared/types'
 import { sync } from 'worker'
 import { getDiff, applyServerPatch } from 'store/data'
 import { keys } from 'shared/helpers/keys'
-import { TDiff } from 'shared/types'
+import { IDiff } from 'shared/types'
 
 /** All syncs with zenmoney goes through this thunk */
 export const syncData = (): AppThunk => async (dispatch, getState) => {
   const state = getState()
-  const diff: TDiff = {
+  const diff: IDiff = {
     ...(getDiff(state) || {}),
     serverTimestamp: getLastSyncTime(state),
   }
@@ -50,7 +50,7 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
   }
 }
 
-function getChangedDomains(data: TDiff) {
+function getChangedDomains(data: IDiff) {
   let domains: Set<keyof TLocalData> = new Set()
   keys(data).forEach(key => {
     if (key === 'deletion') data[key]?.forEach(item => domains.add(item.object))

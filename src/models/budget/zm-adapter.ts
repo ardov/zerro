@@ -1,17 +1,17 @@
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
-import { TBudget, TZmBudget } from 'shared/types'
+import { IBudget, IZmBudget } from 'shared/types'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 import { getBudgetId } from './getBudgetId'
 
-export const convertBudget: TZmAdapter<TZmBudget, TBudget> = {
-  toClient: (el: TZmBudget): TBudget => {
+export const convertBudget: TZmAdapter<IZmBudget, IBudget> = {
+  toClient: (el: IZmBudget): IBudget => {
     return {
       ...el,
       changed: unixToMs(el.changed),
       id: getBudgetId(el.date, el.tag),
     }
   },
-  toServer: (el: TBudget): TZmBudget => {
+  toServer: (el: IBudget): IZmBudget => {
     return {
       changed: msToUnix(el.changed),
       user: el.user,

@@ -1,11 +1,11 @@
 import { v1 as uuidv1 } from 'uuid'
 import { toISODate } from 'shared/helpers/date'
 import { Modify, OptionalExceptFor, TDateDraft } from 'shared/types'
-import { TTransaction } from 'shared/types'
+import { ITransaction } from 'shared/types'
 
 type TransactionDraft = Modify<
   OptionalExceptFor<
-    TTransaction,
+    ITransaction,
     | 'user'
     | 'date'
     | 'incomeInstrument'
@@ -20,7 +20,7 @@ type TransactionDraft = Modify<
   }
 >
 
-export function makeTransaction(draft: TransactionDraft): TTransaction {
+export function makeTransaction(draft: TransactionDraft): ITransaction {
   return {
     id: draft.id || uuidv1(),
     changed: +new Date(draft.changed || Date.now()),

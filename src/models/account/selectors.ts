@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { populate } from './populate'
 import { convertCurrency } from 'models/instrument'
 import { TAccountPopulated } from './types'
-import { accountType, TAccountId } from 'shared/types'
+import { AccountType, TAccountId } from 'shared/types'
 import { RootState } from 'store'
 import { DATA_ACC_NAME } from '../hiddenData/constants'
 
@@ -12,7 +12,7 @@ export const getAccounts = (state: RootState) => state.data.current.account
 
 export const getDebtAccountId = createSelector([getAccounts], accounts => {
   for (const id in accounts) {
-    if (accounts[id].type === accountType.debt) return id
+    if (accounts[id].type === AccountType.Debt) return id
   }
 })
 

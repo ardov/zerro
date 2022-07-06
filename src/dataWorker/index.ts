@@ -1,5 +1,4 @@
 import { TLocalData } from 'shared/types'
-import { convertDiff } from 'models/diff'
 
 // eslint-disable-next-line no-restricted-globals
 // const ctx: Worker = self as any
@@ -14,7 +13,7 @@ import { convertDiff } from 'models/diff'
 
 export const workerMethods = {
   // logIn: loggedIn,
-  convertZmToLocal: convertDiff.toClient,
+  // convertZmToLocal: convertDiff.toClient,
   // getLocalData: () => {
   //   initTriggered()
   //   return getLocalDataFx()

@@ -6,7 +6,7 @@ import {
   TISOMonth,
   TMerchantId,
   TTagId,
-  TTransaction,
+  ITransaction,
 } from 'shared/types'
 import { TFxAmount } from './helpers/fxAmount'
 
@@ -118,13 +118,13 @@ type TMonthInfo = {
   balance: TFxAmount // gradually
   balanceChange: TFxAmount
   transferFees: TFxAmount
-  transferFeesTransactions: TTransaction[]
+  transferFeesTransactions: ITransaction[]
   envelopes: {
     [id: TEnvelopeId]: {
       income: TFxAmount
       outcome: TFxAmount
-      incomeTransactions: TTransaction[]
-      outcomeTransactions: TTransaction[]
+      incomeTransactions: ITransaction[]
+      outcomeTransactions: ITransaction[]
     }
   }
 }

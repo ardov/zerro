@@ -4,19 +4,19 @@ import { getRootUser } from 'models/user'
 import { Modify, OptionalExceptFor, TDateDraft } from 'shared/types'
 import { makeReminder } from './makeReminder'
 import { getReminders } from './model'
-import { TReminder } from 'shared/types'
+import { IReminder } from 'shared/types'
 
-type ReminderPatch = OptionalExceptFor<TReminder, 'id'>
+type ReminderPatch = OptionalExceptFor<IReminder, 'id'>
 
 type ReminderDraft = Modify<
-  OptionalExceptFor<TReminder, 'incomeAccount' | 'outcomeAccount'>,
+  OptionalExceptFor<IReminder, 'incomeAccount' | 'outcomeAccount'>,
   { startDate?: TDateDraft; endDate?: TDateDraft }
 >
 
 export const setReminder =
   (
     draft: ReminderDraft | ReminderPatch | Array<ReminderDraft | ReminderPatch>
-  ): AppThunk<TReminder[]> =>
+  ): AppThunk<IReminder[]> =>
   (dispatch, getState) => {
     const arr = Array.isArray(draft) ? draft : [draft]
     const state = getState()
@@ -24,7 +24,7 @@ export const setReminder =
     const readyReminders = arr.map(el => {
       const currentReminder = el.id && getReminders(state)[el.id]
       const patched = {
-        ...(currentReminder || ({} as TReminder)),
+        ...(currentReminder || ({} as IReminder)),
         ...el,
         changed: el.changed || Date.now(),
       }

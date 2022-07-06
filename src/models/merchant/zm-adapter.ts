@@ -1,8 +1,8 @@
-import { TMerchant, TZmMerchant } from 'shared/types'
+import { IMerchant, IZmMerchant } from 'shared/types'
 import { TZmAdapter } from 'shared/helpers/adapterUtils'
 import { msToUnix, unixToMs } from 'shared/helpers/date'
 
-export const convertMerchant: TZmAdapter<TZmMerchant, TMerchant> = {
+export const convertMerchant: TZmAdapter<IZmMerchant, IMerchant> = {
   toClient: el => {
     return { ...el, changed: unixToMs(el.changed) }
   },

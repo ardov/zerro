@@ -1,32 +1,4 @@
-import {
-  TAccount,
-  TBudget,
-  TCompany,
-  TCountry,
-  DataEntity,
-  TInstrument,
-  TMerchant,
-  TReminder,
-  TReminderMarker,
-  TTag,
-  TTransaction,
-  TUser,
-} from 'shared/types'
-
-// prettier-ignore
-export type TEntities = {
-  [DataEntity.Instrument]:      TInstrument
-  [DataEntity.Country]:         TCountry
-  [DataEntity.Company]:         TCompany
-  [DataEntity.User]:            TUser
-  [DataEntity.Merchant]:        TMerchant
-  [DataEntity.Account]:         TAccount
-  [DataEntity.Tag]:             TTag
-  [DataEntity.Budget]:          TBudget
-  [DataEntity.Reminder]:        TReminder
-  [DataEntity.ReminderMarker]:  TReminderMarker
-  [DataEntity.Transaction]:     TTransaction
-}
+import { DataEntity } from 'shared/types'
 
 export function createEntitySetter(entityType: DataEntity) {
   return (entity: any) => ({

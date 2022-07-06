@@ -6,18 +6,18 @@ import { makeTag } from 'models/tag/makeTag'
 import { makeTransaction } from 'models/transaction/makeTransaction'
 import { toISODate } from 'shared/helpers/date'
 import {
-  accountType,
-  TDiff,
-  TUser,
-  TZmCompany,
-  TZmCountry,
-  TZmInstrument,
+  AccountType,
+  IDiff,
+  IUser,
+  IZmCompany,
+  IZmCountry,
+  IZmInstrument,
 } from 'shared/types'
 
 const NOW = Date.now()
 const DAY = 1000 * 60 * 60 * 24
 
-const USER: TUser = {
+const USER: IUser = {
   id: 777,
   changed: NOW,
   currency: 2, // RUB
@@ -36,14 +36,14 @@ const DEBT_ACC = makeAccount({
   id: 'DEBT_ACC',
   user: USER.id,
   instrument: USER.currency,
-  type: accountType.debt,
+  type: AccountType.Debt,
   title: 'Долги',
 })
 const CASH_ACC = makeAccount({
   id: 'CASH_ACC',
   user: USER.id,
   instrument: USER.currency,
-  type: accountType.cash,
+  type: AccountType.Cash,
   title: 'Наличка',
   startBalance: 0,
 })
@@ -93,12 +93,12 @@ const TR1 = makeTransaction({
   comment: 'Зарплата',
 })
 
-export const getDemoData = (): TDiff => {
+export const getDemoData = (): IDiff => {
   return {
     serverTimestamp: NOW,
-    country: countries as TZmCountry[],
-    company: companies as TZmCompany[],
-    instrument: instruments as TZmInstrument[],
+    country: countries as IZmCountry[],
+    company: companies as IZmCompany[],
+    instrument: instruments as IZmInstrument[],
 
     user: [USER],
     account,

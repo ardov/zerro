@@ -1,4 +1,4 @@
-import type { TTransaction } from 'shared/types'
+import type { ITransaction } from 'shared/types'
 import React, { FC, useEffect, useState } from 'react'
 import './transitions.css'
 import { useAppDispatch, useAppSelector } from 'store'
@@ -275,7 +275,7 @@ const Actions: FC<ActionsProps> = ({
   )
 }
 
-function getAvailableActions(transactions: TTransaction[]) {
+function getAvailableActions(transactions: ITransaction[]) {
   const { incomes, outcomes, transfers } = getTypes(transactions)
   const totalOutcome = outcomes.reduce((sum, tr) => round(sum + tr.outcome), 0)
   const totalIncome = incomes.reduce((sum, tr) => round(sum + tr.income), 0)
@@ -336,13 +336,13 @@ function getAvailableActions(transactions: TTransaction[]) {
   }
 }
 
-function combineToOutcome(transactions: TTransaction[]) {
+function combineToOutcome(transactions: ITransaction[]) {
   const { incomes, outcomes } = getTypes(transactions)
   const outcome = outcomes[0]
   const outcomeInstrument = outcome.outcomeInstrument
   let outcomeSum = outcome.outcome
   const outcomeAccount = outcome.outcomeAccount
-  const modifiedIncomes: TTransaction[] = incomes.map(tr => {
+  const modifiedIncomes: ITransaction[] = incomes.map(tr => {
     outcomeSum = round(outcomeSum - tr.income)
     if (tr.incomeAccount === outcomeAccount) {
       // Same account -> just delete income
@@ -370,13 +370,13 @@ function combineToOutcome(transactions: TTransaction[]) {
   return modifiedIncomes
 }
 
-function combineToIncome(transactions: TTransaction[]) {
+function combineToIncome(transactions: ITransaction[]) {
   const { incomes, outcomes } = getTypes(transactions)
   const income = incomes[0]
   const incomeInstrument = income.incomeInstrument
   let incomeSum = income.income
   const incomeAccount = income.incomeAccount
-  const modifiedOutcomes: TTransaction[] = outcomes.map(tr => {
+  const modifiedOutcomes: ITransaction[] = outcomes.map(tr => {
     incomeSum = round(incomeSum - tr.outcome)
     if (tr.outcomeAccount === incomeAccount) {
       // Same account -> just delete outcome
@@ -404,10 +404,10 @@ function combineToIncome(transactions: TTransaction[]) {
   return modifiedOutcomes
 }
 
-function getTypes(list: TTransaction[] = []) {
-  let incomes: TTransaction[] = []
-  let outcomes: TTransaction[] = []
-  let transfers: TTransaction[] = []
+function getTypes(list: ITransaction[] = []) {
+  let incomes: ITransaction[] = []
+  let outcomes: ITransaction[] = []
+  let transfers: ITransaction[] = []
 
   list?.forEach(tr => {
     let trType = getType(tr)

@@ -1,4 +1,4 @@
-import { TDiff } from 'shared/types'
+import { IDiff } from 'shared/types'
 
 /**
  * Adds changes from the second diff to the first diff
@@ -6,7 +6,7 @@ import { TDiff } from 'shared/types'
  * @param target - target object will be mutated
  * @param diff - object with changes
  */
-export function mergeDiffs(target: TDiff, diff: TDiff) {
+export function mergeDiffs(target: IDiff, diff: IDiff) {
   if (diff.serverTimestamp) target.serverTimestamp = diff.serverTimestamp
   if (diff.deletion) {
     if (target.deletion) target.deletion = target.deletion.concat(diff.deletion)
@@ -28,7 +28,7 @@ export function mergeDiffs(target: TDiff, diff: TDiff) {
    * Merges all objects from diff key into target key
    * @param key - all diff keys except serverTimestamp and deletion
    */
-  function merge(key: keyof TDiff) {
+  function merge(key: keyof IDiff) {
     if (key === 'serverTimestamp' || key === 'deletion') return
     if (!diff[key]) return
     if (target[key]) {

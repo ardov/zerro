@@ -5,7 +5,7 @@ import {
   TAccountId,
   TISOMonth,
   TTagId,
-  TTransaction,
+  ITransaction,
 } from 'shared/types'
 import { toISOMonth } from 'shared/helpers/date'
 import { TFxAmount } from './helpers/fxAmount'
@@ -21,8 +21,8 @@ import { keys } from 'shared/helpers/keys'
 type TEnvelopeNode = {
   income: TFxAmount
   outcome: TFxAmount
-  incomeTransactions: TTransaction[]
-  outcomeTransactions: TTransaction[]
+  incomeTransactions: ITransaction[]
+  outcomeTransactions: ITransaction[]
 }
 
 type TMonthInfo = {
@@ -31,7 +31,7 @@ type TMonthInfo = {
   balanceStart: TFxAmount
   balanceEnd: TFxAmount
   transferFees: TFxAmount
-  transferFeesTransactions: TTransaction[]
+  transferFeesTransactions: ITransaction[]
   envelopes: Record<TEnvelopeId, TEnvelopeNode>
 }
 
@@ -158,7 +158,7 @@ export const getMoneyFlow: TSelector<Record<TISOMonth, TMonthInfo>> =
 function addToMonth(
   month: TMonthInfo,
   id: TEnvelopeId,
-  tr: TTransaction,
+  tr: ITransaction,
   mode: 'income' | 'outcome'
 ) {
   const instrument = tr[`${mode}Instrument`]
@@ -194,13 +194,13 @@ function makeEnvelopeNode(): TEnvelopeNode {
   }
 }
 
-function sameAmountAndCurrency(tr: TTransaction) {
+function sameAmountAndCurrency(tr: ITransaction) {
   return (
     tr.income === tr.outcome && tr.incomeInstrument === tr.outcomeInstrument
   )
 }
 function isTransferInsideBudget(
-  tr: TTransaction,
+  tr: ITransaction,
   inBudgetAccounts: TAccountId[]
 ) {
   return (
@@ -209,15 +209,15 @@ function isTransferInsideBudget(
   )
 }
 
-function getTrMonth(tr: TTransaction): TMonthInfo['date'] {
+function getTrMonth(tr: ITransaction): TMonthInfo['date'] {
   return toISOMonth(tr.date)
 }
 
-function getMainTag(tr: TTransaction): TTagId {
+function getMainTag(tr: ITransaction): TTagId {
   return tr.tag?.[0] || 'null'
 }
 
-function isInBudget(tr: TTransaction, inBudgetAccs: TAccountId[]): boolean {
+function isInBudget(tr: ITransaction, inBudgetAccs: TAccountId[]): boolean {
   return (
     inBudgetAccs.includes(tr.incomeAccount) ||
     inBudgetAccs.includes(tr.outcomeAccount)

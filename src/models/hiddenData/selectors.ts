@@ -4,7 +4,7 @@ import { DataReminderType } from './constants'
 import { getAccountList } from 'models/account'
 import { DATA_ACC_NAME } from './constants'
 import { RootState } from 'store'
-import { TGoal, TReminder, TTagMeta } from 'shared/types'
+import { TGoal, IReminder, TTagMeta } from 'shared/types'
 import { TTagId } from 'shared/types'
 
 const { ACC_LINKS, TAG_ORDER, GOALS, TAG_META } = DataReminderType
@@ -52,7 +52,7 @@ export const getRawTagMeta = createSelector([getHiddenData], d => d[TAG_META])
 /**
  * Parses comment in reminder and returns parsed JSON or null
  */
-function parseComment<OutcomeType>(reminder?: TReminder): OutcomeType | null {
+function parseComment<OutcomeType>(reminder?: IReminder): OutcomeType | null {
   if (!reminder?.comment) return null
   try {
     return JSON.parse(reminder.comment)

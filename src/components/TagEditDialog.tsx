@@ -29,7 +29,7 @@ import {
 import { getUserInstrumentId } from 'models/user'
 import { CurrencySelect } from './CurrencySelect'
 import { useAppDispatch, useAppSelector } from 'store'
-import { TTag } from 'shared/types'
+import { ITag } from 'shared/types'
 
 // TODO: Доделать модалку для редактирования и создания категорий
 
@@ -37,7 +37,7 @@ export type TagEditDialogProps = Modify<
   DialogProps,
   {
     onClose: () => void
-    tag?: Partial<TTag>
+    tag?: Partial<ITag>
   }
 >
 

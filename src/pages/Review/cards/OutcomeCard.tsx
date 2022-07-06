@@ -7,9 +7,9 @@ import { Amount } from 'components/Amount'
 import { getInstruments } from 'models/instrument'
 import { getPopulatedTags } from 'models/tag'
 import { Card } from './Card'
-import { TTransaction } from 'shared/types'
+import { ITransaction } from 'shared/types'
 
-export function OutcomeCard({ transaction }: { transaction: TTransaction }) {
+export function OutcomeCard({ transaction }: { transaction: ITransaction }) {
   const { outcome, outcomeInstrument, date, comment, payee, tag } = transaction
   const currency = useAppSelector(getInstruments)[outcomeInstrument].shortTitle
   const tagTitle = useAppSelector(getPopulatedTags)[tag?.[0] || 'null'].title

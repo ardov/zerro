@@ -1,19 +1,19 @@
 import { ById } from './ts-utils'
 import { goalType } from 'models/hiddenData/constants'
 import {
-  TZmDiff,
-  TZmDeletionObject,
-  TTransaction,
-  TReminder,
-  TReminderMarker,
-  TInstrument,
-  TCountry,
-  TCompany,
-  TUser,
-  TMerchant,
-  TAccount,
-  TTag,
-  TBudget,
+  IZmDiff,
+  IZmDeletionObject,
+  ITransaction,
+  IReminder,
+  IReminderMarker,
+  IInstrument,
+  ICountry,
+  ICompany,
+  IUser,
+  IMerchant,
+  IAccount,
+  ITag,
+  IBudget,
   TInstrumentId,
 } from './data-entities'
 
@@ -48,24 +48,24 @@ export type TGoal = {
   end?: TISODate
 }
 
-export type TLocalData = Omit<TZmDiff, 'deletion'>
+export type TLocalData = Omit<IZmDiff, 'deletion'>
 
 // prettier-ignore
 export type TDataStore = {
   serverTimestamp:  TMsTime
-  instrument:       ById<TInstrument>
-  country:          ById<TCountry>
-  company:          ById<TCompany>
-  user:             ById<TUser>
-  merchant:         ById<TMerchant>
-  account:          ById<TAccount>
-  tag:              ById<TTag>
-  budget:           ById<TBudget>
-  reminder:         ById<TReminder>
-  reminderMarker:   ById<TReminderMarker>
-  transaction:      ById<TTransaction>
+  instrument:       ById<IInstrument>
+  country:          ById<ICountry>
+  company:          ById<ICompany>
+  user:             ById<IUser>
+  merchant:         ById<IMerchant>
+  account:          ById<IAccount>
+  tag:              ById<ITag>
+  budget:           ById<IBudget>
+  reminder:         ById<IReminder>
+  reminderMarker:   ById<IReminderMarker>
+  transaction:      ById<ITransaction>
 }
 
 export type TDataStorePatch = Partial<TDataStore> & {
-  deletion?: TZmDeletionObject[]
+  deletion?: IZmDeletionObject[]
 }

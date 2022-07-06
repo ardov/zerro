@@ -4,14 +4,14 @@ import { applyClientPatch } from 'store/data'
 import { getRootUser } from 'models/user'
 import { getTag } from 'models/tag'
 import { OptionalExceptFor } from 'shared/types'
-import { TTag, TZmTag } from 'shared/types'
+import { ITag, IZmTag } from 'shared/types'
 import { makeTag } from './makeTag'
 
-type TagDraft = OptionalExceptFor<TTag, 'id'>
+type TagDraft = OptionalExceptFor<ITag, 'id'>
 
 export const patchTag =
   (tag: TagDraft): AppThunk =>
-  (dispatch, getState): TZmTag => {
+  (dispatch, getState): IZmTag => {
     if (!tag.id) throw new Error('Trying to patch tag without id')
     if (tag.id === 'null') throw new Error('Trying to patch null tag')
     let current = getTag(getState(), tag.id)
@@ -24,7 +24,7 @@ export const patchTag =
   }
 
 export const createTag =
-  (tag: OptionalExceptFor<TTag, 'title'>): AppThunk =>
+  (tag: OptionalExceptFor<ITag, 'title'>): AppThunk =>
   (dispatch, getState) => {
     if (hasId(tag)) return dispatch(patchTag(tag))
     if (!tag.title) throw new Error('Trying to create tag without title')
@@ -38,4 +38,4 @@ export const createTag =
     return newTag
   }
 
-const hasId = (tag: Partial<TTag>): tag is TagDraft => !!tag.id
+const hasId = (tag: Partial<ITag>): tag is TagDraft => !!tag.id

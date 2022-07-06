@@ -1,6 +1,6 @@
-import { TFxCode, TTag, TTagId } from 'shared/types'
+import { TFxCode, ITag, TTagId } from 'shared/types'
 
-export type TTagPopulated = TTag & {
+export type TTagPopulated = ITag & {
   name: string // Tag name without emoji
   uniqueName: string // If name not unique adds parent name
   symbol: string // Emoji

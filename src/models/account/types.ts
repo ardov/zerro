@@ -1,6 +1,6 @@
-import { TAccount } from 'shared/types'
+import { IAccount } from 'shared/types'
 
-export interface TAccountPopulated extends TAccount {
+export interface TAccountPopulated extends IAccount {
   convertedBalance: number
   convertedStartBalance: number
   inBudget: boolean

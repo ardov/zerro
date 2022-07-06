@@ -1,33 +1,33 @@
 import { getIDBStorage } from 'shared/api/storage'
 import { TToken, TUnixTime } from 'shared/types'
 import {
-  TZmTransaction,
-  TZmInstrument,
-  TZmCountry,
-  TZmCompany,
-  TZmUser,
-  TZmAccount,
-  TZmMerchant,
-  TZmTag,
-  TZmBudget,
-  TZmReminder,
-  TZmReminderMarker,
+  IZmTransaction,
+  IZmInstrument,
+  IZmCountry,
+  IZmCompany,
+  IZmUser,
+  IZmAccount,
+  IZmMerchant,
+  IZmTag,
+  IZmBudget,
+  IZmReminder,
+  IZmReminderMarker,
 } from 'shared/types'
 
 export type TLocalData = {
   token: TToken
   serverTimestamp: TUnixTime
-  instrument: TZmInstrument[]
-  country: TZmCountry[]
-  company: TZmCompany[]
-  user: TZmUser[]
-  account: TZmAccount[]
-  merchant: TZmMerchant[]
-  tag: TZmTag[]
-  budget: TZmBudget[]
-  reminder: TZmReminder[]
-  reminderMarker: TZmReminderMarker[]
-  transaction: TZmTransaction[]
+  instrument: IZmInstrument[]
+  country: IZmCountry[]
+  company: IZmCompany[]
+  user: IZmUser[]
+  account: IZmAccount[]
+  merchant: IZmMerchant[]
+  tag: IZmTag[]
+  budget: IZmBudget[]
+  reminder: IZmReminder[]
+  reminderMarker: IZmReminderMarker[]
+  transaction: IZmTransaction[]
 }
 
 type TLocalDataKey = keyof TLocalData

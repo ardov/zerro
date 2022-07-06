@@ -1,6 +1,6 @@
 import { TAccountPopulated } from './types'
 import { isInBudget } from './helpers'
-import { TAccount } from 'shared/types'
+import { IAccount } from 'shared/types'
 
 interface Options {
   convert: (
@@ -12,7 +12,7 @@ interface Options {
 
 export const populate = (
   { convert }: Options,
-  raw: TAccount
+  raw: IAccount
 ): TAccountPopulated => {
   return {
     ...raw,

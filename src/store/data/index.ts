@@ -6,10 +6,4 @@ export { applyServerPatch, applyClientPatch, resetData } from './slice'
 
 // SELECTORS
 export { getDiff } from './slice'
-export {
-  getDataToSave,
-  getChangedNum,
-  getLastChangeTime,
-  getLastSyncTime,
-} from //  getMerchants,
-'./selectors'
+export { getChangedNum, getLastChangeTime, getLastSyncTime } from './selectors'

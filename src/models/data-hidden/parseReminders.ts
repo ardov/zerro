@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { getReminders } from 'models/reminder'
-import { TReminder, TReminderId } from 'shared/types'
+import { IReminder, TReminderId } from 'shared/types'
 import { parseComment, getRecordId } from './helpers'
 import {
   TRecord,
@@ -28,7 +28,7 @@ export type TAggregatedResult = {
   [RecordType.LinkedDebtors]: TRecordLinkedMerchants['payload']
   [RecordType.TagMeta]: TRecordTagMeta['payload']
   [RecordType.TagOrder]: TRecordTagOrder['payload']
-  dataReminders: { [dataId: string]: TReminder }
+  dataReminders: { [dataId: string]: IReminder }
 }
 
 export const getRawHiddenData = createSelector([getReminders], parseReminders)
@@ -42,7 +42,7 @@ export const getDataReminders = createSelector(
 )
 
 function parseReminders(
-  reminders: Record<TReminderId, TReminder>
+  reminders: Record<TReminderId, IReminder>
 ): TAggregatedResult {
   let res: TAggregatedResult = {
     [RecordType.Goals]: {},

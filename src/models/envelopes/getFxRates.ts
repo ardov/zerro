@@ -1,9 +1,9 @@
-import { TInstrument, TInstrumentId } from 'shared/types'
+import { IInstrument, TInstrumentId } from 'shared/types'
 import { keys } from 'shared/helpers/keys'
 import { TDateDraft } from 'shared/types'
 
 export function makeFxRatesGetter(
-  instruments: Record<TInstrumentId, TInstrument>
+  instruments: Record<TInstrumentId, IInstrument>
   // TODO: add saved and historical rates
 ) {
   let zmRates: Record<TInstrumentId, number> = {}

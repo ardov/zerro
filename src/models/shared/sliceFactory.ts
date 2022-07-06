@@ -4,34 +4,34 @@
 import { createAction, createSlice } from '@reduxjs/toolkit'
 import {
   DataEntity,
-  TAccount,
-  TBudget,
-  TCompany,
-  TCountry,
-  TDiff,
-  TInstrument,
-  TMerchant,
-  TReminder,
-  TReminderMarker,
-  TTag,
-  TUser,
+  IAccount,
+  IBudget,
+  ICompany,
+  ICountry,
+  IDiff,
+  IInstrument,
+  IMerchant,
+  IReminder,
+  IReminderMarker,
+  ITag,
+  IUser,
 } from 'shared/types'
 
-const applyServerPatch = createAction<TDiff>('data/applyServerPatch')
-const applyClientPatch = createAction<TDiff>('data/applyClientPatch')
+const applyServerPatch = createAction<IDiff>('data/applyServerPatch')
+const applyClientPatch = createAction<IDiff>('data/applyClientPatch')
 
 export function makeDataSlice<
   Obj extends
-    | TInstrument
-    | TCountry
-    | TCompany
-    | TUser
-    | TMerchant
-    | TAccount
-    | TBudget
-    | TTag
-    | TReminder
-    | TReminderMarker
+    | IInstrument
+    | ICountry
+    | ICompany
+    | IUser
+    | IMerchant
+    | IAccount
+    | IBudget
+    | ITag
+    | IReminder
+    | IReminderMarker
 >(name: DataEntity) {
   type Id = Obj['id']
 

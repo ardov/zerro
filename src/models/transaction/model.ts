@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { getMerchants } from 'models/merchant'
 import { compareDates, getTime, isDeleted } from './helpers'
 import { RootState } from 'store'
-import { TTransaction, TTransactionId } from 'shared/types'
+import { ITransaction, TTransactionId } from 'shared/types'
 import { withPerf } from 'shared/helpers/performance'
 
 export const getTransactions = (state: RootState) =>
@@ -39,7 +39,7 @@ export const getHistoryStart = createSelector(
 
 export const debtorGetter = createSelector(
   [getMerchants],
-  merchants => (tr: TTransaction) => {
+  merchants => (tr: ITransaction) => {
     const instrument = tr.incomeInstrument || tr.outcomeInstrument
     const merchantTitle = tr.merchant && merchants[tr.merchant]?.title
     return clean(merchantTitle || tr.payee || '') + '-' + instrument

@@ -6,9 +6,9 @@ import { getType } from 'models/transaction/helpers'
 import {
   ById,
   TAccountId,
-  TTransaction,
+  ITransaction,
   TInstrumentId,
-  TMerchant,
+  IMerchant,
   TMerchantId,
 } from 'shared/types'
 import { TSelector } from 'store'
@@ -25,7 +25,7 @@ export type TDebtor = {
   merchantId?: TMerchantId
   merchantName?: string
   payeeNames: string[]
-  transactions: TTransaction[]
+  transactions: ITransaction[]
   balance: TFxAmount
 }
 
@@ -35,8 +35,8 @@ export const getDebtors: TSelector<ById<TDebtor>> = createSelector(
 )
 
 function collectDebtors(
-  trList: TTransaction[],
-  merchants: ById<TMerchant>,
+  trList: ITransaction[],
+  merchants: ById<IMerchant>,
   debtAccId?: TAccountId
 ): ById<TDebtor> {
   const debtors: ById<TDebtor> = {}
@@ -81,7 +81,7 @@ function collectDebtors(
   return debtors
 }
 
-function makeDebtorFromMerchant(merchant: TMerchant): TDebtor {
+function makeDebtorFromMerchant(merchant: IMerchant): TDebtor {
   return {
     id: cleanPayee(merchant.title),
     name: merchant.title,
