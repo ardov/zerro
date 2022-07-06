@@ -3,7 +3,7 @@ import { useAppSelector } from 'store'
 import {
   getInBudgetAccounts,
   getSavingAccounts,
-  TAccountPopulated,
+  IAccountPopulated,
 } from 'models/account'
 import pluralize from 'shared/helpers/pluralize'
 import { Collapse, List, ListItemButton } from '@mui/material'
@@ -57,7 +57,7 @@ export default function AccountList({ className = '' }) {
   )
 }
 
-const ArchivedList: FC<{ accs: TAccountPopulated[] }> = props => {
+const ArchivedList: FC<{ accs: IAccountPopulated[] }> = props => {
   const { accs } = props
   const [visible, toggleVisibility] = useToggle()
   if (!accs.length) return null
@@ -103,6 +103,6 @@ const ArchivedList: FC<{ accs: TAccountPopulated[] }> = props => {
   )
 }
 
-function getTotal(accs: TAccountPopulated[]) {
+function getTotal(accs: IAccountPopulated[]) {
   return accs.reduce((sum, a) => sum + a.convertedBalance, 0)
 }

@@ -1,4 +1,4 @@
-import { TAccountPopulated } from './types'
+import { IAccountPopulated } from './types'
 import { isInBudget } from './helpers'
 import { IAccount } from 'shared/types'
 
@@ -13,7 +13,7 @@ interface Options {
 export const populate = (
   { convert }: Options,
   raw: IAccount
-): TAccountPopulated => {
+): IAccountPopulated => {
   return {
     ...raw,
     convertedBalance: convert(raw.balance, raw.instrument),

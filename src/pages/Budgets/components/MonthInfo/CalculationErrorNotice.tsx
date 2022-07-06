@@ -2,7 +2,7 @@ import React, { FC, ReactNode, useEffect, useState } from 'react'
 import { TSelector, useAppDispatch, useAppSelector } from 'store'
 import { getTotalsArray } from '../../selectors'
 import { convertCurrency, getUserCurrencyCode } from 'models/instrument'
-import { getInBudgetAccounts, TAccountPopulated } from 'models/account'
+import { getInBudgetAccounts, IAccountPopulated } from 'models/account'
 import { round } from 'shared/helpers/currencyHelpers'
 import { Box, Typography, Button, Link } from '@mui/material'
 import { WarningIcon } from 'shared/ui/Icons'
@@ -146,7 +146,7 @@ const A: FC<{ children?: ReactNode; href: string }> = props => (
 
 const CorruptedAccounts: FC<{
   corrupted: {
-    acc: TAccountPopulated
+    acc: IAccountPopulated
     diff: number
   }[]
 }> = ({ corrupted }) => {
@@ -175,7 +175,7 @@ const CorruptedAccounts: FC<{
 }
 
 const getCorruptedAccounts: TSelector<
-  { acc: TAccountPopulated; diff: number }[]
+  { acc: IAccountPopulated; diff: number }[]
 > = createSelector(
   [getAccountsHistory, getInBudgetAccounts],
   (histories, accounts) =>
