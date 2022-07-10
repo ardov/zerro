@@ -1,5 +1,3 @@
 import { TFxCode, TInstrumentId } from 'shared/types'
 
-export type TFxIdMap = {
-  [id: TInstrumentId]: TFxCode
-}
+export type TFxIdMap = Record<TInstrumentId, TFxCode>

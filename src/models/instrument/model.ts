@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { TFxIdMap } from './types'
 import { RootState } from 'store'
 import { getUserInstrumentId } from 'models/user'
-import { TInstrumentId } from 'shared/types'
+import { TFxCode, TInstrumentId } from 'shared/types'
 
 export const getInstruments = (state: RootState) =>
   state.data.current.instrument
@@ -22,6 +22,13 @@ export const getFxIdMap = createSelector([getInstruments], instruments => {
     fxIdMap[curr.id] = curr.shortTitle
   })
   return fxIdMap
+})
+
+export const getCurrentRates = createSelector([getInstruments], instruments => {
+  return Object.values(instruments).reduce((rates, curr) => {
+    rates[curr.shortTitle] = curr.rate
+    return rates
+  }, {} as Record<TFxCode, number>)
 })
 
 export const convertCurrency = createSelector(

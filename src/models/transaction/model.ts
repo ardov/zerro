@@ -2,13 +2,11 @@ import { createSelector } from '@reduxjs/toolkit'
 import { getMerchants } from 'models/merchant'
 import { compareDates, getTime, isDeleted } from './helpers'
 import { RootState } from 'store'
-import { ITransaction, TTransactionId } from 'shared/types'
+import { ITransaction } from 'shared/types'
 import { withPerf } from 'shared/helpers/performance'
 
 export const getTransactions = (state: RootState) =>
   state.data.current.transaction
-export const getTransaction = (state: RootState, id: TTransactionId) =>
-  getTransactions(state)[id]
 
 export const getSortedTransactions = createSelector(
   [getTransactions],

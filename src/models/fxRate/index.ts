@@ -1,0 +1,1 @@
+export { makeFxRatesGetter } from './getFxRates'

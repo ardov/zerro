@@ -34,7 +34,7 @@ const getLastMonth: TSelector<TISOMonth> = createSelector(
   }
 )
 
-export const getMonthDates: TSelector<TISOMonth[]> = createSelector(
+export const getMonthList: TSelector<TISOMonth[]> = createSelector(
   [getFirstMonth, getLastMonth],
   (start, end) => {
     const result: TISOMonth[] = []

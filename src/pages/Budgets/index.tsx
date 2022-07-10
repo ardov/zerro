@@ -31,8 +31,12 @@ import { MapWidget } from './MapWidget'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
 import { nextMonth, prevMonth, toISOMonth } from 'shared/helpers/date'
+import { getComputedTotals } from 'models/envelopes/getEnvelopeBudgets'
 
 export default function BudgetsRouter() {
+  const envBudgets = useAppSelector(getComputedTotals)
+  console.log('envBudgets', envBudgets)
+
   const [month] = useMonth()
   const monthList = useAppSelector(getMonthDates)
   const minMonth = monthList[0]

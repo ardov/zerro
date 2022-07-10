@@ -11,7 +11,7 @@ import {
 import { getPopulatedTags } from 'models/tag'
 import { ById, DataEntity, TFxCode } from 'shared/types'
 
-type TEnvelope = {
+export interface IEnvelope {
   // Used to connect with ZM entity
   id: TEnvelopeId
   // Parsed from id
@@ -45,7 +45,7 @@ type TStoredEnvelopeInfo = {
 
 const getEnvelopeInfo = () => ({} as ById<TStoredEnvelopeInfo>)
 
-export const getEnvelopes: TSelector<ById<TEnvelope>> = createSelector(
+export const getEnvelopes: TSelector<ById<IEnvelope>> = createSelector(
   [
     getDebtors,
     getPopulatedTags,
@@ -54,7 +54,7 @@ export const getEnvelopes: TSelector<ById<TEnvelope>> = createSelector(
     getUserCurrencyCode,
   ],
   (debtors, tags, savingAccounts, envelopeInfo, userCurrency) => {
-    let result: ById<TEnvelope> = {}
+    let result: ById<IEnvelope> = {}
 
     // Convert tags to envelopes
     Object.values(tags).forEach(tag => {
