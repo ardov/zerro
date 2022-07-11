@@ -19,12 +19,12 @@ import { TSelector } from 'store'
 import { keys } from 'shared/helpers/keys'
 import { getEnvelopes, IEnvelope } from './envelopes'
 
-type TEnvelopeNode = {
+export type TEnvelopeNode = {
   activity: TInstAmount
   transactions: ITransaction[]
 }
 
-type TMonthActivity = {
+export type TMonthActivity = {
   date: TISOMonth
   /** Total balance change of in budget accounts */
   totalActivity: TInstAmount

@@ -3,8 +3,8 @@ import { TISOMonth } from 'shared/types'
 import { nextMonth, toISOMonth } from 'shared/helpers/date'
 import { keys } from 'shared/helpers/keys'
 import { getTransactionsHistory } from 'models/transaction'
-import { getBudgets, getISOMonthFromBudgetId } from 'models/budget'
 import { TSelector } from 'store'
+import { getEnvelopeBudgets } from './budgets'
 
 /**
  * Returns the date of first month as ISO.
@@ -20,13 +20,10 @@ const getFirstMonth: TSelector<TISOMonth> = createSelector(
  * Returns the last available month to budget.
  */
 const getLastMonth: TSelector<TISOMonth> = createSelector(
-  [getBudgets],
+  [getEnvelopeBudgets],
   budgets => {
     const currentMonth = toISOMonth(Date.now())
-    const lastBudgetId = keys(budgets).sort().pop()
-    const lastBudgetMonth = lastBudgetId
-      ? getISOMonthFromBudgetId(lastBudgetId)
-      : currentMonth
+    const lastBudgetMonth = keys(budgets).sort().pop() || currentMonth
     const lastMonth =
       lastBudgetMonth > currentMonth ? lastBudgetMonth : currentMonth
     // Add 1 month to be able to budget in future
