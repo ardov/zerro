@@ -8,7 +8,7 @@ import {
   TTagId,
   ITransaction,
 } from 'shared/types'
-import { TInstAmount } from './helpers/fxAmount'
+import { TFxAmount } from './helpers/fxAmount'
 
 interface IEnvelopeBase {
   type: DataEntity.Account | DataEntity.Merchant | DataEntity.Tag
@@ -21,8 +21,8 @@ interface IEnvelopeBase {
   keepIncome: boolean
   carryNegatives: boolean
 
-  income: TInstAmount
-  outcome: TInstAmount
+  income: TFxAmount
+  outcome: TFxAmount
   budgeted: number
 }
 
@@ -43,15 +43,15 @@ interface IEnvelopeTag extends IEnvelopeBase {
 
 export type TMonthNode = {
   date: TISOMonth
-  prevFunds: TInstAmount
-  prevOverspent: TInstAmount
+  prevFunds: TFxAmount
+  prevOverspent: TFxAmount
   budgeted: number
 
   groups: Array<{
     name: string
-    budgetedTotal: TInstAmount
-    activityTotal: TInstAmount
-    availableTotal: TInstAmount
+    budgetedTotal: TFxAmount
+    activityTotal: TFxAmount
+    availableTotal: TFxAmount
     children: Array<{
       type: DataEntity.Account | DataEntity.Merchant | DataEntity.Tag
       symbol: string
@@ -115,14 +115,14 @@ type Dates = TISOMonth[]
 
 type TMonthInfo = {
   date: TISOMonth
-  balance: TInstAmount // gradually
-  balanceChange: TInstAmount
-  transferFees: TInstAmount
+  balance: TFxAmount // gradually
+  balanceChange: TFxAmount
+  transferFees: TFxAmount
   transferFeesTransactions: ITransaction[]
   envelopes: {
     [id: TEnvelopeId]: {
-      income: TInstAmount
-      outcome: TInstAmount
+      income: TFxAmount
+      outcome: TFxAmount
       incomeTransactions: ITransaction[]
       outcomeTransactions: ITransaction[]
     }

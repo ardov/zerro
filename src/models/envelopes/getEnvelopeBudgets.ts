@@ -1,134 +1,105 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 import { getMonthDates } from 'pages/Budgets/selectors'
-import { ById, IInstrument, TFxCode, TISOMonth } from 'shared/types'
-import { getEnvelopes, IEnvelope } from './parts/envelopes'
-import { TInstAmount, subFxAmount, TFxAmount } from './helpers/fxAmount'
+import { TFxCode, TISOMonth } from 'shared/types'
+import {
+  addFxAmount,
+  convertFx,
+  isEqualFxAmount,
+  subFxAmount,
+  TFxAmount,
+} from './helpers/fxAmount'
 import { keys } from 'shared/helpers/keys'
 import { getCurrentFunds } from './parts/currentFunds'
 import { toISOMonth } from 'shared/helpers/date'
 import { getActivity, TMonthActivity } from './parts/activity'
 import { getMonthlyRates } from './parts/rates'
-import { getInstruments } from 'models/instrument'
+import { getCalculatedEnvelopes, IEnvelopeWithData } from './calculateEnvelopes'
+import { getUserCurrencyCode } from 'models/instrument'
 
-interface IEnvelopeWithData extends IEnvelope {
-  /** Activity calculated from income and outcome but depends on envelope settings. `keepIncome` affects this calculation */
-  activityByFx: TFxAmount
-
-  /** Activity converted to a currency of envelope */
-  activity: number
-  activitySelf: number
-  activityChildren: number
-
-  /** Leftover in a currency of envelope */
-  leftover: number
-  leftoverSelf: number
-  leftoverChildren: number
-
-  /** Budget in a currency of envelope */
-  budgeted: number
-  budgetedSelf: number
-  budgetedChildren: number
-
-  /** Available = `leftover` + `budgeted` + `activity` */
-  available: number
-  availableSelf: number
-  availableChildren: number
-
-  /** If there is negative amount in `available` */
-  overspend: number
-  overspendSelf: number
-  overspendChildren: number
-}
-
-interface TEnvelopeBudgets {
+export interface TEnvelopeBudgets {
   date: TISOMonth
+  currency: TFxCode
 
   /** Currency rates for this month */
-  rates: { [currency: string]: number }
+  rates: { [currency: TFxCode]: number }
 
   // Money amounts for month
   fundsStart: TFxAmount
   fundsChange: TFxAmount
   fundsEnd: TFxAmount
 
-  // Transfer fees
+  /** Transfer fees */
   transferFees: TFxAmount
-
   /** Unsorted income */
   generalIncome: TFxAmount
-
-  // Envelope totals
-  budgeted: TFxAmount
+  /** Transactions associated with envelopes */
   activity: TFxAmount
+
+  /** Envelope totals */
+  budgeted: TFxAmount
+
+  /** Envelope totals */
   available: TFxAmount
+
+  /** Total amount of money budgeted in future months */
+  budgetedInFuture: TFxAmount
+  displayBudgetedInFuture: number
+
+  freeFunds: TFxAmount
+  displayFreeFunds: number
+
+  toBeBudgeted: TFxAmount
+  displayToBeBudgeted: number
 
   /** Amounts for each envelope */
   envelopes: Record<TEnvelopeId, IEnvelopeWithData>
 }
 
-const getEnvelopeBudgets = createSelector([], () => {
-  return {} as Record<TISOMonth, { [id: TEnvelopeId]: number }>
-})
-
 export const getComputedTotals = createSelector(
   [
     getMonthDates,
-    getEnvelopes,
+    getCalculatedEnvelopes,
     getActivity,
     getCurrentFunds,
     getMonthlyRates,
-    getEnvelopeBudgets,
-    getInstruments,
+    getUserCurrencyCode,
   ],
   aggregateEnvelopeBudgets
 )
 
 function aggregateEnvelopeBudgets(
   monthList: TISOMonth[],
-  envelopes: ById<IEnvelope>,
+  envelopes: Record<TISOMonth, { [id: TEnvelopeId]: IEnvelopeWithData }>,
   activity: Record<TISOMonth, TMonthActivity>,
-  currentBalance: TInstAmount,
+  currentBalance: TFxAmount,
   rates: Record<TISOMonth, { [fx: TFxCode]: number }>,
-  budgets: Record<TISOMonth, { [id: TEnvelopeId]: number }>,
-  instruments: ById<IInstrument>
+  mainCurrency: TFxCode
 ) {
   const result: Record<TISOMonth, TEnvelopeBudgets> = {}
 
-  const toCodes = (amount?: TInstAmount): TFxAmount => {
-    if (!amount) {
-      return {} as TFxAmount
-    }
-    const result: TFxAmount = {}
-    keys(amount).forEach(id => {
-      let code = instruments[id].shortTitle
-      result[code] = amount[id]
-    })
-    return result
-  }
+  const monthListReversed = [...monthList].reverse()
 
   // Fill with empty nodes
   monthList.forEach(date => (result[date] = createMonth(date)))
 
   // Fill current month funds
   const currentMonth = toISOMonth(Date.now())
-  result[currentMonth].fundsEnd = toCodes(currentBalance)
+  result[currentMonth].fundsEnd = currentBalance
   result[currentMonth].fundsStart = subFxAmount(
     result[currentMonth].fundsEnd,
     result[currentMonth].fundsChange
   )
 
   // Fill future months funds
-  keys(result)
-    .sort()
-    .forEach((date, idx, arr) => {
-      if (date <= currentMonth) return
-      let prevMonth = arr[idx - 1]
-      let prevFunds = result[prevMonth].fundsEnd
-      result[date].fundsStart = { ...prevFunds }
-      // Do not count changes in future months cause it can lead to unpredictable results. And there should be no balance changes in future months.
-      result[date].fundsEnd = { ...prevFunds }
-    })
+  monthList.forEach((date, idx, arr) => {
+    if (date <= currentMonth) return
+    let prevMonth = arr[idx - 1]
+    let prevFunds = result[prevMonth].fundsEnd
+    result[date].fundsStart = { ...prevFunds }
+    // Do not count changes in future months cause it can lead to unpredictable results. And there should be no balance changes in future months.
+    result[date].fundsEnd = { ...prevFunds }
+  })
 
   // Fill previous months funds
   keys(result)
@@ -146,68 +117,92 @@ function aggregateEnvelopeBudgets(
       )
     })
 
-  // Use first budgeting month here
+  // Fill rest metrics
+  let budgetedInFuture: TFxAmount = {}
+  monthListReversed.forEach(date => {
+    let m = result[date]
+    const convert = (fx: TFxAmount) => convertFx(fx, m.currency, m.rates)
 
-  // Calculate envelope balances
+    // freeFunds: TFxAmount
+    // displayFreeFunds: number
+    m.freeFunds = subFxAmount(m.fundsEnd, m.available)
+    m.budgetedInFuture = { ...budgetedInFuture }
+    m.toBeBudgeted = subFxAmount(m.freeFunds, m.budgetedInFuture)
+
+    m.displayFreeFunds = convert(m.freeFunds)
+
+    if (m.displayFreeFunds <= 0) {
+      // If no free funds
+      m.displayBudgetedInFuture = 0
+      m.displayToBeBudgeted = m.displayFreeFunds
+    } else {
+      const realBudgetedInFuture = convert(m.budgetedInFuture)
+      if (m.displayFreeFunds <= realBudgetedInFuture) {
+        // Has free money but it all allocated in future
+        m.displayBudgetedInFuture = m.displayFreeFunds
+        m.displayToBeBudgeted = 0
+      } else {
+        // There are some free money
+        m.displayBudgetedInFuture = realBudgetedInFuture
+        m.displayToBeBudgeted = convert(m.toBeBudgeted)
+      }
+    }
+
+    budgetedInFuture = addFxAmount(budgetedInFuture, m.budgeted)
+  })
 
   return result
 
   /**
    * Creates month node and fills
    * - rates
-   * - budgets
+   * - calculated envelopes
    * - activity
+   * - mainCurrency
    */
   function createMonth(date: TISOMonth) {
-    const mActivity = activity[date] || {}
-    const mBudgets = budgets[date] || {}
-
-    // Create empty node
     const month: TEnvelopeBudgets = {
       date,
       rates: rates[date],
-      fundsStart: {},
-      fundsEnd: {},
-      fundsChange: toCodes(mActivity?.totalActivity),
-      transferFees: toCodes(mActivity?.transferFees?.activity),
-      generalIncome: toCodes(mActivity?.generalIncome?.activity),
-      budgeted: {},
-      activity: {},
-      available: {},
-      envelopes: {},
+      currency: mainCurrency,
+      fundsStart: {}, // Fills later
+      fundsEnd: {}, // Fills later
+      fundsChange: activity[date]?.totalActivity || {},
+      transferFees: activity[date]?.transferFees?.activity || {},
+      generalIncome: activity[date]?.generalIncome?.activity || {},
+
+      activity: {}, // to be calculated from envelopes
+      budgeted: {}, // to be calculated from envelopes
+      available: {}, // to be calculated from envelopes
+
+      budgetedInFuture: {}, // Fills later
+      displayBudgetedInFuture: 0, // Fills later
+
+      toBeBudgeted: {}, // Fills later
+      displayToBeBudgeted: 0, // Fills later
+
+      freeFunds: {}, // Fills later
+      displayFreeFunds: 0, // Fills later
+
+      envelopes: envelopes[date] || {},
     }
 
-    // Fill envelopes with activity and budgets
-    keys(envelopes).forEach(id => {
-      month.envelopes[id] = makeEnvelopeWithData(envelopes[id])
-      month.envelopes[id].activityByFx = toCodes(
-        mActivity?.envelopes?.[id]?.activity
-      )
-      month.envelopes[id].budgeted = mBudgets[id] || 0
+    Object.values(month.envelopes).forEach(e => {
+      if (e.parent) return
+      month.activity = addFxAmount(month.activity, e.activity)
+      month.budgeted = addFxAmount(month.budgeted, e.budgeted)
+      month.available = addFxAmount(month.available, e.available)
     })
 
-    return month
-  }
-}
+    // Check calculations
+    let totalChange = addFxAmount(
+      month.activity,
+      month.transferFees,
+      month.generalIncome
+    )
+    if (!isEqualFxAmount(month.fundsChange, totalChange))
+      console.warn('Error in calculations', month)
 
-function makeEnvelopeWithData(e: IEnvelope): IEnvelopeWithData {
-  return {
-    ...e,
-    activityByFx: {},
-    activity: 0,
-    activitySelf: 0,
-    activityChildren: 0,
-    leftover: 0,
-    leftoverSelf: 0,
-    leftoverChildren: 0,
-    budgeted: 0,
-    budgetedSelf: 0,
-    budgetedChildren: 0,
-    available: 0,
-    availableSelf: 0,
-    availableChildren: 0,
-    overspend: 0,
-    overspendSelf: 0,
-    overspendChildren: 0,
+    return month
   }
 }
