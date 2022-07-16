@@ -10,8 +10,8 @@ import {
   IAccount,
   TAccountId,
   TFxCode,
+  TFxAmount,
 } from 'shared/types'
-import { TFxAmount } from './helpers/fxAmount'
 import { IEnvelope } from './parts/envelopes'
 
 type TStoredEnvelopeInfo = {

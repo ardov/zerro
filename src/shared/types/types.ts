@@ -15,6 +15,7 @@ import {
   ITag,
   IBudget,
   TInstrumentId,
+  TFxCode,
 } from './data-entities'
 
 type TYear = `${number}${number}${number}${number}`
@@ -32,6 +33,9 @@ export type TUnits = number
 export type TMilliUnits = number
 
 export type TToken = string | null
+
+export type TFxAmount = Record<TFxCode, number>
+export type TRates = Record<TFxCode, number>
 
 // ---------------------------------------------------------------------
 // Other

@@ -7,17 +7,15 @@ import {
   ById,
   TAccountId,
   ITransaction,
-  TInstrumentId,
   IMerchant,
   TMerchantId,
+  IInstrument,
+  TFxAmount,
 } from 'shared/types'
 import { TSelector } from 'store'
 import { cleanPayee } from 'models/shared/cleanPayee'
 import { getMerchants } from 'models/merchant'
-
-type TFxAmount = {
-  [currency: TInstrumentId]: number
-}
+import { getInstruments } from 'models/instrument'
 
 export type TDebtor = {
   id: string
@@ -30,13 +28,14 @@ export type TDebtor = {
 }
 
 export const getDebtors: TSelector<ById<TDebtor>> = createSelector(
-  [getTransactionsHistory, getMerchants, getDebtAccountId],
+  [getTransactionsHistory, getMerchants, getInstruments, getDebtAccountId],
   collectDebtors
 )
 
 function collectDebtors(
   trList: ITransaction[],
   merchants: ById<IMerchant>,
+  instruments: ById<IInstrument>,
   debtAccId?: TAccountId
 ): ById<TDebtor> {
   const debtors: ById<TDebtor> = {}
@@ -65,17 +64,13 @@ function collectDebtors(
     }
     if (!debtor) return
     if (trType === TrType.IncomeDebt) {
-      debtor.balance[tr.incomeInstrument] ??= 0
-      debtor.balance[tr.incomeInstrument] = sub(
-        debtor.balance[tr.incomeInstrument],
-        tr.income
-      )
+      let fxCode = instruments[tr.incomeInstrument].shortTitle
+      debtor.balance[fxCode] ??= 0
+      debtor.balance[fxCode] = sub(debtor.balance[fxCode], tr.income)
     } else {
-      debtor.balance[tr.outcomeInstrument] ??= 0
-      debtor.balance[tr.outcomeInstrument] = add(
-        debtor.balance[tr.outcomeInstrument],
-        tr.outcome
-      )
+      let fxCode = instruments[tr.outcomeInstrument].shortTitle
+      debtor.balance[fxCode] ??= 0
+      debtor.balance[fxCode] = add(debtor.balance[fxCode], tr.outcome)
     }
   })
   return debtors

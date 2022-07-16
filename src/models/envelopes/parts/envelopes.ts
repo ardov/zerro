@@ -74,7 +74,7 @@ export const getEnvelopes: TSelector<ById<IEnvelope>> = createSelector(
         comment: envelopeInfo[id]?.comment || '',
         currency: envelopeInfo[id]?.currency || userCurrency,
         keepIncome: envelopeInfo[id]?.keepIncome || false,
-        carryNegatives: envelopeInfo[id]?.carryNegatives || false,
+        carryNegatives: envelopeInfo[id]?.carryNegatives || true,
       }
     })
 
@@ -93,8 +93,9 @@ export const getEnvelopes: TSelector<ById<IEnvelope>> = createSelector(
         children: [],
         comment: envelopeInfo[id]?.comment || '',
         currency: envelopeInfo[id]?.currency || userCurrency,
-        keepIncome: envelopeInfo[id]?.keepIncome || false,
-        carryNegatives: envelopeInfo[id]?.carryNegatives || false,
+        // TODO change to false
+        keepIncome: envelopeInfo[id]?.keepIncome || true,
+        carryNegatives: envelopeInfo[id]?.carryNegatives || true,
       }
     })
 
@@ -114,8 +115,9 @@ export const getEnvelopes: TSelector<ById<IEnvelope>> = createSelector(
           children: [],
           comment: envelopeInfo[id]?.comment || '',
           currency: envelopeInfo[id]?.currency || userCurrency,
-          keepIncome: envelopeInfo[id]?.keepIncome || false,
-          carryNegatives: envelopeInfo[id]?.carryNegatives || false,
+          // TODO change to false
+          keepIncome: envelopeInfo[id]?.keepIncome || true,
+          carryNegatives: envelopeInfo[id]?.carryNegatives || true,
         }
       } else {
         // It's payee (old format that depends only on payee names)
@@ -132,8 +134,9 @@ export const getEnvelopes: TSelector<ById<IEnvelope>> = createSelector(
           children: [],
           comment: '',
           currency: userCurrency,
-          keepIncome: false,
-          carryNegatives: false,
+          // TODO change to false
+          keepIncome: true,
+          carryNegatives: true,
         }
       }
     })

@@ -8,9 +8,9 @@ import {
   ITransaction,
   TInstrumentId,
   TFxCode,
+  TFxAmount,
 } from 'shared/types'
 import { toISOMonth } from 'shared/helpers/date'
-import { TFxAmount } from '../helpers/fxAmount'
 import { getTransactionsHistory, TrType } from 'models/transaction'
 import { getDebtAccountId, getInBudgetAccounts } from 'models/account'
 import { getEnvelopeId, TEnvelopeId } from 'models/shared/envelopeHelpers'
@@ -20,6 +20,7 @@ import { TSelector } from 'store'
 import { keys } from 'shared/helpers/keys'
 import { getEnvelopes } from './envelopes'
 import { getInstruments } from 'models/instrument'
+import { getDebtors } from 'models/debtors'
 
 export type TEnvelopeNode = {
   activity: TFxAmount
@@ -46,6 +47,7 @@ export const getActivity: TSelector<Record<TISOMonth, TMonthActivity>> =
       getDebtAccountId,
       getEnvelopes,
       getInstruments,
+      getDebtors,
     ],
     (
       transactions,
@@ -53,7 +55,8 @@ export const getActivity: TSelector<Record<TISOMonth, TMonthActivity>> =
       debtAccId,
       envelopes,
       /** Instruments needed to convert ids to currency codes */
-      instruments
+      instruments,
+      debtors
     ): Record<TISOMonth, TMonthActivity> => {
       const result: Record<TISOMonth, TMonthActivity> = {}
       const inBudgetAccIds = accountsInBudget.map(acc => acc.id)
@@ -108,7 +111,11 @@ export const getActivity: TSelector<Record<TISOMonth, TMonthActivity>> =
 
           // PAYEE OUTCOME
           if (tr.payee) {
-            let envelopeId = getEnvelopeId('payee', cleanPayee(tr.payee))
+            let cleanName = cleanPayee(tr.payee)
+            let debtor = debtors[cleanName]
+            let envelopeId = debtor.merchantId
+              ? getEnvelopeId(DataEntity.Merchant, debtor.merchantId)
+              : getEnvelopeId('payee', cleanName)
             addToMonth(node, envelopeId, tr, 'outcome')
             return
           }
@@ -123,9 +130,9 @@ export const getActivity: TSelector<Record<TISOMonth, TMonthActivity>> =
             if (sameAmountAndCurrency(tr)) return
 
             // Add to transfer fees
-            const incomFxCode = toFxCode(tr.incomeInstrument)
-            node.transferFees.activity[incomFxCode] = add(
-              node.transferFees.activity[incomFxCode] || 0,
+            const incomeFxCode = toFxCode(tr.incomeInstrument)
+            node.transferFees.activity[incomeFxCode] = add(
+              node.transferFees.activity[incomeFxCode] || 0,
               tr.income
             )
             const outcomeFxCode = toFxCode(tr.outcomeInstrument)
@@ -134,22 +141,32 @@ export const getActivity: TSelector<Record<TISOMonth, TMonthActivity>> =
               -tr.outcome
             )
             node.transferFees.transactions.push(tr)
+
+            // Add to total activity
+            node.totalActivity[incomeFxCode] = add(
+              node.totalActivity[incomeFxCode] || 0,
+              tr.income
+            )
+            node.totalActivity[outcomeFxCode] = add(
+              node.totalActivity[outcomeFxCode] || 0,
+              -tr.outcome
+            )
             return
           }
 
           // ACCOUNT INCOME
           if (inBudgetAccIds.includes(tr.incomeAccount)) {
-            let envelopeId = getEnvelopeId(DataEntity.Account, tr.incomeAccount)
+            let envelopeId = getEnvelopeId(
+              DataEntity.Account,
+              tr.outcomeAccount
+            )
             addToMonth(node, envelopeId, tr, 'income')
             return
           }
 
           // ACCOUNT OUTCOME
           if (inBudgetAccIds.includes(tr.outcomeAccount)) {
-            let envelopeId = getEnvelopeId(
-              DataEntity.Account,
-              tr.outcomeAccount
-            )
+            let envelopeId = getEnvelopeId(DataEntity.Account, tr.incomeAccount)
             addToMonth(node, envelopeId, tr, 'outcome')
             return
           }

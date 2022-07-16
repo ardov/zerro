@@ -7,8 +7,8 @@ import {
   TMerchantId,
   TTagId,
   ITransaction,
+  TFxAmount,
 } from 'shared/types'
-import { TFxAmount } from './helpers/fxAmount'
 
 interface IEnvelopeBase {
   type: DataEntity.Account | DataEntity.Merchant | DataEntity.Tag

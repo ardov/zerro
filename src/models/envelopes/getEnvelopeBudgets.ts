@@ -1,14 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 import { getMonthDates } from 'pages/Budgets/selectors'
-import { TFxCode, TISOMonth } from 'shared/types'
-import {
-  addFxAmount,
-  convertFx,
-  isEqualFxAmount,
-  subFxAmount,
-  TFxAmount,
-} from './helpers/fxAmount'
+import { TFxAmount, TFxCode, TISOMonth } from 'shared/types'
 import { keys } from 'shared/helpers/keys'
 import { getCurrentFunds } from './parts/currentFunds'
 import { toISOMonth } from 'shared/helpers/date'
@@ -16,6 +9,12 @@ import { getActivity, TMonthActivity } from './parts/activity'
 import { getMonthlyRates } from './parts/rates'
 import { getCalculatedEnvelopes, IEnvelopeWithData } from './calculateEnvelopes'
 import { getUserCurrencyCode } from 'models/instrument'
+import {
+  addFxAmount,
+  convertFx,
+  isEqualFxAmount,
+  subFxAmount,
+} from 'shared/helpers/currencyHelpers'
 
 export interface TEnvelopeBudgets {
   date: TISOMonth
@@ -201,7 +200,12 @@ function aggregateEnvelopeBudgets(
       month.generalIncome
     )
     if (!isEqualFxAmount(month.fundsChange, totalChange))
-      console.warn('Error in calculations', month)
+      console.log(
+        `🛑 ${date} Error in calculations`,
+        month.fundsChange,
+        totalChange,
+        month
+      )
 
     return month
   }
