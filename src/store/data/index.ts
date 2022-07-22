@@ -5,5 +5,9 @@ export default reducer
 export { applyServerPatch, applyClientPatch, resetData } from './slice'
 
 // SELECTORS
-export { getDiff } from './slice'
-export { getChangedNum, getLastChangeTime, getLastSyncTime } from './selectors'
+export {
+  getDiff,
+  getChangedNum,
+  getLastChangeTime,
+  getLastSyncTime,
+} from './selectors'

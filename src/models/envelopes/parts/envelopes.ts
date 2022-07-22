@@ -10,6 +10,12 @@ import {
 } from 'models/shared/envelopeHelpers'
 import { getPopulatedTags } from 'models/tag'
 import { ById, DataEntity, TFxCode } from 'shared/types'
+import { keys } from 'shared/helpers/keys'
+
+const defaultTagGroup = 'Категории'
+const defaultAccountGroup = 'Переводы'
+const defaultMerchantGroup = 'Долги'
+const defaultPayeeGroup = 'Долги'
 
 export interface IEnvelope {
   // Used to connect with ZM entity
@@ -27,6 +33,7 @@ export interface IEnvelope {
   parent: TEnvelopeId | null
   children: TEnvelopeId[]
   // From custom storage
+  group: string
   comment: string
   currency: TFxCode
   keepIncome: boolean
@@ -35,6 +42,7 @@ export interface IEnvelope {
 
 type TStoredEnvelopeInfo = {
   id: TEnvelopeId
+  group?: string
   showInBudget?: boolean
   parent?: TEnvelopeId
   comment?: string
@@ -71,10 +79,11 @@ export const getEnvelopes: TSelector<ById<IEnvelope>> = createSelector(
         children: tag.children.map(childId =>
           getEnvelopeId(DataEntity.Tag, childId)
         ),
+        group: envelopeInfo[id]?.group || defaultTagGroup,
         comment: envelopeInfo[id]?.comment || '',
         currency: envelopeInfo[id]?.currency || userCurrency,
         keepIncome: envelopeInfo[id]?.keepIncome || false,
-        carryNegatives: envelopeInfo[id]?.carryNegatives || true,
+        carryNegatives: envelopeInfo[id]?.carryNegatives || false,
       }
     })
 
@@ -91,11 +100,11 @@ export const getEnvelopes: TSelector<ById<IEnvelope>> = createSelector(
         showInBudget: envelopeInfo[id]?.showInBudget || false,
         parent: envelopeInfo[id]?.parent || null,
         children: [],
+        group: envelopeInfo[id]?.group || defaultAccountGroup,
         comment: envelopeInfo[id]?.comment || '',
         currency: envelopeInfo[id]?.currency || userCurrency,
-        // TODO change to false
-        keepIncome: envelopeInfo[id]?.keepIncome || true,
-        carryNegatives: envelopeInfo[id]?.carryNegatives || true,
+        keepIncome: envelopeInfo[id]?.keepIncome || false,
+        carryNegatives: envelopeInfo[id]?.carryNegatives || false,
       }
     })
 
@@ -113,11 +122,11 @@ export const getEnvelopes: TSelector<ById<IEnvelope>> = createSelector(
           showInBudget: envelopeInfo[id]?.showInBudget || false,
           parent: envelopeInfo[id]?.parent || null,
           children: [],
+          group: envelopeInfo[id]?.group || defaultMerchantGroup,
           comment: envelopeInfo[id]?.comment || '',
           currency: envelopeInfo[id]?.currency || userCurrency,
-          // TODO change to false
-          keepIncome: envelopeInfo[id]?.keepIncome || true,
-          carryNegatives: envelopeInfo[id]?.carryNegatives || true,
+          keepIncome: envelopeInfo[id]?.keepIncome || false,
+          carryNegatives: envelopeInfo[id]?.carryNegatives || false,
         }
       } else {
         // It's payee (old format that depends only on payee names)
@@ -132,12 +141,25 @@ export const getEnvelopes: TSelector<ById<IEnvelope>> = createSelector(
           showInBudget: false,
           parent: null,
           children: [],
+          group: envelopeInfo[id]?.group || defaultPayeeGroup,
           comment: '',
           currency: userCurrency,
-          // TODO change to false
-          keepIncome: true,
-          carryNegatives: true,
+          keepIncome: false,
+          carryNegatives: false,
         }
+      }
+    })
+
+    // Fix nesting issues (only 2 levels are allowed)
+    keys(result).forEach(id => {
+      const envelope = result[id]
+      if (!envelope.parent) return
+      envelope.parent = getParent(envelope)
+
+      // Use recursion to get topmost parent id
+      function getParent(envelope: IEnvelope): IEnvelope['id'] {
+        if (!envelope.parent) return envelope.id
+        else return getParent(result[envelope.parent])
       }
     })
 

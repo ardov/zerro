@@ -1,2 +1,2 @@
 export { convertUser } from './zm-adapter'
-export * from './model'
+export { getUsers, getRootUser, getUserInstrumentId } from './model'

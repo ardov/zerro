@@ -20,6 +20,7 @@ import { getAmountsById } from 'pages/Budgets/selectors'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { endOfMonth } from 'shared/helpers/date'
 import { TrType } from 'models/transaction'
+import { getComputedTotals, getEnvelopeStructure } from 'models/envelopes'
 
 export type MetricType = 'outcome' | 'available' | 'budgeted'
 
@@ -45,6 +46,11 @@ export const TagTable: FC<TagTableProps> = props => {
   const [goalPopoverData, setGoalPopoverData] = useState<PopoverData>({})
   const [budgetPopoverData, setBudgetPopoverData] = useState<PopoverData>({})
   const { dragMode } = useContext(DragModeContext)
+
+  // New data
+  const data = useAppSelector(getComputedTotals)[month]
+  const structure = useAppSelector(getEnvelopeStructure)
+  console.log(structure)
 
   const [, setId] = useSearchParam('transactions')
 

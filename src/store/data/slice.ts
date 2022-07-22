@@ -1,8 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { RootState } from 'store'
 import { TDataStore, IDiff } from 'shared/types'
-import { applyDiff } from './applyDiff'
-import { mergeDiffs } from './mergeDiffs'
+import { applyDiff } from './shared/applyDiff'
+import { mergeDiffs } from './shared/mergeDiffs'
 
 interface DataSlice {
   current: TDataStore
@@ -64,6 +63,3 @@ export default reducer
 
 // ACTIONS
 export const { applyServerPatch, applyClientPatch, resetData } = actions
-
-// SELECTORS
-export const getDiff = (state: RootState) => state.data.diff

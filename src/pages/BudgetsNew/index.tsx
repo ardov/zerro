@@ -1,50 +1,38 @@
-import React, {
-  useCallback,
-  // useState
-} from 'react'
+import React, { useCallback } from 'react'
 import { useAppSelector } from 'store'
 import { Redirect } from 'react-router-dom'
-import { TagTable } from './components/TagTable'
-import { TransferTable } from './components/TransferTable'
 import { MonthInfo } from './components/MonthInfo'
 import { ToBeBudgeted } from './components/ToBeBudgeted'
 import { MonthSelect } from './MonthSelect'
-import { getMonthDates } from './selectors'
-import {
-  // Button,
-  // Paper,
-  Box,
-  Drawer,
-  Theme,
-  useMediaQuery,
-} from '@mui/material'
+import { Box, Drawer, Theme, useMediaQuery } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { GoalsProgressWidget } from './components/GoalsProgressWidget'
-import { useMonth } from './pathHooks'
 import { DnDContext } from './components/DnDContext'
 import { TagPreview } from './components/TagPreview'
 import { Helmet } from 'react-helmet'
-// import { SankeyChart } from './SankeyChart'
 import { formatDate } from 'shared/helpers/date'
 import { useHotkeys } from 'react-hotkeys-hook'
-import { MapWidget } from './MapWidget'
+
 import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
 import { nextMonth, prevMonth, toISOMonth } from 'shared/helpers/date'
-import { getComputedTotals } from 'models/envelopes/getEnvelopeBudgets'
+import { getComputedTotals, getMonthList } from 'models/envelopes'
+import { EnvelopeTable } from './components/EnvelopeTable'
+import { useMonth } from './model'
 
 export default function BudgetsRouter() {
-  const envBudgets = useAppSelector(getComputedTotals)
-  console.log('envBudgets', envBudgets)
-
   const [month] = useMonth()
-  const monthList = useAppSelector(getMonthDates)
+  const monthList = useAppSelector(getMonthList)
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
   if (!month)
     return <Redirect to={`/budget/?month=${toISOMonth(new Date())}`} />
-  if (month < minMonth) return <Redirect to={`/budget/?month=${minMonth}`} />
-  if (month > maxMonth) return <Redirect to={`/budget/?month=${maxMonth}`} />
+  if (month < minMonth) {
+    return <Redirect to={`/budget/?month=${minMonth}`} />
+  }
+  if (month > maxMonth) {
+    return <Redirect to={`/budget/?month=${maxMonth}`} />
+  }
   return <Budgets />
 }
 
@@ -89,14 +77,15 @@ const useStyles = makeStyles(theme => ({
 }))
 
 function Budgets() {
-  const monthList = useAppSelector(getMonthDates)
+  const monthList = useAppSelector(getMonthList)
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
   const [month, setMonth] = useMonth()
+
+  const envBudgets = useAppSelector(getComputedTotals)[month]
+
   const [drawerId, setDrawerId] = useSearchParam('drawer')
   const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))
-  // const isSM = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
-  // const [showSankey, setShowSankey] = useState(false)
   const c = useStyles()
   const drawerVisibility = !isMD || !!drawerId
 
@@ -142,29 +131,16 @@ function Budgets() {
             />
             <GoalsProgressWidget className={c.goals} />
             <ToBeBudgeted className={c.toBeBudgeted} onClick={openOverview} />
-            <TagTable
+            <EnvelopeTable
               className={c.tags}
               openDetails={openTagInfo}
               onOpenMonthDrawer={openOverview}
             />
-            <TransferTable className={c.transfers} />
-
-            {/* {!isSM &&
-              (showSankey ? (
-                <Paper className={c.chart}>
-                  <SankeyChart />
-                </Paper>
-              ) : (
-                <Button
-                  className={c.chart}
-                  fullWidth
-                  onClick={() => setShowSankey(true)}
-                >
-                  Показать распределение денег
-                </Button>
-              ))} */}
-
-            <MapWidget className={c.treemap} onSelectTag={openTagInfo} />
+            {/* <TagTable
+              className={c.tags}
+              openDetails={openTagInfo}
+              onOpenMonthDrawer={openOverview}
+            /> */}
           </Box>
 
           <Drawer

@@ -17,7 +17,6 @@ import { getEnvelopeId, TEnvelopeId } from 'models/shared/envelopeHelpers'
 import { cleanPayee } from 'models/shared/cleanPayee'
 import { createSelector } from '@reduxjs/toolkit'
 import { TSelector } from 'store'
-import { keys } from 'shared/helpers/keys'
 import { getEnvelopes } from './envelopes'
 import { getInstruments } from 'models/instrument'
 import { getDebtors } from 'models/debtors'
@@ -172,8 +171,6 @@ export const getActivity: TSelector<Record<TISOMonth, TMonthActivity>> =
           }
         }
       })
-
-      console.log('Sorted keys', keys(result).sort())
 
       return result
 

@@ -16,7 +16,7 @@ import {
 import { makeStyles } from '@mui/styles'
 import { Tooltip } from 'shared/ui/Tooltip'
 import Rhythm from 'shared/ui/Rhythm'
-import { useMonth } from '../pathHooks'
+import { useMonth } from '../model'
 import { Amount } from 'components/Amount'
 import { TDateDraft } from 'shared/types'
 import { keys } from 'shared/helpers/keys'

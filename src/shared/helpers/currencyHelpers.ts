@@ -39,6 +39,14 @@ export function isEqualFxAmount(a1: TFxAmount, a2: TFxAmount): boolean {
   return true
 }
 
+export function isZero(a: TFxAmount): boolean {
+  const currencies = keys(a)
+  for (const fx of currencies) {
+    if (a[fx]) return false
+  }
+  return true
+}
+
 export function convertFx(
   fxAmount: TFxAmount,
   targetFxCode: TFxCode,

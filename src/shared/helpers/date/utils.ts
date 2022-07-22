@@ -100,6 +100,15 @@ export function eachDayOfInterval(start: TDateDraft, end: TDateDraft) {
 }
 
 /**
+ * Function checks if string is valid ISO month
+ */
+export function isISOMonth(month?: string | null): month is TISOMonth {
+  if (!month) return false
+  const regex = /\d{4}-\d{2}/g // 0000-00
+  return regex.test(month)
+}
+
+/**
  * Formats date.
  * @link https://date-fns.org/v2.25.0/docs/format doc
  * @param date

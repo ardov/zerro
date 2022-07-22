@@ -1,6 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { TEnvelopeId } from 'models/shared/envelopeHelpers'
-import { getMonthDates } from 'pages/Budgets/selectors'
 import { TFxAmount, TFxCode, TISOMonth } from 'shared/types'
 import { keys } from 'shared/helpers/keys'
 import { getCurrentFunds } from './parts/currentFunds'
@@ -15,6 +14,8 @@ import {
   isEqualFxAmount,
   subFxAmount,
 } from 'shared/helpers/currencyHelpers'
+import { TSelector } from 'store'
+import { getMonthList } from './parts/monthList'
 
 export interface TEnvelopeBudgets {
   date: TISOMonth
@@ -55,17 +56,18 @@ export interface TEnvelopeBudgets {
   envelopes: Record<TEnvelopeId, IEnvelopeWithData>
 }
 
-export const getComputedTotals = createSelector(
-  [
-    getMonthDates,
-    getCalculatedEnvelopes,
-    getActivity,
-    getCurrentFunds,
-    getMonthlyRates,
-    getUserCurrencyCode,
-  ],
-  aggregateEnvelopeBudgets
-)
+export const getComputedTotals: TSelector<Record<TISOMonth, TEnvelopeBudgets>> =
+  createSelector(
+    [
+      getMonthList,
+      getCalculatedEnvelopes,
+      getActivity,
+      getCurrentFunds,
+      getMonthlyRates,
+      getUserCurrencyCode,
+    ],
+    aggregateEnvelopeBudgets
+  )
 
 function aggregateEnvelopeBudgets(
   monthList: TISOMonth[],

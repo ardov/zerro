@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 import { getMonthDates } from 'pages/Budgets/selectors'
-import { ById, TFxAmount, TFxCode, TISOMonth } from 'shared/types'
+import { ById, ITransaction, TFxAmount, TFxCode, TISOMonth } from 'shared/types'
 import { getEnvelopes, IEnvelope } from './parts/envelopes'
 import { keys } from 'shared/helpers/keys'
 import { getActivity, TMonthActivity } from './parts/activity'
@@ -32,6 +32,8 @@ export interface IEnvelopeWithData extends IEnvelope {
   availableSelf: TFxAmount
   availableChildrenPositive: TFxAmount
   availableChildrenNegative: TFxAmount
+
+  transactions: ITransaction[]
 }
 
 type TCalculatedEnvelopes = Record<TEnvelopeId, IEnvelopeWithData>
@@ -54,8 +56,6 @@ function aggregateEnvelopeBudgets(
   budgets: Record<TISOMonth, { [id: TEnvelopeId]: number }>,
   rates: Record<TISOMonth, { [fx: TFxCode]: number }>
 ) {
-  console.log('activity', activity)
-
   const ids = keys(envelopes)
   const result: Record<TISOMonth, TCalculatedEnvelopes> = {}
 
@@ -133,6 +133,8 @@ function aggregateEnvelopeBudgets(
             child.available
           )
         }
+
+        child.transactions = currActivity[childId]?.transactions || []
       })
 
       let currency = parent.currency
@@ -170,6 +172,8 @@ function aggregateEnvelopeBudgets(
         parent.availableSelf,
         parent.availableChildrenPositive
       )
+
+      parent.transactions = currActivity[id]?.transactions || []
     })
 
     result[date] = node
@@ -199,6 +203,8 @@ function makeEnvelopeWithData(e: IEnvelope): IEnvelopeWithData {
     availableSelf: {},
     availableChildrenPositive: {},
     availableChildrenNegative: {},
+
+    transactions: [],
   }
 }
 
