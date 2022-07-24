@@ -25,7 +25,11 @@ import { Droppable, Draggable } from 'react-beautiful-dnd'
 import { GoalProgress as GoalProgressType } from 'pages/Budgets/selectors'
 import { Amount } from 'components/Amount'
 import { useContext } from 'react'
-import { IsDraggingContext, DragModeContext, DragModeType } from '../DnDContext'
+import {
+  IsDraggingContext,
+  DragModeContext,
+  DragModeType,
+} from '../../components/DnDContext'
 import { TFxAmount, TFxCode, TGoal, TRates } from 'shared/types'
 import { getUserCurrencyCode } from 'models/instrument'
 import { SxProps } from '@mui/system'
@@ -33,15 +37,16 @@ import { useAppSelector } from 'store'
 import { TEnvelopePopulated, useMonth, useRates } from '../../model'
 import { convertFx, isZero } from 'shared/helpers/currencyHelpers'
 import { keys } from 'shared/helpers/keys'
+import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 
 type EnvelopeRowProps = {
   envelope: TEnvelopePopulated
   showAll?: boolean
   metric: 'available' | 'budgeted' | 'outcome'
-  openDetails: (id: string) => void
-  openGoalPopover: (id: string, target: Element) => void
-  openBudgetPopover: (id: string, target: Element) => void
-  openTransactionsPopover: (id: string) => void
+  openDetails: (id: TEnvelopeId) => void
+  openGoalPopover: (id: TEnvelopeId, target: Element) => void
+  openBudgetPopover: (id: TEnvelopeId, target: Element) => void
+  openTransactionsPopover: (id: TEnvelopeId) => void
 }
 
 export const Row: FC<EnvelopeRowProps> = props => {
@@ -68,7 +73,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
   }
 
   const isChild = !!envelope.parent || isSelf
-  const showBudget = isChild ? !!budgeted : true
+  const showBudget = isChild ? !isZero(budgeted) : true
 
   return (
     <Wrapper
@@ -441,10 +446,10 @@ function getAmountTitle(amount: TFxAmount, currency: TFxCode, rates: TRates) {
   return (
     <span>
       {strings.map(s => (
-        <>
+        <span key={s}>
           <span>{s}</span>
           <br />
-        </>
+        </span>
       ))}
     </span>
   )

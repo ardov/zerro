@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { Collapse, Box, IconButton } from '@mui/material'
 import { ChevronRightIcon, DragIndicatorIcon } from 'shared/ui/Icons'
-import { DragModeContext } from '../DnDContext'
+import { DragModeContext } from '../../components/DnDContext'
 import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 
 type ParentProps = {

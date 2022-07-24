@@ -4,29 +4,26 @@ import { getEnvelopeId, TEnvelopeId } from 'models/shared/envelopeHelpers'
 import { toISOMonth } from 'shared/helpers/date'
 import { keys } from 'shared/helpers/keys'
 import { DataEntity, TISOMonth } from 'shared/types'
-
-// TODO: write normal function
-const getHiddenBudgets = () =>
-  ({} as Record<TISOMonth, Record<TEnvelopeId, number>>)
+import { budgetStore } from './budgetStore'
 
 export const getEnvelopeBudgets = createSelector(
-  [getBudgets, getHiddenBudgets],
+  [getBudgets, budgetStore.getData],
   (tagBudgets, hiddenBudgets) => {
     const result: Record<TISOMonth, Record<TEnvelopeId, number>> = {}
 
     keys(tagBudgets).forEach(id => {
       const budget = tagBudgets[id]
-      const date = toISOMonth(budget.date)
+      const month = toISOMonth(budget.date)
       const value = budget.outcome
       const envelopeId = getEnvelopeId(DataEntity.Tag, String(budget.tag))
-      result[date] ??= {}
-      result[date][envelopeId] = value
+      result[month] ??= {}
+      result[month][envelopeId] = value
     })
 
-    keys(hiddenBudgets).forEach(date => {
-      keys(hiddenBudgets[date]).forEach(envelopeId => {
-        result[date] ??= {}
-        result[date][envelopeId] = hiddenBudgets[date][envelopeId]
+    keys(hiddenBudgets).forEach(month => {
+      keys(hiddenBudgets[month]).forEach(envelopeId => {
+        result[month] ??= {}
+        result[month][envelopeId] = hiddenBudgets[month][envelopeId]
       })
     })
 

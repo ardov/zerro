@@ -8,7 +8,7 @@ import {
   TUnits,
 } from 'shared/types'
 
-export enum RecordType {
+export enum HiddenDataType {
   Goals = 'goals',
   FxRates = 'fxRates',
   Budgets = 'budgets',
@@ -35,7 +35,7 @@ export type TGoal = {
 }
 
 export type TRecordGoals = {
-  type: RecordType.Goals
+  type: HiddenDataType.Goals
   date: TISODate
   payload: Record<TEnvelopeId, TGoal>
 }
@@ -52,7 +52,7 @@ export type TTagMetaData = {
 }
 
 export type TRecordTagMeta = {
-  type: RecordType.TagMeta
+  type: HiddenDataType.TagMeta
   payload: { [id: TTagId]: TTagMetaData } // Only merchants?
 }
 
@@ -69,18 +69,8 @@ export type TTagTree = Array<{
 }>
 
 export type TRecordTagOrder = {
-  type: RecordType.TagOrder
+  type: HiddenDataType.TagOrder
   payload: TTagTree
-}
-
-// —————————————————————————————————————————————————————————————————————————————
-// FX RATES
-// —————————————————————————————————————————————————————————————————————————————
-
-export type TRecordFxRates = {
-  type: RecordType.FxRates
-  date: TISODate
-  payload: Record<TFxCode, number>
 }
 
 // —————————————————————————————————————————————————————————————————————————————
@@ -93,7 +83,7 @@ export type TBudget = {
 }
 
 export type TRecordBudgets = {
-  type: RecordType.Budgets
+  type: HiddenDataType.Budgets
   date: TISODate
   payload: Record<TEnvelopeId, TBudget>
 }
@@ -103,7 +93,7 @@ export type TRecordBudgets = {
 // —————————————————————————————————————————————————————————————————————————————
 
 export type TRecordLinkedAccounts = {
-  type: RecordType.LinkedAccounts
+  type: HiddenDataType.LinkedAccounts
   payload: Record<TAccountId, TTagId>
 }
 
@@ -112,19 +102,10 @@ export type TRecordLinkedAccounts = {
 // —————————————————————————————————————————————————————————————————————————————
 
 export type TRecordLinkedMerchants = {
-  type: RecordType.LinkedDebtors
+  type: HiddenDataType.LinkedDebtors
   payload: Record<TMerchantId, TTagId>
 }
 
 // —————————————————————————————————————————————————————————————————————————————
 // RECORD
 // —————————————————————————————————————————————————————————————————————————————
-
-export type TRecord =
-  | TRecordGoals
-  | TRecordFxRates
-  | TRecordBudgets
-  | TRecordLinkedAccounts
-  | TRecordLinkedMerchants
-  | TRecordTagMeta
-  | TRecordTagOrder

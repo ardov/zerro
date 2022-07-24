@@ -5,7 +5,6 @@ import { keys } from 'shared/helpers/keys'
 import { getCurrentFunds } from './parts/currentFunds'
 import { toISOMonth } from 'shared/helpers/date'
 import { getActivity, TMonthActivity } from './parts/activity'
-import { getMonthlyRates } from './parts/rates'
 import { getCalculatedEnvelopes, IEnvelopeWithData } from './calculateEnvelopes'
 import { getUserCurrencyCode } from 'models/instrument'
 import {
@@ -16,6 +15,8 @@ import {
 } from 'shared/helpers/currencyHelpers'
 import { TSelector } from 'store'
 import { getMonthList } from './parts/monthList'
+import { getFxRatesGetter } from 'models/fxRate'
+import { TFxRates } from 'models/fxRate/fxRateStore'
 
 export interface TEnvelopeBudgets {
   date: TISOMonth
@@ -63,7 +64,7 @@ export const getComputedTotals: TSelector<Record<TISOMonth, TEnvelopeBudgets>> =
       getCalculatedEnvelopes,
       getActivity,
       getCurrentFunds,
-      getMonthlyRates,
+      getFxRatesGetter,
       getUserCurrencyCode,
     ],
     aggregateEnvelopeBudgets
@@ -74,7 +75,7 @@ function aggregateEnvelopeBudgets(
   envelopes: Record<TISOMonth, { [id: TEnvelopeId]: IEnvelopeWithData }>,
   activity: Record<TISOMonth, TMonthActivity>,
   currentBalance: TFxAmount,
-  rates: Record<TISOMonth, { [fx: TFxCode]: number }>,
+  getRates: (month: TISOMonth) => TFxRates,
   mainCurrency: TFxCode
 ) {
   const result: Record<TISOMonth, TEnvelopeBudgets> = {}
@@ -164,7 +165,7 @@ function aggregateEnvelopeBudgets(
   function createMonth(date: TISOMonth) {
     const month: TEnvelopeBudgets = {
       date,
-      rates: rates[date],
+      rates: getRates(date),
       currency: mainCurrency,
       fundsStart: {}, // Fills later
       fundsEnd: {}, // Fills later

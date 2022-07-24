@@ -1,1 +1,1 @@
-export { makeFxRatesGetter } from './getFxRates'
+export { getFxRatesGetter, getRates } from './getFxRates'

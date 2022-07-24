@@ -5,17 +5,17 @@ import { IReminder } from 'shared/types'
 import { AppThunk, TSelector } from 'store'
 import { prepareDataAccount } from './dataAccount'
 import { parseComment } from './helpers'
-import { RecordType } from './types'
+import { HiddenDataType } from './types'
 
 type TSimpleStore<TPayload> = {
-  type: RecordType
+  type: HiddenDataType
   getDataReminder: TSelector<IReminder | null>
   getData: TSelector<TPayload>
   setData: (payload: TPayload) => AppThunk<void>
 }
 
 export function makeSimpleHiddenStore<TPayload>(
-  type: RecordType,
+  type: HiddenDataType,
   defaultValue: TPayload
 ): TSimpleStore<TPayload> {
   const getDataReminder: TSelector<IReminder | null> = createSelector(

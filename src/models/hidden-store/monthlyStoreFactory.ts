@@ -7,17 +7,17 @@ import { IReminder, TISOMonth } from 'shared/types'
 import { AppThunk, TSelector } from 'store'
 import { prepareDataAccount } from './dataAccount'
 import { parseComment } from './helpers'
-import { RecordType } from './types'
+import { HiddenDataType } from './types'
 
 type TMonthlyStore<TPayload> = {
-  type: RecordType
+  type: HiddenDataType
   getDataReminders: TSelector<Record<TISOMonth, IReminder>>
   getData: TSelector<Record<TISOMonth, TPayload>>
   setData: (payload: TPayload, month: TISOMonth) => AppThunk<void>
 }
 
 export function makeMonthlyHiddenStore<TPayload>(
-  type: RecordType
+  type: HiddenDataType
 ): TMonthlyStore<TPayload> {
   const getDataReminders: TSelector<Record<TISOMonth, IReminder>> =
     createSelector([getReminders], reminders => {

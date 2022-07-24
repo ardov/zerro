@@ -3,7 +3,7 @@ import { IBudget } from 'shared/types'
 import { OptionalExceptFor, Modify, TDateDraft } from 'shared/types'
 import { getBudgetId } from './getBudgetId'
 
-type BudgetDraft = Modify<
+export type BudgetDraft = Modify<
   OptionalExceptFor<IBudget, 'user' | 'date' | 'tag'>,
   { date: TDateDraft }
 >

@@ -30,7 +30,7 @@ import { sendEvent } from 'shared/helpers/tracking'
 import { TagEditDialog } from 'components/TagEditDialog'
 import { useToggle } from 'shared/hooks/useToggle'
 import { getTagComment, setTagComment } from 'models/hiddenData/tagMeta'
-import { BudgetPopover } from '../BudgetPopover'
+import { BudgetPopover } from '../../widgets/BudgetPopover'
 import { getGoals } from 'models/hiddenData/goals'
 import { goalToWords } from 'models/hiddenData/goals/helpers'
 import { useDebounce } from 'shared/hooks/useDebounce'
@@ -154,13 +154,13 @@ export const TagPreview: FC<TagPreviewProps> = ({ onClose, id }) => {
         </Rhythm>
       </Box>
 
-      <BudgetPopover
+      {/* <BudgetPopover
         id={id}
         month={month}
         open={!!budgetPopoverAnchor}
         anchorEl={budgetPopoverAnchor}
         onClose={() => setBudgetPopoverAnchor(undefined)}
-      />
+      /> */}
       <GoalPopover
         id={id}
         open={!!goalPopoverAnchor}

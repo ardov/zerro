@@ -277,7 +277,7 @@ const NameValueRow: FC<BoxProps & { name: string; value: string }> = ({
         display: 'flex',
         width: '100%',
         gap: 2,
-        '& > :first-child': { flexGrow: 1 },
+        '& > :first-of-type': { flexGrow: 1 },
         '& > :last-child': { color: 'text.secondary' },
       }}
       {...rest}

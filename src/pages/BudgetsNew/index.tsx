@@ -17,7 +17,7 @@ import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
 import { nextMonth, prevMonth, toISOMonth } from 'shared/helpers/date'
 import { getComputedTotals, getMonthList } from 'models/envelopes'
-import { EnvelopeTable } from './components/EnvelopeTable'
+import { EnvelopeTable } from './widgets/EnvelopeTable'
 import { useMonth } from './model'
 
 export default function BudgetsRouter() {
@@ -25,8 +25,10 @@ export default function BudgetsRouter() {
   const monthList = useAppSelector(getMonthList)
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
-  if (!month)
+
+  if (!month) {
     return <Redirect to={`/budget/?month=${toISOMonth(new Date())}`} />
+  }
   if (month < minMonth) {
     return <Redirect to={`/budget/?month=${minMonth}`} />
   }
