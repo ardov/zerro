@@ -11,6 +11,7 @@ import { Row } from './Row'
 import { BudgetPopover } from '../BudgetPopover'
 import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 import { TISOMonth } from 'shared/types'
+import { GoalPopover } from '../GoalPopover'
 
 type TagTableProps = {
   openDetails: (id: string) => void
@@ -23,7 +24,8 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
   const [month] = useMonth()
   const groups = useEnvelopeGroups(month)
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
-  const budget = useEnvelopePopover(month)
+  const budget = useEnvelopePopover(month, 'budget')
+  const goal = useEnvelopePopover(month, 'goal')
   return (
     <>
       <Stack spacing={2} className={props.className}>
@@ -42,7 +44,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
                   <Row
                     envelope={parent}
                     metric="available"
-                    openGoalPopover={() => {}}
+                    openGoalPopover={goal.onOpen}
                     openBudgetPopover={budget.onOpen}
                     openTransactionsPopover={() => {}}
                     openDetails={() => {}}
@@ -50,10 +52,10 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
                 }
                 children={parent.children.map(child => (
                   <Row
-                    key={child.id}
+                    key={'child' + child.id}
                     envelope={child}
                     metric="available"
-                    openGoalPopover={() => {}}
+                    openGoalPopover={goal.onOpen}
                     openBudgetPopover={budget.onOpen}
                     openTransactionsPopover={() => {}}
                     openDetails={() => {}}
@@ -67,6 +69,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
       {budget.props.id && (
         <BudgetPopover {...budget.props} id={budget.props.id} />
       )}
+      {goal.props.id && <GoalPopover {...goal.props} id={goal.props.id} />}
     </>
   )
 }
@@ -87,7 +90,7 @@ const EnvelopeGroup: FC<TEnvelopeGroupProps> = ({ group, children }) => {
   )
 }
 
-function useEnvelopePopover(month: TISOMonth) {
+function useEnvelopePopover(month: TISOMonth, name = '') {
   const [anchorEl, setAnchorEl] = useState<Element>()
   const [id, setId] = useState<TEnvelopeId>()
   const open = !!anchorEl
@@ -97,7 +100,7 @@ function useEnvelopePopover(month: TISOMonth) {
   }
 
   const props = {
-    key: id + month,
+    key: name + id + month,
     id,
     month,
     open,

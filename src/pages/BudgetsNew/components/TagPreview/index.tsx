@@ -34,7 +34,7 @@ import { BudgetPopover } from '../../widgets/BudgetPopover'
 import { getGoals } from 'models/hiddenData/goals'
 import { goalToWords } from 'models/hiddenData/goals/helpers'
 import { useDebounce } from 'shared/hooks/useDebounce'
-import { GoalPopover } from '../GoalPopover'
+import { GoalPopover } from '../../widgets/GoalPopover/GoalPopover'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
 
 type TagPreviewProps = {
@@ -161,12 +161,13 @@ export const TagPreview: FC<TagPreviewProps> = ({ onClose, id }) => {
         anchorEl={budgetPopoverAnchor}
         onClose={() => setBudgetPopoverAnchor(undefined)}
       /> */}
-      <GoalPopover
+      {/* <GoalPopover
         id={id}
+        month={month}
         open={!!goalPopoverAnchor}
         anchorEl={goalPopoverAnchor}
         onClose={() => setGoalPopoverAnchor(undefined)}
-      />
+      /> */}
     </>
   )
 }

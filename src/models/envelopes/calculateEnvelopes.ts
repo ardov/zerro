@@ -9,6 +9,7 @@ import { addFxAmount, convertFx } from 'shared/helpers/currencyHelpers'
 import { TFxRates } from 'models/fxRate/fxRateStore'
 import { getFxRatesGetter } from 'models/fxRate'
 import { getEnvelopeBudgets } from 'models/envelopeBudgets'
+import { calculateGoalProgress, getGoals, TGoal } from 'models/goal'
 
 export interface IEnvelopeWithData extends IEnvelope {
   /** Activity calculated from income and outcome but depends on envelope settings. `keepIncome` affects this calculation */
@@ -34,6 +35,14 @@ export interface IEnvelopeWithData extends IEnvelope {
   availableChildrenPositive: TFxAmount
   availableChildrenNegative: TFxAmount
 
+  goal: TGoal | null
+  /** number from 0 to 1. It is goal completion progress for month or overall (for TARGET_BALANCE without end date) */
+  goalProgress: number | null
+  /** amount of money you should add to your budget to complete the goal */
+  goalNeed: TFxAmount | null
+  /** budget needed to complete the goal in current */
+  goalTarget: TFxAmount | null
+
   transactions: ITransaction[]
 }
 
@@ -46,6 +55,7 @@ export const getCalculatedEnvelopes = createSelector(
     getActivity,
     getEnvelopeBudgets,
     getFxRatesGetter,
+    getGoals,
   ],
   aggregateEnvelopeBudgets
 )
@@ -55,17 +65,18 @@ function aggregateEnvelopeBudgets(
   envelopes: ById<IEnvelope>,
   activity: Record<TISOMonth, TMonthActivity>,
   budgets: Record<TISOMonth, { [id: TEnvelopeId]: number }>,
-  getRates: (month: TISOMonth) => TFxRates
+  getRates: (month: TISOMonth) => TFxRates,
+  goals: Record<TISOMonth, Record<TEnvelopeId, TGoal | null>>
 ) {
   const ids = keys(envelopes)
   const result: Record<TISOMonth, TCalculatedEnvelopes> = {}
 
   let prevValues: TCalculatedEnvelopes = {}
 
-  monthList.forEach(date => {
-    const currRates = getRates(date)
-    const currBudgets = budgets[date] || {}
-    const currActivity = activity[date]?.envelopes || {}
+  monthList.forEach(month => {
+    const currRates = getRates(month)
+    const currBudgets = budgets[month] || {}
+    const currActivity = activity[month]?.envelopes || {}
 
     const node: TCalculatedEnvelopes = {}
 
@@ -177,8 +188,45 @@ function aggregateEnvelopeBudgets(
       parent.transactions = currActivity[id]?.transactions || []
     })
 
-    result[date] = node
+    result[month] = node
     prevValues = node
+  })
+
+  // Fill in goal data
+  let prevGoals: Record<TEnvelopeId, TGoal | null> = {}
+  keys(result).forEach(month => {
+    const envelopes = result[month]
+    Object.values(envelopes).forEach(envelope => {
+      const id = envelope.id
+
+      // Set goal
+      if (goals[month]?.[id] !== undefined) {
+        envelope.goal = goals[month][id]
+      } else {
+        envelope.goal = prevGoals[id] || null
+      }
+      // Remove goal if it is already ended
+      if (envelope.goal?.end && envelope.goal?.end > month) {
+        envelope.goal = null
+      }
+      prevGoals[id] = envelope.goal
+
+      if (!envelope.goal) return
+
+      const toValue = (amount?: TFxAmount) =>
+        amount ? convertFx(amount, envelope.currency, getRates(month)) : 0
+
+      const goalProgress = calculateGoalProgress(envelope.goal, {
+        leftover: toValue(envelope.leftover),
+        budgeted: toValue(envelope.budgeted),
+        available: toValue(envelope.available),
+        generalIncome: toValue(activity[month]?.generalIncome?.activity),
+        month,
+      })
+      envelope.goalProgress = goalProgress.progress
+      envelope.goalNeed = { [envelope.currency]: goalProgress.need }
+      envelope.goalTarget = { [envelope.currency]: goalProgress.target }
+    })
   })
 
   return result
@@ -204,6 +252,11 @@ function makeEnvelopeWithData(e: IEnvelope): IEnvelopeWithData {
     availableSelf: {},
     availableChildrenPositive: {},
     availableChildrenNegative: {},
+
+    goal: null,
+    goalProgress: null,
+    goalNeed: null,
+    goalTarget: null,
 
     transactions: [],
   }

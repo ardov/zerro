@@ -120,6 +120,7 @@ function populateEnvelope(
     ...envelope,
     isDefaultVisible:
       envelope.showInBudget ||
+      !!envelope.goal ||
       !isZero(envelope.budgeted) ||
       !isZero(envelope.activity) ||
       !isZero(envelope.available) ||

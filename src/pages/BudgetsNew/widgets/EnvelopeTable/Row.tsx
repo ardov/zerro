@@ -19,10 +19,8 @@ import {
   EmojiFlagsIcon,
   NotesIcon,
 } from 'shared/ui/Icons'
-import { goalToWords } from 'models/hiddenData/goals/helpers'
 import { RadialProgress } from 'shared/ui/RadialProgress'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import { GoalProgress as GoalProgressType } from 'pages/Budgets/selectors'
 import { Amount } from 'components/Amount'
 import { useContext } from 'react'
 import {
@@ -30,7 +28,7 @@ import {
   DragModeContext,
   DragModeType,
 } from '../../components/DnDContext'
-import { TFxAmount, TFxCode, TGoal, TRates } from 'shared/types'
+import { TFxAmount, TFxCode, TRates } from 'shared/types'
 import { getUserCurrencyCode } from 'models/instrument'
 import { SxProps } from '@mui/system'
 import { useAppSelector } from 'store'
@@ -38,6 +36,7 @@ import { TEnvelopePopulated, useMonth, useRates } from '../../model'
 import { convertFx, isZero } from 'shared/helpers/currencyHelpers'
 import { keys } from 'shared/helpers/keys'
 import { TEnvelopeId } from 'models/shared/envelopeHelpers'
+import { goalToWords, TGoal } from 'models/goal'
 
 type EnvelopeRowProps = {
   envelope: TEnvelopePopulated
@@ -61,11 +60,8 @@ export const Row: FC<EnvelopeRowProps> = props => {
   } = props
   let { id, comment, currency, name, color, symbol, budgeted, isSelf } =
     envelope
-  const userCurrency = useAppSelector(getUserCurrencyCode)
 
   const { dragMode } = useContext(DragModeContext)
-  const goal = null // useAppSelector(state => getGoal(state, id), shallowEqual)
-  const goalProgress = null // useAppSelector(state => getGoalProgress(state, month, id), shallowEqual)
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
   if (!envelope.isDefaultVisible && !showAll && dragMode !== 'REORDER') {
@@ -132,11 +128,13 @@ export const Row: FC<EnvelopeRowProps> = props => {
         />
       )}
 
-      {/* <GoalButton
-        goal={goal}
-        goalProgress={goalProgress}
-        onClick={e => openGoalPopover(id, e.currentTarget)}
-      /> */}
+      {!isSelf && (
+        <GoalButton
+          goal={envelope.goal}
+          goalProgress={envelope.goalProgress}
+          onClick={e => openGoalPopover(id, e.currentTarget)}
+        />
+      )}
     </Wrapper>
   )
 }
@@ -367,22 +365,16 @@ const AvailableCell: FC<AvailableCellProps> = props => {
   )
 }
 
-// const AvailableCellWrapper: FC<{
-//   id: string
-//   enableDrag: boolean
-//   isChild: boolean
-// }> = props => {}
-
 type GoalButtonProps = {
-  goal: TGoal
-  goalProgress?: GoalProgressType | null
+  goal: TGoal | null
+  goalProgress?: number | null
   onClick: IconButtonProps['onClick']
 }
 
 const GoalButton: FC<GoalButtonProps> = props => {
   const { goal, goalProgress, onClick } = props
 
-  if (!goalProgress) {
+  if (!goal) {
     return (
       <span className={'addGoal'}>
         <Tooltip title={'Добавить цель'}>
@@ -398,7 +390,7 @@ const GoalButton: FC<GoalButtonProps> = props => {
     <span>
       <Tooltip title={goalToWords(goal)}>
         <IconButton size="small" onClick={onClick}>
-          <RadialProgress value={goalProgress.progress} fontSize="inherit" />
+          <RadialProgress value={goalProgress || 0} fontSize="inherit" />
         </IconButton>
       </Tooltip>
     </span>
