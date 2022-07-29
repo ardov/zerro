@@ -1,54 +1,85 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 import { getMonthDates } from 'pages/Budgets/selectors'
-import { ById, ITransaction, TFxAmount, TISOMonth } from 'shared/types'
+import { ById, ITransaction, TFxAmount, TISOMonth, TRates } from 'shared/types'
 import { getEnvelopes, IEnvelope } from './parts/envelopes'
 import { keys } from 'shared/helpers/keys'
-import { getActivity, TMonthActivity } from './parts/activity'
-import { addFxAmount, convertFx } from 'shared/helpers/currencyHelpers'
+import { getActivity, TEnvelopeNode, TMonthActivity } from './parts/activity'
+import { addFxAmount, convertFx, round } from 'shared/helpers/currencyHelpers'
 import { TFxRates } from 'models/fxRate/fxRateStore'
 import { getFxRatesGetter } from 'models/fxRate'
 import { getEnvelopeBudgets } from 'models/envelopeBudgets'
 import { calculateGoalProgress, getGoals, TGoal } from 'models/goal'
+import { TSelector } from 'store'
 
-export interface IEnvelopeWithData extends IEnvelope {
-  /** Activity calculated from income and outcome but depends on envelope settings. `keepIncome` affects this calculation */
+function makeEnvelopeWithData(e: IEnvelope) {
+  return {
+    ...e,
 
-  /** Activity converted to a currency of envelope */
-  activity: TFxAmount
-  activitySelf: TFxAmount
-  activityChildren: TFxAmount
+    // Self metrics
+    selfLeftoverValue: 0,
+    selfLeftover: {} as TFxAmount,
+    selfBudgetedValue: 0,
+    selfBudgeted: {} as TFxAmount,
+    selfActivityValue: 0,
+    selfActivity: {} as TFxAmount,
+    transactions: [] as ITransaction[],
 
-  /** Leftover in a currency of envelope */
-  leftover: TFxAmount
-  leftoverSelf: TFxAmount
-  leftoverChildren: TFxAmount
+    // Children metrics
+    childrenLeftoverValue: 0,
+    childrenLeftover: {} as TFxAmount,
+    childrenBudgetedValue: 0,
+    childrenBudgeted: {} as TFxAmount,
+    childrenActivityValue: 0,
+    childrenActivity: {} as TFxAmount,
+    childrenSurplusValue: 0,
+    childrenSurplus: {} as TFxAmount, // positive balances
+    childrenOverspendValue: 0,
+    childrenOverspend: {} as TFxAmount, // negative balances (will be covered from parent balance)
 
-  /** Budget in a currency of envelope */
-  budgeted: TFxAmount
-  budgetedSelf: TFxAmount
-  budgetedChildren: TFxAmount
+    // Computed metrics
 
-  /** Available = `leftover` + `budgeted` + `activity` */
-  available: TFxAmount
-  availableSelf: TFxAmount
-  availableChildrenPositive: TFxAmount
-  availableChildrenNegative: TFxAmount
+    get selfAvailableValue(): number {
+      // Tricky moment children overspend covered by parent balance ⤵
+      // selfLeftover + selfBudgeted + selfActivity + childrenOverspend
+      return round(
+        this.selfLeftoverValue +
+          this.selfBudgetedValue +
+          this.selfActivityValue +
+          this.childrenOverspendValue
+      )
+    },
+    get selfAvailable(): TFxAmount {
+      return { [this.currency]: this.selfAvailableValue }
+    },
 
-  goal: TGoal | null
-  /** number from 0 to 1. It is goal completion progress for month or overall (for TARGET_BALANCE without end date) */
-  goalProgress: number | null
-  /** amount of money you should add to your budget to complete the goal */
-  goalNeed: TFxAmount | null
-  /** budget needed to complete the goal in current */
-  goalTarget: TFxAmount | null
+    get totalLeftover(): TFxAmount {
+      return addFxAmount(this.selfLeftover, this.childrenLeftover)
+    },
+    get totalBudgeted(): TFxAmount {
+      return addFxAmount(this.selfBudgeted, this.childrenBudgeted)
+    },
+    get totalActivity(): TFxAmount {
+      return addFxAmount(this.selfActivity, this.childrenActivity)
+    },
+    get totalAvailable(): TFxAmount {
+      // children overspend already counted in selfAvailable
+      return addFxAmount(this.selfAvailable, this.childrenSurplus)
+    },
 
-  transactions: ITransaction[]
+    // Goal
+    goal: null as TGoal | null, // goal itself
+    goalProgress: null as number | null, // [0-1] percent of goal completion
+    goalNeed: null as number | null, // amount of money thet budget lacks
+    goalTarget: null as number | null, // desired budget to complete the goal
+  }
 }
 
-type TCalculatedEnvelopes = Record<TEnvelopeId, IEnvelopeWithData>
+export type IEnvelopeWithData = ReturnType<typeof makeEnvelopeWithData>
 
-export const getCalculatedEnvelopes = createSelector(
+export const getCalculatedEnvelopes: TSelector<
+  Record<TISOMonth, ById<IEnvelopeWithData>>
+> = createSelector(
   [
     getMonthDates,
     getEnvelopes,
@@ -68,209 +99,186 @@ function aggregateEnvelopeBudgets(
   getRates: (month: TISOMonth) => TFxRates,
   goals: Record<TISOMonth, Record<TEnvelopeId, TGoal | null>>
 ) {
-  const ids = keys(envelopes)
-  const result: Record<TISOMonth, TCalculatedEnvelopes> = {}
+  const result: Record<TISOMonth, ById<IEnvelopeWithData>> = {}
 
-  let prevValues: TCalculatedEnvelopes = {}
-
+  let prevNode: ById<IEnvelopeWithData> = {}
   monthList.forEach(month => {
-    const currRates = getRates(month)
-    const currBudgets = budgets[month] || {}
-    const currActivity = activity[month]?.envelopes || {}
+    const node: ById<IEnvelopeWithData> = {}
+    const rates = getRates(month)
 
-    const node: TCalculatedEnvelopes = {}
+    // Step 1: fill with placeholders
+    createPlaceholders(node, envelopes)
 
-    ids.forEach(id => {
-      let envelope = makeEnvelopeWithData(envelopes[id])
-      node[id] = envelope
-    })
+    // Step 2: fill self metrics
+    addSelfMetrics(
+      node,
+      prevNode,
+      budgets[month],
+      activity[month]?.envelopes,
+      rates
+    )
 
-    // Self check that all envelopes present
-    keys(currActivity).forEach(id => {
-      if (!node[id]) {
-        console.error(`Unknown envelope: ${id}`)
-      }
-    })
+    // Step 3: fill children metrics
+    addChildrenData(node, rates)
 
-    ids.forEach(id => {
-      let parent = node[id]
-      if (parent.parent) return
-      parent.children.forEach(childId => {
-        let child = node[childId]
-        let currency = child.currency
-
-        child.leftover = child.leftoverSelf = getLeftover(
-          prevValues[childId]?.availableSelf,
-          child.carryNegatives
-        )
-        parent.leftoverChildren = addFxAmount(
-          parent.leftoverChildren,
-          child.leftover
-        )
-
-        child.budgeted = child.budgetedSelf = {
-          [currency]: currBudgets[childId] || 0,
-        }
-        parent.budgetedChildren = addFxAmount(
-          parent.budgetedChildren,
-          child.budgeted
-        )
-
-        child.activity = child.activitySelf =
-          currActivity[childId]?.activity || {}
-        parent.activityChildren = addFxAmount(
-          parent.activityChildren,
-          child.activity
-        )
-
-        let childAvailable = addFxAmount(
-          child.leftover,
-          child.activity,
-          child.budgeted
-        )
-        let childAvailableValue = convertFx(childAvailable, currency, currRates)
-
-        child.available = child.availableSelf = {
-          [currency]: childAvailableValue,
-        }
-        if (childAvailableValue > 0) {
-          parent.availableChildrenPositive = addFxAmount(
-            parent.availableChildrenPositive,
-            child.available
-          )
-        }
-        if (childAvailableValue < 0) {
-          parent.availableChildrenNegative = addFxAmount(
-            parent.availableChildrenNegative,
-            child.available
-          )
-        }
-
-        child.transactions = currActivity[childId]?.transactions || []
-      })
-
-      let currency = parent.currency
-
-      parent.leftoverSelf = getLeftover(
-        prevValues[id]?.availableSelf,
-        parent.carryNegatives
-      )
-      parent.leftover = addFxAmount(
-        parent.leftoverSelf,
-        parent.leftoverChildren
-      )
-
-      parent.budgetedSelf = { [currency]: currBudgets[id] || 0 }
-      parent.budgeted = addFxAmount(
-        parent.budgetedSelf,
-        parent.budgetedChildren
-      )
-
-      parent.activitySelf = currActivity[id]?.activity || {}
-      parent.activity = addFxAmount(
-        parent.activitySelf,
-        parent.activityChildren
-      )
-
-      let parentAvailable = addFxAmount(
-        parent.leftoverSelf,
-        parent.budgetedSelf,
-        parent.activitySelf,
-        parent.availableChildrenNegative
-      )
-      let parentAvailableValue = convertFx(parentAvailable, currency, currRates)
-      parent.availableSelf = { [currency]: parentAvailableValue }
-      parent.available = addFxAmount(
-        parent.availableSelf,
-        parent.availableChildrenPositive
-      )
-
-      parent.transactions = currActivity[id]?.transactions || []
-    })
+    // Step 4: fill goal metrics
+    addGoalData(month, node, prevNode, goals[month], activity[month], rates)
 
     result[month] = node
-    prevValues = node
-  })
-
-  // Fill in goal data
-  let prevGoals: Record<TEnvelopeId, TGoal | null> = {}
-  keys(result).forEach(month => {
-    const envelopes = result[month]
-    Object.values(envelopes).forEach(envelope => {
-      const id = envelope.id
-
-      // Set goal
-      if (goals[month]?.[id] !== undefined) {
-        envelope.goal = goals[month][id]
-      } else {
-        envelope.goal = prevGoals[id] || null
-      }
-      // Remove goal if it is already ended
-      if (envelope.goal?.end && envelope.goal?.end > month) {
-        envelope.goal = null
-      }
-      prevGoals[id] = envelope.goal
-
-      if (!envelope.goal) return
-
-      const toValue = (amount?: TFxAmount) =>
-        amount ? convertFx(amount, envelope.currency, getRates(month)) : 0
-
-      const goalProgress = calculateGoalProgress(envelope.goal, {
-        leftover: toValue(envelope.leftover),
-        budgeted: toValue(envelope.budgeted),
-        available: toValue(envelope.available),
-        generalIncome: toValue(activity[month]?.generalIncome?.activity),
-        month,
-      })
-      envelope.goalProgress = goalProgress.progress
-      envelope.goalNeed = { [envelope.currency]: goalProgress.need }
-      envelope.goalTarget = { [envelope.currency]: goalProgress.target }
-    })
+    prevNode = node
   })
 
   return result
 }
 
-function makeEnvelopeWithData(e: IEnvelope): IEnvelopeWithData {
-  return {
-    ...e,
+/**
+ * Creates placeholders for all envelopes
+ */
+function createPlaceholders(
+  node: ById<IEnvelopeWithData>,
+  envelopes: ById<IEnvelope>
+) {
+  keys(envelopes).forEach(id => {
+    node[id] = makeEnvelopeWithData(envelopes[id])
+  })
+}
 
-    activity: {},
-    activitySelf: {},
-    activityChildren: {},
+/**
+ * Populates envelopes with basic metrics:
+ * selfLeftover, selfBudgeted, selfActivity
+ */
+function addSelfMetrics(
+  node: ById<IEnvelopeWithData>,
+  prevMonth: ById<IEnvelopeWithData>,
+  budgets: Record<TEnvelopeId, number> = {},
+  activity: Record<TEnvelopeId, TEnvelopeNode> = {},
+  rates: TRates
+) {
+  Object.values(node).forEach(envelope => {
+    const { id, currency } = envelope
+    envelope.selfLeftoverValue = getLeftover(
+      prevMonth[id]?.selfAvailableValue,
+      envelope.carryNegatives
+    )
+    envelope.selfLeftover = { [currency]: envelope.selfLeftoverValue }
+    envelope.selfBudgetedValue = budgets[id] || 0
+    envelope.selfBudgeted = { [currency]: envelope.selfBudgetedValue }
+    envelope.selfActivity = activity[id]?.activity || {}
+    envelope.selfActivityValue = convertFx(
+      envelope.selfActivity,
+      currency,
+      rates
+    )
+    envelope.transactions = activity[id]?.transactions || []
+  })
 
-    leftover: {},
-    leftoverSelf: {},
-    leftoverChildren: {},
-
-    budgeted: {},
-    budgetedSelf: {},
-    budgetedChildren: {},
-
-    available: {},
-    availableSelf: {},
-    availableChildrenPositive: {},
-    availableChildrenNegative: {},
-
-    goal: null,
-    goalProgress: null,
-    goalNeed: null,
-    goalTarget: null,
-
-    transactions: [],
+  /** Returns leftover depending on envelope settings */
+  function getLeftover(
+    prevAvailable: number | undefined = 0,
+    carryNegatives: boolean
+  ): number {
+    if (prevAvailable >= 0) return prevAvailable
+    if (carryNegatives) return prevAvailable
+    return 0
   }
 }
 
-function getLeftover(
-  prevAvailable: TFxAmount | undefined = {},
-  carryNegatives: boolean
-): TFxAmount {
-  const currencies = keys(prevAvailable)
-  if (currencies.length === 0) return {}
-  if (currencies.length > 1) throw Error('Multiple currencies in leftover')
-  const currency = currencies[0]
-  if (prevAvailable[currency] >= 0) return prevAvailable
-  if (carryNegatives) return prevAvailable
-  return {}
+/**
+ * Calculates children metrics for each parent envelope
+ */
+function addChildrenData(node: ById<IEnvelopeWithData>, rates: TRates) {
+  Object.values(node).forEach(parent => {
+    if (parent.children.length === 0) return
+
+    parent.children.forEach(childId => {
+      const child = node[childId]
+      parent.childrenLeftover = addFxAmount(
+        parent.childrenLeftover,
+        child.totalLeftover
+      )
+      parent.childrenBudgeted = addFxAmount(
+        parent.childrenBudgeted,
+        child.totalBudgeted
+      )
+      parent.childrenActivity = addFxAmount(
+        parent.childrenActivity,
+        child.totalActivity
+      )
+      const isOverspending = child.selfAvailableValue < 0
+      if (isOverspending) {
+        parent.childrenOverspend = addFxAmount(
+          parent.childrenOverspend,
+          child.totalAvailable
+        )
+      } else {
+        parent.childrenSurplus = addFxAmount(
+          parent.childrenSurplus,
+          child.totalAvailable
+        )
+      }
+    })
+
+    parent.childrenOverspendValue = convertFx(
+      parent.childrenOverspend,
+      parent.currency,
+      rates
+    )
+    parent.childrenSurplusValue = convertFx(
+      parent.childrenSurplus,
+      parent.currency,
+      rates
+    )
+  })
+}
+
+/**
+ * Adds monthly goals and calculates their progress
+ */
+function addGoalData(
+  month: TISOMonth,
+  node: ById<IEnvelopeWithData>,
+  prevNode: ById<IEnvelopeWithData>,
+  goals: Record<TEnvelopeId, TGoal | null>,
+  monthActivity: TMonthActivity,
+  rates: TFxRates
+) {
+  Object.values(node).forEach(envelope => {
+    envelope.goal = getGoal(
+      month,
+      goals?.[envelope.id],
+      prevNode?.[envelope.id]?.goal
+    )
+
+    if (!envelope.goal) return
+
+    const toValue = (amount?: TFxAmount) =>
+      amount ? convertFx(amount, envelope.currency, rates) : 0
+
+    const goalProgress = calculateGoalProgress(envelope.goal, {
+      leftover: toValue(envelope.totalLeftover),
+      budgeted: toValue(envelope.totalBudgeted),
+      available: toValue(envelope.totalAvailable),
+      generalIncome: toValue(monthActivity?.generalIncome?.activity),
+      month,
+    })
+    envelope.goalProgress = goalProgress.progress
+    envelope.goalNeed = goalProgress.need
+    envelope.goalTarget = goalProgress.target
+  })
+
+  /** Returns valid goal */
+  function getGoal(
+    currMonth: TISOMonth,
+    currGoal?: TGoal | null,
+    prevGoal?: TGoal | null
+  ) {
+    const goal =
+      currGoal !== undefined
+        ? currGoal
+        : prevGoal !== undefined
+        ? prevGoal
+        : null
+    if (goal?.end && goal.end < currMonth) return null
+    return goal
+  }
 }

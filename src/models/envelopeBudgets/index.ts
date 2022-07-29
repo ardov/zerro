@@ -1,2 +1,2 @@
-export { setEnvelopeBudget } from './setEnvelopeBudget'
+export { setEnvelopeBudgets } from './setEnvelopeBudget'
 export { getEnvelopeBudgets } from './getEnvelopeBudgets'

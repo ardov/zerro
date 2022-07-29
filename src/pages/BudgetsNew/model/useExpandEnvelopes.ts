@@ -19,9 +19,9 @@ export function useExpandEnvelopes(month: TISOMonth = toISOMonth(new Date())): {
   groups.forEach(group => {
     group.children.forEach(node => {
       if (
-        !isZero(node.leftoverChildren) ||
-        !isZero(node.budgetedChildren) ||
-        !isZero(node.availableChildrenPositive)
+        !isZero(node.childrenLeftover) ||
+        !isZero(node.childrenBudgeted) ||
+        !isZero(node.childrenSurplus)
       ) {
         defaultExpanded.push(node.id)
       }

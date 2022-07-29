@@ -17,8 +17,8 @@ import { TDateDraft, TISOMonth } from 'shared/types'
 import { goalType, setGoal, TGoal } from 'models/goal'
 import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 
-import MonthSelectPopover from 'pages/BudgetsNew/MonthSelectPopover'
-import { getComputedTotals } from 'models/envelopes'
+import MonthSelectPopover from 'shared/ui/MonthSelectPopover'
+import { getMonthTotals } from 'models/envelopes'
 import { round } from 'shared/helpers/currencyHelpers'
 
 const amountLabels = {
@@ -36,7 +36,7 @@ type TGoalPopoverProps = PopoverProps & {
 export const GoalPopover: FC<TGoalPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
   const dispatch = useAppDispatch()
-  const envelope = useAppSelector(getComputedTotals)[month].envelopes[id]
+  const envelope = useAppSelector(getMonthTotals)[month].envelopes[id]
   const { goal } = envelope
 
   const [amount, setAmount] = useState(goal?.amount || 0)

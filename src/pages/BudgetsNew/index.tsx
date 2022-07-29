@@ -16,7 +16,7 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
 import { nextMonth, prevMonth, toISOMonth } from 'shared/helpers/date'
-import { getComputedTotals, getMonthList } from 'models/envelopes'
+import { getMonthTotals, getMonthList } from 'models/envelopes'
 import { EnvelopeTable } from './widgets/EnvelopeTable'
 import { useMonth } from './model'
 
@@ -84,7 +84,7 @@ function Budgets() {
   const maxMonth = monthList[monthList.length - 1]
   const [month, setMonth] = useMonth()
 
-  const envBudgets = useAppSelector(getComputedTotals)[month]
+  const envBudgets = useAppSelector(getMonthTotals)[month]
 
   const [drawerId, setDrawerId] = useSearchParam('drawer')
   const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))

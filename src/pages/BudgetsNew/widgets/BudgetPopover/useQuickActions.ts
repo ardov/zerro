@@ -1,4 +1,4 @@
-import { getComputedTotals } from 'models/envelopes'
+import { getMonthTotals } from 'models/envelopes'
 import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 import { convertFx, round } from 'shared/helpers/currencyHelpers'
 import { toISOMonth } from 'shared/helpers/date'
@@ -7,7 +7,7 @@ import { TDateDraft, TFxAmount, TISOMonth } from 'shared/types'
 import { useAppSelector } from 'store'
 
 export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
-  const totals = useAppSelector(getComputedTotals)
+  const totals = useAppSelector(getMonthTotals)
   if (!id) return []
   const monthInfo = totals[month]
   const envelope = totals[month]?.envelopes[id]
@@ -21,22 +21,22 @@ export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
   const prevEnvelopeData = totals[prevMonth]?.envelopes[id]
 
   let prevActivity: number[] = getPrev12MonthsISO(month)
-    .map(month => totals?.[month]?.envelopes[id]?.activity)
+    .map(month => totals?.[month]?.envelopes[id]?.totalActivity)
     .filter(outcome => outcome !== undefined)
     .map(convert)
 
   return getQuickActions({
     hasChildren: envelope.children.length > 0,
-    budgeted: convert(envelope.budgetedSelf),
-    totalBudgeted: convert(envelope.budgeted),
-    available: convert(envelope.availableSelf),
-    totalAvailable: convert(envelope.available),
+    budgeted: envelope.selfBudgetedValue,
+    totalBudgeted: convert(envelope.totalBudgeted),
+    available: envelope.selfAvailableValue,
+    totalAvailable: convert(envelope.totalAvailable),
     hasGoal: !!envelope.goal,
-    goalTarget: convert(envelope.goalTarget),
+    goalTarget: envelope.goalTarget || 0,
     prevOutcomesLength: prevActivity.length,
     avgOutcome: getAverage(prevActivity),
-    prevBudgeted: convert(prevEnvelopeData?.budgeted || {}),
-    prevOutcome: convert(prevEnvelopeData?.activity || {}),
+    prevBudgeted: convert(prevEnvelopeData?.totalBudgeted || {}),
+    prevOutcome: convert(prevEnvelopeData?.totalActivity || {}),
   })
 }
 

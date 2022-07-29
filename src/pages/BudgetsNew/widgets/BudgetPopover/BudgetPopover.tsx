@@ -17,9 +17,9 @@ import { sendEvent } from 'shared/helpers/tracking'
 import { Box, BoxProps } from '@mui/system'
 import { TFxAmount, TISOMonth } from 'shared/types'
 import { useQuickActions } from './useQuickActions'
-import { getComputedTotals } from 'models/envelopes'
+import { getMonthTotals } from 'models/envelopes'
 import { TEnvelopeId } from 'models/shared/envelopeHelpers'
-import { setEnvelopeBudget } from 'models/envelopeBudgets'
+import { setEnvelopeBudgets } from 'models/envelopeBudgets'
 import { useDisplayCurrency, useRates } from 'pages/BudgetsNew/model'
 
 type TBudgetPopoverProps = PopoverProps & {
@@ -33,7 +33,7 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   const displayCurrency = useDisplayCurrency()
   const dispatch = useAppDispatch()
   const rates = useRates(month)
-  const envelope = useAppSelector(getComputedTotals)[month].envelopes[id]
+  const envelope = useAppSelector(getMonthTotals)[month].envelopes[id]
 
   const currency = {
     env: envelope.currency, // Envelope currency
@@ -51,13 +51,13 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   }
   /** Current budgeted */
   const budgeted = {
-    env: convert.toEnv(envelope.budgeted),
-    disp: convert.toDisp(envelope.budgeted),
+    env: convert.toEnv(envelope.totalBudgeted),
+    disp: convert.toDisp(envelope.totalBudgeted),
   }
   /** Current available */
   const available = {
-    env: convert.toEnv(envelope.available),
-    disp: convert.toDisp(envelope.available),
+    env: convert.toEnv(envelope.totalAvailable),
+    disp: convert.toDisp(envelope.totalAvailable),
   }
 
   /** Input value sets in envelope currency */
@@ -79,7 +79,7 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   }, [budgeted.env])
 
   const onChange = (value: number) =>
-    dispatch(setEnvelopeBudget(month, id, value))
+    dispatch(setEnvelopeBudgets({ month, id, value }))
 
   const changeAndClose = (value: number) => {
     onClose?.({}, 'escapeKeyDown')

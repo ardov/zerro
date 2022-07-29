@@ -11,9 +11,8 @@ import {
   ListItemButtonProps,
 } from '@mui/material'
 import { ChevronRightIcon, ChevronLeftIcon } from 'shared/ui/Icons'
-import { formatDate } from 'shared/helpers/date'
-import { TDateDraft, TISOMonth } from 'shared/types'
-import { toISOMonth } from 'shared/helpers/date'
+import { formatDate, toISOMonth } from 'shared/helpers/date'
+import { Modify, TDateDraft, TISOMonth } from 'shared/types'
 
 interface MonthItemItemProps extends ListItemButtonProps {
   isCurrent: boolean
@@ -31,13 +30,19 @@ const MonthItem = withStyles(theme => ({
   <ListItemButton {...rest} />
 ))
 
-interface MonthSelectPopoverProps extends Omit<PopoverProps, 'onChange'> {
-  onChange: (month: TISOMonth) => void
-  value?: TDateDraft
-  minMonth?: TDateDraft
-  maxMonth?: TDateDraft
-  disablePast?: boolean
-}
+type MonthSelectPopoverProps = Modify<
+  PopoverProps,
+  {
+    // Rewrite onChange
+    onChange: (month: TISOMonth) => void
+    // Add other props
+    value?: TDateDraft
+    minMonth?: TDateDraft
+    maxMonth?: TDateDraft
+    disablePast?: boolean
+  }
+>
+
 export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
   const { onChange, disablePast, ...rest } = props
   const value = props.value ? toISOMonth(props.value) : null

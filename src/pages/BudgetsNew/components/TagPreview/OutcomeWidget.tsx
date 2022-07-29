@@ -7,7 +7,7 @@ import Rhythm from 'shared/ui/Rhythm'
 import { getAmountsById } from 'pages/Budgets/selectors'
 import { getMonthDates } from 'pages/Budgets/selectors'
 import { useMonth } from 'pages/Budgets/pathHooks'
-import { DataLine } from '../../../../shared/ui/DataLine'
+import { DataLine } from 'shared/ui/DataLine'
 import { TISOMonth } from 'shared/types'
 
 type OutcomWidgetProps = BoxProps & {

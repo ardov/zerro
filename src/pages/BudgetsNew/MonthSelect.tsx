@@ -9,7 +9,7 @@ import {
 } from '@mui/material'
 import { ChevronRightIcon, ChevronLeftIcon } from 'shared/ui/Icons'
 import { styled } from '@mui/styles'
-import MonthSelectPopover from './MonthSelectPopover'
+import MonthSelectPopover from 'shared/ui/MonthSelectPopover'
 import { formatDate } from 'shared/helpers/date'
 import { Modify, TDateDraft, TISOMonth } from 'shared/types'
 import {

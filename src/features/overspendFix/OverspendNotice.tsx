@@ -1,19 +1,20 @@
 import React, { FC } from 'react'
 import { useAppDispatch, useAppSelector } from 'store'
-import { getUserCurrencyCode } from 'models/instrument'
 import { Box, Typography, Button } from '@mui/material'
 import { WarningIcon } from 'shared/ui/Icons'
 import { Amount } from 'components/Amount'
 import { Confirm } from 'shared/ui/Confirm'
-import { fixOverspends } from 'pages/Budgets/thunks'
-import { getTotalsByMonth } from 'pages/Budgets/selectors'
-import { useMonth } from 'pages/Budgets/pathHooks'
+import { overspendModel } from './model'
+import { TISOMonth } from 'shared/types'
 
-export const OverspentNotice: FC = () => {
-  const [month] = useMonth()
-  const overspent = useAppSelector(getTotalsByMonth)?.[month]?.overspent
-  const currency = useAppSelector(getUserCurrencyCode)
+export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
   const dispatch = useAppDispatch()
+  const { totalOverspendValue, currency, envelopes } = useAppSelector(
+    overspendModel.get
+  )?.[month]
+
+  if (totalOverspendValue === 0) return null
+  console.log('Overspending envelopes', envelopes)
 
   return (
     <Box
@@ -30,7 +31,8 @@ export const OverspentNotice: FC = () => {
       </Box>
       <Box ml={1.5}>
         <Typography variant="subtitle1">
-          Перерасход <Amount value={overspent} currency={currency} noShade />.
+          Перерасход{' '}
+          <Amount value={-totalOverspendValue} currency={currency} noShade />.
         </Typography>
         <Typography variant="body2">
           Добавьте денег в категории с отрицательным балансом, чтобы быть
@@ -39,7 +41,7 @@ export const OverspentNotice: FC = () => {
         <Box mt={1} ml={-1}>
           <Confirm
             title="Избавиться от перерасходов?"
-            onOk={() => dispatch(fixOverspends(month))}
+            onOk={() => dispatch(overspendModel.fixAll(month))}
             okText="Покрыть перерасходы"
             cancelText="Отмена"
           >

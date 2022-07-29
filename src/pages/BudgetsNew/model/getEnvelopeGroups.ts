@@ -1,10 +1,10 @@
 import { createSelector } from '@reduxjs/toolkit'
 import {
-  getComputedTotals,
+  getMonthTotals,
   getEnvelopeStructure,
   TEnvelopeBudgets,
+  IEnvelopeWithData,
 } from 'models/envelopes'
-import { IEnvelopeWithData } from 'models/envelopes/calculateEnvelopes'
 import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 import { addFxAmount, convertFx, isZero } from 'shared/helpers/currencyHelpers'
 import { keys } from 'shared/helpers/keys'
@@ -42,7 +42,7 @@ export type TGroupInfo = {
 
 export const getEnvelopeGroups: TSelector<Record<TISOMonth, TGroupInfo[]>> =
   createSelector(
-    [getComputedTotals, getEnvelopeStructure],
+    [getMonthTotals, getEnvelopeStructure],
     (computedTotals, structure) => {
       const result: Record<TISOMonth, TGroupInfo[]> = {}
 
@@ -55,10 +55,10 @@ export const getEnvelopeGroups: TSelector<Record<TISOMonth, TGroupInfo[]>> =
             populateEnvelope(node.id, node.children, monthInfo)
           )
 
-          const leftover = addFxAmount(...children.map(e => e.leftover))
-          const budgeted = addFxAmount(...children.map(e => e.budgeted))
-          const activity = addFxAmount(...children.map(e => e.activity))
-          const available = addFxAmount(...children.map(e => e.available))
+          const leftover = addFxAmount(...children.map(e => e.totalLeftover))
+          const budgeted = addFxAmount(...children.map(e => e.totalBudgeted))
+          const activity = addFxAmount(...children.map(e => e.totalActivity))
+          const available = addFxAmount(...children.map(e => e.totalAvailable))
 
           return {
             name: group.name,
@@ -96,13 +96,13 @@ function populateEnvelope(
   const convert = (a: TFxAmount) =>
     convertFx(a, displayCurrency, monthInfo.rates)
 
-  const displayLeftover = convert(envelope.leftover)
-  const displayBudgeted = convert(envelope.budgeted)
-  const displayActivity = convert(envelope.activity)
-  const displayAvailable = convert(envelope.available)
+  const displayLeftover = convert(envelope.totalLeftover)
+  const displayBudgeted = convert(envelope.totalBudgeted)
+  const displayActivity = convert(envelope.totalActivity)
+  const displayAvailable = convert(envelope.totalAvailable)
 
   let displayHiddenOverspend = 0
-  const availableSelf = convert(envelope.availableSelf)
+  const availableSelf = convert(envelope.selfAvailable)
   if (displayAvailable >= 0 && availableSelf < 0) {
     displayHiddenOverspend = availableSelf
   }
@@ -121,9 +121,9 @@ function populateEnvelope(
     isDefaultVisible:
       envelope.showInBudget ||
       !!envelope.goal ||
-      !isZero(envelope.budgeted) ||
-      !isZero(envelope.activity) ||
-      !isZero(envelope.available) ||
+      !isZero(envelope.selfBudgeted) ||
+      !isZero(envelope.selfActivity) ||
+      !isZero(envelope.selfAvailable) ||
       (hasChildren && hasVisibleChildren),
     displayCurrency,
     displayLeftover,
@@ -133,7 +133,7 @@ function populateEnvelope(
     displayHiddenOverspend,
     hasCustomCurency,
     children:
-      !isZero(envelope.activitySelf) && hasChildren
+      !isZero(envelope.selfActivity) && hasChildren
         ? [populateSelfEnvelope(envelope, monthInfo), ...populatedChildren]
         : populatedChildren,
     isSelf: false,
@@ -156,10 +156,10 @@ function populateSelfEnvelope(
     name: `${envelope.name} (основная)`,
     isDefaultVisible: true,
     displayCurrency,
-    displayLeftover: convert(envelope.leftoverSelf),
-    displayBudgeted: convert(envelope.budgetedSelf),
-    displayActivity: convert(envelope.activitySelf),
-    displayAvailable: convert(envelope.availableSelf),
+    displayLeftover: convert(envelope.selfLeftover),
+    displayBudgeted: convert(envelope.selfBudgeted),
+    displayActivity: convert(envelope.selfActivity),
+    displayAvailable: convert(envelope.selfAvailable),
     displayHiddenOverspend: 0,
     hasCustomCurency: envelope.currency !== displayCurrency,
     children: [],

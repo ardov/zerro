@@ -14,10 +14,10 @@ import { AmountInput } from 'shared/ui/AmountInput'
 import { getGoals, setGoal, deleteGoal } from 'models/hiddenData/goals'
 import { goalType } from 'models/hiddenData/constants'
 import { CloseIcon } from 'shared/ui/Icons'
-import MonthSelectPopover from 'pages/Budgets/MonthSelectPopover'
 import { formatDate } from 'shared/helpers/date'
 import { TDateDraft, TGoal } from 'shared/types'
 import { toISODate } from 'shared/helpers/date'
+import MonthSelectPopover from 'shared/ui/MonthSelectPopover'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 

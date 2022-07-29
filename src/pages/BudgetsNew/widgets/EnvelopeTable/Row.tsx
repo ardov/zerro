@@ -58,7 +58,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
     openTransactionsPopover,
     openDetails,
   } = props
-  let { id, comment, currency, name, color, symbol, budgeted, isSelf } =
+  let { id, comment, currency, name, color, symbol, totalBudgeted, isSelf } =
     envelope
 
   const { dragMode } = useContext(DragModeContext)
@@ -69,7 +69,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
   }
 
   const isChild = !!envelope.parent || isSelf
-  const showBudget = isChild ? !isZero(budgeted) : true
+  const showBudget = isChild ? !isZero(totalBudgeted) : true
 
   return (
     <Wrapper
@@ -110,7 +110,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
 
       {(metric === 'outcome' || !isMobile) && (
         <OutcomeCell
-          activity={envelope.activity}
+          activity={envelope.totalActivity}
           displayActivity={envelope.displayActivity}
           onClick={e => openTransactionsPopover(id)}
         />
