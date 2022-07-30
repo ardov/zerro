@@ -20,6 +20,7 @@ import { useMonth } from '../model'
 import { Amount } from 'components/Amount'
 import { TDateDraft } from 'shared/types'
 import { keys } from 'shared/helpers/keys'
+import { getMonthTotals } from 'models/envelopes'
 
 type TColor = 'error' | 'warning' | 'success'
 
@@ -57,6 +58,7 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
   const { small, className, ...rest } = props
   const [month] = useMonth()
   const currency = useAppSelector(getUserCurrencyCode)
+  const totals2 = useAppSelector(getMonthTotals)[month]
   const totalsByMonth = useAppSelector(getTotalsByMonth)
   const firstMonth = keys(totalsByMonth).sort()[0]
   const isFirstMonth = month === firstMonth
@@ -74,7 +76,7 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
       <Typography noWrap align="center" variant={isMobile ? 'body1' : 'h5'}>
         {toBeBudgeted ? (
           <Amount
-            value={toBeBudgeted}
+            value={totals2.toBeBudgeted}
             currency={currency}
             decMode="ifAny"
             noShade

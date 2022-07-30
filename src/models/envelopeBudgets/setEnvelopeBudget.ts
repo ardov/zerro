@@ -7,7 +7,7 @@ import { AppThunk } from 'store'
 import { applyClientPatch } from 'store/data'
 import { budgetStore } from './budgetStore'
 
-type TBudgetUpdate = {
+export type TBudgetUpdate = {
   id: TEnvelopeId
   month: TISOMonth
   value: number

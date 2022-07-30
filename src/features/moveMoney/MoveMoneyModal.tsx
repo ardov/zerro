@@ -1,21 +1,21 @@
 import React, { FC, useState } from 'react'
 import Dialog, { DialogProps } from '@mui/material/Dialog'
-import TagChip from 'components/TagChip'
 import { AmountInput } from 'shared/ui/AmountInput'
 import { ArrowForwardIcon, ArrowRightAltIcon } from 'shared/ui/Icons'
-import { Box, InputAdornment, IconButton } from '@mui/material'
-import { getAmountsById } from '../selectors'
-import { moveFunds } from '../thunks'
-import { getTotalsByMonth } from '../selectors'
-import { RootState, useAppDispatch, useAppSelector } from 'store'
+import { Box, InputAdornment, IconButton, Chip } from '@mui/material'
+import { moveMoney } from './moveMoney'
+import { useAppDispatch, useAppSelector } from 'store'
 import { Modify, TISOMonth } from 'shared/types'
+import { TEnvelopeId } from 'models/shared/envelopeHelpers'
+import { getMonthTotals } from 'models/envelopes'
+import { convertFx } from 'shared/helpers/currencyHelpers'
 
-type MoveMoneyModalProps = Modify<
+export type MoveMoneyModalProps = Modify<
   DialogProps,
   {
     month: TISOMonth
-    source: string
-    destination: string
+    source: TEnvelopeId | 'toBeBudgeted'
+    destination: TEnvelopeId | 'toBeBudgeted'
     onClose: () => void
   }
 >
@@ -23,32 +23,58 @@ type MoveMoneyModalProps = Modify<
 export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   const dispatch = useAppDispatch()
   const { open, onClose, source, month, destination } = props
-  const sourceAvailable = useAppSelector(state =>
-    getAvailableFor(state, month, source)
-  )
-  const destinationAvailable = useAppSelector(state =>
-    getAvailableFor(state, month, destination)
-  )
-  const suggestedAmount = suggestAmount(
-    sourceAvailable,
-    destinationAvailable,
-    1000
-  )
+
+  const totals = useAppSelector(getMonthTotals)[month]
+
+  const sourceName =
+    source === 'toBeBudgeted' ? 'To be budgeted' : totals.envelopes[source].name
+  const destinationName =
+    destination === 'toBeBudgeted'
+      ? 'To be budgeted'
+      : totals.envelopes[destination].name
+
+  const sourceValue =
+    source === 'toBeBudgeted'
+      ? totals.toBeBudgeted
+      : convertFx(
+          totals.envelopes[source].selfAvailable,
+          totals.currency,
+          totals.rates
+        )
+  const destinationValue =
+    destination === 'toBeBudgeted'
+      ? totals.toBeBudgeted
+      : convertFx(
+          totals.envelopes[destination].selfAvailable,
+          totals.currency,
+          totals.rates
+        )
+
+  const suggestedAmount = suggestAmount(sourceValue, destinationValue, 1000)
 
   const [amount, setAmount] = useState(suggestedAmount)
   const handleSubmit = () => {
-    if (amount) dispatch(moveFunds(amount, source, destination, month))
+    if (amount) dispatch(moveMoney(amount, source, destination, month))
     onClose()
   }
+
+  console.log(sourceValue, destinationValue, suggestedAmount)
+
   return (
     <Dialog open={open} onClose={onClose}>
       <Box display="flex" flexDirection="column" p={2}>
-        <Box display="flex" alignItems="center" justifyContent="center" mb={2}>
-          <TagChip id={source} />
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          gap={1}
+          mb={2}
+        >
+          <Chip label={sourceName} />
           <Box mx={1} display="flex" alignItems="center">
             <ArrowRightAltIcon />
           </Box>
-          <TagChip id={destination} />
+          <Chip label={destinationName} />
         </Box>
         <AmountInput
           value={amount}
@@ -73,19 +99,12 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   )
 }
 
-function getAvailableFor(state: RootState, month: TISOMonth, id: string) {
-  if (!id) return 0
-  if (id === 'toBeBudgeted')
-    return +getTotalsByMonth(state)?.[month]?.toBeBudgeted
-  return +getAmountsById(state)?.[month]?.[id]?.available
-}
-
 function suggestAmount(from = 0, to = 0, defaultAmount = 1000) {
   // No money to move --> 0
   if (from <= 0) return 0
-  // Enough money to cover overspent --> overspent
+  // Enough money to cover overspend --> overspend
   if (to < 0 && from >= -to) return -to
-  // Not enough money to cover overspent --> move all we have
+  // Not enough money to cover overspend --> move all we have
   if (to < 0 && from < -to) return from
   // Less money than default value --> move all we have
   if (to >= 0 && from < defaultAmount) return from
