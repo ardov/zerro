@@ -9,12 +9,11 @@ import { TISOMonth } from 'shared/types'
 
 export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
   const dispatch = useAppDispatch()
-  const { totalOverspendValue, currency, envelopes } = useAppSelector(
+  const { totalOverspendValue, currency } = useAppSelector(
     overspendModel.get
   )?.[month]
 
   if (totalOverspendValue === 0) return null
-  console.log('Overspending envelopes', envelopes)
 
   return (
     <Box

@@ -58,8 +58,6 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
     onClose()
   }
 
-  console.log(sourceValue, destinationValue, suggestedAmount)
-
   return (
     <Dialog open={open} onClose={onClose}>
       <Box display="flex" flexDirection="column" p={2}>
