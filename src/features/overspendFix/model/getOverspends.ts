@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getMonthTotals } from 'models/envelopes'
-import { TMonthTotals } from 'models/envelopes/getMonthTotals'
+import { getMonthTotals } from 'models/envelopeData'
+import { TMonthTotals } from 'models/envelopeData/getMonthTotals'
 import { addFxAmount, convertFx } from 'shared/helpers/currencyHelpers'
 import { keys } from 'shared/helpers/keys'
 import { TFxAmount, TISOMonth } from 'shared/types'

@@ -1,3 +1,5 @@
+export type { TAccountDraft } from './thunks'
+
 export { convertAccount } from './zm-adapter'
 
 // Selectors
@@ -11,8 +13,7 @@ export {
 } from './selectors'
 
 // Thunks
-export { checkDataAcc } from './thunks'
-export { setInBudget } from './thunks'
+export { patchAccount, setInBudget } from './thunks'
 
 // Helpers
 export { makeAccount } from './makeAccount'

@@ -1,5 +1,5 @@
 import { HiddenDataType, makeMonthlyHiddenStore } from 'models/hidden-store'
-import { TEnvelopeId } from 'models/shared/envelopeHelpers'
+import { TEnvelopeId } from 'shared/types'
 import { TGoal } from './types'
 
 export type TGoals = Record<TEnvelopeId, TGoal | null>

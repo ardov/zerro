@@ -8,17 +8,17 @@ import { Box, Drawer, Theme, useMediaQuery } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { GoalsProgressWidget } from './components/GoalsProgressWidget'
 import { DnDContext } from './components/DnDContext'
-import { TagPreview } from './components/TagPreview'
+import { EnvelopePreview } from './widgets/EnvelopePreview'
 import { Helmet } from 'react-helmet'
 import { formatDate } from 'shared/helpers/date'
 import { useHotkeys } from 'react-hotkeys-hook'
-
 import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
 import { nextMonth, prevMonth, toISOMonth } from 'shared/helpers/date'
-import { getMonthTotals, getMonthList } from 'models/envelopes'
+import { getMonthList } from 'models/envelopeData'
 import { EnvelopeTable } from './widgets/EnvelopeTable'
 import { useMonth } from './model'
+import { TEnvelopeId } from 'shared/types'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
@@ -78,15 +78,15 @@ const useStyles = makeStyles(theme => ({
   treemap: { gridArea: 'treemap' },
 }))
 
+type TDrawerId = TEnvelopeId | 'overview'
+
 function Budgets() {
   const monthList = useAppSelector(getMonthList)
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
   const [month, setMonth] = useMonth()
 
-  const envBudgets = useAppSelector(getMonthTotals)[month]
-
-  const [drawerId, setDrawerId] = useSearchParam('drawer')
+  const [drawerId, setDrawerId] = useSearchParam<TDrawerId>('drawer')
   const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))
   const c = useStyles()
   const drawerVisibility = !isMD || !!drawerId
@@ -109,8 +109,8 @@ function Budgets() {
   )
 
   const openOverview = useCallback(() => setDrawerId('overview'), [setDrawerId])
-  const openTagInfo = useCallback(
-    (id: string | null | undefined) => setDrawerId(id),
+  const openEnvelopeInfo = useCallback(
+    (id: TEnvelopeId | null) => setDrawerId(id),
     [setDrawerId]
   )
   const closeDrawer = useCallback(() => setDrawerId(), [setDrawerId])
@@ -135,14 +135,8 @@ function Budgets() {
             <ToBeBudgeted className={c.toBeBudgeted} onClick={openOverview} />
             <EnvelopeTable
               className={c.tags}
-              openDetails={openTagInfo}
-              onOpenMonthDrawer={openOverview}
+              onOpenDetails={openEnvelopeInfo}
             />
-            {/* <TagTable
-              className={c.tags}
-              openDetails={openTagInfo}
-              onOpenMonthDrawer={openOverview}
-            /> */}
           </Box>
 
           <Drawer
@@ -155,7 +149,9 @@ function Budgets() {
             {(!drawerId || drawerId === 'overview') && (
               <MonthInfo onClose={closeDrawer} />
             )}
-            {drawerId && <TagPreview onClose={closeDrawer} id={drawerId} />}
+            {drawerId && drawerId !== 'overview' && (
+              <EnvelopePreview onClose={closeDrawer} id={drawerId} />
+            )}
           </Drawer>
 
           <BudgetTransactionsDrawer />

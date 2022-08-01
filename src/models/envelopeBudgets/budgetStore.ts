@@ -1,5 +1,5 @@
 import { HiddenDataType, makeMonthlyHiddenStore } from 'models/hidden-store'
-import { TEnvelopeId } from 'models/shared/envelopeHelpers'
+import { TEnvelopeId } from 'shared/types'
 
 export type TBudgets = Record<TEnvelopeId, number>
 

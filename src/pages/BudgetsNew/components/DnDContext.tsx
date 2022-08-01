@@ -5,8 +5,8 @@ import { useMonth } from '../model'
 import { useCallback } from 'react'
 import { MoveMoneyModal } from 'features/moveMoney'
 import { moveTag } from 'models/hiddenData/tagOrder'
-import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 import { useToggle } from 'shared/hooks/useToggle'
+import { TEnvelopeId } from 'shared/types'
 
 export type DragModeType = 'FUNDS' | 'REORDER'
 type DragModeContextType = {

@@ -20,7 +20,7 @@ import { useMonth } from '../model'
 import { Amount } from 'components/Amount'
 import { TDateDraft } from 'shared/types'
 import { keys } from 'shared/helpers/keys'
-import { getMonthTotals } from 'models/envelopes'
+import { getMonthTotals } from 'models/envelopeData'
 
 type TColor = 'error' | 'warning' | 'success'
 

@@ -1,6 +1,5 @@
-import { OptionalExceptFor } from 'shared/types'
-import { ITag } from 'shared/types'
 import { v1 as uuidv1 } from 'uuid'
+import { OptionalExceptFor, ITag } from 'shared/types'
 
 type TagDraft = OptionalExceptFor<ITag, 'user' | 'title'>
 

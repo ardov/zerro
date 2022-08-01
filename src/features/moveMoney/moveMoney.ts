@@ -1,9 +1,8 @@
 import { setEnvelopeBudgets, TBudgetUpdate } from 'models/envelopeBudgets'
-import { getMonthTotals } from 'models/envelopes'
-import { TEnvelopeId } from 'models/shared/envelopeHelpers'
+import { getMonthTotals } from 'models/envelopeData'
 import { convertFx, round } from 'shared/helpers/currencyHelpers'
 import { sendEvent } from 'shared/helpers/tracking'
-import { TISOMonth } from 'shared/types'
+import { TISOMonth, TEnvelopeId } from 'shared/types'
 import { AppThunk } from 'store'
 
 export const moveMoney =

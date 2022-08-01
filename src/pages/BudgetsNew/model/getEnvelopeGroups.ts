@@ -4,11 +4,16 @@ import {
   getEnvelopeStructure,
   TEnvelopeBudgets,
   IEnvelopeWithData,
-} from 'models/envelopes'
-import { TEnvelopeId } from 'models/shared/envelopeHelpers'
+} from 'models/envelopeData'
 import { addFxAmount, convertFx, isZero } from 'shared/helpers/currencyHelpers'
 import { keys } from 'shared/helpers/keys'
-import { Modify, TFxAmount, TFxCode, TISOMonth } from 'shared/types'
+import {
+  Modify,
+  TEnvelopeId,
+  TFxAmount,
+  TFxCode,
+  TISOMonth,
+} from 'shared/types'
 import { TSelector } from 'store'
 
 export type TEnvelopePopulated = Modify<

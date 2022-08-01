@@ -1,4 +1,3 @@
-import { TEnvelopeId, TEnvelopeType } from 'models/shared/envelopeHelpers'
 import {
   DataEntity,
   TAccountId,
@@ -8,6 +7,8 @@ import {
   TTagId,
   ITransaction,
   TFxAmount,
+  TEnvelopeId,
+  TEnvelopeType,
 } from 'shared/types'
 
 interface IEnvelopeBase {

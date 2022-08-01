@@ -1,71 +1,85 @@
 import React, { FC, useEffect, useState } from 'react'
-import { useAppSelector } from 'store'
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { Box, BoxProps, useTheme } from '@mui/material'
-import { formatDate } from 'shared/helpers/date'
 import Rhythm from 'shared/ui/Rhythm'
-import { getAmountsById } from 'pages/Budgets/selectors'
-import { getMonthDates } from 'pages/Budgets/selectors'
-import { useMonth } from 'pages/Budgets/pathHooks'
 import { DataLine } from 'shared/ui/DataLine'
-import { TISOMonth } from 'shared/types'
+import { formatDate } from 'shared/helpers/date'
+import { keys } from 'shared/helpers/keys'
+import { convertFx } from 'shared/helpers/currencyHelpers'
+import { TEnvelopeId, TFxAmount, TISOMonth } from 'shared/types'
+import { useAppSelector } from 'store'
+import { getMonthTotals } from 'models/envelopeData'
+import { useMonth } from 'pages/BudgetsNew/model'
 
-type OutcomWidgetProps = BoxProps & {
-  tagId: string
-}
+type ActivityWidgetProps = BoxProps & { id: TEnvelopeId }
 
-export const OutcomeWidget: FC<OutcomWidgetProps> = ({
-  tagId,
+export const ActivityWidget: FC<ActivityWidgetProps> = ({
+  id,
   ...boxProps
 }) => {
   const [month, setMonth] = useMonth()
-  const [selected, setSelected] = useState(month)
-  const allAmounts = useAppSelector(getAmountsById)
-  const dates = useAppSelector(getMonthDates)
+  const [highlighted, setHighlighted] = useState(month)
+  const totals = useAppSelector(getMonthTotals)
+  const { currency } = totals[month].envelopes[id]
+  const dates = keys(totals)
   const dateRange = getDateRange(dates, 12, month)
 
-  const data = dateRange.map(date => {
-    const tagData = allAmounts[date][tagId]
-    let outcome = tagData.totalOutcome
-    let leftover = tagData.totalLeftover
-    let budgeted = tagData.totalBudgeted
-    let available = tagData.totalAvailable
-    let startingAmount = available + outcome
-    if (outcome < 0) {
+  const data = dateRange.map(month => {
+    const envelope = totals[month].envelopes[id]
+    const toEnvelope = (a: TFxAmount) =>
+      convertFx(a, currency, totals[month].rates)
+    let activity = toEnvelope(envelope.totalActivity)
+    let leftover = toEnvelope(envelope.totalLeftover)
+    let budgeted = toEnvelope(envelope.totalBudgeted)
+    let available = toEnvelope(envelope.totalAvailable)
+    let startingAmount = leftover + budgeted
+    if (activity > 0) {
       // Handle positive outcome. It's possible with income transfers
-      outcome = 0
+      activity = 0
       startingAmount = available
     }
 
     // Prevent chart going weird
     if (startingAmount < 0) startingAmount = 0
 
-    return { date, outcome, leftover, budgeted, available, startingAmount }
+    return {
+      date: month,
+      activity: -activity,
+      leftover,
+      budgeted,
+      available,
+      startingAmount,
+    }
   })
 
-  const selectedData = data.find(node => node.date === selected)
+  const selectedData = data.find(node => node.date === highlighted)
   useEffect(() => {
-    setSelected(month)
+    setHighlighted(month)
   }, [month])
 
   const theme = useTheme()
-  const outcomeColor = theme.palette.info.main
+  const activityColor = theme.palette.info.main
   const budgetLineColor = theme.palette.background.default
   const startingAmountColor = theme.palette.primary.main
 
   const StartingAmountTooltip = (
     <Rhythm gap={0.5}>
-      <DataLine name="Бюджет в этом месяце" amount={selectedData?.budgeted} />
+      <DataLine
+        name="Бюджет в этом месяце"
+        amount={selectedData?.budgeted}
+        currency={currency}
+      />
       <DataLine
         name="Остаток с прошлого месяца"
         amount={selectedData?.leftover}
+        currency={currency}
       />
     </Rhythm>
   )
 
   const onMouseMove = (e: any) => {
-    if (e?.activeLabel && e.activeLabel !== selected) {
-      setSelected(e.activeLabel)
+    if (e?.activeLabel && e.activeLabel !== highlighted) {
+      setHighlighted(e.activeLabel)
     }
   }
   const onClick = (e: any) => {
@@ -79,14 +93,16 @@ export const OutcomeWidget: FC<OutcomWidgetProps> = ({
       <Rhythm gap={0.5} pt={2} px={2}>
         <DataLine
           name="Расход"
-          color={outcomeColor}
-          amount={selectedData?.outcome}
+          color={activityColor}
+          amount={selectedData?.activity}
+          currency={currency}
         />
         <DataLine
-          name={`Доступно на ${formatDate(selected, 'LLL')}`}
+          name={`Доступно на ${formatDate(highlighted, 'LLL')}`}
           color={startingAmountColor}
           colorOpacity={0.2}
           amount={selectedData?.startingAmount}
+          currency={currency}
           tooltip={StartingAmountTooltip}
         />
       </Rhythm>
@@ -99,7 +115,7 @@ export const OutcomeWidget: FC<OutcomWidgetProps> = ({
             barGap={0}
             onMouseMove={onMouseMove}
             onClick={onClick}
-            onMouseLeave={() => setSelected(month)}
+            onMouseLeave={() => setHighlighted(month)}
           >
             <Bar
               dataKey="startingAmount"
@@ -110,11 +126,11 @@ export const OutcomeWidget: FC<OutcomWidgetProps> = ({
               }
             />
             <Bar
-              dataKey="outcome"
-              fill={outcomeColor}
+              dataKey="activity"
+              fill={activityColor}
               shape={
                 // @ts-ignore
-                <OutcomeBar current={selected} />
+                <ActivityBar current={highlighted} />
               }
             />
             <Bar
@@ -163,13 +179,14 @@ const BudgetBar: FC<BarProps> = ({ fill, x, y, width, height }) => {
   )
 }
 
-type OutcomeBarProps = BarProps & {
+type ActivityBarProps = BarProps & {
   date: number
   current: number
 }
 
-const OutcomeBar: FC<OutcomeBarProps> = props => {
+const ActivityBar: FC<ActivityBarProps> = props => {
   const { fill, x, y, width, height, date, current } = props
+
   return (
     <>
       {height > 0 && (
@@ -196,13 +213,13 @@ const OutcomeBar: FC<OutcomeBarProps> = props => {
 }
 
 type BudgetLineProps = BarProps & {
-  outcome: number
+  activity: number
   startingAmount: number
 }
 
 const BudgetLine: FC<BudgetLineProps> = props => {
-  const { fill, x, y, width, outcome, startingAmount } = props
-  if (startingAmount >= outcome || !outcome) return null
+  const { fill, x, y, width, activity, startingAmount } = props
+  if (startingAmount >= activity || !activity) return null
   return (
     <rect x={x - width * 2} y={y} width={width * 3} height={1} fill={fill} />
   )

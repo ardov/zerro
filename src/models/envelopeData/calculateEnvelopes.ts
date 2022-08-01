@@ -1,16 +1,22 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { TEnvelopeId } from 'models/shared/envelopeHelpers'
-import { getMonthDates } from 'pages/Budgets/selectors'
-import { ById, ITransaction, TFxAmount, TISOMonth, TRates } from 'shared/types'
-import { getEnvelopes, IEnvelope } from './parts/envelopes'
+import {
+  ById,
+  ITransaction,
+  TEnvelopeId,
+  TFxAmount,
+  TISOMonth,
+  TRates,
+} from 'shared/types'
 import { keys } from 'shared/helpers/keys'
-import { getActivity, TEnvelopeNode, TMonthActivity } from './parts/activity'
 import { addFxAmount, convertFx, round } from 'shared/helpers/currencyHelpers'
+import { TSelector } from 'store'
 import { TFxRates } from 'models/fxRate/fxRateStore'
 import { getFxRatesGetter } from 'models/fxRate'
 import { getEnvelopeBudgets } from 'models/envelopeBudgets'
 import { calculateGoalProgress, getGoals, TGoal } from 'models/goal'
-import { TSelector } from 'store'
+import { getEnvelopes, IEnvelope } from 'models/envelope'
+import { getActivity, TEnvelopeNode, TMonthActivity } from './parts/activity'
+import { getMonthList } from './parts/monthList'
 
 function makeEnvelopeWithData(e: IEnvelope) {
   return {
@@ -81,7 +87,7 @@ export const getCalculatedEnvelopes: TSelector<
   Record<TISOMonth, ById<IEnvelopeWithData>>
 > = createSelector(
   [
-    getMonthDates,
+    getMonthList,
     getEnvelopes,
     getActivity,
     getEnvelopeBudgets,

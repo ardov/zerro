@@ -9,14 +9,14 @@ function getModifiedPath(key: string, value?: string | null) {
   return path
 }
 
-export function useSearchParam(
+export function useSearchParam<T extends string>(
   key: string
-): [string | null, (id?: string | null) => void] {
+): [T | null, (id?: T | null) => void] {
   const history = useHistory()
   const location = useLocation()
-  const value = new URLSearchParams(location.search).get(key)
+  const value = new URLSearchParams(location.search).get(key) as T | null
   const setValue = useCallback(
-    (id?: string | null) => {
+    (id?: T | null) => {
       history.push(getModifiedPath(key, id))
     },
     [history, key]

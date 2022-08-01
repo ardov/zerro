@@ -28,15 +28,15 @@ import {
   DragModeContext,
   DragModeType,
 } from '../../components/DnDContext'
-import { TFxAmount, TFxCode, TRates } from 'shared/types'
+import { TEnvelopeId, TFxAmount, TFxCode, TRates } from 'shared/types'
 import { getUserCurrencyCode } from 'models/instrument'
 import { SxProps } from '@mui/system'
 import { useAppSelector } from 'store'
-import { TEnvelopePopulated, useMonth, useRates } from '../../model'
+import { TEnvelopePopulated, useMonth } from '../../model'
 import { convertFx, isZero } from 'shared/helpers/currencyHelpers'
 import { keys } from 'shared/helpers/keys'
-import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 import { goalToWords, TGoal } from 'models/goal'
+import { useRates } from 'models/envelopeData'
 
 type EnvelopeRowProps = {
   envelope: TEnvelopePopulated

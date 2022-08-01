@@ -9,15 +9,15 @@ import {
   TInstrumentId,
   TFxCode,
   TFxAmount,
+  TEnvelopeId,
 } from 'shared/types'
 import { toISOMonth } from 'shared/helpers/date'
 import { getTransactionsHistory, TrType } from 'models/transaction'
 import { getDebtAccountId, getInBudgetAccounts } from 'models/account'
-import { getEnvelopeId, TEnvelopeId } from 'models/shared/envelopeHelpers'
+import { getEnvelopeId, getEnvelopes } from 'models/envelope'
 import { cleanPayee } from 'models/shared/cleanPayee'
 import { createSelector } from '@reduxjs/toolkit'
 import { TSelector } from 'store'
-import { getEnvelopes } from './envelopes'
 import { getInstruments } from 'models/instrument'
 import { getDebtors } from 'models/debtors'
 

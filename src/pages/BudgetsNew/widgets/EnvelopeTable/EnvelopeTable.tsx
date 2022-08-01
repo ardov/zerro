@@ -1,5 +1,6 @@
 import React, { FC, useState } from 'react'
-import { BoxProps, Paper, Stack, Typography } from '@mui/material'
+import { Paper, Stack, Typography } from '@mui/material'
+import { TEnvelopeId, TISOMonth } from 'shared/types'
 import {
   TGroupInfo,
   useEnvelopeGroups,
@@ -9,18 +10,16 @@ import {
 import { Parent } from './Parent'
 import { Row } from './Row'
 import { BudgetPopover } from '../BudgetPopover'
-import { TEnvelopeId } from 'models/shared/envelopeHelpers'
-import { TISOMonth } from 'shared/types'
 import { GoalPopover } from '../GoalPopover'
 
 type TagTableProps = {
-  openDetails: (id: string) => void
-  onOpenMonthDrawer: () => void
-  sx?: BoxProps['sx']
-  className: string
+  onOpenDetails: (id: TEnvelopeId) => void
+  className?: string
+  // sx?: BoxProps['sx']
 }
 
 export const EnvelopeTable: FC<TagTableProps> = props => {
+  const { onOpenDetails, className } = props
   const [month] = useMonth()
   const groups = useEnvelopeGroups(month)
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
@@ -28,7 +27,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
   const goal = useEnvelopePopover(month, 'goal')
   return (
     <>
-      <Stack spacing={2} className={props.className}>
+      <Stack spacing={2} className={className}>
         {groups.map(group => (
           <EnvelopeGroup key={group.name} group={group}>
             {group.children.map(parent => (
@@ -47,7 +46,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
                     openGoalPopover={goal.onOpen}
                     openBudgetPopover={budget.onOpen}
                     openTransactionsPopover={() => {}}
-                    openDetails={() => {}}
+                    openDetails={onOpenDetails}
                   />
                 }
                 children={parent.children.map(child => (
@@ -58,7 +57,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
                     openGoalPopover={goal.onOpen}
                     openBudgetPopover={budget.onOpen}
                     openTransactionsPopover={() => {}}
-                    openDetails={() => {}}
+                    openDetails={onOpenDetails}
                   />
                 ))}
               />

@@ -3,7 +3,7 @@ import { useAppSelector } from 'store'
 import { Box } from '@mui/material'
 import { Total } from '../components'
 import { useMonth } from 'pages/Budgets/pathHooks'
-import { getMonthTotals } from 'models/envelopes'
+import { getMonthTotals } from 'models/envelopeData'
 import { convertFx } from 'shared/helpers/currencyHelpers'
 
 export function WidgetOutcome() {

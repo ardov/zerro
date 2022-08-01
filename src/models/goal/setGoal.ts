@@ -1,7 +1,6 @@
 import { makeGoal } from './helpers'
-import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 import { sendEvent } from 'shared/helpers/tracking'
-import { TISOMonth } from 'shared/types'
+import { TEnvelopeId, TISOMonth } from 'shared/types'
 import { AppThunk } from 'store'
 import { goalStore } from './goalStore'
 import { TGoal } from './types'

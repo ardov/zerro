@@ -1,38 +1,27 @@
-import { getRootUser } from 'models/user'
 import { getAccounts } from './index'
 import { AppThunk } from 'store'
 import { sendEvent } from 'shared/helpers/tracking'
-import { getDataAccountId } from '../hiddenData/selectors'
-import { makeDataAcc } from '../hiddenData/helpers'
-import { TAccountId } from 'shared/types'
+import { IAccount, OptionalExceptFor, TAccountId } from 'shared/types'
 import { applyClientPatch } from 'store/data'
 
-const createDataAcc = (): AppThunk => (dispatch, getState) => {
-  sendEvent(`Accounts: Create data accaunt`)
-  const state = getState()
-  const user = getRootUser(state)
-  if (!user) return
-  const acc = makeDataAcc(user.id)
-  dispatch(applyClientPatch({ account: [acc] }))
-}
+export type TAccountDraft = OptionalExceptFor<IAccount, 'id'>
 
-export const checkDataAcc = (): AppThunk => (dispatch, getState) => {
-  const state = getState()
-  if (!getDataAccountId(state)) {
-    dispatch(createDataAcc())
+export const patchAccount =
+  (draft: TAccountDraft): AppThunk<IAccount> =>
+  (dispatch, getState): IAccount => {
+    if (!draft.id) throw new Error('Trying to patch account without id')
+    let current = getAccounts(getState())[draft.id]
+    if (!current) throw new Error('Account not found')
+    const patched = { ...current, ...draft, changed: Date.now() }
+
+    sendEvent('Account: edit')
+    dispatch(applyClientPatch({ account: [patched] }))
+    return patched
   }
-}
 
 export const setInBudget =
   (id: TAccountId, inBalance: boolean): AppThunk =>
   (dispatch, getState) => {
     sendEvent(`Accounts: Set in budget`)
-    const state = getState()
-    const account = getAccounts(state)[id]
-    if (!account) {
-      console.warn('No account found')
-      return
-    }
-    const newAcc = { ...account, inBalance: !!inBalance, changed: Date.now() }
-    dispatch(applyClientPatch({ account: [newAcc] }))
+    dispatch(patchAccount({ id, inBalance: !!inBalance }))
   }

@@ -1,5 +1,4 @@
 import { TDebtor } from 'models/debtors'
-import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 import { TTagPopulated } from 'models/tag'
 import {
   TISOMonth,
@@ -11,8 +10,9 @@ import {
   TAccountId,
   TFxCode,
   TFxAmount,
+  TEnvelopeId,
 } from 'shared/types'
-import { IEnvelope } from './parts/envelopes'
+import { IEnvelope } from 'models/envelope'
 
 type TStoredEnvelopeInfo = {
   id: TEnvelopeId

@@ -1,6 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { TEnvelopeId } from 'models/shared/envelopeHelpers'
-import { ById, TFxAmount, TFxCode, TISOMonth } from 'shared/types'
+import { ById, TEnvelopeId, TFxAmount, TFxCode, TISOMonth } from 'shared/types'
 import { keys } from 'shared/helpers/keys'
 import { getCurrentFunds } from './parts/currentFunds'
 import { toISOMonth } from 'shared/helpers/date'

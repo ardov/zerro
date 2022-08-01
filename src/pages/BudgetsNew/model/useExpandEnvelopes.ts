@@ -1,8 +1,7 @@
-import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 import { useState } from 'react'
 import { isZero } from 'shared/helpers/currencyHelpers'
 import { toISOMonth } from 'shared/helpers/date'
-import { TISOMonth } from 'shared/types'
+import { TEnvelopeId, TISOMonth } from 'shared/types'
 import { useAppSelector } from 'store'
 import { getEnvelopeGroups } from './getEnvelopeGroups'
 

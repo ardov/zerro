@@ -5,9 +5,8 @@ import { ArrowForwardIcon, ArrowRightAltIcon } from 'shared/ui/Icons'
 import { Box, InputAdornment, IconButton, Chip } from '@mui/material'
 import { moveMoney } from './moveMoney'
 import { useAppDispatch, useAppSelector } from 'store'
-import { Modify, TISOMonth } from 'shared/types'
-import { TEnvelopeId } from 'models/shared/envelopeHelpers'
-import { getMonthTotals } from 'models/envelopes'
+import { Modify, TISOMonth, TEnvelopeId } from 'shared/types'
+import { getMonthTotals } from 'models/envelopeData'
 import { convertFx } from 'shared/helpers/currencyHelpers'
 
 export type MoveMoneyModalProps = Modify<

@@ -15,12 +15,11 @@ import { formatMoney } from 'shared/helpers/format'
 import { convertFx } from 'shared/helpers/currencyHelpers'
 import { sendEvent } from 'shared/helpers/tracking'
 import { Box, BoxProps } from '@mui/system'
-import { TFxAmount, TISOMonth } from 'shared/types'
+import { TEnvelopeId, TFxAmount, TISOMonth } from 'shared/types'
 import { useQuickActions } from './useQuickActions'
-import { getMonthTotals } from 'models/envelopes'
-import { TEnvelopeId } from 'models/shared/envelopeHelpers'
+import { getMonthTotals, useRates } from 'models/envelopeData'
 import { setEnvelopeBudgets } from 'models/envelopeBudgets'
-import { useDisplayCurrency, useRates } from 'pages/BudgetsNew/model'
+import { useDisplayCurrency } from 'pages/BudgetsNew/model'
 
 type TBudgetPopoverProps = PopoverProps & {
   id: TEnvelopeId

@@ -13,12 +13,11 @@ import {
 import { AmountInput } from 'shared/ui/AmountInput'
 import { CloseIcon } from 'shared/ui/Icons'
 import { toISODate, formatDate } from 'shared/helpers/date'
-import { TDateDraft, TISOMonth } from 'shared/types'
+import { TDateDraft, TEnvelopeId, TISOMonth } from 'shared/types'
 import { goalType, setGoal, TGoal } from 'models/goal'
-import { TEnvelopeId } from 'models/shared/envelopeHelpers'
 
 import MonthSelectPopover from 'shared/ui/MonthSelectPopover'
-import { getMonthTotals } from 'models/envelopes'
+import { getMonthTotals } from 'models/envelopeData'
 import { round } from 'shared/helpers/currencyHelpers'
 
 const amountLabels = {
