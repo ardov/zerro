@@ -12,7 +12,7 @@ import {
 } from '@mui/material'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { EmojiIcon } from 'shared/ui/EmojiIcon'
-import { formatMoney } from 'shared/helpers/format'
+import { formatMoney } from 'shared/helpers/money'
 import {
   WarningIcon,
   AddIcon,
@@ -33,7 +33,7 @@ import { getUserCurrencyCode } from 'models/instrument'
 import { SxProps } from '@mui/system'
 import { useAppSelector } from 'store'
 import { TEnvelopePopulated, useMonth } from '../../model'
-import { convertFx, isZero } from 'shared/helpers/currencyHelpers'
+import { convertFx, isZero } from 'shared/helpers/money'
 import { keys } from 'shared/helpers/keys'
 import { goalToWords, TGoal } from 'models/goal'
 import { useRates } from 'models/envelopeData'

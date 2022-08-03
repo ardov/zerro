@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { add, sub } from 'shared/helpers/currencyHelpers'
+import { add, sub } from 'shared/helpers/money'
 import { getDebtAccountId } from 'models/account'
 import { getTransactionsHistory, TrType } from 'models/transaction'
 import { getType } from 'models/transaction/helpers'

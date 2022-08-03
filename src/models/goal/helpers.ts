@@ -1,6 +1,6 @@
 import { goalType, TGoal } from './types'
 import { TDateDraft } from 'shared/types'
-import { formatMoney } from 'shared/helpers/format'
+import { formatMoney } from 'shared/helpers/money'
 import { parseDate, toISODate } from 'shared/helpers/date'
 
 export const makeGoal = (goalDraft?: TGoal | null): TGoal | null => {

@@ -1,5 +1,5 @@
 import { setEnvelopeBudgets } from 'models/envelopeBudgets'
-import { round } from 'shared/helpers/currencyHelpers'
+import { round } from 'shared/helpers/money'
 import { sendEvent } from 'shared/helpers/tracking'
 import { TISOMonth } from 'shared/types'
 import { AppThunk } from 'store'

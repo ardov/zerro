@@ -1,4 +1,4 @@
-import { add } from 'shared/helpers/currencyHelpers'
+import { add } from 'shared/helpers/money'
 import { getType } from 'models/transaction/helpers'
 import {
   DataEntity,

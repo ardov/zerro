@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { isZero } from 'shared/helpers/currencyHelpers'
+import { isZero } from 'shared/helpers/money'
 import { toISOMonth } from 'shared/helpers/date'
 import { TEnvelopeId, TISOMonth } from 'shared/types'
 import { useAppSelector } from 'store'

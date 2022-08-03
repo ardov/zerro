@@ -30,7 +30,7 @@ import { BulkEditModal } from './BulkEditModal'
 import { getType, isNew } from 'models/transaction/helpers'
 import { getTransactions } from 'models/transaction'
 import { Divider, ListItemIcon, ListItemText } from '@mui/material'
-import { round } from 'shared/helpers/currencyHelpers'
+import { round } from 'shared/helpers/money'
 import { applyClientPatch } from 'store/data'
 import { sendEvent } from 'shared/helpers/tracking'
 

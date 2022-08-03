@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { formatMoney } from 'shared/helpers/format'
+import { formatMoney } from 'shared/helpers/money'
 import { OptionalExceptFor, TInstrumentId } from 'shared/types'
 import { getInstruments } from 'models/instrument'
 import { useAppSelector } from 'store'

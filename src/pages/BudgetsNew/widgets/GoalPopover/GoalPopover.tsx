@@ -18,7 +18,7 @@ import { goalType, setGoal, TGoal } from 'models/goal'
 
 import MonthSelectPopover from 'shared/ui/MonthSelectPopover'
 import { getMonthTotals } from 'models/envelopeData'
-import { round } from 'shared/helpers/currencyHelpers'
+import { round } from 'shared/helpers/money'
 
 const amountLabels = {
   [goalType.MONTHLY]: 'Откладывать каждый месяц',

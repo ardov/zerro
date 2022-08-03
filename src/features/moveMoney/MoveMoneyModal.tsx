@@ -7,7 +7,7 @@ import { moveMoney } from './moveMoney'
 import { useAppDispatch, useAppSelector } from 'store'
 import { Modify, TISOMonth, TEnvelopeId } from 'shared/types'
 import { getMonthTotals } from 'models/envelopeData'
-import { convertFx } from 'shared/helpers/currencyHelpers'
+import { convertFx } from 'shared/helpers/money'
 
 export type MoveMoneyModalProps = Modify<
   DialogProps,

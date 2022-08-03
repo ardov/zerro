@@ -2,10 +2,16 @@ import { HiddenDataType, makeSimpleHiddenStore } from 'models/hidden-store'
 import { ById, OptionalExceptFor, TEnvelopeId, TFxCode } from 'shared/types'
 import { AppThunk } from 'store'
 
+export enum envelopeVisibility {
+  hidden = 'hidden',
+  visible = 'visible',
+  auto = 'auto',
+}
+
 export type TEnvelopeMeta = {
   id: TEnvelopeId
   group?: string
-  showInBudget?: boolean
+  visibility?: envelopeVisibility
   parent?: TEnvelopeId
   comment?: string
   currency?: TFxCode

@@ -12,7 +12,7 @@ import {
 } from '@mui/material'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { EmojiIcon } from 'shared/ui/EmojiIcon'
-import { formatMoney } from 'shared/helpers/format'
+import { formatMoney } from 'shared/helpers/money'
 import {
   WarningIcon,
   AddIcon,

@@ -8,7 +8,7 @@ import {
   TRates,
 } from 'shared/types'
 import { keys } from 'shared/helpers/keys'
-import { addFxAmount, convertFx, round } from 'shared/helpers/currencyHelpers'
+import { addFxAmount, convertFx, round } from 'shared/helpers/money'
 import { TSelector } from 'store'
 import { TFxRates } from 'models/fxRate/fxRateStore'
 import { getFxRatesGetter } from 'models/fxRate'

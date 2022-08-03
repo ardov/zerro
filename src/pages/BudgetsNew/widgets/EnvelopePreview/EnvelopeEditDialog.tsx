@@ -20,6 +20,7 @@ import { DataEntity, Modify } from 'shared/types'
 import { ColorPicker } from 'shared/ui/ColorPickerPopover'
 import { useAppDispatch, useAppSelector } from 'store'
 import {
+  envelopeVisibility,
   getEnvelopeId,
   IEnvelope,
   parseEnvelopeId,
@@ -28,6 +29,7 @@ import {
 import { getUserCurrencyCode } from 'models/instrument'
 import { TagSelect } from 'components/TagSelect'
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
+import { VisibilitySelect } from './VisidilitySelect'
 
 // TODO: Доделать модалку для редактирования и создания категорий
 
@@ -58,7 +60,7 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
       parentTagId: envelope?.parent
         ? parseEnvelopeId(envelope.parent).id
         : null,
-      showInBudget: envelope?.showInBudget || false,
+      visibility: envelope?.visibility || envelopeVisibility.auto,
       carryNegatives: envelope?.carryNegatives || false,
       keepIncome: envelope?.keepIncome || false,
       color: envelope?.color || null,
@@ -150,6 +152,12 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
             value={values.currency}
             onChange={handleChange}
           />
+          <VisibilitySelect
+            label="Показывать в бюджете"
+            name="visibility"
+            value={values.visibility}
+            onChange={handleChange}
+          />
           <FormGroup>
             {/* <FormControlLabel
               name="showIncome"
@@ -172,13 +180,13 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
               control={<Checkbox />}
               label="Переносить минусы"
             />
-            <FormControlLabel
+            {/* <FormControlLabel
               name="showInBudget"
               checked={values.showInBudget}
               onChange={handleChange}
               control={<Checkbox />}
               label="Расходная"
-            />
+            /> */}
             {/* <FormControlLabel
               name="budgetOutcome"
               checked={values.budgetOutcome}

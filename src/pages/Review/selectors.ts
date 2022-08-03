@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { round } from 'shared/helpers/currencyHelpers'
+import { round } from 'shared/helpers/money'
 import { getType } from 'models/transaction/helpers'
 import { getAccounts, getStartBalance } from 'models/account'
 import { getSortedTransactions } from 'models/transaction'

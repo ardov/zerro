@@ -1,10 +1,5 @@
 export type { IEnvelope } from './getEnvelopes'
-
-export {
-  setEnvelopeComment,
-  setEnvelopeCurrency,
-  setEnvelopeParent,
-} from './actions'
+export { envelopeVisibility } from './metaData'
 
 export { parseEnvelopeId, getEnvelopeId } from './helpers'
 export { patchEnvelope } from './patchEnvelope'

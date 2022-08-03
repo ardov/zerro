@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react'
 import { Box, Paper, Typography, Collapse, Link, BoxProps } from '@mui/material'
 import QRCode from 'qrcode.react'
-import { formatMoney } from 'shared/helpers/format'
+import { formatMoney } from 'shared/helpers/money'
 import { formatDate } from 'shared/helpers/date'
 import { parseDate } from 'shared/helpers/date'
 

@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { getInBudgetAccounts } from 'models/account'
-import { add } from 'shared/helpers/currencyHelpers'
+import { add } from 'shared/helpers/money'
 import { TFxAmount } from 'shared/types'
 
 export const getCurrentFunds = createSelector([getInBudgetAccounts], accounts =>

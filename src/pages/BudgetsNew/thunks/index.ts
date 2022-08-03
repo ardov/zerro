@@ -19,7 +19,7 @@ import {
   TISOMonth,
 } from 'shared/types'
 import { getMetaForTag } from 'models/hiddenData/tagMeta'
-import { round } from 'shared/helpers/currencyHelpers'
+import { round } from 'shared/helpers/money'
 import { prevMonth, toISODate, toISOMonth } from 'shared/helpers/date'
 import { keys } from 'shared/helpers/keys'
 import { getUserInstrumentId } from 'models/user/model'

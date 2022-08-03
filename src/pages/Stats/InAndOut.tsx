@@ -12,10 +12,10 @@ import {
 } from 'recharts'
 import { DataLine } from 'shared/ui/DataLine'
 import { getHistoryStart, getTransactionsHistory } from 'models/transaction'
-import { formatMoney } from 'shared/helpers/format'
+import { formatMoney } from 'shared/helpers/money'
 import { makeDateArray, startOfMonth, formatDate } from 'shared/helpers/date'
 import { convertCurrency } from 'models/instrument'
-import { round } from 'shared/helpers/currencyHelpers'
+import { round } from 'shared/helpers/money'
 import { getType } from 'models/transaction/helpers'
 
 type Point = {

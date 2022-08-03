@@ -10,7 +10,7 @@ import {
   PopoverProps,
 } from '@mui/material'
 import { CheckCircleIcon } from 'shared/ui/Icons'
-import { formatMoney } from 'shared/helpers/format'
+import { formatMoney } from 'shared/helpers/money'
 import { AmountInput } from 'shared/ui/AmountInput'
 import { getAmountsById } from 'pages/Budgets/selectors'
 import {
@@ -21,7 +21,7 @@ import {
 import { setOutcomeBudget } from 'pages/Budgets/thunks'
 import { getGoals } from 'models/hiddenData/goals'
 import { getGoalsProgress } from 'pages/Budgets/selectors'
-import { round } from 'shared/helpers/currencyHelpers'
+import { round } from 'shared/helpers/money'
 import { sendEvent } from 'shared/helpers/tracking'
 import pluralize from 'shared/helpers/pluralize'
 import { getMetaForTag } from 'models/hiddenData/tagMeta'

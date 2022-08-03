@@ -1,11 +1,12 @@
 import { createSelector } from '@reduxjs/toolkit'
+import { envelopeVisibility } from 'models/envelope'
 import {
   getMonthTotals,
   getEnvelopeStructure,
   TEnvelopeBudgets,
   IEnvelopeWithData,
 } from 'models/envelopeData'
-import { addFxAmount, convertFx, isZero } from 'shared/helpers/currencyHelpers'
+import { addFxAmount, convertFx, isZero } from 'shared/helpers/money'
 import { keys } from 'shared/helpers/keys'
 import {
   Modify,
@@ -123,13 +124,7 @@ function populateEnvelope(
 
   const populated: TEnvelopePopulated = {
     ...envelope,
-    isDefaultVisible:
-      envelope.showInBudget ||
-      !!envelope.goal ||
-      !isZero(envelope.selfBudgeted) ||
-      !isZero(envelope.selfActivity) ||
-      !isZero(envelope.selfAvailable) ||
-      (hasChildren && hasVisibleChildren),
+    isDefaultVisible: getDefaultVisibility(envelope, hasVisibleChildren),
     displayCurrency,
     displayLeftover,
     displayBudgeted,
@@ -170,4 +165,23 @@ function populateSelfEnvelope(
     children: [],
     isSelf: true,
   }
+}
+
+function getDefaultVisibility(
+  envelope: IEnvelopeWithData,
+  hasVisibleChildren: boolean
+): boolean {
+  if (envelope.visibility === envelopeVisibility.visible) {
+    return true
+  }
+  if (envelope.visibility === envelopeVisibility.hidden) {
+    return false
+  }
+  return (
+    !!envelope.goal ||
+    !isZero(envelope.selfBudgeted) ||
+    !isZero(envelope.selfActivity) ||
+    !isZero(envelope.selfAvailable) ||
+    hasVisibleChildren
+  )
 }

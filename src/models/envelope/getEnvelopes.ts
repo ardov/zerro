@@ -14,7 +14,7 @@ import { getDebtors, TDebtor } from 'models/debtors'
 import { getUserCurrencyCode } from 'models/instrument'
 import { getPopulatedTags, TTagPopulated } from 'models/tag'
 import { getEnvelopeId } from 'models/envelope'
-import { getEnvelopeMeta, TEnvelopeMeta } from './metaData'
+import { getEnvelopeMeta, TEnvelopeMeta, envelopeVisibility } from './metaData'
 
 const defaultTagGroup = 'Категории'
 const defaultAccountGroup = 'Переводы'
@@ -29,7 +29,7 @@ export interface IEnvelope {
   name: string // From ZM entity
   symbol: string // From ZM entity
   color: string | null
-  showInBudget: boolean
+  visibility: envelopeVisibility
   // For tags getting this props from ZM entity
   // For other types store in custom storage
   parent: TEnvelopeId | null
@@ -116,7 +116,7 @@ function makeEnvelopeFromTag(
     name: tag.name,
     symbol: tag.symbol,
     color: tag.colorHEX,
-    showInBudget: tag.showOutcome,
+    visibility: getVisibility(info[id]?.visibility, tag.showOutcome),
     parent: tag.parent ? getEnvelopeId(DataEntity.Tag, tag.parent) : null,
     children: [], // fill later
     // children: tag.children.map(childId =>
@@ -143,7 +143,7 @@ function makeEnvelopeFromAccount(
     name: account.title,
     symbol: '🏦',
     color: null,
-    showInBudget: info[id]?.showInBudget || false,
+    visibility: getVisibility(info[id]?.visibility),
     parent: info[id]?.parent || null,
     children: [],
     group: info[id]?.group || defaultAccountGroup,
@@ -168,7 +168,7 @@ function makeEnvelopeFromDebtor(
       name: debtor.name,
       symbol: '👤',
       color: null,
-      showInBudget: info[id]?.showInBudget || false,
+      visibility: getVisibility(info[id]?.visibility),
       parent: info[id]?.parent || null,
       children: [],
       group: info[id]?.group || defaultMerchantGroup,
@@ -187,7 +187,7 @@ function makeEnvelopeFromDebtor(
       name: debtor.name,
       symbol: '🌚',
       color: null,
-      showInBudget: false,
+      visibility: getVisibility(info[id]?.visibility),
       parent: null,
       children: [],
       group: info[id]?.group || defaultPayeeGroup,
@@ -197,4 +197,13 @@ function makeEnvelopeFromDebtor(
       carryNegatives: false,
     }
   }
+}
+
+function getVisibility(
+  isVisible: envelopeVisibility | undefined,
+  tagShowOutcome?: boolean
+): envelopeVisibility {
+  if (isVisible) return isVisible
+  else if (tagShowOutcome) return envelopeVisibility.visible
+  else return envelopeVisibility.auto
 }

@@ -25,7 +25,7 @@ import {
   useEnvelope,
 } from 'models/envelopeData'
 import { TEnvelopeId, TFxAmount } from 'shared/types'
-import { convertFx } from 'shared/helpers/currencyHelpers'
+import { convertFx } from 'shared/helpers/money'
 import { CommentWidget } from './CommentWidget'
 import { goalToWords } from 'models/goal'
 import { cardStyle } from './shared'

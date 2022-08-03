@@ -1,4 +1,4 @@
-import { round } from 'shared/helpers/currencyHelpers'
+import { round } from 'shared/helpers/money'
 import { TISOMonth } from 'shared/types'
 import { differenceInCalendarMonths, toISOMonth } from 'shared/helpers/date'
 import { goalType, TGoal } from './types'

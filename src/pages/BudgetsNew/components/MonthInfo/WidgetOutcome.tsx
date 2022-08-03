@@ -4,7 +4,7 @@ import { Box } from '@mui/material'
 import { Total } from '../components'
 import { useMonth } from 'pages/Budgets/pathHooks'
 import { getMonthTotals } from 'models/envelopeData'
-import { convertFx } from 'shared/helpers/currencyHelpers'
+import { convertFx } from 'shared/helpers/money'
 
 export function WidgetOutcome() {
   const [month] = useMonth()

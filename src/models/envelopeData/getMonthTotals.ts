@@ -11,7 +11,7 @@ import {
   convertFx,
   isEqualFxAmount,
   subFxAmount,
-} from 'shared/helpers/currencyHelpers'
+} from 'shared/helpers/money'
 import { TSelector } from 'store'
 import { getMonthList } from './parts/monthList'
 import { getFxRatesGetter } from 'models/fxRate'

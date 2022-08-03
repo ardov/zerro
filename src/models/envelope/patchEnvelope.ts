@@ -46,9 +46,9 @@ export const patchEnvelope =
               tagPatch.color = getTagColor(draft.color)
             }
             break
-          case 'showInBudget':
+          case 'visibility':
             if (current[key] !== draft[key]) {
-              tagPatch.showOutcome = draft.showInBudget
+              metaPatch[key] = draft[key]
             }
             break
           case 'parent':
@@ -93,9 +93,9 @@ export const patchEnvelope =
           case 'color': // ignore
           case 'children': // ignore
             break
-          case 'showInBudget':
+          case 'visibility':
             if (current[key] !== draft[key]) {
-              metaPatch.showInBudget = draft.showInBudget
+              metaPatch[key] = draft[key]
             }
             break
           case 'parent':

@@ -83,8 +83,13 @@ function Links() {
   return (
     <List>
       <NavigationLink
-        text="Бюджет"
+        text="Бюджет (старый)"
         path="/budget"
+        icon={<AccountBalanceIcon />}
+      />
+      <NavigationLink
+        text="Бюджет"
+        path="/budget-new"
         icon={<AccountBalanceIcon />}
       />
       <NavigationLink
