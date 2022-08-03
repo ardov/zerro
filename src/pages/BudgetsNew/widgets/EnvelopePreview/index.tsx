@@ -15,7 +15,7 @@ import { Total, Line as TextLine } from '../../components/components'
 import Rhythm from 'shared/ui/Rhythm'
 import { useMonth } from 'pages/Budgets/pathHooks'
 import { ActivityWidget } from './ActivityWidget'
-import { ColorPicker } from 'components/ColorPickerPopover'
+import { ColorPicker } from 'shared/ui/ColorPickerPopover'
 import { sendEvent } from 'shared/helpers/tracking'
 import { useToggle } from 'shared/hooks/useToggle'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
@@ -29,6 +29,8 @@ import { convertFx } from 'shared/helpers/currencyHelpers'
 import { CommentWidget } from './CommentWidget'
 import { goalToWords } from 'models/goal'
 import { cardStyle } from './shared'
+import { patchEnvelope } from 'models/envelope'
+import { EnvelopeEditDialog } from './EnvelopeEditDialog'
 
 type EnvelopePreviewProps = {
   id: TEnvelopeId
@@ -148,7 +150,7 @@ const Header: FC<{
   const handleColorChange = (hex?: string | null) => {
     sendEvent('Tag: set color: ' + hex)
     // TODO set color on envelopes
-    // dispatch(patchTag({ id: envelope.id, color: hex2int(hex) }))
+    dispatch(patchEnvelope({ id: envelope.id, color: hex }))
   }
   return (
     <Box
@@ -193,12 +195,12 @@ const Header: FC<{
 
       {/* TODO add edit dialog for envelopes */}
 
-      {/* <TagEditDialog
+      <EnvelopeEditDialog
         key={envelope.id}
         open={showEditor}
         onClose={toggleEditor}
         envelope={envelope}
-      /> */}
+      />
     </Box>
   )
 }

@@ -6,6 +6,7 @@ import { TEnvelopeId, TISOMonth } from 'shared/types'
 import { useAppDispatch } from 'store'
 import { useEnvelope } from 'models/envelopeData'
 import { cardStyle } from './shared'
+import { patchEnvelope } from 'models/envelope'
 
 export const CommentWidget: FC<{ month: TISOMonth; id: TEnvelopeId }> = ({
   month,
@@ -20,8 +21,7 @@ export const CommentWidget: FC<{ month: TISOMonth; id: TEnvelopeId }> = ({
   // Update comment only when debounced value updated
   useEffect(() => {
     if (comment !== debouncedValue) {
-      // TODO
-      // dispatch(setTagComment(id, debouncedValue))
+      dispatch(patchEnvelope({ id, comment: debouncedValue }))
     }
   }, [debouncedValue, dispatch, id, comment])
 

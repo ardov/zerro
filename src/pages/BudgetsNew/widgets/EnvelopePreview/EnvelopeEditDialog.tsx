@@ -1,4 +1,7 @@
 import React, { FC, useState } from 'react'
+import { shallowEqual } from 'react-redux'
+import { v1 as uuidv1 } from 'uuid'
+import { useFormik } from 'formik'
 import {
   Button,
   ButtonBase,
@@ -13,23 +16,18 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
-import { TagSelect } from './TagSelect'
-import { Modify } from 'shared/types'
-import { shallowEqual } from 'react-redux'
-import { createTag } from 'models/tag/thunks'
-import { useFormik } from 'formik'
-import { hex2int, int2hex } from 'shared/helpers/color'
-import { ColorPicker } from '../shared/ui/ColorPickerPopover'
-import { v1 as uuidv1 } from 'uuid'
-import {
-  getTagMeta,
-  setTagComment,
-  setTagCurrency,
-} from 'models/hiddenData/tagMeta'
-import { getUserInstrumentId } from 'models/user'
-import { CurrencySelect } from './CurrencySelect'
+import { DataEntity, Modify } from 'shared/types'
+import { ColorPicker } from 'shared/ui/ColorPickerPopover'
 import { useAppDispatch, useAppSelector } from 'store'
-import { ITag } from 'shared/types'
+import {
+  getEnvelopeId,
+  IEnvelope,
+  parseEnvelopeId,
+  patchEnvelope,
+} from 'models/envelope'
+import { getUserCurrencyCode } from 'models/instrument'
+import { TagSelect } from 'components/TagSelect'
+import { CurrencyCodeSelect } from './CurrencyCodeSelect'
 
 // TODO: Доделать модалку для редактирования и создания категорий
 
@@ -37,17 +35,16 @@ export type TagEditDialogProps = Modify<
   DialogProps,
   {
     onClose: () => void
-    tag?: Partial<ITag>
+    envelope?: Partial<IEnvelope>
   }
 >
 
-export const TagEditDialog: FC<TagEditDialogProps> = props => {
-  const { tag, onClose, ...dialogProps } = props
+export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
+  const { envelope, onClose, ...dialogProps } = props
   const dispatch = useAppDispatch()
-  const isNew = !tag?.id
-  const id = tag?.id || uuidv1()
-  const meta = useAppSelector(getTagMeta)[id]
-  const userInstrument = useAppSelector(getUserInstrumentId)
+  const isNew = !envelope?.id
+  const id = envelope?.id || getEnvelopeId(DataEntity.Tag, uuidv1())
+  const defaultCurrency = useAppSelector(getUserCurrencyCode)
   const {
     values,
     initialValues,
@@ -57,26 +54,30 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
     setFieldValue,
   } = useFormik({
     initialValues: {
-      title: tag?.title || '',
-      parent: tag?.parent || null,
-      showIncome: tag?.showIncome || false,
-      showOutcome: tag?.showOutcome || false,
-      budgetOutcome: tag?.budgetOutcome || false,
-      color: tag?.color || null,
-      comment: meta?.comment || '',
-      currency: meta?.currency || userInstrument,
+      name: envelope?.name || '',
+      parentTagId: envelope?.parent
+        ? parseEnvelopeId(envelope.parent).id
+        : null,
+      showInBudget: envelope?.showInBudget || false,
+      carryNegatives: envelope?.carryNegatives || false,
+      keepIncome: envelope?.keepIncome || false,
+      color: envelope?.color || null,
+      group: envelope?.group || '',
+      comment: envelope?.comment || '',
+      currency: envelope?.currency || defaultCurrency,
     },
     validate: values => {
-      if (!values.title.trim()) {
-        return { title: 'Название категории точно пригодится 😉' }
+      if (!values.name.trim()) {
+        return { name: 'Название категории точно пригодится 😉' }
       }
     },
     onSubmit: (values, helpers) => {
-      const { comment, currency, ...tagData } = values
-      const newTag = dispatch(createTag({ ...tagData, id }))
-      console.log('newTag', newTag)
-      dispatch(setTagComment(id, comment))
-      dispatch(setTagCurrency(id, currency))
+      const { parentTagId, ...envData } = values
+      const parent = parentTagId
+        ? getEnvelopeId(DataEntity.Tag, parentTagId)
+        : null
+      const patch = { id, parent, ...envData }
+      dispatch(patchEnvelope(patch))
       onClose()
     },
     enableReinitialize: true,
@@ -101,13 +102,13 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
           mt={1}
         >
           <TextField
-            label="Название категории"
-            error={!!errors.title}
-            helperText={errors.title}
+            label="Название конверта"
+            error={!!errors.name}
+            helperText={errors.name}
             autoFocus
-            name="title"
+            name="name"
             inputProps={{ autoComplete: 'off' }}
-            value={values.title}
+            value={values.name}
             onChange={handleChange}
             InputProps={{
               endAdornment: (
@@ -124,8 +125,16 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
           <TagSelect
             label="Родительская категория"
             tagFilters={{ topLevel: true, exclude: id ? [id] : undefined }}
-            value={values.parent}
-            onChange={v => setFieldValue('parent', v)}
+            value={values.parentTagId}
+            onChange={v => setFieldValue('parentTagId', v || null)}
+          />
+          <TextField
+            label="Группа"
+            name="group"
+            multiline
+            inputProps={{ autoComplete: 'off' }}
+            value={values.group}
+            onChange={handleChange}
           />
           <TextField
             label="Комментарий"
@@ -135,34 +144,48 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
             value={values.comment}
             onChange={handleChange}
           />
-          <CurrencySelect
+          <CurrencyCodeSelect
             label="Валюта"
             name="currency"
             value={values.currency}
             onChange={handleChange}
           />
           <FormGroup>
-            <FormControlLabel
+            {/* <FormControlLabel
               name="showIncome"
               checked={values.showIncome}
               onChange={handleChange}
               control={<Checkbox />}
               label="Доходная"
+            /> */}
+            <FormControlLabel
+              name="keepIncome"
+              checked={values.keepIncome}
+              onChange={handleChange}
+              control={<Checkbox />}
+              label="Класть доходы в конверт"
             />
             <FormControlLabel
-              name="showOutcome"
-              checked={values.showOutcome}
+              name="carryNegatives"
+              checked={values.carryNegatives}
+              onChange={handleChange}
+              control={<Checkbox />}
+              label="Переносить минусы"
+            />
+            <FormControlLabel
+              name="showInBudget"
+              checked={values.showInBudget}
               onChange={handleChange}
               control={<Checkbox />}
               label="Расходная"
             />
-            <FormControlLabel
+            {/* <FormControlLabel
               name="budgetOutcome"
               checked={values.budgetOutcome}
               onChange={handleChange}
               control={<Checkbox />}
               label="Показывать в бюджете"
-            />
+            /> */}
           </FormGroup>
 
           <Button type="submit" size="large" variant="contained">
@@ -178,15 +201,15 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
 }
 
 type ColorProps = {
-  value: number | null
-  onChange: (v: number | null) => void
+  value: string | null
+  onChange: (v: string | null) => void
 }
 
 const Color: FC<ColorProps> = ({ value, onChange }) => {
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
-  const hexColor = int2hex(value)
+  const hexColor = value
   const handleColorChange = (hex?: string | null) => {
-    onChange(hex2int(hex))
+    onChange(hex || null)
   }
   return (
     <>

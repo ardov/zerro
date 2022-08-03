@@ -11,6 +11,7 @@ import { patchTag, TTagDraft } from 'models/tag'
 import { getEnvelopes, IEnvelope } from './getEnvelopes'
 import { parseEnvelopeId } from './helpers'
 import { patchEnvelopeMeta, TEnvelopeMetaPatch } from './metaData'
+import { hex2int, isHEX } from 'shared/helpers/color'
 
 type TEnvelopeDraft = OptionalExceptFor<IEnvelope, 'id'>
 
@@ -40,22 +41,34 @@ export const patchEnvelope =
             break
           case 'symbol': // TODO add icon support later
             break
-          case 'color': // TODO add color support later
+          case 'color':
+            if (current[key] !== draft[key]) {
+              tagPatch.color = getTagColor(draft.color)
+            }
             break
           case 'showInBudget':
-            tagPatch.showOutcome = draft.showInBudget
+            if (current[key] !== draft[key]) {
+              tagPatch.showOutcome = draft.showInBudget
+            }
             break
           case 'parent':
-            tagPatch.parent = getRightTagParent(envelopes, draft.parent)
+            if (current[key] !== draft[key]) {
+              tagPatch.parent = getRightTagParent(envelopes, draft.parent)
+            }
             break
           case 'group':
           case 'comment':
           case 'currency':
-            metaPatch[key] = draft[key]
+            if (current[key] !== draft[key]) {
+              // TODO recalculate budgets and goals
+              metaPatch[key] = draft[key]
+            }
             break
           case 'keepIncome':
           case 'carryNegatives':
-            metaPatch[key] = draft[key]
+            if (current[key] !== draft[key]) {
+              metaPatch[key] = draft[key]
+            }
             break
           default:
             throw new Error(`Unknown key ${key}`)
@@ -81,19 +94,27 @@ export const patchEnvelope =
           case 'children': // ignore
             break
           case 'showInBudget':
-            metaPatch.showInBudget = draft.showInBudget
+            if (current[key] !== draft[key]) {
+              metaPatch.showInBudget = draft.showInBudget
+            }
             break
           case 'parent':
-            metaPatch.parent = getRightParent(envelopes, draft.parent)
+            if (current[key] !== draft[key]) {
+              metaPatch.parent = getRightParent(envelopes, draft.parent)
+            }
             break
           case 'group':
           case 'comment':
           case 'currency':
-            metaPatch[key] = draft[key]
+            if (current[key] !== draft[key]) {
+              metaPatch[key] = draft[key]
+            }
             break
           case 'keepIncome':
           case 'carryNegatives':
-            metaPatch[key] = draft[key]
+            if (current[key] !== draft[key]) {
+              metaPatch[key] = draft[key]
+            }
             break
           default:
             throw new Error(`Unknown key ${key}`)
@@ -109,7 +130,7 @@ function getRightParent(
   parent?: TEnvelopeId | null
 ): TEnvelopeId | undefined {
   if (!parent) return undefined
-  if (!envelopes[parent]) throw new Error('Parent envelope not found')
+  if (!envelopes[parent]) throw new Error('Parent envelope not found ' + parent)
   if (envelopes[parent].parent) return envelopes[parent].parent as TEnvelopeId
   return parent
 }
@@ -123,4 +144,11 @@ function getRightTagParent(
   if (parsed.type !== DataEntity.Tag) throw new Error('Parent is not tag')
   if (parsed.id === 'null') return null
   return parsed.id
+}
+
+function getTagColor(color?: string | null) {
+  if (isHEX(color)) {
+    return hex2int(color)
+  }
+  return null
 }
