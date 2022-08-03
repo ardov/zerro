@@ -14,7 +14,7 @@ import { getDiff } from 'store/data'
 import { getAccountsHistory } from 'pages/Stats/selectors'
 import { createSelector } from '@reduxjs/toolkit'
 
-// TODO: Надо бы как-то округлять все цифры только в конце. Иначе из-за валют копится ошибка.
+// TODO: Надо бы как-то округлять все цифры только в конце. Иначе из-за валют копится ошибк
 const TOLERANCE = 3
 
 /**
