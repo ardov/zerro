@@ -5,8 +5,8 @@ const currencyInfo = currencySymbols as Record<
   TFxCode,
   { name: string; symbol?: string }
 >
-const thousandSeparator = ','
-const decimalSeparator = '.'
+const thousandSeparator = ' '
+const decimalSeparator = ','
 
 /**
  * Formats number using thousand separator and decimal separator.
@@ -24,6 +24,7 @@ export function formatMoney(
   const value = parts.join(decimalSeparator)
   if (currency) {
     return value + ' ' + getCurrencySymbol(currency)
+    // return getCurrencySymbol(currency) + ' ' + value
   }
   return value
 }

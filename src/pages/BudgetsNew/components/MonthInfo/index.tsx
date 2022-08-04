@@ -21,7 +21,6 @@ import Rhythm from 'shared/ui/Rhythm'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { Line } from '../components'
 import { WidgetIncome } from './WidgetIncome'
-import { CalculationErrorNotice } from './CalculationErrorNotice'
 import { WidgetOutcome } from './WidgetOutcome'
 import { useMonth } from 'pages/Budgets/pathHooks'
 import { useToggle } from 'shared/hooks/useToggle'
@@ -61,7 +60,6 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
       )}
 
       <Rhythm gap={2} p={3}>
-        <CalculationErrorNotice />
         <OverspendNotice month={month} />
         <WidgetIncome />
         <WidgetOutcome />

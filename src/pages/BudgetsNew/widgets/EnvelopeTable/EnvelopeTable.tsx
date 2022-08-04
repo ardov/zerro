@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react'
-import { Paper, Stack, Typography } from '@mui/material'
+import { Paper, Typography } from '@mui/material'
 import { TEnvelopeId, TISOMonth } from 'shared/types'
 import {
   TGroupInfo,
@@ -27,7 +27,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
   const goal = useEnvelopePopover(month, 'goal')
   return (
     <>
-      <Stack spacing={2} className={className}>
+      <Paper className={className}>
         {groups.map(group => (
           <EnvelopeGroup key={group.name} group={group}>
             {group.children.map(parent => (
@@ -64,7 +64,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
             ))}
           </EnvelopeGroup>
         ))}
-      </Stack>
+      </Paper>
       {budget.props.id && (
         <BudgetPopover {...budget.props} id={budget.props.id} />
       )}
@@ -80,12 +80,22 @@ type TEnvelopeGroupProps = {
 
 const EnvelopeGroup: FC<TEnvelopeGroupProps> = ({ group, children }) => {
   return (
-    <Paper sx={{ position: 'relative', py: 1 }}>
-      <Typography variant="h6" sx={{ pl: 3 }}>
+    <>
+      <Typography
+        variant="h6"
+        sx={{
+          pl: 3,
+          pb: 1,
+          pt: 2,
+          borderBottom: `1px solid black`,
+          borderColor: 'divider',
+          '&:last-child': { border: 0 },
+        }}
+      >
         {group.name}
       </Typography>
       {children}
-    </Paper>
+    </>
   )
 }
 
