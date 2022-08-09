@@ -43,6 +43,8 @@ export type TMonthTotals = {
 
   toBeBudgetedFx: TFxAmount
   toBeBudgeted: number
+
+  overspend: TFxAmount
 }
 
 export const getMonthTotals: TSelector<Record<TISOMonth, TMonthTotals>> =
@@ -200,6 +202,16 @@ function createMonth(
 
     get toBeBudgeted() {
       return convert(this.toBeBudgetedFx)
+    },
+
+    get overspend(): TFxAmount {
+      const { envelopes } = this
+      return Object.values(envelopes)
+        .filter(envelope => !envelope.parent && envelope.selfAvailableValue < 0)
+        .reduce(
+          (acc, envelope) => addFxAmount(acc, envelope.selfAvailable),
+          {} as TFxAmount
+        )
     },
   }
 
