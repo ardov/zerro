@@ -4,7 +4,7 @@ import { nextMonth, toISOMonth } from 'shared/helpers/date'
 import { keys } from 'shared/helpers/keys'
 import { getTransactionsHistory } from 'models/transaction'
 import { TSelector } from 'store'
-import { getEnvelopeBudgets } from 'models/envelopeBudgets'
+import { getEnvelopeBudgets } from 'models/budget'
 
 /**
  * Returns the date of first month as ISO.

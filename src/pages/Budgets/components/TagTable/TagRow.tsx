@@ -28,7 +28,7 @@ import {
   getGoalProgress,
   GoalProgress as GoalProgressType,
 } from 'pages/Budgets/selectors'
-import { Amount } from 'components/Amount'
+import { SmartAmount } from 'components/Amount'
 import { useContext } from 'react'
 import { IsDraggingContext, DragModeContext, DragModeType } from '../DnDContext'
 import { getPopulatedTag } from 'models/tag'
@@ -293,7 +293,7 @@ const BudgetCell: FC<BudgetCellProps> = props => {
       justifyContent="flex-end"
     >
       <Btn onClick={onBudgetClick}>
-        <Amount value={budgeted} decMode="ifOnly" />
+        <SmartAmount value={budgeted} decMode="ifOnly" />
       </Btn>
     </Box>
   ) : (
@@ -333,7 +333,7 @@ const OutcomeCell: FC<OutcomeCellProps> = props => {
     >
       <Btn onClick={onClick}>
         <Typography variant="body1" align="right">
-          <Amount value={-outcome} decMode="ifOnly" />
+          <SmartAmount value={-outcome} decMode="ifOnly" />
         </Typography>
       </Btn>
     </Box>
@@ -378,7 +378,7 @@ const AvailableCell: FC<AvailableCellProps> = props => {
       {...provided?.dragHandleProps}
       style={snapshot?.isDragging ? provided?.draggableProps.style : null}
     >
-      <Amount value={available} decMode="ifOnly" />
+      <SmartAmount value={available} decMode="ifOnly" />
     </Box>
   )
 

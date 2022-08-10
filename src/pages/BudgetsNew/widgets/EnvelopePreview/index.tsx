@@ -10,7 +10,7 @@ import {
 import { EmojiIcon } from 'shared/ui/EmojiIcon'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { CloseIcon, EditIcon, EmojiFlagsIcon } from 'shared/ui/Icons'
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch } from 'store'
 import { Total, Line as TextLine } from '../../components/components'
 import Rhythm from 'shared/ui/Rhythm'
 import { useMonth } from 'pages/Budgets/pathHooks'
@@ -19,11 +19,7 @@ import { ColorPicker } from 'shared/ui/ColorPickerPopover'
 import { sendEvent } from 'shared/helpers/tracking'
 import { useToggle } from 'shared/hooks/useToggle'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
-import {
-  getMonthTotals,
-  IEnvelopeWithData,
-  useEnvelope,
-} from 'models/envelopeData'
+import { IEnvelopeWithData, useEnvelope, useRates } from 'models/envelopeData'
 import { TEnvelopeId, TFxAmount } from 'shared/types'
 import { convertFx } from 'shared/helpers/money'
 import { CommentWidget } from './CommentWidget'
@@ -40,7 +36,7 @@ type EnvelopePreviewProps = {
 export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   const [month] = useMonth()
   const [, setId] = useSearchParam('transactions')
-  const { rates } = useAppSelector(getMonthTotals)[month]
+  const rates = useRates(month)
 
   const envelope = useEnvelope(month, id)
   const { goal, currency } = envelope

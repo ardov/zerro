@@ -6,7 +6,7 @@ import { useMonth } from 'pages/Budgets/pathHooks'
 import { Tooltip, Treemap, ResponsiveContainer } from 'recharts'
 import { formatMoney } from 'shared/helpers/money'
 import { Card, Typography, useTheme } from '@mui/material'
-import { Amount } from 'components/Amount'
+import { SmartAmount } from 'components/Amount'
 import { getMostContrast } from 'shared/helpers/color'
 
 type TTreeNode = {
@@ -266,7 +266,7 @@ const CustomTooltip = (props: any) => {
     <Card elevation={10} sx={{ p: 2 }}>
       <Typography variant="body2">
         {name}:{' '}
-        <Amount value={value} decMode="ifAny" instrument="user" noShade />
+        <SmartAmount value={value} decMode="ifAny" instrument="user" noShade />
       </Typography>
     </Card>
   )

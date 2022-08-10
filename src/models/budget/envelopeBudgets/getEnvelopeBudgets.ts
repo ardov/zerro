@@ -2,8 +2,8 @@ import { createSelector } from '@reduxjs/toolkit'
 import { toISOMonth } from 'shared/helpers/date'
 import { keys } from 'shared/helpers/keys'
 import { DataEntity, TEnvelopeId, TISOMonth } from 'shared/types'
-import { getBudgets } from 'models/budget'
 import { getEnvelopeId } from 'models/envelope'
+import { getBudgets } from '../tagBudget'
 import { budgetStore } from './budgetStore'
 
 export const getEnvelopeBudgets = createSelector(

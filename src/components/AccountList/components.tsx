@@ -7,7 +7,7 @@ import {
   Typography,
   ListItemButton,
 } from '@mui/material'
-import { Amount } from 'components/Amount'
+import { SmartAmount } from 'components/Amount'
 import { useAppDispatch } from 'store'
 import { setInBudget, IAccountPopulated } from 'models/account'
 
@@ -52,7 +52,7 @@ export const Account: FC<{ account: IAccountPopulated } & ListItemButtonProps> =
             color: account.balance < 0 ? 'error.main' : 'text.secondary',
           }}
         >
-          <Amount
+          <SmartAmount
             value={account.balance}
             instrument={account.instrument}
             decMode="ifOnly"
@@ -86,7 +86,12 @@ export const Subheader: FC<
           color={amount < 0 ? 'error.main' : 'text.secondary'}
         >
           <b>
-            <Amount value={amount} instrument="user" decMode="ifOnly" noShade />
+            <SmartAmount
+              value={amount}
+              instrument="user"
+              decMode="ifOnly"
+              noShade
+            />
           </b>
         </Box>
       </Box>

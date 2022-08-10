@@ -2,11 +2,11 @@ import React from 'react'
 import { Typography } from '@mui/material'
 import { useAppSelector } from 'store'
 import Rhythm from 'shared/ui/Rhythm'
-import { Amount } from 'components/Amount'
 import { getUserCurrencyCode } from 'models/instrument'
 import pluralize from 'shared/helpers/pluralize'
 import { Card } from './Card'
 import { Stats } from '../selectors'
+import { Amount } from 'shared/ui/Amount'
 
 interface PayeeByFrequencyCardProps {
   byPayee: Stats['byPayee']

@@ -4,7 +4,7 @@ import { RootState } from 'store'
 import { convertCurrency } from 'models/instrument'
 import { TPopulatedBudget } from './types'
 import { TBudgetId, TDateDraft, TISOMonth } from 'shared/types'
-import { getTagMeta } from '../hiddenData/tagMeta'
+import { getTagMeta } from 'models/hiddenData/tagMeta'
 import { getBudgetId } from './getBudgetId'
 import { toISOMonth } from 'shared/helpers/date'
 import { keys } from 'shared/helpers/keys'
@@ -15,6 +15,7 @@ export const getBudgets = (state: RootState) => state.data.current.budget
 export const getBudget = (state: RootState, tag: TTagId, month: TDateDraft) =>
   getBudgets(state)[getBudgetId(month, tag)]
 
+// TODO: remove this selector
 const getPopulatedBudgets = createSelector(
   [getBudgets, getTagMeta, convertCurrency],
   (budgets, meta, convert) => {

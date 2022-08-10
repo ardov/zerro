@@ -25,7 +25,7 @@ import { WidgetOutcome } from './WidgetOutcome'
 import { useMonth } from 'pages/Budgets/pathHooks'
 import { useToggle } from 'shared/hooks/useToggle'
 import { TDateDraft } from 'shared/types'
-import { OverspendNotice } from 'features/overspendFix'
+import { OverspendNotice } from 'features/fixOverspend'
 
 type MonthInfoProps = BoxProps & {
   onClose: () => void

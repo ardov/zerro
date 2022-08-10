@@ -17,9 +17,9 @@ import { makeStyles } from '@mui/styles'
 import { Tooltip } from 'shared/ui/Tooltip'
 import Rhythm from 'shared/ui/Rhythm'
 import { useMonth } from '../pathHooks'
-import { Amount } from 'components/Amount'
 import { TDateDraft } from 'shared/types'
 import { keys } from 'shared/helpers/keys'
+import { Amount } from 'shared/ui/Amount'
 
 type TColor = 'error' | 'warning' | 'success'
 

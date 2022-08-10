@@ -6,7 +6,7 @@ import { getInBudgetAccounts, IAccountPopulated } from 'models/account'
 import { round } from 'shared/helpers/money'
 import { Box, Typography, Button, Link } from '@mui/material'
 import { WarningIcon } from 'shared/ui/Icons'
-import { Amount } from 'components/Amount'
+import { SmartAmount } from 'components/Amount'
 import { resetData } from 'store/data'
 import { clearLocalData } from 'features/localData'
 import { captureError, sendEvent } from 'shared/helpers/tracking'
@@ -83,7 +83,7 @@ export const CalculationErrorNotice: FC = () => {
           <>
             <Typography variant="h6">
               Нашлись счета с ошибками на{' '}
-              <Amount value={diff} currency={currency} noShade />
+              <SmartAmount value={diff} currency={currency} noShade />
             </Typography>
             <Box mt={1}>
               <Typography variant="body1">
@@ -105,7 +105,7 @@ export const CalculationErrorNotice: FC = () => {
           <>
             <Typography variant="h6">
               Ошибка в вычислениях на{' '}
-              <Amount value={diff} currency={currency} noShade />
+              <SmartAmount value={diff} currency={currency} noShade />
             </Typography>
             <Box mt={1}>
               <Typography variant="body1">
@@ -160,7 +160,7 @@ const CorruptedAccounts: FC<{
         {corrupted.map(({ acc, diff }) => (
           <li key={acc.id}>
             {acc.title} (
-            <Amount
+            <SmartAmount
               value={diff}
               instrument={acc.instrument}
               decMode="ifAny"

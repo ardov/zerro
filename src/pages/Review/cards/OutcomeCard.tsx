@@ -3,11 +3,11 @@ import { Box, Typography } from '@mui/material'
 import { useAppSelector } from 'store'
 import { formatDate } from 'shared/helpers/date'
 import Rhythm from 'shared/ui/Rhythm'
-import { Amount } from 'components/Amount'
 import { getInstruments } from 'models/instrument'
 import { getPopulatedTags } from 'models/tag'
 import { Card } from './Card'
 import { ITransaction } from 'shared/types'
+import { Amount } from 'shared/ui/Amount'
 
 export function OutcomeCard({ transaction }: { transaction: ITransaction }) {
   const { outcome, outcomeInstrument, date, comment, payee, tag } = transaction

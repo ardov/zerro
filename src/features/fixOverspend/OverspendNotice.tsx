@@ -1,11 +1,11 @@
 import React, { FC } from 'react'
-import { useAppDispatch, useAppSelector } from 'store'
 import { Box, Typography, Button } from '@mui/material'
-import { WarningIcon } from 'shared/ui/Icons'
-import { Amount } from 'components/Amount'
-import { Confirm } from 'shared/ui/Confirm'
-import { overspendModel } from './model'
 import { TISOMonth } from 'shared/types'
+import { Amount } from 'shared/ui/Amount'
+import { WarningIcon } from 'shared/ui/Icons'
+import { Confirm } from 'shared/ui/Confirm'
+import { useAppDispatch, useAppSelector } from 'store'
+import { overspendModel } from './model'
 
 export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
   const dispatch = useAppDispatch()

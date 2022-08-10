@@ -1,15 +1,13 @@
 import React from 'react'
-import { useAppSelector } from 'store'
 import { Box } from '@mui/material'
 import { Total } from '../components'
 import { useMonth } from 'pages/Budgets/pathHooks'
-import { getMonthTotals } from 'models/envelopeData'
+import { useMonthTotals } from 'models/envelopeData'
 import { convertFx } from 'shared/helpers/money'
 
 export function WidgetOutcome() {
   const [month] = useMonth()
-  const data = useAppSelector(getMonthTotals)?.[month]
-  const { activity, currency, rates } = data
+  const { activity, currency, rates } = useMonthTotals(month)
   const envActivity = convertFx(activity, currency, rates)
 
   return (

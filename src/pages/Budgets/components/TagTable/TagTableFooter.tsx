@@ -7,7 +7,7 @@ import {
   TypographyProps,
   Theme,
 } from '@mui/material'
-import { Amount } from 'components/Amount'
+import { SmartAmount } from 'components/Amount'
 import { makeStyles } from '@mui/styles'
 import { useMonth } from 'pages/Budgets/pathHooks'
 import { getTotalsByMonth } from '../../selectors'
@@ -52,18 +52,18 @@ export const TagTableFooter: FC<{
 
       {isMobile ? (
         <Cell align="right">
-          <Amount value={metrics[metric]} decMode="ifOnly" />
+          <SmartAmount value={metrics[metric]} decMode="ifOnly" />
         </Cell>
       ) : (
         <>
           <Cell align="right" title={budgeted.toString()}>
-            <Amount value={budgeted} decMode="ifOnly" />
+            <SmartAmount value={budgeted} decMode="ifOnly" />
           </Cell>
           <Cell align="right" title={outcome.toString()}>
-            <Amount value={-outcome} decMode="ifOnly" />
+            <SmartAmount value={-outcome} decMode="ifOnly" />
           </Cell>
           <Cell align="right" title={available.toString()}>
-            <Amount value={available} decMode="ifOnly" />
+            <SmartAmount value={available} decMode="ifOnly" />
           </Cell>
         </>
       )}

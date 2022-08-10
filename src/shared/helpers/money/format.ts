@@ -29,6 +29,28 @@ export function formatMoney(
   return value
 }
 
+/**
+ * Formats number using thousand separator and decimal separator.
+ * @param number - Number to format.
+ * @param currency - currency code.
+ * @param decimals - Number of decimals to show
+ */
+export function getFormattedParts(
+  number: number,
+  currency?: TFxCode | null,
+  decimals = 2
+) {
+  const parts = Math.abs(number).toFixed(decimals).split('.')
+  return {
+    original: number,
+    sign: number < 0 ? '-' : number > 0 ? '+' : '',
+    value: parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator),
+    decimals: parts[1],
+    decimalSeparator,
+    currency: currency ? getCurrencySymbol(currency) : '',
+  }
+}
+
 export function getCurrencySymbol(code: TFxCode): string {
   return currencyInfo[code]?.symbol || code
 }

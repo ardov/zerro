@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from 'store'
 import { getUserCurrencyCode } from 'models/instrument'
 import { Box, Typography, Button } from '@mui/material'
 import { WarningIcon } from 'shared/ui/Icons'
-import { Amount } from 'components/Amount'
+import { SmartAmount } from 'components/Amount'
 import { Confirm } from 'shared/ui/Confirm'
 import { fixOverspends } from 'pages/Budgets/thunks'
 import { getTotalsByMonth } from 'pages/Budgets/selectors'
@@ -30,7 +30,8 @@ export const OverspentNotice: FC = () => {
       </Box>
       <Box ml={1.5}>
         <Typography variant="subtitle1">
-          Перерасход <Amount value={overspent} currency={currency} noShade />.
+          Перерасход{' '}
+          <SmartAmount value={overspent} currency={currency} noShade />.
         </Typography>
         <Typography variant="body2">
           Добавьте денег в категории с отрицательным балансом, чтобы быть

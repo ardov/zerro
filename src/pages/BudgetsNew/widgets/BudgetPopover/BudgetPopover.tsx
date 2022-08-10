@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react'
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch } from 'store'
 import {
   List,
   ListItemButton,
@@ -17,8 +17,8 @@ import { sendEvent } from 'shared/helpers/tracking'
 import { Box, BoxProps } from '@mui/system'
 import { TEnvelopeId, TFxAmount, TISOMonth } from 'shared/types'
 import { useQuickActions } from './useQuickActions'
-import { getMonthTotals, useRates } from 'models/envelopeData'
-import { setEnvelopeBudgets } from 'models/envelopeBudgets'
+import { useMonthTotals, useRates } from 'models/envelopeData'
+import { setEnvelopeBudgets } from 'models/budget'
 import { useDisplayCurrency } from 'pages/BudgetsNew/model'
 
 type TBudgetPopoverProps = PopoverProps & {
@@ -32,7 +32,7 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   const displayCurrency = useDisplayCurrency()
   const dispatch = useAppDispatch()
   const rates = useRates(month)
-  const envelope = useAppSelector(getMonthTotals)[month].envelopes[id]
+  const envelope = useMonthTotals(month).envelopes[id]
 
   const currency = {
     env: envelope.currency, // Envelope currency

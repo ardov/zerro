@@ -2,7 +2,7 @@ import React, { FC } from 'react'
 import styled from '@emotion/styled'
 import { EmojiIcon } from 'shared/ui/EmojiIcon'
 import { useAppSelector } from 'store'
-import { Amount } from 'components/Amount'
+import { SmartAmount } from 'components/Amount'
 import { getAccounts } from 'models/account'
 import { TrType } from 'models/transaction'
 import { getPopulatedTags } from 'models/tag'
@@ -138,7 +138,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
                 color="textSecondary"
                 component="span"
               >
-                <Amount
+                <SmartAmount
                   value={tr.opOutcome}
                   instrument={tr.opOutcomeInstrument}
                   decMode="ifAny"
@@ -146,7 +146,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
               </Typography>
             </Tooltip>
           )}
-          <Amount value={tr.outcome} instrument={tr.outcomeInstrument} />
+          <SmartAmount value={tr.outcome} instrument={tr.outcomeInstrument} />
         </AmountsWrapper>
       )
     case 'income':
@@ -171,7 +171,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
                 color="textSecondary"
                 component="span"
               >
-                <Amount
+                <SmartAmount
                   value={tr.opIncome}
                   instrument={tr.opIncomeInstrument}
                   decMode="ifAny"
@@ -180,7 +180,11 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
               </Typography>
             </Tooltip>
           )}
-          <Amount value={tr.income} instrument={tr.incomeInstrument} sign />
+          <SmartAmount
+            value={tr.income}
+            instrument={tr.incomeInstrument}
+            sign
+          />
         </AmountsWrapper>
       )
     case 'transfer':
@@ -189,9 +193,9 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
       return (
         <AmountsWrapper type="transfer" {...rest}>
           {!isEqual && (
-            <Amount value={tr.outcome} instrument={tr.outcomeInstrument} />
+            <SmartAmount value={tr.outcome} instrument={tr.outcomeInstrument} />
           )}
-          <Amount value={tr.income} instrument={tr.incomeInstrument} />
+          <SmartAmount value={tr.income} instrument={tr.incomeInstrument} />
         </AmountsWrapper>
       )
     default:
@@ -394,9 +398,9 @@ const ExchangeRate: FC<ExchangeRateProps> = props => {
   if (sum1 < sum2) {
     return (
       <span {...rest}>
-        <Amount value={1} instrument={inst1} decMode="ifAny" noShade />
+        <SmartAmount value={1} instrument={inst1} decMode="ifAny" noShade />
          =
-        <Amount
+        <SmartAmount
           value={sum2 / sum1}
           instrument={inst2}
           decMode="ifAny"
@@ -407,9 +411,9 @@ const ExchangeRate: FC<ExchangeRateProps> = props => {
   } else {
     return (
       <span {...rest}>
-        <Amount value={1} instrument={inst2} decMode="ifAny" noShade />
+        <SmartAmount value={1} instrument={inst2} decMode="ifAny" noShade />
          =
-        <Amount
+        <SmartAmount
           value={sum1 / sum2}
           instrument={inst1}
           decMode="ifAny"

@@ -15,14 +15,14 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
 import { nextMonth, prevMonth, toISOMonth } from 'shared/helpers/date'
-import { getMonthList } from 'models/envelopeData'
+import { getMonthList, useMonthList } from 'models/envelopeData'
 import { EnvelopeTable } from './widgets/EnvelopeTable'
 import { useMonth } from './model'
 import { TEnvelopeId } from 'shared/types'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
-  const monthList = useAppSelector(getMonthList)
+  const monthList = useMonthList()
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
 

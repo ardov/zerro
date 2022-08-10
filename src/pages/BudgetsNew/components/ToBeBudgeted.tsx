@@ -11,6 +11,7 @@ import {
 import { makeStyles } from '@mui/styles'
 import { formatMoney, sub } from 'shared/helpers/money'
 import { Tooltip } from 'shared/ui/Tooltip'
+import { Amount } from 'shared/ui/Amount'
 import Rhythm from 'shared/ui/Rhythm'
 import {
   useDisplayValue,
@@ -18,7 +19,6 @@ import {
   useMonthTotals,
 } from 'models/envelopeData'
 import { useDisplayCurrency, useMonth } from '../model'
-import { Amount } from 'components/Amount'
 
 type TMsgType = 'error' | 'warning' | 'success'
 

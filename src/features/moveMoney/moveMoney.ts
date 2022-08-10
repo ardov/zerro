@@ -1,4 +1,4 @@
-import { setEnvelopeBudgets, TBudgetUpdate } from 'models/envelopeBudgets'
+import { setEnvelopeBudgets, TBudgetUpdate } from 'models/budget'
 import { getMonthTotals } from 'models/envelopeData'
 import { convertFx, round } from 'shared/helpers/money'
 import { sendEvent } from 'shared/helpers/tracking'

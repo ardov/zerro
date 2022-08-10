@@ -8,7 +8,7 @@ import {
 import pluralize from 'shared/helpers/pluralize'
 import { Collapse, List, ListItemButton } from '@mui/material'
 import { Account, Subheader } from './components'
-import { Amount } from 'components/Amount'
+import { SmartAmount } from 'components/Amount'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { useToggle } from 'shared/hooks/useToggle'
 
@@ -87,7 +87,7 @@ const ArchivedList: FC<{ accs: IAccountPopulated[] }> = props => {
             {!!sum && (
               <>
                 (
-                <Amount
+                <SmartAmount
                   value={sum}
                   instrument="user"
                   decMode="ifOnly"

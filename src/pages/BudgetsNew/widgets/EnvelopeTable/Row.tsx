@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, useContext } from 'react'
 import {
   Typography,
   Box,
@@ -10,9 +10,12 @@ import {
   ButtonBaseProps,
   Chip,
 } from '@mui/material'
+import { SxProps } from '@mui/system'
+import { Droppable, Draggable } from 'react-beautiful-dnd'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { EmojiIcon } from 'shared/ui/EmojiIcon'
-import { formatMoney } from 'shared/helpers/money'
+import { formatMoney, convertFx, isZero } from 'shared/helpers/money'
+import { keys } from 'shared/helpers/keys'
 import {
   WarningIcon,
   AddIcon,
@@ -20,23 +23,18 @@ import {
   NotesIcon,
 } from 'shared/ui/Icons'
 import { RadialProgress } from 'shared/ui/RadialProgress'
-import { Droppable, Draggable } from 'react-beautiful-dnd'
-import { Amount } from 'components/Amount'
-import { useContext } from 'react'
+import { Amount } from 'shared/ui/Amount'
+import { TEnvelopeId, TFxAmount, TFxCode, TRates } from 'shared/types'
+import { useAppSelector } from 'store'
+import { getUserCurrencyCode } from 'models/instrument'
+import { goalToWords, TGoal } from 'models/goal'
+import { useRates } from 'models/envelopeData'
 import {
   IsDraggingContext,
   DragModeContext,
   DragModeType,
 } from '../../components/DnDContext'
-import { TEnvelopeId, TFxAmount, TFxCode, TRates } from 'shared/types'
-import { getUserCurrencyCode } from 'models/instrument'
-import { SxProps } from '@mui/system'
-import { useAppSelector } from 'store'
 import { TEnvelopePopulated, useMonth } from '../../model'
-import { convertFx, isZero } from 'shared/helpers/money'
-import { keys } from 'shared/helpers/keys'
-import { goalToWords, TGoal } from 'models/goal'
-import { useRates } from 'models/envelopeData'
 
 type EnvelopeRowProps = {
   envelope: TEnvelopePopulated

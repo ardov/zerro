@@ -1,7 +1,9 @@
 import React, { FC } from 'react'
 import { Box, BoxProps, TooltipProps, Typography } from '@mui/material'
-import { Amount, AmountProps } from 'components/Amount'
+import { AmountProps } from 'shared/ui/Amount'
 import { Tooltip } from 'shared/ui/Tooltip'
+// TODO: use Amount instead
+import { SmartAmount } from 'components/Amount'
 
 type DataLineProps = BoxProps & {
   name: string
@@ -41,7 +43,11 @@ export const DataLine: FC<DataLineProps> = ({
       </Box>
       {amount !== undefined && (
         <Typography variant="body1">
-          <Amount value={amount} currency={currency} instrument={instrument} />
+          <SmartAmount
+            value={amount}
+            currency={currency}
+            instrument={instrument}
+          />
         </Typography>
       )}
     </Box>

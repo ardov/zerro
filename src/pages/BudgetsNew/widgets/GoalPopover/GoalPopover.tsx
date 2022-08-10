@@ -1,5 +1,5 @@
 import React, { useState, FC } from 'react'
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch } from 'store'
 import {
   Box,
   Popover,
@@ -17,7 +17,7 @@ import { TDateDraft, TEnvelopeId, TISOMonth } from 'shared/types'
 import { goalType, setGoal, TGoal } from 'models/goal'
 
 import MonthSelectPopover from 'shared/ui/MonthSelectPopover'
-import { getMonthTotals } from 'models/envelopeData'
+import { useMonthTotals } from 'models/envelopeData'
 import { round } from 'shared/helpers/money'
 
 const amountLabels = {
@@ -35,7 +35,7 @@ type TGoalPopoverProps = PopoverProps & {
 export const GoalPopover: FC<TGoalPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
   const dispatch = useAppDispatch()
-  const envelope = useAppSelector(getMonthTotals)[month].envelopes[id]
+  const envelope = useMonthTotals(month).envelopes[id]
   const { goal } = envelope
 
   const [amount, setAmount] = useState(goal?.amount || 0)

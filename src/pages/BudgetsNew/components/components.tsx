@@ -1,7 +1,8 @@
 import React, { ReactNode } from 'react'
-import { Box, BoxProps, Typography } from '@mui/material'
+import { Box, BoxProps, Typography, TypographyProps } from '@mui/material'
 import { Tooltip } from 'shared/ui/Tooltip'
-import { Amount, AmountProps } from 'components/Amount'
+import { Amount, AmountProps } from 'shared/ui/Amount'
+import { TFxCode } from 'shared/types'
 
 interface TotalProps extends BoxProps {
   name: string
@@ -49,7 +50,8 @@ interface LineProps extends BoxProps {
   name: ReactNode
   amount: number
   description?: string
-  currency?: string
+  currency?: TFxCode
+  variant?: TypographyProps['variant']
 }
 
 export function Line({
@@ -57,20 +59,17 @@ export function Line({
   amount,
   description,
   currency,
+  variant = 'body2',
   ...rest
 }: LineProps) {
   return (
     <Box display="flex" flexDirection="row" {...rest}>
       <Box flexGrow={1} mr={1} minWidth={0}>
-        {description ? (
-          <Tooltip title={description}>
-            <Typography noWrap variant="body2" children={name} />
-          </Tooltip>
-        ) : (
-          <Typography noWrap variant="body2" children={name} />
-        )}
+        <Tooltip title={description}>
+          <Typography noWrap variant={variant} children={name} />
+        </Tooltip>
       </Box>
-      <Typography variant="body2">
+      <Typography variant={variant}>
         <Amount value={amount} currency={currency} />
       </Typography>
     </Box>

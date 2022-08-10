@@ -1,11 +1,22 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { withStyles } from '@mui/styles'
 import { Tooltip as MaterialTooltip, TooltipProps } from '@mui/material'
+import { Modify } from 'shared/types'
 
 const StyledTooltip = withStyles(theme => ({
   tooltip: { fontSize: theme.typography.fontSize },
 }))(MaterialTooltip)
 
-export const Tooltip = (props: TooltipProps) => (
-  <StyledTooltip enterDelay={300} {...props} />
-)
+type CustomTooltipProps = Modify<
+  TooltipProps,
+  {
+    title?: TooltipProps['title']
+  }
+>
+
+export const Tooltip: FC<CustomTooltipProps> = ({ title, ...props }) => {
+  if (!title) {
+    return <>{props.children}</>
+  }
+  return <StyledTooltip enterDelay={300} title={title} {...props} />
+}
