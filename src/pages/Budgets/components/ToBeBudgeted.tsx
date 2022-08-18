@@ -1,9 +1,4 @@
-import React, { FC, ReactElement } from 'react'
-import { useAppSelector } from 'store'
-import { formatMoney } from 'shared/helpers/money'
-import { formatDate } from 'shared/helpers/date'
-import { getTotalsByMonth, MonthTotals } from '../selectors'
-import { getUserCurrencyCode } from 'models/instrument'
+import React, { FC } from 'react'
 import {
   Typography,
   ButtonBase,
@@ -14,16 +9,20 @@ import {
   Theme,
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
+import { formatMoney, sub } from 'shared/helpers/money'
 import { Tooltip } from 'shared/ui/Tooltip'
-import Rhythm from 'shared/ui/Rhythm'
-import { useMonth } from '../pathHooks'
-import { TDateDraft } from 'shared/types'
-import { keys } from 'shared/helpers/keys'
 import { Amount } from 'shared/ui/Amount'
+import Rhythm from 'shared/ui/Rhythm'
+import {
+  useDisplayValue,
+  useMonthList,
+  useMonthTotals,
+} from 'models/envelopeData'
+import { useDisplayCurrency, useMonth } from '../model'
 
-type TColor = 'error' | 'warning' | 'success'
+type TMsgType = 'error' | 'warning' | 'success'
 
-const useStyles = makeStyles<Theme, { color: TColor }>(
+const useStyles = makeStyles<Theme, { color: TMsgType }>(
   ({ shape, spacing, palette, breakpoints }) => ({
     base: {
       display: 'flex',
@@ -47,26 +46,20 @@ const useStyles = makeStyles<Theme, { color: TColor }>(
   })
 )
 
-const getMonthName = (date: TDateDraft) =>
-  formatDate(new Date(date), 'LLL').toLowerCase()
-
 type ToBeBudgetedProps = ButtonBaseProps & {
   small?: boolean
 }
 export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
   const { small, className, ...rest } = props
-  const [month] = useMonth()
-  const currency = useAppSelector(getUserCurrencyCode)
-  const totalsByMonth = useAppSelector(getTotalsByMonth)
-  const firstMonth = keys(totalsByMonth).sort()[0]
-  const isFirstMonth = month === firstMonth
-  const totals = totalsByMonth[month]
-  const { toBeBudgeted, overspent, realBudgetedInFuture, budgetedInFuture } =
-    totals
-  const color: TColor =
-    toBeBudgeted < 0 ? 'error' : overspent ? 'warning' : 'success'
-  const hasFutureOverspend = realBudgetedInFuture > budgetedInFuture
-  const c = useStyles({ color })
+  const {
+    currency,
+    toBeBudgeted,
+    hasFutureOverspend,
+    msgType,
+    TooltipContent,
+  } = useTotalsModel()
+
+  const c = useStyles({ color: msgType })
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
   const BigWidget = (
@@ -116,100 +109,99 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
   )
 
   return (
-    <TotalsTooltip color={color} {...{ currency, totals, isFirstMonth }}>
+    <Tooltip arrow title={<TooltipContent />}>
       {small ? SmallWidget : BigWidget}
-    </TotalsTooltip>
+    </Tooltip>
   )
 }
 
-type TotalsTooltipProps = {
-  currency: string
-  color: TColor
-  totals: MonthTotals
-  isFirstMonth: boolean
-  children: ReactElement
-}
-const TotalsTooltip: FC<TotalsTooltipProps> = ({
-  currency,
-  color,
-  totals,
-  isFirstMonth,
-  children,
-}) => {
-  const {
-    date,
-    prevOverspent,
-    toBeBudgeted,
-    overspent,
-    income,
-    prevFunds,
-    transferOutcome,
-    transferFees,
-    // realBudgetedInFuture,
-    budgeted,
-    budgetedInFuture,
-  } = totals
+function useTotalsModel() {
+  const [month] = useMonth()
+
+  const currency = useDisplayCurrency()
+  const toDisplay = useDisplayValue(month)
+
+  const monthList = useMonthList()
+  const lastMonth = monthList[monthList.length - 1]
+
+  const totals = useMonthTotals(month)
+  const lastTotals = useMonthTotals(lastMonth)
+
+  const toBeBudgeted = toDisplay(totals.toBeBudgetedFx)
+  const overspend = toDisplay(totals.overspend)
+  const hasFutureOverspend = toDisplay(lastTotals.overspend)
+  const fundsEnd = toDisplay(totals.fundsEnd)
+  const allocated = toDisplay(totals.available)
+  const budgetedInFuture = toDisplay(totals.budgetedInFuture)
+
+  const freeWithoutFuture = sub(fundsEnd, allocated)
+  const displayBudgetedInFuture =
+    freeWithoutFuture < 0
+      ? 0
+      : budgetedInFuture >= freeWithoutFuture
+      ? freeWithoutFuture
+      : budgetedInFuture
+
+  const msgType: TMsgType =
+    toBeBudgeted < 0 ? 'error' : !!overspend ? 'warning' : 'success'
+
   const formatSum = (sum: number) => formatMoney(sum, currency)
 
   const messages = {
     success: toBeBudgeted
       ? `Распределите деньги по категориям в этом или следующем месяце.`
-      : `Все деньги распределены по\u00A0категориям, так держать 🥳`,
-    warning: `Перерасход в категориях ${formatSum(
-      overspent
-    )}. Добавьте денег в категории с перерасходом.`,
-    error: `Вы распределили больше денег, чем у вас есть. Из каких-то категорий придётся забрать деньги.`,
-  }
-
-  const Line: FC<{ name: string; amount: number }> = props => {
-    const { name, amount } = props
-    return (
-      <Box display="flex" flexDirection="row">
-        <Typography
-          noWrap
-          variant="caption"
-          sx={{ flexGrow: 1, mr: 1, minWidth: 0 }}
-        >
-          {name}
-        </Typography>
-
-        <Typography variant="caption">
-          {amount > 0 && '+'}
-          {formatSum(amount)}
-        </Typography>
-      </Box>
-    )
+      : `Все деньги распределены по категориям, так держать 🥳`,
+    warning: `Перерасход в категориях на ${formatSum(
+      -overspend
+    )}. Добавьте денег в категории с перерасходом.`,
+    error: `Вы распределили больше денег, чем у вас есть. Из каких-то категорий придётся забрать деньги.`,
   }
 
   function TooltipContent() {
     return (
       <Rhythm gap={1}>
         <Typography variant="body2" align="center">
-          {messages[color]}
+          {messages[msgType]}
         </Typography>
         <Divider />
-        {isFirstMonth ? (
-          <Line name="Начальный остаток на счетах" amount={prevFunds} />
-        ) : (
-          <>
-            <Line name="Остаток с прошлого месяца" amount={prevFunds} />
-            <Line name="Перерасход в прошлом месяце" amount={-prevOverspent} />
-          </>
-        )}
-        <Line name={`Доход за ${getMonthName(date)}`} amount={income} />
-        <Line name={`Бюджеты на ${getMonthName(date)}`} amount={-budgeted} />
+
+        <Line name="Всего в бюджете" amount={formatSum(fundsEnd)} />
+        <Divider />
+
+        <Line name={`Лежит в конвертах`} amount={formatSum(allocated)} />
         <Line
-          name="Переводы без категории"
-          amount={-transferOutcome - transferFees}
+          name={`Распределено в будущем`}
+          amount={formatSum(displayBudgetedInFuture)}
         />
-        <Line name="Распределено в будущем" amount={-budgetedInFuture} />
+        <Line name={`Свободно`} amount={formatSum(toBeBudgeted)} />
       </Rhythm>
     )
   }
 
+  return {
+    currency,
+    toBeBudgeted,
+    overspend,
+    hasFutureOverspend,
+    month,
+    msgType,
+    TooltipContent,
+  }
+}
+
+const Line: FC<{ name: string; amount: string }> = props => {
+  const { name, amount } = props
   return (
-    <Tooltip arrow title={<TooltipContent />}>
-      {children}
-    </Tooltip>
+    <Box display="flex" flexDirection="row">
+      <Typography
+        noWrap
+        variant="caption"
+        sx={{ flexGrow: 1, mr: 1, minWidth: 0 }}
+      >
+        {name}
+      </Typography>
+
+      <Typography variant="caption">{amount}</Typography>
+    </Box>
   )
 }

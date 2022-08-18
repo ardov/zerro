@@ -1,14 +1,15 @@
 import React from 'react'
+import { useAppSelector } from 'store'
+import { getTotalsByMonth } from '../../selectors'
+import { getUserCurrencyCode } from 'models/instrument'
 import { Box } from '@mui/material'
 import { Total } from '../components'
 import { useMonth } from 'pages/BudgetsOld/pathHooks'
-import { useMonthTotals } from 'models/envelopeData'
-import { convertFx } from 'shared/helpers/money'
 
 export function WidgetOutcome() {
   const [month] = useMonth()
-  const { activity, currency, rates } = useMonthTotals(month)
-  const envActivity = convertFx(activity, currency, rates)
+  const outcome = useAppSelector(getTotalsByMonth)?.[month]?.outcome
+  const currency = useAppSelector(getUserCurrencyCode)
 
   return (
     <Box
@@ -19,9 +20,8 @@ export function WidgetOutcome() {
         display: 'flex',
         justifyContent: 'center',
       }}
-      onClick={() => console.log(activity)}
     >
-      <Total name="Расход" value={envActivity} currency={currency} sign />
+      <Total name="Расход" value={-outcome} currency={currency} sign />
     </Box>
   )
 }

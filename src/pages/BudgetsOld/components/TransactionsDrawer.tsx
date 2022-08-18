@@ -1,5 +1,6 @@
 import React, { FC } from 'react'
 import { useAppSelector } from 'store'
+import { useMonth } from '../pathHooks'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { TransactionsDrawer } from 'components/TransactionsDrawer'
 import { getInBudgetAccounts } from 'models/account'
@@ -8,7 +9,6 @@ import { getPopulatedTags } from 'models/tag'
 import { FilterConditions } from 'models/transaction/filtering'
 import { endOfMonth } from 'shared/helpers/date'
 import { TrType } from 'models/transaction'
-import { useMonth } from '../model'
 
 export const BudgetTransactionsDrawer: FC = () => {
   const [month] = useMonth()

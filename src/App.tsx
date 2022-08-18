@@ -18,8 +18,8 @@ import { getRootUser } from 'models/user'
 import { initTracking, setUserId } from 'shared/helpers/tracking'
 import Transactions from 'pages/Transactions'
 import Auth from 'pages/Auth'
+import BudgetsOld from 'pages/BudgetsOld'
 import Budgets from 'pages/Budgets'
-import BudgetsNew from 'pages/BudgetsNew'
 import Review from 'pages/Review'
 import Accounts from 'pages/Accounts'
 import Stats from 'pages/Stats'
@@ -64,8 +64,8 @@ const PrivateApp = () => {
               <Route path="/transactions" component={Transactions} />
               <Route path="/review" component={Review} />
               <Route path="/accounts" component={Accounts} />
+              <Route path="/budget-old" component={BudgetsOld} />
               <Route path="/budget" component={Budgets} />
-              <Route path="/budget-new" component={BudgetsNew} />
               <Route path="/stats" component={Stats} />
               <Route path="/token" component={Token} />
               <Route path="/donation" component={Donation} />

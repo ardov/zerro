@@ -1,8 +1,10 @@
+import { convertCurrency, getInstruments } from 'models/instrument'
 import { getRootUser } from 'models/user'
+import { getPopulatedTag } from 'models/tag'
 import { getAmountsByTag, TagAmounts } from '../selectors'
 import { sendEvent } from 'shared/helpers/tracking'
 import { getBudgets, getISOMonthFromBudgetId, makeBudget } from 'models/budget'
-import { getBudgetsByMonthAndTag } from 'models/budget'
+import { getBudgetsByMonthAndTag, getBudget } from 'models/budget'
 import { getTags } from 'models/tag'
 import { getGoalsProgress } from '../selectors'
 import { goalType } from 'models/hiddenData/constants'
@@ -16,8 +18,88 @@ import {
   TDateDraft,
   TISOMonth,
 } from 'shared/types'
+import { getMetaForTag } from 'models/hiddenData/tagMeta'
+import { round } from 'shared/helpers/money'
 import { prevMonth, toISODate, toISOMonth } from 'shared/helpers/date'
 import { keys } from 'shared/helpers/keys'
+import { getUserInstrumentId } from 'models/user/model'
+
+export const moveFunds =
+  (
+    amount: number,
+    source: string,
+    destination: string,
+    month: TISOMonth
+  ): AppThunk<void> =>
+  (dispatch, getState) => {
+    if (!source || !amount || !destination || source === destination) return
+    sendEvent('Budgets: move funds')
+    const state = getState()
+    const user = getRootUser(state)?.id
+    if (!user) return
+
+    const resultBudgets: IBudget[] = []
+    if (source !== 'toBeBudgeted') {
+      resultBudgets.push(getUpdatedBudget(source, -amount))
+    }
+    if (destination !== 'toBeBudgeted') {
+      resultBudgets.push(getUpdatedBudget(destination, amount))
+    }
+    dispatch(applyClientPatch({ budget: resultBudgets }))
+
+    function getUpdatedBudget(id: string, outcomeDiff: number) {
+      const tag = id === 'null' ? null : id
+      const budget =
+        getBudget(state, id, month) ||
+        makeBudget({ user: user as number, date: month, tag })
+      return {
+        ...budget,
+        outcome: budget.outcome + outcomeDiff,
+        changed: Date.now(),
+      }
+    }
+  }
+
+export const setOutcomeBudget =
+  (targetOutcome: number, month: TISOMonth, tagId: string): AppThunk<void> =>
+  (dispatch, getState) => {
+    sendEvent('Budgets: set budget')
+    const state = getState()
+    const user = getRootUser(state)?.id
+    if (!user) return
+    const created = getBudget(state, tagId, month)
+    const amounts = getAmountsByTag(state)[month]
+    const parentTagId = getPopulatedTag(state, tagId).parent
+
+    // ------------------------------------------------------------------
+    // Currency part. Refactor me, pls 🥺
+    const currConverter = convertCurrency(state)
+    const { currency } = getMetaForTag(tagId)(state)
+    const instruments = getInstruments(state)
+    const userInstrumentId = getUserInstrumentId(state)
+    if (!userInstrumentId) return
+    const userInstrument = instruments[userInstrumentId]
+    const tagInstrument = currency ? instruments[currency] : userInstrument
+    const toTagCurrency = (v: number) =>
+      v && tagInstrument && userInstrument
+        ? round(currConverter(v, userInstrument.id, tagInstrument.id))
+        : v
+    // End of currency part
+    // ------------------------------------------------------------------
+
+    let outcome = targetOutcome
+
+    if (!parentTagId) {
+      // if it's top level category
+      const { budgeted, totalBudgeted } = amounts[tagId]
+      const childrenBudgets = totalBudgeted - budgeted
+      outcome = targetOutcome - toTagCurrency(childrenBudgets)
+    }
+
+    const budget = created || makeBudget({ user, date: month, tag: tagId })
+    const changed = { ...budget, outcome, changed: Date.now() }
+    dispatch(applyClientPatch({ budget: [changed] }))
+  }
 
 export const copyPreviousBudget =
   (month: TISOMonth): AppThunk<void> =>

@@ -3,11 +3,11 @@ import { useAppSelector } from 'store'
 import { getAmountsByTag, getTotalsByMonth } from '../../selectors'
 import { getUserCurrencyCode } from 'models/instrument'
 import { Box, Typography, ButtonBase, Collapse, BoxProps } from '@mui/material'
-import { Amount } from 'shared/ui/Amount'
 import { withStyles } from '@mui/styles'
 import Rhythm from 'shared/ui/Rhythm'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { Line } from '../components'
+import { SmartAmount } from 'components/Amount'
 import { getTagsTree } from 'models/tag'
 import { TransactionsDrawer } from 'components/TransactionsDrawer'
 import { useMonth } from 'pages/BudgetsOld/pathHooks'
@@ -72,7 +72,7 @@ export function WidgetIncome() {
         <Box display="flex" width="100%" justifyContent="space-between">
           <Typography>Доход за {monthName}</Typography>
           <Typography>
-            <Amount value={income} currency={currency} />
+            <SmartAmount value={income} currency={currency} />
           </Typography>
         </Box>
 

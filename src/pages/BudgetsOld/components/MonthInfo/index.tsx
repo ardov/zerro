@@ -21,11 +21,12 @@ import Rhythm from 'shared/ui/Rhythm'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { Line } from '../components'
 import { WidgetIncome } from './WidgetIncome'
+import { OverspentNotice } from './OverspentNotice'
+import { CalculationErrorNotice } from './CalculationErrorNotice'
 import { WidgetOutcome } from './WidgetOutcome'
 import { useMonth } from 'pages/BudgetsOld/pathHooks'
 import { useToggle } from 'shared/hooks/useToggle'
 import { TDateDraft } from 'shared/types'
-import { OverspendNotice } from 'features/fixOverspend'
 
 type MonthInfoProps = BoxProps & {
   onClose: () => void
@@ -60,7 +61,8 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
       )}
 
       <Rhythm gap={2} p={3}>
-        <OverspendNotice month={month} />
+        <CalculationErrorNotice />
+        {!!overspent && <OverspentNotice />}
         <WidgetIncome />
         <WidgetOutcome />
 

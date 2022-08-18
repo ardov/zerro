@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { useDisplayCurrency } from 'pages/BudgetsNew/model'
+import { useDisplayCurrency } from 'pages/Budgets/model'
 import { convertFx } from 'shared/helpers/money'
 import { TFxAmount, TISOMonth } from 'shared/types'
 import { useRates } from './useRates'

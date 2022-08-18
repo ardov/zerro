@@ -1,17 +1,23 @@
 import React, { FC, ReactNode, useState } from 'react'
 import { useAppDispatch } from 'store'
 import { DragDropContext, DropResult } from 'react-beautiful-dnd'
-import { useMonth } from '../model'
+import { useMonth } from '../pathHooks'
 import { useCallback } from 'react'
-import { MoveMoneyModal } from 'features/moveMoney'
+import { MoveMoneyModal } from './MoveMoneyModal'
 import { moveTag } from 'models/hiddenData/tagOrder'
-import { useToggle } from 'shared/hooks/useToggle'
-import { TEnvelopeId } from 'shared/types'
+import { TISOMonth } from 'shared/types'
 
 export type DragModeType = 'FUNDS' | 'REORDER'
 type DragModeContextType = {
   dragMode: DragModeType
   setDragMode: (mode: DragModeType) => void
+}
+interface IMoneyModalProps {
+  open: boolean
+  source?: string
+  destination?: string
+  month?: TISOMonth
+  key?: string
 }
 
 export const IsDraggingContext = React.createContext(false)
@@ -25,12 +31,9 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
   const [month] = useMonth()
   const [isDragging, setIsDragging] = useState(false)
   const [dragMode, setDragMode] = useState<DragModeType>('FUNDS')
-
-  const [moneySource, setMoneySource] =
-    useState<TEnvelopeId | 'toBeBudgeted'>('toBeBudgeted')
-  const [moneyDestination, setMoneyDestination] =
-    useState<TEnvelopeId | 'toBeBudgeted'>('toBeBudgeted')
-  const [isOpen, toggleOpen] = useToggle()
+  const [moneyModalProps, setMoneyModalProps] = useState<IMoneyModalProps>({
+    open: false,
+  })
 
   const onDragEnd = useCallback(
     (e: DropResult) => {
@@ -41,9 +44,15 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
         dragMode === 'FUNDS' &&
         e.source.droppableId !== e.destination.droppableId
       ) {
-        setMoneySource(e.source.droppableId as TEnvelopeId)
-        setMoneyDestination(e.destination.droppableId as TEnvelopeId)
-        toggleOpen()
+        const source = e.source.droppableId
+        const destination = e.destination.droppableId
+        setMoneyModalProps({
+          open: true,
+          source,
+          destination,
+          month,
+          key: source + destination + month,
+        })
       }
 
       if (dragMode === 'REORDER' && e.source.index !== e.destination.index) {
@@ -52,26 +61,24 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
         dispatch(moveTag(startIndex, endIndex))
       }
     },
-    [dispatch, dragMode, month, toggleOpen]
+    [dispatch, dragMode, month]
   )
   const onBeforeCapture = useCallback(() => {
     setIsDragging(true)
     if (window.navigator.vibrate) window.navigator.vibrate(100)
   }, [])
+  const closeMoveMoneyModal = useCallback(
+    () => setMoneyModalProps({ open: false }),
+    []
+  )
 
   return (
     <DragDropContext onDragEnd={onDragEnd} onBeforeCapture={onBeforeCapture}>
       <IsDraggingContext.Provider value={isDragging}>
         <DragModeContext.Provider value={{ dragMode, setDragMode }}>
           {children}
-          <MoveMoneyModal
-            key={moneySource + moneyDestination + month}
-            open={isOpen}
-            month={month}
-            source={moneySource}
-            destination={moneyDestination}
-            onClose={toggleOpen}
-          />
+          {/*// @ts-ignore*/}
+          <MoveMoneyModal {...moneyModalProps} onClose={closeMoveMoneyModal} />
         </DragModeContext.Provider>
       </IsDraggingContext.Provider>
     </DragDropContext>

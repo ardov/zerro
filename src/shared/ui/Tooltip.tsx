@@ -4,7 +4,9 @@ import { Tooltip as MaterialTooltip, TooltipProps } from '@mui/material'
 import { Modify } from 'shared/types'
 
 const StyledTooltip = withStyles(theme => ({
-  tooltip: { fontSize: theme.typography.fontSize },
+  tooltip: {
+    fontSize: theme.typography.fontSize,
+  },
 }))(MaterialTooltip)
 
 type CustomTooltipProps = Modify<
