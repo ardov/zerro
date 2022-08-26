@@ -3,18 +3,23 @@ import { Box } from '@mui/material'
 import { SxProps } from '@mui/system'
 import { Theme } from '@mui/material/styles'
 import { useAppSelector } from 'store'
-import { getSortedTransactions } from 'models/transaction'
-import { groupTransactionsBy } from 'models/transaction/helpers'
-import { checkRaw, FilterConditions } from 'models/transaction/filtering'
+import {
+  getSortedTransactions,
+  compareTrDates,
+  groupTransactionsBy,
+  checkRaw,
+  FilterConditions,
+} from 'models/transaction'
 import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
 import { sendEvent } from 'shared/helpers/tracking'
 // import { getGroupedTransactions } from 'worker'
 import { useDebounce } from 'shared/hooks/useDebounce'
-import { TTransactionId } from 'shared/types'
+import { ITransaction, TTransactionId } from 'shared/types'
 
-type TransactionListProps = {
+export type TTransactionListProps = {
+  transactions?: ITransaction[]
   prefilter?: FilterConditions | FilterConditions[]
   filterConditions?: FilterConditions
   hideFilter?: boolean
@@ -22,8 +27,9 @@ type TransactionListProps = {
   sx?: SxProps<Theme>
 }
 
-const TransactionList: FC<TransactionListProps> = props => {
+export const TransactionList: FC<TTransactionListProps> = props => {
   const {
+    transactions,
     prefilter,
     filterConditions,
     hideFilter = false,
@@ -31,7 +37,7 @@ const TransactionList: FC<TransactionListProps> = props => {
     sx,
   } = props
 
-  const transactions = useAppSelector(getSortedTransactions)
+  const allTransactions = useAppSelector(getSortedTransactions)
   const [filter, setFilter] = useState(filterConditions)
   const debouncedFilter = useDebounce(filter, 300)
   const setCondition = useCallback(
@@ -46,17 +52,18 @@ const TransactionList: FC<TransactionListProps> = props => {
     (payee?: string) => setFilter({ search: payee }),
     []
   )
+  const trList = transactions?.sort(compareTrDates) || allTransactions
 
   const groups = useMemo(() => {
     if (prefilter) {
       return groupTransactionsBy(
         'DAY',
-        transactions.filter(checkRaw(prefilter)),
+        trList.filter(checkRaw(prefilter)),
         debouncedFilter
       )
     }
-    return groupTransactionsBy('DAY', transactions, debouncedFilter)
-  }, [transactions, debouncedFilter, prefilter])
+    return groupTransactionsBy('DAY', trList, debouncedFilter)
+  }, [trList, debouncedFilter, prefilter])
 
   // const [groups, setGroups] = useState([])
   // useEffect(() => {
@@ -96,12 +103,12 @@ const TransactionList: FC<TransactionListProps> = props => {
   const checkByChangedDate = useCallback(
     (date: Date | number) => {
       sendEvent('Transaction: select similar')
-      const ids = transactions
+      const ids = allTransactions
         .filter(tr => tr.changed === +date)
         .map(tr => tr.id)
       setChecked(ids)
     },
-    [transactions]
+    [allTransactions]
   )
 
   useEffect(() => {
@@ -158,5 +165,3 @@ const TransactionList: FC<TransactionListProps> = props => {
     </Box>
   )
 }
-
-export default TransactionList

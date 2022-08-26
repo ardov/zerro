@@ -13,7 +13,7 @@ import { getSavingAccounts } from 'models/account'
 import { getDebtors, TDebtor } from 'models/debtors'
 import { getUserCurrencyCode } from 'models/instrument'
 import { getPopulatedTags, TTagPopulated } from 'models/tag'
-import { getEnvelopeId } from 'models/envelope'
+import { getEnvelopeId } from './helpers'
 import { getEnvelopeMeta, TEnvelopeMeta, envelopeVisibility } from './metaData'
 
 const defaultTagGroup = 'Категории'

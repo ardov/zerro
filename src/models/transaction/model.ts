@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { getMerchants } from 'models/merchant'
-import { compareDates, getTime, isDeleted } from './helpers'
+import { compareTrDates, getTime, isDeleted } from './helpers'
 import { RootState } from 'store'
 import { ITransaction } from 'shared/types'
 import { withPerf } from 'shared/helpers/performance'
@@ -11,7 +11,7 @@ export const getTransactions = (state: RootState) =>
 export const getSortedTransactions = createSelector(
   [getTransactions],
   withPerf('getSortedTransactions', transactions =>
-    Object.values(transactions).sort(compareDates)
+    Object.values(transactions).sort(compareTrDates)
   )
 )
 

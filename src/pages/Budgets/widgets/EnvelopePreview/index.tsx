@@ -11,7 +11,7 @@ import { EmojiIcon } from 'shared/ui/EmojiIcon'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { CloseIcon, EditIcon, EmojiFlagsIcon } from 'shared/ui/Icons'
 import { useAppDispatch } from 'store'
-import { Total, Line as TextLine } from '../../components/components'
+import { Total } from '../../../../shared/ui/Total'
 import Rhythm from 'shared/ui/Rhythm'
 import { useMonth } from 'pages/BudgetsOld/pathHooks'
 import { ActivityWidget } from './ActivityWidget'
@@ -27,6 +27,7 @@ import { goalToWords } from 'models/goal'
 import { cardStyle } from './shared'
 import { patchEnvelope } from 'models/envelope'
 import { EnvelopeEditDialog } from './EnvelopeEditDialog'
+import { DataLine } from 'shared/ui/DataLine'
 
 type EnvelopePreviewProps = {
   id: TEnvelopeId
@@ -102,13 +103,13 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
         </Grid>
 
         <Rhythm gap={1.5} px={3} mt={3}>
-          <TextLine
+          <DataLine
             name="Остаток с прошлого месяца"
             amount={totalLeftover}
             currency={currency}
           />
-          <TextLine name="Бюджет" amount={totalBudgeted} currency={currency} />
-          <TextLine name="Расход" amount={totalActivity} currency={currency} />
+          <DataLine name="Бюджет" amount={totalBudgeted} currency={currency} />
+          <DataLine name="Расход" amount={totalActivity} currency={currency} />
           <Box>
             <Button onClick={() => setId(id)} fullWidth>
               Показать операции

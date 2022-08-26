@@ -1,9 +1,9 @@
 import React from 'react'
 import { Box } from '@mui/material'
-import { Total } from '../components'
-import { useMonth } from 'pages/BudgetsOld/pathHooks'
-import { useMonthTotals } from 'models/envelopeData'
 import { convertFx } from 'shared/helpers/money'
+import { Total } from 'shared/ui/Total'
+import { useMonthTotals } from 'models/envelopeData'
+import { useMonth } from 'pages/Budgets/model'
 
 export function WidgetOutcome() {
   const [month] = useMonth()

@@ -37,7 +37,7 @@ export function groupTransactionsBy(
   return Object.values(groups)
 }
 
-export function compareDates(tr1: ITransaction, tr2: ITransaction) {
+export function compareTrDates(tr1: ITransaction, tr2: ITransaction) {
   if (tr1.date < tr2.date) return 1
   if (tr1.date > tr2.date) return -1
   return tr2.created - tr1.created

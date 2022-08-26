@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react'
+import React, { FC, useCallback, useState } from 'react'
 import { Paper, Typography } from '@mui/material'
 import { TEnvelopeId, TISOMonth } from 'shared/types'
 import {
@@ -11,6 +11,7 @@ import { Parent } from './Parent'
 import { Row } from './Row'
 import { BudgetPopover } from '../BudgetPopover'
 import { GoalPopover } from '../GoalPopover'
+import { useSearchParam } from 'shared/hooks/useSearchParam'
 
 type TagTableProps = {
   onOpenDetails: (id: TEnvelopeId) => void
@@ -25,6 +26,14 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
   const budget = useEnvelopePopover(month, 'budget')
   const goal = useEnvelopePopover(month, 'goal')
+  const [, setId] = useSearchParam<TEnvelopeId>('transactions')
+  const onOpenTransactionPopover = useCallback(
+    (id: TEnvelopeId) => {
+      console.log(id)
+      setId(id)
+    },
+    [setId]
+  )
   return (
     <>
       <Paper className={className}>
@@ -45,7 +54,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
                     metric="available"
                     openGoalPopover={goal.onOpen}
                     openBudgetPopover={budget.onOpen}
-                    openTransactionsPopover={() => {}}
+                    openTransactionsPopover={onOpenTransactionPopover}
                     openDetails={onOpenDetails}
                   />
                 }
@@ -56,7 +65,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
                     metric="available"
                     openGoalPopover={goal.onOpen}
                     openBudgetPopover={budget.onOpen}
-                    openTransactionsPopover={() => {}}
+                    openTransactionsPopover={onOpenTransactionPopover}
                     openDetails={onOpenDetails}
                   />
                 ))}

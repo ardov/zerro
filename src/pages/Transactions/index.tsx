@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import TransactionList from 'components/TransactionList'
+import { TransactionList } from 'components/TransactionList'
 import {
   Box,
   Drawer,

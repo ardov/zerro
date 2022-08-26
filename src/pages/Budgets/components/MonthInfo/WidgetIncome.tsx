@@ -7,7 +7,6 @@ import { Amount } from 'shared/ui/Amount'
 import { withStyles } from '@mui/styles'
 import Rhythm from 'shared/ui/Rhythm'
 import { Tooltip } from 'shared/ui/Tooltip'
-import { Line } from '../components'
 import { getTagsTree } from 'models/tag'
 import { TransactionsDrawer } from 'components/TransactionsDrawer'
 import { useMonth } from 'pages/BudgetsOld/pathHooks'
@@ -16,6 +15,7 @@ import { FilterConditions } from 'models/transaction/filtering'
 import { useToggle } from 'shared/hooks/useToggle'
 import { endOfMonth } from 'shared/helpers/date'
 import { TrType } from 'models/transaction'
+import { DataLine } from 'shared/ui/DataLine'
 
 type IncomeDataPoint = {
   id: string
@@ -83,7 +83,7 @@ export function WidgetIncome() {
             <Collapse in={opened}>
               <Rhythm gap={1.5} pt={2} width="100%">
                 {incomeData.map(tag => (
-                  <Line
+                  <DataLine
                     key={tag.id}
                     onClick={e => {
                       e.stopPropagation()

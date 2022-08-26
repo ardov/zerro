@@ -1,57 +1,30 @@
-import React, { FC } from 'react'
-import { useAppSelector } from 'store'
+import React, { FC, useEffect, useState } from 'react'
 import { useSearchParam } from 'shared/hooks/useSearchParam'
 import { TransactionsDrawer } from 'components/TransactionsDrawer'
-import { getInBudgetAccounts } from 'models/account'
-import { getTagAccMap } from 'models/hiddenData/accTagMap'
-import { getPopulatedTags } from 'models/tag'
-import { FilterConditions } from 'models/transaction/filtering'
-import { endOfMonth } from 'shared/helpers/date'
-import { TrType } from 'models/transaction'
 import { useMonth } from '../model'
+import { useMonthTotals } from 'models/envelopeData'
+import { TEnvelopeId } from 'shared/types'
 
 export const BudgetTransactionsDrawer: FC = () => {
   const [month] = useMonth()
-  const [id, setId] = useSearchParam('transactions')
-  const accountsInBudget = useAppSelector(getInBudgetAccounts).map(a => a.id)
-  const tagAccMap = useAppSelector(getTagAccMap)
-  const tagsById = useAppSelector(getPopulatedTags)
-
+  const [id, setId] = useSearchParam<TEnvelopeId>('transactions')
+  const [savedId, setSavedId] = useState(id)
+  const totals = useMonthTotals(month)
   const onClose = () => setId(undefined)
 
-  if (!id) return <TransactionsDrawer open={false} onClose={onClose} />
+  useEffect(() => {
+    if (id) setSavedId(id)
+  }, [setSavedId, id])
 
-  const tag = tagsById[id]
-  const tagIds = [tag.id, ...tag.children]
+  if (!savedId) return <TransactionsDrawer open={false} onClose={onClose} />
 
-  let prefilter: FilterConditions[] = []
-  prefilter.push({
-    type: TrType.Outcome,
-    dateFrom: month,
-    dateTo: endOfMonth(month),
-    accountsFrom: accountsInBudget,
-    mainTags: tagIds,
-  })
-  tagIds.forEach(id => {
-    if (tagAccMap[id]) {
-      prefilter.push({
-        type: TrType.Transfer,
-        dateFrom: month,
-        dateTo: endOfMonth(month),
-        accountsFrom: accountsInBudget,
-        accountsTo: tagAccMap[id],
-      })
-      prefilter.push({
-        type: TrType.Transfer,
-        dateFrom: month,
-        dateTo: endOfMonth(month),
-        accountsFrom: tagAccMap[id],
-        accountsTo: accountsInBudget,
-      })
-    }
-  })
+  const envelope = totals.envelopes[savedId]
+
+  const trList = envelope.children.reduce((acc, childId) => {
+    return acc.concat(totals.envelopes[childId].transactions)
+  }, envelope.transactions)
 
   return (
-    <TransactionsDrawer prefilter={prefilter} open={!!id} onClose={onClose} />
+    <TransactionsDrawer transactions={trList} open={!!id} onClose={onClose} />
   )
 }

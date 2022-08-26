@@ -19,13 +19,13 @@ import {
 import { CloseIcon } from 'shared/ui/Icons'
 import Rhythm from 'shared/ui/Rhythm'
 import { Tooltip } from 'shared/ui/Tooltip'
-import { Line } from '../components'
 import { WidgetIncome } from './WidgetIncome'
 import { WidgetOutcome } from './WidgetOutcome'
 import { useMonth } from 'pages/BudgetsOld/pathHooks'
 import { useToggle } from 'shared/hooks/useToggle'
 import { TDateDraft } from 'shared/types'
 import { OverspendNotice } from 'features/fixOverspend'
+import { DataLine } from 'shared/ui/DataLine'
 
 type MonthInfoProps = BoxProps & {
   onClose: () => void
@@ -111,25 +111,25 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
         <Box display="flex" flexDirection="column" justifyContent="center">
           <Collapse in={showMore}>
             <Rhythm gap={1} width="100%" pb={1}>
-              <Line
+              <DataLine
                 name={
                   transferOutcome > 0
                     ? 'Переводы из бюджета'
                     : 'Переводы в бюджет'
                 }
-                description="Сумма переводов между счетами в бюджете и остальными"
+                tooltip="Сумма переводов между счетами в бюджете и остальными"
                 amount={
                   transferOutcome < 0 ? -transferOutcome : transferOutcome
                 }
                 currency={currency}
               />
-              <Line
+              <DataLine
                 name={`${transferFees > 0 ? 'Потери' : 'Доходы'} на переводах`}
-                description="Здесь учитываются комиссии или переводы в валюту. Например, купили долларов, а потом они подорожали, разница будет тут."
+                tooltip="Здесь учитываются комиссии или переводы в валюту. Например, купили долларов, а потом они подорожали, разница будет тут."
                 amount={-transferFees}
                 currency={currency}
               />
-              <Line
+              <DataLine
                 name={`Все будущие бюджеты`}
                 amount={realBudgetedInFuture}
                 currency={currency}

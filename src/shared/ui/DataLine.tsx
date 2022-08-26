@@ -1,18 +1,25 @@
-import React, { FC } from 'react'
-import { Box, BoxProps, TooltipProps, Typography } from '@mui/material'
+import React, { FC, ReactNode } from 'react'
+import {
+  Box,
+  BoxProps,
+  TooltipProps,
+  Typography,
+  TypographyProps,
+} from '@mui/material'
 import { AmountProps } from 'shared/ui/Amount'
 import { Tooltip } from 'shared/ui/Tooltip'
 // TODO: use Amount instead
 import { SmartAmount } from 'components/Amount'
 
 type DataLineProps = BoxProps & {
-  name: string
+  name: ReactNode
   amount?: AmountProps['value']
   currency?: AmountProps['currency']
   instrument?: AmountProps['instrument']
   color?: string
   colorOpacity?: number
   tooltip?: TooltipProps['title']
+  variant?: TypographyProps['variant']
 }
 
 export const DataLine: FC<DataLineProps> = ({
@@ -23,26 +30,21 @@ export const DataLine: FC<DataLineProps> = ({
   color,
   colorOpacity = 1,
   tooltip,
+  variant = 'body1',
   ...rest
 }) => {
   return (
     <Box display="flex" flexDirection="row" {...rest}>
       <Box flexGrow={1} mr={1} minWidth={0} display="flex" alignItems="center">
         {!!color && <Dot color={color} colorOpacity={colorOpacity} />}
-        {tooltip ? (
-          <Tooltip title={tooltip}>
-            <Typography noWrap variant="body1">
-              {name}
-            </Typography>
-          </Tooltip>
-        ) : (
-          <Typography noWrap variant="body1">
+        <Tooltip title={tooltip}>
+          <Typography noWrap variant={variant}>
             {name}
           </Typography>
-        )}
+        </Tooltip>
       </Box>
       {amount !== undefined && (
-        <Typography variant="body1">
+        <Typography variant={variant}>
           <SmartAmount
             value={amount}
             currency={currency}

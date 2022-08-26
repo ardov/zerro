@@ -1,28 +1,30 @@
 import React, { FC } from 'react'
-import TransactionList from './TransactionList'
+import { TransactionList, TTransactionListProps } from './TransactionList'
 import { Drawer, Box, Typography, IconButton, DrawerProps } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { CloseIcon } from 'shared/ui/Icons'
-import { FilterConditions } from 'models/transaction/filtering'
 import { Modify } from 'shared/types'
 
 export type TransactionsDrawerProps = Modify<
   DrawerProps,
   { onClose: () => void }
 > & {
-  prefilter?: FilterConditions | FilterConditions[]
-  filterConditions?: FilterConditions
+  transactions?: TTransactionListProps['transactions']
+  prefilter?: TTransactionListProps['prefilter']
+  filterConditions?: TTransactionListProps['filterConditions']
 }
 
-export const TransactionsDrawer: FC<TransactionsDrawerProps> = ({
-  prefilter,
-  filterConditions,
-  title,
-  onClose,
-  open,
-  ...rest
-}) => {
+export const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
+  const {
+    transactions,
+    prefilter,
+    filterConditions,
+    title,
+    onClose,
+    open,
+    ...rest
+  } = props
   const c = useStyles()
   return (
     <Drawer
@@ -46,6 +48,7 @@ export const TransactionsDrawer: FC<TransactionsDrawerProps> = ({
         </Box>
 
         <TransactionList
+          transactions={transactions}
           prefilter={prefilter}
           filterConditions={filterConditions}
           hideFilter
