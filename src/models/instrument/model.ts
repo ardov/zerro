@@ -1,8 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { TFxIdMap } from './types'
+import { IInstrument, TFxCode, TInstrumentId } from 'shared/types'
 import { RootState } from 'store'
 import { getUserInstrumentId } from 'models/user'
-import { IInstrument, TFxCode, TInstrumentId } from 'shared/types'
+import { TFxIdMap } from './types'
 
 export const getInstruments = (state: RootState) =>
   state.data.current.instrument

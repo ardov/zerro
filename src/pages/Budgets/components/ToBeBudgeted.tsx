@@ -18,7 +18,8 @@ import {
   useMonthList,
   useMonthTotals,
 } from 'models/envelopeData'
-import { useDisplayCurrency, useMonth } from '../model'
+import { useMonth } from '../model'
+import { useDisplayCurrency } from 'models/instrument/hooks'
 
 type TMsgType = 'error' | 'warning' | 'success'
 

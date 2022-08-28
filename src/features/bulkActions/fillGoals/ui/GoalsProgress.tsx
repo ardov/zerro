@@ -14,7 +14,7 @@ import { Tooltip } from 'shared/ui/Tooltip'
 import { Confirm } from 'shared/ui/Confirm'
 import { useAppDispatch, useAppSelector } from 'store'
 import { totalGoalsModel } from '../model'
-import { useDisplayCurrency } from 'pages/Budgets/model'
+import { useDisplayCurrency } from 'models/instrument/hooks'
 
 type TGoalsProgressProps = ButtonBaseProps & {
   month: TISOMonth
@@ -29,8 +29,6 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
 
   const onOk = () => dispatch(totalGoalsModel.fillAll(month))
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
-
-  console.log(totalProgress)
 
   if (!totalProgress || totalProgress.goalsCount === 0) {
     return (

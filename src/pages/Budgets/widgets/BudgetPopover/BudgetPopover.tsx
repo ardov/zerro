@@ -19,7 +19,7 @@ import { TEnvelopeId, TFxAmount, TISOMonth } from 'shared/types'
 import { useQuickActions } from './useQuickActions'
 import { useMonthTotals, useRates } from 'models/envelopeData'
 import { setEnvelopeBudgets } from 'models/budget'
-import { useDisplayCurrency } from 'pages/Budgets/model'
+import { useDisplayCurrency } from 'models/instrument/hooks'
 
 type TBudgetPopoverProps = PopoverProps & {
   id: TEnvelopeId

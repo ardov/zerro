@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
-import { useDisplayCurrency } from 'pages/Budgets/model'
 import { convertFx } from 'shared/helpers/money'
 import { TFxAmount, TISOMonth } from 'shared/types'
+import { useDisplayCurrency } from 'models/instrument/hooks'
 import { useRates } from './useRates'
 
 export function useDisplayValue(month: TISOMonth): (a: TFxAmount) => number {
