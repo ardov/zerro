@@ -3,7 +3,7 @@ import { envelopeVisibility } from 'models/envelope'
 import {
   getMonthTotals,
   getEnvelopeStructure,
-  TEnvelopeBudgets,
+  TMonthTotals,
   IEnvelopeWithData,
 } from 'models/envelopeData'
 import { addFxAmount, convertFx, isZero } from 'shared/helpers/money'
@@ -94,7 +94,7 @@ export const getEnvelopeGroups: TSelector<Record<TISOMonth, TGroupInfo[]>> =
 function populateEnvelope(
   id: TEnvelopeId,
   children: TEnvelopeId[],
-  monthInfo: TEnvelopeBudgets
+  monthInfo: TMonthTotals
 ): TEnvelopePopulated {
   const envelope = monthInfo.envelopes[id]
   const displayCurrency = monthInfo.currency
@@ -144,7 +144,7 @@ function populateEnvelope(
 
 function populateSelfEnvelope(
   envelope: IEnvelopeWithData,
-  monthInfo: TEnvelopeBudgets
+  monthInfo: TMonthTotals
 ): TEnvelopePopulated {
   const displayCurrency = monthInfo.currency
   const convert = (a: TFxAmount) =>

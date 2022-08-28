@@ -1,8 +1,8 @@
 import React, { FC, useState } from 'react'
 import { useAppDispatch } from 'store'
 import { logOut } from 'features/authorization'
-import { exportCSV } from 'features/exportCSV'
-import { exportJSON } from 'features/exportJSON'
+import { exportCSV } from 'features/export/exportCSV'
+import { exportJSON } from 'features/export/exportJSON'
 import { makeStyles } from '@mui/styles'
 import {
   SettingsIcon,

@@ -6,7 +6,6 @@ import { ToBeBudgeted } from './components/ToBeBudgeted'
 import { MonthSelect } from './MonthSelect'
 import { Box, Drawer, Theme, useMediaQuery } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { GoalsProgressWidget } from './components/GoalsProgressWidget'
 import { DnDContext } from './components/DnDContext'
 import { EnvelopePreview } from './widgets/EnvelopePreview'
 import { Helmet } from 'react-helmet'
@@ -19,6 +18,7 @@ import { getMonthList, useMonthList } from 'models/envelopeData'
 import { EnvelopeTable } from './widgets/EnvelopeTable'
 import { useMonth } from './model'
 import { TEnvelopeId } from 'shared/types'
+import { GoalsProgress } from 'features/bulkActions/fillGoals'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
@@ -131,7 +131,7 @@ function Budgets() {
               onChange={setMonth}
               {...{ minMonth, maxMonth, value: month }}
             />
-            <GoalsProgressWidget className={c.goals} />
+            <GoalsProgress month={month} className={c.goals} />
             <ToBeBudgeted className={c.toBeBudgeted} onClick={openOverview} />
             <EnvelopeTable
               className={c.tags}

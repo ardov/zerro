@@ -5,7 +5,7 @@ import { Amount } from 'shared/ui/Amount'
 import { WarningIcon } from 'shared/ui/Icons'
 import { Confirm } from 'shared/ui/Confirm'
 import { useAppDispatch, useAppSelector } from 'store'
-import { overspendModel } from './model'
+import { overspendModel } from '../model'
 
 export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
   const dispatch = useAppDispatch()

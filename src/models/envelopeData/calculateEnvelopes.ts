@@ -76,7 +76,7 @@ function makeEnvelopeWithData(e: IEnvelope) {
     // Goal
     goal: null as TGoal | null, // goal itself
     goalProgress: null as number | null, // [0-1] percent of goal completion
-    goalNeed: null as number | null, // amount of money thet budget lacks
+    goalNeed: null as number | null, // amount of money that budget lacks
     goalTarget: null as number | null, // desired budget to complete the goal
   }
 }

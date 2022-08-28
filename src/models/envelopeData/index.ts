@@ -1,4 +1,4 @@
-export type { TMonthTotals as TEnvelopeBudgets } from './getMonthTotals'
+export type { TMonthTotals } from './getMonthTotals'
 export type { IEnvelopeWithData } from './calculateEnvelopes'
 
 export { getMonthTotals } from './getMonthTotals'

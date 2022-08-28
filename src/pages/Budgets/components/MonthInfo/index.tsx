@@ -2,10 +2,9 @@ import React, { FC } from 'react'
 import { useAppDispatch, useAppSelector } from 'store'
 import { formatMoney } from 'shared/helpers/money'
 import { formatDate } from 'shared/helpers/date'
-import { getTotalsByMonth } from '../../selectors'
 import { getUserCurrencyCode } from 'models/instrument'
 import { Confirm } from 'shared/ui/Confirm'
-import { copyPreviousBudget, startFresh, fixOverspends } from '../../thunks'
+import { startFresh } from 'features/bulkActions/startFresh'
 import {
   Box,
   Typography,
@@ -24,8 +23,12 @@ import { WidgetOutcome } from './WidgetOutcome'
 import { useMonth } from 'pages/BudgetsOld/pathHooks'
 import { useToggle } from 'shared/hooks/useToggle'
 import { TDateDraft } from 'shared/types'
-import { OverspendNotice } from 'features/fixOverspend'
+import {
+  overspendModel,
+  OverspendNotice,
+} from 'features/bulkActions/fixOverspend'
 import { DataLine } from 'shared/ui/DataLine'
+import { copyPreviousBudget } from 'features/bulkActions/copyPrevMonth'
 
 type MonthInfoProps = BoxProps & {
   onClose: () => void
@@ -33,13 +36,12 @@ type MonthInfoProps = BoxProps & {
 
 export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
   const [month] = useMonth()
-  const currency = useAppSelector(getUserCurrencyCode)
-  const totals = useAppSelector(getTotalsByMonth)[month]
+
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const [showMore, toggleMore] = useToggle(false)
-
-  const { overspent, transferOutcome, transferFees, realBudgetedInFuture } =
-    totals
+  const { totalOverspendValue, currency } = useAppSelector(
+    overspendModel.get
+  )?.[month]
 
   const dispatch = useAppDispatch()
 
@@ -82,15 +84,16 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
             </Button>
           </Confirm>
 
-          {!!overspent && (
+          {!!totalOverspendValue && (
             <Confirm
               title="Избавиться от перерасходов?"
-              onOk={() => dispatch(fixOverspends(month))}
+              onOk={() => dispatch(overspendModel.fixAll(month))}
               okText="Покрыть перерасходы"
               cancelText="Отмена"
             >
               <Button fullWidth color="secondary">
-                Покрыть перерасходы ({formatMoney(overspent, currency)})
+                Покрыть перерасходы (
+                {formatMoney(totalOverspendValue, currency)})
               </Button>
             </Confirm>
           )}
@@ -108,7 +111,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
           </Confirm>
         </Box>
 
-        <Box display="flex" flexDirection="column" justifyContent="center">
+        {/* <Box display="flex" flexDirection="column" justifyContent="center">
           <Collapse in={showMore}>
             <Rhythm gap={1} width="100%" pb={1}>
               <DataLine
@@ -134,18 +137,18 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
                 amount={realBudgetedInFuture}
                 currency={currency}
               />
-              {/* <Line
+              <DataLine
                 name={`В бюджете`}
                 amount={moneyInBudget}
                 currency={currency}
-              /> */}
+              />
             </Rhythm>
           </Collapse>
 
           <Button onClick={toggleMore} fullWidth>
             {showMore ? 'Меньше цифр' : 'Больше цифр'}
           </Button>
-        </Box>
+        </Box> */}
       </Rhythm>
     </Box>
   )

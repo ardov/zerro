@@ -1,7 +1,4 @@
 import React, { FC } from 'react'
-import { useAppDispatch, useAppSelector } from 'store'
-import { formatMoney } from 'shared/helpers/money'
-import { getUserCurrencyCode } from 'models/instrument'
 import {
   Typography,
   ButtonBase,
@@ -11,24 +8,33 @@ import {
   Box,
 } from '@mui/material'
 import { styled } from '@mui/styles'
+import { TISOMonth } from 'shared/types'
+import { formatMoney } from 'shared/helpers/money'
 import { Tooltip } from 'shared/ui/Tooltip'
 import { Confirm } from 'shared/ui/Confirm'
-import { fillGoals } from '../thunks'
-import { useMonth } from '../model'
-import { getTotalGoalsProgress } from '../selectors'
+import { useAppDispatch, useAppSelector } from 'store'
+import { totalGoalsModel } from '../model'
+import { useDisplayCurrency } from 'pages/Budgets/model'
 
-export const GoalsProgressWidget: FC<ButtonBaseProps> = props => {
+type TGoalsProgressProps = ButtonBaseProps & {
+  month: TISOMonth
+}
+
+export const GoalsProgress: FC<TGoalsProgressProps> = props => {
+  const { month, ...btnProps } = props
   const dispatch = useAppDispatch()
-  const [month] = useMonth()
-  const currency = useAppSelector(getUserCurrencyCode)
+  const currency = useDisplayCurrency()
+  const totalProgress = useAppSelector(totalGoalsModel.getTotals)[month]
   const formatSum = (sum: number) => formatMoney(sum, currency)
-  const totals = useAppSelector(getTotalGoalsProgress)?.[month]
-  const onOk = () => dispatch(fillGoals(month))
+
+  const onOk = () => dispatch(totalGoalsModel.fillAll(month))
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
-  if (!totals) {
+  console.log(totalProgress)
+
+  if (!totalProgress || totalProgress.goalsCount === 0) {
     return (
-      <StyledBase {...props}>
+      <StyledBase {...btnProps}>
         <Typography noWrap align="center" variant="h5" color="textPrimary">
           🚩
         </Typography>
@@ -39,7 +45,7 @@ export const GoalsProgressWidget: FC<ButtonBaseProps> = props => {
     )
   }
 
-  const { need, target, progress } = totals
+  const { needValue, targetValue, progress } = totalProgress
 
   return (
     <Confirm
@@ -52,9 +58,11 @@ export const GoalsProgressWidget: FC<ButtonBaseProps> = props => {
       <Tooltip
         arrow
         title={
-          need
-            ? `${formatSum(target - need)} из ${formatSum(target)}`
-            : `Всего нужно было ${formatSum(target)}`
+          needValue
+            ? `${formatSum(targetValue - needValue)} из ${formatSum(
+                targetValue
+              )}`
+            : `Всего нужно было ${formatSum(targetValue)}`
         }
       >
         <StyledBase {...props}>
@@ -65,7 +73,7 @@ export const GoalsProgressWidget: FC<ButtonBaseProps> = props => {
             variant={isMobile ? 'body1' : 'h5'}
             color="textPrimary"
           >
-            {need > 0 ? formatSum(need) : '🥳'}
+            {needValue > 0 ? formatSum(needValue) : '🥳'}
           </Typography>
           <Typography
             noWrap
@@ -73,7 +81,7 @@ export const GoalsProgressWidget: FC<ButtonBaseProps> = props => {
             variant={isMobile ? 'body1' : 'body2'}
             color="textSecondary"
           >
-            {need > 0 ? 'Ещё нужно на цели' : 'Цели выполнены'}
+            {needValue > 0 ? 'Ещё нужно на цели' : 'Цели выполнены'}
           </Typography>
         </StyledBase>
       </Tooltip>

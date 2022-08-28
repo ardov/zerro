@@ -1,19 +1,20 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getMonthTotals } from 'models/envelopeData'
-import { TMonthTotals } from 'models/envelopeData/getMonthTotals'
-import { addFxAmount, convertFx } from 'shared/helpers/money'
-import { keys } from 'shared/helpers/keys'
 import { TFxAmount, TISOMonth } from 'shared/types'
+import { keys } from 'shared/helpers/keys'
+import { addFxAmount, convertFx } from 'shared/helpers/money'
+import { getMonthTotals, TMonthTotals } from 'models/envelopeData'
+import { TSelector } from 'store'
 
 type TOverspends = ReturnType<typeof calculateOverspends>
 
-export const getOverspendsByMonth = createSelector([getMonthTotals], totals => {
-  const result: Record<TISOMonth, TOverspends> = {}
-  keys(totals).forEach(month => {
-    result[month] = calculateOverspends(totals[month])
+export const getOverspendsByMonth: TSelector<Record<TISOMonth, TOverspends>> =
+  createSelector([getMonthTotals], totals => {
+    const result: Record<TISOMonth, TOverspends> = {}
+    keys(totals).forEach(month => {
+      result[month] = calculateOverspends(totals[month])
+    })
+    return result
   })
-  return result
-})
 
 function calculateOverspends(monthInfo: TMonthTotals) {
   const { envelopes, currency, rates } = monthInfo

@@ -80,7 +80,13 @@ export const Row: FC<EnvelopeRowProps> = props => {
         display="flex"
         alignItems="center"
         minWidth={0}
-        onClick={() => openDetails(id)}
+        onClick={e => {
+          if (e.altKey) {
+            console.log(envelope.name, envelope)
+          } else {
+            openDetails(id)
+          }
+        }}
       >
         <EmojiIcon symbol={symbol} mr={1.5} color={color} />
         <Typography component="span" variant="body1" title={name} noWrap>
