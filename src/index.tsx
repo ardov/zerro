@@ -5,7 +5,7 @@ import AdapterDateFns from '@mui/lab/AdapterDateFns'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import ruDateLocale from 'date-fns/locale/ru'
 import App from './App'
-import * as serviceWorkerRegistration from './serviceWorkerRegistration'
+// import * as serviceWorkerRegistration from './serviceWorkerRegistration'
 import { store } from '@store'
 import GlobalErrorBoundary from '@components/GlobalErrorBoundary'
 import { initSentry, sendEvent } from '@shared/helpers/tracking'
@@ -43,16 +43,16 @@ root.render(
 
 // Register service worker fot app to work offline.
 // Learn more here http://bit.ly/CRA-PWA
-serviceWorkerRegistration.register({
-  onUpdate: (registration: ServiceWorkerRegistration) => {
-    registration.unregister().then(() => {
-      window.location.reload()
-    })
-  },
-  onSuccess: (registration: ServiceWorkerRegistration) => {
-    sendEvent('Version Update: ' + appVersion)
-  },
-})
+// serviceWorkerRegistration.register({
+//   onUpdate: (registration: ServiceWorkerRegistration) => {
+//     registration.unregister().then(() => {
+//       window.location.reload()
+//     })
+//   },
+//   onSuccess: (registration: ServiceWorkerRegistration) => {
+//     sendEvent('Version Update: ' + appVersion)
+//   },
+// })
 
 /** `zerro` can be used in console to access state and modify data */
 function createZerroInstance(s: typeof store) {
