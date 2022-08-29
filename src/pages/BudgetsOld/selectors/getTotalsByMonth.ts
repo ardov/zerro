@@ -6,10 +6,10 @@ import {
   getLinkedTransfers,
   getTransferFees,
 } from './getAmountsByTag'
-import { round } from 'shared/helpers/money'
-import { withPerf } from 'shared/helpers/performance'
-import { RootState } from 'store'
-import { TISOMonth } from 'shared/types'
+import { round } from '@shared/helpers/money'
+import { withPerf } from '@shared/helpers/performance'
+import { RootState } from '@store'
+import { TISOMonth } from '@shared/types'
 
 const CARRY_NEGATIVES = !!localStorage.getItem('CARRY_NEGATIVES')
 

@@ -1,9 +1,9 @@
 import React, { FC, useState } from 'react'
 import { Menu, MenuItem, MenuProps, PopoverPosition } from '@mui/material'
-import { ITransaction } from 'shared/types'
-import { isNew } from 'models/transaction/helpers'
-import { useAppDispatch } from 'store'
-import { markViewed } from 'models/transaction'
+import { ITransaction } from '@shared/types'
+import { isNew } from '@models/transaction/helpers'
+import { useAppDispatch } from '@store'
+import { markViewed } from '@models/transaction'
 
 interface TransactionMenuProps extends MenuProps {
   id: string

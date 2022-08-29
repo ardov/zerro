@@ -2,8 +2,8 @@ import { getRootUser } from '../user'
 import { makeDataAcc, makeDataReminder } from './helpers'
 import { getDataReminders, getDataAccountId } from './selectors'
 import { DataReminderType } from './constants'
-import { AppThunk } from 'store'
-import { applyClientPatch } from 'store/data'
+import { AppThunk } from '@store'
+import { applyClientPatch } from '@store/data'
 
 const prepareData: AppThunk = (dispatch, getState) => {
   let state = getState()

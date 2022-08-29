@@ -1,5 +1,5 @@
 import React, { FC, useEffect } from 'react'
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch, useAppSelector } from '@store'
 import {
   List,
   ListItemButton,
@@ -9,25 +9,25 @@ import {
   IconButton,
   PopoverProps,
 } from '@mui/material'
-import { CheckCircleIcon } from 'shared/ui/Icons'
-import { formatMoney } from 'shared/helpers/money'
-import { AmountInput } from 'shared/ui/AmountInput'
-import { getAmountsById } from 'pages/BudgetsOld/selectors'
+import { CheckCircleIcon } from '@shared/ui/Icons'
+import { formatMoney } from '@shared/helpers/money'
+import { AmountInput } from '@shared/ui/AmountInput'
+import { getAmountsById } from '@pages/BudgetsOld/selectors'
 import {
   convertCurrency,
   getInstruments,
   getUserInstrument,
-} from 'models/instrument'
-import { setOutcomeBudget } from 'pages/BudgetsOld/thunks'
-import { getGoals } from 'models/hiddenData/goals'
-import { getGoalsProgress } from 'pages/BudgetsOld/selectors'
-import { round } from 'shared/helpers/money'
-import { sendEvent } from 'shared/helpers/tracking'
-import pluralize from 'shared/helpers/pluralize'
-import { getMetaForTag } from 'models/hiddenData/tagMeta'
+} from '@models/instrument'
+import { setOutcomeBudget } from '@pages/BudgetsOld/thunks'
+import { getGoals } from '@models/hiddenData/goals'
+import { getGoalsProgress } from '@pages/BudgetsOld/selectors'
+import { round } from '@shared/helpers/money'
+import { sendEvent } from '@shared/helpers/tracking'
+import pluralize from '@shared/helpers/pluralize'
+import { getMetaForTag } from '@models/hiddenData/tagMeta'
 import { Box, BoxProps } from '@mui/system'
-import { TDateDraft, TISOMonth } from 'shared/types'
-import { toISOMonth } from 'shared/helpers/date'
+import { TDateDraft, TISOMonth } from '@shared/types'
+import { toISOMonth } from '@shared/helpers/date'
 
 export const BudgetPopover: FC<
   PopoverProps & {

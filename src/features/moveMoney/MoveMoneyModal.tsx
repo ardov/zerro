@@ -1,13 +1,13 @@
 import React, { FC, useState } from 'react'
 import Dialog, { DialogProps } from '@mui/material/Dialog'
-import { AmountInput } from 'shared/ui/AmountInput'
-import { ArrowForwardIcon, ArrowRightAltIcon } from 'shared/ui/Icons'
+import { AmountInput } from '@shared/ui/AmountInput'
+import { ArrowForwardIcon, ArrowRightAltIcon } from '@shared/ui/Icons'
 import { Box, InputAdornment, IconButton, Chip } from '@mui/material'
 import { moveMoney } from './moveMoney'
-import { useAppDispatch, useAppSelector } from 'store'
-import { Modify, TISOMonth, TEnvelopeId } from 'shared/types'
-import { getMonthTotals } from 'models/envelopeData'
-import { convertFx } from 'shared/helpers/money'
+import { useAppDispatch, useAppSelector } from '@store'
+import { Modify, TISOMonth, TEnvelopeId } from '@shared/types'
+import { getMonthTotals } from '@models/envelopeData'
+import { convertFx } from '@shared/helpers/money'
 
 export type MoveMoneyModalProps = Modify<
   DialogProps,

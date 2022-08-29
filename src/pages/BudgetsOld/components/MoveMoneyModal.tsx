@@ -1,14 +1,14 @@
 import React, { FC, useState } from 'react'
 import Dialog, { DialogProps } from '@mui/material/Dialog'
-import TagChip from 'components/TagChip'
-import { AmountInput } from 'shared/ui/AmountInput'
-import { ArrowForwardIcon, ArrowRightAltIcon } from 'shared/ui/Icons'
+import TagChip from '@components/TagChip'
+import { AmountInput } from '@shared/ui/AmountInput'
+import { ArrowForwardIcon, ArrowRightAltIcon } from '@shared/ui/Icons'
 import { Box, InputAdornment, IconButton } from '@mui/material'
 import { getAmountsById } from '../selectors'
 import { moveFunds } from '../thunks'
 import { getTotalsByMonth } from '../selectors'
-import { RootState, useAppDispatch, useAppSelector } from 'store'
-import { Modify, TISOMonth } from 'shared/types'
+import { RootState, useAppDispatch, useAppSelector } from '@store'
+import { Modify, TISOMonth } from '@shared/types'
 
 type MoveMoneyModalProps = Modify<
   DialogProps,

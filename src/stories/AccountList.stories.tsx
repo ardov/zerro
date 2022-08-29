@@ -1,6 +1,6 @@
 import React from 'react'
 import { Story, Meta } from '@storybook/react'
-import AccountList from 'components/AccountList'
+import AccountList from '@components/AccountList'
 
 export default {
   title: 'AccountList',

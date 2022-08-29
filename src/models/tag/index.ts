@@ -2,7 +2,6 @@ export type { TagTreeNode } from './model'
 export type { TTagPopulated } from './types'
 export type { TTagDraft } from './thunks'
 
-export { convertTag } from './zm-adapter'
 export {
   getTags,
   getTag,

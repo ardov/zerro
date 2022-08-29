@@ -2,9 +2,9 @@ import React, { FC } from 'react'
 import { TransactionList, TTransactionListProps } from './TransactionList'
 import { Drawer, Box, Typography, IconButton, DrawerProps } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { Tooltip } from 'shared/ui/Tooltip'
-import { CloseIcon } from 'shared/ui/Icons'
-import { Modify } from 'shared/types'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { CloseIcon } from '@shared/ui/Icons'
+import { Modify } from '@shared/types'
 
 export type TransactionsDrawerProps = Modify<
   DrawerProps,

@@ -4,17 +4,17 @@ import { Box } from '@mui/material'
 import { useTheme } from '@mui/material'
 import { Link } from 'react-router-dom'
 import './index.scss'
-import { Logo } from 'shared/ui/Logo'
+import { Logo } from '@shared/ui/Logo'
 import { Switch, Route } from 'react-router'
 import { ScrollToTop, TextLink } from './Components'
 
 /* eslint-disable import/no-webpack-loader-syntax */
 // @ts-ignore
-import Method from '!babel-loader!@mdx-js/loader!./pages/Method.mdx'
+import Method from './pages/Method.mdx'
 // @ts-ignore
-import About from '!babel-loader!@mdx-js/loader!./pages/About.mdx'
+import About from './pages/About.mdx'
 // @ts-ignore
-import QuickStart from '!babel-loader!@mdx-js/loader!./pages/QuickStart.mdx'
+import QuickStart from './pages/QuickStart.mdx'
 
 const components = { a: TextLink }
 

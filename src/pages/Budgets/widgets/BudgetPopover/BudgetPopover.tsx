@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react'
-import { useAppDispatch } from 'store'
+import { useAppDispatch } from '@store'
 import {
   List,
   ListItemButton,
@@ -9,17 +9,17 @@ import {
   IconButton,
   PopoverProps,
 } from '@mui/material'
-import { CheckCircleIcon } from 'shared/ui/Icons'
-import { AmountInput } from 'shared/ui/AmountInput'
-import { formatMoney } from 'shared/helpers/money'
-import { convertFx } from 'shared/helpers/money'
-import { sendEvent } from 'shared/helpers/tracking'
+import { CheckCircleIcon } from '@shared/ui/Icons'
+import { AmountInput } from '@shared/ui/AmountInput'
+import { formatMoney } from '@shared/helpers/money'
+import { convertFx } from '@shared/helpers/money'
+import { sendEvent } from '@shared/helpers/tracking'
 import { Box, BoxProps } from '@mui/system'
-import { TEnvelopeId, TFxAmount, TISOMonth } from 'shared/types'
+import { TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
 import { useQuickActions } from './useQuickActions'
-import { useMonthTotals, useRates } from 'models/envelopeData'
-import { setEnvelopeBudgets } from 'models/budget'
-import { useDisplayCurrency } from 'models/instrument/hooks'
+import { useMonthTotals, useRates } from '@models/envelopeData'
+import { setEnvelopeBudgets } from '@models/budget'
+import { useDisplayCurrency } from '@models/instrument/hooks'
 
 type TBudgetPopoverProps = PopoverProps & {
   id: TEnvelopeId

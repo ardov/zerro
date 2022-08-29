@@ -1,6 +1,6 @@
-import { parseDate, toISODate } from 'shared/helpers/date'
-import { IBudget } from 'shared/types'
-import { OptionalExceptFor, Modify, TDateDraft } from 'shared/types'
+import { parseDate, toISODate } from '@shared/helpers/date'
+import { IBudget } from '@shared/types'
+import { OptionalExceptFor, Modify, TDateDraft } from '@shared/types'
 import { getBudgetId } from './getBudgetId'
 
 export type BudgetDraft = Modify<

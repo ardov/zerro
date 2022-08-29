@@ -1,5 +1,5 @@
 import { ById } from './ts-utils'
-import { goalType } from 'models/hiddenData/constants'
+import { goalType } from '@models/hiddenData/constants'
 import {
   IZmDiff,
   IZmDeletionObject,

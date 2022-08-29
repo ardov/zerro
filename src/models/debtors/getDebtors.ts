@@ -1,8 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { add, sub } from 'shared/helpers/money'
-import { getDebtAccountId } from 'models/account'
-import { getTransactionsHistory, TrType } from 'models/transaction'
-import { getType } from 'models/transaction/helpers'
+import { add, sub } from '@shared/helpers/money'
+import { getDebtAccountId } from '@models/account'
+import { getTransactionsHistory, TrType } from '@models/transaction'
+import { getType } from '@models/transaction/helpers'
 import {
   ById,
   TAccountId,
@@ -11,11 +11,11 @@ import {
   TMerchantId,
   IInstrument,
   TFxAmount,
-} from 'shared/types'
-import { TSelector } from 'store'
-import { cleanPayee } from 'models/shared/cleanPayee'
-import { getMerchants } from 'models/merchant'
-import { getInstruments } from 'models/instrument'
+} from '@shared/types'
+import { TSelector } from '@store'
+import { cleanPayee } from '@models/shared/cleanPayee'
+import { getMerchants } from '@models/merchant'
+import { getInstruments } from '@models/instrument'
 
 export type TDebtor = {
   id: string

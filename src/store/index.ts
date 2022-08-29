@@ -1,7 +1,7 @@
 import { configureStore, AnyAction } from '@reduxjs/toolkit'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 import { ThunkAction } from 'redux-thunk'
-import { zenmoney } from 'shared/api/zenmoney'
+import { zenmoney } from '@shared/api/zenmoney'
 
 import data from './data'
 import token from './token'

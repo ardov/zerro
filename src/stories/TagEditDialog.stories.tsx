@@ -1,5 +1,5 @@
 import React from 'react'
-import { TagEditDialog, TagEditDialogProps } from 'components/TagEditDialog'
+import { TagEditDialog, TagEditDialogProps } from '@components/TagEditDialog'
 import { Story, Meta } from '@storybook/react'
 
 export default {

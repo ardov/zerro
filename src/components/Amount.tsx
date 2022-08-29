@@ -1,9 +1,9 @@
 import React, { FC } from 'react'
-import { OptionalExceptFor } from 'shared/types'
-import { getInstruments } from 'models/instrument'
-import { useAppSelector } from 'store'
-import { getUserInstrumentId } from 'models/user'
-import { AmountProps, Amount } from 'shared/ui/Amount'
+import { OptionalExceptFor } from '@shared/types'
+import { getInstruments } from '@models/instrument'
+import { useAppSelector } from '@store'
+import { getUserInstrumentId } from '@models/user'
+import { AmountProps, Amount } from '@shared/ui/Amount'
 
 export const SmartAmount: FC<AmountProps> = props => {
   if (props.instrument !== undefined)

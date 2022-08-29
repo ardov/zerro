@@ -1,21 +1,21 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { envelopeVisibility } from 'models/envelope'
+import { envelopeVisibility } from '@models/envelope'
 import {
   getMonthTotals,
   getEnvelopeStructure,
   TMonthTotals,
   IEnvelopeWithData,
-} from 'models/envelopeData'
-import { addFxAmount, convertFx, isZero } from 'shared/helpers/money'
-import { keys } from 'shared/helpers/keys'
+} from '@models/envelopeData'
+import { addFxAmount, convertFx, isZero } from '@shared/helpers/money'
+import { keys } from '@shared/helpers/keys'
 import {
   Modify,
   TEnvelopeId,
   TFxAmount,
   TFxCode,
   TISOMonth,
-} from 'shared/types'
-import { TSelector } from 'store'
+} from '@shared/types'
+import { TSelector } from '@store'
 
 export type TEnvelopePopulated = Modify<
   IEnvelopeWithData,

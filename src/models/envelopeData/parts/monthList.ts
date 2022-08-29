@@ -1,10 +1,10 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { TISOMonth } from 'shared/types'
-import { nextMonth, toISOMonth } from 'shared/helpers/date'
-import { keys } from 'shared/helpers/keys'
-import { getTransactionsHistory } from 'models/transaction'
-import { TSelector } from 'store'
-import { getEnvelopeBudgets } from 'models/budget'
+import { TISOMonth } from '@shared/types'
+import { nextMonth, toISOMonth } from '@shared/helpers/date'
+import { keys } from '@shared/helpers/keys'
+import { getTransactionsHistory } from '@models/transaction'
+import { TSelector } from '@store'
+import { getEnvelopeBudgets } from '@models/budget'
 
 /**
  * Returns the date of first month as ISO.

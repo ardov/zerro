@@ -1,9 +1,9 @@
 import React, { FC } from 'react'
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@store'
 import { getTotalsByMonth } from './selectors'
 import { getAmountsByTag } from './selectors'
-import { getTagsTree } from 'models/tag'
-import { useMonth } from 'pages/BudgetsOld/pathHooks'
+import { getTagsTree } from '@models/tag'
+import { useMonth } from '@pages/BudgetsOld/pathHooks'
 import {
   Sankey,
   Tooltip,
@@ -11,9 +11,9 @@ import {
   Layer,
   ResponsiveContainer,
 } from 'recharts'
-import { formatMoney } from 'shared/helpers/money'
+import { formatMoney } from '@shared/helpers/money'
 import { useTheme } from '@mui/material'
-import { round } from 'shared/helpers/money'
+import { round } from '@shared/helpers/money'
 
 export function SankeyChart() {
   const theme = useTheme()

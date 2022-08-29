@@ -1,8 +1,8 @@
 import React, { FC, useEffect, useState } from 'react'
-import { TEnvelopeId } from 'shared/types'
-import { useSearchParam } from 'shared/hooks/useSearchParam'
-import { TransactionsDrawer } from 'components/TransactionsDrawer'
-import { useMonthTotals } from 'models/envelopeData'
+import { TEnvelopeId } from '@shared/types'
+import { useSearchParam } from '@shared/hooks/useSearchParam'
+import { TransactionsDrawer } from '@components/TransactionsDrawer'
+import { useMonthTotals } from '@models/envelopeData'
 import { useMonth } from '../model'
 
 export const BudgetTransactionsDrawer: FC = () => {

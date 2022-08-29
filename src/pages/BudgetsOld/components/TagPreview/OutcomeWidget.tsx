@@ -1,14 +1,14 @@
 import React, { FC, useEffect, useState } from 'react'
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@store'
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { Box, BoxProps, useTheme } from '@mui/material'
-import { formatDate } from 'shared/helpers/date'
-import Rhythm from 'shared/ui/Rhythm'
-import { getAmountsById } from 'pages/BudgetsOld/selectors'
-import { getMonthDates } from 'pages/BudgetsOld/selectors'
-import { useMonth } from 'pages/BudgetsOld/pathHooks'
+import { formatDate } from '@shared/helpers/date'
+import Rhythm from '@shared/ui/Rhythm'
+import { getAmountsById } from '@pages/BudgetsOld/selectors'
+import { getMonthDates } from '@pages/BudgetsOld/selectors'
+import { useMonth } from '@pages/BudgetsOld/pathHooks'
 import { DataLine } from '../../../../shared/ui/DataLine'
-import { TISOMonth } from 'shared/types'
+import { TISOMonth } from '@shared/types'
 
 type OutcomWidgetProps = BoxProps & {
   tagId: string

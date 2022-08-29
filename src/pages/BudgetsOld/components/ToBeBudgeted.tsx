@@ -1,9 +1,9 @@
 import React, { FC, ReactElement } from 'react'
-import { useAppSelector } from 'store'
-import { formatMoney } from 'shared/helpers/money'
-import { formatDate } from 'shared/helpers/date'
+import { useAppSelector } from '@store'
+import { formatMoney } from '@shared/helpers/money'
+import { formatDate } from '@shared/helpers/date'
 import { getTotalsByMonth, MonthTotals } from '../selectors'
-import { getUserCurrencyCode } from 'models/instrument'
+import { getUserCurrencyCode } from '@models/instrument'
 import {
   Typography,
   ButtonBase,
@@ -14,12 +14,12 @@ import {
   Theme,
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { Tooltip } from 'shared/ui/Tooltip'
-import Rhythm from 'shared/ui/Rhythm'
+import { Tooltip } from '@shared/ui/Tooltip'
+import Rhythm from '@shared/ui/Rhythm'
 import { useMonth } from '../pathHooks'
-import { TDateDraft } from 'shared/types'
-import { keys } from 'shared/helpers/keys'
-import { Amount } from 'shared/ui/Amount'
+import { TDateDraft } from '@shared/types'
+import { keys } from '@shared/helpers/keys'
+import { Amount } from '@shared/ui/Amount'
 
 type TColor = 'error' | 'warning' | 'success'
 

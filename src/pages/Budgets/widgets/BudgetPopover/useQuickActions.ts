@@ -1,9 +1,9 @@
-import { getMonthTotals } from 'models/envelopeData'
-import { convertFx, round } from 'shared/helpers/money'
-import { toISOMonth } from 'shared/helpers/date'
-import pluralize from 'shared/helpers/pluralize'
-import { TDateDraft, TEnvelopeId, TFxAmount, TISOMonth } from 'shared/types'
-import { useAppSelector } from 'store'
+import { getMonthTotals } from '@models/envelopeData'
+import { convertFx, round } from '@shared/helpers/money'
+import { toISOMonth } from '@shared/helpers/date'
+import pluralize from '@shared/helpers/pluralize'
+import { TDateDraft, TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
+import { useAppSelector } from '@store'
 
 export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
   const totals = useAppSelector(getMonthTotals)

@@ -2,7 +2,7 @@ import React, {
   useCallback,
   // useState
 } from 'react'
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@store'
 import { Redirect } from 'react-router-dom'
 import { TagTable } from './components/TagTable'
 import { TransferTable } from './components/TransferTable'
@@ -25,12 +25,12 @@ import { DnDContext } from './components/DnDContext'
 import { TagPreview } from './components/TagPreview'
 import { Helmet } from 'react-helmet'
 // import { SankeyChart } from './SankeyChart'
-import { formatDate } from 'shared/helpers/date'
+import { formatDate } from '@shared/helpers/date'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { MapWidget } from './MapWidget'
-import { useSearchParam } from 'shared/hooks/useSearchParam'
+import { useSearchParam } from '@shared/hooks/useSearchParam'
 import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
-import { nextMonth, prevMonth, toISOMonth } from 'shared/helpers/date'
+import { nextMonth, prevMonth, toISOMonth } from '@shared/helpers/date'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()

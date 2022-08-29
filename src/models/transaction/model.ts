@@ -1,9 +1,9 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getMerchants } from 'models/merchant'
+import { getMerchants } from '@models/merchant'
 import { compareTrDates, getTime, isDeleted } from './helpers'
-import { RootState } from 'store'
-import { ITransaction } from 'shared/types'
-import { withPerf } from 'shared/helpers/performance'
+import { RootState } from '@store'
+import { ITransaction } from '@shared/types'
+import { withPerf } from '@shared/helpers/performance'
 
 export const getTransactions = (state: RootState) =>
   state.data.current.transaction

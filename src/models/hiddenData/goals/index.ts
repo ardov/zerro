@@ -1,12 +1,12 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { sendEvent } from 'shared/helpers/tracking'
+import { sendEvent } from '@shared/helpers/tracking'
 import { DataReminderType } from '../constants'
 import { makeGoal } from './helpers'
 import { getRawGoals } from '../selectors'
 import { setHiddenData } from '../thunks'
-import { AppThunk, RootState } from 'store'
-import { TGoal, TTagId } from 'shared/types'
-import { getTags } from 'models/tag'
+import { AppThunk, RootState } from '@store'
+import { TGoal, TTagId } from '@shared/types'
+import { getTags } from '@models/tag'
 
 // THUNKS
 export const setGoal =

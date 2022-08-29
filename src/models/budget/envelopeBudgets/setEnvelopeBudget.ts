@@ -4,12 +4,12 @@ import {
   TEnvelopeId,
   TISOMonth,
   TTagId,
-} from 'shared/types'
-import { keys } from 'shared/helpers/keys'
-import { AppThunk } from 'store'
-import { applyClientPatch } from 'store/data'
-import { parseEnvelopeId } from 'models/envelope'
-import { getRootUser } from 'models/user'
+} from '@shared/types'
+import { keys } from '@shared/helpers/keys'
+import { AppThunk } from '@store'
+import { applyClientPatch } from '@store/data'
+import { parseEnvelopeId } from '@models/envelope'
+import { getRootUser } from '@models/user'
 import { getBudgetId, getBudgets, makeBudget } from '../tagBudget'
 import { budgetStore } from './budgetStore'
 

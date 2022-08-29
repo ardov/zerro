@@ -1,5 +1,5 @@
 import React, { useState, FC } from 'react'
-import { useAppDispatch } from 'store'
+import { useAppDispatch } from '@store'
 import {
   Box,
   Popover,
@@ -10,15 +10,15 @@ import {
   PopoverProps,
   OutlinedTextFieldProps,
 } from '@mui/material'
-import { AmountInput } from 'shared/ui/AmountInput'
-import { CloseIcon } from 'shared/ui/Icons'
-import { toISODate, formatDate } from 'shared/helpers/date'
-import { TDateDraft, TEnvelopeId, TISOMonth } from 'shared/types'
-import { goalType, setGoal, TGoal } from 'models/goal'
+import { AmountInput } from '@shared/ui/AmountInput'
+import { CloseIcon } from '@shared/ui/Icons'
+import { toISODate, formatDate } from '@shared/helpers/date'
+import { TDateDraft, TEnvelopeId, TISOMonth } from '@shared/types'
+import { goalType, setGoal, TGoal } from '@models/goal'
 
-import MonthSelectPopover from 'shared/ui/MonthSelectPopover'
-import { useMonthTotals } from 'models/envelopeData'
-import { round } from 'shared/helpers/money'
+import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
+import { useMonthTotals } from '@models/envelopeData'
+import { round } from '@shared/helpers/money'
 
 const amountLabels = {
   [goalType.MONTHLY]: 'Откладывать каждый месяц',

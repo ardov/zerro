@@ -1,4 +1,4 @@
-import { appPublicUrl, isProduction } from 'shared/config'
+import { appPublicUrl, isProduction } from '@shared/config'
 
 // This optional code is used to register a service worker.
 // register() is not called by default.

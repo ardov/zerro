@@ -1,10 +1,10 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { addFxAmount, convertFx } from 'shared/helpers/money'
-import { keys } from 'shared/helpers/keys'
-import { TFxAmount, TISOMonth } from 'shared/types'
-import { TSelector } from 'store'
-import { goalType } from 'models/goal'
-import { getMonthTotals, TMonthTotals } from 'models/envelopeData'
+import { addFxAmount, convertFx } from '@shared/helpers/money'
+import { keys } from '@shared/helpers/keys'
+import { TFxAmount, TISOMonth } from '@shared/types'
+import { TSelector } from '@store'
+import { goalType } from '@models/goal'
+import { getMonthTotals, TMonthTotals } from '@models/envelopeData'
 
 type TGoalTotals = ReturnType<typeof calcGoalTotals>
 

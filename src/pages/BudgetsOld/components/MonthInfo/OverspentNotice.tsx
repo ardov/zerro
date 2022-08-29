@@ -1,13 +1,13 @@
 import React, { FC } from 'react'
-import { useAppDispatch, useAppSelector } from 'store'
-import { getUserCurrencyCode } from 'models/instrument'
+import { useAppDispatch, useAppSelector } from '@store'
+import { getUserCurrencyCode } from '@models/instrument'
 import { Box, Typography, Button } from '@mui/material'
-import { WarningIcon } from 'shared/ui/Icons'
-import { SmartAmount } from 'components/Amount'
-import { Confirm } from 'shared/ui/Confirm'
-import { fixOverspends } from 'pages/BudgetsOld/thunks'
-import { getTotalsByMonth } from 'pages/BudgetsOld/selectors'
-import { useMonth } from 'pages/BudgetsOld/pathHooks'
+import { WarningIcon } from '@shared/ui/Icons'
+import { SmartAmount } from '@components/Amount'
+import { Confirm } from '@shared/ui/Confirm'
+import { fixOverspends } from '@pages/BudgetsOld/thunks'
+import { getTotalsByMonth } from '@pages/BudgetsOld/selectors'
+import { useMonth } from '@pages/BudgetsOld/pathHooks'
 
 export const OverspentNotice: FC = () => {
   const [month] = useMonth()

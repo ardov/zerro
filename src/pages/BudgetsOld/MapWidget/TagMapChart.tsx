@@ -1,13 +1,13 @@
 import React, { useCallback } from 'react'
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@store'
 import { getAmountsByTag, getTotalsByMonth } from '../selectors'
-import { getTagsTree } from 'models/tag'
-import { useMonth } from 'pages/BudgetsOld/pathHooks'
+import { getTagsTree } from '@models/tag'
+import { useMonth } from '@pages/BudgetsOld/pathHooks'
 import { Tooltip, Treemap, ResponsiveContainer } from 'recharts'
-import { formatMoney } from 'shared/helpers/money'
+import { formatMoney } from '@shared/helpers/money'
 import { Card, Typography, useTheme } from '@mui/material'
-import { SmartAmount } from 'components/Amount'
-import { getMostContrast } from 'shared/helpers/color'
+import { SmartAmount } from '@components/Amount'
+import { getMostContrast } from '@shared/helpers/color'
 
 type TTreeNode = {
   id: string

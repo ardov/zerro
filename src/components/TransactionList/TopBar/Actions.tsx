@@ -1,7 +1,7 @@
-import type { ITransaction } from 'shared/types'
+import type { ITransaction } from '@shared/types'
 import React, { FC, useEffect, useState } from 'react'
 import './transitions.css'
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch, useAppSelector } from '@store'
 import IconButton from '@mui/material/IconButton'
 import {
   DeleteOutlineIcon,
@@ -10,29 +10,29 @@ import {
   MoreVertIcon,
   VisibilityIcon,
   MergeTypeIcon,
-} from 'shared/ui/Icons'
-import { Tooltip } from 'shared/ui/Tooltip'
+} from '@shared/ui/Icons'
+import { Tooltip } from '@shared/ui/Tooltip'
 import Chip from '@mui/material/Chip'
 import Box from '@mui/material/Box'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-import pluralize from 'shared/helpers/pluralize'
-import { Confirm } from 'shared/ui/Confirm'
-import TagSelect2 from 'components/TagSelect2'
+import pluralize from '@shared/helpers/pluralize'
+import { Confirm } from '@shared/ui/Confirm'
+import TagSelect2 from '@components/TagSelect2'
 import {
   deleteTransactions,
   markViewed,
   bulkEditTransactions,
-} from 'models/transaction/thunks'
+} from '@models/transaction/thunks'
 import { CSSTransition } from 'react-transition-group'
 import { EditOutlined } from '@mui/icons-material'
 import { BulkEditModal } from './BulkEditModal'
-import { getType, isNew } from 'models/transaction/helpers'
-import { getTransactions } from 'models/transaction'
+import { getType, isNew } from '@models/transaction/helpers'
+import { getTransactions } from '@models/transaction'
 import { Divider, ListItemIcon, ListItemText } from '@mui/material'
-import { round } from 'shared/helpers/money'
-import { applyClientPatch } from 'store/data'
-import { sendEvent } from 'shared/helpers/tracking'
+import { round } from '@shared/helpers/money'
+import { applyClientPatch } from '@store/data'
+import { sendEvent } from '@shared/helpers/tracking'
 
 type ActionsProps = {
   visible: boolean

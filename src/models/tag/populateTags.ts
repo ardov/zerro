@@ -1,8 +1,8 @@
 import toArray from 'lodash/toArray'
-import { int2rgb, int2hex, getColorForString } from 'shared/helpers/color'
-import { sendEvent } from 'shared/helpers/tracking'
-import { ByIdOld, ITag } from 'shared/types'
-import tagIcons from 'shared/tagIcons.json'
+import { int2rgb, int2hex, getColorForString } from '@shared/helpers/color'
+import { sendEvent } from '@shared/helpers/tracking'
+import { ByIdOld, ITag } from '@shared/types'
+import tagIcons from '@shared/tagIcons.json'
 import { TTagPopulated } from './types'
 import { nullTag } from './makeTag'
 

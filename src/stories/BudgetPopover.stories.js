@@ -1,8 +1,8 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 import { action } from '@storybook/addon-actions'
-import BudgetPopover from 'pages/BudgetsOld/components/BudgetPopover'
-import decorator from 'shared/helpers/storybookDecorator'
+import BudgetPopover from '@pages/BudgetsOld/components/BudgetPopover'
+import decorator from '@shared/helpers/storybookDecorator'
 
 const data = {
   budgeted: 100,

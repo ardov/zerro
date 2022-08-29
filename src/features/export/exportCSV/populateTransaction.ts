@@ -1,5 +1,5 @@
-import { TrType } from 'models/transaction'
-import { getType } from 'models/transaction/helpers'
+import { TrType } from '@models/transaction'
+import { getType } from '@models/transaction/helpers'
 import {
   ByIdOld,
   Modify,
@@ -8,7 +8,7 @@ import {
   ITag,
   TTagId,
   ITransaction,
-} from 'shared/types'
+} from '@shared/types'
 
 interface DataSources {
   instruments: { [id: number]: IInstrument }

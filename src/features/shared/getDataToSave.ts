@@ -1,7 +1,7 @@
-import { keys } from 'shared/helpers/keys'
-import { RootState } from 'store'
-import { IDiff, TLocalData } from 'shared/types'
-import { convertDiff } from 'models/diff'
+import { keys } from '@shared/helpers/keys'
+import { RootState } from '@store'
+import { IDiff, TLocalData } from '@shared/types'
+import { convertDiff } from '@shared/api/zm-adapter'
 
 export const getDataToSave = (state: RootState): TLocalData => {
   const data = state.data.server

@@ -1,6 +1,6 @@
 import { IAccountPopulated } from './types'
 import { isInBudget } from './helpers'
-import { ById, IAccount, IInstrument } from 'shared/types'
+import { ById, IAccount, IInstrument } from '@shared/types'
 
 interface Options {
   convert: (

@@ -8,13 +8,13 @@ import {
   Box,
 } from '@mui/material'
 import { styled } from '@mui/styles'
-import { TISOMonth } from 'shared/types'
-import { formatMoney } from 'shared/helpers/money'
-import { Tooltip } from 'shared/ui/Tooltip'
-import { Confirm } from 'shared/ui/Confirm'
-import { useAppDispatch, useAppSelector } from 'store'
+import { TISOMonth } from '@shared/types'
+import { formatMoney } from '@shared/helpers/money'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { Confirm } from '@shared/ui/Confirm'
+import { useAppDispatch, useAppSelector } from '@store'
 import { totalGoalsModel } from '../model'
-import { useDisplayCurrency } from 'models/instrument/hooks'
+import { useDisplayCurrency } from '@models/instrument/hooks'
 
 type TGoalsProgressProps = ButtonBaseProps & {
   month: TISOMonth

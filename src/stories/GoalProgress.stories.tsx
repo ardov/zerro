@@ -1,6 +1,6 @@
 import React from 'react'
 import { Story, Meta } from '@storybook/react'
-import { RadialProgress, RadialProgressProps } from 'shared/ui/RadialProgress'
+import { RadialProgress, RadialProgressProps } from '@shared/ui/RadialProgress'
 
 export default {
   title: 'GoalProgress',

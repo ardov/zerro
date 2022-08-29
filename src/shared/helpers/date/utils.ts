@@ -15,7 +15,7 @@ import {
   TISOMonth,
   TMsTime,
   TUnixTime,
-} from 'shared/types'
+} from '@shared/types'
 
 export function unixToMs(seconds: TUnixTime): TMsTime {
   return seconds * 1000

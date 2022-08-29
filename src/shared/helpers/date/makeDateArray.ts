@@ -1,4 +1,4 @@
-import { TDateDraft } from 'shared/types'
+import { TDateDraft } from '@shared/types'
 
 export function makeDateArray(
   from: TDateDraft,

@@ -6,15 +6,15 @@ import {
   TFxAmount,
   TISOMonth,
   TRates,
-} from 'shared/types'
-import { keys } from 'shared/helpers/keys'
-import { addFxAmount, convertFx, round } from 'shared/helpers/money'
-import { TSelector } from 'store'
-import { TFxRates } from 'models/fxRate/fxRateStore'
-import { getFxRatesGetter } from 'models/fxRate'
-import { getEnvelopeBudgets } from 'models/budget'
-import { calculateGoalProgress, getGoals, TGoal } from 'models/goal'
-import { getEnvelopes, IEnvelope } from 'models/envelope'
+} from '@shared/types'
+import { keys } from '@shared/helpers/keys'
+import { addFxAmount, convertFx, round } from '@shared/helpers/money'
+import { TSelector } from '@store'
+import { TFxRates } from '@models/fxRate/fxRateStore'
+import { getFxRatesGetter } from '@models/fxRate'
+import { getEnvelopeBudgets } from '@models/budget'
+import { calculateGoalProgress, getGoals, TGoal } from '@models/goal'
+import { getEnvelopes, IEnvelope } from '@models/envelope'
 import { getActivity, TEnvelopeNode, TMonthActivity } from './parts/activity'
 import { getMonthList } from './parts/monthList'
 

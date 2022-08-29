@@ -1,9 +1,9 @@
-import { sendEvent } from 'shared/helpers/tracking'
-import { OptionalExceptFor, ITag, IZmTag } from 'shared/types'
-import { AppThunk } from 'store'
-import { applyClientPatch } from 'store/data'
-import { getRootUser } from 'models/user'
-import { getTag } from 'models/tag'
+import { sendEvent } from '@shared/helpers/tracking'
+import { OptionalExceptFor, ITag, IZmTag } from '@shared/types'
+import { AppThunk } from '@store'
+import { applyClientPatch } from '@store/data'
+import { getRootUser } from '@models/user'
+import { getTag } from '@models/tag'
 import { makeTag } from './makeTag'
 
 export type TTagDraft = OptionalExceptFor<ITag, 'id'>

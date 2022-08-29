@@ -1,4 +1,4 @@
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@store'
 import { getUserCurrencyCode } from './model'
 
 export const useDisplayCurrency = () => {

@@ -1,7 +1,7 @@
 import { goalType } from '../constants'
-import { TDateDraft, TGoal } from 'shared/types'
-import { formatMoney } from 'shared/helpers/money'
-import { parseDate } from 'shared/helpers/date'
+import { TDateDraft, TGoal } from '@shared/types'
+import { formatMoney } from '@shared/helpers/money'
+import { parseDate } from '@shared/helpers/date'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 

@@ -1,6 +1,6 @@
-import { getMonthTotals } from 'models/envelopeData'
-import { TFxCode, TISOMonth } from 'shared/types'
-import { useAppSelector } from 'store'
+import { getMonthTotals } from '@models/envelopeData'
+import { TFxCode, TISOMonth } from '@shared/types'
+import { useAppSelector } from '@store'
 
 export const useCurrencyConverter = (month: TISOMonth) => {
   const rates = useAppSelector(getMonthTotals)[month]?.rates

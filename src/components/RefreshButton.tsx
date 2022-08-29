@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useState } from 'react'
-import { syncData } from 'features/sync'
-import { getChangedNum } from 'store/data'
-import { getPendingState } from 'store/isPending'
+import { syncData } from '@features/sync'
+import { getChangedNum } from '@store/data'
+import { getPendingState } from '@store/isPending'
 import CircularProgress from '@mui/material/CircularProgress'
 import { BottomNavigationAction } from '@mui/material'
 import {
@@ -9,13 +9,13 @@ import {
   SyncDisabledIcon,
   DoneIcon,
   WarningIcon,
-} from 'shared/ui/Icons'
+} from '@shared/ui/Icons'
 import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
-import { Tooltip } from 'shared/ui/Tooltip'
-import { getLastSyncInfo } from 'store/lastSync'
-import { useRegularSync } from 'components/RegularSyncHandler'
-import { useAppDispatch, useAppSelector } from 'store'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { getLastSyncInfo } from '@store/lastSync'
+import { useRegularSync } from '@components/RegularSyncHandler'
+import { useAppDispatch, useAppSelector } from '@store'
 
 type ButtonState = 'idle' | 'pending' | 'success' | 'fail'
 

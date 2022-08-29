@@ -1,8 +1,8 @@
 import React, { FC, useContext, useState } from 'react'
-import { useAppDispatch, useAppSelector } from 'store'
-import { getUserCurrencyCode } from 'models/instrument'
-import { formatMoney } from 'shared/helpers/money'
-import { formatDate } from 'shared/helpers/date'
+import { useAppDispatch, useAppSelector } from '@store'
+import { getUserCurrencyCode } from '@models/instrument'
+import { formatMoney } from '@shared/helpers/money'
+import { formatDate } from '@shared/helpers/date'
 import {
   Typography,
   Box,
@@ -14,26 +14,26 @@ import {
   BoxProps,
   Theme,
 } from '@mui/material'
-import { Tooltip } from 'shared/ui/Tooltip'
+import { Tooltip } from '@shared/ui/Tooltip'
 import {
   SettingsIcon,
   CheckCircleIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-} from 'shared/ui/Icons'
+} from '@shared/ui/Icons'
 import { fillGoals } from '../../thunks'
-import { Confirm } from 'shared/ui/Confirm'
-import { RadialProgress } from 'shared/ui/RadialProgress'
+import { Confirm } from '@shared/ui/Confirm'
+import { RadialProgress } from '@shared/ui/RadialProgress'
 import { makeStyles } from '@mui/styles'
 import { ToBeBudgeted } from '../ToBeBudgeted'
 import useScrollPosition from '@react-hook/window-scroll'
-import { useMonth } from 'pages/BudgetsOld/pathHooks'
+import { useMonth } from '@pages/BudgetsOld/pathHooks'
 import { DragModeContext } from '../DnDContext'
 import {
   getMonthDates,
   getTotalGoalsProgress,
-} from 'pages/BudgetsOld/selectors'
-import { nextMonth, prevMonth, toISOMonth } from 'shared/helpers/date'
+} from '@pages/BudgetsOld/selectors'
+import { nextMonth, prevMonth, toISOMonth } from '@shared/helpers/date'
 
 const useStyles = makeStyles(theme => ({
   row: {

@@ -1,9 +1,9 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { TISOMonth, TDateDraft } from 'shared/types'
-import { keys } from 'shared/helpers/keys'
-import { toISOMonth } from 'shared/helpers/date'
-import { TSelector } from 'store'
-import { getInstruments } from 'models/instrument'
+import { TISOMonth, TDateDraft } from '@shared/types'
+import { keys } from '@shared/helpers/keys'
+import { toISOMonth } from '@shared/helpers/date'
+import { TSelector } from '@store'
+import { getInstruments } from '@models/instrument'
 import { fxRateStore, TFxRates } from './fxRateStore'
 
 // TODO: write normal function

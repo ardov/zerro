@@ -1,6 +1,6 @@
 import React from 'react'
 import { Story, Meta } from '@storybook/react'
-import { AmountInput, AmountInputProps } from 'shared/ui/AmountInput'
+import { AmountInput, AmountInputProps } from '@shared/ui/AmountInput'
 
 export default {
   title: 'AmountInput',

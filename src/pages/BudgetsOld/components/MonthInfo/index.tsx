@@ -1,10 +1,10 @@
 import React, { FC } from 'react'
-import { useAppDispatch, useAppSelector } from 'store'
-import { formatMoney } from 'shared/helpers/money'
-import { formatDate } from 'shared/helpers/date'
+import { useAppDispatch, useAppSelector } from '@store'
+import { formatMoney } from '@shared/helpers/money'
+import { formatDate } from '@shared/helpers/date'
 import { getTotalsByMonth } from '../../selectors'
-import { getUserCurrencyCode } from 'models/instrument'
-import { Confirm } from 'shared/ui/Confirm'
+import { getUserCurrencyCode } from '@models/instrument'
+import { Confirm } from '@shared/ui/Confirm'
 import { copyPreviousBudget, startFresh, fixOverspends } from '../../thunks'
 import {
   Box,
@@ -16,17 +16,17 @@ import {
   Theme,
   BoxProps,
 } from '@mui/material'
-import { CloseIcon } from 'shared/ui/Icons'
-import Rhythm from 'shared/ui/Rhythm'
-import { Tooltip } from 'shared/ui/Tooltip'
+import { CloseIcon } from '@shared/ui/Icons'
+import Rhythm from '@shared/ui/Rhythm'
+import { Tooltip } from '@shared/ui/Tooltip'
 import { Line } from '../components'
 import { WidgetIncome } from './WidgetIncome'
 import { OverspentNotice } from './OverspentNotice'
 import { CalculationErrorNotice } from './CalculationErrorNotice'
 import { WidgetOutcome } from './WidgetOutcome'
-import { useMonth } from 'pages/BudgetsOld/pathHooks'
-import { useToggle } from 'shared/hooks/useToggle'
-import { TDateDraft } from 'shared/types'
+import { useMonth } from '@pages/BudgetsOld/pathHooks'
+import { useToggle } from '@shared/hooks/useToggle'
+import { TDateDraft } from '@shared/types'
 
 type MonthInfoProps = BoxProps & {
   onClose: () => void

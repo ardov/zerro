@@ -10,28 +10,28 @@ import {
   Button,
   Stack,
 } from '@mui/material'
-import { Tooltip } from 'shared/ui/Tooltip'
-import { DeleteIcon, CloseIcon, RestoreFromTrashIcon } from 'shared/ui/Icons'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { DeleteIcon, CloseIcon, RestoreFromTrashIcon } from '@shared/ui/Icons'
 import DatePicker from '@mui/lab/DatePicker'
 import { Map } from './Map'
-import { AmountInput } from 'shared/ui/AmountInput'
-import { rateToWords } from 'shared/helpers/money'
-import { formatDate, parseDate } from 'shared/helpers/date'
-import { TagList } from 'components/TagList'
-import { useAppDispatch, useAppSelector } from 'store'
-import { getTransactions } from 'models/transaction'
-import { getType } from 'models/transaction/helpers'
-import { getPopulatedAccounts } from 'models/account'
-import { getInstruments } from 'models/instrument'
+import { AmountInput } from '@shared/ui/AmountInput'
+import { rateToWords } from '@shared/helpers/money'
+import { formatDate, parseDate } from '@shared/helpers/date'
+import { TagList } from '@components/TagList'
+import { useAppDispatch, useAppSelector } from '@store'
+import { getTransactions } from '@models/transaction'
+import { getType } from '@models/transaction/helpers'
+import { getPopulatedAccounts } from '@models/account'
+import { getInstruments } from '@models/instrument'
 import {
   applyChangesToTransaction,
   deleteTransactions,
   deleteTransactionsPermanently,
   recreateTransaction,
   restoreTransaction,
-} from 'models/transaction/thunks'
-import { toISODate } from 'shared/helpers/date'
-import { ITransaction } from 'shared/types'
+} from '@models/transaction/thunks'
+import { toISODate } from '@shared/helpers/date'
+import { ITransaction } from '@shared/types'
 
 type TransactionPreviewProps = {
   id: string

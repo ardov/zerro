@@ -1,5 +1,5 @@
 import React from 'react'
-import { Filter, FilterProps } from 'components/Filtering'
+import { Filter, FilterProps } from '@components/Filtering'
 import { Story, Meta } from '@storybook/react'
 
 export default {

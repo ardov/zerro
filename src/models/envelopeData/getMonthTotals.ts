@@ -1,21 +1,21 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { ById, TEnvelopeId, TFxAmount, TFxCode, TISOMonth } from 'shared/types'
-import { keys } from 'shared/helpers/keys'
+import { ById, TEnvelopeId, TFxAmount, TFxCode, TISOMonth } from '@shared/types'
+import { keys } from '@shared/helpers/keys'
 import { getCurrentFunds } from './parts/currentFunds'
-import { toISOMonth } from 'shared/helpers/date'
+import { toISOMonth } from '@shared/helpers/date'
 import { getActivity, TMonthActivity } from './parts/activity'
 import { getCalculatedEnvelopes, IEnvelopeWithData } from './calculateEnvelopes'
-import { getUserCurrencyCode } from 'models/instrument'
+import { getUserCurrencyCode } from '@models/instrument'
 import {
   addFxAmount,
   convertFx,
   isEqualFxAmount,
   subFxAmount,
-} from 'shared/helpers/money'
-import { TSelector } from 'store'
+} from '@shared/helpers/money'
+import { TSelector } from '@store'
 import { getMonthList } from './parts/monthList'
-import { getFxRatesGetter } from 'models/fxRate'
-import { TFxRates } from 'models/fxRate/fxRateStore'
+import { getFxRatesGetter } from '@models/fxRate'
+import { TFxRates } from '@models/fxRate/fxRateStore'
 
 export type TMonthTotals = {
   month: TISOMonth

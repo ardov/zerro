@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { withStyles } from '@mui/styles'
 import { Tooltip as MaterialTooltip, TooltipProps } from '@mui/material'
-import { Modify } from 'shared/types'
+import { Modify } from '@shared/types'
 
 const StyledTooltip = withStyles(theme => ({
   tooltip: {

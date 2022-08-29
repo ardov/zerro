@@ -9,7 +9,7 @@ import {
   Card,
 } from '@mui/material'
 import { withStyles } from '@mui/styles'
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@store'
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -19,15 +19,15 @@ import {
   Line,
   ReferenceLine,
 } from 'recharts'
-import { getInBudgetAccounts, getSavingAccounts } from 'models/account'
-import { convertCurrency } from 'models/instrument'
+import { getInBudgetAccounts, getSavingAccounts } from '@models/account'
+import { convertCurrency } from '@models/instrument'
 import { getAvailableMonths } from './availablePeriod'
 import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
-import { round } from 'shared/helpers/money'
+import { round } from '@shared/helpers/money'
 import { useState } from 'react'
-import { formatDate } from 'shared/helpers/date'
-import { DataLine } from 'shared/ui/DataLine'
-import { TInstrumentId } from 'shared/types'
+import { formatDate } from '@shared/helpers/date'
+import { DataLine } from '@shared/ui/DataLine'
+import { TInstrumentId } from '@shared/types'
 
 type Point = {
   date: Date

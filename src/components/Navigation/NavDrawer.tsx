@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { useRouteMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import RefreshButton from 'components/RefreshButton'
+import RefreshButton from '@components/RefreshButton'
 import { MenuButton } from './MenuButton'
 import {
   Box,
@@ -14,8 +14,8 @@ import {
   DrawerProps,
 } from '@mui/material'
 import { useTheme } from '@mui/material'
-import { Logo } from 'shared/ui/Logo'
-import AccountList from 'components/AccountList'
+import { Logo } from '@shared/ui/Logo'
+import AccountList from '@components/AccountList'
 import { makeStyles } from '@mui/styles'
 import {
   AccountBalanceIcon,
@@ -23,7 +23,7 @@ import {
   FavoriteBorderIcon,
   SyncAltIcon,
   WhatshotIcon,
-} from 'shared/ui/Icons'
+} from '@shared/ui/Icons'
 
 export default function NavigationDrawer(props: DrawerProps) {
   const theme = useTheme()

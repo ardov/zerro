@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useHistory, useLocation } from 'react-router'
-import { TDateDraft, TISOMonth } from 'shared/types'
-import { toISOMonth } from 'shared/helpers/date'
+import { TDateDraft, TISOMonth } from '@shared/types'
+import { toISOMonth } from '@shared/helpers/date'
 
 function getModifiedPath(key: string, value?: string | null) {
   const url = new URL(window.location.href)

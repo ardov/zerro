@@ -1,12 +1,12 @@
 import React, { FC, useEffect, useState } from 'react'
 import { InputBase, InputAdornment } from '@mui/material'
-import { NotesIcon } from 'shared/ui/Icons'
-import { useDebounce } from 'shared/hooks/useDebounce'
-import { TEnvelopeId, TISOMonth } from 'shared/types'
-import { useAppDispatch } from 'store'
-import { useEnvelope } from 'models/envelopeData'
+import { NotesIcon } from '@shared/ui/Icons'
+import { useDebounce } from '@shared/hooks/useDebounce'
+import { TEnvelopeId, TISOMonth } from '@shared/types'
+import { useAppDispatch } from '@store'
+import { useEnvelope } from '@models/envelopeData'
 import { cardStyle } from './shared'
-import { patchEnvelope } from 'models/envelope'
+import { patchEnvelope } from '@models/envelope'
 
 export const CommentWidget: FC<{ month: TISOMonth; id: TEnvelopeId }> = ({
   month,

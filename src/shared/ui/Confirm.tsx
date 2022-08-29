@@ -5,7 +5,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
-import { Modify } from 'shared/types'
+import { Modify } from '@shared/types'
 
 type ConfirmCommonProps = {
   onOk: () => void

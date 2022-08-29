@@ -1,10 +1,10 @@
-import { AppThunk } from 'store'
-import { applyClientPatch } from 'store/data'
-import { getRootUser } from 'models/user'
-import { Modify, OptionalExceptFor, TDateDraft } from 'shared/types'
+import { AppThunk } from '@store'
+import { applyClientPatch } from '@store/data'
+import { getRootUser } from '@models/user'
+import { Modify, OptionalExceptFor, TDateDraft } from '@shared/types'
 import { makeReminder } from './makeReminder'
 import { getReminders } from './model'
-import { IReminder } from 'shared/types'
+import { IReminder } from '@shared/types'
 
 type ReminderPatch = OptionalExceptFor<IReminder, 'id'>
 

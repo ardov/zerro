@@ -1,7 +1,5 @@
 export type { TAccountDraft } from './thunks'
 
-export { convertAccount } from './zm-adapter'
-
 // Selectors
 export {
   getAccounts,

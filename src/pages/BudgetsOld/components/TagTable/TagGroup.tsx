@@ -1,13 +1,13 @@
 import React, { useContext } from 'react'
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@store'
 import { Collapse, Box, IconButton } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { ChevronRightIcon, DragIndicatorIcon } from 'shared/ui/Icons'
+import { ChevronRightIcon, DragIndicatorIcon } from '@shared/ui/Icons'
 import { TagRow } from './TagRow'
-import { getAmountsById } from 'pages/BudgetsOld/selectors'
-import { useMonth } from 'pages/BudgetsOld/pathHooks'
+import { getAmountsById } from '@pages/BudgetsOld/selectors'
+import { useMonth } from '@pages/BudgetsOld/pathHooks'
 import { DragModeContext } from '../DnDContext'
-import { TTagPopulated } from 'models/tag'
+import { TTagPopulated } from '@models/tag'
 
 export const useStyles = makeStyles(theme => ({
   panelRoot: {

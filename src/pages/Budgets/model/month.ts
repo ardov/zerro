@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useHistory, useLocation } from 'react-router'
-import { TDateDraft, TISOMonth } from 'shared/types'
-import { isISOMonth, toISOMonth } from 'shared/helpers/date'
+import { TDateDraft, TISOMonth } from '@shared/types'
+import { isISOMonth, toISOMonth } from '@shared/helpers/date'
 
 export function useMonth(): [TISOMonth, (date: TDateDraft) => void] {
   const history = useHistory()

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, BoxProps, Typography } from '@mui/material'
-import { Amount, AmountProps } from 'shared/ui/Amount'
+import { Amount, AmountProps } from '@shared/ui/Amount'
 
 interface TotalProps extends BoxProps {
   name: string

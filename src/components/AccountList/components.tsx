@@ -7,9 +7,9 @@ import {
   Typography,
   ListItemButton,
 } from '@mui/material'
-import { SmartAmount } from 'components/Amount'
-import { useAppDispatch } from 'store'
-import { setInBudget, IAccountPopulated } from 'models/account'
+import { SmartAmount } from '@components/Amount'
+import { useAppDispatch } from '@store'
+import { setInBudget, IAccountPopulated } from '@models/account'
 
 export const Account: FC<{ account: IAccountPopulated } & ListItemButtonProps> =
   ({ account, sx, ...rest }) => {

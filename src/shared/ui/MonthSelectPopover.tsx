@@ -10,9 +10,9 @@ import {
   ListItemButton,
   ListItemButtonProps,
 } from '@mui/material'
-import { ChevronRightIcon, ChevronLeftIcon } from 'shared/ui/Icons'
-import { formatDate, toISOMonth } from 'shared/helpers/date'
-import { Modify, TDateDraft, TISOMonth } from 'shared/types'
+import { ChevronRightIcon, ChevronLeftIcon } from '@shared/ui/Icons'
+import { formatDate, toISOMonth } from '@shared/helpers/date'
+import { Modify, TDateDraft, TISOMonth } from '@shared/types'
 
 interface MonthItemItemProps extends ListItemButtonProps {
   isCurrent: boolean

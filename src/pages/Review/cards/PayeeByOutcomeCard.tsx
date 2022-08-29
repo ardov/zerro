@@ -1,12 +1,12 @@
 import React from 'react'
 import { Typography } from '@mui/material'
-import { useAppSelector } from 'store'
-import Rhythm from 'shared/ui/Rhythm'
-import { getUserCurrencyCode } from 'models/instrument'
-import pluralize from 'shared/helpers/pluralize'
+import { useAppSelector } from '@store'
+import Rhythm from '@shared/ui/Rhythm'
+import { getUserCurrencyCode } from '@models/instrument'
+import pluralize from '@shared/helpers/pluralize'
 import { Card } from './Card'
 import { Stats } from '../selectors'
-import { Amount } from 'shared/ui/Amount'
+import { Amount } from '@shared/ui/Amount'
 
 interface PayeeByOutcomeCardProps {
   byPayee: Stats['byPayee']

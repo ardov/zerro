@@ -1,4 +1,4 @@
-import { AccountType, IAccount } from 'shared/types'
+import { AccountType, IAccount } from '@shared/types'
 
 export function getStartBalance(acc: IAccount): number {
   //  Для deposit и loan поле startBalance имеет смысл начального взноса/тела кредита

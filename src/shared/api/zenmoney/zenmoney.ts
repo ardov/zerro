@@ -6,8 +6,8 @@ import {
   diffEndpoint,
   redirectUri,
   tokenEndpoint,
-} from 'shared/config'
-import { IZmDiff, IZmRequest } from 'shared/types'
+} from '../../config'
+import { IZmDiff, IZmRequest } from '@shared/types'
 
 export type TAccessToken = {
   access_token: string

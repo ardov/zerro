@@ -1,4 +1,4 @@
-import { TISODate } from 'shared/types'
+import { TISODate } from '@shared/types'
 
 export enum goalType {
   /**

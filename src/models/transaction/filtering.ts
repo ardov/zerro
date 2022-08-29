@@ -1,7 +1,7 @@
-import { TAccountId, TDateDraft, TTagId, ITransaction } from 'shared/types'
-import { keys } from 'shared/helpers/keys'
+import { TAccountId, TDateDraft, TTagId, ITransaction } from '@shared/types'
+import { keys } from '@shared/helpers/keys'
 import { getType, isDeleted, isNew, TrType } from './helpers'
-import { toISODate } from 'shared/helpers/date'
+import { toISODate } from '@shared/helpers/date'
 
 type OperatorType = 'AND' | 'OR'
 

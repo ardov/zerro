@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react'
 import { Box, BoxProps, Typography } from '@mui/material'
-import { Tooltip } from 'shared/ui/Tooltip'
-import { Amount, AmountProps } from 'shared/ui/Amount'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { Amount, AmountProps } from '@shared/ui/Amount'
 
 interface TotalProps extends BoxProps {
   name: string

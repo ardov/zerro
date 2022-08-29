@@ -1,5 +1,5 @@
 import { TUnixTime, TUnits, TISODate, TMsTime } from './types'
-import tagIcons from 'shared/tagIcons.json'
+import tagIcons from '@shared/tagIcons.json'
 
 type TIconName = keyof typeof tagIcons
 

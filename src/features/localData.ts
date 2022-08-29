@@ -1,8 +1,8 @@
-import { AppThunk } from 'store'
-import { applyServerPatch } from 'store/data'
-import { getDataToSave } from 'features/shared/getDataToSave'
-import { TLocalData } from 'shared/types'
-import { getLocalData, clearStorage, saveLocalData } from 'worker'
+import { AppThunk } from '@store'
+import { applyServerPatch } from '@store/data'
+import { getDataToSave } from '@features/shared/getDataToSave'
+import { TLocalData } from '@shared/types'
+import { getLocalData, clearStorage, saveLocalData } from '@worker'
 
 type LocalKey = keyof TLocalData
 

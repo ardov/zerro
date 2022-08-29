@@ -2,7 +2,17 @@
   "compilerOptions": {
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "src",
-    "target": "es5",
+    "paths": {
+      "@components/*": ["components/*"],
+      "@features/*": ["features/*"],
+      "@models/*": ["models/*"],
+      "@pages/*": ["pages/*"],
+      "@shared/*": ["shared/*"],
+      "@store/*": ["store/*"],
+      "@store": ["store"],
+      "@worker": ["worker"]
+    },
+    "target": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -19,8 +29,9 @@
   },
   "include": [
     "src",
-    "typings/worker-loader.d.ts",
     "typings/theme.d.ts",
-    "typings/mdx.d.ts"
-  ]
+    "typings/mdx.d.ts",
+    "typings/vite-env.d.ts"
+  ],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

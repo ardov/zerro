@@ -1,6 +1,6 @@
-import { HiddenDataType, makeSimpleHiddenStore } from 'models/hidden-store'
-import { ById, OptionalExceptFor, TEnvelopeId, TFxCode } from 'shared/types'
-import { AppThunk } from 'store'
+import { HiddenDataType, makeSimpleHiddenStore } from '@models/hidden-store'
+import { ById, OptionalExceptFor, TEnvelopeId, TFxCode } from '@shared/types'
+import { AppThunk } from '@store'
 
 export enum envelopeVisibility {
   hidden = 'hidden',

@@ -4,14 +4,14 @@ import {
   OptionalExceptFor,
   TEnvelopeId,
   TTagId,
-} from 'shared/types'
-import { keys } from 'shared/helpers/keys'
-import { AppThunk } from 'store'
-import { patchTag, TTagDraft } from 'models/tag'
+} from '@shared/types'
+import { keys } from '@shared/helpers/keys'
+import { AppThunk } from '@store'
+import { patchTag, TTagDraft } from '@models/tag'
 import { getEnvelopes, IEnvelope } from './getEnvelopes'
 import { parseEnvelopeId } from './helpers'
 import { patchEnvelopeMeta, TEnvelopeMetaPatch } from './metaData'
-import { hex2int, isHEX } from 'shared/helpers/color'
+import { hex2int, isHEX } from '@shared/helpers/color'
 
 type TEnvelopeDraft = OptionalExceptFor<IEnvelope, 'id'>
 

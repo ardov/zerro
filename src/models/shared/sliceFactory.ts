@@ -15,7 +15,7 @@ import {
   IReminderMarker,
   ITag,
   IUser,
-} from 'shared/types'
+} from '@shared/types'
 
 const applyServerPatch = createAction<IDiff>('data/applyServerPatch')
 const applyClientPatch = createAction<IDiff>('data/applyClientPatch')

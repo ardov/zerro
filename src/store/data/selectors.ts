@@ -1,4 +1,4 @@
-import { RootState } from 'store'
+import { RootState } from '@store'
 
 export const getDiff = (state: RootState) => state.data.diff
 

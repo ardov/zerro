@@ -1,9 +1,9 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { populate } from './populate'
-import { convertCurrency, getInstruments } from 'models/instrument'
+import { convertCurrency, getInstruments } from '@models/instrument'
 import { IAccountPopulated } from './types'
-import { AccountType, TAccountId } from 'shared/types'
-import { RootState } from 'store'
+import { AccountType, TAccountId } from '@shared/types'
+import { RootState } from '@store'
 import { DATA_ACC_NAME } from '../hiddenData/constants'
 
 // SELECTORS

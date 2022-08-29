@@ -1,7 +1,7 @@
 import { v1 as uuidv1 } from 'uuid'
-import { IReminder } from 'shared/types'
-import { toISODate } from 'shared/helpers/date'
-import { Modify, OptionalExceptFor, TDateDraft } from 'shared/types'
+import { IReminder } from '@shared/types'
+import { toISODate } from '@shared/helpers/date'
+import { Modify, OptionalExceptFor, TDateDraft } from '@shared/types'
 
 type ReminderDraft = Modify<
   OptionalExceptFor<IReminder, 'user' | 'incomeAccount' | 'outcomeAccount'>,

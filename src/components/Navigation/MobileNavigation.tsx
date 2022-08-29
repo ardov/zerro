@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { useLocation, useHistory } from 'react-router'
-import RefreshButton from 'components/RefreshButton'
+import RefreshButton from '@components/RefreshButton'
 import { SettingsMenu } from './MenuButton'
 import SettingsIcon from '@mui/icons-material/Settings'
 import {
@@ -13,9 +13,9 @@ import {
   AccountBalanceIcon,
   AccountBalanceWalletIcon,
   SyncAltIcon,
-} from 'shared/ui/Icons'
+} from '@shared/ui/Icons'
 import { makeStyles } from '@mui/styles'
-import { useHomeBar } from 'shared/hooks/useHomeBar'
+import { useHomeBar } from '@shared/hooks/useHomeBar'
 
 const useStyles = makeStyles(theme => ({ action: { minWidth: 32 } }))
 

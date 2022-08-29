@@ -7,17 +7,17 @@ import {
   ButtonBase,
   PaperProps,
 } from '@mui/material'
-import { ChevronRightIcon, ChevronLeftIcon } from 'shared/ui/Icons'
+import { ChevronRightIcon, ChevronLeftIcon } from '@shared/ui/Icons'
 import { styled } from '@mui/styles'
-import MonthSelectPopover from 'shared/ui/MonthSelectPopover'
-import { formatDate } from 'shared/helpers/date'
-import { Modify, TDateDraft, TISOMonth } from 'shared/types'
+import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
+import { formatDate } from '@shared/helpers/date'
+import { Modify, TDateDraft, TISOMonth } from '@shared/types'
 import {
   nextMonth,
   parseDate,
   prevMonth,
   toISOMonth,
-} from 'shared/helpers/date'
+} from '@shared/helpers/date'
 
 type MonthSelectProps = Modify<
   PaperProps,

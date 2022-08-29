@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react'
-import { useAppDispatch, useAppSelector } from 'store'
-import { EmojiIcon } from 'shared/ui/EmojiIcon'
+import { useAppDispatch, useAppSelector } from '@store'
+import { EmojiIcon } from '@shared/ui/EmojiIcon'
 import {
   Box,
   Typography,
@@ -11,31 +11,36 @@ import {
   InputAdornment,
   Button,
 } from '@mui/material'
-import { Tooltip } from 'shared/ui/Tooltip'
-import { CloseIcon, EditIcon, EmojiFlagsIcon, NotesIcon } from 'shared/ui/Icons'
-import { getPopulatedTag, TTagPopulated } from 'models/tag'
+import { Tooltip } from '@shared/ui/Tooltip'
+import {
+  CloseIcon,
+  EditIcon,
+  EmojiFlagsIcon,
+  NotesIcon,
+} from '@shared/ui/Icons'
+import { getPopulatedTag, TTagPopulated } from '@models/tag'
 import { Total, Line as TextLine } from '../components'
 import {
   getAmountsById,
   // getGoalsProgress
-} from 'pages/BudgetsOld/selectors'
-import Rhythm from 'shared/ui/Rhythm'
-import { useMonth } from 'pages/BudgetsOld/pathHooks'
+} from '@pages/BudgetsOld/selectors'
+import Rhythm from '@shared/ui/Rhythm'
+import { useMonth } from '@pages/BudgetsOld/pathHooks'
 import { LinkedAccs } from './LinkedAccs'
 import { OutcomeWidget } from './OutcomeWidget'
-import { ColorPicker } from 'shared/ui/ColorPickerPopover'
-import { hex2int } from 'shared/helpers/color'
-import { patchTag } from 'models/tag/thunks'
-import { sendEvent } from 'shared/helpers/tracking'
-import { TagEditDialog } from 'components/TagEditDialog'
-import { useToggle } from 'shared/hooks/useToggle'
-import { getTagComment, setTagComment } from 'models/hiddenData/tagMeta'
+import { ColorPicker } from '@shared/ui/ColorPickerPopover'
+import { hex2int } from '@shared/helpers/color'
+import { patchTag } from '@models/tag/thunks'
+import { sendEvent } from '@shared/helpers/tracking'
+import { TagEditDialog } from '@components/TagEditDialog'
+import { useToggle } from '@shared/hooks/useToggle'
+import { getTagComment, setTagComment } from '@models/hiddenData/tagMeta'
 import { BudgetPopover } from '../BudgetPopover'
-import { getGoals } from 'models/hiddenData/goals'
-import { goalToWords } from 'models/hiddenData/goals/helpers'
-import { useDebounce } from 'shared/hooks/useDebounce'
+import { getGoals } from '@models/hiddenData/goals'
+import { goalToWords } from '@models/hiddenData/goals/helpers'
+import { useDebounce } from '@shared/hooks/useDebounce'
 import { GoalPopover } from '../GoalPopover'
-import { useSearchParam } from 'shared/hooks/useSearchParam'
+import { useSearchParam } from '@shared/hooks/useSearchParam'
 
 type TagPreviewProps = {
   id: string

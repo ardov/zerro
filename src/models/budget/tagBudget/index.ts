@@ -1,5 +1,3 @@
-export { convertBudget } from './zm-adapter'
-
 // Selectors
 export { getBudgets, getBudget, getBudgetsByMonthAndTag } from './selectors'
 

@@ -1,13 +1,13 @@
 import React, { FC } from 'react'
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@store'
 import { Select, MenuItem, SelectProps } from '@mui/material'
 import {
   getInstruments,
   getInstrumentsByCode,
   getUserCurrencyCode,
-} from 'models/instrument'
-import { getAccountList } from 'models/account'
-import { TFxCode } from 'shared/types'
+} from '@models/instrument'
+import { getAccountList } from '@models/account'
+import { TFxCode } from '@shared/types'
 
 export const CurrencyCodeSelect: FC<SelectProps<TFxCode>> = props => {
   const instrumentsById = useAppSelector(getInstruments)

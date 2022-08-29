@@ -1,15 +1,15 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { round } from 'shared/helpers/money'
-import { getAccounts, getStartBalance } from 'models/account'
-import { getTransactionsHistory } from 'models/transaction'
-import { TAccountId, TISODate } from 'shared/types'
-import { keys } from 'shared/helpers/keys'
+import { round } from '@shared/helpers/money'
+import { getAccounts, getStartBalance } from '@models/account'
+import { getTransactionsHistory } from '@models/transaction'
+import { TAccountId, TISODate } from '@shared/types'
+import { keys } from '@shared/helpers/keys'
 import {
   eachDayOfInterval,
   parseDate,
   startOfDay,
   toISODate,
-} from 'shared/helpers/date'
+} from '@shared/helpers/date'
 
 type Point = {
   date: TISODate

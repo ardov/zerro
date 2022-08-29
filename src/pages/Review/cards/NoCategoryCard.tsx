@@ -1,7 +1,7 @@
 import React from 'react'
 import { Typography } from '@mui/material'
-import Rhythm from 'shared/ui/Rhythm'
-import pluralize from 'shared/helpers/pluralize'
+import Rhythm from '@shared/ui/Rhythm'
+import pluralize from '@shared/helpers/pluralize'
 import { Card } from './Card'
 
 export function NoCategoryCard({ value = 0 }) {

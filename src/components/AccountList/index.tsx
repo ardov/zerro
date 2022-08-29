@@ -1,16 +1,16 @@
 import React, { FC } from 'react'
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@store'
 import {
   getInBudgetAccounts,
   getSavingAccounts,
   IAccountPopulated,
-} from 'models/account'
-import pluralize from 'shared/helpers/pluralize'
+} from '@models/account'
+import pluralize from '@shared/helpers/pluralize'
 import { Collapse, List, ListItemButton } from '@mui/material'
 import { Account, Subheader } from './components'
-import { SmartAmount } from 'components/Amount'
-import { Tooltip } from 'shared/ui/Tooltip'
-import { useToggle } from 'shared/hooks/useToggle'
+import { SmartAmount } from '@components/Amount'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { useToggle } from '@shared/hooks/useToggle'
 
 export default function AccountList({ className = '' }) {
   const inBudget = useAppSelector(getInBudgetAccounts)

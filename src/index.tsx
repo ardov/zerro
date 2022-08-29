@@ -6,15 +6,15 @@ import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import ruDateLocale from 'date-fns/locale/ru'
 import App from './App'
 import * as serviceWorkerRegistration from './serviceWorkerRegistration'
-import { store } from 'store'
-import GlobalErrorBoundary from 'components/GlobalErrorBoundary'
-import { initSentry, sendEvent } from 'shared/helpers/tracking'
-import { bindWorkerToStore } from 'worker'
-import { applyClientPatch, resetData } from 'store/data'
+import { store } from '@store'
+import GlobalErrorBoundary from '@components/GlobalErrorBoundary'
+import { initSentry, sendEvent } from '@shared/helpers/tracking'
+import { bindWorkerToStore } from '@worker'
+import { applyClientPatch, resetData } from '@store/data'
 import { AppThemeProvider } from './AppThemeProvider'
 import { StyledEngineProvider } from '@mui/material/styles'
-import { appVersion } from 'shared/config'
-import { IDiff } from 'shared/types'
+import { appVersion } from '@shared/config'
+import { IDiff } from '@shared/types'
 
 initSentry()
 bindWorkerToStore(store.dispatch)
@@ -61,7 +61,8 @@ function createZerroInstance(s: typeof store) {
     get state() {
       return s.getState()
     },
-    env: process.env,
+    // @ts-ignore
+    env: import.meta.env,
     logsShow: false,
     logs: {},
     resetData: () => s.dispatch(resetData()),

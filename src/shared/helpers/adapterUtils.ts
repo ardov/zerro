@@ -1,4 +1,4 @@
-import { TMilliUnits, TUnits } from 'shared/types'
+import { TMilliUnits, TUnits } from '@shared/types'
 
 export type TZmAdapter<ZmType, ClientType> = {
   toClient: (el: ZmType) => ClientType

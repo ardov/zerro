@@ -1,11 +1,11 @@
 import React, { FC, ReactNode, useState } from 'react'
-import { useAppDispatch } from 'store'
+import { useAppDispatch } from '@store'
 import { DragDropContext, DropResult } from 'react-beautiful-dnd'
 import { useMonth } from '../pathHooks'
 import { useCallback } from 'react'
 import { MoveMoneyModal } from './MoveMoneyModal'
-import { moveTag } from 'models/hiddenData/tagOrder'
-import { TISOMonth } from 'shared/types'
+import { moveTag } from '@models/hiddenData/tagOrder'
+import { TISOMonth } from '@shared/types'
 
 export type DragModeType = 'FUNDS' | 'REORDER'
 type DragModeContextType = {

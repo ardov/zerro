@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { TagSelect } from 'components/TagSelect'
+import { TagSelect } from '@components/TagSelect'
 import {
   Drawer,
   Box,
@@ -14,13 +14,13 @@ import {
 } from '@mui/material'
 import { DateRangePicker } from '@mui/lab'
 import { makeStyles } from '@mui/styles'
-import { Tooltip } from 'shared/ui/Tooltip'
-import { CloseIcon } from 'shared/ui/Icons'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { CloseIcon } from '@shared/ui/Icons'
 import Button from '@mui/material/Button'
-import { formatDate } from 'shared/helpers/date'
-import { FilterConditions } from 'models/transaction/filtering'
-import { TrType } from 'models/transaction'
-import { endOfDay, prevMonth, startOfDay } from 'shared/helpers/date'
+import { formatDate } from '@shared/helpers/date'
+import { FilterConditions } from '@models/transaction/filtering'
+import { TrType } from '@models/transaction'
+import { endOfDay, prevMonth, startOfDay } from '@shared/helpers/date'
 
 const useStyles = makeStyles(theme => ({
   drawerWidth: {

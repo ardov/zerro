@@ -16,18 +16,18 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
-import { DataEntity, Modify } from 'shared/types'
-import { ColorPicker } from 'shared/ui/ColorPickerPopover'
-import { useAppDispatch, useAppSelector } from 'store'
+import { DataEntity, Modify } from '@shared/types'
+import { ColorPicker } from '@shared/ui/ColorPickerPopover'
+import { useAppDispatch, useAppSelector } from '@store'
 import {
   envelopeVisibility,
   getEnvelopeId,
   IEnvelope,
   parseEnvelopeId,
   patchEnvelope,
-} from 'models/envelope'
-import { getUserCurrencyCode } from 'models/instrument'
-import { TagSelect } from 'components/TagSelect'
+} from '@models/envelope'
+import { getUserCurrencyCode } from '@models/instrument'
+import { TagSelect } from '@components/TagSelect'
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
 import { VisibilitySelect } from './VisidilitySelect'
 

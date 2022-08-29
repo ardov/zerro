@@ -10,35 +10,35 @@ import {
   ButtonBaseProps,
   Chip,
 } from '@mui/material'
-import { Tooltip } from 'shared/ui/Tooltip'
-import { EmojiIcon } from 'shared/ui/EmojiIcon'
-import { formatMoney } from 'shared/helpers/money'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { EmojiIcon } from '@shared/ui/EmojiIcon'
+import { formatMoney } from '@shared/helpers/money'
 import {
   WarningIcon,
   AddIcon,
   EmojiFlagsIcon,
   NotesIcon,
-} from 'shared/ui/Icons'
-import { goalToWords } from 'models/hiddenData/goals/helpers'
-import { RadialProgress } from 'shared/ui/RadialProgress'
+} from '@shared/ui/Icons'
+import { goalToWords } from '@models/hiddenData/goals/helpers'
+import { RadialProgress } from '@shared/ui/RadialProgress'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import { getGoal } from 'models/hiddenData/goals'
+import { getGoal } from '@models/hiddenData/goals'
 import { shallowEqual } from 'react-redux'
 import {
   getGoalProgress,
   GoalProgress as GoalProgressType,
-} from 'pages/BudgetsOld/selectors'
-import { SmartAmount } from 'components/Amount'
+} from '@pages/BudgetsOld/selectors'
+import { SmartAmount } from '@components/Amount'
 import { useContext } from 'react'
 import { IsDraggingContext, DragModeContext, DragModeType } from '../DnDContext'
-import { getPopulatedTag } from 'models/tag'
-import { getAmountsById } from 'pages/BudgetsOld/selectors'
-import { TGoal, TISOMonth } from 'shared/types'
-import { getTagMeta } from 'models/hiddenData/tagMeta'
-import { getInstruments } from 'models/instrument'
-import { getUserInstrumentId } from 'models/user'
+import { getPopulatedTag } from '@models/tag'
+import { getAmountsById } from '@pages/BudgetsOld/selectors'
+import { TGoal, TISOMonth } from '@shared/types'
+import { getTagMeta } from '@models/hiddenData/tagMeta'
+import { getInstruments } from '@models/instrument'
+import { getUserInstrumentId } from '@models/user'
 import { SxProps } from '@mui/system'
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@store'
 
 type TagRowProps = {
   id: string

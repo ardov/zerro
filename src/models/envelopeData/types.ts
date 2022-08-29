@@ -9,7 +9,7 @@ import {
   TFxAmount,
   TEnvelopeId,
   TEnvelopeType,
-} from 'shared/types'
+} from '@shared/types'
 
 interface IEnvelopeBase {
   type: DataEntity.Account | DataEntity.Merchant | DataEntity.Tag

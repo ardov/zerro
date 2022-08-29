@@ -1,8 +1,9 @@
+// @ts-ignore Module not found
 // eslint-disable-next-line import/no-webpack-loader-syntax
-import Worker from 'worker-loader!./worker'
+import Worker from './worker?worker'
 import * as Comlink from 'comlink'
 import { WorkerObj } from './worker'
-import { AppDispatch } from 'store'
+import { AppDispatch } from '@store'
 
 type Message = { action: string; payload?: any }
 
@@ -19,7 +20,7 @@ export const sendMessage = (message: Message) => {
 }
 
 export const bindWorkerToStore = (dispatch: AppDispatch) =>
-  worker.addEventListener('message', message => {
+  worker.addEventListener('message', (message: any) => {
     if (typeof message.data?.action === 'string') {
       console.log(`⚙️ ${message.data?.action}`, message.data)
       // dispatch(message.data)

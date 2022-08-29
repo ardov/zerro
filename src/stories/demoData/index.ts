@@ -1,10 +1,10 @@
 import countries from './countries.json'
 import companies from './companies.json'
 import instruments from './instruments.json'
-import { makeAccount } from 'models/account'
-import { makeTag } from 'models/tag/makeTag'
-import { makeTransaction } from 'models/transaction/makeTransaction'
-import { toISODate } from 'shared/helpers/date'
+import { makeAccount } from '@models/account'
+import { makeTag } from '@models/tag/makeTag'
+import { makeTransaction } from '@models/transaction/makeTransaction'
+import { toISODate } from '@shared/helpers/date'
 import {
   AccountType,
   IDiff,
@@ -12,7 +12,7 @@ import {
   IZmCompany,
   IZmCountry,
   IZmInstrument,
-} from 'shared/types'
+} from '@shared/types'
 
 const NOW = Date.now()
 const DAY = 1000 * 60 * 60 * 24

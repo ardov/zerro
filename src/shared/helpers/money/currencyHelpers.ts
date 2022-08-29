@@ -1,5 +1,5 @@
-import { TFxAmount, TFxCode, TRates } from 'shared/types'
-import { keys } from 'shared/helpers/keys'
+import { TFxAmount, TFxCode, TRates } from '@shared/types'
+import { keys } from '@shared/helpers/keys'
 
 export const round = (amount: number): number => Math.round(amount * 100) / 100
 

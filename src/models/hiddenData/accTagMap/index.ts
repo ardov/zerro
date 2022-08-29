@@ -1,12 +1,12 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { sendEvent } from 'shared/helpers/tracking'
+import { sendEvent } from '@shared/helpers/tracking'
 import { DataReminderType } from '../constants'
 import { setHiddenData } from '../thunks'
-import { getTags } from 'models/tag'
+import { getTags } from '@models/tag'
 import { getAccLinks } from '../selectors'
-import { AppThunk, TSelector } from 'store'
-import { getAccounts } from 'models/account'
-import { TAccountId, TTagId } from 'shared/types'
+import { AppThunk, TSelector } from '@store'
+import { getAccounts } from '@models/account'
+import { TAccountId, TTagId } from '@shared/types'
 
 // THUNK
 export const addConnection =

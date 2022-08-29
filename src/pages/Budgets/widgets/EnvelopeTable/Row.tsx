@@ -12,23 +12,23 @@ import {
 } from '@mui/material'
 import { SxProps } from '@mui/system'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import { Tooltip } from 'shared/ui/Tooltip'
-import { EmojiIcon } from 'shared/ui/EmojiIcon'
-import { formatMoney, convertFx, isZero } from 'shared/helpers/money'
-import { keys } from 'shared/helpers/keys'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { EmojiIcon } from '@shared/ui/EmojiIcon'
+import { formatMoney, convertFx, isZero } from '@shared/helpers/money'
+import { keys } from '@shared/helpers/keys'
 import {
   WarningIcon,
   AddIcon,
   EmojiFlagsIcon,
   NotesIcon,
-} from 'shared/ui/Icons'
-import { RadialProgress } from 'shared/ui/RadialProgress'
-import { Amount } from 'shared/ui/Amount'
-import { TEnvelopeId, TFxAmount, TFxCode, TRates } from 'shared/types'
-import { useAppSelector } from 'store'
-import { getUserCurrencyCode } from 'models/instrument'
-import { goalToWords, TGoal } from 'models/goal'
-import { useRates } from 'models/envelopeData'
+} from '@shared/ui/Icons'
+import { RadialProgress } from '@shared/ui/RadialProgress'
+import { Amount } from '@shared/ui/Amount'
+import { TEnvelopeId, TFxAmount, TFxCode, TRates } from '@shared/types'
+import { useAppSelector } from '@store'
+import { getUserCurrencyCode } from '@models/instrument'
+import { goalToWords, TGoal } from '@models/goal'
+import { useRates } from '@models/envelopeData'
 import {
   IsDraggingContext,
   DragModeContext,

@@ -1,10 +1,10 @@
 import React from 'react'
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@store'
 import { getTotalsByMonth } from '../../selectors'
-import { getUserCurrencyCode } from 'models/instrument'
+import { getUserCurrencyCode } from '@models/instrument'
 import { Box } from '@mui/material'
 import { Total } from '../components'
-import { useMonth } from 'pages/BudgetsOld/pathHooks'
+import { useMonth } from '@pages/BudgetsOld/pathHooks'
 
 export function WidgetOutcome() {
   const [month] = useMonth()

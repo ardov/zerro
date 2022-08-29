@@ -1,5 +1,5 @@
 import React from 'react'
-import { EmojiIcon, EmojiIconProps } from 'shared/ui/EmojiIcon'
+import { EmojiIcon, EmojiIconProps } from '@shared/ui/EmojiIcon'
 import { Story, Meta } from '@storybook/react'
 
 export default {

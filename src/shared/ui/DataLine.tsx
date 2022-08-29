@@ -6,10 +6,10 @@ import {
   Typography,
   TypographyProps,
 } from '@mui/material'
-import { AmountProps } from 'shared/ui/Amount'
-import { Tooltip } from 'shared/ui/Tooltip'
+import { AmountProps } from '@shared/ui/Amount'
+import { Tooltip } from '@shared/ui/Tooltip'
 // TODO: use Amount instead
-import { SmartAmount } from 'components/Amount'
+import { SmartAmount } from '@components/Amount'
 
 type DataLineProps = BoxProps & {
   name: ReactNode

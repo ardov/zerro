@@ -1,7 +1,7 @@
 import { v1 as uuidv1 } from 'uuid'
-import { toISODate } from 'shared/helpers/date'
-import { Modify, OptionalExceptFor, TDateDraft } from 'shared/types'
-import { ITransaction } from 'shared/types'
+import { toISODate } from '@shared/helpers/date'
+import { Modify, OptionalExceptFor, TDateDraft } from '@shared/types'
+import { ITransaction } from '@shared/types'
 
 type TransactionDraft = Modify<
   OptionalExceptFor<

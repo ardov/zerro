@@ -1,8 +1,8 @@
 import React, { FC, useState } from 'react'
-import { useAppDispatch } from 'store'
-import { logOut } from 'features/authorization'
-import { exportCSV } from 'features/export/exportCSV'
-import { exportJSON } from 'features/export/exportJSON'
+import { useAppDispatch } from '@store'
+import { logOut } from '@features/authorization'
+import { exportCSV } from '@features/export/exportCSV'
+import { exportJSON } from '@features/export/exportJSON'
 import { makeStyles } from '@mui/styles'
 import {
   SettingsIcon,
@@ -16,7 +16,7 @@ import {
   BarChartIcon,
   SyncIcon,
   SyncDisabledIcon,
-} from 'shared/ui/Icons'
+} from '@shared/ui/Icons'
 import { Link } from 'react-router-dom'
 import {
   Box,
@@ -29,14 +29,14 @@ import {
   Switch,
   Typography,
 } from '@mui/material'
-import { Tooltip } from 'shared/ui/Tooltip'
-import { useThemeType } from 'shared/hooks/useThemeType'
-import { sendEvent } from 'shared/helpers/tracking'
-import { resetData } from 'store/data'
-import { clearLocalData } from 'features/localData'
-import { Confirm } from 'shared/ui/Confirm'
-import { useRegularSync } from 'components/RegularSyncHandler'
-import { appVersion } from 'shared/config'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { useThemeType } from '@shared/hooks/useThemeType'
+import { sendEvent } from '@shared/helpers/tracking'
+import { resetData } from '@store/data'
+import { clearLocalData } from '@features/localData'
+import { Confirm } from '@shared/ui/Confirm'
+import { useRegularSync } from '@components/RegularSyncHandler'
+import { appVersion } from '@shared/config'
 
 const useStyles = makeStyles(({ spacing }) => ({
   menuIcon: { marginRight: spacing(1) },

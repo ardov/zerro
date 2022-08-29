@@ -1,7 +1,7 @@
 import React from 'react'
 import { makeStyles } from '@mui/styles'
 import { Box, BoxProps, Checkbox, CheckboxProps } from '@mui/material'
-import { Modify } from 'shared/types'
+import { Modify } from '@shared/types'
 
 const sizes = { s: 32, m: 40 }
 const fonts = { s: '4em', m: '6em' }

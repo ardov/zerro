@@ -1,7 +1,7 @@
 import React from 'react'
 import { Story, Meta } from '@storybook/react'
-import { Reciept } from 'components/TransactionPreview/Reciept'
-import { Map } from 'components/TransactionPreview/Map'
+import { Reciept } from '@components/TransactionPreview/Reciept'
+import { Map } from '@components/TransactionPreview/Map'
 
 export default {
   title: 'Transaction/Details',

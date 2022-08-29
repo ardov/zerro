@@ -6,13 +6,13 @@ import {
   TEnvelopeId,
   TEnvelopeType,
   TFxCode,
-} from 'shared/types'
-import { keys } from 'shared/helpers/keys'
-import { TSelector } from 'store'
-import { getSavingAccounts } from 'models/account'
-import { getDebtors, TDebtor } from 'models/debtors'
-import { getUserCurrencyCode } from 'models/instrument'
-import { getPopulatedTags, TTagPopulated } from 'models/tag'
+} from '@shared/types'
+import { keys } from '@shared/helpers/keys'
+import { TSelector } from '@store'
+import { getSavingAccounts } from '@models/account'
+import { getDebtors, TDebtor } from '@models/debtors'
+import { getUserCurrencyCode } from '@models/instrument'
+import { getPopulatedTags, TTagPopulated } from '@models/tag'
 import { getEnvelopeId } from './helpers'
 import { getEnvelopeMeta, TEnvelopeMeta, envelopeVisibility } from './metaData'
 

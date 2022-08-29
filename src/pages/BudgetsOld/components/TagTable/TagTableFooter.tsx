@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@store'
 import {
   Typography,
   Box,
@@ -7,9 +7,9 @@ import {
   TypographyProps,
   Theme,
 } from '@mui/material'
-import { SmartAmount } from 'components/Amount'
+import { SmartAmount } from '@components/Amount'
 import { makeStyles } from '@mui/styles'
-import { useMonth } from 'pages/BudgetsOld/pathHooks'
+import { useMonth } from '@pages/BudgetsOld/pathHooks'
 import { getTotalsByMonth } from '../../selectors'
 
 const useStyles = makeStyles(theme => ({

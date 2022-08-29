@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { Box, Link, Typography, useTheme } from '@mui/material'
 import { Helmet } from 'react-helmet'
-import Rhythm from 'shared/ui/Rhythm'
+import Rhythm from '@shared/ui/Rhythm'
 
 export default function Donation() {
   return (

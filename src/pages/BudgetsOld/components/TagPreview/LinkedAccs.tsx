@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch, useAppSelector } from '@store'
 import {
   Box,
   Typography,
@@ -10,10 +10,10 @@ import {
   Button,
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { AddIcon, CloseIcon } from 'shared/ui/Icons'
-import { getTagAccMap, addConnection } from 'models/hiddenData/accTagMap'
-import { getAccounts, getSavingAccounts } from 'models/account'
-import { Tooltip } from 'shared/ui/Tooltip'
+import { AddIcon, CloseIcon } from '@shared/ui/Icons'
+import { getTagAccMap, addConnection } from '@models/hiddenData/accTagMap'
+import { getAccounts, getSavingAccounts } from '@models/account'
+import { Tooltip } from '@shared/ui/Tooltip'
 import { useEffect } from 'react'
 
 const useStyles = makeStyles(({ shape, spacing, palette, breakpoints }) => ({

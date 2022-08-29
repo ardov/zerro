@@ -1,8 +1,8 @@
-import { sendEvent } from 'shared/helpers/tracking'
-import { TISOMonth } from 'shared/types'
-import { AppThunk } from 'store'
-import { setEnvelopeBudgets, TBudgetUpdate } from 'models/budget'
-import { getMonthTotals } from 'models/envelopeData'
+import { sendEvent } from '@shared/helpers/tracking'
+import { TISOMonth } from '@shared/types'
+import { AppThunk } from '@store'
+import { setEnvelopeBudgets, TBudgetUpdate } from '@models/budget'
+import { getMonthTotals } from '@models/envelopeData'
 
 export const fillGoals =
   (month: TISOMonth): AppThunk<void> =>

@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useState } from 'react'
 import { Paper, Typography } from '@mui/material'
-import { TEnvelopeId, TISOMonth } from 'shared/types'
+import { TEnvelopeId, TISOMonth } from '@shared/types'
 import {
   TGroupInfo,
   useEnvelopeGroups,
@@ -11,7 +11,7 @@ import { Parent } from './Parent'
 import { Row } from './Row'
 import { BudgetPopover } from '../BudgetPopover'
 import { GoalPopover } from '../GoalPopover'
-import { useSearchParam } from 'shared/hooks/useSearchParam'
+import { useSearchParam } from '@shared/hooks/useSearchParam'
 
 type TagTableProps = {
   onOpenDetails: (id: TEnvelopeId) => void

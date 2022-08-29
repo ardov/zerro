@@ -1,5 +1,5 @@
 import React, { useState, FC } from 'react'
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppDispatch, useAppSelector } from '@store'
 import {
   Box,
   Popover,
@@ -10,14 +10,14 @@ import {
   PopoverProps,
   OutlinedTextFieldProps,
 } from '@mui/material'
-import { AmountInput } from 'shared/ui/AmountInput'
-import { getGoals, setGoal, deleteGoal } from 'models/hiddenData/goals'
-import { goalType } from 'models/hiddenData/constants'
-import { CloseIcon } from 'shared/ui/Icons'
-import { formatDate } from 'shared/helpers/date'
-import { TDateDraft, TGoal } from 'shared/types'
-import { toISODate } from 'shared/helpers/date'
-import MonthSelectPopover from 'shared/ui/MonthSelectPopover'
+import { AmountInput } from '@shared/ui/AmountInput'
+import { getGoals, setGoal, deleteGoal } from '@models/hiddenData/goals'
+import { goalType } from '@models/hiddenData/constants'
+import { CloseIcon } from '@shared/ui/Icons'
+import { formatDate } from '@shared/helpers/date'
+import { TDateDraft, TGoal } from '@shared/types'
+import { toISODate } from '@shared/helpers/date'
+import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
 
 const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
 

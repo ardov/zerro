@@ -1,8 +1,8 @@
 import { getAccounts } from './index'
-import { AppThunk } from 'store'
-import { sendEvent } from 'shared/helpers/tracking'
-import { IAccount, OptionalExceptFor, TAccountId } from 'shared/types'
-import { applyClientPatch } from 'store/data'
+import { AppThunk } from '@store'
+import { sendEvent } from '@shared/helpers/tracking'
+import { IAccount, OptionalExceptFor, TAccountId } from '@shared/types'
+import { applyClientPatch } from '@store/data'
 
 export type TAccountDraft = OptionalExceptFor<IAccount, 'id'>
 

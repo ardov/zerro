@@ -1,14 +1,14 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { round } from 'shared/helpers/money'
-import { RootState } from 'store'
-import { convertCurrency } from 'models/instrument'
+import { round } from '@shared/helpers/money'
+import { RootState } from '@store'
+import { convertCurrency } from '@models/instrument'
 import { TPopulatedBudget } from './types'
-import { TBudgetId, TDateDraft, TISOMonth } from 'shared/types'
-import { getTagMeta } from 'models/hiddenData/tagMeta'
+import { TBudgetId, TDateDraft, TISOMonth } from '@shared/types'
+import { getTagMeta } from '@models/hiddenData/tagMeta'
 import { getBudgetId } from './getBudgetId'
-import { toISOMonth } from 'shared/helpers/date'
-import { keys } from 'shared/helpers/keys'
-import { TTagId } from 'shared/types'
+import { toISOMonth } from '@shared/helpers/date'
+import { keys } from '@shared/helpers/keys'
+import { TTagId } from '@shared/types'
 
 export const getBudgets = (state: RootState) => state.data.current.budget
 

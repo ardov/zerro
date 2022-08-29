@@ -2,7 +2,7 @@ import reactGA from 'react-ga'
 import * as Sentry from '@sentry/browser'
 import { ErrorInfo } from 'react'
 import { History } from 'history'
-import { appVersion, gaid, isProduction, sentryDSN, ymid } from 'shared/config'
+import { appVersion, gaid, isProduction, sentryDSN, ymid } from '@shared/config'
 
 export function initSentry() {
   if (isProduction && sentryDSN) {

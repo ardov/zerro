@@ -1,8 +1,8 @@
-import { setEnvelopeBudgets } from 'models/budget'
-import { round } from 'shared/helpers/money'
-import { sendEvent } from 'shared/helpers/tracking'
-import { TISOMonth } from 'shared/types'
-import { AppThunk } from 'store'
+import { setEnvelopeBudgets } from '@models/budget'
+import { round } from '@shared/helpers/money'
+import { sendEvent } from '@shared/helpers/tracking'
+import { TISOMonth } from '@shared/types'
+import { AppThunk } from '@store'
 import { getOverspendsByMonth } from './getOverspends'
 
 export const fixOverspends =

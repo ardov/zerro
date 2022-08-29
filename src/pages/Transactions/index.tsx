@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { TransactionList } from 'components/TransactionList'
+import { TransactionList } from '@components/TransactionList'
 import {
   Box,
   Drawer,
@@ -9,12 +9,12 @@ import {
   Theme,
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { TransactionPreview } from 'components/TransactionPreview'
-import { sendEvent } from 'shared/helpers/tracking'
+import { TransactionPreview } from '@components/TransactionPreview'
+import { sendEvent } from '@shared/helpers/tracking'
 import { Helmet } from 'react-helmet'
-import { useSearchParam } from 'shared/hooks/useSearchParam'
-import { useAppSelector } from 'store'
-import { getTransactions } from 'models/transaction'
+import { useSearchParam } from '@shared/hooks/useSearchParam'
+import { useAppSelector } from '@store'
+import { getTransactions } from '@models/transaction'
 
 const useStyles = makeStyles(theme => ({
   drawerWidth: {

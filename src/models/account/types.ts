@@ -1,4 +1,4 @@
-import { IAccount, TFxCode } from 'shared/types'
+import { IAccount, TFxCode } from '@shared/types'
 
 export interface IAccountPopulated extends IAccount {
   convertedBalance: number

@@ -2,21 +2,21 @@ import React, { useMemo, useState, useCallback, useEffect, FC } from 'react'
 import { Box } from '@mui/material'
 import { SxProps } from '@mui/system'
 import { Theme } from '@mui/material/styles'
-import { useAppSelector } from 'store'
+import { useAppSelector } from '@store'
 import {
   getSortedTransactions,
   compareTrDates,
   groupTransactionsBy,
   checkRaw,
   FilterConditions,
-} from 'models/transaction'
+} from '@models/transaction'
 import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
-import { sendEvent } from 'shared/helpers/tracking'
-// import { getGroupedTransactions } from 'worker'
-import { useDebounce } from 'shared/hooks/useDebounce'
-import { ITransaction, TTransactionId } from 'shared/types'
+import { sendEvent } from '@shared/helpers/tracking'
+// import { getGroupedTransactions } from '@worker'
+import { useDebounce } from '@shared/hooks/useDebounce'
+import { ITransaction, TTransactionId } from '@shared/types'
 
 export type TTransactionListProps = {
   transactions?: ITransaction[]

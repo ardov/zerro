@@ -9,17 +9,17 @@ import {
   Theme,
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { formatMoney, sub } from 'shared/helpers/money'
-import { Tooltip } from 'shared/ui/Tooltip'
-import { Amount } from 'shared/ui/Amount'
-import Rhythm from 'shared/ui/Rhythm'
+import { formatMoney, sub } from '@shared/helpers/money'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { Amount } from '@shared/ui/Amount'
+import Rhythm from '@shared/ui/Rhythm'
 import {
   useDisplayValue,
   useMonthList,
   useMonthTotals,
-} from 'models/envelopeData'
+} from '@models/envelopeData'
 import { useMonth } from '../model'
-import { useDisplayCurrency } from 'models/instrument/hooks'
+import { useDisplayCurrency } from '@models/instrument/hooks'
 
 type TMsgType = 'error' | 'warning' | 'success'
 

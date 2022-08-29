@@ -1,10 +1,10 @@
 import React, { FC } from 'react'
-import { useAppDispatch, useAppSelector } from 'store'
-import { formatMoney } from 'shared/helpers/money'
-import { formatDate } from 'shared/helpers/date'
-import { getUserCurrencyCode } from 'models/instrument'
-import { Confirm } from 'shared/ui/Confirm'
-import { startFresh } from 'features/bulkActions/startFresh'
+import { useAppDispatch, useAppSelector } from '@store'
+import { formatMoney } from '@shared/helpers/money'
+import { formatDate } from '@shared/helpers/date'
+import { getUserCurrencyCode } from '@models/instrument'
+import { Confirm } from '@shared/ui/Confirm'
+import { startFresh } from '@features/bulkActions/startFresh'
 import {
   Box,
   Typography,
@@ -15,20 +15,20 @@ import {
   Theme,
   BoxProps,
 } from '@mui/material'
-import { CloseIcon } from 'shared/ui/Icons'
-import Rhythm from 'shared/ui/Rhythm'
-import { Tooltip } from 'shared/ui/Tooltip'
+import { CloseIcon } from '@shared/ui/Icons'
+import Rhythm from '@shared/ui/Rhythm'
+import { Tooltip } from '@shared/ui/Tooltip'
 import { WidgetIncome } from './WidgetIncome'
 import { WidgetOutcome } from './WidgetOutcome'
-import { useMonth } from 'pages/BudgetsOld/pathHooks'
-import { useToggle } from 'shared/hooks/useToggle'
-import { TDateDraft } from 'shared/types'
+import { useMonth } from '@pages/BudgetsOld/pathHooks'
+import { useToggle } from '@shared/hooks/useToggle'
+import { TDateDraft } from '@shared/types'
 import {
   overspendModel,
   OverspendNotice,
-} from 'features/bulkActions/fixOverspend'
-import { DataLine } from 'shared/ui/DataLine'
-import { copyPreviousBudget } from 'features/bulkActions/copyPrevMonth'
+} from '@features/bulkActions/fixOverspend'
+import { DataLine } from '@shared/ui/DataLine'
+import { copyPreviousBudget } from '@features/bulkActions/copyPrevMonth'
 
 type MonthInfoProps = BoxProps & {
   onClose: () => void

@@ -1,9 +1,9 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { TFxAmount, TISOMonth } from 'shared/types'
-import { keys } from 'shared/helpers/keys'
-import { addFxAmount, convertFx } from 'shared/helpers/money'
-import { getMonthTotals, TMonthTotals } from 'models/envelopeData'
-import { TSelector } from 'store'
+import { TFxAmount, TISOMonth } from '@shared/types'
+import { keys } from '@shared/helpers/keys'
+import { addFxAmount, convertFx } from '@shared/helpers/money'
+import { getMonthTotals, TMonthTotals } from '@models/envelopeData'
+import { TSelector } from '@store'
 
 type TOverspends = ReturnType<typeof calculateOverspends>
 

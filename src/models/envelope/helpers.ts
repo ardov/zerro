@@ -1,4 +1,4 @@
-import { TEnvelopeId, TEnvelopeType } from 'shared/types'
+import { TEnvelopeId, TEnvelopeType } from '@shared/types'
 
 export function parseEnvelopeId(id: TEnvelopeId) {
   return {

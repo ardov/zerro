@@ -1,9 +1,9 @@
 import React, { FC } from 'react'
-import { useAppSelector } from 'store'
-import { getPopulatedTags, TTagPopulated } from 'models/tag'
+import { useAppSelector } from '@store'
+import { getPopulatedTags, TTagPopulated } from '@models/tag'
 import { Chip, ChipProps } from '@mui/material'
-import { CloseIcon } from 'shared/ui/Icons'
-import { TTagId } from 'shared/types'
+import { CloseIcon } from '@shared/ui/Icons'
+import { TTagId } from '@shared/types'
 
 function getTagLabel(tag?: TTagPopulated) {
   if (!tag) return null

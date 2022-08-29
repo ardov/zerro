@@ -1,4 +1,4 @@
-import { IDiff } from 'shared/types'
+import { IDiff } from '@shared/types'
 
 /**
  * Adds changes from the second diff to the first diff

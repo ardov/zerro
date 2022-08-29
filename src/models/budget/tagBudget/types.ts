@@ -1,4 +1,4 @@
-import { IBudget, TInstrumentId } from 'shared/types'
+import { IBudget, TInstrumentId } from '@shared/types'
 
 export type TPopulatedBudget = IBudget & {
   convertedOutcome: number
