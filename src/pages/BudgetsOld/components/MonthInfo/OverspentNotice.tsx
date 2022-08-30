@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { useAppDispatch, useAppSelector } from '@store'
-import { getUserCurrencyCode } from '@models/instrument'
+import { getUserCurrencyCode } from '@entities/instrument'
 import { Box, Typography, Button } from '@mui/material'
 import { WarningIcon } from '@shared/ui/Icons'
 import { SmartAmount } from '@components/Amount'

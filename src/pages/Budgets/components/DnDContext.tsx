@@ -4,7 +4,7 @@ import { DragDropContext, DropResult } from 'react-beautiful-dnd'
 import { useMonth } from '../model'
 import { useCallback } from 'react'
 import { MoveMoneyModal } from '@features/moveMoney'
-import { moveTag } from '@models/hiddenData/tagOrder'
+import { moveTag } from '@entities/hiddenData/tagOrder'
 import { useToggle } from '@shared/hooks/useToggle'
 import { TEnvelopeId } from '@shared/types'
 

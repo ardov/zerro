@@ -1,8 +1,8 @@
 import React, { FC } from 'react'
 import { useAppSelector } from '@store'
 import { Select, MenuItem, SelectProps } from '@mui/material'
-import { getInstruments } from '@models/instrument'
-import { getAccountList } from '@models/account'
+import { getInstruments } from '@entities/instrument'
+import { getAccountList } from '@entities/account'
 
 export const CurrencySelect: FC<SelectProps<number>> = props => {
   const instruments = useAppSelector(getInstruments)

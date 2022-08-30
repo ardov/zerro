@@ -1,4 +1,4 @@
-import { getMonthTotals } from '@models/envelopeData'
+import { getMonthTotals } from '@entities/envelopeData'
 import { convertFx, round } from '@shared/helpers/money'
 import { toISOMonth } from '@shared/helpers/date'
 import pluralize from '@shared/helpers/pluralize'

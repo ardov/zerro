@@ -1,14 +1,18 @@
-import { convertCurrency, getInstruments } from '@models/instrument'
-import { getRootUser } from '@models/user'
-import { getPopulatedTag } from '@models/tag'
+import { convertCurrency, getInstruments } from '@entities/instrument'
+import { getRootUser } from '@entities/user'
+import { getPopulatedTag } from '@entities/tag'
 import { getAmountsByTag, TagAmounts } from '../selectors'
 import { sendEvent } from '@shared/helpers/tracking'
-import { getBudgets, getISOMonthFromBudgetId, makeBudget } from '@models/budget'
-import { getBudgetsByMonthAndTag, getBudget } from '@models/budget'
-import { getTags } from '@models/tag'
+import {
+  getBudgets,
+  getISOMonthFromBudgetId,
+  makeBudget,
+} from '@entities/budget'
+import { getBudgetsByMonthAndTag, getBudget } from '@entities/budget'
+import { getTags } from '@entities/tag'
 import { getGoalsProgress } from '../selectors'
-import { goalType } from '@models/hiddenData/constants'
-import { getGoals } from '@models/hiddenData/goals'
+import { goalType } from '@entities/hiddenData/constants'
+import { getGoals } from '@entities/hiddenData/goals'
 import { applyClientPatch } from '@store/data'
 import { AppThunk } from '@store'
 import {
@@ -18,11 +22,11 @@ import {
   TDateDraft,
   TISOMonth,
 } from '@shared/types'
-import { getMetaForTag } from '@models/hiddenData/tagMeta'
+import { getMetaForTag } from '@entities/hiddenData/tagMeta'
 import { round } from '@shared/helpers/money'
 import { prevMonth, toISODate, toISOMonth } from '@shared/helpers/date'
 import { keys } from '@shared/helpers/keys'
-import { getUserInstrumentId } from '@models/user/model'
+import { getUserInstrumentId } from '@entities/user/model'
 
 export const moveFunds =
   (

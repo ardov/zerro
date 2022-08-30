@@ -25,8 +25,8 @@ import {
   IEnvelope,
   parseEnvelopeId,
   patchEnvelope,
-} from '@models/envelope'
-import { getUserCurrencyCode } from '@models/instrument'
+} from '@entities/envelope'
+import { getUserCurrencyCode } from '@entities/instrument'
 import { TagSelect } from '@components/TagSelect'
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
 import { VisibilitySelect } from './VisidilitySelect'

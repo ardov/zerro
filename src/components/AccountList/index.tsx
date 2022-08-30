@@ -4,7 +4,7 @@ import {
   getInBudgetAccounts,
   getSavingAccounts,
   IAccountPopulated,
-} from '@models/account'
+} from '@entities/account'
 import pluralize from '@shared/helpers/pluralize'
 import { Collapse, List, ListItemButton } from '@mui/material'
 import { Account, Subheader } from './components'

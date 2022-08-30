@@ -17,9 +17,9 @@ import {
   useDisplayValue,
   useMonthList,
   useMonthTotals,
-} from '@models/envelopeData'
+} from '@entities/envelopeData'
 import { useMonth } from '../model'
-import { useDisplayCurrency } from '@models/instrument/hooks'
+import { useDisplayCurrency } from '@entities/instrument/hooks'
 
 type TMsgType = 'error' | 'warning' | 'success'
 

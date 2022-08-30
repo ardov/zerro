@@ -1,5 +1,5 @@
-import { setEnvelopeBudgets, TBudgetUpdate } from '@models/budget'
-import { getMonthTotals } from '@models/envelopeData'
+import { setEnvelopeBudgets, TBudgetUpdate } from '@entities/budget'
+import { getMonthTotals } from '@entities/envelopeData'
 import { convertFx, round } from '@shared/helpers/money'
 import { sendEvent } from '@shared/helpers/tracking'
 import { TISOMonth, TEnvelopeId } from '@shared/types'

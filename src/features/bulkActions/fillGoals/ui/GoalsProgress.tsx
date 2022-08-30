@@ -14,7 +14,7 @@ import { Tooltip } from '@shared/ui/Tooltip'
 import { Confirm } from '@shared/ui/Confirm'
 import { useAppDispatch, useAppSelector } from '@store'
 import { totalGoalsModel } from '../model'
-import { useDisplayCurrency } from '@models/instrument/hooks'
+import { useDisplayCurrency } from '@entities/instrument/hooks'
 
 type TGoalsProgressProps = ButtonBaseProps & {
   month: TISOMonth

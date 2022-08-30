@@ -1,11 +1,11 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { envelopeVisibility } from '@models/envelope'
+import { envelopeVisibility } from '@entities/envelope'
 import {
   getMonthTotals,
   getEnvelopeStructure,
   TMonthTotals,
   IEnvelopeWithData,
-} from '@models/envelopeData'
+} from '@entities/envelopeData'
 import { addFxAmount, convertFx, isZero } from '@shared/helpers/money'
 import { keys } from '@shared/helpers/keys'
 import {

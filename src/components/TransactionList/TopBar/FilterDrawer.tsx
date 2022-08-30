@@ -18,8 +18,8 @@ import { Tooltip } from '@shared/ui/Tooltip'
 import { CloseIcon } from '@shared/ui/Icons'
 import Button from '@mui/material/Button'
 import { formatDate } from '@shared/helpers/date'
-import { FilterConditions } from '@models/transaction/filtering'
-import { TrType } from '@models/transaction'
+import { FilterConditions } from '@entities/transaction/filtering'
+import { TrType } from '@entities/transaction'
 import { endOfDay, prevMonth, startOfDay } from '@shared/helpers/date'
 
 const useStyles = makeStyles(theme => ({

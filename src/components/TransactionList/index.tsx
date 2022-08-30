@@ -9,7 +9,7 @@ import {
   groupTransactionsBy,
   checkRaw,
   FilterConditions,
-} from '@models/transaction'
+} from '@entities/transaction'
 import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'

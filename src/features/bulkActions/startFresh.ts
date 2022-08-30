@@ -1,9 +1,9 @@
 import { sendEvent } from '@shared/helpers/tracking'
-import { setEnvelopeBudgets, TBudgetUpdate } from '@models/budget'
+import { setEnvelopeBudgets, TBudgetUpdate } from '@entities/budget'
 import { AppThunk } from '@store'
 import { TISOMonth } from '@shared/types'
 import { prevMonth, toISOMonth } from '@shared/helpers/date'
-import { getMonthTotals } from '@models/envelopeData'
+import { getMonthTotals } from '@entities/envelopeData'
 
 export const startFresh =
   (month: TISOMonth): AppThunk<void> =>

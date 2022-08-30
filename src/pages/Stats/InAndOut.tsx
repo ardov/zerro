@@ -11,12 +11,12 @@ import {
   CartesianGrid,
 } from 'recharts'
 import { DataLine } from '@shared/ui/DataLine'
-import { getHistoryStart, getTransactionsHistory } from '@models/transaction'
+import { getHistoryStart, getTransactionsHistory } from '@entities/transaction'
 import { formatMoney } from '@shared/helpers/money'
 import { makeDateArray, startOfMonth, formatDate } from '@shared/helpers/date'
-import { convertCurrency } from '@models/instrument'
+import { convertCurrency } from '@entities/instrument'
 import { round } from '@shared/helpers/money'
-import { getType } from '@models/transaction/helpers'
+import { getType } from '@entities/transaction/helpers'
 
 type Point = {
   date: Date

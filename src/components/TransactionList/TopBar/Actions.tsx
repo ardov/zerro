@@ -23,12 +23,12 @@ import {
   deleteTransactions,
   markViewed,
   bulkEditTransactions,
-} from '@models/transaction/thunks'
+} from '@entities/transaction/thunks'
 import { CSSTransition } from 'react-transition-group'
 import { EditOutlined } from '@mui/icons-material'
 import { BulkEditModal } from './BulkEditModal'
-import { getType, isNew } from '@models/transaction/helpers'
-import { getTransactions } from '@models/transaction'
+import { getType, isNew } from '@entities/transaction/helpers'
+import { getTransactions } from '@entities/transaction'
 import { Divider, ListItemIcon, ListItemText } from '@mui/material'
 import { round } from '@shared/helpers/money'
 import { applyClientPatch } from '@store/data'

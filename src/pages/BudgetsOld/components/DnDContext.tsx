@@ -4,7 +4,7 @@ import { DragDropContext, DropResult } from 'react-beautiful-dnd'
 import { useMonth } from '../pathHooks'
 import { useCallback } from 'react'
 import { MoveMoneyModal } from './MoveMoneyModal'
-import { moveTag } from '@models/hiddenData/tagOrder'
+import { moveTag } from '@entities/hiddenData/tagOrder'
 import { TISOMonth } from '@shared/types'
 
 export type DragModeType = 'FUNDS' | 'REORDER'

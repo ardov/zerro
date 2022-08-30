@@ -5,7 +5,7 @@ import {
   getTagsTree,
   TagTreeNode,
   TTagPopulated,
-} from '@models/tag'
+} from '@entities/tag'
 import { Box, Autocomplete, TextField } from '@mui/material'
 import { EmojiIcon } from '@shared/ui/EmojiIcon'
 import TagChip from './TagChip'

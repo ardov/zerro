@@ -1,5 +1,5 @@
-import { TrType } from '@models/transaction'
-import { getType } from '@models/transaction/helpers'
+import { TrType } from '@entities/transaction'
+import { getType } from '@entities/transaction/helpers'
 import {
   ByIdOld,
   Modify,

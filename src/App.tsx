@@ -14,7 +14,7 @@ import {
 import { createBrowserHistory } from 'history'
 import ErrorBoundary from '@components/ErrorBoundary'
 import { getLastSyncTime } from '@store/data/selectors'
-import { getRootUser } from '@models/user'
+import { getRootUser } from '@entities/user'
 import { initTracking, setUserId } from '@shared/helpers/tracking'
 import Transactions from '@pages/Transactions'
 import Auth from '@pages/Auth'

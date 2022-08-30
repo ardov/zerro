@@ -1,6 +1,6 @@
 import React, { FC, useContext, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@store'
-import { getUserCurrencyCode } from '@models/instrument'
+import { getUserCurrencyCode } from '@entities/instrument'
 import { formatMoney } from '@shared/helpers/money'
 import { formatDate } from '@shared/helpers/date'
 import {

@@ -5,7 +5,7 @@
     "paths": {
       "@components/*": ["components/*"],
       "@features/*": ["features/*"],
-      "@models/*": ["models/*"],
+      "@entities/*": ["entities/*"],
       "@pages/*": ["pages/*"],
       "@shared/*": ["shared/*"],
       "@store/*": ["store/*"],

@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { Select, MenuItem, SelectProps } from '@mui/material'
-import { envelopeVisibility } from '@models/envelope'
+import { envelopeVisibility } from '@entities/envelope'
 
 export const VisibilitySelect: FC<SelectProps<envelopeVisibility>> = props => {
   return (

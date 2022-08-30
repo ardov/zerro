@@ -5,8 +5,8 @@ import {
   getInstruments,
   getInstrumentsByCode,
   getUserCurrencyCode,
-} from '@models/instrument'
-import { getAccountList } from '@models/account'
+} from '@entities/instrument'
+import { getAccountList } from '@entities/account'
 import { TFxCode } from '@shared/types'
 
 export const CurrencyCodeSelect: FC<SelectProps<TFxCode>> = props => {

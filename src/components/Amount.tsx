@@ -1,8 +1,8 @@
 import React, { FC } from 'react'
 import { OptionalExceptFor } from '@shared/types'
-import { getInstruments } from '@models/instrument'
+import { getInstruments } from '@entities/instrument'
 import { useAppSelector } from '@store'
-import { getUserInstrumentId } from '@models/user'
+import { getUserInstrumentId } from '@entities/user'
 import { AmountProps, Amount } from '@shared/ui/Amount'
 
 export const SmartAmount: FC<AmountProps> = props => {

@@ -7,7 +7,7 @@ import { TagRow } from './TagRow'
 import { getAmountsById } from '@pages/BudgetsOld/selectors'
 import { useMonth } from '@pages/BudgetsOld/pathHooks'
 import { DragModeContext } from '../DnDContext'
-import { TTagPopulated } from '@models/tag'
+import { TTagPopulated } from '@entities/tag'
 
 export const useStyles = makeStyles(theme => ({
   panelRoot: {

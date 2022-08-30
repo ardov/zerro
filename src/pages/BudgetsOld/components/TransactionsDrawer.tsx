@@ -3,12 +3,12 @@ import { useAppSelector } from '@store'
 import { useMonth } from '../pathHooks'
 import { useSearchParam } from '@shared/hooks/useSearchParam'
 import { TransactionsDrawer } from '@components/TransactionsDrawer'
-import { getInBudgetAccounts } from '@models/account'
-import { getTagAccMap } from '@models/hiddenData/accTagMap'
-import { getPopulatedTags } from '@models/tag'
-import { FilterConditions } from '@models/transaction/filtering'
+import { getInBudgetAccounts } from '@entities/account'
+import { getTagAccMap } from '@entities/hiddenData/accTagMap'
+import { getPopulatedTags } from '@entities/tag'
+import { FilterConditions } from '@entities/transaction/filtering'
 import { endOfMonth } from '@shared/helpers/date'
-import { TrType } from '@models/transaction'
+import { TrType } from '@entities/transaction'
 
 export const BudgetTransactionsDrawer: FC = () => {
   const [month] = useMonth()

@@ -3,8 +3,8 @@ import { addFxAmount, convertFx } from '@shared/helpers/money'
 import { keys } from '@shared/helpers/keys'
 import { TFxAmount, TISOMonth } from '@shared/types'
 import { TSelector } from '@store'
-import { goalType } from '@models/goal'
-import { getMonthTotals, TMonthTotals } from '@models/envelopeData'
+import { goalType } from '@entities/goal'
+import { getMonthTotals, TMonthTotals } from '@entities/envelopeData'
 
 type TGoalTotals = ReturnType<typeof calcGoalTotals>
 

@@ -1,10 +1,10 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { round } from '@shared/helpers/money'
-import { getType } from '@models/transaction/helpers'
-import { getAccounts, getStartBalance } from '@models/account'
-import { getSortedTransactions } from '@models/transaction'
-import { getTransactionsHistory } from '@models/transaction'
-import { convertCurrency } from '@models/instrument'
+import { getType } from '@entities/transaction/helpers'
+import { getAccounts, getStartBalance } from '@entities/account'
+import { getSortedTransactions } from '@entities/transaction'
+import { getTransactionsHistory } from '@entities/transaction'
+import { convertCurrency } from '@entities/instrument'
 import {
   IAccount,
   TAccountId,

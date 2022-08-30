@@ -11,8 +11,8 @@ import {
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { AddIcon, CloseIcon } from '@shared/ui/Icons'
-import { getTagAccMap, addConnection } from '@models/hiddenData/accTagMap'
-import { getAccounts, getSavingAccounts } from '@models/account'
+import { getTagAccMap, addConnection } from '@entities/hiddenData/accTagMap'
+import { getAccounts, getSavingAccounts } from '@entities/account'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { useEffect } from 'react'
 

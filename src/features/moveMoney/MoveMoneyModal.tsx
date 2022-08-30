@@ -6,7 +6,7 @@ import { Box, InputAdornment, IconButton, Chip } from '@mui/material'
 import { moveMoney } from './moveMoney'
 import { useAppDispatch, useAppSelector } from '@store'
 import { Modify, TISOMonth, TEnvelopeId } from '@shared/types'
-import { getMonthTotals } from '@models/envelopeData'
+import { getMonthTotals } from '@entities/envelopeData'
 import { convertFx } from '@shared/helpers/money'
 
 export type MoveMoneyModalProps = Modify<

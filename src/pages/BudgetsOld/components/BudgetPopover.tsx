@@ -17,14 +17,14 @@ import {
   convertCurrency,
   getInstruments,
   getUserInstrument,
-} from '@models/instrument'
+} from '@entities/instrument'
 import { setOutcomeBudget } from '@pages/BudgetsOld/thunks'
-import { getGoals } from '@models/hiddenData/goals'
+import { getGoals } from '@entities/hiddenData/goals'
 import { getGoalsProgress } from '@pages/BudgetsOld/selectors'
 import { round } from '@shared/helpers/money'
 import { sendEvent } from '@shared/helpers/tracking'
 import pluralize from '@shared/helpers/pluralize'
-import { getMetaForTag } from '@models/hiddenData/tagMeta'
+import { getMetaForTag } from '@entities/hiddenData/tagMeta'
 import { Box, BoxProps } from '@mui/system'
 import { TDateDraft, TISOMonth } from '@shared/types'
 import { toISOMonth } from '@shared/helpers/date'

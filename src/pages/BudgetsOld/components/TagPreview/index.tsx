@@ -18,7 +18,7 @@ import {
   EmojiFlagsIcon,
   NotesIcon,
 } from '@shared/ui/Icons'
-import { getPopulatedTag, TTagPopulated } from '@models/tag'
+import { getPopulatedTag, TTagPopulated } from '@entities/tag'
 import { Total, Line as TextLine } from '../components'
 import {
   getAmountsById,
@@ -30,14 +30,14 @@ import { LinkedAccs } from './LinkedAccs'
 import { OutcomeWidget } from './OutcomeWidget'
 import { ColorPicker } from '@shared/ui/ColorPickerPopover'
 import { hex2int } from '@shared/helpers/color'
-import { patchTag } from '@models/tag/thunks'
+import { patchTag } from '@entities/tag/thunks'
 import { sendEvent } from '@shared/helpers/tracking'
 import { TagEditDialog } from '@components/TagEditDialog'
 import { useToggle } from '@shared/hooks/useToggle'
-import { getTagComment, setTagComment } from '@models/hiddenData/tagMeta'
+import { getTagComment, setTagComment } from '@entities/hiddenData/tagMeta'
 import { BudgetPopover } from '../BudgetPopover'
-import { getGoals } from '@models/hiddenData/goals'
-import { goalToWords } from '@models/hiddenData/goals/helpers'
+import { getGoals } from '@entities/hiddenData/goals'
+import { goalToWords } from '@entities/hiddenData/goals/helpers'
 import { useDebounce } from '@shared/hooks/useDebounce'
 import { GoalPopover } from '../GoalPopover'
 import { useSearchParam } from '@shared/hooks/useSearchParam'

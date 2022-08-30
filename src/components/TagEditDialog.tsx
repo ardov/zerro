@@ -16,7 +16,7 @@ import {
 import { TagSelect } from './TagSelect'
 import { Modify } from '@shared/types'
 import { shallowEqual } from 'react-redux'
-import { createTag } from '@models/tag/thunks'
+import { createTag } from '@entities/tag/thunks'
 import { useFormik } from 'formik'
 import { hex2int, int2hex } from '@shared/helpers/color'
 import { ColorPicker } from '../shared/ui/ColorPickerPopover'
@@ -25,8 +25,8 @@ import {
   getTagMeta,
   setTagComment,
   setTagCurrency,
-} from '@models/hiddenData/tagMeta'
-import { getUserInstrumentId } from '@models/user'
+} from '@entities/hiddenData/tagMeta'
+import { getUserInstrumentId } from '@entities/user'
 import { CurrencySelect } from './CurrencySelect'
 import { useAppDispatch, useAppSelector } from '@store'
 import { ITag } from '@shared/types'

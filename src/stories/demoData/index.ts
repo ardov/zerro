@@ -1,9 +1,9 @@
 import countries from './countries.json'
 import companies from './companies.json'
 import instruments from './instruments.json'
-import { makeAccount } from '@models/account'
-import { makeTag } from '@models/tag/makeTag'
-import { makeTransaction } from '@models/transaction/makeTransaction'
+import { makeAccount } from '@entities/account'
+import { makeTag } from '@entities/tag/makeTag'
+import { makeTransaction } from '@entities/transaction/makeTransaction'
 import { toISODate } from '@shared/helpers/date'
 import {
   AccountType,

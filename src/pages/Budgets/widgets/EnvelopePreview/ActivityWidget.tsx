@@ -8,7 +8,7 @@ import { keys } from '@shared/helpers/keys'
 import { convertFx } from '@shared/helpers/money'
 import { TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
 import { useAppSelector } from '@store'
-import { getMonthTotals } from '@models/envelopeData'
+import { getMonthTotals } from '@entities/envelopeData'
 import { useMonth } from '@pages/Budgets/model'
 
 type ActivityWidgetProps = BoxProps & { id: TEnvelopeId }

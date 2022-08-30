@@ -1,4 +1,4 @@
-import { getMonthTotals } from '@models/envelopeData'
+import { getMonthTotals } from '@entities/envelopeData'
 import { TFxCode, TISOMonth } from '@shared/types'
 import { useAppSelector } from '@store'
 

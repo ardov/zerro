@@ -19,17 +19,17 @@ import { rateToWords } from '@shared/helpers/money'
 import { formatDate, parseDate } from '@shared/helpers/date'
 import { TagList } from '@components/TagList'
 import { useAppDispatch, useAppSelector } from '@store'
-import { getTransactions } from '@models/transaction'
-import { getType } from '@models/transaction/helpers'
-import { getPopulatedAccounts } from '@models/account'
-import { getInstruments } from '@models/instrument'
+import { getTransactions } from '@entities/transaction'
+import { getType } from '@entities/transaction/helpers'
+import { getPopulatedAccounts } from '@entities/account'
+import { getInstruments } from '@entities/instrument'
 import {
   applyChangesToTransaction,
   deleteTransactions,
   deleteTransactionsPermanently,
   recreateTransaction,
   restoreTransaction,
-} from '@models/transaction/thunks'
+} from '@entities/transaction/thunks'
 import { toISODate } from '@shared/helpers/date'
 import { ITransaction } from '@shared/types'
 

@@ -1,6 +1,6 @@
 import React, { FC, KeyboardEventHandler, useEffect, useState } from 'react'
 import { useAppSelector } from '@store'
-import { getTagsTree, TagTreeNode, TTagPopulated } from '@models/tag'
+import { getTagsTree, TagTreeNode, TTagPopulated } from '@entities/tag'
 import {
   Popover,
   Paper,

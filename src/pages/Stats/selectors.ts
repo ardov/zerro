@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { round } from '@shared/helpers/money'
-import { getAccounts, getStartBalance } from '@models/account'
-import { getTransactionsHistory } from '@models/transaction'
+import { getAccounts, getStartBalance } from '@entities/account'
+import { getTransactionsHistory } from '@entities/transaction'
 import { TAccountId, TISODate } from '@shared/types'
 import { keys } from '@shared/helpers/keys'
 import {

@@ -19,13 +19,17 @@ import { ColorPicker } from '@shared/ui/ColorPickerPopover'
 import { sendEvent } from '@shared/helpers/tracking'
 import { useToggle } from '@shared/hooks/useToggle'
 import { useSearchParam } from '@shared/hooks/useSearchParam'
-import { IEnvelopeWithData, useEnvelope, useRates } from '@models/envelopeData'
+import {
+  IEnvelopeWithData,
+  useEnvelope,
+  useRates,
+} from '@entities/envelopeData'
 import { TEnvelopeId, TFxAmount } from '@shared/types'
 import { convertFx } from '@shared/helpers/money'
 import { CommentWidget } from './CommentWidget'
-import { goalToWords } from '@models/goal'
+import { goalToWords } from '@entities/goal'
 import { cardStyle } from './shared'
-import { patchEnvelope } from '@models/envelope'
+import { patchEnvelope } from '@entities/envelope'
 import { EnvelopeEditDialog } from './EnvelopeEditDialog'
 import { DataLine } from '@shared/ui/DataLine'
 

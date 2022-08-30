@@ -26,9 +26,9 @@ import { RadialProgress } from '@shared/ui/RadialProgress'
 import { Amount } from '@shared/ui/Amount'
 import { TEnvelopeId, TFxAmount, TFxCode, TRates } from '@shared/types'
 import { useAppSelector } from '@store'
-import { getUserCurrencyCode } from '@models/instrument'
-import { goalToWords, TGoal } from '@models/goal'
-import { useRates } from '@models/envelopeData'
+import { getUserCurrencyCode } from '@entities/instrument'
+import { goalToWords, TGoal } from '@entities/goal'
+import { useRates } from '@entities/envelopeData'
 import {
   IsDraggingContext,
   DragModeContext,
