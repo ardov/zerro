@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import { Router, Route, Redirect, Switch } from 'react-router-dom'
-import { getLoginState } from '@store/token'
-import { RegularSyncHandler } from '@components/RegularSyncHandler'
-import Nav from '@components/Navigation'
-import { MobileNavigation } from '@components/Navigation'
+import { createBrowserHistory } from 'history'
 import {
   Box,
   CircularProgress,
@@ -11,11 +8,15 @@ import {
   useMediaQuery,
   Theme,
 } from '@mui/material'
-import { createBrowserHistory } from 'history'
-import ErrorBoundary from '@components/ErrorBoundary'
-import { getLastSyncTime } from '@store/data/selectors'
-import { getRootUser } from '@entities/user'
 import { initTracking, setUserId } from '@shared/helpers/tracking'
+import { useAppSelector } from '@store'
+import { getLoginState } from '@store/token'
+import { getLastSyncTime } from '@store/data/selectors'
+import { RegularSyncHandler } from '@components/RegularSyncHandler'
+import Nav from '@components/Navigation'
+import { MobileNavigation } from '@components/Navigation'
+import ErrorBoundary from '@components/ErrorBoundary'
+import { getRootUser } from '@entities/user'
 import Transactions from '@pages/Transactions'
 import Auth from '@pages/Auth'
 import BudgetsOld from '@pages/BudgetsOld'
@@ -26,55 +27,84 @@ import Stats from '@pages/Stats'
 import About from '@pages/About'
 import Token from '@pages/Token'
 import Donation from '@pages/Donation'
-import { useAppSelector } from '@store'
 
 const history = createBrowserHistory()
 initTracking(history)
 
 export default function App() {
   const isLoggedIn = useAppSelector(getLoginState)
+  const hasData = useAppSelector(state => !!getLastSyncTime(state))
   const userId = useAppSelector(state => getRootUser(state)?.id)
   useEffect(() => {
     if (typeof userId === 'number') setUserId(userId)
   }, [userId])
 
+  const publicRoutes = (
+    <>
+      <Route path="/about" component={About} />
+      <Route path="/about/*" component={About} />
+      <Route path="/donation" component={Donation} />
+    </>
+  )
+
+  const notLoggedIn = (
+    <>
+      {publicRoutes}
+      <Route path="/*" component={Auth} />
+    </>
+  )
+
+  const loggedInNoData = (
+    <>
+      {publicRoutes}
+      <Route path="/token" component={Token} />
+      <Route path="/*" component={MainLoader} />
+    </>
+  )
+
+  const loggedInWithData = (
+    <>
+      {publicRoutes}
+      <Route path="/token" component={Token} />
+      <Route path="/transactions" component={Transactions} />
+      <Route path="/review" component={Review} />
+      <Route path="/accounts" component={Accounts} />
+      <Route path="/budget-old" component={BudgetsOld} />
+      <Route path="/budget" component={Budgets} />
+      <Route path="/stats" component={Stats} />
+      <Redirect to="/budget" />
+    </>
+  )
+
   return (
-    <ErrorBoundary>
+    <Router history={history}>
       <RegularSyncHandler />
-      <Router history={history}>
-        <Switch>
-          <Route path="/about" component={About} />
-          <Route path="/about/*" component={About} />
-          <Route path="/*" component={isLoggedIn ? PrivateApp : Auth} />
-        </Switch>
-      </Router>
-    </ErrorBoundary>
+      <Layout isLoggedIn={isLoggedIn}>
+        <ErrorBoundary>
+          <Switch>
+            {isLoggedIn
+              ? hasData
+                ? loggedInWithData
+                : loggedInNoData
+              : notLoggedIn}
+          </Switch>
+        </ErrorBoundary>
+      </Layout>
+    </Router>
   )
 }
 
-const PrivateApp = () => {
-  const hasData = useAppSelector(state => !!getLastSyncTime(state))
+type TLayoutProps = {
+  isLoggedIn: boolean
+  children: React.ReactNode
+}
+
+const Layout: FC<TLayoutProps> = ({ isLoggedIn, children }) => {
   return (
     <Box display="flex">
-      <Navigation />
+      {isLoggedIn && <Navigation />}
       <Box minHeight="100vh" flexGrow={1}>
-        <ErrorBoundary>
-          {hasData ? (
-            <Switch>
-              <Route path="/transactions" component={Transactions} />
-              <Route path="/review" component={Review} />
-              <Route path="/accounts" component={Accounts} />
-              <Route path="/budget-old" component={BudgetsOld} />
-              <Route path="/budget" component={Budgets} />
-              <Route path="/stats" component={Stats} />
-              <Route path="/token" component={Token} />
-              <Route path="/donation" component={Donation} />
-              <Redirect to="/budget" />
-            </Switch>
-          ) : (
-            <MainLoader />
-          )}
-        </ErrorBoundary>
+        {children}
       </Box>
     </Box>
   )
