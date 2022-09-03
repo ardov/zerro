@@ -53,7 +53,7 @@ function calcIncomePercent(goal: TGoal, data: TContext): GoalProgress {
   const target = round(percent * generalIncome)
   const need = round(target - budgeted)
 
-  if (budgeted <= 0) return { progress: 0, need, target }
+  if (budgeted < 0) return { progress: 0, need, target }
   if (budgeted >= target) return { progress: 1, need: 0, target }
   return { progress: budgeted / target, need, target }
 }
