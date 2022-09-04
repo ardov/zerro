@@ -7,8 +7,8 @@ import {
   ButtonBase,
   PaperProps,
 } from '@mui/material'
-import { ChevronRightIcon, ChevronLeftIcon } from '@shared/ui/Icons'
 import { styled } from '@mui/styles'
+import { ChevronRightIcon, ChevronLeftIcon } from '@shared/ui/Icons'
 import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
 import { formatDate } from '@shared/helpers/date'
 import { Modify, TDateDraft, TISOMonth } from '@shared/types'
@@ -35,10 +35,14 @@ export const MonthSelect: FC<MonthSelectProps> = props => {
   const minDate = parseDate(minMonth)
   const maxDate = parseDate(maxMonth)
   const paperRef = useRef(null)
-  const year = currDate.getFullYear()
   const [anchorEl, setAnchorEl] = useState(null)
+
   const prevMonthDate = currDate > minDate ? prevMonth(currDate) : null
   const nextMonthDate = currDate < maxDate ? nextMonth(currDate) : null
+  const isFirst = !prevMonthDate
+  const isLast = !nextMonthDate
+  const goPrevMonth = () => prevMonthDate && onChange(toISOMonth(prevMonthDate))
+  const goNextMonth = () => nextMonthDate && onChange(toISOMonth(nextMonthDate))
 
   const openPopover = useCallback(
     () => setAnchorEl(paperRef.current),
@@ -55,36 +59,31 @@ export const MonthSelect: FC<MonthSelectProps> = props => {
 
   return (
     <>
-      <Paper ref={paperRef} {...rest}>
-        <Box display="flex" px={0.5} py={1}>
-          <Box alignSelf="center" flexShrink={0}>
-            <IconButton
-              children={<ChevronLeftIcon />}
-              onClick={() =>
-                prevMonthDate && onChange(toISOMonth(prevMonthDate))
-              }
-              disabled={!prevMonthDate}
-            />
-          </Box>
+      <Paper ref={paperRef} sx={{ display: 'flex' }} {...rest}>
+        <ButtonBase
+          sx={{ borderRadius: 1, py: 1, pl: 2 }}
+          onClick={openPopover}
+        >
+          <Typography variant="body1" noWrap>
+            <b>{getMonthName(currDate)}</b> {currDate.getFullYear()}
+          </Typography>
+        </ButtonBase>
 
-          <MonthButton onClick={openPopover}>
-            <Typography variant="h5" noWrap>
-              {getMonthName(currDate)}
-            </Typography>
-            <Typography variant="body2" color="textSecondary" noWrap>
-              {year}
-            </Typography>
-          </MonthButton>
-
-          <Box alignSelf="center" flexShrink={0}>
-            <IconButton
-              children={<ChevronRightIcon />}
-              onClick={() =>
-                nextMonthDate && onChange(toISOMonth(nextMonthDate))
-              }
-              disabled={!nextMonthDate}
-            />
-          </Box>
+        <Box>
+          <IconButton
+            onClick={goPrevMonth}
+            disabled={isFirst}
+            sx={{ color: 'text.secondary' }}
+          >
+            <ChevronLeftIcon />
+          </IconButton>
+          <IconButton
+            onClick={goNextMonth}
+            disabled={isLast}
+            sx={{ color: 'text.secondary', ml: -1 }}
+          >
+            <ChevronRightIcon />
+          </IconButton>
         </Box>
       </Paper>
 
@@ -103,15 +102,15 @@ export const MonthSelect: FC<MonthSelectProps> = props => {
 
 const MonthButton = styled(ButtonBase)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
-  flexGrow: 1,
-  flexShrink: 1,
-  minWidth: 0,
+  // flexGrow: 1,
+  // flexShrink: 1,
+  // minWidth: 0,
   padding: theme.spacing(0.5, 1),
-  justifyContent: 'flex-start',
-  display: 'flex',
-  flexDirection: 'column',
+  // justifyContent: 'flex-start',
+  // display: 'flex',
+  // flexDirection: 'column',
 }))
 
 function getMonthName(month: TDateDraft) {
-  return formatDate(month, 'LLLL').toUpperCase()
+  return formatDate(month, 'LLL').toUpperCase().slice(0, 3)
 }

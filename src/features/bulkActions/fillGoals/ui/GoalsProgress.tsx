@@ -15,9 +15,22 @@ import { Confirm } from '@shared/ui/Confirm'
 import { useAppDispatch, useAppSelector } from '@store'
 import { totalGoalsModel } from '../model'
 import { useDisplayCurrency } from '@entities/instrument/hooks'
+import { RadialProgress } from '@shared/ui/RadialProgress'
 
 type TGoalsProgressProps = ButtonBaseProps & {
   month: TISOMonth
+}
+
+const baseStyles = {
+  bgcolor: 'background.paper',
+  borderRadius: 1,
+  py: 1,
+  px: 2,
+  display: 'flex',
+  gap: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  minHeight: '40px',
 }
 
 export const GoalsProgress: FC<TGoalsProgressProps> = props => {
@@ -30,20 +43,27 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const onOk = () => dispatch(totalGoalsModel.fillAll(month))
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
+  // No goals
   if (!totalProgress || totalProgress.goalsCount === 0) {
     return (
-      <StyledBase {...btnProps}>
-        <Typography noWrap align="center" variant="h5" color="textPrimary">
-          🚩
-        </Typography>
-        <Typography noWrap align="center" variant="body2" color="textSecondary">
-          Пока целей нет
-        </Typography>
-      </StyledBase>
+      <ButtonBase sx={baseStyles} {...btnProps}>
+        <Typography variant="body1">🚩 Пока целей нет</Typography>
+      </ButtonBase>
     )
   }
 
   const { needValue, targetValue, progress } = totalProgress
+
+  // All completed
+  // if (totalProgress.progress === 1) {
+  //   return (
+  //     <Tooltip arrow title={`Всего нужно было ${formatSum(targetValue)}`}>
+  //       <StyledBase {...btnProps}>
+  //         <Typography variant="body1">🥳 Цели выполнены</Typography>
+  //       </StyledBase>
+  //     </Tooltip>
+  //   )
+  // }
 
   return (
     <Confirm
@@ -55,33 +75,16 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
     >
       <Tooltip
         arrow
-        title={
-          needValue
-            ? `${formatSum(targetValue - needValue)} из ${formatSum(
-                targetValue
-              )}`
-            : `Всего нужно было ${formatSum(targetValue)}`
-        }
+        title={`${formatSum(targetValue - needValue)} из ${formatSum(
+          targetValue
+        )}`}
       >
-        <StyledBase {...props}>
-          <Bar style={{ transform: `scaleX(${1 - progress})` }} />
-          <Typography
-            noWrap
-            align="center"
-            variant={isMobile ? 'body1' : 'h5'}
-            color="textPrimary"
-          >
-            {needValue > 0 ? formatSum(needValue) : '🥳'}
+        <ButtonBase sx={baseStyles} {...btnProps}>
+          <RadialProgress value={progress} />
+          <Typography variant="body1">
+            Цели {Math.floor(progress * 100)}%
           </Typography>
-          <Typography
-            noWrap
-            align="center"
-            variant={isMobile ? 'body1' : 'body2'}
-            color="textSecondary"
-          >
-            {needValue > 0 ? 'Ещё нужно на цели' : 'Цели выполнены'}
-          </Typography>
-        </StyledBase>
+        </ButtonBase>
       </Tooltip>
     </Confirm>
   )
@@ -89,10 +92,8 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
 
 const StyledBase = styled(ButtonBase)(({ theme }) => ({
   display: 'flex',
-  flexDirection: 'column',
-  width: '100%',
   borderRadius: theme.shape.borderRadius,
-  padding: theme.spacing(1.5, 2),
+  // padding: theme.spacing(1.5, 2),
   background: theme.palette.background.paper,
   boxShadow: theme.shadows[2],
   position: 'relative',

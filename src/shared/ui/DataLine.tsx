@@ -16,6 +16,7 @@ type DataLineProps = BoxProps & {
   amount?: AmountProps['value']
   currency?: AmountProps['currency']
   instrument?: AmountProps['instrument']
+  sign?: AmountProps['sign']
   color?: string
   colorOpacity?: number
   tooltip?: TooltipProps['title']
@@ -27,6 +28,7 @@ export const DataLine: FC<DataLineProps> = ({
   amount,
   currency,
   instrument,
+  sign,
   color,
   colorOpacity = 1,
   tooltip,
@@ -49,6 +51,7 @@ export const DataLine: FC<DataLineProps> = ({
             value={amount}
             currency={currency}
             instrument={instrument}
+            sign={sign}
           />
         </Typography>
       )}

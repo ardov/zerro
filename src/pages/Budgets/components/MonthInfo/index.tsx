@@ -29,6 +29,7 @@ import {
 } from '@features/bulkActions/fixOverspend'
 import { DataLine } from '@shared/ui/DataLine'
 import { copyPreviousBudget } from '@features/bulkActions/copyPrevMonth'
+import { BalanceInfo } from '@pages/Budgets/widgets/BalanceInfo'
 
 type MonthInfoProps = BoxProps & {
   onClose: () => void
@@ -62,6 +63,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
       )}
 
       <Rhythm gap={2} p={3}>
+        <BalanceInfo month={month} />
         <OverspendNotice month={month} />
         <WidgetIncome />
         <WidgetOutcome />

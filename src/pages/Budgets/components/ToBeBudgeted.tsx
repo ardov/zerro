@@ -26,21 +26,21 @@ type TMsgType = 'error' | 'warning' | 'success'
 const useStyles = makeStyles<Theme, { color: TMsgType }>(
   ({ shape, spacing, palette, breakpoints }) => ({
     base: {
-      display: 'flex',
-      flexDirection: 'column',
-      borderRadius: shape.borderRadius,
-      padding: spacing(1.5, 2),
+      // display: 'flex',
+      // flexDirection: 'column',
+      // borderRadius: shape.borderRadius,
+      // padding: spacing(1.5, 2),
       background: ({ color }) =>
         `linear-gradient(105deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 100%
         ),${palette[color].main}`,
-      boxShadow: ({ color }) => `0 8px 20px -12px ${palette[color].main}`,
-      transition: '0.4s',
+      // boxShadow: ({ color }) => `0 8px 20px -12px ${palette[color].main}`,
+      // transition: '0.4s',
       color: ({ color }) => palette.getContrastText(palette[color].main),
 
-      [breakpoints.down('xs')]: {
-        flexDirection: 'row-reverse',
-        justifyContent: 'space-between',
-      },
+      // [breakpoints.down('xs')]: {
+      //   flexDirection: 'row-reverse',
+      //   justifyContent: 'space-between',
+      // },
     },
     small: { padding: spacing(1, 2) },
     label: { minWidth: 0 },
@@ -64,8 +64,17 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
   const BigWidget = (
-    <ButtonBase className={`${c.base} ${className}`} {...rest}>
-      <Typography noWrap align="center" variant={isMobile ? 'body1' : 'h5'}>
+    <ButtonBase
+      sx={{
+        borderRadius: 1,
+        py: 1,
+        px: 2,
+      }}
+      className={`${c.base} ${className}`}
+      {...rest}
+    >
+      <Typography noWrap align="center" variant="body1" className={c.label}>
+        {toBeBudgeted ? 'Не распределено' : 'Деньги распределены'}{' '}
         {toBeBudgeted ? (
           <Amount
             value={toBeBudgeted}
@@ -78,14 +87,6 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
         ) : (
           '👌'
         )}
-      </Typography>
-      <Typography
-        noWrap
-        align="center"
-        variant={isMobile ? 'body1' : 'body2'}
-        className={c.label}
-      >
-        {toBeBudgeted ? 'Не распределено' : 'Деньги распределены'}
       </Typography>
     </ButtonBase>
   )
@@ -111,7 +112,8 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
 
   return (
     <Tooltip arrow title={<TooltipContent />}>
-      {small ? SmallWidget : BigWidget}
+      {/* {small ? SmallWidget : BigWidget} */}
+      {BigWidget}
     </Tooltip>
   )
 }

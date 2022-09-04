@@ -1,24 +1,29 @@
-import React, { useCallback } from 'react'
-import { useAppSelector } from '@store'
+import React, {
+  FC,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 import { Redirect } from 'react-router-dom'
+import { Helmet } from 'react-helmet'
+import { Box, Drawer, DrawerProps, Theme, useMediaQuery } from '@mui/material'
+import { useHotkeys } from 'react-hotkeys-hook'
+import { formatDate } from '@shared/helpers/date'
+import { useSearchParam } from '@shared/hooks/useSearchParam'
+import { nextMonth, prevMonth, toISOMonth } from '@shared/helpers/date'
+import { Modify, TEnvelopeId, TISOMonth } from '@shared/types'
+import { useAppSelector } from '@store'
+import { getMonthList, useMonthList } from '@entities/envelopeData'
+import { GoalsProgress } from '@features/bulkActions/fillGoals'
 import { MonthInfo } from './components/MonthInfo'
 import { ToBeBudgeted } from './components/ToBeBudgeted'
 import { MonthSelect } from './MonthSelect'
-import { Box, Drawer, Theme, useMediaQuery } from '@mui/material'
-import { makeStyles } from '@mui/styles'
 import { DnDContext } from './components/DnDContext'
 import { EnvelopePreview } from './widgets/EnvelopePreview'
-import { Helmet } from 'react-helmet'
-import { formatDate } from '@shared/helpers/date'
-import { useHotkeys } from 'react-hotkeys-hook'
-import { useSearchParam } from '@shared/hooks/useSearchParam'
 import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
-import { nextMonth, prevMonth, toISOMonth } from '@shared/helpers/date'
-import { getMonthList, useMonthList } from '@entities/envelopeData'
 import { EnvelopeTable } from './widgets/EnvelopeTable'
 import { useMonth } from './model'
-import { TEnvelopeId } from '@shared/types'
-import { GoalsProgress } from '@features/bulkActions/fillGoals'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
@@ -38,46 +43,6 @@ export default function BudgetsRouter() {
   return <Budgets />
 }
 
-const useStyles = makeStyles(theme => ({
-  drawerWidth: {
-    width: 360,
-    [theme.breakpoints.down('sm')]: {
-      width: '100vw',
-    },
-  },
-  grid: {
-    display: 'grid',
-    padding: theme.spacing(3),
-    gap: theme.spacing(3),
-    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-    gridTemplateAreas: `
-      'month-select   goals     to-be-budgeted'
-      'tags           tags      tags'
-      'transfers      transfers transfers'
-      'chart          chart     chart'
-      'treemap        treemap   treemap'
-    `,
-    width: '100%',
-    maxWidth: 800,
-    [theme.breakpoints.down('md')]: {
-      padding: theme.spacing(1, 1, 10),
-    },
-    [theme.breakpoints.down('sm')]: {
-      gap: theme.spacing(2),
-      padding: theme.spacing(1, 1, 10),
-      gridTemplateColumns: '1fr',
-      gridTemplateAreas: `'month-select' 'goals' 'to-be-budgeted' 'tags' 'transfers' 'treemap'`,
-    },
-  },
-  monthSelect: { gridArea: 'month-select' },
-  goals: { gridArea: 'goals' },
-  toBeBudgeted: { gridArea: 'to-be-budgeted' },
-  tags: { gridArea: 'tags' },
-  transfers: { gridArea: 'transfers' },
-  chart: { gridArea: 'chart' },
-  treemap: { gridArea: 'treemap' },
-}))
-
 type TDrawerId = TEnvelopeId | 'overview'
 
 function Budgets() {
@@ -88,8 +53,6 @@ function Budgets() {
 
   const [drawerId, setDrawerId] = useSearchParam<TDrawerId>('drawer')
   const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))
-  const c = useStyles()
-  const drawerVisibility = !isMD || !!drawerId
 
   useHotkeys(
     'left',
@@ -115,6 +78,52 @@ function Budgets() {
   )
   const closeDrawer = useCallback(() => setDrawerId(), [setDrawerId])
 
+  const detailsContent = !drawerId ? undefined : drawerId === 'overview' ? (
+    <MonthInfo onClose={closeDrawer} />
+  ) : (
+    <EnvelopePreview onClose={closeDrawer} id={drawerId} />
+  )
+
+  const sideDefault = <MonthInfo onClose={closeDrawer} />
+
+  const mainContent = (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+        height: 'fit-content',
+        gap: 2,
+        width: '100%',
+        maxWidth: 800,
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 2,
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          position: 'sticky',
+          top: 0,
+          zIndex: 9,
+        }}
+      >
+        <MonthSelect
+          onChange={setMonth}
+          {...{ minMonth, maxMonth, value: month }}
+        />
+
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <GoalsProgress month={month} />
+          <ToBeBudgeted onClick={openOverview} />
+        </Box>
+      </Box>
+
+      <EnvelopeTable onOpenDetails={openEnvelopeInfo} />
+    </Box>
+  )
+
   return (
     <>
       <Helmet>
@@ -124,39 +133,75 @@ function Budgets() {
       </Helmet>
 
       <DnDContext>
-        <Box display="flex" justifyContent="center" position="relative">
-          <Box className={c.grid}>
-            <MonthSelect
-              className={c.monthSelect}
-              onChange={setMonth}
-              {...{ minMonth, maxMonth, value: month }}
-            />
-            <GoalsProgress month={month} className={c.goals} />
-            <ToBeBudgeted className={c.toBeBudgeted} onClick={openOverview} />
-            <EnvelopeTable
-              className={c.tags}
-              onOpenDetails={openEnvelopeInfo}
-            />
-          </Box>
-
-          <Drawer
-            classes={{ paper: c.drawerWidth, root: c.drawerWidth }}
-            variant={isMD ? 'temporary' : 'persistent'}
-            anchor="right"
-            open={drawerVisibility}
-            onClose={closeDrawer}
-          >
-            {(!drawerId || drawerId === 'overview') && (
-              <MonthInfo onClose={closeDrawer} />
-            )}
-            {drawerId && drawerId !== 'overview' && (
-              <EnvelopePreview onClose={closeDrawer} id={drawerId} />
-            )}
-          </Drawer>
-
-          <BudgetTransactionsDrawer />
-        </Box>
+        <BudgetLayout
+          mainContent={mainContent}
+          sideContent={detailsContent}
+          sideDefault={sideDefault}
+          onSideClose={closeDrawer}
+        />
+        <BudgetTransactionsDrawer />
       </DnDContext>
     </>
   )
+}
+
+type BudgetLayoutProps = {
+  mainContent: ReactElement
+  sideContent?: ReactElement
+  sideDefault: ReactElement
+  onSideClose: () => void
+}
+const sideWidth = 360
+
+const BudgetLayout: FC<BudgetLayoutProps> = props => {
+  const { mainContent, sideContent, sideDefault, onSideClose } = props
+  const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))
+  const isXS = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+
+  const drawerVisibility = isMD && !!sideContent
+  const cachedContent = useCachedValue(sideContent)
+
+  return (
+    <Box sx={{ display: 'flex', height: '100vh' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexGrow: 1,
+          justifyContent: 'center',
+          height: '100%',
+          overflow: 'auto',
+          px: isMD ? 1 : 3,
+          py: 3,
+        }}
+      >
+        {mainContent}
+      </Box>
+
+      {!isMD && (
+        <Box
+          sx={{
+            width: sideWidth,
+            flexShrink: 0,
+            height: '100%',
+            overflow: 'auto',
+            bgcolor: 'background.paper',
+          }}
+        >
+          {sideContent || sideDefault}
+        </Box>
+      )}
+
+      <Drawer anchor="right" open={drawerVisibility} onClose={onSideClose}>
+        <Box sx={{ width: isXS ? '100vw' : sideWidth }}>{cachedContent}</Box>
+      </Drawer>
+    </Box>
+  )
+}
+
+function useCachedValue<T>(value: T): T {
+  const [cachedValue, setCachedValue] = useState(value)
+  useEffect(() => {
+    if (value) setCachedValue(value)
+  }, [value])
+  return cachedValue
 }
