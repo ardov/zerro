@@ -5711,6 +5711,13 @@ ee-first@1.1.1:
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
 
+effector-react@^22.1.6:
+  version "22.1.6"
+  resolved "https://registry.yarnpkg.com/effector-react/-/effector-react-22.1.6.tgz#51d68c23dc62aebf964da5e641a14831d7aa927d"
+  integrity sha512-1+kjtjX62tm3upJBQvsFGm6Sp+5po8j1OEWmkllSw4e8Kg1XampD5gqSRlGt9s9iJxtNl1oZoDiTxKyF5EoKtw==
+  dependencies:
+    use-sync-external-store "^1.0.0"
+
 effector@^22.3.0:
   version "22.3.0"
   resolved "https://registry.yarnpkg.com/effector/-/effector-22.3.0.tgz#c743dd7d934ec3f9a2efac76a563cd0281bc4201"
