@@ -23,7 +23,14 @@ const getLastMonth: TSelector<TISOMonth> = createSelector(
   [getEnvelopeBudgets],
   budgets => {
     const currentMonth = toISOMonth(Date.now())
-    const lastBudgetMonth = keys(budgets).sort().pop() || currentMonth
+    const lastBudgetMonth =
+      keys(budgets)
+        .filter(month => {
+          // Filter months with empty budgets
+          return Object.values(budgets[month]).filter(Boolean).length
+        })
+        .sort()
+        .pop() || currentMonth
     const lastMonth =
       lastBudgetMonth > currentMonth ? lastBudgetMonth : currentMonth
     // Add 1 month to be able to budget in future
