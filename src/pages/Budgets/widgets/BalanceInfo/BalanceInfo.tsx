@@ -7,16 +7,6 @@ import { DataLine } from '@shared/ui/DataLine'
 import { useAppSelector } from '@store/index'
 import { FC } from 'react'
 
-const useBudgetInfoModel = (month: TISOMonth) => {
-  const totals = useAppSelector(getMonthTotals)[month]
-  const { currency, rates, envelopes, fundsEnd } = totals
-
-  return {
-    fundsEnd: totals.fundsEnd,
-    fundsStart: totals.fundsStart,
-  }
-}
-
 export const BalanceInfo: FC<{ month: TISOMonth }> = props => {
   const totals = useAppSelector(getMonthTotals)[props.month]
   const displayCurrency = useDisplayCurrency()
