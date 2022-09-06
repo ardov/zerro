@@ -92,7 +92,11 @@ export const getActivity: TSelector<Record<TISOMonth, TMonthActivity>> =
 
           // PAYEE INCOME
           if (tr.payee) {
-            let envelopeId = getEnvelopeId('payee', cleanPayee(tr.payee))
+            let cleanName = cleanPayee(tr.payee)
+            let debtor = debtors[cleanName]
+            let envelopeId = debtor.merchantId
+              ? getEnvelopeId(DataEntity.Merchant, debtor.merchantId)
+              : getEnvelopeId('payee', cleanName)
             addToMonth(node, envelopeId, tr, 'income')
             return
           }
