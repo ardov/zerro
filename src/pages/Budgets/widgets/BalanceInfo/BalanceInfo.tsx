@@ -1,20 +1,49 @@
-import { getMonthTotals } from '@entities/envelopeData'
+import { getMonthTotals, getTotalChanges } from '@entities/envelopeData'
 import { useDisplayCurrency } from '@entities/instrument/hooks'
 import { Divider, Paper } from '@mui/material'
+import { prevMonth, toISOMonth } from '@shared/helpers/date'
 import { convertFx } from '@shared/helpers/money'
 import { TFxAmount, TISOMonth } from '@shared/types'
 import { DataLine } from '@shared/ui/DataLine'
 import { useAppSelector } from '@store/index'
 import { FC } from 'react'
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  XAxis,
+} from 'recharts'
 
 export const BalanceInfo: FC<{ month: TISOMonth }> = props => {
+  const changes = useAppSelector(getTotalChanges)[props.month]
+  const changesPrev =
+    useAppSelector(getTotalChanges)[toISOMonth(prevMonth(props.month))]
   const totals = useAppSelector(getMonthTotals)[props.month]
   const displayCurrency = useDisplayCurrency()
   const { rates } = totals
   const toDisplay = (a: TFxAmount) => convertFx(a, displayCurrency, rates)
 
+  let diff = 0
+  let outcome = 0
+  let outcomePrev = 0
+  const data = changes.sum.trend.map((v, i) => {
+    diff += toDisplay(v)
+    outcome += toDisplay(changes.sum.trendOutcome[i])
+    outcomePrev += toDisplay(changesPrev.sum.trendOutcome[i])
+    return {
+      day: i + 1,
+      diff: diff,
+      income: toDisplay(changes.sum.trendIncome[i]),
+      outcome: outcome,
+      outcomePrev: outcomePrev,
+    }
+  })
+
   return (
     <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <Chart data={data} />
+
       <DataLine
         name="Всего в бюджете"
         amount={toDisplay(totals.fundsEnd)}
@@ -23,6 +52,24 @@ export const BalanceInfo: FC<{ month: TISOMonth }> = props => {
       <DataLine
         name="За месяц"
         amount={toDisplay(totals.fundsChange)}
+        currency={displayCurrency}
+        sign
+      />
+      <DataLine
+        name="Доходы"
+        amount={toDisplay(changes.sum.totalIncome)}
+        currency={displayCurrency}
+        sign
+      />
+      <DataLine
+        name="Расходы"
+        amount={toDisplay(changes.sum.totalOutcome)}
+        currency={displayCurrency}
+        sign
+      />
+      <DataLine
+        name="Комиссии/обмен"
+        amount={toDisplay(changes.transferFees.total)}
         currency={displayCurrency}
         sign
       />
@@ -45,5 +92,29 @@ export const BalanceInfo: FC<{ month: TISOMonth }> = props => {
         currency={displayCurrency}
       />
     </Paper>
+  )
+}
+
+function Chart(props: any) {
+  return (
+    <LineChart width={270} height={100} data={props.data}>
+      <Line
+        type="monotone"
+        dataKey="outcome"
+        dot={false}
+        stroke="#8884d8"
+        strokeWidth={2}
+      />
+      <Line
+        type="monotone"
+        dataKey="outcomePrev"
+        dot={false}
+        stroke="#8884d8"
+        strokeWidth={0.5}
+      />
+      {/* <Line type="monotone" dataKey="diff" stroke="#8884d8" strokeWidth={2} /> */}
+      {/* <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="day" /> */}
+    </LineChart>
   )
 }

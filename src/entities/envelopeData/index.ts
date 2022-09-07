@@ -3,6 +3,7 @@ export type { IEnvelopeWithData } from './calculateEnvelopes'
 
 export { getMonthTotals } from './getMonthTotals'
 export { getMonthList } from './parts/monthList'
+export { getTotalChanges } from './parts/getTotalChanges'
 
 export { useRates } from './hooks/useRates'
 export { useEnvelope } from './hooks/useEnvelope'
