@@ -1,3 +1,5 @@
+// TODO: remove or start using
+
 import { combine, createEvent, createStore } from 'effector'
 import { TDataStore, IDiff } from '@shared/types'
 import { immutableApplyDiff } from './shared/applyDiff'
