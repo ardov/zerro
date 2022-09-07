@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { TEnvelopeId } from '@shared/types'
-import { getEnvelopes } from '@entities/envelope'
+import { getEnvelopes } from './getEnvelopes'
 
 type TGroup = {
   name: string
