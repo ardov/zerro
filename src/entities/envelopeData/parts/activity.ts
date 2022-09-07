@@ -4,12 +4,12 @@ import {
   DataEntity,
   TAccountId,
   TISOMonth,
-  TTagId,
   ITransaction,
   TInstrumentId,
   TFxCode,
   TFxAmount,
   TEnvelopeId,
+  ById,
 } from '@shared/types'
 import { toISOMonth } from '@shared/helpers/date'
 import { getTransactionsHistory, TrType } from '@entities/transaction'
@@ -19,7 +19,7 @@ import { cleanPayee } from '@entities/shared/cleanPayee'
 import { createSelector } from '@reduxjs/toolkit'
 import { TSelector } from '@store'
 import { getInstruments } from '@entities/instrument'
-import { getDebtors } from '@entities/debtors'
+import { getDebtors, TDebtor } from '@entities/debtors'
 
 export type TEnvelopeNode = {
   activity: TFxAmount
@@ -70,60 +70,26 @@ export const getActivity: TSelector<Record<TISOMonth, TMonthActivity>> =
 
         // TAG INCOME
         if (type === TrType.Income) {
-          let envelopeId = getEnvelopeId(DataEntity.Tag, getMainTag(tr))
-          addToMonth(node, envelopeId, tr, 'income')
+          addToMonth(node, getTagId(tr), tr, 'income')
           return
         }
 
         // TAG OUTCOME
         if (type === TrType.Outcome) {
-          let envelopeId = getEnvelopeId(DataEntity.Tag, getMainTag(tr))
-          addToMonth(node, envelopeId, tr, 'outcome')
+          addToMonth(node, getTagId(tr), tr, 'outcome')
           return
         }
 
+        // MERCHANT INCOME
         if (type === TrType.IncomeDebt) {
-          // MERCHANT INCOME
-          if (tr.merchant) {
-            let envelopeId = getEnvelopeId(DataEntity.Merchant, tr.merchant)
-            addToMonth(node, envelopeId, tr, 'income')
-            return
-          }
-
-          // PAYEE INCOME
-          if (tr.payee) {
-            let cleanName = cleanPayee(tr.payee)
-            let debtor = debtors[cleanName]
-            let envelopeId = debtor.merchantId
-              ? getEnvelopeId(DataEntity.Merchant, debtor.merchantId)
-              : getEnvelopeId('payee', cleanName)
-            addToMonth(node, envelopeId, tr, 'income')
-            return
-          }
-
-          throw new Error("Transaction doesn't have payee or merchant")
+          addToMonth(node, getDebtorId(tr, debtors), tr, 'income')
+          return
         }
 
+        // MERCHANT OUTCOME
         if (type === TrType.OutcomeDebt) {
-          // MERCHANT OUTCOME
-          if (tr.merchant) {
-            let envelopeId = getEnvelopeId(DataEntity.Merchant, tr.merchant)
-            addToMonth(node, envelopeId, tr, 'outcome')
-            return
-          }
-
-          // PAYEE OUTCOME
-          if (tr.payee) {
-            let cleanName = cleanPayee(tr.payee)
-            let debtor = debtors[cleanName]
-            let envelopeId = debtor.merchantId
-              ? getEnvelopeId(DataEntity.Merchant, debtor.merchantId)
-              : getEnvelopeId('payee', cleanName)
-            addToMonth(node, envelopeId, tr, 'outcome')
-            return
-          }
-
-          throw new Error("Transaction doesn't have payee or merchant")
+          addToMonth(node, getDebtorId(tr, debtors), tr, 'outcome')
+          return
         }
 
         if (type === TrType.Transfer) {
@@ -246,13 +212,24 @@ function getTrMonth(tr: ITransaction): TMonthActivity['date'] {
   return toISOMonth(tr.date)
 }
 
-function getMainTag(tr: ITransaction): TTagId {
-  return tr.tag?.[0] || 'null'
-}
-
 function isInBudget(tr: ITransaction, inBudgetAccs: TAccountId[]): boolean {
   return (
     inBudgetAccs.includes(tr.incomeAccount) ||
     inBudgetAccs.includes(tr.outcomeAccount)
   )
+}
+
+function getTagId(tr: ITransaction): TEnvelopeId {
+  const mainTag = tr.tag?.[0] || 'null'
+  return getEnvelopeId(DataEntity.Tag, mainTag)
+}
+
+function getDebtorId(tr: ITransaction, debtors: ById<TDebtor>): TEnvelopeId {
+  if (tr.merchant) return getEnvelopeId(DataEntity.Merchant, tr.merchant)
+  // PAYEE INCOME
+  let cleanName = cleanPayee(String(tr.payee))
+  let debtor = debtors[cleanName]
+  return debtor.merchantId
+    ? getEnvelopeId(DataEntity.Merchant, debtor.merchantId)
+    : getEnvelopeId('payee', cleanName)
 }
