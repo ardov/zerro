@@ -25,7 +25,7 @@ export enum trDirection {
   internal = 'internal',
 }
 
-type TBudgetChange = {
+export type TBudgetChange = {
   date: TISODate
   direction: trDirection
   envelope: TEnvelopeId | null
@@ -53,14 +53,12 @@ export const getBudgetChanges: TSelector<TBudgetChange[]> = createSelector(
     let list: TBudgetChange[] = []
 
     transactions.forEach(tr => {
-      let direction = getDirection(tr, inBudgetAccIds)
+      const type = getType(tr, debtAccId)
+      let direction = getDirection(tr, type, inBudgetAccIds)
       if (!direction) return
 
-      const type = getType(tr, debtAccId)
-      const date = tr.date
-
       list.push({
-        date,
+        date: tr.date,
         direction,
         envelope: getEnvelope(tr, type, direction, debtors),
         diff: getDiff(tr, direction, instruments),
@@ -74,14 +72,30 @@ export const getBudgetChanges: TSelector<TBudgetChange[]> = createSelector(
 
 function getDirection(
   tr: ITransaction,
+  type: TrType,
   inBudgetAccIds: TAccountId[]
 ): trDirection | null {
   let isFromBudget = inBudgetAccIds.includes(tr.outcomeAccount)
   let isToBudget = inBudgetAccIds.includes(tr.incomeAccount)
-  if (isFromBudget && isToBudget) return trDirection.internal
-  if (isFromBudget) return trDirection.outcome
-  if (isToBudget) return trDirection.income
-  return null
+
+  switch (type) {
+    case TrType.Income:
+    case TrType.IncomeDebt:
+      return isToBudget ? trDirection.income : null
+
+    case TrType.Outcome:
+    case TrType.OutcomeDebt:
+      return isFromBudget ? trDirection.outcome : null
+
+    case TrType.Transfer:
+      if (isFromBudget && isToBudget) return trDirection.internal
+      if (isFromBudget) return trDirection.outcome
+      if (isToBudget) return trDirection.income
+      return null
+
+    default:
+      throw new Error('Unknown transaction type: ' + type)
+  }
 }
 
 function getDiff(
