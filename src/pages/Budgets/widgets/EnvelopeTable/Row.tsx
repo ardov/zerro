@@ -152,7 +152,7 @@ const Wrapper: FC<{
   const { id, enableDrop, isChild, children } = props
   const isDragging = useContext(IsDraggingContext)
   const style: SxProps = {
-    paddingLeft: isChild ? 8 : 3,
+    paddingLeft: isChild ? 7 : 2,
     paddingRight: 2,
     display: 'grid',
     width: '100%',
@@ -163,10 +163,7 @@ const Wrapper: FC<{
     transition: '0.1s',
     alignItems: 'center',
     justifyContent: 'initial',
-    gridColumnGap: {
-      xs: '4px',
-      sm: '16px',
-    },
+    gridColumnGap: '12px',
     '&:hover': { bgcolor: isDragging ? 'none' : 'action.hover' },
     '&:hover .addGoal': { opacity: 1, transition: '.3s' },
     '&:not(:hover) .addGoal': { opacity: 0 },
@@ -319,10 +316,12 @@ const AvailableCell: FC<AvailableCellProps> = props => {
     <Box
       component="span"
       sx={{
-        borderRadius: 2,
+        borderRadius: 1,
         bgcolor: !!provided ? 'background.paper' : '',
-        px: 1,
-        mx: -1,
+        px: 2,
+        mx: -2,
+        py: 0.5,
+        my: -0.5,
         component: 'span',
         display: 'inline-block',
         color: availableColor,

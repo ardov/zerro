@@ -65,8 +65,8 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
             size="small"
             sx={{
               position: 'absolute',
-              left: 0,
-              top: 12,
+              left: -6,
+              top: 10,
               transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
               transition: '.3s',
             }}
