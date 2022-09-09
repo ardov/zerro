@@ -14,11 +14,11 @@ import { TFxRates } from '@entities/fxRate/fxRateStore'
 import { getFxRatesGetter } from '@entities/fxRate'
 import { getEnvelopeBudgets } from '@entities/budget'
 import { calculateGoalProgress, getGoals, TGoal } from '@entities/goal'
-import { getEnvelopes, IEnvelope } from '@entities/envelope'
+import { getEnvelopes, TEnvelope } from '@entities/envelope'
 import { getActivity, TEnvelopeNode, TMonthActivity } from './parts/activity'
 import { getMonthList } from './parts/monthList'
 
-function makeEnvelopeWithData(e: IEnvelope) {
+function makeEnvelopeWithData(e: TEnvelope) {
   return {
     ...e,
 
@@ -99,7 +99,7 @@ export const getCalculatedEnvelopes: TSelector<
 
 function aggregateEnvelopeBudgets(
   monthList: TISOMonth[],
-  envelopes: ById<IEnvelope>,
+  envelopes: ById<TEnvelope>,
   activity: Record<TISOMonth, TMonthActivity>,
   budgets: Record<TISOMonth, { [id: TEnvelopeId]: number }>,
   getRates: (month: TISOMonth) => TFxRates,
@@ -142,7 +142,7 @@ function aggregateEnvelopeBudgets(
  */
 function createPlaceholders(
   node: ById<IEnvelopeWithData>,
-  envelopes: ById<IEnvelope>
+  envelopes: ById<TEnvelope>
 ) {
   keys(envelopes).forEach(id => {
     node[id] = makeEnvelopeWithData(envelopes[id])

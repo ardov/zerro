@@ -8,12 +8,13 @@ import {
 import { keys } from '@shared/helpers/keys'
 import { AppThunk } from '@store'
 import { patchTag, TTagDraft } from '@entities/tag'
-import { getEnvelopes, IEnvelope } from './getEnvelopes'
-import { parseEnvelopeId } from './helpers'
-import { patchEnvelopeMeta, TEnvelopeMetaPatch } from './metaData'
+import { getEnvelopes } from './getEnvelopes'
+import { parseEnvelopeId } from './shared/helpers'
+import { patchEnvelopeMeta, TEnvelopeMetaPatch } from './shared/metaData'
 import { hex2int, isHEX } from '@shared/helpers/color'
+import { TEnvelope } from './shared/makeEnvelope'
 
-type TEnvelopeDraft = OptionalExceptFor<IEnvelope, 'id'>
+type TEnvelopeDraft = OptionalExceptFor<TEnvelope, 'id'>
 
 export const patchEnvelope =
   (draft: TEnvelopeDraft): AppThunk =>
@@ -133,7 +134,7 @@ export const patchEnvelope =
   }
 
 function getRightParent(
-  envelopes: ById<IEnvelope>,
+  envelopes: ById<TEnvelope>,
   parent?: TEnvelopeId | null
 ): TEnvelopeId | undefined {
   if (!parent) return undefined
@@ -143,7 +144,7 @@ function getRightParent(
 }
 
 function getRightTagParent(
-  envelopes: ById<IEnvelope>,
+  envelopes: ById<TEnvelope>,
   parent?: TEnvelopeId | null
 ): TTagId | null {
   const id = getRightParent(envelopes, parent)

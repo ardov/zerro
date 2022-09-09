@@ -22,7 +22,7 @@ import { useAppDispatch, useAppSelector } from '@store'
 import {
   envelopeVisibility,
   getEnvelopeId,
-  IEnvelope,
+  TEnvelope,
   parseEnvelopeId,
   patchEnvelope,
 } from '@entities/envelope'
@@ -37,7 +37,7 @@ export type TagEditDialogProps = Modify<
   DialogProps,
   {
     onClose: () => void
-    envelope?: Partial<IEnvelope>
+    envelope?: Partial<TEnvelope>
   }
 >
 

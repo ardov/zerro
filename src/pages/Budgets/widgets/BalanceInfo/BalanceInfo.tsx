@@ -14,7 +14,7 @@ import {
   ResponsiveContainer,
   XAxis,
 } from 'recharts'
-import { Explainer } from './explainer'
+import { Explainer } from './Explainer'
 
 export const BalanceInfo: FC<{ month: TISOMonth }> = props => {
   const changes = useAppSelector(getTotalChanges)[props.month]
