@@ -44,10 +44,10 @@ type MonthSelectPopoverProps = Modify<
 >
 
 export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
-  const { onChange, disablePast, ...rest } = props
+  const { onChange, disablePast, minMonth, maxMonth, ...rest } = props
   const value = props.value ? toISOMonth(props.value) : null
-  const minMonth = props.minMonth ? toISOMonth(props.minMonth) : null
-  const maxMonth = props.maxMonth ? toISOMonth(props.maxMonth) : null
+  const start = minMonth ? toISOMonth(minMonth) : null
+  const end = maxMonth ? toISOMonth(maxMonth) : null
   const [year, setYear] = useState(new Date(value || Date.now()).getFullYear())
   const months: TISOMonth[] = []
   for (let month = 0; month < 12; month++) {
@@ -56,12 +56,12 @@ export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
   const curMonth = toISOMonth(new Date())
   const isMonthDisabled = (month: TISOMonth) => {
     if (disablePast && month < curMonth) return true
-    if (minMonth && month < minMonth) return true
-    if (maxMonth && month > maxMonth) return true
+    if (start && month < start) return true
+    if (end && month > end) return true
     return false
   }
-  const isNextYearDisabled = !!maxMonth && months[months.length - 1] >= maxMonth
-  const isPrevYearDisabled = !!minMonth && months[0] <= minMonth
+  const isNextYearDisabled = !!end && months[months.length - 1] >= end
+  const isPrevYearDisabled = !!start && months[0] <= start
   return (
     <Popover {...rest}>
       <Box pt={1} px={1}>
