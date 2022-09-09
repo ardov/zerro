@@ -72,11 +72,11 @@ function explainMe(p: {
         ])
       : ''
   const sFunds = p.isPast
-    ? `На них было в конце месяца ${formatSum(funds)}${sFx}.`
-    : `На них сейчас ${formatSum(funds)}${sFx}.`
+    ? `В конце месяца в балансе было ${formatSum(funds)}.`
+    : `Сейчас в балансе ${formatSum(funds)}.`
 
   const sAllocNow = allocatedNow
-    ? `${formatSum(allocatedNow)} распределено по конвертам`
+    ? `${formatSum(allocatedNow)} лежит в конвертах`
     : ''
   const sAllocFuture = allocatedInFuture
     ? `${formatSum(allocatedInFuture)} распределено в будущем`
@@ -95,5 +95,5 @@ function explainMe(p: {
           -toBeBudgeted
         )} больше чем у вас есть.`
 
-  return [sAccs, sFunds, sAlloc, sFin].join(' ')
+  return [sFunds, sAlloc, sFin].join(' ')
 }

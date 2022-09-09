@@ -14,6 +14,7 @@ import {
   ResponsiveContainer,
   XAxis,
 } from 'recharts'
+import { Explainer } from './explainer'
 
 export const BalanceInfo: FC<{ month: TISOMonth }> = props => {
   const changes = useAppSelector(getTotalChanges)[props.month]
@@ -24,6 +25,9 @@ export const BalanceInfo: FC<{ month: TISOMonth }> = props => {
   const { rates } = totals
   const toDisplay = (a: TFxAmount) => convertFx(a, displayCurrency, rates)
 
+  let currDay =
+    toISOMonth(new Date()) === props.month ? new Date().getDate() : null
+
   let diff = 0
   let outcome = 0
   let outcomePrev = 0
@@ -31,6 +35,15 @@ export const BalanceInfo: FC<{ month: TISOMonth }> = props => {
     diff += toDisplay(v)
     outcome += toDisplay(changes.sum.trendOutcome[i])
     outcomePrev += toDisplay(changesPrev.sum.trendOutcome[i])
+    if (currDay && i + 1 > currDay) {
+      return {
+        day: i + 1,
+        diff: null,
+        income: null,
+        outcome: null,
+        outcomePrev: outcomePrev,
+      }
+    }
     return {
       day: i + 1,
       diff: diff,
@@ -43,6 +56,12 @@ export const BalanceInfo: FC<{ month: TISOMonth }> = props => {
   return (
     <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
       <Chart data={data} />
+
+      <Divider />
+
+      <Explainer month={props.month} />
+
+      <Divider />
 
       <DataLine
         name="Всего в бюджете"
