@@ -1,7 +1,6 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { Collapse, Box, IconButton } from '@mui/material'
-import { ChevronRightIcon, DragIndicatorIcon } from '@shared/ui/Icons'
-import { DragModeContext } from '../../components/DnDContext'
+import { ChevronRightIcon } from '@shared/ui/Icons'
 import { TEnvelopeId } from '@shared/types'
 
 type ParentProps = {
@@ -28,7 +27,6 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
       onCollapseAll,
       ...rest
     } = props
-    const { dragMode } = useContext(DragModeContext)
 
     const hasChildren = !!children && children.length > 0
 
@@ -53,14 +51,7 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
         ref={ref}
         {...rest}
       >
-        {dragMode === 'REORDER' && (
-          <DragIndicatorIcon
-            fontSize="small"
-            color="action"
-            sx={{ position: 'absolute', left: 4, top: 13 }}
-          />
-        )}
-        {hasChildren && dragMode !== 'REORDER' && (
+        {hasChildren && (
           <IconButton
             size="small"
             sx={{
@@ -77,7 +68,7 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
         )}
         {parent}
 
-        {hasChildren && dragMode !== 'REORDER' && (
+        {hasChildren && (
           <Collapse in={isExpanded} unmountOnExit>
             <Box pb={1}>{children}</Box>
           </Collapse>
