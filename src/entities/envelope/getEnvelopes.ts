@@ -27,6 +27,7 @@ export interface IEnvelope {
   entityId: string // Used to connect with ZM entity
 
   name: string // From ZM entity
+  originalName: string // ZM title
   symbol: string // From ZM entity
   color: string | null
   visibility: envelopeVisibility
@@ -35,6 +36,7 @@ export interface IEnvelope {
   parent: TEnvelopeId | null
   children: TEnvelopeId[]
   // From custom storage
+  index: number
   group: string
   comment: string
   currency: TFxCode
@@ -51,45 +53,40 @@ export const getEnvelopes: TSelector<ById<IEnvelope>> = createSelector(
     getUserCurrencyCode,
   ],
   (debtors, tags, savingAccounts, envelopeMeta, userCurrency) => {
+    let list: IEnvelope[] = []
     let result: ById<IEnvelope> = {}
 
     // Convert tags to envelopes
     Object.values(tags).forEach(tag => {
-      const envelope = makeEnvelopeFromTag(tag, envelopeMeta, userCurrency)
-      result[envelope.id] = envelope
+      list.push(makeEnvelopeFromTag(tag, envelopeMeta, userCurrency))
     })
 
     // Convert accounts to envelopes
     savingAccounts.forEach(account => {
-      const envelope = makeEnvelopeFromAccount(
-        account,
-        envelopeMeta,
-        userCurrency
-      )
-      result[envelope.id] = envelope
+      list.push(makeEnvelopeFromAccount(account, envelopeMeta, userCurrency))
     })
 
     // Convert debtors to envelopes
     Object.values(debtors).forEach(debtor => {
-      const envelope = makeEnvelopeFromDebtor(
-        debtor,
-        envelopeMeta,
-        userCurrency
-      )
-      result[envelope.id] = envelope
+      list.push(makeEnvelopeFromDebtor(debtor, envelopeMeta, userCurrency))
     })
 
     // Fix nesting issues (only 2 levels are allowed)
-    keys(result).forEach(id => {
-      const envelope = result[id]
+    list.forEach(envelope => {
       if (!envelope.parent) return
       envelope.parent = getParent(envelope)
-
       // Use recursion to get topmost parent id
-      function getParent(envelope: IEnvelope): IEnvelope['id'] {
+      function getParent(envelope?: IEnvelope): IEnvelope['parent'] {
+        if (!envelope) return null
         if (!envelope.parent) return envelope.id
-        else return getParent(result[envelope.parent])
+        return getParent(list.find(e => e.id === envelope.parent))
       }
+    })
+
+    // Sort array
+    list.sort(compareEnvelopes).forEach((e, i) => {
+      e.index = i // update index (to compare later)
+      result[e.id] = e // add to result
     })
 
     // Fill children
@@ -114,6 +111,7 @@ function makeEnvelopeFromTag(
     type: DataEntity.Tag,
     entityId: tag.id,
     name: tag.name,
+    originalName: tag.title,
     symbol: tag.symbol,
     color: tag.colorHEX,
     visibility: getVisibility(info[id]?.visibility, tag.showOutcome),
@@ -122,6 +120,7 @@ function makeEnvelopeFromTag(
     // children: tag.children.map(childId =>
     //   getEnvelopeId(DataEntity.Tag, childId)
     // ),
+    index: info[id]?.index || -1,
     group: info[id]?.group || defaultTagGroup,
     comment: info[id]?.comment || '',
     currency: info[id]?.currency || userCurrency,
@@ -141,11 +140,13 @@ function makeEnvelopeFromAccount(
     type: DataEntity.Account,
     entityId: account.id,
     name: account.title,
+    originalName: account.title,
     symbol: '🏦',
     color: null,
     visibility: getVisibility(info[id]?.visibility),
     parent: info[id]?.parent || null,
     children: [],
+    index: info[id]?.index || -1,
     group: info[id]?.group || defaultAccountGroup,
     comment: info[id]?.comment || '',
     currency: info[id]?.currency || userCurrency,
@@ -166,11 +167,13 @@ function makeEnvelopeFromDebtor(
       type: DataEntity.Merchant,
       entityId: debtor.merchantId,
       name: debtor.name,
+      originalName: debtor.name,
       symbol: '👤',
       color: null,
       visibility: getVisibility(info[id]?.visibility),
       parent: info[id]?.parent || null,
       children: [],
+      index: info[id]?.index || -1,
       group: info[id]?.group || defaultMerchantGroup,
       comment: info[id]?.comment || '',
       currency: info[id]?.currency || userCurrency,
@@ -185,11 +188,13 @@ function makeEnvelopeFromDebtor(
       type: 'payee',
       entityId: debtor.id,
       name: debtor.name,
+      originalName: debtor.name,
       symbol: '🌚',
       color: null,
       visibility: getVisibility(info[id]?.visibility),
       parent: null,
       children: [],
+      index: info[id]?.index || -1,
       group: info[id]?.group || defaultPayeeGroup,
       comment: '',
       currency: userCurrency,
@@ -206,4 +211,25 @@ function getVisibility(
   if (isVisible) return isVisible
   else if (tagShowOutcome) return envelopeVisibility.visible
   else return envelopeVisibility.auto
+}
+
+function compareEnvelopes(a: IEnvelope, b: IEnvelope) {
+  // Sort by index if it's set (!== -1)
+  if (a.index !== -1 && b.index !== -1) return a.index - b.index
+  if (a.index !== -1) return -1
+  if (b.index !== -1) return 1
+
+  // Sort by type
+  if (a.type !== b.type) {
+    const typeOrder = [
+      DataEntity.Tag,
+      DataEntity.Account,
+      DataEntity.Merchant,
+      'payee',
+    ]
+    return typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type)
+  }
+
+  // Sort by name
+  return a.name.localeCompare(b.name)
 }

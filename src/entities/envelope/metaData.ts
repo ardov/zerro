@@ -11,6 +11,7 @@ export enum envelopeVisibility {
 export type TEnvelopeMeta = {
   id: TEnvelopeId
   group?: string
+  index?: number
   visibility?: envelopeVisibility
   parent?: TEnvelopeId
   comment?: string
