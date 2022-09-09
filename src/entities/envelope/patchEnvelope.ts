@@ -56,6 +56,9 @@ export const patchEnvelope =
               tagPatch.parent = getRightTagParent(envelopes, draft.parent)
             }
             break
+          case 'index':
+            // TODO update indices
+            break
           case 'group':
           case 'comment':
           case 'currency':
@@ -78,6 +81,7 @@ export const patchEnvelope =
       if (keys(metaPatch).length > 1) dispatch(patchEnvelopeMeta(metaPatch))
       return
     }
+
     if (
       current.type === DataEntity.Account ||
       current.type === DataEntity.Merchant
@@ -102,6 +106,9 @@ export const patchEnvelope =
             if (current[key] !== draft[key]) {
               metaPatch.parent = getRightParent(envelopes, draft.parent)
             }
+            break
+          case 'index':
+            // TODO update indices
             break
           case 'group':
           case 'comment':
@@ -134,6 +141,7 @@ function getRightParent(
   if (envelopes[parent].parent) return envelopes[parent].parent as TEnvelopeId
   return parent
 }
+
 function getRightTagParent(
   envelopes: ById<IEnvelope>,
   parent?: TEnvelopeId | null

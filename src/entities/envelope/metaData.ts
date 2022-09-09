@@ -20,7 +20,7 @@ export type TEnvelopeMeta = {
   carryNegatives?: boolean
 }
 
-export const envelopeMetaStore = makeSimpleHiddenStore<ById<TEnvelopeMeta>>(
+const envelopeMetaStore = makeSimpleHiddenStore<ById<TEnvelopeMeta>>(
   HiddenDataType.EnvelopeMeta,
   {}
 )

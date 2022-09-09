@@ -7,7 +7,6 @@ import {
   TEnvelopeType,
   TFxCode,
 } from '@shared/types'
-import { keys } from '@shared/helpers/keys'
 import { TSelector } from '@store'
 import { getSavingAccounts } from '@entities/account'
 import { getDebtors, TDebtor } from '@entities/debtors'
@@ -44,7 +43,18 @@ export interface IEnvelope {
   carryNegatives: boolean
 }
 
-export const getEnvelopes: TSelector<ById<IEnvelope>> = createSelector(
+type TGroup = {
+  name: string
+  children: {
+    id: TEnvelopeId
+    children: TEnvelopeId[]
+  }[]
+}
+
+const getCompiledEnvelopes: TSelector<{
+  byId: ById<IEnvelope>
+  structure: TGroup[]
+}> = createSelector(
   [
     getDebtors,
     getPopulatedTags,
@@ -53,52 +63,59 @@ export const getEnvelopes: TSelector<ById<IEnvelope>> = createSelector(
     getUserCurrencyCode,
   ],
   (debtors, tags, savingAccounts, envelopeMeta, userCurrency) => {
-    let list: IEnvelope[] = []
     let result: ById<IEnvelope> = {}
 
-    // Convert tags to envelopes
+    // Step 1. Create envelopes from tags, saving accounts and debtors
     Object.values(tags).forEach(tag => {
-      list.push(makeEnvelopeFromTag(tag, envelopeMeta, userCurrency))
+      const e = makeEnvelopeFromTag(tag, envelopeMeta, userCurrency)
+      result[e.id] = e
     })
-
-    // Convert accounts to envelopes
     savingAccounts.forEach(account => {
-      list.push(makeEnvelopeFromAccount(account, envelopeMeta, userCurrency))
+      const e = makeEnvelopeFromAccount(account, envelopeMeta, userCurrency)
+      result[e.id] = e
     })
-
-    // Convert debtors to envelopes
     Object.values(debtors).forEach(debtor => {
-      list.push(makeEnvelopeFromDebtor(debtor, envelopeMeta, userCurrency))
+      const e = makeEnvelopeFromDebtor(debtor, envelopeMeta, userCurrency)
+      result[e.id] = e
     })
 
-    // Fix nesting issues (only 2 levels are allowed)
-    list.forEach(envelope => {
-      if (!envelope.parent) return
-      envelope.parent = getParent(envelope)
-      // Use recursion to get topmost parent id
-      function getParent(envelope?: IEnvelope): IEnvelope['parent'] {
-        if (!envelope) return null
-        if (!envelope.parent) return envelope.id
-        return getParent(list.find(e => e.id === envelope.parent))
-      }
+    // Step 2. Update indices, prepare for building tree
+    const list = Object.values(result)
+      .sort(compareEnvelopes)
+      .map((e, i) => {
+        // update index (to compare later)
+        e.index = i
+        // Fix nesting issues (only 2 levels are allowed)
+        e.parent = getRightParent(e.parent, result)
+        if (e.parent) {
+          const parent = result[e.parent]
+          // Attach child to parent
+          parent.children.push(e.id)
+          // Inherit group names from parents
+          e.group = result[e.parent].group
+        }
+        return e
+      })
+
+    // Step 3. Build structure and update indicies according to it
+    const structure = buildStructure(result)
+    const flatList = flattenStructure(structure)
+    // Update indicies
+    flatList.forEach((id, index) => {
+      result[id].index = index
     })
 
-    // Sort array
-    list.sort(compareEnvelopes).forEach((e, i) => {
-      e.index = i // update index (to compare later)
-      result[e.id] = e // add to result
-    })
-
-    // Fill children
-    keys(result).forEach(id => {
-      const envelope = result[id]
-      if (!envelope.parent) return
-      result[envelope.parent].children.push(envelope.id)
-    })
-
-    return result
+    return {
+      byId: result,
+      structure,
+    }
   }
 )
+
+export const getEnvelopes: TSelector<ById<IEnvelope>> = state =>
+  getCompiledEnvelopes(state).byId
+export const getEnvelopeStructure: TSelector<TGroup[]> = state =>
+  getCompiledEnvelopes(state).structure
 
 function makeEnvelopeFromTag(
   tag: TTagPopulated,
@@ -117,9 +134,6 @@ function makeEnvelopeFromTag(
     visibility: getVisibility(info[id]?.visibility, tag.showOutcome),
     parent: tag.parent ? getEnvelopeId(DataEntity.Tag, tag.parent) : null,
     children: [], // fill later
-    // children: tag.children.map(childId =>
-    //   getEnvelopeId(DataEntity.Tag, childId)
-    // ),
     index: info[id]?.index || -1,
     group: info[id]?.group || defaultTagGroup,
     comment: info[id]?.comment || '',
@@ -213,8 +227,64 @@ function getVisibility(
   else return envelopeVisibility.auto
 }
 
+/**
+ * Returns id of the topmost parent. So it flattens envelopes to only 2 levels of depth
+ * @param parentId
+ * @param byId
+ * @returns
+ */
+function getRightParent(
+  parentId: IEnvelope['parent'],
+  byId: ById<IEnvelope>
+): IEnvelope['parent'] {
+  if (!parentId) return null
+  const parent = byId[parentId]
+  if (!parent) return null
+  if (!parent.parent) return parentId
+  return getRightParent(parent.parent, byId)
+}
+
+/**
+ * Builds a tree of sorted groups
+ * @param envelopes
+ * @returns
+ */
+function buildStructure(envelopes: ById<IEnvelope>): TGroup[] {
+  const groupCollection: Record<string, TGroup> = {}
+  Object.values(envelopes)
+    .sort(compareEnvelopes)
+    .filter(e => !e.parent)
+    .forEach(e => {
+      groupCollection[e.group] ??= { name: e.group, children: [] }
+      groupCollection[e.group].children.push({ id: e.id, children: e.children })
+    })
+
+  const groupList = Object.values(groupCollection).sort((a, b) => {
+    let envA = envelopes[a.children[0].id]
+    let envB = envelopes[b.children[0].id]
+    return compareEnvelopes(envA, envB)
+  })
+
+  return groupList
+}
+
+/**
+ * Flattens structure to an id array
+ * @param tree
+ * @returns list of envelope ids
+ */
+function flattenStructure(tree: TGroup[]): TEnvelopeId[] {
+  let flatList: TEnvelopeId[] = []
+  tree.forEach(group => {
+    group.children.forEach(({ id, children }) => {
+      flatList = [...flatList, id, ...children]
+    })
+  })
+  return flatList
+}
+
 function compareEnvelopes(a: IEnvelope, b: IEnvelope) {
-  // Sort by index if it's set (!== -1)
+  // Sort by index if it's present (!== -1)
   if (a.index !== -1 && b.index !== -1) return a.index - b.index
   if (a.index !== -1) return -1
   if (b.index !== -1) return 1
@@ -230,6 +300,11 @@ function compareEnvelopes(a: IEnvelope, b: IEnvelope) {
     return typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type)
   }
 
-  // Sort by name
+  // Null category should be the first one
+  const nullTagId = getEnvelopeId(DataEntity.Tag, null)
+  if (a.id === nullTagId) return -1
+  if (b.id === nullTagId) return 1
+
+  // Finally sort by name
   return a.name.localeCompare(b.name)
 }

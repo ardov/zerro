@@ -6,6 +6,6 @@ export function parseEnvelopeId(id: TEnvelopeId) {
     id: id.split('#')[1],
   }
 }
-export function getEnvelopeId(type: TEnvelopeType, id: string) {
+export function getEnvelopeId(type: TEnvelopeType, id: string | null) {
   return `${type}#${id}` as TEnvelopeId
 }
