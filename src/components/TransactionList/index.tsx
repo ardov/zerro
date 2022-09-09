@@ -16,10 +16,10 @@ import Actions from './TopBar/Actions'
 import { sendEvent } from '@shared/helpers/tracking'
 // import { getGroupedTransactions } from '@worker'
 import { useDebounce } from '@shared/hooks/useDebounce'
-import { ITransaction, TTransactionId } from '@shared/types'
+import { TTransaction, TTransactionId } from '@shared/types'
 
 export type TTransactionListProps = {
-  transactions?: ITransaction[]
+  transactions?: TTransaction[]
   prefilter?: FilterConditions | FilterConditions[]
   filterConditions?: FilterConditions
   hideFilter?: boolean

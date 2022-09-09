@@ -1,4 +1,4 @@
-import { TISOMonth, ITransaction, TFxAmount, TEnvelopeId } from '@shared/types'
+import { TISOMonth, TTransaction, TFxAmount, TEnvelopeId } from '@shared/types'
 import { toISOMonth } from '@shared/helpers/date'
 import { getEnvelopes } from '@entities/envelope'
 import { createSelector } from '@reduxjs/toolkit'
@@ -12,7 +12,7 @@ import { addFxAmount } from '@shared/helpers/money'
 
 export type TEnvelopeNode = {
   activity: TFxAmount
-  transactions: ITransaction[]
+  transactions: TTransaction[]
 }
 
 export type TMonthActivity = {

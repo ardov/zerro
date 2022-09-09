@@ -6,7 +6,7 @@ import { StyledEngineProvider } from '@mui/material/styles'
 import ruDateLocale from 'date-fns/locale/ru'
 import { initSentry, sendEvent } from '@shared/helpers/tracking'
 import { appVersion } from '@shared/config'
-import { IDiff } from '@shared/types'
+import { TDiff } from '@shared/types'
 import { store } from '@store'
 import { bindWorkerToStore } from '@worker'
 import { applyClientPatch, resetData } from '@store/data'
@@ -50,6 +50,6 @@ function createZerroInstance(s: typeof store) {
     logsShow: false,
     logs: {},
     resetData: () => s.dispatch(resetData()),
-    applyClientPatch: (patch: IDiff) => s.dispatch(applyClientPatch(patch)),
+    applyClientPatch: (patch: TDiff) => s.dispatch(applyClientPatch(patch)),
   }
 }

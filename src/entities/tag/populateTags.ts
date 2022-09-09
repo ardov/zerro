@@ -1,12 +1,12 @@
 import toArray from 'lodash/toArray'
 import { int2rgb, int2hex, getColorForString } from '@shared/helpers/color'
 import { sendEvent } from '@shared/helpers/tracking'
-import { ByIdOld, ITag } from '@shared/types'
+import { ByIdOld, TTag } from '@shared/types'
 import tagIcons from '@shared/tagIcons.json'
 import { TTagPopulated } from './types'
 import { nullTag } from './makeTag'
 
-export default function populateTags(rawTags: ByIdOld<ITag>) {
+export default function populateTags(rawTags: ByIdOld<TTag>) {
   let tags: {
     [x: string]: TTagPopulated
   } = { null: makePopulatedTag(nullTag) }
@@ -35,7 +35,7 @@ export default function populateTags(rawTags: ByIdOld<ITag>) {
   return tags
 }
 
-function makePopulatedTag(tag: ITag): TTagPopulated {
+function makePopulatedTag(tag: TTag): TTagPopulated {
   return {
     ...tag,
     children: [],
@@ -57,7 +57,7 @@ function getName(title: string) {
     return title
   }
 }
-function getSymbol(tag: ITag) {
+function getSymbol(tag: TTag) {
   if (tag.id === 'null') return '?'
   if (tag.icon) {
     if (tagIcons[tag.icon]) {

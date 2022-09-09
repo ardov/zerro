@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit'
 import {
   ById,
-  ITransaction,
+  TTransaction,
   TEnvelopeId,
   TFxAmount,
   TISOMonth,
@@ -29,7 +29,7 @@ function makeEnvelopeWithData(e: TEnvelope) {
     selfBudgeted: {} as TFxAmount,
     selfActivityValue: 0,
     selfActivity: {} as TFxAmount,
-    transactions: [] as ITransaction[],
+    transactions: [] as TTransaction[],
 
     // Children metrics
     childrenLeftoverValue: 0,

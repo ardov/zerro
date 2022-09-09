@@ -1,6 +1,6 @@
 import {
   DataEntity,
-  IBudget,
+  TBudget,
   TEnvelopeId,
   TISOMonth,
   TTagId,
@@ -50,7 +50,7 @@ export const setEnvelopeBudgets =
     // Process tag budgets
     const readyBudgets = tagUpdates.map(update => {
       let id = getBudgetId(update.month, update.id)
-      const currentBudget = getBudgets(state)[id] || ({} as IBudget)
+      const currentBudget = getBudgets(state)[id] || ({} as TBudget)
       const patched = {
         ...currentBudget,
         tag: update.id,

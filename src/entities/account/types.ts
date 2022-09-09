@@ -1,6 +1,6 @@
-import { IAccount, TFxCode } from '@shared/types'
+import { TAccount, TFxCode } from '@shared/types'
 
-export interface IAccountPopulated extends IAccount {
+export interface IAccountPopulated extends TAccount {
   convertedBalance: number
   convertedStartBalance: number
   inBudget: boolean

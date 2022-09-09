@@ -10,7 +10,7 @@ import { getTransactions } from '@entities/transaction'
 import { getType } from '@entities/transaction/helpers'
 import { bulkEditTransactions } from '@entities/transaction/thunks'
 import { TagList } from '@components/TagList'
-import { Modify, ITransaction } from '@shared/types'
+import { Modify, TTransaction } from '@shared/types'
 import { Box, TextField } from '@mui/material'
 
 type BulkEditModalProps = Modify<DialogProps, { onClose: () => void }> & {
@@ -104,12 +104,12 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   )
 }
 
-function isSameTags(list: ITransaction[] = []) {
+function isSameTags(list: TTransaction[] = []) {
   return list
     .map(tr => JSON.stringify(tr.tag))
     .every((tags, i, arr) => tags === arr[0])
 }
-function isSameComments(list: ITransaction[] = []) {
+function isSameComments(list: TTransaction[] = []) {
   return list
     .map(tr => tr.comment)
     .every((comment, i, arr) => comment === arr[0])
@@ -119,7 +119,7 @@ function equalArrays(a: string[], b: string[]) {
   return JSON.stringify(a) === JSON.stringify(b)
 }
 
-function getTypes(list: ITransaction[] = []) {
+function getTypes(list: TTransaction[] = []) {
   let res = { income: 0, outcome: 0, transfer: 0 }
   list.forEach(tr => res[getType(tr) as 'income' | 'outcome' | 'transfer']++)
   return res

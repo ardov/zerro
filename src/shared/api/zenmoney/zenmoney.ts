@@ -7,7 +7,7 @@ import {
   redirectUri,
   tokenEndpoint,
 } from '../../config'
-import { IZmDiff, IZmRequest } from '@shared/types'
+import { TZmDiff, TZmRequest } from '@shared/types'
 
 export type TAccessToken = {
   access_token: string
@@ -22,7 +22,7 @@ const FAKE_TOKEN = 'fakeToken'
 
 export const zenmoney = { getData, checkCode, getLocalToken, getToken }
 
-async function getData(token: string, diff: IZmDiff = { serverTimestamp: 0 }) {
+async function getData(token: string, diff: TZmDiff = { serverTimestamp: 0 }) {
   if (!token) {
     throw Error('No token')
   }
@@ -34,7 +34,7 @@ async function getData(token: string, diff: IZmDiff = { serverTimestamp: 0 }) {
     return { ...diff, serverTimestamp: Math.ceil(Date.now() / 1000) }
   }
 
-  const body: IZmRequest = {
+  const body: TZmRequest = {
     ...diff,
     currentClientTimestamp: Math.floor(Date.now() / 1000),
   }
@@ -50,7 +50,7 @@ async function getData(token: string, diff: IZmDiff = { serverTimestamp: 0 }) {
   const json = await response.json()
   if (json.error) throw Error(JSON.stringify(json.error))
 
-  return json as IZmDiff
+  return json as TZmDiff
 }
 
 function checkCode() {

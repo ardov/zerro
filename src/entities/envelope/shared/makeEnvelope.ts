@@ -1,7 +1,7 @@
 import {
   ById,
   DataEntity,
-  IAccount,
+  TAccount,
   TEnvelopeId,
   TEnvelopeType,
   TFxCode,
@@ -72,7 +72,7 @@ function makeEnvelopeFromTag(
 }
 
 function makeEnvelopeFromAccount(
-  account: IAccount,
+  account: TAccount,
   info: ById<TEnvelopeMeta>,
   userCurrency: TFxCode
 ): TEnvelope {

@@ -1,32 +1,32 @@
 import {
-  IAccount,
-  IZmAccount,
-  IBudget,
-  IZmBudget,
+  TAccount,
+  TZmAccount,
+  TBudget,
+  TZmBudget,
   TBudgetId,
   TTagId,
-  IZmCompany,
-  ICompany,
-  IZmCountry,
-  ICountry,
-  IZmInstrument,
-  IInstrument,
-  IZmMerchant,
-  IMerchant,
-  IZmReminder,
-  IReminder,
-  IZmReminderMarker,
-  IReminderMarker,
-  IZmTag,
-  ITag,
-  IZmTransaction,
-  ITransaction,
-  IZmUser,
-  IUser,
-  IZmDiff,
-  IDiff,
-  IZmDeletionObject,
-  IDeletionObject,
+  TZmCompany,
+  TCompany,
+  TZmCountry,
+  TCountry,
+  TZmInstrument,
+  TInstrument,
+  TZmMerchant,
+  TMerchant,
+  TZmReminder,
+  TReminder,
+  TZmReminderMarker,
+  TReminderMarker,
+  TZmTag,
+  TTag,
+  TZmTransaction,
+  TTransaction,
+  TZmUser,
+  TUser,
+  TZmDiff,
+  TDiff,
+  TZmDeletionObject,
+  TDeletionObject,
   TUnixTime,
   TMsTime,
   TISODate,
@@ -39,7 +39,7 @@ const msToUnix = (date: TMsTime): TUnixTime => Math.round(date / 1000)
 export const toBudgetId = (date: TISODate, tag: TTagId | null): TBudgetId =>
   `${date}#${tag}`
 
-const convertAccount: TZmAdapter<IZmAccount, IAccount> = {
+const convertAccount: TZmAdapter<TZmAccount, TAccount> = {
   toClient: el => {
     return { ...el, changed: unixToMs(el.changed) }
   },
@@ -48,15 +48,15 @@ const convertAccount: TZmAdapter<IZmAccount, IAccount> = {
   },
 }
 
-const convertBudget: TZmAdapter<IZmBudget, IBudget> = {
-  toClient: (el: IZmBudget): IBudget => {
+const convertBudget: TZmAdapter<TZmBudget, TBudget> = {
+  toClient: (el: TZmBudget): TBudget => {
     return {
       ...el,
       changed: unixToMs(el.changed),
       id: toBudgetId(el.date, el.tag),
     }
   },
-  toServer: (el: IBudget): IZmBudget => {
+  toServer: (el: TBudget): TZmBudget => {
     return {
       changed: msToUnix(el.changed),
       user: el.user,
@@ -70,7 +70,7 @@ const convertBudget: TZmAdapter<IZmBudget, IBudget> = {
   },
 }
 
-const convertCompany: TZmAdapter<IZmCompany, ICompany> = {
+const convertCompany: TZmAdapter<TZmCompany, TCompany> = {
   toClient: el => {
     return { ...el, changed: unixToMs(el.changed) }
   },
@@ -79,21 +79,21 @@ const convertCompany: TZmAdapter<IZmCompany, ICompany> = {
   },
 }
 
-const convertCountry: TZmAdapter<IZmCountry, ICountry> = {
+const convertCountry: TZmAdapter<TZmCountry, TCountry> = {
   toClient: el => el,
   toServer: el => el,
 }
 
-const convertInstrument: TZmAdapter<IZmInstrument, IInstrument> = {
-  toClient: (el: IZmInstrument): IInstrument => {
+const convertInstrument: TZmAdapter<TZmInstrument, TInstrument> = {
+  toClient: (el: TZmInstrument): TInstrument => {
     return { ...el, changed: unixToMs(el.changed) }
   },
-  toServer: (el: IInstrument): IZmInstrument => {
+  toServer: (el: TInstrument): TZmInstrument => {
     return { ...el, changed: msToUnix(el.changed) }
   },
 }
 
-const convertMerchant: TZmAdapter<IZmMerchant, IMerchant> = {
+const convertMerchant: TZmAdapter<TZmMerchant, TMerchant> = {
   toClient: el => {
     return { ...el, changed: unixToMs(el.changed) }
   },
@@ -102,27 +102,27 @@ const convertMerchant: TZmAdapter<IZmMerchant, IMerchant> = {
   },
 }
 
-const convertReminder: TZmAdapter<IZmReminder, IReminder> = {
-  toClient: (el: IZmReminder): IReminder => ({
+const convertReminder: TZmAdapter<TZmReminder, TReminder> = {
+  toClient: (el: TZmReminder): TReminder => ({
     ...el,
     changed: unixToMs(el.changed),
   }),
-  toServer: (el: IReminder): IZmReminder => ({
+  toServer: (el: TReminder): TZmReminder => ({
     ...el,
     changed: msToUnix(el.changed),
   }),
 }
 
-const convertReminderMarker: TZmAdapter<IZmReminderMarker, IReminderMarker> = {
-  toClient: (el: IZmReminderMarker): IReminderMarker => {
+const convertReminderMarker: TZmAdapter<TZmReminderMarker, TReminderMarker> = {
+  toClient: (el: TZmReminderMarker): TReminderMarker => {
     return { ...el, changed: unixToMs(el.changed) }
   },
-  toServer: (el: IReminderMarker): IZmReminderMarker => {
+  toServer: (el: TReminderMarker): TZmReminderMarker => {
     return { ...el, changed: msToUnix(el.changed) }
   },
 }
 
-const convertTag: TZmAdapter<IZmTag, ITag> = {
+const convertTag: TZmAdapter<TZmTag, TTag> = {
   toClient: el => {
     return { ...el, changed: unixToMs(el.changed) }
   },
@@ -131,20 +131,20 @@ const convertTag: TZmAdapter<IZmTag, ITag> = {
   },
 }
 
-const convertTransaction: TZmAdapter<IZmTransaction, ITransaction> = {
-  toClient: (el: IZmTransaction): ITransaction => ({
+const convertTransaction: TZmAdapter<TZmTransaction, TTransaction> = {
+  toClient: (el: TZmTransaction): TTransaction => ({
     ...el,
     changed: unixToMs(el.changed),
     created: unixToMs(el.created),
   }),
-  toServer: (el: ITransaction): IZmTransaction => ({
+  toServer: (el: TTransaction): TZmTransaction => ({
     ...el,
     changed: msToUnix(el.changed),
     created: msToUnix(el.created),
   }),
 }
 
-const convertUser: TZmAdapter<IZmUser, IUser> = {
+const convertUser: TZmAdapter<TZmUser, TUser> = {
   toClient: el => {
     return {
       ...el,
@@ -161,18 +161,18 @@ const convertUser: TZmAdapter<IZmUser, IUser> = {
   },
 }
 
-const convertDeletion: TZmAdapter<IZmDeletionObject, IDeletionObject> = {
-  toClient: (el: IZmDeletionObject): IDeletionObject => {
+const convertDeletion: TZmAdapter<TZmDeletionObject, TDeletionObject> = {
+  toClient: (el: TZmDeletionObject): TDeletionObject => {
     return { ...el, stamp: unixToMs(el.stamp) }
   },
-  toServer: (el: IDeletionObject): IZmDeletionObject => {
+  toServer: (el: TDeletionObject): TZmDeletionObject => {
     return { ...el, stamp: msToUnix(el.stamp) }
   },
 }
 
-export const convertDiff: TZmAdapter<IZmDiff, IDiff> = {
+export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
   toClient: d => {
-    let r: IDiff = { serverTimestamp: 0 }
+    let r: TDiff = { serverTimestamp: 0 }
     if (d.serverTimestamp) r.serverTimestamp = unixToMs(d.serverTimestamp)
     if (d.deletion) r.deletion = d.deletion.map(convertDeletion.toClient)
     if (d.instrument)
@@ -193,7 +193,7 @@ export const convertDiff: TZmAdapter<IZmDiff, IDiff> = {
   },
 
   toServer: d => {
-    let r: IZmDiff = { serverTimestamp: 0 }
+    let r: TZmDiff = { serverTimestamp: 0 }
     if (d.serverTimestamp) r.serverTimestamp = msToUnix(d.serverTimestamp)
     if (d.deletion) r.deletion = d.deletion.map(convertDeletion.toServer)
     if (d.instrument)

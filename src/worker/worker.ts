@@ -1,5 +1,5 @@
 import * as Comlink from 'comlink'
-import { IDiff, TLocalData, IZmDiff } from '../shared/types'
+import { TDiff, TLocalData, TZmDiff } from '../shared/types'
 import { keys } from '../shared/helpers/keys'
 import { storage } from '../shared/api/storage'
 import { zenmoney } from '../shared/api/zenmoney'
@@ -34,11 +34,11 @@ const LOCAL_KEYS = [
   'transaction',
 ] as LocalKey[]
 
-function convertZmToLocal(diff: IZmDiff) {
+function convertZmToLocal(diff: TZmDiff) {
   return convertDiff.toClient(diff)
 }
 
-async function sync(token: string, diff: IDiff) {
+async function sync(token: string, diff: TDiff) {
   const zmDiff = convertDiff.toServer(diff)
   try {
     let data = await zenmoney.getData(token, zmDiff)

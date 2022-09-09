@@ -7,17 +7,17 @@ import { makeTransaction } from '@entities/transaction/makeTransaction'
 import { toISODate } from '@shared/helpers/date'
 import {
   AccountType,
-  IDiff,
-  IUser,
-  IZmCompany,
-  IZmCountry,
-  IZmInstrument,
+  TDiff,
+  TUser,
+  TZmCompany,
+  TZmCountry,
+  TZmInstrument,
 } from '@shared/types'
 
 const NOW = Date.now()
 const DAY = 1000 * 60 * 60 * 24
 
-const USER: IUser = {
+const USER: TUser = {
   id: 777,
   changed: NOW,
   currency: 2, // RUB
@@ -93,12 +93,12 @@ const TR1 = makeTransaction({
   comment: 'Зарплата',
 })
 
-export const getDemoData = (): IDiff => {
+export const getDemoData = (): TDiff => {
   return {
     serverTimestamp: NOW,
-    country: countries as IZmCountry[],
-    company: companies as IZmCompany[],
-    instrument: instruments as IZmInstrument[],
+    country: countries as TZmCountry[],
+    company: companies as TZmCompany[],
+    instrument: instruments as TZmInstrument[],
 
     user: [USER],
     account,

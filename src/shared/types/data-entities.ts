@@ -27,7 +27,7 @@ export type TInstrumentId = number
 
 export type TFxCode = string
 
-export interface IZmInstrument {
+export type TZmInstrument = {
   id: TInstrumentId
   changed: TUnixTime
   title: string
@@ -36,7 +36,7 @@ export interface IZmInstrument {
   rate: number
 }
 
-export interface IInstrument extends IZmInstrument {
+export type TInstrument = TZmInstrument & {
   changed: TMsTime
 }
 
@@ -46,14 +46,14 @@ export interface IInstrument extends IZmInstrument {
 
 export type TCountryId = number
 
-export interface IZmCountry {
+export type TZmCountry = {
   id: TCountryId
   title: string
   currency: TInstrumentId
   domain: string
 }
 
-export interface ICountry extends IZmCountry {}
+export type TCountry = TZmCountry
 
 // ---------------------------------------------------------------------
 // COMPANY
@@ -61,7 +61,7 @@ export interface ICountry extends IZmCountry {}
 
 export type TCompanyId = number
 
-export interface IZmCompany {
+export type TZmCompany = {
   id: TCompanyId
   changed: TUnixTime
   title: string
@@ -72,7 +72,7 @@ export interface IZmCompany {
   deleted: boolean
 }
 
-export interface ICompany extends IZmCompany {
+export type TCompany = TZmCompany & {
   changed: TMsTime
 }
 
@@ -82,7 +82,7 @@ export interface ICompany extends IZmCompany {
 
 export type TUserId = number
 
-export interface IZmUser {
+export type TZmUser = {
   id: TUserId
   changed: TUnixTime
   currency: TInstrumentId
@@ -96,7 +96,7 @@ export interface IZmUser {
   subscription: '10yearssubscription' | '1MonthSubscription' | string
 }
 
-export interface IUser extends IZmUser {
+export type TUser = TZmUser & {
   changed: TMsTime
   paidTill: TMsTime
 }
@@ -117,7 +117,7 @@ export enum AccountType {
   Debt = 'debt',
 }
 
-export interface IZmAccount {
+export type TZmAccount = {
   id: TAccountId
   changed: TUnixTime
   user: TUserId
@@ -147,7 +147,7 @@ export interface IZmAccount {
   payoffInterval: 'month' | 'year' | null
 }
 
-export interface IAccount extends IZmAccount {
+export type TAccount = TZmAccount & {
   changed: TMsTime
 }
 
@@ -157,14 +157,14 @@ export interface IAccount extends IZmAccount {
 
 export type TMerchantId = string
 
-export interface IZmMerchant {
+export type TZmMerchant = {
   id: TMerchantId
   changed: TUnixTime
   user: TUserId
   title: string
 }
 
-export interface IMerchant extends IZmMerchant {
+export type TMerchant = TZmMerchant & {
   changed: TMsTime
 }
 
@@ -174,7 +174,7 @@ export interface IMerchant extends IZmMerchant {
 
 export type TTagId = string
 
-export interface IZmTag {
+export type TZmTag = {
   id: TTagId
   changed: TUnixTime
   user: TUserId
@@ -190,7 +190,7 @@ export interface IZmTag {
   required: boolean | null
 }
 
-export interface ITag extends IZmTag {
+export type TTag = TZmTag & {
   changed: TMsTime
 }
 
@@ -200,7 +200,7 @@ export interface ITag extends IZmTag {
 
 export type TBudgetId = `${TISODate}#${TTagId}`
 
-export interface IZmBudget {
+export type TZmBudget = {
   changed: TUnixTime
   user: TUserId
   tag: TTagId | '00000000-0000-0000-0000-000000000000' | null
@@ -211,7 +211,7 @@ export interface IZmBudget {
   outcomeLock: boolean
 }
 
-export interface IBudget extends IZmBudget {
+export type TBudget = TZmBudget & {
   changed: TMsTime
   // income: TMilliUnits
   // outcome: TMilliUnits
@@ -226,7 +226,7 @@ export interface IBudget extends IZmBudget {
 
 export type TReminderId = string
 
-export interface IZmReminder {
+export type TZmReminder = {
   id: TReminderId
   changed: TUnixTime
   user: TUserId
@@ -248,7 +248,7 @@ export interface IZmReminder {
   notify: boolean
 }
 
-export interface IReminder extends IZmReminder {
+export type TReminder = TZmReminder & {
   changed: TMsTime
 }
 
@@ -258,7 +258,7 @@ export interface IReminder extends IZmReminder {
 
 export type TReminderMarkerId = string
 
-export interface IZmReminderMarker {
+export type TZmReminderMarker = {
   id: TReminderMarkerId // UUID
   changed: TUnixTime
   user: TUserId
@@ -278,7 +278,7 @@ export interface IZmReminderMarker {
   notify: boolean
 }
 
-export interface IReminderMarker extends IZmReminderMarker {
+export type TReminderMarker = TZmReminderMarker & {
   changed: TMsTime
   // income: TMilliUnits
   // outcome: TMilliUnits
@@ -290,7 +290,7 @@ export interface IReminderMarker extends IZmReminderMarker {
 
 export type TTransactionId = string
 
-export interface IZmTransaction {
+export type TZmTransaction = {
   id: TTransactionId
   changed: TUnixTime
   created: TUnixTime
@@ -323,7 +323,7 @@ export interface IZmTransaction {
   longitude: number | null
 }
 
-export interface ITransaction extends IZmTransaction {
+export type TTransaction = TZmTransaction & {
   changed: TMsTime
   created: TMsTime
   // income: TMilliUnits
@@ -341,14 +341,14 @@ export interface ITransaction extends IZmTransaction {
 // DELETION
 // ---------------------------------------------------------------------
 
-export interface IZmDeletionObject {
+export type TZmDeletionObject = {
   id: string | number
   object: DataEntity
   stamp: TUnixTime
   user: TUserId
 }
 
-export interface IDeletionObject extends IZmDeletionObject {
+export type TDeletionObject = TZmDeletionObject & {
   stamp: TMsTime
 }
 
@@ -356,39 +356,39 @@ export interface IDeletionObject extends IZmDeletionObject {
 // DIFF
 // ---------------------------------------------------------------------
 
-export interface IZmDiff {
+export type TZmDiff = {
   serverTimestamp: TUnixTime
-  deletion?: IZmDeletionObject[]
-  instrument?: IZmInstrument[]
-  country?: IZmCountry[]
-  company?: IZmCompany[]
-  user?: IZmUser[]
-  merchant?: IZmMerchant[]
-  account?: IZmAccount[]
-  tag?: IZmTag[]
-  budget?: IZmBudget[]
-  reminder?: IZmReminder[]
-  reminderMarker?: IZmReminderMarker[]
-  transaction?: IZmTransaction[]
+  deletion?: TZmDeletionObject[]
+  instrument?: TZmInstrument[]
+  country?: TZmCountry[]
+  company?: TZmCompany[]
+  user?: TZmUser[]
+  merchant?: TZmMerchant[]
+  account?: TZmAccount[]
+  tag?: TZmTag[]
+  budget?: TZmBudget[]
+  reminder?: TZmReminder[]
+  reminderMarker?: TZmReminderMarker[]
+  transaction?: TZmTransaction[]
 }
 
-export interface IDiff {
+export type TDiff = {
   serverTimestamp?: TMsTime
-  deletion?: IDeletionObject[]
-  instrument?: IInstrument[]
-  country?: ICountry[]
-  company?: ICompany[]
-  user?: IUser[]
-  account?: IAccount[]
-  merchant?: IMerchant[]
-  tag?: ITag[]
-  budget?: IBudget[]
-  reminder?: IReminder[]
-  reminderMarker?: IReminderMarker[]
-  transaction?: ITransaction[]
+  deletion?: TDeletionObject[]
+  instrument?: TInstrument[]
+  country?: TCountry[]
+  company?: TCompany[]
+  user?: TUser[]
+  account?: TAccount[]
+  merchant?: TMerchant[]
+  tag?: TTag[]
+  budget?: TBudget[]
+  reminder?: TReminder[]
+  reminderMarker?: TReminderMarker[]
+  transaction?: TTransaction[]
 }
 
-export interface IZmRequest extends IZmDiff {
+export type TZmRequest = TZmDiff & {
   currentClientTimestamp: TUnixTime
   forceFetch?: DataEntity[]
 }

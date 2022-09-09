@@ -3,36 +3,36 @@ import { getType } from '@entities/transaction/helpers'
 import {
   ByIdOld,
   Modify,
-  IAccount,
-  IInstrument,
-  ITag,
+  TAccount,
+  TInstrument,
+  TTag,
   TTagId,
-  ITransaction,
+  TTransaction,
 } from '@shared/types'
 
 interface DataSources {
-  instruments: { [id: number]: IInstrument }
-  accounts: { [id: string]: IAccount }
-  tags: { [id: string]: ITag }
+  instruments: { [id: number]: TInstrument }
+  accounts: { [id: string]: TAccount }
+  tags: { [id: string]: TTag }
 }
 
 export type PopulatedTransaction = Modify<
-  ITransaction,
+  TTransaction,
   {
-    incomeInstrument: IInstrument
-    incomeAccount: IAccount
-    opIncomeInstrument: IInstrument
-    outcomeInstrument: IInstrument
-    outcomeAccount: IAccount
-    opOutcomeInstrument: IInstrument
-    tag: ITag[] | null
+    incomeInstrument: TInstrument
+    incomeAccount: TAccount
+    opIncomeInstrument: TInstrument
+    outcomeInstrument: TInstrument
+    outcomeAccount: TAccount
+    opOutcomeInstrument: TInstrument
+    tag: TTag[] | null
     type: TrType
   }
 >
 
 export const populateTransaction = (
   { instruments, accounts, tags }: DataSources,
-  raw: ITransaction
+  raw: TTransaction
 ) => ({
   ...raw,
   incomeInstrument: instruments[raw.incomeInstrument],
@@ -46,7 +46,7 @@ export const populateTransaction = (
   type: getType(raw),
 })
 
-function mapTags(ids: TTagId[] | null, tags: ByIdOld<ITag>) {
+function mapTags(ids: TTagId[] | null, tags: ByIdOld<TTag>) {
   // TODO: Надо что-то придумать с null тегом 🤔    ⤵
   return ids && ids.length ? ids.map(id => tags[id + '']) : null
 }

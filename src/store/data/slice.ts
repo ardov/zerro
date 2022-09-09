@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { TDataStore, IDiff } from '@shared/types'
+import { TDataStore, TDiff } from '@shared/types'
 import { dataModel } from './effector'
 import { applyDiff } from './shared/applyDiff'
 import { mergeDiffs } from './shared/mergeDiffs'
@@ -7,7 +7,7 @@ import { mergeDiffs } from './shared/mergeDiffs'
 interface DataSlice {
   current: TDataStore
   server?: TDataStore
-  diff?: IDiff
+  diff?: TDiff
 }
 
 const makeDataStore = (): TDataStore => ({
@@ -32,7 +32,7 @@ const initialState: DataSlice = {
   diff: undefined,
 }
 
-interface ExtendedDiff extends IDiff {
+interface ExtendedDiff extends TDiff {
   syncStartTime?: number
 }
 
@@ -50,7 +50,7 @@ const { reducer, actions } = createSlice({
       // TODO: Тут хорошо бы не всё удалять, а только то что синхронизировалось (по времени старта). После этого надо ещё current пересобрать на основе серверных данных и диффа
       state.diff = undefined
     },
-    applyClientPatch: (state, { payload }: PayloadAction<IDiff>) => {
+    applyClientPatch: (state, { payload }: PayloadAction<TDiff>) => {
       dataModel.applyClientPatch(payload)
       if (!payload) return
       applyDiff(payload, state.current)

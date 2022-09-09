@@ -3,10 +3,10 @@ import { getType } from '@entities/transaction/helpers'
 import {
   DataEntity,
   TAccountId,
-  ITransaction,
+  TTransaction,
   TFxAmount,
   TEnvelopeId,
-  IInstrument,
+  TInstrument,
   ById,
   TISODate,
 } from '@shared/types'
@@ -30,7 +30,7 @@ export type TBudgetChange = {
   direction: trDirection
   envelope: TEnvelopeId | null
   diff: TFxAmount
-  transaction: ITransaction
+  transaction: TTransaction
 }
 
 export const getBudgetChanges: TSelector<TBudgetChange[]> = createSelector(
@@ -71,7 +71,7 @@ export const getBudgetChanges: TSelector<TBudgetChange[]> = createSelector(
 )
 
 function getDirection(
-  tr: ITransaction,
+  tr: TTransaction,
   type: TrType,
   inBudgetAccIds: TAccountId[]
 ): trDirection | null {
@@ -99,9 +99,9 @@ function getDirection(
 }
 
 function getDiff(
-  tr: ITransaction,
+  tr: TTransaction,
   direction: trDirection,
-  instruments: ById<IInstrument>
+  instruments: ById<TInstrument>
 ): TFxAmount {
   let income = { [instruments[tr.incomeInstrument].shortTitle]: tr.income }
   let outcome = { [instruments[tr.outcomeInstrument].shortTitle]: -tr.outcome }
@@ -112,7 +112,7 @@ function getDiff(
 }
 
 function getEnvelope(
-  tr: ITransaction,
+  tr: TTransaction,
   type: TrType,
   direction: trDirection,
   debtors: ById<TDebtor>
@@ -143,7 +143,7 @@ function getEnvelope(
   }
 }
 
-function getDebtorId(tr: ITransaction, debtors: ById<TDebtor>): TEnvelopeId {
+function getDebtorId(tr: TTransaction, debtors: ById<TDebtor>): TEnvelopeId {
   if (tr.merchant) return getEnvelopeId(DataEntity.Merchant, tr.merchant)
   // PAYEE INCOME
   let cleanName = cleanPayee(String(tr.payee))

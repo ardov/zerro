@@ -1,6 +1,6 @@
 import { IAccountPopulated } from './types'
 import { isInBudget } from './helpers'
-import { ById, IAccount, IInstrument } from '@shared/types'
+import { ById, TAccount, TInstrument } from '@shared/types'
 
 interface Options {
   convert: (
@@ -8,12 +8,12 @@ interface Options {
     from: number
     // to?: number | undefined
   ) => number
-  instruments: ById<IInstrument>
+  instruments: ById<TInstrument>
 }
 
 export const populate = (
   { convert, instruments }: Options,
-  raw: IAccount
+  raw: TAccount
 ): IAccountPopulated => {
   return {
     ...raw,

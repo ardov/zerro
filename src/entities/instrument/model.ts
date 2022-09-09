@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { IInstrument, TFxCode, TInstrumentId } from '@shared/types'
+import { TInstrument, TFxCode, TInstrumentId } from '@shared/types'
 import { RootState } from '@store'
 import { getUserInstrumentId } from '@entities/user'
 import { TFxIdMap } from './types'
@@ -19,7 +19,7 @@ export const getUserCurrencyCode = (state: RootState) => {
 export const getInstrumentsByCode = createSelector(
   [getInstruments],
   instruments => {
-    const result: Record<TFxCode, IInstrument> = {}
+    const result: Record<TFxCode, TInstrument> = {}
     Object.values(instruments).forEach(instrument => {
       result[instrument.shortTitle] = instrument
     })

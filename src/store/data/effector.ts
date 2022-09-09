@@ -1,12 +1,14 @@
 // TODO: remove or start using
 
 import { combine, createEvent, createStore } from 'effector'
-import { TDataStore, IDiff } from '@shared/types'
+import { TDataStore, TDiff } from '@shared/types'
 import { immutableApplyDiff } from './shared/applyDiff'
 import { immutableMergeDiffs } from './shared/mergeDiffs'
+import { getItemsCount } from './shared/getItemsCount'
+import { getLastDiffChange } from './shared/getLastDiffChange'
 
-const applyServerPatch = createEvent<IDiff>('applyServerPatch')
-const applyClientPatch = createEvent<IDiff>('applyClientPatch')
+const applyServerPatch = createEvent<TDiff>('applyServerPatch')
+const applyClientPatch = createEvent<TDiff>('applyClientPatch')
 const resetData = createEvent<void>('resetData')
 
 //
@@ -37,7 +39,7 @@ const $lastSyncTime = $serverData.map<number>(data => data.serverTimestamp)
 
 //
 // Diff store
-const $diff = createStore<IDiff | null>(null)
+const $diff = createStore<TDiff | null>(null)
   .on(applyClientPatch, (state, diff) => {
     if (!diff) return state
     return state ? immutableMergeDiffs(state, diff) : diff
@@ -45,21 +47,9 @@ const $diff = createStore<IDiff | null>(null)
   .on(applyServerPatch, () => null)
   .on(resetData, () => null)
 
-const $shangedNum = $diff.map<number>(diff => {
-  if (!diff) return 0
-  return Object.values(diff).reduce((sum, arr) => sum + arr.length, 0)
-})
+const $changedNum = $diff.map<number>(getItemsCount)
 
-const $lastChange = $diff.map<number>(diff => {
-  if (!diff) return 0
-  let lastChange = 0
-  Object.values(diff).forEach(array =>
-    array.forEach((item: { changed: number; [x: string]: any }) => {
-      lastChange = Math.max(item.changed, lastChange)
-    })
-  )
-  return lastChange
-})
+const $lastChange = $diff.map<number>(getLastDiffChange)
 
 const $currentData = combine($serverData, $diff, (data, diff) => {
   if (!diff) return data
@@ -76,6 +66,6 @@ export const dataModel = {
   $currentData,
 
   $lastSyncTime,
-  $shangedNum,
+  $shangedNum: $changedNum,
   $lastChange,
 }

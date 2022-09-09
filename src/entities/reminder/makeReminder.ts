@@ -1,17 +1,17 @@
 import { v1 as uuidv1 } from 'uuid'
-import { IReminder } from '@shared/types'
+import { TReminder } from '@shared/types'
 import { toISODate } from '@shared/helpers/date'
 import { Modify, OptionalExceptFor, TDateDraft } from '@shared/types'
 
 type ReminderDraft = Modify<
-  OptionalExceptFor<IReminder, 'user' | 'incomeAccount' | 'outcomeAccount'>,
+  OptionalExceptFor<TReminder, 'user' | 'incomeAccount' | 'outcomeAccount'>,
   {
     startDate?: TDateDraft
     endDate?: TDateDraft
   }
 >
 
-export function makeReminder(draft: ReminderDraft): IReminder {
+export function makeReminder(draft: ReminderDraft): TReminder {
   return {
     // Required
     user: draft.user,

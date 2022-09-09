@@ -1,10 +1,10 @@
 import { makeAccount } from '@entities/account'
 import { makeReminder } from '@entities/reminder'
-import { IAccount } from '@shared/types'
+import { TAccount } from '@shared/types'
 import { DataReminderType, DATA_ACC_NAME } from './constants'
 
 // DATA ACCOUNT
-export function makeDataAcc(user: number): IAccount {
+export function makeDataAcc(user: number): TAccount {
   return makeAccount({
     user,
     instrument: 2,

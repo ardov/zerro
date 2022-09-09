@@ -6,11 +6,11 @@ import { getSortedTransactions } from '@entities/transaction'
 import { getTransactionsHistory } from '@entities/transaction'
 import { convertCurrency } from '@entities/instrument'
 import {
-  IAccount,
+  TAccount,
   TAccountId,
   TInstrumentId,
   TISODate,
-  ITransaction,
+  TTransaction,
 } from '@shared/types'
 import { eachDayOfInterval, parseDate, toISODate } from '@shared/helpers/date'
 
@@ -25,7 +25,7 @@ interface History {
 
 export const getAccountsHistory = createSelector(
   [getTransactionsHistory, getAccounts],
-  (transactions: ITransaction[], accounts: { [x: string]: IAccount }) => {
+  (transactions: TTransaction[], accounts: { [x: string]: TAccount }) => {
     if (!transactions?.length || !accounts) return {}
     let historyById: History = {}
     const firstDate = transactions[0].date
@@ -118,9 +118,9 @@ export const getAccountsHistory = createSelector(
 interface InfoNode {
   income: number
   outcome: number
-  incomeTransactions: ITransaction[]
-  outcomeTransactions: ITransaction[]
-  transferTransactions: ITransaction[]
+  incomeTransactions: TTransaction[]
+  outcomeTransactions: TTransaction[]
+  transferTransactions: TTransaction[]
 }
 
 export interface Stats {
@@ -147,7 +147,7 @@ const createInfoNode = (): InfoNode => ({
 export const getYearStats = (year: number) =>
   createSelector(
     [getSortedTransactions, convertCurrency],
-    (allTransactions: ITransaction[], convert) => {
+    (allTransactions: TTransaction[], convert) => {
       if (!allTransactions?.length) return null
       const dateStart = toISODate(new Date(year, 0, 1))
       const dateEnd = toISODate(new Date(year + 1, 0, 1))
@@ -169,7 +169,7 @@ export const getYearStats = (year: number) =>
         byWeekday: {},
       } as Stats
 
-      function addToNode(node: InfoNode, tr: ITransaction) {
+      function addToNode(node: InfoNode, tr: TTransaction) {
         const type = getType(tr)
         if (type === 'transfer') {
           node.transferTransactions.push(tr)
@@ -185,9 +185,9 @@ export const getYearStats = (year: number) =>
       }
 
       function groupBy(
-        field: keyof ITransaction | Function,
+        field: keyof TTransaction | Function,
         object: any,
-        tr: ITransaction
+        tr: TTransaction
       ) {
         let key
         if (typeof field === 'string') key = tr[field]
@@ -216,20 +216,20 @@ export const getYearStats = (year: number) =>
     }
   )
 
-function getMainTag(tr: ITransaction) {
+function getMainTag(tr: TTransaction) {
   return tr.tag?.[0] || 'null'
 }
-function getMonth(tr: ITransaction) {
+function getMonth(tr: TTransaction) {
   return parseDate(tr.date).getMonth()
 }
-function getWeekday(tr: ITransaction) {
+function getWeekday(tr: TTransaction) {
   return parseDate(tr.date).getDay()
 }
 
 function compareByAmount(
   convert: (amount: number, id: TInstrumentId) => number
 ) {
-  return function (tr1: ITransaction, tr2: ITransaction) {
+  return function (tr1: TTransaction, tr2: TTransaction) {
     const amount1 = Math.max(
       convert(tr1.income, tr1.incomeInstrument),
       convert(tr1.outcome, tr1.outcomeInstrument)

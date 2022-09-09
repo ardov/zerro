@@ -1,4 +1,4 @@
-import { IDiff } from '@shared/types'
+import { TDiff } from '@shared/types'
 import { TDataStore } from '@shared/types'
 
 /**
@@ -6,7 +6,7 @@ import { TDataStore } from '@shared/types'
  * @param diff
  * @param store
  */
-export function applyDiff(diff: IDiff, store: TDataStore) {
+export function applyDiff(diff: TDiff, store: TDataStore) {
   if (diff.serverTimestamp) store.serverTimestamp = diff.serverTimestamp
   diff.deletion?.forEach(obj => {
     // @ts-ignore
@@ -25,7 +25,7 @@ export function applyDiff(diff: IDiff, store: TDataStore) {
   processKey('reminderMarker')
   processKey('transaction')
 
-  function processKey(key: keyof IDiff) {
+  function processKey(key: keyof TDiff) {
     if (key === 'serverTimestamp' || key === 'deletion') return
     if (diff[key])
       diff[key]?.forEach(el => {
@@ -41,7 +41,7 @@ export function applyDiff(diff: IDiff, store: TDataStore) {
  * @param diff
  * @param store
  */
-export function immutableApplyDiff(diff: IDiff, store: TDataStore) {
+export function immutableApplyDiff(diff: TDiff, store: TDataStore) {
   const result: TDataStore = { ...store }
   if (diff.serverTimestamp) result.serverTimestamp = diff.serverTimestamp
   diff.deletion?.forEach(obj => {
@@ -65,7 +65,7 @@ export function immutableApplyDiff(diff: IDiff, store: TDataStore) {
 
   return result
 
-  function processKey(key: keyof IDiff) {
+  function processKey(key: keyof TDiff) {
     if (key === 'serverTimestamp' || key === 'deletion') return
     if (diff[key])
       // @ts-ignore

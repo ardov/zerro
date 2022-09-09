@@ -3,7 +3,7 @@ import { getReminders, setReminder } from '@entities/reminder'
 import { getRootUser } from '@entities/user'
 import { isISOMonth } from '@shared/helpers/date'
 import { keys } from '@shared/helpers/keys'
-import { IReminder, TISOMonth } from '@shared/types'
+import { TReminder, TISOMonth } from '@shared/types'
 import { AppThunk, TSelector } from '@store'
 import { prepareDataAccount } from './dataAccount'
 import { parseComment } from './helpers'
@@ -11,7 +11,7 @@ import { HiddenDataType } from './types'
 
 type TMonthlyStore<TPayload> = {
   type: HiddenDataType
-  getDataReminders: TSelector<Record<TISOMonth, IReminder>>
+  getDataReminders: TSelector<Record<TISOMonth, TReminder>>
   getData: TSelector<Record<TISOMonth, TPayload>>
   setData: (payload: TPayload, month: TISOMonth) => AppThunk<void>
 }
@@ -19,9 +19,9 @@ type TMonthlyStore<TPayload> = {
 export function makeMonthlyHiddenStore<TPayload>(
   type: HiddenDataType
 ): TMonthlyStore<TPayload> {
-  const getDataReminders: TSelector<Record<TISOMonth, IReminder>> =
+  const getDataReminders: TSelector<Record<TISOMonth, TReminder>> =
     createSelector([getReminders], reminders => {
-      const result: Record<TISOMonth, IReminder> = {}
+      const result: Record<TISOMonth, TReminder> = {}
       Object.values(reminders).forEach(r => {
         const data = parseComment(r.comment)
         if (data && data.type === type && isISOMonth(data.month)) {
@@ -42,7 +42,7 @@ export function makeMonthlyHiddenStore<TPayload>(
     }
   )
   const setData =
-    (payload: TPayload, month: TISOMonth): AppThunk<IReminder> =>
+    (payload: TPayload, month: TISOMonth): AppThunk<TReminder> =>
     (dispatch, getState) => {
       if (!isISOMonth(month)) {
         throw new Error('Invalid month')

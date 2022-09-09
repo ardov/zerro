@@ -4,11 +4,11 @@ import { TrType } from '@entities/transaction'
 import { Theme, TypographyVariant } from '@mui/material'
 import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'
 import { sendEvent } from '@shared/helpers/tracking'
-import { ITransaction } from '@shared/types'
+import { TTransaction } from '@shared/types'
 
 type TransactionProps = {
   id: string
-  transaction: ITransaction
+  transaction: TTransaction
   type: TrType
   isInSelectionMode: boolean
   isChecked: boolean
