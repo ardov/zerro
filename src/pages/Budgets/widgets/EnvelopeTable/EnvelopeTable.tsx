@@ -8,10 +8,12 @@ import {
   useMonth,
 } from '../../model'
 import { Parent } from './Parent'
-import { Row } from './Row'
+import { Row } from './Row/Row'
 import { BudgetPopover } from '../BudgetPopover'
 import { GoalPopover } from '../GoalPopover'
 import { useSearchParam } from '@shared/hooks/useSearchParam'
+import { Header } from './Header'
+import { Metric, rowStyle } from './shared/shared'
 
 type TagTableProps = {
   onOpenDetails: (id: TEnvelopeId) => void
@@ -27,9 +29,10 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
   const budget = useEnvelopePopover(month, 'budget')
   const goal = useEnvelopePopover(month, 'goal')
   const [, setId] = useSearchParam<TEnvelopeId>('transactions')
+  const [metric, setMetric] = useState<Metric>(Metric.available)
+  const switchMetric = () => {}
   const onOpenTransactionPopover = useCallback(
     (id: TEnvelopeId) => {
-      console.log(id)
       setId(id)
     },
     [setId]
@@ -37,6 +40,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
   return (
     <>
       <Paper className={className}>
+        <Header metric={metric} onMetricSwitch={switchMetric} />
         {groups.map(group => (
           <EnvelopeGroup key={group.name} group={group}>
             {group.children.map(parent => (
@@ -51,7 +55,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
                 parent={
                   <Row
                     envelope={parent}
-                    metric="available"
+                    metric={metric}
                     openGoalPopover={goal.onOpen}
                     openBudgetPopover={budget.onOpen}
                     openTransactionsPopover={onOpenTransactionPopover}
@@ -62,7 +66,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
                   <Row
                     key={'child' + child.id}
                     envelope={child}
-                    metric="available"
+                    metric={metric}
                     openGoalPopover={goal.onOpen}
                     openBudgetPopover={budget.onOpen}
                     openTransactionsPopover={onOpenTransactionPopover}
@@ -93,7 +97,7 @@ const EnvelopeGroup: FC<TEnvelopeGroupProps> = ({ group, children }) => {
       <Typography
         variant="h6"
         sx={{
-          pl: 3,
+          ...rowStyle,
           pb: 1,
           pt: 2,
           borderBottom: `1px solid black`,

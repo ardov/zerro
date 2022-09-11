@@ -1,6 +1,5 @@
-import React, { FC } from 'react'
+import React, { FC, useCallback } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
-import { CSS } from '@dnd-kit/utilities'
 import {
   Typography,
   Box,
@@ -30,13 +29,14 @@ import { useAppSelector } from '@store'
 import { getUserCurrencyCode } from '@entities/instrument'
 import { goalToWords, TGoal } from '@entities/goal'
 import { useRates } from '@entities/envelopeData'
-import { TEnvelopePopulated, useMonth } from '../../model'
-import { DragTypes } from '../DnDContext'
+import { TEnvelopePopulated, useMonth } from '../../../model'
+import { DragTypes } from '../../DnDContext'
+import { Metric, rowStyle } from '../shared/shared'
 
 type EnvelopeRowProps = {
   envelope: TEnvelopePopulated
   showAll?: boolean
-  metric: 'available' | 'budgeted' | 'outcome'
+  metric: Metric
   openDetails: (id: TEnvelopeId) => void
   openGoalPopover: (id: TEnvelopeId, target: Element) => void
   openBudgetPopover: (id: TEnvelopeId, target: Element) => void
@@ -57,52 +57,26 @@ export const Row: FC<EnvelopeRowProps> = props => {
     envelope
   const isChild = !!envelope.parent || isSelf
   const showBudget = isChild ? !isZero(totalBudgeted) : true
-
-  const { setNodeRef, isOver, over } = useDroppable({
-    id,
-    data: { type: DragTypes.envelope },
-  })
-
-  const style: SxProps = {
-    display: 'grid',
-    gridTemplateColumns: {
-      xs: 'auto 90px 16px',
-      sm: 'auto 90px 90px 90px 16px',
-    },
-    bgcolor: isOver ? 'action.selected' : 'transparent',
-    width: '100%',
-    paddingLeft: isChild ? 7 : 2,
-    paddingRight: 2,
-    transition: '0.1s',
-    alignItems: 'center',
-    justifyContent: 'initial',
-    gridColumnGap: '12px',
-    '&:hover': { bgcolor: isOver ? 'none' : 'action.hover' },
-    '&:hover .addGoal': { opacity: 1, transition: '.3s' },
-    '&:not(:hover) .addGoal': { opacity: 0 },
-    '& > *': { py: isChild ? 0.5 : 1 },
-  }
-
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
-  if (!envelope.isDefaultVisible && !showAll) {
-    return null
-  }
+  const handleNameClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.altKey) console.log(envelope.name, envelope)
+      else openDetails(id)
+    },
+    [id]
+  )
+
+  if (!envelope.isDefaultVisible && !showAll) return null
 
   return (
-    <Box ref={setNodeRef} sx={style}>
+    <Droppable id={id} isChild={isChild}>
       {/* Name cell */}
       <Box
         display="flex"
         alignItems="center"
         minWidth={0}
-        onClick={e => {
-          if (e.altKey) {
-            console.log(envelope.name, envelope)
-          } else {
-            openDetails(id)
-          }
-        }}
+        onClick={handleNameClick}
       >
         <EmojiIcon symbol={symbol} mr={1.5} color={color} />
         <Typography component="span" variant="body1" title={name} noWrap>
@@ -119,7 +93,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
         )}
       </Box>
 
-      {(metric === 'budgeted' || !isMobile) && (
+      {(metric === Metric.budgeted || !isMobile) && (
         <BudgetCell
           isUnsorted={isSelf}
           budgeted={envelope.displayBudgeted}
@@ -128,7 +102,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
         />
       )}
 
-      {(metric === 'outcome' || !isMobile) && (
+      {(metric === Metric.outcome || !isMobile) && (
         <OutcomeCell
           activity={envelope.totalActivity}
           displayActivity={envelope.displayActivity}
@@ -136,7 +110,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
         />
       )}
 
-      {(metric === 'available' || !isMobile) && (
+      {(metric === Metric.available || !isMobile) && (
         <AvailableCell
           hiddenOverspend={envelope.displayHiddenOverspend}
           id={id}
@@ -154,6 +128,36 @@ export const Row: FC<EnvelopeRowProps> = props => {
           onClick={e => openGoalPopover(id, e.currentTarget)}
         />
       )}
+    </Droppable>
+  )
+}
+
+const Droppable: FC<{
+  id: TEnvelopeId
+  isChild: boolean
+  children: React.ReactNode
+}> = props => {
+  const { id, isChild, children } = props
+  const { setNodeRef, isOver } = useDroppable({
+    id,
+    data: { type: DragTypes.envelope },
+  })
+  const style: SxProps = {
+    ...rowStyle,
+    pl: isChild ? 7 : 2,
+    bgcolor: isOver ? 'action.selected' : 'transparent',
+    transition: '0.1s',
+    // alignItems: 'center',
+    // justifyContent: 'initial',
+    // gridColumnGap: '12px',
+    '&:hover': { bgcolor: isOver ? 'none' : 'action.hover' },
+    '&:hover .addGoal': { opacity: 1, transition: '.3s' },
+    '&:not(:hover) .addGoal': { opacity: 0 },
+    '& > *': { py: isChild ? 0.5 : 1 },
+  }
+  return (
+    <Box ref={setNodeRef} sx={style}>
+      {children}
     </Box>
   )
 }
@@ -240,20 +244,36 @@ const OutcomeCell: FC<OutcomeCellProps> = props => {
   const mainCurrency = useAppSelector(getUserCurrencyCode)
   const { activity, displayActivity, onClick } = props
 
+  // <Tooltip title={getAmountTitle(activity, mainCurrency, rates)}>
+  //   </Tooltip>
   return (
-    <Tooltip title={getAmountTitle(activity, mainCurrency, rates)}>
-      <Box
-        display="flex"
-        justifyContent="flex-end"
-        color={displayActivity ? 'text.primary' : 'text.hint'}
-      >
-        <Btn onClick={onClick}>
-          <Typography variant="body1" align="right">
-            <Amount value={displayActivity} decMode="ifOnly" />
-          </Typography>
-        </Btn>
-      </Box>
-    </Tooltip>
+    <Box
+      display="flex"
+      justifyContent="flex-end"
+      color={displayActivity ? 'text.primary' : 'text.hint'}
+    >
+      <Btn onClick={onClick}>
+        <Typography variant="body1" align="right">
+          <Amount value={displayActivity} decMode="ifOnly" />
+        </Typography>
+      </Btn>
+    </Box>
+  )
+}
+
+const Draggable: FC<{
+  id: string
+  children: React.ReactNode
+  type: DragTypes
+  disabled?: boolean
+}> = props => {
+  const { id, children, disabled, type } = props
+  const { setNodeRef, isDragging, transform, attributes, listeners } =
+    useDraggable({ id, disabled, data: { type } })
+  return (
+    <span ref={setNodeRef} {...attributes} {...listeners}>
+      {children}
+    </span>
   )
 }
 
@@ -268,12 +288,6 @@ type AvailableCellProps = {
 const AvailableCell: FC<AvailableCellProps> = props => {
   const { hiddenOverspend, id, available, isChild, budgeted, isUnsorted } =
     props
-  const { setNodeRef, isDragging, transform, attributes, listeners } =
-    useDraggable({
-      id,
-      disabled: isUnsorted,
-      data: { type: DragTypes.amount },
-    })
   const availableColor = getAvailableColor(available, isChild, !!budgeted)
 
   return (
@@ -297,27 +311,28 @@ const AvailableCell: FC<AvailableCellProps> = props => {
           </Tooltip>
         )}
 
-        <Box
-          component="span"
-          sx={{
-            borderRadius: 1,
-            bgcolor: isDragging ? 'background.paper' : '',
-            px: 2,
-            mx: -2,
-            py: 0.5,
-            my: -0.5,
-            component: 'span',
-            display: 'inline-block',
-            color: availableColor,
-            transform: CSS.Translate.toString(transform),
-            cursor: isDragging ? 'grabbing' : 'grab',
-          }}
-          ref={setNodeRef}
-          {...attributes}
-          {...listeners}
-        >
-          <Amount value={available} decMode="ifOnly" />
-        </Box>
+        <Draggable id={id} type={DragTypes.amount} disabled={isUnsorted}>
+          <Box
+            component="span"
+            sx={{
+              borderRadius: 1,
+              // bgcolor: isDragging ? 'background.paper' : '',
+              px: 2,
+              mx: -2,
+              py: 0.5,
+              my: -0.5,
+              component: 'span',
+              display: 'inline-block',
+              color: availableColor,
+              touchAction: 'none',
+              // transform: CSS.Translate.toString(transform),
+              // cursor: isDragging ? 'grabbing' : 'grab',
+              cursor: 'grab',
+            }}
+          >
+            <Amount value={available} decMode="ifOnly" />
+          </Box>
+        </Draggable>
       </Typography>
     </Box>
   )
@@ -328,7 +343,6 @@ type GoalButtonProps = {
   goalProgress?: number | null
   onClick: IconButtonProps['onClick']
 }
-
 const GoalButton: FC<GoalButtonProps> = props => {
   const { goal, goalProgress, onClick } = props
 

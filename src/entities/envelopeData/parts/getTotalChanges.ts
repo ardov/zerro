@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { TFxAmount, TEnvelopeId, TISOMonth } from '@shared/types'
+import { TFxAmount, TEnvelopeId, TISOMonth, TTransaction } from '@shared/types'
 import { toISOMonth } from '@shared/helpers/date'
 import { addFxAmount } from '@shared/helpers/money'
 import { TSelector } from '@store'
@@ -18,6 +18,9 @@ type TTotalNode = {
   trend: TFxAmount[]
   trendIncome: TFxAmount[]
   trendOutcome: TFxAmount[]
+
+  trIncome: TTransaction[]
+  trOutcome: TTransaction[]
 }
 
 export type TMonthChange = {
@@ -82,6 +85,8 @@ function makeTotalNode(): TTotalNode {
     trend: makeMonthlyTrend(),
     trendIncome: makeMonthlyTrend(),
     trendOutcome: makeMonthlyTrend(),
+    trIncome: [],
+    trOutcome: [],
   }
 }
 function makeMonthlyTrend(): TFxAmount[] {
@@ -96,11 +101,13 @@ function addToTotalNode(node: TTotalNode, ch: TBudgetChange) {
 
   if (ch.direction === trDirection.income) {
     node.totalIncome = addFxAmount(node.totalIncome, ch.diff)
+    node.trIncome.push(ch.transaction)
     node.trendIncome[day] = addFxAmount(node.trendIncome[day], ch.diff)
   }
 
   if (ch.direction === trDirection.outcome) {
     node.totalOutcome = addFxAmount(node.totalOutcome, ch.diff)
+    node.trOutcome.push(ch.transaction)
     node.trendOutcome[day] = addFxAmount(node.trendOutcome[day], ch.diff)
   }
 }

@@ -10,6 +10,7 @@ import { TDebtor } from '@entities/debtors'
 import { TTagPopulated } from '@entities/tag'
 import { getEnvelopeId } from './helpers'
 import { TEnvelopeMeta, envelopeVisibility } from './metaData'
+import { getColorForString } from '@shared/helpers/color'
 
 const defaultTagGroup = 'Категории'
 const defaultAccountGroup = 'Переводы'
@@ -25,6 +26,7 @@ export type TEnvelope = {
   originalName: string // ZM title
   symbol: string // From ZM entity
   color: string | null
+  colorGenerated: string
   visibility: envelopeVisibility
   // For tags getting this props from ZM entity
   // For other types store in custom storage
@@ -58,7 +60,8 @@ function makeEnvelopeFromTag(
     name: tag.name,
     originalName: tag.title,
     symbol: tag.symbol,
-    color: tag.colorHEX,
+    color: tag.id === 'null' ? '#ff0000' : tag.colorHEX,
+    colorGenerated: getColorForString(tag.title),
     visibility: getVisibility(info[id]?.visibility, tag.showOutcome),
     parent: tag.parent ? getEnvelopeId(DataEntity.Tag, tag.parent) : null,
     children: [],
@@ -85,6 +88,7 @@ function makeEnvelopeFromAccount(
     originalName: account.title,
     symbol: '🏦',
     color: null,
+    colorGenerated: getColorForString(account.title),
     visibility: getVisibility(info[id]?.visibility),
     parent: info[id]?.parent || null,
     children: [],
@@ -112,6 +116,7 @@ function makeEnvelopeFromDebtor(
       originalName: debtor.name,
       symbol: '👤',
       color: null,
+      colorGenerated: getColorForString(debtor.name),
       visibility: getVisibility(info[id]?.visibility),
       parent: info[id]?.parent || null,
       children: [],
@@ -133,6 +138,7 @@ function makeEnvelopeFromDebtor(
       originalName: debtor.name,
       symbol: '🌚',
       color: null,
+      colorGenerated: getColorForString(debtor.name),
       visibility: getVisibility(info[id]?.visibility),
       parent: null,
       children: [],

@@ -1,6 +1,6 @@
 import { getMonthTotals, getTotalChanges } from '@entities/envelopeData'
 import { useDisplayCurrency } from '@entities/instrument/hooks'
-import { Divider, Paper } from '@mui/material'
+import { Divider, Paper, Stack } from '@mui/material'
 import { prevMonth, toISOMonth } from '@shared/helpers/date'
 import { convertFx } from '@shared/helpers/money'
 import { TFxAmount, TISOMonth } from '@shared/types'
@@ -14,7 +14,9 @@ import {
   ResponsiveContainer,
   XAxis,
 } from 'recharts'
+import { BalaneWidget } from './BalaneWidget'
 import { Explainer } from './Explainer'
+import { StatWidget } from './StatWidget'
 
 export const BalanceInfo: FC<{ month: TISOMonth }> = props => {
   const changes = useAppSelector(getTotalChanges)[props.month]
@@ -54,63 +56,70 @@ export const BalanceInfo: FC<{ month: TISOMonth }> = props => {
   })
 
   return (
-    <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-      <Chart data={data} />
+    <Stack gap={2}>
+      <BalaneWidget month={props.month} />
+      <StatWidget month={props.month} mode="income" />
+      <StatWidget month={props.month} mode="outcome" />
+      {/*  */}
 
-      <Divider />
+      <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Chart data={data} />
 
-      <Explainer month={props.month} />
+        <Divider />
 
-      <Divider />
+        <Explainer month={props.month} />
 
-      <DataLine
-        name="Всего в бюджете"
-        amount={toDisplay(totals.fundsEnd)}
-        currency={displayCurrency}
-      />
-      <DataLine
-        name="За месяц"
-        amount={toDisplay(totals.fundsChange)}
-        currency={displayCurrency}
-        sign
-      />
-      <DataLine
-        name="Доходы"
-        amount={toDisplay(changes.sum.totalIncome)}
-        currency={displayCurrency}
-        sign
-      />
-      <DataLine
-        name="Расходы"
-        amount={toDisplay(changes.sum.totalOutcome)}
-        currency={displayCurrency}
-        sign
-      />
-      <DataLine
-        name="Комиссии/обмен"
-        amount={toDisplay(changes.transferFees.total)}
-        currency={displayCurrency}
-        sign
-      />
+        <Divider />
 
-      <Divider />
+        <DataLine
+          name="Всего в бюджете"
+          amount={toDisplay(totals.fundsEnd)}
+          currency={displayCurrency}
+        />
+        <DataLine
+          name="За месяц"
+          amount={toDisplay(totals.fundsChange)}
+          currency={displayCurrency}
+          sign
+        />
+        <DataLine
+          name="Доходы"
+          amount={toDisplay(changes.sum.totalIncome)}
+          currency={displayCurrency}
+          sign
+        />
+        <DataLine
+          name="Расходы"
+          amount={toDisplay(changes.sum.totalOutcome)}
+          currency={displayCurrency}
+          sign
+        />
+        <DataLine
+          name="Комиссии/обмен"
+          amount={toDisplay(changes.transferFees.total)}
+          currency={displayCurrency}
+          sign
+        />
 
-      <DataLine
-        name="Распределено"
-        amount={toDisplay(totals.available)}
-        currency={displayCurrency}
-      />
-      <DataLine
-        name="Распределено в будущем"
-        amount={toDisplay(totals.budgetedInFuture)}
-        currency={displayCurrency}
-      />
-      <DataLine
-        name="Свободно"
-        amount={toDisplay(totals.toBeBudgetedFx)}
-        currency={displayCurrency}
-      />
-    </Paper>
+        <Divider />
+
+        <DataLine
+          name="Распределено"
+          amount={toDisplay(totals.available)}
+          currency={displayCurrency}
+        />
+        <DataLine
+          name="Распределено в будущем"
+          amount={toDisplay(totals.budgetedInFuture)}
+          currency={displayCurrency}
+        />
+        <DataLine
+          name="Свободно"
+          amount={toDisplay(totals.toBeBudgetedFx)}
+          currency={displayCurrency}
+        />
+      </Paper>
+    </Stack>
   )
 }
 

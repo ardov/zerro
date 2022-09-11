@@ -2,7 +2,6 @@ import React, { FC } from 'react'
 import { useAppDispatch, useAppSelector } from '@store'
 import { formatMoney } from '@shared/helpers/money'
 import { formatDate } from '@shared/helpers/date'
-import { getUserCurrencyCode } from '@entities/instrument'
 import { Confirm } from '@shared/ui/Confirm'
 import { startFresh } from '@features/bulkActions/startFresh'
 import {
@@ -11,15 +10,12 @@ import {
   Button,
   IconButton,
   useMediaQuery,
-  Collapse,
   Theme,
   BoxProps,
 } from '@mui/material'
 import { CloseIcon } from '@shared/ui/Icons'
 import Rhythm from '@shared/ui/Rhythm'
 import { Tooltip } from '@shared/ui/Tooltip'
-import { WidgetIncome } from './WidgetIncome'
-import { WidgetOutcome } from './WidgetOutcome'
 import { useMonth } from '@pages/BudgetsOld/pathHooks'
 import { useToggle } from '@shared/hooks/useToggle'
 import { TDateDraft } from '@shared/types'
@@ -27,7 +23,6 @@ import {
   overspendModel,
   OverspendNotice,
 } from '@features/bulkActions/fixOverspend'
-import { DataLine } from '@shared/ui/DataLine'
 import { copyPreviousBudget } from '@features/bulkActions/copyPrevMonth'
 import { BalanceInfo } from '@pages/Budgets/widgets/BalanceInfo'
 
@@ -65,8 +60,6 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
       <Rhythm gap={2} p={3}>
         <BalanceInfo month={month} />
         <OverspendNotice month={month} />
-        <WidgetIncome />
-        <WidgetOutcome />
 
         <Box p={2} bgcolor="background.default" borderRadius={1}>
           <Box mb={1}>
