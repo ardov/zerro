@@ -13,141 +13,149 @@ import { parseEnvelopeId } from './shared/helpers'
 import { patchEnvelopeMeta, TEnvelopeMetaPatch } from './shared/metaData'
 import { hex2int, isHEX } from '@shared/helpers/color'
 import { TEnvelope } from './shared/makeEnvelope'
+import { getRightParent } from './shared/structure'
+import { patchAccount, TAccountDraft } from '@entities/account'
+import { patchMerchant } from '@entities/merchant'
 
 type TEnvelopeDraft = OptionalExceptFor<TEnvelope, 'id'>
+
+type TPatches = {
+  [DataEntity.Tag]?: TTagDraft
+  [DataEntity.Account]?: TAccountDraft
+  [DataEntity.Merchant]?: any
+  meta?: TEnvelopeMetaPatch
+}
 
 export const patchEnvelope =
   (draft: TEnvelopeDraft): AppThunk =>
   (dispatch, getState) => {
-    if (!draft.id) throw new Error('Trying to patch tag without id')
-    let envelopes = getEnvelopes(getState())
-    let current = envelopes[draft.id]
-    if (!current) throw new Error('Envelope not found')
-
-    if (current.type === 'payee') {
-      throw new Error('Trying to patch payee envelope')
-    }
-
-    if (current.type === DataEntity.Tag) {
-      let tagPatch: TTagDraft = { id: current.entityId }
-      let metaPatch: TEnvelopeMetaPatch = { id: current.id }
-      keys(draft).forEach(key => {
-        switch (key) {
-          case 'id': // ignore
-          case 'type': // ignore
-          case 'entityId': // ignore
-          case 'children': // ignore
-            break
-          case 'name': // TODO need to store full title somewhere
-            break
-          case 'symbol': // TODO add icon support later
-            break
-          case 'color':
-            if (current[key] !== draft[key]) {
-              tagPatch.color = getTagColor(draft.color)
-            }
-            break
-          case 'visibility':
-            if (current[key] !== draft[key]) {
-              metaPatch[key] = draft[key]
-            }
-            break
-          case 'parent':
-            if (current[key] !== draft[key]) {
-              tagPatch.parent = getRightTagParent(envelopes, draft.parent)
-            }
-            break
-          case 'index':
-            // TODO update indices
-            break
-          case 'group':
-          case 'comment':
-          case 'currency':
-            if (current[key] !== draft[key]) {
-              // TODO recalculate budgets and goals
-              metaPatch[key] = draft[key]
-            }
-            break
-          case 'keepIncome':
-          case 'carryNegatives':
-            if (current[key] !== draft[key]) {
-              metaPatch[key] = draft[key]
-            }
-            break
-          default:
-            throw new Error(`Unknown key ${key}`)
-        }
-      })
-      if (keys(tagPatch).length > 1) dispatch(patchTag(tagPatch))
-      if (keys(metaPatch).length > 1) dispatch(patchEnvelopeMeta(metaPatch))
-      return
-    }
-
-    if (
-      current.type === DataEntity.Account ||
-      current.type === DataEntity.Merchant
-    ) {
-      let metaPatch: TEnvelopeMetaPatch = { id: current.id }
-      keys(draft).forEach(key => {
-        switch (key) {
-          case 'id': // ignore
-          case 'type': // ignore
-          case 'entityId': // ignore
-          case 'name': // ignore
-          case 'symbol': // ignore
-          case 'color': // ignore
-          case 'children': // ignore
-            break
-          case 'visibility':
-            if (current[key] !== draft[key]) {
-              metaPatch[key] = draft[key]
-            }
-            break
-          case 'parent':
-            if (current[key] !== draft[key]) {
-              metaPatch.parent = getRightParent(envelopes, draft.parent)
-            }
-            break
-          case 'index':
-            // TODO update indices
-            break
-          case 'group':
-          case 'comment':
-          case 'currency':
-            if (current[key] !== draft[key]) {
-              metaPatch[key] = draft[key]
-            }
-            break
-          case 'keepIncome':
-          case 'carryNegatives':
-            if (current[key] !== draft[key]) {
-              metaPatch[key] = draft[key]
-            }
-            break
-          default:
-            throw new Error(`Unknown key ${key}`)
-        }
-      })
-      if (keys(metaPatch).length > 1) dispatch(patchEnvelopeMeta(metaPatch))
-      return
-    }
+    const envelopes = getEnvelopes(getState())
+    const patches = toPatches(draft, envelopes)
+    if (patches.tag) dispatch(patchTag(patches.tag))
+    if (patches.account) dispatch(patchAccount(patches.account))
+    if (patches.merchant) dispatch(patchMerchant(patches.merchant))
+    if (patches.meta) dispatch(patchEnvelopeMeta(patches.meta))
+    return
   }
 
-function getRightParent(
-  envelopes: ById<TEnvelope>,
-  parent?: TEnvelopeId | null
-): TEnvelopeId | undefined {
-  if (!parent) return undefined
-  if (!envelopes[parent]) throw new Error('Parent envelope not found ' + parent)
-  if (envelopes[parent].parent) return envelopes[parent].parent as TEnvelopeId
-  return parent
+const funcs: {
+  [key in keyof TEnvelope]: (
+    draft: TEnvelopeDraft,
+    patches: TPatches,
+    envelopes: ById<TEnvelope>
+  ) => void
+} = {
+  id: () => {},
+  type: () => {},
+  entityId: () => {},
+  name: () => {},
+  symbol: () => {},
+  colorGenerated: () => {},
+  children: () => {},
+  index: () => {}, // Not here
+
+  originalName: (draft, patches) => {
+    const { type, id } = parseEnvelopeId(draft.id)
+    if (
+      type === DataEntity.Tag ||
+      type === DataEntity.Account ||
+      type === DataEntity.Merchant
+    ) {
+      patches[type] = { ...patches[type], id, title: draft.originalName }
+    }
+  },
+
+  color: (draft, patches) => {
+    const { type, id } = parseEnvelopeId(draft.id)
+    if (type === DataEntity.Tag) {
+      patches[type] = { ...patches[type], id, color: getTagColor(draft.color) }
+    }
+  },
+
+  parent: (draft, patches, envelopes) => {
+    const { type, id } = parseEnvelopeId(draft.id)
+    if (type === DataEntity.Tag) {
+      patches[type] = {
+        ...patches[type],
+        id,
+        parent: getRightTagParent(draft.parent, envelopes),
+      }
+    } else {
+      patches.meta = {
+        ...patches.meta,
+        id: draft.id,
+        parent: getRightParent(draft.parent, envelopes) || undefined,
+      }
+    }
+  },
+
+  // Virtual properties from metadata
+  visibility: (draft, patches) => {
+    patches.meta = {
+      ...patches.meta,
+      id: draft.id,
+      visibility: draft.visibility,
+    }
+  },
+  group: (draft, patches) => {
+    patches.meta = {
+      ...patches.meta,
+      id: draft.id,
+      group: draft.group,
+    }
+  },
+  comment: (draft, patches) => {
+    patches.meta = {
+      ...patches.meta,
+      id: draft.id,
+      comment: draft.comment,
+    }
+  },
+  currency: (draft, patches) => {
+    patches.meta = {
+      ...patches.meta,
+      id: draft.id,
+      currency: draft.currency,
+    }
+  },
+  keepIncome: (draft, patches) => {
+    patches.meta = {
+      ...patches.meta,
+      id: draft.id,
+      keepIncome: draft.keepIncome,
+    }
+  },
+  carryNegatives: (draft, patches) => {
+    patches.meta = {
+      ...patches.meta,
+      id: draft.id,
+      carryNegatives: draft.carryNegatives,
+    }
+  },
+}
+
+function toPatches(draft: TEnvelopeDraft, envelopes: ById<TEnvelope>) {
+  if (!draft.id) throw new Error('Trying to patch tag without id')
+  let current = envelopes[draft.id]
+  if (!current) throw new Error('Envelope not found')
+
+  if (current.type === 'payee') {
+    throw new Error('Trying to patch payee envelope')
+  }
+  const patches: TPatches = {}
+  keys(draft).forEach(key => {
+    if (current[key] !== draft[key]) {
+      funcs[key](draft, patches, envelopes)
+    }
+  })
+  return patches
 }
 
 function getRightTagParent(
-  envelopes: ById<TEnvelope>,
-  parent?: TEnvelopeId | null
+  parent: TEnvelopeId | null | undefined,
+  envelopes: ById<TEnvelope>
 ): TTagId | null {
-  const id = getRightParent(envelopes, parent)
+  const id = getRightParent(parent, envelopes)
   if (!id) return null
   const parsed = parseEnvelopeId(id)
   if (parsed.type !== DataEntity.Tag) throw new Error('Parent is not tag')

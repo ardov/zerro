@@ -17,7 +17,7 @@ export type TGroup = {
  * @returns
  */
 export function getRightParent(
-  parentId: TEnvelope['parent'],
+  parentId: TEnvelope['parent'] | undefined,
   byId: ById<TEnvelope>
 ): TEnvelope['parent'] {
   if (!parentId) return null
