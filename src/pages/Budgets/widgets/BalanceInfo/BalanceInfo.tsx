@@ -14,7 +14,7 @@ import {
   ResponsiveContainer,
   XAxis,
 } from 'recharts'
-import { BalaneWidget } from './BalaneWidget'
+import { BalanceWidget } from './BalanceWidget'
 import { Explainer } from './Explainer'
 import { StatWidget } from './StatWidget'
 
@@ -57,7 +57,7 @@ export const BalanceInfo: FC<{ month: TISOMonth }> = props => {
 
   return (
     <Stack gap={2}>
-      <BalaneWidget month={props.month} />
+      <BalanceWidget month={props.month} />
       <StatWidget month={props.month} mode="income" />
       <StatWidget month={props.month} mode="outcome" />
       {/*  */}

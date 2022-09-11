@@ -11,9 +11,9 @@ import { Parent } from './Parent'
 import { Row } from './Row/Row'
 import { BudgetPopover } from '../BudgetPopover'
 import { GoalPopover } from '../GoalPopover'
-import { useSearchParam } from '@shared/hooks/useSearchParam'
 import { Header } from './Header'
 import { Metric, rowStyle } from './shared/shared'
+import { useTrDrawer } from '../TransactionsDrawer'
 
 type TagTableProps = {
   onOpenDetails: (id: TEnvelopeId) => void
@@ -22,21 +22,18 @@ type TagTableProps = {
 }
 
 export const EnvelopeTable: FC<TagTableProps> = props => {
+  const { setDrawer } = useTrDrawer()
   const { onOpenDetails, className } = props
   const [month] = useMonth()
   const groups = useEnvelopeGroups(month)
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
   const budget = useEnvelopePopover(month, 'budget')
   const goal = useEnvelopePopover(month, 'goal')
-  const [, setId] = useSearchParam<TEnvelopeId>('transactions')
   const [metric, setMetric] = useState<Metric>(Metric.available)
-  const switchMetric = () => {}
-  const onOpenTransactionPopover = useCallback(
-    (id: TEnvelopeId) => {
-      setId(id)
-    },
-    [setId]
-  )
+  const switchMetric = () => {
+    // TODO
+  }
+
   return (
     <>
       <Paper className={className}>
@@ -58,7 +55,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
                     metric={metric}
                     openGoalPopover={goal.onOpen}
                     openBudgetPopover={budget.onOpen}
-                    openTransactionsPopover={onOpenTransactionPopover}
+                    openTransactionsPopover={setDrawer}
                     openDetails={onOpenDetails}
                   />
                 }
@@ -69,7 +66,9 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
                     metric={metric}
                     openGoalPopover={goal.onOpen}
                     openBudgetPopover={budget.onOpen}
-                    openTransactionsPopover={onOpenTransactionPopover}
+                    openTransactionsPopover={() =>
+                      setDrawer(child.id, { isExact: true })
+                    }
                     openDetails={onOpenDetails}
                   />
                 ))}

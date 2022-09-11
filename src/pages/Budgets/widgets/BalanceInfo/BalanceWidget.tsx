@@ -1,15 +1,15 @@
 import { getMonthTotals } from '@entities/envelopeData'
 import { useDisplayCurrency } from '@entities/instrument/hooks'
-import { Divider, Paper, Typography } from '@mui/material'
+import { Chip, Divider, Paper, Typography } from '@mui/material'
 import { keys } from '@shared/helpers/keys'
-import { convertFx } from '@shared/helpers/money'
+import { convertFx, formatMoney } from '@shared/helpers/money'
 import pluralize from '@shared/helpers/pluralize'
 import { TFxAmount, TISOMonth } from '@shared/types'
 import { DataLine } from '@shared/ui/DataLine'
 import { Total } from '@shared/ui/Total'
 import { useAppSelector } from '@store/index'
 
-export function BalaneWidget(props: { month: TISOMonth }) {
+export function BalanceWidget(props: { month: TISOMonth }) {
   const totals = useAppSelector(getMonthTotals)[props.month]
   const displayCurrency = useDisplayCurrency()
   const { rates } = totals
@@ -22,6 +22,7 @@ export function BalaneWidget(props: { month: TISOMonth }) {
       ? ` | ${currCount} ${pluralize(currCount, ['валюта', 'валюты', 'валют'])}`
       : ''
   const fundsEnd = toDisplay(totals.fundsEnd)
+  const fundsChange = toDisplay(totals.fundsChange)
   const available = toDisplay(totals.available)
   const budgetedInFuture = toDisplay(totals.budgetedInFuture)
   const toBeBudgeted = toDisplay(totals.toBeBudgetedFx)
@@ -43,6 +44,11 @@ export function BalaneWidget(props: { month: TISOMonth }) {
         value={fundsEnd}
         currency={displayCurrency}
       />
+      <div>
+        <Chip label={currString.trim()} />
+        <Chip label={'5 счетов'} />
+        <Chip label={formatMoney(fundsChange, displayCurrency)} />
+      </div>
       <Divider />
       <DataLine
         name="В конвертах"

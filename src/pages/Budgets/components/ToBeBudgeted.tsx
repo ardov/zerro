@@ -74,7 +74,8 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
       {...rest}
     >
       <Typography noWrap align="center" variant="body1" className={c.label}>
-        {toBeBudgeted ? 'Не распределено' : 'Деньги распределены'}{' '}
+        {!isMobile &&
+          (toBeBudgeted ? 'Не распределено ' : 'Деньги распределены ')}
         {toBeBudgeted ? (
           <Amount
             value={toBeBudgeted}

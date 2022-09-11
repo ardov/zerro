@@ -1,24 +1,15 @@
-import { TransactionsDrawer } from '@components/TransactionsDrawer'
-import { getMonthTotals, getTotalChanges } from '@entities/envelopeData'
-import { useDisplayCurrency } from '@entities/instrument/hooks'
-import {
-  Box,
-  BoxProps,
-  ButtonBase,
-  Collapse,
-  Divider,
-  Paper,
-  Stack,
-} from '@mui/material'
+import { FC } from 'react'
+import { Box, BoxProps, ButtonBase, Collapse, Stack } from '@mui/material'
 import { keys } from '@shared/helpers/keys'
 import { convertFx } from '@shared/helpers/money'
 import { useToggle } from '@shared/hooks/useToggle'
-import { TEnvelopeId, TFxAmount, TISOMonth, TTransaction } from '@shared/types'
+import { TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
 import { DataLine } from '@shared/ui/DataLine'
 import { Tooltip } from '@shared/ui/Tooltip'
-import { Total } from '@shared/ui/Total'
 import { useAppSelector } from '@store/index'
-import { FC, useState } from 'react'
+import { getMonthTotals, getTotalChanges } from '@entities/envelopeData'
+import { useDisplayCurrency } from '@entities/instrument/hooks'
+import { trMode, useTrDrawer } from '../TransactionsDrawer'
 
 type DataPoint = {
   id: TEnvelopeId
@@ -32,20 +23,14 @@ export function StatWidget(props: {
   month: TISOMonth
   mode: 'income' | 'outcome'
 }) {
+  const { setDrawer } = useTrDrawer()
   const showIncome = props.mode === 'income'
   const displayCurrency = useDisplayCurrency()
   const totals = useAppSelector(getMonthTotals)[props.month]
   const { rates } = totals
   const changes = useAppSelector(getTotalChanges)[props.month]
   const [opened, toggleOpened] = useToggle(false)
-  const [selected, setSelected] = useState<TEnvelopeId>()
   const toDisplay = (a: TFxAmount) => convertFx(a, displayCurrency, rates)
-
-  const trList: TTransaction[] = selected
-    ? showIncome
-      ? changes.byEnvelope[selected].trIncome
-      : changes.byEnvelope[selected].trOutcome
-    : []
 
   const totalAmount = toDisplay(
     showIncome ? changes.sum.totalIncome : changes.sum.totalOutcome
@@ -81,12 +66,6 @@ export function StatWidget(props: {
           flexDirection: 'column',
         }}
       >
-        {/* <Total
-        name={'Доход'}
-        value={totalOutcome}
-        currency={displayCurrency}
-        sign
-      /> */}
         <DataLine
           name={showIncome ? 'Доходы' : 'Расходы'}
           amount={totalAmount}
@@ -105,19 +84,16 @@ export function StatWidget(props: {
                 currency={displayCurrency}
                 onClick={e => {
                   e.stopPropagation()
-                  setSelected(envelope.id)
+                  setDrawer(envelope.id, {
+                    mode: showIncome ? trMode.income : trMode.outcome,
+                    isExact: true,
+                  })
                 }}
               />
             ))}
           </Stack>
         </Collapse>
       </ButtonBase>
-
-      <TransactionsDrawer
-        transactions={trList}
-        open={!!selected}
-        onClose={() => setSelected(undefined)}
-      />
     </>
   )
 }

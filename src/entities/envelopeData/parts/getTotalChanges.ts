@@ -19,6 +19,7 @@ type TTotalNode = {
   trendIncome: TFxAmount[]
   trendOutcome: TFxAmount[]
 
+  trAll: TTransaction[]
   trIncome: TTransaction[]
   trOutcome: TTransaction[]
 }
@@ -85,6 +86,7 @@ function makeTotalNode(): TTotalNode {
     trend: makeMonthlyTrend(),
     trendIncome: makeMonthlyTrend(),
     trendOutcome: makeMonthlyTrend(),
+    trAll: [],
     trIncome: [],
     trOutcome: [],
   }
@@ -98,6 +100,7 @@ function addToTotalNode(node: TTotalNode, ch: TBudgetChange) {
 
   node.total = addFxAmount(node.total, ch.diff)
   node.trend[day] = addFxAmount(node.trend[day], ch.diff)
+  node.trAll.push(ch.transaction)
 
   if (ch.direction === trDirection.income) {
     node.totalIncome = addFxAmount(node.totalIncome, ch.diff)

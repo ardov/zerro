@@ -1,18 +1,13 @@
-import React, {
-  FC,
-  ReactElement,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react'
+import React, { FC, ReactElement, useCallback } from 'react'
 import { Redirect } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
 import { Box, Drawer, Theme, useMediaQuery } from '@mui/material'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { TEnvelopeId } from '@shared/types'
 import { formatDate } from '@shared/helpers/date'
+import { useCachedValue } from '@shared/hooks/useCachedValue'
 import { useSearchParam } from '@shared/hooks/useSearchParam'
 import { nextMonth, prevMonth, toISOMonth } from '@shared/helpers/date'
-import { TEnvelopeId } from '@shared/types'
 import { useAppSelector } from '@store'
 import { getMonthList, useMonthList } from '@entities/envelopeData'
 import { GoalsProgress } from '@features/bulkActions/fillGoals'
@@ -20,7 +15,7 @@ import { MonthInfo } from './components/MonthInfo'
 import { ToBeBudgeted } from './components/ToBeBudgeted'
 import { MonthSelect } from './MonthSelect'
 import { EnvelopePreview } from './widgets/EnvelopePreview'
-import { BudgetTransactionsDrawer } from './components/TransactionsDrawer'
+import { BudgetTransactionsDrawer } from './widgets/TransactionsDrawer'
 import { EnvelopeTable } from './widgets/EnvelopeTable'
 import { useMonth } from './model'
 import { DnDContext } from './widgets/DnDContext'
@@ -52,7 +47,6 @@ function Budgets() {
   const [month, setMonth] = useMonth()
 
   const [drawerId, setDrawerId] = useSearchParam<TDrawerId>('drawer')
-  const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))
 
   useHotkeys(
     'left',
@@ -145,21 +139,19 @@ function Budgets() {
   )
 }
 
-type BudgetLayoutProps = {
+const BudgetLayout: FC<{
   mainContent: ReactElement
   sideContent?: ReactElement
   sideDefault: ReactElement
   onSideClose: () => void
-}
-const sideWidth = 360
-
-const BudgetLayout: FC<BudgetLayoutProps> = props => {
+}> = props => {
+  const sideWidth = 360
   const { mainContent, sideContent, sideDefault, onSideClose } = props
   const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))
   const isXS = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
   const drawerVisibility = isMD && !!sideContent
-  const cachedContent = useCachedValue(sideContent)
+  const cachedContent = useCachedValue(sideContent, drawerVisibility)
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
@@ -196,12 +188,4 @@ const BudgetLayout: FC<BudgetLayoutProps> = props => {
       </Drawer>
     </Box>
   )
-}
-
-function useCachedValue<T>(value: T): T {
-  const [cachedValue, setCachedValue] = useState(value)
-  useEffect(() => {
-    if (value) setCachedValue(value)
-  }, [value])
-  return cachedValue
 }
