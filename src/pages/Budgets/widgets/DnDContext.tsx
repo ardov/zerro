@@ -45,7 +45,7 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
       autoScroll={{ threshold: { x: 0, y: 0.2 } }}
     >
       {children}
-      <DragOverlay>AAAA</DragOverlay>
+      <DragOverlay>Денюшки</DragOverlay>
       <MoveMoneyModal
         key={moneySource + moneyDestination + month}
         open={isOpen}
