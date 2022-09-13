@@ -8,7 +8,6 @@ import { getPopulatedTags } from '@entities/tag'
 import { getEnvelopeMeta } from './shared/metaData'
 import { makeEnvelope, TEnvelope } from './shared/makeEnvelope'
 import {
-  TGroup,
   getRightParent,
   buildStructure,
   flattenStructure,
@@ -17,7 +16,7 @@ import { compareEnvelopes } from './shared/compareEnvelopes'
 
 const getCompiledEnvelopes: TSelector<{
   byId: ById<TEnvelope>
-  structure: TGroup[]
+  structure: ReturnType<typeof buildStructure>
 }> = createSelector(
   [
     getDebtors,
@@ -65,8 +64,8 @@ const getCompiledEnvelopes: TSelector<{
     const structure = buildStructure(result)
     const flatList = flattenStructure(structure)
     // Update indicies
-    flatList.forEach((id, index) => {
-      result[id].index = index
+    flatList.forEach(({ id, type }, index) => {
+      if (type === 'envelope') result[id].index = index
     })
 
     return {
@@ -79,5 +78,6 @@ const getCompiledEnvelopes: TSelector<{
 export const getEnvelopes: TSelector<ById<TEnvelope>> = state =>
   getCompiledEnvelopes(state).byId
 
-export const getEnvelopeStructure: TSelector<TGroup[]> = state =>
-  getCompiledEnvelopes(state).structure
+export const getEnvelopeStructure: TSelector<
+  ReturnType<typeof buildStructure>
+> = state => getCompiledEnvelopes(state).structure

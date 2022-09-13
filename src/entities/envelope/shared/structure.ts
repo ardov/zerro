@@ -2,14 +2,6 @@ import { ById, TEnvelopeId } from '@shared/types'
 import { compareEnvelopes } from './compareEnvelopes'
 import { TEnvelope } from './makeEnvelope'
 
-export type TGroup = {
-  name: string
-  children: {
-    id: TEnvelopeId
-    children: TEnvelopeId[]
-  }[]
-}
-
 /**
  * Returns id of the topmost parent. So it flattens envelopes to only 2 levels of depth
  * @param parentId
@@ -27,21 +19,32 @@ export function getRightParent(
   return getRightParent(parent.parent, byId)
 }
 
+type TEnvNode = { id: TEnvelopeId; type: 'envelope' }
+type TGroupNode = { id: string; type: 'group' }
+type TEnvTreeNode = TEnvNode & { children: TEnvTreeNode[] }
+type TGroupTreeNode = TGroupNode & { children: TEnvTreeNode[] }
+
 /**
  * Builds a tree of sorted groups
  * @param envelopes
  * @returns
  */
-export function buildStructure(envelopes: ById<TEnvelope>): TGroup[] {
-  const groupCollection: Record<string, TGroup> = {}
+export function buildStructure(envelopes: ById<TEnvelope>): TGroupTreeNode[] {
+  const groupCollection: Record<string, TGroupTreeNode> = {}
   Object.values(envelopes)
     .sort(compareEnvelopes)
     .filter(e => !e.parent)
     .forEach(e => {
-      groupCollection[e.group] ??= { name: e.group, children: [] }
-      groupCollection[e.group].children.push({ id: e.id, children: e.children })
+      groupCollection[e.group] ??= { id: e.group, type: 'group', children: [] }
+      const children: TEnvTreeNode[] = e.children.map(id => {
+        return { id, type: 'envelope', children: [] }
+      })
+      groupCollection[e.group].children.push({
+        id: e.id,
+        type: 'envelope',
+        children,
+      })
     })
-
   const groupList = Object.values(groupCollection).sort((a, b) => {
     let envA = envelopes[a.children[0].id]
     let envB = envelopes[b.children[0].id]
@@ -56,12 +59,15 @@ export function buildStructure(envelopes: ById<TEnvelope>): TGroup[] {
  * @param tree
  * @returns list of envelope ids
  */
-export function flattenStructure(tree: TGroup[]): TEnvelopeId[] {
-  let flatList: TEnvelopeId[] = []
-  tree.forEach(group => {
-    group.children.forEach(({ id, children }) => {
-      flatList = [...flatList, id, ...children]
-    })
-  })
+export function flattenStructure(
+  tree: TGroupTreeNode[]
+): (TEnvNode | TGroupNode)[] {
+  let flatList: (TEnvNode | TGroupNode)[] = []
+  tree.forEach(addNode)
   return flatList
+
+  function addNode(node: TEnvTreeNode | TGroupTreeNode) {
+    flatList.push({ id: node.id, type: node.type } as TEnvNode | TGroupNode)
+    node.children.forEach(addNode)
+  }
 }

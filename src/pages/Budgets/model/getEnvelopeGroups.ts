@@ -66,7 +66,7 @@ export const getEnvelopeGroups: TSelector<Record<TISOMonth, TGroupInfo[]>> =
           const available = addFxAmount(...children.map(e => e.totalAvailable))
 
           return {
-            name: group.name,
+            name: group.id,
             leftover,
             budgeted,
             activity,
@@ -92,7 +92,7 @@ export const getEnvelopeGroups: TSelector<Record<TISOMonth, TGroupInfo[]>> =
  */
 function populateEnvelope(
   id: TEnvelopeId,
-  children: TEnvelopeId[],
+  children: { id: TEnvelopeId; [key: string]: any }[],
   monthInfo: TMonthTotals
 ): TEnvelopePopulated {
   const envelope = monthInfo.envelopes[id]
@@ -114,7 +114,7 @@ function populateEnvelope(
 
   const hasCustomCurency = envelope.currency !== displayCurrency
 
-  const populatedChildren = children.map(id =>
+  const populatedChildren = children.map(({ id }) =>
     populateEnvelope(id, [], monthInfo)
   )
   const hasChildren = !!populatedChildren.length
