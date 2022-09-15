@@ -10,28 +10,31 @@ import {
 import { EmojiIcon } from '@shared/ui/EmojiIcon'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { CloseIcon, EditIcon, EmojiFlagsIcon } from '@shared/ui/Icons'
-import { useAppDispatch } from '@store'
-import { Total } from '../../../../shared/ui/Total'
+import { Total } from '@shared/ui/Total'
 import Rhythm from '@shared/ui/Rhythm'
-import { useMonth } from '@pages/BudgetsOld/pathHooks'
-import { ActivityWidget } from './ActivityWidget'
 import { ColorPicker } from '@shared/ui/ColorPickerPopover'
 import { sendEvent } from '@shared/helpers/tracking'
 import { useToggle } from '@shared/hooks/useToggle'
 import { useSearchParam } from '@shared/hooks/useSearchParam'
+import { TEnvelopeId, TFxAmount } from '@shared/types'
+import { convertFx } from '@shared/helpers/money'
+import { DataLine } from '@shared/ui/DataLine'
+import { useEnvelopePopover } from '@shared/hooks/useEnvelopePopover'
+import { useAppDispatch } from '@store'
 import {
   IEnvelopeWithData,
   useEnvelope,
   useRates,
 } from '@entities/envelopeData'
-import { TEnvelopeId, TFxAmount } from '@shared/types'
-import { convertFx } from '@shared/helpers/money'
-import { CommentWidget } from './CommentWidget'
 import { goalToWords } from '@entities/goal'
-import { cardStyle } from './shared'
 import { patchEnvelope } from '@entities/envelope'
+import { useMonth } from '@pages/Budgets/model'
+import { GoalPopover } from '../GoalPopover'
+import { BudgetPopover } from '../BudgetPopover'
+import { ActivityWidget } from './ActivityWidget'
+import { CommentWidget } from './CommentWidget'
+import { cardStyle } from './shared'
 import { EnvelopeEditDialog } from './EnvelopeEditDialog'
-import { DataLine } from '@shared/ui/DataLine'
 
 type EnvelopePreviewProps = {
   id: TEnvelopeId
@@ -52,6 +55,8 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   const totalBudgeted = toEnvelope(envelope.totalBudgeted)
   const totalActivity = toEnvelope(envelope.totalActivity)
   const totalAvailable = toEnvelope(envelope.totalAvailable)
+  const goalPopover = useEnvelopePopover(month, 'goal')
+  const budgetPopover = useEnvelopePopover(month, 'budget')
 
   return (
     <>
@@ -65,8 +70,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
 
           <Grid item xs={12}>
             <ButtonBase
-              // TODO show popover on click
-              // onClick={e => setGoalPopoverAnchor(e.currentTarget)}
+              onClick={e => goalPopover.onOpen(id, e.currentTarget)}
               sx={{
                 ...cardStyle,
                 display: 'flex',
@@ -88,7 +92,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
 
           <Grid item xs={6}>
             <ButtonBase
-              // onClick={e => setBudgetPopoverAnchor(e.currentTarget)}
+              onClick={e => budgetPopover.onOpen(id, e.currentTarget)}
               sx={cardStyle}
             >
               <Total name="Бюджет" value={totalBudgeted} decMode="ifAny" />
@@ -122,20 +126,8 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
         </Rhythm>
       </Box>
 
-      {/* <BudgetPopover
-        id={id}
-        month={month}
-        open={!!budgetPopoverAnchor}
-        anchorEl={budgetPopoverAnchor}
-        onClose={() => setBudgetPopoverAnchor(undefined)}
-      /> */}
-      {/* <GoalPopover
-        id={id}
-        month={month}
-        open={!!goalPopoverAnchor}
-        anchorEl={goalPopoverAnchor}
-        onClose={() => setGoalPopoverAnchor(undefined)}
-      /> */}
+      <BudgetPopover {...budgetPopover.props} id={budgetPopover.props.id} />
+      <GoalPopover {...goalPopover.props} id={goalPopover.props.id} />
     </>
   )
 }

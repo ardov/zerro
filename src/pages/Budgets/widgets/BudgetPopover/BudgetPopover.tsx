@@ -26,7 +26,17 @@ type TBudgetPopoverProps = PopoverProps & {
   month: TISOMonth
 }
 
-export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
+export const BudgetPopover: FC<
+  PopoverProps & {
+    id?: TEnvelopeId
+    month?: TISOMonth
+  }
+> = ({ id, month, ...props }) => {
+  if (!id || !month) return null
+  return <BudgetPopoverContent id={id} month={month} {...props} />
+}
+
+const BudgetPopoverContent: FC<TBudgetPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
   const quickActions = useQuickActions(month, id)
   const displayCurrency = useDisplayCurrency()

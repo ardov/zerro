@@ -1,6 +1,7 @@
-import React, { FC, useCallback, useState } from 'react'
+import React, { FC, useState } from 'react'
 import { Paper, Typography } from '@mui/material'
-import { TEnvelopeId, TISOMonth } from '@shared/types'
+import { TEnvelopeId } from '@shared/types'
+import { useEnvelopePopover } from '@shared/hooks/useEnvelopePopover'
 import {
   TGroupInfo,
   useEnvelopeGroups,
@@ -18,7 +19,6 @@ import { useTrDrawer } from '../TransactionsDrawer'
 type TagTableProps = {
   onOpenDetails: (id: TEnvelopeId) => void
   className?: string
-  // sx?: BoxProps['sx']
 }
 
 export const EnvelopeTable: FC<TagTableProps> = props => {
@@ -109,26 +109,4 @@ const EnvelopeGroup: FC<TEnvelopeGroupProps> = ({ group, children }) => {
       {children}
     </>
   )
-}
-
-function useEnvelopePopover(month: TISOMonth, name = '') {
-  const [anchorEl, setAnchorEl] = useState<Element>()
-  const [id, setId] = useState<TEnvelopeId>()
-  const open = !!anchorEl
-  const onOpen = (id: TEnvelopeId, anchor: Element) => {
-    setAnchorEl(anchor)
-    setId(id)
-  }
-
-  const props = {
-    key: name + id + month,
-    id,
-    month,
-    open,
-    anchorEl,
-    onClose: () => {
-      setAnchorEl(undefined)
-    },
-  }
-  return { props, onOpen }
 }
