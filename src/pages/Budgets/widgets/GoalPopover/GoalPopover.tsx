@@ -12,13 +12,11 @@ import {
 } from '@mui/material'
 import { AmountInput } from '@shared/ui/AmountInput'
 import { CloseIcon } from '@shared/ui/Icons'
+import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
 import { toISODate, formatDate } from '@shared/helpers/date'
 import { TDateDraft, TEnvelopeId, TISOMonth } from '@shared/types'
 import { goalType, setGoal, TGoal } from '@entities/goal'
-
-import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
 import { useMonthTotals } from '@entities/envelopeData'
-import { round } from '@shared/helpers/money'
 
 const amountLabels = {
   [goalType.MONTHLY]: 'Откладывать каждый месяц',
@@ -32,18 +30,30 @@ type TGoalPopoverProps = PopoverProps & {
   month: TISOMonth
 }
 
-export const GoalPopover: FC<TGoalPopoverProps> = props => {
+export const GoalPopover: FC<
+  PopoverProps & {
+    id?: TEnvelopeId
+    month?: TISOMonth
+  }
+> = ({ id, month, ...props }) => {
+  if (!id || !month) return null
+  return <GoalPopoverContent id={id} month={month} {...props} />
+}
+
+const GoalPopoverContent: FC<TGoalPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
   const dispatch = useAppDispatch()
   const envelope = useMonthTotals(month).envelopes[id]
-  const { goal } = envelope
+  const { goal, currency } = envelope
 
-  const [amount, setAmount] = useState(goal?.amount || 0)
   const [type, setType] = useState(goal?.type || goalType.MONTHLY_SPEND)
+  const isInPercents = type === goalType.INCOME_PERCENT
+  const [rawValue, setRawValue] = useState(getInput(goal?.amount))
   const [endDate, setEndDate] = useState<TGoal['end']>(goal?.end)
 
   const [monthPopoverAnchor, setMonthPopoverAnchor] =
     useState<typeof props['anchorEl']>(null)
+  if (!id || !month) return null
 
   const handleTypeChange: OutlinedTextFieldProps['onChange'] = e =>
     setType(e.target.value as goalType)
@@ -56,14 +66,12 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
   const removeDate = () => handleDateChange(undefined)
 
   const save = () => {
+    const amount = getAmount(rawValue)
     const hasChanges =
       amount !== goal?.amount || type !== goal?.type || endDate !== goal?.end
 
     if (hasChanges) {
       const goal: TGoal = { type, amount }
-      if (type === goalType.INCOME_PERCENT) {
-        goal.amount = round(amount / 100)
-      }
       if (type === goalType.TARGET_BALANCE && endDate) {
         goal.end = endDate
       }
@@ -102,14 +110,15 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
             autoFocus
             onFocus={e => e.target.select()}
             selectOnFocus
-            value={amount}
+            value={rawValue}
             label={amountLabels[type]}
             fullWidth
-            onChange={value => setAmount(+value)}
+            onChange={value => setRawValue(+value)}
             onEnter={value => {
-              setAmount(+value)
+              setRawValue(+value)
               save()
             }}
+            currency={isInPercents ? '%' : currency}
             placeholder="0"
           />
 
@@ -151,4 +160,14 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
       />
     </>
   )
+
+  function getAmount(input: string | number) {
+    if (!+input) return 0
+    return isInPercents ? +input / 100 : +input
+  }
+
+  function getInput(goalAmount: undefined | number) {
+    if (!goalAmount) return 0
+    return isInPercents ? +goalAmount * 100 : +goalAmount
+  }
 }
