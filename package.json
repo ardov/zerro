@@ -143,6 +143,8 @@
     "@types/react-window": "^1.8.2",
     "@types/uuid": "^8.3.0",
     "@vitejs/plugin-react": "^2.0.1",
+    "eslint": "^8.0.0",
+    "eslint-config-react-app": "^7.0.1",
     "sass": "^1.39.2",
     "stylelint": "^14.1.0",
     "stylelint-config-rational-order": "^0.1.2",
