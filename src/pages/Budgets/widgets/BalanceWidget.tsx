@@ -39,16 +39,12 @@ export function BalanceWidget(props: { month: TISOMonth }) {
         gap: 1.5,
       }}
     >
-      <Total
-        name={'Баланс' + currString}
-        value={fundsEnd}
-        currency={displayCurrency}
-      />
-      <div>
+      <Total name={'В бюджете'} value={fundsEnd} currency={displayCurrency} />
+      {/* <div>
         <Chip label={currString.trim()} />
         <Chip label={'5 счетов'} />
         <Chip label={formatMoney(fundsChange, displayCurrency)} />
-      </div>
+      </div> */}
       <Divider />
       <DataLine
         name="В конвертах"
@@ -56,12 +52,14 @@ export function BalanceWidget(props: { month: TISOMonth }) {
         amount={available}
         currency={displayCurrency}
       />
-      <DataLine
-        name="Отложено на будущее"
-        tooltip="Эти деньги зарезервированы под будущие бюджеты"
-        amount={budgetedInFuture}
-        currency={displayCurrency}
-      />
+      {!!budgetedInFuture && (
+        <DataLine
+          name="Отложено на будущее"
+          tooltip="Эти деньги зарезервированы под будущие бюджеты"
+          amount={budgetedInFuture}
+          currency={displayCurrency}
+        />
+      )}
       <DataLine
         name="Свободно"
         tooltip="Нераспределённые деньги"
@@ -87,7 +85,6 @@ export function BalanceWidget(props: { month: TISOMonth }) {
       return 'Выглядит замечательно! Распределите свободные деньги, чтобы было совсем хорошо.'
     }
     if (balance < 0) {
-      // TODO make prompt smarter
       return 'Кажется, у вас отрицательный баланс, поэтому распределять нечего. Кредиты лучше всего унести за баланс.'
     }
     if (toBeBudgeted === 0) {

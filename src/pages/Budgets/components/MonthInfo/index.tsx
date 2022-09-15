@@ -12,9 +12,9 @@ import {
   useMediaQuery,
   Theme,
   BoxProps,
+  Stack,
 } from '@mui/material'
 import { CloseIcon } from '@shared/ui/Icons'
-import Rhythm from '@shared/ui/Rhythm'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { useMonth } from '@pages/BudgetsOld/pathHooks'
 import { useToggle } from '@shared/hooks/useToggle'
@@ -24,7 +24,8 @@ import {
   OverspendNotice,
 } from '@features/bulkActions/fixOverspend'
 import { copyPreviousBudget } from '@features/bulkActions/copyPrevMonth'
-import { BalanceInfo } from '@pages/Budgets/widgets/BalanceInfo'
+import { BalanceWidget } from '@pages/Budgets/widgets/BalanceWidget'
+import { StatWidget } from '@pages/Budgets/widgets/StatWidget'
 
 type MonthInfoProps = BoxProps & {
   onClose: () => void
@@ -57,9 +58,12 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
         </Box>
       )}
 
-      <Rhythm gap={2} p={3}>
-        <BalanceInfo month={month} />
+      <Stack gap={2} p={3}>
         <OverspendNotice month={month} />
+
+        <BalanceWidget month={month} />
+        <StatWidget month={month} mode="income" />
+        <StatWidget month={month} mode="outcome" />
 
         <Box p={2} bgcolor="background.default" borderRadius={1}>
           <Box mb={1}>
@@ -105,46 +109,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
             </Button>
           </Confirm>
         </Box>
-
-        {/* <Box display="flex" flexDirection="column" justifyContent="center">
-          <Collapse in={showMore}>
-            <Rhythm gap={1} width="100%" pb={1}>
-              <DataLine
-                name={
-                  transferOutcome > 0
-                    ? 'Переводы из бюджета'
-                    : 'Переводы в бюджет'
-                }
-                tooltip="Сумма переводов между счетами в бюджете и остальными"
-                amount={
-                  transferOutcome < 0 ? -transferOutcome : transferOutcome
-                }
-                currency={currency}
-              />
-              <DataLine
-                name={`${transferFees > 0 ? 'Потери' : 'Доходы'} на переводах`}
-                tooltip="Здесь учитываются комиссии или переводы в валюту. Например, купили долларов, а потом они подорожали, разница будет тут."
-                amount={-transferFees}
-                currency={currency}
-              />
-              <DataLine
-                name={`Все будущие бюджеты`}
-                amount={realBudgetedInFuture}
-                currency={currency}
-              />
-              <DataLine
-                name={`В бюджете`}
-                amount={moneyInBudget}
-                currency={currency}
-              />
-            </Rhythm>
-          </Collapse>
-
-          <Button onClick={toggleMore} fullWidth>
-            {showMore ? 'Меньше цифр' : 'Больше цифр'}
-          </Button>
-        </Box> */}
-      </Rhythm>
+      </Stack>
     </Box>
   )
 }

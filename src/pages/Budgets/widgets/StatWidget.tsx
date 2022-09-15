@@ -9,7 +9,8 @@ import { Tooltip } from '@shared/ui/Tooltip'
 import { useAppSelector } from '@store/index'
 import { getMonthTotals, getTotalChanges } from '@entities/envelopeData'
 import { useDisplayCurrency } from '@entities/instrument/hooks'
-import { trMode, useTrDrawer } from '../TransactionsDrawer'
+import { trMode, useTrDrawer } from './TransactionsDrawer'
+import { ChangesChart } from './ChangesChart'
 
 type DataPoint = {
   id: TEnvelopeId
@@ -66,6 +67,11 @@ export function StatWidget(props: {
           flexDirection: 'column',
         }}
       >
+        <Collapse in={opened}>
+          <ChangesChart mode={props.mode} />
+          <Box height={12} />
+        </Collapse>
+
         <DataLine
           name={showIncome ? 'Доходы' : 'Расходы'}
           amount={totalAmount}
