@@ -6,7 +6,6 @@ import { TSelector } from '@store'
 import { getInstruments } from '@entities/instrument'
 import { fxRateStore, TFxRates } from './fxRateStore'
 
-// TODO: write normal function
 const getHistoricalRates = () => ({} as Record<TISOMonth, TFxRates>)
 
 export const getRates: TSelector<Record<TISOMonth, TFxRates>> = createSelector(

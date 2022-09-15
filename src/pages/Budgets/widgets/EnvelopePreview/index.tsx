@@ -150,7 +150,6 @@ const Header: FC<{
   const dispatch = useAppDispatch()
   const handleColorChange = (hex?: string | null) => {
     sendEvent('Tag: set color: ' + hex)
-    // TODO set color on envelopes
     dispatch(patchEnvelope({ id: envelope.id, color: hex }))
   }
   return (
@@ -193,8 +192,6 @@ const Header: FC<{
         onClose={() => setAnchorEl(null)}
         onChange={handleColorChange}
       />
-
-      {/* TODO add edit dialog for envelopes */}
 
       <EnvelopeEditDialog
         key={envelope.id}

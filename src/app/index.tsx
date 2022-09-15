@@ -34,9 +34,6 @@ export const MainApp = () => (
   </GlobalErrorBoundary>
 )
 
-// TODO: add event on version update
-// sendEvent('Version Update: ' + appVersion)
-
 /** `zerro` can be used in console to access state and modify data */
 function createZerroInstance(s: typeof store) {
   // @ts-ignore
