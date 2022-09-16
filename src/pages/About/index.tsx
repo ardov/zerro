@@ -1,48 +1,49 @@
 import React from 'react'
-import { MDXProvider } from '@mdx-js/react'
+import { Switch, Route } from 'react-router'
 import { Box } from '@mui/material'
 import { useTheme } from '@mui/material'
 import { Link } from 'react-router-dom'
-import './index.scss'
 import { Logo } from '@shared/ui/Logo'
-import { Switch, Route } from 'react-router'
 import { ScrollToTop, TextLink } from './Components'
-
-/* eslint-disable import/no-webpack-loader-syntax */
-// @ts-ignore
 import Method from './pages/Method.mdx'
-// @ts-ignore
 import About from './pages/About.mdx'
-// @ts-ignore
 import QuickStart from './pages/QuickStart.mdx'
+import './index.scss'
 
 const components = { a: TextLink }
 
 export default function Main() {
   return (
-    <MDXProvider components={components}>
-      <Box width="100%" sx={{ bgcolor: 'background.paper' }}>
-        <ScrollToTop />
-        <Header />
+    <Box width="100%" sx={{ bgcolor: 'background.paper' }}>
+      <ScrollToTop />
+      <Header />
 
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          px={2}
-          pt={8}
-          pb={8}
-        >
-          <Box width="100%" maxWidth={680} minWidth={100} className="article">
-            <Switch>
-              <Route path="/about/method" component={Method} />
-              <Route path="/about/quick-start" component={QuickStart} />
-              <Route path="/about" component={About} />
-            </Switch>
-          </Box>
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        px={2}
+        pt={8}
+        pb={8}
+      >
+        <Box width="100%" maxWidth={680} minWidth={100} className="article">
+          <Switch>
+            <Route
+              path="/about/method"
+              render={() => <Method components={components} />}
+            />
+            <Route
+              path="/about/quick-start"
+              render={() => <QuickStart components={components} />}
+            />
+            <Route
+              path="/about"
+              render={() => <About components={components} />}
+            />
+          </Switch>
         </Box>
       </Box>
-    </MDXProvider>
+    </Box>
   )
 }
 
