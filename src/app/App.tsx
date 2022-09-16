@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react'
+import React, { FC, lazy, Suspense, useEffect, useState } from 'react'
 import { Router, Route, Redirect, Switch } from 'react-router-dom'
 import { createBrowserHistory } from 'history'
 import {
@@ -19,14 +19,21 @@ import ErrorBoundary from '@components/ErrorBoundary'
 import { getRootUser } from '@entities/user'
 import Transactions from '@pages/Transactions'
 import Auth from '@pages/Auth'
-import BudgetsOld from '@pages/BudgetsOld'
+// import BudgetsOld from '@pages/BudgetsOld'
 import Budgets from '@pages/Budgets'
-import Review from '@pages/Review'
+// import Review from '@pages/Review'
 import Accounts from '@pages/Accounts'
-import Stats from '@pages/Stats'
-import About from '@pages/About'
-import Token from '@pages/Token'
-import Donation from '@pages/Donation'
+// import Stats from '@pages/Stats'
+// import About from '@pages/About'
+// import Token from '@pages/Token'
+// import Donation from '@pages/Donation'
+
+const About = lazy(() => import('@pages/About'))
+const Donation = lazy(() => import('@pages/Donation'))
+const Token = lazy(() => import('@pages/Token'))
+const Stats = lazy(() => import('@pages/Stats'))
+const BudgetsOld = lazy(() => import('@pages/BudgetsOld'))
+const Review = lazy(() => import('@pages/Review'))
 
 const history = createBrowserHistory()
 initTracking(history)
@@ -39,55 +46,57 @@ export default function App() {
     if (typeof userId === 'number') setUserId(userId)
   }, [userId])
 
-  const publicRoutes = (
-    <>
-      <Route path="/about" component={About} />
-      <Route path="/about/*" component={About} />
-      <Route path="/donation" component={Donation} />
-    </>
-  )
+  const publicRoutes = [
+    <Route key="about" path="/about" component={About} />,
+    <Route key="about/*" path="/about/*" component={About} />,
+    <Route key="donation" path="/donation" component={Donation} />,
+  ]
 
-  const notLoggedIn = (
-    <>
-      {publicRoutes}
-      <Route path="/*" component={Auth} />
-    </>
-  )
+  const notLoggedIn = [
+    ...publicRoutes,
+    <Route key="*" path="/*" component={Auth} />,
+  ]
 
-  const loggedInNoData = (
-    <>
-      {publicRoutes}
-      <Route path="/token" component={Token} />
-      <Route path="/*" component={MainLoader} />
-    </>
-  )
+  const loggedInNoData = [
+    ...publicRoutes,
+    <Route key="token" path="/token" component={Token} />,
+    <Route key="*" path="*" component={MainLoader} />,
+  ]
 
-  const loggedInWithData = (
-    <>
-      {publicRoutes}
-      <Route path="/token" component={Token} />
-      <Route path="/transactions" component={Transactions} />
-      <Route path="/review" component={Review} />
-      <Route path="/accounts" component={Accounts} />
-      <Route path="/budget-old" component={BudgetsOld} />
-      <Route path="/budget" component={Budgets} />
-      <Route path="/stats" component={Stats} />
-      <Redirect to="/budget" />
-    </>
-  )
+  const loggedInWithData = [
+    ...publicRoutes,
+    <Route key="token" path="/token" component={Token} />,
+    <Route key="transactions" path="/transactions" component={Transactions} />,
+    <Route key="review" path="/review" component={Review} />,
+    <Route key="accounts" path="/accounts" component={Accounts} />,
+    <Route key="budget-old" path="/budget-old" component={BudgetsOld} />,
+    <Route key="budget" path="/budget" component={Budgets} />,
+    <Route key="stats" path="/stats" component={Stats} />,
+    <Route key="*" path="*" render={() => <Redirect to="/budget" />} />,
+  ]
 
   return (
     <Router history={history}>
       <RegularSyncHandler />
       <Layout isLoggedIn={isLoggedIn}>
         <ErrorBoundary>
-          <Switch>
-            {isLoggedIn
-              ? hasData
-                ? loggedInWithData
-                : loggedInNoData
-              : notLoggedIn}
-          </Switch>
+          <Suspense
+            fallback={
+              <Box
+                sx={{ display: 'grid', placeContent: 'center', height: '100%' }}
+              >
+                <CircularProgress />
+              </Box>
+            }
+          >
+            <Switch>
+              {isLoggedIn
+                ? hasData
+                  ? loggedInWithData
+                  : loggedInNoData
+                : notLoggedIn}
+            </Switch>
+          </Suspense>
         </ErrorBoundary>
       </Layout>
     </Router>

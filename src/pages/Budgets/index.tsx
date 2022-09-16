@@ -27,13 +27,13 @@ export default function BudgetsRouter() {
   const maxMonth = monthList[monthList.length - 1]
 
   if (!month) {
-    return <Redirect to={`/budget/?month=${toISOMonth(new Date())}`} />
+    return <Redirect to={`/budget?month=${toISOMonth(new Date())}`} />
   }
   if (month < minMonth) {
-    return <Redirect to={`/budget/?month=${minMonth}`} />
+    return <Redirect to={`/budget?month=${minMonth}`} />
   }
   if (month > maxMonth) {
-    return <Redirect to={`/budget/?month=${maxMonth}`} />
+    return <Redirect to={`/budget?month=${maxMonth}`} />
   }
   return <Budgets />
 }
