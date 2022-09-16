@@ -6,9 +6,9 @@ import {
   fakeToken,
   redirectUri,
   tokenEndpoint,
-} from '@shared/config'
-import { TZmDiff, TZmRequest } from '@shared/types'
-import { tokenStorage } from '@shared/api/tokenStorage'
+} from '../../config'
+import { TZmDiff, TZmRequest } from '../../types'
+import { tokenStorage } from '../tokenStorage'
 
 export type TAccessToken = {
   access_token: string
