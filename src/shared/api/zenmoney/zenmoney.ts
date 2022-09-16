@@ -1,13 +1,14 @@
-import Cookies from 'cookies-js'
 import {
   authEndpoint,
   clientId,
   clientSecret,
   diffEndpoint,
+  fakeToken,
   redirectUri,
   tokenEndpoint,
-} from '../../config'
+} from '@shared/config'
 import { TZmDiff, TZmRequest } from '@shared/types'
+import { tokenStorage } from '@shared/api/tokenStorage'
 
 export type TAccessToken = {
   access_token: string
@@ -17,8 +18,6 @@ export type TAccessToken = {
 }
 
 const CODE_DATA_KEY = 'auth-code-data'
-const TOKEN_KEY = 'token'
-const FAKE_TOKEN = 'fakeToken'
 
 export const zenmoney = { getData, checkCode, getLocalToken, getToken }
 
@@ -29,7 +28,7 @@ async function getData(token: string, diff: TZmDiff = { serverTimestamp: 0 }) {
   if (!diffEndpoint) {
     throw Error('Fill REACT_APP_DIFF_ENDPOINT in your .env file')
   }
-  if (token === FAKE_TOKEN) {
+  if (token === fakeToken) {
     // If token is fake, pretend we got data from server
     return { ...diff, serverTimestamp: Math.ceil(Date.now() / 1000) }
   }
@@ -67,7 +66,7 @@ function checkCode() {
 }
 
 function getLocalToken() {
-  return Cookies.get(TOKEN_KEY) || null
+  return tokenStorage.get()
 }
 
 async function getToken() {
@@ -111,9 +110,9 @@ function getAccessTokenData(authorizationCode: string): Promise<TAccessToken> {
   }).then(response => response.json())
 }
 
-function storeAccessTokenData({ access_token, expires_in }: TAccessToken) {
+function storeAccessTokenData({ access_token }: TAccessToken) {
   if (access_token && access_token !== 'null') {
-    Cookies.set(TOKEN_KEY, access_token, { expires: expires_in })
+    tokenStorage.set(access_token)
     return access_token
   } else return null
 }

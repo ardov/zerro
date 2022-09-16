@@ -1,17 +1,18 @@
 import React, { FC, useState } from 'react'
-import Cookies from 'cookies-js'
-import { useAppDispatch } from '@store'
+import { Link as RouterLink } from 'react-router-dom'
 import { Box, Button, Link, Fade, LinkProps } from '@mui/material'
-import { logIn } from '@features/authorization'
-import { zenmoney } from '@shared/api/zenmoney'
 import { useTheme } from '@mui/material'
+import { fakeToken } from '@shared/config'
+import { tokenStorage } from '@shared/api/tokenStorage'
+import { zenmoney } from '@shared/api/zenmoney'
 import { Logo } from '@shared/ui/Logo'
+import { useAppDispatch, AppThunk } from '@store'
 import { applyServerPatch } from '@store/data'
 import { setToken } from '@store/token'
+import { logIn } from '@features/authorization'
 import { saveDataLocally } from '@features/localData'
-import { Link as RouterLink } from 'react-router-dom'
 import { convertZmToLocal } from '@worker'
-import { AppThunk } from '@store'
+
 zenmoney.checkCode()
 
 export default function Auth() {
@@ -98,10 +99,10 @@ const loadFromFile =
       const data = JSON.parse(txt)
       const converted = await convertZmToLocal(data)
       // TODO: maybe later make more elegant solution for local data
-      dispatch(setToken('fakeToken'))
+      dispatch(setToken(fakeToken))
       dispatch(applyServerPatch(converted))
       dispatch(saveDataLocally())
-      Cookies.set('token', 'fakeToken', { expires: new Date(2030, 1) })
+      tokenStorage.set(fakeToken)
     } catch (error) {
       console.log(error)
       return

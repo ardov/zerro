@@ -1,11 +1,11 @@
-import Cookies from 'cookies-js'
+import { tokenStorage } from '@shared/api/tokenStorage'
 import { zenmoney } from '@shared/api/zenmoney'
 import { setToken } from '@store/token'
 import { resetData } from '@store/data'
-import { syncData } from '@features/sync'
-import { clearLocalData } from './localData'
 import { AppThunk } from '@store'
+import { syncData } from '@features/sync'
 import { workerMethods } from '@worker'
+import { clearLocalData } from './localData'
 
 export const logIn = (): AppThunk => async (dispatch, getState) => {
   dispatch(logOut())
@@ -19,5 +19,5 @@ export const logOut = (): AppThunk => (dispatch, getState) => {
   dispatch(resetData())
   dispatch(setToken(null))
   dispatch(clearLocalData())
-  Cookies.expire('token')
+  tokenStorage.clear()
 }

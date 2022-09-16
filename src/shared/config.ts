@@ -32,3 +32,5 @@ export const isProduction = import.meta.env.PROD
 // Database parameters
 export const idbBaseName = 'zerro_data'
 export const idbStoreName = 'serverData'
+
+export const fakeToken = 'fake_token'
