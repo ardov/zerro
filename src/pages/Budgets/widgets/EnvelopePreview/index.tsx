@@ -31,10 +31,10 @@ import { patchEnvelope } from '@entities/envelope'
 import { useMonth } from '@pages/Budgets/model'
 import { GoalPopover } from '../GoalPopover'
 import { BudgetPopover } from '../BudgetPopover'
+import { EnvelopeEditDialog } from '../EnvelopeEditDialog'
 import { ActivityWidget } from './ActivityWidget'
 import { CommentWidget } from './CommentWidget'
 import { cardStyle } from './shared'
-import { EnvelopeEditDialog } from './EnvelopeEditDialog'
 
 type EnvelopePreviewProps = {
   id: TEnvelopeId

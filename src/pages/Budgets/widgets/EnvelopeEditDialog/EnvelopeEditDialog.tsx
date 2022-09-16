@@ -31,8 +31,6 @@ import { TagSelect } from '@components/TagSelect'
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
 import { VisibilitySelect } from './VisidilitySelect'
 
-// TODO: Доделать модалку для редактирования и создания категорий
-
 export type TagEditDialogProps = Modify<
   DialogProps,
   {
@@ -56,7 +54,7 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
     setFieldValue,
   } = useFormik({
     initialValues: {
-      name: envelope?.name || '',
+      originalName: envelope?.originalName || '',
       parentTagId: envelope?.parent
         ? parseEnvelopeId(envelope.parent).id
         : null,
@@ -69,8 +67,8 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
       currency: envelope?.currency || defaultCurrency,
     },
     validate: values => {
-      if (!values.name.trim()) {
-        return { name: 'Название категории точно пригодится 😉' }
+      if (!values.originalName.trim()) {
+        return { originalName: 'Название точно пригодится 😉' }
       }
     },
     onSubmit: (values, helpers) => {
@@ -93,7 +91,7 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
       }}
     >
       <DialogTitle>
-        {isNew ? 'Новая категория' : 'Редактирование категории'}
+        {isNew ? 'Новая категория' : 'Редактирование конверта'}
       </DialogTitle>
       <DialogContent>
         <Stack
@@ -105,12 +103,12 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
         >
           <TextField
             label="Название конверта"
-            error={!!errors.name}
-            helperText={errors.name}
+            error={!!errors.originalName}
+            helperText={errors.originalName}
             autoFocus
-            name="name"
+            name="originalName"
             inputProps={{ autoComplete: 'off' }}
-            value={values.name}
+            value={values.originalName}
             onChange={handleChange}
             InputProps={{
               endAdornment: (
