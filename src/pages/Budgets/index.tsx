@@ -10,10 +10,7 @@ import { useSearchParam } from '@shared/hooks/useSearchParam'
 import { nextMonth, prevMonth, toISOMonth } from '@shared/helpers/date'
 import { useAppSelector } from '@store'
 import { getMonthList, useMonthList } from '@entities/envelopeData'
-import { GoalsProgress } from '@features/bulkActions/fillGoals'
-import { MonthInfo } from './components/MonthInfo'
-import { ToBeBudgeted } from './components/ToBeBudgeted'
-import { MonthSelect } from './MonthSelect'
+import { MonthInfo } from './widgets/MonthInfo'
 import { EnvelopePreview } from './widgets/EnvelopePreview'
 import { BudgetTransactionsDrawer } from './widgets/TransactionsDrawer'
 import { EnvelopeTable } from './widgets/EnvelopeTable'
@@ -90,31 +87,13 @@ function Budgets() {
         gap: 2,
         width: '100%',
         maxWidth: 800,
+        py: 3,
       }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 2,
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          position: 'sticky',
-          top: 0,
-          zIndex: 9,
-        }}
-      >
-        <MonthSelect
-          onChange={setMonth}
-          {...{ minMonth, maxMonth, value: month }}
-        />
-
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <GoalsProgress month={month} />
-          <ToBeBudgeted onClick={openOverview} />
-        </Box>
-      </Box>
-
-      <EnvelopeTable onOpenDetails={openEnvelopeInfo} />
+      <EnvelopeTable
+        onOpenOverview={openOverview}
+        onOpenDetails={openEnvelopeInfo}
+      />
     </Box>
   )
 
@@ -163,7 +142,6 @@ const BudgetLayout: FC<{
           height: '100%',
           overflow: 'auto',
           px: isMD ? 1 : 3,
-          py: 3,
         }}
       >
         {mainContent}

@@ -18,12 +18,13 @@ import { useTrDrawer } from '../TransactionsDrawer'
 
 type TagTableProps = {
   onOpenDetails: (id: TEnvelopeId) => void
+  onOpenOverview: () => void
   className?: string
 }
 
 export const EnvelopeTable: FC<TagTableProps> = props => {
   const { setDrawer } = useTrDrawer()
-  const { onOpenDetails, className } = props
+  const { onOpenDetails, className, onOpenOverview } = props
   const [month] = useMonth()
   const groups = useEnvelopeGroups(month)
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
@@ -36,8 +37,12 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
 
   return (
     <>
-      <Paper className={className}>
-        <Header metric={metric} onMetricSwitch={switchMetric} />
+      <Paper className={className} sx={{ position: 'relative' }}>
+        <Header
+          metric={metric}
+          onMetricSwitch={switchMetric}
+          onOpenOverview={onOpenOverview}
+        />
         {groups.map(group => (
           <EnvelopeGroup key={group.name} group={group}>
             {group.children.map(parent => (

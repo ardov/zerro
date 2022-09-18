@@ -17,7 +17,6 @@ import {
 import { CloseIcon } from '@shared/ui/Icons'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { useMonth } from '@pages/BudgetsOld/pathHooks'
-import { useToggle } from '@shared/hooks/useToggle'
 import { TDateDraft } from '@shared/types'
 import {
   overspendModel,
@@ -35,7 +34,6 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
   const [month] = useMonth()
 
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
-  const [showMore, toggleMore] = useToggle(false)
   const { totalOverspendValue, currency } = useAppSelector(
     overspendModel.get
   )?.[month]
