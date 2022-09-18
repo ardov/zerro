@@ -60,6 +60,7 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
               top: 10,
               transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
               transition: '.3s',
+              zIndex: 1,
             }}
             onClick={handleExpand}
           >
