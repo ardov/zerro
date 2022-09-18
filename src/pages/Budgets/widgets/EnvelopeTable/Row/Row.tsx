@@ -1,5 +1,5 @@
-import React, { FC, useCallback } from 'react'
-import { useDraggable, useDroppable } from '@dnd-kit/core'
+import React, { FC, useCallback, useState } from 'react'
+import { useDndMonitor, useDraggable, useDroppable } from '@dnd-kit/core'
 import {
   Typography,
   Box,
@@ -25,11 +25,8 @@ import {
 import { RadialProgress } from '@shared/ui/RadialProgress'
 import { Amount } from '@shared/ui/Amount'
 import { TEnvelopeId, TFxAmount, TFxCode, TRates } from '@shared/types'
-import { useAppSelector } from '@store'
-import { getUserCurrencyCode } from '@entities/instrument'
 import { goalToWords, TGoal } from '@entities/goal'
-import { useRates } from '@entities/envelopeData'
-import { TEnvelopePopulated, useMonth } from '../../../model'
+import { TEnvelopePopulated } from '../model'
 import { DragTypes } from '../../DnDContext'
 import { Metric, rowStyle } from '../shared/shared'
 
@@ -53,8 +50,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
     openTransactionsPopover,
     openDetails,
   } = props
-  const { id, comment, currency, name, color, symbol, totalBudgeted, isSelf } =
-    envelope
+  const { id, totalBudgeted, isSelf } = envelope
   const isChild = !!envelope.parent || isSelf
   const showBudget = isChild ? !isZero(totalBudgeted) : true
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
@@ -64,34 +60,14 @@ export const Row: FC<EnvelopeRowProps> = props => {
       if (e.altKey) console.log(envelope.name, envelope)
       else openDetails(id)
     },
-    [id]
+    [envelope, id, openDetails]
   )
 
   if (!envelope.isDefaultVisible && !showAll) return null
 
   return (
     <Droppable id={id} isChild={isChild}>
-      {/* Name cell */}
-      <Box
-        display="flex"
-        alignItems="center"
-        minWidth={0}
-        onClick={handleNameClick}
-      >
-        <EmojiIcon symbol={symbol} mr={1.5} color={color} />
-        <Typography component="span" variant="body1" title={name} noWrap>
-          {name}
-        </Typography>
-        {envelope.hasCustomCurency && <CurrencyTag currency={currency} />}
-        {!!comment && (
-          <Tooltip title={comment}>
-            <NotesIcon
-              sx={{ ml: 1, color: 'text.secondary' }}
-              fontSize="small"
-            />
-          </Tooltip>
-        )}
-      </Box>
+      <NameCell envelope={envelope} onClick={handleNameClick} />
 
       {(metric === Metric.budgeted || !isMobile) && (
         <BudgetCell
@@ -132,25 +108,71 @@ export const Row: FC<EnvelopeRowProps> = props => {
   )
 }
 
+const NameCell: FC<{
+  envelope: TEnvelopePopulated
+  onClick: (e: React.MouseEvent) => void
+}> = props => {
+  const e = props.envelope
+  const { symbol, color, name, hasCustomCurency, currency, comment } = e
+  const { setNodeRef, attributes, listeners } = useDraggable({
+    id: 'envelope' + e.id,
+    data: { type: DragTypes.envelope, id: e.id },
+  })
+  return (
+    <Box display="flex" alignItems="center" minWidth={0}>
+      <ButtonBase
+        sx={{
+          p: 0.5,
+          m: -0.5,
+          borderRadius: 1,
+          minWidth: 0,
+          transition: '0.1s',
+          typography: 'body1',
+          '&:hover': { bgcolor: 'action.hover' },
+          '&:focus': { bgcolor: 'action.focus' },
+        }}
+        onClick={props.onClick}
+      >
+        <span ref={setNodeRef} {...attributes} {...listeners}>
+          <EmojiIcon symbol={symbol} mr={1.5} color={color} />
+        </span>
+        <Typography component="span" variant="body1" title={name} noWrap>
+          {name}
+        </Typography>
+      </ButtonBase>
+
+      {hasCustomCurency && <CurrencyTag currency={currency} />}
+
+      {!!comment && (
+        <Tooltip title={comment}>
+          <NotesIcon sx={{ ml: 1, color: 'text.secondary' }} fontSize="small" />
+        </Tooltip>
+      )}
+    </Box>
+  )
+}
+
 const Droppable: FC<{
   id: TEnvelopeId
   isChild: boolean
   children: React.ReactNode
 }> = props => {
   const { id, isChild, children } = props
-  const { setNodeRef, isOver } = useDroppable({
-    id,
-    data: { type: DragTypes.envelope },
+  const { setNodeRef, isOver, active } = useDroppable({
+    id: 'envelope-drop' + id + isChild,
+    data: { type: DragTypes.envelope, id },
   })
+  const highlight = useHighLight(id)
+
+  const isAmount = active?.data.current?.type === DragTypes.amount
+
   const style: SxProps = {
     ...rowStyle,
     pl: isChild ? 7 : 2,
-    bgcolor: isOver ? 'action.selected' : 'transparent',
+    bgcolor: isOver && isAmount ? 'action.selected' : 'transparent',
+    position: 'relative',
     transition: '0.1s',
-    // alignItems: 'center',
-    // justifyContent: 'initial',
-    // gridColumnGap: '12px',
-    '&:hover': { bgcolor: isOver ? 'none' : 'action.hover' },
+    '&:hover': { bgcolor: isAmount ? 'none' : 'action.hover' },
     '&:hover .addGoal': { opacity: 1, transition: '.3s' },
     '&:not(:hover) .addGoal': { opacity: 0 },
     '& > *': { py: isChild ? 0.5 : 1 },
@@ -158,6 +180,21 @@ const Droppable: FC<{
   return (
     <Box ref={setNodeRef} sx={style}>
       {children}
+      {!!highlight && (
+        <Box
+          left={highlight === 'child' ? '56px' : 0}
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            height: '2px',
+            padding: 0,
+            margin: 0,
+            bgcolor: 'primary.main',
+            transition: '0.1s',
+          }}
+        />
+      )}
     </Box>
   )
 }
@@ -239,13 +276,7 @@ type OutcomeCellProps = {
   onClick: React.MouseEventHandler<HTMLButtonElement>
 }
 const OutcomeCell: FC<OutcomeCellProps> = props => {
-  const [month] = useMonth()
-  const rates = useRates(month)
-  const mainCurrency = useAppSelector(getUserCurrencyCode)
-  const { activity, displayActivity, onClick } = props
-
-  // <Tooltip title={getAmountTitle(activity, mainCurrency, rates)}>
-  //   </Tooltip>
+  const { displayActivity, onClick } = props
   return (
     <Box
       display="flex"
@@ -268,8 +299,11 @@ const Draggable: FC<{
   disabled?: boolean
 }> = props => {
   const { id, children, disabled, type } = props
-  const { setNodeRef, isDragging, transform, attributes, listeners } =
-    useDraggable({ id, disabled, data: { type } })
+  const { setNodeRef, attributes, listeners } = useDraggable({
+    id: 'amount' + id,
+    disabled,
+    data: { type, id },
+  })
   return (
     <span ref={setNodeRef} {...attributes} {...listeners}>
       {children}
@@ -417,4 +451,46 @@ function getAmountTitle(amount: TFxAmount, currency: TFxCode, rates: TRates) {
       ))}
     </span>
   )
+}
+
+function useHighLight(id: TEnvelopeId) {
+  const [state, setState] = useState<'next' | 'child' | null>(null)
+
+  const OFFSET = 56
+
+  useDndMonitor({
+    onDragMove: e => {
+      const activeData = e.active.data.current
+      const overData = e.over?.data.current
+      const activeRect = e.active.rect.current.translated
+      const overRect = e.over?.rect
+      if (
+        // has active
+        !activeData ||
+        !activeData.id ||
+        activeData.type !== DragTypes.envelope ||
+        !activeRect ||
+        // has over
+        !overData ||
+        !overData.id ||
+        overData.type !== DragTypes.envelope ||
+        !overRect ||
+        // over current tag
+        overData.id !== id
+      ) {
+        setState(null)
+        return
+      }
+      const isIndented = activeRect.left - overRect.left > OFFSET
+      setState(isIndented ? 'child' : 'next')
+    },
+    onDragEnd: e => {
+      setState(null)
+    },
+    onDragCancel: e => {
+      setState(null)
+    },
+  })
+
+  return state
 }
