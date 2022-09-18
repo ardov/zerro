@@ -7,7 +7,7 @@ import {
   ButtonBaseProps,
   Theme,
 } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { useTheme } from '@mui/styles'
 import { formatMoney, sub } from '@shared/helpers/money'
 import { useMonth } from '@shared/hooks/useMonth'
 import { Tooltip } from '@shared/ui/Tooltip'
@@ -20,22 +20,12 @@ import {
 } from '@entities/envelopeData'
 import { useDisplayCurrency } from '@entities/instrument/hooks'
 import { DataLine } from '@shared/ui/DataLine'
+import { ArrowForwardIcon } from '@shared/ui/Icons'
 
 type TMsgType = 'error' | 'warning' | 'success'
 
-const useStyles = makeStyles<Theme, { color: TMsgType }>(({ palette }) => ({
-  base: {
-    background: ({ color }) =>
-      `linear-gradient(105deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 100%
-        ),${palette[color].main}`,
-    color: ({ color }) => palette.getContrastText(palette[color].main),
-  },
-  label: { minWidth: 0 },
-}))
-
 type ToBeBudgetedProps = ButtonBaseProps
 export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
-  const { className, ...rest } = props
   const {
     currency,
     toBeBudgeted,
@@ -44,21 +34,28 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
     TooltipContent,
   } = useTotalsModel()
 
-  const c = useStyles({ color: msgType })
+  const theme = useTheme()
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+
+  const bg = theme.palette[msgType].main
+  const color = theme.palette.getContrastText(bg)
 
   return (
     <Tooltip arrow title={<TooltipContent />}>
       <ButtonBase
         sx={{
+          display: 'flex',
+          gap: 1,
           borderRadius: 1,
           py: 1,
-          px: 2,
+          pl: 2,
+          pr: 1,
+          background: bg,
+          color: color,
         }}
-        className={`${c.base} ${className}`}
-        {...rest}
+        {...props}
       >
-        <Typography noWrap align="center" variant="body1" className={c.label}>
+        <Typography noWrap align="center" variant="body1">
           {!isMobile &&
             (toBeBudgeted ? 'Не распределено ' : 'Деньги распределены ')}
           {toBeBudgeted ? (
@@ -74,6 +71,7 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
             '👌'
           )}
         </Typography>
+        <ArrowForwardIcon fontSize="small" />
       </ButtonBase>
     </Tooltip>
   )
