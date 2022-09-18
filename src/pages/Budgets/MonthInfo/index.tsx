@@ -23,8 +23,8 @@ import {
   OverspendNotice,
 } from '@features/bulkActions/fixOverspend'
 import { copyPreviousBudget } from '@features/bulkActions/copyPrevMonth'
-import { BalanceWidget } from '@pages/Budgets/widgets/BalanceWidget'
-import { StatWidget } from '@pages/Budgets/widgets/StatWidget'
+import { BalanceWidget } from '../BalanceWidget'
+import { StatWidget } from '../StatWidget'
 
 type MonthInfoProps = BoxProps & {
   onClose: () => void

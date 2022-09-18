@@ -11,11 +11,11 @@ import { nextMonth, prevMonth, toISOMonth } from '@shared/helpers/date'
 import { useMonth } from '@shared/hooks/useMonth'
 import { useAppSelector } from '@store'
 import { getMonthList, useMonthList } from '@entities/envelopeData'
-import { MonthInfo } from './widgets/MonthInfo'
-import { EnvelopePreview } from './widgets/EnvelopePreview'
-import { BudgetTransactionsDrawer } from './widgets/TransactionsDrawer'
-import { EnvelopeTable } from './widgets/EnvelopeTable'
-import { DnDContext } from './widgets/DnDContext'
+import { MonthInfo } from './MonthInfo'
+import { EnvelopePreview } from './EnvelopePreview'
+import { BudgetTransactionsDrawer } from './TransactionsDrawer'
+import { EnvelopeTable } from './EnvelopeTable'
+import { DnDContext } from './DnDContext'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
