@@ -1,16 +1,19 @@
-import React, { FC, useState } from 'react'
+import React, { FC } from 'react'
 import { Paper, Typography } from '@mui/material'
 import { TEnvelopeId } from '@shared/types'
 import { useEnvelopePopover } from '@shared/hooks/useEnvelopePopover'
 import { useMonth } from '@shared/hooks/useMonth'
-import { TGroupInfo, useEnvelopeGroups, useExpandEnvelopes } from './model'
 import { Parent } from './Parent'
 import { Row } from './Row/Row'
 import { BudgetPopover } from '../BudgetPopover'
 import { GoalPopover } from '../GoalPopover'
 import { Header } from './Header'
-import { Metric, rowStyle } from './shared/shared'
+import { rowStyle } from './shared/shared'
 import { useTrDrawer } from '../TransactionsDrawer'
+import { useMetric } from './models/useMetric'
+import { useEnvelopeGroups } from './models/envelopeGroups'
+import { useExpandEnvelopes } from './models/useExpandEnvelopes'
+import { TGroupInfo } from './models/getEnvelopeGroups'
 
 type TagTableProps = {
   onOpenDetails: (id: TEnvelopeId) => void
@@ -19,24 +22,21 @@ type TagTableProps = {
 }
 
 export const EnvelopeTable: FC<TagTableProps> = props => {
-  const { setDrawer } = useTrDrawer()
   const { onOpenDetails, className, onOpenOverview } = props
+  const { setDrawer } = useTrDrawer()
   const [month] = useMonth()
   const groups = useEnvelopeGroups(month)
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
   const budget = useEnvelopePopover(month, 'budget')
   const goal = useEnvelopePopover(month, 'goal')
-  const [metric, setMetric] = useState<Metric>(Metric.available)
-  const switchMetric = () => {
-    // TODO
-  }
+  const { metric, toggleMetric } = useMetric()
 
   return (
     <>
       <Paper className={className} sx={{ position: 'relative' }}>
         <Header
           metric={metric}
-          onMetricSwitch={switchMetric}
+          onMetricSwitch={toggleMetric}
           onOpenOverview={onOpenOverview}
         />
         {groups.map(group => (

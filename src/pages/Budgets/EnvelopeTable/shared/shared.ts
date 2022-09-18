@@ -12,9 +12,3 @@ export const rowStyle: SxProps = {
   justifyContent: 'initial',
   gridColumnGap: '12px',
 }
-
-export enum Metric {
-  budgeted = 'budgeted',
-  outcome = 'outcome',
-  available = 'available',
-}

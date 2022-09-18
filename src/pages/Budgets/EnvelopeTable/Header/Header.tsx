@@ -2,9 +2,10 @@ import React, { FC } from 'react'
 import { Typography, Box, useMediaQuery, Theme } from '@mui/material'
 import { useMonth } from '@shared/hooks/useMonth'
 import { GoalsProgress } from '@features/bulkActions/fillGoals'
-import { Metric, rowStyle } from '../shared/shared'
+import { rowStyle } from '../shared/shared'
 import { MonthSelect } from './MonthSelect'
 import { ToBeBudgeted } from './ToBeBudgeted'
+import { Metric } from '../models/useMetric'
 
 type HeaderProps = {
   metric: Metric

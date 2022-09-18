@@ -26,9 +26,10 @@ import { RadialProgress } from '@shared/ui/RadialProgress'
 import { Amount } from '@shared/ui/Amount'
 import { TEnvelopeId, TFxAmount, TFxCode, TRates } from '@shared/types'
 import { goalToWords, TGoal } from '@entities/goal'
-import { TEnvelopePopulated } from '../model'
 import { DragTypes } from '../../DnDContext'
-import { Metric, rowStyle } from '../shared/shared'
+import { rowStyle } from '../shared/shared'
+import { Metric } from '../models/useMetric'
+import { TEnvelopePopulated } from '../models/getEnvelopeGroups'
 
 type EnvelopeRowProps = {
   envelope: TEnvelopePopulated
