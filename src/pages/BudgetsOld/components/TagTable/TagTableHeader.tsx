@@ -27,7 +27,7 @@ import { RadialProgress } from '@shared/ui/RadialProgress'
 import { makeStyles } from '@mui/styles'
 import { ToBeBudgeted } from '../ToBeBudgeted'
 import useScrollPosition from '@react-hook/window-scroll'
-import { useMonth } from '@pages/BudgetsOld/pathHooks'
+import { useMonth } from '@shared/hooks/useMonth'
 import { DragModeContext } from '../DnDContext'
 import {
   getMonthDates,

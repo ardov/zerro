@@ -25,7 +25,7 @@ import {
   // getGoalsProgress
 } from '@pages/BudgetsOld/selectors'
 import Rhythm from '@shared/ui/Rhythm'
-import { useMonth } from '@pages/BudgetsOld/pathHooks'
+import { useMonth } from '@shared/hooks/useMonth'
 import { LinkedAccs } from './LinkedAccs'
 import { OutcomeWidget } from './OutcomeWidget'
 import { ColorPicker } from '@shared/ui/ColorPickerPopover'

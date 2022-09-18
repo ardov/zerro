@@ -16,7 +16,7 @@ import {
 } from '@mui/material'
 import { CloseIcon } from '@shared/ui/Icons'
 import { Tooltip } from '@shared/ui/Tooltip'
-import { useMonth } from '@pages/BudgetsOld/pathHooks'
+import { useMonth } from '@shared/hooks/useMonth'
 import { TDateDraft } from '@shared/types'
 import {
   overspendModel,

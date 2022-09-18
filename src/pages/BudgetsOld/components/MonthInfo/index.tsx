@@ -24,7 +24,7 @@ import { WidgetIncome } from './WidgetIncome'
 import { OverspentNotice } from './OverspentNotice'
 import { CalculationErrorNotice } from './CalculationErrorNotice'
 import { WidgetOutcome } from './WidgetOutcome'
-import { useMonth } from '@pages/BudgetsOld/pathHooks'
+import { useMonth } from '@shared/hooks/useMonth'
 import { useToggle } from '@shared/hooks/useToggle'
 import { TDateDraft } from '@shared/types'
 

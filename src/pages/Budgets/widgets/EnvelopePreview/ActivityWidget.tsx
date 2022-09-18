@@ -1,15 +1,15 @@
 import React, { FC, useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { Box, BoxProps, useTheme } from '@mui/material'
+import { TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
 import Rhythm from '@shared/ui/Rhythm'
 import { DataLine } from '@shared/ui/DataLine'
 import { formatDate } from '@shared/helpers/date'
 import { keys } from '@shared/helpers/keys'
 import { convertFx } from '@shared/helpers/money'
-import { TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
+import { useMonth } from '@shared/hooks/useMonth'
 import { useAppSelector } from '@store'
 import { getMonthTotals } from '@entities/envelopeData'
-import { useMonth } from '@pages/Budgets/model'
 
 type ActivityWidgetProps = BoxProps & { id: TEnvelopeId }
 

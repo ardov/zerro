@@ -7,13 +7,13 @@ import {
   ButtonBase,
   PaperProps,
 } from '@mui/material'
+import { TDateDraft, TISOMonth } from '@shared/types'
 import { ChevronRightIcon, ChevronLeftIcon } from '@shared/ui/Icons'
 import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
 import { formatDate } from '@shared/helpers/date'
-import { TDateDraft, TISOMonth } from '@shared/types'
+import { useMonth } from '@shared/hooks/useMonth'
 import { nextMonth, prevMonth } from '@shared/helpers/date'
 import { useMonthList } from '@entities/envelopeData'
-import { useMonth } from '../../../model'
 
 export const MonthSelect: FC<PaperProps> = props => {
   const [month, setMonth] = useMonth()

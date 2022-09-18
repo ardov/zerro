@@ -6,8 +6,8 @@ import { formatDate } from '@shared/helpers/date'
 import Rhythm from '@shared/ui/Rhythm'
 import { getAmountsById } from '@pages/BudgetsOld/selectors'
 import { getMonthDates } from '@pages/BudgetsOld/selectors'
-import { useMonth } from '@pages/BudgetsOld/pathHooks'
-import { DataLine } from '../../../../shared/ui/DataLine'
+import { useMonth } from '@shared/hooks/useMonth'
+import { DataLine } from '@shared/ui/DataLine'
 import { TISOMonth } from '@shared/types'
 
 type OutcomWidgetProps = BoxProps & {

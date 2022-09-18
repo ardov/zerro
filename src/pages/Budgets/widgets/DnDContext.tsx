@@ -1,7 +1,7 @@
 import React, { FC, ReactNode, useState } from 'react'
 import { DndContext, DragOverlay, DragEndEvent } from '@dnd-kit/core'
-import { useMonth } from '../model'
 import { useCallback } from 'react'
+import { useMonth } from '@shared/hooks/useMonth'
 import { MoveMoneyModal } from '@features/moveMoney'
 import { useToggle } from '@shared/hooks/useToggle'
 import { TEnvelopeId } from '@shared/types'
@@ -22,19 +22,19 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
 
   const onDragEnd = useCallback(
     (e: DragEndEvent) => {
-      if (!e.active || !e.over || !month) return
-      let dataType = e.active.data.current?.type as DragTypes | undefined
-      if (dataType === DragTypes.amount && e.active.id !== e.over.id) {
-        setMoneySource(e.active.id as TEnvelopeId)
-        setMoneyDestination(e.over.id as TEnvelopeId)
+      const active = e.active.data.current
+      const over = e.over?.data.current
+      if (!active || !over || !month) return
+      let dataType = active?.type as DragTypes | undefined
+      if (dataType === DragTypes.amount && active.id !== over.id) {
+        setMoneySource(active.id as TEnvelopeId)
+        setMoneyDestination(over.id as TEnvelopeId)
         toggleOpen()
       }
     },
     [month, toggleOpen]
   )
   const onDragStart = useCallback(() => {
-    console.log('Started')
-
     if (window.navigator.vibrate) window.navigator.vibrate(100)
   }, [])
 

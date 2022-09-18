@@ -1,9 +1,9 @@
 import React, { FC } from 'react'
+import { useMonth } from '@shared/hooks/useMonth'
 import { useAppSelector } from '@store'
 import { getTotalsByMonth } from './selectors'
 import { getAmountsByTag } from './selectors'
 import { getTagsTree } from '@entities/tag'
-import { useMonth } from '@pages/BudgetsOld/pathHooks'
 import {
   Sankey,
   Tooltip,

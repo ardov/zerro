@@ -17,7 +17,7 @@ import { addConnection, getAccTagMap } from '@entities/hiddenData/accTagMap'
 import { getTransfers } from '../selectors'
 import { getAccounts } from '@entities/account'
 import TagChip from '@components/TagChip'
-import { useMonth } from '../pathHooks'
+import { useMonth } from '@shared/hooks/useMonth'
 import { useAppDispatch, useAppSelector } from '@store'
 
 const useStyles = makeStyles(theme => ({

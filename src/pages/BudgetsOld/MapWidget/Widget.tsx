@@ -3,7 +3,7 @@ import { Box, Button, Paper, PaperProps, Typography } from '@mui/material'
 import { TagMapChart } from './TagMapChart'
 import { sendEvent } from '@shared/helpers/tracking'
 import { getTotalsByMonth } from '../selectors'
-import { useMonth } from '../pathHooks'
+import { useMonth } from '@shared/hooks/useMonth'
 import { useAppSelector } from '@store'
 
 type WidgetProps = PaperProps & {

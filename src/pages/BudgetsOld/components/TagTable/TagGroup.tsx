@@ -5,7 +5,7 @@ import { makeStyles } from '@mui/styles'
 import { ChevronRightIcon, DragIndicatorIcon } from '@shared/ui/Icons'
 import { TagRow } from './TagRow'
 import { getAmountsById } from '@pages/BudgetsOld/selectors'
-import { useMonth } from '@pages/BudgetsOld/pathHooks'
+import { useMonth } from '@shared/hooks/useMonth'
 import { DragModeContext } from '../DnDContext'
 import { TTagPopulated } from '@entities/tag'
 

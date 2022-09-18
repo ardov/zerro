@@ -2,12 +2,8 @@ import React, { FC, useState } from 'react'
 import { Paper, Typography } from '@mui/material'
 import { TEnvelopeId } from '@shared/types'
 import { useEnvelopePopover } from '@shared/hooks/useEnvelopePopover'
-import {
-  TGroupInfo,
-  useEnvelopeGroups,
-  useExpandEnvelopes,
-  useMonth,
-} from '../../model'
+import { useMonth } from '@shared/hooks/useMonth'
+import { TGroupInfo, useEnvelopeGroups, useExpandEnvelopes } from '../../model'
 import { Parent } from './Parent'
 import { Row } from './Row/Row'
 import { BudgetPopover } from '../BudgetPopover'

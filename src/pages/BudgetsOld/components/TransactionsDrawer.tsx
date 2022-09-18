@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { useAppSelector } from '@store'
-import { useMonth } from '../pathHooks'
+import { useMonth } from '@shared/hooks/useMonth'
 import { useSearchParam } from '@shared/hooks/useSearchParam'
 import { TransactionsDrawer } from '@components/TransactionsDrawer'
 import { getInBudgetAccounts } from '@entities/account'

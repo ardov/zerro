@@ -7,7 +7,7 @@ import { SmartAmount } from '@components/Amount'
 import { Confirm } from '@shared/ui/Confirm'
 import { fixOverspends } from '@pages/BudgetsOld/thunks'
 import { getTotalsByMonth } from '@pages/BudgetsOld/selectors'
-import { useMonth } from '@pages/BudgetsOld/pathHooks'
+import { useMonth } from '@shared/hooks/useMonth'
 
 export const OverspentNotice: FC = () => {
   const [month] = useMonth()

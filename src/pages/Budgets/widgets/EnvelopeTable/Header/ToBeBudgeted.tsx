@@ -2,7 +2,6 @@ import React, { FC } from 'react'
 import {
   Typography,
   ButtonBase,
-  Box,
   Divider,
   useMediaQuery,
   ButtonBaseProps,
@@ -10,6 +9,7 @@ import {
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { formatMoney, sub } from '@shared/helpers/money'
+import { useMonth } from '@shared/hooks/useMonth'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { Amount } from '@shared/ui/Amount'
 import Rhythm from '@shared/ui/Rhythm'
@@ -18,40 +18,24 @@ import {
   useMonthList,
   useMonthTotals,
 } from '@entities/envelopeData'
-import { useMonth } from '../../../model'
 import { useDisplayCurrency } from '@entities/instrument/hooks'
+import { DataLine } from '@shared/ui/DataLine'
 
 type TMsgType = 'error' | 'warning' | 'success'
 
-const useStyles = makeStyles<Theme, { color: TMsgType }>(
-  ({ shape, spacing, palette, breakpoints }) => ({
-    base: {
-      // display: 'flex',
-      // flexDirection: 'column',
-      // borderRadius: shape.borderRadius,
-      // padding: spacing(1.5, 2),
-      background: ({ color }) =>
-        `linear-gradient(105deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 100%
+const useStyles = makeStyles<Theme, { color: TMsgType }>(({ palette }) => ({
+  base: {
+    background: ({ color }) =>
+      `linear-gradient(105deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 100%
         ),${palette[color].main}`,
-      // boxShadow: ({ color }) => `0 8px 20px -12px ${palette[color].main}`,
-      // transition: '0.4s',
-      color: ({ color }) => palette.getContrastText(palette[color].main),
+    color: ({ color }) => palette.getContrastText(palette[color].main),
+  },
+  label: { minWidth: 0 },
+}))
 
-      // [breakpoints.down('xs')]: {
-      //   flexDirection: 'row-reverse',
-      //   justifyContent: 'space-between',
-      // },
-    },
-    small: { padding: spacing(1, 2) },
-    label: { minWidth: 0 },
-  })
-)
-
-type ToBeBudgetedProps = ButtonBaseProps & {
-  small?: boolean
-}
+type ToBeBudgetedProps = ButtonBaseProps
 export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
-  const { small, className, ...rest } = props
+  const { className, ...rest } = props
   const {
     currency,
     toBeBudgeted,
@@ -63,58 +47,34 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
   const c = useStyles({ color: msgType })
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
-  const BigWidget = (
-    <ButtonBase
-      sx={{
-        borderRadius: 1,
-        py: 1,
-        px: 2,
-      }}
-      className={`${c.base} ${className}`}
-      {...rest}
-    >
-      <Typography noWrap align="center" variant="body1" className={c.label}>
-        {!isMobile &&
-          (toBeBudgeted ? 'Не распределено ' : 'Деньги распределены ')}
-        {toBeBudgeted ? (
-          <Amount
-            value={toBeBudgeted}
-            currency={currency}
-            decMode="ifAny"
-            noShade
-          />
-        ) : hasFutureOverspend ? (
-          '👍'
-        ) : (
-          '👌'
-        )}
-      </Typography>
-    </ButtonBase>
-  )
-
-  const SmallWidget = (
-    <ButtonBase className={`${c.base} ${c.small} ${className}`} {...rest}>
-      <Typography noWrap align="center" variant="body1">
-        {toBeBudgeted ? (
-          <Amount
-            value={toBeBudgeted}
-            currency={currency}
-            decMode="ifAny"
-            noShade
-          />
-        ) : hasFutureOverspend ? (
-          '👍'
-        ) : (
-          '👌'
-        )}
-      </Typography>
-    </ButtonBase>
-  )
-
   return (
     <Tooltip arrow title={<TooltipContent />}>
-      {/* {small ? SmallWidget : BigWidget} */}
-      {BigWidget}
+      <ButtonBase
+        sx={{
+          borderRadius: 1,
+          py: 1,
+          px: 2,
+        }}
+        className={`${c.base} ${className}`}
+        {...rest}
+      >
+        <Typography noWrap align="center" variant="body1" className={c.label}>
+          {!isMobile &&
+            (toBeBudgeted ? 'Не распределено ' : 'Деньги распределены ')}
+          {toBeBudgeted ? (
+            <Amount
+              value={toBeBudgeted}
+              currency={currency}
+              decMode="ifAny"
+              noShade
+            />
+          ) : hasFutureOverspend ? (
+            '👍'
+          ) : (
+            '👌'
+          )}
+        </Typography>
+      </ButtonBase>
     </Tooltip>
   )
 }
@@ -169,15 +129,24 @@ function useTotalsModel() {
         </Typography>
         <Divider />
 
-        <Line name="Всего в бюджете" amount={formatSum(fundsEnd)} />
+        <DataLine
+          name="Всего в бюджете"
+          amount={fundsEnd}
+          currency={currency}
+        />
         <Divider />
 
-        <Line name={`Лежит в конвертах`} amount={formatSum(allocated)} />
-        <Line
-          name={`Распределено в будущем`}
-          amount={formatSum(displayBudgetedInFuture)}
+        <DataLine
+          name={`Лежит в конвертах`}
+          amount={allocated}
+          currency={currency}
         />
-        <Line name={`Свободно`} amount={formatSum(toBeBudgeted)} />
+        <DataLine
+          name={`Распределено в будущем`}
+          amount={displayBudgetedInFuture}
+          currency={currency}
+        />
+        <DataLine name={`Свободно`} amount={toBeBudgeted} currency={currency} />
       </Rhythm>
     )
   }
@@ -191,21 +160,4 @@ function useTotalsModel() {
     msgType,
     TooltipContent,
   }
-}
-
-const Line: FC<{ name: string; amount: string }> = props => {
-  const { name, amount } = props
-  return (
-    <Box display="flex" flexDirection="row">
-      <Typography
-        noWrap
-        variant="caption"
-        sx={{ flexGrow: 1, mr: 1, minWidth: 0 }}
-      >
-        {name}
-      </Typography>
-
-      <Typography variant="caption">{amount}</Typography>
-    </Box>
-  )
 }

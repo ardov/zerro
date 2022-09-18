@@ -6,7 +6,7 @@ import { add, convertFx, sub } from '@shared/helpers/money'
 import { useAppSelector } from '@store/index'
 import { getTotalChanges, useRates } from '@entities/envelopeData'
 import { useDisplayCurrency } from '@entities/instrument/hooks'
-import { useMonth } from '../model'
+import { useMonth } from '@shared/hooks/useMonth'
 
 type ChartProps = {
   mode: 'balance' | 'outcome' | 'income'

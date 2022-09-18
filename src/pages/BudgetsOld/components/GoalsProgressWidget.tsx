@@ -15,7 +15,7 @@ import { Tooltip } from '@shared/ui/Tooltip'
 import { Confirm } from '@shared/ui/Confirm'
 import { fillGoals } from '../thunks'
 import { getTotalGoalsProgress } from '../selectors'
-import { useMonth } from '../pathHooks'
+import { useMonth } from '@shared/hooks/useMonth'
 
 export const GoalsProgressWidget: FC<ButtonBaseProps> = props => {
   const dispatch = useAppDispatch()

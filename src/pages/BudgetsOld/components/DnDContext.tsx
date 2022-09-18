@@ -1,7 +1,7 @@
 import React, { FC, ReactNode, useState } from 'react'
 import { useAppDispatch } from '@store'
 import { DragDropContext, DropResult } from 'react-beautiful-dnd'
-import { useMonth } from '../pathHooks'
+import { useMonth } from '@shared/hooks/useMonth'
 import { useCallback } from 'react'
 import { MoveMoneyModal } from './MoveMoneyModal'
 import { moveTag } from '@entities/hiddenData/tagOrder'
