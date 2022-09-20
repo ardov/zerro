@@ -16,6 +16,8 @@ import { EnvelopePreview } from './EnvelopePreview'
 import { BudgetTransactionsDrawer } from './TransactionsDrawer'
 import { EnvelopeTable } from './EnvelopeTable'
 import { DnDContext } from './DnDContext'
+import { BudgetPopoverProvider } from './BudgetPopover'
+import { GoalPopoverProvider } from './GoalPopover'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
@@ -106,13 +108,17 @@ function Budgets() {
       </Helmet>
 
       <DnDContext>
-        <BudgetLayout
-          mainContent={mainContent}
-          sideContent={detailsContent}
-          sideDefault={sideDefault}
-          onSideClose={closeDrawer}
-        />
-        <BudgetTransactionsDrawer />
+        <BudgetPopoverProvider>
+          <GoalPopoverProvider>
+            <BudgetLayout
+              mainContent={mainContent}
+              sideContent={detailsContent}
+              sideDefault={sideDefault}
+              onSideClose={closeDrawer}
+            />
+            <BudgetTransactionsDrawer />
+          </GoalPopoverProvider>
+        </BudgetPopoverProvider>
       </DnDContext>
     </>
   )

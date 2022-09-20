@@ -20,7 +20,6 @@ import { useMonth } from '@shared/hooks/useMonth'
 import { TEnvelopeId, TFxAmount } from '@shared/types'
 import { convertFx } from '@shared/helpers/money'
 import { DataLine } from '@shared/ui/DataLine'
-import { useEnvelopePopover } from '@shared/hooks/useEnvelopePopover'
 import { useAppDispatch } from '@store'
 import {
   IEnvelopeWithData,
@@ -29,12 +28,12 @@ import {
 } from '@entities/envelopeData'
 import { goalToWords } from '@entities/goal'
 import { patchEnvelope } from '@entities/envelope'
-import { GoalPopover } from '../GoalPopover'
-import { BudgetPopover } from '../BudgetPopover'
+import { useBudgetPopover } from '../BudgetPopover'
 import { EnvelopeEditDialog } from '../EnvelopeEditDialog'
 import { ActivityWidget } from './ActivityWidget'
 import { CommentWidget } from './CommentWidget'
 import { cardStyle } from './shared'
+import { useGoalPopover } from '../GoalPopover'
 
 type EnvelopePreviewProps = {
   id: TEnvelopeId
@@ -55,8 +54,8 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   const totalBudgeted = toEnvelope(envelope.totalBudgeted)
   const totalActivity = toEnvelope(envelope.totalActivity)
   const totalAvailable = toEnvelope(envelope.totalAvailable)
-  const goalPopover = useEnvelopePopover(month, 'goal')
-  const budgetPopover = useEnvelopePopover(month, 'budget')
+  const openBudgetPopover = useBudgetPopover()
+  const openGoalPopover = useGoalPopover()
 
   return (
     <>
@@ -70,7 +69,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
 
           <Grid item xs={12}>
             <ButtonBase
-              onClick={e => goalPopover.onOpen(id, e.currentTarget)}
+              onClick={e => openGoalPopover(id, e.currentTarget)}
               sx={{
                 ...cardStyle,
                 display: 'flex',
@@ -92,7 +91,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
 
           <Grid item xs={6}>
             <ButtonBase
-              onClick={e => budgetPopover.onOpen(id, e.currentTarget)}
+              onClick={e => openBudgetPopover(id, e.currentTarget)}
               sx={cardStyle}
             >
               <Total name="Бюджет" value={totalBudgeted} decMode="ifAny" />
@@ -125,9 +124,6 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
           </Box>
         </Rhythm>
       </Box>
-
-      <BudgetPopover {...budgetPopover.props} id={budgetPopover.props.id} />
-      <GoalPopover {...goalPopover.props} id={goalPopover.props.id} />
     </>
   )
 }

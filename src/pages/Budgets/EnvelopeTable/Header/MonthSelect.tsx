@@ -1,12 +1,6 @@
 import React, { useState, useRef, useCallback, FC } from 'react'
-import {
-  Box,
-  Paper,
-  Typography,
-  IconButton,
-  ButtonBase,
-  PaperProps,
-} from '@mui/material'
+import { Box, Typography, IconButton, ButtonBase } from '@mui/material'
+import { BoxProps } from '@mui/system'
 import { TDateDraft, TISOMonth } from '@shared/types'
 import { ChevronRightIcon, ChevronLeftIcon } from '@shared/ui/Icons'
 import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
@@ -15,7 +9,7 @@ import { useMonth } from '@shared/hooks/useMonth'
 import { nextMonth, prevMonth } from '@shared/helpers/date'
 import { useMonthList } from '@entities/envelopeData'
 
-export const MonthSelect: FC<PaperProps> = props => {
+export const MonthSelect: FC<BoxProps> = props => {
   const [month, setMonth] = useMonth()
   const list = useMonthList()
   const first = list[0]
@@ -45,9 +39,9 @@ export const MonthSelect: FC<PaperProps> = props => {
 
   return (
     <>
-      <Paper ref={paperRef} sx={{ display: 'flex' }} {...props}>
+      <Box ref={paperRef} sx={{ display: 'flex' }} {...props}>
         <ButtonBase
-          sx={{ borderRadius: 1, py: 1, pl: 2 }}
+          sx={{ borderRadius: 1, py: 1, pl: 1 }}
           onClick={openPopover}
         >
           <Typography variant="body1" noWrap>
@@ -71,7 +65,7 @@ export const MonthSelect: FC<PaperProps> = props => {
             <ChevronRightIcon />
           </IconButton>
         </Box>
-      </Paper>
+      </Box>
 
       <MonthSelectPopover
         open={!!anchorEl}

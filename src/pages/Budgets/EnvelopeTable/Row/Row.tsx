@@ -30,31 +30,25 @@ import { DragTypes } from '../../DnDContext'
 import { rowStyle } from '../shared/shared'
 import { Metric } from '../models/useMetric'
 import { TEnvelopePopulated } from '../models/getEnvelopeGroups'
+import { useBudgetPopover } from '@pages/Budgets/BudgetPopover'
+import { useGoalPopover } from '@pages/Budgets/GoalPopover'
 
 type EnvelopeRowProps = {
   envelope: TEnvelopePopulated
-  showAll?: boolean
   metric: Metric
+  isBottom: boolean
   openDetails: (id: TEnvelopeId) => void
-  openGoalPopover: (id: TEnvelopeId, target: Element) => void
-  openBudgetPopover: (id: TEnvelopeId, target: Element) => void
   openTransactionsPopover: (id: TEnvelopeId) => void
 }
 
 export const Row: FC<EnvelopeRowProps> = props => {
-  const {
-    envelope,
-    showAll,
-    metric,
-    openGoalPopover,
-    openBudgetPopover,
-    openTransactionsPopover,
-    openDetails,
-  } = props
+  const { envelope, metric, openTransactionsPopover, openDetails } = props
   const { id, totalBudgeted, isSelf } = envelope
   const isChild = !!envelope.parent || isSelf
   const showBudget = isChild ? !isZero(totalBudgeted) : true
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+  const openBudgetPopover = useBudgetPopover()
+  const openGoalPopover = useGoalPopover()
 
   const handleNameClick = useCallback(
     (e: React.MouseEvent) => {
@@ -64,7 +58,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
     [envelope, id, openDetails]
   )
 
-  if (!envelope.isDefaultVisible && !showAll) return null
+  // if (!envelope.isDefaultVisible && !showAll) return null
 
   return (
     <Droppable id={id} isChild={isChild}>
@@ -113,11 +107,19 @@ const NameCell: FC<{
   envelope: TEnvelopePopulated
   onClick: (e: React.MouseEvent) => void
 }> = props => {
-  const e = props.envelope
-  const { symbol, color, name, hasCustomCurency, currency, comment } = e
+  const {
+    id,
+    symbol,
+    color,
+    name,
+    hasCustomCurency,
+    currency,
+    comment,
+    isDefaultVisible,
+  } = props.envelope
   const { setNodeRef, attributes, listeners } = useDraggable({
-    id: 'envelope' + e.id,
-    data: { type: DragTypes.envelope, id: e.id },
+    id: 'envelope' + id,
+    data: { type: DragTypes.envelope, id: id },
   })
   return (
     <Box display="flex" alignItems="center" minWidth={0}>
@@ -129,7 +131,8 @@ const NameCell: FC<{
           minWidth: 0,
           transition: '0.1s',
           typography: 'body1',
-          '&:hover': { bgcolor: 'action.hover' },
+          opacity: isDefaultVisible ? 1 : 0.5,
+          '&:hover': { bgcolor: 'action.hover', opacity: 1 },
           '&:focus': { bgcolor: 'action.focus' },
         }}
         onClick={props.onClick}
