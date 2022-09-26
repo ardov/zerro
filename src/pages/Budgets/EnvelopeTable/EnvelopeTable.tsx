@@ -1,12 +1,9 @@
 import React, { FC } from 'react'
 import { Paper, Typography } from '@mui/material'
 import { TEnvelopeId } from '@shared/types'
-import { useEnvelopePopover } from '@shared/hooks/useEnvelopePopover'
 import { useMonth } from '@shared/hooks/useMonth'
 import { Parent } from './Parent'
 import { Row } from './Row/Row'
-import { BudgetPopover } from '../BudgetPopover'
-import { GoalPopover } from '../GoalPopover'
 import { Header } from './Header'
 import { rowStyle } from './shared/shared'
 import { useTrDrawer } from '../TransactionsDrawer'
@@ -14,6 +11,8 @@ import { useMetric } from './models/useMetric'
 import { useEnvelopeGroups } from './models/envelopeGroups'
 import { useExpandEnvelopes } from './models/useExpandEnvelopes'
 import { TGroupInfo } from './models/getEnvelopeGroups'
+import { useToggle } from '@shared/hooks/useToggle'
+import { Highlight } from './Highlight'
 
 type TagTableProps = {
   onOpenDetails: (id: TEnvelopeId) => void
@@ -27,9 +26,58 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
   const [month] = useMonth()
   const groups = useEnvelopeGroups(month)
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
-  const budget = useEnvelopePopover(month, 'budget')
-  const goal = useEnvelopePopover(month, 'goal')
   const { metric, toggleMetric } = useMetric()
+  const [showAll, toggleShowAll] = useToggle()
+
+  const renderGroups = groups.map(group => {
+    const parents = group.children
+      .filter(parent => showAll || parent.isDefaultVisible)
+      .map(parent => {
+        const children = parent.children
+          .filter(parent => showAll || parent.isDefaultVisible)
+          .map(child => (
+            <Row
+              key={'child' + child.id}
+              envelope={child}
+              metric={metric}
+              openTransactionsPopover={() =>
+                setDrawer(child.id, { isExact: true })
+              }
+              openDetails={onOpenDetails}
+              isBottom={false}
+            />
+          ))
+
+        return (
+          <Parent
+            key={parent.id}
+            id={parent.id}
+            // isVisible={parent.isDefaultVisible}
+            isVisible={true}
+            isExpanded={expanded.includes(parent.id)}
+            onExpandToggle={toggle}
+            onExpandAll={expandAll}
+            onCollapseAll={collapseAll}
+            parent={
+              <Row
+                envelope={parent}
+                metric={metric}
+                openTransactionsPopover={setDrawer}
+                openDetails={onOpenDetails}
+                isBottom={false}
+              />
+            }
+            children={children}
+          />
+        )
+      })
+    if (!parents.length) return null
+    return (
+      <EnvelopeGroup key={group.name} group={group}>
+        {parents}
+      </EnvelopeGroup>
+    )
+  })
 
   return (
     <>
@@ -39,49 +87,9 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
           onMetricSwitch={toggleMetric}
           onOpenOverview={onOpenOverview}
         />
-        {groups.map(group => (
-          <EnvelopeGroup key={group.name} group={group}>
-            {group.children.map(parent => (
-              <Parent
-                key={parent.id}
-                id={parent.id}
-                isVisible={parent.isDefaultVisible}
-                isExpanded={expanded.includes(parent.id)}
-                onExpandToggle={toggle}
-                onExpandAll={expandAll}
-                onCollapseAll={collapseAll}
-                parent={
-                  <Row
-                    envelope={parent}
-                    metric={metric}
-                    openGoalPopover={goal.onOpen}
-                    openBudgetPopover={budget.onOpen}
-                    openTransactionsPopover={setDrawer}
-                    openDetails={onOpenDetails}
-                  />
-                }
-                children={parent.children.map(child => (
-                  <Row
-                    key={'child' + child.id}
-                    envelope={child}
-                    metric={metric}
-                    openGoalPopover={goal.onOpen}
-                    openBudgetPopover={budget.onOpen}
-                    openTransactionsPopover={() =>
-                      setDrawer(child.id, { isExact: true })
-                    }
-                    openDetails={onOpenDetails}
-                  />
-                ))}
-              />
-            ))}
-          </EnvelopeGroup>
-        ))}
+        {renderGroups}
       </Paper>
-      {budget.props.id && (
-        <BudgetPopover {...budget.props} id={budget.props.id} />
-      )}
-      {goal.props.id && <GoalPopover {...goal.props} id={goal.props.id} />}
+      <Highlight />
     </>
   )
 }

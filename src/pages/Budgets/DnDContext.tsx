@@ -5,6 +5,7 @@ import { useMonth } from '@shared/hooks/useMonth'
 import { MoveMoneyModal } from '@features/moveMoney'
 import { useToggle } from '@shared/hooks/useToggle'
 import { TEnvelopeId } from '@shared/types'
+import { Box } from '@mui/system'
 
 export enum DragTypes {
   amount = 'amount',
@@ -45,7 +46,19 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
       autoScroll={{ threshold: { x: 0, y: 0.2 } }}
     >
       {children}
-      <DragOverlay>Денюшки</DragOverlay>
+      <DragOverlay>
+        <Box
+          position="absolute"
+          display="flex"
+          bgcolor="background.default"
+          py={0.5}
+          px={2}
+          borderRadius={1}
+          width="auto"
+        >
+          Денюшки
+        </Box>
+      </DragOverlay>
       <MoveMoneyModal
         key={moneySource + moneyDestination + month}
         open={isOpen}

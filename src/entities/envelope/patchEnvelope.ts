@@ -15,26 +15,43 @@ import { hex2int, isHEX } from '@shared/helpers/color'
 import { TEnvelope } from './shared/makeEnvelope'
 import { getRightParent } from './shared/structure'
 import { patchAccount, TAccountDraft } from '@entities/account'
-import { patchMerchant } from '@entities/merchant'
+import { patchMerchant, TMerchantDraft } from '@entities/merchant'
 
-type TEnvelopeDraft = OptionalExceptFor<TEnvelope, 'id'>
+export type TEnvelopeDraft = OptionalExceptFor<TEnvelope, 'id'>
 
 type TPatches = {
   [DataEntity.Tag]?: TTagDraft
   [DataEntity.Account]?: TAccountDraft
-  [DataEntity.Merchant]?: any
+  [DataEntity.Merchant]?: TMerchantDraft
   meta?: TEnvelopeMetaPatch
 }
 
 export const patchEnvelope =
-  (draft: TEnvelopeDraft): AppThunk =>
+  (draft: TEnvelopeDraft | TEnvelopeDraft[]): AppThunk =>
   (dispatch, getState) => {
     const envelopes = getEnvelopes(getState())
-    const patches = toPatches(draft, envelopes)
-    if (patches.tag) dispatch(patchTag(patches.tag))
-    if (patches.account) dispatch(patchAccount(patches.account))
-    if (patches.merchant) dispatch(patchMerchant(patches.merchant))
-    if (patches.meta) dispatch(patchEnvelopeMeta(patches.meta))
+    const drafts = Array.isArray(draft) ? draft : [draft]
+    const patches = drafts.map(d => toPatches(d, envelopes))
+    const tagPatches = patches.reduce(
+      (arr, p) => (p.tag ? [...arr, p.tag] : arr),
+      [] as TTagDraft[]
+    )
+    const accPatches = patches.reduce(
+      (arr, p) => (p.account ? [...arr, p.account] : arr),
+      [] as TAccountDraft[]
+    )
+    const merchantPatches = patches.reduce(
+      (arr, p) => (p.merchant ? [...arr, p.merchant] : arr),
+      [] as TMerchantDraft[]
+    )
+    const metaPatches = patches.reduce(
+      (arr, p) => (p.meta ? [...arr, p.meta] : arr),
+      [] as TEnvelopeMetaPatch[]
+    )
+    if (tagPatches.length) dispatch(patchTag(tagPatches))
+    if (accPatches.length) dispatch(patchAccount(accPatches))
+    if (merchantPatches.length) dispatch(patchMerchant(merchantPatches))
+    if (metaPatches.length) dispatch(patchEnvelopeMeta(metaPatches))
     return
   }
 
@@ -45,14 +62,14 @@ const funcs: {
     envelopes: ById<TEnvelope>
   ) => void
 } = {
-  id: () => {},
-  type: () => {},
-  entityId: () => {},
-  name: () => {},
+  id: () => {}, // Read only
+  type: () => {}, // Read only
+  entityId: () => {}, // Read only
+  name: () => {}, // Read only
   symbol: () => {},
-  colorGenerated: () => {},
-  children: () => {},
-  index: () => {}, // Not here
+  colorGenerated: () => {}, // Read only
+  children: () => {}, // Read only
+  index: () => {}, // Read only
 
   originalName: (draft, patches) => {
     const { type, id } = parseEnvelopeId(draft.id)
@@ -97,26 +114,17 @@ const funcs: {
       visibility: draft.visibility,
     }
   },
+  indexRaw: (draft, patches) => {
+    patches.meta = { ...patches.meta, id: draft.id, index: draft.indexRaw }
+  },
   group: (draft, patches) => {
-    patches.meta = {
-      ...patches.meta,
-      id: draft.id,
-      group: draft.group,
-    }
+    patches.meta = { ...patches.meta, id: draft.id, group: draft.group }
   },
   comment: (draft, patches) => {
-    patches.meta = {
-      ...patches.meta,
-      id: draft.id,
-      comment: draft.comment,
-    }
+    patches.meta = { ...patches.meta, id: draft.id, comment: draft.comment }
   },
   currency: (draft, patches) => {
-    patches.meta = {
-      ...patches.meta,
-      id: draft.id,
-      currency: draft.currency,
-    }
+    patches.meta = { ...patches.meta, id: draft.id, currency: draft.currency }
   },
   keepIncome: (draft, patches) => {
     patches.meta = {
@@ -140,6 +148,7 @@ function toPatches(draft: TEnvelopeDraft, envelopes: ById<TEnvelope>) {
   if (!current) throw new Error('Envelope not found')
 
   if (current.type === 'payee') {
+    return {} as TPatches
     throw new Error('Trying to patch payee envelope')
   }
   const patches: TPatches = {}

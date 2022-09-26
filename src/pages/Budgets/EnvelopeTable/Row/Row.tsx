@@ -1,5 +1,5 @@
-import React, { FC, useCallback, useState } from 'react'
-import { useDndMonitor, useDraggable, useDroppable } from '@dnd-kit/core'
+import React, { FC, useCallback } from 'react'
+import { useDraggable, useDroppable } from '@dnd-kit/core'
 import {
   Typography,
   Box,
@@ -166,7 +166,6 @@ const Droppable: FC<{
     id: 'envelope-drop' + id + isChild,
     data: { type: DragTypes.envelope, id },
   })
-  const highlight = useHighLight(id)
 
   const isAmount = active?.data.current?.type === DragTypes.amount
 
@@ -184,21 +183,6 @@ const Droppable: FC<{
   return (
     <Box ref={setNodeRef} sx={style}>
       {children}
-      {!!highlight && (
-        <Box
-          left={highlight === 'child' ? '56px' : 0}
-          sx={{
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-            height: '2px',
-            padding: 0,
-            margin: 0,
-            bgcolor: 'primary.main',
-            transition: '0.1s',
-          }}
-        />
-      )}
     </Box>
   )
 }
@@ -455,46 +439,4 @@ function getAmountTitle(amount: TFxAmount, currency: TFxCode, rates: TRates) {
       ))}
     </span>
   )
-}
-
-function useHighLight(id: TEnvelopeId) {
-  const [state, setState] = useState<'next' | 'child' | null>(null)
-
-  const OFFSET = 56
-
-  useDndMonitor({
-    onDragMove: e => {
-      const activeData = e.active.data.current
-      const overData = e.over?.data.current
-      const activeRect = e.active.rect.current.translated
-      const overRect = e.over?.rect
-      if (
-        // has active
-        !activeData ||
-        !activeData.id ||
-        activeData.type !== DragTypes.envelope ||
-        !activeRect ||
-        // has over
-        !overData ||
-        !overData.id ||
-        overData.type !== DragTypes.envelope ||
-        !overRect ||
-        // over current tag
-        overData.id !== id
-      ) {
-        setState(null)
-        return
-      }
-      const isIndented = activeRect.left - overRect.left > OFFSET
-      setState(isIndented ? 'child' : 'next')
-    },
-    onDragEnd: e => {
-      setState(null)
-    },
-    onDragCancel: e => {
-      setState(null)
-    },
-  })
-
-  return state
 }
