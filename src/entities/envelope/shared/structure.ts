@@ -19,8 +19,18 @@ export function getRightParent(
   return getRightParent(parent.parent, byId)
 }
 
-type TEnvNode = { id: TEnvelopeId; type: 'envelope' }
-type TGroupNode = { id: string; type: 'group' }
+type TEnvNode = {
+  type: 'envelope'
+  id: TEnvelopeId
+  group: string
+  parent: TEnvelopeId | null
+}
+type TGroupNode = {
+  type: 'group'
+  id: string
+  group: string
+  parent: null
+}
 type TEnvTreeNode = TEnvNode & { children: TEnvTreeNode[] }
 type TGroupTreeNode = TGroupNode & { children: TEnvTreeNode[] }
 
@@ -34,14 +44,31 @@ export function buildStructure(envelopes: ById<TEnvelope>): TGroupTreeNode[] {
   Object.values(envelopes)
     .sort(compareEnvelopes)
     .filter(e => !e.parent)
-    .forEach(e => {
-      groupCollection[e.group] ??= { id: e.group, type: 'group', children: [] }
-      const children: TEnvTreeNode[] = e.children.map(id => {
-        return { id, type: 'envelope', children: [] }
+    .forEach(parent => {
+      // Create group
+      groupCollection[parent.group] ??= {
+        id: parent.group,
+        type: 'group',
+        group: parent.group,
+        parent: null,
+        children: [],
+      }
+      // Create children nodes
+      const children: TEnvTreeNode[] = parent.children.map(id => {
+        return {
+          id,
+          type: 'envelope',
+          group: parent.group,
+          parent: parent.id,
+          children: [],
+        }
       })
-      groupCollection[e.group].children.push({
-        id: e.id,
+      // Push node with children into group
+      groupCollection[parent.group].children.push({
+        id: parent.id,
         type: 'envelope',
+        group: parent.group,
+        parent: parent.parent,
         children,
       })
     })
@@ -67,7 +94,12 @@ export function flattenStructure(
   return flatList
 
   function addNode(node: TEnvTreeNode | TGroupTreeNode) {
-    flatList.push({ id: node.id, type: node.type } as TEnvNode | TGroupNode)
+    flatList.push({
+      id: node.id,
+      type: node.type,
+      group: node.group,
+      parent: node.parent,
+    } as TEnvNode | TGroupNode)
     node.children.forEach(addNode)
   }
 }
