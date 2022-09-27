@@ -62,7 +62,7 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
             <Amount
               value={toBeBudgeted}
               currency={currency}
-              decMode="ifAny"
+              decMode="ifOnly"
               noShade
             />
           ) : hasFutureOverspend ? (

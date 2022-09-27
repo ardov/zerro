@@ -28,7 +28,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
   const { metric, toggleMetric } = useMetric()
   const [showAll, toggleShowAll] = useToggle()
-  const [reorderMode, toggleReorderMode] = useToggle(true)
+  const [reorderMode, toggleReorderMode] = useToggle()
 
   const renderGroups = groups.map(group => {
     const parents = group.children
@@ -94,7 +94,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
         />
         {renderGroups}
       </Paper>
-      <Highlight />
+      {reorderMode && <Highlight />}
     </>
   )
 }

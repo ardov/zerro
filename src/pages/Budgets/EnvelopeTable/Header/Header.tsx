@@ -38,7 +38,7 @@ export const Header: FC<HeaderProps> = props => {
     onOpenOverview,
     onMetricSwitch,
   } = props
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+  const isMd = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const tableMenu = usePopover()
   return (
     <>
@@ -69,7 +69,7 @@ export const Header: FC<HeaderProps> = props => {
           <MonthSelect />
 
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <GoalsProgress month={month} />
+            {!isMd && <GoalsProgress month={month} />}
             <ToBeBudgeted onClick={onOpenOverview} />
           </Box>
         </Box>
@@ -88,7 +88,7 @@ export const Header: FC<HeaderProps> = props => {
             </Button>
           </div>
 
-          {(metric === Metric.budgeted || !isMobile) && (
+          {(metric === Metric.budgeted || !isMd) && (
             <Typography
               variant="overline"
               color="text.secondary"
@@ -100,7 +100,7 @@ export const Header: FC<HeaderProps> = props => {
             </Typography>
           )}
 
-          {(metric === Metric.outcome || !isMobile) && (
+          {(metric === Metric.outcome || !isMd) && (
             <Typography
               variant="overline"
               color="text.secondary"
@@ -112,7 +112,7 @@ export const Header: FC<HeaderProps> = props => {
             </Typography>
           )}
 
-          {(metric === Metric.available || !isMobile) && (
+          {(metric === Metric.available || !isMd) && (
             <Typography
               variant="overline"
               color="text.secondary"

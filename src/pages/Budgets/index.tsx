@@ -40,30 +40,9 @@ export default function BudgetsRouter() {
 type TDrawerId = TEnvelopeId | 'overview'
 
 function Budgets() {
-  const monthList = useAppSelector(getMonthList)
-  const minMonth = monthList[0]
-  const maxMonth = monthList[monthList.length - 1]
-  const [month, setMonth] = useMonth()
-
+  useMonthHotkeys()
+  const [month] = useMonth()
   const [drawerId, setDrawerId] = useSearchParam<TDrawerId>('drawer')
-
-  useHotkeys(
-    'left',
-    () => {
-      const prevMonthISO = toISOMonth(prevMonth(month))
-      if (minMonth <= prevMonthISO) setMonth(prevMonthISO)
-    },
-    [month, minMonth]
-  )
-  useHotkeys(
-    'right',
-    () => {
-      const nextMonthISO = toISOMonth(nextMonth(month))
-      if (nextMonthISO <= maxMonth) setMonth(nextMonthISO)
-    },
-    [month, maxMonth]
-  )
-
   const openOverview = useCallback(() => setDrawerId('overview'), [setDrawerId])
   const openEnvelopeInfo = useCallback(
     (id: TEnvelopeId | null) => setDrawerId(id),
@@ -171,5 +150,29 @@ const BudgetLayout: FC<{
         <Box sx={{ width: isXS ? '100vw' : sideWidth }}>{cachedContent}</Box>
       </Drawer>
     </Box>
+  )
+}
+
+function useMonthHotkeys() {
+  const monthList = useAppSelector(getMonthList)
+  const minMonth = monthList[0]
+  const maxMonth = monthList[monthList.length - 1]
+  const [month, setMonth] = useMonth()
+
+  useHotkeys(
+    'left',
+    () => {
+      const prevMonthISO = toISOMonth(prevMonth(month))
+      if (minMonth <= prevMonthISO) setMonth(prevMonthISO)
+    },
+    [month, minMonth]
+  )
+  useHotkeys(
+    'right',
+    () => {
+      const nextMonthISO = toISOMonth(nextMonth(month))
+      if (nextMonthISO <= maxMonth) setMonth(nextMonthISO)
+    },
+    [month, maxMonth]
   )
 }

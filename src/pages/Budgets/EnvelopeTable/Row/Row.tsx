@@ -15,13 +15,17 @@ import {
 import { SxProps } from '@mui/system'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { EmojiIcon } from '@shared/ui/EmojiIcon'
-import { formatMoney, convertFx, isZero } from '@shared/helpers/money'
+import {
+  formatMoney,
+  convertFx,
+  isZero,
+  getCurrencySymbol,
+} from '@shared/helpers/money'
 import { keys } from '@shared/helpers/keys'
 import {
   WarningIcon,
   AddIcon,
   EmojiFlagsIcon,
-  NotesIcon,
   DragIndicatorIcon,
 } from '@shared/ui/Icons'
 import { RadialProgress } from '@shared/ui/RadialProgress'
@@ -122,6 +126,7 @@ const NameCell: FC<{
   const { isReordering } = props
   const {
     id,
+    type,
     symbol,
     color,
     name,
@@ -135,7 +140,7 @@ const NameCell: FC<{
     data: { type: DragTypes.envelope, id: id },
   })
   return (
-    <Box display="flex" alignItems="center" minWidth={0}>
+    <Box display="flex" alignItems="center" gap={1} minWidth={0}>
       <Collapse orientation="horizontal" in={isReordering}>
         <IconButton
           size="small"
@@ -153,6 +158,7 @@ const NameCell: FC<{
           p: 0.5,
           m: -0.5,
           borderRadius: 1,
+          flexShrink: 1,
           minWidth: 0,
           transition: '0.1s',
           typography: 'body1',
@@ -168,12 +174,32 @@ const NameCell: FC<{
         </Typography>
       </ButtonBase>
 
+      {type !== 'tag' && (
+        <Typography
+          sx={{ flexShrink: 1000000, fontStyle: 'italic' }}
+          color="text.hint"
+          component="span"
+          variant="body1"
+          title={comment}
+          noWrap
+        >
+          {comment}
+        </Typography>
+      )}
+
       {hasCustomCurency && <CurrencyTag currency={currency} />}
 
       {!!comment && (
-        <Tooltip title={comment}>
-          <NotesIcon sx={{ ml: 1, color: 'text.secondary' }} fontSize="small" />
-        </Tooltip>
+        <Typography
+          sx={{ flexShrink: 1000000, fontStyle: 'italic' }}
+          color="text.hint"
+          component="span"
+          variant="body1"
+          title={comment}
+          noWrap
+        >
+          {comment}
+        </Typography>
       )}
     </Box>
   )
@@ -235,7 +261,7 @@ const CurrencyTag: FC<{ currency?: TFxCode }> = ({ currency }) => {
     <Tooltip
       title={`Бюджет этой категории задаётся в ${currency}. Он будет пересчитываться автоматически по текущему курсу.`}
     >
-      <Chip label={currency} sx={{ ml: 1 }} size="small" />
+      <Chip label={getCurrencySymbol(currency)} size="small" />
     </Tooltip>
   )
 }
