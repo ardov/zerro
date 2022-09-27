@@ -28,6 +28,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
   const { metric, toggleMetric } = useMetric()
   const [showAll, toggleShowAll] = useToggle()
+  const [reorderMode, toggleReorderMode] = useToggle(true)
 
   const renderGroups = groups.map(group => {
     const parents = group.children
@@ -45,6 +46,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
               }
               openDetails={onOpenDetails}
               isBottom={false}
+              isReordering={reorderMode}
             />
           ))
 
@@ -52,8 +54,6 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
           <Parent
             key={parent.id}
             id={parent.id}
-            // isVisible={parent.isDefaultVisible}
-            isVisible={true}
             isExpanded={expanded.includes(parent.id)}
             onExpandToggle={toggle}
             onExpandAll={expandAll}
@@ -65,6 +65,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
                 openTransactionsPopover={setDrawer}
                 openDetails={onOpenDetails}
                 isBottom={false}
+                isReordering={reorderMode}
               />
             }
             children={children}
@@ -84,6 +85,10 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
       <Paper className={className} sx={{ position: 'relative' }}>
         <Header
           metric={metric}
+          isAllShown={showAll}
+          isReordering={reorderMode}
+          onShowAllToggle={toggleShowAll}
+          onReorderModeToggle={toggleReorderMode}
           onMetricSwitch={toggleMetric}
           onOpenOverview={onOpenOverview}
         />

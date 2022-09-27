@@ -9,7 +9,7 @@ import { moveEnvelope } from '@entities/envelope/moveEnvelope'
 
 export function Highlight() {
   const dispatch = useAppDispatch()
-  const OFFSET = 56
+  const OFFSET = 100
 
   const envelopes = useAppSelector(getEnvelopes)
 

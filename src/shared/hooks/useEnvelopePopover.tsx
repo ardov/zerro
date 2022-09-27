@@ -28,17 +28,11 @@ export function usePopover<T extends object>() {
   const [anchorEl, setAnchorEl] = useState<Element>()
   const [props, setProps] = useState<T | undefined>()
   const open = !!anchorEl
-  const onOpen = (props: T, anchor: Element) => {
-    setAnchorEl(anchor)
+  const onOpen = (event: React.MouseEvent, props?: T) => {
+    setAnchorEl(event.currentTarget)
     setProps(props)
   }
-
-  const popoverProps: PopoverProps = {
-    open,
-    anchorEl,
-    onClose: () => {
-      setAnchorEl(undefined)
-    },
-  }
-  return { props: popoverProps, additional: props, onOpen }
+  const onClose = () => setAnchorEl(undefined)
+  const popoverProps: PopoverProps = { open, anchorEl, onClose }
+  return { popoverProps, additional: props, onOpen, onClose }
 }

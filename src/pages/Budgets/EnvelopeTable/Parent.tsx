@@ -5,7 +5,6 @@ import { TEnvelopeId } from '@shared/types'
 
 type ParentProps = {
   id: TEnvelopeId
-  isVisible: boolean
   isExpanded: boolean
   parent: React.ReactNode
   children?: React.ReactNode[]
@@ -18,7 +17,6 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
   (props, ref) => {
     const {
       id,
-      isVisible,
       isExpanded,
       parent,
       children,
@@ -29,8 +27,6 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
     } = props
 
     const hasChildren = !!children && children.length > 0
-
-    if (!isVisible) return null
 
     const handleExpand = (
       e: React.MouseEvent<HTMLButtonElement, MouseEvent>

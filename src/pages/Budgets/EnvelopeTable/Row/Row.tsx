@@ -10,6 +10,7 @@ import {
   IconButtonProps,
   ButtonBaseProps,
   Chip,
+  Collapse,
 } from '@mui/material'
 import { SxProps } from '@mui/system'
 import { Tooltip } from '@shared/ui/Tooltip'
@@ -21,6 +22,7 @@ import {
   AddIcon,
   EmojiFlagsIcon,
   NotesIcon,
+  DragIndicatorIcon,
 } from '@shared/ui/Icons'
 import { RadialProgress } from '@shared/ui/RadialProgress'
 import { Amount } from '@shared/ui/Amount'
@@ -37,12 +39,19 @@ type EnvelopeRowProps = {
   envelope: TEnvelopePopulated
   metric: Metric
   isBottom: boolean
+  isReordering: boolean
   openDetails: (id: TEnvelopeId) => void
   openTransactionsPopover: (id: TEnvelopeId) => void
 }
 
 export const Row: FC<EnvelopeRowProps> = props => {
-  const { envelope, metric, openTransactionsPopover, openDetails } = props
+  const {
+    envelope,
+    metric,
+    isReordering,
+    openTransactionsPopover,
+    openDetails,
+  } = props
   const { id, totalBudgeted, isSelf } = envelope
   const isChild = !!envelope.parent || isSelf
   const showBudget = isChild ? !isZero(totalBudgeted) : true
@@ -58,11 +67,13 @@ export const Row: FC<EnvelopeRowProps> = props => {
     [envelope, id, openDetails]
   )
 
-  // if (!envelope.isDefaultVisible && !showAll) return null
-
   return (
     <Droppable id={id} isChild={isChild}>
-      <NameCell envelope={envelope} onClick={handleNameClick} />
+      <NameCell
+        envelope={envelope}
+        onClick={handleNameClick}
+        isReordering={isReordering}
+      />
 
       {(metric === Metric.budgeted || !isMobile) && (
         <BudgetCell
@@ -105,8 +116,10 @@ export const Row: FC<EnvelopeRowProps> = props => {
 
 const NameCell: FC<{
   envelope: TEnvelopePopulated
+  isReordering: boolean
   onClick: (e: React.MouseEvent) => void
 }> = props => {
+  const { isReordering } = props
   const {
     id,
     symbol,
@@ -123,6 +136,18 @@ const NameCell: FC<{
   })
   return (
     <Box display="flex" alignItems="center" minWidth={0}>
+      <Collapse orientation="horizontal" in={isReordering}>
+        <IconButton
+          size="small"
+          sx={{ ml: 1, display: 'grid', placeItems: 'center', cursor: 'grab' }}
+          ref={setNodeRef}
+          {...attributes}
+          {...listeners}
+        >
+          <DragIndicatorIcon />
+        </IconButton>
+      </Collapse>
+
       <ButtonBase
         sx={{
           p: 0.5,
@@ -137,9 +162,7 @@ const NameCell: FC<{
         }}
         onClick={props.onClick}
       >
-        <span ref={setNodeRef} {...attributes} {...listeners}>
-          <EmojiIcon symbol={symbol} mr={1.5} color={color} />
-        </span>
+        <EmojiIcon symbol={symbol} mr={1.5} color={color} />
         <Typography component="span" variant="body1" title={name} noWrap>
           {name}
         </Typography>
