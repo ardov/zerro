@@ -171,13 +171,13 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
               control={<Checkbox />}
               label="Класть доходы в конверт"
             />
-            <FormControlLabel
+            {/* <FormControlLabel
               name="carryNegatives"
               checked={values.carryNegatives}
               onChange={handleChange}
               control={<Checkbox />}
               label="Переносить минусы"
-            />
+            /> */}
             {/* <FormControlLabel
               name="showInBudget"
               checked={values.showInBudget}
