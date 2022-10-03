@@ -1,7 +1,14 @@
 import { AppThunk } from '@store'
 import { applyClientPatch } from '@store/data'
 import { getRootUser } from '@entities/user'
-import { Modify, OptionalExceptFor, TDateDraft } from '@shared/types'
+import {
+  DataEntity,
+  Modify,
+  OptionalExceptFor,
+  TDateDraft,
+  TDeletionObject,
+  TReminderId,
+} from '@shared/types'
 import { makeReminder } from './makeReminder'
 import { getReminders } from './model'
 import { TReminder } from '@shared/types'
@@ -42,4 +49,24 @@ export const setReminder =
     })
     dispatch(applyClientPatch({ reminder: readyReminders }))
     return readyReminders
+  }
+
+export const deleteReminder =
+  (id: TReminderId): AppThunk =>
+  (dispatch, getState) => {
+    const state = getState()
+    const userId = getRootUser(state)?.id
+    if (!userId) {
+      throw new Error('User is not defined')
+    }
+    const currentReminder = getReminders(state)[id]
+    if (currentReminder) {
+      const del: TDeletionObject = {
+        id,
+        object: DataEntity.Reminder,
+        stamp: Date.now(),
+        user: userId,
+      }
+      dispatch(applyClientPatch({ deletion: [del] }))
+    }
   }

@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import {
+import type {
   ById,
   TTransaction,
   TEnvelopeId,
@@ -7,11 +7,10 @@ import {
   TISOMonth,
   TRates,
 } from '@shared/types'
+import type { TSelector } from '@store'
 import { keys } from '@shared/helpers/keys'
 import { addFxAmount, convertFx, round } from '@shared/helpers/money'
-import { TSelector } from '@store'
-import { TFxRates } from '@entities/fxRate/fxRateStore'
-import { getFxRatesGetter } from '@entities/fxRate'
+import { fxRates, TFxRateData, TFxRates } from '@entities/fxRate'
 import { getEnvelopeBudgets } from '@entities/budget'
 import { calculateGoalProgress, getGoals, TGoal } from '@entities/goal'
 import { getEnvelopes, TEnvelope } from '@entities/envelope'
@@ -91,7 +90,7 @@ export const getCalculatedEnvelopes: TSelector<
     getEnvelopes,
     getActivity,
     getEnvelopeBudgets,
-    getFxRatesGetter,
+    fxRates.getter,
     getGoals,
   ],
   aggregateEnvelopeBudgets
@@ -102,7 +101,7 @@ function aggregateEnvelopeBudgets(
   envelopes: ById<TEnvelope>,
   activity: Record<TISOMonth, TMonthActivity>,
   budgets: Record<TISOMonth, { [id: TEnvelopeId]: number }>,
-  getRates: (month: TISOMonth) => TFxRates,
+  getRates: (month: TISOMonth) => TFxRateData,
   goals: Record<TISOMonth, Record<TEnvelopeId, TGoal | null>>
 ) {
   const result: Record<TISOMonth, ById<IEnvelopeWithData>> = {}
@@ -110,7 +109,7 @@ function aggregateEnvelopeBudgets(
   let prevNode: ById<IEnvelopeWithData> = {}
   monthList.forEach(month => {
     const node: ById<IEnvelopeWithData> = {}
-    const rates = getRates(month)
+    const rateData = getRates(month)
 
     // Step 1: fill with placeholders
     createPlaceholders(node, envelopes)
@@ -121,14 +120,21 @@ function aggregateEnvelopeBudgets(
       prevNode,
       budgets[month],
       activity[month]?.envelopes,
-      rates
+      rateData.rates
     )
 
     // Step 3: fill children metrics
-    addChildrenData(node, rates)
+    addChildrenData(node, rateData.rates)
 
     // Step 4: fill goal metrics
-    addGoalData(month, node, prevNode, goals[month], activity[month], rates)
+    addGoalData(
+      month,
+      node,
+      prevNode,
+      goals[month],
+      activity[month],
+      rateData.rates
+    )
 
     result[month] = node
     prevNode = node

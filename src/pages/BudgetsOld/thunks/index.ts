@@ -11,8 +11,8 @@ import {
 import { getBudgetsByMonthAndTag, getBudget } from '@entities/budget'
 import { getTags } from '@entities/tag'
 import { getGoalsProgress } from '../selectors'
-import { goalType } from '@entities/hiddenData/constants'
-import { getGoals } from '@entities/hiddenData/goals'
+import { goalType } from '@entities/old-hiddenData/constants'
+import { getGoals } from '@entities/old-hiddenData/goals'
 import { applyClientPatch } from '@store/data'
 import { AppThunk } from '@store'
 import {
@@ -22,7 +22,7 @@ import {
   TDateDraft,
   TISOMonth,
 } from '@shared/types'
-import { getMetaForTag } from '@entities/hiddenData/tagMeta'
+import { getMetaForTag } from '@entities/old-hiddenData/tagMeta'
 import { round } from '@shared/helpers/money'
 import { prevMonth, toISODate, toISOMonth } from '@shared/helpers/date'
 import { keys } from '@shared/helpers/keys'

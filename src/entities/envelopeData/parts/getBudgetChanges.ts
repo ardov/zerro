@@ -1,4 +1,4 @@
-import { add, addFxAmount, subFxAmount } from '@shared/helpers/money'
+import { addFxAmount } from '@shared/helpers/money'
 import { getType } from '@entities/transaction/helpers'
 import {
   DataEntity,

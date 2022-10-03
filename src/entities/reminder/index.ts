@@ -1,4 +1,4 @@
 export * from './model'
 
 export { makeReminder } from './makeReminder'
-export { setReminder } from './setReminder'
+export { setReminder, deleteReminder } from './setReminder'

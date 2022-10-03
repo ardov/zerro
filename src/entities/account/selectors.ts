@@ -4,7 +4,7 @@ import { convertCurrency, getInstruments } from '@entities/instrument'
 import { IAccountPopulated } from './types'
 import { AccountType, TAccountId } from '@shared/types'
 import { RootState } from '@store'
-import { DATA_ACC_NAME } from '../hiddenData/constants'
+import { DATA_ACC_NAME } from '../old-hiddenData/constants'
 
 // SELECTORS
 

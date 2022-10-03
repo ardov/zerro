@@ -25,7 +25,7 @@ import {
   getTagMeta,
   setTagComment,
   setTagCurrency,
-} from '@entities/hiddenData/tagMeta'
+} from '@entities/old-hiddenData/tagMeta'
 import { getUserInstrumentId } from '@entities/user'
 import { CurrencySelect } from './CurrencySelect'
 import { useAppDispatch, useAppSelector } from '@store'

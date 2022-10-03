@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getReminders, setReminder } from '@entities/reminder'
+import { deleteReminder, getReminders, setReminder } from '@entities/reminder'
 import { getRootUser } from '@entities/user'
 import { isISOMonth } from '@shared/helpers/date'
 import { keys } from '@shared/helpers/keys'
@@ -14,6 +14,7 @@ type TMonthlyStore<TPayload> = {
   getDataReminders: TSelector<Record<TISOMonth, TReminder>>
   getData: TSelector<Record<TISOMonth, TPayload>>
   setData: (payload: TPayload, month: TISOMonth) => AppThunk<void>
+  resetMonth: (month: TISOMonth) => AppThunk<void>
 }
 
 export function makeMonthlyHiddenStore<TPayload>(
@@ -68,10 +69,18 @@ export function makeMonthlyHiddenStore<TPayload>(
       )[0]
     }
 
+  const resetMonth =
+    (month: TISOMonth): AppThunk =>
+    (dispatch, getState) => {
+      const id = getDataReminders(getState())[month]?.id
+      if (id) dispatch(deleteReminder(id))
+    }
+
   return {
     type,
     getDataReminders,
     getData,
     setData,
+    resetMonth,
   }
 }

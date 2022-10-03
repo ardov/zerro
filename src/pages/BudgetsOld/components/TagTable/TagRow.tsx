@@ -19,10 +19,10 @@ import {
   EmojiFlagsIcon,
   NotesIcon,
 } from '@shared/ui/Icons'
-import { goalToWords } from '@entities/hiddenData/goals/helpers'
+import { goalToWords } from '@entities/old-hiddenData/goals/helpers'
 import { RadialProgress } from '@shared/ui/RadialProgress'
 import { Droppable, Draggable } from 'react-beautiful-dnd'
-import { getGoal } from '@entities/hiddenData/goals'
+import { getGoal } from '@entities/old-hiddenData/goals'
 import { shallowEqual } from 'react-redux'
 import {
   getGoalProgress,
@@ -34,7 +34,7 @@ import { IsDraggingContext, DragModeContext, DragModeType } from '../DnDContext'
 import { getPopulatedTag } from '@entities/tag'
 import { getAmountsById } from '@pages/BudgetsOld/selectors'
 import { TGoal, TISOMonth } from '@shared/types'
-import { getTagMeta } from '@entities/hiddenData/tagMeta'
+import { getTagMeta } from '@entities/old-hiddenData/tagMeta'
 import { getInstruments } from '@entities/instrument'
 import { getUserInstrumentId } from '@entities/user'
 import { SxProps } from '@mui/system'

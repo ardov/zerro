@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getReminders, setReminder } from '@entities/reminder'
+import { deleteReminder, getReminders, setReminder } from '@entities/reminder'
 import { getRootUser } from '@entities/user'
 import { TReminder } from '@shared/types'
 import { AppThunk, TSelector } from '@store'
@@ -12,6 +12,7 @@ type TSimpleStore<TPayload> = {
   getDataReminder: TSelector<TReminder | null>
   getData: TSelector<TPayload>
   setData: (payload: TPayload) => AppThunk<void>
+  resetData: () => AppThunk<void>
 }
 
 export function makeSimpleHiddenStore<TPayload>(
@@ -60,10 +61,16 @@ export function makeSimpleHiddenStore<TPayload>(
       )[0]
     }
 
+  const resetData = (): AppThunk => (dispatch, getState) => {
+    const id = getDataReminder(getState())?.id
+    if (id) dispatch(deleteReminder(id))
+  }
+
   return {
     type,
     getDataReminder,
     getData,
     setData,
+    resetData,
   }
 }

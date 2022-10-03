@@ -11,8 +11,8 @@ import {
   OutlinedTextFieldProps,
 } from '@mui/material'
 import { AmountInput } from '@shared/ui/AmountInput'
-import { getGoals, setGoal, deleteGoal } from '@entities/hiddenData/goals'
-import { goalType } from '@entities/hiddenData/constants'
+import { getGoals, setGoal, deleteGoal } from '@entities/old-hiddenData/goals'
+import { goalType } from '@entities/old-hiddenData/constants'
 import { CloseIcon } from '@shared/ui/Icons'
 import { formatDate } from '@shared/helpers/date'
 import { TDateDraft, TGoal } from '@shared/types'

@@ -1,5 +1,5 @@
 import { ById } from './ts-utils'
-import { goalType } from '@entities/hiddenData/constants'
+import { goalType } from '@entities/old-hiddenData/constants'
 import {
   TZmDiff,
   TZmDeletionObject,

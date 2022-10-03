@@ -13,7 +13,7 @@ import {
   PaperProps,
 } from '@mui/material'
 import TagSelect2 from '@components/TagSelect2'
-import { addConnection, getAccTagMap } from '@entities/hiddenData/accTagMap'
+import { addConnection, getAccTagMap } from '@entities/old-hiddenData/accTagMap'
 import { getTransfers } from '../selectors'
 import { getAccounts } from '@entities/account'
 import TagChip from '@components/TagChip'

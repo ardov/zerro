@@ -14,7 +14,7 @@ import {
 } from '@shared/helpers/money'
 import { TSelector } from '@store'
 import { getMonthList } from './parts/monthList'
-import { getFxRatesGetter } from '@entities/fxRate'
+import { fxRates, TFxRateData } from '@entities/fxRate'
 import { TFxRates } from '@entities/fxRate/fxRateStore'
 
 export type TMonthTotals = {
@@ -54,7 +54,7 @@ export const getMonthTotals: TSelector<Record<TISOMonth, TMonthTotals>> =
       getCalculatedEnvelopes,
       getActivity,
       getCurrentFunds,
-      getFxRatesGetter,
+      fxRates.getter,
       getUserCurrencyCode,
     ],
     aggregateEnvelopeBudgets
@@ -65,7 +65,7 @@ function aggregateEnvelopeBudgets(
   envelopes: Record<TISOMonth, ById<IEnvelopeWithData>>,
   activity: Record<TISOMonth, TMonthActivity>,
   currentBalance: TFxAmount,
-  getRates: (month: TISOMonth) => TFxRates,
+  getRates: (month: TISOMonth) => TFxRateData,
   mainCurrency: TFxCode
 ) {
   const result: Record<TISOMonth, TMonthTotals> = {}
@@ -128,15 +128,16 @@ function aggregateEnvelopeBudgets(
  */
 function createMonth(
   month: TISOMonth,
-  rates: TFxRates,
+  rateData: TFxRateData,
   displayCurrency: TFxCode,
   envelopes: ById<IEnvelopeWithData>,
   activity: TMonthActivity
 ) {
-  const convert = (fx: TFxAmount) => convertFx(fx, displayCurrency, rates)
+  const convert = (fx: TFxAmount) =>
+    convertFx(fx, displayCurrency, rateData.rates)
   const totals: TMonthTotals = {
     month,
-    rates,
+    rates: rateData.rates,
     currency: displayCurrency,
     envelopes: envelopes || ({} as ById<IEnvelopeWithData>),
     budgetedInFuture: {}, // Fills later

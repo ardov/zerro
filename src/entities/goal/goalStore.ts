@@ -1,4 +1,7 @@
-import { HiddenDataType, makeMonthlyHiddenStore } from '@entities/hidden-store'
+import {
+  HiddenDataType,
+  makeMonthlyHiddenStore,
+} from '@entities/shared/hidden-store'
 import { TEnvelopeId } from '@shared/types'
 import { TGoal } from './types'
 

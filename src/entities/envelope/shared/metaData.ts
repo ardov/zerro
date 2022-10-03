@@ -1,4 +1,7 @@
-import { HiddenDataType, makeSimpleHiddenStore } from '@entities/hidden-store'
+import {
+  HiddenDataType,
+  makeSimpleHiddenStore,
+} from '@entities/shared/hidden-store'
 import { ById, OptionalExceptFor, TEnvelopeId, TFxCode } from '@shared/types'
 import { AppThunk } from '@store'
 
