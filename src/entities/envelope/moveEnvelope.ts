@@ -74,7 +74,6 @@ export function moveEnvelope(
         patches.push({ id: el.id, indexRaw: idx })
       })
     }
-    console.log({ patches })
 
     dispatch(patchEnvelope(patches))
 

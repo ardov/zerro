@@ -1,6 +1,6 @@
 import {
+  ByMonth,
   DataEntity,
-  TBudget,
   TEnvelopeId,
   TISOMonth,
   TTagId,
@@ -12,74 +12,101 @@ import { parseEnvelopeId } from '@entities/envelope'
 import { getRootUser } from '@entities/user'
 import { getBudgetId, getBudgets, makeBudget } from '../tagBudget'
 import { budgetStore } from './budgetStore'
+import { getMonthTotals } from '@entities/envelopeData'
+import { convertFx, sub } from '@shared/helpers/money'
 
-export type TBudgetUpdate = {
+export type TEnvBudgetUpdate = {
   id: TEnvelopeId
   month: TISOMonth
   value: number
 }
 
-export const setEnvelopeBudgets =
-  (upd: TBudgetUpdate | TBudgetUpdate[]): AppThunk<void> =>
-  (dispatch, getState) => {
-    const state = getState()
+export function setEnvelopeBudgets(
+  upd: TEnvBudgetUpdate | TEnvBudgetUpdate[]
+): AppThunk {
+  return (dispatch, getState) => {
     const updates = Array.isArray(upd) ? upd : [upd]
+    const totals = getMonthTotals(getState())
 
-    // TODO: calculate self budgets
+    const tagUpdates: TTagBudgetUpdate[] = []
+    const envelopeUpdates: TEnvBudgetUpdate[] = []
 
-    const tagUpdates: { id: TTagId | null; month: TISOMonth; value: number }[] =
-      []
-    const envelopeUpdates: Record<TISOMonth, Record<TEnvelopeId, number>> = {}
-
-    updates.forEach(update => {
+    updates.map(adjustValue).forEach(update => {
       const { type, id } = parseEnvelopeId(update.id)
       if (type === DataEntity.Tag) {
         tagUpdates.push({
-          id: id === 'null' ? null : id,
+          tag: id === 'null' ? null : id,
           month: update.month,
           value: update.value,
         })
       } else {
-        envelopeUpdates[update.month] = {
-          ...envelopeUpdates[update.month],
-          [update.id]: update.value,
-        }
+        envelopeUpdates.push(update)
       }
     })
 
-    // Process tag budgets
-    const readyBudgets = tagUpdates.map(update => {
-      let id = getBudgetId(update.month, update.id)
-      const currentBudget = getBudgets(state)[id] || ({} as TBudget)
-      const patched = {
-        ...currentBudget,
-        tag: update.id,
-        date: update.month,
-        outcome: update.value,
-        changed: Date.now(),
-      }
-      if (!patched.user) {
-        const userId = getRootUser(state)?.id
-        if (!userId) {
-          throw new Error('User is not defined')
-        }
-        patched.user = userId
-      }
-      if (!patched.tag) {
-        patched.tag = null
-      }
-      if (!patched.date) {
-        throw new Error('No date provided')
-      }
-      return makeBudget(patched)
-    })
-    dispatch(applyClientPatch({ budget: readyBudgets }))
+    dispatch(setTagBudget(tagUpdates))
+    dispatch(setEnvBudget(envelopeUpdates))
 
-    // Process envelope budgets
-    const curentEnvelopeBudgets = budgetStore.getData(getState())
-    keys(envelopeUpdates).forEach(month => {
-      const currentData = curentEnvelopeBudgets[month] || {}
-      const newData = { ...currentData, ...envelopeUpdates[month] }
+    /**
+     * Adjusts budget depending on children budgets.
+     */
+    function adjustValue(u: TEnvBudgetUpdate): TEnvBudgetUpdate {
+      const monthTotals = totals[u.month]
+      if (!monthTotals) return u
+      const { currency, childrenBudgeted } = monthTotals.envelopes[u.id]
+      const rates = monthTotals.rates
+      const childrenValue = convertFx(childrenBudgeted, currency, rates)
+      return { ...u, value: sub(u.value, childrenValue) }
+    }
+  }
+}
+
+function setEnvBudget(upd: TEnvBudgetUpdate | TEnvBudgetUpdate[]): AppThunk {
+  return (dispatch, getState) => {
+    const updates = Array.isArray(upd) ? upd : [upd]
+    if (!upd || !updates.length) return null
+
+    let byMonth: ByMonth<Record<TEnvelopeId, number>> = {}
+    updates.forEach(({ id, month, value }) => {
+      byMonth[month] ??= {}
+      byMonth[month][id] = value
+    })
+    const curentBudgets = budgetStore.getData(getState())
+    keys(byMonth).forEach(month => {
+      const currentData = curentBudgets[month] || {}
+      const newData = { ...currentData, ...byMonth[month] }
       dispatch(budgetStore.setData(newData, month))
     })
   }
+}
+
+type TTagBudgetUpdate = {
+  tag: TTagId | null
+  month: TISOMonth
+  value: number
+}
+
+function setTagBudget(upd: TTagBudgetUpdate | TTagBudgetUpdate[]): AppThunk {
+  return (dispatch, getState) => {
+    const updates = Array.isArray(upd) ? upd : [upd]
+    if (!upd || !updates.length) return null
+
+    const state = getState()
+    const userId = getRootUser(state)?.id
+    if (!userId) throw new Error('User is not defined')
+
+    const budgets = updates.map(({ tag, month, value }) => {
+      const id = getBudgetId(month, tag)
+      const current = getBudgets(state)[id] || {}
+      return makeBudget({
+        ...current,
+        tag: tag,
+        date: month,
+        user: current.user || userId,
+        outcome: value,
+        changed: Date.now(),
+      })
+    })
+    dispatch(applyClientPatch({ budget: budgets }))
+  }
+}
