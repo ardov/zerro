@@ -14,6 +14,11 @@ export type TFxRateData = {
   rates: TFxRates
 }
 
+export const getLatestRates: TSelector<TFxRateData> = createSelector(
+  [getInstruments],
+  instruments => currentToRates(instruments)
+)
+
 export const getRates: TSelector<ByMonth<TFxRateData>> = createSelector(
   [getInstruments, fxRateStore.getData],
   (instruments, savedRates) => {
