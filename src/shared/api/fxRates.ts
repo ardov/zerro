@@ -10,7 +10,7 @@ export async function requestRates(date: TDateDraft) {
   const isInFuture = toISODate(new Date()) < isoDate
   if (isInFuture) {
     throw new Error(
-      'Requesting for future rates. Understandable intention however imposible 😔'
+      'Requesting future rates. Understandable intention yet imposible 😔'
     )
   }
   const response = await fetch(

@@ -25,10 +25,9 @@ import {
 import { copyPreviousBudget } from '@features/bulkActions/copyPrevMonth'
 import { BalanceWidget } from '../BalanceWidget'
 import { StatWidget } from '../StatWidget'
+import { FxRates } from './FxRates'
 
-type MonthInfoProps = BoxProps & {
-  onClose: () => void
-}
+type MonthInfoProps = BoxProps & { onClose: () => void }
 
 export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
   const [month] = useMonth()
@@ -62,11 +61,12 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
         <BalanceWidget month={month} />
         <StatWidget month={month} mode="income" />
         <StatWidget month={month} mode="outcome" />
+        <FxRates month={month} />
 
         <Box p={2} bgcolor="background.default" borderRadius={1}>
           <Box mb={1}>
-            <Typography variant="body1" color="textSecondary" align="center">
-              Быстрые бюджеты
+            <Typography variant="body1" align="center">
+              Действия
             </Typography>
           </Box>
           <Confirm

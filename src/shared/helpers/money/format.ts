@@ -63,14 +63,14 @@ export function rateToWords(
 ): string {
   if (!sum1 || !sum2) return ''
   if (sum1 < sum2) {
-    return `${formatMoney(1, currency2, 0)} = ${formatMoney(
+    return `${formatMoney(1, currency1, 0)} = ${formatMoney(
       sum2 / sum1,
-      currency1
+      currency2
     )}`
   } else {
-    return `${formatMoney(1, currency1, 0)} = ${formatMoney(
+    return `${formatMoney(1, currency2, 0)} = ${formatMoney(
       sum1 / sum2,
-      currency2
+      currency1
     )}`
   }
 }

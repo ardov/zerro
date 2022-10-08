@@ -28,6 +28,8 @@ export function BalanceWidget(props: { month: TISOMonth }) {
   const toBeBudgeted = toDisplay(totals.toBeBudgetedFx)
   const overspend = toDisplay(totals.overspend)
 
+  const smartBudgetedInFuture = toBeBudgeted < 0 ? 0 : budgetedInFuture
+
   return (
     <Paper
       elevation={0}
@@ -52,11 +54,11 @@ export function BalanceWidget(props: { month: TISOMonth }) {
         amount={available}
         currency={displayCurrency}
       />
-      {!!budgetedInFuture && (
+      {!!smartBudgetedInFuture && (
         <DataLine
           name="Отложено на будущее"
           tooltip="Эти деньги зарезервированы под будущие бюджеты"
-          amount={budgetedInFuture}
+          amount={smartBudgetedInFuture}
           currency={displayCurrency}
         />
       )}
