@@ -2,10 +2,12 @@ import React from 'react'
 import { Story, Meta } from '@storybook/react'
 import { Reciept } from '@components/TransactionPreview/Reciept'
 import { Map } from '@components/TransactionPreview/Map'
+import { context } from './shared/context'
 
 export default {
   title: 'Transaction/Details',
   component: Reciept,
+  decorators: [context],
 } as Meta
 
 const QRCodeTemplate: Story<{}> = args => <Reciept {...args} />

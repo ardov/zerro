@@ -1,5 +1,4 @@
 import React from 'react'
-// import { DemoProviders } from '../src/stories/shared/DemoProviders'
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
@@ -10,11 +9,3 @@ export const parameters = {
     },
   },
 }
-
-// export const decorators = [
-//   Story => (
-//     <DemoProviders>
-//       <Story />
-//     </DemoProviders>
-//   ),
-// ]
