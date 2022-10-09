@@ -1,11 +1,11 @@
 import React, { FC } from 'react'
+import { Helmet } from 'react-helmet'
+import { Global, css } from '@emotion/react'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider as JSSThemeProvider } from '@mui/styles'
 import { ThemeProvider } from '@mui/material/styles'
 import { createTheme } from '@shared/helpers/createTheme'
 import { useThemeType } from '@shared/hooks/useThemeType'
-import { Helmet } from 'react-helmet'
-import { Global, css } from '@emotion/react'
 
 const GlobalVaribles = (props: { theme: DefaultTheme }) => {
   const styles = css`

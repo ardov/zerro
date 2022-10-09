@@ -1,17 +1,12 @@
 import React from 'react'
-import { Provider } from 'react-redux'
-import AdapterDateFns from '@mui/lab/AdapterDateFns'
-import LocalizationProvider from '@mui/lab/LocalizationProvider'
-import { StyledEngineProvider } from '@mui/material/styles'
-import ruDateLocale from 'date-fns/locale/ru'
 import { initSentry } from '@shared/helpers/tracking'
 import { TDiff } from '@shared/types'
 import { store } from '@store'
 import { bindWorkerToStore } from '@worker'
 import { applyClientPatch, resetData } from '@store/data'
 import GlobalErrorBoundary from './GlobalErrorBoundary'
-import { AppThemeProvider } from './AppThemeProvider'
 import App from './App'
+import { Providers } from './Providers'
 
 initSentry()
 bindWorkerToStore(store.dispatch)
@@ -19,18 +14,9 @@ createZerroInstance(store)
 
 export const MainApp = () => (
   <GlobalErrorBoundary>
-    <StyledEngineProvider injectFirst>
-      <Provider store={store}>
-        <LocalizationProvider
-          dateAdapter={AdapterDateFns}
-          locale={ruDateLocale}
-        >
-          <AppThemeProvider>
-            <App />
-          </AppThemeProvider>
-        </LocalizationProvider>
-      </Provider>
-    </StyledEngineProvider>
+    <Providers store={store}>
+      <App />
+    </Providers>
   </GlobalErrorBoundary>
 )
 
