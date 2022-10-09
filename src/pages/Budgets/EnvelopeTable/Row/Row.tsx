@@ -140,7 +140,7 @@ const NameCell: FC<{
     data: { type: DragTypes.envelope, id: id },
   })
   return (
-    <Box display="flex" alignItems="center" gap={1} minWidth={0}>
+    <Box display="flex" alignItems="center" ml={-1} gap={1} minWidth={0}>
       <Collapse orientation="horizontal" in={isReordering}>
         <IconButton
           size="small"

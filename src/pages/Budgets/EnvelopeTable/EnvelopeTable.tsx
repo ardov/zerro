@@ -113,6 +113,7 @@ const EnvelopeGroup: FC<TEnvelopeGroupProps> = ({ group, children }) => {
           ...rowStyle,
           pb: 1,
           pt: 2,
+          fontWeight: 900,
           borderBottom: `1px solid black`,
           borderColor: 'divider',
           '&:last-child': { border: 0 },
