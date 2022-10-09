@@ -1,37 +1,38 @@
 import React, { FC } from 'react'
 import { useAppSelector } from '@store'
-import { Select, MenuItem, SelectProps } from '@mui/material'
-import {
-  getInstruments,
-  getInstrumentsByCode,
-  getUserCurrencyCode,
-} from '@entities/instrument'
-import { getAccountList } from '@entities/account'
-import { TFxCode } from '@shared/types'
+import { Select, MenuItem, SelectProps, ListItemText } from '@mui/material'
+import { getInstrumentsByCode, getUserCurrencyCode } from '@entities/instrument'
+import { getInBudgetAccounts } from '@entities/account'
+import { TFxCode, TInstrument } from '@shared/types'
+import { getCurrencySymbol } from '@shared/helpers/money'
 
 export const CurrencyCodeSelect: FC<SelectProps<TFxCode>> = props => {
-  const instrumentsById = useAppSelector(getInstruments)
   const instrumentsByCode = useAppSelector(getInstrumentsByCode)
   const userCurrency = useAppSelector(getUserCurrencyCode)
-  const accounts = useAppSelector(getAccountList)
+  const accs = useAppSelector(getInBudgetAccounts)
   const value = props.value
-  let shortList = accounts.map(a => instrumentsById[a.instrument].shortTitle)
 
-  shortList = [userCurrency, ...shortList]
-  if (value) {
-    shortList = [value, ...shortList]
-  }
-  const list = shortList
-    .filter((v, i, a) => a.indexOf(v) === i)
-    .map(code => instrumentsByCode[code]) // unique instruments
+  const fxSet = new Set(accs.map(a => a.fxCode))
+  fxSet.add(userCurrency)
+  if (value) fxSet.add(value)
+  const instruments = [...fxSet].map(code => instrumentsByCode[code])
 
   return (
-    <Select {...props}>
-      {list.map(instr => (
+    <Select {...props} renderValue={v => v}>
+      {instruments.map(instr => (
         <MenuItem key={instr.shortTitle} value={instr.shortTitle}>
-          {instr.title} ({instr.symbol})
+          <ListItemText
+            primary={instr.shortTitle}
+            secondary={describe(instr)}
+          />
         </MenuItem>
       ))}
     </Select>
   )
+}
+
+function describe(i: TInstrument) {
+  const symbol = getCurrencySymbol(i.shortTitle)
+  if (symbol !== i.shortTitle) return `${i.title} (${symbol})`
+  return i.title
 }
