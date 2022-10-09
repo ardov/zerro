@@ -15,13 +15,7 @@ import {
 import { SxProps } from '@mui/system'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { EmojiIcon } from '@shared/ui/EmojiIcon'
-import {
-  formatMoney,
-  convertFx,
-  isZero,
-  getCurrencySymbol,
-} from '@shared/helpers/money'
-import { keys } from '@shared/helpers/keys'
+import { formatMoney, isZero, getCurrencySymbol } from '@shared/helpers/money'
 import {
   WarningIcon,
   AddIcon,
@@ -30,7 +24,7 @@ import {
 } from '@shared/ui/Icons'
 import { RadialProgress } from '@shared/ui/RadialProgress'
 import { Amount } from '@shared/ui/Amount'
-import { TEnvelopeId, TFxAmount, TFxCode, TRates } from '@shared/types'
+import { TEnvelopeId, TFxAmount, TFxCode } from '@shared/types'
 import { goalToWords, TGoal } from '@entities/goal'
 import { DragTypes } from '../../DnDContext'
 import { rowStyle } from '../shared/shared'
@@ -459,33 +453,4 @@ function getAvailableColor(
   if (!isChild || hasBudget) return negative
   // child tag without budget
   else return neutral
-}
-
-function getAmountTitle(amount: TFxAmount, currency: TFxCode, rates: TRates) {
-  if (isZero(amount)) return <span>0</span>
-  const codes = keys(amount)
-  if (codes.length === 0) return <span>0</span>
-
-  let strings = codes.map(fx => {
-    if (fx === currency) return formatMoney(amount[fx], fx)
-    let converted = convertFx({ [fx]: amount[fx] }, currency, rates)
-    return `${formatMoney(amount[fx], fx)} (${formatMoney(
-      converted,
-      currency
-    )})`
-  })
-  if (strings.length > 1)
-    strings.push(
-      `Итого: ${formatMoney(convertFx(amount, currency, rates), currency)}`
-    )
-  return (
-    <span>
-      {strings.map(s => (
-        <span key={s}>
-          <span>{s}</span>
-          <br />
-        </span>
-      ))}
-    </span>
-  )
 }
