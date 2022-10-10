@@ -87,7 +87,7 @@ function getQuickActions({
     },
     {
       text: getAvgOutcomeName(prevOutcomesLength),
-      amount: avgOutcome,
+      amount: -avgOutcome,
       condition: !!avgOutcome && prevOutcomesLength > 1,
     },
     {
@@ -97,7 +97,7 @@ function getQuickActions({
     },
     {
       text: 'Прошлый расход',
-      amount: prevOutcome,
+      amount: -prevOutcome,
       condition: !!prevOutcome,
     },
     {
