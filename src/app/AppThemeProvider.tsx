@@ -63,6 +63,7 @@ const globalStyles = css`
     background-size: 100%;
     background-repeat: repeat;
     background-clip: text;
+    -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     -moz-text-fill-color: transparent;
   }
