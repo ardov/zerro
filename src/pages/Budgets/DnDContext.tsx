@@ -1,11 +1,20 @@
 import React, { FC, ReactNode, useState } from 'react'
-import { DndContext, DragOverlay, DragEndEvent } from '@dnd-kit/core'
+import {
+  DndContext,
+  DragOverlay,
+  DragEndEvent,
+  DragStartEvent,
+  useDndMonitor,
+} from '@dnd-kit/core'
 import { useCallback } from 'react'
 import { useMonth } from '@shared/hooks/useMonth'
 import { MoveMoneyModal } from '@features/moveMoney'
 import { useToggle } from '@shared/hooks/useToggle'
 import { TEnvelopeId } from '@shared/types'
-import { Box } from '@mui/system'
+import { Box, SxProps } from '@mui/system'
+import { useAppSelector } from '@store/index'
+import { getMonthTotals } from '@entities/envelopeData'
+import { Typography } from '@mui/material'
 
 export enum DragTypes {
   amount = 'amount',
@@ -35,7 +44,8 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
     },
     [month, toggleOpen]
   )
-  const onDragStart = useCallback(() => {
+
+  const onDragStart = useCallback((e: DragStartEvent) => {
     if (window.navigator.vibrate) window.navigator.vibrate(100)
   }, [])
 
@@ -46,19 +56,7 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
       autoScroll={{ threshold: { x: 0, y: 0.2 } }}
     >
       {children}
-      <DragOverlay>
-        <Box
-          position="absolute"
-          display="flex"
-          bgcolor="background.default"
-          py={0.5}
-          px={2}
-          borderRadius={1}
-          width="auto"
-        >
-          Денюшки
-        </Box>
-      </DragOverlay>
+      <DragObj />
       <MoveMoneyModal
         key={moneySource + moneyDestination + month}
         open={isOpen}
@@ -69,4 +67,58 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
       />
     </DndContext>
   )
+}
+
+const DragObj = () => {
+  const [month] = useMonth()
+  const [activeType, setActiveType] = useState<DragTypes>(DragTypes.amount)
+  const [activeId, setActiveId] = useState<TEnvelopeId>()
+  const totals = useAppSelector(getMonthTotals)[month]
+  const env = activeId && totals.envelopes[activeId]
+
+  useDndMonitor({
+    onDragStart(e) {
+      const activeData = e.active.data.current
+      if (!activeData) return
+      setActiveType(activeData.type)
+      setActiveId(activeData.id)
+    },
+  })
+
+  const props: SxProps = {
+    position: 'absolute',
+    display: 'flex',
+    bgcolor: 'background.default',
+    py: 0.5,
+    px: 2,
+    borderRadius: 1,
+    width: 'auto',
+  }
+
+  if (!env)
+    return (
+      <DragOverlay>
+        <Box sx={props}>
+          {activeType === DragTypes.amount ? 'Денюшки' : 'Конверт'}
+        </Box>
+      </DragOverlay>
+    )
+
+  if (activeType === DragTypes.amount)
+    return (
+      <DragOverlay>
+        <Box sx={props}>Денюшки</Box>
+      </DragOverlay>
+    )
+
+  if (activeType === DragTypes.envelope)
+    return (
+      <DragOverlay>
+        <Box sx={props}>
+          <Typography noWrap>{env.name}</Typography>
+        </Box>
+      </DragOverlay>
+    )
+
+  return null
 }
