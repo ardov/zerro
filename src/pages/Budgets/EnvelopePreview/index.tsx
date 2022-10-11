@@ -15,7 +15,6 @@ import Rhythm from '@shared/ui/Rhythm'
 import { ColorPicker } from '@shared/ui/ColorPickerPopover'
 import { sendEvent } from '@shared/helpers/tracking'
 import { useToggle } from '@shared/hooks/useToggle'
-import { useSearchParam } from '@shared/hooks/useSearchParam'
 import { useMonth } from '@shared/hooks/useMonth'
 import { TEnvelopeId, TFxAmount } from '@shared/types'
 import { convertFx } from '@shared/helpers/money'
@@ -34,6 +33,7 @@ import { ActivityWidget } from './ActivityWidget'
 import { CommentWidget } from './CommentWidget'
 import { cardStyle } from './shared'
 import { useGoalPopover } from '../GoalPopover'
+import { useTrDrawer } from '../TransactionsDrawer'
 
 type EnvelopePreviewProps = {
   id: TEnvelopeId
@@ -42,7 +42,7 @@ type EnvelopePreviewProps = {
 
 export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   const [month] = useMonth()
-  const [, setId] = useSearchParam('transactions')
+  const { setDrawer } = useTrDrawer()
   const rates = useRates(month)
 
   const envelope = useEnvelope(month, id)
@@ -118,7 +118,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
           <DataLine name="Бюджет" amount={totalBudgeted} currency={currency} />
           <DataLine name="Расход" amount={totalActivity} currency={currency} />
           <Box>
-            <Button onClick={() => setId(id)} fullWidth>
+            <Button onClick={() => setDrawer(id)} fullWidth>
               Показать операции
             </Button>
           </Box>

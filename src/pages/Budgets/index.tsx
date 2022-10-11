@@ -127,6 +127,7 @@ const BudgetLayout: FC<{
           height: '100%',
           overflow: 'auto',
           px: isMD ? 1 : 3,
+          pb: 6,
         }}
       >
         {mainContent}
