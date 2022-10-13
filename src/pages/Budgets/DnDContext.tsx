@@ -3,7 +3,6 @@ import {
   DndContext,
   DragOverlay,
   DragEndEvent,
-  DragStartEvent,
   useDndMonitor,
 } from '@dnd-kit/core'
 import { useCallback } from 'react'
@@ -20,6 +19,9 @@ export enum DragTypes {
   amount = 'amount',
   envelope = 'envelope',
 }
+
+const autoscrollOptions = { threshold: { x: 0, y: 0.2 } }
+const vibrate = () => window?.navigator?.vibrate(100)
 
 export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
   const [month] = useMonth()
@@ -45,15 +47,11 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
     [month, toggleOpen]
   )
 
-  const onDragStart = useCallback((e: DragStartEvent) => {
-    if (window.navigator.vibrate) window.navigator.vibrate(100)
-  }, [])
-
   return (
     <DndContext
-      onDragStart={onDragStart}
+      onDragStart={vibrate}
       onDragEnd={onDragEnd}
-      autoScroll={{ threshold: { x: 0, y: 0.2 } }}
+      autoScroll={autoscrollOptions}
     >
       {children}
       <DragObj />
@@ -67,6 +65,16 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
       />
     </DndContext>
   )
+}
+
+const props: SxProps = {
+  position: 'absolute',
+  display: 'flex',
+  bgcolor: 'background.default',
+  py: 0.5,
+  px: 2,
+  borderRadius: 1,
+  width: 'auto',
 }
 
 const DragObj = () => {
@@ -84,16 +92,6 @@ const DragObj = () => {
       setActiveId(activeData.id)
     },
   })
-
-  const props: SxProps = {
-    position: 'absolute',
-    display: 'flex',
-    bgcolor: 'background.default',
-    py: 0.5,
-    px: 2,
-    borderRadius: 1,
-    width: 'auto',
-  }
 
   if (!env)
     return (

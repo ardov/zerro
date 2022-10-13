@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react'
+import React, { FC, forwardRef, useCallback } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import {
   Typography,
@@ -129,22 +129,11 @@ const NameCell: FC<{
     comment,
     isDefaultVisible,
   } = props.envelope
-  const { setNodeRef, attributes, listeners } = useDraggable({
-    id: 'envelope' + id,
-    data: { type: DragTypes.envelope, id: id },
-  })
+
   return (
     <Box display="flex" alignItems="center" ml={-1} gap={1} minWidth={0}>
       <Collapse orientation="horizontal" in={isReordering}>
-        <IconButton
-          size="small"
-          sx={{ ml: 1, display: 'grid', placeItems: 'center', cursor: 'grab' }}
-          ref={setNodeRef}
-          {...attributes}
-          {...listeners}
-        >
-          <DragIndicatorIcon />
-        </IconButton>
+        <EnvDraggable id={id} />
       </Collapse>
 
       <ButtonBase
@@ -198,6 +187,29 @@ const NameCell: FC<{
     </Box>
   )
 }
+const envDraggableSx = {
+  ml: 1,
+  display: 'grid',
+  placeItems: 'center',
+  cursor: 'grab',
+}
+const EnvDraggable: FC<{ id: TEnvelopeId }> = ({ id }) => {
+  const { setNodeRef, attributes, listeners } = useDraggable({
+    id: 'envelope' + id,
+    data: { type: DragTypes.envelope, id: id },
+  })
+  return (
+    <IconButton
+      size="small"
+      sx={envDraggableSx}
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+    >
+      <DragIndicatorIcon />
+    </IconButton>
+  )
+}
 
 const Droppable: FC<{
   id: TEnvelopeId
@@ -210,25 +222,44 @@ const Droppable: FC<{
     data: { type: DragTypes.envelope, id },
   })
 
-  const isAmount = active?.data.current?.type === DragTypes.amount
-
+  return (
+    <RowWrapper
+      ref={setNodeRef}
+      isChild={isChild}
+      disableHover={active?.data.current?.type === DragTypes.amount}
+      isHighlighted={isOver}
+    >
+      {children}
+    </RowWrapper>
+  )
+}
+const RowWrapper = forwardRef<
+  HTMLDivElement,
+  {
+    isChild: boolean
+    disableHover: boolean
+    isHighlighted: boolean
+    children: React.ReactNode
+  }
+>((props, ref) => {
+  const { isChild, disableHover, isHighlighted, children } = props
   const style: SxProps = {
     ...rowStyle,
     pl: isChild ? 7 : 2,
-    bgcolor: isOver && isAmount ? 'action.selected' : 'transparent',
+    bgcolor: isHighlighted ? 'action.selected' : 'transparent',
     position: 'relative',
     transition: '0.1s',
-    '&:hover': { bgcolor: isAmount ? 'none' : 'action.hover' },
+    '&:hover': { bgcolor: disableHover ? 'none' : 'action.hover' },
     '&:hover .addGoal': { opacity: 1, transition: '.3s' },
     '&:not(:hover) .addGoal': { opacity: 0 },
     '& > *': { py: isChild ? 0.5 : 1 },
   }
   return (
-    <Box ref={setNodeRef} sx={style}>
+    <Box ref={ref} sx={style}>
       {children}
     </Box>
   )
-}
+})
 
 const Btn: FC<ButtonBaseProps> = props => (
   <ButtonBase

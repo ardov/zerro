@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { TDataStore, TDiff } from '@shared/types'
-import { dataModel } from './effector'
+// import { dataModel } from './effector'
 import { applyDiff } from './shared/applyDiff'
 import { mergeDiffs } from './shared/mergeDiffs'
 
@@ -42,7 +42,7 @@ const { reducer, actions } = createSlice({
   initialState,
   reducers: {
     applyServerPatch: (state, { payload }: PayloadAction<ExtendedDiff>) => {
-      dataModel.applyServerPatch(payload)
+      // dataModel.applyServerPatch(payload)
       if (!payload) return
       state.server ??= makeDataStore()
       applyDiff(payload, state.server)
@@ -51,14 +51,14 @@ const { reducer, actions } = createSlice({
       state.diff = undefined
     },
     applyClientPatch: (state, { payload }: PayloadAction<TDiff>) => {
-      dataModel.applyClientPatch(payload)
+      // dataModel.applyClientPatch(payload)
       if (!payload) return
       applyDiff(payload, state.current)
       if (!state.diff) state.diff = { ...payload }
       else mergeDiffs(state.diff, payload)
     },
     resetData: () => {
-      dataModel.resetData()
+      // dataModel.resetData()
       return initialState
     },
   },

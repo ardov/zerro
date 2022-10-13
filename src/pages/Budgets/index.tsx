@@ -86,9 +86,9 @@ function Budgets() {
         <link rel="canonical" href="https://zerro.app/budget" />
       </Helmet>
 
-      <DnDContext>
-        <BudgetPopoverProvider>
-          <GoalPopoverProvider>
+      <BudgetPopoverProvider>
+        <GoalPopoverProvider>
+          <DnDContext>
             <BudgetLayout
               mainContent={mainContent}
               sideContent={detailsContent}
@@ -96,9 +96,9 @@ function Budgets() {
               onSideClose={closeDrawer}
             />
             <BudgetTransactionsDrawer />
-          </GoalPopoverProvider>
-        </BudgetPopoverProvider>
-      </DnDContext>
+          </DnDContext>
+        </GoalPopoverProvider>
+      </BudgetPopoverProvider>
     </>
   )
 }

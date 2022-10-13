@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { DragMoveEvent, useDndMonitor } from '@dnd-kit/core'
+import React, { useCallback, useState } from 'react'
+import { DragEndEvent, DragMoveEvent, useDndMonitor } from '@dnd-kit/core'
 import { Box } from '@mui/system'
 import { DragTypes } from '../DnDContext'
 import { useAppDispatch, useAppSelector } from '@store/index'
@@ -16,9 +16,42 @@ export function Highlight() {
   const [rect, setRect] = useState<number[] | null>(null)
   const [isNested, setIsNested] = useState<boolean>(false)
 
-  useDndMonitor({
-    onDragMove: updatePos,
-    onDragEnd: e => {
+  const onDragMove = useCallback(
+    (e: DragMoveEvent) => {
+      const activeData = e.active.data.current
+      const overData = e.over?.data.current
+      const activeRect = e.active.rect.current.translated
+      const overRect = e.over?.rect
+      if (
+        // has active
+        !activeData ||
+        !activeData.id ||
+        activeData.type !== DragTypes.envelope ||
+        !activeRect ||
+        // has over
+        !overData ||
+        !overData.id ||
+        overData.type !== DragTypes.envelope ||
+        !overRect
+      ) {
+        return setRect(null)
+      }
+      const overEnv = envelopes[overData.id as TEnvelopeId]
+      const isChild = !!overEnv?.parent
+      const isNested = activeRect.left - overRect.left > OFFSET || isChild
+      setIsNested(isNested)
+      setRect([
+        overRect.left + (isNested ? OFFSET : 0),
+        overRect.top + overRect.height,
+        overRect.width - (isNested ? OFFSET : 0),
+      ])
+    },
+    [envelopes]
+  )
+
+  const onDragEnd = useCallback(
+    (e: DragEndEvent) => {
+      setRect(null)
       const activeData = e.active.data.current
       const overData = e.over?.data.current
       if (
@@ -37,10 +70,13 @@ export function Highlight() {
           moveEnvelope(activeData.id, envelopes[overData.id].index, isNested)
         )
       }
-      setRect(null)
     },
-    onDragCancel: e => setRect(null),
-  })
+    [dispatch, envelopes, isNested]
+  )
+
+  const onDragCancel = useCallback(() => setRect(null), [])
+
+  useDndMonitor({ onDragMove, onDragEnd, onDragCancel })
 
   return rect ? (
     <Box
@@ -49,42 +85,13 @@ export function Highlight() {
         transition: '0.1s ease-in-out',
         borderRadius: 1,
         position: 'fixed',
+        top: 0,
+        left: 0,
         height: 2,
-        left: rect[0],
-        top: rect[1],
+        transform: `translate(${rect[0]}px, ${rect[1]}px)`,
         width: rect[2],
         zIndex: 100,
       }}
     />
   ) : null
-
-  function updatePos(e: DragMoveEvent) {
-    const activeData = e.active.data.current
-    const overData = e.over?.data.current
-    const activeRect = e.active.rect.current.translated
-    const overRect = e.over?.rect
-    if (
-      // has active
-      !activeData ||
-      !activeData.id ||
-      activeData.type !== DragTypes.envelope ||
-      !activeRect ||
-      // has over
-      !overData ||
-      !overData.id ||
-      overData.type !== DragTypes.envelope ||
-      !overRect
-    ) {
-      return setRect(null)
-    }
-    const overEnv = envelopes[overData.id as TEnvelopeId]
-    const isChild = !!overEnv?.parent
-    const isNested = activeRect.left - overRect.left > OFFSET || isChild
-    setIsNested(isNested)
-    setRect([
-      overRect.left + (isNested ? OFFSET : 0),
-      overRect.top + overRect.height,
-      overRect.width - (isNested ? OFFSET : 0),
-    ])
-  }
 }
