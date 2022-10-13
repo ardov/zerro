@@ -192,6 +192,7 @@ const envDraggableSx = {
   display: 'grid',
   placeItems: 'center',
   cursor: 'grab',
+  touchAction: 'none',
 }
 const EnvDraggable: FC<{ id: TEnvelopeId }> = ({ id }) => {
   const { setNodeRef, attributes, listeners } = useDraggable({
