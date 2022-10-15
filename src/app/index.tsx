@@ -22,7 +22,8 @@ export const MainApp = () => (
 
 /** `zerro` can be used in console to access state and modify data */
 function createZerroInstance(s: typeof store) {
-  let logsShow = !!localStorage.getItem('showLogs')
+  let logsShow = localStorage.getItem('showLogs') === 'true'
+
   // @ts-ignore
   window.zerro = {
     get state() {
