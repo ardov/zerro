@@ -16,6 +16,7 @@ import { TSelector } from '@store'
 import { getMonthList } from './parts/monthList'
 import { fxRates, TFxRateData } from '@entities/fxRate'
 import { TFxRates } from '@entities/fxRate/fxRateStore'
+import { withPerf } from '@shared/helpers/performance'
 
 export type TMonthTotals = {
   month: TISOMonth
@@ -57,7 +58,7 @@ export const getMonthTotals: TSelector<Record<TISOMonth, TMonthTotals>> =
       fxRates.getter,
       getUserCurrencyCode,
     ],
-    aggregateEnvelopeBudgets
+    withPerf('getMonthTotals', aggregateEnvelopeBudgets)
   )
 
 function aggregateEnvelopeBudgets(

@@ -9,6 +9,7 @@ import {
   trDirection,
 } from './getBudgetChanges'
 import { getMonthList } from './monthList'
+import { withPerf } from '@shared/helpers/performance'
 
 type TTotalNode = {
   total: TFxAmount
@@ -37,35 +38,38 @@ export type TMonthChange = {
 }
 
 export const getTotalChanges: TSelector<Record<TISOMonth, TMonthChange>> =
-  createSelector([getBudgetChanges, getMonthList], (changes, months) => {
-    const result: Record<TISOMonth, TMonthChange> = {}
+  createSelector(
+    [getBudgetChanges, getMonthList],
+    withPerf('getTotalChanges', (changes, months) => {
+      const result: Record<TISOMonth, TMonthChange> = {}
 
-    months.forEach(date => {
-      result[date] ??= makeMonthNode(date)
+      months.forEach(date => {
+        result[date] ??= makeMonthNode(date)
+      })
+
+      changes.forEach(ch => {
+        const date = toISOMonth(ch.date)
+        addToTotalNode(result[date].sum, ch)
+        if (ch.envelope) {
+          result[date].byEnvelope[ch.envelope] ??= makeTotalNode()
+          addToTotalNode(result[date].byEnvelope[ch.envelope], ch)
+          return
+        } else {
+          const day = new Date(ch.date).getDate() - 1
+          result[date].transferFees.total = addFxAmount(
+            result[date].transferFees.total,
+            ch.diff
+          )
+          result[date].transferFees.trend[day] = addFxAmount(
+            result[date].transferFees.trend[day],
+            ch.diff
+          )
+        }
+      })
+
+      return result
     })
-
-    changes.forEach(ch => {
-      const date = toISOMonth(ch.date)
-      addToTotalNode(result[date].sum, ch)
-      if (ch.envelope) {
-        result[date].byEnvelope[ch.envelope] ??= makeTotalNode()
-        addToTotalNode(result[date].byEnvelope[ch.envelope], ch)
-        return
-      } else {
-        const day = new Date(ch.date).getDate() - 1
-        result[date].transferFees.total = addFxAmount(
-          result[date].transferFees.total,
-          ch.diff
-        )
-        result[date].transferFees.trend[day] = addFxAmount(
-          result[date].transferFees.trend[day],
-          ch.diff
-        )
-      }
-    })
-
-    return result
-  })
+  )
 
 function makeMonthNode(date: TISOMonth): TMonthChange {
   return {

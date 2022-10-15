@@ -5,10 +5,11 @@ import { DataEntity, TEnvelopeId, TISOMonth } from '@shared/types'
 import { getEnvelopeId } from '@entities/envelope'
 import { getBudgets } from '../tagBudget'
 import { budgetStore } from './budgetStore'
+import { withPerf } from '@shared/helpers/performance'
 
 export const getEnvelopeBudgets = createSelector(
   [getBudgets, budgetStore.getData],
-  (tagBudgets, hiddenBudgets) => {
+  withPerf('getEnvelopeBudgets', (tagBudgets, hiddenBudgets) => {
     const result: Record<TISOMonth, Record<TEnvelopeId, number>> = {}
 
     keys(tagBudgets).forEach(id => {
@@ -28,5 +29,5 @@ export const getEnvelopeBudgets = createSelector(
     })
 
     return result
-  }
+  })
 )

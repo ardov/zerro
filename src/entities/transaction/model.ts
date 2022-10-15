@@ -24,7 +24,7 @@ export const getTransactionsHistory = createSelector(
 
 export const getHistoryStart = createSelector(
   [getTransactionsHistory],
-  transactions => {
+  withPerf('getHistoryStart', transactions => {
     if (!transactions.length) return Date.now()
     const historyBeginning = new Date(2000, 0)
     for (const tr of transactions) {
@@ -32,7 +32,7 @@ export const getHistoryStart = createSelector(
       if (trTime >= historyBeginning) return trTime
     }
     return Date.now()
-  }
+  })
 )
 
 export const debtorGetter = createSelector(

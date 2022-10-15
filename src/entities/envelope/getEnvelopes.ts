@@ -12,6 +12,7 @@ import {
   buildStructure,
   flattenStructure,
 } from './shared/structure'
+import { withPerf } from '@shared/helpers/performance'
 
 const getCompiledEnvelopes: TSelector<{
   byId: ById<TEnvelope>
@@ -24,47 +25,50 @@ const getCompiledEnvelopes: TSelector<{
     getEnvelopeMeta,
     getUserCurrencyCode,
   ],
-  (debtors, tags, savingAccounts, envelopeMeta, userCurrency) => {
-    let result: ById<TEnvelope> = {}
+  withPerf(
+    'getCompiledEnvelopes',
+    (debtors, tags, savingAccounts, envelopeMeta, userCurrency) => {
+      let result: ById<TEnvelope> = {}
 
-    // Step 1. Create envelopes from tags, saving accounts and debtors
-    Object.values(tags).forEach(tag => {
-      const e = makeEnvelope.tag(tag, envelopeMeta, userCurrency)
-      result[e.id] = e
-    })
-    savingAccounts.forEach(account => {
-      const e = makeEnvelope.account(account, envelopeMeta, userCurrency)
-      result[e.id] = e
-    })
-    Object.values(debtors).forEach(debtor => {
-      const e = makeEnvelope.debtor(debtor, envelopeMeta, userCurrency)
-      result[e.id] = e
-    })
+      // Step 1. Create envelopes from tags, saving accounts and debtors
+      Object.values(tags).forEach(tag => {
+        const e = makeEnvelope.tag(tag, envelopeMeta, userCurrency)
+        result[e.id] = e
+      })
+      savingAccounts.forEach(account => {
+        const e = makeEnvelope.account(account, envelopeMeta, userCurrency)
+        result[e.id] = e
+      })
+      Object.values(debtors).forEach(debtor => {
+        const e = makeEnvelope.debtor(debtor, envelopeMeta, userCurrency)
+        result[e.id] = e
+      })
 
-    // Step 2. Attach children, prepare for building tree
-    Object.values(result).forEach(e => {
-      // Fix nesting issues (only 2 levels are allowed)
-      e.parent = getRightParent(e.parent, result)
-      if (e.parent) {
-        const parent = result[e.parent]
-        parent.children.push(e.id) // Attach child to parent
-        e.group = result[e.parent].group // Inherit group names from parents
+      // Step 2. Attach children, prepare for building tree
+      Object.values(result).forEach(e => {
+        // Fix nesting issues (only 2 levels are allowed)
+        e.parent = getRightParent(e.parent, result)
+        if (e.parent) {
+          const parent = result[e.parent]
+          parent.children.push(e.id) // Attach child to parent
+          e.group = result[e.parent].group // Inherit group names from parents
+        }
+      })
+
+      // Step 3. Build structure and update indicies according to it
+      const structure = buildStructure(result)
+      const flatList = flattenStructure(structure)
+      // Update indicies
+      flatList.forEach(({ id, type }, index) => {
+        if (type === 'envelope') result[id].index = index
+      })
+
+      return {
+        byId: result,
+        structure,
       }
-    })
-
-    // Step 3. Build structure and update indicies according to it
-    const structure = buildStructure(result)
-    const flatList = flattenStructure(structure)
-    // Update indicies
-    flatList.forEach(({ id, type }, index) => {
-      if (type === 'envelope') result[id].index = index
-    })
-
-    return {
-      byId: result,
-      structure,
     }
-  }
+  )
 )
 
 export const getEnvelopes: TSelector<ById<TEnvelope>> = state =>

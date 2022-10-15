@@ -18,6 +18,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { TSelector } from '@store'
 import { getInstruments } from '@entities/instrument'
 import { getDebtors, TDebtor } from '@entities/debtors'
+import { withPerf } from '@shared/helpers/performance'
 
 export enum trDirection {
   income = 'income',
@@ -41,33 +42,36 @@ export const getBudgetChanges: TSelector<TBudgetChange[]> = createSelector(
     getInstruments,
     getDebtors,
   ],
-  (
-    transactions,
-    accountsInBudget,
-    debtAccId,
-    /** Instruments needed to convert ids to currency codes */
-    instruments,
-    debtors
-  ) => {
-    const inBudgetAccIds = accountsInBudget.map(acc => acc.id)
-    let list: TBudgetChange[] = []
+  withPerf(
+    'getBudgetChanges',
+    (
+      transactions,
+      accountsInBudget,
+      debtAccId,
+      /** Instruments needed to convert ids to currency codes */
+      instruments,
+      debtors
+    ) => {
+      const inBudgetAccIds = accountsInBudget.map(acc => acc.id)
+      let list: TBudgetChange[] = []
 
-    transactions.forEach(tr => {
-      const type = getType(tr, debtAccId)
-      let direction = getDirection(tr, type, inBudgetAccIds)
-      if (!direction) return
+      transactions.forEach(tr => {
+        const type = getType(tr, debtAccId)
+        let direction = getDirection(tr, type, inBudgetAccIds)
+        if (!direction) return
 
-      list.push({
-        date: tr.date,
-        direction,
-        envelope: getEnvelope(tr, type, direction, debtors),
-        diff: getDiff(tr, direction, instruments),
-        transaction: tr,
+        list.push({
+          date: tr.date,
+          direction,
+          envelope: getEnvelope(tr, type, direction, debtors),
+          diff: getDiff(tr, direction, instruments),
+          transaction: tr,
+        })
       })
-    })
 
-    return list
-  }
+      return list
+    }
+  )
 )
 
 function getDirection(
