@@ -46,7 +46,8 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   const rates = useRates(month)
 
   const envelope = useEnvelope(month, id)
-  const { goal, currency } = envelope
+  const { goal } = envelope
+  const { currency } = envelope.env
 
   const toEnvelope = (a: TFxAmount) => convertFx(a, currency, rates)
 
@@ -132,7 +133,7 @@ const Header: FC<{
   envelope: IEnvelopeWithData
   onClose: () => void
 }> = ({ envelope, onClose }) => {
-  const { symbol, color, name } = envelope
+  const { symbol, color, name } = envelope.env
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
   const [showEditor, toggleEditor] = useToggle()
   const dispatch = useAppDispatch()

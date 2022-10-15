@@ -11,7 +11,7 @@ export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
   const monthInfo = totals[month]
   const envelope = totals[month]?.envelopes[id]
   if (!envelope) return []
-  const envelopeCurrency = envelope.currency
+  const envelopeCurrency = envelope.env.currency
 
   const convert = (a: TFxAmount | null) =>
     a ? convertFx(a, envelopeCurrency, monthInfo.rates) : 0
@@ -25,7 +25,7 @@ export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
     .map(convert)
 
   return getQuickActions({
-    hasChildren: envelope.children.length > 0,
+    hasChildren: envelope.env.children.length > 0,
     budgeted: envelope.selfBudgetedValue,
     totalBudgeted: convert(envelope.totalBudgeted),
     available: envelope.selfAvailableValue,

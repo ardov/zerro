@@ -23,9 +23,9 @@ export const moveMoney =
     if (source !== 'toBeBudgeted') {
       const envelope = envelopes[source]
       const change =
-        envelope.currency === currency
+        envelope.env.currency === currency
           ? -amount
-          : convertFx({ [currency]: -amount }, envelope.currency, rates)
+          : convertFx({ [currency]: -amount }, envelope.env.currency, rates)
       const newBudget = round(envelope.selfBudgetedValue + change)
       updates.push({ month, id: envelope.id, value: newBudget })
     }
@@ -33,9 +33,9 @@ export const moveMoney =
     if (destination !== 'toBeBudgeted') {
       const envelope = envelopes[destination]
       const change =
-        envelope.currency === currency
+        envelope.env.currency === currency
           ? amount
-          : convertFx({ [currency]: amount }, envelope.currency, rates)
+          : convertFx({ [currency]: amount }, envelope.env.currency, rates)
       const newBudget = round(envelope.selfBudgetedValue + change)
       updates.push({ month, id: envelope.id, value: newBudget })
     }

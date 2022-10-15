@@ -26,11 +26,13 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   const totals = useAppSelector(getMonthTotals)[month]
 
   const sourceName =
-    source === 'toBeBudgeted' ? 'To be budgeted' : totals.envelopes[source].name
+    source === 'toBeBudgeted'
+      ? 'To be budgeted'
+      : totals.envelopes[source].env.name
   const destinationName =
     destination === 'toBeBudgeted'
       ? 'To be budgeted'
-      : totals.envelopes[destination].name
+      : totals.envelopes[destination].env.name
 
   const sourceValue =
     source === 'toBeBudgeted'

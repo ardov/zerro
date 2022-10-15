@@ -30,10 +30,10 @@ function calcGoalTotals(month: TMonthTotals) {
 
     goalsCount++
     if (e.goalNeed && e.goalNeed > 0) {
-      need = addFxAmount(need, { [e.currency]: e.goalNeed })
+      need = addFxAmount(need, { [e.env.currency]: e.goalNeed })
     }
     if (e.goalTarget && e.goalTarget > 0) {
-      target = addFxAmount(target, { [e.currency]: e.goalTarget })
+      target = addFxAmount(target, { [e.env.currency]: e.goalTarget })
     }
   })
 

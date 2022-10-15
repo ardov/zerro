@@ -53,12 +53,12 @@ export const resetMonthThunk =
     // Step 1. Remove children balances
     let totals = getMonthTotals(getState())[month]
     const updates = Object.values(totals.envelopes)
-      .filter(e => e.parent) // Only children
+      .filter(e => e.env.parent) // Only children
       .filter(
         e =>
           e.selfBudgetedValue !== 0 || // has budget
           e.selfAvailableValue > 0 || // has positive balance
-          (e.selfAvailableValue < 0 && e.carryNegatives) // carry negatives
+          (e.selfAvailableValue < 0 && e.env.carryNegatives) // carry negatives
       )
       .map(e => ({
         id: e.id,
@@ -70,7 +70,7 @@ export const resetMonthThunk =
     // Step 2. Remove parent balances
     let totals2 = getMonthTotals(getState())[month]
     const updates2 = Object.values(totals2.envelopes)
-      .filter(e => !e.parent) // Only parents
+      .filter(e => !e.env.parent) // Only parents
       .filter(e => e.selfAvailableValue) // with positive available or budget
       .map(e => ({
         id: e.id,

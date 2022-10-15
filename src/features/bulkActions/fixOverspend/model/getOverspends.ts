@@ -19,7 +19,7 @@ export const getOverspendsByMonth: TSelector<Record<TISOMonth, TOverspends>> =
 function calculateOverspends(monthInfo: TMonthTotals) {
   const { envelopes, currency, rates } = monthInfo
   const overspendingParents = Object.values(envelopes).filter(
-    envelope => !envelope.parent && envelope.selfAvailableValue < 0
+    envelope => !envelope.env.parent && envelope.selfAvailableValue < 0
   )
   const totalOverspend = overspendingParents.reduce(
     (acc, envelope) => addFxAmount(acc, envelope.selfAvailable),

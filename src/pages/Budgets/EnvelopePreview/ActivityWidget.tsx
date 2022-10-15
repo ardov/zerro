@@ -20,7 +20,7 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
   const [month, setMonth] = useMonth()
   const [highlighted, setHighlighted] = useState(month)
   const totals = useAppSelector(getMonthTotals)
-  const { currency } = totals[month].envelopes[id]
+  const { currency } = totals[month].envelopes[id].env
   const dates = keys(totals)
   const dateRange = getDateRange(dates, 12, month)
 

@@ -51,7 +51,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
     openDetails,
   } = props
   const { id, totalBudgeted, isSelf } = envelope
-  const isChild = !!envelope.parent || isSelf
+  const isChild = !!envelope.env.parent || isSelf
   const showBudget = isChild ? !isZero(totalBudgeted) : true
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
   const openBudgetPopover = useBudgetPopover()
@@ -59,7 +59,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
 
   const handleNameClick = useCallback(
     (e: React.MouseEvent) => {
-      if (e.altKey) console.log(envelope.name, envelope)
+      if (e.altKey) console.log(envelope.env.name, envelope)
       else openDetails(id)
     },
     [envelope, id, openDetails]
@@ -118,17 +118,9 @@ const NameCell: FC<{
   onClick: (e: React.MouseEvent) => void
 }> = props => {
   const { isReordering } = props
-  const {
-    id,
-    type,
-    symbol,
-    color,
-    name,
-    hasCustomCurency,
-    currency,
-    comment,
-    isDefaultVisible,
-  } = props.envelope
+  const { hasCustomCurency, isDefaultVisible } = props.envelope
+  const { id, type, symbol, color, name, currency, comment } =
+    props.envelope.env
 
   return (
     <Box display="flex" alignItems="center" ml={-1} gap={1} minWidth={0}>

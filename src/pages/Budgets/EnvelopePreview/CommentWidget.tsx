@@ -14,7 +14,7 @@ export const CommentWidget: FC<{ month: TISOMonth; id: TEnvelopeId }> = ({
 }) => {
   const envelope = useEnvelope(month, id)
   const dispatch = useAppDispatch()
-  const comment = envelope.comment
+  const comment = envelope.env.comment
   const [value, setValue] = useState(comment)
   const debouncedValue = useDebounce(value, 300)
 

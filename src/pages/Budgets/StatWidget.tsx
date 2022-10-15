@@ -47,9 +47,11 @@ export function StatWidget(props: {
     data.push({
       id,
       amount,
-      color: totals.envelopes[id].color || totals.envelopes[id].colorGenerated,
-      keepIncome: totals.envelopes[id].keepIncome,
-      name: totals.envelopes[id].name,
+      color:
+        totals.envelopes[id].env.color ||
+        totals.envelopes[id].env.colorGenerated,
+      keepIncome: totals.envelopes[id].env.keepIncome,
+      name: totals.envelopes[id].env.name,
     })
   })
   data.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))

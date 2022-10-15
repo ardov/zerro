@@ -53,7 +53,8 @@ export function setEnvelopeBudgets(
     function adjustValue(u: TEnvBudgetUpdate): TEnvBudgetUpdate {
       const monthTotals = totals[u.month]
       if (!monthTotals) return u
-      const { currency, childrenBudgeted } = monthTotals.envelopes[u.id]
+      const { childrenBudgeted } = monthTotals.envelopes[u.id]
+      const { currency } = monthTotals.envelopes[u.id].env
       const rates = monthTotals.rates
       const childrenValue = convertFx(childrenBudgeted, currency, rates)
       return { ...u, value: sub(u.value, childrenValue) }

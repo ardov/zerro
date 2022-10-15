@@ -19,7 +19,8 @@ import { getMonthList } from './parts/monthList'
 
 function makeEnvelopeWithData(e: TEnvelope) {
   return {
-    ...e,
+    id: e.id,
+    env: e,
 
     // Self metrics
     selfLeftoverValue: 0,
@@ -55,7 +56,7 @@ function makeEnvelopeWithData(e: TEnvelope) {
       )
     },
     get selfAvailable(): TFxAmount {
-      return { [this.currency]: this.selfAvailableValue }
+      return { [this.env.currency]: this.selfAvailableValue }
     },
 
     get totalLeftover(): TFxAmount {
@@ -166,22 +167,18 @@ function addSelfMetrics(
   activity: Record<TEnvelopeId, TEnvelopeNode> = {},
   rates: TRates
 ) {
-  Object.values(node).forEach(envelope => {
-    const { id, currency } = envelope
-    envelope.selfLeftoverValue = getLeftover(
+  Object.values(node).forEach(envData => {
+    const { id, currency } = envData.env
+    envData.selfLeftoverValue = getLeftover(
       prevMonth[id]?.selfAvailableValue,
-      envelope.carryNegatives
+      envData.env.carryNegatives
     )
-    envelope.selfLeftover = { [currency]: envelope.selfLeftoverValue }
-    envelope.selfBudgetedValue = budgets[id] || 0
-    envelope.selfBudgeted = { [currency]: envelope.selfBudgetedValue }
-    envelope.selfActivity = activity[id]?.activity || {}
-    envelope.selfActivityValue = convertFx(
-      envelope.selfActivity,
-      currency,
-      rates
-    )
-    envelope.transactions = activity[id]?.transactions || []
+    envData.selfLeftover = { [currency]: envData.selfLeftoverValue }
+    envData.selfBudgetedValue = budgets[id] || 0
+    envData.selfBudgeted = { [currency]: envData.selfBudgetedValue }
+    envData.selfActivity = activity[id]?.activity || {}
+    envData.selfActivityValue = convertFx(envData.selfActivity, currency, rates)
+    envData.transactions = activity[id]?.transactions || []
   })
 
   /** Returns leftover depending on envelope settings */
@@ -200,9 +197,9 @@ function addSelfMetrics(
  */
 function addChildrenData(node: ById<IEnvelopeWithData>, rates: TRates) {
   Object.values(node).forEach(parent => {
-    if (parent.children.length === 0) return
+    if (parent.env.children.length === 0) return
 
-    parent.children.forEach(childId => {
+    parent.env.children.forEach(childId => {
       const child = node[childId]
       parent.childrenLeftover = addFxAmount(
         parent.childrenLeftover,
@@ -232,12 +229,12 @@ function addChildrenData(node: ById<IEnvelopeWithData>, rates: TRates) {
 
     parent.childrenOverspendValue = convertFx(
       parent.childrenOverspend,
-      parent.currency,
+      parent.env.currency,
       rates
     )
     parent.childrenSurplusValue = convertFx(
       parent.childrenSurplus,
-      parent.currency,
+      parent.env.currency,
       rates
     )
   })
@@ -264,7 +261,7 @@ function addGoalData(
     if (!envelope.goal) return
 
     const toValue = (amount?: TFxAmount) =>
-      amount ? convertFx(amount, envelope.currency, rates) : 0
+      amount ? convertFx(amount, envelope.env.currency, rates) : 0
 
     const goalProgress = calculateGoalProgress(envelope.goal, {
       leftover: toValue(envelope.totalLeftover),

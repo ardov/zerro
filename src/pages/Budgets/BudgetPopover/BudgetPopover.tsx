@@ -45,7 +45,7 @@ const BudgetPopoverContent: FC<TBudgetPopoverProps> = props => {
   const envelope = useMonthTotals(month).envelopes[id]
 
   const currency = {
-    env: envelope.currency, // Envelope currency
+    env: envelope.env.currency, // Envelope currency
     disp: displayCurrency, // Display currency
   }
   /** Functions to convert amounts */
@@ -121,7 +121,7 @@ const BudgetPopoverContent: FC<TBudgetPopoverProps> = props => {
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              {envelope.currency}
+              {envelope.env.currency}
             </InputAdornment>
           ),
           endAdornment: (

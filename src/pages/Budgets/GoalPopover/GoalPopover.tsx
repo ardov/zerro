@@ -44,7 +44,8 @@ const GoalPopoverContent: FC<TGoalPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
   const dispatch = useAppDispatch()
   const envelope = useMonthTotals(month).envelopes[id]
-  const { goal, currency } = envelope
+  const { goal } = envelope
+  const { currency } = envelope.env
 
   const [type, setType] = useState(goal?.type || goalType.MONTHLY_SPEND)
   const isInPercents = type === goalType.INCOME_PERCENT

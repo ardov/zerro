@@ -113,7 +113,7 @@ const DragObj = () => {
     return (
       <DragOverlay>
         <Box sx={props}>
-          <Typography noWrap>{env.name}</Typography>
+          <Typography noWrap>{env.env.name}</Typography>
         </Box>
       </DragOverlay>
     )

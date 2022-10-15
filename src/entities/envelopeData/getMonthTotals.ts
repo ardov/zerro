@@ -154,7 +154,7 @@ function createMonth(
     generalIncome: activity?.generalIncome?.activity || {},
     get activity(): TFxAmount {
       return Object.values(this.envelopes)
-        .filter(e => !e.parent)
+        .filter(e => !e.env.parent)
         .reduce(
           (acc, envelope) => addFxAmount(acc, envelope.totalActivity),
           {} as TFxAmount
@@ -164,7 +164,7 @@ function createMonth(
     // Envelope totals
     get budgeted(): TFxAmount {
       return Object.values(this.envelopes)
-        .filter(e => !e.parent)
+        .filter(e => !e.env.parent)
         .reduce(
           (acc, envelope) => addFxAmount(acc, envelope.totalBudgeted),
           {} as TFxAmount
@@ -173,7 +173,7 @@ function createMonth(
 
     get available(): TFxAmount {
       return Object.values(this.envelopes)
-        .filter(e => !e.parent)
+        .filter(e => !e.env.parent)
         .reduce(
           (acc, envelope) => addFxAmount(acc, envelope.totalAvailable),
           {} as TFxAmount
@@ -208,7 +208,9 @@ function createMonth(
     get overspend(): TFxAmount {
       const { envelopes } = this
       return Object.values(envelopes)
-        .filter(envelope => !envelope.parent && envelope.selfAvailableValue < 0)
+        .filter(
+          envelope => !envelope.env.parent && envelope.selfAvailableValue < 0
+        )
         .reduce(
           (acc, envelope) => addFxAmount(acc, envelope.selfAvailable),
           {} as TFxAmount

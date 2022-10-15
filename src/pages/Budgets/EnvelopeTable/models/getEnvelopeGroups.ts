@@ -112,7 +112,7 @@ function populateEnvelope(
     displayHiddenOverspend = availableSelf
   }
 
-  const hasCustomCurency = envelope.currency !== displayCurrency
+  const hasCustomCurency = envelope.env.currency !== displayCurrency
 
   const populatedChildren = children.map(({ id }) =>
     populateEnvelope(id, [], monthInfo)
@@ -150,9 +150,12 @@ function populateSelfEnvelope(
     convertFx(a, displayCurrency, monthInfo.rates)
   return {
     ...envelope,
-    symbol: '-',
-    color: null,
-    name: `${envelope.name} (основная)`,
+    env: {
+      ...envelope.env,
+      symbol: '-',
+      color: null,
+      name: `${envelope.env.name} (основная)`,
+    },
     isDefaultVisible: true,
     displayCurrency,
     displayLeftover: convert(envelope.selfLeftover),
@@ -160,7 +163,7 @@ function populateSelfEnvelope(
     displayActivity: convert(envelope.selfActivity),
     displayAvailable: convert(envelope.selfAvailable),
     displayHiddenOverspend: 0,
-    hasCustomCurency: envelope.currency !== displayCurrency,
+    hasCustomCurency: envelope.env.currency !== displayCurrency,
     children: [],
     isSelf: true,
   }
@@ -170,10 +173,10 @@ function getDefaultVisibility(
   envelope: IEnvelopeWithData,
   hasVisibleChildren: boolean
 ): boolean {
-  if (envelope.visibility === envelopeVisibility.visible) {
+  if (envelope.env.visibility === envelopeVisibility.visible) {
     return true
   }
-  if (envelope.visibility === envelopeVisibility.hidden) {
+  if (envelope.env.visibility === envelopeVisibility.hidden) {
     return false
   }
   return (
