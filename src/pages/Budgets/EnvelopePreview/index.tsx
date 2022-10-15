@@ -186,7 +186,7 @@ const Header: FC<{
         key={envelope.id}
         open={showEditor}
         onClose={toggleEditor}
-        envelope={envelope}
+        envelope={envelope.env}
       />
     </Box>
   )

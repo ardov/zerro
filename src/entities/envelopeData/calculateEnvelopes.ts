@@ -16,6 +16,7 @@ import { calculateGoalProgress, getGoals, TGoal } from '@entities/goal'
 import { getEnvelopes, TEnvelope } from '@entities/envelope'
 import { getActivity, TEnvelopeNode, TMonthActivity } from './parts/activity'
 import { getMonthList } from './parts/monthList'
+import { withPerf } from '@shared/helpers/performance'
 
 function makeEnvelopeWithData(e: TEnvelope) {
   return {
@@ -94,7 +95,7 @@ export const getCalculatedEnvelopes: TSelector<
     fxRates.getter,
     getGoals,
   ],
-  aggregateEnvelopeBudgets
+  withPerf('getCalculatedEnvelopes', aggregateEnvelopeBudgets)
 )
 
 function aggregateEnvelopeBudgets(

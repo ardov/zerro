@@ -69,7 +69,7 @@ export function StatWidget(props: {
           flexDirection: 'column',
         }}
       >
-        <Collapse in={opened}>
+        <Collapse in={opened} unmountOnExit>
           <ChangesChart mode={props.mode} />
           <Box height={12} />
         </Collapse>
@@ -81,7 +81,7 @@ export function StatWidget(props: {
         />
 
         <PercentBar data={data} mt={1.5} />
-        <Collapse in={opened}>
+        <Collapse in={opened} unmountOnExit>
           <Stack gap={1.5} mt={2}>
             {data.map(envelope => (
               <DataLine

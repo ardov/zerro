@@ -1,36 +1,45 @@
 import React, { FC, useEffect, useState } from 'react'
 import { InputBase, InputAdornment } from '@mui/material'
 import { NotesIcon } from '@shared/ui/Icons'
-import { useDebounce } from '@shared/hooks/useDebounce'
 import { TEnvelopeId, TISOMonth } from '@shared/types'
 import { useAppDispatch } from '@store'
 import { useEnvelope } from '@entities/envelopeData'
 import { cardStyle } from './shared'
 import { patchEnvelope } from '@entities/envelope'
+import { useDebouncedCallback } from '@shared/hooks/useDebouncedCallback'
 
 export const CommentWidget: FC<{ month: TISOMonth; id: TEnvelopeId }> = ({
   month,
   id,
 }) => {
-  const envelope = useEnvelope(month, id)
   const dispatch = useAppDispatch()
+  const envelope = useEnvelope(month, id)
   const comment = envelope.env.comment
   const [value, setValue] = useState(comment)
-  const debouncedValue = useDebounce(value, 300)
 
-  // Update comment only when debounced value updated
+  const applyChanges = useDebouncedCallback(
+    value => {
+      if (comment !== value) {
+        dispatch(patchEnvelope({ id, comment: value }))
+      }
+    },
+    [id, dispatch],
+    300
+  )
+
   useEffect(() => {
-    if (comment !== debouncedValue) {
-      dispatch(patchEnvelope({ id, comment: debouncedValue }))
-    }
-  }, [debouncedValue, dispatch, id, comment])
+    setValue(comment)
+  }, [comment])
 
   return (
     <InputBase
       sx={cardStyle}
       placeholder="Комментарий"
       value={value}
-      onChange={e => setValue(e.target.value)}
+      onChange={e => {
+        setValue(e.target.value)
+        applyChanges(e.target.value)
+      }}
       multiline
       startAdornment={
         <InputAdornment position="start" component="label">

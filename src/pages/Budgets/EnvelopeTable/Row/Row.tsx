@@ -10,18 +10,11 @@ import {
   IconButtonProps,
   ButtonBaseProps,
   Chip,
-  Collapse,
 } from '@mui/material'
 import { SxProps } from '@mui/system'
 import { Tooltip } from '@shared/ui/Tooltip'
-import { EmojiIcon } from '@shared/ui/EmojiIcon'
 import { formatMoney, isZero, getCurrencySymbol } from '@shared/helpers/money'
-import {
-  WarningIcon,
-  AddIcon,
-  EmojiFlagsIcon,
-  DragIndicatorIcon,
-} from '@shared/ui/Icons'
+import { WarningIcon, AddIcon, EmojiFlagsIcon } from '@shared/ui/Icons'
 import { RadialProgress } from '@shared/ui/RadialProgress'
 import { Amount } from '@shared/ui/Amount'
 import { TEnvelopeId, TFxAmount, TFxCode } from '@shared/types'
@@ -32,6 +25,7 @@ import { Metric } from '../models/useMetric'
 import { TEnvelopePopulated } from '../models/getEnvelopeGroups'
 import { useBudgetPopover } from '@pages/Budgets/BudgetPopover'
 import { useGoalPopover } from '@pages/Budgets/GoalPopover'
+import { NameCell } from './NameCell'
 
 type EnvelopeRowProps = {
   envelope: TEnvelopePopulated
@@ -57,18 +51,14 @@ export const Row: FC<EnvelopeRowProps> = props => {
   const openBudgetPopover = useBudgetPopover()
   const openGoalPopover = useGoalPopover()
 
-  const handleNameClick = useCallback(
-    (e: React.MouseEvent) => {
-      if (e.altKey) console.log(envelope.env.name, envelope)
-      else openDetails(id)
-    },
-    [envelope, id, openDetails]
-  )
+  const handleNameClick = useCallback(() => openDetails(id), [id, openDetails])
 
   return (
     <Droppable id={id} isChild={isChild}>
       <NameCell
-        envelope={envelope}
+        envelope={envelope.env}
+        isDefaultVisible={envelope.isDefaultVisible}
+        hasCustomCurency={envelope.hasCustomCurency}
         onClick={handleNameClick}
         isReordering={isReordering}
       />
@@ -109,98 +99,6 @@ export const Row: FC<EnvelopeRowProps> = props => {
         />
       )}
     </Droppable>
-  )
-}
-
-const NameCell: FC<{
-  envelope: TEnvelopePopulated
-  isReordering: boolean
-  onClick: (e: React.MouseEvent) => void
-}> = props => {
-  const { isReordering } = props
-  const { hasCustomCurency, isDefaultVisible } = props.envelope
-  const { id, type, symbol, color, name, currency, comment } =
-    props.envelope.env
-
-  return (
-    <Box display="flex" alignItems="center" ml={-1} gap={1} minWidth={0}>
-      <Collapse orientation="horizontal" in={isReordering}>
-        <EnvDraggable id={id} />
-      </Collapse>
-
-      <ButtonBase
-        sx={{
-          p: 0.5,
-          m: -0.5,
-          borderRadius: 1,
-          flexShrink: 1,
-          minWidth: 0,
-          transition: '0.1s',
-          typography: 'body1',
-          opacity: isDefaultVisible ? 1 : 0.5,
-          '&:hover': { bgcolor: 'action.hover', opacity: 1 },
-          '&:focus': { bgcolor: 'action.focus' },
-        }}
-        onClick={props.onClick}
-      >
-        <EmojiIcon symbol={symbol} mr={1.5} color={color} />
-        <Typography component="span" variant="body1" title={name} noWrap>
-          {name}
-        </Typography>
-      </ButtonBase>
-
-      {type !== 'tag' && (
-        <Typography
-          sx={{ flexShrink: 1000000, fontStyle: 'italic' }}
-          color="text.hint"
-          component="span"
-          variant="body1"
-          title={comment}
-          noWrap
-        >
-          {comment}
-        </Typography>
-      )}
-
-      {hasCustomCurency && <CurrencyTag currency={currency} />}
-
-      {!!comment && (
-        <Typography
-          sx={{ flexShrink: 1000000, fontStyle: 'italic' }}
-          color="text.hint"
-          component="span"
-          variant="body1"
-          title={comment}
-          noWrap
-        >
-          {comment}
-        </Typography>
-      )}
-    </Box>
-  )
-}
-const envDraggableSx = {
-  ml: 1,
-  display: 'grid',
-  placeItems: 'center',
-  cursor: 'grab',
-  touchAction: 'none',
-}
-const EnvDraggable: FC<{ id: TEnvelopeId }> = ({ id }) => {
-  const { setNodeRef, attributes, listeners } = useDraggable({
-    id: 'envelope' + id,
-    data: { type: DragTypes.envelope, id: id },
-  })
-  return (
-    <IconButton
-      size="small"
-      sx={envDraggableSx}
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-    >
-      <DragIndicatorIcon />
-    </IconButton>
   )
 }
 
@@ -273,7 +171,7 @@ const Btn: FC<ButtonBaseProps> = props => (
   />
 )
 
-const CurrencyTag: FC<{ currency?: TFxCode }> = ({ currency }) => {
+export const CurrencyTag: FC<{ currency?: TFxCode }> = ({ currency }) => {
   if (!currency) return null
   return (
     <Tooltip

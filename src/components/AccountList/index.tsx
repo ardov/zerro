@@ -64,7 +64,7 @@ const ArchivedList: FC<{ accs: IAccountPopulated[] }> = props => {
   const sum = getTotal(accs)
   return (
     <>
-      <Collapse in={visible}>
+      <Collapse in={visible} unmountOnExit>
         <List dense>
           {accs.map(acc => (
             <Account key={acc.id} account={acc} />

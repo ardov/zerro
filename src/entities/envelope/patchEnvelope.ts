@@ -143,20 +143,22 @@ const funcs: {
 }
 
 function toPatches(draft: TEnvelopeDraft, envelopes: ById<TEnvelope>) {
-  if (!draft.id) throw new Error('Trying to patch tag without id')
+  if (!draft.id) throw new Error('Trying to patch envelope without id')
   let current = envelopes[draft.id]
   if (!current) throw new Error('Envelope not found')
 
   if (current.type === 'payee') {
+    // throw new Error('Trying to patch payee envelope')
     return {} as TPatches
-    throw new Error('Trying to patch payee envelope')
   }
+
   const patches: TPatches = {}
   keys(draft).forEach(key => {
     if (current[key] !== draft[key]) {
       funcs[key](draft, patches, envelopes)
     }
   })
+
   return patches
 }
 

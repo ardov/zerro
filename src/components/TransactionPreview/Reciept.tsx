@@ -24,7 +24,7 @@ export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
         <Line name="Дата" value={formatDate(parsed.t, 'dd.MM.yyyy, HH:mm')} />
 
         <Box mt="auto">
-          <Collapse in={!showMore}>
+          <Collapse in={!showMore} unmountOnExit>
             <Link
               component="button"
               variant="caption"
@@ -36,7 +36,7 @@ export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
           </Collapse>
         </Box>
 
-        <Collapse in={showMore}>
+        <Collapse in={showMore} unmountOnExit>
           <div>
             <Line name="ФН" value={parsed.fn} />
             <Line name="ФД" value={parsed.i} />

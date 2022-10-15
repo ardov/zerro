@@ -131,7 +131,6 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
           <TextField
             label="Группа"
             name="group"
-            multiline
             inputProps={{ autoComplete: 'off' }}
             value={values.group}
             onChange={handleChange}
