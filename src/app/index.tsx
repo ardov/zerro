@@ -22,6 +22,7 @@ export const MainApp = () => (
 
 /** `zerro` can be used in console to access state and modify data */
 function createZerroInstance(s: typeof store) {
+  let logsShow = !!localStorage.getItem('showLogs')
   // @ts-ignore
   window.zerro = {
     get state() {
@@ -29,7 +30,14 @@ function createZerroInstance(s: typeof store) {
     },
     // @ts-ignore
     env: import.meta.env,
-    logsShow: false,
+    get logsShow() {
+      return logsShow
+    },
+    toggleLogs: () => {
+      logsShow = !logsShow
+      localStorage.setItem('showLogs', String(logsShow))
+      return logsShow
+    },
     logs: {},
     resetData: () => s.dispatch(resetData()),
     applyClientPatch: (patch: TDiff) => s.dispatch(applyClientPatch(patch)),
