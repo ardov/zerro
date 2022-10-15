@@ -143,7 +143,7 @@ const funcs: TFuncs = {
     tag: (el, fx, meta) => meta?.group || defaultTagGroup,
     account: (el, fx, meta) => meta?.group || defaultAccountGroup,
     debtor: (el, fx, meta) =>
-      meta?.group || el.merchantId ? defaultMerchantGroup : defaultPayeeGroup,
+      meta?.group || (el.merchantId ? defaultMerchantGroup : defaultPayeeGroup),
   },
   visibility: {
     tag: (el, fx, meta) => getVisibility(meta?.visibility, el.showOutcome),
