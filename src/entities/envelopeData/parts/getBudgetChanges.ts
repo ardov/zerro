@@ -48,8 +48,7 @@ export const getBudgetChanges: TSelector<TBudgetChange[]> = createSelector(
       transactions,
       accountsInBudget,
       debtAccId,
-      /** Instruments needed to convert ids to currency codes */
-      instruments,
+      instruments, // needed to convert ids to currency codes
       debtors
     ) => {
       const inBudgetAccIds = accountsInBudget.map(acc => acc.id)

@@ -8,6 +8,12 @@ import { useCachedValue } from '@shared/hooks/useCachedValue'
 import { useAppSelector } from '@store/index'
 import { getEnvelopes } from '@entities/envelope'
 
+export enum trMode {
+  all = 'all',
+  income = 'income',
+  outcome = 'outcome',
+}
+
 export const BudgetTransactionsDrawer: FC = () => {
   const { params, setDrawer } = useTrDrawer()
   const isOpened = !!params.id
@@ -42,12 +48,6 @@ export const BudgetTransactionsDrawer: FC = () => {
       onClose={onClose}
     />
   )
-}
-
-export enum trMode {
-  all = 'all',
-  income = 'income',
-  outcome = 'outcome',
 }
 
 export function useTrDrawer() {
