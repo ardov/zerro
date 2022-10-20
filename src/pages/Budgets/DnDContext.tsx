@@ -14,14 +14,20 @@ import { Box, SxProps } from '@mui/system'
 import { useAppSelector } from '@store/index'
 import { getMonthTotals } from '@entities/envelopeData'
 import { Typography } from '@mui/material'
+import { createPortal } from 'react-dom'
 
 export enum DragTypes {
   amount = 'amount',
   envelope = 'envelope',
 }
 
+export type TDragData = {
+  type: DragTypes
+  id: TEnvelopeId
+}
+
 const autoscrollOptions = { threshold: { x: 0, y: 0.2 } }
-const vibrate = () => window?.navigator?.vibrate(100)
+const vibrate = () => window?.navigator?.vibrate?.(100)
 
 export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
   const [month] = useMonth()
@@ -34,13 +40,13 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
 
   const onDragEnd = useCallback(
     (e: DragEndEvent) => {
-      const active = e.active.data.current
-      const over = e.over?.data.current
+      const active = e.active.data.current as TDragData
+      const over = e.over?.data.current as TDragData
       if (!active || !over || !month) return
-      let dataType = active?.type as DragTypes | undefined
+      let dataType = active?.type
       if (dataType === DragTypes.amount && active.id !== over.id) {
-        setMoneySource(active.id as TEnvelopeId)
-        setMoneyDestination(over.id as TEnvelopeId)
+        setMoneySource(active.id)
+        setMoneyDestination(over.id)
         toggleOpen()
       }
     },
@@ -75,6 +81,7 @@ const props: SxProps = {
   px: 2,
   borderRadius: 1,
   width: 'auto',
+  cursor: 'grabbing',
 }
 
 const DragObj = () => {
@@ -93,30 +100,14 @@ const DragObj = () => {
     },
   })
 
-  if (!env)
-    return (
-      <DragOverlay>
-        <Box sx={props}>
-          {activeType === DragTypes.amount ? 'Денюшки' : 'Конверт'}
-        </Box>
-      </DragOverlay>
-    )
+  const content =
+    activeType === DragTypes.amount ? (
+      <Box sx={props}>Денюшки</Box>
+    ) : activeType === DragTypes.envelope ? (
+      <Box sx={props}>
+        <Typography noWrap>{env?.env?.name || 'Конверт'}</Typography>
+      </Box>
+    ) : null
 
-  if (activeType === DragTypes.amount)
-    return (
-      <DragOverlay>
-        <Box sx={props}>Денюшки</Box>
-      </DragOverlay>
-    )
-
-  if (activeType === DragTypes.envelope)
-    return (
-      <DragOverlay>
-        <Box sx={props}>
-          <Typography noWrap>{env.env.name}</Typography>
-        </Box>
-      </DragOverlay>
-    )
-
-  return null
+  return createPortal(<DragOverlay>{content}</DragOverlay>, document.body)
 }
