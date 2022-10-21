@@ -1,14 +1,12 @@
-import React, { FC, forwardRef, useCallback } from 'react'
+import React, { FC, forwardRef, useCallback, useMemo } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import {
   Typography,
   Box,
   IconButton,
   useMediaQuery,
-  ButtonBase,
   Theme,
   IconButtonProps,
-  ButtonBaseProps,
   Chip,
 } from '@mui/material'
 import { SxProps } from '@mui/system'
@@ -20,12 +18,13 @@ import { Amount } from '@shared/ui/Amount'
 import { TEnvelopeId, TFxAmount, TFxCode } from '@shared/types'
 import { goalToWords, TGoal } from '@entities/goal'
 import { DragTypes } from '../../DnDContext'
-import { rowStyle } from '../shared/shared'
+import { SRowWrapper } from '../shared/shared'
 import { Metric } from '../models/useMetric'
 import { TEnvelopePopulated } from '../models/getEnvelopeGroups'
 import { useBudgetPopover } from '@pages/Budgets/BudgetPopover'
 import { useGoalPopover } from '@pages/Budgets/GoalPopover'
 import { NameCell } from './NameCell'
+import { Btn } from './Btn'
 
 type EnvelopeRowProps = {
   envelope: TEnvelopePopulated
@@ -57,10 +56,12 @@ export const Row: FC<EnvelopeRowProps> = props => {
     <Droppable id={id} isChild={isChild}>
       <NameCell
         envelope={envelope.env}
+        isChild={isChild}
         isDefaultVisible={envelope.isDefaultVisible}
         hasCustomCurency={envelope.hasCustomCurency}
         onClick={handleNameClick}
         isReordering={isReordering}
+        dropIndicator={false}
       />
 
       {(metric === Metric.budgeted || !isMobile) && (
@@ -113,63 +114,24 @@ const Droppable: FC<{
     data: { type: DragTypes.envelope, id },
   })
 
-  return (
-    <RowWrapper
-      ref={setNodeRef}
-      isChild={isChild}
-      disableHover={active?.data.current?.type === DragTypes.amount}
-      isHighlighted={isOver}
-    >
-      {children}
-    </RowWrapper>
-  )
-}
-const RowWrapper = forwardRef<
-  HTMLDivElement,
-  {
-    isChild: boolean
-    disableHover: boolean
-    isHighlighted: boolean
-    children: React.ReactNode
-  }
->((props, ref) => {
-  const { isChild, disableHover, isHighlighted, children } = props
   const style: SxProps = {
-    ...rowStyle,
-    pl: isChild ? 7 : 2,
-    bgcolor: isHighlighted ? 'action.selected' : 'transparent',
+    // ...rowStyle,
+    // pl: isChild ? 7 : 2,
+    bgcolor: isOver ? 'action.selected' : 'transparent',
     position: 'relative',
     transition: '0.1s',
-    '&:hover': { bgcolor: disableHover ? 'none' : 'action.hover' },
+    '&:hover': { bgcolor: active ? 'none' : 'action.hover' },
     '&:hover .addGoal': { opacity: 1, transition: '.3s' },
     '&:not(:hover) .addGoal': { opacity: 0 },
     '& > *': { py: isChild ? 0.5 : 1 },
   }
-  return (
-    <Box ref={ref} sx={style}>
-      {children}
-    </Box>
-  )
-})
 
-const Btn: FC<ButtonBaseProps> = props => (
-  <ButtonBase
-    sx={{
-      py: 1,
-      px: 1.5,
-      my: -1,
-      mx: -1.5,
-      borderRadius: 1,
-      minWidth: 0,
-      transition: '0.1s',
-      textAlign: 'right',
-      typography: 'body1',
-      '&:hover': { bgcolor: 'action.hover' },
-      '&:focus': { bgcolor: 'action.focus' },
-    }}
-    {...props}
-  />
-)
+  return (
+    <SRowWrapper sx={style} ref={setNodeRef}>
+      {children}
+    </SRowWrapper>
+  )
+}
 
 export const CurrencyTag: FC<{ currency?: TFxCode }> = ({ currency }) => {
   if (!currency) return null
@@ -303,7 +265,6 @@ const AvailableCell: FC<AvailableCellProps> = props => {
             component="span"
             sx={{
               borderRadius: 1,
-              // bgcolor: isDragging ? 'background.paper' : '',
               px: 2,
               mx: -2,
               py: 0.5,
@@ -312,8 +273,6 @@ const AvailableCell: FC<AvailableCellProps> = props => {
               display: 'inline-block',
               color: availableColor,
               touchAction: 'none',
-              // transform: CSS.Translate.toString(transform),
-              // cursor: isDragging ? 'grabbing' : 'grab',
               cursor: 'grab',
             }}
           >

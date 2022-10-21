@@ -16,16 +16,30 @@ import { CurrencyTag } from './Row'
 
 export const NameCell: FC<{
   envelope: TEnvelope
+  isChild: boolean
   isReordering: boolean
   isDefaultVisible: boolean
   hasCustomCurency: boolean
+  dropIndicator: boolean | 'child'
   onClick: (e: React.MouseEvent) => void
 }> = props => {
-  const { isReordering, isDefaultVisible, hasCustomCurency } = props
+  const {
+    isReordering,
+    isDefaultVisible,
+    hasCustomCurency,
+    isChild,
+    dropIndicator,
+  } = props
   const { id, symbol, color, name, currency, comment } = props.envelope
 
   return (
-    <Box display="flex" alignItems="center" gap={1} minWidth={0}>
+    <Box
+      display="flex"
+      alignItems="center"
+      gap={1}
+      minWidth={0}
+      pl={isChild ? 5 : 0}
+    >
       {/* <Collapse orientation="horizontal" in={isReordering} unmountOnExit>
         <EnvDraggable id={id} />
       </Collapse> */}
