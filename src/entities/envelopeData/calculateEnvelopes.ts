@@ -6,6 +6,7 @@ import type {
   TFxAmount,
   TISOMonth,
   TRates,
+  ByMonth,
 } from '@shared/types'
 import type { TSelector } from '@store'
 import { keys } from '@shared/helpers/keys'
@@ -84,8 +85,17 @@ function makeEnvelopeWithData(e: TEnvelope) {
 
 export type IEnvelopeWithData = ReturnType<typeof makeEnvelopeWithData>
 
+export const getRatesByMonth: TSelector<ByMonth<TFxRateData>> = createSelector(
+  [getMonthList, fxRates.getter],
+  withPerf('getRatesByMonth', (months, getter) => {
+    const res: ByMonth<TFxRateData> = {}
+    months.forEach(month => (res[month] = getter(month)))
+    return res
+  })
+)
+
 export const getCalculatedEnvelopes: TSelector<
-  Record<TISOMonth, ById<IEnvelopeWithData>>
+  ByMonth<ById<IEnvelopeWithData>>
 > = createSelector(
   [
     getMonthList,
@@ -95,18 +105,18 @@ export const getCalculatedEnvelopes: TSelector<
     fxRates.getter,
     getGoals,
   ],
-  withPerf('getCalculatedEnvelopes', aggregateEnvelopeBudgets)
+  withPerf('🤡getCalculatedEnvelopes', aggregateEnvelopeBudgets)
 )
 
 function aggregateEnvelopeBudgets(
   monthList: TISOMonth[],
   envelopes: ById<TEnvelope>,
-  activity: Record<TISOMonth, TMonthActivity>,
-  budgets: Record<TISOMonth, { [id: TEnvelopeId]: number }>,
+  activity: ByMonth<TMonthActivity>,
+  budgets: ByMonth<{ [id: TEnvelopeId]: number }>,
   getRates: (month: TISOMonth) => TFxRateData,
-  goals: Record<TISOMonth, Record<TEnvelopeId, TGoal | null>>
+  goals: ByMonth<Record<TEnvelopeId, TGoal | null>>
 ) {
-  const result: Record<TISOMonth, ById<IEnvelopeWithData>> = {}
+  const result: ByMonth<ById<IEnvelopeWithData>> = {}
 
   let prevNode: ById<IEnvelopeWithData> = {}
   monthList.forEach(month => {
