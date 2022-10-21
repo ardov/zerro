@@ -94,7 +94,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
         />
         {renderGroups}
       </Paper>
-      {reorderMode && <Highlight />}
+      <Highlight />
     </>
   )
 }

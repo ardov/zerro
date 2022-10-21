@@ -1,4 +1,4 @@
-import React, { FC, forwardRef, useCallback, useMemo } from 'react'
+import React, { FC, useCallback } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import {
   Typography,
@@ -18,7 +18,7 @@ import { Amount } from '@shared/ui/Amount'
 import { TEnvelopeId, TFxAmount, TFxCode } from '@shared/types'
 import { goalToWords, TGoal } from '@entities/goal'
 import { DragTypes } from '../../DnDContext'
-import { SRowWrapper } from '../shared/shared'
+import { rowStyle } from '../shared/shared'
 import { Metric } from '../models/useMetric'
 import { TEnvelopePopulated } from '../models/getEnvelopeGroups'
 import { useBudgetPopover } from '@pages/Budgets/BudgetPopover'
@@ -54,51 +54,53 @@ export const Row: FC<EnvelopeRowProps> = props => {
 
   return (
     <Droppable id={id} isChild={isChild}>
-      <NameCell
-        envelope={envelope.env}
-        isChild={isChild}
-        isDefaultVisible={envelope.isDefaultVisible}
-        hasCustomCurency={envelope.hasCustomCurency}
-        onClick={handleNameClick}
-        isReordering={isReordering}
-        dropIndicator={false}
-      />
-
-      {(metric === Metric.budgeted || !isMobile) && (
-        <BudgetCell
-          isUnsorted={isSelf}
-          budgeted={envelope.displayBudgeted}
-          showBudget={showBudget}
-          onBudgetClick={e => openBudgetPopover(id, e.currentTarget)}
-        />
-      )}
-
-      {(metric === Metric.outcome || !isMobile) && (
-        <OutcomeCell
-          activity={envelope.totalActivity}
-          displayActivity={envelope.displayActivity}
-          onClick={e => openTransactionsPopover(id)}
-        />
-      )}
-
-      {(metric === Metric.available || !isMobile) && (
-        <AvailableCell
-          hiddenOverspend={envelope.displayHiddenOverspend}
-          id={id}
-          available={envelope.displayAvailable}
+      <RowWrapper isChild={isChild}>
+        <NameCell
+          envelope={envelope.env}
           isChild={isChild}
-          budgeted={envelope.displayBudgeted}
-          isUnsorted={isSelf}
+          isDefaultVisible={envelope.isDefaultVisible}
+          hasCustomCurency={envelope.hasCustomCurency}
+          onClick={handleNameClick}
+          isReordering={isReordering}
+          dropIndicator={false}
         />
-      )}
 
-      {!isSelf && (
-        <GoalButton
-          goal={envelope.goal}
-          goalProgress={envelope.goalProgress}
-          onClick={e => openGoalPopover(id, e.currentTarget)}
-        />
-      )}
+        {(metric === Metric.budgeted || !isMobile) && (
+          <BudgetCell
+            isUnsorted={isSelf}
+            budgeted={envelope.displayBudgeted}
+            showBudget={showBudget}
+            onBudgetClick={e => openBudgetPopover(id, e.currentTarget)}
+          />
+        )}
+
+        {(metric === Metric.outcome || !isMobile) && (
+          <OutcomeCell
+            activity={envelope.totalActivity}
+            displayActivity={envelope.displayActivity}
+            onClick={e => openTransactionsPopover(id)}
+          />
+        )}
+
+        {(metric === Metric.available || !isMobile) && (
+          <AvailableCell
+            hiddenOverspend={envelope.displayHiddenOverspend}
+            id={id}
+            available={envelope.displayAvailable}
+            isChild={isChild}
+            budgeted={envelope.displayBudgeted}
+            isUnsorted={isSelf}
+          />
+        )}
+
+        {!isSelf && (
+          <GoalButton
+            goal={envelope.goal}
+            goalProgress={envelope.goalProgress}
+            onClick={e => openGoalPopover(id, e.currentTarget)}
+          />
+        )}
+      </RowWrapper>
     </Droppable>
   )
 }
@@ -109,28 +111,29 @@ const Droppable: FC<{
   children: React.ReactNode
 }> = props => {
   const { id, isChild, children } = props
-  const { setNodeRef, isOver, active } = useDroppable({
+  const { setNodeRef } = useDroppable({
     id: 'envelope-drop' + id + isChild,
     data: { type: DragTypes.envelope, id },
   })
 
+  return <div ref={setNodeRef}>{children}</div>
+}
+
+const RowWrapper: FC<{
+  children: React.ReactNode
+  isChild: boolean
+}> = props => {
+  const { children, isChild } = props
   const style: SxProps = {
-    // ...rowStyle,
-    // pl: isChild ? 7 : 2,
-    bgcolor: isOver ? 'action.selected' : 'transparent',
+    ...rowStyle,
     position: 'relative',
     transition: '0.1s',
-    '&:hover': { bgcolor: active ? 'none' : 'action.hover' },
+    '&:hover': { bgcolor: 'action.hover' },
     '&:hover .addGoal': { opacity: 1, transition: '.3s' },
     '&:not(:hover) .addGoal': { opacity: 0 },
     '& > *': { py: isChild ? 0.5 : 1 },
   }
-
-  return (
-    <SRowWrapper sx={style} ref={setNodeRef}>
-      {children}
-    </SRowWrapper>
-  )
+  return <Box sx={style}>{children}</Box>
 }
 
 export const CurrencyTag: FC<{ currency?: TFxCode }> = ({ currency }) => {

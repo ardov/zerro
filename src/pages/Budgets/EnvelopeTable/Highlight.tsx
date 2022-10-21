@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { DragEndEvent, DragMoveEvent, useDndMonitor } from '@dnd-kit/core'
 import { Box, SxProps } from '@mui/system'
 import { DragTypes } from '../DnDContext'
@@ -8,7 +8,8 @@ import { TEnvelopeId } from '@shared/types'
 import { moveEnvelope } from '@entities/envelope/moveEnvelope'
 
 const style: SxProps = {
-  bgcolor: 'primary.main',
+  border: '1px solid red',
+  borderColor: 'primary.main',
   transition: '0.1s ease-in-out',
   borderRadius: 1,
   position: 'fixed',
@@ -18,11 +19,13 @@ const style: SxProps = {
   height: 2,
   width: 100,
   zIndex: 100,
+  willChange: 'transform width height',
 }
 
 export function Highlight() {
   const dispatch = useAppDispatch()
   const OFFSET = 100
+  const [isDragging, setIsDragging] = useState(false)
 
   const envelopes = useAppSelector(getEnvelopes)
 
@@ -30,15 +33,16 @@ export function Highlight() {
 
   const onDragMove = useCallback(
     (e: DragMoveEvent) => {
+      const el = boxRef.current
+      if (!el) return
       const activeData = e.active.data.current
-      const overData = e.over?.data.current
       const activeRect = e.active.rect.current.translated
+      const overData = e.over?.data.current
       const overRect = e.over?.rect
       if (
         // has active
         !activeData ||
         !activeData.id ||
-        activeData.type !== DragTypes.envelope ||
         !activeRect ||
         // has over
         !overData ||
@@ -46,22 +50,32 @@ export function Highlight() {
         overData.type !== DragTypes.envelope ||
         !overRect
       ) {
-        if (boxRef?.current?.style) {
-          boxRef.current.style.display = `none`
-        }
+        el.style.display = `none`
         return
       }
-      const overEnv = envelopes[overData.id as TEnvelopeId]
-      const isChild = !!overEnv?.parent
-      const isNested = activeRect.left - overRect.left > OFFSET || isChild
 
-      if (boxRef?.current?.style) {
+      if (activeData.type === DragTypes.envelope) {
+        const overEnv = envelopes[overData.id as TEnvelopeId]
+        const isChild = !!overEnv?.parent
+        const isNested = activeRect.left - overRect.left > OFFSET || isChild
+
         let width = overRect.width - (isNested ? OFFSET : 0)
         let left = overRect.left + (isNested ? OFFSET : 0)
         let top = overRect.top + overRect.height
-        boxRef.current.style.display = `block`
-        boxRef.current.style.width = `${width}px`
-        boxRef.current.style.transform = `translate(${left}px, ${top}px)`
+        el.style.display = `block`
+        el.style.width = `${width}px`
+        el.style.height = `2px`
+        el.style.transform = `translate(${left}px, ${top}px)`
+      }
+
+      if (activeData.type === DragTypes.amount) {
+        const brdr = 4
+        el.style.display = `block`
+        el.style.width = `${overRect.width + brdr * 2}px`
+        el.style.height = `${overRect.height + brdr * 2}px`
+        el.style.transform = `translate(${overRect.left - brdr}px, ${
+          overRect.top - brdr
+        }px)`
       }
     },
     [envelopes]
@@ -69,9 +83,8 @@ export function Highlight() {
 
   const onDragEnd = useCallback(
     (e: DragEndEvent) => {
-      if (boxRef?.current?.style) {
-        boxRef.current.style.display = `none`
-      }
+      setIsDragging(false)
+
       const activeData = e.active.data.current
       const overData = e.over?.data.current
       const activeRect = e.active.rect.current.translated
@@ -100,16 +113,18 @@ export function Highlight() {
   )
 
   const onDragCancel = useCallback(() => {
-    if (boxRef?.current?.style) {
+    setIsDragging(false)
+    if (boxRef.current) {
       boxRef.current.style.display = `none`
     }
   }, [])
 
   useDndMonitor({
+    onDragStart: () => setIsDragging(true),
     onDragMove,
     onDragEnd,
     onDragCancel,
   })
 
-  return <Box ref={boxRef} sx={style} />
+  return isDragging ? <Box ref={boxRef} sx={style} /> : null
 }

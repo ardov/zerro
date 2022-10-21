@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, ReactNode } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import {
   Typography,
@@ -43,7 +43,13 @@ export const NameCell: FC<{
       {/* <Collapse orientation="horizontal" in={isReordering} unmountOnExit>
         <EnvDraggable id={id} />
       </Collapse> */}
-      {isReordering && <EnvDraggable id={id} />}
+      {isReordering && (
+        <EnvDraggable id={id}>
+          <IconButton size="small" sx={envDraggableSx}>
+            <DragIndicatorIcon />
+          </IconButton>
+        </EnvDraggable>
+      )}
 
       <ButtonBase
         sx={{
@@ -90,20 +96,17 @@ const envDraggableSx = {
   cursor: 'grab',
   touchAction: 'none',
 }
-const EnvDraggable: FC<{ id: TEnvelopeId }> = ({ id }) => {
+const EnvDraggable: FC<{ id: TEnvelopeId; children: ReactNode }> = ({
+  id,
+  children,
+}) => {
   const { setNodeRef, attributes, listeners } = useDraggable({
     id: 'envelope' + id,
     data: { type: DragTypes.envelope, id: id },
   })
   return (
-    <IconButton
-      size="small"
-      sx={envDraggableSx}
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-    >
-      <DragIndicatorIcon />
-    </IconButton>
+    <span ref={setNodeRef} {...attributes} {...listeners}>
+      {children}
+    </span>
   )
 }
