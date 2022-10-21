@@ -8,6 +8,7 @@ import { AppThunk, TSelector } from '@store'
 import { prepareDataAccount } from './dataAccount'
 import { parseComment } from './helpers'
 import { HiddenDataType } from './types'
+import { shallowEqual } from 'react-redux'
 
 type TMonthlyStore<TPayload> = {
   type: HiddenDataType
@@ -21,16 +22,20 @@ export function makeMonthlyHiddenStore<TPayload>(
   type: HiddenDataType
 ): TMonthlyStore<TPayload> {
   const getDataReminders: TSelector<Record<TISOMonth, TReminder>> =
-    createSelector([getReminders], reminders => {
-      const result: Record<TISOMonth, TReminder> = {}
-      Object.values(reminders).forEach(r => {
-        const data = parseComment(r.comment)
-        if (data && data.type === type && isISOMonth(data.month)) {
-          result[data.month] = r
-        }
-      })
-      return result
-    })
+    createSelector(
+      [getReminders],
+      reminders => {
+        const result: Record<TISOMonth, TReminder> = {}
+        Object.values(reminders).forEach(r => {
+          const data = parseComment(r.comment)
+          if (data && data.type === type && isISOMonth(data.month)) {
+            result[data.month] = r
+          }
+        })
+        return result
+      },
+      { memoizeOptions: { resultEqualityCheck: shallowEqual } }
+    )
   const getData: TSelector<Record<TISOMonth, TPayload>> = createSelector(
     [getDataReminders],
     reminders => {
