@@ -13,7 +13,7 @@ import { useAppSelector } from '@store'
 import { getMonthList, useMonthList } from '@entities/envelopeData'
 import { MonthInfo } from './MonthInfo'
 import { EnvelopePreview } from './EnvelopePreview'
-import { BudgetTransactionsDrawer } from './TransactionsDrawer'
+import { BudgetTransactionsDrawer, useTrDrawer } from './TransactionsDrawer'
 import { EnvelopeTable } from './EnvelopeTable'
 import { DnDContext } from './DnDContext'
 import { BudgetPopoverProvider } from './BudgetPopover'
@@ -43,6 +43,7 @@ function Budgets() {
   useMonthHotkeys()
   const [month] = useMonth()
   const [drawerId, setDrawerId] = useSearchParam<TDrawerId>('drawer')
+  const { setDrawer } = useTrDrawer()
   const openOverview = useCallback(() => setDrawerId('overview'), [setDrawerId])
   const openEnvelopeInfo = useCallback(
     (id: TEnvelopeId | null) => setDrawerId(id),
@@ -72,6 +73,8 @@ function Budgets() {
       }}
     >
       <EnvelopeTable
+        month={month}
+        onShowTransactions={setDrawer}
         onOpenOverview={openOverview}
         onOpenDetails={openEnvelopeInfo}
       />
@@ -86,8 +89,8 @@ function Budgets() {
         <link rel="canonical" href="https://zerro.app/budget" />
       </Helmet>
 
-      <BudgetPopoverProvider>
-        <GoalPopoverProvider>
+      <BudgetPopoverProvider month={month}>
+        <GoalPopoverProvider month={month}>
           <DnDContext>
             <BudgetLayout
               mainContent={mainContent}

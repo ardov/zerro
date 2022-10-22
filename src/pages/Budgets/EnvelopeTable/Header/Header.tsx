@@ -8,7 +8,6 @@ import {
   MenuItem,
   Button,
 } from '@mui/material'
-import { useMonth } from '@shared/hooks/useMonth'
 import { GoalsProgress } from '@features/bulkActions/fillGoals'
 import { rowStyle } from '../shared/shared'
 import { MonthSelect } from './MonthSelect'
@@ -16,8 +15,10 @@ import { ToBeBudgeted } from './ToBeBudgeted'
 import { Metric } from '../models/useMetric'
 import { usePopover } from '@shared/hooks/useEnvelopePopover'
 import { ChevronDownIcon } from '@shared/ui/Icons'
+import { TISOMonth } from '@shared/types'
 
 type HeaderProps = {
+  month: TISOMonth
   metric: Metric
   isAllShown: boolean
   isReordering: boolean
@@ -28,8 +29,8 @@ type HeaderProps = {
 }
 
 export const Header: FC<HeaderProps> = props => {
-  const [month] = useMonth()
   const {
+    month,
     metric,
     isAllShown,
     isReordering,

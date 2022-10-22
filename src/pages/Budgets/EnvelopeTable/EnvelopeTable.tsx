@@ -1,29 +1,43 @@
-import React, { FC } from 'react'
+import React, { FC, memo } from 'react'
 import { Paper, Typography } from '@mui/material'
-import { TEnvelopeId } from '@shared/types'
-import { useMonth } from '@shared/hooks/useMonth'
+import { TEnvelopeId, TISOMonth } from '@shared/types'
 import { Parent } from './Parent'
 import { Row } from './Row/Row'
 import { Header } from './Header'
 import { rowStyle } from './shared/shared'
-import { useTrDrawer } from '../TransactionsDrawer'
+import { trMode } from '../TransactionsDrawer'
 import { useMetric } from './models/useMetric'
 import { useEnvelopeGroups } from './models/envelopeGroups'
 import { useExpandEnvelopes } from './models/useExpandEnvelopes'
 import { TGroupInfo } from './models/getEnvelopeGroups'
 import { useToggle } from '@shared/hooks/useToggle'
 import { Highlight } from './Highlight'
+import { shallowEqual } from 'react-redux'
 
 type TagTableProps = {
+  month: TISOMonth
+  className?: string
   onOpenDetails: (id: TEnvelopeId) => void
   onOpenOverview: () => void
-  className?: string
+  onShowTransactions: (
+    id: TEnvelopeId | null,
+    opts?:
+      | {
+          mode?: trMode | undefined
+          isExact?: boolean | undefined
+        }
+      | undefined
+  ) => void
 }
 
-export const EnvelopeTable: FC<TagTableProps> = props => {
-  const { onOpenDetails, className, onOpenOverview } = props
-  const { setDrawer } = useTrDrawer()
-  const [month] = useMonth()
+const EnvelopeTable2: FC<TagTableProps> = props => {
+  const {
+    month,
+    className,
+    onOpenDetails,
+    onOpenOverview,
+    onShowTransactions,
+  } = props
   const groups = useEnvelopeGroups(month)
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
   const { metric, toggleMetric } = useMetric()
@@ -42,7 +56,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
               envelope={child}
               metric={metric}
               openTransactionsPopover={() =>
-                setDrawer(child.id, { isExact: true })
+                onShowTransactions(child.id, { isExact: true })
               }
               openDetails={onOpenDetails}
               isBottom={false}
@@ -62,7 +76,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
               <Row
                 envelope={parent}
                 metric={metric}
-                openTransactionsPopover={setDrawer}
+                openTransactionsPopover={onShowTransactions}
                 openDetails={onOpenDetails}
                 isBottom={false}
                 isReordering={reorderMode}
@@ -84,6 +98,7 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
     <>
       <Paper className={className} sx={{ position: 'relative' }}>
         <Header
+          month={month}
           metric={metric}
           isAllShown={showAll}
           isReordering={reorderMode}
@@ -98,6 +113,11 @@ export const EnvelopeTable: FC<TagTableProps> = props => {
     </>
   )
 }
+
+export const EnvelopeTable = memo(
+  (props: TagTableProps) => <EnvelopeTable2 {...props} />,
+  shallowEqual
+)
 
 type TEnvelopeGroupProps = {
   group: TGroupInfo
