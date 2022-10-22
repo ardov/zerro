@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useHistory, useLocation } from 'react-router'
 
 function getModifiedPath(key: string, value?: string | null) {
@@ -14,13 +14,19 @@ export function useSearchParam<T extends string>(
 ): [T | null, (id?: T | null) => void] {
   const history = useHistory()
   const location = useLocation()
+  const hitoryRef = useRef(history)
+
+  useEffect(() => {
+    hitoryRef.current = history
+  }, [history])
+
   let value = new URLSearchParams(location.search).get(key) as T | null
   if (value) value = decodeURIComponent(value) as T
   const setValue = useCallback(
     (id?: T | null) => {
-      history.push(getModifiedPath(key, id))
+      hitoryRef.current.push(getModifiedPath(key, id))
     },
-    [history, key]
+    [hitoryRef, key]
   )
   return [value, setValue]
 }
