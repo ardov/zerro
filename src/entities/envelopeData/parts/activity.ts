@@ -9,6 +9,7 @@ import {
   trDirection,
 } from './getBudgetChanges'
 import { addFxAmount } from '@shared/helpers/money'
+import { withPerf } from '@shared/helpers/performance'
 
 export type TEnvelopeNode = {
   activity: TFxAmount
@@ -28,38 +29,41 @@ export type TMonthActivity = {
 }
 
 export const getActivity: TSelector<Record<TISOMonth, TMonthActivity>> =
-  createSelector([getBudgetChanges, getEnvelopes], (changes, envelopes): Record<
-    TISOMonth,
-    TMonthActivity
-  > => {
-    const result: Record<TISOMonth, TMonthActivity> = {}
+  createSelector(
+    [getBudgetChanges, getEnvelopes],
+    withPerf('getActivity', (changes, envelopes): Record<
+      TISOMonth,
+      TMonthActivity
+    > => {
+      const result: Record<TISOMonth, TMonthActivity> = {}
 
-    changes.forEach(ch => {
-      let date = toISOMonth(ch.date)
-      let month = (result[date] ??= makeMonthInfo(date))
-      month.totalActivity = addFxAmount(month.totalActivity, ch.diff)
+      changes.forEach(ch => {
+        let date = toISOMonth(ch.date)
+        let month = (result[date] ??= makeMonthInfo(date))
+        month.totalActivity = addFxAmount(month.totalActivity, ch.diff)
 
-      if (ch.direction === trDirection.internal) {
-        return addToNode(month.transferFees, ch)
-      }
+        if (ch.direction === trDirection.internal) {
+          return addToNode(month.transferFees, ch)
+        }
 
-      if (ch.direction === trDirection.outcome) {
-        return addToEnvelope(month, ch)
-      }
-
-      if (ch.direction === trDirection.income && ch.envelope) {
-        if (envelopes[ch.envelope].keepIncome) {
+        if (ch.direction === trDirection.outcome) {
           return addToEnvelope(month, ch)
         }
 
-        return addToNode(month.generalIncome, ch)
-      }
+        if (ch.direction === trDirection.income && ch.envelope) {
+          if (envelopes[ch.envelope].keepIncome) {
+            return addToEnvelope(month, ch)
+          }
 
-      throw new Error('Unknown direction: ' + ch.direction)
+          return addToNode(month.generalIncome, ch)
+        }
+
+        throw new Error('Unknown direction: ' + ch.direction)
+      })
+
+      return result
     })
-
-    return result
-  })
+  )
 
 function makeMonthInfo(date: TMonthActivity['date']): TMonthActivity {
   return {

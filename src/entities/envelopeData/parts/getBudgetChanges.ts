@@ -1,5 +1,5 @@
 import { addFxAmount } from '@shared/helpers/money'
-import { getType } from '@entities/transaction/helpers'
+import { getType } from '@entities/transaction'
 import {
   DataEntity,
   TAccountId,
