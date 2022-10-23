@@ -9,9 +9,14 @@ import type {
 } from '@shared/types'
 import { keys } from '@shared/helpers/keys'
 import { addFxAmount, convertFx } from '@shared/helpers/money'
-import { TFxRateData } from '@entities/fxRate'
-import { TEnvelope } from '@entities/envelope'
-import { TMonthActivity } from './parts/activity'
+import { fxRates, TFxRateData } from '@entities/fxRate'
+import { getEnvelopes, TEnvelope } from '@entities/envelope'
+import { getActivity2, TActivity } from './parts/wip-activity'
+import { TSelector } from '@store/index'
+import { createSelector } from '@reduxjs/toolkit'
+import { withPerf } from '@shared/helpers/performance'
+import { getMonthList } from './parts/monthList'
+import { getEnvelopeBudgets } from '@entities/budget'
 
 type TEnvMetrics = {
   id: TEnvelopeId
@@ -35,10 +40,31 @@ type TEnvMetrics = {
   totalAvailable: TFxAmount
 }
 
-export function calcEnvMetrics(
+const getRatesByMonth: TSelector<ByMonth<TFxRateData>> = createSelector(
+  [getMonthList, fxRates.getter],
+  withPerf('getRatesByMonth', (months, getter) => {
+    const res: ByMonth<TFxRateData> = {}
+    months.forEach(month => (res[month] = getter(month)))
+    return res
+  })
+)
+
+export const getEnvMetrics: TSelector<Record<TISOMonth, ById<TEnvMetrics>>> =
+  createSelector(
+    [
+      getMonthList,
+      getEnvelopes,
+      getActivity2,
+      getEnvelopeBudgets,
+      getRatesByMonth,
+    ],
+    withPerf('🖤 getEnvMetrics', calcEnvMetrics)
+  )
+
+function calcEnvMetrics(
   monthList: TISOMonth[],
   envelopes: ById<TEnvelope>,
-  activity: ByMonth<TMonthActivity>,
+  activity: TActivity,
   budgets: ByMonth<Record<TEnvelopeId, number>>,
   rates: ByMonth<TFxRateData>
 ) {
@@ -60,6 +86,8 @@ export function calcEnvMetrics(
     prevMetrics = metrics
   })
 
+  console.log(result)
+
   return result
 
   function calcEnv(
@@ -70,7 +98,14 @@ export function calcEnvMetrics(
   ) {
     const env = envelopes[id]
     const fx = env.currency
-    const envActivity = activity?.[month]?.envelopes?.[id] || {}
+    const envOutcome = activity?.[month]?.outcome?.[id] || {}
+    const envIncome = activity?.[month]?.income?.[id] || {}
+    const selfActivity = env.keepIncome
+      ? addFxAmount(envOutcome.total || {}, envIncome.total || {})
+      : envOutcome.total || {}
+    const transactions = env.keepIncome
+      ? (envOutcome.transactions || []).concat(envIncome.transactions || [])
+      : envOutcome.transactions || []
     const budgetedValue = budgets?.[month]?.[id] || 0
 
     // Children metrics
@@ -100,7 +135,7 @@ export function calcEnvMetrics(
     // Self metrics
     const selfLeftover = prevMetrics[id]?.selfAvailable || zero(fx)
     const selfBudgeted = { [fx]: budgetedValue }
-    const selfActivity = envActivity?.activity || zero(fx)
+    // const selfActivity = envActivity?.activity || zero(fx)
     const selfAvailableRaw = addFxAmount(
       selfLeftover,
       selfBudgeted,
@@ -114,7 +149,7 @@ export function calcEnvMetrics(
     const res: TEnvMetrics = {
       id,
       currency: fx,
-      transactions: envActivity?.transactions || [],
+      transactions,
 
       selfLeftover,
       selfBudgeted,
