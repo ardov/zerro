@@ -1,62 +1,33 @@
 import { createSelector } from '@reduxjs/toolkit'
-import {
-  ById,
-  ByMonth,
-  TEnvelopeId,
-  TFxAmount,
-  TFxCode,
-  TISOMonth,
-} from '@shared/types'
-import { keys } from '@shared/helpers/keys'
+import { shallowEqual } from 'react-redux'
+import { ById, ByMonth, TFxAmount, TISOMonth } from '@shared/types'
 import { toISOMonth } from '@shared/helpers/date'
-import {
-  getCalculatedEnvelopes,
-  IEnvelopeWithData,
-} from '../calculateEnvelopes'
-import { getUserCurrencyCode } from '@entities/instrument'
-import {
-  addFxAmount,
-  convertFx,
-  isEqualFxAmount,
-  subFxAmount,
-} from '@shared/helpers/money'
+import { addFxAmount, subFxAmount } from '@shared/helpers/money'
+import { withPerf } from '@shared/helpers/performance'
 import { TSelector } from '@store'
 
-import { fxRates, TFxRateData } from '@entities/fxRate'
-import { TFxRates } from '@entities/fxRate/fxRateStore'
-import { withPerf } from '@shared/helpers/performance'
-import { getEnvMetrics, TEnvMetrics } from './3 - calcEnvMetrics'
 import { getCurrentFunds } from './1 - currentFunds'
 import { getMonthList } from './1 - monthList'
 import { getActivity, TActivityNode } from './2 - activity'
-import { shallowEqual } from 'react-redux'
+import { getEnvMetrics, TEnvMetrics } from './3 - calcEnvMetrics'
 
 export type TMonthTotals = {
   month: TISOMonth
-  // currency: TFxCode // display currency
-  // rates: TFxRates // Currency rates for this month
-  // envelopes: Record<TEnvelopeId, IEnvelopeWithData> // Amounts for each envelope
-
   // Money amounts for month
   fundsStart: TFxAmount
   fundsChange: TFxAmount
   fundsEnd: TFxAmount
-
   // Detailed money movements
   transferFees: TFxAmount // Transfer fees
   generalIncome: TFxAmount // Unsorted income
   envActivity: TFxAmount // Transactions associated with envelopes
-
   // Envelope totals
   budgeted: TFxAmount
   available: TFxAmount
 
   budgetedInFuture: TFxAmount // Total amount of money budgeted in future months
-
   freeFunds: TFxAmount
-
   toBeBudgeted: TFxAmount
-
   overspend: TFxAmount
 }
 
@@ -77,13 +48,17 @@ function calcMonthTotals(
   const monthListReversed = [...months].reverse()
 
   let prev = monthListReversed[0]
-  monthListReversed.forEach(month => {
+  monthListReversed.forEach((month, idx) => {
     const isFuture = month > currentMonth
     const isCurrent = month === currentMonth
+    const prevMonth = result[prev] || {}
+
+    if (idx === 0) {
+      console.assert(isFuture || isCurrent, 'Last month is in the past')
+    }
 
     // Funds part
-    let fundsEnd =
-      isFuture || isCurrent ? currentFunds : result[prev].fundsStart
+    let fundsEnd = isFuture || isCurrent ? currentFunds : prevMonth.fundsStart
     let fundsChange = activity[month]?.total || {}
     let fundsStart = subFxAmount(fundsEnd, fundsChange)
 
@@ -100,9 +75,17 @@ function calcMonthTotals(
 
     let budgeted = {}
     let available = {}
+    Object.values(envMetrics[month]).forEach(metrics => {
+      budgeted = addFxAmount(budgeted, metrics.selfBudgeted)
+      available = addFxAmount(available, metrics.selfAvailable)
+    })
 
-    let budgetedInFuture = {}
-    let freeFunds = {}
+    let budgetedInFuture = addFxAmount(
+      prevMonth.budgeted || {},
+      prevMonth.budgetedInFuture || {}
+    )
+
+    let freeFunds = subFxAmount(fundsEnd, available)
     let toBeBudgeted = {}
     let overspend = {}
 
@@ -126,23 +109,4 @@ function calcMonthTotals(
   console.log(result)
 
   return result
-}
-
-function makeTotals(month: TISOMonth) {
-  return {
-    month,
-    fundsStart: {},
-    fundsChange: {},
-    fundsEnd: {},
-    transferFees: {},
-    generalIncome: {},
-    envActivity: {},
-    budgeted: {},
-    available: {},
-    budgetedInFuture: {},
-    freeFunds: {},
-    toBeBudgetedFx: {},
-    toBeBudgeted: 0,
-    overspend: {},
-  }
 }
