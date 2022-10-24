@@ -9,7 +9,7 @@ import { TSelector } from '@store'
 import { getCurrentFunds } from './1 - currentFunds'
 import { getMonthList } from './1 - monthList'
 import { getActivity, TActivityNode } from './2 - activity'
-import { getEnvMetrics, TEnvMetrics } from './3 - calcEnvMetrics'
+import { getEnvMetrics, TEnvMetrics } from './3 - envMetrics'
 
 export type TMonthTotals = {
   month: TISOMonth

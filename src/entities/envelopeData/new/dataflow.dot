@@ -1,0 +1,69 @@
+// Chart made in graphwiz https://graphviz.org/
+// VS Code extention https://marketplace.visualstudio.com/items?itemName=joaompinto.vscode-graphviz
+
+digraph G {
+// splines="FALSE";
+rankdir=LR;
+pad=0.5;
+edge [
+  fontname="'Fira Code', monospace"
+  color="#8a8e9b"
+]
+node [
+  fontname="'Fira Code', monospace",
+  shape="box",
+  style="filled,rounded"
+  width=2.5
+]
+
+{
+  node [color="#c4e5fe"]
+  rank=same;
+  getInBudgetAccounts
+  getEnvelopes
+  getTransactionsHistory
+  getEnvelopeBudgets
+  getDebtAccountId
+  getDebtors
+  getInstruments
+  fxRatesGetter
+}
+
+
+subgraph INSTRUMENTS { //cluster_
+  style="filled,rounded"
+  color="#e8e8e8";
+
+  node [color="#ffcccc"] // Results
+  getInBudgetAccounts -> getCurrentFunds
+
+  getEnvelopes -> getKeepingEnvelopes
+
+  getTransactionsHistory -> getFirstMonth -> getMonthList
+  getEnvelopeBudgets -> getLastMonth -> getMonthList
+
+  getTransactionsHistory -> getRawActivity
+  getInBudgetAccounts -> getRawActivity
+  getDebtAccountId -> getRawActivity
+  getDebtors -> getRawActivity
+  getInstruments -> getRawActivity
+
+  getKeepingEnvelopes -> getActivity
+  getRawActivity -> getActivity
+
+  fxRatesGetter -> getRatesByMonth
+  getMonthList -> getRatesByMonth
+
+  getMonthList -> getEnvMetrics
+  getEnvelopes -> getEnvMetrics
+  getActivity -> getEnvMetrics
+  getEnvelopeBudgets -> getEnvMetrics
+  getRatesByMonth -> getEnvMetrics
+
+  getMonthList -> getMonthTotals
+  getCurrentFunds -> getMonthTotals
+  getActivity -> getMonthTotals
+  getEnvMetrics -> getMonthTotals
+}
+
+}
