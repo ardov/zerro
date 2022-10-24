@@ -1,3 +1,4 @@
+import { createSelector } from '@reduxjs/toolkit'
 import type {
   ById,
   TTransaction,
@@ -9,17 +10,19 @@ import type {
 } from '@shared/types'
 import { keys } from '@shared/helpers/keys'
 import { addFxAmount, convertFx } from '@shared/helpers/money'
-import { fxRates, TFxRateData } from '@entities/fxRate'
-import { getEnvelopes, TEnvelope } from '@entities/envelope'
-import { getActivity2, TActivity } from './parts/wip-activity'
-import { TSelector } from '@store/index'
-import { createSelector } from '@reduxjs/toolkit'
 import { withPerf } from '@shared/helpers/performance'
-import { getMonthList } from './parts/monthList'
-import { getEnvelopeBudgets } from '@entities/budget'
+import { TSelector } from '@store/index'
 
-type TEnvMetrics = {
+import { getEnvelopes, TEnvelope } from '@entities/envelope'
+import { getEnvelopeBudgets } from '@entities/budget'
+import { TFxRateData } from '@entities/fxRate'
+import { getMonthList } from './1 - monthList'
+import { getRatesByMonth } from './2 - rates'
+import { getActivity, TActivityNode } from './2 - activity'
+
+export type TEnvMetrics = {
   id: TEnvelopeId
+  name: string
   currency: TFxCode
   transactions: TTransaction[]
   // Self metrics
@@ -40,21 +43,12 @@ type TEnvMetrics = {
   totalAvailable: TFxAmount
 }
 
-const getRatesByMonth: TSelector<ByMonth<TFxRateData>> = createSelector(
-  [getMonthList, fxRates.getter],
-  withPerf('getRatesByMonth', (months, getter) => {
-    const res: ByMonth<TFxRateData> = {}
-    months.forEach(month => (res[month] = getter(month)))
-    return res
-  })
-)
-
-export const getEnvMetrics: TSelector<Record<TISOMonth, ById<TEnvMetrics>>> =
+export const getEnvMetrics: TSelector<ByMonth<ById<TEnvMetrics>>> =
   createSelector(
     [
       getMonthList,
       getEnvelopes,
-      getActivity2,
+      getActivity,
       getEnvelopeBudgets,
       getRatesByMonth,
     ],
@@ -64,7 +58,7 @@ export const getEnvMetrics: TSelector<Record<TISOMonth, ById<TEnvMetrics>>> =
 function calcEnvMetrics(
   monthList: TISOMonth[],
   envelopes: ById<TEnvelope>,
-  activity: TActivity,
+  activity: ByMonth<TActivityNode>,
   budgets: ByMonth<Record<TEnvelopeId, number>>,
   rates: ByMonth<TFxRateData>
 ) {
@@ -86,8 +80,6 @@ function calcEnvMetrics(
     prevMetrics = metrics
   })
 
-  console.log(result)
-
   return result
 
   function calcEnv(
@@ -96,46 +88,37 @@ function calcEnvMetrics(
     metrics: ById<TEnvMetrics>,
     prevMetrics: ById<TEnvMetrics>
   ) {
-    const env = envelopes[id]
-    const fx = env.currency
-    const envOutcome = activity?.[month]?.outcome?.[id] || {}
-    const envIncome = activity?.[month]?.income?.[id] || {}
-    const selfActivity = env.keepIncome
-      ? addFxAmount(envOutcome.total || {}, envIncome.total || {})
-      : envOutcome.total || {}
-    const transactions = env.keepIncome
-      ? (envOutcome.transactions || []).concat(envIncome.transactions || [])
-      : envOutcome.transactions || []
-    const budgetedValue = budgets?.[month]?.[id] || 0
+    const { currency, children, name, carryNegatives } = envelopes[id]
 
-    // Children metrics
-    const childrenLeftover = env.children.reduce(
-      (sum, id) => addFxAmount(metrics[id].selfLeftover, sum),
-      {}
-    )
-    const childrenBudgeted = env.children.reduce(
-      (sum, id) => addFxAmount(metrics[id].selfBudgeted, sum),
-      {}
-    )
-    const childrenActivity = env.children.reduce(
-      (sum, id) => addFxAmount(metrics[id].selfActivity, sum),
-      {}
-    )
-    const childrenSurplus = env.children.reduce((sum, id) => {
-      const { selfAvailable, currency } = metrics[id]
-      if (selfAvailable[currency] > 0) return addFxAmount(selfAvailable, sum)
-      return sum
-    }, {})
-    const childrenOverspend = env.children.reduce((sum, id) => {
-      const { selfAvailable, currency } = metrics[id]
-      if (selfAvailable[currency] < 0) return addFxAmount(selfAvailable, sum)
-      return sum
-    }, {})
+    // Placeholders for children metrics
+    let childrenLeftover = {} as TFxAmount
+    let childrenBudgeted = {} as TFxAmount
+    let childrenActivity = {} as TFxAmount
+    let childrenSurplus = {} as TFxAmount
+    let childrenOverspend = {} as TFxAmount
+
+    // Fill children metrics
+    children.forEach(id => {
+      const ch = metrics[id]
+      childrenLeftover = addFxAmount(childrenLeftover, ch.selfLeftover)
+      childrenBudgeted = addFxAmount(childrenBudgeted, ch.selfBudgeted)
+      childrenActivity = addFxAmount(childrenActivity, ch.selfActivity)
+      if (ch.selfAvailable[ch.currency] > 0) {
+        childrenSurplus = addFxAmount(childrenSurplus, ch.selfAvailable)
+      } else {
+        childrenOverspend = addFxAmount(childrenOverspend, ch.selfAvailable)
+      }
+    })
 
     // Self metrics
-    const selfLeftover = prevMetrics[id]?.selfAvailable || zero(fx)
-    const selfBudgeted = { [fx]: budgetedValue }
-    // const selfActivity = envActivity?.activity || zero(fx)
+    const selfLeftover = getLeftover(
+      prevMetrics[id]?.selfAvailable,
+      currency,
+      carryNegatives
+    )
+    const selfBudgeted = { [currency]: budgets?.[month]?.[id] || 0 }
+    const selfActivity =
+      activity?.[month]?.envActivity?.byEnv?.[id]?.total || {}
     const selfAvailableRaw = addFxAmount(
       selfLeftover,
       selfBudgeted,
@@ -143,12 +126,16 @@ function calcEnvMetrics(
       childrenOverspend
     )
     const selfAvailable = {
-      [fx]: convertFx(selfAvailableRaw, fx, rates[month].rates),
+      [currency]: convertFx(selfAvailableRaw, currency, rates[month].rates),
     }
+
+    const transactions =
+      activity?.[month]?.envActivity?.byEnv?.[id]?.transactions || []
 
     const res: TEnvMetrics = {
       id,
-      currency: fx,
+      name,
+      currency,
       transactions,
 
       selfLeftover,
@@ -167,10 +154,24 @@ function calcEnvMetrics(
       totalActivity: addFxAmount(selfActivity, childrenActivity),
       totalAvailable: addFxAmount(selfAvailable, childrenSurplus),
     }
+
     return res
   }
 }
 
+/** Create zero TFxAmount */
 function zero(fx: TFxCode): TFxAmount {
   return { [fx]: 0 }
+}
+
+/** Returns leftover depending on envelope settings */
+function getLeftover(
+  prevAvailable: TFxAmount | undefined,
+  currency: TFxCode,
+  carryNegatives: boolean
+): TFxAmount {
+  if (!prevAvailable) return zero(currency)
+  if ((prevAvailable[currency] || 0) >= 0) return prevAvailable
+  if (carryNegatives) return prevAvailable
+  return zero(currency)
 }

@@ -29,25 +29,25 @@ type TActivityNode = {
   trend: TFxAmount[]
   transactions: TTransaction[]
 }
-export type TMonthNode = {
+export type TRawActivityNode = {
   internal: TActivityNode
   income: Record<TEnvelopeId, TActivityNode>
   outcome: Record<TEnvelopeId, TActivityNode>
 }
-export type TActivity = ByMonth<TMonthNode>
 
-export const getActivity2: TSelector<TActivity> = createSelector(
-  [
-    getTransactionsHistory,
-    getInBudgetAccounts,
-    getDebtAccountId,
-    getDebtors,
-    getInstruments,
-  ],
-  withPerf('🖤 getActivity', getActivityFn)
-)
+export const getRawActivity: TSelector<ByMonth<TRawActivityNode>> =
+  createSelector(
+    [
+      getTransactionsHistory,
+      getInBudgetAccounts,
+      getDebtAccountId,
+      getDebtors,
+      getInstruments,
+    ],
+    withPerf('🖤 getRawActivity', getRawActivityFn)
+  )
 
-function getActivityFn(
+function getRawActivityFn(
   transactions: TTransaction[],
   inBudgetAccsPop: IAccountPopulated[],
   debtAccId: TAccountId | undefined,
@@ -55,7 +55,7 @@ function getActivityFn(
   instruments: ById<TInstrument>
 ) {
   const inBudgetAccs = inBudgetAccsPop.map(acc => acc.id)
-  const res: TActivity = {}
+  const res: ByMonth<TRawActivityNode> = {}
   transactions.forEach(addTransaction)
   return res
 
@@ -145,7 +145,7 @@ function makeActivityNode(): TActivityNode {
   }
 }
 
-function makeMonthNode(): TMonthNode {
+function makeMonthNode(): TRawActivityNode {
   return {
     internal: makeActivityNode(),
     income: {},
