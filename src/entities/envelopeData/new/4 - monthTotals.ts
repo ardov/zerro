@@ -76,8 +76,10 @@ function calcMonthTotals(
     let budgeted = {}
     let available = {}
     Object.values(envMetrics[month]).forEach(metrics => {
-      budgeted = addFxAmount(budgeted, metrics.selfBudgeted)
-      available = addFxAmount(available, metrics.selfAvailable)
+      if (!metrics.parent) {
+        budgeted = addFxAmount(budgeted, metrics.totalBudgeted)
+        available = addFxAmount(available, metrics.totalAvailable)
+      }
     })
 
     let budgetedInFuture = addFxAmount(
@@ -104,6 +106,7 @@ function calcMonthTotals(
       toBeBudgeted,
       overspend,
     }
+    prev = month
   })
 
   console.log(result)

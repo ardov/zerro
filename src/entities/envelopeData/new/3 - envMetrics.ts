@@ -21,9 +21,12 @@ import { getRatesByMonth } from './2 - rates'
 import { getActivity, TActivityNode } from './2 - activity'
 
 export type TEnvMetrics = {
-  id: TEnvelopeId
-  name: string
-  currency: TFxCode
+  id: TEnvelope['id']
+  name: TEnvelope['name']
+  parent: TEnvelope['parent']
+  children: TEnvelope['children']
+  currency: TEnvelope['currency']
+
   transactions: TTransaction[]
   // Self metrics
   selfLeftover: TFxAmount
@@ -88,7 +91,7 @@ function calcEnvMetrics(
     metrics: ById<TEnvMetrics>,
     prevMetrics: ById<TEnvMetrics>
   ) {
-    const { currency, children, name, carryNegatives } = envelopes[id]
+    const { currency, children, name, carryNegatives, parent } = envelopes[id]
 
     // Placeholders for children metrics
     let childrenLeftover = {} as TFxAmount
@@ -135,6 +138,8 @@ function calcEnvMetrics(
     const res: TEnvMetrics = {
       id,
       name,
+      children,
+      parent,
       currency,
       transactions,
 

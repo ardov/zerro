@@ -18,8 +18,6 @@ import { getEnvelopes, TEnvelope } from '@entities/envelope'
 import { getActivity, TEnvelopeNode, TMonthActivity } from './parts/activity'
 import { getMonthList } from './parts/monthList'
 import { withPerf } from '@shared/helpers/performance'
-import { getEnvMetrics } from './new/3 - calcEnvMetrics'
-import { getMonthTotals } from './new/4 - monthTotals'
 
 function makeEnvelopeWithData(e: TEnvelope) {
   return {
@@ -106,7 +104,6 @@ export const getCalculatedEnvelopes: TSelector<
     getEnvelopeBudgets,
     fxRates.getter,
     getGoals,
-    getMonthTotals,
   ],
   withPerf('🤡getCalculatedEnvelopes', aggregateEnvelopeBudgets)
 )
@@ -117,8 +114,7 @@ function aggregateEnvelopeBudgets(
   activity: ByMonth<TMonthActivity>,
   budgets: ByMonth<{ [id: TEnvelopeId]: number }>,
   getRates: (month: TISOMonth) => TFxRateData,
-  goals: ByMonth<Record<TEnvelopeId, TGoal | null>>,
-  h: any
+  goals: ByMonth<Record<TEnvelopeId, TGoal | null>>
 ) {
   const result: ByMonth<ById<IEnvelopeWithData>> = {}
 

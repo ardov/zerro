@@ -15,9 +15,9 @@ export function sub(first: number, ...params: number[]): number {
 
 export function addFxAmount(...amounts: TFxAmount[]): TFxAmount {
   return amounts.reduce((acc, curr) => {
-    keys(curr).forEach(fx => {
-      acc[fx] = add(acc[fx] || 0, curr[fx] || 0)
-    })
+    for (const fx in curr) {
+      acc[fx] = add(acc[fx] || 0, curr[fx])
+    }
     return acc
   }, {} as TFxAmount)
 }
