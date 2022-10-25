@@ -18,6 +18,8 @@ import { fxRates, TFxRateData } from '@entities/fxRate'
 import { TFxRates } from '@entities/fxRate/fxRateStore'
 import { withPerf } from '@shared/helpers/performance'
 
+import { getMonthTotals as newMonthTotals } from '../envBalances/4 - monthTotals'
+
 export type TMonthTotals = {
   month: TISOMonth
   currency: TFxCode // display currency
@@ -51,6 +53,7 @@ export type TMonthTotals = {
 export const getMonthTotals: TSelector<Record<TISOMonth, TMonthTotals>> =
   createSelector(
     [
+      newMonthTotals,
       getMonthList,
       getCalculatedEnvelopes,
       getActivity,
@@ -62,6 +65,7 @@ export const getMonthTotals: TSelector<Record<TISOMonth, TMonthTotals>> =
   )
 
 function aggregateEnvelopeBudgets(
+  n: any,
   monthList: TISOMonth[],
   envelopes: Record<TISOMonth, ById<IEnvelopeWithData>>,
   activity: Record<TISOMonth, TMonthActivity>,
@@ -116,6 +120,47 @@ function aggregateEnvelopeBudgets(
     result[date].budgetedInFuture = { ...budgetedInFuture }
     budgetedInFuture = addFxAmount(budgetedInFuture, result[date].budgeted)
   })
+
+  const m = '2022-10'
+  const a = result[m]
+  const b = n[m]
+
+  console.assert(isEqualFxAmount(a.budgeted, b.budgeted), 'not equal budgeted')
+  console.assert(
+    isEqualFxAmount(a.budgetedInFuture, b.budgetedInFuture),
+    'not equal budgetedInFuture',
+    { old: a.budgetedInFuture, new: b.budgetedInFuture }
+  )
+  console.assert(
+    isEqualFxAmount(a.fundsChange, b.fundsChange),
+    'not equal fundsChange',
+    { old: a.fundsChange, new: b.fundsChange }
+  )
+  console.assert(
+    isEqualFxAmount(a.fundsEnd, b.fundsEnd),
+    'not equal fundsEnd',
+    { old: a.fundsEnd, new: b.fundsEnd }
+  )
+  console.assert(
+    isEqualFxAmount(a.freeFunds, b.freeFunds),
+    'not equal freeFunds',
+    { old: a.freeFunds, new: b.freeFunds }
+  )
+  console.assert(
+    isEqualFxAmount(a.transferFees, b.transferFees),
+    'not equal transferFees',
+    { old: a.transferFees, new: b.transferFees }
+  )
+  console.assert(
+    isEqualFxAmount(a.available, b.available),
+    'not equal available',
+    { old: a.available, new: b.available }
+  )
+  console.assert(
+    isEqualFxAmount(a.activity, b.envActivity),
+    'not equal activity',
+    { old: a.activity, new: b.envActivity }
+  )
 
   return result
 }
