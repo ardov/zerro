@@ -270,13 +270,14 @@ function createMonth(
     totals.transferFees,
     totals.generalIncome
   )
-  if (!isEqualFxAmount(totals.fundsChange, totalChange))
-    console.log(
-      `🛑 ${month} Error in calculations`,
-      totals.fundsChange,
-      totalChange,
-      totals
-    )
+
+  console.assert(
+    isEqualFxAmount(totals.fundsChange, totalChange),
+    `🛑 ${month} Error in calculations`,
+    totals.fundsChange,
+    totalChange,
+    totals
+  )
 
   return totals
 }

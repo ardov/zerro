@@ -124,7 +124,7 @@ const DemoSankeyNode: FC<SankeyNodeProps> = ({
   payload,
   containerWidth,
 }) => {
-  if (isNaN(y)) console.log('payload', payload)
+  console.assert(!isNaN(y), 'Y is NaN', payload)
   const isOut = x + width + 6 > containerWidth
   return (
     <Layer key={`CustomNode${index}`}>

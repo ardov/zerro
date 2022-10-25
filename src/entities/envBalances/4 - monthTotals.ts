@@ -109,7 +109,5 @@ function calcMonthTotals(
     prev = month
   })
 
-  console.log(result)
-
   return result
 }
