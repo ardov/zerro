@@ -5,11 +5,10 @@ import { TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
 import Rhythm from '@shared/ui/Rhythm'
 import { DataLine } from '@shared/ui/DataLine'
 import { formatDate } from '@shared/helpers/date'
-import { keys } from '@shared/helpers/keys'
 import { convertFx } from '@shared/helpers/money'
 import { useMonth } from '@shared/hooks/useMonth'
-import { useAppSelector } from '@store'
-import { getMonthTotals } from '@entities/envelopeData'
+
+import { balances } from '@entities/envBalances'
 
 type ActivityWidgetProps = BoxProps & { id: TEnvelopeId }
 
@@ -19,15 +18,16 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
 }) => {
   const [month, setMonth] = useMonth()
   const [highlighted, setHighlighted] = useState(month)
-  const totals = useAppSelector(getMonthTotals)
-  const { currency } = totals[month].envelopes[id].env
-  const dates = keys(totals)
+  const rates = balances.useRates()
+  const envData = balances.useEnvData()
+  const dates = balances.useMonthList()
+  const { currency } = envData[month][id]
   const dateRange = getDateRange(dates, 12, month)
 
   const data = dateRange.map(month => {
-    const envelope = totals[month].envelopes[id]
+    const envelope = envData[month][id]
     const toEnvelope = (a: TFxAmount) =>
-      convertFx(a, currency, totals[month].rates)
+      convertFx(a, currency, rates[month].rates)
     let activity = toEnvelope(envelope.totalActivity)
     let leftover = toEnvelope(envelope.totalLeftover)
     let budgeted = toEnvelope(envelope.totalBudgeted)

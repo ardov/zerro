@@ -7,11 +7,12 @@ import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
 import { formatDate } from '@shared/helpers/date'
 import { useMonth } from '@shared/hooks/useMonth'
 import { nextMonth, prevMonth } from '@shared/helpers/date'
-import { useMonthList } from '@entities/envelopeData'
+
+import { balances } from '@entities/envBalances'
 
 export const MonthSelect: FC<BoxProps> = props => {
   const [month, setMonth] = useMonth()
-  const list = useMonthList()
+  const list = balances.useMonthList()
   const first = list[0]
   const last = list[list.length - 1]
 

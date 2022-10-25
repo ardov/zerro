@@ -7,10 +7,12 @@ import { TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
 import { DataLine } from '@shared/ui/DataLine'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { useAppSelector } from '@store/index'
-import { getMonthTotals, getTotalChanges } from '@entities/envelopeData'
+import { getTotalChanges } from '@entities/envelopeData'
 import { useDisplayCurrency } from '@entities/instrument/hooks'
 import { trMode, useTrDrawer } from './TransactionsDrawer'
 import { ChangesChart } from './ChangesChart'
+import { balances } from '@entities/envBalances'
+import { getEnvelopes } from '@entities/envelope'
 
 type DataPoint = {
   id: TEnvelopeId
@@ -27,8 +29,8 @@ export function StatWidget(props: {
   const { setDrawer } = useTrDrawer()
   const showIncome = props.mode === 'income'
   const displayCurrency = useDisplayCurrency()
-  const totals = useAppSelector(getMonthTotals)[props.month]
-  const { rates } = totals
+  const rates = balances.useRates()[props.month].rates
+  const envelopes = useAppSelector(getEnvelopes)
   const changes = useAppSelector(getTotalChanges)[props.month]
   const [opened, toggleOpened] = useToggle(false)
   const toDisplay = (a: TFxAmount) => convertFx(a, displayCurrency, rates)
@@ -47,11 +49,9 @@ export function StatWidget(props: {
     data.push({
       id,
       amount,
-      color:
-        totals.envelopes[id].env.color ||
-        totals.envelopes[id].env.colorGenerated,
-      keepIncome: totals.envelopes[id].env.keepIncome,
-      name: totals.envelopes[id].env.name,
+      color: envelopes[id].color || envelopes[id].colorGenerated,
+      keepIncome: envelopes[id].keepIncome,
+      name: envelopes[id].name,
     })
   })
   data.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))

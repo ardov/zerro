@@ -19,14 +19,12 @@ import { useMonth } from '@shared/hooks/useMonth'
 import { TEnvelopeId, TFxAmount } from '@shared/types'
 import { convertFx } from '@shared/helpers/money'
 import { DataLine } from '@shared/ui/DataLine'
-import { useAppDispatch } from '@store'
-import {
-  IEnvelopeWithData,
-  useEnvelope,
-  useRates,
-} from '@entities/envelopeData'
+
+import { useAppDispatch, useAppSelector } from '@store'
+import { useEnvelope } from '@entities/envelopeData'
 import { goalToWords } from '@entities/goal'
-import { patchEnvelope } from '@entities/envelope'
+import { balances } from '@entities/envBalances'
+import { getEnvelopes, patchEnvelope, TEnvelope } from '@entities/envelope'
 import { useBudgetPopover } from '../BudgetPopover'
 import { EnvelopeEditDialog } from '../EnvelopeEditDialog'
 import { ActivityWidget } from './ActivityWidget'
@@ -43,25 +41,26 @@ type EnvelopePreviewProps = {
 export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   const [month] = useMonth()
   const { setDrawer } = useTrDrawer()
-  const rates = useRates(month)
+  const rates = balances.useRates()[month].rates
+  const envMetrics = balances.useEnvData()[month][id]
+  const env = useAppSelector(getEnvelopes)[id]
 
-  const envelope = useEnvelope(month, id)
-  const { goal } = envelope
-  const { currency } = envelope.env
+  const { goal } = useEnvelope(month, id)
+  const { currency } = envMetrics
 
   const toEnvelope = (a: TFxAmount) => convertFx(a, currency, rates)
 
-  const totalLeftover = toEnvelope(envelope.totalLeftover)
-  const totalBudgeted = toEnvelope(envelope.totalBudgeted)
-  const totalActivity = toEnvelope(envelope.totalActivity)
-  const totalAvailable = toEnvelope(envelope.totalAvailable)
+  const totalLeftover = toEnvelope(envMetrics.totalLeftover)
+  const totalBudgeted = toEnvelope(envMetrics.totalBudgeted)
+  const totalActivity = toEnvelope(envMetrics.totalActivity)
+  const totalAvailable = toEnvelope(envMetrics.totalAvailable)
   const openBudgetPopover = useBudgetPopover()
   const openGoalPopover = useGoalPopover()
 
   return (
     <>
       <Box position="relative">
-        <Header envelope={envelope} onClose={onClose} />
+        <Header envelope={env} onClose={onClose} />
 
         <Grid container spacing={2} px={3} pt={3}>
           <Grid item xs={12}>
@@ -130,10 +129,10 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
 }
 
 const Header: FC<{
-  envelope: IEnvelopeWithData
+  envelope: TEnvelope
   onClose: () => void
 }> = ({ envelope, onClose }) => {
-  const { symbol, color, name } = envelope.env
+  const { symbol, color, name } = envelope
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
   const [showEditor, toggleEditor] = useToggle()
   const dispatch = useAppDispatch()
@@ -186,7 +185,7 @@ const Header: FC<{
         key={envelope.id}
         open={showEditor}
         onClose={toggleEditor}
-        envelope={envelope.env}
+        envelope={envelope}
       />
     </Box>
   )

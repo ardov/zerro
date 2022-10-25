@@ -12,9 +12,9 @@ import { useToggle } from '@shared/hooks/useToggle'
 import { TEnvelopeId } from '@shared/types'
 import { Box, SxProps } from '@mui/system'
 import { useAppSelector } from '@store/index'
-import { getMonthTotals } from '@entities/envelopeData'
 import { Typography } from '@mui/material'
 import { createPortal } from 'react-dom'
+import { getEnvelopes } from '@entities/envelope'
 
 export enum DragTypes {
   amount = 'amount',
@@ -85,11 +85,9 @@ const props: SxProps = {
 }
 
 const DragObj = () => {
-  const [month] = useMonth()
   const [activeType, setActiveType] = useState<DragTypes>(DragTypes.amount)
   const [activeId, setActiveId] = useState<TEnvelopeId>()
-  const totals = useAppSelector(getMonthTotals)[month]
-  const env = activeId && totals.envelopes[activeId]
+  const envelopes = useAppSelector(getEnvelopes)
 
   useDndMonitor({
     onDragStart(e) {
@@ -105,7 +103,9 @@ const DragObj = () => {
       <Box sx={props}>Денюшки</Box>
     ) : activeType === DragTypes.envelope ? (
       <Box sx={props}>
-        <Typography noWrap>{env?.env?.name || 'Конверт'}</Typography>
+        <Typography noWrap>
+          {activeId ? envelopes[activeId].name : 'Конверт'}
+        </Typography>
       </Box>
     ) : null
 

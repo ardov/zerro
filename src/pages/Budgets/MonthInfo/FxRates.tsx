@@ -1,5 +1,4 @@
 import React, { FC, useEffect, useState } from 'react'
-import { useAppDispatch, useAppSelector } from '@store'
 import {
   Box,
   Button,
@@ -9,21 +8,22 @@ import {
   Typography,
 } from '@mui/material'
 import { TFxCode, TISOMonth } from '@shared/types'
-import { useDisplayCurrency } from '@entities/instrument/hooks'
-import { getMonthTotals } from '@entities/envelopeData'
-import { fxRates, TFxRates } from '@entities/fxRate'
 import { keys } from '@shared/helpers/keys'
 import { useDebouncedCallback } from '@shared/hooks/useDebouncedCallback'
 import { useToggle } from '@shared/hooks/useToggle'
 import { formatDate } from '@shared/helpers/date'
 
+import { useAppDispatch } from '@store'
+import { useDisplayCurrency } from '@entities/instrument/hooks'
+import { fxRates, TFxRates } from '@entities/fxRate'
+import { balances } from '@entities/envBalances'
+
 export const FxRates: FC<{ month: TISOMonth }> = props => {
   const dispatch = useAppDispatch()
   const { month } = props
-  const totals = useAppSelector(getMonthTotals)[month]
   const displayCurrency = useDisplayCurrency()
-  const funds = totals.fundsEnd
-  const rateData = useAppSelector(fxRates.getter)(month)
+  const funds = balances.useTotals()[month].fundsEnd
+  const rateData = balances.useRates()[month]
 
   const currencies = keys(funds)
     .map(code => {

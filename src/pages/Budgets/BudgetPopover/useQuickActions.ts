@@ -1,37 +1,38 @@
-import { getMonthTotals } from '@entities/envelopeData'
 import { convertFx, round } from '@shared/helpers/money'
 import { toISOMonth } from '@shared/helpers/date'
 import pluralize from '@shared/helpers/pluralize'
 import { TDateDraft, TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
-import { useAppSelector } from '@store'
+
+import { balances } from '@entities/envBalances'
 
 export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
-  const totals = useAppSelector(getMonthTotals)
+  const rates = balances.useRates()[month].rates
+  const envMetrics = balances.useEnvData()
   if (!id) return []
-  const monthInfo = totals[month]
-  const envelope = totals[month]?.envelopes[id]
+
+  const envelope = envMetrics[month][id]
   if (!envelope) return []
-  const envelopeCurrency = envelope.env.currency
+  const currency = envelope.currency
 
   const convert = (a: TFxAmount | null) =>
-    a ? convertFx(a, envelopeCurrency, monthInfo.rates) : 0
+    a ? convertFx(a, currency, rates) : 0
 
   const prevMonth = getPrevMonth(month)
-  const prevEnvelopeData = totals[prevMonth]?.envelopes[id]
+  const prevEnvelopeData = envMetrics[prevMonth]?.[id]
 
   let prevActivity: number[] = getPrev12MonthsISO(month)
-    .map(month => totals?.[month]?.envelopes[id]?.totalActivity)
+    .map(month => envMetrics?.[month]?.[id]?.totalActivity)
     .filter(outcome => outcome !== undefined)
     .map(convert)
 
   return getQuickActions({
-    hasChildren: envelope.env.children.length > 0,
-    budgeted: envelope.selfBudgetedValue,
+    hasChildren: envelope.children.length > 0,
+    budgeted: convert(envelope.selfBudgeted),
     totalBudgeted: convert(envelope.totalBudgeted),
-    available: envelope.selfAvailableValue,
+    available: convert(envelope.selfAvailable),
     totalAvailable: convert(envelope.totalAvailable),
-    hasGoal: !!envelope.goal,
-    goalTarget: envelope.goalTarget || 0,
+    hasGoal: false, // TODO !!envelope.goal,
+    goalTarget: 0, // TODO envelope.goalTarget || 0,
     prevOutcomesLength: prevActivity.length,
     avgOutcome: getAverage(prevActivity),
     prevBudgeted: convert(prevEnvelopeData?.totalBudgeted || {}),

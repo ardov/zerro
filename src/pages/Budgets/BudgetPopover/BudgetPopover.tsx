@@ -1,5 +1,4 @@
 import React, { FC, useEffect, useState } from 'react'
-import { useAppDispatch } from '@store'
 import {
   List,
   ListItemButton,
@@ -9,17 +8,19 @@ import {
   IconButton,
   PopoverProps,
 } from '@mui/material'
+import { Box, BoxProps } from '@mui/system'
 import { CheckCircleIcon } from '@shared/ui/Icons'
 import { AmountInput } from '@shared/ui/AmountInput'
 import { formatMoney } from '@shared/helpers/money'
 import { convertFx } from '@shared/helpers/money'
 import { sendEvent } from '@shared/helpers/tracking'
-import { Box, BoxProps } from '@mui/system'
 import { TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
-import { useQuickActions } from './useQuickActions'
-import { useMonthTotals, useRates } from '@entities/envelopeData'
+
+import { useAppDispatch } from '@store'
 import { setEnvelopeBudgets } from '@entities/budget'
 import { useDisplayCurrency } from '@entities/instrument/hooks'
+import { balances } from '@entities/envBalances'
+import { useQuickActions } from './useQuickActions'
 
 type TBudgetPopoverProps = PopoverProps & {
   id: TEnvelopeId
@@ -41,11 +42,11 @@ const BudgetPopoverContent: FC<TBudgetPopoverProps> = props => {
   const quickActions = useQuickActions(month, id)
   const displayCurrency = useDisplayCurrency()
   const dispatch = useAppDispatch()
-  const rates = useRates(month)
-  const envelope = useMonthTotals(month).envelopes[id]
+  const rates = balances.useRates()[month].rates
+  const envelope = balances.useEnvData()[month][id]
 
   const currency = {
-    env: envelope.env.currency, // Envelope currency
+    env: envelope.currency, // Envelope currency
     disp: displayCurrency, // Display currency
   }
   /** Functions to convert amounts */
@@ -120,9 +121,7 @@ const BudgetPopoverContent: FC<TBudgetPopoverProps> = props => {
         placeholder="0"
         InputProps={{
           startAdornment: (
-            <InputAdornment position="start">
-              {envelope.env.currency}
-            </InputAdornment>
+            <InputAdornment position="start">{currency.env}</InputAdornment>
           ),
           endAdornment: (
             <InputAdornment position="end">
