@@ -7,6 +7,7 @@ import { getEnvMetrics } from './3 - envMetrics'
 import { getMonthTotals } from './4 - monthTotals'
 
 export type { TRawActivityNode } from './1 - rawActivity'
+export type { TActivityNode } from './2 - activity'
 export type { TEnvMetrics } from './3 - envMetrics'
 export type { TMonthTotals } from './4 - monthTotals'
 

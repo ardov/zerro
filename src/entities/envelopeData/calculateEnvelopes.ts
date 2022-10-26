@@ -13,7 +13,7 @@ import { keys } from '@shared/helpers/keys'
 import { addFxAmount, convertFx, round } from '@shared/helpers/money'
 import { fxRates, TFxRateData, TFxRates } from '@entities/fxRate'
 import { getEnvelopeBudgets } from '@entities/budget'
-import { calculateGoalProgress, getGoals, TGoal } from '@entities/goal'
+import { calculateGoalProgress, getRawGoals, TGoal } from '@entities/goal'
 import { getEnvelopes, TEnvelope } from '@entities/envelope'
 import { getActivity, TEnvelopeNode, TMonthActivity } from './parts/activity'
 import { getMonthList } from './parts/monthList'
@@ -103,7 +103,7 @@ export const getCalculatedEnvelopes: TSelector<
     getActivity,
     getEnvelopeBudgets,
     fxRates.getter,
-    getGoals,
+    getRawGoals,
   ],
   withPerf('🤡getCalculatedEnvelopes', aggregateEnvelopeBudgets)
 )

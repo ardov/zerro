@@ -1,6 +1,10 @@
 export type { TGoal } from './types'
+export type { TGoals } from './goalStore'
+export type { GoalProgress } from './goalProgress'
+export type { TGoalInfo } from './getGoals'
 
-export { getGoals } from './goalStore'
+export { getGoals } from './getGoals'
+export { getRawGoals } from './goalStore'
 export { setGoal } from './setGoal'
 export { goalToWords } from './helpers'
 export { calculateGoalProgress } from './goalProgress'

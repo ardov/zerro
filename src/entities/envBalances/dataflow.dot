@@ -27,6 +27,7 @@ node [
   getDebtors
   getInstruments
   fxRatesGetter
+  getGoals
 }
 
 
@@ -59,6 +60,12 @@ subgraph INSTRUMENTS { //cluster_
   getActivity -> getEnvMetrics
   getEnvelopeBudgets -> getEnvMetrics
   getRatesByMonth -> getEnvMetrics
+
+  getMonthList -> getGoalsState
+  getEnvMetrics -> getGoalsState
+  getGoals -> getGoalsState
+  getActivity -> getGoalsState
+  getRatesByMonth -> getGoalsState
 
   getMonthList -> getMonthTotals
   getCurrentFunds -> getMonthTotals
