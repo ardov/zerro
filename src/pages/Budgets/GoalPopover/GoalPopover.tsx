@@ -15,7 +15,7 @@ import { CloseIcon } from '@shared/ui/Icons'
 import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
 import { toISODate, formatDate } from '@shared/helpers/date'
 import { TDateDraft, TEnvelopeId, TISOMonth } from '@shared/types'
-import { goalType, setGoal, TGoal } from '@entities/goal'
+import { goalModel, goalType, TGoal } from '@entities/goal'
 import { useMonthTotals } from '@entities/envelopeData'
 
 const amountLabels = {
@@ -76,12 +76,12 @@ const GoalPopoverContent: FC<TGoalPopoverProps> = props => {
       if (type === goalType.TARGET_BALANCE && endDate) {
         goal.end = endDate
       }
-      dispatch(setGoal(month, id, goal))
+      dispatch(goalModel.set(month, id, goal))
     }
     onClose?.({}, 'escapeKeyDown')
   }
   const removeGoal = () => {
-    dispatch(setGoal(month, id, null))
+    dispatch(goalModel.set(month, id, null))
     onClose?.({}, 'escapeKeyDown')
   }
 

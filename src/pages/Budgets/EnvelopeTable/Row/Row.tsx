@@ -16,7 +16,7 @@ import { WarningIcon, AddIcon, EmojiFlagsIcon } from '@shared/ui/Icons'
 import { RadialProgress } from '@shared/ui/RadialProgress'
 import { Amount } from '@shared/ui/Amount'
 import { TEnvelopeId, TFxAmount, TFxCode } from '@shared/types'
-import { goalToWords, TGoal } from '@entities/goal'
+import { goalModel, TGoal } from '@entities/goal'
 import { DragTypes } from '../../DnDContext'
 import { rowStyle } from '../shared/shared'
 import { Metric } from '../models/useMetric'
@@ -309,7 +309,7 @@ const GoalButton: FC<GoalButtonProps> = props => {
 
   return (
     <span>
-      <Tooltip title={goalToWords(goal)}>
+      <Tooltip title={goalModel.toWords(goal)}>
         <IconButton size="small" onClick={onClick}>
           <RadialProgress value={goalProgress || 0} fontSize="inherit" />
         </IconButton>

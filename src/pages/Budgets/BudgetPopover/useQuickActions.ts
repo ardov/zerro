@@ -4,10 +4,12 @@ import pluralize from '@shared/helpers/pluralize'
 import { TDateDraft, TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
 
 import { balances } from '@entities/envBalances'
+import { goalModel } from '@entities/goal'
 
 export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
   const rates = balances.useRates()[month].rates
   const envMetrics = balances.useEnvData()
+  const goals = goalModel.useGoals()[month]
   if (!id) return []
 
   const envelope = envMetrics[month][id]
@@ -31,8 +33,8 @@ export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
     totalBudgeted: convert(envelope.totalBudgeted),
     available: convert(envelope.selfAvailable),
     totalAvailable: convert(envelope.totalAvailable),
-    hasGoal: false, // TODO !!envelope.goal,
-    goalTarget: 0, // TODO envelope.goalTarget || 0,
+    hasGoal: !!goals[id],
+    goalTarget: goals[id]?.state.target || 0,
     prevOutcomesLength: prevActivity.length,
     avgOutcome: getAverage(prevActivity),
     prevBudgeted: convert(prevEnvelopeData?.totalBudgeted || {}),

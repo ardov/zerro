@@ -22,7 +22,6 @@ import { DataLine } from '@shared/ui/DataLine'
 
 import { useAppDispatch, useAppSelector } from '@store'
 import { useEnvelope } from '@entities/envelopeData'
-import { goalToWords } from '@entities/goal'
 import { balances } from '@entities/envBalances'
 import { getEnvelopes, patchEnvelope, TEnvelope } from '@entities/envelope'
 import { useBudgetPopover } from '../BudgetPopover'
@@ -32,6 +31,7 @@ import { CommentWidget } from './CommentWidget'
 import { cardStyle } from './shared'
 import { useGoalPopover } from '../GoalPopover'
 import { useTrDrawer } from '../TransactionsDrawer'
+import { goalModel } from '@entities/goal'
 
 type EnvelopePreviewProps = {
   id: TEnvelopeId
@@ -84,7 +84,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
                 component="span"
                 color={goal ? 'text.primary' : 'text.hint'}
               >
-                {goal ? goalToWords(goal) : 'Цель'}
+                {goal ? goalModel.toWords(goal) : 'Цель'}
               </Typography>
             </ButtonBase>
           </Grid>
