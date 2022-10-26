@@ -16,8 +16,8 @@ import {
   makeBudget,
 } from '../entities/budget/tagBudget'
 import { budgetStore } from '../entities/budget/envelopeBudgets/budgetStore'
-import { getMonthTotals } from '@entities/envelopeData'
 import { convertFx, sub } from '@shared/helpers/money'
+import { balances } from '@entities/envBalances'
 
 export type TEnvBudgetUpdate = {
   id: TEnvelopeId
@@ -30,7 +30,10 @@ export function setEnvelopeBudgets(
 ): AppThunk {
   return (dispatch, getState) => {
     const updates = Array.isArray(upd) ? upd : [upd]
-    const totals = getMonthTotals(getState())
+    const state = getState()
+
+    const rateData = balances.rates(state)
+    const envMetrics = balances.envData(state)
 
     const tagUpdates: TTagBudgetUpdate[] = []
     const envelopeUpdates: TEnvBudgetUpdate[] = []
@@ -51,15 +54,10 @@ export function setEnvelopeBudgets(
     dispatch(setTagBudget(tagUpdates))
     dispatch(setEnvBudget(envelopeUpdates))
 
-    /**
-     * Adjusts budget depending on children budgets.
-     */
+    /** Adjusts budget depending on children budgets */
     function adjustValue(u: TEnvBudgetUpdate): TEnvBudgetUpdate {
-      const monthTotals = totals[u.month]
-      if (!monthTotals) return u
-      const { childrenBudgeted } = monthTotals.envelopes[u.id]
-      const { currency } = monthTotals.envelopes[u.id].env
-      const rates = monthTotals.rates
+      const { childrenBudgeted, currency } = envMetrics[u.month][u.id]
+      const { rates } = rateData[u.month]
       const childrenValue = convertFx(childrenBudgeted, currency, rates)
       return { ...u, value: sub(u.value, childrenValue) }
     }

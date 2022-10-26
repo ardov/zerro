@@ -26,6 +26,7 @@ export type TEnvMetrics = {
   parent: TEnvelope['parent']
   children: TEnvelope['children']
   currency: TEnvelope['currency']
+  carryNegatives: TEnvelope['carryNegatives']
 
   transactions: TTransaction[]
   // Self metrics
@@ -142,6 +143,7 @@ function calcEnvMetrics(
       parent,
       currency,
       transactions,
+      carryNegatives,
 
       selfLeftover,
       selfBudgeted,
