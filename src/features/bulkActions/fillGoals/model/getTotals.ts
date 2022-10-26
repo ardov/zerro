@@ -16,6 +16,7 @@ export const getTotals: TSelector<Record<TISOMonth, TGoalTotals>> =
     })
     return result
   })
+
 function calcGoalTotals(month: TMonthTotals) {
   let target: TFxAmount = {} // How much money should be budgeted
   let need: TFxAmount = {} // How much money still needed to fill goals
@@ -50,6 +51,7 @@ function calcGoalTotals(month: TMonthTotals) {
     goalsCount,
   }
 }
+
 function getProgress(target: number, need: number): number {
   if (target > 0) return (target - need) / target
   if (target === 0 && need < 0) return 0

@@ -3,8 +3,8 @@ import { round } from '@shared/helpers/money'
 import { getGoals } from '@entities/old-hiddenData/goals'
 import { getAmountsById } from './getAmountsByTag'
 import { getMonthDates } from './getMonthDates'
-import { goalType } from '@entities/old-hiddenData/constants'
-import { TGoal, TISODate, TISOMonth } from '@shared/types'
+import { oldGoalType } from '@entities/old-hiddenData/constants'
+import { TOldGoal, TISODate, TISOMonth } from '@shared/types'
 import { RootState, TSelector } from '@store'
 import { getTagMeta } from '@entities/old-hiddenData/tagMeta'
 import { convertCurrency } from '@entities/instrument'
@@ -12,7 +12,7 @@ import { keys } from '@shared/helpers/keys'
 import { differenceInCalendarMonths } from '@shared/helpers/date'
 import { TTagId } from '@shared/types'
 
-const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
+const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = oldGoalType
 
 /**
  * Goal progress per month
@@ -99,8 +99,8 @@ export const getTotalGoalsProgress: TSelector<
 > = createSelector([getGoals, getGoalsProgress], (goals, goalsProgress) => {
   let result: Record<TISOMonth, GoalProgress | null> = {}
 
-  const isCounted = (goal: TGoal) => goal.type !== TARGET_BALANCE || goal.end
-  let countedGoals: { [id: string]: TGoal } = {}
+  const isCounted = (goal: TOldGoal) => goal.type !== TARGET_BALANCE || goal.end
+  let countedGoals: { [id: string]: TOldGoal } = {}
   let hasCountedGoals = false
   for (const id in goals) {
     if (isCounted(goals[id])) {

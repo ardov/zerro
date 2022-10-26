@@ -5,12 +5,12 @@ import { makeGoal } from './helpers'
 import { getRawGoals } from '../selectors'
 import { setHiddenData } from '../thunks'
 import { AppThunk, RootState } from '@store'
-import { TGoal, TTagId } from '@shared/types'
+import { TOldGoal, TTagId } from '@shared/types'
 import { getTags } from '@entities/tag'
 
 // THUNKS
 export const setGoal =
-  ({ type, amount, end, tag }: TGoal & { tag: TTagId }): AppThunk =>
+  ({ type, amount, end, tag }: TOldGoal & { tag: TTagId }): AppThunk =>
   (dispatch, getState) => {
     const state = getState()
     const goals = getRawGoals(state)
@@ -55,7 +55,7 @@ export const deleteGoal =
 export const getGoals = createSelector(
   [getRawGoals, getTags],
   (rawGoals, tags) => {
-    let goals: Record<TTagId, TGoal> = {}
+    let goals: Record<TTagId, TOldGoal> = {}
     for (const tag in rawGoals) {
       if (rawGoals[tag] && tags[tag]) goals[tag] = rawGoals[tag]
     }
