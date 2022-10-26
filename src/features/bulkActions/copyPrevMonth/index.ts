@@ -1,9 +1,12 @@
 import { sendEvent } from '@shared/helpers/tracking'
-import { setEnvelopeBudgets, TBudgetUpdate } from '@entities/budget'
 import { AppThunk } from '@store'
 import { TISOMonth } from '@shared/types'
 import { prevMonth, toISOMonth } from '@shared/helpers/date'
 import { balances } from '@entities/envBalances'
+import {
+  setEnvelopeBudgets,
+  TEnvBudgetUpdate,
+} from '@features/setEnvelopeBudget'
 
 export const copyPreviousBudget =
   (month: TISOMonth): AppThunk<void> =>
@@ -15,7 +18,7 @@ export const copyPreviousBudget =
 
     if (!curr || !prev) return
 
-    const updates: TBudgetUpdate[] = []
+    const updates: TEnvBudgetUpdate[] = []
     Object.values(prev).forEach(({ id, currency, selfBudgeted }) => {
       let prevVal = selfBudgeted[currency]
       let currVal = curr[id].selfBudgeted[currency]

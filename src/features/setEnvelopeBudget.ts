@@ -10,8 +10,12 @@ import { AppThunk } from '@store'
 import { applyClientPatch } from '@store/data'
 import { parseEnvelopeId } from '@entities/envelope'
 import { getRootUser } from '@entities/user'
-import { getBudgetId, getBudgets, makeBudget } from '../tagBudget'
-import { budgetStore } from './budgetStore'
+import {
+  getBudgetId,
+  getBudgets,
+  makeBudget,
+} from '../entities/budget/tagBudget'
+import { budgetStore } from '../entities/budget/envelopeBudgets/budgetStore'
 import { getMonthTotals } from '@entities/envelopeData'
 import { convertFx, sub } from '@shared/helpers/money'
 

@@ -1,5 +1,8 @@
-import { setEnvelopeBudgets, TBudgetUpdate } from '@entities/budget'
 import { getMonthTotals } from '@entities/envelopeData'
+import {
+  setEnvelopeBudgets,
+  TEnvBudgetUpdate,
+} from '@features/setEnvelopeBudget'
 import { convertFx, round } from '@shared/helpers/money'
 import { sendEvent } from '@shared/helpers/tracking'
 import { TISOMonth, TEnvelopeId } from '@shared/types'
@@ -18,7 +21,7 @@ export const moveMoney =
     const state = getState()
     const { envelopes, currency, rates } = getMonthTotals(state)[month]
 
-    const updates: TBudgetUpdate[] = []
+    const updates: TEnvBudgetUpdate[] = []
 
     if (source !== 'toBeBudgeted') {
       const envelope = envelopes[source]

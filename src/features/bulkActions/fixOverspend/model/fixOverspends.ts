@@ -1,4 +1,4 @@
-import { setEnvelopeBudgets } from '@entities/budget'
+import { setEnvelopeBudgets } from '@features/setEnvelopeBudget'
 import { round } from '@shared/helpers/money'
 import { sendEvent } from '@shared/helpers/tracking'
 import { TISOMonth } from '@shared/types'

@@ -17,10 +17,10 @@ import { sendEvent } from '@shared/helpers/tracking'
 import { TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
 
 import { useAppDispatch } from '@store'
-import { setEnvelopeBudgets } from '@entities/budget'
 import { useDisplayCurrency } from '@entities/instrument/hooks'
 import { balances } from '@entities/envBalances'
 import { useQuickActions } from './useQuickActions'
+import { setEnvelopeBudgets } from '@features/setEnvelopeBudget'
 
 type TBudgetPopoverProps = PopoverProps & {
   id: TEnvelopeId

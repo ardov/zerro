@@ -1,9 +1,13 @@
 import { sendEvent } from '@shared/helpers/tracking'
-import { setEnvelopeBudgets, TBudgetUpdate } from '@entities/budget'
+
 import { AppThunk } from '@store'
 import { TISOMonth } from '@shared/types'
 import { prevMonth, toISOMonth } from '@shared/helpers/date'
 import { getMonthTotals } from '@entities/envelopeData'
+import {
+  setEnvelopeBudgets,
+  TEnvBudgetUpdate,
+} from '@features/setEnvelopeBudget'
 
 export const startFresh =
   (month: TISOMonth): AppThunk<void> =>
@@ -30,7 +34,7 @@ export const removeFutureBudgets =
           .filter(e => e.selfBudgetedValue)
           .map(e => ({ id: e.id, value: 0, month: monthTotals.month }))
           .concat(updates)
-      }, [] as Array<TBudgetUpdate>)
+      }, [] as Array<TEnvBudgetUpdate>)
     dispatch(setEnvelopeBudgets(updates))
   }
 
