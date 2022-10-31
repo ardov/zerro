@@ -55,7 +55,9 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
 
   const [amount, setAmount] = useState(suggestedAmount)
   const handleSubmit = () => {
-    if (amount) dispatch(moveMoney(amount, source, destination, month))
+    if (amount) {
+      dispatch(moveMoney(amount, totals.currency, source, destination, month))
+    }
     onClose()
   }
 
