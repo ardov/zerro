@@ -16,8 +16,8 @@ import Rhythm from '@shared/ui/Rhythm'
 import { DataLine } from '@shared/ui/DataLine'
 import { ArrowForwardIcon } from '@shared/ui/Icons'
 
-import { useDisplayCurrency } from '@entities/displayCurrency'
-import { useDisplayValue, useMonthTotals } from '@entities/envelopeData'
+import { useDisplayCurrency, useToDisplay } from '@entities/displayCurrency'
+import { useMonthTotals } from '@entities/envelopeData'
 import { balances } from '@entities/envBalances'
 
 type TMsgType = 'error' | 'warning' | 'success'
@@ -79,7 +79,7 @@ function useTotalsModel() {
   const [month] = useMonth()
 
   const [currency] = useDisplayCurrency()
-  const toDisplay = useDisplayValue(month)
+  const toDisplay = useToDisplay(month)
 
   const monthList = balances.useMonthList()
   const lastMonth = monthList[monthList.length - 1]

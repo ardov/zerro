@@ -21,9 +21,9 @@ import { convertFx } from '@shared/helpers/money'
 import { DataLine } from '@shared/ui/DataLine'
 
 import { useAppDispatch, useAppSelector } from '@store'
-import { useEnvelope } from '@entities/envelopeData'
-import { balances } from '@entities/envBalances'
 import { getEnvelopes, patchEnvelope, TEnvelope } from '@entities/envelope'
+import { balances } from '@entities/envBalances'
+import { goalModel } from '@entities/goal'
 import { useBudgetPopover } from '../BudgetPopover'
 import { EnvelopeEditDialog } from '../EnvelopeEditDialog'
 import { ActivityWidget } from './ActivityWidget'
@@ -31,7 +31,6 @@ import { CommentWidget } from './CommentWidget'
 import { cardStyle } from './shared'
 import { useGoalPopover } from '../GoalPopover'
 import { useTrDrawer } from '../TransactionsDrawer'
-import { goalModel } from '@entities/goal'
 
 type EnvelopePreviewProps = {
   id: TEnvelopeId
@@ -45,7 +44,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   const envMetrics = balances.useEnvData()[month][id]
   const env = useAppSelector(getEnvelopes)[id]
 
-  const { goal } = useEnvelope(month, id)
+  const goalInfo = goalModel.useGoals()[month][id]
   const { currency } = envMetrics
 
   const toEnvelope = (a: TFxAmount) => convertFx(a, currency, rates)
@@ -82,9 +81,9 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
                 variant="body1"
                 textAlign="left"
                 component="span"
-                color={goal ? 'text.primary' : 'text.hint'}
+                color={goalInfo ? 'text.primary' : 'text.hint'}
               >
-                {goal ? goalModel.toWords(goal) : 'Цель'}
+                {goalInfo ? goalModel.toWords(goalInfo.goal) : 'Цель'}
               </Typography>
             </ButtonBase>
           </Grid>

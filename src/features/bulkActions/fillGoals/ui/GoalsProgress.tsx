@@ -44,6 +44,7 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const { need, target, progress } = totalProgress
   const targetValue = toDisplay(target)
   const needValue = toDisplay(need)
+  if (!targetValue || !needValue) return null
 
   // All completed
   // if (totalProgress.progress === 1) {

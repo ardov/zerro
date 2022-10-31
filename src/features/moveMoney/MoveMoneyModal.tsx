@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from '@store'
 import { Modify, TISOMonth, TEnvelopeId } from '@shared/types'
 import { getMonthTotals } from '@entities/envelopeData'
 import { convertFx } from '@shared/helpers/money'
+import { useDisplayCurrency } from '@entities/displayCurrency'
 
 export type MoveMoneyModalProps = Modify<
   DialogProps,
@@ -24,6 +25,7 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   const { open, onClose, source, month, destination } = props
 
   const totals = useAppSelector(getMonthTotals)[month]
+  const [currency] = useDisplayCurrency()
 
   const sourceName =
     source === 'toBeBudgeted'
@@ -39,7 +41,7 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
       ? totals.toBeBudgeted
       : convertFx(
           totals.envelopes[source].selfAvailable,
-          totals.currency,
+          currency,
           totals.rates
         )
   const destinationValue =
@@ -47,7 +49,7 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
       ? totals.toBeBudgeted
       : convertFx(
           totals.envelopes[destination].selfAvailable,
-          totals.currency,
+          currency,
           totals.rates
         )
 
@@ -56,7 +58,7 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   const [amount, setAmount] = useState(suggestedAmount)
   const handleSubmit = () => {
     if (amount) {
-      dispatch(moveMoney(amount, totals.currency, source, destination, month))
+      dispatch(moveMoney(amount, currency, source, destination, month))
     }
     onClose()
   }
