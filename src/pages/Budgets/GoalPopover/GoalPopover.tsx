@@ -1,5 +1,4 @@
 import React, { useState, FC } from 'react'
-import { useAppDispatch } from '@store'
 import {
   Box,
   Popover,
@@ -15,9 +14,9 @@ import { CloseIcon } from '@shared/ui/Icons'
 import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
 import { toISODate, formatDate } from '@shared/helpers/date'
 import { TDateDraft, TEnvelopeId, TISOMonth } from '@shared/types'
+import { useAppDispatch } from '@store'
 
 import { goalModel, goalType, TGoal } from '@entities/goal'
-import { useMonthTotals } from '@entities/envelopeData'
 
 const amountLabels = {
   [goalType.MONTHLY]: 'Откладывать каждый месяц',
@@ -44,9 +43,8 @@ export const GoalPopover: FC<
 const GoalPopoverContent: FC<TGoalPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
   const dispatch = useAppDispatch()
-  const envelope = useMonthTotals(month).envelopes[id]
-  const { goal } = envelope
-  const { currency } = envelope.env
+  const goalInfo = goalModel.useGoals()[month][id]
+  const { goal, currency } = goalInfo
 
   const [type, setType] = useState(goal?.type || goalType.MONTHLY_SPEND)
   const isInPercents = type === goalType.INCOME_PERCENT

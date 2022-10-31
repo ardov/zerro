@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { shallowEqual } from 'react-redux'
 import { ById, ByMonth, TFxAmount, TISOMonth } from '@shared/types'
 import { toISOMonth } from '@shared/helpers/date'
-import { addFxAmount, subFxAmount } from '@shared/helpers/money'
+import { addFxAmount, convertFx, subFxAmount } from '@shared/helpers/money'
 import { withPerf } from '@shared/helpers/performance'
 import { TSelector } from '@store'
 
@@ -10,6 +10,10 @@ import { getCurrentFunds } from './1 - currentFunds'
 import { getMonthList } from './1 - monthList'
 import { getActivity, TActivityNode } from './2 - activity'
 import { getEnvMetrics, TEnvMetrics } from './3 - envMetrics'
+import { getRatesByMonth } from './2 - rates'
+import { TFxRateData, TFxRates } from '@entities/fxRate'
+
+type TToBeBudgetedState = 'positive' | 'allocated' | 'negative'
 
 export type TMonthTotals = {
   month: TISOMonth
@@ -27,12 +31,13 @@ export type TMonthTotals = {
 
   budgetedInFuture: TFxAmount // Total amount of money budgeted in future months
   freeFunds: TFxAmount
-  // toBeBudgeted: TFxAmount
+  toBeBudgeted: TFxAmount
+  toBeBudgetedState: TToBeBudgetedState
   overspend: TFxAmount
 }
 
 export const getMonthTotals: TSelector<ByMonth<TMonthTotals>> = createSelector(
-  [getMonthList, getCurrentFunds, getActivity, getEnvMetrics],
+  [getMonthList, getCurrentFunds, getActivity, getEnvMetrics, getRatesByMonth],
   withPerf('🖤 getMonthTotals', calcMonthTotals)
 )
 
@@ -40,7 +45,8 @@ function calcMonthTotals(
   months: TISOMonth[],
   currentFunds: TFxAmount,
   activity: ByMonth<TActivityNode>,
-  envMetrics: ByMonth<ById<TEnvMetrics>>
+  envMetrics: ByMonth<ById<TEnvMetrics>>,
+  rates: ByMonth<TFxRateData>
 ) {
   const result: ByMonth<TMonthTotals> = {}
 
@@ -93,7 +99,11 @@ function calcMonthTotals(
     )
 
     let freeFunds = subFxAmount(fundsEnd, available)
-    // let toBeBudgeted = {}
+    let toBeBudgetedInfo = calcToBeBudgeted(
+      freeFunds,
+      budgetedInFuture,
+      rates[month].rates
+    )
 
     result[month] = {
       month,
@@ -107,11 +117,25 @@ function calcMonthTotals(
       available,
       budgetedInFuture,
       freeFunds,
-      // toBeBudgeted,
+      toBeBudgeted: toBeBudgetedInfo.value,
+      toBeBudgetedState: toBeBudgetedInfo.state,
       overspend,
     }
     prev = month
   })
 
   return result
+}
+
+function calcToBeBudgeted(
+  freeNow: TFxAmount,
+  needForFuture: TFxAmount,
+  rates: TFxRates
+): { value: TFxAmount; state: TToBeBudgetedState } {
+  const withFuture = subFxAmount(freeNow, needForFuture)
+  const withFutureValue = convertFx(withFuture, 'USD', rates)
+  const freeNowValue = convertFx(freeNow, 'USD', rates)
+  if (freeNowValue < 0) return { value: freeNow, state: 'negative' }
+  if (withFutureValue > 0) return { value: withFuture, state: 'positive' }
+  return { value: {}, state: 'allocated' }
 }

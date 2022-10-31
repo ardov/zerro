@@ -1,14 +1,15 @@
 import React, { FC, useState } from 'react'
+import { Box, InputAdornment, IconButton, Chip } from '@mui/material'
 import Dialog, { DialogProps } from '@mui/material/Dialog'
 import { AmountInput } from '@shared/ui/AmountInput'
 import { ArrowForwardIcon, ArrowRightAltIcon } from '@shared/ui/Icons'
-import { Box, InputAdornment, IconButton, Chip } from '@mui/material'
-import { moveMoney } from './moveMoney'
-import { useAppDispatch, useAppSelector } from '@store'
 import { Modify, TISOMonth, TEnvelopeId } from '@shared/types'
-import { getMonthTotals } from '@entities/envelopeData'
-import { convertFx } from '@shared/helpers/money'
-import { useDisplayCurrency } from '@entities/displayCurrency'
+import { useAppDispatch, useAppSelector } from '@store'
+
+import { useDisplayCurrency, useToDisplay } from '@entities/displayCurrency'
+import { getEnvelopes } from '@entities/envelope'
+import { balances } from '@entities/envBalances'
+import { moveMoney } from './moveMoney'
 
 export type MoveMoneyModalProps = Modify<
   DialogProps,
@@ -24,34 +25,28 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   const dispatch = useAppDispatch()
   const { open, onClose, source, month, destination } = props
 
-  const totals = useAppSelector(getMonthTotals)[month]
+  const envelopes = useAppSelector(getEnvelopes)
+  const metrics = balances.useEnvData()[month]
+  const totalMetrics = balances.useTotals()[month]
+  // const totals = useAppSelector(getMonthTotals)[month]
   const [currency] = useDisplayCurrency()
+  const toDisplay = useToDisplay(month)
 
   const sourceName =
-    source === 'toBeBudgeted'
-      ? 'To be budgeted'
-      : totals.envelopes[source].env.name
+    source === 'toBeBudgeted' ? 'To be budgeted' : envelopes[source].name
   const destinationName =
     destination === 'toBeBudgeted'
       ? 'To be budgeted'
-      : totals.envelopes[destination].env.name
+      : envelopes[destination].name
 
   const sourceValue =
     source === 'toBeBudgeted'
-      ? totals.toBeBudgeted
-      : convertFx(
-          totals.envelopes[source].selfAvailable,
-          currency,
-          totals.rates
-        )
+      ? toDisplay(totalMetrics.toBeBudgeted)
+      : toDisplay(metrics[source].selfAvailable)
   const destinationValue =
     destination === 'toBeBudgeted'
-      ? totals.toBeBudgeted
-      : convertFx(
-          totals.envelopes[destination].selfAvailable,
-          currency,
-          totals.rates
-        )
+      ? toDisplay(totalMetrics.toBeBudgeted)
+      : toDisplay(metrics[destination].selfAvailable)
 
   const suggestedAmount = suggestAmount(sourceValue, destinationValue, 1000)
 
