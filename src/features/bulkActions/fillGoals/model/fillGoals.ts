@@ -16,11 +16,11 @@ export const fillGoals =
     const updates: TEnvBudgetUpdate[] = []
     Object.values(goals).forEach(goalInfo => {
       if (
-        !goalInfo?.state.need ||
+        !goalInfo?.need ||
         (goalInfo?.goal.type === goalType.TARGET_BALANCE && !goalInfo?.goal.end)
       )
         return
-      updates.push({ id: goalInfo.id, value: goalInfo.state.target, month })
+      updates.push({ id: goalInfo.id, value: goalInfo.target, month })
     })
     dispatch(setEnvelopeBudgets(updates))
   }

@@ -14,14 +14,14 @@ import { useToggle } from '@shared/hooks/useToggle'
 import { formatDate } from '@shared/helpers/date'
 
 import { useAppDispatch } from '@store'
-import { useDisplayCurrency } from '@entities/instrument/hooks'
+import { useDisplayCurrency } from '@entities/displayCurrency'
 import { fxRates, TFxRates } from '@entities/fxRate'
 import { balances } from '@entities/envBalances'
 
 export const FxRates: FC<{ month: TISOMonth }> = props => {
   const dispatch = useAppDispatch()
   const { month } = props
-  const displayCurrency = useDisplayCurrency()
+  const [displayCurrency] = useDisplayCurrency()
   const funds = balances.useTotals()[month].fundsEnd
   const rateData = balances.useRates()[month]
 
@@ -54,7 +54,7 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
           Курсы на {formatDate(rateData.date, 'LLLL yyyy')}{' '}
           {rateData.type === 'current' && ' (текущие)'}
         </Typography>
-        <Button fullWidth onClick={() => dispatch(fxRates.freeze(month))}>
+        <Button fullWidth onClick={() => dispatch(fxRates.load(month))}>
           Загрузить курсы
         </Button>
       </Stack>

@@ -17,7 +17,7 @@ import { sendEvent } from '@shared/helpers/tracking'
 import { TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
 
 import { useAppDispatch } from '@store'
-import { useDisplayCurrency } from '@entities/instrument/hooks'
+import { useDisplayCurrency } from '@entities/displayCurrency'
 import { balances } from '@entities/envBalances'
 import { useQuickActions } from './useQuickActions'
 import { setEnvelopeBudgets } from '@features/setEnvelopeBudget'
@@ -40,7 +40,7 @@ export const BudgetPopover: FC<
 const BudgetPopoverContent: FC<TBudgetPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
   const quickActions = useQuickActions(month, id)
-  const displayCurrency = useDisplayCurrency()
+  const [displayCurrency] = useDisplayCurrency()
   const dispatch = useAppDispatch()
   const rates = balances.useRates()[month].rates
   const envelope = balances.useEnvData()[month][id]

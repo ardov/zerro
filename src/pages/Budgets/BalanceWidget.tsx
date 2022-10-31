@@ -6,13 +6,13 @@ import { TFxAmount, TISOMonth } from '@shared/types'
 import { DataLine } from '@shared/ui/DataLine'
 import { Total } from '@shared/ui/Total'
 
-import { useDisplayCurrency } from '@entities/instrument/hooks'
+import { useDisplayCurrency } from '@entities/displayCurrency'
 import { balances } from '@entities/envBalances'
 
 export function BalanceWidget(props: { month: TISOMonth }) {
   const totals = balances.useTotals()[props.month]
   const rates = balances.useRates()[props.month].rates
-  const displayCurrency = useDisplayCurrency()
+  const [displayCurrency] = useDisplayCurrency()
   const toDisplay = (a: TFxAmount) => convertFx(a, displayCurrency, rates)
   const currencies = keys(totals.fundsEnd)
   const currCount = currencies.length

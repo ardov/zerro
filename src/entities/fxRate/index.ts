@@ -11,11 +11,13 @@ export type { TFxRateData } from './getFxRates'
 export type { TFxRates } from './fxRateStore'
 
 export const fxRates = {
+  // Selectors
   get: getRates,
   getter: getFxRatesGetter,
   latest: getLatestRates,
+  // Thunks
   edit: editRates,
   reset: resetRates,
   freezeCurrent: freezeCurrentRates,
-  freeze: loadRates,
+  load: loadRates,
 }

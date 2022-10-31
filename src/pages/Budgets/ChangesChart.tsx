@@ -5,7 +5,7 @@ import { TEnvelopeId, TFxAmount, TISODate, TISOMonth } from '@shared/types'
 import { add, convertFx, sub } from '@shared/helpers/money'
 import { useAppSelector } from '@store/index'
 import { getTotalChanges } from '@entities/envelopeData'
-import { useDisplayCurrency } from '@entities/instrument/hooks'
+import { useDisplayCurrency } from '@entities/displayCurrency'
 import { useMonth } from '@shared/hooks/useMonth'
 import { balances } from '@entities/envBalances'
 
@@ -73,7 +73,7 @@ type TTrendNode = {
 }
 
 function useDataTrend(month: TISOMonth, id?: TEnvelopeId): TTrendNode[] {
-  const displayCurrency = useDisplayCurrency()
+  const [displayCurrency] = useDisplayCurrency()
   const rates = balances.useRates()[month].rates
   const toDisplay = (a: TFxAmount) => convertFx(a, displayCurrency, rates)
   const changes = useAppSelector(getTotalChanges)[month]

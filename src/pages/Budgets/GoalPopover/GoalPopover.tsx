@@ -15,6 +15,7 @@ import { CloseIcon } from '@shared/ui/Icons'
 import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
 import { toISODate, formatDate } from '@shared/helpers/date'
 import { TDateDraft, TEnvelopeId, TISOMonth } from '@shared/types'
+
 import { goalModel, goalType, TGoal } from '@entities/goal'
 import { useMonthTotals } from '@entities/envelopeData'
 

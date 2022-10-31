@@ -8,7 +8,7 @@ import { DataLine } from '@shared/ui/DataLine'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { useAppSelector } from '@store/index'
 import { getTotalChanges } from '@entities/envelopeData'
-import { useDisplayCurrency } from '@entities/instrument/hooks'
+import { useDisplayCurrency } from '@entities/displayCurrency'
 import { trMode, useTrDrawer } from './TransactionsDrawer'
 import { ChangesChart } from './ChangesChart'
 import { balances } from '@entities/envBalances'
@@ -28,7 +28,7 @@ export function StatWidget(props: {
 }) {
   const { setDrawer } = useTrDrawer()
   const showIncome = props.mode === 'income'
-  const displayCurrency = useDisplayCurrency()
+  const [displayCurrency] = useDisplayCurrency()
   const rates = balances.useRates()[props.month].rates
   const envelopes = useAppSelector(getEnvelopes)
   const changes = useAppSelector(getTotalChanges)[props.month]

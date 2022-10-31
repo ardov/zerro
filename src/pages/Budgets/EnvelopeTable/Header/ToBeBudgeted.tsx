@@ -16,7 +16,7 @@ import Rhythm from '@shared/ui/Rhythm'
 import { DataLine } from '@shared/ui/DataLine'
 import { ArrowForwardIcon } from '@shared/ui/Icons'
 
-import { useDisplayCurrency } from '@entities/instrument/hooks'
+import { useDisplayCurrency } from '@entities/displayCurrency'
 import { useDisplayValue, useMonthTotals } from '@entities/envelopeData'
 import { balances } from '@entities/envBalances'
 
@@ -78,7 +78,7 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
 function useTotalsModel() {
   const [month] = useMonth()
 
-  const currency = useDisplayCurrency()
+  const [currency] = useDisplayCurrency()
   const toDisplay = useDisplayValue(month)
 
   const monthList = balances.useMonthList()
