@@ -1,19 +1,17 @@
 import { Divider, Paper, Typography } from '@mui/material'
 import { keys } from '@shared/helpers/keys'
-import { convertFx } from '@shared/helpers/money'
 import pluralize from '@shared/helpers/pluralize'
-import { TFxAmount, TISOMonth } from '@shared/types'
+import { TISOMonth } from '@shared/types'
 import { DataLine } from '@shared/ui/DataLine'
 import { Total } from '@shared/ui/Total'
 
-import { useDisplayCurrency } from '@entities/displayCurrency'
+import { useDisplayCurrency, useToDisplay } from '@entities/displayCurrency'
 import { balances } from '@entities/envBalances'
 
 export function BalanceWidget(props: { month: TISOMonth }) {
   const totals = balances.useTotals()[props.month]
-  const rates = balances.useRates()[props.month].rates
   const [displayCurrency] = useDisplayCurrency()
-  const toDisplay = (a: TFxAmount) => convertFx(a, displayCurrency, rates)
+  const toDisplay = useToDisplay(props.month)
   const currencies = keys(totals.fundsEnd)
   const currCount = currencies.length
 
@@ -25,7 +23,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
   const fundsChange = toDisplay(totals.fundsChange)
   const available = toDisplay(totals.available)
   const budgetedInFuture = toDisplay(totals.budgetedInFuture)
-  const toBeBudgeted = toDisplay(totals.toBeBudgeted)
+  const toBeBudgeted = 0 // toDisplay(totals.toBeBudgeted)
   const overspend = toDisplay(totals.overspend)
 
   const smartBudgetedInFuture = toBeBudgeted < 0 ? 0 : budgetedInFuture

@@ -27,7 +27,7 @@ export type TMonthTotals = {
 
   budgetedInFuture: TFxAmount // Total amount of money budgeted in future months
   freeFunds: TFxAmount
-  toBeBudgeted: TFxAmount
+  // toBeBudgeted: TFxAmount
   overspend: TFxAmount
 }
 
@@ -75,10 +75,15 @@ function calcMonthTotals(
 
     let budgeted = {}
     let available = {}
+    let overspend = {}
     Object.values(envMetrics[month]).forEach(metrics => {
       if (!metrics.parent) {
         budgeted = addFxAmount(budgeted, metrics.totalBudgeted)
         available = addFxAmount(available, metrics.totalAvailable)
+        let selfAvailableValue = metrics.selfAvailable[metrics.currency] || 0
+        if (selfAvailableValue < 0) {
+          overspend = addFxAmount(overspend, metrics.selfAvailable)
+        }
       }
     })
 
@@ -88,8 +93,7 @@ function calcMonthTotals(
     )
 
     let freeFunds = subFxAmount(fundsEnd, available)
-    let toBeBudgeted = {}
-    let overspend = {}
+    // let toBeBudgeted = {}
 
     result[month] = {
       month,
@@ -103,7 +107,7 @@ function calcMonthTotals(
       available,
       budgetedInFuture,
       freeFunds,
-      toBeBudgeted,
+      // toBeBudgeted,
       overspend,
     }
     prev = month
