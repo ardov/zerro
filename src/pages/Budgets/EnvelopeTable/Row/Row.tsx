@@ -8,6 +8,8 @@ import {
   Theme,
   IconButtonProps,
   Chip,
+  ButtonBaseProps,
+  ButtonBase,
 } from '@mui/material'
 import { SxProps } from '@mui/system'
 import { Tooltip } from '@shared/ui/Tooltip'
@@ -15,7 +17,7 @@ import { formatMoney, isZero, getCurrencySymbol } from '@shared/helpers/money'
 import { WarningIcon, AddIcon, EmojiFlagsIcon } from '@shared/ui/Icons'
 import { RadialProgress } from '@shared/ui/RadialProgress'
 import { Amount } from '@shared/ui/Amount'
-import { TEnvelopeId, TFxAmount, TFxCode } from '@shared/types'
+import { TEnvelopeId, TFxAmount, TFxCode, TISOMonth } from '@shared/types'
 import { goalModel, TGoal } from '@entities/goal'
 import { DragTypes } from '../../DnDContext'
 import { rowStyle } from '../shared/shared'
@@ -54,15 +56,13 @@ export const Row: FC<EnvelopeRowProps> = props => {
 
   return (
     <Droppable id={id} isChild={isChild}>
-      <RowWrapper isChild={isChild}>
+      <RowWrapper isChild={isChild} onClick={handleNameClick}>
         <NameCell
           envelope={envelope.env}
           isChild={isChild}
           isDefaultVisible={envelope.isDefaultVisible}
           hasCustomCurency={envelope.hasCustomCurency}
-          onClick={handleNameClick}
           isReordering={isReordering}
-          dropIndicator={false}
         />
 
         {(metric === Metric.budgeted || !isMobile) && (
@@ -70,7 +70,10 @@ export const Row: FC<EnvelopeRowProps> = props => {
             isUnsorted={isSelf}
             budgeted={envelope.displayBudgeted}
             showBudget={showBudget}
-            onBudgetClick={e => openBudgetPopover(id, e.currentTarget)}
+            onBudgetClick={e => {
+              e.stopPropagation()
+              openBudgetPopover(id, e.currentTarget)
+            }}
           />
         )}
 
@@ -78,7 +81,10 @@ export const Row: FC<EnvelopeRowProps> = props => {
           <OutcomeCell
             activity={envelope.totalActivity}
             displayActivity={envelope.displayActivity}
-            onClick={e => openTransactionsPopover(id)}
+            onClick={e => {
+              e.stopPropagation()
+              openTransactionsPopover(id)
+            }}
           />
         )}
 
@@ -119,21 +125,29 @@ const Droppable: FC<{
   return <div ref={setNodeRef}>{children}</div>
 }
 
-const RowWrapper: FC<{
-  children: React.ReactNode
-  isChild: boolean
-}> = props => {
-  const { children, isChild } = props
+const RowWrapper: FC<
+  ButtonBaseProps & {
+    isChild: boolean
+  }
+> = props => {
+  const { children, isChild, ...delegated } = props
   const style: SxProps = {
     ...rowStyle,
     position: 'relative',
-    transition: '0.1s',
-    '&:hover': { bgcolor: 'action.hover' },
+    // transition: '0.1s',
+    // borderRadius: 1,
+    '&:hover': { bgcolor: 'action.hover', transition: '0.1s' },
+    '&:active': { bgcolor: 'action.focus', transition: '0.1s' },
+    // '&:focus': { bgcolor: 'action.focus' },
     '&:hover .addGoal': { opacity: 1, transition: '.3s' },
     '&:not(:hover) .addGoal': { opacity: 0 },
     '& > *': { py: isChild ? 0.5 : 1 },
   }
-  return <Box sx={style}>{children}</Box>
+  return (
+    <ButtonBase sx={style} disableRipple {...delegated}>
+      {children}
+    </ButtonBase>
+  )
 }
 
 export const CurrencyTag: FC<{ currency?: TFxCode }> = ({ currency }) => {
@@ -210,7 +224,7 @@ const OutcomeCell: FC<OutcomeCellProps> = props => {
   )
 }
 
-const Draggable: FC<{
+const DraggableAmount: FC<{
   id: string
   children: React.ReactNode
   type: DragTypes
@@ -263,7 +277,7 @@ const AvailableCell: FC<AvailableCellProps> = props => {
           </Tooltip>
         )}
 
-        <Draggable id={id} type={DragTypes.amount} disabled={isUnsorted}>
+        <DraggableAmount id={id} type={DragTypes.amount} disabled={isUnsorted}>
           <Box
             component="span"
             sx={{
@@ -281,7 +295,7 @@ const AvailableCell: FC<AvailableCellProps> = props => {
           >
             <Amount value={available} decMode="ifOnly" />
           </Box>
-        </Draggable>
+        </DraggableAmount>
       </Typography>
     </Box>
   )

@@ -1,12 +1,6 @@
 import React, { FC, ReactNode } from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import {
-  Typography,
-  Box,
-  IconButton,
-  ButtonBase,
-  Collapse,
-} from '@mui/material'
+import { Typography, Box, IconButton, Collapse } from '@mui/material'
 import { EmojiIcon } from '@shared/ui/EmojiIcon'
 import { DragIndicatorIcon } from '@shared/ui/Icons'
 import { TEnvelopeId } from '@shared/types'
@@ -20,17 +14,9 @@ export const NameCell: FC<{
   isReordering: boolean
   isDefaultVisible: boolean
   hasCustomCurency: boolean
-  dropIndicator: boolean | 'child'
-  onClick: (e: React.MouseEvent) => void
 }> = props => {
-  const {
-    isReordering,
-    isDefaultVisible,
-    hasCustomCurency,
-    isChild,
-    dropIndicator,
-  } = props
   const { id, symbol, color, name, currency, comment } = props.envelope
+  const { isReordering, isDefaultVisible, hasCustomCurency, isChild } = props
 
   return (
     <Box
@@ -51,26 +37,22 @@ export const NameCell: FC<{
         </EnvDraggable>
       )}
 
-      <ButtonBase
+      <Box
         sx={{
-          p: 0.5,
-          m: -0.5,
-          borderRadius: 1,
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
           flexShrink: 1,
           minWidth: 0,
-          transition: '0.1s',
-          typography: 'body1',
           opacity: isDefaultVisible ? 1 : 0.5,
-          '&:hover': { bgcolor: 'action.hover', opacity: 1 },
-          '&:focus': { bgcolor: 'action.focus' },
         }}
-        onClick={props.onClick}
       >
         <EmojiIcon symbol={symbol} mr={1.5} color={color} />
         <Typography component="span" variant="body1" title={name} noWrap>
           {name}
         </Typography>
-      </ButtonBase>
+      </Box>
 
       {hasCustomCurency && <CurrencyTag currency={currency} />}
 
@@ -89,6 +71,7 @@ export const NameCell: FC<{
     </Box>
   )
 }
+
 const envDraggableSx = {
   my: -1,
   display: 'grid',
@@ -96,10 +79,9 @@ const envDraggableSx = {
   cursor: 'grab',
   touchAction: 'none',
 }
-const EnvDraggable: FC<{ id: TEnvelopeId; children: ReactNode }> = ({
-  id,
-  children,
-}) => {
+
+const EnvDraggable: FC<{ id: TEnvelopeId; children: ReactNode }> = props => {
+  const { id, children } = props
   const { setNodeRef, attributes, listeners } = useDraggable({
     id: 'envelope' + id,
     data: { type: DragTypes.envelope, id: id },
