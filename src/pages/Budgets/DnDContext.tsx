@@ -1,9 +1,14 @@
 import React, { FC, ReactNode, useState } from 'react'
 import {
+  useDndMonitor,
+  useSensor,
+  useSensors,
   DndContext,
   DragOverlay,
   DragEndEvent,
-  useDndMonitor,
+  MouseSensor,
+  TouchSensor,
+  KeyboardSensor,
 } from '@dnd-kit/core'
 import { useCallback } from 'react'
 import { useMonth } from '@shared/hooks/useMonth'
@@ -32,6 +37,14 @@ const vibrate = () => window?.navigator?.vibrate?.(100)
 export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
   const [month] = useMonth()
 
+  const sensors = useSensors(
+    useSensor(MouseSensor),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 250, tolerance: 5 },
+    }),
+    useSensor(KeyboardSensor)
+  )
+
   const [moneySource, setMoneySource] =
     useState<TEnvelopeId | 'toBeBudgeted'>('toBeBudgeted')
   const [moneyDestination, setMoneyDestination] =
@@ -55,6 +68,7 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
 
   return (
     <DndContext
+      sensors={sensors}
       onDragStart={vibrate}
       onDragEnd={onDragEnd}
       autoScroll={autoscrollOptions}
