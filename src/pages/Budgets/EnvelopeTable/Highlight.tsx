@@ -3,8 +3,8 @@ import { DragEndEvent, DragMoveEvent, useDndMonitor } from '@dnd-kit/core'
 import { Box, SxProps } from '@mui/system'
 import { DragTypes } from '../DnDContext'
 import { useAppDispatch, useAppSelector } from '@store/index'
-import { getEnvelopes } from '@entities/envelope'
-import { TEnvelopeId } from '@shared/types'
+import { getEnvelopes, TEnvelope } from '@entities/envelope'
+import { ById, TEnvelopeId } from '@shared/types'
 import { moveEnvelope } from '@entities/envelope/moveEnvelope'
 
 const style: SxProps = {
@@ -22,9 +22,10 @@ const style: SxProps = {
   willChange: 'transform width height',
 }
 
+const OFFSET = 100
+
 export function Highlight() {
   const dispatch = useAppDispatch()
-  const OFFSET = 100
   const [isDragging, setIsDragging] = useState(false)
 
   const envelopes = useAppSelector(getEnvelopes)
@@ -35,46 +36,36 @@ export function Highlight() {
     (e: DragMoveEvent) => {
       const el = boxRef.current
       if (!el) return
-      const activeData = e.active.data.current
-      const activeRect = e.active.rect.current.translated
-      const overData = e.over?.data.current
-      const overRect = e.over?.rect
-      if (
-        // has active
-        !activeData ||
-        !activeData.id ||
-        !activeRect ||
-        // has over
-        !overData ||
-        !overData.id ||
-        overData.type !== DragTypes.envelope ||
-        !overRect
-      ) {
+      const info = whatsHappening(e, envelopes, OFFSET)
+
+      if (!info) {
         el.style.display = `none`
         return
       }
 
-      if (activeData.type === DragTypes.envelope) {
-        const overEnv = envelopes[overData.id as TEnvelopeId]
-        const isChild = !!overEnv?.parent
-        const isNested = activeRect.left - overRect.left > OFFSET || isChild
-
-        let width = overRect.width - (isNested ? OFFSET : 0)
-        let left = overRect.left + (isNested ? OFFSET : 0)
-        let top = overRect.top + overRect.height
+      if (
+        info.activeType === DragTypes.envelope &&
+        info.overType === DragTypes.envelope
+      ) {
+        let width = info.overRect.width - (info.isNesting ? OFFSET : 0)
+        let left = info.overRect.left + (info.isNesting ? OFFSET : 0)
+        let top = info.overRect.top + info.overRect.height
         el.style.display = `block`
         el.style.width = `${width}px`
         el.style.height = `2px`
         el.style.transform = `translate(${left}px, ${top}px)`
       }
 
-      if (activeData.type === DragTypes.amount) {
+      if (
+        info.activeType === DragTypes.amount &&
+        info.overType === DragTypes.envelope
+      ) {
         const brdr = 4
         el.style.display = `block`
-        el.style.width = `${overRect.width + brdr * 2}px`
-        el.style.height = `${overRect.height + brdr * 2}px`
-        el.style.transform = `translate(${overRect.left - brdr}px, ${
-          overRect.top - brdr
+        el.style.width = `${info.overRect.width + brdr * 2}px`
+        el.style.height = `${info.overRect.height + brdr * 2}px`
+        el.style.transform = `translate(${info.overRect.left - brdr}px, ${
+          info.overRect.top - brdr
         }px)`
       }
     },
@@ -84,28 +75,20 @@ export function Highlight() {
   const onDragEnd = useCallback(
     (e: DragEndEvent) => {
       setIsDragging(false)
+      const info = whatsHappening(e, envelopes, OFFSET)
+      if (!info) return
 
-      const activeData = e.active.data.current
-      const overData = e.over?.data.current
-      const activeRect = e.active.rect.current.translated
-      const overRect = e.over?.rect
       if (
-        // has active
-        activeData &&
-        activeData.id &&
-        activeData.type === DragTypes.envelope &&
-        activeRect &&
-        // has over
-        overData &&
-        overData.id &&
-        overData.type === DragTypes.envelope &&
-        overRect &&
-        // Not the same
-        activeData.id !== overData.id
+        info.activeType === DragTypes.envelope &&
+        info.overType === DragTypes.envelope &&
+        info.activeId !== info.overId
       ) {
-        const isNested = activeRect.left - overRect.left > OFFSET
         dispatch(
-          moveEnvelope(activeData.id, envelopes[overData.id].index, isNested)
+          moveEnvelope(
+            info.activeId,
+            envelopes[info.overId].index,
+            info.isNesting
+          )
         )
       }
     },
@@ -127,4 +110,70 @@ export function Highlight() {
   })
 
   return isDragging ? <Box ref={boxRef} sx={style} /> : null
+}
+
+function whatsHappening(
+  e: DragEndEvent | DragMoveEvent,
+  envelopes: ById<TEnvelope>,
+  offset: number
+) {
+  const activeData = e.active.data.current
+  const activeRect = e.active.rect.current.translated
+  const overData = e.over?.data.current
+  const overRect = e.over?.rect
+
+  if (
+    // has active
+    !activeData ||
+    !activeData.id ||
+    !activeRect ||
+    // has over
+    !overData ||
+    !overData.id ||
+    overData.type !== DragTypes.envelope ||
+    !overRect
+  ) {
+    return null
+  }
+
+  const overEnv = envelopes[overData.id as TEnvelopeId]
+  const isOverChild = !!overEnv?.parent
+  const isLastVisibleChild = !!overData.isLastVisibleChild
+  const isExpanded = !!overData.isExpanded
+  const tryingToNest = activeRect.left - overRect.left > offset
+
+  return {
+    isOverChild,
+    isNesting: getNestingState(
+      tryingToNest,
+      isOverChild,
+      isLastVisibleChild,
+      isExpanded
+    ),
+
+    activeId: activeData.id as TEnvelopeId,
+    activeType: activeData.type as DragTypes,
+    activeRect: activeRect,
+
+    overId: overData.id as TEnvelopeId,
+    overType: overData.type as DragTypes,
+    overRect: overRect,
+  }
+}
+
+function getNestingState(
+  tryingToNest: boolean,
+  overChild: boolean,
+  overLastVisibleChild: boolean,
+  isExpanded: boolean
+) {
+  if (overChild) {
+    // Child
+    if (overLastVisibleChild) return tryingToNest
+    return true
+  } else {
+    // Parent
+    if (isExpanded) return true
+    return tryingToNest
+  }
 }

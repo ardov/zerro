@@ -1,22 +1,24 @@
 import React, { FC, ReactNode } from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import { Typography, Box, IconButton, Collapse } from '@mui/material'
+import { Typography, Box, IconButton, Collapse, Chip } from '@mui/material'
 import { EmojiIcon } from '@shared/ui/EmojiIcon'
 import { DragIndicatorIcon } from '@shared/ui/Icons'
-import { TEnvelopeId } from '@shared/types'
+import { TEnvelopeId, TFxCode } from '@shared/types'
 import { DragTypes } from '../../DnDContext'
 import { TEnvelope } from '@entities/envelope'
-import { CurrencyTag } from './Row'
+import { useDisplayCurrency } from '@entities/displayCurrency'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { getCurrencySymbol } from '@shared/helpers/money'
 
 export const NameCell: FC<{
   envelope: TEnvelope
   isChild: boolean
   isReordering: boolean
   isDefaultVisible: boolean
-  hasCustomCurency: boolean
 }> = props => {
   const { id, symbol, color, name, currency, comment } = props.envelope
-  const { isReordering, isDefaultVisible, hasCustomCurency, isChild } = props
+  const { isReordering, isDefaultVisible, isChild } = props
+  const [displayCurrency] = useDisplayCurrency()
 
   return (
     <Box
@@ -54,7 +56,7 @@ export const NameCell: FC<{
         </Typography>
       </Box>
 
-      {hasCustomCurency && <CurrencyTag currency={currency} />}
+      {displayCurrency !== currency && <CurrencyTag currency={currency} />}
 
       {!!comment && (
         <Typography
@@ -90,5 +92,16 @@ const EnvDraggable: FC<{ id: TEnvelopeId; children: ReactNode }> = props => {
     <span ref={setNodeRef} {...attributes} {...listeners}>
       {children}
     </span>
+  )
+}
+
+const CurrencyTag: FC<{ currency?: TFxCode }> = ({ currency }) => {
+  if (!currency) return null
+  return (
+    <Tooltip
+      title={`Бюджет этой категории задаётся в ${currency}. Он будет пересчитываться автоматически по текущему курсу.`}
+    >
+      <Chip label={getCurrencySymbol(currency)} size="small" />
+    </Tooltip>
   )
 }

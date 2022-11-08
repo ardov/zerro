@@ -48,9 +48,10 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
     const parents = group.children
       .filter(parent => showAll || parent.isDefaultVisible)
       .map(parent => {
+        const isExpanded = expanded.includes(parent.id)
         const children = parent.children
           .filter(parent => showAll || parent.isDefaultVisible)
-          .map(child => (
+          .map((child, idx, arr) => (
             <Row
               key={'child' + child.id}
               envelope={child}
@@ -59,7 +60,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
                 onShowTransactions(child.id, { isExact: true })
               }
               openDetails={onOpenDetails}
-              isBottom={false}
+              isLastVisibleChild={idx === arr.length - 1}
               isReordering={reorderMode}
             />
           ))
@@ -68,7 +69,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
           <Parent
             key={parent.id}
             id={parent.id}
-            isExpanded={expanded.includes(parent.id)}
+            isExpanded={isExpanded}
             onExpandToggle={toggle}
             onExpandAll={expandAll}
             onCollapseAll={collapseAll}
@@ -78,7 +79,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
                 metric={metric}
                 openTransactionsPopover={onShowTransactions}
                 openDetails={onOpenDetails}
-                isBottom={false}
+                isExpanded={isExpanded}
                 isReordering={reorderMode}
               />
             }

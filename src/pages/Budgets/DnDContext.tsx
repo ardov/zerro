@@ -29,6 +29,8 @@ export enum DragTypes {
 export type TDragData = {
   type: DragTypes
   id: TEnvelopeId
+  isExpanded?: boolean
+  isLastVisibleChild?: boolean
 }
 
 const autoscrollOptions = { threshold: { x: 0, y: 0.2 } }

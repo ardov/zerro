@@ -7,17 +7,16 @@ import {
   useMediaQuery,
   Theme,
   IconButtonProps,
-  Chip,
   ButtonBaseProps,
   ButtonBase,
 } from '@mui/material'
 import { SxProps } from '@mui/system'
 import { Tooltip } from '@shared/ui/Tooltip'
-import { formatMoney, isZero, getCurrencySymbol } from '@shared/helpers/money'
+import { formatMoney, isZero } from '@shared/helpers/money'
 import { WarningIcon, AddIcon, EmojiFlagsIcon } from '@shared/ui/Icons'
 import { RadialProgress } from '@shared/ui/RadialProgress'
 import { Amount } from '@shared/ui/Amount'
-import { TEnvelopeId, TFxAmount, TFxCode, TISOMonth } from '@shared/types'
+import { TEnvelopeId, TFxAmount } from '@shared/types'
 import { goalModel, TGoal } from '@entities/goal'
 import { DragTypes } from '../../DnDContext'
 import { rowStyle } from '../shared/shared'
@@ -31,7 +30,8 @@ import { Btn } from './Btn'
 type EnvelopeRowProps = {
   envelope: TEnvelopePopulated
   metric: Metric
-  isBottom: boolean
+  isLastVisibleChild?: boolean
+  isExpanded?: boolean
   isReordering: boolean
   openDetails: (id: TEnvelopeId) => void
   openTransactionsPopover: (id: TEnvelopeId) => void
@@ -41,6 +41,8 @@ export const Row: FC<EnvelopeRowProps> = props => {
   const {
     envelope,
     metric,
+    isLastVisibleChild,
+    isExpanded,
     isReordering,
     openTransactionsPopover,
     openDetails,
@@ -55,13 +57,17 @@ export const Row: FC<EnvelopeRowProps> = props => {
   const handleNameClick = useCallback(() => openDetails(id), [id, openDetails])
 
   return (
-    <Droppable id={id} isChild={isChild}>
+    <Droppable
+      id={id}
+      isChild={isChild}
+      isLastVisibleChild={!!isLastVisibleChild}
+      isExpanded={!!isExpanded}
+    >
       <RowWrapper isChild={isChild} onClick={handleNameClick}>
         <NameCell
           envelope={envelope.env}
           isChild={isChild}
           isDefaultVisible={envelope.isDefaultVisible}
-          hasCustomCurency={envelope.hasCustomCurency}
           isReordering={isReordering}
         />
 
@@ -114,12 +120,14 @@ export const Row: FC<EnvelopeRowProps> = props => {
 const Droppable: FC<{
   id: TEnvelopeId
   isChild: boolean
+  isLastVisibleChild: boolean
+  isExpanded: boolean
   children: React.ReactNode
 }> = props => {
-  const { id, isChild, children } = props
+  const { id, isChild, isLastVisibleChild, isExpanded, children } = props
   const { setNodeRef } = useDroppable({
     id: 'envelope-drop' + id + isChild,
-    data: { type: DragTypes.envelope, id },
+    data: { type: DragTypes.envelope, id, isLastVisibleChild, isExpanded },
   })
 
   return <div ref={setNodeRef}>{children}</div>
@@ -147,17 +155,6 @@ const RowWrapper: FC<
     <ButtonBase sx={style} disableRipple {...delegated}>
       {children}
     </ButtonBase>
-  )
-}
-
-export const CurrencyTag: FC<{ currency?: TFxCode }> = ({ currency }) => {
-  if (!currency) return null
-  return (
-    <Tooltip
-      title={`Бюджет этой категории задаётся в ${currency}. Он будет пересчитываться автоматически по текущему курсу.`}
-    >
-      <Chip label={getCurrencySymbol(currency)} size="small" />
-    </Tooltip>
   )
 }
 
