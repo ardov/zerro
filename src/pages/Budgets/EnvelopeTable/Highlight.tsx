@@ -80,16 +80,13 @@ export function Highlight() {
 
       if (
         info.activeType === DragTypes.envelope &&
-        info.overType === DragTypes.envelope &&
-        info.activeId !== info.overId
+        info.overType === DragTypes.envelope
       ) {
-        dispatch(
-          moveEnvelope(
-            info.activeId,
-            envelopes[info.overId].index,
-            info.isNesting
-          )
-        )
+        const activeEnv = envelopes[info.activeId]
+        const overEnv = envelopes[info.overId]
+        if (activeEnv.id === overEnv.id) return
+        if (overEnv.parent && activeEnv.id === overEnv.parent) return
+        dispatch(moveEnvelope(activeEnv.index, overEnv.index, info.isNesting))
       }
     },
     [dispatch, envelopes]

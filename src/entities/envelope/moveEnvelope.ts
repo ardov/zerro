@@ -5,7 +5,7 @@ import { patchEnvelope, TEnvelopeDraft } from './patchEnvelope'
 import { flattenStructure } from './shared/structure'
 
 export function moveEnvelope(
-  id: TEnvelopeId,
+  sourceIdx: number,
   targetIdx: number,
   asChild: boolean
 ): AppThunk {
@@ -13,46 +13,46 @@ export function moveEnvelope(
     const envelopes = getEnvelopes(getState())
     const structure = getEnvelopeStructure(getState())
     const flatList = flattenStructure(structure)
-    const target = flatList[targetIdx]
-    const newIdx = targetIdx + 1
-    const curr = flatList.find(el => el.id === id)
+    const active = flatList[sourceIdx]
+    const over = flatList[targetIdx]
     const patches: TEnvelopeDraft[] = []
 
-    if (!curr) throw new Error("Couldn't find id: " + id)
+    if (!active) throw new Error("Couldn't find idx: " + sourceIdx)
 
     // Group over group
-    if (curr.type === 'group' && target.type === 'group') {
+    if (active.type === 'group' && over.type === 'group') {
       // TODO
     }
 
     // Group over envelope
-    if (curr.type === 'group' && target.type === 'envelope') {
+    if (active.type === 'group' && over.type === 'envelope') {
       // TODO
     }
 
     // Envelope over group
-    if (curr.type === 'envelope' && target.type === 'group') {
+    if (active.type === 'envelope' && over.type === 'group') {
       if (asChild) throw new Error("can't insert as child into group")
       // TODO
     }
 
     // Envelope over envelope
-    if (curr.type === 'envelope' && target.type === 'envelope') {
-      const newParent = getNewParent(target.parent || target.id, asChild)
-      const newGroup = target.group
-      const currentEnv = envelopes[id]
+    if (active.type === 'envelope' && over.type === 'envelope') {
+      const newParent = getNewParent(active.id, over.parent || over.id, asChild)
+      const newGroup = over.group
+      const activeEnv = envelopes[active.id]
+      const newActiveIdx = sourceIdx > targetIdx ? targetIdx + 1 : targetIdx
 
-      console.log('Moving envelope', currentEnv.index, '->', newIdx)
+      console.log('Moving envelope', sourceIdx, '->', newActiveIdx)
 
       // Change indices of affected envelopes
-      const idsToMove = [currentEnv.id, ...currentEnv.children]
+      const idsToMove = [activeEnv.id, ...activeEnv.children]
       idsToMove.forEach((id, idx) => {
-        arrayMove(flatList, envelopes[id].index, newIdx + idx)
+        arrayMove(flatList, envelopes[id].index, newActiveIdx + idx)
       })
 
       flatList.forEach((el, idx) => {
         if (el.type === 'group') return
-        if (el.id === currentEnv.id) {
+        if (el.id === activeEnv.id) {
           return patches.push({
             id: el.id,
             indexRaw: idx,
@@ -60,7 +60,7 @@ export function moveEnvelope(
             group: newGroup,
           })
         }
-        if (currentEnv.children.includes(el.id)) {
+        if (activeEnv.children.includes(el.id)) {
           if (newParent) {
             return patches.push({
               id: el.id,
@@ -77,8 +77,13 @@ export function moveEnvelope(
 
     dispatch(patchEnvelope(patches))
 
-    function getNewParent(suppposedParent: TEnvelopeId, asChild: boolean) {
+    function getNewParent(
+      elId: TEnvelopeId,
+      suppposedParent: TEnvelopeId,
+      asChild: boolean
+    ) {
       if (!asChild) return null
+      if (elId === suppposedParent) return null
       return parseEnvelopeId(suppposedParent).type === 'tag'
         ? suppposedParent
         : null
@@ -88,22 +93,22 @@ export function moveEnvelope(
 
 /*
 
- group
- - parent
- - - child 1
- - - child 2
- - - child 3
- - parent
- - - child 1
- group
- - parent
- - - child 1
- - - child 2
- - - child 3
- - parent
- - - child 1
- - - child 2
- - - child 3
+ 0 group
+ 1 - parent
+ 2 - - child 1
+ 3 - - child 2
+ 4 - - child 3
+ 5 - parent
+ 6 - - child 1
+ 7 group
+ 8 - parent
+ 9 - - child 1
+10 - - child 2
+11 - - child 3
+12 - parent
+13 - - child 1
+14 - - child 2
+15 - - child 3
 
 */
 

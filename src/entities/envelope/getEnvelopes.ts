@@ -13,6 +13,7 @@ import {
   flattenStructure,
 } from './shared/structure'
 import { withPerf } from '@shared/helpers/performance'
+import { compareEnvelopes } from './shared/compareEnvelopes'
 
 const getCompiledEnvelopes: TSelector<{
   byId: ById<TEnvelope>
@@ -45,15 +46,17 @@ const getCompiledEnvelopes: TSelector<{
       })
 
       // Step 2. Attach children, prepare for building tree
-      Object.values(result).forEach(e => {
-        // Fix nesting issues (only 2 levels are allowed)
-        e.parent = getRightParent(e.parent, result)
-        if (e.parent) {
-          const parent = result[e.parent]
-          parent.children.push(e.id) // Attach child to parent
-          e.group = result[e.parent].group // Inherit group names from parents
-        }
-      })
+      Object.values(result)
+        .sort(compareEnvelopes)
+        .forEach(e => {
+          // Fix nesting issues (only 2 levels are allowed)
+          e.parent = getRightParent(e.parent, result)
+          if (e.parent) {
+            const parent = result[e.parent]
+            parent.children.push(e.id) // Attach child to parent
+            e.group = result[e.parent].group // Inherit group names from parents
+          }
+        })
 
       // Step 3. Build structure and update indicies according to it
       const structure = buildStructure(result)
