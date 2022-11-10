@@ -42,5 +42,14 @@ function createZerroInstance(s: typeof store) {
     logs: {},
     resetData: () => s.dispatch(resetData()),
     applyClientPatch: (patch: TDiff) => s.dispatch(applyClientPatch(patch)),
+    showEl: (id: string) => {
+      let data = s.getState().data.current
+      return (
+        Object.values(data)
+          // @ts-ignore
+          .map(c => c[id])
+          .filter(Boolean)[0]
+      )
+    },
   }
 }
