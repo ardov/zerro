@@ -12,12 +12,13 @@ import { getCurrencySymbol } from '@shared/helpers/money'
 
 export const NameCell: FC<{
   envelope: TEnvelope
-  isChild: boolean
+  isChild?: boolean
+  isSelf?: boolean
   isReordering: boolean
   isDefaultVisible: boolean
 }> = props => {
   const { id, symbol, color, name, currency, comment } = props.envelope
-  const { isReordering, isDefaultVisible, isChild } = props
+  const { isReordering, isDefaultVisible, isChild, isSelf } = props
   const [displayCurrency] = useDisplayCurrency()
 
   return (
@@ -50,9 +51,14 @@ export const NameCell: FC<{
           opacity: isDefaultVisible ? 1 : 0.5,
         }}
       >
-        <EmojiIcon symbol={symbol} mr={1.5} color={color} />
+        <EmojiIcon
+          symbol={isSelf ? '–' : symbol}
+          color={isSelf ? null : color}
+          mr={1.5}
+        />
         <Typography component="span" variant="body1" title={name} noWrap>
           {name}
+          {isSelf ? ' (основная)' : ''}
         </Typography>
       </Box>
 

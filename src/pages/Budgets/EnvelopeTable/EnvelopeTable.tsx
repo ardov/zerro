@@ -49,21 +49,6 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
       .filter(parent => showAll || parent.isDefaultVisible)
       .map(parent => {
         const isExpanded = expanded.includes(parent.id)
-        const children = parent.children
-          .filter(parent => showAll || parent.isDefaultVisible)
-          .map((child, idx, arr) => (
-            <Row
-              key={'child' + child.id}
-              envelope={child}
-              metric={metric}
-              openTransactionsPopover={() =>
-                onShowTransactions(child.id, { isExact: true })
-              }
-              openDetails={onOpenDetails}
-              isLastVisibleChild={idx === arr.length - 1}
-              isReordering={reorderMode}
-            />
-          ))
 
         return (
           <Parent
@@ -75,15 +60,36 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
             onCollapseAll={collapseAll}
             parent={
               <Row
-                envelope={parent}
+                id={parent.id}
+                month={month}
                 metric={metric}
+                isSelf={parent.isSelf}
+                isDefaultVisible={parent.isDefaultVisible}
                 openTransactionsPopover={onShowTransactions}
                 openDetails={onOpenDetails}
                 isExpanded={isExpanded}
                 isReordering={reorderMode}
               />
             }
-            children={children}
+            children={parent.children
+              .filter(parent => showAll || parent.isDefaultVisible)
+              .map((child, idx, arr) => (
+                <Row
+                  key={'child' + child.id}
+                  id={child.id}
+                  month={month}
+                  metric={metric}
+                  isSelf={child.isSelf}
+                  isDefaultVisible={child.isDefaultVisible}
+                  isLastVisibleChild={idx === arr.length - 1}
+                  isExpanded={false}
+                  isReordering={reorderMode}
+                  openTransactionsPopover={() =>
+                    onShowTransactions(child.id, { isExact: true })
+                  }
+                  openDetails={onOpenDetails}
+                />
+              ))}
           />
         )
       })
