@@ -98,6 +98,7 @@ const props: SxProps = {
   borderRadius: 1,
   width: 'auto',
   cursor: 'grabbing',
+  userSelect: 'none',
 }
 
 const DragObj = () => {

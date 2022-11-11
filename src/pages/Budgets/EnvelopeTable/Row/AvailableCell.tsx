@@ -83,7 +83,14 @@ const DraggableAmount: FC<{
     data: { type, id },
   })
   return (
-    <span ref={setNodeRef} {...attributes} {...listeners}>
+    <span
+      style={{
+        userSelect: 'none',
+      }}
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+    >
       {children}
     </span>
   )

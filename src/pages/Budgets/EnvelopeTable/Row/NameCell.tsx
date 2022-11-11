@@ -95,7 +95,14 @@ const EnvDraggable: FC<{ id: TEnvelopeId; children: ReactNode }> = props => {
     data: { type: DragTypes.envelope, id: id },
   })
   return (
-    <span ref={setNodeRef} {...attributes} {...listeners}>
+    <span
+      style={{
+        userSelect: 'none',
+      }}
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+    >
       {children}
     </span>
   )
