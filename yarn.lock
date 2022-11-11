@@ -2299,10 +2299,10 @@
   dependencies:
     tslib "^2.0.0"
 
-"@dnd-kit/core@^6.0.5":
-  version "6.0.5"
-  resolved "https://registry.yarnpkg.com/@dnd-kit/core/-/core-6.0.5.tgz#5670ad0dcc83cd51dbf2fa8c6a5c8af4ac0c1989"
-  integrity sha512-3nL+Zy5cT+1XwsWdlXIvGIFvbuocMyB4NBxTN74DeBaBqeWdH9JsnKwQv7buZQgAHmAH+eIENfS1ginkvW6bCw==
+"@dnd-kit/core@^6.0.5-next-2022514174911":
+  version "6.0.5-next-2022514174911"
+  resolved "https://registry.yarnpkg.com/@dnd-kit/core/-/core-6.0.5-next-2022514174911.tgz#adf368fa2fa6de5295e14cff867e10d015aacf1c"
+  integrity sha512-mmw/xGJfMMQFhe7wETLH4nNyIK8KZIt+yn/Fz8SMt9rZLiW5qoWyg86iBTPFr3bSMmsWXPcDXkPVP46ozNOclg==
   dependencies:
     "@dnd-kit/accessibility" "^3.0.0"
     "@dnd-kit/utilities" "^3.2.0"
