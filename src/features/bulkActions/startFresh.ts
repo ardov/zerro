@@ -63,12 +63,11 @@ export const resetMonthThunk =
       .filter(e => {
         let available = e.selfAvailable[e.currency]
         if (!available) return false // already empty
-        if (available > 0 || e.carryNegatives) return true // has something to carry
-        return false
+        return true
       })
       .map(e => ({
         id: e.id,
-        value: e.selfBudgeted[e.currency] - e.selfAvailable[e.currency],
+        value: e.totalBudgeted[e.currency] - e.selfAvailable[e.currency],
         month,
       }))
     dispatch(setEnvelopeBudgets(updates))
@@ -80,7 +79,7 @@ export const resetMonthThunk =
       .filter(e => !isZero(e.selfAvailable)) // with positive available
       .map(e => ({
         id: e.id,
-        value: e.selfBudgeted[e.currency] - e.selfAvailable[e.currency],
+        value: e.totalBudgeted[e.currency] - e.selfAvailable[e.currency],
         month,
       }))
     dispatch(setEnvelopeBudgets(updates2))

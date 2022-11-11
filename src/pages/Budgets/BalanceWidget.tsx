@@ -23,7 +23,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
   const fundsChange = toDisplay(totals.fundsChange)
   const available = toDisplay(totals.available)
   const budgetedInFuture = toDisplay(totals.budgetedInFuture)
-  const toBeBudgeted = 0 // toDisplay(totals.toBeBudgeted)
+  const toBeBudgeted = toDisplay(totals.toBeBudgeted)
   const overspend = toDisplay(totals.overspend)
 
   const smartBudgetedInFuture = toBeBudgeted < 0 ? 0 : budgetedInFuture
