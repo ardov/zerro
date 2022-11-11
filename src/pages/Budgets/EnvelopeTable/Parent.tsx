@@ -40,7 +40,7 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
         sx={{
           position: 'relative',
           background: 'background.paper',
-          borderBottom: `1px solid black`,
+          borderBottom: `0.5px solid black`,
           borderColor: 'divider',
           '&:last-child': { border: 0 },
         }}

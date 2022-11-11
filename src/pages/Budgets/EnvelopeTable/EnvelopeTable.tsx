@@ -1,18 +1,20 @@
-import React, { FC, memo } from 'react'
+import React, { FC, memo, useCallback } from 'react'
+import { shallowEqual } from 'react-redux'
 import { Paper, Typography } from '@mui/material'
 import { TEnvelopeId, TISOMonth } from '@shared/types'
+import { useToggle } from '@shared/hooks/useToggle'
+import { useAppSelector } from '@store/index'
+import { getEnvelopeStructure } from '@entities/envelope'
 import { Parent } from './Parent'
 import { Row } from './Row'
 import { Header } from './Header'
 import { rowStyle } from './shared/shared'
 import { trMode } from '../TransactionsDrawer'
 import { useMetric } from './models/useMetric'
-import { useEnvelopeGroups } from './models/envelopeGroups'
 import { useExpandEnvelopes } from './models/useExpandEnvelopes'
-import { TGroupInfo } from './models/getEnvelopeGroups'
-import { useToggle } from '@shared/hooks/useToggle'
 import { Highlight } from './Highlight'
-import { shallowEqual } from 'react-redux'
+import { useEnvRenderInfo } from './models/envRenderInfo'
+import { isEqual } from 'lodash'
 
 type TagTableProps = {
   month: TISOMonth
@@ -38,17 +40,60 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
     onOpenOverview,
     onShowTransactions,
   } = props
-  const groups = useEnvelopeGroups(month)
+
+  const structure = useAppSelector(getEnvelopeStructure, isEqual)
+  const renderInfo = useEnvRenderInfo(month)
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
   const { metric, toggleMetric } = useMetric()
   const [showAll, toggleShowAll] = useToggle()
   const [reorderMode, toggleReorderMode] = useToggle()
 
-  const renderGroups = groups.map(group => {
+  const onShowExactTransactions = useCallback(
+    (id: TEnvelopeId) => onShowTransactions(id, { isExact: true }),
+    [onShowTransactions]
+  )
+
+  const renderGroups = structure.map(group => {
     const parents = group.children
-      .filter(parent => showAll || parent.isDefaultVisible)
+      .filter(parent => showAll || renderInfo[parent.id].isDefaultVisible)
       .map(parent => {
-        const isExpanded = expanded.includes(parent.id)
+        const { isDefaultVisible, showSelf } = renderInfo[parent.id]
+
+        let renderChildren = parent.children
+          .filter(child => showAll || renderInfo[child.id].isDefaultVisible)
+          .map((child, idx, arr) => (
+            <Row
+              key={'child' + child.id}
+              id={child.id}
+              month={month}
+              metric={metric}
+              isDefaultVisible={renderInfo[child.id].isDefaultVisible}
+              isLastVisibleChild={idx === arr.length - 1}
+              isReordering={reorderMode}
+              openTransactionsPopover={onShowExactTransactions}
+              openDetails={onOpenDetails}
+            />
+          ))
+
+        if (showSelf) {
+          renderChildren = [
+            <Row
+              isSelf
+              key={'self' + parent.id}
+              id={parent.id}
+              month={month}
+              metric={metric}
+              isDefaultVisible={renderInfo[parent.id].isDefaultVisible}
+              isReordering={reorderMode}
+              openTransactionsPopover={onShowExactTransactions}
+              openDetails={onOpenDetails}
+            />,
+            ...renderChildren,
+          ]
+        }
+
+        const isExpanded =
+          !!renderChildren.length && expanded.includes(parent.id)
 
         return (
           <Parent
@@ -63,39 +108,20 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
                 id={parent.id}
                 month={month}
                 metric={metric}
-                isSelf={parent.isSelf}
-                isDefaultVisible={parent.isDefaultVisible}
-                openTransactionsPopover={onShowTransactions}
-                openDetails={onOpenDetails}
+                isDefaultVisible={isDefaultVisible}
                 isExpanded={isExpanded}
                 isReordering={reorderMode}
+                openDetails={onOpenDetails}
+                openTransactionsPopover={onShowTransactions}
               />
             }
-            children={parent.children
-              .filter(parent => showAll || parent.isDefaultVisible)
-              .map((child, idx, arr) => (
-                <Row
-                  key={'child' + child.id}
-                  id={child.id}
-                  month={month}
-                  metric={metric}
-                  isSelf={child.isSelf}
-                  isDefaultVisible={child.isDefaultVisible}
-                  isLastVisibleChild={idx === arr.length - 1}
-                  isExpanded={false}
-                  isReordering={reorderMode}
-                  openTransactionsPopover={() =>
-                    onShowTransactions(child.id, { isExact: true })
-                  }
-                  openDetails={onOpenDetails}
-                />
-              ))}
+            children={renderChildren}
           />
         )
       })
     if (!parents.length) return null
     return (
-      <EnvelopeGroup key={group.name} group={group}>
+      <EnvelopeGroup key={group.id} name={group.id}>
         {parents}
       </EnvelopeGroup>
     )
@@ -127,11 +153,11 @@ export const EnvelopeTable = memo(
 )
 
 type TEnvelopeGroupProps = {
-  group: TGroupInfo
+  name: string
   children?: React.ReactNode[]
 }
 
-const EnvelopeGroup: FC<TEnvelopeGroupProps> = ({ group, children }) => {
+const EnvelopeGroup: FC<TEnvelopeGroupProps> = ({ name, children }) => {
   return (
     <>
       <Typography
@@ -141,12 +167,12 @@ const EnvelopeGroup: FC<TEnvelopeGroupProps> = ({ group, children }) => {
           pb: 1,
           pt: 2,
           fontWeight: 900,
-          borderBottom: `1px solid black`,
+          borderBottom: `0.5px solid black`,
           borderColor: 'divider',
           '&:last-child': { border: 0 },
         }}
       >
-        {group.name}
+        {name}
       </Typography>
       {children}
     </>

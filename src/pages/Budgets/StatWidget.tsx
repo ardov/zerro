@@ -69,7 +69,7 @@ export function StatWidget(props: {
           currency={displayCurrency}
         />
 
-        <PercentBar data={data} mt={1.5} />
+        {!!totalAmount && <PercentBar data={data} mt={1.5} />}
         <Collapse in={opened} unmountOnExit>
           <Stack gap={1.5} mt={2}>
             {data.map(point => (

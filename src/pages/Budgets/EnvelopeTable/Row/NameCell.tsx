@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from 'react'
+import React, { FC, memo, ReactNode } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { Typography, Box, IconButton, Collapse, Chip } from '@mui/material'
 import { EmojiIcon } from '@shared/ui/EmojiIcon'
@@ -16,7 +16,7 @@ export const NameCell: FC<{
   isSelf?: boolean
   isReordering: boolean
   isDefaultVisible: boolean
-}> = props => {
+}> = memo(props => {
   const { id, symbol, color, name, currency, comment } = props.envelope
   const { isReordering, isDefaultVisible, isChild, isSelf } = props
   const [displayCurrency] = useDisplayCurrency()
@@ -78,7 +78,7 @@ export const NameCell: FC<{
       )}
     </Box>
   )
-}
+})
 
 const envDraggableSx = {
   my: -1,

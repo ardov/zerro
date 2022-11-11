@@ -82,6 +82,11 @@ export const Row: FC<EnvelopeRowProps> = props => {
       : 0
 
   const handleNameClick = useCallback(() => openDetails(id), [id, openDetails])
+  const handleGoalClick: React.MouseEventHandler<HTMLButtonElement> =
+    useCallback(
+      e => openGoalPopover(id, e.currentTarget),
+      [id, openGoalPopover]
+    )
 
   return (
     <Droppable
@@ -135,7 +140,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
           <GoalButton
             goal={goalInfo?.goal}
             goalProgress={goalInfo?.progress}
-            onClick={e => openGoalPopover(id, e.currentTarget)}
+            onClick={handleGoalClick}
           />
         )}
       </RowWrapper>

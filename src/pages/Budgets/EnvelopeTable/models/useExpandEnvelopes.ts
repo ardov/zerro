@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { isZero } from '@shared/helpers/money'
 import { toISOMonth } from '@shared/helpers/date'
 import { TEnvelopeId, TISOMonth } from '@shared/types'
-import { useEnvelopeGroups } from './envelopeGroups'
+import { useEnvRenderInfo } from './envRenderInfo'
 
 export function useExpandEnvelopes(month: TISOMonth = toISOMonth(new Date())): {
   expanded: TEnvelopeId[]
@@ -10,19 +9,11 @@ export function useExpandEnvelopes(month: TISOMonth = toISOMonth(new Date())): {
   expandAll: () => void
   collapseAll: () => void
 } {
-  const groups = useEnvelopeGroups(month)
-  const defaultExpanded: TEnvelopeId[] = []
-  groups.forEach(group => {
-    group.children.forEach(node => {
-      if (
-        !isZero(node.childrenLeftover) ||
-        !isZero(node.childrenBudgeted) ||
-        !isZero(node.childrenSurplus)
-      ) {
-        defaultExpanded.push(node.id)
-      }
-    })
-  })
+  const renderInfo = useEnvRenderInfo(month)
+  const defaultExpanded = Object.values(renderInfo)
+    .filter(e => e.isDefaultExpanded)
+    .map(e => e.id)
+
   const [expanded, setExpanded] = useState(defaultExpanded)
   return {
     expanded,
@@ -32,12 +23,9 @@ export function useExpandEnvelopes(month: TISOMonth = toISOMonth(new Date())): {
         : setExpanded([...expanded, id])
     },
     expandAll: () => {
-      let expandedList: TEnvelopeId[] = []
-      groups.forEach(group => {
-        group.children.forEach(node => {
-          expandedList.push(node.id)
-        })
-      })
+      let expandedList = Object.values(renderInfo)
+        .filter(e => e.hasChildren)
+        .map(e => e.id)
       setExpanded(expandedList)
     },
     collapseAll: () => setExpanded([]),

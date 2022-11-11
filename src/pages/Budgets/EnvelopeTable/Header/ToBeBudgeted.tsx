@@ -17,7 +17,6 @@ import { DataLine } from '@shared/ui/DataLine'
 import { ArrowForwardIcon } from '@shared/ui/Icons'
 
 import { useDisplayCurrency, useToDisplay } from '@entities/displayCurrency'
-import { useMonthTotals } from '@entities/envelopeData'
 import { balances } from '@entities/envBalances'
 
 type TMsgType = 'error' | 'warning' | 'success'
@@ -84,10 +83,10 @@ function useTotalsModel() {
   const monthList = balances.useMonthList()
   const lastMonth = monthList[monthList.length - 1]
 
-  const totals = useMonthTotals(month)
-  const lastTotals = useMonthTotals(lastMonth)
+  const totals = balances.useTotals()[month]
+  const lastTotals = balances.useTotals()[lastMonth]
 
-  const toBeBudgeted = toDisplay(totals.toBeBudgetedFx)
+  const toBeBudgeted = toDisplay(totals.toBeBudgeted)
   const overspend = toDisplay(totals.overspend)
   const hasFutureOverspend = toDisplay(lastTotals.overspend)
   const fundsEnd = toDisplay(totals.fundsEnd)
