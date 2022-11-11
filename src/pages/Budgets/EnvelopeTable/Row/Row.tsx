@@ -5,8 +5,8 @@ import {
   useMediaQuery,
   Theme,
   IconButtonProps,
-  ButtonBaseProps,
-  ButtonBase,
+  BoxProps,
+  Box,
 } from '@mui/material'
 import { SxProps } from '@mui/system'
 import { Tooltip } from '@shared/ui/Tooltip'
@@ -165,7 +165,7 @@ const Droppable: FC<{
 }
 
 const RowWrapper: FC<
-  ButtonBaseProps & {
+  BoxProps & {
     isChild: boolean
   }
 > = props => {
@@ -173,6 +173,7 @@ const RowWrapper: FC<
   const style: SxProps = {
     ...rowStyle,
     position: 'relative',
+    cursor: 'pointer',
     // transition: '0.1s',
     // borderRadius: 1,
     '&:hover': { bgcolor: 'action.hover', transition: '0.1s' },
@@ -182,10 +183,11 @@ const RowWrapper: FC<
     '&:not(:hover) .addGoal': { opacity: 0 },
     '& > *': { py: isChild ? 0.5 : 1 },
   }
+  // TODO: make it clickable in an accessible way
   return (
-    <ButtonBase sx={style} disableRipple {...delegated}>
+    <Box sx={style} {...delegated}>
       {children}
-    </ButtonBase>
+    </Box>
   )
 }
 
