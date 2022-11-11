@@ -9,8 +9,8 @@ import { useCachedValue } from '@shared/hooks/useCachedValue'
 import { useSearchParam } from '@shared/hooks/useSearchParam'
 import { nextMonth, prevMonth, toISOMonth } from '@shared/helpers/date'
 import { useMonth } from '@shared/hooks/useMonth'
-import { useAppSelector } from '@store'
-import { getMonthList, useMonthList } from '@entities/envelopeData'
+
+import { balances } from '@entities/envBalances'
 import { MonthInfo } from './MonthInfo'
 import { EnvelopePreview } from './EnvelopePreview'
 import { BudgetTransactionsDrawer, useTrDrawer } from './TransactionsDrawer'
@@ -21,7 +21,7 @@ import { GoalPopoverProvider } from './GoalPopover'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
-  const monthList = useMonthList()
+  const monthList = balances.useMonthList()
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
 
@@ -158,7 +158,7 @@ const BudgetLayout: FC<{
 }
 
 function useMonthHotkeys() {
-  const monthList = useAppSelector(getMonthList)
+  const monthList = balances.useMonthList()
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
   const [month, setMonth] = useMonth()

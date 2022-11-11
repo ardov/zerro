@@ -121,7 +121,6 @@ const AccHist = ({ id, startDate = 0, endDate, onClick }) => {
             onClick={e => {
               if (!e) return
               const date = data[e.activeLabel].date
-              console.log({ history, acc })
               onClick(id, date)
             }}
             onMouseMove={e => e && setHoverIdx(e.activeLabel ?? null)}

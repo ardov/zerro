@@ -12,14 +12,14 @@ import {
 } from '@mui/material'
 import { AmountInput } from '@shared/ui/AmountInput'
 import { getGoals, setGoal, deleteGoal } from '@entities/old-hiddenData/goals'
-import { goalType } from '@entities/old-hiddenData/constants'
+import { oldGoalType } from '@entities/old-hiddenData/constants'
 import { CloseIcon } from '@shared/ui/Icons'
 import { formatDate } from '@shared/helpers/date'
-import { TDateDraft, TGoal } from '@shared/types'
+import { TDateDraft, TOldGoal } from '@shared/types'
 import { toISODate } from '@shared/helpers/date'
 import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
 
-const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = goalType
+const { MONTHLY, MONTHLY_SPEND, TARGET_BALANCE } = oldGoalType
 
 const amountLabels = {
   [MONTHLY]: 'Откладывать каждый месяц',
@@ -34,13 +34,13 @@ export const GoalPopover: FC<PopoverProps & { id: string }> = props => {
 
   const [amount, setAmount] = useState(goal.amount || 0)
   const [type, setType] = useState(goal.type || MONTHLY_SPEND)
-  const [endDate, setEndDate] = useState<TGoal['end']>(goal.end)
+  const [endDate, setEndDate] = useState<TOldGoal['end']>(goal.end)
 
   const [monthPopoverAnchor, setMonthPopoverAnchor] =
     useState<typeof props['anchorEl']>(null)
 
   const handleTypeChange: OutlinedTextFieldProps['onChange'] = e =>
-    setType(e.target.value as goalType)
+    setType(e.target.value as oldGoalType)
   const openMonthPopover = () => setMonthPopoverAnchor(props.anchorEl)
   const closeMonthPopover = () => setMonthPopoverAnchor(null)
   const handleDateChange = (date?: TDateDraft) => {

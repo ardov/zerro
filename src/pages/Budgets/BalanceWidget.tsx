@@ -1,19 +1,17 @@
-import { getMonthTotals } from '@entities/envelopeData'
-import { useDisplayCurrency } from '@entities/instrument/hooks'
-import { Chip, Divider, Paper, Typography } from '@mui/material'
+import { Divider, Paper, Typography } from '@mui/material'
 import { keys } from '@shared/helpers/keys'
-import { convertFx, formatMoney } from '@shared/helpers/money'
 import pluralize from '@shared/helpers/pluralize'
-import { TFxAmount, TISOMonth } from '@shared/types'
+import { TISOMonth } from '@shared/types'
 import { DataLine } from '@shared/ui/DataLine'
 import { Total } from '@shared/ui/Total'
-import { useAppSelector } from '@store/index'
+
+import { useDisplayCurrency, useToDisplay } from '@entities/displayCurrency'
+import { balances } from '@entities/envBalances'
 
 export function BalanceWidget(props: { month: TISOMonth }) {
-  const totals = useAppSelector(getMonthTotals)[props.month]
-  const displayCurrency = useDisplayCurrency()
-  const { rates } = totals
-  const toDisplay = (a: TFxAmount) => convertFx(a, displayCurrency, rates)
+  const totals = balances.useTotals()[props.month]
+  const [displayCurrency] = useDisplayCurrency()
+  const toDisplay = useToDisplay(props.month)
   const currencies = keys(totals.fundsEnd)
   const currCount = currencies.length
 
@@ -25,7 +23,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
   const fundsChange = toDisplay(totals.fundsChange)
   const available = toDisplay(totals.available)
   const budgetedInFuture = toDisplay(totals.budgetedInFuture)
-  const toBeBudgeted = toDisplay(totals.toBeBudgetedFx)
+  const toBeBudgeted = toDisplay(totals.toBeBudgeted)
   const overspend = toDisplay(totals.overspend)
 
   const smartBudgetedInFuture = toBeBudgeted < 0 ? 0 : budgetedInFuture

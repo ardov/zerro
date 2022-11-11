@@ -1,36 +1,25 @@
-import React, { FC, ReactNode } from 'react'
+import React, { FC, memo, ReactNode } from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import {
-  Typography,
-  Box,
-  IconButton,
-  ButtonBase,
-  Collapse,
-} from '@mui/material'
+import { Typography, Box, IconButton, Collapse, Chip } from '@mui/material'
 import { EmojiIcon } from '@shared/ui/EmojiIcon'
 import { DragIndicatorIcon } from '@shared/ui/Icons'
-import { TEnvelopeId } from '@shared/types'
+import { TEnvelopeId, TFxCode } from '@shared/types'
 import { DragTypes } from '../../DnDContext'
 import { TEnvelope } from '@entities/envelope'
-import { CurrencyTag } from './Row'
+import { useDisplayCurrency } from '@entities/displayCurrency'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { getCurrencySymbol } from '@shared/helpers/money'
 
 export const NameCell: FC<{
   envelope: TEnvelope
-  isChild: boolean
+  isChild?: boolean
+  isSelf?: boolean
   isReordering: boolean
   isDefaultVisible: boolean
-  hasCustomCurency: boolean
-  dropIndicator: boolean | 'child'
-  onClick: (e: React.MouseEvent) => void
-}> = props => {
-  const {
-    isReordering,
-    isDefaultVisible,
-    hasCustomCurency,
-    isChild,
-    dropIndicator,
-  } = props
+}> = memo(props => {
   const { id, symbol, color, name, currency, comment } = props.envelope
+  const { isReordering, isDefaultVisible, isChild, isSelf } = props
+  const [displayCurrency] = useDisplayCurrency()
 
   return (
     <Box
@@ -51,28 +40,29 @@ export const NameCell: FC<{
         </EnvDraggable>
       )}
 
-      <ButtonBase
+      <Box
         sx={{
-          p: 0.5,
-          m: -0.5,
-          borderRadius: 1,
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
           flexShrink: 1,
           minWidth: 0,
-          transition: '0.1s',
-          typography: 'body1',
           opacity: isDefaultVisible ? 1 : 0.5,
-          '&:hover': { bgcolor: 'action.hover', opacity: 1 },
-          '&:focus': { bgcolor: 'action.focus' },
         }}
-        onClick={props.onClick}
       >
-        <EmojiIcon symbol={symbol} mr={1.5} color={color} />
+        <EmojiIcon
+          symbol={isSelf ? '–' : symbol}
+          color={isSelf ? null : color}
+          mr={1.5}
+        />
         <Typography component="span" variant="body1" title={name} noWrap>
           {name}
+          {isSelf ? ' (основная)' : ''}
         </Typography>
-      </ButtonBase>
+      </Box>
 
-      {hasCustomCurency && <CurrencyTag currency={currency} />}
+      {displayCurrency !== currency && <CurrencyTag currency={currency} />}
 
       {!!comment && (
         <Typography
@@ -88,7 +78,8 @@ export const NameCell: FC<{
       )}
     </Box>
   )
-}
+})
+
 const envDraggableSx = {
   my: -1,
   display: 'grid',
@@ -96,10 +87,9 @@ const envDraggableSx = {
   cursor: 'grab',
   touchAction: 'none',
 }
-const EnvDraggable: FC<{ id: TEnvelopeId; children: ReactNode }> = ({
-  id,
-  children,
-}) => {
+
+const EnvDraggable: FC<{ id: TEnvelopeId; children: ReactNode }> = props => {
+  const { id, children } = props
   const { setNodeRef, attributes, listeners } = useDraggable({
     id: 'envelope' + id,
     data: { type: DragTypes.envelope, id: id },
@@ -108,5 +98,16 @@ const EnvDraggable: FC<{ id: TEnvelopeId; children: ReactNode }> = ({
     <span ref={setNodeRef} {...attributes} {...listeners}>
       {children}
     </span>
+  )
+}
+
+const CurrencyTag: FC<{ currency?: TFxCode }> = ({ currency }) => {
+  if (!currency) return null
+  return (
+    <Tooltip
+      title={`Бюджет этой категории задаётся в ${currency}. Он будет пересчитываться автоматически по текущему курсу.`}
+    >
+      <Chip label={getCurrencySymbol(currency)} size="small" />
+    </Tooltip>
   )
 }

@@ -4,9 +4,10 @@ import { prevMonth, toISODate, toISOMonth } from '@shared/helpers/date'
 import { TEnvelopeId, TFxAmount, TISODate, TISOMonth } from '@shared/types'
 import { add, convertFx, sub } from '@shared/helpers/money'
 import { useAppSelector } from '@store/index'
-import { getTotalChanges, useRates } from '@entities/envelopeData'
-import { useDisplayCurrency } from '@entities/instrument/hooks'
+// import { getTotalChanges } from '@entities/envelopeData'
+import { useDisplayCurrency } from '@entities/displayCurrency'
 import { useMonth } from '@shared/hooks/useMonth'
+import { balances } from '@entities/envBalances'
 
 type ChartProps = {
   mode: 'balance' | 'outcome' | 'income'
@@ -72,44 +73,45 @@ type TTrendNode = {
 }
 
 function useDataTrend(month: TISOMonth, id?: TEnvelopeId): TTrendNode[] {
-  const displayCurrency = useDisplayCurrency()
-  const rates = useRates(month)
-  const toDisplay = (a: TFxAmount) => convertFx(a, displayCurrency, rates)
-  const changes = useAppSelector(getTotalChanges)[month]
-  if (!changes) return []
+  return []
+  // const [displayCurrency] = useDisplayCurrency()
+  // const rates = balances.useRates()[month].rates
+  // const toDisplay = (a: TFxAmount) => convertFx(a, displayCurrency, rates)
+  // const changes = useAppSelector(getTotalChanges)[month]
+  // if (!changes) return []
 
-  const node = id ? changes.byEnvelope[id] : changes.sum
-  const { trend, trendIncome, trendOutcome } = node
+  // const node = id ? changes.byEnvelope[id] : changes.sum
+  // const { trend, trendIncome, trendOutcome } = node
 
-  const currDate = toISODate(new Date())
-  let balance = 0
-  let totalIncome = 0
-  let totalOutcome = 0
+  // const currDate = toISODate(new Date())
+  // let balance = 0
+  // let totalIncome = 0
+  // let totalOutcome = 0
 
-  const result: TTrendNode[] = trend.map((_, i) => {
-    balance = add(balance, toDisplay(trend[i]))
-    totalIncome = add(totalIncome, toDisplay(trendIncome[i]))
-    totalOutcome = sub(totalOutcome, toDisplay(trendOutcome[i]))
-    const date = getDate(i + 1)
+  // const result: TTrendNode[] = trend.map((_, i) => {
+  //   balance = add(balance, toDisplay(trend[i]))
+  //   totalIncome = add(totalIncome, toDisplay(trendIncome[i]))
+  //   totalOutcome = sub(totalOutcome, toDisplay(trendOutcome[i]))
+  //   const date = getDate(i + 1)
 
-    if (!date || currDate < date) {
-      return {
-        day: i,
-        date: null,
-        balance: null,
-        totalIncome: null,
-        totalOutcome: null,
-      }
-    }
+  //   if (!date || currDate < date) {
+  //     return {
+  //       day: i,
+  //       date: null,
+  //       balance: null,
+  //       totalIncome: null,
+  //       totalOutcome: null,
+  //     }
+  //   }
 
-    return { day: i, date, balance, totalIncome, totalOutcome }
-  })
+  //   return { day: i, date, balance, totalIncome, totalOutcome }
+  // })
 
-  return result
+  // return result
 
-  function getDate(day: number) {
-    const isoDate = (month + '-' + day.toString().padStart(2, '0')) as TISODate
-    const isValid = new Date(isoDate).toString() !== 'Invalid Date'
-    return isValid ? isoDate : null
-  }
+  // function getDate(day: number) {
+  //   const isoDate = (month + '-' + day.toString().padStart(2, '0')) as TISODate
+  //   const isValid = new Date(isoDate).toString() !== 'Invalid Date'
+  //   return isValid ? isoDate : null
+  // }
 }

@@ -4,8 +4,7 @@ import { keys } from '@shared/helpers/keys'
 import { toISOMonth } from '@shared/helpers/date'
 import { TSelector } from '@store'
 import { getInstruments } from '@entities/instrument'
-import { fxRateStore, TFxRatesStoredValue } from './fxRateStore'
-import { TFxRates } from '.'
+import { fxRateStore, TFxRates, TFxRatesStoredValue } from './fxRateStore'
 
 export type TFxRateData = {
   date: TISOMonth

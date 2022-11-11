@@ -9,7 +9,7 @@ export enum DataReminderType {
   TAG_META = 'tagMeta',
 }
 
-export enum goalType {
+export enum oldGoalType {
   MONTHLY = 'monthly', // monthly contribution
   MONTHLY_SPEND = 'monthlySpend', // monthly spend
   TARGET_BALANCE = 'targetBalance', //

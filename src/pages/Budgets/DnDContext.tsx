@@ -1,9 +1,14 @@
 import React, { FC, ReactNode, useState } from 'react'
 import {
+  useDndMonitor,
+  useSensor,
+  useSensors,
   DndContext,
   DragOverlay,
   DragEndEvent,
-  useDndMonitor,
+  MouseSensor,
+  TouchSensor,
+  KeyboardSensor,
 } from '@dnd-kit/core'
 import { useCallback } from 'react'
 import { useMonth } from '@shared/hooks/useMonth'
@@ -12,9 +17,9 @@ import { useToggle } from '@shared/hooks/useToggle'
 import { TEnvelopeId } from '@shared/types'
 import { Box, SxProps } from '@mui/system'
 import { useAppSelector } from '@store/index'
-import { getMonthTotals } from '@entities/envelopeData'
 import { Typography } from '@mui/material'
 import { createPortal } from 'react-dom'
+import { getEnvelopes } from '@entities/envelope'
 
 export enum DragTypes {
   amount = 'amount',
@@ -24,6 +29,8 @@ export enum DragTypes {
 export type TDragData = {
   type: DragTypes
   id: TEnvelopeId
+  isExpanded?: boolean
+  isLastVisibleChild?: boolean
 }
 
 const autoscrollOptions = { threshold: { x: 0, y: 0.2 } }
@@ -31,6 +38,14 @@ const vibrate = () => window?.navigator?.vibrate?.(100)
 
 export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
   const [month] = useMonth()
+
+  const sensors = useSensors(
+    useSensor(MouseSensor),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 250, tolerance: 5 },
+    }),
+    useSensor(KeyboardSensor)
+  )
 
   const [moneySource, setMoneySource] =
     useState<TEnvelopeId | 'toBeBudgeted'>('toBeBudgeted')
@@ -55,6 +70,7 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
 
   return (
     <DndContext
+      sensors={sensors}
       onDragStart={vibrate}
       onDragEnd={onDragEnd}
       autoScroll={autoscrollOptions}
@@ -85,11 +101,9 @@ const props: SxProps = {
 }
 
 const DragObj = () => {
-  const [month] = useMonth()
   const [activeType, setActiveType] = useState<DragTypes>(DragTypes.amount)
   const [activeId, setActiveId] = useState<TEnvelopeId>()
-  const totals = useAppSelector(getMonthTotals)[month]
-  const env = activeId && totals.envelopes[activeId]
+  const envelopes = useAppSelector(getEnvelopes)
 
   useDndMonitor({
     onDragStart(e) {
@@ -105,7 +119,9 @@ const DragObj = () => {
       <Box sx={props}>Денюшки</Box>
     ) : activeType === DragTypes.envelope ? (
       <Box sx={props}>
-        <Typography noWrap>{env?.env?.name || 'Конверт'}</Typography>
+        <Typography noWrap>
+          {activeId ? envelopes[activeId].name : 'Конверт'}
+        </Typography>
       </Box>
     ) : null
 

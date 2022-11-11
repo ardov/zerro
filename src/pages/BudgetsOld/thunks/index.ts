@@ -11,7 +11,7 @@ import {
 import { getBudgetsByMonthAndTag, getBudget } from '@entities/budget'
 import { getTags } from '@entities/tag'
 import { getGoalsProgress } from '../selectors'
-import { goalType } from '@entities/old-hiddenData/constants'
+import { oldGoalType } from '@entities/old-hiddenData/constants'
 import { getGoals } from '@entities/old-hiddenData/goals'
 import { applyClientPatch } from '@store/data'
 import { AppThunk } from '@store'
@@ -153,7 +153,7 @@ export const fillGoals =
 
     const changedArr = []
     for (const tag in goalsProgress) {
-      if (goals[tag].type === goalType.TARGET_BALANCE && !goals[tag].end)
+      if (goals[tag].type === oldGoalType.TARGET_BALANCE && !goals[tag].end)
         continue
       const target = goalsProgress[tag]?.target || 0
       const currentBudget = budgets?.[tag]?.outcome || 0

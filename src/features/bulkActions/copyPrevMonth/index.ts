@@ -1,23 +1,31 @@
 import { sendEvent } from '@shared/helpers/tracking'
-import { setEnvelopeBudgets, TBudgetUpdate } from '@entities/budget'
 import { AppThunk } from '@store'
 import { TISOMonth } from '@shared/types'
 import { prevMonth, toISOMonth } from '@shared/helpers/date'
-import { getMonthTotals } from '@entities/envelopeData'
+import { balances } from '@entities/envBalances'
+import {
+  setEnvelopeBudgets,
+  TEnvBudgetUpdate,
+} from '@features/setEnvelopeBudget'
 
 export const copyPreviousBudget =
   (month: TISOMonth): AppThunk<void> =>
   (dispatch, getState) => {
     sendEvent('Budgets: copy previous')
-    const state = getState()
-    const totals = getMonthTotals(state)
-    const prevMonthISO = toISOMonth(prevMonth(month))
-    const prevEnvelopes = totals[prevMonthISO].envelopes
-    const currentEnvelopes = totals[month].envelopes
-    const updates: TBudgetUpdate[] = []
-    Object.values(prevEnvelopes).forEach(({ id, selfBudgetedValue }) => {
-      let prevVal = selfBudgetedValue
-      let currVal = currentEnvelopes[id].selfBudgetedValue
+    const envData = balances.envData(getState())
+    const curr = envData[month]
+    const prev = envData[toISOMonth(prevMonth(month))]
+
+    if (!curr || !prev) return
+
+    const updates: TEnvBudgetUpdate[] = []
+    Object.values(prev).forEach(({ id, currency, selfBudgeted }) => {
+      let prevVal = selfBudgeted[currency]
+      let currVal = curr[id].selfBudgeted[currency]
+      console.assert(
+        typeof prevVal === 'number' && typeof currVal === 'number',
+        'Value is not number'
+      )
       if (prevVal === currVal) return
       updates.push({ id, value: prevVal, month })
     })

@@ -10,11 +10,11 @@ export type GoalProgress = {
 }
 
 type TContext = {
+  month: TISOMonth
   leftover: number
   budgeted: number
   available: number
   generalIncome: number
-  month: TISOMonth
 }
 
 export function calculateGoalProgress(

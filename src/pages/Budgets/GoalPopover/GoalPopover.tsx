@@ -1,5 +1,4 @@
 import React, { useState, FC } from 'react'
-import { useAppDispatch } from '@store'
 import {
   Box,
   Popover,
@@ -15,8 +14,10 @@ import { CloseIcon } from '@shared/ui/Icons'
 import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
 import { toISODate, formatDate } from '@shared/helpers/date'
 import { TDateDraft, TEnvelopeId, TISOMonth } from '@shared/types'
-import { goalType, setGoal, TGoal } from '@entities/goal'
-import { useMonthTotals } from '@entities/envelopeData'
+import { useAppDispatch, useAppSelector } from '@store'
+
+import { goalModel, goalType, TGoal } from '@entities/goal'
+import { getEnvelopes } from '@entities/envelope'
 
 const amountLabels = {
   [goalType.MONTHLY]: 'Откладывать каждый месяц',
@@ -43,9 +44,9 @@ export const GoalPopover: FC<
 const GoalPopoverContent: FC<TGoalPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
   const dispatch = useAppDispatch()
-  const envelope = useMonthTotals(month).envelopes[id]
-  const { goal } = envelope
-  const { currency } = envelope.env
+  const envelope = useAppSelector(getEnvelopes)[id]
+  const goalInfo = goalModel.useGoals()[month][id] || {}
+  const { goal } = goalInfo
 
   const [type, setType] = useState(goal?.type || goalType.MONTHLY_SPEND)
   const isInPercents = type === goalType.INCOME_PERCENT
@@ -76,12 +77,12 @@ const GoalPopoverContent: FC<TGoalPopoverProps> = props => {
       if (type === goalType.TARGET_BALANCE && endDate) {
         goal.end = endDate
       }
-      dispatch(setGoal(month, id, goal))
+      dispatch(goalModel.set(month, id, goal))
     }
     onClose?.({}, 'escapeKeyDown')
   }
   const removeGoal = () => {
-    dispatch(setGoal(month, id, null))
+    dispatch(goalModel.set(month, id, null))
     onClose?.({}, 'escapeKeyDown')
   }
 
@@ -119,7 +120,7 @@ const GoalPopoverContent: FC<TGoalPopoverProps> = props => {
               setRawValue(+value)
               save()
             }}
-            currency={isInPercents ? '%' : currency}
+            currency={isInPercents ? '%' : envelope.currency}
             placeholder="0"
           />
 

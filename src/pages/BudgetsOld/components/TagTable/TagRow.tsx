@@ -33,7 +33,7 @@ import { useContext } from 'react'
 import { IsDraggingContext, DragModeContext, DragModeType } from '../DnDContext'
 import { getPopulatedTag } from '@entities/tag'
 import { getAmountsById } from '@pages/BudgetsOld/selectors'
-import { TGoal, TISOMonth } from '@shared/types'
+import { TOldGoal, TISOMonth } from '@shared/types'
 import { getTagMeta } from '@entities/old-hiddenData/tagMeta'
 import { getInstruments } from '@entities/instrument'
 import { getUserInstrumentId } from '@entities/user'
@@ -422,7 +422,7 @@ const AvailableCell: FC<AvailableCellProps> = props => {
 // }> = props => {}
 
 type GoalButtonProps = {
-  goal: TGoal
+  goal: TOldGoal
   goalProgress?: GoalProgressType | null
   onClick: IconButtonProps['onClick']
 }

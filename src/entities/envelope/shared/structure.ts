@@ -16,6 +16,7 @@ export function getRightParent(
   const parent = byId[parentId]
   if (!parent) return null
   if (!parent.parent) return parentId
+  if (parent.parent === parentId) return null // prevent cycles
   return getRightParent(parent.parent, byId)
 }
 

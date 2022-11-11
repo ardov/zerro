@@ -1,5 +1,5 @@
 import { ById } from './ts-utils'
-import { goalType } from '@entities/old-hiddenData/constants'
+import { oldGoalType } from '@entities/old-hiddenData/constants'
 import {
   TZmDiff,
   TZmDeletionObject,
@@ -46,8 +46,8 @@ export type TTagMeta = {
   currency?: TInstrumentId
 }
 
-export type TGoal = {
-  type: goalType
+export type TOldGoal = {
+  type: oldGoalType
   amount: number
   end?: TISODate
 }

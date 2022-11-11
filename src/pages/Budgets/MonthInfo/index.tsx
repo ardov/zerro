@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
-import { useAppDispatch, useAppSelector } from '@store'
-import { formatMoney } from '@shared/helpers/money'
+import { useAppDispatch } from '@store'
+import { isZero } from '@shared/helpers/money'
 import { formatDate } from '@shared/helpers/date'
 import { Confirm } from '@shared/ui/Confirm'
 import { startFresh } from '@features/bulkActions/startFresh'
@@ -18,6 +18,9 @@ import { CloseIcon } from '@shared/ui/Icons'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { useMonth } from '@shared/hooks/useMonth'
 import { TDateDraft } from '@shared/types'
+
+import { balances } from '@entities/envBalances'
+import { DisplayAmount } from '@entities/displayCurrency'
 import {
   overspendModel,
   OverspendNotice,
@@ -31,11 +34,8 @@ type MonthInfoProps = BoxProps & { onClose: () => void }
 
 export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
   const [month] = useMonth()
-
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
-  const { totalOverspendValue, currency } = useAppSelector(
-    overspendModel.get
-  )?.[month]
+  const { overspend } = balances.useTotals()[month]
 
   const dispatch = useAppDispatch()
 
@@ -81,7 +81,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
             </Button>
           </Confirm>
 
-          {!!totalOverspendValue && (
+          {!isZero(overspend) && (
             <Confirm
               title="Избавиться от перерасходов?"
               onOk={() => dispatch(overspendModel.fixAll(month))}
@@ -90,7 +90,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
             >
               <Button fullWidth color="secondary">
                 Покрыть перерасходы (
-                {formatMoney(totalOverspendValue, currency)})
+                <DisplayAmount value={overspend} month={month} />)
               </Button>
             </Confirm>
           )}

@@ -9,4 +9,4 @@ export type TGoals = Record<TEnvelopeId, TGoal | null>
 
 export const goalStore = makeMonthlyHiddenStore<TGoals>(HiddenDataType.Goals)
 
-export const getGoals = goalStore.getData
+export const getRawGoals = goalStore.getData

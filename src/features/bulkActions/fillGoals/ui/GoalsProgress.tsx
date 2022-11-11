@@ -1,21 +1,15 @@
 import React, { FC } from 'react'
-import {
-  Typography,
-  ButtonBase,
-  useMediaQuery,
-  ButtonBaseProps,
-  Theme,
-  Box,
-} from '@mui/material'
-import { styled } from '@mui/styles'
+import { Typography, ButtonBase, ButtonBaseProps } from '@mui/material'
 import { TISOMonth } from '@shared/types'
 import { formatMoney } from '@shared/helpers/money'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { Confirm } from '@shared/ui/Confirm'
-import { useAppDispatch, useAppSelector } from '@store'
-import { totalGoalsModel } from '../model'
-import { useDisplayCurrency } from '@entities/instrument/hooks'
 import { RadialProgress } from '@shared/ui/RadialProgress'
+import { useAppDispatch, useAppSelector } from '@store'
+
+import { useDisplayCurrency, useToDisplay } from '@entities/displayCurrency'
+import { goalModel } from '@entities/goal'
+import { totalGoalsModel } from '../model'
 
 type TGoalsProgressProps = ButtonBaseProps & {
   month: TISOMonth
@@ -36,23 +30,21 @@ const baseStyles = {
 export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const { month, ...btnProps } = props
   const dispatch = useAppDispatch()
-  const currency = useDisplayCurrency()
-  const totalProgress = useAppSelector(totalGoalsModel.getTotals)[month]
+  const [currency] = useDisplayCurrency()
+  const toDisplay = useToDisplay(month)
+  const totalProgress = useAppSelector(goalModel.getTotals)[month]
   const formatSum = (sum: number) => formatMoney(sum, currency)
 
   const onOk = () => dispatch(totalGoalsModel.fillAll(month))
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+  // const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
   // No goals
-  if (!totalProgress || totalProgress.goalsCount === 0) {
-    return (
-      <ButtonBase sx={baseStyles} {...btnProps}>
-        <Typography variant="body1">🚩 Пока целей нет</Typography>
-      </ButtonBase>
-    )
-  }
+  if (!totalProgress || totalProgress.goalsCount === 0) return null
 
-  const { needValue, targetValue, progress } = totalProgress
+  const { need, target, progress } = totalProgress
+  const targetValue = toDisplay(target)
+  const needValue = toDisplay(need)
+  if (!targetValue || !needValue) return null
 
   // All completed
   // if (totalProgress.progress === 1) {
@@ -89,30 +81,3 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
     </Confirm>
   )
 }
-
-const StyledBase = styled(ButtonBase)(({ theme }) => ({
-  display: 'flex',
-  borderRadius: theme.shape.borderRadius,
-  // padding: theme.spacing(1.5, 2),
-  background: theme.palette.background.paper,
-  boxShadow: theme.shadows[2],
-  position: 'relative',
-  overflow: 'hidden',
-
-  [theme.breakpoints.down('xs')]: {
-    flexDirection: 'row-reverse',
-    justifyContent: 'space-between',
-  },
-}))
-
-const Bar = styled(Box)(({ theme }) => ({
-  position: 'absolute',
-  width: '100%',
-  transformOrigin: 'right',
-  top: 0,
-  bottom: 0,
-  right: -1,
-  backgroundColor: theme.palette.action.selected,
-  willChange: 'transform',
-  transition: '0.4s ease-in-out',
-}))

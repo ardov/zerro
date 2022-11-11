@@ -1,9 +1,15 @@
 import { sendEvent } from '@shared/helpers/tracking'
-import { setEnvelopeBudgets, TBudgetUpdate } from '@entities/budget'
-import { AppThunk } from '@store'
 import { TISOMonth } from '@shared/types'
 import { prevMonth, toISOMonth } from '@shared/helpers/date'
-import { getMonthTotals } from '@entities/envelopeData'
+import { AppThunk } from '@store'
+
+import {
+  setEnvelopeBudgets,
+  TEnvBudgetUpdate,
+} from '@features/setEnvelopeBudget'
+import { balances } from '@entities/envBalances'
+import { keys } from '@shared/helpers/keys'
+import { isZero } from '@shared/helpers/money'
 
 export const startFresh =
   (month: TISOMonth): AppThunk<void> =>
@@ -17,20 +23,20 @@ export const startFresh =
 
 /**
  * Removes all budgets after given month
- * @param month
+ * @param targetMonth
  */
 export const removeFutureBudgets =
-  (month: TISOMonth): AppThunk<void> =>
+  (targetMonth: TISOMonth): AppThunk<void> =>
   (dispatch, getState) => {
-    let totals = getMonthTotals(getState())
-    const updates = Object.values(totals)
-      .filter(t => t.month > month)
-      .reduce((updates, monthTotals) => {
-        return Object.values(monthTotals.envelopes)
-          .filter(e => e.selfBudgetedValue)
-          .map(e => ({ id: e.id, value: 0, month: monthTotals.month }))
+    const envData = balances.envData(getState())
+    const updates = keys(envData)
+      .filter(month => month > targetMonth)
+      .reduce((updates, month) => {
+        return Object.values(envData[month])
+          .filter(e => !isZero(e.selfBudgeted))
+          .map(e => ({ id: e.id, value: 0, month }))
           .concat(updates)
-      }, [] as Array<TBudgetUpdate>)
+      }, [] as Array<TEnvBudgetUpdate>)
     dispatch(setEnvelopeBudgets(updates))
   }
 
@@ -51,30 +57,29 @@ export const resetMonthThunk =
   (month: TISOMonth): AppThunk<void> =>
   (dispatch, getState) => {
     // Step 1. Remove children balances
-    let totals = getMonthTotals(getState())[month]
-    const updates = Object.values(totals.envelopes)
-      .filter(e => e.env.parent) // Only children
-      .filter(
-        e =>
-          e.selfBudgetedValue !== 0 || // has budget
-          e.selfAvailableValue > 0 || // has positive balance
-          (e.selfAvailableValue < 0 && e.env.carryNegatives) // carry negatives
-      )
+    const envData = balances.envData(getState())[month]
+    const updates = Object.values(envData)
+      .filter(e => e.parent) // Only children
+      .filter(e => {
+        let available = e.selfAvailable[e.currency]
+        if (!available) return false // already empty
+        return true
+      })
       .map(e => ({
         id: e.id,
-        value: e.selfBudgetedValue - e.selfAvailableValue,
+        value: e.totalBudgeted[e.currency] - e.selfAvailable[e.currency],
         month,
       }))
     dispatch(setEnvelopeBudgets(updates))
 
     // Step 2. Remove parent balances
-    let totals2 = getMonthTotals(getState())[month]
-    const updates2 = Object.values(totals2.envelopes)
-      .filter(e => !e.env.parent) // Only parents
-      .filter(e => e.selfAvailableValue) // with positive available or budget
+    const envData2 = balances.envData(getState())[month]
+    const updates2 = Object.values(envData2)
+      .filter(e => !e.parent) // Only parents
+      .filter(e => !isZero(e.selfAvailable)) // with positive available
       .map(e => ({
         id: e.id,
-        value: e.selfBudgetedValue - e.selfAvailableValue,
+        value: e.totalBudgeted[e.currency] - e.selfAvailable[e.currency],
         month,
       }))
     dispatch(setEnvelopeBudgets(updates2))

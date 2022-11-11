@@ -26,6 +26,7 @@ export const editRates =
     dispatch(fxRateStore.setData(newData, month))
   }
 
+/** Resets saved rates for month */
 export const resetRates =
   (month: TISOMonth): AppThunk =>
   dispatch => {

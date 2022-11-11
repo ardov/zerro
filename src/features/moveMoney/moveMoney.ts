@@ -1,13 +1,17 @@
-import { setEnvelopeBudgets, TBudgetUpdate } from '@entities/budget'
-import { getMonthTotals } from '@entities/envelopeData'
+import { balances } from '@entities/envBalances'
+import {
+  setEnvelopeBudgets,
+  TEnvBudgetUpdate,
+} from '@features/setEnvelopeBudget'
 import { convertFx, round } from '@shared/helpers/money'
 import { sendEvent } from '@shared/helpers/tracking'
-import { TISOMonth, TEnvelopeId } from '@shared/types'
+import { TISOMonth, TEnvelopeId, TFxCode } from '@shared/types'
 import { AppThunk } from '@store'
 
 export const moveMoney =
   (
     amount: number,
+    currency: TFxCode,
     source: TEnvelopeId | 'toBeBudgeted',
     destination: TEnvelopeId | 'toBeBudgeted',
     month: TISOMonth
@@ -16,28 +20,31 @@ export const moveMoney =
     if (!source || !amount || !destination || source === destination) return
     sendEvent('Budgets: move funds')
     const state = getState()
-    const { envelopes, currency, rates } = getMonthTotals(state)[month]
+    const rates = balances.rates(state)[month].rates
+    const metrics = balances.envData(state)[month]
 
-    const updates: TBudgetUpdate[] = []
+    const updates: TEnvBudgetUpdate[] = []
 
     if (source !== 'toBeBudgeted') {
-      const envelope = envelopes[source]
+      const env = metrics[source]
+      const budgeted = env.selfBudgeted[env.currency]
       const change =
-        envelope.env.currency === currency
+        env.currency === currency
           ? -amount
-          : convertFx({ [currency]: -amount }, envelope.env.currency, rates)
-      const newBudget = round(envelope.selfBudgetedValue + change)
-      updates.push({ month, id: envelope.id, value: newBudget })
+          : convertFx({ [currency]: -amount }, env.currency, rates)
+      const newBudget = round(budgeted + change)
+      updates.push({ month, id: env.id, value: newBudget })
     }
 
     if (destination !== 'toBeBudgeted') {
-      const envelope = envelopes[destination]
+      const env = metrics[destination]
+      const budgeted = env.selfBudgeted[env.currency]
       const change =
-        envelope.env.currency === currency
+        env.currency === currency
           ? amount
-          : convertFx({ [currency]: amount }, envelope.env.currency, rates)
-      const newBudget = round(envelope.selfBudgetedValue + change)
-      updates.push({ month, id: envelope.id, value: newBudget })
+          : convertFx({ [currency]: amount }, env.currency, rates)
+      const newBudget = round(budgeted + change)
+      updates.push({ month, id: env.id, value: newBudget })
     }
 
     dispatch(setEnvelopeBudgets(updates))

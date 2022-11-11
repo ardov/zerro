@@ -1,19 +1,22 @@
 import { FC } from 'react'
 import { Box, BoxProps, ButtonBase, Collapse, Stack } from '@mui/material'
 import { keys } from '@shared/helpers/keys'
-import { convertFx } from '@shared/helpers/money'
+import { add } from '@shared/helpers/money'
 import { useToggle } from '@shared/hooks/useToggle'
-import { TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
+import { TEnvelopeId, TISOMonth } from '@shared/types'
 import { DataLine } from '@shared/ui/DataLine'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { useAppSelector } from '@store/index'
-import { getMonthTotals, getTotalChanges } from '@entities/envelopeData'
-import { useDisplayCurrency } from '@entities/instrument/hooks'
+
+import { useDisplayCurrency, useToDisplay } from '@entities/displayCurrency'
+import { balances } from '@entities/envBalances'
+import { getEnvelopes } from '@entities/envelope'
+
 import { trMode, useTrDrawer } from './TransactionsDrawer'
-import { ChangesChart } from './ChangesChart'
 
 type DataPoint = {
-  id: TEnvelopeId
+  id: TEnvelopeId | 'transferFees'
+  mode: trMode
   color: string
   amount: number
   keepIncome: boolean
@@ -24,36 +27,22 @@ export function StatWidget(props: {
   month: TISOMonth
   mode: 'income' | 'outcome'
 }) {
+  const { month, mode } = props
   const { setDrawer } = useTrDrawer()
   const showIncome = props.mode === 'income'
-  const displayCurrency = useDisplayCurrency()
-  const totals = useAppSelector(getMonthTotals)[props.month]
-  const { rates } = totals
-  const changes = useAppSelector(getTotalChanges)[props.month]
+  const [displayCurrency] = useDisplayCurrency()
   const [opened, toggleOpened] = useToggle(false)
-  const toDisplay = (a: TFxAmount) => convertFx(a, displayCurrency, rates)
 
-  const totalAmount = toDisplay(
-    showIncome ? changes.sum.totalIncome : changes.sum.totalOutcome
+  const points = useDataPoints(month)
+
+  const data = points.filter(
+    point =>
+      (point.amount > 0 && mode === 'income') ||
+      (point.amount < 0 && mode === 'outcome')
   )
-  const data: DataPoint[] = []
-  keys(changes.byEnvelope).forEach(id => {
-    const amount = toDisplay(
-      showIncome
-        ? changes.byEnvelope[id].totalIncome
-        : changes.byEnvelope[id].totalOutcome
-    )
-    if (!amount) return
-    data.push({
-      id,
-      amount,
-      color:
-        totals.envelopes[id].env.color ||
-        totals.envelopes[id].env.colorGenerated,
-      keepIncome: totals.envelopes[id].env.keepIncome,
-      name: totals.envelopes[id].env.name,
-    })
-  })
+
+  const totalAmount = data.reduce((sum, point) => add(sum, point.amount), 0)
+
   data.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
 
   return (
@@ -69,10 +58,10 @@ export function StatWidget(props: {
           flexDirection: 'column',
         }}
       >
-        <Collapse in={opened} unmountOnExit>
+        {/* <Collapse in={opened} unmountOnExit>
           <ChangesChart mode={props.mode} />
           <Box height={12} />
-        </Collapse>
+        </Collapse> */}
 
         <DataLine
           name={showIncome ? 'Доходы' : 'Расходы'}
@@ -80,20 +69,20 @@ export function StatWidget(props: {
           currency={displayCurrency}
         />
 
-        <PercentBar data={data} mt={1.5} />
+        {!!totalAmount && <PercentBar data={data} mt={1.5} />}
         <Collapse in={opened} unmountOnExit>
           <Stack gap={1.5} mt={2}>
-            {data.map(envelope => (
+            {data.map(point => (
               <DataLine
-                key={envelope.id}
-                name={envelope.name}
-                amount={envelope.amount}
-                color={envelope.color}
+                key={point.id}
+                name={point.name}
+                amount={point.amount}
+                color={point.color}
                 currency={displayCurrency}
                 onClick={e => {
                   e.stopPropagation()
-                  setDrawer(envelope.id, {
-                    mode: showIncome ? trMode.income : trMode.outcome,
+                  setDrawer(point.id, {
+                    mode: point.mode,
                     isExact: true,
                   })
                 }}
@@ -131,4 +120,51 @@ const PercentBar: FC<BoxProps & { data: DataPoint[] }> = props => {
       ))}
     </Box>
   )
+}
+
+function useDataPoints(month: TISOMonth) {
+  const toDisplay = useToDisplay(month)
+  const activity = balances.useActivity()[month]
+  const envelopes = useAppSelector(getEnvelopes)
+  const data: DataPoint[] = []
+
+  if (!activity) return data
+
+  // Add env activity
+  const envActivity = activity?.envActivity?.byEnv || {}
+  keys(envActivity).forEach(id => {
+    data.push({
+      id,
+      mode: trMode.Envelope,
+      amount: toDisplay(envActivity[id].total),
+      color: envelopes[id].color || envelopes[id].colorGenerated,
+      keepIncome: envelopes[id].keepIncome,
+      name: envelopes[id].name,
+    })
+  })
+
+  // Add general income
+  const generalIncome = activity?.generalIncome?.byEnv || {}
+  keys(generalIncome).forEach(id => {
+    data.push({
+      id,
+      mode: trMode.GeneralIncome,
+      amount: toDisplay(generalIncome[id].total),
+      color: envelopes[id].color || envelopes[id].colorGenerated,
+      keepIncome: envelopes[id].keepIncome,
+      name: envelopes[id].name,
+    })
+  })
+
+  // Add transfer fees
+  data.push({
+    id: 'transferFees',
+    mode: trMode.TransferFees,
+    amount: toDisplay(activity?.transferFees?.total || {}),
+    color: '#808080',
+    keepIncome: false,
+    name: 'Переводы внутри',
+  })
+
+  return data
 }
