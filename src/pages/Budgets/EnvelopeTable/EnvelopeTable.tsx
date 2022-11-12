@@ -15,6 +15,7 @@ import { useExpandEnvelopes } from './models/useExpandEnvelopes'
 import { Highlight } from './Highlight'
 import { useEnvRenderInfo } from './models/envRenderInfo'
 import { isEqual } from 'lodash'
+import { Footer } from './Footer'
 
 type TagTableProps = {
   month: TISOMonth
@@ -129,7 +130,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
 
   return (
     <>
-      <Paper className={className} sx={{ position: 'relative' }}>
+      <Paper className={className} sx={{ position: 'relative', pb: 1 }}>
         <Header
           month={month}
           metric={metric}
@@ -141,6 +142,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
           onOpenOverview={onOpenOverview}
         />
         {renderGroups}
+        <Footer month={month} metric={metric} />
       </Paper>
       <Highlight />
     </>
