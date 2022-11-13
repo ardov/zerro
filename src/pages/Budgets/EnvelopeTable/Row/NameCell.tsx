@@ -84,8 +84,6 @@ const envDraggableSx = {
   my: -1,
   display: 'grid',
   placeItems: 'center',
-  cursor: 'grab',
-  touchAction: 'none',
 }
 
 const EnvDraggable: FC<{ id: TEnvelopeId; children: ReactNode }> = props => {
@@ -98,6 +96,8 @@ const EnvDraggable: FC<{ id: TEnvelopeId; children: ReactNode }> = props => {
     <span
       style={{
         userSelect: 'none',
+        cursor: 'grab',
+        touchAction: 'manipulation',
       }}
       ref={setNodeRef}
       {...attributes}

@@ -58,8 +58,6 @@ export const AvailableCell: FC<AvailableCellProps> = props => {
               component: 'span',
               display: 'inline-block',
               color: availableColor,
-              touchAction: 'none',
-              cursor: 'grab',
             }}
           >
             <Amount value={available} decMode="ifOnly" />
@@ -86,6 +84,8 @@ const DraggableAmount: FC<{
     <span
       style={{
         userSelect: 'none',
+        touchAction: 'manipulation',
+        cursor: 'grab',
       }}
       ref={setNodeRef}
       {...attributes}
