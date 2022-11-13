@@ -89,8 +89,10 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
               cancelText="Отмена"
             >
               <Button fullWidth color="secondary">
-                Покрыть перерасходы (
-                <DisplayAmount value={overspend} month={month} />)
+                <span>
+                  Покрыть перерасходы (
+                  <DisplayAmount value={overspend} month={month} />)
+                </span>
               </Button>
             </Confirm>
           )}

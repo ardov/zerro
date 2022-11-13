@@ -19,14 +19,8 @@ import ErrorBoundary from '@components/ErrorBoundary'
 import { getRootUser } from '@entities/user'
 import Transactions from '@pages/Transactions'
 import Auth from '@pages/Auth'
-// import BudgetsOld from '@pages/BudgetsOld'
 import Budgets from '@pages/Budgets'
-// import Review from '@pages/Review'
 import Accounts from '@pages/Accounts'
-// import Stats from '@pages/Stats'
-// import About from '@pages/About'
-// import Token from '@pages/Token'
-// import Donation from '@pages/Donation'
 
 const About = lazy(() => import('@pages/About'))
 const Donation = lazy(() => import('@pages/Donation'))
