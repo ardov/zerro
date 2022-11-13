@@ -88,11 +88,6 @@ function Links() {
         icon={<AccountBalanceIcon />}
       />
       <NavigationLink
-        text="Бюджет (старый)"
-        path="/budget-old"
-        icon={<AccountBalanceIcon />}
-      />
-      <NavigationLink
         text="Операции"
         path="/transactions"
         icon={<SyncAltIcon />}
