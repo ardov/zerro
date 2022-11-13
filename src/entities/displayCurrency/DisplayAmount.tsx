@@ -7,12 +7,19 @@ type TDisplayAmountProps = Modify<
   {
     value: TFxAmount
     month: TISOMonth
+    noCurrency?: boolean
   }
 >
 
 export const DisplayAmount = (props: TDisplayAmountProps) => {
-  const { value, month, ...delegated } = props
+  const { value, month, noCurrency, ...delegated } = props
   const [currency] = useDisplayCurrency()
   const convert = useToDisplay(month)
-  return <Amount value={convert(value)} currency={currency} {...delegated} />
+  return (
+    <Amount
+      value={convert(value)}
+      currency={noCurrency ? undefined : currency}
+      {...delegated}
+    />
+  )
 }

@@ -5,8 +5,7 @@ import { rowStyle } from '../shared/shared'
 import { Metric } from '../models/useMetric'
 import { TISOMonth } from '@shared/types'
 import { balances } from '@entities/envBalances'
-import { useToDisplay } from '@entities/displayCurrency'
-import { Amount } from '@shared/ui/Amount'
+import { DisplayAmount } from '@entities/displayCurrency'
 
 type FooterProps = {
   month: TISOMonth
@@ -17,7 +16,6 @@ export const Footer: FC<FooterProps> = props => {
   const { month, metric } = props
   const isMd = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const totals = balances.useTotals()[month]
-  const toDisplay = useToDisplay(month)
 
   return (
     <Box sx={rowStyle}>
@@ -34,7 +32,12 @@ export const Footer: FC<FooterProps> = props => {
           align="right"
           noWrap
         >
-          <Amount value={toDisplay(totals.budgeted)} decMode="ifOnly" />
+          <DisplayAmount
+            value={totals.budgeted}
+            decMode="ifOnly"
+            month={month}
+            noCurrency
+          />
         </Typography>
       )}
 
@@ -45,7 +48,12 @@ export const Footer: FC<FooterProps> = props => {
           align="right"
           noWrap
         >
-          <Amount value={toDisplay(totals.envActivity)} decMode="ifOnly" />
+          <DisplayAmount
+            value={totals.envActivity}
+            decMode="ifOnly"
+            month={month}
+            noCurrency
+          />
         </Typography>
       )}
 
@@ -56,7 +64,12 @@ export const Footer: FC<FooterProps> = props => {
           align="right"
           noWrap
         >
-          <Amount value={toDisplay(totals.available)} decMode="ifOnly" />
+          <DisplayAmount
+            value={totals.available}
+            decMode="ifOnly"
+            month={month}
+            noCurrency
+          />
         </Typography>
       )}
     </Box>

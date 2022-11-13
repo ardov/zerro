@@ -23,7 +23,7 @@ export const Amount: FC<AmountProps> = props => {
   const {
     value = 0,
     currency,
-    sign = false,
+    sign,
     noShade = false,
     decimals = 2,
     decMode = 'always',
@@ -40,7 +40,8 @@ export const Amount: FC<AmountProps> = props => {
 
   let str = ''
   if (value === 0) str = formatMoney(0, currency, dec)
-  if (value < 0) str = '−' + formatMoney(-value, currency, dec)
+  if (value < 0)
+    str = (sign === false ? '' : '−') + formatMoney(-value, currency, dec)
   if (value > 0) str = (sign ? '+' : '') + formatMoney(value, currency, dec)
   const arr = str.split(',')
   if (arr.length === 2) {

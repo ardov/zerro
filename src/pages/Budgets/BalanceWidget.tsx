@@ -10,10 +10,16 @@ import { balances } from '@entities/envBalances'
 
 export function BalanceWidget(props: { month: TISOMonth }) {
   const totals = balances.useTotals()[props.month]
-  const [displayCurrency] = useDisplayCurrency()
+  const [displayCurrency, setDisplayCurrency] = useDisplayCurrency()
   const toDisplay = useToDisplay(props.month)
   const currencies = keys(totals.fundsEnd)
   const currCount = currencies.length
+
+  const cycleForward = () => {
+    const idx = currencies.findIndex(c => c === displayCurrency)
+    const newIdx = (idx + 1) % currencies.length
+    if (currencies[newIdx]) setDisplayCurrency(currencies[newIdx])
+  }
 
   const currString =
     currCount > 1
@@ -39,7 +45,12 @@ export function BalanceWidget(props: { month: TISOMonth }) {
         gap: 1.5,
       }}
     >
-      <Total name={'В бюджете'} value={fundsEnd} currency={displayCurrency} />
+      <Total
+        name={'В бюджете'}
+        value={fundsEnd}
+        currency={displayCurrency}
+        onClick={cycleForward}
+      />
       {/* <div>
         <Chip label={currString.trim()} />
         <Chip label={'5 счетов'} />
