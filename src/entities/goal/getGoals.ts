@@ -95,6 +95,7 @@ function getGoal(
   currGoal?: TGoal | null,
   prevGoal?: TGoal | null
 ) {
+  if (currGoal === null) return null // deleted goal
   const goal = currGoal || prevGoal || null
   if (goal?.end && goal.end < currMonth) return null // expired goal
   return goal
