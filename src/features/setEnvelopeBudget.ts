@@ -8,7 +8,7 @@ import {
 import { keys } from '@shared/helpers/keys'
 import { AppThunk } from '@store'
 import { applyClientPatch } from '@store/data'
-import { parseEnvelopeId } from '@entities/envelope'
+import { envId } from '@entities/envelope'
 import { getRootUser } from '@entities/user'
 import {
   getBudgetId,
@@ -39,7 +39,7 @@ export function setEnvelopeBudgets(
     const envelopeUpdates: TEnvBudgetUpdate[] = []
 
     updates.map(adjustValue).forEach(update => {
-      const { type, id } = parseEnvelopeId(update.id)
+      const { type, id } = envId.parse(update.id)
       if (type === DataEntity.Tag) {
         tagUpdates.push({
           tag: id === 'null' ? null : id,

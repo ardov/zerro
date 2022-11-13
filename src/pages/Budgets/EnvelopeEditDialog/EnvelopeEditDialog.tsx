@@ -21,10 +21,9 @@ import { ColorPicker } from '@shared/ui/ColorPickerPopover'
 import { useAppDispatch, useAppSelector } from '@store'
 import {
   envelopeVisibility,
-  getEnvelopeId,
   TEnvelope,
-  parseEnvelopeId,
   patchEnvelope,
+  envId,
 } from '@entities/envelope'
 import { getUserCurrencyCode } from '@entities/instrument'
 import { TagSelect } from '@components/TagSelect'
@@ -43,7 +42,7 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
   const { envelope, onClose, ...dialogProps } = props
   const dispatch = useAppDispatch()
   const isNew = !envelope?.id
-  const id = envelope?.id || getEnvelopeId(DataEntity.Tag, uuidv1())
+  const id = envelope?.id || envId.get(DataEntity.Tag, uuidv1())
   const defaultCurrency = useAppSelector(getUserCurrencyCode)
   const {
     values,
@@ -55,9 +54,7 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
   } = useFormik({
     initialValues: {
       originalName: envelope?.originalName || '',
-      parentTagId: envelope?.parent
-        ? parseEnvelopeId(envelope.parent).id
-        : null,
+      parentTagId: envelope?.parent ? envId.parse(envelope.parent).id : null,
       visibility: envelope?.visibility || envelopeVisibility.auto,
       carryNegatives: envelope?.carryNegatives || false,
       keepIncome: envelope?.keepIncome || false,
@@ -73,9 +70,7 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
     },
     onSubmit: (values, helpers) => {
       const { parentTagId, ...envData } = values
-      const parent = parentTagId
-        ? getEnvelopeId(DataEntity.Tag, parentTagId)
-        : null
+      const parent = parentTagId ? envId.get(DataEntity.Tag, parentTagId) : null
       const patch = { id, parent, ...envData }
       dispatch(patchEnvelope(patch))
       onClose()

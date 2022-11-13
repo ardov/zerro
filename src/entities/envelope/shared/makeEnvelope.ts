@@ -8,7 +8,7 @@ import {
 } from '@shared/types'
 import { TDebtor } from '@entities/debtors'
 import { TTagPopulated } from '@entities/tag'
-import { getEnvelopeId } from './helpers'
+import { envId } from './envelopeId'
 import { TEnvelopeMeta, envelopeVisibility } from './metaData'
 import { getColorForString } from '@shared/helpers/color'
 
@@ -77,17 +77,17 @@ type TFuncs = {
 
 const funcs: TFuncs = {
   id: {
-    tag: el => getEnvelopeId(DataEntity.Tag, el.id),
-    account: el => getEnvelopeId(DataEntity.Account, el.id),
+    tag: el => envId.get(DataEntity.Tag, el.id),
+    account: el => envId.get(DataEntity.Account, el.id),
     debtor: el =>
       el.merchantId
-        ? getEnvelopeId(DataEntity.Merchant, el.merchantId)
-        : getEnvelopeId('payee', el.id),
+        ? envId.get(DataEntity.Merchant, el.merchantId)
+        : envId.get('payee', el.id),
   },
   entityId: {
     tag: el => el.id,
     account: el => el.id,
-    debtor: el => (el.merchantId ? el.merchantId : el.id),
+    debtor: el => el.merchantId || el.id,
   },
   type: {
     tag: () => DataEntity.Tag,
@@ -120,7 +120,7 @@ const funcs: TFuncs = {
     debtor: el => getColorForString(el.name),
   },
   parent: {
-    tag: el => (el.parent ? getEnvelopeId(DataEntity.Tag, el.parent) : null),
+    tag: el => (el.parent ? envId.get(DataEntity.Tag, el.parent) : null),
     account: (el, fx, meta) => meta?.parent || null,
     debtor: (el, fx, meta) => meta?.parent || null,
   },

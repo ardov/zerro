@@ -19,7 +19,7 @@ import {
   IAccountPopulated,
 } from '@entities/account'
 import { getDebtors, TDebtor } from '@entities/debtors'
-import { getEnvelopeId } from '@entities/envelope'
+import { envId } from '@entities/envelope'
 import { getInstruments } from '@entities/instrument'
 import { cleanPayee } from '@entities/shared/cleanPayee'
 import { getTransactionsHistory, getType, TrType } from '@entities/transaction'
@@ -163,7 +163,7 @@ function getEnvelope(
   switch (type) {
     case TrType.Income:
     case TrType.Outcome:
-      return getEnvelopeId(DataEntity.Tag, tr.tag?.[0] || 'null')
+      return envId.get(DataEntity.Tag, tr.tag?.[0] || 'null')
 
     case TrType.IncomeDebt:
     case TrType.OutcomeDebt:
@@ -171,10 +171,10 @@ function getEnvelope(
 
     case TrType.Transfer:
       if (direction === 'outcome') {
-        return getEnvelopeId(DataEntity.Account, tr.incomeAccount)
+        return envId.get(DataEntity.Account, tr.incomeAccount)
       }
       if (direction === 'income') {
-        return getEnvelopeId(DataEntity.Account, tr.outcomeAccount)
+        return envId.get(DataEntity.Account, tr.outcomeAccount)
       }
       throw new Error('Unknown direction: ' + direction)
     default:
@@ -183,11 +183,11 @@ function getEnvelope(
 }
 
 function getDebtorId(tr: TTransaction, debtors: ById<TDebtor>): TEnvelopeId {
-  if (tr.merchant) return getEnvelopeId(DataEntity.Merchant, tr.merchant)
+  if (tr.merchant) return envId.get(DataEntity.Merchant, tr.merchant)
   // PAYEE INCOME
   let cleanName = cleanPayee(String(tr.payee))
   let debtor = debtors[cleanName]
   return debtor.merchantId
-    ? getEnvelopeId(DataEntity.Merchant, debtor.merchantId)
-    : getEnvelopeId('payee', cleanName)
+    ? envId.get(DataEntity.Merchant, debtor.merchantId)
+    : envId.get('payee', cleanName)
 }

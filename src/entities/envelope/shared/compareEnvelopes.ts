@@ -1,5 +1,5 @@
 import { DataEntity } from '@shared/types'
-import { getEnvelopeId } from './helpers'
+import { envId } from './envelopeId'
 import { TEnvelope } from './makeEnvelope'
 
 export function compareEnvelopes(a: TEnvelope, b: TEnvelope) {
@@ -20,7 +20,7 @@ export function compareEnvelopes(a: TEnvelope, b: TEnvelope) {
   }
 
   // Null category should be the first one
-  const nullTagId = getEnvelopeId(DataEntity.Tag, null)
+  const nullTagId = envId.get(DataEntity.Tag, null)
   if (a.id === nullTagId) return -1
   if (b.id === nullTagId) return 1
 

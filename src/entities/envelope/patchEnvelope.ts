@@ -9,7 +9,7 @@ import { keys } from '@shared/helpers/keys'
 import { AppThunk } from '@store'
 import { patchTag, TTagDraft } from '@entities/tag'
 import { getEnvelopes } from './getEnvelopes'
-import { parseEnvelopeId } from './shared/helpers'
+import { envId } from './shared/envelopeId'
 import { patchEnvelopeMeta, TEnvelopeMetaPatch } from './shared/metaData'
 import { hex2int, isHEX } from '@shared/helpers/color'
 import { TEnvelope } from './shared/makeEnvelope'
@@ -72,7 +72,7 @@ const funcs: {
   index: () => {}, // Read only
 
   originalName: (draft, patches) => {
-    const { type, id } = parseEnvelopeId(draft.id)
+    const { type, id } = envId.parse(draft.id)
     if (
       type === DataEntity.Tag ||
       type === DataEntity.Account ||
@@ -83,14 +83,14 @@ const funcs: {
   },
 
   color: (draft, patches) => {
-    const { type, id } = parseEnvelopeId(draft.id)
+    const { type, id } = envId.parse(draft.id)
     if (type === DataEntity.Tag) {
       patches[type] = { ...patches[type], id, color: getTagColor(draft.color) }
     }
   },
 
   parent: (draft, patches, envelopes) => {
-    const { type, id } = parseEnvelopeId(draft.id)
+    const { type, id } = envId.parse(draft.id)
     if (type === DataEntity.Tag) {
       patches[type] = {
         ...patches[type],
@@ -168,7 +168,7 @@ function getRightTagParent(
 ): TTagId | null {
   const id = getRightParent(parent, envelopes)
   if (!id) return null
-  const parsed = parseEnvelopeId(id)
+  const parsed = envId.parse(id)
   if (parsed.type !== DataEntity.Tag) throw new Error('Parent is not tag')
   if (parsed.id === 'null') return null
   return parsed.id

@@ -1,6 +1,6 @@
 import { TEnvelopeId } from '@shared/types'
 import { AppThunk } from '@store/index'
-import { getEnvelopes, getEnvelopeStructure, parseEnvelopeId } from '.'
+import { envId, getEnvelopes, getEnvelopeStructure } from '.'
 import { patchEnvelope, TEnvelopeDraft } from './patchEnvelope'
 import { flattenStructure } from './shared/structure'
 
@@ -84,7 +84,7 @@ export function moveEnvelope(
     ) {
       if (!asChild) return null
       if (elId === suppposedParent) return null
-      return parseEnvelopeId(suppposedParent).type === 'tag'
+      return envId.parse(suppposedParent).type === 'tag'
         ? suppposedParent
         : null
     }
