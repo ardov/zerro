@@ -86,6 +86,7 @@ export function SankeyChart() {
         link={{ stroke: theme.palette.action.active }}
       >
         <Tooltip
+          // @ts-ignore 🤷🏻‍♂️
           formatter={(v: number) => formatMoney(v)}
           contentStyle={{
             borderRadius: theme.shape.borderRadius,
