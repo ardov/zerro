@@ -24,6 +24,7 @@ import {
   SyncAltIcon,
   WhatshotIcon,
 } from '@shared/ui/Icons'
+import { DebtorList } from '@components/DebtorList'
 
 export default function NavigationDrawer(props: DrawerProps) {
   const theme = useTheme()
@@ -47,6 +48,10 @@ export default function NavigationDrawer(props: DrawerProps) {
 
         <Box width="100%" px={1}>
           <AccountList />
+        </Box>
+
+        <Box width="100%" px={1}>
+          <DebtorList />
         </Box>
 
         <Box height={64} width="100%" flexShrink={0} />

@@ -1,4 +1,4 @@
-import React, { FC, ReactChild, useCallback } from 'react'
+import React, { FC, ReactNode, useCallback } from 'react'
 import {
   ListSubheader,
   Box,
@@ -65,7 +65,7 @@ export const Account: FC<{ account: IAccountPopulated } & ListItemButtonProps> =
 
 export const Subheader: FC<
   {
-    name: ReactChild
+    name: ReactNode
     amount: number
   } & ListSubheaderProps
 > = ({ name, amount, sx, ...rest }) => {

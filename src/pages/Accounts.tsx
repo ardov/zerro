@@ -2,6 +2,7 @@ import React from 'react'
 import { Box } from '@mui/material'
 import AccountList from '@components/AccountList'
 import { Helmet } from 'react-helmet'
+import { DebtorList } from '@components/DebtorList'
 
 export default function Accounts() {
   return (
@@ -14,6 +15,7 @@ export default function Accounts() {
 
       <Box p={2} pb={8} mx="auto" maxWidth={320}>
         <AccountList />
+        <DebtorList />
       </Box>
     </>
   )
