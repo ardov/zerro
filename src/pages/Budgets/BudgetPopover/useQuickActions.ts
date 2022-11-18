@@ -34,7 +34,7 @@ export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
     available: convert(envelope.selfAvailable),
     totalAvailable: convert(envelope.totalAvailable),
     hasGoal: !!goals[id],
-    goalTarget: goals[id]?.target || 0,
+    goalTarget: goals[id]?.targetBudget || 0,
     prevOutcomesLength: prevActivity.length,
     avgOutcome: getAverage(prevActivity),
     prevBudgeted: convert(prevEnvelopeData?.totalBudgeted || {}),

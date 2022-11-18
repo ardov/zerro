@@ -4,7 +4,8 @@ import { keys } from '@shared/helpers/keys'
 import { ByMonth, TEnvelopeId, TFxAmount, TRates } from '@shared/types'
 import { TSelector } from '@store'
 import { getGoals, TGoalInfo } from './getGoals'
-import { goalType } from './types'
+import { getProgress } from './shared/calcGoals'
+import { goalType, TGoal } from './shared/types'
 import { balances } from '@entities/envBalances'
 
 type TGoalTotals = ReturnType<typeof calcGoalTotals>
@@ -25,39 +26,49 @@ function calcGoalTotals(
   rates: TRates
 ) {
   let totalTarget: TFxAmount = {} // How much money should be budgeted
-  let totalNeed: TFxAmount = {} // How much money still needed to fill goals
+  let totalNeedNow: TFxAmount = {} // How much money still needed to fill goals
+  let totalNeedStart: TFxAmount = {}
   let goalsCount = 0
 
   Object.values(goals).forEach(goalInfo => {
     if (!goalInfo) return
-
-    const { goal, need, currency, target } = goalInfo
-    // Skip envelopes with target balance goal and without end date
-    if (goal.type === goalType.TARGET_BALANCE && !goal.end) return
+    const { goal, needNow, needStart, currency, targetBudget } = goalInfo
+    if (!isCountedGoal(goal)) return
 
     goalsCount++
-    if (need > 0) {
-      totalNeed = addFxAmount(totalNeed, { [currency]: need })
-    }
-    if (target > 0) {
-      totalTarget = addFxAmount(totalTarget, { [currency]: target })
+
+    totalNeedNow = addFxAmount(totalNeedNow, { [currency]: needNow })
+    totalNeedStart = addFxAmount(totalNeedStart, { [currency]: needStart })
+
+    if (targetBudget > 0) {
+      totalTarget = addFxAmount(totalTarget, { [currency]: targetBudget })
     }
   })
 
-  let needValue = convertFx(totalNeed, 'USD', rates)
-  let targetValue = convertFx(totalTarget, 'USD', rates)
-  let progress = getProgress(targetValue, needValue)
+  let needNowValue = convertFx(totalNeedNow, 'USD', rates)
+  let needStartValue = convertFx(totalNeedNow, 'USD', rates)
+  let progress = getProgress(needStartValue, needNowValue)
+
+  console.assert(
+    needNowValue >= 0,
+    'Needed negative value to complete goals',
+    goals
+  )
+  console.assert(progress >= 0, 'Negative goal progress', goals)
 
   return {
-    need: totalNeed,
+    need: totalNeedNow,
     target: totalTarget,
     progress,
     goalsCount,
   }
 }
 
-function getProgress(target: number, need: number): number {
-  if (target > 0) return (target - need) / target
-  if (target === 0 && need < 0) return 0
-  return 1
+/**
+ * Decides should we skip these type of goals or not.
+ * Saving goals without end date not counted towards monthly progress.
+ */
+function isCountedGoal(goal: TGoal) {
+  if (goal.type === goalType.TARGET_BALANCE && !goal.end) return false
+  return true
 }
