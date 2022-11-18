@@ -2,6 +2,11 @@ import { toISODate } from '@shared/helpers/date'
 import { keys } from '@shared/helpers/keys'
 import { TDateDraft, TFxCode, TISODate } from '@shared/types'
 
+/*
+Currency rates are loaded from this great repository by Fawaz Ahmed
+https://github.com/fawazahmed0/currency-api
+*/
+
 export const firstPossibleDate: TISODate = '2020-11-22'
 
 export async function requestRates(date: TDateDraft) {

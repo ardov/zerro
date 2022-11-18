@@ -1,7 +1,7 @@
 import { round } from '@shared/helpers/money'
 import { TISOMonth } from '@shared/types'
 import { differenceInCalendarMonths, toISOMonth } from '@shared/helpers/date'
-import { goalType, TGoal } from './types'
+import { goalType, TGoal } from './shared/types'
 
 export type GoalProgress = {
   progress: number
