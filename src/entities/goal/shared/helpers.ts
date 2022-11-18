@@ -1,6 +1,6 @@
 import { goalType, TGoal } from './types'
 import { TDateDraft } from '@shared/types'
-import { formatMoney } from '@shared/helpers/money'
+import { formatMoney, round } from '@shared/helpers/money'
 import { parseDate, toISODate } from '@shared/helpers/date'
 
 export const makeGoal = (goalDraft?: TGoal | null): TGoal | null => {
@@ -33,7 +33,7 @@ export const goalToWords = ({ type, amount, end }: TGoal): string => {
       if (end) return `Хочу накопить ${formattedSum} к ${formatMonth(end)}`
       else return `Хочу накопить ${formattedSum}`
     case goalType.INCOME_PERCENT:
-      return `Откладываю ${amount * 100}% от дохода`
+      return `Откладываю ${round(amount * 100)}% от дохода`
     default:
       throw new Error(`Unsupported type ${type}`)
   }
