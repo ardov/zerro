@@ -1,12 +1,11 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { round } from '@shared/helpers/money'
 import { getType } from '@entities/transaction/helpers'
-import { getAccounts, getStartBalance } from '@entities/account'
+import { getPopulatedAccounts } from '@entities/account'
 import { getSortedTransactions } from '@entities/transaction'
 import { getTransactionsHistory } from '@entities/transaction'
 import { convertCurrency } from '@entities/instrument'
 import {
-  TAccount,
   TAccountId,
   TInstrumentId,
   TISODate,
@@ -24,8 +23,8 @@ interface History {
 }
 
 export const getAccountsHistory = createSelector(
-  [getTransactionsHistory, getAccounts],
-  (transactions: TTransaction[], accounts: { [x: string]: TAccount }) => {
+  [getTransactionsHistory, getPopulatedAccounts],
+  (transactions, accounts) => {
     if (!transactions?.length || !accounts) return {}
     let historyById: History = {}
     const firstDate = transactions[0].date
@@ -35,7 +34,7 @@ export const getAccountsHistory = createSelector(
       historyById[id] = [
         {
           date: firstDate,
-          balance: getStartBalance(accounts[id]),
+          balance: accounts[id].startBalanceReal,
           transactions: [],
         },
       ]

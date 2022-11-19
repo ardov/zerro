@@ -1,11 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { round } from '@shared/helpers/money'
 import { getTime, getType } from '@entities/transaction/helpers'
-import {
-  getAccounts,
-  getDebtAccountId,
-  getStartBalance,
-} from '@entities/account'
+import { getDebtAccountId, getPopulatedAccounts } from '@entities/account'
 import { debtorGetter, getTransactionsHistory } from '@entities/transaction'
 
 type HistoryPoint = {
@@ -26,14 +22,19 @@ export const getBalancesOnDate = (nodes: HistoryPoint[], date: number) => {
  * Returns an array of balance changes created for every transaction from getTransactionsHistory
  */
 export const getBalanceChanges = createSelector(
-  [getTransactionsHistory, getDebtAccountId, getAccounts, debtorGetter],
+  [
+    getTransactionsHistory,
+    getDebtAccountId,
+    getPopulatedAccounts,
+    debtorGetter,
+  ],
   (transactions, debtId, accounts, getDebtorId) => {
     let prevPoint: HistoryPoint = {
       date: 0,
       accounts: Object.fromEntries(
         Object.entries(accounts)
           .filter(([id, acc]) => acc.type !== 'debt')
-          .map(([id, acc]) => [id, getStartBalance(acc)])
+          .map(([id, acc]) => [id, acc.startBalanceReal])
       ),
       debtors: {},
     }

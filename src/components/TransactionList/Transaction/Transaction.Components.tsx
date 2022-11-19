@@ -3,7 +3,7 @@ import styled from '@emotion/styled'
 import { EmojiIcon } from '@shared/ui/EmojiIcon'
 import { useAppSelector } from '@store'
 import { SmartAmount } from '@components/Amount'
-import { getAccounts } from '@entities/account'
+import { getPopulatedAccounts } from '@entities/account'
 import { TrType } from '@entities/transaction'
 import { getPopulatedTags } from '@entities/tag'
 import { Typography } from '@mui/material'
@@ -279,7 +279,7 @@ export const Accounts: FC<InfoProps> = ({
 }
 
 const Account: FC<{ id: string }> = ({ id, ...rest }) => {
-  const account = useAppSelector(getAccounts)[id]
+  const account = useAppSelector(getPopulatedAccounts)[id]
   return <span {...rest}>{account.title}</span>
 }
 

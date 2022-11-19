@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { round } from '@shared/helpers/money'
-import { getAccounts, getStartBalance } from '@entities/account'
+import { getPopulatedAccounts } from '@entities/account'
 import { getTransactionsHistory } from '@entities/transaction'
 import { TAccountId, TISODate } from '@shared/types'
 import { keys } from '@shared/helpers/keys'
@@ -18,7 +18,7 @@ type Point = {
 }
 
 export const getAccountsHistory = createSelector(
-  [getTransactionsHistory, getAccounts],
+  [getTransactionsHistory, getPopulatedAccounts],
   (transactions, accounts) => {
     if (!accounts) return {}
     const firstDate = transactions[0]
@@ -31,7 +31,7 @@ export const getAccountsHistory = createSelector(
       changes[id] = [
         {
           date: toISODate(firstDate),
-          balance: getStartBalance(accounts[id]),
+          balance: accounts[id].startBalanceReal,
           transactions: [],
         },
       ]

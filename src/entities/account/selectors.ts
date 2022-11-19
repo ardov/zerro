@@ -1,9 +1,9 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { populate } from './populate'
-import { convertCurrency, getInstruments } from '@entities/instrument'
-import { IAccountPopulated } from './types'
-import { AccountType, TAccountId } from '@shared/types'
+import { populate } from './shared/populate'
+import { AccountType, ById } from '@shared/types'
 import { RootState } from '@store'
+import { getFxIdMap } from '@entities/instrument'
+import { TAccountPopulated } from './shared/populate'
 import { DATA_ACC_NAME } from '../old-hiddenData/constants'
 
 // SELECTORS
@@ -17,20 +17,18 @@ export const getDebtAccountId = createSelector([getAccounts], accounts => {
 })
 
 export const getPopulatedAccounts = createSelector(
-  [convertCurrency, getAccounts, getInstruments],
-  (convert, accounts, instruments) => {
-    const result: Record<TAccountId, IAccountPopulated> = {}
+  [getAccounts, getFxIdMap],
+  (accounts, fxIdMap) => {
+    const result: ById<TAccountPopulated> = {}
     for (const id in accounts) {
-      result[id] = populate({ convert, instruments }, accounts[id])
+      result[id] = populate(accounts[id], fxIdMap)
     }
     return result
   }
 )
 
 export const getAccountList = createSelector([getPopulatedAccounts], accounts =>
-  Object.values(accounts).sort(
-    (a, b) => b.convertedBalance - a.convertedBalance
-  )
+  Object.values(accounts)
 )
 
 export const getInBudgetAccounts = createSelector([getAccountList], accounts =>

@@ -16,7 +16,7 @@ import { TSelector } from '@store/index'
 import {
   getDebtAccountId,
   getInBudgetAccounts,
-  IAccountPopulated,
+  TAccountPopulated,
 } from '@entities/account'
 import { getDebtors, TDebtor } from '@entities/debtors'
 import { envId } from '@entities/envelope'
@@ -49,7 +49,7 @@ export const getRawActivity: TSelector<ByMonth<TRawActivityNode>> =
 
 function getRawActivityFn(
   transactions: TTransaction[],
-  inBudgetAccsPop: IAccountPopulated[],
+  inBudgetAccsPop: TAccountPopulated[],
   debtAccId: TAccountId | undefined,
   debtors: ById<TDebtor>,
   instruments: ById<TInstrument>

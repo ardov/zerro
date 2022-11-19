@@ -1,20 +1,33 @@
 import React, { FC } from 'react'
+import { Collapse, List, ListItemButton } from '@mui/material'
+import pluralize from '@shared/helpers/pluralize'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { useToggle } from '@shared/hooks/useToggle'
+import { TFxAmount } from '@shared/types'
+import { addFxAmount } from '@shared/helpers/money'
+import { toISOMonth } from '@shared/helpers/date'
+
 import { useAppSelector } from '@store'
 import {
   getInBudgetAccounts,
   getSavingAccounts,
-  IAccountPopulated,
+  TAccountPopulated,
 } from '@entities/account'
-import pluralize from '@shared/helpers/pluralize'
-import { Collapse, List, ListItemButton } from '@mui/material'
+import { DisplayAmount, useToDisplay } from '@entities/displayCurrency'
 import { Account, Subheader } from './components'
-import { SmartAmount } from '@components/Amount'
-import { Tooltip } from '@shared/ui/Tooltip'
-import { useToggle } from '@shared/hooks/useToggle'
 
 export default function AccountList({ className = '' }) {
-  const inBudget = useAppSelector(getInBudgetAccounts)
-  const savings = useAppSelector(getSavingAccounts)
+  const toDisplay = useToDisplay(toISOMonth(new Date()))
+  const inBudget = useAppSelector(getInBudgetAccounts).sort(
+    (a, b) =>
+      toDisplay({ [b.fxCode]: b.balance }) -
+      toDisplay({ [a.fxCode]: a.balance })
+  )
+  const savings = useAppSelector(getSavingAccounts).sort(
+    (a, b) =>
+      toDisplay({ [b.fxCode]: b.balance }) -
+      toDisplay({ [a.fxCode]: a.balance })
+  )
 
   const inBudgetActive = inBudget.filter(a => !a.archive)
   const inBudgetArchived = inBudget.filter(a => a.archive)
@@ -57,11 +70,17 @@ export default function AccountList({ className = '' }) {
   )
 }
 
-const ArchivedList: FC<{ accs: IAccountPopulated[] }> = props => {
+const ArchivedList: FC<{ accs: TAccountPopulated[] }> = props => {
   const { accs } = props
+  const month = toISOMonth(new Date())
+  const toDisplay = useToDisplay(month)
   const [visible, toggleVisibility] = useToggle()
   if (!accs.length) return null
+
   const sum = getTotal(accs)
+  console.log({ sum, d: toDisplay(sum) })
+
+  const hasArchivedMoney = Boolean(toDisplay(sum)) // It can be to small to show
   return (
     <>
       <Collapse in={visible} unmountOnExit>
@@ -84,17 +103,13 @@ const ArchivedList: FC<{ accs: IAccountPopulated[] }> = props => {
               'архивных счёта',
               'архивных счётов',
             ])} `}
-            {!!sum && (
-              <>
-                (
-                <SmartAmount
-                  value={sum}
-                  instrument="user"
-                  decMode="ifOnly"
-                  noShade
-                />
-                )
-              </>
+            {hasArchivedMoney && (
+              <DisplayAmount
+                month={month}
+                value={sum}
+                decMode="ifOnly"
+                noShade
+              />
             )}
           </span>
         )}
@@ -103,6 +118,9 @@ const ArchivedList: FC<{ accs: IAccountPopulated[] }> = props => {
   )
 }
 
-function getTotal(accs: IAccountPopulated[]) {
-  return accs.reduce((sum, a) => sum + a.convertedBalance, 0)
+function getTotal(accs: TAccountPopulated[]): TFxAmount {
+  return accs.reduce(
+    (sum, a) => addFxAmount(sum, { [a.fxCode]: a.balance }),
+    {}
+  )
 }

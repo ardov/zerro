@@ -7,16 +7,20 @@ import {
   Typography,
   ListItemButton,
 } from '@mui/material'
-import { SmartAmount } from '@components/Amount'
-import { useAppDispatch } from '@store'
-import { setInBudget, IAccountPopulated } from '@entities/account'
+import { toISOMonth } from '@shared/helpers/date'
+import { Amount } from '@shared/ui/Amount'
+import { TFxAmount } from '@shared/types'
 
-export const Account: FC<{ account: IAccountPopulated } & ListItemButtonProps> =
+import { useAppDispatch } from '@store'
+import { setInBudget, TAccountPopulated } from '@entities/account'
+import { DisplayAmount, useToDisplay } from '@entities/displayCurrency'
+
+export const Account: FC<{ account: TAccountPopulated } & ListItemButtonProps> =
   ({ account, sx, ...rest }) => {
     const dispatch = useAppDispatch()
     const toggleInBalance = useCallback(
-      () => dispatch(setInBudget(account.id, !account.inBalance)),
-      [account.id, account.inBalance, dispatch]
+      () => dispatch(setInBudget(account.id, !account.inBudget)),
+      [account.id, account.inBudget, dispatch]
     )
     return (
       <ListItemButton
@@ -52,9 +56,9 @@ export const Account: FC<{ account: IAccountPopulated } & ListItemButtonProps> =
             color: account.balance < 0 ? 'error.main' : 'text.secondary',
           }}
         >
-          <SmartAmount
+          <Amount
             value={account.balance}
-            instrument={account.instrument}
+            currency={account.fxCode}
             decMode="ifOnly"
             noShade
           />
@@ -66,9 +70,12 @@ export const Account: FC<{ account: IAccountPopulated } & ListItemButtonProps> =
 export const Subheader: FC<
   {
     name: ReactNode
-    amount: number
+    amount: TFxAmount
   } & ListSubheaderProps
 > = ({ name, amount, sx, ...rest }) => {
+  const month = toISOMonth(new Date())
+  const toDisplay = useToDisplay(month)
+  const isNegative = toDisplay(amount) < 0
   return (
     <ListSubheader sx={{ borderRadius: 1, ...sx }} {...rest}>
       <Box component="span" display="flex" width="100%">
@@ -83,12 +90,12 @@ export const Subheader: FC<
         <Box
           component="span"
           ml={2}
-          color={amount < 0 ? 'error.main' : 'text.secondary'}
+          color={isNegative ? 'error.main' : 'text.secondary'}
         >
           <b>
-            <SmartAmount
+            <DisplayAmount
+              month={month}
               value={amount}
-              instrument="user"
               decMode="ifOnly"
               noShade
             />

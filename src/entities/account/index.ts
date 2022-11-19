@@ -1,4 +1,5 @@
 export type { TAccountDraft } from './thunks'
+export type { TAccountPopulated } from './shared/populate'
 
 // Selectors
 export {
@@ -14,7 +15,4 @@ export {
 export { patchAccount, setInBudget } from './thunks'
 
 // Helpers
-export { makeAccount } from './makeAccount'
-export { getStartBalance } from './helpers'
-
-export * from './types'
+export { makeAccount } from './shared/makeAccount'

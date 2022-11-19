@@ -9,13 +9,13 @@ import {
 import { AmountProps } from '@shared/ui/Amount'
 import { Tooltip } from '@shared/ui/Tooltip'
 // TODO: use Amount instead
-import { SmartAmount } from '@components/Amount'
+import { SmartAmount, TSmartAmountProps } from '@components/Amount'
 
 type DataLineProps = BoxProps & {
   name: ReactNode
   amount?: AmountProps['value']
   currency?: AmountProps['currency']
-  instrument?: AmountProps['instrument']
+  instrument?: TSmartAmountProps['instrument']
   sign?: AmountProps['sign']
   color?: string
   colorOpacity?: number
