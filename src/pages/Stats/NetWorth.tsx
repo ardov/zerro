@@ -20,7 +20,7 @@ import {
   ReferenceLine,
 } from 'recharts'
 import { getInBudgetAccounts, getSavingAccounts } from '@entities/account'
-import { instrumentModel } from '@entities/instrument'
+import { instrumentModel } from '@entities/currency/instrument'
 import { getAvailableMonths } from './availablePeriod'
 import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 import { round } from '@shared/helpers/money'

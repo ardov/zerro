@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { populate } from './shared/populate'
 import { AccountType, ById } from '@shared/types'
 import { RootState } from '@store'
-import { instrumentModel } from '@entities/instrument'
+import { instrumentModel } from '@entities/currency/instrument'
 import { TAccountPopulated } from './shared/populate'
 import { DATA_ACC_NAME } from '../old-hiddenData/constants'
 

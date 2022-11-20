@@ -1,6 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { deleteReminder, getReminders, setReminder } from '@entities/reminder'
-import { getRootUser } from '@entities/user'
 import { TReminder } from '@shared/types'
 import { AppThunk, TSelector } from '@store'
 import { prepareDataAccount } from './dataAccount'
@@ -43,11 +42,6 @@ export function makeSimpleHiddenStore<TPayload>(
       const state = getState()
       const dataAccId = dispatch(prepareDataAccount())
       const existingReminder = getDataReminder(state)
-      const user = getRootUser(state)?.id
-      if (!user) {
-        throw new Error('No user')
-      }
-
       return dispatch(
         setReminder({
           id: existingReminder?.id,

@@ -16,7 +16,7 @@ import Rhythm from '@shared/ui/Rhythm'
 import { DataLine } from '@shared/ui/DataLine'
 import { ArrowForwardIcon } from '@shared/ui/Icons'
 
-import { displayCurrency } from '@entities/displayCurrency'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 import { balances } from '@entities/envBalances'
 
 type TMsgType = 'error' | 'warning' | 'success'

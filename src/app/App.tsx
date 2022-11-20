@@ -16,7 +16,7 @@ import { RegularSyncHandler } from '@components/RegularSyncHandler'
 import Nav from '@components/Navigation'
 import { MobileNavigation } from '@components/Navigation'
 import ErrorBoundary from '@components/ErrorBoundary'
-import { getRootUser } from '@entities/user'
+import { userModel } from '@entities/user'
 import Transactions from '@pages/Transactions'
 import Auth from '@pages/Auth'
 import Budgets from '@pages/Budgets'
@@ -34,9 +34,9 @@ initTracking(history)
 export default function App() {
   const isLoggedIn = useAppSelector(getLoginState)
   const hasData = useAppSelector(state => !!getLastSyncTime(state))
-  const userId = useAppSelector(state => getRootUser(state)?.id)
+  const userId = userModel.useRootUserId()
   useEffect(() => {
-    if (typeof userId === 'number') setUserId(userId)
+    if (userId) setUserId(userId)
   }, [userId])
 
   const publicRoutes = [

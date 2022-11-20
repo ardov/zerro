@@ -13,7 +13,10 @@ import { TFxAmount } from '@shared/types'
 
 import { useAppDispatch } from '@store'
 import { setInBudget, TAccountPopulated } from '@entities/account'
-import { DisplayAmount, displayCurrency } from '@entities/displayCurrency'
+import {
+  DisplayAmount,
+  displayCurrency,
+} from '@entities/currency/displayCurrency'
 
 export const Account: FC<{ account: TAccountPopulated } & ListItemButtonProps> =
   ({ account, sx, ...rest }) => {

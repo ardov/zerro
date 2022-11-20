@@ -1,5 +1,5 @@
 import { TAccount, TFxCode, AccountType } from '@shared/types'
-import { TFxIdMap } from '@entities/instrument'
+import { TFxIdMap } from '@entities/currency/instrument'
 
 export type TAccountPopulated = TAccount & {
   startBalanceReal: number

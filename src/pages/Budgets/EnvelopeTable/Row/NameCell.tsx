@@ -6,7 +6,7 @@ import { DragIndicatorIcon } from '@shared/ui/Icons'
 import { TEnvelopeId, TFxCode } from '@shared/types'
 import { DragTypes } from '../../DnDContext'
 import { TEnvelope } from '@entities/envelope'
-import { displayCurrency } from '@entities/displayCurrency'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { getCurrencySymbol } from '@shared/helpers/money'
 

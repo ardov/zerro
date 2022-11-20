@@ -7,7 +7,7 @@ import { Confirm } from '@shared/ui/Confirm'
 import { RadialProgress } from '@shared/ui/RadialProgress'
 import { useAppDispatch, useAppSelector } from '@store'
 
-import { displayCurrency } from '@entities/displayCurrency'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 import { goalModel } from '@entities/goal'
 import { totalGoalsModel } from '../model'
 

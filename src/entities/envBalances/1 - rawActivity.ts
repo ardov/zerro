@@ -20,7 +20,7 @@ import {
 } from '@entities/account'
 import { getDebtors, TDebtor } from '@entities/debtors'
 import { envId } from '@entities/envelope'
-import { instrumentModel } from '@entities/instrument'
+import { instrumentModel } from '@entities/currency/instrument'
 import { cleanPayee } from '@entities/shared/cleanPayee'
 import { getTransactionsHistory, getType, TrType } from '@entities/transaction'
 

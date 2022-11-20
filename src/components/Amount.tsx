@@ -2,7 +2,7 @@ import React, { FC } from 'react'
 import { OptionalExceptFor, TInstrumentId } from '@shared/types'
 import { AmountProps, Amount } from '@shared/ui/Amount'
 
-import { instrumentModel } from '@entities/instrument'
+import { instrumentModel } from '@entities/currency/instrument'
 import { userModel } from '@entities/user'
 
 export type TSmartAmountProps = AmountProps & {

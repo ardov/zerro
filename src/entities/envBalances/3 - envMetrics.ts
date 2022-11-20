@@ -15,7 +15,7 @@ import { TSelector } from '@store/index'
 
 import { getEnvelopes, TEnvelope } from '@entities/envelope'
 import { getEnvelopeBudgets } from '@entities/budget'
-import { TFxRateData } from '@entities/fxRate'
+import { TFxRateData } from '@entities/currency/fxRate'
 import { getMonthList } from './1 - monthList'
 import { getRatesByMonth } from './2 - rates'
 import { getActivity, TActivityNode } from './2 - activity'

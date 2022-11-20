@@ -26,7 +26,7 @@ import { getEnvelopes } from '@entities/envelope'
 import { BudgetCell } from './BudgetCell'
 import { ActivityCell } from './ActivityCell'
 import { AvailableCell } from './AvailableCell'
-import { displayCurrency } from '@entities/displayCurrency'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 
 type EnvelopeRowProps = {
   id: TEnvelopeId

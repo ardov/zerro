@@ -3,7 +3,7 @@ import { TISOMonth, ByMonth, ById, TInstrument, TMsTime } from '@shared/types'
 import { keys } from '@shared/helpers/keys'
 import { toISOMonth } from '@shared/helpers/date'
 import { TSelector } from '@store'
-import { instrumentModel } from '@entities/instrument'
+import { instrumentModel } from '@entities/currency/instrument'
 import { fxRateStore, TFxRates, TFxRatesStoredValue } from './fxRateStore'
 
 export type TFxRateData = {

@@ -20,7 +20,7 @@ import { useAppDispatch } from '@store'
 import { balances } from '@entities/envBalances'
 import { useQuickActions } from './useQuickActions'
 import { setEnvelopeBudgets } from '@features/setEnvelopeBudget'
-import { displayCurrency } from '@entities/displayCurrency'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 
 type TBudgetPopoverProps = PopoverProps & {
   id: TEnvelopeId

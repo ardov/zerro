@@ -7,7 +7,7 @@ import { formatDate } from '@shared/helpers/date'
 import { ById } from '@shared/types'
 import { AppThunk } from '@store'
 import { getTransactions, TrType } from '@entities/transaction'
-import { instrumentModel } from '@entities/instrument'
+import { instrumentModel } from '@entities/currency/instrument'
 import { getAccounts } from '@entities/account'
 import { getPopulatedTags } from '@entities/tag'
 

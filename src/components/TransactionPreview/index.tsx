@@ -22,7 +22,7 @@ import { useAppDispatch, useAppSelector } from '@store'
 import { getTransactions } from '@entities/transaction'
 import { getType } from '@entities/transaction/helpers'
 import { getPopulatedAccounts } from '@entities/account'
-import { instrumentModel } from '@entities/instrument'
+import { instrumentModel } from '@entities/currency/instrument'
 import {
   applyChangesToTransaction,
   deleteTransactions,

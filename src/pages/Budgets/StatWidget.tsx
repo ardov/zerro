@@ -8,7 +8,7 @@ import { DataLine } from '@shared/ui/DataLine'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { useAppSelector } from '@store/index'
 
-import { displayCurrency } from '@entities/displayCurrency'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 import { balances } from '@entities/envBalances'
 import { getEnvelopes } from '@entities/envelope'
 

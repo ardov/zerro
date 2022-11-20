@@ -13,7 +13,10 @@ import {
   getSavingAccounts,
   TAccountPopulated,
 } from '@entities/account'
-import { DisplayAmount, displayCurrency } from '@entities/displayCurrency'
+import {
+  DisplayAmount,
+  displayCurrency,
+} from '@entities/currency/displayCurrency'
 import { Account, Subheader } from './components'
 
 export default function AccountList({ className = '' }) {

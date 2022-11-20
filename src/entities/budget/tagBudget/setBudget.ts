@@ -1,6 +1,6 @@
 import { AppThunk } from '@store'
 import { applyClientPatch } from '@store/data'
-import { getRootUser } from '@entities/user'
+import { userModel } from '@entities/user'
 import { TBudget, OptionalExceptFor, TISOMonth, TTagId } from '@shared/types'
 import { getBudgets } from './selectors'
 import { BudgetDraft, makeBudget } from './makeBudget'
@@ -27,10 +27,8 @@ export const setBudget =
         changed: el.changed || Date.now(),
       }
       if (!patched.user) {
-        const userId = getRootUser(state)?.id
-        if (!userId) {
-          throw new Error('User is not defined')
-        }
+        const userId = userModel.getRootUserId(state)
+        if (!userId) throw new Error('User is not defined')
         patched.user = userId
       }
       if (!patched.tag) {

@@ -4,7 +4,7 @@ import { getType } from '@entities/transaction/helpers'
 import { getPopulatedAccounts } from '@entities/account'
 import { getSortedTransactions } from '@entities/transaction'
 import { getTransactionsHistory } from '@entities/transaction'
-import { instrumentModel } from '@entities/instrument'
+import { instrumentModel } from '@entities/currency/instrument'
 import {
   TAccountId,
   TInstrumentId,

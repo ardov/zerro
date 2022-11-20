@@ -14,8 +14,8 @@ import { useToggle } from '@shared/hooks/useToggle'
 import { formatDate } from '@shared/helpers/date'
 
 import { useAppDispatch } from '@store'
-import { displayCurrency } from '@entities/displayCurrency'
-import { fxRateModel, TFxRates } from '@entities/fxRate'
+import { displayCurrency } from '@entities/currency/displayCurrency'
+import { fxRateModel, TFxRates } from '@entities/currency/fxRate'
 import { balances } from '@entities/envBalances'
 
 export const FxRates: FC<{ month: TISOMonth }> = props => {

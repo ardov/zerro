@@ -6,7 +6,7 @@ import { ArrowForwardIcon, ArrowRightAltIcon } from '@shared/ui/Icons'
 import { Modify, TISOMonth, TEnvelopeId } from '@shared/types'
 import { useAppDispatch, useAppSelector } from '@store'
 
-import { displayCurrency } from '@entities/displayCurrency'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 import { getEnvelopes } from '@entities/envelope'
 import { balances } from '@entities/envBalances'
 import { moveMoney } from './moveMoney'

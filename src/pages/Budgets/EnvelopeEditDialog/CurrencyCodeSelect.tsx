@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { useAppSelector } from '@store'
 import { Select, MenuItem, SelectProps, ListItemText } from '@mui/material'
-import { instrumentModel } from '@entities/instrument'
+import { instrumentModel } from '@entities/currency/instrument'
 import { getInBudgetAccounts } from '@entities/account'
 import { TFxCode, TInstrument } from '@shared/types'
 import { getCurrencySymbol } from '@shared/helpers/money'

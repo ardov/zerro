@@ -14,7 +14,7 @@ import { DataLine } from '@shared/ui/DataLine'
 import { getHistoryStart, getTransactionsHistory } from '@entities/transaction'
 import { formatMoney } from '@shared/helpers/money'
 import { makeDateArray, startOfMonth, formatDate } from '@shared/helpers/date'
-import { instrumentModel } from '@entities/instrument'
+import { instrumentModel } from '@entities/currency/instrument'
 import { round } from '@shared/helpers/money'
 import { getType } from '@entities/transaction/helpers'
 

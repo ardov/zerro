@@ -1,5 +1,5 @@
 import { ByMonth } from '@shared/types'
-import { fxRateModel, TFxRateData } from '@entities/fxRate'
+import { fxRateModel, TFxRateData } from '@entities/currency/fxRate'
 import { TSelector } from '@store/index'
 import { createSelector } from '@reduxjs/toolkit'
 import { withPerf } from '@shared/helpers/performance'

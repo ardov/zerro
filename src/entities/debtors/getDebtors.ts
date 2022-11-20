@@ -15,7 +15,7 @@ import {
 import { TSelector } from '@store'
 import { cleanPayee } from '@entities/shared/cleanPayee'
 import { getMerchants } from '@entities/merchant'
-import { instrumentModel } from '@entities/instrument'
+import { instrumentModel } from '@entities/currency/instrument'
 import { withPerf } from '@shared/helpers/performance'
 
 export type TDebtor = {

@@ -5,7 +5,7 @@ import { rowStyle } from '../shared/shared'
 import { Metric } from '../models/useMetric'
 import { TISOMonth } from '@shared/types'
 import { balances } from '@entities/envBalances'
-import { DisplayAmount } from '@entities/displayCurrency'
+import { DisplayAmount } from '@entities/currency/displayCurrency'
 
 type FooterProps = {
   month: TISOMonth

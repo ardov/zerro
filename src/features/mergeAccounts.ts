@@ -1,12 +1,11 @@
 import { DataEntity, TAccountId, TTransaction } from '@shared/types'
 import { add } from '@shared/helpers/money'
 
-import { applyClientPatch } from '@store/data'
 import { AppThunk } from '@store'
-
+import { applyClientPatch } from '@store/data'
 import { getAccounts } from '@entities/account'
 import { getTransactionsHistory } from '@entities/transaction'
-import { getRootUser } from '@entities/user'
+import { userModel } from '@entities/user'
 
 /**
  * Deletes account and moves all the transactions to another one
@@ -20,7 +19,7 @@ export const mergeAccounts =
     const state = getState()
     const accounts = getAccounts(state)
     const transactions = getTransactionsHistory(state)
-    const user = getRootUser(state)
+    const user = userModel.getRootUser(state)
     const changes: TTransaction[] = []
 
     const sourceAcc = accounts[source]

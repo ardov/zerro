@@ -2,9 +2,9 @@ import { sendEvent } from '@shared/helpers/tracking'
 import { OptionalExceptFor, TTag } from '@shared/types'
 import { AppThunk } from '@store'
 import { applyClientPatch } from '@store/data'
-import { getRootUser } from '@entities/user'
 import { getTag } from '@entities/tag'
 import { makeTag } from './makeTag'
+import { userModel } from '@entities/user'
 
 export type TTagDraft = OptionalExceptFor<TTag, 'id'>
 
@@ -32,7 +32,7 @@ export const createTag =
   (dispatch, getState) => {
     if (hasId(draft)) return dispatch(patchTag(draft))
     if (!draft.title) throw new Error('Trying to create tag without title')
-    let user = getRootUser(getState())?.id
+    let user = userModel.getRootUserId(getState())
     if (!user) throw new Error('No user')
     const newTag = makeTag({ ...draft, user })
 

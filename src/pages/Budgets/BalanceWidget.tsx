@@ -5,7 +5,7 @@ import { TISOMonth } from '@shared/types'
 import { DataLine } from '@shared/ui/DataLine'
 import { Total } from '@shared/ui/Total'
 
-import { displayCurrency } from '@entities/displayCurrency'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 import { balances } from '@entities/envBalances'
 
 export function BalanceWidget(props: { month: TISOMonth }) {

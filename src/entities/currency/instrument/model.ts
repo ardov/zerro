@@ -1,8 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { TInstrument, TFxCode, TInstrumentId } from '@shared/types'
 import { RootState, useAppSelector } from '@store'
-import { getUserInstrumentId } from '@entities/user'
-import { TFxIdMap } from './types'
+import { userModel } from '@entities/user'
 
 const getInstruments = (state: RootState) => state.data.current.instrument
 
@@ -14,6 +13,8 @@ const getInstrumentsByCode = createSelector([getInstruments], instruments => {
   return result
 })
 
+export type TFxIdMap = Record<TInstrumentId, TFxCode>
+
 const getFxIdMap = createSelector([getInstruments], instruments => {
   const fxIdMap: TFxIdMap = {}
   Object.values(instruments).forEach(curr => {
@@ -23,7 +24,7 @@ const getFxIdMap = createSelector([getInstruments], instruments => {
 })
 
 const convertCurrency = createSelector(
-  [getInstruments, getUserInstrumentId],
+  [getInstruments, userModel.getUserInstrumentId],
   (instruments, userInstrument) =>
     (amount = 0, from: TInstrumentId, to?: TInstrumentId) => {
       to = to || userInstrument

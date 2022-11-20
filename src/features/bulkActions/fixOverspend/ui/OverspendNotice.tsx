@@ -6,7 +6,7 @@ import { Confirm } from '@shared/ui/Confirm'
 import { useAppDispatch } from '@store'
 import { overspendModel } from '../model'
 import { balances } from '@entities/envBalances'
-import { DisplayAmount } from '@entities/displayCurrency'
+import { DisplayAmount } from '@entities/currency/displayCurrency'
 import { isZero } from '@shared/helpers/money'
 
 export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
