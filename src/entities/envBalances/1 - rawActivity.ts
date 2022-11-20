@@ -20,7 +20,7 @@ import {
 } from '@entities/account'
 import { getDebtors, TDebtor } from '@entities/debtors'
 import { envId } from '@entities/envelope'
-import { getInstruments } from '@entities/instrument'
+import { instrumentModel } from '@entities/instrument'
 import { cleanPayee } from '@entities/shared/cleanPayee'
 import { getTransactionsHistory, getType, TrType } from '@entities/transaction'
 
@@ -42,7 +42,7 @@ export const getRawActivity: TSelector<ByMonth<TRawActivityNode>> =
       getInBudgetAccounts,
       getDebtAccountId,
       getDebtors,
-      getInstruments,
+      instrumentModel.getInstruments,
     ],
     withPerf('🖤 getRawActivity', getRawActivityFn)
   )

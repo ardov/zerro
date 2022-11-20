@@ -18,17 +18,17 @@ import {
 } from '@mui/material'
 import { DataEntity, Modify } from '@shared/types'
 import { ColorPicker } from '@shared/ui/ColorPickerPopover'
-import { useAppDispatch, useAppSelector } from '@store'
+import { useAppDispatch } from '@store'
 import {
   envelopeVisibility,
   TEnvelope,
   patchEnvelope,
   envId,
 } from '@entities/envelope'
-import { getUserCurrencyCode } from '@entities/instrument'
 import { TagSelect } from '@components/TagSelect'
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
 import { VisibilitySelect } from './VisidilitySelect'
+import { userModel } from '@entities/user'
 
 export type TagEditDialogProps = Modify<
   DialogProps,
@@ -43,7 +43,7 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
   const dispatch = useAppDispatch()
   const isNew = !envelope?.id
   const id = envelope?.id || envId.get(DataEntity.Tag, uuidv1())
-  const defaultCurrency = useAppSelector(getUserCurrencyCode)
+  const defaultCurrency = userModel.useUserCurrency()
   const {
     values,
     initialValues,

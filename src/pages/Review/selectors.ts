@@ -4,7 +4,7 @@ import { getType } from '@entities/transaction/helpers'
 import { getPopulatedAccounts } from '@entities/account'
 import { getSortedTransactions } from '@entities/transaction'
 import { getTransactionsHistory } from '@entities/transaction'
-import { convertCurrency } from '@entities/instrument'
+import { instrumentModel } from '@entities/instrument'
 import {
   TAccountId,
   TInstrumentId,
@@ -145,7 +145,7 @@ const createInfoNode = (): InfoNode => ({
 
 export const getYearStats = (year: number) =>
   createSelector(
-    [getSortedTransactions, convertCurrency],
+    [getSortedTransactions, instrumentModel.convertCurrency],
     (allTransactions: TTransaction[], convert) => {
       if (!allTransactions?.length) return null
       const dateStart = toISODate(new Date(year, 0, 1))

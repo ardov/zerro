@@ -15,7 +15,7 @@ import {
 import { TSelector } from '@store'
 import { cleanPayee } from '@entities/shared/cleanPayee'
 import { getMerchants } from '@entities/merchant'
-import { getInstruments } from '@entities/instrument'
+import { instrumentModel } from '@entities/instrument'
 import { withPerf } from '@shared/helpers/performance'
 
 export type TDebtor = {
@@ -29,7 +29,12 @@ export type TDebtor = {
 }
 
 export const getDebtors: TSelector<ById<TDebtor>> = createSelector(
-  [getTransactionsHistory, getMerchants, getInstruments, getDebtAccountId],
+  [
+    getTransactionsHistory,
+    getMerchants,
+    instrumentModel.getInstruments,
+    getDebtAccountId,
+  ],
   withPerf('getDebtors', collectDebtors)
 )
 

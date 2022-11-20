@@ -1,2 +1,2 @@
-export { useDisplayCurrency, useToDisplay } from './displayCurrency'
+export { displayCurrency } from './displayCurrency'
 export { DisplayAmount } from './DisplayAmount'

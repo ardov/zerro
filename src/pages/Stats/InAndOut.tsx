@@ -14,7 +14,7 @@ import { DataLine } from '@shared/ui/DataLine'
 import { getHistoryStart, getTransactionsHistory } from '@entities/transaction'
 import { formatMoney } from '@shared/helpers/money'
 import { makeDateArray, startOfMonth, formatDate } from '@shared/helpers/date'
-import { convertCurrency } from '@entities/instrument'
+import { instrumentModel } from '@entities/instrument'
 import { round } from '@shared/helpers/money'
 import { getType } from '@entities/transaction/helpers'
 
@@ -27,7 +27,7 @@ type Point = {
 export function InAndOut() {
   const theme = useTheme()
   const transactions = useAppSelector(getTransactionsHistory)
-  const convert = useAppSelector(convertCurrency)
+  const convert = useAppSelector(instrumentModel.convertCurrency)
   const historyStart = useAppSelector(getHistoryStart)
   const [filterMode, setFilterMode] = useState<'lastYear' | 'all'>('lastYear')
 

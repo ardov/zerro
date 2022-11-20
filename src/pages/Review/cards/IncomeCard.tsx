@@ -1,20 +1,21 @@
 import React, { useState } from 'react'
 import { Box, Typography, Chip } from '@mui/material'
-import { useAppSelector } from '@store'
 import Rhythm from '@shared/ui/Rhythm'
-import { getUserCurrencyCode } from '@entities/instrument'
-import { getPopulatedTags } from '@entities/tag'
 import pluralize from '@shared/helpers/pluralize'
+import { Amount } from '@shared/ui/Amount'
+
+import { useAppSelector } from '@store'
+import { getPopulatedTags } from '@entities/tag'
+import { userModel } from '@entities/user'
 import { Card } from './Card'
 import { Stats } from '../selectors'
-import { Amount } from '@shared/ui/Amount'
 
 interface IncomeCardProps {
   byTag: Stats['byTag']
 }
 
 export function IncomeCard({ byTag }: IncomeCardProps) {
-  const currency = useAppSelector(getUserCurrencyCode)
+  const currency = userModel.useUserCurrency()
   const tags = useAppSelector(getPopulatedTags)
   const incomeTags = Object.keys(byTag)
     .filter(id => byTag[id].income > 0)

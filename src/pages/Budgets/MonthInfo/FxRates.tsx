@@ -14,14 +14,14 @@ import { useToggle } from '@shared/hooks/useToggle'
 import { formatDate } from '@shared/helpers/date'
 
 import { useAppDispatch } from '@store'
-import { useDisplayCurrency } from '@entities/displayCurrency'
-import { fxRates, TFxRates } from '@entities/fxRate'
+import { displayCurrency } from '@entities/displayCurrency'
+import { fxRateModel, TFxRates } from '@entities/fxRate'
 import { balances } from '@entities/envBalances'
 
 export const FxRates: FC<{ month: TISOMonth }> = props => {
   const dispatch = useAppDispatch()
   const { month } = props
-  const [displayCurrency] = useDisplayCurrency()
+  const [displCurrency] = displayCurrency.useDisplayCurrency()
   const funds = balances.useTotals()[month].fundsEnd
   const rateData = balances.useRates()[month]
 
@@ -30,11 +30,11 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
       return {
         code,
         amount: funds[code],
-        rate: rateData.rates[code] / rateData.rates[displayCurrency],
+        rate: rateData.rates[code] / rateData.rates[displCurrency],
       }
     })
     .sort((a, b) => b.amount - a.amount)
-    .filter(c => c.code !== displayCurrency)
+    .filter(c => c.code !== displCurrency)
 
   if (currencies.length === 0) return null
 
@@ -45,16 +45,18 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
           <FxRateInput
             key={c.code + month}
             code={c.code}
-            mainCode={displayCurrency}
+            mainCode={displCurrency}
             rates={rateData.rates}
-            onChange={rate => dispatch(fxRates.edit({ [c.code]: rate }, month))}
+            onChange={rate =>
+              dispatch(fxRateModel.edit({ [c.code]: rate }, month))
+            }
           />
         ))}
         <Typography variant="caption" color="textSecondary" align="center">
           Курсы на {formatDate(rateData.date, 'LLLL yyyy')}{' '}
           {rateData.type === 'current' && ' (текущие)'}
         </Typography>
-        <Button fullWidth onClick={() => dispatch(fxRates.load(month))}>
+        <Button fullWidth onClick={() => dispatch(fxRateModel.load(month))}>
           Загрузить курсы
         </Button>
       </Stack>

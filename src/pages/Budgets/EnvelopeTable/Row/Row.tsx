@@ -26,7 +26,7 @@ import { getEnvelopes } from '@entities/envelope'
 import { BudgetCell } from './BudgetCell'
 import { ActivityCell } from './ActivityCell'
 import { AvailableCell } from './AvailableCell'
-import { useToDisplay } from '@entities/displayCurrency'
+import { displayCurrency } from '@entities/displayCurrency'
 
 type EnvelopeRowProps = {
   id: TEnvelopeId
@@ -61,7 +61,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
   const envelope = useAppSelector(getEnvelopes)[id]
   const envData = balances.useEnvData()[month][id]
   const goalInfo = goalModel.useGoals()[month][id]
-  const toDisplay = useToDisplay(month)
+  const toDisplay = displayCurrency.useToDisplay(month)
 
   const isChild = !!envelope.parent || !!isSelf
 

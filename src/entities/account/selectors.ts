@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { populate } from './shared/populate'
 import { AccountType, ById } from '@shared/types'
 import { RootState } from '@store'
-import { getFxIdMap } from '@entities/instrument'
+import { instrumentModel } from '@entities/instrument'
 import { TAccountPopulated } from './shared/populate'
 import { DATA_ACC_NAME } from '../old-hiddenData/constants'
 
@@ -17,7 +17,7 @@ export const getDebtAccountId = createSelector([getAccounts], accounts => {
 })
 
 export const getPopulatedAccounts = createSelector(
-  [getAccounts, getFxIdMap],
+  [getAccounts, instrumentModel.getFxIdMap],
   (accounts, fxIdMap) => {
     const result: ById<TAccountPopulated> = {}
     for (const id in accounts) {

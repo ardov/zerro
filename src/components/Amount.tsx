@@ -1,9 +1,9 @@
 import React, { FC } from 'react'
 import { OptionalExceptFor, TInstrumentId } from '@shared/types'
-import { getInstruments } from '@entities/instrument'
-import { useAppSelector } from '@store'
-import { getUserInstrumentId } from '@entities/user'
 import { AmountProps, Amount } from '@shared/ui/Amount'
+
+import { instrumentModel } from '@entities/instrument'
+import { userModel } from '@entities/user'
 
 export type TSmartAmountProps = AmountProps & {
   instrument?: TInstrumentId | 'user'
@@ -20,8 +20,8 @@ type ConnectedAmountProps = OptionalExceptFor<
   'value' | 'instrument'
 >
 function ConnectedAmount(props: ConnectedAmountProps) {
-  const userInstrumentId = useAppSelector(getUserInstrumentId)
-  const instruments = useAppSelector(getInstruments)
+  const userInstrumentId = userModel.useUserInstrumentId()
+  const instruments = instrumentModel.useInstruments()
   const id = props.instrument === 'user' ? userInstrumentId : props.instrument
   const currency = id ? instruments?.[id]?.shortTitle : undefined
   return <Amount {...props} currency={currency} />

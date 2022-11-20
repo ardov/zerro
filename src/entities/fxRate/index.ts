@@ -10,7 +10,7 @@ import {
 export type { TFxRateData } from './getFxRates'
 export type { TFxRates } from './fxRateStore'
 
-export const fxRates = {
+export const fxRateModel = {
   // Selectors
   get: getRates,
   getter: getFxRatesGetter,

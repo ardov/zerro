@@ -6,7 +6,7 @@ import { DragIndicatorIcon } from '@shared/ui/Icons'
 import { TEnvelopeId, TFxCode } from '@shared/types'
 import { DragTypes } from '../../DnDContext'
 import { TEnvelope } from '@entities/envelope'
-import { useDisplayCurrency } from '@entities/displayCurrency'
+import { displayCurrency } from '@entities/displayCurrency'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { getCurrencySymbol } from '@shared/helpers/money'
 
@@ -19,7 +19,7 @@ export const NameCell: FC<{
 }> = memo(props => {
   const { id, symbol, color, name, currency, comment } = props.envelope
   const { isReordering, isDefaultVisible, isChild, isSelf } = props
-  const [displayCurrency] = useDisplayCurrency()
+  const [displCurrency] = displayCurrency.useDisplayCurrency()
 
   return (
     <Box
@@ -62,7 +62,7 @@ export const NameCell: FC<{
         </Typography>
       </Box>
 
-      {displayCurrency !== currency && <CurrencyTag currency={currency} />}
+      {displCurrency !== currency && <CurrencyTag currency={currency} />}
 
       {!!comment && (
         <Typography

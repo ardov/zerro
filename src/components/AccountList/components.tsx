@@ -13,7 +13,7 @@ import { TFxAmount } from '@shared/types'
 
 import { useAppDispatch } from '@store'
 import { setInBudget, TAccountPopulated } from '@entities/account'
-import { DisplayAmount, useToDisplay } from '@entities/displayCurrency'
+import { DisplayAmount, displayCurrency } from '@entities/displayCurrency'
 
 export const Account: FC<{ account: TAccountPopulated } & ListItemButtonProps> =
   ({ account, sx, ...rest }) => {
@@ -74,7 +74,7 @@ export const Subheader: FC<
   } & ListSubheaderProps
 > = ({ name, amount, sx, ...rest }) => {
   const month = toISOMonth(new Date())
-  const toDisplay = useToDisplay(month)
+  const toDisplay = displayCurrency.useToDisplay(month)
   const isNegative = toDisplay(amount) < 0
   return (
     <ListSubheader sx={{ borderRadius: 1, ...sx }} {...rest}>

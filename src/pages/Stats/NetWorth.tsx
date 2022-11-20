@@ -20,7 +20,7 @@ import {
   ReferenceLine,
 } from 'recharts'
 import { getInBudgetAccounts, getSavingAccounts } from '@entities/account'
-import { convertCurrency } from '@entities/instrument'
+import { instrumentModel } from '@entities/instrument'
 import { getAvailableMonths } from './availablePeriod'
 import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 import { round } from '@shared/helpers/money'
@@ -48,7 +48,7 @@ export function NetWorth() {
   const balanceChanges = useAppSelector(getBalanceChanges)
   const accsInBudget = useAppSelector(getInBudgetAccounts)
   const accsSaving = useAppSelector(getSavingAccounts)
-  const convert = useAppSelector(convertCurrency)
+  const convert = useAppSelector(instrumentModel.convertCurrency)
 
   const [inBudget, setInBudget] = useState(true)
   const [savings, setSavings] = useState(true)

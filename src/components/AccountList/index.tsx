@@ -13,11 +13,11 @@ import {
   getSavingAccounts,
   TAccountPopulated,
 } from '@entities/account'
-import { DisplayAmount, useToDisplay } from '@entities/displayCurrency'
+import { DisplayAmount, displayCurrency } from '@entities/displayCurrency'
 import { Account, Subheader } from './components'
 
 export default function AccountList({ className = '' }) {
-  const toDisplay = useToDisplay(toISOMonth(new Date()))
+  const toDisplay = displayCurrency.useToDisplay(toISOMonth(new Date()))
   const inBudget = useAppSelector(getInBudgetAccounts).sort(
     (a, b) =>
       toDisplay({ [b.fxCode]: b.balance }) -
@@ -73,13 +73,11 @@ export default function AccountList({ className = '' }) {
 const ArchivedList: FC<{ accs: TAccountPopulated[] }> = props => {
   const { accs } = props
   const month = toISOMonth(new Date())
-  const toDisplay = useToDisplay(month)
+  const toDisplay = displayCurrency.useToDisplay(month)
   const [visible, toggleVisibility] = useToggle()
   if (!accs.length) return null
 
   const sum = getTotal(accs)
-  console.log({ sum, d: toDisplay(sum) })
-
   const hasArchivedMoney = Boolean(toDisplay(sum)) // It can be to small to show
   return (
     <>

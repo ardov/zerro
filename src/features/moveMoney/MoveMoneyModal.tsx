@@ -6,7 +6,7 @@ import { ArrowForwardIcon, ArrowRightAltIcon } from '@shared/ui/Icons'
 import { Modify, TISOMonth, TEnvelopeId } from '@shared/types'
 import { useAppDispatch, useAppSelector } from '@store'
 
-import { useDisplayCurrency, useToDisplay } from '@entities/displayCurrency'
+import { displayCurrency } from '@entities/displayCurrency'
 import { getEnvelopes } from '@entities/envelope'
 import { balances } from '@entities/envBalances'
 import { moveMoney } from './moveMoney'
@@ -29,8 +29,8 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   const metrics = balances.useEnvData()[month]
   const totalMetrics = balances.useTotals()[month]
   // const totals = useAppSelector(getMonthTotals)[month]
-  const [currency] = useDisplayCurrency()
-  const toDisplay = useToDisplay(month)
+  const [currency] = displayCurrency.useDisplayCurrency()
+  const toDisplay = displayCurrency.useToDisplay(month)
 
   const sourceName =
     source === 'toBeBudgeted' ? 'To be budgeted' : envelopes[source].name

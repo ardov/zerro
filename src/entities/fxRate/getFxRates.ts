@@ -3,7 +3,7 @@ import { TISOMonth, ByMonth, ById, TInstrument, TMsTime } from '@shared/types'
 import { keys } from '@shared/helpers/keys'
 import { toISOMonth } from '@shared/helpers/date'
 import { TSelector } from '@store'
-import { getInstruments } from '@entities/instrument'
+import { instrumentModel } from '@entities/instrument'
 import { fxRateStore, TFxRates, TFxRatesStoredValue } from './fxRateStore'
 
 export type TFxRateData = {
@@ -14,17 +14,17 @@ export type TFxRateData = {
 }
 
 export const getLatestRates: TSelector<TFxRateData> = createSelector(
-  [getInstruments],
+  [instrumentModel.getInstruments],
   instruments => currentToRates(instruments)
 )
 
 export const getRates: TSelector<ByMonth<TFxRateData>> = createSelector(
-  [getInstruments, fxRateStore.getData],
-  (instruments, savedRates) => {
+  [getLatestRates, fxRateStore.getData],
+  (latestRates, savedRates) => {
     return mergeRates(
       getHistoricalRates(),
       savedToRates(savedRates),
-      currentToRates(instruments)
+      latestRates
     )
   }
 )
@@ -34,9 +34,7 @@ function getHistoricalRates() {
   return {} as ByMonth<TFxRateData>
 }
 
-/**
- * Merges historical, current and saved rates according to their priorities
- */
+/** Merges historical, current and saved rates according to their priorities */
 function mergeRates(
   historical: ByMonth<TFxRateData>,
   saved: ByMonth<TFxRateData>,
@@ -66,9 +64,7 @@ function combine(
   return node
 }
 
-/**
- * Converts instrument collection to standard rates
- */
+/** Converts instrument collection to standard rates */
 function currentToRates(instruments: ById<TInstrument>): TFxRateData {
   const result: TFxRateData = {
     date: toISOMonth(new Date()),
@@ -83,9 +79,7 @@ function currentToRates(instruments: ById<TInstrument>): TFxRateData {
   return result
 }
 
-/**
- * Converts instrument collection to standard rates
- */
+/** Converts rate store to standard rates */
 function savedToRates(
   saved: ByMonth<TFxRatesStoredValue>
 ): ByMonth<TFxRateData> {

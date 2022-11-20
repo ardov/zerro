@@ -1,5 +1,5 @@
 // Selectors
-export { getBudgets, getBudget, getBudgetsByMonthAndTag } from './selectors'
+export { getBudgets, getBudget } from './selectors'
 
 // Other
 export { makeBudget } from './makeBudget'
