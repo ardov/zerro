@@ -10,11 +10,7 @@ import { keys } from '@shared/helpers/keys'
 import { AppThunk } from '@store'
 import { applyClientPatch } from '@store/data'
 import { envId } from '@entities/envelope'
-import {
-  getBudgetId,
-  getBudgets,
-  makeBudget,
-} from '../entities/budget/tagBudget'
+import { getBudgetId, getBudgets, makeBudget } from '@entities/budget/tagBudget'
 import { budgetStore } from '@entities/budget/envelopeBudgets/budgetStore'
 import { balances } from '@entities/envBalances'
 import { userModel } from '@entities/user'
