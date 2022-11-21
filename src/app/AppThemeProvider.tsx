@@ -44,6 +44,17 @@ const globalStyles = css`
     border: 2px solid var(--c-bg);
   }
 
+  @media (max-width: 880px) {
+    * {
+      scrollbar-width: none;
+      overflow: -moz-scrollbars-none;
+    }
+
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
   .hidden-scroll {
     scrollbar-width: none;
     overflow: -moz-scrollbars-none;
