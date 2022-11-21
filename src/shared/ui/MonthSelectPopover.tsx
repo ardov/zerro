@@ -24,8 +24,6 @@ const MonthItem = withStyles(theme => ({
     border: ({ isCurrent }: MonthItemItemProps) =>
       isCurrent ? `1px solid ${theme.palette.primary.main}` : '',
   },
-  // Wrapper causes type error. Here is similar problem https://stackoverflow.com/questions/62223353/error-creating-wrapped-component-with-typescript-and-material-ui-listitem
-  // @ts-ignore
 }))(({ isCurrent, ...rest }: MonthItemItemProps) => (
   <ListItemButton {...rest} />
 ))

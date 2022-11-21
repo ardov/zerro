@@ -18,7 +18,7 @@ const getRootUserId = (state: RootState) =>
 const getUserInstrumentId = (state: RootState) => getRootUser(state)?.currency
 
 const getUserCurrency = (state: RootState): TFxCode =>
-  instrumentModel.getFxIdMap(state)[getUserInstrumentId(state) || 1] // USD as default
+  instrumentModel.getInstCodeMap(state)[getUserInstrumentId(state) || 1] // USD as default
 
 export const userModel = {
   getUsers,

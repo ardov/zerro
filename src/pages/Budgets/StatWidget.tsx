@@ -4,7 +4,7 @@ import { keys } from '@shared/helpers/keys'
 import { add } from '@shared/helpers/money'
 import { useToggle } from '@shared/hooks/useToggle'
 import { TEnvelopeId, TISOMonth } from '@shared/types'
-import { DataLine } from '@shared/ui/DataLine'
+import { DataLine } from '@components/DataLine'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { useAppSelector } from '@store/index'
 

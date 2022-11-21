@@ -10,13 +10,13 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts'
-import { DataLine } from '@shared/ui/DataLine'
+import { DataLine } from '@components/DataLine'
 import { getHistoryStart, getTransactionsHistory } from '@entities/transaction'
 import { formatMoney } from '@shared/helpers/money'
 import { makeDateArray, startOfMonth, formatDate } from '@shared/helpers/date'
-import { instrumentModel } from '@entities/currency/instrument'
 import { round } from '@shared/helpers/money'
 import { getType } from '@entities/transaction/helpers'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 
 type Point = {
   date: Date
@@ -27,7 +27,7 @@ type Point = {
 export function InAndOut() {
   const theme = useTheme()
   const transactions = useAppSelector(getTransactionsHistory)
-  const convert = useAppSelector(instrumentModel.convertCurrency)
+  const convert = useAppSelector(displayCurrency.convertCurrency)
   const historyStart = useAppSelector(getHistoryStart)
   const [filterMode, setFilterMode] = useState<'lastYear' | 'all'>('lastYear')
 

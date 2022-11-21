@@ -5,7 +5,7 @@ import { getFxRatesGetter } from './getFxRatesGetter'
 import { fxRateStore, TFxRates, TFxRatesStoredValue } from './fxRateStore'
 import { firstPossibleDate, requestRates } from '@shared/api/fxRates'
 import { toISOMonth } from '@shared/helpers/date'
-import { getLatestRates } from './getFxRates'
+import { getCurrentRates } from './getFxRates'
 
 export const editRates =
   (patch: TFxRates, month: TISOMonth): AppThunk =>
@@ -47,7 +47,7 @@ export const loadRates =
     const currMonth = toISOMonth(new Date())
 
     if (month >= currMonth) {
-      const latest = getLatestRates(getState()).rates
+      const latest = getCurrentRates(getState()).rates
       dispatch(editRates(latest, month))
       return
     }

@@ -1,15 +1,7 @@
 import React, { FC } from 'react'
-import {
-  Typography,
-  Box,
-  useMediaQuery,
-  Theme,
-  Menu,
-  MenuItem,
-  Button,
-} from '@mui/material'
+import { Typography, Box, Menu, MenuItem, Button } from '@mui/material'
 import { GoalsProgress } from '@features/bulkActions/fillGoals'
-import { rowStyle } from '../shared/shared'
+import { rowStyle, useIsSmall } from '../shared/shared'
 import { MonthSelect } from './MonthSelect'
 import { ToBeBudgeted } from './ToBeBudgeted'
 import { Metric } from '../models/useMetric'
@@ -39,7 +31,7 @@ export const Header: FC<HeaderProps> = props => {
     onOpenOverview,
     onMetricSwitch,
   } = props
-  const isMd = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
+  const isSmall = useIsSmall()
   const tableMenu = usePopover()
   return (
     <>
@@ -70,7 +62,7 @@ export const Header: FC<HeaderProps> = props => {
           <MonthSelect />
 
           <Box sx={{ display: 'flex', gap: 2 }}>
-            {!isMd && <GoalsProgress month={month} />}
+            {!isSmall && <GoalsProgress month={month} />}
             <ToBeBudgeted onClick={onOpenOverview} />
           </Box>
         </Box>
@@ -89,7 +81,7 @@ export const Header: FC<HeaderProps> = props => {
             </Button>
           </div>
 
-          {(metric === Metric.budgeted || !isMd) && (
+          {(metric === Metric.budgeted || !isSmall) && (
             <Typography
               variant="overline"
               color="text.secondary"
@@ -101,7 +93,7 @@ export const Header: FC<HeaderProps> = props => {
             </Typography>
           )}
 
-          {(metric === Metric.outcome || !isMd) && (
+          {(metric === Metric.outcome || !isSmall) && (
             <Typography
               variant="overline"
               color="text.secondary"
@@ -113,7 +105,7 @@ export const Header: FC<HeaderProps> = props => {
             </Typography>
           )}
 
-          {(metric === Metric.available || !isMd) && (
+          {(metric === Metric.available || !isSmall) && (
             <Typography
               variant="overline"
               color="text.secondary"

@@ -1,5 +1,5 @@
 import { TAccount, TFxCode, AccountType } from '@shared/types'
-import { TFxIdMap } from '@entities/currency/instrument'
+import { TInstCodeMap } from '@entities/currency/instrument'
 
 export type TAccountPopulated = TAccount & {
   startBalanceReal: number
@@ -7,7 +7,10 @@ export type TAccountPopulated = TAccount & {
   fxCode: TFxCode
 }
 
-export function populate(raw: TAccount, fxIdMap: TFxIdMap): TAccountPopulated {
+export function populate(
+  raw: TAccount,
+  fxIdMap: TInstCodeMap
+): TAccountPopulated {
   return {
     ...raw,
     startBalanceReal: getStartBalance(raw),

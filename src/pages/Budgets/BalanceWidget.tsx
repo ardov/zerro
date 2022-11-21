@@ -2,7 +2,7 @@ import { Divider, Paper, Typography } from '@mui/material'
 import { keys } from '@shared/helpers/keys'
 import pluralize from '@shared/helpers/pluralize'
 import { TISOMonth } from '@shared/types'
-import { DataLine } from '@shared/ui/DataLine'
+import { DataLine } from '@components/DataLine'
 import { Total } from '@shared/ui/Total'
 
 import { displayCurrency } from '@entities/currency/displayCurrency'

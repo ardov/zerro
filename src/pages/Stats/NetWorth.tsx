@@ -20,14 +20,14 @@ import {
   ReferenceLine,
 } from 'recharts'
 import { getInBudgetAccounts, getSavingAccounts } from '@entities/account'
-import { instrumentModel } from '@entities/currency/instrument'
 import { getAvailableMonths } from './availablePeriod'
 import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 import { round } from '@shared/helpers/money'
 import { useState } from 'react'
 import { formatDate } from '@shared/helpers/date'
-import { DataLine } from '@shared/ui/DataLine'
+import { DataLine } from '@components/DataLine'
 import { TInstrumentId } from '@shared/types'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 
 type Point = {
   date: Date
@@ -48,7 +48,7 @@ export function NetWorth() {
   const balanceChanges = useAppSelector(getBalanceChanges)
   const accsInBudget = useAppSelector(getInBudgetAccounts)
   const accsSaving = useAppSelector(getSavingAccounts)
-  const convert = useAppSelector(instrumentModel.convertCurrency)
+  const convert = useAppSelector(displayCurrency.convertCurrency)
 
   const [inBudget, setInBudget] = useState(true)
   const [savings, setSavings] = useState(true)

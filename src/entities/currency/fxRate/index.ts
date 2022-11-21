@@ -1,4 +1,4 @@
-import { getLatestRates, getRates } from './getFxRates'
+import { getCurrentRates, getRates } from './getFxRates'
 import { getFxRatesGetter } from './getFxRatesGetter'
 import {
   editRates,
@@ -14,7 +14,7 @@ export const fxRateModel = {
   // Selectors
   get: getRates,
   getter: getFxRatesGetter,
-  latest: getLatestRates,
+  latest: getCurrentRates,
   // Thunks
   edit: editRates,
   reset: resetRates,

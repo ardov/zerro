@@ -1,3 +1,3 @@
-export type { TFxIdMap } from './model'
+export type { TInstCodeMap } from './model'
 
 export { instrumentModel } from './model'

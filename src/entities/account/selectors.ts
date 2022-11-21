@@ -17,7 +17,7 @@ export const getDebtAccountId = createSelector([getAccounts], accounts => {
 })
 
 export const getPopulatedAccounts = createSelector(
-  [getAccounts, instrumentModel.getFxIdMap],
+  [getAccounts, instrumentModel.getInstCodeMap],
   (accounts, fxIdMap) => {
     const result: ById<TAccountPopulated> = {}
     for (const id in accounts) {

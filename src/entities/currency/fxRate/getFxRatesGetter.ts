@@ -2,16 +2,27 @@ import { createSelector } from '@reduxjs/toolkit'
 import { TISOMonth, TDateDraft } from '@shared/types'
 import { keys } from '@shared/helpers/keys'
 import { toISOMonth } from '@shared/helpers/date'
-import { TSelector } from '@store'
-import { TFxRateData, getRates } from './getFxRates'
 
-export const getFxRatesGetter: TSelector<(date: TDateDraft) => TFxRateData> =
-  createSelector([getRates], rates => (date: TDateDraft): TFxRateData => {
-    const month = toISOMonth(date)
-    if (rates[month]) return rates[month]
-    const d = findDate(keys(rates).sort(), month)
-    return rates[d]
-  })
+import { TSelector } from '@store'
+import { TFxRateData, getRates, getCurrentRates } from './getFxRates'
+
+export const getFxRatesGetter: TSelector<
+  (date: TDateDraft | 'current') => TFxRateData
+> = createSelector(
+  [getRates, getCurrentRates],
+  (rates, latestRates) =>
+    (date: TDateDraft | 'current'): TFxRateData => {
+      if (date === 'current') {
+        return latestRates
+      }
+      const month = toISOMonth(date)
+      if (rates[month]) {
+        return rates[month]
+      }
+      const idx = findDate(keys(rates).sort(), month)
+      return rates[idx]
+    }
+)
 
 /**
  * Returns the exact date from the array

@@ -8,6 +8,5 @@ export {
   getPopulatedTags,
   getPopulatedTag,
   getTagsTree,
-  getTagLinks,
 } from './model'
 export { patchTag, createTag } from './thunks'

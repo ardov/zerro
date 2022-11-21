@@ -4,7 +4,6 @@ import { getType } from '@entities/transaction/helpers'
 import { getPopulatedAccounts } from '@entities/account'
 import { getSortedTransactions } from '@entities/transaction'
 import { getTransactionsHistory } from '@entities/transaction'
-import { instrumentModel } from '@entities/currency/instrument'
 import {
   TAccountId,
   TInstrumentId,
@@ -12,6 +11,7 @@ import {
   TTransaction,
 } from '@shared/types'
 import { eachDayOfInterval, parseDate, toISODate } from '@shared/helpers/date'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 
 interface DayNode {
   date: TISODate
@@ -145,7 +145,7 @@ const createInfoNode = (): InfoNode => ({
 
 export const getYearStats = (year: number) =>
   createSelector(
-    [getSortedTransactions, instrumentModel.convertCurrency],
+    [getSortedTransactions, displayCurrency.convertCurrency],
     (allTransactions: TTransaction[], convert) => {
       if (!allTransactions?.length) return null
       const dateStart = toISODate(new Date(year, 0, 1))

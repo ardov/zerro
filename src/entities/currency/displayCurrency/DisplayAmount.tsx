@@ -5,8 +5,8 @@ import { displayCurrency } from './displayCurrency'
 type TDisplayAmountProps = Modify<
   AmountProps,
   {
-    value: TFxAmount
-    month: TISOMonth
+    value: TFxAmount | number
+    month?: TISOMonth
     noCurrency?: boolean
   }
 >
@@ -14,10 +14,11 @@ type TDisplayAmountProps = Modify<
 export const DisplayAmount = (props: TDisplayAmountProps) => {
   const { value, month, noCurrency, ...delegated } = props
   const [currency] = displayCurrency.useDisplayCurrency()
-  const convert = displayCurrency.useToDisplay(month)
+  const convert = displayCurrency.useToDisplay(month || 'current')
+  const amount = typeof value === 'number' ? value : convert(value)
   return (
     <Amount
-      value={convert(value)}
+      value={amount}
       currency={noCurrency ? undefined : currency}
       {...delegated}
     />
