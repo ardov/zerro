@@ -82,9 +82,19 @@ export function prevMonth(d: TDateDraft) {
   return new Date(date.getFullYear(), date.getMonth() - 1, 1)
 }
 
+export function nextDay(d: TDateDraft) {
+  const date = parseDate(d)
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
+}
+
 export function nextMonth(d: TDateDraft) {
   const date = parseDate(d)
   return new Date(date.getFullYear(), date.getMonth() + 1, 1)
+}
+
+export function nextYear(d: TDateDraft) {
+  const date = parseDate(d)
+  return new Date(date.getFullYear() + 1, 0, 1)
 }
 
 export function startOfWeek(d: TDateDraft) {

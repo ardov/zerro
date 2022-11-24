@@ -16,7 +16,7 @@ export function sub(first: number, ...params: number[]): number {
 export function addFxAmount(...amounts: TFxAmount[]): TFxAmount {
   return amounts.reduce((acc, curr) => {
     for (const fx in curr) {
-      acc[fx] = add(acc[fx] || 0, curr[fx])
+      acc[fx] = round((acc[fx] || 0) + curr[fx])
     }
     return acc
   }, {} as TFxAmount)
@@ -54,7 +54,7 @@ export function convertFx(
 ): number {
   let result = 0
   keys(fxAmount).forEach(fx => {
-    result = add(result, (fxAmount[fx] * rates[fx]) / rates[targetFxCode])
+    result = round(result + (fxAmount[fx] * rates[fx]) / rates[targetFxCode])
   })
   return result
 }

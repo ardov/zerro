@@ -1,5 +1,10 @@
 import { checkRaw, FilterConditions } from './filtering'
-import { TISODate, TTransaction, TTransactionId } from '@shared/types'
+import {
+  TAccountId,
+  TISODate,
+  TTransaction,
+  TTransactionId,
+} from '@shared/types'
 import {
   parseDate,
   startOfMonth,
@@ -57,7 +62,7 @@ export enum TrType {
   OutcomeDebt = 'outcomeDebt',
 }
 
-export function getType(tr: TTransaction, debtId?: string): TrType {
+export function getType(tr: TTransaction, debtId?: TAccountId): TrType {
   if (debtId && tr.incomeAccount === debtId) return TrType.OutcomeDebt
   if (debtId && tr.outcomeAccount === debtId) return TrType.IncomeDebt
   if (tr.income && tr.outcome) return TrType.Transfer
