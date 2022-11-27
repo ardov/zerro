@@ -1,8 +1,7 @@
 import React, { FC } from 'react'
-import { useAppSelector } from '@store'
 import { Select, MenuItem, SelectProps, ListItemText } from '@mui/material'
 import { instrumentModel } from '@entities/currency/instrument'
-import { getInBudgetAccounts } from '@entities/account'
+import { accountModel } from '@entities/account'
 import { TFxCode, TInstrument } from '@shared/types'
 import { getCurrencySymbol } from '@shared/helpers/money'
 import { userModel } from '@entities/user'
@@ -10,7 +9,7 @@ import { userModel } from '@entities/user'
 export const CurrencyCodeSelect: FC<SelectProps<TFxCode>> = props => {
   const instrumentsByCode = instrumentModel.useInstrumentsByCode()
   const userCurrency = userModel.useUserCurrency()
-  const accs = useAppSelector(getInBudgetAccounts)
+  const accs = accountModel.useInBudgetAccounts()
   const value = props.value
 
   const fxSet = new Set(accs.map(a => a.fxCode))

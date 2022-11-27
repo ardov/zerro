@@ -5,7 +5,7 @@ import { setHiddenData } from '../thunks'
 import { getTags } from '@entities/tag'
 import { getAccLinks } from '../selectors'
 import { AppThunk, TSelector } from '@store'
-import { getAccounts } from '@entities/account'
+import { accountModel } from '@entities/account'
 import { TAccountId, TTagId } from '@shared/types'
 
 // THUNK
@@ -33,7 +33,7 @@ export const addConnection =
  */
 export const getAccTagMap: TSelector<Record<TAccountId, TTagId>> =
   createSelector(
-    [getAccLinks, getTags, getAccounts],
+    [getAccLinks, getTags, accountModel.getAccounts],
     (links, tags, accounts) => {
       if (!links) return {}
       const filtered = Object.entries(links).filter(

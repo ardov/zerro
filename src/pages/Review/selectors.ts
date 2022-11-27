@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { round } from '@shared/helpers/money'
 import { getType } from '@entities/transaction/helpers'
-import { getPopulatedAccounts } from '@entities/account'
+import { accountModel } from '@entities/account'
 import { getSortedTransactions } from '@entities/transaction'
 import { getTransactionsHistory } from '@entities/transaction'
 import {
@@ -23,7 +23,7 @@ interface History {
 }
 
 export const getAccountsHistory = createSelector(
-  [getTransactionsHistory, getPopulatedAccounts],
+  [getTransactionsHistory, accountModel.getPopulatedAccounts],
   (transactions, accounts) => {
     if (!transactions?.length || !accounts) return {}
     let historyById: History = {}

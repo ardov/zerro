@@ -12,7 +12,7 @@ import { Amount } from '@shared/ui/Amount'
 import { TFxAmount } from '@shared/types'
 
 import { useAppDispatch } from '@store'
-import { setInBudget, TAccountPopulated } from '@entities/account'
+import { accountModel, TAccountPopulated } from '@entities/account'
 import {
   DisplayAmount,
   displayCurrency,
@@ -22,7 +22,7 @@ export const Account: FC<{ account: TAccountPopulated } & ListItemButtonProps> =
   ({ account, sx, ...rest }) => {
     const dispatch = useAppDispatch()
     const toggleInBalance = useCallback(
-      () => dispatch(setInBudget(account.id, !account.inBudget)),
+      () => dispatch(accountModel.setInBudget(account.id, !account.inBudget)),
       [account.id, account.inBudget, dispatch]
     )
     return (

@@ -1,11 +1,11 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { getReminders } from '@entities/reminder'
 import { DataReminderType } from './constants'
-import { getAccountList } from '@entities/account'
 import { DATA_ACC_NAME } from './constants'
 import { RootState } from '@store'
 import { TOldGoal, TReminder, TTagMeta } from '@shared/types'
 import { TTagId } from '@shared/types'
+import { accountModel } from '@entities/account'
 
 const { ACC_LINKS, TAG_ORDER, GOALS, TAG_META } = DataReminderType
 
@@ -13,7 +13,9 @@ const { ACC_LINKS, TAG_ORDER, GOALS, TAG_META } = DataReminderType
  * Returns id of special account to store data
  */
 export function getDataAccountId(state: RootState) {
-  const dataAcc = getAccountList(state).find(acc => acc.title === DATA_ACC_NAME)
+  const dataAcc = accountModel
+    .getAccountList(state)
+    .find(acc => acc.title === DATA_ACC_NAME)
   return dataAcc ? dataAcc.id : null
 }
 

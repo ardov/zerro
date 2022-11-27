@@ -1,18 +1,35 @@
+import { useAppSelector } from '@store/index'
+import {
+  getAccountList,
+  getAccounts,
+  getDebtAccountId,
+  getInBudgetAccounts,
+  getPopulatedAccounts,
+  getSavingAccounts,
+} from './selectors'
+import { makeAccount } from './shared/makeAccount'
+import { patchAccount, setInBudget } from './thunks'
+
 export type { TAccountDraft } from './thunks'
 export type { TAccountPopulated } from './shared/populate'
 
-// Selectors
-export {
+export const accountModel = {
   getAccounts,
+  getDebtAccountId,
   getPopulatedAccounts,
   getAccountList,
-  getDebtAccountId,
   getInBudgetAccounts,
   getSavingAccounts,
-} from './selectors'
-
-// Thunks
-export { patchAccount, setInBudget } from './thunks'
-
-// Helpers
-export { makeAccount } from './shared/makeAccount'
+  // Hooks
+  useAccounts: () => useAppSelector(getAccounts),
+  useDebtAccountId: () => useAppSelector(getDebtAccountId),
+  usePopulatedAccounts: () => useAppSelector(getPopulatedAccounts),
+  useAccountList: () => useAppSelector(getAccountList),
+  useInBudgetAccounts: () => useAppSelector(getInBudgetAccounts),
+  useSavingAccounts: () => useAppSelector(getSavingAccounts),
+  // Actions
+  makeAccount,
+  // Thunks
+  patchAccount,
+  setInBudget,
+}

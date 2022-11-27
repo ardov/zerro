@@ -1,7 +1,7 @@
 import countries from './countries.json'
 import companies from './companies.json'
 import instruments from './instruments.json'
-import { makeAccount } from '@entities/account'
+import { accountModel } from '@entities/account'
 import { makeTag } from '@entities/tag/makeTag'
 import { makeTransaction } from '@entities/transaction/makeTransaction'
 import { toISODate } from '@shared/helpers/date'
@@ -32,14 +32,14 @@ const USER: TUser = {
 }
 
 // ACCOUNTS
-const DEBT_ACC = makeAccount({
+const DEBT_ACC = accountModel.makeAccount({
   id: 'DEBT_ACC',
   user: USER.id,
   instrument: USER.currency,
   type: AccountType.Debt,
   title: 'Долги',
 })
-const CASH_ACC = makeAccount({
+const CASH_ACC = accountModel.makeAccount({
   id: 'CASH_ACC',
   user: USER.id,
   instrument: USER.currency,

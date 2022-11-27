@@ -13,12 +13,8 @@ import { toISOMonth } from '@shared/helpers/date'
 import { addFxAmount } from '@shared/helpers/money'
 import { withPerf } from '@shared/helpers/performance'
 import { TSelector } from '@store/index'
-import {
-  getDebtAccountId,
-  getInBudgetAccounts,
-  TAccountPopulated,
-} from '@entities/account'
-import { getDebtors, TDebtor } from '@entities/debtors'
+import { accountModel, TAccountPopulated } from '@entities/account'
+import { debtorModel, TDebtor } from '@entities/debtors'
 import { envId } from '@entities/envelope'
 import { instrumentModel } from '@entities/currency/instrument'
 import { cleanPayee } from '@entities/shared/cleanPayee'
@@ -39,9 +35,9 @@ export const getRawActivity: TSelector<ByMonth<TRawActivityNode>> =
   createSelector(
     [
       getTransactionsHistory,
-      getInBudgetAccounts,
-      getDebtAccountId,
-      getDebtors,
+      accountModel.getInBudgetAccounts,
+      accountModel.getDebtAccountId,
+      debtorModel.getDebtors,
       instrumentModel.getInstruments,
     ],
     withPerf('🖤 getRawActivity', getRawActivityFn)

@@ -1,10 +1,11 @@
-import { TDateDraft } from '@shared/types'
+import { TDateDraft, TISODate } from '@shared/types'
+import { toISODate } from './utils'
 
 export function makeDateArray(
   from: TDateDraft,
   to: TDateDraft = new Date(),
   aggregation: 'day' | 'month' | 'year' = 'month'
-): Array<Date> {
+): Array<TISODate> {
   let current = getDate(from, aggregation)
   let last = getDate(to, aggregation)
   const months = [current]
@@ -15,7 +16,7 @@ export function makeDateArray(
     if (aggregation === 'year') current.setFullYear(current.getFullYear() + 1)
     months.push(current)
   }
-  return months
+  return months.map(toISODate)
 }
 
 function getDate(

@@ -19,7 +19,6 @@ import {
   Line,
   ReferenceLine,
 } from 'recharts'
-import { getInBudgetAccounts, getSavingAccounts } from '@entities/account'
 import { getAvailableMonths } from './availablePeriod'
 import { getBalanceChanges, getBalancesOnDate } from './getBalanceChanges'
 import { round } from '@shared/helpers/money'
@@ -28,6 +27,7 @@ import { formatDate } from '@shared/helpers/date'
 import { DataLine } from '@components/DataLine'
 import { TInstrumentId } from '@shared/types'
 import { displayCurrency } from '@entities/currency/displayCurrency'
+import { accountModel } from '@entities/account'
 
 type Point = {
   date: Date
@@ -46,8 +46,8 @@ export function NetWorth() {
   const theme = useTheme()
   const months = useAppSelector(getAvailableMonths)
   const balanceChanges = useAppSelector(getBalanceChanges)
-  const accsInBudget = useAppSelector(getInBudgetAccounts)
-  const accsSaving = useAppSelector(getSavingAccounts)
+  const accsInBudget = accountModel.useInBudgetAccounts()
+  const accsSaving = accountModel.useSavingAccounts()
   const convert = useAppSelector(displayCurrency.convertCurrency)
 
   const [inBudget, setInBudget] = useState(true)

@@ -7,12 +7,7 @@ import { TFxAmount } from '@shared/types'
 import { addFxAmount } from '@shared/helpers/money'
 import { toISOMonth } from '@shared/helpers/date'
 
-import { useAppSelector } from '@store'
-import {
-  getInBudgetAccounts,
-  getSavingAccounts,
-  TAccountPopulated,
-} from '@entities/account'
+import { accountModel, TAccountPopulated } from '@entities/account'
 import {
   DisplayAmount,
   displayCurrency,
@@ -21,16 +16,20 @@ import { Account, Subheader } from './components'
 
 export default function AccountList({ className = '' }) {
   const toDisplay = displayCurrency.useToDisplay(toISOMonth(new Date()))
-  const inBudget = useAppSelector(getInBudgetAccounts).sort(
-    (a, b) =>
-      toDisplay({ [b.fxCode]: b.balance }) -
-      toDisplay({ [a.fxCode]: a.balance })
-  )
-  const savings = useAppSelector(getSavingAccounts).sort(
-    (a, b) =>
-      toDisplay({ [b.fxCode]: b.balance }) -
-      toDisplay({ [a.fxCode]: a.balance })
-  )
+  const inBudget = accountModel
+    .useInBudgetAccounts()
+    .sort(
+      (a, b) =>
+        toDisplay({ [b.fxCode]: b.balance }) -
+        toDisplay({ [a.fxCode]: a.balance })
+    )
+  const savings = accountModel
+    .useSavingAccounts()
+    .sort(
+      (a, b) =>
+        toDisplay({ [b.fxCode]: b.balance }) -
+        toDisplay({ [a.fxCode]: a.balance })
+    )
 
   const inBudgetActive = inBudget.filter(a => !a.archive)
   const inBudgetArchived = inBudget.filter(a => a.archive)

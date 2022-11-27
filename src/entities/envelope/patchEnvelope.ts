@@ -14,7 +14,7 @@ import { patchEnvelopeMeta, TEnvelopeMetaPatch } from './shared/metaData'
 import { hex2int, isHEX } from '@shared/helpers/color'
 import { TEnvelope } from './shared/makeEnvelope'
 import { getRightParent } from './shared/structure'
-import { patchAccount, TAccountDraft } from '@entities/account'
+import { accountModel, TAccountDraft } from '@entities/account'
 import { patchMerchant, TMerchantDraft } from '@entities/merchant'
 
 export type TEnvelopeDraft = OptionalExceptFor<TEnvelope, 'id'>
@@ -49,7 +49,7 @@ export const patchEnvelope =
       [] as TEnvelopeMetaPatch[]
     )
     if (tagPatches.length) dispatch(patchTag(tagPatches))
-    if (accPatches.length) dispatch(patchAccount(accPatches))
+    if (accPatches.length) dispatch(accountModel.patchAccount(accPatches))
     if (merchantPatches.length) dispatch(patchMerchant(merchantPatches))
     if (metaPatches.length) dispatch(patchEnvelopeMeta(metaPatches))
     return

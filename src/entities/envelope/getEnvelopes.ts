@@ -1,8 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { ById } from '@shared/types'
 import { TSelector } from '@store'
-import { getSavingAccounts } from '@entities/account'
-import { getDebtors } from '@entities/debtors'
+import { accountModel } from '@entities/account'
+import { debtorModel } from '@entities/debtors'
 import { getPopulatedTags } from '@entities/tag'
 import { getEnvelopeMeta } from './shared/metaData'
 import { makeEnvelope, TEnvelope } from './shared/makeEnvelope'
@@ -20,9 +20,9 @@ const getCompiledEnvelopes: TSelector<{
   structure: ReturnType<typeof buildStructure>
 }> = createSelector(
   [
-    getDebtors,
+    debtorModel.getDebtors,
     getPopulatedTags,
-    getSavingAccounts,
+    accountModel.getSavingAccounts,
     getEnvelopeMeta,
     userModel.getUserCurrency,
   ],

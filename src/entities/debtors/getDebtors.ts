@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { add, sub } from '@shared/helpers/money'
-import { getDebtAccountId } from '@entities/account'
+import { accountModel } from '@entities/account'
 import { getTransactionsHistory, TrType } from '@entities/transaction'
 import { getType } from '@entities/transaction/helpers'
 import {
@@ -33,7 +33,7 @@ export const getDebtors: TSelector<ById<TDebtor>> = createSelector(
     getTransactionsHistory,
     getMerchants,
     instrumentModel.getInstruments,
-    getDebtAccountId,
+    accountModel.getDebtAccountId,
   ],
   withPerf('getDebtors', collectDebtors)
 )

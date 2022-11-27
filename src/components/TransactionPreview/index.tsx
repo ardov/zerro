@@ -21,7 +21,7 @@ import { TagList } from '@components/TagList'
 import { useAppDispatch, useAppSelector } from '@store'
 import { getTransactions } from '@entities/transaction'
 import { getType } from '@entities/transaction/helpers'
-import { getPopulatedAccounts } from '@entities/account'
+import { accountModel } from '@entities/account'
 import { instrumentModel } from '@entities/currency/instrument'
 import {
   applyChangesToTransaction,
@@ -51,8 +51,8 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
 
   const tr = useAppSelector(getTransactions)[id]
   const trType = getType(tr)
-  const incomeAccount = useAppSelector(getPopulatedAccounts)[tr.incomeAccount]
-  const outcomeAccount = useAppSelector(getPopulatedAccounts)[tr.outcomeAccount]
+  const incomeAccount = accountModel.usePopulatedAccounts()[tr.incomeAccount]
+  const outcomeAccount = accountModel.usePopulatedAccounts()[tr.outcomeAccount]
   const instruments = instrumentModel.useInstruments()
   const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
   const outcomeCurrency = instruments[tr.outcomeInstrument]?.shortTitle

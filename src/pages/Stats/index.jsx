@@ -3,7 +3,7 @@ import { Box, Typography, Paper, useTheme } from '@mui/material'
 import { useAppSelector } from '@store'
 import { AreaChart, Area, ResponsiveContainer } from 'recharts'
 import { getAccountsHistory } from './selectors'
-import { getAccounts, getAccountList } from '@entities/account'
+import { accountModel } from '@entities/account'
 import { formatMoney } from '@shared/helpers/money'
 import { formatDate } from '@shared/helpers/date'
 import Rhythm from '@shared/ui/Rhythm'
@@ -12,7 +12,7 @@ import { NetWorth } from './NetWorth'
 import { InAndOut } from './InAndOut'
 
 export default function Stats() {
-  const accs = useAppSelector(getAccountList)
+  const accs = accountModel.useAccountList()
   const [selected, setSelected] = useState({})
 
   const startDate = +new Date(2019, 0)
@@ -64,7 +64,7 @@ export default function Stats() {
 const AccHist = ({ id, startDate = 0, endDate, onClick }) => {
   const theme = useTheme()
   const history = useAppSelector(getAccountsHistory)[id]
-  const acc = useAppSelector(getAccounts)[id]
+  const acc = accountModel.useAccounts()[id]
   const [hoverIdx, setHoverIdx] = useState(null)
 
   const diff = Math.abs(history[history.length - 1].balance - acc.balance)

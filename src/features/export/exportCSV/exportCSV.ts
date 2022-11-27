@@ -8,14 +8,14 @@ import { ById } from '@shared/types'
 import { AppThunk } from '@store'
 import { getTransactions, TrType } from '@entities/transaction'
 import { instrumentModel } from '@entities/currency/instrument'
-import { getAccounts } from '@entities/account'
+import { accountModel } from '@entities/account'
 import { getPopulatedTags } from '@entities/tag'
 
 // Only for CSV
 const getPopulatedTransactions = createSelector(
   [
     instrumentModel.getInstruments,
-    getAccounts,
+    accountModel.getAccounts,
     getPopulatedTags,
     getTransactions,
   ],

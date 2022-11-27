@@ -4,7 +4,7 @@ import { useAppSelector } from '@store'
 import { RootState } from '@store'
 import { getTransactions } from '@entities/transaction'
 import { getType } from '@entities/transaction/helpers'
-import { getDebtAccountId } from '@entities/account'
+import { accountModel } from '@entities/account'
 import { Transaction } from './Transaction'
 import { useContextMenu, TransactionMenu } from './ContextMenu'
 
@@ -32,7 +32,7 @@ const TransactionWrapper: FC<WrapperProps> = props => {
   const transaction = useAppSelector(
     (state: RootState) => getTransactions(state)[id]
   )
-  const debtId = useAppSelector(getDebtAccountId)
+  const debtId = accountModel.useDebtAccountId()
   const type = getType(transaction, debtId)
   const onClick = useCallback(() => setOpened(id), [id, setOpened])
 
