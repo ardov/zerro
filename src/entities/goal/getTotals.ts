@@ -45,15 +45,11 @@ function calcGoalTotals(
     }
   })
 
-  let needNowValue = convertFx(totalNeedNow, 'USD', rates)
-  let needStartValue = convertFx(totalNeedNow, 'USD', rates)
-  let progress = getProgress(needStartValue, needNowValue)
-
-  console.assert(
-    needNowValue >= 0,
-    'Needed negative value to complete goals',
-    goals
+  let progress = getProgress(
+    convertFx(totalNeedStart, 'USD', rates),
+    convertFx(totalNeedNow, 'USD', rates)
   )
+
   console.assert(progress >= 0, 'Negative goal progress', goals)
 
   return {
