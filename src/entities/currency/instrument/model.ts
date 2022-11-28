@@ -31,4 +31,5 @@ export const instrumentModel = {
   // Hooks
   useInstruments: () => useAppSelector(getInstruments),
   useInstrumentsByCode: () => useAppSelector(getInstrumentsByCode),
+  useInstCodeMap: () => useAppSelector(getInstCodeMap),
 }

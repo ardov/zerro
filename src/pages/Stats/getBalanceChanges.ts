@@ -1,13 +1,16 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { round } from '@shared/helpers/money'
 import { getTime, getType } from '@entities/transaction/helpers'
-import { getDebtAccountId, getPopulatedAccounts } from '@entities/account'
-import { debtorGetter, getTransactionsHistory } from '@entities/transaction'
+import { getTransactionsHistory } from '@entities/transaction'
+import { TAccountId, TTransaction } from '@shared/types'
+import { getMerchants } from '@entities/merchant'
+import { cleanPayee } from '@entities/shared/cleanPayee'
+import { accountModel } from '@entities/account'
 
 type HistoryPoint = {
   date: number
-  accounts: { [account: string]: number }
-  debtors: { [debtorId: string]: number }
+  accounts: Record<TAccountId, number>
+  debtors: Record<string, number>
 }
 
 export const getBalancesOnDate = (nodes: HistoryPoint[], date: number) => {
@@ -18,14 +21,23 @@ export const getBalancesOnDate = (nodes: HistoryPoint[], date: number) => {
   return nodes[0]
 }
 
+const debtorGetter = createSelector(
+  [getMerchants],
+  merchants => (tr: TTransaction) => {
+    const instrument = tr.incomeInstrument || tr.outcomeInstrument
+    const merchantTitle = tr.merchant && merchants[tr.merchant]?.title
+    return cleanPayee(merchantTitle || tr.payee || '') + '-' + instrument
+  }
+)
+
 /**
  * Returns an array of balance changes created for every transaction from getTransactionsHistory
  */
 export const getBalanceChanges = createSelector(
   [
     getTransactionsHistory,
-    getDebtAccountId,
-    getPopulatedAccounts,
+    accountModel.getDebtAccountId,
+    accountModel.getPopulatedAccounts,
     debtorGetter,
   ],
   (transactions, debtId, accounts, getDebtorId) => {
