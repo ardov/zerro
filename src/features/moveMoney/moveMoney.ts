@@ -33,7 +33,7 @@ export const moveMoney =
           ? -amount
           : convertFx({ [currency]: -amount }, env.currency, rates)
       const newBudget = round(budgeted + change)
-      updates.push({ month, id: env.id, value: newBudget })
+      updates.push({ month, id: env.id, value: newBudget, exact: true })
     }
 
     if (destination !== 'toBeBudgeted') {
@@ -44,7 +44,7 @@ export const moveMoney =
           ? amount
           : convertFx({ [currency]: amount }, env.currency, rates)
       const newBudget = round(budgeted + change)
-      updates.push({ month, id: env.id, value: newBudget })
+      updates.push({ month, id: env.id, value: newBudget, exact: true })
     }
 
     dispatch(setEnvelopeBudgets(updates))
