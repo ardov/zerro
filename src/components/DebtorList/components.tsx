@@ -9,7 +9,10 @@ import {
 } from '@mui/material'
 import { TFxAmount, TFxCode } from '@shared/types'
 import { Amount } from '@shared/ui/Amount'
-import { DisplayAmount, useToDisplay } from '@entities/displayCurrency'
+import {
+  DisplayAmount,
+  displayCurrency,
+} from '@entities/currency/displayCurrency'
 import { toISOMonth } from '@shared/helpers/date'
 
 export const Debtor: FC<
@@ -60,7 +63,7 @@ export const Subheader: FC<
   } & ListSubheaderProps
 > = ({ name, amount, sx, ...rest }) => {
   const month = toISOMonth(new Date())
-  const toDisplay = useToDisplay(month)
+  const toDisplay = displayCurrency.useToDisplay(month)
   return (
     <ListSubheader sx={{ borderRadius: 1, ...sx }} {...rest}>
       <Box component="span" display="flex" width="100%">

@@ -1,11 +1,11 @@
 import React, { FC } from 'react'
-import { Typography, Box, useMediaQuery, Theme } from '@mui/material'
-import { rowStyle } from '../shared/shared'
+import { Typography, Box } from '@mui/material'
+import { rowStyle, useIsSmall } from '../shared/shared'
 
 import { Metric } from '../models/useMetric'
 import { TISOMonth } from '@shared/types'
 import { balances } from '@entities/envBalances'
-import { DisplayAmount } from '@entities/displayCurrency'
+import { DisplayAmount } from '@entities/currency/displayCurrency'
 
 type FooterProps = {
   month: TISOMonth
@@ -14,7 +14,7 @@ type FooterProps = {
 
 export const Footer: FC<FooterProps> = props => {
   const { month, metric } = props
-  const isMd = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
+  const isSmall = useIsSmall()
   const totals = balances.useTotals()[month]
 
   return (
@@ -25,7 +25,7 @@ export const Footer: FC<FooterProps> = props => {
         </Typography>
       </div>
 
-      {(metric === Metric.budgeted || !isMd) && (
+      {(metric === Metric.budgeted || !isSmall) && (
         <Typography
           variant="overline"
           color="text.secondary"
@@ -41,7 +41,7 @@ export const Footer: FC<FooterProps> = props => {
         </Typography>
       )}
 
-      {(metric === Metric.outcome || !isMd) && (
+      {(metric === Metric.outcome || !isSmall) && (
         <Typography
           variant="overline"
           color="text.secondary"
@@ -57,7 +57,7 @@ export const Footer: FC<FooterProps> = props => {
         </Typography>
       )}
 
-      {(metric === Metric.available || !isMd) && (
+      {(metric === Metric.available || !isSmall) && (
         <Typography
           variant="overline"
           color="text.secondary"

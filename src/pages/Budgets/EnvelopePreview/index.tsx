@@ -18,7 +18,7 @@ import { useToggle } from '@shared/hooks/useToggle'
 import { useMonth } from '@shared/hooks/useMonth'
 import { TEnvelopeId, TFxAmount } from '@shared/types'
 import { convertFx } from '@shared/helpers/money'
-import { DataLine } from '@shared/ui/DataLine'
+import { DataLine } from '@components/DataLine'
 
 import { useAppDispatch, useAppSelector } from '@store'
 import { getEnvelopes, patchEnvelope, TEnvelope } from '@entities/envelope'

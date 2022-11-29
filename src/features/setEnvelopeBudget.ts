@@ -5,24 +5,26 @@ import {
   TISOMonth,
   TTagId,
 } from '@shared/types'
+import { convertFx, round } from '@shared/helpers/money'
 import { keys } from '@shared/helpers/keys'
 import { AppThunk } from '@store'
 import { applyClientPatch } from '@store/data'
 import { envId } from '@entities/envelope'
-import { getRootUser } from '@entities/user'
-import {
-  getBudgetId,
-  getBudgets,
-  makeBudget,
-} from '../entities/budget/tagBudget'
-import { budgetStore } from '../entities/budget/envelopeBudgets/budgetStore'
-import { convertFx, sub } from '@shared/helpers/money'
+import { getBudgetId, getBudgets, makeBudget } from '@entities/budget/tagBudget'
+import { budgetStore } from '@entities/budget/envelopeBudgets/budgetStore'
 import { balances } from '@entities/envBalances'
+import { userModel } from '@entities/user'
 
 export type TEnvBudgetUpdate = {
   id: TEnvelopeId
   month: TISOMonth
   value: number
+  /**
+   * Controlls budgeting mode
+   * - false - sets total budget
+   * - true - sets only parent budget
+   */
+  exact?: boolean
 }
 
 export function setEnvelopeBudgets(
@@ -56,10 +58,11 @@ export function setEnvelopeBudgets(
 
     /** Adjusts budget depending on children budgets */
     function adjustValue(u: TEnvBudgetUpdate): TEnvBudgetUpdate {
+      if (u.exact) return u
       const { childrenBudgeted, currency } = envMetrics[u.month][u.id]
       const { rates } = rateData[u.month]
       const childrenValue = convertFx(childrenBudgeted, currency, rates)
-      return { ...u, value: sub(u.value, childrenValue) }
+      return { ...u, value: round(u.value - childrenValue) }
     }
   }
 }
@@ -95,8 +98,7 @@ function setTagBudget(upd: TTagBudgetUpdate | TTagBudgetUpdate[]): AppThunk {
     if (!upd || !updates.length) return null
 
     const state = getState()
-    const userId = getRootUser(state)?.id
-    if (!userId) throw new Error('User is not defined')
+    const userId = userModel.getRootUserId(state)
 
     const budgets = updates.map(({ tag, month, value }) => {
       const id = getBudgetId(month, tag)

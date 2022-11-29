@@ -1,23 +1,17 @@
 import React, { FC } from 'react'
-import {
-  Typography,
-  ButtonBase,
-  Divider,
-  useMediaQuery,
-  ButtonBaseProps,
-  Theme,
-} from '@mui/material'
+import { Typography, ButtonBase, Divider, ButtonBaseProps } from '@mui/material'
 import { useTheme } from '@mui/styles'
 import { formatMoney, sub } from '@shared/helpers/money'
 import { useMonth } from '@shared/hooks/useMonth'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { Amount } from '@shared/ui/Amount'
 import Rhythm from '@shared/ui/Rhythm'
-import { DataLine } from '@shared/ui/DataLine'
+import { DataLine } from '@components/DataLine'
 import { ArrowForwardIcon } from '@shared/ui/Icons'
 
-import { useDisplayCurrency, useToDisplay } from '@entities/displayCurrency'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 import { balances } from '@entities/envBalances'
+import { useIsSmall } from '../shared/shared'
 
 type TMsgType = 'error' | 'warning' | 'success'
 
@@ -32,7 +26,7 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
   } = useTotalsModel()
 
   const theme = useTheme()
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+  const isSmall = useIsSmall()
 
   const bg = theme.palette[msgType].main
   const color = theme.palette.getContrastText(bg)
@@ -53,7 +47,7 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
         {...props}
       >
         <Typography noWrap align="center" variant="body1">
-          {!isMobile &&
+          {!isSmall &&
             (toBeBudgeted ? 'Не распределено ' : 'Деньги распределены ')}
           {toBeBudgeted ? (
             <Amount
@@ -77,8 +71,8 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
 function useTotalsModel() {
   const [month] = useMonth()
 
-  const [currency] = useDisplayCurrency()
-  const toDisplay = useToDisplay(month)
+  const [currency] = displayCurrency.useDisplayCurrency()
+  const toDisplay = displayCurrency.useToDisplay(month)
 
   const monthList = balances.useMonthList()
   const lastMonth = monthList[monthList.length - 1]

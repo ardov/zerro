@@ -1,14 +1,14 @@
+import { shallowEqual } from 'react-redux'
 import { createSelector } from '@reduxjs/toolkit'
-import { deleteReminder, getReminders, setReminder } from '@entities/reminder'
-import { getRootUser } from '@entities/user'
 import { isISOMonth } from '@shared/helpers/date'
 import { keys } from '@shared/helpers/keys'
 import { TReminder, TISOMonth, ByMonth } from '@shared/types'
+
 import { AppThunk, TSelector } from '@store'
+import { deleteReminder, getReminders, setReminder } from '@entities/reminder'
 import { prepareDataAccount } from './dataAccount'
 import { parseComment } from './helpers'
 import { HiddenDataType } from './types'
-import { shallowEqual } from 'react-redux'
 
 type TMonthlyStore<TPayload> = {
   type: HiddenDataType
@@ -55,10 +55,6 @@ export function makeMonthlyHiddenStore<TPayload>(
       const state = getState()
       const dataAccId = dispatch(prepareDataAccount())
       const existingReminder = getDataReminders(state)[month]
-      const user = getRootUser(state)?.id
-      if (!user) {
-        throw new Error('No user')
-      }
 
       return dispatch(
         setReminder({

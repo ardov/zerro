@@ -1,8 +1,10 @@
-import { RootState } from '@store'
+import { TFxCode, TUserId } from '@shared/types'
+import { RootState, useAppSelector } from '@store'
+import { instrumentModel } from '@entities/currency/instrument'
 
-export const getUsers = (state: RootState) => state.data.current.user
+const getUsers = (state: RootState) => state.data.current.user
 
-export const getRootUser = (state: RootState) => {
+const getRootUser = (state: RootState) => {
   const users = getUsers(state)
   for (const id in users) {
     if (!users[id].parent) return users[id]
@@ -10,5 +12,22 @@ export const getRootUser = (state: RootState) => {
   return null
 }
 
-export const getUserInstrumentId = (state: RootState) =>
-  getRootUser(state)?.currency
+const getRootUserId = (state: RootState) =>
+  getRootUser(state)?.id || (0 as TUserId)
+
+const getUserInstrumentId = (state: RootState) => getRootUser(state)?.currency
+
+const getUserCurrency = (state: RootState): TFxCode =>
+  instrumentModel.getInstCodeMap(state)[getUserInstrumentId(state) || 1] // USD as default
+
+export const userModel = {
+  getUsers,
+  getRootUser,
+  getRootUserId,
+  getUserInstrumentId,
+  getUserCurrency,
+  // Hooks
+  useRootUserId: () => useAppSelector(getRootUserId),
+  useUserCurrency: () => useAppSelector(getUserCurrency),
+  useUserInstrumentId: () => useAppSelector(getUserInstrumentId),
+}

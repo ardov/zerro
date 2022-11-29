@@ -1,11 +1,10 @@
 import React from 'react'
-import { useAppSelector } from '@store'
 import { List } from '@mui/material'
 import { Debtor, Subheader } from './components'
-import { getDebtors } from '@entities/debtors'
 import { addFxAmount, isZero } from '@shared/helpers/money'
 import { keys } from '@shared/helpers/keys'
 import { TFxCode } from '@shared/types'
+import { debtorModel } from '@entities/debtors'
 
 type TDebtorInfo = {
   name: string
@@ -14,7 +13,7 @@ type TDebtorInfo = {
 }
 
 export function DebtorList({ className = '' }) {
-  const debtors = useAppSelector(getDebtors)
+  const debtors = debtorModel.useDebtors()
   const list = Object.values(debtors)
     .filter(debtor => !isZero(debtor.balance))
     .reduce((acc, debtor) => {

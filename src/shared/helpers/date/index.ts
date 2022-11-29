@@ -1,2 +1,2 @@
 export * from './utils'
-export { makeDateArray } from './makeDateArray'
+export { GroupBy, toGroup, nextGroup, makeDateArray } from './makeDateArray'

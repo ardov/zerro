@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useAppSelector } from '@store'
 import { Paper, Card, Typography, Box, useTheme } from '@mui/material'
 import {
   ResponsiveContainer,
@@ -10,66 +9,26 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts'
-import { DataLine } from '@shared/ui/DataLine'
-import { getHistoryStart, getTransactionsHistory } from '@entities/transaction'
+import { DataLine } from '@components/DataLine'
 import { formatMoney } from '@shared/helpers/money'
-import { makeDateArray, startOfMonth, formatDate } from '@shared/helpers/date'
-import { convertCurrency } from '@entities/instrument'
-import { round } from '@shared/helpers/money'
-import { getType } from '@entities/transaction/helpers'
+import { formatDate, parseDate } from '@shared/helpers/date'
+import { TISODate } from '@shared/types'
+import { useCashFlow } from './model'
+import { nextPeriod, Period, periodTitles } from '../shared/period'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 
 type Point = {
-  date: Date
-  in: number
-  out: number
+  date: TISODate
+  income: number
+  outcome: number
 }
 
-export function InAndOut() {
+export function WidgetCashflow() {
   const theme = useTheme()
-  const transactions = useAppSelector(getTransactionsHistory)
-  const convert = useAppSelector(convertCurrency)
-  const historyStart = useAppSelector(getHistoryStart)
-  const [filterMode, setFilterMode] = useState<'lastYear' | 'all'>('lastYear')
+  const [period, setPeriod] = useState<Period>(Period.LastYear)
+  const points = useCashFlow(period)
 
-  let points: Point[] = makeDateArray(historyStart).map(date => ({
-    date,
-    in: 0,
-    out: 0,
-  }))
-
-  transactions.forEach(tr => {
-    const trType = getType(tr)
-    if (trType === 'transfer') return
-    const monthDate = startOfMonth(tr.date)
-    const monthNode = points.find(node => +node.date === +monthDate)
-    if (!monthNode) return
-    if (trType === 'income') {
-      monthNode.in = round(
-        monthNode.in + convert(tr.income, tr.incomeInstrument)
-      )
-    }
-    if (trType === 'outcome') {
-      monthNode.out = round(
-        monthNode.out + convert(tr.outcome, tr.outcomeInstrument)
-      )
-    }
-  })
-
-  points = points.map((node, i, arr) => {
-    const num = 1
-    const first = i - num >= 0 ? i - num : 0
-    const array = arr.slice(first + 1, i + 1)
-    const result = {
-      ...node,
-      in: array.reduce((sum, node) => sum + node.in, 0) / array.length,
-      out: array.reduce((sum, node) => sum + node.out, 0) / array.length,
-    }
-    return result
-  })
-
-  if (filterMode === 'lastYear') {
-    points = points.slice(-12)
-  }
+  const togglePeriod = () => setPeriod(nextPeriod)
 
   const colorIncome = theme.palette.success.main
   const colorOutcome = theme.palette.error.main
@@ -82,11 +41,9 @@ export function InAndOut() {
           Доходы и расходы{' '}
           <span
             style={{ color: theme.palette.secondary.main, cursor: 'pointer' }}
-            onClick={() => {
-              setFilterMode(mode => (mode === 'all' ? 'lastYear' : 'all'))
-            }}
+            onClick={togglePeriod}
           >
-            {filterMode === 'all' ? 'за всё время' : 'за год'}
+            {periodTitles[period]}
           </span>
         </Typography>
       </Box>
@@ -104,13 +61,13 @@ export function InAndOut() {
             </linearGradient>
           </defs>
           <Area
-            dataKey="in"
+            dataKey="income"
             name="Доход"
             stroke={colorIncome}
             fill="url(#areaIn)"
           />
           <Area
-            dataKey="out"
+            dataKey="outcome"
             name="Расход"
             stroke={colorOutcome}
             fill="url(#areaOut)"
@@ -156,10 +113,13 @@ type TPayload = {
 }
 
 const CustomTooltip = (props: any) => {
+  const [currency] = displayCurrency.useDisplayCurrency()
   const payload = props.payload as TPayload[]
   const active = props.active as boolean
   if (!active || !payload?.length) return null
   const date = payload[0]?.payload?.date
+
+  const diff = payload[0].payload.income - payload[0].payload.outcome
 
   return (
     <Card elevation={10} sx={{ p: 2 }}>
@@ -172,14 +132,14 @@ const CustomTooltip = (props: any) => {
           key={v.dataKey}
           name={v.name}
           amount={v.value}
-          instrument="user"
+          currency={currency}
         />
       ))}
       <DataLine
         color="transparent"
-        name={'Чистый доход'}
-        amount={payload[0].payload.in - payload[0].payload.out}
-        instrument="user"
+        name={diff < 0 ? 'Чистый расход' : 'Чистый доход'}
+        amount={diff}
+        currency={currency}
       />
     </Card>
   )
@@ -189,8 +149,8 @@ function capitalize(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1)
 }
 
-function tickFormatter(date: Date) {
-  return date?.getMonth() === 0
+function tickFormatter(date: TISODate) {
+  return parseDate(date).getMonth() === 0
     ? formatDate(date, 'yyyy')
     : formatDate(date, 'LLL').toUpperCase().replace('.', '')
 }

@@ -1,7 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { Modify, TTag, TTagId } from '@shared/types'
+import { Modify, TTag } from '@shared/types'
 import { RootState } from '@store'
-import { compareTags } from '@entities/old-hiddenData/tagOrder'
 import { TTagPopulated } from './types'
 import populateTags from './populateTags'
 
@@ -19,29 +18,19 @@ export const getPopulatedTag = (state: RootState, id: string) =>
 // TODO below are deprecated methods
 
 export type TagTreeNode = Modify<TTagPopulated, { children: TTagPopulated[] }>
-export const getTagsTree = createSelector(
-  [getPopulatedTags, compareTags],
-  (tags, compare) => {
-    let result = []
-    for (const id in tags) {
-      if (tags[id].parent) continue
-      const tag = { ...tags[id], children: [] } as TagTreeNode
-      if (tags[id].children)
-        tag.children = tags[id].children.map(id => tags[id]).sort(compare)
-      result.push(tag)
-    }
-    result.sort(compare)
-    return result
-  }
-)
-
-export const getTagLinks = createSelector([getPopulatedTags], tags => {
-  let result: {
-    [tagId: string]: TTagId[]
-  } = {}
+export const getTagsTree = createSelector([getPopulatedTags], tags => {
+  let result = []
   for (const id in tags) {
     if (tags[id].parent) continue
-    result[id] = tags[id].children || []
+    const tag = { ...tags[id], children: [] } as TagTreeNode
+    if (tags[id].children)
+      tag.children = tags[id].children.map(id => tags[id]).sort(compareTags)
+    result.push(tag)
   }
+  result.sort(compareTags)
   return result
 })
+
+function compareTags<T extends { name: string }>(tag1: T, tag2: T) {
+  return tag1.name.localeCompare(tag2.name)
+}

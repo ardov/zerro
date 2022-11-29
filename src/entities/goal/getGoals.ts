@@ -12,7 +12,7 @@ import { convertFx } from '@shared/helpers/money'
 import { withPerf } from '@shared/helpers/performance'
 import { TSelector } from '@store/index'
 
-import { TFxRateData } from '@entities/fxRate'
+import { TFxRateData } from '@entities/currency/fxRate'
 import { balances, TActivityNode, TEnvMetrics } from '@entities/envBalances'
 import { TGoal } from './shared/types'
 import { goalStore, TGoals } from './goalStore'

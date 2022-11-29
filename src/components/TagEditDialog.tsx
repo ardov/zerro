@@ -26,7 +26,7 @@ import {
   setTagComment,
   setTagCurrency,
 } from '@entities/old-hiddenData/tagMeta'
-import { getUserInstrumentId } from '@entities/user'
+import { userModel } from '@entities/user'
 import { CurrencySelect } from './CurrencySelect'
 import { useAppDispatch, useAppSelector } from '@store'
 import { TTag } from '@shared/types'
@@ -47,7 +47,7 @@ export const TagEditDialog: FC<TagEditDialogProps> = props => {
   const isNew = !tag?.id
   const id = tag?.id || uuidv1()
   const meta = useAppSelector(getTagMeta)[id]
-  const userInstrument = useAppSelector(getUserInstrumentId)
+  const userInstrument = userModel.useUserInstrumentId()
   const {
     values,
     initialValues,

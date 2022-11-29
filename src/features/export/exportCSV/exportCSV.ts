@@ -7,13 +7,18 @@ import { formatDate } from '@shared/helpers/date'
 import { ById } from '@shared/types'
 import { AppThunk } from '@store'
 import { getTransactions, TrType } from '@entities/transaction'
-import { getInstruments } from '@entities/instrument'
-import { getAccounts } from '@entities/account'
+import { instrumentModel } from '@entities/currency/instrument'
+import { accountModel } from '@entities/account'
 import { getPopulatedTags } from '@entities/tag'
 
 // Only for CSV
 const getPopulatedTransactions = createSelector(
-  [getInstruments, getAccounts, getPopulatedTags, getTransactions],
+  [
+    instrumentModel.getInstruments,
+    accountModel.getAccounts,
+    getPopulatedTags,
+    getTransactions,
+  ],
   (instruments, accounts, tags, transactions) => {
     const result: { [id: string]: PopulatedTransaction } = {}
     for (const id in transactions) {

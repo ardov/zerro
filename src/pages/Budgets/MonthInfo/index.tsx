@@ -20,7 +20,7 @@ import { useMonth } from '@shared/hooks/useMonth'
 import { TDateDraft } from '@shared/types'
 
 import { balances } from '@entities/envBalances'
-import { DisplayAmount } from '@entities/displayCurrency'
+import { DisplayAmount } from '@entities/currency/displayCurrency'
 import {
   overspendModel,
   OverspendNotice,

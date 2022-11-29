@@ -1,19 +1,19 @@
 import React from 'react'
 import { Typography } from '@mui/material'
-import { useAppSelector } from '@store'
 import Rhythm from '@shared/ui/Rhythm'
-import { getUserCurrencyCode } from '@entities/instrument'
 import pluralize from '@shared/helpers/pluralize'
+import { Amount } from '@shared/ui/Amount'
+
+import { userModel } from '@entities/user'
 import { Card } from './Card'
 import { Stats } from '../selectors'
-import { Amount } from '@shared/ui/Amount'
 
 interface PayeeByFrequencyCardProps {
   byPayee: Stats['byPayee']
 }
 
 export function PayeeByFrequencyCard({ byPayee }: PayeeByFrequencyCardProps) {
-  const currency = useAppSelector(getUserCurrencyCode)
+  const currency = userModel.useUserCurrency()
   const sortedPayees = Object.keys(byPayee).sort(
     (a, b) =>
       byPayee[b].outcomeTransactions.length -

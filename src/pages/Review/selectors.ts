@@ -1,18 +1,17 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { round } from '@shared/helpers/money'
 import { getType } from '@entities/transaction/helpers'
-import { getAccounts, getStartBalance } from '@entities/account'
+import { accountModel } from '@entities/account'
 import { getSortedTransactions } from '@entities/transaction'
 import { getTransactionsHistory } from '@entities/transaction'
-import { convertCurrency } from '@entities/instrument'
 import {
-  TAccount,
   TAccountId,
   TInstrumentId,
   TISODate,
   TTransaction,
 } from '@shared/types'
 import { eachDayOfInterval, parseDate, toISODate } from '@shared/helpers/date'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 
 interface DayNode {
   date: TISODate
@@ -24,8 +23,8 @@ interface History {
 }
 
 export const getAccountsHistory = createSelector(
-  [getTransactionsHistory, getAccounts],
-  (transactions: TTransaction[], accounts: { [x: string]: TAccount }) => {
+  [getTransactionsHistory, accountModel.getPopulatedAccounts],
+  (transactions, accounts) => {
     if (!transactions?.length || !accounts) return {}
     let historyById: History = {}
     const firstDate = transactions[0].date
@@ -35,7 +34,7 @@ export const getAccountsHistory = createSelector(
       historyById[id] = [
         {
           date: firstDate,
-          balance: getStartBalance(accounts[id]),
+          balance: accounts[id].startBalanceReal,
           transactions: [],
         },
       ]
@@ -146,7 +145,7 @@ const createInfoNode = (): InfoNode => ({
 
 export const getYearStats = (year: number) =>
   createSelector(
-    [getSortedTransactions, convertCurrency],
+    [getSortedTransactions, displayCurrency.convertCurrency],
     (allTransactions: TTransaction[], convert) => {
       if (!allTransactions?.length) return null
       const dateStart = toISODate(new Date(year, 0, 1))

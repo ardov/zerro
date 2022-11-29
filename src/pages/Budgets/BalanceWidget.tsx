@@ -2,21 +2,21 @@ import { Divider, Paper, Typography } from '@mui/material'
 import { keys } from '@shared/helpers/keys'
 import pluralize from '@shared/helpers/pluralize'
 import { TISOMonth } from '@shared/types'
-import { DataLine } from '@shared/ui/DataLine'
+import { DataLine } from '@components/DataLine'
 import { Total } from '@shared/ui/Total'
 
-import { useDisplayCurrency, useToDisplay } from '@entities/displayCurrency'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 import { balances } from '@entities/envBalances'
 
 export function BalanceWidget(props: { month: TISOMonth }) {
   const totals = balances.useTotals()[props.month]
-  const [displayCurrency, setDisplayCurrency] = useDisplayCurrency()
-  const toDisplay = useToDisplay(props.month)
+  const [currency, setDisplayCurrency] = displayCurrency.useDisplayCurrency()
+  const toDisplay = displayCurrency.useToDisplay(props.month)
   const currencies = keys(totals.fundsEnd)
   const currCount = currencies.length
 
   const cycleForward = () => {
-    const idx = currencies.findIndex(c => c === displayCurrency)
+    const idx = currencies.findIndex(c => c === currency)
     const newIdx = (idx + 1) % currencies.length
     if (currencies[newIdx]) setDisplayCurrency(currencies[newIdx])
   }
@@ -48,7 +48,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
       <Total
         name={'В бюджете'}
         value={fundsEnd}
-        currency={displayCurrency}
+        currency={currency}
         onClick={cycleForward}
       />
       {/* <div>
@@ -61,21 +61,21 @@ export function BalanceWidget(props: { month: TISOMonth }) {
         name="В конвертах"
         tooltip="Эта сумма сейчас лежит в конвертах (столбец «Доступно»)"
         amount={available}
-        currency={displayCurrency}
+        currency={currency}
       />
       {!!smartBudgetedInFuture && (
         <DataLine
           name="Отложено на будущее"
           tooltip="Эти деньги зарезервированы под будущие бюджеты"
           amount={smartBudgetedInFuture}
-          currency={displayCurrency}
+          currency={currency}
         />
       )}
       <DataLine
         name="Свободно"
         tooltip="Нераспределённые деньги"
         amount={toBeBudgeted}
-        currency={displayCurrency}
+        currency={currency}
       />
       <Divider />
       <Typography variant="body2" color="text.secondary" align="center">

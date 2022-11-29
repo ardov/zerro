@@ -21,8 +21,8 @@ import { TagList } from '@components/TagList'
 import { useAppDispatch, useAppSelector } from '@store'
 import { getTransactions } from '@entities/transaction'
 import { getType } from '@entities/transaction/helpers'
-import { getPopulatedAccounts } from '@entities/account'
-import { getInstruments } from '@entities/instrument'
+import { accountModel } from '@entities/account'
+import { instrumentModel } from '@entities/currency/instrument'
 import {
   applyChangesToTransaction,
   deleteTransactions,
@@ -51,9 +51,9 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
 
   const tr = useAppSelector(getTransactions)[id]
   const trType = getType(tr)
-  const incomeAccount = useAppSelector(getPopulatedAccounts)[tr.incomeAccount]
-  const outcomeAccount = useAppSelector(getPopulatedAccounts)[tr.outcomeAccount]
-  const instruments = useAppSelector(getInstruments)
+  const incomeAccount = accountModel.usePopulatedAccounts()[tr.incomeAccount]
+  const outcomeAccount = accountModel.usePopulatedAccounts()[tr.outcomeAccount]
+  const instruments = instrumentModel.useInstruments()
   const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
   const outcomeCurrency = instruments[tr.outcomeInstrument]?.shortTitle
 
@@ -333,7 +333,7 @@ const SaveButton: FC<{ visible: boolean; onSave: () => void }> = ({
 const RateToWords: FC<{ tr: TTransaction }> = ({ tr }) => {
   const trType = getType(tr)
   const { income, opIncome, outcome, opOutcome } = tr
-  const instruments = useAppSelector(getInstruments)
+  const instruments = instrumentModel.useInstruments()
   const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
   const opIncomeCurrency =
     tr.opIncomeInstrument && instruments[tr.opIncomeInstrument]?.shortTitle

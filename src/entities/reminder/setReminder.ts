@@ -1,6 +1,6 @@
 import { AppThunk } from '@store'
 import { applyClientPatch } from '@store/data'
-import { getRootUser } from '@entities/user'
+import { userModel } from '@entities/user'
 import {
   DataEntity,
   Modify,
@@ -36,7 +36,7 @@ export const setReminder =
         changed: el.changed || Date.now(),
       }
       if (!patched.user) {
-        const userId = getRootUser(state)?.id
+        const userId = userModel.getRootUserId(state)
         if (!userId) {
           throw new Error('User is not defined')
         }
@@ -55,7 +55,7 @@ export const deleteReminder =
   (id: TReminderId): AppThunk =>
   (dispatch, getState) => {
     const state = getState()
-    const userId = getRootUser(state)?.id
+    const userId = userModel.getRootUserId(state)
     if (!userId) {
       throw new Error('User is not defined')
     }

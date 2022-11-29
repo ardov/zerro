@@ -7,7 +7,7 @@ import { Confirm } from '@shared/ui/Confirm'
 import { RadialProgress } from '@shared/ui/RadialProgress'
 import { useAppDispatch, useAppSelector } from '@store'
 
-import { useDisplayCurrency, useToDisplay } from '@entities/displayCurrency'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 import { goalModel } from '@entities/goal'
 import { totalGoalsModel } from '../model'
 
@@ -30,8 +30,8 @@ const baseStyles = {
 export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const { month, ...btnProps } = props
   const dispatch = useAppDispatch()
-  const [currency] = useDisplayCurrency()
-  const toDisplay = useToDisplay(month)
+  const [currency] = displayCurrency.useDisplayCurrency()
+  const toDisplay = displayCurrency.useToDisplay(month)
   const totalProgress = useAppSelector(goalModel.getTotals)[month]
   const formatSum = (sum: number) => formatMoney(sum, currency)
 

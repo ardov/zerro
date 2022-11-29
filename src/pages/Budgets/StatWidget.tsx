@@ -4,11 +4,11 @@ import { keys } from '@shared/helpers/keys'
 import { add } from '@shared/helpers/money'
 import { useToggle } from '@shared/hooks/useToggle'
 import { TEnvelopeId, TISOMonth } from '@shared/types'
-import { DataLine } from '@shared/ui/DataLine'
+import { DataLine } from '@components/DataLine'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { useAppSelector } from '@store/index'
 
-import { useDisplayCurrency, useToDisplay } from '@entities/displayCurrency'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 import { balances } from '@entities/envBalances'
 import { getEnvelopes } from '@entities/envelope'
 
@@ -30,7 +30,7 @@ export function StatWidget(props: {
   const { month, mode } = props
   const { setDrawer } = useTrDrawer()
   const showIncome = props.mode === 'income'
-  const [displayCurrency] = useDisplayCurrency()
+  const [currency] = displayCurrency.useDisplayCurrency()
   const [opened, toggleOpened] = useToggle(false)
 
   const points = useDataPoints(month)
@@ -66,7 +66,7 @@ export function StatWidget(props: {
         <DataLine
           name={showIncome ? 'Доходы' : 'Расходы'}
           amount={totalAmount}
-          currency={displayCurrency}
+          currency={currency}
         />
 
         {!!totalAmount && <PercentBar data={data} mt={1.5} />}
@@ -78,7 +78,7 @@ export function StatWidget(props: {
                 name={point.name}
                 amount={point.amount}
                 color={point.color}
-                currency={displayCurrency}
+                currency={currency}
                 onClick={e => {
                   e.stopPropagation()
                   setDrawer(point.id, {
@@ -123,7 +123,7 @@ const PercentBar: FC<BoxProps & { data: DataPoint[] }> = props => {
 }
 
 function useDataPoints(month: TISOMonth) {
-  const toDisplay = useToDisplay(month)
+  const toDisplay = displayCurrency.useToDisplay(month)
   const activity = balances.useActivity()[month]
   const envelopes = useAppSelector(getEnvelopes)
   const data: DataPoint[] = []

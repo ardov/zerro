@@ -11,7 +11,7 @@ import { getMonthList } from './1 - monthList'
 import { getActivity, TActivityNode } from './2 - activity'
 import { getEnvMetrics, TEnvMetrics } from './3 - envMetrics'
 import { getRatesByMonth } from './2 - rates'
-import { TFxRateData, TFxRates } from '@entities/fxRate'
+import { TFxRateData, TFxRates } from '@entities/currency/fxRate'
 
 type TToBeBudgetedState = 'positive' | 'allocated' | 'negative'
 

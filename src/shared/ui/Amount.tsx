@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { formatMoney } from '@shared/helpers/money'
-import { TFxCode, TInstrumentId } from '@shared/types'
+import { TFxCode } from '@shared/types'
 
 export type AmountProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLSpanElement>,
@@ -8,7 +8,6 @@ export type AmountProps = React.DetailedHTMLProps<
 > & {
   value: number
   currency?: TFxCode
-  instrument?: TInstrumentId | 'user'
   sign?: boolean
   noShade?: boolean
   decimals?: number

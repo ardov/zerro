@@ -37,6 +37,8 @@ export function differenceInCalendarMonths(
 }
 
 export function toISODate(date: TDateDraft): TISODate {
+  if (isISODate(date)) return date
+  if (isISOMonth(date)) return (date + '-01') as TISODate
   const d = parseDate(date)
   const yyyy = d.getFullYear()
   const mm = (d.getMonth() + 1).toString().padStart(2, '0')
@@ -45,6 +47,7 @@ export function toISODate(date: TDateDraft): TISODate {
 }
 
 export function toISOMonth(date: TDateDraft): TISOMonth {
+  if (isISOMonth(date)) return date
   const d = parseDate(date)
   const yyyy = d.getFullYear()
   const mm = (d.getMonth() + 1).toString().padStart(2, '0')
@@ -82,9 +85,19 @@ export function prevMonth(d: TDateDraft) {
   return new Date(date.getFullYear(), date.getMonth() - 1, 1)
 }
 
+export function nextDay(d: TDateDraft) {
+  const date = parseDate(d)
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
+}
+
 export function nextMonth(d: TDateDraft) {
   const date = parseDate(d)
   return new Date(date.getFullYear(), date.getMonth() + 1, 1)
+}
+
+export function nextYear(d: TDateDraft) {
+  const date = parseDate(d)
+  return new Date(date.getFullYear() + 1, 0, 1)
 }
 
 export function startOfWeek(d: TDateDraft) {
@@ -99,13 +112,20 @@ export function eachDayOfInterval(start: TDateDraft, end: TDateDraft) {
   })
 }
 
-/**
- * Function checks if string is valid ISO month
- */
-export function isISOMonth(month?: string | null): month is TISOMonth {
-  if (!month) return false
+/** Checks if string is valid ISO month */
+export function isISOMonth(date?: any): date is TISOMonth {
+  if (!date) return false
+  if (typeof date !== 'string') return false
   const regex = /\d{4}-\d{2}/g // 0000-00
-  return regex.test(month)
+  return regex.test(date) && date.length === 7
+}
+
+/** Checks if string is valid ISO date */
+export function isISODate(date?: any): date is TISODate {
+  if (!date) return false
+  if (typeof date !== 'string') return false
+  const regex = /\d{4}-\d{2}-\d{2}/g // 0000-00-00
+  return regex.test(date) && date.length === 10
 }
 
 /**

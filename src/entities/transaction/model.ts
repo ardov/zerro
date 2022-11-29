@@ -1,8 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getMerchants } from '@entities/merchant'
-import { compareTrDates, getTime, isDeleted } from './helpers'
+import { compareTrDates, isDeleted } from './helpers'
 import { RootState } from '@store'
-import { TTransaction } from '@shared/types'
 import { withPerf } from '@shared/helpers/performance'
 
 export const getTransactions = (state: RootState) =>
@@ -21,27 +19,3 @@ export const getTransactionsHistory = createSelector(
     transactions.filter(tr => !isDeleted(tr)).reverse()
   )
 )
-
-export const getHistoryStart = createSelector(
-  [getTransactionsHistory],
-  withPerf('getHistoryStart', transactions => {
-    if (!transactions.length) return Date.now()
-    const historyBeginning = new Date(2000, 0)
-    for (const tr of transactions) {
-      const trTime = getTime(tr)
-      if (trTime >= historyBeginning) return trTime
-    }
-    return Date.now()
-  })
-)
-
-export const debtorGetter = createSelector(
-  [getMerchants],
-  merchants => (tr: TTransaction) => {
-    const instrument = tr.incomeInstrument || tr.outcomeInstrument
-    const merchantTitle = tr.merchant && merchants[tr.merchant]?.title
-    return clean(merchantTitle || tr.payee || '') + '-' + instrument
-  }
-)
-
-const clean = (s: string) => s.toLowerCase().replace(/[\s/|{}\\-]/gm, '')

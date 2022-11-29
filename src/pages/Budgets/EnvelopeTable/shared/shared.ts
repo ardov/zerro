@@ -1,3 +1,4 @@
+import { Theme, useMediaQuery } from '@mui/material'
 import { SxProps } from '@mui/system'
 
 export const rowStyle: SxProps = {
@@ -11,4 +12,8 @@ export const rowStyle: SxProps = {
   alignItems: 'center',
   justifyContent: 'initial',
   gridColumnGap: '12px',
+}
+
+export function useIsSmall() {
+  return useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 }

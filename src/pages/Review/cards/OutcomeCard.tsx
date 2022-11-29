@@ -3,7 +3,7 @@ import { Box, Typography } from '@mui/material'
 import { useAppSelector } from '@store'
 import { formatDate } from '@shared/helpers/date'
 import Rhythm from '@shared/ui/Rhythm'
-import { getInstruments } from '@entities/instrument'
+import { instrumentModel } from '@entities/currency/instrument'
 import { getPopulatedTags } from '@entities/tag'
 import { Card } from './Card'
 import { TTransaction } from '@shared/types'
@@ -11,7 +11,8 @@ import { Amount } from '@shared/ui/Amount'
 
 export function OutcomeCard({ transaction }: { transaction: TTransaction }) {
   const { outcome, outcomeInstrument, date, comment, payee, tag } = transaction
-  const currency = useAppSelector(getInstruments)[outcomeInstrument].shortTitle
+  const currency =
+    instrumentModel.useInstruments()[outcomeInstrument].shortTitle
   const tagTitle = useAppSelector(getPopulatedTags)[tag?.[0] || 'null'].title
   let additionalInfo = [formatDate(date)]
   if (tagTitle) additionalInfo.push(tagTitle)

@@ -1,13 +1,6 @@
 import React, { FC, useCallback } from 'react'
 import { useDroppable } from '@dnd-kit/core'
-import {
-  IconButton,
-  useMediaQuery,
-  Theme,
-  IconButtonProps,
-  BoxProps,
-  Box,
-} from '@mui/material'
+import { IconButton, IconButtonProps, BoxProps, Box } from '@mui/material'
 import { SxProps } from '@mui/system'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { EmojiFlagsIcon } from '@shared/ui/Icons'
@@ -15,7 +8,7 @@ import { RadialProgress } from '@shared/ui/RadialProgress'
 import { TEnvelopeId, TISOMonth } from '@shared/types'
 import { goalModel, TGoal } from '@entities/goal'
 import { DragTypes } from '../../DnDContext'
-import { rowStyle } from '../shared/shared'
+import { rowStyle, useIsSmall } from '../shared/shared'
 import { Metric } from '../models/useMetric'
 import { useBudgetPopover } from '@pages/Budgets/BudgetPopover'
 import { useGoalPopover } from '@pages/Budgets/GoalPopover'
@@ -26,7 +19,7 @@ import { getEnvelopes } from '@entities/envelope'
 import { BudgetCell } from './BudgetCell'
 import { ActivityCell } from './ActivityCell'
 import { AvailableCell } from './AvailableCell'
-import { useToDisplay } from '@entities/displayCurrency'
+import { displayCurrency } from '@entities/currency/displayCurrency'
 
 type EnvelopeRowProps = {
   id: TEnvelopeId
@@ -54,14 +47,14 @@ export const Row: FC<EnvelopeRowProps> = props => {
     openTransactionsPopover,
     openDetails,
   } = props
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+  const isSmall = useIsSmall()
   const openBudgetPopover = useBudgetPopover()
   const openGoalPopover = useGoalPopover()
 
   const envelope = useAppSelector(getEnvelopes)[id]
   const envData = balances.useEnvData()[month][id]
   const goalInfo = goalModel.useGoals()[month][id]
-  const toDisplay = useToDisplay(month)
+  const toDisplay = displayCurrency.useToDisplay(month)
 
   const isChild = !!envelope.parent || !!isSelf
 
@@ -104,7 +97,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
           isReordering={isReordering}
         />
 
-        {(metric === Metric.budgeted || !isMobile) && (
+        {(metric === Metric.budgeted || !isSmall) && (
           <BudgetCell
             isSelf={isSelf}
             value={budgeted}
@@ -115,7 +108,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
           />
         )}
 
-        {(metric === Metric.outcome || !isMobile) && (
+        {(metric === Metric.outcome || !isSmall) && (
           <ActivityCell
             value={activity}
             onClick={e => {
@@ -125,7 +118,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
           />
         )}
 
-        {(metric === Metric.available || !isMobile) && (
+        {(metric === Metric.available || !isSmall) && (
           <AvailableCell
             hiddenOverspend={hiddenOverspend}
             id={id}

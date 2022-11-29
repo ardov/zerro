@@ -1,1 +1,1 @@
-export { getUsers, getRootUser, getUserInstrumentId } from './model'
+export { userModel } from './model'
