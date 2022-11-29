@@ -1,5 +1,4 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getTransactionsHistory, getType, TrType } from '@entities/transaction'
 import {
   ById,
   TAccountId,
@@ -8,8 +7,9 @@ import {
   TTransactionId,
 } from '@shared/types'
 
-import { instrumentModel } from '@entities/currency/instrument'
 import { TSelector } from '@store/index'
+import { getTransactionsHistory, getType, TrType } from '@entities/transaction'
+import { instrumentModel } from '@entities/currency/instrument'
 import { debtorModel } from '@entities/debtors'
 import { accountModel } from '@entities/account'
 

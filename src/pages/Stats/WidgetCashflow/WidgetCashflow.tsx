@@ -13,7 +13,8 @@ import { DataLine } from '@components/DataLine'
 import { formatMoney } from '@shared/helpers/money'
 import { formatDate, parseDate } from '@shared/helpers/date'
 import { TISODate } from '@shared/types'
-import { Period, useCashFlow } from './model'
+import { useCashFlow } from './model'
+import { nextPeriod, Period, periodTitles } from '../shared/period'
 import { displayCurrency } from '@entities/currency/displayCurrency'
 
 type Point = {
@@ -27,6 +28,8 @@ export function WidgetCashflow() {
   const [period, setPeriod] = useState<Period>(Period.LastYear)
   const points = useCashFlow(period)
 
+  const togglePeriod = () => setPeriod(nextPeriod)
+
   const colorIncome = theme.palette.success.main
   const colorOutcome = theme.palette.error.main
   const colorAxisText = theme.palette.text.disabled
@@ -38,13 +41,9 @@ export function WidgetCashflow() {
           Доходы и расходы{' '}
           <span
             style={{ color: theme.palette.secondary.main, cursor: 'pointer' }}
-            onClick={() => {
-              setPeriod(mode =>
-                mode === Period.All ? Period.LastYear : Period.All
-              )
-            }}
+            onClick={togglePeriod}
           >
-            {period === Period.All ? 'за всё время' : 'за год'}
+            {periodTitles[period]}
           </span>
         </Typography>
       </Box>

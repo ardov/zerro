@@ -1,6 +1,6 @@
 import { TAccountId, TFxAmount, TISODate, TTransaction } from '@shared/types'
 import { addFxAmount } from '@shared/helpers/money'
-import { makeDateArray, toISODate } from '@shared/helpers/date'
+import { GroupBy, makeDateArray, toGroup } from '@shared/helpers/date'
 import { keys } from '@shared/helpers/keys'
 
 import { useAppSelector } from '@store/index'
@@ -8,6 +8,7 @@ import { accountModel } from '@entities/account'
 import { instrumentModel, TInstCodeMap } from '@entities/currency/instrument'
 import { displayCurrency } from '@entities/currency/displayCurrency'
 import { getTransactionsHistory, getType, TrType } from '@entities/transaction'
+import { Period, getStart } from '../shared/period'
 
 type TPoint = {
   date: TISODate
@@ -15,18 +16,6 @@ type TPoint = {
   income: TFxAmount
   outcome: TFxAmount
   transfers: TFxAmount
-}
-
-export enum Period {
-  LastYear = 'LastYear',
-  ThreeYears = 'ThreeYears',
-  All = 'All',
-}
-
-export enum GroupBy {
-  Day = 'Day',
-  Month = 'Month',
-  Year = 'Year',
 }
 
 export function calcCashflow(
@@ -38,7 +27,7 @@ export function calcCashflow(
   let result: Record<TISODate, TPoint> = {}
 
   transactions.forEach(tr => {
-    const group = getGroup(tr.date, aggregation)
+    const group = toGroup(tr.date, aggregation)
     if (!result[group]) result[group] = makePoint(group)
 
     const type = getType(tr, debtAccId)
@@ -83,16 +72,6 @@ export function calcCashflow(
   })
 
   return result
-}
-
-function getGroup(date: TISODate, aggregation: GroupBy): TISODate {
-  if (aggregation === GroupBy.Year) {
-    return (date.slice(0, 4) + '-01-01') as TISODate
-  }
-  if (aggregation === GroupBy.Month) {
-    return (date.slice(0, 7) + '-01') as TISODate
-  }
-  return date
 }
 
 function makePoint(date: TISODate): TPoint {
@@ -142,19 +121,4 @@ export function useCashFlow(
     })
 
   return points
-}
-
-function getStart(period: Period, aggregation: GroupBy) {
-  if (period === Period.All) return '2000-01-01' as TISODate
-  if (period === Period.LastYear) {
-    const date = new Date()
-    date.setFullYear(date.getFullYear() - 1)
-    return getGroup(toISODate(date), aggregation)
-  }
-  if (period === Period.ThreeYears) {
-    const date = new Date()
-    date.setFullYear(date.getFullYear() - 3)
-    return getGroup(toISODate(date), aggregation)
-  }
-  throw new Error('Unknown period: ', period)
 }

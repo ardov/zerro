@@ -1,37 +1,51 @@
 import { TDateDraft, TISODate } from '@shared/types'
-import { toISODate } from './utils'
+import { nextDay, nextMonth, nextYear, toISODate } from './utils'
+
+export enum GroupBy {
+  Day = 'day',
+  Month = 'month',
+  Year = 'year',
+}
+
+export function toGroup(date: TDateDraft, aggregation: GroupBy): TISODate {
+  const isoDate = toISODate(date)
+  switch (aggregation) {
+    case GroupBy.Year:
+      return (isoDate.slice(0, 4) + '-01-01') as TISODate
+    case GroupBy.Month:
+      return (isoDate.slice(0, 7) + '-01') as TISODate
+    case GroupBy.Day:
+      return isoDate
+    default:
+      throw new Error('Unknown aggregation', aggregation)
+  }
+}
+
+export function nextGroup(date: TDateDraft, aggregation: GroupBy): TISODate {
+  const currGroup = toGroup(date, aggregation)
+  switch (aggregation) {
+    case GroupBy.Year:
+      return toISODate(nextYear(currGroup))
+    case GroupBy.Month:
+      return toISODate(nextMonth(currGroup))
+    case GroupBy.Day:
+      return toISODate(nextDay(currGroup))
+    default:
+      throw new Error('Unknown aggregation', aggregation)
+  }
+}
 
 export function makeDateArray(
   from: TDateDraft,
   to: TDateDraft = new Date(),
-  aggregation: 'day' | 'month' | 'year' = 'month'
+  aggregation: GroupBy = GroupBy.Month
 ): Array<TISODate> {
-  let current = getDate(from, aggregation)
-  let last = getDate(to, aggregation)
+  let current = toGroup(from, aggregation)
+  let last = toGroup(to, aggregation)
   const months = [current]
-  while (+current < +last) {
-    current = new Date(current)
-    if (aggregation === 'day') current.setDate(current.getDate() + 1)
-    if (aggregation === 'month') current.setMonth(current.getMonth() + 1)
-    if (aggregation === 'year') current.setFullYear(current.getFullYear() + 1)
+  while (current < last) {
+    current = nextGroup(current, aggregation)
     months.push(current)
   }
-  return months.map(toISODate)
-}
-
-function getDate(
-  d: TDateDraft,
-  aggregation: 'day' | 'month' | 'year' = 'month'
-) {
-  const date = new Date(d)
-  switch (aggregation) {
-    case 'day':
-      return new Date(date.getFullYear(), date.getMonth(), date.getDate())
-    case 'month':
-      return new Date(date.getFullYear(), date.getMonth(), 1)
-    case 'year':
-      return new Date(date.getFullYear(), 0, 1)
-    default:
-      throw new Error('Unknown aggregation ' + aggregation)
-  }
+  return months
 }

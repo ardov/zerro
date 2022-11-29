@@ -12,14 +12,12 @@ import { accountModel } from '@entities/account'
 import { isZero, subFxAmount } from '@shared/helpers/money'
 import { getBalanceChanges, TTrEffect } from './getBalanceChanges'
 
-type TBalanceState = {
+export type TBalanceState = {
   accounts: Record<TAccountId, TFxAmount>
   debtors: Record<string, TFxAmount>
 }
 
-export const getBalanceHistory: TSelector<
-  Record<TTransactionId, TBalanceState>
-> = createSelector(
+const getBalances = createSelector(
   [
     getTransactionsHistory,
     getBalanceChanges,
@@ -27,35 +25,50 @@ export const getBalanceHistory: TSelector<
     debtorModel.getDebtors,
   ],
   (trHistory, changes, accounts, debtors) => {
-    const result: Record<TTransactionId, TBalanceState> = {}
+    const balancesAfter: Record<TTransactionId, TBalanceState> = {}
 
+    // Current account balances
     const accBalances: Record<TAccountId, TFxAmount> = {}
     Object.values(accounts).forEach(acc => {
       if (acc.type === AccountType.Debt) return
-      accBalances[acc.id] = { [acc.fxCode]: acc.startBalanceReal }
+      accBalances[acc.id] = { [acc.fxCode]: acc.balance }
     })
 
+    // Current debtor balances
     const debtorBalances: Record<string, TFxAmount> = {}
     Object.values(debtors).forEach(debtor => {
       debtorBalances[debtor.id] = debtor.balance
     })
 
+    // New first
     const reverseHistory = [...trHistory].reverse()
     let lastState: TBalanceState = {
       accounts: accBalances,
       debtors: debtorBalances,
     }
     reverseHistory.forEach(tr => {
-      result[tr.id] = lastState
+      balancesAfter[tr.id] = lastState
       lastState = substractChange(lastState, changes[tr.id])
     })
 
-    Object.values(lastState.debtors).forEach(amount => {
+    const startingBalances = lastState
+
+    // Double check
+    Object.values(startingBalances.debtors).forEach(amount => {
       console.assert(isZero(amount), 'Starting amount of debtor is not zero')
     })
 
-    return result
+    return { balancesAfter, startingBalances }
   }
+)
+
+export const getBalanceHistory: TSelector<
+  Record<TTransactionId, TBalanceState>
+> = createSelector([getBalances], b => b.balancesAfter)
+
+export const getStartingBalances: TSelector<TBalanceState> = createSelector(
+  [getBalances],
+  b => b.startingBalances
 )
 
 function substractChange(

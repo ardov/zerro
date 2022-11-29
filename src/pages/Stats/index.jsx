@@ -8,7 +8,7 @@ import { formatMoney } from '@shared/helpers/money'
 import { formatDate } from '@shared/helpers/date'
 import Rhythm from '@shared/ui/Rhythm'
 import { TransactionsDrawer } from '@components/TransactionsDrawer'
-import { NetWorth } from './NetWorth'
+import { WidgetNetWorth } from './WidgetNetWorth'
 import { WidgetCashflow } from './WidgetCashflow'
 
 export default function Stats() {
@@ -39,7 +39,7 @@ export default function Stats() {
     <>
       <Box display="flex" flexDirection="column">
         <Rhythm gap={2} axis="y" p={3}>
-          <NetWorth />
+          <WidgetNetWorth />
           <WidgetCashflow />
           {accIds.map(id => (
             <AccHist
