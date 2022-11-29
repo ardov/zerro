@@ -1,11 +1,19 @@
 import { describe, expect, test } from 'vitest'
 import { GroupBy, makeDateArray, nextGroup } from './makeDateArray'
-import { parseDate, toISODate } from './utils'
+import { parseDate, toISODate, toISOMonth } from './utils'
 
 describe('Conversions', () => {
   test('Equal ISO', () => {
     const start = '2022-10-24'
     expect(toISODate(parseDate(start))).toBe(start)
+  })
+  test('to ISO date', () => {
+    expect(toISODate('2000-01-01')).toBe('2000-01-01')
+    expect(toISODate('2000-01')).toBe('2000-01-01')
+  })
+  test('to ISO month', () => {
+    expect(toISOMonth('2000-01-01')).toBe('2000-01')
+    expect(toISOMonth('2000-01')).toBe('2000-01')
   })
 })
 

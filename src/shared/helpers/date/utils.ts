@@ -117,7 +117,7 @@ export function isISOMonth(date?: any): date is TISOMonth {
   if (!date) return false
   if (typeof date !== 'string') return false
   const regex = /\d{4}-\d{2}/g // 0000-00
-  return regex.test(date)
+  return regex.test(date) && date.length === 7
 }
 
 /** Checks if string is valid ISO date */
@@ -125,7 +125,7 @@ export function isISODate(date?: any): date is TISODate {
   if (!date) return false
   if (typeof date !== 'string') return false
   const regex = /\d{4}-\d{2}-\d{2}/g // 0000-00-00
-  return regex.test(date)
+  return regex.test(date) && date.length === 10
 }
 
 /**
