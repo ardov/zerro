@@ -14,8 +14,7 @@ import { useBudgetPopover } from '@pages/Budgets/BudgetPopover'
 import { useGoalPopover } from '@pages/Budgets/GoalPopover'
 import { NameCell } from './NameCell'
 import { balances } from '@entities/envBalances'
-import { useAppSelector } from '@store/index'
-import { getEnvelopes } from '@entities/envelope'
+import { envelopeModel } from '@entities/envelope'
 import { BudgetCell } from './BudgetCell'
 import { ActivityCell } from './ActivityCell'
 import { AvailableCell } from './AvailableCell'
@@ -51,7 +50,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
   const openBudgetPopover = useBudgetPopover()
   const openGoalPopover = useGoalPopover()
 
-  const envelope = useAppSelector(getEnvelopes)[id]
+  const envelope = envelopeModel.useEnvelopes()[id]
   const envData = balances.useEnvData()[month][id]
   const goalInfo = goalModel.useGoals()[month][id]
   const toDisplay = displayCurrency.useToDisplay(month)

@@ -6,11 +6,10 @@ import { useToggle } from '@shared/hooks/useToggle'
 import { TEnvelopeId, TISOMonth } from '@shared/types'
 import { DataLine } from '@components/DataLine'
 import { Tooltip } from '@shared/ui/Tooltip'
-import { useAppSelector } from '@store/index'
 
 import { displayCurrency } from '@entities/currency/displayCurrency'
 import { balances } from '@entities/envBalances'
-import { getEnvelopes } from '@entities/envelope'
+import { envelopeModel } from '@entities/envelope'
 
 import { trMode, useTrDrawer } from './TransactionsDrawer'
 
@@ -125,7 +124,7 @@ const PercentBar: FC<BoxProps & { data: DataPoint[] }> = props => {
 function useDataPoints(month: TISOMonth) {
   const toDisplay = displayCurrency.useToDisplay(month)
   const activity = balances.useActivity()[month]
-  const envelopes = useAppSelector(getEnvelopes)
+  const envelopes = envelopeModel.useEnvelopes()
   const data: DataPoint[] = []
 
   if (!activity) return data

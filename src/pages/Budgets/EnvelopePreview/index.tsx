@@ -20,8 +20,8 @@ import { TEnvelopeId, TFxAmount } from '@shared/types'
 import { convertFx } from '@shared/helpers/money'
 import { DataLine } from '@components/DataLine'
 
-import { useAppDispatch, useAppSelector } from '@store'
-import { getEnvelopes, patchEnvelope, TEnvelope } from '@entities/envelope'
+import { useAppDispatch } from '@store'
+import { envelopeModel, TEnvelope } from '@entities/envelope'
 import { balances } from '@entities/envBalances'
 import { goalModel } from '@entities/goal'
 import { useBudgetPopover } from '../BudgetPopover'
@@ -42,7 +42,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   const { setDrawer } = useTrDrawer()
   const rates = balances.useRates()[month].rates
   const envMetrics = balances.useEnvData()[month][id]
-  const env = useAppSelector(getEnvelopes)[id]
+  const env = envelopeModel.useEnvelopes()[id]
 
   const goalInfo = goalModel.useGoals()[month][id]
   const { currency } = envMetrics
@@ -137,7 +137,7 @@ const Header: FC<{
   const dispatch = useAppDispatch()
   const handleColorChange = (hex?: string | null) => {
     sendEvent('Tag: set color: ' + hex)
-    dispatch(patchEnvelope({ id: envelope.id, color: hex }))
+    dispatch(envelopeModel.patchEnvelope({ id: envelope.id, color: hex }))
   }
   return (
     <Box

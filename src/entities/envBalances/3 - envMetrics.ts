@@ -13,7 +13,7 @@ import { addFxAmount, convertFx } from '@shared/helpers/money'
 import { withPerf } from '@shared/helpers/performance'
 import { TSelector } from '@store/index'
 
-import { getEnvelopes, TEnvelope } from '@entities/envelope'
+import { envelopeModel, TEnvelope } from '@entities/envelope'
 import { getEnvelopeBudgets } from '@entities/budget'
 import { TFxRateData } from '@entities/currency/fxRate'
 import { getMonthList } from './1 - monthList'
@@ -51,7 +51,7 @@ export const getEnvMetrics: TSelector<ByMonth<ById<TEnvMetrics>>> =
   createSelector(
     [
       getMonthList,
-      getEnvelopes,
+      envelopeModel.getEnvelopes,
       getActivity,
       getEnvelopeBudgets,
       getRatesByMonth,

@@ -9,11 +9,11 @@ import { convertFx, round } from '@shared/helpers/money'
 import { keys } from '@shared/helpers/keys'
 import { AppThunk } from '@store'
 import { applyClientPatch } from '@store/data'
-import { envId } from '@entities/envelope'
 import { getBudgetId, getBudgets, makeBudget } from '@entities/budget/tagBudget'
 import { budgetStore } from '@entities/budget/envelopeBudgets/budgetStore'
 import { balances } from '@entities/envBalances'
 import { userModel } from '@entities/user'
+import { envelopeModel } from '@entities/envelope'
 
 export type TEnvBudgetUpdate = {
   id: TEnvelopeId
@@ -41,7 +41,7 @@ export function setEnvelopeBudgets(
     const envelopeUpdates: TEnvBudgetUpdate[] = []
 
     updates.map(adjustValue).forEach(update => {
-      const { type, id } = envId.parse(update.id)
+      const { type, id } = envelopeModel.parseId(update.id)
       if (type === DataEntity.Tag) {
         tagUpdates.push({
           tag: id === 'null' ? null : id,

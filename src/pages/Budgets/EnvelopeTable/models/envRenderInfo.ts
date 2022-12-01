@@ -3,7 +3,11 @@ import { isZero } from '@shared/helpers/money'
 import { ById, ByMonth, TEnvelopeId, TISOMonth } from '@shared/types'
 
 import { TSelector, useAppSelector } from '@store'
-import { envelopeVisibility, getEnvelopes, TEnvelope } from '@entities/envelope'
+import {
+  envelopeModel,
+  envelopeVisibility,
+  TEnvelope,
+} from '@entities/envelope'
 import { balances } from '@entities/envBalances'
 import { goalModel } from '@entities/goal'
 import { isEqual } from 'lodash'
@@ -19,7 +23,12 @@ export type TRenderInfo = {
 
 export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
   createSelector(
-    [getEnvelopes, balances.monthList, balances.envData, goalModel.get],
+    [
+      envelopeModel.getEnvelopes,
+      balances.monthList,
+      balances.envData,
+      goalModel.get,
+    ],
     (envelopes, monthList, envData, goals) => {
       const result: ByMonth<ById<TRenderInfo>> = {}
 

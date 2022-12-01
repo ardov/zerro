@@ -4,7 +4,7 @@ import { Paper, Typography } from '@mui/material'
 import { TEnvelopeId, TISOMonth } from '@shared/types'
 import { useToggle } from '@shared/hooks/useToggle'
 import { useAppSelector } from '@store/index'
-import { getEnvelopeStructure } from '@entities/envelope'
+import { envelopeModel } from '@entities/envelope'
 import { Parent } from './Parent'
 import { Row } from './Row'
 import { Header } from './Header'
@@ -42,7 +42,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
     onShowTransactions,
   } = props
 
-  const structure = useAppSelector(getEnvelopeStructure, isEqual)
+  const structure = useAppSelector(envelopeModel.getEnvelopeStructure, isEqual)
   const renderInfo = useEnvRenderInfo(month)
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
   const { metric, toggleMetric } = useMetric()

@@ -14,10 +14,10 @@ import { CloseIcon } from '@shared/ui/Icons'
 import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
 import { toISODate, formatDate } from '@shared/helpers/date'
 import { TDateDraft, TEnvelopeId, TISOMonth } from '@shared/types'
-import { useAppDispatch, useAppSelector } from '@store'
+import { useAppDispatch } from '@store'
 
 import { goalModel, goalType, TGoal } from '@entities/goal'
-import { getEnvelopes } from '@entities/envelope'
+import { envelopeModel } from '@entities/envelope'
 
 const amountLabels = {
   [goalType.MONTHLY]: 'Откладывать каждый месяц',
@@ -44,7 +44,7 @@ export const GoalPopover: FC<
 const GoalPopoverContent: FC<TGoalPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
   const dispatch = useAppDispatch()
-  const envelope = useAppSelector(getEnvelopes)[id]
+  const envelope = envelopeModel.useEnvelopes()[id]
   const goalInfo = goalModel.useGoals()[month][id] || {}
   const { goal } = goalInfo
 

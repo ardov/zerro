@@ -4,8 +4,7 @@ import { useSearchParam } from '@shared/hooks/useSearchParam'
 import { useMonth } from '@shared/hooks/useMonth'
 import { TransactionsDrawer } from '@components/TransactionsDrawer'
 import { useCachedValue } from '@shared/hooks/useCachedValue'
-import { useAppSelector } from '@store/index'
-import { getEnvelopes, TEnvelope } from '@entities/envelope'
+import { envelopeModel, TEnvelope } from '@entities/envelope'
 import { balances, TActivityNode } from '@entities/envBalances'
 
 export enum trMode {
@@ -21,7 +20,7 @@ export const BudgetTransactionsDrawer: FC = () => {
   const cached = useCachedValue(params, isOpened)
   const onClose = () => setDrawer(null)
 
-  const envelopes = useAppSelector(getEnvelopes)
+  const envelopes = envelopeModel.useEnvelopes()
   const activity = balances.useActivity()[cached.month]
 
   const transactions = getTransactions(

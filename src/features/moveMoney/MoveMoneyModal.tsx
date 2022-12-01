@@ -4,12 +4,12 @@ import Dialog, { DialogProps } from '@mui/material/Dialog'
 import { AmountInput } from '@shared/ui/AmountInput'
 import { ArrowForwardIcon, ArrowRightAltIcon } from '@shared/ui/Icons'
 import { Modify, TISOMonth, TEnvelopeId } from '@shared/types'
-import { useAppDispatch, useAppSelector } from '@store'
+import { useAppDispatch } from '@store'
 
 import { displayCurrency } from '@entities/currency/displayCurrency'
-import { getEnvelopes } from '@entities/envelope'
 import { balances } from '@entities/envBalances'
 import { moveMoney } from './moveMoney'
+import { envelopeModel } from '@entities/envelope'
 
 export type MoveMoneyModalProps = Modify<
   DialogProps,
@@ -25,7 +25,7 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   const dispatch = useAppDispatch()
   const { open, onClose, source, month, destination } = props
 
-  const envelopes = useAppSelector(getEnvelopes)
+  const envelopes = envelopeModel.useEnvelopes()
   const metrics = balances.useEnvData()[month]
   const totalMetrics = balances.useTotals()[month]
   // const totals = useAppSelector(getMonthTotals)[month]

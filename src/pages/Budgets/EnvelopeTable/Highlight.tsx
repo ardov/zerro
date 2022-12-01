@@ -2,10 +2,10 @@ import React, { useCallback, useRef, useState } from 'react'
 import { DragEndEvent, DragMoveEvent, useDndMonitor } from '@dnd-kit/core'
 import { Box, SxProps } from '@mui/system'
 import { DragTypes } from '../DnDContext'
-import { useAppDispatch, useAppSelector } from '@store/index'
-import { getEnvelopes, TEnvelope } from '@entities/envelope'
+import { useAppDispatch } from '@store/index'
+import { envelopeModel, TEnvelope } from '@entities/envelope'
 import { ById, TEnvelopeId } from '@shared/types'
-import { moveEnvelope } from '@entities/envelope/moveEnvelope'
+import { moveEnvelope } from '@features/moveEnvelope'
 
 const style: SxProps = {
   border: '1px solid red',
@@ -28,7 +28,7 @@ export function Highlight() {
   const dispatch = useAppDispatch()
   const [isDragging, setIsDragging] = useState(false)
 
-  const envelopes = useAppSelector(getEnvelopes)
+  const envelopes = envelopeModel.useEnvelopes()
 
   const boxRef = useRef<HTMLDivElement>(null)
 
