@@ -1,76 +1,29 @@
-import React, { useState, useCallback } from 'react'
+import React, { FC, useState } from 'react'
 import { Box, Typography, Paper, useTheme } from '@mui/material'
-import { useAppSelector } from '@store'
 import { AreaChart, Area, ResponsiveContainer } from 'recharts'
-import { getAccountsHistory } from './selectors'
 import { accountModel } from '@entities/account'
 import { formatMoney } from '@shared/helpers/money'
 import { formatDate } from '@shared/helpers/date'
-import Rhythm from '@shared/ui/Rhythm'
-import { TransactionsDrawer } from '@components/TransactionsDrawer'
-import { WidgetNetWorth } from './WidgetNetWorth'
-import { WidgetCashflow } from './WidgetCashflow'
+import { TAccountId, TISODate } from '@shared/types'
+import { Period } from '../shared/period'
+import { useAccountHistory } from './model'
 
-export default function Stats() {
-  const accs = accountModel.useAccountList()
-  const [selected, setSelected] = useState({})
-
-  const startDate = +new Date(2019, 0)
-  const accIds = accs
-    .sort((acc1, acc2) => {
-      if (acc1.archive && acc2.archive) return 0
-      if (acc1.archive) return 1
-      if (acc2.archive) return -1
-      return 0
-    })
-    .map(acc => acc.id)
-
-  const onSelect = useCallback((id, date) => {
-    setSelected({ id, date })
-  }, [])
-
-  const filterConditions = {
-    accounts: [selected.id],
-    dateFrom: selected.date,
-    dateTo: selected.date,
-  }
-
-  return (
-    <>
-      <Box display="flex" flexDirection="column">
-        <Rhythm gap={2} axis="y" p={3}>
-          <WidgetNetWorth />
-          <WidgetCashflow />
-          {accIds.map(id => (
-            <AccHist
-              key={id}
-              id={id}
-              startDate={startDate}
-              onClick={onSelect}
-            />
-          ))}
-        </Rhythm>
-      </Box>
-
-      <TransactionsDrawer
-        filterConditions={filterConditions}
-        open={!!selected.date && !!selected.id}
-        onClose={() => setSelected({})}
-      />
-    </>
-  )
+type AccTrendProps = {
+  period: Period
+  id: TAccountId
+  onClick: (id: TAccountId, date: TISODate) => void
 }
 
-const AccHist = ({ id, startDate = 0, endDate, onClick }) => {
+export const WidgetAccHistory: FC<AccTrendProps> = ({
+  id,
+  period,
+  onClick,
+}) => {
   const theme = useTheme()
-  const history = useAppSelector(getAccountsHistory)[id]
-  const acc = accountModel.useAccounts()[id]
-  const [hoverIdx, setHoverIdx] = useState(null)
+  const acc = accountModel.usePopulatedAccounts()[id]
+  const data = useAccountHistory(id, period)
 
-  const diff = Math.abs(history[history.length - 1].balance - acc.balance)
-  const hasError = diff > 0.001 && acc.type !== 'debt'
-
-  const data = history.filter(({ date }) => date >= startDate)
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null)
 
   const isHovering = !!hoverIdx || hoverIdx === 0
   const balance = isHovering ? data[hoverIdx].balance : acc.balance
@@ -93,13 +46,12 @@ const AccHist = ({ id, startDate = 0, endDate, onClick }) => {
     <Paper style={{ overflow: 'hidden', position: 'relative' }}>
       <Box p={2} minWidth={160}>
         <Typography variant="body2" onClick={() => console.log(acc)}>
-          {hasError && <span>⚠️ Ошибка на {formatMoney(diff)}⚠️ </span>}
           <span
             style={{ textDecoration: acc.archive ? 'line-through' : 'none' }}
           >
             {acc.title}
           </span>{' '}
-          {isHovering && formatDate(hoverDate)}
+          {isHovering && hoverDate && formatDate(hoverDate)}
         </Typography>
         <Typography variant="h6">{formatMoney(balance)}</Typography>
       </Box>
@@ -119,11 +71,17 @@ const AccHist = ({ id, startDate = 0, endDate, onClick }) => {
             data={data}
             margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
             onClick={e => {
-              if (!e) return
-              const date = data[e.activeLabel].date
+              if (!e || !e.activeLabel) return
+              const date = data[+e.activeLabel].date
               onClick(id, date)
             }}
-            onMouseMove={e => e && setHoverIdx(e.activeLabel ?? null)}
+            onMouseMove={e => {
+              if (!e || !e.activeLabel) {
+                setHoverIdx(null)
+                return
+              }
+              setHoverIdx(+e.activeLabel)
+            }}
             onMouseLeave={() => setHoverIdx(null)}
           >
             <defs>
