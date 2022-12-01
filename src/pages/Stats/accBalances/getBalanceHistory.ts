@@ -11,6 +11,7 @@ import { debtorModel } from '@entities/debtors'
 import { accountModel } from '@entities/account'
 import { isZero, subFxAmount } from '@shared/helpers/money'
 import { getBalanceChanges, TTrEffect } from './getBalanceChanges'
+import { withPerf } from '@shared/helpers/performance'
 
 export type TBalanceState = {
   accounts: Record<TAccountId, TFxAmount>
@@ -24,7 +25,7 @@ const getBalances = createSelector(
     accountModel.getPopulatedAccounts,
     debtorModel.getDebtors,
   ],
-  (trHistory, changes, accounts, debtors) => {
+  withPerf('getBalances', (trHistory, changes, accounts, debtors) => {
     const balancesAfter: Record<TTransactionId, TBalanceState> = {}
 
     // Current account balances
@@ -59,7 +60,7 @@ const getBalances = createSelector(
     })
 
     return { balancesAfter, startingBalances }
-  }
+  })
 )
 
 export const getBalanceHistory: TSelector<

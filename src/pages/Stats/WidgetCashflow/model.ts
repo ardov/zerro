@@ -9,6 +9,7 @@ import { instrumentModel, TInstCodeMap } from '@entities/currency/instrument'
 import { displayCurrency } from '@entities/currency/displayCurrency'
 import { getTransactionsHistory, getType, TrType } from '@entities/transaction'
 import { Period, getStart } from '../shared/period'
+import { useMemo } from 'react'
 
 type TPoint = {
   date: TISODate
@@ -95,18 +96,16 @@ export function useCashFlow(
   const debtAccId = accountModel.useDebtAccountId()
   const instCodeMap = instrumentModel.useInstCodeMap()
 
-  const firstDate = getStart(period, aggregation)
-
-  const cashflowNodes = calcCashflow(
-    transactionHistory.filter(tr => tr.date >= firstDate),
-    debtAccId,
-    instCodeMap,
-    aggregation
+  const cashflowNodes = useMemo(
+    () => calcCashflow(transactionHistory, debtAccId, instCodeMap, aggregation),
+    [aggregation, debtAccId, instCodeMap, transactionHistory]
   )
 
-  let first = keys(cashflowNodes).sort()[0]
+  const firstData = keys(cashflowNodes).sort()[0]
+  const firstPeriod = getStart(period, aggregation)
+  const firstDate = firstData > firstPeriod ? firstData : firstPeriod
 
-  const points = makeDateArray(first)
+  const points = makeDateArray(firstDate)
     .map(date => {
       return cashflowNodes[date] || makePoint(date)
     })

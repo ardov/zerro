@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react'
-import { Box } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import { TAccountId, TISODate } from '@shared/types'
 import Rhythm from '@shared/ui/Rhythm'
 
@@ -9,16 +9,19 @@ import { WidgetNetWorth } from './WidgetNetWorth'
 import { WidgetCashflow } from './WidgetCashflow'
 import { WidgetAccHistory } from './WidgetAccHistory'
 import { nextPeriod, Period } from './shared/period'
+import { useToggle } from '@shared/hooks/useToggle'
 
 export default function Stats() {
   const accs = accountModel.useAccountList()
   const [period, setPeriod] = useState<Period>(Period.LastYear)
+  const [showArchived, toggleArchived] = useToggle(false)
   const togglePeriod = useCallback(() => setPeriod(nextPeriod), [])
 
   const [selected, setSelected] =
     useState<{ id: TAccountId; date: TISODate } | null>(null)
 
   const accIds = accs
+    .filter(acc => showArchived || !acc.archive)
     .sort((acc1, acc2) => {
       if (acc1.archive && acc2.archive) return 0
       if (acc1.archive) return 1
@@ -51,6 +54,9 @@ export default function Stats() {
               onClick={onSelect}
             />
           ))}
+          <Button onClick={toggleArchived}>
+            {showArchived ? 'Скрыть' : 'Показать'} архивные
+          </Button>
         </Rhythm>
       </Box>
 
