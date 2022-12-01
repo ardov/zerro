@@ -8,10 +8,13 @@ import { TransactionsDrawer } from '@components/TransactionsDrawer'
 import { WidgetNetWorth } from './WidgetNetWorth'
 import { WidgetCashflow } from './WidgetCashflow'
 import { WidgetAccHistory } from './WidgetAccHistory'
-import { Period } from './shared/period'
+import { nextPeriod, Period } from './shared/period'
 
 export default function Stats() {
   const accs = accountModel.useAccountList()
+  const [period, setPeriod] = useState<Period>(Period.LastYear)
+  const togglePeriod = useCallback(() => setPeriod(nextPeriod), [])
+
   const [selected, setSelected] =
     useState<{ id: TAccountId; date: TISODate } | null>(null)
 
@@ -38,13 +41,13 @@ export default function Stats() {
     <>
       <Box display="flex" flexDirection="column" pb={10}>
         <Rhythm gap={2} axis="y" p={3}>
-          <WidgetNetWorth />
-          <WidgetCashflow />
+          <WidgetNetWorth period={period} onTogglePeriod={togglePeriod} />
+          <WidgetCashflow period={period} onTogglePeriod={togglePeriod} />
           {accIds.map(id => (
             <WidgetAccHistory
               key={id}
               id={id}
-              period={Period.All}
+              period={period}
               onClick={onSelect}
             />
           ))}

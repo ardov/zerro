@@ -22,15 +22,21 @@ import { formatDate, GroupBy } from '@shared/helpers/date'
 
 import { displayCurrency } from '@entities/currency/displayCurrency'
 import { DataLine } from '@components/DataLine'
-import { nextPeriod, Period, periodTitles } from '../shared/period'
+import { Period, periodTitles } from '../shared/period'
 import { TPoint, useNetWorth } from './model'
 
 type Point = TPoint & { total: number }
 type TDataKey = keyof Omit<Point, 'date'>
 
-export function WidgetNetWorth() {
+type WidgetNetWorthProps = {
+  period: Period
+  onTogglePeriod: () => void
+}
+
+export function WidgetNetWorth(props: WidgetNetWorthProps) {
+  const { period, onTogglePeriod } = props
   const theme = useTheme()
-  const [period, setPeriod] = useState<Period>(Period.LastYear)
+
   const balances = useNetWorth(period, GroupBy.Month)
 
   const [visibleParts, setVisibleParts] = useState<Array<TDataKey>>([
@@ -74,10 +80,6 @@ export function WidgetNetWorth() {
     total: 'Всего',
   }
 
-  const togglePeriod = () => {
-    setPeriod(nextPeriod)
-  }
-
   const makeBar = (key: TDataKey) => {
     if (!isVisible(key)) return null
     return (
@@ -118,7 +120,7 @@ export function WidgetNetWorth() {
           Рост капитала{' '}
           <span
             style={{ color: theme.palette.secondary.main, cursor: 'pointer' }}
-            onClick={togglePeriod}
+            onClick={onTogglePeriod}
           >
             {periodTitles[period]}
           </span>
