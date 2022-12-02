@@ -18,6 +18,7 @@ import { Highlight } from './Highlight'
 import { useEnvRenderInfo } from './models/envRenderInfo'
 import { Footer } from './Footer'
 import { Group } from './Group'
+import { NewGroup } from './NewGroup'
 
 type TagTableProps = {
   month: TISOMonth
@@ -162,6 +163,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
           onMetricSwitch={toggleMetric}
           onOpenOverview={onOpenOverview}
         />
+        <NewGroup visible={reorderMode} />
         {renderGroups}
         <Footer month={month} metric={metric} />
       </Paper>
