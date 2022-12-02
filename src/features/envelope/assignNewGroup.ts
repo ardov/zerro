@@ -14,9 +14,9 @@ export function assignNewGroup(id: TEnvelopeId): AppThunk {
 
     const patches: TEnvelopeDraft[] = Object.values(envelopes).map(e => {
       if (e.id === id) {
-        return { id, group: groupName, indexRaw: 1 }
+        return { id, group: groupName, indexRaw: 0 }
       }
-      return { id: e.id, indexRaw: e.index + 2 }
+      return { id: e.id, indexRaw: e.index + 1 }
     })
 
     dispatch(envelopeModel.patchEnvelope(patches))

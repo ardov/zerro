@@ -3,10 +3,11 @@ import { envId } from './envelopeId'
 import { TEnvelope } from './makeEnvelope'
 
 export function compareEnvelopes(a: TEnvelope, b: TEnvelope) {
-  // Sort by index if it's present (!== -1)
-  if (a.index !== -1 && b.index !== -1) return a.index - b.index
-  if (a.index !== -1) return -1
-  if (b.index !== -1) return 1
+  // Sort by index if it's present
+  if (a.indexRaw !== undefined && b.indexRaw !== undefined)
+    return a.indexRaw - b.indexRaw
+  if (a.indexRaw !== undefined) return -1
+  if (b.indexRaw !== undefined) return 1
 
   // Sort by type
   if (a.type !== b.type) {
