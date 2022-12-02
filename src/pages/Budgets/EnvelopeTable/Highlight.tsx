@@ -5,7 +5,7 @@ import { DragTypes } from '../DnDContext'
 import { useAppDispatch } from '@store/index'
 import { envelopeModel, TEnvelope } from '@entities/envelope'
 import { ById, TEnvelopeId } from '@shared/types'
-import { moveEnvelope } from '@features/moveEnvelope'
+import { moveEnvelope } from '@features/envelope/moveEnvelope'
 
 const style: SxProps = {
   border: '1px solid red',

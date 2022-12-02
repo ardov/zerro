@@ -4,6 +4,7 @@ import { patchEnvelope } from './patchEnvelope'
 import { envId } from './shared/envelopeId'
 import { flattenStructure } from './shared/structure'
 
+export type { TEnvTreeNode, TGroupTreeNode } from './shared/structure'
 export type { TEnvelopeDraft } from './patchEnvelope'
 export type { TEnvelope } from './shared/makeEnvelope'
 export { envelopeVisibility } from './shared/metaData'
