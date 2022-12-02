@@ -1,32 +1,24 @@
-import React, { FC, memo, useCallback, useEffect, useState } from 'react'
+import React, { FC, memo, useCallback } from 'react'
 import { shallowEqual } from 'react-redux'
-import {
-  ButtonBase,
-  IconButton,
-  Paper,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { isEqual } from 'lodash'
+import { Paper } from '@mui/material'
 import { TEnvelopeId, TISOMonth } from '@shared/types'
 import { useToggle } from '@shared/hooks/useToggle'
-import { useAppDispatch, useAppSelector } from '@store/index'
+
+import { useAppSelector } from '@store/index'
 import { envelopeModel } from '@entities/envelope'
+
 import { Parent } from './Parent'
 import { Row } from './Row'
 import { Header } from './Header'
-import { rowStyle } from './shared/shared'
 import { trMode } from '../TransactionsDrawer'
 import { useMetric } from './models/useMetric'
 import { useExpandEnvelopes } from './models/useExpandEnvelopes'
 import { Highlight } from './Highlight'
 import { useEnvRenderInfo } from './models/envRenderInfo'
-import { isEqual } from 'lodash'
 import { Footer } from './Footer'
-import { renameGroup } from '@features/envelope/renameGroup'
-import { Box } from '@mui/system'
-import { moveGroupDown } from '@features/envelope/moveGroupDown'
-import { ArrowDownwardIcon } from '@shared/ui/Icons'
-import { Tooltip } from '@shared/ui/Tooltip'
+import { Group } from './Group'
+import { NewGroup } from './NewGroup'
 
 type TagTableProps = {
   month: TISOMonth
@@ -65,79 +57,98 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
     [onShowTransactions]
   )
 
-  const renderGroups = structure.map(group => {
-    const parents = group.children
-      .filter(parent => showAll || renderInfo[parent.id].isDefaultVisible)
-      .map(parent => {
-        const { isDefaultVisible, showSelf } = renderInfo[parent.id]
+  const renderGroups = structure
+    .map((group, groupIdx) => {
+      const parents = group.children
+        .filter(parent => showAll || renderInfo[parent.id].isDefaultVisible)
+        .map(parent => {
+          const { isDefaultVisible, showSelf } = renderInfo[parent.id]
 
-        let renderChildren = parent.children
-          .filter(child => showAll || renderInfo[child.id].isDefaultVisible)
-          .map((child, idx, arr) => (
-            <Row
-              key={'child' + child.id}
-              id={child.id}
-              month={month}
-              metric={metric}
-              isDefaultVisible={renderInfo[child.id].isDefaultVisible}
-              isLastVisibleChild={idx === arr.length - 1}
-              isReordering={reorderMode}
-              openTransactionsPopover={onShowExactTransactions}
-              openDetails={onOpenDetails}
-            />
-          ))
-
-        if (showSelf) {
-          renderChildren = [
-            <Row
-              isSelf
-              key={'self' + parent.id}
-              id={parent.id}
-              month={month}
-              metric={metric}
-              isDefaultVisible={renderInfo[parent.id].isDefaultVisible}
-              isReordering={reorderMode}
-              openTransactionsPopover={onShowExactTransactions}
-              openDetails={onOpenDetails}
-            />,
-            ...renderChildren,
-          ]
-        }
-
-        const isExpanded =
-          !!renderChildren.length && expanded.includes(parent.id)
-
-        return (
-          <Parent
-            key={parent.id}
-            id={parent.id}
-            isExpanded={isExpanded}
-            onExpandToggle={toggle}
-            onExpandAll={expandAll}
-            onCollapseAll={collapseAll}
-            parent={
+          let renderChildren = parent.children
+            .filter(child => showAll || renderInfo[child.id].isDefaultVisible)
+            .map((child, idx, arr) => (
               <Row
+                key={'child' + child.id}
+                id={child.id}
+                month={month}
+                metric={metric}
+                isDefaultVisible={renderInfo[child.id].isDefaultVisible}
+                isLastVisibleChild={idx === arr.length - 1}
+                isReordering={reorderMode}
+                openTransactionsPopover={onShowExactTransactions}
+                openDetails={onOpenDetails}
+              />
+            ))
+
+          if (showSelf) {
+            renderChildren = [
+              <Row
+                isSelf
+                key={'self' + parent.id}
                 id={parent.id}
                 month={month}
                 metric={metric}
-                isDefaultVisible={isDefaultVisible}
-                isExpanded={isExpanded}
+                isDefaultVisible={renderInfo[parent.id].isDefaultVisible}
                 isReordering={reorderMode}
+                openTransactionsPopover={onShowExactTransactions}
                 openDetails={onOpenDetails}
-                openTransactionsPopover={onShowTransactions}
-              />
-            }
-            children={renderChildren}
-          />
-        )
-      })
-    if (!parents.length) return null
-    return (
-      <EnvelopeGroup key={group.id} name={group.id}>
-        {parents}
-      </EnvelopeGroup>
-    )
-  })
+              />,
+              ...renderChildren,
+            ]
+          }
+
+          const isExpanded =
+            !!renderChildren.length && expanded.includes(parent.id)
+
+          return (
+            <Parent
+              key={parent.id}
+              id={parent.id}
+              isExpanded={isExpanded}
+              onExpandToggle={toggle}
+              onExpandAll={expandAll}
+              onCollapseAll={collapseAll}
+              parent={
+                <Row
+                  id={parent.id}
+                  month={month}
+                  metric={metric}
+                  isDefaultVisible={isDefaultVisible}
+                  isExpanded={isExpanded}
+                  isReordering={reorderMode}
+                  openDetails={onOpenDetails}
+                  openTransactionsPopover={onShowTransactions}
+                />
+              }
+              children={renderChildren}
+            />
+          )
+        })
+
+      return {
+        group,
+        groupIdx,
+        renderChildren: parents,
+      }
+    })
+    .filter(data => data.renderChildren.length)
+    .map((data, index, array) => {
+      const { group, groupIdx, renderChildren } = data
+      const prevVisibleIdx = array[index - 1]?.groupIdx
+      const nextVisibleIdx = array[index + 1]?.groupIdx
+      return (
+        <Group
+          key={group.id}
+          name={group.id}
+          groupIdx={groupIdx}
+          prevIdx={prevVisibleIdx}
+          nextIdx={nextVisibleIdx}
+          isReordering={reorderMode}
+        >
+          {renderChildren}
+        </Group>
+      )
+    })
 
   return (
     <>
@@ -152,6 +163,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
           onMetricSwitch={toggleMetric}
           onOpenOverview={onOpenOverview}
         />
+        <NewGroup visible={reorderMode} />
         {renderGroups}
         <Footer month={month} metric={metric} />
       </Paper>
@@ -164,68 +176,3 @@ export const EnvelopeTable = memo(
   (props: TagTableProps) => <EnvelopeTable2 {...props} />,
   shallowEqual
 )
-
-type TEnvelopeGroupProps = {
-  name: string
-  children?: React.ReactNode[]
-}
-
-const EnvelopeGroup: FC<TEnvelopeGroupProps> = ({ name, children }) => {
-  const dispatch = useAppDispatch()
-  const [value, setValue] = useState(name)
-  const [showInput, toggleInput] = useToggle(false)
-
-  return (
-    <>
-      <Box
-        sx={{
-          ...rowStyle,
-          borderBottom: `0.5px solid black`,
-          borderColor: 'divider',
-          '&:last-child': { border: 0 },
-          '&:hover .arrowBtn': { opacity: 1 },
-          '& .arrowBtn': { opacity: 0.1, transition: '200ms ease' },
-        }}
-      >
-        {showInput ? (
-          <TextField
-            sx={{ ml: -1 }}
-            autoFocus
-            name="groupName"
-            inputProps={{ autoComplete: 'off' }}
-            value={value}
-            onChange={e => setValue(e.target.value)}
-            onBlur={() => {
-              toggleInput()
-              if (value !== name) dispatch(renameGroup(name, value))
-            }}
-          />
-        ) : (
-          <span>
-            <ButtonBase
-              sx={{ pb: 1, pt: 2 }}
-              onClick={() => {
-                setValue(name)
-                toggleInput()
-              }}
-            >
-              <Typography variant="h6" sx={{ fontWeight: 900 }}>
-                {name}
-              </Typography>
-            </ButtonBase>
-            <Tooltip title="Опустить вниз">
-              <IconButton
-                className="arrowBtn"
-                sx={{ mt: 1.5, ml: 1 }}
-                onClick={() => dispatch(moveGroupDown(name))}
-              >
-                <ArrowDownwardIcon />
-              </IconButton>
-            </Tooltip>
-          </span>
-        )}
-      </Box>
-      {children}
-    </>
-  )
-}

@@ -16,12 +16,14 @@ import { MoveMoneyModal } from '@features/moveMoney'
 import { useToggle } from '@shared/hooks/useToggle'
 import { TEnvelopeId } from '@shared/types'
 import { Box, SxProps } from '@mui/system'
-import { useAppSelector } from '@store/index'
 import { Typography } from '@mui/material'
 import { createPortal } from 'react-dom'
 import { envelopeModel } from '@entities/envelope'
+import { useAppDispatch } from '@store/index'
+import { assignNewGroup } from '@features/envelope/assignNewGroup'
 
 export enum DragTypes {
+  newGroup = 'newGroup',
   amount = 'amount',
   envelope = 'envelope',
 }
@@ -37,6 +39,7 @@ const autoscrollOptions = { threshold: { x: 0, y: 0.2 } }
 const vibrate = () => window?.navigator?.vibrate?.(100)
 
 export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
+  const dispatch = useAppDispatch()
   const [month] = useMonth()
 
   const sensors = useSensors(
@@ -64,8 +67,15 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
         setMoneyDestination(over.id)
         toggleOpen()
       }
+      if (
+        active?.type === DragTypes.envelope &&
+        active?.id &&
+        over?.type === DragTypes.newGroup
+      ) {
+        dispatch(assignNewGroup(active.id))
+      }
     },
-    [month, toggleOpen]
+    [dispatch, month, toggleOpen]
   )
 
   return (

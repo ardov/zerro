@@ -128,6 +128,7 @@ function whatsHappening(
     !overData ||
     !overData.id ||
     overData.type !== DragTypes.envelope ||
+    // overData.type !== DragTypes.newGroup ||
     !overRect
   ) {
     return null
@@ -141,12 +142,14 @@ function whatsHappening(
 
   return {
     isOverChild,
-    isNesting: getNestingState(
-      tryingToNest,
-      isOverChild,
-      isLastVisibleChild,
-      isExpanded
-    ),
+    isNesting:
+      // overData.type === DragTypes.newGroup ||
+      getNestingState(
+        tryingToNest,
+        isOverChild,
+        isLastVisibleChild,
+        isExpanded
+      ),
 
     activeId: activeData.id as TEnvelopeId,
     activeType: activeData.type as DragTypes,

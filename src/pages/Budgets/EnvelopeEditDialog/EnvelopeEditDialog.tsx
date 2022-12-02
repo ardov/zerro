@@ -24,7 +24,7 @@ import {
   envelopeVisibility,
   TEnvelope,
 } from '@entities/envelope'
-import { TagSelect } from '@components/TagSelect'
+// import { TagSelect } from '@components/TagSelect'
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
 import { VisibilitySelect } from './VisidilitySelect'
 import { userModel } from '@entities/user'
@@ -89,7 +89,7 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
       }}
     >
       <DialogTitle>
-        {isNew ? 'Новая категория' : 'Редактирование конверта'}
+        {isNew ? 'Новая категория' : 'Редактирование категории'}
       </DialogTitle>
       <DialogContent>
         <Stack
@@ -120,19 +120,23 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
             }}
           />
 
-          <TagSelect
+          {/* Can use dnd */}
+          {/* <TagSelect
             label="Родительская категория"
             tagFilters={{ topLevel: true, exclude: id ? [id] : undefined }}
             value={values.parentTagId}
             onChange={v => setFieldValue('parentTagId', v || null)}
-          />
-          <TextField
+          /> */}
+
+          {/* Can use dnd */}
+          {/* <TextField
             label="Группа"
             name="group"
             inputProps={{ autoComplete: 'off' }}
             value={values.group}
             onChange={handleChange}
-          />
+          /> */}
+
           <TextField
             label="Комментарий"
             name="comment"
