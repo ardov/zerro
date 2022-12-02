@@ -4,7 +4,7 @@ import { NotesIcon } from '@shared/ui/Icons'
 import { TEnvelopeId, TISOMonth } from '@shared/types'
 import { useAppDispatch, useAppSelector } from '@store'
 import { cardStyle } from './shared'
-import { getEnvelopes, patchEnvelope } from '@entities/envelope'
+import { envelopeModel } from '@entities/envelope'
 import { useDebouncedCallback } from '@shared/hooks/useDebouncedCallback'
 
 export const CommentWidget: FC<{ month: TISOMonth; id: TEnvelopeId }> = ({
@@ -12,13 +12,13 @@ export const CommentWidget: FC<{ month: TISOMonth; id: TEnvelopeId }> = ({
   id,
 }) => {
   const dispatch = useAppDispatch()
-  const comment = useAppSelector(s => getEnvelopes(s)[id].comment)
+  const comment = useAppSelector(s => envelopeModel.getEnvelopes(s)[id].comment)
   const [value, setValue] = useState(comment)
 
   const applyChanges = useDebouncedCallback(
     value => {
       if (comment !== value) {
-        dispatch(patchEnvelope({ id, comment: value }))
+        dispatch(envelopeModel.patchEnvelope({ id, comment: value }))
       }
     },
     [id, dispatch],

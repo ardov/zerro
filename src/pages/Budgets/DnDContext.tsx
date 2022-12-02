@@ -19,7 +19,7 @@ import { Box, SxProps } from '@mui/system'
 import { useAppSelector } from '@store/index'
 import { Typography } from '@mui/material'
 import { createPortal } from 'react-dom'
-import { getEnvelopes } from '@entities/envelope'
+import { envelopeModel } from '@entities/envelope'
 
 export enum DragTypes {
   amount = 'amount',
@@ -105,7 +105,7 @@ const props: SxProps = {
 const DragObj = () => {
   const [activeType, setActiveType] = useState<DragTypes>(DragTypes.amount)
   const [activeId, setActiveId] = useState<TEnvelopeId>()
-  const envelopes = useAppSelector(getEnvelopes)
+  const envelopes = envelopeModel.useEnvelopes()
 
   useDndMonitor({
     onDragStart(e) {

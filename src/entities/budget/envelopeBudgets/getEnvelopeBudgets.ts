@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { toISOMonth } from '@shared/helpers/date'
 import { keys } from '@shared/helpers/keys'
 import { ByMonth, DataEntity, TEnvelopeId } from '@shared/types'
-import { envId } from '@entities/envelope'
+import { envelopeModel } from '@entities/envelope'
 import { getBudgets } from '../tagBudget'
 import { budgetStore } from './budgetStore'
 import { withPerf } from '@shared/helpers/performance'
@@ -16,7 +16,10 @@ export const getEnvelopeBudgets = createSelector(
       const budget = tagBudgets[budgetId]
       if (!budget.outcome) return
       const month = toISOMonth(budget.date)
-      const envelopeId = envId.get(DataEntity.Tag, String(budget.tag))
+      const envelopeId = envelopeModel.makeId(
+        DataEntity.Tag,
+        String(budget.tag)
+      )
       result[month] ??= {}
       result[month][envelopeId] = budget.outcome
     })

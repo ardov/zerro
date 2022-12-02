@@ -120,29 +120,18 @@ function storeAccessTokenData({ access_token }: TAccessToken) {
 function openAuthWindow() {
   openPopupWindow(
     `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`,
-    'ZenMoney Login',
-    window,
+    '_blank',
     480,
     640
   )
 }
 
-function openPopupWindow(
-  url: string,
-  title: string,
-  win: Window,
-  w: number,
-  h: number
-) {
-  let y = 0
-  let x = 0
-  if (win.top) {
-    y = win.top.outerHeight / 2 + win.top.screenY - h / 2
-    x = win.top.outerWidth / 2 + win.top.screenX - w / 2
-  }
-  return win.open(
+function openPopupWindow(url: string, target: string, w: number, h: number) {
+  let y = window.outerHeight / 2 + window.screenY - h / 2
+  let x = window.outerWidth / 2 + window.screenX - w / 2
+  return window.open(
     url,
-    title,
-    `toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=${w}, height=${h}, top=${y}, left=${x}`
+    target,
+    `width=${w}, height=${h}, top=${y}, left=${x}`
   )
 }

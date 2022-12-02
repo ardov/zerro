@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Paper, Card, Typography, Box, useTheme } from '@mui/material'
 import {
   ResponsiveContainer,
@@ -14,7 +14,7 @@ import { formatMoney } from '@shared/helpers/money'
 import { formatDate, parseDate } from '@shared/helpers/date'
 import { TISODate } from '@shared/types'
 import { useCashFlow } from './model'
-import { nextPeriod, Period, periodTitles } from '../shared/period'
+import { Period, periodTitles } from '../shared/period'
 import { displayCurrency } from '@entities/currency/displayCurrency'
 
 type Point = {
@@ -23,12 +23,15 @@ type Point = {
   outcome: number
 }
 
-export function WidgetCashflow() {
-  const theme = useTheme()
-  const [period, setPeriod] = useState<Period>(Period.LastYear)
-  const points = useCashFlow(period)
+type WidgetCashflowProps = {
+  period: Period
+  onTogglePeriod: () => void
+}
 
-  const togglePeriod = () => setPeriod(nextPeriod)
+export function WidgetCashflow(props: WidgetCashflowProps) {
+  const { period, onTogglePeriod } = props
+  const theme = useTheme()
+  const points = useCashFlow(period)
 
   const colorIncome = theme.palette.success.main
   const colorOutcome = theme.palette.error.main
@@ -41,7 +44,7 @@ export function WidgetCashflow() {
           Доходы и расходы{' '}
           <span
             style={{ color: theme.palette.secondary.main, cursor: 'pointer' }}
-            onClick={togglePeriod}
+            onClick={onTogglePeriod}
           >
             {periodTitles[period]}
           </span>

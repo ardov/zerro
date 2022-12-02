@@ -1,10 +1,16 @@
-import React, { FC, memo, useCallback } from 'react'
+import React, { FC, memo, useCallback, useEffect, useState } from 'react'
 import { shallowEqual } from 'react-redux'
-import { Paper, Typography } from '@mui/material'
+import {
+  ButtonBase,
+  IconButton,
+  Paper,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { TEnvelopeId, TISOMonth } from '@shared/types'
 import { useToggle } from '@shared/hooks/useToggle'
-import { useAppSelector } from '@store/index'
-import { getEnvelopeStructure } from '@entities/envelope'
+import { useAppDispatch, useAppSelector } from '@store/index'
+import { envelopeModel } from '@entities/envelope'
 import { Parent } from './Parent'
 import { Row } from './Row'
 import { Header } from './Header'
@@ -16,6 +22,11 @@ import { Highlight } from './Highlight'
 import { useEnvRenderInfo } from './models/envRenderInfo'
 import { isEqual } from 'lodash'
 import { Footer } from './Footer'
+import { renameGroup } from '@features/envelope/renameGroup'
+import { Box } from '@mui/system'
+import { moveGroupDown } from '@features/envelope/moveGroupDown'
+import { ArrowDownwardIcon } from '@shared/ui/Icons'
+import { Tooltip } from '@shared/ui/Tooltip'
 
 type TagTableProps = {
   month: TISOMonth
@@ -42,7 +53,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
     onShowTransactions,
   } = props
 
-  const structure = useAppSelector(getEnvelopeStructure, isEqual)
+  const structure = useAppSelector(envelopeModel.getEnvelopeStructure, isEqual)
   const renderInfo = useEnvRenderInfo(month)
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
   const { metric, toggleMetric } = useMetric()
@@ -160,22 +171,60 @@ type TEnvelopeGroupProps = {
 }
 
 const EnvelopeGroup: FC<TEnvelopeGroupProps> = ({ name, children }) => {
+  const dispatch = useAppDispatch()
+  const [value, setValue] = useState(name)
+  const [showInput, toggleInput] = useToggle(false)
+
   return (
     <>
-      <Typography
-        variant="h6"
+      <Box
         sx={{
           ...rowStyle,
-          pb: 1,
-          pt: 2,
-          fontWeight: 900,
           borderBottom: `0.5px solid black`,
           borderColor: 'divider',
           '&:last-child': { border: 0 },
+          '&:hover .arrowBtn': { opacity: 1 },
+          '& .arrowBtn': { opacity: 0.1, transition: '200ms ease' },
         }}
       >
-        {name}
-      </Typography>
+        {showInput ? (
+          <TextField
+            sx={{ ml: -1 }}
+            autoFocus
+            name="groupName"
+            inputProps={{ autoComplete: 'off' }}
+            value={value}
+            onChange={e => setValue(e.target.value)}
+            onBlur={() => {
+              toggleInput()
+              if (value !== name) dispatch(renameGroup(name, value))
+            }}
+          />
+        ) : (
+          <span>
+            <ButtonBase
+              sx={{ pb: 1, pt: 2 }}
+              onClick={() => {
+                setValue(name)
+                toggleInput()
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 900 }}>
+                {name}
+              </Typography>
+            </ButtonBase>
+            <Tooltip title="Опустить вниз">
+              <IconButton
+                className="arrowBtn"
+                sx={{ mt: 1.5, ml: 1 }}
+                onClick={() => dispatch(moveGroupDown(name))}
+              >
+                <ArrowDownwardIcon />
+              </IconButton>
+            </Tooltip>
+          </span>
+        )}
+      </Box>
       {children}
     </>
   )

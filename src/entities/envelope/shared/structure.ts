@@ -32,8 +32,8 @@ type TGroupNode = {
   group: string
   parent: null
 }
-type TEnvTreeNode = TEnvNode & { children: TEnvTreeNode[] }
-type TGroupTreeNode = TGroupNode & { children: TEnvTreeNode[] }
+export type TEnvTreeNode = TEnvNode & { children: TEnvTreeNode[] }
+export type TGroupTreeNode = TGroupNode & { children: TEnvTreeNode[] }
 
 /**
  * Builds a tree of sorted groups

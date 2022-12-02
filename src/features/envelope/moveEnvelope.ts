@@ -1,8 +1,6 @@
+import { envelopeModel, TEnvelopeDraft } from '@entities/envelope'
 import { TEnvelopeId } from '@shared/types'
 import { AppThunk } from '@store/index'
-import { envId, getEnvelopes, getEnvelopeStructure } from '.'
-import { patchEnvelope, TEnvelopeDraft } from './patchEnvelope'
-import { flattenStructure } from './shared/structure'
 
 export function moveEnvelope(
   sourceIdx: number,
@@ -10,9 +8,9 @@ export function moveEnvelope(
   asChild: boolean
 ): AppThunk {
   return (dispatch, getState) => {
-    const envelopes = getEnvelopes(getState())
-    const structure = getEnvelopeStructure(getState())
-    const flatList = flattenStructure(structure)
+    const envelopes = envelopeModel.getEnvelopes(getState())
+    const structure = envelopeModel.getEnvelopeStructure(getState())
+    const flatList = envelopeModel.flattenStructure(structure)
     const active = flatList[sourceIdx]
     const over = flatList[targetIdx]
     const patches: TEnvelopeDraft[] = []
@@ -75,7 +73,7 @@ export function moveEnvelope(
       })
     }
 
-    dispatch(patchEnvelope(patches))
+    dispatch(envelopeModel.patchEnvelope(patches))
 
     function getNewParent(
       elId: TEnvelopeId,
@@ -84,7 +82,7 @@ export function moveEnvelope(
     ) {
       if (!asChild) return null
       if (elId === suppposedParent) return null
-      return envId.parse(suppposedParent).type === 'tag'
+      return envelopeModel.parseId(suppposedParent).type === 'tag'
         ? suppposedParent
         : null
     }
