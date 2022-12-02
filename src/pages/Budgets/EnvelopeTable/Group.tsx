@@ -62,6 +62,7 @@ export const Group: FC<TGroupProps> = ({
             sx={{
               pb: 0,
               pt: 1,
+              minWidth: 0,
               display: 'flex',
               flexDirection: 'row',
               alignContent: 'flex-end',
@@ -70,13 +71,13 @@ export const Group: FC<TGroupProps> = ({
             }}
           >
             <ButtonBase
-              sx={{ p: 1, ml: -1 }}
+              sx={{ p: 1, ml: -1, minWidth: 0, flexShrink: 1 }}
               onClick={() => {
                 setValue(name)
                 toggleInput()
               }}
             >
-              <Typography variant="h6" sx={{ fontWeight: 900 }}>
+              <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
                 {name}
               </Typography>
             </ButtonBase>
