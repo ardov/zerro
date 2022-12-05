@@ -40,21 +40,21 @@ type EnvelopePreviewProps = {
 export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   const [month] = useMonth()
   const { setDrawer } = useTrDrawer()
+  const openBudgetPopover = useBudgetPopover()
+  const openGoalPopover = useGoalPopover()
   const rates = balances.useRates()[month].rates
   const envMetrics = balances.useEnvData()[month][id]
   const env = envelopeModel.useEnvelopes()[id]
 
   const goalInfo = goalModel.useGoals()[month][id]
+  if (!envMetrics) return null
+
   const { currency } = envMetrics
-
   const toEnvelope = (a: TFxAmount) => convertFx(a, currency, rates)
-
   const totalLeftover = toEnvelope(envMetrics.totalLeftover)
   const totalBudgeted = toEnvelope(envMetrics.totalBudgeted)
   const totalActivity = toEnvelope(envMetrics.totalActivity)
   const totalAvailable = toEnvelope(envMetrics.totalAvailable)
-  const openBudgetPopover = useBudgetPopover()
-  const openGoalPopover = useGoalPopover()
 
   return (
     <>

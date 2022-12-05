@@ -1,18 +1,12 @@
-import React, { FC, useState } from 'react'
-import {
-  ButtonBase,
-  IconButton,
-  TextField,
-  Typography,
-  Box,
-} from '@mui/material'
-import { useToggle } from '@shared/hooks/useToggle'
+import React, { FC, useRef } from 'react'
+import { ButtonBase, IconButton, Typography, Box } from '@mui/material'
 import { ArrowDownwardIcon, ArrowUpwardIcon } from '@shared/ui/Icons'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { useAppDispatch } from '@store/index'
 import { renameGroup } from '@features/envelope/renameGroup'
 import { moveGroup } from '@features/envelope/moveGroup'
 import { rowStyle } from './shared/shared'
+import { useFloatingInput } from '@shared/ui/FloatingInput'
 
 type TGroupProps = {
   name: string
@@ -31,11 +25,15 @@ export const Group: FC<TGroupProps> = ({
   children,
 }) => {
   const dispatch = useAppDispatch()
-  const [value, setValue] = useState(name)
-  const [showInput, toggleInput] = useToggle(false)
+  const ref = useRef()
+
+  const floating = useFloatingInput(ref, val =>
+    dispatch(renameGroup(name, val))
+  )
 
   return (
     <>
+      {floating.render()}
       <Box
         sx={{
           ...rowStyle,
@@ -44,65 +42,50 @@ export const Group: FC<TGroupProps> = ({
           '&:last-child': { border: 0 },
         }}
       >
-        {showInput ? (
-          <TextField
-            sx={{ ml: -1 }}
-            autoFocus
-            name="groupName"
-            inputProps={{ autoComplete: 'off' }}
-            value={value}
-            onChange={e => setValue(e.target.value)}
-            onBlur={() => {
-              toggleInput()
-              if (value !== name) dispatch(renameGroup(name, value))
-            }}
-          />
-        ) : (
-          <Box
-            sx={{
-              pb: 0,
-              pt: 1,
-              minWidth: 0,
-              display: 'flex',
-              flexDirection: 'row',
-              alignContent: 'flex-end',
-              justifyContent: 'flex-start',
-              alignItems: 'center',
+        <Box
+          ref={ref}
+          sx={{
+            pb: 0,
+            pt: 1,
+            minWidth: 0,
+            display: 'flex',
+            flexDirection: 'row',
+            alignContent: 'flex-end',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+          }}
+        >
+          <ButtonBase
+            sx={{ p: 1, ml: -1, minWidth: 0, flexShrink: 1 }}
+            onClick={() => {
+              floating.open(name)
             }}
           >
-            <ButtonBase
-              sx={{ p: 1, ml: -1, minWidth: 0, flexShrink: 1 }}
-              onClick={() => {
-                setValue(name)
-                toggleInput()
-              }}
-            >
-              <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
-                {name}
-              </Typography>
-            </ButtonBase>
+            <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
+              {name}
+            </Typography>
+          </ButtonBase>
 
-            {isReordering && nextIdx !== undefined && (
-              <Tooltip title="Опустить ниже">
-                <IconButton
-                  onClick={() => dispatch(moveGroup(groupIdx, nextIdx))}
-                >
-                  <ArrowDownwardIcon />
-                </IconButton>
-              </Tooltip>
-            )}
+          {isReordering && nextIdx !== undefined && (
+            <Tooltip title="Опустить ниже">
+              <IconButton
+                onClick={() => dispatch(moveGroup(groupIdx, nextIdx))}
+              >
+                <ArrowDownwardIcon />
+              </IconButton>
+            </Tooltip>
+          )}
 
-            {isReordering && prevIdx !== undefined && (
-              <Tooltip title="Поднять выше">
-                <IconButton
-                  onClick={() => dispatch(moveGroup(groupIdx, prevIdx))}
-                >
-                  <ArrowUpwardIcon />
-                </IconButton>
-              </Tooltip>
-            )}
-          </Box>
-        )}
+          {isReordering && prevIdx !== undefined && (
+            <Tooltip title="Поднять выше">
+              <IconButton
+                onClick={() => dispatch(moveGroup(groupIdx, prevIdx))}
+              >
+                <ArrowUpwardIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
       </Box>
       {children}
     </>

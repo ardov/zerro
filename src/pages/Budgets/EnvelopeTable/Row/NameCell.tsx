@@ -1,14 +1,16 @@
-import React, { FC, memo, ReactNode } from 'react'
+import React, { FC, memo, ReactNode, useCallback, useRef } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { Typography, Box, IconButton, Collapse, Chip } from '@mui/material'
 import { EmojiIcon } from '@shared/ui/EmojiIcon'
 import { DragIndicatorIcon } from '@shared/ui/Icons'
 import { TEnvelopeId, TFxCode } from '@shared/types'
 import { DragTypes } from '../../DnDContext'
-import { TEnvelope } from '@entities/envelope'
+import { envelopeModel, TEnvelope } from '@entities/envelope'
 import { displayCurrency } from '@entities/currency/displayCurrency'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { getCurrencySymbol } from '@shared/helpers/money'
+import { useFloatingInput } from '@shared/ui/FloatingInput'
+import { useAppDispatch } from '@store/index'
 
 export const NameCell: FC<{
   envelope: TEnvelope
@@ -17,9 +19,20 @@ export const NameCell: FC<{
   isReordering: boolean
   isDefaultVisible: boolean
 }> = memo(props => {
-  const { id, symbol, color, name, currency, comment } = props.envelope
+  const { id, symbol, color, name, currency, comment, originalName } =
+    props.envelope
   const { isReordering, isDefaultVisible, isChild, isSelf } = props
   const [displCurrency] = displayCurrency.useDisplayCurrency()
+
+  const dispatch = useAppDispatch()
+  const ref = useRef<any>()
+  const updateName = useCallback(
+    (v: string) => {
+      dispatch(envelopeModel.patchEnvelope({ id, originalName: v }))
+    },
+    [dispatch, id]
+  )
+  const floating = useFloatingInput(ref, updateName)
 
   return (
     <Box
@@ -56,7 +69,20 @@ export const NameCell: FC<{
           color={isSelf ? null : color}
           mr={1.5}
         />
-        <Typography component="span" variant="body1" title={name} noWrap>
+        <Typography
+          component="span"
+          variant="body1"
+          title={name}
+          noWrap
+          ref={ref}
+          onClick={e => {
+            if (e.altKey) {
+              e.preventDefault()
+              e.stopPropagation()
+              floating.open(originalName)
+            }
+          }}
+        >
           {name}
           {isSelf ? ' (основная)' : ''}
         </Typography>
@@ -76,6 +102,8 @@ export const NameCell: FC<{
           {comment}
         </Typography>
       )}
+
+      {floating.render()}
     </Box>
   )
 })
