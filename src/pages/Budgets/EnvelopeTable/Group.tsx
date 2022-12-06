@@ -1,12 +1,14 @@
 import React, { FC, useRef } from 'react'
 import { ButtonBase, IconButton, Typography, Box } from '@mui/material'
-import { ArrowDownwardIcon, ArrowUpwardIcon } from '@shared/ui/Icons'
+import { AddIcon, ArrowDownwardIcon, ArrowUpwardIcon } from '@shared/ui/Icons'
+import { useFloatingInput } from '@shared/ui/FloatingInput'
 import { Tooltip } from '@shared/ui/Tooltip'
+
 import { useAppDispatch } from '@store/index'
 import { renameGroup } from '@features/envelope/renameGroup'
 import { moveGroup } from '@features/envelope/moveGroup'
+import { createEnvelope } from '@features/envelope/createEnvelope'
 import { rowStyle } from './shared/shared'
-import { useFloatingInput } from '@shared/ui/FloatingInput'
 
 type TGroupProps = {
   name: string
@@ -82,6 +84,18 @@ export const Group: FC<TGroupProps> = ({
                 onClick={() => dispatch(moveGroup(groupIdx, prevIdx))}
               >
                 <ArrowUpwardIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+
+          {isReordering && (
+            <Tooltip title="Создать категорию">
+              <IconButton
+                onClick={() =>
+                  dispatch(createEnvelope({ group: name, indexRaw: groupIdx }))
+                }
+              >
+                <AddIcon />
               </IconButton>
             </Tooltip>
           )}
