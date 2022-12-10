@@ -5,7 +5,7 @@ import { keys } from '@shared/helpers/keys'
 import { round } from '@shared/helpers/money'
 import { TISODate } from '@shared/types'
 import { useAppSelector } from '@store/index'
-import { balanceModel } from '../accBalances'
+import { accBalanceModel } from '../accBalances'
 import { getStart, Period } from '../shared/period'
 
 export type TPoint = {
@@ -21,7 +21,7 @@ export type TPoint = {
 }
 
 export function useNetWorth(period: Period, aggregation: GroupBy) {
-  const balances = useAppSelector(balanceModel.getBalancesByDate)
+  const balances = useAppSelector(accBalanceModel.getBalancesByDate)
   const toDisplay = displayCurrency.useToDisplay('current')
   const accs = accountModel.usePopulatedAccounts()
 
