@@ -2,7 +2,7 @@ import { accountModel } from '@entities/account'
 import { GroupBy } from '@shared/helpers/date'
 import { TAccountId, TISODate } from '@shared/types'
 import { useAppSelector } from '@store/index'
-import { accBalanceModel } from '../accBalances'
+import { accBalanceModel } from '@entities/accBalances'
 import { getStart, Period } from '../shared/period'
 
 export type TPoint = {
