@@ -1,7 +1,7 @@
 import type { TTransaction } from '@shared/types'
 import React, { FC, useEffect, useState } from 'react'
 import './transitions.css'
-import { useAppDispatch, useAppSelector } from '@store'
+import { useAppDispatch } from '@store'
 import IconButton from '@mui/material/IconButton'
 import {
   DeleteOutlineIcon,
@@ -19,16 +19,11 @@ import MenuItem from '@mui/material/MenuItem'
 import pluralize from '@shared/helpers/pluralize'
 import { Confirm } from '@shared/ui/Confirm'
 import TagSelect2 from '@components/TagSelect2'
-import {
-  deleteTransactions,
-  markViewed,
-  bulkEditTransactions,
-} from '@entities/transaction/thunks'
 import { CSSTransition } from 'react-transition-group'
 import { EditOutlined } from '@mui/icons-material'
 import { BulkEditModal } from './BulkEditModal'
 import { getType, isNew } from '@entities/transaction/helpers'
-import { getTransactions } from '@entities/transaction'
+import { trModel } from '@entities/transaction'
 import { Divider, ListItemIcon, ListItemText } from '@mui/material'
 import { round } from '@shared/helpers/money'
 import { applyClientPatch } from '@store/data'
@@ -48,7 +43,7 @@ const Actions: FC<ActionsProps> = ({
   onCheckAll,
 }) => {
   const dispatch = useAppDispatch()
-  const allTransactions = useAppSelector(getTransactions)
+  const allTransactions = trModel.useTransactions()
   const [ids, setIds] = useState(checkedIds)
   const transactions = ids?.map(id => allTransactions[id])
   const actions = getAvailableActions(transactions)
@@ -66,14 +61,14 @@ const Actions: FC<ActionsProps> = ({
 
   const handleSetTag = (id: string) => {
     if (!id || id === 'null')
-      dispatch(bulkEditTransactions(checkedIds, { tags: [] }))
-    else dispatch(bulkEditTransactions(checkedIds, { tags: [id] }))
+      dispatch(trModel.bulkEditTransactions(checkedIds, { tags: [] }))
+    else dispatch(trModel.bulkEditTransactions(checkedIds, { tags: [id] }))
     closeMenu()
     onUncheckAll()
   }
 
   const handleDelete = () => {
-    dispatch(deleteTransactions(checkedIds))
+    dispatch(trModel.deleteTransactions(checkedIds))
     closeMenu()
     onUncheckAll()
   }
@@ -84,7 +79,7 @@ const Actions: FC<ActionsProps> = ({
   }
 
   const handleMarkViewed = () => {
-    dispatch(markViewed(checkedIds, true))
+    dispatch(trModel.markViewed(checkedIds, true))
     closeMenu()
     onUncheckAll()
   }

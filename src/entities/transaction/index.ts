@@ -1,7 +1,53 @@
-export type { FilterConditions } from './filtering'
+import { useAppSelector } from '@store/index'
+import { checkRaw } from './filtering'
+import { compareTrDates, getType } from './helpers'
+import { makeTransaction } from './makeTransaction'
+import {
+  getSortedTransactions,
+  getTransactions,
+  getTransactionsHistory,
+} from './model'
+import {
+  deleteTransactions,
+  deleteTransactionsPermanently,
+  markViewed,
+  restoreTransaction,
+  splitTransfer,
+  applyChangesToTransaction,
+  recreateTransaction,
+  bulkEditTransactions,
+} from './thunks'
 
-export { checkRaw } from './filtering'
-export * from './model'
-export * from './thunks'
-export { makeTransaction } from './makeTransaction'
-export { TrType, getType, compareTrDates, groupTransactionsBy } from './helpers'
+export type { TransactionPatch } from './thunks'
+export type { FilterConditions } from './filtering'
+export { TrType } from './helpers'
+
+export const trModel = {
+  // Selectors
+  getTransactions,
+  getSortedTransactions,
+  getTransactionsHistory,
+
+  // Hooks
+  useTransactions: () => useAppSelector(getTransactions),
+  useSortedTransactions: () => useAppSelector(getSortedTransactions),
+  useTransactionsHistory: () => useAppSelector(getTransactionsHistory),
+
+  // Helpers
+  compareTrDates,
+  makeTransaction,
+  getType,
+
+  //Filtering
+  checkRaw,
+
+  // Thunks
+  deleteTransactions,
+  deleteTransactionsPermanently,
+  markViewed,
+  restoreTransaction,
+  splitTransfer,
+  applyChangesToTransaction,
+  recreateTransaction,
+  bulkEditTransactions,
+}

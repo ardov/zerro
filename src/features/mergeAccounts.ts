@@ -4,7 +4,7 @@ import { add } from '@shared/helpers/money'
 import { AppThunk } from '@store'
 import { applyClientPatch } from '@store/data'
 import { accountModel } from '@entities/account'
-import { getTransactionsHistory } from '@entities/transaction'
+import { trModel } from '@entities/transaction'
 import { userModel } from '@entities/user'
 
 /**
@@ -18,7 +18,7 @@ export const mergeAccounts =
   (dispatch, getState) => {
     const state = getState()
     const accounts = accountModel.getAccounts(state)
-    const transactions = getTransactionsHistory(state)
+    const transactions = trModel.getTransactionsHistory(state)
     const user = userModel.getRootUser(state)
     const changes: TTransaction[] = []
 

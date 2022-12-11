@@ -8,7 +8,7 @@ import {
 } from '@shared/types'
 
 import { TSelector } from '@store/index'
-import { getTransactionsHistory, getType, TrType } from '@entities/transaction'
+import { trModel, TrType } from '@entities/transaction'
 import { instrumentModel } from '@entities/currency/instrument'
 import { debtorModel } from '@entities/debtors'
 import { accountModel } from '@entities/account'
@@ -26,7 +26,7 @@ export type TTrEffect = {
  */
 export const getBalanceChanges: TSelector<ById<TTrEffect>> = createSelector(
   [
-    getTransactionsHistory,
+    trModel.getTransactionsHistory,
     accountModel.getDebtAccountId,
     debtorModel.detector,
     instrumentModel.getInstCodeMap,
@@ -37,7 +37,7 @@ export const getBalanceChanges: TSelector<ById<TTrEffect>> = createSelector(
       let result: ById<TTrEffect> = {}
       transactions.forEach(tr => {
         const { id, incomeAccount, outcomeAccount, income, outcome, date } = tr
-        const type = getType(tr, debtId)
+        const type = trModel.getType(tr, debtId)
         const incomeCurrency = instCodeMap[tr.incomeInstrument]
         const outcomeCurrency = instCodeMap[tr.outcomeInstrument]
         switch (type) {

@@ -3,7 +3,7 @@ import { Menu, MenuItem, MenuProps, PopoverPosition } from '@mui/material'
 import { TTransaction } from '@shared/types'
 import { isNew } from '@entities/transaction/helpers'
 import { useAppDispatch } from '@store'
-import { markViewed } from '@entities/transaction'
+import { trModel } from '@entities/transaction'
 
 interface TransactionMenuProps extends MenuProps {
   id: string
@@ -31,7 +31,7 @@ export const TransactionMenu: FC<TransactionMenuProps> = ({
       </MenuItem>
       <MenuItem
         onClick={e => {
-          dispatch(markViewed(id, isNew(transaction)))
+          dispatch(trModel.markViewed(id, isNew(transaction)))
           close()
         }}
       >

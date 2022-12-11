@@ -2,8 +2,9 @@ import { createSelector } from '@reduxjs/toolkit'
 import { TISOMonth } from '@shared/types'
 import { nextMonth, toISOMonth } from '@shared/helpers/date'
 import { keys } from '@shared/helpers/keys'
-import { getTransactionsHistory } from '@entities/transaction'
+
 import { TSelector } from '@store'
+import { trModel } from '@entities/transaction'
 import { getEnvelopeBudgets } from '@entities/budget'
 
 /**
@@ -12,7 +13,7 @@ import { getEnvelopeBudgets } from '@entities/budget'
  * in our calculations. Otherwise calculated balance will be wrong.
  */
 const getFirstMonth: TSelector<TISOMonth> = createSelector(
-  [getTransactionsHistory],
+  [trModel.getTransactionsHistory],
   transactions => toISOMonth(transactions[0]?.date || Date.now())
 )
 

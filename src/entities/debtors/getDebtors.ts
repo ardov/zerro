@@ -1,8 +1,4 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { add, sub } from '@shared/helpers/money'
-import { accountModel } from '@entities/account'
-import { getTransactionsHistory, TrType } from '@entities/transaction'
-import { getType } from '@entities/transaction/helpers'
 import {
   ById,
   TAccountId,
@@ -12,11 +8,16 @@ import {
   TInstrument,
   TFxAmount,
 } from '@shared/types'
+import { round } from '@shared/helpers/money'
+import { withPerf } from '@shared/helpers/performance'
+
 import { TSelector } from '@store'
+import { accountModel } from '@entities/account'
+import { trModel, TrType } from '@entities/transaction'
+import { getType } from '@entities/transaction/helpers'
 import { cleanPayee } from '@entities/shared/cleanPayee'
 import { getMerchants } from '@entities/merchant'
 import { instrumentModel } from '@entities/currency/instrument'
-import { withPerf } from '@shared/helpers/performance'
 
 export type TDebtor = {
   id: string
@@ -30,7 +31,7 @@ export type TDebtor = {
 
 export const getDebtors: TSelector<ById<TDebtor>> = createSelector(
   [
-    getTransactionsHistory,
+    trModel.getTransactionsHistory,
     getMerchants,
     instrumentModel.getInstruments,
     accountModel.getDebtAccountId,
@@ -72,11 +73,11 @@ function collectDebtors(
     if (trType === TrType.IncomeDebt) {
       let fxCode = instruments[tr.incomeInstrument].shortTitle
       debtor.balance[fxCode] ??= 0
-      debtor.balance[fxCode] = sub(debtor.balance[fxCode], tr.income)
+      debtor.balance[fxCode] = round(debtor.balance[fxCode] - tr.income)
     } else {
       let fxCode = instruments[tr.outcomeInstrument].shortTitle
       debtor.balance[fxCode] ??= 0
-      debtor.balance[fxCode] = add(debtor.balance[fxCode], tr.outcome)
+      debtor.balance[fxCode] = round(debtor.balance[fxCode] + tr.outcome)
     }
   })
   return debtors

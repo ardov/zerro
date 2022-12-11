@@ -3,11 +3,10 @@ import { addFxAmount } from '@shared/helpers/money'
 import { GroupBy, makeDateArray, toGroup } from '@shared/helpers/date'
 import { keys } from '@shared/helpers/keys'
 
-import { useAppSelector } from '@store/index'
 import { accountModel } from '@entities/account'
 import { instrumentModel, TInstCodeMap } from '@entities/currency/instrument'
 import { displayCurrency } from '@entities/currency/displayCurrency'
-import { getTransactionsHistory, getType, TrType } from '@entities/transaction'
+import { trModel, TrType } from '@entities/transaction'
 import { Period, getStart } from '../shared/period'
 import { useMemo } from 'react'
 
@@ -31,7 +30,7 @@ export function calcCashflow(
     const group = toGroup(tr.date, aggregation)
     if (!result[group]) result[group] = makePoint(group)
 
-    const type = getType(tr, debtAccId)
+    const type = trModel.getType(tr, debtAccId)
     const incomeCurrency = instCodeMap[tr.incomeInstrument]
     const outcomeCurrency = instCodeMap[tr.outcomeInstrument]
     switch (type) {
@@ -92,7 +91,7 @@ export function useCashFlow(
   aggregation: GroupBy = GroupBy.Month
 ) {
   const toDisplay = displayCurrency.useToDisplay('current')
-  const transactionHistory = useAppSelector(getTransactionsHistory)
+  const transactionHistory = trModel.useTransactionsHistory()
   const debtAccId = accountModel.useDebtAccountId()
   const instCodeMap = instrumentModel.useInstCodeMap()
 

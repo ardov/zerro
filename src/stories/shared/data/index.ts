@@ -3,7 +3,6 @@ import companies from './companies.json'
 import instruments from './instruments.json'
 import { accountModel } from '@entities/account'
 import { makeTag } from '@entities/tag/makeTag'
-import { makeTransaction } from '@entities/transaction/makeTransaction'
 import { toISODate } from '@shared/helpers/date'
 import {
   AccountType,
@@ -13,6 +12,7 @@ import {
   TZmCountry,
   TZmInstrument,
 } from '@shared/types'
+import { trModel } from '@entities/transaction'
 
 const NOW = Date.now()
 const DAY = 1000 * 60 * 60 * 24
@@ -72,7 +72,7 @@ const SALARY_TAG = makeTag({
 const tag = [FOOD_TAG, CAFE_TAG, SALARY_TAG]
 
 // TRANSACTIONS
-const TR1 = makeTransaction({
+const TR1 = trModel.makeTransaction({
   id: 'income',
   user: USER.id,
   date: toISODate(NOW),

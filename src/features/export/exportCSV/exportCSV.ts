@@ -6,7 +6,7 @@ import {
 import { formatDate } from '@shared/helpers/date'
 import { ById } from '@shared/types'
 import { AppThunk } from '@store'
-import { getTransactions, TrType } from '@entities/transaction'
+import { trModel, TrType } from '@entities/transaction'
 import { instrumentModel } from '@entities/currency/instrument'
 import { accountModel } from '@entities/account'
 import { getPopulatedTags } from '@entities/tag'
@@ -17,7 +17,7 @@ const getPopulatedTransactions = createSelector(
     instrumentModel.getInstruments,
     accountModel.getAccounts,
     getPopulatedTags,
-    getTransactions,
+    trModel.getTransactions,
   ],
   (instruments, accounts, tags, transactions) => {
     const result: { [id: string]: PopulatedTransaction } = {}

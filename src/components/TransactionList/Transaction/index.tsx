@@ -2,7 +2,7 @@ import React, { FC, useCallback } from 'react'
 import { useSearchParam } from '@shared/hooks/useSearchParam'
 import { useAppSelector } from '@store'
 import { RootState } from '@store'
-import { getTransactions } from '@entities/transaction'
+import { trModel } from '@entities/transaction'
 import { getType } from '@entities/transaction/helpers'
 import { accountModel } from '@entities/account'
 import { Transaction } from './Transaction'
@@ -30,7 +30,7 @@ const TransactionWrapper: FC<WrapperProps> = props => {
   const [opened, setOpened] = useSearchParam('transaction')
   const isOpened = opened === id
   const transaction = useAppSelector(
-    (state: RootState) => getTransactions(state)[id]
+    (state: RootState) => trModel.getTransactions(state)[id]
   )
   const debtId = accountModel.useDebtAccountId()
   const type = getType(transaction, debtId)

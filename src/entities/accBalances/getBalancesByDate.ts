@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { TISODate } from '@shared/types'
 import { GroupBy, makeDateArray, toISODate } from '@shared/helpers/date'
 
-import { getTransactionsHistory } from '@entities/transaction'
+import { trModel } from '@entities/transaction'
 import {
   getBalanceHistory,
   getStartingBalances,
@@ -16,7 +16,7 @@ const firstReasonableDate = '2000-01-01'
 export const getBalancesByDate: TSelector<
   { date: TISODate; balances: TBalanceState }[]
 > = createSelector(
-  [getTransactionsHistory, getBalanceHistory, getStartingBalances],
+  [trModel.getTransactionsHistory, getBalanceHistory, getStartingBalances],
   withPerf(
     'getBalancesByDate',
     (trHistory, balanceStates, startingBalances) => {

@@ -2,8 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { round } from '@shared/helpers/money'
 import { getType } from '@entities/transaction/helpers'
 import { accountModel } from '@entities/account'
-import { getSortedTransactions } from '@entities/transaction'
-import { getTransactionsHistory } from '@entities/transaction'
+import { trModel } from '@entities/transaction'
 import {
   TAccountId,
   TInstrumentId,
@@ -23,7 +22,7 @@ interface History {
 }
 
 export const getAccountsHistory = createSelector(
-  [getTransactionsHistory, accountModel.getPopulatedAccounts],
+  [trModel.getTransactionsHistory, accountModel.getPopulatedAccounts],
   (transactions, accounts) => {
     if (!transactions?.length || !accounts) return {}
     let historyById: History = {}
@@ -145,7 +144,7 @@ const createInfoNode = (): InfoNode => ({
 
 export const getYearStats = (year: number) =>
   createSelector(
-    [getSortedTransactions, displayCurrency.convertCurrency],
+    [trModel.getSortedTransactions, displayCurrency.convertCurrency],
     (allTransactions: TTransaction[], convert) => {
       if (!allTransactions?.length) return null
       const dateStart = toISODate(new Date(year, 0, 1))

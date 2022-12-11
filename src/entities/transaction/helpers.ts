@@ -1,46 +1,5 @@
-import { checkRaw, FilterConditions } from './filtering'
-import {
-  TAccountId,
-  TISODate,
-  TTransaction,
-  TTransactionId,
-} from '@shared/types'
-import {
-  parseDate,
-  startOfMonth,
-  startOfWeek,
-  toISODate,
-} from '@shared/helpers/date'
-
-/**
- * Groups array of transactions
- */
-export function groupTransactionsBy(
-  groupType: 'DAY' | 'WEEK' | 'MONTH' = 'DAY',
-  transactions: TTransaction[] = [],
-  filterConditions?: FilterConditions
-) {
-  const groupTypes = {
-    DAY: (date: TTransaction['date']) => date,
-    WEEK: (date: TTransaction['date']) => toISODate(startOfWeek(date)),
-    MONTH: (date: TTransaction['date']) => toISODate(startOfMonth(date)),
-  }
-  const converter = groupTypes[groupType]
-  const checker = checkRaw(filterConditions)
-  let groups: {
-    [k: string]: { date: TISODate; transactions: TTransactionId[] }
-  } = {}
-
-  transactions.forEach(tr => {
-    if (checker(tr)) {
-      const date = converter(tr.date)
-      groups[date] ??= { date, transactions: [] }
-      groups[date].transactions.push(tr.id)
-    }
-  })
-
-  return Object.values(groups)
-}
+import { TAccountId, TTransaction } from '@shared/types'
+import { parseDate } from '@shared/helpers/date'
 
 export function compareTrDates(tr1: TTransaction, tr2: TTransaction) {
   if (tr1.date < tr2.date) return 1

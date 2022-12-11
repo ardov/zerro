@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getTransactionsHistory } from '@entities/transaction'
+import { trModel } from '@entities/transaction'
 import {
   AccountType,
   TAccountId,
@@ -19,7 +19,7 @@ export type TBalanceState = {
 
 const getBalances = createSelector(
   [
-    getTransactionsHistory,
+    trModel.getTransactionsHistory,
     getBalanceChanges,
     accountModel.getPopulatedAccounts,
     debtorModel.getDebtors,

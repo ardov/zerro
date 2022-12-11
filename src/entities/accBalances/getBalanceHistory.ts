@@ -1,17 +1,18 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { getTransactionsHistory } from '@entities/transaction'
 import {
   AccountType,
   TAccountId,
   TFxAmount,
   TTransactionId,
 } from '@shared/types'
+import { isZero, subFxAmount } from '@shared/helpers/money'
+import { withPerf } from '@shared/helpers/performance'
+
 import { TSelector } from '@store/index'
+import { trModel } from '@entities/transaction'
 import { debtorModel } from '@entities/debtors'
 import { accountModel } from '@entities/account'
-import { isZero, subFxAmount } from '@shared/helpers/money'
 import { getBalanceChanges, TTrEffect } from './getBalanceChanges'
-import { withPerf } from '@shared/helpers/performance'
 
 export type TBalanceState = {
   accounts: Record<TAccountId, TFxAmount>
@@ -20,7 +21,7 @@ export type TBalanceState = {
 
 const getBalances = createSelector(
   [
-    getTransactionsHistory,
+    trModel.getTransactionsHistory,
     getBalanceChanges,
     accountModel.getPopulatedAccounts,
     debtorModel.getDebtors,

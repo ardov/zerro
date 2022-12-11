@@ -17,7 +17,7 @@ import { accountModel, TAccountPopulated } from '@entities/account'
 import { debtorModel, TDebtor } from '@entities/debtors'
 import { instrumentModel } from '@entities/currency/instrument'
 import { cleanPayee } from '@entities/shared/cleanPayee'
-import { getTransactionsHistory, getType, TrType } from '@entities/transaction'
+import { trModel, TrType } from '@entities/transaction'
 import { envelopeModel } from '@entities/envelope'
 
 type TActivityNode = {
@@ -34,7 +34,7 @@ export type TRawActivityNode = {
 export const getRawActivity: TSelector<ByMonth<TRawActivityNode>> =
   createSelector(
     [
-      getTransactionsHistory,
+      trModel.getTransactionsHistory,
       accountModel.getInBudgetAccounts,
       accountModel.getDebtAccountId,
       debtorModel.getDebtors,
@@ -58,7 +58,7 @@ function getRawActivityFn(
   function addTransaction(tr: TTransaction) {
     const fromBudget = inBudgetAccs.includes(tr.outcomeAccount)
     const toBudget = inBudgetAccs.includes(tr.incomeAccount)
-    const type = getType(tr, debtAccId)
+    const type = trModel.getType(tr, debtAccId)
 
     // Not in budget -> skip
     if (!fromBudget && !toBudget) {
@@ -155,7 +155,7 @@ function getEnvelope(
   debtAccId: TAccountId | undefined,
   debtors: ById<TDebtor>
 ): TEnvelopeId {
-  const type = getType(tr, debtAccId)
+  const type = trModel.getType(tr, debtAccId)
   switch (type) {
     case TrType.Income:
     case TrType.Outcome:

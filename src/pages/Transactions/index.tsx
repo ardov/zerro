@@ -13,8 +13,7 @@ import { TransactionPreview } from '@components/TransactionPreview'
 import { sendEvent } from '@shared/helpers/tracking'
 import { Helmet } from 'react-helmet'
 import { useSearchParam } from '@shared/hooks/useSearchParam'
-import { useAppSelector } from '@store'
-import { getTransactions } from '@entities/transaction'
+import { trModel } from '@entities/transaction'
 
 const useStyles = makeStyles(theme => ({
   drawerWidth: {
@@ -26,7 +25,7 @@ const useStyles = makeStyles(theme => ({
 export default function TransactionsView() {
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const [opened, setOpened] = useSearchParam('transaction')
-  const openedTransaction = useAppSelector(getTransactions)[opened || '']
+  const openedTransaction = trModel.useTransactions()[opened || '']
   const [checkedDate, setCheckedDate] = useState<Date | null>(null)
   const c = useStyles()
 

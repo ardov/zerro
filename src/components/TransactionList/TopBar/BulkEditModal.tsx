@@ -5,10 +5,9 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
-import { useAppDispatch, useAppSelector } from '@store'
-import { getTransactions } from '@entities/transaction'
+import { useAppDispatch } from '@store'
+import { trModel } from '@entities/transaction'
 import { getType } from '@entities/transaction/helpers'
-import { bulkEditTransactions } from '@entities/transaction/thunks'
 import { TagList } from '@components/TagList'
 import { Modify, TTransaction } from '@shared/types'
 import { Box, TextField } from '@mui/material'
@@ -27,7 +26,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   ...rest
 }) => {
   const dispatch = useAppDispatch()
-  const allTransactions = useAppSelector(getTransactions)
+  const allTransactions = trModel.useTransactions()
   const transactions = ids.map(id => allTransactions[id]).filter(Boolean)
   const sameTags = isSameTags(transactions)
   const sameComments = isSameComments(transactions)
@@ -51,7 +50,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
       comment,
     }
     if (opts.tags || opts.comment) {
-      dispatch(bulkEditTransactions(ids, opts))
+      dispatch(trModel.bulkEditTransactions(ids, opts))
     }
     onApply()
   }
