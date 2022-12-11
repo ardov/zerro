@@ -1,10 +1,11 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { TInstrument, TFxCode, TInstrumentId } from '@shared/types'
-import { RootState, TSelector, useAppSelector } from '@store'
+import { RootState, TSelector } from '@store'
 
-const getInstruments = (state: RootState) => state.data.current.instrument
+export const getInstruments = (state: RootState) =>
+  state.data.current.instrument
 
-const getInstrumentsByCode: TSelector<Record<TFxCode, TInstrument>> =
+export const getInstrumentsByCode: TSelector<Record<TFxCode, TInstrument>> =
   createSelector([getInstruments], instruments => {
     const result: Record<TFxCode, TInstrument> = {}
     Object.values(instruments).forEach(instrument => {
@@ -15,7 +16,7 @@ const getInstrumentsByCode: TSelector<Record<TFxCode, TInstrument>> =
 
 export type TInstCodeMap = Record<TInstrumentId, TFxCode>
 
-const getInstCodeMap: TSelector<Record<TInstrumentId, TFxCode>> =
+export const getInstCodeMap: TSelector<Record<TInstrumentId, TFxCode>> =
   createSelector([getInstruments], instruments => {
     const fxIdMap: TInstCodeMap = {}
     Object.values(instruments).forEach(curr => {
@@ -23,13 +24,3 @@ const getInstCodeMap: TSelector<Record<TInstrumentId, TFxCode>> =
     })
     return fxIdMap
   })
-
-export const instrumentModel = {
-  getInstruments,
-  getInstrumentsByCode,
-  getInstCodeMap,
-  // Hooks
-  useInstruments: () => useAppSelector(getInstruments),
-  useInstrumentsByCode: () => useAppSelector(getInstrumentsByCode),
-  useInstCodeMap: () => useAppSelector(getInstCodeMap),
-}

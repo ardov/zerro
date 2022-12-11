@@ -1,6 +1,6 @@
 import { Modify, TFxAmount, TISOMonth } from '@shared/types'
 import { Amount, AmountProps } from '@shared/ui/Amount'
-import { displayCurrency } from './displayCurrency'
+import { displayCurrency } from './model'
 
 type TDisplayAmountProps = Modify<
   AmountProps,

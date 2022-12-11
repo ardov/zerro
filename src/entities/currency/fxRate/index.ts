@@ -15,6 +15,7 @@ export const fxRateModel = {
   get: getRates,
   getter: getFxRatesGetter,
   latest: getCurrentRates,
+
   // Thunks
   edit: editRates,
   reset: resetRates,

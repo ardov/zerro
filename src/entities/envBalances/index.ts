@@ -19,6 +19,7 @@ export const balances = {
   activity: getActivity,
   envData: getEnvMetrics,
   totals: getMonthTotals,
+
   // Hooks
   useMonthList: () => useAppSelector(getMonthList),
   useRates: () => useAppSelector(getRatesByMonth),

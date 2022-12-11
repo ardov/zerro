@@ -14,12 +14,18 @@ export { calculateGoalProgress } from './goalProgress'
 export { goalType } from './shared/types'
 
 export const goalModel = {
+  // Selectors
   get: getGoals,
   getTotals: getTotals,
-  set: setGoal,
-  toWords: goalToWords,
   getRaw: getRawGoals,
+
   // Hooks
   useGoals: () => useAppSelector(getGoals),
   useTotals: () => useAppSelector(getTotals),
+
+  // Thunks
+  set: setGoal,
+
+  // Helpers
+  toWords: goalToWords,
 }

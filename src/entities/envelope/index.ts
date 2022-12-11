@@ -10,13 +10,17 @@ export type { TEnvelope } from './shared/makeEnvelope'
 export { envelopeVisibility } from './shared/metaData'
 
 export const envelopeModel = {
+  // Selectors
   getEnvelopes,
   getEnvelopeStructure,
+
   // Hooks
   useEnvelopes: () => useAppSelector(getEnvelopes),
   useEnvelopeStructure: () => useAppSelector(getEnvelopeStructure),
+
   // Thunk
   patchEnvelope,
+
   // Helpers
   parseId: envId.parse,
   makeId: envId.get,
