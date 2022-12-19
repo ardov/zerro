@@ -1,28 +1,43 @@
 import React, { useState } from 'react'
 import { Box, Typography, Chip } from '@mui/material'
 import Rhythm from '@shared/ui/Rhythm'
-import pluralize from '@shared/helpers/pluralize'
-import { Amount } from '@shared/ui/Amount'
 
 import { useAppSelector } from '@store'
 import { getPopulatedTags } from '@entities/tag'
-import { userModel } from '@entities/user'
-import { Card } from './Card'
-import { Stats } from '../selectors'
+import { Card, TCardProps } from '../shared/Card'
+import { useStats } from '../shared/getFacts'
+import {
+  DisplayAmount,
+  displayCurrency,
+} from '@entities/currency/displayCurrency'
+import { entries } from '@shared/helpers/keys'
+import { addFxAmount } from '@shared/helpers/money'
+import { NotFunFact } from './NotFunFact'
 
-interface IncomeCardProps {
-  byTag: Stats['byTag']
-}
-
-export function IncomeCard({ byTag }: IncomeCardProps) {
-  const currency = userModel.useUserCurrency()
+export function IncomeCard(props: TCardProps) {
+  const yearStats = useStats(props.year)
+  const toDisplay = displayCurrency.useToDisplay('current')
   const tags = useAppSelector(getPopulatedTags)
-  const incomeTags = Object.keys(byTag)
-    .filter(id => byTag[id].income > 0)
-    .sort((a, b) => byTag[b].income - byTag[a].income)
 
-  const [checked, setChecked] = useState(incomeTags)
-  const total = checked.reduce((sum, id) => (sum += byTag[id]?.income || 0), 0)
+  const incomeTags = entries(yearStats.byTag)
+    .map(([id, info]) => {
+      return {
+        id: id,
+        tag: tags[id],
+        name: tags[id].uniqueName,
+        incomeFx: info.income,
+        income: toDisplay(info.income),
+        transactions: info.incomeTransactions,
+      }
+    })
+    .filter(tagInfo => tagInfo.income > 0)
+    .sort((a, b) => b.income - a.income)
+
+  const [checked, setChecked] = useState(incomeTags.map(t => t.id))
+
+  const totalIncomeFx = incomeTags
+    .filter(t => checked.includes(t.id))
+    .reduce((sum, t) => addFxAmount(sum, t.incomeFx), {})
 
   const toggle = (id: string) => {
     if (checked.includes(id)) {
@@ -32,8 +47,6 @@ export function IncomeCard({ byTag }: IncomeCardProps) {
     }
   }
 
-  const isRussian = currency === 'RUB'
-
   return (
     <Card>
       <Rhythm gap={1} alignItems="center">
@@ -41,25 +54,23 @@ export function IncomeCard({ byTag }: IncomeCardProps) {
           Вы заработали
         </Typography>
         <Typography variant="h4" align="center" className="green-gradient">
-          <Amount value={total} currency={currency} noShade decMode="ifOnly" />
+          <DisplayAmount value={totalIncomeFx} noShade decMode="ifOnly" />
         </Typography>
-
-        {isRussian && <NotFunFact income={total} currency={currency} />}
+        <NotFunFact income={totalIncomeFx} />
       </Rhythm>
 
       <Box mt={3} textAlign="center">
-        {incomeTags.map(id => (
-          <Box m={0.5} display="inline-block" key={id}>
+        {incomeTags.map(tagInfo => (
+          <Box m={0.5} display="inline-block" key={tagInfo.id}>
             <Chip
-              variant={checked.includes(id) ? 'filled' : 'outlined'}
+              variant={checked.includes(tagInfo.id) ? 'filled' : 'outlined'}
               clickable
-              onClick={() => toggle(id)}
+              onClick={() => toggle(tagInfo.id)}
               label={
                 <>
-                  {tags[id].title} (
-                  <Amount
-                    value={byTag[id].income}
-                    currency={currency}
+                  {tagInfo.name} (
+                  <DisplayAmount
+                    value={tagInfo.incomeFx}
                     noShade
                     decMode="ifOnly"
                   />
@@ -71,51 +82,5 @@ export function IncomeCard({ byTag }: IncomeCardProps) {
         ))}
       </Box>
     </Card>
-  )
-}
-
-function getPeopleArray(length: number) {
-  const people = ['👩🏼', '👨🏼‍🦳', '👨🏻', '👨🏼‍🦲', '👦🏽', '👩🏻', '👵🏻', '👴🏼']
-  let arr = []
-  for (let i = 0; i < length; i++) {
-    arr.push(people[i % (people.length - 1)])
-  }
-  return arr
-}
-
-function NotFunFact({
-  income,
-  currency,
-}: {
-  income: number
-  currency: string
-}) {
-  const AVG_MONTHLY_INCOME = 35000
-  const monthlyIncome = income / 12
-  const rate = +(monthlyIncome / AVG_MONTHLY_INCOME).toFixed(0)
-  const vat = income * (13 / 87)
-  return (
-    <Typography variant="body1" align="center">
-      Платили 13% подоходного налога?
-      <br />
-      Значит ещё{' '}
-      <Amount value={vat} currency={currency} noShade decMode="ifOnly" /> ушло в
-      казну 🇷🇺
-      {rate > 1 && (
-        <>
-          <br />
-          <br />
-          {getPeopleArray(rate).join(' ')}
-          <br />
-          {`Это ${rate} ${pluralize(rate, [
-            'средний россиянин',
-            'средних россиянина',
-            'средних россиян',
-          ])}.`}
-          <br />
-          Если сложить их зарплаты — получится ваша.
-        </>
-      )}
-    </Typography>
   )
 }

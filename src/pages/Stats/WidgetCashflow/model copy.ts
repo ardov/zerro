@@ -118,7 +118,5 @@ export function useCashFlow(
       }
     })
 
-  console.log(points)
-
   return points
 }

@@ -7,8 +7,11 @@ export enum Period {
   All = 'All',
 }
 
-export function getStart(period: Period, aggregation: GroupBy): TISODate {
-  if (period === Period.All) return '2000-01-01' as TISODate
+export function getStart(
+  period: Period,
+  aggregation: GroupBy
+): TISODate | undefined {
+  if (period === Period.All) return undefined //'2000-01-01' as TISODate
   if (period === Period.LastYear) {
     const date = new Date()
     date.setFullYear(date.getFullYear() - 1)

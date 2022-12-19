@@ -1,13 +1,11 @@
 import { useCallback } from 'react'
 import { createLocalStorageStateHook } from 'use-local-storage-state'
-import { TFxAmount, TFxCode, TInstrumentId, TISOMonth } from '@shared/types'
+import { TDateDraft, TFxAmount, TFxCode } from '@shared/types'
 import { convertFx } from '@shared/helpers/money'
 
-import { balances } from '@entities/envBalances'
 import { userModel } from '@entities/user'
 import { createSelector } from '@reduxjs/toolkit'
 import { fxRateModel } from '@entities/currency/fxRate'
-import { instrumentModel } from '@entities/currency/instrument'
 import { RootState, useAppSelector } from '@store/index'
 
 const KEY = 'display-currency'
@@ -19,8 +17,8 @@ const useSavedDisplayCurrency = createLocalStorageStateHook<TFxCode | null>(
 
 function getDisplayCurrency(state: RootState) {
   const savedCurrency = localStorage.getItem(KEY) || null
-  const userCurrency = userModel.getUserCurrency(state)
-  return savedCurrency || userCurrency
+  if (savedCurrency) return JSON.parse(savedCurrency) as TFxCode
+  return userModel.getUserCurrency(state)
 }
 
 function useDisplayCurrency() {
@@ -30,35 +28,29 @@ function useDisplayCurrency() {
   return [currency, setSavedCurrency] as [TFxCode, typeof setSavedCurrency]
 }
 
-const useToDisplay = (month: TISOMonth | 'current') => {
-  const currentRates = useAppSelector(fxRateModel.latest).rates
-  const ratesByMonth = balances.useRates()
+const useToDisplay = (defaultMonth: TDateDraft | 'current') => {
+  const getRates = useAppSelector(fxRateModel.getter)
   const [displayCurrency] = useDisplayCurrency()
   const converter = useCallback(
-    (amount: TFxAmount) => {
-      if (month === 'current') {
-        return convertFx(amount, displayCurrency, currentRates)
-      }
-      return convertFx(amount, displayCurrency, ratesByMonth[month].rates)
+    (amount: TFxAmount, date = defaultMonth) => {
+      let rates = getRates(date).rates
+      return convertFx(amount, displayCurrency, rates)
     },
-    [month, displayCurrency, ratesByMonth, currentRates]
+    [defaultMonth, displayCurrency, getRates]
   )
   return converter
 }
 
-const convertCurrency = createSelector(
-  [fxRateModel.getter, instrumentModel.getInstCodeMap, getDisplayCurrency],
-  (getRates, instCodeMap, displayCurrency) =>
-    (amount = 0, from: TInstrumentId) => {
-      const rates = getRates('current').rates
-      const rateFrom = rates[instCodeMap[from]]
-      const rateTo = rates[displayCurrency]
-      return amount * (rateFrom / rateTo)
+const getConverter = createSelector(
+  [fxRateModel.getter, getDisplayCurrency],
+  (getRates, displayCurrency) =>
+    (amount: TFxAmount, date: 'current' | TDateDraft) => {
+      return convertFx(amount, displayCurrency, getRates(date).rates)
     }
 )
 
 export const displayCurrency = {
   useDisplayCurrency,
   useToDisplay,
-  convertCurrency,
+  getConverter,
 }

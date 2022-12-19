@@ -1,6 +1,10 @@
 import React from 'react'
 import { Box, BoxProps } from '@mui/material'
 
+export type TCardProps = {
+  year: string | number
+}
+
 export const Card = (props: BoxProps) => (
   <Box
     bgcolor="background.paper"

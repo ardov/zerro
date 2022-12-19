@@ -1,7 +1,6 @@
 import { accountModel } from '@entities/account'
 import { GroupBy } from '@shared/helpers/date'
 import { TAccountId, TISODate } from '@shared/types'
-import { useAppSelector } from '@store/index'
 import { accBalanceModel } from '@entities/accBalances'
 import { getStart, Period } from '../shared/period'
 
@@ -11,16 +10,13 @@ export type TPoint = {
 }
 
 export function useAccountHistory(id: TAccountId, period: Period) {
-  const account = accountModel.usePopulatedAccounts()[id]
-  const balances = useAppSelector(accBalanceModel.getBalancesByDate)
-  const currency = account.fxCode
-  const firstDate = getStart(period, GroupBy.Day)
-  return balances
+  let balances: TPoint[] = accBalanceModel
+    .useDisplayBalances(GroupBy.Day, getStart(period, GroupBy.Day))
     .map(({ date, balances }) => {
       return {
         date,
-        balance: balances.accounts?.[id]?.[currency] || 0,
+        balance: balances.accounts?.[id] || 0,
       }
     })
-    .filter(point => point.date >= firstDate)
+  return balances
 }

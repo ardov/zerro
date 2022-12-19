@@ -2,9 +2,16 @@ import React from 'react'
 import { Typography } from '@mui/material'
 import Rhythm from '@shared/ui/Rhythm'
 import pluralize from '@shared/helpers/pluralize'
-import { Card } from './Card'
+import { Card, TCardProps } from '../shared/Card'
+import { useStats } from '../shared/getFacts'
 
-export function NoCategoryCard({ value = 0 }) {
+export function NoCategoryCard(props: TCardProps) {
+  const yearStats = useStats(props.year)
+  const noTag = [
+    ...yearStats.total.incomeTransactions.filter(tr => !tr.tag),
+    ...yearStats.total.outcomeTransactions.filter(tr => !tr.tag),
+  ]
+  const value = noTag.length
   return (
     <Card>
       <Rhythm gap={1}>

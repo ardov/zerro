@@ -1,9 +1,17 @@
-import { getBalanceChanges } from './getBalanceChanges'
-import { getBalanceHistory } from './getBalanceHistory'
-import { getBalancesByDate } from './getBalancesByDate'
+import { getBalances } from './getBalances'
+import {
+  getBalancesByDate,
+  getDisplayBalancesByDate,
+} from './getBalancesByDate'
+import { useBalances, useDisplayBalances } from './useBalances'
 
 export const accBalanceModel = {
-  getBalanceChanges,
-  getBalanceHistory,
+  // Selectors
+  getBalances,
   getBalancesByDate,
+  getDisplayBalancesByDate,
+
+  // Hooks
+  useBalances,
+  useDisplayBalances,
 }

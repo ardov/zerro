@@ -1,30 +1,46 @@
-import React from 'react'
-import { Box, Typography } from '@mui/material'
+import React, { useState } from 'react'
+import { Box, IconButton, Stack, Typography } from '@mui/material'
 import { useAppSelector } from '@store'
 import { formatDate } from '@shared/helpers/date'
 import Rhythm from '@shared/ui/Rhythm'
-import { instrumentModel } from '@entities/currency/instrument'
 import { getPopulatedTags } from '@entities/tag'
-import { Card } from './Card'
-import { TTransaction } from '@shared/types'
-import { Amount } from '@shared/ui/Amount'
+import { Card, TCardProps } from '../shared/Card'
+import { useStats } from '../shared/getFacts'
+import { DisplayAmount } from '@entities/currency/displayCurrency'
+import { useTrToDisplay } from '../shared/useTrToDisplay'
+import { ArrowBackIcon, ArrowForwardIcon } from '@shared/ui/Icons'
 
-export function OutcomeCard({ transaction }: { transaction: TTransaction }) {
-  const { outcome, outcomeInstrument, date, comment, payee, tag } = transaction
-  const currency =
-    instrumentModel.useInstruments()[outcomeInstrument].shortTitle
-  const tagTitle = useAppSelector(getPopulatedTags)[tag?.[0] || 'null'].title
+export function OutcomeCard(props: TCardProps) {
+  const [i, setI] = useState(0)
+  const yearStats = useStats(props.year)
+  const toVal = useTrToDisplay()
+  const tags = useAppSelector(getPopulatedTags)
+
+  const topTransactions = yearStats.total.outcomeTransactions
+    .map(tr => ({ tr, val: toVal(tr).outcome }))
+    .sort((a, b) => b.val - a.val)
+    .slice(0, 10)
+
+  if (!topTransactions.length) return null
+
+  const next = () => setI(Math.min(i + 1, topTransactions.length - 1))
+  const prev = () => setI(Math.max(i - 1, 0))
+
+  const { val, tr } = topTransactions[i]
+  const { date, comment, payee, tag } = tr
+
+  const tagTitle = tags[tag?.[0] || 'null'].title
   let additionalInfo = [formatDate(date)]
   if (tagTitle) additionalInfo.push(tagTitle)
   if (payee) additionalInfo.push(payee)
   return (
     <Card>
-      <Typography variant="body1" align="center">
-        Покупка года
-      </Typography>
       <Rhythm gap={1} my={1} alignItems="center">
+        <Typography variant="body1" align="center">
+          Покупка года #{i + 1}
+        </Typography>
         <Typography variant="h4" align="center" className="red-gradient">
-          <Amount value={outcome} currency={currency} noShade decMode="ifAny" />
+          <DisplayAmount value={val} noShade decMode="ifAny" />
         </Typography>
         <Typography variant="body1" align="center" color="textSecondary">
           {additionalInfo.join('  •  ')}
@@ -43,6 +59,21 @@ export function OutcomeCard({ transaction }: { transaction: TTransaction }) {
             </Typography>
           </Box>
         )}
+
+        <Stack
+          direction="row"
+          spacing={1}
+          alignItems="center"
+          sx={{ opacity: 0.3, transition: '200ms', '&:hover': { opacity: 1 } }}
+        >
+          <IconButton size="small" onClick={prev}>
+            <ArrowBackIcon />
+          </IconButton>
+
+          <IconButton size="small" onClick={next}>
+            <ArrowForwardIcon />
+          </IconButton>
+        </Stack>
       </Rhythm>
     </Card>
   )

@@ -1,54 +1,78 @@
-import React from 'react'
-import { Typography } from '@mui/material'
+import React, { useState } from 'react'
+import { IconButton, Stack, Typography } from '@mui/material'
 import Rhythm from '@shared/ui/Rhythm'
 import pluralize from '@shared/helpers/pluralize'
-import { Amount } from '@shared/ui/Amount'
 
-import { userModel } from '@entities/user'
-import { Card } from './Card'
-import { Stats } from '../selectors'
+import { Card, TCardProps } from '../shared/Card'
+import { useStats } from '../shared/getFacts'
+import { entries } from '@shared/helpers/keys'
+import {
+  DisplayAmount,
+  displayCurrency,
+} from '@entities/currency/displayCurrency'
+import { ArrowForwardIcon, ArrowBackIcon } from '@shared/ui/Icons'
 
-interface PayeeByFrequencyCardProps {
-  byPayee: Stats['byPayee']
-}
+export function PayeeByFrequencyCard(props: TCardProps) {
+  const [i, setI] = useState(0)
+  const yearStats = useStats(props.year)
+  const toDisplay = displayCurrency.useToDisplay('current')
 
-export function PayeeByFrequencyCard({ byPayee }: PayeeByFrequencyCardProps) {
-  const currency = userModel.useUserCurrency()
-  const sortedPayees = Object.keys(byPayee).sort(
-    (a, b) =>
-      byPayee[b].outcomeTransactions.length -
-      byPayee[a].outcomeTransactions.length
-  )
-  const topPayee = sortedPayees[0]
-  if (!topPayee) return null
-  const transactions = byPayee[topPayee].outcomeTransactions.length
-  const outcome = byPayee[topPayee].outcome
+  const topPayees = entries(yearStats.byPayee)
+    .map(([payee, info]) => {
+      return {
+        payee,
+        transactions: info.outcomeTransactions,
+        outcome: toDisplay(info.outcome),
+      }
+    })
+    .sort((a, b) => b.transactions.length - a.transactions.length)
+    .filter(p => p.payee && p.payee !== 'null')
+    .slice(0, 10)
+
+  if (topPayees.length === 0) return null
+
+  const next = () => setI(Math.min(i + 1, topPayees.length - 1))
+  const prev = () => setI(Math.max(i - 1, 0))
+  const { payee, transactions, outcome } = topPayees[i]
+  const trLength = transactions.length
 
   if (!outcome) return null
   return (
     <Card>
       <Rhythm gap={1} alignItems="center">
         <Typography variant="body1" align="center">
-          Любимое место
+          Любимое место #{i + 1}
         </Typography>
+
         <Typography variant="h4" align="center" className="info-gradient">
-          {topPayee}
+          {payee}
         </Typography>
+
         <Typography variant="body1" align="center">
-          {transactions}
+          {trLength}
           {' '}
-          {pluralize(transactions, ['покупка', 'покупки', 'покупок'])} со
-          средним чеком{' '}
-          <Amount
-            value={outcome / transactions}
-            currency={currency}
-            noShade
-            decMode="ifOnly"
-          />
+          {pluralize(trLength, ['покупка', 'покупки', 'покупок'])} со средним
+          чеком{' '}
+          <DisplayAmount value={outcome / trLength} noShade decMode="ifOnly" />
           .
           <br />А всего потратили{' '}
-          <Amount value={outcome} currency={currency} noShade decMode="ifAny" />
+          <DisplayAmount value={outcome} noShade decMode="ifAny" />
         </Typography>
+
+        <Stack
+          direction="row"
+          spacing={1}
+          alignItems="center"
+          sx={{ opacity: 0.3, transition: '200ms', '&:hover': { opacity: 1 } }}
+        >
+          <IconButton size="small" onClick={prev}>
+            <ArrowBackIcon />
+          </IconButton>
+
+          <IconButton size="small" onClick={next}>
+            <ArrowForwardIcon />
+          </IconButton>
+        </Stack>
       </Rhythm>
     </Card>
   )
