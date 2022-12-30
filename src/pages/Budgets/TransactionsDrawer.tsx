@@ -96,9 +96,9 @@ function getTransactions(
   return ids
     .map(id => {
       if (mode === trMode.GeneralIncome)
-        return activity.generalIncome.byEnv[id]?.transactions || []
+        return activity?.generalIncome.byEnv[id]?.transactions || []
       if (mode === trMode.Envelope)
-        return activity.envActivity.byEnv[id]?.transactions || []
+        return activity?.envActivity.byEnv[id]?.transactions || []
       return []
     })
     .reduce((acc, arr) => acc.concat(arr), [])
