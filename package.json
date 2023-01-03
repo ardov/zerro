@@ -96,6 +96,7 @@
     "react-transition-group": "^4.4.1",
     "react-virtualized-auto-sizer": "^1.0.2",
     "react-window": "^1.8.1",
+    "react-wrap-balancer": "^0.2.4",
     "recharts": "^2.1.13",
     "redux": "^4.2.0",
     "redux-thunk": "^2.4.1",
