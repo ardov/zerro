@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
-import { IconButton, Stack, Typography } from '@mui/material'
-import Rhythm from '@shared/ui/Rhythm'
+import { ButtonBase, IconButton, Stack, Typography } from '@mui/material'
 import pluralize from '@shared/helpers/pluralize'
 
 import { Card, TCardProps } from '../shared/Card'
@@ -39,16 +38,24 @@ export function PayeeByOutcomeCard(props: TCardProps) {
   if (!outcome) return null
   return (
     <Card>
-      <Rhythm gap={1} alignItems="center">
-        <Typography variant="h4" align="center" className="red-gradient">
-          {payee}
-        </Typography>
-        <Typography variant="body1" align="center">
-          Здесь вы оставили{' '}
-          <DisplayAmount value={outcome} noShade decMode="ifOnly" /> ({trLength}
-          {' '}
-          {pluralize(trLength, ['покупка', 'покупки', 'покупок'])})
-        </Typography>
+      <Stack spacing={1} alignItems="center">
+        <ButtonBase
+          sx={{ borderRadius: 1, px: 1 }}
+          onClick={() => props.onShowTransactions(transactions)}
+        >
+          <Stack spacing={1} alignItems="center">
+            <Typography variant="h4" align="center" className="red-gradient">
+              {payee}
+            </Typography>
+            <Typography variant="body1" align="center">
+              Здесь вы оставили{' '}
+              <DisplayAmount value={outcome} noShade decMode="ifOnly" /> (
+              {trLength}
+              {' '}
+              {pluralize(trLength, ['покупка', 'покупки', 'покупок'])})
+            </Typography>
+          </Stack>
+        </ButtonBase>
 
         <Stack
           direction="row"
@@ -64,7 +71,7 @@ export function PayeeByOutcomeCard(props: TCardProps) {
             <ArrowForwardIcon />
           </IconButton>
         </Stack>
-      </Rhythm>
+      </Stack>
     </Card>
   )
 }

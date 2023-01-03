@@ -1,5 +1,5 @@
 import React from 'react'
-import { Typography } from '@mui/material'
+import { ButtonBase, Typography } from '@mui/material'
 import Rhythm from '@shared/ui/Rhythm'
 import pluralize from '@shared/helpers/pluralize'
 import { Card, TCardProps } from '../shared/Card'
@@ -17,9 +17,14 @@ export function NoCategoryCard(props: TCardProps) {
       <Rhythm gap={1}>
         {value ? (
           <>
-            <Typography variant="h4" align="center">
-              {value} {pluralize(value, ['операция', 'операции', 'операций'])}
-            </Typography>
+            <ButtonBase
+              sx={{ borderRadius: 1, px: 1 }}
+              onClick={() => props.onShowTransactions(noTag)}
+            >
+              <Typography variant="h4" align="center">
+                {value} {pluralize(value, ['операция', 'операции', 'операций'])}
+              </Typography>
+            </ButtonBase>
             <Typography variant="body1" align="center">
               не {pluralize(value, ['нашла', 'нашли', 'нашли'])} свою категорию
             </Typography>

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Typography } from '@mui/material'
+import { ButtonBase, Typography } from '@mui/material'
 import Rhythm from '@shared/ui/Rhythm'
 import pluralize from '@shared/helpers/pluralize'
 import { Card, TCardProps } from '../shared/Card'
@@ -13,14 +13,19 @@ export function QRCard(props: TCardProps) {
   if (!value) return null
   return (
     <Card>
-      <Rhythm gap={1}>
-        <Typography variant="body1" align="center">
-          Вы прикрепили
-        </Typography>
-        <Typography variant="h4" align="center">
-          {value} {pluralize(value, ['чек', 'чека', 'чеков'])}
-        </Typography>
-      </Rhythm>
+      <ButtonBase
+        sx={{ borderRadius: 1, px: 1 }}
+        onClick={() => props.onShowTransactions(hasReceipt)}
+      >
+        <Rhythm gap={1}>
+          <Typography variant="body1" align="center">
+            Вы прикрепили
+          </Typography>
+          <Typography variant="h4" align="center">
+            {value} {pluralize(value, ['чек', 'чека', 'чеков'])}
+          </Typography>
+        </Rhythm>
+      </ButtonBase>
     </Card>
   )
 }

@@ -1,17 +1,16 @@
 import React, { useState } from 'react'
-import { Box, Typography, Chip } from '@mui/material'
-import Rhythm from '@shared/ui/Rhythm'
-
+import { Box, Typography, Chip, Stack } from '@mui/material'
 import { useAppSelector } from '@store'
+import { entries } from '@shared/helpers/keys'
+import { addFxAmount } from '@shared/helpers/money'
 import { getPopulatedTags } from '@entities/tag'
-import { Card, TCardProps } from '../shared/Card'
-import { useStats } from '../shared/getFacts'
 import {
   DisplayAmount,
   displayCurrency,
 } from '@entities/currency/displayCurrency'
-import { entries } from '@shared/helpers/keys'
-import { addFxAmount } from '@shared/helpers/money'
+
+import { Card, TCardProps } from '../../shared/Card'
+import { useStats } from '../../shared/getFacts'
 import { NotFunFact } from './NotFunFact'
 
 export function IncomeCard(props: TCardProps) {
@@ -39,6 +38,8 @@ export function IncomeCard(props: TCardProps) {
     .filter(t => checked.includes(t.id))
     .reduce((sum, t) => addFxAmount(sum, t.incomeFx), {})
 
+  const monthlyIncome = toDisplay(totalIncomeFx) / 12
+
   const toggle = (id: string) => {
     if (checked.includes(id)) {
       setChecked(checked.filter(tagId => tagId !== id))
@@ -49,15 +50,19 @@ export function IncomeCard(props: TCardProps) {
 
   return (
     <Card>
-      <Rhythm gap={1} alignItems="center">
+      <Stack spacing={1} alignItems="center">
         <Typography variant="body1" align="center">
           Вы заработали
         </Typography>
         <Typography variant="h4" align="center" className="green-gradient">
           <DisplayAmount value={totalIncomeFx} noShade decMode="ifOnly" />
         </Typography>
+        <Typography variant="body2" align="center" color="textSecondary">
+          <DisplayAmount value={monthlyIncome} noShade decMode="ifOnly" />{' '}
+          в месяц
+        </Typography>
         <NotFunFact income={totalIncomeFx} />
-      </Rhythm>
+      </Stack>
 
       <Box mt={3} textAlign="center">
         {incomeTags.map(tagInfo => (
@@ -66,6 +71,9 @@ export function IncomeCard(props: TCardProps) {
               variant={checked.includes(tagInfo.id) ? 'filled' : 'outlined'}
               clickable
               onClick={() => toggle(tagInfo.id)}
+              onDoubleClick={() =>
+                props.onShowTransactions(tagInfo.transactions)
+              }
               label={
                 <>
                   {tagInfo.name} (

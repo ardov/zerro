@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
-import { IconButton, Stack, Typography } from '@mui/material'
-import Rhythm from '@shared/ui/Rhythm'
+import { ButtonBase, IconButton, Stack, Typography } from '@mui/material'
 import pluralize from '@shared/helpers/pluralize'
 
 import { Card, TCardProps } from '../shared/Card'
@@ -39,25 +38,36 @@ export function PayeeByFrequencyCard(props: TCardProps) {
   if (!outcome) return null
   return (
     <Card>
-      <Rhythm gap={1} alignItems="center">
+      <Stack spacing={1} alignItems="center" direction="column">
         <Typography variant="body1" align="center">
           Любимое место #{i + 1}
         </Typography>
 
-        <Typography variant="h4" align="center" className="info-gradient">
-          {payee}
-        </Typography>
+        <ButtonBase
+          sx={{ borderRadius: 1, px: 1 }}
+          onClick={() => props.onShowTransactions(transactions)}
+        >
+          <Stack spacing={1} alignItems="center" direction="column">
+            <Typography variant="h4" align="center" className="info-gradient">
+              {payee}
+            </Typography>
 
-        <Typography variant="body1" align="center">
-          {trLength}
-          {' '}
-          {pluralize(trLength, ['покупка', 'покупки', 'покупок'])} со средним
-          чеком{' '}
-          <DisplayAmount value={outcome / trLength} noShade decMode="ifOnly" />
-          .
-          <br />А всего потратили{' '}
-          <DisplayAmount value={outcome} noShade decMode="ifAny" />
-        </Typography>
+            <Typography variant="body1" align="center">
+              {trLength}
+              {' '}
+              {pluralize(trLength, ['покупка', 'покупки', 'покупок'])} со
+              средним чеком{' '}
+              <DisplayAmount
+                value={outcome / trLength}
+                noShade
+                decMode="ifOnly"
+              />
+              .
+              <br />А всего потратили{' '}
+              <DisplayAmount value={outcome} noShade decMode="ifAny" />
+            </Typography>
+          </Stack>
+        </ButtonBase>
 
         <Stack
           direction="row"
@@ -73,7 +83,7 @@ export function PayeeByFrequencyCard(props: TCardProps) {
             <ArrowForwardIcon />
           </IconButton>
         </Stack>
-      </Rhythm>
+      </Stack>
     </Card>
   )
 }

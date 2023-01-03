@@ -1,8 +1,10 @@
 import React from 'react'
 import { Box, BoxProps } from '@mui/material'
+import { TTransaction } from '@shared/types'
 
 export type TCardProps = {
   year: string | number
+  onShowTransactions: (t: TTransaction[]) => void
 }
 
 export const Card = (props: BoxProps) => (
