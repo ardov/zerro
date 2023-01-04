@@ -18,6 +18,7 @@ import { EnvelopeTable } from './EnvelopeTable'
 import { DnDContext } from './DnDContext'
 import { BudgetPopoverProvider } from './BudgetPopover'
 import { GoalPopoverProvider } from './GoalPopover'
+import { Explainer } from './Explainer'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
@@ -72,6 +73,7 @@ function Budgets() {
         py: 3,
       }}
     >
+      <Explainer />
       <EnvelopeTable
         month={month}
         onShowTransactions={setDrawer}

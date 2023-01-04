@@ -3,7 +3,7 @@ import { getUserSettings, patchUserSettings } from './userSettings'
 
 export type { TUserSettings, TUserSettingsPatch } from './userSettings'
 
-export const useSettingsModel = {
+export const userSettingsModel = {
   // Selectors
   getUserSettings,
 
