@@ -36,6 +36,7 @@ const findDateIndex = (groups: GroupNode[], date: GroupNode['date']) => {
 type GrouppedListProps = {
   groups: GroupNode[]
   checked: string[]
+  initialDate?: TDateDraft
   toggleTransaction: (id: string) => void
   checkByChangedDate: (date: number) => void
   onFilterByPayee: (payee: string) => void
@@ -47,6 +48,7 @@ type DayData = GrouppedListProps & {
 export const GrouppedList: FC<GrouppedListProps> = ({
   groups,
   checked,
+  initialDate,
   toggleTransaction,
   checkByChangedDate,
   onFilterByPayee,
@@ -59,13 +61,22 @@ export const GrouppedList: FC<GrouppedListProps> = ({
   }, [listRef, groups])
 
   const scrollToDate = useCallback(
-    (date: TDateDraft) =>
+    (date: TDateDraft) => {
       listRef?.current?.scrollToItem(
         findDateIndex(groups, toISODate(date)),
         'start'
-      ),
+      )
+    },
     [groups]
   )
+
+  useEffect(() => {
+    // Scroll to initial date if it's provided
+    if (initialDate) {
+      // For we should render first and only then scroll. That's why there is timeout. Downside of is that the list jumps.
+      setTimeout(() => scrollToDate(initialDate), 10)
+    }
+  }, [initialDate, scrollToDate])
 
   const minDate = groups.length ? groups[groups.length - 1].date : 0
   const maxDate = groups.length ? groups[0].date : 0

@@ -107,6 +107,7 @@ export const WidgetAccHistory: FC<AccTrendProps> = ({
               fill={`url(#${colorId})`}
               fillOpacity={1}
               dataKey="balance"
+              isAnimationActive={false}
             />
           </AreaChart>
         </ResponsiveContainer>

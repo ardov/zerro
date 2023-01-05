@@ -9,7 +9,12 @@ import Actions from './TopBar/Actions'
 import { sendEvent } from '@shared/helpers/tracking'
 // import { getGroupedTransactions } from '@worker'
 import { useDebounce } from '@shared/hooks/useDebounce'
-import { TISODate, TTransaction, TTransactionId } from '@shared/types'
+import {
+  TDateDraft,
+  TISODate,
+  TTransaction,
+  TTransactionId,
+} from '@shared/types'
 
 export type TTransactionListProps = {
   transactions?: TTransaction[]
@@ -17,6 +22,7 @@ export type TTransactionListProps = {
   filterConditions?: FilterConditions
   hideFilter?: boolean
   checkedDate?: Date | null
+  initialDate?: TDateDraft
   sx?: SxProps<Theme>
 }
 
@@ -27,6 +33,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     filterConditions,
     hideFilter = false,
     checkedDate,
+    initialDate,
     sx,
   } = props
 
@@ -145,6 +152,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
           {...{
             groups,
             checked,
+            initialDate,
             toggleTransaction,
             checkByChangedDate,
             onFilterByPayee,

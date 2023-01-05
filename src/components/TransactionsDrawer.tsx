@@ -3,7 +3,7 @@ import { Drawer, Box, Typography, IconButton, DrawerProps } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { CloseIcon } from '@shared/ui/Icons'
-import { Modify } from '@shared/types'
+import { Modify, TDateDraft } from '@shared/types'
 import { TransactionList, TTransactionListProps } from './TransactionList'
 
 export type TransactionsDrawerProps = Modify<
@@ -13,6 +13,7 @@ export type TransactionsDrawerProps = Modify<
   transactions?: TTransactionListProps['transactions']
   prefilter?: TTransactionListProps['prefilter']
   filterConditions?: TTransactionListProps['filterConditions']
+  initialDate?: TDateDraft
 }
 
 export const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
@@ -20,6 +21,7 @@ export const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
     transactions,
     prefilter,
     filterConditions,
+    initialDate,
     title,
     onClose,
     open,
@@ -51,6 +53,7 @@ export const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
           transactions={transactions}
           prefilter={prefilter}
           filterConditions={filterConditions}
+          initialDate={initialDate}
           hideFilter
           sx={{ flex: '1 1 auto' }}
         />

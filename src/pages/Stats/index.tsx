@@ -34,11 +34,7 @@ export default function Stats() {
     setSelected({ id, date })
   }, [])
 
-  const filterConditions = {
-    accounts: selected ? [selected.id] : null,
-    dateFrom: selected ? selected.date : null,
-    dateTo: selected ? selected.date : null,
-  }
+  const filterConditions = { accounts: selected ? [selected.id] : null }
 
   return (
     <>
@@ -62,6 +58,7 @@ export default function Stats() {
 
       <TransactionsDrawer
         filterConditions={filterConditions}
+        initialDate={selected?.date}
         open={!!selected}
         onClose={() => setSelected(null)}
       />
