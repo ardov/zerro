@@ -27,6 +27,7 @@ export type TMonthTotals = {
   envActivity: TFxAmount // Transactions associated with envelopes
   // Envelope totals
   budgeted: TFxAmount
+  positiveBudgeted: TFxAmount // Used to calculate budgetedInFuture
   available: TFxAmount
 
   budgetedInFuture: TFxAmount // Total amount of money budgeted in future months
@@ -79,6 +80,7 @@ function calcMonthTotals(
       'Total change is not equal to sum of transfers + income + anv activity'
     )
 
+    let positiveBudgeted = {} // Used for budgetedInFuture
     let budgeted = {}
     let available = {}
     let overspend = {}
@@ -86,6 +88,15 @@ function calcMonthTotals(
       if (!metrics.parent) {
         budgeted = addFxAmount(budgeted, metrics.totalBudgeted)
         available = addFxAmount(available, metrics.totalAvailable)
+
+        let budgetedValue = metrics.totalBudgeted[metrics.currency] || 0
+        if (budgetedValue > 0) {
+          positiveBudgeted = addFxAmount(
+            positiveBudgeted,
+            metrics.totalBudgeted
+          )
+        }
+
         let selfAvailableValue = metrics.selfAvailable[metrics.currency] || 0
         if (selfAvailableValue < 0) {
           overspend = addFxAmount(overspend, metrics.selfAvailable)
@@ -94,7 +105,7 @@ function calcMonthTotals(
     })
 
     let budgetedInFuture = addFxAmount(
-      prevMonth.budgeted || {},
+      prevMonth.positiveBudgeted || {},
       prevMonth.budgetedInFuture || {}
     )
 
@@ -114,6 +125,7 @@ function calcMonthTotals(
       generalIncome,
       envActivity,
       budgeted,
+      positiveBudgeted,
       available,
       budgetedInFuture,
       freeFunds,
