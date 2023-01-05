@@ -2,11 +2,11 @@ import React, { FC, useState } from 'react'
 import { Box, Typography, Paper, useTheme } from '@mui/material'
 import { AreaChart, Area, ResponsiveContainer } from 'recharts'
 import { accountModel } from '@entities/account'
-import { formatMoney } from '@shared/helpers/money'
 import { formatDate } from '@shared/helpers/date'
 import { TAccountId, TISODate } from '@shared/types'
 import { Period } from '../shared/period'
 import { useAccountHistory } from './model'
+import { Amount } from '@shared/ui/Amount'
 
 type AccTrendProps = {
   period: Period
@@ -53,7 +53,9 @@ export const WidgetAccHistory: FC<AccTrendProps> = ({
           </span>{' '}
           {isHovering && hoverDate && formatDate(hoverDate)}
         </Typography>
-        <Typography variant="h6">{formatMoney(balance)}</Typography>
+        <Typography variant="h6">
+          <Amount value={balance} currency={acc.fxCode} decMode="ifAny" />
+        </Typography>
       </Box>
 
       <div

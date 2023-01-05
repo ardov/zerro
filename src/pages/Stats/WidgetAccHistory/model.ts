@@ -1,8 +1,8 @@
-import { accountModel } from '@entities/account'
 import { GroupBy } from '@shared/helpers/date'
 import { TAccountId, TISODate } from '@shared/types'
 import { accBalanceModel } from '@entities/accBalances'
 import { getStart, Period } from '../shared/period'
+import { accountModel } from '@entities/account'
 
 export type TPoint = {
   date: TISODate
@@ -10,12 +10,13 @@ export type TPoint = {
 }
 
 export function useAccountHistory(id: TAccountId, period: Period) {
+  let acc = accountModel.usePopulatedAccounts()[id]
   let balances: TPoint[] = accBalanceModel
-    .useDisplayBalances(GroupBy.Day, getStart(period, GroupBy.Day))
+    .useBalances(GroupBy.Day, getStart(period, GroupBy.Day))
     .map(({ date, balances }) => {
       return {
         date,
-        balance: balances.accounts?.[id] || 0,
+        balance: balances.accounts?.[id]?.[acc.fxCode] || 0,
       }
     })
   return balances
