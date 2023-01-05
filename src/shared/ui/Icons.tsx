@@ -16,6 +16,7 @@ export { default as FavoriteBorderIcon } from '@mui/icons-material/FavoriteBorde
 export { default as HelpOutlineIcon } from '@mui/icons-material/HelpOutline'
 export { default as BarChartIcon } from '@mui/icons-material/BarChart'
 export { default as AccountBalanceIcon } from '@mui/icons-material/AccountBalance'
+export { default as AutoAwesomeIcon } from '@mui/icons-material/AutoAwesome'
 export { default as AccountBalanceWalletIcon } from '@mui/icons-material/AccountBalanceWallet'
 export { default as SyncAltIcon } from '@mui/icons-material/SyncAlt'
 export { default as DeleteIcon } from '@mui/icons-material/Delete'

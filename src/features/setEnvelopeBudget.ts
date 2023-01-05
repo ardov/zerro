@@ -14,6 +14,7 @@ import { budgetStore } from '@entities/budget/envelopeBudgets/budgetStore'
 import { balances } from '@entities/envBalances'
 import { userModel } from '@entities/user'
 import { envelopeModel } from '@entities/envelope'
+import { userSettingsModel } from '@entities/userSettings'
 
 export type TEnvBudgetUpdate = {
   id: TEnvelopeId
@@ -36,13 +37,15 @@ export function setEnvelopeBudgets(
 
     const rateData = balances.rates(state)
     const envMetrics = balances.envData(state)
+    const useZmBudgets =
+      userSettingsModel.getUserSettings(state)['useZmBudgets']
 
     const tagUpdates: TTagBudgetUpdate[] = []
     const envelopeUpdates: TEnvBudgetUpdate[] = []
 
     updates.map(adjustValue).forEach(update => {
       const { type, id } = envelopeModel.parseId(update.id)
-      if (type === DataEntity.Tag) {
+      if (type === DataEntity.Tag && useZmBudgets) {
         tagUpdates.push({
           tag: id === 'null' ? null : id,
           month: update.month,

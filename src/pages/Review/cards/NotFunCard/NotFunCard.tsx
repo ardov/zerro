@@ -69,7 +69,7 @@ export function NotFunCard(props: TCardProps) {
         <Stack gap={2} alignItems="center" width="100%">
           <div>
             <Typography variant="body1" align="center">
-              Россия забрала {Math.round(taxesRatio * 100)}% вашего дохода
+              Россия получила {Math.round(taxesRatio * 100)}% вашего дохода
             </Typography>
 
             <Typography variant="h4" align="center" className="red-gradient">
@@ -117,7 +117,7 @@ export function NotFunCard(props: TCardProps) {
           <Divider sx={{ width: '100%' }} />
           <Typography variant="body1" align="center">
             <Balancer>
-              Подробнее можно посчитать в{' '}
+              Это приблизительные цифры, подробнее можно посчитать в{' '}
               <Link
                 color="secondary"
                 href="https://journal.tinkoff.ru/fns-loves-you/"
@@ -195,48 +195,4 @@ function useIncomeOutcome(onlyRUB: boolean, year: string | number) {
 
     return { income: incomeTags, outcome: outcomeTags }
   }, [onlyRUB, tags, toDisplay, yearStats.byTag])
-}
-
-export function NotFunFact({ income }: { income: TFxAmount }) {
-  /** Average salary in Russia. Source: https://rosstat.gov.ru/labor_market_employment_salaries# */
-  const AVG_MONTHLY_INCOME = 40000
-  const rubIncome = income.RUB
-  if (!rubIncome || rubIncome < 30000) return null
-  const monthlyIncome = rubIncome / 12
-  const rate = +(monthlyIncome / AVG_MONTHLY_INCOME).toFixed(0)
-  const vat = rubIncome * (13 / 87)
-  return (
-    <Typography variant="body1" align="center">
-      Платили 13% подоходного налога c{' '}
-      <Amount value={rubIncome} currency={'RUB'} noShade decMode="ifOnly" />?
-      <br />
-      Значит ещё{' '}
-      <Amount value={vat} currency={'RUB'} noShade decMode="ifOnly" /> ушло в
-      казну 🇷🇺
-      {rate > 1 && (
-        <>
-          <br />
-          <br />
-          {getPeopleArray(rate).join(' ')}
-          <br />
-          {`Это ${rate} ${pluralize(rate, [
-            'средний россиянин',
-            'средних россиянина',
-            'средних россиян',
-          ])}.`}
-          <br />
-          Если сложить их зарплаты — получится ваша.
-        </>
-      )}
-    </Typography>
-  )
-}
-
-function getPeopleArray(length: number) {
-  const people = ['👩🏼', '👨🏼‍🦳', '👨🏻', '👨🏼‍🦲', '👦🏽', '👩🏻', '👵🏻', '👴🏼']
-  let arr = []
-  for (let i = 0; i < length; i++) {
-    arr.push(people[i % (people.length - 1)])
-  }
-  return arr
 }

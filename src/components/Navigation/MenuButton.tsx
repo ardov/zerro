@@ -16,6 +16,7 @@ import {
   BarChartIcon,
   SyncIcon,
   SyncDisabledIcon,
+  AutoAwesomeIcon,
 } from '@shared/ui/Icons'
 import { Link } from 'react-router-dom'
 import {
@@ -37,6 +38,7 @@ import { clearLocalData } from '@features/localData'
 import { Confirm } from '@shared/ui/Confirm'
 import { useRegularSync } from '@components/RegularSyncHandler'
 import { appVersion } from '@shared/config'
+import { userSettingsModel } from '@entities/userSettings'
 
 const useStyles = makeStyles(({ spacing }) => ({
   menuIcon: { marginRight: spacing(1) },
@@ -51,6 +53,12 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
   const dispatch = useAppDispatch()
   const classes = useStyles()
   const [regular, setRegular] = useRegularSync()
+  const useZmBudgets = userSettingsModel.useUserSettings()['useZmBudgets']
+  // const patchSettings = userSettingsModel.patchUserSettings()
+  const toggleUseZmBudgets = () =>
+    dispatch(
+      userSettingsModel.patchUserSettings({ useZmBudgets: !useZmBudgets })
+    )
   const theme = useThemeType()
   const handleThemeChange = () => {
     sendEvent('Settings: toggle theme')
@@ -140,6 +148,15 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
         )}
         <ListItemText>Автосинхронизация</ListItemText>
         <Switch edge="end" checked={regular} />
+      </MenuItem>
+      <MenuItem onClick={toggleUseZmBudgets}>
+        <AutoAwesomeIcon className={classes.menuIcon} color="action" />
+        <ListItemText
+          sx={{ whiteSpace: 'normal' }}
+          primary={'Бюджеты Дзен-мани'}
+          secondary={'Использовать те же бюджеты что и ДМ'}
+        />
+        <Switch edge="end" checked={!!useZmBudgets} />
       </MenuItem>
       <Box my={1}>
         <Divider light />

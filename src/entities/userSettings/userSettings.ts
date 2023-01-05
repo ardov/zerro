@@ -8,6 +8,9 @@ import { AppThunk } from '@store'
 export type TUserSettings = Partial<{
   /** Shows if user already closed notification about migration from 0 to 1 version */
   sawMigrationAlert: boolean
+
+  /** This flag determines which budgets to use */
+  useZmBudgets: boolean
 }>
 
 const userSettingsStore = makeSimpleHiddenStore<TUserSettings>(
