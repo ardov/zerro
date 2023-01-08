@@ -231,15 +231,17 @@ function BudgetSettingsItem() {
         <Switch edge="end" checked={!!preferZmBudgets} />
       </MenuItem>
 
-      <MenuItem onClick={convertBudgets}>
-        <ListItemIcon>
-          <AutoAwesomeIcon />
-        </ListItemIcon>
-        <ListItemText
-          sx={{ whiteSpace: 'normal' }}
-          primary={'Конвертировать бюджеты из Дзен-мани'}
-        />
-      </MenuItem>
+      {!preferZmBudgets && (
+        <MenuItem onClick={convertBudgets}>
+          <ListItemIcon>
+            <AutoAwesomeIcon />
+          </ListItemIcon>
+          <ListItemText
+            sx={{ whiteSpace: 'normal' }}
+            primary={'Конвертировать бюджеты из Дзен-мани'}
+          />
+        </MenuItem>
+      )}
     </>
   )
 }
