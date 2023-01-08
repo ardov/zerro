@@ -11,6 +11,7 @@ export const SWPrompt = () => {
     needRefresh: [needRefresh, setNeedRefresh],
     offlineReady: [offlineReady, setOfflineReady],
   } = useRegisterSW({
+    immediate: true,
     onRegisteredSW(swUrl, r) {
       console.log(`Service Worker at: ${swUrl}`)
 
