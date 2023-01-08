@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { Box, Button } from '@mui/material'
 import { TAccountId, TISODate } from '@shared/types'
 import Rhythm from '@shared/ui/Rhythm'
@@ -20,15 +20,19 @@ export default function Stats() {
   const [selected, setSelected] =
     useState<{ id: TAccountId; date: TISODate } | null>(null)
 
-  const accIds = accs
-    .filter(acc => showArchived || !acc.archive)
-    .sort((acc1, acc2) => {
-      if (acc1.archive && acc2.archive) return 0
-      if (acc1.archive) return 1
-      if (acc2.archive) return -1
-      return 0
-    })
-    .map(acc => acc.id)
+  const accIds = useMemo(
+    () =>
+      accs
+        .filter(acc => showArchived || !acc.archive)
+        .sort((acc1, acc2) => {
+          if (acc1.archive && acc2.archive) return 0
+          if (acc1.archive) return 1
+          if (acc2.archive) return -1
+          return 0
+        })
+        .map(acc => acc.id),
+    [accs, showArchived]
+  )
 
   const onSelect = useCallback((id: TAccountId, date: TISODate) => {
     setSelected({ id, date })
