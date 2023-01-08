@@ -37,7 +37,7 @@ export const patchUserSettings =
 
     // Remove undefined keys
     keys(newData).forEach(key => {
-      if (update[key] === undefined) delete newData[key]
+      if (newData[key] === undefined) delete newData[key]
     })
 
     dispatch(userSettingsStore.setData(newData))
