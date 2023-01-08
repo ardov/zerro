@@ -3,8 +3,8 @@ import { AppThunk } from '@store'
 import { TISOMonth } from '@shared/types'
 import { prevMonth, toISOMonth } from '@shared/helpers/date'
 import { balances } from '@entities/envBalances'
-import { setTotalBudget } from '@features/budget/setTotalBudget'
 import { TBudgetUpdate } from '@entities/budget'
+import { setBudget } from '@entities/budget/setBudget'
 
 export const copyPreviousBudget =
   (month: TISOMonth): AppThunk<void> =>
@@ -27,5 +27,5 @@ export const copyPreviousBudget =
       if (prevVal === currVal) return
       updates.push({ id, value: prevVal, month })
     })
-    dispatch(setTotalBudget(updates))
+    dispatch(setBudget(updates))
   }

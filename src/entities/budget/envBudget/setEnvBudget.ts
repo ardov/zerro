@@ -20,13 +20,13 @@ export function setEnvBudget(
     let byMonth: ByMonth<TBudgets> = {}
 
     updates.forEach(({ id, month, value }) => {
-      byMonth[month] ??= {}
-      byMonth[month][id] = value
+      byMonth[month] ??= { ...curentBudgets[month] } || {}
+      if (value) byMonth[month][id] = value
+      else delete byMonth[month][id]
     })
 
     keys(byMonth).forEach(month => {
-      const newData = { ...curentBudgets[month], ...byMonth[month] }
-      dispatch(budgetStore.setData(newData, month))
+      dispatch(budgetStore.setData(byMonth[month], month))
     })
   }
 }

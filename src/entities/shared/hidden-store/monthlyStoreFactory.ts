@@ -46,12 +46,30 @@ export function makeMonthlyHiddenStore<TPayload>(
       return result
     }
   )
-  const setData =
-    (payload: TPayload, month: TISOMonth): AppThunk<TReminder> =>
+
+  const resetMonth =
+    (month: TISOMonth): AppThunk =>
     (dispatch, getState) => {
-      if (!isISOMonth(month)) {
-        throw new Error('Invalid month')
+      const id = getDataReminders(getState())[month]?.id
+      if (id) dispatch(deleteReminder(id))
+    }
+
+  const setData =
+    (payload: TPayload, month: TISOMonth): AppThunk<TReminder | void> =>
+    (dispatch, getState) => {
+      if (!isISOMonth(month)) throw new Error('Invalid month')
+
+      // If payload is empty just delete the node
+      const isPayloadEmpty =
+        !payload ||
+        (Array.isArray(payload) && payload.length === 0) ||
+        (typeof payload === 'object' && keys(payload).length === 0)
+      if (isPayloadEmpty) {
+        console.log('reset', payload, month)
+
+        return dispatch(resetMonth(month))
       }
+
       const state = getState()
       const dataAccId = dispatch(prepareDataAccount())
       const existingReminder = getDataReminders(state)[month]
@@ -67,13 +85,6 @@ export function makeMonthlyHiddenStore<TPayload>(
           comment: JSON.stringify({ type, month, payload }),
         })
       )[0]
-    }
-
-  const resetMonth =
-    (month: TISOMonth): AppThunk =>
-    (dispatch, getState) => {
-      const id = getDataReminders(getState())[month]?.id
-      if (id) dispatch(deleteReminder(id))
     }
 
   return {

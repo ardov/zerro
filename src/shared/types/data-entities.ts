@@ -200,6 +200,8 @@ export type TTag = TZmTag & {
 
 export type TBudgetId = `${TISODate}#${TTagId}`
 
+export const globalBudgetTagId = '00000000-0000-0000-0000-000000000000'
+
 export type TZmBudget = {
   changed: TUnixTime
   user: TUserId

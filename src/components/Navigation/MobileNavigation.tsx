@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { useLocation, useHistory } from 'react-router'
 import RefreshButton from '@components/RefreshButton'
-import { SettingsMenu } from './MenuButton'
+import { SettingsMenu } from './SettingsMenu'
 import SettingsIcon from '@mui/icons-material/Settings'
 import {
   BottomNavigation,
