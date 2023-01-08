@@ -76,6 +76,8 @@ export const Explainer = () => {
   )
 }
 
+const HIDE_DATE = '2023-02-15'
+
 function useExplainerModel() {
   const dispatch = useAppDispatch()
   const oldLinks = useAppSelector(s => keys(getAccTagMap(s)).length)
@@ -92,7 +94,7 @@ function useExplainerModel() {
 
   return {
     markSeen,
-    isHidden: sawMigrationAlert,
+    isHidden: sawMigrationAlert || new Date().toISOString() > HIDE_DATE,
     usedOldFeatures: hasOldData,
   }
 }
