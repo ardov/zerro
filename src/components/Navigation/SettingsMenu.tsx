@@ -47,12 +47,7 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
   const { anchorEl, onClose, showLinks } = props
 
   return (
-    <Menu
-      anchorEl={anchorEl}
-      open={Boolean(anchorEl)}
-      onClose={onClose}
-      sx={{ maxWidth: 560 }}
-    >
+    <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose}>
       <ExportCsvItem />
       <ExportJsonItem />
 
