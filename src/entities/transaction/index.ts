@@ -3,6 +3,7 @@ import { checkRaw } from './filtering'
 import { compareTrDates, getType } from './helpers'
 import { makeTransaction } from './makeTransaction'
 import {
+  getHistoryStart,
   getSortedTransactions,
   getTransactions,
   getTransactionsHistory,
@@ -27,6 +28,7 @@ export const trModel = {
   getTransactions,
   getSortedTransactions,
   getTransactionsHistory,
+  getHistoryStart,
 
   // Hooks
   useTransactions: () => useAppSelector(getTransactions),
