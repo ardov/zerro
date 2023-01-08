@@ -1,12 +1,9 @@
-import { balances } from '@entities/envBalances'
-import {
-  setEnvelopeBudgets,
-  TEnvBudgetUpdate,
-} from '@features/setEnvelopeBudget'
 import { convertFx, round } from '@shared/helpers/money'
 import { sendEvent } from '@shared/helpers/tracking'
 import { TISOMonth, TEnvelopeId, TFxCode } from '@shared/types'
 import { AppThunk } from '@store'
+import { budgetModel, TBudgetUpdate } from '@entities/budget'
+import { balances } from '@entities/envBalances'
 
 export const moveMoney =
   (
@@ -23,7 +20,7 @@ export const moveMoney =
     const rates = balances.rates(state)[month].rates
     const metrics = balances.envData(state)[month]
 
-    const updates: TEnvBudgetUpdate[] = []
+    const updates: TBudgetUpdate[] = []
 
     if (source !== 'toBeBudgeted') {
       const env = metrics[source]
@@ -33,7 +30,7 @@ export const moveMoney =
           ? -amount
           : convertFx({ [currency]: -amount }, env.currency, rates)
       const newBudget = round(budgeted + change)
-      updates.push({ month, id: env.id, value: newBudget, exact: true })
+      updates.push({ month, id: env.id, value: newBudget })
     }
 
     if (destination !== 'toBeBudgeted') {
@@ -44,8 +41,8 @@ export const moveMoney =
           ? amount
           : convertFx({ [currency]: amount }, env.currency, rates)
       const newBudget = round(budgeted + change)
-      updates.push({ month, id: env.id, value: newBudget, exact: true })
+      updates.push({ month, id: env.id, value: newBudget })
     }
 
-    dispatch(setEnvelopeBudgets(updates))
+    dispatch(budgetModel.set(updates))
   }

@@ -5,7 +5,7 @@ import { keys } from '@shared/helpers/keys'
 
 import { TSelector } from '@store'
 import { trModel } from '@entities/transaction'
-import { getEnvelopeBudgets } from '@entities/budget'
+import { budgetModel } from '@entities/budget'
 
 /**
  * Returns the date of first month as ISO.
@@ -19,7 +19,7 @@ const getFirstMonth: TSelector<TISOMonth> = createSelector(
 
 /** Returns the last available month to budget. */
 const getLastMonth: TSelector<TISOMonth> = createSelector(
-  [getEnvelopeBudgets],
+  [budgetModel.get],
   budgets => {
     const currentMonth = toISOMonth(Date.now())
     const lastBudgetMonth = keys(budgets).sort().pop() || currentMonth

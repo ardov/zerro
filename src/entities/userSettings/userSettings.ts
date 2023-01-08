@@ -2,30 +2,37 @@ import {
   HiddenDataType,
   makeSimpleHiddenStore,
 } from '@entities/shared/hidden-store'
+import { createSelector } from '@reduxjs/toolkit'
 import { keys } from '@shared/helpers/keys'
-import { AppThunk } from '@store'
+import { AppThunk, TSelector } from '@store'
 
-export type TUserSettings = Partial<{
+export type TUserSettings = {
   /** Shows if user already closed notification about migration from 0 to 1 version */
   sawMigrationAlert: boolean
 
   /** This flag determines which budgets to use */
-  useZmBudgets: boolean
-}>
+  preferZmBudgets: boolean
+}
+export type TUserSettingsPatch = Partial<TUserSettings>
+export type TStoredUserSettings = Partial<TUserSettings>
 
-const userSettingsStore = makeSimpleHiddenStore<TUserSettings>(
+const userSettingsStore = makeSimpleHiddenStore<TStoredUserSettings>(
   HiddenDataType.UserSettings,
   {}
 )
 
-export const getUserSettings = userSettingsStore.getData
-
-export type TUserSettingsPatch = TUserSettings
+export const getUserSettings: TSelector<TUserSettings> = createSelector(
+  [userSettingsStore.getData],
+  raw => ({
+    sawMigrationAlert: raw.sawMigrationAlert ?? false,
+    preferZmBudgets: raw.preferZmBudgets ?? false,
+  })
+)
 
 export const patchUserSettings =
   (update: TUserSettingsPatch): AppThunk =>
   (dispatch, getState) => {
-    const currentData = getUserSettings(getState())
+    const currentData = userSettingsStore.getData(getState())
     const newData = { ...currentData, ...update }
 
     // Remove undefined keys
@@ -35,3 +42,5 @@ export const patchUserSettings =
 
     dispatch(userSettingsStore.setData(newData))
   }
+
+export const resetUserSettings = userSettingsStore.resetData

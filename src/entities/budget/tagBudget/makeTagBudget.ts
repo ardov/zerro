@@ -1,15 +1,15 @@
 import { parseDate, toISODate } from '@shared/helpers/date'
 import { TBudget } from '@shared/types'
 import { OptionalExceptFor, Modify, TDateDraft } from '@shared/types'
-import { getBudgetId } from './getBudgetId'
+import { getTagBudgetId } from './getBudgetId'
 
-export type BudgetDraft = Modify<
+export type TTagBudgetDraft = Modify<
   OptionalExceptFor<TBudget, 'user' | 'date' | 'tag'>,
   { date: TDateDraft }
 >
 
-export const makeBudget = (draft: BudgetDraft): TBudget => ({
-  id: getBudgetId(draft.date, draft.tag),
+export const makeTagBudget = (draft: TTagBudgetDraft): TBudget => ({
+  id: getTagBudgetId(draft.date, draft.tag),
   user: draft.user,
   date: toISODate(parseDate(draft.date)),
   tag: draft.tag || null,

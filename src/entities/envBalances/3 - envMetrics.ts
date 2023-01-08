@@ -14,7 +14,7 @@ import { withPerf } from '@shared/helpers/performance'
 import { TSelector } from '@store/index'
 
 import { envelopeModel, TEnvelope } from '@entities/envelope'
-import { getEnvelopeBudgets } from '@entities/budget'
+import { budgetModel } from '@entities/budget'
 import { TFxRateData } from '@entities/currency/fxRate'
 import { getMonthList } from './1 - monthList'
 import { getRatesByMonth } from './2 - rates'
@@ -53,7 +53,7 @@ export const getEnvMetrics: TSelector<ByMonth<ById<TEnvMetrics>>> =
       getMonthList,
       envelopeModel.getEnvelopes,
       getActivity,
-      getEnvelopeBudgets,
+      budgetModel.get,
       getRatesByMonth,
     ],
     withPerf('🖤 getEnvMetrics', calcEnvMetrics)

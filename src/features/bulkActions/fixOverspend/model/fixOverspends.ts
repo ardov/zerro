@@ -3,10 +3,8 @@ import { sendEvent } from '@shared/helpers/tracking'
 import { TISOMonth } from '@shared/types'
 import { AppThunk } from '@store'
 import { balances } from '@entities/envBalances'
-import {
-  setEnvelopeBudgets,
-  TEnvBudgetUpdate,
-} from '@features/setEnvelopeBudget'
+import { TBudgetUpdate } from '@entities/budget'
+import { setTotalBudget } from '@features/budget/setTotalBudget'
 
 export const fixOverspends =
   (month: TISOMonth): AppThunk<void> =>
@@ -18,7 +16,7 @@ export const fixOverspends =
 
     function fixOverspendingChildren() {
       const metrics = balances.envData(getState())[month]
-      let childrenUpdates: TEnvBudgetUpdate[] = []
+      let childrenUpdates: TBudgetUpdate[] = []
       Object.values(metrics).forEach(m => {
         if (!m.parent) return
         const budgeted = m.selfBudgeted[m.currency] || 0
@@ -31,12 +29,12 @@ export const fixOverspends =
           value: add(budgeted, -available),
         })
       })
-      if (childrenUpdates.length) dispatch(setEnvelopeBudgets(childrenUpdates))
+      if (childrenUpdates.length) dispatch(setTotalBudget(childrenUpdates))
     }
 
     function fixOverspendingParents() {
       const metrics = balances.envData(getState())[month]
-      let parentUpdates: TEnvBudgetUpdate[] = []
+      let parentUpdates: TBudgetUpdate[] = []
       Object.values(metrics).forEach(m => {
         if (m.parent) return
         const totalBudgeted = m.totalBudgeted[m.currency] || 0
@@ -53,6 +51,6 @@ export const fixOverspends =
           value: add(totalBudgeted, need),
         })
       })
-      if (parentUpdates.length) dispatch(setEnvelopeBudgets(parentUpdates))
+      if (parentUpdates.length) dispatch(setTotalBudget(parentUpdates))
     }
   }

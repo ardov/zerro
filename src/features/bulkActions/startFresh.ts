@@ -1,15 +1,13 @@
 import { sendEvent } from '@shared/helpers/tracking'
 import { TISOMonth } from '@shared/types'
 import { prevMonth, toISOMonth } from '@shared/helpers/date'
-import { AppThunk } from '@store'
-
-import {
-  setEnvelopeBudgets,
-  TEnvBudgetUpdate,
-} from '@features/setEnvelopeBudget'
-import { balances } from '@entities/envBalances'
 import { keys } from '@shared/helpers/keys'
 import { isZero } from '@shared/helpers/money'
+import { AppThunk } from '@store'
+
+import { balances } from '@entities/envBalances'
+import { TBudgetUpdate } from '@entities/budget'
+import { setTotalBudget } from '@features/budget/setTotalBudget'
 
 export const startFresh =
   (month: TISOMonth): AppThunk<void> =>
@@ -36,8 +34,8 @@ export const removeFutureBudgets =
           .filter(e => !isZero(e.selfBudgeted))
           .map(e => ({ id: e.id, value: 0, month }))
           .concat(updates)
-      }, [] as Array<TEnvBudgetUpdate>)
-    dispatch(setEnvelopeBudgets(updates))
+      }, [] as Array<TBudgetUpdate>)
+    dispatch(setTotalBudget(updates))
   }
 
 /**
@@ -70,7 +68,7 @@ export const resetMonthThunk =
         value: e.totalBudgeted[e.currency] - e.selfAvailable[e.currency],
         month,
       }))
-    dispatch(setEnvelopeBudgets(updates))
+    dispatch(setTotalBudget(updates))
 
     // Step 2. Remove parent balances
     const envData2 = balances.envData(getState())[month]
@@ -82,5 +80,5 @@ export const resetMonthThunk =
         value: e.totalBudgeted[e.currency] - e.selfAvailable[e.currency],
         month,
       }))
-    dispatch(setEnvelopeBudgets(updates2))
+    dispatch(setTotalBudget(updates2))
   }

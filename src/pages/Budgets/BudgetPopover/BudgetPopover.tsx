@@ -19,7 +19,7 @@ import { TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
 import { useAppDispatch } from '@store'
 import { balances } from '@entities/envBalances'
 import { useQuickActions } from './useQuickActions'
-import { setEnvelopeBudgets } from '@features/setEnvelopeBudget'
+import { setTotalBudget } from '@features/budget/setTotalBudget'
 import { displayCurrency } from '@entities/currency/displayCurrency'
 
 type TBudgetPopoverProps = PopoverProps & {
@@ -89,7 +89,7 @@ const BudgetPopoverContent: FC<TBudgetPopoverProps> = props => {
   }, [budgeted.env])
 
   const onChange = (value: number) =>
-    dispatch(setEnvelopeBudgets({ month, id, value }))
+    dispatch(setTotalBudget({ month, id, value }))
 
   const changeAndClose = (value: number) => {
     onClose?.({}, 'escapeKeyDown')

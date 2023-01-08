@@ -9,3 +9,5 @@ export type TBudgets = Record<TEnvelopeId, number>
 export const budgetStore = makeMonthlyHiddenStore<TBudgets>(
   HiddenDataType.Budgets
 )
+
+export const getEnvBudgets = budgetStore.getData

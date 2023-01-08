@@ -1,3 +1,3 @@
 import { RootState } from '@store'
 
-export const getBudgets = (state: RootState) => state.data.current.budget
+export const getTagBudgets = (state: RootState) => state.data.current.budget
