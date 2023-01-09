@@ -1,4 +1,11 @@
-import { TAccountId, TFxAmount, TISODate, TTransaction } from '@shared/types'
+import { useMemo } from 'react'
+import {
+  ByDate,
+  TAccountId,
+  TFxAmount,
+  TISODate,
+  TTransaction,
+} from '@shared/types'
 import { addFxAmount } from '@shared/helpers/money'
 import { GroupBy, makeDateArray, toGroup } from '@shared/helpers/date'
 import { keys } from '@shared/helpers/keys'
@@ -8,7 +15,6 @@ import { instrumentModel, TInstCodeMap } from '@entities/currency/instrument'
 import { displayCurrency } from '@entities/currency/displayCurrency'
 import { trModel, TrType } from '@entities/transaction'
 import { Period, getStart } from '../shared/period'
-import { useMemo } from 'react'
 
 type TPoint = {
   date: TISODate
@@ -18,13 +24,55 @@ type TPoint = {
   transfers: TFxAmount
 }
 
+// Hook
+export function useCashFlow(
+  period: Period,
+  aggregation: GroupBy = GroupBy.Month
+) {
+  const transactionHistory = trModel.useTransactionsHistory()
+  const debtAccId = accountModel.useDebtAccountId()
+  const instCodeMap = instrumentModel.useInstCodeMap()
+  const aggregatedNodes = useMemo(
+    () => calcCashflow(transactionHistory, debtAccId, instCodeMap, aggregation),
+    [aggregation, debtAccId, instCodeMap, transactionHistory]
+  )
+
+  const toDisplay = displayCurrency.useToDisplay('current')
+  const historyStart = keys(aggregatedNodes).sort()[0]
+  const firstDate = getStartDate(period, aggregation, historyStart)
+
+  const points = makeDateArray(firstDate, Date.now(), aggregation)
+    .map(date => aggregatedNodes[date] || makePoint(date))
+    .map(p => ({
+      date: p.date,
+      debts: toDisplay(p.debts),
+      income: toDisplay(p.income),
+      outcome: -toDisplay(p.outcome),
+      transfers: toDisplay(p.transfers),
+    }))
+
+  return points
+}
+
+function getStartDate(
+  period: Period,
+  aggregation: GroupBy,
+  historyStart?: TISODate
+): TISODate {
+  if (!historyStart) return toGroup(Date.now(), aggregation)
+  const historyStartGroup = toGroup(historyStart, aggregation)
+  const periodStart = getStart(period, aggregation)
+  if (!periodStart) return historyStartGroup
+  return historyStartGroup > periodStart ? historyStartGroup : periodStart
+}
+
 function calcCashflow(
   transactions: TTransaction[],
   debtAccId: TAccountId | undefined,
   instCodeMap: TInstCodeMap,
   aggregation: GroupBy = GroupBy.Month
 ) {
-  let result: Record<TISODate, TPoint> = {}
+  let result: ByDate<TPoint> = {}
 
   transactions.forEach(tr => {
     const group = toGroup(tr.date, aggregation)
@@ -82,41 +130,4 @@ function makePoint(date: TISODate): TPoint {
     outcome: {},
     transfers: {},
   }
-}
-
-// Hook
-
-export function useCashFlow(
-  period: Period,
-  aggregation: GroupBy = GroupBy.Month
-) {
-  const toDisplay = displayCurrency.useToDisplay('current')
-  const transactionHistory = trModel.useTransactionsHistory()
-  const debtAccId = accountModel.useDebtAccountId()
-  const instCodeMap = instrumentModel.useInstCodeMap()
-
-  const cashflowNodes = useMemo(
-    () => calcCashflow(transactionHistory, debtAccId, instCodeMap, aggregation),
-    [aggregation, debtAccId, instCodeMap, transactionHistory]
-  )
-
-  const firstData = keys(cashflowNodes).sort()[0]
-  const firstPeriod = getStart(period, aggregation) || '2000-01-01'
-  const firstDate = firstData > firstPeriod ? firstData : firstPeriod
-
-  const points = makeDateArray(firstDate)
-    .map(date => {
-      return cashflowNodes[date] || makePoint(date)
-    })
-    .map(p => {
-      return {
-        date: p.date,
-        debts: toDisplay(p.debts),
-        income: toDisplay(p.income),
-        outcome: -toDisplay(p.outcome),
-        transfers: toDisplay(p.transfers),
-      }
-    })
-
-  return points
 }
