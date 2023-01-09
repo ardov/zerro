@@ -6,11 +6,12 @@ import {
   TTransaction,
   TTransactionId,
 } from '@shared/types'
+import { withPerf } from '@shared/helpers/performance'
+
 import { trModel, TrType } from '@entities/transaction'
 import { instrumentModel } from '@entities/currency/instrument'
 import { debtorModel } from '@entities/debtors'
 import { accountModel } from '@entities/account'
-import { withPerf } from '@shared/helpers/performance'
 
 export type TTrEffect = {
   id: TTransactionId

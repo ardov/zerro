@@ -1,12 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import {
-  AccountType,
-  ById,
-  TAccountId,
-  TFxAmount,
-  TISODate,
-  TTransactionId,
-} from '@shared/types'
+import { AccountType, ById, TISODate, TTransactionId } from '@shared/types'
 import { withPerf } from '@shared/helpers/performance'
 import { entries } from '@shared/helpers/keys'
 import { isZero, subFxAmount } from '@shared/helpers/money'
@@ -15,12 +8,8 @@ import { TSelector } from '@store/index'
 import { trModel } from '@entities/transaction'
 import { debtorModel, TDebtor } from '@entities/debtors'
 import { accountModel, TAccountPopulated } from '@entities/account'
+import { TBalanceState } from './shared/types'
 import { TTrEffect, getConverterToChange } from './getConverterToChange'
-
-export type TBalanceState = {
-  accounts: Record<TAccountId, TFxAmount>
-  debtors: Record<string, TFxAmount>
-}
 
 /**
  * Returns balances

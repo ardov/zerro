@@ -1,11 +1,11 @@
+import { AccountType, TISODate } from '@shared/types'
 import { GroupBy } from '@shared/helpers/date'
 import { keys } from '@shared/helpers/keys'
-import { AccountType, TISODate } from '@shared/types'
+import { round } from '@shared/helpers/money'
 
 import { accountModel } from '@entities/account'
 import { accBalanceModel } from '@entities/accBalances'
 import { getStart, Period } from '../shared/period'
-import { round } from '@shared/helpers/money'
 
 export type TPoint = {
   date: TISODate

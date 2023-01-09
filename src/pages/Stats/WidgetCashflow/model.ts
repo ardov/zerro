@@ -18,7 +18,7 @@ type TPoint = {
   transfers: TFxAmount
 }
 
-export function calcCashflow(
+function calcCashflow(
   transactions: TTransaction[],
   debtAccId: TAccountId | undefined,
   instCodeMap: TInstCodeMap,

@@ -1,58 +1,35 @@
 import { useMemo } from 'react'
 import { TDateDraft, TISODate } from '@shared/types'
-import {
-  GroupBy,
-  makeDateArray,
-  toGroup,
-  toISODate,
-} from '@shared/helpers/date'
+import { GroupBy, toGroup } from '@shared/helpers/date'
 import { keys } from '@shared/helpers/keys'
 
 import { useAppSelector } from '@store/index'
-
-import { getBalances, TBalanceState } from './getBalances'
-import { getDisplayBalancesByDate } from './getBalancesByDate'
+import { displayCurrency } from '@entities/currency/displayCurrency'
+import { balancesToDisplay } from './shared/convertBalancesToDisplay'
+import { TBalanceNode } from './shared/types'
+import { getBalancesByDate } from './getBalancesByDate'
 
 export function useBalances(
   aggregation: GroupBy,
   start?: TDateDraft,
   end?: TDateDraft
 ) {
-  const { byDay, startingBalances } = useAppSelector(getBalances)
-
+  const list = useAppSelector(getBalancesByDate)
+  const startDate = toGroup(start || list[0].date, aggregation)
+  const endDate = toGroup(end || Date.now(), aggregation)
   const balances = useMemo(() => {
-    let firstDate = getStartDate(start, byDay)
-    return makeDateArray(firstDate, end || Date.now(), aggregation).map(
-      date => {
-        return {
-          date,
-          balances: findBalances(date, aggregation),
-        }
-      }
-    )
-
-    function findBalances(date: TISODate, aggregation: GroupBy) {
-      let key = keys(byDay)
-        .sort()
-        .reverse()
-        .find(key => toGroup(key, aggregation) <= date)
-      return key ? byDay[key] : startingBalances
-    }
-  }, [aggregation, byDay, end, start, startingBalances])
+    let byGroup: Record<TISODate, TBalanceNode> = {}
+    list.forEach(node => {
+      let date = toGroup(node.date, aggregation)
+      if (date < startDate || date > endDate) return
+      byGroup[date] = { date, balances: node.balances }
+    })
+    return keys(byGroup)
+      .sort()
+      .map(group => byGroup[group])
+  }, [aggregation, endDate, list, startDate])
 
   return balances
-}
-
-const firstReasonableDate = '2000-01-01'
-function getStartDate(
-  date: TDateDraft | undefined,
-  byDay: Record<TISODate, TBalanceState>
-) {
-  if (date) return date
-  let firstKey = keys(byDay)
-    .sort()
-    .find(d => d >= firstReasonableDate)
-  return firstKey || toISODate(Date.now())
 }
 
 export function useDisplayBalances(
@@ -60,29 +37,11 @@ export function useDisplayBalances(
   start?: TDateDraft,
   end?: TDateDraft
 ) {
-  const list = useAppSelector(getDisplayBalancesByDate)
-
-  const balances = useMemo(() => {
-    let newFirst = [...list].reverse()
-
-    let firstDate =
-      start ||
-      (list[0].date >= firstReasonableDate ? list[0].date : firstReasonableDate)
-    return makeDateArray(firstDate, end || Date.now(), aggregation).map(
-      date => {
-        return {
-          date,
-          balances: findBalances(date, aggregation),
-        }
-      }
-    )
-
-    function findBalances(date: TISODate, aggregation: GroupBy) {
-      let key =
-        newFirst.find(s => toGroup(s.date, aggregation) <= date) || list[0]
-      return key.balances
-    }
-  }, [aggregation, end, list, start])
-
+  const fxBalances = useBalances(aggregation, start, end)
+  const convert = useAppSelector(displayCurrency.getConverter)
+  const balances = useMemo(
+    () => balancesToDisplay(fxBalances, convert),
+    [convert, fxBalances]
+  )
   return balances
 }
