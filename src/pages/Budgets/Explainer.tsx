@@ -26,15 +26,15 @@ export const Explainer = () => {
         <Stack spacing={1} flexGrow={1}>
           <Typography>
             <Balancer>
-              <b>Zerro обновился и стал умнее</b>
+              <b>Куда пропали бюджеты?</b>
             </Balancer>
           </Typography>
 
           <Typography>
             <Balancer>
-              У Zerro теперь свои, независимые от Дзен-мани бюджеты. Это можно
-              изменить в настройках + там же можно сконвертировать старые
-              бюджеты в новые.
+              Привет! Zerro обновился, у него теперь свои, независимые
+              от Дзен-мани, бюджеты. Сконвертируйте старые бюджеты в новые
+              в настройках.
             </Balancer>
           </Typography>
 
@@ -76,7 +76,7 @@ export const Explainer = () => {
   )
 }
 
-const HIDE_DATE = '2023-02-15'
+const HIDE_DATE = '2023-02-25'
 
 function useExplainerModel() {
   const dispatch = useAppDispatch()

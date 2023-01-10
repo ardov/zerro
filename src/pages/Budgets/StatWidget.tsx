@@ -28,7 +28,6 @@ export function StatWidget(props: {
 }) {
   const { month, mode } = props
   const { setDrawer } = useTrDrawer()
-  const showIncome = props.mode === 'income'
   const [currency] = displayCurrency.useDisplayCurrency()
   const [opened, toggleOpened] = useToggle(false)
 
@@ -63,7 +62,7 @@ export function StatWidget(props: {
         </Collapse> */}
 
         <DataLine
-          name={showIncome ? 'Доходы' : 'Расходы'}
+          name={mode === 'income' ? 'Доходы' : 'Расходы'}
           amount={totalAmount}
           currency={currency}
         />
