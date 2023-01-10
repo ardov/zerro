@@ -54,7 +54,6 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
       <Divider light />
       <ThemeItem onClose={onClose} />
 
-      <Divider light />
       {showLinks && <NavItems onClose={onClose} />}
 
       <Divider light />
@@ -127,6 +126,8 @@ function ThemeItem({ onClose }: ItemProps) {
 function NavItems({ onClose }: ItemProps) {
   return (
     <>
+      <Divider light />
+
       <MenuItem onClick={onClose} component={Link} to="/stats">
         <ListItemIcon>
           <BarChartIcon />

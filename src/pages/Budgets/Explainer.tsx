@@ -2,6 +2,7 @@ import { getAccTagMap } from '@entities/old-hiddenData/accTagMap'
 import { getGoals } from '@entities/old-hiddenData/goals'
 import { getTagMeta } from '@entities/old-hiddenData/tagMeta'
 import { userSettingsModel } from '@entities/userSettings'
+import { convertZmBudgetsToZerro } from '@features/budget/convertZmBudgetsToZerro'
 import { Card, IconButton, Link, Stack, Typography } from '@mui/material'
 import { keys } from '@shared/helpers/keys'
 import { sendEvent } from '@shared/helpers/tracking'
@@ -11,6 +12,7 @@ import { useAppDispatch, useAppSelector } from '@store/index'
 import Balancer from 'react-wrap-balancer'
 
 export const Explainer = () => {
+  const dispatch = useAppDispatch()
   const { markSeen, isHidden, usedOldFeatures } = useExplainerModel()
   if (isHidden) return null
 
@@ -33,8 +35,7 @@ export const Explainer = () => {
           <Typography>
             <Balancer>
               Привет! Zerro обновился, у него теперь свои, независимые
-              от Дзен-мани, бюджеты. Сконвертируйте старые бюджеты в новые
-              в настройках.
+              от Дзен-мани, бюджеты. Сконвертируйте старые бюджеты в новые.
             </Balancer>
           </Typography>
 
@@ -49,6 +50,19 @@ export const Explainer = () => {
           )}
 
           <Stack direction="row" flexWrap="wrap" rowGap={1} columnGap={2}>
+            <Tooltip title="Бюджеты из Дзен-мани скопируются в Zerro. Изменения бюджетов в Zerro не будут влиять на бюджеты в ДМ.">
+              <Link
+                component="button"
+                variant="body1"
+                color="secondary"
+                onClick={() => {
+                  sendEvent('Migration: convert_budgets')
+                  dispatch(convertZmBudgetsToZerro())
+                }}
+              >
+                Конвертировать бюджеты
+              </Link>
+            </Tooltip>
             <Link
               href="https://t.me/zerroapp"
               color="secondary"
