@@ -23,6 +23,7 @@ import {
   FavoriteBorderIcon,
   SyncAltIcon,
   WhatshotIcon,
+  BarChartIcon,
 } from '@shared/ui/Icons'
 import { DebtorList } from '@components/DebtorList'
 
@@ -97,6 +98,12 @@ function Links() {
         path="/transactions"
         icon={<SyncAltIcon />}
       />
+      <NavigationLink text="Аналитика" path="/stats" icon={<BarChartIcon />} />
+      <NavigationLink
+        text="Итоги года"
+        path="/review"
+        icon={<WhatshotIcon />}
+      />
       <NavigationLink
         text="Как пользоваться"
         path="/about"
@@ -106,11 +113,6 @@ function Links() {
         text="Поддержать проект"
         path="/donation"
         icon={<FavoriteBorderIcon />}
-      />
-      <NavigationLink
-        text="Итоги года"
-        path="/review"
-        icon={<WhatshotIcon />}
       />
     </List>
   )

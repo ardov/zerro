@@ -55,7 +55,6 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
       <ThemeItem onClose={onClose} />
 
       <Divider light />
-      <StatsItem onClose={onClose} />
       {showLinks && <NavItems onClose={onClose} />}
 
       <Divider light />
@@ -125,20 +124,23 @@ function ThemeItem({ onClose }: ItemProps) {
   )
 }
 
-function StatsItem({ onClose }: ItemProps) {
-  return (
-    <MenuItem onClick={onClose} component={Link} to="/stats">
-      <ListItemIcon>
-        <BarChartIcon />
-      </ListItemIcon>
-      <ListItemText>Статистика (beta 😬)</ListItemText>
-    </MenuItem>
-  )
-}
-
 function NavItems({ onClose }: ItemProps) {
   return (
     <>
+      <MenuItem onClick={onClose} component={Link} to="/stats">
+        <ListItemIcon>
+          <BarChartIcon />
+        </ListItemIcon>
+        <ListItemText>Аналитика</ListItemText>
+      </MenuItem>
+
+      <MenuItem onClick={onClose} component={Link} to="/review">
+        <ListItemIcon>
+          <WhatshotIcon />
+        </ListItemIcon>
+        <ListItemText>Итоги года</ListItemText>
+      </MenuItem>
+
       <MenuItem onClick={onClose} component={Link} to="/about">
         <ListItemIcon>
           <HelpOutlineIcon />
@@ -151,13 +153,6 @@ function NavItems({ onClose }: ItemProps) {
           <FavoriteBorderIcon />
         </ListItemIcon>
         <ListItemText>Поддержать проект</ListItemText>
-      </MenuItem>
-
-      <MenuItem onClick={onClose} component={Link} to="/review">
-        <ListItemIcon>
-          <WhatshotIcon />
-        </ListItemIcon>
-        <ListItemText>Итоги года</ListItemText>
       </MenuItem>
     </>
   )
