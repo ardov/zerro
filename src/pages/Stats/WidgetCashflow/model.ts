@@ -8,8 +8,8 @@ import {
 } from '@shared/types'
 import { addFxAmount } from '@shared/helpers/money'
 import { GroupBy, makeDateArray, toGroup } from '@shared/helpers/date'
-import { keys } from '@shared/helpers/keys'
 
+import { useAppSelector } from '@store/index'
 import { accountModel } from '@entities/account'
 import { instrumentModel, TInstCodeMap } from '@entities/currency/instrument'
 import { displayCurrency } from '@entities/currency/displayCurrency'
@@ -38,7 +38,7 @@ export function useCashFlow(
   )
 
   const toDisplay = displayCurrency.useToDisplay('current')
-  const historyStart = keys(aggregatedNodes).sort()[0]
+  const historyStart = useAppSelector(trModel.getHistoryStart)
   const firstDate = getStartDate(period, aggregation, historyStart)
 
   const points = makeDateArray(firstDate, Date.now(), aggregation)
