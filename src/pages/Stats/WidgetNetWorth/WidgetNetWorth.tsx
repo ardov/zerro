@@ -136,7 +136,9 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
           >
             <YAxis type="number" domain={['dataMin', 'dataMax']} hide />
             <Tooltip content={<CustomTooltip />} />
-            <ReferenceLine y={0} stroke={theme.palette.divider} />
+            {visibleParts.length > 0 && (
+              <ReferenceLine y={0} stroke={theme.palette.divider} />
+            )}
 
             {makeBar('debts')}
             {makeBar('accountDebts')}
