@@ -6,6 +6,7 @@ import { round } from '@shared/helpers/money'
 import { accountModel } from '@entities/account'
 import { accBalanceModel } from '@entities/accBalances'
 import { getStart, Period } from '../shared/period'
+import { isFinite } from 'lodash'
 
 export type TPoint = {
   date: TISODate
@@ -30,8 +31,15 @@ export function useNetWorth(period: Period, aggregation: GroupBy) {
       let lented = 0
       let debts = 0
       keys(debtors).forEach(id => {
-        if (debtors[id] > 0) lented = round(lented + debtors[id])
-        if (debtors[id] < 0) debts = round(debts + debtors[id])
+        console.assert(
+          isFinite(debtors[id]),
+          `debtors[${id}] is not a number`,
+          debtors[id],
+          date
+        )
+        const value = debtors[id] || 0
+        if (value > 0) lented = round(lented + value)
+        if (value < 0) debts = round(debts + value)
       })
 
       let fundsInBudget = 0
@@ -39,15 +47,22 @@ export function useNetWorth(period: Period, aggregation: GroupBy) {
       let accountDebts = 0
       keys(accounts).forEach(id => {
         if (accs[id].type === AccountType.Debt) return
-        if (accounts[id] > 0) {
+        console.assert(
+          isFinite(accounts[id]),
+          `accounts[${id}] is not a number`,
+          accounts[id],
+          date
+        )
+        const value = accounts[id] || 0
+        if (value > 0) {
           if (accs[id]?.inBudget) {
-            fundsInBudget = round(fundsInBudget + accounts[id])
+            fundsInBudget = round(fundsInBudget + value)
           } else {
-            fundsSaving = round(fundsSaving + accounts[id])
+            fundsSaving = round(fundsSaving + value)
           }
         }
-        if (accounts[id] < 0) {
-          accountDebts = round(accountDebts + accounts[id])
+        if (value < 0) {
+          accountDebts = round(accountDebts + value)
         }
       })
 

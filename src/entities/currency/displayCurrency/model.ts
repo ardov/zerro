@@ -15,10 +15,12 @@ const useSavedDisplayCurrency = createLocalStorageStateHook<TFxCode | null>(
   null
 )
 
-function getDisplayCurrency(state: RootState) {
-  const savedCurrency = localStorage.getItem(KEY) || null
-  if (savedCurrency) return JSON.parse(savedCurrency) as TFxCode
-  return userModel.getUserCurrency(state)
+function getDisplayCurrency(state: RootState): TFxCode {
+  const savedCurrencyRaw = localStorage.getItem(KEY)
+  const parsedCurrency = savedCurrencyRaw
+    ? (JSON.parse(savedCurrencyRaw) as TFxCode)
+    : null
+  return parsedCurrency || userModel.getUserCurrency(state)
 }
 
 function useDisplayCurrency() {
@@ -45,7 +47,14 @@ const getConverter = createSelector(
   [fxRateModel.getter, getDisplayCurrency],
   (getRates, displayCurrency) =>
     (amount: TFxAmount, date: 'current' | TDateDraft) => {
-      return convertFx(amount, displayCurrency, getRates(date).rates)
+      const res = convertFx(amount, displayCurrency, getRates(date).rates)
+      console.assert(
+        !isNaN(res),
+        'NaN in getConverter',
+        amount,
+        displayCurrency
+      )
+      return res
     }
 )
 

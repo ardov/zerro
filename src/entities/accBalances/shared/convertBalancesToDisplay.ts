@@ -1,6 +1,7 @@
 import { TDateDraft, TFxAmount } from '@shared/types'
 import { entries } from '@shared/helpers/keys'
 import { TBalanceNode } from './types'
+import { isFinite } from 'lodash'
 
 export function balancesToDisplay(
   list: Array<TBalanceNode<TFxAmount>>,
@@ -15,10 +16,18 @@ export function balancesToDisplay(
     }
     // Add accounts
     entries(node.balances.accounts).forEach(([id, amount]) => {
+      console.assert(
+        isFinite(convert(amount, node.date)),
+        'Not converted correctly: ' + JSON.stringify(amount)
+      )
       displayNode.balances.accounts[id] = convert(amount, node.date)
     })
     // Add debtors
     entries(node.balances.debtors).forEach(([id, amount]) => {
+      console.assert(
+        isFinite(convert(amount, node.date)),
+        'Not converted correctly: ' + JSON.stringify(amount)
+      )
       displayNode.balances.debtors[id] = convert(amount, node.date)
     })
     return displayNode
