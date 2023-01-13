@@ -52,12 +52,14 @@ export const getConverterToChange = createSelector(
 
         case TrType.IncomeDebt:
           effect.accounts = { [incomeAccount]: { [incomeFx]: income } }
-          effect.debtors = { [getDebtorId(tr)]: { [outcomeFx]: -outcome } }
+          // Use income value as a debt amount
+          effect.debtors = { [getDebtorId(tr)]: { [outcomeFx]: -income } }
           break
 
         case TrType.OutcomeDebt:
           effect.accounts = { [outcomeAccount]: { [outcomeFx]: -outcome } }
-          effect.debtors = { [getDebtorId(tr)]: { [incomeFx]: income } }
+          // Use outcome value as a debt amount
+          effect.debtors = { [getDebtorId(tr)]: { [incomeFx]: outcome } }
           break
 
         default:
