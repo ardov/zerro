@@ -10,6 +10,7 @@ import {
 import { toISOMonth } from '@shared/helpers/date'
 import { Amount } from '@shared/ui/Amount'
 import { TFxAmount } from '@shared/types'
+import { Tooltip } from '@shared/ui/Tooltip'
 
 import { useAppDispatch } from '@store'
 import { accountModel, TAccountPopulated } from '@entities/account'
@@ -59,12 +60,16 @@ export const Account: FC<{ account: TAccountPopulated } & ListItemButtonProps> =
             color: account.balance < 0 ? 'error.main' : 'text.secondary',
           }}
         >
-          <Amount
-            value={account.balance}
-            currency={account.fxCode}
-            decMode="ifOnly"
-            noShade
-          />
+          <Tooltip title={account.balance.toString()}>
+            <div>
+              <Amount
+                value={account.balance}
+                currency={account.fxCode}
+                decMode="ifOnly"
+                noShade
+              />
+            </div>
+          </Tooltip>
         </Box>
       </ListItemButton>
     )

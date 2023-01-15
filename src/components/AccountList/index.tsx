@@ -80,7 +80,7 @@ const ArchivedList: FC<{ accs: TAccountPopulated[] }> = props => {
   if (!accs.length) return null
 
   const sum = getTotal(accs)
-  const hasArchivedMoney = Boolean(toDisplay(sum)) // It can be to small to show
+  const hasArchivedMoney = Boolean(toDisplay(sum)) // It can be too small to show
   return (
     <>
       <Collapse in={visible} unmountOnExit>
