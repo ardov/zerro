@@ -1,19 +1,30 @@
+import { useCallback } from 'react'
+import Balancer from 'react-wrap-balancer'
+import { Card, IconButton, Link, Stack, Typography } from '@mui/material'
+import { keys } from '@shared/helpers/keys'
+import { sendEvent } from '@shared/helpers/tracking'
+import { CloseIcon } from '@shared/ui/Icons'
+import { useSnackbar } from '@shared/ui/SnackbarProvider'
+import { Tooltip } from '@shared/ui/Tooltip'
+
+import { useAppDispatch, useAppSelector } from '@store/index'
 import { getAccTagMap } from '@entities/old-hiddenData/accTagMap'
 import { getGoals } from '@entities/old-hiddenData/goals'
 import { getTagMeta } from '@entities/old-hiddenData/tagMeta'
 import { userSettingsModel } from '@entities/userSettings'
 import { convertZmBudgetsToZerro } from '@features/budget/convertZmBudgetsToZerro'
-import { Card, IconButton, Link, Stack, Typography } from '@mui/material'
-import { keys } from '@shared/helpers/keys'
-import { sendEvent } from '@shared/helpers/tracking'
-import { CloseIcon } from '@shared/ui/Icons'
-import { Tooltip } from '@shared/ui/Tooltip'
-import { useAppDispatch, useAppSelector } from '@store/index'
-import Balancer from 'react-wrap-balancer'
 
 export const Explainer = () => {
   const dispatch = useAppDispatch()
+  const setSnackbar = useSnackbar()
   const { markSeen, isHidden, usedOldFeatures } = useExplainerModel()
+
+  const convertBudgets = useCallback(() => {
+    sendEvent('Migration: convert_budgets')
+    const updated = dispatch(convertZmBudgetsToZerro())
+    setSnackbar({ message: `✅ Бюджеты сконвертированы (${updated.length})` })
+  }, [dispatch, setSnackbar])
+
   if (isHidden) return null
 
   return (
@@ -55,10 +66,7 @@ export const Explainer = () => {
                 component="button"
                 variant="body1"
                 color="secondary"
-                onClick={() => {
-                  sendEvent('Migration: convert_budgets')
-                  dispatch(convertZmBudgetsToZerro())
-                }}
+                onClick={convertBudgets}
               >
                 Конвертировать бюджеты
               </Link>

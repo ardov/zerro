@@ -6,6 +6,7 @@ import { StyledEngineProvider } from '@mui/material/styles'
 import ruDateLocale from 'date-fns/locale/ru'
 import { store } from '@store'
 import { AppThemeProvider } from './AppThemeProvider'
+import { SnackbarProvider } from '@shared/ui/SnackbarProvider'
 
 export function Providers(props: {
   children: React.ReactNode
@@ -18,7 +19,9 @@ export function Providers(props: {
           dateAdapter={AdapterDateFns}
           locale={ruDateLocale}
         >
-          <AppThemeProvider>{props.children}</AppThemeProvider>
+          <AppThemeProvider>
+            <SnackbarProvider>{props.children}</SnackbarProvider>
+          </AppThemeProvider>
         </LocalizationProvider>
       </Provider>
     </StyledEngineProvider>
