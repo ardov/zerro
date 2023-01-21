@@ -4,7 +4,6 @@ import {
   ListItemButton,
   ListItemText,
   InputAdornment,
-  Popover,
   IconButton,
   PopoverProps,
 } from '@mui/material'
@@ -15,6 +14,7 @@ import { formatMoney } from '@shared/helpers/money'
 import { convertFx } from '@shared/helpers/money'
 import { sendEvent } from '@shared/helpers/tracking'
 import { TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
+import { AdaptivePopover } from '@shared/ui/AdaptivePopover'
 
 import { useAppDispatch } from '@store'
 import { balances } from '@entities/envBalances'
@@ -109,7 +109,7 @@ const BudgetPopoverContent: FC<TBudgetPopoverProps> = props => {
     )
 
   return (
-    <Popover onClose={() => changeAndClose(+inputValue)} {...rest}>
+    <AdaptivePopover onClose={() => changeAndClose(+inputValue)} {...rest}>
       <AmountInput
         autoFocus
         value={inputValue}
@@ -153,7 +153,7 @@ const BudgetPopoverContent: FC<TBudgetPopoverProps> = props => {
           </ListItemButton>
         ))}
       </List>
-    </Popover>
+    </AdaptivePopover>
   )
 }
 

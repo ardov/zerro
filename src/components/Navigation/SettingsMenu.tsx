@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   SaveAltIcon,
@@ -12,13 +12,15 @@ import {
   SyncIcon,
   SyncDisabledIcon,
   AutoAwesomeIcon,
+  MoreHorizIcon,
 } from '@shared/ui/Icons'
 import {
   Divider,
   ListItemIcon,
   ListItemText,
-  Menu,
+  ListSubheader,
   MenuItem,
+  MenuList,
   Switch,
   Typography,
 } from '@mui/material'
@@ -37,6 +39,8 @@ import { exportCSV } from '@features/export/exportCSV'
 import { exportJSON } from '@features/export/exportJSON'
 import { clearLocalData } from '@features/localData'
 import { convertZmBudgetsToZerro } from '@features/budget/convertZmBudgetsToZerro'
+import { useSnackbar } from '@shared/ui/SnackbarProvider'
+import { AdaptivePopover } from '../../shared/ui/AdaptivePopover'
 
 type SettingsMenuProps = {
   showLinks?: boolean
@@ -47,31 +51,49 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
   const { anchorEl, onClose, showLinks } = props
 
   return (
-    <Menu
+    <AdaptivePopover
       anchorEl={anchorEl}
       open={Boolean(anchorEl)}
       onClose={onClose}
-      style={{ maxHeight: '90vh' }}
     >
+      <MenuList>
+        <Settings showLinks={showLinks} onClose={onClose} />
+      </MenuList>
+    </AdaptivePopover>
+  )
+}
+
+const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
+  const [isExpanded, setExpanded] = useState(false)
+  return (
+    <>
+      {props.showLinks && <NavItems onClose={props.onClose} />}
+
+      <ListSubheader>Настройки</ListSubheader>
+      <ThemeItem onClose={props.onClose} />
+      <ReloadDataItem onClose={props.onClose} />
+      <AutoSyncItem />
+
+      {isExpanded ? (
+        <BudgetSettingsItem />
+      ) : (
+        <MenuItem onClick={() => setExpanded(true)}>
+          <ListItemIcon>
+            <MoreHorizIcon />
+          </ListItemIcon>
+          <ListItemText>Расширенные настройки...</ListItemText>
+        </MenuItem>
+      )}
+
+      <Divider light />
+      <ListSubheader>Экспорт</ListSubheader>
       <ExportCsvItem />
       <ExportJsonItem />
 
       <Divider light />
-      <ThemeItem onClose={onClose} />
-
-      {showLinks && <NavItems onClose={onClose} />}
-
-      <Divider light />
-      <ReloadDataItem onClose={onClose} />
-      <AutoSyncItem />
-
-      <Divider light />
-      <BudgetSettingsItem />
-
-      <Divider light />
       <LogOutItem />
       <VersionItem />
-    </Menu>
+    </>
   )
 }
 
@@ -131,8 +153,6 @@ function ThemeItem({ onClose }: ItemProps) {
 function NavItems({ onClose }: ItemProps) {
   return (
     <>
-      <Divider light />
-
       <MenuItem onClick={onClose} component={Link} to="/stats">
         <ListItemIcon>
           <BarChartIcon />
@@ -160,6 +180,8 @@ function NavItems({ onClose }: ItemProps) {
         </ListItemIcon>
         <ListItemText>Поддержать проект</ListItemText>
       </MenuItem>
+
+      <Divider light />
     </>
   )
 }
@@ -203,6 +225,7 @@ function AutoSyncItem() {
 
 function BudgetSettingsItem() {
   const dispatch = useAppDispatch()
+  const setSnackbar = useSnackbar()
   const { preferZmBudgets } = userSettingsModel.useUserSettings()
   const toggleSetting = () => {
     sendEvent(`Settings: preferZmBudgets ${preferZmBudgets ? 'off' : 'on'}`)
@@ -210,7 +233,8 @@ function BudgetSettingsItem() {
   }
   const convertBudgets = () => {
     sendEvent(`Settings: convert old budgets`)
-    dispatch(convertZmBudgetsToZerro())
+    const updated = dispatch(convertZmBudgetsToZerro())
+    setSnackbar({ message: `✅ Бюджеты сконвертированы (${updated.length})` })
   }
 
   return (
