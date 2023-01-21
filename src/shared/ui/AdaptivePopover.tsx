@@ -3,18 +3,21 @@ import {
   Popover,
   PopoverProps,
   SwipeableDrawer,
+  SwipeableDrawerProps,
   Theme,
   useMediaQuery,
 } from '@mui/material'
 
-export const AdaptivePopover = (props: PopoverProps) => {
+export const AdaptivePopover = (
+  props: PopoverProps & { anchor?: SwipeableDrawerProps['anchor'] }
+) => {
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
-  const { transitionDuration, anchorEl, ...rest } = props
+  const { transitionDuration, anchorEl, anchor, ...rest } = props
 
   if (isMobile) {
     return (
       <SwipeableDrawer
-        anchor="bottom"
+        anchor={anchor || 'bottom'}
         onOpen={() => {}}
         disableSwipeToOpen
         PaperProps={{

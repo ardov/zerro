@@ -109,7 +109,11 @@ const BudgetPopoverContent: FC<TBudgetPopoverProps> = props => {
     )
 
   return (
-    <AdaptivePopover onClose={() => changeAndClose(+inputValue)} {...rest}>
+    <AdaptivePopover
+      onClose={() => changeAndClose(+inputValue)}
+      anchor="top"
+      {...rest}
+    >
       <AmountInput
         autoFocus
         value={inputValue}
