@@ -12,6 +12,7 @@ const GlobalVaribles = (props: { theme: DefaultTheme }) => {
     :root {
       --c-bg: ${props.theme.palette.background.default};
       --c-scrollbar: ${props.theme.palette.divider};
+      --c-primary: ${props.theme.palette.primary.main};
     }
   `
   return <Global styles={styles} />
