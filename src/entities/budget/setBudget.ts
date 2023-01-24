@@ -18,7 +18,11 @@ export function setBudget(upd: TBudgetUpdate | TBudgetUpdate[]): AppThunk {
     updates.forEach(update => {
       const { type, id } = envelopeModel.parseId(update.id)
       if (type === DataEntity.Tag && preferZmBudgets) {
-        tagUpdates.push({ tag: id, month: update.month, value: update.value })
+        tagUpdates.push({
+          tag: id === 'null' ? null : id,
+          month: update.month,
+          value: update.value,
+        })
       } else {
         envUpdates.push(update)
       }

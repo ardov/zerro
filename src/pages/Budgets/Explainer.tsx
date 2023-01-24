@@ -72,8 +72,9 @@ export const Explainer = () => {
               </Link>
             </Tooltip>
             <Link
-              href="https://t.me/zerroapp"
+              href="https://www.notion.so/zerro/Zerro-v1-2023-ffdc46871b3d4581868fd005e2c2a0f5"
               color="secondary"
+              target="_blank"
               onClick={() => sendEvent('Migration: whats_new')}
             >
               Что изменилось?
