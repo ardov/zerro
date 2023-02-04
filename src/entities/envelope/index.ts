@@ -1,5 +1,9 @@
 import { useAppSelector } from '@store/index'
-import { getEnvelopes, getEnvelopeStructure } from './getEnvelopes'
+import {
+  getEnvelopes,
+  getEnvelopeStructure,
+  getKeepingEnvelopes,
+} from './getEnvelopes'
 import { patchEnvelope } from './patchEnvelope'
 import { envId } from './shared/envelopeId'
 import { flattenStructure } from './shared/structure'
@@ -13,6 +17,7 @@ export const envelopeModel = {
   // Selectors
   getEnvelopes,
   getEnvelopeStructure,
+  getKeepingEnvelopes,
 
   // Hooks
   useEnvelopes: () => useAppSelector(getEnvelopes),

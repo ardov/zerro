@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { ById } from '@shared/types'
+import { ById, TEnvelopeId } from '@shared/types'
 import { TSelector } from '@store'
 import { accountModel } from '@entities/account'
 import { debtorModel } from '@entities/debtors'
@@ -14,6 +14,8 @@ import {
 import { withPerf } from '@shared/helpers/performance'
 import { compareEnvelopes } from './shared/compareEnvelopes'
 import { userModel } from '@entities/user'
+import { keys } from '@shared/helpers/keys'
+import { shallowEqual } from 'react-redux'
 
 const getCompiledEnvelopes: TSelector<{
   byId: ById<TEnvelope>
@@ -80,3 +82,10 @@ export const getEnvelopes: TSelector<ById<TEnvelope>> = state =>
 export const getEnvelopeStructure: TSelector<
   ReturnType<typeof buildStructure>
 > = state => getCompiledEnvelopes(state).structure
+
+/** List of envelopes that keep their income */
+export const getKeepingEnvelopes: TSelector<TEnvelopeId[]> = createSelector(
+  [getEnvelopes],
+  envelopes => keys(envelopes).filter(id => envelopes[id].keepIncome),
+  { memoizeOptions: { resultEqualityCheck: shallowEqual } }
+)

@@ -1,98 +1,79 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { ByMonth, TEnvelopeId, TFxAmount, TTransaction } from '@shared/types'
+import { ByMonth, TEnvelopeId, TFxAmount } from '@shared/types'
 import { keys } from '@shared/helpers/keys'
 import { addFxAmount } from '@shared/helpers/money'
 import { withPerf } from '@shared/helpers/performance'
 import { TSelector } from '@store/index'
 
-import { getRawActivity, TRawActivityNode } from './1 - rawActivity'
-import { getKeepingEnvelopes } from './1 - keepingEnvelopes'
+import {
+  EnvActivity,
+  getRawActivity,
+  TRawActivityNode,
+} from './1 - rawActivity'
+import { envelopeModel } from '@entities/envelope'
 
 export type TActivityNode = {
   total: TFxAmount
-  transferFees: {
-    total: TFxAmount
-    transactions: TTransaction[]
-  }
+  transferFees: EnvActivity
   generalIncome: {
     total: TFxAmount
-    byEnv: {
-      [id: TEnvelopeId]: {
-        total: TFxAmount
-        transactions: TTransaction[]
-      }
-    }
+    byEnv: Record<TEnvelopeId, EnvActivity>
   }
   envActivity: {
     total: TFxAmount
-    byEnv: {
-      [id: TEnvelopeId]: {
-        total: TFxAmount
-        transactions: TTransaction[]
-      }
-    }
+    byEnv: Record<TEnvelopeId, EnvActivity>
   }
 }
 
 export const getActivity: TSelector<ByMonth<TActivityNode>> = createSelector(
-  [getRawActivity, getKeepingEnvelopes],
+  [getRawActivity, envelopeModel.getKeepingEnvelopes],
   withPerf('🖤 getActivity', calcActivity)
 )
 
 function calcActivity(
-  activity: ByMonth<TRawActivityNode>,
+  rawActivity: ByMonth<TRawActivityNode>,
   keepingEnvIds: TEnvelopeId[]
 ) {
   const res: ByMonth<TActivityNode> = {}
 
-  keys(activity).forEach(month => {
+  keys(rawActivity).forEach(month => {
     const node = makeEmptyNode()
-    const { internal, income, outcome } = activity[month]
+    const { internal, income, outcome } = rawActivity[month]
 
-    if (internal.total && internal.transactions.length) {
-      node.total = addFxAmount(node.total, internal.total)
-      node.transferFees.total = internal.total
-      node.transferFees.transactions = internal.transactions
-    }
+    node.total = addFxAmount(node.total, internal.total)
+    node.transferFees = internal
 
     keys(income).forEach(id => {
-      const { total, transactions } = income[id]
+      const activity = income[id]
+      node.total = addFxAmount(node.total, activity.total)
       if (keepingEnvIds.includes(id)) {
         // Envelope keeps income -> all activity goes to envelope
-        node.total = addFxAmount(node.total, total)
-        node.envActivity.total = addFxAmount(node.envActivity.total, total)
-        node.envActivity.byEnv[id] ??= { total: {}, transactions: [] }
-        node.envActivity.byEnv[id].total = addFxAmount(
-          node.envActivity.byEnv[id].total,
-          total
+        node.envActivity.total = addFxAmount(
+          node.envActivity.total,
+          activity.total
         )
-        node.envActivity.byEnv[id].transactions =
-          node.envActivity.byEnv[id].transactions.concat(transactions)
+        node.envActivity.byEnv[id] = activity
       } else {
         // Activity goes to general income
-        node.total = addFxAmount(node.total, total)
-        node.generalIncome.total = addFxAmount(node.generalIncome.total, total)
-        node.generalIncome.byEnv[id] ??= { total: {}, transactions: [] }
-        node.generalIncome.byEnv[id].total = addFxAmount(
-          node.generalIncome.byEnv[id].total,
-          total
+        node.generalIncome.total = addFxAmount(
+          node.generalIncome.total,
+          activity.total
         )
-        node.generalIncome.byEnv[id].transactions =
-          node.generalIncome.byEnv[id].transactions.concat(transactions)
+        node.generalIncome.byEnv[id] = activity
       }
     })
-    keys(outcome).forEach(id => {
-      const { total, transactions } = outcome[id]
 
-      node.total = addFxAmount(node.total, total)
-      node.envActivity.total = addFxAmount(node.envActivity.total, total)
-      node.envActivity.byEnv[id] ??= { total: {}, transactions: [] }
-      node.envActivity.byEnv[id].total = addFxAmount(
-        node.envActivity.byEnv[id].total,
-        total
+    keys(outcome).forEach(id => {
+      const activity = outcome[id]
+      node.total = addFxAmount(node.total, activity.total)
+      node.envActivity.total = addFxAmount(
+        node.envActivity.total,
+        activity.total
       )
-      node.envActivity.byEnv[id].transactions =
-        node.envActivity.byEnv[id].transactions.concat(transactions)
+      node.envActivity.byEnv[id] = EnvActivity.merge(
+        node.envActivity.byEnv[id],
+        activity
+      )
     })
 
     res[month] = node
@@ -104,7 +85,7 @@ function calcActivity(
 function makeEmptyNode(): TActivityNode {
   return {
     total: {},
-    transferFees: { total: {}, transactions: [] },
+    transferFees: new EnvActivity(),
     generalIncome: { total: {}, byEnv: {} },
     envActivity: { total: {}, byEnv: {} },
   }

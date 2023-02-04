@@ -20,15 +20,10 @@ import { cleanPayee } from '@entities/shared/cleanPayee'
 import { trModel, TrType } from '@entities/transaction'
 import { envelopeModel } from '@entities/envelope'
 
-type TActivityNode = {
-  total: TFxAmount
-  trend: TFxAmount[]
-  transactions: TTransaction[]
-}
 export type TRawActivityNode = {
-  internal: TActivityNode
-  income: Record<TEnvelopeId, TActivityNode>
-  outcome: Record<TEnvelopeId, TActivityNode>
+  internal: EnvActivity
+  income: Record<TEnvelopeId, EnvActivity>
+  outcome: Record<TEnvelopeId, EnvActivity>
 }
 
 export const getRawActivity: TSelector<ByMonth<TRawActivityNode>> =
@@ -110,7 +105,7 @@ function getRawActivityFn(
     const dayIdx = new Date(tr.date).getDate() - 1
     const month = toISOMonth(tr.date)
     res[month] ??= makeMonthNode()
-    const node = (res[month].income[envId] ??= makeActivityNode())
+    const node = (res[month].income[envId] ??= new EnvActivity())
     node.transactions.push(tr)
     node.total = addFxAmount(node.total, change)
     node.trend[dayIdx] = addFxAmount(node.trend[dayIdx], change)
@@ -124,7 +119,7 @@ function getRawActivityFn(
     const dayIdx = new Date(tr.date).getDate() - 1
     const month = toISOMonth(tr.date)
     res[month] ??= makeMonthNode()
-    const node = (res[month].outcome[envId] ??= makeActivityNode())
+    const node = (res[month].outcome[envId] ??= new EnvActivity())
     node.transactions.push(tr)
     node.total = addFxAmount(node.total, change)
     node.trend[dayIdx] = addFxAmount(node.trend[dayIdx], change)
@@ -133,22 +128,43 @@ function getRawActivityFn(
 
 // Helpers
 
-function makeActivityNode(): TActivityNode {
-  return {
-    total: {},
-    trend: new Array(31).fill({}),
-    transactions: [],
-  }
-}
-
 function makeMonthNode(): TRawActivityNode {
   return {
-    internal: makeActivityNode(),
+    internal: new EnvActivity(),
     income: {},
     outcome: {},
   }
 }
 
+/**
+ * Groupped transactions info
+ * - `total` — fx amount
+ * - `trend` — 31 fx amount points
+ * - `transactions` — list of transactions
+ * */
+export class EnvActivity {
+  total: TFxAmount = {}
+  trend: TFxAmount[] = new Array(31).fill({}).map(_ => ({}))
+  transactions: TTransaction[] = []
+
+  static merge(
+    a: EnvActivity | undefined,
+    b: EnvActivity | undefined
+  ): EnvActivity {
+    if (!a && !b) return new EnvActivity()
+    if (!a) return b!
+    if (!b) return a
+    return {
+      total: addFxAmount(a.total, b.total),
+      trend: a.trend.map((val, i) => addFxAmount(val, b.trend[i])),
+      transactions: [...a.transactions, ...b.transactions].sort(
+        trModel.compareTrDates
+      ),
+    }
+  }
+}
+
+/** Returns envelope id for a given transaction */
 function getEnvelope(
   tr: TTransaction,
   direction: 'income' | 'outcome',
@@ -156,34 +172,35 @@ function getEnvelope(
   debtors: ById<TDebtor>
 ): TEnvelopeId {
   const type = trModel.getType(tr, debtAccId)
+  const makeId = envelopeModel.makeId
   switch (type) {
     case TrType.Income:
     case TrType.Outcome:
-      return envelopeModel.makeId(DataEntity.Tag, tr.tag?.[0] || 'null')
+      return makeId(DataEntity.Tag, tr.tag?.[0] || 'null')
 
     case TrType.IncomeDebt:
     case TrType.OutcomeDebt:
-      return getDebtorId(tr, debtors)
+      return getDebtorId(tr)
 
     case TrType.Transfer:
       if (direction === 'outcome') {
-        return envelopeModel.makeId(DataEntity.Account, tr.incomeAccount)
+        return makeId(DataEntity.Account, tr.incomeAccount)
       }
       if (direction === 'income') {
-        return envelopeModel.makeId(DataEntity.Account, tr.outcomeAccount)
+        return makeId(DataEntity.Account, tr.outcomeAccount)
       }
       throw new Error('Unknown direction: ' + direction)
     default:
       throw new Error('Unknown transaction type: ' + type)
   }
-}
 
-function getDebtorId(tr: TTransaction, debtors: ById<TDebtor>): TEnvelopeId {
-  if (tr.merchant) return envelopeModel.makeId(DataEntity.Merchant, tr.merchant)
-  // PAYEE INCOME
-  let cleanName = cleanPayee(String(tr.payee))
-  let debtor = debtors[cleanName]
-  return debtor.merchantId
-    ? envelopeModel.makeId(DataEntity.Merchant, debtor.merchantId)
-    : envelopeModel.makeId('payee', cleanName)
+  function getDebtorId(tr: TTransaction): TEnvelopeId {
+    if (tr.merchant) return makeId(DataEntity.Merchant, tr.merchant)
+    // PAYEE INCOME
+    let cleanName = cleanPayee(String(tr.payee))
+    let debtor = debtors[cleanName]
+    return debtor.merchantId
+      ? makeId(DataEntity.Merchant, debtor.merchantId)
+      : makeId('payee', cleanName)
+  }
 }
