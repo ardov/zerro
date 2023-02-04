@@ -14,6 +14,7 @@ import {
   displayCurrency,
 } from '@entities/currency/displayCurrency'
 import { toISOMonth } from '@shared/helpers/date'
+import { Tooltip } from '@shared/ui/Tooltip'
 
 export const Debtor: FC<
   { name: string; currency: TFxCode; balance: number } & ListItemButtonProps
@@ -50,7 +51,11 @@ export const Debtor: FC<
           color: balance < 0 ? 'error.main' : 'text.secondary',
         }}
       >
-        <Amount value={balance} currency={currency} decMode="ifOnly" noShade />
+        <Tooltip title={balance.toString()}>
+          <div>
+            <Amount value={balance} currency={currency} decMode="ifOnly" noShade />
+          </div>
+        </Tooltip>
       </Box>
     </ListItemButton>
   )
