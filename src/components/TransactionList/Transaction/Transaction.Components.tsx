@@ -354,6 +354,18 @@ const AmountsWrapper = styled.div<{
       ? p.theme.palette.text.secondary
       : p.theme.palette.text.primary};
 
+
+  [color="textSecondary"] &[type=transfer] {
+    max-width: 100%;
+    width: 100%;
+    flex-shrink: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -webkit-mask-image: linear-gradient(to left, transparent, black 40px);
+  }
+
+
   > :not(:first-of-type):before {
     content: '${p => (p.type === 'transfer' ? '→' : '')}';
     margin: 0 4px;
@@ -368,6 +380,7 @@ const InfoWrapper = styled.div`
 
 const PayeeWrapper = styled.span`
   position: relative;
+
   :hover {
     color: ${p => p.theme.palette.text.primary};
   }
