@@ -1,3 +1,4 @@
+import { getConverter } from './converter'
 import { getCurrentRates, getRates } from './getFxRates'
 import { getFxRatesGetter } from './getFxRatesGetter'
 import {
@@ -15,6 +16,7 @@ export const fxRateModel = {
   get: getRates,
   getter: getFxRatesGetter,
   latest: getCurrentRates,
+  converter: getConverter,
 
   // Thunks
   edit: editRates,

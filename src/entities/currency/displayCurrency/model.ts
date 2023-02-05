@@ -1,12 +1,11 @@
 import { useCallback } from 'react'
+import { createSelector } from '@reduxjs/toolkit'
 import { createLocalStorageStateHook } from 'use-local-storage-state'
 import { TDateDraft, TFxAmount, TFxCode } from '@shared/types'
-import { convertFx } from '@shared/helpers/money'
 
-import { userModel } from '@entities/user'
-import { createSelector } from '@reduxjs/toolkit'
-import { fxRateModel } from '@entities/currency/fxRate'
 import { RootState, useAppSelector } from '@store/index'
+import { userModel } from '@entities/user'
+import { fxRateModel } from '@entities/currency/fxRate'
 
 const KEY = 'display-currency'
 
@@ -30,33 +29,21 @@ function useDisplayCurrency() {
   return [currency, setSavedCurrency] as [TFxCode, typeof setSavedCurrency]
 }
 
+const getConverter = createSelector(
+  [fxRateModel.converter, getDisplayCurrency],
+  (convert, displayCurrency) =>
+    (amount: TFxAmount, date: 'current' | TDateDraft) =>
+      convert(amount, displayCurrency, date)
+)
+
 const useToDisplay = (defaultMonth: TDateDraft | 'current') => {
-  const getRates = useAppSelector(fxRateModel.getter)
-  const [displayCurrency] = useDisplayCurrency()
+  const conv = useAppSelector(getConverter)
   const converter = useCallback(
-    (amount: TFxAmount, date = defaultMonth) => {
-      let rates = getRates(date).rates
-      return convertFx(amount, displayCurrency, rates)
-    },
-    [defaultMonth, displayCurrency, getRates]
+    (amount: TFxAmount, date = defaultMonth) => conv(amount, date),
+    [conv, defaultMonth]
   )
   return converter
 }
-
-const getConverter = createSelector(
-  [fxRateModel.getter, getDisplayCurrency],
-  (getRates, displayCurrency) =>
-    (amount: TFxAmount, date: 'current' | TDateDraft) => {
-      const res = convertFx(amount, displayCurrency, getRates(date).rates)
-      console.assert(
-        !isNaN(res),
-        'NaN in getConverter',
-        amount,
-        displayCurrency
-      )
-      return res
-    }
-)
 
 export const displayCurrency = {
   useDisplayCurrency,
