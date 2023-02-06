@@ -51,9 +51,18 @@ export const Debtor: FC<
           color: balance < 0 ? 'error.main' : 'text.secondary',
         }}
       >
-        <Tooltip title={balance.toString()}>
+        <Tooltip
+          title={<Amount value={balance} currency={currency} noShade />}
+          disableInteractive
+          placement="right"
+        >
           <div>
-            <Amount value={balance} currency={currency} decMode="ifOnly" noShade />
+            <Amount
+              value={balance}
+              currency={currency}
+              decMode="ifOnly"
+              noShade
+            />
           </div>
         </Tooltip>
       </Box>

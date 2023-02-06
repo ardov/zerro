@@ -60,7 +60,17 @@ export const Account: FC<{ account: TAccountPopulated } & ListItemButtonProps> =
             color: account.balance < 0 ? 'error.main' : 'text.secondary',
           }}
         >
-          <Tooltip title={account.balance.toString()}>
+          <Tooltip
+            title={
+              <Amount
+                value={account.balance}
+                currency={account.fxCode}
+                noShade
+              />
+            }
+            disableInteractive
+            placement="right"
+          >
             <div>
               <Amount
                 value={account.balance}
