@@ -7,6 +7,9 @@ import { RootState, useAppSelector } from '@store/index'
 import { userModel } from '@entities/user'
 import { fxRateModel } from '@entities/currency/fxRate'
 
+// TODO
+// Create separate store with display currency and use selectors from there
+
 const KEY = 'display-currency'
 
 const useSavedDisplayCurrency = createLocalStorageStateHook<TFxCode | null>(
@@ -37,10 +40,11 @@ const getConverter = createSelector(
 )
 
 const useToDisplay = (defaultMonth: TDateDraft | 'current') => {
-  const conv = useAppSelector(getConverter)
+  const [currency] = useDisplayCurrency()
+  const convert = useAppSelector(fxRateModel.converter)
   const converter = useCallback(
-    (amount: TFxAmount, date = defaultMonth) => conv(amount, date),
-    [conv, defaultMonth]
+    (amount: TFxAmount, date = defaultMonth) => convert(amount, currency, date),
+    [convert, currency, defaultMonth]
   )
   return converter
 }
