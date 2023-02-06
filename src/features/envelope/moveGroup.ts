@@ -1,11 +1,11 @@
 import {
   envelopeModel,
   TEnvelopeDraft,
+  TEnvelopeId,
   TEnvTreeNode,
   TGroupTreeNode,
 } from '@entities/envelope'
 import { entries } from '@shared/helpers/keys'
-import { TEnvelopeId } from '@shared/types'
 import { AppThunk } from '@store/index'
 import { arrayMove } from './arrayMove'
 

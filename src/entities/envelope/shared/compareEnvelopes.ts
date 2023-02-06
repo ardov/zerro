@@ -1,5 +1,4 @@
-import { DataEntity } from '@shared/types'
-import { envId } from './envelopeId'
+import { envId, EnvType } from './envelopeId'
 import { TEnvelope } from './makeEnvelope'
 
 export function compareEnvelopes(a: TEnvelope, b: TEnvelope) {
@@ -12,16 +11,16 @@ export function compareEnvelopes(a: TEnvelope, b: TEnvelope) {
   // Sort by type
   if (a.type !== b.type) {
     const typeOrder = [
-      DataEntity.Tag,
-      DataEntity.Account,
-      DataEntity.Merchant,
-      'payee',
+      EnvType.Tag,
+      EnvType.Account,
+      EnvType.Merchant,
+      EnvType.Payee,
     ]
     return typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type)
   }
 
   // Null category should be the first one
-  const nullTagId = envId.get(DataEntity.Tag, null)
+  const nullTagId = envId.get(EnvType.Tag, null)
   if (a.id === nullTagId) return -1
   if (b.id === nullTagId) return 1
 

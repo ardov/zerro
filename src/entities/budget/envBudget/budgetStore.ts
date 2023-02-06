@@ -1,8 +1,8 @@
+import { TEnvelopeId } from '@entities/envelope'
 import {
   HiddenDataType,
   makeMonthlyHiddenStore,
 } from '@entities/shared/hidden-store'
-import { TEnvelopeId } from '@shared/types'
 
 export type TBudgets = Record<TEnvelopeId, number>
 

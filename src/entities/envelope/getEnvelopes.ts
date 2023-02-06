@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { ById, TEnvelopeId } from '@shared/types'
+import { ById } from '@shared/types'
 import { TSelector } from '@store'
 import { accountModel } from '@entities/account'
 import { debtorModel } from '@entities/debtors'
@@ -16,6 +16,7 @@ import { compareEnvelopes } from './shared/compareEnvelopes'
 import { userModel } from '@entities/user'
 import { keys } from '@shared/helpers/keys'
 import { shallowEqual } from 'react-redux'
+import { TEnvelopeId } from './shared/envelopeId'
 
 const getCompiledEnvelopes: TSelector<{
   byId: ById<TEnvelope>

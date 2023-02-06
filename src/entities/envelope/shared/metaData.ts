@@ -2,8 +2,9 @@ import {
   HiddenDataType,
   makeSimpleHiddenStore,
 } from '@entities/shared/hidden-store'
-import { ById, OptionalExceptFor, TEnvelopeId, TFxCode } from '@shared/types'
+import { ById, OptionalExceptFor, TFxCode } from '@shared/types'
 import { AppThunk } from '@store'
+import { TEnvelopeId } from './envelopeId'
 
 export enum envelopeVisibility {
   hidden = 'hidden',

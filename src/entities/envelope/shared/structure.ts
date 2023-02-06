@@ -1,5 +1,6 @@
-import { ById, TEnvelopeId } from '@shared/types'
+import { ById } from '@shared/types'
 import { compareEnvelopes } from './compareEnvelopes'
+import { TEnvelopeId } from './envelopeId'
 import { TEnvelope } from './makeEnvelope'
 
 /**

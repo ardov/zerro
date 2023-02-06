@@ -1,5 +1,6 @@
+import { TEnvelopeId } from '@entities/envelope'
 import { keys } from '@shared/helpers/keys'
-import { ByMonth, TEnvelopeId, TISOMonth } from '@shared/types'
+import { ByMonth, TISOMonth } from '@shared/types'
 import { AppThunk } from '@store/index'
 import { budgetStore, TBudgets } from './budgetStore'
 

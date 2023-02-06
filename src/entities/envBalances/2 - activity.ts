@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { ByMonth, TEnvelopeId, TFxAmount } from '@shared/types'
+import { ByMonth, TFxAmount } from '@shared/types'
 import { keys } from '@shared/helpers/keys'
 import { addFxAmount } from '@shared/helpers/money'
 import { withPerf } from '@shared/helpers/performance'
@@ -10,7 +10,7 @@ import {
   getRawActivity,
   TRawActivityNode,
 } from './1 - rawActivity'
-import { envelopeModel } from '@entities/envelope'
+import { envelopeModel, TEnvelopeId } from '@entities/envelope'
 
 export type TActivityNode = {
   total: TFxAmount

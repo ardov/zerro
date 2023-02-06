@@ -2,9 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import {
   ById,
   ByMonth,
-  DataEntity,
   TAccountId,
-  TEnvelopeId,
   TFxAmount,
   TInstrument,
   TTransaction,
@@ -18,7 +16,7 @@ import { debtorModel, TDebtor } from '@entities/debtors'
 import { instrumentModel } from '@entities/currency/instrument'
 import { cleanPayee } from '@entities/shared/cleanPayee'
 import { trModel, TrType } from '@entities/transaction'
-import { envelopeModel } from '@entities/envelope'
+import { envelopeModel, EnvType, TEnvelopeId } from '@entities/envelope'
 
 export type TRawActivityNode = {
   internal: EnvActivity
@@ -176,7 +174,7 @@ function getEnvelope(
   switch (type) {
     case TrType.Income:
     case TrType.Outcome:
-      return makeId(DataEntity.Tag, tr.tag?.[0] || 'null')
+      return makeId(EnvType.Tag, tr.tag?.[0] || 'null')
 
     case TrType.IncomeDebt:
     case TrType.OutcomeDebt:
@@ -184,10 +182,10 @@ function getEnvelope(
 
     case TrType.Transfer:
       if (direction === 'outcome') {
-        return makeId(DataEntity.Account, tr.incomeAccount)
+        return makeId(EnvType.Account, tr.incomeAccount)
       }
       if (direction === 'income') {
-        return makeId(DataEntity.Account, tr.outcomeAccount)
+        return makeId(EnvType.Account, tr.outcomeAccount)
       }
       throw new Error('Unknown direction: ' + direction)
     default:
@@ -195,12 +193,12 @@ function getEnvelope(
   }
 
   function getDebtorId(tr: TTransaction): TEnvelopeId {
-    if (tr.merchant) return makeId(DataEntity.Merchant, tr.merchant)
+    if (tr.merchant) return makeId(EnvType.Merchant, tr.merchant)
     // PAYEE INCOME
     let cleanName = cleanPayee(String(tr.payee))
     let debtor = debtors[cleanName]
     return debtor.merchantId
-      ? makeId(DataEntity.Merchant, debtor.merchantId)
-      : makeId('payee', cleanName)
+      ? makeId(EnvType.Merchant, debtor.merchantId)
+      : makeId(EnvType.Payee, cleanName)
   }
 }

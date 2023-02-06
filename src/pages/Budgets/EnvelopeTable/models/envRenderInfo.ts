@@ -1,12 +1,13 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { isZero } from '@shared/helpers/money'
-import { ById, ByMonth, TEnvelopeId, TISOMonth } from '@shared/types'
+import { ById, ByMonth, TISOMonth } from '@shared/types'
 
 import { TSelector, useAppSelector } from '@store'
 import {
   envelopeModel,
   envelopeVisibility,
   TEnvelope,
+  TEnvelopeId,
 } from '@entities/envelope'
 import { balances } from '@entities/envBalances'
 import { goalModel } from '@entities/goal'

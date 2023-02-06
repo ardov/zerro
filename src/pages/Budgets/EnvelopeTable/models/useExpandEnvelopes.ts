@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { toISOMonth } from '@shared/helpers/date'
-import { TEnvelopeId, TISOMonth } from '@shared/types'
+import { TISOMonth } from '@shared/types'
 import { useEnvRenderInfo } from './envRenderInfo'
+import { TEnvelopeId } from '@entities/envelope'
 
 export function useExpandEnvelopes(month: TISOMonth = toISOMonth(new Date())): {
   expanded: TEnvelopeId[]

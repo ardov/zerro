@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { Box, BoxProps, useTheme } from '@mui/material'
-import { TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
+import { TFxAmount, TISOMonth } from '@shared/types'
 import Rhythm from '@shared/ui/Rhythm'
 import { DataLine } from '@components/DataLine'
 import { formatDate } from '@shared/helpers/date'
@@ -9,6 +9,7 @@ import { convertFx } from '@shared/helpers/money'
 import { useMonth } from '@shared/hooks/useMonth'
 
 import { balances } from '@entities/envBalances'
+import { TEnvelopeId } from '@entities/envelope'
 
 type ActivityWidgetProps = BoxProps & { id: TEnvelopeId }
 

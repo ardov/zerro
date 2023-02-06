@@ -13,7 +13,7 @@ import { AmountInput } from '@shared/ui/AmountInput'
 import { formatMoney } from '@shared/helpers/money'
 import { convertFx } from '@shared/helpers/money'
 import { sendEvent } from '@shared/helpers/tracking'
-import { TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
+import { TFxAmount, TISOMonth } from '@shared/types'
 import { AdaptivePopover } from '@shared/ui/AdaptivePopover'
 
 import { useAppDispatch } from '@store'
@@ -21,6 +21,7 @@ import { balances } from '@entities/envBalances'
 import { useQuickActions } from './useQuickActions'
 import { setTotalBudget } from '@features/budget/setTotalBudget'
 import { displayCurrency } from '@entities/currency/displayCurrency'
+import { TEnvelopeId } from '@entities/envelope'
 
 type TBudgetPopoverProps = PopoverProps & {
   id: TEnvelopeId

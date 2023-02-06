@@ -1,12 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import {
-  ById,
-  ByMonth,
-  TEnvelopeId,
-  TFxAmount,
-  TFxCode,
-  TISOMonth,
-} from '@shared/types'
+import { ById, ByMonth, TFxAmount, TFxCode, TISOMonth } from '@shared/types'
 import { keys } from '@shared/helpers/keys'
 import { convertFx } from '@shared/helpers/money'
 import { withPerf } from '@shared/helpers/performance'
@@ -17,6 +10,7 @@ import { balances, TActivityNode, TEnvMetrics } from '@entities/envBalances'
 import { TGoal } from './shared/types'
 import { goalStore, TGoals } from './goalStore'
 import { calcGoals } from './shared/calcGoals'
+import { TEnvelopeId } from '@entities/envelope'
 
 export type TGoalInfo = {
   id: TEnvelopeId

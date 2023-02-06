@@ -1,7 +1,7 @@
 import { toISOMonth } from '@shared/helpers/date'
-import { DataEntity, ById, TBudget, globalBudgetTagId } from '@shared/types'
+import { ById, TBudget, globalBudgetTagId } from '@shared/types'
 import { getTagBudgets, setEnvBudget, TBudgetUpdate } from '@entities/budget'
-import { envelopeModel } from '@entities/envelope'
+import { envelopeModel, EnvType } from '@entities/envelope'
 import { AppThunk } from '@store'
 
 export function convertZmBudgetsToZerro(): AppThunk<TBudgetUpdate[]> {
@@ -20,7 +20,7 @@ function convertTagBudgetsToUpdates(tagBudgets: ById<TBudget>) {
     if (!budget.outcome) return
     if (budget.tag === globalBudgetTagId) return
     updates.push({
-      id: envelopeModel.makeId(DataEntity.Tag, String(budget.tag)),
+      id: envelopeModel.makeId(EnvType.Tag, String(budget.tag)),
       month: toISOMonth(budget.date),
       value: budget.outcome,
     })

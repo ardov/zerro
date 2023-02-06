@@ -1,12 +1,13 @@
 import { Line, LineChart, ResponsiveContainer } from 'recharts'
 import { useTheme } from '@mui/material'
 import { prevMonth, toISODate, toISOMonth } from '@shared/helpers/date'
-import { TEnvelopeId, TFxAmount, TISODate, TISOMonth } from '@shared/types'
+import { TFxAmount, TISODate, TISOMonth } from '@shared/types'
 import { add, convertFx, sub } from '@shared/helpers/money'
 import { useAppSelector } from '@store/index'
 // import { getTotalChanges } from '@entities/envelopeData'
 import { useMonth } from '@shared/hooks/useMonth'
 import { balances } from '@entities/envBalances'
+import { TEnvelopeId } from '@entities/envelope'
 
 type ChartProps = {
   mode: 'balance' | 'outcome' | 'income'

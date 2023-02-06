@@ -10,8 +10,11 @@ import { flattenStructure } from './shared/structure'
 
 export type { TEnvTreeNode, TGroupTreeNode } from './shared/structure'
 export type { TEnvelopeDraft } from './patchEnvelope'
+export type { TEnvelopeId } from './shared/envelopeId'
 export type { TEnvelope } from './shared/makeEnvelope'
+
 export { envelopeVisibility } from './shared/metaData'
+export { EnvType } from './shared/envelopeId'
 
 export const envelopeModel = {
   // Selectors

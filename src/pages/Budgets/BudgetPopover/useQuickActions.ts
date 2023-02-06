@@ -1,7 +1,8 @@
 import { convertFx, round } from '@shared/helpers/money'
 import { toISOMonth } from '@shared/helpers/date'
 import pluralize from '@shared/helpers/pluralize'
-import { TDateDraft, TEnvelopeId, TFxAmount, TISOMonth } from '@shared/types'
+import { TDateDraft, TFxAmount, TISOMonth } from '@shared/types'
+import { TEnvelopeId } from '@entities/envelope'
 
 import { balances } from '@entities/envBalances'
 import { goalModel } from '@entities/goal'

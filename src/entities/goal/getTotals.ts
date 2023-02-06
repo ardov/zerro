@@ -1,12 +1,13 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { addFxAmount, convertFx } from '@shared/helpers/money'
 import { keys } from '@shared/helpers/keys'
-import { ByMonth, TEnvelopeId, TFxAmount, TRates } from '@shared/types'
+import { ByMonth, TFxAmount, TRates } from '@shared/types'
 import { TSelector } from '@store'
 import { getGoals, TGoalInfo } from './getGoals'
 import { getProgress } from './shared/calcGoals'
 import { goalType, TGoal } from './shared/types'
 import { balances } from '@entities/envBalances'
+import { TEnvelopeId } from '@entities/envelope'
 
 type TGoalTotals = ReturnType<typeof calcGoalTotals>
 

@@ -3,13 +3,13 @@ import { Box, InputAdornment, IconButton, Chip } from '@mui/material'
 import Dialog, { DialogProps } from '@mui/material/Dialog'
 import { AmountInput } from '@shared/ui/AmountInput'
 import { ArrowForwardIcon, ArrowRightAltIcon } from '@shared/ui/Icons'
-import { Modify, TISOMonth, TEnvelopeId } from '@shared/types'
+import { Modify, TISOMonth } from '@shared/types'
 import { useAppDispatch } from '@store'
 
 import { displayCurrency } from '@entities/currency/displayCurrency'
 import { balances } from '@entities/envBalances'
 import { moveMoney } from './moveMoney'
-import { envelopeModel } from '@entities/envelope'
+import { envelopeModel, TEnvelopeId } from '@entities/envelope'
 
 export type MoveMoneyModalProps = Modify<
   DialogProps,

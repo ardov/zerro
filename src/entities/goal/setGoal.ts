@@ -1,9 +1,10 @@
 import { makeGoal } from './shared/helpers'
 import { sendEvent } from '@shared/helpers/tracking'
-import { TEnvelopeId, TISOMonth } from '@shared/types'
+import { TISOMonth } from '@shared/types'
 import { AppThunk } from '@store'
 import { goalStore } from './goalStore'
 import { TGoal } from './shared/types'
+import { TEnvelopeId } from '@entities/envelope'
 
 export const setGoal =
   (month: TISOMonth, id: TEnvelopeId, goal?: TGoal | null): AppThunk =>

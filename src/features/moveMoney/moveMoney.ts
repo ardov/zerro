@@ -1,9 +1,10 @@
 import { convertFx, round } from '@shared/helpers/money'
 import { sendEvent } from '@shared/helpers/tracking'
-import { TISOMonth, TEnvelopeId, TFxCode } from '@shared/types'
+import { TISOMonth, TFxCode } from '@shared/types'
 import { AppThunk } from '@store'
 import { budgetModel, TBudgetUpdate } from '@entities/budget'
 import { balances } from '@entities/envBalances'
+import { TEnvelopeId } from '@entities/envelope'
 
 export const moveMoney =
   (

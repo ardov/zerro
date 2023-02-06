@@ -2,9 +2,9 @@ import { createSelector } from '@reduxjs/toolkit'
 import { toISOMonth } from '@shared/helpers/date'
 import { keys } from '@shared/helpers/keys'
 import { withPerf } from '@shared/helpers/performance'
-import { ByMonth, DataEntity } from '@shared/types'
+import { ByMonth } from '@shared/types'
 import { TSelector } from '@store/index'
-import { envelopeModel } from '@entities/envelope'
+import { envelopeModel, EnvType } from '@entities/envelope'
 import { userSettingsModel } from '@entities/userSettings'
 import { getTagBudgets } from './tagBudget'
 import { getEnvBudgets, TBudgets } from './envBudget'
@@ -20,10 +20,7 @@ export const getBudgets: TSelector<ByMonth<TBudgets>> = createSelector(
         const budget = tagBudgets[budgetId]
         if (!budget.outcome) return
         const month = toISOMonth(budget.date)
-        const envelopeId = envelopeModel.makeId(
-          DataEntity.Tag,
-          String(budget.tag)
-        )
+        const envelopeId = envelopeModel.makeId(EnvType.Tag, String(budget.tag))
         result[month] ??= {}
         result[month][envelopeId] = budget.outcome
       })
@@ -34,7 +31,7 @@ export const getBudgets: TSelector<ByMonth<TBudgets>> = createSelector(
         if (preferZmBudgets) {
           // Skip Zerro tag budgets if user prefers Zenmoney budgets
           const { type } = envelopeModel.parseId(envelopeId)
-          if (type === DataEntity.Tag) return
+          if (type === EnvType.Tag) return
         }
         if (!hiddenBudgets[month][envelopeId]) return
         result[month] ??= {}

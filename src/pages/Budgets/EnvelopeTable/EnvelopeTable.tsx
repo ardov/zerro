@@ -2,11 +2,11 @@ import React, { FC, memo, useCallback } from 'react'
 import { shallowEqual } from 'react-redux'
 import { isEqual } from 'lodash'
 import { Paper } from '@mui/material'
-import { TEnvelopeId, TISOMonth } from '@shared/types'
+import { TISOMonth } from '@shared/types'
 import { useToggle } from '@shared/hooks/useToggle'
 
 import { useAppSelector } from '@store/index'
-import { envelopeModel } from '@entities/envelope'
+import { envelopeModel, TEnvelopeId } from '@entities/envelope'
 
 import { Parent } from './Parent'
 import { Row } from './Row'

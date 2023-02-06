@@ -1,6 +1,5 @@
-import { envelopeModel } from '@entities/envelope'
+import { envelopeModel, EnvType } from '@entities/envelope'
 import { userSettingsModel } from '@entities/userSettings'
-import { DataEntity } from '@shared/types'
 import { AppThunk } from '@store/index'
 import { setEnvBudget, TEnvBudgetUpdate } from './envBudget'
 import { setTagBudget, TTagBudgetUpdate } from './tagBudget'
@@ -17,7 +16,7 @@ export function setBudget(upd: TBudgetUpdate | TBudgetUpdate[]): AppThunk {
 
     updates.forEach(update => {
       const { type, id } = envelopeModel.parseId(update.id)
-      if (type === DataEntity.Tag && preferZmBudgets) {
+      if (type === EnvType.Tag && preferZmBudgets) {
         tagUpdates.push({
           tag: id === 'null' ? null : id,
           month: update.month,

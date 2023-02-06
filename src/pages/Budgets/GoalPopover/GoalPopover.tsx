@@ -13,11 +13,11 @@ import { AmountInput } from '@shared/ui/AmountInput'
 import { CloseIcon } from '@shared/ui/Icons'
 import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
 import { toISODate, formatDate } from '@shared/helpers/date'
-import { TDateDraft, TEnvelopeId, TISOMonth } from '@shared/types'
+import { TDateDraft, TISOMonth } from '@shared/types'
 import { useAppDispatch } from '@store'
 
 import { goalModel, goalType, TGoal } from '@entities/goal'
-import { envelopeModel } from '@entities/envelope'
+import { envelopeModel, TEnvelopeId } from '@entities/envelope'
 
 const amountLabels = {
   [goalType.MONTHLY]: 'Откладывать каждый месяц',

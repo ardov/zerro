@@ -2,7 +2,6 @@ import { createSelector } from '@reduxjs/toolkit'
 import type {
   ById,
   TTransaction,
-  TEnvelopeId,
   TFxAmount,
   TISOMonth,
   ByMonth,
@@ -13,7 +12,7 @@ import { addFxAmount, convertFx } from '@shared/helpers/money'
 import { withPerf } from '@shared/helpers/performance'
 import { TSelector } from '@store/index'
 
-import { envelopeModel, TEnvelope } from '@entities/envelope'
+import { envelopeModel, TEnvelope, TEnvelopeId } from '@entities/envelope'
 import { budgetModel } from '@entities/budget'
 import { TFxRateData } from '@entities/currency/fxRate'
 import { getMonthList } from './1 - monthList'

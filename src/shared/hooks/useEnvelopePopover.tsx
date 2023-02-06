@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
-import { TEnvelopeId, TISOMonth } from '@shared/types'
+import type { TISOMonth } from '@shared/types'
+import type { TEnvelopeId } from '@entities/envelope'
 import { PopoverProps } from '@mui/material'
 
 export function useEnvelopePopover(month: TISOMonth, name = '') {

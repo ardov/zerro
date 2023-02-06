@@ -1,7 +1,7 @@
 import React from 'react'
 import { Collapse, Box, IconButton } from '@mui/material'
 import { ChevronRightIcon } from '@shared/ui/Icons'
-import { TEnvelopeId } from '@shared/types'
+import { TEnvelopeId } from '@entities/envelope'
 
 type ParentProps = {
   id: TEnvelopeId

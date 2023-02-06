@@ -1,14 +1,7 @@
-import {
-  ById,
-  DataEntity,
-  TAccount,
-  TEnvelopeId,
-  TEnvelopeType,
-  TFxCode,
-} from '@shared/types'
+import { ById, TAccount, TFxCode } from '@shared/types'
 import { TDebtor } from '@entities/debtors'
 import { TTagPopulated } from '@entities/tag'
-import { envId } from './envelopeId'
+import { envId, TEnvelopeId, EnvType } from './envelopeId'
 import { TEnvelopeMeta, envelopeVisibility } from './metaData'
 import { getColorForString } from '@shared/helpers/color'
 
@@ -19,7 +12,7 @@ const defaultPayeeGroup = 'Долги'
 
 export type TEnvelope = {
   id: TEnvelopeId
-  type: TEnvelopeType
+  type: EnvType
   entityId: string // Used to connect with ZM entity
 
   name: string // derived
@@ -77,12 +70,12 @@ type TFuncs = {
 
 const funcs: TFuncs = {
   id: {
-    tag: el => envId.get(DataEntity.Tag, el.id),
-    account: el => envId.get(DataEntity.Account, el.id),
+    tag: el => envId.get(EnvType.Tag, el.id),
+    account: el => envId.get(EnvType.Account, el.id),
     debtor: el =>
       el.merchantId
-        ? envId.get(DataEntity.Merchant, el.merchantId)
-        : envId.get('payee', el.id),
+        ? envId.get(EnvType.Merchant, el.merchantId)
+        : envId.get(EnvType.Payee, el.id),
   },
   entityId: {
     tag: el => el.id,
@@ -90,9 +83,9 @@ const funcs: TFuncs = {
     debtor: el => el.merchantId || el.id,
   },
   type: {
-    tag: () => DataEntity.Tag,
-    account: () => DataEntity.Account,
-    debtor: el => (el.merchantId ? DataEntity.Merchant : 'payee'),
+    tag: () => EnvType.Tag,
+    account: () => EnvType.Account,
+    debtor: el => (el.merchantId ? EnvType.Merchant : EnvType.Payee),
   },
   name: {
     tag: el => el.name,
@@ -120,7 +113,7 @@ const funcs: TFuncs = {
     debtor: el => getColorForString(el.name),
   },
   parent: {
-    tag: el => (el.parent ? envId.get(DataEntity.Tag, el.parent) : null),
+    tag: el => (el.parent ? envId.get(EnvType.Tag, el.parent) : null),
     account: (el, fx, meta) => meta?.parent || null,
     debtor: (el, fx, meta) => meta?.parent || null,
   },

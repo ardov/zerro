@@ -3,8 +3,8 @@ import { DragEndEvent, DragMoveEvent, useDndMonitor } from '@dnd-kit/core'
 import { Box, SxProps } from '@mui/system'
 import { DragTypes } from '../DnDContext'
 import { useAppDispatch } from '@store/index'
-import { envelopeModel, TEnvelope } from '@entities/envelope'
-import { ById, TEnvelopeId } from '@shared/types'
+import { envelopeModel, TEnvelope, TEnvelopeId } from '@entities/envelope'
+import { ById } from '@shared/types'
 import { moveEnvelope } from '@features/envelope/moveEnvelope'
 
 const style: SxProps = {

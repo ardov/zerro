@@ -1,9 +1,9 @@
 import {
   envelopeModel,
   TEnvelopeDraft,
+  TEnvelopeId,
   TGroupTreeNode,
 } from '@entities/envelope'
-import { TEnvelopeId } from '@shared/types'
 import { AppThunk } from '@store/index'
 
 export function assignNewGroup(id: TEnvelopeId): AppThunk {

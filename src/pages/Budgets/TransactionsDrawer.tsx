@@ -1,16 +1,17 @@
 import React, { FC, useCallback, useMemo } from 'react'
-import { ById, TEnvelopeId } from '@shared/types'
+import { ById } from '@shared/types'
 import { useSearchParam } from '@shared/hooks/useSearchParam'
 import { useMonth } from '@shared/hooks/useMonth'
 import { TransactionsDrawer } from '@components/TransactionsDrawer'
 import { useCachedValue } from '@shared/hooks/useCachedValue'
-import { envelopeModel, TEnvelope } from '@entities/envelope'
+import { envelopeModel, TEnvelope, TEnvelopeId } from '@entities/envelope'
 import { balances, TActivityNode } from '@entities/envBalances'
 
 export enum trMode {
   GeneralIncome = 'generalIncome',
-  TransferFees = 'transferFees',
+  // TransferFees = 'transferFees',
   Envelope = 'envelope',
+  All = 'All',
 }
 
 export const BudgetTransactionsDrawer: FC = () => {
@@ -92,14 +93,46 @@ function getTransactions(
   if (id === 'transferFees') return activity.transferFees.transactions
 
   const ids = id ? (isExact ? [id] : [id, ...envelopes[id].children]) : []
-
-  return ids
+  const transactions = ids
     .map(id => {
-      if (mode === trMode.GeneralIncome)
-        return activity?.generalIncome.byEnv[id]?.transactions || []
-      if (mode === trMode.Envelope)
-        return activity?.envActivity.byEnv[id]?.transactions || []
+      const income = activity?.generalIncome.byEnv[id]?.transactions || []
+      const envelope = activity?.envActivity.byEnv[id]?.transactions || []
+      if (mode === trMode.GeneralIncome) return income
+      if (mode === trMode.Envelope) return envelope
+      if (mode === trMode.All) return [...income, ...envelope]
       return []
     })
     .reduce((acc, arr) => acc.concat(arr), [])
+  return transactions
 }
+
+/*
+Which transaction filters do I need?
+
+  - Envelope drawer
+
+    - all transactions affecting envelope balance
+      activity.envActivity.byEnv[id]
+
+  - Incomes widget
+
+    - if not keeping income => only general income
+    activity.generalIncome.byEnv[id]
+
+    - if keeping income => usual env transaction
+    activity.envActivity.byEnv[id]
+
+  - Outcomes widget
+
+    - all transactions affecting envelope balance
+      activity.envActivity.byEnv[id]
+
+  - Transfers & debts widget
+
+    - Envelope transactions + general income transactions
+      activity.generalIncome.byEnv[id] + activity.envActivity.byEnv[id]
+
+    - Transfer fees
+      activity.transferFees
+
+*/

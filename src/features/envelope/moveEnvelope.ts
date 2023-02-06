@@ -1,5 +1,4 @@
-import { envelopeModel, TEnvelopeDraft } from '@entities/envelope'
-import { TEnvelopeId } from '@shared/types'
+import { envelopeModel, TEnvelopeDraft, TEnvelopeId } from '@entities/envelope'
 import { AppThunk } from '@store/index'
 import { arrayMove } from './arrayMove'
 

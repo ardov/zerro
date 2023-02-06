@@ -1,5 +1,6 @@
+import { TEnvelopeId } from '@entities/envelope'
 import { useEnvelopePopover } from '@shared/hooks/useEnvelopePopover'
-import { TEnvelopeId, TISOMonth } from '@shared/types'
+import { TISOMonth } from '@shared/types'
 import React, { FC, ReactNode, useContext } from 'react'
 import { BudgetPopover } from './BudgetPopover'
 

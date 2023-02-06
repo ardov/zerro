@@ -1,7 +1,8 @@
 import React, { FC, ReactNode, useContext } from 'react'
 import { useEnvelopePopover } from '@shared/hooks/useEnvelopePopover'
-import { TEnvelopeId, TISOMonth } from '@shared/types'
+import { TISOMonth } from '@shared/types'
 import { GoalPopover } from './GoalPopover'
+import { TEnvelopeId } from '@entities/envelope'
 
 const GoalPopoverContext = React.createContext<
   (id: TEnvelopeId, anchor: Element) => void

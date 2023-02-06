@@ -1,15 +1,9 @@
-import {
-  ById,
-  DataEntity,
-  OptionalExceptFor,
-  TEnvelopeId,
-  TTagId,
-} from '@shared/types'
+import { ById, DataEntity, OptionalExceptFor, TTagId } from '@shared/types'
 import { keys } from '@shared/helpers/keys'
 import { AppThunk } from '@store'
 import { patchTag, TTagDraft } from '@entities/tag'
 import { getEnvelopes } from './getEnvelopes'
-import { envId } from './shared/envelopeId'
+import { envId, EnvType, TEnvelopeId } from './shared/envelopeId'
 import { patchEnvelopeMeta, TEnvelopeMetaPatch } from './shared/metaData'
 import { hex2int, isHEX } from '@shared/helpers/color'
 import { TEnvelope } from './shared/makeEnvelope'
@@ -74,9 +68,9 @@ const funcs: {
   originalName: (draft, patches) => {
     const { type, id } = envId.parse(draft.id)
     if (
-      type === DataEntity.Tag ||
-      type === DataEntity.Account ||
-      type === DataEntity.Merchant
+      type === EnvType.Tag ||
+      type === EnvType.Account ||
+      type === EnvType.Merchant
     ) {
       patches[type] = { ...patches[type], id, title: draft.originalName }
     }
@@ -84,14 +78,14 @@ const funcs: {
 
   color: (draft, patches) => {
     const { type, id } = envId.parse(draft.id)
-    if (type === DataEntity.Tag) {
+    if (type === EnvType.Tag) {
       patches[type] = { ...patches[type], id, color: getTagColor(draft.color) }
     }
   },
 
   parent: (draft, patches, envelopes) => {
     const { type, id } = envId.parse(draft.id)
-    if (type === DataEntity.Tag) {
+    if (type === EnvType.Tag) {
       patches[type] = {
         ...patches[type],
         id,
@@ -147,7 +141,7 @@ function toPatches(draft: TEnvelopeDraft, envelopes: ById<TEnvelope>) {
   let current = envelopes[draft.id]
   if (!current) throw new Error('Envelope not found')
 
-  if (current.type === 'payee') {
+  if (current.type === EnvType.Payee) {
     // throw new Error('Trying to patch payee envelope')
     return {} as TPatches
   }
@@ -169,7 +163,7 @@ function getRightTagParent(
   const id = getRightParent(parent, envelopes)
   if (!id) return null
   const parsed = envId.parse(id)
-  if (parsed.type !== DataEntity.Tag) throw new Error('Parent is not tag')
+  if (parsed.type !== EnvType.Tag) throw new Error('Parent is not tag')
   if (parsed.id === 'null') return null
   return parsed.id
 }

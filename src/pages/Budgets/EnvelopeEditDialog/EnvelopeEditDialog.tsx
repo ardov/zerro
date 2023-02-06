@@ -16,12 +16,13 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
-import { DataEntity, Modify } from '@shared/types'
+import { Modify } from '@shared/types'
 import { ColorPicker } from '@shared/ui/ColorPickerPopover'
 import { useAppDispatch } from '@store'
 import {
   envelopeModel,
   envelopeVisibility,
+  EnvType,
   TEnvelope,
 } from '@entities/envelope'
 // import { TagSelect } from '@components/TagSelect'
@@ -41,7 +42,7 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
   const { envelope, onClose, ...dialogProps } = props
   const dispatch = useAppDispatch()
   const isNew = !envelope?.id
-  const id = envelope?.id || envelopeModel.makeId(DataEntity.Tag, uuidv1())
+  const id = envelope?.id || envelopeModel.makeId(EnvType.Tag, uuidv1())
   const defaultCurrency = userModel.useUserCurrency()
   const {
     values,
@@ -72,7 +73,7 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
     onSubmit: (values, helpers) => {
       const { parentTagId, ...envData } = values
       const parent = parentTagId
-        ? envelopeModel.makeId(DataEntity.Tag, parentTagId)
+        ? envelopeModel.makeId(EnvType.Tag, parentTagId)
         : null
       const patch = { id, parent, ...envData }
       dispatch(envelopeModel.patchEnvelope(patch))

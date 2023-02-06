@@ -1,10 +1,10 @@
 import React, { FC, useEffect, useState } from 'react'
 import { InputBase, InputAdornment } from '@mui/material'
 import { NotesIcon } from '@shared/ui/Icons'
-import { TEnvelopeId, TISOMonth } from '@shared/types'
+import { TISOMonth } from '@shared/types'
 import { useAppDispatch, useAppSelector } from '@store'
 import { cardStyle } from './shared'
-import { envelopeModel } from '@entities/envelope'
+import { envelopeModel, TEnvelopeId } from '@entities/envelope'
 import { useDebouncedCallback } from '@shared/hooks/useDebouncedCallback'
 
 export const CommentWidget: FC<{ month: TISOMonth; id: TEnvelopeId }> = ({
