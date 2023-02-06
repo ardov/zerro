@@ -71,6 +71,7 @@ const Dot: FC<DotProps> = ({ color, colorOpacity = 1 }) => (
       marginRight: 8,
       borderRadius: '50%',
       opacity: colorOpacity,
+      flex: '0 0 auto'
     }}
   />
 )
