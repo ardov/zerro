@@ -11,7 +11,7 @@ import { TFxCode, TISOMonth } from '@shared/types'
 import { keys } from '@shared/helpers/keys'
 import { useDebouncedCallback } from '@shared/hooks/useDebouncedCallback'
 import { useToggle } from '@shared/hooks/useToggle'
-import { formatDate } from '@shared/helpers/date'
+import { formatDate, toISOMonth } from '@shared/helpers/date'
 
 import { useAppDispatch } from '@store'
 import { displayCurrency } from '@entities/currency/displayCurrency'
@@ -38,6 +38,9 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
 
   if (currencies.length === 0) return null
 
+  const isSaved = rateData.type === 'saved' && rateData.date === month
+  const isPast = toISOMonth(Date.now()) > month
+
   return (
     <Box p={2} bgcolor="background.default" borderRadius={1}>
       <Stack gap={1}>
@@ -56,9 +59,16 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
           Курсы на {formatDate(rateData.date, 'LLLL yyyy')}{' '}
           {rateData.type === 'current' && ' (текущие)'}
         </Typography>
-        <Button fullWidth onClick={() => dispatch(fxRateModel.load(month))}>
-          Загрузить курсы
-        </Button>
+        {isSaved && (
+          <Button fullWidth onClick={() => dispatch(fxRateModel.reset(month))}>
+            Сбросить
+          </Button>
+        )}
+        {isPast && !isSaved && (
+          <Button fullWidth onClick={() => dispatch(fxRateModel.load(month))}>
+            Загрузить курсы
+          </Button>
+        )}
       </Stack>
     </Box>
   )
