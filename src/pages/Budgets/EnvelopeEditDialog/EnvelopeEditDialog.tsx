@@ -138,14 +138,14 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
             onChange={handleChange}
           /> */}
 
-          <TextField
+          {/* <TextField
             label="Комментарий"
             name="comment"
             multiline
             inputProps={{ autoComplete: 'off' }}
             value={values.comment}
             onChange={handleChange}
-          />
+          /> */}
           <CurrencyCodeSelect
             label="Валюта"
             name="currency"
