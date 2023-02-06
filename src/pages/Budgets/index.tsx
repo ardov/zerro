@@ -13,7 +13,11 @@ import { TEnvelopeId } from '@entities/envelope'
 import { balances } from '@entities/envBalances'
 import { MonthInfo } from './MonthInfo'
 import { EnvelopePreview } from './EnvelopePreview'
-import { BudgetTransactionsDrawer, useTrDrawer } from './TransactionsDrawer'
+import {
+  BudgetTransactionsDrawer,
+  TrMode,
+  useTrDrawer,
+} from './TransactionsDrawer'
 import { EnvelopeTable } from './EnvelopeTable'
 import { DnDContext } from './DnDContext'
 import { BudgetPopoverProvider } from './BudgetPopover'
@@ -51,6 +55,16 @@ function Budgets() {
     [setDrawerId]
   )
   const closeDrawer = useCallback(() => setDrawerId(), [setDrawerId])
+  const openTransactions = useCallback(
+    (opts: { id: TEnvelopeId; isExact?: boolean }) =>
+      setDrawer({
+        id: opts.id,
+        month,
+        mode: TrMode.Envelope,
+        isExact: opts.isExact,
+      }),
+    [month, setDrawer]
+  )
 
   const detailsContent = !drawerId ? undefined : drawerId === 'overview' ? (
     <MonthInfo onClose={closeDrawer} />
@@ -76,7 +90,7 @@ function Budgets() {
       <Explainer />
       <EnvelopeTable
         month={month}
-        onShowTransactions={setDrawer}
+        onShowTransactions={openTransactions}
         onOpenOverview={openOverview}
         onOpenDetails={openEnvelopeInfo}
       />

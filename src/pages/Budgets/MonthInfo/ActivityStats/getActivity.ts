@@ -6,6 +6,7 @@ import { TSelector, useAppSelector } from '@store/index'
 import { envelopeModel, EnvType, TEnvelopeId } from '@entities/envelope'
 import { balances, EnvActivity } from '@entities/envBalances'
 import { fxRateModel } from '@entities/currency/fxRate'
+import { TrMode } from '@pages/Budgets/TransactionsDrawer'
 
 // —————————————————————————————————————————————————————————————————————————————
 // ACTIVITY BY TYPE
@@ -61,6 +62,7 @@ const getActivityByType: TSelector<ByMonth<TActivityByType>> = createSelector(
 
 export type TInfoNode = {
   id: TEnvelopeId | 'transferFees'
+  trMode: TrMode // used for filtering
   total: EnvActivity // have to know the value to detect if it is positive
   income?: EnvActivity
   outcome?: EnvActivity
@@ -107,6 +109,7 @@ const getActivityInfo = createSelector(
             income,
             outcome,
             keepIncome,
+            trMode: TrMode.Envelope,
             total: EnvActivity.merge(income, outcome),
           }
           const value = toValue(envInfo.total.total)
@@ -115,10 +118,22 @@ const getActivityInfo = createSelector(
           return
         }
         if (income) {
-          node.incomes.push({ id, total: income, income, keepIncome })
+          node.incomes.push({
+            id,
+            total: income,
+            income,
+            keepIncome,
+            trMode: TrMode.GeneralIncome,
+          })
         }
         if (outcome) {
-          node.outcomes.push({ id, total: outcome, outcome, keepIncome })
+          node.outcomes.push({
+            id,
+            total: outcome,
+            outcome,
+            keepIncome,
+            trMode: TrMode.Envelope,
+          })
         }
       })
 
@@ -126,6 +141,7 @@ const getActivityInfo = createSelector(
         node.transfers.push({
           id: 'transferFees',
           total: internal,
+          trMode: TrMode.All,
         })
       }
 
@@ -137,6 +153,7 @@ const getActivityInfo = createSelector(
           outcome,
           total: EnvActivity.merge(income, outcome),
           keepIncome: keepingEnvelopes.includes(id),
+          trMode: TrMode.All,
         })
       })
 
@@ -148,6 +165,7 @@ const getActivityInfo = createSelector(
           outcome,
           total: EnvActivity.merge(income, outcome),
           keepIncome: keepingEnvelopes.includes(id),
+          trMode: TrMode.All,
         })
       })
 
@@ -182,7 +200,6 @@ const getActivityInfo = createSelector(
 
       res[month] = node
     })
-    console.log('resss', res)
 
     return res
   }

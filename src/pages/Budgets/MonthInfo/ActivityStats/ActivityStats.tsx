@@ -7,27 +7,23 @@ import { Tooltip } from '@shared/ui/Tooltip'
 
 import { displayCurrency } from '@entities/currency/displayCurrency'
 import { EnvActivity } from '@entities/envBalances'
-import { envelopeModel, TEnvelopeId } from '@entities/envelope'
-import { trMode, useTrDrawer } from '@pages/Budgets/TransactionsDrawer'
+import { envelopeModel } from '@entities/envelope'
+import { TrMode, useTrDrawer } from '@pages/Budgets/TransactionsDrawer'
 import { TInfoNode, useActivityStatsModel } from './getActivity'
 
 export function ActivityStats(props: { month: TISOMonth }) {
   const { month } = props
   const activity = useActivityStatsModel(month)
   const { setDrawer } = useTrDrawer()
-  console.log({ activity })
-  const showIncomes = useCallback(
-    (id: TDataNode['id']) => {
-      setDrawer(id, { mode: trMode.GeneralIncome, isExact: true })
+
+  const showTransactions = useCallback(
+    (id: TDataNode['id'], trMode: TrMode) => {
+      setDrawer({ id, month, mode: trMode, isExact: true })
     },
-    [setDrawer]
+    [month, setDrawer]
   )
-  const showOutcomes = useCallback(
-    (id: TDataNode['id']) => {
-      setDrawer(id, { mode: trMode.GeneralIncome, isExact: true })
-    },
-    [setDrawer]
-  )
+
+  if (!activity) return null
 
   return (
     <>
@@ -37,9 +33,7 @@ export function ActivityStats(props: { month: TISOMonth }) {
         items={activity.incomes}
         name="Доходы"
         showBar
-        action={id => {
-          setDrawer(id, { mode: trMode.All, isExact: true })
-        }}
+        action={showTransactions}
       />
       <StatWidget
         month={month}
@@ -47,37 +41,31 @@ export function ActivityStats(props: { month: TISOMonth }) {
         items={activity.outcomes}
         name="Расходы"
         showBar
-        action={id => {
-          setDrawer(id, { mode: trMode.All, isExact: true })
-        }}
+        action={showTransactions}
       />
       <StatWidget
         month={month}
         total={activity.transfersTotal}
         items={activity.transfers}
         name="Переводы"
-        action={id => {
-          setDrawer(id, { mode: trMode.All, isExact: true })
-        }}
+        action={showTransactions}
       />
       <StatWidget
         month={month}
         total={activity.debtsTotal}
         items={activity.debts}
         name="Долги"
-        action={id => {
-          setDrawer(id, { mode: trMode.All, isExact: true })
-        }}
+        action={showTransactions}
       />
     </>
   )
 }
 
 type TDataNode = {
-  id: TEnvelopeId | 'transferFees'
-  color: string
+  id: TInfoNode['id']
+  trMode: TInfoNode['trMode']
   amount: number
-  keepIncome: boolean
+  color: string
   name: string
 }
 
@@ -87,7 +75,7 @@ function StatWidget(props: {
   showBar?: boolean
   total: EnvActivity
   items: TInfoNode[]
-  action: (id: TDataNode['id']) => void
+  action: (id: TDataNode['id'], trMode: TrMode) => void
 }) {
   const { month, total, items, name, showBar, action } = props
   const [currency] = displayCurrency.useDisplayCurrency()
@@ -98,12 +86,12 @@ function StatWidget(props: {
   const nodes: TDataNode[] = items.map(node => {
     return {
       id: node.id,
+      trMode: node.trMode,
+      amount: toDisplay(node.total.total),
       color:
         node.id === 'transferFees'
           ? '#808080'
           : envelopes[node.id].colorGenerated,
-      amount: toDisplay(node.total.total),
-      keepIncome: !!node.keepIncome,
       name:
         node.id === 'transferFees'
           ? 'Курсовая разница'
@@ -112,6 +100,8 @@ function StatWidget(props: {
   })
 
   const totalAmount = toDisplay(total.total)
+
+  if (!totalAmount) return null
 
   return (
     <>
@@ -146,7 +136,7 @@ function StatWidget(props: {
                 currency={currency}
                 onClick={e => {
                   e.stopPropagation()
-                  action(point.id)
+                  action(point.id, point.trMode)
                 }}
               />
             ))}

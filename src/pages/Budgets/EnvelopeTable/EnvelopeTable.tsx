@@ -11,7 +11,6 @@ import { envelopeModel, TEnvelopeId } from '@entities/envelope'
 import { Parent } from './Parent'
 import { Row } from './Row'
 import { Header } from './Header'
-import { trMode } from '../TransactionsDrawer'
 import { useMetric } from './models/useMetric'
 import { useExpandEnvelopes } from './models/useExpandEnvelopes'
 import { Highlight } from './Highlight'
@@ -25,15 +24,10 @@ type TagTableProps = {
   className?: string
   onOpenDetails: (id: TEnvelopeId) => void
   onOpenOverview: () => void
-  onShowTransactions: (
-    id: TEnvelopeId | null,
-    opts?:
-      | {
-          mode?: trMode | undefined
-          isExact?: boolean | undefined
-        }
-      | undefined
-  ) => void
+  onShowTransactions: (conditions: {
+    id: TEnvelopeId
+    isExact?: boolean | undefined
+  }) => void
 }
 
 const EnvelopeTable2: FC<TagTableProps> = props => {
@@ -53,7 +47,11 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
   const [reorderMode, toggleReorderMode] = useToggle()
 
   const onShowExactTransactions = useCallback(
-    (id: TEnvelopeId) => onShowTransactions(id, { isExact: true }),
+    (id: TEnvelopeId) => onShowTransactions({ id, isExact: true }),
+    [onShowTransactions]
+  )
+  const onShowAllTransactions = useCallback(
+    (id: TEnvelopeId) => onShowTransactions({ id }),
     [onShowTransactions]
   )
 
@@ -117,7 +115,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
                   isExpanded={isExpanded}
                   isReordering={reorderMode}
                   openDetails={onOpenDetails}
-                  openTransactionsPopover={onShowTransactions}
+                  openTransactionsPopover={onShowAllTransactions}
                 />
               }
               children={renderChildren}

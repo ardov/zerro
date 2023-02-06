@@ -83,6 +83,14 @@ function getRawActivityFn(
   }
 
   function addInternal(tr: TTransaction) {
+    if (
+      // Skip transactions that don't affect balance
+      tr.income === tr.outcome &&
+      tr.incomeInstrument === tr.outcomeInstrument
+    ) {
+      return
+    }
+
     const change = addFxAmount(
       { [instruments[tr.incomeInstrument].shortTitle]: tr.income },
       { [instruments[tr.outcomeInstrument].shortTitle]: -tr.outcome }

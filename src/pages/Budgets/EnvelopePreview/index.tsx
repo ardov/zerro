@@ -30,7 +30,7 @@ import { ActivityWidget } from './ActivityWidget'
 import { CommentWidget } from './CommentWidget'
 import { cardStyle } from './shared'
 import { useGoalPopover } from '../GoalPopover'
-import { useTrDrawer } from '../TransactionsDrawer'
+import { TrMode, useTrDrawer } from '../TransactionsDrawer'
 
 type EnvelopePreviewProps = {
   id: TEnvelopeId
@@ -117,7 +117,10 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
           <DataLine name="Бюджет" amount={totalBudgeted} currency={currency} />
           <DataLine name="Расход" amount={totalActivity} currency={currency} />
           <Box>
-            <Button onClick={() => setDrawer(id)} fullWidth>
+            <Button
+              onClick={() => setDrawer({ id, month, mode: TrMode.Envelope })}
+              fullWidth
+            >
               Показать операции
             </Button>
           </Box>

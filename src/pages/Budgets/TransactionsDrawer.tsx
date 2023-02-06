@@ -1,17 +1,31 @@
 import React, { FC, useCallback, useMemo } from 'react'
-import { ById } from '@shared/types'
+import { TISOMonth, TTransaction } from '@shared/types'
 import { useSearchParam } from '@shared/hooks/useSearchParam'
 import { useMonth } from '@shared/hooks/useMonth'
 import { TransactionsDrawer } from '@components/TransactionsDrawer'
 import { useCachedValue } from '@shared/hooks/useCachedValue'
-import { envelopeModel, TEnvelope, TEnvelopeId } from '@entities/envelope'
-import { balances, TActivityNode } from '@entities/envBalances'
+import { envelopeModel, TEnvelopeId } from '@entities/envelope'
+import { balances } from '@entities/envBalances'
 
-export enum trMode {
+/** Filter mode for transactions in balance */
+export enum TrMode {
+  /** Income not assigned to envelope */
   GeneralIncome = 'generalIncome',
-  // TransferFees = 'transferFees',
+  /** Transactions assigned to envelope (default) */
   Envelope = 'envelope',
+  /** All income */
+  Income = 'income',
+  /** All outcome */
+  Outcome = 'outcome',
+  /** All transactions */
   All = 'All',
+}
+
+type TConditions = {
+  id: TEnvelopeId | 'transferFees' | null
+  month: TISOMonth
+  mode?: TrMode
+  isExact?: boolean
 }
 
 export const BudgetTransactionsDrawer: FC = () => {
@@ -21,16 +35,7 @@ export const BudgetTransactionsDrawer: FC = () => {
   const cached = useCachedValue(params, isOpened)
   const onClose = () => setDrawer(null)
 
-  const envelopes = envelopeModel.useEnvelopes()
-  const activity = balances.useActivity()[cached.month]
-
-  const transactions = getTransactions(
-    activity,
-    envelopes,
-    cached.id,
-    cached.mode,
-    cached.isExact
-  )
+  const transactions = useFilteredTransactions(cached)
 
   if (!transactions)
     return <TransactionsDrawer open={false} onClose={onClose} />
@@ -48,32 +53,29 @@ export function useTrDrawer() {
   const [month] = useMonth()
   const [id, setId] =
     useSearchParam<TEnvelopeId | 'transferFees'>('tr_envelope')
-  const [mode, setMode] = useSearchParam<trMode>('tr_mode')
+  const [mode, setMode] = useSearchParam<TrMode>('tr_mode')
   const [isExact, setIsExact] = useSearchParam<'true'>('tr_exact')
 
   const setDrawer = useCallback(
-    (
-      id: TEnvelopeId | 'transferFees' | null,
-      opts?: { mode?: trMode; isExact?: boolean }
-    ) => {
-      if (!id) {
+    (conditions: TConditions | null) => {
+      if (!conditions) {
         setId()
         setMode()
         setIsExact()
       } else {
-        setId(id)
-        setMode(opts?.mode)
-        opts?.isExact && setIsExact('true')
+        setId(conditions.id)
+        setMode(conditions?.mode)
+        setIsExact(conditions.isExact ? 'true' : undefined)
       }
     },
     [setId, setMode, setIsExact]
   )
 
-  const params = useMemo(
+  const params: TConditions = useMemo(
     () => ({
       id,
       month,
-      mode: mode || trMode.Envelope,
+      mode: mode || TrMode.Envelope,
       isExact: !!isExact,
     }),
     [id, month, mode, isExact]
@@ -82,25 +84,35 @@ export function useTrDrawer() {
   return { params, setDrawer }
 }
 
-function getTransactions(
-  activity: TActivityNode,
-  envelopes: ById<TEnvelope>,
-  id: TEnvelopeId | 'transferFees' | null,
-  mode: trMode,
-  isExact: boolean
-) {
-  if (!id) return null
+function useFilteredTransactions(conditions: TConditions): TTransaction[] {
+  const { id, month, mode, isExact } = conditions
+  const envelopes = envelopeModel.useEnvelopes()
+  const activity = balances.useActivity()[month]
+  const rawActivity = balances.useRawActivity()[month]
+  if (!activity || !rawActivity || !id) return []
+
+  // Return transfer fees
   if (id === 'transferFees') return activity.transferFees.transactions
 
+  // Prepare ids to get transactions
   const ids = id ? (isExact ? [id] : [id, ...envelopes[id].children]) : []
+
+  // Prepare and merge transactions
   const transactions = ids
     .map(id => {
-      const income = activity?.generalIncome.byEnv[id]?.transactions || []
-      const envelope = activity?.envActivity.byEnv[id]?.transactions || []
-      if (mode === trMode.GeneralIncome) return income
-      if (mode === trMode.Envelope) return envelope
-      if (mode === trMode.All) return [...income, ...envelope]
-      return []
+      if (mode === TrMode.GeneralIncome)
+        return activity?.generalIncome.byEnv[id]?.transactions || []
+      if (mode === TrMode.Envelope)
+        return activity?.envActivity.byEnv[id]?.transactions || []
+      if (mode === TrMode.Income)
+        return rawActivity?.income[id]?.transactions || []
+      if (mode === TrMode.Outcome)
+        return rawActivity?.outcome[id]?.transactions || []
+      // All
+      return [
+        ...(rawActivity?.income[id]?.transactions || []),
+        ...(rawActivity?.outcome[id]?.transactions || []),
+      ]
     })
     .reduce((acc, arr) => acc.concat(arr), [])
   return transactions
