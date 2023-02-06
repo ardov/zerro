@@ -6,10 +6,12 @@ import {
   Collapse,
   Link,
   BoxProps,
+  useTheme,
 } from '@mui/material'
-import parse from 'date-fns/parseISO'
 import QRCode from 'qrcode.react'
-import { formatMoney, formatDate } from 'helpers/format'
+import { formatMoney } from '@shared/helpers/money'
+import { formatDate } from '@shared/helpers/date'
+import { parseReceipt } from '@shared/helpers/receipt'
 
 interface RecieptProps {
   value?: string | null
@@ -18,10 +20,10 @@ interface RecieptProps {
 
 export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
   const [showMore, setShowMore] = useState(false)
+  const theme = useTheme()
   if (!value) return null
 
   const parsed = parseReceipt(value)
-  parsed.t = parse(parsed.t)
 
   return (
     <Paper sx={{ p: 2, display: 'flex', ...sx }}>
@@ -30,7 +32,7 @@ export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
         <Line name="Дата" value={formatDate(parsed.t, 'dd.MM.yyyy, HH:mm')} />
 
         <Box mt="auto">
-          <Collapse in={!showMore}>
+          <Collapse in={!showMore} unmountOnExit>
             <Link
               component="button"
               variant="caption"
@@ -42,7 +44,7 @@ export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
           </Collapse>
         </Box>
 
-        <Collapse in={showMore}>
+        <Collapse in={showMore} unmountOnExit>
           <div>
             <Line name="ФН" value={parsed.fn} />
             <Line name="ФД" value={parsed.i} />
@@ -52,25 +54,16 @@ export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
       </Box>
 
       <Box ml="auto">
-        <QRCode value={value} />
+        <QRCode
+          value={value}
+          bgColor={theme.palette.background.paper}
+          fgColor={theme.palette.text.primary}
+          includeMargin
+        />
       </Box>
     </Paper>
   )
 }
-
-interface RecieptData {
-  t: string
-  i: string
-  fn: string
-  fp: string
-}
-
-const parseReceipt = (string: string) =>
-  string.split('&').reduce((obj: any, str) => {
-    const arr = str.split('=')
-    obj[arr[0]] = arr[1]
-    return obj as RecieptData
-  }, {})
 
 interface LineProps {
   name: string

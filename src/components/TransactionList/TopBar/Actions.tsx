@@ -1,6 +1,7 @@
+import type { TTransaction } from '@shared/types'
 import React, { FC, useEffect, useState } from 'react'
 import './transitions.css'
-import { useSelector, useDispatch } from 'react-redux'
+import { useAppDispatch } from '@store'
 import IconButton from '@mui/material/IconButton'
 import {
   DeleteOutlineIcon,
@@ -9,30 +10,24 @@ import {
   MoreVertIcon,
   VisibilityIcon,
   MergeTypeIcon,
-} from 'components/Icons'
-import { Tooltip } from 'components/Tooltip'
+} from '@shared/ui/Icons'
+import { Tooltip } from '@shared/ui/Tooltip'
 import Chip from '@mui/material/Chip'
 import Box from '@mui/material/Box'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-import pluralize from 'helpers/pluralize'
-import { Confirm } from 'components/Confirm'
-import TagSelect2 from 'components/TagSelect2'
-import {
-  deleteTransactions,
-  markViewed,
-  bulkEditTransactions,
-} from 'store/data/transactions/thunks'
+import pluralize from '@shared/helpers/pluralize'
+import { Confirm } from '@shared/ui/Confirm'
+import TagSelect2 from '@components/TagSelect2'
 import { CSSTransition } from 'react-transition-group'
 import { EditOutlined } from '@mui/icons-material'
 import { BulkEditModal } from './BulkEditModal'
-import { getType, isNew } from 'store/data/transactions/helpers'
-import { getTransactions } from 'store/data/transactions'
+import { getType, isNew } from '@entities/transaction/helpers'
+import { trModel } from '@entities/transaction'
 import { Divider, ListItemIcon, ListItemText } from '@mui/material'
-import { Transaction } from 'types'
-import { round } from 'helpers/currencyHelpers'
-import { applyClientPatch } from 'store/data'
-import { sendEvent } from 'helpers/tracking'
+import { round } from '@shared/helpers/money'
+import { applyClientPatch } from '@store/data'
+import { sendEvent } from '@shared/helpers/tracking'
 
 type ActionsProps = {
   visible: boolean
@@ -47,8 +42,8 @@ const Actions: FC<ActionsProps> = ({
   onUncheckAll,
   onCheckAll,
 }) => {
-  const dispatch = useDispatch()
-  const allTransactions = useSelector(getTransactions)
+  const dispatch = useAppDispatch()
+  const allTransactions = trModel.useTransactions()
   const [ids, setIds] = useState(checkedIds)
   const transactions = ids?.map(id => allTransactions[id])
   const actions = getAvailableActions(transactions)
@@ -66,14 +61,14 @@ const Actions: FC<ActionsProps> = ({
 
   const handleSetTag = (id: string) => {
     if (!id || id === 'null')
-      dispatch(bulkEditTransactions(checkedIds, { tags: [] }))
-    else dispatch(bulkEditTransactions(checkedIds, { tags: [id] }))
+      dispatch(trModel.bulkEditTransactions(checkedIds, { tags: [] }))
+    else dispatch(trModel.bulkEditTransactions(checkedIds, { tags: [id] }))
     closeMenu()
     onUncheckAll()
   }
 
   const handleDelete = () => {
-    dispatch(deleteTransactions(checkedIds))
+    dispatch(trModel.deleteTransactions(checkedIds))
     closeMenu()
     onUncheckAll()
   }
@@ -84,7 +79,7 @@ const Actions: FC<ActionsProps> = ({
   }
 
   const handleMarkViewed = () => {
-    dispatch(markViewed(checkedIds, true))
+    dispatch(trModel.markViewed(checkedIds, true))
     closeMenu()
     onUncheckAll()
   }
@@ -275,7 +270,7 @@ const Actions: FC<ActionsProps> = ({
   )
 }
 
-function getAvailableActions(transactions: Transaction[]) {
+function getAvailableActions(transactions: TTransaction[]) {
   const { incomes, outcomes, transfers } = getTypes(transactions)
   const totalOutcome = outcomes.reduce((sum, tr) => round(sum + tr.outcome), 0)
   const totalIncome = incomes.reduce((sum, tr) => round(sum + tr.income), 0)
@@ -336,13 +331,13 @@ function getAvailableActions(transactions: Transaction[]) {
   }
 }
 
-function combineToOutcome(transactions: Transaction[]) {
+function combineToOutcome(transactions: TTransaction[]) {
   const { incomes, outcomes } = getTypes(transactions)
   const outcome = outcomes[0]
   const outcomeInstrument = outcome.outcomeInstrument
   let outcomeSum = outcome.outcome
   const outcomeAccount = outcome.outcomeAccount
-  const modifiedIncomes: Transaction[] = incomes.map(tr => {
+  const modifiedIncomes: TTransaction[] = incomes.map(tr => {
     outcomeSum = round(outcomeSum - tr.income)
     if (tr.incomeAccount === outcomeAccount) {
       // Same account -> just delete income
@@ -370,13 +365,13 @@ function combineToOutcome(transactions: Transaction[]) {
   return modifiedIncomes
 }
 
-function combineToIncome(transactions: Transaction[]) {
+function combineToIncome(transactions: TTransaction[]) {
   const { incomes, outcomes } = getTypes(transactions)
   const income = incomes[0]
   const incomeInstrument = income.incomeInstrument
   let incomeSum = income.income
   const incomeAccount = income.incomeAccount
-  const modifiedOutcomes: Transaction[] = outcomes.map(tr => {
+  const modifiedOutcomes: TTransaction[] = outcomes.map(tr => {
     incomeSum = round(incomeSum - tr.outcome)
     if (tr.outcomeAccount === incomeAccount) {
       // Same account -> just delete outcome
@@ -404,10 +399,10 @@ function combineToIncome(transactions: Transaction[]) {
   return modifiedOutcomes
 }
 
-function getTypes(list: Transaction[] = []) {
-  let incomes: Transaction[] = []
-  let outcomes: Transaction[] = []
-  let transfers: Transaction[] = []
+function getTypes(list: TTransaction[] = []) {
+  let incomes: TTransaction[] = []
+  let outcomes: TTransaction[] = []
+  let transfers: TTransaction[] = []
 
   list?.forEach(tr => {
     let trType = getType(tr)

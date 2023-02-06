@@ -1,6 +1,6 @@
 import React, { FC, KeyboardEventHandler, useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { getTagsTree, TagTreeNode } from 'store/data/tags'
+import { useAppSelector } from '@store'
+import { getTagsTree, TagTreeNode, TTagPopulated } from '@entities/tag'
 import {
   Popover,
   Paper,
@@ -12,12 +12,11 @@ import {
   PopoverProps,
   ListItemProps,
 } from '@mui/material'
-import { AddIcon } from 'components/Icons'
-import { EmojiIcon } from 'components/EmojiIcon'
-import { PopulatedTag } from 'types'
+import { AddIcon } from '@shared/ui/Icons'
+import { EmojiIcon } from '@shared/ui/EmojiIcon'
 
 type TagType = 'income' | 'outcome' | undefined | null
-type TagNode = TagTreeNode | PopulatedTag
+type TagNode = TagTreeNode | TTagPopulated
 type TagSelectProps = {
   onChange: (id: string) => void
   trigger?: React.ReactElement
@@ -78,7 +77,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
   onClose,
   ...popoverProps
 }) => {
-  const tags = useSelector(getTagsTree)
+  const tags = useAppSelector(getTagsTree)
   const [search, setSearch] = useState('')
   const [focused, setFocused] = useState(0)
   const [localTagType, setLocalTagType] = useState(tagType)
@@ -198,7 +197,7 @@ const makeTagChecker = (props: {
   const { search = '', tagType = null, exclude = [], showNull = false } = props
   const checkSearch = (tag: TagNode, search: string) => {
     if (includes(tag.title, search)) return true
-    const children = tag.children as PopulatedTag[]
+    const children = tag.children as TTagPopulated[]
     return children?.some(child => includes(child.title, search))
   }
   return function (tag: TagNode) {

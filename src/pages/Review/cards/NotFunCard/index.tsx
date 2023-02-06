@@ -1,0 +1,1 @@
+export { NotFunCard } from './NotFunCard'

@@ -1,0 +1,100 @@
+html {
+  box-sizing: border-box;
+  font-size: 16px;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+.article {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.article h1 {
+  // margin: 0;
+  // font-weight: 700;
+  // font-size: 3.5rem;
+  // line-height: 3.75rem;
+  margin: 0 auto 1.5rem;
+  font-weight: 700;
+  font-size: 3rem;
+  line-height: 3.25rem;
+}
+
+.article h2 {
+  margin: 5rem auto 1.25rem;
+  font-weight: 700;
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
+.article h3 {
+  margin: 3.5rem auto 1rem;
+  font-weight: 700;
+  font-size: 1.75rem;
+  line-height: 2rem;
+}
+
+.article h4 {
+  margin: 2rem auto 0;
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.article p {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+
+  + p {
+    margin-top: 1.75rem;
+  }
+}
+
+.article ul,
+.article ol {
+  margin: 1.75rem auto;
+  padding-left: 24px;
+}
+
+.article li {
+  margin-bottom: 0.75rem;
+}
+
+.article a {
+  border-bottom-color: var(--c-primary);
+  border-bottom-width: 0.4px;
+  border-bottom-style: solid;
+  position: relative;
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    border-bottom-width: 2px;
+  }
+}
+
+.slide-down {
+  opacity: 1;
+  animation-name: slideDown;
+  animation-duration: 200ms;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-out;
+}
+
+@keyframes slideDown {
+  0% {
+    transform: translateY(-24px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

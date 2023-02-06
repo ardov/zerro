@@ -10,26 +10,21 @@ import {
   Button,
   Stack,
 } from '@mui/material'
-import { Tooltip } from 'components/Tooltip'
-import { DeleteIcon, CloseIcon, RestoreFromTrashIcon } from 'components/Icons'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { DeleteIcon, CloseIcon, RestoreFromTrashIcon } from '@shared/ui/Icons'
 import DatePicker from '@mui/lab/DatePicker'
 import { Map } from './Map'
-import { AmountInput } from 'components/AmountInput'
-import { formatDate, rateToWords } from 'helpers/format'
-import { TagList } from 'components/TagList'
-import { useDispatch, useSelector } from 'react-redux'
-import { getTransactions } from 'store/data/transactions'
-import { getType } from 'store/data/transactions/helpers'
-import { getPopulatedAccounts } from 'store/data/accounts'
-import { getInstruments } from 'store/data/instruments'
-import {
-  applyChangesToTransaction,
-  deleteTransactions,
-  deleteTransactionsPermanently,
-  recreateTransaction,
-  restoreTransaction,
-} from 'store/data/transactions/thunks'
-import { Transaction } from 'types'
+import { AmountInput } from '@shared/ui/AmountInput'
+import { rateToWords } from '@shared/helpers/money'
+import { formatDate, parseDate } from '@shared/helpers/date'
+import { TagList } from '@components/TagList'
+import { useAppDispatch } from '@store'
+import { trModel } from '@entities/transaction'
+import { getType } from '@entities/transaction/helpers'
+import { accountModel } from '@entities/account'
+import { instrumentModel } from '@entities/currency/instrument'
+import { toISODate } from '@shared/helpers/date'
+import { TTransaction } from '@shared/types'
 
 type TransactionPreviewProps = {
   id: string
@@ -40,18 +35,18 @@ type TransactionPreviewProps = {
 
 export const TransactionPreview: FC<TransactionPreviewProps> = props => {
   const { id, onClose, onOpenOther, onSelectSimilar } = props
-  const dispatch = useDispatch()
-  const onDelete = () => dispatch(deleteTransactions([id]))
+  const dispatch = useAppDispatch()
+  const onDelete = () => dispatch(trModel.deleteTransactions([id]))
   const onDeletePermanently = () =>
-    dispatch(deleteTransactionsPermanently([id]))
-  const onRestore = () => dispatch(restoreTransaction(id))
+    dispatch(trModel.deleteTransactionsPermanently([id]))
+  const onRestore = () => dispatch(trModel.restoreTransaction(id))
   // onSplit: id => dispatch(splitTransfer(id)), // does not work
 
-  const tr = useSelector(getTransactions)[id]
+  const tr = trModel.useTransactions()[id]
   const trType = getType(tr)
-  const incomeAccount = useSelector(getPopulatedAccounts)[tr.incomeAccount]
-  const outcomeAccount = useSelector(getPopulatedAccounts)[tr.outcomeAccount]
-  const instruments = useSelector(getInstruments)
+  const incomeAccount = accountModel.usePopulatedAccounts()[tr.incomeAccount]
+  const outcomeAccount = accountModel.usePopulatedAccounts()[tr.outcomeAccount]
+  const instruments = instrumentModel.useInstruments()
   const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
   const outcomeCurrency = instruments[tr.outcomeInstrument]?.shortTitle
 
@@ -103,11 +98,11 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
     if (timeChanged) {
       const hh = +localTime.split(':')[0]
       const mm = +localTime.split(':')[1]
-      let createdDate = new Date(tr.date)
+      let createdDate = parseDate(tr.date)
       createdDate.setHours(hh)
       createdDate.setMinutes(mm)
       let newId = dispatch(
-        recreateTransaction({
+        trModel.recreateTransaction({
           id,
           created: +createdDate,
           comment: localComment,
@@ -121,7 +116,7 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
       onOpenOther(newId as string)
     } else if (hasChanges) {
       dispatch(
-        applyChangesToTransaction({
+        trModel.applyChangesToTransaction({
           id,
           comment: localComment,
           outcome: localOutcome,
@@ -182,7 +177,7 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
         <Stack direction="row" spacing={2}>
           <DatePicker
             value={localDate}
-            onChange={date => date && setLocalDate(+date)}
+            onChange={date => date && setLocalDate(toISODate(date))}
             label="Дата"
             cancelText="Отмена"
             okText="Ок"
@@ -328,10 +323,10 @@ const SaveButton: FC<{ visible: boolean; onSave: () => void }> = ({
   </Box>
 )
 
-const RateToWords: FC<{ tr: Transaction }> = ({ tr }) => {
+const RateToWords: FC<{ tr: TTransaction }> = ({ tr }) => {
   const trType = getType(tr)
   const { income, opIncome, outcome, opOutcome } = tr
-  const instruments = useSelector(getInstruments)
+  const instruments = instrumentModel.useInstruments()
   const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
   const opIncomeCurrency =
     tr.opIncomeInstrument && instruments[tr.opIncomeInstrument]?.shortTitle

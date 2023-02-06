@@ -1,13 +1,13 @@
 import React, { FC, useState } from 'react'
 import { Menu, MenuItem, MenuProps, PopoverPosition } from '@mui/material'
-import { Transaction } from 'types'
-import { isNew } from 'store/data/transactions/helpers'
-import { useDispatch } from 'react-redux'
-import { markViewed } from 'store/data/transactions/thunks'
+import { TTransaction } from '@shared/types'
+import { isNew } from '@entities/transaction/helpers'
+import { useAppDispatch } from '@store'
+import { trModel } from '@entities/transaction'
 
 interface TransactionMenuProps extends MenuProps {
   id: string
-  transaction: Transaction
+  transaction: TTransaction
   onSelectChanged: (date: number) => void
 }
 
@@ -17,7 +17,7 @@ export const TransactionMenu: FC<TransactionMenuProps> = ({
   onSelectChanged,
   ...rest
 }) => {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const close = () => rest.onClose?.({}, 'escapeKeyDown')
   return (
     <Menu {...rest}>
@@ -31,7 +31,7 @@ export const TransactionMenu: FC<TransactionMenuProps> = ({
       </MenuItem>
       <MenuItem
         onClick={e => {
-          dispatch(markViewed(id, isNew(transaction)))
+          dispatch(trModel.markViewed(id, isNew(transaction)))
           close()
         }}
       >

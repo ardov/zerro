@@ -1,23 +1,24 @@
 import React, { FC } from 'react'
 import styled from '@emotion/styled'
-import { EmojiIcon } from 'components/EmojiIcon'
-import { useSelector } from 'react-redux'
-import { getMerchants } from 'store/data/selectors'
-import { Amount } from 'components/Amount'
-import { getAccounts } from 'store/data/accounts'
-import { Transaction as ITransaction, TransactionType } from 'types'
-import { getPopulatedTags } from 'store/data/tags'
+import { EmojiIcon } from '@shared/ui/EmojiIcon'
+import { useAppSelector } from '@store'
+import { SmartAmount } from '@components/Amount'
+import { accountModel } from '@entities/account'
+import { TrType } from '@entities/transaction'
+import { getPopulatedTags } from '@entities/tag'
 import { Typography } from '@mui/material'
-import { Tooltip } from 'components/Tooltip'
-// import { isNew } from 'store/data/transactions/helpers'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { TTransaction } from '@shared/types'
+import { getMerchants } from '@entities/merchant'
+// import { isNew } from '@store/data/transactions/helpers'
 
 type HTMLDivProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLDivElement>,
   HTMLDivElement
 >
 type TrElementProps = HTMLDivProps & {
-  tr: ITransaction
-  trType: TransactionType
+  tr: TTransaction
+  trType: TrType
 }
 
 type SymbolProps = TrElementProps & {
@@ -42,7 +43,7 @@ export const Symbol: FC<SymbolProps> = ({
   onToggle,
   ...rest
 }) => {
-  const tags = useSelector(getPopulatedTags)
+  const tags = useAppSelector(getPopulatedTags)
   const mainTagId = tr.tag ? tr.tag[0] : 'null'
   const tag = tags[mainTagId]
   switch (trType) {
@@ -85,7 +86,7 @@ export const Symbol: FC<SymbolProps> = ({
 }
 
 export const Tags: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
-  const tags = useSelector(getPopulatedTags)
+  const tags = useAppSelector(getPopulatedTags)
   switch (trType) {
     case 'income':
     case 'outcome':
@@ -137,7 +138,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
                 color="textSecondary"
                 component="span"
               >
-                <Amount
+                <SmartAmount
                   value={tr.opOutcome}
                   instrument={tr.opOutcomeInstrument}
                   decMode="ifAny"
@@ -145,7 +146,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
               </Typography>
             </Tooltip>
           )}
-          <Amount value={tr.outcome} instrument={tr.outcomeInstrument} />
+          <SmartAmount value={tr.outcome} instrument={tr.outcomeInstrument} />
         </AmountsWrapper>
       )
     case 'income':
@@ -170,7 +171,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
                 color="textSecondary"
                 component="span"
               >
-                <Amount
+                <SmartAmount
                   value={tr.opIncome}
                   instrument={tr.opIncomeInstrument}
                   decMode="ifAny"
@@ -179,7 +180,11 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
               </Typography>
             </Tooltip>
           )}
-          <Amount value={tr.income} instrument={tr.incomeInstrument} sign />
+          <SmartAmount
+            value={tr.income}
+            instrument={tr.incomeInstrument}
+            sign
+          />
         </AmountsWrapper>
       )
     case 'transfer':
@@ -188,9 +193,9 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
       return (
         <AmountsWrapper type="transfer" {...rest}>
           {!isEqual && (
-            <Amount value={tr.outcome} instrument={tr.outcomeInstrument} />
+            <SmartAmount value={tr.outcome} instrument={tr.outcomeInstrument} />
           )}
-          <Amount value={tr.income} instrument={tr.incomeInstrument} />
+          <SmartAmount value={tr.income} instrument={tr.incomeInstrument} />
         </AmountsWrapper>
       )
     default:
@@ -274,7 +279,7 @@ export const Accounts: FC<InfoProps> = ({
 }
 
 const Account: FC<{ id: string }> = ({ id, ...rest }) => {
-  const account = useSelector(getAccounts)[id]
+  const account = accountModel.usePopulatedAccounts()[id]
   return <span {...rest}>{account.title}</span>
 }
 
@@ -283,7 +288,7 @@ const Payee: FC<{
   merchant: string | null
   onClick: (payee: string) => void
 }> = ({ payee, merchant, onClick, ...rest }) => {
-  const merchants = useSelector(getMerchants)
+  const merchants = useAppSelector(getMerchants)
   if (!payee && !merchant) return null
   let name = merchant ? merchants[merchant]?.title : payee
   return (
@@ -393,8 +398,9 @@ const ExchangeRate: FC<ExchangeRateProps> = props => {
   if (sum1 < sum2) {
     return (
       <span {...rest}>
-        <Amount value={1} instrument={inst1} decMode="ifAny" noShade /> =
-        <Amount
+        <SmartAmount value={1} instrument={inst1} decMode="ifAny" noShade />
+         =
+        <SmartAmount
           value={sum2 / sum1}
           instrument={inst2}
           decMode="ifAny"
@@ -405,8 +411,9 @@ const ExchangeRate: FC<ExchangeRateProps> = props => {
   } else {
     return (
       <span {...rest}>
-        <Amount value={1} instrument={inst2} decMode="ifAny" noShade /> =
-        <Amount
+        <SmartAmount value={1} instrument={inst2} decMode="ifAny" noShade />
+         =
+        <SmartAmount
           value={sum1 / sum2}
           instrument={inst1}
           decMode="ifAny"

@@ -1,9 +1,11 @@
-import { LocalData, ZmDiff, Diff } from 'types'
 import * as Comlink from 'comlink'
-import { keys } from 'helpers/keys'
-import { getIDBStorage } from 'services/storage'
-import ZenApi from 'services/ZenApi'
-import { toClient, toServer } from './zmAdapter'
+import { TDiff, TLocalData, TZmDiff } from '../shared/types'
+import { keys } from '../shared/helpers/keys'
+import { storage } from '../shared/api/storage'
+import { zenmoney } from '../shared/api/zenmoney'
+import { convertDiff } from '../shared/api/zm-adapter'
+
+// import { workerMethods } from 'dataWorker'
 
 // eslint-disable-next-line no-restricted-globals
 // const ctx: Worker = self as any
@@ -16,7 +18,7 @@ import { toClient, toServer } from './zmAdapter'
 //   return store
 // }
 
-type LocalKey = keyof LocalData
+type LocalKey = keyof TLocalData
 const LOCAL_KEYS = [
   'serverTimestamp',
   'instrument',
@@ -32,35 +34,33 @@ const LOCAL_KEYS = [
   'transaction',
 ] as LocalKey[]
 
-function convertZmToLocal(diff: ZmDiff) {
-  return toClient(diff)
+function convertZmToLocal(diff: TZmDiff) {
+  return convertDiff.toClient(diff)
 }
 
-async function sync(token: string, diff: Diff) {
-  const zmDiff = toServer(diff)
+async function sync(token: string, diff: TDiff) {
+  const zmDiff = convertDiff.toServer(diff)
   try {
-    let data = await ZenApi.getData(token, zmDiff)
-    return { data: toClient(data) }
+    let data = await zenmoney.getData(token, zmDiff)
+    return { data: convertDiff.toClient(data) }
   } catch (error: any) {
     return { error: error.message as string }
   }
 }
 
-const db = getIDBStorage('serverData')
-
 async function getLocalData() {
-  let data = {} as LocalData
-  let arr = await Promise.all(LOCAL_KEYS.map(key => db.get(key)))
+  let data = {} as TLocalData
+  let arr = await Promise.all(LOCAL_KEYS.map(key => storage.get(key)))
   LOCAL_KEYS.forEach((key, i) => (data[key] = arr[i]))
-  return toClient(data)
+  return convertDiff.toClient(data)
 }
 
 const obj = {
   convertZmToLocal,
   getLocalData,
-  clearStorage: () => db.clear(),
-  saveLocalData: (data: LocalData) => {
-    keys(data).forEach(key => db.set(key, data[key]))
+  clearStorage: () => storage.clear(),
+  saveLocalData: (data: TLocalData) => {
+    keys(data).forEach(key => storage.set(key, data[key]))
   },
   sync,
 }

@@ -13,11 +13,14 @@ import TextField from '@mui/material/TextField'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { Box, ListSubheader } from '@mui/material'
 import Transaction from './Transaction'
-import { formatDate } from 'helpers/format'
+import { formatDate, parseDate } from '@shared/helpers/date'
+import { TDateDraft, TISODate } from '@shared/types'
+import { toISODate } from '@shared/helpers/date'
+import { TTransactionId } from '@shared/types'
 
 type GroupNode = {
-  date: number
-  transactions: string[]
+  date: TISODate
+  transactions: TTransactionId[]
 }
 
 const HEADER_HEIGHT = 48
@@ -33,39 +36,54 @@ const findDateIndex = (groups: GroupNode[], date: GroupNode['date']) => {
 type GrouppedListProps = {
   groups: GroupNode[]
   checked: string[]
+  initialDate?: TDateDraft
   toggleTransaction: (id: string) => void
   checkByChangedDate: (date: number) => void
   onFilterByPayee: (payee: string) => void
 }
 type DayData = GrouppedListProps & {
-  onDateClick: (date: Date | number | null) => void
+  onDateClick: (date: TDateDraft | null) => void
 }
 
 export const GrouppedList: FC<GrouppedListProps> = ({
   groups,
   checked,
+  initialDate,
   toggleTransaction,
   checkByChangedDate,
   onFilterByPayee,
 }) => {
   const listRef = useRef<List>(null)
-  const [clickedDate, setClickedDate] = useState<Date | number | null>(null)
+  const [clickedDate, setClickedDate] = useState<TISODate | null>(null)
 
   useEffect(() => {
     listRef?.current?.resetAfterIndex?.(0)
   }, [listRef, groups])
 
   const scrollToDate = useCallback(
-    date =>
-      listRef?.current?.scrollToItem(findDateIndex(groups, date), 'start'),
+    (date: TDateDraft) => {
+      listRef?.current?.scrollToItem(
+        findDateIndex(groups, toISODate(date)),
+        'start'
+      )
+    },
     [groups]
   )
 
+  useEffect(() => {
+    // Scroll to initial date if it's provided
+    if (initialDate) {
+      // For we should render first and only then scroll. That's why there is timeout. Downside of is that the list jumps.
+      setTimeout(() => scrollToDate(initialDate), 10)
+    }
+  }, [initialDate, scrollToDate])
+
   const minDate = groups.length ? groups[groups.length - 1].date : 0
   const maxDate = groups.length ? groups[0].date : 0
-  const getItemKey = useCallback(i => +groups[i].date, [groups])
+  const getItemKey = useCallback((i: number) => groups[i].date, [groups])
   const getItemSize = useCallback(
-    i => HEADER_HEIGHT + TRANSACTION_HEIGHT * groups[i].transactions.length,
+    (i: number) =>
+      HEADER_HEIGHT + TRANSACTION_HEIGHT * groups[i].transactions.length,
     [groups]
   )
   const itemData: DayData = {
@@ -74,20 +92,22 @@ export const GrouppedList: FC<GrouppedListProps> = ({
     toggleTransaction,
     checkByChangedDate,
     onFilterByPayee,
-    onDateClick: (date: Date | number | null) => setClickedDate(date),
+    onDateClick: (date: TDateDraft | null) => {
+      setClickedDate(date ? toISODate(date) : null)
+    },
   }
 
   return (
     <>
       <Dialog open={!!clickedDate} onClose={() => setClickedDate(null)}>
         <StaticDatePicker
-          maxDate={maxDate}
-          minDate={minDate}
+          value={clickedDate && parseDate(clickedDate)}
+          maxDate={parseDate(maxDate)}
+          minDate={parseDate(minDate)}
           openTo="day"
-          value={clickedDate}
           onChange={date => {
             setClickedDate(null)
-            scrollToDate(date)
+            if (date) scrollToDate(date)
           }}
           renderInput={params => <TextField {...params} />}
         />
@@ -175,7 +195,7 @@ const Day: FC<ListChildComponentProps<DayData>> = ({
 }
 
 const DaySkeleton: FC<{
-  date: number | Date
+  date: TDateDraft
   length: number
   style: CSSProperties
 }> = ({ date, style, length }) => (

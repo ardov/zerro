@@ -1,28 +1,32 @@
 import React, { FC } from 'react'
-import TransactionList from './TransactionList'
 import { Drawer, Box, Typography, IconButton, DrawerProps } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { Tooltip } from 'components/Tooltip'
-import { CloseIcon } from 'components/Icons'
-import { FilterConditions } from 'store/data/transactions/filtering'
-import { Modify } from 'types'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { CloseIcon } from '@shared/ui/Icons'
+import { Modify, TDateDraft } from '@shared/types'
+import { TransactionList, TTransactionListProps } from './TransactionList'
 
 export type TransactionsDrawerProps = Modify<
   DrawerProps,
   { onClose: () => void }
 > & {
-  prefilter?: FilterConditions | FilterConditions[]
-  filterConditions?: FilterConditions
+  transactions?: TTransactionListProps['transactions']
+  prefilter?: TTransactionListProps['prefilter']
+  filterConditions?: TTransactionListProps['filterConditions']
+  initialDate?: TDateDraft
 }
 
-export const TransactionsDrawer: FC<TransactionsDrawerProps> = ({
-  prefilter,
-  filterConditions,
-  title,
-  onClose,
-  open,
-  ...rest
-}) => {
+export const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
+  const {
+    transactions,
+    prefilter,
+    filterConditions,
+    initialDate,
+    title,
+    onClose,
+    open,
+    ...rest
+  } = props
   const c = useStyles()
   return (
     <Drawer
@@ -46,8 +50,10 @@ export const TransactionsDrawer: FC<TransactionsDrawerProps> = ({
         </Box>
 
         <TransactionList
+          transactions={transactions}
           prefilter={prefilter}
           filterConditions={filterConditions}
+          initialDate={initialDate}
           hideFilter
           sx={{ flex: '1 1 auto' }}
         />

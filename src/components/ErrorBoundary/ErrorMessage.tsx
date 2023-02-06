@@ -1,12 +1,13 @@
 import React, { FC } from 'react'
 import { Box, Typography, Button } from '@mui/material'
-import { RefreshIcon } from 'components/Icons'
+import { RefreshIcon } from '@shared/ui/Icons'
 
 interface ErrorMessageProps {
   onLogOut: () => void
+  message: string
 }
 
-export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut }) => (
+export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut, message }) => (
   <Box
     display="flex"
     alignItems="center"
@@ -15,7 +16,7 @@ export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut }) => (
   >
     <Box p={5} mx="auto" maxWidth={500}>
       <Typography variant="h4" paragraph>
-        Что-то навернулось
+        Что-то навернулось 👻
       </Typography>
 
       <Typography variant="body1" paragraph>
@@ -36,6 +37,16 @@ export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut }) => (
         <Button onClick={onLogOut} sx={{ ml: 2 }}>
           Выйти
         </Button>
+
+        {!!message && (
+          <Typography
+            sx={{ mt: 6, color: 'text.secondary' }}
+            variant="body1"
+            paragraph
+          >
+            Орёт на програмистском: {message} !1!!
+          </Typography>
+        )}
       </Box>
     </Box>
   </Box>

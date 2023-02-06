@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { TagSelect } from 'components/TagSelect'
+import { TagSelect } from '@components/TagSelect'
 import {
   Drawer,
   Box,
@@ -10,20 +10,17 @@ import {
   Grid,
   Typography,
   IconButton,
+  TextFieldProps,
 } from '@mui/material'
 import { DateRangePicker } from '@mui/lab'
-import startOfDay from 'date-fns/startOfDay'
-import endOfDay from 'date-fns/endOfDay'
-import subMonths from 'date-fns/subMonths'
-
 import { makeStyles } from '@mui/styles'
-import { Tooltip } from 'components/Tooltip'
-import { CloseIcon } from 'components/Icons'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { CloseIcon } from '@shared/ui/Icons'
 import Button from '@mui/material/Button'
-
-import { formatDate } from 'helpers/format'
-import { FilterConditions } from 'store/data/transactions/filtering'
-import { TransactionType } from 'types'
+import { formatDate } from '@shared/helpers/date'
+import { FilterConditions } from '@entities/transaction/filtering'
+import { TrType } from '@entities/transaction'
+import { endOfDay, prevMonth, startOfDay } from '@shared/helpers/date'
 
 const useStyles = makeStyles(theme => ({
   drawerWidth: {
@@ -52,7 +49,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
 }) => {
   const c = useStyles()
   const handleTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value as TransactionType
+    const value = e.target.value as TrType
     setCondition({ type: value || null })
   }
 
@@ -113,14 +110,20 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
             mask="__.__.____"
             value={[conditions.dateFrom || null, conditions.dateTo || null]}
             maxDate={endOfDay(new Date())}
-            defaultCalendarMonth={subMonths(new Date(), 1)}
-            onChange={([dateFrom, dateTo]) => {
+            defaultCalendarMonth={prevMonth(new Date())}
+            onChange={([dateFrom, dateTo]: [
+              number | Date | undefined,
+              number | Date | undefined
+            ]) => {
               setCondition({
                 dateFrom: dateFrom && +startOfDay(dateFrom),
                 dateTo: dateTo && +endOfDay(dateTo),
               })
             }}
-            renderInput={(startProps, endProps) => (
+            renderInput={(
+              startProps: TextFieldProps,
+              endProps: TextFieldProps
+            ) => (
               <Grid container spacing={3}>
                 <Grid item xs={6}>
                   <TextField {...startProps} />

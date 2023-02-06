@@ -1,9 +1,13 @@
 import React, { FC } from 'react'
-import { useSelector } from 'react-redux'
-import { getPopulatedTags, getTagsTree, TagTreeNode } from 'store/data/tags'
+import { useAppSelector } from '@store'
+import {
+  getPopulatedTags,
+  getTagsTree,
+  TagTreeNode,
+  TTagPopulated,
+} from '@entities/tag'
 import { Box, Autocomplete, TextField } from '@mui/material'
-import { EmojiIcon } from 'components/EmojiIcon'
-import { PopulatedTag } from '../types'
+import { EmojiIcon } from '@shared/ui/EmojiIcon'
 import TagChip from './TagChip'
 import ru from 'convert-layout/ru'
 
@@ -31,12 +35,12 @@ export type TagSelectProps = BaseTagSelectProps & {
   label?: string
 }
 
-type TagOption = PopulatedTag | TagTreeNode
+type TagOption = TTagPopulated | TagTreeNode
 
 export const TagSelect: FC<TagSelectProps> = props => {
   const { onChange, tagFilters, multiple, value, label, ...rest } = props
-  const tagsTree = useSelector(getTagsTree)
-  const tags = useSelector(getPopulatedTags)
+  const tagsTree = useAppSelector(getTagsTree)
+  const tags = useAppSelector(getPopulatedTags)
   const options = getMatchedTags(tagsTree, tagFilters)
 
   return (
@@ -105,16 +109,18 @@ const getMatchedTags = (
   return list.map(t => t.id)
 }
 
-const makeChecker = (search = '', filters?: TagFilters) => (tag: TagOption) => {
-  const { tagType, includeNull, topLevel, exclude } = filters || {}
-  if (tag.id === 'null') return includeNull ? true : false
-  if (exclude?.includes(tag.id)) return false
-  if (topLevel && tag.parent) return false
-  if (search) return matchString(tag.name, search)
-  if (tagType === 'income') return tag.showIncome
-  if (tagType === 'outcome') return tag.showOutcome
-  return true
-}
+const makeChecker =
+  (search = '', filters?: TagFilters) =>
+  (tag: TagOption) => {
+    const { tagType, includeNull, topLevel, exclude } = filters || {}
+    if (tag.id === 'null') return includeNull ? true : false
+    if (exclude?.includes(tag.id)) return false
+    if (topLevel && tag.parent) return false
+    if (search) return matchString(tag.name, search)
+    if (tagType === 'income') return tag.showIncome
+    if (tagType === 'outcome') return tag.showOutcome
+    return true
+  }
 
 const matchString = (name: string, search: string) => {
   const n = name.toLowerCase()

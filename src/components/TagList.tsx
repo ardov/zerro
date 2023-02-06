@@ -1,10 +1,10 @@
 import React, { FC } from 'react'
 import { Box, BoxProps, IconButton } from '@mui/material'
-import TagSelect2 from 'components/TagSelect2'
-import TagChip from 'components/TagChip'
-import { Tooltip } from 'components/Tooltip'
-import { AddIcon } from 'components/Icons'
-import { Modify } from 'types'
+import TagSelect2 from '@components/TagSelect2'
+import TagChip from '@components/TagChip'
+import { Tooltip } from '@shared/ui/Tooltip'
+import { AddIcon } from '@shared/ui/Icons'
+import { Modify } from '@shared/types'
 
 type TagListProps = Modify<
   BoxProps,

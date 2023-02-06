@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { useRouteMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import RefreshButton from 'components/RefreshButton'
+import RefreshButton from '@components/RefreshButton'
 import { MenuButton } from './MenuButton'
 import {
   Box,
@@ -14,8 +14,8 @@ import {
   DrawerProps,
 } from '@mui/material'
 import { useTheme } from '@mui/material'
-import { Logo } from 'components/Logo'
-import AccountList from 'components/AccountList'
+import { Logo } from '@shared/ui/Logo'
+import AccountList from '@components/AccountList'
 import { makeStyles } from '@mui/styles'
 import {
   AccountBalanceIcon,
@@ -23,7 +23,9 @@ import {
   FavoriteBorderIcon,
   SyncAltIcon,
   WhatshotIcon,
-} from 'components/Icons'
+  BarChartIcon,
+} from '@shared/ui/Icons'
+import { DebtorList } from '@components/DebtorList'
 
 export default function NavigationDrawer(props: DrawerProps) {
   const theme = useTheme()
@@ -47,6 +49,10 @@ export default function NavigationDrawer(props: DrawerProps) {
 
         <Box width="100%" px={1}>
           <AccountList />
+        </Box>
+
+        <Box width="100%" px={1}>
+          <DebtorList />
         </Box>
 
         <Box height={64} width="100%" flexShrink={0} />
@@ -92,6 +98,12 @@ function Links() {
         path="/transactions"
         icon={<SyncAltIcon />}
       />
+      <NavigationLink text="Аналитика" path="/stats" icon={<BarChartIcon />} />
+      <NavigationLink
+        text="Итоги года"
+        path="/review"
+        icon={<WhatshotIcon />}
+      />
       <NavigationLink
         text="Как пользоваться"
         path="/about"
@@ -101,11 +113,6 @@ function Links() {
         text="Поддержать проект"
         path="/donation"
         icon={<FavoriteBorderIcon />}
-      />
-      <NavigationLink
-        text="Итоги года"
-        path="/review"
-        icon={<WhatshotIcon />}
       />
     </List>
   )

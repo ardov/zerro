@@ -5,12 +5,11 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
-import { useSelector, useDispatch } from 'react-redux'
-import { getTransactions } from 'store/data/transactions'
-import { getType } from 'store/data/transactions/helpers'
-import { bulkEditTransactions } from 'store/data/transactions/thunks'
-import { TagList } from 'components/TagList'
-import { Modify, Transaction } from 'types'
+import { useAppDispatch } from '@store'
+import { trModel } from '@entities/transaction'
+import { getType } from '@entities/transaction/helpers'
+import { TagList } from '@components/TagList'
+import { Modify, TTransaction } from '@shared/types'
 import { Box, TextField } from '@mui/material'
 
 type BulkEditModalProps = Modify<DialogProps, { onClose: () => void }> & {
@@ -26,8 +25,8 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   keepMounted = false,
   ...rest
 }) => {
-  const dispatch = useDispatch()
-  const allTransactions = useSelector(getTransactions)
+  const dispatch = useAppDispatch()
+  const allTransactions = trModel.useTransactions()
   const transactions = ids.map(id => allTransactions[id]).filter(Boolean)
   const sameTags = isSameTags(transactions)
   const sameComments = isSameComments(transactions)
@@ -51,7 +50,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
       comment,
     }
     if (opts.tags || opts.comment) {
-      dispatch(bulkEditTransactions(ids, opts))
+      dispatch(trModel.bulkEditTransactions(ids, opts))
     }
     onApply()
   }
@@ -104,12 +103,12 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   )
 }
 
-function isSameTags(list: Transaction[] = []) {
+function isSameTags(list: TTransaction[] = []) {
   return list
     .map(tr => JSON.stringify(tr.tag))
     .every((tags, i, arr) => tags === arr[0])
 }
-function isSameComments(list: Transaction[] = []) {
+function isSameComments(list: TTransaction[] = []) {
   return list
     .map(tr => tr.comment)
     .every((comment, i, arr) => comment === arr[0])
@@ -119,7 +118,7 @@ function equalArrays(a: string[], b: string[]) {
   return JSON.stringify(a) === JSON.stringify(b)
 }
 
-function getTypes(list: Transaction[] = []) {
+function getTypes(list: TTransaction[] = []) {
   let res = { income: 0, outcome: 0, transfer: 0 }
   list.forEach(tr => res[getType(tr) as 'income' | 'outcome' | 'transfer']++)
   return res

@@ -2,56 +2,64 @@ import React, { useMemo, useState, useCallback, useEffect, FC } from 'react'
 import { Box } from '@mui/material'
 import { SxProps } from '@mui/system'
 import { Theme } from '@mui/material/styles'
-import { useSelector } from 'react-redux'
-import { getSortedTransactions } from 'store/data/transactions'
-import { groupTransactionsBy } from 'store/data/transactions/helpers'
-import { checkRaw, FilterConditions } from 'store/data/transactions/filtering'
+import { FilterConditions, trModel } from '@entities/transaction'
 import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
-import { sendEvent } from 'helpers/tracking'
-// import { getGroupedTransactions } from 'worker'
-import { useDebounce } from 'helpers/useDebounce'
+import { sendEvent } from '@shared/helpers/tracking'
+// import { getGroupedTransactions } from '@worker'
+import { useDebounce } from '@shared/hooks/useDebounce'
+import {
+  TDateDraft,
+  TISODate,
+  TTransaction,
+  TTransactionId,
+} from '@shared/types'
 
-type TransactionListProps = {
+export type TTransactionListProps = {
+  transactions?: TTransaction[]
   prefilter?: FilterConditions | FilterConditions[]
   filterConditions?: FilterConditions
   hideFilter?: boolean
   checkedDate?: Date | null
+  initialDate?: TDateDraft
   sx?: SxProps<Theme>
 }
 
-const TransactionList: FC<TransactionListProps> = props => {
+export const TransactionList: FC<TTransactionListProps> = props => {
   const {
+    transactions,
     prefilter,
     filterConditions,
     hideFilter = false,
     checkedDate,
+    initialDate,
     sx,
   } = props
 
-  const transactions = useSelector(getSortedTransactions)
+  const allTransactions = trModel.useSortedTransactions()
   const [filter, setFilter] = useState(filterConditions)
   const debouncedFilter = useDebounce(filter, 300)
   const setCondition = useCallback(
-    condition => setFilter(filter => ({ ...filter, ...condition })),
+    (condition?: FilterConditions) =>
+      setFilter(filter => ({ ...filter, ...condition })),
     []
   )
   const handleClearFilter = useCallback(() => {
     setFilter(filterConditions)
   }, [filterConditions])
-  const onFilterByPayee = useCallback(payee => setFilter({ search: payee }), [])
+  const onFilterByPayee = useCallback(
+    (payee?: string) => setFilter({ search: payee }),
+    []
+  )
 
   const groups = useMemo(() => {
+    let trList = transactions?.sort(trModel.compareTrDates) || allTransactions
     if (prefilter) {
-      return groupTransactionsBy(
-        'DAY',
-        transactions.filter(checkRaw(prefilter)),
-        debouncedFilter
-      )
+      trList = trList.filter(trModel.checkRaw(prefilter))
     }
-    return groupTransactionsBy('DAY', transactions, debouncedFilter)
-  }, [transactions, debouncedFilter, prefilter])
+    return groupByDay(trList, debouncedFilter)
+  }, [transactions, allTransactions, debouncedFilter, prefilter])
 
   // const [groups, setGroups] = useState([])
   // useEffect(() => {
@@ -80,7 +88,7 @@ const TransactionList: FC<TransactionListProps> = props => {
     setChecked(ids)
   }
 
-  const toggleTransaction = useCallback(id => {
+  const toggleTransaction = useCallback((id: TTransactionId) => {
     setChecked(current => {
       return current.includes(id)
         ? current.filter(checked => id !== checked)
@@ -89,14 +97,14 @@ const TransactionList: FC<TransactionListProps> = props => {
   }, [])
 
   const checkByChangedDate = useCallback(
-    date => {
+    (date: Date | number) => {
       sendEvent('Transaction: select similar')
-      const ids = transactions
+      const ids = allTransactions
         .filter(tr => tr.changed === +date)
         .map(tr => tr.id)
       setChecked(ids)
     },
-    [transactions]
+    [allTransactions]
   )
 
   useEffect(() => {
@@ -144,6 +152,7 @@ const TransactionList: FC<TransactionListProps> = props => {
           {...{
             groups,
             checked,
+            initialDate,
             toggleTransaction,
             checkByChangedDate,
             onFilterByPayee,
@@ -154,4 +163,22 @@ const TransactionList: FC<TransactionListProps> = props => {
   )
 }
 
-export default TransactionList
+function groupByDay(
+  transactions: TTransaction[] = [],
+  filterConditions?: FilterConditions
+) {
+  const checker = trModel.checkRaw(filterConditions)
+  let groups: {
+    [k: string]: { date: TISODate; transactions: TTransactionId[] }
+  } = {}
+
+  transactions.forEach(tr => {
+    if (checker(tr)) {
+      const date = tr.date
+      groups[date] ??= { date, transactions: [] }
+      groups[date].transactions.push(tr.id)
+    }
+  })
+
+  return Object.values(groups)
+}

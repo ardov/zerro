@@ -1,10 +1,12 @@
 import React from 'react'
 import { Story, Meta } from '@storybook/react'
-import { AmountInput, AmountInputProps } from 'components/AmountInput'
+import { AmountInput, AmountInputProps } from '@shared/ui/AmountInput'
+import { context } from './shared/context'
 
 export default {
   title: 'AmountInput',
   component: AmountInput,
+  decorators: [context],
   argTypes: {
     backgroundColor: { control: 'color' },
   },

@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { useLocation, useHistory } from 'react-router'
-import RefreshButton from 'components/RefreshButton'
-import { SettingsMenu } from './MenuButton'
+import RefreshButton from '@components/RefreshButton'
+import { SettingsMenu } from './SettingsMenu'
 import SettingsIcon from '@mui/icons-material/Settings'
 import {
   BottomNavigation,
@@ -13,9 +13,9 @@ import {
   AccountBalanceIcon,
   AccountBalanceWalletIcon,
   SyncAltIcon,
-} from 'components/Icons'
+} from '@shared/ui/Icons'
 import { makeStyles } from '@mui/styles'
-import { useHomeBar } from 'helpers/useHomeBar'
+import { useHomeBar } from '@shared/hooks/useHomeBar'
 
 const useStyles = makeStyles(theme => ({ action: { minWidth: 32 } }))
 

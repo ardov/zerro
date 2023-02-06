@@ -14,20 +14,22 @@ import {
   TextField,
 } from '@mui/material'
 import { TagSelect } from './TagSelect'
-import { Modify, Tag } from 'types'
-import { shallowEqual, useDispatch, useSelector } from 'react-redux'
-import { createTag } from 'store/data/tags/thunks'
+import { Modify } from '@shared/types'
+import { shallowEqual } from 'react-redux'
+import { createTag } from '@entities/tag/thunks'
 import { useFormik } from 'formik'
-import { hex2int, int2hex } from 'helpers/color'
-import { ColorPicker } from './ColorPickerPopover'
+import { hex2int, int2hex } from '@shared/helpers/color'
+import { ColorPicker } from '../shared/ui/ColorPickerPopover'
 import { v1 as uuidv1 } from 'uuid'
 import {
   getTagMeta,
   setTagComment,
   setTagCurrency,
-} from 'store/data/hiddenData/tagMeta'
-import { getUserInstrumentId } from 'store/data/instruments'
+} from '@entities/old-hiddenData/tagMeta'
+import { userModel } from '@entities/user'
 import { CurrencySelect } from './CurrencySelect'
+import { useAppDispatch, useAppSelector } from '@store'
+import { TTag } from '@shared/types'
 
 // TODO: Доделать модалку для редактирования и создания категорий
 
@@ -35,17 +37,17 @@ export type TagEditDialogProps = Modify<
   DialogProps,
   {
     onClose: () => void
-    tag?: Partial<Tag>
+    tag?: Partial<TTag>
   }
 >
 
 export const TagEditDialog: FC<TagEditDialogProps> = props => {
   const { tag, onClose, ...dialogProps } = props
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const isNew = !tag?.id
   const id = tag?.id || uuidv1()
-  const meta = useSelector(getTagMeta)[id]
-  const userInstrument = useSelector(getUserInstrumentId)
+  const meta = useAppSelector(getTagMeta)[id]
+  const userInstrument = userModel.useUserInstrumentId()
   const {
     values,
     initialValues,
