@@ -17,7 +17,7 @@ import {
 import { CloseIcon } from '@shared/ui/Icons'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { useMonth } from '@shared/hooks/useMonth'
-import { TDateDraft } from '@shared/types'
+import { TDateDraft, TISOMonth } from '@shared/types'
 
 import { balances } from '@entities/envBalances'
 import { DisplayAmount } from '@entities/currency/displayCurrency'
@@ -29,6 +29,8 @@ import { copyPreviousBudget } from '@features/bulkActions/copyPrevMonth'
 import { BalanceWidget } from '../BalanceWidget'
 import { FxRates } from './FxRates'
 import { ActivityStats } from './ActivityStats'
+import { goalModel } from '@entities/goal'
+import { totalGoalsModel } from '@features/bulkActions/fillGoals'
 
 type MonthInfoProps = BoxProps & { onClose: () => void }
 
@@ -96,6 +98,8 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
             </Confirm>
           )}
 
+          <GoalAction month={month} />
+
           <Confirm
             title="Хотите начать всё заново?"
             description="Остатки во всех категориях сбросятся, а бюджеты в будущем удалятся. Вы сможете начать распределять деньги с чистого листа. Меняются только бюджеты, все остальные данные останутся как есть."
@@ -115,3 +119,26 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
 
 const getMonthName = (date: TDateDraft) =>
   formatDate(new Date(date), 'LLLL').toUpperCase()
+
+function GoalAction(props: { month: TISOMonth }) {
+  const dispatch = useAppDispatch()
+  const { month } = props
+  const { progress, goalsCount } = goalModel.useTotals()[month]
+  const canComplete = progress < 1 && goalsCount > 0
+
+  if (!canComplete) return null
+
+  return (
+    <Confirm
+      title="Выполнить все цели?"
+      description="Бюджеты будут выставлены так, чтобы цели в этом месяце выполнились."
+      okText="Выполнить цели"
+      cancelText="Отмена"
+      onOk={() => dispatch(totalGoalsModel.fillAll(month))}
+    >
+      <Button fullWidth color="secondary">
+        Выполнить все цели
+      </Button>
+    </Confirm>
+  )
+}
