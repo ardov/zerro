@@ -7,7 +7,9 @@ import { applyClientPatch, resetData } from '@store/data'
 import GlobalErrorBoundary from './GlobalErrorBoundary'
 import App from './App'
 import { Providers } from './Providers'
+import { registerSW } from 'virtual:pwa-register'
 
+registerSW({ immediate: true })
 initSentry()
 bindWorkerToStore(store.dispatch)
 createZerroInstance(store)

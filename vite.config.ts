@@ -10,7 +10,7 @@ export default defineConfig({
     tsconfigPaths(),
     react(),
     mdx(),
-    VitePWA({ registerType: 'autoUpdate' }),
+    VitePWA({ registerType: 'autoUpdate', filename: 'service-worker.js' }),
   ],
   build: {
     outDir: 'build',
