@@ -6,7 +6,7 @@ import { withPerf } from '@shared/helpers/performance'
 import { TSelector } from '@store/index'
 
 import { TFxRateData } from '@entities/currency/fxRate'
-import { balances, TActivityNode, TEnvMetrics } from '@entities/envBalances'
+import { balances, TEnvMetrics, TSortedActivity } from '@entities/envBalances'
 import { TGoal } from './shared/types'
 import { goalStore, TGoals } from './goalStore'
 import { calcGoals } from './shared/calcGoals'
@@ -32,7 +32,7 @@ export const getGoals: TSelector<ByMonth<ById<TGoalInfo>>> = createSelector(
     goalStore.getData,
     balances.monthList,
     balances.envData,
-    balances.activity,
+    balances.sortedActivity,
     balances.rates,
   ],
   withPerf('🖤 getGoals', calcGoalData)
@@ -43,7 +43,7 @@ function calcGoalData(
   envGoals: ByMonth<TGoals>,
   months: TISOMonth[],
   envMetrics: ByMonth<ById<TEnvMetrics>>,
-  monthActivity: ByMonth<TActivityNode>,
+  sortedActivity: ByMonth<TSortedActivity>,
   ratesData: ByMonth<TFxRateData>
 ) {
   const result: ByMonth<ById<TGoalInfo>> = {}
@@ -53,7 +53,7 @@ function calcGoalData(
     const goals = envGoals[month] || {}
     const metrics = envMetrics[month]
     const rates = ratesData[month].rates
-    const activity = monthActivity[month]
+    const totalIncome = sortedActivity[month]?.incomesTotal?.total || {}
     let node: ById<TGoalInfo> = {}
 
     keys(metrics).forEach(id => {
@@ -66,7 +66,7 @@ function calcGoalData(
         leftover: toValue(env.totalLeftover),
         budgeted: toValue(env.totalBudgeted),
         available: toValue(env.totalAvailable),
-        generalIncome: toValue(activity?.generalIncome?.total),
+        generalIncome: toValue(totalIncome),
         month,
       })
 
