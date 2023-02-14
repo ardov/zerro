@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, FC } from 'react'
+import React, { useState, useEffect, useRef, FC, useCallback } from 'react'
 import {
   TextField,
   InputAdornment,
@@ -31,11 +31,19 @@ export const AmountInput: FC<AmountInputProps> = ({
   onBlur,
   onFocus,
   onKeyDown,
+  autoFocus,
   ...rest
 }) => {
   const ref = useRef<HTMLInputElement>()
   const [expression, setExpression] = useState(value.toString())
   const [focused, setFocused] = useState(false)
+
+  // ❗️Hacky hack cause autoFocus doesn't work for some reason 🤷🏻‍♂️
+  // It focuses but typing is disabled
+  // TODO: update mui and try again
+  useEffect(() => {
+    if (autoFocus) setTimeout(() => ref.current?.focus(), 100)
+  }, [autoFocus])
 
   useEffect(() => {
     if (!focused) setExpression(value === 0 ? '' : value.toString())
@@ -63,7 +71,6 @@ export const AmountInput: FC<AmountInputProps> = ({
           .replace(/[-+*/]*$/g, '') // trim symbols in the end
           .replace(/^[+*/]*/g, '') // trim symbols at the beginning
       )
-
       return computed || 0
     } catch (error) {
       return value

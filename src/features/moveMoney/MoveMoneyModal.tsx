@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react'
+import React, { FC, useState } from 'react'
 import { Box, InputAdornment, IconButton, Chip } from '@mui/material'
 import Dialog, { DialogProps } from '@mui/material/Dialog'
 import { AmountInput } from '@shared/ui/AmountInput'
@@ -50,11 +50,6 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
 
   const suggested = suggestAmount(sourceValue, destinationValue, 1000)
   const [amount, setAmount] = useState(suggested)
-
-  // Put suggested value when dialog opens
-  useEffect(() => {
-    setAmount(suggested)
-  }, [suggested, open])
 
   const handleSubmit = () => {
     if (amount) {
