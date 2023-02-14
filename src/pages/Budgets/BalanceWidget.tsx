@@ -1,4 +1,5 @@
 import { Divider, Paper, Typography } from '@mui/material'
+import Balancer from 'react-wrap-balancer'
 import { keys } from '@shared/helpers/keys'
 import pluralize from '@shared/helpers/pluralize'
 import { TISOMonth } from '@shared/types'
@@ -58,8 +59,8 @@ export function BalanceWidget(props: { month: TISOMonth }) {
       </div> */}
       <Divider />
       <DataLine
-        name="В конвертах"
-        tooltip="Эта сумма сейчас лежит в конвертах (столбец «Доступно»)"
+        name="В категориях"
+        tooltip="Эта сумма сейчас лежит в категориях (столбец «Доступно»)"
         amount={available}
         currency={currency}
       />
@@ -79,7 +80,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
       />
       <Divider />
       <Typography variant="body2" color="text.secondary" align="center">
-        {getExplaining(fundsEnd, toBeBudgeted, overspend)}
+        <Balancer>{getExplaining(fundsEnd, toBeBudgeted, overspend)}</Balancer>
       </Typography>
     </Paper>
   )
@@ -101,6 +102,6 @@ export function BalanceWidget(props: { month: TISOMonth }) {
     if (toBeBudgeted === 0) {
       return 'Все деньги распределены, так держать!'
     }
-    return 'Вы разложили по конвертам больше денег, чем у вас есть. На что-то может не хватить. Чтобы исправить, выложите излишки из конвертов.'
+    return 'Вы разложили по категориям больше денег, чем у вас есть. На что-то может не хватить. Чтобы исправить, выложите излишки из категорий.'
   }
 }

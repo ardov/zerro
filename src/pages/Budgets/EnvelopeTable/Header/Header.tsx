@@ -75,7 +75,7 @@ export const Header: FC<HeaderProps> = props => {
               sx={{ ml: -1, px: 1, py: 0 }}
             >
               <Typography variant="overline" color="text.secondary" noWrap>
-                Конверты{isAllShown && ' (все)'}
+                Категории{isAllShown && ' (все)'}
               </Typography>
               <ChevronDownIcon />
             </Button>
@@ -126,7 +126,7 @@ export const Header: FC<HeaderProps> = props => {
             onShowAllToggle()
           }}
         >
-          {isAllShown ? 'Скрыть часть конвертов' : 'Показать все конверты'}
+          {isAllShown ? 'Скрыть часть категорий' : 'Показать все категории'}
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -134,7 +134,7 @@ export const Header: FC<HeaderProps> = props => {
             onReorderModeToggle()
           }}
         >
-          {isReordering ? 'Скрыть таскалки' : 'Поменять конверты местами'}
+          {isReordering ? 'Скрыть таскалки' : 'Изменить порядок категорий'}
         </MenuItem>
       </Menu>
     </>

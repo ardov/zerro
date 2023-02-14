@@ -101,7 +101,7 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
           mt={1}
         >
           <TextField
-            label="Название конверта"
+            label="Название"
             error={!!errors.originalName}
             helperText={errors.originalName}
             autoFocus
@@ -171,7 +171,7 @@ export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
               checked={values.keepIncome}
               onChange={handleChange}
               control={<Checkbox />}
-              label="Класть доходы в конверт"
+              label="Класть доходы в категорию"
             />
             {/* <FormControlLabel
               name="carryNegatives"

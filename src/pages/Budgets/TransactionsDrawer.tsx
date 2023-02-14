@@ -5,26 +5,12 @@ import { useMonth } from '@shared/hooks/useMonth'
 import { TransactionsDrawer } from '@components/TransactionsDrawer'
 import { useCachedValue } from '@shared/hooks/useCachedValue'
 import { envelopeModel, TEnvelopeId } from '@entities/envelope'
-import { balances } from '@entities/envBalances'
-
-/** Filter mode for transactions in balance */
-export enum TrMode {
-  /** Income not assigned to envelope */
-  GeneralIncome = 'generalIncome',
-  /** Transactions assigned to envelope (default) */
-  Envelope = 'envelope',
-  /** All income */
-  Income = 'income',
-  /** All outcome */
-  Outcome = 'outcome',
-  /** All transactions */
-  All = 'All',
-}
+import { balances, TrFilterMode } from '@entities/envBalances'
 
 type TConditions = {
   id: TEnvelopeId | 'transferFees' | null
   month: TISOMonth
-  mode?: TrMode
+  mode?: TrFilterMode
   isExact?: boolean
 }
 
@@ -53,7 +39,7 @@ export function useTrDrawer() {
   const [month] = useMonth()
   const [id, setId] =
     useSearchParam<TEnvelopeId | 'transferFees'>('tr_envelope')
-  const [mode, setMode] = useSearchParam<TrMode>('tr_mode')
+  const [mode, setMode] = useSearchParam<TrFilterMode>('tr_mode')
   const [isExact, setIsExact] = useSearchParam<'true'>('tr_exact')
 
   const setDrawer = useCallback(
@@ -75,7 +61,7 @@ export function useTrDrawer() {
     () => ({
       id,
       month,
-      mode: mode || TrMode.Envelope,
+      mode: mode || TrFilterMode.Envelope,
       isExact: !!isExact,
     }),
     [id, month, mode, isExact]
@@ -100,13 +86,13 @@ function useFilteredTransactions(conditions: TConditions): TTransaction[] {
   // Prepare and merge transactions
   const transactions = ids
     .map(id => {
-      if (mode === TrMode.GeneralIncome)
+      if (mode === TrFilterMode.GeneralIncome)
         return activity?.generalIncome.byEnv[id]?.transactions || []
-      if (mode === TrMode.Envelope)
+      if (mode === TrFilterMode.Envelope)
         return activity?.envActivity.byEnv[id]?.transactions || []
-      if (mode === TrMode.Income)
+      if (mode === TrFilterMode.Income)
         return rawActivity?.income[id]?.transactions || []
-      if (mode === TrMode.Outcome)
+      if (mode === TrFilterMode.Outcome)
         return rawActivity?.outcome[id]?.transactions || []
       // All
       return [

@@ -131,7 +131,7 @@ const DragObj = () => {
     ) : activeType === DragTypes.envelope ? (
       <Box sx={props}>
         <Typography noWrap>
-          {activeId ? envelopes[activeId].name : 'Конверт'}
+          {activeId ? envelopes[activeId].name : 'Категория'}
         </Typography>
       </Box>
     ) : null

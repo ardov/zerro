@@ -72,9 +72,9 @@ export const calcGoals = {
     if (!end) {
       // "I want to get 1000$ laying in this envelope"
 
-      const { budgeted, available } = context
+      const { leftover, available } = context
       const needNow = Math.max(round(amount - available), 0)
-      const needStart = Math.max(round(needNow - budgeted), 0)
+      const needStart = Math.max(round(amount - leftover), 0)
       return {
         needStart,
         needNow,

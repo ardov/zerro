@@ -22,7 +22,7 @@ import { DataLine } from '@components/DataLine'
 
 import { useAppDispatch } from '@store'
 import { envelopeModel, TEnvelope, TEnvelopeId } from '@entities/envelope'
-import { balances } from '@entities/envBalances'
+import { balances, TrFilterMode } from '@entities/envBalances'
 import { goalModel } from '@entities/goal'
 import { useBudgetPopover } from '../BudgetPopover'
 import { EnvelopeEditDialog } from '../EnvelopeEditDialog'
@@ -30,7 +30,7 @@ import { ActivityWidget } from './ActivityWidget'
 import { CommentWidget } from './CommentWidget'
 import { cardStyle } from './shared'
 import { useGoalPopover } from '../GoalPopover'
-import { TrMode, useTrDrawer } from '../TransactionsDrawer'
+import { useTrDrawer } from '../TransactionsDrawer'
 
 type EnvelopePreviewProps = {
   id: TEnvelopeId
@@ -118,7 +118,9 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
           <DataLine name="Расход" amount={totalActivity} currency={currency} />
           <Box>
             <Button
-              onClick={() => setDrawer({ id, month, mode: TrMode.Envelope })}
+              onClick={() =>
+                setDrawer({ id, month, mode: TrFilterMode.Envelope })
+              }
               fullWidth
             >
               Показать операции

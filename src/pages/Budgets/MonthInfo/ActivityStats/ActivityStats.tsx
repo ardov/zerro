@@ -6,18 +6,22 @@ import { DataLine } from '@components/DataLine'
 import { Tooltip } from '@shared/ui/Tooltip'
 
 import { displayCurrency } from '@entities/currency/displayCurrency'
-import { EnvActivity } from '@entities/envBalances'
+import {
+  balances,
+  EnvActivity,
+  TrFilterMode,
+  TSortedActivityNode,
+} from '@entities/envBalances'
 import { envelopeModel } from '@entities/envelope'
-import { TrMode, useTrDrawer } from '@pages/Budgets/TransactionsDrawer'
-import { TInfoNode, useActivityStatsModel } from './getActivity'
+import { useTrDrawer } from '@pages/Budgets/TransactionsDrawer'
 
 export function ActivityStats(props: { month: TISOMonth }) {
   const { month } = props
-  const activity = useActivityStatsModel(month)
+  const activity = balances.useSortedActivity()[month]
   const { setDrawer } = useTrDrawer()
 
   const showTransactions = useCallback(
-    (id: TDataNode['id'], trMode: TrMode) => {
+    (id: TDataNode['id'], trMode: TrFilterMode) => {
       setDrawer({ id, month, mode: trMode, isExact: true })
     },
     [month, setDrawer]
@@ -62,8 +66,8 @@ export function ActivityStats(props: { month: TISOMonth }) {
 }
 
 type TDataNode = {
-  id: TInfoNode['id']
-  trMode: TInfoNode['trMode']
+  id: TSortedActivityNode['id']
+  trMode: TSortedActivityNode['trMode']
   amount: number
   color: string
   name: string
@@ -74,8 +78,8 @@ function StatWidget(props: {
   name: string
   showBar?: boolean
   total: EnvActivity
-  items: TInfoNode[]
-  action: (id: TDataNode['id'], trMode: TrMode) => void
+  items: TSortedActivityNode[]
+  action: (id: TDataNode['id'], trMode: TrFilterMode) => void
 }) {
   const { month, total, items, name, showBar, action } = props
   const [currency] = displayCurrency.useDisplayCurrency()

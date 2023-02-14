@@ -10,14 +10,10 @@ import { nextMonth, prevMonth, toISOMonth } from '@shared/helpers/date'
 import { useMonth } from '@shared/hooks/useMonth'
 import { TEnvelopeId } from '@entities/envelope'
 
-import { balances } from '@entities/envBalances'
+import { balances, TrFilterMode } from '@entities/envBalances'
 import { MonthInfo } from './MonthInfo'
 import { EnvelopePreview } from './EnvelopePreview'
-import {
-  BudgetTransactionsDrawer,
-  TrMode,
-  useTrDrawer,
-} from './TransactionsDrawer'
+import { BudgetTransactionsDrawer, useTrDrawer } from './TransactionsDrawer'
 import { EnvelopeTable } from './EnvelopeTable'
 import { DnDContext } from './DnDContext'
 import { BudgetPopoverProvider } from './BudgetPopover'
@@ -60,7 +56,7 @@ function Budgets() {
       setDrawer({
         id: opts.id,
         month,
-        mode: TrMode.Envelope,
+        mode: TrFilterMode.Envelope,
         isExact: opts.isExact,
       }),
     [month, setDrawer]

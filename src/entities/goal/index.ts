@@ -7,10 +7,8 @@ import { setGoal } from './setGoal'
 
 export type { TGoal } from './shared/types'
 export type { TGoals } from './goalStore'
-export type { GoalProgress } from './goalProgress'
 export type { TGoalInfo } from './getGoals'
 
-export { calculateGoalProgress } from './goalProgress'
 export { goalType } from './shared/types'
 
 export const goalModel = {
