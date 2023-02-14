@@ -46,7 +46,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
       }}
     >
       <Total
-        name={'В бюджете'}
+        name={'В балансе'}
         value={fundsEnd}
         currency={currency}
         onClick={cycleForward}

@@ -1,6 +1,13 @@
 import { useCallback } from 'react'
 import Balancer from 'react-wrap-balancer'
-import { Card, IconButton, Link, Stack, Typography } from '@mui/material'
+import {
+  Button,
+  Card,
+  IconButton,
+  Link,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { keys } from '@shared/helpers/keys'
 import { sendEvent } from '@shared/helpers/tracking'
 import { CloseIcon } from '@shared/ui/Icons'
@@ -45,8 +52,8 @@ export const Explainer = () => {
 
           <Typography>
             <Balancer>
-              Привет! Zerro обновился, у него теперь свои, независимые
-              от Дзен-мани, бюджеты. Сконвертируйте старые бюджеты в новые.
+              Привет! Бюджеты в Zerro больше не зависят от Дзен-мани. Перенести
+              старые бюджеты можно одной кнопкой внизу.
             </Balancer>
           </Typography>
 
@@ -60,32 +67,43 @@ export const Explainer = () => {
             </Typography>
           )}
 
-          <Stack direction="row" flexWrap="wrap" rowGap={1} columnGap={2}>
+          <Stack
+            direction="row"
+            flexWrap="wrap-reverse"
+            alignItems="center"
+            rowGap={2}
+            columnGap={2}
+            pt={1}
+          >
             <Tooltip title="Бюджеты из Дзен-мани скопируются в Zerro. Изменения бюджетов в Zerro не будут влиять на бюджеты в ДМ.">
-              <Link
-                component="button"
-                variant="body1"
-                color="secondary"
-                onClick={convertBudgets}
-              >
-                Конвертировать бюджеты
-              </Link>
+              <Button variant="contained" onClick={convertBudgets}>
+                Перенести бюджеты
+              </Button>
             </Tooltip>
-            <Link
-              href="https://www.notion.so/zerro/Zerro-v1-2023-ffdc46871b3d4581868fd005e2c2a0f5"
-              color="secondary"
-              target="_blank"
-              onClick={() => sendEvent('Migration: whats_new')}
+
+            <Stack
+              direction="row"
+              flexWrap="wrap"
+              alignItems="center"
+              rowGap={2}
+              columnGap={2}
             >
-              Что изменилось?
-            </Link>
-            <Link
-              href="https://old.zerro.app"
-              color="secondary"
-              onClick={() => sendEvent('Migration: old_version')}
-            >
-              Старая версия
-            </Link>
+              <Link
+                href="https://www.notion.so/zerro/Zerro-v1-2023-ffdc46871b3d4581868fd005e2c2a0f5"
+                color="secondary"
+                target="_blank"
+                onClick={() => sendEvent('Migration: whats_new')}
+              >
+                Что изменилось?
+              </Link>
+              <Link
+                href="https://old.zerro.app"
+                color="secondary"
+                onClick={() => sendEvent('Migration: old_version')}
+              >
+                Старая версия
+              </Link>
+            </Stack>
           </Stack>
         </Stack>
 

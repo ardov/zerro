@@ -42,7 +42,7 @@ export default function AccountList({ className = '' }) {
       <List dense>
         <Subheader
           name={
-            <Tooltip title="Эти счета учитываются в бюджете">
+            <Tooltip title="Деньги на этих счетах учитываются в бюджете">
               <span>В балансе</span>
             </Tooltip>
           }

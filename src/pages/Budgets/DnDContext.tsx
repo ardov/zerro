@@ -87,7 +87,7 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
       {children}
       <DragObj />
       <MoveMoneyModal
-        key={moneySource + moneyDestination + month}
+        key={moneySource + moneyDestination + month + isOpen}
         open={isOpen}
         month={month}
         source={moneySource}
