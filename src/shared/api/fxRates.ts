@@ -7,7 +7,7 @@ Currency rates are loaded from this great repository by Fawaz Ahmed
 https://github.com/fawazahmed0/currency-api
 */
 
-export const firstPossibleDate: TISODate = '2020-11-22'
+export const firstPossibleDate: TISODate = '2022-01-01'
 
 export async function requestRates(date: TDateDraft) {
   const base = 'usd'
@@ -18,10 +18,14 @@ export async function requestRates(date: TDateDraft) {
       'Requesting future rates. Understandable intention yet imposible 😔'
     )
   }
-  const response = await fetch(
-    `https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/${isoDate}/currencies/${base}.json`
-  ).then(
-    resp => resp.json(),
+
+  const response = await fetchWithFallback([
+    `https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/${isoDate}/currencies/usd/${base}.min.json`,
+    `https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/${isoDate}/currencies/usd/${base}.json`,
+    `https://raw.githubusercontent.com/fawazahmed0/currency-api/1/${isoDate}/currencies/usd/${base}.min.json`,
+    `https://raw.githubusercontent.com/fawazahmed0/currency-api/1/${isoDate}/currencies/usd/${base}.json`,
+  ]).then(
+    resp => resp?.json(),
     reason => {
       throw new Error('Unable to load rates', reason)
     }
@@ -46,6 +50,17 @@ export async function requestRates(date: TDateDraft) {
     }
   })
   return result
+}
+
+async function fetchWithFallback(links: string[]) {
+  let response
+  for (let link of links) {
+    try {
+      response = await fetch(link)
+      if (response.ok) return response
+    } catch (e) {}
+  }
+  return response
 }
 
 function round(amount: number) {
