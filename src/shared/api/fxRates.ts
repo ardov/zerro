@@ -7,7 +7,7 @@ Currency rates are loaded from this great repository by Fawaz Ahmed
 https://github.com/fawazahmed0/currency-api
 */
 
-export const firstPossibleDate: TISODate = '2020-11-22'
+export const firstPossibleDate: TISODate = '2022-01-01'
 
 export async function requestRates(date: TDateDraft) {
   const base = 'usd'
