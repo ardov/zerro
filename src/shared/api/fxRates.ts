@@ -38,7 +38,7 @@ export async function requestRates(date: TDateDraft) {
       // convert BTC to µBTC
       case 'BTC':
       case 'ETH':
-        result[code] = round((1 / rate) * 1_000_000)
+        result[code] = round(1 / rate / 1_000_000)
         return
       default:
         result[code] = round(1 / rate)

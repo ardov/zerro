@@ -119,7 +119,7 @@ function useTotalsModel() {
         <Divider />
 
         <DataLine
-          name="Всего в бюджете"
+          name="Всего в балансе"
           amount={fundsEnd}
           currency={currency}
         />

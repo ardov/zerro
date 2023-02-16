@@ -16,7 +16,7 @@ export function Total({
   name = '',
   value = 0,
   currency,
-  sign = false,
+  sign = undefined,
   decMode,
   ...rest
 }: TotalProps) {
