@@ -1,6 +1,6 @@
 import { ById } from '@shared/types'
 import { compareEnvelopes } from './compareEnvelopes'
-import { TEnvelopeId } from './envelopeId'
+import { envId, EnvType, TEnvelopeId } from './envelopeId'
 import { TEnvelope } from './makeEnvelope'
 
 /**
@@ -91,6 +91,70 @@ export function buildStructure(envelopes: ById<TEnvelope>): TGroupNode[] {
   })
 
   return groups
+}
+
+export function normalizeStructure(structure: TGroupNode[]): TGroupNode[] {
+  const validStructure = structure
+    .filter(group => {
+      if (group.type !== 'group') {
+        console.error('Not group on the first level of structure')
+        return false
+      }
+      // Remove empty groups
+      return group.children.length
+    })
+    .map(group => {
+      let groupChildren = [] as TEnvNode[]
+
+      group.children.forEach(parent => {
+        const parentIsTag = envId.parse(parent.id).type === EnvType.Tag
+        let parentChildren = [] as TEnvNode[]
+        let elevated = [] as TEnvNode[]
+
+        flattenChildren(parent.children).forEach(child => {
+          const childIsTag = envId.parse(child.id).type === EnvType.Tag
+          if (!parentIsTag && childIsTag) {
+            // impossible to nest tag under virtual envelope => elevate
+            elevated.push({
+              ...child,
+              parent: null,
+              group: group.id,
+              children: [],
+            })
+          } else {
+            parentChildren.push({
+              ...child,
+              parent: parent.id,
+              group: group.id,
+              children: [],
+            })
+          }
+        })
+
+        const updatedParent = {
+          ...parent,
+          parent: null,
+          group: group.id,
+          children: parentChildren,
+        }
+
+        groupChildren = [...groupChildren, updatedParent, ...elevated]
+      })
+
+      return { ...group, children: groupChildren } as TGroupNode
+    })
+  return validStructure
+}
+
+function flattenChildren(children: TEnvNode[]) {
+  const flattened = [] as TEnvNode[]
+  children.forEach(moveChildrenUp)
+  return flattened
+
+  function moveChildrenUp(node: TEnvNode) {
+    node.children.forEach(moveChildrenUp)
+    flattened.push({ ...node, children: [] } as TEnvNode)
+  }
 }
 
 /**
