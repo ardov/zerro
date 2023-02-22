@@ -126,7 +126,7 @@ function useTotalsModel() {
         <Divider />
 
         <DataLine
-          name={`Лежит в категриях`}
+          name={`Лежит в категориях`}
           amount={allocated}
           currency={currency}
         />

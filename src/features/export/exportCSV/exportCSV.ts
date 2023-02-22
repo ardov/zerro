@@ -53,7 +53,7 @@ interface RowObj {
   Создана: string
   Тип: string
   Категория: string
-  'Доп категрии': string
+  'Доп категории': string
   'Со счёта': string
   Расход: string | number
   'Валюта -': string
@@ -70,7 +70,7 @@ const head: Column[] = [
   'Создана',
   'Тип',
   'Категория',
-  'Доп категрии',
+  'Доп категории',
   'Со счёта',
   'Расход',
   'Валюта -',
@@ -107,7 +107,7 @@ const transactionToRowObj = (t: PopulatedTransaction): RowObj => ({
   Создана: formatDate(t.created, 'yyyy-MM-dd HH:mm'),
   Тип: types[t.type as TrType],
   Категория: t.tag ? t.tag[0].title.replace(',', '') : '',
-  'Доп категрии': '',
+  'Доп категории': '',
   'Со счёта': t.outcomeAccount ? t.outcomeAccount.title : '',
   Расход: !!t.outcome ? t.outcome : '',
   'Валюта -': t.outcomeInstrument ? t.outcomeInstrument.shortTitle : '',

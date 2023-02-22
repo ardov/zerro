@@ -1,21 +1,18 @@
+import { shallowEqual } from 'react-redux'
 import { createSelector } from '@reduxjs/toolkit'
 import { ById } from '@shared/types'
+import { withPerf } from '@shared/helpers/performance'
+import { keys } from '@shared/helpers/keys'
+
 import { TSelector } from '@store'
 import { accountModel } from '@entities/account'
 import { debtorModel } from '@entities/debtors'
 import { getPopulatedTags } from '@entities/tag'
-import { getEnvelopeMeta } from './shared/metaData'
-import { makeEnvelope, TEnvelope } from './shared/makeEnvelope'
-import {
-  getRightParent,
-  buildStructure,
-  flattenStructure,
-} from './shared/structure'
-import { withPerf } from '@shared/helpers/performance'
-import { compareEnvelopes } from './shared/compareEnvelopes'
 import { userModel } from '@entities/user'
-import { keys } from '@shared/helpers/keys'
-import { shallowEqual } from 'react-redux'
+
+import { makeEnvelope, TEnvelope } from './shared/makeEnvelope'
+import { getEnvelopeMeta } from './shared/metaData'
+import { buildStructure, flattenStructure } from './shared/structure'
 import { TEnvelopeId } from './shared/envelopeId'
 
 const getCompiledEnvelopes: TSelector<{
@@ -32,47 +29,38 @@ const getCompiledEnvelopes: TSelector<{
   withPerf(
     'getCompiledEnvelopes',
     (debtors, tags, savingAccounts, envelopeMeta, userCurrency) => {
-      let result: ById<TEnvelope> = {}
+      let envelopes: ById<TEnvelope> = {}
 
       // Step 1. Create envelopes from tags, saving accounts and debtors
       Object.values(tags).forEach(tag => {
         const e = makeEnvelope.tag(tag, envelopeMeta, userCurrency)
-        result[e.id] = e
+        envelopes[e.id] = e
       })
       savingAccounts.forEach(account => {
         const e = makeEnvelope.account(account, envelopeMeta, userCurrency)
-        result[e.id] = e
+        envelopes[e.id] = e
       })
       Object.values(debtors).forEach(debtor => {
         const e = makeEnvelope.debtor(debtor, envelopeMeta, userCurrency)
-        result[e.id] = e
+        envelopes[e.id] = e
       })
 
-      // Step 2. Attach children, prepare for building tree
-      Object.values(result)
-        .sort(compareEnvelopes)
-        .forEach(e => {
-          // Fix nesting issues (only 2 levels are allowed)
-          e.parent = getRightParent(e.parent, result)
-          if (e.parent) {
-            const parent = result[e.parent]
-            parent.children.push(e.id) // Attach child to parent
-            e.group = result[e.parent].group // Inherit group names from parents
-          }
-        })
+      // Step 2. Build a valid structure
+      const structure = buildStructure(envelopes)
 
-      // Step 3. Build structure and update indicies according to it
-      const structure = buildStructure(result)
-      const flatList = flattenStructure(structure)
-      // Update indicies
-      flatList.forEach(({ id, type }, index) => {
-        if (type === 'envelope') result[id].index = index
+      // Step 3. Apply parameters from structure to envelopes
+      flattenStructure(structure).forEach((node, index) => {
+        // Skip groups
+        if (node.type === 'group') return
+        // Update envelope props from valid structure
+        const envelope = envelopes[node.id]
+        envelope.parent = node.parent
+        envelope.group = node.group
+        envelope.children = node.children.map(child => child.id)
+        envelope.index = index // Update indicies
       })
 
-      return {
-        byId: result,
-        structure,
-      }
+      return { byId: envelopes, structure }
     }
   )
 )

@@ -2,7 +2,7 @@ import {
   envelopeModel,
   TEnvelopeDraft,
   TEnvelopeId,
-  TGroupTreeNode,
+  TGroupNode,
 } from '@entities/envelope'
 import { AppThunk } from '@store/index'
 
@@ -23,7 +23,7 @@ export function assignNewGroup(id: TEnvelopeId): AppThunk {
   }
 }
 
-function getNewGroupName(structure: TGroupTreeNode[]) {
+function getNewGroupName(structure: TGroupNode[]) {
   const baseName = 'Новая группа'
   let names = structure
     .map(group => group.id)

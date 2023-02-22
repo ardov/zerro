@@ -24,136 +24,111 @@ export const patchEnvelope =
   (draft: TEnvelopeDraft | TEnvelopeDraft[]): AppThunk =>
   (dispatch, getState) => {
     const envelopes = getEnvelopes(getState())
+
+    const patchLists = {
+      tag: [] as TTagDraft[],
+      account: [] as TAccountDraft[],
+      merchant: [] as TMerchantDraft[],
+      meta: [] as TEnvelopeMetaPatch[],
+    }
+
     const drafts = Array.isArray(draft) ? draft : [draft]
-    const patches = drafts.map(d => toPatches(d, envelopes))
-    const tagPatches = patches.reduce(
-      (arr, p) => (p.tag ? [...arr, p.tag] : arr),
-      [] as TTagDraft[]
-    )
-    const accPatches = patches.reduce(
-      (arr, p) => (p.account ? [...arr, p.account] : arr),
-      [] as TAccountDraft[]
-    )
-    const merchantPatches = patches.reduce(
-      (arr, p) => (p.merchant ? [...arr, p.merchant] : arr),
-      [] as TMerchantDraft[]
-    )
-    const metaPatches = patches.reduce(
-      (arr, p) => (p.meta ? [...arr, p.meta] : arr),
-      [] as TEnvelopeMetaPatch[]
-    )
-    if (tagPatches.length) dispatch(patchTag(tagPatches))
-    if (accPatches.length) dispatch(accountModel.patchAccount(accPatches))
-    if (merchantPatches.length) dispatch(patchMerchant(merchantPatches))
-    if (metaPatches.length) dispatch(patchEnvelopeMeta(metaPatches))
+    drafts.forEach(draft => {
+      const patch = getChanges(draft, envelopes)
+      if (patch.tag) patchLists.tag.push(patch.tag)
+      if (patch.account) patchLists.account.push(patch.account)
+      if (patch.merchant) patchLists.merchant.push(patch.merchant)
+      if (patch.meta) patchLists.meta.push(patch.meta)
+    })
+
+    if (patchLists.tag.length) dispatch(patchTag(patchLists.tag))
+    if (patchLists.account.length)
+      dispatch(accountModel.patchAccount(patchLists.account))
+    if (patchLists.merchant.length) dispatch(patchMerchant(patchLists.merchant))
+    if (patchLists.meta.length) dispatch(patchEnvelopeMeta(patchLists.meta))
     return
   }
 
-const funcs: {
-  [key in keyof TEnvelope]: (
-    draft: TEnvelopeDraft,
-    patches: TPatches,
-    envelopes: ById<TEnvelope>
-  ) => void
-} = {
-  id: () => {}, // Read only
-  type: () => {}, // Read only
-  entityId: () => {}, // Read only
-  name: () => {}, // Read only
-  symbol: () => {},
-  colorGenerated: () => {}, // Read only
-  children: () => {}, // Read only
-  index: () => {}, // Read only
-
-  originalName: (draft, patches) => {
-    const { type, id } = envId.parse(draft.id)
-    if (
-      type === EnvType.Tag ||
-      type === EnvType.Account ||
-      type === EnvType.Merchant
-    ) {
-      patches[type] = { ...patches[type], id, title: draft.originalName }
-    }
-  },
-
-  color: (draft, patches) => {
-    const { type, id } = envId.parse(draft.id)
-    if (type === EnvType.Tag) {
-      patches[type] = { ...patches[type], id, color: getTagColor(draft.color) }
-    }
-  },
-
-  parent: (draft, patches, envelopes) => {
-    const { type, id } = envId.parse(draft.id)
-    if (type === EnvType.Tag) {
-      patches[type] = {
-        ...patches[type],
-        id,
-        parent: getRightTagParent(draft.parent, envelopes),
-      }
-    } else {
-      patches.meta = {
-        ...patches.meta,
-        id: draft.id,
-        parent: getRightParent(draft.parent, envelopes) || undefined,
-      }
-    }
-  },
-
-  // Virtual properties from metadata
-  visibility: (draft, patches) => {
-    patches.meta = {
-      ...patches.meta,
-      id: draft.id,
-      visibility: draft.visibility,
-    }
-  },
-  indexRaw: (draft, patches) => {
-    patches.meta = { ...patches.meta, id: draft.id, index: draft.indexRaw }
-  },
-  group: (draft, patches) => {
-    patches.meta = { ...patches.meta, id: draft.id, group: draft.group }
-  },
-  comment: (draft, patches) => {
-    patches.meta = { ...patches.meta, id: draft.id, comment: draft.comment }
-  },
-  currency: (draft, patches) => {
-    patches.meta = { ...patches.meta, id: draft.id, currency: draft.currency }
-  },
-  keepIncome: (draft, patches) => {
-    patches.meta = {
-      ...patches.meta,
-      id: draft.id,
-      keepIncome: draft.keepIncome,
-    }
-  },
-  carryNegatives: (draft, patches) => {
-    patches.meta = {
-      ...patches.meta,
-      id: draft.id,
-      carryNegatives: draft.carryNegatives,
-    }
-  },
-}
-
-function toPatches(draft: TEnvelopeDraft, envelopes: ById<TEnvelope>) {
-  if (!draft.id) throw new Error('Trying to patch envelope without id')
-  let current = envelopes[draft.id]
-  if (!current) throw new Error('Envelope not found')
-
-  if (current.type === EnvType.Payee) {
-    // throw new Error('Trying to patch payee envelope')
-    return {} as TPatches
-  }
-
+/**
+ * Returns a set of changes that need to be performed to apply given patch.
+ * This set includes:
+ * - Patches for tags
+ * - Patches for accounts
+ * - Patches for merchants
+ * - Patches for metadata
+ */
+function getChanges(draft: TEnvelopeDraft, envelopes: ById<TEnvelope>) {
+  const current = envelopes[draft.id]
+  const { type, id } = envId.parse(draft.id)
   const patches: TPatches = {}
   keys(draft).forEach(key => {
-    if (current[key] !== draft[key]) {
-      funcs[key](draft, patches, envelopes)
+    if (current[key] === draft[key]) return
+    switch (key) {
+      case 'id':
+      case 'type':
+      case 'entityId':
+      case 'name':
+      case 'symbol':
+      case 'colorGenerated':
+      case 'children':
+      case 'index':
+        // Read-only props
+        break
+
+      case 'originalName':
+        if (
+          type === EnvType.Tag ||
+          type === EnvType.Account ||
+          type === EnvType.Merchant
+        ) {
+          patches[type] ??= { id }
+          patches[type]!.title = draft.originalName
+        }
+        break
+
+      case 'color':
+        if (type === EnvType.Tag) {
+          patches[type] ??= { id }
+          patches[type]!.color = getTagColor(draft.color)
+        }
+        break
+
+      case 'parent':
+        if (type === EnvType.Tag) {
+          patches[type] ??= { id }
+          patches[type]!.parent = getRightTagParent(draft.parent, envelopes)
+        } else {
+          updateMeta(key, getRightParent(draft.parent, envelopes) || undefined)
+        }
+        break
+
+      case 'indexRaw':
+        updateMeta('index', draft[key])
+        break
+
+      case 'visibility':
+      case 'group':
+      case 'comment':
+      case 'currency':
+      case 'keepIncome':
+      case 'carryNegatives':
+        updateMeta(key, draft[key])
+        break
+
+      default:
+        console.log('Unknown key in envelope ' + key)
+        break
     }
   })
-
   return patches
+
+  function updateMeta<T extends keyof TEnvelopeMetaPatch>(
+    key: T,
+    value: TEnvelopeMetaPatch[T]
+  ) {
+    patches.meta ??= { id: draft.id }
+    patches.meta[key] = value
+  }
 }
 
 function getRightTagParent(
@@ -169,8 +144,6 @@ function getRightTagParent(
 }
 
 function getTagColor(color?: string | null) {
-  if (isHEX(color)) {
-    return hex2int(color)
-  }
+  if (isHEX(color)) return hex2int(color)
   return null
 }

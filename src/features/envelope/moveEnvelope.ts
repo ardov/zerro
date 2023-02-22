@@ -1,6 +1,5 @@
-import { envelopeModel, TEnvelopeDraft, TEnvelopeId } from '@entities/envelope'
 import { AppThunk } from '@store/index'
-import { arrayMove } from './arrayMove'
+import { envelopeModel, TEnvNode, TGroupNode } from '@entities/envelope'
 
 export function moveEnvelope(
   sourceIdx: number,
@@ -8,83 +7,86 @@ export function moveEnvelope(
   asChild: boolean
 ): AppThunk {
   return (dispatch, getState) => {
-    const envelopes = envelopeModel.getEnvelopes(getState())
     const structure = envelopeModel.getEnvelopeStructure(getState())
-    const flatList = envelopeModel.flattenStructure(structure)
+
+    const newStructure = JSON.parse(JSON.stringify(structure)) as TGroupNode[]
+    const flatList = envelopeModel.flattenStructure(newStructure)
     const active = flatList[sourceIdx]
     const over = flatList[targetIdx]
-    const patches: TEnvelopeDraft[] = []
 
     if (!active) throw new Error("Couldn't find idx: " + sourceIdx)
 
-    // Group over group
-    if (active.type === 'group' && over.type === 'group') {
-      // TODO
+    cutOutNode(active, newStructure)
+    placeNode(active, over, asChild, newStructure)
+    dispatch(envelopeModel.applyStructure(newStructure))
+  }
+}
+
+function cutOutNode(node: TEnvNode | TGroupNode, structure: TGroupNode[]) {
+  if (node.type === 'group') {
+    structure = structure.filter(gr => gr !== node)
+    return
+  }
+
+  const group = structure.find(group => group.id === node.group)
+  if (!group) throw new Error("Couldn't find group: " + node.group)
+
+  if (!node.parent) {
+    group.children = group.children.filter(gr => gr !== node)
+    return
+  }
+
+  const parent = group.children.find(parent => parent.id === node.parent)
+  if (!parent) throw new Error("Couldn't find node: " + node.parent)
+  parent.children = parent.children.filter(gr => gr !== node)
+  return
+}
+
+function placeNode(
+  node: TEnvNode | TGroupNode,
+  under: TEnvNode | TGroupNode,
+  asChild: boolean,
+  structure: TGroupNode[]
+) {
+  for (let grIdx = 0; grIdx < structure.length; grIdx++) {
+    const group = structure[grIdx]
+    if (group.id !== under.group) continue
+
+    if (node.type === 'group') {
+      structure.splice(grIdx + 1, 0, node)
+      return
     }
 
-    // Group over envelope
-    if (active.type === 'group' && over.type === 'envelope') {
-      // TODO
+    if (under.type === 'group') {
+      group.children.splice(0, 0, node)
+      return
     }
 
-    // Envelope over group
-    if (active.type === 'envelope' && over.type === 'group') {
-      if (asChild) throw new Error("can't insert as child into group")
-      // TODO
-    }
+    const parents = group.children
+    const parentId = under.parent || under.id
 
-    // Envelope over envelope
-    if (active.type === 'envelope' && over.type === 'envelope') {
-      const newParent = getNewParent(active.id, over.parent || over.id, asChild)
-      const newGroup = over.group
-      const activeEnv = envelopes[active.id]
-      const newActiveIdx = sourceIdx > targetIdx ? targetIdx + 1 : targetIdx
+    for (let parentIdx = 0; parentIdx < parents.length; parentIdx++) {
+      const parent = parents[parentIdx]
+      if (parent.id !== parentId) continue
 
-      console.log('Moving envelope', sourceIdx, '->', newActiveIdx)
+      if (!asChild) {
+        parents.splice(parentIdx + 1, 0, node)
+        return
+      }
 
-      // Change indices of affected envelopes
-      const idsToMove = [activeEnv.id, ...activeEnv.children]
-      idsToMove.forEach((id, idx) => {
-        arrayMove(flatList, envelopes[id].index, newActiveIdx + idx)
-      })
+      if (!under.parent) {
+        parent.children.splice(0, 0, node)
+        return
+      }
 
-      flatList.forEach((el, idx) => {
-        if (el.type === 'group') return
-        if (el.id === activeEnv.id) {
-          return patches.push({
-            id: el.id,
-            indexRaw: idx,
-            parent: newParent,
-            group: newGroup,
-          })
-        }
-        if (activeEnv.children.includes(el.id)) {
-          if (newParent) {
-            return patches.push({
-              id: el.id,
-              indexRaw: idx,
-              parent: newParent,
-              group: newGroup,
-            })
-          }
-          return patches.push({ id: el.id, indexRaw: idx, group: newGroup })
-        }
-        patches.push({ id: el.id, indexRaw: idx })
-      })
-    }
+      const children = parent.children
+      for (let childIdx = 0; childIdx < children.length; childIdx++) {
+        const child = children[childIdx]
+        if (child.id !== under.id) continue
 
-    dispatch(envelopeModel.patchEnvelope(patches))
-
-    function getNewParent(
-      elId: TEnvelopeId,
-      suppposedParent: TEnvelopeId,
-      asChild: boolean
-    ) {
-      if (!asChild) return null
-      if (elId === suppposedParent) return null
-      return envelopeModel.parseId(suppposedParent).type === 'tag'
-        ? suppposedParent
-        : null
+        children.splice(childIdx + 1, 0, node)
+        return
+      }
     }
   }
 }

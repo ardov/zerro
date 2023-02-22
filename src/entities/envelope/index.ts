@@ -1,4 +1,5 @@
 import { useAppSelector } from '@store/index'
+import { applyStructure } from './applyStructure'
 import {
   getEnvelopes,
   getEnvelopeStructure,
@@ -8,7 +9,7 @@ import { patchEnvelope } from './patchEnvelope'
 import { envId } from './shared/envelopeId'
 import { flattenStructure } from './shared/structure'
 
-export type { TEnvTreeNode, TGroupTreeNode } from './shared/structure'
+export type { TEnvNode, TGroupNode } from './shared/structure'
 export type { TEnvelopeDraft } from './patchEnvelope'
 export type { TEnvelopeId } from './shared/envelopeId'
 export type { TEnvelope } from './shared/makeEnvelope'
@@ -28,6 +29,7 @@ export const envelopeModel = {
 
   // Thunk
   patchEnvelope,
+  applyStructure,
 
   // Helpers
   parseId: envId.parse,

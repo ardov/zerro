@@ -2,8 +2,8 @@ import {
   envelopeModel,
   TEnvelopeDraft,
   TEnvelopeId,
-  TEnvTreeNode,
-  TGroupTreeNode,
+  TEnvNode,
+  TGroupNode,
 } from '@entities/envelope'
 import { entries } from '@shared/helpers/keys'
 import { AppThunk } from '@store/index'
@@ -27,13 +27,13 @@ export function moveGroup(fromIdx: number, toIdx: number): AppThunk {
   }
 }
 
-function getIndices(structure: TGroupTreeNode[]) {
+function getIndices(structure: TGroupNode[]) {
   let indices: Record<TEnvelopeId, number> = {}
   let idx = 0
   structure.forEach(group => group.children.forEach(addIndex))
   return indices
 
-  function addIndex(el: TEnvTreeNode) {
+  function addIndex(el: TEnvNode) {
     indices[el.id] = idx
     idx++
     el.children.forEach(addIndex)
