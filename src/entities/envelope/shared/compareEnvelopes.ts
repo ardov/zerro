@@ -1,6 +1,8 @@
 import { envId, EnvType } from './envelopeId'
 import { TEnvelope } from './makeEnvelope'
 
+const nullTagId = envId.get(EnvType.Tag, null)
+
 export function compareEnvelopes(a: TEnvelope, b: TEnvelope) {
   // Sort by index if it's present
   if (a.indexRaw !== undefined && b.indexRaw !== undefined)
@@ -20,7 +22,6 @@ export function compareEnvelopes(a: TEnvelope, b: TEnvelope) {
   }
 
   // Null category should be the first one
-  const nullTagId = envId.get(EnvType.Tag, null)
   if (a.id === nullTagId) return -1
   if (b.id === nullTagId) return 1
 

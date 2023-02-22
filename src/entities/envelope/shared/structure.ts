@@ -21,87 +21,90 @@ export function getRightParent(
   return getRightParent(parent.parent, byId)
 }
 
-type TEnvNode = {
+export type TEnvNode = {
   type: 'envelope'
   id: TEnvelopeId
   group: string
   parent: TEnvelopeId | null
+  children: TEnvNode[]
 }
-type TGroupNode = {
+export type TGroupNode = {
   type: 'group'
   id: string
   group: string
   parent: null
+  children: TEnvNode[]
 }
-export type TEnvTreeNode = TEnvNode & { children: TEnvTreeNode[] }
-export type TGroupTreeNode = TGroupNode & { children: TEnvTreeNode[] }
 
 /**
  * Builds a tree of sorted groups
+ * It's a main place for applying sorting and fixing nesting issues
  * @param envelopes
  * @returns
  */
-export function buildStructure(envelopes: ById<TEnvelope>): TGroupTreeNode[] {
-  const groupCollection: Record<string, TGroupTreeNode> = {}
+export function buildStructure(envelopes: ById<TEnvelope>): TGroupNode[] {
+  const groups: TGroupNode[] = []
+  const groupsById: Record<string, TGroupNode> = {}
+
+  const sortedParents = [] as TEnvNode[]
+  const sortedChildren = [] as TEnvNode[]
+  const nodesById: Record<TEnvelopeId, TEnvNode> = {}
+
   Object.values(envelopes)
     .sort(compareEnvelopes)
-    .filter(e => !e.parent)
-    .forEach(parent => {
-      // Create group
-      groupCollection[parent.group] ??= {
+    .forEach(env => {
+      const parent = getRightParent(env.parent, envelopes)
+      const group = parent ? envelopes[parent].group : env.group
+      const node: TEnvNode = {
+        id: env.id,
+        type: 'envelope',
+        group,
+        parent,
+        children: [],
+      }
+      nodesById[node.id] = node
+      if (parent) sortedChildren.push(node)
+      else sortedParents.push(node)
+    })
+
+  // Attach children
+  sortedChildren.forEach(child => {
+    if (!child.parent) return console.error('Child without parent')
+    nodesById[child.parent].children.push(child)
+  })
+
+  // Create groups and attach parents to them
+  sortedParents.forEach(parent => {
+    if (!groupsById[parent.group]) {
+      const group: TGroupNode = {
         id: parent.group,
         type: 'group',
         group: parent.group,
         parent: null,
         children: [],
       }
-      // Create children nodes
-      const children: TEnvTreeNode[] = parent.children.map(id => {
-        return {
-          id,
-          type: 'envelope',
-          group: parent.group,
-          parent: parent.id,
-          children: [],
-        }
-      })
-      // Push node with children into group
-      groupCollection[parent.group].children.push({
-        id: parent.id,
-        type: 'envelope',
-        group: parent.group,
-        parent: parent.parent,
-        children,
-      })
-    })
-  const groupList = Object.values(groupCollection).sort((a, b) => {
-    let envA = envelopes[a.children[0].id]
-    let envB = envelopes[b.children[0].id]
-    return compareEnvelopes(envA, envB)
+      groupsById[group.id] = group
+      // Groups will be sorted by first parent
+      groups.push(group)
+    }
+    groupsById[parent.group].children.push(parent)
   })
 
-  return groupList
+  return groups
 }
 
 /**
  * Flattens structure to an id array
  * @param tree
- * @returns list of envelope ids
+ * @returns sorted list of tree nodes
  */
-export function flattenStructure(
-  tree: TGroupTreeNode[]
-): (TEnvNode | TGroupNode)[] {
+export function flattenStructure(tree: TGroupNode[]) {
   let flatList: (TEnvNode | TGroupNode)[] = []
   tree.forEach(addNode)
   return flatList
 
-  function addNode(node: TEnvTreeNode | TGroupTreeNode) {
-    flatList.push({
-      id: node.id,
-      type: node.type,
-      group: node.group,
-      parent: node.parent,
-    } as TEnvNode | TGroupNode)
+  function addNode(node: TEnvNode | TGroupNode) {
+    flatList.push(node)
     node.children.forEach(addNode)
   }
 }
