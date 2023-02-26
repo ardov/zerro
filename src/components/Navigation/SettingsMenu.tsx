@@ -21,6 +21,7 @@ import {
   ListSubheader,
   MenuItem,
   MenuList,
+  PopoverProps,
   Switch,
   Typography,
 } from '@mui/material'
@@ -41,21 +42,19 @@ import { clearLocalData } from '@features/localData'
 import { convertZmBudgetsToZerro } from '@features/budget/convertZmBudgetsToZerro'
 import { useSnackbar } from '@shared/ui/SnackbarProvider'
 import { AdaptivePopover } from '../../shared/ui/AdaptivePopover'
+import { Modify } from '@shared/types'
 
-type SettingsMenuProps = {
+type SettingsMenuProps = Modify<PopoverProps, { onClose: () => void }> & {
   showLinks?: boolean
-  anchorEl: Element | null
-  onClose: () => void
+  // open: boolean
+  // anchorEl?: Element | null
+  // onClose: () => void
 }
 export const SettingsMenu: FC<SettingsMenuProps> = props => {
-  const { anchorEl, onClose, showLinks } = props
+  const { anchorEl, onClose, showLinks, open } = props
 
   return (
-    <AdaptivePopover
-      anchorEl={anchorEl}
-      open={Boolean(anchorEl)}
-      onClose={onClose}
-    >
+    <AdaptivePopover anchorEl={anchorEl} open={open} onClose={onClose}>
       <MenuList>
         <Settings showLinks={showLinks} onClose={onClose} />
       </MenuList>

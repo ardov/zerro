@@ -16,6 +16,7 @@ import {
 } from '@shared/ui/Icons'
 import { makeStyles } from '@mui/styles'
 import { useHomeBar } from '@shared/hooks/useHomeBar'
+import { usePopover } from '@shared/hooks/useEnvelopePopover'
 
 const useStyles = makeStyles(theme => ({ action: { minWidth: 32 } }))
 
@@ -28,9 +29,8 @@ const routes = [
 export const MobileNavigation: FC = props => {
   const path = useLocation().pathname
   const history = useHistory()
-  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null)
+  const settingsMenu = usePopover('settingsMenu')
   const c = useStyles()
-  const handleMenuClose = () => setAnchorEl(null)
   const hasHomeBar = useHomeBar()
   const paddingBottom = hasHomeBar ? '20px' : '0px'
   const currentRoute = routes.find(route => path.startsWith(route.path))
@@ -67,12 +67,12 @@ export const MobileNavigation: FC = props => {
           className={c.action}
           value="menu"
           icon={<SettingsIcon />}
-          onClick={e => setAnchorEl(e.currentTarget)}
+          onClick={settingsMenu.onOpen}
         />
         <RefreshButton isMobile={true} className={c.action} />
       </BottomNavigation>
 
-      <SettingsMenu anchorEl={anchorEl} onClose={handleMenuClose} showLinks />
+      <SettingsMenu {...settingsMenu.popoverProps} showLinks />
     </Paper>
   )
 }

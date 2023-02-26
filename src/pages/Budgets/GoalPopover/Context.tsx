@@ -14,7 +14,7 @@ export const GoalPopoverProvider: FC<{
   children: ReactNode
   month: TISOMonth
 }> = props => {
-  const goal = useEnvelopePopover(props.month, 'budget')
+  const goal = useEnvelopePopover(props.month, 'goalPopover')
 
   return (
     <GoalPopoverContext.Provider value={goal.onOpen}>

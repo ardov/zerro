@@ -3,26 +3,22 @@ import { SettingsIcon } from '@shared/ui/Icons'
 import { IconButton, IconButtonProps } from '@mui/material'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { SettingsMenu } from './SettingsMenu'
+import { usePopover } from '@shared/hooks/useEnvelopePopover'
 
 interface MenuButtonProps extends IconButtonProps {
   showLinks?: boolean
 }
 
 export const MenuButton: FC<MenuButtonProps> = ({ showLinks, ...rest }) => {
-  const [anchorEl, setAnchorEl] = useState<Element | null>(null)
-  const handleClose = () => setAnchorEl(null)
+  const settingsMenu = usePopover('settingsMenu')
   return (
     <>
       <Tooltip title="Настройки">
-        <IconButton onClick={e => setAnchorEl(e.currentTarget)} {...rest}>
+        <IconButton onClick={settingsMenu.onOpen} {...rest}>
           <SettingsIcon />
         </IconButton>
       </Tooltip>
-      <SettingsMenu
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        showLinks={showLinks}
-      />
+      <SettingsMenu {...settingsMenu.popoverProps} showLinks={showLinks} />
     </>
   )
 }

@@ -32,7 +32,7 @@ export const Header: FC<HeaderProps> = props => {
     onMetricSwitch,
   } = props
   const isSmall = useIsSmall()
-  const tableMenu = usePopover()
+  const tableMenu = usePopover('tableMenu')
   return (
     <>
       <Box
