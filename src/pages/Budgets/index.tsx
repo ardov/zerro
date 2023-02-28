@@ -5,9 +5,9 @@ import { Box, Drawer, Theme, useMediaQuery } from '@mui/material'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { formatDate } from '@shared/helpers/date'
 import { useCachedValue } from '@shared/hooks/useCachedValue'
-import { useSearchParam } from '@shared/hooks/useSearchParam'
 import { nextMonth, prevMonth, toISOMonth } from '@shared/helpers/date'
 import { useMonth } from '@shared/hooks/useMonth'
+import { TPopoverProps, usePopover } from '@shared/ui/PopoverManager'
 import { TEnvelopeId } from '@entities/envelope'
 
 import { balances, TrFilterMode } from '@entities/envBalances'
@@ -43,14 +43,19 @@ type TDrawerId = TEnvelopeId | 'overview'
 function Budgets() {
   useMonthHotkeys()
   const [month] = useMonth()
-  const [drawerId, setDrawerId] = useSearchParam<TDrawerId>('drawer')
+  const popover = usePopover<TPopoverProps & { id: TDrawerId }>('sideContent')
+  const drawerId: TDrawerId = popover.props.id || 'overview'
+
   const showTransactions = useTrDrawer()
-  const openOverview = useCallback(() => setDrawerId('overview'), [setDrawerId])
-  const openEnvelopeInfo = useCallback(
-    (id: TEnvelopeId | null) => setDrawerId(id),
-    [setDrawerId]
+  const openOverview = useCallback(
+    () => popover.open({ id: 'overview' }),
+    [popover]
   )
-  const closeDrawer = useCallback(() => setDrawerId(), [setDrawerId])
+  const openEnvelopeInfo = useCallback(
+    (id: TEnvelopeId) => popover.open({ id }),
+    [popover]
+  )
+  const closeDrawer = popover.close
   const openTransactions = useCallback(
     (opts: { id: TEnvelopeId; isExact?: boolean }) =>
       showTransactions({
@@ -62,13 +67,15 @@ function Budgets() {
     [month, showTransactions]
   )
 
-  const detailsContent = !drawerId ? undefined : drawerId === 'overview' ? (
-    <MonthInfo onClose={closeDrawer} />
+  const detailsContent = popover.props.open ? (
+    drawerId === 'overview' ? (
+      <MonthInfo onClose={closeDrawer} />
+    ) : (
+      <EnvelopePreview onClose={closeDrawer} id={drawerId} />
+    )
   ) : (
-    <EnvelopePreview onClose={closeDrawer} id={drawerId} />
+    <MonthInfo onClose={closeDrawer} />
   )
-
-  const sideDefault = <MonthInfo onClose={closeDrawer} />
 
   const mainContent = (
     <Box
@@ -105,7 +112,7 @@ function Budgets() {
         <BudgetLayout
           mainContent={mainContent}
           sideContent={detailsContent}
-          sideDefault={sideDefault}
+          isSideOpened={popover.props.open}
           onSideClose={closeDrawer}
         />
         <BudgetTransactionsDrawer />
@@ -119,16 +126,16 @@ function Budgets() {
 
 const BudgetLayout: FC<{
   mainContent: ReactElement
-  sideContent?: ReactElement
-  sideDefault: ReactElement
+  sideContent: ReactElement
+  isSideOpened: boolean
   onSideClose: () => void
 }> = props => {
   const sideWidth = 360
-  const { mainContent, sideContent, sideDefault, onSideClose } = props
+  const { mainContent, sideContent, isSideOpened, onSideClose } = props
   const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))
   const isXS = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
-  const drawerVisibility = isMD && !!sideContent
+  const drawerVisibility = isMD && isSideOpened
   const cachedContent = useCachedValue(sideContent, drawerVisibility)
 
   return (
@@ -157,7 +164,7 @@ const BudgetLayout: FC<{
             bgcolor: 'background.paper',
           }}
         >
-          {sideContent || sideDefault}
+          {sideContent}
         </Box>
       )}
 
