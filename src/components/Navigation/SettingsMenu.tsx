@@ -21,13 +21,15 @@ import {
   ListSubheader,
   MenuItem,
   MenuList,
-  PopoverProps,
   Switch,
   Typography,
 } from '@mui/material'
 import { useThemeType } from '@shared/hooks/useThemeType'
 import { sendEvent } from '@shared/helpers/tracking'
 import { Confirm } from '@shared/ui/Confirm'
+import { useSnackbar } from '@shared/ui/SnackbarProvider'
+import { AdaptivePopover } from '@shared/ui/AdaptivePopover'
+import { TPopoverProps } from '@shared/ui/PopoverManager'
 import { appVersion } from '@shared/config'
 
 import { useAppDispatch } from '@store'
@@ -40,23 +42,20 @@ import { exportCSV } from '@features/export/exportCSV'
 import { exportJSON } from '@features/export/exportJSON'
 import { clearLocalData } from '@features/localData'
 import { convertZmBudgetsToZerro } from '@features/budget/convertZmBudgetsToZerro'
-import { useSnackbar } from '@shared/ui/SnackbarProvider'
-import { AdaptivePopover } from '../../shared/ui/AdaptivePopover'
-import { Modify } from '@shared/types'
 
-type SettingsMenuProps = Modify<PopoverProps, { onClose: () => void }> & {
-  showLinks?: boolean
-  // open: boolean
-  // anchorEl?: Element | null
-  // onClose: () => void
-}
+export const settingsMenuKey = 'settingsMenu'
+
+type SettingsMenuProps = TPopoverProps & { showLinks?: boolean }
+
 export const SettingsMenu: FC<SettingsMenuProps> = props => {
-  const { anchorEl, onClose, showLinks, open } = props
-
+  const { showLinks, ...popoverProps } = props
   return (
-    <AdaptivePopover anchorEl={anchorEl} open={open} onClose={onClose}>
+    <AdaptivePopover {...popoverProps}>
       <MenuList>
-        <Settings showLinks={showLinks} onClose={onClose} />
+        <Settings
+          showLinks={showLinks}
+          onClose={popoverProps.onClose || (() => {})}
+        />
       </MenuList>
     </AdaptivePopover>
   )

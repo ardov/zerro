@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react'
+import React, { FC } from 'react'
 import {
   Box,
   Typography,
@@ -12,12 +12,12 @@ import { Tooltip } from '@shared/ui/Tooltip'
 import { CloseIcon, EditIcon, EmojiFlagsIcon } from '@shared/ui/Icons'
 import { Total } from '@shared/ui/Total'
 import Rhythm from '@shared/ui/Rhythm'
-import { ColorPicker } from '@shared/ui/ColorPickerPopover'
+import { ColorPicker, colorPickerKey } from '@shared/ui/ColorPickerPopover'
 import { sendEvent } from '@shared/helpers/tracking'
-import { useLocationState } from '@shared/hooks/useLocationState'
 import { useMonth } from '@shared/hooks/useMonth'
 import { TFxAmount } from '@shared/types'
 import { convertFx } from '@shared/helpers/money'
+import { usePopover } from '@shared/ui/PopoverManager'
 import { DataLine } from '@components/DataLine'
 
 import { useAppDispatch } from '@store'
@@ -25,7 +25,10 @@ import { envelopeModel, TEnvelope, TEnvelopeId } from '@entities/envelope'
 import { balances, TrFilterMode } from '@entities/envBalances'
 import { goalModel } from '@entities/goal'
 import { useBudgetPopover } from '../BudgetPopover'
-import { EnvelopeEditDialog } from '../EnvelopeEditDialog'
+import {
+  EnvelopeEditDialog,
+  EnvelopeEditDialogProps,
+} from '../EnvelopeEditDialog'
 import { ActivityWidget } from './ActivityWidget'
 import { CommentWidget } from './CommentWidget'
 import { cardStyle } from './shared'
@@ -137,10 +140,8 @@ const Header: FC<{
   onClose: () => void
 }> = ({ envelope, onClose }) => {
   const { symbol, color, name } = envelope
-  const [anchorEl, setAnchorEl] = useState<Element | null>(null)
-  const [isColorPickerOpen, openColorPicker, closeColorPicker] =
-    useLocationState('colorPicker')
-  const [isEditorOpen, openEditor, closeEditor] = useLocationState('editor')
+  const colorPicker = usePopover(colorPickerKey)
+  const editor = usePopover<EnvelopeEditDialogProps>('editor')
   const dispatch = useAppDispatch()
   const handleColorChange = (hex?: string | null) => {
     sendEvent('Tag: set color: ' + hex)
@@ -164,10 +165,7 @@ const Header: FC<{
           mr={2}
           flexShrink={0}
           color={color}
-          onClick={e => {
-            setAnchorEl(e.currentTarget)
-            openColorPicker()
-          }}
+          onClick={colorPicker.openOnClick}
           button
         />
         <Typography variant="h6" component="span" noWrap>
@@ -176,26 +174,22 @@ const Header: FC<{
       </Box>
 
       <Tooltip title="Изменить">
-        <IconButton onClick={openEditor} children={<EditIcon />} />
+        <IconButton
+          onClick={() => editor.open({ key: envelope.id, envelope })}
+          children={<EditIcon />}
+        />
       </Tooltip>
       <Tooltip title="Закрыть">
         <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
       </Tooltip>
 
       <ColorPicker
-        open={isColorPickerOpen}
-        anchorEl={anchorEl}
+        {...colorPicker.props}
         value={color}
-        onClose={closeColorPicker}
-        onChange={handleColorChange}
+        onColorChange={handleColorChange}
       />
 
-      <EnvelopeEditDialog
-        key={envelope.id}
-        open={isEditorOpen}
-        onClose={closeEditor}
-        envelope={envelope}
-      />
+      <EnvelopeEditDialog {...editor.props} />
     </Box>
   )
 }

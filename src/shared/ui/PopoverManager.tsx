@@ -13,6 +13,7 @@ import React, {
 } from 'react'
 
 type TKey = string
+type TBaseProps = { open: boolean; onClose: () => void }
 
 export type TPopoverProps = Modify<PopoverProps, { onClose?: () => void }>
 
@@ -28,10 +29,10 @@ const PopoverContext = React.createContext<{
   getProps: () => defaultProps,
 })
 
-export function usePopover(key: TKey) {
+export function usePopover<Props extends TBaseProps>(key: TKey) {
   const { open, close, getProps } = useContext(PopoverContext)
   const openPopover = useCallback(
-    (props?: Partial<TPopoverProps>) => open(key, props),
+    (props?: Partial<Props>) => open(key, props),
     [key, open]
   )
   const openOnClick = useCallback(
@@ -40,7 +41,7 @@ export function usePopover(key: TKey) {
     [key, open]
   )
   const closePopover = useCallback(() => close(key), [key, close])
-  const props = getProps(key)
+  const props = getProps(key) as Props
 
   return {
     openOnClick,

@@ -59,9 +59,7 @@ export const Group: FC<TGroupProps> = ({
         >
           <ButtonBase
             sx={{ p: 1, ml: -1, minWidth: 0, flexShrink: 1 }}
-            onClick={() => {
-              floating.open(name)
-            }}
+            onClick={() => floating.open(name)}
           >
             <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
               {name}

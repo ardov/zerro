@@ -1,7 +1,5 @@
 import React, { FC } from 'react'
 import { useLocation, useHistory } from 'react-router'
-import RefreshButton from '@components/RefreshButton'
-import { SettingsMenu } from './SettingsMenu'
 import SettingsIcon from '@mui/icons-material/Settings'
 import {
   BottomNavigation,
@@ -9,14 +7,16 @@ import {
   Paper,
   Divider,
 } from '@mui/material'
+import { makeStyles } from '@mui/styles'
 import {
   AccountBalanceIcon,
   AccountBalanceWalletIcon,
   SyncAltIcon,
 } from '@shared/ui/Icons'
-import { makeStyles } from '@mui/styles'
 import { useHomeBar } from '@shared/hooks/useHomeBar'
-import { usePopover } from '@shared/hooks/useEnvelopePopover'
+import { usePopover } from '@shared/ui/PopoverManager'
+import RefreshButton from '@components/RefreshButton'
+import { SettingsMenu, settingsMenuKey } from './SettingsMenu'
 
 const useStyles = makeStyles(theme => ({ action: { minWidth: 32 } }))
 
@@ -29,7 +29,8 @@ const routes = [
 export const MobileNavigation: FC = props => {
   const path = useLocation().pathname
   const history = useHistory()
-  const settingsMenu = usePopover('settingsMenu')
+  const settingsMenu = usePopover(settingsMenuKey)
+
   const c = useStyles()
   const hasHomeBar = useHomeBar()
   const paddingBottom = hasHomeBar ? '20px' : '0px'
@@ -67,12 +68,12 @@ export const MobileNavigation: FC = props => {
           className={c.action}
           value="menu"
           icon={<SettingsIcon />}
-          onClick={settingsMenu.onOpen}
+          onClick={settingsMenu.openOnClick}
         />
         <RefreshButton isMobile={true} className={c.action} />
       </BottomNavigation>
 
-      <SettingsMenu {...settingsMenu.popoverProps} showLinks />
+      <SettingsMenu {...settingsMenu.props} showLinks />
     </Paper>
   )
 }

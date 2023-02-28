@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react'
+import React, { FC } from 'react'
 import { shallowEqual } from 'react-redux'
 import { v1 as uuidv1 } from 'uuid'
 import { useFormik } from 'formik'
@@ -17,7 +17,7 @@ import {
   TextField,
 } from '@mui/material'
 import { Modify } from '@shared/types'
-import { ColorPicker } from '@shared/ui/ColorPickerPopover'
+import { ColorPicker, colorPickerKey } from '@shared/ui/ColorPickerPopover'
 import { useAppDispatch } from '@store'
 import {
   envelopeModel,
@@ -29,16 +29,14 @@ import {
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
 import { VisibilitySelect } from './VisidilitySelect'
 import { userModel } from '@entities/user'
+import { usePopover } from '@shared/ui/PopoverManager'
 
-export type TagEditDialogProps = Modify<
+export type EnvelopeEditDialogProps = Modify<
   DialogProps,
-  {
-    onClose: () => void
-    envelope?: Partial<TEnvelope>
-  }
+  { onClose: () => void } & { envelope?: Partial<TEnvelope> }
 >
 
-export const EnvelopeEditDialog: FC<TagEditDialogProps> = props => {
+export const EnvelopeEditDialog: FC<EnvelopeEditDialogProps> = props => {
   const { envelope, onClose, ...dialogProps } = props
   const dispatch = useAppDispatch()
   const isNew = !envelope?.id
@@ -214,7 +212,7 @@ type ColorProps = {
 }
 
 const Color: FC<ColorProps> = ({ value, onChange }) => {
-  const [anchorEl, setAnchorEl] = useState<Element | null>(null)
+  const colorPicker = usePopover(colorPickerKey)
   const hexColor = value
   const handleColorChange = (hex?: string | null) => {
     onChange(hex || null)
@@ -222,7 +220,7 @@ const Color: FC<ColorProps> = ({ value, onChange }) => {
   return (
     <>
       <ButtonBase
-        onClick={e => setAnchorEl(e.currentTarget)}
+        onClick={colorPicker.openOnClick}
         sx={{
           width: 24,
           height: 24,
@@ -233,11 +231,9 @@ const Color: FC<ColorProps> = ({ value, onChange }) => {
       />
 
       <ColorPicker
-        open={!!anchorEl}
-        anchorEl={anchorEl}
+        {...colorPicker.props}
         value={hexColor}
-        onClose={() => setAnchorEl(null)}
-        onChange={handleColorChange}
+        onColorChange={handleColorChange}
       />
     </>
   )

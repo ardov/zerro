@@ -9,6 +9,7 @@ import {
   Theme,
 } from '@mui/material'
 import { initTracking, setUserId } from '@shared/helpers/tracking'
+import { PopoverManager } from '@shared/ui/PopoverManager'
 import { useAppSelector } from '@store'
 import { getLoginState } from '@store/token'
 import { getLastSyncTime } from '@store/data/selectors'
@@ -69,28 +70,34 @@ export default function App() {
 
   return (
     <Router history={history}>
-      <RegularSyncHandler />
-      <Layout isLoggedIn={isLoggedIn}>
-        <ErrorBoundary>
-          <Suspense
-            fallback={
-              <Box
-                sx={{ display: 'grid', placeContent: 'center', height: '100%' }}
-              >
-                <CircularProgress />
-              </Box>
-            }
-          >
-            <Switch>
-              {isLoggedIn
-                ? hasData
-                  ? loggedInWithData
-                  : loggedInNoData
-                : notLoggedIn}
-            </Switch>
-          </Suspense>
-        </ErrorBoundary>
-      </Layout>
+      <PopoverManager>
+        <RegularSyncHandler />
+        <Layout isLoggedIn={isLoggedIn}>
+          <ErrorBoundary>
+            <Suspense
+              fallback={
+                <Box
+                  sx={{
+                    display: 'grid',
+                    placeContent: 'center',
+                    height: '100%',
+                  }}
+                >
+                  <CircularProgress />
+                </Box>
+              }
+            >
+              <Switch>
+                {isLoggedIn
+                  ? hasData
+                    ? loggedInWithData
+                    : loggedInNoData
+                  : notLoggedIn}
+              </Switch>
+            </Suspense>
+          </ErrorBoundary>
+        </Layout>
+      </PopoverManager>
     </Router>
   )
 }

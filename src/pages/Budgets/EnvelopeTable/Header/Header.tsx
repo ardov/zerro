@@ -1,13 +1,13 @@
 import React, { FC } from 'react'
-import { Typography, Box, Menu, MenuItem, Button } from '@mui/material'
+import { Typography, Box, Button, Menu, MenuItem } from '@mui/material'
 import { GoalsProgress } from '@features/bulkActions/fillGoals'
 import { rowStyle, useIsSmall } from '../shared/shared'
 import { MonthSelect } from './MonthSelect'
 import { ToBeBudgeted } from './ToBeBudgeted'
 import { Metric } from '../models/useMetric'
-import { usePopover } from '@shared/hooks/useEnvelopePopover'
 import { ChevronDownIcon } from '@shared/ui/Icons'
 import { TISOMonth } from '@shared/types'
+import { usePopover } from '@shared/ui/PopoverManager'
 
 type HeaderProps = {
   month: TISOMonth
@@ -33,6 +33,7 @@ export const Header: FC<HeaderProps> = props => {
   } = props
   const isSmall = useIsSmall()
   const tableMenu = usePopover('tableMenu')
+
   return (
     <>
       <Box
@@ -71,7 +72,7 @@ export const Header: FC<HeaderProps> = props => {
           <div>
             <Button
               size="small"
-              onClick={tableMenu.onOpen}
+              onClick={tableMenu.openOnClick}
               sx={{ ml: -1, px: 1, py: 0 }}
             >
               <Typography variant="overline" color="text.secondary" noWrap>
@@ -119,10 +120,10 @@ export const Header: FC<HeaderProps> = props => {
         </Box>
       </Box>
 
-      <Menu {...tableMenu.popoverProps}>
+      <Menu {...tableMenu.props}>
         <MenuItem
           onClick={() => {
-            tableMenu.onClose()
+            tableMenu.close()
             onShowAllToggle()
           }}
         >
@@ -130,7 +131,7 @@ export const Header: FC<HeaderProps> = props => {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            tableMenu.onClose()
+            tableMenu.close()
             onReorderModeToggle()
           }}
         >
