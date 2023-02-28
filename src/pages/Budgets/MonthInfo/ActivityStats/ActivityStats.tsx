@@ -18,13 +18,13 @@ import { useTrDrawer } from '@pages/Budgets/TransactionsDrawer'
 export function ActivityStats(props: { month: TISOMonth }) {
   const { month } = props
   const activity = balances.useSortedActivity()[month]
-  const { setDrawer } = useTrDrawer()
+  const openTrDrawer = useTrDrawer()
 
   const showTransactions = useCallback(
     (id: TDataNode['id'], trMode: TrFilterMode) => {
-      setDrawer({ id, month, mode: trMode, isExact: true })
+      openTrDrawer({ id, month, mode: trMode, isExact: true })
     },
-    [month, setDrawer]
+    [month, openTrDrawer]
   )
 
   if (!activity) return null

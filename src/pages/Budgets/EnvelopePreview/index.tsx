@@ -42,7 +42,7 @@ type EnvelopePreviewProps = {
 
 export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   const [month] = useMonth()
-  const { setDrawer } = useTrDrawer()
+  const showTransactions = useTrDrawer()
   const openBudgetPopover = useBudgetPopover()
   const openGoalPopover = useGoalPopover()
   const rates = balances.useRates()[month].rates
@@ -122,7 +122,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
           <Box>
             <Button
               onClick={() =>
-                setDrawer({ id, month, mode: TrFilterMode.Envelope })
+                showTransactions({ id, month, mode: TrFilterMode.Envelope })
               }
               fullWidth
             >

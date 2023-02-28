@@ -5,7 +5,6 @@ import {
   ListItemText,
   InputAdornment,
   IconButton,
-  PopoverProps,
 } from '@mui/material'
 import { Box, BoxProps } from '@mui/system'
 import { CheckCircleIcon } from '@shared/ui/Icons'
@@ -15,6 +14,7 @@ import { convertFx } from '@shared/helpers/money'
 import { sendEvent } from '@shared/helpers/tracking'
 import { TFxAmount, TISOMonth } from '@shared/types'
 import { AdaptivePopover } from '@shared/ui/AdaptivePopover'
+import { TPopoverProps } from '@shared/ui/PopoverManager'
 
 import { useAppDispatch } from '@store'
 import { balances } from '@entities/envBalances'
@@ -23,22 +23,12 @@ import { setTotalBudget } from '@features/budget/setTotalBudget'
 import { displayCurrency } from '@entities/currency/displayCurrency'
 import { TEnvelopeId } from '@entities/envelope'
 
-type TBudgetPopoverProps = PopoverProps & {
+export type TBudgetPopoverProps = TPopoverProps & {
   id: TEnvelopeId
   month: TISOMonth
 }
 
-export const BudgetPopover: FC<
-  PopoverProps & {
-    id?: TEnvelopeId
-    month?: TISOMonth
-  }
-> = ({ id, month, ...props }) => {
-  if (!id || !month) return null
-  return <BudgetPopoverContent id={id} month={month} {...props} />
-}
-
-const BudgetPopoverContent: FC<TBudgetPopoverProps> = props => {
+export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
   const quickActions = useQuickActions(month, id)
   const [dispCurrency] = displayCurrency.useDisplayCurrency()
@@ -93,7 +83,7 @@ const BudgetPopoverContent: FC<TBudgetPopoverProps> = props => {
     dispatch(setTotalBudget({ month, id, value }))
 
   const changeAndClose = (value: number) => {
-    onClose?.({}, 'escapeKeyDown')
+    onClose?.()
     if (value !== budgeted.env) onChange(value)
   }
 

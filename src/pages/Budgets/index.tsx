@@ -16,8 +16,8 @@ import { EnvelopePreview } from './EnvelopePreview'
 import { BudgetTransactionsDrawer, useTrDrawer } from './TransactionsDrawer'
 import { EnvelopeTable } from './EnvelopeTable'
 import { DnDContext } from './DnDContext'
-import { BudgetPopoverProvider } from './BudgetPopover'
-import { GoalPopoverProvider } from './GoalPopover'
+import { SmartBudgetPopover } from './BudgetPopover'
+import { SmartGoalPopover } from './GoalPopover'
 import { Explainer } from './Explainer'
 
 export default function BudgetsRouter() {
@@ -44,7 +44,7 @@ function Budgets() {
   useMonthHotkeys()
   const [month] = useMonth()
   const [drawerId, setDrawerId] = useSearchParam<TDrawerId>('drawer')
-  const { setDrawer } = useTrDrawer()
+  const showTransactions = useTrDrawer()
   const openOverview = useCallback(() => setDrawerId('overview'), [setDrawerId])
   const openEnvelopeInfo = useCallback(
     (id: TEnvelopeId | null) => setDrawerId(id),
@@ -53,13 +53,13 @@ function Budgets() {
   const closeDrawer = useCallback(() => setDrawerId(), [setDrawerId])
   const openTransactions = useCallback(
     (opts: { id: TEnvelopeId; isExact?: boolean }) =>
-      setDrawer({
+      showTransactions({
         id: opts.id,
         month,
         mode: TrFilterMode.Envelope,
         isExact: opts.isExact,
       }),
-    [month, setDrawer]
+    [month, showTransactions]
   )
 
   const detailsContent = !drawerId ? undefined : drawerId === 'overview' ? (
@@ -101,19 +101,18 @@ function Budgets() {
         <link rel="canonical" href="https://zerro.app/budget" />
       </Helmet>
 
-      <BudgetPopoverProvider month={month}>
-        <GoalPopoverProvider month={month}>
-          <DnDContext>
-            <BudgetLayout
-              mainContent={mainContent}
-              sideContent={detailsContent}
-              sideDefault={sideDefault}
-              onSideClose={closeDrawer}
-            />
-            <BudgetTransactionsDrawer />
-          </DnDContext>
-        </GoalPopoverProvider>
-      </BudgetPopoverProvider>
+      <DnDContext>
+        <BudgetLayout
+          mainContent={mainContent}
+          sideContent={detailsContent}
+          sideDefault={sideDefault}
+          onSideClose={closeDrawer}
+        />
+        <BudgetTransactionsDrawer />
+      </DnDContext>
+
+      <SmartGoalPopover />
+      <SmartBudgetPopover />
     </>
   )
 }

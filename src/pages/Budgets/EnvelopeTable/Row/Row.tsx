@@ -6,15 +6,17 @@ import { Tooltip } from '@shared/ui/Tooltip'
 import { EmojiFlagsIcon } from '@shared/ui/Icons'
 import { RadialProgress } from '@shared/ui/RadialProgress'
 import { TISOMonth } from '@shared/types'
+
 import { goalModel, TGoal } from '@entities/goal'
-import { DragTypes } from '../../DnDContext'
-import { rowStyle, useIsSmall } from '../shared/shared'
-import { Metric } from '../models/useMetric'
-import { useBudgetPopover } from '@pages/Budgets/BudgetPopover'
-import { useGoalPopover } from '@pages/Budgets/GoalPopover'
-import { NameCell } from './NameCell'
 import { balances } from '@entities/envBalances'
 import { envelopeModel, TEnvelopeId } from '@entities/envelope'
+
+import { DragTypes } from '../../DnDContext'
+import { useBudgetPopover } from '../../BudgetPopover'
+import { useGoalPopover } from '../../GoalPopover'
+import { Metric } from '../models/useMetric'
+import { rowStyle, useIsSmall } from '../shared/shared'
+import { NameCell } from './NameCell'
 import { BudgetCell } from './BudgetCell'
 import { ActivityCell } from './ActivityCell'
 import { AvailableCell } from './AvailableCell'
@@ -76,7 +78,11 @@ export const Row: FC<EnvelopeRowProps> = props => {
   const handleNameClick = useCallback(() => openDetails(id), [id, openDetails])
   const handleGoalClick: React.MouseEventHandler<HTMLButtonElement> =
     useCallback(
-      e => openGoalPopover(id, e.currentTarget),
+      e => {
+        e.preventDefault()
+        e.stopPropagation()
+        openGoalPopover(id, e.currentTarget)
+      },
       [id, openGoalPopover]
     )
 

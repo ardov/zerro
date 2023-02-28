@@ -1,11 +1,9 @@
-import React, { FC, useCallback, useMemo } from 'react'
+import React, { FC } from 'react'
 import { TISOMonth, TTransaction } from '@shared/types'
-import { useSearchParam } from '@shared/hooks/useSearchParam'
-import { useMonth } from '@shared/hooks/useMonth'
 import { TransactionsDrawer } from '@components/TransactionsDrawer'
-import { useCachedValue } from '@shared/hooks/useCachedValue'
 import { envelopeModel, TEnvelopeId } from '@entities/envelope'
 import { balances, TrFilterMode } from '@entities/envBalances'
+import { TPopoverProps, usePopover } from '@shared/ui/PopoverManager'
 
 type TConditions = {
   id: TEnvelopeId | 'transferFees' | null
@@ -14,60 +12,33 @@ type TConditions = {
   isExact?: boolean
 }
 
+export const budgetTrDrawerKey = 'budgetTransactionsDrawer'
+
+export function useTrDrawer() {
+  const trDrawer = usePopover<TPopoverProps & TConditions>(budgetTrDrawerKey)
+  return trDrawer.open
+}
+
 export const BudgetTransactionsDrawer: FC = () => {
-  const { params, setDrawer } = useTrDrawer()
-  const isOpened = !!params.id
+  const trDrawer = usePopover<TPopoverProps & TConditions>(budgetTrDrawerKey)
+  const { id, month, mode, isExact, open, onClose } = trDrawer.props
 
-  const cached = useCachedValue(params, isOpened)
-  const onClose = () => setDrawer(null)
+  const transactions = useFilteredTransactions({
+    id,
+    month,
+    mode: mode || TrFilterMode.Envelope,
+    isExact: !!isExact,
+  })
 
-  const transactions = useFilteredTransactions(cached)
-
-  if (!transactions)
-    return <TransactionsDrawer open={false} onClose={onClose} />
+  if (!transactions) return null
 
   return (
     <TransactionsDrawer
       transactions={transactions}
-      open={isOpened}
+      open={open}
       onClose={onClose}
     />
   )
-}
-
-export function useTrDrawer() {
-  const [month] = useMonth()
-  const [id, setId] =
-    useSearchParam<TEnvelopeId | 'transferFees'>('tr_envelope')
-  const [mode, setMode] = useSearchParam<TrFilterMode>('tr_mode')
-  const [isExact, setIsExact] = useSearchParam<'true'>('tr_exact')
-
-  const setDrawer = useCallback(
-    (conditions: TConditions | null) => {
-      if (!conditions) {
-        setId()
-        setMode()
-        setIsExact()
-      } else {
-        setId(conditions.id)
-        setMode(conditions?.mode)
-        setIsExact(conditions.isExact ? 'true' : undefined)
-      }
-    },
-    [setId, setMode, setIsExact]
-  )
-
-  const params: TConditions = useMemo(
-    () => ({
-      id,
-      month,
-      mode: mode || TrFilterMode.Envelope,
-      isExact: !!isExact,
-    }),
-    [id, month, mode, isExact]
-  )
-
-  return { params, setDrawer }
 }
 
 function useFilteredTransactions(conditions: TConditions): TTransaction[] {

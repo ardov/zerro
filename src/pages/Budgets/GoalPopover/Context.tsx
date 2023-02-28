@@ -1,25 +1,24 @@
-import React, { FC, ReactNode, useContext } from 'react'
-import { useEnvelopePopover } from '@shared/hooks/useEnvelopePopover'
-import { TISOMonth } from '@shared/types'
-import { GoalPopover } from './GoalPopover'
+import React, { FC, useCallback } from 'react'
+import { useMonth } from '@shared/hooks/useMonth'
+import { usePopover } from '@shared/ui/PopoverManager'
+
 import { TEnvelopeId } from '@entities/envelope'
+import { GoalPopover, TGoalPopoverProps } from './GoalPopover'
 
-const GoalPopoverContext = React.createContext<
-  (id: TEnvelopeId, anchor: Element) => void
->(() => {})
+const goalPopoverKey = 'goalPopover'
 
-export const useGoalPopover = () => useContext(GoalPopoverContext)
-
-export const GoalPopoverProvider: FC<{
-  children: ReactNode
-  month: TISOMonth
-}> = props => {
-  const goal = useEnvelopePopover(props.month, 'goalPopover')
-
-  return (
-    <GoalPopoverContext.Provider value={goal.onOpen}>
-      {props.children}
-      <GoalPopover {...goal.props} />
-    </GoalPopoverContext.Provider>
+export const useGoalPopover = () => {
+  const [month] = useMonth()
+  const { open } = usePopover<TGoalPopoverProps>(goalPopoverKey)
+  const openPopover = useCallback(
+    (id: TEnvelopeId, anchorEl: Element) => open({ id, anchorEl, month }),
+    [month, open]
   )
+  return openPopover
+}
+
+export const SmartGoalPopover: FC = () => {
+  const popover = usePopover<TGoalPopoverProps>(goalPopoverKey)
+  if (!popover.props.month || !popover.props.id) return null
+  return <GoalPopover {...popover.props} />
 }
