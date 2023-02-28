@@ -12,7 +12,7 @@ export function useSearchParam<T extends string>(
   if (value) value = decodeURIComponent(value) as T
   const setValue = useCallback(
     (id?: T | null, method: TUpdateMethod = defaultMethod) =>
-      history[method](getModifiedPath(key, id)),
+      history[method](getModifiedPath(key, id), history.location.state),
     [history, key, defaultMethod]
   )
   return [value, setValue] as [T | null, (id?: T | null) => void]
