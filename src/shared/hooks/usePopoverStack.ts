@@ -36,9 +36,14 @@ function getStack(location: Location<TLocationState>) {
 
 function show(history: History<TLocationState>, key: string) {
   if (!key) return
+  const currStack = getStack(history.location)
+
+  // Do nothing if already visible
+  if (currStack.includes(key)) return
+
   const { pathname, hash, search, state = {} } = history.location
   let nextState = { ...state }
-  nextState.dialogs = [...getStack(history.location)]
+  nextState.dialogs = [...currStack]
   nextState.dialogs.push(key)
   history.push(pathname + hash + search, nextState)
 }
