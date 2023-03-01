@@ -8,14 +8,12 @@ import {
   Drawer,
   Divider,
   List,
-  ListItem,
   ListItemText,
   ListItemIcon,
   DrawerProps,
+  ListItemButton,
+  useTheme,
 } from '@mui/material'
-import { useTheme } from '@mui/material'
-import { Logo } from '@shared/ui/Logo'
-import AccountList from '@components/AccountList'
 import { makeStyles } from '@mui/styles'
 import {
   AccountBalanceIcon,
@@ -25,6 +23,9 @@ import {
   WhatshotIcon,
   BarChartIcon,
 } from '@shared/ui/Icons'
+import { Logo } from '@shared/ui/Logo'
+
+import AccountList from '@components/AccountList'
 import { DebtorList } from '@components/DebtorList'
 
 export default function NavigationDrawer(props: DrawerProps) {
@@ -130,15 +131,14 @@ const NavigationLink: FC<{
   const c = useStyles()
   const match = useRouteMatch(path)
   return (
-    <ListItem
+    <ListItemButton
       className={c.listItem}
-      button
       selected={!!match}
       component={Link}
       to={path}
     >
       <ListItemIcon>{icon}</ListItemIcon>
       <ListItemText primary={text} />
-    </ListItem>
+    </ListItemButton>
   )
 }

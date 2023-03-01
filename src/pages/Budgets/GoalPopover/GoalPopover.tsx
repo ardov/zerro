@@ -6,7 +6,6 @@ import {
   MenuItem,
   Button,
   IconButton,
-  PopoverProps,
   OutlinedTextFieldProps,
 } from '@mui/material'
 import { AmountInput } from '@shared/ui/AmountInput'
@@ -14,6 +13,7 @@ import { CloseIcon } from '@shared/ui/Icons'
 import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
 import { toISODate, formatDate } from '@shared/helpers/date'
 import { TDateDraft, TISOMonth } from '@shared/types'
+import { TPopoverProps } from '@shared/ui/PopoverManager'
 import { useAppDispatch } from '@store'
 
 import { goalModel, goalType, TGoal } from '@entities/goal'
@@ -26,22 +26,12 @@ const amountLabels = {
   [goalType.INCOME_PERCENT]: 'Процент от дохода',
 }
 
-type TGoalPopoverProps = PopoverProps & {
+export type TGoalPopoverProps = TPopoverProps & {
   id: TEnvelopeId
   month: TISOMonth
 }
 
-export const GoalPopover: FC<
-  PopoverProps & {
-    id?: TEnvelopeId
-    month?: TISOMonth
-  }
-> = ({ id, month, ...props }) => {
-  if (!id || !month) return null
-  return <GoalPopoverContent id={id} month={month} {...props} />
-}
-
-const GoalPopoverContent: FC<TGoalPopoverProps> = props => {
+export const GoalPopover: FC<TGoalPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
   const dispatch = useAppDispatch()
   const envelope = envelopeModel.useEnvelopes()[id]
@@ -79,11 +69,11 @@ const GoalPopoverContent: FC<TGoalPopoverProps> = props => {
       }
       dispatch(goalModel.set(month, id, goal))
     }
-    onClose?.({}, 'escapeKeyDown')
+    onClose?.()
   }
   const removeGoal = () => {
     dispatch(goalModel.set(month, id, null))
-    onClose?.({}, 'escapeKeyDown')
+    onClose?.()
   }
 
   const showDateBlock = type === goalType.TARGET_BALANCE

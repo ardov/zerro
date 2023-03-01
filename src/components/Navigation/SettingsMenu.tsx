@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import {
   SaveAltIcon,
   ExitToAppIcon,
@@ -27,6 +27,9 @@ import {
 import { useThemeType } from '@shared/hooks/useThemeType'
 import { sendEvent } from '@shared/helpers/tracking'
 import { Confirm } from '@shared/ui/Confirm'
+import { useSnackbar } from '@shared/ui/SnackbarProvider'
+import { AdaptivePopover } from '@shared/ui/AdaptivePopover'
+import { TPopoverProps } from '@shared/ui/PopoverManager'
 import { appVersion } from '@shared/config'
 
 import { useAppDispatch } from '@store'
@@ -39,25 +42,20 @@ import { exportCSV } from '@features/export/exportCSV'
 import { exportJSON } from '@features/export/exportJSON'
 import { clearLocalData } from '@features/localData'
 import { convertZmBudgetsToZerro } from '@features/budget/convertZmBudgetsToZerro'
-import { useSnackbar } from '@shared/ui/SnackbarProvider'
-import { AdaptivePopover } from '../../shared/ui/AdaptivePopover'
 
-type SettingsMenuProps = {
-  showLinks?: boolean
-  anchorEl: Element | null
-  onClose: () => void
-}
+export const settingsMenuKey = 'settingsMenu'
+
+type SettingsMenuProps = TPopoverProps & { showLinks?: boolean }
+
 export const SettingsMenu: FC<SettingsMenuProps> = props => {
-  const { anchorEl, onClose, showLinks } = props
-
+  const { showLinks, ...popoverProps } = props
   return (
-    <AdaptivePopover
-      anchorEl={anchorEl}
-      open={Boolean(anchorEl)}
-      onClose={onClose}
-    >
+    <AdaptivePopover {...popoverProps}>
       <MenuList>
-        <Settings showLinks={showLinks} onClose={onClose} />
+        <Settings
+          showLinks={showLinks}
+          onClose={popoverProps.onClose || (() => {})}
+        />
       </MenuList>
     </AdaptivePopover>
   )
@@ -151,30 +149,42 @@ function ThemeItem({ onClose }: ItemProps) {
 }
 
 function NavItems({ onClose }: ItemProps) {
+  const history = useHistory()
+  const handleNav =
+    (path: string): React.MouseEventHandler<HTMLAnchorElement> =>
+    e => {
+      e.preventDefault()
+      onClose()
+      setTimeout(() => history.push(path), 10)
+    }
   return (
     <>
-      <MenuItem onClick={onClose} component={Link} to="/stats">
+      <MenuItem onClick={handleNav('/stats')} component={Link} to="/stats">
         <ListItemIcon>
           <BarChartIcon />
         </ListItemIcon>
         <ListItemText>Аналитика</ListItemText>
       </MenuItem>
 
-      <MenuItem onClick={onClose} component={Link} to="/review">
+      <MenuItem onClick={handleNav('/review')} component={Link} to="/review">
         <ListItemIcon>
           <WhatshotIcon />
         </ListItemIcon>
         <ListItemText>Итоги года</ListItemText>
       </MenuItem>
 
-      <MenuItem onClick={onClose} component={Link} to="/about">
+      <MenuItem onClick={handleNav('/about')} component={Link} to="/about">
         <ListItemIcon>
           <HelpOutlineIcon />
         </ListItemIcon>
         <ListItemText>Как пользоваться</ListItemText>
       </MenuItem>
 
-      <MenuItem onClick={onClose} component={Link} to="/donation">
+      <MenuItem
+        onClick={handleNav('/donation')}
+        component={Link}
+        to="/donation"
+      >
         <ListItemIcon>
           <FavoriteBorderIcon />
         </ListItemIcon>

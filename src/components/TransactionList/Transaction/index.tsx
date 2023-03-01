@@ -27,7 +27,7 @@ const TransactionWrapper: FC<WrapperProps> = props => {
     onSelectChanged,
   } = props
   const [onContextMenu, bind] = useContextMenu()
-  const [opened, setOpened] = useSearchParam('transaction')
+  const [opened, setOpened] = useSearchParam('transaction', 'push')
   const isOpened = opened === id
   const transaction = useAppSelector(
     (state: RootState) => trModel.getTransactions(state)[id]

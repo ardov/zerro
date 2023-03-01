@@ -1,28 +1,25 @@
-import React, { FC, useState } from 'react'
-import { SettingsIcon } from '@shared/ui/Icons'
+import React, { FC } from 'react'
 import { IconButton, IconButtonProps } from '@mui/material'
+import { SettingsIcon } from '@shared/ui/Icons'
 import { Tooltip } from '@shared/ui/Tooltip'
-import { SettingsMenu } from './SettingsMenu'
+import { usePopover } from '@shared/ui/PopoverManager'
+
+import { SettingsMenu, settingsMenuKey } from './SettingsMenu'
 
 interface MenuButtonProps extends IconButtonProps {
   showLinks?: boolean
 }
 
 export const MenuButton: FC<MenuButtonProps> = ({ showLinks, ...rest }) => {
-  const [anchorEl, setAnchorEl] = useState<Element | null>(null)
-  const handleClose = () => setAnchorEl(null)
+  const settingsMenu = usePopover(settingsMenuKey)
   return (
     <>
       <Tooltip title="Настройки">
-        <IconButton onClick={e => setAnchorEl(e.currentTarget)} {...rest}>
+        <IconButton onClick={settingsMenu.openOnClick} {...rest}>
           <SettingsIcon />
         </IconButton>
       </Tooltip>
-      <SettingsMenu
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        showLinks={showLinks}
-      />
+      <SettingsMenu {...settingsMenu.props} showLinks={showLinks} />
     </>
   )
 }

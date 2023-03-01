@@ -1,1 +1,1 @@
-export { useBudgetPopover, BudgetPopoverProvider } from './Context'
+export { useBudgetPopover, SmartBudgetPopover } from './Context'

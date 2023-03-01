@@ -1,7 +1,5 @@
 import React, { FC } from 'react'
 import { useLocation, useHistory } from 'react-router'
-import RefreshButton from '@components/RefreshButton'
-import { SettingsMenu } from './SettingsMenu'
 import SettingsIcon from '@mui/icons-material/Settings'
 import {
   BottomNavigation,
@@ -9,13 +7,16 @@ import {
   Paper,
   Divider,
 } from '@mui/material'
+import { makeStyles } from '@mui/styles'
 import {
   AccountBalanceIcon,
   AccountBalanceWalletIcon,
   SyncAltIcon,
 } from '@shared/ui/Icons'
-import { makeStyles } from '@mui/styles'
 import { useHomeBar } from '@shared/hooks/useHomeBar'
+import { usePopover } from '@shared/ui/PopoverManager'
+import RefreshButton from '@components/RefreshButton'
+import { SettingsMenu, settingsMenuKey } from './SettingsMenu'
 
 const useStyles = makeStyles(theme => ({ action: { minWidth: 32 } }))
 
@@ -28,9 +29,9 @@ const routes = [
 export const MobileNavigation: FC = props => {
   const path = useLocation().pathname
   const history = useHistory()
-  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null)
+  const settingsMenu = usePopover(settingsMenuKey)
+
   const c = useStyles()
-  const handleMenuClose = () => setAnchorEl(null)
   const hasHomeBar = useHomeBar()
   const paddingBottom = hasHomeBar ? '20px' : '0px'
   const currentRoute = routes.find(route => path.startsWith(route.path))
@@ -67,12 +68,12 @@ export const MobileNavigation: FC = props => {
           className={c.action}
           value="menu"
           icon={<SettingsIcon />}
-          onClick={e => setAnchorEl(e.currentTarget)}
+          onClick={settingsMenu.openOnClick}
         />
         <RefreshButton isMobile={true} className={c.action} />
       </BottomNavigation>
 
-      <SettingsMenu anchorEl={anchorEl} onClose={handleMenuClose} showLinks />
+      <SettingsMenu {...settingsMenu.props} showLinks />
     </Paper>
   )
 }
