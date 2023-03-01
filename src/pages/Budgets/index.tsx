@@ -1,24 +1,22 @@
 import React, { FC, ReactElement, useCallback } from 'react'
 import { Redirect } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
-import { Box, Drawer, Theme, useMediaQuery } from '@mui/material'
+import { Box, Theme, useMediaQuery } from '@mui/material'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { formatDate } from '@shared/helpers/date'
-import { useCachedValue } from '@shared/hooks/useCachedValue'
 import { nextMonth, prevMonth, toISOMonth } from '@shared/helpers/date'
 import { useMonth } from '@shared/hooks/useMonth'
-import { TPopoverProps, usePopover } from '@shared/ui/PopoverManager'
 import { TEnvelopeId } from '@entities/envelope'
 
 import { balances, TrFilterMode } from '@entities/envBalances'
-import { MonthInfo } from './MonthInfo'
-import { EnvelopePreview } from './EnvelopePreview'
+
 import { BudgetTransactionsDrawer, useTrDrawer } from './TransactionsDrawer'
 import { EnvelopeTable } from './EnvelopeTable'
 import { DnDContext } from './DnDContext'
 import { SmartBudgetPopover } from './BudgetPopover'
 import { SmartGoalPopover } from './GoalPopover'
 import { Explainer } from './Explainer'
+import { SideContent, useSideContent } from './SideContent'
 
 export default function BudgetsRouter() {
   const [month] = useMonth()
@@ -38,24 +36,13 @@ export default function BudgetsRouter() {
   return <Budgets />
 }
 
-type TDrawerId = TEnvelopeId | 'overview'
-
 function Budgets() {
   useMonthHotkeys()
   const [month] = useMonth()
-  const popover = usePopover<TPopoverProps & { id: TDrawerId }>('sideContent')
-  const drawerId: TDrawerId = popover.props.id || 'overview'
-
+  const openSide = useSideContent()
   const showTransactions = useTrDrawer()
-  const openOverview = useCallback(
-    () => popover.open({ id: 'overview' }),
-    [popover]
-  )
-  const openEnvelopeInfo = useCallback(
-    (id: TEnvelopeId) => popover.open({ id }),
-    [popover]
-  )
-  const closeDrawer = popover.close
+  const openOverview = useCallback(() => openSide('overview'), [openSide])
+
   const openTransactions = useCallback(
     (opts: { id: TEnvelopeId; isExact?: boolean }) =>
       showTransactions({
@@ -65,16 +52,6 @@ function Budgets() {
         isExact: opts.isExact,
       }),
     [month, showTransactions]
-  )
-
-  const detailsContent = popover.props.open ? (
-    drawerId === 'overview' ? (
-      <MonthInfo onClose={closeDrawer} />
-    ) : (
-      <EnvelopePreview onClose={closeDrawer} id={drawerId} />
-    )
-  ) : (
-    <MonthInfo onClose={closeDrawer} />
   )
 
   const mainContent = (
@@ -95,7 +72,7 @@ function Budgets() {
         month={month}
         onShowTransactions={openTransactions}
         onOpenOverview={openOverview}
-        onOpenDetails={openEnvelopeInfo}
+        onOpenDetails={openSide}
       />
     </Box>
   )
@@ -109,12 +86,7 @@ function Budgets() {
       </Helmet>
 
       <DnDContext>
-        <BudgetLayout
-          mainContent={mainContent}
-          sideContent={detailsContent}
-          isSideOpened={popover.props.open}
-          onSideClose={closeDrawer}
-        />
+        <BudgetLayout mainContent={mainContent} />
         <BudgetTransactionsDrawer />
       </DnDContext>
 
@@ -124,19 +96,20 @@ function Budgets() {
   )
 }
 
+const sideWidth = 360
+const sideSx = {
+  width: sideWidth,
+  flexShrink: 0,
+  height: '100%',
+  overflow: 'auto',
+  bgcolor: 'background.paper',
+}
+
 const BudgetLayout: FC<{
   mainContent: ReactElement
-  sideContent: ReactElement
-  isSideOpened: boolean
-  onSideClose: () => void
 }> = props => {
-  const sideWidth = 360
-  const { mainContent, sideContent, isSideOpened, onSideClose } = props
+  const { mainContent } = props
   const isMD = useMediaQuery<Theme>(theme => theme.breakpoints.down('lg'))
-  const isXS = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
-
-  const drawerVisibility = isMD && isSideOpened
-  const cachedContent = useCachedValue(sideContent, drawerVisibility)
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
@@ -147,30 +120,20 @@ const BudgetLayout: FC<{
           justifyContent: 'center',
           height: '100%',
           overflow: 'auto',
-          px: isMD ? 1 : 3,
+          px: { xs: 1, md: 3 },
           pb: 6,
         }}
       >
         {mainContent}
       </Box>
 
-      {!isMD && (
-        <Box
-          sx={{
-            width: sideWidth,
-            flexShrink: 0,
-            height: '100%',
-            overflow: 'auto',
-            bgcolor: 'background.paper',
-          }}
-        >
-          {sideContent}
+      {isMD ? (
+        <SideContent width={sideWidth} />
+      ) : (
+        <Box sx={sideSx}>
+          <SideContent width={sideWidth} docked />
         </Box>
       )}
-
-      <Drawer anchor="right" open={drawerVisibility} onClose={onSideClose}>
-        <Box sx={{ width: isXS ? '100vw' : sideWidth }}>{cachedContent}</Box>
-      </Drawer>
     </Box>
   )
 }

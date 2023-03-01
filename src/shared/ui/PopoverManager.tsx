@@ -5,7 +5,6 @@ import { Modify } from '@shared/types'
 import React, {
   FC,
   ReactNode,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -16,77 +15,47 @@ type TKey = string
 type TBaseProps = { open: boolean; onClose?: () => void }
 type WithBaseProps<T> = Modify<T, Required<TBaseProps>>
 type WithoutBaseProps<T> = Omit<T, 'open' | 'onClose'>
-
 export type TPopoverProps = Modify<PopoverProps, { onClose?: () => void }>
-
 const defaultProps: TPopoverProps = { open: false, onClose: () => {} }
 
-const PopoverContext = React.createContext<{
+const PopoverMethodsContext = React.createContext<{
   close: (key: TKey) => void
   open: (key: TKey, props?: Partial<TPopoverProps>) => void
-  getProps: (key: TKey) => TPopoverProps
-}>({
-  close: () => {},
-  open: () => {},
-  getProps: () => defaultProps,
-})
+}>({ close: () => {}, open: () => {} })
+const PopoverPropsContext = React.createContext<
+  Record<TKey, TPopoverProps | undefined>
+>({})
+
+export function usePopoverProps<Props extends TBaseProps>(key: TKey) {
+  const props = useContext(PopoverPropsContext)
+  return (props[key] || defaultProps) as WithBaseProps<Props>
+}
+
+export function usePopoverMethods<Props extends TBaseProps>(key: TKey) {
+  const { open, close } = useContext(PopoverMethodsContext)
+  const memoized = useMemo(
+    () => ({
+      openOnClick: (e: React.MouseEvent<Element, MouseEvent>) =>
+        open(key, { anchorEl: e.currentTarget }),
+      open: (props?: WithoutBaseProps<Props>) => open(key, props),
+      close: () => close(key),
+    }),
+    [open, close, key]
+  )
+  return memoized
+}
 
 export function usePopover<Props extends TBaseProps>(key: TKey) {
-  const { open, close, getProps } = useContext(PopoverContext)
-  const openPopover = useCallback(
-    (props?: WithoutBaseProps<Props>) => open(key, props),
-    [key, open]
-  )
-  const openOnClick = useCallback(
-    (e: React.MouseEvent<Element, MouseEvent>) =>
-      open(key, { anchorEl: e.currentTarget }),
-    [key, open]
-  )
-  const closePopover = useCallback(() => close(key), [key, close])
-  const props = getProps(key) as WithBaseProps<Props>
-
-  return {
-    openOnClick,
-    open: openPopover,
-    close: closePopover,
-    props,
-  }
+  const methods = usePopoverMethods<Props>(key)
+  const props = usePopoverProps<Props>(key)
+  return { ...methods, props }
 }
 
 export const PopoverManager: FC<{ children: ReactNode }> = props => {
+  const [stack, pushKey, popKey] = usePopoverStack()
   const [popProps, setPopProps] = useState<
     Record<TKey, TPopoverProps | undefined>
   >({})
-
-  const [stack, pushKey, popKey] = usePopoverStack()
-
-  const close = useCallback(popKey, [popKey])
-
-  const open = useCallback(
-    (key: TKey, props?: Partial<TPopoverProps>) => {
-      setPopProps(s => {
-        return {
-          ...s,
-          [key]: {
-            ...s[key],
-            ...props,
-            open: true,
-            onClose: () => close(key),
-          },
-        }
-      })
-      pushKey(key)
-    },
-    [close, pushKey]
-  )
-
-  const getProps = useCallback(
-    (key: TKey): TPopoverProps => {
-      if (popProps[key]) return popProps[key]!
-      return defaultProps
-    },
-    [popProps]
-  )
 
   useEffect(() => {
     setPopProps(state => {
@@ -103,25 +72,39 @@ export const PopoverManager: FC<{ children: ReactNode }> = props => {
       stack.forEach(key => {
         if (key in nextState) return
         changed = true
-        nextState[key] = { open: true, onClose: () => close(key) }
+        nextState[key] = { open: true, onClose: () => popKey(key) }
       })
 
       return changed ? nextState : state
     })
-  }, [close, stack])
+  }, [popKey, stack])
 
   const methods = useMemo(
     () => ({
-      close,
-      open,
-      getProps,
+      close: popKey,
+      open: (key: TKey, props?: Partial<TPopoverProps>) => {
+        setPopProps(s => {
+          return {
+            ...s,
+            [key]: {
+              ...s[key],
+              ...props,
+              open: true,
+              onClose: () => popKey(key),
+            },
+          }
+        })
+        pushKey(key)
+      },
     }),
-    [close, getProps, open]
+    [popKey, pushKey]
   )
 
   return (
-    <PopoverContext.Provider value={methods}>
-      {props.children}
-    </PopoverContext.Provider>
+    <PopoverMethodsContext.Provider value={methods}>
+      <PopoverPropsContext.Provider value={popProps}>
+        {props.children}
+      </PopoverPropsContext.Provider>
+    </PopoverMethodsContext.Provider>
   )
 }

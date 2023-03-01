@@ -1,13 +1,14 @@
 import React, { FC } from 'react'
 import { Typography, Box, Button, Menu, MenuItem } from '@mui/material'
+import { ChevronDownIcon } from '@shared/ui/Icons'
+import { TISOMonth } from '@shared/types'
+import { usePopoverMethods, usePopoverProps } from '@shared/ui/PopoverManager'
+
 import { GoalsProgress } from '@features/bulkActions/fillGoals'
 import { rowStyle, useIsSmall } from '../shared/shared'
 import { MonthSelect } from './MonthSelect'
 import { ToBeBudgeted } from './ToBeBudgeted'
 import { Metric } from '../models/useMetric'
-import { ChevronDownIcon } from '@shared/ui/Icons'
-import { TISOMonth } from '@shared/types'
-import { usePopover } from '@shared/ui/PopoverManager'
 
 type HeaderProps = {
   month: TISOMonth
@@ -32,7 +33,7 @@ export const Header: FC<HeaderProps> = props => {
     onMetricSwitch,
   } = props
   const isSmall = useIsSmall()
-  const tableMenu = usePopover('tableMenu')
+  const { openOnClick } = usePopoverMethods('tableMenu')
 
   return (
     <>
@@ -72,7 +73,7 @@ export const Header: FC<HeaderProps> = props => {
           <div>
             <Button
               size="small"
-              onClick={tableMenu.openOnClick}
+              onClick={openOnClick}
               sx={{ ml: -1, px: 1, py: 0 }}
             >
               <Typography variant="overline" color="text.secondary" noWrap>
@@ -120,24 +121,45 @@ export const Header: FC<HeaderProps> = props => {
         </Box>
       </Box>
 
-      <Menu {...tableMenu.props}>
-        <MenuItem
-          onClick={() => {
-            tableMenu.close()
-            onShowAllToggle()
-          }}
-        >
-          {isAllShown ? 'Скрыть часть категорий' : 'Показать все категории'}
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            tableMenu.close()
-            onReorderModeToggle()
-          }}
-        >
-          {isReordering ? 'Скрыть таскалки' : 'Изменить порядок категорий'}
-        </MenuItem>
-      </Menu>
+      <TableMenu
+        isAllShown={isAllShown}
+        isReordering={isReordering}
+        onShowAllToggle={onShowAllToggle}
+        onReorderModeToggle={onReorderModeToggle}
+      />
     </>
+  )
+}
+
+type TableMenuProps = {
+  isAllShown: boolean
+  isReordering: boolean
+  onShowAllToggle: () => void
+  onReorderModeToggle: () => void
+}
+
+function TableMenu(props: TableMenuProps) {
+  const { onShowAllToggle, onReorderModeToggle, isReordering, isAllShown } =
+    props
+  const popoverProps = usePopoverProps('tableMenu')
+  return (
+    <Menu {...popoverProps}>
+      <MenuItem
+        onClick={() => {
+          popoverProps.onClose()
+          onShowAllToggle()
+        }}
+      >
+        {isAllShown ? 'Скрыть часть категорий' : 'Показать все категории'}
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
+          popoverProps.onClose()
+          onReorderModeToggle()
+        }}
+      >
+        {isReordering ? 'Скрыть таскалки' : 'Изменить порядок категорий'}
+      </MenuItem>
+    </Menu>
   )
 }

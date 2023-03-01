@@ -3,7 +3,11 @@ import { TISOMonth, TTransaction } from '@shared/types'
 import { TransactionsDrawer } from '@components/TransactionsDrawer'
 import { envelopeModel, TEnvelopeId } from '@entities/envelope'
 import { balances, TrFilterMode } from '@entities/envBalances'
-import { TPopoverProps, usePopover } from '@shared/ui/PopoverManager'
+import {
+  TPopoverProps,
+  usePopoverMethods,
+  usePopoverProps,
+} from '@shared/ui/PopoverManager'
 
 type TConditions = {
   id: TEnvelopeId | 'transferFees' | null
@@ -15,13 +19,14 @@ type TConditions = {
 export const budgetTrDrawerKey = 'budgetTransactionsDrawer'
 
 export function useTrDrawer() {
-  const trDrawer = usePopover<TPopoverProps & TConditions>(budgetTrDrawerKey)
+  const trDrawer =
+    usePopoverMethods<TPopoverProps & TConditions>(budgetTrDrawerKey)
   return trDrawer.open
 }
 
 export const BudgetTransactionsDrawer: FC = () => {
-  const trDrawer = usePopover<TPopoverProps & TConditions>(budgetTrDrawerKey)
-  const { id, month, mode, isExact, open, onClose } = trDrawer.props
+  const props = usePopoverProps<TPopoverProps & TConditions>(budgetTrDrawerKey)
+  const { id, month, mode, isExact, open, onClose } = props
 
   const transactions = useFilteredTransactions({
     id,
