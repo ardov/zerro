@@ -34,8 +34,11 @@ export type TDragData = {
   isLastVisibleChild?: boolean
 }
 
-const autoscrollOptions = { threshold: { x: 0, y: 0.2 } }
 const vibrate = () => window?.navigator?.vibrate?.(100)
+const autoscrollOptions = { threshold: { x: 0, y: 0.2 } }
+const touchSensorOptions = {
+  activationConstraint: { delay: 250, tolerance: 5 },
+}
 
 export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
   const dispatch = useAppDispatch()
@@ -43,9 +46,7 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
 
   const sensors = useSensors(
     useSensor(MouseSensor),
-    useSensor(TouchSensor, {
-      activationConstraint: { delay: 250, tolerance: 5 },
-    }),
+    useSensor(TouchSensor, touchSensorOptions),
     useSensor(KeyboardSensor)
   )
 
