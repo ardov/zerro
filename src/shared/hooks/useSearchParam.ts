@@ -1,4 +1,5 @@
-import { useCallback } from 'react'
+import { Location } from 'history'
+import { useCallback, useEffect, useState } from 'react'
 import { useHistory } from 'react-router'
 
 type TUpdateMethod = 'push' | 'replace'
@@ -8,14 +9,25 @@ export function useSearchParam<T extends string>(
   defaultMethod: TUpdateMethod = 'replace'
 ) {
   const history = useHistory()
-  let value = new URLSearchParams(history.location.search).get(key) as T | null
-  if (value) value = decodeURIComponent(value) as T
+  const [val, setVal] = useState<T | null>(getParam<T>(history.location, key))
+
+  useEffect(
+    () => history.listen(location => setVal(getParam<T>(location, key))),
+    [history, key]
+  )
+
   const setValue = useCallback(
-    (id?: T | null, method: TUpdateMethod = defaultMethod) =>
-      history[method](getModifiedPath(key, id), history.location.state),
+    (value?: T | null, method: TUpdateMethod = defaultMethod) =>
+      history[method](getModifiedPath(key, value), history.location.state),
     [history, key, defaultMethod]
   )
-  return [value, setValue] as [T | null, (id?: T | null) => void]
+
+  return [val, setValue] as [T | null, (value?: T | null) => void]
+}
+
+function getParam<T extends string>(location: Location, key: string) {
+  const value = new URLSearchParams(location.search).get(key)
+  return value ? (decodeURIComponent(value) as T) : null
 }
 
 function getModifiedPath(key: string, value?: string | null) {
