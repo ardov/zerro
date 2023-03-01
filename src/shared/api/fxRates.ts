@@ -20,10 +20,10 @@ export async function requestRates(date: TDateDraft) {
   }
 
   const response = await fetchWithFallback([
-    `https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/${isoDate}/currencies/usd/${base}.min.json`,
-    `https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/${isoDate}/currencies/usd/${base}.json`,
-    `https://raw.githubusercontent.com/fawazahmed0/currency-api/1/${isoDate}/currencies/usd/${base}.min.json`,
-    `https://raw.githubusercontent.com/fawazahmed0/currency-api/1/${isoDate}/currencies/usd/${base}.json`,
+    `https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/${isoDate}/currencies/${base}.min.json`,
+    `https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/${isoDate}/currencies/${base}.json`,
+    `https://raw.githubusercontent.com/fawazahmed0/currency-api/1/${isoDate}/currencies/${base}.min.json`,
+    `https://raw.githubusercontent.com/fawazahmed0/currency-api/1/${isoDate}/currencies/${base}.json`,
   ]).then(
     resp => resp?.json(),
     reason => {
