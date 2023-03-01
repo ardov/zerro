@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import {
   SaveAltIcon,
   ExitToAppIcon,
@@ -149,30 +149,42 @@ function ThemeItem({ onClose }: ItemProps) {
 }
 
 function NavItems({ onClose }: ItemProps) {
+  const history = useHistory()
+  const handleNav =
+    (path: string): React.MouseEventHandler<HTMLAnchorElement> =>
+    e => {
+      e.preventDefault()
+      onClose()
+      setTimeout(() => history.push(path), 10)
+    }
   return (
     <>
-      <MenuItem onClick={onClose} component={Link} to="/stats">
+      <MenuItem onClick={handleNav('/stats')} component={Link} to="/stats">
         <ListItemIcon>
           <BarChartIcon />
         </ListItemIcon>
         <ListItemText>Аналитика</ListItemText>
       </MenuItem>
 
-      <MenuItem onClick={onClose} component={Link} to="/review">
+      <MenuItem onClick={handleNav('/review')} component={Link} to="/review">
         <ListItemIcon>
           <WhatshotIcon />
         </ListItemIcon>
         <ListItemText>Итоги года</ListItemText>
       </MenuItem>
 
-      <MenuItem onClick={onClose} component={Link} to="/about">
+      <MenuItem onClick={handleNav('/about')} component={Link} to="/about">
         <ListItemIcon>
           <HelpOutlineIcon />
         </ListItemIcon>
         <ListItemText>Как пользоваться</ListItemText>
       </MenuItem>
 
-      <MenuItem onClick={onClose} component={Link} to="/donation">
+      <MenuItem
+        onClick={handleNav('/donation')}
+        component={Link}
+        to="/donation"
+      >
         <ListItemIcon>
           <FavoriteBorderIcon />
         </ListItemIcon>
