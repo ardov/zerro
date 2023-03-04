@@ -11,7 +11,8 @@ export const useGoalPopover = () => {
   const [month] = useMonth()
   const { open } = usePopoverMethods<TGoalPopoverProps>(goalPopoverKey)
   const openPopover = useCallback(
-    (id: TEnvelopeId, anchorEl: Element) => open({ id, anchorEl, month }),
+    (id: TEnvelopeId, anchorEl: Element) =>
+      open({ id, anchorEl, month, key: Date.now() }),
     [month, open]
   )
   return openPopover
