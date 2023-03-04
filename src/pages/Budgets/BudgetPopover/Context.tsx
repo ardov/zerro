@@ -1,8 +1,8 @@
 import React, { FC, useCallback } from 'react'
-import { useMonth } from '@shared/hooks/useMonth'
 import { usePopoverMethods, usePopoverProps } from '@shared/ui/PopoverManager'
 
 import { TEnvelopeId } from '@entities/envelope'
+import { useMonth } from '../MonthProvider'
 import { BudgetPopover, TBudgetPopoverProps } from './BudgetPopover'
 
 export const useBudgetPopover = () => {

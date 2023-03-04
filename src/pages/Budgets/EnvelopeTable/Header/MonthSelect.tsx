@@ -5,9 +5,9 @@ import { TDateDraft, TISOMonth } from '@shared/types'
 import { ChevronRightIcon, ChevronLeftIcon } from '@shared/ui/Icons'
 import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
 import { formatDate } from '@shared/helpers/date'
-import { useMonth } from '@shared/hooks/useMonth'
 import { nextMonth, prevMonth } from '@shared/helpers/date'
 
+import { useMonth } from '../../MonthProvider'
 import { balances } from '@entities/envBalances'
 
 export const MonthSelect: FC<BoxProps> = props => {

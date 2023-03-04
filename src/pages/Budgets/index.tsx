@@ -1,11 +1,10 @@
 import React, { FC, ReactElement, useCallback } from 'react'
-import { Redirect } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
 import { Box, Theme, useMediaQuery } from '@mui/material'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { formatDate } from '@shared/helpers/date'
 import { nextMonth, prevMonth, toISOMonth } from '@shared/helpers/date'
-import { useMonth } from '@shared/hooks/useMonth'
+import { MonthProvider, useMonth } from './MonthProvider'
 import { TEnvelopeId } from '@entities/envelope'
 
 import { balances, TrFilterMode } from '@entities/envBalances'
@@ -18,22 +17,12 @@ import { SmartGoalPopover } from './GoalPopover'
 import { Explainer } from './Explainer'
 import { SideContent, useSideContent } from './SideContent'
 
-export default function BudgetsRouter() {
-  const [month] = useMonth()
-  const monthList = balances.useMonthList()
-  const minMonth = monthList[0]
-  const maxMonth = monthList[monthList.length - 1]
-
-  if (!month) {
-    return <Redirect to={`/budget?month=${toISOMonth(new Date())}`} />
-  }
-  if (month < minMonth) {
-    return <Redirect to={`/budget?month=${minMonth}`} />
-  }
-  if (month > maxMonth) {
-    return <Redirect to={`/budget?month=${maxMonth}`} />
-  }
-  return <Budgets />
+export default function WithMonth() {
+  return (
+    <MonthProvider>
+      <Budgets />
+    </MonthProvider>
+  )
 }
 
 function Budgets() {

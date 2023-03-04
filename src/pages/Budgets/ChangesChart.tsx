@@ -5,7 +5,7 @@ import { TFxAmount, TISODate, TISOMonth } from '@shared/types'
 import { add, convertFx, sub } from '@shared/helpers/money'
 import { useAppSelector } from '@store/index'
 // import { getTotalChanges } from '@entities/envelopeData'
-import { useMonth } from '@shared/hooks/useMonth'
+import { useMonth } from './MonthProvider'
 import { balances } from '@entities/envBalances'
 import { TEnvelopeId } from '@entities/envelope'
 

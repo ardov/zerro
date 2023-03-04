@@ -6,10 +6,10 @@ import Rhythm from '@shared/ui/Rhythm'
 import { DataLine } from '@components/DataLine'
 import { formatDate } from '@shared/helpers/date'
 import { convertFx } from '@shared/helpers/money'
-import { useMonth } from '@shared/hooks/useMonth'
 
 import { balances } from '@entities/envBalances'
 import { TEnvelopeId } from '@entities/envelope'
+import { useMonth } from '../MonthProvider'
 
 type ActivityWidgetProps = BoxProps & { id: TEnvelopeId }
 

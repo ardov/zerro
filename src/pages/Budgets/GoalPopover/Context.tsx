@@ -1,5 +1,5 @@
 import React, { FC, useCallback } from 'react'
-import { useMonth } from '@shared/hooks/useMonth'
+import { useMonth } from '../MonthProvider'
 import { usePopoverMethods, usePopoverProps } from '@shared/ui/PopoverManager'
 
 import { TEnvelopeId } from '@entities/envelope'
