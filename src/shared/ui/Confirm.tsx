@@ -1,11 +1,12 @@
 import React, { FC, ReactElement } from 'react'
 import Button, { ButtonProps } from '@mui/material/Button'
-import Dialog, { DialogProps } from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import { Modify } from '@shared/types'
+import { SmartDialog, TSmartDialogProps } from './SmartDialog'
+import { popoverStack } from '@shared/hooks/usePopoverStack'
 
 type ConfirmCommonProps = {
   onOk: () => void
@@ -17,42 +18,41 @@ type ConfirmCommonProps = {
   okVariant?: ButtonProps['variant']
 }
 type ConfirmProps = Modify<
-  ConfirmCommonProps & Omit<DialogProps, 'open'>,
+  ConfirmCommonProps & Omit<TSmartDialogProps, 'elKey'>,
   { children: ReactElement }
 >
 export const Confirm: FC<ConfirmProps> = ({ onOk, children, ...rest }) => {
-  const [open, setOpen] = React.useState(false)
-  const openConfirm = () => setOpen(true)
-  const closeConfirm = () => setOpen(false)
+  const elKey = 'confirm'
+  const confirm = popoverStack.useActions(elKey)
+
   const handleOk = () => {
-    closeConfirm()
+    confirm.close()
     onOk()
   }
   if (!children) return null
   return (
     <>
       {React.Children.only(
-        React.cloneElement(children, { onClick: openConfirm })
+        React.cloneElement(children, { onClick: confirm.open })
       )}
       <ConfirmModal
         {...rest}
-        open={open}
+        elKey={elKey}
         onOk={handleOk}
-        onCancel={closeConfirm}
-      ></ConfirmModal>
+        onCancel={confirm.close}
+      />
     </>
   )
 }
 
 type ConfirmModalProps = ConfirmCommonProps &
-  DialogProps & { onCancel: () => void }
-export const ConfirmModal: FC<ConfirmModalProps> = props => {
+  TSmartDialogProps & { onCancel: () => void }
+const ConfirmModal: FC<ConfirmModalProps> = props => {
   const {
     onCancel,
     onOk,
     title = 'Вы уверены?',
     description,
-    open,
     cancelText = 'Отменить',
     okText = 'OK',
     okColor = 'primary',
@@ -60,7 +60,7 @@ export const ConfirmModal: FC<ConfirmModalProps> = props => {
     ...rest
   } = props
   return (
-    <Dialog open={open} onClose={onCancel} {...rest}>
+    <SmartDialog onClose={onCancel} {...rest}>
       <DialogTitle>{title}</DialogTitle>
 
       {!!description && (
@@ -77,6 +77,6 @@ export const ConfirmModal: FC<ConfirmModalProps> = props => {
           {okText}
         </Button>
       </DialogActions>
-    </Dialog>
+    </SmartDialog>
   )
 }

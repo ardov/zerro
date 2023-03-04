@@ -1,7 +1,3 @@
-import { PopoverProps } from '@mui/material'
-import { keys } from '@shared/helpers/keys'
-import { usePopoverStack } from '@shared/hooks/usePopoverStack'
-import { Modify } from '@shared/types'
 import React, {
   FC,
   ReactNode,
@@ -10,6 +6,10 @@ import React, {
   useMemo,
   useState,
 } from 'react'
+import { PopoverProps } from '@mui/material'
+import { keys } from '@shared/helpers/keys'
+import { popoverStack } from '@shared/hooks/usePopoverStack'
+import { Modify } from '@shared/types'
 
 type TKey = string
 type TBaseProps = { open: boolean; onClose?: () => void }
@@ -52,7 +52,7 @@ export function usePopover<Props extends TBaseProps>(key: TKey) {
 }
 
 export const PopoverManager: FC<{ children: ReactNode }> = props => {
-  const [stack, pushKey, popKey] = usePopoverStack()
+  const [stack, pushKey, popKey] = popoverStack.useStack()
   const [popProps, setPopProps] = useState<
     Record<TKey, TPopoverProps | undefined>
   >({})
