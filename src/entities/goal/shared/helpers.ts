@@ -1,5 +1,5 @@
 import { goalType, TGoal } from './types'
-import { TDateDraft } from '@shared/types'
+import { TDateDraft, TFxCode } from '@shared/types'
 import { formatMoney, round } from '@shared/helpers/money'
 import { parseDate, toISODate } from '@shared/helpers/date'
 
@@ -22,8 +22,11 @@ export const makeGoal = (goalDraft?: TGoal | null): TGoal | null => {
   }
 }
 
-export const goalToWords = ({ type, amount, end }: TGoal): string => {
-  const formattedSum = formatMoney(amount, null, 0)
+export const goalToWords = (
+  { type, amount, end }: TGoal,
+  currency?: TFxCode
+): string => {
+  const formattedSum = formatMoney(amount, currency, 0)
   switch (type) {
     case goalType.MONTHLY:
       return `Откладываю ${formattedSum} каждый месяц`

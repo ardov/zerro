@@ -5,7 +5,7 @@ import { SxProps } from '@mui/system'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { EmojiFlagsIcon } from '@shared/ui/Icons'
 import { RadialProgress } from '@shared/ui/RadialProgress'
-import { TISOMonth } from '@shared/types'
+import { TFxCode, TISOMonth } from '@shared/types'
 
 import { goalModel, TGoal } from '@entities/goal'
 import { balances } from '@entities/envBalances'
@@ -137,6 +137,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
         {!isSelf && (
           <GoalButton
             goal={goalInfo?.goal}
+            currency={envelope.currency}
             goalProgress={goalInfo?.progress}
             onClick={handleGoalClick}
           />
@@ -191,11 +192,12 @@ const RowWrapper: FC<
 
 type GoalButtonProps = {
   goal: TGoal | null
+  currency: TFxCode
   goalProgress?: number | null
   onClick: IconButtonProps['onClick']
 }
 const GoalButton: FC<GoalButtonProps> = props => {
-  const { goal, goalProgress, onClick } = props
+  const { goal, currency, goalProgress, onClick } = props
 
   if (!goal) {
     return (
@@ -211,7 +213,7 @@ const GoalButton: FC<GoalButtonProps> = props => {
 
   return (
     <span>
-      <Tooltip title={goalModel.toWords(goal)}>
+      <Tooltip title={goalModel.toWords(goal, currency)}>
         <IconButton size="small" onClick={onClick}>
           <RadialProgress value={goalProgress || 0} fontSize="inherit" />
         </IconButton>

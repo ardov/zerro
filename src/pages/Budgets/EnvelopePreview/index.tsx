@@ -86,7 +86,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
                 component="span"
                 color={goalInfo ? 'text.primary' : 'text.hint'}
               >
-                {goalInfo ? goalModel.toWords(goalInfo.goal) : 'Цель'}
+                {goalInfo ? goalModel.toWords(goalInfo.goal, currency) : 'Цель'}
               </Typography>
             </ButtonBase>
           </Grid>
