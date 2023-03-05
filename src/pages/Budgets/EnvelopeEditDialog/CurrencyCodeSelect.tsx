@@ -5,6 +5,7 @@ import { accountModel } from '@entities/account'
 import { TFxCode, TInstrument } from '@shared/types'
 import { getCurrencySymbol } from '@shared/helpers/money'
 import { userModel } from '@entities/user'
+import { SmartSelect } from '@shared/ui/SmartSelect'
 
 export const CurrencyCodeSelect: FC<SelectProps<TFxCode>> = props => {
   const instrumentsByCode = instrumentModel.useInstrumentsByCode()
@@ -18,7 +19,7 @@ export const CurrencyCodeSelect: FC<SelectProps<TFxCode>> = props => {
   const instruments = [...fxSet].map(code => instrumentsByCode[code])
 
   return (
-    <Select {...props} renderValue={v => v}>
+    <SmartSelect {...props} renderValue={v => v} elKey="CurrencyCodeSelect">
       {instruments.map(instr => (
         <MenuItem key={instr.shortTitle} value={instr.shortTitle}>
           <ListItemText
@@ -27,7 +28,7 @@ export const CurrencyCodeSelect: FC<SelectProps<TFxCode>> = props => {
           />
         </MenuItem>
       ))}
-    </Select>
+    </SmartSelect>
   )
 }
 

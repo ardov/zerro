@@ -1,13 +1,14 @@
 import React, { FC } from 'react'
-import { Select, MenuItem, SelectProps } from '@mui/material'
+import { MenuItem, SelectProps } from '@mui/material'
 import { envelopeVisibility } from '@entities/envelope'
+import { SmartSelect } from '@shared/ui/SmartSelect'
 
 export const VisibilitySelect: FC<SelectProps<envelopeVisibility>> = props => {
   return (
-    <Select {...props}>
+    <SmartSelect {...props} elKey="VisibilitySelect">
       <MenuItem value={envelopeVisibility.auto}>Автоматически</MenuItem>
       <MenuItem value={envelopeVisibility.visible}>Всегда показывать</MenuItem>
       <MenuItem value={envelopeVisibility.hidden}>Всегда скрывать</MenuItem>
-    </Select>
+    </SmartSelect>
   )
 }
