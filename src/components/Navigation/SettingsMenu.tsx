@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react'
+import React, { FC, useCallback, useState } from 'react'
 import { Link, useHistory } from 'react-router-dom'
 import {
   SaveAltIcon,
@@ -21,6 +21,7 @@ import {
   ListSubheader,
   MenuItem,
   MenuList,
+  PopoverProps,
   Switch,
   Typography,
 } from '@mui/material'
@@ -29,7 +30,6 @@ import { sendEvent } from '@shared/helpers/tracking'
 import { Confirm } from '@shared/ui/Confirm'
 import { useSnackbar } from '@shared/ui/SnackbarProvider'
 import { AdaptivePopover } from '@shared/ui/AdaptivePopover'
-import { TPopoverProps } from '@shared/ui/PopoverManager'
 import { appVersion } from '@shared/config'
 
 import { useAppDispatch } from '@store'
@@ -42,20 +42,29 @@ import { exportCSV } from '@features/export/exportCSV'
 import { exportJSON } from '@features/export/exportJSON'
 import { clearLocalData } from '@features/localData'
 import { convertZmBudgetsToZerro } from '@features/budget/convertZmBudgetsToZerro'
+import { makePopoverHooks } from '@shared/ui/PopoverManager'
 
-export const settingsMenuKey = 'settingsMenu'
+const settingsHooks = makePopoverHooks<{}, PopoverProps>('settingsMenu', {})
 
-type SettingsMenuProps = TPopoverProps & { showLinks?: boolean }
+export const useSettingsMenu = () => {
+  const { open } = settingsHooks.useMethods()
+  return useCallback(
+    (e: React.MouseEvent) => {
+      open({}, { anchorEl: e.currentTarget })
+    },
+    [open]
+  )
+}
+
+type SettingsMenuProps = { showLinks?: boolean }
 
 export const SettingsMenu: FC<SettingsMenuProps> = props => {
-  const { showLinks, ...popoverProps } = props
+  const { showLinks } = props
+  const { displayProps } = settingsHooks.useProps()
   return (
-    <AdaptivePopover {...popoverProps}>
+    <AdaptivePopover {...displayProps}>
       <MenuList>
-        <Settings
-          showLinks={showLinks}
-          onClose={popoverProps.onClose || (() => {})}
-        />
+        <Settings showLinks={showLinks} onClose={displayProps.onClose} />
       </MenuList>
     </AdaptivePopover>
   )

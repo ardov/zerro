@@ -1,25 +1,31 @@
 import React, { FC, useCallback } from 'react'
 import { useMonth } from '../MonthProvider'
-import { usePopoverMethods, usePopoverProps } from '@shared/ui/PopoverManager'
 
 import { TEnvelopeId } from '@entities/envelope'
-import { GoalPopover, TGoalPopoverProps } from './GoalPopover'
+import { GoalPopover } from './GoalPopover'
+import { makePopoverHooks } from '@shared/ui/PopoverManager'
+import { TISOMonth } from '@shared/types'
+import { PopoverProps } from '@mui/material'
 
-const goalPopoverKey = 'goalPopover'
+const goalPopover = makePopoverHooks<
+  { id?: TEnvelopeId; month?: TISOMonth },
+  PopoverProps
+>('goalPopover', {})
 
 export const useGoalPopover = () => {
   const [month] = useMonth()
-  const { open } = usePopoverMethods<TGoalPopoverProps>(goalPopoverKey)
+  const { open } = goalPopover.useMethods()
   const openPopover = useCallback(
-    (id: TEnvelopeId, anchorEl: Element) =>
-      open({ id, anchorEl, month, key: Date.now() }),
+    (id: TEnvelopeId, anchorEl?: Element) =>
+      open({ id, month }, { anchorEl, key: Date.now() }),
     [month, open]
   )
   return openPopover
 }
 
 export const SmartGoalPopover: FC = () => {
-  const props = usePopoverProps<TGoalPopoverProps>(goalPopoverKey)
-  if (!props.month || !props.id) return null
-  return <GoalPopover {...props} />
+  const popover = goalPopover.useProps()
+  const { month, id } = popover.extraProps
+  if (!month || !id) return null
+  return <GoalPopover {...popover.displayProps} {...{ month, id }} />
 }

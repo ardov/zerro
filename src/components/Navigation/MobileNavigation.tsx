@@ -14,9 +14,8 @@ import {
   SyncAltIcon,
 } from '@shared/ui/Icons'
 import { useHomeBar } from '@shared/hooks/useHomeBar'
-import { usePopover } from '@shared/ui/PopoverManager'
 import RefreshButton from '@components/RefreshButton'
-import { SettingsMenu, settingsMenuKey } from './SettingsMenu'
+import { SettingsMenu, useSettingsMenu } from './SettingsMenu'
 
 const useStyles = makeStyles(theme => ({ action: { minWidth: 32 } }))
 
@@ -26,10 +25,10 @@ const routes = [
   { path: '/accounts', label: 'Счета', icon: <AccountBalanceWalletIcon /> },
 ]
 
-export const MobileNavigation: FC = props => {
+export const MobileNavigation: FC = () => {
   const path = useLocation().pathname
   const history = useHistory()
-  const settingsMenu = usePopover(settingsMenuKey)
+  const openSettings = useSettingsMenu()
 
   const c = useStyles()
   const hasHomeBar = useHomeBar()
@@ -68,12 +67,12 @@ export const MobileNavigation: FC = props => {
           className={c.action}
           value="menu"
           icon={<SettingsIcon />}
-          onClick={settingsMenu.openOnClick}
+          onClick={openSettings}
         />
         <RefreshButton isMobile={true} className={c.action} />
       </BottomNavigation>
 
-      <SettingsMenu {...settingsMenu.props} showLinks />
+      <SettingsMenu showLinks />
     </Paper>
   )
 }

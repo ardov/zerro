@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect, FC } from 'react'
-import { Box } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import { SxProps } from '@mui/system'
 import { Theme } from '@mui/material/styles'
 import { FilterConditions, trModel } from '@entities/transaction'
@@ -7,18 +7,20 @@ import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
 import { sendEvent } from '@shared/helpers/tracking'
-// import { getGroupedTransactions } from '@worker'
 import { useDebounce } from '@shared/hooks/useDebounce'
 import {
+  ByDate,
   TDateDraft,
   TISODate,
   TTransaction,
   TTransactionId,
 } from '@shared/types'
+import { Transaction } from './Transaction'
+import { accountModel } from '@entities/account'
 
 export type TTransactionListProps = {
+  onTrOpen?: (id: TTransactionId) => void
   transactions?: TTransaction[]
-  prefilter?: FilterConditions | FilterConditions[]
   filterConditions?: FilterConditions
   hideFilter?: boolean
   checkedDate?: Date | null
@@ -28,8 +30,8 @@ export type TTransactionListProps = {
 
 export const TransactionList: FC<TTransactionListProps> = props => {
   const {
+    onTrOpen,
     transactions,
-    prefilter,
     filterConditions,
     hideFilter = false,
     checkedDate,
@@ -37,7 +39,6 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     sx,
   } = props
 
-  const allTransactions = trModel.useSortedTransactions()
   const [filter, setFilter] = useState(filterConditions)
   const debouncedFilter = useDebounce(filter, 300)
   const setCondition = useCallback(
@@ -48,46 +49,21 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   const handleClearFilter = useCallback(() => {
     setFilter(filterConditions)
   }, [filterConditions])
+
   const onFilterByPayee = useCallback(
     (payee?: string) => setFilter({ search: payee }),
     []
   )
 
-  const groups = useMemo(() => {
-    let trList = transactions?.sort(trModel.compareTrDates) || allTransactions
-    if (prefilter) {
-      trList = trList.filter(trModel.checkRaw(prefilter))
-    }
-    return groupByDay(trList, debouncedFilter)
-  }, [transactions, allTransactions, debouncedFilter, prefilter])
+  const trList = useFilteredTransactions(transactions, debouncedFilter)
+  const debtId = accountModel.useDebtAccountId()
 
-  // const [groups, setGroups] = useState([])
-  // useEffect(() => {
-  //   async function updateTransactions() {
-  //     const t0 = performance.now()
-  //     const gr = await getGroupedTransactions(
-  //       'DAY',
-  //       null, //prefilter ? transactions.filter(checkRaw(prefilter)) : transactions,
-  //       debouncedFilter
-  //     )
-  //     console.log('GET groupped ', +(performance.now() - t0).toFixed(2))
-  //     setGroups(gr)
-  //   }
-  //   updateTransactions()
-  // }, [transactions, debouncedFilter, prefilter])
-
-  const [checked, setChecked] = useState<string[]>([])
-
+  const [checked, setChecked] = useState<TTransactionId[]>([])
   const uncheckAll = useCallback(() => setChecked([]), [])
-
-  const checkAll = () => {
-    let ids: string[] = []
-    Object.values(groups).forEach(day => {
-      ids = ids.concat(day.transactions)
-    })
-    setChecked(ids)
-  }
-
+  const checkAll = useCallback(
+    () => setChecked(trList.map(tr => tr.id)),
+    [trList]
+  )
   const toggleTransaction = useCallback((id: TTransactionId) => {
     setChecked(current => {
       return current.includes(id)
@@ -95,34 +71,51 @@ export const TransactionList: FC<TTransactionListProps> = props => {
         : [...current, id]
     })
   }, [])
-
   const checkByChangedDate = useCallback(
     (date: Date | number) => {
       sendEvent('Transaction: select similar')
-      const ids = allTransactions
-        .filter(tr => tr.changed === +date)
-        .map(tr => tr.id)
+      const ids = trList.filter(tr => tr.changed === +date).map(tr => tr.id)
       setChecked(ids)
     },
-    [allTransactions]
+    [trList]
   )
 
   useEffect(() => {
     if (checkedDate) checkByChangedDate(checkedDate)
   }, [checkByChangedDate, checkedDate])
 
-  const showActions = Boolean(checked?.length)
+  const groups = useMemo(() => {
+    let groups: ByDate<{ date: TISODate; transactions: JSX.Element[] }> = {}
+    trList.forEach(tr => {
+      let Component = (
+        <Transaction
+          key={tr.id}
+          id={tr.id}
+          transaction={tr}
+          type={trModel.getType(tr, debtId)}
+          isOpened={false}
+          isChecked={checked.includes(tr.id)}
+          isInSelectionMode={!!checked.length}
+          onToggle={toggleTransaction}
+          onContextMenu={() => {}}
+          onOpen={onTrOpen}
+          onPayeeClick={onFilterByPayee}
+        />
+      )
+      groups[tr.date] ??= { date: tr.date, transactions: [] }
+      groups[tr.date].transactions.push(Component)
+    })
+    return Object.values(groups)
+  }, [checked, debtId, onFilterByPayee, onTrOpen, toggleTransaction, trList])
 
   return (
     <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        px: 1,
-        pt: 1,
-        position: 'relative',
-        ...sx,
-      }}
+      display={'flex'}
+      flexDirection={'column'}
+      px={1}
+      pt={1}
+      position={'relative'}
+      sx={sx}
     >
       {!hideFilter && (
         <Box
@@ -141,44 +134,42 @@ export const TransactionList: FC<TTransactionListProps> = props => {
       )}
 
       <Actions
-        visible={showActions}
+        visible={Boolean(checked?.length)}
         checkedIds={checked}
         onUncheckAll={uncheckAll}
         onCheckAll={checkAll}
       />
 
       <Box flex="1 1 auto">
-        <GrouppedList
-          {...{
-            groups,
-            checked,
-            initialDate,
-            toggleTransaction,
-            checkByChangedDate,
-            onFilterByPayee,
-          }}
-        />
+        {groups.length ? (
+          <GrouppedList {...{ groups, initialDate }} />
+        ) : (
+          <EmptyState />
+        )}
       </Box>
     </Box>
   )
 }
 
-function groupByDay(
-  transactions: TTransaction[] = [],
-  filterConditions?: FilterConditions
+function useFilteredTransactions(
+  transactions?: TTransaction[],
+  conditions?: FilterConditions
 ) {
-  const checker = trModel.checkRaw(filterConditions)
-  let groups: {
-    [k: string]: { date: TISODate; transactions: TTransactionId[] }
-  } = {}
-
-  transactions.forEach(tr => {
-    if (checker(tr)) {
-      const date = tr.date
-      groups[date] ??= { date, transactions: [] }
-      groups[date].transactions.push(tr.id)
-    }
-  })
-
-  return Object.values(groups)
+  const allTransactions = trModel.useSortedTransactions()
+  const groups = useMemo(() => {
+    const checker = trModel.checkRaw(conditions)
+    const list = transactions || allTransactions
+    return list.filter(checker).sort(trModel.compareTrDates)
+  }, [transactions, allTransactions, conditions])
+  return groups
 }
+
+const EmptyState = () => (
+  <Box p={5}>
+    <Typography variant="body1" align="center" paragraph>
+      Таких операций нет.
+      <br />
+      Возможно, дело в фильтрах.
+    </Typography>
+  </Box>
+)

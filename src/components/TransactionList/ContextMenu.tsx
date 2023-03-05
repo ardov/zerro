@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react'
 import { Menu, MenuItem, MenuProps, PopoverPosition } from '@mui/material'
-import { TTransaction } from '@shared/types'
+import { TTransaction, TTransactionId } from '@shared/types'
 import { isNew } from '@entities/transaction/helpers'
 import { useAppDispatch } from '@store'
 import { trModel } from '@entities/transaction'
@@ -9,6 +9,12 @@ interface TransactionMenuProps extends MenuProps {
   id: string
   transaction: TTransaction
   onSelectChanged: (date: number) => void
+}
+
+type TTrMenuProps = {
+  left: number
+  top: number
+  id: TTransactionId
 }
 
 export const TransactionMenu: FC<TransactionMenuProps> = ({

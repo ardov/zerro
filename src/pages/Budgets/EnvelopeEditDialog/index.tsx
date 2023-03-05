@@ -1,2 +1,1 @@
-export type { EnvelopeEditDialogProps } from './EnvelopeEditDialog'
-export { EnvelopeEditDialog } from './EnvelopeEditDialog'
+export { EnvelopeEditDialog, useEditDialog } from './EnvelopeEditDialog'

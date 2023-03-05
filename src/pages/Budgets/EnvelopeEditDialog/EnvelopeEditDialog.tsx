@@ -16,8 +16,7 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
-import { Modify } from '@shared/types'
-import { ColorPicker, colorPickerKey } from '@shared/ui/ColorPickerPopover'
+import { ColorPicker, useColorPicker } from '@shared/ui/ColorPickerPopover'
 import { useAppDispatch } from '@store'
 import {
   envelopeModel,
@@ -29,15 +28,21 @@ import {
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
 import { VisibilitySelect } from './VisidilitySelect'
 import { userModel } from '@entities/user'
-import { usePopover } from '@shared/ui/PopoverManager'
+import { makePopoverHooks } from '@shared/ui/PopoverManager'
 
-export type EnvelopeEditDialogProps = Modify<
-  DialogProps,
-  { onClose: () => void } & { envelope?: Partial<TEnvelope> }
->
+const editDialog = makePopoverHooks<
+  { envelope?: Partial<TEnvelope> },
+  DialogProps
+>('envelopeEditDialog', {})
 
-export const EnvelopeEditDialog: FC<EnvelopeEditDialogProps> = props => {
-  const { envelope, onClose, ...dialogProps } = props
+export const useEditDialog = () => {
+  const { open } = editDialog.useMethods()
+  return open
+}
+
+export const EnvelopeEditDialog: FC = () => {
+  const { displayProps, extraProps } = editDialog.useProps()
+  const { envelope } = extraProps
   const dispatch = useAppDispatch()
   const isNew = !envelope?.id
   const id = envelope?.id || envelopeModel.makeId(EnvType.Tag, uuidv1())
@@ -69,22 +74,23 @@ export const EnvelopeEditDialog: FC<EnvelopeEditDialogProps> = props => {
       }
     },
     onSubmit: (values, helpers) => {
+      displayProps.onClose()
       const { parentTagId, ...envData } = values
       const parent = parentTagId
         ? envelopeModel.makeId(EnvType.Tag, parentTagId)
         : null
       const patch = { id, parent, ...envData }
       dispatch(envelopeModel.patchEnvelope(patch))
-      onClose()
     },
     enableReinitialize: true,
   })
 
   return (
     <Dialog
-      {...dialogProps}
+      {...displayProps}
       onClose={() => {
-        if (shallowEqual(values, initialValues)) onClose()
+        // TODO: with back button it closes anyway, maybe we can prevent it somehow
+        if (shallowEqual(values, initialValues)) displayProps.onClose()
       }}
     >
       <DialogTitle>
@@ -197,7 +203,7 @@ export const EnvelopeEditDialog: FC<EnvelopeEditDialogProps> = props => {
           <Button type="submit" size="large" variant="contained">
             {id ? 'Сохранить категорию' : 'Создать категорию'}
           </Button>
-          <Button onClick={onClose} size="large">
+          <Button onClick={displayProps.onClose} size="large">
             Отменить
           </Button>
         </Stack>
@@ -212,29 +218,20 @@ type ColorProps = {
 }
 
 const Color: FC<ColorProps> = ({ value, onChange }) => {
-  const colorPicker = usePopover(colorPickerKey)
-  const hexColor = value
-  const handleColorChange = (hex?: string | null) => {
-    onChange(hex || null)
-  }
+  const open = useColorPicker(value, onChange)
   return (
     <>
       <ButtonBase
-        onClick={colorPicker.openOnClick}
+        onClick={open}
         sx={{
           width: 24,
           height: 24,
           borderRadius: '50%',
-          backgroundColor: hexColor,
+          backgroundColor: value,
           boxShadow: 'inset 0 0 0 1px rgba(0,0,0,.1)',
         }}
       />
-
-      <ColorPicker
-        {...colorPicker.props}
-        value={hexColor}
-        onColorChange={handleColorChange}
-      />
+      <ColorPicker />
     </>
   )
 }

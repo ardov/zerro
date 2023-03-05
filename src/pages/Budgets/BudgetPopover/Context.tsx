@@ -1,23 +1,31 @@
 import React, { FC, useCallback } from 'react'
-import { usePopoverMethods, usePopoverProps } from '@shared/ui/PopoverManager'
 
 import { TEnvelopeId } from '@entities/envelope'
 import { useMonth } from '../MonthProvider'
-import { BudgetPopover, TBudgetPopoverProps } from './BudgetPopover'
+import { BudgetPopover } from './BudgetPopover'
+import { makePopoverHooks } from '@shared/ui/PopoverManager'
+import { TISOMonth } from '@shared/types'
+import { PopoverProps } from '@mui/material'
+
+const budgetPopover = makePopoverHooks<
+  { id?: TEnvelopeId; month?: TISOMonth },
+  PopoverProps
+>('budgetPopover', {})
 
 export const useBudgetPopover = () => {
   const [month] = useMonth()
-  const { open } = usePopoverMethods<TBudgetPopoverProps>('budgetPopover')
+  const { open } = budgetPopover.useMethods()
   const openPopover = useCallback(
     (id: TEnvelopeId, anchorEl?: Element) =>
-      open({ id, anchorEl, month, key: Date.now() }),
+      open({ id, month }, { anchorEl, key: Date.now() }),
     [month, open]
   )
   return openPopover
 }
 
 export const SmartBudgetPopover: FC = () => {
-  const props = usePopoverProps<TBudgetPopoverProps>('budgetPopover')
-  if (!props.month || !props.id) return null
-  return <BudgetPopover {...props} />
+  const popover = budgetPopover.useProps()
+  const { month, id } = popover.extraProps
+  if (!month || !id) return null
+  return <BudgetPopover {...popover.displayProps} {...{ month, id }} />
 }

@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, useCallback } from 'react'
 import {
   Box,
   Typography,
@@ -12,11 +12,11 @@ import { Tooltip } from '@shared/ui/Tooltip'
 import { CloseIcon, EditIcon, EmojiFlagsIcon } from '@shared/ui/Icons'
 import { Total } from '@shared/ui/Total'
 import Rhythm from '@shared/ui/Rhythm'
-import { ColorPicker, colorPickerKey } from '@shared/ui/ColorPickerPopover'
+import { ColorPicker, useColorPicker } from '@shared/ui/ColorPickerPopover'
 import { sendEvent } from '@shared/helpers/tracking'
 import { TFxAmount } from '@shared/types'
 import { convertFx } from '@shared/helpers/money'
-import { usePopover } from '@shared/ui/PopoverManager'
+// import { usePopover } from '@shared/ui/PopoverManager'
 import { DataLine } from '@components/DataLine'
 
 import { useAppDispatch } from '@store'
@@ -25,10 +25,7 @@ import { balances, TrFilterMode } from '@entities/envBalances'
 import { goalModel } from '@entities/goal'
 import { useMonth } from '../MonthProvider'
 import { useBudgetPopover } from '../BudgetPopover'
-import {
-  EnvelopeEditDialog,
-  EnvelopeEditDialogProps,
-} from '../EnvelopeEditDialog'
+import { EnvelopeEditDialog, useEditDialog } from '../EnvelopeEditDialog'
 import { ActivityWidget } from './ActivityWidget'
 import { CommentWidget } from './CommentWidget'
 import { cardStyle } from './shared'
@@ -140,13 +137,16 @@ const Header: FC<{
   onClose: () => void
 }> = ({ envelope, onClose }) => {
   const { symbol, color, name } = envelope
-  const colorPicker = usePopover(colorPickerKey)
-  const editor = usePopover<EnvelopeEditDialogProps>('editor')
+  const openEditDialog = useEditDialog()
   const dispatch = useAppDispatch()
-  const handleColorChange = (hex?: string | null) => {
-    sendEvent('Tag: set color: ' + hex)
-    dispatch(envelopeModel.patchEnvelope({ id: envelope.id, color: hex }))
-  }
+  const handleColorChange = useCallback(
+    (hex?: string | null) => {
+      sendEvent('Tag: set color: ' + hex)
+      dispatch(envelopeModel.patchEnvelope({ id: envelope.id, color: hex }))
+    },
+    [dispatch, envelope.id]
+  )
+  const openColorPicker = useColorPicker(color, handleColorChange)
   return (
     <Box
       py={1}
@@ -165,7 +165,7 @@ const Header: FC<{
           mr={2}
           flexShrink={0}
           color={color}
-          onClick={colorPicker.openOnClick}
+          onClick={openColorPicker}
           button
         />
         <Typography variant="h6" component="span" noWrap>
@@ -175,7 +175,7 @@ const Header: FC<{
 
       <Tooltip title="Изменить">
         <IconButton
-          onClick={() => editor.open({ key: envelope.id, envelope })}
+          onClick={() => openEditDialog({ envelope }, { key: envelope.id })}
           children={<EditIcon />}
         />
       </Tooltip>
@@ -183,13 +183,8 @@ const Header: FC<{
         <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
       </Tooltip>
 
-      <ColorPicker
-        {...colorPicker.props}
-        value={color}
-        onColorChange={handleColorChange}
-      />
-
-      <EnvelopeEditDialog {...editor.props} />
+      <ColorPicker />
+      <EnvelopeEditDialog />
     </Box>
   )
 }

@@ -4,53 +4,50 @@ import { TrType } from '@entities/transaction'
 import { Theme, TypographyVariant } from '@mui/material'
 import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'
 import { sendEvent } from '@shared/helpers/tracking'
-import { TTransaction } from '@shared/types'
+import { TTransaction, TTransactionId } from '@shared/types'
 
-type TransactionProps = {
-  id: string
-  transaction: TTransaction
-  type: TrType
-  isInSelectionMode: boolean
+export type TTransactionProps = {
+  id: TTransactionId
   isChecked: boolean
   isOpened: boolean
-  onClick?: (id: string) => void
-  onToggle: (id: string) => void
-  onContextMenu?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
-  onFilterByPayee: (payee: string) => void
+  isInSelectionMode: boolean
+  transaction: TTransaction
+  type: TrType
+  // Actions
+  onOpen?: (id: TTransactionId) => void
+  onToggle?: (id: TTransactionId) => void
+  onPayeeClick?: (payee: string) => void
+  onContextMenu?: (e: React.MouseEvent) => void
 }
 
-export const Transaction: FC<TransactionProps> = props => {
+export const Transaction: FC<TTransactionProps> = props => {
   const {
     id,
-    transaction,
-    type,
-    isInSelectionMode,
     isChecked,
     isOpened,
-    onClick,
+    isInSelectionMode,
+    transaction,
+    type,
+    onOpen,
     onToggle,
+    onPayeeClick: onFilterByPayee,
     onContextMenu,
-    onFilterByPayee,
   } = props
 
   const tr = transaction
   const trType = type
   const { deleted } = tr
 
-  const handleOpen = () => {
-    onClick?.(id)
-  }
-
   return (
     <Wrapper
       opened={isOpened}
       deleted={deleted}
-      onClick={handleOpen}
+      onClick={() => onOpen?.(id)}
       onContextMenu={e => {
         sendEvent('Transaction: open context menu')
         onContextMenu?.(e)
       }}
-      onDoubleClick={() => onToggle(id)}
+      onDoubleClick={() => onToggle?.(id)}
     >
       <Symbol {...{ tr, trType, isChecked, isInSelectionMode, onToggle }} />
       <Content>

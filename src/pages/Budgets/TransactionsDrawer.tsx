@@ -3,11 +3,9 @@ import { TISOMonth, TTransaction } from '@shared/types'
 import { TransactionsDrawer } from '@components/TransactionsDrawer'
 import { envelopeModel, TEnvelopeId } from '@entities/envelope'
 import { balances, TrFilterMode } from '@entities/envBalances'
-import {
-  TPopoverProps,
-  usePopoverMethods,
-  usePopoverProps,
-} from '@shared/ui/PopoverManager'
+import { makePopoverHooks } from '@shared/ui/PopoverManager'
+import { toISOMonth } from '@shared/helpers/date'
+import { DrawerProps } from '@mui/material'
 
 type TConditions = {
   id: TEnvelopeId | 'transferFees' | null
@@ -16,38 +14,29 @@ type TConditions = {
   isExact?: boolean
 }
 
-export const budgetTrDrawerKey = 'budgetTransactionsDrawer'
+const trDrawer = makePopoverHooks<TConditions, DrawerProps>(
+  'budgetTransactionsDrawer',
+  {
+    id: null,
+    month: toISOMonth(new Date()),
+  }
+)
 
 export function useTrDrawer() {
-  const trDrawer =
-    usePopoverMethods<TPopoverProps & TConditions>(budgetTrDrawerKey)
-  return trDrawer.open
+  return trDrawer.useMethods().open
 }
 
 export const BudgetTransactionsDrawer: FC = () => {
-  const props = usePopoverProps<TPopoverProps & TConditions>(budgetTrDrawerKey)
-  const { id, month, mode, isExact, open, onClose } = props
-
-  const transactions = useFilteredTransactions({
-    id,
-    month,
-    mode: mode || TrFilterMode.Envelope,
-    isExact: !!isExact,
-  })
-
+  const drawer = trDrawer.useProps()
+  const transactions = useFilteredTransactions(drawer.extraProps)
   if (!transactions) return null
-
   return (
-    <TransactionsDrawer
-      transactions={transactions}
-      open={open}
-      onClose={onClose}
-    />
+    <TransactionsDrawer transactions={transactions} {...drawer.displayProps} />
   )
 }
 
 function useFilteredTransactions(conditions: TConditions): TTransaction[] {
-  const { id, month, mode, isExact } = conditions
+  const { id, month, mode = TrFilterMode.Envelope, isExact } = conditions
   const envelopes = envelopeModel.useEnvelopes()
   const activity = balances.useActivity()[month]
   const rawActivity = balances.useRawActivity()[month]

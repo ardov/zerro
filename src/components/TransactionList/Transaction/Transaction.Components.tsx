@@ -10,7 +10,6 @@ import { Typography } from '@mui/material'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { TTransaction } from '@shared/types'
 import { getMerchants } from '@entities/merchant'
-// import { isNew } from '@store/data/transactions/helpers'
 
 type HTMLDivProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLDivElement>,
@@ -24,7 +23,7 @@ type TrElementProps = HTMLDivProps & {
 type SymbolProps = TrElementProps & {
   isChecked: boolean
   isInSelectionMode: boolean
-  onToggle: (id: string) => void
+  onToggle?: (id: string) => void
 }
 
 const symbols = {
@@ -55,7 +54,7 @@ export const Symbol: FC<SymbolProps> = ({
             symbol={tag.symbol}
             showCheckBox={isInSelectionMode}
             checked={isChecked}
-            onChange={() => onToggle(tr.id)}
+            onChange={() => onToggle?.(tr.id)}
             color={tag.colorHEX}
             size="m"
           />
@@ -73,7 +72,7 @@ export const Symbol: FC<SymbolProps> = ({
             symbol={symbols[trType]}
             showCheckBox={isInSelectionMode}
             checked={isChecked}
-            onChange={() => onToggle(tr.id)}
+            onChange={() => onToggle?.(tr.id)}
             size="m"
           />
           {/* <NewIndicator isNew={isNew(tr)} /> */}
@@ -203,7 +202,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
   }
 }
 
-type InfoProps = TrElementProps & { onFilterByPayee: (payee: string) => void }
+type InfoProps = TrElementProps & { onFilterByPayee?: (payee: string) => void }
 
 export const Info: FC<InfoProps> = ({
   tr,
@@ -286,7 +285,7 @@ const Account: FC<{ id: string }> = ({ id, ...rest }) => {
 const Payee: FC<{
   payee: string | null
   merchant: string | null
-  onClick: (payee: string) => void
+  onClick?: (payee: string) => void
 }> = ({ payee, merchant, onClick, ...rest }) => {
   const merchants = useAppSelector(getMerchants)
   if (!payee && !merchant) return null
@@ -294,9 +293,11 @@ const Payee: FC<{
   return (
     <PayeeWrapper
       onClick={e => {
-        e.preventDefault()
-        e.stopPropagation()
-        onClick(payee || '')
+        if (onClick) {
+          e.preventDefault()
+          e.stopPropagation()
+          onClick(payee || '')
+        }
       }}
       {...rest}
     >
@@ -354,8 +355,7 @@ const AmountsWrapper = styled.div<{
       ? p.theme.palette.text.secondary
       : p.theme.palette.text.primary};
 
-
-  [color="textSecondary"] &[type=transfer] {
+  [color='textSecondary'] &[type='transfer'] {
     max-width: 100%;
     width: 100%;
     flex-shrink: 1;
@@ -364,7 +364,6 @@ const AmountsWrapper = styled.div<{
     text-overflow: ellipsis;
     -webkit-mask-image: linear-gradient(to left, transparent, black 40px);
   }
-
 
   > :not(:first-of-type):before {
     content: '${p => (p.type === 'transfer' ? '→' : '')}';
