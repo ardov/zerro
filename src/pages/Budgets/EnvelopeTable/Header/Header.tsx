@@ -1,14 +1,14 @@
 import React, { FC } from 'react'
-import { Typography, Box, Button, Menu, MenuItem } from '@mui/material'
+import { Typography, Box, Button } from '@mui/material'
 import { ChevronDownIcon } from '@shared/ui/Icons'
 import { TISOMonth } from '@shared/types'
-import { usePopoverMethods, usePopoverProps } from '@shared/ui/PopoverManager'
 
 import { GoalsProgress } from '@features/bulkActions/fillGoals'
 import { rowStyle, useIsSmall } from '../shared/shared'
 import { MonthSelect } from './MonthSelect'
 import { ToBeBudgeted } from './ToBeBudgeted'
 import { Metric } from '../models/useMetric'
+import { useTableMenu, TableMenu } from './TableMenu'
 
 type HeaderProps = {
   month: TISOMonth
@@ -33,7 +33,12 @@ export const Header: FC<HeaderProps> = props => {
     onMetricSwitch,
   } = props
   const isSmall = useIsSmall()
-  const { openOnClick } = usePopoverMethods('tableMenu')
+  const openOnClick = useTableMenu({
+    isAllShown,
+    isReordering,
+    onShowAllToggle,
+    onReorderModeToggle,
+  })
 
   return (
     <>
@@ -121,45 +126,7 @@ export const Header: FC<HeaderProps> = props => {
         </Box>
       </Box>
 
-      <TableMenu
-        isAllShown={isAllShown}
-        isReordering={isReordering}
-        onShowAllToggle={onShowAllToggle}
-        onReorderModeToggle={onReorderModeToggle}
-      />
+      <TableMenu />
     </>
-  )
-}
-
-type TableMenuProps = {
-  isAllShown: boolean
-  isReordering: boolean
-  onShowAllToggle: () => void
-  onReorderModeToggle: () => void
-}
-
-function TableMenu(props: TableMenuProps) {
-  const { onShowAllToggle, onReorderModeToggle, isReordering, isAllShown } =
-    props
-  const popoverProps = usePopoverProps('tableMenu')
-  return (
-    <Menu {...popoverProps}>
-      <MenuItem
-        onClick={() => {
-          popoverProps.onClose()
-          onShowAllToggle()
-        }}
-      >
-        {isAllShown ? 'Скрыть часть категорий' : 'Показать все категории'}
-      </MenuItem>
-      <MenuItem
-        onClick={() => {
-          popoverProps.onClose()
-          onReorderModeToggle()
-        }}
-      >
-        {isReordering ? 'Скрыть таскалки' : 'Изменить порядок категорий'}
-      </MenuItem>
-    </Menu>
   )
 }

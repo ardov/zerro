@@ -1,44 +1,33 @@
 import React, { FC, memo, useCallback } from 'react'
 import { Box, Drawer, Theme, useMediaQuery } from '@mui/material'
-import {
-  TPopoverProps,
-  usePopoverMethods,
-  usePopoverProps,
-} from '@shared/ui/PopoverManager'
 import { TEnvelopeId } from '@entities/envelope'
 import { MonthInfo } from './MonthInfo'
 import { EnvelopePreview } from './EnvelopePreview'
+import { makePopoverHooks } from '@shared/ui/PopoverManager'
 
-export const sideContentKey = 'sideContent'
+type TDrawerId = TEnvelopeId | 'overview'
+
+const sideDrawer = makePopoverHooks<{ id: TDrawerId }>('sideContent', {
+  id: 'overview',
+})
 
 export const useSideContent = () => {
-  const methods =
-    usePopoverMethods<TPopoverProps & { id: TDrawerId }>(sideContentKey)
-  const open = useCallback(
-    (id: TDrawerId) => {
-      methods.open({ id })
-    },
-    [methods]
-  )
-  return open
+  const { open } = sideDrawer.useMethods()
+  return useCallback((id: TDrawerId) => open({ id }), [open])
 }
 
 export const SideContent: FC<{ docked?: boolean; width: number }> = props => {
-  const popoverProps =
-    usePopoverProps<TPopoverProps & { id: TDrawerId }>(sideContentKey)
-
+  const drawer = sideDrawer.useProps()
   return (
     <MemoSideDrawer
-      open={popoverProps.open}
-      onClose={popoverProps.onClose}
-      id={popoverProps.id}
+      {...drawer.displayProps}
+      {...drawer.extraProps}
       docked={props.docked}
       width={props.width}
     />
   )
 }
 
-type TDrawerId = TEnvelopeId | 'overview'
 type TSideContentProps = {
   open: boolean
   onClose: () => void

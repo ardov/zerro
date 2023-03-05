@@ -11,7 +11,6 @@ import {
   KeyboardSensor,
 } from '@dnd-kit/core'
 import { useCallback } from 'react'
-import { useMonth } from '@shared/hooks/useMonth'
 import { MoveMoneyModal } from '@features/moveMoney'
 import { useToggle } from '@shared/hooks/useToggle'
 import { Box, SxProps } from '@mui/system'
@@ -20,6 +19,7 @@ import { createPortal } from 'react-dom'
 import { envelopeModel, TEnvelopeId } from '@entities/envelope'
 import { useAppDispatch } from '@store/index'
 import { assignNewGroup } from '@features/envelope/assignNewGroup'
+import { useMonth } from './MonthProvider'
 
 export enum DragTypes {
   newGroup = 'newGroup',

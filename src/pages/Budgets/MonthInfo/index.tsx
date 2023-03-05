@@ -16,7 +16,6 @@ import {
 } from '@mui/material'
 import { CloseIcon } from '@shared/ui/Icons'
 import { Tooltip } from '@shared/ui/Tooltip'
-import { useMonth } from '@shared/hooks/useMonth'
 import { TDateDraft, TISOMonth } from '@shared/types'
 
 import { balances } from '@entities/envBalances'
@@ -26,6 +25,7 @@ import {
   OverspendNotice,
 } from '@features/bulkActions/fixOverspend'
 import { copyPreviousBudget } from '@features/bulkActions/copyPrevMonth'
+import { useMonth } from '../MonthProvider'
 import { BalanceWidget } from '../BalanceWidget'
 import { FxRates } from './FxRates'
 import { ActivityStats } from './ActivityStats'

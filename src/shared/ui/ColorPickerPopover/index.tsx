@@ -1,10 +1,11 @@
-import React, { ChangeEvent, FC, useEffect, useState } from 'react'
+import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react'
 import {
   Box,
   Button,
   Divider,
   InputAdornment,
   Popover,
+  PopoverProps,
   SxProps,
   TextField,
 } from '@mui/material'
@@ -12,39 +13,52 @@ import './styles.scss'
 import { zmColors, colors } from './colors'
 import { isHEX } from '@shared/helpers/color'
 import Rhythm from '@shared/ui/Rhythm'
-import { TPopoverProps } from '@shared/ui/PopoverManager'
+import { makePopoverHooks } from '../PopoverManager'
 
-export const colorPickerKey = 'colorPicker'
-
-export type ColorPickerProps = TPopoverProps & {
+export type ColorPickerProps = {
   value?: string | null
-  onColorChange: (value: string | null) => void
+  onColorChange?: (value: string | null) => void
 }
 
-export const ColorPicker: FC<ColorPickerProps> = ({
-  value,
-  onColorChange,
-  onClose = () => {},
-  ...rest
-}) => {
+const colorPicker = makePopoverHooks<ColorPickerProps, PopoverProps>(
+  'colorPicker',
+  {}
+)
+
+export const useColorPicker = (
+  value: ColorPickerProps['value'],
+  onColorChange: ColorPickerProps['onColorChange']
+) => {
+  const { open } = colorPicker.useMethods()
+  return useCallback(
+    (e: React.MouseEvent) => {
+      open({ value, onColorChange }, { anchorEl: e.currentTarget })
+    },
+    [onColorChange, open, value]
+  )
+}
+
+export const ColorPicker: FC = () => {
+  const popover = colorPicker.useProps()
+  const { value, onColorChange } = popover.extraProps
   const [custom, setCustom] = useState(value || '')
   const handleColorClick = (color?: string | null) => {
     if (isSameColor(value, color) || color === null) {
-      onColorChange(null)
-      onClose()
+      onColorChange?.(null)
+      popover.close()
       return
     }
     if (!isHEX(color)) return
     setCustom(color)
-    onColorChange(color)
-    onClose()
+    onColorChange?.(color)
+    popover.close()
   }
   useEffect(() => {
     setCustom(value || '')
   }, [value])
 
   return (
-    <Popover onClose={onClose} {...rest}>
+    <Popover {...popover.displayProps}>
       <Rhythm gap={2} p={2}>
         <Box sx={gridSx}>
           {zmColors.map(color => (

@@ -7,13 +7,13 @@ import {
   Button,
   IconButton,
   OutlinedTextFieldProps,
+  PopoverProps,
 } from '@mui/material'
 import { AmountInput } from '@shared/ui/AmountInput'
 import { CloseIcon } from '@shared/ui/Icons'
 import MonthSelectPopover from '@shared/ui/MonthSelectPopover'
 import { toISODate, formatDate } from '@shared/helpers/date'
-import { TDateDraft, TISOMonth } from '@shared/types'
-import { TPopoverProps } from '@shared/ui/PopoverManager'
+import { Modify, TDateDraft, TISOMonth } from '@shared/types'
 import { useAppDispatch } from '@store'
 
 import { goalModel, goalType, TGoal } from '@entities/goal'
@@ -26,7 +26,10 @@ const amountLabels = {
   [goalType.INCOME_PERCENT]: 'Процент от дохода',
 }
 
-export type TGoalPopoverProps = TPopoverProps & {
+export type TGoalPopoverProps = Modify<
+  PopoverProps,
+  { onClose: () => void }
+> & {
   id: TEnvelopeId
   month: TISOMonth
 }

@@ -11,6 +11,9 @@ import {
   Typography,
   IconButton,
   TextFieldProps,
+  SelectChangeEvent,
+  FormControl,
+  InputLabel,
 } from '@mui/material'
 import { DateRangePicker } from '@mui/lab'
 import { makeStyles } from '@mui/styles'
@@ -21,6 +24,7 @@ import { formatDate } from '@shared/helpers/date'
 import { FilterConditions } from '@entities/transaction/filtering'
 import { TrType } from '@entities/transaction'
 import { endOfDay, prevMonth, startOfDay } from '@shared/helpers/date'
+import { SmartSelect } from '@shared/ui/SmartSelect'
 
 const useStyles = makeStyles(theme => ({
   drawerWidth: {
@@ -48,7 +52,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
   ...rest
 }) => {
   const c = useStyles()
-  const handleTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTypeChange = (e: SelectChangeEvent<string>) => {
     const value = e.target.value as TrType
     setCondition({ type: value || null })
   }
@@ -142,19 +146,22 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
           />
         </Box>
         <Box mt={3}>
-          <TextField
-            select
-            variant="outlined"
-            value={conditions.type || ''}
-            onChange={handleTypeChange}
-            label="Тип транзакции"
-            fullWidth
-          >
-            <MenuItem value="">Все</MenuItem>
-            <MenuItem value="income">Доход</MenuItem>
-            <MenuItem value="outcome">Расход</MenuItem>
-            <MenuItem value="transfer">Перевод</MenuItem>
-          </TextField>
+          <FormControl fullWidth>
+            <InputLabel>Тип транзакции</InputLabel>
+            <SmartSelect
+              elKey="transactionType"
+              variant="outlined"
+              value={conditions.type || ''}
+              onChange={handleTypeChange}
+              label="Тип транзакции"
+              fullWidth
+            >
+              <MenuItem value="">Все</MenuItem>
+              <MenuItem value="income">Доход</MenuItem>
+              <MenuItem value="outcome">Расход</MenuItem>
+              <MenuItem value="transfer">Перевод</MenuItem>
+            </SmartSelect>
+          </FormControl>
         </Box>
 
         <Box mt={3}>

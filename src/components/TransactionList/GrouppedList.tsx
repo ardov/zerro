@@ -1,26 +1,20 @@
-import React, {
-  CSSProperties,
-  FC,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
-import { Dialog, Typography } from '@mui/material'
-import { ListChildComponentProps, VariableSizeList as List } from 'react-window'
-import StaticDatePicker from '@mui/lab/StaticDatePicker'
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react'
+import { ListChildComponentProps, VariableSizeList } from 'react-window'
+import StaticDatePicker, {
+  StaticDatePickerProps,
+} from '@mui/lab/StaticDatePicker'
 import TextField from '@mui/material/TextField'
 import AutoSizer from 'react-virtualized-auto-sizer'
-import { Box, ListSubheader } from '@mui/material'
-import Transaction from './Transaction'
+import { ListSubheader } from '@mui/material'
 import { formatDate, parseDate } from '@shared/helpers/date'
 import { TDateDraft, TISODate } from '@shared/types'
 import { toISODate } from '@shared/helpers/date'
-import { TTransactionId } from '@shared/types'
+import { SmartDialog } from '@shared/ui/SmartDialog'
+import { makePopoverHooks } from '@shared/ui/PopoverManager'
 
 type GroupNode = {
   date: TISODate
-  transactions: TTransactionId[]
+  transactions: JSX.Element[]
 }
 
 const HEADER_HEIGHT = 48
@@ -35,26 +29,13 @@ const findDateIndex = (groups: GroupNode[], date: GroupNode['date']) => {
 
 type GrouppedListProps = {
   groups: GroupNode[]
-  checked: string[]
   initialDate?: TDateDraft
-  toggleTransaction: (id: string) => void
-  checkByChangedDate: (date: number) => void
-  onFilterByPayee: (payee: string) => void
-}
-type DayData = GrouppedListProps & {
-  onDateClick: (date: TDateDraft | null) => void
 }
 
-export const GrouppedList: FC<GrouppedListProps> = ({
-  groups,
-  checked,
-  initialDate,
-  toggleTransaction,
-  checkByChangedDate,
-  onFilterByPayee,
-}) => {
-  const listRef = useRef<List>(null)
-  const [clickedDate, setClickedDate] = useState<TISODate | null>(null)
+export const GrouppedList: FC<GrouppedListProps> = props => {
+  const { groups, initialDate } = props
+  const listRef = useRef<VariableSizeList>(null)
+  const datePopover = dateDialog.useMethods()
 
   useEffect(() => {
     listRef?.current?.resetAfterIndex?.(0)
@@ -62,152 +43,149 @@ export const GrouppedList: FC<GrouppedListProps> = ({
 
   const scrollToDate = useCallback(
     (date: TDateDraft) => {
-      listRef?.current?.scrollToItem(
-        findDateIndex(groups, toISODate(date)),
-        'start'
-      )
+      const idx = findDateIndex(groups, toISODate(date))
+      listRef?.current?.scrollToItem(idx, 'start')
     },
     [groups]
   )
 
+  const onDateClick = useCallback(
+    (date: TISODate) => {
+      datePopover.open({
+        value: parseDate(date),
+        minDate: parseDate(groups.at(-1)?.date || 0),
+        maxDate: parseDate(groups.at(0)?.date || 0),
+        onChange: d => {
+          datePopover.close()
+          scrollToDate(d as TISODate)
+        },
+      })
+    },
+    [datePopover, groups, scrollToDate]
+  )
+
+  // Scroll to initial date if it's provided
+  // We should render first and only then scroll.
+  // That's why there is a timeout. Downside of is that the list jumps.
   useEffect(() => {
-    // Scroll to initial date if it's provided
-    if (initialDate) {
-      // For we should render first and only then scroll. That's why there is timeout. Downside of is that the list jumps.
-      setTimeout(() => scrollToDate(initialDate), 10)
-    }
+    if (initialDate) setTimeout(() => scrollToDate(initialDate), 10)
   }, [initialDate, scrollToDate])
-
-  const minDate = groups.length ? groups[groups.length - 1].date : 0
-  const maxDate = groups.length ? groups[0].date : 0
-  const getItemKey = useCallback((i: number) => groups[i].date, [groups])
-  const getItemSize = useCallback(
-    (i: number) =>
-      HEADER_HEIGHT + TRANSACTION_HEIGHT * groups[i].transactions.length,
-    [groups]
-  )
-  const itemData: DayData = {
-    groups,
-    checked,
-    toggleTransaction,
-    checkByChangedDate,
-    onFilterByPayee,
-    onDateClick: (date: TDateDraft | null) => {
-      setClickedDate(date ? toISODate(date) : null)
-    },
-  }
 
   return (
     <>
-      <Dialog open={!!clickedDate} onClose={() => setClickedDate(null)}>
-        <StaticDatePicker
-          value={clickedDate && parseDate(clickedDate)}
-          maxDate={parseDate(maxDate)}
-          minDate={parseDate(minDate)}
-          openTo="day"
-          onChange={date => {
-            setClickedDate(null)
-            if (date) scrollToDate(date)
-          }}
-          renderInput={params => <TextField {...params} />}
-        />
-      </Dialog>
-
+      <DateDialog />
       <AutoSizer disableWidth>
-        {({ height }) =>
-          groups.length ? (
-            <List
-              className="hidden-scroll"
-              ref={listRef}
-              height={height}
-              itemCount={groups.length}
-              itemSize={getItemSize}
-              width="100%"
-              itemKey={getItemKey}
-              itemData={itemData}
-              useIsScrolling
-            >
-              {Day}
-            </List>
-          ) : (
-            <Box p={5}>
-              <Typography variant="body1" align="center" paragraph>
-                Таких операций нет.
-                <br />
-                Возможно, дело в фильтрах.
-              </Typography>
-            </Box>
-          )
-        }
+        {({ height }) => (
+          <VariableSizeList
+            className="hidden-scroll"
+            width="100%"
+            height={height}
+            ref={listRef}
+            useIsScrolling
+            itemCount={groups.length}
+            itemData={{ groups, onDateClick }}
+            itemKey={i => groups[i].date}
+            itemSize={i =>
+              HEADER_HEIGHT + TRANSACTION_HEIGHT * groups[i].transactions.length
+            }
+          >
+            {Day}
+          </VariableSizeList>
+        )}
       </AutoSizer>
     </>
   )
 }
 
-const Day: FC<ListChildComponentProps<DayData>> = ({
-  index,
-  style,
-  data,
-  isScrolling,
-}) => {
-  const {
-    groups,
-    checked,
-    toggleTransaction,
-    checkByChangedDate,
-    onFilterByPayee,
-    onDateClick,
-  } = data
+//
+//
+//
+//
+//
+//
+
+type DayData = {
+  groups: GroupNode[]
+  onDateClick: (date: TISODate) => void
+}
+const Day: FC<ListChildComponentProps<DayData>> = props => {
+  const { index, style, data, isScrolling } = props
+  const { groups, onDateClick } = data
+  const renderContent = useRenderState(isScrolling)
+  const date = groups[index].date
+  const length = groups[index].transactions.length
+  return (
+    <div style={{ ...groupStyle, ...style }}>
+      <ListSubheader onClick={() => onDateClick(date)}>
+        {formatDate(date)}
+      </ListSubheader>
+
+      {renderContent ? (
+        groups[index].transactions
+      ) : (
+        <TrSkeleton length={length} />
+      )}
+    </div>
+  )
+}
+
+const TrSkeleton = (props: { length: number }) => (
+  <div
+    style={{
+      height: props.length * TRANSACTION_HEIGHT,
+      background:
+        'radial-gradient(circle at 36px 36px, rgba(128,128,128,0.2) 20px,transparent 20px)',
+      backgroundSize: '100% 72px',
+    }}
+  />
+)
+
+/** Used to delay rendering of complex components */
+const useRenderState = (isScrolling?: boolean, delay = 300) => {
   const [renderContent, setRenderContent] = useState(!isScrolling)
   useEffect(() => {
     if (!isScrolling) setRenderContent(true)
-    let timer = setTimeout(() => setRenderContent(true), 300)
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [isScrolling])
-  const date = groups[index].date
-  const length = groups[index].transactions.length
-
-  if (!renderContent)
-    return <DaySkeleton date={date} style={style} length={length} />
-  else
-    return (
-      <Box position="relative" maxWidth={560} mx="auto" style={style}>
-        <ListSubheader onClick={() => onDateClick(date)}>
-          {formatDate(date)}
-        </ListSubheader>
-
-        {groups[index].transactions.map(id => (
-          <Transaction
-            key={id}
-            id={id}
-            // isOpened={id === opened}
-            isChecked={checked.includes(id)}
-            isInSelectionMode={!!checked.length}
-            onToggle={toggleTransaction}
-            onSelectChanged={checkByChangedDate}
-            onFilterByPayee={onFilterByPayee}
-          />
-        ))}
-      </Box>
-    )
+    let timer = setTimeout(() => setRenderContent(true), delay)
+    return () => clearTimeout(timer)
+  }, [delay, isScrolling])
+  return renderContent
 }
 
-const DaySkeleton: FC<{
-  date: TDateDraft
-  length: number
-  style: CSSProperties
-}> = ({ date, style, length }) => (
-  <Box position="relative" maxWidth={560} mx="auto" style={style}>
-    <ListSubheader>{formatDate(date)}</ListSubheader>
-    <div
-      style={{
-        height: length * TRANSACTION_HEIGHT,
-        background:
-          'radial-gradient(circle at 36px 36px, rgba(128,128,128,0.2) 20px,transparent 20px)',
-        backgroundSize: '100% 72px',
-      }}
-    />
-  </Box>
-)
+const groupStyle: React.CSSProperties = {
+  position: 'relative',
+  maxWidth: 560,
+  marginLeft: 'auto',
+  marginRight: 'auto',
+}
+
+//
+//
+//
+//
+//
+//
+
+type TDateDialogProps = {
+  value: StaticDatePickerProps['value']
+  minDate?: StaticDatePickerProps['minDate']
+  maxDate?: StaticDatePickerProps['maxDate']
+  onChange: StaticDatePickerProps['onChange']
+}
+
+const dateDialog = makePopoverHooks<TDateDialogProps>('listSateDialog', {
+  value: new Date(),
+  onChange: () => {},
+})
+
+const DateDialog = () => {
+  const { extraProps } = dateDialog.useProps()
+  return (
+    <SmartDialog elKey={dateDialog.key}>
+      <StaticDatePicker
+        {...extraProps}
+        openTo="day"
+        renderInput={params => <TextField {...params} />}
+      />
+    </SmartDialog>
+  )
+}

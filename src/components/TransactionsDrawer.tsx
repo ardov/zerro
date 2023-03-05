@@ -11,7 +11,6 @@ export type TransactionsDrawerProps = Modify<
   { onClose: () => void }
 > & {
   transactions?: TTransactionListProps['transactions']
-  prefilter?: TTransactionListProps['prefilter']
   filterConditions?: TTransactionListProps['filterConditions']
   initialDate?: TDateDraft
 }
@@ -19,7 +18,6 @@ export type TransactionsDrawerProps = Modify<
 export const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
   const {
     transactions,
-    prefilter,
     filterConditions,
     initialDate,
     title,
@@ -51,7 +49,6 @@ export const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
 
         <TransactionList
           transactions={transactions}
-          prefilter={prefilter}
           filterConditions={filterConditions}
           initialDate={initialDate}
           hideFilter

@@ -1,103 +1,86 @@
-import { PopoverProps } from '@mui/material'
-import { keys } from '@shared/helpers/keys'
-import { usePopoverStack } from '@shared/hooks/usePopoverStack'
+import React, { FC, ReactNode, useContext, useMemo, useState } from 'react'
+import { popoverStack } from '@shared/hooks/usePopoverStack'
 import { Modify } from '@shared/types'
-import React, {
-  FC,
-  ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
 
 type TKey = string
-type TBaseProps = { open: boolean; onClose?: () => void }
-type WithBaseProps<T> = Modify<T, Required<TBaseProps>>
-type WithoutBaseProps<T> = Omit<T, 'open' | 'onClose'>
-export type TPopoverProps = Modify<PopoverProps, { onClose?: () => void }>
-const defaultProps: TPopoverProps = { open: false, onClose: () => {} }
+export type WithoutBaseProps<T> = Omit<T, 'open' | 'onClose'>
+type WithBaseProps<T> = Modify<T, TBaseProps>
+type TBaseProps = { open: boolean; onClose: () => void }
+
+export function makePopoverHooks<
+  ExtraProps extends object = {},
+  DisplayProps extends object = TBaseProps
+>(
+  key: TKey,
+  defaultExtraProps: ExtraProps,
+  defaultDisplayProps?: WithoutBaseProps<DisplayProps>
+) {
+  type TStored =
+    | { extra: ExtraProps; display?: WithoutBaseProps<DisplayProps> }
+    | undefined
+
+  function useMethods() {
+    const { open, close } = useContext(PopoverMethodsContext)
+    return useMemo(() => {
+      return {
+        open: (extra: ExtraProps, display?: WithoutBaseProps<DisplayProps>) =>
+          open(key, { extra, display } as TStored),
+        close: () => close(key),
+      }
+    }, [open, close])
+  }
+
+  function useProps() {
+    const [isOpened] = popoverStack.useState(key)
+    const methods = useMethods()
+    const props = useContext(PopoverPropsContext)[key] as TStored
+    const display = props?.display || defaultDisplayProps
+    const extra = props?.extra || defaultExtraProps
+
+    return useMemo(() => {
+      const displayProps = {
+        ...display,
+        open: isOpened,
+        onClose: methods.close,
+      } as WithBaseProps<DisplayProps>
+
+      return {
+        key,
+        displayProps,
+        extraProps: extra,
+        ...methods,
+      }
+    }, [display, extra, isOpened, methods])
+  }
+
+  return { useMethods, useProps, key }
+}
 
 const PopoverMethodsContext = React.createContext<{
   close: (key: TKey) => void
-  open: (key: TKey, props?: Partial<TPopoverProps>) => void
+  open: (key: TKey, props?: object) => void
 }>({ close: () => {}, open: () => {} })
+
 const PopoverPropsContext = React.createContext<
-  Record<TKey, TPopoverProps | undefined>
+  Record<TKey, object | undefined>
 >({})
 
-export function usePopoverProps<Props extends TBaseProps>(key: TKey) {
-  const props = useContext(PopoverPropsContext)
-  return (props[key] || defaultProps) as WithBaseProps<Props>
-}
-
-export function usePopoverMethods<Props extends TBaseProps>(key: TKey) {
-  const { open, close } = useContext(PopoverMethodsContext)
-  const memoized = useMemo(
-    () => ({
-      openOnClick: (e: React.MouseEvent<Element, MouseEvent>) =>
-        open(key, { anchorEl: e.currentTarget }),
-      open: (props?: WithoutBaseProps<Props>) => open(key, props),
-      close: () => close(key),
-    }),
-    [open, close, key]
-  )
-  return memoized
-}
-
-export function usePopover<Props extends TBaseProps>(key: TKey) {
-  const methods = usePopoverMethods<Props>(key)
-  const props = usePopoverProps<Props>(key)
-  return { ...methods, props }
-}
-
 export const PopoverManager: FC<{ children: ReactNode }> = props => {
-  const [stack, pushKey, popKey] = usePopoverStack()
-  const [popProps, setPopProps] = useState<
-    Record<TKey, TPopoverProps | undefined>
-  >({})
-
-  useEffect(() => {
-    setPopProps(state => {
-      let changed = false
-      let nextState = { ...state }
-
-      keys(state).forEach(key => {
-        const isOpen = stack.includes(key)
-        if (state[key]!.open === isOpen) return
-        changed = true
-        nextState[key] = { ...nextState[key], open: isOpen }
-      })
-
-      stack.forEach(key => {
-        if (key in nextState) return
-        changed = true
-        nextState[key] = { open: true, onClose: () => popKey(key) }
-      })
-
-      return changed ? nextState : state
-    })
-  }, [popKey, stack])
+  const stackActions = popoverStack.useActions()
+  const [popProps, setPopProps] = useState<Record<TKey, any | undefined>>({})
 
   const methods = useMemo(
     () => ({
-      close: popKey,
-      open: (key: TKey, props?: Partial<TPopoverProps>) => {
+      close: stackActions.close,
+      open: (key: TKey, props?: object) => {
         setPopProps(s => {
-          return {
-            ...s,
-            [key]: {
-              ...s[key],
-              ...props,
-              open: true,
-              onClose: () => popKey(key),
-            },
-          }
+          if (s[key] === props) return s
+          return { ...s, [key]: { ...s[key], ...props } }
         })
-        pushKey(key)
+        stackActions.open(key)
       },
     }),
-    [popKey, pushKey]
+    [stackActions]
   )
 
   return (
