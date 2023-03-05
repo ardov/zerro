@@ -17,6 +17,7 @@ import {
 } from '@shared/types'
 import { Transaction } from './Transaction'
 import { accountModel } from '@entities/account'
+import { TransactionMenu, useTrContextMenu } from './ContextMenu'
 
 export type TTransactionListProps = {
   onTrOpen?: (id: TTransactionId) => void
@@ -79,6 +80,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     },
     [trList]
   )
+  const openContextMenu = useTrContextMenu(checkByChangedDate)
 
   useEffect(() => {
     if (checkedDate) checkByChangedDate(checkedDate)
@@ -96,58 +98,70 @@ export const TransactionList: FC<TTransactionListProps> = props => {
           isOpened={false}
           isChecked={checked.includes(tr.id)}
           isInSelectionMode={!!checked.length}
-          onToggle={toggleTransaction}
-          onContextMenu={() => {}}
           onOpen={onTrOpen}
+          onToggle={toggleTransaction}
           onPayeeClick={onFilterByPayee}
+          onContextMenu={openContextMenu(tr.id)}
         />
       )
       groups[tr.date] ??= { date: tr.date, transactions: [] }
       groups[tr.date].transactions.push(Component)
     })
     return Object.values(groups)
-  }, [checked, debtId, onFilterByPayee, onTrOpen, toggleTransaction, trList])
+  }, [
+    checked,
+    debtId,
+    onFilterByPayee,
+    onTrOpen,
+    openContextMenu,
+    toggleTransaction,
+    trList,
+  ])
 
   return (
-    <Box
-      display={'flex'}
-      flexDirection={'column'}
-      px={1}
-      pt={1}
-      position={'relative'}
-      sx={sx}
-    >
-      {!hideFilter && (
-        <Box
-          position="relative"
-          zIndex={10}
-          maxWidth={560}
-          width="100%"
-          mx="auto"
-        >
-          <Filter
-            conditions={filter}
-            setCondition={setCondition}
-            clearFilter={handleClearFilter}
-          />
-        </Box>
-      )}
-
-      <Actions
-        visible={Boolean(checked?.length)}
-        checkedIds={checked}
-        onUncheckAll={uncheckAll}
-        onCheckAll={checkAll}
-      />
-
-      <Box flex="1 1 auto">
-        {groups.length ? (
-          <GrouppedList {...{ groups, initialDate }} />
-        ) : (
-          <EmptyState />
+    <>
+      <Box
+        display={'flex'}
+        flexDirection={'column'}
+        px={1}
+        pt={1}
+        position={'relative'}
+        sx={sx}
+      >
+        {!hideFilter && (
+          <Box
+            position="relative"
+            zIndex={10}
+            maxWidth={560}
+            width="100%"
+            mx="auto"
+          >
+            <Filter
+              conditions={filter}
+              setCondition={setCondition}
+              clearFilter={handleClearFilter}
+            />
+          </Box>
         )}
+
+        <Actions
+          visible={Boolean(checked?.length)}
+          checkedIds={checked}
+          onUncheckAll={uncheckAll}
+          onCheckAll={checkAll}
+        />
+
+        <Box flex="1 1 auto">
+          {groups.length ? (
+            <GrouppedList {...{ groups, initialDate }} />
+          ) : (
+            <EmptyState />
+          )}
+        </Box>
       </Box>
-    </Box>
+
+      <TransactionMenu />
+    </>
   )
 }
 

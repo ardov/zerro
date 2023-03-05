@@ -1,75 +1,55 @@
-import React, { FC, useState } from 'react'
-import { Menu, MenuItem, MenuProps, PopoverPosition } from '@mui/material'
+import React, { FC, useCallback } from 'react'
+import { Menu, MenuItem, MenuProps } from '@mui/material'
 import { TTransaction, TTransactionId } from '@shared/types'
-import { isNew } from '@entities/transaction/helpers'
 import { useAppDispatch } from '@store'
 import { trModel } from '@entities/transaction'
-
-interface TransactionMenuProps extends MenuProps {
-  id: string
-  transaction: TTransaction
-  onSelectChanged: (date: number) => void
-}
+import { makePopoverHooks } from '@shared/ui/PopoverManager'
 
 type TTrMenuProps = {
-  left: number
-  top: number
   id: TTransactionId
+  onSelectSimilar: (changed: TTransaction['changed']) => void
 }
 
-export const TransactionMenu: FC<TransactionMenuProps> = ({
-  id,
-  transaction,
-  onSelectChanged,
-  ...rest
-}) => {
+const trContext = makePopoverHooks<TTrMenuProps, MenuProps>(
+  'transactionContext',
+  { id: '', onSelectSimilar: () => {} }
+)
+
+export const useTrContextMenu = (
+  onSelectSimilar: TTrMenuProps['onSelectSimilar']
+) => {
+  const { open } = trContext.useMethods()
+  return useCallback(
+    (id: TTransactionId) => (event: React.MouseEvent) => {
+      event.preventDefault()
+      open(
+        { id, onSelectSimilar },
+        {
+          anchorReference: 'anchorPosition',
+          anchorPosition: { left: event.clientX - 2, top: event.clientY - 4 },
+        }
+      )
+    },
+    [onSelectSimilar, open]
+  )
+}
+
+export const TransactionMenu: FC = () => {
+  const { displayProps, extraProps } = trContext.useProps()
+  const { id, onSelectSimilar } = extraProps
   const dispatch = useAppDispatch()
-  const close = () => rest.onClose?.({}, 'escapeKeyDown')
+  const transaction = trModel.useTransactions()[id]
+
   return (
-    <Menu {...rest}>
+    <Menu {...displayProps}>
       <MenuItem
         onClick={e => {
-          onSelectChanged(transaction.changed)
-          close()
+          displayProps.onClose()
+          onSelectSimilar(transaction.changed)
         }}
       >
         Выбрать изменённые в это же время
       </MenuItem>
-      <MenuItem
-        onClick={e => {
-          dispatch(trModel.markViewed(id, isNew(transaction)))
-          close()
-        }}
-      >
-        Сделать {isNew(transaction) ? 'просмотренной' : 'непросмотренной'}
-      </MenuItem>
     </Menu>
   )
-}
-
-type Coords = PopoverPosition | undefined
-type ClickHandler = (event: React.MouseEvent<HTMLDivElement>) => void
-type Bind = {
-  open: MenuProps['open']
-  onClose: MenuProps['onClose']
-  anchorPosition: MenuProps['anchorPosition']
-  anchorReference: MenuProps['anchorReference']
-}
-
-export const useContextMenu = (initial?: Coords): [ClickHandler, Bind] => {
-  const [position, setPosition] = useState<Coords>(initial)
-  const onTriggerClick: ClickHandler = event => {
-    event.preventDefault()
-    setPosition({
-      left: event.clientX - 2,
-      top: event.clientY - 4,
-    })
-  }
-  const bind: Bind = {
-    open: !!position,
-    onClose: () => setPosition(undefined),
-    anchorReference: 'anchorPosition',
-    anchorPosition: position,
-  }
-  return [onTriggerClick, bind]
 }
