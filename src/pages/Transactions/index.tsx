@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, FC, useCallback } from 'react'
 import { TransactionList } from '@components/TransactionList'
 import {
   Box,
@@ -7,33 +7,39 @@ import {
   Typography,
   Paper,
   Theme,
+  DrawerProps,
 } from '@mui/material'
-import { makeStyles } from '@mui/styles'
 import { TransactionPreview } from '@components/TransactionPreview'
-import { sendEvent } from '@shared/helpers/tracking'
 import { Helmet } from 'react-helmet'
-import { useSearchParam } from '@shared/hooks/useSearchParam'
-import { trModel } from '@entities/transaction'
+import { makePopoverHooks } from '@shared/ui/PopoverManager'
+import { TTransaction, TTransactionId } from '@shared/types'
+import { sendEvent } from '@shared/helpers/tracking'
 
-const useStyles = makeStyles(theme => ({
-  drawerWidth: {
-    width: 360,
-    [theme.breakpoints.down('sm')]: { width: '100vw' },
-  },
-}))
+const sideWidth = 360
+const sideSx = {
+  width: sideWidth,
+  flexShrink: 0,
+  overflow: 'auto',
+  bgcolor: 'background.paper',
+}
 
 export default function TransactionsView() {
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
-  const [opened, setOpened] = useSearchParam('transaction')
-  const openedTransaction = trModel.useTransactions()[opened || '']
   const [checkedDate, setCheckedDate] = useState<Date | null>(null)
-  const c = useStyles()
+  const { open } = trPreview.useMethods()
+  const openedProps = trPreview.useProps()
+  const opened = openedProps.displayProps.open && openedProps.extraProps.id
 
-  // send analytics
-  useEffect(() => {
-    if (openedTransaction) sendEvent('Transaction: see details')
-    if (opened && !openedTransaction) setOpened(null)
-  }, [opened, openedTransaction, setOpened])
+  const handleTrOpen = useCallback(
+    (id: TTransactionId) => {
+      sendEvent('Transaction: see details')
+      open({
+        id,
+        onSelectSimilar: changed => setCheckedDate(new Date(changed)),
+      })
+    },
+    [open]
+  )
 
   return (
     <>
@@ -43,10 +49,9 @@ export default function TransactionsView() {
         <link rel="canonical" href="https://zerro.app/transactions" />
       </Helmet>
 
-      <Box display="flex">
+      <Box display="flex" height="100vh">
         <Box
-          p={isMobile ? 0 : 2}
-          height="100vh"
+          p={{ xs: 0, md: 2 }}
           flexGrow={1}
           minWidth={0}
           display="flex"
@@ -58,49 +63,86 @@ export default function TransactionsView() {
               display: 'flex',
               overflow: 'hidden',
               maxWidth: 560,
-              pb: isMobile ? 7 : 0,
+              pb: { xs: 7, md: 0 },
             }}
           >
             <TransactionList
               checkedDate={checkedDate}
               sx={{ flex: '1 1 auto' }}
+              onTrOpen={handleTrOpen}
+              opened={opened || undefined}
             />
           </Paper>
         </Box>
 
-        <Drawer
-          classes={{ paper: c.drawerWidth, root: c.drawerWidth }}
-          variant={isMobile ? 'temporary' : 'persistent'}
-          anchor="right"
-          open={!isMobile || !!opened}
-          onClose={() => setOpened(null)}
-        >
-          {openedTransaction && opened ? (
-            <TransactionPreview
-              id={opened}
-              key={opened}
-              onClose={() => setOpened(null)}
-              onOpenOther={setOpened}
-              onSelectSimilar={date => setCheckedDate(new Date(date))}
-            />
-          ) : (
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              minHeight="100vh"
-              color="text.hint"
-              p={3}
-            >
-              <Typography variant="body2" align="center" color="inherit">
-                Выберите операцию,
-                <br />
-                чтобы увидеть детали
-              </Typography>
-            </Box>
-          )}
-        </Drawer>
+        {isMobile ? (
+          <SideContent width={sideWidth} />
+        ) : (
+          <Box sx={sideSx}>
+            <SideContent width={sideWidth} docked />
+          </Box>
+        )}
       </Box>
     </>
   )
 }
+
+const trPreview = makePopoverHooks<
+  {
+    id?: TTransactionId
+    onSelectSimilar?: (changed: TTransaction['changed']) => void
+  },
+  DrawerProps
+>('transactionPreview', {})
+
+const SideContent: FC<{ docked?: boolean; width: number }> = ({
+  docked,
+  width,
+}) => {
+  const { displayProps, extraProps, open } = trPreview.useProps()
+  const { id, onSelectSimilar } = extraProps
+  const isXS = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+
+  const openAnother = (id: TTransactionId) => {
+    open({ id, onSelectSimilar })
+  }
+
+  const drawerContent = id ? (
+    <TransactionPreview
+      id={extraProps.id || ''}
+      key={extraProps.id}
+      onClose={displayProps.onClose}
+      onOpenOther={openAnother}
+      onSelectSimilar={onSelectSimilar}
+    />
+  ) : (
+    <EmptyState />
+  )
+
+  if (docked) {
+    return displayProps.open ? drawerContent : <EmptyState />
+  }
+
+  return (
+    <Drawer {...displayProps} anchor="right">
+      <Box sx={{ width: isXS ? '100vw' : width }}>{drawerContent}</Box>
+    </Drawer>
+  )
+}
+
+const EmptyState = () => (
+  <Box
+    display="flex"
+    alignItems="center"
+    justifyContent="center"
+    minHeight="100vh"
+    color="text.hint"
+    p={3}
+  >
+    <Typography variant="body2" align="center" color="inherit">
+      Выберите операцию,
+      <br />
+      чтобы увидеть детали
+    </Typography>
+  </Box>
+)

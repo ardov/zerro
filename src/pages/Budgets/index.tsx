@@ -89,7 +89,6 @@ const sideWidth = 360
 const sideSx = {
   width: sideWidth,
   flexShrink: 0,
-  height: '100%',
   overflow: 'auto',
   bgcolor: 'background.paper',
 }

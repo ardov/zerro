@@ -24,16 +24,21 @@ import { getType } from '@entities/transaction/helpers'
 import { accountModel } from '@entities/account'
 import { instrumentModel } from '@entities/currency/instrument'
 import { toISODate } from '@shared/helpers/date'
-import { TTransaction } from '@shared/types'
+import { TTransaction, TTransactionId } from '@shared/types'
 
 type TransactionPreviewProps = {
   id: string
   onClose: () => void
-  onOpenOther: (id: string) => void
-  onSelectSimilar: (date: number) => void
+  onOpenOther: (id: TTransactionId) => void
+  onSelectSimilar?: (date: number) => void
 }
 
 export const TransactionPreview: FC<TransactionPreviewProps> = props => {
+  const transaction = trModel.useTransactions()[props.id]
+  return transaction ? <TransactionContent {...props} /> : <EmptyState />
+}
+
+const TransactionContent: FC<TransactionPreviewProps> = props => {
   const { id, onClose, onOpenOther, onSelectSimilar } = props
   const dispatch = useAppDispatch()
   const onDelete = () => dispatch(trModel.deleteTransactions([id]))
@@ -237,15 +242,34 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
           <RateToWords tr={tr} />
         </Stack>
 
-        <Button onClick={() => onSelectSimilar(changed)}>
-          Другие из этой синхронизации
-        </Button>
+        {!!onSelectSimilar && (
+          <Button onClick={() => onSelectSimilar(changed)}>
+            Другие из этой синхронизации
+          </Button>
+        )}
       </Stack>
 
       <SaveButton visible={hasChanges} onSave={onSave} />
     </Box>
   )
 }
+
+const EmptyState = () => (
+  <Box
+    display="flex"
+    alignItems="center"
+    justifyContent="center"
+    minHeight="100vh"
+    color="text.hint"
+    p={3}
+  >
+    <Typography variant="body2" align="center" color="inherit">
+      Выберите операцию,
+      <br />
+      чтобы увидеть детали
+    </Typography>
+  </Box>
+)
 
 const titles = {
   income: 'Доход',

@@ -21,6 +21,7 @@ import { TransactionMenu, useTrContextMenu } from './ContextMenu'
 
 export type TTransactionListProps = {
   onTrOpen?: (id: TTransactionId) => void
+  opened?: TTransactionId
   transactions?: TTransaction[]
   filterConditions?: FilterConditions
   hideFilter?: boolean
@@ -32,6 +33,7 @@ export type TTransactionListProps = {
 export const TransactionList: FC<TTransactionListProps> = props => {
   const {
     onTrOpen,
+    opened,
     transactions,
     filterConditions,
     hideFilter = false,
@@ -95,7 +97,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
           id={tr.id}
           transaction={tr}
           type={trModel.getType(tr, debtId)}
-          isOpened={false}
+          isOpened={tr.id === opened}
           isChecked={checked.includes(tr.id)}
           isInSelectionMode={!!checked.length}
           onOpen={onTrOpen}
@@ -111,11 +113,12 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   }, [
     checked,
     debtId,
-    onFilterByPayee,
+    opened,
+    trList,
     onTrOpen,
+    onFilterByPayee,
     openContextMenu,
     toggleTransaction,
-    trList,
   ])
 
   return (
