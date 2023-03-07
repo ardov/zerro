@@ -18,10 +18,11 @@ export const NameCell: FC<{
   isSelf?: boolean
   isReordering: boolean
   isDefaultVisible: boolean
+  onClick?: () => void
 }> = memo(props => {
   const { id, symbol, color, name, currency, comment, originalName } =
     props.envelope
-  const { isReordering, isDefaultVisible, isChild, isSelf } = props
+  const { isReordering, isDefaultVisible, isChild, isSelf, onClick } = props
   const [displCurrency] = displayCurrency.useDisplayCurrency()
 
   const dispatch = useAppDispatch()
@@ -40,6 +41,7 @@ export const NameCell: FC<{
       alignItems="center"
       gap={1}
       minWidth={0}
+      onClick={onClick}
       pl={isChild ? 5 : 0}
     >
       {/* <Collapse orientation="horizontal" in={isReordering} unmountOnExit>

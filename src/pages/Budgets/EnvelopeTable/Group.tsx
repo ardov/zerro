@@ -8,7 +8,7 @@ import { useAppDispatch } from '@store/index'
 import { renameGroup } from '@features/envelope/renameGroup'
 import { moveGroup } from '@features/envelope/moveGroup'
 import { createEnvelope } from '@features/envelope/createEnvelope'
-import { rowStyle } from './shared/shared'
+import { TableRow } from './shared/shared'
 
 type TGroupProps = {
   name: string
@@ -33,72 +33,79 @@ export const Group: FC<TGroupProps> = ({
     dispatch(renameGroup(name, val))
   )
 
+  const Actions = (
+    <>
+      {nextIdx !== undefined && (
+        <Tooltip title="Опустить ниже">
+          <IconButton onClick={() => dispatch(moveGroup(groupIdx, nextIdx))}>
+            <ArrowDownwardIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      {prevIdx !== undefined && (
+        <Tooltip title="Поднять выше">
+          <IconButton onClick={() => dispatch(moveGroup(groupIdx, prevIdx))}>
+            <ArrowUpwardIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      <Tooltip title="Создать категорию">
+        <IconButton
+          onClick={() =>
+            dispatch(createEnvelope({ group: name, indexRaw: groupIdx }))
+          }
+        >
+          <AddIcon />
+        </IconButton>
+      </Tooltip>
+    </>
+  )
+
+  const NameCell = (
+    <Box
+      ref={ref}
+      sx={{
+        pb: 0,
+        pt: 1,
+        minWidth: 0,
+        display: 'flex',
+        flexDirection: 'row',
+        alignContent: 'flex-end',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+      }}
+    >
+      <ButtonBase
+        sx={{ p: 1, ml: -1, minWidth: 0, flexShrink: 1 }}
+        onClick={() => floating.open(name)}
+      >
+        <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
+          {name}
+        </Typography>
+      </ButtonBase>
+
+      {isReordering && Actions}
+    </Box>
+  )
+
   return (
     <>
       {floating.render()}
-      <Box
+      <TableRow
         sx={{
-          ...rowStyle,
           borderBottom: `0.5px solid black`,
           borderColor: 'divider',
           '&:last-child': { border: 0 },
         }}
-      >
-        <Box
-          ref={ref}
-          sx={{
-            pb: 0,
-            pt: 1,
-            minWidth: 0,
-            display: 'flex',
-            flexDirection: 'row',
-            alignContent: 'flex-end',
-            justifyContent: 'flex-start',
-            alignItems: 'center',
-          }}
-        >
-          <ButtonBase
-            sx={{ p: 1, ml: -1, minWidth: 0, flexShrink: 1 }}
-            onClick={() => floating.open(name)}
-          >
-            <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
-              {name}
-            </Typography>
-          </ButtonBase>
+        name={NameCell}
+        budgeted={null}
+        outcome={null}
+        available={null}
+        goal={null}
+      />
 
-          {isReordering && nextIdx !== undefined && (
-            <Tooltip title="Опустить ниже">
-              <IconButton
-                onClick={() => dispatch(moveGroup(groupIdx, nextIdx))}
-              >
-                <ArrowDownwardIcon />
-              </IconButton>
-            </Tooltip>
-          )}
-
-          {isReordering && prevIdx !== undefined && (
-            <Tooltip title="Поднять выше">
-              <IconButton
-                onClick={() => dispatch(moveGroup(groupIdx, prevIdx))}
-              >
-                <ArrowUpwardIcon />
-              </IconButton>
-            </Tooltip>
-          )}
-
-          {isReordering && (
-            <Tooltip title="Создать категорию">
-              <IconButton
-                onClick={() =>
-                  dispatch(createEnvelope({ group: name, indexRaw: groupIdx }))
-                }
-              >
-                <AddIcon />
-              </IconButton>
-            </Tooltip>
-          )}
-        </Box>
-      </Box>
       {children}
     </>
   )

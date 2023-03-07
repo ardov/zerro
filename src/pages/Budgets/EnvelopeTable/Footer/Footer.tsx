@@ -1,9 +1,9 @@
 import React, { FC } from 'react'
-import { Typography, Box } from '@mui/material'
-import { rowStyle, useIsSmall } from '../shared/shared'
+import { Typography } from '@mui/material'
+import { TableRow } from '../shared/shared'
 
 import { Metric } from '../models/useMetric'
-import { TISOMonth } from '@shared/types'
+import { TFxAmount, TISOMonth } from '@shared/types'
 import { balances } from '@entities/envBalances'
 import { DisplayAmount } from '@entities/currency/displayCurrency'
 
@@ -13,65 +13,28 @@ type FooterProps = {
 }
 
 export const Footer: FC<FooterProps> = props => {
-  const { month, metric } = props
-  const isSmall = useIsSmall()
+  const { month } = props
   const totals = balances.useTotals()[month]
 
+  const Sum: FC<{ value: TFxAmount }> = ({ value }) => (
+    <Typography variant="overline" color="text.secondary" align="right" noWrap>
+      <DisplayAmount value={value} decMode="ifOnly" month={month} noCurrency />
+    </Typography>
+  )
+
   return (
-    <Box sx={rowStyle}>
-      <div>
-        <Typography variant="overline" color="text.secondary" noWrap>
-          Итого
-        </Typography>
-      </div>
-
-      {(metric === Metric.budgeted || !isSmall) && (
-        <Typography
-          variant="overline"
-          color="text.secondary"
-          align="right"
-          noWrap
-        >
-          <DisplayAmount
-            value={totals.budgeted}
-            decMode="ifOnly"
-            month={month}
-            noCurrency
-          />
-        </Typography>
-      )}
-
-      {(metric === Metric.outcome || !isSmall) && (
-        <Typography
-          variant="overline"
-          color="text.secondary"
-          align="right"
-          noWrap
-        >
-          <DisplayAmount
-            value={totals.envActivity}
-            decMode="ifOnly"
-            month={month}
-            noCurrency
-          />
-        </Typography>
-      )}
-
-      {(metric === Metric.available || !isSmall) && (
-        <Typography
-          variant="overline"
-          color="text.secondary"
-          align="right"
-          noWrap
-        >
-          <DisplayAmount
-            value={totals.available}
-            decMode="ifOnly"
-            month={month}
-            noCurrency
-          />
-        </Typography>
-      )}
-    </Box>
+    <TableRow
+      name={
+        <div>
+          <Typography variant="overline" color="text.secondary" noWrap>
+            Итого
+          </Typography>
+        </div>
+      }
+      budgeted={<Sum value={totals.budgeted} />}
+      outcome={<Sum value={totals.envActivity} />}
+      available={<Sum value={totals.available} />}
+      goal={null}
+    />
   )
 }

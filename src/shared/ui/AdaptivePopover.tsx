@@ -8,6 +8,14 @@ import {
   useMediaQuery,
 } from '@mui/material'
 
+const radius = '16px'
+const br = {
+  top: [0, 0, radius, radius].join(' '),
+  left: [radius, 0, 0, radius].join(' '),
+  right: [0, radius, radius, 0].join(' '),
+  bottom: [radius, radius, 0, 0].join(' '),
+}
+
 export const AdaptivePopover = (
   props: PopoverProps & { anchor?: SwipeableDrawerProps['anchor'] }
 ) => {
@@ -15,15 +23,16 @@ export const AdaptivePopover = (
   const { transitionDuration, anchorEl, anchor, ...rest } = props
 
   if (isMobile) {
+    const placement = anchor || 'bottom'
     return (
       <SwipeableDrawer
-        anchor={anchor || 'bottom'}
+        anchor={placement}
         onOpen={() => {}}
         disableSwipeToOpen
         PaperProps={{
           sx: {
             maxHeight: 'calc(100vh - 48px)',
-            borderRadius: '8px 8px 0 0',
+            borderRadius: br[placement],
           },
         }}
         {...rest}
