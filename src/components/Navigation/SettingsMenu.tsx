@@ -214,7 +214,7 @@ function ReloadDataItem({ onClose }: ItemProps) {
     window.location.reload()
   }
   return (
-    <Confirm onOk={reloadData}>
+    <Confirm onOk={reloadData} elKey="reloadDataConfirm">
       <MenuItem>
         <ListItemIcon>
           <SyncIcon />

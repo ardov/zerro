@@ -76,6 +76,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
             onOk={() => dispatch(copyPreviousBudget(month))}
             okText="Скопировать"
             cancelText="Отмена"
+            elKey="copyBudgetsConfirm"
           >
             <Button fullWidth color="secondary">
               Копировать с прошлого месяца
@@ -88,6 +89,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
               onOk={() => dispatch(overspendModel.fixAll(month))}
               okText="Покрыть перерасходы"
               cancelText="Отмена"
+              elKey="coverOverspends2Confirm"
             >
               <Button fullWidth color="secondary">
                 <span>
@@ -106,6 +108,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
             onOk={() => dispatch(startFresh(month))}
             okText="Сбросить остатки"
             cancelText="Отмена"
+            elKey="startFreshConfirm"
           >
             <Button fullWidth color="secondary">
               Сбросить все остатки
@@ -135,6 +138,7 @@ function GoalAction(props: { month: TISOMonth }) {
       okText="Выполнить цели"
       cancelText="Отмена"
       onOk={() => dispatch(totalGoalsModel.fillAll(month))}
+      elKey="completeAllGoalsConfirm2"
     >
       <Button fullWidth color="secondary">
         Выполнить все цели

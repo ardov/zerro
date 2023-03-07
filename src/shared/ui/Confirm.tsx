@@ -18,11 +18,15 @@ type ConfirmCommonProps = {
   okVariant?: ButtonProps['variant']
 }
 type ConfirmProps = Modify<
-  ConfirmCommonProps & Omit<TSmartDialogProps, 'elKey'>,
+  ConfirmCommonProps & TSmartDialogProps,
   { children: ReactElement }
 >
-export const Confirm: FC<ConfirmProps> = ({ onOk, children, ...rest }) => {
-  const elKey = 'confirm'
+export const Confirm: FC<ConfirmProps> = ({
+  onOk,
+  children,
+  elKey,
+  ...rest
+}) => {
   const confirm = popoverStack.useActions(elKey)
 
   const handleOk = () => {

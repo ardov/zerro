@@ -50,6 +50,7 @@ export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
             onOk={() => dispatch(overspendModel.fixAll(month))}
             okText="Покрыть перерасходы"
             cancelText="Отмена"
+            elKey="coverOverspendsConfirm"
           >
             <Button color="secondary">Исправить автоматически</Button>
           </Confirm>

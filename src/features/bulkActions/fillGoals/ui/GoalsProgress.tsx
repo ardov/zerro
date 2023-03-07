@@ -64,6 +64,7 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
       onOk={onOk}
       okText="Выполнить цели"
       cancelText="Отмена"
+      elKey="completeAllGoals"
     >
       <Tooltip
         arrow

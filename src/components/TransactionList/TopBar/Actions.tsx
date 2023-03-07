@@ -137,6 +137,7 @@ const Actions: FC<ActionsProps> = ({
               onOk={handleDelete}
               okText="Удалить"
               cancelText="Оставить"
+              elKey="deleteSelectedConfirm"
             >
               <Tooltip title="Удалить выбранные">
                 <IconButton children={<DeleteOutlineIcon />} />
@@ -239,6 +240,7 @@ const Actions: FC<ActionsProps> = ({
                   onOk={handleDelete}
                   okText="Удалить"
                   cancelText="Оставить"
+                  elKey="mergeOperationsConfirm"
                 >
                   <MenuItem>
                     <ListItemIcon>
