@@ -1,11 +1,11 @@
 import React, { FC, useEffect, useState } from 'react'
 import {
-  List,
-  ListItemButton,
   ListItemText,
   InputAdornment,
   IconButton,
   PopoverProps,
+  MenuList,
+  MenuItem,
 } from '@mui/material'
 import { Box, BoxProps } from '@mui/system'
 import { CheckCircleIcon } from '@shared/ui/Icons'
@@ -106,49 +106,53 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
       anchor="top"
       {...rest}
     >
-      <AmountInput
-        autoFocus
-        value={inputValue}
-        fullWidth
-        onChange={value => setInputValue(+value)}
-        onEnter={value => changeAndClose(+value)}
-        helperText={helperText}
-        signButtons="auto"
-        placeholder="0"
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">{currency.env}</InputAdornment>
-          ),
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton
-                edge="end"
-                onClick={() => changeAndClose(+inputValue)}
-              >
-                <CheckCircleIcon />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-      />
+      <Box p={1}>
+        <AmountInput
+          autoFocus
+          value={inputValue}
+          fullWidth
+          onChange={value => setInputValue(+value)}
+          onEnter={value => changeAndClose(+value)}
+          helperText={helperText}
+          signButtons="auto"
+          placeholder="0"
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">{currency.env}</InputAdornment>
+            ),
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  edge="end"
+                  onClick={() => changeAndClose(+inputValue)}
+                >
+                  <CheckCircleIcon />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
 
-      <List>
-        {quickActions.map(({ text, amount }) => (
-          <ListItemButton
-            key={text}
-            selected={inputValue === amount}
-            onClick={() => {
-              sendEvent('Budgets: quick budget: ' + text)
-              changeAndClose(amount)
-            }}
-          >
-            <ListItemText
-              primary={<NameValueRow name={text} value={format.env(amount)} />}
-            />
-            {/* <ListItemText primary={format.tag(amount)} /> */}
-          </ListItemButton>
-        ))}
-      </List>
+        <MenuList>
+          {quickActions.map(({ text, amount }) => (
+            <MenuItem
+              key={text}
+              selected={inputValue === amount}
+              sx={{ borderRadius: 1 }}
+              onClick={() => {
+                sendEvent('Budgets: quick budget: ' + text)
+                changeAndClose(amount)
+              }}
+            >
+              <ListItemText
+                primary={
+                  <NameValueRow name={text} value={format.env(amount)} />
+                }
+              />
+            </MenuItem>
+          ))}
+        </MenuList>
+      </Box>
     </AdaptivePopover>
   )
 }

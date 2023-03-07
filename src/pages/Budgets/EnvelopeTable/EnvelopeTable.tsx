@@ -11,7 +11,7 @@ import { envelopeModel, TEnvelopeId } from '@entities/envelope'
 import { Parent } from './Parent'
 import { Row } from './Row'
 import { Header } from './Header'
-import { useMetric } from './models/useMetric'
+import { RenderColumnsProvider, useMetric } from './models/useMetric'
 import { useExpandEnvelopes } from './models/useExpandEnvelopes'
 import { Highlight } from './Highlight'
 import { useEnvRenderInfo } from './models/envRenderInfo'
@@ -42,7 +42,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
   const structure = useAppSelector(envelopeModel.getEnvelopeStructure, isEqual)
   const renderInfo = useEnvRenderInfo(month)
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
-  const { metric, toggleMetric } = useMetric()
+  const { metric } = useMetric()
   const [showAll, toggleShowAll] = useToggle()
   const [reorderMode, toggleReorderMode] = useToggle()
 
@@ -69,7 +69,6 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
                 key={'child' + child.id}
                 id={child.id}
                 month={month}
-                metric={metric}
                 isDefaultVisible={renderInfo[child.id].isDefaultVisible}
                 isLastVisibleChild={idx === arr.length - 1}
                 isReordering={reorderMode}
@@ -85,7 +84,6 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
                 key={'self' + parent.id}
                 id={parent.id}
                 month={month}
-                metric={metric}
                 isDefaultVisible={renderInfo[parent.id].isDefaultVisible}
                 isReordering={reorderMode}
                 openTransactionsPopover={onShowExactTransactions}
@@ -110,7 +108,6 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
                 <Row
                   id={parent.id}
                   month={month}
-                  metric={metric}
                   isDefaultVisible={isDefaultVisible}
                   isExpanded={isExpanded}
                   isReordering={reorderMode}
@@ -153,12 +150,10 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
       <Paper className={className} sx={{ position: 'relative', pb: 1 }}>
         <Header
           month={month}
-          metric={metric}
           isAllShown={showAll}
           isReordering={reorderMode}
           onShowAllToggle={toggleShowAll}
           onReorderModeToggle={toggleReorderMode}
-          onMetricSwitch={toggleMetric}
           onOpenOverview={onOpenOverview}
         />
         <NewGroup visible={reorderMode} />
@@ -171,6 +166,10 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
 }
 
 export const EnvelopeTable = memo(
-  (props: TagTableProps) => <EnvelopeTable2 {...props} />,
+  (props: TagTableProps) => (
+    <RenderColumnsProvider>
+      <EnvelopeTable2 {...props} />
+    </RenderColumnsProvider>
+  ),
   shallowEqual
 )

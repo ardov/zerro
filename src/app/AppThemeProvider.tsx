@@ -28,6 +28,7 @@ const globalStyles = css`
   *::before,
   *::after {
     box-sizing: inherit;
+    -webkit-tap-highlight-color: transparent;
   }
 
   ::-webkit-scrollbar {
