@@ -3,13 +3,13 @@ import { Typography, ButtonBase, ButtonBaseProps } from '@mui/material'
 import { TISOMonth } from '@shared/types'
 import { formatMoney } from '@shared/helpers/money'
 import { Tooltip } from '@shared/ui/Tooltip'
-import { Confirm } from '@shared/ui/Confirm'
 import { RadialProgress } from '@shared/ui/RadialProgress'
 import { useAppDispatch, useAppSelector } from '@store'
 
 import { displayCurrency } from '@entities/currency/displayCurrency'
 import { goalModel } from '@entities/goal'
 import { totalGoalsModel } from '../model'
+import { useConfirm } from '@shared/ui/SmartConfirm'
 
 type TGoalsProgressProps = ButtonBaseProps & {
   month: TISOMonth
@@ -35,8 +35,14 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const totalProgress = useAppSelector(goalModel.getTotals)[month]
   const formatSum = (sum: number) => formatMoney(sum, currency)
 
-  const onOk = () => dispatch(totalGoalsModel.fillAll(month))
-  // const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
+  const completeAll = useConfirm({
+    onOk: () => dispatch(totalGoalsModel.fillAll(month)),
+    okText: 'Выполнить цели',
+    title: 'Выполнить все цели?',
+    description:
+      'Бюджеты будут выставлены так, чтобы цели в этом месяце выполнились.',
+    cancelText: 'Отмена',
+  })
 
   // No goals
   if (!totalProgress || totalProgress.goalsCount === 0) return null
@@ -46,39 +52,19 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const needValue = toDisplay(need)
   if (!targetValue || !needValue) return null
 
-  // All completed
-  // if (totalProgress.progress === 1) {
-  //   return (
-  //     <Tooltip arrow title={`Всего нужно было ${formatSum(targetValue)}`}>
-  //       <StyledBase {...btnProps}>
-  //         <Typography variant="body1">🥳 Цели выполнены</Typography>
-  //       </StyledBase>
-  //     </Tooltip>
-  //   )
-  // }
-
   return (
-    <Confirm
-      title="Выполнить все цели?"
-      description="Бюджеты будут выставлены так, чтобы цели в этом месяце выполнились."
-      onOk={onOk}
-      okText="Выполнить цели"
-      cancelText="Отмена"
-      elKey="completeAllGoals"
+    <Tooltip
+      arrow
+      title={`${formatSum(targetValue - needValue)} из ${formatSum(
+        targetValue
+      )}`}
     >
-      <Tooltip
-        arrow
-        title={`${formatSum(targetValue - needValue)} из ${formatSum(
-          targetValue
-        )}`}
-      >
-        <ButtonBase sx={baseStyles} {...btnProps}>
-          <RadialProgress value={progress} />
-          <Typography variant="body1">
-            Цели {Math.floor(progress * 100)}%
-          </Typography>
-        </ButtonBase>
-      </Tooltip>
-    </Confirm>
+      <ButtonBase sx={baseStyles} {...btnProps} onClick={completeAll}>
+        <RadialProgress value={progress} />
+        <Typography variant="body1">
+          Цели {Math.floor(progress * 100)}%
+        </Typography>
+      </ButtonBase>
+    </Tooltip>
   )
 }

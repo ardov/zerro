@@ -22,6 +22,7 @@ import Transactions from '@pages/Transactions'
 import Auth from '@pages/Auth'
 import Budgets from '@pages/Budgets'
 import Accounts from '@pages/Accounts'
+import { SmartConfirm } from '@shared/ui/SmartConfirm'
 
 const About = lazy(() => import('@pages/About'))
 const Donation = lazy(() => import('@pages/Donation'))
@@ -97,6 +98,8 @@ export default function App() {
             </Suspense>
           </ErrorBoundary>
         </Layout>
+
+        <SmartConfirm />
       </PopoverManager>
     </Router>
   )

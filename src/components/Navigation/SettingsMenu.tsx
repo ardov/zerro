@@ -27,7 +27,6 @@ import {
 } from '@mui/material'
 import { useThemeType } from '@shared/hooks/useThemeType'
 import { sendEvent } from '@shared/helpers/tracking'
-import { Confirm } from '@shared/ui/Confirm'
 import { useSnackbar } from '@shared/ui/SnackbarProvider'
 import { AdaptivePopover } from '@shared/ui/AdaptivePopover'
 import { appVersion } from '@shared/config'
@@ -43,6 +42,7 @@ import { exportJSON } from '@features/export/exportJSON'
 import { clearLocalData } from '@features/localData'
 import { convertZmBudgetsToZerro } from '@features/budget/convertZmBudgetsToZerro'
 import { makePopoverHooks } from '@shared/ui/PopoverManager'
+import { useConfirm } from '@shared/ui/SmartConfirm'
 
 const settingsHooks = makePopoverHooks<{}, PopoverProps>('settingsMenu', {})
 
@@ -213,15 +213,14 @@ function ReloadDataItem({ onClose }: ItemProps) {
     dispatch(clearLocalData())
     window.location.reload()
   }
+  const reload = useConfirm({ onOk: reloadData })
   return (
-    <Confirm onOk={reloadData} elKey="reloadDataConfirm">
-      <MenuItem>
-        <ListItemIcon>
-          <SyncIcon />
-        </ListItemIcon>
-        <ListItemText>Перезагрузить данные</ListItemText>
-      </MenuItem>
-    </Confirm>
+    <MenuItem onClick={reload}>
+      <ListItemIcon>
+        <SyncIcon />
+      </ListItemIcon>
+      <ListItemText>Перезагрузить данные</ListItemText>
+    </MenuItem>
   )
 }
 
