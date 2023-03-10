@@ -7,6 +7,7 @@ import data from './data'
 import token from './token'
 import isPending from './isPending'
 import lastSync from './lastSync'
+import displayCurrency from './displayCurrency'
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     isPending,
     lastSync,
     token,
+    displayCurrency,
   },
   preloadedState: { token: zenmoney.getLocalToken() },
   middleware: getDefaultMiddleware =>
