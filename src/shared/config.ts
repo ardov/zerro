@@ -1,32 +1,21 @@
 // ZenMoney endpoints
-// @ts-ignore
-export const authEndpoint = import.meta.env.REACT_APP_AUTH_ENDPOINT
-// @ts-ignore
-export const tokenEndpoint = import.meta.env.REACT_APP_TOKEN_ENDPOINT
-// @ts-ignore
-export const diffEndpoint = import.meta.env.REACT_APP_DIFF_ENDPOINT
+export const authEndpoint = import.meta.env.REACT_APP_AUTH_ENDPOINT as string
+export const tokenEndpoint = import.meta.env.REACT_APP_TOKEN_ENDPOINT as string
+export const diffEndpoint = import.meta.env.REACT_APP_DIFF_ENDPOINT as string
 
 // Parameters for ZenMoney requests
-// @ts-ignore
-export const clientId = import.meta.env.REACT_APP_CLIENT_ID
-// @ts-ignore
-export const clientSecret = import.meta.env.REACT_APP_CLIENT_SECRET
-// @ts-ignore
-export const redirectUri = import.meta.env.REACT_APP_REDIRECT_URI
+export const clientId = import.meta.env.REACT_APP_CLIENT_ID as string
+export const clientSecret = import.meta.env.REACT_APP_CLIENT_SECRET as string
+export const redirectUri = import.meta.env.REACT_APP_REDIRECT_URI as string
 
 // Tracking parameters
-// @ts-ignore
-export const sentryDSN = import.meta.env.REACT_APP_SENTRY_DSN
-// @ts-ignore
-export const ymid = import.meta.env.REACT_APP_YMID
-// @ts-ignore
-export const gaid = import.meta.env.REACT_APP_GAID
+export const sentryDSN = import.meta.env.REACT_APP_SENTRY_DSN as string
+export const ymid = import.meta.env.REACT_APP_YMID as string
+export const gaid = import.meta.env.REACT_APP_GAID as string
 
 // Info about the app
 export const appVersion = APP_VERSION
-// @ts-ignore
 export const appPublicUrl = import.meta.env.BASE_URL
-// @ts-ignore
 export const isProduction = import.meta.env.PROD
 
 // Database parameters
