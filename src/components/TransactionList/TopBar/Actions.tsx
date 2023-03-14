@@ -4,12 +4,12 @@ import './transitions.css'
 import { useAppDispatch } from '@store'
 import IconButton from '@mui/material/IconButton'
 import {
-  DeleteOutlineIcon,
   LocalOfferOutlinedIcon,
   DoneAllIcon,
   MoreVertIcon,
   VisibilityIcon,
   MergeTypeIcon,
+  DeleteIcon,
 } from '@shared/ui/Icons'
 import { Tooltip } from '@shared/ui/Tooltip'
 import Chip from '@mui/material/Chip'
@@ -137,7 +137,7 @@ const Actions: FC<ActionsProps> = ({
 
             <Tooltip title="Удалить выбранные">
               <IconButton onClick={handleDelete}>
-                <DeleteOutlineIcon />
+                <DeleteIcon />
               </IconButton>
             </Tooltip>
 

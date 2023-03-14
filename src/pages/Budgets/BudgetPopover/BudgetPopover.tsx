@@ -8,7 +8,7 @@ import {
   MenuItem,
 } from '@mui/material'
 import { Box, BoxProps } from '@mui/system'
-import { CheckCircleIcon } from '@shared/ui/Icons'
+import { DoneIcon } from '@shared/ui/Icons'
 import { AmountInput } from '@shared/ui/AmountInput'
 import { formatMoney } from '@shared/helpers/money'
 import { convertFx } from '@shared/helpers/money'
@@ -126,7 +126,7 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
                   edge="end"
                   onClick={() => changeAndClose(+inputValue)}
                 >
-                  <CheckCircleIcon />
+                  <DoneIcon />
                 </IconButton>
               </InputAdornment>
             ),

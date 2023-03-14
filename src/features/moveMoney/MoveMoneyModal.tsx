@@ -2,7 +2,7 @@ import React, { FC, useState } from 'react'
 import { Box, InputAdornment, IconButton, Chip } from '@mui/material'
 import Dialog, { DialogProps } from '@mui/material/Dialog'
 import { AmountInput } from '@shared/ui/AmountInput'
-import { ArrowForwardIcon, ArrowRightAltIcon } from '@shared/ui/Icons'
+import { ArrowForwardIcon } from '@shared/ui/Icons'
 import { Modify, TISOMonth } from '@shared/types'
 import { useAppDispatch } from '@store'
 
@@ -70,7 +70,7 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
         >
           <Chip label={sourceName} />
           <Box mx={1} display="flex" alignItems="center">
-            <ArrowRightAltIcon />
+            <ArrowForwardIcon />
           </Box>
           <Chip label={destinationName} />
         </Box>

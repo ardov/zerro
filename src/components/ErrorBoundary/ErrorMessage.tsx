@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { Box, Typography, Button } from '@mui/material'
-import { RefreshIcon } from '@shared/ui/Icons'
+import { SyncIcon } from '@shared/ui/Icons'
 
 interface ErrorMessageProps {
   onLogOut: () => void
@@ -28,7 +28,7 @@ export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut, message }) => (
         <Button
           variant="contained"
           color="primary"
-          startIcon={<RefreshIcon />}
+          startIcon={<SyncIcon />}
           onClick={() => window.location.reload()}
         >
           Обновить

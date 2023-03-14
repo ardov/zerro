@@ -1,6 +1,5 @@
 import React, { FC } from 'react'
 import { useLocation, useHistory } from 'react-router'
-import SettingsIcon from '@mui/icons-material/Settings'
 import {
   BottomNavigation,
   BottomNavigationAction,
@@ -11,6 +10,7 @@ import { makeStyles } from '@mui/styles'
 import {
   AccountBalanceIcon,
   AccountBalanceWalletIcon,
+  SettingsIcon,
   SyncAltIcon,
 } from '@shared/ui/Icons'
 import { useHomeBar } from '@shared/hooks/useHomeBar'

@@ -98,8 +98,8 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
       <ExportJsonItem />
 
       <Divider light />
-      <LogOutItem />
-      <VersionItem />
+      <LogOutItem onClose={props.onClose} />
+      <VersionItem onClose={props.onClose} />
     </>
   )
 }
@@ -284,9 +284,10 @@ function BudgetSettingsItem() {
   )
 }
 
-function LogOutItem() {
+function LogOutItem({ onClose }: ItemProps) {
   const dispatch = useAppDispatch()
   const handleClick = () => {
+    onClose()
     sendEvent('Settings: log out')
     dispatch(logOut())
   }
@@ -300,16 +301,17 @@ function LogOutItem() {
   )
 }
 
-function VersionItem() {
+function VersionItem({ onClose }: ItemProps) {
   return (
-    <MenuItem onClick={() => window.location.reload()}>
+    <MenuItem
+      onClick={() => {
+        onClose()
+        window.location.reload()
+      }}
+    >
       <ListItemIcon />
       <ListItemText>
-        <Typography
-          variant="overline"
-          color="textSecondary"
-          onClick={() => window.location.reload()}
-        >
+        <Typography variant="overline" color="textSecondary">
           Версия: {appVersion}
         </Typography>
       </ListItemText>
