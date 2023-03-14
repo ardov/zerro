@@ -53,8 +53,8 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
     (date: TISODate) => {
       datePopover.open({
         value: parseDate(date),
-        minDate: parseDate(groups.at(-1)?.date || 0),
-        maxDate: parseDate(groups.at(0)?.date || 0),
+        minDate: parseDate(groups[groups.length - 1]?.date || 0),
+        maxDate: parseDate(groups[0]?.date || 0),
         onChange: d => {
           datePopover.close()
           scrollToDate(d as TISODate)

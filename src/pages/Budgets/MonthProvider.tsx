@@ -17,8 +17,8 @@ export function useMonth() {
 export const MonthProvider: FC<{ children: ReactNode }> = props => {
   const currentMonth = toISOMonth(new Date())
   const monthList = balances.useMonthList()
-  const firstMonth = monthList.at(0) || currentMonth
-  const lastMonth = monthList.at(-1) || currentMonth
+  const firstMonth = monthList[0] || currentMonth
+  const lastMonth = monthList[monthList.length - 1] || currentMonth
   const [month, setMonth] = useState<TISOMonth>(currentMonth)
   const setNewMonth = useCallback(
     (date: TDateDraft) =>
