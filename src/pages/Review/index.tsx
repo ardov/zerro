@@ -50,6 +50,9 @@ export default function Review() {
           <Button onClick={() => setYear(y => y - 1)}>
             А что было в прошлом году?
           </Button>
+          <Button onClick={() => setYear(y => y + 1)}>
+            Назад в будущее
+          </Button>
         </Rhythm>
       </Box>
 
