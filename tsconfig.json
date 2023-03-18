@@ -2,7 +2,17 @@
   "compilerOptions": {
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "src",
-    "target": "es5",
+    "paths": {
+      "@components/*": ["components/*"],
+      "@features/*": ["features/*"],
+      "@entities/*": ["entities/*"],
+      "@pages/*": ["pages/*"],
+      "@shared/*": ["shared/*"],
+      "@store/*": ["store/*"],
+      "@store": ["store"],
+      "@worker": ["worker"]
+    },
+    "target": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -17,5 +27,11 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "typings/theme.d.ts",
+    "typings/mdx.d.ts",
+    "typings/vite-env.d.ts"
+  ],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

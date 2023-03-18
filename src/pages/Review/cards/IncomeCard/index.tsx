@@ -1,0 +1,1 @@
+export { IncomeCard } from './IncomeCard'

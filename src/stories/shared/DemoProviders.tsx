@@ -1,0 +1,11 @@
+import React, { FC } from 'react'
+import { store } from '@store'
+import { applyServerPatch } from '@store/data'
+import { Providers } from 'app/Providers'
+import { getDemoData } from './data'
+
+store.dispatch(applyServerPatch(getDemoData()))
+
+export const DemoProviders: FC<{ children?: React.ReactNode }> = props => (
+  <Providers store={store}>{props.children}</Providers>
+)

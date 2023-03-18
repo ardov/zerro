@@ -1,23 +1,25 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
-import { getPopulatedTags } from 'store/localData/tags'
-import { Chip, ChipTypeMap } from '@material-ui/core'
-import CloseIcon from '@material-ui/icons/Close'
-import { PopulatedTag, TagId } from 'types'
+import React, { FC } from 'react'
+import { useAppSelector } from '@store'
+import { getPopulatedTags, TTagPopulated } from '@entities/tag'
+import { Chip, ChipProps } from '@mui/material'
+import { CloseIcon } from '@shared/ui/Icons'
+import { TTagId } from '@shared/types'
 
-function getTagLabel(tag?: PopulatedTag) {
+function getTagLabel(tag?: TTagPopulated) {
   if (!tag) return null
   if (tag.icon) return `${tag.symbol} ${tag.name}`
   return tag.title
 }
 
-interface TagChipProps extends ChipTypeMap {
-  id: TagId
+interface TagChipProps extends ChipProps {
+  id: TTagId
 }
 
-export default function TagChip({ id, ...rest }: TagChipProps) {
-  let tag = useSelector(getPopulatedTags)[id]
+const TagChip: FC<TagChipProps> = ({ id, ...rest }) => {
+  let tag = useAppSelector(getPopulatedTags)[id]
   let label = getTagLabel(tag)
   if (id === 'mixed') label = 'Разные категории'
   return <Chip deleteIcon={<CloseIcon />} label={label} {...rest} />
 }
+
+export default TagChip

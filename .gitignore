@@ -12,6 +12,7 @@
 /build
 
 # misc
+.idea
 .vscode
 .DS_Store
 .env.local
@@ -27,3 +28,5 @@ yarn-error.log*
 # cache
 .eslintcache
 .cache
+
+.vercel
