@@ -9,21 +9,17 @@ import {
   Switch,
   Grid,
   Typography,
+  Button,
   IconButton,
-  TextFieldProps,
   SelectChangeEvent,
   FormControl,
   InputLabel,
 } from '@mui/material'
-import { DateRangePicker } from '@mui/lab'
 import { makeStyles } from '@mui/styles'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { CloseIcon } from '@shared/ui/Icons'
-import Button from '@mui/material/Button'
-import { formatDate } from '@shared/helpers/date'
 import { FilterConditions } from '@entities/transaction/filtering'
 import { TrType } from '@entities/transaction'
-import { endOfDay, prevMonth, startOfDay } from '@shared/helpers/date'
 import { SmartSelect } from '@shared/ui/SmartSelect'
 
 const useStyles = makeStyles(theme => ({
@@ -107,7 +103,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
           </Grid>
         </Box>
 
-        <Box mt={3} display="flex">
+        {/* <Box mt={3} display="flex">
           <DateRangePicker
             startText="Дата от"
             endText="Дата до"
@@ -144,7 +140,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
               </Grid>
             )}
           />
-        </Box>
+        </Box> */}
         <Box mt={3}>
           <FormControl fullWidth>
             <InputLabel>Тип транзакции</InputLabel>
