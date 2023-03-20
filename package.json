@@ -67,7 +67,7 @@
     "@mui/material": "^5.11.13",
     "@mui/styles": "^5.11.13",
     "@mui/system": "^5.11.13",
-    "@mui/x-date-pickers": "^6.0.1",
+    "@mui/x-date-pickers": "^6.0.2",
     "@react-hook/window-scroll": "^1.3.0",
     "@reduxjs/toolkit": "^1.9.3",
     "@sentry/browser": "^7.43.0",
