@@ -128,6 +128,7 @@
     "eslint": "^8.36.0",
     "eslint-config-react-app": "^7.0.1",
     "postcss": "^8.4.21",
+    "rollup": "^3.20.0",
     "sass": "^1.59.3",
     "storybook": "^7.0.0-rc.5",
     "stylelint": "^15.3.0",
