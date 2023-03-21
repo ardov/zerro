@@ -1,16 +1,21 @@
 import React from 'react'
-import { EmojiIcon, EmojiIconProps } from '@shared/ui/EmojiIcon'
-import { Story, Meta } from '@storybook/react'
+import { EmojiIcon } from '@shared/ui/EmojiIcon'
+import { Meta, StoryObj } from '@storybook/react'
 import { context } from './shared/context'
 
-export default {
+const meta = {
   title: 'EmojiIcon',
   component: EmojiIcon,
   decorators: [context],
-  argTypes: { color: { control: { type: 'color' } } },
-} as Meta
+  argTypes: {
+    color: { control: { type: 'color' } },
+  },
+} satisfies Meta<typeof EmojiIcon>
 
-const Template: Story<EmojiIconProps> = args => <EmojiIcon {...args} />
+export default meta
 
-export const Icon = Template.bind({})
-Icon.args = { symbol: '💩' }
+type Story = StoryObj<typeof meta>
+
+export const Icon: Story = {
+  args: { symbol: '💩' },
+}

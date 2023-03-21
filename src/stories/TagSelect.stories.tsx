@@ -1,16 +1,15 @@
 import React from 'react'
-import { ComponentStory, ComponentMeta } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 import { TagSelect } from '../components/TagSelect'
 import { context } from './shared/context'
 
-export default {
+const meta = {
   title: 'TagSelect',
   component: TagSelect,
   decorators: [context],
-} as ComponentMeta<typeof TagSelect>
+} satisfies Meta<typeof TagSelect>
 
-const Template: ComponentStory<typeof TagSelect> = args => (
-  <TagSelect {...args} />
-)
+export default meta
+type Story = StoryObj<typeof meta>
 
-export const TagSelectStory = Template.bind({})
+export const TagSelectStory: Story = {}
