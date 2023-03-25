@@ -1,6 +1,11 @@
 import React, { FC } from 'react'
-import { Typography, ButtonBase, Divider, ButtonBaseProps } from '@mui/material'
-import { useTheme } from '@mui/styles'
+import {
+  Typography,
+  ButtonBase,
+  Divider,
+  ButtonBaseProps,
+  useTheme,
+} from '@mui/material'
 import { formatMoney, sub } from '@shared/helpers/money'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { Amount } from '@shared/ui/Amount'

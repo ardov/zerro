@@ -1,6 +1,5 @@
 import React from 'react'
-import { makeStyles } from '@mui/styles'
-import { Box, BoxProps, Checkbox, CheckboxProps } from '@mui/material'
+import { Box, BoxProps, Checkbox, CheckboxProps, SxProps } from '@mui/material'
 import { Modify } from '@shared/types'
 
 const sizes = { s: 32, m: 40 }
@@ -20,70 +19,6 @@ export type EmojiIconProps = Modify<
   }
 >
 
-interface StylesProps {
-  symbol: string
-  color?: string
-  size: 's' | 'm'
-  isInteractive: boolean
-  checked: CheckboxProps['checked']
-  showCheckBox: boolean
-  button: boolean
-}
-
-const useStyles = makeStyles(theme => ({
-  symbol: {
-    width: ({ size }: StylesProps) => sizes[size],
-    height: ({ size }: StylesProps) => sizes[size],
-    flexShrink: 0,
-    color: ({ color }: StylesProps) =>
-      theme.palette.getContrastText(color || theme.palette.background.paper),
-    cursor: ({ button }: StylesProps) => (button ? 'pointer' : 'auto'),
-    borderRadius: '50%',
-    border: ({ color }: StylesProps) => (color ? `1px solid ${color}` : 'none'),
-    background: ({ color }: StylesProps) =>
-      color
-        ? 'linear-gradient(-30deg, rgba(255,255,255,0.2), transparent)'
-        : 'none',
-    backgroundColor: ({ color }: StylesProps) =>
-      color ? color : theme.palette.action.hover,
-    transition: '.2s ease-in-out',
-
-    '&:hover': {
-      transform: ({ button }: StylesProps) => (button ? 'scale(1.1)' : 'none'),
-    },
-    '&:active': {
-      transform: ({ button }: StylesProps) => (button ? 'scale(1)' : 'none'),
-      transition: '.1s ease-in-out',
-    },
-
-    '&:hover .checkbox': {
-      opacity: ({ isInteractive }: StylesProps) => (isInteractive ? 1 : 0),
-      transition: '.2s',
-    },
-    '&:not(:hover) .checkbox': {
-      opacity: ({ showCheckBox, checked }: StylesProps) =>
-        showCheckBox || checked ? 1 : 0,
-      transition: '.2s',
-    },
-    '&:hover .emoji': {
-      opacity: ({ isInteractive }: StylesProps) => (isInteractive ? 0 : 1),
-      transition: '.2s',
-    },
-    '&:not(:hover) .emoji': {
-      opacity: ({ showCheckBox, checked }: StylesProps) =>
-        showCheckBox || checked ? 0 : 1,
-      transition: '.2s',
-    },
-  },
-
-  emoji: {
-    position: 'absolute',
-    fontSize: ({ size }: StylesProps) => fonts[size],
-    transform: 'scale(.25)',
-    textAlign: 'center',
-  },
-}))
-
 export function EmojiIcon(props: EmojiIconProps) {
   const {
     symbol,
@@ -96,25 +31,66 @@ export function EmojiIcon(props: EmojiIconProps) {
     button = false,
     ...rest
   } = props
-  const c = useStyles({
-    color,
-    size,
-    isInteractive: !!onChange,
-    button,
-    showCheckBox,
-    checked,
-  } as StylesProps)
+  const isInteractive = !!onChange
+
+  const symbolSx: SxProps<DefaultTheme> = {
+    width: sizes[size],
+    height: sizes[size],
+    flexShrink: 0,
+    color: theme =>
+      theme.palette.getContrastText(color || theme.palette.background.paper),
+    cursor: button ? 'pointer' : 'auto',
+    borderRadius: '50%',
+    border: color ? `1px solid ${color}` : 'none',
+    background: color
+      ? 'linear-gradient(-30deg, rgba(255,255,255,0.2), transparent)'
+      : 'none',
+    backgroundColor: theme => (color ? color : theme.palette.action.hover),
+    transition: '.2s ease-in-out',
+
+    '&:hover': {
+      transform: button ? 'scale(1.1)' : 'none',
+    },
+    '&:active': {
+      transform: button ? 'scale(1)' : 'none',
+      transition: '.1s ease-in-out',
+    },
+
+    '&:hover .checkbox': {
+      opacity: isInteractive ? 1 : 0,
+      transition: '.2s',
+    },
+    '&:not(:hover) .checkbox': {
+      opacity: showCheckBox || checked ? 1 : 0,
+      transition: '.2s',
+    },
+    '&:hover .emoji': {
+      opacity: isInteractive ? 0 : 1,
+      transition: '.2s',
+    },
+    '&:not(:hover) .emoji': {
+      opacity: showCheckBox || checked ? 0 : 1,
+      transition: '.2s',
+    },
+
+    '& .emoji': {
+      position: 'absolute',
+      fontSize: fonts[size],
+      transform: 'scale(.25)',
+      textAlign: 'center',
+    },
+  }
 
   return (
     <Box
-      className={c.symbol}
       display="flex"
       alignItems="center"
       justifyContent="center"
       position="relative"
+      sx={symbolSx}
       {...rest}
     >
-      <span className={c.emoji + ' emoji'}>{symbol}</span>
+      <span className="emoji">{symbol}</span>
       {onChange && (
         <Checkbox
           className="checkbox"

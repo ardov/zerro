@@ -1,6 +1,5 @@
 import React, { FC } from 'react'
 import { Drawer, Box, Typography, IconButton, DrawerProps } from '@mui/material'
-import { makeStyles } from '@mui/styles'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { CloseIcon } from '@shared/ui/Icons'
 import { Modify, TDateDraft } from '@shared/types'
@@ -25,13 +24,12 @@ export const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
     open,
     ...rest
   } = props
-  const c = useStyles()
   return (
     <Drawer
       anchor="right"
       onClose={onClose}
       open={open}
-      classes={{ paper: c.drawerWidth, root: c.drawerWidth }}
+      sx={contentSx}
       {...rest}
     >
       <Box height="100vh" display="flex" flexDirection="column" minWidth={320}>
@@ -59,11 +57,8 @@ export const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
   )
 }
 
-const useStyles = makeStyles(theme => ({
-  drawerWidth: {
-    width: 360,
-    [theme.breakpoints.down('sm')]: {
-      width: '100vw',
-    },
-  },
-}))
+const drawerWidth = { xs: '100vw', sm: 360 }
+const contentSx = {
+  width: drawerWidth,
+  [`& .MuiDrawer-paper`]: { width: drawerWidth },
+}
