@@ -12,7 +12,6 @@ import {
   ListItemIcon,
   DrawerProps,
   ListItemButton,
-  useTheme,
 } from '@mui/material'
 import {
   AccountBalanceIcon,
@@ -23,12 +22,14 @@ import {
   BarChartIcon,
 } from '@shared/ui/Icons'
 import { Logo } from '@shared/ui/Logo'
+import { useAppTheme } from '@shared/ui/theme'
 
 import AccountList from '@components/AccountList'
 import { DebtorList } from '@components/DebtorList'
 
 export default function NavigationDrawer(props: DrawerProps) {
-  const theme = useTheme()
+  const theme = useAppTheme()
+  console.log({ theme })
 
   return (
     <Drawer {...props}>

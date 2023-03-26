@@ -31,8 +31,7 @@
     "tabWidth": 2,
     "semi": false,
     "singleQuote": true,
-    "arrowParens": "avoid",
-    "parser": "babel-ts"
+    "arrowParens": "avoid"
   },
   "stylelint": {
     "defaultSeverity": "warning",
@@ -63,7 +62,6 @@
     "@mdx-js/react": "^2.3.0",
     "@mui/icons-material": "^5.11.11",
     "@mui/material": "^5.11.13",
-    "@mui/styles": "^5.11.13",
     "@mui/system": "^5.11.13",
     "@mui/x-date-pickers": "^6.0.2",
     "@reduxjs/toolkit": "^1.9.3",

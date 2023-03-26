@@ -1,5 +1,12 @@
 import React from 'react'
-import { Box, BoxProps, Checkbox, CheckboxProps, SxProps } from '@mui/material'
+import {
+  Box,
+  BoxProps,
+  Checkbox,
+  CheckboxProps,
+  SxProps,
+  Theme,
+} from '@mui/material'
 import { Modify } from '@shared/types'
 
 const sizes = { s: 32, m: 40 }
@@ -33,7 +40,7 @@ export function EmojiIcon(props: EmojiIconProps) {
   } = props
   const isInteractive = !!onChange
 
-  const symbolSx: SxProps<DefaultTheme> = {
+  const symbolSx: SxProps<Theme> = {
     width: sizes[size],
     height: sizes[size],
     flexShrink: 0,

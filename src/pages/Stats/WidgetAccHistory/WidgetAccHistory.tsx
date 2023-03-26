@@ -1,12 +1,14 @@
 import React, { FC, useState } from 'react'
-import { Box, Typography, Paper, useTheme } from '@mui/material'
+import { Box, Typography, Paper } from '@mui/material'
 import { AreaChart, Area, ResponsiveContainer } from 'recharts'
-import { accountModel } from '@entities/account'
+import { useAppTheme } from '@shared/ui/theme'
 import { formatDate } from '@shared/helpers/date'
 import { TAccountId, TISODate } from '@shared/types'
+import { Amount } from '@shared/ui/Amount'
+
+import { accountModel } from '@entities/account'
 import { Period } from '../shared/period'
 import { useAccountHistory } from './model'
-import { Amount } from '@shared/ui/Amount'
 
 type AccTrendProps = {
   period: Period
@@ -19,7 +21,7 @@ export const WidgetAccHistory: FC<AccTrendProps> = ({
   period,
   onClick,
 }) => {
-  const theme = useTheme()
+  const theme = useAppTheme()
   const acc = accountModel.usePopulatedAccounts()[id]
   const data = useAccountHistory(id, period)
 

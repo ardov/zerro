@@ -25,7 +25,6 @@ import {
   Switch,
   Typography,
 } from '@mui/material'
-import { useThemeType } from '@shared/hooks/useThemeType'
 import { sendEvent } from '@shared/helpers/tracking'
 import { useSnackbar } from '@shared/ui/SnackbarProvider'
 import { AdaptivePopover } from '@shared/ui/AdaptivePopover'
@@ -43,6 +42,7 @@ import { clearLocalData } from '@features/localData'
 import { convertZmBudgetsToZerro } from '@features/budget/convertZmBudgetsToZerro'
 import { makePopoverHooks } from '@shared/ui/PopoverManager'
 import { useConfirm } from '@shared/ui/SmartConfirm'
+import { useColorScheme } from '@shared/ui/theme'
 
 const settingsHooks = makePopoverHooks<{}, PopoverProps>('settingsMenu', {})
 
@@ -139,7 +139,7 @@ function ExportJsonItem() {
 }
 
 function ThemeItem({ onClose }: ItemProps) {
-  const theme = useThemeType()
+  const theme = useColorScheme()
   const handleThemeChange = () => {
     sendEvent('Settings: toggle theme')
     onClose()
@@ -148,10 +148,10 @@ function ThemeItem({ onClose }: ItemProps) {
   return (
     <MenuItem onClick={handleThemeChange}>
       <ListItemIcon>
-        {theme.type === 'dark' ? <WbSunnyIcon /> : <NightsStayIcon />}
+        {theme.mode === 'dark' ? <WbSunnyIcon /> : <NightsStayIcon />}
       </ListItemIcon>
       <ListItemText>
-        {theme.type === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
+        {theme.mode === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
       </ListItemText>
     </MenuItem>
   )

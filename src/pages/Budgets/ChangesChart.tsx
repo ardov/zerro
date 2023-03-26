@@ -1,5 +1,5 @@
 import { Line, LineChart, ResponsiveContainer } from 'recharts'
-import { useTheme } from '@mui/material'
+import { useAppTheme } from '@shared/ui/theme'
 import { prevMonth, toISODate, toISOMonth } from '@shared/helpers/date'
 import { TFxAmount, TISODate, TISOMonth } from '@shared/types'
 import { add, convertFx, sub } from '@shared/helpers/money'
@@ -18,7 +18,7 @@ export function ChangesChart(props: ChartProps) {
   const { mode, id } = props
   const [month] = useMonth()
   const trend = useDoubleTrend(month, id)
-  const theme = useTheme()
+  const theme = useAppTheme()
 
   const key = {
     balance: { curr: 'balance', prev: 'prevBalance' },
