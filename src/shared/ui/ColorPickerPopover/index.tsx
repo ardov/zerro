@@ -6,13 +6,13 @@ import {
   InputAdornment,
   Popover,
   PopoverProps,
+  Stack,
   SxProps,
   TextField,
 } from '@mui/material'
 import './styles.scss'
 import { zmColors, colors } from './colors'
 import { isHEX } from '@shared/helpers/color'
-import Rhythm from '@shared/ui/Rhythm'
 import { makePopoverHooks } from '../PopoverManager'
 
 export type ColorPickerProps = {
@@ -59,7 +59,7 @@ export const ColorPicker: FC = () => {
 
   return (
     <Popover {...popover.displayProps}>
-      <Rhythm gap={2} p={2}>
+      <Stack spacing={2} p={2}>
         <Box sx={gridSx}>
           {zmColors.map(color => (
             <ColorCheck
@@ -102,7 +102,7 @@ export const ColorPicker: FC = () => {
         <Button fullWidth onClick={() => handleColorClick(null)}>
           Убрать цвет
         </Button>
-      </Rhythm>
+      </Stack>
     </Popover>
   )
 }

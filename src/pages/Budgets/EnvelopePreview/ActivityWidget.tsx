@@ -1,9 +1,8 @@
 import React, { FC, useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
-import { Box, BoxProps } from '@mui/material'
+import { Stack, Box, BoxProps } from '@mui/material'
 import { useAppTheme } from '@shared/ui/theme'
 import { TFxAmount, TISOMonth } from '@shared/types'
-import Rhythm from '@shared/ui/Rhythm'
 import { DataLine } from '@components/DataLine'
 import { formatDate } from '@shared/helpers/date'
 import { convertFx } from '@shared/helpers/money'
@@ -65,7 +64,7 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
   const startingAmountColor = theme.palette.primary.main
 
   const StartingAmountTooltip = (
-    <Rhythm gap={0.5}>
+    <Stack spacing={0.5}>
       <DataLine
         name="Бюджет в этом месяце"
         amount={selectedData?.budgeted}
@@ -76,7 +75,7 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
         amount={selectedData?.leftover}
         currency={currency}
       />
-    </Rhythm>
+    </Stack>
   )
 
   const onMouseMove = (e: any) => {
@@ -92,7 +91,7 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
 
   return (
     <Box borderRadius={1} bgcolor="background.default" {...boxProps}>
-      <Rhythm gap={0.5} pt={2} px={2}>
+      <Stack spacing={0.5} pt={2} px={2}>
         <DataLine
           name="Расход"
           color={activityColor}
@@ -107,7 +106,7 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
           currency={currency}
           tooltip={StartingAmountTooltip}
         />
-      </Rhythm>
+      </Stack>
 
       <Box width="100%" height="160px">
         <ResponsiveContainer>

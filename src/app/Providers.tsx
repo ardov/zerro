@@ -17,7 +17,7 @@ export function Providers(props: {
       <Provider store={props.store || store}>
         <LocalizationProvider
           dateAdapter={AdapterDateFns}
-          locale={ruDateLocale}
+          adapterLocale={ruDateLocale}
         >
           <AppThemeProvider>
             <SnackbarProvider>{props.children}</SnackbarProvider>

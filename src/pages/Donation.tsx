@@ -2,7 +2,7 @@ import React, { FC } from 'react'
 import { Box, Link, Typography } from '@mui/material'
 import { Helmet } from 'react-helmet'
 import { useAppTheme } from '@shared/ui/theme'
-import Rhythm from '@shared/ui/Rhythm'
+import { Stack } from '@mui/system'
 
 export default function Donation() {
   return (
@@ -29,7 +29,7 @@ export default function Donation() {
             проекта. И не забудьте отметить это в бюджете 😉
           </Typography>
 
-          <Rhythm gap={2} py={2}>
+          <Stack spacing={2} py={2}>
             <LinkCard
               icon={<PatreonLogo />}
               primary="Patreon"
@@ -42,7 +42,7 @@ export default function Donation() {
               secondary="Вы всегда можете перевести любую сумму"
               href="https://www.tinkoff.ru/sl/3zbRWFqgcT1"
             />
-          </Rhythm>
+          </Stack>
 
           <Typography
             variant="body1"

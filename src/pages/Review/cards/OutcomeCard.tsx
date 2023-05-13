@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { Box, IconButton, Stack, Typography } from '@mui/material'
 import { useAppSelector } from '@store'
 import { formatDate } from '@shared/helpers/date'
-import Rhythm from '@shared/ui/Rhythm'
 import { getPopulatedTags } from '@entities/tag'
 import { Card, TCardProps } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
@@ -35,7 +34,7 @@ export function OutcomeCard(props: TCardProps) {
   if (payee) additionalInfo.push(payee)
   return (
     <Card>
-      <Rhythm gap={1} my={1} alignItems="center">
+      <Stack spacing={1} my={1} alignItems="center">
         <Typography variant="body1" align="center">
           Покупка года #{i + 1}
         </Typography>
@@ -61,8 +60,8 @@ export function OutcomeCard(props: TCardProps) {
         )}
 
         <Stack
-          direction="row"
           spacing={1}
+          direction="row"
           alignItems="center"
           sx={{ opacity: 0.3, transition: '200ms', '&:hover': { opacity: 1 } }}
         >
@@ -74,7 +73,7 @@ export function OutcomeCard(props: TCardProps) {
             <ArrowForwardIcon />
           </IconButton>
         </Stack>
-      </Rhythm>
+      </Stack>
     </Card>
   )
 }

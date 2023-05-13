@@ -1,10 +1,15 @@
 import React, { FC } from 'react'
-import { Typography, ButtonBase, Divider, ButtonBaseProps } from '@mui/material'
+import {
+  Typography,
+  ButtonBase,
+  Divider,
+  ButtonBaseProps,
+  Stack,
+} from '@mui/material'
 import { useAppTheme } from '@shared/ui/theme'
 import { formatMoney, sub } from '@shared/helpers/money'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { Amount } from '@shared/ui/Amount'
-import Rhythm from '@shared/ui/Rhythm'
 import { DataLine } from '@components/DataLine'
 import { ArrowForwardIcon } from '@shared/ui/Icons'
 
@@ -112,7 +117,7 @@ function useTotalsModel() {
 
   function TooltipContent() {
     return (
-      <Rhythm gap={1}>
+      <Stack spacing={1}>
         <Typography variant="body2" align="center">
           {messages[msgType]}
         </Typography>
@@ -136,7 +141,7 @@ function useTotalsModel() {
           currency={currency}
         />
         <DataLine name={`Свободно`} amount={toBeBudgeted} currency={currency} />
-      </Rhythm>
+      </Stack>
     )
   }
 
