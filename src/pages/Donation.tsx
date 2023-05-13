@@ -1,6 +1,7 @@
 import React, { FC } from 'react'
-import { Box, Link, Typography, useTheme } from '@mui/material'
+import { Box, Link, Typography } from '@mui/material'
 import { Helmet } from 'react-helmet'
+import { useAppTheme } from '@shared/ui/theme'
 import Rhythm from '@shared/ui/Rhythm'
 
 export default function Donation() {
@@ -94,7 +95,7 @@ const LinkCard: FC<LinkCardProps> = props => {
 }
 
 function PatreonLogo() {
-  const theme = useTheme()
+  const theme = useAppTheme()
   const isDark = theme.palette.mode === 'dark'
   return (
     <svg
@@ -117,7 +118,7 @@ function PatreonLogo() {
 }
 
 function CardLogo() {
-  const theme = useTheme()
+  const theme = useAppTheme()
   const mainColor = theme.palette.primary.main
   const secondaryColor = theme.palette.warning.main
   return (

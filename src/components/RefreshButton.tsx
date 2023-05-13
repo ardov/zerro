@@ -3,7 +3,7 @@ import { syncData } from '@features/sync'
 import { getChangedNum } from '@store/data'
 import { getPendingState } from '@store/isPending'
 import CircularProgress from '@mui/material/CircularProgress'
-import { BottomNavigationAction } from '@mui/material'
+import { BottomNavigationAction, SxProps } from '@mui/material'
 import {
   SyncIcon,
   SyncDisabledIcon,
@@ -19,7 +19,7 @@ import { useAppDispatch, useAppSelector } from '@store'
 
 type ButtonState = 'idle' | 'pending' | 'success' | 'fail'
 
-const RefreshButton: FC<{ isMobile?: boolean; className?: string }> = ({
+const RefreshButton: FC<{ isMobile?: boolean; sx?: SxProps }> = ({
   isMobile,
   ...rest
 }) => {

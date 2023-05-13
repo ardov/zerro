@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { Box, Button, Link, Fade, LinkProps } from '@mui/material'
-import { useTheme } from '@mui/material'
+import { useAppTheme } from '@shared/ui/theme'
 import { fakeToken } from '@shared/config'
 import { tokenStorage } from '@shared/api/tokenStorage'
 import { zenmoney } from '@shared/api/zenmoney'
@@ -17,7 +17,7 @@ zenmoney.checkCode()
 
 export default function Auth() {
   const dispatch = useAppDispatch()
-  const theme = useTheme()
+  const theme = useAppTheme()
   const [logoIn, setLogoIn] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   setTimeout(() => setLogoIn(true), 300)

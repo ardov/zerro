@@ -3,7 +3,6 @@ import {
   Box,
   Typography,
   Paper,
-  useTheme,
   Checkbox,
   FormControlLabel,
   Card,
@@ -17,6 +16,7 @@ import {
   Line,
   ReferenceLine,
 } from 'recharts'
+import { useAppTheme } from '@shared/ui/theme'
 import { round } from '@shared/helpers/money'
 import { formatDate, GroupBy } from '@shared/helpers/date'
 
@@ -35,7 +35,7 @@ type WidgetNetWorthProps = {
 
 export function WidgetNetWorth(props: WidgetNetWorthProps) {
   const { period, onTogglePeriod } = props
-  const theme = useTheme()
+  const theme = useAppTheme()
 
   const balances = useNetWorth(period, GroupBy.Month)
 

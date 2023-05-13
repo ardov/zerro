@@ -1,18 +1,22 @@
 import React from 'react'
-import { Story, Meta } from '@storybook/react'
-import { AmountInput, AmountInputProps } from '@shared/ui/AmountInput'
+import { StoryObj, Meta } from '@storybook/react'
+import { AmountInput } from '@shared/ui/AmountInput'
 import { context } from './shared/context'
 
-export default {
+const meta = {
   title: 'AmountInput',
   component: AmountInput,
   decorators: [context],
-  argTypes: {
-    backgroundColor: { control: 'color' },
+} satisfies Meta<typeof AmountInput>
+
+export default meta
+
+type Story = StoryObj<typeof meta>
+
+export const Primary: Story = {
+  args: {
+    value: 12004.23,
+    currency: 'RUB',
+    label: 'Доход',
   },
-} as Meta
-
-const Template: Story<AmountInputProps> = args => <AmountInput {...args} />
-
-export const Primary = Template.bind({})
-Primary.args = { value: 12004.23, currency: 'RUB', label: 'Доход' }
+}

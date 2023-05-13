@@ -7,7 +7,7 @@ export const withPerf = <T extends Array<any>, U>(
     const res = fn(...args)
     const time = +(performance.now() - t0).toFixed(4)
     //@ts-ignore
-    if (window.zerro.logsShow) console.log('⏱ ' + name.padEnd(32, ' '), time)
+    if (window?.zerro?.logsShow) console.log('⏱ ' + name.padEnd(32, ' '), time)
 
     //@ts-ignore
     if (window.zerro) {

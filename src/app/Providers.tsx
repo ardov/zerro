@@ -1,11 +1,11 @@
 import React from 'react'
 import { Provider } from 'react-redux'
-import AdapterDateFns from '@mui/lab/AdapterDateFns'
-import LocalizationProvider from '@mui/lab/LocalizationProvider'
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { StyledEngineProvider } from '@mui/material/styles'
 import ruDateLocale from 'date-fns/locale/ru'
 import { store } from '@store'
-import { AppThemeProvider } from './AppThemeProvider'
+import { AppThemeProvider } from '@shared/ui/theme'
 import { SnackbarProvider } from '@shared/ui/SnackbarProvider'
 
 export function Providers(props: {

@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { Typography, ButtonBase, Divider, ButtonBaseProps } from '@mui/material'
-import { useTheme } from '@mui/styles'
+import { useAppTheme } from '@shared/ui/theme'
 import { formatMoney, sub } from '@shared/helpers/money'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { Amount } from '@shared/ui/Amount'
@@ -25,7 +25,7 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
     TooltipContent,
   } = useTotalsModel()
 
-  const theme = useTheme()
+  const theme = useAppTheme()
   const isSmall = useIsSmall()
 
   const bg = theme.palette[msgType].main

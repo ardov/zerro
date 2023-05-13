@@ -1,7 +1,7 @@
 import { Stack } from '@mui/material'
-import { useTheme } from '@mui/system'
-import { round } from '@shared/helpers/money'
 import { FC } from 'react'
+import { useAppTheme } from '@shared/ui/theme'
+import { round } from '@shared/helpers/money'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { getTaxes } from './getTaxesByIncome'
 
@@ -11,7 +11,7 @@ type TaxesChartProps = {
 }
 
 export const TaxesChart: FC<TaxesChartProps> = ({ income, outcome }) => {
-  const theme = useTheme()
+  const theme = useAppTheme()
 
   let primaryColor = theme.palette.primary.main // theme.palette.success.light
   let taxesColor = theme.palette.error.light

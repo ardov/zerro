@@ -1,25 +1,7 @@
 import React from 'react'
-import { Box, BoxProps } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { Stack, StackProps } from '@mui/system'
 
-interface StylesProps {
-  gap: number
-}
-
-const useStyles = makeStyles(theme => ({
-  y: {
-    display: 'flex',
-    flexDirection: 'column',
-    '& > * + *': { marginTop: ({ gap }: StylesProps) => theme.spacing(gap) },
-  },
-  x: {
-    display: 'flex',
-    flexDirection: 'row',
-    '& > * + *': { marginLeft: ({ gap }: StylesProps) => theme.spacing(gap) },
-  },
-}))
-
-type RhythmProps = BoxProps & {
+type RhythmProps = StackProps & {
   gap?: number
   axis?: 'y' | 'x'
 }
@@ -30,10 +12,9 @@ export default function Rhythm({
   children,
   ...rest
 }: RhythmProps) {
-  const classes = useStyles({ gap })
   return (
-    <Box className={classes[axis]} {...rest}>
+    <Stack direction={axis === 'x' ? 'row' : undefined} spacing={gap}>
       {children}
-    </Box>
+    </Stack>
   )
 }

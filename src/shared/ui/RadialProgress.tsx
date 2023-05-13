@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useTheme } from '@mui/material'
+import { useAppTheme } from '@shared/ui/theme'
 
 export type RadialProgressProps = React.SVGProps<SVGSVGElement> & {
   size?: number
@@ -13,7 +13,7 @@ export const RadialProgress: FC<RadialProgressProps> = ({
 }) => {
   value = value < 0 ? 0 : value
   const completed = value >= 1
-  const theme = useTheme()
+  const theme = useAppTheme()
   const colorSuccess = theme.palette.success.main
   const colorMain = theme.palette.text.secondary
 

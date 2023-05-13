@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
-import { Box, BoxProps, useTheme } from '@mui/material'
+import { Box, BoxProps } from '@mui/material'
+import { useAppTheme } from '@shared/ui/theme'
 import { TFxAmount, TISOMonth } from '@shared/types'
 import Rhythm from '@shared/ui/Rhythm'
 import { DataLine } from '@components/DataLine'
@@ -58,7 +59,7 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
     setHighlighted(month)
   }, [month])
 
-  const theme = useTheme()
+  const theme = useAppTheme()
   const activityColor = theme.palette.info.main
   const budgetLineColor = theme.palette.background.default
   const startingAmountColor = theme.palette.primary.main

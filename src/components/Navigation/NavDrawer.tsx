@@ -12,9 +12,7 @@ import {
   ListItemIcon,
   DrawerProps,
   ListItemButton,
-  useTheme,
 } from '@mui/material'
-import { makeStyles } from '@mui/styles'
 import {
   AccountBalanceIcon,
   HelpOutlineIcon,
@@ -24,12 +22,14 @@ import {
   BarChartIcon,
 } from '@shared/ui/Icons'
 import { Logo } from '@shared/ui/Logo'
+import { useAppTheme } from '@shared/ui/theme'
 
 import AccountList from '@components/AccountList'
 import { DebtorList } from '@components/DebtorList'
 
 export default function NavigationDrawer(props: DrawerProps) {
-  const theme = useTheme()
+  const theme = useAppTheme()
+  console.log({ theme })
 
   return (
     <Drawer {...props}>
@@ -119,20 +119,15 @@ function Links() {
   )
 }
 
-const useStyles = makeStyles(theme => ({
-  listItem: { borderRadius: theme.shape.borderRadius },
-}))
-
 const NavigationLink: FC<{
   icon: React.ReactNode
   text: React.ReactNode
   path: string
 }> = ({ icon, text, path }) => {
-  const c = useStyles()
   const match = useRouteMatch(path)
   return (
     <ListItemButton
-      className={c.listItem}
+      sx={{ borderRadius: 1 }}
       selected={!!match}
       component={Link}
       to={path}
