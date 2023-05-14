@@ -40,7 +40,7 @@ export const calcGoals = {
     const { budgeted, leftover } = context
     const { amount } = goal
     const needStart = Math.max(round(amount - leftover), 0)
-    const needNow = Math.max(round(needStart - budgeted), 0)
+    const needNow = Math.max(round(amount - leftover - budgeted), 0)
 
     return {
       needStart,

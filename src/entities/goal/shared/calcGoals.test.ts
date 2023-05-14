@@ -32,6 +32,12 @@ describe('goal', () => {
     expect(calc({ ...ctx, leftover: 0, budgeted: -10 })).toBe(0)
     expect(calc({ ...ctx, leftover: 0, budgeted: 100 })).toBe(1)
     expect(calc({ ...ctx, leftover: 0, budgeted: 120 })).toBe(1)
+    // With big leftover
+    expect(calc({ ...ctx, leftover: 100, budgeted: 0 })).toBe(1)
+    expect(calc({ ...ctx, leftover: 100, budgeted: 10 })).toBe(1)
+    expect(calc({ ...ctx, leftover: 150, budgeted: -10 })).toBe(1)
+    expect(calc({ ...ctx, leftover: 150, budgeted: -50 })).toBe(1)
+    expect(calc({ ...ctx, leftover: 150, budgeted: -100 })).toBe(0)
     // With leftover
     expect(calc({ ...ctx, leftover: 50, budgeted: 0 })).toBe(0)
     expect(calc({ ...ctx, leftover: 50, budgeted: 10 })).toBe(0.2)

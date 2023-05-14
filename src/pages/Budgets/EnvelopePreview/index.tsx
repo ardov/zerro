@@ -31,6 +31,7 @@ import { CommentWidget } from './CommentWidget'
 import { cardStyle } from './shared'
 import { useGoalPopover } from '../GoalPopover'
 import { useTrDrawer } from '../TransactionsDrawer'
+import { BurndownWidget } from './BurndownWidget'
 
 type EnvelopePreviewProps = {
   id: TEnvelopeId
@@ -105,6 +106,10 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
 
           <Grid item xs={12}>
             <ActivityWidget id={id} />
+          </Grid>
+
+          <Grid item xs={12}>
+            <BurndownWidget id={id} />
           </Grid>
         </Grid>
 
