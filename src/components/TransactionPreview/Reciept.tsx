@@ -1,14 +1,7 @@
 import React, { FC, useState } from 'react'
-import {
-  Box,
-  Paper,
-  Typography,
-  Collapse,
-  Link,
-  BoxProps,
-  useTheme,
-} from '@mui/material'
+import { Box, Paper, Typography, Collapse, Link, BoxProps } from '@mui/material'
 import QRCode from 'qrcode.react'
+import { useAppTheme } from '@shared/ui/theme'
 import { formatMoney } from '@shared/helpers/money'
 import { formatDate } from '@shared/helpers/date'
 import { parseReceipt } from '@shared/helpers/receipt'
@@ -20,7 +13,7 @@ interface RecieptProps {
 
 export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
   const [showMore, setShowMore] = useState(false)
-  const theme = useTheme()
+  const theme = useAppTheme()
   if (!value) return null
 
   const parsed = parseReceipt(value)

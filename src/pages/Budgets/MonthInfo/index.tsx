@@ -2,7 +2,6 @@ import React, { FC } from 'react'
 import { useAppDispatch } from '@store'
 import { isZero } from '@shared/helpers/money'
 import { formatDate } from '@shared/helpers/date'
-import { Confirm } from '@shared/ui/Confirm'
 import { startFresh } from '@features/bulkActions/startFresh'
 import {
   Box,
@@ -31,6 +30,7 @@ import { FxRates } from './FxRates'
 import { ActivityStats } from './ActivityStats'
 import { goalModel } from '@entities/goal'
 import { totalGoalsModel } from '@features/bulkActions/fillGoals'
+import { useConfirm } from '@shared/ui/SmartConfirm'
 
 type MonthInfoProps = BoxProps & { onClose: () => void }
 
@@ -40,6 +40,30 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
   const { overspend } = balances.useTotals()[month]
 
   const dispatch = useAppDispatch()
+
+  const copyAllBudgets = useConfirm({
+    onOk: () => dispatch(copyPreviousBudget(month)),
+    title: 'Скопировать все бюджеты?',
+    description: 'Бюджеты будут точно такими же, как в предыдущем месяце.',
+    okText: 'Скопировать',
+    cancelText: 'Отмена',
+  })
+
+  const fixOverspends = useConfirm({
+    onOk: () => dispatch(overspendModel.fixAll(month)),
+    title: 'Избавиться от перерасходов?',
+    okText: 'Покрыть перерасходы',
+    cancelText: 'Отмена',
+  })
+
+  const startAgain = useConfirm({
+    onOk: () => dispatch(startFresh(month)),
+    title: 'Хотите начать всё заново?',
+    description:
+      'Остатки во всех категориях сбросятся, а бюджеты в будущем удалятся. Вы сможете начать распределять деньги с чистого листа. Меняются только бюджеты, все остальные данные останутся как есть.',
+    okText: 'Сбросить остатки',
+    cancelText: 'Отмена',
+  })
 
   return (
     <Box {...rest} minHeight="100vh">
@@ -70,47 +94,25 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
               Действия
             </Typography>
           </Box>
-          <Confirm
-            title="Скопировать все бюджеты?"
-            description="Бюджеты будут точно такими же, как в предыдущем месяце."
-            onOk={() => dispatch(copyPreviousBudget(month))}
-            okText="Скопировать"
-            cancelText="Отмена"
-          >
-            <Button fullWidth color="secondary">
-              Копировать с прошлого месяца
-            </Button>
-          </Confirm>
+
+          <Button fullWidth color="secondary" onClick={copyAllBudgets}>
+            Копировать с прошлого месяца
+          </Button>
 
           {!isZero(overspend) && (
-            <Confirm
-              title="Избавиться от перерасходов?"
-              onOk={() => dispatch(overspendModel.fixAll(month))}
-              okText="Покрыть перерасходы"
-              cancelText="Отмена"
-            >
-              <Button fullWidth color="secondary">
-                <span>
-                  Покрыть перерасходы (
-                  <DisplayAmount value={overspend} month={month} />)
-                </span>
-              </Button>
-            </Confirm>
+            <Button fullWidth color="secondary" onClick={fixOverspends}>
+              <span>
+                Покрыть перерасходы (
+                <DisplayAmount value={overspend} month={month} />)
+              </span>
+            </Button>
           )}
 
           <GoalAction month={month} />
 
-          <Confirm
-            title="Хотите начать всё заново?"
-            description="Остатки во всех категориях сбросятся, а бюджеты в будущем удалятся. Вы сможете начать распределять деньги с чистого листа. Меняются только бюджеты, все остальные данные останутся как есть."
-            onOk={() => dispatch(startFresh(month))}
-            okText="Сбросить остатки"
-            cancelText="Отмена"
-          >
-            <Button fullWidth color="secondary">
-              Сбросить все остатки
-            </Button>
-          </Confirm>
+          <Button fullWidth color="secondary" onClick={startAgain}>
+            Сбросить все остатки
+          </Button>
         </Box>
       </Stack>
     </Box>
@@ -126,19 +128,20 @@ function GoalAction(props: { month: TISOMonth }) {
   const { progress, goalsCount } = goalModel.useTotals()[month]
   const canComplete = progress < 1 && goalsCount > 0
 
+  const completeAll = useConfirm({
+    onOk: () => dispatch(totalGoalsModel.fillAll(month)),
+    title: 'Выполнить все цели?',
+    description:
+      'Бюджеты будут выставлены так, чтобы цели в этом месяце выполнились.',
+    okText: 'Выполнить цели',
+    cancelText: 'Отмена',
+  })
+
   if (!canComplete) return null
 
   return (
-    <Confirm
-      title="Выполнить все цели?"
-      description="Бюджеты будут выставлены так, чтобы цели в этом месяце выполнились."
-      okText="Выполнить цели"
-      cancelText="Отмена"
-      onOk={() => dispatch(totalGoalsModel.fillAll(month))}
-    >
-      <Button fullWidth color="secondary">
-        Выполнить все цели
-      </Button>
-    </Confirm>
+    <Button fullWidth color="secondary" onClick={completeAll}>
+      Выполнить все цели
+    </Button>
   )
 }

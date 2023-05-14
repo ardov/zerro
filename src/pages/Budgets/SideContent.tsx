@@ -1,5 +1,5 @@
 import React, { FC, memo, useCallback } from 'react'
-import { Box, Drawer, Theme, useMediaQuery } from '@mui/material'
+import { Box, Drawer } from '@mui/material'
 import { TEnvelopeId } from '@entities/envelope'
 import { MonthInfo } from './MonthInfo'
 import { EnvelopePreview } from './EnvelopePreview'
@@ -36,7 +36,6 @@ type TSideContentProps = {
   width: number
 }
 const MemoSideDrawer = memo<TSideContentProps>(props => {
-  const isXS = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
   const { open, onClose, id, docked, width } = props
 
   const drawerContent =
@@ -52,7 +51,7 @@ const MemoSideDrawer = memo<TSideContentProps>(props => {
 
   return (
     <Drawer anchor="right" open={open} onClose={onClose}>
-      <Box sx={{ width: isXS ? '100vw' : width }}>{drawerContent}</Box>
+      <Box sx={{ width: { xs: '100vw', sm: width } }}>{drawerContent}</Box>
     </Drawer>
   )
 })

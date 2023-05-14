@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react'
-import { Box, Button } from '@mui/material'
+import { Button } from '@mui/material'
 import { TAccountId, TISODate } from '@shared/types'
-import Rhythm from '@shared/ui/Rhythm'
 
 import { accountModel } from '@entities/account'
 import { TransactionsDrawer } from '@components/TransactionsDrawer'
@@ -10,6 +9,7 @@ import { WidgetCashflow } from './WidgetCashflow'
 import { WidgetAccHistory } from './WidgetAccHistory'
 import { nextPeriod, Period } from './shared/period'
 import { useToggle } from '@shared/hooks/useToggle'
+import { Stack } from '@mui/system'
 
 export default function Stats() {
   const accs = accountModel.useAccountList()
@@ -17,8 +17,10 @@ export default function Stats() {
   const [showArchived, toggleArchived] = useToggle(false)
   const togglePeriod = useCallback(() => setPeriod(nextPeriod), [])
 
-  const [selected, setSelected] =
-    useState<{ id: TAccountId; date: TISODate } | null>(null)
+  const [selected, setSelected] = useState<{
+    id: TAccountId
+    date: TISODate
+  } | null>(null)
 
   const accIds = useMemo(
     () =>
@@ -42,23 +44,21 @@ export default function Stats() {
 
   return (
     <>
-      <Box display="flex" flexDirection="column" pb={10}>
-        <Rhythm gap={2} axis="y" p={3}>
-          <WidgetNetWorth period={period} onTogglePeriod={togglePeriod} />
-          <WidgetCashflow period={period} onTogglePeriod={togglePeriod} />
-          {accIds.map(id => (
-            <WidgetAccHistory
-              key={id}
-              id={id}
-              period={period}
-              onClick={onSelect}
-            />
-          ))}
-          <Button onClick={toggleArchived}>
-            {showArchived ? 'Скрыть' : 'Показать'} архивные
-          </Button>
-        </Rhythm>
-      </Box>
+      <Stack spacing={2} p={3} pb={10}>
+        <WidgetNetWorth period={period} onTogglePeriod={togglePeriod} />
+        <WidgetCashflow period={period} onTogglePeriod={togglePeriod} />
+        {accIds.map(id => (
+          <WidgetAccHistory
+            key={id}
+            id={id}
+            period={period}
+            onClick={onSelect}
+          />
+        ))}
+        <Button onClick={toggleArchived}>
+          {showArchived ? 'Скрыть' : 'Показать'} архивные
+        </Button>
+      </Stack>
 
       <TransactionsDrawer
         filterConditions={filterConditions}

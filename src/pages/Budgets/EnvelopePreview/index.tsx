@@ -6,12 +6,12 @@ import {
   Grid,
   ButtonBase,
   Button,
+  Stack,
 } from '@mui/material'
 import { EmojiIcon } from '@shared/ui/EmojiIcon'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { CloseIcon, EditIcon, EmojiFlagsIcon } from '@shared/ui/Icons'
 import { Total } from '@shared/ui/Total'
-import Rhythm from '@shared/ui/Rhythm'
 import { ColorPicker, useColorPicker } from '@shared/ui/ColorPickerPopover'
 import { sendEvent } from '@shared/helpers/tracking'
 import { TFxAmount } from '@shared/types'
@@ -31,6 +31,7 @@ import { CommentWidget } from './CommentWidget'
 import { cardStyle } from './shared'
 import { useGoalPopover } from '../GoalPopover'
 import { useTrDrawer } from '../TransactionsDrawer'
+import { BurndownWidget } from './BurndownWidget'
 
 type EnvelopePreviewProps = {
   id: TEnvelopeId
@@ -106,9 +107,13 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
           <Grid item xs={12}>
             <ActivityWidget id={id} />
           </Grid>
+
+          <Grid item xs={12}>
+            <BurndownWidget id={id} />
+          </Grid>
         </Grid>
 
-        <Rhythm gap={1.5} px={3} mt={3}>
+        <Stack spacing={1.5} px={3} mt={3}>
           <DataLine
             name="Остаток с прошлого месяца"
             amount={totalLeftover}
@@ -126,7 +131,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
               Показать операции
             </Button>
           </Box>
-        </Rhythm>
+        </Stack>
       </Box>
     </>
   )

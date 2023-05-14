@@ -25,9 +25,7 @@ import {
   Switch,
   Typography,
 } from '@mui/material'
-import { useThemeType } from '@shared/hooks/useThemeType'
 import { sendEvent } from '@shared/helpers/tracking'
-import { Confirm } from '@shared/ui/Confirm'
 import { useSnackbar } from '@shared/ui/SnackbarProvider'
 import { AdaptivePopover } from '@shared/ui/AdaptivePopover'
 import { appVersion } from '@shared/config'
@@ -43,6 +41,8 @@ import { exportJSON } from '@features/export/exportJSON'
 import { clearLocalData } from '@features/localData'
 import { convertZmBudgetsToZerro } from '@features/budget/convertZmBudgetsToZerro'
 import { makePopoverHooks } from '@shared/ui/PopoverManager'
+import { useConfirm } from '@shared/ui/SmartConfirm'
+import { useColorScheme } from '@shared/ui/theme'
 
 const settingsHooks = makePopoverHooks<{}, PopoverProps>('settingsMenu', {})
 
@@ -98,8 +98,8 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
       <ExportJsonItem />
 
       <Divider light />
-      <LogOutItem />
-      <VersionItem />
+      <LogOutItem onClose={props.onClose} />
+      <VersionItem onClose={props.onClose} />
     </>
   )
 }
@@ -139,7 +139,7 @@ function ExportJsonItem() {
 }
 
 function ThemeItem({ onClose }: ItemProps) {
-  const theme = useThemeType()
+  const theme = useColorScheme()
   const handleThemeChange = () => {
     sendEvent('Settings: toggle theme')
     onClose()
@@ -148,10 +148,10 @@ function ThemeItem({ onClose }: ItemProps) {
   return (
     <MenuItem onClick={handleThemeChange}>
       <ListItemIcon>
-        {theme.type === 'dark' ? <WbSunnyIcon /> : <NightsStayIcon />}
+        {theme.mode === 'dark' ? <WbSunnyIcon /> : <NightsStayIcon />}
       </ListItemIcon>
       <ListItemText>
-        {theme.type === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
+        {theme.mode === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
       </ListItemText>
     </MenuItem>
   )
@@ -213,15 +213,14 @@ function ReloadDataItem({ onClose }: ItemProps) {
     dispatch(clearLocalData())
     window.location.reload()
   }
+  const reload = useConfirm({ onOk: reloadData })
   return (
-    <Confirm onOk={reloadData}>
-      <MenuItem>
-        <ListItemIcon>
-          <SyncIcon />
-        </ListItemIcon>
-        <ListItemText>Перезагрузить данные</ListItemText>
-      </MenuItem>
-    </Confirm>
+    <MenuItem onClick={reload}>
+      <ListItemIcon>
+        <SyncIcon />
+      </ListItemIcon>
+      <ListItemText>Перезагрузить данные</ListItemText>
+    </MenuItem>
   )
 }
 
@@ -285,9 +284,10 @@ function BudgetSettingsItem() {
   )
 }
 
-function LogOutItem() {
+function LogOutItem({ onClose }: ItemProps) {
   const dispatch = useAppDispatch()
   const handleClick = () => {
+    onClose()
     sendEvent('Settings: log out')
     dispatch(logOut())
   }
@@ -301,16 +301,17 @@ function LogOutItem() {
   )
 }
 
-function VersionItem() {
+function VersionItem({ onClose }: ItemProps) {
   return (
-    <MenuItem onClick={() => window.location.reload()}>
+    <MenuItem
+      onClick={() => {
+        onClose()
+        window.location.reload()
+      }}
+    >
       <ListItemIcon />
       <ListItemText>
-        <Typography
-          variant="overline"
-          color="textSecondary"
-          onClick={() => window.location.reload()}
-        >
+        <Typography variant="overline" color="textSecondary">
           Версия: {appVersion}
         </Typography>
       </ListItemText>

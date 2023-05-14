@@ -1,8 +1,8 @@
 import React from 'react'
 import { Switch, Route } from 'react-router'
 import { Box } from '@mui/material'
-import { useTheme } from '@mui/material'
 import { Link } from 'react-router-dom'
+import { useAppTheme } from '@shared/ui/theme'
 import { Logo } from '@shared/ui/Logo'
 import { ScrollToTop, TextLink } from './Components'
 import Method from './pages/Method.mdx'
@@ -48,7 +48,7 @@ export default function Main() {
 }
 
 const Header = () => {
-  const theme = useTheme()
+  const theme = useAppTheme()
   return (
     <Box
       position="sticky"

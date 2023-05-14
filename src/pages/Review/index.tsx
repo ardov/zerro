@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
-import { Box, Button, Typography } from '@mui/material'
+import { Box, Button, Stack, Typography } from '@mui/material'
 import './index.scss'
-import Rhythm from '@shared/ui/Rhythm'
 import { TTransaction } from '@shared/types'
 import { TransactionsDrawer } from '@components/TransactionsDrawer'
 
@@ -32,7 +31,7 @@ export default function Review() {
   return (
     <>
       <Box className="container">
-        <Rhythm gap={2} axis="y" p={3} pb={10}>
+        <Stack spacing={2} p={3} pb={10}>
           <CardTitle year={year} />
           <IncomeCard year={year} onShowTransactions={showTransactions} />
           <NotFunCard year={year} onShowTransactions={showTransactions} />
@@ -50,7 +49,7 @@ export default function Review() {
           <Button onClick={() => setYear(y => y - 1)}>
             А что было в прошлом году?
           </Button>
-        </Rhythm>
+        </Stack>
       </Box>
 
       <TransactionsDrawer

@@ -9,31 +9,23 @@ import {
   Switch,
   Grid,
   Typography,
+  Button,
   IconButton,
-  TextFieldProps,
   SelectChangeEvent,
   FormControl,
   InputLabel,
 } from '@mui/material'
-import { DateRangePicker } from '@mui/lab'
-import { makeStyles } from '@mui/styles'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { CloseIcon } from '@shared/ui/Icons'
-import Button from '@mui/material/Button'
-import { formatDate } from '@shared/helpers/date'
 import { FilterConditions } from '@entities/transaction/filtering'
 import { TrType } from '@entities/transaction'
-import { endOfDay, prevMonth, startOfDay } from '@shared/helpers/date'
 import { SmartSelect } from '@shared/ui/SmartSelect'
 
-const useStyles = makeStyles(theme => ({
-  drawerWidth: {
-    width: 360,
-    [theme.breakpoints.down('sm')]: {
-      width: '100vw',
-    },
-  },
-}))
+const drawerWidth = { xs: '100vw', sm: 360 }
+const contentSx = {
+  width: drawerWidth,
+  [`& .MuiDrawer-paper`]: { width: drawerWidth },
+}
 
 type FilterDrawerProps = {
   setCondition: (c: FilterConditions) => void
@@ -51,7 +43,6 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
   open,
   ...rest
 }) => {
-  const c = useStyles()
   const handleTypeChange = (e: SelectChangeEvent<string>) => {
     const value = e.target.value as TrType
     setCondition({ type: value || null })
@@ -62,7 +53,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
       anchor="right"
       onClose={onClose}
       open={open}
-      classes={{ paper: c.drawerWidth, root: c.drawerWidth }}
+      sx={contentSx}
       {...rest}
     >
       <Box py={1} px={2} display="flex" alignItems="center">
@@ -107,7 +98,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
           </Grid>
         </Box>
 
-        <Box mt={3} display="flex">
+        {/* <Box mt={3} display="flex">
           <DateRangePicker
             startText="Дата от"
             endText="Дата до"
@@ -144,7 +135,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
               </Grid>
             )}
           />
-        </Box>
+        </Box> */}
         <Box mt={3}>
           <FormControl fullWidth>
             <InputLabel>Тип транзакции</InputLabel>

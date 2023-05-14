@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { withStyles } from '@mui/styles'
 import {
   Box,
   IconButton,
@@ -8,25 +7,10 @@ import {
   ListItemText,
   PopoverProps,
   ListItemButton,
-  ListItemButtonProps,
 } from '@mui/material'
 import { ChevronRightIcon, ChevronLeftIcon } from '@shared/ui/Icons'
 import { formatDate, toISOMonth } from '@shared/helpers/date'
 import { Modify, TDateDraft, TISOMonth } from '@shared/types'
-
-interface MonthItemItemProps extends ListItemButtonProps {
-  isCurrent: boolean
-}
-
-const MonthItem = withStyles(theme => ({
-  root: {
-    borderRadius: theme.shape.borderRadius,
-    border: ({ isCurrent }: MonthItemItemProps) =>
-      isCurrent ? `1px solid ${theme.palette.primary.main}` : '',
-  },
-}))(({ isCurrent, ...rest }: MonthItemItemProps) => (
-  <ListItemButton {...rest} />
-))
 
 type MonthSelectPopoverProps = Modify<
   PopoverProps,
@@ -79,9 +63,15 @@ export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
 
         <List sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr' }}>
           {months.map(month => (
-            <MonthItem
+            <ListItemButton
               key={month}
-              isCurrent={month === curMonth}
+              sx={{
+                borderRadius: 1,
+                border: theme =>
+                  month === curMonth
+                    ? `1px solid ${theme.palette.primary.main}`
+                    : 'none',
+              }}
               disabled={isMonthDisabled(month)}
               selected={month === value}
               onClick={() => onChange(month)}
@@ -89,7 +79,7 @@ export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
               <ListItemText sx={{ textAlign: 'center' }}>
                 {formatDate(month, 'LLL').toUpperCase()}
               </ListItemText>
-            </MonthItem>
+            </ListItemButton>
           ))}
         </List>
       </Box>

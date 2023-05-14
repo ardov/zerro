@@ -1,9 +1,9 @@
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react'
 import { ListChildComponentProps, VariableSizeList } from 'react-window'
-import StaticDatePicker, {
+import {
+  StaticDatePicker,
   StaticDatePickerProps,
-} from '@mui/lab/StaticDatePicker'
-import TextField from '@mui/material/TextField'
+} from '@mui/x-date-pickers/StaticDatePicker'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { ListSubheader } from '@mui/material'
 import { formatDate, parseDate } from '@shared/helpers/date'
@@ -53,8 +53,8 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
     (date: TISODate) => {
       datePopover.open({
         value: parseDate(date),
-        minDate: parseDate(groups.at(-1)?.date || 0),
-        maxDate: parseDate(groups.at(0)?.date || 0),
+        minDate: parseDate(groups[groups.length - 1]?.date || 0),
+        maxDate: parseDate(groups[0]?.date || 0),
         onChange: d => {
           datePopover.close()
           scrollToDate(d as TISODate)
@@ -166,10 +166,10 @@ const groupStyle: React.CSSProperties = {
 //
 
 type TDateDialogProps = {
-  value: StaticDatePickerProps['value']
-  minDate?: StaticDatePickerProps['minDate']
-  maxDate?: StaticDatePickerProps['maxDate']
-  onChange: StaticDatePickerProps['onChange']
+  value: StaticDatePickerProps<TDateDraft>['value']
+  minDate?: StaticDatePickerProps<TDateDraft>['minDate']
+  maxDate?: StaticDatePickerProps<TDateDraft>['maxDate']
+  onChange: StaticDatePickerProps<TDateDraft>['onChange']
 }
 
 const dateDialog = makePopoverHooks<TDateDialogProps>('listSateDialog', {
@@ -184,7 +184,7 @@ const DateDialog = () => {
       <StaticDatePicker
         {...extraProps}
         openTo="day"
-        renderInput={params => <TextField {...params} />}
+        // renderInput={params => <TextField {...params} />}
       />
     </SmartDialog>
   )

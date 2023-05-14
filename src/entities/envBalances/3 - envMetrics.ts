@@ -18,6 +18,7 @@ import { TFxRateData } from '@entities/currency/fxRate'
 import { getMonthList } from './1 - monthList'
 import { getRatesByMonth } from './2 - rates'
 import { getActivity, TActivityNode } from './2 - activity'
+import { EnvActivity } from './1 - rawActivity'
 
 export type TEnvMetrics = {
   id: TEnvelope['id']
@@ -33,17 +34,20 @@ export type TEnvMetrics = {
   selfBudgeted: TFxAmount
   selfActivity: TFxAmount
   selfAvailable: TFxAmount
+  selfActivityTrend: TFxAmount[]
   // Children metrics
   childrenLeftover: TFxAmount
   childrenBudgeted: TFxAmount
   childrenActivity: TFxAmount
   childrenSurplus: TFxAmount // Positive balances
   childrenOverspend: TFxAmount // Negative balances
+  childrenActivityTrend: TFxAmount[]
   // Total metrics
   totalLeftover: TFxAmount
   totalBudgeted: TFxAmount
   totalActivity: TFxAmount
   totalAvailable: TFxAmount
+  totalActivityTrend: TFxAmount[]
 }
 
 export const getEnvMetrics: TSelector<ByMonth<ById<TEnvMetrics>>> =
@@ -99,6 +103,7 @@ function calcEnvMetrics(
     let childrenActivity = {} as TFxAmount
     let childrenSurplus = {} as TFxAmount
     let childrenOverspend = {} as TFxAmount
+    let childrenActivityTrend = new EnvActivity().trend
 
     // Fill children metrics
     children.forEach(id => {
@@ -111,6 +116,9 @@ function calcEnvMetrics(
       } else {
         childrenOverspend = addFxAmount(childrenOverspend, ch.selfAvailable)
       }
+      childrenActivityTrend = childrenActivityTrend.map((amount, i) =>
+        addFxAmount(amount, ch.selfActivityTrend[i])
+      )
     })
 
     // Self metrics
@@ -120,8 +128,9 @@ function calcEnvMetrics(
       carryNegatives
     )
     const selfBudgeted = { [currency]: budgets?.[month]?.[id] || 0 }
-    const selfActivity =
-      activity?.[month]?.envActivity?.byEnv?.[id]?.total || {}
+    const envActivity = activity?.[month]?.envActivity?.byEnv?.[id]
+    const selfActivity = envActivity?.total || {}
+    const selfActivityTrend = envActivity?.trend || new EnvActivity().trend
     const selfAvailableRaw = addFxAmount(
       selfLeftover,
       selfBudgeted,
@@ -148,17 +157,22 @@ function calcEnvMetrics(
       selfBudgeted,
       selfActivity,
       selfAvailable,
+      selfActivityTrend,
 
       childrenLeftover,
       childrenBudgeted,
       childrenActivity,
       childrenSurplus,
       childrenOverspend,
+      childrenActivityTrend,
 
       totalLeftover: addFxAmount(selfLeftover, childrenLeftover),
       totalBudgeted: addFxAmount(selfBudgeted, childrenBudgeted),
       totalActivity: addFxAmount(selfActivity, childrenActivity),
       totalAvailable: addFxAmount(selfAvailable, childrenSurplus),
+      totalActivityTrend: childrenActivityTrend.map((amount, i) =>
+        addFxAmount(amount, selfActivityTrend[i])
+      ),
     }
 
     return res

@@ -2,16 +2,22 @@ import React, { FC } from 'react'
 import { Box, Typography, Button } from '@mui/material'
 import { TISOMonth } from '@shared/types'
 import { WarningIcon } from '@shared/ui/Icons'
-import { Confirm } from '@shared/ui/Confirm'
+import { isZero } from '@shared/helpers/money'
+import { useConfirm } from '@shared/ui/SmartConfirm'
 import { useAppDispatch } from '@store'
-import { overspendModel } from '../model'
 import { balances } from '@entities/envBalances'
 import { DisplayAmount } from '@entities/currency/displayCurrency'
-import { isZero } from '@shared/helpers/money'
+import { overspendModel } from '../model'
 
 export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
   const dispatch = useAppDispatch()
   const { overspend } = balances.useTotals()[month]
+  const fixOverspends = useConfirm({
+    onOk: () => dispatch(overspendModel.fixAll(month)),
+    title: 'Избавиться от перерасходов?',
+    okText: 'Покрыть перерасходы',
+    cancelText: 'Отмена',
+  })
 
   if (isZero(overspend)) return null
 
@@ -44,16 +50,14 @@ export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
           Добавьте денег в категории с отрицательным балансом, чтобы быть
           уверенным в бюджете.
         </Typography>
-        <Box mt={1} ml={-1}>
-          <Confirm
-            title="Избавиться от перерасходов?"
-            onOk={() => dispatch(overspendModel.fixAll(month))}
-            okText="Покрыть перерасходы"
-            cancelText="Отмена"
-          >
-            <Button color="secondary">Исправить автоматически</Button>
-          </Confirm>
-        </Box>
+
+        <Button
+          sx={{ mt: 1, ml: -1 }}
+          color="secondary"
+          onClick={fixOverspends}
+        >
+          Исправить автоматически
+        </Button>
       </Box>
     </Box>
   )

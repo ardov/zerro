@@ -1,5 +1,5 @@
 import React from 'react'
-import { Paper, Card, Typography, Box, useTheme } from '@mui/material'
+import { Paper, Card, Typography, Box } from '@mui/material'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -9,13 +9,14 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts'
-import { DataLine } from '@components/DataLine'
+import { useAppTheme } from '@shared/ui/theme'
 import { formatMoney } from '@shared/helpers/money'
 import { formatDate, parseDate } from '@shared/helpers/date'
 import { TISODate } from '@shared/types'
+import { displayCurrency } from '@entities/currency/displayCurrency'
+import { DataLine } from '@components/DataLine'
 import { useCashFlow } from './model'
 import { Period, periodTitles } from '../shared/period'
-import { displayCurrency } from '@entities/currency/displayCurrency'
 
 type Point = {
   date: TISODate
@@ -30,7 +31,7 @@ type WidgetCashflowProps = {
 
 export function WidgetCashflow(props: WidgetCashflowProps) {
   const { period, onTogglePeriod } = props
-  const theme = useTheme()
+  const theme = useAppTheme()
   const points = useCashFlow(period)
 
   const colorIncome = theme.palette.success.main

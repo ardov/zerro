@@ -4,33 +4,29 @@ import { ChevronDownIcon } from '@shared/ui/Icons'
 import { TISOMonth } from '@shared/types'
 
 import { GoalsProgress } from '@features/bulkActions/fillGoals'
-import { rowStyle, useIsSmall } from '../shared/shared'
+import { TableRow, useIsSmall } from '../shared/shared'
 import { MonthSelect } from './MonthSelect'
 import { ToBeBudgeted } from './ToBeBudgeted'
-import { Metric } from '../models/useMetric'
+import { useColumns } from '../models/useMetric'
 import { useTableMenu, TableMenu } from './TableMenu'
 
 type HeaderProps = {
   month: TISOMonth
-  metric: Metric
   isAllShown: boolean
   isReordering: boolean
   onShowAllToggle: () => void
   onReorderModeToggle: () => void
   onOpenOverview: () => void
-  onMetricSwitch: () => void
 }
 
 export const Header: FC<HeaderProps> = props => {
   const {
     month,
-    metric,
     isAllShown,
     isReordering,
     onShowAllToggle,
     onReorderModeToggle,
     onOpenOverview,
-    onMetricSwitch,
   } = props
   const isSmall = useIsSmall()
   const openOnClick = useTableMenu({
@@ -39,6 +35,19 @@ export const Header: FC<HeaderProps> = props => {
     onShowAllToggle,
     onReorderModeToggle,
   })
+
+  const { nextColumn } = useColumns()
+  const ColumnTitle: FC<{ name: string }> = props => (
+    <Typography
+      variant="overline"
+      color="text.secondary"
+      align="right"
+      onClick={nextColumn}
+      noWrap
+    >
+      {props.name}
+    </Typography>
+  )
 
   return (
     <>
@@ -74,56 +83,26 @@ export const Header: FC<HeaderProps> = props => {
           </Box>
         </Box>
 
-        <Box sx={rowStyle}>
-          <div>
-            <Button
-              size="small"
-              onClick={openOnClick}
-              sx={{ ml: -1, px: 1, py: 0 }}
-            >
-              <Typography variant="overline" color="text.secondary" noWrap>
-                Категории{isAllShown && ' (все)'}
-              </Typography>
-              <ChevronDownIcon />
-            </Button>
-          </div>
-
-          {(metric === Metric.budgeted || !isSmall) && (
-            <Typography
-              variant="overline"
-              color="text.secondary"
-              align="right"
-              onClick={onMetricSwitch}
-              noWrap
-            >
-              Бюджет
-            </Typography>
-          )}
-
-          {(metric === Metric.outcome || !isSmall) && (
-            <Typography
-              variant="overline"
-              color="text.secondary"
-              align="right"
-              onClick={onMetricSwitch}
-              noWrap
-            >
-              Операции
-            </Typography>
-          )}
-
-          {(metric === Metric.available || !isSmall) && (
-            <Typography
-              variant="overline"
-              color="text.secondary"
-              align="right"
-              onClick={onMetricSwitch}
-              noWrap
-            >
-              Доступно
-            </Typography>
-          )}
-        </Box>
+        <TableRow
+          name={
+            <div>
+              <Button
+                size="small"
+                onClick={openOnClick}
+                sx={{ ml: -1, px: 1, py: 0 }}
+              >
+                <Typography variant="overline" color="text.secondary" noWrap>
+                  Категории {isAllShown && '(все)'}
+                </Typography>
+                <ChevronDownIcon />
+              </Button>
+            </div>
+          }
+          budgeted={<ColumnTitle name="Бюджет" />}
+          outcome={<ColumnTitle name="Операции" />}
+          available={<ColumnTitle name="Доступно" />}
+          goal={null}
+        />
       </Box>
 
       <TableMenu />

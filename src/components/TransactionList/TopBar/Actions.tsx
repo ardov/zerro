@@ -4,12 +4,12 @@ import './transitions.css'
 import { useAppDispatch } from '@store'
 import IconButton from '@mui/material/IconButton'
 import {
-  DeleteOutlineIcon,
   LocalOfferOutlinedIcon,
   DoneAllIcon,
   MoreVertIcon,
   VisibilityIcon,
   MergeTypeIcon,
+  DeleteIcon,
 } from '@shared/ui/Icons'
 import { Tooltip } from '@shared/ui/Tooltip'
 import Chip from '@mui/material/Chip'
@@ -17,7 +17,6 @@ import Box from '@mui/material/Box'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import pluralize from '@shared/helpers/pluralize'
-import { Confirm } from '@shared/ui/Confirm'
 import TagSelect2 from '@components/TagSelect2'
 import { CSSTransition } from 'react-transition-group'
 import { EditOutlined } from '@mui/icons-material'
@@ -28,6 +27,7 @@ import { Divider, ListItemIcon, ListItemText } from '@mui/material'
 import { round } from '@shared/helpers/money'
 import { applyClientPatch } from '@store/data'
 import { sendEvent } from '@shared/helpers/tracking'
+import { useConfirm } from '@shared/ui/SmartConfirm'
 
 type ActionsProps = {
   visible: boolean
@@ -67,11 +67,20 @@ const Actions: FC<ActionsProps> = ({
     onUncheckAll()
   }
 
-  const handleDelete = () => {
-    dispatch(trModel.deleteTransactions(checkedIds))
-    closeMenu()
-    onUncheckAll()
-  }
+  const handleDelete = useConfirm({
+    onOk: () => {
+      dispatch(trModel.deleteTransactions(checkedIds))
+      closeMenu()
+      onUncheckAll()
+    },
+    title: `Удалить ${length} ${pluralize(length, [
+      'операцию',
+      'операции',
+      'операций',
+    ])}?`,
+    okText: 'Удалить',
+    cancelText: 'Оставить',
+  })
 
   const handleCheckAll = () => {
     onCheckAll()
@@ -88,12 +97,6 @@ const Actions: FC<ActionsProps> = ({
     pluralize(length, ['Выбрана', 'Выбрано', 'Выбрано']) +
     ` ${length} ` +
     pluralize(length, ['операция', 'операции', 'операций'])
-
-  const deleteText = `Удалить ${length} ${pluralize(length, [
-    'операцию',
-    'операции',
-    'операций',
-  ])}?`
 
   return (
     <>
@@ -132,16 +135,11 @@ const Actions: FC<ActionsProps> = ({
           >
             <Chip label={chipText} onDelete={onUncheckAll} variant="outlined" />
 
-            <Confirm
-              title={deleteText}
-              onOk={handleDelete}
-              okText="Удалить"
-              cancelText="Оставить"
-            >
-              <Tooltip title="Удалить выбранные">
-                <IconButton children={<DeleteOutlineIcon />} />
-              </Tooltip>
-            </Confirm>
+            <Tooltip title="Удалить выбранные">
+              <IconButton onClick={handleDelete}>
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
 
             {actions.setMainTag && (
               <TagSelect2
@@ -234,22 +232,15 @@ const Actions: FC<ActionsProps> = ({
               )}
 
               {actions.collapseTransactionsEasy && (
-                <Confirm
-                  title={deleteText}
-                  onOk={handleDelete}
-                  okText="Удалить"
-                  cancelText="Оставить"
-                >
-                  <MenuItem>
-                    <ListItemIcon>
-                      <MergeTypeIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Схлопнуть операции"
-                      secondary="Они просто удалятся 😉"
-                    />
-                  </MenuItem>
-                </Confirm>
+                <MenuItem onClick={handleDelete}>
+                  <ListItemIcon>
+                    <MergeTypeIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Схлопнуть операции"
+                    secondary="Они просто удалятся 😉"
+                  />
+                </MenuItem>
               )}
 
               <Box my={1}>

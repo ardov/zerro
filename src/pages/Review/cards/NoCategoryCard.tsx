@@ -1,6 +1,5 @@
 import React from 'react'
-import { ButtonBase, Typography } from '@mui/material'
-import Rhythm from '@shared/ui/Rhythm'
+import { ButtonBase, Stack, Typography } from '@mui/material'
 import pluralize from '@shared/helpers/pluralize'
 import { Card, TCardProps } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
@@ -14,7 +13,7 @@ export function NoCategoryCard(props: TCardProps) {
   const value = noTag.length
   return (
     <Card>
-      <Rhythm gap={1}>
+      <Stack spacing={1}>
         {value ? (
           <>
             <ButtonBase
@@ -39,7 +38,7 @@ export function NoCategoryCard(props: TCardProps) {
             </Typography>
           </>
         )}
-      </Rhythm>
+      </Stack>
     </Card>
   )
 }

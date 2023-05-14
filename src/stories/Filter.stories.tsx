@@ -1,14 +1,18 @@
 import React from 'react'
-import { Filter, FilterProps } from '@components/Filtering'
-import { Story, Meta } from '@storybook/react'
+import { Filter } from '@components/Filtering'
+import { Meta, StoryObj } from '@storybook/react'
 import { context } from './shared/context'
 
-export default {
+const meta = {
   title: 'Experimental/Filter',
   component: Filter,
   decorators: [context],
-} as Meta
+} satisfies Meta<typeof Filter>
 
-const Template: Story<FilterProps> = args => <Filter {...args} />
-export const FilterStory = Template.bind({})
-FilterStory.args = { onConditionChange: () => {} }
+export default meta
+
+type Story = StoryObj<typeof meta>
+
+export const FilterStory: Story = {
+  args: { onConditionChange: () => {} },
+}

@@ -43,7 +43,7 @@ export const Symbol: FC<SymbolProps> = ({
   ...rest
 }) => {
   const tags = useAppSelector(getPopulatedTags)
-  const mainTagId = tr.tag ? tr.tag[0] : 'null'
+  const mainTagId = tr.tag?.length ? tr.tag[0] : 'null'
   const tag = tags[mainTagId]
   switch (trType) {
     case 'income':

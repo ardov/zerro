@@ -11,8 +11,13 @@ import {
   Stack,
 } from '@mui/material'
 import { Tooltip } from '@shared/ui/Tooltip'
-import { DeleteIcon, CloseIcon, RestoreFromTrashIcon } from '@shared/ui/Icons'
-import DatePicker from '@mui/lab/DatePicker'
+import {
+  DeleteIcon,
+  CloseIcon,
+  RestoreFromTrashIcon,
+  CalendarIcon,
+} from '@shared/ui/Icons'
+import { DatePicker } from '@mui/x-date-pickers'
 import { Map } from './Map'
 import { AmountInput } from '@shared/ui/AmountInput'
 import { rateToWords } from '@shared/helpers/money'
@@ -181,15 +186,13 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
         )}
         <Stack direction="row" spacing={2}>
           <DatePicker
-            value={localDate}
+            value={parseDate(localDate)}
             onChange={date => date && setLocalDate(toISODate(date))}
             label="Дата"
-            cancelText="Отмена"
-            okText="Ок"
-            mask="__.__.____"
-            renderInput={params => (
-              <TextField size="small" fullWidth {...params} />
-            )}
+            showDaysOutsideCurrentMonth
+            format="MM.dd.yyyy"
+            slotProps={{ textField: { size: 'small', fullWidth: true } }}
+            slots={{ openPickerIcon: CalendarIcon }}
           />
           <TextField
             value={localTime}
