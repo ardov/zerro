@@ -116,6 +116,7 @@ export const AmountInput: FC<AmountInputProps> = ({
       onFocus={focusHandler}
       onBlur={blurHandler}
       onKeyDown={keyDownHandler}
+      autoFocus={autoFocus}
       {...rest}
     />
   )
