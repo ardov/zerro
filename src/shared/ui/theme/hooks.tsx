@@ -28,3 +28,13 @@ export function useColorScheme() {
     toggle,
   }
 }
+
+export function fixOldTheme() {
+  const theme = localStorage.getItem(THEME_KEY)
+  if (theme === '"dark"') {
+    localStorage.setItem(THEME_KEY, 'dark')
+  }
+  if (theme === '"light"') {
+    localStorage.setItem(THEME_KEY, 'light')
+  }
+}
