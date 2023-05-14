@@ -41,9 +41,9 @@ export const AmountInput: FC<AmountInputProps> = ({
   // ❗️Hacky hack cause autoFocus doesn't work for some reason 🤷🏻‍♂️
   // It focuses but typing is disabled
   // TODO: update mui and try again
-  useEffect(() => {
-    if (autoFocus) setTimeout(() => ref.current?.focus(), 100)
-  }, [autoFocus])
+  // useEffect(() => {
+  //   if (autoFocus) setTimeout(() => ref.current?.focus(), 100)
+  // }, [autoFocus])
 
   useEffect(() => {
     if (!focused) setExpression(value === 0 ? '' : value.toString())
