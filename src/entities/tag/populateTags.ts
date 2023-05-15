@@ -57,6 +57,7 @@ function getName(title: string) {
     return title
   }
 }
+
 function getSymbol(tag: TTag) {
   if (tag.id === 'null') return '?'
   if (tag.icon) {
@@ -66,7 +67,8 @@ function getSymbol(tag: TTag) {
       sendEvent('Tags: UnknownNames: ' + tag.icon)
     }
   }
-  return tag.title.slice(0, 2)
+  const titleArr = toArray(tag.title)
+  return (titleArr[0] + titleArr[1]).trim() || '?'
 }
 
 function isEmoji(str: string) {
