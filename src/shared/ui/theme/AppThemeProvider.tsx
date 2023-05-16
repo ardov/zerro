@@ -7,9 +7,11 @@ import {
   Theme,
 } from '@mui/material/styles'
 import { appTheme } from './createTheme'
-import { THEME_KEY, useAppTheme } from './hooks'
+import { THEME_KEY, fixOldTheme, useAppTheme } from './hooks'
 
 import './styles.scss'
+
+fixOldTheme()
 
 const GlobalVaribles = (props: { theme: Theme }) => {
   const styles = css`
