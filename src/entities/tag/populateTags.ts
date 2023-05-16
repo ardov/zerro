@@ -68,6 +68,7 @@ function getSymbol(tag: TTag) {
     }
   }
   const titleArr = toArray(tag.title)
+  if (isEmoji(titleArr[0])) return titleArr[0]
   return (titleArr[0] + titleArr[1]).trim() || '?'
 }
 
