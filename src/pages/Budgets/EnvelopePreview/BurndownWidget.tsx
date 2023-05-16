@@ -162,35 +162,39 @@ type TTrendNode = {
 }
 
 function useDataTrend(month: TISOMonth, id: TEnvelopeId): TTrendNode[] {
-  const envData = balances.useEnvData()[month][id]
   const toDisplay = displayCurrency.useToDisplay(month)
+  const envData = balances.useEnvData()?.[month]?.[id]
 
-  const leftover = envData.totalLeftover
-  const budgeted = envData.totalBudgeted
-  const activityTrend = envData.totalActivityTrend
-
-  const start = addFxAmount(leftover, budgeted)
-
-  let prevStart = start
-  const adjustedTrend = activityTrend.map(amount => {
-    const next = addFxAmount(amount, prevStart)
-    prevStart = next
-    return next
+  return new Array(31).fill(null).map((_, i) => {
+    return { day: i, date: null, balance: null }
   })
 
-  const result: TTrendNode[] = [
-    { day: 0, date: null, balance: toDisplay(start) },
-  ]
+  // const leftover = envData.totalLeftover
+  // const budgeted = envData.totalBudgeted
+  // const activityTrend = envData.totalActivityTrend
 
-  const currDate = toISODate(new Date())
-  adjustedTrend.forEach((amount, i) => {
-    const day = i + 1
-    const date = getDate(day)
-    const balance = date === null || date > currDate ? null : toDisplay(amount)
-    result.push({ day, date, balance })
-  })
+  // const start = addFxAmount(leftover, budgeted)
 
-  return result
+  // let prevStart = start
+  // const adjustedTrend = activityTrend.map(amount => {
+  //   const next = addFxAmount(amount, prevStart)
+  //   prevStart = next
+  //   return next
+  // })
+
+  // const result: TTrendNode[] = [
+  //   { day: 0, date: null, balance: toDisplay(start) },
+  // ]
+
+  // const currDate = toISODate(new Date())
+  // adjustedTrend.forEach((amount, i) => {
+  //   const day = i + 1
+  //   const date = getDate(day)
+  //   const balance = date === null || date > currDate ? null : toDisplay(amount)
+  //   result.push({ day, date, balance })
+  // })
+
+  // return result
 
   function getDate(day: number) {
     const isoDate = (month + '-' + day.toString().padStart(2, '0')) as TISODate
