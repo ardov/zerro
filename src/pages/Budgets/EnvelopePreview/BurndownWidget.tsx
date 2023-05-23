@@ -2,7 +2,7 @@ import React, { FC, useState } from 'react'
 import { Area, ComposedChart, Line, ResponsiveContainer, YAxis } from 'recharts'
 import { Stack, Box, BoxProps } from '@mui/material'
 import { DataLine } from '@components/DataLine'
-import { formatDate } from '@shared/helpers/date'
+import { formatDate, toISODate } from '@shared/helpers/date'
 
 import { useAppTheme } from '@shared/ui/theme'
 import { prevMonth, toISOMonth } from '@shared/helpers/date'
@@ -175,16 +175,21 @@ function useDataTrend(month: TISOMonth, id: TEnvelopeId): TTrendNode[] {
   const childrenTrends = envData.children.map(
     childId => activity?.[childId]?.trend || []
   )
+  const currentISODate = toISODate(new Date())
 
   trend.forEach((node, i) => {
     if (i !== 0) {
+      // Set new balance
       balance = addFxAmount(
         balance,
         selfTrend[i] || {},
         ...childrenTrends.map(trend => trend[i] || {})
       )
     }
-    node.balance = toDisplay(balance)
+
+    // Balance for future dates is null
+    const isInFuture = !node.date || node.date > currentISODate
+    node.balance = isInFuture ? null : toDisplay(balance)
   })
 
   return trend

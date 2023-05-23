@@ -88,18 +88,30 @@ function StatWidget(props: {
   const [opened, toggleOpened] = useToggle(false)
 
   const nodes: TDataNode[] = items.map(node => {
+    const color =
+      node.id === 'transferFees'
+        ? '#808080'
+        : envelopes[node.id]?.colorGenerated || '#ff0000'
+    const name =
+      node.id === 'transferFees'
+        ? 'Курсовая разница'
+        : envelopes[node.id]?.name || 'Неизвестная категория'
+
+    if (node.id !== 'transferFees') {
+      console.assert(
+        envelopes[node.id] !== undefined,
+        'envelopes[node.id] is undefined',
+        node.id,
+        envelopes
+      )
+    }
+
     return {
       id: node.id,
       trMode: node.trMode,
       amount: toDisplay(node.total.total),
-      color:
-        node.id === 'transferFees'
-          ? '#808080'
-          : envelopes[node.id].colorGenerated,
-      name:
-        node.id === 'transferFees'
-          ? 'Курсовая разница'
-          : envelopes[node.id].name,
+      color,
+      name,
     }
   })
 
