@@ -75,23 +75,27 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
     <>
       <DateDialog />
       <AutoSizer disableWidth>
-        {({ height }) => (
-          <VariableSizeList
-            className="hidden-scroll"
-            width="100%"
-            height={height}
-            ref={listRef}
-            useIsScrolling
-            itemCount={groups.length}
-            itemData={{ groups, onDateClick }}
-            itemKey={i => groups[i].date}
-            itemSize={i =>
-              HEADER_HEIGHT + TRANSACTION_HEIGHT * groups[i].transactions.length
-            }
-          >
-            {Day}
-          </VariableSizeList>
-        )}
+        {({ height }) => {
+          if (!height) return null
+          return (
+            <VariableSizeList
+              className="hidden-scroll"
+              width="100%"
+              height={height}
+              ref={listRef}
+              useIsScrolling
+              itemCount={groups.length}
+              itemData={{ groups, onDateClick }}
+              itemKey={i => groups[i].date}
+              itemSize={i =>
+                HEADER_HEIGHT +
+                TRANSACTION_HEIGHT * groups[i].transactions.length
+              }
+            >
+              {Day}
+            </VariableSizeList>
+          )
+        }}
       </AutoSizer>
     </>
   )

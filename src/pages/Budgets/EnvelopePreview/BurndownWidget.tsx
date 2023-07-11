@@ -2,10 +2,10 @@ import React, { FC, useState } from 'react'
 import { Area, ComposedChart, Line, ResponsiveContainer, YAxis } from 'recharts'
 import { Stack, Box, BoxProps } from '@mui/material'
 import { DataLine } from '@components/DataLine'
-import { formatDate } from '@shared/helpers/date'
+import { formatDate, toISODate } from '@shared/helpers/date'
 
 import { useAppTheme } from '@shared/ui/theme'
-import { prevMonth, toISODate, toISOMonth } from '@shared/helpers/date'
+import { prevMonth, toISOMonth } from '@shared/helpers/date'
 import { TISODate, TISOMonth } from '@shared/types'
 import { addFxAmount, round } from '@shared/helpers/money'
 
@@ -162,39 +162,51 @@ type TTrendNode = {
 }
 
 function useDataTrend(month: TISOMonth, id: TEnvelopeId): TTrendNode[] {
-  const envData = balances.useEnvData()[month][id]
   const toDisplay = displayCurrency.useToDisplay(month)
+  const activity = balances.useActivity()?.[month]?.envActivity?.byEnv
+  const envData = balances.useEnvData()?.[month]?.[id]
 
-  const leftover = envData.totalLeftover
-  const budgeted = envData.totalBudgeted
-  const activityTrend = envData.totalActivityTrend
+  const trend = makeTrend(month)
+  if (!envData) return trend
 
-  const start = addFxAmount(leftover, budgeted)
+  let balance = addFxAmount(envData.totalLeftover, envData.totalBudgeted)
 
-  let prevStart = start
-  const adjustedTrend = activityTrend.map(amount => {
-    const next = addFxAmount(amount, prevStart)
-    prevStart = next
-    return next
+  const selfTrend = activity?.[id]?.trend || []
+  const childrenTrends = envData.children.map(
+    childId => activity?.[childId]?.trend || []
+  )
+  const currentISODate = toISODate(new Date())
+
+  trend.forEach((node, i) => {
+    if (i !== 0) {
+      // Set new balance
+      balance = addFxAmount(
+        balance,
+        selfTrend[i] || {},
+        ...childrenTrends.map(trend => trend[i] || {})
+      )
+    }
+
+    // Balance for future dates is null
+    const isInFuture = !node.date || node.date > currentISODate
+    node.balance = isInFuture ? null : toDisplay(balance)
   })
 
-  const result: TTrendNode[] = [
-    { day: 0, date: null, balance: toDisplay(start) },
-  ]
+  return trend
 
-  const currDate = toISODate(new Date())
-  adjustedTrend.forEach((amount, i) => {
-    const day = i + 1
-    const date = getDate(day)
-    const balance = date === null || date > currDate ? null : toDisplay(amount)
-    result.push({ day, date, balance })
-  })
+  function makeTrend(month: TISOMonth): TTrendNode[] {
+    return new Array(32).fill(null).map((_, i) => ({
+      day: i,
+      date: i === 0 ? getDate(1) : getDate(i),
+      balance: null,
+    }))
 
-  return result
-
-  function getDate(day: number) {
-    const isoDate = (month + '-' + day.toString().padStart(2, '0')) as TISODate
-    const isValid = new Date(isoDate).toString() !== 'Invalid Date'
-    return isValid ? isoDate : null
+    function getDate(day: number) {
+      const isoDate = (month +
+        '-' +
+        day.toString().padStart(2, '0')) as TISODate
+      const isValid = new Date(isoDate).toString() !== 'Invalid Date'
+      return isValid ? isoDate : null
+    }
   }
 }
