@@ -88,8 +88,6 @@ export function ChangesChart(props: ChartProps) {
   const trend = useDoubleTrend(month, id)
   const theme = useAppTheme()
 
-  console.log('trend', trend)
-
   return (
     <ResponsiveContainer>
       <ComposedChart
