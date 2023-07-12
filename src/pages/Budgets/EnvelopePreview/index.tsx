@@ -1,37 +1,24 @@
 import React, { FC, useCallback } from 'react'
-import {
-  Box,
-  Typography,
-  IconButton,
-  Grid,
-  ButtonBase,
-  Button,
-  Stack,
-} from '@mui/material'
+import { Box, Typography, IconButton, Grid, ButtonBase } from '@mui/material'
 import { EmojiIcon } from '@shared/ui/EmojiIcon'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { CloseIcon, EditIcon, EmojiFlagsIcon } from '@shared/ui/Icons'
-import { Total } from '@shared/ui/Total'
 import { ColorPicker, useColorPicker } from '@shared/ui/ColorPickerPopover'
 import { sendEvent } from '@shared/helpers/tracking'
-import { TFxAmount } from '@shared/types'
-import { convertFx } from '@shared/helpers/money'
 // import { usePopover } from '@shared/ui/PopoverManager'
-import { DataLine } from '@components/DataLine'
 
 import { useAppDispatch } from '@store'
 import { envelopeModel, TEnvelope, TEnvelopeId } from '@entities/envelope'
-import { balances, TrFilterMode } from '@entities/envBalances'
+import { balances } from '@entities/envBalances'
 import { goalModel } from '@entities/goal'
 import { useMonth } from '../MonthProvider'
-import { useBudgetPopover } from '../BudgetPopover'
 import { EnvelopeEditDialog, useEditDialog } from '../EnvelopeEditDialog'
 import { ActivityWidget } from './ActivityWidget'
 import { CommentWidget } from './CommentWidget'
 import { cardStyle } from './shared'
 import { useGoalPopover } from '../GoalPopover'
-import { useTrDrawer } from '../TransactionsDrawer'
 import { BurndownWidget } from './BurndownWidget'
+import { EnvelopeInfo } from './EnvelopeInfo'
 
 type EnvelopePreviewProps = {
   id: TEnvelopeId
@@ -40,10 +27,8 @@ type EnvelopePreviewProps = {
 
 export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   const [month] = useMonth()
-  const showTransactions = useTrDrawer()
-  const openBudgetPopover = useBudgetPopover()
   const openGoalPopover = useGoalPopover()
-  const rates = balances.useRates()[month].rates
+
   const envMetrics = balances.useEnvData()[month][id]
   const env = envelopeModel.useEnvelopes()[id]
 
@@ -51,89 +36,51 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   if (!envMetrics) return null
 
   const { currency } = envMetrics
-  const toEnvelope = (a: TFxAmount) => convertFx(a, currency, rates)
-  const totalLeftover = toEnvelope(envMetrics.totalLeftover)
-  const totalBudgeted = toEnvelope(envMetrics.totalBudgeted)
-  const totalActivity = toEnvelope(envMetrics.totalActivity)
-  const totalAvailable = toEnvelope(envMetrics.totalAvailable)
 
   return (
-    <>
-      <Box position="relative">
-        <Header envelope={env} onClose={onClose} />
+    <Box position="relative">
+      <Header envelope={env} onClose={onClose} />
 
-        <Grid container spacing={2} px={3} pt={3}>
-          <Grid item xs={12}>
-            <CommentWidget key={id} month={month} id={id} />
-          </Grid>
-
-          <Grid item xs={12}>
-            <ButtonBase
-              onClick={e => openGoalPopover(id, e.currentTarget)}
-              sx={{
-                ...cardStyle,
-                display: 'flex',
-                justifyContent: 'flex-start',
-                gap: 1,
-              }}
-            >
-              <EmojiFlagsIcon />
-              <Typography
-                variant="body1"
-                textAlign="left"
-                component="span"
-                color={goalInfo ? 'text.primary' : 'text.hint'}
-              >
-                {goalInfo ? goalModel.toWords(goalInfo.goal, currency) : 'Цель'}
-              </Typography>
-            </ButtonBase>
-          </Grid>
-
-          <Grid item xs={6}>
-            <ButtonBase
-              onClick={e => openBudgetPopover(id, e.currentTarget)}
-              sx={cardStyle}
-            >
-              <Total name="Бюджет" value={totalBudgeted} decMode="ifAny" />
-            </ButtonBase>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={cardStyle}>
-              <Total name="Доступно" value={totalAvailable} decMode="ifAny" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={12}>
-            <ActivityWidget id={id} />
-          </Grid>
-
-          <Grid item xs={12}>
-            <BurndownWidget id={id} />
-          </Grid>
+      <Grid container spacing={2} px={3} pb={5} pt={3}>
+        <Grid item xs={12}>
+          <CommentWidget key={id} month={month} id={id} />
         </Grid>
 
-        <Stack spacing={1.5} px={3} mt={3}>
-          <DataLine
-            name="Остаток с прошлого месяца"
-            amount={totalLeftover}
-            currency={currency}
-          />
-          <DataLine name="Бюджет" amount={totalBudgeted} currency={currency} />
-          <DataLine name="Расход" amount={totalActivity} currency={currency} />
-          <Box>
-            <Button
-              onClick={() =>
-                showTransactions({ id, month, mode: TrFilterMode.Envelope })
-              }
-              fullWidth
+        <Grid item xs={12}>
+          <ButtonBase
+            onClick={e => openGoalPopover(id, e.currentTarget)}
+            sx={{
+              ...cardStyle,
+              display: 'flex',
+              justifyContent: 'flex-start',
+              gap: 1,
+            }}
+          >
+            <EmojiFlagsIcon />
+            <Typography
+              variant="body1"
+              textAlign="left"
+              component="span"
+              color={goalInfo ? 'text.primary' : 'text.hint'}
             >
-              Показать операции
-            </Button>
-          </Box>
-        </Stack>
-      </Box>
-    </>
+              {goalInfo ? goalModel.toWords(goalInfo.goal, currency) : 'Цель'}
+            </Typography>
+          </ButtonBase>
+        </Grid>
+
+        <Grid item xs={12}>
+          <EnvelopeInfo month={month} id={id} />
+        </Grid>
+
+        <Grid item xs={12}>
+          <ActivityWidget id={id} />
+        </Grid>
+
+        <Grid item xs={12}>
+          <BurndownWidget id={id} />
+        </Grid>
+      </Grid>
+    </Box>
   )
 }
 

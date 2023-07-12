@@ -3,21 +3,25 @@ import { Box, BoxProps, Typography } from '@mui/material'
 import { Amount, AmountProps } from '@shared/ui/Amount'
 
 interface TotalProps extends BoxProps {
-  name: string
+  title: string
+  amountColor?: string
   align?: 'center' | 'right' | 'left'
   value: AmountProps['value']
   currency?: AmountProps['currency']
   sign?: AmountProps['sign']
   decMode?: AmountProps['decMode']
+  noShade?: AmountProps['noShade']
 }
 
 export function Total({
   align = 'center',
-  name = '',
+  title = '',
   value = 0,
   currency,
   sign = undefined,
   decMode,
+  noShade = false,
+  amountColor,
   ...rest
 }: TotalProps) {
   return (
@@ -26,18 +30,19 @@ export function Total({
         align={align}
         variant="body2"
         color="textSecondary"
-        children={name}
+        children={title}
       />
       <Typography
         align={align}
         variant="h5"
-        color={value ? 'textPrimary' : 'textSecondary'}
+        color={amountColor || (value ? 'textPrimary' : 'textSecondary')}
       >
         <Amount
           value={value}
           currency={currency}
           sign={sign}
           decMode={decMode}
+          noShade={noShade}
         />
       </Typography>
     </Box>

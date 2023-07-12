@@ -27,14 +27,15 @@ export type TEnvMetrics = {
   currency: TEnvelope['currency']
   carryNegatives: TEnvelope['carryNegatives']
 
-  transactions: TTransaction[]
   // Self metrics
+  selfTransactions: TTransaction[]
   selfLeftover: TFxAmount
   selfBudgeted: TFxAmount
   selfActivity: TFxAmount
   selfAvailable: TFxAmount
 
   // Children metrics
+  childrenTransactions: TTransaction[]
   childrenLeftover: TFxAmount
   childrenBudgeted: TFxAmount
   childrenActivity: TFxAmount
@@ -42,6 +43,7 @@ export type TEnvMetrics = {
   childrenOverspend: TFxAmount // Negative balances
 
   // Total metrics
+  totalTransactions: TTransaction[]
   totalLeftover: TFxAmount
   totalBudgeted: TFxAmount
   totalActivity: TFxAmount
@@ -101,6 +103,7 @@ function calcEnvMetrics(
     let childrenActivity = {} as TFxAmount
     let childrenSurplus = {} as TFxAmount
     let childrenOverspend = {} as TFxAmount
+    let childrenTransactions = [] as TTransaction[]
 
     // Fill children metrics
     children.forEach(id => {
@@ -113,6 +116,7 @@ function calcEnvMetrics(
       } else {
         childrenOverspend = addFxAmount(childrenOverspend, ch.selfAvailable)
       }
+      childrenTransactions.push(...ch.selfTransactions)
     })
 
     // Self metrics
@@ -134,7 +138,7 @@ function calcEnvMetrics(
       [currency]: convertFx(selfAvailableRaw, currency, rates[month].rates),
     }
 
-    const transactions =
+    const selfTransactions =
       activity?.[month]?.envActivity?.byEnv?.[id]?.transactions || []
 
     const res: TEnvMetrics = {
@@ -143,20 +147,22 @@ function calcEnvMetrics(
       children,
       parent,
       currency,
-      transactions,
       carryNegatives,
 
+      selfTransactions,
       selfLeftover,
       selfBudgeted,
       selfActivity,
       selfAvailable,
 
+      childrenTransactions,
       childrenLeftover,
       childrenBudgeted,
       childrenActivity,
       childrenSurplus,
       childrenOverspend,
 
+      totalTransactions: [...selfTransactions, ...childrenTransactions],
       totalLeftover: addFxAmount(selfLeftover, childrenLeftover),
       totalBudgeted: addFxAmount(selfBudgeted, childrenBudgeted),
       totalActivity: addFxAmount(selfActivity, childrenActivity),
@@ -167,19 +173,14 @@ function calcEnvMetrics(
   }
 }
 
-/** Create zero TFxAmount */
-function zero(fx: TFxCode): TFxAmount {
-  return { [fx]: 0 }
-}
-
 /** Returns leftover depending on envelope settings */
 function getLeftover(
   prevAvailable: TFxAmount | undefined,
   currency: TFxCode,
   carryNegatives: boolean
 ): TFxAmount {
-  if (!prevAvailable) return zero(currency)
+  if (!prevAvailable) return { [currency]: 0 }
   if ((prevAvailable[currency] || 0) >= 0) return prevAvailable
   if (carryNegatives) return prevAvailable
-  return zero(currency)
+  return { [currency]: 0 }
 }

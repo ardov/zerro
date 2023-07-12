@@ -29,7 +29,6 @@ import { DebtorList } from '@components/DebtorList'
 
 export default function NavigationDrawer(props: DrawerProps) {
   const theme = useAppTheme()
-  console.log({ theme })
 
   return (
     <Drawer {...props}>

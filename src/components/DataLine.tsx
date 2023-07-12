@@ -71,7 +71,33 @@ const Dot: FC<DotProps> = ({ color, colorOpacity = 1 }) => (
       marginRight: 8,
       borderRadius: '50%',
       opacity: colorOpacity,
-      flex: '0 0 auto'
+      flex: '0 0 auto',
     }}
   />
 )
+
+export const OneLiner: FC<{
+  left: React.ReactNode
+  right: React.ReactNode
+}> = ({ left, right }) => {
+  return (
+    <Box sx={{ typography: 'body1', display: 'flex', width: '100%' }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          minWidth: 0,
+          position: 'relative',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          maskImage: 'linear-gradient(to left, transparent, black 40px)',
+        }}
+      >
+        {left}
+      </Box>
+
+      <Box component="span" sx={{ ml: 1, flexShrink: 0 }}>
+        {right}
+      </Box>
+    </Box>
+  )
+}
