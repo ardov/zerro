@@ -1,5 +1,6 @@
+import type { TTransaction, TTransactionId } from '@shared/types'
+
 import React, { useState, useEffect, FC } from 'react'
-import { Reciept } from './Reciept'
 import {
   Box,
   Typography,
@@ -10,6 +11,7 @@ import {
   Button,
   Stack,
 } from '@mui/material'
+import { DatePicker } from '@mui/x-date-pickers'
 import { Tooltip } from '@shared/ui/Tooltip'
 import {
   DeleteIcon,
@@ -17,19 +19,19 @@ import {
   RestoreFromTrashIcon,
   CalendarIcon,
 } from '@shared/ui/Icons'
-import { DatePicker } from '@mui/x-date-pickers'
-import { Map } from './Map'
 import { AmountInput } from '@shared/ui/AmountInput'
 import { rateToWords } from '@shared/helpers/money'
-import { formatDate, parseDate } from '@shared/helpers/date'
-import { TagList } from '@components/TagList'
+import { formatDate, parseDate, toISODate } from '@shared/helpers/date'
+
 import { useAppDispatch } from '@store'
+
 import { trModel } from '@entities/transaction'
-import { getType } from '@entities/transaction/helpers'
 import { accountModel } from '@entities/account'
 import { instrumentModel } from '@entities/currency/instrument'
-import { toISODate } from '@shared/helpers/date'
-import { TTransaction, TTransactionId } from '@shared/types'
+
+import { TagList } from '@components/TagList'
+import { Reciept } from './Reciept'
+import { Map } from './Map'
 
 type TransactionPreviewProps = {
   id: string
@@ -53,7 +55,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
   // onSplit: id => dispatch(splitTransfer(id)), // does not work
 
   const tr = trModel.useTransactions()[id]
-  const trType = getType(tr)
+  const trType = trModel.getType(tr)
   const incomeAccount = accountModel.usePopulatedAccounts()[tr.incomeAccount]
   const outcomeAccount = accountModel.usePopulatedAccounts()[tr.outcomeAccount]
   const instruments = instrumentModel.useInstruments()
@@ -186,19 +188,19 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
         )}
         <Stack direction="row" spacing={2}>
           <DatePicker
+            label="Дата"
             value={parseDate(localDate)}
             onChange={date => date && setLocalDate(toISODate(date))}
-            label="Дата"
             showDaysOutsideCurrentMonth
             format="MM.dd.yyyy"
             slotProps={{ textField: { size: 'small', fullWidth: true } }}
             slots={{ openPickerIcon: CalendarIcon }}
           />
           <TextField
+            label="Время"
             value={localTime}
             onChange={e => setLocalTime(e.target.value)}
             type="time"
-            label="Время"
             size="small"
             inputProps={{
               sx: {
@@ -210,9 +212,9 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
           />
         </Stack>
         <TextField
+          label="Место платежа"
           value={localPayee || ''}
           onChange={e => setLocalPayee(e.target.value)}
-          label="Место платежа"
           multiline
           maxRows="4"
           fullWidth
@@ -220,9 +222,9 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
           size="small"
         />
         <TextField
+          label="Комментарий"
           value={localComment || ''}
           onChange={e => setLocalComment(e.target.value)}
-          label="Комментарий"
           multiline
           maxRows="4"
           fullWidth
@@ -351,7 +353,7 @@ const SaveButton: FC<{ visible: boolean; onSave: () => void }> = ({
 )
 
 const RateToWords: FC<{ tr: TTransaction }> = ({ tr }) => {
-  const trType = getType(tr)
+  const trType = trModel.getType(tr)
   const { income, opIncome, outcome, opOutcome } = tr
   const instruments = instrumentModel.useInstruments()
   const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
@@ -374,7 +376,7 @@ const RateToWords: FC<{ tr: TTransaction }> = ({ tr }) => {
   }
 
   if (rate) {
-    return <span>Курс – {rate}</span>
+    return <span>Курс: {rate}</span>
   }
   return null
 }
