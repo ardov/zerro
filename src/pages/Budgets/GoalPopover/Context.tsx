@@ -3,7 +3,7 @@ import { useMonth } from '../MonthProvider'
 
 import { TEnvelopeId } from '@entities/envelope'
 import { GoalPopover } from './GoalPopover'
-import { makePopoverHooks } from '@shared/ui/PopoverManager'
+import { makePopoverHooks } from '@shared/historyPopovers'
 import { TISOMonth } from '@shared/types'
 import { PopoverProps } from '@mui/material'
 

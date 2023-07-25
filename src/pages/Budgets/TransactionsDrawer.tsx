@@ -3,7 +3,7 @@ import { TISOMonth, TTransaction } from '@shared/types'
 import { TransactionsDrawer } from '@components/TransactionsDrawer'
 import { envelopeModel, TEnvelopeId } from '@entities/envelope'
 import { balances, TrFilterMode } from '@entities/envBalances'
-import { makePopoverHooks } from '@shared/ui/PopoverManager'
+import { makePopoverHooks } from '@shared/historyPopovers'
 import { toISOMonth } from '@shared/helpers/date'
 import { DrawerProps } from '@mui/material'
 

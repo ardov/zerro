@@ -10,7 +10,7 @@ import { formatDate, parseDate } from '@shared/helpers/date'
 import { TDateDraft, TISODate } from '@shared/types'
 import { toISODate } from '@shared/helpers/date'
 import { SmartDialog } from '@shared/ui/SmartDialog'
-import { makePopoverHooks } from '@shared/ui/PopoverManager'
+import { makePopoverHooks } from '@shared/historyPopovers'
 
 type GroupNode = {
   date: TISODate

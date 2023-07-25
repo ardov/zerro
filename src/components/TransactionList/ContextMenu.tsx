@@ -3,7 +3,7 @@ import { Menu, MenuItem, MenuProps } from '@mui/material'
 import { TTransaction, TTransactionId } from '@shared/types'
 import { useAppDispatch } from '@store'
 import { trModel } from '@entities/transaction'
-import { makePopoverHooks } from '@shared/ui/PopoverManager'
+import { makePopoverHooks } from '@shared/historyPopovers'
 
 type TTrMenuProps = {
   id: TTransactionId

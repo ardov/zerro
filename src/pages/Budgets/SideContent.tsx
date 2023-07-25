@@ -3,7 +3,7 @@ import { Box, Drawer } from '@mui/material'
 import { TEnvelopeId } from '@entities/envelope'
 import { MonthInfo } from './MonthInfo'
 import { EnvelopePreview } from './EnvelopePreview'
-import { makePopoverHooks } from '@shared/ui/PopoverManager'
+import { makePopoverHooks } from '@shared/historyPopovers'
 
 type TDrawerId = TEnvelopeId | 'overview'
 
