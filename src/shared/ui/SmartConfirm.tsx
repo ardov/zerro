@@ -5,7 +5,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import { SmartDialog } from './SmartDialog'
-import { makePopoverHooks } from './PopoverManager'
+import { makePopoverHooks } from '@shared/historyPopovers'
 
 type ConfirmCommonProps = {
   onOk: () => void

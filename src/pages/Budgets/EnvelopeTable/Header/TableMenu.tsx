@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { Menu, MenuItem, PopoverProps } from '@mui/material'
-import { makePopoverHooks } from '@shared/ui/PopoverManager'
+import { makePopoverHooks } from '@shared/historyPopovers'
 
 type TableMenuProps = {
   isAllShown: boolean

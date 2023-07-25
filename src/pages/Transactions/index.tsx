@@ -11,7 +11,7 @@ import {
 } from '@mui/material'
 import { TransactionPreview } from '@components/TransactionPreview'
 import { Helmet } from 'react-helmet'
-import { makePopoverHooks } from '@shared/ui/PopoverManager'
+import { makePopoverHooks } from '@shared/historyPopovers'
 import { TTransaction, TTransactionId } from '@shared/types'
 import { sendEvent } from '@shared/helpers/tracking'
 

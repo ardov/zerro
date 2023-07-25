@@ -1,6 +1,6 @@
 import React from 'react'
 import { MenuList, Select, SelectProps } from '@mui/material'
-import { popoverStack } from '@shared/hooks/usePopoverStack'
+import { popoverStack } from '@shared/historyPopovers'
 
 import { SwipeableDrawer, Theme, useMediaQuery } from '@mui/material'
 
@@ -8,7 +8,7 @@ type TSmartSelectProps<T = unknown> = SelectProps<T> & { elKey: string }
 
 export function SmartSelect<T>(props: TSmartSelectProps<T>) {
   const { elKey, ...selectProps } = props
-  const [open, onOpen, onClose] = popoverStack.useState(elKey)
+  const [open, onOpen, onClose] = popoverStack.usePopoverState(elKey)
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
   return (
@@ -34,6 +34,8 @@ export function SmartSelect<T>(props: TSmartSelectProps<T>) {
           }}
           open={open}
           onClose={onClose}
+          keepMounted={false}
+          ModalProps={{ keepMounted: false }}
         >
           <MenuList autoFocus>
             {React.Children.toArray(selectProps.children).map(child => {

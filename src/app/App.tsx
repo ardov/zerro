@@ -9,7 +9,7 @@ import {
   Theme,
 } from '@mui/material'
 import { initTracking, setUserId } from '@shared/helpers/tracking'
-import { PopoverManager } from '@shared/ui/PopoverManager'
+import { PopoverManager } from '@shared/historyPopovers'
 import { useAppSelector } from '@store'
 import { getLoginState } from '@store/token'
 import { getLastSyncTime } from '@store/data/selectors'

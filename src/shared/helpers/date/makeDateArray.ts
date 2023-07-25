@@ -17,7 +17,7 @@ export function toGroup(date: TDateDraft, aggregation: GroupBy): TISODate {
     case GroupBy.Day:
       return isoDate
     default:
-      throw new Error('Unknown aggregation', aggregation)
+      throw new Error(`Unknown aggregation: ${aggregation}`)
   }
 }
 
@@ -31,7 +31,7 @@ export function nextGroup(date: TDateDraft, aggregation: GroupBy): TISODate {
     case GroupBy.Day:
       return toISODate(nextDay(currGroup))
     default:
-      throw new Error('Unknown aggregation', aggregation)
+      throw new Error(`Unknown aggregation: ${aggregation}`)
   }
 }
 

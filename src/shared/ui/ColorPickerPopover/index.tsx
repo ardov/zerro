@@ -13,7 +13,7 @@ import {
 import './styles.scss'
 import { zmColors, colors } from './colors'
 import { isHEX } from '@shared/helpers/color'
-import { makePopoverHooks } from '../PopoverManager'
+import { makePopoverHooks } from '@shared/historyPopovers'
 
 export type ColorPickerProps = {
   value?: string | null

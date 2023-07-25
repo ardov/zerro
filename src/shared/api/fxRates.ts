@@ -27,11 +27,11 @@ export async function requestRates(date: TDateDraft) {
   ]).then(
     resp => resp?.json(),
     reason => {
-      throw new Error('Unable to load rates', reason)
+      throw new Error(`Unable to load rates. ${reason}`)
     }
   )
   const rates = response?.[base] as Record<TFxCode, number>
-  if (!rates) throw new Error('No rates found in a response', response)
+  if (!rates) throw new Error(`No rates found in a response. ${response}`)
 
   let result: Record<TFxCode, number> = {}
 

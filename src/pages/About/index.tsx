@@ -9,8 +9,9 @@ import Method from './pages/Method.mdx'
 import About from './pages/About.mdx'
 import QuickStart from './pages/QuickStart.mdx'
 import './index.scss'
+import { MDXComponents } from 'mdx/types'
 
-const components = { a: TextLink }
+const components = { a: TextLink } as MDXComponents
 
 export default function Main() {
   return (
