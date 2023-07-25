@@ -19,23 +19,21 @@ export function SmartDialog(props: TSmartDialogProps) {
   const [open, onOpen, onClose] = popoverStack.usePopoverState(elKey)
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
-  if (!isMobile)
-    return (
-      <Dialog
-        {...dialogProps}
-        open={open}
-        onClose={onClose}
-        keepMounted={false}
-      />
-    )
-
-  return (
+  return isMobile ? (
     <SwipeableDrawer
       {...dialogProps}
       anchor="bottom"
       onOpen={onOpen}
       disableSwipeToOpen
       PaperProps={drawerPaperProps}
+      open={open}
+      onClose={onClose}
+      keepMounted={false}
+      ModalProps={{ keepMounted: false }}
+    />
+  ) : (
+    <Dialog
+      {...dialogProps}
       open={open}
       onClose={onClose}
       keepMounted={false}

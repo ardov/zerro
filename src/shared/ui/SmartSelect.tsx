@@ -34,6 +34,8 @@ export function SmartSelect<T>(props: TSmartSelectProps<T>) {
           }}
           open={open}
           onClose={onClose}
+          keepMounted={false}
+          ModalProps={{ keepMounted: false }}
         >
           <MenuList autoFocus>
             {React.Children.toArray(selectProps.children).map(child => {
