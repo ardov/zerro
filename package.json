@@ -111,7 +111,7 @@
     "@types/convert-layout": "^0.5.1",
     "@types/json2mq": "^0.2.0",
     "@types/lodash": "^4.14.191",
-    "@types/mdx-js__react": "^1.5.5",
+    "@types/mdx": "^2.0.5",
     "@types/node": "^18.15.5",
     "@types/qrcode.react": "^1.0.2",
     "@types/react": "^18.0.28",
