@@ -22,7 +22,7 @@ export function getStart(
     date.setFullYear(date.getFullYear() - 3)
     return toGroup(toISODate(date), aggregation)
   }
-  throw new Error('Unknown period: ', period)
+  throw new Error(`Unknown period: ${period}`)
 }
 
 export const periodTitles = {
