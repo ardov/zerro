@@ -9,7 +9,7 @@ import { TEnvelopeId } from '@entities/envelope'
 
 import { balances, TrFilterMode } from '@entities/envBalances'
 
-import { BudgetTransactionsDrawer, useTrDrawer } from './TransactionsDrawer'
+import { useTrDrawer } from './useTrDrawer'
 import { EnvelopeTable } from './EnvelopeTable'
 import { DnDContext } from './DnDContext'
 import { SmartBudgetPopover } from './BudgetPopover'
@@ -76,7 +76,6 @@ function Budgets() {
 
       <DnDContext>
         <BudgetLayout mainContent={mainContent} />
-        <BudgetTransactionsDrawer />
       </DnDContext>
 
       <SmartGoalPopover />

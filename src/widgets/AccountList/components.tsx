@@ -18,72 +18,82 @@ import {
   DisplayAmount,
   displayCurrency,
 } from '@entities/currency/displayCurrency'
+import { useTransactionDrawer } from 'widgets/TransactionListDrawer'
 
-export const Account: FC<{ account: TAccountPopulated } & ListItemButtonProps> =
-  ({ account, sx, ...rest }) => {
-    const dispatch = useAppDispatch()
-    const toggleInBalance = useCallback(
-      () => dispatch(accountModel.setInBudget(account.id, !account.inBudget)),
-      [account.id, account.inBudget, dispatch]
-    )
-    return (
-      <ListItemButton
+export const Account: FC<
+  { account: TAccountPopulated } & ListItemButtonProps
+> = ({ account, sx, ...rest }) => {
+  const transactionDrawer = useTransactionDrawer()
+  const dispatch = useAppDispatch()
+  const toggleInBalance = useCallback(
+    () => dispatch(accountModel.setInBudget(account.id, !account.inBudget)),
+    [account.id, account.inBudget, dispatch]
+  )
+  const showTransactions = useCallback(
+    () =>
+      transactionDrawer.open({
+        title: account.title,
+        filterConditions: {
+          accounts: [account.id],
+        },
+      }),
+    [account.id, account.title, transactionDrawer]
+  )
+  return (
+    <ListItemButton
+      sx={{
+        typography: 'body2',
+        borderRadius: 1,
+        display: 'flex',
+        ...sx,
+      }}
+      onDoubleClick={toggleInBalance}
+      onClick={showTransactions}
+      {...rest}
+    >
+      <Box
         sx={{
-          typography: 'body2',
-          borderRadius: 1,
-          display: 'flex',
-          ...sx,
+          textDecoration: account.archive ? 'line-through' : 'none',
+          flexGrow: 1,
+          minWidth: 0,
+          position: 'relative',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          maskImage: 'linear-gradient(to left, transparent, black 40px)',
         }}
-        onDoubleClick={toggleInBalance}
-        {...rest}
+        title={account.title}
       >
-        <Box
-          sx={{
-            textDecoration: account.archive ? 'line-through' : 'none',
-            flexGrow: 1,
-            minWidth: 0,
-            position: 'relative',
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            maskImage: 'linear-gradient(to left, transparent, black 40px)',
-          }}
-          title={account.title}
-        >
-          {account.title}
-        </Box>
+        {account.title}
+      </Box>
 
-        <Box
-          component="span"
-          sx={{
-            ml: 1,
-            flexShrink: 0,
-            color: account.balance < 0 ? 'error.main' : 'text.secondary',
-          }}
+      <Box
+        component="span"
+        sx={{
+          ml: 1,
+          flexShrink: 0,
+          color: account.balance < 0 ? 'error.main' : 'text.secondary',
+        }}
+      >
+        <Tooltip
+          title={
+            <Amount value={account.balance} currency={account.fxCode} noShade />
+          }
+          disableInteractive
+          placement="right"
         >
-          <Tooltip
-            title={
-              <Amount
-                value={account.balance}
-                currency={account.fxCode}
-                noShade
-              />
-            }
-            disableInteractive
-            placement="right"
-          >
-            <div>
-              <Amount
-                value={account.balance}
-                currency={account.fxCode}
-                decMode="ifOnly"
-                noShade
-              />
-            </div>
-          </Tooltip>
-        </Box>
-      </ListItemButton>
-    )
-  }
+          <div>
+            <Amount
+              value={account.balance}
+              currency={account.fxCode}
+              decMode="ifOnly"
+              noShade
+            />
+          </div>
+        </Tooltip>
+      </Box>
+    </ListItemButton>
+  )
+}
 
 export const Subheader: FC<
   {

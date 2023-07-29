@@ -13,7 +13,7 @@ import {
   TSortedActivityNode,
 } from '@entities/envBalances'
 import { envelopeModel } from '@entities/envelope'
-import { useTrDrawer } from '@pages/Budgets/TransactionsDrawer'
+import { useTrDrawer } from '@pages/Budgets/useTrDrawer'
 
 export function ActivityStats(props: { month: TISOMonth }) {
   const { month } = props

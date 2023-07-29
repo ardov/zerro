@@ -26,7 +26,7 @@ import { balances, TrFilterMode } from '@entities/envBalances'
 
 import { cardStyle } from './shared'
 import { useBudgetPopover } from '../BudgetPopover'
-import { useTrDrawer } from '../TransactionsDrawer'
+import { useTrDrawer } from '../useTrDrawer'
 
 function getPrepositionalMonthName(month: TISOMonth | TDateDraft) {
   const monthNames = [

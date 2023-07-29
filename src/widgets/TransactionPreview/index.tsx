@@ -33,7 +33,7 @@ import { TagList } from 'widgets/TagList'
 import { Reciept } from './Reciept'
 import { Map } from './Map'
 
-type TransactionPreviewProps = {
+export type TransactionPreviewProps = {
   id: string
   onClose: () => void
   onOpenOther: (id: TTransactionId) => void
