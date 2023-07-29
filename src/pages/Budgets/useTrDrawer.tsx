@@ -1,11 +1,8 @@
-import React, { FC } from 'react'
 import { TISOMonth, TTransaction } from '@shared/types'
-import { TransactionsDrawer } from '@components/TransactionsDrawer'
 import { envelopeModel, TEnvelopeId } from '@entities/envelope'
 import { balances, TrFilterMode } from '@entities/envBalances'
-import { makePopoverHooks } from '@shared/historyPopovers'
-import { toISOMonth } from '@shared/helpers/date'
-import { DrawerProps } from '@mui/material'
+import { store } from '@store/index'
+import { useTransactionDrawer } from 'widgets/TransactionListDrawer'
 
 type TConditions = {
   id: TEnvelopeId | 'transferFees' | null
@@ -14,32 +11,23 @@ type TConditions = {
   isExact?: boolean
 }
 
-const trDrawer = makePopoverHooks<TConditions, DrawerProps>(
-  'budgetTransactionsDrawer',
-  {
-    id: null,
-    month: toISOMonth(new Date()),
-  }
-)
+// TODO: with this approach list of transactions stays the same even after edits
 
 export function useTrDrawer() {
-  return trDrawer.useMethods().open
+  const transactionDrawer = useTransactionDrawer()
+  const open = (conditions: TConditions) => {
+    const transactions = getFilteredTransactions(conditions)
+    transactionDrawer.open({ transactions })
+  }
+  return open
 }
 
-export const BudgetTransactionsDrawer: FC = () => {
-  const drawer = trDrawer.useProps()
-  const transactions = useFilteredTransactions(drawer.extraProps)
-  if (!transactions) return null
-  return (
-    <TransactionsDrawer transactions={transactions} {...drawer.displayProps} />
-  )
-}
-
-function useFilteredTransactions(conditions: TConditions): TTransaction[] {
+function getFilteredTransactions(conditions: TConditions): TTransaction[] {
   const { id, month, mode = TrFilterMode.Envelope, isExact } = conditions
-  const envelopes = envelopeModel.useEnvelopes()
-  const activity = balances.useActivity()[month]
-  const rawActivity = balances.useRawActivity()[month]
+  const state = store.getState()
+  const envelopes = envelopeModel.getEnvelopes(state)
+  const activity = balances.activity(state)[month]
+  const rawActivity = balances.rawActivity(state)[month]
   if (!activity || !rawActivity || !id) return []
 
   // Return transfer fees
@@ -70,6 +58,8 @@ function useFilteredTransactions(conditions: TConditions): TTransaction[] {
 }
 
 /*
+NOTES
+
 Which transaction filters do I need?
 
   - Envelope drawer

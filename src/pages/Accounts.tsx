@@ -1,8 +1,8 @@
 import React from 'react'
 import { Box } from '@mui/material'
-import AccountList from '@components/AccountList'
+import AccountList from 'widgets/AccountList'
 import { Helmet } from 'react-helmet'
-import { DebtorList } from '@components/DebtorList'
+import { DebtorList } from 'widgets/DebtorList'
 
 export default function Accounts() {
   return (

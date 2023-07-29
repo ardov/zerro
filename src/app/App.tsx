@@ -13,16 +13,18 @@ import { PopoverManager } from '@shared/historyPopovers'
 import { useAppSelector } from '@store'
 import { getLoginState } from '@store/token'
 import { getLastSyncTime } from '@store/data/selectors'
-import { RegularSyncHandler } from '@components/RegularSyncHandler'
-import Nav from '@components/Navigation'
-import { MobileNavigation } from '@components/Navigation'
-import ErrorBoundary from '@components/ErrorBoundary'
+import { RegularSyncHandler } from 'widgets/RegularSyncHandler'
+import Nav from 'widgets/Navigation'
+import { MobileNavigation } from 'widgets/Navigation'
+import ErrorBoundary from 'widgets/ErrorBoundary'
 import { userModel } from '@entities/user'
 import Transactions from '@pages/Transactions'
 import Auth from '@pages/Auth'
 import Budgets from '@pages/Budgets'
 import Accounts from '@pages/Accounts'
 import { SmartConfirm } from '@shared/ui/SmartConfirm'
+import { SmartTransactionListDrawer } from 'widgets/TransactionListDrawer'
+import { SmartTransactionPreview } from 'widgets/TransactionPreviewDrawer'
 
 const About = lazy(() => import('@pages/About'))
 const Donation = lazy(() => import('@pages/Donation'))
@@ -100,6 +102,8 @@ export default function App() {
         </Layout>
 
         <SmartConfirm />
+        <SmartTransactionListDrawer />
+        <SmartTransactionPreview />
       </PopoverManager>
     </Router>
   )

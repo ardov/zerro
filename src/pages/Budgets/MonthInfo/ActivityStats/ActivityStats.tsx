@@ -2,7 +2,7 @@ import { FC, useCallback } from 'react'
 import { Box, BoxProps, ButtonBase, Collapse, Stack } from '@mui/material'
 import { useToggle } from '@shared/hooks/useToggle'
 import { TISOMonth } from '@shared/types'
-import { DataLine } from '@components/DataLine'
+import { DataLine } from 'widgets/DataLine'
 import { Tooltip } from '@shared/ui/Tooltip'
 
 import { displayCurrency } from '@entities/currency/displayCurrency'
@@ -13,7 +13,7 @@ import {
   TSortedActivityNode,
 } from '@entities/envBalances'
 import { envelopeModel } from '@entities/envelope'
-import { useTrDrawer } from '@pages/Budgets/TransactionsDrawer'
+import { useTrDrawer } from '@pages/Budgets/useTrDrawer'
 
 export function ActivityStats(props: { month: TISOMonth }) {
   const { month } = props

@@ -34,7 +34,7 @@ import { useAppDispatch } from '@store'
 import { resetData } from '@store/data'
 
 import { userSettingsModel } from '@entities/userSettings'
-import { useRegularSync } from '@components/RegularSyncHandler'
+import { useRegularSync } from 'widgets/RegularSyncHandler'
 import { logOut } from '@features/authorization'
 import { exportCSV } from '@features/export/exportCSV'
 import { exportJSON } from '@features/export/exportJSON'

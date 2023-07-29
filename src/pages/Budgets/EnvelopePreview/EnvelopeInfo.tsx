@@ -19,14 +19,14 @@ import {
   toISOMonth,
 } from '@shared/helpers/date'
 
-import { OneLiner } from '@components/DataLine'
+import { OneLiner } from 'widgets/DataLine'
 
 import { TEnvelopeId } from '@entities/envelope'
 import { balances, TrFilterMode } from '@entities/envBalances'
 
 import { cardStyle } from './shared'
 import { useBudgetPopover } from '../BudgetPopover'
-import { useTrDrawer } from '../TransactionsDrawer'
+import { useTrDrawer } from '../useTrDrawer'
 
 function getPrepositionalMonthName(month: TISOMonth | TDateDraft) {
   const monthNames = [

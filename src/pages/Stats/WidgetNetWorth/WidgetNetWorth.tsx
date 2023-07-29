@@ -21,7 +21,7 @@ import { round } from '@shared/helpers/money'
 import { formatDate, GroupBy } from '@shared/helpers/date'
 
 import { displayCurrency } from '@entities/currency/displayCurrency'
-import { DataLine } from '@components/DataLine'
+import { DataLine } from 'widgets/DataLine'
 import { Period, periodTitles } from '../shared/period'
 import { TPoint, useNetWorth } from './model'
 

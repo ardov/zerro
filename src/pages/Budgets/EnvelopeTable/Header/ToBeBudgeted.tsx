@@ -10,7 +10,7 @@ import { useAppTheme } from '@shared/ui/theme'
 import { formatMoney, sub } from '@shared/helpers/money'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { Amount } from '@shared/ui/Amount'
-import { DataLine } from '@components/DataLine'
+import { DataLine } from 'widgets/DataLine'
 import { ArrowForwardIcon } from '@shared/ui/Icons'
 
 import { displayCurrency } from '@entities/currency/displayCurrency'

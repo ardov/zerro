@@ -13,7 +13,7 @@ import {
   SyncAltIcon,
 } from '@shared/ui/Icons'
 import { useHomeBar } from '@shared/hooks/useHomeBar'
-import RefreshButton from '@components/RefreshButton'
+import RefreshButton from 'widgets/RefreshButton'
 import { SettingsMenu, useSettingsMenu } from './SettingsMenu'
 
 const actionSx = { minWidth: 32 }

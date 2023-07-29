@@ -14,7 +14,7 @@ import { formatMoney } from '@shared/helpers/money'
 import { formatDate, parseDate } from '@shared/helpers/date'
 import { TISODate } from '@shared/types'
 import { displayCurrency } from '@entities/currency/displayCurrency'
-import { DataLine } from '@components/DataLine'
+import { DataLine } from 'widgets/DataLine'
 import { useCashFlow } from './model'
 import { Period, periodTitles } from '../shared/period'
 
