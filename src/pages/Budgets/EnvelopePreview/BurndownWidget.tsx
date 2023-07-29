@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react'
 import { Area, ComposedChart, Line, ResponsiveContainer, YAxis } from 'recharts'
 import { Stack, Box, BoxProps } from '@mui/material'
-import { DataLine } from '@components/DataLine'
+import { DataLine } from 'widgets/DataLine'
 import { formatDate, toISODate } from '@shared/helpers/date'
 
 import { useAppTheme } from '@shared/ui/theme'

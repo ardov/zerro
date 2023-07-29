@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { Stack, Box, BoxProps } from '@mui/material'
 import { useAppTheme } from '@shared/ui/theme'
 import { TFxAmount, TISOMonth } from '@shared/types'
-import { DataLine } from '@components/DataLine'
+import { DataLine } from 'widgets/DataLine'
 import { formatDate } from '@shared/helpers/date'
 import { convertFx } from '@shared/helpers/money'
 

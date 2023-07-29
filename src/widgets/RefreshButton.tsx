@@ -14,7 +14,7 @@ import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { getLastSyncInfo } from '@store/lastSync'
-import { useRegularSync } from '@components/RegularSyncHandler'
+import { useRegularSync } from 'widgets/RegularSyncHandler'
 import { useAppDispatch, useAppSelector } from '@store'
 
 type ButtonState = 'idle' | 'pending' | 'success' | 'fail'

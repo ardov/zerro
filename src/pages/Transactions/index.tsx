@@ -1,5 +1,5 @@
 import React, { useState, FC, useCallback } from 'react'
-import { TransactionList } from '@components/TransactionList'
+import { TransactionList } from 'widgets/TransactionList'
 import {
   Box,
   Drawer,
@@ -9,7 +9,7 @@ import {
   Theme,
   DrawerProps,
 } from '@mui/material'
-import { TransactionPreview } from '@components/TransactionPreview'
+import { TransactionPreview } from 'widgets/TransactionPreview'
 import { Helmet } from 'react-helmet'
 import { makePopoverHooks } from '@shared/historyPopovers'
 import { TTransaction, TTransactionId } from '@shared/types'

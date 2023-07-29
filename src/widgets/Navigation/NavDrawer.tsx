@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { useRouteMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import RefreshButton from '@components/RefreshButton'
+import RefreshButton from 'widgets/RefreshButton'
 import { MenuButton } from './MenuButton'
 import {
   Box,
@@ -24,8 +24,8 @@ import {
 import { Logo } from '@shared/ui/Logo'
 import { useAppTheme } from '@shared/ui/theme'
 
-import AccountList from '@components/AccountList'
-import { DebtorList } from '@components/DebtorList'
+import AccountList from 'widgets/AccountList'
+import { DebtorList } from 'widgets/DebtorList'
 
 export default function NavigationDrawer(props: DrawerProps) {
   const theme = useAppTheme()

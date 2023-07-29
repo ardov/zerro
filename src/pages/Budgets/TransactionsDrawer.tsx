@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { TISOMonth, TTransaction } from '@shared/types'
-import { TransactionsDrawer } from '@components/TransactionsDrawer'
+import { TransactionsDrawer } from 'widgets/TransactionsDrawer'
 import { envelopeModel, TEnvelopeId } from '@entities/envelope'
 import { balances, TrFilterMode } from '@entities/envBalances'
 import { makePopoverHooks } from '@shared/historyPopovers'

@@ -9,7 +9,7 @@ import {
 import { AmountProps } from '@shared/ui/Amount'
 import { Tooltip } from '@shared/ui/Tooltip'
 // TODO: use Amount instead
-import { SmartAmount, TSmartAmountProps } from '@components/Amount'
+import { SmartAmount, TSmartAmountProps } from 'widgets/Amount'
 
 type DataLineProps = BoxProps & {
   name: ReactNode

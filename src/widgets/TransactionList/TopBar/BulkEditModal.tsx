@@ -8,7 +8,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import { useAppDispatch } from '@store'
 import { trModel } from '@entities/transaction'
 import { getType } from '@entities/transaction/helpers'
-import { TagList } from '@components/TagList'
+import { TagList } from 'widgets/TagList'
 import { Modify, TTransaction } from '@shared/types'
 import { Box, TextField } from '@mui/material'
 

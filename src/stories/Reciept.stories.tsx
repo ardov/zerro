@@ -1,6 +1,6 @@
 import React from 'react'
 import { StoryObj, Meta } from '@storybook/react'
-import { Reciept } from '@components/TransactionPreview/Reciept'
+import { Reciept } from 'widgets/TransactionPreview/Reciept'
 import { context } from './shared/context'
 
 const meta = {

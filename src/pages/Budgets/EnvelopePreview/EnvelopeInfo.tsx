@@ -19,7 +19,7 @@ import {
   toISOMonth,
 } from '@shared/helpers/date'
 
-import { OneLiner } from '@components/DataLine'
+import { OneLiner } from 'widgets/DataLine'
 
 import { TEnvelopeId } from '@entities/envelope'
 import { balances, TrFilterMode } from '@entities/envBalances'

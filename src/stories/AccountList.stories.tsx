@@ -1,4 +1,4 @@
-import AccountList from '@components/AccountList'
+import AccountList from 'widgets/AccountList'
 import { context } from './shared/context'
 
 import type { Meta, StoryObj } from '@storybook/react'
@@ -9,7 +9,7 @@ const meta = {
   decorators: [context],
 } satisfies Meta<typeof AccountList>
 
-export default meta;
+export default meta
 type Story = StoryObj<typeof meta>
 
 export const Primary: Story = { args: {} }

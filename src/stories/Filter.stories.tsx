@@ -1,5 +1,5 @@
 import React from 'react'
-import { Filter } from '@components/Filtering'
+import { Filter } from 'widgets/Filtering'
 import { Meta, StoryObj } from '@storybook/react'
 import { context } from './shared/context'
 
