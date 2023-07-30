@@ -1,58 +1,45 @@
-import { TAccountId, TDateDraft, TTagId, TTransaction } from '@shared/types'
+import { TAccountId, TISOMonth, TTagId, TTransaction } from '@shared/types'
 import { keys } from '@shared/helpers/keys'
 import { getType, isDeleted, isNew, TrType } from './helpers'
-import { toISODate } from '@shared/helpers/date'
+import type { KeyCondition, StringCondition } from './basicFiltering'
+import { checkValue } from './basicFiltering'
+import { toISOMonth } from '@shared/helpers/date'
 
-type OperatorType = 'AND' | 'OR'
-
-type ConditionRule =
-  | number
-  | string
-  | boolean
-  | null
-  | {
-      is?: number | string | string[]
-      contains?: string | string[]
-      in?: [number, number]
-      '>'?: number
-      '>='?: number
-      '<'?: number
-      '<='?: number
-    }
-
-type DefaultConditions = {
-  [key in keyof TTransaction]?: ConditionRule
-}
-
-type CustomConditions = {
+export type FilterConditions = {
+  [key in keyof TTransaction]?: KeyCondition
+} & {
   search?: null | string
-  type?: null | TrType
+  type?: StringCondition<TrType>
   showDeleted?: boolean
   isNew?: boolean
-  dateFrom?: null | TDateDraft
-  dateTo?: null | TDateDraft
   tags?: null | TTagId[]
-  mainTags?: null | TTagId[]
-  accountsFrom?: null | TAccountId[]
-  accountsTo?: null | TAccountId[]
-  accounts?: null | TAccountId[]
-  amountFrom?: null | number
-  amountTo?: null | number
+  mainTag?: StringCondition<TTagId>
+
+  month?: StringCondition<TISOMonth>
+  account?: StringCondition<TAccountId>
+  amount?: KeyCondition
 }
 
-export type FilterConditions = DefaultConditions & CustomConditions
+type FilterArray =
+  | FilterConditions
+  | ['AND' | 'OR', ...(FilterConditions | FilterArray)[]]
 
 export const checkRaw =
-  (
-    conditions: FilterConditions | FilterConditions[] = {},
-    operator: OperatorType = 'OR'
-  ) =>
-  (tr: TTransaction) => {
-    if (Array.isArray(conditions)) {
-      const results = conditions.map(cond => checkConditions(tr, cond))
-      return operator === 'AND' ? results.every(Boolean) : results.some(Boolean)
+  (condition: FilterArray = {}) =>
+  (tr: TTransaction): boolean => {
+    if (Array.isArray(condition)) {
+      const [operator, ...conditionList] = condition
+      if (conditionList.length === 0) return true
+      switch (operator) {
+        case 'AND':
+          return conditionList.every(condition => checkRaw(condition)(tr))
+        case 'OR':
+          return conditionList.some(condition => checkRaw(condition)(tr))
+        default:
+          throw new Error(`Invalid operator ${operator}`)
+      }
     }
-    return checkConditions(tr, conditions)
+    return checkConditions(tr, condition)
   }
 
 const checkConditions = (tr: TTransaction, conditions: FilterConditions) => {
@@ -60,89 +47,54 @@ const checkConditions = (tr: TTransaction, conditions: FilterConditions) => {
     // Always check is transaction deleted or not (usually we don't want deleted transactions)
     checkDeleted(tr, conditions.showDeleted) &&
     keys(conditions)
-      .map(field => {
-        switch (field) {
+      .map(key => {
+        if (conditions[key] === undefined) return true
+        switch (key) {
           case 'search':
-            return checkSearch(tr, conditions[field])
+            return checkSearch(tr, conditions[key])
           case 'type':
-            return checkType(tr, conditions.type)
+            return checkValue(getType(tr), conditions[key])
           case 'showDeleted':
-            return checkDeleted(tr, conditions.showDeleted)
+            return conditions[key] || !isDeleted(tr)
           case 'isNew':
             return checkIsNew(tr, conditions.isNew)
-          case 'dateFrom':
-          case 'dateTo':
-            return checkDate(tr, conditions.dateFrom, conditions.dateTo)
           case 'tags':
             return checkTags(tr, conditions.tags, 'any')
-          case 'mainTags':
-            return checkTags(tr, conditions.mainTags, 'main')
-          case 'accountsFrom':
-          case 'accountsTo':
-            return checkAccounts(
-              tr,
-              conditions.accountsFrom,
-              conditions.accountsTo
-            )
-          case 'accounts':
+          case 'mainTag': {
+            const mainTag = tr.tag?.[0] || null
+            return checkValue(mainTag, conditions[key])
+          }
+          case 'month':
+            return checkValue(toISOMonth(tr.date), conditions[key])
+
+          case 'account':
             return (
-              checkAccounts(tr, undefined, conditions.accounts) ||
-              checkAccounts(tr, conditions.accounts)
+              checkValue(tr.incomeAccount, conditions[key]) ||
+              checkValue(tr.outcomeAccount, conditions[key])
             )
-          case 'amountFrom':
-            return checkAmount(tr, conditions.amountFrom, 'greaterOrEqual')
-          case 'amountTo':
-            return checkAmount(tr, conditions.amountTo, 'lessOrEqual')
+
+          case 'amount': {
+            const type = getType(tr)
+            if (type === TrType.Income)
+              return checkValue(tr.income, conditions[key])
+            if (type === TrType.Outcome)
+              return checkValue(tr.outcome, conditions[key])
+            return (
+              checkValue(tr.income, conditions[key]) ||
+              checkValue(tr.outcome, conditions[key])
+            )
+          }
 
           default:
-            if (field in tr) {
-              return checkRule(tr[field], conditions[field])
+            if (key in tr) {
+              return checkValue(tr[key], conditions[key])
             } else {
-              throw new Error('Unknown filtering field: ' + field)
+              throw new Error('Unknown filtering field: ' + key)
             }
         }
       })
       .every(Boolean)
   )
-}
-
-const checkRule = (value: any, rule?: ConditionRule) => {
-  if (rule === undefined) {
-    return true
-  }
-  if (
-    typeof rule === 'number' ||
-    typeof rule === 'string' ||
-    typeof rule === 'boolean' ||
-    rule === null
-  ) {
-    return value === rule
-  }
-
-  if (rule['is'] !== undefined) {
-    // TODO Arrray check
-    if (rule.is !== value) return false
-  }
-  if (rule['contains'] !== undefined) {
-    // TODO
-    return false
-  }
-  if (rule['in'] !== undefined) {
-    if (rule.in[0] > value || rule.in[1] < value) return false
-  }
-  if (rule['>'] !== undefined) {
-    if (!(value > rule['>'])) return false
-  }
-  if (rule['>='] !== undefined) {
-    if (!(value >= rule['>='])) return false
-  }
-  if (rule['<'] !== undefined) {
-    if (!(value < rule['<'])) return false
-  }
-  if (rule['<='] !== undefined) {
-    if (!(value <= rule['<='])) return false
-  }
-  return true
 }
 
 const checkSearch = (tr: TTransaction, search?: FilterConditions['search']) => {
@@ -152,40 +104,14 @@ const checkSearch = (tr: TTransaction, search?: FilterConditions['search']) => {
   return false
 }
 
-const checkType = (tr: TTransaction, type?: FilterConditions['type']) =>
-  !type || getType(tr) === type
-
 const checkDeleted = (
   tr: TTransaction,
   showDeleted?: FilterConditions['showDeleted']
 ) => showDeleted || !isDeleted(tr)
 
-const checkDate = (
-  tr: TTransaction,
-  dateFrom?: FilterConditions['dateFrom'],
-  dateTo?: FilterConditions['dateTo']
-) => {
-  if (dateFrom && tr.date < toISODate(dateFrom)) return false
-  if (dateTo && tr.date > toISODate(dateTo)) return false
-  return true
-}
-
-const checkAccounts = (
-  tr: TTransaction,
-  accountsFrom?: FilterConditions['accountsFrom'],
-  accountsTo?: FilterConditions['accountsTo']
-) => {
-  const check = (current: TAccountId, need?: null | TAccountId[]) =>
-    need ? need.includes(current) : true
-  return (
-    check(tr.incomeAccount, accountsTo) &&
-    check(tr.outcomeAccount, accountsFrom)
-  )
-}
-
 const checkTags = (
   tr: TTransaction,
-  tags?: FilterConditions['mainTags'],
+  tags?: FilterConditions['tags'],
   matchType: 'main' | 'any' = 'any'
 ) => {
   if (!tags || !tags.length) return true
@@ -194,16 +120,6 @@ const checkTags = (
 
   if (matchType === 'main') return tags.includes(tr.tag[0])
   return tr.tag.some(id => tags.includes(id))
-}
-
-const checkAmount = (
-  tr: TTransaction,
-  amount?: FilterConditions['amountFrom'],
-  compareType: 'greaterOrEqual' | 'lessOrEqual' = 'lessOrEqual'
-) => {
-  if (!amount) return true
-  const trAmount = getType(tr) === 'income' ? tr.income : tr.outcome
-  return compareType === 'lessOrEqual' ? trAmount <= amount : trAmount >= amount
 }
 
 const checkIsNew = (

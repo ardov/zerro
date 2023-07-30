@@ -33,9 +33,7 @@ export const Account: FC<
     () =>
       transactionDrawer.open({
         title: account.title,
-        filterConditions: {
-          accounts: [account.id],
-        },
+        filterConditions: { account: account.id },
       }),
     [account.id, account.title, transactionDrawer]
   )

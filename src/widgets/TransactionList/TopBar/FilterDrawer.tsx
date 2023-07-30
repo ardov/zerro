@@ -17,7 +17,7 @@ import {
 } from '@mui/material'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { CloseIcon } from '@shared/ui/Icons'
-import { FilterConditions } from '@entities/transaction/filtering'
+import { FilterConditions } from '@entities/transaction'
 import { TrType } from '@entities/transaction'
 import { SmartSelect } from '@shared/ui/SmartSelect'
 
@@ -47,6 +47,8 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
     const value = e.target.value as TrType
     setCondition({ type: value || null })
   }
+
+  const { gte, lte } = getGteLte(conditions.amount)
 
   return (
     <Drawer
@@ -83,16 +85,20 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
               <TextField
                 variant="outlined"
                 label="Сумма от"
-                value={conditions.amountFrom || ''}
-                onChange={e => setCondition({ amountFrom: +e.target.value })}
+                value={gte}
+                onChange={e =>
+                  setCondition({ amount: { lte, gte: +e.target.value } })
+                }
               />
             </Grid>
             <Grid item xs={6}>
               <TextField
                 variant="outlined"
                 label="Сумма до"
-                value={conditions.amountTo || ''}
-                onChange={e => setCondition({ amountTo: +e.target.value })}
+                value={lte}
+                onChange={e =>
+                  setCondition({ amount: { gte, lte: +e.target.value } })
+                }
               />
             </Grid>
           </Grid>
@@ -142,15 +148,15 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
             <SmartSelect
               elKey="transactionType"
               variant="outlined"
-              value={conditions.type || ''}
+              value={typeof conditions.type === 'string' ? conditions.type : ''}
               onChange={handleTypeChange}
               label="Тип транзакции"
               fullWidth
             >
               <MenuItem value="">Все</MenuItem>
-              <MenuItem value="income">Доход</MenuItem>
-              <MenuItem value="outcome">Расход</MenuItem>
-              <MenuItem value="transfer">Перевод</MenuItem>
+              <MenuItem value={TrType.Income}>Доход</MenuItem>
+              <MenuItem value={TrType.Outcome}>Расход</MenuItem>
+              <MenuItem value={TrType.Transfer}>Перевод</MenuItem>
             </SmartSelect>
           </FormControl>
         </Box>
@@ -211,3 +217,15 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
 }
 
 export default FilterDrawer
+
+function getGteLte(amount: FilterConditions['amount']) {
+  if (amount === undefined || amount === null)
+    return { gte: undefined, lte: undefined }
+  if (typeof amount === 'number') return { gte: amount, lte: amount }
+  if (typeof amount === 'object')
+    return {
+      gte: amount.gte === undefined ? undefined : +amount.gte,
+      lte: amount.lte === undefined ? undefined : +amount.lte,
+    }
+  return { gte: undefined, lte: undefined }
+}

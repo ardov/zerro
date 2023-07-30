@@ -40,7 +40,7 @@ export default function Stats() {
     setSelected({ id, date })
   }, [])
 
-  const filterConditions = { accounts: selected ? [selected.id] : null }
+  const filterConditions = { account: selected?.id || null }
 
   return (
     <>
