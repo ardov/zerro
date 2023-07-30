@@ -1,9 +1,9 @@
 import * as Comlink from 'comlink'
-import { TDiff, TLocalData, TZmDiff } from '../shared/types'
-import { keys } from '../shared/helpers/keys'
-import { storage } from '../shared/api/storage'
-import { zenmoney } from '../shared/api/zenmoney'
-import { convertDiff } from '../shared/api/zm-adapter'
+import { TDiff, TLocalData, TZmDiff } from '../6-shared/types'
+import { keys } from '../6-shared/helpers/keys'
+import { storage } from '../6-shared/api/storage'
+import { zenmoney } from '../6-shared/api/zenmoney'
+import { convertDiff } from '../6-shared/api/zm-adapter'
 
 // import { workerMethods } from 'dataWorker'
 

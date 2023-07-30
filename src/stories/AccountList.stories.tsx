@@ -1,4 +1,4 @@
-import AccountList from 'widgets/account/AccountList'
+import AccountList from '3-widgets/account/AccountList'
 import { context } from './shared/context'
 
 import type { Meta, StoryObj } from '@storybook/react'

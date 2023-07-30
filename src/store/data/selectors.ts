@@ -1,4 +1,4 @@
-import { RootState } from '@store'
+import { RootState } from 'store'
 import { getItemsCount } from './shared/getItemsCount'
 import { getLastDiffChange } from './shared/getLastDiffChange'
 

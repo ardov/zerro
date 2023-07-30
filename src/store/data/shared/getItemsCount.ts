@@ -1,4 +1,4 @@
-import { TDiff } from '@shared/types'
+import { TDiff } from '6-shared/types'
 
 /**
  * Counts all items in a diff object

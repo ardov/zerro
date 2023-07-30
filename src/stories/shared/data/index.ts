@@ -1,9 +1,9 @@
 import countries from './countries.json'
 import companies from './companies.json'
 import instruments from './instruments.json'
-import { accountModel } from '@entities/account'
-import { makeTag } from '@entities/tag/makeTag'
-import { toISODate } from '@shared/helpers/date'
+import { accountModel } from '5-entities/account'
+import { makeTag } from '5-entities/tag/makeTag'
+import { toISODate } from '6-shared/helpers/date'
 import {
   AccountType,
   TDiff,
@@ -11,8 +11,8 @@ import {
   TZmCompany,
   TZmCountry,
   TZmInstrument,
-} from '@shared/types'
-import { trModel } from '@entities/transaction'
+} from '6-shared/types'
+import { trModel } from '5-entities/transaction'
 
 const NOW = Date.now()
 const DAY = 1000 * 60 * 60 * 24

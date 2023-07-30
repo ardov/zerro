@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { withPerf } from '@shared/helpers/performance'
-import { TDataStore, TDiff } from '@shared/types'
+import { withPerf } from '6-shared/helpers/performance'
+import { TDataStore, TDiff } from '6-shared/types'
 // import { dataModel } from './effector'
 import { applyDiff } from './shared/applyDiff'
 import { mergeDiffs } from './shared/mergeDiffs'

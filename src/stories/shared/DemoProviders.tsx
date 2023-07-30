@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
-import { store } from '@store'
-import { applyServerPatch } from '@store/data'
-import { Providers } from 'app/Providers'
+import { store } from 'store'
+import { applyServerPatch } from 'store/data'
+import { Providers } from '1-app/Providers'
 import { getDemoData } from './data'
 
 store.dispatch(applyServerPatch(getDemoData()))

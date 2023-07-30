@@ -1,4 +1,4 @@
-import { TDiff, TMsTime } from '@shared/types'
+import { TDiff, TMsTime } from '6-shared/types'
 
 /**
  * Returns last time an item was changed in the diff

@@ -1,6 +1,6 @@
 import React from 'react'
 import { StoryObj, Meta } from '@storybook/react'
-import { Map } from 'widgets/transaction/TransactionPreview/Map'
+import { Map } from '3-widgets/transaction/TransactionPreview/Map'
 import { context } from './shared/context'
 
 const meta = {
