@@ -23,8 +23,8 @@ import Auth from '@pages/Auth'
 import Budgets from '@pages/Budgets'
 import Accounts from '@pages/Accounts'
 import { SmartConfirm } from '@shared/ui/SmartConfirm'
-import { SmartTransactionListDrawer } from 'widgets/TransactionListDrawer'
-import { SmartTransactionPreview } from 'widgets/TransactionPreviewDrawer'
+import { SmartTransactionListDrawer } from 'widgets/transaction/TransactionListDrawer'
+import { SmartTransactionPreview } from 'widgets/transaction/TransactionPreviewDrawer'
 
 const About = lazy(() => import('@pages/About'))
 const Donation = lazy(() => import('@pages/Donation'))

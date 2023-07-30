@@ -24,7 +24,7 @@ import {
 import { Logo } from '@shared/ui/Logo'
 import { useAppTheme } from '@shared/ui/theme'
 
-import AccountList from 'widgets/AccountList'
+import AccountList from 'widgets/account/AccountList'
 import { DebtorList } from 'widgets/DebtorList'
 
 export default function NavigationDrawer(props: DrawerProps) {

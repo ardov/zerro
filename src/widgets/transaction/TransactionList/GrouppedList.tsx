@@ -10,7 +10,7 @@ import { formatDate, parseDate } from '@shared/helpers/date'
 import { TDateDraft, TISODate } from '@shared/types'
 import { toISODate } from '@shared/helpers/date'
 import { SmartDialog } from '@shared/ui/SmartDialog'
-import { makePopoverHooks } from '@shared/historyPopovers'
+import { registerPopover } from '@shared/historyPopovers'
 
 type GroupNode = {
   date: TISODate
@@ -177,7 +177,7 @@ type TDateDialogProps = {
   onChange: StaticDatePickerProps<TDateDraft>['onChange']
 }
 
-const dateDialog = makePopoverHooks<TDateDialogProps>('listSateDialog', {
+const dateDialog = registerPopover<TDateDialogProps>('listSateDialog', {
   value: new Date(),
   onChange: () => {},
 })

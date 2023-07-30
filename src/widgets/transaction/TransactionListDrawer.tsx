@@ -2,18 +2,18 @@ import React, { useCallback } from 'react'
 import { Drawer, Box, Typography, IconButton } from '@mui/material'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { CloseIcon } from '@shared/ui/Icons'
-import { makePopoverHooks } from '@shared/historyPopovers'
+import { registerPopover } from '@shared/historyPopovers'
 import { TransactionList, TTransactionListProps } from './TransactionList'
 import { useTransactionPreview } from './TransactionPreviewDrawer'
 
 export type TransactionDrawerProps = {
   title?: string
   transactions?: TTransactionListProps['transactions']
-  filterConditions?: TTransactionListProps['filterConditions']
+  filterConditions?: TTransactionListProps['preFilter']
   initialDate?: TTransactionListProps['initialDate']
 }
 
-const trDrawerHooks = makePopoverHooks(
+const trDrawerHooks = registerPopover(
   'transaction-list-drawer',
   {} as TransactionDrawerProps
 )
@@ -65,7 +65,7 @@ export const SmartTransactionListDrawer = () => {
 
         <TransactionList
           transactions={transactions}
-          filterConditions={filterConditions}
+          preFilter={filterConditions}
           initialDate={initialDate}
           onTrOpen={showTransaction}
           hideFilter

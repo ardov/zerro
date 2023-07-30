@@ -5,7 +5,7 @@ import type { KeyCondition, StringCondition } from './basicFiltering'
 import { checkValue } from './basicFiltering'
 import { toISOMonth } from '@shared/helpers/date'
 
-export type FilterConditions = {
+export type TrCondition = {
   [key in keyof TTransaction]?: KeyCondition
 } & {
   search?: null | string
@@ -20,12 +20,12 @@ export type FilterConditions = {
   amount?: KeyCondition
 }
 
-type FilterArray =
-  | FilterConditions
-  | ['AND' | 'OR', ...(FilterConditions | FilterArray)[]]
+export type TrConditions =
+  | TrCondition
+  | ['AND' | 'OR', ...(TrCondition | TrConditions | undefined)[]]
 
 export const checkRaw =
-  (condition: FilterArray = {}) =>
+  (condition: TrConditions = {}) =>
   (tr: TTransaction): boolean => {
     if (Array.isArray(condition)) {
       const [operator, ...conditionList] = condition
@@ -42,7 +42,7 @@ export const checkRaw =
     return checkConditions(tr, condition)
   }
 
-const checkConditions = (tr: TTransaction, conditions: FilterConditions) => {
+const checkConditions = (tr: TTransaction, conditions: TrCondition) => {
   return (
     // Always check is transaction deleted or not (usually we don't want deleted transactions)
     checkDeleted(tr, conditions.showDeleted) &&
@@ -97,7 +97,7 @@ const checkConditions = (tr: TTransaction, conditions: FilterConditions) => {
   )
 }
 
-const checkSearch = (tr: TTransaction, search?: FilterConditions['search']) => {
+const checkSearch = (tr: TTransaction, search?: TrCondition['search']) => {
   if (!search) return true
   if (tr.comment?.toUpperCase().includes(search.toUpperCase())) return true
   if (tr.payee?.toUpperCase().includes(search.toUpperCase())) return true
@@ -106,12 +106,12 @@ const checkSearch = (tr: TTransaction, search?: FilterConditions['search']) => {
 
 const checkDeleted = (
   tr: TTransaction,
-  showDeleted?: FilterConditions['showDeleted']
+  showDeleted?: TrCondition['showDeleted']
 ) => showDeleted || !isDeleted(tr)
 
 const checkTags = (
   tr: TTransaction,
-  tags?: FilterConditions['tags'],
+  tags?: TrCondition['tags'],
   matchType: 'main' | 'any' = 'any'
 ) => {
   if (!tags || !tags.length) return true
@@ -122,10 +122,7 @@ const checkTags = (
   return tr.tag.some(id => tags.includes(id))
 }
 
-const checkIsNew = (
-  tr: TTransaction,
-  condition?: FilterConditions['isNew']
-) => {
+const checkIsNew = (tr: TTransaction, condition?: TrCondition['isNew']) => {
   if (condition === undefined) return true
   const isNewTransaction = isNew(tr)
   return isNewTransaction === condition

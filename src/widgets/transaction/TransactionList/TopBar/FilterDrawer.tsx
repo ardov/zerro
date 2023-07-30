@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { TagSelect } from 'widgets/TagSelect'
+import { TagSelect } from 'widgets/tag/TagSelect'
 import {
   Drawer,
   Box,
@@ -17,7 +17,7 @@ import {
 } from '@mui/material'
 import { Tooltip } from '@shared/ui/Tooltip'
 import { CloseIcon } from '@shared/ui/Icons'
-import { FilterConditions } from '@entities/transaction'
+import { TrCondition } from '@entities/transaction'
 import { TrType } from '@entities/transaction'
 import { SmartSelect } from '@shared/ui/SmartSelect'
 
@@ -28,8 +28,8 @@ const contentSx = {
 }
 
 type FilterDrawerProps = {
-  setCondition: (c: FilterConditions) => void
-  conditions: FilterConditions
+  setCondition: (c: TrCondition) => void
+  conditions: TrCondition
   clearFilter: () => void
   onClose: () => void
   open: boolean
@@ -167,7 +167,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
             tagFilters={{ includeNull: true }}
             value={conditions.tags || []}
             onChange={tags =>
-              setCondition({ tags: tags as FilterConditions['tags'] })
+              setCondition({ tags: tags as TrCondition['tags'] })
             }
           />
         </Box>
@@ -218,7 +218,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
 
 export default FilterDrawer
 
-function getGteLte(amount: FilterConditions['amount']) {
+function getGteLte(amount: TrCondition['amount']) {
   if (amount === undefined || amount === null)
     return { gte: undefined, lte: undefined }
   if (typeof amount === 'number') return { gte: amount, lte: amount }

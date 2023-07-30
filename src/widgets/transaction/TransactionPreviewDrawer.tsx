@@ -1,6 +1,6 @@
 import React from 'react'
 import { Drawer, Box } from '@mui/material'
-import { makePopoverHooks } from '@shared/historyPopovers'
+import { registerPopover } from '@shared/historyPopovers'
 import { TTransactionId } from '@shared/types'
 import {
   TransactionPreview,
@@ -13,7 +13,7 @@ export type TransactionPreviewDrawerProps = {
   onSelectSimilar?: TransactionPreviewProps['onSelectSimilar']
 }
 
-const trDrawerHooks = makePopoverHooks('transaction-preview-drawer', {
+const trDrawerHooks = registerPopover('transaction-preview-drawer', {
   id: '',
 } as TransactionPreviewDrawerProps)
 

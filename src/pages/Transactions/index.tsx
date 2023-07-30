@@ -1,5 +1,5 @@
 import React, { useState, FC, useCallback } from 'react'
-import { TransactionList } from 'widgets/TransactionList'
+import { TransactionList } from 'widgets/transaction/TransactionList'
 import {
   Box,
   Drawer,
@@ -9,9 +9,9 @@ import {
   Theme,
   DrawerProps,
 } from '@mui/material'
-import { TransactionPreview } from 'widgets/TransactionPreview'
+import { TransactionPreview } from 'widgets/transaction/TransactionPreview'
 import { Helmet } from 'react-helmet'
-import { makePopoverHooks } from '@shared/historyPopovers'
+import { registerPopover } from '@shared/historyPopovers'
 import { TTransaction, TTransactionId } from '@shared/types'
 import { sendEvent } from '@shared/helpers/tracking'
 
@@ -87,7 +87,7 @@ export default function TransactionsView() {
   )
 }
 
-const trPreview = makePopoverHooks<
+const trPreview = registerPopover<
   {
     id?: TTransactionId
     onSelectSimilar?: (changed: TTransaction['changed']) => void

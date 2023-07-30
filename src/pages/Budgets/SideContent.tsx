@@ -3,11 +3,11 @@ import { Box, Drawer } from '@mui/material'
 import { TEnvelopeId } from '@entities/envelope'
 import { MonthInfo } from './MonthInfo'
 import { EnvelopePreview } from './EnvelopePreview'
-import { makePopoverHooks } from '@shared/historyPopovers'
+import { registerPopover } from '@shared/historyPopovers'
 
 type TDrawerId = TEnvelopeId | 'overview'
 
-const sideDrawer = makePopoverHooks<{ id: TDrawerId }>('sideContent', {
+const sideDrawer = registerPopover<{ id: TDrawerId }>('sideContent', {
   id: 'overview',
 })
 

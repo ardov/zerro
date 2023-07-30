@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { Menu, MenuItem, PopoverProps } from '@mui/material'
-import { makePopoverHooks } from '@shared/historyPopovers'
+import { registerPopover } from '@shared/historyPopovers'
 
 type TableMenuProps = {
   isAllShown: boolean
@@ -9,7 +9,7 @@ type TableMenuProps = {
   onReorderModeToggle: () => void
 }
 
-const tableMenu = makePopoverHooks<TableMenuProps, PopoverProps>('tableMenu', {
+const tableMenu = registerPopover<TableMenuProps, PopoverProps>('tableMenu', {
   isAllShown: false,
   isReordering: false,
   onShowAllToggle: () => {},

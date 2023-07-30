@@ -18,7 +18,7 @@ import {
   DisplayAmount,
   displayCurrency,
 } from '@entities/currency/displayCurrency'
-import { useTransactionDrawer } from 'widgets/TransactionListDrawer'
+import { useTransactionDrawer } from 'widgets/transaction/TransactionListDrawer'
 
 export const Account: FC<
   { account: TAccountPopulated } & ListItemButtonProps

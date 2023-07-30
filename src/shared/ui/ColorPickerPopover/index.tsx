@@ -13,14 +13,14 @@ import {
 import './styles.scss'
 import { zmColors, colors } from './colors'
 import { isHEX } from '@shared/helpers/color'
-import { makePopoverHooks } from '@shared/historyPopovers'
+import { registerPopover } from '@shared/historyPopovers'
 
 export type ColorPickerProps = {
   value?: string | null
   onColorChange?: (value: string | null) => void
 }
 
-const colorPicker = makePopoverHooks<ColorPickerProps, PopoverProps>(
+const colorPicker = registerPopover<ColorPickerProps, PopoverProps>(
   'colorPicker',
   {}
 )

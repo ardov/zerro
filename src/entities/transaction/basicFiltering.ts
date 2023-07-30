@@ -41,7 +41,7 @@ export type StringCondition<T extends string> =
 export function checkValue(
   value: any,
   condition?: KeyCondition | StringCondition<string>
-) {
+): boolean {
   // Undefined condition matches any value.
   if (condition === undefined) return true
 

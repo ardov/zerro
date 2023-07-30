@@ -6,13 +6,13 @@ import { FilterListIcon, CloseIcon } from '@shared/ui/Icons'
 import { Tooltip } from '@shared/ui/Tooltip'
 import FilterDrawer from './FilterDrawer'
 import { useToggle } from '@shared/hooks/useToggle'
-import { FilterConditions } from '@entities/transaction'
+import { TrCondition } from '@entities/transaction'
 import { SxProps } from '@mui/system'
 import { Theme } from '@mui/material/styles'
 
 type FilterProps = {
-  setCondition: (c: FilterConditions) => void
-  conditions?: FilterConditions
+  setCondition: (c: TrCondition) => void
+  conditions?: TrCondition
   clearFilter: () => void
   sx?: SxProps<Theme>
 }

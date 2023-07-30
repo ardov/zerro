@@ -3,7 +3,7 @@ import { Button } from '@mui/material'
 import { TAccountId, TISODate } from '@shared/types'
 
 import { accountModel } from '@entities/account'
-import { TransactionsDrawer } from 'widgets/TransactionsDrawer'
+import { TransactionsDrawer } from 'widgets/transaction/TransactionsDrawer'
 import { WidgetNetWorth } from './WidgetNetWorth'
 import { WidgetCashflow } from './WidgetCashflow'
 import { WidgetAccHistory } from './WidgetAccHistory'

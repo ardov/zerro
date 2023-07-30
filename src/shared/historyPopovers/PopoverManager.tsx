@@ -56,7 +56,9 @@ type WithoutBaseProps<T> = Omit<T, 'open' | 'onClose'>
 type WithBaseProps<T> = Modify<T, TBaseProps>
 type TBaseProps = { open: boolean; onClose: () => void }
 
-export function makePopoverHooks<
+const registeredPopovers = {} as Record<TKey, any>
+
+export function registerPopover<
   ExtraProps extends object = {},
   DisplayProps extends object = TBaseProps
 >(
@@ -64,6 +66,11 @@ export function makePopoverHooks<
   defaultExtraProps: ExtraProps,
   defaultDisplayProps?: WithoutBaseProps<DisplayProps>
 ) {
+  // Prevent duplicate registration
+  if (registeredPopovers[key])
+    throw new Error(`Popover "${key}" already registered`)
+  registeredPopovers[key] = true
+
   type TStored =
     | { extra: ExtraProps; display?: WithoutBaseProps<DisplayProps> }
     | undefined

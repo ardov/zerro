@@ -29,7 +29,7 @@ import { trModel } from '@entities/transaction'
 import { accountModel } from '@entities/account'
 import { instrumentModel } from '@entities/currency/instrument'
 
-import { TagList } from 'widgets/TagList'
+import { TagList } from 'widgets/tag/TagList'
 import { Reciept } from './Reciept'
 import { Map } from './Map'
 

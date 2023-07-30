@@ -1,29 +1,32 @@
-import React, { useMemo, useState, useCallback, useEffect, FC } from 'react'
-import { Box, Typography } from '@mui/material'
-import { SxProps } from '@mui/system'
-import { Theme } from '@mui/material/styles'
-import { FilterConditions, trModel } from '@entities/transaction'
-import { GrouppedList } from './GrouppedList'
-import Filter from './TopBar/Filter'
-import Actions from './TopBar/Actions'
-import { sendEvent } from '@shared/helpers/tracking'
-import { useDebounce } from '@shared/hooks/useDebounce'
-import {
+import type { SxProps } from '@mui/system'
+import type {
   ByDate,
   TDateDraft,
   TISODate,
   TTransaction,
   TTransactionId,
 } from '@shared/types'
-import { Transaction } from './Transaction'
+import type { TrCondition, TrConditions } from '@entities/transaction'
+
+import React, { useMemo, useState, useCallback, useEffect, FC } from 'react'
+import { Box, Typography, Theme } from '@mui/material'
+import { sendEvent } from '@shared/helpers/tracking'
+import { useDebounce } from '@shared/hooks/useDebounce'
 import { accountModel } from '@entities/account'
+import { trModel } from '@entities/transaction'
+
+import { GrouppedList } from './GrouppedList'
+import Filter from './TopBar/Filter'
+import Actions from './TopBar/Actions'
+import { Transaction } from './Transaction'
 import { TransactionMenu, useTrContextMenu } from './ContextMenu'
 
 export type TTransactionListProps = {
   onTrOpen?: (id: TTransactionId) => void
   opened?: TTransactionId
   transactions?: TTransaction[]
-  filterConditions?: FilterConditions
+  preFilter?: TrConditions
+  initialFilter?: TrCondition
   hideFilter?: boolean
   checkedDate?: Date | null
   initialDate?: TDateDraft
@@ -35,29 +38,39 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     onTrOpen,
     opened,
     transactions,
-    filterConditions,
+    preFilter,
+    initialFilter: defaultConditions,
     hideFilter = false,
     checkedDate,
     initialDate,
     sx,
   } = props
 
-  const [filter, setFilter] = useState(filterConditions)
-  const debouncedFilter = useDebounce(filter, 300)
+  const [filter, setFilter] = useState(defaultConditions)
   const setCondition = useCallback(
-    (condition?: FilterConditions) =>
-      setFilter(filter => ({ ...filter, ...condition })),
+    (condition?: TrConditions) =>
+      setFilter(filter => {
+        return { ...filter, ...condition }
+      }),
     []
   )
   const handleClearFilter = useCallback(() => {
-    setFilter(filterConditions)
-  }, [filterConditions])
+    setFilter(undefined)
+  }, [])
 
   const onFilterByPayee = useCallback(
     (payee?: string) => setFilter({ search: payee }),
     []
   )
 
+  const resultFilter = useMemo(() => {
+    if (preFilter) {
+      return filter ? (['AND', preFilter, filter] as TrConditions) : preFilter
+    }
+    return filter
+  }, [filter, preFilter])
+
+  const debouncedFilter = useDebounce(resultFilter, 300)
   const trList = useFilteredTransactions(transactions, debouncedFilter)
   const debtId = accountModel.useDebtAccountId()
 
@@ -170,7 +183,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
 function useFilteredTransactions(
   transactions?: TTransaction[],
-  conditions?: FilterConditions
+  conditions?: TrConditions
 ) {
   const allTransactions = trModel.useSortedTransactions()
   const groups = useMemo(() => {

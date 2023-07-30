@@ -1,2 +1,2 @@
-export { PopoverManager, makePopoverHooks } from './PopoverManager'
+export { PopoverManager, registerPopover } from './PopoverManager'
 export { popoverStack } from './popoverStack'

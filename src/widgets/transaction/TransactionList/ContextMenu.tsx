@@ -2,15 +2,15 @@ import React, { FC, useCallback } from 'react'
 import { Menu, MenuItem, MenuProps } from '@mui/material'
 import { TTransaction, TTransactionId } from '@shared/types'
 import { useAppDispatch } from '@store'
+import { registerPopover } from '@shared/historyPopovers'
 import { trModel } from '@entities/transaction'
-import { makePopoverHooks } from '@shared/historyPopovers'
 
 type TTrMenuProps = {
   id: TTransactionId
   onSelectSimilar: (changed: TTransaction['changed']) => void
 }
 
-const trContext = makePopoverHooks<TTrMenuProps, MenuProps>(
+const trContext = registerPopover<TTrMenuProps, MenuProps>(
   'transactionContext',
   { id: '', onSelectSimilar: () => {} }
 )
@@ -40,14 +40,14 @@ export const TransactionMenu: FC = () => {
   const dispatch = useAppDispatch()
   const transaction = trModel.useTransactions()[id]
 
+  const handleSelectSimilar = useCallback(() => {
+    displayProps.onClose()
+    onSelectSimilar(transaction.changed)
+  }, [displayProps, onSelectSimilar, transaction.changed])
+
   return (
     <Menu {...displayProps}>
-      <MenuItem
-        onClick={e => {
-          displayProps.onClose()
-          onSelectSimilar(transaction.changed)
-        }}
-      >
+      <MenuItem onClick={handleSelectSimilar}>
         Выбрать изменённые в это же время
       </MenuItem>
     </Menu>

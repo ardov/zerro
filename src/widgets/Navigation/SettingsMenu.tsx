@@ -40,11 +40,11 @@ import { exportCSV } from '@features/export/exportCSV'
 import { exportJSON } from '@features/export/exportJSON'
 import { clearLocalData } from '@features/localData'
 import { convertZmBudgetsToZerro } from '@features/budget/convertZmBudgetsToZerro'
-import { makePopoverHooks } from '@shared/historyPopovers'
+import { registerPopover } from '@shared/historyPopovers'
 import { useConfirm } from '@shared/ui/SmartConfirm'
 import { useColorScheme } from '@shared/ui/theme'
 
-const settingsHooks = makePopoverHooks<{}, PopoverProps>('settingsMenu', {})
+const settingsHooks = registerPopover<{}, PopoverProps>('settingsMenu', {})
 
 export const useSettingsMenu = () => {
   const { open } = settingsHooks.useMethods()

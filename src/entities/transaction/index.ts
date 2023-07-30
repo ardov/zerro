@@ -20,7 +20,7 @@ import {
 } from './thunks'
 
 export type { TransactionPatch } from './thunks'
-export type { FilterConditions } from './filtering'
+export type { TrCondition, TrConditions } from './filtering'
 export { TrType } from './helpers'
 
 export const trModel = {

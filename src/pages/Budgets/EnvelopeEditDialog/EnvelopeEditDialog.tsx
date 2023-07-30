@@ -28,9 +28,9 @@ import {
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
 import { VisibilitySelect } from './VisidilitySelect'
 import { userModel } from '@entities/user'
-import { makePopoverHooks } from '@shared/historyPopovers'
+import { registerPopover } from '@shared/historyPopovers'
 
-const editDialog = makePopoverHooks<
+const editDialog = registerPopover<
   { envelope?: Partial<TEnvelope> },
   DialogProps
 >('envelopeEditDialog', {})

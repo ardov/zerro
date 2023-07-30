@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box } from '@mui/material'
-import AccountList from 'widgets/AccountList'
+import AccountList from 'widgets/account/AccountList'
 import { Helmet } from 'react-helmet'
 import { DebtorList } from 'widgets/DebtorList'
 

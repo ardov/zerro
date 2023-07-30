@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import './index.scss'
 import { TTransaction } from '@shared/types'
-import { TransactionsDrawer } from 'widgets/TransactionsDrawer'
+import { TransactionsDrawer } from 'widgets/transaction/TransactionsDrawer'
 
 import { OutcomeCard } from './cards/OutcomeCard'
 import { NoCategoryCard } from './cards/NoCategoryCard'

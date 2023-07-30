@@ -3,11 +3,11 @@ import { useMonth } from '../MonthProvider'
 
 import { TEnvelopeId } from '@entities/envelope'
 import { GoalPopover } from './GoalPopover'
-import { makePopoverHooks } from '@shared/historyPopovers'
+import { registerPopover } from '@shared/historyPopovers'
 import { TISOMonth } from '@shared/types'
 import { PopoverProps } from '@mui/material'
 
-const goalPopover = makePopoverHooks<
+const goalPopover = registerPopover<
   { id?: TEnvelopeId; month?: TISOMonth },
   PopoverProps
 >('goalPopover', {})

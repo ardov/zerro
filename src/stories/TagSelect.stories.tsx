@@ -1,6 +1,6 @@
 import React from 'react'
 import { Meta, StoryObj } from '@storybook/react'
-import { TagSelect } from '../widgets/TagSelect'
+import { TagSelect } from '../widgets/tag/TagSelect'
 import { context } from './shared/context'
 
 const meta = {

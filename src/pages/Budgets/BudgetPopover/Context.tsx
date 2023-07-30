@@ -3,11 +3,11 @@ import React, { FC, useCallback } from 'react'
 import { TEnvelopeId } from '@entities/envelope'
 import { useMonth } from '../MonthProvider'
 import { BudgetPopover } from './BudgetPopover'
-import { makePopoverHooks } from '@shared/historyPopovers'
+import { registerPopover } from '@shared/historyPopovers'
 import { TISOMonth } from '@shared/types'
 import { PopoverProps } from '@mui/material'
 
-const budgetPopover = makePopoverHooks<
+const budgetPopover = registerPopover<
   { id?: TEnvelopeId; month?: TISOMonth },
   PopoverProps
 >('budgetPopover', {})
