@@ -4,8 +4,12 @@ import React, { FC } from 'react'
 import styled from '@emotion/styled'
 import { Theme, TypographyVariant } from '@mui/material'
 import { sendEvent } from '6-shared/helpers/tracking'
+import { EmojiIcon } from '6-shared/ui/EmojiIcon'
+import { useAppSelector } from 'store'
 import { TrType } from '5-entities/transaction'
-import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'
+import { getPopulatedTags } from '5-entities/tag'
+import { Tags, Amounts, Info, Accounts } from './Transaction.Components'
+import classes from './Transaction.module.scss'
 
 export type TTransactionProps = {
   id: TTransactionId
@@ -40,6 +44,19 @@ export const Transaction: FC<TTransactionProps> = props => {
   const { deleted } = tr
 
   return (
+    <li className={classes.wrapper}>
+      <button className={classes.body}>
+        <div className={classes.mainRow}>111</div>
+      </button>
+
+      <div className={classes.symbol}>
+        <Symbol {...{ tr, trType, isChecked, isInSelectionMode, onToggle }} />
+        <QRIndicator {...{ tr }} />
+      </div>
+    </li>
+  )
+
+  return (
     <Wrapper
       opened={isOpened}
       deleted={deleted}
@@ -63,6 +80,71 @@ export const Transaction: FC<TTransactionProps> = props => {
       </Content>
     </Wrapper>
   )
+}
+
+const Symbol: FC<{
+  tr: TTransaction
+  trType: TrType
+  isChecked: boolean
+  isInSelectionMode: boolean
+  onToggle?: (id: TTransactionId) => void
+}> = props => {
+  const { tr, trType, isChecked, isInSelectionMode, onToggle } = props
+  const { symbol, color } = useTransactionSymbol(tr, trType)
+  return (
+    <EmojiIcon
+      symbol={symbol}
+      color={color}
+      showCheckBox={isInSelectionMode}
+      checked={isChecked}
+      onChange={() => onToggle?.(tr.id)}
+      size="m"
+    />
+  )
+
+  function useTransactionSymbol(tr: TTransaction, trType: TrType) {
+    const tags = useAppSelector(getPopulatedTags)
+    if (trType === TrType.Transfer) return { symbol: '↔️', color: null }
+    if (trType === TrType.OutcomeDebt) return { symbol: '⬅️', color: null }
+    if (trType === TrType.IncomeDebt) return { symbol: '➡️', color: null }
+    const mainTagId = tr.tag?.length ? tr.tag[0] : 'null'
+    const tag = tags[mainTagId]
+    return { symbol: tag.symbol, color: tag.colorHEX }
+  }
+}
+
+const QRIndicator: FC<{ tr: TTransaction }> = props => {
+  return props.tr.qrCode ? <div className={classes.qr}>🧾</div> : null
+}
+
+export const TagList: FC<{
+  tr: TTransaction
+  trType: TrType
+}> = props => {
+  const { tr, trType } = props
+  const tags = useAppSelector(getPopulatedTags)
+  switch (trType) {
+    case TrType.Transfer:
+      return <div className={classes.tagList}>Перевод</div>
+    case TrType.IncomeDebt:
+    case TrType.OutcomeDebt:
+      return <div className={classes.tagList}>Долг</div>
+    case TrType.Outcome:
+    case TrType.Income: {
+      if (!tr.tag?.length) {
+        return <div className={classes.tagList}>Без категории</div>
+      }
+      return (
+        <div className={classes.tagList}>
+          {tr.tag.map(id => (
+            <span key={id}>{tags[id]?.name}</span>
+          ))}
+        </div>
+      )
+    }
+    default:
+      return null
+  }
 }
 
 const Wrapper = styled.div<{ opened: boolean; deleted: boolean }>`

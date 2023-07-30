@@ -1,0 +1,124 @@
+.wrapper {
+  --radius: 12px;
+
+  --c-text-primary: white;
+
+  --c-panel-normal: #e0e0e0;
+  --c-panel-focus: #e0e0e0;
+  --c-panel-hover: #e0e0e0;
+  --c-panel-active: #e0e0e0;
+
+  --pad-x: 12px;
+  --pad-y: 12px;
+
+  --symbol-size: 40px;
+
+  all: unset;
+  display: flex;
+  cursor: pointer;
+  position: relative;
+  width: 100%;
+  min-height: calc(var(--symbol-size) + var(--pad-y) * 2);
+}
+
+.symbol {
+  position: absolute;
+  top: var(--pad-y);
+  left: var(--pad-x);
+}
+
+.qr {
+  font-size: 1rem;
+  text-shadow: 0 0 2px var(--c-panel-normal);
+  color: black;
+  position: absolute;
+  right: -6px;
+  bottom: -3px;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: var(--pad-y) var(--pad-x);
+  padding-left: calc(12px + var(--pad-x) + var(--symbol-size));
+  width: 100%;
+}
+
+.mainRow {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.tagList {
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+.wrapper2 {
+  --radius: 12px;
+
+  --c-text-primary: white;
+
+  --c-panel-normal: #e0e0e0;
+  --c-panel-focus: #e0e0e0;
+  --c-panel-hover: #e0e0e0;
+  --c-panel-active: #e0e0e0;
+
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  color: var(--c-text-primary);
+  padding: 12px;
+  transition: 0.1s ease-in-out;
+  //   text-decoration: ${p =>
+  //  p.deleted ? 'line-through '+p.theme.palette.error.main: 'none'
+  // }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius);
+    //   background-color: ${p =>
+    //  p.opened ? p.theme.palette.action.focus: 'transparent'
+    // }
+    z-index: -1;
+    transition: 0.1s ease-in-out;
+  }
+
+  :hover::before {
+    //   ${p =>
+    //  p.opened ? '' : `background-color: ${p.theme.palette.action.hover};
+    //   `
+    // }
+  }
+
+  :active::before {
+    // background-color: ${p => p.theme.palette.action.focus};
+  }
+}
+
+.transaction--opened {
+  ::before {
+    // background-color: ${p => p.theme.palette.action.focus};
+  }
+}

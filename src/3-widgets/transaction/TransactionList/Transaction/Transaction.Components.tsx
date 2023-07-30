@@ -1,15 +1,16 @@
 import React, { FC } from 'react'
 import styled from '@emotion/styled'
-import { EmojiIcon } from '6-shared/ui/EmojiIcon'
-import { useAppSelector } from 'store'
-import { SmartAmount } from '3-widgets/Amount'
-import { accountModel } from '5-entities/account'
-import { TrType } from '5-entities/transaction'
-import { getPopulatedTags } from '5-entities/tag'
 import { Typography } from '@mui/material'
+import { useAppSelector } from 'store'
+import { EmojiIcon } from '6-shared/ui/EmojiIcon'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { TTransaction } from '6-shared/types'
 import { getMerchants } from '5-entities/merchant'
+import { accountModel } from '5-entities/account'
+import { TrType } from '5-entities/transaction'
+import { getPopulatedTags } from '5-entities/tag'
+import { isNew } from '5-entities/transaction/helpers'
+import { SmartAmount } from '3-widgets/Amount'
 
 type HTMLDivProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLDivElement>,
@@ -59,7 +60,7 @@ export const Symbol: FC<SymbolProps> = ({
             size="m"
           />
           {/* Disable new indicator it doesn't work as expected */}
-          {/* <NewIndicator isNew={isNew(tr)} /> */}
+          <NewIndicator isNew={isNew(tr)} />
           {tr.qrCode && <Reciept>🧾</Reciept>}
         </SymbolWrapper>
       )
@@ -75,7 +76,7 @@ export const Symbol: FC<SymbolProps> = ({
             onChange={() => onToggle?.(tr.id)}
             size="m"
           />
-          {/* <NewIndicator isNew={isNew(tr)} /> */}
+          <NewIndicator isNew={isNew(tr)} />
           {tr.qrCode && <Reciept>🧾</Reciept>}
         </SymbolWrapper>
       )
@@ -313,7 +314,7 @@ const SymbolWrapper = styled.div`
   position: relative;
   align-self: center;
 `
-/* const NewIndicator = styled.div<{ isNew?: boolean }>`
+const NewIndicator = styled.div<{ isNew?: boolean }>`
   position: absolute;
   left: 1px;
   top: 2px;
@@ -325,7 +326,7 @@ const SymbolWrapper = styled.div`
   transform: scale(${p => (p.isNew ? 1 : 0)});
   opacity: ${p => (p.isNew ? 1 : 0)};
   transition: 200ms;
-` */
+`
 const Reciept = styled.div`
   font-size: ${16 / 16}rem;
   text-shadow: 0 0 2px ${p => p.theme.palette.background.paper};
