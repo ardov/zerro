@@ -24,7 +24,7 @@ type TagSelectProps = {
   tagType?: TagType
 }
 
-export const TagSelect: FC<TagSelectProps> = props => {
+export const TagSelect2: FC<TagSelectProps> = props => {
   const { onChange, trigger, value, exclude, tagType } = props
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
   const handleClick: React.MouseEventHandler = e => setAnchorEl(e.currentTarget)
@@ -55,7 +55,6 @@ export const TagSelect: FC<TagSelectProps> = props => {
     </>
   )
 }
-export default TagSelect
 
 type TagSelectPopoverProps = PopoverProps & {
   exclude?: string[] | null
