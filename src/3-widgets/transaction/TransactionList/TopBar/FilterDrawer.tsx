@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { TagSelect } from '3-widgets/tag/TagSelect'
+import { TagSelect } from '5-entities/tag/ui/TagSelect'
 import {
   Drawer,
   Box,

@@ -29,7 +29,7 @@ import { trModel } from '5-entities/transaction'
 import { accountModel } from '5-entities/account'
 import { instrumentModel } from '5-entities/currency/instrument'
 
-import { TagList } from '3-widgets/tag/TagList'
+import { TagList } from '5-entities/tag/ui/TagList'
 import { Reciept } from './Reciept'
 import { Map } from './Map'
 

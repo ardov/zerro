@@ -2,7 +2,7 @@ import React, { FC } from 'react'
 import { tagModel, TagTreeNode, TTagPopulated } from '5-entities/tag'
 import { Box, Autocomplete, TextField } from '@mui/material'
 import { EmojiIcon } from '6-shared/ui/EmojiIcon'
-import TagChip from './TagChip'
+import { TagChip } from './TagChip'
 import ru from 'convert-layout/ru'
 
 type TagFilters = {
