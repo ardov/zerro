@@ -1,12 +1,26 @@
+import type { ById, TFxCode, TTag, TTagId } from '6-shared/types'
+
 import toArray from 'lodash/toArray'
 import { int2rgb, int2hex, getColorForString } from '6-shared/helpers/color'
 import { sendEvent } from '6-shared/helpers/tracking'
-import { ByIdOld, TTag } from '6-shared/types'
 import tagIcons from '6-shared/tagIcons.json'
-import { TTagPopulated } from './types'
 import { nullTag } from './makeTag'
 
-export default function populateTags(rawTags: ByIdOld<TTag>) {
+export type TTagPopulated = TTag & {
+  name: string // Tag name without emoji
+  uniqueName: string // If name not unique adds parent name
+  symbol: string // Emoji
+  children: TTagId[]
+  colorRGB: string | null
+  colorHEX: string | null
+  colorGenerated: string // Color generated from name
+  // From hidden data
+  comment?: string | null
+  currencyCode?: TFxCode | null
+  group?: string | null
+}
+
+export function populateTags(rawTags: ById<TTag>) {
   let tags: {
     [x: string]: TTagPopulated
   } = { null: makePopulatedTag(nullTag) }

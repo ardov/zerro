@@ -6,7 +6,7 @@ import { getRawGoals } from '../selectors'
 import { setHiddenData } from '../thunks'
 import { AppThunk, RootState } from 'store'
 import { TOldGoal, TTagId } from '6-shared/types'
-import { getTags } from '5-entities/tag'
+import { tagModel } from '5-entities/tag'
 
 // THUNKS
 export const setGoal =
@@ -14,7 +14,7 @@ export const setGoal =
   (dispatch, getState) => {
     const state = getState()
     const goals = getRawGoals(state)
-    const tags = getTags(state)
+    const tags = tagModel.getTags(state)
     let newGoals = goals ? { ...goals } : {}
 
     // remove goals for deleted tags
@@ -37,7 +37,7 @@ export const deleteGoal =
   (dispatch, getState) => {
     const state = getState()
     const goals = getRawGoals(state)
-    const tags = getTags(state)
+    const tags = tagModel.getTags(state)
     let newGoals = goals ? { ...goals } : {}
 
     // remove goals for deleted tags
@@ -53,7 +53,7 @@ export const deleteGoal =
 
 // SELECTORS
 export const getGoals = createSelector(
-  [getRawGoals, getTags],
+  [getRawGoals, tagModel.getTags],
   (rawGoals, tags) => {
     let goals: Record<TTagId, TOldGoal> = {}
     for (const tag in rawGoals) {

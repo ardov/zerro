@@ -15,22 +15,21 @@ import {
 import Balancer from 'react-wrap-balancer'
 import pluralize from '6-shared/helpers/pluralize'
 import { round } from '6-shared/helpers/money'
-import { Card, TCardProps } from '../../shared/Card'
-import { useStats } from '../../shared/getFacts'
+import { entries } from '6-shared/helpers/keys'
+import { useToggle } from '6-shared/hooks/useToggle'
+import { SettingsIcon } from '6-shared/ui/Icons'
+import { Tooltip } from '6-shared/ui/Tooltip'
+import { sendEvent } from '6-shared/helpers/tracking'
 import {
   DisplayAmount,
   displayCurrency,
 } from '5-entities/currency/displayCurrency'
-import { useAppSelector } from 'store/index'
-import { getPopulatedTags } from '5-entities/tag'
-import { entries } from '6-shared/helpers/keys'
-import { useToggle } from '6-shared/hooks/useToggle'
+import { Card, TCardProps } from '../../shared/Card'
+import { useStats } from '../../shared/getFacts'
+import { tagModel } from '5-entities/tag'
 import { TagSelect } from './TagSelect'
 import { TaxesChart } from './Chart'
 import { getTaxes } from './getTaxesByIncome'
-import { SettingsIcon } from '6-shared/ui/Icons'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { sendEvent } from '6-shared/helpers/tracking'
 
 export function NotFunCard(props: TCardProps) {
   const [settings, toggleSettings] = useToggle(false)
@@ -203,7 +202,7 @@ export function NotFunCard(props: TCardProps) {
 function useIncomeOutcome(onlyRUB: boolean, year: string | number) {
   const yearStats = useStats(year)
   const toDisplay = displayCurrency.useToDisplay('current')
-  const tags = useAppSelector(getPopulatedTags)
+  const tags = tagModel.usePopulatedTags()
 
   return useMemo(() => {
     const incomeTags = entries(yearStats.byTag)

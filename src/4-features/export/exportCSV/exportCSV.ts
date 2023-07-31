@@ -9,14 +9,14 @@ import { AppThunk } from 'store'
 import { trModel, TrType } from '5-entities/transaction'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { accountModel } from '5-entities/account'
-import { getPopulatedTags } from '5-entities/tag'
+import { tagModel } from '5-entities/tag'
 
 // Only for CSV
 const getPopulatedTransactions = createSelector(
   [
     instrumentModel.getInstruments,
     accountModel.getAccounts,
-    getPopulatedTags,
+    tagModel.getPopulatedTags,
     trModel.getTransactions,
   ],
   (instruments, accounts, tags, transactions) => {

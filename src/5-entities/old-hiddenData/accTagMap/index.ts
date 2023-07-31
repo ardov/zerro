@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { DataReminderType } from '../constants'
 import { setHiddenData } from '../thunks'
-import { getTags } from '5-entities/tag'
+import { tagModel } from '5-entities/tag'
 import { getAccLinks } from '../selectors'
 import { AppThunk, TSelector } from 'store'
 import { accountModel } from '5-entities/account'
@@ -33,7 +33,7 @@ export const addConnection =
  */
 export const getAccTagMap: TSelector<Record<TAccountId, TTagId>> =
   createSelector(
-    [getAccLinks, getTags, accountModel.getAccounts],
+    [getAccLinks, tagModel.getTags, accountModel.getAccounts],
     (links, tags, accounts) => {
       if (!links) return {}
       const filtered = Object.entries(links).filter(

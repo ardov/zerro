@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import { Box, Typography, Chip, Stack } from '@mui/material'
-import { useAppSelector } from 'store'
 import { entries } from '6-shared/helpers/keys'
 import { addFxAmount } from '6-shared/helpers/money'
-import { getPopulatedTags } from '5-entities/tag'
+import { tagModel } from '5-entities/tag'
 import {
   DisplayAmount,
   displayCurrency,
@@ -16,7 +15,7 @@ import { NotFunFact } from './NotFunFact'
 export function IncomeCard(props: TCardProps) {
   const yearStats = useStats(props.year)
   const toDisplay = displayCurrency.useToDisplay('current')
-  const tags = useAppSelector(getPopulatedTags)
+  const tags = tagModel.usePopulatedTags()
 
   const incomeTags = entries(yearStats.byTag)
     .map(([id, info]) => {

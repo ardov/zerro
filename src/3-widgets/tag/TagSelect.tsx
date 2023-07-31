@@ -1,11 +1,5 @@
 import React, { FC } from 'react'
-import { useAppSelector } from 'store'
-import {
-  getPopulatedTags,
-  getTagsTree,
-  TagTreeNode,
-  TTagPopulated,
-} from '5-entities/tag'
+import { tagModel, TagTreeNode, TTagPopulated } from '5-entities/tag'
 import { Box, Autocomplete, TextField } from '@mui/material'
 import { EmojiIcon } from '6-shared/ui/EmojiIcon'
 import TagChip from './TagChip'
@@ -39,8 +33,8 @@ type TagOption = TTagPopulated | TagTreeNode
 
 export const TagSelect: FC<TagSelectProps> = props => {
   const { onChange, tagFilters, multiple, value, label, ...rest } = props
-  const tagsTree = useAppSelector(getTagsTree)
-  const tags = useAppSelector(getPopulatedTags)
+  const tagsTree = tagModel.useTagsTree()
+  const tags = tagModel.usePopulatedTags()
   const options = getMatchedTags(tagsTree, tagFilters)
 
   return (

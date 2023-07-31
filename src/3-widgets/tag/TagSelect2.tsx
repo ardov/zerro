@@ -1,6 +1,5 @@
 import React, { FC, KeyboardEventHandler, useEffect, useState } from 'react'
-import { useAppSelector } from 'store'
-import { getTagsTree, TagTreeNode, TTagPopulated } from '5-entities/tag'
+import { tagModel, TagTreeNode, TTagPopulated } from '5-entities/tag'
 import {
   Popover,
   Paper,
@@ -77,7 +76,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
   onClose,
   ...popoverProps
 }) => {
-  const tags = useAppSelector(getTagsTree)
+  const tags = tagModel.useTagsTree()
   const [search, setSearch] = useState('')
   const [focused, setFocused] = useState(0)
   const [localTagType, setLocalTagType] = useState(tagType)

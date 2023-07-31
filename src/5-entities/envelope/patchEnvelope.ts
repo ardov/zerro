@@ -1,15 +1,16 @@
+import type { TTagDraft } from '5-entities/tag'
+import type { AppThunk } from 'store'
 import { ById, DataEntity, OptionalExceptFor, TTagId } from '6-shared/types'
 import { keys } from '6-shared/helpers/keys'
-import { AppThunk } from 'store'
-import { patchTag, TTagDraft } from '5-entities/tag'
-import { getEnvelopes } from './getEnvelopes'
 import { envId, EnvType, TEnvelopeId } from './shared/envelopeId'
-import { patchEnvelopeMeta, TEnvelopeMetaPatch } from './shared/metaData'
 import { hex2int, isHEX } from '6-shared/helpers/color'
-import { TEnvelope } from './shared/makeEnvelope'
-import { getRightParent } from './shared/structure'
 import { accountModel, TAccountDraft } from '5-entities/account'
 import { patchMerchant, TMerchantDraft } from '5-entities/merchant'
+import { tagModel } from '5-entities/tag'
+import { patchEnvelopeMeta, TEnvelopeMetaPatch } from './shared/metaData'
+import { TEnvelope } from './shared/makeEnvelope'
+import { getRightParent } from './shared/structure'
+import { getEnvelopes } from './getEnvelopes'
 
 export type TEnvelopeDraft = OptionalExceptFor<TEnvelope, 'id'>
 
@@ -41,7 +42,7 @@ export const patchEnvelope =
       if (patch.meta) patchLists.meta.push(patch.meta)
     })
 
-    if (patchLists.tag.length) dispatch(patchTag(patchLists.tag))
+    if (patchLists.tag.length) dispatch(tagModel.patchTag(patchLists.tag))
     if (patchLists.account.length)
       dispatch(accountModel.patchAccount(patchLists.account))
     if (patchLists.merchant.length) dispatch(patchMerchant(patchLists.merchant))

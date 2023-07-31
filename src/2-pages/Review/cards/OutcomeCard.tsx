@@ -1,11 +1,10 @@
 import React, { useState } from 'react'
 import { Box, IconButton, Stack, Typography } from '@mui/material'
-import { useAppSelector } from 'store'
 import { formatDate } from '6-shared/helpers/date'
-import { getPopulatedTags } from '5-entities/tag'
+import { tagModel } from '5-entities/tag'
+import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { Card, TCardProps } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
-import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { useTrToDisplay } from '../shared/useTrToDisplay'
 import { ArrowBackIcon, ArrowForwardIcon } from '6-shared/ui/Icons'
 
@@ -13,7 +12,7 @@ export function OutcomeCard(props: TCardProps) {
   const [i, setI] = useState(0)
   const yearStats = useStats(props.year)
   const toVal = useTrToDisplay()
-  const tags = useAppSelector(getPopulatedTags)
+  const tags = tagModel.usePopulatedTags()
 
   const topTransactions = yearStats.total.outcomeTransactions
     .map(tr => ({ tr, val: toVal(tr).outcome }))

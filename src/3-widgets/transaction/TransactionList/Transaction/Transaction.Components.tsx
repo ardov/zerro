@@ -5,7 +5,7 @@ import { useAppSelector } from 'store'
 import { SmartAmount } from '3-widgets/Amount'
 import { accountModel } from '5-entities/account'
 import { TrType } from '5-entities/transaction'
-import { getPopulatedTags } from '5-entities/tag'
+import { tagModel } from '5-entities/tag'
 import { Typography } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { TTransaction } from '6-shared/types'
@@ -42,7 +42,7 @@ export const Symbol: FC<SymbolProps> = ({
   onToggle,
   ...rest
 }) => {
-  const tags = useAppSelector(getPopulatedTags)
+  const tags = tagModel.usePopulatedTags()
   const mainTagId = tr.tag?.length ? tr.tag[0] : 'null'
   const tag = tags[mainTagId]
   switch (trType) {
@@ -85,7 +85,7 @@ export const Symbol: FC<SymbolProps> = ({
 }
 
 export const Tags: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
-  const tags = useAppSelector(getPopulatedTags)
+  const tags = tagModel.usePopulatedTags()
   switch (trType) {
     case 'income':
     case 'outcome':

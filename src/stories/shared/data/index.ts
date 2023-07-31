@@ -2,7 +2,7 @@ import countries from './countries.json'
 import companies from './companies.json'
 import instruments from './instruments.json'
 import { accountModel } from '5-entities/account'
-import { makeTag } from '5-entities/tag/makeTag'
+import { makeTag } from '5-entities/tag/model/makeTag'
 import { toISODate } from '6-shared/helpers/date'
 import {
   AccountType,

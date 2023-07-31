@@ -7,7 +7,7 @@ import { keys } from '6-shared/helpers/keys'
 import { TSelector } from 'store'
 import { accountModel } from '5-entities/account'
 import { debtorModel } from '5-entities/debtors'
-import { getPopulatedTags } from '5-entities/tag'
+import { tagModel } from '5-entities/tag'
 import { userModel } from '5-entities/user'
 
 import { makeEnvelope, TEnvelope } from './shared/makeEnvelope'
@@ -21,7 +21,7 @@ const getCompiledEnvelopes: TSelector<{
 }> = createSelector(
   [
     debtorModel.getDebtors,
-    getPopulatedTags,
+    tagModel.getPopulatedTags,
     accountModel.getSavingAccounts,
     getEnvelopeMeta,
     userModel.getUserCurrency,

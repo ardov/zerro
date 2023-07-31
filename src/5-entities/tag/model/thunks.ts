@@ -1,10 +1,10 @@
+import type { OptionalExceptFor, TTag } from '6-shared/types'
+import type { AppThunk } from 'store'
 import { sendEvent } from '6-shared/helpers/tracking'
-import { OptionalExceptFor, TTag } from '6-shared/types'
-import { AppThunk } from 'store'
 import { applyClientPatch } from 'store/data'
-import { getTag } from '5-entities/tag'
-import { makeTag } from './makeTag'
 import { userModel } from '5-entities/user'
+import { makeTag } from './makeTag'
+import { getTags } from './model'
 
 export type TTagDraft = OptionalExceptFor<TTag, 'id'>
 
@@ -17,7 +17,7 @@ export const patchTag =
     list.forEach(draft => {
       if (!draft.id) throw new Error('Trying to patch tag without id')
       if (draft.id === 'null') throw new Error('Trying to patch null tag')
-      let current = getTag(getState(), draft.id)
+      let current = getTags(getState())[draft.id]
       if (!current) throw new Error('Tag not found')
       patched.push({ ...current, ...draft, changed: Date.now() })
     })
