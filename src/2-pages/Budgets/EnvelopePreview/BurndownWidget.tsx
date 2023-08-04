@@ -1,12 +1,12 @@
-import React, { FC, useState } from 'react'
+import React, { FC } from 'react'
 import { Area, ComposedChart, Line, ResponsiveContainer, YAxis } from 'recharts'
 import { Stack, Box, BoxProps } from '@mui/material'
 import { DataLine } from '3-widgets/DataLine'
-import { formatDate, toISODate } from '6-shared/helpers/date'
+import { formatDate, getMonthLength, toISODate } from '6-shared/helpers/date'
 
 import { useAppTheme } from '6-shared/ui/theme'
 import { prevMonth, toISOMonth } from '6-shared/helpers/date'
-import { TISODate, TISOMonth } from '6-shared/types'
+import { TFxAmount, TISODate, TISOMonth } from '6-shared/types'
 import { addFxAmount, round } from '6-shared/helpers/money'
 
 import { balances } from '5-entities/envBalances'
@@ -20,41 +20,9 @@ export const BurndownWidget: FC<BurndownWidgetProps> = ({
   id,
   ...boxProps
 }) => {
-  const [month, setMonth] = useMonth()
-  const [highlighted, setHighlighted] = useState(month)
+  const [month] = useMonth()
   const envData = balances.useEnvData()
   const { currency } = envData[month][id]
-
-  const theme = useAppTheme()
-  const activityColor = theme.palette.primary.main
-
-  const StartingAmountTooltip = (
-    <Stack spacing={0.5}>
-      <DataLine
-        name="Бюджет в этом месяце"
-        // amount={selectedData?.budgeted}
-        amount={0}
-        currency={currency}
-      />
-      <DataLine
-        name="Остаток с прошлого месяца"
-        // amount={selectedData?.leftover}
-        amount={0}
-        currency={currency}
-      />
-    </Stack>
-  )
-
-  const onMouseMove = (e: any) => {
-    if (e?.activeLabel && e.activeLabel !== highlighted) {
-      setHighlighted(e.activeLabel)
-    }
-  }
-  const onClick = (e: any) => {
-    if (e?.activeLabel && e.activeLabel !== month) {
-      setMonth(e.activeLabel)
-    }
-  }
 
   return (
     <Box borderRadius={1} bgcolor="background.default" {...boxProps}>
@@ -131,11 +99,12 @@ function useDoubleTrend(month: TISOMonth, id: TEnvelopeId) {
   const monthPrev = toISOMonth(prevMonth(month))
   const currTrend = useDataTrend(month, id)
   const prevTrend = useDataTrend(monthPrev, id)
+  console.log('currTrend', currTrend)
   const startValue = currTrend[0].balance || 0
-  const lastaDayInMonth = getMonthLength(month)
+  const monthLength = getMonthLength(month)
   const trend = currTrend.map((node, i) => {
     const prev = prevTrend[i] || {}
-    const burndown = round(startValue - (startValue / lastaDayInMonth) * i)
+    const burndown = round(startValue - (startValue / monthLength) * i)
     return {
       ...node,
       prevDate: prev.date || null,
@@ -143,14 +112,8 @@ function useDoubleTrend(month: TISOMonth, id: TEnvelopeId) {
       burndown: burndown < 0 ? null : burndown,
     }
   })
-  trend.splice(lastaDayInMonth, trend.length - lastaDayInMonth)
+  trend.splice(monthLength, trend.length - monthLength)
   return trend
-}
-
-function getMonthLength(month: TISOMonth) {
-  const year = month.slice(0, 4)
-  const monthNum = Number(month.slice(5, 7))
-  return new Date(Number(year), monthNum, 0).getDate()
 }
 
 type TTrendNode = {
@@ -161,50 +124,70 @@ type TTrendNode = {
 
 function useDataTrend(month: TISOMonth, id: TEnvelopeId): TTrendNode[] {
   const toDisplay = displayCurrency.useToDisplay(month)
+  const envData = balances.useEnvData()?.[month]?.[id]
+  const activityTrend = useActivityTrend(month, id)
+
+  const startBalance = addFxAmount(
+    envData?.totalLeftover || {},
+    envData?.totalBudgeted || {}
+  )
+
+  const startNode = {
+    day: 0,
+    date: getDate(month, 1),
+    balance: startBalance,
+  }
+
+  let prevBalance = startNode.balance
+  const eodBalances = activityTrend.map((activity, i) => {
+    const day = i + 1
+    const node = {
+      day,
+      date: getDate(month, day),
+      balance: addFxAmount(prevBalance, activity),
+    }
+    prevBalance = node.balance
+    return node
+  })
+
+  const array = [startNode, ...eodBalances]
+
+  const currentISODate = toISODate(new Date())
+  return array.map(node => {
+    // Balance for future dates is null
+    const isInFuture = !node.date || node.date > currentISODate
+    const balance = isInFuture ? null : toDisplay(node.balance)
+    return { ...node, balance }
+  })
+}
+
+/**
+ * Returns an array of 31 nodes, each representing a day of the month.
+ * @param month
+ * @param id
+ * @returns
+ */
+function useActivityTrend(month: TISOMonth, id: TEnvelopeId): TFxAmount[] {
   const activity = balances.useActivity()?.[month]?.envActivity?.byEnv
   const envData = balances.useEnvData()?.[month]?.[id]
 
-  const trend = makeTrend(month)
+  let trend = new Array(31).fill({})
   if (!envData) return trend
 
-  let balance = addFxAmount(envData.totalLeftover, envData.totalBudgeted)
+  const activityTrends = [
+    activity?.[id]?.trend,
+    ...envData.children.map(id => activity?.[id]?.trend),
+  ].filter(Boolean)
 
-  const selfTrend = activity?.[id]?.trend || []
-  const childrenTrends = envData.children.map(
-    childId => activity?.[childId]?.trend || []
-  )
-  const currentISODate = toISODate(new Date())
-
-  trend.forEach((node, i) => {
-    if (i !== 0) {
-      // Set new balance
-      balance = addFxAmount(
-        balance,
-        selfTrend[i] || {},
-        ...childrenTrends.map(trend => trend[i] || {})
-      )
-    }
-
-    // Balance for future dates is null
-    const isInFuture = !node.date || node.date > currentISODate
-    node.balance = isInFuture ? null : toDisplay(balance)
+  return trend.map((_, i) => {
+    const dailyActivity = activityTrends.map(trend => trend[i] || {})
+    if (dailyActivity.length) return addFxAmount(...dailyActivity)
+    return {}
   })
+}
 
-  return trend
-
-  function makeTrend(month: TISOMonth): TTrendNode[] {
-    return new Array(32).fill(null).map((_, i) => ({
-      day: i,
-      date: i === 0 ? getDate(1) : getDate(i),
-      balance: null,
-    }))
-
-    function getDate(day: number) {
-      const isoDate = (month +
-        '-' +
-        day.toString().padStart(2, '0')) as TISODate
-      const isValid = new Date(isoDate).toString() !== 'Invalid Date'
-      return isValid ? isoDate : null
-    }
-  }
+function getDate(month: TISOMonth, day: number) {
+  const isoDate = (month + '-' + day.toString().padStart(2, '0')) as TISODate
+  const isValid = new Date(isoDate).toString() !== 'Invalid Date'
+  return isValid ? isoDate : null
 }

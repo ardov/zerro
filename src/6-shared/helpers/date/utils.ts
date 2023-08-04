@@ -65,6 +65,10 @@ export function endOfMonth(d: TDateDraft) {
   return new Date(+nextMonthStart - 1)
 }
 
+export function getMonthLength(d: TDateDraft) {
+  return endOfMonth(d).getDate()
+}
+
 export function startOfDay(d: TDateDraft) {
   const date = parseDate(d)
   return new Date(date.getFullYear(), date.getMonth(), date.getDate())
