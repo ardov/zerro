@@ -8,7 +8,7 @@ import {
 } from '@mui/material'
 import {
   AccountBalanceIcon,
-  AccountBalanceWalletIcon,
+  BarChartIcon,
   SettingsIcon,
   SyncAltIcon,
 } from '6-shared/ui/Icons'
@@ -20,7 +20,7 @@ const actionSx = { minWidth: 32 }
 const routes = [
   { path: '/budget', label: 'Бюджет', icon: <AccountBalanceIcon /> },
   { path: '/transactions', label: 'Операции', icon: <SyncAltIcon /> },
-  { path: '/accounts', label: 'Счета', icon: <AccountBalanceWalletIcon /> },
+  { path: '/stats', label: 'Аналитика', icon: <BarChartIcon /> },
 ]
 
 export const MobileNavigation: FC = () => {

@@ -8,11 +8,11 @@ import {
   NightsStayIcon,
   FavoriteBorderIcon,
   HelpOutlineIcon,
-  BarChartIcon,
   SyncIcon,
   SyncDisabledIcon,
   AutoAwesomeIcon,
   MoreHorizIcon,
+  AccountBalanceWalletIcon,
 } from '6-shared/ui/Icons'
 import {
   Divider,
@@ -168,11 +168,11 @@ function NavItems({ onClose }: ItemProps) {
     }
   return (
     <>
-      <MenuItem onClick={handleNav('/stats')} component={Link} to="/stats">
+      <MenuItem onClick={handleNav('/accounts')} component={Link} to="/stats">
         <ListItemIcon>
-          <BarChartIcon />
+          <AccountBalanceWalletIcon />
         </ListItemIcon>
-        <ListItemText>Аналитика</ListItemText>
+        <ListItemText>Счета</ListItemText>
       </MenuItem>
 
       <MenuItem onClick={handleNav('/review')} component={Link} to="/review">
