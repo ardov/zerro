@@ -1,6 +1,6 @@
 import React from 'react'
 import { StoryObj, Meta } from '@storybook/react'
-import { AmountInput } from '@shared/ui/AmountInput'
+import { AmountInput } from '6-shared/ui/AmountInput'
 import { context } from './shared/context'
 
 const meta = {

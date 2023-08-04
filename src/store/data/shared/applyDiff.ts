@@ -1,5 +1,5 @@
-import { TDiff } from '@shared/types'
-import { TDataStore } from '@shared/types'
+import { TDiff } from '6-shared/types'
+import { TDataStore } from '6-shared/types'
 
 /**
  * Mutable method

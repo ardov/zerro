@@ -1,5 +1,5 @@
 import { Theme as MaterialTheme } from '@mui/material'
-import { RootState } from '@store'
+import { RootState } from 'store'
 
 declare module '@emotion/react' {
   interface Theme extends MaterialTheme {}

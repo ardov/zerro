@@ -1,6 +1,6 @@
 import React from 'react'
 import { Meta, StoryObj } from '@storybook/react'
-import { RadialProgress } from '@shared/ui/RadialProgress'
+import { RadialProgress } from '6-shared/ui/RadialProgress'
 
 const meta = {
   title: 'GoalProgress',

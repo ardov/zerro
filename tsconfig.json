@@ -2,16 +2,6 @@
   "compilerOptions": {
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "src",
-    "paths": {
-      "@components/*": ["components/*"],
-      "@features/*": ["features/*"],
-      "@entities/*": ["entities/*"],
-      "@pages/*": ["pages/*"],
-      "@shared/*": ["shared/*"],
-      "@store/*": ["store/*"],
-      "@store": ["store"],
-      "@worker": ["worker"]
-    },
     "target": "esnext",
     "lib": ["dom", "dom.iterable", "es2021"],
     "allowJs": true,
