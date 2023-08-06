@@ -12,11 +12,13 @@ import { setToken } from 'store/token'
 import { logIn } from '4-features/authorization'
 import { saveDataLocally } from '4-features/localData'
 import { convertZmToLocal } from 'worker'
+import { useTranslation } from 'react-i18next'
 
 zenmoney.checkCode()
 
 export default function Auth() {
   const dispatch = useAppDispatch()
+  const { t } = useTranslation()
   const theme = useAppTheme()
   const [logoIn, setLogoIn] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
@@ -70,14 +72,14 @@ export default function Auth() {
           color="primary"
           size="large"
           onClick={() => dispatch(logIn())}
-          children="Войти через Дзен-мани"
+          children={t('btnLogin')}
         />
       </Fade>
 
       <Fade in timeout={3000}>
         <Box mt={2}>
           <RouterLink to="/about" component={SecondaryLink}>
-            Что это такое?
+            {t('btnAbout')}
           </RouterLink>
         </Box>
       </Fade>

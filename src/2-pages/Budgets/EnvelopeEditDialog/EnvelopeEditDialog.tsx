@@ -29,6 +29,7 @@ import { CurrencyCodeSelect } from './CurrencyCodeSelect'
 import { VisibilitySelect } from './VisidilitySelect'
 import { userModel } from '5-entities/user'
 import { registerPopover } from '6-shared/historyPopovers'
+import { useTranslation } from 'react-i18next'
 
 const editDialog = registerPopover<
   { envelope?: Partial<TEnvelope> },
@@ -44,6 +45,7 @@ export const EnvelopeEditDialog: FC = () => {
   const { displayProps, extraProps } = editDialog.useProps()
   const { envelope } = extraProps
   const dispatch = useAppDispatch()
+  const { t } = useTranslation('envelopeEditDialog')
   const isNew = !envelope?.id
   const id = envelope?.id || envelopeModel.makeId(EnvType.Tag, uuidv1())
   const defaultCurrency = userModel.useUserCurrency()
@@ -70,7 +72,7 @@ export const EnvelopeEditDialog: FC = () => {
     },
     validate: values => {
       if (!values.originalName.trim()) {
-        return { originalName: 'Название точно пригодится 😉' }
+        return { originalName: t('nameError') }
       }
     },
     onSubmit: (values, helpers) => {
@@ -93,9 +95,7 @@ export const EnvelopeEditDialog: FC = () => {
         if (shallowEqual(values, initialValues)) displayProps.onClose()
       }}
     >
-      <DialogTitle>
-        {isNew ? 'Новая категория' : 'Редактирование категории'}
-      </DialogTitle>
+      <DialogTitle>{t(isNew ? 'titleNew' : 'titleEdit')}</DialogTitle>
       <DialogContent>
         <Stack
           component="form"
@@ -105,7 +105,7 @@ export const EnvelopeEditDialog: FC = () => {
           mt={1}
         >
           <TextField
-            label="Название"
+            label={t('nameLabel')}
             error={!!errors.originalName}
             helperText={errors.originalName}
             autoFocus
@@ -151,14 +151,14 @@ export const EnvelopeEditDialog: FC = () => {
             onChange={handleChange}
           /> */}
           <CurrencyCodeSelect
-            label="Валюта"
             name="currency"
+            label={t('currencyLabel')}
             value={values.currency}
             onChange={handleChange}
           />
           <VisibilitySelect
-            label="Показывать в бюджете"
             name="visibility"
+            label={t('visibilityLabel')}
             value={values.visibility}
             onChange={handleChange}
           />
@@ -172,10 +172,10 @@ export const EnvelopeEditDialog: FC = () => {
             /> */}
             <FormControlLabel
               name="keepIncome"
+              label={t('keepIncomeLabel')}
               checked={values.keepIncome}
               onChange={handleChange}
               control={<Checkbox />}
-              label="Класть доходы в категорию"
             />
             {/* <FormControlLabel
               name="carryNegatives"
@@ -201,10 +201,10 @@ export const EnvelopeEditDialog: FC = () => {
           </FormGroup>
 
           <Button type="submit" size="large" variant="contained">
-            {id ? 'Сохранить категорию' : 'Создать категорию'}
+            {t(id ? 'btnSave' : 'btnCreate')}
           </Button>
           <Button onClick={displayProps.onClose} size="large">
-            Отменить
+            {t('btnCancel')}
           </Button>
         </Stack>
       </DialogContent>

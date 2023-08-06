@@ -1,13 +1,15 @@
 import { convertFx, round } from '6-shared/helpers/money'
 import { toISOMonth } from '6-shared/helpers/date'
-import pluralize from '6-shared/helpers/pluralize'
 import { TDateDraft, TFxAmount, TISOMonth } from '6-shared/types'
 import { TEnvelopeId } from '5-entities/envelope'
 
 import { balances } from '5-entities/envBalances'
 import { goalModel } from '5-entities/goal'
+import { useTranslation } from 'react-i18next'
+import { TFunction } from 'i18next'
 
 export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
+  const { t } = useTranslation()
   const rates = balances.useRates()[month].rates
   const envMetrics = balances.useEnvData()
   const goals = goalModel.useGoals()[month]
@@ -29,6 +31,7 @@ export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
     .map(convert)
 
   return getQuickActions({
+    t,
     hasChildren: envelope.children.length > 0,
     budgeted: convert(envelope.selfBudgeted),
     totalBudgeted: convert(envelope.totalBudgeted),
@@ -44,6 +47,7 @@ export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
 }
 
 function getQuickActions({
+  t,
   hasChildren,
   budgeted,
   totalBudgeted,
@@ -56,6 +60,7 @@ function getQuickActions({
   prevBudgeted,
   prevOutcome,
 }: {
+  t: TFunction
   hasChildren: boolean
   budgeted: number
   totalBudgeted: number
@@ -70,42 +75,42 @@ function getQuickActions({
 }) {
   return [
     {
-      text: 'Покрыть перерасход',
+      text: t('coverOverspend', { ns: 'quickBudgets' }),
       amount: round(+totalBudgeted - available),
       condition: hasChildren && available < 0 && totalAvailable >= 0,
     },
     {
-      text: 'Покрыть перерасход',
+      text: t('coverOverspend', { ns: 'quickBudgets' }),
       amount: round(+totalBudgeted - totalAvailable),
       condition: totalAvailable < 0,
     },
     {
-      text: 'Сбросить остаток',
+      text: t('dropLeftover', { ns: 'quickBudgets' }),
       amount: round(+totalBudgeted - totalAvailable),
       condition: totalAvailable > 0,
     },
     {
-      text: 'Цель',
+      text: t('goal', { ns: 'quickBudgets' }),
       amount: goalTarget,
       condition: hasGoal && !!goalTarget,
     },
     {
-      text: getAvgOutcomeName(prevOutcomesLength),
+      text: getAvgOutcomeName(t, prevOutcomesLength),
       amount: -avgOutcome,
       condition: !!avgOutcome && prevOutcomesLength > 1,
     },
     {
-      text: 'Прошлый бюджет',
+      text: t('prevBudget', { ns: 'quickBudgets' }),
       amount: prevBudgeted,
       condition: !!prevBudgeted,
     },
     {
-      text: 'Прошлый расход',
+      text: t('prevOutcome', { ns: 'quickBudgets' }),
       amount: -prevOutcome,
       condition: !!prevOutcome,
     },
     {
-      text: 'Сумма дочерних категорий',
+      text: t('sumOfChildren', { ns: 'quickBudgets' }),
       amount: round(totalBudgeted - budgeted),
       condition:
         hasChildren &&
@@ -140,9 +145,8 @@ function getAverage(outcomes: number[]) {
   return round(sum / outcomes.length)
 }
 
-function getAvgOutcomeName(number: number) {
-  const s = 'Средний расход за '
-  if (number === 12) return s + 'год'
-  if (number === 6) return s + 'полгода'
-  return s + number + ' ' + pluralize(number, ['месяц', 'месяца', 'месяцев'])
+function getAvgOutcomeName(t: TFunction, count: number) {
+  if (count === 12) return t('avgOutcome_year', { ns: 'quickBudgets' })
+  if (count === 6) return t('avgOutcome_halfYear', { ns: 'quickBudgets' })
+  return t('avgOutcome', { ns: 'quickBudgets', count })
 }

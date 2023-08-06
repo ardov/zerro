@@ -8,23 +8,24 @@ import {
   useMediaQuery,
   Theme,
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { initTracking, setUserId } from '6-shared/helpers/tracking'
 import { PopoverManager } from '6-shared/historyPopovers'
+import { SmartConfirm } from '6-shared/ui/SmartConfirm'
 import { useAppSelector } from 'store'
 import { getLoginState } from 'store/token'
 import { getLastSyncTime } from 'store/data/selectors'
+import { userModel } from '5-entities/user'
 import { RegularSyncHandler } from '3-widgets/RegularSyncHandler'
 import Nav from '3-widgets/Navigation'
 import { MobileNavigation } from '3-widgets/Navigation'
 import ErrorBoundary from '3-widgets/ErrorBoundary'
-import { userModel } from '5-entities/user'
+import { SmartTransactionListDrawer } from '3-widgets/transaction/TransactionListDrawer'
+import { SmartTransactionPreview } from '3-widgets/transaction/TransactionPreviewDrawer'
 import Transactions from '2-pages/Transactions'
 import Auth from '2-pages/Auth'
 import Budgets from '2-pages/Budgets'
 import Accounts from '2-pages/Accounts'
-import { SmartConfirm } from '6-shared/ui/SmartConfirm'
-import { SmartTransactionListDrawer } from '3-widgets/transaction/TransactionListDrawer'
-import { SmartTransactionPreview } from '3-widgets/transaction/TransactionPreviewDrawer'
 
 const About = lazy(() => import('2-pages/About'))
 const Donation = lazy(() => import('2-pages/Donation'))
@@ -130,24 +131,25 @@ const Navigation = React.memo(() => {
   return isMobile ? <MobileNavigation /> : <Nav />
 })
 
-const hints = [
-  { hint: 'Первая загрузка самая долгая 😅', delay: 5000 },
-  { hint: 'Всё зависит от интернета и количества операций 🤞', delay: 10000 },
-  { hint: 'Может всё-таки загрузится? 🤔', delay: 30000 },
-  { hint: 'Что-то долго, попробуйте перезагрузить страницу 🤪', delay: 45000 },
-]
-
 function MainLoader() {
-  const [hint, setHint] = useState('Загружаемся... 🖤')
+  const [hint, setHint] = useState('')
+  const { t } = useTranslation('loadingHints')
 
   useEffect(() => {
+    const hints = [
+      { hint: t('hint'), delay: 0 },
+      { hint: t('hint_1', 'hint'), delay: 5000 },
+      { hint: t('hint_2', 'hint'), delay: 10000 },
+      { hint: t('hint_3', 'hint'), delay: 30000 },
+      { hint: t('hint_4', 'hint'), delay: 45000 },
+    ]
     const timers = hints.map(({ hint, delay }) =>
       setTimeout(() => setHint(hint), delay)
     )
     return () => {
       timers.forEach(timer => clearTimeout(timer))
     }
-  }, [])
+  }, [t])
   return (
     <Box
       display="flex"
