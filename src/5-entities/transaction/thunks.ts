@@ -50,7 +50,8 @@ export const markViewed =
       .map(id => ({
         ...transactions[id],
         viewed,
-        changed: Date.now(),
+        // If we mark transaction as viewed we try to minimally affect its changed time (add 1 second). It is needed for filtering by changed date to work correctly.
+        changed: viewed ? transactions[id].changed + 1000 : Date.now(),
       }))
     dispatch(applyClientPatch({ transaction: result }))
   }
