@@ -271,7 +271,7 @@ function getAvailableActions(transactions: TTransaction[]) {
     delete: true,
     setMainTag: !transfers.length && (incomes.length || outcomes.length),
     bulkEdit: true,
-    markViewed: transactions.some(tr => trModel.isViewed(tr)),
+    markViewed: transactions.some(tr => !trModel.isViewed(tr)),
     combineToOutcome: canCombineToOutcome(),
     combineToIncome: canCombineToIncome(),
     collapseTransactionsEasy: canCollapseTransactionsEasy(),
