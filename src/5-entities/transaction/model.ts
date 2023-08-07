@@ -8,6 +8,9 @@ import { toISODate } from '6-shared/helpers/date'
 export const getTransactions = (state: RootState) =>
   state.data.current.transaction
 
+/**
+ * Transactions sorted from newest to oldest
+ */
 export const getSortedTransactions = createSelector(
   [getTransactions],
   withPerf('getSortedTransactions', transactions =>
@@ -15,6 +18,9 @@ export const getSortedTransactions = createSelector(
   )
 )
 
+/**
+ * Transactions sorted from oldest to newest
+ */
 export const getTransactionsHistory = createSelector(
   [getSortedTransactions],
   withPerf('getTransactionsHistory', transactions =>

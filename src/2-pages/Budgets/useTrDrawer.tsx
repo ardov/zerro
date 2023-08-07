@@ -2,7 +2,7 @@ import { TISOMonth, TTransaction } from '6-shared/types'
 import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
 import { balances, TrFilterMode } from '5-entities/envBalances'
 import { store } from 'store/index'
-import { useTransactionDrawer } from '3-widgets/transaction/TransactionListDrawer'
+import { useTransactionDrawer } from '3-widgets/global/TransactionListDrawer'
 
 type TConditions = {
   id: TEnvelopeId | 'transferFees' | null

@@ -99,7 +99,6 @@ function useDoubleTrend(month: TISOMonth, id: TEnvelopeId) {
   const monthPrev = toISOMonth(prevMonth(month))
   const currTrend = useDataTrend(month, id)
   const prevTrend = useDataTrend(monthPrev, id)
-  console.log('currTrend', currTrend)
   const startValue = currTrend[0].balance || 0
   const monthLength = getMonthLength(month)
   const trend = currTrend.map((node, i) => {

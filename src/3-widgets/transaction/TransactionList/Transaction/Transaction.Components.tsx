@@ -1,15 +1,16 @@
+import type { TTransaction } from '6-shared/types'
 import React, { FC } from 'react'
+import { useTranslation } from 'react-i18next'
 import styled from '@emotion/styled'
-import { EmojiIcon } from '6-shared/ui/EmojiIcon'
-import { useAppSelector } from 'store'
-import { SmartAmount } from '3-widgets/Amount'
-import { accountModel } from '5-entities/account'
-import { TrType } from '5-entities/transaction'
-import { tagModel } from '5-entities/tag'
 import { Typography } from '@mui/material'
+import { EmojiIcon } from '6-shared/ui/EmojiIcon'
 import { Tooltip } from '6-shared/ui/Tooltip'
-import { TTransaction } from '6-shared/types'
+import { useAppSelector } from 'store'
+import { accountModel } from '5-entities/account'
+import { TrType, trModel } from '5-entities/transaction'
+import { TTagPopulated, tagModel } from '5-entities/tag'
 import { getMerchants } from '5-entities/merchant'
+import { SmartAmount } from '3-widgets/Amount'
 
 type HTMLDivProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLDivElement>,
@@ -26,14 +27,6 @@ type SymbolProps = TrElementProps & {
   onToggle?: (id: string) => void
 }
 
-const symbols = {
-  income: '',
-  outcome: '',
-  transfer: '↔️',
-  outcomeDebt: '⬅️',
-  incomeDebt: '➡️',
-}
-
 export const Symbol: FC<SymbolProps> = ({
   tr,
   trType,
@@ -45,46 +38,41 @@ export const Symbol: FC<SymbolProps> = ({
   const tags = tagModel.usePopulatedTags()
   const mainTagId = tr.tag?.length ? tr.tag[0] : 'null'
   const tag = tags[mainTagId]
-  switch (trType) {
-    case 'income':
-    case 'outcome':
-      return (
-        <SymbolWrapper>
-          <EmojiIcon
-            symbol={tag.symbol}
-            showCheckBox={isInSelectionMode}
-            checked={isChecked}
-            onChange={() => onToggle?.(tr.id)}
-            color={tag.colorHEX}
-            size="m"
-          />
-          {/* Disable new indicator it doesn't work as expected */}
-          {/* <NewIndicator isNew={isNew(tr)} /> */}
-          {tr.qrCode && <Reciept>🧾</Reciept>}
-        </SymbolWrapper>
-      )
-    case 'transfer':
-    case 'outcomeDebt':
-    case 'incomeDebt':
-      return (
-        <SymbolWrapper>
-          <EmojiIcon
-            symbol={symbols[trType]}
-            showCheckBox={isInSelectionMode}
-            checked={isChecked}
-            onChange={() => onToggle?.(tr.id)}
-            size="m"
-          />
-          {/* <NewIndicator isNew={isNew(tr)} /> */}
-          {tr.qrCode && <Reciept>🧾</Reciept>}
-        </SymbolWrapper>
-      )
-    default:
-      return null
+  const { symbol, color } = getSymAndColor(trType, tag)
+  return (
+    <SymbolWrapper>
+      <EmojiIcon
+        symbol={symbol}
+        showCheckBox={isInSelectionMode}
+        checked={isChecked}
+        onChange={() => onToggle?.(tr.id)}
+        color={color}
+        size="m"
+      />
+      <NewIndicator viewed={trModel.isViewed(tr)} />
+      {tr.qrCode && <Reciept>🧾</Reciept>}
+    </SymbolWrapper>
+  )
+
+  function getSymAndColor(type: TrType, tag: TTagPopulated) {
+    switch (type) {
+      case TrType.Income:
+      case TrType.Outcome:
+        return { symbol: tag.symbol, color: tag.colorHEX }
+      case TrType.Transfer:
+        return { symbol: '↔️' }
+      case TrType.OutcomeDebt:
+        return { symbol: '⬅️' }
+      case TrType.IncomeDebt:
+        return { symbol: '➡️' }
+      default:
+        return { symbol: '' }
+    }
   }
 }
 
 export const Tags: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
+  const { t } = useTranslation()
   const tags = tagModel.usePopulatedTags()
   switch (trType) {
     case 'income':
@@ -92,7 +80,7 @@ export const Tags: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
       if (!tr.tag)
         return (
           <TagsWrapper {...rest}>
-            <NoCategory>Без категории</NoCategory>
+            <NoCategory>{t('noCategory')}</NoCategory>
           </TagsWrapper>
         )
       else
@@ -104,10 +92,10 @@ export const Tags: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
           </TagsWrapper>
         )
     case 'transfer':
-      return <TagsWrapper {...rest}>Перевод</TagsWrapper>
+      return <TagsWrapper {...rest}>{t('transfer')}</TagsWrapper>
     case 'outcomeDebt':
     case 'incomeDebt':
-      return <TagsWrapper {...rest}>Долг</TagsWrapper>
+      return <TagsWrapper {...rest}>{t('debt')}</TagsWrapper>
     default:
       return null
   }
@@ -313,19 +301,19 @@ const SymbolWrapper = styled.div`
   position: relative;
   align-self: center;
 `
-/* const NewIndicator = styled.div<{ isNew?: boolean }>`
+const NewIndicator = styled.div<{ viewed?: boolean }>`
   position: absolute;
-  left: 1px;
-  top: 2px;
-  width: 10px;
-  height: 10px;
+  left: -2px;
+  top: -1px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background-color: ${p => p.theme.palette.info.light};
+  background-color: ${p => p.theme.palette.error.main};
   border: solid 2px ${p => p.theme.palette.background.paper};
-  transform: scale(${p => (p.isNew ? 1 : 0)});
-  opacity: ${p => (p.isNew ? 1 : 0)};
+  transform: scale(${p => (p.viewed ? 0 : 1)});
+  opacity: ${p => (p.viewed ? 0 : 1)};
   transition: 200ms;
-` */
+`
 const Reciept = styled.div`
   font-size: ${16 / 16}rem;
   text-shadow: 0 0 2px ${p => p.theme.palette.background.paper};

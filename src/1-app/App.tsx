@@ -8,23 +8,22 @@ import {
   useMediaQuery,
   Theme,
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { initTracking, setUserId } from '6-shared/helpers/tracking'
 import { PopoverManager } from '6-shared/historyPopovers'
 import { useAppSelector } from 'store'
 import { getLoginState } from 'store/token'
 import { getLastSyncTime } from 'store/data/selectors'
+import { userModel } from '5-entities/user'
 import { RegularSyncHandler } from '3-widgets/RegularSyncHandler'
 import Nav from '3-widgets/Navigation'
 import { MobileNavigation } from '3-widgets/Navigation'
 import ErrorBoundary from '3-widgets/ErrorBoundary'
-import { userModel } from '5-entities/user'
 import Transactions from '2-pages/Transactions'
 import Auth from '2-pages/Auth'
 import Budgets from '2-pages/Budgets'
 import Accounts from '2-pages/Accounts'
-import { SmartConfirm } from '6-shared/ui/SmartConfirm'
-import { SmartTransactionListDrawer } from '3-widgets/transaction/TransactionListDrawer'
-import { SmartTransactionPreview } from '3-widgets/transaction/TransactionPreviewDrawer'
+import { GlobalWidgets } from './GlobalWidgets'
 
 const About = lazy(() => import('2-pages/About'))
 const Donation = lazy(() => import('2-pages/Donation'))
@@ -71,50 +70,36 @@ export default function App() {
     <Route key="*" path="*" render={() => <Redirect to="/budget" />} />,
   ]
 
+  const getRoutes = () => {
+    if (!isLoggedIn) return notLoggedIn
+    if (!hasData) return loggedInNoData
+    return loggedInWithData
+  }
+
+  const routes = getRoutes()
+
   return (
     <Router history={history}>
       <PopoverManager>
         <RegularSyncHandler />
         <Layout isLoggedIn={isLoggedIn}>
           <ErrorBoundary>
-            <Suspense
-              fallback={
-                <Box
-                  sx={{
-                    display: 'grid',
-                    placeContent: 'center',
-                    height: '100%',
-                  }}
-                >
-                  <CircularProgress />
-                </Box>
-              }
-            >
-              <Switch>
-                {isLoggedIn
-                  ? hasData
-                    ? loggedInWithData
-                    : loggedInNoData
-                  : notLoggedIn}
-              </Switch>
+            <Suspense fallback={<FallbackLoader />}>
+              <Switch>{routes}</Switch>
             </Suspense>
           </ErrorBoundary>
         </Layout>
-
-        <SmartConfirm />
-        <SmartTransactionListDrawer />
-        <SmartTransactionPreview />
+        <GlobalWidgets />
       </PopoverManager>
     </Router>
   )
 }
 
-type TLayoutProps = {
+const Layout: FC<{
   isLoggedIn: boolean
   children: React.ReactNode
-}
-
-const Layout: FC<TLayoutProps> = ({ isLoggedIn, children }) => {
+}> = props => {
+  const { isLoggedIn, children } = props
   return (
     <Box display="flex">
       {isLoggedIn && <Navigation />}
@@ -125,29 +110,36 @@ const Layout: FC<TLayoutProps> = ({ isLoggedIn, children }) => {
   )
 }
 
+const FallbackLoader = () => (
+  <Box sx={{ display: 'grid', placeContent: 'center', height: '100%' }}>
+    <CircularProgress />
+  </Box>
+)
+
 const Navigation = React.memo(() => {
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   return isMobile ? <MobileNavigation /> : <Nav />
 })
 
-const hints = [
-  { hint: 'Первая загрузка самая долгая 😅', delay: 5000 },
-  { hint: 'Всё зависит от интернета и количества операций 🤞', delay: 10000 },
-  { hint: 'Может всё-таки загрузится? 🤔', delay: 30000 },
-  { hint: 'Что-то долго, попробуйте перезагрузить страницу 🤪', delay: 45000 },
-]
-
 function MainLoader() {
-  const [hint, setHint] = useState('Загружаемся... 🖤')
+  const [hint, setHint] = useState('')
+  const { t } = useTranslation('loadingHints')
 
   useEffect(() => {
+    const hints = [
+      { hint: t('hint'), delay: 0 },
+      { hint: t('hint_1', 'hint'), delay: 5000 },
+      { hint: t('hint_2', 'hint'), delay: 10000 },
+      { hint: t('hint_3', 'hint'), delay: 30000 },
+      { hint: t('hint_4', 'hint'), delay: 45000 },
+    ]
     const timers = hints.map(({ hint, delay }) =>
       setTimeout(() => setHint(hint), delay)
     )
     return () => {
       timers.forEach(timer => clearTimeout(timer))
     }
-  }, [])
+  }, [t])
   return (
     <Box
       display="flex"

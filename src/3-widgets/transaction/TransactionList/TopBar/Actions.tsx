@@ -21,7 +21,6 @@ import { TagSelect2 } from '5-entities/tag/ui/TagSelect2'
 import { CSSTransition } from 'react-transition-group'
 import { EditOutlined } from '@mui/icons-material'
 import { BulkEditModal } from './BulkEditModal'
-import { getType, isNew } from '5-entities/transaction/helpers'
 import { trModel } from '5-entities/transaction'
 import { Divider, ListItemIcon, ListItemText } from '@mui/material'
 import { round } from '6-shared/helpers/money'
@@ -272,7 +271,7 @@ function getAvailableActions(transactions: TTransaction[]) {
     delete: true,
     setMainTag: !transfers.length && (incomes.length || outcomes.length),
     bulkEdit: true,
-    markViewed: transactions.some(isNew),
+    markViewed: transactions.some(tr => !trModel.isViewed(tr)),
     combineToOutcome: canCombineToOutcome(),
     combineToIncome: canCombineToIncome(),
     collapseTransactionsEasy: canCollapseTransactionsEasy(),
@@ -396,7 +395,7 @@ function getTypes(list: TTransaction[] = []) {
   let transfers: TTransaction[] = []
 
   list?.forEach(tr => {
-    let trType = getType(tr)
+    let trType = trModel.getType(tr)
     if (trType === 'income') incomes.push(tr)
     if (trType === 'outcome') outcomes.push(tr)
     if (trType === 'transfer') transfers.push(tr)

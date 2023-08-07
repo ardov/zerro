@@ -8,6 +8,7 @@ import {
   MenuItem,
 } from '@mui/material'
 import { Box, BoxProps } from '@mui/system'
+import { useTranslation } from 'react-i18next'
 import { DoneIcon } from '6-shared/ui/Icons'
 import { AmountInput } from '6-shared/ui/AmountInput'
 import { formatMoney } from '6-shared/helpers/money'
@@ -31,6 +32,7 @@ export type TBudgetPopoverProps = Omit<PopoverProps, 'onClose'> & {
 
 export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
+  const { t } = useTranslation()
   const quickActions = useQuickActions(month, id)
   const [dispCurrency] = displayCurrency.useDisplayCurrency()
   const dispatch = useAppDispatch()
@@ -93,11 +95,11 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
       <>
         {format.disp(value.disp)}
         <br />
-        Остаток {format.env(availableAfter.env)} (
+        {t('leftover')} {format.env(availableAfter.env)} (
         {format.disp(availableAfter.disp)})
       </>
     ) : (
-      `Остаток ${format.env(availableAfter.env)}`
+      `${t('leftover')} ${format.env(availableAfter.env)}`
     )
 
   return (

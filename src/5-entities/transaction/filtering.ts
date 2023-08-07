@@ -1,6 +1,6 @@
 import { TAccountId, TISOMonth, TTagId, TTransaction } from '6-shared/types'
 import { keys } from '6-shared/helpers/keys'
-import { getType, isDeleted, isNew, TrType } from './helpers'
+import { getType, isDeleted, isViewed, TrType } from './helpers'
 import type { KeyCondition, StringCondition } from './basicFiltering'
 import { checkValue } from './basicFiltering'
 import { toISOMonth } from '6-shared/helpers/date'
@@ -124,6 +124,6 @@ const checkTags = (
 
 const checkIsNew = (tr: TTransaction, condition?: TrCondition['isNew']) => {
   if (condition === undefined) return true
-  const isNewTransaction = isNew(tr)
+  const isNewTransaction = isViewed(tr)
   return isNewTransaction === condition
 }

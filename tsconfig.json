@@ -17,6 +17,11 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "typings/theme.d.ts", "typings/vite-env.d.ts"],
+  "include": [
+    "src",
+    "typings/theme.d.ts",
+    "typings/vite-env.d.ts",
+    "typings/i18n.d.ts"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
