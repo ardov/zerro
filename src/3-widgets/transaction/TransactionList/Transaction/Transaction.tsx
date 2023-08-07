@@ -18,7 +18,7 @@ export type TTransactionProps = {
   onOpen?: (id: TTransactionId) => void
   onToggle?: (id: TTransactionId) => void
   onPayeeClick?: (payee: string) => void
-  onContextMenu?: (e: React.MouseEvent) => void
+  onContextMenu?: (e: React.MouseEvent | React.TouchEvent) => void
 }
 
 export const Transaction: FC<TTransactionProps> = props => {
@@ -48,7 +48,12 @@ export const Transaction: FC<TTransactionProps> = props => {
         sendEvent('Transaction: open context menu')
         onContextMenu?.(e)
       }}
-      onDoubleClick={() => onToggle?.(id)}
+      onTouchStart={e => {
+        if (e.touches.length === 2) {
+          sendEvent('Transaction: open context menu')
+          onContextMenu?.(e)
+        }
+      }}
     >
       <Symbol {...{ tr, trType, isChecked, isInSelectionMode, onToggle }} />
       <Content>
@@ -66,6 +71,8 @@ export const Transaction: FC<TTransactionProps> = props => {
 }
 
 const Wrapper = styled.div<{ opened: boolean; deleted: boolean }>`
+  user-select: none;
+  -webkit-touch-callout: none;
   cursor: pointer;
   position: relative;
   display: flex;

@@ -20,11 +20,18 @@ const trContext = registerPopover<TTrMenuProps, MenuProps>(
 export const useTrContextMenu = () => {
   const { open } = trContext.useMethods()
   const handleClick = useCallback(
-    (event: React.MouseEvent, props: TTrMenuProps) => {
+    (event: React.MouseEvent | React.TouchEvent, props: TTrMenuProps) => {
       event.preventDefault()
+      const getCoordinates = () => {
+        if ('touches' in event) {
+          const { clientX, clientY } = event.touches[0]
+          return { left: clientX, top: clientY }
+        }
+        return { left: event.clientX, top: event.clientY }
+      }
       open(props, {
         anchorReference: 'anchorPosition',
-        anchorPosition: { left: event.clientX - 2, top: event.clientY - 4 },
+        anchorPosition: getCoordinates(),
       })
     },
     [open]
