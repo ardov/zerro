@@ -176,10 +176,11 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
           <FormControlLabel
             control={
               <Switch
-                checked={Boolean(conditions.isNew)}
-                onChange={e =>
-                  setCondition({ isNew: e.target.checked || undefined })
-                }
+                checked={conditions.isViewed === false}
+                onChange={e => {
+                  if (e.target.checked) setCondition({ isViewed: false })
+                  else setCondition({ isViewed: undefined })
+                }}
                 color="primary"
               />
             }

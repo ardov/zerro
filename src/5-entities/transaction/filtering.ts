@@ -11,7 +11,7 @@ export type TrCondition = {
   search?: null | string
   type?: StringCondition<TrType>
   showDeleted?: boolean
-  isNew?: boolean
+  isViewed?: boolean
   tags?: null | TTagId[]
   mainTag?: StringCondition<TTagId>
 
@@ -56,8 +56,8 @@ const checkConditions = (tr: TTransaction, conditions: TrCondition) => {
             return checkValue(getType(tr), conditions[key])
           case 'showDeleted':
             return conditions[key] || !isDeleted(tr)
-          case 'isNew':
-            return checkIsNew(tr, conditions.isNew)
+          case 'isViewed':
+            return checkIsViewed(tr, conditions.isViewed)
           case 'tags':
             return checkTags(tr, conditions.tags, 'any')
           case 'mainTag': {
@@ -122,8 +122,10 @@ const checkTags = (
   return tr.tag.some(id => tags.includes(id))
 }
 
-const checkIsNew = (tr: TTransaction, condition?: TrCondition['isNew']) => {
+const checkIsViewed = (
+  tr: TTransaction,
+  condition?: TrCondition['isViewed']
+) => {
   if (condition === undefined) return true
-  const isNewTransaction = isViewed(tr)
-  return isNewTransaction === condition
+  return isViewed(tr) === condition
 }
