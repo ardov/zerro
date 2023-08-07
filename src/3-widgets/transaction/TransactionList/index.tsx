@@ -19,7 +19,8 @@ import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
 import { Transaction } from './Transaction'
-import { TransactionMenu, useTrContextMenu } from './ContextMenu'
+import { useTrContextMenu } from '../../global/TrContextMenu'
+import { useAppDispatch } from 'store'
 
 export type TTransactionListProps = {
   onTrOpen?: (id: TTransactionId) => void
@@ -46,6 +47,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     sx,
   } = props
 
+  const dispatch = useAppDispatch()
   const [filter, setFilter] = useState(defaultConditions)
   const setCondition = useCallback(
     (condition?: TrConditions) =>
@@ -87,7 +89,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
         : [...current, id]
     })
   }, [])
-  const checkByChangedDate = useCallback(
+  const onSelectSimilar = useCallback(
     (date: Date | number) => {
       sendEvent('Transaction: select similar')
       const ids = trList.filter(tr => tr.changed === +date).map(tr => tr.id)
@@ -95,11 +97,25 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     },
     [trList]
   )
-  const openContextMenu = useTrContextMenu(checkByChangedDate)
+  const onMarkOlderViewed = useCallback(
+    (id: TTransactionId) => {
+      sendEvent('Transaction: mark older viewed')
+      const index = trList.findIndex(tr => tr.id === id)
+      if (index === -1) return
+      const ids = trList
+        .slice(index)
+        .filter(tr => !trModel.isViewed(tr))
+        .map(tr => tr.id)
+      dispatch(trModel.markViewed(ids, true))
+    },
+    [dispatch, trList]
+  )
+
+  const openContextMenu = useTrContextMenu()
 
   useEffect(() => {
-    if (checkedDate) checkByChangedDate(checkedDate)
-  }, [checkByChangedDate, checkedDate])
+    if (checkedDate) onSelectSimilar(checkedDate)
+  }, [onSelectSimilar, checkedDate])
 
   const groups = useMemo(() => {
     let groups: ByDate<{ date: TISODate; transactions: JSX.Element[] }> = {}
@@ -116,7 +132,13 @@ export const TransactionList: FC<TTransactionListProps> = props => {
           onOpen={onTrOpen}
           onToggle={toggleTransaction}
           onPayeeClick={onFilterByPayee}
-          onContextMenu={openContextMenu(tr.id)}
+          onContextMenu={e =>
+            openContextMenu(e, {
+              id: tr.id,
+              onSelectSimilar,
+              onMarkOlderViewed,
+            })
+          }
         />
       )
       groups[tr.date] ??= { date: tr.date, transactions: [] }
@@ -124,14 +146,16 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     })
     return Object.values(groups)
   }, [
-    checked,
+    trList,
     debtId,
     opened,
-    trList,
+    checked,
     onTrOpen,
+    toggleTransaction,
     onFilterByPayee,
     openContextMenu,
-    toggleTransaction,
+    onSelectSimilar,
+    onMarkOlderViewed,
   ])
 
   return (
@@ -175,8 +199,6 @@ export const TransactionList: FC<TTransactionListProps> = props => {
           )}
         </Box>
       </Box>
-
-      <TransactionMenu />
     </>
   )
 }

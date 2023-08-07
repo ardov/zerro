@@ -14,7 +14,6 @@ import { withPerf } from '6-shared/helpers/performance'
 import { TSelector } from 'store'
 import { accountModel } from '5-entities/account'
 import { trModel, TrType } from '5-entities/transaction'
-import { getType } from '5-entities/transaction/helpers'
 import { cleanPayee } from '5-entities/shared/cleanPayee'
 import { getMerchants } from '5-entities/merchant'
 import { instrumentModel } from '5-entities/currency/instrument'
@@ -47,7 +46,7 @@ function collectDebtors(
 ): ById<TDebtor> {
   const debtors: ById<TDebtor> = {}
   trList.forEach(tr => {
-    const trType = getType(tr, debtAccId)
+    const trType = trModel.getType(tr, debtAccId)
     if (trType !== TrType.IncomeDebt && trType !== TrType.OutcomeDebt) {
       // Not debt transaction
       return

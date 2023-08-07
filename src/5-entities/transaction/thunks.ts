@@ -9,6 +9,7 @@ import {
 } from '6-shared/types'
 import { applyClientPatch } from 'store/data'
 import { getTransactions } from './model'
+import { isViewed } from './helpers'
 
 export const deleteTransactions =
   (ids: TTransactionId | TTransactionId[]): AppThunk<void> =>
@@ -43,11 +44,14 @@ export const markViewed =
     sendEvent(`Transaction: mark viewed: ${viewed}`)
     const array = Array.isArray(ids) ? ids : [ids]
     const state = getState()
-    const result = array.map(id => ({
-      ...getTransactions(state)[id],
-      viewed,
-      changed: Date.now(),
-    }))
+    const transactions = getTransactions(state)
+    const result = array
+      .filter(id => isViewed(transactions[id]) !== viewed)
+      .map(id => ({
+        ...transactions[id],
+        viewed,
+        changed: Date.now(),
+      }))
     dispatch(applyClientPatch({ transaction: result }))
   }
 

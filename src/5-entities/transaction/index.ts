@@ -1,6 +1,6 @@
 import { useAppSelector } from 'store/index'
 import { checkRaw } from './filtering'
-import { compareTrDates, getType } from './helpers'
+import { compareTrDates, getType, isViewed } from './helpers'
 import { makeTransaction } from './makeTransaction'
 import {
   getHistoryStart,
@@ -39,6 +39,7 @@ export const trModel = {
   compareTrDates,
   makeTransaction,
   getType,
+  isViewed,
 
   //Filtering
   checkRaw,

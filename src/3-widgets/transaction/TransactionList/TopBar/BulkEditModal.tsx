@@ -7,7 +7,6 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import { useAppDispatch } from 'store'
 import { trModel } from '5-entities/transaction'
-import { getType } from '5-entities/transaction/helpers'
 import { TagList } from '5-entities/tag/ui/TagList'
 import { Modify, TTransaction } from '6-shared/types'
 import { Box, TextField } from '@mui/material'
@@ -120,6 +119,8 @@ function equalArrays(a: string[], b: string[]) {
 
 function getTypes(list: TTransaction[] = []) {
   let res = { income: 0, outcome: 0, transfer: 0 }
-  list.forEach(tr => res[getType(tr) as 'income' | 'outcome' | 'transfer']++)
+  list.forEach(
+    tr => res[trModel.getType(tr) as 'income' | 'outcome' | 'transfer']++
+  )
   return res
 }

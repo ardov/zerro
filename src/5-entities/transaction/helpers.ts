@@ -41,10 +41,9 @@ export function getMainTag(tr: TTransaction) {
   else return null
 }
 
-export function isNew(tr: TTransaction) {
-  if (tr.deleted) return false
-  if (tr.viewed) return false
-  const DAY = 1000 * 60 * 60 * 24
-  if (Date.now() - tr.changed > 31 * DAY) return false
-  return true
+export function isViewed(tr: TTransaction) {
+  if (tr.deleted) return true
+  if (tr.viewed === true) return true
+  if (tr.viewed === undefined) return true
+  return false
 }

@@ -12,23 +12,19 @@ import { Amount } from '6-shared/ui/Amount'
 import { TFxAmount } from '6-shared/types'
 import { Tooltip } from '6-shared/ui/Tooltip'
 
-import { useAppDispatch } from 'store'
-import { accountModel, TAccountPopulated } from '5-entities/account'
+import { TAccountPopulated } from '5-entities/account'
 import {
   DisplayAmount,
   displayCurrency,
 } from '5-entities/currency/displayCurrency'
-import { useTransactionDrawer } from '3-widgets/transaction/TransactionListDrawer'
+import { useTransactionDrawer } from '3-widgets/global/TransactionListDrawer'
+import { useAccountContextMenu } from '3-widgets/global/AccountContextMenu'
 
 export const Account: FC<
   { account: TAccountPopulated } & ListItemButtonProps
 > = ({ account, sx, ...rest }) => {
   const transactionDrawer = useTransactionDrawer()
-  const dispatch = useAppDispatch()
-  const toggleInBalance = useCallback(
-    () => dispatch(accountModel.setInBudget(account.id, !account.inBudget)),
-    [account.id, account.inBudget, dispatch]
-  )
+  const onContextMenu = useAccountContextMenu()
   const showTransactions = useCallback(
     () =>
       transactionDrawer.open({
@@ -45,7 +41,7 @@ export const Account: FC<
         display: 'flex',
         ...sx,
       }}
-      onDoubleClick={toggleInBalance}
+      onContextMenu={e => onContextMenu(e, { id: account.id })}
       onClick={showTransactions}
       {...rest}
     >

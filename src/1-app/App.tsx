@@ -11,7 +11,6 @@ import {
 import { useTranslation } from 'react-i18next'
 import { initTracking, setUserId } from '6-shared/helpers/tracking'
 import { PopoverManager } from '6-shared/historyPopovers'
-import { SmartConfirm } from '6-shared/ui/SmartConfirm'
 import { useAppSelector } from 'store'
 import { getLoginState } from 'store/token'
 import { getLastSyncTime } from 'store/data/selectors'
@@ -20,12 +19,11 @@ import { RegularSyncHandler } from '3-widgets/RegularSyncHandler'
 import Nav from '3-widgets/Navigation'
 import { MobileNavigation } from '3-widgets/Navigation'
 import ErrorBoundary from '3-widgets/ErrorBoundary'
-import { SmartTransactionListDrawer } from '3-widgets/transaction/TransactionListDrawer'
-import { SmartTransactionPreview } from '3-widgets/transaction/TransactionPreviewDrawer'
 import Transactions from '2-pages/Transactions'
 import Auth from '2-pages/Auth'
 import Budgets from '2-pages/Budgets'
 import Accounts from '2-pages/Accounts'
+import { GlobalWidgets } from './GlobalWidgets'
 
 const About = lazy(() => import('2-pages/About'))
 const Donation = lazy(() => import('2-pages/Donation'))
@@ -72,50 +70,36 @@ export default function App() {
     <Route key="*" path="*" render={() => <Redirect to="/budget" />} />,
   ]
 
+  const getRoutes = () => {
+    if (!isLoggedIn) return notLoggedIn
+    if (!hasData) return loggedInNoData
+    return loggedInWithData
+  }
+
+  const routes = getRoutes()
+
   return (
     <Router history={history}>
       <PopoverManager>
         <RegularSyncHandler />
         <Layout isLoggedIn={isLoggedIn}>
           <ErrorBoundary>
-            <Suspense
-              fallback={
-                <Box
-                  sx={{
-                    display: 'grid',
-                    placeContent: 'center',
-                    height: '100%',
-                  }}
-                >
-                  <CircularProgress />
-                </Box>
-              }
-            >
-              <Switch>
-                {isLoggedIn
-                  ? hasData
-                    ? loggedInWithData
-                    : loggedInNoData
-                  : notLoggedIn}
-              </Switch>
+            <Suspense fallback={<FallbackLoader />}>
+              <Switch>{routes}</Switch>
             </Suspense>
           </ErrorBoundary>
         </Layout>
-
-        <SmartConfirm />
-        <SmartTransactionListDrawer />
-        <SmartTransactionPreview />
+        <GlobalWidgets />
       </PopoverManager>
     </Router>
   )
 }
 
-type TLayoutProps = {
+const Layout: FC<{
   isLoggedIn: boolean
   children: React.ReactNode
-}
-
-const Layout: FC<TLayoutProps> = ({ isLoggedIn, children }) => {
+}> = props => {
+  const { isLoggedIn, children } = props
   return (
     <Box display="flex">
       {isLoggedIn && <Navigation />}
@@ -125,6 +109,12 @@ const Layout: FC<TLayoutProps> = ({ isLoggedIn, children }) => {
     </Box>
   )
 }
+
+const FallbackLoader = () => (
+  <Box sx={{ display: 'grid', placeContent: 'center', height: '100%' }}>
+    <CircularProgress />
+  </Box>
+)
 
 const Navigation = React.memo(() => {
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))

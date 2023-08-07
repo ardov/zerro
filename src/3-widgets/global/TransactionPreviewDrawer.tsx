@@ -5,7 +5,7 @@ import { TTransactionId } from '6-shared/types'
 import {
   TransactionPreview,
   TransactionPreviewProps,
-} from './TransactionPreview'
+} from '../transaction/TransactionPreview'
 
 export type TransactionPreviewDrawerProps = {
   id: TTransactionId
