@@ -6,6 +6,7 @@ import { Theme, TypographyVariant } from '@mui/material'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { TrType } from '5-entities/transaction'
 import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'
+import { useContextMenu } from '6-shared/hooks/useContextMenu'
 
 export type TTransactionProps = {
   id: TTransactionId
@@ -18,7 +19,7 @@ export type TTransactionProps = {
   onOpen?: (id: TTransactionId) => void
   onToggle?: (id: TTransactionId) => void
   onPayeeClick?: (payee: string) => void
-  onContextMenu?: (e: React.MouseEvent | React.TouchEvent) => void
+  onContextMenu?: (event: React.MouseEvent | React.TouchEvent) => void
 }
 
 export const Transaction: FC<TTransactionProps> = props => {
@@ -35,26 +36,17 @@ export const Transaction: FC<TTransactionProps> = props => {
     onContextMenu,
   } = props
 
+  const propsToPass = useContextMenu({
+    onClick: () => onOpen?.(id),
+    onContextMenu,
+  })
   const tr = transaction
   const trType = type
   const { deleted } = tr
 
+  // sendEvent('Transaction: open context menu')
   return (
-    <Wrapper
-      opened={isOpened}
-      deleted={deleted}
-      onClick={() => onOpen?.(id)}
-      onContextMenu={e => {
-        sendEvent('Transaction: open context menu')
-        onContextMenu?.(e)
-      }}
-      onTouchStart={e => {
-        if (e.touches.length === 2) {
-          sendEvent('Transaction: open context menu')
-          onContextMenu?.(e)
-        }
-      }}
-    >
+    <Wrapper opened={isOpened} deleted={deleted} {...propsToPass}>
       <Symbol {...{ tr, trType, isChecked, isInSelectionMode, onToggle }} />
       <Content>
         <Row color="textPrimary">

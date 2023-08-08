@@ -5,6 +5,7 @@ import { useAppDispatch } from 'store'
 import { registerPopover } from '6-shared/historyPopovers'
 import { trModel } from '5-entities/transaction'
 import { useTranslation } from 'react-i18next'
+import { getMenuPosition } from './shared/helpers'
 
 type TTrMenuProps = {
   id: TTransactionId
@@ -19,25 +20,13 @@ const trContext = registerPopover<TTrMenuProps, MenuProps>(
 
 export const useTrContextMenu = () => {
   const { open } = trContext.useMethods()
-  const handleClick = useCallback(
-    (event: React.MouseEvent | React.TouchEvent, props: TTrMenuProps) => {
-      event.preventDefault()
-      const getCoordinates = () => {
-        if ('touches' in event) {
-          const { clientX, clientY } = event.touches[0]
-          return { left: clientX, top: clientY }
-        }
-        return { left: event.clientX, top: event.clientY }
-      }
-      open(props, {
-        anchorReference: 'anchorPosition',
-        anchorPosition: getCoordinates(),
-      })
+  const openMenu = useCallback(
+    (props: TTrMenuProps, anchorPosition?: { left: number; top: number }) => {
+      open(props, getMenuPosition(anchorPosition))
     },
     [open]
   )
-
-  return handleClick
+  return openMenu
 }
 
 export const TrContextMenu: FC = () => {
