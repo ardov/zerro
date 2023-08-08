@@ -19,12 +19,14 @@ import {
 } from '5-entities/currency/displayCurrency'
 import { useTransactionDrawer } from '3-widgets/global/TransactionListDrawer'
 import { useAccountContextMenu } from '3-widgets/global/AccountContextMenu'
+import { useContextMenu } from '6-shared/hooks/useContextMenu'
+import { getEventPosition } from '3-widgets/global/shared/helpers'
 
 export const Account: FC<
   { account: TAccountPopulated } & ListItemButtonProps
 > = ({ account, sx, ...rest }) => {
   const transactionDrawer = useTransactionDrawer()
-  const onContextMenu = useAccountContextMenu()
+  const openContextMenu = useAccountContextMenu()
   const showTransactions = useCallback(
     () =>
       transactionDrawer.open({
@@ -33,6 +35,11 @@ export const Account: FC<
       }),
     [account.id, account.title, transactionDrawer]
   )
+  const propsToPass = useContextMenu({
+    onContextMenu: e =>
+      openContextMenu({ id: account.id }, getEventPosition(e)),
+    onClick: showTransactions,
+  })
   return (
     <ListItemButton
       sx={{
@@ -41,9 +48,8 @@ export const Account: FC<
         display: 'flex',
         ...sx,
       }}
-      onContextMenu={e => onContextMenu(e, { id: account.id })}
-      onClick={showTransactions}
       {...rest}
+      {...propsToPass}
     >
       <Box
         sx={{

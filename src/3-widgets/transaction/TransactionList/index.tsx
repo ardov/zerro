@@ -21,6 +21,7 @@ import Actions from './TopBar/Actions'
 import { Transaction } from './Transaction'
 import { useTrContextMenu } from '../../global/TrContextMenu'
 import { useAppDispatch } from 'store'
+import { getEventPosition } from '3-widgets/global/shared/helpers'
 
 export type TTransactionListProps = {
   onTrOpen?: (id: TTransactionId) => void
@@ -133,11 +134,14 @@ export const TransactionList: FC<TTransactionListProps> = props => {
           onToggle={toggleTransaction}
           onPayeeClick={onFilterByPayee}
           onContextMenu={e =>
-            openContextMenu(e, {
-              id: tr.id,
-              onSelectSimilar,
-              onMarkOlderViewed,
-            })
+            openContextMenu(
+              {
+                id: tr.id,
+                onSelectSimilar,
+                onMarkOlderViewed,
+              },
+              getEventPosition(e)
+            )
           }
         />
       )

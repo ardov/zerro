@@ -5,32 +5,32 @@ import { useAppDispatch } from 'store'
 import { registerPopover } from '6-shared/historyPopovers'
 import { useTranslation } from 'react-i18next'
 import { accountModel } from '5-entities/account'
+import { getMenuPosition } from './shared/helpers'
 
 type AccountMenuProps = { id: TAccountId }
 
-const trContext = registerPopover<AccountMenuProps, MenuProps>(
+const accContext = registerPopover<AccountMenuProps, MenuProps>(
   'accountContextMenu',
   { id: '' }
 )
 
 export const useAccountContextMenu = () => {
-  const { open } = trContext.useMethods()
-  const handleClick = useCallback(
-    (event: React.MouseEvent, props: AccountMenuProps) => {
-      event.preventDefault()
-      open(props, {
-        anchorReference: 'anchorPosition',
-        anchorPosition: { left: event.clientX - 2, top: event.clientY - 4 },
-      })
+  const { open } = accContext.useMethods()
+  const openMenu = useCallback(
+    (
+      props: AccountMenuProps,
+      anchorPosition?: { left: number; top: number }
+    ) => {
+      open(props, getMenuPosition(anchorPosition))
     },
     [open]
   )
-  return handleClick
+  return openMenu
 }
 
 export const AccountContextMenu: FC = () => {
   const { t } = useTranslation('accountContextMenu')
-  const { displayProps, extraProps } = trContext.useProps()
+  const { displayProps, extraProps } = accContext.useProps()
   const { id } = extraProps
   const dispatch = useAppDispatch()
   const account = accountModel.useAccounts()[id]
