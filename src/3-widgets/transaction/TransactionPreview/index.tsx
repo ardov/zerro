@@ -192,7 +192,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
             value={parseDate(localDate)}
             onChange={date => date && setLocalDate(toISODate(date))}
             showDaysOutsideCurrentMonth
-            format="MM.dd.yyyy"
+            format="dd.MM.yyyy"
             slotProps={{ textField: { size: 'small', fullWidth: true } }}
             slots={{ openPickerIcon: CalendarIcon }}
           />
