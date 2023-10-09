@@ -45,7 +45,7 @@ export function TableMenu() {
           onReorderModeToggle()
         }}
       >
-        {isReordering ? 'Скрыть таскалки' : 'Изменить порядок категорий'}
+        {isReordering ? 'Выйти из режима редактирования' : 'Режим редактирования'}
       </MenuItem>
     </Menu>
   )
