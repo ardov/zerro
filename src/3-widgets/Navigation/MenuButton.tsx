@@ -9,6 +9,7 @@ interface MenuButtonProps extends IconButtonProps {
   showLinks?: boolean
 }
 
+// TODO: i18n
 export const MenuButton: FC<MenuButtonProps> = ({ showLinks, ...rest }) => {
   const openSettings = useSettingsMenu()
   return (

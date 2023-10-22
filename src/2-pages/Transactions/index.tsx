@@ -41,6 +41,7 @@ export default function TransactionsView() {
     [open]
   )
 
+  // TODO: i18n
   return (
     <>
       <Helmet>

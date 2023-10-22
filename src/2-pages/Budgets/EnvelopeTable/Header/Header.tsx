@@ -19,6 +19,7 @@ type HeaderProps = {
   onOpenOverview: () => void
 }
 
+// TODO: i18n
 export const Header: FC<HeaderProps> = props => {
   const {
     month,

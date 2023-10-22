@@ -54,6 +54,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
     onApply()
   }
 
+  // TODO: i18n
   return (
     <Dialog open={open} onClose={onClose} {...rest}>
       <DialogTitle>Редактирование операций</DialogTitle>

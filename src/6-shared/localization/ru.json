@@ -88,7 +88,10 @@
     "leftoverFromLastMonth": "Остаток с прошлого месяца",
     "availableFor": "Доступно на",
     "balanceFor": "Баланс на",
-    "balanceChartTooltip": "Сплошная линия показывает изменение баланса в этом месяце. Пунктирная — в прошлом."
+    "balanceChartTooltip": "Сплошная линия показывает изменение баланса в этом месяце. Пунктирная — в прошлом.",
+    "availableTitle_now": "Доступно сейчас",
+    "availableTitle_future": "Будет доступно в {{month}}",
+    "availableTitle_past": "Осталось в конце {{month}}"
   },
   "accountContextMenu": {
     "moveInBalance": "Включить в баланс",

@@ -128,6 +128,7 @@ const DragObj = () => {
     },
   })
 
+  // TODO: i18n
   const content =
     activeType === DragTypes.amount ? (
       <Box sx={props}>Денюшки</Box>

@@ -29,6 +29,7 @@ export function ActivityStats(props: { month: TISOMonth }) {
 
   if (!activity) return null
 
+  // TODO: i18n
   return (
     <>
       <StatWidget

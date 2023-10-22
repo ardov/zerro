@@ -7,6 +7,7 @@ interface ErrorMessageProps {
   message: string
 }
 
+// TODO: i18n
 export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut, message }) => (
   <Box
     display="flex"

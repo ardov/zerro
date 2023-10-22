@@ -17,6 +17,7 @@ import RefreshButton from '3-widgets/RefreshButton'
 import { SettingsMenu, useSettingsMenu } from './SettingsMenu'
 
 const actionSx = { minWidth: 32 }
+// TODO: i18n
 const routes = [
   { path: '/budget', label: 'Бюджет', icon: <AccountBalanceIcon /> },
   { path: '/transactions', label: 'Операции', icon: <SyncAltIcon /> },

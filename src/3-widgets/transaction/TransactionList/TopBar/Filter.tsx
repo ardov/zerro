@@ -25,6 +25,7 @@ const Filter: FC<FilterProps> = ({
   const [isDrawerVisible, toggleDrawer] = useToggle(false)
   const isFiltered = Object.values(conditions).filter(Boolean).length > 0
 
+  // TODO: i18n
   return (
     <Paper
       elevation={10}

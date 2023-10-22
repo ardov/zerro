@@ -9,6 +9,7 @@ import { balances } from '5-entities/envBalances'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { overspendModel } from '../model'
 
+// TODO: i18n
 export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
   const dispatch = useAppDispatch()
   const { overspend } = balances.useTotals()[month]

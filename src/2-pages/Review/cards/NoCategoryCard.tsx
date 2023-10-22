@@ -4,6 +4,7 @@ import pluralize from '6-shared/helpers/pluralize'
 import { Card, TCardProps } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
 
+// TODO: i18n
 export function NoCategoryCard(props: TCardProps) {
   const yearStats = useStats(props.year)
   const noTag = [

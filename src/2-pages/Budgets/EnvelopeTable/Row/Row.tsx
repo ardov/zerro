@@ -169,6 +169,7 @@ type GoalButtonProps = {
   goalProgress?: number | null
   onClick: IconButtonProps['onClick']
 }
+// TODO: i18n
 const GoalButton: FC<GoalButtonProps> = props => {
   const { goal, currency, goalProgress, onClick } = props
 

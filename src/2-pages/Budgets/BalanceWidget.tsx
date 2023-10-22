@@ -22,6 +22,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
     if (currencies[newIdx]) setDisplayCurrency(currencies[newIdx])
   }
 
+  // TODO: i18n
   const currString =
     currCount > 1
       ? ` | ${currCount} ${pluralize(currCount, ['валюта', 'валюты', 'валют'])}`

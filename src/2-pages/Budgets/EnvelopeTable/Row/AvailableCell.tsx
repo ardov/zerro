@@ -16,6 +16,7 @@ type AvailableCellProps = {
   isSelf?: boolean
 }
 
+// TODO: i18n
 export const AvailableCell: FC<AvailableCellProps> = props => {
   const { hiddenOverspend, id, available, isChild, budgeted, isSelf } = props
   const availableColor = getAvailableColor(

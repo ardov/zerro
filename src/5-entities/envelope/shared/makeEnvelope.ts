@@ -5,6 +5,7 @@ import { envId, TEnvelopeId, EnvType } from './envelopeId'
 import { TEnvelopeMeta, envelopeVisibility } from './metaData'
 import { getColorForString } from '6-shared/helpers/color'
 
+// TODO: i18n
 const defaultTagGroup = 'Категории'
 const defaultAccountGroup = 'Переводы'
 const defaultMerchantGroup = 'Долги'

@@ -50,6 +50,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
 
   const { gte, lte } = getGteLte(conditions.amount)
 
+  // TODO: i18n
   return (
     <Drawer
       anchor="right"

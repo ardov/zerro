@@ -41,6 +41,7 @@ export function DebtorList({ className = '' }) {
     {}
   )
 
+  // TODO: i18n
   return (
     <div className={className}>
       {!!iOweList.length && (

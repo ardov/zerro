@@ -26,6 +26,7 @@ export const Explainer = () => {
   const setSnackbar = useSnackbar()
   const { markSeen, isHidden, usedOldFeatures } = useExplainerModel()
 
+  // TODO: i18n
   const convertBudgets = useCallback(() => {
     sendEvent('Migration: convert_budgets')
     const updated = dispatch(convertZmBudgetsToZerro())

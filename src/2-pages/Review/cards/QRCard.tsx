@@ -10,6 +10,7 @@ export function QRCard(props: TCardProps) {
   const value = hasReceipt.length
 
   if (!value) return null
+  // TODO: i18n
   return (
     <Card>
       <ButtonBase

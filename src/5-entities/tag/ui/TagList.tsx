@@ -22,6 +22,7 @@ export const TagList: FC<TagListProps> = props => {
     tags && onChange(tags.map(id => (id === oldId ? newId : id)))
   const addTag = (id: string) => onChange(tags ? [...tags, id] : [id])
 
+  // TODO: i18n
   return (
     <Box {...rest}>
       {tags?.map(id => (

@@ -220,6 +220,7 @@ function useFilteredTransactions(
   return groups
 }
 
+// TODO: i18n
 const EmptyState = () => (
   <Box p={5}>
     <Typography variant="body1" align="center" paragraph>

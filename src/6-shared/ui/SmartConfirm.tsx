@@ -26,6 +26,7 @@ export const useConfirm = (props: ConfirmCommonProps) => {
   return useCallback(() => open(props), [open, props])
 }
 
+// TODO: i18n
 export const SmartConfirm = () => {
   const { displayProps, extraProps } = confirmHooks.useProps()
 

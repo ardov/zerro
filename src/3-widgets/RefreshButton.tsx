@@ -51,6 +51,7 @@ const RefreshButton: FC<{ isMobile?: boolean; sx?: SxProps }> = ({
     fail: <WarningIcon color="error" />,
   }
 
+  // TODO: i18n
   return isMobile ? (
     <BottomNavigationAction
       label="Обновить"

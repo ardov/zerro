@@ -1,6 +1,7 @@
 /** Source https://journal.tinkoff.ru/fns-loves-you/ */
 import { round } from '6-shared/helpers/money'
 
+// TODO: i18n
 const ruIncomeTaxes = [
   {
     type: 'income',

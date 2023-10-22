@@ -7,6 +7,7 @@ export enum Period {
   All = 'All',
 }
 
+// TODO: i18n
 export function getStart(
   period: Period,
   aggregation: GroupBy

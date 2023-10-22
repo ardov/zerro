@@ -26,6 +26,7 @@ type TGroupProps = {
   isReordering: boolean
   children?: React.ReactNode[]
 }
+// TODO: i18n
 export const Group: FC<TGroupProps> = ({
   name,
   groupIdx,

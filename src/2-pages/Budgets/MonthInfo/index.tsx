@@ -41,6 +41,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
 
   const dispatch = useAppDispatch()
 
+  // TODO: i18n
   const copyAllBudgets = useConfirm({
     onOk: () => dispatch(copyPreviousBudget(month)),
     title: 'Скопировать все бюджеты?',

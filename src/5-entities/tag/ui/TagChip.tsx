@@ -4,6 +4,7 @@ import { Chip, ChipProps } from '@mui/material'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { tagModel, TTagPopulated } from '../model'
 
+// TODO: i18n
 export const TagChip: FC<ChipProps & { id: TTagId }> = ({ id, ...rest }) => {
   let tag = tagModel.usePopulatedTags()[id]
   let label = getTagLabel(tag)

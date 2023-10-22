@@ -12,6 +12,7 @@ import { getCurrencySymbol } from '6-shared/helpers/money'
 import { useFloatingInput } from '6-shared/ui/FloatingInput'
 import { useAppDispatch } from 'store/index'
 
+// TODO: i18n
 export const NameCell: FC<{
   envelope: TEnvelope
   isChild?: boolean

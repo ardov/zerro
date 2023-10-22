@@ -21,6 +21,7 @@ export function makeTag(raw: TagDraft): TTag {
   }
 }
 
+// TODO: i18n
 export const nullTag = makeTag({
   title: 'Без категории',
   user: 0,

@@ -22,6 +22,7 @@ export const makeGoal = (goalDraft?: TGoal | null): TGoal | null => {
   }
 }
 
+// TODO: i18n
 export const goalToWords = (
   { type, amount, end }: TGoal,
   currency?: TFxCode

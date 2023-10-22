@@ -85,6 +85,7 @@ export default function NavigationDrawer(props: DrawerProps) {
   )
 }
 
+// TODO: i18n
 function Links() {
   return (
     <List>

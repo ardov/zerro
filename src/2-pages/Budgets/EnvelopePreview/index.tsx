@@ -84,6 +84,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   )
 }
 
+// TODO: i18n
 const Header: FC<{
   envelope: TEnvelope
   onClose: () => void
@@ -134,7 +135,6 @@ const Header: FC<{
       <Tooltip title="Закрыть">
         <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
       </Tooltip>
-
       <ColorPicker />
       <EnvelopeEditDialog />
     </Box>

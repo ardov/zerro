@@ -14,6 +14,7 @@ export type TransactionsDrawerProps = Modify<
   initialDate?: TDateDraft
 }
 
+// TODO: i18n
 export const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
   const {
     transactions,

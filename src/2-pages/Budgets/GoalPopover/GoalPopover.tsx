@@ -19,6 +19,7 @@ import { useAppDispatch } from 'store'
 import { goalModel, goalType, TGoal } from '5-entities/goal'
 import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
 
+// TODO: i18n
 const amountLabels = {
   [goalType.MONTHLY]: 'Откладывать каждый месяц',
   [goalType.MONTHLY_SPEND]: 'Нужно на месяц',

@@ -29,6 +29,7 @@ import { cardStyle } from './shared'
 import { useBudgetPopover } from '../BudgetPopover'
 import { useTrDrawer } from '../useTrDrawer'
 
+// TODO: i18n
 function getPrepositionalMonthName(month: TISOMonth | TDateDraft) {
   const monthNames = [
     'январе',
@@ -70,10 +71,10 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
 
   const blockTitle =
     currentMonth === month
-      ? 'Доступно сейчас'
+      ? t('availableTitle_now')
       : month > currentMonth
-      ? `Будет доступно в ${getPrepositionalMonthName(month)}`
-      : `Осталось в конце ${formatDate(month, 'MMMM')}`
+      ? t('availableTitle_future', { month: getPrepositionalMonthName(month) })
+      : t('availableTitle_past', { month: formatDate(month, 'MMMM') })
 
   return (
     <Box

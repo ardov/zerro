@@ -13,6 +13,7 @@ export function NewGroup(props: { visible: boolean }) {
   })
   const canDrop = active?.data?.current?.type === DragTypes.envelope
 
+  // TODO: i18n
   const text = isOver
     ? canDrop
       ? 'Ага, отпускай'

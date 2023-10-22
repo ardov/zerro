@@ -41,6 +41,7 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
   const isSaved = rateData.type === 'saved' && rateData.date === month
   const isPast = toISOMonth(Date.now()) > month
 
+  // TODO: i18n
   return (
     <Box p={2} bgcolor="background.default" borderRadius={1}>
       <Stack gap={1}>

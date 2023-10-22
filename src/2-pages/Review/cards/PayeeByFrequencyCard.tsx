@@ -36,6 +36,7 @@ export function PayeeByFrequencyCard(props: TCardProps) {
   const trLength = transactions.length
 
   if (!outcome) return null
+  // TODO: i18n
   return (
     <Card>
       <Stack spacing={1} alignItems="center" direction="column">

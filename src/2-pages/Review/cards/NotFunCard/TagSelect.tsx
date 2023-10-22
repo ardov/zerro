@@ -19,6 +19,7 @@ type TagSelectProps = {
   label: string
 }
 
+// TODO: i18n
 export function TagSelect(props: TagSelectProps) {
   let { options, onChange, selected, label } = props
   let renderText = (selected: TagSelectProps['selected']) => {

@@ -38,6 +38,7 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
   const colorOutcome = theme.palette.error.main
   const colorAxisText = theme.palette.text.disabled
 
+  // TODO: i18n
   return (
     <Paper>
       <Box p={2} minWidth="100%">

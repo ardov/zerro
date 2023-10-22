@@ -66,6 +66,7 @@ const Actions: FC<ActionsProps> = ({
     onUncheckAll()
   }
 
+  // TODO: i18n
   const handleDelete = useConfirm({
     onOk: () => {
       dispatch(trModel.deleteTransactions(checkedIds))

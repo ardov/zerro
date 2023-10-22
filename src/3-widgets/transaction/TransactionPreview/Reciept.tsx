@@ -18,6 +18,7 @@ export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
 
   const parsed = parseReceipt(value)
 
+  // TODO: i18n
   return (
     <Paper sx={{ p: 2, display: 'flex', ...sx }}>
       <Box display="flex" flexDirection="column">

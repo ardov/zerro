@@ -37,6 +37,7 @@ export default function AccountList({ className = '' }) {
   const savingsActive = savings.filter(a => !a.archive)
   const savingsArchived = savings.filter(a => a.archive)
 
+  // TODO: i18n
   return (
     <div className={className}>
       <List dense>

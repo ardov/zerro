@@ -23,6 +23,7 @@ export function assignNewGroup(id: TEnvelopeId): AppThunk {
   }
 }
 
+// TODO: i18n
 function getNewGroupName(structure: TGroupNode[]) {
   const baseName = 'Новая группа'
   let names = structure

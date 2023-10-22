@@ -128,6 +128,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
     }
   }
 
+  // TODO: i18n
   return (
     <Popover
       open={open}

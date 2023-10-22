@@ -24,6 +24,7 @@ export const useTableMenu = (props: TableMenuProps) => {
   )
 }
 
+// TODO: i18n
 export function TableMenu() {
   const popover = tableMenu.useProps()
   const { onShowAllToggle, onReorderModeToggle, isReordering, isAllShown } =
@@ -45,7 +46,9 @@ export function TableMenu() {
           onReorderModeToggle()
         }}
       >
-        {isReordering ? 'Выйти из режима редактирования' : 'Режим редактирования'}
+        {isReordering
+          ? 'Выйти из режима редактирования'
+          : 'Режим редактирования'}
       </MenuItem>
     </Menu>
   )

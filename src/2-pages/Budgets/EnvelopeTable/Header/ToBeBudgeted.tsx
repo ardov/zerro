@@ -21,6 +21,7 @@ import { useIsSmall } from '../shared/shared'
 type TMsgType = 'error' | 'warning' | 'success'
 
 type ToBeBudgetedProps = ButtonBaseProps
+// TODO: i18n
 export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
   const {
     currency,

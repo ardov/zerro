@@ -45,6 +45,7 @@ export const SmartTransactionListDrawer = () => {
     },
     [trPreview]
   )
+  // TODO: i18n
   return (
     <Drawer
       anchor="right"

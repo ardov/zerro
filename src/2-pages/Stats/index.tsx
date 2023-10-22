@@ -42,6 +42,7 @@ export default function Stats() {
 
   const filterConditions = { account: selected?.id || null }
 
+  // TODO: i18n
   return (
     <>
       <Stack spacing={2} p={3} pb={10}>

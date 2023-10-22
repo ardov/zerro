@@ -27,6 +27,7 @@ const baseStyles = {
   minHeight: '40px',
 }
 
+// TODO: i18n
 export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const { month, ...btnProps } = props
   const dispatch = useAppDispatch()

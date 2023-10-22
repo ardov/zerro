@@ -132,6 +132,7 @@ export function isISODate(date?: any): date is TISODate {
   return regex.test(date) && date.length === 10
 }
 
+// TODO: i18n
 /**
  * Formats date.
  * @link https://date-fns.org/v2.25.0/docs/format doc

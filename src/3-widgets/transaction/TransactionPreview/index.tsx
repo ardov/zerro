@@ -140,7 +140,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
       )
     }
   }
-
+  // TODO: i18n
   return (
     <Box minWidth={320} position="relative">
       <Head

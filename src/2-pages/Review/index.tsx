@@ -28,6 +28,7 @@ export default function Review() {
     toogleTrList(true)
   }
 
+  // TODO: i18n
   return (
     <>
       <Box className="container">

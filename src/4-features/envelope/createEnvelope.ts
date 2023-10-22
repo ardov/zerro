@@ -7,6 +7,7 @@ export const createEnvelope =
   (dispatch, getState) => {
     const newTag = dispatch(
       tagModel.createTag({
+        // TODO: i18n
         title: draft.name || 'Новая категория',
         showOutcome: true,
       })

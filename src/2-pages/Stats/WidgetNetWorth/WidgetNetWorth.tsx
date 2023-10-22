@@ -71,6 +71,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
     fundsSaving: theme.palette.primary.light,
     total: theme.palette.info.main,
   }
+  // TODO: i18n
   const names = {
     lented: 'Мне должны',
     debts: 'Долги',

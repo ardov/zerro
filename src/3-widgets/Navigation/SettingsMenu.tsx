@@ -72,6 +72,7 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
 
 const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
   const [isExpanded, setExpanded] = useState(false)
+  // TODO: i18n
   return (
     <>
       {props.showLinks && <NavItems onClose={props.onClose} />}

@@ -42,7 +42,7 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
     dispatch(applyServerPatch({ ...data, syncStartTime }))
     const changedDomains = getChangedDomains(data)
     dispatch(saveDataLocally(changedDomains))
-    console.log(`✅ Данные обновлены ${formatDate(new Date(), 'HH:mm:ss')}`)
+    console.log(`✅ Data synced ${formatDate(new Date(), 'HH:mm:ss')}`)
   } else {
     console.warn('Syncing failed', response)
     sendEvent(`Error: ${response.error}`)
