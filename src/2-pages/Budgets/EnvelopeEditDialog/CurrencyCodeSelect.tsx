@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { Select, MenuItem, SelectProps, ListItemText } from '@mui/material'
+import { MenuItem, SelectProps, ListItemText } from '@mui/material'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { accountModel } from '5-entities/account'
 import { TFxCode, TInstrument } from '6-shared/types'

@@ -1,9 +1,8 @@
 import React, { FC } from 'react'
 import { Area, ComposedChart, Line, ResponsiveContainer, YAxis } from 'recharts'
 import { Stack, Box, BoxProps } from '@mui/material'
-import { DataLine } from '3-widgets/DataLine'
+import { useTranslation } from 'react-i18next'
 import { formatDate, getMonthLength, toISODate } from '6-shared/helpers/date'
-
 import { useAppTheme } from '6-shared/ui/theme'
 import { prevMonth, toISOMonth } from '6-shared/helpers/date'
 import { TFxAmount, TISODate, TISOMonth } from '6-shared/types'
@@ -12,6 +11,8 @@ import { addFxAmount, round } from '6-shared/helpers/money'
 import { balances } from '5-entities/envBalances'
 import { TEnvelopeId } from '5-entities/envelope'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
+import { DataLine } from '3-widgets/DataLine'
+
 import { useMonth } from '../MonthProvider'
 
 type BurndownWidgetProps = BoxProps & { id: TEnvelopeId }
@@ -20,6 +21,7 @@ export const BurndownWidget: FC<BurndownWidgetProps> = ({
   id,
   ...boxProps
 }) => {
+  const { t } = useTranslation('budgets')
   const [month] = useMonth()
   const envData = balances.useEnvData()
   const { currency } = envData[month][id]
@@ -28,14 +30,12 @@ export const BurndownWidget: FC<BurndownWidgetProps> = ({
     <Box borderRadius={1} bgcolor="background.default" {...boxProps}>
       <Stack spacing={0.5} pt={2} px={2}>
         <DataLine
-          name={`Баланс на ${formatDate(month, 'LLL')}`}
+          name={`${t('balanceFor')} ${formatDate(month, 'LLL')}`}
           // color={activityColor}
           // amount={selectedData?.activity}
           // amount={0}
           currency={currency}
-          tooltip={
-            'Сплошная линия показывает изменение баланса в этом месяце. Пунктирная — в прошлом.'
-          }
+          tooltip={t('balanceChartTooltip')}
         />
       </Stack>
 

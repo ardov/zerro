@@ -9,6 +9,7 @@ import {
   ListItemButton,
   useTheme,
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { Total } from '6-shared/ui/Total'
 import { Amount } from '6-shared/ui/Amount'
 import { convertFx } from '6-shared/helpers/money'
@@ -49,6 +50,7 @@ function getPrepositionalMonthName(month: TISOMonth | TDateDraft) {
 
 export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
   const { month, id } = props
+  const { t } = useTranslation('budgets')
   const theme = useTheme()
   const showTransactions = useTrDrawer()
   const openBudgetPopover = useBudgetPopover()
@@ -119,7 +121,7 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
           onClick={e => openBudgetPopover(id, e.currentTarget)}
         >
           <OneLiner
-            left={`Бюджет`}
+            left={t('budget', { ns: 'common' })}
             right={
               <Amount
                 value={totalBudgeted}
@@ -142,10 +144,10 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
           <OneLiner
             left={
               <span>
-                <span>{`Операции `}</span>
+                <span>{t('transactions', { ns: 'common' })}</span>
                 {Boolean(envMetrics.totalTransactions.length) && (
                   <span style={{ opacity: 0.5 }}>
-                    {envMetrics.totalTransactions.length}
+                    {' ' + envMetrics.totalTransactions.length}
                   </span>
                 )}
               </span>
