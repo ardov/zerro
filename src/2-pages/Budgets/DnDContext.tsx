@@ -1,4 +1,6 @@
+import { createPortal } from 'react-dom'
 import React, { FC, ReactNode, useState } from 'react'
+import { useCallback } from 'react'
 import {
   useDndMonitor,
   useSensor,
@@ -10,14 +12,13 @@ import {
   TouchSensor,
   KeyboardSensor,
 } from '@dnd-kit/core'
-import { useCallback } from 'react'
-import { MoveMoneyModal } from '4-features/moveMoney'
-import { useToggle } from '6-shared/hooks/useToggle'
+import { useTranslation } from 'react-i18next'
 import { Box, SxProps } from '@mui/system'
 import { Typography } from '@mui/material'
-import { createPortal } from 'react-dom'
-import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
+import { useToggle } from '6-shared/hooks/useToggle'
 import { useAppDispatch } from 'store/index'
+import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
+import { MoveMoneyModal } from '4-features/moveMoney'
 import { assignNewGroup } from '4-features/envelope/assignNewGroup'
 import { useMonth } from './MonthProvider'
 
@@ -115,6 +116,7 @@ const props: SxProps = {
 }
 
 const DragObj = () => {
+  const { t } = useTranslation('common')
   const [activeType, setActiveType] = useState<DragTypes>(DragTypes.amount)
   const [activeId, setActiveId] = useState<TEnvelopeId>()
   const envelopes = envelopeModel.useEnvelopes()
@@ -128,14 +130,13 @@ const DragObj = () => {
     },
   })
 
-  // TODO: i18n
   const content =
     activeType === DragTypes.amount ? (
-      <Box sx={props}>Денюшки</Box>
+      <Box sx={props}>{t('moneyDnd')}</Box>
     ) : activeType === DragTypes.envelope ? (
       <Box sx={props}>
         <Typography noWrap>
-          {activeId ? envelopes[activeId].name : 'Категория'}
+          {activeId ? envelopes[activeId].name : t('category')}
         </Typography>
       </Box>
     ) : null
