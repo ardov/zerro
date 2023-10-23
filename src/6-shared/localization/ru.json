@@ -9,6 +9,7 @@
     "outcome": "Расход",
     "debt": "Долг",
     "budget": "Бюджет",
+    "available": "Доступно",
     "transactions": "Операции",
     "comment": "Комментарий",
     "currency": "Валюта",
@@ -116,7 +117,16 @@
     },
     "moveUp": "Поднять выше",
     "moveDown": "Опустить ниже",
-    "createEnvelope": "Создать категорию"
+    "createEnvelope": "Создать категорию",
+    "categories": "Категории",
+    "categories_all": "Категории (все)",
+    "parentOverspend": "Перерасход в родительской категории.\nУвеличьте бюджет на {{amount}}."
+  },
+  "envelopeTableMenu": {
+    "showAllEnvelopes": "Показать все категории",
+    "showPrtiallyEnvelopes": "Скрыть часть категорий",
+    "goToEditMode": "Режим редактирования",
+    "leaveEditMode": "Выйти из режима редактирования"
   },
   "accountContextMenu": {
     "moveInBalance": "Включить в баланс",

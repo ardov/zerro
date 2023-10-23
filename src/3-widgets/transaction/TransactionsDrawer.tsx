@@ -4,6 +4,7 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { Modify, TDateDraft } from '6-shared/types'
 import { TransactionList, TTransactionListProps } from './TransactionList'
+import { useTranslation } from 'react-i18next'
 
 export type TransactionsDrawerProps = Modify<
   DrawerProps,
@@ -14,7 +15,6 @@ export type TransactionsDrawerProps = Modify<
   initialDate?: TDateDraft
 }
 
-// TODO: i18n
 export const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
   const {
     transactions,
@@ -25,6 +25,7 @@ export const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
     open,
     ...rest
   } = props
+  const { t } = useTranslation('common')
   return (
     <Drawer
       anchor="right"
@@ -37,11 +38,11 @@ export const TransactionsDrawer: FC<TransactionsDrawerProps> = props => {
         <Box py={1} px={3} display="flex" alignItems="center">
           <Box flexGrow={1}>
             <Typography variant="h6" noWrap>
-              {title || 'Операции'}
+              {title || t('transactions')}
             </Typography>
           </Box>
 
-          <Tooltip title="Закрыть">
+          <Tooltip title={t('close')}>
             <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
           </Tooltip>
         </Box>
