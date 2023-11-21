@@ -7,6 +7,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { TFxCode, TISOMonth } from '6-shared/types'
 import { keys } from '6-shared/helpers/keys'
 import { useDebouncedCallback } from '6-shared/hooks/useDebouncedCallback'
@@ -21,6 +22,7 @@ import { balances } from '5-entities/envBalances'
 export const FxRates: FC<{ month: TISOMonth }> = props => {
   const dispatch = useAppDispatch()
   const { month } = props
+  const { t } = useTranslation('fxRates')
   const [displCurrency] = displayCurrency.useDisplayCurrency()
   const funds = balances.useTotals()[month].fundsEnd
   const rateData = balances.useRates()[month]
@@ -40,8 +42,8 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
 
   const isSaved = rateData.type === 'saved' && rateData.date === month
   const isPast = toISOMonth(Date.now()) > month
+  const isCurrentRates = rateData.type === 'current'
 
-  // TODO: i18n
   return (
     <Box p={2} bgcolor="background.default" borderRadius={1}>
       <Stack gap={1}>
@@ -57,17 +59,18 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
           />
         ))}
         <Typography variant="caption" color="textSecondary" align="center">
-          Курсы на {formatDate(rateData.date, 'LLLL yyyy')}{' '}
-          {rateData.type === 'current' && ' (текущие)'}
+          {t(isCurrentRates ? 'title_current' : 'title', {
+            date: formatDate(rateData.date, 'LLLL yyyy'),
+          })}
         </Typography>
         {isSaved && (
           <Button fullWidth onClick={() => dispatch(fxRateModel.reset(month))}>
-            Сбросить
+            {t('reset')}
           </Button>
         )}
         {isPast && !isSaved && (
           <Button fullWidth onClick={() => dispatch(fxRateModel.load(month))}>
-            Загрузить курсы
+            {t('download')}
           </Button>
         )}
       </Stack>

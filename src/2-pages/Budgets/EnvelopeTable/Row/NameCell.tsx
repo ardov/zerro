@@ -1,18 +1,19 @@
 import React, { FC, memo, ReactNode, useCallback, useRef } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { Typography, Box, IconButton, Collapse, Chip } from '@mui/material'
+import { useTranslation } from 'react-i18next'
+
 import { EmojiIcon } from '6-shared/ui/EmojiIcon'
 import { DragIndicatorIcon } from '6-shared/ui/Icons'
 import { TFxCode } from '6-shared/types'
-import { DragTypes } from '../../DnDContext'
-import { envelopeModel, TEnvelope, TEnvelopeId } from '5-entities/envelope'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { getCurrencySymbol } from '6-shared/helpers/money'
 import { useFloatingInput } from '6-shared/ui/FloatingInput'
 import { useAppDispatch } from 'store/index'
+import { envelopeModel, TEnvelope, TEnvelopeId } from '5-entities/envelope'
+import { displayCurrency } from '5-entities/currency/displayCurrency'
+import { DragTypes } from '../../DnDContext'
 
-// TODO: i18n
 export const NameCell: FC<{
   envelope: TEnvelope
   isChild?: boolean
@@ -25,6 +26,7 @@ export const NameCell: FC<{
     props.envelope
   const { isReordering, isDefaultVisible, isChild, isSelf, onClick } = props
   const [displCurrency] = displayCurrency.useDisplayCurrency()
+  const { t } = useTranslation('budgets')
 
   const dispatch = useAppDispatch()
   const ref = useRef<any>()
@@ -86,8 +88,7 @@ export const NameCell: FC<{
             }
           }}
         >
-          {name}
-          {isSelf ? ' (основная)' : ''}
+          {isSelf ? `${name} ${t('isSelf')}` : name}
         </Typography>
       </Box>
 
@@ -140,11 +141,10 @@ const EnvDraggable: FC<{ id: TEnvelopeId; children: ReactNode }> = props => {
 }
 
 const CurrencyTag: FC<{ currency?: TFxCode }> = ({ currency }) => {
+  const { t } = useTranslation('budgets')
   if (!currency) return null
   return (
-    <Tooltip
-      title={`Бюджет этой категории задаётся в ${currency}. Он будет пересчитываться автоматически по текущему курсу.`}
-    >
+    <Tooltip title={t('envelopeCurrencyTooltip', { currency })}>
       <Chip label={getCurrencySymbol(currency)} size="small" />
     </Tooltip>
   )

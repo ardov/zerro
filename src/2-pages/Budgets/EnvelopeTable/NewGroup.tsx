@@ -2,8 +2,10 @@ import React, { useState } from 'react'
 import { Box, Collapse } from '@mui/material'
 import { useDroppable } from '@dnd-kit/core'
 import { DragTypes } from '../DnDContext'
+import { useTranslation } from 'react-i18next'
 
 export function NewGroup(props: { visible: boolean }) {
+  const { t } = useTranslation('creatingNewGroup')
   const { visible } = props
   const [clicked, setClicked] = useState(false)
   const { setNodeRef, active, isOver } = useDroppable({
@@ -13,14 +15,13 @@ export function NewGroup(props: { visible: boolean }) {
   })
   const canDrop = active?.data?.current?.type === DragTypes.envelope
 
-  // TODO: i18n
   const text = isOver
     ? canDrop
-      ? 'Ага, отпускай'
-      : 'Надо перетащить именно категорию'
+      ? t('okDropIt')
+      : t('categoryNeeded')
     : clicked
-    ? 'Кидай сюда категорию'
-    : 'Новая группа'
+    ? t('dropCategoryHere')
+    : t('newGroup')
   return (
     <Collapse in={visible} unmountOnExit>
       <Box ref={setNodeRef} py={1} px={2}>

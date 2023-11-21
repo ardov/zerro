@@ -16,6 +16,7 @@ import {
   TMsTime,
   TUnixTime,
 } from '6-shared/types'
+import { t } from 'i18next'
 
 export function unixToMs(seconds: TUnixTime): TMsTime {
   return seconds * 1000
@@ -132,7 +133,6 @@ export function isISODate(date?: any): date is TISODate {
   return regex.test(date) && date.length === 10
 }
 
-// TODO: i18n
 /**
  * Formats date.
  * @link https://date-fns.org/v2.25.0/docs/format doc
@@ -140,11 +140,13 @@ export function isISODate(date?: any): date is TISODate {
  * @param template
  */
 export function formatDate(date: TDateDraft, template?: string): string {
+  // TODO: Date i18n
   const opts = { locale: ru }
   const d = parseDate(date)
   if (template) return format(d, template, opts)
-  if (isToday(d)) return format(d, 'Сегодня, d MMMM, EEEEEE', opts)
-  if (isYesterday(d)) return format(d, 'Вчера, d MMMM, EEEEEE', opts)
+  if (isToday(d)) return format(d, `${t('common:today')}, d MMMM, EEEEEE`, opts)
+  if (isYesterday(d))
+    return format(d, `${t('common:yesterday')}, d MMMM, EEEEEE`, opts)
   if (isThisYear(d)) return format(d, 'd MMMM, EEEEEE', opts)
   return format(d, 'd MMMM yyyy, EEEEEE', opts)
 }

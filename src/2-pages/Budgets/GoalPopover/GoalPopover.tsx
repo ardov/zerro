@@ -9,23 +9,16 @@ import {
   OutlinedTextFieldProps,
   PopoverProps,
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { AmountInput } from '6-shared/ui/AmountInput'
 import { CloseIcon } from '6-shared/ui/Icons'
 import MonthSelectPopover from '6-shared/ui/MonthSelectPopover'
 import { toISODate, formatDate } from '6-shared/helpers/date'
 import { Modify, TDateDraft, TISOMonth } from '6-shared/types'
-import { useAppDispatch } from 'store'
 
+import { useAppDispatch } from 'store'
 import { goalModel, goalType, TGoal } from '5-entities/goal'
 import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
-
-// TODO: i18n
-const amountLabels = {
-  [goalType.MONTHLY]: 'Откладывать каждый месяц',
-  [goalType.MONTHLY_SPEND]: 'Нужно на месяц',
-  [goalType.TARGET_BALANCE]: 'Хочу накопить',
-  [goalType.INCOME_PERCENT]: 'Процент от дохода',
-}
 
 export type TGoalPopoverProps = Modify<
   PopoverProps,
@@ -37,6 +30,7 @@ export type TGoalPopoverProps = Modify<
 
 export const GoalPopover: FC<TGoalPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
+  const { t } = useTranslation('goals')
   const dispatch = useAppDispatch()
   const envelope = envelopeModel.useEnvelopes()[id]
   const goalInfo = goalModel.useGoals()[month][id] || {}
@@ -82,6 +76,13 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
 
   const showDateBlock = type === goalType.TARGET_BALANCE
 
+  const amountLabels = {
+    [goalType.MONTHLY]: t('inputLabels.monthly'),
+    [goalType.MONTHLY_SPEND]: t('inputLabels.monthlySpend'),
+    [goalType.TARGET_BALANCE]: t('inputLabels.targetBalance'),
+    [goalType.INCOME_PERCENT]: t('inputLabels.incomePercent'),
+  }
+
   return (
     <>
       <Popover disableRestoreFocus onClose={onClose} {...rest}>
@@ -94,11 +95,15 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
             label="Тип цели"
             fullWidth
           >
-            <MenuItem value={goalType.MONTHLY}>Регулярные сбережения</MenuItem>
-            <MenuItem value={goalType.MONTHLY_SPEND}>Сумма на месяц</MenuItem>
-            <MenuItem value={goalType.TARGET_BALANCE}>Накопить сумму</MenuItem>
+            <MenuItem value={goalType.MONTHLY}>{t('names.monthly')}</MenuItem>
+            <MenuItem value={goalType.MONTHLY_SPEND}>
+              {t('names.monthlySpend')}
+            </MenuItem>
+            <MenuItem value={goalType.TARGET_BALANCE}>
+              {t('names.targetBalance')}
+            </MenuItem>
             <MenuItem value={goalType.INCOME_PERCENT}>
-              Процент от дохода
+              {t('names.incomePercent')}
             </MenuItem>
           </TextField>
 
@@ -127,7 +132,7 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
               >
                 {endDate
                   ? formatDate(endDate, 'LLLL yyyy').toUpperCase()
-                  : 'К определённой дате'}
+                  : t('tillDate')}
               </Button>
               {endDate && (
                 <IconButton onClick={removeDate} children={<CloseIcon />} />
@@ -136,11 +141,11 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
           )}
 
           <Button onClick={save} variant="contained" color="primary">
-            Сохранить цель
+            {t('save')}
           </Button>
           {!!goal?.amount && (
             <Button onClick={removeGoal} variant="outlined" color="error">
-              Удалить цель
+              {t('remove')}
             </Button>
           )}
         </Box>

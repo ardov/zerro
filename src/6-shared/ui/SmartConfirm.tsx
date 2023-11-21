@@ -6,6 +6,7 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import { SmartDialog } from './SmartDialog'
 import { registerPopover } from '6-shared/historyPopovers'
+import { useTranslation } from 'react-i18next'
 
 type ConfirmCommonProps = {
   onOk: () => void
@@ -26,16 +27,16 @@ export const useConfirm = (props: ConfirmCommonProps) => {
   return useCallback(() => open(props), [open, props])
 }
 
-// TODO: i18n
 export const SmartConfirm = () => {
+  const { t } = useTranslation('confirmDefaults')
   const { displayProps, extraProps } = confirmHooks.useProps()
 
   const {
     onOk,
-    title = 'Вы уверены?',
+    title = t('title'),
     description,
-    cancelText = 'Отменить',
-    okText = 'OK',
+    cancelText = t('cancelText'),
+    okText = t('okText'),
     okColor = 'primary',
     okVariant = 'contained',
   } = extraProps
