@@ -22,6 +22,7 @@ export type TEnvelopeMeta = {
   currency?: TFxCode
   keepIncome?: boolean
   carryNegatives?: boolean
+  expendByDefault?: boolean
 }
 
 const envelopeMetaStore = makeSimpleHiddenStore<ById<TEnvelopeMeta>>(

@@ -113,6 +113,7 @@ function getChanges(draft: TEnvelopeDraft, envelopes: ById<TEnvelope>) {
       case 'currency':
       case 'keepIncome':
       case 'carryNegatives':
+      case 'expendByDefault':
         updateMeta(key, draft[key])
         break
 

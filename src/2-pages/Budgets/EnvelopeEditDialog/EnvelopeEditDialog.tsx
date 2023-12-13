@@ -69,6 +69,7 @@ export const EnvelopeEditDialog: FC = () => {
       group: envelope?.group || '',
       comment: envelope?.comment || '',
       currency: envelope?.currency || defaultCurrency,
+      expendByDefault: envelope?.expendByDefault || true,
     },
     validate: values => {
       if (!values.originalName.trim()) {
@@ -174,6 +175,13 @@ export const EnvelopeEditDialog: FC = () => {
               name="keepIncome"
               label={t('keepIncomeLabel')}
               checked={values.keepIncome}
+              onChange={handleChange}
+              control={<Checkbox />}
+            />
+            <FormControlLabel
+              name="expendByDefault"
+              label={t('expendByDefaultLabel')}
+              checked={values.expendByDefault}
               onChange={handleChange}
               control={<Checkbox />}
             />
