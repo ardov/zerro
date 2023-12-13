@@ -33,7 +33,7 @@ export type TEnvelope = {
   currency: TFxCode
   keepIncome: boolean
   carryNegatives: boolean
-  expendByDefault: boolean
+  expandByDefault: boolean
 }
 
 export const makeEnvelope = {
@@ -67,7 +67,7 @@ type TFuncs = {
   currency: TMaker<TEnvelope['currency']>
   keepIncome: TMaker<TEnvelope['keepIncome']>
   carryNegatives: TMaker<TEnvelope['carryNegatives']>
-  expendByDefault: TMaker<TEnvelope['expendByDefault']>
+  expandByDefault: TMaker<TEnvelope['expandByDefault']>
 }
 
 const funcs: TFuncs = {
@@ -165,10 +165,10 @@ const funcs: TFuncs = {
     account: (el, fx, meta) => meta?.carryNegatives || false,
     debtor: (el, fx, meta) => meta?.carryNegatives || false,
   },
-  expendByDefault: {
-    tag: (el, fx, meta) => meta?.expendByDefault || false,
-    account: (el, fx, meta) => meta?.expendByDefault || false,
-    debtor: (el, fx, meta) => meta?.expendByDefault || false,
+  expandByDefault: {
+    tag: (el, fx, meta) => meta?.expandByDefault || false,
+    account: (el, fx, meta) => meta?.expandByDefault || false,
+    debtor: (el, fx, meta) => meta?.expandByDefault || false,
   },
 }
 
@@ -198,7 +198,7 @@ function makeEnvelopeFromTag(
     currency: funcs.currency.tag(el, userCurrency, meta),
     keepIncome: funcs.keepIncome.tag(el, userCurrency, meta),
     carryNegatives: funcs.carryNegatives.tag(el, userCurrency, meta),
-    expendByDefault: funcs.expendByDefault.tag(el, userCurrency, meta),
+    expandByDefault: funcs.expandByDefault.tag(el, userCurrency, meta),
   }
 }
 function makeEnvelopeFromAccount(
@@ -227,7 +227,7 @@ function makeEnvelopeFromAccount(
     currency: funcs.currency.account(el, userCurrency, meta),
     keepIncome: funcs.keepIncome.account(el, userCurrency, meta),
     carryNegatives: funcs.carryNegatives.account(el, userCurrency, meta),
-    expendByDefault: funcs.expendByDefault.account(el, userCurrency, meta),
+    expandByDefault: funcs.expandByDefault.account(el, userCurrency, meta),
   }
 }
 function makeEnvelopeFromDebtor(
@@ -256,7 +256,7 @@ function makeEnvelopeFromDebtor(
     currency: funcs.currency.debtor(el, userCurrency, meta),
     keepIncome: funcs.keepIncome.debtor(el, userCurrency, meta),
     carryNegatives: funcs.carryNegatives.debtor(el, userCurrency, meta),
-    expendByDefault: funcs.expendByDefault.debtor(el, userCurrency, meta),
+    expandByDefault: funcs.expandByDefault.debtor(el, userCurrency, meta),
   }
 }
 

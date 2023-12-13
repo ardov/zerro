@@ -72,7 +72,7 @@ export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
                 hasVisibleChildren
 
           const isDefaultExpanded =
-            (e.expendByDefault === null || e.expendByDefault) &&
+            !(e.expandByDefault === false) &&
             hasChildren &&
             (!isZero(metrics[e.id].childrenLeftover) ||
               !isZero(metrics[e.id].childrenBudgeted) ||
