@@ -1,4 +1,5 @@
 import React, { FC } from 'react'
+import { useTranslation } from 'react-i18next'
 import { IconButton, IconButtonProps } from '@mui/material'
 import { SettingsIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
@@ -9,12 +10,12 @@ interface MenuButtonProps extends IconButtonProps {
   showLinks?: boolean
 }
 
-// TODO: i18n
 export const MenuButton: FC<MenuButtonProps> = ({ showLinks, ...rest }) => {
+  const { t } = useTranslation('navigation')
   const openSettings = useSettingsMenu()
   return (
     <>
-      <Tooltip title="Настройки">
+      <Tooltip title={t('settings')}>
         <IconButton onClick={openSettings} {...rest}>
           <SettingsIcon />
         </IconButton>

@@ -1,14 +1,15 @@
 import React, { FC } from 'react'
+import { useTranslation } from 'react-i18next'
 import Paper from '@mui/material/Paper'
 import InputBase from '@mui/material/InputBase'
+import { SxProps } from '@mui/system'
+import { Theme } from '@mui/material/styles'
 import IconButton from '@mui/material/IconButton'
 import { FilterListIcon, CloseIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
-import FilterDrawer from './FilterDrawer'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { TrCondition } from '5-entities/transaction'
-import { SxProps } from '@mui/system'
-import { Theme } from '@mui/material/styles'
+import FilterDrawer from './FilterDrawer'
 
 type FilterProps = {
   setCondition: (c: TrCondition) => void
@@ -22,10 +23,10 @@ const Filter: FC<FilterProps> = ({
   clearFilter,
   sx,
 }) => {
+  const { t } = useTranslation('filterDrawer')
   const [isDrawerVisible, toggleDrawer] = useToggle(false)
   const isFiltered = Object.values(conditions).filter(Boolean).length > 0
 
-  // TODO: i18n
   return (
     <Paper
       elevation={10}
@@ -33,13 +34,13 @@ const Filter: FC<FilterProps> = ({
     >
       <InputBase
         value={conditions.search || ''}
-        placeholder="Поиск по комментариям"
+        placeholder={t('searchComments')}
         onChange={e => setCondition({ search: e.target.value })}
         sx={{ flexGrow: 1 }}
       />
 
       {!!conditions.search && (
-        <Tooltip title="Очистить поле">
+        <Tooltip title={t('clearField')}>
           <IconButton
             onClick={() => setCondition({ search: '' })}
             children={<CloseIcon />}
@@ -47,7 +48,7 @@ const Filter: FC<FilterProps> = ({
         </Tooltip>
       )}
 
-      <Tooltip title="Расширенные фильтры">
+      <Tooltip title={t('extendedFilters')}>
         <IconButton
           edge="end"
           color={isFiltered ? 'secondary' : 'primary'}

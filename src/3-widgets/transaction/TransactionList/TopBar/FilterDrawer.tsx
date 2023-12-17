@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { TagSelect } from '5-entities/tag/ui/TagSelect'
+import { useTranslation } from 'react-i18next'
 import {
   Drawer,
   Box,
@@ -17,9 +17,10 @@ import {
 } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon } from '6-shared/ui/Icons'
+import { SmartSelect } from '6-shared/ui/SmartSelect'
+import { TagSelect } from '5-entities/tag/ui/TagSelect'
 import { TrCondition } from '5-entities/transaction'
 import { TrType } from '5-entities/transaction'
-import { SmartSelect } from '6-shared/ui/SmartSelect'
 
 const drawerWidth = { xs: '100vw', sm: 360 }
 const contentSx = {
@@ -43,6 +44,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
   open,
   ...rest
 }) => {
+  const { t } = useTranslation('filterDrawer')
   const handleTypeChange = (e: SelectChangeEvent<string>) => {
     const value = e.target.value as TrType
     setCondition({ type: value || null })
@@ -50,7 +52,6 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
 
   const { gte, lte } = getGteLte(conditions.amount)
 
-  // TODO: i18n
   return (
     <Drawer
       anchor="right"
@@ -62,18 +63,18 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
       <Box py={1} px={2} display="flex" alignItems="center">
         <Box flexGrow={1}>
           <Typography variant="h6" noWrap>
-            Фильтр
+            {t('filter')}
           </Typography>
         </Box>
 
-        <Tooltip title="Закрыть">
+        <Tooltip title={t('close')}>
           <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
         </Tooltip>
       </Box>
       <Box px={2} flex="1" display="flex" flexDirection="column">
         <TextField
           id="search-input"
-          label="Поиск по комментариям"
+          label={t('searchComments')}
           value={conditions.search || ''}
           onChange={e => setCondition({ search: e.target.value })}
           variant="outlined"
@@ -85,7 +86,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
             <Grid item xs={6}>
               <TextField
                 variant="outlined"
-                label="Сумма от"
+                label={t('amountFrom')}
                 value={gte}
                 onChange={e =>
                   setCondition({ amount: { lte, gte: +e.target.value } })
@@ -95,7 +96,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
             <Grid item xs={6}>
               <TextField
                 variant="outlined"
-                label="Сумма до"
+                label={t('amountTo')}
                 value={lte}
                 onChange={e =>
                   setCondition({ amount: { gte, lte: +e.target.value } })
@@ -145,19 +146,25 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
         </Box> */}
         <Box mt={3}>
           <FormControl fullWidth>
-            <InputLabel>Тип транзакции</InputLabel>
+            <InputLabel>{t('transactionType')}</InputLabel>
             <SmartSelect
               elKey="transactionType"
               variant="outlined"
               value={typeof conditions.type === 'string' ? conditions.type : ''}
               onChange={handleTypeChange}
-              label="Тип транзакции"
+              label={t('transactionType')}
               fullWidth
             >
-              <MenuItem value="">Все</MenuItem>
-              <MenuItem value={TrType.Income}>Доход</MenuItem>
-              <MenuItem value={TrType.Outcome}>Расход</MenuItem>
-              <MenuItem value={TrType.Transfer}>Перевод</MenuItem>
+              <MenuItem value="">{t('transactionType_all')}</MenuItem>
+              <MenuItem value={TrType.Income}>
+                {t('transactionType_income')}
+              </MenuItem>
+              <MenuItem value={TrType.Outcome}>
+                {t('transactionType_outcome')}
+              </MenuItem>
+              <MenuItem value={TrType.Transfer}>
+                {t('transactionType_transfer')}
+              </MenuItem>
             </SmartSelect>
           </FormControl>
         </Box>
@@ -175,22 +182,23 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
 
         <Box mt={3}>
           <FormControlLabel
+            label={t('onlyNew')}
             control={
               <Switch
+                color="primary"
                 checked={conditions.isViewed === false}
                 onChange={e => {
                   if (e.target.checked) setCondition({ isViewed: false })
                   else setCondition({ isViewed: undefined })
                 }}
-                color="primary"
               />
             }
-            label="Только новые"
           />
         </Box>
 
         <Box mt={3}>
           <FormControlLabel
+            label={t('showDeleted')}
             control={
               <Switch
                 checked={Boolean(conditions.showDeleted)}
@@ -200,7 +208,6 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
                 color="primary"
               />
             }
-            label="Показывать удалённые"
           />
         </Box>
         <Box mt="auto" mb={3}>
@@ -210,7 +217,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
             fullWidth
             color="primary"
           >
-            Очистить фильтры
+            {t('clearFilter')}
           </Button>
         </Box>
       </Box>

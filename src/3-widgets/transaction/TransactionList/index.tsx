@@ -9,11 +9,13 @@ import type {
 import type { TrCondition, TrConditions } from '5-entities/transaction'
 
 import React, { useMemo, useState, useCallback, useEffect, FC } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Typography, Theme } from '@mui/material'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { useDebounce } from '6-shared/hooks/useDebounce'
 import { accountModel } from '5-entities/account'
 import { trModel } from '5-entities/transaction'
+import { getEventPosition } from '3-widgets/global/shared/helpers'
 
 import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
@@ -21,7 +23,6 @@ import Actions from './TopBar/Actions'
 import { Transaction } from './Transaction'
 import { useTrContextMenu } from '../../global/TrContextMenu'
 import { useAppDispatch } from 'store'
-import { getEventPosition } from '3-widgets/global/shared/helpers'
 
 export type TTransactionListProps = {
   onTrOpen?: (id: TTransactionId) => void
@@ -220,13 +221,13 @@ function useFilteredTransactions(
   return groups
 }
 
-// TODO: i18n
-const EmptyState = () => (
-  <Box p={5}>
-    <Typography variant="body1" align="center" paragraph>
-      Таких операций нет.
-      <br />
-      Возможно, дело в фильтрах.
-    </Typography>
-  </Box>
-)
+const EmptyState = () => {
+  const { t } = useTranslation('transactions')
+  return (
+    <Box p={5}>
+      <Typography variant="body1" align="center" paragraph>
+        {t('emptyState')}
+      </Typography>
+    </Box>
+  )
+}

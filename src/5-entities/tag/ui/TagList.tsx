@@ -5,6 +5,7 @@ import { AddIcon } from '6-shared/ui/Icons'
 import { Modify } from '6-shared/types'
 import { TagSelect2 } from './TagSelect2'
 import { TagChip } from './TagChip'
+import { useTranslation } from 'react-i18next'
 
 type TagListProps = Modify<
   BoxProps,
@@ -15,6 +16,7 @@ type TagListProps = Modify<
   }
 >
 export const TagList: FC<TagListProps> = props => {
+  const { t } = useTranslation()
   const { tags = null, onChange, tagType, ...rest } = props
   const removeTag = (removeId: string) =>
     tags && onChange(tags.filter(id => id !== removeId))
@@ -22,7 +24,6 @@ export const TagList: FC<TagListProps> = props => {
     tags && onChange(tags.map(id => (id === oldId ? newId : id)))
   const addTag = (id: string) => onChange(tags ? [...tags, id] : [id])
 
-  // TODO: i18n
   return (
     <Box {...rest}>
       {tags?.map(id => (
@@ -44,7 +45,7 @@ export const TagList: FC<TagListProps> = props => {
         tagType={tagType}
         trigger={
           <Box my={0.5} display="inline-block">
-            <Tooltip title="Добавить категорию">
+            <Tooltip title={t('addCategory')}>
               <IconButton
                 edge="end"
                 size="small"
