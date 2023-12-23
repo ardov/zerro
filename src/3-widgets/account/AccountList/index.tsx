@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Collapse, List, ListItemButton } from '@mui/material'
-import pluralize from '6-shared/helpers/pluralize'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { TFxAmount } from '6-shared/types'
@@ -15,6 +15,7 @@ import {
 import { Account, Subheader } from './components'
 
 export default function AccountList({ className = '' }) {
+  const { t } = useTranslation('accounts')
   const toDisplay = displayCurrency.useToDisplay(toISOMonth(new Date()))
   const inBudget = accountModel
     .useInBudgetAccounts()
@@ -37,14 +38,13 @@ export default function AccountList({ className = '' }) {
   const savingsActive = savings.filter(a => !a.archive)
   const savingsArchived = savings.filter(a => a.archive)
 
-  // TODO: i18n
   return (
     <div className={className}>
       <List dense>
         <Subheader
           name={
-            <Tooltip title="Деньги на этих счетах учитываются в бюджете">
-              <span>В балансе</span>
+            <Tooltip title={t('inBalanceDescription')}>
+              <span>{t('inBalance')}</span>
             </Tooltip>
           }
           amount={getTotal(inBudget)}
@@ -58,8 +58,8 @@ export default function AccountList({ className = '' }) {
       <List dense>
         <Subheader
           name={
-            <Tooltip title="Эти счета не учитываются в бюджете, переводы на них отражаются как расходы. Сюда удобно выносить инвестиционные счета, ипотеку, кредиты и долгосрочные накопления.">
-              <span>Прочее</span>
+            <Tooltip title={t('otherDescription')}>
+              <span>{t('other')}</span>
             </Tooltip>
           }
           amount={getTotal(savings)}
@@ -74,6 +74,7 @@ export default function AccountList({ className = '' }) {
 }
 
 const ArchivedList: FC<{ accs: TAccountPopulated[] }> = props => {
+  const { t } = useTranslation('accounts')
   const { accs } = props
   const month = toISOMonth(new Date())
   const toDisplay = displayCurrency.useToDisplay(month)
@@ -99,11 +100,7 @@ const ArchivedList: FC<{ accs: TAccountPopulated[] }> = props => {
           <span>Скрыть архивные</span>
         ) : (
           <span>
-            {`+${accs.length} ${pluralize(accs.length, [
-              'архивный счёт',
-              'архивных счёта',
-              'архивных счётов',
-            ])} `}
+            {t('archivedAccounts', { count: accs.length })}{' '}
             {hasArchivedMoney && (
               <DisplayAmount
                 month={month}

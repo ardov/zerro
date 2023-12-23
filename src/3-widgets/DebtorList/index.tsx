@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { List } from '@mui/material'
 import { Debtor, Subheader } from './components'
 import { addFxAmount, isZero } from '6-shared/helpers/money'
@@ -13,6 +14,7 @@ type TDebtorInfo = {
 }
 
 export function DebtorList({ className = '' }) {
+  const { t } = useTranslation('common')
   const debtors = debtorModel.useDebtors()
   const list = Object.values(debtors)
     .filter(debtor => !isZero(debtor.balance))
@@ -41,12 +43,11 @@ export function DebtorList({ className = '' }) {
     {}
   )
 
-  // TODO: i18n
   return (
     <div className={className}>
       {!!iOweList.length && (
         <List dense>
-          <Subheader name="Я должен" amount={totalOwe} />
+          <Subheader name={t('iOwe')} amount={totalOwe} />
           {iOweList.map(d => (
             <Debtor
               key={d.name + d.currency}
@@ -60,7 +61,7 @@ export function DebtorList({ className = '' }) {
 
       {!!iLentList.length && (
         <List dense>
-          <Subheader name="Мне должны" amount={totalLent} />
+          <Subheader name={t('iAmOwed')} amount={totalLent} />
           {iLentList.map(d => (
             <Debtor
               key={d.name + d.currency}
