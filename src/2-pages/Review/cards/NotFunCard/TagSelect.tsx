@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Checkbox,
   FormControl,
@@ -8,7 +9,6 @@ import {
   OutlinedInput,
   Select,
 } from '@mui/material'
-import pluralize from '6-shared/helpers/pluralize'
 import { formatMoney } from '6-shared/helpers/money'
 import { TTagId } from '6-shared/types'
 
@@ -19,17 +19,15 @@ type TagSelectProps = {
   label: string
 }
 
-// TODO: i18n
 export function TagSelect(props: TagSelectProps) {
+  const { t } = useTranslation('common')
   let { options, onChange, selected, label } = props
   let renderText = (selected: TagSelectProps['selected']) => {
-    return selected.length === 0
-      ? 'Ничего не выбрано'
-      : selected.length === 1
-      ? options.find(opt => opt.id === selected[0])?.name || '1'
-      : selected.length +
-        ' ' +
-        pluralize(selected.length, ['категория', 'категории', 'категорий'])
+    if (selected.length === 1) {
+      let opt = options.find(opt => opt.id === selected[0])
+      if (opt?.name) return opt.name
+    }
+    return t('tagSelected', { count: selected.length })
   }
 
   return (

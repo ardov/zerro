@@ -1,5 +1,7 @@
 import type { TDateDraft, TFxAmount, TISOMonth } from '6-shared/types'
+
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Stack,
@@ -9,7 +11,6 @@ import {
   ListItemButton,
   useTheme,
 } from '@mui/material'
-import { useTranslation } from 'react-i18next'
 import { Total } from '6-shared/ui/Total'
 import { Amount } from '6-shared/ui/Amount'
 import { convertFx } from '6-shared/helpers/money'
@@ -21,33 +22,14 @@ import {
 } from '6-shared/helpers/date'
 
 import { OneLiner } from '3-widgets/DataLine'
-
 import { TEnvelopeId } from '5-entities/envelope'
 import { balances, TrFilterMode } from '5-entities/envBalances'
-
 import { cardStyle } from './shared'
 import { useBudgetPopover } from '../BudgetPopover'
 import { useTrDrawer } from '../useTrDrawer'
 
-// TODO: i18n
-function getPrepositionalMonthName(month: TISOMonth | TDateDraft) {
-  const monthNames = [
-    'январе',
-    'феврале',
-    'марте',
-    'апреле',
-    'мае',
-    'июне',
-    'июле',
-    'августе',
-    'сентябре',
-    'октябре',
-    'ноябре',
-    'декабре',
-  ]
-  const monthIndex = parseDate(month).getMonth()
-  return monthNames[monthIndex]
-}
+const getMonthNum = (month: TISOMonth | TDateDraft) =>
+  parseDate(month).getMonth() + 1
 
 export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
   const { month, id } = props
@@ -71,10 +53,10 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
 
   const blockTitle =
     currentMonth === month
-      ? t('availableTitle_now')
+      ? t('availableTitleNow')
       : month > currentMonth
-      ? t('availableTitle_future', { month: getPrepositionalMonthName(month) })
-      : t('availableTitle_past', { month: formatDate(month, 'MMMM') })
+      ? t('availableTitleFuture', { context: getMonthNum(month).toString() })
+      : t('availableTitlePast', { context: getMonthNum(month).toString() })
 
   return (
     <Box
