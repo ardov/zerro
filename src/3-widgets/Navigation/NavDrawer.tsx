@@ -100,7 +100,7 @@ function Links() {
         path="/transactions"
         icon={<SyncAltIcon />}
       />
-      <NavigationLink text="Аналитика" path="/stats" icon={<BarChartIcon />} />
+      <NavigationLink text={t('stats')} path="/stats" icon={<BarChartIcon />} />
       <NavigationLink
         text={t('yearWrapped')}
         path="/review"

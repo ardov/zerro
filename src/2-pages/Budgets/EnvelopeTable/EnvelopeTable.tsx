@@ -13,7 +13,6 @@ import { Row } from './Row'
 import { Header } from './Header'
 import { RenderColumnsProvider, useMetric } from './models/useMetric'
 import { useExpandEnvelopes } from './models/useExpandEnvelopes'
-import { Highlight } from './Highlight'
 import { useEnvRenderInfo } from './models/envRenderInfo'
 import { Footer } from './Footer'
 import { Group } from './Group'
@@ -146,22 +145,19 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
     })
 
   return (
-    <>
-      <Paper className={className} sx={{ position: 'relative', pb: 1 }}>
-        <Header
-          month={month}
-          isAllShown={showAll}
-          isReordering={reorderMode}
-          onShowAllToggle={toggleShowAll}
-          onReorderModeToggle={toggleReorderMode}
-          onOpenOverview={onOpenOverview}
-        />
-        <NewGroup visible={reorderMode} />
-        {renderGroups}
-        <Footer month={month} metric={metric} />
-      </Paper>
-      <Highlight />
-    </>
+    <Paper className={className} sx={{ position: 'relative', pb: 1 }}>
+      <Header
+        month={month}
+        isAllShown={showAll}
+        isReordering={reorderMode}
+        onShowAllToggle={toggleShowAll}
+        onReorderModeToggle={toggleReorderMode}
+        onOpenOverview={onOpenOverview}
+      />
+      <NewGroup visible={reorderMode} />
+      {renderGroups}
+      <Footer month={month} metric={metric} />
+    </Paper>
   )
 }
 

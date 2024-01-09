@@ -12,7 +12,7 @@ import { balances } from '5-entities/envBalances'
 import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 
-import { DragTypes } from '../../DnDContext'
+import { DragTypes } from '2-pages/Budgets/DnD'
 import { useBudgetPopover } from '../../BudgetPopover'
 import { useGoalPopover } from '../../GoalPopover'
 

@@ -11,7 +11,7 @@ import { balances, TrFilterMode } from '5-entities/envBalances'
 
 import { useTrDrawer } from './useTrDrawer'
 import { EnvelopeTable } from './EnvelopeTable'
-import { DnDContext } from './DnDContext'
+import { DnDContext } from './DnD/DnDContext'
 import { SmartBudgetPopover } from './BudgetPopover'
 import { SmartGoalPopover } from './GoalPopover'
 import { SideContent, useSideContent } from './SideContent'

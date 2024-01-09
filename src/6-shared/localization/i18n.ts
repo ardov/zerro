@@ -8,10 +8,16 @@ export const defaultNS = 'common'
 i18n.use(initReactI18next).init({
   resources,
   defaultNS,
+  // lng: 'dev',
   lng: 'ru',
+  debug: true,
   interpolation: {
     escapeValue: false,
   },
+})
+
+i18n.on('missingKey', function (lngs, namespace, key, res) {
+  console.warn(`Missing translation: ${lngs[0]}, ${namespace}, ${key}`)
 })
 
 export default i18n

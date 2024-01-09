@@ -1,6 +1,10 @@
+import type { TAccountId, TISODate } from '6-shared/types'
+
 import React, { useState, useCallback, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@mui/material'
-import { TAccountId, TISODate } from '6-shared/types'
+import { Stack } from '@mui/system'
+import { useToggle } from '6-shared/hooks/useToggle'
 
 import { accountModel } from '5-entities/account'
 import { TransactionsDrawer } from '3-widgets/transaction/TransactionsDrawer'
@@ -8,10 +12,9 @@ import { WidgetNetWorth } from './WidgetNetWorth'
 import { WidgetCashflow } from './WidgetCashflow'
 import { WidgetAccHistory } from './WidgetAccHistory'
 import { nextPeriod, Period } from './shared/period'
-import { useToggle } from '6-shared/hooks/useToggle'
-import { Stack } from '@mui/system'
 
 export default function Stats() {
+  const { t } = useTranslation('accounts')
   const accs = accountModel.useAccountList()
   const [period, setPeriod] = useState<Period>(Period.LastYear)
   const [showArchived, toggleArchived] = useToggle(false)
@@ -42,7 +45,6 @@ export default function Stats() {
 
   const filterConditions = { account: selected?.id || null }
 
-  // TODO: i18n
   return (
     <>
       <Stack spacing={2} p={3} pb={10}>
@@ -57,7 +59,7 @@ export default function Stats() {
           />
         ))}
         <Button onClick={toggleArchived}>
-          {showArchived ? 'Скрыть' : 'Показать'} архивные
+          {t(showArchived ? 'hideArchived' : 'showArchived')}
         </Button>
       </Stack>
 

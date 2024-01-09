@@ -1,15 +1,16 @@
 import type { ById, TAccount, TFxCode } from '6-shared/types'
+
+import { t } from 'i18next'
+import { getColorForString } from '6-shared/helpers/color'
 import type { TTagPopulated } from '5-entities/tag'
 import type { TDebtor } from '5-entities/debtors'
 import { envId, TEnvelopeId, EnvType } from './envelopeId'
 import { TEnvelopeMeta, envelopeVisibility } from './metaData'
-import { getColorForString } from '6-shared/helpers/color'
 
-// TODO: i18n
-const defaultTagGroup = 'Категории'
-const defaultAccountGroup = 'Переводы'
-const defaultMerchantGroup = 'Долги'
-const defaultPayeeGroup = 'Долги'
+const defaultTagGroup = t('defaultTagGroup', { ns: 'common' })
+const defaultAccountGroup = t('defaultAccountGroup', { ns: 'common' })
+const defaultMerchantGroup = t('defaultMerchantGroup', { ns: 'common' })
+const defaultPayeeGroup = t('defaultPayeeGroup', { ns: 'common' })
 
 export type TEnvelope = {
   id: TEnvelopeId

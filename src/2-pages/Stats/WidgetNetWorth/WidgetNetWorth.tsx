@@ -22,8 +22,9 @@ import { formatDate, GroupBy } from '6-shared/helpers/date'
 
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { DataLine } from '3-widgets/DataLine'
-import { Period, periodTitles } from '../shared/period'
+import { Period, PeriodTitle } from '../shared/period'
 import { TPoint, useNetWorth } from './model'
+import { useTranslation } from 'react-i18next'
 
 type Point = TPoint & { total: number }
 type TDataKey = keyof Omit<Point, 'date'>
@@ -35,6 +36,7 @@ type WidgetNetWorthProps = {
 
 export function WidgetNetWorth(props: WidgetNetWorthProps) {
   const { period, onTogglePeriod } = props
+  const { t } = useTranslation('analytics')
   const theme = useAppTheme()
 
   const balances = useNetWorth(period, GroupBy.Month)
@@ -71,14 +73,14 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
     fundsSaving: theme.palette.primary.light,
     total: theme.palette.info.main,
   }
-  // TODO: i18n
+
   const names = {
-    lented: 'Мне должны',
-    debts: 'Долги',
-    accountDebts: 'Кредиты',
-    fundsInBudget: 'Деньги в балансе',
-    fundsSaving: 'Деньги за балансом',
-    total: 'Всего',
+    lented: t('netWorth.lented'),
+    debts: t('netWorth.debts'),
+    accountDebts: t('netWorth.accountDebts'),
+    fundsInBudget: t('netWorth.fundsInBudget'),
+    fundsSaving: t('netWorth.fundsSaving'),
+    total: t('netWorth.total'),
   }
 
   const makeBar = (key: TDataKey) => {
@@ -102,9 +104,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
           <Checkbox
             sx={{
               color: colors[key],
-              '&.Mui-checked': {
-                color: colors[key],
-              },
+              '&.Mui-checked': { color: colors[key] },
             }}
             checked={isVisible(key)}
             onChange={() => toggle(key)}
@@ -123,7 +123,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
             style={{ color: theme.palette.secondary.main, cursor: 'pointer' }}
             onClick={onTogglePeriod}
           >
-            {periodTitles[period]}
+            <PeriodTitle period={period} />
           </span>
         </Typography>
       </Box>

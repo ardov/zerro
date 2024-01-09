@@ -20,20 +20,9 @@ import { useAppDispatch } from 'store/index'
 import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
 import { MoveMoneyModal } from '4-features/moveMoney'
 import { assignNewGroup } from '4-features/envelope/assignNewGroup'
-import { useMonth } from './MonthProvider'
-
-export enum DragTypes {
-  newGroup = 'newGroup',
-  amount = 'amount',
-  envelope = 'envelope',
-}
-
-export type TDragData = {
-  type: DragTypes
-  id: TEnvelopeId
-  isExpanded?: boolean
-  isLastVisibleChild?: boolean
-}
+import { useMonth } from '../MonthProvider'
+import { TDragData, DragTypes } from './dragTypes'
+import { Highlight } from './Highlight'
 
 const vibrate = () => window?.navigator?.vibrate?.(100)
 const autoscrollOptions = { threshold: { x: 0, y: 0.2 } }
@@ -70,6 +59,7 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
         setMoneyDestination(over.id)
         toggleOpen()
       }
+
       if (
         active?.type === DragTypes.envelope &&
         active?.id &&
@@ -90,6 +80,7 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
     >
       {children}
       <DragObj />
+      <Highlight />
       <MoveMoneyModal
         key={moneySource + moneyDestination + month + isOpen}
         open={isOpen}

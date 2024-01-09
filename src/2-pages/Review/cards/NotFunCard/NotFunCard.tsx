@@ -67,7 +67,6 @@ export function NotFunCard(props: TCardProps) {
     </Stack>
   )
 
-  // TODO: i18n
   const cardContent = (
     <Stack gap={2} alignItems="center" width="100%">
       <TaxesChart income={totalIncome} outcome={totalOutcome} />

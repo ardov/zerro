@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useState } from 'react'
 import { Link, useHistory } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   SaveAltIcon,
   ExitToAppIcon,
@@ -71,13 +72,13 @@ export const SettingsMenu: FC<SettingsMenuProps> = props => {
 }
 
 const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
+  const { t } = useTranslation('settings')
   const [isExpanded, setExpanded] = useState(false)
-  // TODO: i18n
   return (
     <>
       {props.showLinks && <NavItems onClose={props.onClose} />}
 
-      <ListSubheader>Настройки</ListSubheader>
+      <ListSubheader>{t('settings')}</ListSubheader>
       <ThemeItem onClose={props.onClose} />
       <ReloadDataItem onClose={props.onClose} />
       <AutoSyncItem />
@@ -89,12 +90,12 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
           <ListItemIcon>
             <MoreHorizIcon />
           </ListItemIcon>
-          <ListItemText>Расширенные настройки...</ListItemText>
+          <ListItemText>{t('advancedSettings')}</ListItemText>
         </MenuItem>
       )}
 
       <Divider light />
-      <ListSubheader>Экспорт</ListSubheader>
+      <ListSubheader>{t('export')}</ListSubheader>
       <ExportCsvItem />
       <ExportJsonItem />
 
@@ -108,6 +109,7 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
 type ItemProps = { onClose: () => void }
 
 function ExportCsvItem() {
+  const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
   const handleExportCSV = () => {
     sendEvent('Settings: export csv')
@@ -118,12 +120,13 @@ function ExportCsvItem() {
       <ListItemIcon>
         <SaveAltIcon />
       </ListItemIcon>
-      <ListItemText>Скачать CSV</ListItemText>
+      <ListItemText>{t('downloadCSV')}</ListItemText>
     </MenuItem>
   )
 }
 
 function ExportJsonItem() {
+  const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
   const handleExportCSV = () => {
     sendEvent('Settings: export json')
@@ -134,12 +137,13 @@ function ExportJsonItem() {
       <ListItemIcon>
         <SaveAltIcon />
       </ListItemIcon>
-      <ListItemText>Полный бэкап</ListItemText>
+      <ListItemText>{t('fullBackup')}</ListItemText>
     </MenuItem>
   )
 }
 
 function ThemeItem({ onClose }: ItemProps) {
+  const { t } = useTranslation('settings')
   const theme = useColorScheme()
   const handleThemeChange = () => {
     sendEvent('Settings: toggle theme')
@@ -152,13 +156,14 @@ function ThemeItem({ onClose }: ItemProps) {
         {theme.mode === 'dark' ? <WbSunnyIcon /> : <NightsStayIcon />}
       </ListItemIcon>
       <ListItemText>
-        {theme.mode === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
+        {t(theme.mode === 'dark' ? 'lightMode' : 'darkMode')}
       </ListItemText>
     </MenuItem>
   )
 }
 
 function NavItems({ onClose }: ItemProps) {
+  const { t } = useTranslation('navigation')
   const history = useHistory()
   const handleNav =
     (path: string): React.MouseEventHandler<HTMLAnchorElement> =>
@@ -173,21 +178,21 @@ function NavItems({ onClose }: ItemProps) {
         <ListItemIcon>
           <AccountBalanceWalletIcon />
         </ListItemIcon>
-        <ListItemText>Счета</ListItemText>
+        <ListItemText>{t('accounts')}</ListItemText>
       </MenuItem>
 
       <MenuItem onClick={handleNav('/review')} component={Link} to="/review">
         <ListItemIcon>
           <WhatshotIcon />
         </ListItemIcon>
-        <ListItemText>Итоги года</ListItemText>
+        <ListItemText>{t('yearWrapped')}</ListItemText>
       </MenuItem>
 
       <MenuItem onClick={handleNav('/about')} component={Link} to="/about">
         <ListItemIcon>
           <HelpOutlineIcon />
         </ListItemIcon>
-        <ListItemText>Как пользоваться</ListItemText>
+        <ListItemText>{t('about')}</ListItemText>
       </MenuItem>
 
       <MenuItem
@@ -198,7 +203,7 @@ function NavItems({ onClose }: ItemProps) {
         <ListItemIcon>
           <FavoriteBorderIcon />
         </ListItemIcon>
-        <ListItemText>Поддержать проект</ListItemText>
+        <ListItemText>{t('donate')}</ListItemText>
       </MenuItem>
 
       <Divider light />
@@ -207,6 +212,7 @@ function NavItems({ onClose }: ItemProps) {
 }
 
 function ReloadDataItem({ onClose }: ItemProps) {
+  const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
   const reloadData = () => {
     sendEvent('Settings: reload data')
@@ -220,12 +226,13 @@ function ReloadDataItem({ onClose }: ItemProps) {
       <ListItemIcon>
         <SyncIcon />
       </ListItemIcon>
-      <ListItemText>Перезагрузить данные</ListItemText>
+      <ListItemText>{t('reloadData')}</ListItemText>
     </MenuItem>
   )
 }
 
 function AutoSyncItem() {
+  const { t } = useTranslation('settings')
   const [regular, setRegular] = useRegularSync()
   const handleClick = () => {
     sendEvent(`Settings: turn sync ${regular ? 'off' : 'on'}`)
@@ -236,13 +243,14 @@ function AutoSyncItem() {
       <ListItemIcon>
         {regular ? <SyncIcon /> : <SyncDisabledIcon />}
       </ListItemIcon>
-      <ListItemText>Автосинхронизация</ListItemText>
+      <ListItemText>{t('regularSync')}</ListItemText>
       <Switch edge="end" checked={regular} />
     </MenuItem>
   )
 }
 
 function BudgetSettingsItem() {
+  const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
   const setSnackbar = useSnackbar()
   const { preferZmBudgets } = userSettingsModel.useUserSettings()
@@ -253,7 +261,11 @@ function BudgetSettingsItem() {
   const convertBudgets = () => {
     sendEvent(`Settings: convert old budgets`)
     const updated = dispatch(convertZmBudgetsToZerro())
-    setSnackbar({ message: `✅ Бюджеты сконвертированы (${updated.length})` })
+    setSnackbar({
+      message: t('budgetsConverted', {
+        budgets: updated.length,
+      }),
+    })
   }
 
   return (
@@ -264,8 +276,8 @@ function BudgetSettingsItem() {
         </ListItemIcon>
         <ListItemText
           sx={{ whiteSpace: 'normal' }}
-          primary={'Бюджеты Дзен-мани'}
-          secondary={'Использовать те же бюджеты что и ДМ'}
+          primary={t('useZmBudgets')}
+          secondary={t('useZmBudgetsDescription')}
         />
         <Switch edge="end" checked={!!preferZmBudgets} />
       </MenuItem>
@@ -277,7 +289,7 @@ function BudgetSettingsItem() {
           </ListItemIcon>
           <ListItemText
             sx={{ whiteSpace: 'normal' }}
-            primary={'Конвертировать бюджеты из Дзен-мани'}
+            primary={t('convertBudgetsFromZm')}
           />
         </MenuItem>
       )}
@@ -286,6 +298,7 @@ function BudgetSettingsItem() {
 }
 
 function LogOutItem({ onClose }: ItemProps) {
+  const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
   const handleClick = () => {
     onClose()
@@ -297,12 +310,13 @@ function LogOutItem({ onClose }: ItemProps) {
       <ListItemIcon>
         <ExitToAppIcon />
       </ListItemIcon>
-      <ListItemText>Выйти</ListItemText>
+      <ListItemText>{t('logOut')}</ListItemText>
     </MenuItem>
   )
 }
 
 function VersionItem({ onClose }: ItemProps) {
+  const { t } = useTranslation('settings')
   return (
     <MenuItem
       onClick={() => {
@@ -313,7 +327,7 @@ function VersionItem({ onClose }: ItemProps) {
       <ListItemIcon />
       <ListItemText>
         <Typography variant="overline" color="textSecondary">
-          Версия: {appVersion}
+          {t('version', { version: appVersion })}
         </Typography>
       </ListItemText>
     </MenuItem>

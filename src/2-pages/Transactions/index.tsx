@@ -4,16 +4,19 @@ import {
   Box,
   Drawer,
   useMediaQuery,
-  Typography,
   Paper,
   Theme,
   DrawerProps,
 } from '@mui/material'
-import { TransactionPreview } from '3-widgets/transaction/TransactionPreview'
+import {
+  TrEmptyState,
+  TransactionPreview,
+} from '3-widgets/transaction/TransactionPreview'
 import { Helmet } from 'react-helmet'
 import { registerPopover } from '6-shared/historyPopovers'
 import { TTransaction, TTransactionId } from '6-shared/types'
 import { sendEvent } from '6-shared/helpers/tracking'
+import { useTranslation } from 'react-i18next'
 
 const sideWidth = 360
 const sideSx = {
@@ -24,6 +27,7 @@ const sideSx = {
 }
 
 export default function TransactionsView() {
+  const { t } = useTranslation('transactions')
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const [checkedDate, setCheckedDate] = useState<Date | null>(null)
   const { open } = trPreview.useMethods()
@@ -41,12 +45,11 @@ export default function TransactionsView() {
     [open]
   )
 
-  // TODO: i18n
   return (
     <>
       <Helmet>
-        <title>Операции | Zerro</title>
-        <meta name="description" content="Список операций" />
+        <title>{t('pageTitle')}</title>
+        <meta name="description" content={t('pageDescription')} />
         <link rel="canonical" href="https://zerro.app/transactions" />
       </Helmet>
 
@@ -117,11 +120,11 @@ const SideContent: FC<{ docked?: boolean; width: number }> = ({
       onSelectSimilar={onSelectSimilar}
     />
   ) : (
-    <EmptyState />
+    <TrEmptyState />
   )
 
   if (docked) {
-    return displayProps.open ? drawerContent : <EmptyState />
+    return displayProps.open ? drawerContent : <TrEmptyState />
   }
 
   return (
@@ -130,20 +133,3 @@ const SideContent: FC<{ docked?: boolean; width: number }> = ({
     </Drawer>
   )
 }
-
-const EmptyState = () => (
-  <Box
-    display="flex"
-    alignItems="center"
-    justifyContent="center"
-    minHeight="100vh"
-    color="text.hint"
-    p={3}
-  >
-    <Typography variant="body2" align="center" color="inherit">
-      Выберите операцию,
-      <br />
-      чтобы увидеть детали
-    </Typography>
-  </Box>
-)

@@ -1,6 +1,7 @@
 import type { TTransaction, TTransactionId } from '6-shared/types'
 
 import React, { useState, useEffect, FC } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Typography,
@@ -28,10 +29,31 @@ import { useAppDispatch } from 'store'
 import { trModel } from '5-entities/transaction'
 import { accountModel } from '5-entities/account'
 import { instrumentModel } from '5-entities/currency/instrument'
-
 import { TagList } from '5-entities/tag/ui/TagList'
+
 import { Reciept } from './Reciept'
 import { Map } from './Map'
+
+/**
+ * Empty state for transaction preview
+ */
+export const TrEmptyState = () => {
+  const { t } = useTranslation('transaction')
+  return (
+    <Box
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      minHeight="100vh"
+      color="text.hint"
+      p={3}
+    >
+      <Typography variant="body2" align="center" color="inherit">
+        {t('fullEmptyState')}
+      </Typography>
+    </Box>
+  )
+}
 
 export type TransactionPreviewProps = {
   id: string
@@ -42,11 +64,12 @@ export type TransactionPreviewProps = {
 
 export const TransactionPreview: FC<TransactionPreviewProps> = props => {
   const transaction = trModel.useTransactions()[props.id]
-  return transaction ? <TransactionContent {...props} /> : <EmptyState />
+  return transaction ? <TransactionContent {...props} /> : <TrEmptyState />
 }
 
 const TransactionContent: FC<TransactionPreviewProps> = props => {
   const { id, onClose, onOpenOther, onSelectSimilar } = props
+  const { t } = useTranslation('transaction')
   const dispatch = useAppDispatch()
   const onDelete = () => dispatch(trModel.deleteTransactions([id]))
   const onDeletePermanently = () =>
@@ -140,7 +163,15 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
       )
     }
   }
-  // TODO: i18n
+
+  const titles = {
+    income: t('type_income'),
+    outcome: t('type_outcome'),
+    transfer: t('type_transfer'),
+    incomeDebt: t('type_debt'),
+    outcomeDebt: t('type_debt'),
+  }
+
   return (
     <Box minWidth={320} position="relative">
       <Head
@@ -166,7 +197,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
       <Stack spacing={4} p={3}>
         {trType !== 'income' && (
           <AmountInput
-            label={`Расход с ${outcomeAccount.title}`}
+            label={t('otcomeFrom', { account: outcomeAccount.title })}
             currency={outcomeCurrency}
             value={localOutcome}
             onChange={setLocalOutcome}
@@ -177,7 +208,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
         )}
         {trType !== 'outcome' && (
           <AmountInput
-            label={`Доход на ${incomeAccount.title}`}
+            label={t('incomeTo', { account: incomeAccount.title })}
             currency={incomeCurrency}
             value={localIncome}
             onChange={setLocalIncome}
@@ -188,7 +219,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
         )}
         <Stack direction="row" spacing={2}>
           <DatePicker
-            label="Дата"
+            label={t('date')}
             value={parseDate(localDate)}
             onChange={date => date && setLocalDate(toISODate(date))}
             showDaysOutsideCurrentMonth
@@ -197,7 +228,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
             slots={{ openPickerIcon: CalendarIcon }}
           />
           <TextField
-            label="Время"
+            label={t('time')}
             value={localTime}
             onChange={e => setLocalTime(e.target.value)}
             type="time"
@@ -212,7 +243,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
           />
         </Stack>
         <TextField
-          label="Место платежа"
+          label={t('payee')}
           value={localPayee || ''}
           onChange={e => setLocalPayee(e.target.value)}
           multiline
@@ -222,7 +253,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
           size="small"
         />
         <TextField
-          label="Комментарий"
+          label={t('comment')}
           value={localComment || ''}
           onChange={e => setLocalComment(e.target.value)}
           multiline
@@ -239,17 +270,21 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
           sx={{ typography: 'caption', color: 'text.secondary' }}
         >
           <span>
-            Операция создана – {formatDate(created, 'dd MMM yyyy, HH:mm')}
+            {t('created', {
+              date: formatDate(created, 'dd MMM yyyy, HH:mm'),
+            })}
           </span>
           <span>
-            Операция изменена – {formatDate(changed, 'dd MMM yyyy, HH:mm')}
+            {t('changed', {
+              date: formatDate(changed, 'dd MMM yyyy, HH:mm'),
+            })}
           </span>
           <RateToWords tr={tr} />
         </Stack>
 
         {!!onSelectSimilar && (
           <Button onClick={() => onSelectSimilar(changed)}>
-            Другие из этой синхронизации
+            {t('btnOtherFromSync')}
           </Button>
         )}
       </Stack>
@@ -259,100 +294,74 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
   )
 }
 
-const EmptyState = () => (
-  <Box
-    display="flex"
-    alignItems="center"
-    justifyContent="center"
-    minHeight="100vh"
-    color="text.hint"
-    p={3}
-  >
-    <Typography variant="body2" align="center" color="inherit">
-      Выберите операцию,
-      <br />
-      чтобы увидеть детали
-    </Typography>
-  </Box>
-)
-
-const titles = {
-  income: 'Доход',
-  outcome: 'Расход',
-  transfer: 'Перевод',
-  incomeDebt: 'Долг',
-  outcomeDebt: 'Долг',
-}
-
-type HeadProps = {
+const Head: FC<{
   title: string
   deleted: boolean
   onClose: () => void
   onDelete: () => void
   onDeletePermanently: () => void
   onRestore: () => void
-}
-const Head: FC<HeadProps> = ({
-  title,
-  deleted,
-  onClose,
-  onDelete,
-  onDeletePermanently,
-  onRestore,
-}) => (
-  <Box py={1} px={3} display="flex" alignItems="center">
-    <Box flexGrow={1}>
-      {deleted && (
-        <Typography variant="caption" color="error" noWrap>
-          Операция удалена
+}> = props => {
+  const { title, deleted, onClose, onDelete, onDeletePermanently, onRestore } =
+    props
+  const { t } = useTranslation('transaction')
+  return (
+    <Box py={1} px={3} display="flex" alignItems="center">
+      <Box flexGrow={1}>
+        {deleted && (
+          <Typography variant="caption" color="error" noWrap>
+            {t('transactionDeleted')}
+          </Typography>
+        )}
+        <Typography variant="h6" noWrap>
+          {title}
         </Typography>
+      </Box>
+
+      {deleted ? (
+        <Tooltip title={t('btnRestore')}>
+          <IconButton onClick={onRestore} children={<RestoreFromTrashIcon />} />
+        </Tooltip>
+      ) : (
+        <Tooltip title={t('btnDelete')}>
+          <IconButton
+            onClick={e => (e.shiftKey ? onDeletePermanently() : onDelete())}
+            children={<DeleteIcon />}
+          />
+        </Tooltip>
       )}
-      <Typography variant="h6" noWrap>
-        {title}
-      </Typography>
+
+      <Tooltip title={t('btnClose')}>
+        <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
+      </Tooltip>
     </Box>
+  )
+}
 
-    {deleted ? (
-      <Tooltip title="Восстановить">
-        <IconButton onClick={onRestore} children={<RestoreFromTrashIcon />} />
-      </Tooltip>
-    ) : (
-      <Tooltip title="Удалить">
-        <IconButton
-          onClick={e => (e.shiftKey ? onDeletePermanently() : onDelete())}
-          children={<DeleteIcon />}
-        />
-      </Tooltip>
-    )}
-
-    <Tooltip title="Закрыть">
-      <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
-    </Tooltip>
-  </Box>
-)
-
-const SaveButton: FC<{ visible: boolean; onSave: () => void }> = ({
-  visible,
-  onSave,
-}) => (
-  <Box
-    mt={4}
-    zIndex={200}
-    position="sticky"
-    bottom={16}
-    left="50%"
-    display="inline-block"
-    style={{ transform: 'translateX(-50%)' }}
-  >
-    <Zoom in={visible}>
-      <Fab variant="extended" color="primary" onClick={onSave}>
-        Сохранить
-      </Fab>
-    </Zoom>
-  </Box>
-)
+const SaveButton: FC<{ visible: boolean; onSave: () => void }> = props => {
+  const { visible, onSave } = props
+  const { t } = useTranslation('transaction')
+  return (
+    <Box
+      mt={4}
+      zIndex={200}
+      position="sticky"
+      bottom={16}
+      left="50%"
+      display="inline-block"
+      style={{ transform: 'translateX(-50%)' }}
+    >
+      <Zoom in={visible}>
+        <Fab variant="extended" color="primary" onClick={onSave}>
+          {t('btnSave')}
+        </Fab>
+      </Zoom>
+    </Box>
+  )
+}
 
 const RateToWords: FC<{ tr: TTransaction }> = ({ tr }) => {
+  const { t } = useTranslation('transaction')
   const trType = trModel.getType(tr)
   const { income, opIncome, outcome, opOutcome } = tr
   const instruments = instrumentModel.useInstruments()
@@ -376,7 +385,7 @@ const RateToWords: FC<{ tr: TTransaction }> = ({ tr }) => {
   }
 
   if (rate) {
-    return <span>Курс: {rate}</span>
+    return <span>{t('rate', { rate })}</span>
   }
   return null
 }

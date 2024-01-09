@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ButtonBase, IconButton, Stack, Typography } from '@mui/material'
 import pluralize from '6-shared/helpers/pluralize'
 
@@ -12,6 +13,7 @@ import { entries } from '6-shared/helpers/keys'
 import { ArrowBackIcon, ArrowForwardIcon } from '6-shared/ui/Icons'
 
 export function PayeeByOutcomeCard(props: TCardProps) {
+  const { t } = useTranslation('yearReview', { keyPrefix: 'payeeByOutcome' })
   const [i, setI] = useState(0)
   const yearStats = useStats(props.year)
   const toDisplay = displayCurrency.useToDisplay('current')
@@ -33,10 +35,10 @@ export function PayeeByOutcomeCard(props: TCardProps) {
   const next = () => setI(Math.min(i + 1, topPayees.length - 1))
   const prev = () => setI(Math.max(i - 1, 0))
   const { payee, transactions, outcome } = topPayees[i]
-  const trLength = transactions.length
+  const count = transactions.length
 
   if (!outcome) return null
-  // TODO: i18n
+
   return (
     <Card>
       <Stack spacing={1} alignItems="center">
@@ -49,11 +51,9 @@ export function PayeeByOutcomeCard(props: TCardProps) {
               {payee}
             </Typography>
             <Typography variant="body1" align="center">
-              Здесь вы оставили{' '}
-              <DisplayAmount value={outcome} noShade decMode="ifOnly" /> (
-              {trLength}
-              {' '}
-              {pluralize(trLength, ['покупка', 'покупки', 'покупок'])})
+              {t('spentHere ')}
+              <DisplayAmount value={outcome} noShade decMode="ifOnly" />
+              {t(' purchase', { count })}
             </Typography>
           </Stack>
         </ButtonBase>

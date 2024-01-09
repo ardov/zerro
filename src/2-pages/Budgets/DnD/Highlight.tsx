@@ -1,11 +1,12 @@
+import type { ById } from '6-shared/types'
+
 import React, { useCallback, useRef, useState } from 'react'
 import { DragEndEvent, DragMoveEvent, useDndMonitor } from '@dnd-kit/core'
 import { Box, SxProps } from '@mui/system'
-import { DragTypes } from '../DnDContext'
 import { useAppDispatch } from 'store/index'
 import { envelopeModel, TEnvelope, TEnvelopeId } from '5-entities/envelope'
-import { ById } from '6-shared/types'
 import { moveEnvelope } from '4-features/envelope/moveEnvelope'
+import { DragTypes } from './dragTypes'
 
 const style: SxProps = {
   border: '1px solid red',

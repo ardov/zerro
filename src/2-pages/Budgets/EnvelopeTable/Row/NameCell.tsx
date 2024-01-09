@@ -12,7 +12,7 @@ import { useFloatingInput } from '6-shared/ui/FloatingInput'
 import { useAppDispatch } from 'store/index'
 import { envelopeModel, TEnvelope, TEnvelopeId } from '5-entities/envelope'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { DragTypes } from '../../DnDContext'
+import { DragTypes } from '2-pages/Budgets/DnD'
 
 export const NameCell: FC<{
   envelope: TEnvelope

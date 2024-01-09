@@ -5,7 +5,7 @@ import { Card, TCardProps } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
 
 export function QRCard(props: TCardProps) {
-  const { t } = useTranslation('yearReviewQR')
+  const { t } = useTranslation('yearReview', { keyPrefix: 'qrCard' })
   const yearStats = useStats(props.year)
   const hasReceipt = yearStats.total.outcomeTransactions.filter(tr => tr.qrCode)
   const value = hasReceipt.length

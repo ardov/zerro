@@ -24,7 +24,6 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
   // Shown when income in rubbles is greater than median wage and total monthly incom is greater than median wage
   if (rubIncome < MEDIAN_WAGE_RUB || rate < 1) return null
 
-  // TODO: i18n
   return (
     <>
       <Stack direction="column" spacing={1} sx={{ p: 3 }}>

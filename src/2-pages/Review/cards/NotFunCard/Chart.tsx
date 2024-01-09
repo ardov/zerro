@@ -19,7 +19,6 @@ export const TaxesChart: FC<TaxesChartProps> = ({ income, outcome }) => {
   const taxes = getTaxes(income, outcome).sort((a, b) => b.value - a.value)
   let totalTaxes = taxes.reduce((sum, t) => round(sum + t.value), 0)
 
-  // TODO: i18n
   let data = [
     {
       name: 'Ваш доход',

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Box, Collapse } from '@mui/material'
 import { useDroppable } from '@dnd-kit/core'
-import { DragTypes } from '../DnDContext'
+import { DragTypes } from '../DnD'
 import { useTranslation } from 'react-i18next'
 
 export function NewGroup(props: { visible: boolean }) {

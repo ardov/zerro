@@ -2,6 +2,7 @@ import { goalType, TGoal } from './types'
 import { TDateDraft, TFxCode } from '6-shared/types'
 import { formatMoney, round } from '6-shared/helpers/money'
 import { parseDate, toISODate } from '6-shared/helpers/date'
+import { t } from 'i18next'
 
 export const makeGoal = (goalDraft?: TGoal | null): TGoal | null => {
   const { type, amount, end } = goalDraft || {}
@@ -22,46 +23,32 @@ export const makeGoal = (goalDraft?: TGoal | null): TGoal | null => {
   }
 }
 
-// TODO: i18n
 export const goalToWords = (
   { type, amount, end }: TGoal,
   currency?: TFxCode
 ): string => {
-  const formattedSum = formatMoney(amount, currency, 0)
+  const sum = formatMoney(amount, currency, 0)
   switch (type) {
     case goalType.MONTHLY:
-      return `Откладываю ${formattedSum} каждый месяц`
+      return t('toWords.monthly', { sum, ns: 'goals' })
     case goalType.MONTHLY_SPEND:
-      return `Нужно ${formattedSum} на месяц`
+      return t('toWords.monthlySpend', { sum, ns: 'goals' })
     case goalType.TARGET_BALANCE:
-      if (end) return `Хочу накопить ${formattedSum} к ${formatMonth(end)}`
-      else return `Хочу накопить ${formattedSum}`
+      return t('toWords.targetBalance', { sum, ns: 'goals' }) + monthSuffix(end)
     case goalType.INCOME_PERCENT:
-      return `Откладываю ${round(amount * 100)}% от дохода`
+      const percent = round(amount * 100)
+      return t('toWords.incomePercent', { percent, ns: 'goals' })
     default:
       throw new Error(`Unsupported type ${type}`)
   }
 }
 
-function formatMonth(monthDate: TDateDraft) {
+function monthSuffix(monthDate?: TDateDraft) {
   if (!monthDate) return ''
   const date = parseDate(monthDate)
-  const MM = date.getMonth()
   const YYYY = date.getFullYear()
   const isSameYear = new Date().getFullYear() === YYYY
-  const months = [
-    'январю',
-    'февралю',
-    'марту',
-    'апрелю',
-    'маю',
-    'июню',
-    'июлю',
-    'августу',
-    'сентябрю',
-    'октябрю',
-    'ноябрю',
-    'декабрю',
-  ]
-  return `${months[MM]} ${isSameYear ? 'этого года' : YYYY}`
+  const yearAddon = isSameYear ? '' : ' ' + YYYY
+  const context = date.getMonth() + 1
+  return ` ${t('toWords.till', { context, ns: 'goals' })}` + yearAddon
 }

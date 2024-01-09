@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Paper, Card, Typography, Box } from '@mui/material'
 import {
   ResponsiveContainer,
@@ -16,7 +17,7 @@ import { TISODate } from '6-shared/types'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { DataLine } from '3-widgets/DataLine'
 import { useCashFlow } from './model'
-import { Period, periodTitles } from '../shared/period'
+import { Period, PeriodTitle } from '../shared/period'
 
 type Point = {
   date: TISODate
@@ -30,6 +31,7 @@ type WidgetCashflowProps = {
 }
 
 export function WidgetCashflow(props: WidgetCashflowProps) {
+  const { t } = useTranslation('analytics')
   const { period, onTogglePeriod } = props
   const theme = useAppTheme()
   const points = useCashFlow(period)
@@ -38,17 +40,16 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
   const colorOutcome = theme.palette.error.main
   const colorAxisText = theme.palette.text.disabled
 
-  // TODO: i18n
   return (
     <Paper>
       <Box p={2} minWidth="100%">
         <Typography variant="h5">
-          Доходы и расходы{' '}
+          {t('incomesAndOutcomes')}{' '}
           <span
             style={{ color: theme.palette.secondary.main, cursor: 'pointer' }}
             onClick={onTogglePeriod}
           >
-            {periodTitles[period]}
+            <PeriodTitle period={period} />
           </span>
         </Typography>
       </Box>
@@ -67,13 +68,13 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
           </defs>
           <Area
             dataKey="income"
-            name="Доход"
+            name={t('income')}
             stroke={colorIncome}
             fill="url(#areaIn)"
           />
           <Area
             dataKey="outcome"
-            name="Расход"
+            name={t('outcome')}
             stroke={colorOutcome}
             fill="url(#areaOut)"
           />
@@ -88,7 +89,7 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
           />
           <YAxis
             type="number"
-            domain={['dataMin', 'dataMax']}
+            domain={[0, 'dataMax']}
             tickFormatter={number => formatMoney(number, undefined, 0)}
             axisLine={false}
             tickLine={false}
@@ -118,6 +119,7 @@ type TPayload = {
 }
 
 const CustomTooltip = (props: any) => {
+  const { t } = useTranslation('analytics')
   const [currency] = displayCurrency.useDisplayCurrency()
   const payload = props.payload as TPayload[]
   const active = props.active as boolean
@@ -142,7 +144,7 @@ const CustomTooltip = (props: any) => {
       ))}
       <DataLine
         color="transparent"
-        name={diff < 0 ? 'Чистый расход' : 'Чистый доход'}
+        name={t(diff < 0 ? 'netOutcome' : 'netIncome')}
         amount={diff}
         currency={currency}
       />
