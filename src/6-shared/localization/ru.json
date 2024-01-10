@@ -478,6 +478,11 @@
     "yearReview": "ИТОГИ ГОДА",
     "whatWasInPreviousYear": "А что было в прошлом году?",
 
+    "incomeCard": {
+      "youEarned": "Вы заработали",
+      "perMonth": "в месяц"
+    },
+
     "noCategory": {
       "title_one": "{{count}} операция",
       "title_few": "{{count}} операции",

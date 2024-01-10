@@ -498,6 +498,11 @@ export const en: typeof ru = {
     yearReview: 'YEAR IN REVIEW',
     whatWasInPreviousYear: 'What was in the previous year?',
 
+    incomeCard: {
+      youEarned: 'You earned',
+      perMonth: 'per month',
+    },
+
     noCategory: {
       title_one: '{{count}} transaction',
       title_few: '{{count}} transactions',

@@ -11,8 +11,10 @@ import {
 import { Card, TCardProps } from '../../shared/Card'
 import { useStats } from '../../shared/getFacts'
 import { NotFunFact } from './NotFunFact'
+import { useTranslation } from 'react-i18next'
 
 export function IncomeCard(props: TCardProps) {
+  const { t } = useTranslation('yearReview', { keyPrefix: 'incomeCard' })
   const yearStats = useStats(props.year)
   const toDisplay = displayCurrency.useToDisplay('current')
   const tags = tagModel.usePopulatedTags()
@@ -51,14 +53,14 @@ export function IncomeCard(props: TCardProps) {
     <Card>
       <Stack spacing={1} alignItems="center">
         <Typography variant="body1" align="center">
-          Вы заработали
+          {t('youEarned')}
         </Typography>
         <Typography variant="h4" align="center" className="green-gradient">
           <DisplayAmount value={totalIncomeFx} noShade decMode="ifOnly" />
         </Typography>
         <Typography variant="body2" align="center" color="textSecondary">
           <DisplayAmount value={monthlyIncome} noShade decMode="ifOnly" />{' '}
-          в месяц
+          {t('perMonth')}
         </Typography>
         <NotFunFact income={totalIncomeFx} />
       </Stack>
