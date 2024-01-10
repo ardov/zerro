@@ -4858,6 +4858,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/hoist-non-react-statics@npm:^3.3.1":
+  version: 3.3.5
+  resolution: "@types/hoist-non-react-statics@npm:3.3.5"
+  dependencies:
+    "@types/react": "*"
+    hoist-non-react-statics: ^3.3.0
+  checksum: b645b062a20cce6ab1245ada8274051d8e2e0b2ee5c6bd58215281d0ec6dae2f26631af4e2e7c8abe238cdcee73fcaededc429eef569e70908f82d0cc0ea31d7
+  languageName: node
+  linkType: hard
+
 "@types/http-errors@npm:*":
   version: 2.0.1
   resolution: "@types/http-errors@npm:2.0.1"
@@ -9055,10 +9065,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"formik@npm:^2.2.9":
-  version: 2.4.2
-  resolution: "formik@npm:2.4.2"
+"formik@npm:^2.4.5":
+  version: 2.4.5
+  resolution: "formik@npm:2.4.5"
   dependencies:
+    "@types/hoist-non-react-statics": ^3.3.1
     deepmerge: ^2.1.1
     hoist-non-react-statics: ^3.3.0
     lodash: ^4.17.21
@@ -9068,7 +9079,7 @@ __metadata:
     tslib: ^2.0.0
   peerDependencies:
     react: ">=16.8.0"
-  checksum: 2a942674ee0271707ccc575ecc025e4ac0658a66613d9a4f21e72ed81588c69e99bd627bd4844e512134268962435d3904401bcff726e49d7509125e5002f107
+  checksum: 316c91fc4e440094655c0d0ba47277a0f84f6082f77ae2ae959e97e2eebb8eab5b866a9e43d93a28efdae07c3f23e779da67922e2f2a1fb47d135b7346e0b5f3
   languageName: node
   linkType: hard
 
@@ -16719,13 +16730,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-local-storage-state@npm:^12.0.0":
-  version: 12.0.0
-  resolution: "use-local-storage-state@npm:12.0.0"
+"use-local-storage-state@npm:^19.1.0":
+  version: 19.1.0
+  resolution: "use-local-storage-state@npm:19.1.0"
   peerDependencies:
-    react: ">=16.8.0"
-    react-dom: ">=16.8.0"
-  checksum: 84ac8110d9e660cbdf7874a8c1cbe1f533888de5f7ad1f909bfd86664c05c63e564f125ba3c0c7327b86a0666e6732316ca736a3db95c085b5caff44a1229232
+    react: ">=18"
+    react-dom: ">=18"
+  checksum: c8c65e000cdd96f6ddbae9361aba464a15943e1c928d49c166a84b8fa7ef9ef578f7b9e37f3be8bc440edee3ccb803af2f0c4db666c056159ff9f597fbfba796
   languageName: node
   linkType: hard
 
@@ -17613,7 +17624,7 @@ __metadata:
     date-fns: ^2.30.0
     eslint: ^8.56.0
     eslint-config-react-app: ^7.0.1
-    formik: ^2.2.9
+    formik: ^2.4.5
     history: ^4.10.1
     i18next: ^23.7.16
     idb: ^8.0.0
@@ -17647,7 +17658,7 @@ __metadata:
     stylelint-processor-styled-components: ^1.10.0
     stylelint-scss: ^6.0.0
     typescript: ^5.3.3
-    use-local-storage-state: ^12.0.0
+    use-local-storage-state: ^19.1.0
     uuid: ^9.0.1
     vite: ^5.0.11
     vite-plugin-pwa: ^0.17.4

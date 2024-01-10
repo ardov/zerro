@@ -71,7 +71,7 @@
     "comlink": "^4.4.1",
     "convert-layout": "^0.11.1",
     "date-fns": "^2.30.0",
-    "formik": "^2.2.9",
+    "formik": "^2.4.5",
     "history": "^4.10.1",
     "i18next": "^23.7.16",
     "idb": "^8.0.0",
@@ -93,7 +93,7 @@
     "react-window": "^1.8.10",
     "react-wrap-balancer": "^1.1.0",
     "recharts": "^2.10.4",
-    "use-local-storage-state": "^12.0.0",
+    "use-local-storage-state": "^19.1.0",
     "uuid": "^9.0.1",
     "workbox-build": "^7.0.0",
     "workbox-window": "^7.0.0"
