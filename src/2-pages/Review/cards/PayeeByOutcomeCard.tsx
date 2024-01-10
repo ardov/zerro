@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ButtonBase, IconButton, Stack, Typography } from '@mui/material'
-import pluralize from '6-shared/helpers/pluralize'
 
 import { Card, TCardProps } from '../shared/Card'
 import { useStats } from '../shared/getFacts'

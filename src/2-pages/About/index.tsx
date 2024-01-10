@@ -5,13 +5,42 @@ import { Link } from 'react-router-dom'
 import { useAppTheme } from '6-shared/ui/theme'
 import { Logo } from '6-shared/ui/Logo'
 import { ScrollToTop, TextLink } from './Components'
-import Method from './pages/Method.mdx'
-import About from './pages/About.mdx'
-import QuickStart from './pages/QuickStart.mdx'
+import MethodRu from './pages/MethodRu.mdx'
+import MethodEn from './pages/MethodEn.mdx'
+import AboutRu from './pages/AboutRu.mdx'
+import AboutEn from './pages/AboutEn.mdx'
+import QuickStartEn from './pages/QuickStartEn.mdx'
+import QuickStartRu from './pages/QuickStartRu.mdx'
 import './index.scss'
 import { MDXComponents } from 'mdx/types'
+import { LangSwitcher } from '6-shared/localization'
 
 const components = { a: TextLink } as MDXComponents
+
+const About = () => {
+  return (
+    <LangSwitcher
+      ru={<AboutRu components={components} />}
+      en={<AboutEn components={components} />}
+    />
+  )
+}
+const Method = () => {
+  return (
+    <LangSwitcher
+      ru={<MethodRu components={components} />}
+      en={<MethodEn components={components} />}
+    />
+  )
+}
+const QuickStart = () => {
+  return (
+    <LangSwitcher
+      ru={<QuickStartRu components={components} />}
+      en={<QuickStartEn components={components} />}
+    />
+  )
+}
 
 export default function Main() {
   return (
@@ -29,18 +58,9 @@ export default function Main() {
       >
         <Box width="100%" maxWidth={680} minWidth={100} className="article">
           <Switch>
-            <Route
-              path="/about/method"
-              render={() => <Method components={components} />}
-            />
-            <Route
-              path="/about/quick-start"
-              render={() => <QuickStart components={components} />}
-            />
-            <Route
-              path="/about"
-              render={() => <About components={components} />}
-            />
+            <Route path="/about/method" render={() => <Method />} />
+            <Route path="/about/quick-start" render={() => <QuickStart />} />
+            <Route path="/about" render={() => <About />} />
           </Switch>
         </Box>
       </Box>

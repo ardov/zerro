@@ -104,7 +104,7 @@ export const Header: FC<HeaderProps> = props => {
             </div>
           }
           budgeted={<ColumnTitle name={t('budget')} />}
-          outcome={<ColumnTitle name={t('transactions')} />}
+          outcome={<ColumnTitle name={t('activity')} />}
           available={<ColumnTitle name={t('available')} />}
           goal={null}
         />

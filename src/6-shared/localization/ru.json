@@ -12,12 +12,14 @@
     "debt": "Долг",
     "budget": "Бюджет",
     "available": "Доступно",
+    "activity": "Операции",
     "transactions": "Операции",
     "comment": "Комментарий",
     "currency": "Валюта",
     "currency_one": "1 валюта",
     "currency_few": "{{count}} валюты",
     "currency_many": "{{count}} валют",
+    "currency_other": "{{count}} валют",
     "moneyDnd": "Денюбшки",
     "edit": "Изменить",
     "close": "Закрыть",
@@ -33,6 +35,7 @@
     "tagSelected_one": "{{count}} категория",
     "tagSelected_few": "{{count}} категории",
     "tagSelected_many": "{{count}} категорий",
+    "tagSelected_other": "{{count}} категорий",
     "groupNew": "Новая группа",
     "tagNull": "Без категории",
     "tagNew": "Новая категория",
@@ -80,6 +83,7 @@
     "avgOutcome_one": "$t(prevOutcome)",
     "avgOutcome_few": "Средний расход за {{count}} месяца",
     "avgOutcome_many": "Средний расход за {{count}} месяцев",
+    "avgOutcome_other": "Средний расход за {{count}} месяцев",
     "avgOutcome_year": "Средний расход за год",
     "avgOutcome_halfYear": "Средний расход за полгода",
     "goal": "Цель",
@@ -125,6 +129,7 @@
     "archivedAccounts_one": "+{{count}} архивный счёт",
     "archivedAccounts_few": "+{{count}} архивных счёта",
     "archivedAccounts_many": "+{{count}} архивных счетов",
+    "archivedAccounts_other": "+{{count}} архивных счетов",
     "hideArchived": "Скрыть архивные",
     "showArchived": "Показать архивные"
   },
@@ -142,6 +147,7 @@
     "netOutcome": "Чистый расход",
 
     "netWorth": {
+      "title": "Рост капитала",
       "lented": "Мне должны",
       "debts": "Долги",
       "accountDebts": "Кредиты",
@@ -369,6 +375,7 @@
 
   "settings": {
     "settings": "Настройки",
+    "language": "Язык",
     "advancedSettings": "Расширенные настройки...",
     "export": "Экспорт",
     "downloadCSV": "Скачать CSV",
@@ -426,9 +433,11 @@
     "selected_one": "Выбрана {{count}} операция",
     "selected_few": "Выбрано {{count}} операции",
     "selected_many": "Выбрано {{count}} операций",
+    "selected_other": "Выбрано {{count}} операций",
     "delete_one": "Удалить {{count}} операцию?",
     "delete_few": "Удалить {{count}} операции?",
     "delete_many": "Удалить {{count}} операций?",
+    "delete_other": "Удалить {{count}} операций?",
     "deleteBtn": "Удалить",
     "cancelDeletion": "Оставить",
     "deleteSelected": "Удалить выбранные",
@@ -473,9 +482,11 @@
       "title_one": "{{count}} операция",
       "title_few": "{{count}} операции",
       "title_many": "{{count}} операций",
+      "title_other": "{{count}} операций",
       "withoutCategory_one": "не нашла свою категорию",
       "withoutCategory_few": "не нашли свою категорию",
       "withoutCategory_many": "не нашли свою категорию",
+      "withoutCategory_other": "не нашли свою категорию",
       "allTransactionsHaveCategories": "Круто! Ни одной операции без категории!"
     },
 
@@ -483,7 +494,8 @@
       "youAttached": "Вы прикрепили",
       "receipt_one": "{{count}} чек",
       "receipt_few": "{{count}} чека",
-      "receipt_many": "{{count}} чеков"
+      "receipt_many": "{{count}} чеков",
+      "receipt_other": "{{count}} чеков"
     },
 
     "payeeByFrequency": {
@@ -491,6 +503,7 @@
       "purchase_one": "{{count}} покупка со средним чеком ",
       "purchase_few": "{{count}} покупки со средним чеком ",
       "purchase_many": "{{count}} покупок со средним чеком ",
+      "purchase_other": "{{count}} покупок со средним чеком ",
       "andTotalSpend": "А всего потратили "
     },
 
@@ -498,7 +511,8 @@
       "spentHere ": "Здесь вы оставили ",
       " purchase_one": " ({{count}} покупка)",
       " purchase_few": " ({{count}} покупки)",
-      " purchase_many": " ({{count}} покупок)"
+      " purchase_many": " ({{count}} покупок)",
+      " purchase_other": " ({{count}} покупок)"
     }
   }
 }

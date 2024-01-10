@@ -83,6 +83,7 @@ const ArchivedList: FC<{ accs: TAccountPopulated[] }> = props => {
 
   const sum = getTotal(accs)
   const hasArchivedMoney = Boolean(toDisplay(sum)) // It can be too small to show
+
   return (
     <>
       <Collapse in={visible} unmountOnExit>
@@ -97,7 +98,7 @@ const ArchivedList: FC<{ accs: TAccountPopulated[] }> = props => {
         onClick={toggleVisibility}
       >
         {visible ? (
-          <span>Скрыть архивные</span>
+          <span>{t('hideArchived')}</span>
         ) : (
           <span>
             {t('archivedAccounts', { count: accs.length })}{' '}

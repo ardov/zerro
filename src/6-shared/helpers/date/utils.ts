@@ -144,9 +144,9 @@ export function formatDate(date: TDateDraft, template?: string): string {
   const opts = { locale: ru }
   const d = parseDate(date)
   if (template) return format(d, template, opts)
-  if (isToday(d)) return format(d, `${t('common:today')}, d MMMM, EEEEEE`, opts)
-  if (isYesterday(d))
-    return format(d, `${t('common:yesterday')}, d MMMM, EEEEEE`, opts)
-  if (isThisYear(d)) return format(d, 'd MMMM, EEEEEE', opts)
+  const thisYearDate = format(d, `d MMMM, EEEEEE`, opts)
+  if (isToday(d)) return `${t('common:today')}, ${thisYearDate}`
+  if (isYesterday(d)) return `${t('common:yesterday')}, ${thisYearDate}`
+  if (isThisYear(d)) return thisYearDate
   return format(d, 'd MMMM yyyy, EEEEEE', opts)
 }

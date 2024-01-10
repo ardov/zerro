@@ -118,7 +118,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
     <Paper>
       <Box p={2} minWidth="100%">
         <Typography variant="h5">
-          Рост капитала{' '}
+          {t('netWorth.title')}{' '}
           <span
             style={{ color: theme.palette.secondary.main, cursor: 'pointer' }}
             onClick={onTogglePeriod}

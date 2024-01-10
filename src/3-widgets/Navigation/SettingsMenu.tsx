@@ -14,10 +14,12 @@ import {
   AutoAwesomeIcon,
   MoreHorizIcon,
   AccountBalanceWalletIcon,
+  GlobeIcon,
 } from '6-shared/ui/Icons'
 import {
   Divider,
   ListItemIcon,
+  ListItemSecondaryAction,
   ListItemText,
   ListSubheader,
   MenuItem,
@@ -100,6 +102,7 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
       <ExportJsonItem />
 
       <Divider light />
+      <LangItem onClose={props.onClose} />
       <LogOutItem onClose={props.onClose} />
       <VersionItem onClose={props.onClose} />
     </>
@@ -158,6 +161,29 @@ function ThemeItem({ onClose }: ItemProps) {
       <ListItemText>
         {t(theme.mode === 'dark' ? 'lightMode' : 'darkMode')}
       </ListItemText>
+    </MenuItem>
+  )
+}
+
+function LangItem({ onClose }: ItemProps) {
+  const { t, i18n } = useTranslation('settings')
+  const currentLang = i18n.language
+
+  const setNextLang = () => {
+    const nextLang = currentLang === 'en' ? 'ru' : 'en'
+    sendEvent(`Settings: change language to ${nextLang}`)
+    i18n.changeLanguage(nextLang)
+  }
+
+  return (
+    <MenuItem onClick={setNextLang}>
+      <ListItemIcon>
+        <GlobeIcon />
+      </ListItemIcon>
+      <ListItemText>{t('language')}</ListItemText>
+      <ListItemSecondaryAction>
+        {currentLang.toUpperCase()}
+      </ListItemSecondaryAction>
     </MenuItem>
   )
 }
