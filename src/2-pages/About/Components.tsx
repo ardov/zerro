@@ -1,8 +1,7 @@
-import React, { FC, ReactNode } from 'react'
+import React, { FC, ReactNode, useEffect } from 'react'
+import { useLocation, Link as RouterLink } from 'react-router-dom'
 import { Box, BoxProps, ButtonBase } from '@mui/material'
 import { ChevronRightIcon } from '6-shared/ui/Icons'
-import { useEffect } from 'react'
-import { useLocation, Link as RouterLink } from 'react-router-dom'
 import { useToggle } from '6-shared/hooks/useToggle'
 
 export function ScrollToTop() {
