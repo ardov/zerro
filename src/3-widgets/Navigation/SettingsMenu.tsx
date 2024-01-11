@@ -167,7 +167,7 @@ function ThemeItem({ onClose }: ItemProps) {
 
 function LangItem({ onClose }: ItemProps) {
   const { t, i18n } = useTranslation('settings')
-  const currentLang = i18n.language
+  const currentLang = i18n.resolvedLanguage || i18n.language
 
   const setNextLang = () => {
     const nextLang = currentLang === 'en' ? 'ru' : 'en'

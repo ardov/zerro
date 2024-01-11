@@ -10,7 +10,7 @@ export const LangSwitcher = (props: LangSwitcherProps) => {
 
   const getChildForCurrentLang = () => {
     // Return child for current language
-    const currentLang = i18n.language
+    const currentLang = i18n.resolvedLanguage || i18n.language
     if (props[currentLang]) return props[currentLang]
 
     // Return first fallback language that has a child
