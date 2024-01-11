@@ -1,9 +1,12 @@
+import type { MDXComponents } from 'mdx/types'
+
 import React from 'react'
 import { Switch, Route } from 'react-router'
 import { Box } from '@mui/material'
 import { Link } from 'react-router-dom'
 import { useAppTheme } from '6-shared/ui/theme'
 import { Logo } from '6-shared/ui/Logo'
+import { LangSwitcher } from '6-shared/localization'
 import { ScrollToTop, TextLink } from './Components'
 import MethodRu from './pages/MethodRu.mdx'
 import MethodEn from './pages/MethodEn.mdx'
@@ -12,8 +15,6 @@ import AboutEn from './pages/AboutEn.mdx'
 import QuickStartEn from './pages/QuickStartEn.mdx'
 import QuickStartRu from './pages/QuickStarRu.mdx'
 import './index.scss'
-import { MDXComponents } from 'mdx/types'
-import { LangSwitcher } from '6-shared/localization'
 
 const components = { a: TextLink } as MDXComponents
 
