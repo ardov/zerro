@@ -3,12 +3,7 @@ import {
   differenceInCalendarMonths as differenceInCalendarMonthsFNS,
   eachDayOfInterval as eachDayOfIntervalFNS,
   parseISO,
-  isToday,
-  format,
-  isYesterday,
-  isThisYear,
 } from 'date-fns'
-import ru from 'date-fns/locale/ru'
 import {
   TDateDraft,
   TISODate,
@@ -16,7 +11,6 @@ import {
   TMsTime,
   TUnixTime,
 } from '6-shared/types'
-import { t } from 'i18next'
 
 export function unixToMs(seconds: TUnixTime): TMsTime {
   return seconds * 1000
@@ -131,22 +125,4 @@ export function isISODate(date?: any): date is TISODate {
   if (typeof date !== 'string') return false
   const regex = /\d{4}-\d{2}-\d{2}/g // 0000-00-00
   return regex.test(date) && date.length === 10
-}
-
-/**
- * Formats date.
- * @link https://date-fns.org/v2.25.0/docs/format doc
- * @param date
- * @param template
- */
-export function formatDate(date: TDateDraft, template?: string): string {
-  // TODO: Date i18n
-  const opts = { locale: ru }
-  const d = parseDate(date)
-  if (template) return format(d, template, opts)
-  const thisYearDate = format(d, `d MMMM, EEEEEE`, opts)
-  if (isToday(d)) return `${t('common:today')}, ${thisYearDate}`
-  if (isYesterday(d)) return `${t('common:yesterday')}, ${thisYearDate}`
-  if (isThisYear(d)) return thisYearDate
-  return format(d, 'd MMMM yyyy, EEEEEE', opts)
 }
