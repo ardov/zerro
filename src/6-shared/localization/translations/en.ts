@@ -45,6 +45,7 @@ export const en: typeof ru = {
     defaultAccountGroup: 'Transfers',
     defaultMerchantGroup: 'Debts',
     defaultPayeeGroup: 'Debts',
+    total: 'Total',
   },
 
   errorGlobal: {

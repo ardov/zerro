@@ -6,6 +6,7 @@ import { Metric } from '../models/useMetric'
 import { TFxAmount, TISOMonth } from '6-shared/types'
 import { balances } from '5-entities/envBalances'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
+import { useTranslation } from 'react-i18next'
 
 type FooterProps = {
   month: TISOMonth
@@ -15,6 +16,7 @@ type FooterProps = {
 export const Footer: FC<FooterProps> = props => {
   const { month } = props
   const totals = balances.useTotals()[month]
+  const { t } = useTranslation('common')
 
   const Sum: FC<{ value: TFxAmount }> = ({ value }) => (
     <Typography variant="overline" color="text.secondary" align="right" noWrap>
@@ -27,7 +29,7 @@ export const Footer: FC<FooterProps> = props => {
       name={
         <div>
           <Typography variant="overline" color="text.secondary" noWrap>
-            Итого
+            {t('total')}
           </Typography>
         </div>
       }

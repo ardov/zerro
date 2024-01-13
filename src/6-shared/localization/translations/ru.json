@@ -42,7 +42,8 @@
     "defaultTagGroup": "Категории",
     "defaultAccountGroup": "Переводы",
     "defaultMerchantGroup": "Долги",
-    "defaultPayeeGroup": "Долги"
+    "defaultPayeeGroup": "Долги",
+    "total": "Итого"
   },
 
   "errorGlobal": {
