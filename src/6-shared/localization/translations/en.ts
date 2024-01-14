@@ -2,8 +2,10 @@ import ru from './ru.json'
 
 export const en: typeof ru = {
   common: {
-    btnLogin: 'Log in via Zenmoney',
-    btnAbout: 'What is this?',
+    btnLogin: 'Sign in with Zenmoney',
+    btnAbout: 'What is Zerro?',
+    haveTrouble: 'Having trouble signing in?',
+    btnAlternativeSignIn: 'Try this',
     refresh: 'Refresh',
     refreshData: 'Refresh Data',
     leftover: 'Balance',

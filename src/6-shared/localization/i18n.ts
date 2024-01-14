@@ -44,9 +44,13 @@ i18n.use(initReactI18next).init({
   },
 })
 
+// Set html lang attribute
+document.documentElement.lang = i18n.resolvedLanguage || i18n.language
+
 // Cache language on change
 i18n.on('languageChanged', function (lng) {
   localStorage.setItem(LOCAL_STORAGE_KEY, i18n.resolvedLanguage || lng)
+  document.documentElement.lang = i18n.resolvedLanguage || lng
 })
 
 i18n.on('missingKey', function (lngs, namespace, key, res) {

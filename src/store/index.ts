@@ -1,7 +1,7 @@
 import { configureStore, UnknownAction } from '@reduxjs/toolkit'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 import { ThunkAction, ThunkDispatch } from 'redux-thunk'
-import { zenmoney } from '6-shared/api/zenmoney'
+import { tokenStorage } from '6-shared/api/tokenStorage'
 
 import data from './data'
 import token from './token'
@@ -17,7 +17,7 @@ export const store = configureStore({
     token,
     displayCurrency,
   },
-  preloadedState: { token: zenmoney.getLocalToken() },
+  preloadedState: { token: tokenStorage.get() },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({ immutableCheck: false, serializableCheck: false }),
 })

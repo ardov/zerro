@@ -1,7 +1,9 @@
 {
   "common": {
     "btnLogin": "Войти через Дзен-мани",
-    "btnAbout": "Что это такое?",
+    "btnAbout": "Что такое Zerro?",
+    "haveTrouble": "Не получается зайти?",
+    "btnAlternativeSignIn": "А если так",
     "refresh": "Обновить",
     "refreshData": "Обновить данные",
     "leftover": "Остаток",

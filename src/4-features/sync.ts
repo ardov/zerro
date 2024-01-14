@@ -11,6 +11,7 @@ import { sync } from 'worker'
 import { getDiff, applyServerPatch } from 'store/data'
 import { keys } from '6-shared/helpers/keys'
 import { TDiff } from '6-shared/types'
+import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
 
 /** All syncs with zenmoney goes through this thunk */
 export const syncData = (): AppThunk => async (dispatch, getState) => {
@@ -24,7 +25,7 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
   const syncStartTime = Date.now()
   dispatch(setPending(true))
 
-  const response = await sync(token, diff)
+  const response = await sync(token, zmPreferenceStorage.get(), diff)
   dispatch(setPending(false))
   dispatch(
     setSyncData({
