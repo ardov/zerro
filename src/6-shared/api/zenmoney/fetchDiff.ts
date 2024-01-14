@@ -1,6 +1,8 @@
 import type { TToken, TZmDiff, TZmRequest } from '6-shared/types'
-import type { EndpointPreference } from '6-shared/config'
-import { endpoints, fakeToken } from '6-shared/config'
+import type { EndpointPreference } from './endpoints'
+import { endpoints } from './endpoints'
+
+export const fakeToken = 'fake_token'
 
 export async function fetchDiff(
   token: TToken,

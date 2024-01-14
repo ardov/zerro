@@ -1,4 +1,4 @@
-import { fakeToken, type EndpointPreference } from '6-shared/config'
+import type { EndpointPreference } from '6-shared/api/zenmoney'
 import type { AppThunk } from 'store'
 import { tokenStorage } from '6-shared/api/tokenStorage'
 import { zenmoney } from '6-shared/api/zenmoney'
@@ -44,8 +44,8 @@ export const loadBackup =
       const data = JSON.parse(txt)
       const converted = await convertZmToLocal(data)
       // TODO: maybe later make more elegant solution for local data
-      tokenStorage.set(fakeToken)
-      dispatch(setToken(fakeToken))
+      tokenStorage.set(zenmoney.fakeToken)
+      dispatch(setToken(zenmoney.fakeToken))
       dispatch(applyServerPatch(converted))
       dispatch(saveDataLocally())
     } catch (error) {

@@ -1,4 +1,4 @@
-import type { EndpointPreference } from '6-shared/config'
+import type { EndpointPreference } from '6-shared/api/zenmoney'
 
 const STORAGE_KEY = 'zm_server'
 

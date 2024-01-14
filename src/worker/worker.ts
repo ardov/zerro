@@ -1,4 +1,4 @@
-import type { EndpointPreference } from '../6-shared/config'
+import type { EndpointPreference } from '../6-shared/api/zenmoney/endpoints'
 import * as Comlink from 'comlink'
 import { TDiff, TLocalData, TZmDiff } from '../6-shared/types'
 import { keys } from '../6-shared/helpers/keys'

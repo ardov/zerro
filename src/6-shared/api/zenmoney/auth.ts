@@ -1,5 +1,7 @@
-import type { EndpointPreference } from '6-shared/config'
-import { clientId, clientSecret, endpoints, redirectUri } from '6-shared/config'
+import type { EndpointPreference } from './endpoints'
+import { endpoints } from './endpoints'
+// Have to use relative path here because of using in worker
+import { clientId, clientSecret, redirectUri } from '../../config'
 
 type TAccessToken = {
   access_token: string
