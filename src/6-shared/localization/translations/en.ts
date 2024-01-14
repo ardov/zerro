@@ -4,7 +4,7 @@ export const en: typeof ru = {
   common: {
     btnLogin: 'Sign in with Zenmoney',
     btnAbout: 'What is Zerro?',
-    haveTrouble: 'Having trouble signing in?',
+    haveTrouble: 'Not loading?',
     btnAlternativeSignIn: 'Try this',
     refresh: 'Refresh',
     refreshData: 'Refresh Data',

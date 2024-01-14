@@ -91,12 +91,12 @@ export default function Auth() {
                 fontWeight: 'inherit',
                 lineHeight: 'inherit',
                 borderRadius: 1,
-                color: theme.palette.secondary.main,
+                color: theme.palette.primary.main,
                 '&:hover': {
-                  color: theme.palette.primary.main,
+                  color: theme.palette.secondary.main,
                 },
                 '&:focus': {
-                  color: theme.palette.primary.main,
+                  color: theme.palette.secondary.main,
                 },
               }}
             >

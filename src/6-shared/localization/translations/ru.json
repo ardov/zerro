@@ -2,7 +2,7 @@
   "common": {
     "btnLogin": "Войти через Дзен-мани",
     "btnAbout": "Что такое Zerro?",
-    "haveTrouble": "Не получается зайти?",
+    "haveTrouble": "Не грузится?",
     "btnAlternativeSignIn": "А если так",
     "refresh": "Обновить",
     "refreshData": "Обновить данные",
