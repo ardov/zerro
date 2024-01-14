@@ -1,3 +1,4 @@
+import { t } from 'i18next'
 import {
   envelopeModel,
   TEnvelopeDraft,
@@ -24,7 +25,7 @@ export function assignNewGroup(id: TEnvelopeId): AppThunk {
 }
 
 function getNewGroupName(structure: TGroupNode[]) {
-  const baseName = 'Новая группа'
+  const baseName = t('groupNew', { ns: 'common' })
   let names = structure
     .map(group => group.id)
     .filter(name => name.startsWith(baseName))

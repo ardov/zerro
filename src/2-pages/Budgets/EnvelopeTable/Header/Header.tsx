@@ -1,5 +1,6 @@
 import React, { FC } from 'react'
 import { Typography, Box, Button } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { ChevronDownIcon } from '6-shared/ui/Icons'
 import { TISOMonth } from '6-shared/types'
 
@@ -28,6 +29,7 @@ export const Header: FC<HeaderProps> = props => {
     onReorderModeToggle,
     onOpenOverview,
   } = props
+  const { t } = useTranslation('common')
   const isSmall = useIsSmall()
   const openOnClick = useTableMenu({
     isAllShown,
@@ -92,15 +94,18 @@ export const Header: FC<HeaderProps> = props => {
                 sx={{ ml: -1, px: 1, py: 0 }}
               >
                 <Typography variant="overline" color="text.secondary" noWrap>
-                  Категории {isAllShown && '(все)'}
+                  {t('categories', {
+                    ns: 'budgets',
+                    context: isAllShown ? 'all' : '',
+                  })}
                 </Typography>
                 <ChevronDownIcon />
               </Button>
             </div>
           }
-          budgeted={<ColumnTitle name="Бюджет" />}
-          outcome={<ColumnTitle name="Операции" />}
-          available={<ColumnTitle name="Доступно" />}
+          budgeted={<ColumnTitle name={t('budget')} />}
+          outcome={<ColumnTitle name={t('activity')} />}
+          available={<ColumnTitle name={t('available')} />}
           goal={null}
         />
       </Box>

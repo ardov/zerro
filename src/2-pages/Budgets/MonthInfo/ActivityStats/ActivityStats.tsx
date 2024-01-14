@@ -2,7 +2,6 @@ import { FC, useCallback } from 'react'
 import { Box, BoxProps, ButtonBase, Collapse, Stack } from '@mui/material'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { TISOMonth } from '6-shared/types'
-import { DataLine } from '3-widgets/DataLine'
 import { Tooltip } from '6-shared/ui/Tooltip'
 
 import { displayCurrency } from '5-entities/currency/displayCurrency'
@@ -13,10 +12,13 @@ import {
   TSortedActivityNode,
 } from '5-entities/envBalances'
 import { envelopeModel } from '5-entities/envelope'
+import { DataLine } from '3-widgets/DataLine'
 import { useTrDrawer } from '2-pages/Budgets/useTrDrawer'
+import { useTranslation } from 'react-i18next'
 
 export function ActivityStats(props: { month: TISOMonth }) {
   const { month } = props
+  const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
   const activity = balances.useSortedActivity()[month]
   const openTrDrawer = useTrDrawer()
 
@@ -35,7 +37,7 @@ export function ActivityStats(props: { month: TISOMonth }) {
         month={month}
         total={activity.incomesTotal}
         items={activity.incomes}
-        name="Доходы"
+        name={t('incomes')}
         showBar
         action={showTransactions}
       />
@@ -43,7 +45,7 @@ export function ActivityStats(props: { month: TISOMonth }) {
         month={month}
         total={activity.outcomesTotal}
         items={activity.outcomes}
-        name="Расходы"
+        name={t('outcomes')}
         showBar
         action={showTransactions}
       />
@@ -51,14 +53,14 @@ export function ActivityStats(props: { month: TISOMonth }) {
         month={month}
         total={activity.transfersTotal}
         items={activity.transfers}
-        name="Переводы"
+        name={t('transfers')}
         action={showTransactions}
       />
       <StatWidget
         month={month}
         total={activity.debtsTotal}
         items={activity.debts}
-        name="Долги"
+        name={t('debts')}
         action={showTransactions}
       />
     </>
@@ -82,6 +84,7 @@ function StatWidget(props: {
   action: (id: TDataNode['id'], trMode: TrFilterMode) => void
 }) {
   const { month, total, items, name, showBar, action } = props
+  const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
   const [currency] = displayCurrency.useDisplayCurrency()
   const toDisplay = displayCurrency.useToDisplay(month)
   const envelopes = envelopeModel.useEnvelopes()
@@ -94,8 +97,8 @@ function StatWidget(props: {
         : envelopes[node.id]?.colorGenerated || '#ff0000'
     const name =
       node.id === 'transferFees'
-        ? 'Курсовая разница'
-        : envelopes[node.id]?.name || 'Неизвестная категория'
+        ? t('fxDifference')
+        : envelopes[node.id]?.name || t('unknownCategory')
 
     if (node.id !== 'transferFees') {
       console.assert(

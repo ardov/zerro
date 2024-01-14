@@ -1,18 +1,20 @@
 import React from 'react'
 import { Box, Button, Typography } from '@mui/material'
+import { Helmet } from 'react-helmet'
+import { useTranslation } from 'react-i18next'
 import { getToken } from 'store/token'
 import { useAppSelector } from 'store'
-import { Helmet } from 'react-helmet'
 
 export default function Token() {
+  const { t } = useTranslation('token')
   const token = useAppSelector(getToken)
   const [tokenIsVisible, setTokenVisibility] = React.useState(false)
 
   return (
     <>
       <Helmet>
-        <title>Токен | Zerro</title>
-        <meta name="description" content="" />
+        <title>{t('pageTitle')} | Zerro</title>
+        <meta name="description" content={t('pageDescription')} />
         <link rel="canonical" href="https://zerro.app/token" />
       </Helmet>
 
@@ -24,13 +26,11 @@ export default function Token() {
       >
         <Box p={5} mx="auto" maxWidth={500}>
           <Typography variant="h4" paragraph>
-            ⚠️ Внимание
+            {t('heading')}
           </Typography>
 
           <Typography variant="body1" paragraph>
-            Токен даёт бессрочный доступ к вашему аккаунту. Приложения
-            используют токен вместо логина и пароля, чтобы получать данные.
-            Используйте его аккуратно и храните в безопасном месте.
+            {t('body')}
           </Typography>
 
           <Box mt={3}>
@@ -39,7 +39,7 @@ export default function Token() {
               color="primary"
               onClick={() => setTokenVisibility(!tokenIsVisible)}
             >
-              {tokenIsVisible ? 'Скрыть токен' : 'Показать токен'}
+              {t(tokenIsVisible ? 'btnHide' : 'btnShow')}
             </Button>
           </Box>
 

@@ -1,11 +1,12 @@
 import React, { FC } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { Typography, Box } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { formatMoney } from '6-shared/helpers/money'
 import { WarningIcon } from '6-shared/ui/Icons'
 import { Amount } from '6-shared/ui/Amount'
-import { DragTypes } from '../../DnDContext'
+import { DragTypes } from '2-pages/Budgets/DnD'
 
 type AvailableCellProps = {
   id: string
@@ -18,6 +19,7 @@ type AvailableCellProps = {
 
 export const AvailableCell: FC<AvailableCellProps> = props => {
   const { hiddenOverspend, id, available, isChild, budgeted, isSelf } = props
+  const { t } = useTranslation('budgets')
   const availableColor = getAvailableColor(
     available,
     isChild,
@@ -32,9 +34,9 @@ export const AvailableCell: FC<AvailableCellProps> = props => {
           <Tooltip
             title={
               <span>
-                Перерасход в родительской категории.
-                <br />
-                {`Увеличьте бюджет на ${formatMoney(-hiddenOverspend)}`}
+                {t('parentOverspend', {
+                  amount: formatMoney(-hiddenOverspend),
+                })}
               </span>
             }
           >

@@ -1,8 +1,18 @@
 import type { TTransaction } from '6-shared/types'
 import React, { FC, useEffect, useState } from 'react'
-import './transitions.css'
-import { useAppDispatch } from 'store'
-import IconButton from '@mui/material/IconButton'
+import { useTranslation } from 'react-i18next'
+import { CSSTransition } from 'react-transition-group'
+import { EditOutlined } from '@mui/icons-material'
+import {
+  Box,
+  Chip,
+  Divider,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+  Menu,
+} from '@mui/material'
 import {
   LocalOfferOutlinedIcon,
   DoneAllIcon,
@@ -12,21 +22,15 @@ import {
   DeleteIcon,
 } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
-import Chip from '@mui/material/Chip'
-import Box from '@mui/material/Box'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
-import pluralize from '6-shared/helpers/pluralize'
-import { TagSelect2 } from '5-entities/tag/ui/TagSelect2'
-import { CSSTransition } from 'react-transition-group'
-import { EditOutlined } from '@mui/icons-material'
-import { BulkEditModal } from './BulkEditModal'
-import { trModel } from '5-entities/transaction'
-import { Divider, ListItemIcon, ListItemText } from '@mui/material'
 import { round } from '6-shared/helpers/money'
-import { applyClientPatch } from 'store/data'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
+import { useAppDispatch } from 'store'
+import { applyClientPatch } from 'store/data'
+import { TagSelect2 } from '5-entities/tag/ui/TagSelect2'
+import { trModel } from '5-entities/transaction'
+import { BulkEditModal } from './BulkEditModal'
+import './transitions.css'
 
 type ActionsProps = {
   visible: boolean
@@ -41,12 +45,12 @@ const Actions: FC<ActionsProps> = ({
   onUncheckAll,
   onCheckAll,
 }) => {
+  const { t } = useTranslation('transactionActions')
   const dispatch = useAppDispatch()
   const allTransactions = trModel.useTransactions()
   const [ids, setIds] = useState(checkedIds)
   const transactions = ids?.map(id => allTransactions[id])
   const actions = getAvailableActions(transactions)
-  const length = ids.length
   const [editModalVisible, setEditModalVisible] = useState(false)
 
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
@@ -67,18 +71,14 @@ const Actions: FC<ActionsProps> = ({
   }
 
   const handleDelete = useConfirm({
+    title: t('delete', { count: ids.length }),
+    okText: t('deleteBtn'),
+    cancelText: t('cancelDeletion'),
     onOk: () => {
       dispatch(trModel.deleteTransactions(checkedIds))
       closeMenu()
       onUncheckAll()
     },
-    title: `Удалить ${length} ${pluralize(length, [
-      'операцию',
-      'операции',
-      'операций',
-    ])}?`,
-    okText: 'Удалить',
-    cancelText: 'Оставить',
   })
 
   const handleCheckAll = () => {
@@ -91,11 +91,6 @@ const Actions: FC<ActionsProps> = ({
     closeMenu()
     onUncheckAll()
   }
-
-  const chipText =
-    pluralize(length, ['Выбрана', 'Выбрано', 'Выбрано']) +
-    ` ${length} ` +
-    pluralize(length, ['операция', 'операции', 'операций'])
 
   return (
     <>
@@ -132,9 +127,13 @@ const Actions: FC<ActionsProps> = ({
             boxShadow="4"
             borderRadius="60px"
           >
-            <Chip label={chipText} onDelete={onUncheckAll} variant="outlined" />
+            <Chip
+              label={t('selected', { count: ids.length })}
+              onDelete={onUncheckAll}
+              variant="outlined"
+            />
 
-            <Tooltip title="Удалить выбранные">
+            <Tooltip title={t('deleteSelected')}>
               <IconButton onClick={handleDelete}>
                 <DeleteIcon />
               </IconButton>
@@ -144,14 +143,14 @@ const Actions: FC<ActionsProps> = ({
               <TagSelect2
                 onChange={handleSetTag}
                 trigger={
-                  <Tooltip title="Выставить категорию">
+                  <Tooltip title={t('setCategory')}>
                     <IconButton children={<LocalOfferOutlinedIcon />} />
                   </Tooltip>
                 }
               />
             )}
 
-            <Tooltip title="Действия">
+            <Tooltip title={t('actions')}>
               <IconButton
                 children={<MoreVertIcon />}
                 aria-controls="actions-menu"
@@ -173,7 +172,7 @@ const Actions: FC<ActionsProps> = ({
                   <ListItemIcon>
                     <VisibilityIcon />
                   </ListItemIcon>
-                  <ListItemText primary="Сделать просмотренными" />
+                  <ListItemText primary={t('markViewed')} />
                 </MenuItem>
               )}
 
@@ -182,7 +181,7 @@ const Actions: FC<ActionsProps> = ({
                   <ListItemIcon>
                     <EditOutlined />
                   </ListItemIcon>
-                  <ListItemText primary="Редактировать" />
+                  <ListItemText primary={t('edit')} />
                 </MenuItem>
               )}
 
@@ -202,8 +201,8 @@ const Actions: FC<ActionsProps> = ({
                     <MergeTypeIcon />
                   </ListItemIcon>
                   <ListItemText
-                    primary="Объединить в расход"
-                    secondary="Возвраты удалятся или станут переводами"
+                    primary={t('combineToOutcome')}
+                    secondary={t('combineToOutcomeComment')}
                   />
                 </MenuItem>
               )}
@@ -224,8 +223,8 @@ const Actions: FC<ActionsProps> = ({
                     <MergeTypeIcon />
                   </ListItemIcon>
                   <ListItemText
-                    primary="Объединить в доход"
-                    secondary="Расходы удалятся или станут переводами"
+                    primary={t('combineToIncome')}
+                    secondary={t('combineToIncomeComment')}
                   />
                 </MenuItem>
               )}
@@ -236,8 +235,8 @@ const Actions: FC<ActionsProps> = ({
                     <MergeTypeIcon />
                   </ListItemIcon>
                   <ListItemText
-                    primary="Схлопнуть операции"
-                    secondary="Они просто удалятся 😉"
+                    primary={t('mergeTransactions')}
+                    secondary={t('mergeTransactionsComment')}
                   />
                 </MenuItem>
               )}
@@ -250,7 +249,7 @@ const Actions: FC<ActionsProps> = ({
                 <ListItemIcon>
                   <DoneAllIcon />
                 </ListItemIcon>
-                <ListItemText primary="Выбрать все" />
+                <ListItemText primary={t('selectAll')} />
               </MenuItem>
             </Menu>
           </Box>

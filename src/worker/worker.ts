@@ -1,3 +1,4 @@
+import type { EndpointPreference } from '../6-shared/api/zenmoney/endpoints'
 import * as Comlink from 'comlink'
 import { TDiff, TLocalData, TZmDiff } from '../6-shared/types'
 import { keys } from '../6-shared/helpers/keys'
@@ -38,10 +39,14 @@ function convertZmToLocal(diff: TZmDiff) {
   return convertDiff.toClient(diff)
 }
 
-async function sync(token: string, diff: TDiff) {
+async function sync(
+  token: string,
+  preference: EndpointPreference,
+  diff: TDiff
+) {
   const zmDiff = convertDiff.toServer(diff)
   try {
-    let data = await zenmoney.getData(token, zmDiff)
+    let data = await zenmoney.fetchDiff(token, preference, zmDiff)
     return { data: convertDiff.toClient(data) }
   } catch (error: any) {
     return { error: error.message as string }

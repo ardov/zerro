@@ -1,15 +1,17 @@
 import React, { FC } from 'react'
 import { Box, Link, Typography } from '@mui/material'
-import { Helmet } from 'react-helmet'
-import { useAppTheme } from '6-shared/ui/theme'
 import { Stack } from '@mui/system'
+import { Helmet } from 'react-helmet'
+import { useTranslation } from 'react-i18next'
+import { useAppTheme } from '6-shared/ui/theme'
 
 export default function Donation() {
+  const { t } = useTranslation('donation')
   return (
     <>
       <Helmet>
-        <title>Поддержать приложение | Zerro</title>
-        <meta name="description" content="" />
+        <title>{t('pageTitle')} | Zerro</title>
+        <meta name="description" content={t('pageDescription')} />
         <link rel="canonical" href="https://zerro.app/donation" />
       </Helmet>
 
@@ -21,25 +23,24 @@ export default function Donation() {
       >
         <Box p={3} pb={8} mx="auto" maxWidth={480}>
           <Typography variant="h5" align="center" paragraph>
-            Поддержать приложение
+            {t('heading')}
           </Typography>
 
           <Typography variant="body1" align="center" paragraph>
-            Подпишитесь на патреон или просто переведите любую сумму на развитие
-            проекта. И не забудьте отметить это в бюджете 😉
+            {t('subtitle')}
           </Typography>
 
           <Stack spacing={2} py={2}>
             <LinkCard
               icon={<PatreonLogo />}
-              primary="Patreon"
-              secondary="Patreon позволяет регулярно жертвовать комфортную сумму на развитие проекта"
+              primary={t('patreonTitle')}
+              secondary={t('patreonDescription')}
               href="https://www.patreon.com/ardov"
             />
             <LinkCard
               icon={<CardLogo />}
-              primary="Перевод на карту"
-              secondary="Вы всегда можете перевести любую сумму"
+              primary={t('cardTitle')}
+              secondary={t('cardDescription')}
               href="https://www.tinkoff.ru/sl/3zbRWFqgcT1"
             />
           </Stack>
@@ -50,8 +51,7 @@ export default function Donation() {
             align="center"
             paragraph
           >
-            А ещё обязательно расскажите близким про бюджетирование. О деньгах
-            сложно говорить, но эти знания могут сильно улучшить их жизнь 🖤
+            {t('afterword')}
           </Typography>
         </Box>
       </Box>

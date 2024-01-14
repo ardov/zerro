@@ -13,6 +13,7 @@ import {
 } from '@mui/material'
 import { AddIcon } from '6-shared/ui/Icons'
 import { EmojiIcon } from '6-shared/ui/EmojiIcon'
+import { useTranslation } from 'react-i18next'
 
 type TagType = 'income' | 'outcome' | undefined | null
 type TagNode = TagTreeNode | TTagPopulated
@@ -75,6 +76,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
   onClose,
   ...popoverProps
 }) => {
+  const { t } = useTranslation('common')
   const tags = tagModel.useTagsTree()
   const [search, setSearch] = useState('')
   const [focused, setFocused] = useState(0)
@@ -145,7 +147,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
           onChange={e => setSearch(e.target.value)}
           onKeyDown={handleKeyDown}
           variant="outlined"
-          placeholder="Выберите категорию"
+          placeholder={t('selectCategory')}
           fullWidth
           autoFocus
         />

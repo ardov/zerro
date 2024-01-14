@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Drawer, Box, Typography, IconButton } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon } from '6-shared/ui/Icons'
@@ -24,6 +25,7 @@ const trDrawerHooks = registerPopover(
 export const useTransactionDrawer = trDrawerHooks.useMethods
 
 export const SmartTransactionListDrawer = () => {
+  const { t } = useTranslation('common')
   const drawer = trDrawerHooks.useProps()
   const trPreview = useTransactionPreview()
   const { transactions, filterConditions, initialDate, title } =
@@ -45,6 +47,7 @@ export const SmartTransactionListDrawer = () => {
     },
     [trPreview]
   )
+
   return (
     <Drawer
       anchor="right"
@@ -57,11 +60,11 @@ export const SmartTransactionListDrawer = () => {
         <Box py={1} px={3} display="flex" alignItems="center">
           <Box flexGrow={1}>
             <Typography variant="h6" noWrap>
-              {title || 'Операции'}
+              {title || t('transactions')}
             </Typography>
           </Box>
 
-          <Tooltip title="Закрыть">
+          <Tooltip title={t('close')}>
             <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
           </Tooltip>
         </Box>

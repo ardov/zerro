@@ -1,0 +1,89 @@
+import { DetailsBox } from '../Components'
+import { Box } from '@mui/material'
+import wholeImg from './whole-screenshot.png'
+import { Head } from '../Head'
+
+<Head
+  title="Getting Started | Zerro"
+  description="This guide will help you start budgeting"
+/>
+
+# Getting Started
+
+## 1. Setting Up Accounts
+
+First, let's determine which money we will be categorizing. There are two groups of accounts:
+
+- **Accounts in the balance.** These are the funds we will be working with and distributing across categories.
+- **Accounts outside the balance.** These accounts are not included in the budget and do not affect it. Include all debt accounts here: loans, mortgages. Also, money that we do not want to distribute by categories, for example, investment accounts.
+
+You can turn an account on or off from the balance directly in Zerro by double-clicking on it.
+
+<DetailsBox title="What to do with credit cards?">
+  Credit cards can be used in different ways, so they can fall into either group. How do you use your credit card?
+
+  <ul>
+    <li>
+      <strong>I don’t use the credit card, only pay off the debt.</strong> Then you can consider it a loan and keep it outside the balance.
+    </li>
+    <li>
+      <strong>I use the credit card and always have money to pay off the debt on it.</strong>
+      In this case, you can safely include the credit card in the balance.
+    </li>
+    <li>
+      <strong>I use the credit card and have a large debt on it.</strong> Unfortunately,
+      Zerro doesn't have a neat solution for this situation yet. But you can use
+      a couple of tricks.
+    </li>
+  </ul>
+</DetailsBox>
+
+## 2. Allocating Money
+
+Hurray, we are ready to allocate money! Open the current month and look at the "Unallocated" figure - that's exactly how much money needs to be distributed across categories (envelopes). If any category is missing, create it in Zenmoney .
+
+<Box
+  component="img"
+  src={wholeImg}
+  alt="This is roughly what the interface looks like"
+  sx={{
+    my: 4,
+    maxWidth: '100%',
+    borderRadius: 1,
+    border: '1px solid rgba(0,0,0,0.08)',
+    boxShadow: '0 8px 32px 0 rgba(0,0,0,0.16)',
+  }}
+/>
+
+### How to Save?
+
+And how would we save with paper envelopes? We would create a separate envelope for each goal: vacation, car, new phone, etc. Work with Zerro in the same way. Create the necessary category and regularly set aside money there.
+
+<DetailsBox title="How to hide a category in Zenmoney , but keep it in Zerro?">
+  <ol>
+    <li> Create a category and check “Show in expenses”</li>
+    <li> Assign a budget to it</li>
+    <li> Uncheck “Show in expenses”</li>
+  </ol>
+  Now the category won't appear in Zenmoney 's expense categories but will be visible in Zerro,
+  because there is money in this “envelope”.
+</DetailsBox>
+
+### How to Account for Transfers?
+
+All transfers outside the balance take money out of the budget. For example, transfers to a mortgage or investment account. Such transfers should be planned in advance, and Zerro can do this.
+
+Zerro automatically creates categories for all accounts outside the balance. These categories will appear as soon as you make a transfer.
+
+For example, every month we pay 1000₽ on a loan, for this we transfer money to a special “Loan” account outside the balance. How to account for this transfer?
+
+1. Find the "Loan" category in the list and set aside 1000₽ there. This reserves money for the transfer. If the category is not visible, enable its display in the table settings.
+2. When we transfer 1000₽ to the loan, the transfer will be recorded as an expense in the category.
+
+## 4. Monitor the Budget
+
+- After each paycheck, go to Zerro and distribute unallocated money across categories.
+- Periodically check that there is enough money in the categories. You can [install Zerro as an app](https://t.me/zerroapp/10) for this.
+- Move money from one category to another if needed. You can directly drag them from the “Available” column.
+- Save and [create new goals](https://t.me/zerroapp/7).
+- Subscribe to the [updates channel](https://t.me/zerroapp) and ask questions in the [chat](https://t.me/zerrochat).

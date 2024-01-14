@@ -26,6 +26,7 @@ import { useAppTheme } from '6-shared/ui/theme'
 
 import AccountList from '3-widgets/account/AccountList'
 import { DebtorList } from '3-widgets/DebtorList'
+import { useTranslation } from 'react-i18next'
 
 export default function NavigationDrawer(props: DrawerProps) {
   const theme = useAppTheme()
@@ -86,31 +87,32 @@ export default function NavigationDrawer(props: DrawerProps) {
 }
 
 function Links() {
+  const { t } = useTranslation('navigation')
   return (
     <List>
       <NavigationLink
-        text="Бюджет"
+        text={t('budget')}
         path="/budget"
         icon={<AccountBalanceIcon />}
       />
       <NavigationLink
-        text="Операции"
+        text={t('transactions')}
         path="/transactions"
         icon={<SyncAltIcon />}
       />
-      <NavigationLink text="Аналитика" path="/stats" icon={<BarChartIcon />} />
+      <NavigationLink text={t('stats')} path="/stats" icon={<BarChartIcon />} />
       <NavigationLink
-        text="Итоги года"
+        text={t('yearWrapped')}
         path="/review"
         icon={<WhatshotIcon />}
       />
       <NavigationLink
-        text="Как пользоваться"
+        text={t('about')}
         path="/about"
         icon={<HelpOutlineIcon />}
       />
       <NavigationLink
-        text="Поддержать проект"
+        text={t('donate')}
         path="/donation"
         icon={<FavoriteBorderIcon />}
       />

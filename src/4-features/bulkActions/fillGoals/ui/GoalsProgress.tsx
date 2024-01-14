@@ -10,6 +10,7 @@ import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { goalModel } from '5-entities/goal'
 import { totalGoalsModel } from '../model'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
+import { useTranslation } from 'react-i18next'
 
 type TGoalsProgressProps = ButtonBaseProps & {
   month: TISOMonth
@@ -28,6 +29,7 @@ const baseStyles = {
 }
 
 export const GoalsProgress: FC<TGoalsProgressProps> = props => {
+  const { t } = useTranslation('goals')
   const { month, ...btnProps } = props
   const dispatch = useAppDispatch()
   const [currency] = displayCurrency.useDisplayCurrency()
@@ -37,11 +39,10 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
 
   const completeAll = useConfirm({
     onOk: () => dispatch(totalGoalsModel.fillAll(month)),
-    okText: 'Выполнить цели',
-    title: 'Выполнить все цели?',
-    description:
-      'Бюджеты будут выставлены так, чтобы цели в этом месяце выполнились.',
-    cancelText: 'Отмена',
+    title: t('completeAll.title'),
+    description: t('completeAll.description'),
+    okText: t('completeAll.okText'),
+    cancelText: t('completeAll.cancelText'),
   })
 
   // No goals
@@ -62,7 +63,7 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
       <ButtonBase sx={baseStyles} {...btnProps} onClick={completeAll}>
         <RadialProgress value={progress} />
         <Typography variant="body1">
-          Цели {Math.floor(progress * 100)}%
+          {t('goalsProgress', { percent: Math.floor(progress * 100) })}
         </Typography>
       </ButtonBase>
     </Tooltip>

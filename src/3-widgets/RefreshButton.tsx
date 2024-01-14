@@ -1,21 +1,23 @@
 import React, { FC, useCallback, useEffect, useState } from 'react'
-import { syncData } from '4-features/sync'
-import { getChangedNum } from 'store/data'
-import { getPendingState } from 'store/isPending'
-import CircularProgress from '@mui/material/CircularProgress'
+import { useTranslation } from 'react-i18next'
 import { BottomNavigationAction, SxProps } from '@mui/material'
+import CircularProgress from '@mui/material/CircularProgress'
+import Badge from '@mui/material/Badge'
+import IconButton from '@mui/material/IconButton'
 import {
   SyncIcon,
   SyncDisabledIcon,
   DoneIcon,
   WarningIcon,
 } from '6-shared/ui/Icons'
-import Badge from '@mui/material/Badge'
-import IconButton from '@mui/material/IconButton'
 import { Tooltip } from '6-shared/ui/Tooltip'
+
+import { getChangedNum } from 'store/data'
+import { getPendingState } from 'store/isPending'
 import { getLastSyncInfo } from 'store/lastSync'
-import { useRegularSync } from '3-widgets/RegularSyncHandler'
 import { useAppDispatch, useAppSelector } from 'store'
+import { syncData } from '4-features/sync'
+import { useRegularSync } from '3-widgets/RegularSyncHandler'
 
 type ButtonState = 'idle' | 'pending' | 'success' | 'fail'
 
@@ -23,6 +25,7 @@ const RefreshButton: FC<{ isMobile?: boolean; sx?: SxProps }> = ({
   isMobile,
   ...rest
 }) => {
+  const { t } = useTranslation('common')
   const dispatch = useAppDispatch()
   const handleClick = useCallback(() => dispatch(syncData()), [dispatch])
   const changedNum = useAppSelector(getChangedNum)
@@ -53,7 +56,7 @@ const RefreshButton: FC<{ isMobile?: boolean; sx?: SxProps }> = ({
 
   return isMobile ? (
     <BottomNavigationAction
-      label="Обновить"
+      label={t('refresh')}
       value="refresh"
       icon={
         <Badge color="info" overlap="rectangular" badgeContent={changedNum}>
@@ -64,7 +67,7 @@ const RefreshButton: FC<{ isMobile?: boolean; sx?: SxProps }> = ({
       {...rest}
     />
   ) : (
-    <Tooltip title="Обновить данные">
+    <Tooltip title={t('refreshData')}>
       <Badge color="info" overlap="circular" badgeContent={changedNum}>
         <IconButton onClick={handleClick} {...rest}>
           {components[state]}

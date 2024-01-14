@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react'
 import { Menu, MenuItem, PopoverProps } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { registerPopover } from '6-shared/historyPopovers'
 
 type TableMenuProps = {
@@ -25,6 +26,7 @@ export const useTableMenu = (props: TableMenuProps) => {
 }
 
 export function TableMenu() {
+  const { t } = useTranslation('envelopeTableMenu')
   const popover = tableMenu.useProps()
   const { onShowAllToggle, onReorderModeToggle, isReordering, isAllShown } =
     popover.extraProps
@@ -37,7 +39,7 @@ export function TableMenu() {
           onShowAllToggle()
         }}
       >
-        {isAllShown ? 'Скрыть часть категорий' : 'Показать все категории'}
+        {t(isAllShown ? 'showPrtiallyEnvelopes' : 'showAllEnvelopes')}
       </MenuItem>
       <MenuItem
         onClick={() => {
@@ -45,7 +47,7 @@ export function TableMenu() {
           onReorderModeToggle()
         }}
       >
-        {isReordering ? 'Выйти из режима редактирования' : 'Режим редактирования'}
+        {t(isReordering ? 'leaveEditMode' : 'goToEditMode')}
       </MenuItem>
     </Menu>
   )

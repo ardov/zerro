@@ -1,15 +1,21 @@
+import type { DialogProps } from '@mui/material/Dialog'
+import type { Modify, TTransaction } from '6-shared/types'
+
 import React, { FC, useEffect, useState } from 'react'
-import Button from '@mui/material/Button'
-import Dialog, { DialogProps } from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import DialogTitle from '@mui/material/DialogTitle'
+import { useTranslation } from 'react-i18next'
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
+} from '@mui/material'
 import { useAppDispatch } from 'store'
 import { trModel } from '5-entities/transaction'
 import { TagList } from '5-entities/tag/ui/TagList'
-import { Modify, TTransaction } from '6-shared/types'
-import { Box, TextField } from '@mui/material'
 
 type BulkEditModalProps = Modify<DialogProps, { onClose: () => void }> & {
   ids: string[]
@@ -24,6 +30,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   keepMounted = false,
   ...rest
 }) => {
+  const { t } = useTranslation('transactionsBulkEdit')
   const dispatch = useAppDispatch()
   const allTransactions = trModel.useTransactions()
   const transactions = ids.map(id => allTransactions[id]).filter(Boolean)
@@ -56,21 +63,17 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
 
   return (
     <Dialog open={open} onClose={onClose} {...rest}>
-      <DialogTitle>Редактирование операций</DialogTitle>
+      <DialogTitle>{t('editTransactions')}</DialogTitle>
 
       <DialogContent>
         {types.transfer === 0 && (
           <>
-            <DialogContentText>Категории</DialogContentText>
+            <DialogContentText>{t('categories')}</DialogContentText>
             <TagList
               tags={tags}
               tagType={tagType}
               onChange={setTags}
-              sx={{
-                p: 2,
-                bgcolor: 'background.default',
-                borderRadius: 1,
-              }}
+              sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1 }}
             />
           </>
         )}
@@ -79,7 +82,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
           <TextField
             value={comment}
             onChange={e => setComment(e.target.value)}
-            label="Комментарий"
+            label={t('comment')}
             multiline
             maxRows="4"
             fullWidth
@@ -92,10 +95,10 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
 
       <DialogActions>
         <Button onClick={onClose} color="primary">
-          Отмена
+          {t('cancel')}
         </Button>
         <Button onClick={onSave} color="primary" variant="contained" autoFocus>
-          Применить изменения
+          {t('save')}
         </Button>
       </DialogActions>
     </Dialog>

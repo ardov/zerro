@@ -1,13 +1,16 @@
 import type { TTagId } from '6-shared/types'
+
 import React, { FC } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Chip, ChipProps } from '@mui/material'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { tagModel, TTagPopulated } from '../model'
 
 export const TagChip: FC<ChipProps & { id: TTagId }> = ({ id, ...rest }) => {
+  const { t } = useTranslation()
   let tag = tagModel.usePopulatedTags()[id]
   let label = getTagLabel(tag)
-  if (id === 'mixed') label = 'Разные категории'
+  if (id === 'mixed') label = t('mixedCategories')
   return <Chip deleteIcon={<CloseIcon />} label={label} {...rest} />
 }
 

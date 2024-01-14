@@ -1,10 +1,8 @@
-import {
+import type {
   TAccount,
   TZmAccount,
   TBudget,
   TZmBudget,
-  TBudgetId,
-  TTagId,
   TZmCompany,
   TCompany,
   TZmCountry,
@@ -29,15 +27,12 @@ import {
   TDeletionObject,
   TUnixTime,
   TMsTime,
-  TISODate,
 } from '6-shared/types'
-import { TZmAdapter } from '6-shared/helpers/adapterUtils'
+import type { TZmAdapter } from '6-shared/helpers/adapterUtils'
+import { toBudgetId } from './toBudgetId'
 
 const unixToMs = (seconds: TUnixTime): TMsTime => seconds * 1000
 const msToUnix = (date: TMsTime): TUnixTime => Math.round(date / 1000)
-
-export const toBudgetId = (date: TISODate, tag: TTagId | null): TBudgetId =>
-  `${date}#${tag}`
 
 const convertAccount: TZmAdapter<TZmAccount, TAccount> = {
   toClient: el => {
@@ -172,6 +167,7 @@ const convertDeletion: TZmAdapter<TZmDeletionObject, TDeletionObject> = {
 
 export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
   toClient: d => {
+    const t0 = performance.now()
     let r: TDiff = { serverTimestamp: 0 }
     if (d.serverTimestamp) r.serverTimestamp = unixToMs(d.serverTimestamp)
     if (d.deletion) r.deletion = d.deletion.map(convertDeletion.toClient)
@@ -189,10 +185,13 @@ export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
       r.reminderMarker = d.reminderMarker.map(convertReminderMarker.toClient)
     if (d.transaction)
       r.transaction = d.transaction.map(convertTransaction.toClient)
+    const t1 = performance.now()
+    console.log('convertDiff.toClient', t1 - t0)
     return r
   },
 
   toServer: d => {
+    const t0 = performance.now()
     let r: TZmDiff = { serverTimestamp: 0 }
     if (d.serverTimestamp) r.serverTimestamp = msToUnix(d.serverTimestamp)
     if (d.deletion) r.deletion = d.deletion.map(convertDeletion.toServer)
@@ -210,6 +209,8 @@ export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
       r.reminderMarker = d.reminderMarker.map(convertReminderMarker.toServer)
     if (d.transaction)
       r.transaction = d.transaction.map(convertTransaction.toServer)
+    const t1 = performance.now()
+    console.log('convertDiff.toServer', t1 - t0)
     return r
   },
 }

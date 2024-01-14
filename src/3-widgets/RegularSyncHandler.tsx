@@ -4,13 +4,17 @@ import { syncData } from '4-features/sync'
 import { getLastSyncTime, getLastChangeTime } from 'store/data'
 import { getPendingState } from 'store/isPending'
 import { loadLocalData } from '4-features/localData'
-import { createLocalStorageStateHook } from 'use-local-storage-state'
+import useLocalStorageState from 'use-local-storage-state'
 import { useAppDispatch, useAppSelector } from 'store'
 
-export const useRegularSync = createLocalStorageStateHook<boolean>(
-  'regularSync',
-  true
-)
+export const useRegularSync = () =>
+  useLocalStorageState<boolean>('regularSync', {
+    defaultValue: true,
+  })
+// export const useRegularSync = ()  createLocalStorageStateHook<boolean>(
+//   'regularSync',
+//   true
+// )
 
 const SYNC_DELAY = 20 * 60 * 1000 // 20min
 const CHECK_DELAY = 20 * 1000 // 20sec

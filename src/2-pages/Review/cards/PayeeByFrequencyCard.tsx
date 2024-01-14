@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ButtonBase, IconButton, Stack, Typography } from '@mui/material'
-import pluralize from '6-shared/helpers/pluralize'
 
 import { Card, TCardProps } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
@@ -12,6 +12,7 @@ import {
 import { ArrowForwardIcon, ArrowBackIcon } from '6-shared/ui/Icons'
 
 export function PayeeByFrequencyCard(props: TCardProps) {
+  const { t } = useTranslation('yearReview', { keyPrefix: 'payeeByFrequency' })
   const [i, setI] = useState(0)
   const yearStats = useStats(props.year)
   const toDisplay = displayCurrency.useToDisplay('current')
@@ -33,14 +34,15 @@ export function PayeeByFrequencyCard(props: TCardProps) {
   const next = () => setI(Math.min(i + 1, topPayees.length - 1))
   const prev = () => setI(Math.max(i - 1, 0))
   const { payee, transactions, outcome } = topPayees[i]
-  const trLength = transactions.length
+  const count = transactions.length
 
   if (!outcome) return null
+
   return (
     <Card>
       <Stack spacing={1} alignItems="center" direction="column">
         <Typography variant="body1" align="center">
-          Любимое место #{i + 1}
+          {t('favouritePlace', { number: i + 1 })}
         </Typography>
 
         <ButtonBase
@@ -53,17 +55,10 @@ export function PayeeByFrequencyCard(props: TCardProps) {
             </Typography>
 
             <Typography variant="body1" align="center">
-              {trLength}
-              {' '}
-              {pluralize(trLength, ['покупка', 'покупки', 'покупок'])} со
-              средним чеком{' '}
-              <DisplayAmount
-                value={outcome / trLength}
-                noShade
-                decMode="ifOnly"
-              />
-              .
-              <br />А всего потратили{' '}
+              {t('purchase', { count })}
+              <DisplayAmount value={outcome / count} noShade decMode="ifOnly" />
+              <br />
+              {t('andTotalSpend')}
               <DisplayAmount value={outcome} noShade decMode="ifAny" />
             </Typography>
           </Stack>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import './index.scss'
 import { TTransaction } from '6-shared/types'
@@ -19,6 +20,7 @@ const currYear = new Date().getFullYear()
 const startingYear = currMonth >= 11 ? currYear : currYear - 1
 
 export default function Review() {
+  const { t } = useTranslation('yearReview')
   const [year, setYear] = useState(startingYear)
   const [isOpenTrList, toogleTrList] = useState(false)
   const [transactions, setTransactions] = useState<TTransaction[]>([])
@@ -47,7 +49,7 @@ export default function Review() {
           <QRCard year={year} onShowTransactions={showTransactions} />
           <NoCategoryCard year={year} onShowTransactions={showTransactions} />
           <Button onClick={() => setYear(y => y - 1)}>
-            А что было в прошлом году?
+            {t('whatWasInPreviousYear')}
           </Button>
         </Stack>
       </Box>
@@ -62,6 +64,7 @@ export default function Review() {
 }
 
 function CardTitle({ year }: { year: number }) {
+  const { t } = useTranslation('yearReview')
   return (
     <Card>
       <Typography
@@ -70,7 +73,7 @@ function CardTitle({ year }: { year: number }) {
         color="textSecondary"
         className="results"
       >
-        ИТОГИ ГОДА
+        {t('yearReview')}
       </Typography>
       <Box position="relative">
         <Typography variant="h1" align="center" className="year">

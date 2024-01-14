@@ -1,5 +1,6 @@
 import { v1 as uuidv1 } from 'uuid'
 import { OptionalExceptFor, TTag } from '6-shared/types'
+import { t } from 'i18next'
 
 type TagDraft = OptionalExceptFor<TTag, 'user' | 'title'>
 
@@ -22,7 +23,8 @@ export function makeTag(raw: TagDraft): TTag {
 }
 
 export const nullTag = makeTag({
-  title: 'Без категории',
+  // TODO: ??? i18n
+  title: t('common:tagNull'),
   user: 0,
   id: 'null',
   budgetIncome: true,

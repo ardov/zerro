@@ -1,5 +1,6 @@
 import React, { FC } from 'react'
 import { useLocation, useHistory } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import {
   BottomNavigation,
   BottomNavigationAction,
@@ -17,19 +18,21 @@ import RefreshButton from '3-widgets/RefreshButton'
 import { SettingsMenu, useSettingsMenu } from './SettingsMenu'
 
 const actionSx = { minWidth: 32 }
-const routes = [
-  { path: '/budget', label: 'Бюджет', icon: <AccountBalanceIcon /> },
-  { path: '/transactions', label: 'Операции', icon: <SyncAltIcon /> },
-  { path: '/stats', label: 'Аналитика', icon: <BarChartIcon /> },
-]
 
 export const MobileNavigation: FC = () => {
+  const { t } = useTranslation('navigation')
   const path = useLocation().pathname
   const history = useHistory()
   const openSettings = useSettingsMenu()
 
   const hasHomeBar = useHomeBar()
   const paddingBottom = hasHomeBar ? '20px' : '0px'
+
+  const routes = [
+    { path: '/budget', label: t('budget'), icon: <AccountBalanceIcon /> },
+    { path: '/transactions', label: t('transactions'), icon: <SyncAltIcon /> },
+    { path: '/stats', label: t('stats'), icon: <BarChartIcon /> },
+  ]
   const currentRoute = routes.find(route => path.startsWith(route.path))
 
   return (
@@ -60,7 +63,7 @@ export const MobileNavigation: FC = () => {
           />
         ))}
         <BottomNavigationAction
-          label="Меню"
+          label={t('settings')}
           value="menu"
           icon={<SettingsIcon />}
           onClick={openSettings}

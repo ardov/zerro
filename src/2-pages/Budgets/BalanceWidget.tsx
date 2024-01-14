@@ -1,15 +1,16 @@
 import { Divider, Paper, Typography } from '@mui/material'
 import Balancer from 'react-wrap-balancer'
+import { useTranslation } from 'react-i18next'
 import { keys } from '6-shared/helpers/keys'
-import pluralize from '6-shared/helpers/pluralize'
 import { TISOMonth } from '6-shared/types'
-import { DataLine } from '3-widgets/DataLine'
 import { Total } from '6-shared/ui/Total'
+import { DataLine } from '3-widgets/DataLine'
 
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { balances } from '5-entities/envBalances'
 
 export function BalanceWidget(props: { month: TISOMonth }) {
+  const { t } = useTranslation('budgets')
   const totals = balances.useTotals()[props.month]
   const [currency, setDisplayCurrency] = displayCurrency.useDisplayCurrency()
   const toDisplay = displayCurrency.useToDisplay(props.month)
@@ -24,7 +25,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
 
   const currString =
     currCount > 1
-      ? ` | ${currCount} ${pluralize(currCount, ['валюта', 'валюты', 'валют'])}`
+      ? ` | ${t('currency', { ns: 'common', count: currCount })}`
       : ''
   const fundsEnd = toDisplay(totals.fundsEnd)
   const fundsChange = toDisplay(totals.fundsChange)
@@ -47,7 +48,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
       }}
     >
       <Total
-        title={'В балансе'}
+        title={t('inBalance')}
         value={fundsEnd}
         currency={currency}
         onClick={cycleForward}
@@ -59,22 +60,22 @@ export function BalanceWidget(props: { month: TISOMonth }) {
       </div> */}
       <Divider />
       <DataLine
-        name="В категориях"
-        tooltip="Эта сумма сейчас лежит в категориях (столбец «Доступно»)"
+        name={t('inEnvelopes')}
+        tooltip={t('inEnvelopesTooltip')}
         amount={available}
         currency={currency}
       />
       {!!smartBudgetedInFuture && (
         <DataLine
-          name="Отложено на будущее"
-          tooltip="Эти деньги зарезервированы под будущие бюджеты"
+          name={t('budgetedInFuture')}
+          tooltip={t('budgetedInFutureTooltip')}
           amount={smartBudgetedInFuture}
           currency={currency}
         />
       )}
       <DataLine
-        name="Свободно"
-        tooltip="Нераспределённые деньги"
+        name={t('toBeBudgeted')}
+        tooltip={t('toBeBudgetedTooltip')}
         amount={toBeBudgeted}
         currency={currency}
       />
@@ -91,17 +92,17 @@ export function BalanceWidget(props: { month: TISOMonth }) {
     overspend: number
   ) {
     if (!!overspend) {
-      return 'Добавьте денег в категории с перерасходом.'
+      return t('explainer.overspend')
     }
     if (toBeBudgeted > 0) {
-      return 'Выглядит замечательно! Распределите свободные деньги, чтобы было совсем хорошо.'
+      return t('explainer.hasFreeMoney')
     }
     if (balance < 0) {
-      return 'Кажется, у вас отрицательный баланс, поэтому распределять нечего. Кредиты лучше всего унести за баланс.'
+      return t('explainer.negativeBalance')
     }
     if (toBeBudgeted === 0) {
-      return 'Все деньги распределены, так держать!'
+      return t('explainer.zeroToBeBudgeted')
     }
-    return 'Вы разложили по категориям больше денег, чем у вас есть. На что-то может не хватить. Чтобы исправить, выложите излишки из категорий.'
+    return t('explainer.budgetedMoreThanHave')
   }
 }

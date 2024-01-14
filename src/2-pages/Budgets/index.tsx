@@ -11,10 +11,9 @@ import { balances, TrFilterMode } from '5-entities/envBalances'
 
 import { useTrDrawer } from './useTrDrawer'
 import { EnvelopeTable } from './EnvelopeTable'
-import { DnDContext } from './DnDContext'
+import { DnDContext } from './DnD/DnDContext'
 import { SmartBudgetPopover } from './BudgetPopover'
 import { SmartGoalPopover } from './GoalPopover'
-import { Explainer } from './Explainer'
 import { SideContent, useSideContent } from './SideContent'
 
 export default function WithMonth() {
@@ -56,7 +55,6 @@ function Budgets() {
         py: 3,
       }}
     >
-      <Explainer />
       <EnvelopeTable
         month={month}
         onShowTransactions={openTransactions}

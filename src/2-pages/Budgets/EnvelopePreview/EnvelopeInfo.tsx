@@ -1,5 +1,7 @@
 import type { TDateDraft, TFxAmount, TISOMonth } from '6-shared/types'
+
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Stack,
@@ -20,35 +22,18 @@ import {
 } from '6-shared/helpers/date'
 
 import { OneLiner } from '3-widgets/DataLine'
-
 import { TEnvelopeId } from '5-entities/envelope'
 import { balances, TrFilterMode } from '5-entities/envBalances'
-
 import { cardStyle } from './shared'
 import { useBudgetPopover } from '../BudgetPopover'
 import { useTrDrawer } from '../useTrDrawer'
 
-function getPrepositionalMonthName(month: TISOMonth | TDateDraft) {
-  const monthNames = [
-    'январе',
-    'феврале',
-    'марте',
-    'апреле',
-    'мае',
-    'июне',
-    'июле',
-    'августе',
-    'сентябре',
-    'октябре',
-    'ноябре',
-    'декабре',
-  ]
-  const monthIndex = parseDate(month).getMonth()
-  return monthNames[monthIndex]
-}
+const getMonthNum = (month: TISOMonth | TDateDraft) =>
+  parseDate(month).getMonth() + 1
 
 export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
   const { month, id } = props
+  const { t } = useTranslation('budgets')
   const theme = useTheme()
   const showTransactions = useTrDrawer()
   const openBudgetPopover = useBudgetPopover()
@@ -68,10 +53,10 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
 
   const blockTitle =
     currentMonth === month
-      ? 'Доступно сейчас'
+      ? t('availableTitleNow')
       : month > currentMonth
-      ? `Будет доступно в ${getPrepositionalMonthName(month)}`
-      : `Осталось в конце ${formatDate(month, 'MMMM')}`
+      ? t('availableTitleFuture', { context: getMonthNum(month).toString() })
+      : t('availableTitlePast', { context: getMonthNum(month).toString() })
 
   return (
     <Box
@@ -119,7 +104,7 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
           onClick={e => openBudgetPopover(id, e.currentTarget)}
         >
           <OneLiner
-            left={`Бюджет`}
+            left={t('budget', { ns: 'common' })}
             right={
               <Amount
                 value={totalBudgeted}
@@ -142,10 +127,10 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
           <OneLiner
             left={
               <span>
-                <span>{`Операции `}</span>
+                <span>{t('transactions', { ns: 'common' })}</span>
                 {Boolean(envMetrics.totalTransactions.length) && (
                   <span style={{ opacity: 0.5 }}>
-                    {envMetrics.totalTransactions.length}
+                    {' ' + envMetrics.totalTransactions.length}
                   </span>
                 )}
               </span>

@@ -17,6 +17,7 @@ import { addFxAmount } from '6-shared/helpers/money'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { useMonth } from '../MonthProvider'
 import { Amount } from '6-shared/ui/Amount'
+import { useTranslation } from 'react-i18next'
 
 type TGroupProps = {
   name: string
@@ -34,6 +35,7 @@ export const Group: FC<TGroupProps> = ({
   isReordering,
   children,
 }) => {
+  const { t } = useTranslation('budgets')
   const dispatch = useAppDispatch()
   const { budgeted, available, activity } = useGroupTotals(name)
   const ref = useRef()
@@ -45,7 +47,7 @@ export const Group: FC<TGroupProps> = ({
   const Actions = (
     <>
       {nextIdx !== undefined && (
-        <Tooltip title="Опустить ниже">
+        <Tooltip title={t('moveDown')}>
           <IconButton onClick={() => dispatch(moveGroup(groupIdx, nextIdx))}>
             <ArrowDownwardIcon />
           </IconButton>
@@ -53,14 +55,14 @@ export const Group: FC<TGroupProps> = ({
       )}
 
       {prevIdx !== undefined && (
-        <Tooltip title="Поднять выше">
+        <Tooltip title={t('moveUp')}>
           <IconButton onClick={() => dispatch(moveGroup(groupIdx, prevIdx))}>
             <ArrowUpwardIcon />
           </IconButton>
         </Tooltip>
       )}
 
-      <Tooltip title="Создать категорию">
+      <Tooltip title={t('createEnvelope')}>
         <IconButton
           onClick={() =>
             dispatch(createEnvelope({ group: name, indexRaw: groupIdx }))

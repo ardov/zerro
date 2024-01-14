@@ -1,4 +1,5 @@
 import React, { FC, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Paper, Typography, Collapse, Link, BoxProps } from '@mui/material'
 import QRCode from 'qrcode.react'
 import { useAppTheme } from '6-shared/ui/theme'
@@ -12,6 +13,7 @@ interface RecieptProps {
 }
 
 export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
+  const { t } = useTranslation('reciept')
   const [showMore, setShowMore] = useState(false)
   const theme = useAppTheme()
   if (!value) return null
@@ -21,8 +23,11 @@ export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
   return (
     <Paper sx={{ p: 2, display: 'flex', ...sx }}>
       <Box display="flex" flexDirection="column">
-        <Line name="Сумма" value={formatMoney(parsed.s, 'RUB')} />
-        <Line name="Дата" value={formatDate(parsed.t, 'dd.MM.yyyy, HH:mm')} />
+        <Line name={t('sum')} value={formatMoney(parsed.s, 'RUB')} />
+        <Line
+          name={t('date')}
+          value={formatDate(parsed.t, 'dd.MM.yyyy, HH:mm')}
+        />
 
         <Box mt="auto">
           <Collapse in={!showMore} unmountOnExit>
@@ -32,16 +37,16 @@ export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
               color="primary"
               onClick={() => setShowMore(true)}
             >
-              Показать больше
+              {t('showMore', { ns: 'common' })}
             </Link>
           </Collapse>
         </Box>
 
         <Collapse in={showMore} unmountOnExit>
           <div>
-            <Line name="ФН" value={parsed.fn} />
-            <Line name="ФД" value={parsed.i} />
-            <Line name="ФП" value={parsed.fp} />
+            <Line name={t('fn')} value={parsed.fn} />
+            <Line name={t('i')} value={parsed.i} />
+            <Line name={t('fp')} value={parsed.fp} />
           </div>
         </Collapse>
       </Box>

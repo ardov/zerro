@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { Stack, Box, BoxProps } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 import { TFxAmount, TISOMonth } from '6-shared/types'
 import { DataLine } from '3-widgets/DataLine'
@@ -17,6 +18,7 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
   id,
   ...boxProps
 }) => {
+  const { t } = useTranslation('budgets')
   const [month, setMonth] = useMonth()
   const [highlighted, setHighlighted] = useState(month)
   const rates = balances.useRates()
@@ -66,12 +68,12 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
   const StartingAmountTooltip = (
     <Stack spacing={0.5}>
       <DataLine
-        name="Бюджет в этом месяце"
+        name={t('budgetedThisMonth')}
         amount={selectedData?.budgeted}
         currency={currency}
       />
       <DataLine
-        name="Остаток с прошлого месяца"
+        name={t('leftoverFromLastMonth')}
         amount={selectedData?.leftover}
         currency={currency}
       />
@@ -93,13 +95,13 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
     <Box borderRadius={1} bgcolor="background.default" {...boxProps}>
       <Stack spacing={0.5} pt={2} px={2}>
         <DataLine
-          name="Расход"
+          name={t('outcome', { ns: 'common' })}
           color={activityColor}
           amount={selectedData?.activity}
           currency={currency}
         />
         <DataLine
-          name={`Доступно на ${formatDate(highlighted, 'LLL')}`}
+          name={`${t('availableFor')} ${formatDate(highlighted, 'LLL')}`}
           color={startingAmountColor}
           colorOpacity={0.2}
           amount={selectedData?.startingAmount}

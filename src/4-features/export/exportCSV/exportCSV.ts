@@ -48,6 +48,7 @@ export const exportCSV: AppThunk = (_, getState) => {
   link.click()
 }
 
+// TODO: i18n
 interface RowObj {
   Дата: string
   Создана: string

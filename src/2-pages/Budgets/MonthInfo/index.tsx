@@ -31,10 +31,12 @@ import { ActivityStats } from './ActivityStats'
 import { goalModel } from '5-entities/goal'
 import { totalGoalsModel } from '4-features/bulkActions/fillGoals'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
+import { useTranslation } from 'react-i18next'
 
 type MonthInfoProps = BoxProps & { onClose: () => void }
 
 export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
+  const { t } = useTranslation('budgets', { keyPrefix: 'actions' })
   const [month] = useMonth()
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const { overspend } = balances.useTotals()[month]
@@ -43,26 +45,25 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
 
   const copyAllBudgets = useConfirm({
     onOk: () => dispatch(copyPreviousBudget(month)),
-    title: 'Скопировать все бюджеты?',
-    description: 'Бюджеты будут точно такими же, как в предыдущем месяце.',
-    okText: 'Скопировать',
-    cancelText: 'Отмена',
+    title: t('copyAllBudgets.title'),
+    description: t('copyAllBudgets.description'),
+    okText: t('copyAllBudgets.okText'),
+    cancelText: t('copyAllBudgets.cancelText'),
   })
 
   const fixOverspends = useConfirm({
     onOk: () => dispatch(overspendModel.fixAll(month)),
-    title: 'Избавиться от перерасходов?',
-    okText: 'Покрыть перерасходы',
-    cancelText: 'Отмена',
+    title: t('fixOverspends.title'),
+    okText: t('fixOverspends.okText'),
+    cancelText: t('fixOverspends.cancelText'),
   })
 
   const startAgain = useConfirm({
     onOk: () => dispatch(startFresh(month)),
-    title: 'Хотите начать всё заново?',
-    description:
-      'Остатки во всех категориях сбросятся, а бюджеты в будущем удалятся. Вы сможете начать распределять деньги с чистого листа. Меняются только бюджеты, все остальные данные останутся как есть.',
-    okText: 'Сбросить остатки',
-    cancelText: 'Отмена',
+    title: t('startAgain.title'),
+    description: t('startAgain.description'),
+    okText: t('startAgain.okText'),
+    cancelText: t('startAgain.cancelText'),
   })
 
   return (
@@ -75,7 +76,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
             </Typography>
           </Box>
 
-          <Tooltip title="Закрыть">
+          <Tooltip title={t('close')}>
             <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
           </Tooltip>
         </Box>
@@ -91,18 +92,18 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
         <Box p={2} bgcolor="background.default" borderRadius={1}>
           <Box mb={1}>
             <Typography variant="body1" align="center">
-              Действия
+              {t('actions')}
             </Typography>
           </Box>
 
           <Button fullWidth color="secondary" onClick={copyAllBudgets}>
-            Копировать с прошлого месяца
+            {t('copyAllBudgets.trigger')}
           </Button>
 
           {!isZero(overspend) && (
             <Button fullWidth color="secondary" onClick={fixOverspends}>
               <span>
-                Покрыть перерасходы (
+                {t('fixOverspends.trigger')} (
                 <DisplayAmount value={overspend} month={month} />)
               </span>
             </Button>
@@ -111,7 +112,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
           <GoalAction month={month} />
 
           <Button fullWidth color="secondary" onClick={startAgain}>
-            Сбросить все остатки
+            {t('startAgain.trigger')}
           </Button>
         </Box>
       </Stack>
@@ -123,6 +124,9 @@ const getMonthName = (date: TDateDraft) =>
   formatDate(new Date(date), 'LLLL').toUpperCase()
 
 function GoalAction(props: { month: TISOMonth }) {
+  const { t } = useTranslation('budgets', {
+    keyPrefix: 'actions.completeAllGoals',
+  })
   const dispatch = useAppDispatch()
   const { month } = props
   const { progress, goalsCount } = goalModel.useTotals()[month]
@@ -130,18 +134,17 @@ function GoalAction(props: { month: TISOMonth }) {
 
   const completeAll = useConfirm({
     onOk: () => dispatch(totalGoalsModel.fillAll(month)),
-    title: 'Выполнить все цели?',
-    description:
-      'Бюджеты будут выставлены так, чтобы цели в этом месяце выполнились.',
-    okText: 'Выполнить цели',
-    cancelText: 'Отмена',
+    title: t('title'),
+    description: t('description'),
+    okText: t('okText'),
+    cancelText: t('cancelText'),
   })
 
   if (!canComplete) return null
 
   return (
     <Button fullWidth color="secondary" onClick={completeAll}>
-      Выполнить все цели
+      {t('trigger')}
     </Button>
   )
 }

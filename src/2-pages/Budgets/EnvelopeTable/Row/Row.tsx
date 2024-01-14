@@ -1,6 +1,7 @@
 import React, { FC, ReactNode, useCallback } from 'react'
 import { useDroppable } from '@dnd-kit/core'
 import { IconButton, IconButtonProps } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { EmojiFlagsIcon } from '6-shared/ui/Icons'
 import { RadialProgress } from '6-shared/ui/RadialProgress'
@@ -9,8 +10,9 @@ import { TFxCode, TISOMonth } from '6-shared/types'
 import { goalModel, TGoal } from '5-entities/goal'
 import { balances } from '5-entities/envBalances'
 import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
+import { displayCurrency } from '5-entities/currency/displayCurrency'
 
-import { DragTypes } from '../../DnDContext'
+import { DragTypes } from '2-pages/Budgets/DnD'
 import { useBudgetPopover } from '../../BudgetPopover'
 import { useGoalPopover } from '../../GoalPopover'
 
@@ -19,7 +21,6 @@ import { NameCell } from './NameCell'
 import { BudgetCell } from './BudgetCell'
 import { ActivityCell } from './ActivityCell'
 import { AvailableCell } from './AvailableCell'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
 
 type EnvelopeRowProps = {
   id: TEnvelopeId
@@ -169,13 +170,15 @@ type GoalButtonProps = {
   goalProgress?: number | null
   onClick: IconButtonProps['onClick']
 }
+
 const GoalButton: FC<GoalButtonProps> = props => {
   const { goal, currency, goalProgress, onClick } = props
+  const { t } = useTranslation('budgets')
 
   if (!goal) {
     return (
       <span className={'addGoal'}>
-        <Tooltip title={'Добавить цель'}>
+        <Tooltip title={t('addGoal')}>
           <IconButton size="small" onClick={onClick}>
             <EmojiFlagsIcon fontSize="inherit" />
           </IconButton>

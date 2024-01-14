@@ -1,0 +1,106 @@
+import { ExampleBox, Muted } from '../Components'
+import wholeImg from './whole-screenshot.png'
+import { Box } from '@mui/material'
+import { Head } from '../Head'
+
+<Head
+  title="What is Zerro?"
+  description="Zerro helps you manage personal and family budget."
+/>
+
+# 👋 Hello!
+
+Zerro is an unofficial app for [Zenmoney](https://zenmoney.app/), it helps to plan your finances correctly.
+
+<ExampleBox symbol="🖤">
+  Zerro is a free application, but you can always
+  [buy me a coffee](/donation).
+
+  <Muted>Be sure to write what you liked</Muted>
+</ExampleBox>
+
+<Box
+  component="img"
+  src={wholeImg}
+  alt="This is roughly what the interface looks like"
+  sx={{
+    maxWidth: '100%',
+    borderRadius: 1,
+    border: '1px solid rgba(0,0,0,0.08)',
+    boxShadow: '0 8px 32px 0 rgba(0,0,0,0.16)',
+  }}
+/>
+
+## What's inside?
+
+### Budgets
+
+The main advantage of Zerro is envelope-type budgets. If you've used YNAB, you know how cool this is. Read about the budgeting approach to get a better understanding.
+
+- [Budgeting Approach in Zerro](/about/method)
+- [Getting Started](/about/quick-start)
+
+### Fixing Corrections
+
+Sometimes after syncing with the bank, duplicate transactions appear, to catch them:
+
+1. Open the duplicate transaction
+2. Click "Others from this sync" at the bottom
+3. Now you can view these transactions and delete them if necessary
+
+### And more...
+
+- Restoring deleted transactions
+- Dark mode 🌚
+- Group actions with transactions: changing categories and deletion.
+- Full backup of all data (without restoration yet)
+
+## How to install the app?
+
+Zerro is a web application. It's as cool as regular apps (can even work offline), and is installed directly from the browser ✨
+
+- **iPhone.** In Safari "Share" → "Add to Home Screen"
+- **Android.** In Chrome three dots in the top right corner → "Install app"
+- **Windows / MacOS.** In Chrome icon in the address bar "Install app"
+
+## A few words about security
+
+<ExampleBox symbol="🔒">
+  Zerro does not have access to your banking connections. Zenmoney stores these data
+  in your app and does not transmit through API, third-party services simply do not have
+  access to them.
+
+  [API Documentation](https://github.com/zenmoney/ZenPlugins/wiki/ZenMoney-API)
+</ExampleBox>
+
+- Zerro does not store anything on its own. Data is stored locally on your computer and in Zenmoney.
+- Source code is open and [available on GitHub](https://github.com/ardov/zerro).
+- Zerro collects only anonymous statistics like the number of visits, these numbers warm my heart and help solve problems 🙂
+
+## Useful links
+
+<ExampleBox symbol="💵">
+  [Approach to Budgets in Zerro](/about/method) →
+
+  <Muted>How to use budgets</Muted>
+</ExampleBox>
+
+<ExampleBox symbol="🚀">
+  [Getting Started with Zerro](/about/quick-start) →
+
+  <Muted>This guide will help you tackle initial problems</Muted>
+</ExampleBox>
+
+<ExampleBox symbol="🔥">
+  [Channel with updates on Telegram @zerroapp](https://t.me/zerroapp) →
+
+  <Muted>Updates and features</Muted>
+</ExampleBox>
+
+<ExampleBox symbol="💬">
+  [Chat on Telegram @zerrochat](https://t.me/zerrochat) →
+
+  <Muted>
+    Ask questions here, or write [to me](http://t.me/ardov) directly
+  </Muted>
+</ExampleBox>

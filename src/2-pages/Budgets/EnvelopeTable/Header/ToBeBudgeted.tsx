@@ -6,8 +6,9 @@ import {
   ButtonBaseProps,
   Stack,
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
-import { formatMoney, sub } from '6-shared/helpers/money'
+import { sub } from '6-shared/helpers/money'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { Amount } from '6-shared/ui/Amount'
 import { DataLine } from '3-widgets/DataLine'
@@ -21,7 +22,9 @@ import { useIsSmall } from '../shared/shared'
 type TMsgType = 'error' | 'warning' | 'success'
 
 type ToBeBudgetedProps = ButtonBaseProps
+
 export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
+  const { t } = useTranslation('budgets')
   const {
     currency,
     toBeBudgeted,
@@ -53,7 +56,7 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
       >
         <Typography noWrap align="center" variant="body1">
           {!isSmall &&
-            (toBeBudgeted ? 'Не распределено ' : 'Деньги распределены ')}
+            (toBeBudgeted ? t('notAllocated') : t('allAllocated')) + ' '}
           {toBeBudgeted ? (
             <Amount
               value={toBeBudgeted}
@@ -74,6 +77,7 @@ export const ToBeBudgeted: FC<ToBeBudgetedProps> = props => {
 }
 
 function useTotalsModel() {
+  const { t } = useTranslation('budgets')
   const [month] = useMonth()
 
   const [currency] = displayCurrency.useDisplayCurrency()
@@ -103,16 +107,12 @@ function useTotalsModel() {
   const msgType: TMsgType =
     toBeBudgeted < 0 ? 'error' : !!overspend ? 'warning' : 'success'
 
-  const formatSum = (sum: number) => formatMoney(sum, currency)
-
   const messages = {
     success: toBeBudgeted
-      ? `Распределите деньги по категориям в этом или следующем месяце.`
-      : `Все деньги распределены по категориям, так держать 🥳`,
-    warning: `Перерасход в категориях на ${formatSum(
-      -overspend
-    )}. Добавьте денег в категории с перерасходом.`,
-    error: `Вы распределили больше денег, чем у вас есть. Из каких-то категорий придётся забрать деньги.`,
+      ? t('explainer.hasFreeMoney')
+      : t('explainer.zeroToBeBudgeted'),
+    warning: t('explainer.overspend'),
+    error: t('explainer.budgetedMoreThanHave'),
   }
 
   function TooltipContent() {
@@ -123,24 +123,24 @@ function useTotalsModel() {
         </Typography>
         <Divider />
 
-        <DataLine
-          name="Всего в балансе"
-          amount={fundsEnd}
-          currency={currency}
-        />
+        <DataLine name={t('inBalance')} amount={fundsEnd} currency={currency} />
         <Divider />
 
         <DataLine
-          name={`Лежит в категориях`}
+          name={t('inEnvelopes')}
           amount={allocated}
           currency={currency}
         />
         <DataLine
-          name={`Распределено в будущем`}
+          name={t('budgetedInFuture')}
           amount={displayBudgetedInFuture}
           currency={currency}
         />
-        <DataLine name={`Свободно`} amount={toBeBudgeted} currency={currency} />
+        <DataLine
+          name={t('toBeBudgeted')}
+          amount={toBeBudgeted}
+          currency={currency}
+        />
       </Stack>
     )
   }

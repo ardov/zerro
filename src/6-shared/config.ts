@@ -1,8 +1,3 @@
-// ZenMoney endpoints
-export const authEndpoint = import.meta.env.REACT_APP_AUTH_ENDPOINT as string
-export const tokenEndpoint = import.meta.env.REACT_APP_TOKEN_ENDPOINT as string
-export const diffEndpoint = import.meta.env.REACT_APP_DIFF_ENDPOINT as string
-
 // Parameters for ZenMoney requests
 export const clientId = import.meta.env.REACT_APP_CLIENT_ID as string
 export const clientSecret = import.meta.env.REACT_APP_CLIENT_SECRET as string
@@ -21,5 +16,3 @@ export const isProduction = import.meta.env.PROD
 // Database parameters
 export const idbBaseName = 'zerro_data'
 export const idbStoreName = 'serverData'
-
-export const fakeToken = 'fake_token'

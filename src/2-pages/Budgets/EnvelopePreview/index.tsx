@@ -1,5 +1,6 @@
 import React, { FC, useCallback } from 'react'
 import { Box, Typography, IconButton, Grid, ButtonBase } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { EmojiIcon } from '6-shared/ui/EmojiIcon'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon, EditIcon, EmojiFlagsIcon } from '6-shared/ui/Icons'
@@ -89,6 +90,7 @@ const Header: FC<{
   onClose: () => void
 }> = ({ envelope, onClose }) => {
   const { symbol, color, name } = envelope
+  const { t } = useTranslation('common')
   const openEditDialog = useEditDialog()
   const dispatch = useAppDispatch()
   const handleColorChange = useCallback(
@@ -125,16 +127,15 @@ const Header: FC<{
         </Typography>
       </Box>
 
-      <Tooltip title="Изменить">
+      <Tooltip title={t('edit')}>
         <IconButton
           onClick={() => openEditDialog({ envelope }, { key: envelope.id })}
           children={<EditIcon />}
         />
       </Tooltip>
-      <Tooltip title="Закрыть">
+      <Tooltip title={t('close')}>
         <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
       </Tooltip>
-
       <ColorPicker />
       <EnvelopeEditDialog />
     </Box>

@@ -1,5 +1,6 @@
 import { TISODate } from '6-shared/types'
 import { GroupBy, toGroup, toISODate } from '6-shared/helpers/date'
+import { useTranslation } from 'react-i18next'
 
 export enum Period {
   LastYear = 'LastYear',
@@ -25,15 +26,22 @@ export function getStart(
   throw new Error(`Unknown period: ${period}`)
 }
 
-export const periodTitles = {
-  [Period.All]: 'за всё время',
-  [Period.LastYear]: 'за год',
-  [Period.ThreeYears]: 'за три года',
-}
-
 const order = [Period.All, Period.LastYear, Period.ThreeYears]
 export const nextPeriod = (current: Period) => {
   const currIdx = order.findIndex(p => p === current)
   const nextIdx = (currIdx + 1) % order.length
   return order[nextIdx]
+}
+
+/**
+ * Returns the localized title of the period
+ */
+export const PeriodTitle = (props: { period: Period }) => {
+  const { t } = useTranslation('analytics')
+  const { period } = props
+  if (period === Period.All) return t('period_all')
+  if (period === Period.LastYear) return t('period_year')
+  if (period === Period.ThreeYears) return t('period_3years')
+  console.error(`Unknown period: ${period}`)
+  return null
 }

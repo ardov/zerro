@@ -1,7 +1,7 @@
 import type { TDiff } from '6-shared/types'
+
 import React from 'react'
 import { initSentry } from '6-shared/helpers/tracking'
-import '6-shared/localization'
 import { store } from 'store'
 import { bindWorkerToStore } from 'worker'
 import { applyClientPatch, resetData } from 'store/data'

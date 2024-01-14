@@ -35,7 +35,7 @@ export function mergeDiffs(target: TDiff, diff: TDiff) {
       diff[key]?.forEach((el: any) => {
         const id = el.id
         // @ts-ignore
-        const filtered = target[key]?.filter((el: any) => id !== el.id)
+        const filtered = target[key]?.filter((el: any) => id !== el.id) || []
         target[key] = [...filtered, el]
       })
     } else {
@@ -85,7 +85,7 @@ export function immutableMergeDiffs(target: TDiff, diff: TDiff) {
       diff[key]?.forEach((el: any) => {
         const id = el.id
         // @ts-ignore
-        const filtered = result[key]?.filter((el: any) => id !== el.id)
+        const filtered = result[key]?.filter((el: any) => id !== el.id) || []
         result[key] = [...filtered, el]
       })
     } else {
