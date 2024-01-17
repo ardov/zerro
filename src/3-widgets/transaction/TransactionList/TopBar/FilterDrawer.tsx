@@ -47,7 +47,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
   const { t } = useTranslation('filterDrawer')
   const handleTypeChange = (e: SelectChangeEvent<string>) => {
     const value = e.target.value as TrType
-    setCondition({ type: value || null })
+    setCondition({ type: value || undefined })
   }
 
   const { gte, lte } = getGteLte(conditions.amount)
@@ -87,20 +87,22 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
               <TextField
                 variant="outlined"
                 label={t('amountFrom')}
-                value={gte}
-                onChange={e =>
-                  setCondition({ amount: { lte, gte: +e.target.value } })
-                }
+                value={gte || ''}
+                onChange={e => {
+                  const value = e.target.value ? +e.target.value : undefined
+                  setCondition({ amount: { lte, gte: value } })
+                }}
               />
             </Grid>
             <Grid item xs={6}>
               <TextField
                 variant="outlined"
                 label={t('amountTo')}
-                value={lte}
-                onChange={e =>
-                  setCondition({ amount: { gte, lte: +e.target.value } })
-                }
+                value={lte || ''}
+                onChange={e => {
+                  const value = e.target.value ? +e.target.value : undefined
+                  setCondition({ amount: { gte, lte: value } })
+                }}
               />
             </Grid>
           </Grid>

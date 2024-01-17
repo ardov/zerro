@@ -6,7 +6,7 @@ import type {
   TTransaction,
   TTransactionId,
 } from '6-shared/types'
-import type { TrCondition, TrConditions } from '5-entities/transaction'
+import type { TrCondition } from '5-entities/transaction'
 
 import React, { useMemo, useState, useCallback, useEffect, FC } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -28,8 +28,8 @@ export type TTransactionListProps = {
   onTrOpen?: (id: TTransactionId) => void
   opened?: TTransactionId
   transactions?: TTransaction[]
-  preFilter?: TrConditions
-  initialFilter?: TrCondition
+  preFilter?: TrCondition
+  // initialFilter?: TrCondition
   hideFilter?: boolean
   checkedDate?: Date | null
   initialDate?: TDateDraft
@@ -42,7 +42,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     opened,
     transactions,
     preFilter,
-    initialFilter: defaultConditions,
+    // initialFilter: defaultConditions,
     hideFilter = false,
     checkedDate,
     initialDate,
@@ -50,9 +50,9 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   } = props
 
   const dispatch = useAppDispatch()
-  const [filter, setFilter] = useState(defaultConditions)
+  const [filter, setFilter] = useState<TrCondition | undefined>(undefined)
   const setCondition = useCallback(
-    (condition?: TrConditions) =>
+    (condition?: TrCondition) =>
       setFilter(filter => {
         return { ...filter, ...condition }
       }),
@@ -69,7 +69,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
   const resultFilter = useMemo(() => {
     if (preFilter) {
-      return filter ? (['AND', preFilter, filter] as TrConditions) : preFilter
+      return filter ? ({ and: [preFilter, filter] } as TrCondition) : preFilter
     }
     return filter
   }, [filter, preFilter])
@@ -210,7 +210,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
 function useFilteredTransactions(
   transactions?: TTransaction[],
-  conditions?: TrConditions
+  conditions?: TrCondition
 ) {
   const allTransactions = trModel.useSortedTransactions()
   const groups = useMemo(() => {

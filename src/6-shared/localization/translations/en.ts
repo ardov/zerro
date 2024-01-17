@@ -331,6 +331,7 @@ export const en: typeof ru = {
 
   goals: {
     goalType: 'Type of goal',
+    progressOnTagret: '{{budgeted}} out of {{target}}',
     names: {
       monthly: 'Regular savings',
       monthlySpend: 'Monthly amount',
@@ -504,6 +505,10 @@ export const en: typeof ru = {
     incomeCard: {
       youEarned: 'You earned',
       perMonth: 'per month',
+    },
+
+    outcomeCard: {
+      purchaseOfTheYear: 'Purchase of the year #{number}',
     },
 
     noCategory: {

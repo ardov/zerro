@@ -19,7 +19,7 @@ export const getSortedTransactions = createSelector(
 )
 
 /**
- * Transactions sorted from oldest to newest
+ * Transactions sorted from oldest to newest without deleted
  */
 export const getTransactionsHistory = createSelector(
   [getSortedTransactions],

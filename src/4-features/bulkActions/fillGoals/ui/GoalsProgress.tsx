@@ -56,9 +56,10 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   return (
     <Tooltip
       arrow
-      title={`${formatSum(targetValue - needValue)} из ${formatSum(
-        targetValue
-      )}`}
+      title={t('progressOnTagret', {
+        budgeted: formatSum(targetValue - needValue),
+        target: formatSum(targetValue),
+      })}
     >
       <ButtonBase sx={baseStyles} {...btnProps} onClick={completeAll}>
         <RadialProgress value={progress} />

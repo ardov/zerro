@@ -7,8 +7,10 @@ import { Card, TCardProps } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
 import { useTrToDisplay } from '../shared/useTrToDisplay'
 import { ArrowBackIcon, ArrowForwardIcon } from '6-shared/ui/Icons'
+import { useTranslation } from 'react-i18next'
 
 export function OutcomeCard(props: TCardProps) {
+  const { t } = useTranslation('yearReview', { keyPrefix: 'outcomeCard' })
   const [i, setI] = useState(0)
   const yearStats = useStats(props.year)
   const toVal = useTrToDisplay()
@@ -35,7 +37,7 @@ export function OutcomeCard(props: TCardProps) {
     <Card>
       <Stack spacing={1} my={1} alignItems="center">
         <Typography variant="body1" align="center">
-          Покупка года #{i + 1}
+          {t('purchaseOfTheYear', { number: i + 1 })}
         </Typography>
         <Typography variant="h4" align="center" className="red-gradient">
           <DisplayAmount value={val} noShade decMode="ifAny" />

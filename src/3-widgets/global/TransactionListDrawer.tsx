@@ -9,10 +9,15 @@ import {
   TTransactionListProps,
 } from '../transaction/TransactionList'
 import { useTransactionPreview } from './TransactionPreviewDrawer'
+import {
+  TEnvConditions,
+  useFilteredByEnvelope,
+} from '4-features/envelope/envelopeFiltering'
 
 export type TransactionDrawerProps = {
   title?: string
   transactions?: TTransactionListProps['transactions']
+  envelopeConditions?: TEnvConditions
   filterConditions?: TTransactionListProps['preFilter']
   initialDate?: TTransactionListProps['initialDate']
 }
@@ -28,9 +33,15 @@ export const SmartTransactionListDrawer = () => {
   const { t } = useTranslation('common')
   const drawer = trDrawerHooks.useProps()
   const trPreview = useTransactionPreview()
-  const { transactions, filterConditions, initialDate, title } =
-    drawer.extraProps
+  const {
+    title,
+    transactions,
+    envelopeConditions,
+    filterConditions,
+    initialDate,
+  } = drawer.extraProps
   const { onClose, open } = drawer.displayProps
+  const filteredTransactions = useFilteredByEnvelope(envelopeConditions)
 
   const showTransaction = useCallback(
     (id: string) => {
@@ -70,7 +81,9 @@ export const SmartTransactionListDrawer = () => {
         </Box>
 
         <TransactionList
-          transactions={transactions}
+          transactions={
+            filteredTransactions.length ? filteredTransactions : transactions
+          }
           preFilter={filterConditions}
           initialDate={initialDate}
           onTrOpen={showTransaction}
