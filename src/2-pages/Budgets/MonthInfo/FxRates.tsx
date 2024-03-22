@@ -41,7 +41,8 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
   if (currencies.length === 0) return null
 
   const isSaved = rateData.type === 'saved' && rateData.date === month
-  const isPast = toISOMonth(Date.now()) > month
+  const canFetch =
+    toISOMonth(Date.now()) > month && fxRateModel.canFetchRates(month)
   const isCurrentRates = rateData.type === 'current'
 
   return (
@@ -68,7 +69,7 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
             {t('reset')}
           </Button>
         )}
-        {isPast && !isSaved && (
+        {canFetch && !isSaved && (
           <Button fullWidth onClick={() => dispatch(fxRateModel.load(month))}>
             {t('download')}
           </Button>

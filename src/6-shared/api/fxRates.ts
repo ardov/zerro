@@ -4,10 +4,10 @@ import { TDateDraft, TFxCode, TISODate } from '6-shared/types'
 
 /*
 Currency rates are loaded from this great repository by Fawaz Ahmed
-https://github.com/fawazahmed0/currency-api
+https://github.com/fawazahmed0/exchange-api
 */
 
-export const firstPossibleDate: TISODate = '2022-01-01'
+export const firstPossibleDate: TISODate = '2024-03-10'
 
 export async function requestRates(date: TDateDraft) {
   const base = 'usd'
@@ -15,15 +15,14 @@ export async function requestRates(date: TDateDraft) {
   const isInFuture = toISODate(new Date()) < isoDate
   if (isInFuture) {
     throw new Error(
-      'Requesting future rates. Understandable intention yet imposible 😔'
+      'Requesting future rates. Intention understandable yet imposible 😔'
     )
   }
 
   const response = await fetchWithFallback([
-    `https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/${isoDate}/currencies/${base}.min.json`,
-    `https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/${isoDate}/currencies/${base}.json`,
-    `https://raw.githubusercontent.com/fawazahmed0/currency-api/1/${isoDate}/currencies/${base}.min.json`,
-    `https://raw.githubusercontent.com/fawazahmed0/currency-api/1/${isoDate}/currencies/${base}.json`,
+    `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${isoDate}/v1/currencies/${base}.min.json`,
+    `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${isoDate}/v1/currencies/${base}.json`,
+    `https://${isoDate}.currency-api.pages.dev/v1/currencies/${base}.json`,
   ]).then(
     resp => resp?.json(),
     reason => {

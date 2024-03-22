@@ -41,6 +41,11 @@ export const freezeCurrentRates =
     dispatch(editRates(currentValues.rates, month))
   }
 
+export const canFetchRates = (month: TISOMonth) => {
+  const currMonth = toISOMonth(new Date())
+  return month < currMonth && month >= firstPossibleDate
+}
+
 export const loadRates =
   (month: TISOMonth): AppThunk =>
   async (dispatch, getState) => {

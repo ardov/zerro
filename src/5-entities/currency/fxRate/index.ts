@@ -2,6 +2,7 @@ import { getConverter } from './converter'
 import { getCurrentRates, getRates } from './getFxRates'
 import { getFxRatesGetter } from './getFxRatesGetter'
 import {
+  canFetchRates,
   editRates,
   freezeCurrentRates,
   loadRates,
@@ -23,4 +24,7 @@ export const fxRateModel = {
   reset: resetRates,
   freezeCurrent: freezeCurrentRates,
   load: loadRates,
+
+  // Utils
+  canFetchRates,
 }
