@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom'
-import React, { FC, ReactNode, useState } from 'react'
+import React, { FC, ReactNode, useEffect, useState } from 'react'
 import { useCallback } from 'react'
 import {
   useDndMonitor,
@@ -106,6 +106,15 @@ const props: SxProps = {
   transform: 'scale(1.3)',
 }
 
+let moniesRenderCount = 0
+const Monies = () => {
+  const { t } = useTranslation('common')
+  useEffect(() => {
+    moniesRenderCount = (moniesRenderCount + 1) % 7
+  }, [])
+  return <Box sx={props}>{t('moneyDnd', { context: moniesRenderCount })}</Box>
+}
+
 const DragObj = () => {
   const { t } = useTranslation('common')
   const [activeType, setActiveType] = useState<DragTypes>(DragTypes.amount)
@@ -123,7 +132,7 @@ const DragObj = () => {
 
   const content =
     activeType === DragTypes.amount ? (
-      <Box sx={props}>{t('moneyDnd')}</Box>
+      <Monies />
     ) : activeType === DragTypes.envelope ? (
       <Box sx={props}>
         <Typography noWrap>
