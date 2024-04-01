@@ -41,23 +41,27 @@ export const freezeCurrentRates =
     dispatch(editRates(currentValues.rates, month))
   }
 
+/** Returns date for which rates should be requested (28th) */
+const getRequestDate = (month: TISOMonth) => (month + '-28') as TISODate
+
 export const canFetchRates = (month: TISOMonth) => {
-  const currMonth = toISOMonth(new Date())
-  return month < currMonth && month >= firstPossibleDate
+  const isPastMonth = month < toISOMonth(new Date())
+  const apiHasData = getRequestDate(month) >= firstPossibleDate
+  return isPastMonth && apiHasData
 }
 
 export const loadRates =
   (month: TISOMonth): AppThunk =>
   async (dispatch, getState) => {
-    const currMonth = toISOMonth(new Date())
+    const isPastMonth = month < toISOMonth(new Date())
 
-    if (month >= currMonth) {
+    if (!isPastMonth) {
       const latest = getCurrentRates(getState()).rates
       dispatch(editRates(latest, month))
       return
     }
 
-    const date = (month + '-28') as TISODate
+    const date = getRequestDate(month)
 
     const rates =
       date < firstPossibleDate

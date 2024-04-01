@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { withPerf } from '6-shared/helpers/performance'
 import { TDataStore, TDiff } from '6-shared/types'
-// import { dataModel } from './effector'
 import { applyDiff } from './shared/applyDiff'
 import { mergeDiffs } from './shared/mergeDiffs'
 
@@ -57,7 +56,6 @@ const { reducer, actions } = createSlice({
     applyClientPatch: withPerf(
       'applyClientPatch',
       (state, { payload }: PayloadAction<TDiff>) => {
-        // dataModel.applyClientPatch(payload)
         if (!payload) return
         applyDiff(payload, state.current)
         if (!state.diff) state.diff = { ...payload }
@@ -65,7 +63,6 @@ const { reducer, actions } = createSlice({
       }
     ),
     resetData: () => {
-      // dataModel.resetData()
       return initialState
     },
   },
