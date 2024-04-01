@@ -1,3 +1,4 @@
+/*
 import React from 'react'
 import { Meta, StoryObj } from '@storybook/react'
 import { RadialProgress } from '6-shared/ui/RadialProgress'
@@ -18,3 +19,5 @@ type Story = StoryObj<typeof meta>
 export const Progress: Story = {
   args: { size: 16, value: 0.4 },
 }
+
+*/

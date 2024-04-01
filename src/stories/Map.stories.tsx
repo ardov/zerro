@@ -1,3 +1,4 @@
+/*
 import React from 'react'
 import { StoryObj, Meta } from '@storybook/react'
 import { Map } from '3-widgets/transaction/TransactionPreview/Map'
@@ -18,3 +19,5 @@ export const MapComp: Story = {
     latitude: 60.0762,
   },
 }
+
+*/

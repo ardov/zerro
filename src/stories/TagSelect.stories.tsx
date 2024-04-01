@@ -1,3 +1,4 @@
+/*
 import React from 'react'
 import { Meta, StoryObj } from '@storybook/react'
 import { TagSelect } from '../5-entities/tag/ui/TagSelect'
@@ -15,5 +16,7 @@ type Story = StoryObj<typeof meta>
 export const TagSelectStory: Story = {
   args: {
     onChange: (value: string | null) => console.log(value),
-  }
+  },
 }
+
+*/

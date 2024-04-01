@@ -1,3 +1,4 @@
+/*
 import React from 'react'
 import { EmojiIcon } from '6-shared/ui/EmojiIcon'
 import { Meta, StoryObj } from '@storybook/react'
@@ -19,3 +20,5 @@ type Story = StoryObj<typeof meta>
 export const Icon: Story = {
   args: { symbol: '💩' },
 }
+
+*/

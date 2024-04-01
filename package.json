@@ -9,24 +9,11 @@
     "preview": "vite preview --port 3000",
     "tsc": "tsc --watch",
     "test": "vitest",
-    "lint:css": "stylelint './src/**/*.js'",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "lint:css": "stylelint './src/**/*.js'"
   },
   "eslintConfig": {
     "extends": [
-      "react-app",
-      "plugin:storybook/recommended"
-    ],
-    "overrides": [
-      {
-        "files": [
-          "**/*.stories.*"
-        ],
-        "rules": {
-          "import/no-anonymous-default-export": "off"
-        }
-      }
+      "react-app"
     ]
   },
   "prettier": {
@@ -103,17 +90,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.24.3",
-    "@chromatic-com/storybook": "^1.2.25",
     "@emotion/eslint-plugin": "^11.11.0",
     "@mdx-js/rollup": "^3.0.1",
-    "@storybook/addon-essentials": "^8.0.5",
-    "@storybook/addon-interactions": "^8.0.5",
-    "@storybook/addon-links": "^8.0.5",
-    "@storybook/addon-onboarding": "^8.0.5",
-    "@storybook/blocks": "^8.0.5",
-    "@storybook/react": "^8.0.5",
-    "@storybook/react-vite": "^8.0.5",
-    "@storybook/test": "^8.0.5",
     "@types/convert-layout": "^0.5.3",
     "@types/json2mq": "^0.2.2",
     "@types/lodash": "^4.17.0",
@@ -131,10 +109,8 @@
     "@vitejs/plugin-react": "^4.2.1",
     "eslint": "^8.57.0",
     "eslint-config-react-app": "^7.0.1",
-    "eslint-plugin-storybook": "^0.8.0",
     "postcss": "^8.4.38",
     "sass": "^1.72.0",
-    "storybook": "^8.0.5",
     "stylelint": "^16.3.1",
     "stylelint-config-rational-order": "^0.1.2",
     "stylelint-config-recommended": "^14.0.0",

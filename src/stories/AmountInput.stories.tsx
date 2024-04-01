@@ -1,3 +1,4 @@
+/*
 import React from 'react'
 import { StoryObj, Meta } from '@storybook/react'
 import { AmountInput } from '6-shared/ui/AmountInput'
@@ -21,3 +22,5 @@ export const Primary: Story = {
     label: 'Доход',
   },
 }
+
+*/

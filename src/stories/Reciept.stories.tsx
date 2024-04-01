@@ -1,3 +1,4 @@
+/*
 import React from 'react'
 import { StoryObj, Meta } from '@storybook/react'
 import { Reciept } from '3-widgets/transaction/TransactionPreview/Reciept'
@@ -15,6 +16,8 @@ type Story = StoryObj<typeof meta>
 export const QRCode: Story = {
   args: {
     value:
-      't=20190320T2303&s=5803.00&fn=9251440300007971&i=141637&fp=4087570038&n=1',
+    't=20190320T2303&s=5803.00&fn=9251440300007971&i=141637&fp=4087570038&n=1',
   },
 }
+
+*/
