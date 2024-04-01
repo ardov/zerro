@@ -15,6 +15,13 @@ export default defineConfig({
   build: {
     outDir: 'build',
     sourcemap: true,
+    rollupOptions: {
+      // TODO: Remove when this issue fixed https://github.com/vitejs/vite/issues/15012
+      onwarn(warning, defaultHandler) {
+        if (warning.code === 'SOURCEMAP_ERROR') return
+        defaultHandler(warning)
+      },
+    },
   },
   envPrefix: 'REACT_APP_',
   define: {
