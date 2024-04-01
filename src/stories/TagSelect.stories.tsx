@@ -12,4 +12,8 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const TagSelectStory: Story = {}
+export const TagSelectStory: Story = {
+  args: {
+    onChange: (value: string | null) => console.log(value),
+  }
+}

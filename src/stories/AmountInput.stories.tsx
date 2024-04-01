@@ -15,6 +15,7 @@ type Story = StoryObj<typeof meta>
 
 export const Primary: Story = {
   args: {
+    onChange: (value: number) => console.log(value),
     value: 12004.23,
     currency: 'RUB',
     label: 'Доход',
