@@ -494,7 +494,7 @@
     },
 
     "outcomeCard": {
-      "purchaseOfTheYear": "Покупка года #{number}"
+      "purchaseOfTheYear": "Покупка года #{{number}}"
     },
 
     "noCategory": {

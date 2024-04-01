@@ -514,7 +514,7 @@ export const en: typeof ru = {
     },
 
     outcomeCard: {
-      purchaseOfTheYear: 'Purchase of the year #{number}',
+      purchaseOfTheYear: 'Purchase of the year #{{number}}',
     },
 
     noCategory: {
