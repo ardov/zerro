@@ -1,4 +1,5 @@
 import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Button,
@@ -39,6 +40,7 @@ export const useColorPicker = (
 }
 
 export const ColorPicker: FC = () => {
+  const { t } = useTranslation('envelopeEditDialog')
   const popover = colorPicker.useProps()
   const { value, onColorChange } = popover.extraProps
   const [custom, setCustom] = useState(value || '')
@@ -100,7 +102,7 @@ export const ColorPicker: FC = () => {
           }}
         />
         <Button fullWidth onClick={() => handleColorClick(null)}>
-          Убрать цвет
+          {t('removeColor')}
         </Button>
       </Stack>
     </Popover>

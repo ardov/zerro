@@ -27,6 +27,7 @@ type EnvelopePreviewProps = {
 }
 
 export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
+  const { t } = useTranslation('budgets')
   const [month] = useMonth()
   const openGoalPopover = useGoalPopover()
 
@@ -64,7 +65,9 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
               component="span"
               color={goalInfo ? 'text.primary' : 'text.hint'}
             >
-              {goalInfo ? goalModel.toWords(goalInfo.goal, currency) : 'Цель'}
+              {goalInfo
+                ? goalModel.toWords(goalInfo.goal, currency)
+                : t('goal')}
             </Typography>
           </ButtonBase>
         </Grid>

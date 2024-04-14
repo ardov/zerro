@@ -15,6 +15,7 @@ import { DnDContext } from './DnD/DnDContext'
 import { SmartBudgetPopover } from './BudgetPopover'
 import { SmartGoalPopover } from './GoalPopover'
 import { SideContent, useSideContent } from './SideContent'
+import { useTranslation } from 'react-i18next'
 
 export default function WithMonth() {
   return (
@@ -26,6 +27,7 @@ export default function WithMonth() {
 
 function Budgets() {
   useMonthHotkeys()
+  const { t } = useTranslation('budgets')
   const [month] = useMonth()
   const openSide = useSideContent()
   const showTransactions = useTrDrawer()
@@ -67,7 +69,9 @@ function Budgets() {
   return (
     <>
       <Helmet>
-        <title>Бюджет на {formatDate(month, 'LLLL yyyy')} | Zerro</title>
+        <title>
+          {t('pageTitle', { month: formatDate(month, 'LLLL yyyy') })} | Zerro
+        </title>
         <meta name="description" content="" />
         <link rel="canonical" href="https://zerro.app/budget" />
       </Helmet>

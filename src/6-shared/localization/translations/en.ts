@@ -35,10 +35,11 @@ export const en: typeof ru = {
     close: 'Close',
     today: 'Today',
     yesterday: 'Yesterday',
-    selectCategory: 'Select Category',
-    addCategory: 'Add Category',
-    mixedCategories: 'Mixed Categories',
-    showMore: 'Show More',
+    selectCategory: 'Select category',
+    addCategory: 'Add category',
+    showAllCategories: 'Show all categories',
+    mixedCategories: 'Mixed categories',
+    showMore: 'Show more',
     iOwe: 'I Owe',
     iAmOwed: 'Owed to Me',
     tagSelected_zero: 'Nothing Selected',
@@ -118,9 +119,10 @@ export const en: typeof ru = {
       hidden: 'Always hide',
     },
     keepIncomeLabel: 'Put income into this category',
-    btnSave: 'Save Category',
-    btnCreate: 'Create Category',
+    btnSave: 'Save category',
+    btnCreate: 'Create category',
     btnCancel: 'Cancel',
+    removeColor: 'Remove color',
   },
 
   transactionContextMenu: {
@@ -197,6 +199,7 @@ export const en: typeof ru = {
   },
 
   budgets: {
+    pageTitle: 'Budget for {{month}}',
     budgetedThisMonth: 'Budgeted This Month',
     leftoverFromLastMonth: 'Leftover from Last Month',
     availableFor: 'Available for',
@@ -258,7 +261,8 @@ export const en: typeof ru = {
     isSelf: '(main)',
     envelopeCurrencyTooltip:
       'The budget of this category is set in {{currency}}. It will be automatically recalculated at the current exchange rate.',
-    addGoal: 'Add Goal',
+    addGoal: 'Add goal',
+    goal: 'Goal',
     activityStats: {
       incomes: 'Incomes',
       outcomes: 'Expenses',

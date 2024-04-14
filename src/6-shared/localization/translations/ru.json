@@ -35,6 +35,7 @@
     "yesterday": "Вчера",
     "selectCategory": "Выберите категорию",
     "addCategory": "Добавить категорию",
+    "showAllCategories": "Показать все категории",
     "mixedCategories": "Разные категории",
     "showMore": "Показать больше",
     "iOwe": "Я должен",
@@ -116,7 +117,8 @@
     "keepIncomeLabel": "Класть доходы в категорию",
     "btnSave": "Сохранить категорию",
     "btnCreate": "Создать категорию",
-    "btnCancel": "Отменить"
+    "btnCancel": "Отменить",
+    "removeColor": "Убрать цвет"
   },
 
   "transactionContextMenu": {
@@ -188,6 +190,7 @@
   },
 
   "budgets": {
+    "pageTitle": "Бюджет на {{month}}",
     "budgetedThisMonth": "Бюджет в этом месяце",
     "leftoverFromLastMonth": "Остаток с прошлого месяца",
     "availableFor": "Доступно на",
@@ -242,6 +245,7 @@
     "parentOverspend": "Перерасход в родительской категории.\nУвеличьте бюджет на {{amount}}.",
     "isSelf": "(основная)",
     "envelopeCurrencyTooltip": "Бюджет этой категории задаётся в {{currency}}. Он автоматически будет пересчитываться по текущему курсу.",
+    "goal": "Цель",
     "addGoal": "Добавить цель",
     "activityStats": {
       "incomes": "Доходы",

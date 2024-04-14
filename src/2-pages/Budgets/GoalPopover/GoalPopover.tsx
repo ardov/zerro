@@ -92,7 +92,7 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
             variant="outlined"
             value={type}
             onChange={handleTypeChange}
-            label="Тип цели"
+            label={t('goalType')}
             fullWidth
           >
             <MenuItem value={goalType.MONTHLY}>{t('names.monthly')}</MenuItem>
