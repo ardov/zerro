@@ -165,7 +165,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
         ))}
         {localTagType && !search && (
           <ListItem button onClick={() => setLocalTagType(null)}>
-            Показать все категории
+            {t('showAllCategories')}
           </ListItem>
         )}
       </List>
