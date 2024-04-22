@@ -388,6 +388,7 @@ export const en: typeof ru = {
   },
 
   reciept: {
+    unknown: 'Unknown receipt format 🤷🏻‍♂️',
     sum: 'Amount',
     date: 'Date',
     fn: 'FN',
