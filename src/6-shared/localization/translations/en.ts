@@ -202,6 +202,7 @@ export const en: typeof ru = {
     pageTitle: 'Budget for {{month}}',
     budgetedThisMonth: 'Budgeted This Month',
     leftoverFromLastMonth: 'Leftover from Last Month',
+    leftoverFrom: 'Leftover from {{month}}',
     availableFor: 'Available for',
     balanceFor: 'Balance for',
     balanceChartTooltip:

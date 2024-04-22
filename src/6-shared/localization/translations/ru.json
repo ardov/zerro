@@ -193,6 +193,7 @@
     "pageTitle": "Бюджет на {{month}}",
     "budgetedThisMonth": "Бюджет в этом месяце",
     "leftoverFromLastMonth": "Остаток с прошлого месяца",
+    "leftoverFrom": "Остаток с {{month}}",
     "availableFor": "Доступно на",
     "balanceFor": "Баланс на",
     "balanceChartTooltip": "Сплошная линия показывает изменение баланса в этом месяце. Пунктирная — в прошлом.",

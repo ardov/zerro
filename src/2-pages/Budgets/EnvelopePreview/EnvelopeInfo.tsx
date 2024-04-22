@@ -85,7 +85,9 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
       <List dense sx={{ mx: -2, color: 'text.secondary' }}>
         <ListItem>
           <OneLiner
-            left={`Остаток с ${formatDate(prevMonth(month), 'MMMM')}`}
+            left={t('leftoverFrom', {
+              month: formatDate(prevMonth(month), 'MMM'),
+            })}
             right={
               <Amount
                 value={totalLeftover}
