@@ -24,6 +24,10 @@ export function parseDate(date: TDateDraft): Date {
   return new Date(date)
 }
 
+export function isValidDate(date: TDateDraft) {
+  return !isNaN(parseDate(date).getTime())
+}
+
 export function differenceInCalendarMonths(
   date1: TDateDraft,
   date2: TDateDraft

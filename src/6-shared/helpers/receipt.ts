@@ -1,5 +1,5 @@
 import { TDateDraft } from '6-shared/types'
-import { parseDate } from './date'
+import { isValidDate, parseDate } from './date'
 
 interface TReciept {
   /** Timestamp */
@@ -40,8 +40,12 @@ function stringToObject(str: string) {
 
 function parseReceiptUnsafe(string: string): TReciept {
   let obj = stringToObject(string)
+  const date = parseDate(obj.t as TDateDraft)
+  if (!isValidDate(date) || isNaN(+obj.s)) {
+    throw new Error('Unknown reciept format')
+  }
   return {
-    t: parseDate(obj.t as TDateDraft),
+    t: date,
     s: +obj.s || 0,
     fn: obj.fn || '',
     i: obj.i || '',
