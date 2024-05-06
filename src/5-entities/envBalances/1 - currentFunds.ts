@@ -1,11 +1,14 @@
+import type { TSelector } from 'store/index'
+import type { TFxAmount } from '6-shared/types'
+
 import { createSelector } from '@reduxjs/toolkit'
-import { accountModel } from '5-entities/account'
 import { addFxAmount } from '6-shared/helpers/money'
-import { TFxAmount } from '6-shared/types'
-import { TSelector } from 'store/index'
+import { accountModel } from '5-entities/account'
 
 export const getCurrentFunds: TSelector<TFxAmount> = createSelector(
   [accountModel.getInBudgetAccounts],
-  accounts =>
-    accounts.reduce((sum, a) => addFxAmount(sum, { [a.fxCode]: a.balance }), {})
+  accounts => {
+    const balances = accounts.map(a => ({ [a.fxCode]: a.balance } as TFxAmount))
+    return addFxAmount(...balances)
+  }
 )

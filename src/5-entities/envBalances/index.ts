@@ -19,7 +19,7 @@ export { TrFilterMode } from './2 - sortedActivity'
 export const balances = {
   // Selectors
   monthList: getMonthList,
-  rates: getRatesByMonth,
+  rates: getRatesByMonth, // TODO: remove
   rawActivity: getRawActivity,
   activity: getActivity,
   sortedActivity: getSortedActivity,
@@ -28,7 +28,7 @@ export const balances = {
 
   // Hooks
   useMonthList: () => useAppSelector(getMonthList),
-  useRates: () => useAppSelector(getRatesByMonth),
+  useRates: () => useAppSelector(getRatesByMonth), // TODO: remove
   useRawActivity: () => useAppSelector(getRawActivity),
   useActivity: () => useAppSelector(getActivity),
   useSortedActivity: () => useAppSelector(getSortedActivity),

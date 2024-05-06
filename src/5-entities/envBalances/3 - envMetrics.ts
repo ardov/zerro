@@ -8,15 +8,14 @@ import type {
   TFxCode,
 } from '6-shared/types'
 import { keys } from '6-shared/helpers/keys'
-import { addFxAmount, convertFx } from '6-shared/helpers/money'
+import { addFxAmount } from '6-shared/helpers/money'
 import { withPerf } from '6-shared/helpers/performance'
 import { TSelector } from 'store/index'
 
 import { envelopeModel, TEnvelope, TEnvelopeId } from '5-entities/envelope'
 import { budgetModel } from '5-entities/budget'
-import { TFxRateData } from '5-entities/currency/fxRate'
+import { fxRateModel, TFxConverter } from '5-entities/currency/fxRate'
 import { getMonthList } from './1 - monthList'
-import { getRatesByMonth } from './2 - rates'
 import { getActivity, TActivityNode } from './2 - activity'
 
 export type TEnvMetrics = {
@@ -57,7 +56,7 @@ export const getEnvMetrics: TSelector<ByMonth<ById<TEnvMetrics>>> =
       envelopeModel.getEnvelopes,
       getActivity,
       budgetModel.get,
-      getRatesByMonth,
+      fxRateModel.converter,
     ],
     withPerf('🖤 getEnvMetrics', calcEnvMetrics)
   )
@@ -67,7 +66,7 @@ function calcEnvMetrics(
   envelopes: ById<TEnvelope>,
   activity: ByMonth<TActivityNode>,
   budgets: ByMonth<Record<TEnvelopeId, number>>,
-  rates: ByMonth<TFxRateData>
+  convertFx: TFxConverter
 ) {
   const result: Record<TISOMonth, ById<TEnvMetrics>> = {}
 
@@ -135,7 +134,7 @@ function calcEnvMetrics(
       childrenOverspend
     )
     const selfAvailable = {
-      [currency]: convertFx(selfAvailableRaw, currency, rates[month].rates),
+      [currency]: convertFx(selfAvailableRaw, currency, month),
     }
 
     const selfTransactions =

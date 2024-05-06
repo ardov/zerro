@@ -5,9 +5,16 @@ import { convertFx } from '6-shared/helpers/money'
 import { TSelector } from 'store'
 import { getFxRatesGetter } from './getFxRatesGetter'
 
-export const getConverter: TSelector<
-  (amount: TFxAmount, target: TFxCode, date: TDateDraft | 'current') => number
-> = createSelector([getFxRatesGetter], getter => {
-  return (amount: TFxAmount, target: TFxCode, date: TDateDraft | 'current') =>
-    convertFx(amount, target, getter(date).rates)
-})
+export type TFxConverter = (
+  amount: TFxAmount,
+  target: TFxCode,
+  date: TDateDraft | 'current'
+) => number
+
+export const getConverter: TSelector<TFxConverter> = createSelector(
+  [getFxRatesGetter],
+  getter => {
+    return (amount, target, date) =>
+      convertFx(amount, target, getter(date).rates)
+  }
+)

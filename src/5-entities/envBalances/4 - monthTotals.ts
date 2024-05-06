@@ -1,17 +1,16 @@
+import type { ById, ByMonth, TFxAmount, TISOMonth } from '6-shared/types'
+import type { TSelector } from 'store'
 import { createSelector } from '@reduxjs/toolkit'
 import { shallowEqual } from 'react-redux'
-import { ById, ByMonth, TFxAmount, TISOMonth } from '6-shared/types'
 import { toISOMonth } from '6-shared/helpers/date'
-import { addFxAmount, convertFx, subFxAmount } from '6-shared/helpers/money'
+import { addFxAmount, subFxAmount } from '6-shared/helpers/money'
 import { withPerf } from '6-shared/helpers/performance'
-import { TSelector } from 'store'
 
+import { fxRateModel, TFxConverter } from '5-entities/currency/fxRate'
 import { getCurrentFunds } from './1 - currentFunds'
 import { getMonthList } from './1 - monthList'
 import { getActivity, TActivityNode } from './2 - activity'
 import { getEnvMetrics, TEnvMetrics } from './3 - envMetrics'
-import { getRatesByMonth } from './2 - rates'
-import { TFxRateData, TFxRates } from '5-entities/currency/fxRate'
 
 type TToBeBudgetedState = 'positive' | 'allocated' | 'negative'
 
@@ -38,7 +37,13 @@ export type TMonthTotals = {
 }
 
 export const getMonthTotals: TSelector<ByMonth<TMonthTotals>> = createSelector(
-  [getMonthList, getCurrentFunds, getActivity, getEnvMetrics, getRatesByMonth],
+  [
+    getMonthList,
+    getCurrentFunds,
+    getActivity,
+    getEnvMetrics,
+    fxRateModel.converter,
+  ],
   withPerf('🖤 getMonthTotals', calcMonthTotals)
 )
 
@@ -47,7 +52,7 @@ function calcMonthTotals(
   currentFunds: TFxAmount,
   activity: ByMonth<TActivityNode>,
   envMetrics: ByMonth<ById<TEnvMetrics>>,
-  rates: ByMonth<TFxRateData>
+  convertFx: TFxConverter
 ) {
   const result: ByMonth<TMonthTotals> = {}
 
@@ -56,6 +61,7 @@ function calcMonthTotals(
 
   let prev = monthListReversed[0]
   monthListReversed.forEach((month, idx) => {
+    const toValue = (amount: TFxAmount) => convertFx(amount, 'USD', month)
     const isFuture = month > currentMonth
     const isCurrent = month === currentMonth
     const prevMonth = result[prev] || {}
@@ -85,22 +91,19 @@ function calcMonthTotals(
     let available = {}
     let overspend = {}
     Object.values(envMetrics[month]).forEach(metrics => {
-      if (!metrics.parent) {
-        budgeted = addFxAmount(budgeted, metrics.totalBudgeted)
-        available = addFxAmount(available, metrics.totalAvailable)
+      if (metrics.parent) return // Skip children
+      const { totalBudgeted, totalAvailable, selfAvailable } = metrics
+      budgeted = addFxAmount(budgeted, totalBudgeted)
+      available = addFxAmount(available, totalAvailable)
 
-        let budgetedValue = metrics.totalBudgeted[metrics.currency] || 0
-        if (budgetedValue > 0) {
-          positiveBudgeted = addFxAmount(
-            positiveBudgeted,
-            metrics.totalBudgeted
-          )
-        }
+      let hasPositiveBudget = toValue(totalBudgeted) > 0
+      if (hasPositiveBudget) {
+        positiveBudgeted = addFxAmount(positiveBudgeted, totalBudgeted)
+      }
 
-        let selfAvailableValue = metrics.selfAvailable[metrics.currency] || 0
-        if (selfAvailableValue < 0) {
-          overspend = addFxAmount(overspend, metrics.selfAvailable)
-        }
+      let hasOverspend = toValue(selfAvailable) < 0
+      if (hasOverspend) {
+        overspend = addFxAmount(overspend, selfAvailable)
       }
     })
 
@@ -113,7 +116,7 @@ function calcMonthTotals(
     let toBeBudgetedInfo = calcToBeBudgeted(
       freeFunds,
       budgetedInFuture,
-      rates[month].rates
+      toValue
     )
 
     result[month] = {
@@ -142,12 +145,14 @@ function calcMonthTotals(
 function calcToBeBudgeted(
   freeNow: TFxAmount,
   needForFuture: TFxAmount,
-  rates: TFxRates
+  toValue: (amount: TFxAmount) => number
 ): { value: TFxAmount; state: TToBeBudgetedState } {
+  if (toValue(freeNow) < 0) {
+    return { value: freeNow, state: 'negative' }
+  }
   const withFuture = subFxAmount(freeNow, needForFuture)
-  const withFutureValue = convertFx(withFuture, 'USD', rates)
-  const freeNowValue = convertFx(freeNow, 'USD', rates)
-  if (freeNowValue < 0) return { value: freeNow, state: 'negative' }
-  if (withFutureValue > 0) return { value: withFuture, state: 'positive' }
+  if (toValue(withFuture) > 0) {
+    return { value: withFuture, state: 'positive' }
+  }
   return { value: {}, state: 'allocated' }
 }

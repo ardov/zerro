@@ -1,40 +1,42 @@
+import type { TDateDraft } from '6-shared/types'
+import type { TSelector } from 'store'
+
 import { createSelector } from '@reduxjs/toolkit'
-import { TISOMonth, TDateDraft } from '6-shared/types'
 import { keys } from '6-shared/helpers/keys'
 import { toISOMonth } from '6-shared/helpers/date'
 
-import { TSelector } from 'store'
 import { TFxRateData, getRates, getCurrentRates } from './getFxRates'
 
 export const getFxRatesGetter: TSelector<
   (date: TDateDraft | 'current') => TFxRateData
-> = createSelector(
-  [getRates, getCurrentRates],
-  (rates, latestRates) =>
-    (date: TDateDraft | 'current'): TFxRateData => {
-      if (date === 'current') {
-        return latestRates
-      }
-      const month = toISOMonth(date)
-      if (rates[month]) {
-        return rates[month]
-      }
-      const idx = findDate(keys(rates).sort(), month)
-      return rates[idx]
-    }
-)
+> = createSelector([getRates, getCurrentRates], (rates, latestRates) => {
+  const monthsWithRates = keys(rates).sort()
+  const firstDate = monthsWithRates[0]
+  const lastDate = monthsWithRates[monthsWithRates.length - 1]
+  return (date: TDateDraft | 'current'): TFxRateData => {
+    if (date === 'current') return latestRates
 
-/**
- * Returns the exact date from the array
- * or previous date no exact match
- * or the first date in the array if no previous date
- * expects sorted array
- */
-function findDate(dates: TISOMonth[], target: TISOMonth): TISOMonth {
-  const prevDates = dates.filter(d => d <= target).sort()
-  if (prevDates.length) {
-    // return the last available date
-    return prevDates[prevDates.length - 1]
+    // Convert date to ISO month
+    const month = toISOMonth(date)
+
+    // Return exact match if available
+    if (rates[month]) return rates[month]
+
+    // Use first or last date if the date is outside the available range
+    if (month <= firstDate) return rates[firstDate]
+    if (month >= lastDate) return rates[lastDate]
+
+    // Othrwise get rates from the closest past month
+    const prevDates = monthsWithRates.filter(d => d <= month)
+    const monthToUse = prevDates[prevDates.length - 1]
+    const result = rates[monthToUse]
+
+    if (!result) {
+      // Error happened, return latest rates as a fallback
+      console.error(`No rates found for ${month}`)
+      return latestRates
+    }
+
+    return result
   }
-  return dates[0] // first available date
-}
+})
