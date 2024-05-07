@@ -11,10 +11,8 @@ export type TFxConverter = (
   date: TDateDraft | 'current'
 ) => number
 
-export const getConverter: TSelector<TFxConverter> = createSelector(
-  [getFxRatesGetter],
-  getter => {
-    return (amount, target, date) =>
-      convertFx(amount, target, getter(date).rates)
-  }
-)
+export const getConverter: TSelector<
+  (amount: TFxAmount, target: TFxCode, date: TDateDraft | 'current') => number
+> = createSelector([getFxRatesGetter], getter => {
+  return (amount, target, date) => convertFx(amount, target, getter(date).rates)
+})

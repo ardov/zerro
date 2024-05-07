@@ -4,12 +4,12 @@ import { Stack, Box, BoxProps } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 import { TFxAmount, TISOMonth } from '6-shared/types'
-import { DataLine } from '3-widgets/DataLine'
 import { formatDate } from '6-shared/helpers/date'
-import { convertFx } from '6-shared/helpers/money'
 
 import { balances } from '5-entities/envBalances'
 import { TEnvelopeId } from '5-entities/envelope'
+import { fxRateModel } from '5-entities/currency/fxRate'
+import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
 
 type ActivityWidgetProps = BoxProps & { id: TEnvelopeId }
@@ -21,7 +21,7 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
   const { t } = useTranslation('budgets')
   const [month, setMonth] = useMonth()
   const [highlighted, setHighlighted] = useState(month)
-  const rates = balances.useRates()
+  const convertFx = fxRateModel.useConverter()
   const envData = balances.useEnvData()
   const dates = balances.useMonthList()
   const { currency } = envData[month][id]
@@ -29,8 +29,7 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
 
   const data = dateRange.map(month => {
     const envelope = envData[month][id]
-    const toEnvelope = (a: TFxAmount) =>
-      convertFx(a, currency, rates[month].rates)
+    const toEnvelope = (a: TFxAmount) => convertFx(a, currency, month)
     let activity = toEnvelope(envelope.totalActivity)
     let leftover = toEnvelope(envelope.totalLeftover)
     let budgeted = toEnvelope(envelope.totalBudgeted)

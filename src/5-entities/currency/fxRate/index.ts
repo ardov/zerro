@@ -23,6 +23,7 @@ export const fxRateModel = {
 
   // Hooks
   useConverter: () => useAppSelector(getConverter),
+  useRatesGetter: () => useAppSelector(getFxRatesGetter),
 
   // Thunks
   edit: editRates,

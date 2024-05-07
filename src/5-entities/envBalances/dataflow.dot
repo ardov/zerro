@@ -19,15 +19,14 @@ node [
 {
   node [color="#c4e5fe"]
   rank=same;
-  getInBudgetAccounts
   getEnvelopes
+  getInBudgetAccounts
   getTransactionsHistory
-  getEnvelopeBudgets
+  getBudgets
   getDebtAccountId
   getDebtors
   getInstruments
-  fxRatesGetter
-  getGoals
+  fxConverter
 }
 
 
@@ -36,41 +35,51 @@ subgraph INSTRUMENTS { //cluster_
   color="#e8e8e8";
 
   node [color="#ffcccc"] // Results
-  getInBudgetAccounts -> getCurrentFunds
-
   getEnvelopes -> getKeepingEnvelopes
 
-  getTransactionsHistory -> getFirstMonth -> getMonthList
-  getEnvelopeBudgets -> getLastMonth -> getMonthList
+  // 1 - currentFunds
+  getInBudgetAccounts -> getCurrentFunds
 
+  // 1 - monthList
+  getTransactionsHistory -> getFirstMonth -> getMonthList
+  getBudgets -> getLastMonth -> getMonthList
+
+  // 1 - rawActivity
   getTransactionsHistory -> getRawActivity
   getInBudgetAccounts -> getRawActivity
   getDebtAccountId -> getRawActivity
   getDebtors -> getRawActivity
   getInstruments -> getRawActivity
 
-  getKeepingEnvelopes -> getActivity
+  // 2 - activity
   getRawActivity -> getActivity
+  getKeepingEnvelopes -> getActivity
 
-  fxRatesGetter -> getRatesByMonth
-  getMonthList -> getRatesByMonth
+  // 2 - sortedActivity
+  getRawActivity -> getActivityByType -> getSortedActivity
+  getKeepingEnvelopes -> getSortedActivity
+  fxConverter -> getSortedActivity
 
+  // 3 - envMetrics
   getMonthList -> getEnvMetrics
   getEnvelopes -> getEnvMetrics
   getActivity -> getEnvMetrics
-  getEnvelopeBudgets -> getEnvMetrics
-  getRatesByMonth -> getEnvMetrics
+  getBudgets -> getEnvMetrics
+  fxConverter -> getEnvMetrics
 
-  getMonthList -> getGoalsState
-  getEnvMetrics -> getGoalsState
-  getGoals -> getGoalsState
-  getActivity -> getGoalsState
-  getRatesByMonth -> getGoalsState
-
+  // 4 - monthTotals
   getMonthList -> getMonthTotals
   getCurrentFunds -> getMonthTotals
   getActivity -> getMonthTotals
   getEnvMetrics -> getMonthTotals
+  fxConverter -> getMonthTotals
+
+  // getMonthList -> getGoalsState
+  // getEnvMetrics -> getGoalsState
+  // getGoals -> getGoalsState
+  // getActivity -> getGoalsState
+  // getRatesByMonth -> getGoalsState
+
 }
 
 }

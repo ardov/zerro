@@ -1,16 +1,22 @@
-import { createSelector } from '@reduxjs/toolkit'
-import { ById, ByMonth, TFxAmount, TFxCode, TISOMonth } from '6-shared/types'
-import { keys } from '6-shared/helpers/keys'
-import { convertFx } from '6-shared/helpers/money'
-import { withPerf } from '6-shared/helpers/performance'
-import { TSelector } from 'store/index'
+import type {
+  ById,
+  ByMonth,
+  TFxAmount,
+  TFxCode,
+  TISOMonth,
+} from '6-shared/types'
+import type { TSelector } from 'store/index'
+import type { TEnvelopeId } from '5-entities/envelope'
+import type { TGoal } from './shared/types'
 
-import { TFxRateData } from '5-entities/currency/fxRate'
+import { createSelector } from '@reduxjs/toolkit'
+import { keys } from '6-shared/helpers/keys'
+import { withPerf } from '6-shared/helpers/performance'
+
+import { fxRateModel, TFxConverter } from '5-entities/currency/fxRate'
 import { balances, TEnvMetrics, TSortedActivity } from '5-entities/envBalances'
-import { TGoal } from './shared/types'
 import { goalStore, TGoals } from './goalStore'
 import { calcGoals } from './shared/calcGoals'
-import { TEnvelopeId } from '5-entities/envelope'
 
 export type TGoalInfo = {
   id: TEnvelopeId
@@ -33,7 +39,7 @@ export const getGoals: TSelector<ByMonth<ById<TGoalInfo>>> = createSelector(
     balances.monthList,
     balances.envData,
     balances.sortedActivity,
-    balances.rates,
+    fxRateModel.converter,
   ],
   withPerf('🖤 getGoals', calcGoalData)
 )
@@ -44,7 +50,7 @@ function calcGoalData(
   months: TISOMonth[],
   envMetrics: ByMonth<ById<TEnvMetrics>>,
   sortedActivity: ByMonth<TSortedActivity>,
-  ratesData: ByMonth<TFxRateData>
+  convertFx: TFxConverter
 ) {
   const result: ByMonth<ById<TGoalInfo>> = {}
 
@@ -52,7 +58,6 @@ function calcGoalData(
   months.forEach(month => {
     const goals = envGoals[month] || {}
     const metrics = envMetrics[month]
-    const rates = ratesData[month].rates
     const totalIncome = sortedActivity[month]?.incomesTotal?.total || {}
     let node: ById<TGoalInfo> = {}
 
@@ -61,7 +66,7 @@ function calcGoalData(
       if (!goal) return
       const env = metrics[id]
       const toValue = (amount?: TFxAmount) =>
-        amount ? convertFx(amount, env.currency, rates) : 0
+        amount ? convertFx(amount, env.currency, month) : 0
       const goalProgress = calcGoals[goal.type](goal, {
         leftover: toValue(env.totalLeftover),
         budgeted: toValue(env.totalBudgeted),

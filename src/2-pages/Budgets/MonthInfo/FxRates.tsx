@@ -1,3 +1,4 @@
+import type { TFxCode, TISOMonth } from '6-shared/types'
 import React, { FC, useEffect, useState } from 'react'
 import {
   Box,
@@ -8,7 +9,6 @@ import {
   Typography,
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import { TFxCode, TISOMonth } from '6-shared/types'
 import { keys } from '6-shared/helpers/keys'
 import { useDebouncedCallback } from '6-shared/hooks/useDebouncedCallback'
 import { useToggle } from '6-shared/hooks/useToggle'
@@ -25,7 +25,8 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
   const { t } = useTranslation('fxRates')
   const [displCurrency] = displayCurrency.useDisplayCurrency()
   const funds = balances.useTotals()[month].fundsEnd
-  const rateData = balances.useRates()[month]
+  const ratesGetter = fxRateModel.useRatesGetter()
+  const rateData = ratesGetter(month)
 
   const currencies = keys(funds)
     .map(code => {

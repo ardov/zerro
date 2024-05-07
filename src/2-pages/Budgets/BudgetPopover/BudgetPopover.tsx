@@ -1,3 +1,6 @@
+import type { TFxAmount, TISOMonth } from '6-shared/types'
+import type { TEnvelopeId } from '5-entities/envelope'
+
 import React, { FC, useEffect, useState } from 'react'
 import {
   ListItemText,
@@ -12,17 +15,15 @@ import { useTranslation } from 'react-i18next'
 import { DoneIcon } from '6-shared/ui/Icons'
 import { AmountInput } from '6-shared/ui/AmountInput'
 import { formatMoney } from '6-shared/helpers/money'
-import { convertFx } from '6-shared/helpers/money'
 import { sendEvent } from '6-shared/helpers/tracking'
-import { TFxAmount, TISOMonth } from '6-shared/types'
 import { AdaptivePopover } from '6-shared/ui/AdaptivePopover'
 
 import { useAppDispatch } from 'store'
 import { balances } from '5-entities/envBalances'
-import { useQuickActions } from './useQuickActions'
-import { setTotalBudget } from '4-features/budget/setTotalBudget'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { TEnvelopeId } from '5-entities/envelope'
+import { fxRateModel } from '5-entities/currency/fxRate'
+import { setTotalBudget } from '4-features/budget/setTotalBudget'
+import { useQuickActions } from './useQuickActions'
 
 export type TBudgetPopoverProps = Omit<PopoverProps, 'onClose'> & {
   onClose: () => void
@@ -36,8 +37,8 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   const quickActions = useQuickActions(month, id)
   const [dispCurrency] = displayCurrency.useDisplayCurrency()
   const dispatch = useAppDispatch()
-  const rates = balances.useRates()[month].rates
   const envelope = balances.useEnvData()[month][id]
+  const convertFx = fxRateModel.useConverter()
 
   const currency = {
     env: envelope.currency, // Envelope currency
@@ -45,8 +46,8 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   }
   /** Functions to convert amounts */
   const convert = {
-    toEnv: (a: TFxAmount) => convertFx(a, currency.env, rates),
-    toDisp: (a: TFxAmount) => convertFx(a, currency.disp, rates),
+    toEnv: (a: TFxAmount) => convertFx(a, currency.env, month),
+    toDisp: (a: TFxAmount) => convertFx(a, currency.disp, month),
   }
   /** Formatters */
   const format = {

@@ -1,26 +1,26 @@
-import { convertFx, round } from '6-shared/helpers/money'
+import type { TFunction } from 'i18next'
+import type { TDateDraft, TFxAmount, TISOMonth } from '6-shared/types'
+import type { TEnvelopeId } from '5-entities/envelope'
+import { useTranslation } from 'react-i18next'
+import { round } from '6-shared/helpers/money'
 import { toISOMonth } from '6-shared/helpers/date'
-import { TDateDraft, TFxAmount, TISOMonth } from '6-shared/types'
-import { TEnvelopeId } from '5-entities/envelope'
 
 import { balances } from '5-entities/envBalances'
 import { goalModel } from '5-entities/goal'
-import { useTranslation } from 'react-i18next'
-import { TFunction } from 'i18next'
+import { fxRateModel } from '5-entities/currency/fxRate'
 
 export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
   const { t } = useTranslation()
-  const rates = balances.useRates()[month].rates
+  const convertFx = fxRateModel.useConverter()
   const envMetrics = balances.useEnvData()
   const goals = goalModel.useGoals()[month]
   if (!id) return []
 
   const envelope = envMetrics[month][id]
   if (!envelope) return []
-  const currency = envelope.currency
 
   const convert = (a: TFxAmount | null) =>
-    a ? convertFx(a, currency, rates) : 0
+    a ? convertFx(a, envelope.currency, month) : 0
 
   const prevMonth = getPrevMonth(month)
   const prevEnvelopeData = envMetrics[prevMonth]?.[id]

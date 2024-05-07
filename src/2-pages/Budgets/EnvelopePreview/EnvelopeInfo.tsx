@@ -13,7 +13,6 @@ import {
 } from '@mui/material'
 import { Total } from '6-shared/ui/Total'
 import { Amount } from '6-shared/ui/Amount'
-import { convertFx } from '6-shared/helpers/money'
 import {
   formatDate,
   parseDate,
@@ -21,9 +20,10 @@ import {
   toISOMonth,
 } from '6-shared/helpers/date'
 
-import { OneLiner } from '3-widgets/DataLine'
 import { TEnvelopeId } from '5-entities/envelope'
 import { balances, TrFilterMode } from '5-entities/envBalances'
+import { fxRateModel } from '5-entities/currency/fxRate'
+import { OneLiner } from '3-widgets/DataLine'
 import { cardStyle } from './shared'
 import { useBudgetPopover } from '../BudgetPopover'
 import { useTrDrawer } from '../useTrDrawer'
@@ -37,13 +37,13 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
   const theme = useTheme()
   const showTransactions = useTrDrawer()
   const openBudgetPopover = useBudgetPopover()
-  const rates = balances.useRates()[month].rates
+  const convertFx = fxRateModel.useConverter()
   const envMetrics = balances.useEnvData()[month][id]
 
   if (!envMetrics) return null
 
   const { currency } = envMetrics
-  const toEnvelope = (a: TFxAmount) => convertFx(a, currency, rates)
+  const toEnvelope = (a: TFxAmount) => convertFx(a, currency, month)
   const totalLeftover = toEnvelope(envMetrics.totalLeftover)
   const totalBudgeted = toEnvelope(envMetrics.totalBudgeted)
   const totalActivity = toEnvelope(envMetrics.totalActivity)
