@@ -272,6 +272,17 @@ export const en: typeof ru = {
       fxDifference: 'Exchange Rate Difference',
       unknownCategory: 'Unknown Category',
     },
+    statisticWidget: {
+      movingAverage: "Average",
+      movingMedian: "Median",
+      movingAverageFull: "Moving Average",
+      movingMedianFull: "Moving Median",
+      threeMonths: "3 months",
+      sixMonths: "6 months",
+      twelveMonths: "12 months",
+      activity: "Expenses",
+      budgeted: "Budget"
+    },
     actions: {
       actions: 'Actions',
       close: 'Close',

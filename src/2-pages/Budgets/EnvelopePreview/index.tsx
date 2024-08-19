@@ -20,6 +20,7 @@ import { cardStyle } from './shared'
 import { useGoalPopover } from '../GoalPopover'
 import { BurndownWidget } from './BurndownWidget'
 import { EnvelopeInfo } from './EnvelopeInfo'
+import {StatisticWidget} from "./StatisticWidget";
 
 type EnvelopePreviewProps = {
   id: TEnvelopeId
@@ -78,6 +79,10 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
 
         <Grid item xs={12}>
           <ActivityWidget id={id} />
+        </Grid>
+
+        <Grid item xs={12}>
+          <StatisticWidget id={id} />
         </Grid>
 
         <Grid item xs={12}>

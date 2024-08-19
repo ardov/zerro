@@ -256,7 +256,17 @@
       "fxDifference": "Курсовая разница",
       "unknownCategory": "Неизвестная категория"
     },
-
+    "statisticWidget": {
+      "movingAverage": "Среднее",
+      "movingMedian": "Медиана",
+      "movingAverageFull": "Скользящая средняя",
+      "movingMedianFull": "Скользящая медиана",
+      "threeMonths": "3 месяца",
+      "sixMonths": "6 месяцев",
+      "twelveMonths": "Год",
+      "activity": "Расход",
+      "budgeted": "Бюджет"
+    },
     "actions": {
       "actions": "Действия",
       "close": "Закрыть",
