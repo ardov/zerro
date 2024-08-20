@@ -4,7 +4,7 @@ import { Stack, Box, BoxProps } from '@mui/material'
 import ChooseButton from './ChooseButton'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
-import { TFxAmount, TISOMonth } from '6-shared/types'
+import {TDateDraft, TFxAmount, TFxCode, TISOMonth} from '6-shared/types'
 import { formatDate } from '6-shared/helpers/date'
 
 import { balances, TEnvMetrics } from '5-entities/envBalances'
@@ -51,38 +51,21 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
   const dates = balances.useMonthList()
   const { currency } = envData[month][id]
   const dateRange = getDateRange(dates, 24, month)
-
-  useEffect(() => {
-    setHighlighted(month)
-  }, [month])
+  const aggrPeriodValue = chooseAggregatePeriod(aggregatePeriod)
 
   const data = dateRange.map(m => {
-    const dateR = getPreviousMonths(dates, chooseAggregatePeriod(aggregatePeriod), m)
-    const activities: number[] = [];
-    const budgeteds: number[] = [];
-    for (const d of dateR) {
+    const previousMonths = getPreviousMonths(dates, aggrPeriodValue, m)
+    const statsArray: number[] = []
+    for (const d of previousMonths) {
       const envelope = envData[d][id]
-      const toEnvelope = (a: TFxAmount) => convertFx(a, currency, d)
-      let activity = toEnvelope(envelope.totalActivity)
-      let budgeted = toEnvelope(envelope.totalBudgeted)
-      if (activity > 0) {
-        activity = 0
-      }
-      activities.push(-activity)
-      budgeteds.push(budgeted)
+      statsArray.push(getConvertedStatisticsValue(statisticsValue, currency, d, envelope, convertFx))
     }
-
-    let activity = calculateValue(activities, aggregateType)
-    let budgeted = calculateValue(budgeteds, aggregateType)
-
-    return {
-      date: m,
-      activity: activity,
-      budgeted,
-    }
+    let stat = calculateValue(statsArray, aggregateType)
+    return { date: m, statValue: stat }
   })
 
   const selectedData = data.find(node => node.date === highlighted)
+  useEffect(() => { setHighlighted(month) }, [month])
 
   const theme = useAppTheme()
   const positiveStatColor = theme.palette.info.main
@@ -125,7 +108,7 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
         <DataLine
           name={t(`${aggregateType}Full`)}
           color={positiveStatColor}
-          amount={selectedData ? Number(selectedData[statisticsValue as keyof typeof selectedData]) : undefined}
+          amount={selectedData?.statValue}
           currency={currency}
         />
       </Stack>
@@ -140,7 +123,7 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
             onMouseLeave={() => setHighlighted(month)}
           >
             <Bar
-              dataKey={statisticsValue}
+              dataKey={'statValue'}
               shape={
                 // @ts-ignore
                 <StatisticBar
@@ -214,8 +197,8 @@ function getConvertedStatisticsValue(
   statValue: statisticsValue,
   currency: string,
   date: TISOMonth,
-  envelope: TEnvMetrics) {
-  const convertFx = fxRateModel.useConverter()
+  envelope: TEnvMetrics,
+  convertFx: (amount: TFxAmount, target: TFxCode, date: (TDateDraft | "current")) => number) {
   if (statValue === statisticsValue.budgeted) {
     return convertFx(envelope.totalBudgeted, currency, date)
   }
