@@ -4,7 +4,7 @@ import { Stack, Box, BoxProps } from '@mui/material'
 import ChooseButton from './ChooseButton'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
-import {TDateDraft, TFxAmount, TFxCode, TISOMonth} from '6-shared/types'
+import { TDateDraft, TFxAmount, TFxCode, TISOMonth } from '6-shared/types'
 import { formatDate } from '6-shared/helpers/date'
 
 import { balances, TEnvMetrics } from '5-entities/envBalances'
@@ -13,7 +13,7 @@ import { fxRateModel } from '5-entities/currency/fxRate'
 import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
 import { getDateRange } from './shared'
-import {getAverage, getMedian} from "../../../6-shared/helpers/money/currencyHelpers";
+import { getAverage, getMedian } from "../../../6-shared/helpers/money/currencyHelpers";
 
 type StatisticWidgetProps = BoxProps & { id: TEnvelopeId }
 

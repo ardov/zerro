@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { Stack, Box, BoxProps } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
-import { TFxAmount, TISOMonth } from '6-shared/types'
+import { TFxAmount } from '6-shared/types'
 import { formatDate } from '6-shared/helpers/date'
 
 import { balances } from '5-entities/envBalances'
@@ -11,7 +11,7 @@ import { TEnvelopeId } from '5-entities/envelope'
 import { fxRateModel } from '5-entities/currency/fxRate'
 import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
-import {getDateRange} from "./shared";
+import { getDateRange } from "./shared";
 
 type ActivityWidgetProps = BoxProps & { id: TEnvelopeId }
 

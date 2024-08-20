@@ -1,13 +1,6 @@
 import * as React from 'react';
-import Button from '@mui/material/Button';
-import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
-import KeyboardArrowRightOutlinedIcon from '@mui/icons-material/KeyboardArrowRightOutlined';
-import ClickAwayListener from '@mui/material/ClickAwayListener';
-import Grow from '@mui/material/Grow';
-import Paper from '@mui/material/Paper';
-import Popper from '@mui/material/Popper';
-import MenuItem from '@mui/material/MenuItem';
-import MenuList from '@mui/material/MenuList';
+import { KeyboardArrowDownOutlined, KeyboardArrowRightOutlined } from '@mui/icons-material';
+import { ClickAwayListener, Grow, Paper, Popper, MenuItem, MenuList, Button } from '@mui/material';
 
 type ChooseButtonProps = {
   chosen?: any
@@ -61,7 +54,7 @@ export default function ChooseButton(props: ChooseButtonProps) {
         onClick={handleToggle}
       >
         {props.renderValue ? props.renderValue(chosen2) : chosen2}
-        {open ? <KeyboardArrowDownOutlinedIcon fontSize='small'/> : <KeyboardArrowRightOutlinedIcon fontSize='small'/>}
+        {open ? <KeyboardArrowDownOutlined fontSize='small'/> : <KeyboardArrowRightOutlined fontSize='small'/>}
       </Button>
 
       <Popper

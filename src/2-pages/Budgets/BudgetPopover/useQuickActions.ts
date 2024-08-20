@@ -8,7 +8,7 @@ import { toISOMonth } from '6-shared/helpers/date'
 import { balances } from '5-entities/envBalances'
 import { goalModel } from '5-entities/goal'
 import { fxRateModel } from '5-entities/currency/fxRate'
-import {getAverage} from "../../../6-shared/helpers/money/currencyHelpers";
+import { getAverage } from "../../../6-shared/helpers/money/currencyHelpers";
 
 export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
   const { t } = useTranslation()

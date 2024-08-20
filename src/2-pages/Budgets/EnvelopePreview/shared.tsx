@@ -1,4 +1,4 @@
-import {TISOMonth} from "../../../6-shared/types";
+import { TISOMonth } from "../../../6-shared/types";
 
 export const cardStyle = {
   borderRadius: 1,
