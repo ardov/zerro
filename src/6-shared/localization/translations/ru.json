@@ -259,7 +259,7 @@
     "statisticWidget": {
       "movingAverage": "Среднее",
       "movingMedian": "Медиана",
-      "movingAverageFull": "Скользящая средняя",
+      "movingAverageFull": "Скользящее среднее",
       "movingMedianFull": "Скользящая медиана",
       "threeMonths": "3 месяца",
       "sixMonths": "6 месяцев",
