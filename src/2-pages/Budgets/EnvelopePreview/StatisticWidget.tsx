@@ -13,6 +13,7 @@ import { fxRateModel } from '5-entities/currency/fxRate'
 import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
 import { getDateRange } from './shared'
+import {getAverage, getMedian} from "../../../6-shared/helpers/money/currencyHelpers";
 
 type StatisticWidgetProps = BoxProps & { id: TEnvelopeId }
 
@@ -208,21 +209,9 @@ function getConvertedStatisticsValue(
 
 function calculateValue(arr: number[], aggType: string): number {
   if (aggType === aggregateType.MovingMedian) {
-    return median(arr)
+    return getMedian(arr)
   }
-  return average(arr)
-}
-
-// Helper function to calculate the median of an array
-function median(arr: number[]): number {
-  const sorted = [...arr].sort((a, b) => a - b)
-  const mid = Math.floor(sorted.length / 2)
-  return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
-}
-
-function average(arr: number[]): number {
-  const sum = arr.reduce((acc, val) => acc + val, 0)
-  return arr.length ? sum / arr.length : 0
+  return getAverage(arr)
 }
 
 function chooseAggregatePeriod(aggregatePeriodString: string) {
