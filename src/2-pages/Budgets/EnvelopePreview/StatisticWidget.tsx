@@ -7,11 +7,12 @@ import { useAppTheme } from '6-shared/ui/theme'
 import { TFxAmount, TISOMonth } from '6-shared/types'
 import { formatDate } from '6-shared/helpers/date'
 
-import { balances } from '5-entities/envBalances'
+import { balances, TEnvMetrics } from '5-entities/envBalances'
 import { TEnvelopeId } from '5-entities/envelope'
 import { fxRateModel } from '5-entities/currency/fxRate'
 import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
+import { getDateRange } from './shared'
 
 type StatisticWidgetProps = BoxProps & { id: TEnvelopeId }
 
@@ -26,9 +27,14 @@ enum aggregatePeriod {
   twelveMonths = 'twelveMonths'
 }
 
+enum statisticsValue {
+  activity = 'activity',
+  budgeted = 'budgeted'
+}
+
 let aggregatePeriods = [aggregatePeriod.threeMonths, aggregatePeriod.sixMonths, aggregatePeriod.twelveMonths]
 let aggregateTypes = [aggregateType.MovingAverage, aggregateType.MovingMedian]
-let statisticsValues = ['activity', 'budgeted']
+let statisticsValues = [statisticsValue.activity, statisticsValue.budgeted]
 
 export const StatisticWidget: FC<StatisticWidgetProps> = ({
   id,
@@ -45,6 +51,10 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
   const dates = balances.useMonthList()
   const { currency } = envData[month][id]
   const dateRange = getDateRange(dates, 24, month)
+
+  useEffect(() => {
+    setHighlighted(month)
+  }, [month])
 
   const data = dateRange.map(m => {
     const dateR = getPreviousMonths(dates, chooseAggregatePeriod(aggregatePeriod), m)
@@ -73,12 +83,10 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
   })
 
   const selectedData = data.find(node => node.date === highlighted)
-  useEffect(() => {
-    setHighlighted(month)
-  }, [month])
 
   const theme = useAppTheme()
-  const activityColor = theme.palette.info.main
+  const positiveStatColor = theme.palette.info.main
+  const negativeStatColor = theme.palette.error.main
 
   const onMouseMove = (e: any) => {
     if (e?.activeLabel && e.activeLabel !== highlighted) {
@@ -97,26 +105,26 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
         <ChooseButton
           chosen={statisticsValue}
           elements={statisticsValues}
-          onChoose={(val) => {setStatisticsValues(val)}}
+          onChoose={(val) => { setStatisticsValues(val) }}
           renderValue={(value) => t(value)}
         />
         <ChooseButton
           chosen={aggregateType}
           elements={aggregateTypes}
-          onChoose={(val) => {setAggregateType(val)}}
+          onChoose={(val) => { setAggregateType(val) }}
           renderValue={(value) => t(value)}
         />
         <ChooseButton
           chosen={aggregatePeriod}
           elements={aggregatePeriods}
-          onChoose={(val) => {setAggregatePeriod(val)}}
+          onChoose={(val) => { setAggregatePeriod(val) }}
           renderValue={(value) => t(value)}
         />
       </Stack>
       <Stack spacing={0.5} pt={2} px={2}>
         <DataLine
           name={t(`${aggregateType}Full`)}
-          color={activityColor}
+          color={positiveStatColor}
           amount={selectedData ? Number(selectedData[statisticsValue as keyof typeof selectedData]) : undefined}
           currency={currency}
         />
@@ -125,7 +133,7 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
         <ResponsiveContainer>
           <BarChart
             data={data}
-            margin={{top: 8, right: 16, left: 16, bottom: 0}}
+            margin={{ top: 8, right: 16, left: 16, bottom: 0 }}
             barGap={0}
             onMouseMove={onMouseMove}
             onClick={onClick}
@@ -133,10 +141,13 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
           >
             <Bar
               dataKey={statisticsValue}
-              fill={activityColor}
               shape={
                 // @ts-ignore
-                <ActivityBar current={highlighted}/>
+                <StatisticBar
+                  current={highlighted}
+                  positiveColor={positiveStatColor}
+                  negativeColor={negativeStatColor}
+                />
               }
             />
             <XAxis
@@ -154,53 +165,40 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
 }
 
 type BarProps = {
-  fill?: string
+  positiveColor?: string
+  negativeColor?: string
   x: number
   y: number
   width: number
   height: number
-  date: number
-  current: number
+  date: TISOMonth
+  current: TISOMonth
 }
 
-const ActivityBar: FC<BarProps> = props => {
-  const { fill, x, y, width, height, date, current } = props
+const StatisticBar: FC<BarProps> = props => {
+  const { positiveColor, negativeColor, x, y, width, height, date, current } = props
 
   return (
     <>
-      {height > 0 && (
-        <rect
-          rx={4}
-          ry={4}
-          x={x}
-          y={y}
-          width={width}
-          height={height}
-          fill={fill}
-        />
-      )}
+      <rect
+        rx={4}
+        ry={4}
+        x={x}
+        y={height > 0 ? y : y + height}
+        width={width}
+        height={height > 0 ? height : -height}
+        fill={height > 0 ? positiveColor : negativeColor}
+      />
       {date === current && (
         <circle
           cx={x - width + (width * 3) / 2}
-          cy={y + height + 5}
+          cy={height > 0 ? y + height + 5 : y + height - 5}
           r="2"
-          fill={fill}
+          fill={height > 0 ? positiveColor : negativeColor}
         />
       )}
     </>
   )
-}
-
-function getDateRange(
-  dates: TISOMonth[],
-  range: number,
-  targetMonth: TISOMonth
-) {
-  const idx = dates.findIndex(d => d === targetMonth)
-  const arrayToTrim =
-    idx === dates.length - 1 ? dates : dates.slice(0, dates.length - 1)
-  if (idx === -1) return trimArray(arrayToTrim, range)
-  return trimArray(arrayToTrim, range, idx)
 }
 
 function getPreviousMonths(
@@ -208,30 +206,24 @@ function getPreviousMonths(
   range: number,
   targetMonth: TISOMonth) {
   const idx = dates.findIndex(d => d === targetMonth)
-  const startIndex = Math.max(0, idx - range + 1);
-  return dates.slice(startIndex, idx + 1);
+  const startIndex = Math.max(0, idx - range + 1)
+  return dates.slice(startIndex, idx + 1)
 }
 
-/** Cuts out a range with target index in center */
-function trimArray<T>(
-  arr: Array<T> = [],
-  range = 1,
-  targetIdx?: number
-): Array<T> {
-  if (arr.length <= range) return arr
-  if (targetIdx === undefined) return arr.slice(-range)
-
-  let padLeft = Math.floor((range - 1) / 2)
-  let padRight = range - 1 - padLeft
-  let rangeStart = targetIdx - padLeft
-  let rangeEnd = targetIdx + padRight
-
-  if (rangeEnd >= arr.length) return arr.slice(-range)
-  if (rangeStart <= 0) return arr.slice(0, range)
-  return arr.slice(rangeStart, rangeEnd + 1)
+function getConvertedStatisticsValue(
+  statValue: statisticsValue,
+  currency: string,
+  date: TISOMonth,
+  envelope: TEnvMetrics) {
+  const convertFx = fxRateModel.useConverter()
+  if (statValue === statisticsValue.budgeted) {
+    return convertFx(envelope.totalBudgeted, currency, date)
+  }
+  let activity = convertFx(envelope.totalActivity, currency, date)
+  return activity > 0 ? 0 : -activity
 }
 
-function calculateValue(arr: number[], aggType: string):number {
+function calculateValue(arr: number[], aggType: string): number {
   if (aggType === aggregateType.MovingMedian) {
     return median(arr)
   }
@@ -240,14 +232,14 @@ function calculateValue(arr: number[], aggType: string):number {
 
 // Helper function to calculate the median of an array
 function median(arr: number[]): number {
-  const sorted = [...arr].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  const sorted = [...arr].sort((a, b) => a - b)
+  const mid = Math.floor(sorted.length / 2)
+  return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
 }
 
 function average(arr: number[]): number {
-  const sum = arr.reduce((acc, val) => acc + val, 0);
-  return arr.length ? sum / arr.length : 0;
+  const sum = arr.reduce((acc, val) => acc + val, 0)
+  return arr.length ? sum / arr.length : 0
 }
 
 function chooseAggregatePeriod(aggregatePeriodString: string) {
