@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 import { TDateDraft, TFxAmount, TFxCode, TISOMonth } from '6-shared/types'
 import { formatDate } from '6-shared/helpers/date'
+import { getAverage, getMedian } from '6-shared/helpers/money/currencyHelpers'
 
 import { balances, TEnvMetrics } from '5-entities/envBalances'
 import { TEnvelopeId } from '5-entities/envelope'
@@ -13,27 +14,30 @@ import { fxRateModel } from '5-entities/currency/fxRate'
 import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
 import { getDateRange } from './shared'
-import { getAverage, getMedian } from "../../../6-shared/helpers/money/currencyHelpers";
 
 type StatisticWidgetProps = BoxProps & { id: TEnvelopeId }
 
 enum aggregateType {
   MovingAverage = 'movingAverage',
-  MovingMedian = 'movingMedian'
+  MovingMedian = 'movingMedian',
 }
 
 enum aggregatePeriod {
   threeMonths = 'threeMonths',
   sixMonths = 'sixMonths',
-  twelveMonths = 'twelveMonths'
+  twelveMonths = 'twelveMonths',
 }
 
 enum statisticsValue {
   activity = 'activity',
-  budgeted = 'budgeted'
+  budgeted = 'budgeted',
 }
 
-let aggregatePeriods = [aggregatePeriod.threeMonths, aggregatePeriod.sixMonths, aggregatePeriod.twelveMonths]
+let aggregatePeriods = [
+  aggregatePeriod.threeMonths,
+  aggregatePeriod.sixMonths,
+  aggregatePeriod.twelveMonths,
+]
 let aggregateTypes = [aggregateType.MovingAverage, aggregateType.MovingMedian]
 let statisticsValues = [statisticsValue.activity, statisticsValue.budgeted]
 
@@ -59,14 +63,24 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
     const statsArray: number[] = []
     for (const d of previousMonths) {
       const envelope = envData[d][id]
-      statsArray.push(getConvertedStatisticsValue(statisticsValue, currency, d, envelope, convertFx))
+      statsArray.push(
+        getConvertedStatisticsValue(
+          statisticsValue,
+          currency,
+          d,
+          envelope,
+          convertFx
+        )
+      )
     }
     let stat = calculateValue(statsArray, aggregateType)
     return { date: m, statValue: stat }
   })
 
   const selectedData = data.find(node => node.date === highlighted)
-  useEffect(() => { setHighlighted(month) }, [month])
+  useEffect(() => {
+    setHighlighted(month)
+  }, [month])
 
   const theme = useAppTheme()
   const positiveStatColor = theme.palette.info.main
@@ -89,20 +103,26 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
         <ChooseButton
           chosen={statisticsValue}
           elements={statisticsValues}
-          onChoose={(val) => { setStatisticsValues(val) }}
-          renderValue={(value) => t(value)}
+          onChoose={val => {
+            setStatisticsValues(val)
+          }}
+          renderValue={value => t(value)}
         />
         <ChooseButton
           chosen={aggregateType}
           elements={aggregateTypes}
-          onChoose={(val) => { setAggregateType(val) }}
-          renderValue={(value) => t(value)}
+          onChoose={val => {
+            setAggregateType(val)
+          }}
+          renderValue={value => t(value)}
         />
         <ChooseButton
           chosen={aggregatePeriod}
           elements={aggregatePeriods}
-          onChoose={(val) => { setAggregatePeriod(val) }}
-          renderValue={(value) => t(value)}
+          onChoose={val => {
+            setAggregatePeriod(val)
+          }}
+          renderValue={value => t(value)}
         />
       </Stack>
       <Stack spacing={0.5} pt={2} px={2}>
@@ -160,7 +180,8 @@ type BarProps = {
 }
 
 const StatisticBar: FC<BarProps> = props => {
-  const { positiveColor, negativeColor, x, y, width, height, date, current } = props
+  const { positiveColor, negativeColor, x, y, width, height, date, current } =
+    props
 
   return (
     <>
@@ -188,7 +209,8 @@ const StatisticBar: FC<BarProps> = props => {
 function getPreviousMonths(
   dates: TISOMonth[],
   range: number,
-  targetMonth: TISOMonth) {
+  targetMonth: TISOMonth
+) {
   const idx = dates.findIndex(d => d === targetMonth)
   const startIndex = Math.max(0, idx - range + 1)
   return dates.slice(startIndex, idx + 1)
@@ -199,7 +221,12 @@ function getConvertedStatisticsValue(
   currency: string,
   date: TISOMonth,
   envelope: TEnvMetrics,
-  convertFx: (amount: TFxAmount, target: TFxCode, date: (TDateDraft | "current")) => number) {
+  convertFx: (
+    amount: TFxAmount,
+    target: TFxCode,
+    date: TDateDraft | 'current'
+  ) => number
+) {
   if (statValue === statisticsValue.budgeted) {
     return convertFx(envelope.totalBudgeted, currency, date)
   }

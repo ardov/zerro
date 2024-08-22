@@ -4,11 +4,11 @@ import type { TEnvelopeId } from '5-entities/envelope'
 import { useTranslation } from 'react-i18next'
 import { round } from '6-shared/helpers/money'
 import { toISOMonth } from '6-shared/helpers/date'
+import { getAverage } from '6-shared/helpers/money/currencyHelpers'
 
 import { balances } from '5-entities/envBalances'
 import { goalModel } from '5-entities/goal'
 import { fxRateModel } from '5-entities/currency/fxRate'
-import { getAverage } from "../../../6-shared/helpers/money/currencyHelpers";
 
 export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
   const { t } = useTranslation()

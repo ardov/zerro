@@ -20,7 +20,7 @@ import { cardStyle } from './shared'
 import { useGoalPopover } from '../GoalPopover'
 import { BurndownWidget } from './BurndownWidget'
 import { EnvelopeInfo } from './EnvelopeInfo'
-import { StatisticWidget } from "./StatisticWidget";
+import { StatisticWidget } from './StatisticWidget'
 
 type EnvelopePreviewProps = {
   id: TEnvelopeId

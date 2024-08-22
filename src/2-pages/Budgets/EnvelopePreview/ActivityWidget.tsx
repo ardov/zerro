@@ -11,7 +11,7 @@ import { TEnvelopeId } from '5-entities/envelope'
 import { fxRateModel } from '5-entities/currency/fxRate'
 import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
-import { getDateRange } from "./shared";
+import { getDateRange } from './shared'
 
 type ActivityWidgetProps = BoxProps & { id: TEnvelopeId }
 
