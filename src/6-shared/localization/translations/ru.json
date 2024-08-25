@@ -256,7 +256,16 @@
       "fxDifference": "Курсовая разница",
       "unknownCategory": "Неизвестная категория"
     },
-
+    "statisticWidget": {
+      "average": "Средний",
+      "avgBudgeted": "бюджет",
+      "avgExpenses": "расход",
+      "over": "за",
+      "months3": "3 месяца",
+      "months6": "6 месяцев",
+      "months12": "год",
+      "avgForDate": "Среднее на {{date}}"
+    },
     "actions": {
       "actions": "Действия",
       "close": "Закрыть",

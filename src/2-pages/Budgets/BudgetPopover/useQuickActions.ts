@@ -4,6 +4,7 @@ import type { TEnvelopeId } from '5-entities/envelope'
 import { useTranslation } from 'react-i18next'
 import { round } from '6-shared/helpers/money'
 import { toISOMonth } from '6-shared/helpers/date'
+import { getAverage } from '6-shared/helpers/money/currencyHelpers'
 
 import { balances } from '5-entities/envBalances'
 import { goalModel } from '5-entities/goal'
@@ -136,13 +137,6 @@ function getPrevMonth(date: TDateDraft): TISOMonth {
   const yyyy = current.getFullYear()
   const mm = current.getMonth() - 1
   return toISOMonth(new Date(yyyy, mm))
-}
-
-function getAverage(outcomes: number[]) {
-  if (!outcomes.length) return 0
-  let sum = 0
-  outcomes.forEach(outcome => (sum += outcome))
-  return round(sum / outcomes.length)
 }
 
 function getAvgOutcomeName(t: TFunction, count: number) {

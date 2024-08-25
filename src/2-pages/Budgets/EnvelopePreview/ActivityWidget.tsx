@@ -11,13 +11,12 @@ import { TEnvelopeId } from '5-entities/envelope'
 import { fxRateModel } from '5-entities/currency/fxRate'
 import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
+import { getDateRange } from './shared'
 
 type ActivityWidgetProps = BoxProps & { id: TEnvelopeId }
 
-export const ActivityWidget: FC<ActivityWidgetProps> = ({
-  id,
-  ...boxProps
-}) => {
+export const ActivityWidget: FC<ActivityWidgetProps> = props => {
+  const { id, ...boxProps } = props
   const { t } = useTranslation('budgets')
   const [month, setMonth] = useMonth()
   const [highlighted, setHighlighted] = useState(month)
@@ -64,32 +63,6 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
   const budgetLineColor = theme.palette.background.default
   const startingAmountColor = theme.palette.primary.main
 
-  const StartingAmountTooltip = (
-    <Stack spacing={0.5}>
-      <DataLine
-        name={t('budgetedThisMonth')}
-        amount={selectedData?.budgeted}
-        currency={currency}
-      />
-      <DataLine
-        name={t('leftoverFromLastMonth')}
-        amount={selectedData?.leftover}
-        currency={currency}
-      />
-    </Stack>
-  )
-
-  const onMouseMove = (e: any) => {
-    if (e?.activeLabel && e.activeLabel !== highlighted) {
-      setHighlighted(e.activeLabel)
-    }
-  }
-  const onClick = (e: any) => {
-    if (e?.activeLabel && e.activeLabel !== month) {
-      setMonth(e.activeLabel)
-    }
-  }
-
   return (
     <Box borderRadius={1} bgcolor="background.default" {...boxProps}>
       <Stack spacing={0.5} pt={2} px={2}>
@@ -105,7 +78,20 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
           colorOpacity={0.2}
           amount={selectedData?.startingAmount}
           currency={currency}
-          tooltip={StartingAmountTooltip}
+          tooltip={
+            <Stack spacing={0.5}>
+              <DataLine
+                name={t('budgetedThisMonth')}
+                amount={selectedData?.budgeted}
+                currency={currency}
+              />
+              <DataLine
+                name={t('leftoverFromLastMonth')}
+                amount={selectedData?.leftover}
+                currency={currency}
+              />
+            </Stack>
+          }
         />
       </Stack>
 
@@ -115,33 +101,33 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
             data={data}
             margin={{ top: 8, right: 16, left: 16, bottom: 0 }}
             barGap={0}
-            onMouseMove={onMouseMove}
-            onClick={onClick}
+            onClick={e => {
+              if (!e.activeLabel || e.activeLabel === month) return
+              setMonth(e.activeLabel as TISOMonth)
+            }}
+            onMouseMove={e => {
+              if (!e.activeLabel || e.activeLabel === highlighted) return
+              setHighlighted(e.activeLabel as TISOMonth)
+            }}
             onMouseLeave={() => setHighlighted(month)}
           >
             <Bar
               dataKey="startingAmount"
               fill={startingAmountColor}
-              shape={
-                // @ts-ignore
-                <BudgetBar />
-              }
+              // @ts-ignore
+              shape={<BudgetBar />}
             />
             <Bar
               dataKey="activity"
               fill={activityColor}
-              shape={
-                // @ts-ignore
-                <ActivityBar current={highlighted} />
-              }
+              // @ts-ignore
+              shape={<ActivityBar current={highlighted} />}
             />
             <Bar
               dataKey="startingAmount"
               fill={budgetLineColor}
-              shape={
-                // @ts-ignore
-                <BudgetLine />
-              }
+              // @ts-ignore
+              shape={<BudgetLine />}
             />
             <XAxis
               dataKey="date"
@@ -225,35 +211,4 @@ const BudgetLine: FC<BudgetLineProps> = props => {
   return (
     <rect x={x - width * 2} y={y} width={width * 3} height={1} fill={fill} />
   )
-}
-
-function getDateRange(
-  dates: TISOMonth[],
-  range: number,
-  targetMonth: TISOMonth
-) {
-  const idx = dates.findIndex(d => d === targetMonth)
-  const arrayToTrim =
-    idx === dates.length - 1 ? dates : dates.slice(0, dates.length - 1)
-  if (idx === -1) return trimArray(arrayToTrim, range)
-  return trimArray(arrayToTrim, range, idx)
-}
-
-/** Cuts out a range with target index in center */
-function trimArray<T>(
-  arr: Array<T> = [],
-  range = 1,
-  targetIdx?: number
-): Array<T> {
-  if (arr.length <= range) return arr
-  if (targetIdx === undefined) return arr.slice(-range)
-
-  let padLeft = Math.floor((range - 1) / 2)
-  let padRight = range - 1 - padLeft
-  let rangeStart = targetIdx - padLeft
-  let rangeEnd = targetIdx + padRight
-
-  if (rangeEnd >= arr.length) return arr.slice(-range)
-  if (rangeStart <= 0) return arr.slice(0, range)
-  return arr.slice(rangeStart, rangeEnd + 1)
 }

@@ -272,6 +272,16 @@ export const en: typeof ru = {
       fxDifference: 'Exchange Rate Difference',
       unknownCategory: 'Unknown Category',
     },
+    statisticWidget: {
+      average: 'Average',
+      avgBudgeted: 'budgeted',
+      avgExpenses: 'expenses',
+      over: 'over',
+      months3: '3 months',
+      months6: '6 months',
+      months12: 'a year',
+      avgForDate: 'Average for {{date}}',
+    },
     actions: {
       actions: 'Actions',
       close: 'Close',
