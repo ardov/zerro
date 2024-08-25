@@ -78,15 +78,15 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
         </Grid>
 
         <Grid item xs={12}>
+          <BurndownWidget id={id} />
+        </Grid>
+
+        <Grid item xs={12}>
           <ActivityWidget id={id} />
         </Grid>
 
         <Grid item xs={12}>
           <StatisticWidget id={id} />
-        </Grid>
-
-        <Grid item xs={12}>
-          <BurndownWidget id={id} />
         </Grid>
       </Grid>
     </Box>

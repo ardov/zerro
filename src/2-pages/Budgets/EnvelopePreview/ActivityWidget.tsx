@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { Stack, Box, BoxProps } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
-import { TFxAmount } from '6-shared/types'
+import { TFxAmount, TISOMonth } from '6-shared/types'
 import { formatDate } from '6-shared/helpers/date'
 
 import { balances } from '5-entities/envBalances'
@@ -15,10 +15,8 @@ import { getDateRange } from './shared'
 
 type ActivityWidgetProps = BoxProps & { id: TEnvelopeId }
 
-export const ActivityWidget: FC<ActivityWidgetProps> = ({
-  id,
-  ...boxProps
-}) => {
+export const ActivityWidget: FC<ActivityWidgetProps> = props => {
+  const { id, ...boxProps } = props
   const { t } = useTranslation('budgets')
   const [month, setMonth] = useMonth()
   const [highlighted, setHighlighted] = useState(month)
@@ -65,32 +63,6 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
   const budgetLineColor = theme.palette.background.default
   const startingAmountColor = theme.palette.primary.main
 
-  const StartingAmountTooltip = (
-    <Stack spacing={0.5}>
-      <DataLine
-        name={t('budgetedThisMonth')}
-        amount={selectedData?.budgeted}
-        currency={currency}
-      />
-      <DataLine
-        name={t('leftoverFromLastMonth')}
-        amount={selectedData?.leftover}
-        currency={currency}
-      />
-    </Stack>
-  )
-
-  const onMouseMove = (e: any) => {
-    if (e?.activeLabel && e.activeLabel !== highlighted) {
-      setHighlighted(e.activeLabel)
-    }
-  }
-  const onClick = (e: any) => {
-    if (e?.activeLabel && e.activeLabel !== month) {
-      setMonth(e.activeLabel)
-    }
-  }
-
   return (
     <Box borderRadius={1} bgcolor="background.default" {...boxProps}>
       <Stack spacing={0.5} pt={2} px={2}>
@@ -106,7 +78,20 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
           colorOpacity={0.2}
           amount={selectedData?.startingAmount}
           currency={currency}
-          tooltip={StartingAmountTooltip}
+          tooltip={
+            <Stack spacing={0.5}>
+              <DataLine
+                name={t('budgetedThisMonth')}
+                amount={selectedData?.budgeted}
+                currency={currency}
+              />
+              <DataLine
+                name={t('leftoverFromLastMonth')}
+                amount={selectedData?.leftover}
+                currency={currency}
+              />
+            </Stack>
+          }
         />
       </Stack>
 
@@ -116,33 +101,33 @@ export const ActivityWidget: FC<ActivityWidgetProps> = ({
             data={data}
             margin={{ top: 8, right: 16, left: 16, bottom: 0 }}
             barGap={0}
-            onMouseMove={onMouseMove}
-            onClick={onClick}
+            onClick={e => {
+              if (!e.activeLabel || e.activeLabel === month) return
+              setMonth(e.activeLabel as TISOMonth)
+            }}
+            onMouseMove={e => {
+              if (!e.activeLabel || e.activeLabel === highlighted) return
+              setHighlighted(e.activeLabel as TISOMonth)
+            }}
             onMouseLeave={() => setHighlighted(month)}
           >
             <Bar
               dataKey="startingAmount"
               fill={startingAmountColor}
-              shape={
-                // @ts-ignore
-                <BudgetBar />
-              }
+              // @ts-ignore
+              shape={<BudgetBar />}
             />
             <Bar
               dataKey="activity"
               fill={activityColor}
-              shape={
-                // @ts-ignore
-                <ActivityBar current={highlighted} />
-              }
+              // @ts-ignore
+              shape={<ActivityBar current={highlighted} />}
             />
             <Bar
               dataKey="startingAmount"
               fill={budgetLineColor}
-              shape={
-                // @ts-ignore
-                <BudgetLine />
-              }
+              // @ts-ignore
+              shape={<BudgetLine />}
             />
             <XAxis
               dataKey="date"

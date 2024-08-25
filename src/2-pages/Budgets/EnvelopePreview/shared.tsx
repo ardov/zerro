@@ -13,28 +13,31 @@ export function getDateRange(
   range: number,
   targetMonth: TISOMonth
 ) {
-  const idx = dates.findIndex(d => d === targetMonth)
-  const arrayToTrim =
-    idx === dates.length - 1 ? dates : dates.slice(0, dates.length - 1)
-  if (idx === -1) return trimArray(arrayToTrim, range)
-  return trimArray(arrayToTrim, range, idx)
+  let idx = dates.findIndex(d => d === targetMonth)
+  if (idx === -1) idx = dates.length - 1
+  return trimMonths(dates, range, idx)
 }
 
 /** Cuts out a range with target index in center */
-function trimArray<T>(
-  arr: Array<T> = [],
-  range = 1,
-  targetIdx?: number
+export function trimMonths<T>(
+  arr: Array<T>,
+  windowSize: number,
+  targetIdx: number
 ): Array<T> {
-  if (arr.length <= range) return arr
-  if (targetIdx === undefined) return arr.slice(-range)
+  // In this case the last month is always empty
+  // so we can throw it away if it's not the target
+  const isLast = targetIdx === arr.length - 1
+  const cleanArr = isLast ? arr : arr.slice(0, arr.length - 1)
 
-  let padLeft = Math.floor((range - 1) / 2)
-  let padRight = range - 1 - padLeft
+  if (cleanArr.length <= windowSize) return cleanArr
+
+  // Calculate the range with the target in the center
+  let padLeft = Math.floor((windowSize - 1) / 2)
+  let padRight = windowSize - 1 - padLeft
   let rangeStart = targetIdx - padLeft
   let rangeEnd = targetIdx + padRight
 
-  if (rangeEnd >= arr.length) return arr.slice(-range)
-  if (rangeStart <= 0) return arr.slice(0, range)
-  return arr.slice(rangeStart, rangeEnd + 1)
+  if (rangeEnd >= cleanArr.length) return cleanArr.slice(-windowSize)
+  if (rangeStart <= 0) return cleanArr.slice(0, windowSize)
+  return cleanArr.slice(rangeStart, rangeEnd + 1)
 }

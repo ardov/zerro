@@ -257,15 +257,14 @@
       "unknownCategory": "Неизвестная категория"
     },
     "statisticWidget": {
-      "movingAverage": "Среднее",
-      "movingMedian": "Медиана",
-      "movingAverageFull": "Скользящее среднее",
-      "movingMedianFull": "Скользящая медиана",
-      "threeMonths": "3 месяца",
-      "sixMonths": "6 месяцев",
-      "twelveMonths": "Год",
-      "activity": "Расход",
-      "budgeted": "Бюджет"
+      "average": "Средний",
+      "avgBudgeted": "бюджет",
+      "avgExpenses": "расход",
+      "over": "за",
+      "months3": "3 месяца",
+      "months6": "6 месяцев",
+      "months12": "год",
+      "avgForDate": "Среднее на {{date}}"
     },
     "actions": {
       "actions": "Действия",
