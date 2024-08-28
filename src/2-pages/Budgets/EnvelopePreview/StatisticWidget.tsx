@@ -18,7 +18,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 import { TFxCode, TISOMonth } from '6-shared/types'
-import { formatDate } from '6-shared/helpers/date'
+import { formatDate, toISOMonth } from '6-shared/helpers/date'
 import { getAverage } from '6-shared/helpers/money/currencyHelpers'
 
 import { balances } from '5-entities/envBalances'
@@ -86,12 +86,18 @@ function useAggregatedStats(
         convertFx(envData[date][id].totalBudgeted, currency, date)
       )
     )
-    const avgActivity = getAverage(
-      aggregatedMonths.map(date =>
-        convertFx(envData[date][id].totalActivity, currency, date)
+    const currentMonth = toISOMonth(new Date())
+    let avgExpenses = 0
+    // Do not calculate expenses for future months
+    if (month <= currentMonth) {
+      const avgActivity = getAverage(
+        aggregatedMonths.map(date =>
+          convertFx(envData[date][id].totalActivity, currency, date)
+        )
       )
-    )
-    const avgExpenses = avgActivity > 0 ? 0 : -avgActivity
+      // Negative activity is expenses
+      if (avgActivity < 0) avgExpenses = -avgActivity
+    }
     return { month, avgBudgeted, avgExpenses }
   })
   return result
