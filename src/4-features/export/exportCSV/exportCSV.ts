@@ -103,11 +103,28 @@ const types = {
   [TrType.IncomeDebt]: '',
 }
 
-const transactionToRowObj = (t: PopulatedTransaction): RowObj => ({
+const csvEscapeString = (term: string): string => {
+  if (term.match && term.match(/,|"/))  {
+    return `"${term.replace(/"/g,'""')}"`
+  } else {
+    return term
+  }
+}
+
+const csvEscapeRow = (row: RowObj): RowObj => {
+  return Object.fromEntries(
+    Object.entries(row).map(([key, value]) => [
+      key,
+      typeof value === 'string' ? csvEscapeString(value) : value
+    ])
+  ) as RowObj
+}
+
+const transactionToRowObj = (t: PopulatedTransaction): RowObj => csvEscapeRow({
   Дата: t.date,
   Создана: formatDate(t.created, 'yyyy-MM-dd HH:mm'),
   Тип: types[t.type as TrType],
-  Категория: t.tag ? t.tag[0].title.replace(',', '') : '',
+  Категория: t.tag ? t.tag[0].title: '',
   'Доп категории': '',
   'Со счёта': t.outcomeAccount ? t.outcomeAccount.title : '',
   Расход: !!t.outcome ? t.outcome : '',
