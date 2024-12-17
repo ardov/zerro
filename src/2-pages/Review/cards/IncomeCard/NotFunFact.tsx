@@ -9,8 +9,8 @@ import { Amount } from '6-shared/ui/Amount'
 
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 
-/** Median salary in Russia 2022. Source: https://sberindex.ru/ru/dashboards/median-wages */
-const MEDIAN_WAGE_RUB = 41_937
+/** Median salary in Russia 2024. Source: https://sberindex.ru/ru/dashboards/median-wages */
+const MEDIAN_WAGE_RUB = 62_632
 const MEDIAN_WAGE_SOURCE = 'https://sberindex.ru/ru/dashboards/median-wages'
 
 export function NotFunFact({ income }: { income: TFxAmount }) {
@@ -48,7 +48,7 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
         <Stack direction="column" spacing={3} sx={{ p: 3, maxWidth: 360 }}>
           <Balancer>
             <Typography variant="body1">
-              Медианная зарплата в 2022 году в России{' '}
+              Медианная зарплата в 2024 году в России{' '}
               <Amount value={MEDIAN_WAGE_RUB} currency="RUB" decMode="ifAny" />{' '}
               по данным <Link href={MEDIAN_WAGE_SOURCE}>Сбериндекса</Link>. Это
               значит, что половина россиян получают меньше этой суммы.
