@@ -13,7 +13,7 @@ export default defineConfig({
     VitePWA({ registerType: 'autoUpdate', filename: 'service-worker.js' }),
   ],
   build: {
-    outDir: 'build',
+    outDir: 'dist',
     sourcemap: true,
     rollupOptions: {
       // TODO: Remove when this issue fixed https://github.com/vitejs/vite/issues/15012
