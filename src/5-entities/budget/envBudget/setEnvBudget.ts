@@ -21,7 +21,12 @@ export function setEnvBudget(
     let byMonth: ByMonth<TBudgets> = {}
 
     updates.forEach(({ id, month, value }) => {
-      byMonth[month] ??= { ...curentBudgets[month] } || {}
+      // Create month if not exists
+      if (!byMonth[month]) {
+        // Copy existing month or create new
+        if (curentBudgets[month]) byMonth[month] = { ...curentBudgets[month] }
+        else byMonth[month] = {}
+      }
       if (value) byMonth[month][id] = value
       else delete byMonth[month][id]
     })
