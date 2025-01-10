@@ -10,7 +10,14 @@ export default defineConfig({
     tsconfigPaths(),
     react(),
     mdx(),
-    VitePWA({ registerType: 'autoUpdate', filename: 'service-worker.js' }),
+    VitePWA({
+      registerType: 'autoUpdate',
+      filename: 'service-worker.js',
+      workbox: {
+        // Increase the default 2,097,152 (2MiB) limit
+        maximumFileSizeToCacheInBytes: 3_000_000,
+      },
+    }),
   ],
   build: {
     outDir: 'dist',
