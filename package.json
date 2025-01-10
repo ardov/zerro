@@ -43,6 +43,9 @@
   "browserslist": [
     "defaults"
   ],
+  "resolutions": {
+    "@types/react": "18.3.18"
+  },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/utilities": "^3.2.2",
@@ -123,5 +126,6 @@
     "vite-plugin-pwa": "^0.21.1",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^2.1.8"
-  }
+  },
+  "packageManager": "yarn@4.6.0"
 }
