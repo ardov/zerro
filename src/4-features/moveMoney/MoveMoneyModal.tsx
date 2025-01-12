@@ -28,7 +28,6 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   const envelopes = envelopeModel.useEnvelopes()
   const metrics = balances.useEnvData()[month]
   const totalMetrics = balances.useTotals()[month]
-  // const totals = useAppSelector(getMonthTotals)[month]
   const [currency] = displayCurrency.useDisplayCurrency()
   const toDisplay = displayCurrency.useToDisplay(month)
 
@@ -48,7 +47,7 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
       ? toDisplay(totalMetrics.toBeBudgeted)
       : toDisplay(metrics[destination].selfAvailable)
 
-  const suggested = suggestAmount(sourceValue, destinationValue, 1000)
+  const suggested = suggestAmount(sourceValue, destinationValue)
   const [amount, setAmount] = useState(suggested)
 
   const handleSubmit = () => {
@@ -97,15 +96,11 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   )
 }
 
-function suggestAmount(from = 0, to = 0, defaultAmount = 1000) {
+function suggestAmount(from = 0, to = 0) {
   // No money to move --> 0
   if (from <= 0) return 0
   // Enough money to cover overspend --> overspend
   if (to < 0 && from >= -to) return -to
-  // Not enough money to cover overspend --> move all we have
-  if (to < 0 && from < -to) return from
-  // Less money than default value --> move all we have
-  if (to >= 0 && from < defaultAmount) return from
-  // Else move default value
-  return defaultAmount
+  // Otherwise --> move all we have
+  return from
 }
