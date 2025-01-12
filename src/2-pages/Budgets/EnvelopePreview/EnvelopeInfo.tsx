@@ -23,10 +23,10 @@ import {
 import { TEnvelopeId } from '5-entities/envelope'
 import { balances, TrFilterMode } from '5-entities/envBalances'
 import { fxRateModel } from '5-entities/currency/fxRate'
+import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 import { OneLiner } from '3-widgets/DataLine'
 import { cardStyle } from './shared'
 import { useBudgetPopover } from '../BudgetPopover'
-import { useTrDrawer } from '../useTrDrawer'
 
 const getMonthNum = (month: TISOMonth | TDateDraft) =>
   parseDate(month).getMonth() + 1
@@ -35,7 +35,7 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
   const { month, id } = props
   const { t } = useTranslation('budgets')
   const theme = useTheme()
-  const showTransactions = useTrDrawer()
+  const transactionDrawer = useEnvTransactionsDrawer()
   const openBudgetPopover = useBudgetPopover()
   const convertFx = fxRateModel.useConverter()
   const envMetrics = balances.useEnvData()[month][id]
@@ -122,9 +122,11 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
             '&:hover': { color: 'text.primary' },
             transition: '.2s ease-in-out',
           }}
-          onClick={() =>
-            showTransactions({ id, month, mode: TrFilterMode.Envelope })
-          }
+          onClick={() => {
+            transactionDrawer.open({
+              envelopeConditions: { id, month, mode: TrFilterMode.Envelope },
+            })
+          }}
         >
           <OneLiner
             left={

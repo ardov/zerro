@@ -2,20 +2,19 @@ import React, { FC, ReactElement, useCallback } from 'react'
 import { Helmet } from 'react-helmet'
 import { Box, Theme, useMediaQuery } from '@mui/material'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { useTranslation } from 'react-i18next'
 import { formatDate } from '6-shared/helpers/date'
 import { nextMonth, prevMonth, toISOMonth } from '6-shared/helpers/date'
-import { MonthProvider, useMonth } from './MonthProvider'
 import { TEnvelopeId } from '5-entities/envelope'
-
 import { balances, TrFilterMode } from '5-entities/envBalances'
+import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 
-import { useTrDrawer } from './useTrDrawer'
+import { MonthProvider, useMonth } from './MonthProvider'
 import { EnvelopeTable } from './EnvelopeTable'
 import { DnDContext } from './DnD/DnDContext'
 import { SmartBudgetPopover } from './BudgetPopover'
 import { SmartGoalPopover } from './GoalPopover'
 import { SideContent, useSideContent } from './SideContent'
-import { useTranslation } from 'react-i18next'
 
 export default function WithMonth() {
   return (
@@ -30,18 +29,20 @@ function Budgets() {
   const { t } = useTranslation('budgets')
   const [month] = useMonth()
   const openSide = useSideContent()
-  const showTransactions = useTrDrawer()
+  const transactionDrawer = useEnvTransactionsDrawer()
   const openOverview = useCallback(() => openSide('overview'), [openSide])
 
   const openTransactions = useCallback(
     (opts: { id: TEnvelopeId; isExact?: boolean }) =>
-      showTransactions({
-        id: opts.id,
-        month,
-        mode: TrFilterMode.Envelope,
-        isExact: opts.isExact,
+      transactionDrawer.open({
+        envelopeConditions: {
+          id: opts.id,
+          month,
+          mode: TrFilterMode.Envelope,
+          isExact: opts.isExact,
+        },
       }),
-    [month, showTransactions]
+    [month, transactionDrawer]
   )
 
   const mainContent = (

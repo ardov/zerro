@@ -8,7 +8,7 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 import { useAppDispatch, useAppSelector } from 'store/index'
 import { renameGroup } from '4-features/envelope/renameGroup'
 import { moveGroup } from '4-features/envelope/moveGroup'
-import { createEnvelope } from '4-features/envelope/createEnvelope'
+import { createEnvelopeInGroup } from '4-features/envelope/createEnvelope'
 import { TableRow } from './shared/shared'
 import { TFxAmount } from '6-shared/types'
 import { balances } from '5-entities/envBalances'
@@ -63,11 +63,7 @@ export const Group: FC<TGroupProps> = ({
       )}
 
       <Tooltip title={t('createEnvelope')}>
-        <IconButton
-          onClick={() =>
-            dispatch(createEnvelope({ group: name, indexRaw: groupIdx }))
-          }
-        >
+        <IconButton onClick={() => dispatch(createEnvelopeInGroup(name))}>
           <AddIcon />
         </IconButton>
       </Tooltip>

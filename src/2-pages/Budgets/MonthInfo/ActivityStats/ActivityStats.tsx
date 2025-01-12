@@ -1,5 +1,6 @@
 import { FC, useCallback } from 'react'
 import { Box, BoxProps, ButtonBase, Collapse, Stack } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { TISOMonth } from '6-shared/types'
 import { Tooltip } from '6-shared/ui/Tooltip'
@@ -13,20 +14,21 @@ import {
 } from '5-entities/envBalances'
 import { envelopeModel } from '5-entities/envelope'
 import { DataLine } from '3-widgets/DataLine'
-import { useTrDrawer } from '2-pages/Budgets/useTrDrawer'
-import { useTranslation } from 'react-i18next'
+import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 
 export function ActivityStats(props: { month: TISOMonth }) {
   const { month } = props
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
   const activity = balances.useSortedActivity()[month]
-  const openTrDrawer = useTrDrawer()
+  const transactionDrawer = useEnvTransactionsDrawer()
 
   const showTransactions = useCallback(
     (id: TDataNode['id'], trMode: TrFilterMode) => {
-      openTrDrawer({ id, month, mode: trMode, isExact: true })
+      transactionDrawer.open({
+        envelopeConditions: { id, month, mode: trMode, isExact: true },
+      })
     },
-    [month, openTrDrawer]
+    [month, transactionDrawer]
   )
 
   if (!activity) return null
