@@ -1,24 +1,21 @@
+import type { TTransaction } from '6-shared/types'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Drawer, Box, Typography, IconButton } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { registerPopover } from '6-shared/historyPopovers'
+import { TrCondition } from '5-entities/transaction'
 import {
   TransactionList,
   TTransactionListProps,
 } from '../transaction/TransactionList'
 import { useTransactionPreview } from './TransactionPreviewDrawer'
-import {
-  TEnvConditions,
-  useFilteredByEnvelope,
-} from '4-features/envelope/envelopeFiltering'
 
 export type TransactionDrawerProps = {
   title?: string
-  transactions?: TTransactionListProps['transactions']
-  envelopeConditions?: TEnvConditions
-  filterConditions?: TTransactionListProps['preFilter']
+  transactions?: TTransaction[]
+  filterConditions?: TrCondition
   initialDate?: TTransactionListProps['initialDate']
 }
 
@@ -29,19 +26,16 @@ const trDrawerHooks = registerPopover(
 
 export const useTransactionDrawer = trDrawerHooks.useMethods
 
+const width = { xs: '100vw', sm: 360 }
+const contentSx = { width, [`& .MuiDrawer-paper`]: { width } }
+
 export const SmartTransactionListDrawer = () => {
   const { t } = useTranslation('common')
   const drawer = trDrawerHooks.useProps()
   const trPreview = useTransactionPreview()
-  const {
-    title,
-    transactions,
-    envelopeConditions,
-    filterConditions,
-    initialDate,
-  } = drawer.extraProps
+  const { title, transactions, filterConditions, initialDate } =
+    drawer.extraProps
   const { onClose, open } = drawer.displayProps
-  const filteredTransactions = useFilteredByEnvelope(envelopeConditions)
 
   const showTransaction = useCallback(
     (id: string) => {
@@ -81,9 +75,7 @@ export const SmartTransactionListDrawer = () => {
         </Box>
 
         <TransactionList
-          transactions={
-            filteredTransactions.length ? filteredTransactions : transactions
-          }
+          transactions={transactions}
           preFilter={filterConditions}
           initialDate={initialDate}
           onTrOpen={showTransaction}
@@ -93,10 +85,4 @@ export const SmartTransactionListDrawer = () => {
       </Box>
     </Drawer>
   )
-}
-
-const drawerWidth = { xs: '100vw', sm: 360 }
-const contentSx = {
-  width: drawerWidth,
-  [`& .MuiDrawer-paper`]: { width: drawerWidth },
 }

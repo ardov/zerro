@@ -7,7 +7,7 @@ import { Stack } from '@mui/system'
 import { useToggle } from '6-shared/hooks/useToggle'
 
 import { accountModel } from '5-entities/account'
-import { TransactionsDrawer } from '3-widgets/transaction/TransactionsDrawer'
+import { useTransactionDrawer } from '3-widgets/global/TransactionListDrawer'
 import { WidgetNetWorth } from './WidgetNetWorth'
 import { WidgetCashflow } from './WidgetCashflow'
 import { WidgetAccHistory } from './WidgetAccHistory'
@@ -19,11 +19,7 @@ export default function Stats() {
   const [period, setPeriod] = useState<Period>(Period.LastYear)
   const [showArchived, toggleArchived] = useToggle(false)
   const togglePeriod = useCallback(() => setPeriod(nextPeriod), [])
-
-  const [selected, setSelected] = useState<{
-    id: TAccountId
-    date: TISODate
-  } | null>(null)
+  const trDrawer = useTransactionDrawer()
 
   const accIds = useMemo(
     () =>
@@ -40,35 +36,19 @@ export default function Stats() {
   )
 
   const onSelect = useCallback((id: TAccountId, date: TISODate) => {
-    setSelected({ id, date })
+    trDrawer.open({ filterConditions: { account: id }, initialDate: date })
   }, [])
 
-  const filterConditions = { account: selected?.id || null }
-
   return (
-    <>
-      <Stack spacing={2} p={3} pb={10}>
-        <WidgetNetWorth period={period} onTogglePeriod={togglePeriod} />
-        <WidgetCashflow period={period} onTogglePeriod={togglePeriod} />
-        {accIds.map(id => (
-          <WidgetAccHistory
-            key={id}
-            id={id}
-            period={period}
-            onClick={onSelect}
-          />
-        ))}
-        <Button onClick={toggleArchived}>
-          {t(showArchived ? 'hideArchived' : 'showArchived')}
-        </Button>
-      </Stack>
-
-      <TransactionsDrawer
-        filterConditions={filterConditions}
-        initialDate={selected?.date}
-        open={!!selected}
-        onClose={() => setSelected(null)}
-      />
-    </>
+    <Stack spacing={2} p={3} pb={10}>
+      <WidgetNetWorth period={period} onTogglePeriod={togglePeriod} />
+      <WidgetCashflow period={period} onTogglePeriod={togglePeriod} />
+      {accIds.map(id => (
+        <WidgetAccHistory key={id} id={id} period={period} onClick={onSelect} />
+      ))}
+      <Button onClick={toggleArchived}>
+        {t(showArchived ? 'hideArchived' : 'showArchived')}
+      </Button>
+    </Stack>
   )
 }
