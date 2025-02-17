@@ -22,6 +22,7 @@ describe('goal', () => {
     expect(calc({ ...ctx, budgeted: -10 })).toBe(0)
     expect(calc({ ...ctx, budgeted: 100 })).toBe(1)
     expect(calc({ ...ctx, budgeted: 120 })).toBe(1)
+    expect(calc({ ...ctx, budgeted: 99.99 })).toBe(0.99)
   })
 
   test('Monthly spend goal', () => {

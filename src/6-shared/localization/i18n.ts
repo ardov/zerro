@@ -13,9 +13,10 @@ function detectBestLanguage(languges: string[]) {
   const getLangOnly = (lang: string) => lang.split(/-|_/)[0]
 
   // Try with cached language
-  const cachedLanguage = getLangOnly(
-    localStorage.getItem(LOCAL_STORAGE_KEY) || ''
-  )
+  let cachedLanguage = ''
+  try {
+    cachedLanguage = getLangOnly(localStorage.getItem(LOCAL_STORAGE_KEY) || '')
+  } catch {}
   if (languges.includes(cachedLanguage)) return cachedLanguage
 
   // Try with browser language list
@@ -45,7 +46,9 @@ i18n.use(initReactI18next).init({
 })
 
 // Set html lang attribute
-document.documentElement.lang = i18n.resolvedLanguage || i18n.language
+try {
+  document.documentElement.lang = i18n.resolvedLanguage || i18n.language
+} catch {}
 
 // Cache language on change
 i18n.on('languageChanged', function (lng) {

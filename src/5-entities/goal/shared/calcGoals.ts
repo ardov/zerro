@@ -113,11 +113,13 @@ export function getProgress(needStart: number, needNow: number): number {
   100        0         1
   100        20        0.8
   */
-  const start = Math.max(needStart, 0)
-  const now = Math.max(needNow, 0)
-  if (now === 0) return 1
-  if (now >= start) return 0
-  return round(1 - now / start)
+  if (needStart < 0) needStart = 0
+  if (needNow <= 0) return 1
+  if (needNow >= needStart) return 0
+  let progress = round(1 - needNow / needStart)
+  // 0.9999 -> 0.99
+  if (progress >= 1) return 0.99
+  return progress
 }
 
 function clamp(num: number, min: number, max: number) {
