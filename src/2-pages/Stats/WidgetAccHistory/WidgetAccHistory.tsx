@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react'
 import { Box, Typography, Paper } from '@mui/material'
-import { AreaChart, Area, ResponsiveContainer } from 'recharts'
+import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts'
 import { useAppTheme } from '6-shared/ui/theme'
 import { formatDate } from '6-shared/helpers/date'
 import { TAccountId, TISODate } from '6-shared/types'
@@ -24,6 +24,9 @@ export const WidgetAccHistory: FC<AccTrendProps> = ({
   const theme = useAppTheme()
   const acc = accountModel.usePopulatedAccounts()[id]
   const data = useAccountHistory(id, period)
+  const dataMax = Math.max(...data.map(i => i.balance))
+  const dataMin = Math.min(...data.map(i => i.balance))
+  const yAxisMin = Math.min(0, dataMin)
 
   const [hoverIdx, setHoverIdx] = useState<number | null>(null)
 
@@ -32,16 +35,12 @@ export const WidgetAccHistory: FC<AccTrendProps> = ({
   const hoverDate = isHovering ? data[hoverIdx].date : null
 
   const gradientOffset = () => {
-    const dataMax = Math.max(...data.map(i => i.balance))
-    const dataMin = Math.min(...data.map(i => i.balance))
-
     if (dataMax <= 0) return 0
     if (dataMin >= 0) return 1
-
     return dataMax / (dataMax - dataMin)
   }
 
-  const off = gradientOffset()
+  const offset = gradientOffset()
   const colorId = 'gradient' + acc.id
 
   return (
@@ -91,17 +90,19 @@ export const WidgetAccHistory: FC<AccTrendProps> = ({
             <defs>
               <linearGradient id={colorId} x1="0" y1="0" x2="0" y2="1">
                 <stop
-                  offset={off}
+                  offset={offset}
                   stopColor={theme.palette.primary.main}
                   stopOpacity={0.2}
                 />
                 <stop
-                  offset={off}
+                  offset={offset}
                   stopColor={theme.palette.error.main}
                   stopOpacity={0.3}
                 />
               </linearGradient>
             </defs>
+
+            <YAxis domain={[yAxisMin, 'dataMax']} hide />
 
             <Area
               type="monotone"
