@@ -345,12 +345,9 @@ const AmountsWrapper = styled.div<{
 
   [color='textSecondary'] &[type='transfer'] {
     max-width: 100%;
-    width: 100%;
-    flex-shrink: 1;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    -webkit-mask-image: linear-gradient(to left, transparent, black 40px);
   }
 
   > :not(:first-of-type):before {

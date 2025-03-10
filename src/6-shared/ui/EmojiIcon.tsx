@@ -10,7 +10,7 @@ import {
 import { Modify } from '6-shared/types'
 
 const sizes = { s: 32, m: 40 }
-const fonts = { s: '4em', m: '6em' }
+const fonts = { s: '1rem', m: '1.5rem' }
 
 export type EmojiIconProps = Modify<
   BoxProps,
@@ -63,6 +63,9 @@ export function EmojiIcon(props: EmojiIconProps) {
       transition: '.1s ease-in-out',
     },
 
+    '& .checkbox': {
+      position: 'absolute',
+    },
     '&:hover .checkbox': {
       opacity: isInteractive ? 1 : 0,
       transition: '.2s',
@@ -71,6 +74,10 @@ export function EmojiIcon(props: EmojiIconProps) {
       opacity: showCheckBox || checked ? 1 : 0,
       transition: '.2s',
     },
+
+    '& .emoji': {
+      fontSize: fonts[size],
+    },
     '&:hover .emoji': {
       opacity: isInteractive ? 0 : 1,
       transition: '.2s',
@@ -78,13 +85,6 @@ export function EmojiIcon(props: EmojiIconProps) {
     '&:not(:hover) .emoji': {
       opacity: showCheckBox || checked ? 0 : 1,
       transition: '.2s',
-    },
-
-    '& .emoji': {
-      position: 'absolute',
-      fontSize: fonts[size],
-      transform: 'scale(.25)',
-      textAlign: 'center',
     },
   }
 

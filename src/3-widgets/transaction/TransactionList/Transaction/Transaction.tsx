@@ -119,10 +119,6 @@ const Row = styled.div`
     -webkit-mask-image: linear-gradient(to left, transparent, black 40px);
   }
 
-  > *:first-child:empty {
-    flex-grow: 0;
-  }
-
   > *:empty + * {
     margin-left: 0;
   }
