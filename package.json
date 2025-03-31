@@ -122,7 +122,7 @@
     "stylelint-processor-styled-components": "^1.10.0",
     "stylelint-scss": "^6.11.1",
     "typescript": "^5.8.2",
-    "vite": "^6.2.3",
+    "vite": "^6.2.4",
     "vite-plugin-pwa": "^0.21.1",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^2.1.9"
