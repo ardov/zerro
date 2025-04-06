@@ -443,7 +443,8 @@
     "btnSave": "Сохранить",
     "btnClose": "Закрыть",
     "rate": "Курс: {{rate}}",
-    "fullEmptyState": "Выберите операцию,\nчтобы увидеть детали"
+    "fullEmptyState": "Выберите операцию,\nчтобы увидеть детали",
+    "dailyTotal": "Итого за день"
   },
 
   "transactionsBulkEdit": {

@@ -465,6 +465,7 @@ export const en: typeof ru = {
     btnClose: 'Close',
     rate: 'Rate: {{rate}}',
     fullEmptyState: 'Select a transaction to see details',
+    dailyTotal: 'Daily total'
   },
 
   transactionsBulkEdit: {
