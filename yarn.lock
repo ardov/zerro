@@ -13340,9 +13340,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^6.2.3":
-  version: 6.2.3
-  resolution: "vite@npm:6.2.3"
+"vite@npm:^6.2.6":
+  version: 6.2.6
+  resolution: "vite@npm:6.2.6"
   dependencies:
     esbuild: "npm:^0.25.0"
     fsevents: "npm:~2.3.3"
@@ -13388,7 +13388,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10/3cd7b3a8d9a31c8eb7141004ddb1c9489afa0cdaf0ccbf41dacee121a8f13062d0fb2cee160589aaf1c534a02402aac674f1b1618876ba0bd299b55f69b2b495
+  checksum: 10c0/68a2ed3e61bdd654c59b817b4f3203065241c66d1739faa707499130f3007bc3a666c7a8320a4198e275e62b5e4d34d9b78a6533f69e321d366e76f5093b2071
   languageName: node
   linkType: hard
 
@@ -13950,7 +13950,7 @@ __metadata:
     typescript: "npm:^5.8.2"
     use-local-storage-state: "npm:^19.5.0"
     uuid: "npm:^9.0.1"
-    vite: "npm:^6.2.3"
+    vite: "npm:^6.2.6"
     vite-plugin-pwa: "npm:^0.21.1"
     vite-tsconfig-paths: "npm:^5.1.4"
     vitest: "npm:^2.1.9"
