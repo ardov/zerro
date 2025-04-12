@@ -36,8 +36,25 @@ export const DataLine: FC<DataLineProps> = ({
   ...rest
 }) => {
   return (
-    <Box display="flex" flexDirection="row" {...rest}>
-      <Box flexGrow={1} mr={1} minWidth={0} display="flex" alignItems="center">
+    <Box
+      {...rest}
+      sx={[
+        {
+          display: 'flex',
+          flexDirection: 'row',
+        },
+        ...(Array.isArray(rest.sx) ? rest.sx : [rest.sx]),
+      ]}
+    >
+      <Box
+        sx={{
+          flexGrow: 1,
+          mr: 1,
+          minWidth: 0,
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
         {!!color && <Dot color={color} colorOpacity={colorOpacity} />}
         <Tooltip title={tooltip}>
           <Typography noWrap variant={variant}>

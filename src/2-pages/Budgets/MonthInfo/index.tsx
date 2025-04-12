@@ -67,10 +67,29 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
   })
 
   return (
-    <Box {...rest} minHeight="100vh">
+    <Box
+      {...rest}
+      sx={[
+        {
+          minHeight: '100vh',
+        },
+        ...(Array.isArray(rest.sx) ? rest.sx : [rest.sx]),
+      ]}
+    >
       {isMobile && (
-        <Box py={1} px={3} display="flex" alignItems="center">
-          <Box flexGrow={1}>
+        <Box
+          sx={{
+            py: 1,
+            px: 3,
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <Box
+            sx={{
+              flexGrow: 1,
+            }}
+          >
             <Typography variant="h6" noWrap>
               {getMonthName(month)}
             </Typography>
@@ -81,16 +100,30 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
           </Tooltip>
         </Box>
       )}
-
-      <Stack gap={2} p={3}>
+      <Stack
+        sx={{
+          gap: 2,
+          p: 3,
+        }}
+      >
         <OverspendNotice month={month} />
 
         <BalanceWidget month={month} />
         <ActivityStats month={month} />
         <FxRates month={month} />
 
-        <Box p={2} bgcolor="background.default" borderRadius={1}>
-          <Box mb={1}>
+        <Box
+          sx={{
+            p: 2,
+            bgcolor: 'background.default',
+            borderRadius: 1,
+          }}
+        >
+          <Box
+            sx={{
+              mb: 1,
+            }}
+          >
             <Typography variant="body1" align="center">
               {t('actions')}
             </Typography>

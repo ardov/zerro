@@ -52,14 +52,20 @@ export default function TransactionsView() {
         <meta name="description" content={t('pageDescription')} />
         <link rel="canonical" href="https://zerro.app/transactions" />
       </Helmet>
-
-      <Box display="flex" height="100vh">
+      <Box
+        sx={{
+          display: 'flex',
+          height: '100vh',
+        }}
+      >
         <Box
-          p={{ xs: 0, md: 2 }}
-          flexGrow={1}
-          minWidth={0}
-          display="flex"
-          justifyContent="center"
+          sx={{
+            p: { xs: 0, md: 2 },
+            flexGrow: 1,
+            minWidth: 0,
+            display: 'flex',
+            justifyContent: 'center',
+          }}
         >
           <Paper
             sx={{

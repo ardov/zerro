@@ -31,7 +31,14 @@ export const SmartTransactionPreview = () => {
       sx={contentSx}
       keepMounted={false}
     >
-      <Box height="100vh" display="flex" flexDirection="column" minWidth={320}>
+      <Box
+        sx={{
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          minWidth: 320,
+        }}
+      >
         <TransactionPreview
           id={id}
           onClose={onClose}

@@ -106,7 +106,7 @@ function getAvailableColor(
 ) {
   const positive = 'success.main'
   const negative = 'error.main'
-  const neutral = 'text.hint'
+  const neutral = 'text.disabled'
 
   if (isSelf) return neutral
 

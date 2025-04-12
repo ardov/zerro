@@ -12,21 +12,29 @@ export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut, message }) => {
   const { t } = useTranslation('errorBoudary')
   return (
     <Box
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      height="inherit"
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 'inherit',
+      }}
     >
-      <Box p={5} mx="auto" maxWidth={500}>
-        <Typography variant="h4" paragraph>
+      <Box
+        sx={{
+          p: 5,
+          mx: 'auto',
+          maxWidth: 500,
+        }}
+      >
+        <Typography variant="h4" sx={{ marginBottom: '16px' }}>
           {t('title')}
         </Typography>
 
-        <Typography variant="body1" paragraph>
+        <Typography variant="body1" sx={{ marginBottom: '16px' }}>
           {t('description')}
         </Typography>
 
-        <Box mt={3}>
+        <Box sx={{ mt: 3 }}>
           <Button
             variant="contained"
             color="primary"
@@ -42,9 +50,8 @@ export const ErrorMessage: FC<ErrorMessageProps> = ({ onLogOut, message }) => {
 
           {!!message && (
             <Typography
-              sx={{ mt: 6, color: 'text.secondary' }}
+              sx={{ mt: 6, color: 'text.secondary', marginBottom: '16px' }}
               variant="body1"
-              paragraph
             >
               {t('errorMsg', { message })}
             </Typography>

@@ -25,11 +25,11 @@ export function SmartDialog(props: TSmartDialogProps) {
       anchor="bottom"
       onOpen={onOpen}
       disableSwipeToOpen
-      PaperProps={drawerPaperProps}
       open={open}
       onClose={onClose}
       keepMounted={false}
       ModalProps={{ keepMounted: false }}
+      slotProps={{ paper: drawerPaperProps }}
     />
   ) : (
     <Dialog

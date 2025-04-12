@@ -33,7 +33,6 @@ export const SnackbarProvider: FC<{ children: React.ReactNode }> = props => {
         onClose={onClose}
         autoHideDuration={cached?.autoHideDuration || 6000}
         message={cached?.message || ''}
-        TransitionComponent={TransitionLeft}
         action={
           <IconButton
             size="small"
@@ -44,6 +43,9 @@ export const SnackbarProvider: FC<{ children: React.ReactNode }> = props => {
             <CloseIcon fontSize="small" />
           </IconButton>
         }
+        slots={{
+          transition: TransitionLeft,
+        }}
       />
     </SnackbarContext.Provider>
   )

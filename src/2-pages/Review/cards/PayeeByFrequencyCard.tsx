@@ -40,7 +40,7 @@ export function PayeeByFrequencyCard(props: TCardProps) {
 
   return (
     <Card>
-      <Stack spacing={1} alignItems="center" direction="column">
+      <Stack spacing={1} direction="column" sx={{ alignItems: 'center' }}>
         <Typography variant="body1" align="center">
           {t('favouritePlace', { number: i + 1 })}
         </Typography>
@@ -49,7 +49,7 @@ export function PayeeByFrequencyCard(props: TCardProps) {
           sx={{ borderRadius: 1, px: 1 }}
           onClick={() => props.onShowTransactions(transactions)}
         >
-          <Stack spacing={1} alignItems="center" direction="column">
+          <Stack spacing={1} direction="column" sx={{ alignItems: 'center' }}>
             <Typography variant="h4" align="center" className="info-gradient">
               {payee}
             </Typography>
@@ -67,8 +67,12 @@ export function PayeeByFrequencyCard(props: TCardProps) {
         <Stack
           direction="row"
           spacing={1}
-          alignItems="center"
-          sx={{ opacity: 0.3, transition: '200ms', '&:hover': { opacity: 1 } }}
+          sx={{
+            alignItems: 'center',
+            opacity: 0.3,
+            transition: '200ms',
+            '&:hover': { opacity: 1 },
+          }}
         >
           <IconButton size="small" onClick={prev}>
             <ArrowBackIcon />

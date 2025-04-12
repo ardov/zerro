@@ -106,13 +106,14 @@ const Actions: FC<ActionsProps> = ({
         }}
         open={editModalVisible}
       />
-
       <Box
-        position="absolute"
-        left="50%"
-        bottom={16}
         style={{ transform: 'translateX(-50%)' }}
-        zIndex={1000}
+        sx={{
+          position: 'absolute',
+          left: '50%',
+          bottom: 16,
+          zIndex: 1000,
+        }}
       >
         <CSSTransition
           mountOnEnter
@@ -122,12 +123,14 @@ const Actions: FC<ActionsProps> = ({
           classNames="actions-transition"
         >
           <Box
-            display="flex"
-            alignItems="center"
-            paddingLeft={1}
-            bgcolor="info.main"
-            boxShadow="4"
-            borderRadius="60px"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              paddingLeft: 1,
+              bgcolor: 'info.main',
+              boxShadow: '4',
+              borderRadius: '60px',
+            }}
           >
             <Chip
               label={t('selected', { count: ids.length })}
@@ -267,7 +270,7 @@ const Actions: FC<ActionsProps> = ({
                 </MenuItem>
               )}
 
-              <Box my={1}>
+              <Box sx={{ my: 1 }}>
                 <Divider />
               </Box>
 

@@ -64,7 +64,6 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   return (
     <Dialog open={open} onClose={onClose} {...rest}>
       <DialogTitle>{t('editTransactions')}</DialogTitle>
-
       <DialogContent>
         {types.transfer === 0 && (
           <>
@@ -78,7 +77,11 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
           </>
         )}
 
-        <Box pt={2}>
+        <Box
+          sx={{
+            pt: 2,
+          }}
+        >
           <TextField
             value={comment}
             onChange={e => setComment(e.target.value)}
@@ -92,7 +95,6 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
           />
         </Box>
       </DialogContent>
-
       <DialogActions>
         <Button onClick={onClose} color="primary">
           {t('cancel')}

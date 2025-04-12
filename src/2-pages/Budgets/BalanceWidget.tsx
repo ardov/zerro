@@ -80,7 +80,11 @@ export function BalanceWidget(props: { month: TISOMonth }) {
         currency={currency}
       />
       <Divider />
-      <Typography variant="body2" color="text.secondary" align="center">
+      <Typography
+        variant="body2"
+        align="center"
+        sx={{ color: 'text.secondary' }}
+      >
         <Balancer>{getExplaining(fundsEnd, toBeBudgeted, overspend)}</Balancer>
       </Typography>
     </Paper>

@@ -40,10 +40,6 @@ export default function Auth() {
   return (
     <Stack
       spacing={8}
-      p={3}
-      alignItems="center"
-      justifyContent="center"
-      minHeight="100vh"
       style={isDragging ? dragOverStyle : defaultStyle}
       onDragOver={e => {
         e.stopPropagation()
@@ -64,10 +60,18 @@ export default function Auth() {
         e.preventDefault()
         parseFiles(e?.dataTransfer?.files)
       }}
+      sx={{
+        p: 3,
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+      }}
     >
       <Logo width="200" fill={theme.palette.primary.main} visible={logoIn} />
-
-      <Stack spacing={3} justifyContent="center" alignItems="center">
+      <Stack
+        spacing={3}
+        sx={{ justifyContent: 'center', alignItems: 'center' }}
+      >
         <Fade in timeout={1000}>
           <Button
             variant="contained"
@@ -79,7 +83,7 @@ export default function Auth() {
         </Fade>
 
         <Fade in timeout={2000}>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
             {t('haveTrouble')}{' '}
             <ButtonBase
               onClick={() => dispatch(logIn('app'))}
@@ -106,7 +110,7 @@ export default function Auth() {
         </Fade>
 
         <Fade in timeout={3000}>
-          <Box mt={2}>
+          <Box sx={{ mt: 2 }}>
             <RouterLink to="/about" component={SecondaryLink}>
               {t('btnAbout')}
             </RouterLink>

@@ -34,49 +34,84 @@ export default function NavigationDrawer(props: DrawerProps) {
   return (
     <Drawer {...props}>
       <Box
-        display="flex"
-        position="relative"
-        flexDirection="column"
-        alignItems="center"
-        height="100%"
+        sx={{
+          display: 'flex',
+          position: 'relative',
+          flexDirection: 'column',
+          alignItems: 'center',
+          height: '100%',
+        }}
       >
-        <Box width="100%" px={1} pt={2}>
+        <Box
+          sx={{
+            width: '100%',
+            px: 1,
+            pt: 2,
+          }}
+        >
           <Links />
         </Box>
 
-        <Box width="100%" py={3}>
+        <Box
+          sx={{
+            width: '100%',
+            py: 3,
+          }}
+        >
           <Divider />
         </Box>
 
-        <Box width="100%" px={1}>
+        <Box
+          sx={{
+            width: '100%',
+            px: 1,
+          }}
+        >
           <AccountList />
         </Box>
 
-        <Box width="100%" px={1}>
+        <Box
+          sx={{
+            width: '100%',
+            px: 1,
+          }}
+        >
           <DebtorList />
         </Box>
 
-        <Box height={64} width="100%" flexShrink={0} />
+        <Box
+          sx={{
+            height: 64,
+            width: '100%',
+            flexShrink: 0,
+          }}
+        />
 
         <Box
-          bgcolor="background.paper"
-          width="100%"
-          pt={1}
-          pb={2}
-          px={3}
-          mt="auto"
-          position="sticky"
-          bottom="0"
-          left="0"
-          right="0"
-          zIndex="5"
-          flexShrink={0}
-          display="flex"
-          alignItems="center"
-          flexDirection="row"
+          sx={{
+            bgcolor: 'background.paper',
+            width: '100%',
+            pt: 1,
+            pb: 2,
+            px: 3,
+            mt: 'auto',
+            position: 'sticky',
+            bottom: '0',
+            left: '0',
+            right: '0',
+            zIndex: '5',
+            flexShrink: 0,
+            display: 'flex',
+            alignItems: 'center',
+            flexDirection: 'row',
+          }}
         >
           <Logo fill={theme.palette.primary.main} width="100" />
-          <Box ml="auto">
+          <Box
+            sx={{
+              ml: 'auto',
+            }}
+          >
             <RefreshButton />
             <MenuButton edge="end" />
           </Box>

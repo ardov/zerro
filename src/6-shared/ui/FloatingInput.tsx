@@ -51,15 +51,17 @@ function FloatingInput(props: {
 
   return (
     <Popover open={open} onClose={submitForm} anchorEl={anchorEl}>
-      <Box component="form" p={0} width={280} onSubmit={handleSubmit}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ p: 0, width: 280 }}>
         <TextField
           fullWidth
           autoFocus
           name="name"
-          inputProps={{ autoComplete: 'off' }}
           value={values.name}
           onChange={handleChange}
           onBlur={submitForm}
+          slotProps={{
+            htmlInput: { autoComplete: 'off' },
+          }}
         />
       </Box>
     </Popover>

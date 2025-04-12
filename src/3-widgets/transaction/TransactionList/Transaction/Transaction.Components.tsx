@@ -122,8 +122,10 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
             >
               <Typography
                 variant="body2"
-                color="textSecondary"
                 component="span"
+                sx={{
+                  color: 'text.secondary',
+                }}
               >
                 <SmartAmount
                   value={tr.opOutcome}

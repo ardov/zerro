@@ -33,10 +33,19 @@ export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
         flexDirection: 'row',
       }}
     >
-      <Box color="warning.main" pt="2px">
+      <Box
+        sx={{
+          color: 'warning.main',
+          pt: '2px',
+        }}
+      >
         <WarningIcon />
       </Box>
-      <Box ml={1.5}>
+      <Box
+        sx={{
+          ml: 1.5,
+        }}
+      >
         <Typography variant="subtitle1">
           {t('title')}{' '}
           <DisplayAmount

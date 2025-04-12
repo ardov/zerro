@@ -90,12 +90,17 @@ export function EmojiIcon(props: EmojiIconProps) {
 
   return (
     <Box
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      position="relative"
-      sx={symbolSx}
       {...rest}
+      sx={[
+        {
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+        },
+        ...(Array.isArray(symbolSx) ? symbolSx : [symbolSx]),
+        rest.sx,
+      ]}
     >
       <span className="emoji">{symbol}</span>
       {onChange && (

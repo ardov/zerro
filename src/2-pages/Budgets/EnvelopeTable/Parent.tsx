@@ -64,10 +64,15 @@ export const Parent = React.forwardRef<HTMLDivElement, ParentProps>(
           </IconButton>
         )}
         {parent}
-
         {hasChildren && (
           <Collapse in={isExpanded} unmountOnExit>
-            <Box pb={1}>{children}</Box>
+            <Box
+              sx={{
+                pb: 1,
+              }}
+            >
+              {children}
+            </Box>
           </Collapse>
         )}
       </Box>

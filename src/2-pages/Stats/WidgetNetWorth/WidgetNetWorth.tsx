@@ -115,8 +115,8 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
 
   return (
     <Paper>
+      <Box sx={{ p: 2, minWidth: '100%' }}>
       {/* Header */}
-      <Box p={2} minWidth="100%">
         <Typography variant="h5">
           {t('netWorth.title')}{' '}
           <span
@@ -131,9 +131,8 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
           <SurviveFact />
         </Typography>
       </Box>
-
       {/* Chart */}
-      <Box p={2} minWidth="100%" height={300}>
+      <Box sx={{ p: 2, minWidth: '100%', height: 300 }}>
         <ResponsiveContainer>
           <ComposedChart
             data={points}
@@ -166,9 +165,8 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
           </ComposedChart>
         </ResponsiveContainer>
       </Box>
-
       {/* Legend */}
-      <Box p={2}>
+      <Box sx={{ p: 2 }}>
         {makeCheck('fundsInBudget')}
         {makeCheck('fundsSaving')}
         {makeCheck('accountDebts')}
