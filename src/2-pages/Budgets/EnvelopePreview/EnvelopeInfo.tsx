@@ -55,17 +55,12 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
     currentMonth === month
       ? t('availableTitleNow')
       : month > currentMonth
-      ? t('availableTitleFuture', { context: getMonthNum(month).toString() })
-      : t('availableTitlePast', { context: getMonthNum(month).toString() })
+        ? t('availableTitleFuture', { context: getMonthNum(month).toString() })
+        : t('availableTitlePast', { context: getMonthNum(month).toString() })
 
   return (
-    <Box
-      sx={{
-        ...cardStyle,
-        '--color': theme.palette.text.secondary,
-      }}
-    >
-      <Stack spacing={1.5} py={1}>
+    <Box sx={{ ...cardStyle, '--color': theme.palette.text.secondary }}>
+      <Stack spacing={1.5} sx={{ py: 1 }}>
         <Total
           title={blockTitle}
           value={totalAvailable}
@@ -76,11 +71,11 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
             totalAvailable < 0
               ? 'error.main'
               : totalAvailable > 0
-              ? 'success.main'
-              : undefined
+                ? 'success.main'
+                : undefined
           }
         />
-        <Divider light />
+        <Divider sx={{ opacity: '0.6' }} />
       </Stack>
       <List dense sx={{ mx: -2, color: 'text.secondary' }}>
         <ListItem>
@@ -134,7 +129,7 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
                 <span>{t('transactions', { ns: 'common' })}</span>
                 {Boolean(envMetrics.totalTransactions.length) && (
                   <span style={{ opacity: 0.5 }}>
-                    {' ' + envMetrics.totalTransactions.length}
+                    {' ' + envMetrics.totalTransactions.length}
                   </span>
                 )}
               </span>

@@ -19,7 +19,14 @@ export const Footer: FC<FooterProps> = props => {
   const { t } = useTranslation('common')
 
   const Sum: FC<{ value: TFxAmount }> = ({ value }) => (
-    <Typography variant="overline" color="text.secondary" align="right" noWrap>
+    <Typography
+      variant="overline"
+      align="right"
+      noWrap
+      sx={{
+        color: 'text.secondary',
+      }}
+    >
       <DisplayAmount value={value} decMode="ifOnly" month={month} noCurrency />
     </Typography>
   )
@@ -28,7 +35,13 @@ export const Footer: FC<FooterProps> = props => {
     <TableRow
       name={
         <div>
-          <Typography variant="overline" color="text.secondary" noWrap>
+          <Typography
+            variant="overline"
+            noWrap
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             {t('total')}
           </Typography>
         </div>

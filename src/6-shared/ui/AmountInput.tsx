@@ -106,18 +106,21 @@ export const AmountInput: FC<AmountInputProps> = ({
       value={focused ? expression || '' : formattedValue || ''}
       variant="outlined"
       inputRef={ref}
-      inputProps={{ type: 'tel' }}
-      InputProps={{
-        endAdornment: sym && (
-          <InputAdornment position="end" disableTypography children={sym} />
-        ),
-      }}
       onChange={changeHandler}
       onFocus={focusHandler}
       onBlur={blurHandler}
       onKeyDown={keyDownHandler}
       autoFocus={autoFocus}
       {...rest}
+      slotProps={{
+        input: {
+          endAdornment: sym && (
+            <InputAdornment position="end" disableTypography children={sym} />
+          ),
+        },
+
+        htmlInput: { type: 'tel' },
+      }}
     />
   )
 
@@ -130,8 +133,12 @@ export const AmountInput: FC<AmountInputProps> = ({
   return (
     <div>
       {Field}
-
-      <Stack direction="row" width="100%">
+      <Stack
+        direction="row"
+        sx={{
+          width: '100%',
+        }}
+      >
         <Button
           onClick={() => {
             ref.current?.focus()

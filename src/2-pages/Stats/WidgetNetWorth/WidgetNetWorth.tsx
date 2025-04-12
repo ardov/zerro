@@ -102,10 +102,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
         label={names[key]}
         control={
           <Checkbox
-            sx={{
-              color: colors[key],
-              '&.Mui-checked': { color: colors[key] },
-            }}
+            sx={{ color: colors[key], '&.Mui-checked': { color: colors[key] } }}
             checked={isVisible(key)}
             onChange={() => toggle(key)}
           />
@@ -116,7 +113,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
 
   return (
     <Paper>
-      <Box p={2} minWidth="100%">
+      <Box sx={{ p: 2, minWidth: '100%' }}>
         <Typography variant="h5">
           {t('netWorth.title')}{' '}
           <span
@@ -127,8 +124,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
           </span>
         </Typography>
       </Box>
-
-      <Box p={2} minWidth="100%" height={300}>
+      <Box sx={{ p: 2, minWidth: '100%', height: 300 }}>
         <ResponsiveContainer>
           <ComposedChart
             data={points}
@@ -161,8 +157,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
           </ComposedChart>
         </ResponsiveContainer>
       </Box>
-
-      <Box p={2}>
+      <Box sx={{ p: 2 }}>
         {makeCheck('fundsInBudget')}
         {makeCheck('fundsSaving')}
         {makeCheck('accountDebts')}

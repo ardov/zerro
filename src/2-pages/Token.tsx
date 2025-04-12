@@ -17,23 +17,24 @@ export default function Token() {
         <meta name="description" content={t('pageDescription')} />
         <link rel="canonical" href="https://zerro.app/token" />
       </Helmet>
-
       <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        height="inherit"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: 'inherit',
+        }}
       >
-        <Box p={5} mx="auto" maxWidth={500}>
-          <Typography variant="h4" paragraph>
+        <Box sx={{ p: 5, mx: 'auto', maxWidth: 500 }}>
+          <Typography variant="h4" sx={{ marginBottom: '16px' }}>
             {t('heading')}
           </Typography>
 
-          <Typography variant="body1" paragraph>
+          <Typography variant="body1" sx={{ marginBottom: '16px' }}>
             {t('body')}
           </Typography>
 
-          <Box mt={3}>
+          <Box sx={{ mt: 3 }}>
             <Button
               variant="contained"
               color="primary"

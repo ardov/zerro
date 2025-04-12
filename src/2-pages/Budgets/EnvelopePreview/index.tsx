@@ -45,11 +45,11 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
       <Header envelope={env} onClose={onClose} />
 
       <Grid container spacing={2} px={3} pb={5} pt={3}>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <CommentWidget key={id} month={month} id={id} />
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid size={12}>
           <ButtonBase
             onClick={e => openGoalPopover(id, e.currentTarget)}
             sx={{
@@ -64,7 +64,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
               variant="body1"
               textAlign="left"
               component="span"
-              color={goalInfo ? 'text.primary' : 'text.hint'}
+              color={goalInfo ? 'text.primary' : 'text.disabled'}
             >
               {goalInfo
                 ? goalModel.toWords(goalInfo.goal, currency)
@@ -73,19 +73,19 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
           </ButtonBase>
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid size={12}>
           <EnvelopeInfo month={month} id={id} />
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid size={12}>
           <BurndownWidget id={id} />
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid size={12}>
           <ActivityWidget id={id} />
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid size={12}>
           <StatisticWidget id={id} />
         </Grid>
       </Grid>

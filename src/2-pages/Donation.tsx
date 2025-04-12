@@ -14,23 +14,28 @@ export default function Donation() {
         <meta name="description" content={t('pageDescription')} />
         <link rel="canonical" href="https://zerro.app/donation" />
       </Helmet>
-
       <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        height="100%"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+        }}
       >
-        <Box p={3} pb={8} mx="auto" maxWidth={480}>
-          <Typography variant="h5" align="center" paragraph>
+        <Box sx={{ p: 3, pb: 8, mx: 'auto', maxWidth: 480 }}>
+          <Typography variant="h5" align="center" sx={{ marginBottom: '16px' }}>
             {t('heading')}
           </Typography>
 
-          <Typography variant="body1" align="center" paragraph>
+          <Typography
+            variant="body1"
+            align="center"
+            sx={{ marginBottom: '16px' }}
+          >
             {t('subtitle')}
           </Typography>
 
-          <Stack spacing={2} py={2}>
+          <Stack spacing={2} sx={{ py: 2 }}>
             <LinkCard
               icon={<PatreonLogo />}
               primary={t('patreonTitle')}
@@ -49,7 +54,7 @@ export default function Donation() {
             variant="body1"
             color="textSecondary"
             align="center"
-            paragraph
+            sx={{ marginBottom: '16px' }}
           >
             {t('afterword')}
           </Typography>
@@ -81,12 +86,12 @@ const LinkCard: FC<LinkCardProps> = props => {
         boxShadow: 2,
       }}
     >
-      <Box maxWidth={48}>{icon}</Box>
-      <Box ml={2}>
+      <Box sx={{ maxWidth: 48 }}>{icon}</Box>
+      <Box sx={{ ml: 2 }}>
         <Typography variant="h6" color="textPrimary">
           {primary}
         </Typography>
-        <Typography variant="body2" color="textSecondary">
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
           {secondary}
         </Typography>
       </Box>

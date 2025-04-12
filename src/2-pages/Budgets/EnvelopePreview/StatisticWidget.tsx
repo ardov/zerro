@@ -143,18 +143,26 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
   }, [month])
 
   return (
-    <Box borderRadius={1} bgcolor="background.default" {...boxProps}>
-      <Box px={2} pt={2}>
-        <Typography variant="body1" color="text.primary">
+    <Box
+      {...boxProps}
+      sx={[
+        {
+          borderRadius: 1,
+          bgcolor: 'background.default',
+        },
+        ...(Array.isArray(boxProps.sx) ? boxProps.sx : [boxProps.sx]),
+      ]}
+    >
+      <Box sx={{ px: 2, pt: 2 }}>
+        <Typography variant="body1" sx={{ color: 'text.primary' }}>
           <span>{t('average')} </span>
           <InlineButton onClick={switchMetric}>{t(metric)}</InlineButton>
           <span> {t('over')} </span>
           <InlineButton onClick={switchPeriod}>{t(period)}</InlineButton>
         </Typography>
       </Box>
-
       {selectedData && (
-        <Stack spacing={0.5} pt={2} px={2}>
+        <Stack spacing={0.5} sx={{ pt: 2, px: 2 }}>
           <DataLine
             name={t('avgForDate', {
               date: formatDate(selectedData.month, 'LLL'),
@@ -165,7 +173,7 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
           />
         </Stack>
       )}
-      <Box width="100%" height="160px">
+      <Box sx={{ width: '100%', height: '160px' }}>
         <ResponsiveContainer>
           <BarChart
             data={trimmedData}

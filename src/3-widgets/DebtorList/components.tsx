@@ -80,7 +80,13 @@ export const Subheader: FC<
   const toDisplay = displayCurrency.useToDisplay(month)
   return (
     <ListSubheader sx={{ borderRadius: 1, ...sx }} {...rest}>
-      <Box component="span" display="flex" width="100%">
+      <Box
+        component="span"
+        sx={{
+          display: 'flex',
+          width: '100%',
+        }}
+      >
         <Typography
           component="span"
           noWrap
@@ -91,8 +97,10 @@ export const Subheader: FC<
 
         <Box
           component="span"
-          ml={2}
-          color={toDisplay(amount) < 0 ? 'error.main' : 'text.secondary'}
+          sx={{
+            ml: 2,
+            color: toDisplay(amount) < 0 ? 'error.main' : 'text.secondary',
+          }}
         >
           <b>
             <DisplayAmount

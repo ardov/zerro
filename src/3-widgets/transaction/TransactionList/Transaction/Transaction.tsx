@@ -53,7 +53,7 @@ export const Transaction: FC<TTransactionProps> = props => {
           <Tags {...{ tr, trType }} />
           <Amounts {...{ tr, trType }} />
         </Row>
-        <SecondaryRow color="textSecondary">
+        <SecondaryRow color="text.secondary">
           <Info {...{ tr, trType, onFilterByPayee }} />
           <Accounts {...{ tr, trType, onFilterByPayee }} />
         </SecondaryRow>

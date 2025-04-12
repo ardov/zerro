@@ -45,7 +45,7 @@ export const WidgetAccHistory: FC<AccTrendProps> = ({
 
   return (
     <Paper style={{ overflow: 'hidden', position: 'relative' }}>
-      <Box p={2} minWidth={160}>
+      <Box sx={{ p: 2, minWidth: 160 }}>
         <Typography variant="body2" onClick={() => console.log(acc)}>
           <span
             style={{ textDecoration: acc.archive ? 'line-through' : 'none' }}
@@ -58,7 +58,6 @@ export const WidgetAccHistory: FC<AccTrendProps> = ({
           <Amount value={balance} currency={acc.fxCode} decMode="ifAny" />
         </Typography>
       </Box>
-
       <div
         style={{
           width: '100%',

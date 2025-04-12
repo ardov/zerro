@@ -17,7 +17,11 @@ export function QRCard(props: TCardProps) {
         sx={{ borderRadius: 1, px: 1 }}
         onClick={() => props.onShowTransactions(hasReceipt)}
       >
-        <Stack gap={1}>
+        <Stack
+          sx={{
+            gap: 1,
+          }}
+        >
           <Typography variant="body1" align="center">
             {t('youAttached')}
           </Typography>

@@ -79,12 +79,10 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
   return (
     <>
       {props.showLinks && <NavItems onClose={props.onClose} />}
-
       <ListSubheader>{t('settings')}</ListSubheader>
       <ThemeItem onClose={props.onClose} />
       <ReloadDataItem onClose={props.onClose} />
       <AutoSyncItem />
-
       {isExpanded ? (
         <BudgetSettingsItem />
       ) : (
@@ -95,13 +93,11 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
           <ListItemText>{t('advancedSettings')}</ListItemText>
         </MenuItem>
       )}
-
-      <Divider light />
+      <Divider sx={{ opacity: '0.6' }} />
       <ListSubheader>{t('export')}</ListSubheader>
       <ExportCsvItem />
       <ExportJsonItem />
-
-      <Divider light />
+      <Divider sx={{ opacity: '0.6' }} />
       <LangItem onClose={props.onClose} />
       <LogOutItem onClose={props.onClose} />
       <VersionItem onClose={props.onClose} />
@@ -206,21 +202,18 @@ function NavItems({ onClose }: ItemProps) {
         </ListItemIcon>
         <ListItemText>{t('accounts')}</ListItemText>
       </MenuItem>
-
       <MenuItem onClick={handleNav('/review')} component={Link} to="/review">
         <ListItemIcon>
           <WhatshotIcon />
         </ListItemIcon>
         <ListItemText>{t('yearWrapped')}</ListItemText>
       </MenuItem>
-
       <MenuItem onClick={handleNav('/about')} component={Link} to="/about">
         <ListItemIcon>
           <HelpOutlineIcon />
         </ListItemIcon>
         <ListItemText>{t('about')}</ListItemText>
       </MenuItem>
-
       <MenuItem
         onClick={handleNav('/donation')}
         component={Link}
@@ -231,8 +224,7 @@ function NavItems({ onClose }: ItemProps) {
         </ListItemIcon>
         <ListItemText>{t('donate')}</ListItemText>
       </MenuItem>
-
-      <Divider light />
+      <Divider sx={{ opacity: '0.6' }} />
     </>
   )
 }
@@ -352,7 +344,7 @@ function VersionItem({ onClose }: ItemProps) {
     >
       <ListItemIcon />
       <ListItemText>
-        <Typography variant="overline" color="textSecondary">
+        <Typography variant="overline" sx={{ color: 'text.secondary' }}>
           {t('version', { version: appVersion })}
         </Typography>
       </ListItemText>

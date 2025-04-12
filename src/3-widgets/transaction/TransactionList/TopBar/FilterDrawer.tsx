@@ -60,8 +60,8 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
       sx={contentSx}
       {...rest}
     >
-      <Box py={1} px={2} display="flex" alignItems="center">
-        <Box flexGrow={1}>
+      <Box sx={{ py: 1, px: 2, display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h6" noWrap>
             {t('filter')}
           </Typography>
@@ -71,7 +71,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
           <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
         </Tooltip>
       </Box>
-      <Box px={2} flex="1" display="flex" flexDirection="column">
+      <Box sx={{ px: 2, flex: '1', display: 'flex', flexDirection: 'column' }}>
         <TextField
           id="search-input"
           label={t('searchComments')}
@@ -81,9 +81,9 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
           fullWidth
         />
 
-        <Box mt={3} display="flex">
+        <Box sx={{ mt: 3, display: 'flex' }}>
           <Grid container spacing={3}>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <TextField
                 variant="outlined"
                 label={t('amountFrom')}
@@ -94,7 +94,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
                 }}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <TextField
                 variant="outlined"
                 label={t('amountTo')}
@@ -146,7 +146,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
             )}
           />
         </Box> */}
-        <Box mt={3}>
+        <Box sx={{ mt: 3 }}>
           <FormControl fullWidth>
             <InputLabel>{t('transactionType')}</InputLabel>
             <SmartSelect
@@ -171,7 +171,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
           </FormControl>
         </Box>
 
-        <Box mt={3}>
+        <Box sx={{ mt: 3 }}>
           <TagSelect
             multiple
             tagFilters={{ includeNull: true }}
@@ -182,7 +182,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
           />
         </Box>
 
-        <Box mt={3}>
+        <Box sx={{ mt: 3 }}>
           <FormControlLabel
             label={t('onlyNew')}
             control={
@@ -198,7 +198,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
           />
         </Box>
 
-        <Box mt={3}>
+        <Box sx={{ mt: 3 }}>
           <FormControlLabel
             label={t('showDeleted')}
             control={
@@ -212,7 +212,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
             }
           />
         </Box>
-        <Box mt="auto" mb={3}>
+        <Box sx={{ mt: 'auto', mb: 3 }}>
           <Button
             onClick={clearFilter}
             variant="contained"
