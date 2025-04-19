@@ -147,6 +147,7 @@ export const en: typeof ru = {
     archivedAccounts_other: '+{{count}} archived accounts',
     archivedAccounts_few: '+{{count}} archived accounts',
     archivedAccounts_many: '+{{count}} archived accounts',
+    archived: 'Archived',
     hideArchived: 'Hide archived',
     showArchived: 'Show archived',
   },

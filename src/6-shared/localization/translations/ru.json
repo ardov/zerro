@@ -141,6 +141,7 @@
     "archivedAccounts_few": "+{{count}} архивных счёта",
     "archivedAccounts_many": "+{{count}} архивных счетов",
     "archivedAccounts_other": "+{{count}} архивных счетов",
+    "archived": "Архивные",
     "hideArchived": "Скрыть архивные",
     "showArchived": "Показать архивные"
   },
