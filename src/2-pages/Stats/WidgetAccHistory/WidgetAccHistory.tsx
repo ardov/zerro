@@ -1,4 +1,4 @@
-import React, { FC, useState, useMemo } from 'react'
+import React, { FC, useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Paper, List, ListSubheader, Collapse } from '@mui/material'
 import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts'
@@ -13,10 +13,12 @@ import { accountModel, TAccountPopulated } from '5-entities/account'
 import { DisplayAmount, displayCurrency } from '5-entities/currency/displayCurrency'
 import { Period } from '../shared/period'
 import { useAccountHistory } from './model'
+import {
+  useTransactionDrawer
+} from "../../../3-widgets/global/TransactionListDrawer";
 
 type WidgetAccHistoryProps = {
   period: Period
-  onClick: (id: TAccountId, date: TISODate) => void
 }
 
 const SUBHEADER_MARGIN_BOTTOM = 1
@@ -33,12 +35,14 @@ const sortAccountsByBalance = (
   )
 }
 
-export const WidgetAccHistory: FC<WidgetAccHistoryProps> = ({
-  period,
-  onClick,
-}) => {
+export const WidgetAccHistory: FC<WidgetAccHistoryProps> = ({ period }) => {
   const { t } = useTranslation('accounts')
   const toDisplay = displayCurrency.useToDisplay(toISOMonth(new Date()))
+  const trDrawer = useTransactionDrawer()
+
+  const onClick = useCallback((id: TAccountId, date: TISODate) => {
+    trDrawer.open({ filterConditions: { account: id }, initialDate: date })
+  }, [trDrawer])
 
   const inBudgetAccounts = accountModel.useInBudgetAccounts()
   const savingAccounts = accountModel.useSavingAccounts()
