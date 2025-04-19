@@ -271,6 +271,13 @@ export const en: typeof ru = {
       debts: 'Debts',
       fxDifference: 'Exchange Rate Difference',
       unknownCategory: 'Unknown Category',
+      yearlyExpenses: 'Yearly Expenses',
+      noCategory: 'No Category',
+      combineIntoParentCategories: 'Combine all into parent categories',
+      parentCategories: 'Parent Categories',
+      showLess: 'Show less',
+      showAll: 'Show all ({{count}})',
+      otherCategories: 'Other categories',
     },
     statisticWidget: {
       average: 'Average',

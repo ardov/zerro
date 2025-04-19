@@ -254,7 +254,14 @@
       "transfers": "Переводы",
       "debts": "Долги",
       "fxDifference": "Курсовая разница",
-      "unknownCategory": "Неизвестная категория"
+      "unknownCategory": "Неизвестная категория",
+      "yearlyExpenses": "Расходы за год",
+      "noCategory": "Без категории",
+      "combineIntoParentCategories": "Объединить всё в родительские категории",
+      "parentCategories": "Объединить дочерние",
+      "showLess": "Показать меньше",
+      "showAll": "Показать все ({{count}})",
+      "otherCategories": "Остальные категории"
     },
     "statisticWidget": {
       "average": "Средний",
