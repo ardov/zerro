@@ -4,6 +4,7 @@ import { Stack } from '@mui/system'
 import { WidgetNetWorth } from './WidgetNetWorth'
 import { WidgetCashflow } from './WidgetCashflow'
 import { WidgetAccHistory } from './WidgetAccHistory'
+import { WidgetStatCards } from './WidgetStatCards'
 import { nextPeriod, Period } from './shared/period'
 
 export default function Stats() {
@@ -12,6 +13,7 @@ export default function Stats() {
 
   return (
     <Stack spacing={2} p={3} pb={10}>
+      <WidgetStatCards period={period} />
       <WidgetNetWorth period={period} onTogglePeriod={togglePeriod} />
       <WidgetCashflow period={period} onTogglePeriod={togglePeriod} />
       <WidgetAccHistory period={period} />

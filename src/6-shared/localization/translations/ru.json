@@ -157,7 +157,7 @@
     "outcome": "Расход",
     "netIncome": "Чистый доход",
     "netOutcome": "Чистый расход",
-    "savingsRate": "Норма сбережений",
+    "savingsRate": "Процент сбережений",
 
     "netWorth": {
       "title": "Рост капитала",
