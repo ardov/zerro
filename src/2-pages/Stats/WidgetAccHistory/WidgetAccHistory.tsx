@@ -1,4 +1,4 @@
-import React, { FC, useState, useMemo, useCallback } from 'react'
+import React, { FC, useState, useMemo, useCallback, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Paper, List, ListSubheader, Collapse } from '@mui/material'
 import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts'
@@ -13,9 +13,7 @@ import { accountModel, TAccountPopulated } from '5-entities/account'
 import { DisplayAmount, displayCurrency } from '5-entities/currency/displayCurrency'
 import { Period } from '../shared/period'
 import { useAccountHistory } from './model'
-import {
-  useTransactionDrawer
-} from "../../../3-widgets/global/TransactionListDrawer";
+import { useTransactionDrawer } from "../../../3-widgets/global/TransactionListDrawer";
 
 type WidgetAccHistoryProps = {
   period: Period
@@ -24,18 +22,7 @@ type WidgetAccHistoryProps = {
 const SUBHEADER_MARGIN_BOTTOM = 1
 const ACCOUNT_MARGIN_BOTTOM = 8
 
-const sortAccountsByBalance = (
-  accounts: TAccountPopulated[],
-  toDisplay: (amount: TFxAmount) => number
-): TAccountPopulated[] => {
-  return [...accounts].sort(
-    (a, b) =>
-      toDisplay({ [b.fxCode]: b.balance }) -
-      toDisplay({ [a.fxCode]: a.balance })
-  )
-}
-
-export const WidgetAccHistory: FC<WidgetAccHistoryProps> = ({ period }) => {
+export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(({ period }) => {
   const { t } = useTranslation('accounts')
   const toDisplay = displayCurrency.useToDisplay(toISOMonth(new Date()))
   const trDrawer = useTransactionDrawer()
@@ -46,6 +33,7 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = ({ period }) => {
 
   const inBudgetAccounts = accountModel.useInBudgetAccounts()
   const savingAccounts = accountModel.useSavingAccounts()
+
   const {
     inBudget,
     inBudgetActive,
@@ -101,19 +89,33 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = ({ period }) => {
       <ArchivedList accs={savingsArchived} period={period} onClick={onClick} />
     </div>
   )
+})
+
+const sortAccountsByBalance = (
+  accounts: TAccountPopulated[],
+  toDisplay: (amount: TFxAmount) => number
+): TAccountPopulated[] => {
+  return [...accounts].sort(
+    (a, b) =>
+      toDisplay({ [b.fxCode]: b.balance }) -
+      toDisplay({ [a.fxCode]: a.balance })
+  )
 }
 
-const ArchivedList: FC<{
+type ArchivedListProps = {
   accs: TAccountPopulated[],
   period: Period,
   onClick: (id: TAccountId, date: TISODate) => void
-}> = props => {
+}
+
+const ArchivedList: FC<ArchivedListProps> = memo(props => {
   const { t } = useTranslation('accounts')
   const { accs, period, onClick } = props
   const [visible, toggleVisibility] = useToggle()
+
   if (!accs.length) return null
 
-  const sum = getTotal(accs)
+  const sum = useMemo(() => getTotal(accs), [accs])
 
   return (
     <List dense>
@@ -131,23 +133,28 @@ const ArchivedList: FC<{
       </Collapse>
     </List>
   )
-}
+})
 
 function getTotal(accs: TAccountPopulated[]): TFxAmount {
+  if (!accs.length) return {}
+
   return accs.reduce(
     (sum, a) => addFxAmount(sum, { [a.fxCode]: a.balance }),
     {}
   )
 }
 
-const Subheader: FC<{
+type SubheaderProps = {
   name: React.ReactNode
   amount: TFxAmount
   onClick?: () => void
-}> = ({ name, amount, onClick }) => {
+}
+
+const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
   const month = toISOMonth(new Date())
   const toDisplay = displayCurrency.useToDisplay(month)
   const isNegative = toDisplay(amount) < 0
+
   return (
     <ListSubheader
       sx={{
@@ -183,7 +190,7 @@ const Subheader: FC<{
       </Box>
     </ListSubheader>
   )
-}
+})
 
 type AccTrendProps = {
   period: Period
@@ -191,7 +198,7 @@ type AccTrendProps = {
   onClick: (id: TAccountId, date: TISODate) => void
 }
 
-const AccountHistoryWidget: FC<AccTrendProps> = ({
+const AccountHistoryWidget: FC<AccTrendProps> = memo(({
   id,
   period,
   onClick,
@@ -199,9 +206,12 @@ const AccountHistoryWidget: FC<AccTrendProps> = ({
   const theme = useAppTheme()
   const acc = accountModel.usePopulatedAccounts()[id]
   const data = useAccountHistory(id, period)
-  const dataMax = Math.max(...data.map(i => i.balance))
-  const dataMin = Math.min(...data.map(i => i.balance))
-  const yAxisMin = Math.min(0, dataMin)
+
+  const { dataMax, dataMin, yAxisMin } = useMemo(() => {
+    const dataMax = Math.max(...data.map(i => i.balance))
+    const dataMin = Math.min(...data.map(i => i.balance))
+    return { dataMax, dataMin, yAxisMin: Math.min(0, dataMin) }
+  }, [data])
 
   const [hoverIdx, setHoverIdx] = useState<number | null>(null)
 
@@ -286,4 +296,4 @@ const AccountHistoryWidget: FC<AccTrendProps> = ({
       </div>
     </Paper>
   )
-}
+})
