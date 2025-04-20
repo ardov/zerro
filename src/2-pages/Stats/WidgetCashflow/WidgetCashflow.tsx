@@ -127,6 +127,8 @@ const CustomTooltip = (props: any) => {
   const date = payload[0]?.payload?.date
 
   const diff = payload[0].payload.income - payload[0].payload.outcome
+  const income = payload[0].payload.income
+  const savingsRate = income > 0 ? (diff / income * 100) : 0
 
   return (
     <Card elevation={10} sx={{ p: 2 }}>
@@ -147,6 +149,12 @@ const CustomTooltip = (props: any) => {
         name={t(diff < 0 ? 'netOutcome' : 'netIncome')}
         amount={diff}
         currency={currency}
+      />
+      <DataLine
+        color="transparent"
+        name={t('savingsRate')}
+        amount={savingsRate}
+        currency="%"
       />
     </Card>
   )

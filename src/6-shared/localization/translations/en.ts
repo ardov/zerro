@@ -163,6 +163,7 @@ export const en: typeof ru = {
     outcome: 'Expense',
     netIncome: 'Net Income',
     netOutcome: 'Net Expense',
+    savingsRate: 'Savings rate',
 
     netWorth: {
       title: 'Net Worth',
