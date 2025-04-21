@@ -166,6 +166,8 @@ export const en: typeof ru = {
     savingsRate: 'Savings rate',
     monthsToLive: 'At this spending rate, your balance will last for {{count}} months',
     monthsToLive_one: 'At this spending rate, your balance will last for {{count}} month',
+    fromFundsInBalance: 'From funds in balance',
+    fromFundsSaving: 'From funds out of balance',
 
     netWorth: {
       title: 'Net Worth',

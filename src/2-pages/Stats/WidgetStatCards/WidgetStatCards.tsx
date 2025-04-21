@@ -2,24 +2,14 @@ import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Grid, Paper, Typography } from '@mui/material'
 import { useAppTheme } from '6-shared/ui/theme'
-import { formatMoney, round } from '6-shared/helpers/money'
+import { formatMoney } from '6-shared/helpers/money'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { Tooltip } from '6-shared/ui/Tooltip'
-import { accBalanceModel } from '5-entities/accBalances'
-import { AccountType } from '6-shared/types'
-import { keys } from '6-shared/helpers/keys'
-import { accountModel } from '5-entities/account'
 import { Period } from '../shared/period'
-import { GroupBy } from '6-shared/helpers/date'
 import { useStatSummary } from './model'
-import { trModel } from '5-entities/transaction'
-import { useAppSelector } from 'store'
-import { differenceInMonths } from 'date-fns'
+import { OutcomeTooltip } from './OutcomeTooltip'
 
-const DECIMAL_PRECISION = 10
 const PERCENT_THRESHOLD = 0.05
-const DEFAULT_MONTHS = 12
-const THREE_YEARS_MONTHS = 36
 
 type StatCardProps = {
   title: string
@@ -33,23 +23,36 @@ type WidgetStatCardsProps = {
   period: Period
 }
 
-export function WidgetStatCards({ period }: WidgetStatCardsProps) {
-  const {t} = useTranslation('analytics')
+type Formatters = {
+  formatCurrency: (amount: number) => string
+  formatPercent: (value: number) => string
+}
+
+const styles = {
+  cardContent: {
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    p: 2
+  },
+  value: {
+    wordBreak: 'break-word' as const,
+    fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }
+  },
+  valueWrapper: {
+    whiteSpace: 'nowrap' as const
+  }
+}
+
+export const WidgetStatCards = React.memo(function WidgetStatCards({ period }: WidgetStatCardsProps) {
+  const { t } = useTranslation('analytics')
   const theme = useAppTheme()
+  const { palette } = theme
   const stats = useStatSummary(period)
   const [currency] = displayCurrency.useDisplayCurrency()
   const { formatCurrency, formatPercent } = useFormatters(currency)
-  const monthsToLive = useMonthsToLive(stats.totalOutcome, period)
-
-  const outcomeTooltip = useMemo(() =>
-      monthsToLive > 0 ? (
-        <Box p={1}>
-          <Typography variant="body2">
-            {t('monthsToLive', { count: monthsToLive })}
-          </Typography>
-        </Box>
-      ) : null
-    , [monthsToLive, t])
 
   return (
     <Box>
@@ -58,22 +61,28 @@ export function WidgetStatCards({ period }: WidgetStatCardsProps) {
           <StatCard
             title={t('income')}
             value={formatCurrency(stats.totalIncome)}
-            color={theme.palette.success.main}
+            color={palette.success.main}
           />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
           <StatCard
             title={t('outcome')}
             value={formatCurrency(stats.totalOutcome)}
-            color={theme.palette.error.main}
-            tooltip={outcomeTooltip}
+            color={palette.error.main}
+            tooltip={
+              <OutcomeTooltip 
+                totalOutcome={stats.totalOutcome} 
+                period={period} 
+                formatCurrency={formatCurrency}
+              />
+            }
           />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
           <StatCard
             title={t(stats.totalSavings < 0 ? 'netOutcome' : 'netIncome')}
             value={formatCurrency(stats.totalSavings)}
-            color={stats.totalSavings >= 0 ? theme.palette.success.main : theme.palette.error.main}
+            color={stats.totalSavings >= 0 ? palette.success.main : palette.error.main}
           />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
@@ -81,70 +90,15 @@ export function WidgetStatCards({ period }: WidgetStatCardsProps) {
             title={t('savingsRate')}
             value={formatPercent(stats.savingsRate)}
             suffix="%"
-            color={stats.savingsRate >= 0 ? theme.palette.success.main : theme.palette.error.main}
+            color={stats.savingsRate >= 0 ? palette.success.main : palette.error.main}
           />
         </Grid>
       </Grid>
     </Box>
   )
-}
+})
 
-function useFundsInBudget() {
-  const accs = accountModel.usePopulatedAccounts()
-  const balanceNodes = accBalanceModel.useDisplayBalances(GroupBy.Day)
-
-  return useMemo(() => {
-    const currentBalances = balanceNodes.length > 0
-      ? balanceNodes[balanceNodes.length - 1].balances
-      : { accounts: {}, debtors: {} }
-
-    let fundsInBudget = 0
-    keys(currentBalances.accounts).forEach(id => {
-      if (accs[id]?.type === AccountType.Debt) return
-      const value = currentBalances.accounts[id] || 0
-      if (value > 0) {
-        fundsInBudget = round(fundsInBudget + value)
-      }
-    })
-
-    return fundsInBudget
-  }, [balanceNodes, accs])
-}
-
-function useMonthsInPeriod(period: Period) {
-  const historyStart = useAppSelector(trModel.getHistoryStart)
-
-  return useMemo(() => {
-    switch (period) {
-      case Period.LastYear:
-        return DEFAULT_MONTHS
-      case Period.ThreeYears:
-        return THREE_YEARS_MONTHS
-      case Period.All:
-        const startDate = new Date(historyStart)
-        const currentDate = new Date()
-        const monthsDiff = differenceInMonths(currentDate, startDate) + 1
-        return Math.max(1, monthsDiff)
-      default:
-        return DEFAULT_MONTHS
-    }
-  }, [period, historyStart])
-}
-
-function useMonthsToLive(totalOutcome: number, period: Period) {
-  const fundsInBudget = useFundsInBudget()
-  const monthsInPeriod = useMonthsInPeriod(period)
-
-  return useMemo(() => {
-    const monthlyOutcome = totalOutcome / monthsInPeriod
-
-    return monthlyOutcome > 0
-      ? Math.round((fundsInBudget / monthlyOutcome) * DECIMAL_PRECISION) / DECIMAL_PRECISION
-      : 0
-  }, [fundsInBudget, totalOutcome, monthsInPeriod])
-}
-
-function useFormatters(currency: string) {
+function useFormatters(currency: string): Formatters {
   return useMemo(() => ({
     formatCurrency: (amount: number): string => formatMoney(amount, currency),
     formatPercent: (value: number): string =>
@@ -152,17 +106,10 @@ function useFormatters(currency: string) {
   }), [currency])
 }
 
-function StatCard({ title, value, color, suffix = '', tooltip }: StatCardProps) {
+const StatCard = React.memo(function StatCard({ title, value, color, suffix = '', tooltip }: StatCardProps) {
   const content = (
     <Paper sx={{ height: '100%' }}>
-      <Box
-        p={2}
-        display="flex"
-        flexDirection="column"
-        alignItems="flex-start"
-        justifyContent="center"
-        height="100%"
-      >
+      <Box sx={styles.cardContent}>
         <Typography
           variant="body2"
           color="text.secondary"
@@ -174,12 +121,11 @@ function StatCard({ title, value, color, suffix = '', tooltip }: StatCardProps) 
           variant="h4"
           component="div"
           sx={{
-            color: color || 'inherit',
-            wordBreak: 'break-word',
-            fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }
+            ...styles.value,
+            color: color || 'inherit'
           }}
         >
-          <span style={{ whiteSpace: 'nowrap' }}>{value}{suffix}</span>
+          <span style={styles.valueWrapper}>{value}{suffix}</span>
         </Typography>
       </Box>
     </Paper>
@@ -190,4 +136,4 @@ function StatCard({ title, value, color, suffix = '', tooltip }: StatCardProps) 
       {content}
     </Tooltip>
   ) : content
-}
+})

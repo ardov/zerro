@@ -9,8 +9,15 @@ export type StatSummary = {
   savingsRate: number
 }
 
+type CashFlowPoint = {
+  income: number
+  outcome: number
+  date?: string
+  month?: string
+}
+
 export function useStatSummary(period: Period): StatSummary {
-  const points = useCashFlow(period)
+  const points = useCashFlow(period) as CashFlowPoint[]
 
   return useMemo(() => {
     const totalIncome = points.reduce(
