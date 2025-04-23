@@ -98,32 +98,19 @@ export function OutcomeTooltip({
   )
 }
 
-function getStartDate(
-  period: Period,
-  aggregation: GroupBy,
-  historyStart?: TISODate
-): TISODate {
-  if (!historyStart) return toGroup(Date.now(), aggregation)
-  const historyStartGroup = toGroup(historyStart, aggregation)
-  const periodStart = getStart(period, aggregation)
-  if (!periodStart) return historyStartGroup
-  return historyStartGroup > periodStart ? historyStartGroup : periodStart
-}
-
 export function useOutcomeByAccountType(period: Period): OutcomeByAccountType {
   const transactionHistory = trModel.useTransactionsHistory()
   const debtAccId = accountModel.useDebtAccountId()
   const instCodeMap = instrumentModel.useInstCodeMap()
   const accounts = accountModel.usePopulatedAccounts() as Record<string, Account>
-  const historyStart = useAppSelector(trModel.getHistoryStart)
 
   return useMemo(() => {
     let inBalanceOutcome: TFxAmount = {}
     let outOfBalanceOutcome: TFxAmount = {}
-    const startDate = getStartDate(period, GroupBy.Month, historyStart)
+    const startDate = getStart(period, GroupBy.Month)
 
     transactionHistory.forEach(tr => {
-      if (tr.date < startDate) return
+      if (startDate && tr.date < startDate) return
 
       const type = trModel.getType(tr, debtAccId)
 
@@ -141,7 +128,7 @@ export function useOutcomeByAccountType(period: Period): OutcomeByAccountType {
     })
 
     return { inBalanceOutcome, outOfBalanceOutcome }
-  }, [transactionHistory, debtAccId, instCodeMap, accounts, period, historyStart])
+  }, [transactionHistory, debtAccId, instCodeMap, accounts, period])
 }
 
 export function useFundsInBudget(): number {
