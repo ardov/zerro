@@ -26,6 +26,7 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(({ period }) => 
   const { t } = useTranslation('accounts')
   const toDisplay = displayCurrency.useToDisplay(toISOMonth(new Date()))
   const trDrawer = useTransactionDrawer()
+  const [visible, toggleVisibility] = useToggle()
 
   const onClick = useCallback((id: TAccountId, date: TISODate) => {
     trDrawer.open({ filterConditions: { account: id }, initialDate: date })
@@ -35,58 +36,56 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(({ period }) => 
   const savingAccounts = accountModel.useSavingAccounts()
 
   const {
-    inBudget,
+    totalInBudget,
     inBudgetActive,
-    inBudgetArchived,
-    savings,
+    totalSavings,
     savingsActive,
-    savingsArchived
+    totalArchived,
+    archived
   } = useMemo(() => {
     const inBudget = sortAccountsByBalance(inBudgetAccounts, toDisplay)
     const savings = sortAccountsByBalance(savingAccounts, toDisplay)
+    const inBudgetArchived = inBudget.filter(a => a.archive)
+    const savingsArchived = savings.filter(a => a.archive)
+    const archived = sortAccountsByBalance([...inBudgetArchived, ...savingsArchived], toDisplay)
+
 
     return {
-      inBudget,
+      totalInBudget: getTotal(inBudget),
       inBudgetActive: inBudget.filter(a => !a.archive),
-      inBudgetArchived: inBudget.filter(a => a.archive),
-      savings,
+      totalSavings: getTotal(savings),
       savingsActive: savings.filter(a => !a.archive),
-      savingsArchived: savings.filter(a => a.archive)
+      totalArchived: getTotal(archived),
+      archived
     }
   }, [inBudgetAccounts, savingAccounts, toDisplay])
 
   return (
     <div>
       <List dense>
-        <Subheader
-          name={
-            <Tooltip title={t('inBalanceDescription')}>
-              <span>{t('inBalance')}</span>
-            </Tooltip>
-          }
-          amount={getTotal(inBudget)}
-        />
+        <Subheader name={t('inBalance')} amount={totalInBudget}/>
         {inBudgetActive.map(acc => (
           <AccountHistoryWidget key={acc.id} id={acc.id} period={period} onClick={onClick} />
         ))}
-        <ArchivedList accs={inBudgetArchived} period={period} onClick={onClick} />
       </List>
 
       <List dense>
-        <Subheader
-          name={
-            <Tooltip title={t('otherDescription')}>
-              <span>{t('other')}</span>
-            </Tooltip>
-          }
-          amount={getTotal(savings)}
-        />
+        <Subheader name={t('other')} amount={totalSavings}/>
         {savingsActive.map(acc => (
           <AccountHistoryWidget key={acc.id} id={acc.id} period={period} onClick={onClick} />
         ))}
       </List>
 
-      <ArchivedList accs={savingsArchived} period={period} onClick={onClick} />
+      <List dense>
+        <Subheader name={t('archived')} amount={totalArchived} onClick={toggleVisibility}/>
+        <Collapse in={visible} unmountOnExit>
+          <List dense disablePadding>
+            {archived.map(acc => (
+              <AccountHistoryWidget key={acc.id} id={acc.id} period={period} onClick={onClick}/>
+            ))}
+          </List>
+        </Collapse>
+      </List>
     </div>
   )
 })
@@ -101,39 +100,6 @@ const sortAccountsByBalance = (
       toDisplay({ [a.fxCode]: a.balance })
   )
 }
-
-type ArchivedListProps = {
-  accs: TAccountPopulated[],
-  period: Period,
-  onClick: (id: TAccountId, date: TISODate) => void
-}
-
-const ArchivedList: FC<ArchivedListProps> = memo(props => {
-  const { t } = useTranslation('accounts')
-  const { accs, period, onClick } = props
-  const [visible, toggleVisibility] = useToggle()
-
-  if (!accs.length) return null
-
-  const sum = useMemo(() => getTotal(accs), [accs])
-
-  return (
-    <List dense>
-      <Subheader
-        name={t('archived')}
-        amount={sum}
-        onClick={toggleVisibility}
-      />
-      <Collapse in={visible} unmountOnExit>
-        <List dense disablePadding>
-          {accs.map(acc => (
-            <AccountHistoryWidget key={acc.id} id={acc.id} period={period} onClick={onClick} />
-          ))}
-        </List>
-      </Collapse>
-    </List>
-  )
-})
 
 function getTotal(accs: TAccountPopulated[]): TFxAmount {
   if (!accs.length) return {}
