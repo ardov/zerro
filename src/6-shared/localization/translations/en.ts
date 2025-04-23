@@ -164,8 +164,10 @@ export const en: typeof ru = {
     netIncome: 'Net Income',
     netOutcome: 'Net Expense',
     savingsRate: 'Savings rate',
-    monthsToLive: 'At this spending rate, your balance will last for {{count}} months',
     monthsToLive_one: 'At this spending rate, your balance will last for {{count}} month',
+    monthsToLive_few: 'At this spending rate, your balance will last for {{count}} months',
+    monthsToLive_many: 'At this spending rate, your balance will last for {{count}} months',
+    monthsToLive_other: 'At this spending rate, your balance will last for {{count}} months',
     fromFundsInBalance: 'From funds in balance',
     fromFundsSaving: 'From funds out of balance',
 
