@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import {
+  AccountType,
   ByDate,
   TAccountId,
   TFxAmount,
@@ -14,26 +15,34 @@ import { accountModel } from '5-entities/account'
 import { instrumentModel, TInstCodeMap } from '5-entities/currency/instrument'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { trModel, TrType } from '5-entities/transaction'
-import { Period, getStart } from '../shared/period'
+import { Period, getStart } from './period'
 
-type TPoint = {
+export type TCashflowPoint = {
   date: TISODate
-  debts: TFxAmount
-  income: TFxAmount
-  outcome: TFxAmount
-  transfers: TFxAmount
+  debts: number
+  income: number
+  outcome: number
+  outcomeInBalance: number
+  outcomeOutOfBalance: number
+  transfers: number
 }
 
-// Hook
+type Account = {
+  inBudget?: boolean
+  type?: AccountType
+  [key: string]: any
+}
+
 export function useCashFlow(
   period: Period,
   aggregation: GroupBy = GroupBy.Month
-) {
+): TCashflowPoint[] {
   const transactionHistory = trModel.useTransactionsHistory()
   const debtAccId = accountModel.useDebtAccountId()
   const instCodeMap = instrumentModel.useInstCodeMap()
+  const accounts = accountModel.usePopulatedAccounts() as Record<string, Account>
   const aggregatedNodes = useMemo(
-    () => calcCashflow(transactionHistory, debtAccId, instCodeMap, aggregation),
+    () => calcCashflow(transactionHistory, debtAccId, instCodeMap, accounts, aggregation),
     [aggregation, debtAccId, instCodeMap, transactionHistory]
   )
 
@@ -41,17 +50,22 @@ export function useCashFlow(
   const historyStart = useAppSelector(trModel.getHistoryStart)
   const firstDate = getStartDate(period, aggregation, historyStart)
 
-  const points = makeDateArray(firstDate, Date.now(), aggregation)
+  return makeDateArray(firstDate, Date.now(), aggregation)
     .map(date => aggregatedNodes[date] || makePoint(date))
-    .map(p => ({
-      date: p.date,
-      debts: toDisplay(p.debts),
-      income: toDisplay(p.income),
-      outcome: -toDisplay(p.outcome),
-      transfers: toDisplay(p.transfers),
-    }))
+    .map(p => {
+      const outcomeInBalance = -toDisplay(p.outcomeInBalance)
+      const outcomeOutOfBalance = -toDisplay(p.outcomeOutOfBalance)
 
-  return points
+      return {
+        date: p.date,
+        debts: toDisplay(p.debts),
+        income: toDisplay(p.income),
+        outcome: outcomeInBalance + outcomeOutOfBalance,
+        outcomeInBalance: outcomeInBalance,
+        outcomeOutOfBalance: outcomeOutOfBalance,
+        transfers: toDisplay(p.transfers),
+      }
+    })
 }
 
 function getStartDate(
@@ -70,8 +84,9 @@ function calcCashflow(
   transactions: TTransaction[],
   debtAccId: TAccountId | undefined,
   instCodeMap: TInstCodeMap,
+  accounts: Record<string, Account>,
   aggregation: GroupBy = GroupBy.Month
-) {
+) : ByDate<TPoint> {
   let result: ByDate<TPoint> = {}
 
   transactions.forEach(tr => {
@@ -89,9 +104,16 @@ function calcCashflow(
         return
 
       case TrType.Outcome:
-        result[group].outcome = addFxAmount(result[group].outcome, {
-          [outcomeCurrency]: -tr.outcome,
-        })
+        const account = accounts[tr.outcomeAccount]
+        if (account?.inBudget) {
+          result[group].outcomeInBalance = addFxAmount(result[group].outcomeInBalance, {
+            [outcomeCurrency]: -tr.outcome,
+          })
+        } else {
+          result[group].outcomeOutOfBalance = addFxAmount(result[group].outcomeOutOfBalance, {
+            [outcomeCurrency]: -tr.outcome,
+          })
+        }
         return
 
       case TrType.IncomeDebt:
@@ -122,12 +144,22 @@ function calcCashflow(
   return result
 }
 
+type TPoint = {
+  date: TISODate
+  debts: TFxAmount
+  income: TFxAmount
+  outcomeInBalance: TFxAmount
+  outcomeOutOfBalance: TFxAmount
+  transfers: TFxAmount
+}
+
 function makePoint(date: TISODate): TPoint {
   return {
     date,
     debts: {},
     income: {},
-    outcome: {},
+    outcomeInBalance: {},
+    outcomeOutOfBalance: {},
     transfers: {},
   }
 }

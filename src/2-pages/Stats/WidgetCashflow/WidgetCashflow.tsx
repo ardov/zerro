@@ -16,7 +16,7 @@ import { formatDate, parseDate } from '6-shared/helpers/date'
 import { TISODate } from '6-shared/types'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { DataLine } from '3-widgets/DataLine'
-import { useCashFlow } from './model'
+import { useCashFlow } from '../shared/cashflow'
 import { Period, PeriodTitle } from '../shared/period'
 
 type Point = {

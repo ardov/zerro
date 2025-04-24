@@ -67,12 +67,13 @@ export const WidgetStatCards = React.memo(function WidgetStatCards({ period }: W
         <Grid item xs={12} sm={6} lg={3}>
           <StatCard
             title={t('outcome')}
-            value={formatCurrency(stats.totalOutcome)}
+            value={formatCurrency(stats.totalOutcomeInBalance + stats.totalOutcomeOutOfBalance)}
             color={palette.error.main}
             tooltip={
-              <OutcomeTooltip 
-                totalOutcome={stats.totalOutcome} 
-                period={period} 
+              <OutcomeTooltip
+                totalOutcomeInBudget={stats.totalOutcomeInBalance}
+                totalOutcomeOutOfBudget={stats.totalOutcomeOutOfBalance}
+                period={period}
                 formatCurrency={formatCurrency}
               />
             }

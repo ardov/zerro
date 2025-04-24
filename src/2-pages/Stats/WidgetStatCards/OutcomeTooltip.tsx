@@ -1,18 +1,12 @@
-import React, { useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
-import { Box, Typography } from '@mui/material'
-import { addFxAmount, round, isZero } from '6-shared/helpers/money'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { accBalanceModel } from '5-entities/accBalances'
-import { AccountType, TISODate, TFxAmount } from '6-shared/types'
-import { keys } from '6-shared/helpers/keys'
-import { accountModel } from '5-entities/account'
-import { getStart, Period } from '../shared/period'
-import { GroupBy, toGroup } from '6-shared/helpers/date'
-import { trModel, TrType } from '5-entities/transaction'
-import { useAppSelector } from 'store'
-import { differenceInMonths } from 'date-fns'
-import { instrumentModel } from '5-entities/currency/instrument'
+import React, {useMemo} from 'react'
+import {useTranslation} from 'react-i18next'
+import {Box, Typography} from '@mui/material'
+import {Period} from '../shared/period'
+import {GroupBy} from '6-shared/helpers/date'
+import {trModel} from '5-entities/transaction'
+import {useAppSelector} from 'store'
+import {differenceInMonths} from 'date-fns'
+import {useNetWorth} from "../shared/netWorth";
 
 const CONSTANTS = {
   DECIMAL_PRECISION: 1,
@@ -22,42 +16,22 @@ const CONSTANTS = {
 }
 
 type OutcomeTooltipProps = {
-  totalOutcome: number
+  totalOutcomeInBudget: number
+  totalOutcomeOutOfBudget: number
   period: Period
   formatCurrency: (amount: number) => string
 }
 
-type OutcomeByAccountType = {
-  inBalanceOutcome: TFxAmount
-  outOfBalanceOutcome: TFxAmount
-}
-
-type Account = {
-  inBalance?: boolean
-  type?: AccountType
-  [key: string]: any
-}
-
-type BalanceNode = {
-  balances: {
-    accounts: Record<string, number>
-    debtors: Record<string, any>
-  }
-  [key: string]: any
-}
-
 export function OutcomeTooltip({
-  totalOutcome,
+  totalOutcomeInBudget,
+  totalOutcomeOutOfBudget,
   period,
   formatCurrency
 }: OutcomeTooltipProps) {
-  const monthsToLive = useMonthsToLive(totalOutcome, period)
-  const {inBalanceOutcome, outOfBalanceOutcome} = useOutcomeByAccountType(period)
+  const monthsToLive = useMonthsToLive(totalOutcomeInBudget + totalOutcomeOutOfBudget, period)
   const {t} = useTranslation('analytics')
-  const toDisplay = displayCurrency.useToDisplay('current')
-
-  const hasInBalanceOutcome = !isZero(inBalanceOutcome)
-  const hasOutOfBalanceOutcome = !isZero(outOfBalanceOutcome)
+  const hasInBalanceOutcome = totalOutcomeInBudget > 0
+  const hasOutOfBalanceOutcome = totalOutcomeOutOfBudget > 0
   const showOutcomeSection = hasInBalanceOutcome || hasOutOfBalanceOutcome
 
   if (monthsToLive <= 0 && !showOutcomeSection)
@@ -67,7 +41,7 @@ export function OutcomeTooltip({
     <Box p={1}>
       {monthsToLive > 0 && (
         <Typography variant="body2">
-          {t('monthsToLive', { count: monthsToLive })}
+          {t('monthsToLive', {count: monthsToLive})}
         </Typography>
       )}
 
@@ -80,16 +54,20 @@ export function OutcomeTooltip({
           </Box>
 
           {hasInBalanceOutcome && (
-            <Typography variant="body2" display="flex" justifyContent="space-between">
+            <Typography variant="body2" display="flex"
+                        justifyContent="space-between">
               <span>{t('fromFundsInBalance')}:</span>
-              <span style={{marginLeft: 8}}>{formatCurrency(toDisplay(inBalanceOutcome))}</span>
+              <span
+                style={{marginLeft: 8}}>{formatCurrency(totalOutcomeInBudget)}</span>
             </Typography>
           )}
 
           {hasOutOfBalanceOutcome && (
-            <Typography variant="body2" display="flex" justifyContent="space-between">
+            <Typography variant="body2" display="flex"
+                        justifyContent="space-between">
               <span>{t('fromFundsSaving')}:</span>
-              <span style={{marginLeft: 8}}>{formatCurrency(toDisplay(outOfBalanceOutcome))}</span>
+              <span
+                style={{marginLeft: 8}}>{formatCurrency(totalOutcomeOutOfBudget)}</span>
             </Typography>
           )}
         </>
@@ -98,62 +76,14 @@ export function OutcomeTooltip({
   )
 }
 
-export function useOutcomeByAccountType(period: Period): OutcomeByAccountType {
-  const transactionHistory = trModel.useTransactionsHistory()
-  const debtAccId = accountModel.useDebtAccountId()
-  const instCodeMap = instrumentModel.useInstCodeMap()
-  const accounts = accountModel.usePopulatedAccounts() as Record<string, Account>
-
-  return useMemo(() => {
-    let inBalanceOutcome: TFxAmount = {}
-    let outOfBalanceOutcome: TFxAmount = {}
-    const startDate = getStart(period, GroupBy.Month)
-
-    transactionHistory.forEach(tr => {
-      if (startDate && tr.date < startDate) return
-
-      const type = trModel.getType(tr, debtAccId)
-
-      if (type === TrType.Outcome) {
-        const account = accounts[tr.outcomeAccount]
-        const outcomeCurrency = instCodeMap[tr.outcomeInstrument]
-        const outcomeAmount: TFxAmount = { [outcomeCurrency]: tr.outcome }
-
-        if (account?.inBalance) {
-          inBalanceOutcome = addFxAmount(inBalanceOutcome, outcomeAmount)
-        } else {
-          outOfBalanceOutcome = addFxAmount(outOfBalanceOutcome, outcomeAmount)
-        }
-      }
-    })
-
-    return { inBalanceOutcome, outOfBalanceOutcome }
-  }, [transactionHistory, debtAccId, instCodeMap, accounts, period])
+function useMonthsToLive(totalOutcome: number, period: Period): number {
+  const fundsInBudget = getLastBudgetFromNetWorth()
+  const monthsInPeriod = useMonthsInPeriod(period)
+  const monthlyOutcome = totalOutcome / monthsInPeriod
+  return Math.round(fundsInBudget / monthlyOutcome)
 }
 
-export function useFundsInBudget(): number {
-  const accs = accountModel.usePopulatedAccounts() as Record<string, Account>
-  const balanceNodes = accBalanceModel.useDisplayBalances(GroupBy.Day) as BalanceNode[]
-
-  return useMemo(() => {
-    const currentBalances = balanceNodes.length > 0
-      ? balanceNodes[balanceNodes.length - 1].balances
-      : { accounts: {}, debtors: {} }
-
-    let fundsInBudget = 0
-    keys(currentBalances.accounts).forEach(id => {
-      if (accs[id]?.type === AccountType.Debt) return
-      const value = currentBalances.accounts[id] || 0
-      if (value > 0) {
-        fundsInBudget = round(fundsInBudget + value)
-      }
-    })
-
-    return fundsInBudget
-  }, [balanceNodes, accs])
-}
-
-export function useMonthsInPeriod(period: Period): number {
+function useMonthsInPeriod(period: Period): number {
   const historyStart = useAppSelector(trModel.getHistoryStart)
 
   return useMemo(() => {
@@ -173,12 +103,12 @@ export function useMonthsInPeriod(period: Period): number {
   }, [period, historyStart])
 }
 
-export function useMonthsToLive(totalOutcome: number, period: Period): number {
-  const fundsInBudget = useFundsInBudget()
-  const monthsInPeriod = useMonthsInPeriod(period)
+function getLastBudgetFromNetWorth(): number {
+  const netWorthPoints = useNetWorth(Period.LastYear, GroupBy.Month)
+  const lastMonth = netWorthPoints.length > 0 ? netWorthPoints[netWorthPoints.length - 1] : null
 
-  return useMemo(() => {
-    const monthlyOutcome = totalOutcome / monthsInPeriod
-    return Math.round(fundsInBudget / monthlyOutcome)
-  }, [fundsInBudget, totalOutcome, monthsInPeriod])
+  if (!lastMonth)
+    return 0
+
+  return lastMonth.lented + lastMonth.debts + lastMonth.accountDebts + lastMonth.fundsInBudget + lastMonth.fundsSaving
 }

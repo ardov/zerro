@@ -23,10 +23,10 @@ import { formatDate, GroupBy } from '6-shared/helpers/date'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { DataLine } from '3-widgets/DataLine'
 import { Period, PeriodTitle } from '../shared/period'
-import { TPoint, useNetWorth } from './model'
+import { TNetWorthPoint, useNetWorth } from '../shared/netWorth'
 import { useTranslation } from 'react-i18next'
 
-type Point = TPoint & { total: number }
+type Point = TNetWorthPoint & { total: number }
 type TDataKey = keyof Omit<Point, 'date'>
 
 type WidgetNetWorthProps = {
