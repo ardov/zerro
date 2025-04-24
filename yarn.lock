@@ -5122,6 +5122,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cookie@npm:^1.0.1":
+  version: 1.0.2
+  resolution: "cookie@npm:1.0.2"
+  checksum: 10c0/fd25fe79e8fbcfcaf6aa61cd081c55d144eeeba755206c058682257cb38c4bd6795c6620de3f064c740695bb65b7949ebb1db7a95e4636efb8357a335ad3f54b
+  languageName: node
+  linkType: hard
+
 "copy-descriptor@npm:^0.1.0":
   version: 0.1.1
   resolution: "copy-descriptor@npm:0.1.1"
@@ -10558,7 +10565,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:5.3.4, react-router@npm:^5.3.4":
+"react-router@npm:5.3.4":
   version: 5.3.4
   resolution: "react-router@npm:5.3.4"
   dependencies:
@@ -10574,6 +10581,23 @@ __metadata:
   peerDependencies:
     react: ">=15"
   checksum: 8/892d4e274a23bf4f39abc2efca54472fb646d3aed4b584020cf49654d2f50d09a2bacebe7c92b4ec7cb8925077376dfcd0664bad6442a73604397cefec9f01f9
+  languageName: node
+  linkType: hard
+
+"react-router@npm:^7.5.2":
+  version: 7.5.2
+  resolution: "react-router@npm:7.5.2"
+  dependencies:
+    cookie: "npm:^1.0.1"
+    set-cookie-parser: "npm:^2.6.0"
+    turbo-stream: "npm:2.4.0"
+  peerDependencies:
+    react: ">=18"
+    react-dom: ">=18"
+  peerDependenciesMeta:
+    react-dom:
+      optional: true
+  checksum: 10c0/5972ecb783e0ac0512c500b84bd4ff475665ba49c67b69e13b79dc24c7ee0496d523858058bb43c70147367688e0cc0d6d6d0f51cabfdebfbc5556d559bff457
   languageName: node
   linkType: hard
 
@@ -11451,6 +11475,13 @@ __metadata:
   dependencies:
     randombytes: "npm:^2.1.0"
   checksum: 8/c4839c6206c1d143c0f80763997a361310305751171dd95e4b57efee69b8f6edd8960a0b7fbfc45042aadff98b206d55428aee0dc276efe54f100899c7fa8ab7
+  languageName: node
+  linkType: hard
+
+"set-cookie-parser@npm:^2.6.0":
+  version: 2.7.1
+  resolution: "set-cookie-parser@npm:2.7.1"
+  checksum: 10c0/060c198c4c92547ac15988256f445eae523f57f2ceefeccf52d30d75dedf6bff22b9c26f756bd44e8e560d44ff4ab2130b178bd2e52ef5571bf7be3bd7632d9a
   languageName: node
   linkType: hard
 
@@ -12729,6 +12760,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"turbo-stream@npm:2.4.0":
+  version: 2.4.0
+  resolution: "turbo-stream@npm:2.4.0"
+  checksum: 10c0/e68b2569f1f16e6e9633d090c6024b2ae9f0e97bfeacb572451ca3732e120ebbb546f3bc4afc717c46cb57b5aea6104e04ef497f9912eef6a7641e809518e98a
+  languageName: node
+  linkType: hard
+
 "type-check@npm:^0.4.0, type-check@npm:~0.4.0":
   version: 0.4.0
   resolution: "type-check@npm:0.4.0"
@@ -13931,7 +13969,7 @@ __metadata:
     react-hotkeys-hook: "npm:^4.6.1"
     react-i18next: "npm:^14.1.3"
     react-redux: "npm:^9.2.0"
-    react-router: "npm:^5.3.4"
+    react-router: "npm:^7.5.2"
     react-router-dom: "npm:^5.3.4"
     react-transition-group: "npm:^4.4.5"
     react-virtualized-auto-sizer: "npm:^1.0.25"
