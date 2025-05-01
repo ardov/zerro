@@ -28,7 +28,7 @@ export function OutcomeTooltip({
   period,
   formatCurrency
 }: OutcomeTooltipProps) {
-  const monthsToLive = useMonthsToLive(totalOutcomeInBudget + totalOutcomeOutOfBudget, period)
+  const {monthsToLive, avgOutcome} = calculateMonthsToLiveAndAgvOutcome(totalOutcomeInBudget + totalOutcomeOutOfBudget, period)
   const {t} = useTranslation('analytics')
   const hasInBalanceOutcome = totalOutcomeInBudget > 0
   const hasOutOfBalanceOutcome = totalOutcomeOutOfBudget > 0
@@ -41,18 +41,12 @@ export function OutcomeTooltip({
     <Box p={1}>
       {monthsToLive > 0 && (
         <Typography variant="body2">
-          {t('monthsToLive', {count: monthsToLive})}
+          {t('monthsToLive', {count: monthsToLive, avgOutcome: formatCurrency(avgOutcome)})}
         </Typography>
       )}
 
       {showOutcomeSection && (
-        <>
-          <Box mt={1.5} mb={0.5}>
-            <Typography variant="body2" fontWeight="bold">
-              {t('outcome')}:
-            </Typography>
-          </Box>
-
+        <Box mt={1.5} mb={0.5}>
           {hasInBalanceOutcome && (
             <Typography variant="body2" display="flex"
                         justifyContent="space-between">
@@ -70,20 +64,22 @@ export function OutcomeTooltip({
                 style={{marginLeft: 8}}>{formatCurrency(totalOutcomeOutOfBudget)}</span>
             </Typography>
           )}
-        </>
+        </Box>
       )}
     </Box>
   )
 }
 
-function useMonthsToLive(totalOutcome: number, period: Period): number {
+function calculateMonthsToLiveAndAgvOutcome(
+  totalOutcome: number,
+  period: Period): { monthsToLive: number; avgOutcome: number } {
   // with period = LastYear it return 13 points max, so we need to get only 12,
   // but if it returns only 11 or less we need to divide by 11
   const netWorthPoints = useNetWorth(period, GroupBy.Month)
   const lastMonth = netWorthPoints.length > 0 ? netWorthPoints[netWorthPoints.length - 1] : null
 
   if (!lastMonth)
-    return 0
+    return { monthsToLive: 0,  avgOutcome: 0 }
 
   const currentBalance = lastMonth.lented +
     lastMonth.debts +
@@ -93,8 +89,11 @@ function useMonthsToLive(totalOutcome: number, period: Period): number {
 
   const monthsInPeriod = useMonthsInPeriod(period)
   const months = monthsInPeriod >= netWorthPoints.length ? netWorthPoints.length : monthsInPeriod
-  const monthlyOutcome = totalOutcome / months
-  return Math.round(currentBalance / monthlyOutcome)
+  const avgOutcome = totalOutcome / months
+  return {
+    monthsToLive: Math.round(currentBalance / avgOutcome),
+    avgOutcome: avgOutcome
+  }
 }
 
 function useMonthsInPeriod(period: Period): number {
