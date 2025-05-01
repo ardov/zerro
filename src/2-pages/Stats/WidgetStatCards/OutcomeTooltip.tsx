@@ -77,10 +77,24 @@ export function OutcomeTooltip({
 }
 
 function useMonthsToLive(totalOutcome: number, period: Period): number {
-  const fundsInBudget = getLastBudgetFromNetWorth()
+  // with period = LastYear it return 13 points max, so we need to get only 12,
+  // but if it returns only 11 or less we need to divide by 11
+  const netWorthPoints = useNetWorth(period, GroupBy.Month)
+  const lastMonth = netWorthPoints.length > 0 ? netWorthPoints[netWorthPoints.length - 1] : null
+
+  if (!lastMonth)
+    return 0
+
+  const currentBalance = lastMonth.lented +
+    lastMonth.debts +
+    lastMonth.accountDebts +
+    lastMonth.fundsInBudget +
+    lastMonth.fundsSaving
+
   const monthsInPeriod = useMonthsInPeriod(period)
-  const monthlyOutcome = totalOutcome / monthsInPeriod
-  return Math.round(fundsInBudget / monthlyOutcome)
+  const months = monthsInPeriod >= netWorthPoints.length ? netWorthPoints.length : monthsInPeriod
+  const monthlyOutcome = totalOutcome / months
+  return Math.round(currentBalance / monthlyOutcome)
 }
 
 function useMonthsInPeriod(period: Period): number {
@@ -95,20 +109,11 @@ function useMonthsInPeriod(period: Period): number {
       case Period.All:
         const startDate = new Date(historyStart)
         const currentDate = new Date()
-        const monthsDiff = differenceInMonths(currentDate, startDate) + 1
+        const difference = differenceInMonths(currentDate, startDate)
+        const monthsDiff = difference + 1
         return Math.max(1, monthsDiff)
       default:
         return CONSTANTS.DEFAULT_MONTHS
     }
   }, [period, historyStart])
-}
-
-function getLastBudgetFromNetWorth(): number {
-  const netWorthPoints = useNetWorth(Period.LastYear, GroupBy.Month)
-  const lastMonth = netWorthPoints.length > 0 ? netWorthPoints[netWorthPoints.length - 1] : null
-
-  if (!lastMonth)
-    return 0
-
-  return lastMonth.lented + lastMonth.debts + lastMonth.accountDebts + lastMonth.fundsInBudget + lastMonth.fundsSaving
 }

@@ -157,6 +157,7 @@ export const en: typeof ru = {
     period_all: 'for all time',
     period_year: 'for the year',
     period_3years: 'for three years',
+    period_from: 'for the period from {{date}}',
 
     incomesAndOutcomes: 'Incomes and Expenses',
     income: 'Income',

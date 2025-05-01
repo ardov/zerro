@@ -5,14 +5,15 @@ import { useAppTheme } from '6-shared/ui/theme'
 import { formatMoney } from '6-shared/helpers/money'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { Tooltip } from '6-shared/ui/Tooltip'
-import { Period } from '../shared/period'
+import { Period, getStart } from '../shared/period'
+import {GroupBy, formatDate, nextDay} from '6-shared/helpers/date'
 import { useStatSummary } from './model'
 import { OutcomeTooltip } from './OutcomeTooltip'
 
 const PERCENT_THRESHOLD = 0.05
 
 type StatCardProps = {
-  title: string
+  title: string | React.ReactNode
   value: string | number
   color?: string
   suffix?: string
@@ -54,12 +55,21 @@ export const WidgetStatCards = React.memo(function WidgetStatCards({ period }: W
   const [currency] = displayCurrency.useDisplayCurrency()
   const { formatCurrency, formatPercent } = useFormatters(currency)
 
+  const startDate = getStart(period, GroupBy.Day)
+  const incomeLabelTooltip = startDate
+    ? t('period_from', { date: formatDate(nextDay(startDate)) })
+    : t('period_all')
+
   return (
     <Box>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6} lg={3}>
           <StatCard
-            title={t('income')}
+            title={
+              <Tooltip title={incomeLabelTooltip} arrow placement="right">
+                <span>{t('income')}</span>
+              </Tooltip>
+            }
             value={formatCurrency(stats.totalIncome)}
             color={palette.success.main}
           />
