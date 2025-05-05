@@ -1,5 +1,11 @@
 import React from 'react'
-import { MenuList, Select, SelectProps } from '@mui/material'
+import {
+  FormControl,
+  InputLabel,
+  MenuList,
+  Select,
+  SelectProps
+} from '@mui/material'
 import { popoverStack } from '6-shared/historyPopovers'
 
 import { SwipeableDrawer, Theme, useMediaQuery } from '@mui/material'
@@ -12,7 +18,8 @@ export function SmartSelect<T>(props: TSmartSelectProps<T>) {
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
   return (
-    <>
+    <FormControl>
+      {props.label && <InputLabel>{props.label}</InputLabel>}
       <Select
         {...selectProps}
         open={isMobile ? false : open}
@@ -74,6 +81,6 @@ export function SmartSelect<T>(props: TSmartSelectProps<T>) {
           </MenuList>
         </SwipeableDrawer>
       )}
-    </>
+    </FormControl>
   )
 }
