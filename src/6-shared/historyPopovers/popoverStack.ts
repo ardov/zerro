@@ -35,10 +35,13 @@ function useActions(): {
       },
       close: (key: TKey) => {
         if (!key) return
-        const stack = getStack(history.location)
-        const lastIndex = stack.indexOf(key)
+        const currStack = getStack(history.location)
+        const lastIndex = currStack.indexOf(key)
         if (lastIndex === -1) return
-        history.go(lastIndex - stack.length)
+
+        const { pathname, hash, search, state = {} } = history.location
+        const prevState = {...state, dialogs: currStack[0] === key ? [] : currStack.slice(0, lastIndex)}
+        history.replace(pathname + hash + search, prevState)
       },
     }),
     [history]
