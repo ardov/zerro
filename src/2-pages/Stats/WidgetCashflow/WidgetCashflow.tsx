@@ -54,7 +54,7 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
         </Typography>
       </Box>
 
-      <ResponsiveContainer height={300}>
+      <ResponsiveContainer height={300} style={{ paddingRight: '16px' }}>
         <AreaChart data={points}>
           <defs>
             <linearGradient id="areaIn" x1="0" y1="0" x2="0" y2="1">
