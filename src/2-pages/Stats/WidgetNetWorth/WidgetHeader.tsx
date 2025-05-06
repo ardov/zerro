@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { Box, Typography } from '@mui/material'
-import { useAppTheme } from '6-shared/ui/theme'
+import { useAppTheme, useColorScheme } from '6-shared/ui/theme'
 import { Period, PeriodTitle } from '../shared/period'
 import { useTranslation } from 'react-i18next'
 import { formatMoney } from '6-shared/helpers/money'
@@ -8,6 +8,7 @@ import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { useStatSummary } from '../WidgetStatCards/model'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { SavingsTooltip } from './SavingsTooltip'
+import { getSavingsBackgroundColor } from "6-shared/ui/theme/colors";
 
 type WidgetHeaderProps = {
   period: Period
@@ -27,17 +28,16 @@ function useFormatters(currency: string) {
 export function WidgetHeader({ period, onTogglePeriod }: WidgetHeaderProps) {
   const { t } = useTranslation('analytics')
   const theme = useAppTheme()
+  const { mode } = useColorScheme()
   const stats = useStatSummary(period)
   const [currency] = displayCurrency.useDisplayCurrency()
   const { formatCurrency, formatPercent } = useFormatters(currency)
 
-  const savingsBgColor = stats.totalSavings >= 0
-    ? theme.palette.success.dark
-    : theme.palette.error.dark
+  const savingsBgColor = getSavingsBackgroundColor(stats.totalSavings >= 0, mode)
 
   const savingsTextColor = stats.totalSavings >= 0
-    ? theme.palette.success.light
-    : theme.palette.error.light
+    ? theme.palette.success.main
+    : theme.palette.error.main
 
   return (
     <Box p={2} minWidth="100%">
