@@ -22,9 +22,10 @@ import { formatDate, GroupBy } from '6-shared/helpers/date'
 
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { DataLine } from '3-widgets/DataLine'
-import { Period, PeriodTitle } from '../shared/period'
+import { Period } from '../shared/period'
 import { TNetWorthPoint, useNetWorth } from '../shared/netWorth'
 import { useTranslation } from 'react-i18next'
+import { WidgetHeader } from './WidgetHeader'
 
 type Point = TNetWorthPoint & { total: number }
 type TDataKey = keyof Omit<Point, 'date'>
@@ -116,17 +117,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
 
   return (
     <Paper>
-      <Box p={2} minWidth="100%">
-        <Typography variant="h5">
-          {t('netWorth.title')}{' '}
-          <span
-            style={{ color: theme.palette.secondary.main, cursor: 'pointer' }}
-            onClick={onTogglePeriod}
-          >
-            <PeriodTitle period={period} />
-          </span>
-        </Typography>
-      </Box>
+      <WidgetHeader period={period} onTogglePeriod={onTogglePeriod} />
 
       <Box p={2} minWidth="100%" height={300}>
         <ResponsiveContainer>
