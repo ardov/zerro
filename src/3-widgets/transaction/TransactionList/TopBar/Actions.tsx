@@ -22,7 +22,7 @@ import {
   DeleteIcon,
 } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
-import { round } from '6-shared/helpers/money'
+import { addFxAmount, round } from '6-shared/helpers/money'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useAppDispatch } from 'store'
@@ -31,6 +31,9 @@ import { TagSelect2 } from '5-entities/tag/ui/TagSelect2'
 import { trModel } from '5-entities/transaction'
 import { BulkEditModal } from './BulkEditModal'
 import './transitions.css'
+import { instrumentModel } from "5-entities/currency/instrument";
+import { displayCurrency } from "5-entities/currency/displayCurrency";
+import { createFxAmount } from "6-shared/helpers/money/currencyHelpers";
 
 type ActionsProps = {
   visible: boolean
@@ -45,6 +48,8 @@ const Actions: FC<ActionsProps> = ({
   onUncheckAll,
   onCheckAll,
 }) => {
+  if (!visible) return null
+
   const { t } = useTranslation('transactionActions')
   const dispatch = useAppDispatch()
   const allTransactions = trModel.useTransactions()
@@ -241,6 +246,30 @@ const Actions: FC<ActionsProps> = ({
                 </MenuItem>
               )}
 
+              {actions.canMergeAsTransfer && (
+                <MenuItem
+                  onClick={() => {
+                    sendEvent('Transaction: merge as transfer')
+                    const patch = mergeAsTransfer(transactions)
+                    if (!patch) return
+                    dispatch(
+                      applyClientPatch({
+                        transaction: patch,
+                      })
+                    )
+                    onUncheckAll()
+                  }}
+                >
+                  <ListItemIcon>
+                    <MergeTypeIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={t('mergeAsTransfer')}
+                    secondary={t('mergeAsTransferComment')}
+                  />
+                </MenuItem>
+              )}
+
               <Box my={1}>
                 <Divider />
               </Box>
@@ -260,9 +289,12 @@ const Actions: FC<ActionsProps> = ({
 }
 
 function getAvailableActions(transactions: TTransaction[]) {
-  const { incomes, outcomes, transfers } = getTypes(transactions)
-  const totalOutcome = outcomes.reduce((sum, tr) => round(sum + tr.outcome), 0)
-  const totalIncome = incomes.reduce((sum, tr) => round(sum + tr.income), 0)
+  const { incomes, outcomes, transfers } = groupByType(transactions)
+  const instCodeMap = instrumentModel.useInstCodeMap()
+  const toDisplay = displayCurrency.useToDisplay('current')
+
+  const totalOutcome = toDisplay(addFxAmount(...outcomes.map((tr) => createFxAmount(instCodeMap[tr.outcomeInstrument], tr.outcome))))
+  const totalIncome = toDisplay(addFxAmount(...incomes.map((tr) => createFxAmount(instCodeMap[tr.incomeInstrument], tr.income))))
   const sameInstruments = hasSameInOutInstruments()
   const sameAccounts = hasSameInOutAccounts()
 
@@ -274,6 +306,7 @@ function getAvailableActions(transactions: TTransaction[]) {
     combineToOutcome: canCombineToOutcome(),
     combineToIncome: canCombineToIncome(),
     collapseTransactionsEasy: canCollapseTransactionsEasy(),
+    canMergeAsTransfer: canMergeAsTransfer()
   }
 
   function hasSameInOutInstruments() {
@@ -289,7 +322,16 @@ function getAvailableActions(transactions: TTransaction[]) {
     return accounts.size === 1
   }
 
-  // TODO: add function to delete transactions and convert some of them to transfers
+  function canMergeAsTransfer(): boolean {
+    return (
+      transfers.length === 0 &&
+      outcomes.length == 1 &&
+      incomes.length == 1 &&
+      !sameAccounts &&
+      (!sameInstruments && areApproximatelyEqual(totalIncome, totalOutcome, 0.15)
+        || sameInstruments && totalOutcome === totalIncome)
+    )
+  }
   function canCollapseTransactionsEasy(): boolean {
     return (
       transfers.length === 0 &&
@@ -320,8 +362,40 @@ function getAvailableActions(transactions: TTransaction[]) {
   }
 }
 
+function areApproximatelyEqual(a: number, b: number, tolerance: number = 0.1): boolean {
+  const difference = Math.abs(a - b);
+  const maxAllowedDifference = Math.max(Math.abs(a), Math.abs(b)) * tolerance;
+  return difference <= maxAllowedDifference;
+}
+
+function mergeAsTransfer(transactions: TTransaction[]) {
+  const { incomes, outcomes } = groupByType(transactions)
+  if (incomes.length != 1 || outcomes.length != 1) return null
+
+  const outcome = outcomes[0]
+  const income = incomes[0]
+
+  const modified: TTransaction[] = []
+  modified.push({
+    ...outcome,
+    deleted: true,
+    changed: Date.now()
+  })
+
+  modified.push({
+    ...income,
+    outcomeAccount: outcome.outcomeAccount,
+    outcome: outcome.outcome,
+    outcomeInstrument: outcome.outcomeInstrument,
+    changed: Date.now(),
+  })
+
+  return modified
+}
+
+
 function combineToOutcome(transactions: TTransaction[]) {
-  const { incomes, outcomes } = getTypes(transactions)
+  const { incomes, outcomes } = groupByType(transactions)
   const outcome = outcomes[0]
   const outcomeInstrument = outcome.outcomeInstrument
   let outcomeSum = outcome.outcome
@@ -355,7 +429,7 @@ function combineToOutcome(transactions: TTransaction[]) {
 }
 
 function combineToIncome(transactions: TTransaction[]) {
-  const { incomes, outcomes } = getTypes(transactions)
+  const { incomes, outcomes } = groupByType(transactions)
   const income = incomes[0]
   const incomeInstrument = income.incomeInstrument
   let incomeSum = income.income
@@ -388,7 +462,7 @@ function combineToIncome(transactions: TTransaction[]) {
   return modifiedOutcomes
 }
 
-function getTypes(list: TTransaction[] = []) {
+function groupByType(list: TTransaction[] = []) {
   let incomes: TTransaction[] = []
   let outcomes: TTransaction[] = []
   let transfers: TTransaction[] = []
