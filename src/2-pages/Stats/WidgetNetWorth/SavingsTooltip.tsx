@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Divider } from '@mui/material'
 import { Period } from '../shared/period'
@@ -7,27 +7,18 @@ import { trModel } from '5-entities/transaction'
 import { useAppSelector } from 'store'
 import { differenceInMonths } from 'date-fns'
 import { useNetWorth } from "../shared/netWorth"
-import { StatSummary } from '../WidgetStatCards/model'
-
-const CONSTANTS = {
-  DECIMAL_PRECISION: 1,
-  DEFAULT_MONTHS: 12,
-  THREE_YEARS_MONTHS: 36,
-  DATE_FORMAT: 10
-}
+import { StatSummary } from '../shared/cashflow'
 
 type SavingsTooltipProps = {
   stats: StatSummary
   period: Period
   formatCurrency: (amount: number) => string
-  formatPercent: (value: number) => string
 }
 
 export function SavingsTooltip({
   stats,
   period,
   formatCurrency,
-  formatPercent
 }: SavingsTooltipProps) {
   const { t } = useTranslation('analytics')
   const { monthsToLive, avgOutcome } = calculateMonthsToLiveAndAgvOutcome(
@@ -71,7 +62,7 @@ export function SavingsTooltip({
           )}
         </>
       )}
-      
+
       {monthsToLive > 0 && (
         <>
           <Divider sx={{ my: 1 }} />
@@ -105,7 +96,7 @@ function calculateMonthsToLiveAndAgvOutcome(
   const months = monthsInPeriod >= netWorthPoints.length ? netWorthPoints.length : monthsInPeriod
   const avgOutcome = totalOutcome / months
   return {
-    monthsToLive: Math.round(currentBalance / avgOutcome),
+    monthsToLive: avgOutcome === 0 ? 0 : Math.round(currentBalance / avgOutcome),
     avgOutcome: avgOutcome
   }
 }
@@ -113,12 +104,10 @@ function calculateMonthsToLiveAndAgvOutcome(
 function useMonthsInPeriod(period: Period): number {
   const historyStart = useAppSelector(trModel.getHistoryStart)
 
-  return React.useMemo(() => {
+  return useMemo(() => {
     switch (period) {
-      case Period.LastYear:
-        return CONSTANTS.DEFAULT_MONTHS
       case Period.ThreeYears:
-        return CONSTANTS.THREE_YEARS_MONTHS
+        return 36
       case Period.All:
         const startDate = new Date(historyStart)
         const currentDate = new Date()
@@ -126,7 +115,7 @@ function useMonthsInPeriod(period: Period): number {
         const monthsDiff = difference + 1
         return Math.max(1, monthsDiff)
       default:
-        return CONSTANTS.DEFAULT_MONTHS
+        return 12
     }
   }, [period, historyStart])
 }

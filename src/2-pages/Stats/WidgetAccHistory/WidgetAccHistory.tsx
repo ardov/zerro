@@ -8,19 +8,15 @@ import { TAccountId, TISODate, TFxAmount } from '6-shared/types'
 import { Amount } from '6-shared/ui/Amount'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { addFxAmount } from '6-shared/helpers/money'
-import { Tooltip } from '6-shared/ui/Tooltip'
 import { accountModel, TAccountPopulated } from '5-entities/account'
 import { DisplayAmount, displayCurrency } from '5-entities/currency/displayCurrency'
 import { Period } from '../shared/period'
 import { useAccountHistory } from './model'
-import { useTransactionDrawer } from "../../../3-widgets/global/TransactionListDrawer";
+import { useTransactionDrawer } from "3-widgets/global/TransactionListDrawer";
 
 type WidgetAccHistoryProps = {
   period: Period
 }
-
-const SUBHEADER_MARGIN_BOTTOM = 1
-const ACCOUNT_MARGIN_BOTTOM = 8
 
 export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(({ period }) => {
   const { t } = useTranslation('accounts')
@@ -90,26 +86,6 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(({ period }) => 
   )
 })
 
-const sortAccountsByBalance = (
-  accounts: TAccountPopulated[],
-  toDisplay: (amount: TFxAmount) => number
-): TAccountPopulated[] => {
-  return [...accounts].sort(
-    (a, b) =>
-      toDisplay({ [b.fxCode]: b.balance }) -
-      toDisplay({ [a.fxCode]: a.balance })
-  )
-}
-
-function getTotal(accs: TAccountPopulated[]): TFxAmount {
-  if (!accs.length) return {}
-
-  return accs.reduce(
-    (sum, a) => addFxAmount(sum, { [a.fxCode]: a.balance }),
-    {}
-  )
-}
-
 type SubheaderProps = {
   name: React.ReactNode
   amount: TFxAmount
@@ -125,7 +101,7 @@ const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
     <ListSubheader
       sx={{
         borderRadius: 1,
-        marginBottom: SUBHEADER_MARGIN_BOTTOM,
+        marginBottom: 1,
         cursor: onClick ? 'pointer' : 'default'
       }}
       onClick={onClick}
@@ -174,9 +150,19 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(({
   const data = useAccountHistory(id, period)
 
   const { dataMax, dataMin, yAxisMin } = useMemo(() => {
-    const dataMax = Math.max(...data.map(i => i.balance))
-    const dataMin = Math.min(...data.map(i => i.balance))
-    return { dataMax, dataMin, yAxisMin: Math.min(0, dataMin) }
+    if (data.length === 0) return { dataMax: 0, dataMin: 0, yAxisMin: 0 }
+
+    let max = data[0].balance
+    let min = data[0].balance
+
+    for (let i = 1; i < data.length; i++) {
+      if (data[i].balance > max)
+          max = data[i].balance
+      if (data[i].balance < min)
+          min = data[i].balance
+    }
+
+    return { dataMax: max, dataMin: min, yAxisMin: Math.min(0, min) }
   }, [data])
 
   const [hoverIdx, setHoverIdx] = useState<number | null>(null)
@@ -189,7 +175,7 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(({
   const colorId = 'gradient' + acc.id
 
   return (
-    <Paper style={{ overflow: 'hidden', position: 'relative', marginBottom: ACCOUNT_MARGIN_BOTTOM }}>
+    <Paper style={{ overflow: 'hidden', position: 'relative', marginBottom: 8 }}>
       <Box p={2} minWidth={160}>
         <Typography variant="body2">
           <span
@@ -263,3 +249,23 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(({
     </Paper>
   )
 })
+
+const sortAccountsByBalance = (
+  accounts: TAccountPopulated[],
+  toDisplay: (amount: TFxAmount) => number
+): TAccountPopulated[] => {
+  return [...accounts].sort(
+    (a, b) =>
+      toDisplay({ [b.fxCode]: b.balance }) -
+      toDisplay({ [a.fxCode]: a.balance })
+  )
+}
+
+function getTotal(accs: TAccountPopulated[]): TFxAmount {
+  if (!accs.length) return {}
+
+  return accs.reduce(
+    (sum, a) => addFxAmount(sum, { [a.fxCode]: a.balance }),
+    {}
+  )
+}

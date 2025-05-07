@@ -17,11 +17,14 @@ export function SmartSelect<T>(props: TSmartSelectProps<T>) {
   const [open, onOpen, onClose] = popoverStack.usePopoverState(elKey)
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
+  const labelId = props.label ? `${props.id || 'smart-select'}-label` : undefined
+
   return (
     <FormControl>
-      {props.label && <InputLabel>{props.label}</InputLabel>}
+      {props.label && <InputLabel id={labelId}>{props.label}</InputLabel>}
       <Select
         {...selectProps}
+        labelId={labelId}
         open={isMobile ? false : open}
         onOpen={onOpen}
         onClose={onClose}
