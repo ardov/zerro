@@ -1,4 +1,5 @@
 import * as materialColors from '@mui/material/colors'
+import { mainColors } from "../../ui/theme/createTheme";
 
 type Shade = keyof typeof materialColors['red']
 type ColorGroups = Exclude<keyof typeof materialColors, 'common'>
@@ -23,6 +24,7 @@ const allColors: ColorGroups[] = [
   'grey',
   'blueGrey',
 ]
+
 const allShades: Shade[] = [
   50,
   100,
@@ -46,6 +48,7 @@ type MakeColorArrayProps = {
   byShades?: boolean
 }
 export function makeColorArray(props: MakeColorArrayProps = {}) {
+  const doNotUse = new Set<string>(Object.values(mainColors))
   const { shades = allShades, colors = allColors, byShades } = props
   const colorArray: string[] = []
   if (byShades)
@@ -62,5 +65,5 @@ export function makeColorArray(props: MakeColorArrayProps = {}) {
         if (hex) colorArray.push(hex)
       })
     )
-  return colorArray
+  return colorArray.filter(x => !doNotUse.has(x))
 }
