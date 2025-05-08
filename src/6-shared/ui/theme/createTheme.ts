@@ -3,6 +3,13 @@ import { blueGrey, blue, green, grey } from '@mui/material/colors'
 
 const hoverOpacity = 0.04
 
+export const mainColors = {
+  lightBackgroundPaper: '#ffffff',
+  lightBackgroundDefault: grey[100],
+  darkBackgroundPaper: '#212121',
+  darkBackgroundDefault: '#121212',
+}
+
 export const appTheme = extendTheme({
   colorSchemes: {
     light: {
@@ -17,8 +24,8 @@ export const appTheme = extendTheme({
         // @ts-ignore
         text: { hint: `rgba(0, 0, 0, 0.38)` },
         background: {
-          paper: '#ffffff',
-          default: grey[100],
+          paper: mainColors.lightBackgroundPaper,
+          default: mainColors.lightBackgroundDefault,
         },
       },
     },
@@ -34,8 +41,8 @@ export const appTheme = extendTheme({
         // @ts-ignore
         text: { hint: `rgba(255, 255, 255, 0.38)` },
         background: {
-          paper: '#212121',
-          default: '#121212',
+          paper: mainColors.darkBackgroundPaper,
+          default: mainColors.darkBackgroundDefault,
         },
       },
     },

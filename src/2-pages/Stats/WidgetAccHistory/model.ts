@@ -11,12 +11,12 @@ export type TPoint = {
   balance: number
 }
 
-export function useAccountHistory(id: TAccountId, period: Period) {
+export function useAccountHistory(id: TAccountId, period: Period) : TPoint[] {
   let { fxCode } = accountModel.usePopulatedAccounts()[id]
 
   let allBalances = useAppSelector(accBalanceModel.getBalancesByDate)
 
-  const balances = useMemo(() => {
+  return useMemo(() => {
     const firstDate = getStart(period, GroupBy.Day)
     const filtered = firstDate
       ? allBalances.filter(({ date }) => date >= firstDate!)
@@ -27,6 +27,4 @@ export function useAccountHistory(id: TAccountId, period: Period) {
       balance: balances.accounts?.[id]?.[fxCode] || 0,
     }))
   }, [allBalances, period, fxCode, id])
-
-  return balances
 }
