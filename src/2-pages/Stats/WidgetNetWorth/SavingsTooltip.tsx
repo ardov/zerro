@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, Divider } from '@mui/material'
+import { Box, Typography, Divider, useMediaQuery, Theme } from '@mui/material'
 import { Period } from '../shared/period'
 import { GroupBy } from '6-shared/helpers/date'
 import { trModel } from '5-entities/transaction'
@@ -12,13 +12,15 @@ import { StatSummary } from '../shared/cashflow'
 type SavingsTooltipProps = {
   stats: StatSummary
   period: Period
-  formatCurrency: (amount: number) => string
+  formatCurrency: (amount: number) => string,
+  formatPercent: (amount: number) => string
 }
 
 export function SavingsTooltip({
   stats,
   period,
   formatCurrency,
+  formatPercent
 }: SavingsTooltipProps) {
   const { t } = useTranslation('analytics')
   const { monthsToLive, avgOutcome } = calculateMonthsToLiveAndAgvOutcome(
@@ -29,9 +31,21 @@ export function SavingsTooltip({
   const hasInBalanceOutcome = stats.totalOutcomeInBalance > 0
   const hasOutOfBalanceOutcome = stats.totalOutcomeOutOfBalance > 0
   const showOutcomeSection = hasInBalanceOutcome || hasOutOfBalanceOutcome
+  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
   return (
     <Box p={1} minWidth={240}>
+      {isMobile && (
+        <>
+          <Typography variant="body2">
+            {t(stats.savingsRate >= 0 ? 'savingsRatePositive' : 'savingsRateNegative', {
+              percent: formatPercent(stats.savingsRate)
+            })}
+          </Typography>
+          <Divider sx={{ my: 1 }} />
+        </>
+      )}
+
       <Typography variant="body2" gutterBottom>
         {t('income')}: {formatCurrency(stats.totalIncome)}
       </Typography>

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { Box, Typography } from '@mui/material'
+import { Box, Theme, Typography, useMediaQuery } from '@mui/material'
 import { useAppTheme, useColorScheme } from '6-shared/ui/theme'
 import { red, green } from '@mui/material/colors'
 import { Period, PeriodTitle } from '../shared/period'
@@ -29,6 +29,7 @@ export function WidgetHeader({ period, onTogglePeriod }: WidgetHeaderProps) {
   const stats = useStatSummary(period)
   const [currency] = displayCurrency.useDisplayCurrency()
   const { formatCurrency, formatPercent } = useFormatters(currency)
+  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
   const savingsBgColor = customColors[stats.totalSavings >= 0 ? 'positive' : 'negative'][mode]
   const savingsTextColor = stats.totalSavings >= 0
@@ -52,10 +53,11 @@ export function WidgetHeader({ period, onTogglePeriod }: WidgetHeaderProps) {
               stats={stats}
               period={period}
               formatCurrency={formatCurrency}
+              formatPercent={formatPercent}
             />
           }
           arrow
-          placement="right"
+          placement={isMobile ? "bottom" : "right"}
         >
           <Typography
             component="span"
@@ -73,7 +75,7 @@ export function WidgetHeader({ period, onTogglePeriod }: WidgetHeaderProps) {
         </Tooltip>
       </Typography>
 
-      <Typography
+      {!isMobile && <Typography
         variant="body2"
         color="text.secondary"
         sx={{ mt: 1 }}
@@ -81,7 +83,7 @@ export function WidgetHeader({ period, onTogglePeriod }: WidgetHeaderProps) {
         {t(stats.savingsRate >= 0 ? 'savingsRatePositive' : 'savingsRateNegative', {
           percent: formatPercent(stats.savingsRate)
         })}
-      </Typography>
+      </Typography>}
     </Box>
   )
 }
