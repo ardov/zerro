@@ -5,7 +5,7 @@ import { red, green } from '@mui/material/colors'
 import { Period, PeriodTitle } from '../shared/period'
 import { useTranslation } from 'react-i18next'
 import { formatMoney } from '6-shared/helpers/money'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
+import { DisplayAmount, displayCurrency } from '5-entities/currency/displayCurrency'
 import { useStatSummary } from '../shared/cashflow'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { SavingsTooltip } from './SavingsTooltip'
@@ -70,7 +70,8 @@ export function WidgetHeader({ period, onTogglePeriod }: WidgetHeaderProps) {
               color: savingsTextColor,
             }}
           >
-            {stats.totalSavings > 0 ? '+' : ''}{formatCurrency(stats.totalSavings)}
+            {stats.totalSavings > 0 ? '+' : ''}
+            <DisplayAmount value={stats.totalSavings} noShade decMode="ifOnly" />
           </Typography>
         </Tooltip>
       </Typography>

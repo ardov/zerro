@@ -8,6 +8,7 @@ import { useAppSelector } from 'store'
 import { differenceInMonths } from 'date-fns'
 import { useNetWorth } from "../shared/netWorth"
 import { StatSummary } from '../shared/cashflow'
+import { DisplayAmount } from "5-entities/currency/displayCurrency";
 
 type SavingsTooltipProps = {
   stats: StatSummary
@@ -47,11 +48,11 @@ export function SavingsTooltip({
       )}
 
       <Typography variant="body2" gutterBottom>
-        {t('income')}: {formatCurrency(stats.totalIncome)}
+        {t('income')}: <DisplayAmount value={stats.totalIncome} noShade decMode="ifOnly"/>
       </Typography>
 
       <Typography variant="body2" gutterBottom>
-        {t('outcome')}: {formatCurrency(stats.totalOutcomeInBalance + stats.totalOutcomeOutOfBalance)}
+        {t('outcome')}: <DisplayAmount value={stats.totalOutcomeInBalance + stats.totalOutcomeOutOfBalance} noShade decMode="ifOnly"/>
       </Typography>
 
       {showOutcomeSection && (
@@ -62,16 +63,14 @@ export function SavingsTooltip({
           </Typography>
 
           {hasInBalanceOutcome && (
-            <Typography variant="body2" display="flex" gutterBottom>
-              <span>{t('fromFundsInBalance')}:</span>
-              <span style={{marginLeft: 8}}>{formatCurrency(stats.totalOutcomeInBalance)}</span>
+            <Typography variant="body2" gutterBottom>
+              {t('fromFundsInBalance')}: <DisplayAmount value={stats.totalOutcomeInBalance} noShade decMode="ifOnly"/>
             </Typography>
           )}
 
           {hasOutOfBalanceOutcome && (
-            <Typography variant="body2" display="flex" gutterBottom>
-              <span>{t('fromFundsSaving')}:</span>
-              <span style={{marginLeft: 8}}>{formatCurrency(stats.totalOutcomeOutOfBalance)}</span>
+            <Typography variant="body2" gutterBottom>
+              {t('fromFundsSaving')}: <DisplayAmount value={stats.totalOutcomeOutOfBalance} noShade decMode="ifOnly"/>
             </Typography>
           )}
         </>
