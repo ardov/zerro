@@ -15,11 +15,14 @@ import { useAppTheme } from '6-shared/ui/theme'
 import { formatMoney } from '6-shared/helpers/money'
 import { formatDate, parseDate } from '6-shared/helpers/date'
 import { TISODate } from '6-shared/types'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
+
+import {
+  DisplayAmount,
+  displayCurrency,
+} from '5-entities/currency/displayCurrency'
 import { DataLine } from '3-widgets/DataLine'
 import { summarizeCashflow, useCashFlow } from '../shared/cashflow'
 import { Period, PeriodTitle } from '../shared/period'
-import { Amount } from '6-shared/ui/Amount'
 
 type Point = {
   date: TISODate
@@ -197,7 +200,6 @@ function tickFormatter(date: TISODate) {
 function Summary(props: { income: number; outcome: number }) {
   const { income, outcome } = props
   const { t } = useTranslation('analytics')
-  const [currency] = displayCurrency.useDisplayCurrency()
   const theme = useAppTheme()
 
   const color =
@@ -206,18 +208,17 @@ function Summary(props: { income: number; outcome: number }) {
 
   const tooltip = (
     <>
-      {t('income')}: <Amount value={income} currency={currency} />
+      {t('income')}: <DisplayAmount value={income} />
       <br />
-      {t('outcome')}: <Amount value={outcome} currency={currency} />
+      {t('outcome')}: <DisplayAmount value={outcome} />
     </>
   )
 
   return (
     <Tooltip arrow placement={'bottom'} title={tooltip}>
       <span>
-        <Amount
+        <DisplayAmount
           value={netIncome}
-          currency={currency}
           sign
           noShade
           decMode="ifOnly"

@@ -17,17 +17,19 @@ import {
   Line,
   ReferenceLine,
 } from 'recharts'
+import { Tooltip } from '6-shared/ui/Tooltip'
 import { useAppTheme } from '6-shared/ui/theme'
 import { round } from '6-shared/helpers/money'
 import { formatDate, GroupBy } from '6-shared/helpers/date'
 
-import { displayCurrency } from '5-entities/currency/displayCurrency'
+import {
+  DisplayAmount,
+  displayCurrency,
+} from '5-entities/currency/displayCurrency'
 import { DataLine } from '3-widgets/DataLine'
 import { Period, PeriodTitle } from '../shared/period'
 import { TNetWorthPoint, useNetWorth } from './useNetWorth'
 import { useAverageExpenses } from './useAverageExpenses'
-import { Tooltip } from '6-shared/ui/Tooltip'
-import { Amount } from '6-shared/ui/Amount'
 
 type Point = TNetWorthPoint & { total: number }
 type TDataKey = keyof Omit<Point, 'date'>
@@ -228,7 +230,6 @@ function capitalize(string: string) {
 
 function SurviveFact() {
   const { t } = useTranslation('analytics')
-  const [currency] = displayCurrency.useDisplayCurrency()
   const balances = useNetWorth(Period.LastYear, GroupBy.Month)
   const lastMonth = balances[balances.length - 1]
   const currentBalance = lastMonth.fundsInBudget + lastMonth.fundsSaving
@@ -239,10 +240,10 @@ function SurviveFact() {
   const tooltipContent = (
     <>
       {t('netWorth.tooltipCurrentBalance')}:{' '}
-      <Amount value={currentBalance} currency={currency} />
+      <DisplayAmount value={currentBalance} />
       <br />
       {t('netWorth.tooltipAvgExpenses')}:{' '}
-      <Amount value={averageExpenses} currency={currency} />
+      <DisplayAmount value={averageExpenses} />
     </>
   )
 
