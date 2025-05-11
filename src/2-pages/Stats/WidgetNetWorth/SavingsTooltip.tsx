@@ -62,14 +62,14 @@ export function SavingsTooltip({
           </Typography>
 
           {hasInBalanceOutcome && (
-            <Typography variant="body2" display="flex" justifyContent="space-between">
+            <Typography variant="body2" display="flex" gutterBottom>
               <span>{t('fromFundsInBalance')}:</span>
               <span style={{marginLeft: 8}}>{formatCurrency(stats.totalOutcomeInBalance)}</span>
             </Typography>
           )}
 
           {hasOutOfBalanceOutcome && (
-            <Typography variant="body2" display="flex" justifyContent="space-between">
+            <Typography variant="body2" display="flex" gutterBottom>
               <span>{t('fromFundsSaving')}:</span>
               <span style={{marginLeft: 8}}>{formatCurrency(stats.totalOutcomeOutOfBalance)}</span>
             </Typography>
