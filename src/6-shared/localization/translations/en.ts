@@ -552,6 +552,20 @@ export const en: typeof ru = {
       purchaseOfTheYear: 'Purchase of the year #{{number}}',
     },
 
+    savingsCard: {
+      youSaved: 'You saved',
+      youOverspent: 'You overspent',
+      savingsPercent: 'This year you saved {{percent}}% of your income.',
+      greatJob: "Great job!",
+      goodJob: "Good job!",
+      overspendPercent: '{{percent}}% of your income was spent beyond your means',
+      savingsMonths: 'With your current expenses, these savings will last you {{months}} months without income',
+      savingsMonths_one: 'With your current expenses, these savings will last you {{months}} month without income',
+      savingsMonths_few: 'With your current expenses, these savings will last you {{months}} months without income',
+      savingsMonths_many: 'With your current expenses, these savings will last you {{months}} months without income',
+      savingsMonths_other: 'With your current expenses, these savings will last you {{months}} months without income',
+    },
+
     noCategory: {
       title_one: '{{count}} transaction',
       title_few: '{{count}} transactions',
