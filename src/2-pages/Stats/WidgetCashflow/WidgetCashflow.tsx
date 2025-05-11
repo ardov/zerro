@@ -1,6 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Paper, Card, Typography, Box } from '@mui/material'
+import { Paper, Card, Typography, Box, Divider } from '@mui/material'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -144,6 +144,7 @@ const CustomTooltip = (props: any) => {
           currency={currency}
         />
       ))}
+      <Divider sx={{ my: 1 }} />
       <DataLine
         color="transparent"
         name={t(diff < 0 ? 'netOutcome' : 'netIncome')}
