@@ -1,3 +1,4 @@
+import { isFinite } from 'lodash'
 import { AccountType, TISODate } from '6-shared/types'
 import { GroupBy } from '6-shared/helpers/date'
 import { keys } from '6-shared/helpers/keys'
@@ -5,8 +6,7 @@ import { round } from '6-shared/helpers/money'
 
 import { accountModel } from '5-entities/account'
 import { accBalanceModel } from '5-entities/accBalances'
-import { getStart, Period } from './period'
-import { isFinite } from 'lodash'
+import { getStart, Period } from '../shared/period'
 
 export type TNetWorthPoint = {
   date: TISODate
@@ -20,13 +20,16 @@ export type TNetWorthPoint = {
   fundsSaving: number
 }
 
-export function useNetWorth(period: Period, aggregation: GroupBy): TNetWorthPoint[] {
+export function useNetWorth(
+  period: Period,
+  aggregation: GroupBy
+): TNetWorthPoint[] {
   const accs = accountModel.usePopulatedAccounts()
 
   return accBalanceModel
     .useDisplayBalances(aggregation, getStart(period, aggregation))
-    .map(({date, balances}) => {
-      const {accounts, debtors} = balances
+    .map(({ date, balances }) => {
+      const { accounts, debtors } = balances
 
       let lented = 0
       let debts = 0
@@ -66,6 +69,6 @@ export function useNetWorth(period: Period, aggregation: GroupBy): TNetWorthPoin
         }
       })
 
-      return {date, lented, debts, fundsInBudget, fundsSaving, accountDebts}
+      return { date, lented, debts, fundsInBudget, fundsSaving, accountDebts }
     })
 }
