@@ -235,6 +235,7 @@ function SurviveFact() {
   const currentBalance = lastMonth.fundsInBudget + lastMonth.fundsSaving
 
   const averageExpenses = useAverageExpenses()
+  if (averageExpenses === 0) return null
   const fundedMonths = Math.ceil(currentBalance / averageExpenses)
 
   const tooltipContent = (
