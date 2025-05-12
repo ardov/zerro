@@ -147,6 +147,7 @@ export const en: typeof ru = {
     archivedAccounts_other: '+{{count}} archived accounts',
     archivedAccounts_few: '+{{count}} archived accounts',
     archivedAccounts_many: '+{{count}} archived accounts',
+    archived: 'Archived',
     hideArchived: 'Hide archived',
     showArchived: 'Show archived',
   },
@@ -156,12 +157,17 @@ export const en: typeof ru = {
     period_all: 'for all time',
     period_year: 'for the year',
     period_3years: 'for three years',
+    period_from: 'for the period from {{date}}',
 
     incomesAndOutcomes: 'Incomes and Expenses',
     income: 'Income',
     outcome: 'Expense',
     netIncome: 'Net Income',
     netOutcome: 'Net Expense',
+    savingsRate: 'Savings rate',
+    savingsRatePositive: '{{percent}} of income was saved',
+    savingsRateNegative: '{{percent}} of income was overspent',
+    details: 'details',
 
     netWorth: {
       title: 'Net Worth',
@@ -171,6 +177,13 @@ export const en: typeof ru = {
       fundsInBudget: 'Funds in Balance',
       fundsSaving: 'Funds out of Balance',
       total: 'Total',
+      surviveMonths_one: '{{count}} month',
+      surviveMonths_few: '{{count}} months',
+      surviveMonths_many: '{{count}} months',
+      surviveMonths_other: '{{count}} months',
+      surviveTagline: 'you can survive without earning a dime.',
+      tooltipCurrentBalance: 'Current total balance',
+      tooltipAvgExpenses: 'Average monthly expenses',
     },
   },
 
@@ -538,6 +551,23 @@ export const en: typeof ru = {
 
     outcomeCard: {
       purchaseOfTheYear: 'Purchase of the year #{{number}}',
+    },
+
+    savingsCard: {
+      youSaved: 'You saved',
+      savingsPercent: 'This year you saved {{percent}}% of your income.',
+      greatJob: 'Great job!',
+      goodJob: 'Good job!',
+      savingsMonths:
+        'With your current expenses, these savings will last you {{months}} months without income',
+      savingsMonths_one:
+        'With your current expenses, these savings will last you {{months}} month without income',
+      savingsMonths_few:
+        'With your current expenses, these savings will last you {{months}} months without income',
+      savingsMonths_many:
+        'With your current expenses, these savings will last you {{months}} months without income',
+      savingsMonths_other:
+        'With your current expenses, these savings will last you {{months}} months without income',
     },
 
     noCategory: {

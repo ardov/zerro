@@ -1,5 +1,5 @@
 import { FC, useCallback, useMemo, useState } from 'react'
-import { Box, BoxProps, Button, Stack } from '@mui/material'
+import { Box, Button, Stack } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 import { displayCurrency } from '5-entities/currency/displayCurrency'
@@ -11,20 +11,16 @@ import { envelopeModel, EnvType, TEnvelopeId } from "../../../5-entities/envelop
 import { envId } from "../../../5-entities/envelope/shared/envelopeId";
 import { Tooltip } from "../../../6-shared/ui/Tooltip";
 import { TDateDraft, TFxAmount, TTransaction } from "../../../6-shared/types";
+import { PercentBar, PercentBarItem } from "../../../6-shared/ui/PercentBar";
 
 type TDataNode = {
-  id: string
-  amount: number
-  color: string
-  name: string
   parent: string | null
   envelopeId: TEnvelopeId | null
   childIds: string[]
-}
+} & PercentBarItem
 
 export const DEFAULT_COLOR = '#ff0000'
 export const NO_CATEGORY_COLOR = '#808080'
-export const OTHER_CATEGORIES_COLOR = '#333333'
 
 export const MAX_VISIBLE_NODES = 10
 
@@ -233,78 +229,18 @@ const CategoryList: FC<CategoryListProps> = ({
                                                currency,
                                                onShowTransactions
                                              }) => {
-  return (
-    <>
-      {visibleNodes.map(point => (
-        <DataLine
-          key={point.id}
-          name={point.name}
-          amount={point.amount}
-          color={point.color}
-          currency={currency}
-          onClick={() => onShowTransactions(point)}
-        />
-      ))}
-    </>
-  )
+  return <Stack gap={1.5} mt={2}>
+    {visibleNodes.map(point => (
+      <DataLine
+        key={point.id}
+        name={point.name}
+        amount={point.amount}
+        color={point.color}
+        currency={currency}
+        onClick={() => onShowTransactions(point)}
+      />
+    ))}
+  </Stack>
 }
 
-interface PercentBarProps extends BoxProps {
-  data: TDataNode[]
-  visibleData?: TDataNode[]
-}
 
-const PercentBar: FC<PercentBarProps> = ({data, visibleData, ...rest}) => {
-  const {t} = useTranslation('budgets', {keyPrefix: 'activityStats'})
-
-  const {displayData, totalSum, hiddenSum, showAll} = useMemo(() => {
-    const showAllData = !visibleData || visibleData.length === data.length
-    const displayingData = showAllData ? data : visibleData || data.slice(0, MAX_VISIBLE_NODES)
-
-    const total = data.reduce((sum, n) => sum + Math.abs(n.amount), 0)
-    const visibleSum = displayingData.reduce((sum, n) => sum + Math.abs(n.amount), 0)
-
-    return {
-      displayData: displayingData,
-      totalSum: total,
-      hiddenSum: total - visibleSum,
-      showAll: showAllData
-    }
-  }, [data, visibleData])
-
-  if (totalSum === 0) return null
-
-  return (
-    <Box
-      display="flex"
-      width="100%"
-      height="8px"
-      borderRadius="6px"
-      {...rest}
-    >
-      {displayData.map((bar, i) => (
-        <Tooltip title={bar.name} key={bar.id}>
-          <Box
-            flexBasis={`${(Math.abs(bar.amount) * 100) / totalSum}%`}
-            minWidth="2px"
-            pl={i === 0 ? 0 : '1px'}
-          >
-            <Box bgcolor={bar.color} height="100%"/>
-          </Box>
-        </Tooltip>
-      ))}
-
-      {!showAll && hiddenSum > 0 && (
-        <Tooltip title={t('otherCategories')}>
-          <Box
-            flexBasis={`${(hiddenSum * 100) / totalSum}%`}
-            minWidth="2px"
-            pl="1px"
-          >
-            <Box bgcolor={OTHER_CATEGORIES_COLOR} height="100%"/>
-          </Box>
-        </Tooltip>
-      )}
-    </Box>
-  )
-}

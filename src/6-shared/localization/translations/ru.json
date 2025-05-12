@@ -141,6 +141,7 @@
     "archivedAccounts_few": "+{{count}} архивных счёта",
     "archivedAccounts_many": "+{{count}} архивных счетов",
     "archivedAccounts_other": "+{{count}} архивных счетов",
+    "archived": "Архивные",
     "hideArchived": "Скрыть архивные",
     "showArchived": "Показать архивные"
   },
@@ -150,12 +151,17 @@
     "period_all": "за всё время",
     "period_year": "за год",
     "period_3years": "за три года",
+    "period_from": "за период с {{date}}",
 
     "incomesAndOutcomes": "Доходы и расходы",
     "income": "Доход",
     "outcome": "Расход",
     "netIncome": "Чистый доход",
     "netOutcome": "Чистый расход",
+    "savingsRate": "Процент сбережений",
+    "savingsRatePositive": "{{percent}} от дохода удалось накопить",
+    "savingsRateNegative": "{{percent}} от дохода потрачено сверх нормы",
+    "details": "детали",
 
     "netWorth": {
       "title": "Рост капитала",
@@ -164,7 +170,14 @@
       "accountDebts": "Кредиты",
       "fundsInBudget": "Деньги в балансе",
       "fundsSaving": "Деньги за балансом",
-      "total": "Всего"
+      "total": "Всего",
+      "surviveMonths_one": "{{count}} месяц",
+      "surviveMonths_few": "{{count}} месяца",
+      "surviveMonths_many": "{{count}} месяцев",
+      "surviveMonths_other": "{{count}} месяцев",
+      "surviveTagline": "вы можете прожить, не зарабатывая ни копейки.",
+      "tooltipCurrentBalance": "Текущий общий баланс",
+      "tooltipAvgExpenses": "Среднемесячные расходы"
     }
   },
 
@@ -517,6 +530,18 @@
 
     "outcomeCard": {
       "purchaseOfTheYear": "Покупка года #{{number}}"
+    },
+
+    "savingsCard": {
+      "youSaved": "Вы накопили",
+      "savingsPercent": "Это {{percent}}% от вашего дохода.",
+      "greatJob": "Отличная работа!",
+      "goodJob": "Неплохо!",
+      "savingsMonths": "При текущих тратах этих накоплений вам хватит на {{months}} месяцев жизни без дохода",
+      "savingsMonths_one": "При текущих тратах этих накоплений вам хватит на {{months}} месяц жизни без дохода",
+      "savingsMonths_few": "При текущих тратах этих накоплений вам хватит на {{months}} месяца жизни без дохода",
+      "savingsMonths_many": "При текущих тратах этих накоплений вам хватит на {{months}} месяцев жизни без дохода",
+      "savingsMonths_other": "При текущих тратах этих накоплений вам хватит на {{months}} месяцев жизни без дохода"
     },
 
     "noCategory": {
