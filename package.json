@@ -1,6 +1,6 @@
 {
   "name": "zerro",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -112,6 +112,7 @@
     "eslint": "^9.22.0",
     "eslint-config-react-app": "^7.0.1",
     "postcss": "^8.5.3",
+    "prettier": "^3.5.3",
     "sass": "^1.85.1",
     "stylelint": "^16.15.0",
     "stylelint-config-rational-order": "^0.1.2",

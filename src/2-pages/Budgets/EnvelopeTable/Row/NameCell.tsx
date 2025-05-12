@@ -22,7 +22,7 @@ export const NameCell: FC<{
   isDefaultVisible: boolean
   onClick?: () => void
 }> = memo(props => {
-  const { id, symbol, color, name, currency, comment, originalName } =
+  const { id, symbol, colorHex, name, currency, comment, originalName } =
     props.envelope
   const { isReordering, isDefaultVisible, isChild, isSelf, onClick } = props
   const [displCurrency] = displayCurrency.useDisplayCurrency()
@@ -71,7 +71,7 @@ export const NameCell: FC<{
       >
         <EmojiIcon
           symbol={isSelf ? '–' : symbol}
-          color={isSelf ? null : color}
+          color={isSelf ? null : colorHex}
           mr={1.5}
         />
         <Typography

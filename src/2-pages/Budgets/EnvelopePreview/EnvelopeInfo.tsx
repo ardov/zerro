@@ -55,8 +55,8 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
     currentMonth === month
       ? t('availableTitleNow')
       : month > currentMonth
-      ? t('availableTitleFuture', { context: getMonthNum(month).toString() })
-      : t('availableTitlePast', { context: getMonthNum(month).toString() })
+        ? t('availableTitleFuture', { context: getMonthNum(month).toString() })
+        : t('availableTitlePast', { context: getMonthNum(month).toString() })
 
   return (
     <Box
@@ -76,8 +76,8 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
             totalAvailable < 0
               ? 'error.main'
               : totalAvailable > 0
-              ? 'success.main'
-              : undefined
+                ? 'success.main'
+                : undefined
           }
         />
         <Divider light />

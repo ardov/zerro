@@ -4,7 +4,7 @@ import {
   InputLabel,
   MenuList,
   Select,
-  SelectProps
+  SelectProps,
 } from '@mui/material'
 import { popoverStack } from '6-shared/historyPopovers'
 
@@ -17,7 +17,9 @@ export function SmartSelect<T>(props: TSmartSelectProps<T>) {
   const [open, onOpen, onClose] = popoverStack.usePopoverState(elKey)
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
-  const labelId = props.label ? `${props.id || 'smart-select'}-label` : undefined
+  const labelId = props.label
+    ? `${props.id || 'smart-select'}-label`
+    : undefined
 
   return (
     <FormControl>

@@ -97,14 +97,14 @@ const Header: FC<{
   envelope: TEnvelope
   onClose: () => void
 }> = ({ envelope, onClose }) => {
-  const { symbol, color, name } = envelope
+  const { symbol, colorHex: color, name } = envelope
   const { t } = useTranslation('common')
   const openEditDialog = useEditDialog()
   const dispatch = useAppDispatch()
   const handleColorChange = useCallback(
     (hex?: string | null) => {
       sendEvent('Tag: set color: ' + hex)
-      dispatch(envelopeModel.patchEnvelope({ id: envelope.id, color: hex }))
+      dispatch(envelopeModel.patchEnvelope({ id: envelope.id, colorHex: hex }))
     },
     [dispatch, envelope.id]
   )

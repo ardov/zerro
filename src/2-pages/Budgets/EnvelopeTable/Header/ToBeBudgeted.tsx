@@ -101,8 +101,8 @@ function useTotalsModel() {
     freeWithoutFuture < 0
       ? 0
       : budgetedInFuture >= freeWithoutFuture
-      ? freeWithoutFuture
-      : budgetedInFuture
+        ? freeWithoutFuture
+        : budgetedInFuture
 
   const msgType: TMsgType =
     toBeBudgeted < 0 ? 'error' : !!overspend ? 'warning' : 'success'

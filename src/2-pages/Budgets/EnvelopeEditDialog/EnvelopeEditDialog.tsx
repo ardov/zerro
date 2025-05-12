@@ -65,7 +65,7 @@ export const EnvelopeEditDialog: FC = () => {
       visibility: envelope?.visibility || envelopeVisibility.auto,
       carryNegatives: envelope?.carryNegatives || false,
       keepIncome: envelope?.keepIncome || false,
-      color: envelope?.color || null,
+      color: envelope?.colorHex || null,
       group: envelope?.group || '',
       comment: envelope?.comment || '',
       currency: envelope?.currency || defaultCurrency,

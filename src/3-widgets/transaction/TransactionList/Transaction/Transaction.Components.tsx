@@ -340,8 +340,8 @@ const AmountsWrapper = styled.div<{
     p.type === 'income'
       ? p.theme.palette.success.main
       : p.type === 'transfer'
-      ? p.theme.palette.text.secondary
-      : p.theme.palette.text.primary};
+        ? p.theme.palette.text.secondary
+        : p.theme.palette.text.primary};
 
   [color='textSecondary'] &[type='transfer'] {
     max-width: 100%;

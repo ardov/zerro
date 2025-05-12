@@ -11,7 +11,7 @@ export type TPoint = {
   balance: number
 }
 
-export function useAccountHistory(id: TAccountId, period: Period) : TPoint[] {
+export function useAccountHistory(id: TAccountId, period: Period): TPoint[] {
   let { fxCode } = accountModel.usePopulatedAccounts()[id]
 
   let allBalances = useAppSelector(accBalanceModel.getBalancesByDate)

@@ -20,8 +20,8 @@ export function NewGroup(props: { visible: boolean }) {
       ? t('okDropIt')
       : t('categoryNeeded')
     : clicked
-    ? t('dropCategoryHere')
-    : t('newGroup')
+      ? t('dropCategoryHere')
+      : t('newGroup')
   return (
     <Collapse in={visible} unmountOnExit>
       <Box ref={setNodeRef} py={1} px={2}>

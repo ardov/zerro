@@ -1,7 +1,7 @@
 import * as materialColors from '@mui/material/colors'
-import { mainColors } from "../../ui/theme/createTheme";
+import { mainColors } from '../../ui/theme/createTheme'
 
-type Shade = keyof typeof materialColors['red']
+type Shade = keyof (typeof materialColors)['red']
 type ColorGroups = Exclude<keyof typeof materialColors, 'common'>
 const allColors: ColorGroups[] = [
   'red',

@@ -24,8 +24,10 @@ export function useDebouncedCallback<Fn extends (...args: any[]) => any>(
 ): DebouncedFunction<Fn> {
   const timeout = useRef<ReturnType<typeof setTimeout>>()
   const waitTimeout = useRef<ReturnType<typeof setTimeout>>()
-  const lastCall =
-    useRef<{ args: Parameters<Fn>; this: ThisParameterType<Fn> }>()
+  const lastCall = useRef<{
+    args: Parameters<Fn>
+    this: ThisParameterType<Fn>
+  }>()
 
   const clear = () => {
     if (timeout.current) {

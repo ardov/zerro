@@ -8,7 +8,7 @@ import { accountModel } from '5-entities/account'
 export const getCurrentFunds: TSelector<TFxAmount> = createSelector(
   [accountModel.getInBudgetAccounts],
   accounts => {
-    const balances = accounts.map(a => ({ [a.fxCode]: a.balance } as TFxAmount))
+    const balances = accounts.map(a => ({ [a.fxCode]: a.balance }) as TFxAmount)
     return addFxAmount(...balances)
   }
 )

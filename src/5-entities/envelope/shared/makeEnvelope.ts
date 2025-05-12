@@ -20,8 +20,9 @@ export type TEnvelope = {
   name: string // derived
   originalName: string // ZM entity title
   symbol: string // From ZM entity
-  color: string | null // for tags only
+  colorHex: string | null // for tags only
   colorGenerated: string // generated based on title
+  colorDisplay: string // color to display
   children: TEnvelopeId[] // ids of children envelopes
   parent: TEnvelopeId | null // parent from tag or custom storage
 
@@ -56,8 +57,9 @@ type TFuncs = {
   name: TMaker<TEnvelope['name']>
   originalName: TMaker<TEnvelope['originalName']>
   symbol: TMaker<TEnvelope['symbol']>
-  color: TMaker<TEnvelope['color']>
+  colorHex: TMaker<TEnvelope['colorHex']>
   colorGenerated: TMaker<TEnvelope['colorGenerated']>
+  colorDisplay: TMaker<TEnvelope['colorDisplay']>
   parent: TMaker<TEnvelope['parent']>
   children: TMaker<TEnvelope['children']>
   index: TMaker<TEnvelope['index']>
@@ -104,13 +106,18 @@ const funcs: TFuncs = {
     account: () => '🏦',
     debtor: () => '👤',
   },
-  color: {
-    tag: tag => (tag.id === 'null' ? '#ff0000' : tag.colorHEX),
+  colorHex: {
+    tag: el => (el.id === 'null' ? '#ff0000' : el.colorHEX),
     account: () => null,
     debtor: () => null,
   },
   colorGenerated: {
     tag: el => getColorForString(el.title),
+    account: el => getColorForString(el.title),
+    debtor: el => getColorForString(el.name),
+  },
+  colorDisplay: {
+    tag: el => (el.id === 'null' ? '#ff0000' : el.colorDisplay),
     account: el => getColorForString(el.title),
     debtor: el => getColorForString(el.name),
   },
@@ -181,8 +188,9 @@ function makeEnvelopeFromTag(
     name: funcs.name.tag(el, userCurrency, meta),
     originalName: funcs.originalName.tag(el, userCurrency, meta),
     symbol: funcs.symbol.tag(el, userCurrency, meta),
-    color: funcs.color.tag(el, userCurrency, meta),
+    colorHex: funcs.colorHex.tag(el, userCurrency, meta),
     colorGenerated: funcs.colorGenerated.tag(el, userCurrency, meta),
+    colorDisplay: funcs.colorDisplay.tag(el, userCurrency, meta),
     visibility: funcs.visibility.tag(el, userCurrency, meta),
     parent: funcs.parent.tag(el, userCurrency, meta),
     children: funcs.children.tag(el, userCurrency, meta),
@@ -209,8 +217,9 @@ function makeEnvelopeFromAccount(
     name: funcs.name.account(el, userCurrency, meta),
     originalName: funcs.originalName.account(el, userCurrency, meta),
     symbol: funcs.symbol.account(el, userCurrency, meta),
-    color: funcs.color.account(el, userCurrency, meta),
+    colorHex: funcs.colorHex.account(el, userCurrency, meta),
     colorGenerated: funcs.colorGenerated.account(el, userCurrency, meta),
+    colorDisplay: funcs.colorDisplay.account(el, userCurrency, meta),
     visibility: funcs.visibility.account(el, userCurrency, meta),
     parent: funcs.parent.account(el, userCurrency, meta),
     children: funcs.children.account(el, userCurrency, meta),
@@ -237,8 +246,9 @@ function makeEnvelopeFromDebtor(
     name: funcs.name.debtor(el, userCurrency, meta),
     originalName: funcs.originalName.debtor(el, userCurrency, meta),
     symbol: funcs.symbol.debtor(el, userCurrency, meta),
-    color: funcs.color.debtor(el, userCurrency, meta),
+    colorHex: funcs.colorHex.debtor(el, userCurrency, meta),
     colorGenerated: funcs.colorGenerated.debtor(el, userCurrency, meta),
+    colorDisplay: funcs.colorDisplay.debtor(el, userCurrency, meta),
     visibility: funcs.visibility.debtor(el, userCurrency, meta),
     parent: funcs.parent.debtor(el, userCurrency, meta),
     children: funcs.children.debtor(el, userCurrency, meta),

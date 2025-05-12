@@ -93,7 +93,7 @@ function StatWidget(props: {
     const color =
       node.id === 'transferFees'
         ? '#808080'
-        : envelopes[node.id]?.colorGenerated || '#ff0000'
+        : envelopes[node.id]?.colorDisplay || '#ff0000'
     const name =
       node.id === 'transferFees'
         ? t('fxDifference')

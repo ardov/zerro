@@ -71,6 +71,7 @@ function getChanges(draft: TEnvelopeDraft, envelopes: ById<TEnvelope>) {
       case 'name':
       case 'symbol':
       case 'colorGenerated':
+      case 'colorDisplay':
       case 'children':
       case 'index':
         // Read-only props
@@ -87,10 +88,10 @@ function getChanges(draft: TEnvelopeDraft, envelopes: ById<TEnvelope>) {
         }
         break
 
-      case 'color':
+      case 'colorHex':
         if (type === EnvType.Tag) {
           patches[type] ??= { id }
-          patches[type]!.color = getTagColor(draft.color)
+          patches[type]!.color = getTagColor(draft.colorHex)
         }
         break
 

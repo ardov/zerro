@@ -104,8 +104,8 @@ const types = {
 }
 
 const csvEscapeString = (term: string): string => {
-  if (term.match && term.match(/,|"/))  {
-    return `"${term.replace(/"/g,'""')}"`
+  if (term.match && term.match(/,|"/)) {
+    return `"${term.replace(/"/g, '""')}"`
   } else {
     return term
   }
@@ -115,23 +115,24 @@ const csvEscapeRow = (row: RowObj): RowObj => {
   return Object.fromEntries(
     Object.entries(row).map(([key, value]) => [
       key,
-      typeof value === 'string' ? csvEscapeString(value) : value
+      typeof value === 'string' ? csvEscapeString(value) : value,
     ])
   ) as RowObj
 }
 
-const transactionToRowObj = (t: PopulatedTransaction): RowObj => csvEscapeRow({
-  Дата: t.date,
-  Создана: formatDate(t.created, 'yyyy-MM-dd HH:mm'),
-  Тип: types[t.type as TrType],
-  Категория: t.tag ? t.tag[0].title: '',
-  'Доп категории': '',
-  'Со счёта': t.outcomeAccount ? t.outcomeAccount.title : '',
-  Расход: !!t.outcome ? t.outcome : '',
-  'Валюта -': t.outcomeInstrument ? t.outcomeInstrument.shortTitle : '',
-  'На счёт': t.incomeAccount ? t.incomeAccount.title : '',
-  Доход: !!t.income ? t.income : '',
-  'Валюта +': t.incomeInstrument ? t.incomeInstrument.shortTitle : '',
-  Плательщик: t.payee || '',
-  Комментарий: t.comment || '',
-})
+const transactionToRowObj = (t: PopulatedTransaction): RowObj =>
+  csvEscapeRow({
+    Дата: t.date,
+    Создана: formatDate(t.created, 'yyyy-MM-dd HH:mm'),
+    Тип: types[t.type as TrType],
+    Категория: t.tag ? t.tag[0].title : '',
+    'Доп категории': '',
+    'Со счёта': t.outcomeAccount ? t.outcomeAccount.title : '',
+    Расход: !!t.outcome ? t.outcome : '',
+    'Валюта -': t.outcomeInstrument ? t.outcomeInstrument.shortTitle : '',
+    'На счёт': t.incomeAccount ? t.incomeAccount.title : '',
+    Доход: !!t.income ? t.income : '',
+    'Валюта +': t.incomeInstrument ? t.incomeInstrument.shortTitle : '',
+    Плательщик: t.payee || '',
+    Комментарий: t.comment || '',
+  })

@@ -13,8 +13,8 @@ import { PayeeByFrequencyCard } from './cards/PayeeByFrequencyCard'
 import { IncomeCard } from './cards/IncomeCard'
 import { Card } from './shared/Card'
 import { NotFunCard } from './cards/NotFunCard'
-import { OutcomeStatCard } from "./cards/OutcomeStatCard";
-import { SavingsCard } from "./cards/SavingsCard";
+import { OutcomeStatCard } from './cards/OutcomeStatCard'
+import { SavingsCard } from './cards/SavingsCard'
 
 // New report unlocks in december
 const currMonth = new Date().getMonth()
@@ -38,7 +38,10 @@ export default function Review() {
         <SavingsCard year={year} onShowTransactions={showTransactions} />
         <NotFunCard year={year} onShowTransactions={showTransactions} />
         <PayeeByOutcomeCard year={year} onShowTransactions={showTransactions} />
-        <PayeeByFrequencyCard year={year} onShowTransactions={showTransactions}/>
+        <PayeeByFrequencyCard
+          year={year}
+          onShowTransactions={showTransactions}
+        />
         <OutcomeCard year={year} onShowTransactions={showTransactions} />
         <OutcomeStatCard year={year} onShowTransactions={showTransactions} />
         <QRCard year={year} onShowTransactions={showTransactions} />

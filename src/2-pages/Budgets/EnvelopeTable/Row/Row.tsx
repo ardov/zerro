@@ -69,8 +69,8 @@ export const Row: FC<EnvelopeRowProps> = props => {
     isSelf || isChild || toDisplay(envData.selfAvailable) >= 0
       ? 0
       : toDisplay(envData.totalAvailable) >= 0
-      ? toDisplay(envData.selfAvailable)
-      : 0
+        ? toDisplay(envData.selfAvailable)
+        : 0
 
   const handleNameClick = useCallback(() => openDetails(id), [id, openDetails])
   const handleGoalClick: React.MouseEventHandler<HTMLButtonElement> =
