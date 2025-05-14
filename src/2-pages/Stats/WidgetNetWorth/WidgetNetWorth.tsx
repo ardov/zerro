@@ -43,13 +43,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
   const { period, onTogglePeriod } = props
   const { t } = useTranslation('analytics')
   const theme = useAppTheme()
-
   const balances = useNetWorth(period, GroupBy.Month)
-  const lastMonth = balances[balances.length - 1]
-  const currentBalance = lastMonth.fundsInBudget + lastMonth.fundsSaving
-
-  const averageExpenses = useAverageExpenses()
-  const fundedMonths = Math.ceil(currentBalance / averageExpenses)
 
   const [visibleParts, setVisibleParts] = useState<Array<TDataKey>>([
     'debts',
@@ -236,7 +230,7 @@ function SurviveFact() {
 
   const averageExpenses = useAverageExpenses()
   if (averageExpenses === 0) return null
-  const fundedMonths = Math.ceil(currentBalance / averageExpenses)
+  const fundedMonths = Math.floor(currentBalance / averageExpenses)
 
   const tooltipContent = (
     <Box p={1}>
