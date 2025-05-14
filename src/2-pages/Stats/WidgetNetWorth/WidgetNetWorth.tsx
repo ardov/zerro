@@ -239,13 +239,16 @@ function SurviveFact() {
   const fundedMonths = Math.ceil(currentBalance / averageExpenses)
 
   const tooltipContent = (
-    <>
-      {t('netWorth.tooltipCurrentBalance')}:{' '}
-      <DisplayAmount value={currentBalance} />
-      <br />
-      {t('netWorth.tooltipAvgExpenses')}:{' '}
-      <DisplayAmount value={averageExpenses} />
-    </>
+    <Box p={1}>
+      <Typography variant="body2" gutterBottom>
+        {t('netWorth.tooltipCurrentBalance')}:{' '}
+        <DisplayAmount value={currentBalance} />
+      </Typography>
+      <Typography variant="body2">
+        {t('netWorth.tooltipAvgExpenses')}:{' '}
+        <DisplayAmount value={averageExpenses} />
+      </Typography>
+    </Box>
   )
 
   return (
