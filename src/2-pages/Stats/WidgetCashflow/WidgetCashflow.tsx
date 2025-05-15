@@ -207,11 +207,14 @@ function Summary(props: { income: number; outcome: number }) {
   const netIncome = income - outcome
 
   const tooltip = (
-    <>
-      {t('income')}: <DisplayAmount value={income} />
-      <br />
-      {t('outcome')}: <DisplayAmount value={outcome} />
-    </>
+    <Box p={1}>
+      <Typography variant="body2" gutterBottom>
+        {t('income')}: <DisplayAmount value={income} />
+      </Typography>
+      <Typography variant="body2">
+        {t('outcome')}: <DisplayAmount value={outcome} />
+      </Typography>
+    </Box>
   )
 
   return (

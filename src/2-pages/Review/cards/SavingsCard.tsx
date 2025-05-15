@@ -19,7 +19,7 @@ export function SavingsCard({ year }: TCardProps) {
   if (income === 0) return null // no income, no savings
 
   let savings = income - outcome
-  if (savings < 0) savings = 0 // talk only about savings, not overspending
+  if (savings <= 0) return null // talk only about savings, not overspending
 
   const savingsPercent = Math.round((Math.abs(savings) / income) * 100)
   const monthlyOutcome = outcome / 12

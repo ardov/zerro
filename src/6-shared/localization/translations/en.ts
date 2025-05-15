@@ -181,7 +181,7 @@ export const en: typeof ru = {
       surviveMonths_few: '{{count}} months',
       surviveMonths_many: '{{count}} months',
       surviveMonths_other: '{{count}} months',
-      surviveTagline: 'you can survive without earning a dime.',
+      surviveTagline: 'you can survive without earning a dime',
       tooltipCurrentBalance: 'Current total balance',
       tooltipAvgExpenses: 'Average monthly expenses',
     },
