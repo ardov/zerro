@@ -231,6 +231,7 @@ function SurviveFact() {
   const averageExpenses = useAverageExpenses()
   if (averageExpenses === 0) return null
   const fundedMonths = Math.floor(currentBalance / averageExpenses)
+  if (fundedMonths <= 0) return null
 
   const tooltipContent = (
     <Box p={1}>
