@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "vite --port 3000",
+    "dev": "vite --port 3000",
     "build": "tsc && vite build",
     "preview": "vite preview --port 3000",
     "tsc": "tsc --watch",
@@ -35,8 +35,10 @@
   "browserslist": [
     "defaults"
   ],
-  "resolutions": {
-    "@types/react": "18.3.18"
+  "pnpm": {
+    "overrides": {
+      "@types/react": "18.3.18"
+    }
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -44,7 +46,6 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mdx-js/react": "^3.1.0",
-    "@mui/base": "^5.0.0-beta.70",
     "@mui/icons-material": "^7.0.2",
     "@mui/material": "^7.0.2",
     "@mui/system": "^7.0.2",
@@ -57,7 +58,7 @@
     "date-fns": "^2.30.0",
     "formik": "^2.4.6",
     "history": "^4.10.1",
-    "i18next": "^24.2.3",
+    "i18next": "^25.1.3",
     "idb": "^8.0.2",
     "json2mq": "^0.2.0",
     "lodash": "^4.17.21",
@@ -68,7 +69,7 @@
     "react-ga": "^3.3.1",
     "react-helmet": "^6.1.0",
     "react-hotkeys-hook": "^4.6.2",
-    "react-i18next": "^14.1.3",
+    "react-i18next": "^15.5.1",
     "react-redux": "^9.2.0",
     "react-router": "^5.3.4",
     "react-router-dom": "^5.3.4",
@@ -88,6 +89,7 @@
     "@emotion/eslint-plugin": "^11.12.0",
     "@mdx-js/rollup": "^3.1.0",
     "@types/convert-layout": "^0.5.3",
+    "@types/history": "^4.7.11",
     "@types/json2mq": "^0.2.2",
     "@types/lodash": "^4.17.16",
     "@types/mdx": "^2.0.13",
@@ -98,7 +100,7 @@
     "@types/react-helmet": "^6.1.11",
     "@types/react-router": "^5.1.20",
     "@types/react-router-dom": "^5.3.3",
-    "@types/react-virtualized-auto-sizer": "^1.0.8",
+    "@types/react-transition-group": "^4.4.12",
     "@types/react-window": "^1.8.8",
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^4.3.4",
@@ -115,7 +117,7 @@
     "stylelint-config-recommended": "^16.0.0",
     "stylelint-config-sass-guidelines": "^12.1.0",
     "stylelint-config-styled-components": "^0.1.1",
-    "stylelint-order": "^6.0.4",
+    "stylelint-order": "^7.0.0",
     "stylelint-processor-styled-components": "^1.10.0",
     "stylelint-scss": "^6.11.1",
     "typescript": "^5.8.3",
@@ -124,5 +126,5 @@
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.1.1"
   },
-  "packageManager": "yarn@4.6.0"
+  "packageManager": "pnpm@8.15.4"
 }

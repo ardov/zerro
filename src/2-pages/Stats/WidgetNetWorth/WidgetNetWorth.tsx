@@ -116,7 +116,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
   return (
     <Paper>
       <Box sx={{ p: 2, minWidth: '100%' }}>
-      {/* Header */}
+        {/* Header */}
         <Typography variant="h5">
           {t('netWorth.title')}{' '}
           <span
