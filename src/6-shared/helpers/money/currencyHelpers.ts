@@ -13,6 +13,10 @@ export function sub(first: number, ...params: number[]): number {
 
 // Helpers for currency objects
 
+export function createFxAmount(currency: TFxCode, value: number): TFxAmount {
+  return { [currency]: value }
+}
+
 export function addFxAmount(...amounts: TFxAmount[]): TFxAmount {
   return amounts.reduce((acc, curr) => {
     for (const fx in curr) {
