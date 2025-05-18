@@ -22,18 +22,17 @@ import {
   DeleteIcon,
 } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
-import { addFxAmount, round } from '6-shared/helpers/money'
+import { addFxAmount, round, createFxAmount } from '6-shared/helpers/money'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useAppDispatch } from 'store'
 import { applyClientPatch } from 'store/data'
 import { TagSelect2 } from '5-entities/tag/ui/TagSelect2'
 import { trModel } from '5-entities/transaction'
+import { instrumentModel } from '5-entities/currency/instrument'
+import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { BulkEditModal } from './BulkEditModal'
 import './transitions.css'
-import { instrumentModel } from "5-entities/currency/instrument";
-import { displayCurrency } from "5-entities/currency/displayCurrency";
-import { createFxAmount } from "6-shared/helpers/money/currencyHelpers";
 
 type ActionsProps = {
   visible: boolean
@@ -48,8 +47,6 @@ const Actions: FC<ActionsProps> = ({
   onUncheckAll,
   onCheckAll,
 }) => {
-  if (!visible) return null
-
   const { t } = useTranslation('transactionActions')
   const dispatch = useAppDispatch()
   const allTransactions = trModel.useTransactions()
@@ -293,8 +290,20 @@ function getAvailableActions(transactions: TTransaction[]) {
   const instCodeMap = instrumentModel.useInstCodeMap()
   const toDisplay = displayCurrency.useToDisplay('current')
 
-  const totalOutcome = toDisplay(addFxAmount(...outcomes.map((tr) => createFxAmount(instCodeMap[tr.outcomeInstrument], tr.outcome))))
-  const totalIncome = toDisplay(addFxAmount(...incomes.map((tr) => createFxAmount(instCodeMap[tr.incomeInstrument], tr.income))))
+  const totalOutcome = toDisplay(
+    addFxAmount(
+      ...outcomes.map(tr =>
+        createFxAmount(instCodeMap[tr.outcomeInstrument], tr.outcome)
+      )
+    )
+  )
+  const totalIncome = toDisplay(
+    addFxAmount(
+      ...incomes.map(tr =>
+        createFxAmount(instCodeMap[tr.incomeInstrument], tr.income)
+      )
+    )
+  )
   const sameInstruments = hasSameInOutInstruments()
   const sameAccounts = hasSameInOutAccounts()
 
@@ -306,7 +315,7 @@ function getAvailableActions(transactions: TTransaction[]) {
     combineToOutcome: canCombineToOutcome(),
     combineToIncome: canCombineToIncome(),
     collapseTransactionsEasy: canCollapseTransactionsEasy(),
-    canMergeAsTransfer: canMergeAsTransfer()
+    canMergeAsTransfer: canMergeAsTransfer(),
   }
 
   function hasSameInOutInstruments() {
@@ -323,14 +332,17 @@ function getAvailableActions(transactions: TTransaction[]) {
   }
 
   function canMergeAsTransfer(): boolean {
-    return (
+    // One outcome and one income from different accounts
+    const canBeTransfer =
       transfers.length === 0 &&
-      outcomes.length == 1 &&
-      incomes.length == 1 &&
-      !sameAccounts &&
-      (!sameInstruments && areApproximatelyEqual(totalIncome, totalOutcome, 0.15)
-        || sameInstruments && totalOutcome === totalIncome)
-    )
+      outcomes.length === 1 &&
+      incomes.length === 1 &&
+      !sameAccounts
+    if (!canBeTransfer) return false
+    // Strict equality for same instruments
+    if (sameInstruments) return totalOutcome === totalIncome
+    // Approximately equal for different instruments (15% tolerance)
+    return areApproximatelyEqual(totalIncome, totalOutcome, 0.15)
   }
   function canCollapseTransactionsEasy(): boolean {
     return (
@@ -362,10 +374,14 @@ function getAvailableActions(transactions: TTransaction[]) {
   }
 }
 
-function areApproximatelyEqual(a: number, b: number, tolerance: number = 0.1): boolean {
-  const difference = Math.abs(a - b);
-  const maxAllowedDifference = Math.max(Math.abs(a), Math.abs(b)) * tolerance;
-  return difference <= maxAllowedDifference;
+function areApproximatelyEqual(
+  a: number,
+  b: number,
+  tolerance: number = 0.1
+): boolean {
+  const difference = Math.abs(a - b)
+  const maxAllowedDifference = Math.max(Math.abs(a), Math.abs(b)) * tolerance
+  return difference <= maxAllowedDifference
 }
 
 function mergeAsTransfer(transactions: TTransaction[]) {
@@ -379,7 +395,7 @@ function mergeAsTransfer(transactions: TTransaction[]) {
   modified.push({
     ...outcome,
     deleted: true,
-    changed: Date.now()
+    changed: Date.now(),
   })
 
   modified.push({
@@ -392,7 +408,6 @@ function mergeAsTransfer(transactions: TTransaction[]) {
 
   return modified
 }
-
 
 function combineToOutcome(transactions: TTransaction[]) {
   const { incomes, outcomes } = groupByType(transactions)
