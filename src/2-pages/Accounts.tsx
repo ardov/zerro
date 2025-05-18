@@ -14,8 +14,7 @@ export default function Accounts() {
         <meta name="description" content={t('pageDescription')} />
         <link rel="canonical" href="https://zerro.app/accounts" />
       </Helmet>
-
-      <Box p={2} pb={8} mx="auto" maxWidth={320}>
+      <Box sx={{ p: 2, pb: 8, mx: 'auto', maxWidth: 320 }}>
         <AccountList />
         <DebtorList />
       </Box>

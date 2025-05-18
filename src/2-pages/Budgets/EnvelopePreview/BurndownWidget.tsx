@@ -27,8 +27,17 @@ export const BurndownWidget: FC<BurndownWidgetProps> = ({
   const { currency } = envData[month][id]
 
   return (
-    <Box borderRadius={1} bgcolor="background.default" {...boxProps}>
-      <Stack spacing={0.5} pt={2} px={2}>
+    <Box
+      {...boxProps}
+      sx={[
+        {
+          borderRadius: 1,
+          bgcolor: 'background.default',
+        },
+        ...(Array.isArray(boxProps.sx) ? boxProps.sx : [boxProps.sx]),
+      ]}
+    >
+      <Stack spacing={0.5} sx={{ pt: 2, px: 2 }}>
         <DataLine
           name={`${t('balanceFor')} ${formatDate(month, 'LLL')}`}
           // color={activityColor}
@@ -38,8 +47,7 @@ export const BurndownWidget: FC<BurndownWidgetProps> = ({
           tooltip={t('balanceChartTooltip')}
         />
       </Stack>
-
-      <Box width="100%" height="160px">
+      <Box sx={{ width: '100%', height: '160px' }}>
         <ChangesChart month={month} id={id} />
       </Box>
     </Box>

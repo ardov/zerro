@@ -142,7 +142,7 @@ const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
       }}
       onClick={onClick}
     >
-      <Box component="span" display="flex" width="100%">
+      <Box component="span" sx={{ display: 'flex', width: '100%' }}>
         <Typography
           component="span"
           noWrap
@@ -153,7 +153,7 @@ const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
 
         <Box
           component="span"
-          ml={2}
+          sx={{ ml: 2 }}
           color={isNegative ? 'error.main' : 'text.secondary'}
         >
           <b>
@@ -210,7 +210,7 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
       <Paper
         style={{ overflow: 'hidden', position: 'relative', marginBottom: 8 }}
       >
-        <Box p={2} minWidth={160}>
+        <Box sx={{ p: 2, minWidth: 160 }}>
           <Typography variant="body2">
             <span
               style={{ textDecoration: acc.archive ? 'line-through' : 'none' }}
@@ -223,7 +223,6 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
             <Amount value={balance} currency={acc.fxCode} decMode="ifAny" />
           </Typography>
         </Box>
-
         <div
           style={{
             width: '100%',

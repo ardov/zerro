@@ -166,20 +166,26 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   return (
     <>
       <Box
-        display={'flex'}
-        flexDirection={'column'}
-        px={1}
-        pt={1}
-        position={'relative'}
-        sx={sx}
+        sx={[
+          {
+            display: 'flex',
+            flexDirection: 'column',
+            px: 1,
+            pt: 1,
+            position: 'relative',
+          },
+          ...(Array.isArray(sx) ? sx : [sx]),
+        ]}
       >
         {!hideFilter && (
           <Box
-            position="relative"
-            zIndex={10}
-            maxWidth={560}
-            width="100%"
-            mx="auto"
+            sx={{
+              position: 'relative',
+              zIndex: 10,
+              maxWidth: 560,
+              width: '100%',
+              mx: 'auto',
+            }}
           >
             <Filter
               conditions={filter}
@@ -196,7 +202,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
           onCheckAll={checkAll}
         />
 
-        <Box flex="1 1 auto">
+        <Box sx={{ flex: '1 1 auto' }}>
           {groups.length ? (
             <GrouppedList {...{ groups, initialDate }} />
           ) : (
@@ -224,8 +230,8 @@ function useFilteredTransactions(
 const EmptyState = () => {
   const { t } = useTranslation('transactions')
   return (
-    <Box p={5}>
-      <Typography variant="body1" align="center" paragraph>
+    <Box sx={{ p: 5 }}>
+      <Typography variant="body1" align="center" sx={{ marginBottom: '16px' }}>
         {t('emptyState')}
       </Typography>
     </Box>

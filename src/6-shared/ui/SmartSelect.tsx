@@ -31,23 +31,24 @@ export function SmartSelect<T>(props: TSmartSelectProps<T>) {
         onOpen={onOpen}
         onClose={onClose}
       />
-
       {isMobile && (
         <SwipeableDrawer
           disablePortal
           anchor="bottom"
           onOpen={() => {}}
           disableSwipeToOpen
-          PaperProps={{
-            sx: {
-              maxHeight: 'calc(100vh - 48px)',
-              borderRadius: '8px 8px 0 0',
-            },
-          }}
           open={open}
           onClose={onClose}
           keepMounted={false}
           ModalProps={{ keepMounted: false }}
+          slotProps={{
+            paper: {
+              sx: {
+                maxHeight: 'calc(100vh - 48px)',
+                borderRadius: '8px 8px 0 0',
+              },
+            },
+          }}
         >
           <MenuList autoFocus>
             {React.Children.toArray(selectProps.children).map(child => {

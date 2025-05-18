@@ -101,8 +101,10 @@ export const EnvelopeEditDialog: FC = () => {
           component="form"
           onSubmit={handleSubmit}
           spacing={2}
-          maxWidth={360}
-          mt={1}
+          sx={{
+            maxWidth: 360,
+            mt: 1,
+          }}
         >
           <TextField
             label={t('nameLabel')}
@@ -110,18 +112,21 @@ export const EnvelopeEditDialog: FC = () => {
             helperText={errors.originalName}
             autoFocus
             name="originalName"
-            inputProps={{ autoComplete: 'off' }}
             value={values.originalName}
             onChange={handleChange}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <Color
-                    value={values.color}
-                    onChange={v => setFieldValue('color', v)}
-                  />
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Color
+                      value={values.color}
+                      onChange={v => setFieldValue('color', v)}
+                    />
+                  </InputAdornment>
+                ),
+              },
+
+              htmlInput: { autoComplete: 'off' },
             }}
           />
 

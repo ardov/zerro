@@ -42,10 +42,12 @@ export const Header: FC<HeaderProps> = props => {
   const ColumnTitle: FC<{ name: string }> = props => (
     <Typography
       variant="overline"
-      color="text.secondary"
       align="right"
       onClick={nextColumn}
       noWrap
+      sx={{
+        color: 'text.secondary',
+      }}
     >
       {props.name}
     </Typography>
@@ -93,7 +95,13 @@ export const Header: FC<HeaderProps> = props => {
                 onClick={openOnClick}
                 sx={{ ml: -1, px: 1, py: 0 }}
               >
-                <Typography variant="overline" color="text.secondary" noWrap>
+                <Typography
+                  variant="overline"
+                  noWrap
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
                   {t('categories', {
                     ns: 'budgets',
                     context: isAllShown ? 'all' : '',
@@ -109,7 +117,6 @@ export const Header: FC<HeaderProps> = props => {
           goal={null}
         />
       </Box>
-
       <TableMenu />
     </>
   )

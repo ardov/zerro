@@ -32,7 +32,13 @@ export default function Review() {
 
   return (
     <Box className="container">
-      <Stack spacing={2} p={3} pb={10}>
+      <Stack
+        spacing={2}
+        sx={{
+          p: 3,
+          pb: 10,
+        }}
+      >
         <CardTitle year={year} />
         <IncomeCard year={year} onShowTransactions={showTransactions} />
         <SavingsCard year={year} onShowTransactions={showTransactions} />
@@ -61,12 +67,18 @@ function CardTitle({ year }: { year: number }) {
       <Typography
         variant="body1"
         align="center"
-        color="textSecondary"
         className="results"
+        sx={{
+          color: 'text.secondary',
+        }}
       >
         {t('yearReview')}
       </Typography>
-      <Box position="relative">
+      <Box
+        sx={{
+          position: 'relative',
+        }}
+      >
         <Typography variant="h1" align="center" className="year">
           <b>{year}</b>
         </Typography>

@@ -14,7 +14,13 @@ export default function Stats() {
   )
 
   return (
-    <Stack spacing={2} p={3} pb={10}>
+    <Stack
+      spacing={2}
+      sx={{
+        p: 3,
+        pb: 10,
+      }}
+    >
       <WidgetNetWorth period={period} onTogglePeriod={togglePeriod} />
       <WidgetCashflow period={period} onTogglePeriod={togglePeriod} />
       <WidgetAccHistory period={period} />

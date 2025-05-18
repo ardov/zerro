@@ -61,7 +61,7 @@ export const ColorPicker: FC = () => {
 
   return (
     <Popover {...popover.displayProps}>
-      <Stack spacing={2} p={2}>
+      <Stack spacing={2} sx={{ p: 2 }}>
         <Box sx={gridSx}>
           {zmColors.map(color => (
             <ColorCheck
@@ -89,16 +89,18 @@ export const ColorPicker: FC = () => {
           value={custom}
           onChange={e => setCustom(e.target.value)}
           placeholder="#000000"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <ColorCheck
-                  hex={isHEX(custom) ? custom : value}
-                  checked={isSameColor(value, custom)}
-                  onChange={() => handleColorClick(custom)}
-                />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <ColorCheck
+                    hex={isHEX(custom) ? custom : value}
+                    checked={isSameColor(value, custom)}
+                    onChange={() => handleColorClick(custom)}
+                  />
+                </InputAdornment>
+              ),
+            },
           }}
         />
         <Button fullWidth onClick={() => handleColorClick(null)}>

@@ -74,9 +74,11 @@ export const TagSelect: FC<TagSelectProps> = props => {
         <TextField
           {...params}
           label={label}
-          inputProps={{
-            ...params.inputProps,
-            autoComplete: 'new-password', // disable autocomplete and autofill
+          slotProps={{
+            htmlInput: {
+              ...params.inputProps,
+              autoComplete: 'new-password', // disable autocomplete and autofill
+            },
           }}
         />
       )}

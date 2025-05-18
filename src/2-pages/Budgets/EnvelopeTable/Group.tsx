@@ -97,7 +97,14 @@ export const Group: FC<TGroupProps> = ({
   )
 
   const Sum: FC<{ value: number }> = ({ value }) => (
-    <Typography alignSelf={'baseline'} color="text.hint" align="right" noWrap>
+    <Typography
+      align="right"
+      noWrap
+      sx={{
+        alignSelf: 'baseline',
+        color: 'text.disabled',
+      }}
+    >
       <Amount value={value} decMode="ifOnly" />
     </Typography>
   )

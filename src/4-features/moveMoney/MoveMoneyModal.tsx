@@ -59,16 +59,18 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
 
   return (
     <Dialog open={open} onClose={onClose}>
-      <Box display="flex" flexDirection="column" p={2}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', p: 2 }}>
         <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          gap={1}
-          mb={2}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1,
+            mb: 2,
+          }}
         >
           <Chip label={sourceName} />
-          <Box mx={1} display="flex" alignItems="center">
+          <Box sx={{ mx: 1, display: 'flex', alignItems: 'center' }}>
             <ArrowForwardIcon />
           </Box>
           <Chip label={destinationName} />

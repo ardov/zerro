@@ -29,12 +29,8 @@ export const ExampleBox: FC<ExampleBoxProps> = ({
       }}
       {...rest}
     >
-      {symbol && (
-        <Box mr={1} minWidth="24px">
-          {symbol}
-        </Box>
-      )}
-      <Box flexGrow={1}>{children}</Box>
+      {symbol && <Box sx={{ mr: 1, minWidth: '24px' }}>{symbol}</Box>}
+      <Box sx={{ flexGrow: 1 }}>{children}</Box>
     </Box>
   )
 }
@@ -45,12 +41,7 @@ export const DetailsBox: FC<DetailsBoxProps> = props => {
   const [isOpen, toggle] = useToggle(false)
   return (
     <Box
-      sx={{
-        bgcolor: 'background.default',
-        my: 2,
-        p: 3,
-        borderRadius: 1,
-      }}
+      sx={{ bgcolor: 'background.default', my: 2, p: 3, borderRadius: 1 }}
       {...rest}
     >
       <ButtonBase
@@ -78,9 +69,8 @@ export const DetailsBox: FC<DetailsBoxProps> = props => {
         />
         <strong>{title}</strong>
       </ButtonBase>
-
       {isOpen && (
-        <Box component="aside" className="slide-down" mt={2} pl={4}>
+        <Box component="aside" className="slide-down" sx={{ mt: 2, pl: 4 }}>
           {children}
         </Box>
       )}
@@ -90,7 +80,14 @@ export const DetailsBox: FC<DetailsBoxProps> = props => {
 
 export const Muted: FC<BoxProps> = ({ children, ...rest }) => {
   return (
-    <Box color="text.secondary" component="span" {...rest}>
+    <Box
+      component="span"
+      {...rest}
+      sx={[
+        { color: 'text.secondary' },
+        ...(Array.isArray(rest.sx) ? rest.sx : [rest.sx]),
+      ]}
+    >
       {children}
     </Box>
   )

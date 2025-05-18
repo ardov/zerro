@@ -29,15 +29,17 @@ export const AdaptivePopover = (
         anchor={placement}
         onOpen={() => {}}
         disableSwipeToOpen
-        PaperProps={{
-          sx: {
-            maxHeight: 'calc(100vh - 48px)',
-            borderRadius: br[placement],
-          },
-        }}
         {...rest}
         onClose={e => {
           if (rest.onClose) rest.onClose({}, 'backdropClick')
+        }}
+        slotProps={{
+          paper: {
+            sx: {
+              maxHeight: 'calc(100vh - 48px)',
+              borderRadius: br[placement],
+            },
+          },
         }}
       />
     )

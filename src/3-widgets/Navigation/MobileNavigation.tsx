@@ -45,8 +45,7 @@ export const MobileNavigation: FC = () => {
         zIndex: 5,
       }}
     >
-      <Divider light />
-
+      <Divider sx={{ opacity: '0.6' }} />
       <BottomNavigation
         value={currentRoute?.path}
         onChange={(e, newValue) => {
@@ -71,7 +70,6 @@ export const MobileNavigation: FC = () => {
         />
         <RefreshButton isMobile={true} sx={actionSx} />
       </BottomNavigation>
-
       <SettingsMenu showLinks />
     </Paper>
   )

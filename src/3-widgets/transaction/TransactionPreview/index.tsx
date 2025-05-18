@@ -41,12 +41,14 @@ export const TrEmptyState = () => {
   const { t } = useTranslation('transaction')
   return (
     <Box
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      minHeight="100vh"
-      color="text.hint"
-      p={3}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        color: 'text.disabled',
+        p: 3,
+      }}
     >
       <Typography variant="body2" align="center" color="inherit">
         {t('fullEmptyState')}
@@ -173,7 +175,12 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
   }
 
   return (
-    <Box minWidth={320} position="relative">
+    <Box
+      sx={{
+        minWidth: 320,
+        position: 'relative',
+      }}
+    >
       <Head
         title={titles[trType]}
         onClose={onClose}
@@ -182,7 +189,6 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
         onRestore={onRestore}
         deleted={deleted}
       />
-
       {(trType === 'income' || trType === 'outcome') && (
         <TagList
           tags={localTag}
@@ -193,8 +199,12 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
           bgcolor="background.default"
         />
       )}
-
-      <Stack spacing={4} p={3}>
+      <Stack
+        spacing={4}
+        sx={{
+          p: 3,
+        }}
+      >
         {trType !== 'income' && (
           <AmountInput
             label={t('otcomeFrom', { account: outcomeAccount.title })}
@@ -233,13 +243,15 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
             onChange={e => setLocalTime(e.target.value)}
             type="time"
             size="small"
-            inputProps={{
-              sx: {
-                appearance: 'none',
-                '::-webkit-calendar-picker-indicator': { display: 'none' },
+            sx={{ minWidth: 104 }}
+            slotProps={{
+              htmlInput: {
+                sx: {
+                  appearance: 'none',
+                  '::-webkit-calendar-picker-indicator': { display: 'none' },
+                },
               },
             }}
-            sx={{ minWidth: 104 }}
           />
         </Stack>
         <TextField
@@ -288,7 +300,6 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
           </Button>
         )}
       </Stack>
-
       <SaveButton visible={hasChanges} onSave={onSave} />
     </Box>
   )
@@ -306,8 +317,19 @@ const Head: FC<{
     props
   const { t } = useTranslation('transaction')
   return (
-    <Box py={1} px={3} display="flex" alignItems="center">
-      <Box flexGrow={1}>
+    <Box
+      sx={{
+        py: 1,
+        px: 3,
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
+      <Box
+        sx={{
+          flexGrow: 1,
+        }}
+      >
         {deleted && (
           <Typography variant="caption" color="error" noWrap>
             {t('transactionDeleted')}
@@ -317,7 +339,6 @@ const Head: FC<{
           {title}
         </Typography>
       </Box>
-
       {deleted ? (
         <Tooltip title={t('btnRestore')}>
           <IconButton onClick={onRestore} children={<RestoreFromTrashIcon />} />
@@ -330,7 +351,6 @@ const Head: FC<{
           />
         </Tooltip>
       )}
-
       <Tooltip title={t('btnClose')}>
         <IconButton edge="end" onClick={onClose} children={<CloseIcon />} />
       </Tooltip>
@@ -343,13 +363,15 @@ const SaveButton: FC<{ visible: boolean; onSave: () => void }> = props => {
   const { t } = useTranslation('transaction')
   return (
     <Box
-      mt={4}
-      zIndex={200}
-      position="sticky"
-      bottom={16}
-      left="50%"
-      display="inline-block"
       style={{ transform: 'translateX(-50%)' }}
+      sx={{
+        mt: 4,
+        zIndex: 200,
+        position: 'sticky',
+        bottom: 16,
+        left: '50%',
+        display: 'inline-block',
+      }}
     >
       <Zoom in={visible}>
         <Fab variant="extended" color="primary" onClick={onSave}>

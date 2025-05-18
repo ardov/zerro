@@ -28,7 +28,7 @@ export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
         value={formatDate(parsed.t, 'dd.MM.yyyy, HH:mm')}
       />
 
-      <Box mt="auto">
+      <Box sx={{ mt: 'auto' }}>
         <Collapse in={!showMore} unmountOnExit>
           <Link
             component="button"
@@ -55,11 +55,19 @@ export const Reciept: FC<RecieptProps> = ({ value, sx }) => {
 
   return (
     <Paper sx={{ p: 2, display: 'flex', ...sx }}>
-      <Box display="flex" flexDirection="column">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         {parsedContent}
       </Box>
-
-      <Box ml="auto">
+      <Box
+        sx={{
+          ml: 'auto',
+        }}
+      >
         <QRCode
           value={value}
           bgColor={theme.palette.background.paper}
@@ -77,11 +85,26 @@ interface LineProps {
 }
 
 const Line: FC<LineProps> = ({ name, value }) => (
-  <Box mb={1}>
-    <Typography variant="caption" color="textSecondary" display="block">
+  <Box
+    sx={{
+      mb: 1,
+    }}
+  >
+    <Typography
+      variant="caption"
+      sx={{
+        color: 'text.secondary',
+        display: 'block',
+      }}
+    >
       {name}
     </Typography>
-    <Typography variant="body1" display="block">
+    <Typography
+      variant="body1"
+      sx={{
+        display: 'block',
+      }}
+    >
       {value}
     </Typography>
   </Box>

@@ -29,13 +29,13 @@ export function Total({
       <Typography
         align={align}
         variant="body2"
-        color="textSecondary"
+        color="text.secondary"
         children={title}
       />
       <Typography
         align={align}
         variant="h5"
-        color={amountColor || (value ? 'textPrimary' : 'textSecondary')}
+        color={amountColor || (value ? 'text.primary' : 'text.secondary')}
       >
         <Amount
           value={value}

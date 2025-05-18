@@ -518,7 +518,8 @@ export const en: typeof ru = {
     mergeTransactions: 'Merge Transactions',
     mergeTransactionsComment: 'They will simply be deleted 😉',
     mergeAsTransfer: 'Combine into Transfer',
-    mergeAsTransferComment: 'Two transactions will become a transfer between accounts',
+    mergeAsTransferComment:
+      'Two transactions will become a transfer between accounts',
     selectAll: 'Select All',
   },
 

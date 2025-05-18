@@ -58,7 +58,12 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
 
   return (
     <Paper>
-      <Box p={2} minWidth="100%">
+      <Box
+        sx={{
+          p: 2,
+          minWidth: '100%',
+        }}
+      >
         <Typography variant="h5">
           {t('incomesAndOutcomes')}{' '}
           <span
@@ -79,8 +84,7 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
           })}
         </Typography>
       </Box>
-
-      <ResponsiveContainer height={300} style={{ paddingRight: '16px' }}>
+      <ResponsiveContainer height={300}>
         <AreaChart data={points}>
           <defs>
             <linearGradient id="areaIn" x1="0" y1="0" x2="0" y2="1">

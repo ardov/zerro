@@ -1,4 +1,4 @@
-import { FC, useCallback } from 'react'
+import { useCallback } from 'react'
 import { ButtonBase, Collapse, Stack } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useToggle } from '6-shared/hooks/useToggle'
@@ -144,7 +144,12 @@ function StatWidget(props: {
         {showBar && !!totalAmount && <PercentBar data={nodes} mt={1.5} />}
 
         <Collapse in={opened} unmountOnExit>
-          <Stack gap={1.5} mt={2}>
+          <Stack
+            sx={{
+              gap: 1.5,
+              mt: 2,
+            }}
+          >
             {nodes.map(point => (
               <DataLine
                 key={point.id}

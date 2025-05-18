@@ -1,4 +1,4 @@
-import { experimental_extendTheme as extendTheme } from '@mui/material/styles'
+import { createTheme } from '@mui/material/styles'
 import { blueGrey, blue, green, grey } from '@mui/material/colors'
 
 const hoverOpacity = 0.04
@@ -10,7 +10,7 @@ export const mainColors = {
   darkBackgroundDefault: '#121212',
 }
 
-export const appTheme = extendTheme({
+export const appTheme = createTheme({
   colorSchemes: {
     light: {
       palette: {
@@ -21,8 +21,7 @@ export const appTheme = extendTheme({
           hover: `rgba(0, 0, 0, ${hoverOpacity})`,
           hoverOpacity,
         },
-        // @ts-ignore
-        text: { hint: `rgba(0, 0, 0, 0.38)` },
+        text: { disabled: `rgba(0, 0, 0, 0.38)` },
         background: {
           paper: mainColors.lightBackgroundPaper,
           default: mainColors.lightBackgroundDefault,
@@ -38,8 +37,7 @@ export const appTheme = extendTheme({
           hover: `rgba(255, 255, 255, ${hoverOpacity})`,
           hoverOpacity,
         },
-        // @ts-ignore
-        text: { hint: `rgba(255, 255, 255, 0.38)` },
+        text: { disabled: `rgba(255, 255, 255, 0.38)` },
         background: {
           paper: mainColors.darkBackgroundPaper,
           default: mainColors.darkBackgroundDefault,
@@ -57,7 +55,6 @@ export const appTheme = extendTheme({
   },
   components: {
     MuiPaper: {
-      // Disable elevation brightness change
       styleOverrides: { root: { backgroundImage: 'unset' } },
     },
   },

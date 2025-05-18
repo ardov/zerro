@@ -33,7 +33,7 @@ export const TagList: FC<TagListProps> = props => {
           exclude={tags}
           tagType={tagType}
           trigger={
-            <Box mr={1} my={0.5} display="inline-block">
+            <Box sx={{ mr: 1, my: 0.5, display: 'inline-block' }}>
               <TagChip id={id} onDelete={() => removeTag(id)} />
             </Box>
           }
@@ -44,7 +44,7 @@ export const TagList: FC<TagListProps> = props => {
         exclude={tags}
         tagType={tagType}
         trigger={
-          <Box my={0.5} display="inline-block">
+          <Box sx={{ my: 0.5, display: 'inline-block' }}>
             <Tooltip title={t('addCategory')}>
               <IconButton
                 edge="end"
