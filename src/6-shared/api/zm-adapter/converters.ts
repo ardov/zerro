@@ -38,19 +38,28 @@ type TZmAdapter<ZmType, ClientType> = {
 const unixToMs = (seconds: TUnixTime): TMsTime => seconds * 1000
 const msToUnix = (date: TMsTime): TUnixTime => Math.round(date / 1000)
 
-function changedToMs<T extends { changed: TUnixTime }>(el: T): T {
-  return { ...el, changed: unixToMs(el.changed) } as T
-}
+const changedToMs = <T extends { changed: TUnixTime }>(el: T): T =>
+  ({ ...el, changed: unixToMs(el.changed) }) as T
+const changedToUnix = <T extends { changed: TMsTime }>(el: T): T =>
+  ({ ...el, changed: msToUnix(el.changed) }) as T
 
-function changedToUnix<T extends { changed: TMsTime }>(el: T): T {
-  return { ...el, changed: msToUnix(el.changed) } as T
-}
+const changedAdapter = { toClient: changedToMs, toServer: changedToUnix }
 
-const convertAccount: TZmAdapter<TZmAccount, TAccount> = {
-  toClient: changedToMs,
-  toServer: changedToUnix,
-}
+// Converters
 
+const convertInstrument: TZmAdapter<TZmInstrument, TInstrument> = changedAdapter
+const convertCountry: TZmAdapter<TZmCountry, TCountry> = {
+  toClient: el => el,
+  toServer: el => el,
+}
+const convertCompany: TZmAdapter<TZmCompany, TCompany> = changedAdapter
+const convertUser: TZmAdapter<TZmUser, TUser> = {
+  toClient: el => changedToMs({ ...el, paidTill: unixToMs(el.paidTill) }),
+  toServer: el => changedToUnix({ ...el, paidTill: msToUnix(el.paidTill) }),
+}
+const convertMerchant: TZmAdapter<TZmMerchant, TMerchant> = changedAdapter
+const convertAccount: TZmAdapter<TZmAccount, TAccount> = changedAdapter
+const convertTag: TZmAdapter<TZmTag, TTag> = changedAdapter
 const convertBudget: TZmAdapter<TZmBudget, TBudget> = {
   toClient: el => changedToMs({ ...el, id: toBudgetId(el.date, el.tag) }),
   toServer: el => {
@@ -59,57 +68,19 @@ const convertBudget: TZmAdapter<TZmBudget, TBudget> = {
     return changedToUnix(copy)
   },
 }
-
-const convertCompany: TZmAdapter<TZmCompany, TCompany> = {
-  toClient: el => changedToMs(el),
-  toServer: el => changedToUnix(el),
-}
-
-const convertCountry: TZmAdapter<TZmCountry, TCountry> = {
-  toClient: el => el,
-  toServer: el => el,
-}
-
-const convertInstrument: TZmAdapter<TZmInstrument, TInstrument> = {
-  toClient: el => changedToMs(el),
-  toServer: el => changedToUnix(el),
-}
-
-const convertMerchant: TZmAdapter<TZmMerchant, TMerchant> = {
-  toClient: el => changedToMs(el),
-  toServer: el => changedToUnix(el),
-}
-
-const convertReminder: TZmAdapter<TZmReminder, TReminder> = {
-  toClient: el => changedToMs(el),
-  toServer: el => changedToUnix(el),
-}
-
-const convertReminderMarker: TZmAdapter<TZmReminderMarker, TReminderMarker> = {
-  toClient: el => changedToMs(el),
-  toServer: el => changedToUnix(el),
-}
-
-const convertTag: TZmAdapter<TZmTag, TTag> = {
-  toClient: el => changedToMs(el),
-  toServer: el => changedToUnix(el),
-}
-
+const convertReminder: TZmAdapter<TZmReminder, TReminder> = changedAdapter
+const convertReminderMarker: TZmAdapter<TZmReminderMarker, TReminderMarker> =
+  changedAdapter
 const convertTransaction: TZmAdapter<TZmTransaction, TTransaction> = {
   toClient: el => changedToMs({ ...el, created: unixToMs(el.created) }),
   toServer: el => changedToUnix({ ...el, created: msToUnix(el.created) }),
 }
-
-const convertUser: TZmAdapter<TZmUser, TUser> = {
-  toClient: el => changedToMs({ ...el, paidTill: unixToMs(el.paidTill) }),
-  toServer: el => changedToUnix({ ...el, paidTill: msToUnix(el.paidTill) }),
-}
-
 const convertDeletion: TZmAdapter<TZmDeletionObject, TDeletionObject> = {
   toClient: el => ({ ...el, stamp: unixToMs(el.stamp) }),
   toServer: el => ({ ...el, stamp: msToUnix(el.stamp) }),
 }
 
+/** Main diff converter */
 export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
   toClient: d => {
     const t0 = performance.now()
