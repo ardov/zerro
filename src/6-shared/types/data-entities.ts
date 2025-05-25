@@ -185,6 +185,7 @@ export type TZmTag = {
   title: string
   parent: TTagId | null
   icon: TIconName | null
+  staticId: string | null
   picture: string | null
   color: number | null
   showIncome: boolean
