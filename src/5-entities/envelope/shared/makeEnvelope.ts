@@ -92,7 +92,7 @@ const funcs: TFuncs = {
     debtor: el => (el.merchantId ? EnvType.Merchant : EnvType.Payee),
   },
   name: {
-    tag: el => el.name,
+    tag: el => el.name || el.title,
     account: el => el.title,
     debtor: el => el.name,
   },
