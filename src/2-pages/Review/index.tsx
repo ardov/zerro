@@ -13,6 +13,8 @@ import { PayeeByFrequencyCard } from './cards/PayeeByFrequencyCard'
 import { IncomeCard } from './cards/IncomeCard'
 import { Card } from './shared/Card'
 import { NotFunCard } from './cards/NotFunCard'
+import { OutcomeStatCard } from './cards/OutcomeStatCard'
+import { SavingsCard } from './cards/SavingsCard'
 
 // New report unlocks in december
 const currMonth = new Date().getMonth()
@@ -30,9 +32,16 @@ export default function Review() {
 
   return (
     <Box className="container">
-      <Stack spacing={2} p={3} pb={10}>
+      <Stack
+        spacing={2}
+        sx={{
+          p: 3,
+          pb: 10,
+        }}
+      >
         <CardTitle year={year} />
         <IncomeCard year={year} onShowTransactions={showTransactions} />
+        <SavingsCard year={year} onShowTransactions={showTransactions} />
         <NotFunCard year={year} onShowTransactions={showTransactions} />
         <PayeeByOutcomeCard year={year} onShowTransactions={showTransactions} />
         <PayeeByFrequencyCard
@@ -40,6 +49,7 @@ export default function Review() {
           onShowTransactions={showTransactions}
         />
         <OutcomeCard year={year} onShowTransactions={showTransactions} />
+        <OutcomeStatCard year={year} onShowTransactions={showTransactions} />
         <QRCard year={year} onShowTransactions={showTransactions} />
         <NoCategoryCard year={year} onShowTransactions={showTransactions} />
         <Button onClick={() => setYear(y => y - 1)}>
@@ -57,12 +67,18 @@ function CardTitle({ year }: { year: number }) {
       <Typography
         variant="body1"
         align="center"
-        color="textSecondary"
         className="results"
+        sx={{
+          color: 'text.secondary',
+        }}
       >
         {t('yearReview')}
       </Typography>
-      <Box position="relative">
+      <Box
+        sx={{
+          position: 'relative',
+        }}
+      >
         <Typography variant="h1" align="center" className="year">
           <b>{year}</b>
         </Typography>

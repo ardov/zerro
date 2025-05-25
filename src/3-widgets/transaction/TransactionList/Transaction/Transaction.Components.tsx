@@ -122,8 +122,10 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
             >
               <Typography
                 variant="body2"
-                color="textSecondary"
                 component="span"
+                sx={{
+                  color: 'text.secondary',
+                }}
               >
                 <SmartAmount
                   value={tr.opOutcome}
@@ -340,17 +342,14 @@ const AmountsWrapper = styled.div<{
     p.type === 'income'
       ? p.theme.palette.success.main
       : p.type === 'transfer'
-      ? p.theme.palette.text.secondary
-      : p.theme.palette.text.primary};
+        ? p.theme.palette.text.secondary
+        : p.theme.palette.text.primary};
 
   [color='textSecondary'] &[type='transfer'] {
     max-width: 100%;
-    width: 100%;
-    flex-shrink: 1;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    -webkit-mask-image: linear-gradient(to left, transparent, black 40px);
   }
 
   > :not(:first-of-type):before {

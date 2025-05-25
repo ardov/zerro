@@ -101,11 +101,9 @@ const Layout: FC<{
 }> = props => {
   const { isLoggedIn, children } = props
   return (
-    <Box display="flex">
+    <Box sx={{ display: 'flex' }}>
       {isLoggedIn && <Navigation />}
-      <Box minHeight="100vh" flexGrow={1}>
-        {children}
-      </Box>
+      <Box sx={{ minHeight: '100vh', flexGrow: 1 }}>{children}</Box>
     </Box>
   )
 }
@@ -142,14 +140,16 @@ function MainLoader() {
   }, [t])
   return (
     <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      height="100%"
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+      }}
     >
       <CircularProgress />
-      <Box mt={4} width="200">
+      <Box sx={{ mt: 4, width: '200' }}>
         <Typography align="center">{hint}</Typography>
       </Box>
     </Box>

@@ -60,7 +60,7 @@ const registeredPopovers = {} as Record<TKey, any>
 
 export function registerPopover<
   ExtraProps extends object = {},
-  DisplayProps extends object = TBaseProps
+  DisplayProps extends object = TBaseProps,
 >(
   key: TKey,
   defaultExtraProps: ExtraProps,

@@ -35,26 +35,46 @@ export function OutcomeCard(props: TCardProps) {
   if (payee) additionalInfo.push(payee)
   return (
     <Card>
-      <Stack spacing={1} my={1} alignItems="center">
+      <Stack
+        spacing={1}
+        sx={{
+          my: 1,
+          alignItems: 'center',
+        }}
+      >
         <Typography variant="body1" align="center">
           {t('purchaseOfTheYear', { number: i + 1 })}
         </Typography>
         <Typography variant="h4" align="center" className="red-gradient">
           <DisplayAmount value={val} noShade decMode="ifAny" />
         </Typography>
-        <Typography variant="body1" align="center" color="textSecondary">
+        <Typography
+          variant="body1"
+          align="center"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           {additionalInfo.join('  •  ')}
         </Typography>
         {comment && (
           <Box
-            py={0.5}
-            px={2}
-            mt={1}
-            alignSelf="center"
-            bgcolor="background.default"
-            borderRadius={1}
+            sx={{
+              py: 0.5,
+              px: 2,
+              mt: 1,
+              alignSelf: 'center',
+              bgcolor: 'background.default',
+              borderRadius: 1,
+            }}
           >
-            <Typography variant="body1" align="center" color="textSecondary">
+            <Typography
+              variant="body1"
+              align="center"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
               {comment}
             </Typography>
           </Box>
@@ -63,8 +83,12 @@ export function OutcomeCard(props: TCardProps) {
         <Stack
           spacing={1}
           direction="row"
-          alignItems="center"
-          sx={{ opacity: 0.3, transition: '200ms', '&:hover': { opacity: 1 } }}
+          sx={{
+            alignItems: 'center',
+            opacity: 0.3,
+            transition: '200ms',
+            '&:hover': { opacity: 1 },
+          }}
         >
           <IconButton size="small" onClick={prev}>
             <ArrowBackIcon />

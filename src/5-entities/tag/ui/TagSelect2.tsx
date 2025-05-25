@@ -6,6 +6,7 @@ import {
   IconButton,
   List,
   ListItem,
+  ListItemButton,
   ListItemText,
   TextField,
   PopoverProps,
@@ -159,32 +160,31 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
             key={tag.id}
             tag={tag}
             onClick={handleClick(tag.id)}
-            selected={selectedIds?.includes(tag.id) || focused === idx}
             isChild={!!tag.parent}
           />
         ))}
         {localTagType && !search && (
-          <ListItem button onClick={() => setLocalTagType(null)}>
+          <ListItemButton onClick={() => setLocalTagType(null)}>
             {t('showAllCategories')}
-          </ListItem>
+          </ListItemButton>
         )}
       </List>
     </Popover>
   )
 }
 
-type TagOptionProps = ListItemProps & {
+type TagOptionProps = {
   tag: TagNode
   isChild?: boolean
+  onClick: () => void
 }
-const TagOption: FC<TagOptionProps> = props => {
-  const { tag, isChild, ...rest } = props
-  const button = true as any // need any due to https://github.com/mui-org/material-ui/issues/14971
+
+const TagOption: FC<TagOptionProps> = ({ tag, isChild, onClick }) => {
   return (
-    <ListItem button={button} {...rest}>
+    <ListItemButton onClick={onClick}>
       <EmojiIcon symbol={tag.symbol} mr={2} ml={isChild ? 5 : 0} />
-      <ListItemText primary={tag.name}></ListItemText>
-    </ListItem>
+      <ListItemText primary={tag.name} />
+    </ListItemButton>
   )
 }
 

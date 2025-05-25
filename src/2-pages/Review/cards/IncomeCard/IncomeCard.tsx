@@ -51,23 +51,44 @@ export function IncomeCard(props: TCardProps) {
 
   return (
     <Card>
-      <Stack spacing={1} alignItems="center">
+      <Stack
+        spacing={1}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <Typography variant="body1" align="center">
           {t('youEarned')}
         </Typography>
         <Typography variant="h4" align="center" className="green-gradient">
           <DisplayAmount value={totalIncomeFx} noShade decMode="ifOnly" />
         </Typography>
-        <Typography variant="body2" align="center" color="textSecondary">
+        <Typography
+          variant="body2"
+          align="center"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           <DisplayAmount value={monthlyIncome} noShade decMode="ifOnly" />{' '}
           {t('perMonth')}
         </Typography>
         <NotFunFact income={totalIncomeFx} />
       </Stack>
-
-      <Box mt={3} textAlign="center">
+      <Box
+        sx={{
+          mt: 3,
+          textAlign: 'center',
+        }}
+      >
         {incomeTags.map(tagInfo => (
-          <Box m={0.5} display="inline-block" key={tagInfo.id}>
+          <Box
+            key={tagInfo.id}
+            sx={{
+              m: 0.5,
+              display: 'inline-block',
+            }}
+          >
             <Chip
               variant={checked.includes(tagInfo.id) ? 'filled' : 'outlined'}
               clickable

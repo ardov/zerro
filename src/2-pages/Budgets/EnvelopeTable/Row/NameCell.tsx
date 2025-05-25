@@ -22,7 +22,7 @@ export const NameCell: FC<{
   isDefaultVisible: boolean
   onClick?: () => void
 }> = memo(props => {
-  const { id, symbol, color, name, currency, comment, originalName } =
+  const { id, symbol, colorHex, name, currency, comment, originalName } =
     props.envelope
   const { isReordering, isDefaultVisible, isChild, isSelf, onClick } = props
   const [displCurrency] = displayCurrency.useDisplayCurrency()
@@ -40,12 +40,14 @@ export const NameCell: FC<{
 
   return (
     <Box
-      display="flex"
-      alignItems="center"
-      gap={1}
-      minWidth={0}
       onClick={onClick}
-      pl={isChild ? 5 : 0}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        minWidth: 0,
+        pl: isChild ? 5 : 0,
+      }}
     >
       {/* <Collapse orientation="horizontal" in={isReordering} unmountOnExit>
         <EnvDraggable id={id} />
@@ -57,7 +59,6 @@ export const NameCell: FC<{
           </IconButton>
         </EnvDraggable>
       )}
-
       <Box
         sx={{
           display: 'flex',
@@ -71,7 +72,7 @@ export const NameCell: FC<{
       >
         <EmojiIcon
           symbol={isSelf ? '–' : symbol}
-          color={isSelf ? null : color}
+          color={isSelf ? null : colorHex}
           mr={1.5}
         />
         <Typography
@@ -91,22 +92,22 @@ export const NameCell: FC<{
           {isSelf ? `${name} ${t('isSelf')}` : name}
         </Typography>
       </Box>
-
       {displCurrency !== currency && <CurrencyTag currency={currency} />}
-
       {!!comment && (
         <Typography
-          sx={{ flexShrink: 1000000, fontStyle: 'italic' }}
-          color="text.hint"
           component="span"
           variant="body1"
           title={comment}
           noWrap
+          sx={{
+            color: 'text.disabled',
+            flexShrink: 1000000,
+            fontStyle: 'italic',
+          }}
         >
           {comment}
         </Typography>
       )}
-
       {floating.render()}
     </Box>
   )

@@ -16,11 +16,13 @@ export function getStart(
   if (period === Period.LastYear) {
     const date = new Date()
     date.setFullYear(date.getFullYear() - 1)
+    date.setDate(date.getDate() + 1) // Exclude the first day
     return toGroup(toISODate(date), aggregation)
   }
   if (period === Period.ThreeYears) {
     const date = new Date()
     date.setFullYear(date.getFullYear() - 3)
+    date.setDate(date.getDate() + 1) // Exclude the first day
     return toGroup(toISODate(date), aggregation)
   }
   throw new Error(`Unknown period: ${period}`)

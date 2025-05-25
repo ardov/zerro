@@ -58,7 +58,13 @@ export function NotFunCard(props: TCardProps) {
   const workWeek = Math.round((1 - taxesRatio) * 5 * 10) / 10
 
   const emptyCardContent = (
-    <Stack gap={2} alignItems="center" width="100%">
+    <Stack
+      sx={{
+        gap: 2,
+        alignItems: 'center',
+        width: '100%',
+      }}
+    >
       <Balancer>
         <Typography variant="body1" align="center">
           Нет доходов — нет налогов 😅
@@ -68,7 +74,13 @@ export function NotFunCard(props: TCardProps) {
   )
 
   const cardContent = (
-    <Stack gap={2} alignItems="center" width="100%">
+    <Stack
+      sx={{
+        gap: 2,
+        alignItems: 'center',
+        width: '100%',
+      }}
+    >
       <TaxesChart income={totalIncome} outcome={totalOutcome} />
       <Balancer>
         <Typography variant="body1" align="center">
@@ -106,9 +118,19 @@ export function NotFunCard(props: TCardProps) {
         </Typography>
       </div>
 
-      <Box textAlign="center">
+      <Box
+        sx={{
+          textAlign: 'center',
+        }}
+      >
         {taxes.map(info => (
-          <Box m={0.5} display="inline-block" key={info.name}>
+          <Box
+            key={info.name}
+            sx={{
+              m: 0.5,
+              display: 'inline-block',
+            }}
+          >
             <Tooltip title={info.comment}>
               <Chip
                 variant={'outlined'}

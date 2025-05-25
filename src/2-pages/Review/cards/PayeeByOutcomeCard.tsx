@@ -40,12 +40,12 @@ export function PayeeByOutcomeCard(props: TCardProps) {
 
   return (
     <Card>
-      <Stack spacing={1} alignItems="center">
+      <Stack spacing={1} sx={{ alignItems: 'center' }}>
         <ButtonBase
           sx={{ borderRadius: 1, px: 1 }}
           onClick={() => props.onShowTransactions(transactions)}
         >
-          <Stack spacing={1} alignItems="center">
+          <Stack spacing={1} sx={{ alignItems: 'center' }}>
             <Typography variant="h4" align="center" className="red-gradient">
               {payee}
             </Typography>
@@ -60,8 +60,12 @@ export function PayeeByOutcomeCard(props: TCardProps) {
         <Stack
           direction="row"
           spacing={1}
-          alignItems="center"
-          sx={{ opacity: 0.3, transition: '200ms', '&:hover': { opacity: 1 } }}
+          sx={{
+            alignItems: 'center',
+            opacity: 0.3,
+            transition: '200ms',
+            '&:hover': { opacity: 1 },
+          }}
         >
           <IconButton size="small" onClick={prev}>
             <ArrowBackIcon />

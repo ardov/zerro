@@ -1,7 +1,7 @@
 import type { ById, TFxCode, TTag, TTagId } from '6-shared/types'
 
 import toArray from 'lodash/toArray'
-import { int2rgb, int2hex, getColorForString } from '6-shared/helpers/color'
+import { int2hex, getColorForString } from '6-shared/helpers/color'
 import { sendEvent } from '6-shared/helpers/tracking'
 import tagIcons from '6-shared/tagIcons.json'
 import { nullTag } from './makeTag'
@@ -11,9 +11,9 @@ export type TTagPopulated = TTag & {
   uniqueName: string // If name not unique adds parent name
   symbol: string // Emoji
   children: TTagId[]
-  colorRGB: string | null
   colorHEX: string | null
   colorGenerated: string // Color generated from name
+  colorDisplay: string // Color to display
   // From hidden data
   comment?: string | null
   currencyCode?: TFxCode | null
@@ -27,7 +27,7 @@ export function populateTags(rawTags: ById<TTag>) {
   let names: { [key: string]: number } = {}
 
   for (const id in rawTags) {
-    // Add name, symbol and colorRGB
+    // Add name, symbol and colorHEX
     const populated = makePopulatedTag(rawTags[id])
     tags[id] = populated
     let name = populated.name
@@ -50,15 +50,17 @@ export function populateTags(rawTags: ById<TTag>) {
 }
 
 function makePopulatedTag(tag: TTag): TTagPopulated {
+  const colorHEX = int2hex(tag.color)
+  const colorGenerated = getColorForString(tag.title)
   return {
     ...tag,
     children: [],
     name: getName(tag.title),
     uniqueName: getName(tag.title),
     symbol: getSymbol(tag),
-    colorRGB: int2rgb(tag.color),
-    colorHEX: int2hex(tag.color),
-    colorGenerated: getColorForString(tag.title),
+    colorHEX,
+    colorGenerated,
+    colorDisplay: colorHEX || colorGenerated,
   }
 }
 

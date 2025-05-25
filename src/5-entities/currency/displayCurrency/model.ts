@@ -24,7 +24,9 @@ function useDisplayCurrency() {
   return [currency, setDisplayCurrency] as [TFxCode, typeof setDisplayCurrency]
 }
 
-const getConverter = createSelector(
+const getConverter: TSelector<
+  (amount: TFxAmount, date: 'current' | TDateDraft) => number
+> = createSelector(
   [fxRateModel.converter, getDisplayCurrency],
   (convert, displayCurrency) =>
     (amount: TFxAmount, date: 'current' | TDateDraft) =>

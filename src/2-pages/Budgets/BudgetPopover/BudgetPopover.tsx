@@ -109,7 +109,7 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
       anchor="top"
       {...rest}
     >
-      <Box p={1}>
+      <Box sx={{ p: 1 }}>
         <AmountInput
           autoFocus
           value={inputValue}

@@ -1,6 +1,10 @@
-import { configureStore, UnknownAction } from '@reduxjs/toolkit'
+import {
+  configureStore,
+  UnknownAction,
+  ThunkAction,
+  ThunkDispatch,
+} from '@reduxjs/toolkit'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
-import { ThunkAction, ThunkDispatch } from 'redux-thunk'
 import { tokenStorage } from '6-shared/api/tokenStorage'
 
 import data from './data'

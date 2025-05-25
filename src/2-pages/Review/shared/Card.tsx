@@ -9,16 +9,21 @@ export type TCardProps = {
 
 export const Card = (props: BoxProps) => (
   <Box
-    bgcolor="background.paper"
-    maxWidth={480}
-    minHeight={280}
-    borderRadius={1}
-    py={4}
-    px={2}
-    display="flex"
-    flexDirection="column"
-    alignItems="center"
-    justifyContent="center"
     {...props}
+    sx={[
+      {
+        bgcolor: 'background.paper',
+        maxWidth: 480,
+        minHeight: 280,
+        borderRadius: 1,
+        py: 4,
+        px: 2,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+      ...(Array.isArray(props.sx) ? props.sx : [props.sx]),
+    ]}
   />
 )

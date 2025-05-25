@@ -47,8 +47,18 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
   const isCurrentRates = rateData.type === 'current'
 
   return (
-    <Box p={2} bgcolor="background.default" borderRadius={1}>
-      <Stack gap={1}>
+    <Box
+      sx={{
+        p: 2,
+        bgcolor: 'background.default',
+        borderRadius: 1,
+      }}
+    >
+      <Stack
+        sx={{
+          gap: 1,
+        }}
+      >
         {currencies.map(c => (
           <FxRateInput
             key={c.code + month}
@@ -60,7 +70,13 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
             }
           />
         ))}
-        <Typography variant="caption" color="textSecondary" align="center">
+        <Typography
+          variant="caption"
+          align="center"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           {t(isCurrentRates ? 'title_current' : 'title', {
             date: formatDate(rateData.date, 'LLLL yyyy'),
           })}
@@ -122,14 +138,21 @@ const FxRateInput: FC<{
       }}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
-      inputProps={{ type: 'tel' }}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start" children={`1 ${leftCode} =`} />
-        ),
-        endAdornment: (
-          <InputAdornment position="end" children={rightCode} onClick={swap} />
-        ),
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start" children={`1 ${leftCode} =`} />
+          ),
+          endAdornment: (
+            <InputAdornment
+              position="end"
+              children={rightCode}
+              onClick={swap}
+            />
+          ),
+        },
+
+        htmlInput: { type: 'tel' },
       }}
     />
   )

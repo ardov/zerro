@@ -86,7 +86,14 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
   return (
     <>
       <Popover disableRestoreFocus onClose={onClose} {...rest}>
-        <Box display="grid" rowGap={2} p={2} minWidth={320}>
+        <Box
+          sx={{
+            display: 'grid',
+            rowGap: 2,
+            p: 2,
+            minWidth: 320,
+          }}
+        >
           <TextField
             select
             variant="outlined"
@@ -124,7 +131,11 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
           />
 
           {showDateBlock && (
-            <Box display="flex">
+            <Box
+              sx={{
+                display: 'flex',
+              }}
+            >
               <Button
                 size="large"
                 onClick={openMonthPopover}
@@ -150,7 +161,6 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
           )}
         </Box>
       </Popover>
-
       <MonthSelectPopover
         open={!!monthPopoverAnchor}
         anchorEl={monthPopoverAnchor}

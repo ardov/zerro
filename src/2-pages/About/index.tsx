@@ -45,19 +45,23 @@ const QuickStart = () => {
 
 export default function Main() {
   return (
-    <Box width="100%" sx={{ bgcolor: 'background.paper' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
       <ScrollToTop />
       <Header />
-
       <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        px={2}
-        pt={8}
-        pb={8}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          px: 2,
+          pt: 8,
+          pb: 8,
+        }}
       >
-        <Box width="100%" maxWidth={680} minWidth={100} className="article">
+        <Box
+          className="article"
+          sx={{ width: '100%', maxWidth: 680, minWidth: 100 }}
+        >
           <Switch>
             <Route path="/about/method" render={() => <Method />} />
             <Route path="/about/quick-start" render={() => <QuickStart />} />
@@ -73,15 +77,17 @@ const Header = () => {
   const theme = useAppTheme()
   return (
     <Box
-      position="sticky"
-      top={0}
-      left={0}
-      right={0}
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      p={1}
-      zIndex={100}
+      sx={{
+        position: 'sticky',
+        top: 0,
+        left: 0,
+        right: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        p: 1,
+        zIndex: 100,
+      }}
     >
       <Link to="/">
         <Box

@@ -64,8 +64,17 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
   const startingAmountColor = theme.palette.primary.main
 
   return (
-    <Box borderRadius={1} bgcolor="background.default" {...boxProps}>
-      <Stack spacing={0.5} pt={2} px={2}>
+    <Box
+      {...boxProps}
+      sx={[
+        {
+          borderRadius: 1,
+          bgcolor: 'background.default',
+        },
+        ...(Array.isArray(boxProps.sx) ? boxProps.sx : [boxProps.sx]),
+      ]}
+    >
+      <Stack spacing={0.5} sx={{ pt: 2, px: 2 }}>
         <DataLine
           name={t('outcome', { ns: 'common' })}
           color={activityColor}
@@ -94,8 +103,7 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
           }
         />
       </Stack>
-
-      <Box width="100%" height="160px">
+      <Box sx={{ width: '100%', height: '160px' }}>
         <ResponsiveContainer>
           <BarChart
             data={data}

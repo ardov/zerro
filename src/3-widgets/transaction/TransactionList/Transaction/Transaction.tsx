@@ -53,7 +53,7 @@ export const Transaction: FC<TTransactionProps> = props => {
           <Tags {...{ tr, trType }} />
           <Amounts {...{ tr, trType }} />
         </Row>
-        <SecondaryRow color="textSecondary">
+        <SecondaryRow color="text.secondary">
           <Info {...{ tr, trType, onFilterByPayee }} />
           <Accounts {...{ tr, trType, onFilterByPayee }} />
         </SecondaryRow>
@@ -117,10 +117,6 @@ const Row = styled.div`
     white-space: nowrap;
     mask-image: linear-gradient(to left, transparent, black 40px);
     -webkit-mask-image: linear-gradient(to left, transparent, black 40px);
-  }
-
-  > *:first-child:empty {
-    flex-grow: 0;
   }
 
   > *:empty + * {

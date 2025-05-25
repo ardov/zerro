@@ -30,7 +30,6 @@ export type TMsTime = number
 export type TDateDraft = number | TISOMonth | TISODate | Date
 
 export type TUnits = number
-export type TMilliUnits = number
 
 export type TToken = string | null
 

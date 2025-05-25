@@ -92,8 +92,12 @@ export type TZmUser = {
   email: string | null
   login: string | null
   monthStartDay: 1
+  isForecastEnabled: boolean
+  planBalanceMode: string // 'balance'
+  planSettings: string
   paidTill: TUnixTime
   subscription: '10yearssubscription' | '1MonthSubscription' | string
+  subscriptionRenewalDate: any | null
 }
 
 export type TUser = TZmUser & {
@@ -181,6 +185,7 @@ export type TZmTag = {
   title: string
   parent: TTagId | null
   icon: TIconName | null
+  staticId: string | null
   picture: string | null
   color: number | null
   showIncome: boolean
@@ -215,11 +220,7 @@ export type TZmBudget = {
 
 export type TBudget = TZmBudget & {
   changed: TMsTime
-  // income: TMilliUnits
-  // outcome: TMilliUnits
-
-  // new
-  id: TBudgetId
+  id: TBudgetId // new
 }
 
 // ---------------------------------------------------------------------
@@ -282,8 +283,6 @@ export type TZmReminderMarker = {
 
 export type TReminderMarker = TZmReminderMarker & {
   changed: TMsTime
-  // income: TMilliUnits
-  // outcome: TMilliUnits
 }
 
 // ---------------------------------------------------------------------
@@ -328,15 +327,6 @@ export type TZmTransaction = {
 export type TTransaction = TZmTransaction & {
   changed: TMsTime
   created: TMsTime
-  // income: TMilliUnits
-  // outcome: TMilliUnits
-  // opIncome: TMilliUnits | null
-  // opOutcome: TMilliUnits | null
-  // time: TMsTime
-  // type: TrType
-  // mainTag: TTagId | null
-  // incomeBalanceBefore: TMilliUnits
-  // outcomeBalanceBefore: TMilliUnits
 }
 
 // ---------------------------------------------------------------------

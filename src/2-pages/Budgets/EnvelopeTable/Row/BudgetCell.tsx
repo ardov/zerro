@@ -14,9 +14,15 @@ export const BudgetCell: FC<BudgetCellProps> = props => {
   const { value, onBudgetClick, isSelf } = props
   return (
     <Box
-      color={isSelf ? 'text.hint' : value ? 'text.primary' : 'text.hint'}
-      display="flex"
-      justifyContent="flex-end"
+      sx={{
+        color: isSelf
+          ? 'text.disabled'
+          : value
+            ? 'text.primary'
+            : 'text.disabled',
+        display: 'flex',
+        justifyContent: 'flex-end',
+      }}
     >
       <Btn onClick={onBudgetClick} disabled={isSelf}>
         <Amount value={value} decMode="ifOnly" />

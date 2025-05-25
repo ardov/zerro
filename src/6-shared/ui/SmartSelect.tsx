@@ -1,5 +1,11 @@
 import React from 'react'
-import { MenuList, Select, SelectProps } from '@mui/material'
+import {
+  FormControl,
+  InputLabel,
+  MenuList,
+  Select,
+  SelectProps,
+} from '@mui/material'
 import { popoverStack } from '6-shared/historyPopovers'
 
 import { SwipeableDrawer, Theme, useMediaQuery } from '@mui/material'
@@ -11,31 +17,38 @@ export function SmartSelect<T>(props: TSmartSelectProps<T>) {
   const [open, onOpen, onClose] = popoverStack.usePopoverState(elKey)
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('sm'))
 
+  const labelId = props.label
+    ? `${props.id || 'smart-select'}-label`
+    : undefined
+
   return (
-    <>
+    <FormControl>
+      {props.label && <InputLabel id={labelId}>{props.label}</InputLabel>}
       <Select
         {...selectProps}
+        labelId={labelId}
         open={isMobile ? false : open}
         onOpen={onOpen}
         onClose={onClose}
       />
-
       {isMobile && (
         <SwipeableDrawer
           disablePortal
           anchor="bottom"
           onOpen={() => {}}
           disableSwipeToOpen
-          PaperProps={{
-            sx: {
-              maxHeight: 'calc(100vh - 48px)',
-              borderRadius: '8px 8px 0 0',
-            },
-          }}
           open={open}
           onClose={onClose}
           keepMounted={false}
           ModalProps={{ keepMounted: false }}
+          slotProps={{
+            paper: {
+              sx: {
+                maxHeight: 'calc(100vh - 48px)',
+                borderRadius: '8px 8px 0 0',
+              },
+            },
+          }}
         >
           <MenuList autoFocus>
             {React.Children.toArray(selectProps.children).map(child => {
@@ -74,6 +87,6 @@ export function SmartSelect<T>(props: TSmartSelectProps<T>) {
           </MenuList>
         </SwipeableDrawer>
       )}
-    </>
+    </FormControl>
   )
 }

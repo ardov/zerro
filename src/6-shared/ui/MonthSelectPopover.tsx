@@ -46,14 +46,23 @@ export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
   const isPrevYearDisabled = !!start && months[0] <= start
   return (
     <Popover {...rest}>
-      <Box pt={1} px={1}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
+      <Box sx={{ pt: 1, px: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
           <IconButton
             children={<ChevronLeftIcon />}
             onClick={() => setYear(year => --year)}
             disabled={isPrevYearDisabled}
           />
-          <Box textAlign="center" fontSize="h5.fontSize" children={year} />
+          <Box
+            children={year}
+            sx={{ textAlign: 'center', fontSize: 'h5.fontSize' }}
+          />
           <IconButton
             children={<ChevronRightIcon />}
             onClick={() => setYear(year => ++year)}

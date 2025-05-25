@@ -31,11 +31,14 @@ export function parseReceipt(string: string): TReciept | null {
 }
 
 function stringToObject(str: string) {
-  return str.split('&').reduce((acc, str) => {
-    const [key, val] = str.split('=')
-    if (key && val) acc[key] = val
-    return acc
-  }, {} as Record<string, string>)
+  return str.split('&').reduce(
+    (acc, str) => {
+      const [key, val] = str.split('=')
+      if (key && val) acc[key] = val
+      return acc
+    },
+    {} as Record<string, string>
+  )
 }
 
 function parseReceiptUnsafe(string: string): TReciept {

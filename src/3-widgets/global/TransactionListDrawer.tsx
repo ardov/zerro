@@ -61,9 +61,27 @@ export const SmartTransactionListDrawer = () => {
       sx={contentSx}
       keepMounted={false}
     >
-      <Box height="100vh" display="flex" flexDirection="column" minWidth={320}>
-        <Box py={1} px={3} display="flex" alignItems="center">
-          <Box flexGrow={1}>
+      <Box
+        sx={{
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          minWidth: 320,
+        }}
+      >
+        <Box
+          sx={{
+            py: 1,
+            px: 3,
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <Box
+            sx={{
+              flexGrow: 1,
+            }}
+          >
             <Typography variant="h6" noWrap>
               {title || t('transactions')}
             </Typography>
