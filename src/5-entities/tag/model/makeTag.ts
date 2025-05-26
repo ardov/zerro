@@ -16,6 +16,7 @@ export function makeTag(raw: TagDraft): TTag {
     required: raw.required || false,
     color: raw.color || null,
     picture: raw.picture || null,
+    staticId: raw.staticId || null,
     showIncome: raw.showIncome || false,
     showOutcome: raw.showOutcome || false,
     parent: raw.parent || null,

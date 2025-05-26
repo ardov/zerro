@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, FC, useCallback } from 'react'
+import React, { useState, useEffect, useRef, FC } from 'react'
 import {
   TextField,
   InputAdornment,
@@ -32,18 +32,12 @@ export const AmountInput: FC<AmountInputProps> = ({
   onFocus,
   onKeyDown,
   autoFocus,
+  slotProps,
   ...rest
 }) => {
   const ref = useRef<HTMLInputElement>()
   const [expression, setExpression] = useState(value.toString())
   const [focused, setFocused] = useState(false)
-
-  // ❗️Hacky hack cause autoFocus doesn't work for some reason 🤷🏻‍♂️
-  // It focuses but typing is disabled
-  // TODO: update mui and try again
-  // useEffect(() => {
-  //   if (autoFocus) setTimeout(() => ref.current?.focus(), 100)
-  // }, [autoFocus])
 
   useEffect(() => {
     if (!focused) setExpression(value === 0 ? '' : value.toString())
@@ -101,6 +95,20 @@ export const AmountInput: FC<AmountInputProps> = ({
     if (onKeyDown) onKeyDown(e)
   }
 
+  const slotPropsMerged = {
+    ...slotProps,
+    input: {
+      endAdornment: sym && (
+        <InputAdornment position="end" disableTypography children={sym} />
+      ),
+      ...slotProps?.input,
+    },
+    htmlInput: {
+      type: 'tel',
+      ...slotProps?.htmlInput,
+    },
+  }
+
   const Field = (
     <TextField
       value={focused ? expression || '' : formattedValue || ''}
@@ -111,16 +119,8 @@ export const AmountInput: FC<AmountInputProps> = ({
       onBlur={blurHandler}
       onKeyDown={keyDownHandler}
       autoFocus={autoFocus}
+      slotProps={slotPropsMerged}
       {...rest}
-      slotProps={{
-        input: {
-          endAdornment: sym && (
-            <InputAdornment position="end" disableTypography children={sym} />
-          ),
-        },
-
-        htmlInput: { type: 'tel' },
-      }}
     />
   )
 
@@ -133,12 +133,7 @@ export const AmountInput: FC<AmountInputProps> = ({
   return (
     <div>
       {Field}
-      <Stack
-        direction="row"
-        sx={{
-          width: '100%',
-        }}
-      >
+      <Stack direction="row" sx={{ width: '100%' }}>
         <Button
           onClick={() => {
             ref.current?.focus()

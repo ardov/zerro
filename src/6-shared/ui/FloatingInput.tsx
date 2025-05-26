@@ -59,9 +59,7 @@ function FloatingInput(props: {
           value={values.name}
           onChange={handleChange}
           onBlur={submitForm}
-          slotProps={{
-            htmlInput: { autoComplete: 'off' },
-          }}
+          slotProps={{ htmlInput: { autoComplete: 'off' } }}
         />
       </Box>
     </Popover>
