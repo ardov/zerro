@@ -29,6 +29,10 @@ const USER: TUser = {
   monthStartDay: 1,
   paidTill: NOW + DAY * 365,
   subscription: '10yearssubscription',
+  isForecastEnabled: false,
+  planBalanceMode: 'balance',
+  planSettings: '',
+  subscriptionRenewalDate: NOW + DAY * 365,
 }
 
 // ACCOUNTS
