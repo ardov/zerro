@@ -83,14 +83,16 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
           selectOnFocus
           fullWidth
           placeholder="0"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton edge="end" onClick={handleSubmit}>
-                  <ArrowForwardIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton edge="end" onClick={handleSubmit}>
+                    <ArrowForwardIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
           }}
         />
       </Box>

@@ -12,7 +12,7 @@ import {
 } from '@mui/material'
 import { Box, BoxProps } from '@mui/system'
 import { useTranslation } from 'react-i18next'
-import { DoneIcon } from '6-shared/ui/Icons'
+import { ArrowForwardIcon } from '6-shared/ui/Icons'
 import { AmountInput } from '6-shared/ui/AmountInput'
 import { formatMoney } from '6-shared/helpers/money'
 import { sendEvent } from '6-shared/helpers/tracking'
@@ -119,20 +119,22 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
           helperText={helperText}
           signButtons="auto"
           placeholder="0"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">{currency.env}</InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  edge="end"
-                  onClick={() => changeAndClose(+inputValue)}
-                >
-                  <DoneIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">{currency.env}</InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    edge="end"
+                    onClick={() => changeAndClose(+inputValue)}
+                  >
+                    <ArrowForwardIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
           }}
         />
 
