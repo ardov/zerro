@@ -445,6 +445,7 @@ export const en: typeof ru = {
     export: 'Export',
     downloadCSV: 'Download CSV',
     fullBackup: 'Full backup',
+    downloadJSON: 'Download JSON',
     darkMode: 'Dark Mode',
     lightMode: 'Light Mode',
     reloadData: 'Reload data',

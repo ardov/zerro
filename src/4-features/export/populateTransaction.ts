@@ -1,4 +1,4 @@
-import { TrType } from '5-entities/transaction'
+import { createSelector } from '@reduxjs/toolkit'
 import { getType } from '5-entities/transaction/helpers'
 import {
   ByIdOld,
@@ -9,6 +9,10 @@ import {
   TTagId,
   TTransaction,
 } from '6-shared/types'
+import { trModel, TrType } from '5-entities/transaction'
+import { instrumentModel } from '5-entities/currency/instrument'
+import { accountModel } from '5-entities/account'
+import { tagModel } from '5-entities/tag'
 
 interface DataSources {
   instruments: { [id: number]: TInstrument }
@@ -50,3 +54,22 @@ function mapTags(ids: TTagId[] | null, tags: ByIdOld<TTag>) {
   // TODO: Надо что-то придумать с null тегом 🤔    ⤵
   return ids && ids.length ? ids.map(id => tags[id + '']) : null
 }
+
+export const getPopulatedTransactions = createSelector(
+  [
+    instrumentModel.getInstruments,
+    accountModel.getAccounts,
+    tagModel.getPopulatedTags,
+    trModel.getTransactions,
+  ],
+  (instruments, accounts, tags, transactions) => {
+    const result: { [id: string]: PopulatedTransaction } = {}
+    for (const id in transactions) {
+      result[id] = populateTransaction(
+        { instruments, accounts, tags },
+        transactions[id]
+      )
+    }
+    return result
+  }
+)
