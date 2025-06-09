@@ -372,7 +372,7 @@ export const en: typeof ru = {
 
   goals: {
     goalType: 'Type of goal',
-    progressOnTagret: '{{budgeted}} out of {{target}}',
+    progressOnTarget: '{{budgeted}} out of {{target}}',
     names: {
       monthly: 'Regular savings',
       monthlySpend: 'Monthly amount',
