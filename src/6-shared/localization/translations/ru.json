@@ -353,7 +353,7 @@
 
   "goals": {
     "goalType": "Тип цели",
-    "progressOnTagret": "{{budgeted}} из {{target}}",
+    "progressOnTarget": "{{budgeted}} из {{target}}",
     "names": {
       "monthly": "Регулярные сбережения",
       "monthlySpend": "Сумма на месяц",
