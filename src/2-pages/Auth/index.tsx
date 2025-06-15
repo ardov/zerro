@@ -15,7 +15,7 @@ import { zenmoney } from '6-shared/api/zenmoney'
 import { Logo } from '6-shared/ui/Logo'
 
 import { useAppDispatch } from 'store'
-import { loadBackup, logIn } from '4-features/authorization'
+import { loadBackup, loadDemoData, logIn } from '4-features/authorization'
 
 zenmoney.processAuthCode()
 
@@ -114,6 +114,14 @@ export default function Auth() {
             <RouterLink to="/about" component={SecondaryLink}>
               {t('btnAbout')}
             </RouterLink>
+            <Button
+              variant="text"
+              color="primary"
+              size="large"
+              onClick={() => dispatch(loadDemoData())}
+            >
+              Demo mode
+            </Button>
           </Box>
         </Fade>
       </Stack>

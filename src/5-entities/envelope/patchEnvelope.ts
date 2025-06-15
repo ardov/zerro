@@ -5,7 +5,7 @@ import { keys } from '6-shared/helpers/keys'
 import { envId, EnvType, TEnvelopeId } from './shared/envelopeId'
 import { hex2int, isHEX } from '6-shared/helpers/color'
 import { accountModel, TAccountPatch } from '5-entities/account'
-import { patchMerchant, TMerchantPatch } from '5-entities/merchant'
+import { TMerchantPatch, merchantModel } from '5-entities/merchant'
 import { tagModel } from '5-entities/tag'
 import { patchEnvelopeMeta, TEnvelopeMetaPatch } from './shared/metaData'
 import { TEnvelope } from './shared/makeEnvelope'
@@ -45,7 +45,8 @@ export const patchEnvelope =
     if (patchLists.tag.length) dispatch(tagModel.patchTag(patchLists.tag))
     if (patchLists.account.length)
       dispatch(accountModel.patchAccount(patchLists.account))
-    if (patchLists.merchant.length) dispatch(patchMerchant(patchLists.merchant))
+    if (patchLists.merchant.length)
+      dispatch(merchantModel.patchMerchant(patchLists.merchant))
     if (patchLists.meta.length) dispatch(patchEnvelopeMeta(patchLists.meta))
     return
   }

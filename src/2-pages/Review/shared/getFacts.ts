@@ -13,7 +13,7 @@ import { fxRateModel } from '5-entities/currency/fxRate'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { addFxAmount, convertFx } from '6-shared/helpers/money'
 import { accountModel } from '5-entities/account'
-import { getMerchants } from '5-entities/merchant'
+import { merchantModel } from '5-entities/merchant'
 import { TSelector, useAppSelector } from 'store/index'
 
 type TInfoNode = {
@@ -39,7 +39,7 @@ export const getFactsYearly: TSelector<Record<string, TStats>> = createSelector(
     fxRateModel.getter,
     instrumentModel.getInstCodeMap,
     accountModel.getDebtAccountId,
-    getMerchants,
+    merchantModel.getMerchants,
   ],
   (transactions, convert, codeMap, debtAcc, merchants) => {
     // const rates = convert('current').rates
