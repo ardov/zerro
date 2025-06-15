@@ -1,3 +1,3 @@
-export type { TMerchantDraft } from './patchMerchant'
+export type { TMerchantPatch } from './patchMerchant'
 export { patchMerchant } from './patchMerchant'
 export { getMerchants } from './model'

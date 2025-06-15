@@ -18,4 +18,4 @@ export const { setToken } = actions
 
 // SELECTORS
 export const getToken = (state: RootState) => state.token
-export const getLoginState = (state: RootState) => !!getToken(state)
+export const getLoginState = (state: RootState) => Boolean(getToken(state))

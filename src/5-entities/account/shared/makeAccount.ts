@@ -3,7 +3,7 @@ import { toISODate } from '6-shared/helpers/date'
 import { Modify, OptionalExceptFor, TDateDraft } from '6-shared/types'
 import { TAccount, TAccountId, AccountType } from '6-shared/types'
 
-type TAccountDraft = Modify<
+export type TAccountDraft = Modify<
   OptionalExceptFor<TAccount, 'user' | 'instrument' | 'title'>,
   { startDate?: TDateDraft }
 >

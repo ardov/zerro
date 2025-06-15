@@ -5,7 +5,7 @@ const { reducer, actions } = createSlice({
   name: 'isPending',
   initialState: false,
   reducers: {
-    setPending: (state, action) => !!action.payload,
+    setPending: (state, action) => Boolean(action.payload),
   },
 })
 

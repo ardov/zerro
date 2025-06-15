@@ -50,7 +50,7 @@ export type TZmCountry = {
   id: TCountryId
   title: string
   currency: TInstrumentId
-  domain: string
+  domain: string | null
 }
 
 export type TCountry = TZmCountry
@@ -66,9 +66,9 @@ export type TZmCompany = {
   changed: TUnixTime
   title: string
   fullTitle: string | null
-  www: string
-  country: TCountryId
-  countryCode: string
+  www: string | null
+  country: TCountryId | null
+  countryCode: string | null
   deleted: boolean
 }
 
