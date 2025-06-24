@@ -8,7 +8,7 @@ import {
   TTransactionId,
 } from '6-shared/types'
 import { applyClientPatch } from 'store/data'
-import { getTransactions } from './model'
+import { getTransactionsById } from './model'
 import { isViewed } from './helpers'
 
 export const deleteTransactions =
@@ -17,7 +17,7 @@ export const deleteTransactions =
     sendEvent('Transaction: delete')
     const array = Array.isArray(ids) ? ids : [ids]
     const deleted = array.map(id => ({
-      ...getTransactions(getState())[id],
+      ...getTransactionsById(getState())[id],
       deleted: true,
       changed: Date.now(),
     }))
@@ -30,7 +30,7 @@ export const deleteTransactionsPermanently =
     sendEvent('Transaction: delete permanently')
     const array = Array.isArray(ids) ? ids : [ids]
     const deleted = array.map(id => ({
-      ...getTransactions(getState())[id],
+      ...getTransactionsById(getState())[id],
       outcome: 0.00001,
       income: 0.00001,
       changed: Date.now(),
@@ -44,7 +44,7 @@ export const markViewed =
     sendEvent(`Transaction: mark viewed: ${viewed}`)
     const array = Array.isArray(ids) ? ids : [ids]
     const state = getState()
-    const transactions = getTransactions(state)
+    const transactions = getTransactionsById(state)
     const result = array
       .filter(id => isViewed(transactions[id]) !== viewed)
       .map(id => ({
@@ -60,7 +60,7 @@ export const restoreTransaction =
   (dispatch, getState) => {
     sendEvent('Transaction: restore')
     const tr = {
-      ...getTransactions(getState())[id],
+      ...getTransactionsById(getState())[id],
       deleted: false,
       changed: Date.now(),
       id: uuidv1(),
@@ -74,7 +74,7 @@ export const splitTransfer =
   (id: TTransactionId): AppThunk<void> =>
   (dispatch, getState) => {
     const state = getState()
-    const tr = getTransactions(state)[id]
+    const tr = getTransactionsById(state)[id]
     const list = split(tr)
     if (list) dispatch(applyClientPatch({ transaction: list }))
   }
@@ -85,7 +85,7 @@ export const applyChangesToTransaction =
   (dispatch, getState) => {
     sendEvent('Transaction: edit')
     const tr = {
-      ...getTransactions(getState())[patch.id],
+      ...getTransactionsById(getState())[patch.id],
       ...patch,
       changed: Date.now(),
     }
@@ -96,7 +96,7 @@ export const recreateTransaction =
   (patch: TransactionPatch): AppThunk<string> =>
   (dispatch, getState) => {
     sendEvent('Transaction: recreate')
-    const tr = getTransactions(getState())[patch.id]
+    const tr = getTransactionsById(getState())[patch.id]
     const oldTr = {
       ...tr,
       outcome: 0.00001,
@@ -104,7 +104,7 @@ export const recreateTransaction =
       changed: Date.now(),
     }
     const newTr = {
-      ...getTransactions(getState())[patch.id],
+      ...getTransactionsById(getState())[patch.id],
       ...patch,
       id: uuidv1(),
       changed: Date.now(),
@@ -121,7 +121,7 @@ export const bulkEditTransactions =
   (dispatch, getState) => {
     sendEvent('Bulk Actions: set new tags')
     const state = getState()
-    const allTransactions = getTransactions(state)
+    const allTransactions = getTransactionsById(state)
 
     const result = ids.map(id => {
       const tr = allTransactions[id]

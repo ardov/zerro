@@ -5,7 +5,7 @@ import { makeTransaction } from './makeTransaction'
 import {
   getHistoryStart,
   getSortedTransactions,
-  getTransactions,
+  getTransactionsById,
   getTransactionsHistory,
 } from './model'
 import {
@@ -25,13 +25,13 @@ export { TrType } from './helpers'
 
 export const trModel = {
   // Selectors
-  getTransactions,
+  getTransactions: getTransactionsById,
   getSortedTransactions,
   getTransactionsHistory,
   getHistoryStart,
 
   // Hooks
-  useTransactions: () => useAppSelector(getTransactions),
+  useTransactions: () => useAppSelector(getTransactionsById),
   useSortedTransactions: () => useAppSelector(getSortedTransactions),
   useTransactionsHistory: () => useAppSelector(getTransactionsHistory),
 

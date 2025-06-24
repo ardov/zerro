@@ -5,14 +5,14 @@ import { withPerf } from '6-shared/helpers/performance'
 import { TISODate } from '6-shared/types'
 import { toISODate } from '6-shared/helpers/date'
 
-export const getTransactions = (state: RootState) =>
+export const getTransactionsById = (state: RootState) =>
   state.data.current.transaction
 
 /**
  * Transactions sorted from newest to oldest
  */
 export const getSortedTransactions = createSelector(
-  [getTransactions],
+  [getTransactionsById],
   withPerf('getSortedTransactions', transactions =>
     Object.values(transactions).sort(compareTrDates)
   )
