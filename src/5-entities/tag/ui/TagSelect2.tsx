@@ -1,4 +1,10 @@
-import React, { FC, KeyboardEventHandler, useEffect, useState, useRef } from 'react'
+import React, {
+  FC,
+  KeyboardEventHandler,
+  useEffect,
+  useState,
+  useRef,
+} from 'react'
 import { tagModel, TagTreeNode, TTagPopulated } from '5-entities/tag'
 import {
   Popover,
@@ -15,6 +21,7 @@ import {
 import { AddIcon } from '6-shared/ui/Icons'
 import { EmojiIcon } from '6-shared/ui/EmojiIcon'
 import { useTranslation } from 'react-i18next'
+import { nullTag } from '../model/makeTag'
 
 type TagType = 'income' | 'outcome' | undefined | null
 type TagNode = TagTreeNode | TTagPopulated
@@ -214,7 +221,11 @@ type ShowAllButtonProps = {
   label: string
 }
 
-const ShowAllButton: FC<ShowAllButtonProps> = ({ onClick, selected, label }) => {
+const ShowAllButton: FC<ShowAllButtonProps> = ({
+  onClick,
+  selected,
+  label,
+}) => {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -245,7 +256,7 @@ const makeTagChecker = (props: {
   return function (tag: TagNode) {
     // never show excluded tags
     if (exclude?.includes(tag.id)) return false
-    if (!showNull && tag.id === null) return false
+    if (!showNull && tag.id === nullTag.id) return false
     if (search) return checkSearch(tag, search)
     if (tagType === 'income') return !!tag.showIncome
     if (tagType === 'outcome') return !!tag.showOutcome
