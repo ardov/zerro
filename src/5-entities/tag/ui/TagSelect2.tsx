@@ -1,4 +1,4 @@
-import React, { FC, KeyboardEventHandler, useEffect, useState } from 'react'
+import React, { FC, KeyboardEventHandler, useEffect, useState, useRef } from 'react'
 import { tagModel, TagTreeNode, TTagPopulated } from '5-entities/tag'
 import {
   Popover,
@@ -112,6 +112,9 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
 
   const handleClick = (id: string) => () => onTagSelect(id)
 
+  const showAllButton = localTagType && !search
+  const maxFocusIndex = showAllButton ? flatList.length : flatList.length - 1
+
   const handleKeyDown: KeyboardEventHandler = e => {
     if (e.key === 'ArrowUp' || e.keyCode === 38) {
       e.preventDefault()
@@ -119,11 +122,15 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
     }
     if (e.key === 'ArrowDown' || e.keyCode === 40) {
       e.preventDefault()
-      if (focused < flatList.length - 1) setFocused(focused => focused + 1)
+      if (focused < maxFocusIndex) setFocused(focused => focused + 1)
     }
     if (e.key === 'Enter' || e.keyCode === 13) {
       e.preventDefault()
-      if (flatList.length) onTagSelect(flatList[focused].id)
+      if (focused === flatList.length && showAllButton) {
+        setLocalTagType(null)
+      } else if (flatList.length) {
+        onTagSelect(flatList[focused].id)
+      }
     }
     if (e.key === 'Escape' || e.keyCode === 27) {
       e.preventDefault()
@@ -161,12 +168,15 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
             tag={tag}
             onClick={handleClick(tag.id)}
             isChild={!!tag.parent}
+            selected={idx === focused}
           />
         ))}
-        {localTagType && !search && (
-          <ListItemButton onClick={() => setLocalTagType(null)}>
-            {t('showAllCategories')}
-          </ListItemButton>
+        {showAllButton && (
+          <ShowAllButton
+            onClick={() => setLocalTagType(null)}
+            selected={focused === flatList.length}
+            label={t('showAllCategories')}
+          />
         )}
       </List>
     </Popover>
@@ -177,13 +187,44 @@ type TagOptionProps = {
   tag: TagNode
   isChild?: boolean
   onClick: () => void
+  selected?: boolean
 }
 
-const TagOption: FC<TagOptionProps> = ({ tag, isChild, onClick }) => {
+const TagOption: FC<TagOptionProps> = ({ tag, isChild, onClick, selected }) => {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (selected && ref.current) {
+      ref.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    }
+  }, [selected])
+
   return (
-    <ListItemButton onClick={onClick}>
+    <ListItemButton ref={ref} onClick={onClick} selected={selected}>
       <EmojiIcon symbol={tag.symbol} mr={2} ml={isChild ? 5 : 0} />
       <ListItemText primary={tag.name} />
+    </ListItemButton>
+  )
+}
+
+type ShowAllButtonProps = {
+  onClick: () => void
+  selected?: boolean
+  label: string
+}
+
+const ShowAllButton: FC<ShowAllButtonProps> = ({ onClick, selected, label }) => {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (selected && ref.current) {
+      ref.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    }
+  }, [selected])
+
+  return (
+    <ListItemButton ref={ref} onClick={onClick} selected={selected}>
+      <ListItemText primary={label} />
     </ListItemButton>
   )
 }
