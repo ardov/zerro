@@ -103,6 +103,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
     if (open) {
       setSearch('')
       setLocalTagType(tagType)
+      setFocused(0)
     }
   }, [open, tagType])
 
