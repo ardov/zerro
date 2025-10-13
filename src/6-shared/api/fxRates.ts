@@ -34,18 +34,27 @@ export async function requestRates(date: TDateDraft) {
 
   let result: Record<TFxCode, number> = {}
 
+  // Convert BTC and other crypto currencies to µ-units.
+  // Probably, should be automatically calculated for all currencies with 'μ' prefix
+  // or add a multiplier field to currencySymbols.json
+
+  const MICRO_CURRENCIES = new Set([
+    'ASH',
+    'BCH',
+    'BTC',
+    'ETH',
+    'LTC',
+    'XMR'
+  ])
+
   keys(rates).forEach(key => {
     const code = key.toUpperCase()
     const rate = rates[key]
-    switch (code) {
-      // convert BTC to µBTC
-      case 'BTC':
-      case 'ETH':
-        result[code] = round(1 / rate / 1_000_000)
-        return
-      default:
-        result[code] = round(1 / rate)
-        return
+    if (MICRO_CURRENCIES.has(code)) {
+      // micro-currencies are tiny after scaling; keep more decimal places
+      result[code] = round(1 / rate / 1_000_000, 12)
+    } else {
+      result[code] = round(1 / rate)
     }
   })
   return result
@@ -62,7 +71,7 @@ async function fetchWithFallback(links: string[]) {
   return response
 }
 
-function round(amount: number) {
-  const p = 1_000_000
+function round(amount: number, decimals = 6) {
+  const p = Math.pow(10, decimals)
   return Math.round(amount * p) / p
 }
