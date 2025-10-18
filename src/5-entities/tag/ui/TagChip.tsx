@@ -1,21 +1,32 @@
 import type { TTagId } from '6-shared/types'
+import { Box } from '@mui/material'
 
-import React, { FC } from 'react'
+import { FC, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Chip, ChipProps } from '@mui/material'
 import { CloseIcon } from '6-shared/ui/Icons'
+import { TagIcon } from '../../../6-shared/ui/TagIcon'
 import { tagModel, TTagPopulated } from '../model'
 
 export const TagChip: FC<ChipProps & { id: TTagId }> = ({ id, ...rest }) => {
   const { t } = useTranslation()
   let tag = tagModel.usePopulatedTags()[id]
-  let label = getTagLabel(tag)
-  if (id === 'mixed') label = t('mixedCategories')
+  const label = id === 'mixed' ? t('mixedCategories') : getTagLabel(tag)
   return <Chip deleteIcon={<CloseIcon />} label={label} {...rest} />
 }
 
-function getTagLabel(tag?: TTagPopulated) {
+function getTagLabel(tag?: TTagPopulated): ReactNode {
   if (!tag) return null
-  if (TAG_ICON_SRC === 'emoji' && tag.icon) return `${tag.symbol} ${tag.name}`
+  if (tag.icon)
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <TagIcon
+          symbol={tag.symbol}
+          ml={-1.5}
+          mr={0.5}
+        />
+        {tag.name}
+      </Box>
+    )
   return tag.title
 }

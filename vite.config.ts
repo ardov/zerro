@@ -26,7 +26,6 @@ export default defineConfig({
   envPrefix: 'REACT_APP_',
   define: {
     APP_VERSION: JSON.stringify(process.env.npm_package_version),
-    TAG_ICON_SRC: JSON.stringify('svg'),
   },
   test: {
     globals: true,

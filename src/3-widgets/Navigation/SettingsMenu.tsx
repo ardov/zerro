@@ -83,6 +83,7 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
       <ThemeItem onClose={props.onClose} />
       <ReloadDataItem onClose={props.onClose} />
       <AutoSyncItem />
+      <IconModeItem />
       {isExpanded ? (
         <BudgetSettingsItem />
       ) : (
@@ -263,6 +264,25 @@ function AutoSyncItem() {
       </ListItemIcon>
       <ListItemText>{t('regularSync')}</ListItemText>
       <Switch edge="end" checked={regular} />
+    </MenuItem>
+  )
+}
+
+function IconModeItem() {
+  const dispatch = useAppDispatch()
+  const { zenmoneyIcons } = userSettingsModel.useUserSettings()
+  const handleClick = () => {
+    const next = !zenmoneyIcons
+    sendEvent(`Settings: zenmoney icons set to ${next}`)
+    dispatch(userSettingsModel.patch({ zenmoneyIcons: next }))
+  }
+  return (
+    <MenuItem onClick={handleClick}>
+      <ListItemIcon>
+        <AutoAwesomeIcon />
+      </ListItemIcon>
+      <ListItemText>Zenmoney icons</ListItemText>
+      <Switch edge="end" checked={zenmoneyIcons} />
     </MenuItem>
   )
 }
