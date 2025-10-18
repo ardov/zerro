@@ -3,7 +3,7 @@ import { useDraggable } from '@dnd-kit/core'
 import { Typography, Box, IconButton, Collapse, Chip } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
-import { EmojiIcon } from '6-shared/ui/EmojiIcon'
+import { TagIcon } from '6-shared/ui/TagIcon'
 import { DragIndicatorIcon } from '6-shared/ui/Icons'
 import { TFxCode } from '6-shared/types'
 import { Tooltip } from '6-shared/ui/Tooltip'
@@ -70,7 +70,7 @@ export const NameCell: FC<{
           opacity: isDefaultVisible ? 1 : 0.5,
         }}
       >
-        <EmojiIcon
+        <TagIcon
           symbol={isSelf ? '–' : symbol}
           color={isSelf ? null : colorHex}
           mr={1.5}

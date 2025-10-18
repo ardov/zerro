@@ -16,6 +16,6 @@ export const TagChip: FC<ChipProps & { id: TTagId }> = ({ id, ...rest }) => {
 
 function getTagLabel(tag?: TTagPopulated) {
   if (!tag) return null
-  if (tag.icon) return `${tag.symbol} ${tag.name}`
+  if (TAG_ICON_SRC === 'emoji' && tag.icon) return `${tag.symbol} ${tag.name}`
   return tag.title
 }

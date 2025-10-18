@@ -4,12 +4,13 @@ import toArray from 'lodash/toArray'
 import { int2hex, getColorForString } from '6-shared/helpers/color'
 import { sendEvent } from '6-shared/helpers/tracking'
 import tagIcons from '6-shared/tagIcons.json'
+import { tagIconsSvg } from '6-shared/tagIconsSvg'
 import { nullTag } from './makeTag'
 
 export type TTagPopulated = TTag & {
   name: string // Tag name without emoji
   uniqueName: string // If name not unique adds parent name
-  symbol: string // Emoji
+  symbol: string // Emoji string or SVG URL
   children: TTagId[]
   colorHEX: string | null
   colorGenerated: string // Color generated from name
@@ -77,7 +78,9 @@ function getName(title: string) {
 function getSymbol(tag: TTag) {
   if (tag.id === 'null') return '?'
   if (tag.icon) {
-    if (tagIcons[tag.icon]) {
+    if (TAG_ICON_SRC === 'svg' && tagIconsSvg[tag.icon]) {
+      return tagIconsSvg[tag.icon]
+    } else if (TAG_ICON_SRC === 'emoji' && tagIcons[tag.icon]) {
       return tagIcons[tag.icon]
     } else {
       sendEvent('Tags: UnknownNames: ' + tag.icon)

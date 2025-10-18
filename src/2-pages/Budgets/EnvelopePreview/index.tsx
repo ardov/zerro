@@ -1,7 +1,7 @@
 import React, { FC, useCallback } from 'react'
 import { Box, Typography, IconButton, Grid, ButtonBase } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import { EmojiIcon } from '6-shared/ui/EmojiIcon'
+import { TagIcon } from '6-shared/ui/TagIcon'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon, EditIcon, EmojiFlagsIcon } from '6-shared/ui/Icons'
 import { ColorPicker, useColorPicker } from '6-shared/ui/ColorPickerPopover'
@@ -121,7 +121,7 @@ const Header: FC<{
       top={0}
     >
       <Box flexGrow={1} display="flex" minWidth={0} alignItems="center">
-        <EmojiIcon
+        <TagIcon
           size="m"
           symbol={symbol}
           mr={2}
