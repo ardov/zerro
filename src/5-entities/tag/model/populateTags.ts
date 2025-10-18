@@ -4,8 +4,9 @@ import toArray from 'lodash/toArray'
 import { int2hex, getColorForString } from '6-shared/helpers/color'
 import { sendEvent } from '6-shared/helpers/tracking'
 import tagIcons from '6-shared/tagIcons.json'
-import { tagIconsSvg } from '6-shared/tagIconsSvg'
+import noCategoryIconUrl from '6-shared/icons/no_category-icon.svg'
 import { TUserSettings } from '5-entities/userSettings/userSettings'
+import { tagIconsSvg } from '6-shared/tagIconsSvg'
 import { nullTag } from './makeTag'
 
 export type TTagPopulated = TTag & {
@@ -80,7 +81,9 @@ function getName(title: string) {
 }
 
 function getSymbol(tag: TTag, userSettings: TUserSettings) {
-  if (tag.id === 'null') return '?'
+  if (tag.id === 'null') {
+    return userSettings.zenmoneyIcons ? noCategoryIconUrl : '?'
+  }
   if (tag.icon) {
     if (userSettings.zenmoneyIcons && tagIconsSvg[tag.icon]) {
       return tagIconsSvg[tag.icon]
