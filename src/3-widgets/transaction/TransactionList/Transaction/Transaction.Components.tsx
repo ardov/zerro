@@ -77,7 +77,7 @@ export const Tags: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
   switch (trType) {
     case 'income':
     case 'outcome':
-      if (!tr.tag)
+      if (!tr.tag?.length)
         return (
           <TagsWrapper {...rest}>
             <NoCategory>{t('noCategory')}</NoCategory>

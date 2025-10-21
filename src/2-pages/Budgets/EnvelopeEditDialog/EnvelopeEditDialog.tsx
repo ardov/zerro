@@ -65,7 +65,7 @@ export const EnvelopeEditDialog: FC = () => {
       visibility: envelope?.visibility || envelopeVisibility.auto,
       carryNegatives: envelope?.carryNegatives || false,
       keepIncome: envelope?.keepIncome || false,
-      color: envelope?.colorHex || null,
+      colorHex: envelope?.colorHex || null,
       group: envelope?.group || '',
       comment: envelope?.comment || '',
       currency: envelope?.currency || defaultCurrency,
@@ -119,8 +119,8 @@ export const EnvelopeEditDialog: FC = () => {
                 endAdornment: (
                   <InputAdornment position="end">
                     <Color
-                      value={values.color}
-                      onChange={v => setFieldValue('color', v)}
+                      value={values.colorHex}
+                      onChange={v => setFieldValue('colorHex', v)}
                     />
                   </InputAdornment>
                 ),
