@@ -268,7 +268,7 @@ const tagsChildren = {
 // skip for now
 
 // Transactions
-const since: TISODate = '1800-01-01'
+const since: TISODate = '2019-01-01'
 
 const transactions = [
   // Salary transactions
