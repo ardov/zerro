@@ -1,25 +1,25 @@
-import type { TTransaction, TTransactionId } from '6-shared/types'
+import type { TTransactionId } from '6-shared/types'
 
 import React, { FC } from 'react'
 import styled from '@emotion/styled'
 import { Theme, TypographyVariant } from '@mui/material'
-import { sendEvent } from '6-shared/helpers/tracking'
-import { TrType } from '5-entities/transaction'
-import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'
 import { useContextMenu } from '6-shared/hooks/useContextMenu'
+import { trModel } from '5-entities/transaction'
+import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'
 
 export type TTransactionProps = {
   id: TTransactionId
   isChecked: boolean
   isOpened: boolean
   isInSelectionMode: boolean
-  transaction: TTransaction
-  type: TrType
   // Actions
   onOpen?: (id: TTransactionId) => void
   onToggle?: (id: TTransactionId) => void
   onPayeeClick?: (payee: string) => void
-  onContextMenu?: (event: React.MouseEvent | React.TouchEvent) => void
+  onContextMenu?: (
+    event: React.MouseEvent | React.TouchEvent,
+    id: TTransactionId
+  ) => void
 }
 
 export const Transaction: FC<TTransactionProps> = props => {
@@ -28,8 +28,6 @@ export const Transaction: FC<TTransactionProps> = props => {
     isChecked,
     isOpened,
     isInSelectionMode,
-    transaction,
-    type,
     onOpen,
     onToggle,
     onPayeeClick: onFilterByPayee,
@@ -38,10 +36,15 @@ export const Transaction: FC<TTransactionProps> = props => {
 
   const propsToPass = useContextMenu({
     onClick: () => onOpen?.(id),
-    onContextMenu,
+    onContextMenu: event => onContextMenu?.(event, id),
   })
-  const tr = transaction
-  const trType = type
+  const tr = trModel.useTransaction(id)
+  const getTrType = trModel.useTrTypeGetter()
+  if (!tr) {
+    console.warn('Transaction not found', id)
+    return null
+  }
+  const trType = getTrType(tr)
   const { deleted } = tr
 
   // sendEvent('Transaction: open context menu')

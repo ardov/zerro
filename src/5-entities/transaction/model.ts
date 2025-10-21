@@ -1,31 +1,45 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { compareTrDates, isDeleted } from './helpers'
-import { RootState, TSelector } from 'store'
+import { compareTrDates, getType, isDeleted, TrType } from './helpers'
+import { TSelector } from 'store'
 import { withPerf } from '6-shared/helpers/performance'
-import { TISODate } from '6-shared/types'
+import { ById, TISODate, TTransaction, TTransactionId } from '6-shared/types'
 import { toISODate } from '6-shared/helpers/date'
+import { getDebtAccountId } from 'store/data/selectors'
 
-export const getTransactionsById = (state: RootState) =>
-  state.data.current.transaction
+export const getTransactionsById: TSelector<ById<TTransaction>> = state => {
+  return state.data.current.transaction
+}
 
-/**
- * Transactions sorted from newest to oldest
- */
-export const getSortedTransactions = createSelector(
+/** 🟢 Transaction IDs sorted from oldest to newest */
+export const getTransactionIds: TSelector<TTransactionId[]> = createSelector(
   [getTransactionsById],
-  withPerf('getSortedTransactions', transactions =>
-    Object.values(transactions).sort(compareTrDates)
+  withPerf('getTransactionIds', transactions =>
+    Object.values(transactions)
+      .sort(compareTrDates)
+      .reverse()
+      .map(tr => tr.id)
   )
 )
 
-/**
- * Transactions sorted from oldest to newest without deleted
- */
+/** 🔴 Transactions sorted from oldest to newest without deleted */
 export const getTransactionsHistory = createSelector(
-  [getSortedTransactions],
+  [getTransactionsById],
   withPerf('getTransactionsHistory', transactions =>
-    transactions.filter(tr => !isDeleted(tr)).reverse()
+    Object.values(transactions)
+      .filter(tr => !isDeleted(tr))
+      .sort(compareTrDates)
+      .reverse()
   )
+)
+
+// NEW ID-BASED SELECTORS
+
+/** 🟢 Get a single transaction by ID (memoized) */
+export const getTransaction: TSelector<
+  TTransaction | undefined,
+  TTransactionId
+> = createSelector([getTransactionsById, (_, id) => id], (transactions, id) =>
+  id ? transactions[id] : undefined
 )
 
 export const getHistoryStart: TSelector<TISODate> = createSelector(
@@ -40,3 +54,8 @@ export const getHistoryStart: TSelector<TISODate> = createSelector(
     return firstTr.date
   }
 )
+
+export const getTrTypeGetter: TSelector<(tr: TTransaction) => TrType> =
+  createSelector([getDebtAccountId], debtId => {
+    return (tr: TTransaction) => getType(tr, debtId)
+  })

@@ -65,7 +65,7 @@ export type TransactionPreviewProps = {
 }
 
 export const TransactionPreview: FC<TransactionPreviewProps> = props => {
-  const transaction = trModel.useTransactions()[props.id]
+  const transaction = trModel.useTransaction(props.id)
   return transaction ? <TransactionContent {...props} /> : <TrEmptyState />
 }
 
@@ -79,7 +79,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
   const onRestore = () => dispatch(trModel.restoreTransaction(id))
   // onSplit: id => dispatch(splitTransfer(id)), // does not work
 
-  const tr = trModel.useTransactions()[id]
+  const tr = trModel.useTransaction(id)!
   const trType = trModel.getType(tr)
   const incomeAccount = accountModel.usePopulatedAccounts()[tr.incomeAccount]
   const outcomeAccount = accountModel.usePopulatedAccounts()[tr.outcomeAccount]

@@ -3,6 +3,7 @@ import {
   UnknownAction,
   ThunkAction,
   ThunkDispatch,
+  createSelector,
 } from '@reduxjs/toolkit'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 import { tokenStorage } from '6-shared/api/tokenStorage'
@@ -33,7 +34,10 @@ export type AppThunk<ReturnType = void> = ThunkAction<
   unknown,
   UnknownAction
 >
-export type TSelector<T> = (state: RootState) => T
+export type TSelector<T, Argument = undefined> = (
+  state: RootState,
+  argument?: Argument
+) => T
 
 // App hooks
 export type AppDispatch = ThunkDispatch<RootState, any, UnknownAction> // typeof store.dispatch

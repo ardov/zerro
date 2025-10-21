@@ -4,9 +4,11 @@ import { compareTrDates, getType, isViewed } from './helpers'
 import { makeTransaction } from './makeTransaction'
 import {
   getHistoryStart,
-  getSortedTransactions,
   getTransactionsById,
+  getTransaction,
   getTransactionsHistory,
+  getTransactionIds,
+  getTrTypeGetter,
 } from './model'
 import {
   deleteTransactions,
@@ -18,22 +20,33 @@ import {
   recreateTransaction,
   bulkEditTransactions,
 } from './thunks'
+import { TTransactionId } from '6-shared/types'
 
 export type { TransactionPatch } from './thunks'
 export type { TrCondition } from './filtering'
 export { TrType } from './helpers'
 
 export const trModel = {
-  // Selectors
-  getTransactions: getTransactionsById,
-  getSortedTransactions,
+  // Existing selectors (for backward compatibility)
+  getTransactionsById,
   getTransactionsHistory,
   getHistoryStart,
 
-  // Hooks
+  // New ID-based selectors
+  getTransactionIds,
+  // getTransaction,
+
+  // Existing hooks (for backward compatibility)
   useTransactions: () => useAppSelector(getTransactionsById),
-  useSortedTransactions: () => useAppSelector(getSortedTransactions),
   useTransactionsHistory: () => useAppSelector(getTransactionsHistory),
+
+  // New ID-based hooks
+  useSortedTransactionIds: () => useAppSelector(getTransactionIds),
+  useTransaction: (id: TTransactionId) =>
+    useAppSelector(state => getTransaction(state, id)),
+
+  // Helper hooks
+  useTrTypeGetter: () => useAppSelector(getTrTypeGetter),
 
   // Helpers
   compareTrDates,

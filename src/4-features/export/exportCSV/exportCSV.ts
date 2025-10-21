@@ -17,7 +17,7 @@ const getPopulatedTransactions = createSelector(
     instrumentModel.getInstruments,
     accountModel.getAccounts,
     tagModel.getPopulatedTags,
-    trModel.getTransactions,
+    trModel.getTransactionsById,
   ],
   (instruments, accounts, tags, transactions) => {
     const result: { [id: string]: PopulatedTransaction } = {}

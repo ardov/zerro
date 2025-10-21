@@ -18,7 +18,7 @@ export { TrFilterMode } from './2 - sortedActivity'
 export const balances = {
   // Selectors
   monthList: getMonthList,
-  rawActivity: getRawActivity,
+  // rawActivity: getRawActivity,
   activity: getActivity,
   sortedActivity: getSortedActivity,
   envData: getEnvMetrics,
