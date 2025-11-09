@@ -425,6 +425,7 @@
     "export": "Экспорт",
     "downloadCSV": "Скачать CSV",
     "fullBackup": "Полный бэкап",
+    "downloadJSON": "Скачать JSON",
     "darkMode": "Тёмная тема",
     "lightMode": "Светлая тема",
     "reloadData": "Перезагрузить данные",
