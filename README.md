@@ -4,7 +4,7 @@
 
 Zerro syncs with your ZenMoney account and lets you plan every koruna, euro or dollar using YNAB-style envelope budgets, savings goals and clear analytics.
 
-[Channel with updates](https://t.me/zerroapp) | [User chat](https://t.me/zerroapp_chat)
+[Channel with updates](https://t.me/zerroapp) | [User chat](https://t.me/zerrochat)
 
 ## Main features
 
@@ -17,13 +17,13 @@ Zerro syncs with your ZenMoney account and lets you plan every koruna, euro or d
 
 ## Links
 
-- [Zerro](https://zerro.app/) / [updates](https://t.me/zerroapp) / [chat](https://t.me/zerroapp_chat)
+- [Zerro](https://zerro.app/) / [updates](https://t.me/zerroapp) / [chat](https://t.me/zerrochat)
 - [ZenMoney](https://zenmoney.app/) + [API documentation](https://github.com/zenmoney/ZenPlugins/wiki/ZenMoney-API)
 - [YNAB](https://www.youneedabudget.com/) — they are good at explaining the concept of envelope budgeting
 
 ## Contributing
 
-If you want to contribute, let's discuss the idea first here in issues or in [chat](https://t.me/zerroapp_chat)/[dm](https://t.me/ardov). I'm open to suggestions and ideas but I don't want to waste your time on things that don't fit the product 🖤
+If you want to contribute, let's discuss the idea first here in issues or in [chat](https://t.me/zerrochat)/[dm](https://t.me/ardov). I'm open to suggestions and ideas but I don't want to waste your time on things that don't fit the product 🖤
 
 ### Run locally
 
