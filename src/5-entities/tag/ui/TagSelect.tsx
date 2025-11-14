@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { tagModel, TagTreeNode, TTagPopulated } from '5-entities/tag'
 import { Box, Autocomplete, TextField } from '@mui/material'
-import { EmojiIcon } from '6-shared/ui/EmojiIcon'
+import { TagIcon } from '6-shared/ui/TagIcon'
 import { TagChip } from './TagChip'
 import ru from 'convert-layout/ru'
 
@@ -57,7 +57,7 @@ export const TagSelect: FC<TagSelectProps> = props => {
       getOptionLabel={tag => tags[tag].name}
       renderOption={(props, tag) => (
         <Box component="li" {...props}>
-          <EmojiIcon
+          <TagIcon
             symbol={tags[tag].symbol}
             mr={2}
             ml={tags[tag].parent ? 5 : 0}

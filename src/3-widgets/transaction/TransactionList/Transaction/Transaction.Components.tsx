@@ -3,7 +3,7 @@ import React, { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from '@emotion/styled'
 import { Typography } from '@mui/material'
-import { EmojiIcon } from '6-shared/ui/EmojiIcon'
+import { TagIcon } from '6-shared/ui/TagIcon'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { useAppSelector } from 'store'
 import { accountModel } from '5-entities/account'
@@ -41,7 +41,7 @@ export const Symbol: FC<SymbolProps> = ({
   const { symbol, color } = getSymAndColor(trType, tag)
   return (
     <SymbolWrapper>
-      <EmojiIcon
+      <TagIcon
         symbol={symbol}
         showCheckBox={isInSelectionMode}
         checked={isChecked}

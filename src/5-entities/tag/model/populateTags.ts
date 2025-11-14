@@ -4,12 +4,15 @@ import toArray from 'lodash/toArray'
 import { int2hex, getColorForString } from '6-shared/helpers/color'
 import { sendEvent } from '6-shared/helpers/tracking'
 import tagIcons from '6-shared/tagIcons.json'
+import noCategoryIconUrl from '6-shared/icons/no_category-icon.svg'
+import { TUserSettings } from '5-entities/userSettings/userSettings'
+import { tagIconsSvg } from '6-shared/tagIconsSvg'
 import { nullTag } from './makeTag'
 
 export type TTagPopulated = TTag & {
   name: string // Tag name without emoji
   uniqueName: string // If name not unique adds parent name
-  symbol: string // Emoji
+  symbol: string // Emoji string or SVG URL
   children: TTagId[]
   colorHEX: string | null
   colorGenerated: string // Color generated from name
@@ -20,15 +23,15 @@ export type TTagPopulated = TTag & {
   group?: string | null
 }
 
-export function populateTags(rawTags: ById<TTag>) {
+export function populateTags(rawTags: ById<TTag>, userSettings: TUserSettings) {
   let tags: {
     [x: string]: TTagPopulated
-  } = { null: makePopulatedTag(nullTag) }
+  } = { null: makePopulatedTag(nullTag, userSettings) }
   let names: { [key: string]: number } = {}
 
   for (const id in rawTags) {
     // Add name, symbol and colorHEX
-    const populated = makePopulatedTag(rawTags[id])
+    const populated = makePopulatedTag(rawTags[id], userSettings)
     tags[id] = populated
     let name = populated.name
     names[name] = names[name] ? names[name] + 1 : 1
@@ -49,7 +52,10 @@ export function populateTags(rawTags: ById<TTag>) {
   return tags
 }
 
-function makePopulatedTag(tag: TTag): TTagPopulated {
+function makePopulatedTag(
+  tag: TTag,
+  userSettings: TUserSettings
+): TTagPopulated {
   const colorHEX = int2hex(tag.color)
   const colorGenerated = getColorForString(tag.title)
   return {
@@ -57,7 +63,7 @@ function makePopulatedTag(tag: TTag): TTagPopulated {
     children: [],
     name: getName(tag.title),
     uniqueName: getName(tag.title),
-    symbol: getSymbol(tag),
+    symbol: getSymbol(tag, userSettings),
     colorHEX,
     colorGenerated,
     colorDisplay: colorHEX || colorGenerated,
@@ -74,10 +80,14 @@ function getName(title: string) {
   }
 }
 
-function getSymbol(tag: TTag) {
-  if (tag.id === 'null') return '?'
+function getSymbol(tag: TTag, userSettings: TUserSettings) {
+  if (tag.id === 'null') {
+    return userSettings.zenmoneyIcons ? noCategoryIconUrl : '?'
+  }
   if (tag.icon) {
-    if (tagIcons[tag.icon]) {
+    if (userSettings.zenmoneyIcons && tagIconsSvg[tag.icon]) {
+      return tagIconsSvg[tag.icon]
+    } else if (!userSettings.zenmoneyIcons && tagIcons[tag.icon]) {
       return tagIcons[tag.icon]
     } else {
       sendEvent('Tags: UnknownNames: ' + tag.icon)

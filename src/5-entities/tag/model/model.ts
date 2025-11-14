@@ -1,4 +1,5 @@
 import type { Modify } from '6-shared/types'
+import { getUserSettings } from '../../userSettings/userSettings'
 import type { TTagPopulated } from './populateTags'
 import { createSelector } from '@reduxjs/toolkit'
 import { RootState } from 'store'
@@ -6,7 +7,7 @@ import { populateTags } from './populateTags'
 
 // SELECTORS
 export const getTags = (state: RootState) => state.data.current.tag
-export const getPopulatedTags = createSelector([getTags], populateTags)
+export const getPopulatedTags = createSelector([getTags, getUserSettings], populateTags)
 
 // TODO below are deprecated methods
 
