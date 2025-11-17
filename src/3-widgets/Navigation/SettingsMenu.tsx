@@ -39,8 +39,11 @@ import { resetData } from 'store/data'
 import { userSettingsModel } from '5-entities/userSettings'
 import { useRegularSync } from '3-widgets/RegularSyncHandler'
 import { logOut } from '4-features/authorization'
-import { exportCSV } from '4-features/export/exportCSV'
-import { exportJSON } from '4-features/export/exportJSON'
+import {
+  exportCSV,
+  exportJSON,
+  exportSimpleJSON,
+} from '4-features/export'
 import { clearLocalData } from '4-features/localData'
 import { convertZmBudgetsToZerro } from '4-features/budget/convertZmBudgetsToZerro'
 import { registerPopover } from '6-shared/historyPopovers'
@@ -96,6 +99,7 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
       <Divider sx={{ opacity: '0.6' }} />
       <ListSubheader>{t('export')}</ListSubheader>
       <ExportCsvItem />
+      <ExportSimpleJsonItem />
       <ExportJsonItem />
       <Divider sx={{ opacity: '0.6' }} />
       <LangItem onClose={props.onClose} />
@@ -127,16 +131,33 @@ function ExportCsvItem() {
 function ExportJsonItem() {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
-  const handleExportCSV = () => {
+  const handleExportJSON = () => {
     sendEvent('Settings: export json')
     dispatch(exportJSON)
   }
   return (
-    <MenuItem onClick={handleExportCSV}>
+    <MenuItem onClick={handleExportJSON}>
       <ListItemIcon>
         <SaveAltIcon />
       </ListItemIcon>
       <ListItemText>{t('fullBackup')}</ListItemText>
+    </MenuItem>
+  )
+}
+
+function ExportSimpleJsonItem() {
+  const { t } = useTranslation('settings')
+  const dispatch = useAppDispatch()
+  const handleExportSimpleJSON = () => {
+    sendEvent('Settings: export simple json')
+    dispatch(exportSimpleJSON)
+  }
+  return (
+    <MenuItem onClick={handleExportSimpleJSON}>
+      <ListItemIcon>
+        <SaveAltIcon />
+      </ListItemIcon>
+      <ListItemText>{t('downloadJSON')}</ListItemText>
     </MenuItem>
   )
 }
