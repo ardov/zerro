@@ -15,6 +15,7 @@ import {
   MoreHorizIcon,
   AccountBalanceWalletIcon,
   GlobeIcon,
+  TagIcon,
 } from '6-shared/ui/Icons'
 import {
   Divider,
@@ -83,9 +84,11 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
       <ThemeItem onClose={props.onClose} />
       <ReloadDataItem onClose={props.onClose} />
       <AutoSyncItem />
-      <IconModeItem />
       {isExpanded ? (
-        <BudgetSettingsItem />
+        <>
+          <IconModeItem />
+          <BudgetSettingsItem />
+        </>
       ) : (
         <MenuItem onClick={() => setExpanded(true)}>
           <ListItemIcon>
@@ -269,20 +272,20 @@ function AutoSyncItem() {
 }
 
 function IconModeItem() {
+  const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
-  const { zenmoneyIcons } = userSettingsModel.useUserSettings()
+  const { emojiIcons } = userSettingsModel.useUserSettings()
   const handleClick = () => {
-    const next = !zenmoneyIcons
-    sendEvent(`Settings: zenmoney icons set to ${next}`)
-    dispatch(userSettingsModel.patch({ zenmoneyIcons: next }))
+    const next = !emojiIcons
+    sendEvent(`Settings: emoji icons set to ${next}`)
+    dispatch(userSettingsModel.patch({ emojiIcons: next }))
   }
   return (
     <MenuItem onClick={handleClick}>
       <ListItemIcon>
-        <AutoAwesomeIcon />
+        <TagIcon />
       </ListItemIcon>
-      <ListItemText>Zenmoney icons</ListItemText>
-      <Switch edge="end" checked={zenmoneyIcons} />
+      <ListItemText>{t(emojiIcons ? 'useIcons' : 'useEmojis')}</ListItemText>
     </MenuItem>
   )
 }

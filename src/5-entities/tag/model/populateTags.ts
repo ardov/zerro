@@ -81,17 +81,18 @@ function getName(title: string) {
 }
 
 function getSymbol(tag: TTag, userSettings: TUserSettings) {
+  const useSvgIcons = !userSettings.emojiIcons
   if (tag.id === 'null') {
-    return userSettings.zenmoneyIcons ? noCategoryIconUrl : '?'
+    return useSvgIcons ? noCategoryIconUrl : '?'
   }
   if (tag.icon) {
-    if (userSettings.zenmoneyIcons && tagIconsSvg[tag.icon]) {
+    if (useSvgIcons && tagIconsSvg[tag.icon]) {
       return tagIconsSvg[tag.icon]
-    } else if (!userSettings.zenmoneyIcons && tagIcons[tag.icon]) {
-      return tagIcons[tag.icon]
-    } else {
-      sendEvent('Tags: UnknownNames: ' + tag.icon)
     }
+    if (!useSvgIcons && tagIcons[tag.icon]) {
+      return tagIcons[tag.icon]
+    }
+    sendEvent('Tags: UnknownNames: ' + tag.icon)
   }
   const titleArr = toArray(tag.title)
   if (isEmoji(titleArr[0])) return titleArr[0]

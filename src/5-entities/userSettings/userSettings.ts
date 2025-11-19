@@ -14,7 +14,7 @@ export type TUserSettings = {
   preferZmBudgets: boolean
 
   /** Use SVG icons instead of emoji for tags/categories */
-  zenmoneyIcons: boolean
+  emojiIcons: boolean
 }
 export type TUserSettingsPatch = Partial<TUserSettings>
 export type TStoredUserSettings = Partial<TUserSettings>
@@ -29,7 +29,7 @@ export const getUserSettings: TSelector<TUserSettings> = createSelector(
   raw => ({
     sawMigrationAlert: raw.sawMigrationAlert ?? false,
     preferZmBudgets: raw.preferZmBudgets ?? false,
-    zenmoneyIcons: raw.zenmoneyIcons ?? false,
+    emojiIcons: raw.emojiIcons ?? false,
   })
 )
 
