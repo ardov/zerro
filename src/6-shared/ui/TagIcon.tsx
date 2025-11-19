@@ -1,4 +1,5 @@
-import React from 'react'
+import { getMostContrast } from '6-shared/helpers/color'
+import { Modify } from '6-shared/types'
 import {
   Box,
   BoxProps,
@@ -7,12 +8,16 @@ import {
   SxProps,
   Theme,
 } from '@mui/material'
-import { Modify } from '6-shared/types'
+import React from 'react'
 
-const sizes = { s: 32, m: 40 }
-const fonts = { s: '1rem', m: '1.5rem' }
+const emojiSizes = { s: 32, m: 40 }
+const emojiFonts = { s: '1rem', m: '1.5rem' }
+const svgSizes = { s: 20, m: 24 }
+const isSvgUrl = (symbol: string): boolean => {
+  return symbol.startsWith('data:image/svg') || symbol.includes('.svg')
+}
 
-export type EmojiIconProps = Modify<
+export type TagIconProps = Modify<
   BoxProps,
   {
     symbol: string
@@ -26,7 +31,7 @@ export type EmojiIconProps = Modify<
   }
 >
 
-export function EmojiIcon(props: EmojiIconProps) {
+export function TagIcon(props: TagIconProps) {
   const {
     symbol,
     color,
@@ -39,10 +44,11 @@ export function EmojiIcon(props: EmojiIconProps) {
     ...rest
   } = props
   const isInteractive = !!onChange
+  const isSvg = isSvgUrl(symbol)
 
   const symbolSx: SxProps<Theme> = {
-    width: sizes[size],
-    height: sizes[size],
+    width: emojiSizes[size],
+    height: emojiSizes[size],
     flexShrink: 0,
     color: theme =>
       theme.palette.getContrastText(color || theme.palette.background.paper),
@@ -76,13 +82,32 @@ export function EmojiIcon(props: EmojiIconProps) {
     },
 
     '& .emoji': {
-      fontSize: fonts[size],
+      fontSize: emojiFonts[size],
     },
     '&:hover .emoji': {
       opacity: isInteractive ? 0 : 1,
       transition: '.2s',
     },
     '&:not(:hover) .emoji': {
+      opacity: showCheckBox || checked ? 0 : 1,
+      transition: '.2s',
+    },
+
+    '& .svg-icon': {
+      width: svgSizes[size],
+      height: svgSizes[size],
+      // Make SVG white on dark backgrounds
+      filter: theme => {
+        const bgColor = color || theme.palette.background.paper
+        const shouldInvert = getMostContrast(bgColor) === '#ffffff'
+        return shouldInvert ? 'brightness(0) invert(1)' : 'none'
+      },
+    },
+    '&:hover .svg-icon': {
+      opacity: isInteractive ? 0 : 1,
+      transition: '.2s',
+    },
+    '&:not(:hover) .svg-icon': {
       opacity: showCheckBox || checked ? 0 : 1,
       transition: '.2s',
     },
@@ -102,7 +127,11 @@ export function EmojiIcon(props: EmojiIconProps) {
         rest.sx,
       ]}
     >
-      <span className="emoji">{symbol}</span>
+      {isSvg ? (
+        <img className="svg-icon" src={symbol} alt="" />
+      ) : (
+        <span className="emoji">{symbol}</span>
+      )}
       {onChange && (
         <Checkbox
           className="checkbox"

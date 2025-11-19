@@ -15,6 +15,7 @@ import {
   MoreHorizIcon,
   AccountBalanceWalletIcon,
   GlobeIcon,
+  TagIcon,
 } from '6-shared/ui/Icons'
 import {
   Divider,
@@ -84,7 +85,10 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
       <ReloadDataItem onClose={props.onClose} />
       <AutoSyncItem />
       {isExpanded ? (
-        <BudgetSettingsItem />
+        <>
+          <IconModeItem />
+          <BudgetSettingsItem />
+        </>
       ) : (
         <MenuItem onClick={() => setExpanded(true)}>
           <ListItemIcon>
@@ -263,6 +267,25 @@ function AutoSyncItem() {
       </ListItemIcon>
       <ListItemText>{t('regularSync')}</ListItemText>
       <Switch edge="end" checked={regular} />
+    </MenuItem>
+  )
+}
+
+function IconModeItem() {
+  const { t } = useTranslation('settings')
+  const dispatch = useAppDispatch()
+  const { emojiIcons } = userSettingsModel.useUserSettings()
+  const handleClick = () => {
+    const next = !emojiIcons
+    sendEvent(`Settings: emoji icons set to ${next}`)
+    dispatch(userSettingsModel.patch({ emojiIcons: next }))
+  }
+  return (
+    <MenuItem onClick={handleClick}>
+      <ListItemIcon>
+        <TagIcon />
+      </ListItemIcon>
+      <ListItemText>{t(emojiIcons ? 'useIcons' : 'useEmojis')}</ListItemText>
     </MenuItem>
   )
 }

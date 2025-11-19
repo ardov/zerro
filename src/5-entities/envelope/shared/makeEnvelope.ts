@@ -19,7 +19,7 @@ export type TEnvelope = {
 
   name: string // derived
   originalName: string // ZM entity title
-  symbol: string // From ZM entity
+  symbol: string // From ZM entity - emoji string or SVG URL
   colorHex: string | null // for tags only
   colorGenerated: string // generated based on title
   colorDisplay: string // color to display
