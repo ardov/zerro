@@ -1,11 +1,18 @@
 import { getMostContrast } from '6-shared/helpers/color'
 import { Modify } from '6-shared/types'
-import { Box, BoxProps, Checkbox, CheckboxProps, SxProps, Theme, } from '@mui/material'
+import {
+  Box,
+  BoxProps,
+  Checkbox,
+  CheckboxProps,
+  SxProps,
+  Theme,
+} from '@mui/material'
 import React from 'react'
 
 const emojiSizes = { s: 32, m: 40 }
 const emojiFonts = { s: '1rem', m: '1.5rem' }
-const svgSizes = { s: 16, m: 20 }
+const svgSizes = { s: 20, m: 24 }
 const isSvgUrl = (symbol: string): boolean => {
   return symbol.startsWith('data:image/svg') || symbol.includes('.svg')
 }
@@ -90,10 +97,11 @@ export function TagIcon(props: TagIconProps) {
       width: svgSizes[size],
       height: svgSizes[size],
       // Make SVG white on dark backgrounds
-      filter:
-        color && getMostContrast(color) === '#ffffff'
-          ? 'brightness(0) invert(1)'
-          : 'none',
+      filter: theme => {
+        const bgColor = color || theme.palette.background.paper
+        const shouldInvert = getMostContrast(bgColor) === '#ffffff'
+        return shouldInvert ? 'brightness(0) invert(1)' : 'none'
+      },
     },
     '&:hover .svg-icon': {
       opacity: isInteractive ? 0 : 1,
