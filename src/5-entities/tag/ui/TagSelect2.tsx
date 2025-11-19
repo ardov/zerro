@@ -19,7 +19,7 @@ import {
   ListItemProps,
 } from '@mui/material'
 import { AddIcon } from '6-shared/ui/Icons'
-import { EmojiIcon } from '6-shared/ui/EmojiIcon'
+import { TagIcon } from '6-shared/ui/TagIcon'
 import { useTranslation } from 'react-i18next'
 import { nullTag } from '../model/makeTag'
 
@@ -209,7 +209,7 @@ const TagOption: FC<TagOptionProps> = ({ tag, isChild, onClick, selected }) => {
 
   return (
     <ListItemButton ref={ref} onClick={onClick} selected={selected}>
-      <EmojiIcon symbol={tag.symbol} mr={2} ml={isChild ? 5 : 0} />
+      <TagIcon symbol={tag.symbol} mr={2} ml={isChild ? 5 : 0} />
       <ListItemText primary={tag.name} />
     </ListItemButton>
   )

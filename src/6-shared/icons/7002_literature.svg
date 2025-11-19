@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg
+PUBLIC "-//W3C//DTD SVG 1.1//EN"
+       "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
+ <path clip-rule="evenodd" d="M12.75 8.75V17.5H19.5V6.5H15C13.7574 6.5 12.75 7.50736 12.75 8.75ZM11.25 17.5V8.75C11.25 7.50736 10.2426 6.5 9 6.5H4.5V17.5H11.25ZM12 19H20.25C20.6642 19 21 18.6642 21 18.25V5H15C13.7733 5 12.6842 5.58901 12 6.49964C11.3158 5.58901 10.2267 5 9 5H3V18.25C3 18.6642 3.33579 19 3.75 19H12Z" fill="#151516" fill-rule="evenodd"/>
+</svg>
