@@ -174,87 +174,159 @@ const makeTag = (tag: {
   parent?: TTagId
   showIncome?: boolean
   showOutcome?: boolean
+  icon?: keyof typeof import('../6-shared/tagIcons.json')
+  color?: number | null
 }) =>
   tagModel.makeTag({
     id: tag.title,
     user: mainUser.id,
-    color: hex2int(getColorForString(tag.title)),
+    color: tag.color ?? hex2int(getColorForString(tag.title)),
     ...tag,
   })
 
 const tags = {
   // Income
-  salary: makeTag({ title: 'Salary', showIncome: true }),
-  freelance: makeTag({ title: 'Freelance', showIncome: true }),
-  gifts: makeTag({ title: 'Gifts', showIncome: true }),
+  salary: makeTag({
+    title: 'Salary',
+    showIncome: true,
+    icon: '9002_money_bag',
+    color: hex2int('#4CAF50'),
+  }),
+  freelance: makeTag({
+    title: 'Freelance',
+    showIncome: true,
+    icon: '5505_laptop',
+    color: hex2int('#2196F3'),
+  }),
+  gifts: makeTag({
+    title: 'Gifts',
+    showIncome: true,
+    icon: '7001_gift',
+    color: hex2int('#E91E63'),
+  }),
 
   // Outcome
-  food: makeTag({ title: 'Food', showOutcome: true }),
-  transportation: makeTag({ title: 'Transportation', showOutcome: true }),
-  entertainment: makeTag({ title: 'Entertainment', showOutcome: true }),
-  shopping: makeTag({ title: 'Shopping', showOutcome: true }),
-  health: makeTag({ title: 'Health', showOutcome: true }),
-  bills: makeTag({ title: 'Bills', showOutcome: true }),
-  other: makeTag({ title: 'Other', showOutcome: true }),
+  food: makeTag({
+    title: 'Food',
+    showOutcome: true,
+    icon: '1002_diningroom',
+    color: hex2int('#FF9800'),
+  }),
+  transportation: makeTag({
+    title: 'Transportation',
+    showOutcome: true,
+    icon: '3002_cars',
+    color: hex2int('#3F51B5'),
+  }),
+  entertainment: makeTag({
+    title: 'Entertainment',
+    showOutcome: true,
+    icon: '2003_film_reel',
+    color: hex2int('#9C27B0'),
+  }),
+  shopping: makeTag({
+    title: 'Shopping',
+    showOutcome: true,
+    icon: '5006_shopping',
+    color: hex2int('#F44336'),
+  }),
+  health: makeTag({
+    title: 'Health',
+    showOutcome: true,
+    icon: '6502_pill',
+    color: hex2int('#00BCD4'),
+  }),
+  bills: makeTag({
+    title: 'Bills',
+    showOutcome: true,
+    icon: '9007_tax',
+    color: hex2int('#795548'),
+  }),
+  other: makeTag({
+    title: 'Other',
+    showOutcome: true,
+    icon: '8001_question',
+    color: hex2int('#9E9E9E'),
+  }),
 
   // Adjustment
   adjustment: makeTag({
     title: 'Adjustment',
     showIncome: true,
     showOutcome: true,
+    icon: '9003_banknotes',
+    color: hex2int('#607D8B'),
   }),
 }
 
 const tagsChildren = {
-  // Transportation
+  // Transportation (parent: 🚗 #3F51B5 - Indigo)
   publicTransport: makeTag({
     title: 'Public Transport',
     parent: tags.transportation.id,
     showOutcome: true,
+    icon: '3010_bus',
+    color: hex2int('#5C6BC0'), // Lighter indigo
   }),
   gas: makeTag({
     title: 'Gas',
     parent: tags.transportation.id,
     showOutcome: true,
+    icon: '3501_gas_station',
+    color: hex2int('#3949AB'), // Darker indigo
   }),
   taxi: makeTag({
     title: 'Taxi',
     parent: tags.transportation.id,
     showOutcome: true,
+    icon: '3004_taxi',
+    color: hex2int('#7986CB'), // Light indigo
   }),
 
-  // Food
+  // Food (parent: 🍴 #FF9800 - Orange)
   groceries: makeTag({
     title: 'Groceries',
     parent: tags.food.id,
     showOutcome: true,
+    icon: '1001_bunch_ingredients',
+    color: hex2int('#FFA726'), // Lighter orange
   }),
   restaurant: makeTag({
     title: 'Restaurant',
     parent: tags.food.id,
     showOutcome: true,
+    icon: '1016_coffee_cup',
+    color: hex2int('#FB8C00'), // Darker orange
   }),
   delivery: makeTag({
     title: 'Delivery',
     parent: tags.food.id,
     showOutcome: true,
+    icon: '2013_scooter',
+    color: hex2int('#FFB74D'), // Light orange
   }),
 
-  // Bills
+  // Bills (parent: 🧾 #795548 - Brown)
   rent: makeTag({
     title: 'Rent',
     parent: tags.bills.id,
     showOutcome: true,
+    icon: '9011_mortgage',
+    color: hex2int('#8D6E63'), // Lighter brown
   }),
   electricity: makeTag({
     title: 'Electricity',
     parent: tags.bills.id,
     showOutcome: true,
+    icon: '5503_electrical',
+    color: hex2int('#6D4C41'), // Darker brown
   }),
   internet: makeTag({
     title: 'Internet',
     parent: tags.bills.id,
     showOutcome: true,
+    icon: '8002_globe',
+    color: hex2int('#A1887F'), // Light brown
   }),
 }
 
