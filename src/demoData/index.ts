@@ -373,7 +373,7 @@ export function getDemoData(): TDiff {
 
     // Birthday Gifts
     ...generateTransactions({
-      pattern: { since, repeat: 'monthly', every: 12, offset: 340 },
+      pattern: { since, repeat: 'monthly', every: 12, offset: 0 },
       user: mainUser.id,
       tag: [[tags.gifts.id]],
       income: [100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650],
@@ -575,6 +575,16 @@ export function getDemoData(): TDiff {
       merchant: merchants.mother.id,
       outcomeAccount: accounts.cashRUB,
       comment: 'Gift for mother',
+    }),
+    // Transfer to Cash RUB
+    ...generateTransactions({
+      pattern: { since, repeat: 'monthly', every: 1, offset: 10 },
+      user: mainUser.id,
+      outcome: [50000, 4000, 6000, 20000],
+      income: [50000, 4000, 6000, 20000],
+      outcomeAccount: accounts.ccardRUB,
+      incomeAccount: accounts.cashRUB,
+      comment: 'Transfer to Cash RUB',
     }),
   ]
 
