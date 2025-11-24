@@ -9,7 +9,7 @@ import { useAppSelector } from 'store'
 import { accountModel } from '5-entities/account'
 import { TrType, trModel } from '5-entities/transaction'
 import { TTagPopulated, tagModel } from '5-entities/tag'
-import { getMerchants } from '5-entities/merchant'
+import { merchantModel } from '5-entities/merchant'
 import { SmartAmount } from '3-widgets/Amount'
 
 type HTMLDivProps = React.DetailedHTMLProps<
@@ -277,7 +277,7 @@ const Payee: FC<{
   merchant: string | null
   onClick?: (payee: string) => void
 }> = ({ payee, merchant, onClick, ...rest }) => {
-  const merchants = useAppSelector(getMerchants)
+  const merchants = merchantModel.useMerchants()
   if (!payee && !merchant) return null
   let name = merchant ? merchants[merchant]?.title : payee
   return (

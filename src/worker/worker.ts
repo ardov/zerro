@@ -6,19 +6,6 @@ import { storage } from '../6-shared/api/storage'
 import { zenmoney } from '../6-shared/api/zenmoney'
 import { convertDiff } from '../6-shared/api/zm-adapter'
 
-// import { workerMethods } from 'dataWorker'
-
-// eslint-disable-next-line no-restricted-globals
-// const ctx: Worker = self as any
-// type Action = { payload: any; type: string }
-// function dispatch(action: Action) {
-//   ctx.postMessage(action)
-//   // ctx.addEventListener('message', handleMessage)
-// }
-// function getState() {
-//   return store
-// }
-
 type LocalKey = keyof TLocalData
 const LOCAL_KEYS = [
   'serverTimestamp',

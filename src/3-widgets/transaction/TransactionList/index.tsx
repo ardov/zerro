@@ -21,7 +21,7 @@ import { GrouppedList } from './GrouppedList'
 import Filter from './TopBar/Filter'
 import Actions from './TopBar/Actions'
 import { Transaction } from './Transaction'
-import { useTrContextMenu } from '../../global/TrContextMenu'
+import { useTrContextMenu } from '3-widgets/global/TrContextMenu'
 import { useAppDispatch } from 'store'
 
 export type TTransactionListProps = {
@@ -29,7 +29,6 @@ export type TTransactionListProps = {
   opened?: TTransactionId
   transactions?: TTransaction[]
   preFilter?: TrCondition
-  // initialFilter?: TrCondition
   hideFilter?: boolean
   checkedDate?: Date | null
   initialDate?: TDateDraft
@@ -40,9 +39,8 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   const {
     onTrOpen,
     opened,
-    transactions,
+    transactions: transactionObjects,
     preFilter,
-    // initialFilter: defaultConditions,
     hideFilter = false,
     checkedDate,
     initialDate,
@@ -75,7 +73,13 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   }, [filter, preFilter])
 
   const debouncedFilter = useDebounce(resultFilter, 300)
+
+  const transactions = useMemo(
+    () => transactionObjects?.map(tr => tr.id),
+    [transactionObjects]
+  )
   const trList = useFilteredTransactions(transactions, debouncedFilter)
+
   const debtId = accountModel.useDebtAccountId()
 
   const [checked, setChecked] = useState<TTransactionId[]>([])
@@ -126,21 +130,15 @@ export const TransactionList: FC<TTransactionListProps> = props => {
         <Transaction
           key={tr.id}
           id={tr.id}
-          transaction={tr}
-          type={trModel.getType(tr, debtId)}
           isOpened={tr.id === opened}
           isChecked={checked.includes(tr.id)}
           isInSelectionMode={!!checked.length}
           onOpen={onTrOpen}
           onToggle={toggleTransaction}
           onPayeeClick={onFilterByPayee}
-          onContextMenu={e =>
+          onContextMenu={(e, id) =>
             openContextMenu(
-              {
-                id: tr.id,
-                onSelectSimilar,
-                onMarkOlderViewed,
-              },
+              { id, onSelectSimilar, onMarkOlderViewed },
               getEventPosition(e)
             )
           }
@@ -215,15 +213,19 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 }
 
 function useFilteredTransactions(
-  transactions?: TTransaction[],
+  trIds?: TTransactionId[],
   conditions?: TrCondition
 ) {
-  const allTransactions = trModel.useSortedTransactions()
+  const transactionsById = trModel.useTransactions()
+  const allTransactionIds = trModel.useSortedTransactionIds()
   const groups = useMemo(() => {
     const checker = trModel.checkRaw(conditions)
-    const list = transactions || allTransactions
-    return list.filter(checker).sort(trModel.compareTrDates)
-  }, [transactions, allTransactions, conditions])
+    const list = trIds || allTransactionIds
+    return list
+      .map(id => transactionsById[id])
+      .filter(checker)
+      .sort(trModel.compareTrDates)
+  }, [trIds, allTransactionIds, conditions, transactionsById])
   return groups
 }
 

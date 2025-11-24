@@ -10,7 +10,12 @@ import App from './App'
 import { Providers } from './Providers'
 import { registerSW } from 'virtual:pwa-register'
 
-registerSW({ immediate: true })
+registerSW({
+  immediate: true,
+  onRegisterError(error) {
+    console.error('SW registration error', error)
+  },
+})
 initSentry()
 bindWorkerToStore(store.dispatch)
 createZerroInstance(store)

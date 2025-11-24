@@ -10,7 +10,8 @@ import {
 import { makeAccount } from './shared/makeAccount'
 import { patchAccount, setInBudget } from './thunks'
 
-export type { TAccountDraft } from './thunks'
+export type { TAccountPatch } from './thunks'
+export type { TAccountDraft } from './shared/makeAccount'
 export type { TAccountPopulated } from './shared/populate'
 
 export const accountModel = {

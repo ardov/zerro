@@ -8,6 +8,7 @@ import { syncData } from '4-features/sync'
 import { convertZmToLocal, workerMethods } from 'worker'
 import { clearLocalData, saveDataLocally } from './localData'
 import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
+import { getDemoData } from 'demoData'
 
 export const logOut = (): AppThunk => (dispatch, getState) => {
   workerMethods.clearStorage()
@@ -47,6 +48,21 @@ export const loadBackup =
       tokenStorage.set(zenmoney.fakeToken)
       dispatch(setToken(zenmoney.fakeToken))
       dispatch(applyServerPatch(converted))
+      dispatch(saveDataLocally())
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+export const loadDemoData =
+  (): AppThunk<void> => async (dispatch, getState) => {
+    try {
+      const diff = getDemoData()
+      console.log(diff)
+      // TODO: maybe later make more elegant solution for local data
+      tokenStorage.set(zenmoney.fakeToken)
+      dispatch(setToken(zenmoney.fakeToken))
+      dispatch(applyServerPatch(diff))
       dispatch(saveDataLocally())
     } catch (error) {
       console.error(error)

@@ -15,7 +15,7 @@ import { TSelector } from 'store'
 import { accountModel } from '5-entities/account'
 import { trModel, TrType } from '5-entities/transaction'
 import { cleanPayee } from '5-entities/shared/cleanPayee'
-import { getMerchants } from '5-entities/merchant'
+import { merchantModel } from '5-entities/merchant'
 import { instrumentModel } from '5-entities/currency/instrument'
 
 export type TDebtor = {
@@ -31,7 +31,7 @@ export type TDebtor = {
 export const getDebtors: TSelector<ById<TDebtor>> = createSelector(
   [
     trModel.getTransactionsHistory,
-    getMerchants,
+    merchantModel.getMerchants,
     instrumentModel.getInstruments,
     accountModel.getDebtAccountId,
   ],

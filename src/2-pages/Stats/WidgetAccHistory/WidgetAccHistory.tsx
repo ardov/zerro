@@ -204,13 +204,21 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
 
     const offset =
       dataMax <= 0 ? 0 : dataMin >= 0 ? 1 : dataMax / (dataMax - dataMin)
-    const colorId = 'gradient' + acc.id
+    const colorId = 'gradient' + acc.id.replace(/[^a-zA-Z0-9]/g, '')
 
     return (
       <Paper
         style={{ overflow: 'hidden', position: 'relative', marginBottom: 8 }}
       >
-        <Box sx={{ p: 2, minWidth: 160 }}>
+        <Box
+          sx={{
+            p: 2,
+            minWidth: 160,
+            position: 'relative',
+            zIndex: 1,
+            pointerEvents: 'none',
+          }}
+        >
           <Typography variant="body2">
             <span
               style={{ textDecoration: acc.archive ? 'line-through' : 'none' }}

@@ -32,9 +32,12 @@ const Stats = lazy(() => import('2-pages/Stats'))
 const Review = lazy(() => import('2-pages/Review'))
 
 const history = createBrowserHistory()
-initTracking(history)
 
 export default function App() {
+  useEffect(() => {
+    initTracking(history)
+  }, [])
+
   const isLoggedIn = useAppSelector(getLoginState)
   const hasData = useAppSelector(state => !!getLastSyncTime(state))
   const userId = userModel.useRootUserId()
