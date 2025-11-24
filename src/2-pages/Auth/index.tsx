@@ -120,7 +120,7 @@ export default function Auth() {
               size="large"
               onClick={() => dispatch(loadDemoData())}
             >
-              Demo mode
+              {t('btnDemoMode')}
             </Button>
           </Box>
         </Fade>

@@ -6,6 +6,7 @@ export const en: typeof ru = {
     btnAbout: 'What is Zerro?',
     haveTrouble: 'Not loading?',
     btnAlternativeSignIn: 'Try this',
+    btnDemoMode: 'Demo mode',
     refresh: 'Refresh',
     refreshData: 'Refresh Data',
     leftover: 'Balance',
