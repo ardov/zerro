@@ -12,6 +12,21 @@ export default class GlobalErrorBoundary extends React.Component<{
   static getDerivedStateFromError = (error: any) => ({ hasError: true })
 
   componentDidCatch = (error: Error, errorInfo: React.ErrorInfo) => {
+    // Automatically reload the page if a chunk fails to load
+    // This usually happens after a new deployment
+    if (
+      error.message.includes('Loading chunk') ||
+      error.message.includes('dynamically imported module')
+    ) {
+      const isReloaded = sessionStorage.getItem('global_error_retry')
+      if (!isReloaded) {
+        sessionStorage.setItem('global_error_retry', 'true')
+        window.location.reload()
+        return
+      }
+      sessionStorage.removeItem('global_error_retry')
+    }
+
     sendEvent(`GlobalError: ${error.message}`)
     captureError(error, errorInfo)
   }
