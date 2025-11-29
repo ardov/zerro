@@ -124,7 +124,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   }, [onSelectSimilar, checkedDate])
 
   const groups = useMemo(() => {
-    let groups: ByDate<{ date: TISODate; transactions: JSX.Element[] }> = {}
+    let groups: ByDate<{ date: TISODate; transactions: JSX.Element[]; rawTransactions: TTransaction[] }> = {}
     trList.forEach(tr => {
       let Component = (
         <Transaction
@@ -144,8 +144,9 @@ export const TransactionList: FC<TTransactionListProps> = props => {
           }
         />
       )
-      groups[tr.date] ??= { date: tr.date, transactions: [] }
+      groups[tr.date] ??= { date: tr.date, transactions: [], rawTransactions: [] }
       groups[tr.date].transactions.push(Component)
+      groups[tr.date].rawTransactions.push(tr)
     })
     return Object.values(groups)
   }, [
