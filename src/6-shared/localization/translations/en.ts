@@ -452,6 +452,7 @@ export const en: typeof ru = {
     regularSync: 'Auto-sync',
     useIcons: 'Use icons',
     useEmojis: 'Use emojis',
+    extraCellMenu: 'Сell menu for small screens',
     useZmBudgets: 'Zenmoney budgets',
     useZmBudgetsDescription: 'Use the same budgets as Zenmoney',
     convertBudgetsFromZm: 'Convert budgets from Zenmoney',

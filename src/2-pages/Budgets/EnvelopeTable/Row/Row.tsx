@@ -130,7 +130,10 @@ export const Row: FC<EnvelopeRowProps> = props => {
             available={available}
             isChild={isChild}
             budgeted={budgeted}
+            activity={activity}
             isSelf={isSelf}
+            onBudgetClick={e => openBudgetPopover(id, e.currentTarget)}
+            onActivityClick={() => openTransactionsPopover(id)}
           />
         }
         goal={

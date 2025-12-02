@@ -87,6 +87,7 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
       {isExpanded ? (
         <>
           <IconModeItem />
+          <ExtraCellMenuItem />
           <BudgetSettingsItem />
         </>
       ) : (
@@ -286,6 +287,31 @@ function IconModeItem() {
         <TagIcon />
       </ListItemIcon>
       <ListItemText>{t(emojiIcons ? 'useIcons' : 'useEmojis')}</ListItemText>
+    </MenuItem>
+  )
+}
+
+function ExtraCellMenuItem() {
+  const { t } = useTranslation('settings')
+  const dispatch = useAppDispatch()
+  const { showExtraCellMenu } = userSettingsModel.useUserSettings()
+  const handleClick = () => {
+    sendEvent(
+      `Settings: showExtraCellMenu ${showExtraCellMenu ? 'off' : 'on'}`
+    )
+    dispatch(
+      userSettingsModel.patch({
+        showExtraCellMenu: !showExtraCellMenu,
+      })
+    )
+  }
+  return (
+    <MenuItem onClick={handleClick}>
+      <ListItemIcon>
+        <MoreHorizIcon />
+      </ListItemIcon>
+      <ListItemText>{t('extraCellMenu')}</ListItemText>
+      <Switch edge="end" checked={showExtraCellMenu} />
     </MenuItem>
   )
 }

@@ -432,6 +432,7 @@
     "regularSync": "Автосинхронизация",
     "useIcons": "Использовать иконки",
     "useEmojis": "Использовать эмодзи",
+    "extraCellMenu": "Mеню ячеек для маленьких экранов",
     "useZmBudgets": "Бюджеты Дзен-мани",
     "useZmBudgetsDescription": "Использовать те же бюджеты что и ДМ",
     "convertBudgetsFromZm": "Конвертировать бюджеты из Дзен-мани",
