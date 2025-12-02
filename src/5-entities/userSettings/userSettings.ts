@@ -15,6 +15,9 @@ export type TUserSettings = {
 
   /** Use SVG icons instead of emoji for tags/categories */
   emojiIcons: boolean
+
+  /** Shows a popover icon on mobile to access hidden budget/activity columns */
+  showExtraCellMenu: boolean
 }
 export type TUserSettingsPatch = Partial<TUserSettings>
 export type TStoredUserSettings = Partial<TUserSettings>
@@ -30,6 +33,7 @@ export const getUserSettings: TSelector<TUserSettings> = createSelector(
     sawMigrationAlert: raw.sawMigrationAlert ?? false,
     preferZmBudgets: raw.preferZmBudgets ?? false,
     emojiIcons: raw.emojiIcons ?? false,
+    showExtraCellMenu: raw.showExtraCellMenu ?? false,
   })
 )
 
