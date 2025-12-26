@@ -49,7 +49,7 @@ export function NotFunFact({ income }: { income: TFxAmount }) {
           <Balancer>
             <Typography variant="body1">
               Медианная зарплата в 2024 году в России{' '}
-              <Amount value={MEDIAN_WAGE_RUB} currency="RUB" decMode="ifAny" />{' '}
+              <Amount value={MEDIAN_WAGE_RUB} currency="RUB" decimals="ifAny" />{' '}
               по данным <Link href={MEDIAN_WAGE_SOURCE}>Сбериндекса</Link>. Это
               значит, что половина россиян получают меньше этой суммы.
             </Typography>

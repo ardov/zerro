@@ -61,7 +61,7 @@ export function IncomeCard(props: TCardProps) {
           {t('youEarned')}
         </Typography>
         <Typography variant="h4" align="center" className="green-gradient">
-          <DisplayAmount value={totalIncomeFx} noShade decMode="ifOnly" />
+          <DisplayAmount value={totalIncomeFx} noShade decimals="ifOnly" />
         </Typography>
         <Typography
           variant="body2"
@@ -70,7 +70,7 @@ export function IncomeCard(props: TCardProps) {
             color: 'text.secondary',
           }}
         >
-          <DisplayAmount value={monthlyIncome} noShade decMode="ifOnly" />{' '}
+          <DisplayAmount value={monthlyIncome} noShade decimals="ifOnly" />{' '}
           {t('perMonth')}
         </Typography>
         <NotFunFact income={totalIncomeFx} />
@@ -102,7 +102,7 @@ export function IncomeCard(props: TCardProps) {
                   <DisplayAmount
                     value={tagInfo.incomeFx}
                     noShade
-                    decMode="ifOnly"
+                    decimals="ifOnly"
                   />
                   )
                 </>

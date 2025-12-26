@@ -85,7 +85,7 @@ export const Account: FC<
             <Amount
               value={account.balance}
               currency={account.fxCode}
-              decMode="ifOnly"
+              decimals="ifOnly"
               noShade
             />
           </div>
@@ -132,7 +132,7 @@ export const Subheader: FC<
             <DisplayAmount
               month={month}
               value={amount}
-              decMode="ifOnly"
+              decimals="ifOnly"
               noShade
             />
           </b>

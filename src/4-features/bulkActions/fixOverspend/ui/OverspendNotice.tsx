@@ -53,7 +53,7 @@ export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
             month={month}
             noShade
             sign={false}
-            decMode="ifAny"
+            decimals="ifAny"
           />
           .
         </Typography>

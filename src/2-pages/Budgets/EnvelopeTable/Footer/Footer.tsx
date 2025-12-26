@@ -27,7 +27,7 @@ export const Footer: FC<FooterProps> = props => {
         color: 'text.secondary',
       }}
     >
-      <DisplayAmount value={value} decMode="ifOnly" month={month} noCurrency />
+      <DisplayAmount value={value} decimals="ifOnly" month={month} noCurrency />
     </Typography>
   )
 

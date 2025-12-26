@@ -10,8 +10,7 @@ export type AmountProps = React.DetailedHTMLProps<
   currency?: TFxCode
   sign?: boolean
   noShade?: boolean
-  decimals?: number
-  decMode?: 'always' | 'ifOnly' | 'ifAny'
+  decimals?: number | 'ifOnly' | 'ifAny'
   intProps?: React.HTMLProps<HTMLSpanElement>
   decProps?: React.HTMLProps<HTMLSpanElement>
 }
@@ -25,23 +24,16 @@ export const Amount: FC<AmountProps> = props => {
     sign,
     noShade = false,
     decimals = 2,
-    decMode = 'always',
     intProps,
     decProps,
     ...rest
   } = props
-  let dec = decimals
-  if (decMode === 'always') dec = decimals
-  else if (decMode === 'ifOnly')
-    dec = value !== 0 && value < 1 && value > -1 ? decimals : 0
-  else if (decMode === 'ifAny') dec = value % 1 ? decimals : 0
-  else throw Error('Unknown decMode ' + decMode)
-
   let str = ''
-  if (value === 0) str = formatMoney(0, currency, dec)
+  if (value === 0) str = formatMoney(0, currency, decimals)
   if (value < 0)
-    str = (sign === false ? '' : '−') + formatMoney(-value, currency, dec)
-  if (value > 0) str = (sign ? '+' : '') + formatMoney(value, currency, dec)
+    str = (sign === false ? '' : '−') + formatMoney(-value, currency, decimals)
+  if (value > 0)
+    str = (sign ? '+' : '') + formatMoney(value, currency, decimals)
   const arr = str.split(',')
   if (arr.length === 2) {
     return (

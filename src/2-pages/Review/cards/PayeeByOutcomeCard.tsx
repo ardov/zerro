@@ -51,7 +51,7 @@ export function PayeeByOutcomeCard(props: TCardProps) {
             </Typography>
             <Typography variant="body1" align="center">
               {t('spentHere ')}
-              <DisplayAmount value={outcome} noShade decMode="ifOnly" />
+              <DisplayAmount value={outcome} noShade decimals="ifOnly" />
               {t(' purchase', { count })}
             </Typography>
           </Stack>

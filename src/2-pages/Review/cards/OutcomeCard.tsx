@@ -46,7 +46,7 @@ export function OutcomeCard(props: TCardProps) {
           {t('purchaseOfTheYear', { number: i + 1 })}
         </Typography>
         <Typography variant="h4" align="center" className="red-gradient">
-          <DisplayAmount value={val} noShade decMode="ifAny" />
+          <DisplayAmount value={val} noShade decimals="ifAny" />
         </Typography>
         <Typography
           variant="body1"

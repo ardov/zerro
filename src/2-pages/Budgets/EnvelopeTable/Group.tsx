@@ -105,7 +105,7 @@ export const Group: FC<TGroupProps> = ({
         color: 'text.disabled',
       }}
     >
-      <Amount value={value} decMode="ifOnly" />
+      <Amount value={value} decimals="ifOnly" />
     </Typography>
   )
 
