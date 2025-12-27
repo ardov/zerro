@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Paper, Typography, Collapse, Link, BoxProps } from '@mui/material'
-import QRCode from 'qrcode.react'
+import { QRCodeSVG as QRCode } from 'qrcode.react'
 import { useAppTheme } from '6-shared/ui/theme'
 import { formatMoney } from '6-shared/helpers/money'
 import { formatDate } from '6-shared/helpers/date'

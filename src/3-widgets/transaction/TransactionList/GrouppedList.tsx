@@ -4,7 +4,7 @@ import {
   StaticDatePicker,
   StaticDatePickerProps,
 } from '@mui/x-date-pickers/StaticDatePicker'
-import AutoSizer, { VerticalSize } from 'react-virtualized-auto-sizer'
+import AutoSizer from 'react-virtualized-auto-sizer'
 import { ListSubheader } from '@mui/material'
 import { formatDate, parseDate } from '6-shared/helpers/date'
 import { TDateDraft, TISODate } from '6-shared/types'
@@ -75,8 +75,7 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
     <>
       <DateDialog />
       <AutoSizer disableWidth>
-        {(props: VerticalSize) => {
-          const { height } = props
+        {({ height }) => {
           if (!height) return null
           return (
             <VariableSizeList

@@ -1,6 +1,6 @@
 import { isToday, format, isYesterday, isThisYear } from 'date-fns'
-import ru from 'date-fns/locale/ru'
-import en from 'date-fns/locale/en-GB'
+import { ru } from 'date-fns/locale/ru'
+import { enGB as en } from 'date-fns/locale/en-GB'
 import { TDateDraft } from '6-shared/types'
 import { t } from 'i18next'
 import { parseDate } from './utils'
