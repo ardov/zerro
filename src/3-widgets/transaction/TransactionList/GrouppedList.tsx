@@ -55,9 +55,11 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
         value: parseDate(date),
         minDate: parseDate(groups[groups.length - 1]?.date || 0),
         maxDate: parseDate(groups[0]?.date || 0),
-        onChange: d => {
-          datePopover.close()
-          scrollToDate(d as TISODate)
+        onChange: (d: TDateDraft | null) => {
+          if (d) {
+            datePopover.close()
+            scrollToDate(d as TISODate)
+          }
         },
       })
     },
@@ -170,10 +172,10 @@ const groupStyle: React.CSSProperties = {
 //
 
 type TDateDialogProps = {
-  value: StaticDatePickerProps<TDateDraft>['value']
-  minDate?: StaticDatePickerProps<TDateDraft>['minDate']
-  maxDate?: StaticDatePickerProps<TDateDraft>['maxDate']
-  onChange: StaticDatePickerProps<TDateDraft>['onChange']
+  value: StaticDatePickerProps['value']
+  minDate?: StaticDatePickerProps['minDate']
+  maxDate?: StaticDatePickerProps['maxDate']
+  onChange: StaticDatePickerProps['onChange']
 }
 
 const dateDialog = registerPopover<TDateDialogProps>('listSateDialog', {
@@ -185,11 +187,7 @@ const DateDialog = () => {
   const { extraProps } = dateDialog.useProps()
   return (
     <SmartDialog elKey={dateDialog.key}>
-      <StaticDatePicker
-        {...extraProps}
-        openTo="day"
-        // renderInput={params => <TextField {...params} />}
-      />
+      <StaticDatePicker {...extraProps} openTo="day" />
     </SmartDialog>
   )
 }
