@@ -73,7 +73,6 @@ const Wrapper = styled.div<{ opened: boolean; deleted: boolean }>`
   display: flex;
   color: ${p => p.theme.palette.text.primary};
   padding: 12px;
-  transition: 0.1s ease-in-out;
   text-decoration: ${p =>
     p.deleted ? 'line-through ' + p.theme.palette.error.main : 'none'};
   ::before {
@@ -87,9 +86,10 @@ const Wrapper = styled.div<{ opened: boolean; deleted: boolean }>`
     background-color: ${p =>
       p.opened ? p.theme.palette.action.focus : 'transparent'};
     z-index: -1;
-    transition: 0.1s ease-in-out;
+    transition: 100ms ease-in-out;
   }
   :hover::before {
+    transition: none;
     ${p =>
       p.opened ? '' : `background-color: ${p.theme.palette.action.hover};`}
   }
