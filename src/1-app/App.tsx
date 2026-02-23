@@ -106,7 +106,9 @@ const Layout: FC<{
   return (
     <Box sx={{ display: 'flex' }}>
       {isLoggedIn && <Navigation />}
-      <Box sx={{ minHeight: '100vh', flexGrow: 1 }}>{children}</Box>
+      <Box sx={{ minHeight: '100vh', flexGrow: 1, minWidth: 0 }}>
+        {children}
+      </Box>
     </Box>
   )
 }
