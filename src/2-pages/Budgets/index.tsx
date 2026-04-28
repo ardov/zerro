@@ -14,6 +14,7 @@ import { EnvelopeTable } from './EnvelopeTable'
 import { DnDContext } from './DnD/DnDContext'
 import { SmartBudgetPopover } from './BudgetPopover'
 import { SmartGoalPopover } from './GoalPopover'
+import { SmartEnvelopeContextMenu } from './EnvelopeContextMenu'
 import { SideContent, useSideContent } from './SideContent'
 
 export default function WithMonth() {
@@ -83,6 +84,7 @@ function Budgets() {
 
       <SmartGoalPopover />
       <SmartBudgetPopover />
+      <SmartEnvelopeContextMenu />
     </>
   )
 }

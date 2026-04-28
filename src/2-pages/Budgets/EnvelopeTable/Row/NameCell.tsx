@@ -9,6 +9,7 @@ import { TFxCode } from '6-shared/types'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { getCurrencySymbol } from '6-shared/helpers/money'
 import { useFloatingInput } from '6-shared/ui/FloatingInput'
+import { useContextMenu } from '6-shared/hooks/useContextMenu'
 import { useAppDispatch } from 'store/index'
 import { envelopeModel, TEnvelope, TEnvelopeId } from '5-entities/envelope'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
@@ -21,10 +22,11 @@ export const NameCell: FC<{
   isReordering: boolean
   isDefaultVisible: boolean
   onClick?: () => void
+  onContextMenu?: (event: React.MouseEvent | React.TouchEvent) => void
 }> = memo(props => {
   const { id, symbol, colorHex, name, currency, comment, originalName } =
     props.envelope
-  const { isReordering, isDefaultVisible, isChild, isSelf, onClick } = props
+  const { isReordering, isDefaultVisible, isChild, isSelf, onClick, onContextMenu } = props
   const [displCurrency] = displayCurrency.useDisplayCurrency()
   const { t } = useTranslation('budgets')
 
@@ -37,10 +39,11 @@ export const NameCell: FC<{
     [dispatch, id]
   )
   const floating = useFloatingInput(ref, updateName)
+  const contextMenuProps = useContextMenu({ onClick, onContextMenu })
 
   return (
     <Box
-      onClick={onClick}
+      {...contextMenuProps}
       sx={{
         display: 'flex',
         alignItems: 'center',

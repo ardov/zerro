@@ -13,8 +13,10 @@ import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 
 import { DragTypes } from '2-pages/Budgets/DnD'
+import { getEventPosition } from '3-widgets/global/shared/helpers'
 import { useBudgetPopover } from '../../BudgetPopover'
 import { useGoalPopover } from '../../GoalPopover'
+import { useEnvelopeContextMenu } from '../../EnvelopeContextMenu'
 
 import { TableRow } from '../shared/shared'
 import { NameCell } from './NameCell'
@@ -48,6 +50,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
   } = props
   const openBudgetPopover = useBudgetPopover()
   const openGoalPopover = useGoalPopover()
+  const openEnvMenu = useEnvelopeContextMenu()
 
   const envelope = envelopeModel.useEnvelopes()[id]
   const envData = balances.useEnvData()[month][id]
@@ -73,6 +76,12 @@ export const Row: FC<EnvelopeRowProps> = props => {
         : 0
 
   const handleNameClick = useCallback(() => openDetails(id), [id, openDetails])
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      openEnvMenu({ id, month, isExact: isChild }, getEventPosition(e))
+    },
+    [id, month, isChild, openEnvMenu]
+  )
   const handleGoalClick: React.MouseEventHandler<HTMLButtonElement> =
     useCallback(
       e => {
@@ -103,6 +112,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
         name={
           <NameCell
             onClick={handleNameClick}
+            onContextMenu={handleContextMenu}
             envelope={envelope}
             isChild={isChild}
             isSelf={isSelf}
