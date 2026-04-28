@@ -16,6 +16,7 @@ import {
   AccountBalanceWalletIcon,
   GlobeIcon,
   TagIcon,
+  ChevronLeftIcon,
 } from '6-shared/ui/Icons'
 import {
   Divider,
@@ -87,7 +88,7 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
       {isExpanded ? (
         <>
           <IconModeItem />
-          <ExtraCellMenuItem />
+          <SlideToRevealItem />
           <BudgetSettingsItem />
         </>
       ) : (
@@ -291,31 +292,28 @@ function IconModeItem() {
   )
 }
 
-function ExtraCellMenuItem() {
+function SlideToRevealItem() {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
-  const { showExtraCellMenu } = userSettingsModel.useUserSettings()
+  const { slideToReveal } = userSettingsModel.useUserSettings()
   const handleClick = () => {
-    sendEvent(
-      `Settings: showExtraCellMenu ${showExtraCellMenu ? 'off' : 'on'}`
-    )
-    dispatch(
-      userSettingsModel.patch({
-        showExtraCellMenu: !showExtraCellMenu,
-      })
-    )
+    const next = !slideToReveal
+    sendEvent(`Settings: slide to reveal set to ${next}`)
+    dispatch(userSettingsModel.patch({ slideToReveal: next }))
   }
   return (
     <MenuItem onClick={handleClick}>
       <ListItemIcon>
-        <MoreHorizIcon />
+        <ChevronLeftIcon />
       </ListItemIcon>
-      <ListItemText>{t('extraCellMenu')}</ListItemText>
-      <Switch edge="end" checked={showExtraCellMenu} />
+      <ListItemText 
+        sx={{ whiteSpace: 'normal' }} 
+        primary={t('slideToReveal')} 
+        secondary={t('slideToRevealDescription')} />
+      <Switch edge="end" checked={slideToReveal} />
     </MenuItem>
   )
 }
-
 function BudgetSettingsItem() {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()

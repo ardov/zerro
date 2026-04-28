@@ -11,16 +11,19 @@ import { goalModel, TGoal } from '5-entities/goal'
 import { balances } from '5-entities/envBalances'
 import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
+import { userSettingsModel } from '5-entities/userSettings'
 
 import { DragTypes } from '2-pages/Budgets/DnD'
 import { useBudgetPopover } from '../../BudgetPopover'
 import { useGoalPopover } from '../../GoalPopover'
 
-import { TableRow } from '../shared/shared'
+import { Metric, useColumns } from '../models/useMetric'
+import { TableRow, useIsSmall } from '../shared/shared'
+import { RevealItem, SlideReveal } from '../SlideReveal'
 import { NameCell } from './NameCell'
 import { BudgetCell } from './BudgetCell'
 import { ActivityCell } from './ActivityCell'
-import { AvailableCell } from './AvailableCell'
+import { AvailableCell, getAvailableColor } from './AvailableCell'
 
 type EnvelopeRowProps = {
   id: TEnvelopeId
@@ -46,8 +49,12 @@ export const Row: FC<EnvelopeRowProps> = props => {
     openTransactionsPopover,
     openDetails,
   } = props
+  const { t } = useTranslation(['budgets', 'common'])
   const openBudgetPopover = useBudgetPopover()
   const openGoalPopover = useGoalPopover()
+  const isSmall = useIsSmall()
+  const { columns } = useColumns()
+  const { slideToReveal } = userSettingsModel.useUserSettings()
 
   const envelope = envelopeModel.useEnvelopes()[id]
   const envData = balances.useEnvData()[month][id]
@@ -83,6 +90,35 @@ export const Row: FC<EnvelopeRowProps> = props => {
       [id, openGoalPopover]
     )
 
+  const revealItems: RevealItem[] = []
+  if (!columns.includes(Metric.budgeted)) {
+    revealItems.push({
+      key: Metric.budgeted,
+      label: t('budget', { ns: 'common' }),
+      value: budgeted,
+      color: isSelf || !budgeted ? 'text.disabled' : 'text.primary',
+      onClick: e => openBudgetPopover(id, e.currentTarget),
+    })
+  }
+  if (!columns.includes(Metric.outcome)) {
+    revealItems.push({
+      key: Metric.outcome,
+      label: t('activity', { ns: 'common' }),
+      value: activity,
+      color: activity ? 'text.primary' : 'text.disabled',
+      onClick: () => openTransactionsPopover(id),
+    })
+  }
+  if (!columns.includes(Metric.available)) {
+    revealItems.push({
+      key: Metric.available,
+      label: t('available', { ns: 'common' }),
+      value: available,
+      color: getAvailableColor(available, isChild, !!budgeted, isSelf),
+      draggable: { type: DragTypes.amount, id, disabled: !!isSelf },
+    })
+  }
+
   return (
     <Droppable
       id={id}
@@ -90,63 +126,65 @@ export const Row: FC<EnvelopeRowProps> = props => {
       isLastVisibleChild={!!isLastVisibleChild}
       isExpanded={!!isExpanded}
     >
-      <TableRow
-        sx={{
-          position: 'relative',
-          cursor: 'pointer',
-          '&:hover': { bgcolor: 'action.hover', transition: '0.1s' },
-          '&:active': { bgcolor: 'action.focus', transition: '0.1s' },
-          '&:hover .addGoal': { opacity: 1, transition: '.3s' },
-          '&:not(:hover) .addGoal': { opacity: 0 },
-          '& > *': { py: isChild ? 0.5 : 1 },
-        }}
-        name={
-          <NameCell
-            onClick={handleNameClick}
-            envelope={envelope}
-            isChild={isChild}
-            isSelf={isSelf}
-            isDefaultVisible={isDefaultVisible}
-            isReordering={isReordering}
-          />
-        }
-        budgeted={
-          <BudgetCell
-            isSelf={isSelf}
-            value={budgeted}
-            onBudgetClick={e => openBudgetPopover(id, e.currentTarget)}
-          />
-        }
-        outcome={
-          <ActivityCell
-            value={activity}
-            onClick={e => openTransactionsPopover(id)}
-          />
-        }
-        available={
-          <AvailableCell
-            hiddenOverspend={hiddenOverspend}
-            id={id}
-            available={available}
-            isChild={isChild}
-            budgeted={budgeted}
-            activity={activity}
-            isSelf={isSelf}
-            onBudgetClick={e => openBudgetPopover(id, e.currentTarget)}
-            onActivityClick={() => openTransactionsPopover(id)}
-          />
-        }
-        goal={
-          !isSelf && (
-            <GoalButton
-              goal={goalInfo?.goal}
-              currency={envelope.currency}
-              goalProgress={goalInfo?.progress}
-              onClick={handleGoalClick}
+      <SlideReveal
+        enabled={isSmall && slideToReveal}
+        items={revealItems}
+      >
+        <TableRow
+          sx={{
+            position: 'relative',
+            cursor: 'pointer',
+            '&:hover': { bgcolor: 'action.hover', transition: '0.1s' },
+            '&:active': { bgcolor: 'action.focus', transition: '0.1s' },
+            '&:hover .addGoal': { opacity: 1, transition: '.3s' },
+            '&:not(:hover) .addGoal': { opacity: 0 },
+            '& > *': { py: isChild ? 0.5 : 1 },
+          }}
+          name={
+            <NameCell
+              onClick={handleNameClick}
+              envelope={envelope}
+              isChild={isChild}
+              isSelf={isSelf}
+              isDefaultVisible={isDefaultVisible}
+              isReordering={isReordering}
             />
-          )
-        }
-      />
+          }
+          budgeted={
+            <BudgetCell
+              isSelf={isSelf}
+              value={budgeted}
+              onBudgetClick={e => openBudgetPopover(id, e.currentTarget)}
+            />
+          }
+          outcome={
+            <ActivityCell
+              value={activity}
+              onClick={e => openTransactionsPopover(id)}
+            />
+          }
+          available={
+            <AvailableCell
+              hiddenOverspend={hiddenOverspend}
+              id={id}
+              available={available}
+              isChild={isChild}
+              budgeted={budgeted}
+              isSelf={isSelf}
+            />
+          }
+          goal={
+            !isSelf && (
+              <GoalButton
+                goal={goalInfo?.goal}
+                currency={envelope.currency}
+                goalProgress={goalInfo?.progress}
+                onClick={handleGoalClick}
+              />
+            )
+          }
+        />
+      </SlideReveal>
     </Droppable>
   )
 }
