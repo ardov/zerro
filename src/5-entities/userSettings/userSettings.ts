@@ -15,9 +15,6 @@ export type TUserSettings = {
 
   /** Use SVG icons instead of emoji for tags/categories */
   emojiIcons: boolean
-
-  /** Enable category cells to be revealed by sliding */
-  slideToReveal: boolean
 }
 export type TUserSettingsPatch = Partial<TUserSettings>
 export type TStoredUserSettings = Partial<TUserSettings>
@@ -33,7 +30,6 @@ export const getUserSettings: TSelector<TUserSettings> = createSelector(
     sawMigrationAlert: raw.sawMigrationAlert ?? false,
     preferZmBudgets: raw.preferZmBudgets ?? false,
     emojiIcons: raw.emojiIcons ?? false,
-    slideToReveal: raw.slideToReveal ?? true,
   })
 )
 

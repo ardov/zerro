@@ -6,6 +6,7 @@ import { DragTypes } from '2-pages/Budgets/DnD'
 
 const REVEAL_CELL_WIDTH = 88
 const AXIS_DECISION_THRESHOLD = 8
+const VELOCITY_THRESHOLD = 0.4 // px/ms
 
 export type RevealItem = {
   key: React.Key
@@ -34,33 +35,36 @@ export const SlideReveal: FC<SlideRevealProps> = ({
   const revealWidth = enabled ? items.length * REVEAL_CELL_WIDTH : 0
   const [offsetX, setOffsetX] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
-  const touchRef = useRef<{
+  const dragRef = useRef<{
     x: number
     y: number
     startOffset: number
     axis: 'h' | 'v' | null
+    lastX: number
+    lastTime: number
   } | null>(null)
 
   const closeReveal = useCallback(() => setOffsetX(0), [])
 
-  const handleTouchStart = (e: React.TouchEvent) => {
+  const handlePointerDown = (e: React.PointerEvent) => {
     if (!revealWidth) return
-    const touch = e.touches[0]
-    touchRef.current = {
-      x: touch.clientX,
-      y: touch.clientY,
+    e.currentTarget.setPointerCapture(e.pointerId)
+    dragRef.current = {
+      x: e.clientX,
+      y: e.clientY,
       startOffset: offsetX,
       axis: null,
+      lastX: e.clientX,
+      lastTime: Date.now(),
     }
     setIsDragging(true)
   }
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    const t = touchRef.current
+  const handlePointerMove = (e: React.PointerEvent) => {
+    const t = dragRef.current
     if (!t) return
-    const touch = e.touches[0]
-    const dx = touch.clientX - t.x
-    const dy = touch.clientY - t.y
+    const dx = e.clientX - t.x
+    const dy = e.clientY - t.y
     if (!t.axis) {
       if (
         Math.abs(dx) < AXIS_DECISION_THRESHOLD &&
@@ -70,16 +74,23 @@ export const SlideReveal: FC<SlideRevealProps> = ({
       t.axis = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v'
     }
     if (t.axis !== 'h') return
+    t.lastX = e.clientX
+    t.lastTime = Date.now()
     const next = Math.min(0, Math.max(-revealWidth, t.startOffset + dx))
     setOffsetX(next)
   }
 
-  const handleTouchEnd = () => {
-    const t = touchRef.current
+  const handlePointerUp = (e: React.PointerEvent) => {
+    const t = dragRef.current
     setIsDragging(false)
-    touchRef.current = null
+    dragRef.current = null
+    e.currentTarget.releasePointerCapture(e.pointerId)
     if (!t || t.axis !== 'h') return
-    setOffsetX(prev => (prev < -revealWidth / 2 ? -revealWidth : 0))
+    const elapsed = Date.now() - t.lastTime
+    const velocity = elapsed > 0 ? (e.clientX - t.lastX) / elapsed : 0
+    const shouldOpen =
+      velocity < -VELOCITY_THRESHOLD || offsetX < -revealWidth / 2
+    setOffsetX(shouldOpen ? -revealWidth : 0)
   }
 
   if (!revealWidth) return <>{children}</>
@@ -95,10 +106,10 @@ export const SlideReveal: FC<SlideRevealProps> = ({
           transition: isDragging ? 'none' : 'transform 0.2s ease-out',
           touchAction: 'pan-y',
         }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
       >
         {children}
         {isOpen && (
@@ -208,7 +219,7 @@ const RevealCellContent: FC<{
       {label}
     </Typography>
     <Typography variant="body2" noWrap sx={{ color }}>
-      <Amount value={value} decMode="ifOnly" />
+      <Amount value={value} decimals="ifOnly" />
     </Typography>
   </>
 )

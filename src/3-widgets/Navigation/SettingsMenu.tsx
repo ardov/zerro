@@ -16,7 +16,6 @@ import {
   AccountBalanceWalletIcon,
   GlobeIcon,
   TagIcon,
-  ChevronLeftIcon,
 } from '6-shared/ui/Icons'
 import {
   Divider,
@@ -88,7 +87,6 @@ const Settings = (props: { onClose: () => void; showLinks?: boolean }) => {
       {isExpanded ? (
         <>
           <IconModeItem />
-          <SlideToRevealItem />
           <BudgetSettingsItem />
         </>
       ) : (
@@ -292,28 +290,6 @@ function IconModeItem() {
   )
 }
 
-function SlideToRevealItem() {
-  const { t } = useTranslation('settings')
-  const dispatch = useAppDispatch()
-  const { slideToReveal } = userSettingsModel.useUserSettings()
-  const handleClick = () => {
-    const next = !slideToReveal
-    sendEvent(`Settings: slide to reveal set to ${next}`)
-    dispatch(userSettingsModel.patch({ slideToReveal: next }))
-  }
-  return (
-    <MenuItem onClick={handleClick}>
-      <ListItemIcon>
-        <ChevronLeftIcon />
-      </ListItemIcon>
-      <ListItemText 
-        sx={{ whiteSpace: 'normal' }} 
-        primary={t('slideToReveal')} 
-        secondary={t('slideToRevealDescription')} />
-      <Switch edge="end" checked={slideToReveal} />
-    </MenuItem>
-  )
-}
 function BudgetSettingsItem() {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()

@@ -11,8 +11,6 @@ import { goalModel, TGoal } from '5-entities/goal'
 import { balances } from '5-entities/envBalances'
 import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { userSettingsModel } from '5-entities/userSettings'
-
 import { DragTypes } from '2-pages/Budgets/DnD'
 import { useBudgetPopover } from '../../BudgetPopover'
 import { useGoalPopover } from '../../GoalPopover'
@@ -54,7 +52,6 @@ export const Row: FC<EnvelopeRowProps> = props => {
   const openGoalPopover = useGoalPopover()
   const isSmall = useIsSmall()
   const { columns } = useColumns()
-  const { slideToReveal } = userSettingsModel.useUserSettings()
 
   const envelope = envelopeModel.useEnvelopes()[id]
   const envData = balances.useEnvData()[month][id]
@@ -127,7 +124,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
       isExpanded={!!isExpanded}
     >
       <SlideReveal
-        enabled={isSmall && slideToReveal}
+        enabled={isSmall}
         items={revealItems}
       >
         <TableRow

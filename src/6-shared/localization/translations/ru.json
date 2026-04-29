@@ -432,8 +432,6 @@
     "regularSync": "Автосинхронизация",
     "useIcons": "Использовать иконки",
     "useEmojis": "Использовать эмодзи",
-    "slideToReveal": "Включить свайп категорий",
-    "slideToRevealDescription": "Показывает скрытые ячейки категорий на маленьких экранах",
     "useZmBudgets": "Бюджеты Дзен-мани",
     "useZmBudgetsDescription": "Использовать те же бюджеты что и ДМ",
     "convertBudgetsFromZm": "Конвертировать бюджеты из Дзен-мани",
