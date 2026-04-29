@@ -17,20 +17,7 @@ export const useBudgetPopover = () => {
   const { open } = budgetPopover.useMethods()
   const openPopover = useCallback(
     (id: TEnvelopeId, anchorEl?: Element) =>
-      open(
-        { id, month },
-        anchorEl
-          ? { anchorEl, key: Date.now() }
-          : {
-              anchorReference: 'anchorPosition' as const,
-              anchorPosition: {
-                left: window.innerWidth / 2,
-                top: window.innerHeight / 2,
-              },
-              transformOrigin: { horizontal: 'center', vertical: 'center' },
-              key: Date.now(),
-            }
-      ),
+      open({ id, month }, { anchorEl, key: Date.now() }),
     [month, open]
   )
   return openPopover
