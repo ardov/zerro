@@ -452,6 +452,8 @@ export const en: typeof ru = {
     regularSync: 'Auto-sync',
     useIcons: 'Use icons',
     useEmojis: 'Use emojis',
+    slideToReveal: 'Enable caregory row slide',
+    slideToRevealDescription: 'Show hidden category cells on small screens',
     useZmBudgets: 'Zenmoney budgets',
     useZmBudgetsDescription: 'Use the same budgets as Zenmoney',
     convertBudgetsFromZm: 'Convert budgets from Zenmoney',

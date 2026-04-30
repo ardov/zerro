@@ -98,7 +98,7 @@ const DraggableAmount: FC<{
   )
 }
 
-function getAvailableColor(
+export function getAvailableColor(
   available: number,
   isChild?: boolean,
   hasBudget?: boolean,
