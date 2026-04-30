@@ -160,7 +160,7 @@ const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
             <DisplayAmount
               month={month}
               value={amount}
-              decMode="ifOnly"
+              decimals="ifOnly"
               noShade
             />
           </b>
@@ -228,7 +228,7 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
             {isHovering && hoverDate && formatDate(hoverDate)}
           </Typography>
           <Typography variant="h6">
-            <Amount value={balance} currency={acc.fxCode} decMode="ifAny" />
+            <Amount value={balance} currency={acc.fxCode} decimals="ifAny" />
           </Typography>
         </Box>
         <div

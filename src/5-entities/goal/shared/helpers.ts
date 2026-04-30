@@ -27,7 +27,7 @@ export const goalToWords = (
   { type, amount, end }: TGoal,
   currency?: TFxCode
 ): string => {
-  const sum = formatMoney(amount, currency, 0)
+  const sum = formatMoney(amount, currency, 'ifAny')
   switch (type) {
     case goalType.MONTHLY:
       return t('toWords.monthly', { sum, ns: 'goals' })

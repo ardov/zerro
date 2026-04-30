@@ -56,10 +56,14 @@ export function PayeeByFrequencyCard(props: TCardProps) {
 
             <Typography variant="body1" align="center">
               {t('purchase', { count })}
-              <DisplayAmount value={outcome / count} noShade decMode="ifOnly" />
+              <DisplayAmount
+                value={outcome / count}
+                noShade
+                decimals="ifOnly"
+              />
               <br />
               {t('andTotalSpend')}
-              <DisplayAmount value={outcome} noShade decMode="ifAny" />
+              <DisplayAmount value={outcome} noShade decimals="ifAny" />
             </Typography>
           </Stack>
         </ButtonBase>

@@ -62,7 +62,7 @@ export const AvailableCell: FC<AvailableCellProps> = props => {
               color: availableColor,
             }}
           >
-            <Amount value={available} decMode="ifOnly" />
+            <Amount value={available} decimals="ifOnly" />
           </Box>
         </DraggableAmount>
       </Typography>
@@ -98,7 +98,7 @@ const DraggableAmount: FC<{
   )
 }
 
-function getAvailableColor(
+export function getAvailableColor(
   available: number,
   isChild?: boolean,
   hasBudget?: boolean,

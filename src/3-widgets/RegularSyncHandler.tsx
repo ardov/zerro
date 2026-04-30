@@ -7,21 +7,97 @@ import { loadLocalData } from '4-features/localData'
 import useLocalStorageState from 'use-local-storage-state'
 import { useAppDispatch, useAppSelector } from 'store'
 
+/** Local storage hook for regular sync setting */
 export const useRegularSync = () =>
   useLocalStorageState<boolean>('regularSync', {
     defaultValue: true,
   })
-// export const useRegularSync = ()  createLocalStorageStateHook<boolean>(
-//   'regularSync',
-//   true
-// )
 
-const SYNC_DELAY = 20 * 60 * 1000 // 20min
-const CHECK_DELAY = 20 * 1000 // 20sec
+/** Delay between checks if sync is needed */
+const CHECK_INTERVAL = 5_000 // 5sec
+/** Delay between syncs if nothing changed */
+const IDLE_SYNC_DELAY = 120_000 // 2min
+/** Delay between syncs if there are changes */
+const CHANGES_SYNC_DELAY = 20_000 // 20sec
+
+/**
+ * Decides whether to sync data
+ * @param isLoggedIn - whether user is logged in
+ * @param isPending - whether sync is pending
+ * @param lastSync - last sync time (0 if never synced)
+ * @param lastChange - last change time (0 if no changes)
+ * @param regular - whether regular sync is enabled
+ * @returns true if sync is needed
+ */
+function needSync(
+  isLoggedIn: boolean,
+  isPending: boolean,
+  lastSync: number,
+  lastChange: number,
+  regular: boolean
+) {
+  if (!window.navigator.onLine) return false
+  if (!isLoggedIn) return false
+  if (isPending) return false
+  if (lastSync === 0) return true // Initial sync is always needed
+  if (!regular) return false // All other syncs respect the regular setting
+
+  const sinceLastSync = Date.now() - lastSync
+  const sinceLastChange = Date.now() - lastChange
+
+  // Has changes
+  if (lastChange !== 0) return sinceLastChange > CHANGES_SYNC_DELAY
+
+  // Disable regular sync when window is hidden
+  if (document.hidden) return false
+
+  // Regular periodic sync
+  return sinceLastSync > IDLE_SYNC_DELAY
+}
+
+function useConditionalSync() {
+  const dispatch = useAppDispatch()
+  const [regular] = useRegularSync()
+  const isLoggedIn = useAppSelector(getLoginState)
+  const lastSync = useAppSelector(getLastSyncTime)
+  const lastChange = useAppSelector(getLastChangeTime)
+  const isPending = useAppSelector(getPendingState)
+
+  const trySyncing = useCallback(() => {
+    const shouldSync = needSync(
+      isLoggedIn,
+      isPending,
+      lastSync,
+      lastChange,
+      regular
+    )
+    if (shouldSync) dispatch(syncData())
+  }, [isLoggedIn, isPending, lastSync, lastChange, regular, dispatch])
+
+  return trySyncing
+}
+
+/** Alert about unsaved changes when user tries to close the window */
+function useUnsavedChangesAlert() {
+  const lastChange = useAppSelector(getLastChangeTime)
+  useEffect(() => {
+    const beforeUnload = (e: BeforeUnloadEvent) => {
+      if (lastChange) {
+        e.preventDefault()
+        e.returnValue = true
+        return true
+      }
+    }
+    window.addEventListener('beforeunload', beforeUnload)
+    return () => {
+      window.removeEventListener('beforeunload', beforeUnload)
+    }
+  }, [lastChange])
+}
 
 export const RegularSyncHandler: FC<{}> = props => {
+  useUnsavedChangesAlert()
   const dispatch = useAppDispatch()
-  const lastChange = useAppSelector(getLastChangeTime)
   const sync = useConditionalSync()
 
   // We need ref to pass useEffect equality checks
@@ -38,57 +114,11 @@ export const RegularSyncHandler: FC<{}> = props => {
     async function init() {
       await dispatch(loadLocalData())
       syncRef.current()
-      timer = setInterval(() => syncRef.current(), CHECK_DELAY)
+      timer = setInterval(() => syncRef.current(), CHECK_INTERVAL)
     }
     init()
     return () => clearInterval(timer)
   }, [dispatch, syncRef])
 
-  // Alert about unsaved changes when user tries to close the window
-  useEffect(() => {
-    const beforeUnload = (e: BeforeUnloadEvent) => {
-      if (lastChange) {
-        window.alert('UNSAVED CHANGES')
-        ;(e || window.event).returnValue = null
-        return null
-      }
-    }
-    window.addEventListener('beforeunload', beforeUnload)
-    return () => {
-      window.removeEventListener('beforeunload', beforeUnload)
-    }
-  }, [lastChange])
-
   return null
-}
-
-function useConditionalSync() {
-  const dispatch = useAppDispatch()
-  const [regular] = useRegularSync()
-  const isLoggedIn = useAppSelector(getLoginState)
-  const lastSync = useAppSelector(getLastSyncTime)
-  const lastChange = useAppSelector(getLastChangeTime)
-  const isPending = useAppSelector(getPendingState)
-
-  const needSync = useCallback(() => {
-    if (!window.navigator.onLine) return false
-    if (!isLoggedIn) return false
-    if (isPending) return false
-    if (!regular) return false
-    // Regular sync condition
-    const sinceLastSync = Date.now() - lastSync
-    const sinceLastChange = Date.now() - lastChange
-
-    if (!document.hidden && sinceLastSync > SYNC_DELAY) {
-      return true
-    }
-    // Sync changes condition
-    if (!!lastChange && sinceLastChange > CHECK_DELAY) {
-      return true
-    }
-    return false
-  }, [isLoggedIn, isPending, lastChange, lastSync, regular])
-  return () => {
-    if (needSync()) dispatch(syncData())
-  }
 }

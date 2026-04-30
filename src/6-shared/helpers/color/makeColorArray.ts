@@ -54,14 +54,16 @@ export function makeColorArray(props: MakeColorArrayProps = {}) {
   if (byShades)
     shades.forEach(shade =>
       colors.forEach(color => {
-        const hex = materialColors[color][shade]
+        const colorPalette = materialColors[color] as Record<Shade, string>
+        const hex = colorPalette[shade]
         if (hex) colorArray.push(hex)
       })
     )
   else
     colors.forEach(color =>
       shades.forEach(shade => {
-        const hex = materialColors[color][shade]
+        const colorPalette = materialColors[color] as Record<Shade, string>
+        const hex = colorPalette[shade]
         if (hex) colorArray.push(hex)
       })
     )

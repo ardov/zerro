@@ -130,7 +130,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
                 <SmartAmount
                   value={tr.opOutcome}
                   instrument={tr.opOutcomeInstrument}
-                  decMode="ifAny"
+                  decimals="ifAny"
                 />
               </Typography>
             </Tooltip>
@@ -163,7 +163,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
                 <SmartAmount
                   value={tr.opIncome}
                   instrument={tr.opIncomeInstrument}
-                  decMode="ifAny"
+                  decimals="ifAny"
                   sign
                 />
               </Typography>
@@ -397,12 +397,12 @@ const ExchangeRate: FC<ExchangeRateProps> = props => {
   if (sum1 < sum2) {
     return (
       <span {...rest}>
-        <SmartAmount value={1} instrument={inst1} decMode="ifAny" noShade />
+        <SmartAmount value={1} instrument={inst1} decimals="ifAny" noShade />
          =
         <SmartAmount
           value={sum2 / sum1}
           instrument={inst2}
-          decMode="ifAny"
+          decimals="ifAny"
           noShade
         />
       </span>
@@ -410,12 +410,12 @@ const ExchangeRate: FC<ExchangeRateProps> = props => {
   } else {
     return (
       <span {...rest}>
-        <SmartAmount value={1} instrument={inst2} decMode="ifAny" noShade />
+        <SmartAmount value={1} instrument={inst2} decimals="ifAny" noShade />
          =
         <SmartAmount
           value={sum1 / sum2}
           instrument={inst1}
-          decMode="ifAny"
+          decimals="ifAny"
           noShade
         />
       </span>

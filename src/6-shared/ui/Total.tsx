@@ -9,7 +9,7 @@ interface TotalProps extends BoxProps {
   value: AmountProps['value']
   currency?: AmountProps['currency']
   sign?: AmountProps['sign']
-  decMode?: AmountProps['decMode']
+  decimals?: AmountProps['decimals']
   noShade?: AmountProps['noShade']
 }
 
@@ -19,7 +19,7 @@ export function Total({
   value = 0,
   currency,
   sign = undefined,
-  decMode,
+  decimals,
   noShade = false,
   amountColor,
   ...rest
@@ -41,7 +41,7 @@ export function Total({
           value={value}
           currency={currency}
           sign={sign}
-          decMode={decMode}
+          decimals={decimals}
           noShade={noShade}
         />
       </Typography>

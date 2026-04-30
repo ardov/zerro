@@ -64,7 +64,7 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
         <Total
           title={blockTitle}
           value={totalAvailable}
-          decMode="ifAny"
+          decimals="ifAny"
           currency={currency}
           noShade
           amountColor={
@@ -87,7 +87,7 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
               <Amount
                 value={totalLeftover}
                 currency={currency}
-                decMode="ifAny"
+                decimals="ifAny"
               />
             }
           />
@@ -106,7 +106,7 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
               <Amount
                 value={totalBudgeted}
                 currency={currency}
-                decMode="ifAny"
+                decimals="ifAny"
               />
             }
           />
@@ -138,7 +138,7 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
               <Amount
                 value={totalActivity}
                 currency={currency}
-                decMode="ifAny"
+                decimals="ifAny"
               />
             }
           />

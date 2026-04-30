@@ -228,7 +228,7 @@ function Summary(props: { income: number; outcome: number }) {
           value={netIncome}
           sign
           noShade
-          decMode="ifOnly"
+          decimals="ifOnly"
           style={{
             color,
             backgroundColor: 'rgb(from currentColor r g b / .1)',

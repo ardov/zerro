@@ -106,7 +106,7 @@ const ArchivedList: FC<{ accs: TAccountPopulated[] }> = props => {
               <DisplayAmount
                 month={month}
                 value={sum}
-                decMode="ifOnly"
+                decimals="ifOnly"
                 noShade
               />
             )}

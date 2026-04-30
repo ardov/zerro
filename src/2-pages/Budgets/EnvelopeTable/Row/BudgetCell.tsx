@@ -25,7 +25,7 @@ export const BudgetCell: FC<BudgetCellProps> = props => {
       }}
     >
       <Btn onClick={onBudgetClick} disabled={isSelf}>
-        <Amount value={value} decMode="ifOnly" />
+        <Amount value={value} decimals="ifOnly" />
       </Btn>
     </Box>
   )

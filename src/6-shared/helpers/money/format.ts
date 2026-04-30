@@ -5,26 +5,40 @@ const currencyInfo = currencySymbols as Record<
   TFxCode,
   { name: string; symbol?: string }
 >
+
 const thousandSeparator = ' '
 const decimalSeparator = ','
+
+export function getCurrencySymbol(code: TFxCode): string {
+  return currencyInfo[code]?.symbol || code
+}
+
+function formatNumber(number: number, decimals: number): string {
+  const parts = number.toFixed(decimals).split('.')
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator)
+  return parts.join(decimalSeparator)
+}
 
 /**
  * Formats number using thousand separator and decimal separator.
  * @param number - Number to format.
  * @param currency - currency code.
- * @param decimals - Number of decimals to show
+ * @param decimals - Number of decimals to show or 'ifOnly' or 'ifAny' to automatically determine the number of decimals.
  */
 export function formatMoney(
   number: number,
   currency?: TFxCode | null,
-  decimals = 2
+  decimals: number | undefined | 'ifOnly' | 'ifAny' = 2
 ): string {
-  const parts = number.toFixed(decimals).split('.')
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator)
-  const value = parts.join(decimalSeparator)
+  if (decimals === 'ifOnly') {
+    decimals = number !== 0 && number < 1 && number > -1 ? 2 : 0
+  }
+  if (decimals === 'ifAny') {
+    decimals = Number.isInteger(number) ? 0 : 2
+  }
+  const value = formatNumber(number, decimals)
   if (currency) {
     return value + ' ' + getCurrencySymbol(currency)
-    // return getCurrencySymbol(currency) + ' ' + value
   }
   return value
 }
@@ -44,15 +58,11 @@ export function getFormattedParts(
   return {
     original: number,
     sign: number < 0 ? '-' : number > 0 ? '+' : '',
-    value: parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator),
+    value: formatNumber(number, decimals),
     decimals: parts[1],
     decimalSeparator,
     currency: currency ? getCurrencySymbol(currency) : '',
   }
-}
-
-export function getCurrencySymbol(code: TFxCode): string {
-  return currencyInfo[code]?.symbol || code
 }
 
 export function rateToWords(

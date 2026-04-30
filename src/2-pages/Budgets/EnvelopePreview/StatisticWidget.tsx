@@ -205,7 +205,6 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
                 x={selectedData.month}
                 y={0}
                 r={2}
-                isFront
                 shape={({ cx, cy }) => {
                   const offset = selectedData.value >= 0 ? 5 : -5
                   const fill = selectedData.fill

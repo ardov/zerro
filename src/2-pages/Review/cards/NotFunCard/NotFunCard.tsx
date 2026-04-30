@@ -114,7 +114,7 @@ export function NotFunCard(props: TCardProps) {
           Россия получила от вас
         </Typography>
         <Typography variant="h4" align="center" className="red-gradient">
-          ≈<DisplayAmount value={totalTaxes} noShade decMode="ifOnly" />
+          ≈<DisplayAmount value={totalTaxes} noShade decimals="ifOnly" />
         </Typography>
       </div>
 
@@ -140,7 +140,7 @@ export function NotFunCard(props: TCardProps) {
                     <DisplayAmount
                       value={info.value}
                       noShade
-                      decMode="ifOnly"
+                      decimals="ifOnly"
                     />
                     )
                   </>

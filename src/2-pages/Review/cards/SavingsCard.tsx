@@ -37,7 +37,7 @@ export function SavingsCard({ year }: TCardProps) {
           align="center"
           className={savings ? 'green-gradient' : 'red-gradient'}
         >
-          <DisplayAmount value={savings} noShade decMode="ifOnly" />
+          <DisplayAmount value={savings} noShade decimals="ifOnly" />
         </Typography>
 
         <Box mt={2}>

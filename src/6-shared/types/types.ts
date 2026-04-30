@@ -1,5 +1,4 @@
 import { ById } from './ts-utils'
-import { oldGoalType } from '5-entities/old-hiddenData/constants'
 import {
   TZmDiff,
   TZmDeletionObject,
@@ -43,12 +42,6 @@ export type TRates = Record<TFxCode, number>
 export type TTagMeta = {
   comment?: string
   currency?: TInstrumentId
-}
-
-export type TOldGoal = {
-  type: oldGoalType
-  amount: number
-  end?: TISODate
 }
 
 export type TLocalData = Omit<TZmDiff, 'deletion'>
