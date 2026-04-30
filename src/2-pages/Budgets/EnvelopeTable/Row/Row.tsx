@@ -35,6 +35,71 @@ type EnvelopeRowProps = {
   openTransactionsPopover: (id: TEnvelopeId) => void
 }
 
+/** Builds reveal items for metrics not currently shown as columns. */
+function useRevealItems(params: {
+  id: TEnvelopeId
+  columns: Metric[]
+  budgeted: number
+  activity: number
+  available: number
+  isChild: boolean
+  isSelf?: boolean
+  openBudgetPopover: (id: TEnvelopeId, el: Element) => void
+  openTransactionsPopover: (id: TEnvelopeId) => void
+}): RevealItem[] {
+  const {
+    id,
+    columns,
+    budgeted,
+    activity,
+    available,
+    isChild,
+    isSelf,
+    openBudgetPopover,
+    openTransactionsPopover,
+  } = params
+  const { t } = useTranslation(['budgets', 'common'])
+
+  type MetricConfig = { metric: Metric; item: RevealItem }
+
+  const allMetrics: MetricConfig[] = [
+    {
+      metric: Metric.budgeted,
+      item: {
+        key: Metric.budgeted,
+        label: t('budget', { ns: 'common' }),
+        value: budgeted,
+        color: isSelf || !budgeted ? 'text.disabled' : 'text.primary',
+        onClick: e => openBudgetPopover(id, e.currentTarget),
+      },
+    },
+    {
+      metric: Metric.outcome,
+      item: {
+        key: Metric.outcome,
+        label: t('activity', { ns: 'common' }),
+        value: activity,
+        color: activity ? 'text.primary' : 'text.disabled',
+        onClick: () => openTransactionsPopover(id),
+      },
+    },
+    {
+      metric: Metric.available,
+      item: {
+        key: Metric.available,
+        label: t('available', { ns: 'common' }),
+        value: available,
+        color: getAvailableColor(available, isChild, !!budgeted, isSelf),
+        draggable: { type: DragTypes.amount, id, disabled: !!isSelf },
+      },
+    },
+  ]
+
+  return allMetrics
+    .filter(({ metric }) => !columns.includes(metric))
+    .map(({ item }) => item)
+}
+
 export const Row: FC<EnvelopeRowProps> = props => {
   const {
     id,
@@ -47,7 +112,6 @@ export const Row: FC<EnvelopeRowProps> = props => {
     openTransactionsPopover,
     openDetails,
   } = props
-  const { t } = useTranslation(['budgets', 'common'])
   const openBudgetPopover = useBudgetPopover()
   const openGoalPopover = useGoalPopover()
   const isSmall = useIsSmall()
@@ -87,34 +151,17 @@ export const Row: FC<EnvelopeRowProps> = props => {
       [id, openGoalPopover]
     )
 
-  const revealItems: RevealItem[] = []
-  if (!columns.includes(Metric.budgeted)) {
-    revealItems.push({
-      key: Metric.budgeted,
-      label: t('budget', { ns: 'common' }),
-      value: budgeted,
-      color: isSelf || !budgeted ? 'text.disabled' : 'text.primary',
-      onClick: e => openBudgetPopover(id, e.currentTarget),
-    })
-  }
-  if (!columns.includes(Metric.outcome)) {
-    revealItems.push({
-      key: Metric.outcome,
-      label: t('activity', { ns: 'common' }),
-      value: activity,
-      color: activity ? 'text.primary' : 'text.disabled',
-      onClick: () => openTransactionsPopover(id),
-    })
-  }
-  if (!columns.includes(Metric.available)) {
-    revealItems.push({
-      key: Metric.available,
-      label: t('available', { ns: 'common' }),
-      value: available,
-      color: getAvailableColor(available, isChild, !!budgeted, isSelf),
-      draggable: { type: DragTypes.amount, id, disabled: !!isSelf },
-    })
-  }
+  const revealItems = useRevealItems({
+    id,
+    columns,
+    budgeted,
+    activity,
+    available,
+    isChild,
+    isSelf,
+    openBudgetPopover,
+    openTransactionsPopover,
+  })
 
   return (
     <Droppable
@@ -123,10 +170,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
       isLastVisibleChild={!!isLastVisibleChild}
       isExpanded={!!isExpanded}
     >
-      <SlideReveal
-        enabled={isSmall}
-        items={revealItems}
-      >
+      <SlideReveal enabled={isSmall} items={revealItems}>
         <TableRow
           sx={{
             position: 'relative',

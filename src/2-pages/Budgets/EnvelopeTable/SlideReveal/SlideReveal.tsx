@@ -1,6 +1,13 @@
-import React, { FC, ReactNode, useCallback, useRef, useState } from 'react'
+import React, {
+  FC,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import { Box, SxProps, Theme, Typography } from '@mui/material'
+import { Box, ButtonBase, SxProps, Theme, Typography } from '@mui/material'
 import { Amount } from '6-shared/ui/Amount'
 import { DragTypes } from '2-pages/Budgets/DnD'
 
@@ -13,7 +20,7 @@ export type RevealItem = {
   label: string
   value: number
   color: string
-  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void
+  onClick?: (e: React.MouseEvent<HTMLElement>) => void
   draggable?: {
     type: DragTypes
     id: string
@@ -27,71 +34,116 @@ type SlideRevealProps = {
   children: ReactNode
 }
 
+type DragState = {
+  x: number
+  y: number
+  startOffset: number
+  axis: 'h' | 'v' | null
+  lastX: number
+  lastTime: number
+}
+
+function useSlideRevealGesture(revealWidth: number) {
+  const [offsetX, setOffsetX] = useState(0)
+  // Keep a ref so pointer handlers always see the current value without
+  // needing offsetX in their dependency arrays.
+  const offsetXRef = useRef(offsetX)
+  offsetXRef.current = offsetX
+
+  const [isDragging, setIsDragging] = useState(false)
+  const dragRef = useRef<DragState | null>(null)
+
+  // Clamp or close when the panel width changes (column switch, breakpoint).
+  useEffect(() => {
+    setOffsetX(prev =>
+      prev === 0 ? 0 : Math.max(-revealWidth, Math.min(0, prev))
+    )
+  }, [revealWidth])
+
+  const closeReveal = useCallback(() => setOffsetX(0), [])
+
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      if (!revealWidth) return
+      e.currentTarget.setPointerCapture(e.pointerId)
+      dragRef.current = {
+        x: e.clientX,
+        y: e.clientY,
+        startOffset: offsetXRef.current,
+        axis: null,
+        lastX: e.clientX,
+        lastTime: Date.now(),
+      }
+      setIsDragging(true)
+    },
+    [revealWidth]
+  )
+
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      const t = dragRef.current
+      if (!t) return
+      const dx = e.clientX - t.x
+      const dy = e.clientY - t.y
+      if (!t.axis) {
+        if (
+          Math.abs(dx) < AXIS_DECISION_THRESHOLD &&
+          Math.abs(dy) < AXIS_DECISION_THRESHOLD
+        )
+          return
+        t.axis = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v'
+      }
+      if (t.axis !== 'h') return
+      t.lastX = e.clientX
+      t.lastTime = Date.now()
+      const next = Math.min(0, Math.max(-revealWidth, t.startOffset + dx))
+      setOffsetX(next)
+    },
+    [revealWidth]
+  )
+
+  const handlePointerUp = useCallback(
+    (e: React.PointerEvent) => {
+      const t = dragRef.current
+      setIsDragging(false)
+      dragRef.current = null
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId)
+      }
+      if (!t || t.axis !== 'h') return
+      const elapsed = Date.now() - t.lastTime
+      const velocity = elapsed > 0 ? (e.clientX - t.lastX) / elapsed : 0
+      const shouldOpen =
+        velocity < -VELOCITY_THRESHOLD || offsetXRef.current < -revealWidth / 2
+      setOffsetX(shouldOpen ? -revealWidth : 0)
+    },
+    [revealWidth]
+  )
+
+  return {
+    offsetX,
+    isDragging,
+    closeReveal,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
+  }
+}
+
 export const SlideReveal: FC<SlideRevealProps> = ({
   enabled,
   items,
   children,
 }) => {
   const revealWidth = enabled ? items.length * REVEAL_CELL_WIDTH : 0
-  const [offsetX, setOffsetX] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const dragRef = useRef<{
-    x: number
-    y: number
-    startOffset: number
-    axis: 'h' | 'v' | null
-    lastX: number
-    lastTime: number
-  } | null>(null)
-
-  const closeReveal = useCallback(() => setOffsetX(0), [])
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    if (!revealWidth) return
-    e.currentTarget.setPointerCapture(e.pointerId)
-    dragRef.current = {
-      x: e.clientX,
-      y: e.clientY,
-      startOffset: offsetX,
-      axis: null,
-      lastX: e.clientX,
-      lastTime: Date.now(),
-    }
-    setIsDragging(true)
-  }
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    const t = dragRef.current
-    if (!t) return
-    const dx = e.clientX - t.x
-    const dy = e.clientY - t.y
-    if (!t.axis) {
-      if (
-        Math.abs(dx) < AXIS_DECISION_THRESHOLD &&
-        Math.abs(dy) < AXIS_DECISION_THRESHOLD
-      )
-        return
-      t.axis = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v'
-    }
-    if (t.axis !== 'h') return
-    t.lastX = e.clientX
-    t.lastTime = Date.now()
-    const next = Math.min(0, Math.max(-revealWidth, t.startOffset + dx))
-    setOffsetX(next)
-  }
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    const t = dragRef.current
-    setIsDragging(false)
-    dragRef.current = null
-    e.currentTarget.releasePointerCapture(e.pointerId)
-    if (!t || t.axis !== 'h') return
-    const elapsed = Date.now() - t.lastTime
-    const velocity = elapsed > 0 ? (e.clientX - t.lastX) / elapsed : 0
-    const shouldOpen =
-      velocity < -VELOCITY_THRESHOLD || offsetX < -revealWidth / 2
-    setOffsetX(shouldOpen ? -revealWidth : 0)
-  }
+  const {
+    offsetX,
+    isDragging,
+    closeReveal,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
+  } = useSlideRevealGesture(revealWidth)
 
   if (!revealWidth) return <>{children}</>
 
@@ -104,20 +156,24 @@ export const SlideReveal: FC<SlideRevealProps> = ({
           position: 'relative',
           transform: `translateX(${offsetX}px)`,
           transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-          touchAction: 'pan-y',
         }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
       >
-        {children}
-        {isOpen && (
-          <Box
-            onClick={closeReveal}
-            sx={{ position: 'absolute', inset: 0, cursor: 'pointer' }}
-          />
-        )}
+        <Box
+          sx={{ touchAction: 'pan-y', position: 'relative' }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+        >
+          {children}
+          {isOpen && (
+            <Box
+              onClick={closeReveal}
+              sx={{ position: 'absolute', inset: 0, cursor: 'pointer' }}
+            />
+          )}
+        </Box>
+
         <Box
           sx={{
             position: 'absolute',
@@ -153,25 +209,24 @@ const revealCellSx: SxProps<Theme> = {
   justifyContent: 'center',
   bgcolor: 'action.hover',
   borderLeft: theme => `1px solid ${theme.palette.divider}`,
-  '&:active': { bgcolor: 'action.focus' },
 }
 
 type CellProps = {
   item: RevealItem
-  onClick: (e: React.MouseEvent<HTMLDivElement>) => void
+  onClick: (e: React.MouseEvent<HTMLElement>) => void
 }
 
 const RevealCell: FC<CellProps> = ({ item, onClick }) =>
   item.draggable ? (
     <DraggableRevealCell item={item} onClick={onClick} drag={item.draggable} />
   ) : (
-    <Box onClick={onClick} sx={{ ...revealCellSx, cursor: 'pointer' }}>
+    <ButtonBase onClick={onClick} sx={revealCellSx}>
       <RevealCellContent
         label={item.label}
         value={item.value}
         color={item.color}
       />
-    </Box>
+    </ButtonBase>
   )
 
 const DraggableRevealCell: FC<
@@ -193,6 +248,7 @@ const DraggableRevealCell: FC<
         cursor: drag.disabled ? 'pointer' : 'grab',
         userSelect: 'none',
         touchAction: 'manipulation',
+        '&:active': { bgcolor: 'action.focus' },
       }}
     >
       <RevealCellContent
