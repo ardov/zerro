@@ -13,7 +13,7 @@ import { DragTypes } from '2-pages/Budgets/DnD'
 
 const REVEAL_CELL_WIDTH = 88
 const AXIS_DECISION_THRESHOLD = 8
-const VELOCITY_THRESHOLD = 0.4 // px/ms
+const VELOCITY_THRESHOLD = 0.1 // px/ms
 
 export type RevealItem = {
   key: React.Key
@@ -190,7 +190,6 @@ export const SlideReveal: FC<SlideRevealProps> = ({
               item={item}
               onClick={e => {
                 item.onClick?.(e)
-                closeReveal()
               }}
             />
           ))}
