@@ -28,8 +28,12 @@ import { OneLiner } from '3-widgets/DataLine'
 import { cardStyle } from './shared'
 import { useBudgetPopover } from '../BudgetPopover'
 
+type MonthContext = `${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12}`
+
 const getMonthNum = (month: TISOMonth | TDateDraft) =>
   parseDate(month).getMonth() + 1
+const getMonthContext = (month: TISOMonth | TDateDraft): MonthContext =>
+  String(getMonthNum(month)) as MonthContext
 
 export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
   const { month, id } = props
@@ -55,8 +59,8 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
     currentMonth === month
       ? t('availableTitleNow')
       : month > currentMonth
-        ? t('availableTitleFuture', { context: getMonthNum(month).toString() })
-        : t('availableTitlePast', { context: getMonthNum(month).toString() })
+        ? t('availableTitleFuture', { context: getMonthContext(month) })
+        : t('availableTitlePast', { context: getMonthContext(month) })
 
   return (
     <Box sx={{ ...cardStyle, '--color': theme.palette.text.secondary }}>

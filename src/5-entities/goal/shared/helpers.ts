@@ -50,5 +50,5 @@ function monthSuffix(monthDate?: TDateDraft) {
   const isSameYear = new Date().getFullYear() === YYYY
   const yearAddon = isSameYear ? '' : ' ' + YYYY
   const context = date.getMonth() + 1
-  return ` ${t('toWords.till', { context, ns: 'goals' })}` + yearAddon
+  return ` ${t('toWords.till', { context: String(context), ns: 'goals' })}` + yearAddon
 }

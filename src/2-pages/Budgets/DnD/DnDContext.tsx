@@ -112,7 +112,7 @@ const Monies = () => {
   useEffect(() => {
     moniesRenderCount = (moniesRenderCount + 1) % 7
   }, [])
-  return <Box sx={props}>{t('moneyDnd', { context: moniesRenderCount })}</Box>
+  return <Box sx={props}>{t('moneyDnd', { context: String(moniesRenderCount) })}</Box>
 }
 
 const DragObj = () => {
