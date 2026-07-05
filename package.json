@@ -9,6 +9,8 @@
     "preview": "vite preview --port 3000",
     "tsc": "tsc --watch",
     "test": "vitest",
+    "fixture:summary": "node --max-old-space-size=4096 scripts/private-fixture-summary.mjs",
+    "fixture:test": "node --max-old-space-size=4096 ./node_modules/vitest/vitest.mjs run src/core-next/testing/privateFixture.legacy.test.ts",
     "lint:css": "stylelint \"src/**/*.{js,jsx,ts,tsx}\"",
     "lint:js": "npx eslint --config eslint.config.js src",
     "lint": "npx tsc --noEmit",

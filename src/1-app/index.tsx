@@ -5,6 +5,7 @@ import { initSentry } from '6-shared/helpers/tracking'
 import { store } from 'store'
 import { bindWorkerToStore } from 'worker'
 import { applyClientPatch, resetData } from 'store/data'
+import { downloadPrivateFixture } from '4-features/export/exportPrivateFixture'
 import GlobalErrorBoundary from './GlobalErrorBoundary'
 import App from './App'
 import { Providers } from './Providers'
@@ -50,6 +51,12 @@ function createZerroInstance(s: typeof store) {
     logs: {},
     resetData: () => s.dispatch(resetData()),
     applyClientPatch: (patch: TDiff) => s.dispatch(applyClientPatch(patch)),
+    exportPrivateFixture: (name?: string) => {
+      if (!import.meta.env.DEV) {
+        throw new Error('Private fixture export is available only in dev mode')
+      }
+      return downloadPrivateFixture(s.getState(), name)
+    },
     showEl: (id: string) => {
       let data = s.getState().data.current
       return (

@@ -41,6 +41,27 @@ private-fixtures/
     legacy-output.json
 ```
 
+The browser exporter may download a single bundle file instead:
+
+```txt
+private-fixtures/
+  my-large-account/
+    fixture.json
+```
+
+That file should contain the same sections:
+
+```json
+{
+  "schemaVersion": 1,
+  "manifest": {},
+  "input": {},
+  "legacyOutput": {}
+}
+```
+
+The single-file bundle is the preferred first implementation because browsers cannot reliably download a folder without extra packaging dependencies.
+
 ### `manifest.json`
 
 The manifest describes how the fixture was produced.
@@ -52,6 +73,7 @@ Example:
   "schemaVersion": 1,
   "createdAt": "2026-07-06T12:00:00.000Z",
   "appVersion": "1.9.3",
+  "locale": "en",
   "source": "real-account-private",
   "inputKind": "normalized-current-data",
   "outputs": [
@@ -119,6 +141,36 @@ Suggested first version:
 ## Export strategy
 
 Add a local-only developer export tool that runs inside the current app and downloads a private fixture bundle.
+
+Current first implementation:
+
+```ts
+await window.zerro.exportPrivateFixture('my-large-account')
+```
+
+This downloads one JSON bundle that can be moved into:
+
+```txt
+private-fixtures/my-large-account/fixture.json
+```
+
+After downloading, validate the fixture shape and print a safe summary:
+
+```bash
+pnpm fixture:summary private-fixtures/my-large-account/fixture.json
+```
+
+The summary command prints only metadata and counts. It must not print account names, transactions, comments, payees, or any other private values.
+
+To verify that the fixture can reproduce current legacy selector outputs:
+
+```bash
+PRIVATE_FIXTURE=private-fixtures/my-large-account/fixture.json pnpm fixture:test
+```
+
+This test is skipped unless `PRIVATE_FIXTURE` is provided.
+
+The test compares SHA-256 hashes of each large output instead of using normal deep equality diffs. That avoids dumping private data or huge object diffs to the terminal if something changes.
 
 The exporter should read:
 
@@ -195,15 +247,18 @@ Do not optimize this too early. The first fixture should favor correctness and c
 ## Recommended first implementation
 
 1. Add `.gitignore` entries for private fixture folders.
-2. Add a local developer export function.
-3. Export `input.json` from `state.data.current`.
-4. Export `legacy-output.json` for:
+2. Add a local developer export function available as `window.zerro.exportPrivateFixture(name)`.
+3. Export `input` from `state.data.current`.
+4. Export `legacyOutput` for:
+   - monthList;
    - envelopes;
+   - envelopeStructure;
+   - keepingEnvelopeIds;
    - budgets;
    - rawActivity;
    - activity;
+   - sortedActivity;
    - envMetrics;
    - monthTotals.
 5. Add a local compare script that reads from `private-fixtures/<name>`.
 6. Keep the compare script safe to commit, but keep fixture data ignored.
-
