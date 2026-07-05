@@ -78,6 +78,14 @@ import { createZerroSession, createZerroEngine } from 'core-next'
 
 Internal modules such as `core-next/zerro/envelopes/buildEnvelopes` should not become part of the app-facing API.
 
+Adapter-level APIs should also not be exported from the root facade. For example, Redux selectors should be imported explicitly from the adapter path:
+
+```ts
+import { selectCoreEnvelopes } from 'core-next/adapters/redux'
+```
+
+The root `core-next` entrypoint must stay safe for storage-agnostic and headless usage. It should not pull Redux, React, `5-entities`, or i18n adapter dependencies into ordinary domain imports.
+
 ### `createZerroSession`
 
 `Session` is a pure session over a single snapshot. It is useful for reads, command compilation, tests, comparisons with the legacy system, and headless requests.
@@ -270,7 +278,7 @@ src/core-next/
     fixtures/
 ```
 
-This does not have to be the final structure. The important rule is that `src/core-next/index.ts` remains the public API for application/domain consumers. Adapter-level APIs may be exported for Redux/headless integration, but they should be treated differently from normal UI-facing APIs.
+This does not have to be the final structure. The important rule is that `src/core-next/index.ts` remains the public API for application/domain consumers. Adapter-level APIs may be exported from their own explicit entrypoints, such as `core-next/adapters/redux`, but they should not be re-exported from the root facade.
 
 ## Types and constants
 
@@ -286,7 +294,16 @@ This includes:
 - projection result types;
 - domain constants.
 
-The app may temporarily keep importing legacy types during migration, but the target state is that core-facing code imports domain types from `core-next`.
+The app and the early `core-next` implementation may temporarily keep importing legacy types from `6-shared/types` during migration. This is acceptable for now and avoids a risky big-bang type move.
+
+The target state is still that core-facing code imports domain types from `core-next`. The migration should happen gradually:
+
+1. `core-next/types.ts` may initially re-export selected legacy types under core-oriented names.
+2. New Zerro-specific types should be defined inside `core-next` first.
+3. As modules move, their types should move with them.
+4. Only after the domain module stabilizes should we consider moving normalized ZenMoney entity definitions out of `6-shared/types`.
+
+Do not duplicate large entity type definitions just to satisfy the architecture. Prefer temporary re-exports until the implementation boundary is stable.
 
 Core constants should also live in the module, not in React/Redux entity folders.
 
@@ -1070,6 +1087,9 @@ Verification:
 12. In the React app, Redux owns replica state; the engine facade must not create a second source of truth.
 13. Core projections expose explicit dependencies; expensive nodes such as `rawActivity` must not depend on the whole `current` snapshot.
 14. Envelope/budget metrics are core domain projections, not UI-only calculations.
+15. The root `core-next` facade must not re-export Redux adapters.
+16. Private fixture tests should compare large/private objects through safe hashes or summaries, not deep equality diffs that may print private data.
+17. Temporary imports from `6-shared/types` are acceptable during migration, but new domain-facing type imports should converge toward `core-next`.
 
 ## Open questions
 
@@ -1077,4 +1097,4 @@ Verification:
 2. Should the redo tail be preserved after successful sync, or can it be cleared?
 3. How exactly should pending remote changes be shown in the UI?
 4. Which real fixtures can be safely used for comparison tests?
-5. Should the first heavy-projection migration move the full `envBalances` graph at once, or start with `rawActivity`/`activity` comparison tests first?
+5. Should the next heavy-projection migration move `activity` first, or should we pause to harden the adapter/root facade boundary?
