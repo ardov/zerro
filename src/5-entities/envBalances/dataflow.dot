@@ -1,85 +1,131 @@
-// Chart made in graphwiz https://graphviz.org/
-// VS Code extention https://marketplace.visualstudio.com/items?itemName=joaompinto.vscode-graphviz
+// Chart made in Graphviz https://graphviz.org/
+// VS Code extension https://marketplace.visualstudio.com/items?itemName=joaompinto.vscode-graphviz
+//
+// Main transformations used to calculate envelope budget state.
+// The core result is getEnvMetrics:
+// - leftover from previous month
+// - budgeted this month
+// - activity this month
+// - available balance
+// - children totals / parent totals
+//
+// getMonthTotals is shown as the aggregate summary derived from the same data.
 
 digraph G {
-// splines="FALSE";
-rankdir=LR;
-pad=0.5;
-edge [
-  fontname="'Fira Code', monospace"
-  color="#8a8e9b"
-]
-node [
-  fontname="'Fira Code', monospace",
-  shape="box",
-  style="filled,rounded"
-  width=2.5
-]
+  rankdir=LR;
+  pad=0.5;
 
-{
-  node [color="#c4e5fe"]
-  rank=same;
-  getEnvelopes
-  getInBudgetAccounts
-  getTransactionsHistory
-  getBudgets
-  getDebtAccountId
-  getDebtors
-  getInstruments
-  fxConverter
-}
+  edge [
+    fontname="'Fira Code', monospace"
+    color="#8a8e9b"
+  ]
 
+  node [
+    fontname="'Fira Code', monospace",
+    shape="box",
+    style="filled,rounded",
+    width=2.6
+  ]
 
-subgraph INSTRUMENTS { //cluster_
-  style="filled,rounded"
-  color="#e8e8e8";
+  {
+    node [color="#c4e5fe"]
+    rank=same;
+    getEnvelopes
+    getKeepingEnvelopes
+    getTransactionsHistory
+    getInBudgetAccounts
+    getDebtAccountId
+    getDebtors
+    getInstruments
+    getTagBudgets
+    getEnvBudgets
+    userSettingsModel_get [label="userSettingsModel.get"]
+    fxConverter [label="fxRateModel.converter"]
+  }
 
-  node [color="#ffcccc"] // Results
-  getEnvelopes -> getKeepingEnvelopes
+  subgraph cluster_budget_source {
+    label="1. Resolve monthly budget values";
+    style="filled,rounded"
+    color="#e8e8e8";
 
-  // 1 - currentFunds
-  getInBudgetAccounts -> getCurrentFunds
+    node [color="#ffcccc"] // Result
+    getBudgets [label="getBudgets\nByMonth<envelopeId, amount>"]
 
-  // 1 - monthList
-  getTransactionsHistory -> getFirstMonth -> getMonthList
-  getBudgets -> getLastMonth -> getMonthList
+    getTagBudgets -> getBudgets [label="ZenMoney tag budgets"]
+    getEnvBudgets -> getBudgets [label="Zerro envelope budgets"]
+    userSettingsModel_get -> getBudgets [label="preferZmBudgets"]
+  }
 
-  // 1 - rawActivity
-  getTransactionsHistory -> getRawActivity
-  getInBudgetAccounts -> getRawActivity
-  getDebtAccountId -> getRawActivity
-  getDebtors -> getRawActivity
-  getInstruments -> getRawActivity
+  subgraph cluster_activity {
+    label="2. Convert transactions into envelope activity";
+    style="filled,rounded"
+    color="#e8e8e8";
 
-  // 2 - activity
-  getRawActivity -> getActivity
-  getKeepingEnvelopes -> getActivity
+    node [color="#ffcccc"] // Results
+    getRawActivity [label="getRawActivity\nraw income / outcome / internal"]
+    getActivity [label="getActivity\ngeneral income vs envelope activity"]
 
-  // 2 - sortedActivity
-  getRawActivity -> getActivityByType -> getSortedActivity
-  getKeepingEnvelopes -> getSortedActivity
-  fxConverter -> getSortedActivity
+    getTransactionsHistory -> getRawActivity [label="iterate transactions"]
+    getInBudgetAccounts -> getRawActivity [label="in/out of budget"]
+    getDebtAccountId -> getRawActivity [label="transaction type"]
+    getDebtors -> getRawActivity [label="debt envelopes"]
+    getInstruments -> getRawActivity [label="fx code for amounts"]
 
-  // 3 - envMetrics
-  getMonthList -> getEnvMetrics
-  getEnvelopes -> getEnvMetrics
-  getActivity -> getEnvMetrics
-  getBudgets -> getEnvMetrics
-  fxConverter -> getEnvMetrics
+    getRawActivity -> getActivity [label="merge by envelope"]
+    getKeepingEnvelopes -> getActivity [label="keep income in envelope?"]
+  }
 
-  // 4 - monthTotals
-  getMonthList -> getMonthTotals
-  getCurrentFunds -> getMonthTotals
-  getActivity -> getMonthTotals
-  getEnvMetrics -> getMonthTotals
-  fxConverter -> getMonthTotals
+  subgraph cluster_months {
+    label="3. Build month range";
+    style="filled,rounded"
+    color="#e8e8e8";
 
-  // getMonthList -> getGoalsState
-  // getEnvMetrics -> getGoalsState
-  // getGoals -> getGoalsState
-  // getActivity -> getGoalsState
-  // getRatesByMonth -> getGoalsState
+    node [color="#ffe0a3"] // Internal
+    getFirstMonth
+    getLastMonth
 
-}
+    node [color="#ffcccc"] // Result
+    getMonthList
+
+    getTransactionsHistory -> getFirstMonth [label="first transaction month"]
+    getBudgets -> getLastMonth [label="last budget month"]
+    getFirstMonth -> getMonthList
+    getLastMonth -> getMonthList
+  }
+
+  subgraph cluster_envelope_metrics {
+    label="4. Calculate full envelope budget state";
+    style="filled,rounded"
+    color="#e8e8e8";
+
+    node [color="#ffcccc"] // Result
+    getEnvMetrics [label="getEnvMetrics\nleftover + budgeted + activity + available"]
+
+    getMonthList -> getEnvMetrics [label="process month-by-month"]
+    getEnvelopes -> getEnvMetrics [label="currency, parent, children,\ncarryNegatives"]
+    getActivity -> getEnvMetrics [label="selfActivity,\nselfTransactions"]
+    getBudgets -> getEnvMetrics [label="selfBudgeted"]
+    fxConverter -> getEnvMetrics [label="convert to envelope currency"]
+    getEnvMetrics -> getEnvMetrics [label="previous month selfAvailable\nbecomes selfLeftover"]
+  }
+
+  subgraph cluster_totals {
+    label="5. Aggregate budget month totals";
+    style="filled,rounded"
+    color="#e8e8e8";
+
+    node [color="#ffe0a3"] // Internal
+    getCurrentFunds
+
+    node [color="#ffcccc"] // Result
+    getMonthTotals [label="getMonthTotals\ntoBeBudgeted + freeFunds + overspend"]
+
+    getInBudgetAccounts -> getCurrentFunds [label="current account balances"]
+    getCurrentFunds -> getMonthTotals [label="fundsEnd"]
+    getMonthList -> getMonthTotals
+    getActivity -> getMonthTotals [label="income / fees / env activity"]
+    getEnvMetrics -> getMonthTotals [label="budgeted / available / overspend"]
+    fxConverter -> getMonthTotals [label="compare mixed currencies"]
+  }
 
 }
