@@ -1,16 +1,23 @@
 import { createSelector } from '@reduxjs/toolkit'
+import { toISOMonth } from '6-shared/helpers/date'
 import { i18n } from '6-shared/localization'
 import { accountModel } from '5-entities/account'
 import { getTagBudgets } from '5-entities/budget'
+import { fxRateModel } from '5-entities/currency/fxRate'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { debtorModel } from '5-entities/debtors'
+import { getCurrentFunds } from '5-entities/envBalances/1 - currentFunds'
+import { getMonthList } from '5-entities/envBalances/1 - monthList'
 import { tagModel } from '5-entities/tag'
 import { trModel } from '5-entities/transaction'
 import { userModel } from '5-entities/user'
 import type { RootState } from 'store'
 import {
+  buildActivity,
   buildBudgets,
   buildEnvelopes,
+  buildEnvMetrics,
+  buildMonthTotals,
   buildRawActivity,
   getEnvBudgets,
   getEnvelopeMeta,
@@ -101,6 +108,55 @@ export const selectCoreRawActivity = createSelector(
       debtAccountId,
       debtors,
       instruments,
+    })
+)
+
+export const selectCoreActivity = createSelector(
+  [selectCoreRawActivity, selectCoreKeepingEnvelopeIds],
+  (rawActivity, keepingEnvelopeIds) =>
+    buildActivity({
+      rawActivity,
+      keepingEnvelopeIds,
+    })
+)
+
+export const selectCoreEnvMetrics = createSelector(
+  [
+    getMonthList,
+    selectCoreEnvelopes,
+    selectCoreActivity,
+    selectCoreBudgets,
+    fxRateModel.converter,
+  ],
+  (monthList, envelopes, activity, budgets, convertFx) =>
+    buildEnvMetrics({
+      monthList,
+      envelopes,
+      activity,
+      budgets,
+      convertFx,
+    })
+)
+
+export const selectCoreCurrentMonth = () => toISOMonth(Date.now())
+
+export const selectCoreMonthTotals = createSelector(
+  [
+    getMonthList,
+    getCurrentFunds,
+    selectCoreActivity,
+    selectCoreEnvMetrics,
+    fxRateModel.converter,
+    selectCoreCurrentMonth,
+  ],
+  (monthList, currentFunds, activity, envMetrics, convertFx, currentMonth) =>
+    buildMonthTotals({
+      monthList,
+      currentFunds,
+      activity,
+      envMetrics,
+      convertFx,
+      currentMonth,
     })
 )
 

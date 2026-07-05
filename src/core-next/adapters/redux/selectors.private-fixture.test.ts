@@ -39,18 +39,27 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
       { userSettingsModel },
       {
         selectCoreBudgets,
+        selectCoreActivity,
         selectCoreEnvelopes,
         selectCoreEnvelopeStructure,
+        selectCoreEnvMetrics,
         selectCoreKeepingEnvelopeIds,
+        selectCoreMonthTotals,
         selectCoreRawActivity,
         selectCoreUserSettings,
       },
+      { getMonthTotals },
+      { getEnvMetrics },
+      { getActivity },
       { getRawActivity },
     ] = await Promise.all([
       import('5-entities/budget'),
       import('5-entities/envelope'),
       import('5-entities/userSettings'),
       import('./selectors'),
+      import('5-entities/envBalances/4 - monthTotals'),
+      import('5-entities/envBalances/3 - envMetrics'),
+      import('5-entities/envBalances/2 - activity'),
       import('5-entities/envBalances/1 - rawActivity'),
     ])
 
@@ -80,7 +89,18 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
       selectCoreRawActivity(state),
       getRawActivity(state)
     )
-  })
+    expectSameJsonHash('activity', selectCoreActivity(state), getActivity(state))
+    expectSameJsonHash(
+      'envMetrics',
+      selectCoreEnvMetrics(state),
+      getEnvMetrics(state)
+    )
+    expectSameJsonHash(
+      'monthTotals',
+      selectCoreMonthTotals(state),
+      getMonthTotals(state)
+    )
+  }, 60_000)
 })
 
 function readFixture(filePath: string): PrivateFixture {

@@ -13,6 +13,7 @@ The initial architecture and private fixture workflow are documented in:
 The current branch has these recent commits:
 
 ```txt
+59d043eb Add core-next envelope budget and raw activity projections
 763b8552 Add private fixture harness
 18185f48 Add core-next patch primitives
 050ec4a2 Add core-next hidden data readers
@@ -107,6 +108,9 @@ Implemented:
 - `compareTransactionDates`
 - `buildRawActivity`
 - `EnvActivity`
+- `buildActivity`
+- `buildEnvMetrics`
+- `buildMonthTotals`
 
 `buildEnvelopes` is a pure projector. It accepts prepared `debtors`,
 `populatedTags`, `savingAccounts`, `envelopeMeta`, `userCurrency`, and explicit
@@ -121,6 +125,16 @@ legacy precedence and skip rules.
 history, in-budget account ids, debt account id, debtors, and instruments. The
 Redux adapter exposes it as `selectCoreRawActivity` with explicit dependencies.
 
+`buildActivity`, `buildEnvMetrics`, and `buildMonthTotals` preserve the legacy
+projection graph as separate pure projectors:
+
+```txt
+rawActivity -> activity -> envMetrics -> monthTotals
+```
+
+`buildMonthTotals` accepts `currentMonth` explicitly instead of reading
+`Date.now()` inside the core projector.
+
 ### Core-next Redux adapter
 
 Implemented:
@@ -133,14 +147,18 @@ Implemented:
 - `selectCoreKeepingEnvelopeIds`
 - `selectCoreBudgets`
 - `selectCoreRawActivity`
+- `selectCoreActivity`
+- `selectCoreEnvMetrics`
+- `selectCoreMonthTotals`
 
 The adapter currently uses legacy upstream selectors for prepared inputs, but
 routes the domain projection through `core-next`.
 
-## Review notes before committing current agent changes
+Keep this graph explicit. Do not replace it with a single large
+`current => readModel` selector; that would make transaction-heavy projections
+recompute on unrelated budget or metadata changes.
 
-The current uncommitted agent work mostly matches the plan and passes checks, but
-two small fixes are recommended before committing it.
+## Current guardrails
 
 ### Do not export Redux adapter from root facade
 
@@ -209,6 +227,9 @@ node ./node_modules/vitest/vitest.mjs run \
   src/core-next/zerro/budgets/build.test.ts \
   src/core-next/zenmoney/transactions.test.ts \
   src/core-next/zerro/activity/rawActivity.test.ts \
+  src/core-next/zerro/activity/activity.test.ts \
+  src/core-next/zerro/activity/envMetrics.test.ts \
+  src/core-next/zerro/activity/monthTotals.test.ts \
   src/core-next/adapters/redux/selectors.private-fixture.test.ts \
   src/core-next/zerro/read.private-fixture.test.ts
 ```
@@ -263,138 +284,12 @@ Golden comparisons use stable JSON hashing and ignore object fields with `undefi
 
 ## Recommended next steps
 
-Move in small, testable layers.
+Move in small, testable layers. The read projection chain through
+`monthTotals` is now ported. Remaining useful follow-ups:
 
-### 1. Add Zerro user settings read helpers
-
-Done. Implemented in `core-next` using hidden-data readers:
-
-```ts
-getStoredUserSettings(data)
-getUserSettings(data)
-```
-
-Expected defaults:
-
-```ts
-{
-  sawMigrationAlert: false,
-  preferZmBudgets: false,
-  emojiIcons: false
-}
-```
-
-Tests:
-
-- unit tests with small fixture data;
-- compare against legacy selector on private fixture.
-
-### 2. Add envelope meta read helpers
-
-Done. Implemented:
-
-```ts
-getEnvelopeMeta(data)
-```
-
-This should read `HiddenDataType.EnvelopeMeta` with `{}` default.
-
-Tests:
-
-- unit tests;
-- compare against legacy selector/private fixture.
-
-### 3. Add basic envelope id helpers/types
-
-Done. Ported:
-
-```txt
-EnvType
-TEnvelopeId
-envId.parse
-envId.get
-```
-
-Target names can stay close to legacy for now.
-
-Tests:
-
-- parse/get roundtrip;
-- null tag id handling.
-
-### 4. Start `buildEnvelopes`
-
-Done. It does not import Redux selectors into core.
-
-Target shape:
-
-```ts
-buildEnvelopes({
-  debtors,
-  populatedTags,
-  savingAccounts,
-  envelopeMeta,
-  userCurrency,
-  labels,
-})
-```
-
-Important: avoid `i18next.t(...)` at module initialization. Pass default group labels explicitly, probably through `labels`.
-
-Tests:
-
-- small unit tests;
-- compare core envelopes with `legacyOutput.envelopes` from private fixture.
-
-### 5. Move budgets
-
-Done. Implemented:
-
-```ts
-buildBudgets({
-  tagBudgets,
-  envBudgets,
-  preferZmBudgets,
-})
-```
-
-Compare with `legacyOutput.budgets`.
-
-Also implemented:
-
-```ts
-getEnvBudgets(data)
-```
-
-Tests:
-
-- unit tests for hidden monthly budget reads;
-- unit tests for ZenMoney-vs-hidden precedence;
-- compare core budgets with legacy selector on private fixture.
-
-### 6. Add Redux adapter selectors
-
-Done. Implemented adapter selectors while preserving explicit dependencies.
-
-After projectors exist, create adapter-level selectors that preserve explicit dependencies.
-
-Do not create one large selector like:
-
-```ts
-createSelector([selectCurrent], current => createReadModel(current))
-```
-
-That would invalidate expensive transaction projections too often.
-
-### 7. Move heavy projections
-
-Order:
-
-```txt
-rawActivity - done
-activity
-envMetrics
-monthTotals
-```
-
-Preserve explicit dependencies so `rawActivity` does not recompute on unrelated budget/meta changes.
+1. Decide whether `sortedActivity` should be ported now or kept legacy-only
+   until a UI switching step needs it.
+2. Start replacing selected legacy imports with adapter imports from
+   `core-next/adapters/redux`, one consumer at a time.
+3. Start command/session work only after the read-model comparison surface is
+   stable enough for regression checks.
