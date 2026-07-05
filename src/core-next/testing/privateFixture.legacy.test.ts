@@ -78,9 +78,10 @@ maybeDescribe('private fixture legacy outputs', () => {
         const expected = fixture.legacyOutput.outputs[key]
         const actualHash = hashJson(actual)
         const expectedHash = hashJson(expected)
-        expect(actualHash, `${key}: ${summarizeMismatch(actual, expected)}`).toBe(
-          expectedHash
-        )
+        expect(
+          actualHash,
+          `${key}: ${summarizeMismatch(actual, expected)}`
+        ).toBe(expectedHash)
       })
     } finally {
       vi.useRealTimers()
@@ -124,7 +125,9 @@ function stableStringify(value: unknown): string {
 
   if (Array.isArray(value)) {
     return `[${value
-      .map(item => (typeof item === 'undefined' ? 'null' : stableStringify(item)))
+      .map(item =>
+        typeof item === 'undefined' ? 'null' : stableStringify(item)
+      )
       .join(',')}]`
   }
 
