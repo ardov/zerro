@@ -1,14 +1,20 @@
 import { describe, expect, it } from 'vitest'
 import type { TTransaction } from '6-shared/types'
-import { getTransactionType, TrType } from './transactions'
+import { getTransactionType, TrType } from './read'
 
 describe('transaction helpers', () => {
   it('detects debt transactions before regular transfers', () => {
     expect(
-      getTransactionType(transaction({ incomeAccount: 'debt', outcome: 10 }), 'debt')
+      getTransactionType(
+        transaction({ incomeAccount: 'debt', outcome: 10 }),
+        'debt'
+      )
     ).toBe(TrType.OutcomeDebt)
     expect(
-      getTransactionType(transaction({ outcomeAccount: 'debt', income: 10 }), 'debt')
+      getTransactionType(
+        transaction({ outcomeAccount: 'debt', income: 10 }),
+        'debt'
+      )
     ).toBe(TrType.IncomeDebt)
   })
 

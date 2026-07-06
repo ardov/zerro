@@ -1,4 +1,10 @@
-import type { TFxCode, TDataStore, TInstrumentId, TUser, TUserId } from '6-shared/types'
+import type {
+  TFxCode,
+  TDataStore,
+  TInstrumentId,
+  TUser,
+  TUserId,
+} from '6-shared/types'
 
 export function getRootUser(data: TDataStore): TUser | null {
   for (const id in data.user) {
