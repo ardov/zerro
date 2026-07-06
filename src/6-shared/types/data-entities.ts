@@ -10,6 +10,7 @@ import type {
   TCompanyId,
   TZmCompany,
 } from 'core-next/zenmoney/companies/types'
+import type { TUser, TUserId, TZmUser } from 'core-next/zenmoney/users/types'
 import tagIcons from '../tagIcons.json'
 
 export type {
@@ -23,6 +24,7 @@ export type {
   TCompanyId,
   TZmCompany,
 } from 'core-next/zenmoney/companies/types'
+export type { TUser, TUserId, TZmUser } from 'core-next/zenmoney/users/types'
 
 type TIconName = keyof typeof tagIcons
 
@@ -56,35 +58,6 @@ export type TZmCountry = {
 }
 
 export type TCountry = TZmCountry
-
-// ---------------------------------------------------------------------
-// USER
-// ---------------------------------------------------------------------
-
-export type TUserId = number
-
-export type TZmUser = {
-  id: TUserId
-  changed: TUnixTime
-  currency: TInstrumentId
-  parent: TUserId | null
-  country: TCountryId
-  countryCode: string
-  email: string | null
-  login: string | null
-  monthStartDay: 1
-  isForecastEnabled: boolean
-  planBalanceMode: string // 'balance'
-  planSettings: string
-  paidTill: TUnixTime
-  subscription: '10yearssubscription' | '1MonthSubscription' | string
-  subscriptionRenewalDate: any | null
-}
-
-export type TUser = TZmUser & {
-  changed: TMsTime
-  paidTill: TMsTime
-}
 
 // ---------------------------------------------------------------------
 // ACCOUNT

@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import type { TDataStore } from '6-shared/types'
+import type { TInstrument } from '../instruments'
 import {
   getRootUser,
   getRootUserId,
   getUserCurrency,
   getUserInstrumentId,
 } from '.'
+import type { TUser } from './types'
 
 describe('zenmoney users', () => {
   it('derives root user from data', () => {
@@ -44,12 +46,34 @@ describe('zenmoney users', () => {
   })
 })
 
-function user(value: { id: number; parent: number | null; currency: number }) {
-  return value as any
+function user(value: Pick<TUser, 'id' | 'parent' | 'currency'>): TUser {
+  return {
+    changed: 0,
+    country: 1,
+    countryCode: 'US',
+    email: null,
+    login: null,
+    monthStartDay: 1,
+    isForecastEnabled: false,
+    planBalanceMode: 'balance',
+    planSettings: '',
+    paidTill: 0,
+    subscription: '',
+    subscriptionRenewalDate: null,
+    ...value,
+  }
 }
 
-function instrument(value: { id: number; shortTitle: string }) {
-  return value as any
+function instrument(
+  value: Pick<TInstrument, 'id' | 'shortTitle'>
+): TInstrument {
+  return {
+    changed: 0,
+    title: '',
+    symbol: '',
+    rate: 1,
+    ...value,
+  }
 }
 
 function makeStore(patch: Partial<TDataStore> = {}): TDataStore {
