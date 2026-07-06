@@ -27,7 +27,8 @@ fixtures/private/
 
 Both folders are ignored by `.gitignore`.
 
-Do not place private fixtures under `src/`, `documents/`, or any tracked test fixture folder.
+Do not place private fixtures under `src/`, `src/core-next/documents/`, or any
+tracked test fixture folder.
 
 ## Fixture shape
 

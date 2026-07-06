@@ -5,15 +5,12 @@ Branch: `core-next`
 
 ## Current state
 
-The initial architecture and private fixture workflow are documented in:
-
-- `documents/core-next-architecture.md`
-- `documents/private-fixtures.md`
-
-Core Next also keeps module-local working notes in:
+Core Next documentation lives next to the module:
 
 - `src/core-next/documents/README.md`
+- `src/core-next/documents/architecture.md`
 - `src/core-next/documents/testing.md`
+- `src/core-next/documents/private-fixtures.md`
 
 The current branch has these recent commits:
 
@@ -71,11 +68,11 @@ src/core-next/
   zerro/
 ```
 
-`src/core-next/documents/README.md` records the local module direction and
-near-term fixture plan. `src/core-next/documents/testing.md` records the testing
-policy: focused unit tests for domain rules, deterministic demo-data regression
-tests for migrated read models, and opt-in private fixture parity tests for large
-real-world accounts.
+`src/core-next/documents/README.md` is the documentation index.
+`src/core-next/documents/testing.md` records the testing policy: focused unit
+tests for domain rules, deterministic demo-data regression tests for migrated
+read models, and opt-in private fixture parity tests for large real-world
+accounts.
 
 ### Core Next session facade
 

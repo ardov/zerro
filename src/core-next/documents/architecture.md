@@ -827,7 +827,7 @@ This matters because the new and old code may produce patches with slightly diff
 
 Result:
 
-- `documents/core-next-architecture.md` exists;
+- `src/core-next/documents/architecture.md` exists;
 - boundaries, goals, and the plan are documented.
 
 Verification:

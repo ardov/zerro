@@ -1,11 +1,20 @@
 # Core Next Notes
 
-This folder keeps the local working notes for `src/core-next`.
+This folder is the documentation home for `src/core-next`.
 
-The repo-level documents in `documents/` describe the broader migration plan and
-handoff state. Notes here are closer to the module itself: conventions, testing
-policy, fixture plans, and small decisions that should travel with the code if
-`core-next` later moves into `src/domain` or a separate package.
+Keep Core Next architecture, handoff state, testing policy, fixture workflows,
+and migration decisions here so they travel with the module if `core-next` later
+moves into `src/domain` or a separate package.
+
+## Documents
+
+- [architecture.md](./architecture.md): target architecture, module boundaries,
+  staged migration plan, and invariants.
+- [handoff.md](./handoff.md): current implementation state, verified commands,
+  guardrails, and recommended next steps.
+- [testing.md](./testing.md): testing policy and fixture strategy.
+- [private-fixtures.md](./private-fixtures.md): private fixture export,
+  storage, privacy, and comparison workflow.
 
 ## What We Are Building
 
