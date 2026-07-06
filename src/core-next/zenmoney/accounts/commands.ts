@@ -1,15 +1,10 @@
 import { toISODate } from '6-shared/helpers/date'
-import type {
-  Modify,
-  OptionalExceptFor,
-  TAccount,
-  TAccountId,
-  TDataStore,
-  TDateDraft,
-} from '6-shared/types'
-import { AccountType, DataEntity } from '6-shared/types'
+import type { Modify, OptionalExceptFor, TDataStore } from '6-shared/types'
+import { DataEntity } from '6-shared/types'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
+import type { TDateDraft } from '../primitives'
 import { getRootUserId } from '../users'
+import { AccountType, type TAccount, type TAccountId } from './types'
 
 export type TZenMoneyAccountPatch = OptionalExceptFor<TAccount, 'id'>
 export type TZenMoneyAccountDraft = Modify<

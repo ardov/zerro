@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { AccountType, DataEntity } from '6-shared/types'
-import type { TAccount, TDataStore } from '6-shared/types'
+import { DataEntity } from '6-shared/types'
+import type { TDataStore } from '6-shared/types'
 import { applyPatch } from '../applyPatch'
 import {
   compileCreateAccount,
   compileDeleteAccount,
   compilePatchAccount,
 } from './commands'
+import { AccountType, type TAccount } from './types'
 
 describe('zenmoney account commands', () => {
   it('creates accounts with root user and deterministic id/time', () => {

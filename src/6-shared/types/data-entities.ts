@@ -16,6 +16,11 @@ import type {
   TZmCountry,
 } from 'core-next/zenmoney/countries/types'
 import type { TUser, TUserId, TZmUser } from 'core-next/zenmoney/users/types'
+import type {
+  TAccount,
+  TAccountId,
+  TZmAccount,
+} from 'core-next/zenmoney/accounts/types'
 import tagIcons from '../tagIcons.json'
 
 export type {
@@ -35,6 +40,12 @@ export type {
   TZmCountry,
 } from 'core-next/zenmoney/countries/types'
 export type { TUser, TUserId, TZmUser } from 'core-next/zenmoney/users/types'
+export type {
+  TAccount,
+  TAccountId,
+  TZmAccount,
+} from 'core-next/zenmoney/accounts/types'
+export { AccountType } from 'core-next/zenmoney/accounts/types'
 
 type TIconName = keyof typeof tagIcons
 
@@ -52,56 +63,6 @@ export enum DataEntity {
   Reminder = 'reminder',
   ReminderMarker = 'reminderMarker',
   Transaction = 'transaction',
-}
-
-// ---------------------------------------------------------------------
-// ACCOUNT
-// ---------------------------------------------------------------------
-
-export type TAccountId = string
-
-export enum AccountType {
-  Cash = 'cash',
-  Ccard = 'ccard',
-  Checking = 'checking',
-  Loan = 'loan',
-  Deposit = 'deposit',
-  Emoney = 'emoney',
-  Debt = 'debt',
-}
-
-export type TZmAccount = {
-  id: TAccountId
-  changed: TUnixTime
-  user: TUserId
-  instrument: TInstrumentId
-  title: string
-  role: number | null
-  company: TCompanyId | null
-  type: AccountType
-  syncID: string[] | null
-  balance: TUnits
-  // Для deposit и loan поле startBalance имеет смысл начального взноса/тела кредита
-  startBalance: TUnits
-  creditLimit: TUnits
-  inBalance: boolean
-  savings: boolean
-  enableCorrection: boolean
-  enableSMS: boolean
-  archive: boolean
-  private: boolean
-  // Для счетов с типом отличных от 'loan' и 'deposit' в  этих полях можно ставить null
-  capitalization: boolean | null
-  percent: number | null
-  startDate: TISODate | null
-  endDateOffset: number | null
-  endDateOffsetInterval: 'day' | 'week' | 'month' | 'year' | null
-  payoffStep: number | null
-  payoffInterval: 'month' | 'year' | null
-}
-
-export type TAccount = TZmAccount & {
-  changed: TMsTime
 }
 
 // ---------------------------------------------------------------------
