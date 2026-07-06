@@ -1,5 +1,6 @@
 export * from './applyPatch'
 export * from './accounts'
+export * from './companies'
 export * from './instruments'
 export * from './merchants'
 export * from './replay'

@@ -1,5 +1,28 @@
 import type { TUnixTime, TUnits, TISODate, TMsTime } from './types'
+import type {
+  TFxCode,
+  TInstrument,
+  TInstrumentId,
+  TZmInstrument,
+} from 'core-next/zenmoney/instruments/types'
+import type {
+  TCompany,
+  TCompanyId,
+  TZmCompany,
+} from 'core-next/zenmoney/companies/types'
 import tagIcons from '../tagIcons.json'
+
+export type {
+  TFxCode,
+  TInstrument,
+  TInstrumentId,
+  TZmInstrument,
+} from 'core-next/zenmoney/instruments/types'
+export type {
+  TCompany,
+  TCompanyId,
+  TZmCompany,
+} from 'core-next/zenmoney/companies/types'
 
 type TIconName = keyof typeof tagIcons
 
@@ -20,27 +43,6 @@ export enum DataEntity {
 }
 
 // ---------------------------------------------------------------------
-// INSTRUMENT
-// ---------------------------------------------------------------------
-
-export type TInstrumentId = number
-
-export type TFxCode = string
-
-export type TZmInstrument = {
-  id: TInstrumentId
-  changed: TUnixTime
-  title: string
-  shortTitle: TFxCode
-  symbol: string
-  rate: number
-}
-
-export type TInstrument = TZmInstrument & {
-  changed: TMsTime
-}
-
-// ---------------------------------------------------------------------
 // COUNTRY
 // ---------------------------------------------------------------------
 
@@ -54,27 +56,6 @@ export type TZmCountry = {
 }
 
 export type TCountry = TZmCountry
-
-// ---------------------------------------------------------------------
-// COMPANY
-// ---------------------------------------------------------------------
-
-export type TCompanyId = number
-
-export type TZmCompany = {
-  id: TCompanyId
-  changed: TUnixTime
-  title: string
-  fullTitle: string | null
-  www: string | null
-  country: TCountryId | null
-  countryCode: string | null
-  deleted: boolean
-}
-
-export type TCompany = TZmCompany & {
-  changed: TMsTime
-}
 
 // ---------------------------------------------------------------------
 // USER
