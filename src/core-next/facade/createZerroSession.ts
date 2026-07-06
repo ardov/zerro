@@ -7,7 +7,6 @@ import type {
   TAccountId,
   TDataStore,
   TFxCode,
-  TInstrumentId,
   TTransaction,
 } from '6-shared/types'
 import { AccountType as AccountTypeValue } from '6-shared/types'
@@ -17,6 +16,7 @@ import {
   buildDebtors,
   compareTransactionDates,
   getHistoryStart,
+  getInstrumentCodeById,
   getUserCurrency,
 } from '../zenmoney'
 import {
@@ -42,10 +42,7 @@ import {
   getRawGoals,
   getUserSettings,
 } from '../zerro'
-import type {
-  TBuildEnvelopesInput,
-  TEnvelopeTag,
-} from '../zerro/envelopes'
+import type { TBuildEnvelopesInput, TEnvelopeTag } from '../zerro/envelopes'
 
 export type TZerroSessionContext = {
   now: () => number
@@ -265,16 +262,6 @@ function getDebtAccountId(data: TDataStore): TAccountId | undefined {
   return Object.values(data.account).find(
     account => account.type === AccountTypeValue.Debt
   )?.id
-}
-
-function getInstrumentCodeById(
-  data: TDataStore
-): Record<TInstrumentId, TFxCode> {
-  const result: Record<TInstrumentId, TFxCode> = {}
-  Object.values(data.instrument).forEach(instrument => {
-    result[instrument.id] = instrument.shortTitle
-  })
-  return result
 }
 
 function getSavingAccounts(

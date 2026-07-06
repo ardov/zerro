@@ -5,6 +5,7 @@ import type {
   TUser,
   TUserId,
 } from '6-shared/types'
+import { getInstrumentCode } from '../instruments'
 
 export function getRootUser(data: TDataStore): TUser | null {
   for (const id in data.user) {
@@ -24,5 +25,5 @@ export function getUserInstrumentId(data: TDataStore): TInstrumentId | null {
 export function getUserCurrency(data: TDataStore): TFxCode {
   const instrumentId = getUserInstrumentId(data)
   if (typeof instrumentId !== 'number') return 'USD'
-  return data.instrument[instrumentId]?.shortTitle || 'USD'
+  return getInstrumentCode(data, instrumentId) || 'USD'
 }
