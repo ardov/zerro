@@ -1,9 +1,54 @@
 import { describe, expect, it } from 'vitest'
+import { AccountType, DataEntity } from '6-shared/types'
 import type { TAccount, TDataStore } from '6-shared/types'
 import { applyPatch } from '../applyPatch'
-import { compilePatchAccount } from './commands'
+import {
+  compileCreateAccount,
+  compileDeleteAccount,
+  compilePatchAccount,
+} from './commands'
 
 describe('zenmoney account commands', () => {
+  it('creates accounts with root user and deterministic id/time', () => {
+    const data = makeStore({
+      user: {
+        2: { id: 2, parent: 1 },
+        1: { id: 1, parent: null },
+      } as any,
+    })
+
+    const patch = compileCreateAccount(
+      data,
+      {
+        user: 999,
+        instrument: 2,
+        title: 'Savings',
+        type: AccountType.Deposit,
+        balance: 25,
+        inBalance: true,
+        startDate: '2026-02',
+      },
+      {
+        now: () => 1700000000000,
+        uuid: () => 'acc-new',
+      }
+    )
+
+    expect(patch.account?.[0]).toEqual(
+      account({
+        id: 'acc-new',
+        changed: 1700000000000,
+        user: 1,
+        instrument: 2,
+        title: 'Savings',
+        type: AccountType.Deposit,
+        balance: 25,
+        inBalance: true,
+        startDate: '2026-02-01',
+      })
+    )
+  })
+
   it('compiles account patches using current data and deterministic time', () => {
     const data = makeStore({
       account: {
@@ -99,6 +144,61 @@ describe('zenmoney account commands', () => {
     expect(() =>
       compilePatchAccount(data, { id: 'missing', title: 'Missing' }, ctx)
     ).toThrow('Account not found')
+  })
+
+  it('deletes accounts through normalized deletion patches', () => {
+    const data = makeStore({
+      user: {
+        1: { id: 1, parent: null },
+      } as any,
+      account: {
+        cash: account({ id: 'cash', title: 'Cash', changed: 1 }),
+      },
+    })
+
+    const patch = compileDeleteAccount(data, 'cash', {
+      now: () => 1700000000000,
+    })
+    const next = applyPatch(data, patch)
+
+    expect(patch).toEqual({
+      deletion: [
+        {
+          id: 'cash',
+          object: DataEntity.Account,
+          stamp: 1700000000000,
+          user: 1,
+        },
+      ],
+    })
+    expect(next.account.cash).toBeUndefined()
+    expect(data.account.cash.title).toBe('Cash')
+  })
+
+  it('validates account create and delete commands', () => {
+    expect(() =>
+      compileCreateAccount(
+        makeStore(),
+        { instrument: 1, title: 'No user' },
+        { now: () => 1, uuid: () => 'account' }
+      )
+    ).toThrow('No user')
+
+    expect(() =>
+      compileDeleteAccount(makeStore(), 'missing', { now: () => 1 })
+    ).toThrow('Account not found')
+
+    expect(() =>
+      compileDeleteAccount(
+        makeStore({
+          account: {
+            cash: account({ id: 'cash', title: 'Cash', changed: 1 }),
+          },
+        }),
+        'cash',
+        { now: () => 1 }
+      )
+    ).toThrow('No user')
   })
 })
 
