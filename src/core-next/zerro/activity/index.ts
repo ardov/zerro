@@ -1,4 +1,7 @@
 export * from './activity'
+export * from './currentFunds'
 export * from './envMetrics'
+export * from './monthList'
 export * from './monthTotals'
 export * from './rawActivity'
+export * from './sortedActivity'

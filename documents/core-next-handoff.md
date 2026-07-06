@@ -13,6 +13,7 @@ The initial architecture and private fixture workflow are documented in:
 The current branch has these recent commits:
 
 ```txt
+e739c3bc Add core-next activity metrics and month totals projections
 59d043eb Add core-next envelope budget and raw activity projections
 763b8552 Add private fixture harness
 18185f48 Add core-next patch primitives
@@ -109,6 +110,9 @@ Implemented:
 - `buildRawActivity`
 - `EnvActivity`
 - `buildActivity`
+- `buildSortedActivity`
+- `buildMonthList`
+- `buildCurrentFunds`
 - `buildEnvMetrics`
 - `buildMonthTotals`
 
@@ -125,15 +129,17 @@ legacy precedence and skip rules.
 history, in-budget account ids, debt account id, debtors, and instruments. The
 Redux adapter exposes it as `selectCoreRawActivity` with explicit dependencies.
 
-`buildActivity`, `buildEnvMetrics`, and `buildMonthTotals` preserve the legacy
-projection graph as separate pure projectors:
+`buildActivity`, `buildSortedActivity`, `buildEnvMetrics`, and
+`buildMonthTotals` preserve the legacy projection graph as separate pure
+projectors:
 
 ```txt
 rawActivity -> activity -> envMetrics -> monthTotals
+rawActivity -> sortedActivity
 ```
 
-`buildMonthTotals` accepts `currentMonth` explicitly instead of reading
-`Date.now()` inside the core projector.
+`buildMonthList` and `buildMonthTotals` accept `currentMonth` explicitly instead
+of reading `Date.now()` inside the core projector.
 
 ### Core-next Redux adapter
 
@@ -146,13 +152,19 @@ Implemented:
 - `selectCoreEnvelopeStructure`
 - `selectCoreKeepingEnvelopeIds`
 - `selectCoreBudgets`
+- `selectCoreCurrentMonth`
+- `selectCoreMonthList`
+- `selectCoreCurrentFunds`
 - `selectCoreRawActivity`
 - `selectCoreActivity`
+- `selectCoreSortedActivity`
 - `selectCoreEnvMetrics`
 - `selectCoreMonthTotals`
 
-The adapter currently uses legacy upstream selectors for prepared inputs, but
-routes the domain projection through `core-next`.
+The adapter currently uses legacy upstream selectors for some prepared inputs,
+but routes the domain projection through `core-next`. The read balance chain no
+longer imports legacy `getMonthList`, `getCurrentFunds`, `getActivity`,
+`getSortedActivity`, `getEnvMetrics`, or `getMonthTotals`.
 
 Keep this graph explicit. Do not replace it with a single large
 `current => readModel` selector; that would make transaction-heavy projections
@@ -228,6 +240,9 @@ node ./node_modules/vitest/vitest.mjs run \
   src/core-next/zenmoney/transactions.test.ts \
   src/core-next/zerro/activity/rawActivity.test.ts \
   src/core-next/zerro/activity/activity.test.ts \
+  src/core-next/zerro/activity/sortedActivity.test.ts \
+  src/core-next/zerro/activity/monthList.test.ts \
+  src/core-next/zerro/activity/currentFunds.test.ts \
   src/core-next/zerro/activity/envMetrics.test.ts \
   src/core-next/zerro/activity/monthTotals.test.ts \
   src/core-next/adapters/redux/selectors.private-fixture.test.ts \
@@ -285,10 +300,10 @@ Golden comparisons use stable JSON hashing and ignore object fields with `undefi
 ## Recommended next steps
 
 Move in small, testable layers. The read projection chain through
-`monthTotals` is now ported. Remaining useful follow-ups:
+`monthTotals`, plus `sortedActivity`, is now ported. Remaining useful follow-ups:
 
-1. Decide whether `sortedActivity` should be ported now or kept legacy-only
-   until a UI switching step needs it.
+1. Consider porting `debtors` next, because it is still a legacy prepared input
+   for envelopes and raw activity and it has a clear private-fixture comparison.
 2. Start replacing selected legacy imports with adapter imports from
    `core-next/adapters/redux`, one consumer at a time.
 3. Start command/session work only after the read-model comparison surface is

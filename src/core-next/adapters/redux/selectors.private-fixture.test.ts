@@ -44,12 +44,16 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
         selectCoreEnvelopeStructure,
         selectCoreEnvMetrics,
         selectCoreKeepingEnvelopeIds,
+        selectCoreMonthList,
         selectCoreMonthTotals,
+        selectCoreSortedActivity,
         selectCoreRawActivity,
         selectCoreUserSettings,
       },
+      { getMonthList },
       { getMonthTotals },
       { getEnvMetrics },
+      { getSortedActivity },
       { getActivity },
       { getRawActivity },
     ] = await Promise.all([
@@ -57,8 +61,10 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
       import('5-entities/envelope'),
       import('5-entities/userSettings'),
       import('./selectors'),
+      import('5-entities/envBalances/1 - monthList'),
       import('5-entities/envBalances/4 - monthTotals'),
       import('5-entities/envBalances/3 - envMetrics'),
+      import('5-entities/envBalances/2 - sortedActivity'),
       import('5-entities/envBalances/2 - activity'),
       import('5-entities/envBalances/1 - rawActivity'),
     ])
@@ -91,9 +97,19 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
     )
     expectSameJsonHash('activity', selectCoreActivity(state), getActivity(state))
     expectSameJsonHash(
+      'monthList',
+      selectCoreMonthList(state),
+      getMonthList(state)
+    )
+    expectSameJsonHash(
       'envMetrics',
       selectCoreEnvMetrics(state),
       getEnvMetrics(state)
+    )
+    expectSameJsonHash(
+      'sortedActivity',
+      selectCoreSortedActivity(state),
+      getSortedActivity(state)
     )
     expectSameJsonHash(
       'monthTotals',

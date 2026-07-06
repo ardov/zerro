@@ -6,8 +6,6 @@ import { getTagBudgets } from '5-entities/budget'
 import { fxRateModel } from '5-entities/currency/fxRate'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { debtorModel } from '5-entities/debtors'
-import { getCurrentFunds } from '5-entities/envBalances/1 - currentFunds'
-import { getMonthList } from '5-entities/envBalances/1 - monthList'
 import { tagModel } from '5-entities/tag'
 import { trModel } from '5-entities/transaction'
 import { userModel } from '5-entities/user'
@@ -15,10 +13,13 @@ import type { RootState } from 'store'
 import {
   buildActivity,
   buildBudgets,
+  buildCurrentFunds,
   buildEnvelopes,
   buildEnvMetrics,
+  buildMonthList,
   buildMonthTotals,
   buildRawActivity,
+  buildSortedActivity,
   getEnvBudgets,
   getEnvelopeMeta,
   getKeepingEnvelopes,
@@ -93,6 +94,27 @@ export const selectCoreBudgets = createSelector(
     })
 )
 
+export const selectCoreCurrentMonth = () => toISOMonth(Date.now())
+
+export const selectCoreMonthList = createSelector(
+  [
+    trModel.getTransactionsHistory,
+    selectCoreBudgets,
+    selectCoreCurrentMonth,
+  ],
+  (transactions, budgets, currentMonth) =>
+    buildMonthList({
+      transactions,
+      budgets,
+      currentMonth,
+    })
+)
+
+export const selectCoreCurrentFunds = createSelector(
+  [accountModel.getInBudgetAccounts],
+  buildCurrentFunds
+)
+
 export const selectCoreRawActivity = createSelector(
   [
     trModel.getTransactionsHistory,
@@ -122,7 +144,7 @@ export const selectCoreActivity = createSelector(
 
 export const selectCoreEnvMetrics = createSelector(
   [
-    getMonthList,
+    selectCoreMonthList,
     selectCoreEnvelopes,
     selectCoreActivity,
     selectCoreBudgets,
@@ -138,12 +160,24 @@ export const selectCoreEnvMetrics = createSelector(
     })
 )
 
-export const selectCoreCurrentMonth = () => toISOMonth(Date.now())
+export const selectCoreSortedActivity = createSelector(
+  [
+    selectCoreRawActivity,
+    selectCoreKeepingEnvelopeIds,
+    fxRateModel.converter,
+  ],
+  (rawActivity, keepingEnvelopeIds, convertFx) =>
+    buildSortedActivity({
+      rawActivity,
+      keepingEnvelopeIds,
+      convertFx,
+    })
+)
 
 export const selectCoreMonthTotals = createSelector(
   [
-    getMonthList,
-    getCurrentFunds,
+    selectCoreMonthList,
+    selectCoreCurrentFunds,
     selectCoreActivity,
     selectCoreEnvMetrics,
     fxRateModel.converter,
