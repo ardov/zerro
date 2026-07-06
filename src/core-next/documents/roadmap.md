@@ -42,25 +42,24 @@ Do not:
 Goal: make ZenMoney Core feel like a small domain library instead of scattered
 helpers.
 
-Recommended order:
+Dependency order and status:
 
-1. Reference data cleanup:
-   - instruments;
-   - countries;
-   - companies.
-2. User helpers:
-   - root user detection;
-   - user currency;
-   - type ownership cleanup where useful.
-3. Mutable user-owned entities:
-   - accounts;
-   - merchants;
-   - tags;
-   - transactions.
-4. Derived ZenMoney reads:
-   - debtors;
-   - balances;
-   - balance history.
+1. `primitives` - done.
+2. `instruments` - done.
+3. `countries` - done.
+4. `companies` - done.
+5. `users` - done.
+6. `merchants` - partial: command compiler exists; type ownership remains.
+7. `tags` - partial: command compilers exist; type ownership remains.
+8. `accounts` - partial: types and commands exist; factory/layer review remains.
+9. `budgets` - pending as a ZenMoney entity; Zerro envelope budgets are separate.
+10. `reminders` - pending.
+11. `reminderMarkers` - pending. This is the ZenMoney `reminderMarker` entity,
+    not a separate "reminder maker" concept.
+12. `transactions` - partial: commands/read/effects exist; type ownership and
+    full entity module shape remain.
+13. `debtors` - done as a derived read.
+14. `balances` - done as a derived read.
 
 For each mutable entity:
 
@@ -81,6 +80,11 @@ zenmoney/accounts
 ```
 
 Then repeat the same shape for merchants, tags, and transactions.
+
+Do not skip budgets, reminders, or reminder markers when planning the ZenMoney
+entity layer. They are easy to overlook because current Zerro read work mostly
+touches reminders as hidden-data storage, but they are still normalized
+ZenMoney entities and transaction dependencies.
 
 Do not:
 

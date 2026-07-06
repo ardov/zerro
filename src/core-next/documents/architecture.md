@@ -973,10 +973,14 @@ Verification:
 
 Result:
 
-- transaction edit/create/delete;
 - account patch/create/delete;
-- tag/category patch/create/delete;
 - merchant patch/create/delete;
+- tag/category patch/create/delete;
+- ZenMoney tag budget set/clear, if still needed separately from Zerro envelope
+  budget commands;
+- reminder patch/create/delete;
+- reminder marker patch/create/delete;
+- transaction edit/create/delete;
 - basic validations.
 
 Verification:

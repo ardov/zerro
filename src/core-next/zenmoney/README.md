@@ -9,18 +9,72 @@ Start with infrastructure and reference data, then move toward entities with
 more dependencies:
 
 1. `primitives`: shared domain primitives such as timestamp units.
-2. `instruments`: currency metadata used by users, accounts, transactions, and
-   FX conversion.
+2. `instruments`: currency metadata used by countries, users, accounts,
+   reminders, reminder markers, transactions, and FX conversion.
 3. `countries`: country reference data used by users and companies.
-4. `companies`: bank and provider reference data.
+4. `companies`: bank and provider reference data used by accounts and
+   transactions.
 5. `users`: root user and user currency helpers.
-6. `accounts`: user-owned accounts and account write commands.
-7. `merchants`: payee-like transaction entities.
-8. `tags`: category entities.
-9. `transactions`: transaction commands, transaction read helpers, and account
-   balance effects.
-10. `debtors`: derived debt/payee balances from transactions.
-11. `balances`: derived balance history read models.
+6. `merchants`: payee-like transaction entities used by reminders, reminder
+   markers, transactions, and debtors.
+7. `tags`: category entities used by budgets, reminders, reminder markers, and
+   transactions.
+8. `accounts`: user-owned accounts used by reminders, reminder markers,
+   transactions, debtors, and balances.
+9. `budgets`: ZenMoney tag budgets; these are separate from hidden Zerro
+   envelope budgets.
+10. `reminders`: scheduled transaction templates.
+11. `reminderMarkers`: concrete reminder occurrences that can be linked from
+   transactions.
+12. `transactions`: highest-dependency mutable entity; transaction commands,
+   transaction read helpers, and account balance effects.
+13. `debtors`: derived debt/payee balances from transactions.
+14. `balances`: derived balance history read models.
+
+The order is dependency-oriented, not the exact `TDataStore` field order. The
+store field order is:
+
+```txt
+instrument -> country -> company -> user -> merchant -> account -> tag ->
+budget -> reminder -> reminderMarker -> transaction
+```
+
+## Current Migration Status
+
+Legend:
+
+- `done`: enough for the current Core Next read/command layer.
+- `partial`: useful code exists, but type ownership or module shape is not done.
+- `pending`: not represented as a Core Next ZenMoney entity module yet.
+
+| Area | Status | Notes |
+| --- | --- | --- |
+| `primitives` | done | Timestamp unit aliases live in Core Next. |
+| `instruments` | done | Core-owned types, read helpers, README, and tests are in place. |
+| `countries` | done | Core-owned types, read helpers, and README are in place. |
+| `companies` | done | Core-owned types, read helpers, and README are in place. |
+| `users` | done | Core-owned types and root user/currency reads are in place. |
+| `merchants` | partial | Patch command compiler exists; types still live in `6-shared/types`. |
+| `tags` | partial | Create/patch command compilers exist; types still live in `6-shared/types`. |
+| `accounts` | partial | Core-owned types and create/patch/delete command compilers exist; production factory/layer review is still useful. |
+| `budgets` | pending | ZenMoney tag budget type and ownership still live in `6-shared/types`; Zerro hidden envelope budgets live under `zerro/budgets`. |
+| `reminders` | pending | Needed for hidden-data write paths and scheduled transaction support. |
+| `reminderMarkers` | pending | Needed before transaction reminder-marker behavior can be fully owned. |
+| `transactions` | partial | Command compilers, read helper, and balance effects exist; type ownership and entity module shape are still pending. |
+| `debtors` | done | ZenMoney-derived read model is in Core Next. |
+| `balances` | done | ZenMoney-derived balance history read model is in Core Next. |
+
+## Dependency Notes
+
+- `Instrument` should stay first among reference data because many entities hold
+  instrument ids and FX conversion depends on instrument codes/rates.
+- `Country` and `Company` are synchronized reference data. Users and companies
+  use countries; accounts and transactions may reference companies.
+- `Transaction` should stay last among normalized ZenMoney entities because it
+  can reference user, company, instrument, account, tag, merchant, and reminder
+  marker data.
+- Derived reads such as `debtors` and `balances` come after transactions because
+  they scan transaction history.
 
 Folders are intentionally not numbered. Import paths are part of the future
 library API, so ordering belongs in this README and in `index.ts`, not in path
