@@ -1,8 +1,71 @@
 import { describe, expect, it } from 'vitest'
-import { makeTransaction } from '../../testing/zenmoneyTestData'
-import { getTransactionType, TrType } from './read'
+import { makeStore, makeTransaction } from '../../testing/zenmoneyTestData'
+import {
+  getTransaction,
+  getTransactions,
+  getTransactionsHistory,
+  getTransactionType,
+  isDeletedTransaction,
+  TrType,
+} from './read'
 
 describe('transaction helpers', () => {
+  it('reads transactions by map and id', () => {
+    const transaction = makeTransaction({ id: 'tr' })
+    const data = makeStore({
+      transaction: {
+        tr: transaction,
+      },
+    })
+
+    expect(getTransactions(data)).toBe(data.transaction)
+    expect(getTransaction(data, 'tr')).toBe(transaction)
+    expect(getTransaction(data, 'missing')).toBeNull()
+  })
+
+  it('builds transaction history without deleted or zeroed transactions', () => {
+    const data = makeStore({
+      transaction: {
+        older: makeTransaction({
+          id: 'older',
+          date: '2026-01-01',
+          created: 1,
+          outcome: 1,
+        }),
+        newer: makeTransaction({
+          id: 'newer',
+          date: '2026-01-02',
+          created: 1,
+          outcome: 1,
+        }),
+        newerCreatedLater: makeTransaction({
+          id: 'newerCreatedLater',
+          date: '2026-01-02',
+          created: 2,
+          outcome: 1,
+        }),
+        deleted: makeTransaction({ id: 'deleted', deleted: true }),
+        zeroed: makeTransaction({ id: 'zeroed', income: 0, outcome: 0 }),
+      },
+    })
+
+    expect(getTransactionsHistory(data).map(transaction => transaction.id)).toEqual([
+      'older',
+      'newer',
+      'newerCreatedLater',
+    ])
+  })
+
+  it('treats deleted and effectively zeroed transactions as deleted', () => {
+    expect(isDeletedTransaction(makeTransaction({ deleted: true }))).toBe(true)
+    expect(isDeletedTransaction(makeTransaction({ income: 0, outcome: 0 }))).toBe(
+      true
+    )
+    expect(isDeletedTransaction(makeTransaction({ income: 1, outcome: 0 }))).toBe(
+      false
+    )
+  })
+
   it('detects debt transactions before regular transfers', () => {
     expect(
       getTransactionType(

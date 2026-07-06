@@ -1,14 +1,14 @@
 import type {
   OptionalExceptFor,
   TDataStore,
-  TTagId,
-  TTransaction,
-  TTransactionId,
 } from '6-shared/types'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
+import type { TTagId } from '../tags'
 import { withTransactionAccountBalanceEffects } from './effects'
+import { getTransaction } from './read'
+import type { TTransaction, TTransactionId } from './types'
 
-export type TZenMoneyTransactionPatch = OptionalExceptFor<TTransaction, 'id'>
+export type TTransactionPatch = OptionalExceptFor<TTransaction, 'id'>
 
 export function compileDeleteTransactions(
   data: TDataStore,
@@ -19,7 +19,7 @@ export function compileDeleteTransactions(
     data,
     {
       transaction: toArray(ids).map(id => ({
-        ...getTransaction(data, id),
+        ...getExistingTransaction(data, id),
         deleted: true,
         changed: ctx.now(),
       })),
@@ -37,7 +37,7 @@ export function compileDeleteTransactionsPermanently(
     data,
     {
       transaction: toArray(ids).map(id => ({
-        ...getTransaction(data, id),
+        ...getExistingTransaction(data, id),
         outcome: 0.00001,
         income: 0.00001,
         changed: ctx.now(),
@@ -57,7 +57,7 @@ export function compileMarkTransactionsViewed(
     data,
     {
       transaction: toArray(ids)
-        .map(id => getTransaction(data, id))
+        .map(id => getExistingTransaction(data, id))
         .filter(transaction => isTransactionViewed(transaction) !== viewed)
         .map(transaction => ({
           ...transaction,
@@ -71,10 +71,10 @@ export function compileMarkTransactionsViewed(
 
 export function compileApplyChangesToTransaction(
   data: TDataStore,
-  patch: TZenMoneyTransactionPatch,
+  patch: TTransactionPatch,
   ctx: Pick<TCoreContext, 'now'>
 ): TNormalizedPatch {
-  const transaction = getTransaction(data, patch.id)
+  const transaction = getExistingTransaction(data, patch.id)
 
   return withTransactionAccountBalanceEffects(
     data,
@@ -95,7 +95,7 @@ export function compileRestoreTransaction(
     {
       transaction: [
         {
-          ...getTransaction(data, id),
+          ...getExistingTransaction(data, id),
           deleted: false,
           changed: ctx.now(),
           id: ctx.uuid(),
@@ -108,10 +108,10 @@ export function compileRestoreTransaction(
 
 export function compileRecreateTransaction(
   data: TDataStore,
-  patch: TZenMoneyTransactionPatch,
+  patch: TTransactionPatch,
   ctx: Pick<TCoreContext, 'now' | 'uuid'>
 ): { patch: TNormalizedPatch; transactionId: TTransactionId } {
-  const transaction = getTransaction(data, patch.id)
+  const transaction = getExistingTransaction(data, patch.id)
   const transactionId = ctx.uuid()
 
   return {
@@ -149,7 +149,7 @@ export function compileBulkEditTransactions(
     data,
     {
       transaction: ids.map(id => {
-        const transaction = getTransaction(data, id)
+        const transaction = getExistingTransaction(data, id)
         return {
           ...transaction,
           tag: modifyTags(transaction.tag, opts.tags),
@@ -162,8 +162,11 @@ export function compileBulkEditTransactions(
   )
 }
 
-function getTransaction(data: TDataStore, id: TTransactionId): TTransaction {
-  const transaction = data.transaction[id]
+function getExistingTransaction(
+  data: TDataStore,
+  id: TTransactionId
+): TTransaction {
+  const transaction = getTransaction(data, id)
   if (!transaction) throw new Error('Transaction not found')
   return transaction
 }

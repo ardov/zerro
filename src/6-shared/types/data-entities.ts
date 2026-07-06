@@ -22,6 +22,11 @@ import type {
   TZmAccount,
 } from 'core-next/zenmoney/accounts/types'
 import type { TTag, TTagId, TZmTag } from 'core-next/zenmoney/tags/types'
+import type {
+  TTransaction,
+  TTransactionId,
+  TZmTransaction,
+} from 'core-next/zenmoney/transactions/types'
 
 export type {
   TFxCode,
@@ -46,6 +51,11 @@ export type {
   TZmAccount,
 } from 'core-next/zenmoney/accounts/types'
 export type { TTag, TTagId, TZmTag } from 'core-next/zenmoney/tags/types'
+export type {
+  TTransaction,
+  TTransactionId,
+  TZmTransaction,
+} from 'core-next/zenmoney/transactions/types'
 export { AccountType } from 'core-next/zenmoney/accounts/types'
 
 // export type TToken = TAccessToken['access_token']
@@ -165,50 +175,6 @@ export type TZmReminderMarker = {
 
 export type TReminderMarker = TZmReminderMarker & {
   changed: TMsTime
-}
-
-// ---------------------------------------------------------------------
-// TRANSACTION
-// ---------------------------------------------------------------------
-
-export type TTransactionId = string
-
-export type TZmTransaction = {
-  id: TTransactionId
-  changed: TUnixTime
-  created: TUnixTime
-  user: TUserId
-  deleted: boolean
-  hold: boolean | null
-  viewed?: boolean
-  qrCode: string | null
-  incomeBankID: TCompanyId | null
-  incomeInstrument: TInstrumentId
-  incomeAccount: TAccountId
-  income: TUnits
-  outcomeBankID: TCompanyId | null
-  outcomeInstrument: TInstrumentId
-  outcomeAccount: TAccountId
-  outcome: TUnits
-  tag: TTagId[] | null
-  merchant: TMerchantId | null
-  payee: string | null
-  originalPayee: string | null
-  comment: string | null
-  date: TISODate
-  mcc: number | null
-  reminderMarker: TReminderMarkerId | null
-  opIncome: TUnits | null
-  opIncomeInstrument: TInstrumentId | null
-  opOutcome: TUnits | null
-  opOutcomeInstrument: TInstrumentId | null
-  latitude: number | null
-  longitude: number | null
-}
-
-export type TTransaction = TZmTransaction & {
-  changed: TMsTime
-  created: TMsTime
 }
 
 // ---------------------------------------------------------------------

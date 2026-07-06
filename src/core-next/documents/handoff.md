@@ -16,12 +16,12 @@ Core Next documentation lives next to the module:
 The current branch has these recent commits:
 
 ```txt
+31ed00c5 Shape core-next tag entity layer
 9b3ea3d4 Shape core-next merchant entity layer
 46128a48 Polish core-next account entity layer
 6847cc44 Document ZenMoney entity dependency order
 ee37daee Summarize core-next roadmap
 686bb664 Extract core-next test data builders
-aba677c9 Move core-next docs into module
 ```
 
 Recent Track B work in `zenmoney/merchants`:
@@ -47,6 +47,22 @@ This run also adds Track B work in `zenmoney/tags`:
   `TTagPatch` names, plus the tag read/factory layers;
 - populated tags, tag trees, and localized `nullTag` remain outside this
   normalized ZenMoney entity slice for now.
+
+This run also adds Track B work in `zenmoney/transactions`:
+
+- transaction types now live under
+  `src/core-next/zenmoney/transactions/types.ts`, and `6-shared/types`
+  re-exports them like the other migrated ZenMoney entities;
+- transaction reads now expose `getTransactions`, `getTransaction`,
+  `getTransactionsHistory`, and deletion/type helpers;
+- `createZerroSession` now imports `getTransactionsHistory` from the transaction
+  read layer instead of keeping a private copy;
+- transaction commands now use local `TTransactionPatch` and the transaction
+  read layer;
+- transaction balance effects now use account/transaction read helpers instead
+  of direct store map access;
+- no production transaction factory was added yet because the migrated command
+  surface does not include a create-transaction command.
 
 ## Implemented so far
 
@@ -429,8 +445,8 @@ ZenMoney-derived `debtors` and account balance history are also ported.
 Remaining useful follow-ups:
 
 1. Use `src/core-next/documents/roadmap.md` to choose the next track.
-2. The most conservative next domain slice is `zenmoney/transactions`: type
-   ownership and full entity module shape review.
+2. The next conservative domain slice is `zenmoney/budgets`, `reminders`, or
+   `reminderMarkers`; do not skip these normalized ZenMoney entities.
 3. The most direct command-enabling slice is hidden-data write codecs for user
    settings, envelope meta, env budgets, and goals.
 4. The test-infrastructure slice is deterministic demo data plus demo parity

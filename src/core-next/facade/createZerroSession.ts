@@ -2,19 +2,18 @@ import { toISODate, toISOMonth } from '6-shared/helpers/date'
 import type {
   ById,
   TDataStore,
-  TTransaction,
 } from '6-shared/types'
 import {
   buildBalances,
   buildBalancesByDate,
   buildDebtors,
-  compareTransactionDates,
   getBalanceAccounts,
   getDebtAccountId,
   getHistoryStart,
   getInBudgetAccounts,
   getInstrumentCodeById,
   getSavingAccounts,
+  getTransactionsHistory,
   getUserCurrency,
 } from '../zenmoney'
 import {
@@ -241,17 +240,4 @@ function memo<T>(calculate: () => T): () => T {
     }
     return value
   }
-}
-
-function getTransactionsHistory(data: TDataStore): TTransaction[] {
-  return Object.values(data.transaction)
-    .filter(transaction => !isDeletedTransaction(transaction))
-    .sort(compareTransactionDates)
-    .reverse()
-}
-
-function isDeletedTransaction(transaction: TTransaction) {
-  if (transaction.deleted) return true
-  if (transaction.income < 0.0001 && transaction.outcome < 0.0001) return true
-  return false
 }

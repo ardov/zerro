@@ -3,9 +3,11 @@ import type {
   TAccount,
   TAccountId,
   TDataStore,
-  TTransaction,
 } from '6-shared/types'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
+import { getAccount } from '../accounts'
+import { getTransaction } from './read'
+import type { TTransaction } from './types'
 
 type TAccountBalanceDeltas = Partial<Record<TAccountId, number>>
 
@@ -35,7 +37,7 @@ export function getTransactionAccountBalanceDeltas(
   const deltas: TAccountBalanceDeltas = {}
 
   transactions.forEach(transaction => {
-    const current = data.transaction[transaction.id]
+    const current = getTransaction(data, transaction.id) || undefined
     addTransactionEffect(deltas, current, -1)
     addTransactionEffect(deltas, transaction, 1)
   })
@@ -55,7 +57,7 @@ function mergeAccountBalanceDeltas(
   Object.entries(deltas).forEach(([id, delta]) => {
     if (!delta) return
 
-    const account = accountsById.get(id) || data.account[id]
+    const account = accountsById.get(id) || getAccount(data, id)
     if (!account) throw new Error('Account not found')
 
     accountsById.set(id, {

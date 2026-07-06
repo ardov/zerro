@@ -62,8 +62,9 @@ Dependency order and status:
 10. `reminders` - pending.
 11. `reminderMarkers` - pending. This is the ZenMoney `reminderMarker` entity,
     not a separate "reminder maker" concept.
-12. `transactions` - partial: commands/read/effects exist; type ownership and
-    full entity module shape remain.
+12. `transactions` - mostly done: types, read selectors, commands, balance
+    effects, and focused tests exist; a production create factory can wait until
+    a create-transaction command is migrated.
 13. `debtors` - done as a derived read.
 14. `balances` - done as a derived read.
 
@@ -78,18 +79,20 @@ For each mutable entity:
 Likely immediate slice:
 
 ```txt
-zenmoney/transactions
+zenmoney/budgets, zenmoney/reminders, or zenmoney/reminderMarkers
   type ownership cleanup
   read/factory/module-shape review
-  command and effects review
+  command review when legacy write behavior exists
   focused command tests using shared builders
 ```
 
 The `zenmoney/accounts` slice has already extracted read selectors and a
 production account factory, and tightened create command input so `user` is
 derived from the store. The `zenmoney/merchants` and `zenmoney/tags` slices now
-have the same module shape for types, reads, factories, and commands. Repeat the
-same review shape for transactions.
+have the same module shape for types, reads, factories, and commands.
+`zenmoney/transactions` now owns types, reads, commands, and balance effects;
+it does not add a factory yet because no create command is migrated. Continue
+with budgets, reminders, and reminder markers before calling Track B complete.
 
 Do not skip budgets, reminders, or reminder markers when planning the ZenMoney
 entity layer. They are easy to overlook because current Zerro read work mostly
@@ -169,10 +172,10 @@ If the next agent should continue cleanup:
 
 If the next agent should continue domain migration:
 
-1. Start with Track B, `zenmoney/transactions`.
-2. Review transaction type ownership, reads, commands, and balance effects as a
-   single entity module.
-3. Keep the change limited to entity types/read/factory/commands/effects/tests.
+1. Start with Track B, `zenmoney/budgets`, `zenmoney/reminders`, or
+   `zenmoney/reminderMarkers`.
+2. Review type ownership, reads, factories, and command behavior for that entity.
+3. Keep the change limited to entity types/read/factory/commands/tests.
 
 If the next agent should unlock Zerro commands:
 
@@ -180,9 +183,10 @@ If the next agent should unlock Zerro commands:
 2. Implement one simple hidden-data writer and compare the resulting state with
    the existing legacy write path.
 
-The most conservative next step is Track B for `zenmoney/transactions`, because
-it continues the ZenMoney entity layer without depending on demo-data
-infrastructure or a full Zerro command pipeline.
+The most conservative next step is Track B for `zenmoney/budgets`,
+`zenmoney/reminders`, or `zenmoney/reminderMarkers`, because it continues the
+ZenMoney entity layer without depending on demo-data infrastructure or a full
+Zerro command pipeline.
 
 ## Verification Defaults
 
