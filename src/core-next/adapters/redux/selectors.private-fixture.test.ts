@@ -35,11 +35,14 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
 
     const [
       { budgetModel },
+      { accBalanceModel },
       { envelopeModel },
       { userSettingsModel },
       {
         selectCoreBudgets,
         selectCoreActivity,
+        selectCoreBalances,
+        selectCoreBalancesByDate,
         selectCoreDebtors,
         selectCoreEnvelopes,
         selectCoreEnvelopeStructure,
@@ -64,6 +67,7 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
       { getRawActivity },
     ] = await Promise.all([
       import('5-entities/budget'),
+      import('5-entities/accBalances'),
       import('5-entities/envelope'),
       import('5-entities/userSettings'),
       import('./selectors'),
@@ -135,6 +139,16 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
       'goalTotals',
       selectCoreGoalTotals(state),
       goalModel.getTotals(state)
+    )
+    expectSameJsonHash(
+      'balances',
+      selectCoreBalances(state),
+      accBalanceModel.getBalances(state)
+    )
+    expectSameJsonHash(
+      'balancesByDate',
+      selectCoreBalancesByDate(state),
+      accBalanceModel.getBalancesByDate(state)
     )
   }, 60_000)
 })

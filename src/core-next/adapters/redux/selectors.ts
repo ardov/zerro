@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { toISOMonth } from '6-shared/helpers/date'
+import { toISODate, toISOMonth } from '6-shared/helpers/date'
 import { i18n } from '6-shared/localization'
 import { accountModel } from '5-entities/account'
 import { getTagBudgets } from '5-entities/budget'
@@ -10,7 +10,12 @@ import { tagModel } from '5-entities/tag'
 import { trModel } from '5-entities/transaction'
 import { userModel } from '5-entities/user'
 import type { RootState } from 'store'
-import { buildDebtors } from '../../zenmoney'
+import {
+  buildBalances,
+  buildBalancesByDate,
+  buildDebtors,
+  getHistoryStart,
+} from '../../zenmoney'
 import {
   buildActivity,
   buildBudgets,
@@ -120,6 +125,8 @@ export const selectCoreBudgets = createSelector(
 )
 
 export const selectCoreCurrentMonth = () => toISOMonth(Date.now())
+
+export const selectCoreCurrentDate = () => toISODate(Date.now())
 
 export const selectCoreMonthList = createSelector(
   [
@@ -240,6 +247,48 @@ export const selectCoreGoals = createSelector(
 export const selectCoreGoalTotals = createSelector(
   [selectCoreGoals, fxRateModel.converter],
   buildGoalTotals
+)
+
+export const selectCoreHistoryStart = createSelector(
+  [trModel.getTransactionsHistory, selectCoreCurrentDate],
+  getHistoryStart
+)
+
+export const selectCoreBalances = createSelector(
+  [
+    trModel.getTransactionsHistory,
+    accountModel.getPopulatedAccounts,
+    selectCoreDebtors,
+    merchantModel.getMerchants,
+    instrumentModel.getInstCodeMap,
+    accountModel.getDebtAccountId,
+  ],
+  (
+    transactions,
+    accounts,
+    debtors,
+    merchants,
+    instrumentCodeById,
+    debtAccountId
+  ) =>
+    buildBalances({
+      transactions,
+      accounts,
+      debtors,
+      merchants,
+      instrumentCodeById,
+      debtAccountId,
+    })
+)
+
+export const selectCoreBalancesByDate = createSelector(
+  [selectCoreBalances, selectCoreHistoryStart, selectCoreCurrentDate],
+  (balances, historyStart, currentDate) =>
+    buildBalancesByDate({
+      balances,
+      historyStart,
+      currentDate,
+    })
 )
 
 let labelsCacheLanguage: string | undefined

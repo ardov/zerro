@@ -350,7 +350,7 @@ Responsibilities:
 - basic commands over ZenMoney entities;
 - basic validation;
 - deriving the root user from data;
-- ZenMoney-derived read models such as debtors/payee debt balances;
+- ZenMoney-derived read models such as debtors/payee debt balances and account balance history;
 - cascade operations when they are part of the local domain model.
 
 Examples:
@@ -361,6 +361,7 @@ replay(base, patches) => current
 getRootUser(data) => user | null
 getRootUserId(data) => userId | null
 buildDebtors({ transactions, merchants, instruments, debtAccountId }) => debtors
+buildBalances({ transactions, accounts, debtors, merchants, instruments, debtAccountId }) => balances
 editTransaction(data, command, ctx) => patch
 deleteAccount(data, command, ctx) => patch
 ```

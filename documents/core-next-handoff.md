@@ -79,12 +79,22 @@ Implemented:
 - debtors:
   - `buildDebtors`
   - `cleanPayee`
+- balance history:
+  - `buildTransactionEffect`
+  - `buildBalances`
+  - `buildBalancesByDate`
+  - `getHistoryStart`
 
 `buildDebtors` is a pure ZenMoney-derived read model over transactions,
 merchants, instruments, and the debt account id. It lives under
 `zenmoney/debtors` because a plain ZenMoney client could still use it to show
 how much the user owes or is owed by payee/merchant. Zerro consumes debtors as
 one input when building debtor envelopes.
+
+`buildBalances` and `buildBalancesByDate` are ZenMoney-derived read models over
+transactions, accounts, debtors, merchants, instruments, and the debt account
+id. They intentionally live under `zenmoney/balances`. Display-currency balance
+conversion remains outside this core slice for now.
 
 ### Zerro hidden data readers
 
@@ -169,6 +179,8 @@ Implemented:
 - `selectCoreEnvelopeMeta`
 - `selectCoreEnvBudgets`
 - `selectCoreDebtors`
+- `selectCoreBalances`
+- `selectCoreBalancesByDate`
 - `selectCoreEnvelopes`
 - `selectCoreEnvelopeStructure`
 - `selectCoreKeepingEnvelopeIds`
@@ -261,6 +273,7 @@ node ./node_modules/vitest/vitest.mjs run \
   src/core-next/zerro/envelope-meta/read.test.ts \
   src/core-next/zerro/envelope-id/envelopeId.test.ts \
   src/core-next/zenmoney/debtors/read.test.ts \
+  src/core-next/zenmoney/balances/build.test.ts \
   src/core-next/zerro/envelopes/build.test.ts \
   src/core-next/zerro/budgets/read.test.ts \
   src/core-next/zerro/budgets/build.test.ts \
@@ -331,12 +344,12 @@ Golden comparisons use stable JSON hashing and ignore object fields with `undefi
 
 Move in small, testable layers. The read projection chain through
 `monthTotals`, plus `sortedActivity` and goals, is now ported.
-ZenMoney-derived `debtors` are also ported and feed Zerro envelope/activity
-projections. Remaining useful follow-ups:
+ZenMoney-derived `debtors` and account balance history are also ported.
+Remaining useful follow-ups:
 
-1. Consider account balance history (`accBalances`) if we want to finish another
-   read-model area before write paths.
-2. Alternatively start hidden-data write codecs for user settings, envelope
+1. Consider whether display-currency balance conversion belongs in a separate
+   adapter/display layer or should get a small core helper.
+2. Start hidden-data write codecs for user settings, envelope
    meta, env budgets, and goals, which is the more direct path toward commands.
 3. Start replacing selected legacy imports with adapter imports from
    `core-next/adapters/redux`, one consumer at a time.
