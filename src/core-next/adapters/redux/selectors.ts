@@ -106,13 +106,7 @@ const selectCoreCompiledEnvelopes = createSelector(
     selectCoreEnvelopeMeta,
     userModel.getUserCurrency,
   ],
-  (
-    debtors,
-    populatedTags,
-    savingAccounts,
-    envelopeMeta,
-    userCurrency
-  ) =>
+  (debtors, populatedTags, savingAccounts, envelopeMeta, userCurrency) =>
     buildEnvelopes({
       debtors,
       populatedTags,
@@ -191,11 +185,7 @@ export const selectCoreConvertFx = createSelector(
 )
 
 export const selectCoreMonthList = createSelector(
-  [
-    trModel.getTransactionsHistory,
-    selectCoreBudgets,
-    selectCoreCurrentMonth,
-  ],
+  [trModel.getTransactionsHistory, selectCoreBudgets, selectCoreCurrentMonth],
   (transactions, budgets, currentMonth) =>
     buildMonthList({
       transactions,
@@ -255,11 +245,7 @@ export const selectCoreEnvMetrics = createSelector(
 )
 
 export const selectCoreSortedActivity = createSelector(
-  [
-    selectCoreRawActivity,
-    selectCoreKeepingEnvelopeIds,
-    selectCoreConvertFx,
-  ],
+  [selectCoreRawActivity, selectCoreKeepingEnvelopeIds, selectCoreConvertFx],
   (rawActivity, keepingEnvelopeIds, convertFx) =>
     buildSortedActivity({
       rawActivity,
