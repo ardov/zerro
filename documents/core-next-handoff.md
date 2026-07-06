@@ -125,6 +125,11 @@ Implemented:
 - `buildCurrentFunds`
 - `buildEnvMetrics`
 - `buildMonthTotals`
+- `getRawGoals`
+- `goalType`
+- `calcGoals`
+- `buildGoals`
+- `buildGoalTotals`
 
 `buildEnvelopes` is a pure projector. It accepts prepared `debtors`,
 `populatedTags`, `savingAccounts`, `envelopeMeta`, `userCurrency`, and explicit
@@ -151,6 +156,11 @@ rawActivity -> sortedActivity
 `buildMonthList` and `buildMonthTotals` accept `currentMonth` explicitly instead
 of reading `Date.now()` inside the core projector.
 
+Goals are ported as read projectors too. `getRawGoals` reads hidden monthly
+goal data, `buildGoals` calculates per-envelope goal progress from raw goals,
+month list, env metrics, sorted activity, and FX conversion, and
+`buildGoalTotals` aggregates the result.
+
 ### Core-next Redux adapter
 
 Implemented:
@@ -171,6 +181,9 @@ Implemented:
 - `selectCoreSortedActivity`
 - `selectCoreEnvMetrics`
 - `selectCoreMonthTotals`
+- `selectCoreRawGoals`
+- `selectCoreGoals`
+- `selectCoreGoalTotals`
 
 The adapter currently uses legacy upstream selectors for some prepared inputs,
 but routes the domain projection through `core-next`. The read balance chain no
@@ -259,6 +272,9 @@ node ./node_modules/vitest/vitest.mjs run \
   src/core-next/zerro/activity/currentFunds.test.ts \
   src/core-next/zerro/activity/envMetrics.test.ts \
   src/core-next/zerro/activity/monthTotals.test.ts \
+  src/core-next/zerro/goals/progress.test.ts \
+  src/core-next/zerro/goals/build.test.ts \
+  src/core-next/zerro/goals/totals.test.ts \
   src/core-next/adapters/redux/selectors.private-fixture.test.ts \
   src/core-next/zerro/read.private-fixture.test.ts
 ```
@@ -314,13 +330,12 @@ Golden comparisons use stable JSON hashing and ignore object fields with `undefi
 ## Recommended next steps
 
 Move in small, testable layers. The read projection chain through
-`monthTotals`, plus `sortedActivity`, is now ported. ZenMoney-derived `debtors`
-are also ported and feed Zerro envelope/activity projections. Remaining useful
-follow-ups:
+`monthTotals`, plus `sortedActivity` and goals, is now ported.
+ZenMoney-derived `debtors` are also ported and feed Zerro envelope/activity
+projections. Remaining useful follow-ups:
 
-1. Consider goals next if we want another read-model layer. `getGoals` depends
-   on hidden monthly goals, month list, envMetrics, sortedActivity, and FX
-   conversion; the projection side is now mostly unblocked.
+1. Consider account balance history (`accBalances`) if we want to finish another
+   read-model area before write paths.
 2. Alternatively start hidden-data write codecs for user settings, envelope
    meta, env budgets, and goals, which is the more direct path toward commands.
 3. Start replacing selected legacy imports with adapter imports from

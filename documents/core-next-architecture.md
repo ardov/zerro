@@ -557,7 +557,8 @@ headless read model:
 
 ## Projections
 
-Heavy computations such as `rawActivity`, `activity`, `envMetrics`, and `monthTotals` are core projections.
+Heavy computations such as `rawActivity`, `activity`, `envMetrics`,
+`monthTotals`, and goal progress/totals are core projections.
 
 They should live in `core-next/projections`.
 

@@ -19,10 +19,13 @@ import {
   buildEnvMetrics,
   buildMonthList,
   buildMonthTotals,
+  buildGoals,
+  buildGoalTotals,
   buildRawActivity,
   buildSortedActivity,
   getEnvBudgets,
   getEnvelopeMeta,
+  getRawGoals,
   getKeepingEnvelopes,
   getUserSettings,
   TEnvelopeLabels,
@@ -43,6 +46,11 @@ export const selectCoreEnvelopeMeta = createSelector(
 export const selectCoreEnvBudgets = createSelector(
   [selectCoreCurrentData],
   getEnvBudgets
+)
+
+export const selectCoreRawGoals = createSelector(
+  [selectCoreCurrentData],
+  getRawGoals
 )
 
 export const selectCoreEnvelopeLabels = () => getCoreEnvelopeLabels()
@@ -209,6 +217,29 @@ export const selectCoreMonthTotals = createSelector(
       convertFx,
       currentMonth,
     })
+)
+
+export const selectCoreGoals = createSelector(
+  [
+    selectCoreRawGoals,
+    selectCoreMonthList,
+    selectCoreEnvMetrics,
+    selectCoreSortedActivity,
+    fxRateModel.converter,
+  ],
+  (rawGoals, monthList, envMetrics, sortedActivity, convertFx) =>
+    buildGoals({
+      rawGoals,
+      monthList,
+      envMetrics,
+      sortedActivity,
+      convertFx,
+    })
+)
+
+export const selectCoreGoalTotals = createSelector(
+  [selectCoreGoals, fxRateModel.converter],
+  buildGoalTotals
 )
 
 let labelsCacheLanguage: string | undefined
