@@ -13,12 +13,6 @@ describe('createZerroSession', () => {
         uuid: () => 'test-id',
       },
       {
-        labels: {
-          defaultTagGroup: 'Categories',
-          defaultAccountGroup: 'Accounts',
-          defaultMerchantGroup: 'Merchants',
-          defaultPayeeGroup: 'Payees',
-        },
         populatedTags: {},
       }
     )

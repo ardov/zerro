@@ -12,12 +12,15 @@ import type { TDebtor } from '../../zenmoney'
 import { EnvType, envId, TEnvelopeId } from '../envelope-id'
 import { envelopeVisibility, TEnvelopeMeta } from '../envelope-meta'
 
-export type TEnvelopeLabels = {
-  defaultTagGroup: string
-  defaultAccountGroup: string
-  defaultMerchantGroup: string
-  defaultPayeeGroup: string
-}
+export const defaultEnvelopeGroupIds = {
+  tags: 'default:tags',
+  accounts: 'default:accounts',
+  merchants: 'default:merchants',
+  payees: 'default:payees',
+} as const
+
+export type TDefaultEnvelopeGroupId =
+  (typeof defaultEnvelopeGroupIds)[keyof typeof defaultEnvelopeGroupIds]
 
 export type TEnvelopeTag = TTag & {
   name: string
@@ -72,7 +75,6 @@ export type TBuildEnvelopesInput = {
   savingAccounts: TAccount[]
   envelopeMeta: ById<TEnvelopeMeta>
   userCurrency: TFxCode
-  labels: TEnvelopeLabels
 }
 
 export function buildEnvelopes(input: TBuildEnvelopesInput): {
@@ -85,8 +87,7 @@ export function buildEnvelopes(input: TBuildEnvelopesInput): {
     const envelope = makeEnvelopeFromTag(
       tag,
       input.envelopeMeta,
-      input.userCurrency,
-      input.labels
+      input.userCurrency
     )
     envelopes[envelope.id] = envelope
   })
@@ -94,8 +95,7 @@ export function buildEnvelopes(input: TBuildEnvelopesInput): {
     const envelope = makeEnvelopeFromAccount(
       account,
       input.envelopeMeta,
-      input.userCurrency,
-      input.labels
+      input.userCurrency
     )
     envelopes[envelope.id] = envelope
   })
@@ -103,8 +103,7 @@ export function buildEnvelopes(input: TBuildEnvelopesInput): {
     const envelope = makeEnvelopeFromDebtor(
       debtor,
       input.envelopeMeta,
-      input.userCurrency,
-      input.labels
+      input.userCurrency
     )
     envelopes[envelope.id] = envelope
   })
@@ -130,8 +129,7 @@ export function getKeepingEnvelopes(envelopes: ById<TEnvelope>): TEnvelopeId[] {
 function makeEnvelopeFromTag(
   tag: TEnvelopeTag,
   metaById: ById<TEnvelopeMeta>,
-  userCurrency: TFxCode,
-  labels: TEnvelopeLabels
+  userCurrency: TFxCode
 ): TEnvelope {
   const id = envId.get(EnvType.Tag, tag.id)
   const meta = metaById[id]
@@ -151,7 +149,7 @@ function makeEnvelopeFromTag(
     children: [],
     index: meta?.index || -1,
     indexRaw: meta?.index,
-    group: meta?.group || labels.defaultTagGroup,
+    group: meta?.group || defaultEnvelopeGroupIds.tags,
     comment: meta?.comment || '',
     currency: meta?.currency || userCurrency,
     keepIncome: meta?.keepIncome || false,
@@ -162,8 +160,7 @@ function makeEnvelopeFromTag(
 function makeEnvelopeFromAccount(
   account: TAccount,
   metaById: ById<TEnvelopeMeta>,
-  userCurrency: TFxCode,
-  labels: TEnvelopeLabels
+  userCurrency: TFxCode
 ): TEnvelope {
   const id = envId.get(EnvType.Account, account.id)
   const meta = metaById[id]
@@ -183,7 +180,7 @@ function makeEnvelopeFromAccount(
     children: [],
     index: meta?.index || -1,
     indexRaw: meta?.index,
-    group: meta?.group || labels.defaultAccountGroup,
+    group: meta?.group || defaultEnvelopeGroupIds.accounts,
     comment: meta?.comment || '',
     currency: meta?.currency || userCurrency,
     keepIncome: meta?.keepIncome || false,
@@ -194,8 +191,7 @@ function makeEnvelopeFromAccount(
 function makeEnvelopeFromDebtor(
   debtor: TEnvelopeDebtor,
   metaById: ById<TEnvelopeMeta>,
-  userCurrency: TFxCode,
-  labels: TEnvelopeLabels
+  userCurrency: TFxCode
 ): TEnvelope {
   const id = debtor.merchantId
     ? envId.get(EnvType.Merchant, debtor.merchantId)
@@ -219,7 +215,9 @@ function makeEnvelopeFromDebtor(
     indexRaw: meta?.index,
     group:
       meta?.group ||
-      (debtor.merchantId ? labels.defaultMerchantGroup : labels.defaultPayeeGroup),
+      (debtor.merchantId
+        ? defaultEnvelopeGroupIds.merchants
+        : defaultEnvelopeGroupIds.payees),
     comment: meta?.comment || '',
     currency: meta?.currency || userCurrency,
     keepIncome: meta?.keepIncome || false,
@@ -236,7 +234,7 @@ function getVisibility(
   return envelopeVisibility.auto
 }
 
-function buildStructure(envelopes: ById<TEnvelope>): TGroupNode[] {
+export function buildStructure(envelopes: ById<TEnvelope>): TGroupNode[] {
   const groups: TGroupNode[] = []
   const groupsById: Record<string, TGroupNode> = {}
   const sortedParents: TEnvNode[] = []
@@ -297,7 +295,7 @@ function getRightParent(
   return getRightParent(parent.parent, byId)
 }
 
-function flattenStructure(tree: TGroupNode[]) {
+export function flattenStructure(tree: TGroupNode[]) {
   const flatList: (TEnvNode | TGroupNode)[] = []
   tree.forEach(addNode)
   return flatList

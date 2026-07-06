@@ -44,7 +44,6 @@ import {
 } from '../zerro'
 import type {
   TBuildEnvelopesInput,
-  TEnvelopeLabels,
   TEnvelopeTag,
 } from '../zerro/envelopes'
 
@@ -54,7 +53,6 @@ export type TZerroSessionContext = {
 }
 
 export type TZerroSessionReadDependencies = {
-  labels: TEnvelopeLabels
   populatedTags: ById<TEnvelopeTag>
 }
 
@@ -109,7 +107,6 @@ export function createZerroSession(
       savingAccounts: getSavingAccounts(data),
       envelopeMeta: envelopeMeta(),
       userCurrency: getUserCurrency(data),
-      labels: dependencies.labels,
     })
   )
   const envelopes = memo(() => envelopesCompiled().byId)

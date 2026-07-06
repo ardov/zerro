@@ -60,6 +60,8 @@ maybeDescribe('core-next session reads on private fixture', () => {
           selectCoreMonthTotals,
           selectCoreRawActivity,
           selectCoreRawGoals,
+          selectCoreStableEnvelopes,
+          selectCoreStableEnvelopeStructure,
           selectCoreSortedActivity,
           selectCoreUserSettings,
         },
@@ -75,14 +77,6 @@ maybeDescribe('core-next session reads on private fixture', () => {
           uuid: () => 'private-fixture-session-test',
         },
         {
-          labels: {
-            defaultTagGroup: i18n.t('defaultTagGroup', { ns: 'common' }),
-            defaultAccountGroup: i18n.t('defaultAccountGroup', { ns: 'common' }),
-            defaultMerchantGroup: i18n.t('defaultMerchantGroup', {
-              ns: 'common',
-            }),
-            defaultPayeeGroup: i18n.t('defaultPayeeGroup', { ns: 'common' }),
-          },
           populatedTags: tagModel.getPopulatedTags(state),
         }
       )
@@ -100,12 +94,12 @@ maybeDescribe('core-next session reads on private fixture', () => {
       expectSameJsonHash(
         'envelopes',
         session.read.envelopes(),
-        selectCoreEnvelopes(state)
+        selectCoreStableEnvelopes(state)
       )
       expectSameJsonHash(
         'envelopeStructure',
         session.read.envelopeStructure(),
-        selectCoreEnvelopeStructure(state)
+        selectCoreStableEnvelopeStructure(state)
       )
       expectSameJsonHash(
         'keepingEnvelopeIds',

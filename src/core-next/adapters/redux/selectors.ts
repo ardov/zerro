@@ -23,12 +23,15 @@ import {
   buildCurrentFxRates,
   buildCurrentFunds,
   buildEnvelopes,
+  buildStructure,
   buildEnvMetrics,
+  flattenStructure,
   buildFxConverter,
   buildFxRates,
   buildFxRatesGetter,
   buildMonthList,
   buildMonthTotals,
+  defaultEnvelopeGroupIds,
   buildGoals,
   buildGoalTotals,
   buildRawActivity,
@@ -39,8 +42,16 @@ import {
   getRawGoals,
   getKeepingEnvelopes,
   getUserSettings,
-  TEnvelopeLabels,
+  TEnvelope,
+  TGroupNode,
 } from '../../zerro'
+
+type TEnvelopeLabels = {
+  defaultTagGroup: string
+  defaultAccountGroup: string
+  defaultMerchantGroup: string
+  defaultPayeeGroup: string
+}
 
 export const selectCoreCurrentData = (state: RootState) => state.data.current
 
@@ -94,15 +105,13 @@ const selectCoreCompiledEnvelopes = createSelector(
     accountModel.getSavingAccounts,
     selectCoreEnvelopeMeta,
     userModel.getUserCurrency,
-    selectCoreEnvelopeLabels,
   ],
   (
     debtors,
     populatedTags,
     savingAccounts,
     envelopeMeta,
-    userCurrency,
-    labels
+    userCurrency
   ) =>
     buildEnvelopes({
       debtors,
@@ -110,18 +119,28 @@ const selectCoreCompiledEnvelopes = createSelector(
       savingAccounts,
       envelopeMeta,
       userCurrency,
-      labels,
     })
 )
 
-export const selectCoreEnvelopes = (state: RootState) =>
+export const selectCoreStableEnvelopes = (state: RootState) =>
   selectCoreCompiledEnvelopes(state).byId
 
-export const selectCoreEnvelopeStructure = (state: RootState) =>
+export const selectCoreStableEnvelopeStructure = (state: RootState) =>
   selectCoreCompiledEnvelopes(state).structure
 
+const selectCoreLocalizedCompiledEnvelopes = createSelector(
+  [selectCoreCompiledEnvelopes, selectCoreEnvelopeLabels],
+  localizeDefaultEnvelopeGroups
+)
+
+export const selectCoreEnvelopes = (state: RootState) =>
+  selectCoreLocalizedCompiledEnvelopes(state).byId
+
+export const selectCoreEnvelopeStructure = (state: RootState) =>
+  selectCoreLocalizedCompiledEnvelopes(state).structure
+
 export const selectCoreKeepingEnvelopeIds = createSelector(
-  [selectCoreEnvelopes],
+  [selectCoreStableEnvelopes],
   getKeepingEnvelopes
 )
 
@@ -220,7 +239,7 @@ export const selectCoreActivity = createSelector(
 export const selectCoreEnvMetrics = createSelector(
   [
     selectCoreMonthList,
-    selectCoreEnvelopes,
+    selectCoreStableEnvelopes,
     selectCoreActivity,
     selectCoreBudgets,
     selectCoreConvertFx,
@@ -353,4 +372,49 @@ function getCoreEnvelopeLabels(): TEnvelopeLabels {
     defaultPayeeGroup: i18n.t('defaultPayeeGroup', { ns: 'common' }),
   }
   return labelsCache
+}
+
+function localizeDefaultEnvelopeGroups(
+  compiled: { byId: Record<string, TEnvelope>; structure: TGroupNode[] },
+  labels: TEnvelopeLabels
+) {
+  const byId = Object.fromEntries(
+    Object.entries(compiled.byId).map(([id, envelope]) => [
+      id,
+      {
+        ...envelope,
+        group: localizeGroup(envelope.group, labels),
+      },
+    ])
+  )
+  const structure = buildStructure(byId)
+
+  flattenStructure(structure).forEach((node, index) => {
+    if (node.type === 'group') return
+    const envelope = byId[node.id]
+    envelope.parent = node.parent
+    envelope.group = node.group
+    envelope.children = node.children.map(child => child.id)
+    envelope.index = index
+  })
+
+  return {
+    byId,
+    structure,
+  }
+}
+
+function localizeGroup(group: string, labels: TEnvelopeLabels): string {
+  switch (group) {
+    case defaultEnvelopeGroupIds.tags:
+      return labels.defaultTagGroup
+    case defaultEnvelopeGroupIds.accounts:
+      return labels.defaultAccountGroup
+    case defaultEnvelopeGroupIds.merchants:
+      return labels.defaultMerchantGroup
+    case defaultEnvelopeGroupIds.payees:
+      return labels.defaultPayeeGroup
+    default:
+      return group
+  }
 }

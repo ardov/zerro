@@ -2,14 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { TAccount, TTag } from '6-shared/types'
 import { EnvType, envId } from '../envelope-id'
 import { envelopeVisibility } from '../envelope-meta'
-import { buildEnvelopes, getKeepingEnvelopes, TEnvelopeLabels } from './build'
-
-const labels: TEnvelopeLabels = {
-  defaultTagGroup: 'Tags',
-  defaultAccountGroup: 'Accounts',
-  defaultMerchantGroup: 'Merchants',
-  defaultPayeeGroup: 'Payees',
-}
+import { buildEnvelopes, defaultEnvelopeGroupIds, getKeepingEnvelopes } from './build'
 
 describe('buildEnvelopes', () => {
   it('builds envelopes from prepared inputs and applies structure fields', () => {
@@ -18,7 +11,6 @@ describe('buildEnvelopes', () => {
     const accountId = envId.get(EnvType.Account, 'safe')
 
     const result = buildEnvelopes({
-      labels,
       userCurrency: 'USD',
       populatedTags: {
         null: tag({ id: 'null', title: 'No category', name: 'No category' }),
@@ -64,7 +56,7 @@ describe('buildEnvelopes', () => {
       currency: 'USD',
     })
     expect(result.byId[accountId]).toMatchObject({
-      group: 'Accounts',
+      group: defaultEnvelopeGroupIds.accounts,
       visibility: envelopeVisibility.hidden,
       currency: 'EUR',
       symbol: '🏦',
@@ -72,12 +64,11 @@ describe('buildEnvelopes', () => {
     expect(getKeepingEnvelopes(result.byId)).toEqual([parentId])
   })
 
-  it('uses explicit default labels for debtors', () => {
+  it('uses stable default group ids for debtors', () => {
     const merchantId = envId.get(EnvType.Merchant, 'merchant-1')
     const payeeId = envId.get(EnvType.Payee, 'alex')
 
     const result = buildEnvelopes({
-      labels,
       userCurrency: 'USD',
       populatedTags: {},
       savingAccounts: [],
@@ -102,8 +93,8 @@ describe('buildEnvelopes', () => {
       },
     })
 
-    expect(result.byId[merchantId].group).toBe('Merchants')
-    expect(result.byId[payeeId].group).toBe('Payees')
+    expect(result.byId[merchantId].group).toBe(defaultEnvelopeGroupIds.merchants)
+    expect(result.byId[payeeId].group).toBe(defaultEnvelopeGroupIds.payees)
   })
 })
 
