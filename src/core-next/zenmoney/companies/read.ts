@@ -8,7 +8,3 @@ export function getCompanies(data: TDataStore): ById<TCompany> {
 export function getCompany(data: TDataStore, id: TCompanyId): TCompany | null {
   return data.company[id] || null
 }
-
-export function getActiveCompanies(data: TDataStore): TCompany[] {
-  return Object.values(data.company).filter(company => !company.deleted)
-}

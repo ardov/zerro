@@ -1,14 +1,11 @@
 # Country
 
-`Country` is ZenMoney reference data used by users, companies, and currency
-defaults.
+`Country` is used by `user` and `company` as a reference data.
 
 ## Important Fields And Traps
 
 - `currency`: default country currency as an `Instrument` id, not an FX code.
-- `domain`: optional ZenMoney country-specific domain from reference data.
 
 ## Mutability
 
-Countries are synchronized reference data. Core commands do not create, patch,
-or delete countries.
+Countries are system objects and cannot be mutated by users.

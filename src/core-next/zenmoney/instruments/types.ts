@@ -13,7 +13,7 @@ export type TInstrument = {
 
   title: string
 
-  /** Currency-code-like value used by core read models as `TFxCode`. */
+  /** Currency-code-like value. E.g., 'USD', 'EUR', 'RUB'. */
   shortTitle: TFxCode
 
   symbol: string

@@ -5,13 +5,12 @@ import {
   getInstrumentByCode,
   getInstrumentCode,
   getInstrumentCodeById,
-  getInstruments,
   getInstrumentsByCode,
 } from './read'
 import type { TInstrument } from './types'
 
 describe('zenmoney instruments', () => {
-  it('reads instruments by id and currency code', () => {
+  it('builds currency lookup helpers from normalized data', () => {
     const data = makeStore({
       instrument: {
         1: instrument({ id: 1, shortTitle: 'USD', title: 'US Dollar' }),
@@ -19,25 +18,14 @@ describe('zenmoney instruments', () => {
       },
     })
 
-    expect(getInstruments(data)).toBe(data.instrument)
     expect(getInstrument(data, 1)?.title).toBe('US Dollar')
     expect(getInstrumentCode(data, 2)).toBe('EUR')
-    expect(getInstrumentByCode(data, 'USD')?.id).toBe(1)
-  })
-
-  it('builds lookup maps from normalized data', () => {
-    const data = makeStore({
-      instrument: {
-        1: instrument({ id: 1, shortTitle: 'USD' }),
-        2: instrument({ id: 2, shortTitle: 'EUR' }),
-      },
-    })
-
     expect(getInstrumentCodeById(data)).toEqual({
       1: 'USD',
       2: 'EUR',
     })
     expect(Object.keys(getInstrumentsByCode(data))).toEqual(['USD', 'EUR'])
+    expect(getInstrumentByCode(data, 'USD')?.id).toBe(1)
   })
 
   it('returns null for missing instruments', () => {
