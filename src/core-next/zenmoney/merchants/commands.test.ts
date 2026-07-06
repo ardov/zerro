@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { makeMerchant, makeStore } from '../../testing/zenmoneyTestData'
+import {
+  makeMerchant as makeTestMerchant,
+  makeStore,
+} from '../../testing/zenmoneyTestData'
 import { compilePatchMerchant } from './commands'
+import { makeMerchant } from './factory'
 
 describe('zenmoney merchant commands', () => {
   it('patches existing merchants with deterministic time', () => {
     const data = makeStore({
       merchant: {
-        shop: makeMerchant({ id: 'shop', title: 'Shop', changed: 1 }),
+        shop: makeTestMerchant({ id: 'shop', title: 'Shop', changed: 1 }),
       },
     })
 
@@ -17,14 +21,31 @@ describe('zenmoney merchant commands', () => {
     )
 
     expect(patch.merchant?.[0]).toEqual(
-      makeMerchant({ id: 'shop', title: 'Market', changed: 100 })
+      makeTestMerchant({ id: 'shop', title: 'Market', changed: 100 })
+    )
+  })
+
+  it('creates production merchant defaults through the merchant factory', () => {
+    expect(
+      makeMerchant(
+        {
+          user: 1,
+          title: 'Shop',
+        },
+        {
+          now: () => 100,
+          uuid: () => 'shop',
+        }
+      )
+    ).toEqual(
+      makeTestMerchant({ id: 'shop', user: 1, title: 'Shop', changed: 100 })
     )
   })
 
   it('validates merchant id and existence', () => {
     const data = makeStore({
       merchant: {
-        shop: makeMerchant({ id: 'shop', title: 'Shop', changed: 1 }),
+        shop: makeTestMerchant({ id: 'shop', title: 'Shop', changed: 1 }),
       },
     })
 
