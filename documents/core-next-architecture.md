@@ -241,6 +241,7 @@ src/core-next/
     mergePatches.ts
     replay.ts
     users.ts
+    debtors/
     constants.ts
     commands/
     types.ts
@@ -349,6 +350,7 @@ Responsibilities:
 - basic commands over ZenMoney entities;
 - basic validation;
 - deriving the root user from data;
+- ZenMoney-derived read models such as debtors/payee debt balances;
 - cascade operations when they are part of the local domain model.
 
 Examples:
@@ -358,11 +360,18 @@ applyPatch(data, patch) => nextData
 replay(base, patches) => current
 getRootUser(data) => user | null
 getRootUserId(data) => userId | null
+buildDebtors({ transactions, merchants, instruments, debtAccountId }) => debtors
 editTransaction(data, command, ctx) => patch
 deleteAccount(data, command, ctx) => patch
 ```
 
 The external ZenMoney API format is not part of `zenmoney-core`. Conversion between raw ZenMoney diff and normalized patch should live in a separate adapter layer.
+
+Debtors are a ZenMoney-derived read model, even though ZenMoney does not store
+them as a first-class table. A plain ZenMoney client can still derive “how much
+I owe / am owed by this payee or merchant” from debt-account transactions.
+Zerro may render debtors as envelopes, but that envelope mapping belongs to
+Zerro Core.
 
 ## Zerro Core
 
@@ -377,7 +386,7 @@ Responsibilities:
 - envelopes;
 - budgets;
 - goals;
-- debtor/linking semantics, if they are Zerro-specific;
+- debtor envelope mapping and linking semantics, if they are Zerro-specific;
 - high-level Zerro commands.
 
 Examples:

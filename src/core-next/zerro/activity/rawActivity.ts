@@ -9,6 +9,7 @@ import type {
   TTransaction,
 } from '6-shared/types'
 import {
+  cleanPayee,
   compareTransactionDates,
   getTransactionType,
   TrType,
@@ -217,8 +218,4 @@ function getDebtorEnvelopeId(
   return debtor.merchantId
     ? envId.get(EnvType.Merchant, debtor.merchantId)
     : envId.get(EnvType.Payee, cleanName)
-}
-
-function cleanPayee(name: string) {
-  return name.replace(/[^\d\wа-яА-ЯёЁ]/g, '').toLowerCase()
 }

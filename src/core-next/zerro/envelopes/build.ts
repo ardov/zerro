@@ -8,7 +8,7 @@ import type {
 } from '6-shared/types'
 import { getColorForString } from '6-shared/helpers/color'
 import { keys } from '6-shared/helpers/keys'
-import type { TDebtor } from '../debtors'
+import type { TDebtor } from '../../zenmoney'
 import { EnvType, envId, TEnvelopeId } from '../envelope-id'
 import { envelopeVisibility, TEnvelopeMeta } from '../envelope-meta'
 

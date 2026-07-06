@@ -76,6 +76,15 @@ Implemented:
   - `getRootUserId`
   - `getUserInstrumentId`
   - `getUserCurrency`
+- debtors:
+  - `buildDebtors`
+  - `cleanPayee`
+
+`buildDebtors` is a pure ZenMoney-derived read model over transactions,
+merchants, instruments, and the debt account id. It lives under
+`zenmoney/debtors` because a plain ZenMoney client could still use it to show
+how much the user owes or is owed by payee/merchant. Zerro consumes debtors as
+one input when building debtor envelopes.
 
 ### Zerro hidden data readers
 
@@ -101,8 +110,6 @@ Implemented:
 - `TEnvelopeId`
 - `envId.get`
 - `envId.parse`
-- `buildDebtors`
-- `cleanPayee`
 - `buildEnvelopes`
 - `getKeepingEnvelopes`
 - `getEnvBudgets`
@@ -123,11 +130,6 @@ Implemented:
 `populatedTags`, `savingAccounts`, `envelopeMeta`, `userCurrency`, and explicit
 group `labels`; it does not import Redux selectors or call `i18next.t(...)` at
 module initialization.
-
-`buildDebtors` is a pure Zerro projector over ZenMoney-shaped transactions,
-merchants, instruments, and the debt account id. It intentionally lives under
-`zerro/debtors`, because debtors are a derived Zerro concept, not a first-class
-ZenMoney entity.
 
 `buildBudgets` is also a pure projector. It accepts prepared ZenMoney tag
 budgets, hidden Zerro envelope budgets, and `preferZmBudgets`, preserving the
@@ -245,7 +247,7 @@ node ./node_modules/vitest/vitest.mjs run \
   src/core-next/zerro/user-settings/read.test.ts \
   src/core-next/zerro/envelope-meta/read.test.ts \
   src/core-next/zerro/envelope-id/envelopeId.test.ts \
-  src/core-next/zerro/debtors/read.test.ts \
+  src/core-next/zenmoney/debtors/read.test.ts \
   src/core-next/zerro/envelopes/build.test.ts \
   src/core-next/zerro/budgets/read.test.ts \
   src/core-next/zerro/budgets/build.test.ts \
@@ -312,8 +314,9 @@ Golden comparisons use stable JSON hashing and ignore object fields with `undefi
 ## Recommended next steps
 
 Move in small, testable layers. The read projection chain through
-`monthTotals`, plus `sortedActivity` and `debtors`, is now ported. Remaining
-useful follow-ups:
+`monthTotals`, plus `sortedActivity`, is now ported. ZenMoney-derived `debtors`
+are also ported and feed Zerro envelope/activity projections. Remaining useful
+follow-ups:
 
 1. Consider goals next if we want another read-model layer. `getGoals` depends
    on hidden monthly goals, month list, envMetrics, sortedActivity, and FX

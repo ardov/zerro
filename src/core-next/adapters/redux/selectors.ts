@@ -10,11 +10,11 @@ import { tagModel } from '5-entities/tag'
 import { trModel } from '5-entities/transaction'
 import { userModel } from '5-entities/user'
 import type { RootState } from 'store'
+import { buildDebtors } from '../../zenmoney'
 import {
   buildActivity,
   buildBudgets,
   buildCurrentFunds,
-  buildDebtors,
   buildEnvelopes,
   buildEnvMetrics,
   buildMonthList,

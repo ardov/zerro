@@ -1,6 +1,5 @@
 export * from './hidden-data'
 export * from './user-settings'
-export * from './debtors'
 export * from './envelope-id'
 export * from './envelope-meta'
 export * from './envelopes'

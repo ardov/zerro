@@ -8,7 +8,7 @@ import type {
   TMerchantId,
   TTransaction,
 } from '6-shared/types'
-import { getTransactionType, TrType } from '../../zenmoney'
+import { getTransactionType, TrType } from '../transactions'
 
 export type TDebtor = {
   id: string
