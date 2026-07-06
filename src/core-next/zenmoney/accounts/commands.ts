@@ -1,20 +1,17 @@
-import { toISODate } from '6-shared/helpers/date'
-import type { Modify, OptionalExceptFor, TDataStore } from '6-shared/types'
+import type { OptionalExceptFor, TDataStore } from '6-shared/types'
 import { DataEntity } from '6-shared/types'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
-import type { TDateDraft } from '../primitives'
 import { getRootUserId } from '../users'
-import { AccountType, type TAccount, type TAccountId } from './types'
+import { makeAccount, type TAccountFactoryDraft } from './factory'
+import { getAccount } from './read'
+import type { TAccount, TAccountId } from './types'
 
-export type TZenMoneyAccountPatch = OptionalExceptFor<TAccount, 'id'>
-export type TZenMoneyAccountDraft = Modify<
-  OptionalExceptFor<TAccount, 'instrument' | 'title'>,
-  { startDate?: TDateDraft }
->
+export type TAccountPatch = OptionalExceptFor<TAccount, 'id'>
+export type TAccountDraft = Omit<TAccountFactoryDraft, 'user'>
 
 export function compileCreateAccount(
   data: TDataStore,
-  draft: TZenMoneyAccountDraft,
+  draft: TAccountDraft,
   ctx: Pick<TCoreContext, 'now' | 'uuid'>
 ): TNormalizedPatch {
   const user = getRootUserId(data)
@@ -27,7 +24,7 @@ export function compileCreateAccount(
 
 export function compilePatchAccount(
   data: TDataStore,
-  patch: TZenMoneyAccountPatch | TZenMoneyAccountPatch[],
+  patch: TAccountPatch | TAccountPatch[],
   ctx: Pick<TCoreContext, 'now'>
 ): TNormalizedPatch {
   const list = Array.isArray(patch) ? patch : [patch]
@@ -36,7 +33,7 @@ export function compilePatchAccount(
     account: list.map(item => {
       if (!item.id) throw new Error('Trying to patch account without id')
 
-      const current = data.account[item.id]
+      const current = getAccount(data, item.id)
       if (!current) throw new Error('Account not found')
 
       return { ...current, ...item, changed: ctx.now() }
@@ -49,7 +46,7 @@ export function compileDeleteAccount(
   id: TAccountId,
   ctx: Pick<TCoreContext, 'now'>
 ): TNormalizedPatch {
-  if (!data.account[id]) throw new Error('Account not found')
+  if (!getAccount(data, id)) throw new Error('Account not found')
 
   const user = getRootUserId(data)
   if (!user) throw new Error('No user')
@@ -63,42 +60,5 @@ export function compileDeleteAccount(
         user,
       },
     ],
-  }
-}
-
-function makeAccount(
-  draft: TZenMoneyAccountDraft & Pick<TAccount, 'user'>,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
-): TAccount {
-  return {
-    user: draft.user,
-    instrument: draft.instrument,
-    title: draft.title,
-
-    id: draft.id || (ctx.uuid() as TAccountId),
-    changed: draft.changed || ctx.now(),
-    role: draft.role || null,
-    company: draft.company || null,
-    type: draft.type || AccountType.Cash,
-    syncID: draft.syncID || null,
-
-    balance: draft.balance || 0,
-    startBalance: draft.startBalance || 0,
-    creditLimit: draft.creditLimit || 0,
-
-    inBalance: draft.inBalance || false,
-    savings: draft.savings || false,
-    enableCorrection: draft.enableCorrection || false,
-    enableSMS: draft.enableSMS || false,
-    archive: draft.archive || false,
-    private: draft.private || false,
-
-    capitalization: draft.capitalization || null,
-    percent: draft.percent || null,
-    startDate: draft.startDate ? toISODate(draft.startDate) : null,
-    endDateOffset: draft.endDateOffset || null,
-    endDateOffsetInterval: draft.endDateOffsetInterval || null,
-    payoffStep: draft.payoffStep || null,
-    payoffInterval: draft.payoffInterval || null,
   }
 }

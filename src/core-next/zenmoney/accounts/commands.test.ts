@@ -7,6 +7,7 @@ import {
   compileDeleteAccount,
   compilePatchAccount,
 } from './commands'
+import { makeAccount as makeCoreAccount } from './factory'
 import { AccountType } from './types'
 
 describe('zenmoney account commands', () => {
@@ -21,7 +22,6 @@ describe('zenmoney account commands', () => {
     const patch = compileCreateAccount(
       data,
       {
-        user: 999,
         instrument: 2,
         title: 'Savings',
         type: AccountType.Deposit,
@@ -36,16 +36,46 @@ describe('zenmoney account commands', () => {
     )
 
     expect(patch.account?.[0]).toEqual(
+      makeCoreAccount(
+        {
+          id: 'acc-new',
+          changed: 1700000000000,
+          user: 1,
+          instrument: 2,
+          title: 'Savings',
+          type: AccountType.Deposit,
+          balance: 25,
+          inBalance: true,
+          startDate: '2026-02',
+        },
+        {
+          now: () => 0,
+          uuid: () => 'unused',
+        }
+      )
+    )
+  })
+
+  it('creates production account defaults through the account factory', () => {
+    expect(
+      makeCoreAccount(
+        {
+          user: 1,
+          instrument: 2,
+          title: 'Cash',
+        },
+        {
+          now: () => 1700000000000,
+          uuid: () => 'acc-new',
+        }
+      )
+    ).toEqual(
       makeAccount({
         id: 'acc-new',
         changed: 1700000000000,
         user: 1,
         instrument: 2,
-        title: 'Savings',
-        type: AccountType.Deposit,
-        balance: 25,
-        inBalance: true,
-        startDate: '2026-02-01',
+        title: 'Cash',
       })
     )
   })

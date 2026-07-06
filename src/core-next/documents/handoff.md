@@ -28,6 +28,16 @@ bb8d61dc Document ZenMoney entity order and core type ownership
 8d23bfe0 Add core-next transaction balance effects
 ```
 
+There is also uncommitted Track B work in `zenmoney/accounts`:
+
+- `makeAccount` was extracted as a production account factory under
+  `src/core-next/zenmoney/accounts/factory.ts`;
+- account read selectors now live under `src/core-next/zenmoney/accounts/read.ts`
+  instead of being private helpers in the session facade;
+- `compileCreateAccount` now uses that factory and derives `user` from the root
+  user in the store instead of accepting it as command input;
+- account tests cover read selectors, factory defaults, and patch application.
+
 ## Implemented so far
 
 ### Private fixture harness
@@ -409,8 +419,8 @@ ZenMoney-derived `debtors` and account balance history are also ported.
 Remaining useful follow-ups:
 
 1. Use `src/core-next/documents/roadmap.md` to choose the next track.
-2. The most conservative next domain slice is `zenmoney/accounts`: type/factory
-   cleanup, command review, and focused tests.
+2. The most conservative next domain slice is `zenmoney/merchants` or
+   `zenmoney/tags`: type/factory cleanup, command review, and focused tests.
 3. The most direct command-enabling slice is hidden-data write codecs for user
    settings, envelope meta, env budgets, and goals.
 4. The test-infrastructure slice is deterministic demo data plus demo parity

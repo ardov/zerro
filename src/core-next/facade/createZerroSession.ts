@@ -1,22 +1,20 @@
 import { toISODate, toISOMonth } from '6-shared/helpers/date'
-import { ZERRO_DATA_ACCOUNT_NAME } from '../constants'
 import type {
-  AccountType,
   ById,
-  TAccount,
-  TAccountId,
   TDataStore,
-  TFxCode,
   TTransaction,
 } from '6-shared/types'
-import { AccountType as AccountTypeValue } from '6-shared/types'
 import {
   buildBalances,
   buildBalancesByDate,
   buildDebtors,
   compareTransactionDates,
+  getBalanceAccounts,
+  getDebtAccountId,
   getHistoryStart,
+  getInBudgetAccounts,
   getInstrumentCodeById,
+  getSavingAccounts,
   getUserCurrency,
 } from '../zenmoney'
 import {
@@ -42,7 +40,7 @@ import {
   getRawGoals,
   getUserSettings,
 } from '../zerro'
-import type { TBuildEnvelopesInput, TEnvelopeTag } from '../zerro/envelopes'
+import type { TEnvelopeTag } from '../zerro/envelopes'
 
 export type TZerroSessionContext = {
   now: () => number
@@ -256,59 +254,4 @@ function isDeletedTransaction(transaction: TTransaction) {
   if (transaction.deleted) return true
   if (transaction.income < 0.0001 && transaction.outcome < 0.0001) return true
   return false
-}
-
-function getDebtAccountId(data: TDataStore): TAccountId | undefined {
-  return Object.values(data.account).find(
-    account => account.type === AccountTypeValue.Debt
-  )?.id
-}
-
-function getSavingAccounts(
-  data: TDataStore
-): TBuildEnvelopesInput['savingAccounts'] {
-  return Object.values(data.account).filter(
-    account =>
-      !isInBudget(account) &&
-      account.type !== AccountTypeValue.Debt &&
-      account.title !== ZERRO_DATA_ACCOUNT_NAME
-  )
-}
-
-function getInBudgetAccounts(data: TDataStore) {
-  const instrumentCodeById = getInstrumentCodeById(data)
-  return Object.values(data.account)
-    .filter(isInBudget)
-    .map(account => ({
-      id: account.id,
-      balance: account.balance,
-      fxCode: instrumentCodeById[account.instrument],
-    }))
-}
-
-function getBalanceAccounts(data: TDataStore) {
-  const instrumentCodeById = getInstrumentCodeById(data)
-  const result: ById<{
-    id: TAccountId
-    type: AccountType
-    fxCode: TFxCode
-    balance: number
-  }> = {}
-
-  Object.values(data.account).forEach(account => {
-    result[account.id] = {
-      id: account.id,
-      type: account.type,
-      fxCode: instrumentCodeById[account.instrument],
-      balance: account.balance,
-    }
-  })
-
-  return result
-}
-
-function isInBudget(account: TAccount): boolean {
-  if (account.type === AccountTypeValue.Debt) return false
-  if (account.title.endsWith('📍')) return true
-  return account.inBalance
 }

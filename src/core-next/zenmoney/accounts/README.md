@@ -23,3 +23,14 @@ entities in ZenMoney Core: commands can create, patch, and delete accounts.
 Core account commands currently support create, patch, and normalized deletion.
 Deleting an account does not yet perform higher-level merge or transaction
 cascade behavior; that belongs to a separate command such as `mergeAccounts`.
+
+`makeAccount` is the production factory for account creation defaults.
+It receives deterministic `now` and `uuid` dependencies from `TCoreContext`.
+`compileCreateAccount` derives `user` from the root user in the store; callers
+should not provide the account owner as command input.
+
+## Reads
+
+The account read layer exposes direct normalized reads plus small prepared
+views used by existing projections: debt account id, in-budget accounts, saving
+accounts, and balance inputs with resolved FX codes.
