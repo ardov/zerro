@@ -60,9 +60,33 @@ src/core-next/
   index.ts
   constants.ts
   types.ts
+  facade/
   zenmoney/
   zerro/
 ```
+
+### Core Next session facade
+
+Implemented:
+
+- `createZerroSession`
+- lazy memoized `session.read.*` methods over the migrated read projectors
+
+`createZerroSession(data, ctx, dependencies)` is currently read-only. It uses
+`ctx.now()` for date-dependent reads and keeps read results cached for the
+session lifetime. This gives commands a non-Redux place to read derived domain
+state later.
+
+For now, the session still accepts adapter-prepared read dependencies for the
+parts that are not yet core-owned input preparation:
+
+- envelope labels;
+- populated tags;
+- FX converter;
+- optional display-currency converter or display currency.
+
+This keeps the session facade useful without pulling legacy `5-entities`,
+Redux, i18n, icon assets, or display-currency state into core domain modules.
 
 ### ZenMoney primitives
 
@@ -177,6 +201,7 @@ month list, env metrics, sorted activity, and FX conversion, and
 
 Implemented:
 
+- `createZerroSession`
 - `selectCoreUserSettings`
 - `selectCoreEnvelopeMeta`
 - `selectCoreEnvBudgets`
@@ -352,7 +377,10 @@ Remaining useful follow-ups:
 
 1. Start hidden-data write codecs for user settings, envelope
    meta, env budgets, and goals, which is the more direct path toward commands.
-2. Start replacing selected legacy imports with adapter imports from
+2. Continue moving adapter-prepared read dependencies into core only when the
+   boundary is clear, especially populated tag preparation and FX/display input
+   preparation.
+3. Start replacing selected legacy imports with adapter imports from
    `core-next/adapters/redux`, one consumer at a time.
-3. Start command/session work only after the read-model comparison surface is
-   stable enough for regression checks.
+4. Start command work on top of `createZerroSession`, so commands read derived
+   state through `session.read` instead of Redux selectors.
