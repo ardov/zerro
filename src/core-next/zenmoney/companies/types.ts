@@ -1,3 +1,4 @@
+import type { TCountryId } from '../countries'
 import type { TMsTime, TUnixTime } from '../primitives'
 
 export type TCompanyId = number
@@ -14,7 +15,7 @@ export type TCompany = {
 
   www: string | null
 
-  country: number | null
+  country: TCountryId | null
 
   countryCode: string | null
 

@@ -10,6 +10,11 @@ import type {
   TCompanyId,
   TZmCompany,
 } from 'core-next/zenmoney/companies/types'
+import type {
+  TCountry,
+  TCountryId,
+  TZmCountry,
+} from 'core-next/zenmoney/countries/types'
 import type { TUser, TUserId, TZmUser } from 'core-next/zenmoney/users/types'
 import tagIcons from '../tagIcons.json'
 
@@ -24,6 +29,11 @@ export type {
   TCompanyId,
   TZmCompany,
 } from 'core-next/zenmoney/companies/types'
+export type {
+  TCountry,
+  TCountryId,
+  TZmCountry,
+} from 'core-next/zenmoney/countries/types'
 export type { TUser, TUserId, TZmUser } from 'core-next/zenmoney/users/types'
 
 type TIconName = keyof typeof tagIcons
@@ -43,21 +53,6 @@ export enum DataEntity {
   ReminderMarker = 'reminderMarker',
   Transaction = 'transaction',
 }
-
-// ---------------------------------------------------------------------
-// COUNTRY
-// ---------------------------------------------------------------------
-
-export type TCountryId = number
-
-export type TZmCountry = {
-  id: TCountryId
-  title: string
-  currency: TInstrumentId
-  domain: string | null
-}
-
-export type TCountry = TZmCountry
 
 // ---------------------------------------------------------------------
 // ACCOUNT

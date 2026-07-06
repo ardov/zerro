@@ -11,15 +11,16 @@ more dependencies:
 1. `primitives`: shared domain primitives such as timestamp units.
 2. `instruments`: currency metadata used by users, accounts, transactions, and
    FX conversion.
-3. `companies`: bank and provider reference data.
-4. `users`: root user and user currency helpers.
-5. `accounts`: user-owned accounts and account write commands.
-6. `merchants`: payee-like transaction entities.
-7. `tags`: category entities.
-8. `transactions`: transaction commands, transaction read helpers, and account
+3. `countries`: country reference data used by users and companies.
+4. `companies`: bank and provider reference data.
+5. `users`: root user and user currency helpers.
+6. `accounts`: user-owned accounts and account write commands.
+7. `merchants`: payee-like transaction entities.
+8. `tags`: category entities.
+9. `transactions`: transaction commands, transaction read helpers, and account
    balance effects.
-9. `debtors`: derived debt/payee balances from transactions.
-10. `balances`: derived balance history read models.
+10. `debtors`: derived debt/payee balances from transactions.
+11. `balances`: derived balance history read models.
 
 Folders are intentionally not numbered. Import paths are part of the future
 library API, so ordering belongs in this README and in `index.ts`, not in path

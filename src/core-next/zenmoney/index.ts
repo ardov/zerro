@@ -3,6 +3,7 @@ export * from './replay'
 export * from './primitives'
 
 export * from './instruments'
+export * from './countries'
 export * from './companies'
 export * from './users'
 

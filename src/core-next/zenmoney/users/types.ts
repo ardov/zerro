@@ -1,3 +1,4 @@
+import type { TCountryId } from '../countries'
 import type { TInstrumentId } from '../instruments'
 import type { TMsTime, TUnixTime } from '../primitives'
 
@@ -15,8 +16,7 @@ export type TUser = {
   /** Root user has no parent. Child users point to the root user id. */
   parent: TUserId | null
 
-  /** Numeric ZenMoney country id. This will become `TCountryId` when country moves into core. */
-  country: number
+  country: TCountryId
 
   countryCode: string
   email: string | null
