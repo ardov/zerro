@@ -93,12 +93,7 @@ The root `core-next` entrypoint must stay safe for storage-agnostic and headless
 Example:
 
 ```ts
-const session = createZerroSession(current, {
-  now,
-  uuid,
-}, {
-  populatedTags,
-})
+const session = createZerroSession(current, { now, uuid }, { populatedTags })
 
 const envelopes = session.read.envelopes()
 const budgets = session.read.budgets()
@@ -547,7 +542,7 @@ function createReadModel(data) {
 
   return {
     envelopes() {
-      return envelopesCache ??= buildEnvelopes(data)
+      return (envelopesCache ??= buildEnvelopes(data))
     },
   }
 }
