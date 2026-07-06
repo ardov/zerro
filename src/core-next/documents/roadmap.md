@@ -52,7 +52,9 @@ Dependency order and status:
 6. `merchants` - mostly done: types, read selectors, production factory, patch
    command, and focused tests exist; create/delete commands can wait until a
    real command path needs them.
-7. `tags` - partial: command compilers exist; type ownership remains.
+7. `tags` - mostly done: types, read selectors, production factory,
+   create/patch commands, and focused tests exist; populated tags and tag trees
+   remain outside this normalized entity slice for now.
 8. `accounts` - mostly done: types, read selectors, production factory,
    create/patch/delete commands, and focused tests exist; higher-level
    merge/cascade behavior remains separate.
@@ -76,18 +78,18 @@ For each mutable entity:
 Likely immediate slice:
 
 ```txt
-zenmoney/tags
+zenmoney/transactions
   type ownership cleanup
-  production factory, only if create/default behavior needs it
-  command review
+  read/factory/module-shape review
+  command and effects review
   focused command tests using shared builders
 ```
 
 The `zenmoney/accounts` slice has already extracted read selectors and a
 production account factory, and tightened create command input so `user` is
-derived from the store. The `zenmoney/merchants` slice now has the same module
-shape for types, reads, factory, and patch command. Repeat the same review shape
-for tags and transactions.
+derived from the store. The `zenmoney/merchants` and `zenmoney/tags` slices now
+have the same module shape for types, reads, factories, and commands. Repeat the
+same review shape for transactions.
 
 Do not skip budgets, reminders, or reminder markers when planning the ZenMoney
 entity layer. They are easy to overlook because current Zerro read work mostly
@@ -167,10 +169,10 @@ If the next agent should continue cleanup:
 
 If the next agent should continue domain migration:
 
-1. Start with Track B, `zenmoney/tags`.
-2. Review existing command compilers and decide whether a production factory
-   belongs in the entity module.
-3. Keep the change limited to entity types/factory/commands/tests.
+1. Start with Track B, `zenmoney/transactions`.
+2. Review transaction type ownership, reads, commands, and balance effects as a
+   single entity module.
+3. Keep the change limited to entity types/read/factory/commands/effects/tests.
 
 If the next agent should unlock Zerro commands:
 
@@ -178,8 +180,8 @@ If the next agent should unlock Zerro commands:
 2. Implement one simple hidden-data writer and compare the resulting state with
    the existing legacy write path.
 
-The most conservative next step is Track B for `zenmoney/tags`, because it
-continues the production write layer without depending on demo-data
+The most conservative next step is Track B for `zenmoney/transactions`, because
+it continues the ZenMoney entity layer without depending on demo-data
 infrastructure or a full Zerro command pipeline.
 
 ## Verification Defaults

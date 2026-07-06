@@ -1,18 +1,19 @@
 import type {
   OptionalExceptFor,
   TDataStore,
-  TTag,
-  TTagId,
 } from '6-shared/types'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
 import { getRootUserId } from '../users'
+import { makeTag } from './factory'
+import { getTag } from './read'
+import type { TTag } from './types'
 
-export type TZenMoneyTagPatch = OptionalExceptFor<TTag, 'id'>
-export type TZenMoneyTagDraft = OptionalExceptFor<TTag, 'title'>
+export type TTagPatch = OptionalExceptFor<TTag, 'id'>
+export type TTagDraft = OptionalExceptFor<TTag, 'title'>
 
 export function compilePatchTag(
   data: TDataStore,
-  draft: TZenMoneyTagPatch | TZenMoneyTagPatch[],
+  draft: TTagPatch | TTagPatch[],
   ctx: Pick<TCoreContext, 'now'>
 ): TNormalizedPatch {
   const list = Array.isArray(draft) ? draft : [draft]
@@ -22,7 +23,7 @@ export function compilePatchTag(
       if (!item.id) throw new Error('Trying to patch tag without id')
       if (item.id === 'null') throw new Error('Trying to patch null tag')
 
-      const current = data.tag[item.id]
+      const current = getTag(data, item.id)
       if (!current) throw new Error('Tag not found')
 
       return { ...current, ...item, changed: ctx.now() }
@@ -32,7 +33,7 @@ export function compilePatchTag(
 
 export function compileCreateTag(
   data: TDataStore,
-  draft: TZenMoneyTagDraft,
+  draft: TTagDraft,
   ctx: Pick<TCoreContext, 'now' | 'uuid'>
 ): TNormalizedPatch {
   if (hasId(draft)) return compilePatchTag(data, draft, ctx)
@@ -46,28 +47,6 @@ export function compileCreateTag(
   }
 }
 
-function makeTag(
-  raw: OptionalExceptFor<TTag, 'user' | 'title'>,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
-): TTag {
-  return {
-    id: raw.id || (ctx.uuid() as TTagId),
-    changed: raw.changed || ctx.now(),
-    user: raw.user,
-    title: raw.title,
-    icon: raw.icon || null,
-    budgetIncome: raw.budgetIncome || false,
-    budgetOutcome: raw.budgetOutcome || false,
-    required: raw.required || false,
-    color: raw.color || null,
-    picture: raw.picture || null,
-    staticId: raw.staticId || null,
-    showIncome: raw.showIncome || false,
-    showOutcome: raw.showOutcome || false,
-    parent: raw.parent || null,
-  }
-}
-
-function hasId(tag: Partial<TTag>): tag is TZenMoneyTagPatch {
+function hasId(tag: Partial<TTag>): tag is TTagPatch {
   return !!tag.id
 }

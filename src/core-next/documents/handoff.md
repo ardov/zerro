@@ -16,15 +16,15 @@ Core Next documentation lives next to the module:
 The current branch has these recent commits:
 
 ```txt
+9b3ea3d4 Shape core-next merchant entity layer
 46128a48 Polish core-next account entity layer
 6847cc44 Document ZenMoney entity dependency order
 ee37daee Summarize core-next roadmap
 686bb664 Extract core-next test data builders
 aba677c9 Move core-next docs into module
-53d9d2c3 Document core-next testing policy
 ```
 
-This run also adds Track B work in `zenmoney/merchants`:
+Recent Track B work in `zenmoney/merchants`:
 
 - merchant types now live under `src/core-next/zenmoney/merchants/types.ts`;
 - `getMerchants` and `getMerchant` are exposed from
@@ -34,6 +34,19 @@ This run also adds Track B work in `zenmoney/merchants`:
 - `compilePatchMerchant` now uses the merchant read layer and exports the local
   `TMerchantPatch` type instead of the longer temporary name;
 - merchant tests cover reads, factory defaults, and patch behavior.
+
+This run also adds Track B work in `zenmoney/tags`:
+
+- tag types now live under `src/core-next/zenmoney/tags/types.ts`, and
+  `6-shared/types` re-exports them like the other migrated ZenMoney entities;
+- `getTags` and `getTag` are exposed from
+  `src/core-next/zenmoney/tags/read.ts`;
+- `makeTag` is a production factory for ordinary tags with deterministic `now`
+  and `uuid` dependencies;
+- `compileCreateTag` and `compilePatchTag` now use local `TTagDraft` and
+  `TTagPatch` names, plus the tag read/factory layers;
+- populated tags, tag trees, and localized `nullTag` remain outside this
+  normalized ZenMoney entity slice for now.
 
 ## Implemented so far
 
@@ -416,8 +429,8 @@ ZenMoney-derived `debtors` and account balance history are also ported.
 Remaining useful follow-ups:
 
 1. Use `src/core-next/documents/roadmap.md` to choose the next track.
-2. The most conservative next domain slice is `zenmoney/tags`: type/factory
-   cleanup, command review, and focused tests.
+2. The most conservative next domain slice is `zenmoney/transactions`: type
+   ownership and full entity module shape review.
 3. The most direct command-enabling slice is hidden-data write codecs for user
    settings, envelope meta, env budgets, and goals.
 4. The test-infrastructure slice is deterministic demo data plus demo parity

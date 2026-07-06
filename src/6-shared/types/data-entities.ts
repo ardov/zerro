@@ -21,7 +21,7 @@ import type {
   TAccountId,
   TZmAccount,
 } from 'core-next/zenmoney/accounts/types'
-import tagIcons from '../tagIcons.json'
+import type { TTag, TTagId, TZmTag } from 'core-next/zenmoney/tags/types'
 
 export type {
   TFxCode,
@@ -45,9 +45,8 @@ export type {
   TAccountId,
   TZmAccount,
 } from 'core-next/zenmoney/accounts/types'
+export type { TTag, TTagId, TZmTag } from 'core-next/zenmoney/tags/types'
 export { AccountType } from 'core-next/zenmoney/accounts/types'
-
-type TIconName = keyof typeof tagIcons
 
 // export type TToken = TAccessToken['access_token']
 
@@ -79,33 +78,6 @@ export type TZmMerchant = {
 }
 
 export type TMerchant = TZmMerchant & {
-  changed: TMsTime
-}
-
-// ---------------------------------------------------------------------
-// TAG
-// ---------------------------------------------------------------------
-
-export type TTagId = string
-
-export type TZmTag = {
-  id: TTagId
-  changed: TUnixTime
-  user: TUserId
-  title: string
-  parent: TTagId | null
-  icon: TIconName | null
-  staticId: string | null
-  picture: string | null
-  color: number | null
-  showIncome: boolean
-  showOutcome: boolean
-  budgetIncome: boolean
-  budgetOutcome: boolean
-  required: boolean | null
-}
-
-export type TTag = TZmTag & {
   changed: TMsTime
 }
 

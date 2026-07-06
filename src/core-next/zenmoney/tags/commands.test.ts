@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { makeStore, makeTag } from '../../testing/zenmoneyTestData'
+import {
+  makeStore,
+  makeTag as makeTestTag,
+} from '../../testing/zenmoneyTestData'
 import { compileCreateTag, compilePatchTag } from './commands'
+import { makeTag } from './factory'
 
 describe('zenmoney tag commands', () => {
   it('patches existing tags with deterministic time', () => {
     const data = makeStore({
       tag: {
-        food: makeTag({ id: 'food', title: 'Food', changed: 1 }),
+        food: makeTestTag({ id: 'food', title: 'Food', changed: 1 }),
       },
     })
 
@@ -38,22 +42,44 @@ describe('zenmoney tag commands', () => {
       { now: () => 100, uuid: () => 'tag-new' }
     )
 
-    expect(patch.tag?.[0]).toMatchObject({
-      id: 'tag-new',
-      changed: 100,
-      user: 1,
-      title: 'Travel',
-      parent: null,
-      budgetIncome: false,
-      budgetOutcome: true,
-      required: false,
-    })
+    expect(patch.tag?.[0]).toEqual(
+      makeTag(
+        {
+          id: 'tag-new',
+          changed: 100,
+          user: 1,
+          title: 'Travel',
+          budgetOutcome: true,
+        },
+        {
+          now: () => 0,
+          uuid: () => 'unused',
+        }
+      )
+    )
+  })
+
+  it('creates production tag defaults through the tag factory', () => {
+    expect(
+      makeTag(
+        {
+          user: 1,
+          title: 'Travel',
+        },
+        {
+          now: () => 100,
+          uuid: () => 'tag-new',
+        }
+      )
+    ).toEqual(
+      makeTestTag({ id: 'tag-new', changed: 100, user: 1, title: 'Travel' })
+    )
   })
 
   it('routes create with id through patch semantics', () => {
     const data = makeStore({
       tag: {
-        food: makeTag({ id: 'food', title: 'Food', changed: 1 }),
+        food: makeTestTag({ id: 'food', title: 'Food', changed: 1 }),
       },
     })
 
@@ -73,7 +99,7 @@ describe('zenmoney tag commands', () => {
   it('validates tag commands', () => {
     const data = makeStore({
       tag: {
-        food: makeTag({ id: 'food', title: 'Food', changed: 1 }),
+        food: makeTestTag({ id: 'food', title: 'Food', changed: 1 }),
       },
     })
 
