@@ -11,6 +11,7 @@ import {
   buildBalances,
   buildBalancesByDate,
   buildTransactionEffect,
+  convertBalancesToDisplay,
   getHistoryStart,
   TBalanceAccount,
 } from './build'
@@ -123,6 +124,33 @@ describe('getHistoryStart', () => {
         '2026-01-10'
       )
     ).toBe('2026-01-02')
+  })
+})
+
+describe('convertBalancesToDisplay', () => {
+  it('converts account and debtor fx amounts to display values', () => {
+    expect(
+      convertBalancesToDisplay(
+        [
+          {
+            date: '2026-01-01',
+            balances: {
+              accounts: { cash: { USD: 10 } },
+              debtors: { alex: { USD: -5 } },
+            },
+          },
+        ],
+        amount => amount.USD || 0
+      )
+    ).toEqual([
+      {
+        date: '2026-01-01',
+        balances: {
+          accounts: { cash: 10 },
+          debtors: { alex: -5 },
+        },
+      },
+    ])
   })
 })
 

@@ -12,6 +12,7 @@ import type {
   TMerchant,
   TTransaction,
   TTransactionId,
+  TDateDraft,
 } from '6-shared/types'
 import { cleanPayee, TDebtor } from '../debtors'
 import { getTransactionType, TrType } from '../transactions'
@@ -138,6 +139,38 @@ export function buildBalancesByDate(input: {
     const balances = input.balances.byDay[date] || lastUsedBalance
     lastUsedBalance = balances
     return { date, balances }
+  })
+}
+
+export function convertBalancesToDisplay(
+  list: Array<TBalanceNode<TFxAmount>>,
+  convert: (amount: TFxAmount, date: TDateDraft) => number
+): Array<TBalanceNode<number>> {
+  return list.map(node => {
+    const displayNode: TBalanceNode<number> = {
+      date: node.date,
+      balances: { accounts: {}, debtors: {} },
+    }
+
+    entries(node.balances.accounts).forEach(([id, amount]) => {
+      const value = convert(amount, node.date)
+      console.assert(
+        Number.isFinite(value),
+        'Not converted correctly: ' + JSON.stringify(amount)
+      )
+      displayNode.balances.accounts[id] = value
+    })
+
+    entries(node.balances.debtors).forEach(([id, amount]) => {
+      const value = convert(amount, node.date)
+      console.assert(
+        Number.isFinite(value),
+        'Not converted correctly: ' + JSON.stringify(amount)
+      )
+      displayNode.balances.debtors[id] = value
+    })
+
+    return displayNode
   })
 }
 

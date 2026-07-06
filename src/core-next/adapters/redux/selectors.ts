@@ -3,6 +3,7 @@ import { toISODate, toISOMonth } from '6-shared/helpers/date'
 import { i18n } from '6-shared/localization'
 import { accountModel } from '5-entities/account'
 import { getTagBudgets } from '5-entities/budget'
+import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { fxRateModel } from '5-entities/currency/fxRate'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { merchantModel } from '5-entities/merchant'
@@ -14,6 +15,7 @@ import {
   buildBalances,
   buildBalancesByDate,
   buildDebtors,
+  convertBalancesToDisplay,
   getHistoryStart,
 } from '../../zenmoney'
 import {
@@ -289,6 +291,11 @@ export const selectCoreBalancesByDate = createSelector(
       historyStart,
       currentDate,
     })
+)
+
+export const selectCoreDisplayBalancesByDate = createSelector(
+  [selectCoreBalancesByDate, displayCurrency.getConverter],
+  convertBalancesToDisplay
 )
 
 let labelsCacheLanguage: string | undefined

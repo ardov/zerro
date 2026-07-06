@@ -84,6 +84,7 @@ Implemented:
   - `buildBalances`
   - `buildBalancesByDate`
   - `getHistoryStart`
+  - `convertBalancesToDisplay`
 
 `buildDebtors` is a pure ZenMoney-derived read model over transactions,
 merchants, instruments, and the debt account id. It lives under
@@ -94,7 +95,8 @@ one input when building debtor envelopes.
 `buildBalances` and `buildBalancesByDate` are ZenMoney-derived read models over
 transactions, accounts, debtors, merchants, instruments, and the debt account
 id. They intentionally live under `zenmoney/balances`. Display-currency balance
-conversion remains outside this core slice for now.
+conversion is exposed as a pure helper, with the app adapter providing the
+display-currency converter.
 
 ### Zerro hidden data readers
 
@@ -181,6 +183,7 @@ Implemented:
 - `selectCoreDebtors`
 - `selectCoreBalances`
 - `selectCoreBalancesByDate`
+- `selectCoreDisplayBalancesByDate`
 - `selectCoreEnvelopes`
 - `selectCoreEnvelopeStructure`
 - `selectCoreKeepingEnvelopeIds`
@@ -347,11 +350,9 @@ Move in small, testable layers. The read projection chain through
 ZenMoney-derived `debtors` and account balance history are also ported.
 Remaining useful follow-ups:
 
-1. Consider whether display-currency balance conversion belongs in a separate
-   adapter/display layer or should get a small core helper.
-2. Start hidden-data write codecs for user settings, envelope
+1. Start hidden-data write codecs for user settings, envelope
    meta, env budgets, and goals, which is the more direct path toward commands.
-3. Start replacing selected legacy imports with adapter imports from
+2. Start replacing selected legacy imports with adapter imports from
    `core-next/adapters/redux`, one consumer at a time.
-4. Start command/session work only after the read-model comparison surface is
+3. Start command/session work only after the read-model comparison surface is
    stable enough for regression checks.

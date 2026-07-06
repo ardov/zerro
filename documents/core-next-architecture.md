@@ -362,6 +362,7 @@ getRootUser(data) => user | null
 getRootUserId(data) => userId | null
 buildDebtors({ transactions, merchants, instruments, debtAccountId }) => debtors
 buildBalances({ transactions, accounts, debtors, merchants, instruments, debtAccountId }) => balances
+convertBalancesToDisplay(balances, displayConverter) => displayBalances
 editTransaction(data, command, ctx) => patch
 deleteAccount(data, command, ctx) => patch
 ```

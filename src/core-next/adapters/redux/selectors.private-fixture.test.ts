@@ -44,6 +44,7 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
         selectCoreBalances,
         selectCoreBalancesByDate,
         selectCoreDebtors,
+        selectCoreDisplayBalancesByDate,
         selectCoreEnvelopes,
         selectCoreEnvelopeStructure,
         selectCoreEnvMetrics,
@@ -149,6 +150,11 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
       'balancesByDate',
       selectCoreBalancesByDate(state),
       accBalanceModel.getBalancesByDate(state)
+    )
+    expectSameJsonHash(
+      'displayBalancesByDate',
+      selectCoreDisplayBalancesByDate(state),
+      accBalanceModel.getDisplayBalancesByDate(state)
     )
   }, 60_000)
 })
