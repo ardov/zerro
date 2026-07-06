@@ -40,6 +40,7 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
       {
         selectCoreBudgets,
         selectCoreActivity,
+        selectCoreDebtors,
         selectCoreEnvelopes,
         selectCoreEnvelopeStructure,
         selectCoreEnvMetrics,
@@ -50,6 +51,7 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
         selectCoreRawActivity,
         selectCoreUserSettings,
       },
+      { debtorModel },
       { getMonthList },
       { getMonthTotals },
       { getEnvMetrics },
@@ -61,6 +63,7 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
       import('5-entities/envelope'),
       import('5-entities/userSettings'),
       import('./selectors'),
+      import('5-entities/debtors'),
       import('5-entities/envBalances/1 - monthList'),
       import('5-entities/envBalances/4 - monthTotals'),
       import('5-entities/envBalances/3 - envMetrics'),
@@ -90,6 +93,11 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
       envelopeModel.getKeepingEnvelopes(state)
     )
     expectSameJsonHash('budgets', selectCoreBudgets(state), budgetModel.get(state))
+    expectSameJsonHash(
+      'debtors',
+      selectCoreDebtors(state),
+      debtorModel.getDebtors(state)
+    )
     expectSameJsonHash(
       'rawActivity',
       selectCoreRawActivity(state),

@@ -13,6 +13,7 @@ The initial architecture and private fixture workflow are documented in:
 The current branch has these recent commits:
 
 ```txt
+73df977e Add core-next sorted activity and balance inputs
 e739c3bc Add core-next activity metrics and month totals projections
 59d043eb Add core-next envelope budget and raw activity projections
 763b8552 Add private fixture harness
@@ -100,6 +101,8 @@ Implemented:
 - `TEnvelopeId`
 - `envId.get`
 - `envId.parse`
+- `buildDebtors`
+- `cleanPayee`
 - `buildEnvelopes`
 - `getKeepingEnvelopes`
 - `getEnvBudgets`
@@ -120,6 +123,11 @@ Implemented:
 `populatedTags`, `savingAccounts`, `envelopeMeta`, `userCurrency`, and explicit
 group `labels`; it does not import Redux selectors or call `i18next.t(...)` at
 module initialization.
+
+`buildDebtors` is a pure Zerro projector over ZenMoney-shaped transactions,
+merchants, instruments, and the debt account id. It intentionally lives under
+`zerro/debtors`, because debtors are a derived Zerro concept, not a first-class
+ZenMoney entity.
 
 `buildBudgets` is also a pure projector. It accepts prepared ZenMoney tag
 budgets, hidden Zerro envelope budgets, and `preferZmBudgets`, preserving the
@@ -148,6 +156,7 @@ Implemented:
 - `selectCoreUserSettings`
 - `selectCoreEnvelopeMeta`
 - `selectCoreEnvBudgets`
+- `selectCoreDebtors`
 - `selectCoreEnvelopes`
 - `selectCoreEnvelopeStructure`
 - `selectCoreKeepingEnvelopeIds`
@@ -164,7 +173,9 @@ Implemented:
 The adapter currently uses legacy upstream selectors for some prepared inputs,
 but routes the domain projection through `core-next`. The read balance chain no
 longer imports legacy `getMonthList`, `getCurrentFunds`, `getActivity`,
-`getSortedActivity`, `getEnvMetrics`, or `getMonthTotals`.
+`getSortedActivity`, `getEnvMetrics`, or `getMonthTotals`. The adapter also no
+longer imports legacy `debtorModel.getDebtors`; envelopes and raw activity now
+use `selectCoreDebtors`.
 
 Keep this graph explicit. Do not replace it with a single large
 `current => readModel` selector; that would make transaction-heavy projections
@@ -234,6 +245,7 @@ node ./node_modules/vitest/vitest.mjs run \
   src/core-next/zerro/user-settings/read.test.ts \
   src/core-next/zerro/envelope-meta/read.test.ts \
   src/core-next/zerro/envelope-id/envelopeId.test.ts \
+  src/core-next/zerro/debtors/read.test.ts \
   src/core-next/zerro/envelopes/build.test.ts \
   src/core-next/zerro/budgets/read.test.ts \
   src/core-next/zerro/budgets/build.test.ts \
@@ -300,11 +312,15 @@ Golden comparisons use stable JSON hashing and ignore object fields with `undefi
 ## Recommended next steps
 
 Move in small, testable layers. The read projection chain through
-`monthTotals`, plus `sortedActivity`, is now ported. Remaining useful follow-ups:
+`monthTotals`, plus `sortedActivity` and `debtors`, is now ported. Remaining
+useful follow-ups:
 
-1. Consider porting `debtors` next, because it is still a legacy prepared input
-   for envelopes and raw activity and it has a clear private-fixture comparison.
-2. Start replacing selected legacy imports with adapter imports from
+1. Consider goals next if we want another read-model layer. `getGoals` depends
+   on hidden monthly goals, month list, envMetrics, sortedActivity, and FX
+   conversion; the projection side is now mostly unblocked.
+2. Alternatively start hidden-data write codecs for user settings, envelope
+   meta, env budgets, and goals, which is the more direct path toward commands.
+3. Start replacing selected legacy imports with adapter imports from
    `core-next/adapters/redux`, one consumer at a time.
-3. Start command/session work only after the read-model comparison surface is
+4. Start command/session work only after the read-model comparison surface is
    stable enough for regression checks.

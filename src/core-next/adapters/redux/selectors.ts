@@ -5,7 +5,7 @@ import { accountModel } from '5-entities/account'
 import { getTagBudgets } from '5-entities/budget'
 import { fxRateModel } from '5-entities/currency/fxRate'
 import { instrumentModel } from '5-entities/currency/instrument'
-import { debtorModel } from '5-entities/debtors'
+import { merchantModel } from '5-entities/merchant'
 import { tagModel } from '5-entities/tag'
 import { trModel } from '5-entities/transaction'
 import { userModel } from '5-entities/user'
@@ -14,6 +14,7 @@ import {
   buildActivity,
   buildBudgets,
   buildCurrentFunds,
+  buildDebtors,
   buildEnvelopes,
   buildEnvMetrics,
   buildMonthList,
@@ -46,9 +47,25 @@ export const selectCoreEnvBudgets = createSelector(
 
 export const selectCoreEnvelopeLabels = () => getCoreEnvelopeLabels()
 
+export const selectCoreDebtors = createSelector(
+  [
+    trModel.getTransactionsHistory,
+    merchantModel.getMerchants,
+    instrumentModel.getInstruments,
+    accountModel.getDebtAccountId,
+  ],
+  (transactions, merchants, instruments, debtAccountId) =>
+    buildDebtors({
+      transactions,
+      merchants,
+      instruments,
+      debtAccountId,
+    })
+)
+
 const selectCoreCompiledEnvelopes = createSelector(
   [
-    debtorModel.getDebtors,
+    selectCoreDebtors,
     tagModel.getPopulatedTags,
     accountModel.getSavingAccounts,
     selectCoreEnvelopeMeta,
@@ -120,7 +137,7 @@ export const selectCoreRawActivity = createSelector(
     trModel.getTransactionsHistory,
     accountModel.getInBudgetAccounts,
     accountModel.getDebtAccountId,
-    debtorModel.getDebtors,
+    selectCoreDebtors,
     instrumentModel.getInstruments,
   ],
   (transactions, inBudgetAccounts, debtAccountId, debtors, instruments) =>

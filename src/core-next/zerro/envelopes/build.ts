@@ -3,13 +3,12 @@ import type {
   TAccount,
   TFxAmount,
   TFxCode,
-  TMerchantId,
   TTag,
   TTagId,
-  TTransaction,
 } from '6-shared/types'
 import { getColorForString } from '6-shared/helpers/color'
 import { keys } from '6-shared/helpers/keys'
+import type { TDebtor } from '../debtors'
 import { EnvType, envId, TEnvelopeId } from '../envelope-id'
 import { envelopeVisibility, TEnvelopeMeta } from '../envelope-meta'
 
@@ -27,15 +26,7 @@ export type TEnvelopeTag = TTag & {
   colorDisplay: string
 }
 
-export type TEnvelopeDebtor = {
-  id: string
-  name: string
-  merchantId?: TMerchantId
-  merchantName?: string
-  payeeNames: string[]
-  transactions: TTransaction[]
-  balance: TFxAmount
-}
+export type TEnvelopeDebtor = TDebtor
 
 export type TEnvelope = {
   id: TEnvelopeId
