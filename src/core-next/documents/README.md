@@ -12,6 +12,8 @@ moves into `src/domain` or a separate package.
   staged migration plan, and invariants.
 - [handoff.md](./handoff.md): current implementation state, verified commands,
   guardrails, and recommended next steps.
+- [roadmap.md](./roadmap.md): short map of the active work tracks and suggested
+  next agent starting points.
 - [testing.md](./testing.md): testing policy and fixture strategy.
 - [private-fixtures.md](./private-fixtures.md): private fixture export,
   storage, privacy, and comparison workflow.
@@ -47,12 +49,12 @@ See [testing.md](./testing.md) for the detailed testing policy.
 
 ## Near-Term Plan
 
-1. Keep small local builders for focused unit tests, then extract repeated
-   builders into `src/core-next/testing` when duplication becomes distracting.
-2. Make demo data deterministic by accepting explicit `now` and `until` inputs.
-3. Add a core-owned demo fixture helper that can produce either a `TDiff` or a
-   normalized `TDataStore`.
-4. Use demo fixtures for parity tests between legacy selectors, Redux adapters,
-   and `createZerroSession`.
-5. Prune tests that only assert direct map access or identity wrappers unless
-   they capture an intentional contract such as missing-value behavior.
+See [roadmap.md](./roadmap.md) for the current track map. The short version:
+
+1. Test and fixture infrastructure: deterministic demo data and parity tests.
+2. ZenMoney entity layer: accounts, merchants, tags, transactions, then derived
+   reads.
+3. Zerro write layer: hidden-data writers, service account, envelope/budget/goal
+   commands.
+4. Engine and adapter integration: explicit selectors, outbox engine, gradual UI
+   connection.
