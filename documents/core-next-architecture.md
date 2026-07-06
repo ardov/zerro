@@ -99,7 +99,6 @@ const session = createZerroSession(current, {
 }, {
   labels,
   populatedTags,
-  convertFx,
 })
 
 const envelopes = session.read.envelopes()
@@ -111,10 +110,12 @@ const patch = session.envelopes.rename(id, 'Food')
 `Session` may also expose `execute(command)` as an advanced API for tests, devtools, migrations, headless tools, and command replay from JSON. The ergonomic domain methods are the primary app-facing API.
 
 During the staged migration, `createZerroSession` may accept explicit
-adapter-prepared read dependencies such as labels, populated tags, and FX/display
-converters. This is an interim boundary: it avoids pulling Redux, i18n, icon
-assets, display-currency state, or legacy `5-entities` modules into the core
-facade while still giving commands a non-Redux read API.
+adapter-prepared read dependencies such as labels and populated tags. This is
+an interim boundary: it avoids pulling Redux, i18n, icon assets, or legacy
+`5-entities` modules into the core facade while still giving commands a
+non-Redux read API. FX conversion is derived inside core from normalized
+instrument data and hidden monthly `FxRates` data. Display-currency conversion
+is adapter/display state, not session state.
 
 The context should contain only non-deterministic dependencies:
 
@@ -870,7 +871,7 @@ Result:
 - `ctx` contains `now()` and `uuid()`;
 - root user, root user id, and user currency are derived from data;
 - `mainUserId` is not passed through context.
-- staged read dependencies such as populated tags, labels, and converters may
+- staged read dependencies such as populated tags and labels may
   be passed explicitly until those preparation steps move into core or a stable
   adapter boundary.
 

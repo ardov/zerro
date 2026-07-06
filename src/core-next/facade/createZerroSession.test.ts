@@ -20,8 +20,6 @@ describe('createZerroSession', () => {
           defaultPayeeGroup: 'Payees',
         },
         populatedTags: {},
-        convertFx: amount => amount.USD || 0,
-        displayCurrency: 'USD',
       }
     )
 

@@ -39,8 +39,6 @@ maybeDescribe('core-next session reads on private fixture', () => {
       await i18n.changeLanguage(fixture.manifest.locale || 'ru')
 
       const [
-        { displayCurrency },
-        { fxRateModel },
         { tagModel },
         {
           selectCoreActivity,
@@ -48,11 +46,12 @@ maybeDescribe('core-next session reads on private fixture', () => {
           selectCoreBalancesByDate,
           selectCoreBudgets,
           selectCoreCurrentFunds,
+          selectCoreCurrentFxRates,
           selectCoreDebtors,
-          selectCoreDisplayBalancesByDate,
           selectCoreEnvelopes,
           selectCoreEnvelopeStructure,
           selectCoreEnvMetrics,
+          selectCoreFxRates,
           selectCoreGoalTotals,
           selectCoreGoals,
           selectCoreHistoryStart,
@@ -65,8 +64,6 @@ maybeDescribe('core-next session reads on private fixture', () => {
           selectCoreUserSettings,
         },
       ] = await Promise.all([
-        import('5-entities/currency/displayCurrency'),
-        import('5-entities/currency/fxRate'),
         import('5-entities/tag'),
         import('../adapters/redux/selectors'),
       ])
@@ -87,8 +84,6 @@ maybeDescribe('core-next session reads on private fixture', () => {
             defaultPayeeGroup: i18n.t('defaultPayeeGroup', { ns: 'common' }),
           },
           populatedTags: tagModel.getPopulatedTags(state),
-          convertFx: fxRateModel.converter(state),
-          displayConverter: displayCurrency.getConverter(state),
         }
       )
 
@@ -123,6 +118,12 @@ maybeDescribe('core-next session reads on private fixture', () => {
         session.read.currentFunds(),
         selectCoreCurrentFunds(state)
       )
+      expectSameJsonHash(
+        'currentFxRates',
+        session.read.currentFxRates(),
+        selectCoreCurrentFxRates(state)
+      )
+      expectSameJsonHash('fxRates', session.read.fxRates(), selectCoreFxRates(state))
       expectSameJsonHash(
         'rawActivity',
         session.read.rawActivity(),
@@ -178,11 +179,6 @@ maybeDescribe('core-next session reads on private fixture', () => {
         'balancesByDate',
         session.read.balancesByDate(),
         selectCoreBalancesByDate(state)
-      )
-      expectSameJsonHash(
-        'displayBalancesByDate',
-        session.read.displayBalancesByDate(),
-        selectCoreDisplayBalancesByDate(state)
       )
     } finally {
       vi.useRealTimers()

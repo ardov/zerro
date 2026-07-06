@@ -4,7 +4,6 @@ import { i18n } from '6-shared/localization'
 import { accountModel } from '5-entities/account'
 import { getTagBudgets } from '5-entities/budget'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { fxRateModel } from '5-entities/currency/fxRate'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { merchantModel } from '5-entities/merchant'
 import { tagModel } from '5-entities/tag'
@@ -21,9 +20,13 @@ import {
 import {
   buildActivity,
   buildBudgets,
+  buildCurrentFxRates,
   buildCurrentFunds,
   buildEnvelopes,
   buildEnvMetrics,
+  buildFxConverter,
+  buildFxRates,
+  buildFxRatesGetter,
   buildMonthList,
   buildMonthTotals,
   buildGoals,
@@ -32,6 +35,7 @@ import {
   buildSortedActivity,
   getEnvBudgets,
   getEnvelopeMeta,
+  getStoredFxRates,
   getRawGoals,
   getKeepingEnvelopes,
   getUserSettings,
@@ -58,6 +62,11 @@ export const selectCoreEnvBudgets = createSelector(
 export const selectCoreRawGoals = createSelector(
   [selectCoreCurrentData],
   getRawGoals
+)
+
+export const selectCoreStoredFxRates = createSelector(
+  [selectCoreCurrentData],
+  getStoredFxRates
 )
 
 export const selectCoreEnvelopeLabels = () => getCoreEnvelopeLabels()
@@ -130,6 +139,38 @@ export const selectCoreCurrentMonth = () => toISOMonth(Date.now())
 
 export const selectCoreCurrentDate = () => toISODate(Date.now())
 
+export const selectCoreCurrentFxRates = createSelector(
+  [instrumentModel.getInstruments, selectCoreCurrentMonth],
+  (instruments, currentMonth) =>
+    buildCurrentFxRates({
+      instruments,
+      currentMonth,
+    })
+)
+
+export const selectCoreFxRates = createSelector(
+  [selectCoreStoredFxRates, selectCoreCurrentFxRates],
+  (storedRates, currentRates) =>
+    buildFxRates({
+      storedRates,
+      currentRates,
+    })
+)
+
+export const selectCoreFxRatesGetter = createSelector(
+  [selectCoreFxRates, selectCoreCurrentFxRates],
+  (rates, currentRates) =>
+    buildFxRatesGetter({
+      rates,
+      currentRates,
+    })
+)
+
+export const selectCoreConvertFx = createSelector(
+  [selectCoreFxRatesGetter],
+  buildFxConverter
+)
+
 export const selectCoreMonthList = createSelector(
   [
     trModel.getTransactionsHistory,
@@ -182,7 +223,7 @@ export const selectCoreEnvMetrics = createSelector(
     selectCoreEnvelopes,
     selectCoreActivity,
     selectCoreBudgets,
-    fxRateModel.converter,
+    selectCoreConvertFx,
   ],
   (monthList, envelopes, activity, budgets, convertFx) =>
     buildEnvMetrics({
@@ -198,7 +239,7 @@ export const selectCoreSortedActivity = createSelector(
   [
     selectCoreRawActivity,
     selectCoreKeepingEnvelopeIds,
-    fxRateModel.converter,
+    selectCoreConvertFx,
   ],
   (rawActivity, keepingEnvelopeIds, convertFx) =>
     buildSortedActivity({
@@ -214,7 +255,7 @@ export const selectCoreMonthTotals = createSelector(
     selectCoreCurrentFunds,
     selectCoreActivity,
     selectCoreEnvMetrics,
-    fxRateModel.converter,
+    selectCoreConvertFx,
     selectCoreCurrentMonth,
   ],
   (monthList, currentFunds, activity, envMetrics, convertFx, currentMonth) =>
@@ -234,7 +275,7 @@ export const selectCoreGoals = createSelector(
     selectCoreMonthList,
     selectCoreEnvMetrics,
     selectCoreSortedActivity,
-    fxRateModel.converter,
+    selectCoreConvertFx,
   ],
   (rawGoals, monthList, envMetrics, sortedActivity, convertFx) =>
     buildGoals({
@@ -247,7 +288,7 @@ export const selectCoreGoals = createSelector(
 )
 
 export const selectCoreGoalTotals = createSelector(
-  [selectCoreGoals, fxRateModel.converter],
+  [selectCoreGoals, selectCoreConvertFx],
   buildGoalTotals
 )
 

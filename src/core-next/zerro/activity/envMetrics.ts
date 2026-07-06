@@ -1,23 +1,10 @@
 import { keys } from '6-shared/helpers/keys'
 import { addFxAmount } from '6-shared/helpers/money'
-import type {
-  ById,
-  ByMonth,
-  TDateDraft,
-  TFxAmount,
-  TFxCode,
-  TISOMonth,
-  TTransaction,
-} from '6-shared/types'
+import type { ById, ByMonth, TFxAmount, TFxCode, TISOMonth, TTransaction } from '6-shared/types'
+import type { TFxConverter } from '../fx-rates'
 import type { TEnvelopeId } from '../envelope-id'
 import type { TEnvelope } from '../envelopes'
 import type { TActivityNode } from './activity'
-
-export type TFxConverter = (
-  amount: TFxAmount,
-  target: TFxCode,
-  date: TDateDraft | 'current'
-) => number
 
 export type TEnvMetrics = {
   id: TEnvelope['id']

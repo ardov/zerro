@@ -6,8 +6,6 @@ import type {
   TAccount,
   TAccountId,
   TDataStore,
-  TDateDraft,
-  TFxAmount,
   TFxCode,
   TInstrumentId,
   TTransaction,
@@ -18,16 +16,19 @@ import {
   buildBalancesByDate,
   buildDebtors,
   compareTransactionDates,
-  convertBalancesToDisplay,
   getHistoryStart,
   getUserCurrency,
 } from '../zenmoney'
 import {
   buildActivity,
   buildBudgets,
+  buildCurrentFxRates,
   buildCurrentFunds,
   buildEnvelopes,
   buildEnvMetrics,
+  buildFxConverter,
+  buildFxRates,
+  buildFxRatesGetter,
   buildGoals,
   buildGoalTotals,
   buildMonthList,
@@ -36,6 +37,7 @@ import {
   buildSortedActivity,
   getEnvBudgets,
   getEnvelopeMeta,
+  getStoredFxRates,
   getKeepingEnvelopes,
   getRawGoals,
   getUserSettings,
@@ -45,7 +47,6 @@ import type {
   TEnvelopeLabels,
   TEnvelopeTag,
 } from '../zerro/envelopes'
-import type { TFxConverter } from '../zerro/activity'
 
 export type TZerroSessionContext = {
   now: () => number
@@ -55,9 +56,6 @@ export type TZerroSessionContext = {
 export type TZerroSessionReadDependencies = {
   labels: TEnvelopeLabels
   populatedTags: ById<TEnvelopeTag>
-  convertFx: TFxConverter
-  displayCurrency?: TFxCode
-  displayConverter?: (amount: TFxAmount, date: TDateDraft) => number
 }
 
 export type TZerroSession = ReturnType<typeof createZerroSession>
@@ -73,9 +71,29 @@ export function createZerroSession(
   const envelopeMeta = memo(() => getEnvelopeMeta(data))
   const envBudgets = memo(() => getEnvBudgets(data))
   const rawGoals = memo(() => getRawGoals(data))
+  const storedFxRates = memo(() => getStoredFxRates(data))
   const debtAccountId = memo(() => getDebtAccountId(data))
   const instrumentCodeById = memo(() => getInstrumentCodeById(data))
   const transactionsHistory = memo(() => getTransactionsHistory(data))
+  const currentFxRates = memo(() =>
+    buildCurrentFxRates({
+      instruments: data.instrument,
+      currentMonth: currentMonth(),
+    })
+  )
+  const fxRates = memo(() =>
+    buildFxRates({
+      storedRates: storedFxRates(),
+      currentRates: currentFxRates(),
+    })
+  )
+  const fxRatesGetter = memo(() =>
+    buildFxRatesGetter({
+      rates: fxRates(),
+      currentRates: currentFxRates(),
+    })
+  )
+  const convertFx = memo(() => buildFxConverter(fxRatesGetter()))
   const debtors = memo(() =>
     buildDebtors({
       transactions: transactionsHistory(),
@@ -133,14 +151,14 @@ export function createZerroSession(
       envelopes: envelopes(),
       activity: activity(),
       budgets: budgets(),
-      convertFx: dependencies.convertFx,
+      convertFx: convertFx(),
     })
   )
   const sortedActivity = memo(() =>
     buildSortedActivity({
       rawActivity: rawActivity(),
       keepingEnvelopeIds: keepingEnvelopeIds(),
-      convertFx: dependencies.convertFx,
+      convertFx: convertFx(),
     })
   )
   const monthTotals = memo(() =>
@@ -149,7 +167,7 @@ export function createZerroSession(
       currentFunds: currentFunds(),
       activity: activity(),
       envMetrics: envMetrics(),
-      convertFx: dependencies.convertFx,
+      convertFx: convertFx(),
       currentMonth: currentMonth(),
     })
   )
@@ -159,10 +177,10 @@ export function createZerroSession(
       monthList: monthList(),
       envMetrics: envMetrics(),
       sortedActivity: sortedActivity(),
-      convertFx: dependencies.convertFx,
+      convertFx: convertFx(),
     })
   )
-  const goalTotals = memo(() => buildGoalTotals(goals(), dependencies.convertFx))
+  const goalTotals = memo(() => buildGoalTotals(goals(), convertFx()))
   const historyStart = memo(() =>
     getHistoryStart(transactionsHistory(), currentDate())
   )
@@ -183,13 +201,6 @@ export function createZerroSession(
       currentDate: currentDate(),
     })
   )
-  const displayBalancesByDate = memo(() =>
-    convertBalancesToDisplay(
-      balancesByDate(),
-      getDisplayConverter(dependencies)
-    )
-  )
-
   const read = {
     currentDate,
     currentMonth,
@@ -197,6 +208,11 @@ export function createZerroSession(
     envelopeMeta,
     envBudgets,
     rawGoals,
+    storedFxRates,
+    currentFxRates,
+    fxRates,
+    fxRatesGetter,
+    convertFx,
     debtAccountId,
     instrumentCodeById,
     transactionsHistory,
@@ -218,7 +234,6 @@ export function createZerroSession(
     historyStart,
     balances,
     balancesByDate,
-    displayBalancesByDate,
   }
 
   return { data, ctx, read }
@@ -234,17 +249,6 @@ function memo<T>(calculate: () => T): () => T {
     }
     return value
   }
-}
-
-function getDisplayConverter(dependencies: TZerroSessionReadDependencies) {
-  if (dependencies.displayConverter) return dependencies.displayConverter
-  if (dependencies.displayCurrency) {
-    return (amount: TFxAmount, date: TDateDraft) =>
-      dependencies.convertFx(amount, dependencies.displayCurrency!, date)
-  }
-  throw new Error(
-    'createZerroSession requires displayConverter or displayCurrency to read display balances'
-  )
 }
 
 function getTransactionsHistory(data: TDataStore): TTransaction[] {

@@ -1,7 +1,8 @@
 import { addFxAmount, subFxAmount } from '6-shared/helpers/money'
 import type { ById, ByMonth, TFxAmount, TISOMonth } from '6-shared/types'
+import type { TFxConverter } from '../fx-rates'
 import type { TActivityNode } from './activity'
-import type { TEnvMetrics, TFxConverter } from './envMetrics'
+import type { TEnvMetrics } from './envMetrics'
 
 export type TToBeBudgetedState = 'positive' | 'allocated' | 'negative'
 

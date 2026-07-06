@@ -81,12 +81,11 @@ For now, the session still accepts adapter-prepared read dependencies for the
 parts that are not yet core-owned input preparation:
 
 - envelope labels;
-- populated tags;
-- FX converter;
-- optional display-currency converter or display currency.
+- populated tags.
 
 This keeps the session facade useful without pulling legacy `5-entities`,
 Redux, i18n, icon assets, or display-currency state into core domain modules.
+The FX read/converter graph is now core-owned and derived from normalized data.
 
 ### ZenMoney primitives
 
@@ -109,6 +108,12 @@ Implemented:
   - `buildBalancesByDate`
   - `getHistoryStart`
   - `convertBalancesToDisplay`
+- FX rates:
+  - `getStoredFxRates`
+  - `buildCurrentFxRates`
+  - `buildFxRates`
+  - `buildFxRatesGetter`
+  - `buildFxConverter`
 
 `buildDebtors` is a pure ZenMoney-derived read model over transactions,
 merchants, instruments, and the debt account id. It lives under
@@ -121,6 +126,11 @@ transactions, accounts, debtors, merchants, instruments, and the debt account
 id. They intentionally live under `zenmoney/balances`. Display-currency balance
 conversion is exposed as a pure helper, with the app adapter providing the
 display-currency converter.
+
+FX rates are read from hidden monthly `FxRates` data plus current instrument
+rates. `buildFxConverter` lives in `core-next/zerro/fx-rates`; the Redux adapter
+uses it for core projections. Display-currency conversion remains an
+adapter/display concern.
 
 ### Zerro hidden data readers
 
@@ -205,6 +215,11 @@ Implemented:
 - `selectCoreUserSettings`
 - `selectCoreEnvelopeMeta`
 - `selectCoreEnvBudgets`
+- `selectCoreStoredFxRates`
+- `selectCoreCurrentFxRates`
+- `selectCoreFxRates`
+- `selectCoreFxRatesGetter`
+- `selectCoreConvertFx`
 - `selectCoreDebtors`
 - `selectCoreBalances`
 - `selectCoreBalancesByDate`
@@ -378,7 +393,7 @@ Remaining useful follow-ups:
 1. Start hidden-data write codecs for user settings, envelope
    meta, env budgets, and goals, which is the more direct path toward commands.
 2. Continue moving adapter-prepared read dependencies into core only when the
-   boundary is clear, especially populated tag preparation and FX/display input
+   boundary is clear, especially stable envelope group ids and populated tag
    preparation.
 3. Start replacing selected legacy imports with adapter imports from
    `core-next/adapters/redux`, one consumer at a time.

@@ -37,17 +37,20 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
       { budgetModel },
       { accBalanceModel },
       { envelopeModel },
+      { fxRateModel },
       { userSettingsModel },
       {
         selectCoreBudgets,
         selectCoreActivity,
         selectCoreBalances,
         selectCoreBalancesByDate,
+        selectCoreCurrentFxRates,
         selectCoreDebtors,
         selectCoreDisplayBalancesByDate,
         selectCoreEnvelopes,
         selectCoreEnvelopeStructure,
         selectCoreEnvMetrics,
+        selectCoreFxRates,
         selectCoreGoals,
         selectCoreGoalTotals,
         selectCoreKeepingEnvelopeIds,
@@ -70,6 +73,7 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
       import('5-entities/budget'),
       import('5-entities/accBalances'),
       import('5-entities/envelope'),
+      import('5-entities/currency/fxRate'),
       import('5-entities/userSettings'),
       import('./selectors'),
       import('5-entities/debtors'),
@@ -109,6 +113,12 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
       selectCoreDebtors(state),
       debtorModel.getDebtors(state)
     )
+    expectSameJsonHash(
+      'currentFxRates',
+      selectCoreCurrentFxRates(state),
+      fxRateModel.latest(state)
+    )
+    expectSameJsonHash('fxRates', selectCoreFxRates(state), fxRateModel.get(state))
     expectSameJsonHash(
       'rawActivity',
       selectCoreRawActivity(state),

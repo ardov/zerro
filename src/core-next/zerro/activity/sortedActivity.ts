@@ -1,7 +1,7 @@
 import { keys } from '6-shared/helpers/keys'
 import type { ByMonth, TFxAmount } from '6-shared/types'
 import { EnvType, envId, TEnvelopeId } from '../envelope-id'
-import { TFxConverter } from './envMetrics'
+import type { TFxConverter } from '../fx-rates'
 import { EnvActivity, TRawActivityNode } from './rawActivity'
 
 export enum TrFilterMode {
