@@ -1,11 +1,15 @@
 export * from './applyPatch'
-export * from './accounts'
-export * from './companies'
-export * from './instruments'
-export * from './merchants'
 export * from './replay'
-export * from './tags'
+export * from './primitives'
+
+export * from './instruments'
+export * from './companies'
 export * from './users'
+
+export * from './accounts'
+export * from './merchants'
+export * from './tags'
 export * from './transactions'
+
 export * from './debtors'
 export * from './balances'

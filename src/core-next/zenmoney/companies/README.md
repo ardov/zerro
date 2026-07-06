@@ -3,16 +3,12 @@
 `Company` is ZenMoney reference data for banks and financial providers.
 Transactions can reference companies through bank id fields.
 
-## Important Fields
+## Important Fields And Traps
 
-- `id`: numeric ZenMoney company id. Transaction bank-id fields reference this.
-- `title`: short display name.
-- `fullTitle`: full legal or provider name when ZenMoney has one.
-- `www`: company website from ZenMoney reference data.
-- `country`: numeric ZenMoney country id.
-- `countryCode`: country code string from ZenMoney reference data.
-- `deleted`: marks deleted or deprecated reference entries.
-- `changed`: normalized millisecond timestamp in core data.
+- `deleted`: marks deleted or deprecated reference entries. Such entries may
+  still be present in synchronized data.
+- `changed`: normalized core timestamp in milliseconds. Raw ZenMoney sync data
+  uses seconds.
 
 ## Mutability
 

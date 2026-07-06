@@ -3,17 +3,14 @@
 `Instrument` is ZenMoney reference data for money units. In practice, Zerro
 uses it mostly as currency metadata.
 
-## Important Fields
+## Important Fields And Traps
 
-- `id`: numeric ZenMoney instrument id. Accounts and transactions reference
-  instruments by this id.
 - `shortTitle`: currency-code-like value such as `USD` or `EUR`. Core read
-  models use it as `TFxCode`.
-- `title`: human-readable instrument name from ZenMoney.
-- `symbol`: display symbol from ZenMoney.
+  models use it as `TFxCode`; it is not merely display text.
 - `rate`: current ZenMoney exchange rate value. Zerro combines it with stored
   hidden FX rates in the Zerro FX layer.
-- `changed`: normalized millisecond timestamp in core data.
+- `changed`: normalized core timestamp in milliseconds. Raw ZenMoney sync data
+  uses seconds.
 
 ## Mutability
 
@@ -22,6 +19,6 @@ patch, or delete instruments.
 
 ## Notes
 
-Instrument ids are not currency codes. Domain code should use explicit helpers
-such as `getInstrumentCodeById` when it needs to convert account or transaction
-instrument ids into FX codes.
+Instrument ids are not currency codes. Use explicit helpers such as
+`getInstrumentCodeById` when account or transaction instrument ids need to
+become FX codes.
