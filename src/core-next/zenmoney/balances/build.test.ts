@@ -1,12 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import type {
-  ById,
-  TInstrumentId,
-  TMerchant,
-  TTransaction,
-} from '6-shared/types'
+import type { ById, TInstrumentId } from '6-shared/types'
 import { AccountType } from '6-shared/types'
-import { TDebtor } from '../debtors'
+import { makeTransaction } from '../../testing/zenmoneyTestData'
 import {
   buildBalances,
   buildBalancesByDate,
@@ -19,7 +14,10 @@ import {
 describe('buildTransactionEffect', () => {
   it('converts income, outcome, transfer, and debt transactions to balance effects', () => {
     expect(
-      buildTransactionEffect(transaction({ id: 'income', income: 10 }), baseInput)
+      buildTransactionEffect(
+        makeTransaction({ id: 'income', income: 10 }),
+        baseInput
+      )
     ).toEqual({
       id: 'income',
       date: '2026-01-10',
@@ -28,7 +26,7 @@ describe('buildTransactionEffect', () => {
 
     expect(
       buildTransactionEffect(
-        transaction({ id: 'outcome', outcome: 5 }),
+        makeTransaction({ id: 'outcome', outcome: 5 }),
         baseInput
       )
     ).toEqual({
@@ -39,7 +37,7 @@ describe('buildTransactionEffect', () => {
 
     expect(
       buildTransactionEffect(
-        transaction({
+        makeTransaction({
           id: 'debt',
           income: 20,
           incomeAccount: 'debt',
@@ -62,8 +60,8 @@ describe('buildBalances', () => {
   it('builds current, starting, day, and transaction balances', () => {
     const result = buildBalances({
       transactions: [
-        transaction({ id: 'income', date: '2026-01-01', income: 100 }),
-        transaction({
+        makeTransaction({ id: 'income', date: '2026-01-01', income: 100 }),
+        makeTransaction({
           id: 'outcome',
           date: '2026-01-02',
           outcome: 30,
@@ -118,8 +116,8 @@ describe('getHistoryStart', () => {
     expect(
       getHistoryStart(
         [
-          transaction({ date: '1970-01-01' }),
-          transaction({ date: '2026-01-02' }),
+          makeTransaction({ date: '1970-01-01' }),
+          makeTransaction({ date: '2026-01-02' }),
         ],
         '2026-01-10'
       )
@@ -169,58 +167,4 @@ const accounts: ById<TBalanceAccount> = {
     fxCode: 'USD',
     balance: 70,
   },
-}
-
-function transaction(patch: Partial<TTransaction>): TTransaction {
-  return {
-    id: 'tr',
-    changed: 1,
-    created: 1,
-    user: 1,
-    deleted: false,
-    hold: null,
-    date: '2026-01-10',
-    income: 0,
-    incomeAccount: 'cash',
-    incomeInstrument: 1,
-    outcome: 0,
-    outcomeAccount: 'card',
-    outcomeInstrument: 1,
-    tag: null,
-    merchant: null,
-    payee: null,
-    originalPayee: null,
-    comment: null,
-    reminderMarker: null,
-    opIncome: 0,
-    opIncomeInstrument: null,
-    opOutcome: 0,
-    opOutcomeInstrument: null,
-    latitude: null,
-    longitude: null,
-    ...patch,
-  } as TTransaction
-}
-
-function merchant(patch: Partial<TMerchant> & { id: string }): TMerchant {
-  const { id, ...rest } = patch
-  return {
-    id,
-    changed: 1,
-    user: 1,
-    title: 'Merchant',
-    ...rest,
-  }
-}
-
-function debtor(patch: Partial<TDebtor> & { id: string }): TDebtor {
-  const { id, ...rest } = patch
-  return {
-    id,
-    name: id,
-    payeeNames: [id],
-    transactions: [],
-    balance: {},
-    ...rest,
-  }
 }

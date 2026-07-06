@@ -1,24 +1,26 @@
 import { describe, expect, it } from 'vitest'
-import type { TDataStore } from '6-shared/types'
-import type { TInstrument } from '../instruments'
+import {
+  makeInstrument,
+  makeStore,
+  makeUser,
+} from '../../testing/zenmoneyTestData'
 import {
   getRootUser,
   getRootUserId,
   getUserCurrency,
   getUserInstrumentId,
 } from '.'
-import type { TUser } from './types'
 
 describe('zenmoney users', () => {
   it('derives root user from data', () => {
     const data = makeStore({
       user: {
-        2: user({ id: 2, parent: 1, currency: 2 }),
-        1: user({ id: 1, parent: null, currency: 1 }),
+        2: makeUser({ id: 2, parent: 1, currency: 2 }),
+        1: makeUser({ id: 1, parent: null, currency: 1 }),
       },
       instrument: {
-        1: instrument({ id: 1, shortTitle: 'EUR' }),
-        2: instrument({ id: 2, shortTitle: 'USD' }),
+        1: makeInstrument({ id: 1, shortTitle: 'EUR' }),
+        2: makeInstrument({ id: 2, shortTitle: 'USD' }),
       },
     })
 
@@ -38,58 +40,10 @@ describe('zenmoney users', () => {
       getUserCurrency(
         makeStore({
           user: {
-            1: user({ id: 1, parent: null, currency: 999 }),
+            1: makeUser({ id: 1, parent: null, currency: 999 }),
           },
         })
       )
     ).toBe('USD')
   })
 })
-
-function user(value: Pick<TUser, 'id' | 'parent' | 'currency'>): TUser {
-  return {
-    changed: 0,
-    country: 1,
-    countryCode: 'US',
-    email: null,
-    login: null,
-    monthStartDay: 1,
-    isForecastEnabled: false,
-    planBalanceMode: 'balance',
-    planSettings: '',
-    paidTill: 0,
-    subscription: '',
-    subscriptionRenewalDate: null,
-    ...value,
-  }
-}
-
-function instrument(
-  value: Pick<TInstrument, 'id' | 'shortTitle'>
-): TInstrument {
-  return {
-    changed: 0,
-    title: '',
-    symbol: '',
-    rate: 1,
-    ...value,
-  }
-}
-
-function makeStore(patch: Partial<TDataStore> = {}): TDataStore {
-  return {
-    serverTimestamp: 0,
-    instrument: {},
-    country: {},
-    company: {},
-    user: {},
-    merchant: {},
-    account: {},
-    tag: {},
-    budget: {},
-    reminder: {},
-    reminderMarker: {},
-    transaction: {},
-    ...patch,
-  } as TDataStore
-}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { TDataStore, TReminder } from '6-shared/types'
+import { makeReminder, makeStore } from '../../testing/zenmoneyTestData'
 import { envId, EnvType } from '../envelope-id'
 import { HiddenDataType } from '../hidden-data'
 import { envelopeVisibility, getEnvelopeMeta } from './read'
@@ -13,7 +13,7 @@ describe('envelope meta read helpers', () => {
     const envelopeId = envId.get(EnvType.Tag, 'groceries')
     const data = makeStore({
       reminder: {
-        meta: reminder('meta', {
+        meta: makeReminder('meta', {
           type: HiddenDataType.EnvelopeMeta,
           payload: {
             [envelopeId]: {
@@ -35,28 +35,3 @@ describe('envelope meta read helpers', () => {
     })
   })
 })
-
-function reminder(id: string, comment: unknown): TReminder {
-  return {
-    id,
-    comment: JSON.stringify(comment),
-  } as TReminder
-}
-
-function makeStore(patch: Partial<TDataStore> = {}): TDataStore {
-  return {
-    serverTimestamp: 0,
-    instrument: {},
-    country: {},
-    company: {},
-    user: {},
-    merchant: {},
-    account: {},
-    tag: {},
-    budget: {},
-    reminder: {},
-    reminderMarker: {},
-    transaction: {},
-    ...patch,
-  } as TDataStore
-}

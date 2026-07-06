@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
+import {
+  makeEnvActivity,
+  makeRawActivityNode,
+} from '../../testing/zerroTestData'
 import { EnvType, envId } from '../envelope-id'
 import { buildActivity } from './activity'
-import { EnvActivity, TRawActivityNode } from './rawActivity'
 
 describe('buildActivity', () => {
   it('keeps selected income inside envelope activity', () => {
@@ -9,10 +12,10 @@ describe('buildActivity', () => {
     const regularId = envId.get(EnvType.Tag, 'bonus')
     const result = buildActivity({
       rawActivity: {
-        '2026-01': rawNode({
+        '2026-01': makeRawActivityNode({
           income: {
-            [keepingId]: activity({ USD: 100 }),
-            [regularId]: activity({ USD: 20 }),
+            [keepingId]: makeEnvActivity({ USD: 100 }),
+            [regularId]: makeEnvActivity({ USD: 20 }),
           },
         }),
       },
@@ -28,10 +31,10 @@ describe('buildActivity', () => {
     const foodId = envId.get(EnvType.Tag, 'food')
     const result = buildActivity({
       rawActivity: {
-        '2026-01': rawNode({
-          internal: activity({ USD: -1 }),
+        '2026-01': makeRawActivityNode({
+          internal: makeEnvActivity({ USD: -1 }),
           outcome: {
-            [foodId]: activity({ USD: -20 }),
+            [foodId]: makeEnvActivity({ USD: -20 }),
           },
         }),
       },
@@ -47,12 +50,12 @@ describe('buildActivity', () => {
     const envelopeId = envId.get(EnvType.Tag, 'project')
     const result = buildActivity({
       rawActivity: {
-        '2026-01': rawNode({
+        '2026-01': makeRawActivityNode({
           income: {
-            [envelopeId]: activity({ USD: 100 }),
+            [envelopeId]: makeEnvActivity({ USD: 100 }),
           },
           outcome: {
-            [envelopeId]: activity({ USD: -40 }),
+            [envelopeId]: makeEnvActivity({ USD: -40 }),
           },
         }),
       },
@@ -64,18 +67,3 @@ describe('buildActivity', () => {
     })
   })
 })
-
-function rawNode(patch: Partial<TRawActivityNode>): TRawActivityNode {
-  return {
-    internal: new EnvActivity(),
-    income: {},
-    outcome: {},
-    ...patch,
-  }
-}
-
-function activity(total: Record<string, number>): EnvActivity {
-  const node = new EnvActivity()
-  node.total = total
-  return node
-}

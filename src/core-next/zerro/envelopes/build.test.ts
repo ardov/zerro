@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { TAccount, TTag } from '6-shared/types'
+import type { TTag } from '6-shared/types'
+import { makeAccount } from '../../testing/zenmoneyTestData'
 import { EnvType, envId } from '../envelope-id'
 import { envelopeVisibility } from '../envelope-meta'
 import { buildEnvelopes, defaultEnvelopeGroupIds, getKeepingEnvelopes } from './build'
@@ -22,7 +23,7 @@ describe('buildEnvelopes', () => {
           parent: 'food',
         }),
       },
-      savingAccounts: [account({ id: 'safe', title: 'Safe' })],
+      savingAccounts: [makeAccount({ id: 'safe', title: 'Safe' })],
       debtors: {},
       envelopeMeta: {
         [parentId]: {
@@ -118,33 +119,4 @@ function tag(patch: Partial<TTag> & { id: string; title: string; name: string })
     colorDisplay: '#cccccc',
     ...patch,
   }
-}
-
-function account(patch: Partial<TAccount> & { id: string; title: string }) {
-  return {
-    changed: 1,
-    user: 1,
-    instrument: 1,
-    role: null,
-    company: null,
-    type: 'deposit',
-    syncID: null,
-    balance: 0,
-    startBalance: 0,
-    creditLimit: 0,
-    inBalance: false,
-    savings: false,
-    enableCorrection: false,
-    enableSMS: false,
-    archive: false,
-    private: false,
-    capitalization: null,
-    percent: null,
-    startDate: null,
-    endDateOffset: null,
-    endDateOffsetInterval: null,
-    payoffStep: null,
-    payoffInterval: null,
-    ...patch,
-  } as TAccount
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { TDataStore, TReminder } from '6-shared/types'
+import { makeReminder, makeStore } from '../../testing/zenmoneyTestData'
 import { HiddenDataType } from '../hidden-data'
 import {
   DEFAULT_USER_SETTINGS,
@@ -11,7 +11,7 @@ describe('user settings read helpers', () => {
   it('returns stored partial settings', () => {
     const data = makeStore({
       reminder: {
-        settings: reminder('settings', {
+        settings: makeReminder('settings', {
           type: HiddenDataType.UserSettings,
           payload: { preferZmBudgets: true },
         }),
@@ -26,7 +26,7 @@ describe('user settings read helpers', () => {
 
     const data = makeStore({
       reminder: {
-        settings: reminder('settings', {
+        settings: makeReminder('settings', {
           type: HiddenDataType.UserSettings,
           payload: { emojiIcons: true },
         }),
@@ -40,28 +40,3 @@ describe('user settings read helpers', () => {
     })
   })
 })
-
-function reminder(id: string, comment: unknown): TReminder {
-  return {
-    id,
-    comment: JSON.stringify(comment),
-  } as TReminder
-}
-
-function makeStore(patch: Partial<TDataStore> = {}): TDataStore {
-  return {
-    serverTimestamp: 0,
-    instrument: {},
-    country: {},
-    company: {},
-    user: {},
-    merchant: {},
-    account: {},
-    tag: {},
-    budget: {},
-    reminder: {},
-    reminderMarker: {},
-    transaction: {},
-    ...patch,
-  } as TDataStore
-}

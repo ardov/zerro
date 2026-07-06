@@ -71,6 +71,12 @@ Test builders should be boring defaults with explicit overrides:
 makeTransaction({ id: 'salary', income: 100, tag: ['Salary'] })
 ```
 
+Shared builders live in:
+
+- `src/core-next/testing/zenmoneyTestData.ts` for normalized ZenMoney stores and
+  entities;
+- `src/core-next/testing/zerroTestData.ts` for Zerro projection result shapes.
+
 Avoid scenario builders that hide the behavior under test. If a test depends on
 an account, instrument, tag, or date, the important fields should remain visible
 inside the test case.

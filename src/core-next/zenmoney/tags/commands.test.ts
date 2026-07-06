@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import type { TDataStore, TTag } from '6-shared/types'
+import { makeStore, makeTag } from '../../testing/zenmoneyTestData'
 import { compileCreateTag, compilePatchTag } from './commands'
 
 describe('zenmoney tag commands', () => {
   it('patches existing tags with deterministic time', () => {
     const data = makeStore({
       tag: {
-        food: tag({ id: 'food', title: 'Food', changed: 1 }),
+        food: makeTag({ id: 'food', title: 'Food', changed: 1 }),
       },
     })
 
@@ -53,7 +53,7 @@ describe('zenmoney tag commands', () => {
   it('routes create with id through patch semantics', () => {
     const data = makeStore({
       tag: {
-        food: tag({ id: 'food', title: 'Food', changed: 1 }),
+        food: makeTag({ id: 'food', title: 'Food', changed: 1 }),
       },
     })
 
@@ -73,7 +73,7 @@ describe('zenmoney tag commands', () => {
   it('validates tag commands', () => {
     const data = makeStore({
       tag: {
-        food: tag({ id: 'food', title: 'Food', changed: 1 }),
+        food: makeTag({ id: 'food', title: 'Food', changed: 1 }),
       },
     })
 
@@ -108,40 +108,3 @@ describe('zenmoney tag commands', () => {
     ).toThrow('Trying to create tag without title')
   })
 })
-
-function makeStore(patch: Partial<TDataStore> = {}): TDataStore {
-  return {
-    serverTimestamp: 0,
-    instrument: {},
-    country: {},
-    company: {},
-    user: {},
-    merchant: {},
-    account: {},
-    tag: {},
-    budget: {},
-    reminder: {},
-    reminderMarker: {},
-    transaction: {},
-    ...patch,
-  } as TDataStore
-}
-
-function tag(patch: Partial<TTag> & { id: string }): TTag {
-  return {
-    changed: 0,
-    user: 1,
-    title: '',
-    parent: null,
-    icon: null,
-    staticId: null,
-    picture: null,
-    color: null,
-    showIncome: false,
-    showOutcome: false,
-    budgetIncome: false,
-    budgetOutcome: false,
-    required: false,
-    ...patch,
-  } as TTag
-}

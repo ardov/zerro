@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
+import { makeGoalInfo } from '../../testing/zerroTestData'
 import { EnvType, envId } from '../envelope-id'
-import type { TGoalInfo } from './build'
 import { buildGoalTotals } from './totals'
 import { goalType } from './types'
 
@@ -11,14 +11,14 @@ describe('buildGoalTotals', () => {
     const result = buildGoalTotals(
       {
         '2026-01': {
-          [countedId]: goalInfo({
+          [countedId]: makeGoalInfo({
             id: countedId,
             goal: { type: goalType.MONTHLY, amount: 100 },
             needNow: 50,
             needStart: 100,
             targetBudget: 100,
           }),
-          [skippedId]: goalInfo({
+          [skippedId]: makeGoalInfo({
             id: skippedId,
             goal: { type: goalType.TARGET_BALANCE, amount: 500 },
             needNow: 250,
@@ -38,18 +38,3 @@ describe('buildGoalTotals', () => {
     })
   })
 })
-
-function goalInfo(patch: Partial<TGoalInfo> & { id: TGoalInfo['id'] }): TGoalInfo {
-  const { id, ...rest } = patch
-  return {
-    id,
-    goal: { type: goalType.MONTHLY, amount: 100 },
-    month: '2026-01',
-    currency: 'USD',
-    progress: 0.5,
-    needNow: 0,
-    needStart: 0,
-    targetBudget: 0,
-    ...rest,
-  }
-}

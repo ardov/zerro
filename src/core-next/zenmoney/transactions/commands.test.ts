@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import type { TAccount, TDataStore, TTransaction } from '6-shared/types'
+import {
+  makeAccount,
+  makeStore,
+  makeTransaction,
+} from '../../testing/zenmoneyTestData'
 import { applyPatch } from '../applyPatch'
 import {
   compileApplyChangesToTransaction,
@@ -15,10 +19,10 @@ describe('zenmoney transaction commands', () => {
   it('soft-deletes transactions', () => {
     const data = makeStore({
       account: {
-        card: account({ id: 'card', balance: 50 }),
+        card: makeAccount({ id: 'card', balance: 50 }),
       },
       transaction: {
-        tr: transaction({
+        tr: makeTransaction({
           id: 'tr',
           deleted: false,
           outcome: 10,
@@ -46,11 +50,11 @@ describe('zenmoney transaction commands', () => {
   it('permanently deletes transactions by zeroing visible amounts', () => {
     const data = makeStore({
       account: {
-        cash: account({ id: 'cash', balance: 100 }),
-        card: account({ id: 'card', balance: 50 }),
+        cash: makeAccount({ id: 'cash', balance: 100 }),
+        card: makeAccount({ id: 'card', balance: 50 }),
       },
       transaction: {
-        tr: transaction({ id: 'tr', income: 50, outcome: 10, changed: 1 }),
+        tr: makeTransaction({ id: 'tr', income: 50, outcome: 10, changed: 1 }),
       },
     })
 
@@ -65,21 +69,21 @@ describe('zenmoney transaction commands', () => {
       changed: 100,
     })
     expect(patch.account).toEqual([
-      account({ id: 'cash', balance: 50, changed: 100 }),
-      account({ id: 'card', balance: 60, changed: 100 }),
+      makeAccount({ id: 'cash', balance: 50, changed: 100 }),
+      makeAccount({ id: 'card', balance: 60, changed: 100 }),
     ])
   })
 
   it('marks only transactions whose viewed state changes', () => {
     const data = makeStore({
       transaction: {
-        fresh: transaction({ id: 'fresh', viewed: false, changed: 1 }),
-        alreadyViewed: transaction({
+        fresh: makeTransaction({ id: 'fresh', viewed: false, changed: 1 }),
+        alreadyViewed: makeTransaction({
           id: 'alreadyViewed',
           viewed: true,
           changed: 1,
         }),
-        deleted: transaction({ id: 'deleted', deleted: true, changed: 1 }),
+        deleted: makeTransaction({ id: 'deleted', deleted: true, changed: 1 }),
       },
     })
 
@@ -102,11 +106,11 @@ describe('zenmoney transaction commands', () => {
   it('applies transaction field changes', () => {
     const data = makeStore({
       account: {
-        cash: account({ id: 'cash', balance: 100 }),
-        card: account({ id: 'card', balance: 50 }),
+        cash: makeAccount({ id: 'cash', balance: 100 }),
+        card: makeAccount({ id: 'card', balance: 50 }),
       },
       transaction: {
-        tr: transaction({
+        tr: makeTransaction({
           id: 'tr',
           outcome: 10,
           outcomeAccount: 'card',
@@ -129,17 +133,17 @@ describe('zenmoney transaction commands', () => {
       changed: 100,
     })
     expect(patch.account).toEqual([
-      account({ id: 'card', balance: 40, changed: 100 }),
+      makeAccount({ id: 'card', balance: 40, changed: 100 }),
     ])
   })
 
   it('restores transactions under a new id', () => {
     const data = makeStore({
       account: {
-        card: account({ id: 'card', balance: 50 }),
+        card: makeAccount({ id: 'card', balance: 50 }),
       },
       transaction: {
-        tr: transaction({
+        tr: makeTransaction({
           id: 'tr',
           deleted: true,
           outcome: 10,
@@ -160,18 +164,18 @@ describe('zenmoney transaction commands', () => {
       changed: 100,
     })
     expect(patch.account).toEqual([
-      account({ id: 'card', balance: 40, changed: 100 }),
+      makeAccount({ id: 'card', balance: 40, changed: 100 }),
     ])
   })
 
   it('recreates a transaction and returns the new id', () => {
     const data = makeStore({
       account: {
-        cash: account({ id: 'cash', balance: 100 }),
-        card: account({ id: 'card', balance: 50 }),
+        cash: makeAccount({ id: 'cash', balance: 100 }),
+        card: makeAccount({ id: 'card', balance: 50 }),
       },
       transaction: {
-        tr: transaction({ id: 'tr', income: 50, outcome: 0, changed: 1 }),
+        tr: makeTransaction({ id: 'tr', income: 50, outcome: 0, changed: 1 }),
       },
     })
     const timestamps = [100, 200, 300, 400]
@@ -200,15 +204,15 @@ describe('zenmoney transaction commands', () => {
       changed: 200,
     })
     expect(result.patch.account).toEqual([
-      account({ id: 'cash', balance: 50, changed: 300 }),
-      account({ id: 'card', balance: 25, changed: 400 }),
+      makeAccount({ id: 'cash', balance: 50, changed: 300 }),
+      makeAccount({ id: 'card', balance: 25, changed: 400 }),
     ])
   })
 
   it('bulk-edits tags and comments with legacy placeholders', () => {
     const data = makeStore({
       transaction: {
-        tr: transaction({
+        tr: makeTransaction({
           id: 'tr',
           tag: ['food', 'cash'],
           comment: 'Lunch',
@@ -238,88 +242,3 @@ describe('zenmoney transaction commands', () => {
     ).toThrow('Transaction not found')
   })
 })
-
-function makeStore(patch: Partial<TDataStore> = {}): TDataStore {
-  return {
-    serverTimestamp: 0,
-    instrument: {},
-    country: {},
-    company: {},
-    user: {},
-    merchant: {},
-    account: {},
-    tag: {},
-    budget: {},
-    reminder: {},
-    reminderMarker: {},
-    transaction: {},
-    ...patch,
-  } as TDataStore
-}
-
-function account(value: Partial<TAccount> & { id: string }): TAccount {
-  return {
-    user: 1,
-    instrument: 1,
-    title: '',
-    changed: 0,
-    role: null,
-    company: null,
-    type: 'cash',
-    syncID: null,
-    balance: 0,
-    startBalance: 0,
-    creditLimit: 0,
-    inBalance: false,
-    savings: false,
-    enableCorrection: false,
-    enableSMS: false,
-    archive: false,
-    private: false,
-    capitalization: null,
-    percent: null,
-    startDate: null,
-    endDateOffset: null,
-    endDateOffsetInterval: null,
-    payoffStep: null,
-    payoffInterval: null,
-    ...value,
-  } as TAccount
-}
-
-function transaction(
-  patch: Partial<TTransaction> & { id: string }
-): TTransaction {
-  return {
-    changed: 0,
-    created: 0,
-    user: 1,
-    deleted: false,
-    hold: null,
-    viewed: false,
-    qrCode: null,
-    incomeBankID: null,
-    income: 0,
-    incomeInstrument: 1,
-    incomeAccount: 'cash',
-    outcomeBankID: null,
-    outcome: 0,
-    outcomeInstrument: 1,
-    outcomeAccount: 'card',
-    tag: null,
-    merchant: null,
-    payee: null,
-    originalPayee: null,
-    comment: null,
-    date: '2026-01-01',
-    mcc: null,
-    reminderMarker: null,
-    opIncome: 0,
-    opIncomeInstrument: null,
-    opOutcome: 0,
-    opOutcomeInstrument: null,
-    latitude: null,
-    longitude: null,
-    ...patch,
-  } as TTransaction
-}

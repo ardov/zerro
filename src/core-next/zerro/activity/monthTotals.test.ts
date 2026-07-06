@@ -1,23 +1,25 @@
 import { describe, expect, it } from 'vitest'
+import {
+  makeEnvActivity,
+  makeEnvelope,
+  makeRawActivityNode,
+} from '../../testing/zerroTestData'
 import { EnvType, envId } from '../envelope-id'
-import { envelopeVisibility } from '../envelope-meta'
 import { buildActivity } from './activity'
 import { buildEnvMetrics } from './envMetrics'
 import { buildMonthTotals } from './monthTotals'
-import { EnvActivity, TRawActivityNode } from './rawActivity'
-import type { TEnvelope } from '../envelopes'
 
 describe('buildMonthTotals', () => {
   it('calculates free funds and positive to-be-budgeted amount', () => {
     const envelopeId = envId.get(EnvType.Tag, 'food')
     const activity = buildActivity({
       rawActivity: {
-        '2026-01': rawNode({
+        '2026-01': makeRawActivityNode({
           income: {
-            [envelopeId]: envActivity({ USD: 100 }),
+            [envelopeId]: makeEnvActivity({ USD: 100 }),
           },
           outcome: {
-            [envelopeId]: envActivity({ USD: -20 }),
+            [envelopeId]: makeEnvActivity({ USD: -20 }),
           },
         }),
       },
@@ -26,7 +28,7 @@ describe('buildMonthTotals', () => {
     const envMetrics = buildEnvMetrics({
       monthList: ['2026-01'],
       envelopes: {
-        [envelopeId]: envelope({ id: envelopeId }),
+        [envelopeId]: makeEnvelope({ id: envelopeId }),
       },
       activity,
       budgets: {
@@ -59,7 +61,7 @@ describe('buildMonthTotals', () => {
     const envMetrics = buildEnvMetrics({
       monthList: ['2026-01', '2026-02'],
       envelopes: {
-        [envelopeId]: envelope({ id: envelopeId }),
+        [envelopeId]: makeEnvelope({ id: envelopeId }),
       },
       activity,
       budgets: {
@@ -84,44 +86,3 @@ describe('buildMonthTotals', () => {
     expect(result['2026-01'].toBeBudgeted).toEqual({ USD: 60 })
   })
 })
-
-function envelope(patch: Partial<TEnvelope> & { id: TEnvelope['id'] }): TEnvelope {
-  const { id, ...rest } = patch
-  return {
-    id,
-    type: EnvType.Tag,
-    entityId: 'entity',
-    name: 'Envelope',
-    originalName: 'Envelope',
-    symbol: '',
-    colorHex: null,
-    colorGenerated: '#000000',
-    colorDisplay: '#000000',
-    children: [],
-    parent: null,
-    index: 0,
-    indexRaw: undefined,
-    visibility: envelopeVisibility.visible,
-    group: 'Group',
-    comment: '',
-    currency: 'USD',
-    keepIncome: false,
-    carryNegatives: false,
-    ...rest,
-  }
-}
-
-function rawNode(patch: Partial<TRawActivityNode>): TRawActivityNode {
-  return {
-    internal: new EnvActivity(),
-    income: {},
-    outcome: {},
-    ...patch,
-  }
-}
-
-function envActivity(total: Record<string, number>): EnvActivity {
-  const node = new EnvActivity()
-  node.total = total
-  return node
-}

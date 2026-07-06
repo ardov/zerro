@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { TBudget } from '6-shared/types'
+import { makeBudget } from '../../testing/zenmoneyTestData'
 import { EnvType, envId } from '../envelope-id'
 import { buildBudgets } from './build'
 
@@ -12,7 +12,7 @@ describe('buildBudgets', () => {
       buildBudgets({
         preferZmBudgets: false,
         tagBudgets: {
-          '2026-01-01#food': tagBudget({
+          '2026-01-01#food': makeBudget({
             id: '2026-01-01#food',
             tag: 'food',
             outcome: 100,
@@ -41,12 +41,12 @@ describe('buildBudgets', () => {
       buildBudgets({
         preferZmBudgets: true,
         tagBudgets: {
-          '2026-01-01#food': tagBudget({
+          '2026-01-01#food': makeBudget({
             id: '2026-01-01#food',
             tag: 'food',
             outcome: 100,
           }),
-          '2026-01-01#zero': tagBudget({
+          '2026-01-01#zero': makeBudget({
             id: '2026-01-01#zero',
             tag: 'zero',
             outcome: 0,
@@ -83,17 +83,3 @@ describe('buildBudgets', () => {
     ).toEqual({})
   })
 })
-
-function tagBudget(patch: Partial<TBudget> & { id: string }): TBudget {
-  return {
-    changed: 1,
-    user: 1,
-    date: '2026-01-01',
-    tag: 'food',
-    income: 0,
-    incomeLock: true,
-    outcome: 0,
-    outcomeLock: true,
-    ...patch,
-  } as TBudget
-}

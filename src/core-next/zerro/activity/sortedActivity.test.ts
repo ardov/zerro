@@ -1,19 +1,22 @@
 import { describe, expect, it } from 'vitest'
+import {
+  makeEnvActivity,
+  makeRawActivityNode,
+} from '../../testing/zerroTestData'
 import { EnvType, envId } from '../envelope-id'
 import { buildSortedActivity, TrFilterMode } from './sortedActivity'
-import { EnvActivity, TRawActivityNode } from './rawActivity'
 
 describe('buildSortedActivity', () => {
   it('separates general income and envelope outcome for regular tags', () => {
     const foodId = envId.get(EnvType.Tag, 'food')
     const result = buildSortedActivity({
       rawActivity: {
-        '2026-01': rawNode({
+        '2026-01': makeRawActivityNode({
           income: {
-            [foodId]: activity({ USD: 100 }),
+            [foodId]: makeEnvActivity({ USD: 100 }),
           },
           outcome: {
-            [foodId]: activity({ USD: -20 }),
+            [foodId]: makeEnvActivity({ USD: -20 }),
           },
         }),
       },
@@ -37,12 +40,12 @@ describe('buildSortedActivity', () => {
     const projectId = envId.get(EnvType.Tag, 'project')
     const result = buildSortedActivity({
       rawActivity: {
-        '2026-01': rawNode({
+        '2026-01': makeRawActivityNode({
           income: {
-            [projectId]: activity({ USD: 100 }),
+            [projectId]: makeEnvActivity({ USD: 100 }),
           },
           outcome: {
-            [projectId]: activity({ USD: -40 }),
+            [projectId]: makeEnvActivity({ USD: -40 }),
           },
         }),
       },
@@ -60,11 +63,11 @@ describe('buildSortedActivity', () => {
     const debtorId = envId.get(EnvType.Payee, 'alex')
     const result = buildSortedActivity({
       rawActivity: {
-        '2026-01': rawNode({
-          internal: activity({ USD: -1 }),
+        '2026-01': makeRawActivityNode({
+          internal: makeEnvActivity({ USD: -1 }),
           income: {
-            [accountId]: activity({ USD: 10 }),
-            [debtorId]: activity({ USD: 20 }),
+            [accountId]: makeEnvActivity({ USD: 10 }),
+            [debtorId]: makeEnvActivity({ USD: 20 }),
           },
         }),
       },
@@ -79,18 +82,3 @@ describe('buildSortedActivity', () => {
     expect(result['2026-01'].debts.map(node => node.id)).toEqual([debtorId])
   })
 })
-
-function rawNode(patch: Partial<TRawActivityNode>): TRawActivityNode {
-  return {
-    internal: new EnvActivity(),
-    income: {},
-    outcome: {},
-    ...patch,
-  }
-}
-
-function activity(total: Record<string, number>): EnvActivity {
-  const node = new EnvActivity()
-  node.total = total
-  return node
-}

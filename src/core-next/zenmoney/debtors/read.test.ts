@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import type { ById, TInstrument, TMerchant, TTransaction } from '6-shared/types'
+import {
+  makeMerchant,
+  makeTransaction,
+  usdInstruments,
+} from '../../testing/zenmoneyTestData'
 import { buildDebtors, cleanPayee } from './read'
 
 describe('buildDebtors', () => {
   it('collects payee debt transactions and balances', () => {
     const result = buildDebtors({
       transactions: [
-        transaction({
+        makeTransaction({
           id: 'lend',
           income: 50,
           incomeAccount: 'debt',
@@ -14,7 +18,7 @@ describe('buildDebtors', () => {
           outcomeAccount: 'card',
           payee: 'Alex!',
         }),
-        transaction({
+        makeTransaction({
           id: 'repay',
           income: 20,
           incomeAccount: 'card',
@@ -24,7 +28,7 @@ describe('buildDebtors', () => {
         }),
       ],
       merchants: {},
-      instruments,
+      instruments: usdInstruments,
       debtAccountId: 'debt',
     })
 
@@ -37,7 +41,7 @@ describe('buildDebtors', () => {
   it('collects merchant debt transactions under cleaned merchant title', () => {
     const result = buildDebtors({
       transactions: [
-        transaction({
+        makeTransaction({
           id: 'merchant-debt',
           income: 10,
           incomeAccount: 'debt',
@@ -47,9 +51,9 @@ describe('buildDebtors', () => {
         }),
       ],
       merchants: {
-        m1: merchant({ id: 'm1', title: 'Bob & Co.' }),
+        m1: makeMerchant({ id: 'm1', title: 'Bob & Co.' }),
       },
-      instruments,
+      instruments: usdInstruments,
       debtAccountId: 'debt',
     })
 
@@ -65,7 +69,7 @@ describe('buildDebtors', () => {
   it('ignores non-debt transactions and cleans payee names like legacy', () => {
     const result = buildDebtors({
       transactions: [
-        transaction({
+        makeTransaction({
           id: 'regular',
           income: 0,
           outcome: 10,
@@ -74,7 +78,7 @@ describe('buildDebtors', () => {
         }),
       ],
       merchants: {},
-      instruments,
+      instruments: usdInstruments,
       debtAccountId: 'debt',
     })
 
@@ -82,56 +86,3 @@ describe('buildDebtors', () => {
     expect(cleanPayee(' Вася + Alex! ')).toBe('васяalex')
   })
 })
-
-const instruments: ById<TInstrument> = {
-  1: {
-    id: 1,
-    changed: 1,
-    title: 'US Dollar',
-    shortTitle: 'USD',
-    symbol: '$',
-    rate: 1,
-  },
-}
-
-function merchant(patch: Partial<TMerchant> & { id: string }): TMerchant {
-  const { id, ...rest } = patch
-  return {
-    id,
-    changed: 1,
-    user: 1,
-    title: 'Merchant',
-    ...rest,
-  }
-}
-
-function transaction(patch: Partial<TTransaction>): TTransaction {
-  return {
-    id: 'tr',
-    changed: 1,
-    created: 1,
-    user: 1,
-    deleted: false,
-    hold: null,
-    date: '2026-01-10',
-    income: 0,
-    incomeAccount: 'cash',
-    incomeInstrument: 1,
-    outcome: 0,
-    outcomeAccount: 'card',
-    outcomeInstrument: 1,
-    tag: null,
-    merchant: null,
-    payee: null,
-    originalPayee: null,
-    comment: null,
-    reminderMarker: null,
-    opIncome: 0,
-    opIncomeInstrument: null,
-    opOutcome: 0,
-    opOutcomeInstrument: null,
-    latitude: null,
-    longitude: null,
-    ...patch,
-  } as TTransaction
-}

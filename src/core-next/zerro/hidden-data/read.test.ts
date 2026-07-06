@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { TDataStore, TReminder } from '6-shared/types'
+import { makeReminder, makeStore } from '../../testing/zenmoneyTestData'
 import {
   getMonthlyHiddenData,
   getMonthlyHiddenDataReminders,
@@ -25,7 +25,7 @@ describe('hidden data read codecs', () => {
   it('reads simple hidden data', () => {
     const data = makeStore({
       reminder: {
-        settings: reminder('settings', {
+        settings: makeReminder('settings', {
           type: HiddenDataType.UserSettings,
           payload: { emojiIcons: true },
         }),
@@ -44,17 +44,17 @@ describe('hidden data read codecs', () => {
   it('reads monthly hidden data and ignores invalid months', () => {
     const data = makeStore({
       reminder: {
-        jan: reminder('jan', {
+        jan: makeReminder('jan', {
           type: HiddenDataType.Budgets,
           month: '2026-01',
           payload: { envelope: 100 },
         }),
-        invalidMonth: reminder('invalidMonth', {
+        invalidMonth: makeReminder('invalidMonth', {
           type: HiddenDataType.Budgets,
           month: 'not-month',
           payload: { envelope: 200 },
         }),
-        otherType: reminder('otherType', {
+        otherType: makeReminder('otherType', {
           type: HiddenDataType.Goals,
           month: '2026-01',
           payload: { envelope: {} },
@@ -70,28 +70,3 @@ describe('hidden data read codecs', () => {
     ])
   })
 })
-
-function reminder(id: string, comment: unknown): TReminder {
-  return {
-    id,
-    comment: JSON.stringify(comment),
-  } as TReminder
-}
-
-function makeStore(patch: Partial<TDataStore> = {}): TDataStore {
-  return {
-    serverTimestamp: 0,
-    instrument: {},
-    country: {},
-    company: {},
-    user: {},
-    merchant: {},
-    account: {},
-    tag: {},
-    budget: {},
-    reminder: {},
-    reminderMarker: {},
-    transaction: {},
-    ...patch,
-  } as TDataStore
-}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { TDataStore } from '6-shared/types'
+import { makeInstrument, makeStore } from '../../testing/zenmoneyTestData'
 import {
   getInstrument,
   getInstrumentByCode,
@@ -7,14 +7,13 @@ import {
   getInstrumentCodeById,
   getInstrumentsByCode,
 } from './read'
-import type { TInstrument } from './types'
 
 describe('zenmoney instruments', () => {
   it('builds currency lookup helpers from normalized data', () => {
     const data = makeStore({
       instrument: {
-        1: instrument({ id: 1, shortTitle: 'USD', title: 'US Dollar' }),
-        2: instrument({ id: 2, shortTitle: 'EUR', title: 'Euro' }),
+        1: makeInstrument({ id: 1, shortTitle: 'USD', title: 'US Dollar' }),
+        2: makeInstrument({ id: 2, shortTitle: 'EUR', title: 'Euro' }),
       },
     })
 
@@ -36,32 +35,3 @@ describe('zenmoney instruments', () => {
     expect(getInstrumentByCode(data, 'USD')).toBeNull()
   })
 })
-
-function makeStore(patch: Partial<TDataStore> = {}): TDataStore {
-  return {
-    serverTimestamp: 0,
-    instrument: {},
-    country: {},
-    company: {},
-    user: {},
-    merchant: {},
-    account: {},
-    tag: {},
-    budget: {},
-    reminder: {},
-    reminderMarker: {},
-    transaction: {},
-    ...patch,
-  } as TDataStore
-}
-
-function instrument(patch: Partial<TInstrument> & { id: number }): TInstrument {
-  return {
-    changed: 0,
-    title: '',
-    shortTitle: '',
-    symbol: '',
-    rate: 1,
-    ...patch,
-  } as TInstrument
-}

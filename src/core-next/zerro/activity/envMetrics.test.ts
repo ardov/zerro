@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import type { ById } from '6-shared/types'
+import {
+  makeEnvActivity,
+  makeEnvelope,
+  makeRawActivityNode,
+} from '../../testing/zerroTestData'
 import { EnvType, envId } from '../envelope-id'
-import { envelopeVisibility } from '../envelope-meta'
-import type { TEnvelope } from '../envelopes'
 import { buildActivity } from './activity'
 import { buildEnvMetrics } from './envMetrics'
-import { EnvActivity, TRawActivityNode } from './rawActivity'
 
 describe('buildEnvMetrics', () => {
   it('rolls child overspend into parent availability', () => {
@@ -13,9 +14,9 @@ describe('buildEnvMetrics', () => {
     const childId = envId.get(EnvType.Tag, 'child')
     const activity = buildActivity({
       rawActivity: {
-        '2026-01': rawNode({
+        '2026-01': makeRawActivityNode({
           outcome: {
-            [childId]: envActivity({ USD: -25 }),
+            [childId]: makeEnvActivity({ USD: -25 }),
           },
         }),
       },
@@ -25,8 +26,8 @@ describe('buildEnvMetrics', () => {
     const result = buildEnvMetrics({
       monthList: ['2026-01'],
       envelopes: {
-        [parentId]: envelope({ id: parentId, children: [childId] }),
-        [childId]: envelope({ id: childId, parent: parentId }),
+        [parentId]: makeEnvelope({ id: parentId, children: [childId] }),
+        [childId]: makeEnvelope({ id: childId, parent: parentId }),
       },
       activity,
       budgets: {
@@ -47,7 +48,7 @@ describe('buildEnvMetrics', () => {
     const result = buildEnvMetrics({
       monthList: ['2026-01', '2026-02'],
       envelopes: {
-        [envelopeId]: envelope({ id: envelopeId }),
+        [envelopeId]: makeEnvelope({ id: envelopeId }),
       },
       activity: {},
       budgets: {
@@ -62,44 +63,3 @@ describe('buildEnvMetrics', () => {
     expect(result['2026-02'][envelopeId].selfAvailable).toEqual({ USD: 30 })
   })
 })
-
-function envelope(patch: Partial<TEnvelope> & { id: TEnvelope['id'] }): TEnvelope {
-  const { id, ...rest } = patch
-  return {
-    id,
-    type: EnvType.Tag,
-    entityId: 'entity',
-    name: 'Envelope',
-    originalName: 'Envelope',
-    symbol: '',
-    colorHex: null,
-    colorGenerated: '#000000',
-    colorDisplay: '#000000',
-    children: [],
-    parent: null,
-    index: 0,
-    indexRaw: undefined,
-    visibility: envelopeVisibility.visible,
-    group: 'Group',
-    comment: '',
-    currency: 'USD',
-    keepIncome: false,
-    carryNegatives: false,
-    ...rest,
-  }
-}
-
-function rawNode(patch: Partial<TRawActivityNode>): TRawActivityNode {
-  return {
-    internal: new EnvActivity(),
-    income: {},
-    outcome: {},
-    ...patch,
-  }
-}
-
-function envActivity(total: Record<string, number>): EnvActivity {
-  const node = new EnvActivity()
-  node.total = total
-  return node
-}

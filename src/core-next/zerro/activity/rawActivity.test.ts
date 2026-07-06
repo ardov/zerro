@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type { ById, TInstrument, TTransaction } from '6-shared/types'
+import {
+  makeTransaction,
+  usdInstruments,
+} from '../../testing/zenmoneyTestData'
 import { EnvType, envId } from '../envelope-id'
 import { buildRawActivity, EnvActivity } from './rawActivity'
 
@@ -8,13 +11,13 @@ describe('buildRawActivity', () => {
     const foodId = envId.get(EnvType.Tag, 'food')
     const result = buildRawActivity({
       transactions: [
-        transaction({
+        makeTransaction({
           id: 'outcome',
           outcome: 20,
           outcomeAccount: 'card',
           tag: ['food'],
         }),
-        transaction({
+        makeTransaction({
           id: 'income',
           income: 100,
           incomeAccount: 'card',
@@ -24,7 +27,7 @@ describe('buildRawActivity', () => {
       inBudgetAccountIds: ['card'],
       debtAccountId: undefined,
       debtors: {},
-      instruments,
+      instruments: usdInstruments,
     })
 
     expect(result['2026-01'].outcome[foodId].total).toEqual({ USD: -20 })
@@ -34,14 +37,14 @@ describe('buildRawActivity', () => {
   it('records internal transfer fees only when instruments or amounts differ', () => {
     const result = buildRawActivity({
       transactions: [
-        transaction({
+        makeTransaction({
           id: 'equal-transfer',
           income: 10,
           outcome: 10,
           incomeAccount: 'cash',
           outcomeAccount: 'card',
         }),
-        transaction({
+        makeTransaction({
           id: 'fee-transfer',
           income: 9,
           outcome: 10,
@@ -52,7 +55,7 @@ describe('buildRawActivity', () => {
       inBudgetAccountIds: ['card', 'cash'],
       debtAccountId: undefined,
       debtors: {},
-      instruments,
+      instruments: usdInstruments,
     })
 
     expect(result['2026-01'].internal.total).toEqual({ USD: -1 })
@@ -65,7 +68,7 @@ describe('buildRawActivity', () => {
     const debtorId = envId.get(EnvType.Payee, 'alex')
     const result = buildRawActivity({
       transactions: [
-        transaction({
+        makeTransaction({
           id: 'debt',
           income: 50,
           incomeAccount: 'debt',
@@ -85,7 +88,7 @@ describe('buildRawActivity', () => {
           balance: {},
         },
       },
-      instruments,
+      instruments: usdInstruments,
     })
 
     expect(result['2026-01'].outcome[debtorId].total).toEqual({ USD: -50 })
@@ -100,45 +103,3 @@ describe('buildRawActivity', () => {
     expect(EnvActivity.merge(first, second).total).toEqual({ USD: 1, EUR: 2 })
   })
 })
-
-const instruments: ById<TInstrument> = {
-  1: {
-    id: 1,
-    changed: 1,
-    title: 'US Dollar',
-    shortTitle: 'USD',
-    symbol: '$',
-    rate: 1,
-  },
-}
-
-function transaction(patch: Partial<TTransaction>): TTransaction {
-  return {
-    id: 'tr',
-    changed: 1,
-    created: 1,
-    user: 1,
-    deleted: false,
-    hold: null,
-    date: '2026-01-10',
-    income: 0,
-    incomeAccount: 'cash',
-    incomeInstrument: 1,
-    outcome: 0,
-    outcomeAccount: 'card',
-    outcomeInstrument: 1,
-    tag: null,
-    merchant: null,
-    payee: null,
-    originalPayee: null,
-    comment: null,
-    reminderMarker: null,
-    opIncome: 0,
-    opIncomeInstrument: null,
-    opOutcome: 0,
-    opOutcomeInstrument: null,
-    latitude: null,
-    longitude: null,
-    ...patch,
-  } as TTransaction
-}

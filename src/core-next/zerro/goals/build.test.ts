@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type { TEnvMetrics } from '../activity/envMetrics'
-import { EnvActivity } from '../activity/rawActivity'
-import type { TSortedActivity } from '../activity/sortedActivity'
+import {
+  makeEnvMetrics,
+  makeSortedActivity,
+} from '../../testing/zerroTestData'
 import { EnvType, envId } from '../envelope-id'
 import { buildGoals } from './build'
 import { goalType } from './types'
@@ -18,15 +19,21 @@ describe('buildGoals', () => {
       monthList: ['2026-01', '2026-02'],
       envMetrics: {
         '2026-01': {
-          [envelopeId]: envMetrics({ id: envelopeId, totalBudgeted: { USD: 25 } }),
+          [envelopeId]: makeEnvMetrics({
+            id: envelopeId,
+            totalBudgeted: { USD: 25 },
+          }),
         },
         '2026-02': {
-          [envelopeId]: envMetrics({ id: envelopeId, totalBudgeted: { USD: 50 } }),
+          [envelopeId]: makeEnvMetrics({
+            id: envelopeId,
+            totalBudgeted: { USD: 50 },
+          }),
         },
       },
       sortedActivity: {
-        '2026-01': sortedActivity(),
-        '2026-02': sortedActivity(),
+        '2026-01': makeSortedActivity(),
+        '2026-02': makeSortedActivity(),
       },
       convertFx: amount => amount.USD || 0,
     })
@@ -56,12 +63,12 @@ describe('buildGoals', () => {
       },
       monthList: ['2026-01', '2026-02'],
       envMetrics: {
-        '2026-01': { [envelopeId]: envMetrics({ id: envelopeId }) },
-        '2026-02': { [envelopeId]: envMetrics({ id: envelopeId }) },
+        '2026-01': { [envelopeId]: makeEnvMetrics({ id: envelopeId }) },
+        '2026-02': { [envelopeId]: makeEnvMetrics({ id: envelopeId }) },
       },
       sortedActivity: {
-        '2026-01': sortedActivity(),
-        '2026-02': sortedActivity(),
+        '2026-01': makeSortedActivity(),
+        '2026-02': makeSortedActivity(),
       },
       convertFx: amount => amount.USD || 0,
     })
@@ -70,47 +77,3 @@ describe('buildGoals', () => {
     expect(result['2026-02'][envelopeId]).toBeUndefined()
   })
 })
-
-function envMetrics(
-  patch: Partial<TEnvMetrics> & { id: TEnvMetrics['id'] }
-): TEnvMetrics {
-  const { id, ...rest } = patch
-  return {
-    id,
-    name: 'Envelope',
-    parent: null,
-    children: [],
-    currency: 'USD',
-    carryNegatives: false,
-    selfTransactions: [],
-    selfLeftover: {},
-    selfBudgeted: {},
-    selfActivity: {},
-    selfAvailable: {},
-    childrenTransactions: [],
-    childrenLeftover: {},
-    childrenBudgeted: {},
-    childrenActivity: {},
-    childrenSurplus: {},
-    childrenOverspend: {},
-    totalTransactions: [],
-    totalLeftover: {},
-    totalBudgeted: {},
-    totalActivity: {},
-    totalAvailable: {},
-    ...rest,
-  }
-}
-
-function sortedActivity(): TSortedActivity {
-  return {
-    incomes: [],
-    outcomes: [],
-    transfers: [],
-    debts: [],
-    incomesTotal: new EnvActivity(),
-    outcomesTotal: new EnvActivity(),
-    transfersTotal: new EnvActivity(),
-    debtsTotal: new EnvActivity(),
-  }
-}

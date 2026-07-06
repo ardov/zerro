@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { DataEntity, TDataStore, TDiff } from '6-shared/types'
+import { DataEntity, TDiff } from '6-shared/types'
+import { makeStore } from '../testing/zenmoneyTestData'
 import { applyPatch, applyPatchMutable, replay } from '.'
 
 describe('zenmoney patch primitives', () => {
@@ -69,24 +70,6 @@ describe('zenmoney patch primitives', () => {
     expect(next.account.cash).toBeUndefined()
   })
 })
-
-function makeStore(patch: Partial<TDataStore> = {}): TDataStore {
-  return {
-    serverTimestamp: 0,
-    instrument: {},
-    country: {},
-    company: {},
-    user: {},
-    merchant: {},
-    account: {},
-    tag: {},
-    budget: {},
-    reminder: {},
-    reminderMarker: {},
-    transaction: {},
-    ...patch,
-  } as TDataStore
-}
 
 function entity<T extends { id: string | number }>(value: T) {
   return value as any
