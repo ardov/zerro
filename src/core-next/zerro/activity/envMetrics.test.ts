@@ -5,6 +5,7 @@ import {
   makeRawActivityNode,
 } from '../../testing/zerroTestData'
 import { EnvType, envId } from '../envelope-id'
+import { buildEnvelopes, uncategorizedEnvelopeName } from '../envelopes'
 import { buildActivity } from './activity'
 import { buildEnvMetrics } from './envMetrics'
 
@@ -61,5 +62,45 @@ describe('buildEnvMetrics', () => {
 
     expect(result['2026-02'][envelopeId].selfLeftover).toEqual({ USD: 30 })
     expect(result['2026-02'][envelopeId].selfAvailable).toEqual({ USD: 30 })
+  })
+
+  it('calculates uncategorized activity without legacy null tag input', () => {
+    const nullTagId = envId.get(EnvType.Tag, null)
+    const envelopes = buildEnvelopes({
+      userCurrency: 'USD',
+      populatedTags: {},
+      savingAccounts: [],
+      envelopeMeta: {},
+      debtors: {},
+    }).byId
+    const activity = buildActivity({
+      rawActivity: {
+        '2026-01': makeRawActivityNode({
+          outcome: {
+            [nullTagId]: makeEnvActivity({ USD: -15 }),
+          },
+        }),
+      },
+      keepingEnvelopeIds: [],
+    })
+
+    const result = buildEnvMetrics({
+      monthList: ['2026-01'],
+      envelopes,
+      activity,
+      budgets: {
+        '2026-01': {
+          [nullTagId]: 50,
+        },
+      },
+      convertFx: amount => amount.USD || 0,
+    })
+
+    expect(result['2026-01'][nullTagId]).toMatchObject({
+      name: uncategorizedEnvelopeName,
+      selfBudgeted: { USD: 50 },
+      selfActivity: { USD: -15 },
+      selfAvailable: { USD: 35 },
+    })
   })
 })

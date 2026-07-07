@@ -29,6 +29,31 @@ export type TEnvelopeTag = TTag & {
   colorDisplay: string
 }
 
+export const uncategorizedTagId = 'null' as TTagId
+export const uncategorizedEnvelopeName = 'No category'
+
+const uncategorizedEnvelopeTag: TEnvelopeTag = {
+  id: uncategorizedTagId,
+  changed: 0,
+  user: 0,
+  title: uncategorizedEnvelopeName,
+  name: uncategorizedEnvelopeName,
+  symbol: '?',
+  colorHEX: null,
+  colorDisplay: '#ff0000',
+  icon: null,
+  budgetIncome: true,
+  budgetOutcome: true,
+  archive: false,
+  showIncome: false,
+  showOutcome: false,
+  parent: null,
+  color: null,
+  required: false,
+  staticId: null,
+  picture: null,
+}
+
 export type TEnvelopeDebtor = TDebtor
 
 export type TEnvelope = {
@@ -82,8 +107,9 @@ export function buildEnvelopes(input: TBuildEnvelopesInput): {
   structure: TGroupNode[]
 } {
   const envelopes: ById<TEnvelope> = {}
+  const populatedTags = getEnvelopeTags(input.populatedTags)
 
-  Object.values(input.populatedTags).forEach(tag => {
+  Object.values(populatedTags).forEach(tag => {
     const envelope = makeEnvelopeFromTag(
       tag,
       input.envelopeMeta,
@@ -124,6 +150,13 @@ export function buildEnvelopes(input: TBuildEnvelopesInput): {
 
 export function getKeepingEnvelopes(envelopes: ById<TEnvelope>): TEnvelopeId[] {
   return keys(envelopes).filter(id => envelopes[id].keepIncome)
+}
+
+function getEnvelopeTags(populatedTags: ById<TEnvelopeTag>): ById<TEnvelopeTag> {
+  return {
+    [uncategorizedTagId]: uncategorizedEnvelopeTag,
+    ...populatedTags,
+  }
 }
 
 function makeEnvelopeFromTag(

@@ -106,6 +106,11 @@ This run also adds Track B work in `zenmoney/tags`:
   `TTagPatch` names, plus the tag read/factory layers;
 - populated tags, tag trees, and localized `nullTag` remain outside this
   normalized ZenMoney entity slice for now.
+- Zerro envelope projections now create a Core-owned, non-localized
+  uncategorized `tag#null` envelope when adapter-provided populated tags do not
+  include one. This preserves calculations for transactions without categories
+  and ZenMoney budgets with `tag: null` without moving i18n or legacy
+  `nullTag` creation into the ZenMoney tag entity layer.
 
 This run also adds Track B work in `zenmoney/transactions`:
 

@@ -44,7 +44,7 @@ export type TZerroSessionContext = {
 }
 
 export type TZerroSessionReadDependencies = {
-  populatedTags: ById<TEnvelopeTag>
+  populatedTags?: ById<TEnvelopeTag>
 }
 
 export type TZerroSession = ReturnType<typeof createZerroSession>
@@ -52,7 +52,7 @@ export type TZerroSession = ReturnType<typeof createZerroSession>
 export function createZerroSession(
   data: TDataStore,
   ctx: TZerroSessionContext,
-  dependencies: TZerroSessionReadDependencies
+  dependencies: TZerroSessionReadDependencies = {}
 ) {
   const currentDate = memo(() => toISODate(ctx.now()))
   const currentMonth = memo(() => toISOMonth(ctx.now()))
@@ -94,7 +94,7 @@ export function createZerroSession(
   const envelopesCompiled = memo(() =>
     buildEnvelopes({
       debtors: debtors(),
-      populatedTags: dependencies.populatedTags,
+      populatedTags: dependencies.populatedTags || {},
       savingAccounts: getSavingAccounts(data),
       envelopeMeta: envelopeMeta(),
       userCurrency: getUserCurrency(data),

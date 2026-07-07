@@ -67,6 +67,28 @@ describe('buildBudgets', () => {
     })
   })
 
+  it('maps ZenMoney null tag budgets to the uncategorized envelope', () => {
+    const nullTagId = envId.get(EnvType.Tag, null)
+
+    expect(
+      buildBudgets({
+        preferZmBudgets: true,
+        tagBudgets: {
+          '2026-01-01#null': makeBudget({
+            id: '2026-01-01#null',
+            tag: null,
+            outcome: 50,
+          }),
+        },
+        envBudgets: {},
+      })
+    ).toEqual({
+      '2026-01': {
+        [nullTagId]: 50,
+      },
+    })
+  })
+
   it('drops falsy hidden budgets', () => {
     const tagId = envId.get(EnvType.Tag, 'food')
 

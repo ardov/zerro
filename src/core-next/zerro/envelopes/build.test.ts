@@ -7,6 +7,7 @@ import {
   buildEnvelopes,
   defaultEnvelopeGroupIds,
   getKeepingEnvelopes,
+  uncategorizedEnvelopeName,
 } from './build'
 
 describe('buildEnvelopes', () => {
@@ -107,6 +108,36 @@ describe('buildEnvelopes', () => {
       defaultEnvelopeGroupIds.merchants
     )
     expect(result.byId[payeeId].group).toBe(defaultEnvelopeGroupIds.payees)
+  })
+
+  it('creates the uncategorized envelope without adapter-provided null tag', () => {
+    const nullTagId = envId.get(EnvType.Tag, null)
+
+    const result = buildEnvelopes({
+      userCurrency: 'USD',
+      populatedTags: {},
+      savingAccounts: [],
+      envelopeMeta: {},
+      debtors: {},
+    })
+
+    expect(result.byId[nullTagId]).toMatchObject({
+      id: nullTagId,
+      type: EnvType.Tag,
+      entityId: 'null',
+      name: uncategorizedEnvelopeName,
+      originalName: uncategorizedEnvelopeName,
+      symbol: '?',
+      colorHex: '#ff0000',
+      colorDisplay: '#ff0000',
+      group: defaultEnvelopeGroupIds.tags,
+      parent: null,
+      currency: 'USD',
+    })
+    expect(result.structure[0]).toMatchObject({
+      id: defaultEnvelopeGroupIds.tags,
+      children: [{ id: nullTagId }],
+    })
   })
 })
 
