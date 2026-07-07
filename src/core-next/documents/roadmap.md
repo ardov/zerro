@@ -184,9 +184,9 @@ Recommended order:
 1. Goal orchestration:
    - wire UI-level goal commands to `compileSetGoal`;
    - keep tracking and dispatch outside core.
-2. Engine/adapter command execution:
-   - store command + patch in outbox;
-   - keep replay patch-only.
+2. Command execution wiring:
+   - wrap domain compilers in app-facing methods;
+   - keep tracking, Redux dispatch, and persistence outside core.
 
 Verification should compare resulting state with the old thunk behavior whenever
 legacy command behavior exists.
@@ -207,8 +207,12 @@ Recommended order:
 1. Keep Redux adapter selectors thin and explicit.
 2. Replace legacy selector imports with `core-next/adapters/redux` imports one
    consumer at a time.
-3. Add `createZerroEngine` only after command patch compilation is useful.
-4. Model `base + outbox + outboxHead + inbox + current`.
+3. `createZerroEngine` exists as a pure outbox/current primitive:
+   - stores `base`, `outbox`, `outboxHead`, optional `inbox`;
+   - `executeCompiled(command, patch)` stores command + patch and drops redo
+     tail;
+   - `getCurrent()` replays only the applied outbox prefix.
+4. Add Redux adapter command execution around the pure engine primitive.
 5. Connect one safe read model or command at a time.
 
 Do not:

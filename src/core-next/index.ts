@@ -1,5 +1,6 @@
 export * from './constants'
 export * from './types'
+export * from './engine'
 export * from './facade'
 export * from './zenmoney'
 export * from './zerro'
