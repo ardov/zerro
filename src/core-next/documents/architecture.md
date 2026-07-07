@@ -43,9 +43,7 @@ state => derived view
 base + patches => current
 ```
 
-If a compiler needs to return caller-only information, for example a generated
-entity id, it returns `TCompiled<TReceipt>`. The compiled `patch` is still the
-only replay input; `receipt` is not persisted as domain state.
+If a compiler needs to return caller-only information, for example a generated entity id, it returns `TCompiled<TReceipt>`. The compiled `patch` is still the only replay input; `receipt` is not persisted as domain state.
 
 Storage, persistence, Redux subscriptions, React hooks, and ZenMoney API calls stay in external adapters.
 
@@ -107,14 +105,7 @@ const patch = session.envelopes.rename(id, 'Food')
 
 `Session` may also expose `execute(command)` as an advanced API for tests, devtools, migrations, headless tools, and command replay from JSON. The ergonomic domain methods are the primary app-facing API.
 
-During the staged migration, `createZerroSession` may accept explicit
-adapter-prepared read dependencies such as populated tags. This is an interim
-boundary: it avoids pulling Redux, i18n, icon assets, or legacy `5-entities`
-modules into the core facade while still giving commands a non-Redux read API.
-Default envelope groups are stable core ids; adapters can map them to localized
-labels for presentation. FX conversion is derived inside core from normalized
-instrument data and hidden monthly `FxRates` data. Display-currency conversion
-is adapter/display state, not session state.
+During the staged migration, `createZerroSession` may accept explicit adapter-prepared read dependencies such as populated tags. This is an interim boundary: it avoids pulling Redux, i18n, icon assets, or legacy `5-entities` modules into the core facade while still giving commands a non-Redux read API. Default envelope groups are stable core ids; adapters can map them to localized labels for presentation. FX conversion is derived inside core from normalized instrument data and hidden monthly `FxRates` data. Display-currency conversion is adapter/display state, not session state.
 
 The context should contain only non-deterministic dependencies:
 
@@ -379,11 +370,7 @@ deleteAccount(data, command, ctx) => patch
 
 The external ZenMoney API format is not part of `zenmoney-core`. Conversion between raw ZenMoney diff and normalized patch should live in a separate adapter layer.
 
-Debtors are a ZenMoney-derived read model, even though ZenMoney does not store
-them as a first-class table. A plain ZenMoney client can still derive “how much
-I owe / am owed by this payee or merchant” from debt-account transactions.
-Zerro may render debtors as envelopes, but that envelope mapping belongs to
-Zerro Core.
+Debtors are a ZenMoney-derived read model, even though ZenMoney does not store them as a first-class table. A plain ZenMoney client can still derive “how much I owe / am owed by this payee or merchant” from debt-account transactions. Zerro may render debtors as envelopes, but that envelope mapping belongs to Zerro Core.
 
 ## Zerro Core
 
