@@ -69,8 +69,9 @@ Dependency order and status:
    normalized entity slice for now.
 8. `accounts` - mostly done: types, read selectors, production factory,
    create/patch/delete commands, and focused tests exist. Account reads now stay
-   account-only: FX-code preparation belongs in projections via
-   `instrumentCodeById`. Higher-level merge/cascade behavior remains separate.
+   account-only: FX-code preparation and Zerro-specific in-budget/data-account
+   conventions belong in Zerro projectors via explicit dependencies.
+   Higher-level merge/cascade behavior remains separate.
 9. `budgets` - done: types, map read helper, production factory, id helper,
    set-tag-budget command compiler, and focused tests exist. Zerro envelope
    budgets remain separate.
@@ -114,6 +115,11 @@ Recent bottom-up cleanup moved prepared FX account rows out of the account read
 layer. Keep that direction: pass normalized maps plus explicit dependencies to
 projectors instead of adding presentation-ready read helpers to ZenMoney entity
 modules.
+
+Zerro-specific account conventions also stay out of the ZenMoney account entity
+layer. The `🤖 [Zerro Data]` account name and pinned `📍` title rule live under
+`core-next/zerro/accounts`; ZenMoney account reads expose only normalized
+account facts.
 
 When extending Track B, prefer refinement work rather than adding more entity
 folders: transaction creation/reminder scheduling can build on the new

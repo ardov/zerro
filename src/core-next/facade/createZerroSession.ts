@@ -6,10 +6,8 @@ import {
   buildDebtors,
   getDebtAccountId,
   getHistoryStart,
-  getInBudgetAccountIds,
   getInstCodeMap,
   getTagBudgets,
-  getSavingAccounts,
   getTransactionsHistory,
   getUserCurrency,
 } from '../zenmoney'
@@ -31,6 +29,8 @@ import {
   buildSortedActivity,
   getEnvBudgets,
   getEnvelopeMeta,
+  getZerroInBudgetAccountIds,
+  getZerroSavingAccounts,
   getStoredFxRates,
   getKeepingEnvelopes,
   getRawGoals,
@@ -95,7 +95,7 @@ export function createZerroSession(
     buildEnvelopes({
       debtors: debtors(),
       populatedTags: dependencies.populatedTags || {},
-      savingAccounts: getSavingAccounts(data),
+      savingAccounts: getZerroSavingAccounts(data),
       envelopeMeta: envelopeMeta(),
       userCurrency: getUserCurrency(data),
     })
@@ -117,7 +117,7 @@ export function createZerroSession(
       currentMonth: currentMonth(),
     })
   )
-  const inBudgetAccountIds = memo(() => getInBudgetAccountIds(data))
+  const inBudgetAccountIds = memo(() => getZerroInBudgetAccountIds(data))
   const currentFunds = memo(() =>
     buildCurrentFunds({
       accounts: data.account,

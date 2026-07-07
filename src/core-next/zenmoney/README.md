@@ -45,22 +45,22 @@ Legend:
 - `partial`: useful code exists, but type ownership or module shape is not done.
 - `pending`: not represented as a Core Next ZenMoney entity module yet.
 
-| Area              | Status  | Notes                                                                                                                                       |
-| ----------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `primitives`      | done    | Timestamp unit aliases live in Core Next.                                                                                                   |
-| `instruments`     | done    | Core-owned types and map read helper are in place.                                                                                          |
-| `countries`       | done    | Core-owned types and map read helper are in place.                                                                                          |
-| `companies`       | done    | Core-owned types and map read helper are in place.                                                                                          |
-| `users`           | done    | Core-owned types and root user/currency reads are in place.                                                                                 |
-| `merchants`       | done    | Core-owned types, map read helper, production factory, and patch command compiler are in place.                                             |
-| `tags`            | done    | Core-owned types, map read helper, production factory, and create/patch command compilers are in place; `archive` is part of the tag shape. |
-| `accounts`        | done    | Core-owned types, account-only reads, production factory, and create/patch/delete command compilers are in place.                           |
-| `budgets`         | done    | Core-owned types, map read helper, production factory, id helper, and set-tag-budget command compiler are in place.                         |
-| `reminders`       | done    | Core-owned types, map read helper, production factory, and set/delete command compilers are in place.                                      |
-| `reminderMarkers` | done    | Core-owned types, map read helper, and production factory are in place; no legacy marker command is migrated yet.                          |
-| `transactions`    | done    | Core-owned types, reads, production factory, command compilers, and balance effects are in place.                                          |
-| `debtors`         | done    | ZenMoney-derived read model is in Core Next.                                                                                                |
-| `balances`        | done    | ZenMoney-derived balance history read model is in Core Next.                                                                                |
+| Area              | Status | Notes                                                                                                                                       |
+| ----------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `primitives`      | done   | Timestamp unit aliases live in Core Next.                                                                                                   |
+| `instruments`     | done   | Core-owned types and map read helper are in place.                                                                                          |
+| `countries`       | done   | Core-owned types and map read helper are in place.                                                                                          |
+| `companies`       | done   | Core-owned types and map read helper are in place.                                                                                          |
+| `users`           | done   | Core-owned types and root user/currency reads are in place.                                                                                 |
+| `merchants`       | done   | Core-owned types, map read helper, production factory, and patch command compiler are in place.                                             |
+| `tags`            | done   | Core-owned types, map read helper, production factory, and create/patch command compilers are in place; `archive` is part of the tag shape. |
+| `accounts`        | done   | Core-owned types, account-only reads, production factory, and create/patch/delete command compilers are in place.                           |
+| `budgets`         | done   | Core-owned types, map read helper, production factory, id helper, and set-tag-budget command compiler are in place.                         |
+| `reminders`       | done   | Core-owned types, map read helper, production factory, and set/delete command compilers are in place.                                       |
+| `reminderMarkers` | done   | Core-owned types, map read helper, and production factory are in place; no legacy marker command is migrated yet.                           |
+| `transactions`    | done   | Core-owned types, reads, production factory, command compilers, and balance effects are in place.                                           |
+| `debtors`         | done   | ZenMoney-derived read model is in Core Next.                                                                                                |
+| `balances`        | done   | ZenMoney-derived balance history read model is in Core Next.                                                                                |
 
 ## Dependency Notes
 
@@ -106,11 +106,11 @@ can keep importing from the old facade while ownership moves into `core-next`.
 ## Read Layer Shape
 
 Low-level entity reads should stay close to normalized data. Prefer map reads
-such as `getAccounts(data)` or `getTags(data)` and explicit domain helpers such
-as `getInBudgetAccountIds(data)`. Avoid adding presentation-ready or FX-resolved
-entity rows to ZenMoney reads. Projectors that need FX codes should receive the
-normalized entity map plus `instrumentCodeById` and resolve the currency inside
-the projector.
+such as `getAccounts(data)` or `getTags(data)` and explicit entity facts such as
+`getDebtAccountId(data)`. Avoid adding presentation-ready, FX-resolved, or
+Zerro-convention-aware entity rows to ZenMoney reads. Projectors that need FX
+codes should receive the normalized entity map plus `instrumentCodeById` and
+resolve the currency inside the projector.
 
 ## Documentation
 

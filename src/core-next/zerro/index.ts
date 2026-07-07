@@ -1,4 +1,5 @@
 export * from './hidden-data'
+export * from './accounts'
 export * from './user-settings'
 export * from './envelope-id'
 export * from './envelope-meta'

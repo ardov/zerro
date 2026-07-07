@@ -39,6 +39,8 @@ import {
   buildSortedActivity,
   getEnvBudgets,
   getEnvelopeMeta,
+  getZerroInBudgetAccountIds,
+  getZerroSavingAccounts,
   getStoredFxRates,
   getRawGoals,
   getKeepingEnvelopes,
@@ -103,15 +105,15 @@ const selectCoreCompiledEnvelopes = createSelector(
   [
     selectCoreDebtors,
     tagModel.getPopulatedTags,
-    accountModel.getSavingAccounts,
+    selectCoreCurrentData,
     selectCoreEnvelopeMeta,
     userModel.getUserCurrency,
   ],
-  (debtors, populatedTags, savingAccounts, envelopeMeta, userCurrency) =>
+  (debtors, populatedTags, data, envelopeMeta, userCurrency) =>
     buildEnvelopes({
       debtors,
       populatedTags,
-      savingAccounts,
+      savingAccounts: getZerroSavingAccounts(data),
       envelopeMeta,
       userCurrency,
     })
@@ -196,19 +198,23 @@ export const selectCoreMonthList = createSelector(
 )
 
 export const selectCoreInBudgetAccountIds = createSelector(
-  [accountModel.getInBudgetAccounts],
-  accounts => accounts.map(account => account.id),
+  [selectCoreCurrentData],
+  getZerroInBudgetAccountIds,
   { memoizeOptions: { resultEqualityCheck: shallowEqual } }
 )
 
 export const selectCoreCurrentFunds = createSelector(
   [
-    accountModel.getAccounts,
+    selectCoreCurrentData,
     selectCoreInBudgetAccountIds,
     instrumentModel.getInstCodeMap,
   ],
-  (accounts, inBudgetIds, instrumentCodeById) =>
-    buildCurrentFunds({ accounts, inBudgetIds, instrumentCodeById })
+  (data, inBudgetIds, instrumentCodeById) =>
+    buildCurrentFunds({
+      accounts: data.account,
+      inBudgetIds,
+      instrumentCodeById,
+    })
 )
 
 export const selectCoreRawActivity = createSelector(

@@ -39,10 +39,13 @@ Recent user changes after the transaction slice:
   reintroducing one-off nullable `getX(id)` helpers unless there is a repeated
   domain use case.
 - Account reads were narrowed to account facts: `getAccounts`,
-  `getAccountList`, `getDebtAccountId`, `getSavingAccounts`,
-  `getInBudgetAccountIds`, `getAccStartBalance`, and `isAccInBudget`.
-  FX-code preparation moved out of account reads. Projections that need FX codes
-  should accept `instrumentCodeById` explicitly.
+  `getAccountList`, `getDebtAccountId`, and `getAccStartBalance`. FX-code
+  preparation moved out of account reads. Projections that need FX codes should
+  accept `instrumentCodeById` explicitly.
+- Zerro-specific account conventions live under `core-next/zerro/accounts`:
+  `getZerroDataAccountId`, `isZerroInBudgetAccount`,
+  `getZerroInBudgetAccountIds`, and `getZerroSavingAccounts`. This is where the
+  `🤖 [Zerro Data]` account name and pinned `📍` account title rules belong.
 - `buildCurrentFunds` now accepts `{ accounts, inBudgetIds, instrumentCodeById }`
   instead of pre-populated account rows. The Redux adapter memoizes
   `selectCoreInBudgetAccountIds` with `shallowEqual`, so transaction-heavy
