@@ -79,9 +79,8 @@ Dependency order and status:
 11. `reminderMarkers` - done: types, map read helper, production factory, and
     focused tests exist. This is the ZenMoney `reminderMarker` entity, not a
     separate "reminder maker" concept.
-12. `transactions` - mostly done: types, read selectors, commands, balance
-    effects, and focused tests exist; a production create factory can wait until
-    a create-transaction command is migrated.
+12. `transactions` - done: types, read selectors, production factory,
+    create/mutation commands, balance effects, and focused tests exist.
 13. `debtors` - done as a derived read.
 14. `balances` - done as a derived read.
 
@@ -105,8 +104,8 @@ The `zenmoney/accounts` slice has already extracted read selectors and a
 production account factory, and tightened create command input so `user` is
 derived from the store. The `zenmoney/merchants` and `zenmoney/tags` slices now
 have the same module shape for types, reads, factories, and commands.
-`zenmoney/transactions` now owns types, reads, commands, and balance effects;
-it does not add a factory yet because no create command is migrated.
+`zenmoney/transactions` now owns types, reads, a production factory, commands,
+and balance effects.
 `zenmoney/budgets`, `zenmoney/reminders`, and `zenmoney/reminderMarkers` now own
 their types and direct read layers; budget and reminder command compilers cover
 the existing legacy write behavior.

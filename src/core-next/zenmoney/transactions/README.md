@@ -21,12 +21,13 @@ Core transaction commands currently cover existing mutation flows:
 
 - soft delete;
 - permanent delete by zeroing amounts;
+- creation;
 - viewed-state update;
 - field changes;
 - restore under a new id;
 - recreate with a replacement transaction;
 - bulk tag/comment edits.
 
-Balance effects stay in `effects.ts` and are applied by command compilers. A
-production create-transaction factory is not introduced yet because this slice
-does not own a create command.
+Balance effects stay in `effects.ts` and are applied by command compilers.
+`makeTransaction` is the production factory for transaction creation defaults,
+and `compileCreateTransaction` derives `user` from the root user in the store.

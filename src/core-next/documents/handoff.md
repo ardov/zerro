@@ -125,8 +125,11 @@ This run also adds Track B work in `zenmoney/transactions`:
   read layer;
 - transaction balance effects now use account/transaction read helpers instead
   of direct store map access;
-- no production transaction factory was added yet because the migrated command
-  surface does not include a create-transaction command.
+- `makeTransaction` is now the production factory for transaction creation
+  defaults;
+- `compileCreateTransaction` derives the root user, creates the transaction,
+  applies account balance effects, and returns the new transaction id with the
+  normalized patch.
 
 This run completes the remaining normalized Track B entities:
 

@@ -58,7 +58,7 @@ Legend:
 | `budgets`         | done    | Core-owned types, map read helper, production factory, id helper, and set-tag-budget command compiler are in place.                         |
 | `reminders`       | done    | Core-owned types, map read helper, production factory, and set/delete command compilers are in place.                                      |
 | `reminderMarkers` | done    | Core-owned types, map read helper, and production factory are in place; no legacy marker command is migrated yet.                          |
-| `transactions`    | done    | Core-owned types, reads, mutation command compilers, and balance effects are in place; no create factory until create command migrates.     |
+| `transactions`    | done    | Core-owned types, reads, production factory, command compilers, and balance effects are in place.                                          |
 | `debtors`         | done    | ZenMoney-derived read model is in Core Next.                                                                                                |
 | `balances`        | done    | ZenMoney-derived balance history read model is in Core Next.                                                                                |
 

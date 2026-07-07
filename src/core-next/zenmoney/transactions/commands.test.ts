@@ -6,6 +6,7 @@ import {
 } from '../../testing/zenmoneyTestData'
 import { applyPatch } from '../applyPatch'
 import {
+  compileCreateTransaction,
   compileApplyChangesToTransaction,
   compileBulkEditTransactions,
   compileDeleteTransactions,
@@ -14,8 +15,98 @@ import {
   compileRecreateTransaction,
   compileRestoreTransaction,
 } from './commands'
+import { makeTransaction as makeCoreTransaction } from './factory'
 
 describe('zenmoney transaction commands', () => {
+  it('creates transactions with root user, deterministic id/time, and balance effects', () => {
+    const data = makeStore({
+      user: {
+        1: { id: 1, parent: null },
+      } as any,
+      account: {
+        cash: makeAccount({ id: 'cash', balance: 100 }),
+        card: makeAccount({ id: 'card', balance: 50 }),
+      },
+    })
+
+    const result = compileCreateTransaction(
+      data,
+      {
+        date: '2026-02',
+        income: 25,
+        incomeInstrument: 1,
+        incomeAccount: 'cash',
+        outcome: 10,
+        outcomeInstrument: 1,
+        outcomeAccount: 'card',
+        comment: 'Transfer',
+      },
+      {
+        now: () => 1700000000000,
+        uuid: () => 'tr-new',
+      }
+    )
+    const next = applyPatch(data, result.patch)
+
+    expect(result.transactionId).toBe('tr-new')
+    expect(result.patch.transaction?.[0]).toEqual(
+      makeTransaction({
+        id: 'tr-new',
+        changed: 1700000000000,
+        created: 1700000000000,
+        user: 1,
+        date: '2026-02-01',
+        income: 25,
+        incomeInstrument: 1,
+        incomeAccount: 'cash',
+        outcome: 10,
+        outcomeInstrument: 1,
+        outcomeAccount: 'card',
+        comment: 'Transfer',
+        hold: false,
+      })
+    )
+    expect(result.patch.account).toEqual([
+      makeAccount({ id: 'cash', balance: 125, changed: 1700000000000 }),
+      makeAccount({ id: 'card', balance: 40, changed: 1700000000000 }),
+    ])
+    expect(next.transaction['tr-new'].comment).toBe('Transfer')
+  })
+
+  it('creates production transaction defaults through the transaction factory', () => {
+    expect(
+      makeCoreTransaction(
+        {
+          user: 1,
+          date: '2026-02',
+          incomeInstrument: 1,
+          incomeAccount: 'cash',
+          outcomeInstrument: 1,
+          outcomeAccount: 'card',
+        },
+        {
+          now: () => 1700000000000,
+          uuid: () => 'tr-new',
+        }
+      )
+    ).toEqual(
+      makeTransaction({
+        id: 'tr-new',
+        changed: 1700000000000,
+        created: 1700000000000,
+        user: 1,
+        date: '2026-02-01',
+        incomeInstrument: 1,
+        incomeAccount: 'cash',
+        outcomeInstrument: 1,
+        outcomeAccount: 'card',
+        hold: false,
+        opIncome: 0,
+        opOutcome: 0,
+      })
+    )
+  })
+
   it('soft-deletes transactions', () => {
     const data = makeStore({
       account: {
@@ -237,6 +328,23 @@ describe('zenmoney transaction commands', () => {
   })
 
   it('validates transaction existence', () => {
+    expect(() =>
+      compileCreateTransaction(
+        makeStore(),
+        {
+          date: '2026-01-01',
+          incomeInstrument: 1,
+          incomeAccount: 'cash',
+          outcomeInstrument: 1,
+          outcomeAccount: 'card',
+        },
+        {
+          now: () => 1,
+          uuid: () => 'tr',
+        }
+      )
+    ).toThrow('No user')
+
     expect(() =>
       compileDeleteTransactions(makeStore(), 'missing', { now: () => 1 })
     ).toThrow('Transaction not found')

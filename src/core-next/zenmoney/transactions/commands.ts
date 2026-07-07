@@ -1,14 +1,40 @@
-import type {
-  OptionalExceptFor,
-  TDataStore,
-} from '6-shared/types'
+import type { Modify, OptionalExceptFor, TDataStore } from '6-shared/types'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
+import type { TDateDraft } from '../primitives'
 import type { TTagId } from '../tags'
+import { getRootUserId } from '../users'
 import { withTransactionAccountBalanceEffects } from './effects'
+import { makeTransaction, type TTransactionFactoryDraft } from './factory'
 import { getTransaction } from './read'
 import type { TTransaction, TTransactionId } from './types'
 
 export type TTransactionPatch = OptionalExceptFor<TTransaction, 'id'>
+export type TTransactionDraft = Modify<
+  Omit<TTransactionFactoryDraft, 'user'>,
+  { date: TDateDraft; changed?: TDateDraft; created?: TDateDraft }
+>
+
+export function compileCreateTransaction(
+  data: TDataStore,
+  draft: TTransactionDraft,
+  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+): { patch: TNormalizedPatch; transactionId: TTransactionId } {
+  const user = getRootUserId(data)
+  if (!user) throw new Error('No user')
+
+  const transaction = makeTransaction({ ...draft, user }, ctx)
+
+  return {
+    transactionId: transaction.id,
+    patch: withTransactionAccountBalanceEffects(
+      data,
+      {
+        transaction: [transaction],
+      },
+      ctx
+    ),
+  }
+}
 
 export function compileDeleteTransactions(
   data: TDataStore,
