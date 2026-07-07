@@ -1,6 +1,5 @@
 import type { Modify, OptionalExceptFor, TDataStore } from '6-shared/types'
-import { DataEntity } from '6-shared/types'
-import type { TCoreContext, TNormalizedPatch } from '../../types'
+import { DataEntity, type TCoreContext, type TNormalizedPatch } from '../../types'
 import type { TDateDraft } from '../primitives'
 import { getRootUserId } from '../users'
 import { makeReminder, type TReminderFactoryDraft } from './factory'

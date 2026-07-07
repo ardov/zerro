@@ -154,10 +154,14 @@ function addToActivity(
   transaction: TTransaction,
   change: TFxAmount
 ) {
-  const dayIndex = new Date(transaction.date).getDate() - 1
+  const dayIndex = getISODateDayIndex(transaction.date)
   activity.transactions.push(transaction)
   activity.total = addFxAmount(activity.total, change)
   activity.trend[dayIndex] = addFxAmount(activity.trend[dayIndex], change)
+}
+
+function getISODateDayIndex(date: string): number {
+  return Number(date.slice(8, 10)) - 1
 }
 
 function getMonthNode(

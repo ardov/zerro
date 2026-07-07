@@ -13,7 +13,9 @@ Core Next already has:
 - Zerro read projectors through envelopes, budgets, raw activity, activity, sorted activity, env metrics, month totals, goals, and goal totals;
 - `createZerroSession` with lazy memoized reads;
 - Redux adapter selectors that keep the projection graph explicit;
-- deterministic demo-data generation and public demo parity tests;
+- deterministic demo-data generation under `core-next/demo` and public demo
+  parity tests;
+- package-safe tag icon metadata under `core-next/tag-icons`;
 - private fixture parity tests and shared test-data builders.
 
 The next work is not one straight line. It is a set of related tracks. Keep each
@@ -26,11 +28,13 @@ test.
 
 Implemented:
 
-1. Make `src/demoData` deterministic by accepting explicit `now` and `until`.
-2. Split demo data into a shared generator and an app-facing wrapper.
+1. Make demo data deterministic by accepting explicit `now` and `until`.
+2. Move demo data ownership to `src/core-next/demo` and keep `src/demoData` as a
+   thin compatibility wrapper.
 3. Add `makeDemoDiff({ now, until, scale })` and `makeDemoStore(...)` for Core Next tests.
 4. Add demo-data parity tests for session/read-model outputs.
 5. Keep private fixture tests opt-in and hash/safe-summary based.
+6. Add `src/core-next/tag-icons` as package-safe ZenMoney tag icon metadata.
 
 Useful next tasks:
 
@@ -41,6 +45,9 @@ Useful next tasks:
    accounts.
 3. Keep the pinned demo state small enough for ordinary vitest runs; use private
    fixtures for large-account confidence.
+4. Decide whether `core-next/demo` should expose `createDemoZerroEngine`.
+5. Decide whether Core Next should own SVG icon assets or only emoji metadata
+   plus adapter-provided SVG URLs.
 
 Do not:
 
@@ -227,7 +234,7 @@ Do not:
 
 If the next agent should continue cleanup:
 
-1. Start with Track A and make demo data deterministic.
+1. Review `documents/open-questions.md` and `documents/compatibility.md`.
 2. Add a small demo parity test for one already-migrated read model.
 
 If the next agent should continue domain migration:

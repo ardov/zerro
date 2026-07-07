@@ -17,6 +17,10 @@ moves into `src/domain` or a separate package.
 - [testing.md](./testing.md): testing policy and fixture strategy.
 - [private-fixtures.md](./private-fixtures.md): private fixture export,
   storage, privacy, and comparison workflow.
+- [open-questions.md](./open-questions.md): decisions that need product or
+  architecture input before they become implicit defaults.
+- [compatibility.md](./compatibility.md): temporary bridges and their exit
+  criteria.
 
 ## What We Are Building
 
@@ -55,7 +59,7 @@ See [testing.md](./testing.md) for the detailed testing policy.
 
 See [roadmap.md](./roadmap.md) for the current track map. The short version:
 
-1. Test and fixture infrastructure: deterministic demo data and parity tests.
+1. Test and fixture infrastructure: deterministic Core Next demo data and parity tests.
 2. ZenMoney entity layer: accounts, merchants, tags, transactions, then derived
    reads.
 3. Zerro write layer: hidden-data writers, service account, envelope/budget/goal

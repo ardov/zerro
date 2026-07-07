@@ -1,9 +1,8 @@
-import tagIcons from '6-shared/tagIcons.json'
 import type { TMsTime, TUnixTime } from '../primitives'
 import type { TUserId } from '../users'
 
 export type TTagId = string
-export type TIconName = keyof typeof tagIcons
+export type TIconName = string
 
 export type TTag = {
   id: TTagId

@@ -62,9 +62,9 @@ Recent user changes after the transaction slice:
 
 This run adds the first Track A demo-data harness:
 
-- `src/demoData` now accepts deterministic `now`, `until`, and `scale` options.
-  The app-facing `getDemoData()` wrapper remains, but it delegates to
-  `makeDemoDiff(options)`.
+- `src/core-next/demo` now owns deterministic demo generation with explicit
+  `now`, `until`, and `scale` options. The old `src/demoData` entrypoint remains
+  as a thin compatibility wrapper.
 - demo transactions now have stable ids built from source prefix, date, and
   sequence index; they no longer depend on the legacy transaction factory or
   implicit current date.
@@ -76,8 +76,9 @@ This run adds the first Track A demo-data harness:
   and RootState wrapper used by parity tests.
 - `src/core-next/testing/stableJson.ts` provides deterministic JSON hashing for
   public parity tests.
-- `src/demoData/index.test.ts` covers deterministic generation and normalized
-  store construction.
+- `src/core-next/demo/index.test.ts` covers deterministic generation and
+  normalized store construction; `src/demoData/index.test.ts` verifies the
+  compatibility wrapper.
 - `src/core-next/facade/createZerroSession.demo.test.ts` compares session reads
   against the current Core Redux adapter selectors on the pinned public demo
   store.
@@ -212,6 +213,36 @@ This run starts Track C, the Zerro write layer:
   `execute(command, compiler)`, `executeCompiled(command, patch)`, `undo`, and
   `redo`. `execute` returns caller-only receipts without storing them in outbox
   entries. The engine deliberately does not own Redux persistence yet.
+
+This cleanup hardens the package-ready API boundary:
+
+- `src/core-next/index.ts` now exports only the root facade surface:
+  constants, shared root types, engine, and facade;
+- `core-next/zenmoney` and `core-next/zerro` remain implementation subpaths for
+  migration/test/compatibility code, but they are not public package APIs;
+- `DataEntity` now lives in `src/core-next/patch.ts`, with `6-shared/types`
+  re-exporting it for legacy compatibility;
+- production `core-next` no longer imports runtime values from
+  `6-shared/types`;
+- `TIconName` is no longer derived from `6-shared/tagIcons.json`, so normalized
+  ZenMoney tag types do not depend on the app icon asset catalog;
+- raw activity now parses the day from the ISO date string directly instead of
+  using timezone-sensitive `new Date(transaction.date).getDate()`;
+- `src/core-next/api-boundary.test.ts` protects the root facade and production
+  import boundary.
+
+This run also moves Core Next toward being the knowledge home for ZenMoney
+fixtures and tag icons:
+
+- `src/core-next/demo` owns the demo generator, reference JSON data, and
+  transaction generator;
+- `src/demoData` is now only a compatibility wrapper for the current app import;
+- `src/core-next/tag-icons` owns the package-safe ZenMoney tag icon emoji
+  catalog and lookup helpers;
+- SVG URLs are still supplied by an adapter map such as the legacy
+  `6-shared/tagIconsSvg.ts`, so Core Next does not depend on app SVG bundling;
+- `documents/open-questions.md` records decisions that need user/product input;
+- `documents/compatibility.md` records temporary bridges and exit criteria.
 
 ## Implemented so far
 
@@ -456,28 +487,32 @@ recompute on unrelated budget or metadata changes.
 
 ## Current guardrails
 
-### Do not export Redux adapter from root facade
+### Keep the root facade package-ready
 
-`src/core-next/index.ts` should not re-export `./adapters/redux`.
+`src/core-next/index.ts` should not re-export implementation or adapter
+subtrees such as `./zenmoney`, `./zerro`, or `./adapters/redux`.
 
 Keep this:
 
 ```ts
 export * from './constants'
 export * from './types'
-export * from './zenmoney'
-export * from './zerro'
+export * from './engine'
+export * from './facade'
 ```
 
-Import Redux adapter selectors explicitly:
+Import implementation and adapter APIs explicitly from their subpaths only while
+they are needed by migration code, tests, or compatibility layers:
 
 ```ts
+import { buildRawActivity } from 'core-next/zerro/activity'
 import { selectCoreEnvelopes } from 'core-next/adapters/redux'
 ```
 
 Reason: the root `core-next` facade should stay safe for storage-agnostic and
-headless usage. Re-exporting Redux adapters from root can pull Redux,
-`5-entities`, and i18n adapter dependencies into ordinary domain imports.
+headless usage and future packaging. Re-exporting implementation or adapter
+subtrees from root can turn internal module shape into public API and can pull
+Redux, `5-entities`, i18n, or app assets into ordinary domain imports.
 
 ### Avoid private diffs in private fixture tests
 

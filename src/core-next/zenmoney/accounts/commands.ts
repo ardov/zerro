@@ -1,6 +1,5 @@
 import type { OptionalExceptFor, TDataStore } from '6-shared/types'
-import { DataEntity } from '6-shared/types'
-import type { TCoreContext, TNormalizedPatch } from '../../types'
+import { DataEntity, type TCoreContext, type TNormalizedPatch } from '../../types'
 import { getRootUserId } from '../users'
 import { makeAccount, type TAccountFactoryDraft } from './factory'
 import { getAccounts } from './read'

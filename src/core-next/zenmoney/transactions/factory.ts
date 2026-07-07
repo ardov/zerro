@@ -68,5 +68,5 @@ function toTimestamp(
   date: TDateDraft | undefined,
   ctx: Pick<TCoreContext, 'now'>
 ): number {
-  return +new Date(date || ctx.now())
+  return +new Date(date ?? ctx.now())
 }

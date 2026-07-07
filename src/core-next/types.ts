@@ -1,5 +1,6 @@
 import type { TDiff as TNormalizedPatch } from '6-shared/types'
 
+export { DataEntity } from './patch'
 export type { TDataStore, TDiff as TNormalizedPatch } from '6-shared/types'
 
 export type TCoreContext = {

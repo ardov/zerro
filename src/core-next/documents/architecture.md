@@ -78,7 +78,11 @@ The app should import only the facade:
 import { createZerroSession, createZerroEngine } from 'core-next'
 ```
 
-Internal modules such as `core-next/zerro/envelopes/buildEnvelopes` should not become part of the app-facing API.
+Internal modules such as `core-next/zenmoney`,
+`core-next/zerro`, or `core-next/zerro/envelopes/buildEnvelopes` should not
+become part of the app-facing or package API. During the migration, selected
+compatibility layers and tests may still import implementation subpaths
+explicitly, but the package-ready root surface should stay facade-only.
 
 Adapter-level APIs should also not be exported from the root facade. For example, Redux selectors should be imported explicitly from the adapter path:
 
@@ -1107,10 +1111,8 @@ Verification:
 16. Private fixture tests should compare large/private objects through safe hashes or summaries, not deep equality diffs that may print private data.
 17. Temporary imports from `6-shared/types` are acceptable during migration, but new domain-facing type imports should converge toward `core-next`.
 
-## Open questions
+## Open Questions
 
-1. What is the minimum set of ZenMoney commands to move first after envelope/budget commands?
-2. Should the redo tail be preserved after successful sync, or can it be cleared?
-3. How exactly should pending remote changes be shown in the UI?
-4. Which real fixtures can be safely used for comparison tests?
-5. Should the next heavy-projection migration move `activity` first, or should we pause to harden the adapter/root facade boundary?
+Active unresolved decisions live in
+[open-questions.md](./open-questions.md). Temporary migration bridges and their
+exit criteria live in [compatibility.md](./compatibility.md).

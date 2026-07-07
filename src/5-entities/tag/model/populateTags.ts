@@ -3,10 +3,10 @@ import type { ById, TFxCode, TTag, TTagId } from '6-shared/types'
 import toArray from 'lodash/toArray'
 import { int2hex, getColorForString } from '6-shared/helpers/color'
 import { sendEvent } from '6-shared/helpers/tracking'
-import tagIcons from '6-shared/tagIcons.json'
 import noCategoryIconUrl from '6-shared/icons/no_category-icon.svg'
 import { TUserSettings } from '5-entities/userSettings/userSettings'
 import { tagIconsSvg } from '6-shared/tagIconsSvg'
+import { getTagIconEmoji } from 'core-next/tag-icons'
 import { nullTag } from './makeTag'
 
 export type TTagPopulated = TTag & {
@@ -89,8 +89,9 @@ function getSymbol(tag: TTag, userSettings: TUserSettings) {
     if (useSvgIcons && tagIconsSvg[tag.icon]) {
       return tagIconsSvg[tag.icon]
     }
-    if (!useSvgIcons && tagIcons[tag.icon]) {
-      return tagIcons[tag.icon]
+    const emoji = getTagIconEmoji(tag.icon)
+    if (!useSvgIcons && emoji) {
+      return emoji
     }
     sendEvent('Tags: UnknownNames: ' + tag.icon)
   }

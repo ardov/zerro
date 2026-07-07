@@ -1,5 +1,5 @@
 import type { RootState } from 'store'
-import { makeDemoStore, type TDemoDataOptions } from 'demoData'
+import { makeDemoStore, type TDemoDataOptions } from '../demo'
 import type { TDataStore } from '6-shared/types'
 import type { TZerroSessionContext } from '../facade'
 

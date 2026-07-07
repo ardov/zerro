@@ -47,6 +47,7 @@ import type {
   TTransactionId,
   TZmTransaction,
 } from 'core-next/zenmoney/transactions/types'
+import { DataEntity } from 'core-next/patch'
 
 export type {
   TFxCode,
@@ -101,19 +102,7 @@ export { AccountType } from 'core-next/zenmoney/accounts/types'
 
 // export type TToken = TAccessToken['access_token']
 
-export enum DataEntity {
-  Instrument = 'instrument',
-  Country = 'country',
-  Company = 'company',
-  User = 'user',
-  Account = 'account',
-  Merchant = 'merchant',
-  Tag = 'tag',
-  Budget = 'budget',
-  Reminder = 'reminder',
-  ReminderMarker = 'reminderMarker',
-  Transaction = 'transaction',
-}
+export { DataEntity } from 'core-next/patch'
 
 // ---------------------------------------------------------------------
 // DELETION
