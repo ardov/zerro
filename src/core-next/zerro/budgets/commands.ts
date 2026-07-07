@@ -1,18 +1,52 @@
 import type { ByMonth, TDataStore, TISOMonth } from '6-shared/types'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
-import { applyPatch } from '../../zenmoney'
-import type { TEnvelopeId } from '../envelope-id'
+import { applyPatch, compileSetTagBudget, type TTagBudgetUpdate } from '../../zenmoney'
+import { EnvType, envId, type TEnvelopeId } from '../envelope-id'
 import {
   compileSetMonthlyHiddenData,
   HiddenDataType,
   mergeNormalizedPatches,
 } from '../hidden-data'
+import { getUserSettings } from '../user-settings'
 import { getEnvBudgets, type TBudgets } from './read'
 
 export type TEnvBudgetUpdate = {
   id: TEnvelopeId
   month: TISOMonth
   value: number
+}
+
+export type TBudgetUpdate = TEnvBudgetUpdate
+
+export function compileSetBudget(
+  data: TDataStore,
+  update: TBudgetUpdate | TBudgetUpdate[],
+  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+): TNormalizedPatch {
+  const updates = Array.isArray(update) ? update : [update]
+  if (!updates.length) return {}
+
+  const preferZmBudgets = getUserSettings(data).preferZmBudgets
+  const tagUpdates: TTagBudgetUpdate[] = []
+  const envUpdates: TEnvBudgetUpdate[] = []
+
+  updates.forEach(item => {
+    const parsed = envId.parse(item.id)
+    if (parsed.type === EnvType.Tag && preferZmBudgets) {
+      tagUpdates.push({
+        tag: parsed.id === 'null' ? null : parsed.id,
+        month: item.month,
+        value: item.value,
+      })
+    } else {
+      envUpdates.push(item)
+    }
+  })
+
+  return mergeNormalizedPatches(
+    tagUpdates.length ? compileSetTagBudget(data, tagUpdates, ctx) : {},
+    envUpdates.length ? compileSetEnvBudget(data, envUpdates, ctx) : {}
+  )
 }
 
 export function compileSetEnvBudget(

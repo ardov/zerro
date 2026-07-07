@@ -193,15 +193,19 @@ This run starts Track C, the Zerro write layer:
   groups updates by month, removes zero-valued envelope budgets, writes monthly
   hidden budget payloads, and composes multi-month patches without duplicating
   service account creation.
+- the same budgets command module now adds `compileSetBudget`, which reads
+  `preferZmBudgets`, routes tag envelopes to ZenMoney tag budgets when enabled,
+  routes the rest to hidden env budgets, and preserves the legacy `tag#null` to
+  `tag: null` mapping.
 - `src/core-next/zerro/goals/commands.ts` adds `compileSetGoal`; it normalizes
   goal drafts like legacy `makeGoal`, stores monthly goal payloads, writes
   `null` blockers for deletes, and removes the nearest future blocker when a
   new real goal is set.
-- `src/core-next/zerro/envelopes/commands.ts` starts the envelope write layer
-  with `compilePatchEnvelopeMetadata`; this covers meta-owned envelope fields
-  (`group`, `indexRaw`, visibility, comments, currency, keep/carry flags, and
-  non-tag parents) and deliberately leaves tag/account/merchant entity patches
-  for the next envelope slice.
+- `src/core-next/zerro/envelopes/commands.ts` continues the envelope write layer
+  with `compilePatchEnvelope`; it maps legacy envelope drafts to ZenMoney
+  tag/account/merchant patches for `originalName`, tag `colorHex`, and tag
+  parent changes, plus meta-owned envelope fields through
+  `compilePatchEnvelopeMetadata`.
 
 ## Implemented so far
 

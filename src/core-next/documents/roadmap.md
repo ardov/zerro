@@ -165,23 +165,28 @@ Implemented:
    - normalize goal drafts like the legacy `makeGoal`;
    - write monthly goal payloads through monthly hidden data;
    - remove the nearest future `null` blocker when setting a new real goal.
-7. Envelope metadata command compiler:
+7. Envelope command compiler:
+   - `compilePatchEnvelope` maps legacy envelope drafts to tag/account/merchant
+     patches plus metadata patches;
+   - entity-owned fields now cover `originalName`, tag `colorHex`, and tag
+     parent changes;
    - `compilePatchEnvelopeMetadata` handles the meta-owned fields of legacy
      `patchEnvelope`;
-   - it intentionally does not yet mutate tag/account/merchant entities.
+   - adapters/orchestration are still outside this slice.
+8. Budget command compiler:
+   - `compileSetBudget` chooses ZenMoney tag budgets vs hidden env budgets via
+     `preferZmBudgets`;
+   - tag envelope `tag#null` maps to ZenMoney `tag: null`;
+   - mixed updates compile into a single normalized patch.
 
 Recommended order:
 
-1. Extend the envelope command:
-   - rename;
-   - tag color;
-   - account/tag/merchant entity changes where needed.
-2. Budget command:
-   - choose ZenMoney tag budget vs hidden env budget according to `preferZmBudgets`;
-   - support empty budget clearing.
-3. Goal orchestration:
+1. Goal orchestration:
    - wire UI-level goal commands to `compileSetGoal`;
    - keep tracking and dispatch outside core.
+2. Engine/adapter command execution:
+   - store command + patch in outbox;
+   - keep replay patch-only.
 
 Verification should compare resulting state with the old thunk behavior whenever
 legacy command behavior exists.

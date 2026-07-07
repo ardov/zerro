@@ -2,17 +2,125 @@ import { describe, expect, it } from 'vitest'
 
 import {
   makeAccount,
+  makeBudget,
   makeReminder,
   makeStore,
   makeUser,
 } from '../../testing/zenmoneyTestData'
-import { applyPatch } from '../../zenmoney'
+import { applyPatch, getTagBudgets } from '../../zenmoney'
 import { EnvType, envId } from '../envelope-id'
 import { HiddenDataType } from '../hidden-data'
-import { compileSetEnvBudget } from './commands'
+import { compileSetBudget, compileSetEnvBudget } from './commands'
 import { getEnvBudgets } from './read'
 
 describe('env budget commands', () => {
+  it('routes tag budgets to hidden env budgets by default', () => {
+    const foodId = envId.get(EnvType.Tag, 'food')
+    const data = makeStore({
+      user: {
+        1: makeUser({ id: 1, parent: null, currency: 2 }),
+      },
+    })
+    const ids = ['data-account', 'budget-reminder']
+
+    const patch = compileSetBudget(
+      data,
+      { id: foodId, month: '2026-01', value: 100 },
+      {
+        now: () => 100,
+        uuid: () => ids.shift() || 'unused',
+      }
+    )
+    const next = applyPatch(data, patch)
+
+    expect(patch.budget).toBeUndefined()
+    expect(getEnvBudgets(next)).toEqual({
+      '2026-01': {
+        [foodId]: 100,
+      },
+    })
+  })
+
+  it('routes tag envelopes to ZenMoney budgets when preferred', () => {
+    const foodId = envId.get(EnvType.Tag, 'food')
+    const data = makeStore({
+      user: {
+        1: makeUser({ id: 1, parent: null, currency: 2 }),
+      },
+      reminder: {
+        settings: makeReminder('settings', {
+          type: HiddenDataType.UserSettings,
+          payload: { preferZmBudgets: true },
+        }),
+      },
+    })
+
+    const patch = compileSetBudget(
+      data,
+      { id: foodId, month: '2026-01', value: 100 },
+      {
+        now: () => 100,
+        uuid: () => 'unused',
+      }
+    )
+    const next = applyPatch(data, patch)
+
+    expect(patch.reminder).toBeUndefined()
+    expect(getTagBudgets(next)).toEqual({
+      '2026-01-01#food': makeBudget({
+        id: '2026-01-01#food',
+        changed: 100,
+        user: 1,
+        date: '2026-01-01',
+        tag: 'food',
+        outcome: 100,
+      }),
+    })
+  })
+
+  it('splits mixed budget updates between ZenMoney and hidden env budgets', () => {
+    const foodId = envId.get(EnvType.Tag, 'food')
+    const cashId = envId.get(EnvType.Account, 'cash')
+    const data = makeStore({
+      user: {
+        1: makeUser({ id: 1, parent: null, currency: 2 }),
+      },
+      account: {
+        data: makeAccount({ id: 'data', title: '🤖 [Zerro Data]' }),
+      },
+      reminder: {
+        settings: makeReminder('settings', {
+          type: HiddenDataType.UserSettings,
+          payload: { preferZmBudgets: true },
+        }),
+      },
+    })
+
+    const patch = compileSetBudget(
+      data,
+      [
+        { id: foodId, month: '2026-01', value: 100 },
+        { id: cashId, month: '2026-01', value: 200 },
+      ],
+      {
+        now: () => 100,
+        uuid: () => 'budget-reminder',
+      }
+    )
+    const next = applyPatch(data, patch)
+
+    expect(patch.budget?.[0]).toMatchObject({
+      id: '2026-01-01#food',
+      tag: 'food',
+      outcome: 100,
+    })
+    expect(getEnvBudgets(next)).toEqual({
+      '2026-01': {
+        [cashId]: 200,
+      },
+    })
+  })
+
   it('sets and clears hidden envelope budgets for an existing month', () => {
     const foodId = envId.get(EnvType.Tag, 'food')
     const rentId = envId.get(EnvType.Tag, 'rent')
