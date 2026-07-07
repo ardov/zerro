@@ -31,6 +31,10 @@ state => derived view
 base + patches => current
 ```
 
+When a command compiler must report a generated id back to the caller, it can
+return `TCompiled<TReceipt>`: `patch` remains the replay source of truth, while
+`receipt` is ephemeral caller metadata and is not replayed.
+
 Redux, React, IndexedDB, ZenMoney API calls, localization, and persistence stay
 outside the core module behind adapters.
 

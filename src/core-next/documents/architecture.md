@@ -43,6 +43,10 @@ state => derived view
 base + patches => current
 ```
 
+If a compiler needs to return caller-only information, for example a generated
+entity id, it returns `TCompiled<TReceipt>`. The compiled `patch` is still the
+only replay input; `receipt` is not persisted as domain state.
+
 Storage, persistence, Redux subscriptions, React hooks, and ZenMoney API calls stay in external adapters.
 
 ## Target diagram

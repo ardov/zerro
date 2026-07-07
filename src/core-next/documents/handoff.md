@@ -161,6 +161,27 @@ This run completes the remaining normalized Track B entities:
 - `createZerroSession` and the Redux adapter read ZenMoney tag budgets through
   `getTagBudgets(data)` instead of direct `data.budget` or legacy selectors.
 
+This run starts Track C, the Zerro write layer:
+
+- `src/core-next/zerro/accounts/commands.ts` adds
+  `compileEnsureZerroDataAccount`, a pure compiler that returns
+  `TCompiled<{ accountId }>` with either the existing `🤖 [Zerro Data]` account
+  id or an account creation patch using the root user's currency;
+- `src/core-next/zerro/hidden-data/write.ts` adds generic reminder-backed hidden
+  data write codecs: `compileSetSimpleHiddenData`,
+  `compileResetSimpleHiddenData`, `compileSetMonthlyHiddenData`, and
+  `compileResetMonthlyHiddenData`;
+- simple hidden data writes update or create a reminder with the legacy storage
+  shape: data account as both income/outcome account, `income: 1`, dates
+  `2020-01-01`, and JSON in `comment`;
+- monthly hidden data writes validate `TISOMonth`; empty payloads compile to the
+  same delete behavior as the legacy monthly hidden-store factory;
+- hidden-data compilers stay pure and return normalized patches. They do not
+  import Redux, storage, or legacy hidden-store thunks.
+- command compilers that need to report generated ids use the compact
+  `TCompiled<TReceipt>` shape: replay uses `patch`; `receipt` is caller-only
+  metadata.
+
 ## Implemented so far
 
 ### Private fixture harness

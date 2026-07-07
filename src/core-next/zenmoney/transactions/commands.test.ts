@@ -48,7 +48,7 @@ describe('zenmoney transaction commands', () => {
     )
     const next = applyPatch(data, result.patch)
 
-    expect(result.transactionId).toBe('tr-new')
+    expect(result.receipt.transactionId).toBe('tr-new')
     expect(result.patch.transaction?.[0]).toEqual(
       makeTransaction({
         id: 'tr-new',
@@ -280,7 +280,7 @@ describe('zenmoney transaction commands', () => {
       }
     )
 
-    expect(result.transactionId).toBe('new-tr')
+    expect(result.receipt.transactionId).toBe('new-tr')
     expect(result.patch.transaction).toHaveLength(2)
     expect(result.patch.transaction?.[0]).toMatchObject({
       id: 'tr',

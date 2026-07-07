@@ -90,8 +90,11 @@ For each mutable entity:
 1. Keep types close to the entity module when the boundary is stable.
 2. Add production factories only when domain code needs real creation defaults.
 3. Keep test builders in `src/core-next/testing` permissive and test-only.
-4. Keep command functions pure: `data + input + ctx => patch`.
+4. Keep command functions pure: usually `data + input + ctx => patch`.
 5. Verify command result by applying the patch, not only by checking patch shape.
+6. When a compiler must expose a generated id, return `TCompiled<TReceipt>`:
+   keep the normalized `patch` replayable and put caller-only metadata in
+   `receipt`.
 
 Track B is now structurally complete for normalized ZenMoney entities:
 
@@ -135,29 +138,37 @@ Do not:
 
 Goal: move from read projectors to Zerro commands that compile normalized patches.
 
+Implemented:
+
+1. Service account read/create compiler:
+   - find existing `🤖 [Zerro Data]` account;
+   - create it when missing using the root user's currency;
+   - return `TCompiled<{ accountId }>` so hidden-data writes can use the id
+     without treating it as replay state.
+2. Generic hidden-data write codecs:
+   - set/reset simple reminder-backed payloads;
+   - set/reset monthly reminder-backed payloads;
+   - delete empty monthly payloads like the legacy hidden-store factory.
+
 Recommended order:
 
-1. Hidden-data write codecs:
+1. Domain-specific hidden-data commands:
    - user settings;
    - envelope meta;
    - envelope budgets;
    - goals;
    - FX rates, if needed for command work.
-2. Service account write path:
-   - find existing `🤖 [Zerro Data]` account;
-   - create it when missing;
-   - write reminders without Redux thunks.
-3. First envelope command:
+2. First envelope command:
    - rename;
    - color/icon-ish metadata;
    - group/index;
    - visibility;
    - keep income and carry negatives;
    - account/tag/merchant entity changes where needed.
-4. Budget command:
+3. Budget command:
    - choose ZenMoney tag budget vs hidden env budget according to `preferZmBudgets`;
    - support empty budget clearing.
-5. Goal command:
+4. Goal command:
    - set/update/delete monthly goal data.
 
 Verification should compare resulting state with the old thunk behavior whenever

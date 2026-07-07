@@ -1,5 +1,5 @@
 import type { Modify, OptionalExceptFor, TDataStore } from '6-shared/types'
-import type { TCoreContext, TNormalizedPatch } from '../../types'
+import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../types'
 import type { TDateDraft } from '../primitives'
 import type { TTagId } from '../tags'
 import { getRootUserId } from '../users'
@@ -18,14 +18,13 @@ export function compileCreateTransaction(
   data: TDataStore,
   draft: TTransactionDraft,
   ctx: Pick<TCoreContext, 'now' | 'uuid'>
-): { patch: TNormalizedPatch; transactionId: TTransactionId } {
+): TCompiled<{ transactionId: TTransactionId }> {
   const user = getRootUserId(data)
   if (!user) throw new Error('No user')
 
   const transaction = makeTransaction({ ...draft, user }, ctx)
 
   return {
-    transactionId: transaction.id,
     patch: withTransactionAccountBalanceEffects(
       data,
       {
@@ -33,6 +32,7 @@ export function compileCreateTransaction(
       },
       ctx
     ),
+    receipt: { transactionId: transaction.id },
   }
 }
 
@@ -136,12 +136,11 @@ export function compileRecreateTransaction(
   data: TDataStore,
   patch: TTransactionPatch,
   ctx: Pick<TCoreContext, 'now' | 'uuid'>
-): { patch: TNormalizedPatch; transactionId: TTransactionId } {
+): TCompiled<{ transactionId: TTransactionId }> {
   const transaction = getExistingTransaction(data, patch.id)
   const transactionId = ctx.uuid()
 
   return {
-    transactionId,
     patch: withTransactionAccountBalanceEffects(
       data,
       {
@@ -162,6 +161,7 @@ export function compileRecreateTransaction(
       },
       ctx
     ),
+    receipt: { transactionId },
   }
 }
 
