@@ -1,6 +1,6 @@
 # Core Next Roadmap
 
-Date: 2026-07-06  
+Date: 2026-07-07
 Purpose: short handoff map for choosing the next Core Next task.
 
 ## Current Position
@@ -71,10 +71,14 @@ Dependency order and status:
    create/patch/delete commands, and focused tests exist. Account reads now stay
    account-only: FX-code preparation belongs in projections via
    `instrumentCodeById`. Higher-level merge/cascade behavior remains separate.
-9. `budgets` - pending as a ZenMoney entity; Zerro envelope budgets are separate.
-10. `reminders` - pending.
-11. `reminderMarkers` - pending. This is the ZenMoney `reminderMarker` entity,
-    not a separate "reminder maker" concept.
+9. `budgets` - done: types, map read helper, production factory, id helper,
+   set-tag-budget command compiler, and focused tests exist. Zerro envelope
+   budgets remain separate.
+10. `reminders` - done: types, map read helper, production factory, set/delete
+    command compilers, and focused tests exist.
+11. `reminderMarkers` - done: types, map read helper, production factory, and
+    focused tests exist. This is the ZenMoney `reminderMarker` entity, not a
+    separate "reminder maker" concept.
 12. `transactions` - mostly done: types, read selectors, commands, balance
     effects, and focused tests exist; a production create factory can wait until
     a create-transaction command is migrated.
@@ -89,14 +93,12 @@ For each mutable entity:
 4. Keep command functions pure: `data + input + ctx => patch`.
 5. Verify command result by applying the patch, not only by checking patch shape.
 
-Likely immediate slice:
+Track B is now structurally complete for normalized ZenMoney entities:
 
 ```txt
-zenmoney/budgets, zenmoney/reminders, or zenmoney/reminderMarkers
-  type ownership cleanup
-  read/factory/module-shape review
-  command review when legacy write behavior exists
-  focused command tests using shared builders
+zenmoney/budgets
+zenmoney/reminders
+zenmoney/reminderMarkers
 ```
 
 The `zenmoney/accounts` slice has already extracted read selectors and a
@@ -104,18 +106,19 @@ production account factory, and tightened create command input so `user` is
 derived from the store. The `zenmoney/merchants` and `zenmoney/tags` slices now
 have the same module shape for types, reads, factories, and commands.
 `zenmoney/transactions` now owns types, reads, commands, and balance effects;
-it does not add a factory yet because no create command is migrated. Continue
-with budgets, reminders, and reminder markers before calling Track B complete.
+it does not add a factory yet because no create command is migrated.
+`zenmoney/budgets`, `zenmoney/reminders`, and `zenmoney/reminderMarkers` now own
+their types and direct read layers; budget and reminder command compilers cover
+the existing legacy write behavior.
 
 Recent bottom-up cleanup moved prepared FX account rows out of the account read
 layer. Keep that direction: pass normalized maps plus explicit dependencies to
 projectors instead of adding presentation-ready read helpers to ZenMoney entity
 modules.
 
-Do not skip budgets, reminders, or reminder markers when planning the ZenMoney
-entity layer. They are easy to overlook because current Zerro read work mostly
-touches reminders as hidden-data storage, but they are still normalized
-ZenMoney entities and transaction dependencies.
+When extending Track B, prefer refinement work rather than adding more entity
+folders: transaction creation/reminder scheduling can build on the new
+`reminders` and `reminderMarkers` modules when those command paths are migrated.
 
 Do not:
 
@@ -190,10 +193,11 @@ If the next agent should continue cleanup:
 
 If the next agent should continue domain migration:
 
-1. Start with Track B, `zenmoney/budgets`, `zenmoney/reminders`, or
-   `zenmoney/reminderMarkers`.
-2. Review type ownership, reads, factories, and command behavior for that entity.
-3. Keep the change limited to entity types/read/factory/commands/tests.
+1. Review whether any legacy imports can now switch from `5-entities` to
+   `core-next/zenmoney` one consumer at a time.
+2. Consider the next command path that needs reminder scheduling or transaction
+   creation.
+3. Keep the change limited to one command/read integration and its tests.
 
 If the next agent should unlock Zerro commands:
 
@@ -201,10 +205,9 @@ If the next agent should unlock Zerro commands:
 2. Implement one simple hidden-data writer and compare the resulting state with
    the existing legacy write path.
 
-The most conservative next step is Track B for `zenmoney/budgets`,
-`zenmoney/reminders`, or `zenmoney/reminderMarkers`, because it continues the
-ZenMoney entity layer without depending on demo-data infrastructure or a full
-Zerro command pipeline.
+The most conservative next step is a small Track D integration cleanup, because
+the normalized ZenMoney entity layer now has type/read/factory coverage through
+reminder markers without depending on a full Zerro command pipeline.
 
 ## Verification Defaults
 

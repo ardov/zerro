@@ -123,6 +123,33 @@ This run also adds Track B work in `zenmoney/transactions`:
 - no production transaction factory was added yet because the migrated command
   surface does not include a create-transaction command.
 
+This run completes the remaining normalized Track B entities:
+
+- `src/core-next/zenmoney/budgets` now owns `TBudget`, `TZmBudget`,
+  `TBudgetId`, `globalBudgetTagId`, `getTagBudgets`, `toBudgetId`,
+  `getTagBudgetId`, `makeTagBudget`, and `compileSetTagBudget`;
+- Zerro hidden envelope budgets remain under `core-next/zerro/budgets`; the
+  ZenMoney budget module is only for tag budgets;
+- `makeTagBudget` intentionally preserves the legacy lock defaults where income
+  and outcome locks default to `true`;
+- `compileSetTagBudget` derives the root user, keeps existing budget fields
+  when updating, and emits normalized `budget` patches;
+- `src/core-next/zenmoney/reminders` now owns `TReminder`, `TZmReminder`,
+  `getReminders`, `makeReminder`, `compileSetReminder`, and
+  `compileDeleteReminder`;
+- `compileDeleteReminder` returns an empty patch for missing reminders, matching
+  the old thunk's no-op dispatch behavior, but still requires a root user like
+  the legacy deletion path;
+- `src/core-next/zenmoney/reminderMarkers` now owns `TReminderMarker`,
+  `TZmReminderMarker`, `getReminderMarkers`, and `makeReminderMarker`;
+- no reminder-marker command was added because there is no migrated legacy
+  marker write path in this slice;
+- `6-shared/types` now re-exports these three entities from `core-next`, and
+  `transactions` imports `TReminderMarkerId` from the marker module instead of
+  defining it locally;
+- `createZerroSession` and the Redux adapter read ZenMoney tag budgets through
+  `getTagBudgets(data)` instead of direct `data.budget` or legacy selectors.
+
 ## Implemented so far
 
 ### Private fixture harness

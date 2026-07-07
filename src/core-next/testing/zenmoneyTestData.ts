@@ -6,6 +6,7 @@ import type {
   TInstrument,
   TMerchant,
   TReminder,
+  TReminderMarker,
   TTag,
   TTransaction,
   TUser,
@@ -164,10 +165,36 @@ export function makeUser(
   }
 }
 
-export function makeReminder(id: string, comment: unknown): TReminder {
+export function makeReminder(
+  patchOrId: (Partial<TReminder> & { id: string }) | string,
+  comment?: unknown
+): TReminder {
+  const patch =
+    typeof patchOrId === 'string'
+      ? { id: patchOrId, comment: JSON.stringify(comment) }
+      : patchOrId
+
   return {
-    id,
-    comment: JSON.stringify(comment),
+    changed: 1,
+    user: 1,
+    incomeInstrument: 2,
+    incomeAccount: 'cash',
+    income: 0,
+    outcomeInstrument: 2,
+    outcomeAccount: 'card',
+    outcome: 0,
+    tag: null,
+    merchant: null,
+    payee: null,
+    comment: null,
+    interval: null,
+    step: 0,
+    points: [0],
+    startDate: '2026-01-01',
+    endDate: '2026-01-01',
+    notify: false,
+    ...patch,
+    id: patch.id,
   } as TReminder
 }
 
@@ -183,6 +210,31 @@ export function makeBudget(patch: Partial<TBudget> & { id: string }): TBudget {
     outcomeLock: true,
     ...patch,
   } as TBudget
+}
+
+export function makeReminderMarker(
+  patch: Partial<TReminderMarker> & { id: string }
+): TReminderMarker {
+  return {
+    changed: 1,
+    user: 1,
+    incomeInstrument: 2,
+    incomeAccount: 'cash',
+    income: 0,
+    outcomeInstrument: 2,
+    outcomeAccount: 'card',
+    outcome: 0,
+    tag: null,
+    merchant: null,
+    payee: null,
+    comment: null,
+    date: '2026-01-01',
+    reminder: 'reminder',
+    state: 'planned',
+    notify: false,
+    ...patch,
+    id: patch.id,
+  } as TReminderMarker
 }
 
 export const usdInstrument = makeInstrument({

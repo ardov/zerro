@@ -8,6 +8,7 @@ import {
   getHistoryStart,
   getInBudgetAccountIds,
   getInstCodeMap,
+  getTagBudgets,
   getSavingAccounts,
   getTransactionsHistory,
   getUserCurrency,
@@ -104,7 +105,7 @@ export function createZerroSession(
   const keepingEnvelopeIds = memo(() => getKeepingEnvelopes(envelopes()))
   const budgets = memo(() =>
     buildBudgets({
-      tagBudgets: data.budget,
+      tagBudgets: getTagBudgets(data),
       envBudgets: envBudgets(),
       preferZmBudgets: userSettings().preferZmBudgets,
     })

@@ -3,7 +3,6 @@ import { shallowEqual } from 'react-redux'
 import { toISODate, toISOMonth } from '6-shared/helpers/date'
 import { i18n } from '6-shared/localization'
 import { accountModel } from '5-entities/account'
-import { getTagBudgets } from '5-entities/budget'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { merchantModel } from '5-entities/merchant'
@@ -17,6 +16,7 @@ import {
   buildDebtors,
   convertBalancesToDisplay,
   getHistoryStart,
+  getTagBudgets,
 } from '../../zenmoney'
 import {
   buildActivity,
@@ -140,10 +140,10 @@ export const selectCoreKeepingEnvelopeIds = createSelector(
 )
 
 export const selectCoreBudgets = createSelector(
-  [getTagBudgets, selectCoreEnvBudgets, selectCoreUserSettings],
-  (tagBudgets, envBudgets, userSettings) =>
+  [selectCoreCurrentData, selectCoreEnvBudgets, selectCoreUserSettings],
+  (data, envBudgets, userSettings) =>
     buildBudgets({
-      tagBudgets,
+      tagBudgets: getTagBudgets(data),
       envBudgets,
       preferZmBudgets: userSettings.preferZmBudgets,
     })

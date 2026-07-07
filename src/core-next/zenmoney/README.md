@@ -55,9 +55,9 @@ Legend:
 | `merchants`       | done    | Core-owned types, map read helper, production factory, and patch command compiler are in place.                                             |
 | `tags`            | done    | Core-owned types, map read helper, production factory, and create/patch command compilers are in place; `archive` is part of the tag shape. |
 | `accounts`        | done    | Core-owned types, account-only reads, production factory, and create/patch/delete command compilers are in place.                           |
-| `budgets`         | pending | ZenMoney tag budget type and ownership still live in `6-shared/types`; Zerro hidden envelope budgets live under `zerro/budgets`.            |
-| `reminders`       | pending | Needed for hidden-data write paths and scheduled transaction support.                                                                       |
-| `reminderMarkers` | pending | Needed before transaction reminder-marker behavior can be fully owned.                                                                      |
+| `budgets`         | done    | Core-owned types, map read helper, production factory, id helper, and set-tag-budget command compiler are in place.                         |
+| `reminders`       | done    | Core-owned types, map read helper, production factory, and set/delete command compilers are in place.                                      |
+| `reminderMarkers` | done    | Core-owned types, map read helper, and production factory are in place; no legacy marker command is migrated yet.                          |
 | `transactions`    | done    | Core-owned types, reads, mutation command compilers, and balance effects are in place; no create factory until create command migrates.     |
 | `debtors`         | done    | ZenMoney-derived read model is in Core Next.                                                                                                |
 | `balances`        | done    | ZenMoney-derived balance history read model is in Core Next.                                                                                |
@@ -68,6 +68,10 @@ Legend:
   instrument ids and FX conversion depends on instrument codes/rates.
 - `Country` and `Company` are synchronized reference data. Users and companies
   use countries; accounts and transactions may reference companies.
+- `Budget` depends on users and tags, but Zerro envelope budgets are a separate
+  hidden-data projection under `core-next/zerro/budgets`.
+- `Reminder` and `ReminderMarker` depend on users, instruments, accounts, tags,
+  and merchants. Markers also depend on reminders.
 - `Transaction` should stay last among normalized ZenMoney entities because it
   can reference user, company, instrument, account, tag, merchant, and reminder
   marker data.

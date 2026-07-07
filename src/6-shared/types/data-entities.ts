@@ -1,4 +1,4 @@
-import type { TUnixTime, TUnits, TISODate, TMsTime } from './types'
+import type { TUnixTime, TMsTime } from './types'
 import type {
   TFxCode,
   TInstrument,
@@ -22,6 +22,21 @@ import type {
   TZmAccount,
 } from 'core-next/zenmoney/accounts/types'
 import type { TTag, TTagId, TZmTag } from 'core-next/zenmoney/tags/types'
+import type {
+  TBudget,
+  TBudgetId,
+  TZmBudget,
+} from 'core-next/zenmoney/budgets/types'
+import type {
+  TReminder,
+  TReminderId,
+  TZmReminder,
+} from 'core-next/zenmoney/reminders/types'
+import type {
+  TReminderMarker,
+  TReminderMarkerId,
+  TZmReminderMarker,
+} from 'core-next/zenmoney/reminderMarkers/types'
 import type {
   TTransaction,
   TTransactionId,
@@ -51,6 +66,22 @@ export type {
   TZmAccount,
 } from 'core-next/zenmoney/accounts/types'
 export type { TTag, TTagId, TZmTag } from 'core-next/zenmoney/tags/types'
+export type {
+  TBudget,
+  TBudgetId,
+  TZmBudget,
+} from 'core-next/zenmoney/budgets/types'
+export { globalBudgetTagId } from 'core-next/zenmoney/budgets/types'
+export type {
+  TReminder,
+  TReminderId,
+  TZmReminder,
+} from 'core-next/zenmoney/reminders/types'
+export type {
+  TReminderMarker,
+  TReminderMarkerId,
+  TZmReminderMarker,
+} from 'core-next/zenmoney/reminderMarkers/types'
 export type {
   TTransaction,
   TTransactionId,
@@ -88,92 +119,6 @@ export type TZmMerchant = {
 }
 
 export type TMerchant = TZmMerchant & {
-  changed: TMsTime
-}
-
-// ---------------------------------------------------------------------
-// BUDGET
-// ---------------------------------------------------------------------
-
-export type TBudgetId = `${TISODate}#${TTagId}`
-
-export const globalBudgetTagId = '00000000-0000-0000-0000-000000000000'
-
-export type TZmBudget = {
-  changed: TUnixTime
-  user: TUserId
-  tag: TTagId | '00000000-0000-0000-0000-000000000000' | null
-  date: TISODate
-  income: TUnits
-  incomeLock: boolean
-  outcome: TUnits
-  outcomeLock: boolean
-}
-
-export type TBudget = TZmBudget & {
-  changed: TMsTime
-  id: TBudgetId // new
-}
-
-// ---------------------------------------------------------------------
-// REMINDER
-// ---------------------------------------------------------------------
-
-export type TReminderId = string
-
-export type TZmReminder = {
-  id: TReminderId
-  changed: TUnixTime
-  user: TUserId
-  incomeInstrument: TInstrumentId
-  incomeAccount: string
-  income: TUnits
-  outcomeInstrument: TInstrumentId
-  outcomeAccount: string
-  outcome: TUnits
-  tag: string[] | null
-  merchant: TMerchantId | null
-  payee: string | null
-  comment: string | null
-  interval: 'day' | 'week' | 'month' | 'year' | null
-  step: number | null
-  points: number[] | null
-  startDate: TISODate
-  endDate: TISODate
-  notify: boolean
-}
-
-export type TReminder = TZmReminder & {
-  changed: TMsTime
-}
-
-// ---------------------------------------------------------------------
-// REMINDER_MARKER
-// ---------------------------------------------------------------------
-
-export type TReminderMarkerId = string
-
-export type TZmReminderMarker = {
-  id: TReminderMarkerId // UUID
-  changed: TUnixTime
-  user: TUserId
-  incomeInstrument: TInstrumentId
-  incomeAccount: TAccountId
-  income: TUnits
-  outcomeInstrument: TInstrumentId
-  outcomeAccount: TAccountId
-  outcome: TUnits
-  tag: TTagId[] | null
-  merchant: TMerchantId | null
-  payee: string | null
-  comment: string | null
-  date: TISODate
-  reminder: TReminderId
-  state: 'planned' | 'processed' | 'deleted'
-  notify: boolean
-}
-
-export type TReminderMarker = TZmReminderMarker & {
   changed: TMsTime
 }
 

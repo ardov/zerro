@@ -3,10 +3,10 @@ import type { TCompanyId } from '../companies'
 import type { TInstrumentId } from '../instruments'
 import type { TMerchantId } from '../merchants'
 import type { TMsTime, TISODate, TUnixTime, TUnits } from '../primitives'
+import type { TReminderMarkerId } from '../reminderMarkers'
 import type { TTagId } from '../tags'
 import type { TUserId } from '../users'
 
-export type TReminderMarkerId = string
 export type TTransactionId = string
 
 export type TZmTransaction = {
