@@ -1,8 +1,6 @@
 # Core Next Demo Data
 
-This optional Core Next module owns deterministic public demo data. It describes
-what a realistic normalized ZenMoney/Zerro snapshot can look like without using
-private account data.
+This optional Core Next module owns deterministic public demo data. It describes what a realistic normalized ZenMoney/Zerro snapshot can look like without using private account data.
 
 `src/demoData` is only a compatibility wrapper for the current app import.
 
