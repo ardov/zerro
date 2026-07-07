@@ -36,6 +36,74 @@ describe('createZerroEngine', () => {
     expect(engine.getPendingOutbox()).toEqual([entry])
   })
 
+  it('executes command compilers against the current state', () => {
+    const engine = createZerroEngine({
+      base: makeStore({
+        account: {
+          cash: makeAccount({ id: 'cash', title: 'Cash', balance: 100 }),
+        },
+      }),
+      outbox: [
+        {
+          id: 'entry-1',
+          command: { type: 'account.patch', title: 'Wallet' },
+          patch: {
+            account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+          },
+          createdAt: 100,
+        },
+      ],
+      outboxHead: 1,
+      ctx: {
+        now: () => 200,
+        uuid: () => 'entry-2',
+      },
+    })
+
+    const result = engine.execute(
+      { type: 'account.patch', title: 'Vault' },
+      data => {
+        expect(data.account.cash.title).toBe('Wallet')
+        return {
+          account: [makeAccount({ id: 'cash', title: 'Vault' })],
+        }
+      }
+    )
+
+    expect(result.entry).toMatchObject({
+      id: 'entry-2',
+      command: { type: 'account.patch', title: 'Vault' },
+    })
+    expect(engine.getCurrent().account.cash.title).toBe('Vault')
+  })
+
+  it('returns compiler receipts without storing them in outbox entries', () => {
+    const engine = createZerroEngine({
+      base: makeStore(),
+      ctx: {
+        now: () => 100,
+        uuid: () => 'entry-1',
+      },
+    })
+
+    const result = engine.execute(
+      { type: 'transaction.create' },
+      () => ({
+        patch: {},
+        receipt: { transactionId: 'tr-new' },
+      })
+    )
+
+    expect(result.receipt).toEqual({ transactionId: 'tr-new' })
+    expect(result.entry).toEqual({
+      id: 'entry-1',
+      command: { type: 'transaction.create' },
+      patch: {},
+      createdAt: 100,
+    })
+    expect('receipt' in result.entry).toBe(false)
+  })
+
   it('moves outboxHead for undo and redo without inverse patches', () => {
     const engine = createZerroEngine({
       base: makeStore({

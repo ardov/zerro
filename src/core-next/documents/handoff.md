@@ -209,8 +209,9 @@ This run starts Track C, the Zerro write layer:
 - `src/core-next/engine/createZerroEngine.ts` adds the first pure engine
   primitive. It stores `base`, `outbox`, `outboxHead`, optional `inbox`,
   rebuilds `current` by replaying the applied outbox prefix, and exposes
-  `executeCompiled(command, patch)`, `undo`, and `redo`. It deliberately does
-  not own a command registry or Redux persistence yet.
+  `execute(command, compiler)`, `executeCompiled(command, patch)`, `undo`, and
+  `redo`. `execute` returns caller-only receipts without storing them in outbox
+  entries. The engine deliberately does not own Redux persistence yet.
 
 ## Implemented so far
 

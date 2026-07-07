@@ -1,5 +1,5 @@
 import type { TDataStore } from '6-shared/types'
-import type { TCoreContext, TNormalizedPatch } from '../types'
+import type { TCompiled, TCoreContext, TNormalizedPatch } from '../types'
 import { replay } from '../zenmoney'
 
 export type TOutboxEntry<TCommand = unknown> = {
@@ -26,6 +26,17 @@ export type TZerroEngineInput<TCommand = unknown> = {
   ctx: Pick<TCoreContext, 'now' | 'uuid'>
 }
 
+export type TCommandCompiler<TCommand, TReceipt = unknown> = (
+  data: TDataStore,
+  command: TCommand,
+  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+) => TNormalizedPatch | TCompiled<TReceipt>
+
+export type TExecuteResult<TCommand, TReceipt = unknown> = {
+  entry: TOutboxEntry<TCommand>
+  receipt?: TReceipt
+}
+
 export function createZerroEngine<TCommand = unknown>(
   input: TZerroEngineInput<TCommand>
 ) {
@@ -44,6 +55,7 @@ export function createZerroEngine<TCommand = unknown>(
     getState,
     getCurrent,
     getPendingOutbox,
+    execute,
     executeCompiled,
     undo,
     redo,
@@ -65,6 +77,20 @@ export function createZerroEngine<TCommand = unknown>(
 
   function getPendingOutbox(): TOutboxEntry<TCommand>[] {
     return state.outbox.slice(0, state.outboxHead)
+  }
+
+  function execute<TReceipt = unknown>(
+    command: TCommand,
+    compile: TCommandCompiler<TCommand, TReceipt>
+  ): TExecuteResult<TCommand, TReceipt> {
+    const result = compile(getCurrent(), command, input.ctx)
+    const patch = isCompiled(result) ? result.patch : result
+    const entry = executeCompiled(command, patch)
+
+    if (isCompiled(result)) {
+      return { entry, receipt: result.receipt }
+    }
+    return { entry }
   }
 
   function executeCompiled(
@@ -105,6 +131,12 @@ export function createZerroEngine<TCommand = unknown>(
     }
     return true
   }
+}
+
+function isCompiled<TReceipt>(
+  value: TNormalizedPatch | TCompiled<TReceipt>
+): value is TCompiled<TReceipt> {
+  return 'patch' in value && 'receipt' in value
 }
 
 function clampOutboxHead(outboxHead: number, outboxLength: number): number {

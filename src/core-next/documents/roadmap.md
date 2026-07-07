@@ -209,6 +209,8 @@ Recommended order:
    consumer at a time.
 3. `createZerroEngine` exists as a pure outbox/current primitive:
    - stores `base`, `outbox`, `outboxHead`, optional `inbox`;
+   - `execute(command, compiler)` compiles against current state and stores
+     only command + patch;
    - `executeCompiled(command, patch)` stores command + patch and drops redo
      tail;
    - `getCurrent()` replays only the applied outbox prefix.
