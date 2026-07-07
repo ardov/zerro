@@ -127,7 +127,7 @@ function isHiddenDataPayloadEmpty(payload: unknown): boolean {
   return false
 }
 
-function mergeNormalizedPatches(
+export function mergeNormalizedPatches(
   ...patches: TNormalizedPatch[]
 ): TNormalizedPatch {
   const result: TNormalizedPatch = {}

@@ -181,6 +181,18 @@ This run starts Track C, the Zerro write layer:
 - command compilers that need to report generated ids use the compact
   `TCompiled<TReceipt>` shape: replay uses `patch`; `receipt` is caller-only
   metadata.
+- `src/core-next/zerro/user-settings/commands.ts` adds
+  `compilePatchUserSettings` and `compileResetUserSettings`; patching merges
+  stored hidden settings with the update and removes `undefined` keys like the
+  legacy thunk before writing a simple hidden-data payload.
+- `src/core-next/zerro/envelope-meta/commands.ts` adds
+  `compilePatchEnvelopeMeta`; it accepts one or more meta patches, merges them
+  over current envelope meta, and writes the full meta map through simple
+  hidden data.
+- `src/core-next/zerro/budgets/commands.ts` adds `compileSetEnvBudget`; it
+  groups updates by month, removes zero-valued envelope budgets, writes monthly
+  hidden budget payloads, and composes multi-month patches without duplicating
+  service account creation.
 
 ## Implemented so far
 
@@ -563,10 +575,10 @@ ZenMoney-derived `debtors` and account balance history are also ported.
 Remaining useful follow-ups:
 
 1. Use `src/core-next/documents/roadmap.md` to choose the next track.
-2. The next conservative domain slice is `zenmoney/budgets`, `reminders`, or
-   `reminderMarkers`; do not skip these normalized ZenMoney entities.
-3. The most direct command-enabling slice is hidden-data write codecs for user
-   settings, envelope meta, env budgets, and goals.
+2. The most direct command-enabling slice is the remaining domain-specific
+   hidden-data command for goals.
+3. After hidden-data commands, start the first envelope write command and keep
+   each behavior separately verifiable against legacy thunks.
 4. The test-infrastructure slice is deterministic demo data plus demo parity
    tests for already-migrated read models.
 5. Continue replacing selected legacy imports with adapter imports from

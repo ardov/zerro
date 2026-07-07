@@ -149,13 +149,22 @@ Implemented:
    - set/reset simple reminder-backed payloads;
    - set/reset monthly reminder-backed payloads;
    - delete empty monthly payloads like the legacy hidden-store factory.
+3. User settings command compiler:
+   - patch stored settings over current hidden data;
+   - remove `undefined` keys like the legacy thunk;
+   - reset settings through simple hidden-data deletion.
+4. Envelope meta command compiler:
+   - patch one or more meta records over current hidden data;
+   - write the resulting meta map through simple hidden data.
+5. Env budget command compiler:
+   - group updates by month and merge them over current hidden budgets;
+   - remove zero-valued envelope budgets;
+   - write each month through monthly hidden data without duplicating service
+     account creation in multi-month batches.
 
 Recommended order:
 
 1. Domain-specific hidden-data commands:
-   - user settings;
-   - envelope meta;
-   - envelope budgets;
    - goals;
    - FX rates, if needed for command work.
 2. First envelope command:
