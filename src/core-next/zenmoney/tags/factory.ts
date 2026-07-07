@@ -2,10 +2,8 @@ import type { OptionalExceptFor } from '6-shared/types'
 import type { TCoreContext } from '../../types'
 import type { TTag, TTagId } from './types'
 
-export type TTagFactoryDraft = OptionalExceptFor<TTag, 'user' | 'title'>
-
 export function makeTag(
-  raw: TTagFactoryDraft,
+  raw: OptionalExceptFor<TTag, 'user' | 'title'>,
   ctx: Pick<TCoreContext, 'now' | 'uuid'>
 ): TTag {
   return {
@@ -23,5 +21,6 @@ export function makeTag(
     showIncome: raw.showIncome || false,
     showOutcome: raw.showOutcome || false,
     parent: raw.parent || null,
+    archive: raw.archive || false,
   }
 }

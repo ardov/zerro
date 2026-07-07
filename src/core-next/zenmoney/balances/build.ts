@@ -2,8 +2,8 @@ import { GroupBy, makeDateArray, toISODate } from '6-shared/helpers/date'
 import { entries } from '6-shared/helpers/keys'
 import { isZero, subFxAmount } from '6-shared/helpers/money'
 import type {
-  AccountType,
   ById,
+  TAccount,
   TAccountId,
   TISODate,
   TFxAmount,
@@ -34,16 +34,9 @@ export type TTransactionEffect = {
   debtors?: Record<string, TFxAmount>
 }
 
-export type TBalanceAccount = {
-  id: TAccountId
-  type: AccountType
-  fxCode: TFxCode
-  balance: number
-}
-
 export type TBuildBalancesInput = {
   transactions: TTransaction[]
-  accounts: ById<TBalanceAccount>
+  accounts: ById<TAccount>
   debtors: ById<TDebtor>
   merchants: ById<TMerchant>
   instrumentCodeById: Record<TInstrumentId, TFxCode>
@@ -59,7 +52,11 @@ export type TBalances = {
 export function buildBalances(input: TBuildBalancesInput): TBalances {
   const byDay: Record<TISODate, TBalanceState> = {}
   const byTransaction: Record<TTransactionId, TBalanceState> = {}
-  let lastState = getCurrentBalanceState(input.accounts, input.debtors)
+  let lastState = getCurrentBalanceState(
+    input.accounts,
+    input.debtors,
+    input.instrumentCodeById
+  )
 
   for (let index = input.transactions.length - 1; index >= 0; index--) {
     const change = buildTransactionEffect(input.transactions[index], input)
@@ -212,8 +209,9 @@ function subtractChange(
 }
 
 function getCurrentBalanceState(
-  accounts: ById<TBalanceAccount>,
-  debtors: ById<TDebtor>
+  accounts: ById<TAccount>,
+  debtors: ById<TDebtor>,
+  instrumentCodeById: Record<TInstrumentId, TFxCode>
 ): TBalanceState {
   const result: TBalanceState = {
     accounts: {},
@@ -222,7 +220,8 @@ function getCurrentBalanceState(
 
   Object.values(accounts).forEach(account => {
     if (account.type === 'debt') return
-    result.accounts[account.id] = { [account.fxCode]: account.balance }
+    const fxCode = instrumentCodeById[account.instrument]
+    result.accounts[account.id] = { [fxCode]: account.balance }
   })
   Object.values(debtors).forEach(debtor => {
     result.debtors[debtor.id] = debtor.balance

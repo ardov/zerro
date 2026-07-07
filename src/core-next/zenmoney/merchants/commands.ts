@@ -1,6 +1,6 @@
 import type { OptionalExceptFor, TDataStore } from '6-shared/types'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
-import { getMerchant } from './read'
+import { getMerchants } from './read'
 import type { TMerchant } from './types'
 
 export type TMerchantPatch = OptionalExceptFor<TMerchant, 'id'>
@@ -12,14 +12,16 @@ export function compilePatchMerchant(
 ): TNormalizedPatch {
   const list = Array.isArray(patch) ? patch : [patch]
 
-  return {
-    merchant: list.map(item => {
-      if (!item.id) throw new Error('Trying to patch merchant without id')
+  const merchants = getMerchants(data)
 
-      const current = getMerchant(data, item.id)
+  return {
+    merchant: list.map(patch => {
+      if (!patch.id) throw new Error('Trying to patch merchant without id')
+
+      const current = merchants[patch.id]
       if (!current) throw new Error('Merchant not found')
 
-      return { ...current, ...item, changed: ctx.now() }
+      return { ...current, ...patch, changed: ctx.now() }
     }),
   }
 }

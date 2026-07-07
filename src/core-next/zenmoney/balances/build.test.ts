@@ -1,14 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import type { ById, TInstrumentId } from '6-shared/types'
+import type { ById, TAccount, TInstrumentId } from '6-shared/types'
 import { AccountType } from '6-shared/types'
-import { makeTransaction } from '../../testing/zenmoneyTestData'
+import { makeAccount, makeTransaction } from '../../testing/zenmoneyTestData'
 import {
   buildBalances,
   buildBalancesByDate,
   buildTransactionEffect,
   convertBalancesToDisplay,
   getHistoryStart,
-  TBalanceAccount,
 } from './build'
 
 describe('buildTransactionEffect', () => {
@@ -160,11 +159,11 @@ const baseInput = {
   debtAccountId: 'debt',
 }
 
-const accounts: ById<TBalanceAccount> = {
-  cash: {
+const accounts: ById<TAccount> = {
+  cash: makeAccount({
     id: 'cash',
     type: AccountType.Checking,
-    fxCode: 'USD',
+    instrument: 1,
     balance: 70,
-  },
+  }),
 }

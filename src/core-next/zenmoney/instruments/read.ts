@@ -5,21 +5,8 @@ export function getInstruments(data: TDataStore): ById<TInstrument> {
   return data.instrument
 }
 
-export function getInstrument(
-  data: TDataStore,
-  id: TInstrumentId
-): TInstrument | null {
-  return data.instrument[id] || null
-}
-
-export function getInstrumentCode(
-  data: TDataStore,
-  id: TInstrumentId
-): TFxCode | null {
-  return getInstrument(data, id)?.shortTitle || null
-}
-
-export function getInstrumentCodeById(
+/** Map of instrument IDs to currency codes. */
+export function getInstCodeMap(
   data: TDataStore
 ): Record<TInstrumentId, TFxCode> {
   return Object.fromEntries(
@@ -27,17 +14,12 @@ export function getInstrumentCodeById(
   )
 }
 
+// TODO: used only in one place, remove later
+/** Map of currency codes to instruments. */
 export function getInstrumentsByCode(
   data: TDataStore
 ): Record<TFxCode, TInstrument> {
   return Object.fromEntries(
     Object.values(data.instrument).map(i => [i.shortTitle, i])
   )
-}
-
-export function getInstrumentByCode(
-  data: TDataStore,
-  code: TFxCode
-): TInstrument | null {
-  return getInstrumentsByCode(data)[code] || null
 }

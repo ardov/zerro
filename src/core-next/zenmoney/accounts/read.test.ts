@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { makeAccount, makeInstrument, makeStore } from '../../testing/zenmoneyTestData'
 import {
-  getAccount,
+  makeAccount,
+  makeInstrument,
+  makeStore,
+} from '../../testing/zenmoneyTestData'
+import {
   getAccountList,
   getAccounts,
-  getBalanceAccounts,
   getDebtAccountId,
-  getInBudgetAccounts,
+  getInBudgetAccountIds,
   getSavingAccounts,
-  isInBudgetAccount,
+  isAccInBudget,
 } from './read'
 import { AccountType } from './types'
 
@@ -24,8 +26,6 @@ describe('zenmoney account reads', () => {
     })
 
     expect(getAccounts(data)).toBe(data.account)
-    expect(getAccount(data, 'cash')).toBe(cash)
-    expect(getAccount(data, 'missing')).toBeNull()
     expect(getAccountList(data)).toEqual([cash, card])
   })
 
@@ -78,41 +78,10 @@ describe('zenmoney account reads', () => {
       },
     })
 
-    expect(isInBudgetAccount(data.account.cash)).toBe(true)
-    expect(isInBudgetAccount(data.account.pinned)).toBe(true)
-    expect(isInBudgetAccount(data.account.debt)).toBe(false)
-    expect(getInBudgetAccounts(data)).toEqual([
-      { id: 'cash', balance: 100, fxCode: 'USD' },
-      { id: 'pinned', balance: 50, fxCode: 'USD' },
-    ])
+    expect(isAccInBudget(data.account.cash)).toBe(true)
+    expect(isAccInBudget(data.account.pinned)).toBe(true)
+    expect(isAccInBudget(data.account.debt)).toBe(false)
+    expect(getInBudgetAccountIds(data)).toEqual(['cash', 'pinned'])
     expect(getSavingAccounts(data).map(account => account.id)).toEqual(['safe'])
-  })
-
-  it('prepares balance accounts with fx codes', () => {
-    const data = makeStore({
-      account: {
-        usd: makeAccount({
-          id: 'usd',
-          type: AccountType.Cash,
-          instrument: 1,
-          balance: 10,
-        }),
-        eur: makeAccount({
-          id: 'eur',
-          type: AccountType.Ccard,
-          instrument: 2,
-          balance: -20,
-        }),
-      },
-      instrument: {
-        1: makeInstrument({ id: 1, shortTitle: 'USD' }),
-        2: makeInstrument({ id: 2, shortTitle: 'EUR' }),
-      },
-    })
-
-    expect(getBalanceAccounts(data)).toEqual({
-      usd: { id: 'usd', type: AccountType.Cash, fxCode: 'USD', balance: 10 },
-      eur: { id: 'eur', type: AccountType.Ccard, fxCode: 'EUR', balance: -20 },
-    })
   })
 })

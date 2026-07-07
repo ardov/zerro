@@ -32,5 +32,13 @@ should not provide the account owner as command input.
 ## Reads
 
 The account read layer exposes direct normalized reads plus small prepared
-views used by existing projections: debt account id, in-budget accounts, saving
-accounts, and balance inputs with resolved FX codes.
+views used by existing projections: debt account id, in-budget account ids, and
+saving accounts.
+
+FX resolution is intentionally kept out of the account read layer. Projections
+that need currency codes receive an `instrumentCodeById` map and resolve FX
+themselves: `currentFunds` sums in-budget balances by currency, and
+`buildBalances` seeds account balances from normalized accounts. As a result the
+account reads stay purely about accounts, and the expensive `rawActivity` scan
+depends only on the stable in-budget id set, so it is not invalidated by balance
+changes.

@@ -1,17 +1,13 @@
 import { toISODate, toISOMonth } from '6-shared/helpers/date'
-import type {
-  ById,
-  TDataStore,
-} from '6-shared/types'
+import type { ById, TDataStore } from '6-shared/types'
 import {
   buildBalances,
   buildBalancesByDate,
   buildDebtors,
-  getBalanceAccounts,
   getDebtAccountId,
   getHistoryStart,
-  getInBudgetAccounts,
-  getInstrumentCodeById,
+  getInBudgetAccountIds,
+  getInstCodeMap,
   getSavingAccounts,
   getTransactionsHistory,
   getUserCurrency,
@@ -65,7 +61,7 @@ export function createZerroSession(
   const rawGoals = memo(() => getRawGoals(data))
   const storedFxRates = memo(() => getStoredFxRates(data))
   const debtAccountId = memo(() => getDebtAccountId(data))
-  const instrumentCodeById = memo(() => getInstrumentCodeById(data))
+  const instrumentCodeById = memo(() => getInstCodeMap(data))
   const transactionsHistory = memo(() => getTransactionsHistory(data))
   const currentFxRates = memo(() =>
     buildCurrentFxRates({
@@ -120,11 +116,18 @@ export function createZerroSession(
       currentMonth: currentMonth(),
     })
   )
-  const currentFunds = memo(() => buildCurrentFunds(getInBudgetAccounts(data)))
+  const inBudgetAccountIds = memo(() => getInBudgetAccountIds(data))
+  const currentFunds = memo(() =>
+    buildCurrentFunds({
+      accounts: data.account,
+      inBudgetIds: inBudgetAccountIds(),
+      instrumentCodeById: instrumentCodeById(),
+    })
+  )
   const rawActivity = memo(() =>
     buildRawActivity({
       transactions: transactionsHistory(),
-      inBudgetAccountIds: getInBudgetAccounts(data).map(account => account.id),
+      inBudgetAccountIds: inBudgetAccountIds(),
       debtAccountId: debtAccountId(),
       debtors: debtors(),
       instruments: data.instrument,
@@ -178,7 +181,7 @@ export function createZerroSession(
   const balances = memo(() =>
     buildBalances({
       transactions: transactionsHistory(),
-      accounts: getBalanceAccounts(data),
+      accounts: data.account,
       debtors: debtors(),
       merchants: data.merchant,
       instrumentCodeById: instrumentCodeById(),

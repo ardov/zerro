@@ -8,21 +8,32 @@ export type TIconName = keyof typeof tagIcons
 export type TTag = {
   id: TTagId
 
+  /** Root user ID. */
+  user: TUserId
+
   /** Normalized timestamp in milliseconds. ZenMoney wire data uses seconds. */
   changed: TMsTime
 
-  user: TUserId
-  title: string
-  parent: TTagId | null
+  /** Icon name. */
   icon: TIconName | null
-  staticId: string | null
-  picture: string | null
-  color: number | null
-  showIncome: boolean
-  showOutcome: boolean
   budgetIncome: boolean
   budgetOutcome: boolean
+  /** Whether the tag is archived. */
+  archive: boolean | null
+  /** Whether the tag is shown in a list of income tags. */
+  showIncome: boolean
+  /** Whether the tag is shown in a list of outcome tags. */
+  showOutcome: boolean
+  title: string
+  parent: TTagId | null
+  color: number | null
+
+  /** Used to be used in ZenMoney analytics */
   required: boolean | null
+  /** Deprecated field */
+  staticId: string | null
+  /** Deprecated field */
+  picture: string | null
 }
 
 export type TZmTag = Omit<TTag, 'changed'> & {

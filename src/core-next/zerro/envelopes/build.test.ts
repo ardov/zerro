@@ -3,7 +3,11 @@ import type { TTag } from '6-shared/types'
 import { makeAccount } from '../../testing/zenmoneyTestData'
 import { EnvType, envId } from '../envelope-id'
 import { envelopeVisibility } from '../envelope-meta'
-import { buildEnvelopes, defaultEnvelopeGroupIds, getKeepingEnvelopes } from './build'
+import {
+  buildEnvelopes,
+  defaultEnvelopeGroupIds,
+  getKeepingEnvelopes,
+} from './build'
 
 describe('buildEnvelopes', () => {
   it('builds envelopes from prepared inputs and applies structure fields', () => {
@@ -15,7 +19,12 @@ describe('buildEnvelopes', () => {
       userCurrency: 'USD',
       populatedTags: {
         null: tag({ id: 'null', title: 'No category', name: 'No category' }),
-        food: tag({ id: 'food', title: 'Food', name: 'Food', showOutcome: true }),
+        food: tag({
+          id: 'food',
+          title: 'Food',
+          name: 'Food',
+          showOutcome: true,
+        }),
         cafes: tag({
           id: 'cafes',
           title: 'Cafes',
@@ -94,12 +103,16 @@ describe('buildEnvelopes', () => {
       },
     })
 
-    expect(result.byId[merchantId].group).toBe(defaultEnvelopeGroupIds.merchants)
+    expect(result.byId[merchantId].group).toBe(
+      defaultEnvelopeGroupIds.merchants
+    )
     expect(result.byId[payeeId].group).toBe(defaultEnvelopeGroupIds.payees)
   })
 })
 
-function tag(patch: Partial<TTag> & { id: string; title: string; name: string }) {
+function tag(
+  patch: Partial<TTag> & { id: string; title: string; name: string }
+) {
   return {
     changed: 1,
     user: 1,
@@ -117,6 +130,7 @@ function tag(patch: Partial<TTag> & { id: string; title: string; name: string })
     children: [],
     colorHEX: null,
     colorDisplay: '#cccccc',
+    archive: false,
     ...patch,
   }
 }

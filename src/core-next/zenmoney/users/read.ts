@@ -1,11 +1,19 @@
-import type { TDataStore } from '6-shared/types'
-import { getInstrumentCode } from '../instruments'
-import type { TFxCode, TInstrumentId } from '../instruments'
+import type { ById, TDataStore } from '6-shared/types'
+import {
+  getInstCodeMap,
+  type TFxCode,
+  type TInstrumentId,
+} from '../instruments'
 import type { TUser, TUserId } from './types'
 
+export function getUsers(data: TDataStore): ById<TUser> {
+  return data.user
+}
+
 export function getRootUser(data: TDataStore): TUser | null {
-  for (const id in data.user) {
-    if (!data.user[id].parent) return data.user[id]
+  const users = getUsers(data)
+  for (const id in users) {
+    if (!users[id].parent) return users[id]
   }
   return null
 }
@@ -21,5 +29,5 @@ export function getUserInstrumentId(data: TDataStore): TInstrumentId | null {
 export function getUserCurrency(data: TDataStore): TFxCode {
   const instrumentId = getUserInstrumentId(data)
   if (typeof instrumentId !== 'number') return 'USD'
-  return getInstrumentCode(data, instrumentId) || 'USD'
+  return getInstCodeMap(data)[instrumentId] || 'USD'
 }

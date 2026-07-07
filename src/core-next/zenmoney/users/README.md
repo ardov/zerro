@@ -8,10 +8,6 @@ the root user: the user record without a parent.
 - `currency`: base currency as an `Instrument` id. Use `getUserCurrency` when
   an FX code is needed.
 - `parent`: root user has `null`; child users point to another user id.
-- `changed` and `paidTill`: normalized core timestamps in milliseconds. Raw
-  ZenMoney sync data uses seconds.
-- `planSettings` and `subscriptionRenewalDate`: ZenMoney-controlled payloads
-  that are intentionally not parsed by ZenMoney Core yet.
 
 ## Mutability
 

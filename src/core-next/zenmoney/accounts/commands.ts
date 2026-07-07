@@ -3,7 +3,7 @@ import { DataEntity } from '6-shared/types'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
 import { getRootUserId } from '../users'
 import { makeAccount, type TAccountFactoryDraft } from './factory'
-import { getAccount } from './read'
+import { getAccounts } from './read'
 import type { TAccount, TAccountId } from './types'
 
 export type TAccountPatch = OptionalExceptFor<TAccount, 'id'>
@@ -33,7 +33,7 @@ export function compilePatchAccount(
     account: list.map(item => {
       if (!item.id) throw new Error('Trying to patch account without id')
 
-      const current = getAccount(data, item.id)
+      const current = getAccounts(data)[item.id]
       if (!current) throw new Error('Account not found')
 
       return { ...current, ...item, changed: ctx.now() }
@@ -46,7 +46,7 @@ export function compileDeleteAccount(
   id: TAccountId,
   ctx: Pick<TCoreContext, 'now'>
 ): TNormalizedPatch {
-  if (!getAccount(data, id)) throw new Error('Account not found')
+  if (!getAccounts(data)[id]) throw new Error('Account not found')
 
   const user = getRootUserId(data)
   if (!user) throw new Error('No user')

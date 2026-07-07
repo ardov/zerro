@@ -138,6 +138,7 @@ export function makeTag(patch: Partial<TTag> & { id: string }): TTag {
     budgetIncome: false,
     budgetOutcome: false,
     required: false,
+    archive: false,
     ...patch,
   } as TTag
 }

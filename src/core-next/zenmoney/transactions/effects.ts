@@ -1,11 +1,7 @@
 import { add } from '6-shared/helpers/money'
-import type {
-  TAccount,
-  TAccountId,
-  TDataStore,
-} from '6-shared/types'
+import type { TAccount, TAccountId, TDataStore } from '6-shared/types'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
-import { getAccount } from '../accounts'
+import { getAccounts } from '../accounts'
 import { getTransaction } from './read'
 import type { TTransaction } from './types'
 
@@ -57,7 +53,7 @@ function mergeAccountBalanceDeltas(
   Object.entries(deltas).forEach(([id, delta]) => {
     if (!delta) return
 
-    const account = accountsById.get(id) || getAccount(data, id)
+    const account = accountsById.get(id) || getAccounts(data)[id]
     if (!account) throw new Error('Account not found')
 
     accountsById.set(id, {

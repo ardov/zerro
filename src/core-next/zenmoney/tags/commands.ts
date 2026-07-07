@@ -1,11 +1,8 @@
-import type {
-  OptionalExceptFor,
-  TDataStore,
-} from '6-shared/types'
+import type { OptionalExceptFor, TDataStore } from '6-shared/types'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
 import { getRootUserId } from '../users'
 import { makeTag } from './factory'
-import { getTag } from './read'
+import { getTags } from './read'
 import type { TTag } from './types'
 
 export type TTagPatch = OptionalExceptFor<TTag, 'id'>
@@ -23,7 +20,7 @@ export function compilePatchTag(
       if (!item.id) throw new Error('Trying to patch tag without id')
       if (item.id === 'null') throw new Error('Trying to patch null tag')
 
-      const current = getTag(data, item.id)
+      const current = getTags(data)[item.id]
       if (!current) throw new Error('Tag not found')
 
       return { ...current, ...item, changed: ctx.now() }

@@ -29,6 +29,7 @@ function makeOutcomeTag(id: string, title: string): TTag {
     budgetIncome: false,
     budgetOutcome: false,
     required: null,
+    archive: false,
   }
 }
 

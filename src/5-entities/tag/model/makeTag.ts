@@ -20,6 +20,7 @@ export function makeTag(raw: TagDraft): TTag {
     showIncome: raw.showIncome || false,
     showOutcome: raw.showOutcome || false,
     parent: raw.parent || null,
+    archive: raw.archive || false,
   }
 }
 

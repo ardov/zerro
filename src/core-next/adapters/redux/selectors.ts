@@ -1,4 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
+import { shallowEqual } from 'react-redux'
 import { toISODate, toISOMonth } from '6-shared/helpers/date'
 import { i18n } from '6-shared/localization'
 import { accountModel } from '5-entities/account'
@@ -194,23 +195,34 @@ export const selectCoreMonthList = createSelector(
     })
 )
 
-export const selectCoreCurrentFunds = createSelector(
+export const selectCoreInBudgetAccountIds = createSelector(
   [accountModel.getInBudgetAccounts],
-  buildCurrentFunds
+  accounts => accounts.map(account => account.id),
+  { memoizeOptions: { resultEqualityCheck: shallowEqual } }
+)
+
+export const selectCoreCurrentFunds = createSelector(
+  [
+    accountModel.getAccounts,
+    selectCoreInBudgetAccountIds,
+    instrumentModel.getInstCodeMap,
+  ],
+  (accounts, inBudgetIds, instrumentCodeById) =>
+    buildCurrentFunds({ accounts, inBudgetIds, instrumentCodeById })
 )
 
 export const selectCoreRawActivity = createSelector(
   [
     trModel.getTransactionsHistory,
-    accountModel.getInBudgetAccounts,
+    selectCoreInBudgetAccountIds,
     accountModel.getDebtAccountId,
     selectCoreDebtors,
     instrumentModel.getInstruments,
   ],
-  (transactions, inBudgetAccounts, debtAccountId, debtors, instruments) =>
+  (transactions, inBudgetAccountIds, debtAccountId, debtors, instruments) =>
     buildRawActivity({
       transactions,
-      inBudgetAccountIds: inBudgetAccounts.map(account => account.id),
+      inBudgetAccountIds,
       debtAccountId,
       debtors,
       instruments,
@@ -305,7 +317,7 @@ export const selectCoreHistoryStart = createSelector(
 export const selectCoreBalances = createSelector(
   [
     trModel.getTransactionsHistory,
-    accountModel.getPopulatedAccounts,
+    accountModel.getAccounts,
     selectCoreDebtors,
     merchantModel.getMerchants,
     instrumentModel.getInstCodeMap,

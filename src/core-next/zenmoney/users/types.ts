@@ -22,8 +22,8 @@ export type TUser = {
   email: string | null
   login: string | null
 
-  /** ZenMoney currently sends this as 1 for supported data in this app. */
-  monthStartDay: 1
+  /** Month start day. Used for analytics in ZenMoney. Usually 1. */
+  monthStartDay: number
 
   isForecastEnabled: boolean
 
