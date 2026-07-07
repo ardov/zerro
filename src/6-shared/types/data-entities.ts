@@ -17,6 +17,11 @@ import type {
 } from 'core-next/zenmoney/countries/types'
 import type { TUser, TUserId, TZmUser } from 'core-next/zenmoney/users/types'
 import type {
+  TMerchant,
+  TMerchantId,
+  TZmMerchant,
+} from 'core-next/zenmoney/merchants/types'
+import type {
   TAccount,
   TAccountId,
   TZmAccount,
@@ -61,6 +66,11 @@ export type {
 } from 'core-next/zenmoney/countries/types'
 export type { TUser, TUserId, TZmUser } from 'core-next/zenmoney/users/types'
 export type {
+  TMerchant,
+  TMerchantId,
+  TZmMerchant,
+} from 'core-next/zenmoney/merchants/types'
+export type {
   TAccount,
   TAccountId,
   TZmAccount,
@@ -103,23 +113,6 @@ export enum DataEntity {
   Reminder = 'reminder',
   ReminderMarker = 'reminderMarker',
   Transaction = 'transaction',
-}
-
-// ---------------------------------------------------------------------
-// MERCHANT
-// ---------------------------------------------------------------------
-
-export type TMerchantId = string
-
-export type TZmMerchant = {
-  id: TMerchantId
-  changed: TUnixTime
-  user: TUserId
-  title: string
-}
-
-export type TMerchant = TZmMerchant & {
-  changed: TMsTime
 }
 
 // ---------------------------------------------------------------------
