@@ -1,23 +1,35 @@
 import countries from './countries.json'
 import companies from './companies.json'
 import instruments from './instruments.json'
-import {
-  AccountType,
+import { AccountType } from '6-shared/types'
+import type {
+  ById,
   TAccountId,
+  TDataStore,
   TDiff,
   TInstrumentId,
   TISODate,
   TTagId,
   TUser,
 } from '6-shared/types'
-import { accountModel } from '5-entities/account'
-import { tagModel } from '5-entities/tag'
-import { merchantModel } from '5-entities/merchant'
 import { round } from '6-shared/helpers/money'
 import { generateTransactions } from './generateTransactions'
 import { getColorForString, hex2int } from '6-shared/helpers/color'
+import {
+  makeAccount as makeCoreAccount,
+  makeMerchant as makeCoreMerchant,
+  makeTag as makeCoreTag,
+} from 'core-next/zenmoney'
 
 const since: TISODate = '2022-06-19'
+const defaultDemoNow = Date.parse('2026-07-06T12:00:00.000Z')
+const defaultDemoUntil: TISODate = '2026-07-06'
+
+export type TDemoDataOptions = {
+  now?: number | Date | string
+  until?: TISODate
+  scale?: number
+}
 
 function updateBalances(diff: TDiff) {
   const totals: Record<TAccountId, number> = {}
@@ -29,7 +41,11 @@ function updateBalances(diff: TDiff) {
   diff.account?.forEach(acc => (acc.balance = round(totals[acc.id])))
 }
 
-export function getDemoData(): TDiff {
+export function getDemoData(options: TDemoDataOptions = {}): TDiff {
+  return makeDemoDiff(options)
+}
+
+export function makeDemoDiff(options: TDemoDataOptions = {}): TDiff {
   /*
     Order of creating demo data:
     01. instrument
@@ -45,10 +61,27 @@ export function getDemoData(): TDiff {
     11. transaction
   */
 
-  const NOW = Date.now()
-  const MINUTE = 1000 * 60
-  const HOUR = 1000 * 60 * 60
+  const NOW = resolveDemoNow(options.now)
   const DAY = 1000 * 60 * 60 * 24
+  const until = options.until || defaultDemoUntil
+  const scale = normalizeScale(options.scale)
+  const demoCtx = {
+    now: () => NOW,
+    uuid: () => 'demo-id',
+  }
+  const demoTransactions = (
+    idPrefix: string,
+    opts: Omit<Parameters<typeof generateTransactions>[0], 'idPrefix' | 'until'>
+  ) =>
+    generateTransactions({
+      ...opts,
+      idPrefix,
+      until,
+      pattern: {
+        ...opts.pattern,
+        every: scaleEvery(opts.pattern.every, scale),
+      },
+    })
 
   // Instruments
   const USD = 1
@@ -96,7 +129,7 @@ export function getDemoData(): TDiff {
 
   function makeMerchants(user: TUser) {
     const makeMerchant = (title: string) =>
-      merchantModel.makeMerchant({ id: title, title, user: user.id })
+      makeCoreMerchant({ id: title, title, user: user.id }, demoCtx)
 
     const merchants = {
       // Grocery stores
@@ -146,12 +179,15 @@ export function getDemoData(): TDiff {
     inBalance?: boolean
     startBalance?: number
   }) =>
-    accountModel.makeAccount({
-      id: acc.title,
-      user: mainUser.id,
-      inBalance: true,
-      ...acc,
-    })
+    makeCoreAccount(
+      {
+        id: acc.title,
+        user: mainUser.id,
+        inBalance: true,
+        ...acc,
+      },
+      demoCtx
+    )
 
   const { Debt, Cash, Ccard } = AccountType
 
@@ -190,12 +226,15 @@ export function getDemoData(): TDiff {
     icon?: keyof typeof import('../6-shared/tagIcons.json')
     color?: number | null
   }) =>
-    tagModel.makeTag({
-      id: tag.title,
-      user: mainUser.id,
-      color: tag.color ?? hex2int(getColorForString(tag.title)),
-      ...tag,
-    })
+    makeCoreTag(
+      {
+        id: tag.title,
+        user: mainUser.id,
+        color: tag.color ?? hex2int(getColorForString(tag.title)),
+        ...tag,
+      },
+      demoCtx
+    )
 
   const tags = {
     // Income
@@ -353,7 +392,7 @@ export function getDemoData(): TDiff {
 
   const transactions = [
     // Salary transactions
-    ...generateTransactions({
+    ...demoTransactions('salary', {
       pattern: { since, repeat: 'monthly', every: 1, offset: 5 },
       user: mainUser.id,
       tag: [[tags.salary.id]],
@@ -363,7 +402,7 @@ export function getDemoData(): TDiff {
     }),
 
     // Freelance transactions
-    ...generateTransactions({
+    ...demoTransactions('freelance', {
       pattern: { since, repeat: 'monthly', every: 3, offset: 15 },
       user: mainUser.id,
       tag: [[tags.freelance.id]],
@@ -372,7 +411,7 @@ export function getDemoData(): TDiff {
     }),
 
     // Birthday Gifts
-    ...generateTransactions({
+    ...demoTransactions('birthday-gifts', {
       pattern: { since, repeat: 'monthly', every: 12, offset: 0 },
       user: mainUser.id,
       tag: [[tags.gifts.id]],
@@ -383,7 +422,7 @@ export function getDemoData(): TDiff {
     }),
 
     // Public Transport
-    ...generateTransactions({
+    ...demoTransactions('public-transport', {
       pattern: { since, repeat: 'daily', every: 1, offset: 1 },
       user: mainUser.id,
       tag: [[tagsChildren.publicTransport.id]],
@@ -393,7 +432,7 @@ export function getDemoData(): TDiff {
     }),
 
     // Groceries transactions
-    ...generateTransactions({
+    ...demoTransactions('groceries-supermarket', {
       pattern: { since, repeat: 'daily', every: 4, offset: 1 },
       user: mainUser.id,
       tag: [[tagsChildren.groceries.id]],
@@ -401,7 +440,7 @@ export function getDemoData(): TDiff {
       merchant: merchants.supermarket.id,
       outcomeAccount: accounts.ccardRUB,
     }),
-    ...generateTransactions({
+    ...demoTransactions('groceries-local-store', {
       pattern: { since, repeat: 'daily', every: 2, offset: 2 },
       user: mainUser.id,
       tag: [[tagsChildren.groceries.id]],
@@ -411,7 +450,7 @@ export function getDemoData(): TDiff {
     }),
 
     // Delivery transactions
-    ...generateTransactions({
+    ...demoTransactions('delivery-app', {
       pattern: { since, repeat: 'daily', every: 8, offset: 1 },
       user: mainUser.id,
       tag: [[tagsChildren.delivery.id]],
@@ -420,7 +459,7 @@ export function getDemoData(): TDiff {
       outcomeAccount: accounts.ccardRUB,
       comment: 'Food delivery',
     }),
-    ...generateTransactions({
+    ...demoTransactions('pizza-delivery', {
       pattern: { since, repeat: 'daily', every: 12, offset: 3 },
       user: mainUser.id,
       tag: [[tagsChildren.delivery.id]],
@@ -431,7 +470,7 @@ export function getDemoData(): TDiff {
     }),
 
     // Restaurant transactions
-    ...generateTransactions({
+    ...demoTransactions('restaurant-pizza', {
       pattern: { since, repeat: 'daily', every: 7, offset: 2 },
       user: mainUser.id,
       tag: [[tagsChildren.restaurant.id]],
@@ -440,7 +479,7 @@ export function getDemoData(): TDiff {
       outcomeAccount: accounts.ccardRUB,
       comment: 'Dinner out',
     }),
-    ...generateTransactions({
+    ...demoTransactions('restaurant-cafe', {
       pattern: { since, repeat: 'daily', every: 5, offset: 4 },
       user: mainUser.id,
       tag: [[tagsChildren.restaurant.id]],
@@ -449,7 +488,7 @@ export function getDemoData(): TDiff {
       outcomeAccount: accounts.cashRUB,
       comment: 'Coffee & snacks',
     }),
-    ...generateTransactions({
+    ...demoTransactions('restaurant-fast-food', {
       pattern: { since, repeat: 'daily', every: 14, offset: 6 },
       user: mainUser.id,
       tag: [[tagsChildren.restaurant.id]],
@@ -460,7 +499,7 @@ export function getDemoData(): TDiff {
     }),
 
     // Transportation
-    ...generateTransactions({
+    ...demoTransactions('taxi', {
       pattern: { since, repeat: 'daily', every: 10, offset: 3 },
       user: mainUser.id,
       tag: [[tagsChildren.taxi.id]],
@@ -469,7 +508,7 @@ export function getDemoData(): TDiff {
       outcomeAccount: accounts.cashRUB,
       comment: 'Taxi ride',
     }),
-    ...generateTransactions({
+    ...demoTransactions('gas', {
       pattern: { since, repeat: 'daily', every: 7, offset: 5 },
       user: mainUser.id,
       tag: [[tagsChildren.gas.id]],
@@ -480,7 +519,7 @@ export function getDemoData(): TDiff {
     }),
 
     // Shopping
-    ...generateTransactions({
+    ...demoTransactions('electronics', {
       pattern: { since, repeat: 'monthly', every: 2, offset: 20 },
       user: mainUser.id,
       tag: [[tags.shopping.id]],
@@ -489,7 +528,7 @@ export function getDemoData(): TDiff {
       outcomeAccount: accounts.ccardRUB,
       comment: 'Electronics purchase',
     }),
-    ...generateTransactions({
+    ...demoTransactions('clothing', {
       pattern: { since, repeat: 'monthly', every: 1, offset: 25 },
       user: mainUser.id,
       tag: [[tags.shopping.id]],
@@ -500,7 +539,7 @@ export function getDemoData(): TDiff {
     }),
 
     // Bills
-    ...generateTransactions({
+    ...demoTransactions('electricity', {
       pattern: { since, repeat: 'monthly', every: 1, offset: 10 },
       user: mainUser.id,
       tag: [[tagsChildren.electricity.id]],
@@ -509,7 +548,7 @@ export function getDemoData(): TDiff {
       outcomeAccount: accounts.ccardRUB,
       comment: 'Electricity bill',
     }),
-    ...generateTransactions({
+    ...demoTransactions('internet', {
       pattern: { since, repeat: 'monthly', every: 1, offset: 15 },
       user: mainUser.id,
       tag: [[tagsChildren.internet.id]],
@@ -518,7 +557,7 @@ export function getDemoData(): TDiff {
       outcomeAccount: accounts.ccardRUB,
       comment: 'Internet subscription',
     }),
-    ...generateTransactions({
+    ...demoTransactions('rent', {
       pattern: { since, repeat: 'monthly', every: 1, offset: 3 },
       user: mainUser.id,
       tag: [[tagsChildren.rent.id]],
@@ -528,7 +567,7 @@ export function getDemoData(): TDiff {
     }),
 
     // Healthcare
-    ...generateTransactions({
+    ...demoTransactions('pharmacy', {
       pattern: { since, repeat: 'monthly', every: 3, offset: 18 },
       user: mainUser.id,
       tag: [[tags.health.id]],
@@ -537,7 +576,7 @@ export function getDemoData(): TDiff {
       outcomeAccount: accounts.cashRUB,
       comment: 'Medicine',
     }),
-    ...generateTransactions({
+    ...demoTransactions('clinic', {
       pattern: { since, repeat: 'monthly', every: 6, offset: 25 },
       user: mainUser.id,
       tag: [[tags.health.id]],
@@ -548,7 +587,7 @@ export function getDemoData(): TDiff {
     }),
 
     // Entertainment
-    ...generateTransactions({
+    ...demoTransactions('entertainment', {
       pattern: { since, repeat: 'daily', every: 15, offset: 8 },
       user: mainUser.id,
       tag: [[tags.entertainment.id]],
@@ -558,7 +597,7 @@ export function getDemoData(): TDiff {
     }),
 
     // Personal transfers (friends/family)
-    ...generateTransactions({
+    ...demoTransactions('friend-loan', {
       pattern: { since, repeat: 'monthly', every: 3, offset: 12 },
       user: mainUser.id,
       tag: [[tags.other.id]],
@@ -567,7 +606,7 @@ export function getDemoData(): TDiff {
       outcomeAccount: accounts.cashRUB,
       comment: 'Loan to friend',
     }),
-    ...generateTransactions({
+    ...demoTransactions('mother-gift', {
       pattern: { since, repeat: 'monthly', every: 4, offset: 8 },
       user: mainUser.id,
       tag: [[tags.gifts.id]],
@@ -577,7 +616,7 @@ export function getDemoData(): TDiff {
       comment: 'Gift for mother',
     }),
     // Transfer to Cash RUB
-    ...generateTransactions({
+    ...demoTransactions('cash-rub-transfer', {
       pattern: { since, repeat: 'monthly', every: 1, offset: 10 },
       user: mainUser.id,
       outcome: [50000, 4000, 6000, 20000],
@@ -589,7 +628,7 @@ export function getDemoData(): TDiff {
   ]
 
   const diff: TDiff = {
-    serverTimestamp: Date.now(),
+    serverTimestamp: NOW,
     instrument: instruments,
     country: countries,
     company: companies,
@@ -603,6 +642,44 @@ export function getDemoData(): TDiff {
     transaction: transactions,
   }
   updateBalances(diff)
-  console.log('transactions count: ', diff.transaction?.length)
   return diff
+}
+
+export function makeDemoStore(options: TDemoDataOptions = {}): TDataStore {
+  const diff = makeDemoDiff(options)
+
+  return {
+    serverTimestamp: diff.serverTimestamp || 0,
+    instrument: byId(diff.instrument),
+    country: byId(diff.country),
+    company: byId(diff.company),
+    user: byId(diff.user),
+    merchant: byId(diff.merchant),
+    account: byId(diff.account),
+    tag: byId(diff.tag),
+    budget: byId(diff.budget),
+    reminder: byId(diff.reminder),
+    reminderMarker: byId(diff.reminderMarker),
+    transaction: byId(diff.transaction),
+  }
+}
+
+function resolveDemoNow(now: TDemoDataOptions['now']): number {
+  if (typeof now === 'number') return now
+  if (now instanceof Date) return +now
+  if (typeof now === 'string') return Date.parse(now)
+  return defaultDemoNow
+}
+
+function normalizeScale(scale: TDemoDataOptions['scale']): number {
+  if (!scale || !Number.isFinite(scale)) return 1
+  return Math.max(0.05, scale)
+}
+
+function scaleEvery(every: number, scale: number): number {
+  return Math.max(1, Math.round(every / scale))
+}
+
+function byId<T extends { id: string | number }>(items: T[] = []): ById<T> {
+  return Object.fromEntries(items.map(item => [item.id, item])) as ById<T>
 }

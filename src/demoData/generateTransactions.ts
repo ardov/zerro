@@ -1,6 +1,5 @@
-import { makeTransaction } from '5-entities/transaction/makeTransaction'
 import { toISODate, parseDate } from '6-shared/helpers/date'
-import { TAccount, TISODate, TTransaction } from '6-shared/types'
+import type { TAccount, TISODate, TTransaction } from '6-shared/types'
 
 type TPatternValue<T> = T | T[] | ((index: number, date: Date) => T)
 
@@ -13,7 +12,9 @@ type TPattern = {
 }
 
 export function generateTransactions(opts: {
+  idPrefix: string
   pattern: TPattern
+  until: TISODate
 
   timeOffset?: TPatternValue<number>
   user: TPatternValue<TTransaction['user']>
@@ -47,7 +48,7 @@ export function generateTransactions(opts: {
 
   // Calculate all transaction dates based on frequency and offset
   const startDateObj = parseDate(pattern.since)
-  const endDateObj = parseDate(pattern.until || toISODate(new Date()))
+  const endDateObj = parseDate(pattern.until || opts.until)
 
   // Apply initial offset
   const firstDate = new Date(startDateObj)
@@ -68,12 +69,15 @@ export function generateTransactions(opts: {
       return pattern as T
     }
 
+    const created = +date + resolve(opts.timeOffset || 0)
+    const transactionId = `${opts.idPrefix}:${toISODate(date)}:${index}`
+
     const trDraft = {
-      // id
-      // changed,
+      id: transactionId,
+      changed: created,
       date: toISODate(date),
 
-      created: +date + resolve(opts.timeOffset || 0),
+      created,
       user: resolve(opts.user),
       deleted: false,
       hold: false,
@@ -150,10 +154,7 @@ export function generateTransactions(opts: {
       trDraft.outcomeInstrument = outcomeAcc.instrument
     }
 
-    // Create transaction
-    const transaction = makeTransaction(trDraft)
-
-    transactions.push(transaction)
+    transactions.push(trDraft)
     index++
 
     // Calculate next transaction date

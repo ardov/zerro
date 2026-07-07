@@ -45,22 +45,22 @@ Legend:
 - `partial`: useful code exists, but type ownership or module shape is not done.
 - `pending`: not represented as a Core Next ZenMoney entity module yet.
 
-| Area              | Status  | Notes                                                                                                                            |
-| ----------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `primitives`      | done    | Timestamp unit aliases live in Core Next.                                                                                        |
-| `instruments`     | done    | Core-owned types, read helpers, README, and tests are in place.                                                                  |
-| `countries`       | done    | Core-owned types, read helpers, and README are in place.                                                                         |
-| `companies`       | done    | Core-owned types, read helpers, and README are in place.                                                                         |
-| `users`           | done    | Core-owned types and root user/currency reads are in place.                                                                      |
-| `merchants`       | partial | Patch command compiler exists; types still live in `6-shared/types`.                                                             |
-| `tags`            | partial | Create/patch command compilers exist; types still live in `6-shared/types`.                                                      |
-| `accounts`        | partial | Core-owned types and create/patch/delete command compilers exist; production factory/layer review is still useful.               |
-| `budgets`         | pending | ZenMoney tag budget type and ownership still live in `6-shared/types`; Zerro hidden envelope budgets live under `zerro/budgets`. |
-| `reminders`       | pending | Needed for hidden-data write paths and scheduled transaction support.                                                            |
-| `reminderMarkers` | pending | Needed before transaction reminder-marker behavior can be fully owned.                                                           |
-| `transactions`    | partial | Command compilers, read helper, and balance effects exist; type ownership and entity module shape are still pending.             |
-| `debtors`         | done    | ZenMoney-derived read model is in Core Next.                                                                                     |
-| `balances`        | done    | ZenMoney-derived balance history read model is in Core Next.                                                                     |
+| Area              | Status  | Notes                                                                                                                                       |
+| ----------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `primitives`      | done    | Timestamp unit aliases live in Core Next.                                                                                                   |
+| `instruments`     | done    | Core-owned types and map read helper are in place.                                                                                          |
+| `countries`       | done    | Core-owned types and map read helper are in place.                                                                                          |
+| `companies`       | done    | Core-owned types and map read helper are in place.                                                                                          |
+| `users`           | done    | Core-owned types and root user/currency reads are in place.                                                                                 |
+| `merchants`       | done    | Core-owned types, map read helper, production factory, and patch command compiler are in place.                                             |
+| `tags`            | done    | Core-owned types, map read helper, production factory, and create/patch command compilers are in place; `archive` is part of the tag shape. |
+| `accounts`        | done    | Core-owned types, account-only reads, production factory, and create/patch/delete command compilers are in place.                           |
+| `budgets`         | pending | ZenMoney tag budget type and ownership still live in `6-shared/types`; Zerro hidden envelope budgets live under `zerro/budgets`.            |
+| `reminders`       | pending | Needed for hidden-data write paths and scheduled transaction support.                                                                       |
+| `reminderMarkers` | pending | Needed before transaction reminder-marker behavior can be fully owned.                                                                      |
+| `transactions`    | done    | Core-owned types, reads, mutation command compilers, and balance effects are in place; no create factory until create command migrates.     |
+| `debtors`         | done    | ZenMoney-derived read model is in Core Next.                                                                                                |
+| `balances`        | done    | ZenMoney-derived balance history read model is in Core Next.                                                                                |
 
 ## Dependency Notes
 
@@ -98,6 +98,15 @@ type TZmCompany = Omit<TCompany, 'changed'> & {
 
 During migration, `6-shared/types` may re-export core-owned types so legacy code
 can keep importing from the old facade while ownership moves into `core-next`.
+
+## Read Layer Shape
+
+Low-level entity reads should stay close to normalized data. Prefer map reads
+such as `getAccounts(data)` or `getTags(data)` and explicit domain helpers such
+as `getInBudgetAccountIds(data)`. Avoid adding presentation-ready or FX-resolved
+entity rows to ZenMoney reads. Projectors that need FX codes should receive the
+normalized entity map plus `instrumentCodeById` and resolve the currency inside
+the projector.
 
 ## Documentation
 

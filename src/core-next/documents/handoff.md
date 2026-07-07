@@ -1,6 +1,6 @@
 # Core Next handoff
 
-Date: 2026-07-06  
+Date: 2026-07-07
 Branch: `core-next`
 
 ## Current state
@@ -16,31 +16,90 @@ Core Next documentation lives next to the module:
 The current branch has these recent commits:
 
 ```txt
+0787e7ef update acc type
+c511dd69 Add archive property to tag and update all layers from the bottom up to accounts in core-next
+a408d86c format md
+cd14b5d4 Shape core-next transaction entity layer
 31ed00c5 Shape core-next tag entity layer
 9b3ea3d4 Shape core-next merchant entity layer
-46128a48 Polish core-next account entity layer
-6847cc44 Document ZenMoney entity dependency order
-ee37daee Summarize core-next roadmap
-686bb664 Extract core-next test data builders
 ```
+
+Recent user changes after the transaction slice:
+
+- `a408d86c` is documentation formatting only. It reformats
+  `src/core-next/documents/architecture.md` and `src/core-next/zenmoney/README.md`
+  without changing runtime behavior.
+- `c511dd69` adds `archive` to `TTag` and to tag factories/test builders. This
+  field is now part of the normalized ZenMoney tag shape, so new tag builders
+  must default it explicitly.
+- `c511dd69` also reshapes low-level ZenMoney reads from instruments through
+  accounts: direct entity reads now generally expose maps such as `getTags`,
+  `getMerchants`, `getCompanies`, `getCountries`, and `getInstruments`, while
+  command code indexes those maps when it needs an existence check. Avoid
+  reintroducing one-off nullable `getX(id)` helpers unless there is a repeated
+  domain use case.
+- Account reads were narrowed to account facts: `getAccounts`,
+  `getAccountList`, `getDebtAccountId`, `getSavingAccounts`,
+  `getInBudgetAccountIds`, `getAccStartBalance`, and `isAccInBudget`.
+  FX-code preparation moved out of account reads. Projections that need FX codes
+  should accept `instrumentCodeById` explicitly.
+- `buildCurrentFunds` now accepts `{ accounts, inBudgetIds, instrumentCodeById }`
+  instead of pre-populated account rows. The Redux adapter memoizes
+  `selectCoreInBudgetAccountIds` with `shallowEqual`, so transaction-heavy
+  projections are not invalidated by ordinary account balance changes.
+- `buildBalances` now accepts normalized `ById<TAccount>` plus
+  `instrumentCodeById`, instead of a pre-shaped balance account map. This keeps
+  FX resolution local to the balance projector.
+- `createZerroSession` mirrors the same dependency graph: it memoizes
+  `inBudgetAccountIds`, passes raw account maps to `buildCurrentFunds` and
+  `buildBalances`, and uses `getInstCodeMap`.
+- `0787e7ef` adds `balanceCorrectionType: 'request' | null` to `TAccount` and
+  defaults it in both legacy and core account factories. Account draft
+  `startDate` can now be `null` as well as a date draft.
+
+This run adds the first Track A demo-data harness:
+
+- `src/demoData` now accepts deterministic `now`, `until`, and `scale` options.
+  The app-facing `getDemoData()` wrapper remains, but it delegates to
+  `makeDemoDiff(options)`.
+- demo transactions now have stable ids built from source prefix, date, and
+  sequence index; they no longer depend on the legacy transaction factory or
+  implicit current date.
+- demo account, tag, and merchant creation uses the migrated Core Next factories
+  instead of `5-entities` factories.
+- `makeDemoStore(options)` builds a normalized `TDataStore` from the same demo
+  generator for Core Next tests.
+- `src/core-next/testing/demoState.ts` exposes the pinned public demo test state
+  and RootState wrapper used by parity tests.
+- `src/core-next/testing/stableJson.ts` provides deterministic JSON hashing for
+  public parity tests.
+- `src/demoData/index.test.ts` covers deterministic generation and normalized
+  store construction.
+- `src/core-next/facade/createZerroSession.demo.test.ts` compares session reads
+  against the current Core Redux adapter selectors on the pinned public demo
+  store.
+- `src/core-next/testing/zenmoneyTestData.ts` now defaults
+  `balanceCorrectionType: null` so the account builder matches the current
+  account shape.
 
 Recent Track B work in `zenmoney/merchants`:
 
 - merchant types now live under `src/core-next/zenmoney/merchants/types.ts`;
-- `getMerchants` and `getMerchant` are exposed from
-  `src/core-next/zenmoney/merchants/read.ts`;
+- `getMerchants` is exposed from `src/core-next/zenmoney/merchants/read.ts` as
+  the normalized merchant map; command code indexes that map for existence
+  checks;
 - `makeMerchant` is a production factory with deterministic `now` and `uuid`
   dependencies;
 - `compilePatchMerchant` now uses the merchant read layer and exports the local
   `TMerchantPatch` type instead of the longer temporary name;
-- merchant tests cover reads, factory defaults, and patch behavior.
+- merchant tests cover factory defaults and patch behavior.
 
 This run also adds Track B work in `zenmoney/tags`:
 
 - tag types now live under `src/core-next/zenmoney/tags/types.ts`, and
   `6-shared/types` re-exports them like the other migrated ZenMoney entities;
-- `getTags` and `getTag` are exposed from
-  `src/core-next/zenmoney/tags/read.ts`;
+- `getTags` is exposed from `src/core-next/zenmoney/tags/read.ts` as the
+  normalized tag map; command code indexes that map for existence checks;
 - `makeTag` is a production factory for ordinary tags with deterministic `now`
   and `uuid` dependencies;
 - `compileCreateTag` and `compilePatchTag` now use local `TTagDraft` and

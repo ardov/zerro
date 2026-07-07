@@ -13,6 +13,7 @@ Core Next already has:
 - Zerro read projectors through envelopes, budgets, raw activity, activity, sorted activity, env metrics, month totals, goals, and goal totals;
 - `createZerroSession` with lazy memoized reads;
 - Redux adapter selectors that keep the projection graph explicit;
+- deterministic demo-data generation and public demo parity tests;
 - private fixture parity tests and shared test-data builders.
 
 The next work is not one straight line. It is a set of related tracks. Keep each
@@ -23,13 +24,23 @@ change small, dependency-aware, and separately verifiable.
 Goal: make migration comparisons easy without turning every helper into a unit
 test.
 
-Useful next tasks:
+Implemented:
 
 1. Make `src/demoData` deterministic by accepting explicit `now` and `until`.
 2. Split demo data into a shared generator and an app-facing wrapper.
 3. Add `makeDemoDiff({ now, until, scale })` and `makeDemoStore(...)` for Core Next tests.
 4. Add demo-data parity tests for session/read-model outputs.
 5. Keep private fixture tests opt-in and hash/safe-summary based.
+
+Useful next tasks:
+
+1. Add focused demo parity cases when new read models or command slices are
+   migrated.
+2. Add alternate public demo scenarios only when they protect a distinct domain
+   shape, for example sparse history, multi-currency savings, or debt-heavy
+   accounts.
+3. Keep the pinned demo state small enough for ordinary vitest runs; use private
+   fixtures for large-account confidence.
 
 Do not:
 
@@ -53,11 +64,13 @@ Dependency order and status:
    command, and focused tests exist; create/delete commands can wait until a
    real command path needs them.
 7. `tags` - mostly done: types, read selectors, production factory,
-   create/patch commands, and focused tests exist; populated tags and tag trees
-   remain outside this normalized entity slice for now.
+   create/patch commands, and focused tests exist; `archive` is part of the
+   normalized tag shape. Populated tags and tag trees remain outside this
+   normalized entity slice for now.
 8. `accounts` - mostly done: types, read selectors, production factory,
-   create/patch/delete commands, and focused tests exist; higher-level
-   merge/cascade behavior remains separate.
+   create/patch/delete commands, and focused tests exist. Account reads now stay
+   account-only: FX-code preparation belongs in projections via
+   `instrumentCodeById`. Higher-level merge/cascade behavior remains separate.
 9. `budgets` - pending as a ZenMoney entity; Zerro envelope budgets are separate.
 10. `reminders` - pending.
 11. `reminderMarkers` - pending. This is the ZenMoney `reminderMarker` entity,
@@ -93,6 +106,11 @@ have the same module shape for types, reads, factories, and commands.
 `zenmoney/transactions` now owns types, reads, commands, and balance effects;
 it does not add a factory yet because no create command is migrated. Continue
 with budgets, reminders, and reminder markers before calling Track B complete.
+
+Recent bottom-up cleanup moved prepared FX account rows out of the account read
+layer. Keep that direction: pass normalized maps plus explicit dependencies to
+projectors instead of adding presentation-ready read helpers to ZenMoney entity
+modules.
 
 Do not skip budgets, reminders, or reminder markers when planning the ZenMoney
 entity layer. They are easy to overlook because current Zerro read work mostly

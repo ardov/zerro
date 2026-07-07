@@ -47,6 +47,7 @@ export function makeAccount(
     inBalance: false,
     savings: false,
     enableCorrection: false,
+    balanceCorrectionType: null,
     enableSMS: false,
     archive: false,
     private: false,
