@@ -165,15 +165,16 @@ Implemented:
    - normalize goal drafts like the legacy `makeGoal`;
    - write monthly goal payloads through monthly hidden data;
    - remove the nearest future `null` blocker when setting a new real goal.
+7. Envelope metadata command compiler:
+   - `compilePatchEnvelopeMetadata` handles the meta-owned fields of legacy
+     `patchEnvelope`;
+   - it intentionally does not yet mutate tag/account/merchant entities.
 
 Recommended order:
 
-1. First envelope command:
+1. Extend the envelope command:
    - rename;
-   - color/icon-ish metadata;
-   - group/index;
-   - visibility;
-   - keep income and carry negatives;
+   - tag color;
    - account/tag/merchant entity changes where needed.
 2. Budget command:
    - choose ZenMoney tag budget vs hidden env budget according to `preferZmBudgets`;

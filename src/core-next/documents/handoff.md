@@ -197,6 +197,11 @@ This run starts Track C, the Zerro write layer:
   goal drafts like legacy `makeGoal`, stores monthly goal payloads, writes
   `null` blockers for deletes, and removes the nearest future blocker when a
   new real goal is set.
+- `src/core-next/zerro/envelopes/commands.ts` starts the envelope write layer
+  with `compilePatchEnvelopeMetadata`; this covers meta-owned envelope fields
+  (`group`, `indexRaw`, visibility, comments, currency, keep/carry flags, and
+  non-tag parents) and deliberately leaves tag/account/merchant entity patches
+  for the next envelope slice.
 
 ## Implemented so far
 
@@ -581,8 +586,8 @@ Remaining useful follow-ups:
 1. Use `src/core-next/documents/roadmap.md` to choose the next track.
 2. Domain-specific hidden-data commands now cover user settings, envelope meta,
    env budgets, and goals.
-3. Start the first envelope write command and keep
-   each behavior separately verifiable against legacy thunks.
+3. Extend the envelope write command with entity-owned fields next: rename,
+   tag color, and tag/account/merchant patches.
 4. The test-infrastructure slice is deterministic demo data plus demo parity
    tests for already-migrated read models.
 5. Continue replacing selected legacy imports with adapter imports from
