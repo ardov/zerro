@@ -161,24 +161,26 @@ Implemented:
    - remove zero-valued envelope budgets;
    - write each month through monthly hidden data without duplicating service
      account creation in multi-month batches.
+6. Goal command compiler:
+   - normalize goal drafts like the legacy `makeGoal`;
+   - write monthly goal payloads through monthly hidden data;
+   - remove the nearest future `null` blocker when setting a new real goal.
 
 Recommended order:
 
-1. Domain-specific hidden-data commands:
-   - goals;
-   - FX rates, if needed for command work.
-2. First envelope command:
+1. First envelope command:
    - rename;
    - color/icon-ish metadata;
    - group/index;
    - visibility;
    - keep income and carry negatives;
    - account/tag/merchant entity changes where needed.
-3. Budget command:
+2. Budget command:
    - choose ZenMoney tag budget vs hidden env budget according to `preferZmBudgets`;
    - support empty budget clearing.
-4. Goal command:
-   - set/update/delete monthly goal data.
+3. Goal orchestration:
+   - wire UI-level goal commands to `compileSetGoal`;
+   - keep tracking and dispatch outside core.
 
 Verification should compare resulting state with the old thunk behavior whenever
 legacy command behavior exists.
