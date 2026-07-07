@@ -37,6 +37,7 @@ export type TAccount = {
   inBalance: boolean
   savings: boolean
   enableCorrection: boolean
+  balanceCorrectionType: 'request' | null
   enableSMS: boolean
   archive: boolean
   private: boolean

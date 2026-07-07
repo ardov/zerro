@@ -30,6 +30,7 @@ export function makeAccount(draft: TAccountDraft): TAccount {
     inBalance: draft.inBalance || false,
     savings: draft.savings || false,
     enableCorrection: draft.enableCorrection || false,
+    balanceCorrectionType: draft.balanceCorrectionType || null,
     enableSMS: draft.enableSMS || false,
     archive: draft.archive || false,
     private: draft.private || false,

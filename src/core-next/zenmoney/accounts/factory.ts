@@ -6,7 +6,7 @@ import { AccountType, type TAccount, type TAccountId } from './types'
 
 export type TAccountFactoryDraft = Modify<
   OptionalExceptFor<TAccount, 'user' | 'instrument' | 'title'>,
-  { startDate?: TDateDraft }
+  { startDate?: TDateDraft | null }
 >
 
 export function makeAccount(
@@ -32,6 +32,7 @@ export function makeAccount(
     inBalance: draft.inBalance || false,
     savings: draft.savings || false,
     enableCorrection: draft.enableCorrection || false,
+    balanceCorrectionType: draft.balanceCorrectionType || null,
     enableSMS: draft.enableSMS || false,
     archive: draft.archive || false,
     private: draft.private || false,
