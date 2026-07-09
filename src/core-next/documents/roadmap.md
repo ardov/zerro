@@ -226,6 +226,21 @@ Progress:
   and the budget/hidden-data adapter selectors depend on the reminder/budget
   slices instead of the whole `current`, so unrelated data changes keep them
   cached. `selectors.budgets.test.ts` covers parity and invalidation.
+- 2026-07-09: envelope read consumers switched to core selectors:
+  `envBalances` activity/sortedActivity/envMetrics use
+  `selectCoreKeepingEnvelopeIds`/`selectCoreEnvelopes`, and the Budgets page
+  (EnvelopeTable, Group, envRenderInfo, CommentWidget) uses
+  `selectCoreEnvelopes`/`selectCoreEnvelopeStructure`. Account reads take
+  `TAccountSource` (`Pick<TDataStore, 'account'>`); compiled envelopes,
+  in-budget ids, and current funds depend on the account slice.
+  `selectors.envelopes.test.ts` covers parity and invalidation. Verified live
+  in demo mode: budget set, envelope comment round-trip, totals recompute.
+  Envelope write thunks in `4-features/envelope` still read legacy selectors;
+  they migrate together with command compilers.
+- Known granularity limit: all hidden-data types share the reminder slice, so
+  a hidden write of one type recomputes reads of the others (legacy avoided
+  this with a shallowEqual reminder-filter selector). Rare in practice;
+  refine only if it shows up in profiles.
 
 Recommended order:
 

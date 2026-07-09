@@ -4,6 +4,7 @@ import { keys } from '6-shared/helpers/keys'
 import { TSelector } from 'store/index'
 
 import { envelopeModel, EnvType, TEnvelopeId } from '5-entities/envelope'
+import { selectCoreKeepingEnvelopeIds } from 'core-next/adapters/redux'
 import { fxRateModel } from '5-entities/currency/fxRate'
 
 import { EnvActivity, getRawActivity } from './1 - rawActivity'
@@ -94,7 +95,7 @@ export const getSortedActivity: TSelector<ByMonth<TSortedActivity>> =
   createSelector(
     [
       getActivityByType,
-      envelopeModel.getKeepingEnvelopes,
+      selectCoreKeepingEnvelopeIds,
       fxRateModel.converter,
     ],
     (activity, keepingEnvelopes, convert) => {

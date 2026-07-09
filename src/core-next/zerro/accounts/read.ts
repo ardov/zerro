@@ -1,4 +1,3 @@
-import type { TDataStore } from '6-shared/types'
 import { ZERRO_DATA_ACCOUNT_NAME } from '../../constants'
 import {
   AccountType,
@@ -6,10 +5,11 @@ import {
   getAccounts,
   type TAccount,
   type TAccountId,
+  type TAccountSource,
 } from '../../zenmoney'
 
 export function getZerroDataAccountId(
-  data: TDataStore
+  data: TAccountSource
 ): TAccountId | undefined {
   const accounts = getAccounts(data)
   for (const id in accounts) {
@@ -17,13 +17,13 @@ export function getZerroDataAccountId(
   }
 }
 
-export function getZerroInBudgetAccountIds(data: TDataStore): TAccountId[] {
+export function getZerroInBudgetAccountIds(data: TAccountSource): TAccountId[] {
   return getAccountList(data)
     .filter(isZerroInBudgetAccount)
     .map(account => account.id)
 }
 
-export function getZerroSavingAccounts(data: TDataStore): TAccount[] {
+export function getZerroSavingAccounts(data: TAccountSource): TAccount[] {
   return getAccountList(data).filter(
     account =>
       !isZerroInBudgetAccount(account) &&

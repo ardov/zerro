@@ -1,18 +1,21 @@
 import type { ById, TDataStore } from '6-shared/types'
 import { AccountType, type TAccount, type TAccountId } from './types'
 
-export function getAccounts(data: TDataStore): ById<TAccount> {
+/** Account reads must not depend on wider store slices. */
+export type TAccountSource = Pick<TDataStore, 'account'>
+
+export function getAccounts(data: TAccountSource): ById<TAccount> {
   return data.account
 }
 
-export function getDebtAccountId(data: TDataStore): TAccountId | undefined {
+export function getDebtAccountId(data: TAccountSource): TAccountId | undefined {
   const accounts = getAccounts(data)
   for (const id in accounts) {
     if (accounts[id].type === AccountType.Debt) return id
   }
 }
 
-export function getAccountList(data: TDataStore): TAccount[] {
+export function getAccountList(data: TAccountSource): TAccount[] {
   return Object.values(getAccounts(data))
 }
 

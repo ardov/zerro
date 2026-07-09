@@ -6,7 +6,8 @@ import { TISOMonth } from '6-shared/types'
 import { useToggle } from '6-shared/hooks/useToggle'
 
 import { useAppSelector } from 'store/index'
-import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
+import { TEnvelopeId } from '5-entities/envelope'
+import { selectCoreEnvelopeStructure } from 'core-next/adapters/redux'
 
 import { Parent } from './Parent'
 import { Row } from './Row'
@@ -38,7 +39,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
     onShowTransactions,
   } = props
 
-  const structure = useAppSelector(envelopeModel.getEnvelopeStructure, isEqual)
+  const structure = useAppSelector(selectCoreEnvelopeStructure, isEqual)
   const renderInfo = useEnvRenderInfo(month)
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
   const { metric } = useMetric()

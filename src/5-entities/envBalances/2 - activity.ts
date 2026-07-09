@@ -10,7 +10,8 @@ import {
   getRawActivity,
   TRawActivityNode,
 } from './1 - rawActivity'
-import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
+import { TEnvelopeId } from '5-entities/envelope'
+import { selectCoreKeepingEnvelopeIds } from 'core-next/adapters/redux'
 
 export type TActivityNode = {
   total: TFxAmount
@@ -26,7 +27,7 @@ export type TActivityNode = {
 }
 
 export const getActivity: TSelector<ByMonth<TActivityNode>> = createSelector(
-  [getRawActivity, envelopeModel.getKeepingEnvelopes],
+  [getRawActivity, selectCoreKeepingEnvelopeIds],
   withPerf('🖤 getActivity', calcActivity)
 )
 

@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "zerro-dev",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "--port", "3002", "--strictPort"],
+      "port": 3002,
+      "autoPort": false
+    }
+  ]
+}

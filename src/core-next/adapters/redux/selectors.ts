@@ -65,6 +65,8 @@ const selectCoreReminderSlice = (state: RootState) =>
 
 const selectCoreTagBudgetSlice = (state: RootState) => state.data.current.budget
 
+const selectCoreAccountSlice = (state: RootState) => state.data.current.account
+
 export const selectCoreUserSettings = createSelector(
   [selectCoreReminderSlice],
   reminder => getUserSettings({ reminder })
@@ -112,15 +114,15 @@ const selectCoreCompiledEnvelopes = createSelector(
   [
     selectCoreDebtors,
     tagModel.getPopulatedTags,
-    selectCoreCurrentData,
+    selectCoreAccountSlice,
     selectCoreEnvelopeMeta,
     userModel.getUserCurrency,
   ],
-  (debtors, populatedTags, data, envelopeMeta, userCurrency) =>
+  (debtors, populatedTags, account, envelopeMeta, userCurrency) =>
     buildEnvelopes({
       debtors,
       populatedTags,
-      savingAccounts: getZerroSavingAccounts(data),
+      savingAccounts: getZerroSavingAccounts({ account }),
       envelopeMeta,
       userCurrency,
     })
@@ -205,20 +207,20 @@ export const selectCoreMonthList = createSelector(
 )
 
 export const selectCoreInBudgetAccountIds = createSelector(
-  [selectCoreCurrentData],
-  getZerroInBudgetAccountIds,
+  [selectCoreAccountSlice],
+  account => getZerroInBudgetAccountIds({ account }),
   { memoizeOptions: { resultEqualityCheck: shallowEqual } }
 )
 
 export const selectCoreCurrentFunds = createSelector(
   [
-    selectCoreCurrentData,
+    selectCoreAccountSlice,
     selectCoreInBudgetAccountIds,
     instrumentModel.getInstCodeMap,
   ],
-  (data, inBudgetIds, instrumentCodeById) =>
+  (accounts, inBudgetIds, instrumentCodeById) =>
     buildCurrentFunds({
-      accounts: data.account,
+      accounts,
       inBudgetIds,
       instrumentCodeById,
     })

@@ -3,12 +3,8 @@ import { isZero } from '6-shared/helpers/money'
 import { ById, ByMonth, TISOMonth } from '6-shared/types'
 
 import { TSelector, useAppSelector } from 'store'
-import {
-  envelopeModel,
-  envelopeVisibility,
-  TEnvelope,
-  TEnvelopeId,
-} from '5-entities/envelope'
+import { envelopeVisibility, TEnvelope, TEnvelopeId } from '5-entities/envelope'
+import { selectCoreEnvelopes } from 'core-next/adapters/redux'
 import { balances } from '5-entities/envBalances'
 import { goalModel } from '5-entities/goal'
 import { isEqual } from 'lodash'
@@ -25,7 +21,7 @@ export type TRenderInfo = {
 export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
   createSelector(
     [
-      envelopeModel.getEnvelopes,
+      selectCoreEnvelopes,
       balances.monthList,
       balances.envData,
       goalModel.get,
