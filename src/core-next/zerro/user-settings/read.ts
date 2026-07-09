@@ -1,5 +1,8 @@
-import type { TDataStore } from '6-shared/types'
-import { getSimpleHiddenData, HiddenDataType } from '../hidden-data'
+import {
+  getSimpleHiddenData,
+  HiddenDataType,
+  THiddenDataSource,
+} from '../hidden-data'
 
 export type TUserSettings = {
   sawMigrationAlert: boolean
@@ -15,7 +18,9 @@ export const DEFAULT_USER_SETTINGS: TUserSettings = {
   emojiIcons: false,
 }
 
-export function getStoredUserSettings(data: TDataStore): TStoredUserSettings {
+export function getStoredUserSettings(
+  data: THiddenDataSource
+): TStoredUserSettings {
   return getSimpleHiddenData<TStoredUserSettings>(
     data,
     HiddenDataType.UserSettings,
@@ -23,7 +28,7 @@ export function getStoredUserSettings(data: TDataStore): TStoredUserSettings {
   )
 }
 
-export function getUserSettings(data: TDataStore): TUserSettings {
+export function getUserSettings(data: THiddenDataSource): TUserSettings {
   const raw = getStoredUserSettings(data)
 
   return {

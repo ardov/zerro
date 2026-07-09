@@ -5,7 +5,7 @@ import { keys } from '6-shared/helpers/keys'
 
 import { TSelector } from 'store'
 import { trModel } from '5-entities/transaction'
-import { budgetModel } from '5-entities/budget'
+import { selectCoreBudgets } from 'core-next/adapters/redux'
 
 /**
  * Returns the date of first month as ISO.
@@ -19,7 +19,7 @@ const getFirstMonth: TSelector<TISOMonth> = createSelector(
 
 /** Returns the last available month to budget. */
 const getLastMonth: TSelector<TISOMonth> = createSelector(
-  [budgetModel.get],
+  [selectCoreBudgets],
   budgets => {
     const currentMonth = toISOMonth(Date.now())
     const lastBudgetMonth = keys(budgets).sort().pop() || currentMonth

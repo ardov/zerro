@@ -2,6 +2,9 @@ import { isISOMonth } from '6-shared/helpers/date'
 import type { ByMonth, TDataStore, TISOMonth, TReminder } from '6-shared/types'
 import { HiddenDataType, THiddenDataComment } from './types'
 
+/** Hidden data lives only in reminder comments, so reads must not depend on wider store slices. */
+export type THiddenDataSource = Pick<TDataStore, 'reminder'>
+
 export function parseHiddenDataComment(
   comment: string | null
 ): THiddenDataComment | null {
@@ -16,7 +19,7 @@ export function parseHiddenDataComment(
 }
 
 export function getSimpleHiddenData<TPayload>(
-  data: TDataStore,
+  data: THiddenDataSource,
   type: HiddenDataType,
   defaultValue: TPayload
 ): TPayload {
@@ -26,7 +29,7 @@ export function getSimpleHiddenData<TPayload>(
 }
 
 export function getSimpleHiddenDataReminder(
-  data: TDataStore,
+  data: THiddenDataSource,
   type: HiddenDataType
 ): TReminder | null {
   return (
@@ -38,7 +41,7 @@ export function getSimpleHiddenDataReminder(
 }
 
 export function getMonthlyHiddenData<TPayload>(
-  data: TDataStore,
+  data: THiddenDataSource,
   type: HiddenDataType
 ): ByMonth<TPayload> {
   const result: ByMonth<TPayload> = {}
@@ -53,7 +56,7 @@ export function getMonthlyHiddenData<TPayload>(
 }
 
 export function getMonthlyHiddenDataReminders(
-  data: TDataStore,
+  data: THiddenDataSource,
   type: HiddenDataType
 ): ByMonth<TReminder> {
   const result: ByMonth<TReminder> = {}

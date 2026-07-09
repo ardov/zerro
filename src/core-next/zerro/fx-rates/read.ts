@@ -4,7 +4,6 @@ import { convertFx } from '6-shared/helpers/money'
 import type {
   ById,
   ByMonth,
-  TDataStore,
   TDateDraft,
   TFxAmount,
   TFxCode,
@@ -12,7 +11,11 @@ import type {
   TISOMonth,
   TMsTime,
 } from '6-shared/types'
-import { getMonthlyHiddenData, HiddenDataType } from '../hidden-data'
+import {
+  getMonthlyHiddenData,
+  HiddenDataType,
+  THiddenDataSource,
+} from '../hidden-data'
 
 export type TFxRates = Record<TFxCode, number>
 
@@ -37,7 +40,9 @@ export type TFxConverter = (
   date: TDateDraft | 'current'
 ) => number
 
-export function getStoredFxRates(data: TDataStore): ByMonth<TFxRatesStoredValue> {
+export function getStoredFxRates(
+  data: THiddenDataSource
+): ByMonth<TFxRatesStoredValue> {
   return getMonthlyHiddenData<TFxRatesStoredValue>(data, HiddenDataType.FxRates)
 }
 

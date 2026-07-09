@@ -21,6 +21,13 @@ Core Next already has:
 The next work is not one straight line. It is a set of related tracks. Keep each
 change small, dependency-aware, and separately verifiable.
 
+Priority decision (2026-07-09): Track D consumer switching comes first. Core
+Next has a large parallel implementation but zero production consumers, which
+is the biggest project risk: parity tests only protect a static snapshot, and
+every week without a real consumer grows the eventual cutover. Prefer switching
+one real read consumer over adding new domain slices. Start with budgets
+(`budgetModel.get` has 3 consumers), then envelopes.
+
 ## Track A: Test And Fixture Infrastructure
 
 Goal: make migration comparisons easy without turning every helper into a unit
@@ -209,6 +216,17 @@ Do not:
 
 Goal: let the app use Core Next without introducing a second source of truth.
 
+Progress:
+
+- 2026-07-09: `budgetModel.get` consumers in `5-entities/envBalances`
+  (monthList, envMetrics) now read `selectCoreBudgets`. The export feature's
+  `exportPrivateFixture` intentionally keeps `budgetModel.get` because it
+  snapshots legacy outputs for parity fixtures.
+- Hidden-data reads take `THiddenDataSource` (`Pick<TDataStore, 'reminder'>`),
+  and the budget/hidden-data adapter selectors depend on the reminder/budget
+  slices instead of the whole `current`, so unrelated data changes keep them
+  cached. `selectors.budgets.test.ts` covers parity and invalidation.
+
 Recommended order:
 
 1. Keep Redux adapter selectors thin and explicit.
@@ -251,9 +269,10 @@ If the next agent should unlock Zerro commands:
 2. Implement one simple hidden-data writer and compare the resulting state with
    the existing legacy write path.
 
-The most conservative next step is a small Track D integration cleanup, because
-the normalized ZenMoney entity layer now has type/read/factory coverage through
-reminder markers without depending on a full Zerro command pipeline.
+The default next step is a Track D consumer switch: point one legacy read
+consumer at `core-next/adapters/redux`, keep the legacy selector as a fallback,
+and add an invalidation test for the switched chain (parity tests do not cover
+memoization dependencies). Budgets first, envelopes second.
 
 ## Verification Defaults
 

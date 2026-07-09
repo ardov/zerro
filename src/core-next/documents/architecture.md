@@ -737,6 +737,34 @@ outbox = outbox.slice(outboxHead)
 outboxHead = 0
 ```
 
+### Conflict semantics: entity-level last write wins
+
+Decision date: 2026-07-09. Accepted for the first stage.
+
+ZenMoney itself resolves concurrent edits with last-write-wins at entity
+granularity, and Zerro lives on top of the ZenMoney API. Core Next keeps the
+same rule: applying a remote batch and replaying the local outbox on top of the
+new base does not re-validate or re-compile patches. If a local patch and a
+remote change touch the same entity, the local patch overwrites the whole
+entity.
+
+This also applies to Zerro hidden data, where it is more painful: hidden
+payloads are stored as blobs inside ZenMoney reminders, so a local budget edit
+for one envelope rewrites the whole month payload and can silently drop a
+remote edit to a different envelope in the same month.
+
+Why this is acceptable now:
+
+- a typical account has 2-3 users;
+- budgets and other hidden data are edited rarely and usually from one device;
+- avoiding a dedicated server is a project constraint, so hidden data must stay
+  inside ZenMoney entities.
+
+Revisit triggers: multi-device budget editing becomes common, or the inbox flow
+grows a field-level preview. The stored high-level commands in the outbox leave
+the door open for a semantic rebase (re-compiling commands against the new
+base) without changing the persistence format.
+
 ## Storage adapters
 
 Core must not know where data is stored.

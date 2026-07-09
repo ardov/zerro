@@ -58,29 +58,36 @@ type TEnvelopeLabels = {
 
 export const selectCoreCurrentData = (state: RootState) => state.data.current
 
+// Hidden data lives only in reminder comments; depending on the reminder slice
+// keeps these selectors cached across unrelated data changes.
+const selectCoreReminderSlice = (state: RootState) =>
+  state.data.current.reminder
+
+const selectCoreTagBudgetSlice = (state: RootState) => state.data.current.budget
+
 export const selectCoreUserSettings = createSelector(
-  [selectCoreCurrentData],
-  getUserSettings
+  [selectCoreReminderSlice],
+  reminder => getUserSettings({ reminder })
 )
 
 export const selectCoreEnvelopeMeta = createSelector(
-  [selectCoreCurrentData],
-  getEnvelopeMeta
+  [selectCoreReminderSlice],
+  reminder => getEnvelopeMeta({ reminder })
 )
 
 export const selectCoreEnvBudgets = createSelector(
-  [selectCoreCurrentData],
-  getEnvBudgets
+  [selectCoreReminderSlice],
+  reminder => getEnvBudgets({ reminder })
 )
 
 export const selectCoreRawGoals = createSelector(
-  [selectCoreCurrentData],
-  getRawGoals
+  [selectCoreReminderSlice],
+  reminder => getRawGoals({ reminder })
 )
 
 export const selectCoreStoredFxRates = createSelector(
-  [selectCoreCurrentData],
-  getStoredFxRates
+  [selectCoreReminderSlice],
+  reminder => getStoredFxRates({ reminder })
 )
 
 export const selectCoreEnvelopeLabels = () => getCoreEnvelopeLabels()
@@ -142,10 +149,10 @@ export const selectCoreKeepingEnvelopeIds = createSelector(
 )
 
 export const selectCoreBudgets = createSelector(
-  [selectCoreCurrentData, selectCoreEnvBudgets, selectCoreUserSettings],
-  (data, envBudgets, userSettings) =>
+  [selectCoreTagBudgetSlice, selectCoreEnvBudgets, selectCoreUserSettings],
+  (budget, envBudgets, userSettings) =>
     buildBudgets({
-      tagBudgets: getTagBudgets(data),
+      tagBudgets: getTagBudgets({ budget }),
       envBudgets,
       preferZmBudgets: userSettings.preferZmBudgets,
     })

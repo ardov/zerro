@@ -1,6 +1,10 @@
-import type { ById, TDataStore, TFxCode } from '6-shared/types'
+import type { ById, TFxCode } from '6-shared/types'
 import type { TEnvelopeId } from '../envelope-id'
-import { getSimpleHiddenData, HiddenDataType } from '../hidden-data'
+import {
+  getSimpleHiddenData,
+  HiddenDataType,
+  THiddenDataSource,
+} from '../hidden-data'
 
 export enum envelopeVisibility {
   hidden = 'hidden',
@@ -20,7 +24,7 @@ export type TEnvelopeMeta = {
   carryNegatives?: boolean
 }
 
-export function getEnvelopeMeta(data: TDataStore): ById<TEnvelopeMeta> {
+export function getEnvelopeMeta(data: THiddenDataSource): ById<TEnvelopeMeta> {
   return getSimpleHiddenData<ById<TEnvelopeMeta>>(
     data,
     HiddenDataType.EnvelopeMeta,

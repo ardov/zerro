@@ -42,6 +42,10 @@ settled accidentally by implementation momentum.
    preview summaries, or conflict diagnostics?
 4. How should pending remote changes be shown in the UI?
 
+Settled: conflict resolution is entity-level last write wins, including
+hidden-data blobs. See "Conflict semantics" in
+[architecture.md](./architecture.md) for rationale and revisit triggers.
+
 ## Compatibility Exit Criteria
 
 1. When can `src/demoData` be removed as a compatibility wrapper?
