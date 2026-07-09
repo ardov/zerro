@@ -12,7 +12,8 @@ import {
   TrFilterMode,
   TSortedActivityNode,
 } from '5-entities/envBalances'
-import { envelopeModel } from '5-entities/envelope'
+import { useAppSelector } from 'store'
+import { selectCoreEnvelopes } from 'core-next/adapters/redux'
 import { DataLine } from '3-widgets/DataLine'
 import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 
@@ -86,7 +87,7 @@ function StatWidget(props: {
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
   const [currency] = displayCurrency.useDisplayCurrency()
   const toDisplay = displayCurrency.useToDisplay(month)
-  const envelopes = envelopeModel.useEnvelopes()
+  const envelopes = useAppSelector(selectCoreEnvelopes)
   const [opened, toggleOpened] = useToggle(false)
 
   const nodes: TDataNode[] = items.map(node => {

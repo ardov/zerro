@@ -10,5 +10,7 @@ export {
   selectCoreBudgets,
   selectCoreEnvelopes,
   selectCoreEnvelopeStructure,
+  selectCoreGoals,
+  selectCoreGoalTotals,
   selectCoreKeepingEnvelopeIds,
 } from './selectors'

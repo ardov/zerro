@@ -237,6 +237,15 @@ Progress:
   in demo mode: budget set, envelope comment round-trip, totals recompute.
   Envelope write thunks in `4-features/envelope` still read legacy selectors;
   they migrate together with command compilers.
+- 2026-07-09: goal read consumers switched to `selectCoreGoals` /
+  `selectCoreGoalTotals` (GoalsProgress, MonthInfo, envRenderInfo, Row,
+  useQuickActions, GoalPopover, EnvelopePreview), and the remaining
+  `envelopeModel.useEnvelopes()` hook consumers (10 components) now read
+  `selectCoreEnvelopes` — the first envelope wave only caught direct selector
+  usage. Write paths (`goalModel.set`, `fillGoals` thunk, `goalModel.toWords`
+  formatting) stay legacy until command compilers take over.
+  `selectors.goals.test.ts` seeds a goal through `compileSetGoal` and covers
+  parity, a whole-graph invalidation sentinel, and recompute-on-change.
 - Known granularity limit: all hidden-data types share the reminder slice, so
   a hidden write of one type recomputes reads of the others (legacy avoided
   this with a shallowEqual reminder-filter selector). Rare in practice;

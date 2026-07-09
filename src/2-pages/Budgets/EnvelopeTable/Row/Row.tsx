@@ -7,9 +7,14 @@ import { EmojiFlagsIcon } from '6-shared/ui/Icons'
 import { RadialProgress } from '6-shared/ui/RadialProgress'
 import { TFxCode, TISOMonth } from '6-shared/types'
 
+import { useAppSelector } from 'store'
 import { goalModel, TGoal } from '5-entities/goal'
 import { balances } from '5-entities/envBalances'
-import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
+import { TEnvelopeId } from '5-entities/envelope'
+import {
+  selectCoreEnvelopes,
+  selectCoreGoals,
+} from 'core-next/adapters/redux'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { DragTypes } from '2-pages/Budgets/DnD'
 import { useBudgetPopover } from '../../BudgetPopover'
@@ -117,9 +122,9 @@ export const Row: FC<EnvelopeRowProps> = props => {
   const isSmall = useIsSmall()
   const { columns } = useColumns()
 
-  const envelope = envelopeModel.useEnvelopes()[id]
+  const envelope = useAppSelector(selectCoreEnvelopes)[id]
   const envData = balances.useEnvData()[month][id]
-  const goalInfo = goalModel.useGoals()[month][id]
+  const goalInfo = useAppSelector(selectCoreGoals)[month][id]
   const toDisplay = displayCurrency.useToDisplay(month)
 
   const isChild = !!envelope.parent || !!isSelf

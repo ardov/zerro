@@ -8,10 +8,14 @@ import { ColorPicker, useColorPicker } from '6-shared/ui/ColorPickerPopover'
 import { sendEvent } from '6-shared/helpers/tracking'
 // import { usePopover } from '@shared/ui/PopoverManager'
 
-import { useAppDispatch } from 'store'
+import { useAppDispatch, useAppSelector } from 'store'
 import { envelopeModel, TEnvelope, TEnvelopeId } from '5-entities/envelope'
 import { balances } from '5-entities/envBalances'
 import { goalModel } from '5-entities/goal'
+import {
+  selectCoreEnvelopes,
+  selectCoreGoals,
+} from 'core-next/adapters/redux'
 import { useMonth } from '../MonthProvider'
 import { EnvelopeEditDialog, useEditDialog } from '../EnvelopeEditDialog'
 import { ActivityWidget } from './ActivityWidget'
@@ -33,9 +37,9 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   const openGoalPopover = useGoalPopover()
 
   const envMetrics = balances.useEnvData()[month][id]
-  const env = envelopeModel.useEnvelopes()[id]
+  const env = useAppSelector(selectCoreEnvelopes)[id]
 
-  const goalInfo = goalModel.useGoals()[month][id]
+  const goalInfo = useAppSelector(selectCoreGoals)[month][id]
   if (!envMetrics) return null
 
   const { currency } = envMetrics

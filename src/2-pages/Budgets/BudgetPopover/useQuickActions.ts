@@ -6,15 +6,16 @@ import { round } from '6-shared/helpers/money'
 import { toISOMonth } from '6-shared/helpers/date'
 import { getAverage } from '6-shared/helpers/money/currencyHelpers'
 
+import { useAppSelector } from 'store'
 import { balances } from '5-entities/envBalances'
-import { goalModel } from '5-entities/goal'
+import { selectCoreGoals } from 'core-next/adapters/redux'
 import { fxRateModel } from '5-entities/currency/fxRate'
 
 export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
   const { t } = useTranslation()
   const convertFx = fxRateModel.useConverter()
   const envMetrics = balances.useEnvData()
-  const goals = goalModel.useGoals()[month]
+  const goals = useAppSelector(selectCoreGoals)[month]
   if (!id) return []
 
   const envelope = envMetrics[month][id]

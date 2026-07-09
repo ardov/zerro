@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useAppDispatch } from 'store'
+import { useAppDispatch, useAppSelector } from 'store'
 import { isZero } from '6-shared/helpers/money'
 import { formatDate } from '6-shared/helpers/date'
 import { startFresh } from '4-features/bulkActions/startFresh'
@@ -28,7 +28,7 @@ import { useMonth } from '../MonthProvider'
 import { BalanceWidget } from '../BalanceWidget'
 import { FxRates } from './FxRates'
 import { ActivityStats } from './ActivityStats'
-import { goalModel } from '5-entities/goal'
+import { selectCoreGoalTotals } from 'core-next/adapters/redux'
 import { totalGoalsModel } from '4-features/bulkActions/fillGoals'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useTranslation } from 'react-i18next'
@@ -162,7 +162,7 @@ function GoalAction(props: { month: TISOMonth }) {
   })
   const dispatch = useAppDispatch()
   const { month } = props
-  const { progress, goalsCount } = goalModel.useTotals()[month]
+  const { progress, goalsCount } = useAppSelector(selectCoreGoalTotals)[month]
   const canComplete = progress < 1 && goalsCount > 0
 
   const completeAll = useConfirm({

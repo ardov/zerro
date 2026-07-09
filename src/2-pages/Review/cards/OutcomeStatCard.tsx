@@ -5,8 +5,10 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 import { TDateDraft, TFxAmount, TTransaction } from '6-shared/types'
 import { PercentBar, PercentBarItem } from '6-shared/ui/PercentBar'
 
-import { envelopeModel, EnvType, TEnvelopeId } from '5-entities/envelope'
+import { useAppSelector } from 'store'
+import { EnvType, TEnvelopeId } from '5-entities/envelope'
 import { envId } from '5-entities/envelope/shared/envelopeId'
+import { selectCoreEnvelopes } from 'core-next/adapters/redux'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { DataLine } from '3-widgets/DataLine'
 import { Card, TCardProps } from '../shared/Card'
@@ -124,7 +126,7 @@ function useCreateNodeFromTag(
   toDisplay: (amount: TFxAmount, date?: 'current' | TDateDraft) => number
 ) {
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
-  const envelopes = envelopeModel.useEnvelopes()
+  const envelopes = useAppSelector(selectCoreEnvelopes)
 
   return useCallback(
     (id: string): TDataNode => {

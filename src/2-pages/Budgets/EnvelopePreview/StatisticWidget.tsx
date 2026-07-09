@@ -21,8 +21,10 @@ import { TFxCode, TISOMonth } from '6-shared/types'
 import { formatDate, toISOMonth } from '6-shared/helpers/date'
 import { getAverage } from '6-shared/helpers/money/currencyHelpers'
 
+import { useAppSelector } from 'store'
 import { balances } from '5-entities/envBalances'
-import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
+import { TEnvelopeId } from '5-entities/envelope'
+import { selectCoreEnvelopes } from 'core-next/adapters/redux'
 import { fxRateModel } from '5-entities/currency/fxRate'
 import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
@@ -120,7 +122,7 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
   const [period, setPeriod] = useState<aggregatePeriod>(aggregatePeriod.months6)
   const switchPeriod = () => setPeriod(nextPeriod)
 
-  const currency = envelopeModel.useEnvelopes()[id].currency
+  const currency = useAppSelector(selectCoreEnvelopes)[id].currency
 
   const aggregatedData = useAggregatedStats(
     id,

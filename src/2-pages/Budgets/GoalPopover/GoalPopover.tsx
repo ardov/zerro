@@ -16,9 +16,13 @@ import MonthSelectPopover from '6-shared/ui/MonthSelectPopover'
 import { toISODate, formatDate } from '6-shared/helpers/date'
 import { Modify, TDateDraft, TISOMonth } from '6-shared/types'
 
-import { useAppDispatch } from 'store'
+import { useAppDispatch, useAppSelector } from 'store'
 import { goalModel, goalType, TGoal } from '5-entities/goal'
-import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
+import { TEnvelopeId } from '5-entities/envelope'
+import {
+  selectCoreEnvelopes,
+  selectCoreGoals,
+} from 'core-next/adapters/redux'
 
 export type TGoalPopoverProps = Modify<
   PopoverProps,
@@ -32,8 +36,8 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
   const { t } = useTranslation('goals')
   const dispatch = useAppDispatch()
-  const envelope = envelopeModel.useEnvelopes()[id]
-  const goalInfo = goalModel.useGoals()[month][id] || {}
+  const envelope = useAppSelector(selectCoreEnvelopes)[id]
+  const goalInfo = useAppSelector(selectCoreGoals)[month][id] || {}
   const { goal } = goalInfo
 
   const [type, setType] = useState(goal?.type || goalType.MONTHLY_SPEND)

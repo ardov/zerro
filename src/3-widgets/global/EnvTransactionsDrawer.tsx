@@ -5,7 +5,9 @@ import { Drawer, Box, Typography, IconButton } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { registerPopover } from '6-shared/historyPopovers'
-import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
+import { useAppSelector } from 'store'
+import { TEnvelopeId } from '5-entities/envelope'
+import { selectCoreEnvelopes } from 'core-next/adapters/redux'
 import { balances, TrFilterMode } from '5-entities/envBalances'
 import {
   TransactionList,
@@ -23,7 +25,7 @@ type TEnvConditions = {
 function useFilteredByEnvelope(conditions?: TEnvConditions): TTransaction[] {
   const { id, month, mode = TrFilterMode.Envelope, isExact } = conditions || {}
 
-  const envelopes = envelopeModel.useEnvelopes()
+  const envelopes = useAppSelector(selectCoreEnvelopes)
   const fullActivity = balances.useActivity()
   const fullRawActivity = balances.useRawActivity()
 

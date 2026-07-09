@@ -4,12 +4,13 @@ import Dialog, { DialogProps } from '@mui/material/Dialog'
 import { AmountInput } from '6-shared/ui/AmountInput'
 import { ArrowForwardIcon } from '6-shared/ui/Icons'
 import { Modify, TISOMonth } from '6-shared/types'
-import { useAppDispatch } from 'store'
+import { useAppDispatch, useAppSelector } from 'store'
 
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { balances } from '5-entities/envBalances'
 import { moveMoney } from './moveMoney'
-import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
+import { TEnvelopeId } from '5-entities/envelope'
+import { selectCoreEnvelopes } from 'core-next/adapters/redux'
 
 export type MoveMoneyModalProps = Modify<
   DialogProps,
@@ -25,7 +26,7 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   const dispatch = useAppDispatch()
   const { open, onClose, source, month, destination } = props
 
-  const envelopes = envelopeModel.useEnvelopes()
+  const envelopes = useAppSelector(selectCoreEnvelopes)
   const metrics = balances.useEnvData()[month]
   const totalMetrics = balances.useTotals()[month]
   const [currency] = displayCurrency.useDisplayCurrency()
