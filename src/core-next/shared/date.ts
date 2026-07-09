@@ -1,10 +1,5 @@
 // Internal date utilities. Not part of the public Core Next API.
-import {
-  startOfWeek as startOfWeekFNS,
-  differenceInCalendarMonths as differenceInCalendarMonthsFNS,
-  eachDayOfInterval as eachDayOfIntervalFNS,
-  parseISO,
-} from 'date-fns'
+// Dependency-free: keep it that way so the future package has zero runtime deps.
 import type {
   TDateDraft,
   TISODate,
@@ -20,8 +15,16 @@ export function msToUnix(date: TMsTime): TUnixTime {
   return Math.round(date / 1000)
 }
 
+const ISO_DATE_OR_MONTH = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/
+
 export function parseDate(date: TDateDraft): Date {
-  if (typeof date === 'string') return parseISO(date)
+  if (typeof date === 'string') {
+    // Date-only ISO strings must parse as LOCAL midnight (date-fns parseISO
+    // semantics); native `new Date('2000-01-01')` would treat them as UTC.
+    const m = ISO_DATE_OR_MONTH.exec(date)
+    if (m) return new Date(+m[1], +m[2] - 1, m[3] ? +m[3] : 1)
+    return new Date(date)
+  }
   return new Date(date)
 }
 
@@ -33,7 +36,11 @@ export function differenceInCalendarMonths(
   date1: TDateDraft,
   date2: TDateDraft
 ): number {
-  return differenceInCalendarMonthsFNS(parseDate(date1), parseDate(date2))
+  const d1 = parseDate(date1)
+  const d2 = parseDate(date2)
+  return (
+    (d1.getFullYear() - d2.getFullYear()) * 12 + (d1.getMonth() - d2.getMonth())
+  )
 }
 
 export function toISODate(date: TDateDraft): TISODate {
@@ -102,18 +109,6 @@ export function nextMonth(d: TDateDraft) {
 export function nextYear(d: TDateDraft) {
   const date = parseDate(d)
   return new Date(date.getFullYear() + 1, 0, 1)
-}
-
-export function startOfWeek(d: TDateDraft) {
-  const date = parseDate(d)
-  return startOfWeekFNS(date, { weekStartsOn: 1 })
-}
-
-export function eachDayOfInterval(start: TDateDraft, end: TDateDraft) {
-  return eachDayOfIntervalFNS({
-    start: parseDate(start),
-    end: parseDate(end),
-  })
 }
 
 /** Checks if string is valid ISO month */
