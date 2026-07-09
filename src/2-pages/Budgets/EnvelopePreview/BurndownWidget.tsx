@@ -1,4 +1,9 @@
 import React, { FC } from 'react'
+import { useAppSelector } from 'store'
+import {
+  selectCoreActivity,
+  selectCoreEnvMetrics,
+} from 'core-next/adapters/redux'
 import { Area, ComposedChart, Line, ResponsiveContainer, YAxis } from 'recharts'
 import { Stack, Box, BoxProps } from '@mui/material'
 import { useTranslation } from 'react-i18next'
@@ -8,7 +13,6 @@ import { prevMonth, toISOMonth } from '6-shared/helpers/date'
 import { TFxAmount, TISODate, TISOMonth } from '6-shared/types'
 import { addFxAmount, round } from '6-shared/helpers/money'
 
-import { balances } from '5-entities/envBalances'
 import { TEnvelopeId } from '5-entities/envelope'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { DataLine } from '3-widgets/DataLine'
@@ -23,7 +27,7 @@ export const BurndownWidget: FC<BurndownWidgetProps> = ({
 }) => {
   const { t } = useTranslation('budgets')
   const [month] = useMonth()
-  const envData = balances.useEnvData()
+  const envData = useAppSelector(selectCoreEnvMetrics)
   const { currency } = envData[month][id]
 
   return (
@@ -131,7 +135,7 @@ type TTrendNode = {
 
 function useDataTrend(month: TISOMonth, id: TEnvelopeId): TTrendNode[] {
   const toDisplay = displayCurrency.useToDisplay(month)
-  const envData = balances.useEnvData()?.[month]?.[id]
+  const envData = useAppSelector(selectCoreEnvMetrics)?.[month]?.[id]
   const activityTrend = useActivityTrend(month, id)
 
   const startBalance = addFxAmount(
@@ -175,8 +179,8 @@ function useDataTrend(month: TISOMonth, id: TEnvelopeId): TTrendNode[] {
  * @returns
  */
 function useActivityTrend(month: TISOMonth, id: TEnvelopeId): TFxAmount[] {
-  const activity = balances.useActivity()?.[month]?.envActivity?.byEnv
-  const envData = balances.useEnvData()?.[month]?.[id]
+  const activity = useAppSelector(selectCoreActivity)?.[month]?.envActivity?.byEnv
+  const envData = useAppSelector(selectCoreEnvMetrics)?.[month]?.[id]
 
   let trend = new Array(31).fill({})
   if (!envData) return trend

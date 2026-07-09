@@ -1,19 +1,21 @@
 import React, { FC } from 'react'
+import {
+  selectCoreMonthTotals,
+} from 'core-next/adapters/redux'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Button } from '@mui/material'
 import { TISOMonth } from '6-shared/types'
 import { WarningIcon } from '6-shared/ui/Icons'
 import { isZero } from '6-shared/helpers/money'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
-import { useAppDispatch } from 'store'
-import { balances } from '5-entities/envBalances'
+import { useAppDispatch, useAppSelector } from 'store'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { overspendModel } from '../model'
 
 export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
   const { t } = useTranslation('overspendNotice')
   const dispatch = useAppDispatch()
-  const { overspend } = balances.useTotals()[month]
+  const { overspend } = useAppSelector(selectCoreMonthTotals)[month]
   const fixOverspends = useConfirm({
     onOk: () => dispatch(overspendModel.fixAll(month)),
     title: t('confirm.title'),

@@ -1,4 +1,9 @@
 import React, { FC } from 'react'
+import { useAppSelector } from 'store'
+import {
+  selectCoreMonthList,
+  selectCoreMonthTotals,
+} from 'core-next/adapters/redux'
 import {
   Typography,
   ButtonBase,
@@ -15,7 +20,6 @@ import { DataLine } from '3-widgets/DataLine'
 import { ArrowForwardIcon } from '6-shared/ui/Icons'
 
 import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { balances } from '5-entities/envBalances'
 import { useMonth } from '../../MonthProvider'
 import { useIsSmall } from '../shared/shared'
 
@@ -83,11 +87,11 @@ function useTotalsModel() {
   const [currency] = displayCurrency.useDisplayCurrency()
   const toDisplay = displayCurrency.useToDisplay(month)
 
-  const monthList = balances.useMonthList()
+  const monthList = useAppSelector(selectCoreMonthList)
   const lastMonth = monthList[monthList.length - 1]
 
-  const totals = balances.useTotals()[month]
-  const lastTotals = balances.useTotals()[lastMonth]
+  const totals = useAppSelector(selectCoreMonthTotals)[month]
+  const lastTotals = useAppSelector(selectCoreMonthTotals)[lastMonth]
 
   const toBeBudgeted = toDisplay(totals.toBeBudgeted)
   const overspend = toDisplay(totals.overspend)

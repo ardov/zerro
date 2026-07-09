@@ -7,8 +7,12 @@ import { CloseIcon } from '6-shared/ui/Icons'
 import { registerPopover } from '6-shared/historyPopovers'
 import { useAppSelector } from 'store'
 import { TEnvelopeId } from '5-entities/envelope'
-import { selectCoreEnvelopes } from 'core-next/adapters/redux'
-import { balances, TrFilterMode } from '5-entities/envBalances'
+import {
+  selectCoreActivity,
+  selectCoreEnvelopes,
+  selectCoreRawActivity,
+} from 'core-next/adapters/redux'
+import { TrFilterMode } from '5-entities/envBalances'
 import {
   TransactionList,
   TTransactionListProps,
@@ -26,8 +30,8 @@ function useFilteredByEnvelope(conditions?: TEnvConditions): TTransaction[] {
   const { id, month, mode = TrFilterMode.Envelope, isExact } = conditions || {}
 
   const envelopes = useAppSelector(selectCoreEnvelopes)
-  const fullActivity = balances.useActivity()
-  const fullRawActivity = balances.useRawActivity()
+  const fullActivity = useAppSelector(selectCoreActivity)
+  const fullRawActivity = useAppSelector(selectCoreRawActivity)
 
   const transactionList = useMemo(() => {
     if (!id || !month) return []

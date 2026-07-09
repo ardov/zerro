@@ -11,8 +11,10 @@ import { moveGroup } from '4-features/envelope/moveGroup'
 import { createEnvelopeInGroup } from '4-features/envelope/createEnvelope'
 import { TableRow } from './shared/shared'
 import { TFxAmount } from '6-shared/types'
-import { balances } from '5-entities/envBalances'
-import { selectCoreEnvelopeStructure } from 'core-next/adapters/redux'
+import {
+  selectCoreEnvMetrics,
+  selectCoreEnvelopeStructure,
+} from 'core-next/adapters/redux'
 import { addFxAmount } from '6-shared/helpers/money'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { useMonth } from '../MonthProvider'
@@ -144,7 +146,7 @@ const useGroupTotals = (id: string) => {
     available: number
   }
   const [month] = useMonth()
-  const data = balances.useEnvData()[month]
+  const data = useAppSelector(selectCoreEnvMetrics)[month]
   const structure = useAppSelector(selectCoreEnvelopeStructure, isEqual)
   const toDisplay = displayCurrency.useToDisplay(month)
   const group = structure.find(gr => gr.id === id)

@@ -7,10 +7,16 @@
  * adapter parity tests, and must not leak through this entrypoint.
  */
 export {
+  selectCoreActivity,
   selectCoreBudgets,
   selectCoreEnvelopes,
   selectCoreEnvelopeStructure,
+  selectCoreEnvMetrics,
   selectCoreGoals,
   selectCoreGoalTotals,
   selectCoreKeepingEnvelopeIds,
+  selectCoreMonthList,
+  selectCoreMonthTotals,
+  selectCoreRawActivity,
+  selectCoreSortedActivity,
 } from './selectors'

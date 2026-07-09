@@ -1,7 +1,10 @@
 import React, { FC, ReactNode, useCallback, useState } from 'react'
+import { useAppSelector } from 'store'
+import {
+  selectCoreMonthList,
+} from 'core-next/adapters/redux'
 import { TDateDraft, TISOMonth } from '6-shared/types'
 import { isISOMonth, toISOMonth } from '6-shared/helpers/date'
-import { balances } from '5-entities/envBalances'
 
 type TMonthState = [TISOMonth, (date: TDateDraft) => void]
 
@@ -14,7 +17,7 @@ export const useMonth = () => React.useContext(MonthContext)
 
 export const MonthProvider: FC<{ children: ReactNode }> = props => {
   const currentMonth = toISOMonth(new Date())
-  const monthList = balances.useMonthList()
+  const monthList = useAppSelector(selectCoreMonthList)
   const firstMonth = monthList[0] || currentMonth
   const lastMonth = monthList[monthList.length - 1] || currentMonth
   const [selected, setSelected] = useState<TISOMonth>(currentMonth)

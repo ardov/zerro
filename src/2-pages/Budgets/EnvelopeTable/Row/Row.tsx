@@ -9,9 +9,9 @@ import { TFxCode, TISOMonth } from '6-shared/types'
 
 import { useAppSelector } from 'store'
 import { goalModel, TGoal } from '5-entities/goal'
-import { balances } from '5-entities/envBalances'
 import { TEnvelopeId } from '5-entities/envelope'
 import {
+  selectCoreEnvMetrics,
   selectCoreEnvelopes,
   selectCoreGoals,
 } from 'core-next/adapters/redux'
@@ -123,7 +123,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
   const { columns } = useColumns()
 
   const envelope = useAppSelector(selectCoreEnvelopes)[id]
-  const envData = balances.useEnvData()[month][id]
+  const envData = useAppSelector(selectCoreEnvMetrics)[month][id]
   const goalInfo = useAppSelector(selectCoreGoals)[month][id]
   const toDisplay = displayCurrency.useToDisplay(month)
 

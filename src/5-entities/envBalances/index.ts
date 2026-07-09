@@ -1,6 +1,4 @@
-import { useAppSelector } from 'store/index'
 import { getMonthList } from './1 - monthList'
-import { getRawActivity } from './1 - rawActivity'
 import { getActivity } from './2 - activity'
 import { getSortedActivity } from './2 - sortedActivity'
 import { getEnvMetrics } from './3 - envMetrics'
@@ -15,20 +13,18 @@ export type { TMonthTotals } from './4 - monthTotals'
 export { EnvActivity } from './1 - rawActivity'
 export { TrFilterMode } from './2 - sortedActivity'
 
+// Selectors. Reads are migrated to Core Next; these stay as the reference
+// implementation for parity tests, fixture exports, and the not-yet-migrated
+// write thunks.
 export const balances = {
-  // Selectors
+  /** @deprecated Read via `selectCoreMonthList` from `core-next/adapters/redux` */
   monthList: getMonthList,
-  // rawActivity: getRawActivity,
+  /** @deprecated Read via `selectCoreActivity` from `core-next/adapters/redux` */
   activity: getActivity,
+  /** @deprecated Read via `selectCoreSortedActivity` from `core-next/adapters/redux` */
   sortedActivity: getSortedActivity,
+  /** @deprecated Read via `selectCoreEnvMetrics` from `core-next/adapters/redux` */
   envData: getEnvMetrics,
+  /** @deprecated Read via `selectCoreMonthTotals` from `core-next/adapters/redux` */
   totals: getMonthTotals,
-
-  // Hooks
-  useMonthList: () => useAppSelector(getMonthList),
-  useRawActivity: () => useAppSelector(getRawActivity),
-  useActivity: () => useAppSelector(getActivity),
-  useSortedActivity: () => useAppSelector(getSortedActivity),
-  useEnvData: () => useAppSelector(getEnvMetrics),
-  useTotals: () => useAppSelector(getMonthTotals),
 }

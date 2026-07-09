@@ -1,10 +1,13 @@
 import React, { FC } from 'react'
+import { useAppSelector } from 'store'
+import {
+  selectCoreMonthTotals,
+} from 'core-next/adapters/redux'
 import { Typography } from '@mui/material'
 import { TableRow } from '../shared/shared'
 
 import { Metric } from '../models/useMetric'
 import { TFxAmount, TISOMonth } from '6-shared/types'
-import { balances } from '5-entities/envBalances'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { useTranslation } from 'react-i18next'
 
@@ -15,7 +18,7 @@ type FooterProps = {
 
 export const Footer: FC<FooterProps> = props => {
   const { month } = props
-  const totals = balances.useTotals()[month]
+  const totals = useAppSelector(selectCoreMonthTotals)[month]
   const { t } = useTranslation('common')
 
   const Sum: FC<{ value: TFxAmount }> = ({ value }) => (

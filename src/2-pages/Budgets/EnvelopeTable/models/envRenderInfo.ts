@@ -4,9 +4,12 @@ import { ById, ByMonth, TISOMonth } from '6-shared/types'
 
 import { TSelector, useAppSelector } from 'store'
 import { envelopeVisibility, TEnvelope, TEnvelopeId } from '5-entities/envelope'
-import { selectCoreEnvelopes } from 'core-next/adapters/redux'
-import { balances } from '5-entities/envBalances'
-import { selectCoreGoals } from 'core-next/adapters/redux'
+import {
+  selectCoreEnvelopes,
+  selectCoreEnvMetrics,
+  selectCoreGoals,
+  selectCoreMonthList,
+} from 'core-next/adapters/redux'
 import { isEqual } from 'lodash'
 
 export type TRenderInfo = {
@@ -22,8 +25,8 @@ export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
   createSelector(
     [
       selectCoreEnvelopes,
-      balances.monthList,
-      balances.envData,
+      selectCoreMonthList,
+      selectCoreEnvMetrics,
       selectCoreGoals,
     ],
     (envelopes, monthList, envData, goals) => {

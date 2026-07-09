@@ -17,7 +17,6 @@ import { CloseIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { TDateDraft, TISOMonth } from '6-shared/types'
 
-import { balances } from '5-entities/envBalances'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import {
   overspendModel,
@@ -28,7 +27,10 @@ import { useMonth } from '../MonthProvider'
 import { BalanceWidget } from '../BalanceWidget'
 import { FxRates } from './FxRates'
 import { ActivityStats } from './ActivityStats'
-import { selectCoreGoalTotals } from 'core-next/adapters/redux'
+import {
+  selectCoreGoalTotals,
+  selectCoreMonthTotals,
+} from 'core-next/adapters/redux'
 import { totalGoalsModel } from '4-features/bulkActions/fillGoals'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useTranslation } from 'react-i18next'
@@ -39,7 +41,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
   const { t } = useTranslation('budgets', { keyPrefix: 'actions' })
   const [month] = useMonth()
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
-  const { overspend } = balances.useTotals()[month]
+  const { overspend } = useAppSelector(selectCoreMonthTotals)[month]
 
   const dispatch = useAppDispatch()
 

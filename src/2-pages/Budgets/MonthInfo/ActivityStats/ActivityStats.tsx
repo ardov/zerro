@@ -7,20 +7,22 @@ import { PercentBar, PercentBarItem } from '6-shared/ui/PercentBar'
 
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import {
-  balances,
   EnvActivity,
   TrFilterMode,
   TSortedActivityNode,
 } from '5-entities/envBalances'
 import { useAppSelector } from 'store'
-import { selectCoreEnvelopes } from 'core-next/adapters/redux'
+import {
+  selectCoreEnvelopes,
+  selectCoreSortedActivity,
+} from 'core-next/adapters/redux'
 import { DataLine } from '3-widgets/DataLine'
 import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 
 export function ActivityStats(props: { month: TISOMonth }) {
   const { month } = props
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
-  const activity = balances.useSortedActivity()[month]
+  const activity = useAppSelector(selectCoreSortedActivity)[month]
   const transactionDrawer = useEnvTransactionsDrawer()
 
   const showTransactions = useCallback(

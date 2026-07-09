@@ -10,9 +10,9 @@ import { sendEvent } from '6-shared/helpers/tracking'
 
 import { useAppDispatch, useAppSelector } from 'store'
 import { envelopeModel, TEnvelope, TEnvelopeId } from '5-entities/envelope'
-import { balances } from '5-entities/envBalances'
 import { goalModel } from '5-entities/goal'
 import {
+  selectCoreEnvMetrics,
   selectCoreEnvelopes,
   selectCoreGoals,
 } from 'core-next/adapters/redux'
@@ -36,7 +36,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   const [month] = useMonth()
   const openGoalPopover = useGoalPopover()
 
-  const envMetrics = balances.useEnvData()[month][id]
+  const envMetrics = useAppSelector(selectCoreEnvMetrics)[month][id]
   const env = useAppSelector(selectCoreEnvelopes)[id]
 
   const goalInfo = useAppSelector(selectCoreGoals)[month][id]

@@ -1,4 +1,8 @@
 import React, { useState, useRef, useCallback, FC } from 'react'
+import { useAppSelector } from 'store'
+import {
+  selectCoreMonthList,
+} from 'core-next/adapters/redux'
 import { Box, Typography, IconButton, ButtonBase } from '@mui/material'
 import { BoxProps } from '@mui/system'
 import { TDateDraft, TISOMonth } from '6-shared/types'
@@ -8,11 +12,10 @@ import { formatDate } from '6-shared/helpers/date'
 import { nextMonth, prevMonth } from '6-shared/helpers/date'
 
 import { useMonth } from '../../MonthProvider'
-import { balances } from '5-entities/envBalances'
 
 export const MonthSelect: FC<BoxProps> = props => {
   const [month, setMonth] = useMonth()
-  const list = balances.useMonthList()
+  const list = useAppSelector(selectCoreMonthList)
   const first = list[0]
   const last = list[list.length - 1]
 

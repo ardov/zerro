@@ -7,10 +7,13 @@ import { Modify, TISOMonth } from '6-shared/types'
 import { useAppDispatch, useAppSelector } from 'store'
 
 import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { balances } from '5-entities/envBalances'
 import { moveMoney } from './moveMoney'
 import { TEnvelopeId } from '5-entities/envelope'
-import { selectCoreEnvelopes } from 'core-next/adapters/redux'
+import {
+  selectCoreEnvMetrics,
+  selectCoreEnvelopes,
+  selectCoreMonthTotals,
+} from 'core-next/adapters/redux'
 
 export type MoveMoneyModalProps = Modify<
   DialogProps,
@@ -27,8 +30,8 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   const { open, onClose, source, month, destination } = props
 
   const envelopes = useAppSelector(selectCoreEnvelopes)
-  const metrics = balances.useEnvData()[month]
-  const totalMetrics = balances.useTotals()[month]
+  const metrics = useAppSelector(selectCoreEnvMetrics)[month]
+  const totalMetrics = useAppSelector(selectCoreMonthTotals)[month]
   const [currency] = displayCurrency.useDisplayCurrency()
   const toDisplay = displayCurrency.useToDisplay(month)
 

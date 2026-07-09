@@ -1,4 +1,8 @@
 import { Divider, Paper, Typography } from '@mui/material'
+import { useAppSelector } from 'store'
+import {
+  selectCoreMonthTotals,
+} from 'core-next/adapters/redux'
 import Balancer from 'react-wrap-balancer'
 import { useTranslation } from 'react-i18next'
 import { keys } from '6-shared/helpers/keys'
@@ -7,11 +11,10 @@ import { Total } from '6-shared/ui/Total'
 import { DataLine } from '3-widgets/DataLine'
 
 import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { balances } from '5-entities/envBalances'
 
 export function BalanceWidget(props: { month: TISOMonth }) {
   const { t } = useTranslation('budgets')
-  const totals = balances.useTotals()[props.month]
+  const totals = useAppSelector(selectCoreMonthTotals)[props.month]
   const [currency, setDisplayCurrency] = displayCurrency.useDisplayCurrency()
   const toDisplay = displayCurrency.useToDisplay(props.month)
   const currencies = keys(totals.fundsEnd)

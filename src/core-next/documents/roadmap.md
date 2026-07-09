@@ -246,6 +246,15 @@ Progress:
   formatting) stay legacy until command compilers take over.
   `selectors.goals.test.ts` seeds a goal through `compileSetGoal` and covers
   parity, a whole-graph invalidation sentinel, and recompute-on-change.
+- 2026-07-09: the whole `envBalances` UI read surface switched to core:
+  ~21 components read `selectCoreEnvMetrics`, `selectCoreMonthTotals`,
+  `selectCoreMonthList`, `selectCoreActivity`, `selectCoreSortedActivity`,
+  and `selectCoreRawActivity`. All `balances.use*`, `envelopeModel.use*`, and
+  `goalModel.use*` hooks are deleted (zero consumers); the underlying legacy
+  selectors are marked `@deprecated` and stay only as the parity reference and
+  for the not-yet-migrated write thunks (`setTotalBudget`, `copyPrevMonth`,
+  `fixOverspends`, `startFresh`, `moveMoney`, `fillGoals`, envelope thunks)
+  plus `exportPrivateFixture` and the legacy goal chain internals.
 - Known granularity limit: all hidden-data types share the reminder slice, so
   a hidden write of one type recomputes reads of the others (legacy avoided
   this with a shallowEqual reminder-filter selector). Rare in practice;

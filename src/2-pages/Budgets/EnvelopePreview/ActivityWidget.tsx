@@ -1,4 +1,9 @@
 import React, { FC, useEffect, useState } from 'react'
+import { useAppSelector } from 'store'
+import {
+  selectCoreEnvMetrics,
+  selectCoreMonthList,
+} from 'core-next/adapters/redux'
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { Stack, Box, BoxProps } from '@mui/material'
 import { useTranslation } from 'react-i18next'
@@ -6,7 +11,6 @@ import { useAppTheme } from '6-shared/ui/theme'
 import { TFxAmount, TISOMonth } from '6-shared/types'
 import { formatDate } from '6-shared/helpers/date'
 
-import { balances } from '5-entities/envBalances'
 import { TEnvelopeId } from '5-entities/envelope'
 import { fxRateModel } from '5-entities/currency/fxRate'
 import { DataLine } from '3-widgets/DataLine'
@@ -21,8 +25,8 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
   const [month, setMonth] = useMonth()
   const [highlighted, setHighlighted] = useState(month)
   const convertFx = fxRateModel.useConverter()
-  const envData = balances.useEnvData()
-  const dates = balances.useMonthList()
+  const envData = useAppSelector(selectCoreEnvMetrics)
+  const dates = useAppSelector(selectCoreMonthList)
   const { currency } = envData[month][id]
   const dateRange = getDateRange(dates, 12, month)
 

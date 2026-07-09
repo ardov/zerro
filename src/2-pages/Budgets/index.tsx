@@ -1,4 +1,8 @@
 import React, { FC, ReactElement, useCallback } from 'react'
+import { useAppSelector } from 'store'
+import {
+  selectCoreMonthList,
+} from 'core-next/adapters/redux'
 import { Helmet } from 'react-helmet'
 import { Box, Theme, useMediaQuery } from '@mui/material'
 import { useHotkeys } from 'react-hotkeys-hook'
@@ -6,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { formatDate } from '6-shared/helpers/date'
 import { nextMonth, prevMonth, toISOMonth } from '6-shared/helpers/date'
 import { TEnvelopeId } from '5-entities/envelope'
-import { balances, TrFilterMode } from '5-entities/envBalances'
+import { TrFilterMode } from '5-entities/envBalances'
 import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 
 import { MonthProvider, useMonth } from './MonthProvider'
@@ -129,7 +133,7 @@ const BudgetLayout: FC<{
 }
 
 function useMonthHotkeys() {
-  const monthList = balances.useMonthList()
+  const monthList = useAppSelector(selectCoreMonthList)
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
   const [month, setMonth] = useMonth()

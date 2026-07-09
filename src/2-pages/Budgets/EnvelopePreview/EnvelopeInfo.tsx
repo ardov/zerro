@@ -1,4 +1,8 @@
 import type { TDateDraft, TFxAmount, TISOMonth } from '6-shared/types'
+import { useAppSelector } from 'store'
+import {
+  selectCoreEnvMetrics,
+} from 'core-next/adapters/redux'
 
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -21,7 +25,7 @@ import {
 } from '6-shared/helpers/date'
 
 import { TEnvelopeId } from '5-entities/envelope'
-import { balances, TrFilterMode } from '5-entities/envBalances'
+import { TrFilterMode } from '5-entities/envBalances'
 import { fxRateModel } from '5-entities/currency/fxRate'
 import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 import { OneLiner } from '3-widgets/DataLine'
@@ -42,7 +46,7 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
   const transactionDrawer = useEnvTransactionsDrawer()
   const openBudgetPopover = useBudgetPopover()
   const convertFx = fxRateModel.useConverter()
-  const envMetrics = balances.useEnvData()[month][id]
+  const envMetrics = useAppSelector(selectCoreEnvMetrics)[month][id]
 
   if (!envMetrics) return null
 
