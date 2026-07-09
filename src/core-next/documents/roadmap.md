@@ -241,6 +241,15 @@ Progress:
   a hidden write of one type recomputes reads of the others (legacy avoided
   this with a shallowEqual reminder-filter selector). Rare in practice;
   refine only if it shows up in profiles.
+- 2026-07-09, reactivity decision: stay with passive core + per-runtime
+  memoization for now. The adapter entrypoint (`adapters/redux/index.ts`)
+  exports only selectors with real app consumers; internal memoization nodes
+  are module-private, test-only selectors stay in `./selectors`. A declarative
+  projection-graph definition (one graph spec, derived session/redux runtimes)
+  is the fallback if graph duplication keeps causing invalidation bugs. A
+  reactive core that owns recomputation and notifies subscribers is deferred
+  until the engine owns replica state — doing it while Redux owns data would
+  create a second source of truth.
 
 Recommended order:
 

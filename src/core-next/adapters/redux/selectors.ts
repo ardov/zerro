@@ -56,8 +56,6 @@ type TEnvelopeLabels = {
   defaultPayeeGroup: string
 }
 
-export const selectCoreCurrentData = (state: RootState) => state.data.current
-
 // Hidden data lives only in reminder comments; depending on the reminder slice
 // keeps these selectors cached across unrelated data changes.
 const selectCoreReminderSlice = (state: RootState) =>
@@ -72,12 +70,12 @@ export const selectCoreUserSettings = createSelector(
   reminder => getUserSettings({ reminder })
 )
 
-export const selectCoreEnvelopeMeta = createSelector(
+const selectCoreEnvelopeMeta = createSelector(
   [selectCoreReminderSlice],
   reminder => getEnvelopeMeta({ reminder })
 )
 
-export const selectCoreEnvBudgets = createSelector(
+const selectCoreEnvBudgets = createSelector(
   [selectCoreReminderSlice],
   reminder => getEnvBudgets({ reminder })
 )
@@ -87,12 +85,12 @@ export const selectCoreRawGoals = createSelector(
   reminder => getRawGoals({ reminder })
 )
 
-export const selectCoreStoredFxRates = createSelector(
+const selectCoreStoredFxRates = createSelector(
   [selectCoreReminderSlice],
   reminder => getStoredFxRates({ reminder })
 )
 
-export const selectCoreEnvelopeLabels = () => getCoreEnvelopeLabels()
+const selectCoreEnvelopeLabels = () => getCoreEnvelopeLabels()
 
 export const selectCoreDebtors = createSelector(
   [
@@ -160,9 +158,9 @@ export const selectCoreBudgets = createSelector(
     })
 )
 
-export const selectCoreCurrentMonth = () => toISOMonth(Date.now())
+const selectCoreCurrentMonth = () => toISOMonth(Date.now())
 
-export const selectCoreCurrentDate = () => toISODate(Date.now())
+const selectCoreCurrentDate = () => toISODate(Date.now())
 
 export const selectCoreCurrentFxRates = createSelector(
   [instrumentModel.getInstruments, selectCoreCurrentMonth],
@@ -182,7 +180,7 @@ export const selectCoreFxRates = createSelector(
     })
 )
 
-export const selectCoreFxRatesGetter = createSelector(
+const selectCoreFxRatesGetter = createSelector(
   [selectCoreFxRates, selectCoreCurrentFxRates],
   (rates, currentRates) =>
     buildFxRatesGetter({
@@ -191,7 +189,7 @@ export const selectCoreFxRatesGetter = createSelector(
     })
 )
 
-export const selectCoreConvertFx = createSelector(
+const selectCoreConvertFx = createSelector(
   [selectCoreFxRatesGetter],
   buildFxConverter
 )
@@ -206,7 +204,7 @@ export const selectCoreMonthList = createSelector(
     })
 )
 
-export const selectCoreInBudgetAccountIds = createSelector(
+const selectCoreInBudgetAccountIds = createSelector(
   [selectCoreAccountSlice],
   account => getZerroInBudgetAccountIds({ account }),
   { memoizeOptions: { resultEqualityCheck: shallowEqual } }
