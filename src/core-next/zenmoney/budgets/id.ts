@@ -1,4 +1,4 @@
-import { toISODate } from '6-shared/helpers/date'
+import { toISODate } from '../../shared/date'
 import type { TDateDraft } from '../primitives'
 import type { TBudgetId, TBudgetTagId } from './types'
 

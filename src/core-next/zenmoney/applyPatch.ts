@@ -1,5 +1,5 @@
-import { keys } from '6-shared/helpers/keys'
-import type { TDataStore, TDiff } from '6-shared/types'
+import { keys } from '../shared/keys'
+import type { TDataStore, TDiff } from './store'
 
 export function applyPatch(base: TDataStore, patch: TDiff): TDataStore {
   const next = cloneDataStore(base)

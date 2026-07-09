@@ -1,4 +1,4 @@
-import type { ByMonth } from '6-shared/types'
+import type { ByMonth } from '../../shared/types'
 import type { TEnvelopeId } from '../envelope-id'
 import {
   getMonthlyHiddenData,

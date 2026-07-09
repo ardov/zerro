@@ -1,13 +1,10 @@
-import { round } from '6-shared/helpers/money'
-import type {
-  ById,
-  TAccountId,
-  TFxAmount,
-  TInstrument,
-  TMerchant,
-  TMerchantId,
-  TTransaction,
-} from '6-shared/types'
+import { round } from '../../shared/money'
+import type { ById } from '../../shared/types'
+import type { TAccountId } from '../accounts/types'
+import type { TFxAmount } from '../../shared/money'
+import type { TInstrument } from '../instruments/types'
+import type { TMerchant, TMerchantId } from '../merchants/types'
+import type { TTransaction } from '../transactions/types'
 import { getTransactionType, TrType } from '../transactions'
 
 export type TDebtor = {

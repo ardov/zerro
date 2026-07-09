@@ -1,4 +1,4 @@
-import type { TDataStore } from '6-shared/types'
+import type { TDataStore } from '../../zenmoney/store'
 import { ZERRO_DATA_ACCOUNT_NAME } from '../../constants'
 import type { TCompiled, TCoreContext } from '../../types'
 import { getRootUser, makeAccount, type TAccountId } from '../../zenmoney'

@@ -1,4 +1,5 @@
-import type { OptionalExceptFor, TDataStore } from '6-shared/types'
+import type { OptionalExceptFor } from '../../shared/types'
+import type { TDataStore } from '../store'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
 import { getRootUserId } from '../users'
 import { makeTag } from './factory'

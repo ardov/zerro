@@ -296,6 +296,12 @@ Progress:
   selectors with core replacements are `@deprecated`. `tagModel.getTagsTree`
   and `trModel.useTrTypeGetter` remain legacy until their consumers migrate.
   Write thunks (`mergeAccounts` and friends) still read legacy selectors.
+- 2026-07-10: production core is self-contained. `core-next/shared` holds
+  internal copies of keys/date/money helpers and utility types;
+  `zenmoney/colors` owns the color codec and the frozen generated-color
+  palette; `zenmoney/store` owns `TDataStore` and the normalized patch shapes
+  (`6-shared/types` re-exports them as a shim). The boundary test forbids any
+  `6-shared` import from production core.
 
 Recommended order:
 

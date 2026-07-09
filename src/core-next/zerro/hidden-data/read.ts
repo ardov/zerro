@@ -1,5 +1,8 @@
-import { isISOMonth } from '6-shared/helpers/date'
-import type { ByMonth, TDataStore, TISOMonth, TReminder } from '6-shared/types'
+import { isISOMonth } from '../../shared/date'
+import type { ByMonth } from '../../shared/types'
+import type { TDataStore } from '../../zenmoney/store'
+import type { TISOMonth } from '../../zenmoney/primitives'
+import type { TReminder } from '../../zenmoney/reminders/types'
 import { HiddenDataType, THiddenDataComment } from './types'
 
 /** Hidden data lives only in reminder comments, so reads must not depend on wider store slices. */

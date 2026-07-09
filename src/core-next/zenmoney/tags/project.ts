@@ -1,5 +1,5 @@
-import type { ById } from '6-shared/types'
-import { getColorForString, int2hex } from '6-shared/helpers/color'
+import type { ById } from '../../shared/types'
+import { getColorForString, int2hex } from '../colors'
 import toArray from 'lodash/toArray'
 import type { TTag, TTagId } from './types'
 

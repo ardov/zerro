@@ -1,6 +1,8 @@
 export * from './applyPatch'
 export * from './replay'
 export * from './primitives'
+export * from './colors'
+export * from './store'
 
 export * from './instruments'
 export * from './countries'

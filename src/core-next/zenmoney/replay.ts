@@ -1,4 +1,4 @@
-import type { TDataStore, TDiff } from '6-shared/types'
+import type { TDataStore, TDiff } from './store'
 import { applyPatch } from './applyPatch'
 
 export function replay(base: TDataStore, patches: TDiff[]): TDataStore {

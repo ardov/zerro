@@ -1,4 +1,5 @@
-import type { ById, TDataStore } from '6-shared/types'
+import type { ById } from '../../shared/types'
+import type { TDataStore } from '../store'
 import type { TAccountId } from '../accounts'
 import type { TTransaction, TTransactionId } from './types'
 

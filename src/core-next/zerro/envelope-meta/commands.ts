@@ -1,4 +1,5 @@
-import type { OptionalExceptFor, TDataStore } from '6-shared/types'
+import type { OptionalExceptFor } from '../../shared/types'
+import type { TDataStore } from '../../zenmoney/store'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
 import { compileSetSimpleHiddenData, HiddenDataType } from '../hidden-data'
 import { getEnvelopeMeta, type TEnvelopeMeta } from './read'

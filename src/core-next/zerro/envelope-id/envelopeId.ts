@@ -1,4 +1,6 @@
-import type { TAccountId, TMerchantId, TTagId } from '6-shared/types'
+import type { TAccountId } from '../../zenmoney/accounts/types'
+import type { TMerchantId } from '../../zenmoney/merchants/types'
+import type { TTagId } from '../../zenmoney/tags/types'
 
 export enum EnvType {
   Tag = 'tag',

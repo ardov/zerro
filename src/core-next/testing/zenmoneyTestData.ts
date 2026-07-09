@@ -1,16 +1,14 @@
-import type {
-  ById,
-  TAccount,
-  TBudget,
-  TDataStore,
-  TInstrument,
-  TMerchant,
-  TReminder,
-  TReminderMarker,
-  TTag,
-  TTransaction,
-  TUser,
-} from '6-shared/types'
+import type { ById } from '../shared/types'
+import type { TAccount } from '../zenmoney/accounts/types'
+import type { TBudget } from '../zenmoney/budgets/types'
+import type { TDataStore } from '../zenmoney/store'
+import type { TInstrument } from '../zenmoney/instruments/types'
+import type { TMerchant } from '../zenmoney/merchants/types'
+import type { TReminder } from '../zenmoney/reminders/types'
+import type { TReminderMarker } from '../zenmoney/reminderMarkers/types'
+import type { TTag } from '../zenmoney/tags/types'
+import type { TTransaction } from '../zenmoney/transactions/types'
+import type { TUser } from '../zenmoney/users/types'
 
 export function makeStore(patch: Partial<TDataStore> = {}): TDataStore {
   return {

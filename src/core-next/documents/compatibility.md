@@ -22,25 +22,31 @@ adapter, then remove `src/demoData`.
 
 Status: compatibility facade.
 
-`6-shared/types` re-exports migrated ZenMoney entity types and `DataEntity` from
-Core Next so legacy code can keep compiling during the migration.
+`6-shared/types` re-exports migrated ZenMoney entity types, `DataEntity`, and
+(since 2026-07-10) `TDataStore`, `TDataStorePatch`, `TDiff`, and the deletion
+object types from Core Next (`zenmoney/store.ts` owns the normalized store and
+patch shapes). Production core no longer imports `6-shared/types` at all;
+remaining generic types (`ById`, `Modify`, ...) exist as independent copies in
+`core-next/shared/types` and `6-shared/types/ts-utils` — structural typing
+keeps them interchangeable.
 
 Exit: app/domain code imports domain types from Core Next or an app-level type
 facade; `6-shared/types` stops being the cross-layer domain source.
 
 ### `6-shared/helpers` value imports
 
-Status: undeclared dependency, now tracked.
+Status: resolved 2026-07-10.
 
-Production core code imports small pure helpers from `6-shared/helpers` as
-runtime values: `keys`, date helpers (`toISODate`, `toISOMonth`, ...), money
-helpers (`round`, `addFxAmount`, ...), and color helpers. Types from
-`6-shared/types` are a declared bridge, but these value imports would follow
-the module into a package.
+Production core owns its utilities now: `core-next/shared` holds internal
+copies of `keys`, date, money, and utility types; `zenmoney/colors` owns the
+domain color codec plus a frozen generated-color palette (previously derived
+from `@mui/material/colors` at runtime — the snapshot keeps tag colors stable
+across releases and clients). `api-boundary.test.ts` forbids any `6-shared`
+import from production core. The app keeps its own `6-shared/helpers` copies;
+duplication is accepted.
 
-Exit: copy the needed helpers into `core-next/shared` (duplication is
-accepted), switch internal imports, then extend `api-boundary.test.ts` to
-forbid `6-shared` value imports from production core entirely.
+Note: `core-next/shared` is internal — it must not become public API. Domain
+semantics are exported from `zenmoney`/`zerro`; generic helpers are not.
 
 ### `populatedTags` session read dependency
 

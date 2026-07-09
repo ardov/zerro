@@ -1,4 +1,4 @@
-import type { TDataStore } from '6-shared/types'
+import type { TDataStore } from '../zenmoney/store'
 import type { TCompiled, TCoreContext, TNormalizedPatch } from '../types'
 import { replay } from '../zenmoney'
 

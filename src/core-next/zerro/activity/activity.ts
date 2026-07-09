@@ -1,6 +1,7 @@
-import { keys } from '6-shared/helpers/keys'
-import { addFxAmount } from '6-shared/helpers/money'
-import type { ByMonth, TFxAmount } from '6-shared/types'
+import { keys } from '../../shared/keys'
+import { addFxAmount } from '../../shared/money'
+import type { ByMonth } from '../../shared/types'
+import type { TFxAmount } from '../../shared/money'
 import { TEnvelopeId } from '../envelope-id'
 import { EnvActivity, TRawActivityNode } from './rawActivity'
 

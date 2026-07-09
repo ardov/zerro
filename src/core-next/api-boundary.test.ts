@@ -34,16 +34,14 @@ describe('core-next API boundary', () => {
     expect(violations).toEqual([])
   })
 
-  it('keeps production core from importing runtime values from 6-shared/types', () => {
+  it('keeps production core free from any 6-shared imports', () => {
     const violations = readProductionCoreFiles()
       .flatMap(file => {
         const source = readFileSync(file, 'utf8')
         return source
           .split('\n')
           .map((line, index) => ({ line, index }))
-          .filter(({ line }) =>
-            /^import\s+\{.*\}\s+from ['"]6-shared\/types['"]/.test(line)
-          )
+          .filter(({ line }) => /from ['"]6-shared\//.test(line))
           .map(
             ({ line, index }) =>
               `${relative(coreRoot, file)}:${index + 1}: ${line.trim()}`

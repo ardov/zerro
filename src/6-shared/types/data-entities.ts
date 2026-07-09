@@ -1,27 +1,15 @@
-import type { TUnixTime, TMsTime } from './types'
+import type { TUnixTime } from './types'
 import type {
-  TInstrument,
   TZmInstrument,
-  TCompany,
   TZmCompany,
-  TCountry,
   TZmCountry,
-  TUser,
-  TUserId,
   TZmUser,
-  TMerchant,
   TZmMerchant,
-  TAccount,
   TZmAccount,
-  TTag,
   TZmTag,
-  TBudget,
   TZmBudget,
-  TReminder,
   TZmReminder,
-  TReminderMarker,
   TZmReminderMarker,
-  TTransaction,
   TZmTransaction,
 } from 'core-next/zenmoney'
 
@@ -59,19 +47,14 @@ export { AccountType } from 'core-next/zenmoney'
 export { DataEntity } from 'core-next/patch'
 
 // ---------------------------------------------------------------------
-// DELETION
+// DELETION — owned by Core Next
 // ---------------------------------------------------------------------
 
-export type TZmDeletionObject = {
-  id: string | number
-  object: DataEntity
-  stamp: TUnixTime
-  user: TUserId
-}
-
-export type TDeletionObject = TZmDeletionObject & {
-  stamp: TMsTime
-}
+export type {
+  TZmDeletionObject,
+  TDeletionObject,
+} from 'core-next/zenmoney'
+import type { TZmDeletionObject } from 'core-next/zenmoney'
 
 // ---------------------------------------------------------------------
 // DIFF
@@ -93,21 +76,8 @@ export type TZmDiff = {
   transaction?: TZmTransaction[]
 }
 
-export type TDiff = {
-  serverTimestamp?: TMsTime
-  deletion?: TDeletionObject[]
-  instrument?: TInstrument[]
-  country?: TCountry[]
-  company?: TCompany[]
-  user?: TUser[]
-  account?: TAccount[]
-  merchant?: TMerchant[]
-  tag?: TTag[]
-  budget?: TBudget[]
-  reminder?: TReminder[]
-  reminderMarker?: TReminderMarker[]
-  transaction?: TTransaction[]
-}
+// The normalized diff/patch shape is owned by Core Next.
+export type { TDiff } from 'core-next/zenmoney'
 
 export type TZmRequest = TZmDiff & {
   currentClientTimestamp: TUnixTime

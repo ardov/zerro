@@ -1,6 +1,8 @@
-import { nextMonth, toISOMonth } from '6-shared/helpers/date'
-import { keys } from '6-shared/helpers/keys'
-import type { ByMonth, TISOMonth, TTransaction } from '6-shared/types'
+import { nextMonth, toISOMonth } from '../../shared/date'
+import { keys } from '../../shared/keys'
+import type { ByMonth } from '../../shared/types'
+import type { TISOMonth } from '../../zenmoney/primitives'
+import type { TTransaction } from '../../zenmoney/transactions/types'
 import type { TEnvelopeId } from '../envelope-id'
 
 export type TBuildMonthListInput = {

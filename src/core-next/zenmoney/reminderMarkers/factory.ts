@@ -1,5 +1,5 @@
-import { toISODate } from '6-shared/helpers/date'
-import type { Modify, OptionalExceptFor } from '6-shared/types'
+import { toISODate } from '../../shared/date'
+import type { Modify, OptionalExceptFor } from '../../shared/types'
 import type { TCoreContext } from '../../types'
 import type { TDateDraft } from '../primitives'
 import type { TReminderMarker, TReminderMarkerId } from './types'

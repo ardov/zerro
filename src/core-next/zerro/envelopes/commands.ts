@@ -1,5 +1,6 @@
-import { hex2int, isHEX } from '6-shared/helpers/color'
-import type { ById, OptionalExceptFor, TDataStore } from '6-shared/types'
+import { hex2int, isHEX } from '../../zenmoney/colors'
+import type { ById, OptionalExceptFor } from '../../shared/types'
+import type { TDataStore } from '../../zenmoney/store'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
 import {
   compilePatchAccount,

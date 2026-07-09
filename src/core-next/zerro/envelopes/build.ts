@@ -1,13 +1,10 @@
-import type {
-  ById,
-  TAccount,
-  TFxAmount,
-  TFxCode,
-  TTag,
-  TTagId,
-} from '6-shared/types'
-import { getColorForString } from '6-shared/helpers/color'
-import { keys } from '6-shared/helpers/keys'
+import type { ById } from '../../shared/types'
+import type { TAccount } from '../../zenmoney/accounts/types'
+import type { TFxAmount } from '../../shared/money'
+import type { TFxCode } from '../../zenmoney/instruments/types'
+import type { TTag, TTagId } from '../../zenmoney/tags/types'
+import { getColorForString } from '../../zenmoney/colors'
+import { keys } from '../../shared/keys'
 import type { TDebtor } from '../../zenmoney'
 import { EnvType, envId, TEnvelopeId } from '../envelope-id'
 import { envelopeVisibility, TEnvelopeMeta } from '../envelope-meta'

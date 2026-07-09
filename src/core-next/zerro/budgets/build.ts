@@ -1,6 +1,7 @@
-import { toISOMonth } from '6-shared/helpers/date'
-import { keys } from '6-shared/helpers/keys'
-import type { ById, ByMonth, TBudget } from '6-shared/types'
+import { toISOMonth } from '../../shared/date'
+import { keys } from '../../shared/keys'
+import type { ById, ByMonth } from '../../shared/types'
+import type { TBudget } from '../../zenmoney/budgets/types'
 import { EnvType, envId, TEnvelopeId } from '../envelope-id'
 import type { TBudgets } from './read'
 

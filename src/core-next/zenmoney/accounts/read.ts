@@ -1,4 +1,5 @@
-import type { ById, TDataStore } from '6-shared/types'
+import type { ById } from '../../shared/types'
+import type { TDataStore } from '../store'
 import { AccountType, type TAccount, type TAccountId } from './types'
 
 /** Account reads must not depend on wider store slices. */

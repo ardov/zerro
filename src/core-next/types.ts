@@ -1,7 +1,7 @@
-import type { TDiff as TNormalizedPatch } from '6-shared/types'
+import type { TDiff as TNormalizedPatch } from './zenmoney/store'
 
 export { DataEntity } from './patch'
-export type { TDataStore, TDiff as TNormalizedPatch } from '6-shared/types'
+export type { TDataStore, TDiff as TNormalizedPatch } from './zenmoney/store'
 
 export type TCoreContext = {
   now: () => number

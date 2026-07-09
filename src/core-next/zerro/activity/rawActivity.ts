@@ -1,13 +1,10 @@
-import { toISOMonth } from '6-shared/helpers/date'
-import { addFxAmount } from '6-shared/helpers/money'
-import type {
-  ById,
-  ByMonth,
-  TAccountId,
-  TFxAmount,
-  TInstrument,
-  TTransaction,
-} from '6-shared/types'
+import { toISOMonth } from '../../shared/date'
+import { addFxAmount } from '../../shared/money'
+import type { ById, ByMonth } from '../../shared/types'
+import type { TAccountId } from '../../zenmoney/accounts/types'
+import type { TFxAmount } from '../../shared/money'
+import type { TInstrument } from '../../zenmoney/instruments/types'
+import type { TTransaction } from '../../zenmoney/transactions/types'
 import {
   cleanPayee,
   compareTransactionDates,

@@ -1,5 +1,6 @@
-import { isISOMonth } from '6-shared/helpers/date'
-import type { TDataStore, TISOMonth } from '6-shared/types'
+import { isISOMonth } from '../../shared/date'
+import type { TDataStore } from '../../zenmoney/store'
+import type { TISOMonth } from '../../zenmoney/primitives'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
 import {
   compileDeleteReminder,

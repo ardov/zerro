@@ -1,19 +1,16 @@
 import countries from './countries.json'
 import companies from './companies.json'
 import instruments from './instruments.json'
-import type {
-  ById,
-  TAccountId,
-  TDataStore,
-  TDiff,
-  TInstrumentId,
-  TISODate,
-  TTagId,
-  TUser,
-} from '6-shared/types'
-import { round } from '6-shared/helpers/money'
+import type { ById } from '../shared/types'
+import type { TAccountId } from '../zenmoney/accounts/types'
+import type { TDataStore, TDiff } from '../zenmoney/store'
+import type { TInstrumentId } from '../zenmoney/instruments/types'
+import type { TISODate } from '../zenmoney/primitives'
+import type { TTagId } from '../zenmoney/tags/types'
+import type { TUser } from '../zenmoney/users/types'
+import { round } from '../shared/money'
 import { generateTransactions } from './generateTransactions'
-import { getColorForString, hex2int } from '6-shared/helpers/color'
+import { getColorForString, hex2int } from '../zenmoney/colors'
 import type { TTagIconId } from '../tag-icons'
 import {
   AccountType,

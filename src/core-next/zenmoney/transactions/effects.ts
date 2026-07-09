@@ -1,5 +1,6 @@
-import { add } from '6-shared/helpers/money'
-import type { TAccount, TAccountId, TDataStore } from '6-shared/types'
+import { add } from '../../shared/money'
+import type { TAccount, TAccountId } from '../accounts/types'
+import type { TDataStore } from '../store'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
 import { getAccounts } from '../accounts'
 import { getTransaction } from './read'

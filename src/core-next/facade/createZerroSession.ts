@@ -1,5 +1,6 @@
-import { toISODate, toISOMonth } from '6-shared/helpers/date'
-import type { ById, TDataStore } from '6-shared/types'
+import { toISODate, toISOMonth } from '../shared/date'
+import type { ById } from '../shared/types'
+import type { TDataStore } from '../zenmoney/store'
 import {
   buildBalances,
   buildBalancesByDate,

@@ -1,16 +1,10 @@
-import { toISOMonth } from '6-shared/helpers/date'
-import { keys } from '6-shared/helpers/keys'
-import { convertFx } from '6-shared/helpers/money'
-import type {
-  ById,
-  ByMonth,
-  TDateDraft,
-  TFxAmount,
-  TFxCode,
-  TInstrument,
-  TISOMonth,
-  TMsTime,
-} from '6-shared/types'
+import { toISOMonth } from '../../shared/date'
+import { keys } from '../../shared/keys'
+import { convertFx } from '../../shared/money'
+import type { ById, ByMonth } from '../../shared/types'
+import type { TDateDraft, TISOMonth, TMsTime } from '../../zenmoney/primitives'
+import type { TFxAmount } from '../../shared/money'
+import type { TFxCode, TInstrument } from '../../zenmoney/instruments/types'
 import {
   getMonthlyHiddenData,
   HiddenDataType,

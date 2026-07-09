@@ -1,4 +1,5 @@
-import type { ById, TFxCode } from '6-shared/types'
+import type { ById } from '../../shared/types'
+import type { TFxCode } from '../../zenmoney/instruments/types'
 import type { TEnvelopeId } from '../envelope-id'
 import {
   getSimpleHiddenData,

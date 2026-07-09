@@ -1,19 +1,13 @@
-import { GroupBy, makeDateArray, toISODate } from '6-shared/helpers/date'
-import { entries } from '6-shared/helpers/keys'
-import { isZero, subFxAmount } from '6-shared/helpers/money'
-import type {
-  ById,
-  TAccount,
-  TAccountId,
-  TISODate,
-  TFxAmount,
-  TFxCode,
-  TInstrumentId,
-  TMerchant,
-  TTransaction,
-  TTransactionId,
-  TDateDraft,
-} from '6-shared/types'
+import { GroupBy, makeDateArray, toISODate } from '../../shared/date'
+import { entries } from '../../shared/keys'
+import { isZero, subFxAmount } from '../../shared/money'
+import type { ById } from '../../shared/types'
+import type { TAccount, TAccountId } from '../accounts/types'
+import type { TISODate, TDateDraft } from '../primitives'
+import type { TFxAmount } from '../../shared/money'
+import type { TFxCode, TInstrumentId } from '../instruments/types'
+import type { TMerchant } from '../merchants/types'
+import type { TTransaction, TTransactionId } from '../transactions/types'
 import { cleanPayee, TDebtor } from '../debtors'
 import { getTransactionType, TrType } from '../transactions'
 

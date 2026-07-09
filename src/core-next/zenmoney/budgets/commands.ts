@@ -1,4 +1,5 @@
-import type { TDataStore, TISOMonth } from '6-shared/types'
+import type { TDataStore } from '../store'
+import type { TISOMonth } from '../primitives'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
 import type { TTagId } from '../tags'
 import { getRootUserId } from '../users'

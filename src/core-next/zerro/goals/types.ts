@@ -1,4 +1,4 @@
-import type { TISODate } from '6-shared/types'
+import type { TISODate } from '../../zenmoney/primitives'
 
 export enum goalType {
   MONTHLY = 'monthly',

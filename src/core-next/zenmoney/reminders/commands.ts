@@ -1,4 +1,5 @@
-import type { Modify, OptionalExceptFor, TDataStore } from '6-shared/types'
+import type { Modify, OptionalExceptFor } from '../../shared/types'
+import type { TDataStore } from '../store'
 import { DataEntity, type TCoreContext, type TNormalizedPatch } from '../../types'
 import type { TDateDraft } from '../primitives'
 import { getRootUserId } from '../users'

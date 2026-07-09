@@ -1,5 +1,6 @@
-import { keys } from '6-shared/helpers/keys'
-import type { ByMonth, TFxAmount } from '6-shared/types'
+import { keys } from '../../shared/keys'
+import type { ByMonth } from '../../shared/types'
+import type { TFxAmount } from '../../shared/money'
 import { EnvType, envId, TEnvelopeId } from '../envelope-id'
 import type { TFxConverter } from '../fx-rates'
 import { EnvActivity, TRawActivityNode } from './rawActivity'

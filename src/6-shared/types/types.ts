@@ -1,21 +1,4 @@
-import { ById } from './ts-utils'
-import {
-  TZmDiff,
-  TZmDeletionObject,
-  TTransaction,
-  TReminder,
-  TReminderMarker,
-  TInstrument,
-  TCountry,
-  TCompany,
-  TUser,
-  TMerchant,
-  TAccount,
-  TTag,
-  TBudget,
-  TInstrumentId,
-  TFxCode,
-} from './data-entities'
+import { TZmDiff, TInstrumentId, TFxCode } from './data-entities'
 
 type TYear = `${number}${number}${number}${number}`
 type TMonth = `${number}${number}`
@@ -46,22 +29,5 @@ export type TTagMeta = {
 
 export type TLocalData = Omit<TZmDiff, 'deletion'>
 
-// prettier-ignore
-export type TDataStore = {
-  serverTimestamp:  TMsTime
-  instrument:       ById<TInstrument>
-  country:          ById<TCountry>
-  company:          ById<TCompany>
-  user:             ById<TUser>
-  merchant:         ById<TMerchant>
-  account:          ById<TAccount>
-  tag:              ById<TTag>
-  budget:           ById<TBudget>
-  reminder:         ById<TReminder>
-  reminderMarker:   ById<TReminderMarker>
-  transaction:      ById<TTransaction>
-}
-
-export type TDataStorePatch = Partial<TDataStore> & {
-  deletion?: TZmDeletionObject[]
-}
+// The normalized store and patch shapes are owned by Core Next.
+export type { TDataStore, TDataStorePatch } from 'core-next/zenmoney'

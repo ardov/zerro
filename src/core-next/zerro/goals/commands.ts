@@ -1,5 +1,6 @@
-import { toISODate } from '6-shared/helpers/date'
-import type { TDataStore, TISOMonth } from '6-shared/types'
+import { toISODate } from '../../shared/date'
+import type { TDataStore } from '../../zenmoney/store'
+import type { TISOMonth } from '../../zenmoney/primitives'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
 import { applyPatch } from '../../zenmoney'
 import type { TEnvelopeId } from '../envelope-id'

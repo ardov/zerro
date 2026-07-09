@@ -1,5 +1,6 @@
-import { addFxAmount } from '6-shared/helpers/money'
-import type { ById, TFxAmount } from '6-shared/types'
+import { addFxAmount } from '../../shared/money'
+import type { ById } from '../../shared/types'
+import type { TFxAmount } from '../../shared/money'
 import type {
   TAccount,
   TAccountId,

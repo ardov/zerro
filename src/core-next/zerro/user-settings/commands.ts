@@ -1,4 +1,4 @@
-import type { TDataStore } from '6-shared/types'
+import type { TDataStore } from '../../zenmoney/store'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
 import {
   compileResetSimpleHiddenData,

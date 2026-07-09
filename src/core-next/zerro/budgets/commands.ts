@@ -1,4 +1,6 @@
-import type { ByMonth, TDataStore, TISOMonth } from '6-shared/types'
+import type { ByMonth } from '../../shared/types'
+import type { TDataStore } from '../../zenmoney/store'
+import type { TISOMonth } from '../../zenmoney/primitives'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
 import { applyPatch, compileSetTagBudget, type TTagBudgetUpdate } from '../../zenmoney'
 import { EnvType, envId, type TEnvelopeId } from '../envelope-id'

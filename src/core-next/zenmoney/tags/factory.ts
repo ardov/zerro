@@ -1,4 +1,4 @@
-import type { OptionalExceptFor } from '6-shared/types'
+import type { OptionalExceptFor } from '../../shared/types'
 import type { TCoreContext } from '../../types'
 import type { TTag, TTagId } from './types'
 

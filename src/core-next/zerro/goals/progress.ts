@@ -1,6 +1,6 @@
-import { differenceInCalendarMonths, toISOMonth } from '6-shared/helpers/date'
-import { round } from '6-shared/helpers/money'
-import type { TISOMonth } from '6-shared/types'
+import { differenceInCalendarMonths, toISOMonth } from '../../shared/date'
+import { round } from '../../shared/money'
+import type { TISOMonth } from '../../zenmoney/primitives'
 import { goalType, TGoal } from './types'
 
 type GoalProgress = {
