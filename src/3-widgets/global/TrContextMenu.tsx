@@ -1,8 +1,9 @@
 import React, { FC, useCallback } from 'react'
 import { Menu, MenuItem, MenuProps } from '@mui/material'
 import { TTransaction, TTransactionId } from '6-shared/types'
-import { useAppDispatch } from 'store'
+import { useAppDispatch, useAppSelector } from 'store'
 import { registerPopover } from '6-shared/historyPopovers'
+import { selectCoreTransactions } from 'core-next/adapters/redux'
 import { trModel } from '5-entities/transaction'
 import { useTranslation } from 'react-i18next'
 import { getMenuPosition } from './shared/helpers'
@@ -34,7 +35,7 @@ export const TrContextMenu: FC = () => {
   const { displayProps, extraProps } = trContext.useProps()
   const { id, onSelectSimilar, onMarkOlderViewed } = extraProps
   const dispatch = useAppDispatch()
-  const transaction = trModel.useTransactions()[id]
+  const transaction = useAppSelector(state => selectCoreTransactions(state)[id])
 
   if (!transaction) return null
 

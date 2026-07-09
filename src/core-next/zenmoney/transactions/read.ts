@@ -10,18 +10,33 @@ export enum TrType {
   OutcomeDebt = 'outcomeDebt',
 }
 
-export function getTransactions(data: TDataStore): ById<TTransaction> {
+export type TTransactionSource = Pick<TDataStore, 'transaction'>
+
+export function getTransactions(data: TTransactionSource): ById<TTransaction> {
   return data.transaction
 }
 
 export function getTransaction(
-  data: TDataStore,
+  data: TTransactionSource,
   id: TTransactionId
 ): TTransaction | null {
   return getTransactions(data)[id] || null
 }
 
-export function getTransactionsHistory(data: TDataStore): TTransaction[] {
+/**
+ * Every transaction id in legacy list order, including soft-deleted entries.
+ * UI filtering decides whether deleted rows are visible.
+ */
+export function getTransactionIds(
+  data: TTransactionSource
+): TTransactionId[] {
+  return Object.values(getTransactions(data))
+    .sort(compareTransactionDates)
+    .reverse()
+    .map(transaction => transaction.id)
+}
+
+export function getTransactionsHistory(data: TTransactionSource): TTransaction[] {
   return Object.values(getTransactions(data))
     .filter(transaction => !isDeletedTransaction(transaction))
     .sort(compareTransactionDates)

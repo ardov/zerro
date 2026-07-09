@@ -1,6 +1,6 @@
 import { GroupBy } from '6-shared/helpers/date'
 import { TAccountId, TISODate } from '6-shared/types'
-import { accBalanceModel } from '5-entities/accBalances'
+import { selectCoreBalancesByDate } from 'core-next/adapters/redux'
 import { getStart, Period } from '../shared/period'
 import { accountModel } from '5-entities/account'
 import { useAppSelector } from 'store/index'
@@ -14,7 +14,7 @@ export type TPoint = {
 export function useAccountHistory(id: TAccountId, period: Period): TPoint[] {
   let { fxCode } = accountModel.usePopulatedAccounts()[id]
 
-  let allBalances = useAppSelector(accBalanceModel.getBalancesByDate)
+  let allBalances = useAppSelector(selectCoreBalancesByDate)
 
   return useMemo(() => {
     const firstDate = getStart(period, GroupBy.Day)

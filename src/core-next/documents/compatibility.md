@@ -44,16 +44,32 @@ forbid `6-shared` value imports from production core entirely.
 
 ### `populatedTags` session read dependency
 
-Status: adapter-prepared dependency.
+Status: app-adapter presentation dependency.
 
-`createZerroSession` cannot build envelopes from core data alone: it takes
-`populatedTags` prepared by `5-entities/tag/model/populateTags`, which needs
-i18n and app assets. This blocks true headless envelope reads, one of the main
-goals of the module.
+The Redux adapter now derives tag structure from normalized Core tags, then
+adds localized `null` and SVG/emoji symbols in
+`adapters/redux/tagPresentation.ts`. `createZerroSession` still takes prepared
+`populatedTags`, because it must stay independent of i18n and app assets. This
+continues to block true headless envelope reads.
 
-Exit: core builds the populated tag structure itself from normalized tags
-(stable ids, raw names, icon ids); adapters add localized labels and SVG URLs
-on top, the same way default envelope group labels are handled.
+Exit: session accepts the Core tag structure directly and adapters add localized
+labels and SVG URLs on top, the same way default envelope group labels are
+handled.
+
+### Deep implementation imports from app code
+
+Status: migration bridge.
+
+A few app files import Core Next implementation subpaths directly instead of a
+facade: `TrContextMenu` takes `getTransactionType` from `core-next/zenmoney`,
+and the `5-entities/tag` shims (`makeTag`, `populateTags`) take `nullTag` /
+`populateTags` from `core-next/adapters/redux/tagPresentation`. The deep
+adapter path is deliberate for the tag shims: importing the adapter index would
+pull the whole selector graph into the `5-entities/tag` module graph.
+
+Exit: pure domain helpers get a package-safe facade entrypoint (root facade or
+a dedicated helpers subpath), and the tag shims disappear once their consumers
+import the adapter directly.
 
 ### `6-shared/tagIcons.json`
 
@@ -85,4 +101,3 @@ adapter.
 - Optional package-safe subpaths such as `core-next/demo` and
   `core-next/tag-icons` must not import Redux, React, `5-entities`, i18n, or
   app-only assets directly.
-

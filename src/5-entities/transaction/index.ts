@@ -5,7 +5,6 @@ import { makeTransaction } from './makeTransaction'
 import {
   getHistoryStart,
   getTransactionsById,
-  getTransaction,
   getTransactionsHistory,
   getTransactionIds,
   getTrTypeGetter,
@@ -20,30 +19,21 @@ import {
   recreateTransaction,
   bulkEditTransactions,
 } from './thunks'
-import { TTransactionId } from '6-shared/types'
-
 export type { TransactionPatch } from './thunks'
 export type { TrCondition } from './filtering'
 export { TrType } from './helpers'
 
 export const trModel = {
-  // Existing selectors (for backward compatibility)
+  // Selectors. Reads are migrated to Core Next; these stay as the reference
+  // implementation for parity tests and for the not-yet-migrated write thunks.
+  /** @deprecated Read via `selectCoreTransactions` from `core-next/adapters/redux` */
   getTransactionsById,
+  /** @deprecated Read via `selectCoreTransactionsHistory` from `core-next/adapters/redux` */
   getTransactionsHistory,
+  /** @deprecated Read via `selectCoreHistoryStart` from `core-next/adapters/redux` */
   getHistoryStart,
-
-  // New ID-based selectors
+  /** @deprecated Read via `selectCoreTransactionIds` from `core-next/adapters/redux` */
   getTransactionIds,
-  // getTransaction,
-
-  // Existing hooks (for backward compatibility)
-  useTransactions: () => useAppSelector(getTransactionsById),
-  useTransactionsHistory: () => useAppSelector(getTransactionsHistory),
-
-  // New ID-based hooks
-  useSortedTransactionIds: () => useAppSelector(getTransactionIds),
-  useTransaction: (id: TTransactionId) =>
-    useAppSelector(state => getTransaction(state, id)),
 
   // Helper hooks
   useTrTypeGetter: () => useAppSelector(getTrTypeGetter),

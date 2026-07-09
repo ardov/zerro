@@ -6,8 +6,6 @@ import { accountModel } from '5-entities/account'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { merchantModel } from '5-entities/merchant'
-import { tagModel } from '5-entities/tag'
-import { trModel } from '5-entities/transaction'
 import { userModel } from '5-entities/user'
 import type { RootState } from 'store'
 import {
@@ -17,6 +15,9 @@ import {
   convertBalancesToDisplay,
   getHistoryStart,
   getTagBudgets,
+  getTransactionIds,
+  getTransactions,
+  getTransactionsHistory,
 } from '../../zenmoney'
 import {
   buildActivity,
@@ -48,6 +49,7 @@ import {
   TEnvelope,
   TGroupNode,
 } from '../../zerro'
+import { populateTags } from './tagPresentation'
 
 type TEnvelopeLabels = {
   defaultTagGroup: string
@@ -65,9 +67,34 @@ const selectCoreTagBudgetSlice = (state: RootState) => state.data.current.budget
 
 const selectCoreAccountSlice = (state: RootState) => state.data.current.account
 
+const selectCoreTagSlice = (state: RootState) => state.data.current.tag
+
+// Transaction-heavy projections depend only on this slice. Keep the history
+// transform in the Core entity layer instead of borrowing the legacy selector.
+const selectCoreTransactionSlice = (state: RootState) =>
+  state.data.current.transaction
+
+export const selectCoreTransactions = (state: RootState) =>
+  getTransactions({ transaction: selectCoreTransactionSlice(state) })
+
+export const selectCoreTransactionIds = createSelector(
+  [selectCoreTransactions],
+  transaction => getTransactionIds({ transaction })
+)
+
+export const selectCoreTransactionsHistory = createSelector(
+  [selectCoreTransactions],
+  transaction => getTransactionsHistory({ transaction })
+)
+
 export const selectCoreUserSettings = createSelector(
   [selectCoreReminderSlice],
   reminder => getUserSettings({ reminder })
+)
+
+export const selectCorePopulatedTags = createSelector(
+  [selectCoreTagSlice, selectCoreUserSettings],
+  populateTags
 )
 
 const selectCoreEnvelopeMeta = createSelector(
@@ -94,7 +121,7 @@ const selectCoreEnvelopeLabels = () => getCoreEnvelopeLabels()
 
 export const selectCoreDebtors = createSelector(
   [
-    trModel.getTransactionsHistory,
+    selectCoreTransactionsHistory,
     merchantModel.getMerchants,
     instrumentModel.getInstruments,
     accountModel.getDebtAccountId,
@@ -111,7 +138,7 @@ export const selectCoreDebtors = createSelector(
 const selectCoreCompiledEnvelopes = createSelector(
   [
     selectCoreDebtors,
-    tagModel.getPopulatedTags,
+    selectCorePopulatedTags,
     selectCoreAccountSlice,
     selectCoreEnvelopeMeta,
     userModel.getUserCurrency,
@@ -195,7 +222,7 @@ const selectCoreConvertFx = createSelector(
 )
 
 export const selectCoreMonthList = createSelector(
-  [trModel.getTransactionsHistory, selectCoreBudgets, selectCoreCurrentMonth],
+  [selectCoreTransactionsHistory, selectCoreBudgets, selectCoreCurrentMonth],
   (transactions, budgets, currentMonth) =>
     buildMonthList({
       transactions,
@@ -226,7 +253,7 @@ export const selectCoreCurrentFunds = createSelector(
 
 export const selectCoreRawActivity = createSelector(
   [
-    trModel.getTransactionsHistory,
+    selectCoreTransactionsHistory,
     selectCoreInBudgetAccountIds,
     accountModel.getDebtAccountId,
     selectCoreDebtors,
@@ -323,13 +350,13 @@ export const selectCoreGoalTotals = createSelector(
 )
 
 export const selectCoreHistoryStart = createSelector(
-  [trModel.getTransactionsHistory, selectCoreCurrentDate],
+  [selectCoreTransactionsHistory, selectCoreCurrentDate],
   getHistoryStart
 )
 
 export const selectCoreBalances = createSelector(
   [
-    trModel.getTransactionsHistory,
+    selectCoreTransactionsHistory,
     accountModel.getAccounts,
     selectCoreDebtors,
     merchantModel.getMerchants,

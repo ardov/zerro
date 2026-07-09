@@ -25,10 +25,11 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 import { addFxAmount, round, createFxAmount } from '6-shared/helpers/money'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
-import { useAppDispatch } from 'store'
+import { useAppDispatch, useAppSelector } from 'store'
 import { applyClientPatch } from 'store/data'
 import { TagSelect2 } from '5-entities/tag/ui/TagSelect2'
 import { trModel } from '5-entities/transaction'
+import { selectCoreTransactions } from 'core-next/adapters/redux'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { BulkEditModal } from './BulkEditModal'
@@ -49,7 +50,7 @@ const Actions: FC<ActionsProps> = ({
 }) => {
   const { t } = useTranslation('transactionActions')
   const dispatch = useAppDispatch()
-  const allTransactions = trModel.useTransactions()
+  const allTransactions = useAppSelector(selectCoreTransactions)
   const [ids, setIds] = useState(checkedIds)
   const transactions = ids?.map(id => allTransactions[id])
   const actions = getAvailableActions(transactions)

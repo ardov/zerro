@@ -1,5 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { trModel, TrType } from '5-entities/transaction'
+import { selectCoreTransactionsHistory } from 'core-next/adapters/redux'
 import {
   TFxAmount,
   TFxCode,
@@ -35,7 +36,7 @@ export type TStats = {
 
 export const getFactsYearly: TSelector<Record<string, TStats>> = createSelector(
   [
-    trModel.getTransactionsHistory,
+    selectCoreTransactionsHistory,
     fxRateModel.getter,
     instrumentModel.getInstCodeMap,
     accountModel.getDebtAccountId,

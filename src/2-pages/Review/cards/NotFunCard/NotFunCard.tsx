@@ -26,7 +26,8 @@ import {
 } from '5-entities/currency/displayCurrency'
 import { Card, TCardProps } from '../../shared/Card'
 import { useStats } from '../../shared/getFacts'
-import { tagModel } from '5-entities/tag'
+import { useAppSelector } from 'store'
+import { selectCorePopulatedTags } from 'core-next/adapters/redux'
 import { TagSelect } from './TagSelect'
 import { TaxesChart } from './Chart'
 import { getTaxes } from './getTaxesByIncome'
@@ -224,7 +225,7 @@ export function NotFunCard(props: TCardProps) {
 function useIncomeOutcome(onlyRUB: boolean, year: string | number) {
   const yearStats = useStats(year)
   const toDisplay = displayCurrency.useToDisplay('current')
-  const tags = tagModel.usePopulatedTags()
+  const tags = useAppSelector(selectCorePopulatedTags)
 
   return useMemo(() => {
     const incomeTags = entries(yearStats.byTag)

@@ -4,7 +4,9 @@ import React, { FC } from 'react'
 import styled from '@emotion/styled'
 import { Theme, TypographyVariant } from '@mui/material'
 import { useContextMenu } from '6-shared/hooks/useContextMenu'
+import { selectCoreTransactions } from 'core-next/adapters/redux'
 import { trModel } from '5-entities/transaction'
+import { useAppSelector } from 'store'
 import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'
 
 export type TTransactionProps = {
@@ -38,7 +40,7 @@ export const Transaction: FC<TTransactionProps> = props => {
     onClick: () => onOpen?.(id),
     onContextMenu: event => onContextMenu?.(event, id),
   })
-  const tr = trModel.useTransaction(id)
+  const tr = useAppSelector(state => selectCoreTransactions(state)[id])
   const getTrType = trModel.useTrTypeGetter()
   if (!tr) {
     console.warn('Transaction not found', id)

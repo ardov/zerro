@@ -24,8 +24,9 @@ import { AmountInput } from '6-shared/ui/AmountInput'
 import { rateToWords } from '6-shared/helpers/money'
 import { formatDate, parseDate, toISODate } from '6-shared/helpers/date'
 
-import { useAppDispatch } from 'store'
+import { useAppDispatch, useAppSelector } from 'store'
 
+import { selectCoreTransactions } from 'core-next/adapters/redux'
 import { trModel } from '5-entities/transaction'
 import { accountModel } from '5-entities/account'
 import { instrumentModel } from '5-entities/currency/instrument'
@@ -65,7 +66,9 @@ export type TransactionPreviewProps = {
 }
 
 export const TransactionPreview: FC<TransactionPreviewProps> = props => {
-  const transaction = trModel.useTransaction(props.id)
+  const transaction = useAppSelector(
+    state => selectCoreTransactions(state)[props.id]
+  )
   return transaction ? <TransactionContent {...props} /> : <TrEmptyState />
 }
 
@@ -79,7 +82,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
   const onRestore = () => dispatch(trModel.restoreTransaction(id))
   // onSplit: id => dispatch(splitTransfer(id)), // does not work
 
-  const tr = trModel.useTransaction(id)!
+  const tr = useAppSelector(state => selectCoreTransactions(state)[id])!
   const trType = trModel.getType(tr)
   const incomeAccount = accountModel.usePopulatedAccounts()[tr.incomeAccount]
   const outcomeAccount = accountModel.usePopulatedAccounts()[tr.outcomeAccount]

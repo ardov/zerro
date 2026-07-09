@@ -79,8 +79,9 @@ Dependency order and status:
    real command path needs them.
 7. `tags` - mostly done: types, read selectors, production factory,
    create/patch commands, and focused tests exist; `archive` is part of the
-   normalized tag shape. Populated tags and tag trees remain outside this
-   normalized entity slice for now.
+   normalized tag shape. Core now owns the pure tag structure (names, unique
+   names, children, and colors); the Redux adapter owns the localized `null`
+   sentinel and SVG/emoji symbols. Tag-tree UI remains an adapter concern.
 8. `accounts` - mostly done: types, read selectors, production factory,
    create/patch/delete commands, and focused tests exist. Account reads now stay
    account-only: FX-code preparation and Zerro-specific in-budget/data-account
@@ -268,6 +269,33 @@ Progress:
   reactive core that owns recomputation and notifies subscribers is deferred
   until the engine owns replica state — doing it while Redux owns data would
   create a second source of truth.
+- 2026-07-09: transaction history in the Redux graph now comes from the Core
+  `TTransactionSource` read boundary, not `trModel.getTransactionsHistory`.
+  The internal history selector feeds debtors, month list, raw activity,
+  history start, and balances while depending only on the transaction slice.
+  `DebtorList` is the first direct UI consumer of the public
+  `selectCoreDebtors`, and `WidgetAccHistory` reads the public
+  `selectCoreBalancesByDate`. Transaction List, preview, context menu and bulk
+  edit now read the Core transaction map and Core-compatible sorted IDs;
+  filtering stays UI-owned. Stats cashflow reads Core history and history start
+  and uses the Core transaction classifier. `selectors.transactions.test.ts`
+  covers parity, unrelated-slice caching, and recomputation when transactions
+  change.
+- 2026-07-10: Core owns the pure tag-structure projection. The Redux adapter
+  decorates it with app-only i18n and icon assets, and the compiled-envelope
+  selector now reads that adapter projection directly rather than
+  `tagModel.getPopulatedTags`. `selectors.tags.test.ts` protects parity and
+  tag-slice invalidation; `createZerroSession` deliberately keeps its explicit
+  prepared-tag dependency until it can accept Core structure directly.
+- 2026-07-10: remaining tag/transaction read tails switched:
+  `selectCorePopulatedTags` is public and feeds TagChip, TagSelect, Review
+  cards, transaction list components, and CSV export; Review `getFacts` reads
+  core transaction history; `useBalances` aggregates over
+  `selectCoreBalancesByDate`. Orphaned hooks deleted (`trModel.useTransactions`
+  family, `tagModel.usePopulatedTags`, `debtorModel.useDebtors`); legacy read
+  selectors with core replacements are `@deprecated`. `tagModel.getTagsTree`
+  and `trModel.useTrTypeGetter` remain legacy until their consumers migrate.
+  Write thunks (`mergeAccounts` and friends) still read legacy selectors.
 
 Recommended order:
 

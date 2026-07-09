@@ -5,16 +5,16 @@ import { keys } from '6-shared/helpers/keys'
 
 import { useAppSelector } from 'store/index'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
+import { selectCoreBalancesByDate } from 'core-next/adapters/redux'
 import { balancesToDisplay } from './shared/convertBalancesToDisplay'
 import { TBalanceNode } from './shared/types'
-import { getBalancesByDate } from './getBalancesByDate'
 
 export function useBalances(
   aggregation: GroupBy,
   start?: TDateDraft,
   end?: TDateDraft
 ) {
-  const list = useAppSelector(getBalancesByDate)
+  const list = useAppSelector(selectCoreBalancesByDate)
   const startDate = toGroup(start || list[0].date, aggregation)
   const endDate = toGroup(end || Date.now(), aggregation)
   const balances = useMemo(() => {

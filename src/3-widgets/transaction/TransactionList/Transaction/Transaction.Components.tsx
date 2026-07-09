@@ -8,7 +8,8 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 import { useAppSelector } from 'store'
 import { accountModel } from '5-entities/account'
 import { TrType, trModel } from '5-entities/transaction'
-import { TTagPopulated, tagModel } from '5-entities/tag'
+import { TTagPopulated } from '5-entities/tag'
+import { selectCorePopulatedTags } from 'core-next/adapters/redux'
 import { merchantModel } from '5-entities/merchant'
 import { SmartAmount } from '3-widgets/Amount'
 
@@ -35,7 +36,7 @@ export const Symbol: FC<SymbolProps> = ({
   onToggle,
   ...rest
 }) => {
-  const tags = tagModel.usePopulatedTags()
+  const tags = useAppSelector(selectCorePopulatedTags)
   const mainTagId = tr.tag?.length ? tr.tag[0] : 'null'
   const tag = tags[mainTagId]
   const { symbol, color } = getSymAndColor(trType, tag)
@@ -73,7 +74,7 @@ export const Symbol: FC<SymbolProps> = ({
 
 export const Tags: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
   const { t } = useTranslation()
-  const tags = tagModel.usePopulatedTags()
+  const tags = useAppSelector(selectCorePopulatedTags)
   switch (trType) {
     case 'income':
     case 'outcome':

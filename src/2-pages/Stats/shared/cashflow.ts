@@ -6,7 +6,10 @@ import { useAppSelector } from 'store/index'
 import { accountModel } from '5-entities/account'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { trModel } from '5-entities/transaction'
+import {
+  selectCoreHistoryStart,
+  selectCoreTransactionsHistory,
+} from 'core-next/adapters/redux'
 import { Period, getStart } from './period'
 import { calcCashflow } from './calcCashflow'
 
@@ -51,7 +54,7 @@ export function useCashFlow(
   period: Period,
   aggregation: GroupBy = GroupBy.Month
 ): TCashflowPoint[] {
-  const transactionHistory = trModel.useTransactionsHistory()
+  const transactionHistory = useAppSelector(selectCoreTransactionsHistory)
   const debtAccId = accountModel.useDebtAccountId()
   const instCodeMap = instrumentModel.useInstCodeMap()
   const accounts = accountModel.usePopulatedAccounts()
@@ -68,7 +71,7 @@ export function useCashFlow(
   )
 
   const toDisplay = displayCurrency.useToDisplay('current')
-  const historyStart = useAppSelector(trModel.getHistoryStart)
+  const historyStart = useAppSelector(selectCoreHistoryStart)
   const firstDate = getStartDate(period, aggregation, historyStart)
 
   return makeDateArray(firstDate, Date.now(), aggregation).map(date => {

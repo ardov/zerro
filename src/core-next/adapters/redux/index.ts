@@ -8,15 +8,22 @@
  */
 export {
   selectCoreActivity,
+  selectCoreBalancesByDate,
   selectCoreBudgets,
   selectCoreEnvelopes,
   selectCoreEnvelopeStructure,
   selectCoreEnvMetrics,
   selectCoreGoals,
   selectCoreGoalTotals,
+  selectCoreHistoryStart,
   selectCoreKeepingEnvelopeIds,
   selectCoreMonthList,
   selectCoreMonthTotals,
+  selectCorePopulatedTags,
   selectCoreRawActivity,
   selectCoreSortedActivity,
+  selectCoreDebtors,
+  selectCoreTransactionIds,
+  selectCoreTransactions,
+  selectCoreTransactionsHistory,
 } from './selectors'

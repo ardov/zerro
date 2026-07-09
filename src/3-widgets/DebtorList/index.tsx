@@ -5,7 +5,8 @@ import { Debtor, Subheader } from './components'
 import { addFxAmount, isZero } from '6-shared/helpers/money'
 import { keys } from '6-shared/helpers/keys'
 import { TFxCode } from '6-shared/types'
-import { debtorModel } from '5-entities/debtors'
+import { selectCoreDebtors } from 'core-next/adapters/redux'
+import { useAppSelector } from 'store'
 
 type TDebtorInfo = {
   name: string
@@ -15,7 +16,7 @@ type TDebtorInfo = {
 
 export function DebtorList({ className = '' }) {
   const { t } = useTranslation('common')
-  const debtors = debtorModel.useDebtors()
+  const debtors = useAppSelector(selectCoreDebtors)
   const list = Object.values(debtors)
     .filter(debtor => !isZero(debtor.balance))
     .reduce((acc, debtor) => {

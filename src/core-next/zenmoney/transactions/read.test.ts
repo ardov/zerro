@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { makeStore, makeTransaction } from '../../testing/zenmoneyTestData'
 import {
   getTransaction,
+  getTransactionIds,
   getTransactions,
   getTransactionsHistory,
   getTransactionType,
@@ -54,6 +55,23 @@ describe('transaction helpers', () => {
       'newer',
       'newerCreatedLater',
     ])
+  })
+
+  it('keeps every transaction in list order for UI filtering', () => {
+    const data = makeStore({
+      transaction: {
+        older: makeTransaction({ id: 'older', date: '2026-01-01', created: 1 }),
+        newer: makeTransaction({ id: 'newer', date: '2026-01-02', created: 1 }),
+        deleted: makeTransaction({
+          id: 'deleted',
+          date: '2026-01-03',
+          created: 1,
+          deleted: true,
+        }),
+      },
+    })
+
+    expect(getTransactionIds(data)).toEqual(['older', 'newer', 'deleted'])
   })
 
   it('treats deleted and effectively zeroed transactions as deleted', () => {

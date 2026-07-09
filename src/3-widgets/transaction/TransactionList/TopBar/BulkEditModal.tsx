@@ -13,7 +13,8 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material'
-import { useAppDispatch } from 'store'
+import { useAppDispatch, useAppSelector } from 'store'
+import { selectCoreTransactions } from 'core-next/adapters/redux'
 import { trModel } from '5-entities/transaction'
 import { TagList } from '5-entities/tag/ui/TagList'
 
@@ -32,7 +33,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
 }) => {
   const { t } = useTranslation('transactionsBulkEdit')
   const dispatch = useAppDispatch()
-  const allTransactions = trModel.useTransactions()
+  const allTransactions = useAppSelector(selectCoreTransactions)
   const transactions = ids.map(id => allTransactions[id]).filter(Boolean)
   const sameTags = isSameTags(transactions)
   const sameComments = isSameComments(transactions)

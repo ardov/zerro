@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { Box, IconButton, Stack, Typography } from '@mui/material'
 import { formatDate } from '6-shared/helpers/date'
-import { tagModel } from '5-entities/tag'
+import { useAppSelector } from 'store'
+import { selectCorePopulatedTags } from 'core-next/adapters/redux'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { Card, TCardProps } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
@@ -14,7 +15,7 @@ export function OutcomeCard(props: TCardProps) {
   const [i, setI] = useState(0)
   const yearStats = useStats(props.year)
   const toVal = useTrToDisplay()
-  const tags = tagModel.usePopulatedTags()
+  const tags = useAppSelector(selectCorePopulatedTags)
 
   const topTransactions = yearStats.total.outcomeTransactions
     .map(tr => ({ tr, val: toVal(tr).outcome }))

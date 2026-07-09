@@ -1,5 +1,5 @@
 import { TInstCodeMap } from '5-entities/currency/instrument'
-import { trModel, TrType } from '5-entities/transaction'
+import { getTransactionType, TrType } from 'core-next/zenmoney'
 import { GroupBy, toGroup } from '6-shared/helpers/date'
 import { addFxAmount } from '6-shared/helpers/money'
 import {
@@ -52,7 +52,7 @@ export function calcCashflow(
         transfers: {},
       }
 
-    const type = trModel.getType(tr, debtAccId)
+    const type = getTransactionType(tr, debtAccId)
     const incomeCurrency = instCodeMap[tr.incomeInstrument]
     const outcomeCurrency = instCodeMap[tr.outcomeInstrument]
     switch (type) {

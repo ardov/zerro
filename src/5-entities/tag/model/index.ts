@@ -10,12 +10,12 @@ export type { TTagDraft } from './thunks'
 export const tagModel = {
   // Selectors
   getTags,
+  /** @deprecated Read via `selectCorePopulatedTags` from `core-next/adapters/redux` */
   getPopulatedTags,
   getTagsTree,
 
   // Hooks
   useTags: () => useAppSelector(getTags),
-  usePopulatedTags: () => useAppSelector(getPopulatedTags),
   useTagsTree: () => useAppSelector(getTagsTree),
 
   // Helpers
