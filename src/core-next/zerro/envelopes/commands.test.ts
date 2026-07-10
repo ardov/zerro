@@ -16,9 +16,37 @@ import {
   compilePatchEnvelopeMetadata,
   compileRenameEnvelope,
   compileSetEnvelopeColor,
+  compileSetEnvelopeComment,
 } from './commands'
 
 describe('envelope commands', () => {
+  it('sets, clears, and skips unchanged envelope comments', () => {
+    const id = envId.get(EnvType.Tag, 'food')
+    const data = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      account: {
+        data: makeAccount({ id: 'data', title: '🤖 [Zerro Data]' }),
+      },
+    })
+    const ctx = { now: () => 100, uuid: () => 'meta-reminder' }
+
+    expect(compileSetEnvelopeComment(data, { id, comment: '' }, ctx)).toEqual(
+      {}
+    )
+
+    const withComment = applyPatch(
+      data,
+      compileSetEnvelopeComment(data, { id, comment: 'Notes' }, ctx)
+    )
+    const cleared = applyPatch(
+      withComment,
+      compileSetEnvelopeComment(withComment, { id, comment: '' }, ctx)
+    )
+
+    expect(getEnvelopeMeta(withComment)[id]?.comment).toBe('Notes')
+    expect(getEnvelopeMeta(cleared)[id]?.comment).toBe('')
+  })
+
   it('sets, clears, and skips unchanged tag envelope colors', () => {
     const data = makeStore({
       tag: { food: makeTag({ id: 'food', title: 'Food', color: null }) },

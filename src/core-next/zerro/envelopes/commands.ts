@@ -14,6 +14,7 @@ import {
 import { EnvType, envId, type TEnvelopeId } from '../envelope-id'
 import {
   compilePatchEnvelopeMeta,
+  getEnvelopeMeta,
   type TEnvelopeMetaPatch,
 } from '../envelope-meta'
 import { mergeNormalizedPatches } from '../hidden-data'
@@ -29,6 +30,11 @@ export type TRenameEnvelopeInput = {
 export type TSetEnvelopeColorInput = {
   id: TEnvelopeId
   colorHex: string | null
+}
+
+export type TSetEnvelopeCommentInput = {
+  id: TEnvelopeId
+  comment: string
 }
 
 type TEnvelopePatches = {
@@ -89,6 +95,17 @@ export function compileSetEnvelopeColor(
   const color = hex2int(input.colorHex)
   if (data.tag[id]?.color === color) return {}
   return compilePatchTag(data, { id, color }, ctx)
+}
+
+export function compileSetEnvelopeComment(
+  data: TDataStore,
+  input: TSetEnvelopeCommentInput,
+  ctx: TCoreContext
+): TNormalizedPatch {
+  const currentComment = getEnvelopeMeta(data)[input.id]?.comment || ''
+  if (currentComment === input.comment) return {}
+
+  return compilePatchEnvelopeMeta(data, input, ctx)
 }
 
 export function compilePatchEnvelope(

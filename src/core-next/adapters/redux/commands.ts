@@ -7,6 +7,7 @@ import {
   compilePatchEnvelope,
   compileRenameEnvelope,
   compileSetEnvelopeColor,
+  compileSetEnvelopeComment,
   compileSetBudget,
   compileSetGoal,
   type TBudgetUpdate,
@@ -15,6 +16,7 @@ import {
   type TGoal,
   type TRenameEnvelopeInput,
   type TSetEnvelopeColorInput,
+  type TSetEnvelopeCommentInput,
 } from '../../zerro'
 import { getDomainEnvelopeGroup } from './envelopePresentation'
 import {
@@ -40,6 +42,7 @@ export type TAppCommand =
   | { type: 'zerro.envelope.patch'; payload: TEnvelopeDraft[] }
   | { type: 'zerro.envelope.rename'; payload: TRenameEnvelopeInput }
   | { type: 'zerro.envelope.color.set'; payload: TSetEnvelopeColorInput }
+  | { type: 'zerro.envelope.comment.set'; payload: TSetEnvelopeCommentInput }
   | { type: 'legacy.patch'; payload: TNormalizedPatch }
 
 export function compileAppCommand(
@@ -59,6 +62,8 @@ export function compileAppCommand(
       return compileRenameEnvelope(data, command.payload, ctx)
     case 'zerro.envelope.color.set':
       return compileSetEnvelopeColor(data, command.payload, ctx)
+    case 'zerro.envelope.comment.set':
+      return compileSetEnvelopeComment(data, command.payload, ctx)
     case 'zerro.envelope.patch': {
       const labels = selectCoreEnvelopeLabels()
       const drafts = command.payload.map(draft =>
@@ -108,6 +113,13 @@ export function setEnvelopeColor(
   return executeCommand({
     type: 'zerro.envelope.color.set',
     payload: { id, colorHex },
+  })
+}
+
+export function setEnvelopeComment(id: TEnvelopeId, comment: string): AppThunk {
+  return executeCommand({
+    type: 'zerro.envelope.comment.set',
+    payload: { id, comment },
   })
 }
 

@@ -1,18 +1,17 @@
 import React, { FC, useEffect, useState } from 'react'
 import { InputBase, InputAdornment } from '@mui/material'
 import { NotesIcon } from '6-shared/ui/Icons'
-import { TISOMonth } from '6-shared/types'
 import { useAppDispatch, useAppSelector } from 'store'
 import { cardStyle } from './shared'
-import { envelopeModel, TEnvelopeId } from '5-entities/envelope'
-import { selectCoreEnvelopes } from 'core-next/adapters/redux'
+import { TEnvelopeId } from '5-entities/envelope'
+import {
+  selectCoreEnvelopes,
+  setEnvelopeComment,
+} from 'core-next/adapters/redux'
 import { useDebouncedCallback } from '6-shared/hooks/useDebouncedCallback'
 import { useTranslation } from 'react-i18next'
 
-export const CommentWidget: FC<{ month: TISOMonth; id: TEnvelopeId }> = ({
-  month,
-  id,
-}) => {
+export const CommentWidget: FC<{ id: TEnvelopeId }> = ({ id }) => {
   const { t } = useTranslation('common')
   const dispatch = useAppDispatch()
   const comment = useAppSelector(s => selectCoreEnvelopes(s)[id].comment)
@@ -21,7 +20,7 @@ export const CommentWidget: FC<{ month: TISOMonth; id: TEnvelopeId }> = ({
   const applyChanges = useDebouncedCallback(
     value => {
       if (comment !== value) {
-        dispatch(envelopeModel.patchEnvelope({ id, comment: value }))
+        dispatch(setEnvelopeComment(id, value))
       }
     },
     [id, dispatch],

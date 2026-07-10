@@ -24,24 +24,29 @@ The old transaction `effects.ts` expansion has been removed. Transaction
 commands now produce intent-only transaction patches; account-balance effects
 remain documented for the final materializer phase.
 
+`setEnvelopeComment(id, comment)` is also adopted by CommentWidget and removes
+its unused month dependency.
+
 Replica ownership, server-like materialization rules, and package hardening
 remain incomplete.
 
-## Default next slice: semantic envelope comment
+## Default next slice: semantic envelope settings
 
-Goal: migrate the next real envelope edit to an explicit command while keeping
-the public write vocabulary small.
+Goal: migrate the edit dialog as one atomic domain use case without accepting a
+partial projection.
 
 Scope:
 
-1. Add a semantic comment input such as `{ id, comment }`.
-2. Compile it through envelope metadata without reading a presentation model.
-3. Add a versionable app command without removing `zerro.envelope.patch` yet.
-4. Migrate the existing CommentWidget consumer.
+1. Define an explicit settings input for the fields the form actually edits.
+2. Compose entity-owned title/color/parent changes with envelope metadata.
+3. Normalize localized default groups only in the Redux adapter.
+4. Preserve one atomic app command and one materialization boundary.
+5. Migrate EnvelopeEditDialog without removing compatibility patching yet.
 
 Done when:
 
-- comment set, clear, and unchanged behavior is tested;
+- entity and metadata routing is tested together;
+- presentation-only fields cannot enter the command;
 - the real UI consumer sends only semantic input;
 - resulting-state tests pass through the Redux command funnel;
 - legacy envelope patching remains available for other fields.
@@ -53,7 +58,7 @@ envelope fields in this slice.
 
 | Track                           | State                          | Next useful outcome                                                       |
 | ------------------------------- | ------------------------------ | ------------------------------------------------------------------------- |
-| A. Public facade and read graph | Active, default                | Add and adopt a narrow semantic envelope comment command                  |
+| A. Public facade and read graph | Active, default                | Add and adopt an explicit semantic envelope settings command              |
 | B. Domain/presentation boundary | Boundary landed                | Extract an optional appearance package only when a real consumer needs it |
 | C. ZenMoney materializer rules  | Deferred until final           | Start only after the other architecture and migration tracks are complete |
 | D. Replica and sync             | Designed, not integrated       | Share pure outbox operations and make Redux the replica owner             |
@@ -72,6 +77,7 @@ Current:
 - Redux independently wires the same calculations with cross-snapshot caches.
 - `renameEnvelope(id, name)` is the first adopted narrow write command.
 - `setEnvelopeColor(id, colorHex)` is the second adopted narrow write command.
+- `setEnvelopeComment(id, comment)` is the third adopted narrow write command.
 
 Next:
 

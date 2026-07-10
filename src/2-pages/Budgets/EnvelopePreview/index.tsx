@@ -51,7 +51,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
 
       <Grid container spacing={2} px={3} pb={5} pt={3}>
         <Grid size={12}>
-          <CommentWidget key={id} month={month} id={id} />
+          <CommentWidget key={id} id={id} />
         </Grid>
 
         <Grid size={12}>

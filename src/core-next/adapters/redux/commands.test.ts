@@ -5,7 +5,7 @@ import { applyClientPatch } from 'store/data'
 import { makeDemoStore } from '../../demo'
 import type { TNormalizedPatch } from '../../types'
 import { applyPatch } from '../../zenmoney'
-import { envId, EnvType } from '../../zerro'
+import { envId, EnvType, getEnvelopeMeta } from '../../zerro'
 import { compileAppCommand, executeCommand } from './commands'
 import { applyLegacyPatch } from './legacyPatch'
 import { selectCoreEnvelopes } from './selectors'
@@ -41,6 +41,24 @@ function makeDispatch(state: RootState) {
 }
 
 describe('executeCommand funnel', () => {
+  it('compiles semantic envelope comment to resulting metadata state', () => {
+    const current = makeDemoStore({ now: NOW })
+    const state = makeState(current)
+    const id = envId.get(EnvType.Tag, Object.keys(current.tag)[0])
+
+    const patch = compileAppCommand(
+      state,
+      {
+        type: 'zerro.envelope.comment.set',
+        payload: { id, comment: 'Semantic note' },
+      },
+      { now: () => NOW, uuid: () => 'comment-meta' }
+    )
+    const next = applyPatch(current, patch)
+
+    expect(getEnvelopeMeta(next)[id]?.comment).toBe('Semantic note')
+  })
+
   it('compiles semantic envelope color to resulting tag state', () => {
     const current = makeDemoStore({ now: NOW })
     const state = makeState(current)

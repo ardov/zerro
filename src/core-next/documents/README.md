@@ -43,16 +43,18 @@ The handoff is routing, not proof that code landed. Always verify the tree.
   longer sends a partial envelope projection.
 - Transaction commands compile transaction intent only; account-balance
   effects are reserved for the final materializer phase.
+- Envelope comments have a semantic metadata command; CommentWidget no longer
+  sends a partial envelope projection or an unused month prop.
 
 ## Default next slice
 
-Replace the next projection-shaped write with a narrow semantic command: set an
-envelope comment.
+Replace the projection-shaped edit-dialog write with one explicit semantic
+settings command.
 
-1. Define an explicit `{ id, comment }` input and metadata compiler.
-2. Migrate the existing CommentWidget consumer.
-3. Verify setting, clearing, and unchanged comments.
-4. Keep compatibility patching for the remaining fields.
+1. Define the exact editable settings fields instead of `Partial<TEnvelope>`.
+2. Compile the form atomically across entity and metadata storage.
+3. Normalize presentation group labels at the Redux boundary.
+4. Migrate only EnvelopeEditDialog and retain compatibility patching elsewhere.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 
