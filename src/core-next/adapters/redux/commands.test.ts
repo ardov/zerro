@@ -4,8 +4,10 @@ import type { RootState } from 'store'
 import { applyClientPatch } from 'store/data'
 import { makeDemoStore } from '../../demo'
 import type { TNormalizedPatch } from '../../types'
-import { executeCommand } from './commands'
+import { envId, EnvType } from '../../zerro'
+import { compileAppCommand, executeCommand } from './commands'
 import { applyLegacyPatch } from './legacyPatch'
+import { selectCoreEnvelopes } from './selectors'
 
 // Breaks the legacy hidden-store import cycle, same as the private fixture tests.
 vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
@@ -30,12 +32,31 @@ function makeState(current: TDataStore): RootState {
 
 function makeDispatch(state: RootState) {
   const dispatch: any = vi.fn(action =>
-    typeof action === 'function' ? action(dispatch, () => state, undefined) : action
+    typeof action === 'function'
+      ? action(dispatch, () => state, undefined)
+      : action
   )
   return dispatch
 }
 
 describe('executeCommand funnel', () => {
+  it('normalizes presented default groups before domain compilation', () => {
+    const state = makeState(makeDemoStore({ now: NOW }))
+    const id = envId.get(EnvType.Tag, null)
+    const presentedGroup = selectCoreEnvelopes(state)[id].group
+
+    const patch = compileAppCommand(
+      state,
+      {
+        type: 'zerro.envelope.patch',
+        payload: [{ id, group: presentedGroup }],
+      },
+      { now: () => NOW, uuid: () => 'test-id' }
+    )
+
+    expect(patch).toEqual({})
+  })
+
   it('applies a legacy patch as-is', () => {
     const state = makeState(makeDemoStore({ now: NOW }))
     const [tagId] = Object.keys(state.data.current.tag)

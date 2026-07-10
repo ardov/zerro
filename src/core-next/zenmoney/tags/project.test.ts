@@ -26,9 +26,9 @@ describe('buildTagStructure', () => {
       name: 'Food',
       uniqueName: 'Food',
       children: ['child'],
-      colorHEX: '#ff8800',
-      colorDisplay: '#ff8800',
+      colorHex: '#ff8800',
     })
+    expect(result.parent).not.toHaveProperty('colorDisplay')
     expect(result.child).toMatchObject({
       name: 'Food',
       uniqueName: 'Food / Food',

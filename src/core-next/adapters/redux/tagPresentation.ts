@@ -6,6 +6,7 @@ import { t } from 'i18next'
 import toArray from 'lodash/toArray'
 import {
   buildTagStructure,
+  getColorForString,
   getTagName,
   TTag,
   TTagStructure,
@@ -14,6 +15,9 @@ import { getTagIconEmoji } from '../../tag-icons'
 
 export type TTagPopulated = TTagStructure & {
   symbol: string
+  colorHEX: string | null
+  colorGenerated: string
+  colorDisplay: string
   comment?: string | null
   currencyCode?: TFxCode | null
   group?: string | null
@@ -46,15 +50,30 @@ export function populateTags(
 ): ById<TTagPopulated> {
   const structure = buildTagStructure({
     tags: rawTags,
-    extraTags: { null: nullTag },
   })
+
+  return presentTags(structure, userSettings)
+}
+
+export function presentTags(
+  structure: ById<TTagStructure>,
+  userSettings: TTagPresentationSettings
+): ById<TTagPopulated> {
+  const nullTagStructure = buildTagStructure({
+    tags: {},
+    extraTags: { null: nullTag },
+  }).null
   const populated: ById<TTagPopulated> = {}
 
-  for (const id in structure) {
-    const tag = structure[id]
+  for (const id in { null: nullTagStructure, ...structure }) {
+    const tag = id === 'null' ? nullTagStructure : structure[id]
+    const colorGenerated = getColorForString(tag.title)
     populated[id] = {
       ...tag,
       symbol: getSymbol(tag, userSettings),
+      colorHEX: tag.colorHex,
+      colorGenerated,
+      colorDisplay: tag.colorHex || colorGenerated,
     }
   }
 

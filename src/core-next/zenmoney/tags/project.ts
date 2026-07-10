@@ -1,5 +1,5 @@
 import type { ById } from '../../shared/types'
-import { getColorForString, int2hex } from '../colors'
+import { int2hex } from '../colors'
 import toArray from 'lodash/toArray'
 import type { TTag, TTagId } from './types'
 
@@ -11,9 +11,7 @@ export type TTagStructure = TTag & {
   name: string
   uniqueName: string
   children: TTagId[]
-  colorHEX: string | null
-  colorGenerated: string
-  colorDisplay: string
+  colorHex: string | null
 }
 
 export type TBuildTagStructureInput = {
@@ -36,16 +34,13 @@ export function buildTagStructure({
 
   Object.values(allTags).forEach(tag => {
     const name = getTagName(tag.title)
-    const colorHEX = int2hex(tag.color)
-    const colorGenerated = getColorForString(tag.title)
+    const colorHex = int2hex(tag.color)
     result[tag.id] = {
       ...tag,
       children: [],
       name,
       uniqueName: name,
-      colorHEX,
-      colorGenerated,
-      colorDisplay: colorHEX || colorGenerated,
+      colorHex,
     }
   })
 

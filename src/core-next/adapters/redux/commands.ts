@@ -12,7 +12,11 @@ import {
   type TEnvelopeId,
   type TGoal,
 } from '../../zerro'
-import { selectCoreEnvelopes } from './selectors'
+import { getDomainEnvelopeGroup } from './envelopePresentation'
+import {
+  selectCoreEnvelopeLabels,
+  selectCoreDomainEnvelopes,
+} from './selectors'
 
 /**
  * Serializable app commands. Once the outbox is persisted, a stored payload
@@ -45,16 +49,20 @@ export function compileAppCommand(
       const { month, id, goal } = command.payload
       return compileSetGoal(data, month, id, goal, ctx)
     }
-    case 'zerro.envelope.patch':
-      // Envelope drafts resolve against the adapter-prepared envelope read
-      // model (populatedTags bridge); replay stays patch-based, so this
-      // compile-time dependency does not leak into the outbox.
+    case 'zerro.envelope.patch': {
+      const labels = selectCoreEnvelopeLabels()
+      const drafts = command.payload.map(draft =>
+        draft.group
+          ? { ...draft, group: getDomainEnvelopeGroup(draft.group, labels) }
+          : draft
+      )
       return compilePatchEnvelope(
         data,
-        selectCoreEnvelopes(state),
-        command.payload,
+        selectCoreDomainEnvelopes(state),
+        drafts,
         ctx
       )
+    }
     case 'legacy.patch':
       return command.payload
   }

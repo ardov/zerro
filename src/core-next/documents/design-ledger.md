@@ -17,13 +17,15 @@
 
 ### Facade and reads
 
-- Public reads are grouped by domain and use `get*` names, for example
-  `session.envelopes.getAll()`.
+- Public reads are grouped by domain and use implemented `get*` names, for
+  example `session.envelopes.getAll()`.
 - A session represents one immutable snapshot and memoizes each internal node
   once.
 - Redux owns cross-snapshot memoization and keeps selectors granular.
 - Internal graph nodes need not appear on the semantic root facade.
 - A small readable graph map is preferred over a generic dependency framework.
+- Flat `session.read.*` is deprecated compatibility until parity and fixture
+  consumers move.
 
 ### Domain and presentation
 
@@ -33,6 +35,8 @@
 - Reusable appearance policy and catalogs may live in an optional presentation
   package or package subpath with adapter-provided localization/assets.
 - Write commands resolve against domain envelopes, never decorated views.
+- The Redux command adapter maps localized default-group labels back to stable
+  domain ids before compilation.
 
 ### Commands, materialization, and replay
 
@@ -43,6 +47,9 @@
 - Command compilers produce intent patches.
 - Every local patch passes through `materializePatch`; the first implementation
   is identity-only.
+- Server-like materializer rules are the final migration phase; keep the layer
+  identity-only while the public API, replica, package, and legacy boundaries
+  are still moving.
 - Canonical server diffs bypass local materialization.
 - The outbox stores `command`, `intentPatch`, `appliedPatch`, and
   `materializerVersion`.
@@ -125,13 +132,6 @@ store/patch shapes, and `DataEntity`.
 Exit gradually as app/domain consumers use supported Core types. Do not perform
 a big-bang type move.
 
-### `populatedTags` session dependency
-
-Status: adapter-prepared presentation input required by envelope reads.
-
-Exit when Core builds domain envelopes from normalized tag structure and the
-presentation layer decorates them afterward.
-
 ### Deep implementation imports
 
 Status: migration debt.
@@ -169,6 +169,12 @@ replayed `current`. Resolve the sync transport question before enabling
 non-identity rules.
 
 ## Resolved bridges
+
+### `populatedTags` session dependency
+
+Resolved on 2026-07-10. Sessions build domain envelopes from normalized Core
+tag structure; the Redux adapter decorates them afterward. Envelope commands
+resolve against the domain selector.
 
 ### Production `6-shared/helpers` imports
 

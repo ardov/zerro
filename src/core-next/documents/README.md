@@ -33,22 +33,20 @@ The handoff is routing, not proof that code landed. Always verify the tree.
   diffs bypass it as already canonical.
 - `createZerroEngine` models outbox replay but has no production owner yet;
   Redux must remain the sole reactive state owner in the app.
-- The session is snapshot-based and lazily memoized, but its public API is still
-  a flat read surface rather than the intended domain facade.
-- Envelope reads still mix domain and presentation data through the
-  `populatedTags` bridge.
+- The session is snapshot-based and lazily memoized. Namespaced `get*` reads are
+  the semantic facade; flat `session.read.*` remains deprecated compatibility.
+- Session envelope reads are domain-only. The Redux adapter adds localized
+  groups, icons, and generated/display colors while preserving legacy output.
 
 ## Default next slice
 
-Build the additive semantic read facade and a small readable dependency graph:
+Replace the first projection-shaped envelope write with a narrow semantic
+command: rename one envelope.
 
-1. Add namespaced `get*` methods such as `session.envelopes.getAll()` and
-   `session.envelopes.getStructure()` over the existing memoized nodes.
-2. Keep `session.read.*` temporarily as a compatibility surface.
-3. Record the important graph edges in one small code-owned structure without
-   introducing a generic dependency framework.
-4. Keep Redux selectors granular; do not build one selector from the whole
-   `current` snapshot.
+1. Define an explicit `{ id, name }` input and compiler.
+2. Add it to the app command vocabulary without removing compatibility patching.
+3. Migrate the envelope name editor as the first real consumer.
+4. Verify tag, account, and merchant routing plus resulting state.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 

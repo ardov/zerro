@@ -8,11 +8,12 @@ tags as envelope sources.
 
 The tag read layer exposes direct normalized reads: `getTags` for the entity map
 and `getTag` for a nullable lookup by id. `buildTagStructure` derives stable,
-presentation-neutral names, unique names, children, and colors from raw tags.
+presentation-neutral names, unique names, children, and configured color values
+from raw tags.
 
-SVG URLs, localized labels, and the synthetic uncategorized tag remain outside
-this ZenMoney entity slice. The app adapter decorates Core tag structure with
-those presentation concerns.
+Generated/display colors, SVG URLs, localized labels, and the synthetic
+uncategorized tag remain outside this ZenMoney entity slice. The app adapter
+decorates Core tag structure with those presentation concerns.
 
 ## Mutability
 

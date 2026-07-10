@@ -6,58 +6,52 @@
 ## Current position
 
 The normalized entity layer and read projection chain are broadly established.
-Real app consumers already use Core Redux selectors, and budget, goal, and
-envelope writes use the command funnel. The next risk is no longer missing
-domain folders; it is an awkward public API plus duplicated read-graph wiring.
+The session now exposes namespaced `get*` reads over the same memoized nodes,
+and `facade/readGraph.ts` records the important dependency edges. Flat
+`session.read.*` remains deprecated compatibility.
 
-The materializer boundary has landed as identity-only. Replica ownership,
-presentation extraction, server-like materialization rules, and package
-hardening remain incomplete.
+Envelope reads are now split: session/Core projectors return domain envelopes,
+and the Redux adapter adds symbols, generated/display colors, localized null
+text, and localized groups. The old `populatedTags` session dependency is gone,
+and envelope commands resolve against domain envelopes.
 
-## Default next slice: semantic read facade
+Replica ownership, server-like materialization rules, and package hardening
+remain incomplete.
 
-Goal: make snapshot reads pleasant without changing calculations or Redux
-invalidation behavior.
+## Default next slice: semantic envelope rename
+
+Goal: replace one projection-shaped write with a pleasant, narrow domain
+command without broadening the migration.
 
 Scope:
 
-1. Add additive domain namespaces over the existing session nodes:
-
-   ```ts
-   session.envelopes.getAll()
-   session.envelopes.getStructure()
-   session.budgets.getAll()
-   session.months.getList()
-   session.months.getTotals()
-   ```
-
-2. Keep `session.read.*` temporarily for tests and compatibility.
-3. Separate semantic public reads from internal graph nodes such as
-   `fxRatesGetter`, `rawGoals`, and `envelopesCompiled`.
-4. Add one small readable dependency map for important projection nodes.
-5. Keep existing Redux selectors explicit and granular.
+1. Add a semantic rename input such as `{ id, name }`.
+2. Compile it to the correct tag, account, or merchant entity patch.
+3. Add a versionable app command without removing `zerro.envelope.patch` yet.
+4. Migrate the envelope name editor to the new command.
+5. Keep presentation labels and full envelope projections out of the contract.
 
 Done when:
 
-- the new facade is covered on deterministic demo data;
-- repeated session reads return the same memoized references;
-- no Redux selector starts depending on the full `current` snapshot;
-- root exports remain facade-only;
-- architecture, handoff, and this roadmap reflect the landed API.
+- tag, account, and merchant rename routing is tested;
+- unsupported payee rename behavior is explicit;
+- the real UI consumer sends only semantic input;
+- resulting-state tests pass through the Redux command funnel;
+- legacy envelope patching remains available for other fields.
 
-Do not include domain/presentation envelope splitting in this slice. That is a
-separate track and deserves independent parity tests.
+Do not add a generic `update(Partial<TEnvelope>)` API or migrate unrelated
+envelope fields in this slice.
 
 ## Active tracks
 
-| Track                           | State                          | Next useful outcome                                                                        |
-| ------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------ |
-| A. Public facade and read graph | Active, default                | Add namespaced `get*` reads and one readable graph map                                     |
-| B. Domain/presentation boundary | Ready                          | Remove presentation fields from domain envelopes and design an optional appearance package |
-| C. ZenMoney materializer rules  | Boundary landed                | Move one proven rule into materialization with parity tests                                |
-| D. Replica and sync             | Designed, not integrated       | Share pure outbox operations and make Redux the replica owner                              |
-| E. Legacy cutover               | Reads advanced, writes partial | Migrate one remaining write or deep import at a time                                       |
-| F. Package and test hardening   | Ongoing                        | Consumer-level export/type test and targeted parity coverage                               |
+| Track                           | State                          | Next useful outcome                                                       |
+| ------------------------------- | ------------------------------ | ------------------------------------------------------------------------- |
+| A. Public facade and read graph | Active, default                | Add and adopt a narrow semantic envelope rename command                   |
+| B. Domain/presentation boundary | Boundary landed                | Extract an optional appearance package only when a real consumer needs it |
+| C. ZenMoney materializer rules  | Deferred until final           | Start only after the other architecture and migration tracks are complete |
+| D. Replica and sync             | Designed, not integrated       | Share pure outbox operations and make Redux the replica owner             |
+| E. Legacy cutover               | Reads advanced, writes partial | Migrate one remaining write or deep import at a time                      |
+| F. Package and test hardening   | Ongoing                        | Consumer-level export/type test and targeted parity coverage              |
 
 ## Track A: public facade and read graph
 
@@ -65,11 +59,12 @@ Goal: expose domain use cases without leaking projector assembly.
 
 Current:
 
-- `createZerroSession` memoizes one immutable snapshot;
-- the flat `session.read.*` surface exposes semantic results and internal nodes;
-- Redux independently wires the same calculation graph.
+- namespaced `get*` methods directly reuse existing memoized functions;
+- `session.read.*` remains deprecated compatibility;
+- `facade/readGraph.ts` records important graph edges without driving runtime;
+- Redux independently wires the same calculations with cross-snapshot caches.
 
-After the default slice:
+Next:
 
 1. Add domain write methods that compile narrow semantic command inputs.
 2. Decide which adapter-level projectors deserve a supported subpath.
@@ -79,17 +74,24 @@ Avoid a generic graph framework until simple wiring causes repeated defects.
 
 ## Track B: domain and presentation
 
-Goal: make Core envelope reads headless and move reusable appearance behavior
+Goal: keep Core envelope reads headless and move reusable appearance behavior
 into an optional presentation boundary.
 
-Suggested order:
+Current:
 
-1. Define the minimal domain envelope shape and classify every current field as
-   domain or presentation.
-2. Build a pure presenter accepting label, icon, and SVG resolvers.
-3. Move generated-color, emoji, and fallback policy behind that presenter.
-4. Remove `populatedTags` from the session input.
-5. Later add bank-logo catalogs keyed by stable company/account metadata.
+- `TEnvelope` contains domain fields only;
+- `TPresentedEnvelope` adds symbol and generated/display colors in the adapter;
+- stable group ids are localized only after domain projection;
+- session reads require no adapter-prepared tag input;
+- decorated Redux selectors retain legacy parity;
+- envelope commands resolve against stable domain envelopes.
+
+Later:
+
+1. Decide whether presentation is a supported package subpath or a separate
+   package.
+2. Replace adapter imports with explicit label/icon/asset resolvers.
+3. Add bank-logo catalogs keyed by stable company/account metadata.
 
 Keep localization and bundler-resolved assets outside domain Core. Compare both
 stable domain envelopes and final decorated Redux views during migration.
@@ -98,6 +100,11 @@ stable domain envelopes and final decorated Redux views during migration.
 
 Goal: reproduce known ZenMoney cross-entity behavior in one deterministic
 layer instead of every command.
+
+This track is intentionally last. Keep materialization identity-only until the
+public API, presentation/package boundary, replica groundwork, legacy cutover,
+and package hardening are complete enough that rule work will not churn their
+contracts.
 
 Current:
 
@@ -177,7 +184,8 @@ Do not add tests for trivial map lookups or speculative APIs.
 - Choose Track A by default.
 - Choose Track B when working on tags, envelopes, icons, localization, or bank
   appearance.
-- Choose Track C only for a known, testable ZenMoney rule.
+- Do not choose Track C until the other tracks are complete; materializer rules
+  are the final phase.
 - Choose Track D when changing sync, undo/redo, persistence, or Redux data state.
 - Choose Track E for a single concrete app consumer.
 - Choose Track F when a boundary or fixture problem blocks another track.

@@ -1,10 +1,10 @@
 import { toISODate, toISOMonth } from '../shared/date'
-import type { ById } from '../shared/types'
 import type { TDataStore } from '../zenmoney/store'
 import {
   buildBalances,
   buildBalancesByDate,
   buildDebtors,
+  buildTagStructure,
   getDebtAccountId,
   getHistoryStart,
   getInstCodeMap,
@@ -37,23 +37,17 @@ import {
   getRawGoals,
   getUserSettings,
 } from '../zerro'
-import type { TEnvelopeTag } from '../zerro/envelopes'
 
 export type TZerroSessionContext = {
   now: () => number
   uuid: () => string
 }
 
-export type TZerroSessionReadDependencies = {
-  populatedTags?: ById<TEnvelopeTag>
-}
-
 export type TZerroSession = ReturnType<typeof createZerroSession>
 
 export function createZerroSession(
   data: TDataStore,
-  ctx: TZerroSessionContext,
-  dependencies: TZerroSessionReadDependencies = {}
+  ctx: TZerroSessionContext
 ) {
   const currentDate = memo(() => toISODate(ctx.now()))
   const currentMonth = memo(() => toISOMonth(ctx.now()))
@@ -65,6 +59,7 @@ export function createZerroSession(
   const debtAccountId = memo(() => getDebtAccountId(data))
   const instrumentCodeById = memo(() => getInstCodeMap(data))
   const transactionsHistory = memo(() => getTransactionsHistory(data))
+  const tagStructure = memo(() => buildTagStructure({ tags: data.tag }))
   const currentFxRates = memo(() =>
     buildCurrentFxRates({
       instruments: data.instrument,
@@ -95,7 +90,7 @@ export function createZerroSession(
   const envelopesCompiled = memo(() =>
     buildEnvelopes({
       debtors: debtors(),
-      populatedTags: dependencies.populatedTags || {},
+      tags: tagStructure(),
       savingAccounts: getZerroSavingAccounts(data),
       envelopeMeta: envelopeMeta(),
       userCurrency: getUserCurrency(data),
@@ -212,6 +207,7 @@ export function createZerroSession(
     debtAccountId,
     instrumentCodeById,
     transactionsHistory,
+    tagStructure,
     debtors,
     envelopesCompiled,
     envelopes,
@@ -232,7 +228,71 @@ export function createZerroSession(
     balancesByDate,
   }
 
-  return { data, ctx, read }
+  const calendar = {
+    getCurrentDate: currentDate,
+    getCurrentMonth: currentMonth,
+  }
+  const settings = {
+    get: userSettings,
+  }
+  const transactions = {
+    getHistory: transactionsHistory,
+    getHistoryStart: historyStart,
+  }
+  const debtorsApi = {
+    getAll: debtors,
+  }
+  const accounts = {
+    getCurrentFunds: currentFunds,
+  }
+  const envelopesApi = {
+    getAll: envelopes,
+    getStructure: envelopeStructure,
+    getKeepingIds: keepingEnvelopeIds,
+    getMetrics: envMetrics,
+  }
+  const budgetsApi = {
+    getAll: budgets,
+  }
+  const activityApi = {
+    getAll: activity,
+    getSorted: sortedActivity,
+  }
+  const months = {
+    getList: monthList,
+    getTotals: monthTotals,
+  }
+  const goalsApi = {
+    getAll: goals,
+    getTotals: goalTotals,
+  }
+  const balancesApi = {
+    getAll: balances,
+    getByDate: balancesByDate,
+  }
+  const fx = {
+    getCurrentRates: currentFxRates,
+    getRates: fxRates,
+  }
+
+  return {
+    data,
+    ctx,
+    calendar,
+    settings,
+    transactions,
+    debtors: debtorsApi,
+    accounts,
+    envelopes: envelopesApi,
+    budgets: budgetsApi,
+    activity: activityApi,
+    months,
+    goals: goalsApi,
+    balances: balancesApi,
+    fx,
+    /** @deprecated Use the namespaced domain reads above. */
+    read,
+  }
 }
 
 function memo<T>(calculate: () => T): () => T {

@@ -174,12 +174,12 @@ const session = createZerroSession(snapshot, { now, uuid })
 
 session.envelopes.getAll()
 session.envelopes.getStructure()
-session.budgets.getByMonth(month)
-session.months.getSummary(month)
+session.budgets.getAll()
+session.months.getTotals()
 ```
 
-The current flat `session.read.*` API remains a migration surface until the
-namespaced facade is adopted.
+The namespaced facade is implemented additively. Flat `session.read.*` remains
+a deprecated migration surface for existing parity and private-fixture tests.
 
 Session context contains only nondeterministic dependencies such as `now()` and
 `uuid()`. Root user and currency are derived from normalized data.
@@ -235,9 +235,10 @@ rawGoals + monthList + envMetrics + sortedActivity + FX
                                                -> goals
 ```
 
-Keep this graph readable in one small code-owned structure. Do not introduce a
-generic dependency framework unless manual wiring continues to create real
-invalidation defects.
+The important edges are recorded in `facade/readGraph.ts`. The map is
+descriptive, not a runtime dependency framework; session and Redux wiring stay
+explicit. Introduce more machinery only if manual wiring continues to create
+real invalidation defects.
 
 Adapter-level projectors such as `buildRawActivity` and `buildEnvMetrics` may be
 available to runtime adapters without appearing on the root semantic facade.
@@ -249,8 +250,9 @@ not independent calculation of every month.
 
 ## Domain and presentation
 
-Domain envelopes should contain semantic state only: identity, title, parent,
-group id, icon id, color, visibility, currency, and budgeting behavior.
+Domain envelopes contain semantic state only: identity, normalized and source
+titles, hierarchy, stable group id, configured tag color, visibility, currency,
+and budgeting behavior.
 
 Presentation envelopes may add:
 
@@ -265,8 +267,11 @@ and asset resolvers, but domain Core must not import bundler-specific SVG URLs,
 i18n, React, or Redux.
 
 Write commands must resolve against domain envelopes, never localized or
-presentation-decorated views. The current `populatedTags` session dependency is
-a compatibility bridge to remove.
+presentation-decorated views. This boundary is implemented: the session builds
+tag envelopes from Core tag structure, while the Redux adapter applies
+`TPresentedEnvelope` fields and localized groups afterward. Before compiling an
+app draft, the adapter maps known localized default-group labels back to stable
+domain group ids.
 
 ## Internal responsibilities
 

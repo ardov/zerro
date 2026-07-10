@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import type { TTag } from '6-shared/types'
 import { makeAccount } from '../../testing/zenmoneyTestData'
 import { EnvType, envId } from '../envelope-id'
 import { envelopeVisibility } from '../envelope-meta'
@@ -7,6 +6,7 @@ import {
   buildEnvelopes,
   defaultEnvelopeGroupIds,
   getKeepingEnvelopes,
+  type TEnvelopeTag,
   uncategorizedEnvelopeName,
 } from './build'
 
@@ -18,7 +18,7 @@ describe('buildEnvelopes', () => {
 
     const result = buildEnvelopes({
       userCurrency: 'USD',
-      populatedTags: {
+      tags: {
         null: tag({ id: 'null', title: 'No category', name: 'No category' }),
         food: tag({
           id: 'food',
@@ -70,7 +70,6 @@ describe('buildEnvelopes', () => {
       group: defaultEnvelopeGroupIds.accounts,
       visibility: envelopeVisibility.hidden,
       currency: 'EUR',
-      symbol: '🏦',
     })
     expect(getKeepingEnvelopes(result.byId)).toEqual([parentId])
   })
@@ -81,7 +80,7 @@ describe('buildEnvelopes', () => {
 
     const result = buildEnvelopes({
       userCurrency: 'USD',
-      populatedTags: {},
+      tags: {},
       savingAccounts: [],
       envelopeMeta: {},
       debtors: {
@@ -115,7 +114,7 @@ describe('buildEnvelopes', () => {
 
     const result = buildEnvelopes({
       userCurrency: 'USD',
-      populatedTags: {},
+      tags: {},
       savingAccounts: [],
       envelopeMeta: {},
       debtors: {},
@@ -127,9 +126,7 @@ describe('buildEnvelopes', () => {
       entityId: 'null',
       name: uncategorizedEnvelopeName,
       originalName: uncategorizedEnvelopeName,
-      symbol: '?',
-      colorHex: '#ff0000',
-      colorDisplay: '#ff0000',
+      colorHex: null,
       group: defaultEnvelopeGroupIds.tags,
       parent: null,
       currency: 'USD',
@@ -138,30 +135,18 @@ describe('buildEnvelopes', () => {
       id: defaultEnvelopeGroupIds.tags,
       children: [{ id: nullTagId }],
     })
+    expect(result.byId[nullTagId]).not.toHaveProperty('symbol')
+    expect(result.byId[nullTagId]).not.toHaveProperty('colorDisplay')
   })
 })
 
 function tag(
-  patch: Partial<TTag> & { id: string; title: string; name: string }
-) {
+  patch: Partial<TEnvelopeTag> & { id: string; title: string; name: string }
+): TEnvelopeTag {
   return {
-    changed: 1,
-    user: 1,
     parent: null,
-    icon: null,
-    staticId: null,
-    picture: null,
-    color: null,
-    showIncome: true,
     showOutcome: false,
-    budgetIncome: true,
-    budgetOutcome: true,
-    required: null,
-    symbol: '?',
-    children: [],
-    colorHEX: null,
-    colorDisplay: '#cccccc',
-    archive: false,
+    colorHex: null,
     ...patch,
   }
 }

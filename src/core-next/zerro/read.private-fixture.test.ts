@@ -5,17 +5,14 @@ import { describe, expect, it, vi } from 'vitest'
 
 import type { RootState } from 'store'
 import { i18n } from '6-shared/localization'
+import { presentEnvelopes } from '../adapters/redux/envelopePresentation'
+import { buildTagStructure } from '../zenmoney'
 import {
   buildBudgets,
   buildEnvelopes,
-  buildStructure,
-  defaultEnvelopeGroupIds,
-  flattenStructure,
   getEnvBudgets,
   getEnvelopeMeta as getCoreEnvelopeMeta,
   getUserSettings as getCoreUserSettings,
-  TEnvelope,
-  TGroupNode,
 } from './index'
 
 vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
@@ -81,26 +78,30 @@ maybeDescribe('core-next Zerro readers on private fixture', () => {
 
     const actual = buildEnvelopes({
       debtors: debtorModel.getDebtors(state),
-      populatedTags: tagModel.getPopulatedTags(state),
+      tags: buildTagStructure({ tags: fixture.input.data.tag }),
       savingAccounts: accountModel.getSavingAccounts(state),
       envelopeMeta: getCoreEnvelopeMeta(fixture.input.data),
       userCurrency: userModel.getUserCurrency(state),
     })
-    const localized = localizeDefaultEnvelopeGroups(actual, {
-      defaultTagGroup: i18n.t('defaultTagGroup', { ns: 'common' }),
-      defaultAccountGroup: i18n.t('defaultAccountGroup', { ns: 'common' }),
-      defaultMerchantGroup: i18n.t('defaultMerchantGroup', { ns: 'common' }),
-      defaultPayeeGroup: i18n.t('defaultPayeeGroup', { ns: 'common' }),
-    })
+    const presented = presentEnvelopes(
+      actual.byId,
+      tagModel.getPopulatedTags(state),
+      {
+        defaultTagGroup: i18n.t('defaultTagGroup', { ns: 'common' }),
+        defaultAccountGroup: i18n.t('defaultAccountGroup', { ns: 'common' }),
+        defaultMerchantGroup: i18n.t('defaultMerchantGroup', { ns: 'common' }),
+        defaultPayeeGroup: i18n.t('defaultPayeeGroup', { ns: 'common' }),
+      }
+    )
 
     expectSameJsonHash(
       'envelopes',
-      localized.byId,
+      presented.byId,
       envelopeModel.getEnvelopes(state)
     )
     expectSameJsonHash(
       'envelopeStructure',
-      localized.structure,
+      presented.structure,
       envelopeModel.getEnvelopeStructure(state)
     )
   })
@@ -243,62 +244,4 @@ function describeValue(value: unknown) {
   if (Array.isArray(value)) return `array(${value.length})`
   if (isPlainObject(value)) return `object(${Object.keys(value).length})`
   return typeof value
-}
-
-function localizeDefaultEnvelopeGroups(
-  compiled: { byId: Record<string, TEnvelope>; structure: TGroupNode[] },
-  labels: {
-    defaultTagGroup: string
-    defaultAccountGroup: string
-    defaultMerchantGroup: string
-    defaultPayeeGroup: string
-  }
-) {
-  const byId = Object.fromEntries(
-    Object.entries(compiled.byId).map(([id, envelope]) => [
-      id,
-      {
-        ...envelope,
-        group: localizeGroup(envelope.group, labels),
-      },
-    ])
-  )
-  const structure = buildStructure(byId)
-
-  flattenStructure(structure).forEach((node, index) => {
-    if (node.type === 'group') return
-    const envelope = byId[node.id]
-    envelope.parent = node.parent
-    envelope.group = node.group
-    envelope.children = node.children.map(child => child.id)
-    envelope.index = index
-  })
-
-  return {
-    byId,
-    structure,
-  }
-}
-
-function localizeGroup(
-  group: string,
-  labels: {
-    defaultTagGroup: string
-    defaultAccountGroup: string
-    defaultMerchantGroup: string
-    defaultPayeeGroup: string
-  }
-): string {
-  switch (group) {
-    case defaultEnvelopeGroupIds.tags:
-      return labels.defaultTagGroup
-    case defaultEnvelopeGroupIds.accounts:
-      return labels.defaultAccountGroup
-    case defaultEnvelopeGroupIds.merchants:
-      return labels.defaultMerchantGroup
-    case defaultEnvelopeGroupIds.payees:
-      return labels.defaultPayeeGroup
-    default:
-      return group
-  }
 }

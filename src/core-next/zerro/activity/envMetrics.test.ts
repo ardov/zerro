@@ -68,7 +68,7 @@ describe('buildEnvMetrics', () => {
     const nullTagId = envId.get(EnvType.Tag, null)
     const envelopes = buildEnvelopes({
       userCurrency: 'USD',
-      populatedTags: {},
+      tags: {},
       savingAccounts: [],
       envelopeMeta: {},
       debtors: {},

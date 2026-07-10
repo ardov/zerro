@@ -4,7 +4,12 @@ import type { RootState } from 'store'
 import { i18n } from '6-shared/localization'
 import { makeDemoStore } from '../../demo'
 import { applyPatch } from '../../zenmoney'
-import { compilePatchEnvelopeMeta, envId, EnvType } from '../../zerro'
+import {
+  compilePatchEnvelopeMeta,
+  defaultEnvelopeGroupIds,
+  envId,
+  EnvType,
+} from '../../zerro'
 
 // Breaks the legacy hidden-store import cycle, same as the private fixture tests.
 vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
@@ -21,7 +26,8 @@ const ctx = {
   now: () => NOW,
   uuid: (() => {
     let counter = 0
-    return () => `00000000-0000-4000-8000-${String(counter++).padStart(12, '0')}`
+    return () =>
+      `00000000-0000-4000-8000-${String(counter++).padStart(12, '0')}`
   })(),
 }
 
@@ -53,6 +59,32 @@ function makeRootState(data: TDataStore): RootState {
 }
 
 describe('selectCoreEnvelopes chain', () => {
+  it('keeps appearance out of domain envelopes and adds it in the adapter', async () => {
+    const { selectCoreDomainEnvelopes, selectCoreEnvelopes } =
+      await importModels()
+    const state = makeRootState(makeDemoStore({ now: NOW }))
+    const id = envId.get(EnvType.Tag, null)
+
+    const domain = selectCoreDomainEnvelopes(state)[id]
+    const presented = selectCoreEnvelopes(state)[id]
+
+    expect(domain).toMatchObject({
+      name: 'No category',
+      colorHex: null,
+      group: defaultEnvelopeGroupIds.tags,
+    })
+    expect(domain).not.toHaveProperty('symbol')
+    expect(domain).not.toHaveProperty('colorGenerated')
+    expect(domain).not.toHaveProperty('colorDisplay')
+
+    expect(presented).toMatchObject({
+      symbol: expect.any(String),
+      colorHex: '#ff0000',
+      colorDisplay: '#ff0000',
+      group: i18n.t('defaultTagGroup', { ns: 'common' }),
+    })
+  })
+
   it('matches legacy envelope selectors on demo data', async () => {
     const {
       envelopeModel,

@@ -25,83 +25,81 @@ describe('createZerroSession on deterministic demo data', () => {
     try {
       const data = makeCoreNextDemoStore()
       const state = makeCoreNextDemoRootState(data)
-      const [
-        { tagModel },
-        {
-          selectCoreActivity,
-          selectCoreBalances,
-          selectCoreBalancesByDate,
-          selectCoreBudgets,
-          selectCoreCurrentFunds,
-          selectCoreCurrentFxRates,
-          selectCoreDebtors,
-          selectCoreEnvMetrics,
-          selectCoreFxRates,
-          selectCoreGoalTotals,
-          selectCoreGoals,
-          selectCoreHistoryStart,
-          selectCoreKeepingEnvelopeIds,
-          selectCoreMonthList,
-          selectCoreMonthTotals,
-          selectCoreRawActivity,
-          selectCoreRawGoals,
-          selectCoreSortedActivity,
-          selectCoreStableEnvelopes,
-          selectCoreStableEnvelopeStructure,
-          selectCoreUserSettings,
-        },
-      ] = await Promise.all([
-        import('5-entities/tag'),
-        import('../adapters/redux/selectors'),
-      ])
+      const {
+        selectCoreActivity,
+        selectCoreBalances,
+        selectCoreBalancesByDate,
+        selectCoreBudgets,
+        selectCoreCurrentFunds,
+        selectCoreCurrentFxRates,
+        selectCoreDebtors,
+        selectCoreEnvMetrics,
+        selectCoreFxRates,
+        selectCoreGoalTotals,
+        selectCoreGoals,
+        selectCoreHistoryStart,
+        selectCoreKeepingEnvelopeIds,
+        selectCoreMonthList,
+        selectCoreMonthTotals,
+        selectCoreRawActivity,
+        selectCoreRawGoals,
+        selectCoreSortedActivity,
+        selectCoreDomainEnvelopes,
+        selectCoreDomainEnvelopeStructure,
+        selectCoreTransactionsHistory,
+        selectCoreUserSettings,
+      } = await import('../adapters/redux/selectors')
 
-      const session = createZerroSession(data, coreNextDemoContext, {
-        populatedTags: tagModel.getPopulatedTags(state),
-      })
+      const session = createZerroSession(data, coreNextDemoContext)
 
       expectSameJsonHash(
         'userSettings',
-        session.read.userSettings(),
+        session.settings.get(),
         selectCoreUserSettings(state)
       )
       expectSameJsonHash(
         'debtors',
-        session.read.debtors(),
+        session.debtors.getAll(),
         selectCoreDebtors(state)
       )
       expectSameJsonHash(
+        'transactionsHistory',
+        session.transactions.getHistory(),
+        selectCoreTransactionsHistory(state)
+      )
+      expectSameJsonHash(
         'envelopes',
-        session.read.envelopes(),
-        selectCoreStableEnvelopes(state)
+        session.envelopes.getAll(),
+        selectCoreDomainEnvelopes(state)
       )
       expectSameJsonHash(
         'envelopeStructure',
-        session.read.envelopeStructure(),
-        selectCoreStableEnvelopeStructure(state)
+        session.envelopes.getStructure(),
+        selectCoreDomainEnvelopeStructure(state)
       )
       expectSameJsonHash(
         'keepingEnvelopeIds',
-        session.read.keepingEnvelopeIds(),
+        session.envelopes.getKeepingIds(),
         selectCoreKeepingEnvelopeIds(state)
       )
       expectSameJsonHash(
         'budgets',
-        session.read.budgets(),
+        session.budgets.getAll(),
         selectCoreBudgets(state)
       )
       expectSameJsonHash(
         'currentFunds',
-        session.read.currentFunds(),
+        session.accounts.getCurrentFunds(),
         selectCoreCurrentFunds(state)
       )
       expectSameJsonHash(
         'currentFxRates',
-        session.read.currentFxRates(),
+        session.fx.getCurrentRates(),
         selectCoreCurrentFxRates(state)
       )
       expectSameJsonHash(
         'fxRates',
-        session.read.fxRates(),
+        session.fx.getRates(),
         selectCoreFxRates(state)
       )
       expectSameJsonHash(
@@ -111,27 +109,27 @@ describe('createZerroSession on deterministic demo data', () => {
       )
       expectSameJsonHash(
         'activity',
-        session.read.activity(),
+        session.activity.getAll(),
         selectCoreActivity(state)
       )
       expectSameJsonHash(
         'monthList',
-        session.read.monthList(),
+        session.months.getList(),
         selectCoreMonthList(state)
       )
       expectSameJsonHash(
         'envMetrics',
-        session.read.envMetrics(),
+        session.envelopes.getMetrics(),
         selectCoreEnvMetrics(state)
       )
       expectSameJsonHash(
         'sortedActivity',
-        session.read.sortedActivity(),
+        session.activity.getSorted(),
         selectCoreSortedActivity(state)
       )
       expectSameJsonHash(
         'monthTotals',
-        session.read.monthTotals(),
+        session.months.getTotals(),
         selectCoreMonthTotals(state)
       )
       expectSameJsonHash(
@@ -139,25 +137,29 @@ describe('createZerroSession on deterministic demo data', () => {
         session.read.rawGoals(),
         selectCoreRawGoals(state)
       )
-      expectSameJsonHash('goals', session.read.goals(), selectCoreGoals(state))
+      expectSameJsonHash(
+        'goals',
+        session.goals.getAll(),
+        selectCoreGoals(state)
+      )
       expectSameJsonHash(
         'goalTotals',
-        session.read.goalTotals(),
+        session.goals.getTotals(),
         selectCoreGoalTotals(state)
       )
       expectSameJsonHash(
         'historyStart',
-        session.read.historyStart(),
+        session.transactions.getHistoryStart(),
         selectCoreHistoryStart(state)
       )
       expectSameJsonHash(
         'balances',
-        session.read.balances(),
+        session.balances.getAll(),
         selectCoreBalances(state)
       )
       expectSameJsonHash(
         'balancesByDate',
-        session.read.balancesByDate(),
+        session.balances.getByDate(),
         selectCoreBalancesByDate(state)
       )
     } finally {

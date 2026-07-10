@@ -2,8 +2,7 @@ import type { ById } from '../../shared/types'
 import type { TAccount } from '../../zenmoney/accounts/types'
 import type { TFxAmount } from '../../shared/money'
 import type { TFxCode } from '../../zenmoney/instruments/types'
-import type { TTag, TTagId } from '../../zenmoney/tags/types'
-import { getColorForString } from '../../zenmoney/colors'
+import type { TTagId, TTagStructure } from '../../zenmoney/tags'
 import { keys } from '../../shared/keys'
 import type { TDebtor } from '../../zenmoney'
 import { EnvType, envId, TEnvelopeId } from '../envelope-id'
@@ -19,36 +18,21 @@ export const defaultEnvelopeGroupIds = {
 export type TDefaultEnvelopeGroupId =
   (typeof defaultEnvelopeGroupIds)[keyof typeof defaultEnvelopeGroupIds]
 
-export type TEnvelopeTag = TTag & {
-  name: string
-  symbol: string
-  colorHEX: string | null
-  colorDisplay: string
-}
+export type TEnvelopeTag = Pick<
+  TTagStructure,
+  'id' | 'title' | 'name' | 'parent' | 'showOutcome' | 'colorHex'
+>
 
 export const uncategorizedTagId = 'null' as TTagId
 export const uncategorizedEnvelopeName = 'No category'
 
 const uncategorizedEnvelopeTag: TEnvelopeTag = {
   id: uncategorizedTagId,
-  changed: 0,
-  user: 0,
   title: uncategorizedEnvelopeName,
   name: uncategorizedEnvelopeName,
-  symbol: '?',
-  colorHEX: null,
-  colorDisplay: '#ff0000',
-  icon: null,
-  budgetIncome: true,
-  budgetOutcome: true,
-  archive: false,
-  showIncome: false,
+  colorHex: null,
   showOutcome: false,
   parent: null,
-  color: null,
-  required: false,
-  staticId: null,
-  picture: null,
 }
 
 export type TEnvelopeDebtor = TDebtor
@@ -59,10 +43,7 @@ export type TEnvelope = {
   entityId: string
   name: string
   originalName: string
-  symbol: string
   colorHex: string | null
-  colorGenerated: string
-  colorDisplay: string
   children: TEnvelopeId[]
   parent: TEnvelopeId | null
   index: number
@@ -93,7 +74,7 @@ export type TGroupNode = {
 
 export type TBuildEnvelopesInput = {
   debtors: ById<TEnvelopeDebtor>
-  populatedTags: ById<TEnvelopeTag>
+  tags: ById<TEnvelopeTag>
   savingAccounts: TAccount[]
   envelopeMeta: ById<TEnvelopeMeta>
   userCurrency: TFxCode
@@ -104,9 +85,9 @@ export function buildEnvelopes(input: TBuildEnvelopesInput): {
   structure: TGroupNode[]
 } {
   const envelopes: ById<TEnvelope> = {}
-  const populatedTags = getEnvelopeTags(input.populatedTags)
+  const tags = getEnvelopeTags(input.tags)
 
-  Object.values(populatedTags).forEach(tag => {
+  Object.values(tags).forEach(tag => {
     const envelope = makeEnvelopeFromTag(
       tag,
       input.envelopeMeta,
@@ -149,10 +130,10 @@ export function getKeepingEnvelopes(envelopes: ById<TEnvelope>): TEnvelopeId[] {
   return keys(envelopes).filter(id => envelopes[id].keepIncome)
 }
 
-function getEnvelopeTags(populatedTags: ById<TEnvelopeTag>): ById<TEnvelopeTag> {
+function getEnvelopeTags(tags: ById<TEnvelopeTag>): ById<TEnvelopeTag> {
   return {
     [uncategorizedTagId]: uncategorizedEnvelopeTag,
-    ...populatedTags,
+    ...tags,
   }
 }
 
@@ -170,10 +151,7 @@ function makeEnvelopeFromTag(
     entityId: tag.id,
     name: tag.name || tag.title,
     originalName: tag.title,
-    symbol: tag.symbol,
-    colorHex: tag.id === 'null' ? '#ff0000' : tag.colorHEX,
-    colorGenerated: getColorForString(tag.title),
-    colorDisplay: tag.id === 'null' ? '#ff0000' : tag.colorDisplay,
+    colorHex: tag.colorHex,
     visibility: getVisibility(meta?.visibility, tag.showOutcome),
     parent: tag.parent ? envId.get(EnvType.Tag, tag.parent) : null,
     children: [],
@@ -201,10 +179,7 @@ function makeEnvelopeFromAccount(
     entityId: account.id,
     name: account.title,
     originalName: account.title,
-    symbol: '🏦',
     colorHex: null,
-    colorGenerated: getColorForString(account.title),
-    colorDisplay: getColorForString(account.title),
     visibility: getVisibility(meta?.visibility),
     parent: meta?.parent || null,
     children: [],
@@ -234,10 +209,7 @@ function makeEnvelopeFromDebtor(
     entityId: debtor.merchantId || debtor.id,
     name: debtor.name,
     originalName: debtor.name,
-    symbol: '👤',
     colorHex: null,
-    colorGenerated: getColorForString(debtor.name),
-    colorDisplay: getColorForString(debtor.name),
     visibility: getVisibility(meta?.visibility),
     parent: meta?.parent || null,
     children: [],

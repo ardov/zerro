@@ -7,22 +7,17 @@ import { createZerroSession } from './createZerroSession'
 describe('createZerroSession', () => {
   it('memoizes reads for the session lifetime', () => {
     let now = Date.parse('2026-01-15T12:00:00.000Z')
-    const session = createZerroSession(
-      makeEmptyData(),
-      {
-        now: () => now,
-        uuid: () => 'test-id',
-      },
-      {
-        populatedTags: {},
-      }
-    )
+    const session = createZerroSession(makeEmptyData(), {
+      now: () => now,
+      uuid: () => 'test-id',
+    })
 
-    expect(session.read.currentMonth()).toBe('2026-01')
+    expect(session.calendar.getCurrentMonth()).toBe('2026-01')
 
     now = Date.parse('2026-02-15T12:00:00.000Z')
 
-    expect(session.read.currentMonth()).toBe('2026-01')
+    expect(session.calendar.getCurrentMonth()).toBe('2026-01')
+    expect(session.read.currentMonth).toBe(session.calendar.getCurrentMonth)
   })
 
   it('can build headless envelopes without adapter-provided populated tags', () => {
@@ -32,12 +27,16 @@ describe('createZerroSession', () => {
       uuid: () => 'test-id',
     })
 
-    expect(session.read.envelopes()[nullTagId]).toMatchObject({
+    const envelopes = session.envelopes.getAll()
+
+    expect(envelopes[nullTagId]).toMatchObject({
       id: nullTagId,
       entityId: 'null',
       name: 'No category',
       currency: 'USD',
     })
+    expect(session.envelopes.getAll()).toBe(envelopes)
+    expect(session.read.envelopes()).toBe(envelopes)
   })
 })
 

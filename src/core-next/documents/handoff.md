@@ -2,7 +2,7 @@
 
 - Updated: 2026-07-10
 - Branch: `core-next`
-- Last commit before the current worktree: `3c4d26d3 YAGNI sweep`
+- Last commit before the current worktree: `e42c0a2e Add patch materializer boundary`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -23,55 +23,60 @@ claims against the tree before editing.
 | Package boundary | Root exports constants, shared root types, engine, and facade only; production Core has no runtime `6-shared` imports |
 | ZenMoney layer   | Normalized entities, factories, focused reads, commands, patch/replay, debtors, and balances are present              |
 | Zerro reads      | Envelopes through activity, metrics, month totals, goals, budgets, settings, hidden data, and FX are present          |
-| Session          | Read-only flat `session.read.*` facade with lazy snapshot-local memoization                                           |
+| Session          | Namespaced semantic `get*` reads over lazy snapshot-local memoization; flat `read` is deprecated compatibility        |
 | Redux reads      | Most budget/envelope/goal/activity/transaction/tag/debtor/balance consumers use Core adapter selectors                |
 | Redux writes     | Budget, goal, and envelope commands use the command funnel; legacy writes still use patch bridges                     |
 | Materializer     | Identity layer is wired into every Redux local patch; server patches bypass it                                        |
 | Engine           | Pure outbox reference exists; no production consumer; replay uses stored `appliedPatch`                               |
-| Presentation     | Tag/envelope decoration remains in the Redux adapter and `populatedTags` is still a session bridge                    |
+| Presentation     | Domain envelopes are headless; Redux adds localized groups, symbols, and generated/display colors                     |
 | Tests            | Unit, deterministic demo parity, Redux invalidation, and opt-in private parity layers exist                           |
 
 ## Current worktree slice
 
-The uncommitted slice introduces and documents local patch materialization:
+The uncommitted worktree contains two completed read-boundary slices:
 
-- `src/core-next/materializer/materializePatch.ts` returns identity
-  `intentPatch`/`appliedPatch` plus `materializerVersion`;
-- known future transaction/account rules are recorded beside the function;
-- Redux `applyClientPatch` materializes every local patch centrally;
-- Redux `applyServerPatch` treats server diffs as canonical;
-- `createZerroEngine` stores intent and applied patches separately;
-- reducer and engine tests protect the boundary;
-- the document set has been reduced and rewritten around current decisions and
-  active tracks.
+- session reads are grouped into `calendar`, `settings`, `transactions`,
+  `debtors`, `accounts`, `envelopes`, `budgets`, `activity`, `months`, `goals`,
+  `balances`, and `fx` namespaces;
+- all `get*` methods directly reuse existing memoized functions;
+- flat `session.read.*` remains deprecated compatibility;
+- `facade/readGraph.ts` records important dependencies without becoming a
+  runtime framework;
+- deterministic demo tests exercise the semantic facade;
+- the graph has explicit known-node and acyclicity tests;
+- sessions derive domain envelopes from Core tag structure with no
+  adapter-provided dependencies;
+- domain `TEnvelope` excludes symbol and generated/display colors;
+- `envelopePresentation.ts` restores the decorated legacy Redux shape;
+- envelope commands resolve against stable domain envelopes;
+- domain and presentation parity tests protect the split.
 
-No ZenMoney effect rule is implemented yet; runtime behavior remains legacy
-identity behavior.
+No icon/logo package, materializer rule, or replica behavior is included.
 
 ## Default next task
 
-Implement the additive semantic read facade described in
-[roadmap.md](./roadmap.md#default-next-slice-semantic-read-facade).
+Implement semantic envelope rename described in
+[roadmap.md](./roadmap.md#default-next-slice-semantic-envelope-rename).
 
 Likely files:
 
 ```txt
-src/core-next/facade/createZerroSession.ts
-src/core-next/facade/createZerroSession.test.ts
-src/core-next/facade/createZerroSession.demo.test.ts
-src/core-next/adapters/redux/selectors.ts
+src/core-next/zerro/envelopes/commands.ts
+src/core-next/zerro/envelopes/commands.test.ts
+src/core-next/adapters/redux/commands.ts
+src/core-next/adapters/redux/commands.test.ts
+src/2-pages/Budgets/EnvelopeTable/Row/NameCell.tsx
 src/core-next/documents/roadmap.md
 src/core-next/documents/handoff.md
 ```
 
 Keep the slice bounded:
 
-- add namespaced `get*` methods;
-- retain `session.read.*` compatibility;
-- add a small readable dependency map;
-- do not split presentation envelopes yet;
-- do not rewire Redux around one whole-store selector;
-- do not begin replica-state migration in the same change.
+- use a narrow `{ id, name }` command input;
+- test tag, account, merchant, and unsupported payee routing;
+- migrate only the name editor consumer;
+- retain the compatibility envelope patch command;
+- do not start materializer rules; that track is explicitly last.
 
 ## Important guardrails
 
@@ -90,7 +95,7 @@ Keep the slice bounded:
 
 ## Verification
 
-The materializer and documentation slice was verified with:
+The semantic facade and domain/presentation slices were verified with:
 
 ```bash
 pnpm exec tsc --noEmit
@@ -100,8 +105,8 @@ pnpm exec vitest run
 Expected full-suite baseline at this handoff:
 
 ```txt
-69 test files passed, 4 skipped
-231 tests passed, 6 skipped
+70 test files passed, 4 skipped
+235 tests passed, 6 skipped
 ```
 
 Also run formatting and documentation link checks after changing these files.
