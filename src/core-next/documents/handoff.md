@@ -2,7 +2,7 @@
 
 - Updated: 2026-07-10
 - Branch: `core-next`
-- Last commit before the current worktree: `e42c0a2e Add patch materializer boundary`
+- Last commit before the current worktree: `12435901 Add semantic facade and domain envelopes`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -33,30 +33,24 @@ claims against the tree before editing.
 
 ## Current worktree slice
 
-The uncommitted worktree contains two completed read-boundary slices:
+The uncommitted slice introduces the first narrow semantic envelope write:
 
-- session reads are grouped into `calendar`, `settings`, `transactions`,
-  `debtors`, `accounts`, `envelopes`, `budgets`, `activity`, `months`, `goals`,
-  `balances`, and `fx` namespaces;
-- all `get*` methods directly reuse existing memoized functions;
-- flat `session.read.*` remains deprecated compatibility;
-- `facade/readGraph.ts` records important dependencies without becoming a
-  runtime framework;
-- deterministic demo tests exercise the semantic facade;
-- the graph has explicit known-node and acyclicity tests;
-- sessions derive domain envelopes from Core tag structure with no
-  adapter-provided dependencies;
-- domain `TEnvelope` excludes symbol and generated/display colors;
-- `envelopePresentation.ts` restores the decorated legacy Redux shape;
-- envelope commands resolve against stable domain envelopes;
-- domain and presentation parity tests protect the split.
+- `compileRenameEnvelope` accepts only `{ id, name }`;
+- tag, account, and merchant ids route to their entity command compilers;
+- payee rename is explicitly deferred with a TODO to update all matching
+  `transaction.payee` values;
+- unchanged names compile to no patch;
+- the Redux adapter exposes `renameEnvelope(id, name)`;
+- envelope NameCell uses the semantic command instead of partial projection
+  patching;
+- domain and adapter tests verify routing and resulting state.
 
-No icon/logo package, materializer rule, or replica behavior is included.
+No other envelope field, materializer rule, or replica behavior is included.
 
 ## Default next task
 
-Implement semantic envelope rename described in
-[roadmap.md](./roadmap.md#default-next-slice-semantic-envelope-rename).
+Implement semantic envelope color described in
+[roadmap.md](./roadmap.md#default-next-slice-semantic-envelope-color).
 
 Likely files:
 
@@ -65,16 +59,16 @@ src/core-next/zerro/envelopes/commands.ts
 src/core-next/zerro/envelopes/commands.test.ts
 src/core-next/adapters/redux/commands.ts
 src/core-next/adapters/redux/commands.test.ts
-src/2-pages/Budgets/EnvelopeTable/Row/NameCell.tsx
+src/2-pages/Budgets/EnvelopePreview/index.tsx
 src/core-next/documents/roadmap.md
 src/core-next/documents/handoff.md
 ```
 
 Keep the slice bounded:
 
-- use a narrow `{ id, name }` command input;
-- test tag, account, merchant, and unsupported payee routing;
-- migrate only the name editor consumer;
+- use a narrow `{ id, colorHex }` command input;
+- make non-tag and null-tag behavior explicit;
+- migrate only the color popover consumer;
 - retain the compatibility envelope patch command;
 - do not start materializer rules; that track is explicitly last.
 
@@ -95,7 +89,8 @@ Keep the slice bounded:
 
 ## Verification
 
-The semantic facade and domain/presentation slices were verified with:
+The semantic rename slice and the preceding facade/domain boundary were
+verified with:
 
 ```bash
 pnpm exec tsc --noEmit
@@ -106,7 +101,7 @@ Expected full-suite baseline at this handoff:
 
 ```txt
 70 test files passed, 4 skipped
-235 tests passed, 6 skipped
+238 tests passed, 6 skipped
 ```
 
 Also run formatting and documentation link checks after changing these files.

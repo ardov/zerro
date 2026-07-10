@@ -5,12 +5,14 @@ import type { TISOMonth } from '../../zenmoney/primitives'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
 import {
   compilePatchEnvelope,
+  compileRenameEnvelope,
   compileSetBudget,
   compileSetGoal,
   type TBudgetUpdate,
   type TEnvelopeDraft,
   type TEnvelopeId,
   type TGoal,
+  type TRenameEnvelopeInput,
 } from '../../zerro'
 import { getDomainEnvelopeGroup } from './envelopePresentation'
 import {
@@ -34,6 +36,7 @@ export type TAppCommand =
       payload: { month: TISOMonth; id: TEnvelopeId; goal: TGoal | null }
     }
   | { type: 'zerro.envelope.patch'; payload: TEnvelopeDraft[] }
+  | { type: 'zerro.envelope.rename'; payload: TRenameEnvelopeInput }
   | { type: 'legacy.patch'; payload: TNormalizedPatch }
 
 export function compileAppCommand(
@@ -49,6 +52,8 @@ export function compileAppCommand(
       const { month, id, goal } = command.payload
       return compileSetGoal(data, month, id, goal, ctx)
     }
+    case 'zerro.envelope.rename':
+      return compileRenameEnvelope(data, command.payload, ctx)
     case 'zerro.envelope.patch': {
       const labels = selectCoreEnvelopeLabels()
       const drafts = command.payload.map(draft =>
@@ -82,6 +87,13 @@ export function executeCommand(command: TAppCommand): AppThunk {
     if (isEmptyPatch(patch)) return
     dispatch(applyClientPatch(patch))
   }
+}
+
+export function renameEnvelope(id: TEnvelopeId, name: string): AppThunk {
+  return executeCommand({
+    type: 'zerro.envelope.rename',
+    payload: { id, name },
+  })
 }
 
 function isEmptyPatch(patch: TNormalizedPatch): boolean {

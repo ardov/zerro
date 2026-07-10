@@ -7,7 +7,7 @@
  * adapter parity tests, and must not leak through this entrypoint.
  */
 export { applyLegacyPatch } from './legacyPatch'
-export { executeCommand, type TAppCommand } from './commands'
+export { executeCommand, renameEnvelope, type TAppCommand } from './commands'
 export {
   selectCoreActivity,
   selectCoreBalancesByDate,

@@ -4,6 +4,7 @@ import type { RootState } from 'store'
 import { applyClientPatch } from 'store/data'
 import { makeDemoStore } from '../../demo'
 import type { TNormalizedPatch } from '../../types'
+import { applyPatch } from '../../zenmoney'
 import { envId, EnvType } from '../../zerro'
 import { compileAppCommand, executeCommand } from './commands'
 import { applyLegacyPatch } from './legacyPatch'
@@ -40,6 +41,26 @@ function makeDispatch(state: RootState) {
 }
 
 describe('executeCommand funnel', () => {
+  it('compiles semantic envelope rename to resulting entity state', () => {
+    const current = makeDemoStore({ now: NOW })
+    const state = makeState(current)
+    const id = envId.get(EnvType.Tag, Object.keys(current.tag)[0])
+
+    const patch = compileAppCommand(
+      state,
+      {
+        type: 'zerro.envelope.rename',
+        payload: { id, name: 'Renamed through command' },
+      },
+      { now: () => NOW, uuid: () => 'test-id' }
+    )
+    const next = applyPatch(current, patch)
+
+    expect(next.tag[Object.keys(current.tag)[0]].title).toBe(
+      'Renamed through command'
+    )
+  })
+
   it('normalizes presented default groups before domain compilation', () => {
     const state = makeState(makeDemoStore({ now: NOW }))
     const id = envId.get(EnvType.Tag, null)

@@ -21,6 +21,11 @@ import type { TEnvelope } from './build'
 
 export type TEnvelopeDraft = OptionalExceptFor<TEnvelope, 'id'>
 
+export type TRenameEnvelopeInput = {
+  id: TEnvelopeId
+  name: string
+}
+
 type TEnvelopePatches = {
   tag: TTagPatch[]
   account: TAccountPatch[]
@@ -35,6 +40,31 @@ type TEnvelopePatch = {
   meta?: TEnvelopeMetaPatch
 }
 
+export function compileRenameEnvelope(
+  data: TDataStore,
+  input: TRenameEnvelopeInput,
+  ctx: Pick<TCoreContext, 'now'>
+): TNormalizedPatch {
+  const { type, id } = envId.parse(input.id)
+
+  switch (type) {
+    case EnvType.Tag:
+      if (data.tag[id]?.title === input.name) return {}
+      return compilePatchTag(data, { id, title: input.name }, ctx)
+    case EnvType.Account:
+      if (data.account[id]?.title === input.name) return {}
+      return compilePatchAccount(data, { id, title: input.name }, ctx)
+    case EnvType.Merchant:
+      if (data.merchant[id]?.title === input.name) return {}
+      return compilePatchMerchant(data, { id, title: input.name }, ctx)
+    case EnvType.Payee:
+      // TODO: Resolve the payee envelope to all debtor.payeeNames variants and
+      // patch `transaction.payee` for every matching transaction. Merchant
+      // envelopes already rename their normalized merchant entity above.
+      throw new Error('Payee envelopes cannot be renamed')
+  }
+}
+
 export function compilePatchEnvelope(
   data: TDataStore,
   envelopes: ById<TEnvelope>,
@@ -45,7 +75,9 @@ export function compilePatchEnvelope(
 
   return mergeNormalizedPatches(
     patches.tag.length ? compilePatchTag(data, patches.tag, ctx) : {},
-    patches.account.length ? compilePatchAccount(data, patches.account, ctx) : {},
+    patches.account.length
+      ? compilePatchAccount(data, patches.account, ctx)
+      : {},
     patches.merchant.length
       ? compilePatchMerchant(data, patches.merchant, ctx)
       : {},

@@ -37,16 +37,18 @@ The handoff is routing, not proof that code landed. Always verify the tree.
   the semantic facade; flat `session.read.*` remains deprecated compatibility.
 - Session envelope reads are domain-only. The Redux adapter adds localized
   groups, icons, and generated/display colors while preserving legacy output.
+- Envelope rename now has a narrow semantic compiler and Redux command;
+  NameCell no longer sends a partial envelope projection.
 
 ## Default next slice
 
-Replace the first projection-shaped envelope write with a narrow semantic
-command: rename one envelope.
+Replace the next projection-shaped write with a narrow semantic command: set a
+tag envelope color.
 
-1. Define an explicit `{ id, name }` input and compiler.
-2. Add it to the app command vocabulary without removing compatibility patching.
-3. Migrate the envelope name editor as the first real consumer.
-4. Verify tag, account, and merchant routing plus resulting state.
+1. Define an explicit `{ id, colorHex }` input and compiler.
+2. Make unsupported envelope types explicit.
+3. Migrate the existing color popover consumer.
+4. Keep compatibility patching for the remaining fields.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 

@@ -11,9 +11,73 @@ import { makeEnvelope } from '../../testing/zerroTestData'
 import { applyPatch } from '../../zenmoney'
 import { EnvType, envId } from '../envelope-id'
 import { envelopeVisibility, getEnvelopeMeta } from '../envelope-meta'
-import { compilePatchEnvelope, compilePatchEnvelopeMetadata } from './commands'
+import {
+  compilePatchEnvelope,
+  compilePatchEnvelopeMetadata,
+  compileRenameEnvelope,
+} from './commands'
 
 describe('envelope commands', () => {
+  it('renames tag, account, and merchant envelopes through entity commands', () => {
+    const data = makeStore({
+      tag: { food: makeTag({ id: 'food', title: 'Food' }) },
+      account: { cash: makeAccount({ id: 'cash', title: 'Cash' }) },
+      merchant: { shop: makeMerchant({ id: 'shop', title: 'Shop' }) },
+    })
+    const ctx = { now: () => 100 }
+
+    const renamedTag = applyPatch(
+      data,
+      compileRenameEnvelope(
+        data,
+        { id: envId.get(EnvType.Tag, 'food'), name: 'Groceries' },
+        ctx
+      )
+    )
+    const renamedAccount = applyPatch(
+      data,
+      compileRenameEnvelope(
+        data,
+        { id: envId.get(EnvType.Account, 'cash'), name: 'Wallet' },
+        ctx
+      )
+    )
+    const renamedMerchant = applyPatch(
+      data,
+      compileRenameEnvelope(
+        data,
+        { id: envId.get(EnvType.Merchant, 'shop'), name: 'Market' },
+        ctx
+      )
+    )
+
+    expect(renamedTag.tag.food.title).toBe('Groceries')
+    expect(renamedAccount.account.cash.title).toBe('Wallet')
+    expect(renamedMerchant.merchant.shop.title).toBe('Market')
+  })
+
+  it('rejects payee rename and skips unchanged names', () => {
+    const data = makeStore({
+      tag: { food: makeTag({ id: 'food', title: 'Food' }) },
+    })
+    const ctx = { now: () => 100 }
+
+    expect(
+      compileRenameEnvelope(
+        data,
+        { id: envId.get(EnvType.Tag, 'food'), name: 'Food' },
+        ctx
+      )
+    ).toEqual({})
+    expect(() =>
+      compileRenameEnvelope(
+        data,
+        { id: envId.get(EnvType.Payee, 'Alex'), name: 'Alexander' },
+        ctx
+      )
+    ).toThrow('Payee envelopes cannot be renamed')
+  })
+
   it('compiles entity-owned and metadata envelope patches together', () => {
     const tagId = envId.get(EnvType.Tag, 'food')
     const tagParentId = envId.get(EnvType.Tag, 'parent')
