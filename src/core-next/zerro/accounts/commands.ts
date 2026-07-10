@@ -6,7 +6,7 @@ import { getZerroDataAccountId } from './read'
 
 export function compileEnsureZerroDataAccount(
   data: TDataStore,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TCompiled<{ accountId: TAccountId }> {
   const existingId = getZerroDataAccountId(data)
   if (existingId) return { patch: {}, receipt: { accountId: existingId } }

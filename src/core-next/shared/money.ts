@@ -16,10 +16,6 @@ export function sub(first: number, ...params: number[]): number {
   return params.reduce((acc, cur) => round(acc - cur), first)
 }
 
-export function createFxAmount(currency: TFxCode, value: number): TFxAmount {
-  return { [currency]: value }
-}
-
 export function addFxAmount(...amounts: TFxAmount[]): TFxAmount {
   return amounts.reduce((acc, curr) => {
     for (const fx in curr) {
@@ -36,14 +32,6 @@ export function subFxAmount(acc: TFxAmount, fxAmount: TFxAmount): TFxAmount {
     copy[fx] = sub(copy[fx], fxAmount[fx])
   })
   return copy
-}
-
-export function isEqualFxAmount(a1: TFxAmount, a2: TFxAmount): boolean {
-  const currencies = keys(a1).concat(keys(a2))
-  for (const fx of currencies) {
-    if (a1[fx] !== a2[fx]) return false
-  }
-  return true
 }
 
 export function isZero(a: TFxAmount): boolean {

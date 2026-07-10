@@ -1,19 +1,6 @@
 // Internal date utilities. Not part of the public Core Next API.
 // Dependency-free: keep it that way so the future package has zero runtime deps.
-import type {
-  TDateDraft,
-  TISODate,
-  TISOMonth,
-  TMsTime,
-  TUnixTime,
-} from '../zenmoney/primitives'
-
-export function unixToMs(seconds: TUnixTime): TMsTime {
-  return seconds * 1000
-}
-export function msToUnix(date: TMsTime): TUnixTime {
-  return Math.round(date / 1000)
-}
+import type { TDateDraft, TISODate, TISOMonth } from '../zenmoney/primitives'
 
 const ISO_DATE_OR_MONTH = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/
 
@@ -26,10 +13,6 @@ export function parseDate(date: TDateDraft): Date {
     return new Date(date)
   }
   return new Date(date)
-}
-
-export function isValidDate(date: TDateDraft) {
-  return !isNaN(parseDate(date).getTime())
 }
 
 export function differenceInCalendarMonths(
@@ -59,36 +42,6 @@ export function toISOMonth(date: TDateDraft): TISOMonth {
   const yyyy = d.getFullYear()
   const mm = (d.getMonth() + 1).toString().padStart(2, '0')
   return `${yyyy}-${mm}` as TISOMonth
-}
-
-export function startOfMonth(d: TDateDraft) {
-  const date = parseDate(d)
-  return new Date(date.getFullYear(), date.getMonth(), 1)
-}
-
-export function endOfMonth(d: TDateDraft) {
-  const date = parseDate(d)
-  const nextMonthStart = new Date(date.getFullYear(), date.getMonth() + 1, 1)
-  return new Date(+nextMonthStart - 1)
-}
-
-export function getMonthLength(d: TDateDraft) {
-  return endOfMonth(d).getDate()
-}
-
-export function startOfDay(d: TDateDraft) {
-  const date = parseDate(d)
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
-}
-
-export function endOfDay(d: TDateDraft) {
-  const date = parseDate(d)
-  const nextDayStart = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate() + 1
-  )
-  return new Date(+nextDayStart - 1)
 }
 
 export function prevMonth(d: TDateDraft) {

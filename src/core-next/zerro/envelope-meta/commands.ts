@@ -9,7 +9,7 @@ export type TEnvelopeMetaPatch = OptionalExceptFor<TEnvelopeMeta, 'id'>
 export function compilePatchEnvelopeMeta(
   data: TDataStore,
   updates: TEnvelopeMetaPatch | TEnvelopeMetaPatch[],
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TNormalizedPatch {
   const currentData = getEnvelopeMeta(data)
   const payload = { ...currentData }

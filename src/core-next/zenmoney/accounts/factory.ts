@@ -11,7 +11,7 @@ export type TAccountFactoryDraft = Modify<
 
 export function makeAccount(
   draft: TAccountFactoryDraft,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TAccount {
   return {
     user: draft.user,

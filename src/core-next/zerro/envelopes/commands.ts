@@ -39,7 +39,7 @@ export function compilePatchEnvelope(
   data: TDataStore,
   envelopes: ById<TEnvelope>,
   draft: TEnvelopeDraft | TEnvelopeDraft[],
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TNormalizedPatch {
   const patches = getEnvelopePatches(draft, envelopes)
 
@@ -57,7 +57,7 @@ export function compilePatchEnvelopeMetadata(
   data: TDataStore,
   envelopes: ById<TEnvelope>,
   draft: TEnvelopeDraft | TEnvelopeDraft[],
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TNormalizedPatch {
   const metaPatches = toArray(draft)
     .map(item => getEnvelopePatch(item, envelopes).meta)

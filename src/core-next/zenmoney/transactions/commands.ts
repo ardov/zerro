@@ -18,7 +18,7 @@ export type TTransactionDraft = Modify<
 export function compileCreateTransaction(
   data: TDataStore,
   draft: TTransactionDraft,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TCompiled<{ transactionId: TTransactionId }> {
   const user = getRootUserId(data)
   if (!user) throw new Error('No user')
@@ -115,7 +115,7 @@ export function compileApplyChangesToTransaction(
 export function compileRestoreTransaction(
   data: TDataStore,
   id: TTransactionId,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TNormalizedPatch {
   return withTransactionAccountBalanceEffects(
     data,
@@ -136,7 +136,7 @@ export function compileRestoreTransaction(
 export function compileRecreateTransaction(
   data: TDataStore,
   patch: TTransactionPatch,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TCompiled<{ transactionId: TTransactionId }> {
   const transaction = getExistingTransaction(data, patch.id)
   const transactionId = ctx.uuid()

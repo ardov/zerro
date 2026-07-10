@@ -4,7 +4,7 @@ import type { TTag, TTagId } from './types'
 
 export function makeTag(
   raw: OptionalExceptFor<TTag, 'user' | 'title'>,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TTag {
   return {
     id: raw.id || (ctx.uuid() as TTagId),

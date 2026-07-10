@@ -12,7 +12,7 @@ export type TUserSettingsPatch = Partial<TUserSettings>
 export function compilePatchUserSettings(
   data: TDataStore,
   update: TUserSettingsPatch,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TNormalizedPatch {
   const payload = { ...getStoredUserSettings(data), ...update }
 

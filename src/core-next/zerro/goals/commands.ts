@@ -17,7 +17,7 @@ export function compileSetGoal(
   month: TISOMonth,
   id: TEnvelopeId,
   goal: TGoal | null | undefined,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TNormalizedPatch {
   const goals = getRawGoals(data)
   const newGoal = normalizeGoal(goal)

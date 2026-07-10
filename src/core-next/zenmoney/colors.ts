@@ -59,7 +59,7 @@ function hashCode(str: string) {
 const getIntFromSeed = (seed: number) => (seed * 9301 + 49297) % 233280
 
 // prettier-ignore
-export const GENERATED_COLOR_PALETTE: string[] = [
+const GENERATED_COLOR_PALETTE: string[] = [
   '#ffcdd2', '#ef9a9a', '#e57373', '#ef5350', '#f44336', '#e53935',
   '#d32f2f', '#c62828', '#b71c1c', '#ff8a80', '#f8bbd0', '#f48fb1',
   '#f06292', '#ec407a', '#e91e63', '#d81b60', '#c2185b', '#ad1457',

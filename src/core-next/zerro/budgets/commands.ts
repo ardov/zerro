@@ -23,7 +23,7 @@ export type TBudgetUpdate = TEnvBudgetUpdate
 export function compileSetBudget(
   data: TDataStore,
   update: TBudgetUpdate | TBudgetUpdate[],
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TNormalizedPatch {
   const updates = Array.isArray(update) ? update : [update]
   if (!updates.length) return {}
@@ -54,7 +54,7 @@ export function compileSetBudget(
 export function compileSetEnvBudget(
   data: TDataStore,
   update: TEnvBudgetUpdate | TEnvBudgetUpdate[],
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TNormalizedPatch {
   const updates = Array.isArray(update) ? update : [update]
   if (!updates.length) return {}

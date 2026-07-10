@@ -14,7 +14,7 @@ export type TReminderMarkerFactoryDraft = Modify<
 
 export function makeReminderMarker(
   draft: TReminderMarkerFactoryDraft,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TReminderMarker {
   return {
     user: draft.user,

@@ -24,7 +24,7 @@ export function compileSetSimpleHiddenData<TPayload>(
   data: TDataStore,
   type: HiddenDataType,
   payload: TPayload,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TNormalizedPatch {
   const {
     patch: accountPatch,
@@ -59,7 +59,7 @@ export function compileSetMonthlyHiddenData<TPayload>(
   type: HiddenDataType,
   payload: TPayload,
   month: TISOMonth,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TNormalizedPatch {
   if (!isISOMonth(month)) throw new Error('Invalid month')
   if (isHiddenDataPayloadEmpty(payload)) {
@@ -104,7 +104,7 @@ function compileSetHiddenDataReminder(
     accountId: TReminder['incomeAccount']
     comment: string
   },
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TNormalizedPatch {
   return compileSetReminder(
     data,

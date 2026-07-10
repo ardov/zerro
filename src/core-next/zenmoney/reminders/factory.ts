@@ -14,7 +14,7 @@ export type TReminderFactoryDraft = Modify<
 
 export function makeReminder(
   draft: TReminderFactoryDraft,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TReminder {
   return {
     user: draft.user,

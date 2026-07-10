@@ -12,7 +12,7 @@ export type TAccountDraft = Omit<TAccountFactoryDraft, 'user'>
 export function compileCreateAccount(
   data: TDataStore,
   draft: TAccountDraft,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TNormalizedPatch {
   const user = getRootUserId(data)
   if (!user) throw new Error('No user')

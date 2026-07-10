@@ -35,7 +35,7 @@ export type TAppCommand =
 export function compileAppCommand(
   state: RootState,
   command: TAppCommand,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TNormalizedPatch {
   const data = state.data.current
   switch (command.type) {

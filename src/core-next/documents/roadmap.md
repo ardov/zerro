@@ -367,6 +367,16 @@ in-memory engine from thunks.
   barrel exports types first.
   Next: replica slice — replace `data.diff` with `outbox`/`outboxHead`,
   rebase `applyServerPatch`, add `selectPendingDiff` for sync.
+- 2026-07-10, inventory note: `createZerroEngine` has zero consumers — it was
+  built ahead of use. The replica slice must not duplicate its semantics:
+  extract pure outbox operations (append/drop-redo-tail/replay-prefix/clamp)
+  shared by the slice reducers and the engine, or fold the engine into them.
+  Two implementations of outbox semantics is the failure mode to avoid.
+- 2026-07-10, YAGNI sweep: dropped the per-command `v` field, the identity
+  `Pick<TCoreContext, 'now' | 'uuid'>` (44 sites; single-field
+  `Pick<TCoreContext, 'now'>` narrowings stay — they carry real information),
+  dead helper copies in `core-next/shared`, and speculative exports
+  (`GENERATED_COLOR_PALETTE`, `compileAppCommand` from the adapter index).
 
 Recommended order:
 

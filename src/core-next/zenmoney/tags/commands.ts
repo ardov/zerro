@@ -32,7 +32,7 @@ export function compilePatchTag(
 export function compileCreateTag(
   data: TDataStore,
   draft: TTagDraft,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TNormalizedPatch {
   if (hasId(draft)) return compilePatchTag(data, draft, ctx)
   if (!draft.title) throw new Error('Trying to create tag without title')

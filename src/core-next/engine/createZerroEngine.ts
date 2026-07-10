@@ -23,13 +23,13 @@ export type TZerroEngineInput<TCommand = unknown> = {
   outbox?: TOutboxEntry<TCommand>[]
   outboxHead?: number
   inbox?: TNormalizedPatch | null
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 }
 
 export type TCommandCompiler<TCommand, TReceipt = unknown> = (
   data: TDataStore,
   command: TCommand,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ) => TNormalizedPatch | TCompiled<TReceipt>
 
 export type TExecuteResult<TCommand, TReceipt = unknown> = {

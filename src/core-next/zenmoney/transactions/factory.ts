@@ -23,7 +23,7 @@ export type TTransactionFactoryDraft = Modify<
 
 export function makeTransaction(
   draft: TTransactionFactoryDraft,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TTransaction {
   return {
     id: draft.id || (ctx.uuid() as TTransactionId),

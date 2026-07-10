@@ -4,7 +4,7 @@ import type { TMerchant, TMerchantId } from './types'
 
 export function makeMerchant(
   draft: OptionalExceptFor<TMerchant, 'user' | 'title'>,
-  ctx: Pick<TCoreContext, 'now' | 'uuid'>
+  ctx: TCoreContext
 ): TMerchant {
   return {
     user: draft.user,
