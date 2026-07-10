@@ -7,8 +7,9 @@ entities in ZenMoney Core: commands can create, patch, and delete accounts.
 
 - `instrument`: currency as an `Instrument` id, not an FX code.
 - `company`: optional linked bank/provider company id.
-- `balance`: current persisted account balance. Transaction write commands keep
-  this in sync by adding account balance effects to transaction patches.
+- `balance`: current persisted account balance. Future materializer rules will
+  keep this in sync with transaction intent patches; transaction commands do
+  not mutate account balances themselves.
 - `startBalance`: regular accounts use it as the starting balance; deposit and
   loan accounts treat it as initial deposit or loan principal.
 - `type`: debt accounts are special in balance and envelope logic.

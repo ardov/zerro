@@ -26,6 +26,11 @@ export type TRenameEnvelopeInput = {
   name: string
 }
 
+export type TSetEnvelopeColorInput = {
+  id: TEnvelopeId
+  colorHex: string | null
+}
+
 type TEnvelopePatches = {
   tag: TTagPatch[]
   account: TAccountPatch[]
@@ -63,6 +68,27 @@ export function compileRenameEnvelope(
       // envelopes already rename their normalized merchant entity above.
       throw new Error('Payee envelopes cannot be renamed')
   }
+}
+
+export function compileSetEnvelopeColor(
+  data: TDataStore,
+  input: TSetEnvelopeColorInput,
+  ctx: Pick<TCoreContext, 'now'>
+): TNormalizedPatch {
+  const { type, id } = envId.parse(input.id)
+  if (type !== EnvType.Tag) {
+    throw new Error('Only tag envelopes have configurable colors')
+  }
+  if (id === 'null') {
+    throw new Error('Uncategorized envelope color cannot be changed')
+  }
+  if (input.colorHex !== null && !isHEX(input.colorHex)) {
+    throw new Error('Invalid envelope color')
+  }
+
+  const color = hex2int(input.colorHex)
+  if (data.tag[id]?.color === color) return {}
+  return compilePatchTag(data, { id, color }, ctx)
 }
 
 export function compilePatchEnvelope(

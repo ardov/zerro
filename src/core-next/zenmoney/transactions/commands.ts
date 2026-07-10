@@ -4,7 +4,6 @@ import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../types'
 import type { TDateDraft } from '../primitives'
 import type { TTagId } from '../tags'
 import { getRootUserId } from '../users'
-import { withTransactionAccountBalanceEffects } from './effects'
 import { makeTransaction, type TTransactionFactoryDraft } from './factory'
 import { getTransaction } from './read'
 import type { TTransaction, TTransactionId } from './types'
@@ -26,13 +25,7 @@ export function compileCreateTransaction(
   const transaction = makeTransaction({ ...draft, user }, ctx)
 
   return {
-    patch: withTransactionAccountBalanceEffects(
-      data,
-      {
-        transaction: [transaction],
-      },
-      ctx
-    ),
+    patch: { transaction: [transaction] },
     receipt: { transactionId: transaction.id },
   }
 }
@@ -42,17 +35,13 @@ export function compileDeleteTransactions(
   ids: TTransactionId | TTransactionId[],
   ctx: Pick<TCoreContext, 'now'>
 ): TNormalizedPatch {
-  return withTransactionAccountBalanceEffects(
-    data,
-    {
-      transaction: toArray(ids).map(id => ({
-        ...getExistingTransaction(data, id),
-        deleted: true,
-        changed: ctx.now(),
-      })),
-    },
-    ctx
-  )
+  return {
+    transaction: toArray(ids).map(id => ({
+      ...getExistingTransaction(data, id),
+      deleted: true,
+      changed: ctx.now(),
+    })),
+  }
 }
 
 export function compileDeleteTransactionsPermanently(
@@ -60,18 +49,14 @@ export function compileDeleteTransactionsPermanently(
   ids: TTransactionId | TTransactionId[],
   ctx: Pick<TCoreContext, 'now'>
 ): TNormalizedPatch {
-  return withTransactionAccountBalanceEffects(
-    data,
-    {
-      transaction: toArray(ids).map(id => ({
-        ...getExistingTransaction(data, id),
-        outcome: 0.00001,
-        income: 0.00001,
-        changed: ctx.now(),
-      })),
-    },
-    ctx
-  )
+  return {
+    transaction: toArray(ids).map(id => ({
+      ...getExistingTransaction(data, id),
+      outcome: 0.00001,
+      income: 0.00001,
+      changed: ctx.now(),
+    })),
+  }
 }
 
 export function compileMarkTransactionsViewed(
@@ -80,20 +65,16 @@ export function compileMarkTransactionsViewed(
   viewed: boolean,
   ctx: Pick<TCoreContext, 'now'>
 ): TNormalizedPatch {
-  return withTransactionAccountBalanceEffects(
-    data,
-    {
-      transaction: toArray(ids)
-        .map(id => getExistingTransaction(data, id))
-        .filter(transaction => isTransactionViewed(transaction) !== viewed)
-        .map(transaction => ({
-          ...transaction,
-          viewed,
-          changed: ctx.now(),
-        })),
-    },
-    ctx
-  )
+  return {
+    transaction: toArray(ids)
+      .map(id => getExistingTransaction(data, id))
+      .filter(transaction => isTransactionViewed(transaction) !== viewed)
+      .map(transaction => ({
+        ...transaction,
+        viewed,
+        changed: ctx.now(),
+      })),
+  }
 }
 
 export function compileApplyChangesToTransaction(
@@ -103,13 +84,9 @@ export function compileApplyChangesToTransaction(
 ): TNormalizedPatch {
   const transaction = getExistingTransaction(data, patch.id)
 
-  return withTransactionAccountBalanceEffects(
-    data,
-    {
-      transaction: [{ ...transaction, ...patch, changed: ctx.now() }],
-    },
-    ctx
-  )
+  return {
+    transaction: [{ ...transaction, ...patch, changed: ctx.now() }],
+  }
 }
 
 export function compileRestoreTransaction(
@@ -117,20 +94,16 @@ export function compileRestoreTransaction(
   id: TTransactionId,
   ctx: TCoreContext
 ): TNormalizedPatch {
-  return withTransactionAccountBalanceEffects(
-    data,
-    {
-      transaction: [
-        {
-          ...getExistingTransaction(data, id),
-          deleted: false,
-          changed: ctx.now(),
-          id: ctx.uuid(),
-        },
-      ],
-    },
-    ctx
-  )
+  return {
+    transaction: [
+      {
+        ...getExistingTransaction(data, id),
+        deleted: false,
+        changed: ctx.now(),
+        id: ctx.uuid(),
+      },
+    ],
+  }
 }
 
 export function compileRecreateTransaction(
@@ -142,26 +115,22 @@ export function compileRecreateTransaction(
   const transactionId = ctx.uuid()
 
   return {
-    patch: withTransactionAccountBalanceEffects(
-      data,
-      {
-        transaction: [
-          {
-            ...transaction,
-            outcome: 0.00001,
-            income: 0.00001,
-            changed: ctx.now(),
-          },
-          {
-            ...transaction,
-            ...patch,
-            id: transactionId,
-            changed: ctx.now(),
-          },
-        ],
-      },
-      ctx
-    ),
+    patch: {
+      transaction: [
+        {
+          ...transaction,
+          outcome: 0.00001,
+          income: 0.00001,
+          changed: ctx.now(),
+        },
+        {
+          ...transaction,
+          ...patch,
+          id: transactionId,
+          changed: ctx.now(),
+        },
+      ],
+    },
     receipt: { transactionId },
   }
 }
@@ -172,21 +141,17 @@ export function compileBulkEditTransactions(
   opts: { tags?: TTagId[]; comment?: string },
   ctx: Pick<TCoreContext, 'now'>
 ): TNormalizedPatch {
-  return withTransactionAccountBalanceEffects(
-    data,
-    {
-      transaction: ids.map(id => {
-        const transaction = getExistingTransaction(data, id)
-        return {
-          ...transaction,
-          tag: modifyTags(transaction.tag, opts.tags),
-          comment: modifyComment(transaction.comment, opts.comment),
-          changed: ctx.now(),
-        }
-      }),
-    },
-    ctx
-  )
+  return {
+    transaction: ids.map(id => {
+      const transaction = getExistingTransaction(data, id)
+      return {
+        ...transaction,
+        tag: modifyTags(transaction.tag, opts.tags),
+        comment: modifyComment(transaction.comment, opts.comment),
+        changed: ctx.now(),
+      }
+    }),
+  }
 }
 
 function getExistingTransaction(

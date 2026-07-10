@@ -13,7 +13,8 @@ Use for:
 - command validation, deterministic ids/timestamps, receipts, and resulting
   state;
 - materializer intent/applied contracts and cross-entity effects;
-- transaction classification, deletion, balance effects, and account cascades;
+- transaction classification and intent-only command behavior;
+- future materializer balance effects and account cascades;
 - hidden-data parsing and write semantics;
 - envelope, budget, FX, activity, month-total, and goal edge cases;
 - engine append, replay-prefix, undo/redo, reload, and redo-tail behavior;

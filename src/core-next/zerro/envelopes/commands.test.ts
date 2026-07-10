@@ -15,9 +15,65 @@ import {
   compilePatchEnvelope,
   compilePatchEnvelopeMetadata,
   compileRenameEnvelope,
+  compileSetEnvelopeColor,
 } from './commands'
 
 describe('envelope commands', () => {
+  it('sets, clears, and skips unchanged tag envelope colors', () => {
+    const data = makeStore({
+      tag: { food: makeTag({ id: 'food', title: 'Food', color: null }) },
+    })
+    const coloredData = makeStore({
+      tag: { food: makeTag({ id: 'food', title: 'Food', color: 0x00ff00 }) },
+    })
+    const id = envId.get(EnvType.Tag, 'food')
+    const ctx = { now: () => 100 }
+
+    const colored = applyPatch(
+      data,
+      compileSetEnvelopeColor(data, { id, colorHex: '#00ff00' }, ctx)
+    )
+    const cleared = applyPatch(
+      coloredData,
+      compileSetEnvelopeColor(coloredData, { id, colorHex: null }, ctx)
+    )
+
+    expect(colored.tag.food.color).toBe(0x00ff00)
+    expect(cleared.tag.food.color).toBeNull()
+    expect(compileSetEnvelopeColor(data, { id, colorHex: null }, ctx)).toEqual(
+      {}
+    )
+  })
+
+  it('rejects invalid, uncategorized, and non-tag envelope colors', () => {
+    const data = makeStore({
+      tag: { food: makeTag({ id: 'food', title: 'Food' }) },
+    })
+    const ctx = { now: () => 100 }
+
+    expect(() =>
+      compileSetEnvelopeColor(
+        data,
+        { id: envId.get(EnvType.Tag, 'food'), colorHex: 'red' },
+        ctx
+      )
+    ).toThrow('Invalid envelope color')
+    expect(() =>
+      compileSetEnvelopeColor(
+        data,
+        { id: envId.get(EnvType.Tag, null), colorHex: '#ff0000' },
+        ctx
+      )
+    ).toThrow('Uncategorized envelope color cannot be changed')
+    expect(() =>
+      compileSetEnvelopeColor(
+        data,
+        { id: envId.get(EnvType.Account, 'cash'), colorHex: '#ff0000' },
+        ctx
+      )
+    ).toThrow('Only tag envelopes have configurable colors')
+  })
+
   it('renames tag, account, and merchant envelopes through entity commands', () => {
     const data = makeStore({
       tag: { food: makeTag({ id: 'food', title: 'Food' }) },

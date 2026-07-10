@@ -9,12 +9,13 @@ import { sendEvent } from '6-shared/helpers/tracking'
 // import { usePopover } from '@shared/ui/PopoverManager'
 
 import { useAppDispatch, useAppSelector } from 'store'
-import { envelopeModel, TEnvelope, TEnvelopeId } from '5-entities/envelope'
+import { TEnvelope, TEnvelopeId } from '5-entities/envelope'
 import { goalModel } from '5-entities/goal'
 import {
   selectCoreEnvMetrics,
   selectCoreEnvelopes,
   selectCoreGoals,
+  setEnvelopeColor,
 } from 'core-next/adapters/redux'
 import { useMonth } from '../MonthProvider'
 import { EnvelopeEditDialog, useEditDialog } from '../EnvelopeEditDialog'
@@ -108,7 +109,7 @@ const Header: FC<{
   const handleColorChange = useCallback(
     (hex?: string | null) => {
       sendEvent('Tag: set color: ' + hex)
-      dispatch(envelopeModel.patchEnvelope({ id: envelope.id, colorHex: hex }))
+      dispatch(setEnvelopeColor(envelope.id, hex ?? null))
     },
     [dispatch, envelope.id]
   )

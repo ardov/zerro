@@ -18,7 +18,7 @@ import {
 import { makeTransaction as makeCoreTransaction } from './factory'
 
 describe('zenmoney transaction commands', () => {
-  it('creates transactions with root user, deterministic id/time, and balance effects', () => {
+  it('creates transaction intent without materialized balance effects', () => {
     const data = makeStore({
       user: {
         1: { id: 1, parent: null },
@@ -66,11 +66,10 @@ describe('zenmoney transaction commands', () => {
         hold: false,
       })
     )
-    expect(result.patch.account).toEqual([
-      makeAccount({ id: 'cash', balance: 125, changed: 1700000000000 }),
-      makeAccount({ id: 'card', balance: 40, changed: 1700000000000 }),
-    ])
+    expect(result.patch.account).toBeUndefined()
     expect(next.transaction['tr-new'].comment).toBe('Transfer')
+    expect(next.account.cash.balance).toBe(100)
+    expect(next.account.card.balance).toBe(50)
   })
 
   it('creates production transaction defaults through the transaction factory', () => {
@@ -134,7 +133,8 @@ describe('zenmoney transaction commands', () => {
       changed: 100,
     })
     expect(next.transaction.tr.deleted).toBe(true)
-    expect(next.account.card.balance).toBe(60)
+    expect(patch.account).toBeUndefined()
+    expect(next.account.card.balance).toBe(50)
     expect(data.transaction.tr.deleted).toBe(false)
   })
 
@@ -159,10 +159,7 @@ describe('zenmoney transaction commands', () => {
       outcome: 0.00001,
       changed: 100,
     })
-    expect(patch.account).toEqual([
-      makeAccount({ id: 'cash', balance: 50, changed: 100 }),
-      makeAccount({ id: 'card', balance: 60, changed: 100 }),
-    ])
+    expect(patch.account).toBeUndefined()
   })
 
   it('marks only transactions whose viewed state changes', () => {
@@ -223,9 +220,7 @@ describe('zenmoney transaction commands', () => {
       outcome: 20,
       changed: 100,
     })
-    expect(patch.account).toEqual([
-      makeAccount({ id: 'card', balance: 40, changed: 100 }),
-    ])
+    expect(patch.account).toBeUndefined()
   })
 
   it('restores transactions under a new id', () => {
@@ -254,9 +249,7 @@ describe('zenmoney transaction commands', () => {
       deleted: false,
       changed: 100,
     })
-    expect(patch.account).toEqual([
-      makeAccount({ id: 'card', balance: 40, changed: 100 }),
-    ])
+    expect(patch.account).toBeUndefined()
   })
 
   it('recreates a transaction and returns the new id', () => {
@@ -294,10 +287,7 @@ describe('zenmoney transaction commands', () => {
       outcome: 25,
       changed: 200,
     })
-    expect(result.patch.account).toEqual([
-      makeAccount({ id: 'cash', balance: 50, changed: 300 }),
-      makeAccount({ id: 'card', balance: 25, changed: 400 }),
-    ])
+    expect(result.patch.account).toBeUndefined()
   })
 
   it('bulk-edits tags and comments with legacy placeholders', () => {

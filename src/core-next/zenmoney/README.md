@@ -25,7 +25,8 @@ more dependencies:
    envelope budgets.
 10. `reminders`: scheduled transaction templates.
 11. `reminderMarkers`: concrete reminder occurrences that can be linked from transactions.
-12. `transactions`: highest-dependency mutable entity; transaction commands, transaction read helpers, and account balance effects.
+12. `transactions`: highest-dependency mutable entity; transaction commands and
+    transaction read helpers.
 13. `debtors`: derived debt/payee balances from transactions.
 14. `balances`: derived balance history read models.
 
@@ -58,7 +59,7 @@ Legend:
 | `budgets`         | done   | Core-owned types, map read helper, production factory, id helper, and set-tag-budget command compiler are in place.                         |
 | `reminders`       | done   | Core-owned types, map read helper, production factory, and set/delete command compilers are in place.                                       |
 | `reminderMarkers` | done   | Core-owned types, map read helper, and production factory are in place; no legacy marker command is migrated yet.                           |
-| `transactions`    | done   | Core-owned types, reads, production factory, command compilers, and balance effects are in place.                                           |
+| `transactions`    | done   | Core-owned types, reads, production factory, and intent-only command compilers are in place.                                                |
 | `debtors`         | done   | ZenMoney-derived read model is in Core Next.                                                                                                |
 | `balances`        | done   | ZenMoney-derived balance history read model is in Core Next.                                                                                |
 

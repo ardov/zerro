@@ -41,6 +41,25 @@ function makeDispatch(state: RootState) {
 }
 
 describe('executeCommand funnel', () => {
+  it('compiles semantic envelope color to resulting tag state', () => {
+    const current = makeDemoStore({ now: NOW })
+    const state = makeState(current)
+    const tagId = Object.keys(current.tag)[0]
+    const id = envId.get(EnvType.Tag, tagId)
+
+    const patch = compileAppCommand(
+      state,
+      {
+        type: 'zerro.envelope.color.set',
+        payload: { id, colorHex: '#00ff00' },
+      },
+      { now: () => NOW, uuid: () => 'test-id' }
+    )
+    const next = applyPatch(current, patch)
+
+    expect(next.tag[tagId].color).toBe(0x00ff00)
+  })
+
   it('compiles semantic envelope rename to resulting entity state', () => {
     const current = makeDemoStore({ now: NOW })
     const state = makeState(current)

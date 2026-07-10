@@ -28,6 +28,8 @@ Core transaction commands currently cover existing mutation flows:
 - recreate with a replacement transaction;
 - bulk tag/comment edits.
 
-Balance effects stay in `effects.ts` and are applied by command compilers.
-`makeTransaction` is the production factory for transaction creation defaults,
-and `compileCreateTransaction` derives `user` from the root user in the store.
+Transaction commands compile intent only. Account-balance expansion belongs to
+the final materializer phase; the current identity materializer does not add
+those effects yet. `makeTransaction` is the production factory for transaction
+creation defaults, and `compileCreateTransaction` derives `user` from the root
+user in the store.

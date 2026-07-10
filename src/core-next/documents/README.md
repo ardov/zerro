@@ -39,15 +39,19 @@ The handoff is routing, not proof that code landed. Always verify the tree.
   groups, icons, and generated/display colors while preserving legacy output.
 - Envelope rename now has a narrow semantic compiler and Redux command;
   NameCell no longer sends a partial envelope projection.
+- Tag envelope color has a validated semantic command; the color picker no
+  longer sends a partial envelope projection.
+- Transaction commands compile transaction intent only; account-balance
+  effects are reserved for the final materializer phase.
 
 ## Default next slice
 
-Replace the next projection-shaped write with a narrow semantic command: set a
-tag envelope color.
+Replace the next projection-shaped write with a narrow semantic command: set an
+envelope comment.
 
-1. Define an explicit `{ id, colorHex }` input and compiler.
-2. Make unsupported envelope types explicit.
-3. Migrate the existing color popover consumer.
+1. Define an explicit `{ id, comment }` input and metadata compiler.
+2. Migrate the existing CommentWidget consumer.
+3. Verify setting, clearing, and unchanged comments.
 4. Keep compatibility patching for the remaining fields.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.

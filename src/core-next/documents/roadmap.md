@@ -17,27 +17,31 @@ and envelope commands resolve against domain envelopes.
 
 The first narrow write command is also landed: `renameEnvelope(id, name)`
 routes tag, account, and merchant renames without accepting a partial envelope.
+`setEnvelopeColor(id, colorHex)` adds validated tag color set/clear semantics
+and is adopted by the existing color picker.
+
+The old transaction `effects.ts` expansion has been removed. Transaction
+commands now produce intent-only transaction patches; account-balance effects
+remain documented for the final materializer phase.
 
 Replica ownership, server-like materialization rules, and package hardening
 remain incomplete.
 
-## Default next slice: semantic envelope color
+## Default next slice: semantic envelope comment
 
 Goal: migrate the next real envelope edit to an explicit command while keeping
 the public write vocabulary small.
 
 Scope:
 
-1. Add a semantic color input such as `{ id, colorHex }`.
-2. Route tag colors through the tag entity command.
-3. Make account, merchant, payee, and null-tag behavior explicit.
-4. Add a versionable app command without removing `zerro.envelope.patch` yet.
-5. Migrate the existing color popover consumer.
+1. Add a semantic comment input such as `{ id, comment }`.
+2. Compile it through envelope metadata without reading a presentation model.
+3. Add a versionable app command without removing `zerro.envelope.patch` yet.
+4. Migrate the existing CommentWidget consumer.
 
 Done when:
 
-- tag color conversion and clearing are tested;
-- unsupported envelope types are explicit;
+- comment set, clear, and unchanged behavior is tested;
 - the real UI consumer sends only semantic input;
 - resulting-state tests pass through the Redux command funnel;
 - legacy envelope patching remains available for other fields.
@@ -49,7 +53,7 @@ envelope fields in this slice.
 
 | Track                           | State                          | Next useful outcome                                                       |
 | ------------------------------- | ------------------------------ | ------------------------------------------------------------------------- |
-| A. Public facade and read graph | Active, default                | Add and adopt a narrow semantic envelope color command                    |
+| A. Public facade and read graph | Active, default                | Add and adopt a narrow semantic envelope comment command                  |
 | B. Domain/presentation boundary | Boundary landed                | Extract an optional appearance package only when a real consumer needs it |
 | C. ZenMoney materializer rules  | Deferred until final           | Start only after the other architecture and migration tracks are complete |
 | D. Replica and sync             | Designed, not integrated       | Share pure outbox operations and make Redux the replica owner             |
@@ -67,6 +71,7 @@ Current:
 - `facade/readGraph.ts` records important graph edges without driving runtime;
 - Redux independently wires the same calculations with cross-snapshot caches.
 - `renameEnvelope(id, name)` is the first adopted narrow write command.
+- `setEnvelopeColor(id, colorHex)` is the second adopted narrow write command.
 
 Next:
 

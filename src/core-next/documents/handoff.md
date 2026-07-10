@@ -2,7 +2,7 @@
 
 - Updated: 2026-07-10
 - Branch: `core-next`
-- Last commit before the current worktree: `12435901 Add semantic facade and domain envelopes`
+- Last commit before the current worktree: `18c08d52 Add semantic envelope rename command`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -33,24 +33,26 @@ claims against the tree before editing.
 
 ## Current worktree slice
 
-The uncommitted slice introduces the first narrow semantic envelope write:
+The uncommitted slice introduces semantic tag-envelope color editing:
 
-- `compileRenameEnvelope` accepts only `{ id, name }`;
-- tag, account, and merchant ids route to their entity command compilers;
-- payee rename is explicitly deferred with a TODO to update all matching
-  `transaction.payee` values;
-- unchanged names compile to no patch;
-- the Redux adapter exposes `renameEnvelope(id, name)`;
-- envelope NameCell uses the semantic command instead of partial projection
-  patching;
-- domain and adapter tests verify routing and resulting state.
+- `compileSetEnvelopeColor` accepts only `{ id, colorHex }`;
+- valid tag colors convert to ZenMoney integer storage;
+- `null` clears the configured color and unchanged values compile to no patch;
+- invalid HEX, null-tag, and non-tag inputs fail explicitly;
+- the Redux adapter exposes `setEnvelopeColor(id, colorHex)`;
+- the envelope color picker uses the semantic command;
+- domain and adapter tests verify resulting state.
+- transaction commands now compile intent-only transaction patches;
+- the old ZenMoney transaction balance-effect module and tests are removed;
+- future account-balance effects remain assigned to the final materializer
+  phase.
 
 No other envelope field, materializer rule, or replica behavior is included.
 
 ## Default next task
 
-Implement semantic envelope color described in
-[roadmap.md](./roadmap.md#default-next-slice-semantic-envelope-color).
+Implement semantic envelope comment described in
+[roadmap.md](./roadmap.md#default-next-slice-semantic-envelope-comment).
 
 Likely files:
 
@@ -59,16 +61,16 @@ src/core-next/zerro/envelopes/commands.ts
 src/core-next/zerro/envelopes/commands.test.ts
 src/core-next/adapters/redux/commands.ts
 src/core-next/adapters/redux/commands.test.ts
-src/2-pages/Budgets/EnvelopePreview/index.tsx
+src/2-pages/Budgets/EnvelopePreview/CommentWidget.tsx
 src/core-next/documents/roadmap.md
 src/core-next/documents/handoff.md
 ```
 
 Keep the slice bounded:
 
-- use a narrow `{ id, colorHex }` command input;
-- make non-tag and null-tag behavior explicit;
-- migrate only the color popover consumer;
+- use a narrow `{ id, comment }` command input;
+- test set, clear, and unchanged behavior;
+- migrate only the CommentWidget consumer;
 - retain the compatibility envelope patch command;
 - do not start materializer rules; that track is explicitly last.
 
@@ -100,8 +102,8 @@ pnpm exec vitest run
 Expected full-suite baseline at this handoff:
 
 ```txt
-70 test files passed, 4 skipped
-238 tests passed, 6 skipped
+69 test files passed, 4 skipped
+235 tests passed, 6 skipped
 ```
 
 Also run formatting and documentation link checks after changing these files.
