@@ -80,7 +80,6 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
   const onDeletePermanently = () =>
     dispatch(trModel.deleteTransactionsPermanently([id]))
   const onRestore = () => dispatch(trModel.restoreTransaction(id))
-  // onSplit: id => dispatch(splitTransfer(id)), // does not work
 
   const tr = useAppSelector(state => selectCoreTransactions(state)[id])!
   const trType = trModel.getType(tr)

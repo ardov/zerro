@@ -46,38 +46,39 @@ the `zerro.envelope.patch` command, and app-layer `TEnvelopeDraft` exports are
 gone. The envelope write family is fully semantic; envelope drafts stay
 internal to Core compile functions.
 
-Transaction deletion and restore now flow through the funnel:
-`zenmoney.transaction.delete`, `zenmoney.transaction.delete.permanent`, and
-`zenmoney.transaction.restore` reuse the existing Core compilers, and the
-`5-entities/transaction` thunks delegate to the adapter commands. The other
-transaction thunks still use `applyLegacyPatch`.
+The transaction thunk family now flows through the funnel: delete, permanent
+delete, restore, mark viewed, update, recreate (with an id receipt), and bulk
+edit all reuse the existing Core compilers. Broken `splitTransfer` is removed
+with its commented-out consumer. `5-entities/transaction/thunks.ts` no longer
+imports `applyLegacyPatch`; the remaining transaction-shaped legacy write is
+`combineToOutcome` inside the transaction list bulk actions widget.
 
 Replica ownership, server-like materialization rules, and package hardening
 remain incomplete.
 
-## Default next slice: remaining transaction commands
+## Default next slice: semantic account, tag, and merchant writes
 
-Goal: finish moving the transaction write family off `applyLegacyPatch`.
+Goal: move the small entity write thunks off `applyLegacyPatch` using the
+compilers Core already has.
 
 Scope:
 
-1. Route `markViewed` and `bulkEditTransactions` through the funnel; both have
-   narrow inputs and existing Core compilers.
-2. Route `applyChangesToTransaction` and `recreateTransaction`; recreate
-   returns the new transaction id as a receipt.
-3. Decide whether broken `splitTransfer` is worth a command or should be
-   removed with its consumer.
-4. Keep account-balance effects out of commands; they belong to the deferred
-   materializer phase.
+1. Route `patchAccount` and `setInBudget` through the funnel via
+   `compilePatchAccount`.
+2. Route `patchTag` and `createTag` via `compilePatchTag` and
+   `compileCreateTag` (create returns an id receipt).
+3. Route `patchMerchant` via `compilePatchMerchant`.
+4. Keep `setTagBudget`, `combineToOutcome`, and `mergeAccounts` for later
+   slices; merge needs explicit transfer/cascade semantics first.
 
 Done when:
 
-- migrated thunks dispatch semantic commands instead of `applyLegacyPatch`;
+- the listed thunks dispatch semantic commands instead of `applyLegacyPatch`;
 - resulting-state tests pass through the Redux command funnel;
-- `5-entities/transaction/thunks.ts` no longer imports `applyLegacyPatch`.
+- consumer signatures stay unchanged.
 
-Do not start materializer rules; deleted-transaction immutability is a
-materializer rule, not command logic.
+Do not start materializer rules, and do not attempt `mergeAccounts` in this
+slice.
 
 ## Active tracks
 
@@ -87,7 +88,7 @@ materializer rule, not command logic.
 | B. Domain/presentation boundary | Boundary landed          | Extract an optional appearance package only when a real consumer needs it |
 | C. ZenMoney materializer rules  | Deferred until final     | Start only after the other architecture and migration tracks are complete |
 | D. Replica and sync             | Designed, not integrated | Share pure outbox operations and make Redux the replica owner             |
-| E. Legacy cutover               | Transaction writes begun | Migrate the remaining transaction thunks off the legacy bridge            |
+| E. Legacy cutover               | Transaction thunks done  | Migrate account, tag, and merchant writes off the legacy bridge           |
 | F. Package and test hardening   | Ongoing                  | Consumer-level export/type test and targeted parity coverage              |
 
 ## Track A: public facade and read graph

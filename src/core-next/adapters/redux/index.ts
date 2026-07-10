@@ -8,15 +8,19 @@
  */
 export { applyLegacyPatch } from './legacyPatch'
 export {
+  applyChangesToTransaction,
   applyEnvelopeStructure,
+  bulkEditTransactions,
   createEnvelope,
   deleteTransactions,
   deleteTransactionsPermanently,
   executeCommand,
+  recreateTransaction,
   renameEnvelope,
   restoreTransaction,
   setEnvelopeColor,
   setEnvelopeComment,
+  setTransactionsViewed,
   updateEnvelopeSettings,
   type TAppCommand,
 } from './commands'

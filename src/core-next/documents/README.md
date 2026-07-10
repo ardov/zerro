@@ -55,17 +55,18 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 - The envelope write family is fully semantic: the compatibility
   `patchEnvelope` thunk and `zerro.envelope.patch` command are removed, and
   envelope drafts stay internal to Core compile functions.
-- Transaction deletion and restore are semantic commands through the funnel;
-  the other transaction thunks still use the legacy patch bridge.
+- The whole transaction thunk family is semantic commands through the funnel;
+  broken `splitTransfer` is removed. `combineToOutcome` in the bulk actions
+  widget is the last transaction-shaped legacy write.
 
 ## Default next slice
 
-Migrate the remaining transaction thunks off `applyLegacyPatch`.
+Migrate account, tag, and merchant writes off `applyLegacyPatch`.
 
-1. Route mark-viewed and bulk edit; both have narrow inputs and compilers.
-2. Route apply-changes and recreate; recreate returns an id receipt.
-3. Decide whether broken `splitTransfer` deserves a command or removal.
-4. Account-balance effects keep waiting for the materializer phase.
+1. Route `patchAccount`/`setInBudget` via `compilePatchAccount`.
+2. Route `patchTag`/`createTag`; create returns an id receipt.
+3. Route `patchMerchant` via `compilePatchMerchant`.
+4. Leave `setTagBudget`, `combineToOutcome`, and `mergeAccounts` for later.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 

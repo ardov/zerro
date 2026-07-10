@@ -12,7 +12,11 @@ import {
   getEnvelopeMeta,
   toEnvelopeStructureInput,
 } from '../../zerro'
-import { compileAppCommand, executeCommand } from './commands'
+import {
+  compileAppCommand,
+  executeCommand,
+  recreateTransaction,
+} from './commands'
 import { applyLegacyPatch } from './legacyPatch'
 import { selectCoreEnvelopes, selectCoreEnvelopeStructure } from './selectors'
 
@@ -285,6 +289,105 @@ describe('executeCommand funnel', () => {
     expect(restored.transaction['restored-transaction']).toMatchObject({
       deleted: false,
       changed: NOW,
+    })
+  })
+
+  it('marks transactions viewed only when the state changes', () => {
+    const current = makeDemoStore({ now: NOW })
+    const [id] = Object.keys(current.transaction)
+    const ctx = { now: () => NOW, uuid: () => 'unused' }
+
+    const marked = applyPatch(
+      current,
+      compileAppCommand(
+        makeState(current),
+        {
+          type: 'zenmoney.transaction.viewed.set',
+          payload: { ids: [id], viewed: false },
+        },
+        ctx
+      )
+    )
+    const repeat = compileAppCommand(
+      makeState(marked),
+      {
+        type: 'zenmoney.transaction.viewed.set',
+        payload: { ids: [id], viewed: false },
+      },
+      ctx
+    )
+
+    expect(marked.transaction[id]).toMatchObject({
+      viewed: false,
+      changed: NOW,
+    })
+    expect(repeat.transaction).toEqual([])
+  })
+
+  it('applies transaction field changes through the update command', () => {
+    const current = makeDemoStore({ now: NOW })
+    const [id] = Object.keys(current.transaction)
+
+    const next = applyPatch(
+      current,
+      compileAppCommand(
+        makeState(current),
+        {
+          type: 'zenmoney.transaction.update',
+          payload: { id, comment: 'Edited through command' },
+        },
+        { now: () => NOW, uuid: () => 'unused' }
+      )
+    )
+
+    expect(next.transaction[id]).toMatchObject({
+      comment: 'Edited through command',
+      changed: NOW,
+    })
+  })
+
+  it('recreates a transaction and returns the new id as a receipt', () => {
+    const current = makeDemoStore({ now: NOW })
+    const state = makeState(current)
+    const [id] = Object.keys(current.transaction)
+    const dispatch = makeDispatch(state)
+
+    const newId = dispatch(recreateTransaction({ id, comment: 'Recreated' }))
+
+    const patches = dispatch.mock.calls
+      .map(([action]: [any]) => action)
+      .filter((action: any) => action?.type === applyClientPatch.type)
+    expect(patches).toHaveLength(1)
+    const [oldTr, newTr] = patches[0].payload.transaction
+    expect(newId).toBe(newTr.id)
+    expect(newId).not.toBe(id)
+    expect(oldTr).toMatchObject({ id, income: 0.00001, outcome: 0.00001 })
+    expect(newTr.comment).toBe('Recreated')
+  })
+
+  it('bulk-edits transaction tags and comments', () => {
+    const current = makeDemoStore({ now: NOW })
+    const ids = Object.keys(current.transaction).slice(0, 2)
+    const [tagId] = Object.keys(current.tag)
+
+    const next = applyPatch(
+      current,
+      compileAppCommand(
+        makeState(current),
+        {
+          type: 'zenmoney.transaction.bulk.edit',
+          payload: { ids, tags: [tagId], comment: 'Bulk comment' },
+        },
+        { now: () => NOW, uuid: () => 'unused' }
+      )
+    )
+
+    ids.forEach(id => {
+      expect(next.transaction[id]).toMatchObject({
+        tag: [tagId],
+        comment: 'Bulk comment',
+        changed: NOW,
+      })
     })
   })
 

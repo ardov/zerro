@@ -4,10 +4,16 @@ import { applyClientPatch } from 'store/data'
 import type { TISOMonth } from '../../zenmoney/primitives'
 import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../types'
 import {
+  compileApplyChangesToTransaction,
+  compileBulkEditTransactions,
   compileDeleteTransactions,
   compileDeleteTransactionsPermanently,
+  compileMarkTransactionsViewed,
+  compileRecreateTransaction,
   compileRestoreTransaction,
+  type TTagId,
   type TTransactionId,
+  type TTransactionPatch,
 } from '../../zenmoney'
 import {
   compileApplyEnvelopeStructure,
@@ -69,6 +75,16 @@ export type TAppCommand =
       payload: { ids: TTransactionId[] }
     }
   | { type: 'zenmoney.transaction.restore'; payload: { id: TTransactionId } }
+  | {
+      type: 'zenmoney.transaction.viewed.set'
+      payload: { ids: TTransactionId[]; viewed: boolean }
+    }
+  | { type: 'zenmoney.transaction.update'; payload: TTransactionPatch }
+  | { type: 'zenmoney.transaction.recreate'; payload: TTransactionPatch }
+  | {
+      type: 'zenmoney.transaction.bulk.edit'
+      payload: { ids: TTransactionId[]; tags?: TTagId[]; comment?: string }
+    }
   | { type: 'legacy.patch'; payload: TNormalizedPatch }
 
 export function compileAppCommand(
@@ -142,6 +158,21 @@ function compileAppCommandResult(
       )
     case 'zenmoney.transaction.restore':
       return compileRestoreTransaction(data, command.payload.id, ctx)
+    case 'zenmoney.transaction.viewed.set':
+      return compileMarkTransactionsViewed(
+        data,
+        command.payload.ids,
+        command.payload.viewed,
+        ctx
+      )
+    case 'zenmoney.transaction.update':
+      return compileApplyChangesToTransaction(data, command.payload, ctx)
+    case 'zenmoney.transaction.recreate':
+      return compileRecreateTransaction(data, command.payload, ctx)
+    case 'zenmoney.transaction.bulk.edit': {
+      const { ids, tags, comment } = command.payload
+      return compileBulkEditTransactions(data, ids, { tags, comment }, ctx)
+    }
     case 'legacy.patch':
       return command.payload
   }
@@ -238,6 +269,49 @@ export function restoreTransaction(id: TTransactionId): AppThunk {
   return executeCommand({
     type: 'zenmoney.transaction.restore',
     payload: { id },
+  })
+}
+
+export function setTransactionsViewed(
+  ids: TTransactionId[],
+  viewed: boolean
+): AppThunk {
+  return executeCommand({
+    type: 'zenmoney.transaction.viewed.set',
+    payload: { ids, viewed },
+  })
+}
+
+export function applyChangesToTransaction(patch: TTransactionPatch): AppThunk {
+  return executeCommand({
+    type: 'zenmoney.transaction.update',
+    payload: patch,
+  })
+}
+
+export function recreateTransaction(
+  patch: TTransactionPatch
+): AppThunk<TTransactionId> {
+  const execute = executeCommand({
+    type: 'zenmoney.transaction.recreate',
+    payload: patch,
+  })
+
+  return (dispatch, getState, extra) => {
+    const receipt = execute(dispatch, getState, extra) as {
+      transactionId: TTransactionId
+    }
+    return receipt.transactionId
+  }
+}
+
+export function bulkEditTransactions(
+  ids: TTransactionId[],
+  opts: { tags?: TTagId[]; comment?: string }
+): AppThunk {
+  return executeCommand({
+    type: 'zenmoney.transaction.bulk.edit',
+    payload: { ids, ...opts },
   })
 }
 
