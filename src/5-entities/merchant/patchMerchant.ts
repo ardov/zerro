@@ -1,7 +1,7 @@
 import { sendEvent } from '6-shared/helpers/tracking'
 import { OptionalExceptFor, TMerchant } from '6-shared/types'
 import { AppThunk } from 'store'
-import { applyClientPatch } from 'store/data'
+import { applyLegacyPatch } from 'core-next/adapters/redux/legacyPatch'
 import { getMerchants } from './model'
 
 export type TMerchantPatch = OptionalExceptFor<TMerchant, 'id'>
@@ -20,6 +20,6 @@ export const patchMerchant =
     })
 
     sendEvent('Merchant: edit')
-    dispatch(applyClientPatch({ merchant: patched }))
+    dispatch(applyLegacyPatch({ merchant: patched }))
     return patched
   }

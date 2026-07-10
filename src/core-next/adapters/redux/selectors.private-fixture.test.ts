@@ -33,6 +33,10 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
 
     await i18n.changeLanguage(fixture.manifest.locale || 'ru')
 
+    // Initialize the adapter graph first: concurrent dynamic imports below can
+    // otherwise interleave and evaluate legacy barrels mid-cycle.
+    await import('./selectors')
+
     const [
       { budgetModel },
       { accBalanceModel },

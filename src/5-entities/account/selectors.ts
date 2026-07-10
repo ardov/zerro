@@ -4,7 +4,9 @@ import { AccountType, ById } from '6-shared/types'
 import { RootState } from 'store'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { TAccountPopulated } from './shared/populate'
-import { DATA_ACC_NAME } from '../shared/hidden-store'
+// Import the constant from Core Next directly: going through the hidden-store
+// barrel creates a module cycle (hidden-store -> dataAccount -> accountModel).
+import { ZERRO_DATA_ACCOUNT_NAME as DATA_ACC_NAME } from 'core-next'
 
 // SELECTORS
 

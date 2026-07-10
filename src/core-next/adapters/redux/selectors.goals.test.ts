@@ -28,10 +28,11 @@ const ctx = {
 
 async function importModels() {
   await i18n.changeLanguage('en')
-  const [{ goalModel }, selectors] = await Promise.all([
-    import('5-entities/goal'),
-    import('./selectors'),
-  ])
+  // Sequential on purpose: the goal barrel reaches the adapter through
+  // envBalances/monthList, so the adapter graph must finish initializing
+  // before the goal graph evaluates (concurrent dynamic imports interleave).
+  const selectors = await import('./selectors')
+  const { goalModel } = await import('5-entities/goal')
   return { goalModel, ...selectors }
 }
 

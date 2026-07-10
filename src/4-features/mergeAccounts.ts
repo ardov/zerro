@@ -2,7 +2,7 @@ import { DataEntity, TAccountId, TTransaction } from '6-shared/types'
 import { add } from '6-shared/helpers/money'
 
 import { AppThunk } from 'store'
-import { applyClientPatch } from 'store/data'
+import { applyLegacyPatch } from 'core-next/adapters/redux'
 import { accountModel } from '5-entities/account'
 import { trModel } from '5-entities/transaction'
 import { userModel } from '5-entities/user'
@@ -60,7 +60,7 @@ export const mergeAccounts =
     })
 
     dispatch(
-      applyClientPatch({
+      applyLegacyPatch({
         transaction: changes,
         account: [
           {

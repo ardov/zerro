@@ -7,7 +7,7 @@ import {
   TTransaction,
   TTransactionId,
 } from '6-shared/types'
-import { applyClientPatch } from 'store/data'
+import { applyLegacyPatch } from 'core-next/adapters/redux/legacyPatch'
 import { getTransactionsById } from './model'
 import { isViewed } from './helpers'
 
@@ -21,7 +21,7 @@ export const deleteTransactions =
       deleted: true,
       changed: Date.now(),
     }))
-    dispatch(applyClientPatch({ transaction: deleted }))
+    dispatch(applyLegacyPatch({ transaction: deleted }))
   }
 
 export const deleteTransactionsPermanently =
@@ -35,7 +35,7 @@ export const deleteTransactionsPermanently =
       income: 0.00001,
       changed: Date.now(),
     }))
-    dispatch(applyClientPatch({ transaction: deleted }))
+    dispatch(applyLegacyPatch({ transaction: deleted }))
   }
 
 export const markViewed =
@@ -52,7 +52,7 @@ export const markViewed =
         viewed,
         changed: Date.now(),
       }))
-    dispatch(applyClientPatch({ transaction: result }))
+    dispatch(applyLegacyPatch({ transaction: result }))
   }
 
 export const restoreTransaction =
@@ -65,7 +65,7 @@ export const restoreTransaction =
       changed: Date.now(),
       id: uuidv1(),
     }
-    dispatch(applyClientPatch({ transaction: [tr] }))
+    dispatch(applyLegacyPatch({ transaction: [tr] }))
   }
 
 // Не работает
@@ -76,7 +76,7 @@ export const splitTransfer =
     const state = getState()
     const tr = getTransactionsById(state)[id]
     const list = split(tr)
-    if (list) dispatch(applyClientPatch({ transaction: list }))
+    if (list) dispatch(applyLegacyPatch({ transaction: list }))
   }
 
 export type TransactionPatch = OptionalExceptFor<TTransaction, 'id'>
@@ -89,7 +89,7 @@ export const applyChangesToTransaction =
       ...patch,
       changed: Date.now(),
     }
-    dispatch(applyClientPatch({ transaction: [tr] }))
+    dispatch(applyLegacyPatch({ transaction: [tr] }))
   }
 
 export const recreateTransaction =
@@ -109,7 +109,7 @@ export const recreateTransaction =
       id: uuidv1(),
       changed: Date.now(),
     }
-    dispatch(applyClientPatch({ transaction: [oldTr, newTr] }))
+    dispatch(applyLegacyPatch({ transaction: [oldTr, newTr] }))
     return newTr.id
   }
 
@@ -129,7 +129,7 @@ export const bulkEditTransactions =
       const comment = modifyComment(tr.comment, opts.comment)
       return { ...tr, tag, comment, changed: Date.now() }
     })
-    dispatch(applyClientPatch({ transaction: result }))
+    dispatch(applyLegacyPatch({ transaction: result }))
   }
 
 const modifyTags = (prevTags: string[] | null, newTags?: string[]) => {

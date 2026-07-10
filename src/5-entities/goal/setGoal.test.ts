@@ -54,7 +54,12 @@ describe('setGoal', () => {
       now: () => NOW,
       uuid: () => UUID,
     })
-    const dispatch = vi.fn()
+    // The thunk dispatches an executeCommand thunk; unwrap it like the store would
+    const dispatch: any = vi.fn(action =>
+      typeof action === 'function'
+        ? action(dispatch, () => makeState(current), undefined)
+        : action
+    )
 
     setGoal(MONTH, id, goal)(dispatch, () => makeState(current), undefined)
 
@@ -67,7 +72,11 @@ describe('setGoal', () => {
   it('keeps delete tracking for an empty goal draft', () => {
     const current = makeDemoStore({ now: NOW })
     const [tagId] = Object.keys(current.tag)
-    const dispatch = vi.fn()
+    const dispatch: any = vi.fn(action =>
+      typeof action === 'function'
+        ? action(dispatch, () => makeState(current), undefined)
+        : action
+    )
 
     setGoal(MONTH, envId.get(EnvType.Tag, tagId), undefined)(
       dispatch,
@@ -75,7 +84,6 @@ describe('setGoal', () => {
       undefined
     )
 
-    expect(dispatch).toHaveBeenCalledOnce()
     expect(sendEvent).toHaveBeenCalledWith('Goals: delete goal')
   })
 })

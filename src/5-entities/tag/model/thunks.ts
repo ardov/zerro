@@ -1,7 +1,7 @@
 import type { OptionalExceptFor, TTag } from '6-shared/types'
 import type { AppThunk } from 'store'
 import { sendEvent } from '6-shared/helpers/tracking'
-import { applyClientPatch } from 'store/data'
+import { applyLegacyPatch } from 'core-next/adapters/redux/legacyPatch'
 import { userModel } from '5-entities/user'
 import { makeTag } from './makeTag'
 import { getTags } from './model'
@@ -23,7 +23,7 @@ export const patchTag =
     })
 
     sendEvent('Tag: edit')
-    dispatch(applyClientPatch({ tag: patched }))
+    dispatch(applyLegacyPatch({ tag: patched }))
     return patched
   }
 
@@ -37,7 +37,7 @@ export const createTag =
     const newTag = makeTag({ ...draft, user })
 
     sendEvent('Tag: create')
-    dispatch(applyClientPatch({ tag: [newTag] }))
+    dispatch(applyLegacyPatch({ tag: [newTag] }))
     return [newTag]
   }
 

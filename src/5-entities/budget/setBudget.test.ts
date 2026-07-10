@@ -50,8 +50,13 @@ describe('setBudget', () => {
       { id: envId.get(EnvType.Tag, tagId), month: MONTH, value: 100 },
       { id: envId.get(EnvType.Account, accountId), month: MONTH, value: 200 },
     ]
-    const dispatch = vi.fn()
     const state = makeState(current)
+    // The thunk dispatches an executeCommand thunk; unwrap it like the store would
+    const dispatch: any = vi.fn(action =>
+      typeof action === 'function'
+        ? action(dispatch, () => state, undefined)
+        : action
+    )
     const expected = compileSetBudget(current, updates, {
       now: () => NOW,
       uuid: () => UUID,
@@ -61,16 +66,22 @@ describe('setBudget', () => {
 
     expect(expected.budget).toHaveLength(1)
     expect(expected.reminder).toHaveLength(1)
-    expect(dispatch).toHaveBeenCalledOnce()
     expect(dispatch).toHaveBeenCalledWith(applyClientPatch(expected))
   })
 
   it('does not dispatch an empty patch', () => {
-    const dispatch = vi.fn()
     const state = makeState(makeDemoStore({ now: NOW }))
+    const dispatch: any = vi.fn(action =>
+      typeof action === 'function'
+        ? action(dispatch, () => state, undefined)
+        : action
+    )
 
     setBudget([])(dispatch, () => state, undefined)
 
-    expect(dispatch).not.toHaveBeenCalled()
+    const actions = dispatch.mock.calls
+      .map(([action]: [unknown]) => action)
+      .filter((action: unknown) => typeof action !== 'function')
+    expect(actions).toEqual([])
   })
 })

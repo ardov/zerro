@@ -9,9 +9,20 @@ import dataReducer from 'store/data'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { TagSelect2 } from './TagSelect2'
 
-vi.mock('i18next', () => ({
-  t: (key: string) => key,
-}))
+vi.mock('i18next', () => {
+  const t = (key: string) => key
+  return {
+    t,
+    default: {
+      t,
+      use: () => ({ init: () => Promise.resolve(t) }),
+      on: () => {},
+      off: () => {},
+      changeLanguage: () => Promise.resolve(t),
+      language: 'en',
+    },
+  }
+})
 
 function makeOutcomeTag(id: string, title: string): TTag {
   return {

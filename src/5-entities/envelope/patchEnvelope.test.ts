@@ -63,13 +63,17 @@ describe('patchEnvelope', () => {
       draft,
       { now: () => NOW, uuid: () => UUID }
     )
-    const dispatch = vi.fn()
+    // The thunk dispatches an executeCommand thunk; unwrap it like the store would
+    const dispatch: any = vi.fn(action =>
+      typeof action === 'function'
+        ? action(dispatch, () => state, undefined)
+        : action
+    )
 
     patchEnvelope(draft)(dispatch, () => state, undefined)
 
     expect(expected.tag).toHaveLength(1)
     expect(expected.reminder).toHaveLength(1)
-    expect(dispatch).toHaveBeenCalledOnce()
     expect(dispatch).toHaveBeenCalledWith(applyClientPatch(expected))
   })
 

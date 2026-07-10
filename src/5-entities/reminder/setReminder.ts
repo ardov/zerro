@@ -1,4 +1,8 @@
 import { AppThunk } from 'store'
+// Direct patch on purpose: this thunk is inside the legacy hidden-store write
+// path, and importing the command funnel here creates a module cycle
+// (hidden-store factories -> reminder -> adapter -> selectors -> fxRateStore
+// -> hidden-store). It joins the funnel when core reminder commands land.
 import { applyClientPatch } from 'store/data'
 import { userModel } from '5-entities/user'
 import {

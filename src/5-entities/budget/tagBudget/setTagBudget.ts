@@ -1,6 +1,6 @@
 import { userModel } from '5-entities/user'
 import { TISOMonth, TTagId } from '6-shared/types'
-import { applyClientPatch } from 'store/data'
+import { applyLegacyPatch } from 'core-next/adapters/redux/legacyPatch'
 import { AppThunk } from 'store/index'
 import { getTagBudgetId } from './getBudgetId'
 import { makeTagBudget } from './makeTagBudget'
@@ -35,6 +35,6 @@ export function setTagBudget(
         changed: Date.now(),
       })
     })
-    dispatch(applyClientPatch({ budget: budgets }))
+    dispatch(applyLegacyPatch({ budget: budgets }))
   }
 }

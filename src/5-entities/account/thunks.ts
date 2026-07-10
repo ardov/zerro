@@ -1,7 +1,7 @@
 import { AppThunk } from 'store'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { TAccount, OptionalExceptFor, TAccountId } from '6-shared/types'
-import { applyClientPatch } from 'store/data'
+import { applyLegacyPatch } from 'core-next/adapters/redux/legacyPatch'
 import { getAccounts } from './selectors'
 
 export type TAccountPatch = OptionalExceptFor<TAccount, 'id'>
@@ -20,7 +20,7 @@ export const patchAccount =
     })
 
     sendEvent('Account: edit')
-    dispatch(applyClientPatch({ account: patched }))
+    dispatch(applyLegacyPatch({ account: patched }))
     return patched
   }
 

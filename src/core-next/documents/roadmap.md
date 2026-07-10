@@ -349,6 +349,23 @@ the pure engine. Redux must become the sole owner of `base`, `outbox`,
 `outboxHead`, `inbox`, and replayed `current`; do not instantiate a parallel
 in-memory engine from thunks.
 
+- 2026-07-10: the command funnel exists. `adapters/redux/commands.ts` defines
+  the serializable, versioned `TAppCommand` envelope (`zerro.budget.set`,
+  `zerro.goal.set`, `zerro.envelope.patch`, `legacy.patch`) with
+  `compileAppCommand` as the registry and `executeCommand` as the single write
+  thunk; `setBudget`/`setGoal`/`patchEnvelope` are one-line command creators.
+  Remaining legacy writes flow through `applyLegacyPatch`
+  (`adapters/redux/legacyPatch.ts`) — deliberately selector-free, because
+  entity thunks import it while the selector graph imports entity barrels;
+  the replica step points both entries at the same outbox slice action.
+  Known funnel bypasses: hidden-store `dataAccount`/`setReminder` internals
+  (die with hidden-store) and the `window.zerro` dev helper. Cycle-hardening
+  landed alongside: account selectors take the data-account constant from
+  Core, `dataAccount` reads the account slice directly, and the hidden-store
+  barrel exports types first.
+  Next: replica slice — replace `data.diff` with `outbox`/`outboxHead`,
+  rebase `applyServerPatch`, add `selectPendingDiff` for sync.
+
 Recommended order:
 
 1. Keep Redux adapter selectors thin and explicit.

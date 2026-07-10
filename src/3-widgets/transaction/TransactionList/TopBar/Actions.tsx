@@ -26,7 +26,7 @@ import { addFxAmount, round, createFxAmount } from '6-shared/helpers/money'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useAppDispatch, useAppSelector } from 'store'
-import { applyClientPatch } from 'store/data'
+import { applyLegacyPatch } from 'core-next/adapters/redux'
 import { TagSelect2 } from '5-entities/tag/ui/TagSelect2'
 import { trModel } from '5-entities/transaction'
 import { selectCoreTransactions } from 'core-next/adapters/redux'
@@ -196,7 +196,7 @@ const Actions: FC<ActionsProps> = ({
                   onClick={() => {
                     sendEvent('Transaction: combine to outcome')
                     dispatch(
-                      applyClientPatch({
+                      applyLegacyPatch({
                         transaction: combineToOutcome(transactions),
                       })
                     )
@@ -218,7 +218,7 @@ const Actions: FC<ActionsProps> = ({
                   onClick={() => {
                     sendEvent('Transaction: combine to income')
                     dispatch(
-                      applyClientPatch({
+                      applyLegacyPatch({
                         transaction: combineToIncome(transactions),
                       })
                     )
@@ -254,7 +254,7 @@ const Actions: FC<ActionsProps> = ({
                     const patch = mergeAsTransfer(transactions)
                     if (!patch) return
                     dispatch(
-                      applyClientPatch({
+                      applyLegacyPatch({
                         transaction: patch,
                       })
                     )

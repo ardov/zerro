@@ -6,6 +6,12 @@
  * internal graph wiring (memoization nodes) or is exported there solely for
  * adapter parity tests, and must not leak through this entrypoint.
  */
+export { applyLegacyPatch } from './legacyPatch'
+export {
+  compileAppCommand,
+  executeCommand,
+  type TAppCommand,
+} from './commands'
 export {
   selectCoreActivity,
   selectCoreBalancesByDate,
