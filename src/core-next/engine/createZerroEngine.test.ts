@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { makeAccount, makeStore } from '../testing/zenmoneyTestData'
+import { materializerVersion } from '../materializer'
 import { createZerroEngine } from './createZerroEngine'
 
 describe('createZerroEngine', () => {
@@ -20,9 +21,7 @@ describe('createZerroEngine', () => {
     const entry = engine.executeCompiled(
       { type: 'account.patch', payload: { id: 'cash' } },
       {
-        account: [
-          makeAccount({ id: 'cash', title: 'Wallet', balance: 125 }),
-        ],
+        account: [makeAccount({ id: 'cash', title: 'Wallet', balance: 125 })],
       }
     )
 
@@ -30,7 +29,9 @@ describe('createZerroEngine', () => {
       id: 'entry-1',
       createdAt: 100,
       command: { type: 'account.patch' },
+      materializerVersion,
     })
+    expect(entry.appliedPatch).toBe(entry.intentPatch)
     expect(engine.getCurrent().account.cash.title).toBe('Wallet')
     expect(engine.getCurrent().account.cash.balance).toBe(125)
     expect(engine.getPendingOutbox()).toEqual([entry])
@@ -47,9 +48,13 @@ describe('createZerroEngine', () => {
         {
           id: 'entry-1',
           command: { type: 'account.patch', title: 'Wallet' },
-          patch: {
+          intentPatch: {
             account: [makeAccount({ id: 'cash', title: 'Wallet' })],
           },
+          appliedPatch: {
+            account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+          },
+          materializerVersion,
           createdAt: 100,
         },
       ],
@@ -86,19 +91,18 @@ describe('createZerroEngine', () => {
       },
     })
 
-    const result = engine.execute(
-      { type: 'transaction.create' },
-      () => ({
-        patch: {},
-        receipt: { transactionId: 'tr-new' },
-      })
-    )
+    const result = engine.execute({ type: 'transaction.create' }, () => ({
+      patch: {},
+      receipt: { transactionId: 'tr-new' },
+    }))
 
     expect(result.receipt).toEqual({ transactionId: 'tr-new' })
     expect(result.entry).toEqual({
       id: 'entry-1',
       command: { type: 'transaction.create' },
-      patch: {},
+      intentPatch: {},
+      appliedPatch: {},
+      materializerVersion,
       createdAt: 100,
     })
     expect('receipt' in result.entry).toBe(false)
@@ -115,9 +119,13 @@ describe('createZerroEngine', () => {
         {
           id: 'entry-1',
           command: { type: 'account.patch', title: 'Wallet' },
-          patch: {
+          intentPatch: {
             account: [makeAccount({ id: 'cash', title: 'Wallet' })],
           },
+          appliedPatch: {
+            account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+          },
+          materializerVersion,
           createdAt: 100,
         },
       ],
@@ -148,17 +156,25 @@ describe('createZerroEngine', () => {
         {
           id: 'entry-1',
           command: { type: 'account.patch', title: 'Wallet' },
-          patch: {
+          intentPatch: {
             account: [makeAccount({ id: 'cash', title: 'Wallet' })],
           },
+          appliedPatch: {
+            account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+          },
+          materializerVersion,
           createdAt: 100,
         },
         {
           id: 'entry-2',
           command: { type: 'account.patch', title: 'Pocket' },
-          patch: {
+          intentPatch: {
             account: [makeAccount({ id: 'cash', title: 'Pocket' })],
           },
+          appliedPatch: {
+            account: [makeAccount({ id: 'cash', title: 'Pocket' })],
+          },
+          materializerVersion,
           createdAt: 200,
         },
       ],
@@ -193,9 +209,13 @@ describe('createZerroEngine', () => {
       {
         id: 'entry-1',
         command: { type: 'account.patch', title: 'Wallet' },
-        patch: {
+        intentPatch: {
           account: [makeAccount({ id: 'cash', title: 'Wallet' })],
         },
+        appliedPatch: {
+          account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+        },
+        materializerVersion,
         createdAt: 100,
       },
     ]

@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { materializePatch } from 'core-next/materializer'
 import { withPerf } from '6-shared/helpers/performance'
 import { TDataStore, TDiff } from '6-shared/types'
 import { applyDiffMutable } from './shared/applyDiff'
@@ -56,9 +57,10 @@ const { reducer, actions } = createSlice({
       'applyClientPatch',
       (state, { payload }: PayloadAction<TDiff>) => {
         if (!payload) return
-        applyDiffMutable(payload, state.current)
-        if (!state.diff) state.diff = { ...payload }
-        else mergeDiffs(state.diff, payload)
+        const { appliedPatch } = materializePatch(state.current, payload)
+        applyDiffMutable(appliedPatch, state.current)
+        if (!state.diff) state.diff = { ...appliedPatch }
+        else mergeDiffs(state.diff, appliedPatch)
       }
     ),
     resetData: () => {

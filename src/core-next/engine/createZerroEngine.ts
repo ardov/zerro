@@ -1,11 +1,14 @@
 import type { TDataStore } from '../zenmoney/store'
 import type { TCompiled, TCoreContext, TNormalizedPatch } from '../types'
 import { replay } from '../zenmoney'
+import { materializePatch, type TMaterializedPatch } from '../materializer'
 
 export type TOutboxEntry<TCommand = unknown> = {
   id: string
   command: TCommand
-  patch: TNormalizedPatch
+  intentPatch: TNormalizedPatch
+  appliedPatch: TNormalizedPatch
+  materializerVersion: number
   createdAt: number
 }
 
@@ -71,7 +74,7 @@ export function createZerroEngine<TCommand = unknown>(
   function getCurrent(): TDataStore {
     return replay(
       state.base,
-      state.outbox.slice(0, state.outboxHead).map(entry => entry.patch)
+      state.outbox.slice(0, state.outboxHead).map(entry => entry.appliedPatch)
     )
   }
 
@@ -83,9 +86,13 @@ export function createZerroEngine<TCommand = unknown>(
     command: TCommand,
     compile: TCommandCompiler<TCommand, TReceipt>
   ): TExecuteResult<TCommand, TReceipt> {
-    const result = compile(getCurrent(), command, input.ctx)
-    const patch = isCompiled(result) ? result.patch : result
-    const entry = executeCompiled(command, patch)
+    const current = getCurrent()
+    const result = compile(current, command, input.ctx)
+    const intentPatch = isCompiled(result) ? result.patch : result
+    const entry = appendMaterialized(
+      command,
+      materializePatch(current, intentPatch)
+    )
 
     if (isCompiled(result)) {
       return { entry, receipt: result.receipt }
@@ -95,13 +102,25 @@ export function createZerroEngine<TCommand = unknown>(
 
   function executeCompiled(
     command: TCommand,
-    patch: TNormalizedPatch
+    intentPatch: TNormalizedPatch
+  ): TOutboxEntry<TCommand> {
+    return appendMaterialized(
+      command,
+      materializePatch(getCurrent(), intentPatch)
+    )
+  }
+
+  function appendMaterialized(
+    command: TCommand,
+    materialized: TMaterializedPatch
   ): TOutboxEntry<TCommand> {
     const outbox = state.outbox.slice(0, state.outboxHead)
     const entry: TOutboxEntry<TCommand> = {
       id: input.ctx.uuid(),
       command,
-      patch,
+      intentPatch: materialized.intentPatch,
+      appliedPatch: materialized.appliedPatch,
+      materializerVersion: materialized.materializerVersion,
       createdAt: input.ctx.now(),
     }
 

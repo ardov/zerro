@@ -1,265 +1,113 @@
-# Private fixtures workflow
+# Private fixture workflow
 
-Date: 2026-07-06  
-Status: proposed workflow
+- Status: implemented, opt-in
+- Updated: 2026-07-10
 
-## Goal
+Private fixtures compare Core Next with legacy behavior on a large real account
+without committing or printing private data.
 
-We need realistic test data from a large real account to compare the legacy selectors/commands with `core-next`.
+## Safety rules
 
-The fixture must contain:
+1. Store fixtures only under ignored `private-fixtures/` or
+   `fixtures/private/` directories.
+2. Never place them under `src/` or tracked fixture folders.
+3. Never paste fixture contents into chat, issues, PRs, logs, or screenshots.
+4. Failures must use SHA-256 hashes or safe count summaries, not deep object
+   diffs.
+5. Scripts and tests are safe to commit; fixture data is not.
 
-1. raw input data;
-2. legacy calculated outputs;
-3. enough metadata to reproduce the calculation;
-4. no accidental commits of private account data.
+## Export
 
-## Storage location
-
-Private fixtures must live outside tracked source files.
-
-Use one of these ignored folders:
-
-```txt
-private-fixtures/
-fixtures/private/
-```
-
-Both folders are ignored by `.gitignore`.
-
-Do not place private fixtures under `src/`, `src/core-next/documents/`, or any
-tracked test fixture folder.
-
-## Fixture shape
-
-Each fixture should be a folder:
-
-```txt
-private-fixtures/
-  my-large-account/
-    manifest.json
-    input.json
-    legacy-output.json
-```
-
-The browser exporter may download a single bundle file instead:
-
-```txt
-private-fixtures/
-  my-large-account/
-    fixture.json
-```
-
-That file should contain the same sections:
-
-```json
-{
-  "schemaVersion": 1,
-  "manifest": {},
-  "input": {},
-  "legacyOutput": {}
-}
-```
-
-The single-file bundle is the preferred first implementation because browsers cannot reliably download a folder without extra packaging dependencies.
-
-### `manifest.json`
-
-The manifest describes how the fixture was produced.
-
-Example:
-
-```json
-{
-  "schemaVersion": 1,
-  "createdAt": "2026-07-06T12:00:00.000Z",
-  "appVersion": "1.9.3",
-  "locale": "en",
-  "source": "real-account-private",
-  "inputKind": "normalized-current-data",
-  "outputs": [
-    "envelopes",
-    "budgets",
-    "rawActivity",
-    "activity",
-    "envMetrics",
-    "monthTotals"
-  ],
-  "notes": "Private local fixture. Must not be committed."
-}
-```
-
-### `input.json`
-
-The input should be the normalized data snapshot used by selectors.
-
-For `core-next` comparisons, normalized app data is more useful than raw ZenMoney API backup, because the legacy selectors also work on normalized `state.data.current`.
-
-Suggested first version:
-
-```json
-{
-  "schemaVersion": 1,
-  "data": {
-    "serverTimestamp": 0,
-    "instrument": {},
-    "country": {},
-    "company": {},
-    "user": {},
-    "merchant": {},
-    "account": {},
-    "tag": {},
-    "budget": {},
-    "reminder": {},
-    "reminderMarker": {},
-    "transaction": {}
-  }
-}
-```
-
-We may also export the server-format backup separately, but it should not be the primary comparison input.
-
-### `legacy-output.json`
-
-The output should contain selected results from the current legacy selectors.
-
-Suggested first version:
-
-```json
-{
-  "schemaVersion": 1,
-  "outputs": {
-    "envelopes": {},
-    "budgets": {},
-    "rawActivity": {},
-    "activity": {},
-    "envMetrics": {},
-    "monthTotals": {}
-  }
-}
-```
-
-## Export strategy
-
-Add a local-only developer export tool that runs inside the current app and downloads a private fixture bundle.
-
-Current first implementation:
+In a local development session with the target account loaded:
 
 ```ts
 await window.zerro.exportPrivateFixture('my-large-account')
 ```
 
-This downloads one JSON bundle that can be moved into:
+Move the downloaded JSON bundle into an ignored path, for example:
 
 ```txt
 private-fixtures/my-large-account/fixture.json
 ```
 
-After downloading, validate the fixture shape and print a safe summary:
+The bundle contains:
+
+```txt
+schemaVersion
+manifest       creation time, app version, locale, source, output names
+input          normalized state.data.current snapshot
+legacyOutput   selected legacy selector results
+```
+
+The exporter is a local developer tool and uploads nothing.
+
+## Safe inspection
+
+Print metadata and counts only:
 
 ```bash
 pnpm fixture:summary private-fixtures/my-large-account/fixture.json
 ```
 
-The summary command prints only metadata and counts. It must not print account names, transactions, comments, payees, or any other private values.
+The summary must not print account names, comments, payees, transaction values,
+or other private fields.
 
-To verify that the fixture can reproduce current legacy selector outputs:
+## Parity tests
+
+Legacy-output reproduction:
 
 ```bash
 PRIVATE_FIXTURE=private-fixtures/my-large-account/fixture.json pnpm fixture:test
 ```
 
-This test is skipped unless `PRIVATE_FIXTURE` is provided.
+Core read and Redux adapter parity can be run directly when needed:
 
-The test compares SHA-256 hashes of each large output instead of using normal deep equality diffs. That avoids dumping private data or huge object diffs to the terminal if something changes.
-
-The exporter should read:
-
-```ts
-const state = store.getState()
+```bash
+PRIVATE_FIXTURE=private-fixtures/my-large-account/fixture.json \
+  node --max-old-space-size=4096 ./node_modules/vitest/vitest.mjs run \
+  src/core-next/zerro/read.private-fixture.test.ts \
+  src/core-next/adapters/redux/selectors.private-fixture.test.ts
 ```
 
-And write:
+These tests skip when `PRIVATE_FIXTURE` is absent.
 
-```ts
-input = state.data.current
+## What to compare
 
-legacyOutput = {
-  envelopes: envelopeModel.getEnvelopes(state),
-  budgets: budgetModel.get(state),
-  rawActivity: balances.rawActivity(state),
-  activity: balances.activity(state),
-  envMetrics: balances.envData(state),
-  monthTotals: balances.totals(state),
-}
+Useful read outputs include:
+
+- month list;
+- envelopes and structure;
+- keeping-envelope ids;
+- budgets;
+- raw and sorted activity;
+- activity, env metrics, and month totals;
+- goals, debtors, and balances when relevant.
+
+For commands, compare resulting normalized state rather than only patch shape.
+Keep output scope intentional: large derived structures may contain full
+transaction arrays and object references.
+
+## Serialization notes
+
+- JSON drops fields with `undefined`; stable comparisons intentionally follow
+  JSON semantics.
+- The fixture manifest records locale because legacy envelope presentation can
+  depend on i18n initialization.
+- The legacy private test mocks the hidden-store data-account cycle because it
+  needs read selectors only.
+- If a fixture becomes too large, reduce selected months/ids or store safe
+  aggregates rather than weakening privacy protections.
+
+## Known local fixture
+
+The first large fixture was approximately:
+
+```txt
+287.3 MB
+24,429 transactions
+135 months
+126 envelopes
 ```
 
-The exporter should be clearly marked as a local developer tool and should not upload data anywhere.
-
-## Why export outputs
-
-The purpose is not only to test that `core-next` runs.
-
-The purpose is to prove that `core-next` matches the current behavior:
-
-```ts
-const input = loadFixtureInput()
-const legacy = loadFixtureLegacyOutput()
-
-const next = createZerroSession(input, testCtx)
-
-expect(next.read.envelopes()).toEqual(legacy.outputs.envelopes)
-expect(next.read.budgets()).toEqual(legacy.outputs.budgets)
-expect(next.read.envMetrics()).toEqual(legacy.outputs.envMetrics)
-```
-
-For command migration, compare resulting state, not only patch shape:
-
-```ts
-const nextPatch = next.envelopes.rename(id, name)
-const nextState = applyPatch(input, nextPatch)
-
-expect(nextState).toEqual(legacyStateAfterRunningOldThunk)
-```
-
-## Serialization concerns
-
-Some current selector outputs contain transaction object references and large arrays.
-
-That is acceptable for the first private fixture, but the exporter should keep the output intentionally scoped.
-
-If the fixture becomes too large, prefer exporting:
-
-- selected months;
-- selected envelope ids;
-- aggregate amounts;
-- transaction ids instead of full transaction objects in derived outputs.
-
-Do not optimize this too early. The first fixture should favor correctness and coverage.
-
-## Privacy rules
-
-1. Private fixtures must stay in ignored folders.
-2. Never commit `private-fixtures/` or `fixtures/private/`.
-3. Never paste fixture contents into issues, PRs, docs, or chat.
-4. If a small public fixture is needed, create a separate anonymized/minimized fixture by hand.
-5. Treat screenshots of private fixture outputs as private too.
-
-## Recommended first implementation
-
-1. Add `.gitignore` entries for private fixture folders.
-2. Add a local developer export function available as `window.zerro.exportPrivateFixture(name)`.
-3. Export `input` from `state.data.current`.
-4. Export `legacyOutput` for:
-   - monthList;
-   - envelopes;
-   - envelopeStructure;
-   - keepingEnvelopeIds;
-   - budgets;
-   - rawActivity;
-   - activity;
-   - sortedActivity;
-   - envMetrics;
-   - monthTotals.
-5. Add a local compare script that reads from `private-fixtures/<name>`.
-6. Keep the compare script safe to commit, but keep fixture data ignored.
+That size is acceptable for an opt-in local golden master. Do not add it to
+ordinary CI or repository history.

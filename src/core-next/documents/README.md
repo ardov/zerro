@@ -1,68 +1,96 @@
-# Core Next Notes
+# Core Next documentation
 
-This folder is the documentation home for `src/core-next`.
+`src/core-next` is the staged extraction of Zerro domain behavior into a
+storage-agnostic module. These documents are the durable control plane for the
+migration; implementation history belongs in Git.
 
-Keep Core Next architecture, handoff state, testing policy, fixture workflows,
-and migration decisions here so they travel with the module if `core-next` later
-moves into `src/domain` or a separate package.
+## Start here
 
-## Documents
+For a new task or agent:
 
-- [architecture.md](./architecture.md): target architecture, module boundaries,
-  staged migration plan, and invariants.
-- [handoff.md](./handoff.md): current implementation state, verified commands,
-  guardrails, and recommended next steps.
-- [roadmap.md](./roadmap.md): short map of the active work tracks and suggested
-  next agent starting points.
-- [testing.md](./testing.md): testing policy and fixture strategy.
-- [private-fixtures.md](./private-fixtures.md): private fixture export,
-  storage, privacy, and comparison workflow.
-- [open-questions.md](./open-questions.md): decisions that need product or
-  architecture input before they become implicit defaults.
-- [compatibility.md](./compatibility.md): temporary bridges and their exit
-  criteria.
+1. Inspect `git status --short` and the current `src/core-next` tree.
+2. Read [handoff.md](./handoff.md) for the verified branch state and default
+   next slice.
+3. Read the relevant section of [architecture.md](./architecture.md) before
+   changing a boundary or contract.
+4. Use [roadmap.md](./roadmap.md) to choose another independent track.
+5. Check [design-ledger.md](./design-ledger.md) before settling an open question
+   or removing a compatibility bridge.
 
-## What We Are Building
+The handoff is routing, not proof that code landed. Always verify the tree.
 
-`core-next` is the staged extraction of Zerro domain logic into a
-storage-agnostic module.
+## Current position
 
-The target shape is:
+- Production Core is independent of Redux, React, i18n, storage, ZenMoney HTTP,
+  and runtime imports from `6-shared`.
+- Core owns normalized ZenMoney entities, patch/replay primitives, Zerro hidden
+  data, read projectors, and a substantial command layer.
+- Most budget, envelope, goal, activity, transaction, debtor, and balance reads
+  now reach the app through `core-next/adapters/redux`.
+- Budget, goal, and envelope writes use the Core command funnel; remaining
+  writes pass through the legacy patch bridge.
+- Every local Redux patch now passes through an identity materializer. Server
+  diffs bypass it as already canonical.
+- `createZerroEngine` models outbox replay but has no production owner yet;
+  Redux must remain the sole reactive state owner in the app.
+- The session is snapshot-based and lazily memoized, but its public API is still
+  a flat read surface rather than the intended domain facade.
+- Envelope reads still mix domain and presentation data through the
+  `populatedTags` bridge.
 
-```txt
-state + command => patch
-state => derived view
-base + patches => current
+## Default next slice
+
+Build the additive semantic read facade and a small readable dependency graph:
+
+1. Add namespaced `get*` methods such as `session.envelopes.getAll()` and
+   `session.envelopes.getStructure()` over the existing memoized nodes.
+2. Keep `session.read.*` temporarily as a compatibility surface.
+3. Record the important graph edges in one small code-owned structure without
+   introducing a generic dependency framework.
+4. Keep Redux selectors granular; do not build one selector from the whole
+   `current` snapshot.
+
+See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
+
+## Document map
+
+| Document                                     | Question it answers                                |
+| -------------------------------------------- | -------------------------------------------------- |
+| [handoff.md](./handoff.md)                   | What is true on this branch right now?             |
+| [architecture.md](./architecture.md)         | Which boundaries and contracts should remain true? |
+| [roadmap.md](./roadmap.md)                   | What can be done next, and in what order?          |
+| [design-ledger.md](./design-ledger.md)       | Which decisions are settled, open, or temporary?   |
+| [testing.md](./testing.md)                   | Which tests protect which kind of change?          |
+| [private-fixtures.md](./private-fixtures.md) | How can private parity data be used safely?        |
+
+Entity-specific ZenMoney knowledge belongs beside the implementation under
+`src/core-next/zenmoney/*/README.md`, not in the migration roadmap.
+
+## Working rules
+
+- Prefer one bounded layer and its tests over a broad rewrite.
+- Keep the root `core-next` entrypoint facade-only.
+- Treat `core-next/zenmoney` and `core-next/zerro` as internal migration paths,
+  not supported app-facing APIs.
+- Keep pure projectors explicit about dependencies.
+- Keep presentation, localization, SVG URLs, Redux, and persistence outside
+  domain code.
+- Compare resulting state for command migrations, not only patch shape.
+- Never print or commit private fixture contents.
+- Update the handoff, roadmap, or design ledger in the same slice when their
+  claims change.
+
+## Verification defaults
+
+For ordinary Core work:
+
+```bash
+pnpm exec tsc --noEmit
+pnpm exec vitest run
 ```
 
-When a command compiler must report a generated id back to the caller, it can
-return `TCompiled<TReceipt>`: `patch` remains the replay source of truth, while
-`receipt` is ephemeral caller metadata and is not replayed.
+For a narrow slice, run focused tests first, then the full suite when a shared
+boundary such as patch application, materialization, Redux state, or package
+exports changes.
 
-Redux, React, IndexedDB, ZenMoney API calls, localization, and persistence stay
-outside the core module behind adapters.
-
-## Current Testing Direction
-
-Use three complementary layers:
-
-1. Focused unit tests for domain rules, validations, patch compilation,
-   immutability, date behavior, FX behavior, and read-model edge cases.
-2. Deterministic demo-data regression tests for migrated read models and session
-   behavior.
-3. Private or anonymized fixture parity tests for large real-world accounts,
-   using safe hashes or summaries instead of deep object diffs.
-
-See [testing.md](./testing.md) for the detailed testing policy.
-
-## Near-Term Plan
-
-See [roadmap.md](./roadmap.md) for the current track map. The short version:
-
-1. Test and fixture infrastructure: deterministic Core Next demo data and parity tests.
-2. ZenMoney entity layer: accounts, merchants, tags, transactions, then derived
-   reads.
-3. Zerro write layer: hidden-data writers, service account, envelope/budget/goal
-   commands.
-4. Engine and adapter integration: explicit selectors, outbox engine, gradual UI
-   connection.
+Private fixture commands are opt-in and documented separately.
