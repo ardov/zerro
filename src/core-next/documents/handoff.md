@@ -3,7 +3,7 @@
 - Updated: 2026-07-10
 - Branch: `core-next`
 - Worktree: clean; the branch tip is
-  `Route the remaining transaction thunks through the command funnel`
+  `Make setInBudget semantic and drop dead entity write thunks`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -26,7 +26,7 @@ claims against the tree before editing.
 | Zerro reads      | Envelopes through activity, metrics, month totals, goals, budgets, settings, hidden data, and FX are present          |
 | Session          | Namespaced semantic `get*` reads over lazy snapshot-local memoization; flat `read` is deprecated compatibility        |
 | Redux reads      | Most budget/envelope/goal/activity/transaction/tag/debtor/balance consumers use Core adapter selectors                |
-| Redux writes     | Budget, goal, envelope, and transaction thunks are semantic; account/tag/merchant writes use patch bridges            |
+| Redux writes     | Budget, goal, envelope, transaction, and account thunks are semantic; `combineToOutcome`/`mergeAccounts` use bridges  |
 | Materializer     | Identity layer is wired into every Redux local patch; server patches bypass it                                        |
 | Engine           | Pure outbox reference exists; no production consumer; replay uses stored `appliedPatch`                               |
 | Presentation     | Domain envelopes are headless; Redux adds localized groups, symbols, and generated/display colors                     |
@@ -34,7 +34,19 @@ claims against the tree before editing.
 
 ## Latest landed slices
 
-The branch tip finishes the transaction thunk family:
+The branch tip makes `setInBudget` semantic and removes dead entity writes:
+
+- `zenmoney.account.inBalance.set` compiles through `compilePatchAccount`;
+  the adapter exports `setAccountInBalance` and the `setInBudget` thunk
+  delegates to it;
+- `patchAccount`, `patchTag`, `createTag`, and `patchMerchant` (plus their
+  draft types) are deleted: inspection showed no app consumers remained after
+  the envelope migration, so no commands were minted for them;
+- `setTagBudget` (also consumer-less) and live `combineToOutcome` and
+  `mergeAccounts` are the only remaining `applyLegacyPatch` users;
+- a funnel test covers the inBalance toggle resulting state.
+
+The commit before it finished the transaction thunk family:
 
 - `zenmoney.transaction.viewed.set`, `zenmoney.transaction.update`,
   `zenmoney.transaction.recreate`, and `zenmoney.transaction.bulk.edit` join
@@ -97,29 +109,27 @@ No materializer rule or replica behavior is included in these slices.
 
 ## Default next task
 
-Migrate account, tag, and merchant writes described in
-[roadmap.md](./roadmap.md#default-next-slice-semantic-account-tag-and-merchant-writes):
-`patchAccount`/`setInBudget`, `patchTag`/`createTag` (with an id receipt),
-and `patchMerchant`, all through existing Core compilers.
+Migrate combine-to-outcome and remove the dead tag-budget write described in
+[roadmap.md](./roadmap.md#default-next-slice-combine-to-outcome-command-and-dead-budget-write).
 
 Likely files:
 
 ```txt
+src/core-next/zenmoney/transactions/commands.ts
+src/core-next/zenmoney/transactions/commands.test.ts
 src/core-next/adapters/redux/commands.ts
-src/core-next/adapters/redux/commands.test.ts
-src/5-entities/account/thunks.ts
-src/5-entities/tag/model/thunks.ts
-src/5-entities/merchant/patchMerchant.ts
+src/3-widgets/transaction/TransactionList/TopBar/Actions.tsx
+src/5-entities/budget/tagBudget/setTagBudget.ts
 src/core-next/documents/roadmap.md
 src/core-next/documents/handoff.md
 ```
 
 Keep the slice bounded:
 
-- reuse the existing Core entity compilers; do not fork their logic;
-- consumer signatures stay unchanged;
-- leave `setTagBudget`, `combineToOutcome`, and `mergeAccounts` for later
-  slices; merge needs explicit transfer/cascade semantics first;
+- move the combine pairing/summing logic into a tested Core compiler;
+- confirm `setTagBudget` has no runtime consumers before removing it;
+- leave `mergeAccounts` for its own slice (explicit transfer/cascade
+  semantics first);
 - do not start materializer rules.
 
 ## Important guardrails
@@ -151,7 +161,7 @@ Expected full-suite baseline at this handoff:
 
 ```txt
 69 test files passed, 4 skipped
-251 tests passed, 6 skipped
+252 tests passed, 6 skipped
 ```
 
 Also run formatting and documentation link checks after changing these files.

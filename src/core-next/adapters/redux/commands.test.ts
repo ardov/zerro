@@ -391,6 +391,26 @@ describe('executeCommand funnel', () => {
     })
   })
 
+  it('toggles account budget participation to resulting state', () => {
+    const current = makeDemoStore({ now: NOW })
+    const [id] = Object.keys(current.account)
+    const inBalance = !current.account[id].inBalance
+
+    const next = applyPatch(
+      current,
+      compileAppCommand(
+        makeState(current),
+        {
+          type: 'zenmoney.account.inBalance.set',
+          payload: { id, inBalance },
+        },
+        { now: () => NOW, uuid: () => 'unused' }
+      )
+    )
+
+    expect(next.account[id]).toMatchObject({ inBalance, changed: NOW })
+  })
+
   it('applies a legacy patch as-is', () => {
     const state = makeState(makeDemoStore({ now: NOW }))
     const [tagId] = Object.keys(state.data.current.tag)

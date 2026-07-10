@@ -56,17 +56,20 @@ The handoff is routing, not proof that code landed. Always verify the tree.
   `patchEnvelope` thunk and `zerro.envelope.patch` command are removed, and
   envelope drafts stay internal to Core compile functions.
 - The whole transaction thunk family is semantic commands through the funnel;
-  broken `splitTransfer` is removed. `combineToOutcome` in the bulk actions
-  widget is the last transaction-shaped legacy write.
+  broken `splitTransfer` is removed.
+- `setInBudget` is a semantic account command; the dead `patchAccount`,
+  `patchTag`, `createTag`, and `patchMerchant` thunks are deleted. Only
+  `combineToOutcome`, dead `setTagBudget`, and `mergeAccounts` still use the
+  legacy bridge.
 
 ## Default next slice
 
-Migrate account, tag, and merchant writes off `applyLegacyPatch`.
+Migrate combine-to-outcome and delete the dead tag-budget write.
 
-1. Route `patchAccount`/`setInBudget` via `compilePatchAccount`.
-2. Route `patchTag`/`createTag`; create returns an id receipt.
-3. Route `patchMerchant` via `compilePatchMerchant`.
-4. Leave `setTagBudget`, `combineToOutcome`, and `mergeAccounts` for later.
+1. Move the combine pairing/summing logic into a tested Core compiler.
+2. Dispatch it as a semantic command from the bulk actions widget.
+3. Remove consumer-less `setTagBudget`.
+4. After this, `mergeAccounts` is the only legacy write left.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 

@@ -18,6 +18,7 @@ export {
   recreateTransaction,
   renameEnvelope,
   restoreTransaction,
+  setAccountInBalance,
   setEnvelopeColor,
   setEnvelopeComment,
   setTransactionsViewed,

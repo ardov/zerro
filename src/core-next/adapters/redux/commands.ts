@@ -9,8 +9,10 @@ import {
   compileDeleteTransactions,
   compileDeleteTransactionsPermanently,
   compileMarkTransactionsViewed,
+  compilePatchAccount,
   compileRecreateTransaction,
   compileRestoreTransaction,
+  type TAccountId,
   type TTagId,
   type TTransactionId,
   type TTransactionPatch,
@@ -84,6 +86,10 @@ export type TAppCommand =
   | {
       type: 'zenmoney.transaction.bulk.edit'
       payload: { ids: TTransactionId[]; tags?: TTagId[]; comment?: string }
+    }
+  | {
+      type: 'zenmoney.account.inBalance.set'
+      payload: { id: TAccountId; inBalance: boolean }
     }
   | { type: 'legacy.patch'; payload: TNormalizedPatch }
 
@@ -172,6 +178,10 @@ function compileAppCommandResult(
     case 'zenmoney.transaction.bulk.edit': {
       const { ids, tags, comment } = command.payload
       return compileBulkEditTransactions(data, ids, { tags, comment }, ctx)
+    }
+    case 'zenmoney.account.inBalance.set': {
+      const { id, inBalance } = command.payload
+      return compilePatchAccount(data, { id, inBalance }, ctx)
     }
     case 'legacy.patch':
       return command.payload
@@ -303,6 +313,16 @@ export function recreateTransaction(
     }
     return receipt.transactionId
   }
+}
+
+export function setAccountInBalance(
+  id: TAccountId,
+  inBalance: boolean
+): AppThunk {
+  return executeCommand({
+    type: 'zenmoney.account.inBalance.set',
+    payload: { id, inBalance },
+  })
 }
 
 export function bulkEditTransactions(

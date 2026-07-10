@@ -53,29 +53,38 @@ with its commented-out consumer. `5-entities/transaction/thunks.ts` no longer
 imports `applyLegacyPatch`; the remaining transaction-shaped legacy write is
 `combineToOutcome` inside the transaction list bulk actions widget.
 
+The entity write cleanup landed smaller than planned: inspection showed
+`patchAccount`, `patchTag`, `createTag`, and `patchMerchant` had no app
+consumers left (the envelope migration absorbed them), so they were deleted
+instead of migrated. The one real use case, `setInBudget`, now dispatches the
+semantic `zenmoney.account.inBalance.set` command.
+
+Remaining `applyLegacyPatch` consumers: `combineToOutcome` in the transaction
+list bulk actions widget (live), `setTagBudget` (no app consumers), and
+`mergeAccounts` (needs explicit transfer/cascade semantics).
+
 Replica ownership, server-like materialization rules, and package hardening
 remain incomplete.
 
-## Default next slice: semantic account, tag, and merchant writes
+## Default next slice: combine-to-outcome command and dead budget write
 
-Goal: move the small entity write thunks off `applyLegacyPatch` using the
-compilers Core already has.
+Goal: shrink the legacy bridge to `mergeAccounts` only.
 
 Scope:
 
-1. Route `patchAccount` and `setInBudget` through the funnel via
-   `compilePatchAccount`.
-2. Route `patchTag` and `createTag` via `compilePatchTag` and
-   `compileCreateTag` (create returns an id receipt).
-3. Route `patchMerchant` via `compilePatchMerchant`.
-4. Keep `setTagBudget`, `combineToOutcome`, and `mergeAccounts` for later
-   slices; merge needs explicit transfer/cascade semantics first.
+1. Model the bulk-actions "combine to outcome" use case as a semantic
+   transaction command; move the pairing/summing logic from
+   `TransactionList/TopBar/Actions.tsx` into a Core compiler with tests.
+2. Confirm `setTagBudget` has no runtime consumers and remove it; decide
+   whether the rest of the `tagBudget` model (read side) stays for parity.
+3. Leave `mergeAccounts` for its own slice.
 
 Done when:
 
-- the listed thunks dispatch semantic commands instead of `applyLegacyPatch`;
-- resulting-state tests pass through the Redux command funnel;
-- consumer signatures stay unchanged.
+- the bulk actions widget dispatches a semantic command instead of building
+  transaction arrays inline;
+- dead tag-budget write code is gone;
+- `applyLegacyPatch` has one remaining consumer: `mergeAccounts`.
 
 Do not start materializer rules, and do not attempt `mergeAccounts` in this
 slice.
@@ -88,7 +97,7 @@ slice.
 | B. Domain/presentation boundary | Boundary landed          | Extract an optional appearance package only when a real consumer needs it |
 | C. ZenMoney materializer rules  | Deferred until final     | Start only after the other architecture and migration tracks are complete |
 | D. Replica and sync             | Designed, not integrated | Share pure outbox operations and make Redux the replica owner             |
-| E. Legacy cutover               | Transaction thunks done  | Migrate account, tag, and merchant writes off the legacy bridge           |
+| E. Legacy cutover               | Entity writes done       | Migrate combine-to-outcome; then only `mergeAccounts` remains             |
 | F. Package and test hardening   | Ongoing                  | Consumer-level export/type test and targeted parity coverage              |
 
 ## Track A: public facade and read graph
