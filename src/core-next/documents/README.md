@@ -58,18 +58,21 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 - The whole transaction thunk family is semantic commands through the funnel;
   broken `splitTransfer` is removed.
 - `setInBudget` is a semantic account command; the dead `patchAccount`,
-  `patchTag`, `createTag`, and `patchMerchant` thunks are deleted. Only
-  `combineToOutcome`, dead `setTagBudget`, and `mergeAccounts` still use the
-  legacy bridge.
+  `patchTag`, `createTag`, and `patchMerchant` thunks are deleted.
+- Transaction-list bulk combine/merge actions are semantic commands; the dead
+  `setTagBudget` write is removed. `mergeAccounts` is the only remaining
+  `applyLegacyPatch` consumer.
 
 ## Default next slice
 
-Migrate combine-to-outcome and delete the dead tag-budget write.
+Migrate `mergeAccounts`, the last `applyLegacyPatch` consumer.
 
-1. Move the combine pairing/summing logic into a tested Core compiler.
-2. Dispatch it as a semantic command from the bulk actions widget.
-3. Remove consumer-less `setTagBudget`.
-4. After this, `mergeAccounts` is the only legacy write left.
+1. Compile the merge in Core over source/target account ids: rewrite each
+   transaction's account references and reminders, then delete the source.
+2. Handle source↔target transfers so they do not become zero-amount
+   self-transfers.
+3. Route through the funnel and drop `applyLegacyPatch` from the feature.
+4. After this, no production code imports `applyLegacyPatch`.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 

@@ -22,14 +22,18 @@ import {
   DeleteIcon,
 } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
-import { addFxAmount, round, createFxAmount } from '6-shared/helpers/money'
+import { addFxAmount, createFxAmount } from '6-shared/helpers/money'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useAppDispatch, useAppSelector } from 'store'
-import { applyLegacyPatch } from 'core-next/adapters/redux'
+import {
+  combineTransactionsToIncome,
+  combineTransactionsToOutcome,
+  mergeTransactionsAsTransfer,
+  selectCoreTransactions,
+} from 'core-next/adapters/redux'
 import { TagSelect2 } from '5-entities/tag/ui/TagSelect2'
 import { trModel } from '5-entities/transaction'
-import { selectCoreTransactions } from 'core-next/adapters/redux'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { BulkEditModal } from './BulkEditModal'
@@ -195,11 +199,7 @@ const Actions: FC<ActionsProps> = ({
                 <MenuItem
                   onClick={() => {
                     sendEvent('Transaction: combine to outcome')
-                    dispatch(
-                      applyLegacyPatch({
-                        transaction: combineToOutcome(transactions),
-                      })
-                    )
+                    dispatch(combineTransactionsToOutcome(ids))
                     onUncheckAll()
                   }}
                 >
@@ -217,11 +217,7 @@ const Actions: FC<ActionsProps> = ({
                 <MenuItem
                   onClick={() => {
                     sendEvent('Transaction: combine to income')
-                    dispatch(
-                      applyLegacyPatch({
-                        transaction: combineToIncome(transactions),
-                      })
-                    )
+                    dispatch(combineTransactionsToIncome(ids))
                     onUncheckAll()
                   }}
                 >
@@ -251,13 +247,7 @@ const Actions: FC<ActionsProps> = ({
                 <MenuItem
                   onClick={() => {
                     sendEvent('Transaction: merge as transfer')
-                    const patch = mergeAsTransfer(transactions)
-                    if (!patch) return
-                    dispatch(
-                      applyLegacyPatch({
-                        transaction: patch,
-                      })
-                    )
+                    dispatch(mergeTransactionsAsTransfer(ids))
                     onUncheckAll()
                   }}
                 >
@@ -386,99 +376,6 @@ function areApproximatelyEqual(
   const difference = Math.abs(a - b)
   const maxAllowedDifference = Math.max(Math.abs(a), Math.abs(b)) * tolerance
   return difference <= maxAllowedDifference
-}
-
-function mergeAsTransfer(transactions: TTransaction[]) {
-  const { incomes, outcomes } = groupByType(transactions)
-  if (incomes.length != 1 || outcomes.length != 1) return null
-
-  const outcome = outcomes[0]
-  const income = incomes[0]
-
-  const modified: TTransaction[] = []
-  modified.push({
-    ...outcome,
-    deleted: true,
-    changed: Date.now(),
-  })
-
-  modified.push({
-    ...income,
-    outcomeAccount: outcome.outcomeAccount,
-    outcome: outcome.outcome,
-    outcomeInstrument: outcome.outcomeInstrument,
-    changed: Date.now(),
-  })
-
-  return modified
-}
-
-function combineToOutcome(transactions: TTransaction[]) {
-  const { incomes, outcomes } = groupByType(transactions)
-  const outcome = outcomes[0]
-  const outcomeInstrument = outcome.outcomeInstrument
-  let outcomeSum = outcome.outcome
-  const outcomeAccount = outcome.outcomeAccount
-  const modifiedIncomes: TTransaction[] = incomes.map(tr => {
-    outcomeSum = round(outcomeSum - tr.income)
-    if (tr.incomeAccount === outcomeAccount) {
-      // Same account -> just delete income
-      return {
-        ...tr,
-        changed: Date.now(),
-        deleted: true,
-      }
-    } else {
-      // Other account -> convert to transfer
-      return {
-        ...tr,
-        changed: Date.now(),
-        outcomeAccount,
-        outcome: tr.income,
-        outcomeInstrument,
-      }
-    }
-  })
-  modifiedIncomes.push({
-    ...outcome,
-    outcome: outcomeSum,
-    changed: Date.now(),
-  })
-  return modifiedIncomes
-}
-
-function combineToIncome(transactions: TTransaction[]) {
-  const { incomes, outcomes } = groupByType(transactions)
-  const income = incomes[0]
-  const incomeInstrument = income.incomeInstrument
-  let incomeSum = income.income
-  const incomeAccount = income.incomeAccount
-  const modifiedOutcomes: TTransaction[] = outcomes.map(tr => {
-    incomeSum = round(incomeSum - tr.outcome)
-    if (tr.outcomeAccount === incomeAccount) {
-      // Same account -> just delete outcome
-      return {
-        ...tr,
-        changed: Date.now(),
-        deleted: true,
-      }
-    } else {
-      // Other account -> convert to transfer
-      return {
-        ...tr,
-        changed: Date.now(),
-        incomeAccount,
-        income: tr.outcome,
-        incomeInstrument,
-      }
-    }
-  })
-  modifiedOutcomes.push({
-    ...income,
-    income: incomeSum,
-    changed: Date.now(),
-  })
-  return modifiedOutcomes
 }
 
 function groupByType(list: TTransaction[] = []) {

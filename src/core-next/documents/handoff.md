@@ -3,7 +3,7 @@
 - Updated: 2026-07-10
 - Branch: `core-next`
 - Worktree: clean; the branch tip is
-  `Make setInBudget semantic and drop dead entity write thunks`
+  `Make transaction bulk combine/merge actions semantic`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -26,7 +26,7 @@ claims against the tree before editing.
 | Zerro reads      | Envelopes through activity, metrics, month totals, goals, budgets, settings, hidden data, and FX are present          |
 | Session          | Namespaced semantic `get*` reads over lazy snapshot-local memoization; flat `read` is deprecated compatibility        |
 | Redux reads      | Most budget/envelope/goal/activity/transaction/tag/debtor/balance consumers use Core adapter selectors                |
-| Redux writes     | Budget, goal, envelope, transaction, and account thunks are semantic; `combineToOutcome`/`mergeAccounts` use bridges  |
+| Redux writes     | All budget/goal/envelope/transaction/account writes are semantic; only `mergeAccounts` still uses the legacy bridge   |
 | Materializer     | Identity layer is wired into every Redux local patch; server patches bypass it                                        |
 | Engine           | Pure outbox reference exists; no production consumer; replay uses stored `appliedPatch`                               |
 | Presentation     | Domain envelopes are headless; Redux adds localized groups, symbols, and generated/display colors                     |
@@ -34,19 +34,29 @@ claims against the tree before editing.
 
 ## Latest landed slices
 
-The branch tip makes `setInBudget` semantic and removes dead entity writes:
+The branch tip makes the transaction-list bulk combine/merge actions semantic:
 
-- `zenmoney.account.inBalance.set` compiles through `compilePatchAccount`;
-  the adapter exports `setAccountInBalance` and the `setInBudget` thunk
-  delegates to it;
-- `patchAccount`, `patchTag`, `createTag`, and `patchMerchant` (plus their
-  draft types) are deleted: inspection showed no app consumers remained after
-  the envelope migration, so no commands were minted for them;
-- `setTagBudget` (also consumer-less) and live `combineToOutcome` and
-  `mergeAccounts` are the only remaining `applyLegacyPatch` users;
-- a funnel test covers the inBalance toggle resulting state.
+- `compileCombineToOutcome`, `compileCombineToIncome`, and
+  `compileMergeTransactionsAsTransfer` take selected ids, group them by type,
+  and compile the same delete/transfer/sum logic the widget used inline;
+- funnel commands `zenmoney.transaction.combineToOutcome` /
+  `.combineToIncome` / `.mergeAsTransfer` plus adapter thunks
+  `combineTransactionsToOutcome` / `combineTransactionsToIncome` /
+  `mergeTransactionsAsTransfer`;
+- `TransactionList/TopBar/Actions.tsx` dispatches those thunks and no longer
+  imports `applyLegacyPatch` or defines the mutation helpers; the currency-based
+  availability checks (`getAvailableActions`) stay in the widget;
+- dead `setTagBudget` and its now-unused `makeTagBudget`/`getBudgetId`
+  5-entities helpers are removed (`getTagBudgets` read stays);
+- Core tests cover each compiler (delete/transfer/sum, merge validation) and a
+  funnel routing test covers combine-to-outcome.
 
-The commit before it finished the transaction thunk family:
+`mergeAccounts` is now the only `applyLegacyPatch` consumer left.
+
+The commit before it made `setInBudget` semantic and removed the dead
+`patchAccount`/`patchTag`/`createTag`/`patchMerchant` thunks.
+
+The commit before that finished the transaction thunk family:
 
 - `zenmoney.transaction.viewed.set`, `zenmoney.transaction.update`,
   `zenmoney.transaction.recreate`, and `zenmoney.transaction.bulk.edit` join
@@ -109,28 +119,29 @@ No materializer rule or replica behavior is included in these slices.
 
 ## Default next task
 
-Migrate combine-to-outcome and remove the dead tag-budget write described in
-[roadmap.md](./roadmap.md#default-next-slice-combine-to-outcome-command-and-dead-budget-write).
+Migrate `mergeAccounts`, the last `applyLegacyPatch` consumer, described in
+[roadmap.md](./roadmap.md#default-next-slice-semantic-mergeaccounts).
 
 Likely files:
 
 ```txt
-src/core-next/zenmoney/transactions/commands.ts
-src/core-next/zenmoney/transactions/commands.test.ts
+src/core-next/zenmoney/accounts/commands.ts
+src/core-next/zenmoney/accounts/commands.test.ts
 src/core-next/adapters/redux/commands.ts
-src/3-widgets/transaction/TransactionList/TopBar/Actions.tsx
-src/5-entities/budget/tagBudget/setTagBudget.ts
+src/4-features/mergeAccounts.ts
 src/core-next/documents/roadmap.md
 src/core-next/documents/handoff.md
 ```
 
 Keep the slice bounded:
 
-- move the combine pairing/summing logic into a tested Core compiler;
-- confirm `setTagBudget` has no runtime consumers before removing it;
-- leave `mergeAccounts` for its own slice (explicit transfer/cascade
-  semantics first);
-- do not start materializer rules.
+- reassign transaction income/outcome account references and reminders from
+  source to target, then delete the drained source;
+- handle transfers between source and target so they do not become
+  zero-amount self-transfers;
+- cover transfer and reminder edge cases with resulting-state tests;
+- do not start materializer rules; account-balance recomputation stays
+  deferred.
 
 ## Important guardrails
 
@@ -149,8 +160,8 @@ Keep the slice bounded:
 
 ## Verification
 
-The transaction thunk slices and the preceding envelope command slices were
-verified with:
+The bulk combine/merge slice and the preceding transaction/entity write
+slices were verified with:
 
 ```bash
 pnpm exec tsc --noEmit
@@ -161,8 +172,14 @@ Expected full-suite baseline at this handoff:
 
 ```txt
 69 test files passed, 4 skipped
-252 tests passed, 6 skipped
+257 tests passed, 6 skipped
 ```
+
+Browser check: the transaction-list multi-select bar and bulk-actions menu
+render and dispatch after the migration. The combine/merge math itself is
+covered by Core unit tests and a funnel routing test rather than a live
+combine-eligible selection (fixed demo data makes that selection awkward to
+reproduce by clicking).
 
 Also run formatting and documentation link checks after changing these files.
 Private fixture parity is optional and requires an ignored local fixture; see

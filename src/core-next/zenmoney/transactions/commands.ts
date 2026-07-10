@@ -3,9 +3,10 @@ import type { TDataStore } from '../store'
 import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../types'
 import type { TDateDraft } from '../primitives'
 import type { TTagId } from '../tags'
+import { round } from '../../shared/money'
 import { getRootUserId } from '../users'
 import { makeTransaction, type TTransactionFactoryDraft } from './factory'
-import { getTransaction } from './read'
+import { getTransaction, getTransactionType, TrType } from './read'
 import type { TTransaction, TTransactionId } from './types'
 
 export type TTransactionPatch = OptionalExceptFor<TTransaction, 'id'>
@@ -152,6 +153,125 @@ export function compileBulkEditTransactions(
       }
     }),
   }
+}
+
+/**
+ * Combines selected income transactions into the single selected outcome:
+ * the outcome amount is reduced by each income, same-account incomes are
+ * deleted, and cross-account incomes become transfers into the outcome
+ * account. Availability (single same-instrument outcome larger than the
+ * incomes) is decided by the caller.
+ */
+export function compileCombineToOutcome(
+  data: TDataStore,
+  ids: TTransactionId[],
+  ctx: Pick<TCoreContext, 'now'>
+): TNormalizedPatch {
+  const { incomes, outcomes } = groupTransactionsByType(data, ids)
+  const outcome = outcomes[0]
+  if (!outcome) throw new Error('No outcome transaction to combine into')
+
+  const { outcomeInstrument, outcomeAccount } = outcome
+  let outcomeSum = outcome.outcome
+
+  const transaction = incomes.map(tr => {
+    outcomeSum = round(outcomeSum - tr.income)
+    if (tr.incomeAccount === outcomeAccount) {
+      return { ...tr, changed: ctx.now(), deleted: true }
+    }
+    return {
+      ...tr,
+      changed: ctx.now(),
+      outcomeAccount,
+      outcome: tr.income,
+      outcomeInstrument,
+    }
+  })
+  transaction.push({ ...outcome, outcome: outcomeSum, changed: ctx.now() })
+
+  return { transaction }
+}
+
+/**
+ * Mirror of {@link compileCombineToOutcome}: combines selected outcomes into
+ * the single selected income.
+ */
+export function compileCombineToIncome(
+  data: TDataStore,
+  ids: TTransactionId[],
+  ctx: Pick<TCoreContext, 'now'>
+): TNormalizedPatch {
+  const { incomes, outcomes } = groupTransactionsByType(data, ids)
+  const income = incomes[0]
+  if (!income) throw new Error('No income transaction to combine into')
+
+  const { incomeInstrument, incomeAccount } = income
+  let incomeSum = income.income
+
+  const transaction = outcomes.map(tr => {
+    incomeSum = round(incomeSum - tr.outcome)
+    if (tr.outcomeAccount === incomeAccount) {
+      return { ...tr, changed: ctx.now(), deleted: true }
+    }
+    return {
+      ...tr,
+      changed: ctx.now(),
+      incomeAccount,
+      income: tr.outcome,
+      incomeInstrument,
+    }
+  })
+  transaction.push({ ...income, income: incomeSum, changed: ctx.now() })
+
+  return { transaction }
+}
+
+/**
+ * Merges one selected outcome and one selected income into a single transfer:
+ * the income transaction gains the outcome side and the standalone outcome is
+ * deleted. The caller guarantees exactly one income and one outcome.
+ */
+export function compileMergeTransactionsAsTransfer(
+  data: TDataStore,
+  ids: TTransactionId[],
+  ctx: Pick<TCoreContext, 'now'>
+): TNormalizedPatch {
+  const { incomes, outcomes } = groupTransactionsByType(data, ids)
+  if (incomes.length !== 1 || outcomes.length !== 1) {
+    throw new Error('Transfer merge needs exactly one income and one outcome')
+  }
+  const income = incomes[0]
+  const outcome = outcomes[0]
+
+  return {
+    transaction: [
+      { ...outcome, deleted: true, changed: ctx.now() },
+      {
+        ...income,
+        outcomeAccount: outcome.outcomeAccount,
+        outcome: outcome.outcome,
+        outcomeInstrument: outcome.outcomeInstrument,
+        changed: ctx.now(),
+      },
+    ],
+  }
+}
+
+function groupTransactionsByType(
+  data: TDataStore,
+  ids: TTransactionId[]
+): { incomes: TTransaction[]; outcomes: TTransaction[] } {
+  const incomes: TTransaction[] = []
+  const outcomes: TTransaction[] = []
+
+  ids.forEach(id => {
+    const transaction = getExistingTransaction(data, id)
+    const type = getTransactionType(transaction)
+    if (type === TrType.Income) incomes.push(transaction)
+    if (type === TrType.Outcome) outcomes.push(transaction)
+  })
+
+  return { incomes, outcomes }
 }
 
 function getExistingTransaction(

@@ -6,9 +6,12 @@ import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../types'
 import {
   compileApplyChangesToTransaction,
   compileBulkEditTransactions,
+  compileCombineToIncome,
+  compileCombineToOutcome,
   compileDeleteTransactions,
   compileDeleteTransactionsPermanently,
   compileMarkTransactionsViewed,
+  compileMergeTransactionsAsTransfer,
   compilePatchAccount,
   compileRecreateTransaction,
   compileRestoreTransaction,
@@ -90,6 +93,18 @@ export type TAppCommand =
   | {
       type: 'zenmoney.account.inBalance.set'
       payload: { id: TAccountId; inBalance: boolean }
+    }
+  | {
+      type: 'zenmoney.transaction.combineToOutcome'
+      payload: { ids: TTransactionId[] }
+    }
+  | {
+      type: 'zenmoney.transaction.combineToIncome'
+      payload: { ids: TTransactionId[] }
+    }
+  | {
+      type: 'zenmoney.transaction.mergeAsTransfer'
+      payload: { ids: TTransactionId[] }
     }
   | { type: 'legacy.patch'; payload: TNormalizedPatch }
 
@@ -183,6 +198,12 @@ function compileAppCommandResult(
       const { id, inBalance } = command.payload
       return compilePatchAccount(data, { id, inBalance }, ctx)
     }
+    case 'zenmoney.transaction.combineToOutcome':
+      return compileCombineToOutcome(data, command.payload.ids, ctx)
+    case 'zenmoney.transaction.combineToIncome':
+      return compileCombineToIncome(data, command.payload.ids, ctx)
+    case 'zenmoney.transaction.mergeAsTransfer':
+      return compileMergeTransactionsAsTransfer(data, command.payload.ids, ctx)
     case 'legacy.patch':
       return command.payload
   }
@@ -332,6 +353,27 @@ export function bulkEditTransactions(
   return executeCommand({
     type: 'zenmoney.transaction.bulk.edit',
     payload: { ids, ...opts },
+  })
+}
+
+export function combineTransactionsToOutcome(ids: TTransactionId[]): AppThunk {
+  return executeCommand({
+    type: 'zenmoney.transaction.combineToOutcome',
+    payload: { ids },
+  })
+}
+
+export function combineTransactionsToIncome(ids: TTransactionId[]): AppThunk {
+  return executeCommand({
+    type: 'zenmoney.transaction.combineToIncome',
+    payload: { ids },
+  })
+}
+
+export function mergeTransactionsAsTransfer(ids: TTransactionId[]): AppThunk {
+  return executeCommand({
+    type: 'zenmoney.transaction.mergeAsTransfer',
+    payload: { ids },
   })
 }
 

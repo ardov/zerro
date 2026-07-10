@@ -50,8 +50,7 @@ The transaction thunk family now flows through the funnel: delete, permanent
 delete, restore, mark viewed, update, recreate (with an id receipt), and bulk
 edit all reuse the existing Core compilers. Broken `splitTransfer` is removed
 with its commented-out consumer. `5-entities/transaction/thunks.ts` no longer
-imports `applyLegacyPatch`; the remaining transaction-shaped legacy write is
-`combineToOutcome` inside the transaction list bulk actions widget.
+imports `applyLegacyPatch`.
 
 The entity write cleanup landed smaller than planned: inspection showed
 `patchAccount`, `patchTag`, `createTag`, and `patchMerchant` had no app
@@ -59,46 +58,58 @@ consumers left (the envelope migration absorbed them), so they were deleted
 instead of migrated. The one real use case, `setInBudget`, now dispatches the
 semantic `zenmoney.account.inBalance.set` command.
 
-Remaining `applyLegacyPatch` consumers: `combineToOutcome` in the transaction
-list bulk actions widget (live), `setTagBudget` (no app consumers), and
-`mergeAccounts` (needs explicit transfer/cascade semantics).
+The transaction-list bulk actions are now semantic: `combineToOutcome`,
+`combineToIncome`, and `mergeAsTransfer` compile in Core
+(`compileCombineToOutcome`, `compileCombineToIncome`,
+`compileMergeTransactionsAsTransfer`) from selected ids, and the widget
+dispatches funnel commands instead of building transaction arrays inline. The
+dead `setTagBudget` write and its now-unused `makeTagBudget`/`getBudgetId`
+5-entities helpers are removed; `getTagBudgets` (read) stays for parity.
+
+The only remaining `applyLegacyPatch` consumer is `mergeAccounts`.
 
 Replica ownership, server-like materialization rules, and package hardening
 remain incomplete.
 
-## Default next slice: combine-to-outcome command and dead budget write
+## Default next slice: semantic mergeAccounts
 
-Goal: shrink the legacy bridge to `mergeAccounts` only.
+Goal: remove the final `applyLegacyPatch` consumer.
+
+`mergeAccounts` ([src/4-features/mergeAccounts.ts](../../4-features/mergeAccounts.ts))
+reassigns every transaction and reminder from a source account to a target,
+then deletes the source. It needs explicit transfer/cascade semantics rather
+than a blind field copy.
 
 Scope:
 
-1. Model the bulk-actions "combine to outcome" use case as a semantic
-   transaction command; move the pairing/summing logic from
-   `TransactionList/TopBar/Actions.tsx` into a Core compiler with tests.
-2. Confirm `setTagBudget` has no runtime consumers and remove it; decide
-   whether the rest of the `tagBudget` model (read side) stays for parity.
-3. Leave `mergeAccounts` for its own slice.
+1. Model the merge as a Core compiler over source/target account ids: rewrite
+   each transaction's income/outcome account references, handle the
+   self-transfer edge case, and delete the drained source account.
+2. Cover reminders that reference the source account.
+3. Add resulting-state tests, including a source that has transfers with the
+   target (which must not become zero-amount self-transfers).
+4. Route it through the funnel and drop `applyLegacyPatch` from the feature.
 
 Done when:
 
-- the bulk actions widget dispatches a semantic command instead of building
-  transaction arrays inline;
-- dead tag-budget write code is gone;
-- `applyLegacyPatch` has one remaining consumer: `mergeAccounts`.
+- `mergeAccounts` dispatches a semantic command;
+- no production code imports `applyLegacyPatch` (only the compatibility bridge
+  export and its tests remain);
+- resulting-state tests cover transfer and reminder edge cases.
 
-Do not start materializer rules, and do not attempt `mergeAccounts` in this
-slice.
+This closes Track E's transaction/account write cutover. Do not start
+materializer rules; account-balance recomputation stays deferred.
 
 ## Active tracks
 
-| Track                           | State                    | Next useful outcome                                                       |
-| ------------------------------- | ------------------------ | ------------------------------------------------------------------------- |
-| A. Public facade and read graph | Envelope writes semantic | Decide which adapter-level projectors deserve a supported subpath         |
-| B. Domain/presentation boundary | Boundary landed          | Extract an optional appearance package only when a real consumer needs it |
-| C. ZenMoney materializer rules  | Deferred until final     | Start only after the other architecture and migration tracks are complete |
-| D. Replica and sync             | Designed, not integrated | Share pure outbox operations and make Redux the replica owner             |
-| E. Legacy cutover               | Entity writes done       | Migrate combine-to-outcome; then only `mergeAccounts` remains             |
-| F. Package and test hardening   | Ongoing                  | Consumer-level export/type test and targeted parity coverage              |
+| Track                           | State                     | Next useful outcome                                                       |
+| ------------------------------- | ------------------------- | ------------------------------------------------------------------------- |
+| A. Public facade and read graph | Envelope writes semantic  | Decide which adapter-level projectors deserve a supported subpath         |
+| B. Domain/presentation boundary | Boundary landed           | Extract an optional appearance package only when a real consumer needs it |
+| C. ZenMoney materializer rules  | Deferred until final      | Start only after the other architecture and migration tracks are complete |
+| D. Replica and sync             | Designed, not integrated  | Share pure outbox operations and make Redux the replica owner             |
+| E. Legacy cutover               | Only `mergeAccounts` left | Migrate `mergeAccounts`; then no production `applyLegacyPatch` remains    |
+| F. Package and test hardening   | Ongoing                   | Consumer-level export/type test and targeted parity coverage              |
 
 ## Track A: public facade and read graph
 

@@ -5,6 +5,7 @@ import { applyClientPatch } from 'store/data'
 import { makeDemoStore } from '../../demo'
 import type { TNormalizedPatch } from '../../types'
 import { applyPatch } from '../../zenmoney'
+import { makeStore, makeTransaction } from '../../testing/zenmoneyTestData'
 import {
   envelopeVisibility,
   envId,
@@ -409,6 +410,42 @@ describe('executeCommand funnel', () => {
     )
 
     expect(next.account[id]).toMatchObject({ inBalance, changed: NOW })
+  })
+
+  it('routes a combine-to-outcome command to resulting state', () => {
+    const current = makeStore({
+      transaction: {
+        out: makeTransaction({
+          id: 'out',
+          income: 0,
+          outcome: 100,
+          outcomeInstrument: 1,
+          outcomeAccount: 'card',
+        }),
+        in: makeTransaction({
+          id: 'in',
+          income: 40,
+          incomeInstrument: 1,
+          incomeAccount: 'card',
+          outcome: 0,
+        }),
+      },
+    })
+
+    const next = applyPatch(
+      current,
+      compileAppCommand(
+        makeState(current),
+        {
+          type: 'zenmoney.transaction.combineToOutcome',
+          payload: { ids: ['out', 'in'] },
+        },
+        { now: () => NOW, uuid: () => 'unused' }
+      )
+    )
+
+    expect(next.transaction.in.deleted).toBe(true)
+    expect(next.transaction.out).toMatchObject({ outcome: 60, changed: NOW })
   })
 
   it('applies a legacy patch as-is', () => {

@@ -9,9 +9,12 @@ import {
   compileCreateTransaction,
   compileApplyChangesToTransaction,
   compileBulkEditTransactions,
+  compileCombineToIncome,
+  compileCombineToOutcome,
   compileDeleteTransactions,
   compileDeleteTransactionsPermanently,
   compileMarkTransactionsViewed,
+  compileMergeTransactionsAsTransfer,
   compileRecreateTransaction,
   compileRestoreTransaction,
 } from './commands'
@@ -315,6 +318,147 @@ describe('zenmoney transaction commands', () => {
       comment: 'Team Lunch',
       changed: 100,
     })
+  })
+
+  it('combines incomes into the outcome, deleting or transferring each', () => {
+    const data = makeStore({
+      transaction: {
+        out: makeTransaction({
+          id: 'out',
+          income: 0,
+          outcome: 100,
+          outcomeInstrument: 1,
+          outcomeAccount: 'card',
+        }),
+        inSame: makeTransaction({
+          id: 'inSame',
+          income: 30,
+          incomeInstrument: 1,
+          incomeAccount: 'card',
+          outcome: 0,
+        }),
+        inOther: makeTransaction({
+          id: 'inOther',
+          income: 20,
+          incomeInstrument: 1,
+          incomeAccount: 'cash',
+          outcome: 0,
+        }),
+      },
+    })
+
+    const patch = compileCombineToOutcome(data, ['out', 'inSame', 'inOther'], {
+      now: () => 100,
+    })
+    const byId = Object.fromEntries(
+      (patch.transaction ?? []).map(tr => [tr.id, tr])
+    )
+
+    // Same-account income is deleted.
+    expect(byId.inSame).toMatchObject({ deleted: true, changed: 100 })
+    // Cross-account income becomes a transfer into the outcome account.
+    expect(byId.inOther).toMatchObject({
+      outcomeAccount: 'card',
+      outcome: 20,
+      outcomeInstrument: 1,
+      changed: 100,
+    })
+    // Outcome absorbs both incomes: 100 - 30 - 20 = 50.
+    expect(byId.out).toMatchObject({ outcome: 50, changed: 100 })
+  })
+
+  it('combines outcomes into the income, deleting or transferring each', () => {
+    const data = makeStore({
+      transaction: {
+        in: makeTransaction({
+          id: 'in',
+          income: 100,
+          incomeInstrument: 1,
+          incomeAccount: 'card',
+          outcome: 0,
+        }),
+        outSame: makeTransaction({
+          id: 'outSame',
+          income: 0,
+          outcome: 30,
+          outcomeInstrument: 1,
+          outcomeAccount: 'card',
+        }),
+        outOther: makeTransaction({
+          id: 'outOther',
+          income: 0,
+          outcome: 20,
+          outcomeInstrument: 1,
+          outcomeAccount: 'cash',
+        }),
+      },
+    })
+
+    const patch = compileCombineToIncome(data, ['in', 'outSame', 'outOther'], {
+      now: () => 100,
+    })
+    const byId = Object.fromEntries(
+      (patch.transaction ?? []).map(tr => [tr.id, tr])
+    )
+
+    expect(byId.outSame).toMatchObject({ deleted: true, changed: 100 })
+    expect(byId.outOther).toMatchObject({
+      incomeAccount: 'card',
+      income: 20,
+      incomeInstrument: 1,
+      changed: 100,
+    })
+    expect(byId.in).toMatchObject({ income: 50, changed: 100 })
+  })
+
+  it('merges an income and outcome into a single transfer', () => {
+    const data = makeStore({
+      transaction: {
+        out: makeTransaction({
+          id: 'out',
+          income: 0,
+          outcome: 100,
+          outcomeInstrument: 1,
+          outcomeAccount: 'cash',
+        }),
+        in: makeTransaction({
+          id: 'in',
+          income: 100,
+          incomeInstrument: 1,
+          incomeAccount: 'card',
+          outcome: 0,
+        }),
+      },
+    })
+
+    const patch = compileMergeTransactionsAsTransfer(data, ['out', 'in'], {
+      now: () => 100,
+    })
+    const byId = Object.fromEntries(
+      (patch.transaction ?? []).map(tr => [tr.id, tr])
+    )
+
+    expect(byId.out).toMatchObject({ deleted: true, changed: 100 })
+    expect(byId.in).toMatchObject({
+      income: 100,
+      incomeAccount: 'card',
+      outcome: 100,
+      outcomeAccount: 'cash',
+      outcomeInstrument: 1,
+      changed: 100,
+    })
+  })
+
+  it('rejects a transfer merge without one income and one outcome', () => {
+    const data = makeStore({
+      transaction: {
+        out: makeTransaction({ id: 'out', income: 0, outcome: 100 }),
+      },
+    })
+
+    expect(() =>
+      compileMergeTransactionsAsTransfer(data, ['out'], { now: () => 100 })
+    ).toThrow('Transfer merge needs exactly one income and one outcome')
   })
 
   it('validates transaction existence', () => {
