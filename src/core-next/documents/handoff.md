@@ -2,7 +2,7 @@
 
 - Updated: 2026-07-10
 - Branch: `core-next`
-- Last commit before the current worktree: `bc8a1626 Add envelope color command and intent-only transactions`
+- Last commit before the current worktree: `3dacae0f Add semantic envelope comment command`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -33,21 +33,23 @@ claims against the tree before editing.
 
 ## Current worktree slice
 
-The uncommitted slice introduces semantic envelope comments:
+The uncommitted slice introduces explicit envelope settings:
 
-- `compileSetEnvelopeComment` accepts only `{ id, comment }`;
-- it writes through envelope metadata without reading a presentation model;
-- setting, clearing, and unchanged comments are tested;
-- the Redux adapter exposes `setEnvelopeComment(id, comment)`;
-- CommentWidget uses the semantic command and drops its unused month prop;
-- adapter tests verify resulting metadata state.
+- `compileUpdateEnvelopeSettings` accepts the five fields the form actually
+  edits: name, configured color, currency, visibility, and keep-income;
+- entity and metadata changes compile into one atomic patch;
+- the Redux adapter normalizes unchanged localized null-tag presentation;
+- EnvelopeEditDialog is edit-only and uses `updateEnvelopeSettings(input)`;
+- dead UUID/create behavior and hidden parent/group/comment/carry fields are
+  removed from the form contract;
+- domain and adapter tests verify no-op and resulting state.
 
 No other envelope field, materializer rule, or replica behavior is included.
 
 ## Default next task
 
-Implement semantic envelope settings described in
-[roadmap.md](./roadmap.md#default-next-slice-semantic-envelope-settings).
+Implement semantic envelope create described in
+[roadmap.md](./roadmap.md#default-next-slice-semantic-envelope-create).
 
 Likely files:
 
@@ -56,17 +58,17 @@ src/core-next/zerro/envelopes/commands.ts
 src/core-next/zerro/envelopes/commands.test.ts
 src/core-next/adapters/redux/commands.ts
 src/core-next/adapters/redux/commands.test.ts
-src/2-pages/Budgets/EnvelopeEditDialog/EnvelopeEditDialog.tsx
+src/4-features/envelope/createEnvelope.ts
 src/core-next/documents/roadmap.md
 src/core-next/documents/handoff.md
 ```
 
 Keep the slice bounded:
 
-- enumerate the form's writable settings explicitly;
-- keep entity and metadata changes atomic;
-- normalize presentation groups at the adapter boundary;
-- migrate only EnvelopeEditDialog;
+- use a minimal explicit create input;
+- return the new envelope id as a receipt;
+- preserve group/index initialization;
+- migrate only the createEnvelope feature;
 - retain the compatibility envelope patch command;
 - do not start materializer rules; that track is explicitly last.
 
@@ -99,7 +101,7 @@ Expected full-suite baseline at this handoff:
 
 ```txt
 69 test files passed, 4 skipped
-237 tests passed, 6 skipped
+240 tests passed, 6 skipped
 ```
 
 Also run formatting and documentation link checks after changing these files.

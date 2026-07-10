@@ -1,5 +1,6 @@
 import { hex2int, isHEX } from '../../zenmoney/colors'
 import type { ById, OptionalExceptFor } from '../../shared/types'
+import type { TFxCode } from '../../zenmoney/instruments'
 import type { TDataStore } from '../../zenmoney/store'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
 import {
@@ -14,6 +15,7 @@ import {
 import { EnvType, envId, type TEnvelopeId } from '../envelope-id'
 import {
   compilePatchEnvelopeMeta,
+  envelopeVisibility,
   getEnvelopeMeta,
   type TEnvelopeMetaPatch,
 } from '../envelope-meta'
@@ -35,6 +37,15 @@ export type TSetEnvelopeColorInput = {
 export type TSetEnvelopeCommentInput = {
   id: TEnvelopeId
   comment: string
+}
+
+export type TUpdateEnvelopeSettingsInput = {
+  id: TEnvelopeId
+  name: string
+  colorHex: string | null
+  currency: TFxCode
+  visibility: envelopeVisibility
+  keepIncome: boolean
 }
 
 type TEnvelopePatches = {
@@ -106,6 +117,46 @@ export function compileSetEnvelopeComment(
   if (currentComment === input.comment) return {}
 
   return compilePatchEnvelopeMeta(data, input, ctx)
+}
+
+export function compileUpdateEnvelopeSettings(
+  data: TDataStore,
+  envelopes: ById<TEnvelope>,
+  input: TUpdateEnvelopeSettingsInput,
+  ctx: TCoreContext
+): TNormalizedPatch {
+  const current = envelopes[input.id]
+  if (!current) throw new Error('Envelope not found')
+
+  const { type, id } = envId.parse(input.id)
+  if (type === EnvType.Payee && current.originalName !== input.name) {
+    throw new Error('Payee envelopes cannot be renamed')
+  }
+  if (current.colorHex !== input.colorHex) {
+    if (type !== EnvType.Tag) {
+      throw new Error('Only tag envelopes have configurable colors')
+    }
+    if (id === 'null') {
+      throw new Error('Uncategorized envelope color cannot be changed')
+    }
+    if (input.colorHex !== null && !isHEX(input.colorHex)) {
+      throw new Error('Invalid envelope color')
+    }
+  }
+
+  return compilePatchEnvelope(
+    data,
+    envelopes,
+    {
+      id: input.id,
+      originalName: input.name,
+      colorHex: input.colorHex,
+      currency: input.currency,
+      visibility: input.visibility,
+      keepIncome: input.keepIncome,
+    },
+    ctx
+  )
 }
 
 export function compilePatchEnvelope(

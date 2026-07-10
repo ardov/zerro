@@ -5,7 +5,12 @@ import { applyClientPatch } from 'store/data'
 import { makeDemoStore } from '../../demo'
 import type { TNormalizedPatch } from '../../types'
 import { applyPatch } from '../../zenmoney'
-import { envId, EnvType, getEnvelopeMeta } from '../../zerro'
+import {
+  envelopeVisibility,
+  envId,
+  EnvType,
+  getEnvelopeMeta,
+} from '../../zerro'
 import { compileAppCommand, executeCommand } from './commands'
 import { applyLegacyPatch } from './legacyPatch'
 import { selectCoreEnvelopes } from './selectors'
@@ -41,6 +46,65 @@ function makeDispatch(state: RootState) {
 }
 
 describe('executeCommand funnel', () => {
+  it('compiles semantic envelope settings to entity and metadata state', () => {
+    const current = makeDemoStore({ now: NOW })
+    const state = makeState(current)
+    const tagId = Object.keys(current.tag)[0]
+    const id = envId.get(EnvType.Tag, tagId)
+
+    const patch = compileAppCommand(
+      state,
+      {
+        type: 'zerro.envelope.settings.update',
+        payload: {
+          id,
+          name: 'Configured',
+          colorHex: '#00ff00',
+          currency: 'EUR',
+          visibility: envelopeVisibility.hidden,
+          keepIncome: true,
+        },
+      },
+      { now: () => NOW, uuid: () => 'settings-meta' }
+    )
+    const next = applyPatch(current, patch)
+
+    expect(next.tag[tagId]).toMatchObject({
+      title: 'Configured',
+      color: 0x00ff00,
+    })
+    expect(getEnvelopeMeta(next)[id]).toMatchObject({
+      currency: 'EUR',
+      visibility: envelopeVisibility.hidden,
+      keepIncome: true,
+    })
+  })
+
+  it('normalizes unchanged presented null-tag settings to domain values', () => {
+    const current = makeDemoStore({ now: NOW })
+    const state = makeState(current)
+    const id = envId.get(EnvType.Tag, null)
+    const presented = selectCoreEnvelopes(state)[id]
+
+    const patch = compileAppCommand(
+      state,
+      {
+        type: 'zerro.envelope.settings.update',
+        payload: {
+          id,
+          name: presented.originalName,
+          colorHex: presented.colorHex,
+          currency: presented.currency,
+          visibility: presented.visibility,
+          keepIncome: presented.keepIncome,
+        },
+      },
+      { now: () => NOW, uuid: () => 'unused' }
+    )
+
+    expect(patch).toEqual({})
+  })
+
   it('compiles semantic envelope comment to resulting metadata state', () => {
     const current = makeDemoStore({ now: NOW })
     const state = makeState(current)

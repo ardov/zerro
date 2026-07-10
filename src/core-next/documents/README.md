@@ -45,16 +45,17 @@ The handoff is routing, not proof that code landed. Always verify the tree.
   effects are reserved for the final materializer phase.
 - Envelope comments have a semantic metadata command; CommentWidget no longer
   sends a partial envelope projection or an unused month prop.
+- EnvelopeEditDialog uses one explicit atomic settings command and no longer
+  carries a dead create mode or hidden projection fields.
 
 ## Default next slice
 
-Replace the projection-shaped edit-dialog write with one explicit semantic
-settings command.
+Replace the legacy two-step envelope creation flow with one semantic command.
 
-1. Define the exact editable settings fields instead of `Partial<TEnvelope>`.
-2. Compile the form atomically across entity and metadata storage.
-3. Normalize presentation group labels at the Redux boundary.
-4. Migrate only EnvelopeEditDialog and retain compatibility patching elsewhere.
+1. Define the minimal create input instead of `Partial<TEnvelope>`.
+2. Create the tag and initial envelope metadata atomically.
+3. Return the new envelope id as a compiler receipt.
+4. Migrate only the existing createEnvelope feature.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 

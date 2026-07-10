@@ -17,9 +17,73 @@ import {
   compileRenameEnvelope,
   compileSetEnvelopeColor,
   compileSetEnvelopeComment,
+  compileUpdateEnvelopeSettings,
 } from './commands'
 
 describe('envelope commands', () => {
+  it('updates explicit envelope settings atomically', () => {
+    const id = envId.get(EnvType.Tag, 'food')
+    const data = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      account: {
+        data: makeAccount({ id: 'data', title: '🤖 [Zerro Data]' }),
+      },
+      tag: { food: makeTag({ id: 'food', title: 'Food', color: null }) },
+    })
+    const envelopes = {
+      [id]: makeEnvelope({
+        id,
+        originalName: 'Food',
+        colorHex: null,
+        currency: 'USD',
+        visibility: envelopeVisibility.auto,
+        keepIncome: false,
+      }),
+    }
+    const ctx = { now: () => 100, uuid: () => 'meta-reminder' }
+
+    expect(
+      compileUpdateEnvelopeSettings(
+        data,
+        envelopes,
+        {
+          id,
+          name: 'Food',
+          colorHex: null,
+          currency: 'USD',
+          visibility: envelopeVisibility.auto,
+          keepIncome: false,
+        },
+        ctx
+      )
+    ).toEqual({})
+
+    const patch = compileUpdateEnvelopeSettings(
+      data,
+      envelopes,
+      {
+        id,
+        name: 'Groceries',
+        colorHex: '#00ff00',
+        currency: 'EUR',
+        visibility: envelopeVisibility.hidden,
+        keepIncome: true,
+      },
+      ctx
+    )
+    const next = applyPatch(data, patch)
+
+    expect(next.tag.food).toMatchObject({
+      title: 'Groceries',
+      color: 0x00ff00,
+    })
+    expect(getEnvelopeMeta(next)[id]).toMatchObject({
+      currency: 'EUR',
+      visibility: envelopeVisibility.hidden,
+      keepIncome: true,
+    })
+  })
+
   it('sets, clears, and skips unchanged envelope comments', () => {
     const id = envId.get(EnvType.Tag, 'food')
     const data = makeStore({

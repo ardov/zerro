@@ -1,6 +1,5 @@
 import React, { FC } from 'react'
 import { shallowEqual } from 'react-redux'
-import { v1 as uuidv1 } from 'uuid'
 import { useFormik } from 'formik'
 import {
   Button,
@@ -18,23 +17,18 @@ import {
 } from '@mui/material'
 import { ColorPicker, useColorPicker } from '6-shared/ui/ColorPickerPopover'
 import { useAppDispatch } from 'store'
-import {
-  envelopeModel,
-  envelopeVisibility,
-  EnvType,
-  TEnvelope,
-} from '5-entities/envelope'
+import { envelopeVisibility, TEnvelope } from '5-entities/envelope'
+import { updateEnvelopeSettings } from 'core-next/adapters/redux'
 // import { TagSelect } from '@components/TagSelect'
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
 import { VisibilitySelect } from './VisidilitySelect'
-import { userModel } from '5-entities/user'
 import { registerPopover } from '6-shared/historyPopovers'
 import { useTranslation } from 'react-i18next'
 
-const editDialog = registerPopover<
-  { envelope?: Partial<TEnvelope> },
-  DialogProps
->('envelopeEditDialog', {})
+const editDialog = registerPopover<{ envelope?: TEnvelope }, DialogProps>(
+  'envelopeEditDialog',
+  {}
+)
 
 export const useEditDialog = () => {
   const { open } = editDialog.useMethods()
@@ -42,13 +36,26 @@ export const useEditDialog = () => {
 }
 
 export const EnvelopeEditDialog: FC = () => {
-  const { displayProps, extraProps } = editDialog.useProps()
-  const { envelope } = extraProps
+  const { displayProps, extraProps, close } = editDialog.useProps()
+  if (!extraProps.envelope) return null
+
+  return (
+    <EnvelopeEditDialogForm
+      displayProps={displayProps}
+      envelope={extraProps.envelope}
+      close={close}
+    />
+  )
+}
+
+const EnvelopeEditDialogForm: FC<{
+  displayProps: DialogProps
+  envelope: TEnvelope
+  close: () => void
+}> = ({ displayProps, envelope, close }) => {
   const dispatch = useAppDispatch()
   const { t } = useTranslation('envelopeEditDialog')
-  const isNew = !envelope?.id
-  const id = envelope?.id || envelopeModel.makeId(EnvType.Tag, uuidv1())
-  const defaultCurrency = userModel.useUserCurrency()
+  const id = envelope.id
   const {
     values,
     initialValues,
@@ -58,17 +65,11 @@ export const EnvelopeEditDialog: FC = () => {
     setFieldValue,
   } = useFormik({
     initialValues: {
-      originalName: envelope?.originalName || '',
-      parentTagId: envelope?.parent
-        ? envelopeModel.parseId(envelope.parent).id
-        : null,
-      visibility: envelope?.visibility || envelopeVisibility.auto,
-      carryNegatives: envelope?.carryNegatives || false,
-      keepIncome: envelope?.keepIncome || false,
-      colorHex: envelope?.colorHex || null,
-      group: envelope?.group || '',
-      comment: envelope?.comment || '',
-      currency: envelope?.currency || defaultCurrency,
+      originalName: envelope.originalName,
+      visibility: envelope.visibility || envelopeVisibility.auto,
+      keepIncome: envelope.keepIncome,
+      colorHex: envelope.colorHex,
+      currency: envelope.currency,
     },
     validate: values => {
       if (!values.originalName.trim()) {
@@ -76,13 +77,17 @@ export const EnvelopeEditDialog: FC = () => {
       }
     },
     onSubmit: (values, helpers) => {
-      displayProps.onClose()
-      const { parentTagId, ...envData } = values
-      const parent = parentTagId
-        ? envelopeModel.makeId(EnvType.Tag, parentTagId)
-        : null
-      const patch = { id, parent, ...envData }
-      dispatch(envelopeModel.patchEnvelope(patch))
+      close()
+      dispatch(
+        updateEnvelopeSettings({
+          id,
+          name: values.originalName,
+          colorHex: values.colorHex,
+          currency: values.currency,
+          visibility: values.visibility,
+          keepIncome: values.keepIncome,
+        })
+      )
     },
     enableReinitialize: true,
   })
@@ -92,10 +97,10 @@ export const EnvelopeEditDialog: FC = () => {
       {...displayProps}
       onClose={() => {
         // TODO: with back button it closes anyway, maybe we can prevent it somehow
-        if (shallowEqual(values, initialValues)) displayProps.onClose()
+        if (shallowEqual(values, initialValues)) close()
       }}
     >
-      <DialogTitle>{t(isNew ? 'titleNew' : 'titleEdit')}</DialogTitle>
+      <DialogTitle>{t('titleEdit')}</DialogTitle>
       <DialogContent>
         <Stack
           component="form"
@@ -206,9 +211,9 @@ export const EnvelopeEditDialog: FC = () => {
           </FormGroup>
 
           <Button type="submit" size="large" variant="contained">
-            {t(id ? 'btnSave' : 'btnCreate')}
+            {t('btnSave')}
           </Button>
-          <Button onClick={displayProps.onClose} size="large">
+          <Button onClick={close} size="large">
             {t('btnCancel')}
           </Button>
         </Stack>

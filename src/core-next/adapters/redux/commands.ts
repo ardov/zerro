@@ -8,6 +8,7 @@ import {
   compileRenameEnvelope,
   compileSetEnvelopeColor,
   compileSetEnvelopeComment,
+  compileUpdateEnvelopeSettings,
   compileSetBudget,
   compileSetGoal,
   type TBudgetUpdate,
@@ -17,11 +18,13 @@ import {
   type TRenameEnvelopeInput,
   type TSetEnvelopeColorInput,
   type TSetEnvelopeCommentInput,
+  type TUpdateEnvelopeSettingsInput,
 } from '../../zerro'
 import { getDomainEnvelopeGroup } from './envelopePresentation'
 import {
   selectCoreEnvelopeLabels,
   selectCoreDomainEnvelopes,
+  selectCoreEnvelopes,
 } from './selectors'
 
 /**
@@ -43,6 +46,10 @@ export type TAppCommand =
   | { type: 'zerro.envelope.rename'; payload: TRenameEnvelopeInput }
   | { type: 'zerro.envelope.color.set'; payload: TSetEnvelopeColorInput }
   | { type: 'zerro.envelope.comment.set'; payload: TSetEnvelopeCommentInput }
+  | {
+      type: 'zerro.envelope.settings.update'
+      payload: TUpdateEnvelopeSettingsInput
+    }
   | { type: 'legacy.patch'; payload: TNormalizedPatch }
 
 export function compileAppCommand(
@@ -64,6 +71,13 @@ export function compileAppCommand(
       return compileSetEnvelopeColor(data, command.payload, ctx)
     case 'zerro.envelope.comment.set':
       return compileSetEnvelopeComment(data, command.payload, ctx)
+    case 'zerro.envelope.settings.update':
+      return compileUpdateEnvelopeSettings(
+        data,
+        selectCoreDomainEnvelopes(state),
+        normalizeEnvelopeSettings(state, command.payload),
+        ctx
+      )
     case 'zerro.envelope.patch': {
       const labels = selectCoreEnvelopeLabels()
       const drafts = command.payload.map(draft =>
@@ -121,6 +135,32 @@ export function setEnvelopeComment(id: TEnvelopeId, comment: string): AppThunk {
     type: 'zerro.envelope.comment.set',
     payload: { id, comment },
   })
+}
+
+export function updateEnvelopeSettings(
+  input: TUpdateEnvelopeSettingsInput
+): AppThunk {
+  return executeCommand({
+    type: 'zerro.envelope.settings.update',
+    payload: input,
+  })
+}
+
+function normalizeEnvelopeSettings(
+  state: RootState,
+  input: TUpdateEnvelopeSettingsInput
+): TUpdateEnvelopeSettingsInput {
+  const domain = selectCoreDomainEnvelopes(state)[input.id]
+  const presented = selectCoreEnvelopes(state)[input.id]
+  if (!domain || !presented) return input
+
+  return {
+    ...input,
+    name:
+      input.name === presented.originalName ? domain.originalName : input.name,
+    colorHex:
+      input.colorHex === presented.colorHex ? domain.colorHex : input.colorHex,
+  }
 }
 
 function isEmptyPatch(patch: TNormalizedPatch): boolean {

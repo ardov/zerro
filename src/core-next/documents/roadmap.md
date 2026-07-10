@@ -27,26 +27,29 @@ remain documented for the final materializer phase.
 `setEnvelopeComment(id, comment)` is also adopted by CommentWidget and removes
 its unused month dependency.
 
+`updateEnvelopeSettings(input)` now owns the edit dialog as one explicit atomic
+command. The dialog is edit-only and sends only its five visible fields.
+
 Replica ownership, server-like materialization rules, and package hardening
 remain incomplete.
 
-## Default next slice: semantic envelope settings
+## Default next slice: semantic envelope create
 
-Goal: migrate the edit dialog as one atomic domain use case without accepting a
-partial projection.
+Goal: replace the current tag-create plus envelope-patch sequence with one
+semantic command and receipt.
 
 Scope:
 
-1. Define an explicit settings input for the fields the form actually edits.
-2. Compose entity-owned title/color/parent changes with envelope metadata.
-3. Normalize localized default groups only in the Redux adapter.
-4. Preserve one atomic app command and one materialization boundary.
-5. Migrate EnvelopeEditDialog without removing compatibility patching yet.
+1. Define a minimal input for name and optional initial envelope metadata.
+2. Compile tag creation and metadata creation into one normalized patch.
+3. Return the new envelope id as a receipt.
+4. Add a versionable app command and migrate the existing create feature.
+5. Preserve current group/index behavior with resulting-state tests.
 
 Done when:
 
-- entity and metadata routing is tested together;
-- presentation-only fields cannot enter the command;
+- entity creation and metadata initialization are tested together;
+- the generated envelope id is returned without reading Redux afterward;
 - the real UI consumer sends only semantic input;
 - resulting-state tests pass through the Redux command funnel;
 - legacy envelope patching remains available for other fields.
@@ -58,7 +61,7 @@ envelope fields in this slice.
 
 | Track                           | State                          | Next useful outcome                                                       |
 | ------------------------------- | ------------------------------ | ------------------------------------------------------------------------- |
-| A. Public facade and read graph | Active, default                | Add and adopt an explicit semantic envelope settings command              |
+| A. Public facade and read graph | Active, default                | Add and adopt an explicit semantic envelope create command                |
 | B. Domain/presentation boundary | Boundary landed                | Extract an optional appearance package only when a real consumer needs it |
 | C. ZenMoney materializer rules  | Deferred until final           | Start only after the other architecture and migration tracks are complete |
 | D. Replica and sync             | Designed, not integrated       | Share pure outbox operations and make Redux the replica owner             |
@@ -78,6 +81,7 @@ Current:
 - `renameEnvelope(id, name)` is the first adopted narrow write command.
 - `setEnvelopeColor(id, colorHex)` is the second adopted narrow write command.
 - `setEnvelopeComment(id, comment)` is the third adopted narrow write command.
+- `updateEnvelopeSettings(input)` atomically owns the edit-dialog use case.
 
 Next:
 

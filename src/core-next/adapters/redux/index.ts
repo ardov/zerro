@@ -12,6 +12,7 @@ export {
   renameEnvelope,
   setEnvelopeColor,
   setEnvelopeComment,
+  updateEnvelopeSettings,
   type TAppCommand,
 } from './commands'
 export {
