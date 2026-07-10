@@ -1,14 +1,14 @@
 import { round } from '6-shared/helpers/money'
 import { AppThunk } from 'store'
 
-import { balances } from '5-entities/envBalances'
+import { selectCoreEnvMetrics } from 'core-next/adapters/redux'
 import { budgetModel, TBudgetUpdate } from '5-entities/budget'
 import { fxRateModel } from '5-entities/currency/fxRate'
 
 export function setTotalBudget(upd: TBudgetUpdate | TBudgetUpdate[]): AppThunk {
   return (dispatch, getState) => {
     const state = getState()
-    const envMetrics = balances.envData(state)
+    const envMetrics = selectCoreEnvMetrics(state)
     const updates = Array.isArray(upd) ? upd : [upd]
     const convertFx = fxRateModel.converter(state)
 

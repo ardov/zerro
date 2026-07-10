@@ -481,6 +481,63 @@ longer imports legacy `getMonthList`, `getCurrentFunds`, `getActivity`,
 longer imports legacy `debtorModel.getDebtors`; envelopes and raw activity now
 use `selectCoreDebtors`.
 
+The first Redux write bridge is now also in place: `budgetModel.set` calls
+`compileSetBudget` against `state.data.current` and dispatches the resulting
+normalized patch via the existing `applyClientPatch` action. It keeps Redux as
+the owner of current state, persistence, and sync; it does not use the in-memory
+engine or introduce an outbox. `src/5-entities/budget/setBudget.test.ts` checks
+a mixed tag/envelope update against the compiler and keeps empty updates as a
+no-op.
+
+`goalModel.set` now uses the same bridge shape. `compileSetGoal` owns goal
+normalization, hidden-data patches, and removing the nearest future null
+blocker; the app thunk only applies its patch through Redux and keeps goal event
+tracking. `src/5-entities/goal/setGoal.test.ts` covers the blocker-removal patch
+and delete-event behavior.
+
+The central `envelopeModel.patchEnvelope` thunk now calls
+`compilePatchEnvelope(state.data.current, selectCoreEnvelopes(state), ...)` and
+dispatches its single normalized patch through `applyClientPatch`. This moves
+tag/account/merchant and envelope-metadata writes together while leaving callers
+and Redux ownership unchanged. `src/5-entities/envelope/patchEnvelope.test.ts`
+also checks that `createEnvelope`'s preceding synchronous tag dispatch makes the
+new envelope visible to the Core selector before its metadata patch is compiled.
+
+`setTotalBudget` now reads `selectCoreEnvMetrics` before subtracting child
+budgets and dispatching the adjusted update to the Core-backed `budgetModel.set`.
+That moves the shared read dependency for fill-goals, fix-overspends, and
+start-fresh without moving the app-level FX converter. Its test covers a
+cross-currency child-budget adjustment.
+
+### Next step
+
+`moveMoney` now reads `selectCoreEnvMetrics` and retains the app-level FX
+converter before dispatching through `budgetModel.set`. Its focused test covers
+a cross-currency destination update.
+
+`copyPreviousBudget` now reads `selectCoreEnvMetrics` and preserves its
+previous-month comparison before dispatching through Core-backed `setBudget`.
+Its focused test covers a changed own-budget copy.
+
+`startFresh` now reads `selectCoreEnvMetrics` for every reset and future-budget
+cleanup phase, preserving the legacy sequence after each dispatch. Its focused
+test covers child and parent resets plus future-budget cleanup.
+
+`fixOverspends` now reads `selectCoreEnvMetrics` separately for its child and
+parent passes before dispatching through `setTotalBudget`. Its focused test
+covers both overspend calculations.
+
+`fillGoals` now reads `selectCoreGoals`, preserving the fulfilled-goal and
+endless-target-balance filters before dispatching through `setTotalBudget`. Its
+focused test protects those filters.
+
+### Next architecture slice
+
+Stop selector-by-selector migration here and build a Redux-backed replica
+adapter around the pure engine. Redux must be the only owner of `base`,
+`outbox`, `outboxHead`, `inbox`, and replayed `current`; do not create a
+parallel in-memory engine in thunks.
+
 Keep this graph explicit. Do not replace it with a single large
 `current => readModel` selector; that would make transaction-heavy projections
 recompute on unrelated budget or metadata changes.

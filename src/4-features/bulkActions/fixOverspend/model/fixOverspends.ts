@@ -2,7 +2,7 @@ import { add } from '6-shared/helpers/money'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { TISOMonth } from '6-shared/types'
 import { AppThunk } from 'store'
-import { balances } from '5-entities/envBalances'
+import { selectCoreEnvMetrics } from 'core-next/adapters/redux'
 import { TBudgetUpdate } from '5-entities/budget'
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
 
@@ -15,7 +15,7 @@ export const fixOverspends =
     fixOverspendingParents()
 
     function fixOverspendingChildren() {
-      const metrics = balances.envData(getState())[month]
+      const metrics = selectCoreEnvMetrics(getState())[month]
       let childrenUpdates: TBudgetUpdate[] = []
       Object.values(metrics).forEach(m => {
         if (!m.parent) return
@@ -33,7 +33,7 @@ export const fixOverspends =
     }
 
     function fixOverspendingParents() {
-      const metrics = balances.envData(getState())[month]
+      const metrics = selectCoreEnvMetrics(getState())[month]
       let parentUpdates: TBudgetUpdate[] = []
       Object.values(metrics).forEach(m => {
         if (m.parent) return

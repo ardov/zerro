@@ -5,7 +5,7 @@ import { keys } from '6-shared/helpers/keys'
 import { isZero } from '6-shared/helpers/money'
 import { AppThunk } from 'store'
 
-import { balances } from '5-entities/envBalances'
+import { selectCoreEnvMetrics } from 'core-next/adapters/redux'
 import { TBudgetUpdate } from '5-entities/budget'
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
 
@@ -26,7 +26,7 @@ export const startFresh =
 export const removeFutureBudgets =
   (targetMonth: TISOMonth): AppThunk<void> =>
   (dispatch, getState) => {
-    const envData = balances.envData(getState())
+    const envData = selectCoreEnvMetrics(getState())
     const updates = keys(envData)
       .filter(month => month > targetMonth)
       .reduce((updates, month) => {
@@ -55,7 +55,7 @@ export const resetMonthThunk =
   (month: TISOMonth): AppThunk<void> =>
   (dispatch, getState) => {
     // Step 1. Remove children balances
-    const envData = balances.envData(getState())[month]
+    const envData = selectCoreEnvMetrics(getState())[month]
     const updates = Object.values(envData)
       .filter(e => e.parent) // Only children
       .filter(e => {
@@ -71,7 +71,7 @@ export const resetMonthThunk =
     dispatch(setTotalBudget(updates))
 
     // Step 2. Remove parent balances
-    const envData2 = balances.envData(getState())[month]
+    const envData2 = selectCoreEnvMetrics(getState())[month]
     const updates2 = Object.values(envData2)
       .filter(e => !e.parent) // Only parents
       .filter(e => !isZero(e.selfAvailable)) // with positive available

@@ -302,6 +302,52 @@ Progress:
   palette; `zenmoney/store` owns `TDataStore` and the normalized patch shapes
   (`6-shared/types` re-exports them as a shim). The boundary test forbids any
   `6-shared` import from production core.
+- 2026-07-10: the first budget write consumer now uses Core Next too:
+  `budgetModel.set` compiles its mixed tag/envelope updates through
+  `compileSetBudget` and applies the single normalized patch through the
+  existing Redux `applyClientPatch` action. Redux still owns persistence and
+  sync; this is not an outbox-engine cutover. `setBudget.test.ts` protects the
+  mixed-update bridge and empty-update no-op.
+- 2026-07-10: `goalModel.set` now compiles through `compileSetGoal` and applies
+  the resulting normalized patch through Redux. Core owns goal normalization
+  and future-blocker removal; the thunk keeps only event tracking. The bridge
+  test covers both the nearest-blocker removal and the legacy delete event.
+- 2026-07-10: the central `envelopeModel.patchEnvelope` writer now compiles
+  tag/account/merchant and metadata changes through `compilePatchEnvelope`,
+  using `selectCoreEnvelopes` as its explicit prepared input. Its callers,
+  including envelope creation and group operations, keep their existing Redux
+  entrypoints. `patchEnvelope.test.ts` covers a mixed patch and the synchronous
+  create-tag-then-patch path.
+- 2026-07-10: `setTotalBudget` now reads `selectCoreEnvMetrics` before routing
+  adjusted own-budget updates into the Core-backed `budgetModel.set`. This
+  covers fill-goals, fix-overspends, and start-fresh without changing their
+  orchestration. Its focused test protects child-budget FX adjustment.
+
+- 2026-07-10: `moveMoney` now reads `selectCoreEnvMetrics` and preserves
+the existing app-level FX conversion before dispatching to `budgetModel.set`.
+Its focused test covers a cross-currency destination budget.
+
+- 2026-07-10: `copyPreviousBudget` now reads `selectCoreEnvMetrics` and keeps
+  its previous-month comparison plus Core-backed `setBudget` write unchanged.
+  Its focused test covers copying a changed own budget.
+
+- 2026-07-10: `startFresh` now reads `selectCoreEnvMetrics` independently for
+  each reset/cleanup phase, preserving state-sensitive sequencing after every
+  dispatch. Its focused test covers child reset, parent reset, and future-budget
+  cleanup.
+
+- 2026-07-10: `fixOverspends` now reads `selectCoreEnvMetrics` separately for
+  child and parent passes. Its focused test covers both overspend calculations
+  before they route through `setTotalBudget`.
+
+- 2026-07-10: `fillGoals` now reads `selectCoreGoals`, keeping the existing
+  filters for fulfilled and endless target-balance goals before dispatching
+  through `setTotalBudget`. Its focused test protects those filters.
+
+Next architecture slice: design and land a Redux-backed replica adapter around
+the pure engine. Redux must become the sole owner of `base`, `outbox`,
+`outboxHead`, `inbox`, and replayed `current`; do not instantiate a parallel
+in-memory engine from thunks.
 
 Recommended order:
 

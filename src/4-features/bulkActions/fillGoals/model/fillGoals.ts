@@ -1,7 +1,8 @@
 import { sendEvent } from '6-shared/helpers/tracking'
 import { TISOMonth } from '6-shared/types'
 import { AppThunk } from 'store'
-import { goalModel, goalType } from '5-entities/goal'
+import { goalType } from 'core-next/zerro/goals'
+import { selectCoreGoals } from 'core-next/adapters/redux'
 import { TBudgetUpdate } from '5-entities/budget'
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
 
@@ -9,7 +10,7 @@ export const fillGoals =
   (month: TISOMonth): AppThunk<void> =>
   (dispatch, getState) => {
     sendEvent('Budgets: fill goals')
-    const goals = goalModel.get(getState())[month]
+    const goals = selectCoreGoals(getState())[month]
     const updates: TBudgetUpdate[] = []
 
     Object.values(goals).forEach(goalInfo => {

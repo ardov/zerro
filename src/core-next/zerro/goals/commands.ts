@@ -20,7 +20,7 @@ export function compileSetGoal(
   ctx: Pick<TCoreContext, 'now' | 'uuid'>
 ): TNormalizedPatch {
   const goals = getRawGoals(data)
-  const newGoal = makeGoal(goal)
+  const newGoal = normalizeGoal(goal)
   const patches: TNormalizedPatch[] = []
   let state = data
 
@@ -61,7 +61,7 @@ export function compileSetGoal(
   return mergeNormalizedPatches(...patches)
 }
 
-function makeGoal(goalDraft?: TGoal | null): TGoal | null {
+export function normalizeGoal(goalDraft?: TGoal | null): TGoal | null {
   const { type, amount, end } = goalDraft || {}
   if (!type || !amount) return null
 

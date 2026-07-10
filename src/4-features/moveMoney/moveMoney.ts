@@ -6,8 +6,8 @@ import { round } from '6-shared/helpers/money'
 import { sendEvent } from '6-shared/helpers/tracking'
 
 import { budgetModel, TBudgetUpdate } from '5-entities/budget'
-import { balances } from '5-entities/envBalances'
 import { fxRateModel } from '5-entities/currency/fxRate'
+import { selectCoreEnvMetrics } from 'core-next/adapters/redux'
 
 export const moveMoney =
   (
@@ -21,7 +21,7 @@ export const moveMoney =
     if (!source || !amount || !destination || source === destination) return
     sendEvent('Budgets: move funds')
     const state = getState()
-    const metrics = balances.envData(state)[month]
+    const metrics = selectCoreEnvMetrics(state)[month]
     const convertFx = fxRateModel.converter(state)
 
     const updates: TBudgetUpdate[] = []

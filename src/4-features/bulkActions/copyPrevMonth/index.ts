@@ -2,7 +2,7 @@ import { sendEvent } from '6-shared/helpers/tracking'
 import { AppThunk } from 'store'
 import { TISOMonth } from '6-shared/types'
 import { prevMonth, toISOMonth } from '6-shared/helpers/date'
-import { balances } from '5-entities/envBalances'
+import { selectCoreEnvMetrics } from 'core-next/adapters/redux'
 import { TBudgetUpdate } from '5-entities/budget'
 import { setBudget } from '5-entities/budget/setBudget'
 
@@ -10,7 +10,7 @@ export const copyPreviousBudget =
   (month: TISOMonth): AppThunk<void> =>
   (dispatch, getState) => {
     sendEvent('Budgets: copy previous')
-    const envData = balances.envData(getState())
+    const envData = selectCoreEnvMetrics(getState())
     const curr = envData[month]
     const prev = envData[toISOMonth(prevMonth(month))]
 
