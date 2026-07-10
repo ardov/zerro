@@ -163,23 +163,6 @@ describe('executeCommand funnel', () => {
     )
   })
 
-  it('normalizes presented default groups before domain compilation', () => {
-    const state = makeState(makeDemoStore({ now: NOW }))
-    const id = envId.get(EnvType.Tag, null)
-    const presentedGroup = selectCoreEnvelopes(state)[id].group
-
-    const patch = compileAppCommand(
-      state,
-      {
-        type: 'zerro.envelope.patch',
-        payload: [{ id, group: presentedGroup }],
-      },
-      { now: () => NOW, uuid: () => 'test-id' }
-    )
-
-    expect(patch).toEqual({})
-  })
-
   it('moves an envelope to a new group through the structure command', () => {
     const current = makeDemoStore({ now: NOW })
     const state = makeState(current)

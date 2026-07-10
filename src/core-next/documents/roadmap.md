@@ -39,46 +39,52 @@ accepts the full ordered structure (groups, nesting, order) and compiles
 ordering, group, and parent changes into one atomic patch. The four hierarchy
 consumers — envelope drag-and-drop, group move, group assignment, and group
 rename — send only structure input; the legacy `applyStructure` thunk is
-removed. The compatibility `patchEnvelope` thunk and `zerro.envelope.patch`
-command remain but no longer have app consumers.
+removed.
+
+The compatibility envelope patch path is retired: `envelopeModel.patchEnvelope`,
+the `zerro.envelope.patch` command, and app-layer `TEnvelopeDraft` exports are
+gone. The envelope write family is fully semantic; envelope drafts stay
+internal to Core compile functions.
 
 Replica ownership, server-like materialization rules, and package hardening
 remain incomplete.
 
-## Default next slice: retire the compatibility envelope patch path
+## Default next slice: semantic transaction commands
 
-Goal: close the envelope write family by removing the unused partial-patch
-bridge.
+Goal: move the transaction write family off `applyLegacyPatch` one narrow
+command at a time.
 
 Scope:
 
-1. Confirm no runtime consumer dispatches `envelopeModel.patchEnvelope` or
-   `zerro.envelope.patch`.
-2. Move any resulting-state coverage that still exercises the bridge onto the
-   semantic envelope commands.
-3. Remove the deprecated thunk, its command type, and the `TEnvelopeDraft`
-   re-exports from app layers; envelope drafts stay internal to Core compile.
-4. Update the bridge entry in the design ledger.
+1. Inventory `5-entities/transaction/thunks.ts`: delete, permanent delete,
+   restore, mark viewed, bulk edit, split transfer, and recreate.
+2. Start with deletion and restore: define narrow inputs (`ids`, no partial
+   transaction), compile intent-only patches in Core.
+3. Route the chosen commands through the funnel and migrate their app
+   consumers.
+4. Keep account-balance effects out of commands; they belong to the deferred
+   materializer phase.
 
 Done when:
 
-- app layers import no envelope draft type and no partial envelope patch;
-- the funnel compiles only semantic envelope commands plus `legacy.patch`;
-- the full suite passes without envelope parity regressions.
+- the chosen thunks dispatch semantic commands instead of `applyLegacyPatch`;
+- resulting-state tests pass through the Redux command funnel;
+- remaining transaction thunks keep working through the legacy bridge.
 
-Do not migrate transaction, account, or reminder writes in this slice, and do
-not touch materializer rules.
+Do not migrate every transaction thunk at once, and do not start materializer
+rules; deleted-transaction immutability is a materializer rule, not command
+logic.
 
 ## Active tracks
 
-| Track                           | State                          | Next useful outcome                                                       |
-| ------------------------------- | ------------------------------ | ------------------------------------------------------------------------- |
-| A. Public facade and read graph | Envelope writes semantic       | Decide which adapter-level projectors deserve a supported subpath         |
-| B. Domain/presentation boundary | Boundary landed                | Extract an optional appearance package only when a real consumer needs it |
-| C. ZenMoney materializer rules  | Deferred until final           | Start only after the other architecture and migration tracks are complete |
-| D. Replica and sync             | Designed, not integrated       | Share pure outbox operations and make Redux the replica owner             |
-| E. Legacy cutover               | Reads advanced, writes partial | Migrate one remaining write or deep import at a time                      |
-| F. Package and test hardening   | Ongoing                        | Consumer-level export/type test and targeted parity coverage              |
+| Track                           | State                    | Next useful outcome                                                       |
+| ------------------------------- | ------------------------ | ------------------------------------------------------------------------- |
+| A. Public facade and read graph | Envelope writes semantic | Decide which adapter-level projectors deserve a supported subpath         |
+| B. Domain/presentation boundary | Boundary landed          | Extract an optional appearance package only when a real consumer needs it |
+| C. ZenMoney materializer rules  | Deferred until final     | Start only after the other architecture and migration tracks are complete |
+| D. Replica and sync             | Designed, not integrated | Share pure outbox operations and make Redux the replica owner             |
+| E. Legacy cutover               | Envelope writes done     | Migrate transaction writes one narrow command at a time                   |
+| F. Package and test hardening   | Ongoing                  | Consumer-level export/type test and targeted parity coverage              |
 
 ## Track A: public facade and read graph
 
@@ -189,7 +195,7 @@ Goal: remove compatibility paths only when a real consumer can switch safely.
 High-value remaining work:
 
 - transaction/account/reminder writes still using `applyLegacyPatch` or direct
-  `applyClientPatch`;
+  `applyClientPatch` (envelope writes are fully semantic now);
 - `mergeAccounts`, which needs explicit transfer/cascade semantics;
 - deep app imports from `core-next/zenmoney`, `core-next/zerro`, and tag
   presentation shims;

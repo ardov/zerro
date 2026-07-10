@@ -52,16 +52,18 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 - Envelope hierarchy is one semantic structure command; drag-and-drop, group
   move, group assignment, and group rename send full structure input and the
   legacy `applyStructure` thunk is gone.
+- The envelope write family is fully semantic: the compatibility
+  `patchEnvelope` thunk and `zerro.envelope.patch` command are removed, and
+  envelope drafts stay internal to Core compile functions.
 
 ## Default next slice
 
-Retire the compatibility envelope patch path now that it has no app consumers.
+Add semantic transaction commands, starting with deletion and restore.
 
-1. Confirm nothing dispatches `envelopeModel.patchEnvelope` or
-   `zerro.envelope.patch` at runtime.
-2. Move remaining bridge test coverage onto semantic commands.
-3. Remove the thunk, its command type, and app-layer envelope draft exports.
-4. Update the bridge entry in the design ledger.
+1. Define narrow id-based inputs instead of partial transaction payloads.
+2. Compile intent-only patches; account effects wait for the materializer.
+3. Route the chosen thunks through the command funnel.
+4. Leave the remaining transaction thunks on the legacy bridge for now.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 

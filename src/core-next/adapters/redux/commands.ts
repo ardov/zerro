@@ -6,7 +6,6 @@ import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../types'
 import {
   compileApplyEnvelopeStructure,
   compileCreateEnvelope,
-  compilePatchEnvelope,
   compileRenameEnvelope,
   compileSetEnvelopeColor,
   compileSetEnvelopeComment,
@@ -17,7 +16,6 @@ import {
   type TBudgetUpdate,
   type TCreateEnvelopeInput,
   type TCreateEnvelopeReceipt,
-  type TEnvelopeDraft,
   type TEnvelopeId,
   type TGoal,
   type TRenameEnvelopeInput,
@@ -47,7 +45,6 @@ export type TAppCommand =
       type: 'zerro.goal.set'
       payload: { month: TISOMonth; id: TEnvelopeId; goal: TGoal | null }
     }
-  | { type: 'zerro.envelope.patch'; payload: TEnvelopeDraft[] }
   | { type: 'zerro.envelope.rename'; payload: TRenameEnvelopeInput }
   | { type: 'zerro.envelope.color.set'; payload: TSetEnvelopeColorInput }
   | { type: 'zerro.envelope.comment.set'; payload: TSetEnvelopeCommentInput }
@@ -120,20 +117,6 @@ function compileAppCommandResult(
         data,
         selectCoreDomainEnvelopes(state),
         structure,
-        ctx
-      )
-    }
-    case 'zerro.envelope.patch': {
-      const labels = selectCoreEnvelopeLabels()
-      const drafts = command.payload.map(draft =>
-        draft.group
-          ? { ...draft, group: getDomainEnvelopeGroup(draft.group, labels) }
-          : draft
-      )
-      return compilePatchEnvelope(
-        data,
-        selectCoreDomainEnvelopes(state),
-        drafts,
         ctx
       )
     }

@@ -3,18 +3,16 @@ import { i18n } from '6-shared/localization'
 import type { TDataStore } from '6-shared/types'
 import type { AppDispatch, AppThunk, RootState } from 'store'
 import { applyClientPatch } from 'store/data'
-import { createEnvelope } from '4-features/envelope/createEnvelope'
 import { makeDemoStore } from 'core-next/demo'
 import { applyPatch } from 'core-next/zenmoney'
 import {
-  compilePatchEnvelope,
   defaultEnvelopeGroupIds,
   envId,
   EnvType,
   getEnvelopeMeta,
 } from 'core-next/zerro'
 import { selectCoreEnvelopes } from 'core-next/adapters/redux'
-import { patchEnvelope } from './patchEnvelope'
+import { createEnvelope } from './createEnvelope'
 
 const NOW = Date.parse('2026-07-10T12:00:00Z')
 const UUID = '00000000-0000-4000-8000-000000000001'
@@ -58,34 +56,7 @@ function makeThunkDispatch(initial: RootState) {
   return { dispatch: dispatch as unknown as AppDispatch, getState: () => state }
 }
 
-describe('patchEnvelope', () => {
-  it('dispatches one Core Next patch for entity and metadata changes', () => {
-    vi.spyOn(Date, 'now').mockReturnValue(NOW)
-    const current = makeDemoStore({ now: NOW })
-    const [tagId] = Object.keys(current.tag)
-    const id = envId.get(EnvType.Tag, tagId)
-    const state = makeState(current)
-    const draft = { id, originalName: 'Renamed', comment: 'Core comment' }
-    const expected = compilePatchEnvelope(
-      current,
-      selectCoreEnvelopes(state),
-      draft,
-      { now: () => NOW, uuid: () => UUID }
-    )
-    // The thunk dispatches an executeCommand thunk; unwrap it like the store would
-    const dispatch: any = vi.fn(action =>
-      typeof action === 'function'
-        ? action(dispatch, () => state, undefined)
-        : action
-    )
-
-    patchEnvelope(draft)(dispatch, () => state, undefined)
-
-    expect(expected.tag).toHaveLength(1)
-    expect(expected.reminder).toHaveLength(1)
-    expect(dispatch).toHaveBeenCalledWith(applyClientPatch(expected))
-  })
-
+describe('createEnvelope', () => {
   it('creates an envelope and metadata through one semantic command', () => {
     vi.spyOn(Date, 'now').mockReturnValue(NOW)
     const runtime = makeThunkDispatch(makeState(makeDemoStore({ now: NOW })))

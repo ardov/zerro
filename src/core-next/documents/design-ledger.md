@@ -159,16 +159,6 @@ app-asset sources.
 Exit after the presentation-package decision and consumer migration. Concrete
 SVG URLs must remain outside domain Core.
 
-### Envelope partial-patch command
-
-Status: `envelopeModel.patchEnvelope` and the `zerro.envelope.patch` command
-remain in the funnel but lost their last app consumer when the semantic
-structure slice migrated the hierarchy thunks; only tests exercise them.
-
-Exit in the retire-the-bridge slice: remove the thunk, its command type, and
-app-layer `TEnvelopeDraft` exports. Envelope drafts stay internal to Core
-compile functions.
-
 ### Legacy local diff
 
 Status: Redux still accumulates `data.diff`; the identity materializer means
@@ -179,6 +169,13 @@ replayed `current`. Resolve the sync transport question before enabling
 non-identity rules.
 
 ## Resolved bridges
+
+### Envelope partial-patch command
+
+Resolved on 2026-07-10. The semantic structure slice removed the last app
+consumer; the retire slice then deleted `envelopeModel.patchEnvelope`, the
+`zerro.envelope.patch` command, and app-layer `TEnvelopeDraft` exports.
+Envelope drafts remain internal to Core compile functions.
 
 ### `populatedTags` session dependency
 

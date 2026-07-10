@@ -3,7 +3,7 @@
 - Updated: 2026-07-10
 - Branch: `core-next`
 - Worktree: clean; the branch tip is
-  `Add semantic envelope creation and structure commands`
+  `Retire the compatibility envelope patch path`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -26,7 +26,7 @@ claims against the tree before editing.
 | Zerro reads      | Envelopes through activity, metrics, month totals, goals, budgets, settings, hidden data, and FX are present          |
 | Session          | Namespaced semantic `get*` reads over lazy snapshot-local memoization; flat `read` is deprecated compatibility        |
 | Redux reads      | Most budget/envelope/goal/activity/transaction/tag/debtor/balance consumers use Core adapter selectors                |
-| Redux writes     | Budget, goal, and envelope commands (incl. hierarchy) use the command funnel; other legacy writes use patch bridges   |
+| Redux writes     | Budget, goal, and all envelope writes are semantic commands; transaction/account/reminder writes use patch bridges    |
 | Materializer     | Identity layer is wired into every Redux local patch; server patches bypass it                                        |
 | Engine           | Pure outbox reference exists; no production consumer; replay uses stored `appliedPatch`                               |
 | Presentation     | Domain envelopes are headless; Redux adds localized groups, symbols, and generated/display colors                     |
@@ -34,7 +34,17 @@ claims against the tree before editing.
 
 ## Latest landed slices
 
-The branch tip lands two consecutive slices.
+The branch tip retires the compatibility envelope patch path:
+
+- `envelopeModel.patchEnvelope`, the `zerro.envelope.patch` command, and the
+  app-layer `TEnvelopeDraft` export are removed;
+- Core keeps `compilePatchEnvelope` internal to the settings and structure
+  compilers; envelope drafts do not cross the package boundary;
+- the createEnvelope resulting-state test moved to
+  `src/4-features/envelope/createEnvelope.test.ts`;
+- the funnel compiles only semantic envelope commands plus `legacy.patch`.
+
+The commit before it landed semantic envelope creation and structure.
 
 Semantic envelope creation:
 
@@ -66,33 +76,34 @@ Semantic envelope structure:
   no-op afterwards; it never writes groups or parents (covered by funnel
   tests).
 
-The compatibility `patchEnvelope` thunk and `zerro.envelope.patch` command
-remain but no longer have app consumers. No materializer rule or replica
-behavior is included.
+No materializer rule or replica behavior is included in these slices.
 
 ## Default next task
 
-Retire the compatibility envelope patch path described in
-[roadmap.md](./roadmap.md#default-next-slice-retire-the-compatibility-envelope-patch-path).
+Add semantic transaction commands described in
+[roadmap.md](./roadmap.md#default-next-slice-semantic-transaction-commands),
+starting with deletion and restore.
 
 Likely files:
 
 ```txt
-src/5-entities/envelope/patchEnvelope.ts
-src/5-entities/envelope/patchEnvelope.test.ts
-src/5-entities/envelope/index.ts
+src/core-next/zenmoney/transactions/commands.ts
+src/core-next/zerro/... (if a zerro-level wrapper is needed)
 src/core-next/adapters/redux/commands.ts
-src/core-next/documents/design-ledger.md
+src/core-next/adapters/redux/commands.test.ts
+src/5-entities/transaction/thunks.ts
 src/core-next/documents/roadmap.md
 src/core-next/documents/handoff.md
 ```
 
 Keep the slice bounded:
 
-- confirm no runtime consumer dispatches the bridge before removing it;
-- keep envelope drafts internal to Core compile functions;
-- do not migrate transaction, account, or reminder writes;
-- do not start materializer rules; that track is explicitly last.
+- narrow inputs (ids), no partial transaction payloads;
+- commands compile intent only; account-balance effects stay reserved for the
+  materializer phase;
+- migrate only the chosen thunks; the rest keep the legacy bridge;
+- do not start materializer rules; deleted-transaction immutability belongs
+  there, not in commands.
 
 ## Important guardrails
 
@@ -123,7 +134,7 @@ Expected full-suite baseline at this handoff:
 
 ```txt
 69 test files passed, 4 skipped
-247 tests passed, 6 skipped
+245 tests passed, 6 skipped
 ```
 
 Also run formatting and documentation link checks after changing these files.

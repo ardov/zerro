@@ -3,12 +3,10 @@ import {
   getEnvelopeStructure,
   getKeepingEnvelopes,
 } from './getEnvelopes'
-import { patchEnvelope } from './patchEnvelope'
 import { envId } from './shared/envelopeId'
 import { flattenStructure } from './shared/structure'
 
 export type { TEnvNode, TGroupNode } from './shared/structure'
-export type { TEnvelopeDraft } from './patchEnvelope'
 export type { TEnvelopeId } from './shared/envelopeId'
 export type { TEnvelope } from './shared/makeEnvelope'
 
@@ -24,9 +22,6 @@ export const envelopeModel = {
   getEnvelopeStructure,
   /** @deprecated Read via `selectCoreKeepingEnvelopeIds` from `core-next/adapters/redux` */
   getKeepingEnvelopes,
-
-  // Thunk
-  patchEnvelope,
 
   // Helpers
   parseId: envId.parse,
