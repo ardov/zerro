@@ -2,8 +2,9 @@ import { hex2int, isHEX } from '../../zenmoney/colors'
 import type { ById, OptionalExceptFor } from '../../shared/types'
 import type { TFxCode } from '../../zenmoney/instruments'
 import type { TDataStore } from '../../zenmoney/store'
-import type { TCoreContext, TNormalizedPatch } from '../../types'
+import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../types'
 import {
+  compileCreateTag,
   compilePatchAccount,
   compilePatchMerchant,
   compilePatchTag,
@@ -20,7 +21,7 @@ import {
   type TEnvelopeMetaPatch,
 } from '../envelope-meta'
 import { mergeNormalizedPatches } from '../hidden-data'
-import type { TEnvelope } from './build'
+import type { TEnvelope, TEnvNode, TGroupNode } from './build'
 
 export type TEnvelopeDraft = OptionalExceptFor<TEnvelope, 'id'>
 
@@ -48,6 +49,29 @@ export type TUpdateEnvelopeSettingsInput = {
   keepIncome: boolean
 }
 
+export type TCreateEnvelopeInput = {
+  name: string
+  group?: string
+  index?: number
+  comment?: string
+}
+
+export type TCreateEnvelopeReceipt = {
+  envelopeId: TEnvelopeId
+}
+
+export type TEnvelopeStructureNodeInput = {
+  id: TEnvelopeId
+  children?: TEnvelopeStructureNodeInput[]
+}
+
+export type TEnvelopeStructureGroupInput = {
+  group: string
+  children: TEnvelopeStructureNodeInput[]
+}
+
+export type TApplyEnvelopeStructureInput = TEnvelopeStructureGroupInput[]
+
 type TEnvelopePatches = {
   tag: TTagPatch[]
   account: TAccountPatch[]
@@ -60,6 +84,142 @@ type TEnvelopePatch = {
   account?: TAccountPatch
   merchant?: TMerchantPatch
   meta?: TEnvelopeMetaPatch
+}
+
+export function compileCreateEnvelope(
+  data: TDataStore,
+  input: TCreateEnvelopeInput,
+  ctx: TCoreContext
+): TCompiled<TCreateEnvelopeReceipt> {
+  const tagPatch = compileCreateTag(
+    data,
+    { title: input.name, showOutcome: true },
+    ctx
+  )
+  const tag = tagPatch.tag?.[0]
+  if (!tag) throw new Error('Envelope tag was not created')
+
+  const envelopeId = envId.get(EnvType.Tag, tag.id)
+  const metadata: TEnvelopeMetaPatch = { id: envelopeId }
+  if (input.group !== undefined) metadata.group = input.group
+  if (input.index !== undefined) metadata.index = input.index
+  if (input.comment !== undefined) metadata.comment = input.comment
+
+  const metadataPatch =
+    Object.keys(metadata).length > 1
+      ? compilePatchEnvelopeMeta(data, metadata, ctx)
+      : {}
+
+  return {
+    patch: mergeNormalizedPatches(tagPatch, metadataPatch),
+    receipt: { envelopeId },
+  }
+}
+
+/**
+ * Converts a projected structure tree into the minimal semantic structure
+ * input, keeping group, nesting, and index order.
+ */
+export function toEnvelopeStructureInput(
+  structure: TGroupNode[]
+): TApplyEnvelopeStructureInput {
+  return structure.map(group => ({
+    group: group.id,
+    children: group.children.map(toStructureNodeInput),
+  }))
+}
+
+function toStructureNodeInput(node: TEnvNode): TEnvelopeStructureNodeInput {
+  return { id: node.id, children: node.children.map(toStructureNodeInput) }
+}
+
+/**
+ * Compiles the full desired envelope hierarchy into one atomic patch. The
+ * input is the complete ordered structure; envelopes absent from it stay
+ * untouched. Normalization mirrors the projector: empty groups are dropped,
+ * same-named groups merge, deep nesting flattens to two levels, and tags
+ * nested under non-tag parents are elevated to the group level.
+ */
+export function compileApplyEnvelopeStructure(
+  data: TDataStore,
+  envelopes: ById<TEnvelope>,
+  input: TApplyEnvelopeStructureInput,
+  ctx: TCoreContext
+): TNormalizedPatch {
+  const drafts: TEnvelopeDraft[] = []
+  // Index counts every flattened node, group nodes included, matching the
+  // index order the structure projector assigns after `flattenStructure`.
+  let index = 0
+
+  mergeStructureGroups(input).forEach(group => {
+    if (!group.children.length) return
+    index++
+    normalizeStructureGroup(group.children).forEach(node => {
+      if (!envelopes[node.id]) throw new Error('Envelope not found')
+      drafts.push({
+        id: node.id,
+        group: group.group,
+        parent: node.parent,
+        indexRaw: index++,
+      })
+    })
+  })
+
+  return compilePatchEnvelope(data, envelopes, drafts, ctx)
+}
+
+function mergeStructureGroups(
+  input: TApplyEnvelopeStructureInput
+): TApplyEnvelopeStructureInput {
+  const byName = new Map<string, TEnvelopeStructureGroupInput>()
+  input.forEach(group => {
+    const existing = byName.get(group.group)
+    if (existing) existing.children = existing.children.concat(group.children)
+    else byName.set(group.group, { ...group, children: [...group.children] })
+  })
+  return [...byName.values()]
+}
+
+type TFlatStructureNode = {
+  id: TEnvelopeId
+  parent: TEnvelopeId | null
+}
+
+function normalizeStructureGroup(
+  children: TEnvelopeStructureNodeInput[]
+): TFlatStructureNode[] {
+  const result: TFlatStructureNode[] = []
+
+  children.forEach(node => {
+    const parentIsTag = envId.parse(node.id).type === EnvType.Tag
+    const nested: TFlatStructureNode[] = []
+    const elevated: TFlatStructureNode[] = []
+
+    flattenStructureDescendants(node.children || []).forEach(id => {
+      const childIsTag = envId.parse(id).type === EnvType.Tag
+      if (!parentIsTag && childIsTag) {
+        // Impossible to nest a tag under a virtual envelope => elevate
+        elevated.push({ id, parent: null })
+      } else {
+        nested.push({ id, parent: node.id })
+      }
+    })
+
+    result.push({ id: node.id, parent: null }, ...nested, ...elevated)
+  })
+
+  return result
+}
+
+function flattenStructureDescendants(
+  nodes: TEnvelopeStructureNodeInput[]
+): TEnvelopeId[] {
+  const flat: TEnvelopeId[] = []
+  nodes.forEach(function visit(node) {
+    ;(node.children || []).forEach(visit)
+    flat.push(node.id)
+  })
+  return flat
 }
 
 export function compileRenameEnvelope(

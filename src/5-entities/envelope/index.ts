@@ -1,4 +1,3 @@
-import { applyStructure } from './applyStructure'
 import {
   getEnvelopes,
   getEnvelopeStructure,
@@ -28,7 +27,6 @@ export const envelopeModel = {
 
   // Thunk
   patchEnvelope,
-  applyStructure,
 
   // Helpers
   parseId: envId.parse,

@@ -12,6 +12,8 @@ import { applyPatch } from '../../zenmoney'
 import { EnvType, envId } from '../envelope-id'
 import { envelopeVisibility, getEnvelopeMeta } from '../envelope-meta'
 import {
+  compileApplyEnvelopeStructure,
+  compileCreateEnvelope,
   compilePatchEnvelope,
   compilePatchEnvelopeMetadata,
   compileRenameEnvelope,
@@ -21,6 +23,41 @@ import {
 } from './commands'
 
 describe('envelope commands', () => {
+  it('creates a tag and initial envelope metadata with an id receipt', () => {
+    const data = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      account: {
+        data: makeAccount({ id: 'data', title: '🤖 [Zerro Data]' }),
+      },
+    })
+    const ids = ['new-tag', 'meta-reminder']
+
+    const result = compileCreateEnvelope(
+      data,
+      {
+        name: 'Travel',
+        group: 'Plans',
+        index: 2,
+        comment: 'Save for a trip',
+      },
+      { now: () => 100, uuid: () => ids.shift() || 'unexpected-id' }
+    )
+    const next = applyPatch(data, result.patch)
+    const id = envId.get(EnvType.Tag, 'new-tag')
+
+    expect(result.receipt.envelopeId).toBe(id)
+    expect(next.tag['new-tag']).toMatchObject({
+      title: 'Travel',
+      showOutcome: true,
+    })
+    expect(getEnvelopeMeta(next)[id]).toMatchObject({
+      id,
+      group: 'Plans',
+      index: 2,
+      comment: 'Save for a trip',
+    })
+  })
+
   it('updates explicit envelope settings atomically', () => {
     const id = envId.get(EnvType.Tag, 'food')
     const data = makeStore({
@@ -450,6 +487,238 @@ describe('envelope commands', () => {
     )
 
     expect(patch).toEqual({})
+  })
+
+  it('applies reorder, regroup, and reparent structure as one atomic patch', () => {
+    const foodId = envId.get(EnvType.Tag, 'food')
+    const funId = envId.get(EnvType.Tag, 'fun')
+    const parentId = envId.get(EnvType.Tag, 'parent')
+    const cashId = envId.get(EnvType.Account, 'cash')
+    const data = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      account: {
+        cash: makeAccount({ id: 'cash', title: 'Cash' }),
+        data: makeAccount({ id: 'data', title: '🤖 [Zerro Data]' }),
+      },
+      tag: {
+        food: makeTag({ id: 'food', title: 'Food' }),
+        fun: makeTag({ id: 'fun', title: 'Fun' }),
+        parent: makeTag({ id: 'parent', title: 'Parent' }),
+      },
+    })
+    const envelopes = {
+      [foodId]: makeEnvelope({
+        id: foodId,
+        entityId: 'food',
+        group: 'Costs',
+        parent: null,
+        indexRaw: 1,
+      }),
+      [funId]: makeEnvelope({
+        id: funId,
+        entityId: 'fun',
+        group: 'Costs',
+        parent: null,
+        indexRaw: 2,
+      }),
+      [parentId]: makeEnvelope({
+        id: parentId,
+        entityId: 'parent',
+        group: 'Costs',
+        parent: null,
+        indexRaw: 3,
+      }),
+      [cashId]: makeEnvelope({
+        id: cashId,
+        type: EnvType.Account,
+        entityId: 'cash',
+        group: 'Costs',
+        parent: null,
+        indexRaw: 4,
+      }),
+    }
+
+    const patch = compileApplyEnvelopeStructure(
+      data,
+      envelopes,
+      [
+        {
+          group: 'Costs',
+          children: [{ id: parentId, children: [{ id: foodId }] }],
+        },
+        { group: 'Savings', children: [{ id: cashId }, { id: funId }] },
+      ],
+      { now: () => 100, uuid: () => 'meta-reminder' }
+    )
+    const next = applyPatch(data, patch)
+    const meta = getEnvelopeMeta(next)
+
+    // Flat order: [Costs, parent, food, Savings, cash, fun]
+    expect(next.tag.food.parent).toBe('parent')
+    expect(meta[parentId]).toMatchObject({ index: 1 })
+    expect(meta[foodId]).toMatchObject({ index: 2 })
+    expect(meta[cashId]).toEqual({ id: cashId, group: 'Savings' })
+    expect(meta[funId]).toMatchObject({ group: 'Savings', index: 5 })
+  })
+
+  it('elevates tags under virtual envelopes and flattens deep nesting', () => {
+    const virtId = envId.get(EnvType.Account, 'virt')
+    const tId = envId.get(EnvType.Tag, 't')
+    const pId = envId.get(EnvType.Tag, 'p')
+    const c1Id = envId.get(EnvType.Tag, 'c1')
+    const c2Id = envId.get(EnvType.Tag, 'c2')
+    const data = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      account: {
+        virt: makeAccount({ id: 'virt', title: 'Virtual' }),
+        data: makeAccount({ id: 'data', title: '🤖 [Zerro Data]' }),
+      },
+      tag: {
+        t: makeTag({ id: 't', title: 'T' }),
+        p: makeTag({ id: 'p', title: 'P' }),
+        c1: makeTag({ id: 'c1', title: 'C1' }),
+        c2: makeTag({ id: 'c2', title: 'C2' }),
+      },
+    })
+    const envelopes = {
+      [virtId]: makeEnvelope({
+        id: virtId,
+        type: EnvType.Account,
+        entityId: 'virt',
+        group: 'G',
+        parent: null,
+        indexRaw: 1,
+      }),
+      [tId]: makeEnvelope({
+        id: tId,
+        entityId: 't',
+        group: 'Other',
+        parent: null,
+        indexRaw: 6,
+      }),
+      [pId]: makeEnvelope({
+        id: pId,
+        entityId: 'p',
+        group: 'G',
+        parent: null,
+        indexRaw: 3,
+      }),
+      [c1Id]: makeEnvelope({
+        id: c1Id,
+        entityId: 'c1',
+        group: 'G',
+        parent: pId,
+        indexRaw: 4,
+      }),
+      [c2Id]: makeEnvelope({
+        id: c2Id,
+        entityId: 'c2',
+        group: 'G',
+        parent: c1Id,
+        indexRaw: 5,
+      }),
+    }
+
+    const patch = compileApplyEnvelopeStructure(
+      data,
+      envelopes,
+      [
+        {
+          group: 'G',
+          children: [
+            { id: virtId, children: [{ id: tId }] },
+            { id: pId, children: [{ id: c1Id, children: [{ id: c2Id }] }] },
+          ],
+        },
+      ],
+      { now: () => 100, uuid: () => 'meta-reminder' }
+    )
+    const next = applyPatch(data, patch)
+    const meta = getEnvelopeMeta(next)
+
+    // Flat order: [G, virt, t (elevated), p, c2, c1]
+    expect(next.tag.t.parent).toBeNull()
+    expect(next.tag.c2.parent).toBe('p')
+    expect(meta[tId]).toMatchObject({ group: 'G', index: 2 })
+    expect(meta[c2Id]).toMatchObject({ index: 4 })
+    expect(meta[c1Id]).toMatchObject({ index: 5 })
+  })
+
+  it('merges same-named groups, drops empty ones, and skips no-op structures', () => {
+    const foodId = envId.get(EnvType.Tag, 'food')
+    const funId = envId.get(EnvType.Tag, 'fun')
+    const data = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      account: {
+        data: makeAccount({ id: 'data', title: '🤖 [Zerro Data]' }),
+      },
+      tag: {
+        food: makeTag({ id: 'food', title: 'Food' }),
+        fun: makeTag({ id: 'fun', title: 'Fun' }),
+      },
+    })
+    const envelopes = {
+      [foodId]: makeEnvelope({
+        id: foodId,
+        entityId: 'food',
+        group: 'A',
+        parent: null,
+        indexRaw: 1,
+      }),
+      [funId]: makeEnvelope({
+        id: funId,
+        entityId: 'fun',
+        group: 'B',
+        parent: null,
+        indexRaw: 3,
+      }),
+    }
+    const ctx = { now: () => 100, uuid: () => 'meta-reminder' }
+
+    expect(
+      compileApplyEnvelopeStructure(
+        data,
+        envelopes,
+        [
+          { group: 'A', children: [{ id: foodId }] },
+          { group: 'B', children: [{ id: funId }] },
+        ],
+        ctx
+      )
+    ).toEqual({})
+
+    const merged = compileApplyEnvelopeStructure(
+      data,
+      envelopes,
+      [
+        { group: 'A', children: [{ id: foodId }] },
+        { group: 'Empty', children: [] },
+        { group: 'A', children: [{ id: funId }] },
+      ],
+      ctx
+    )
+    const next = applyPatch(data, merged)
+    const meta = getEnvelopeMeta(next)
+
+    // Flat order: [A, food, fun] — the empty group takes no index
+    expect(meta[foodId]).toBeUndefined()
+    expect(meta[funId]).toEqual({ id: funId, group: 'A', index: 2 })
+  })
+
+  it('rejects structures with unknown envelopes', () => {
+    expect(() =>
+      compileApplyEnvelopeStructure(
+        makeStore(),
+        {},
+        [
+          {
+            group: 'A',
+            children: [{ id: envId.get(EnvType.Tag, 'ghost') }],
+          },
+        ],
+        { now: () => 100, uuid: () => 'unused' }
+      )
+    ).toThrow('Envelope not found')
   })
 
   it('rejects non-tag parents for tag envelopes', () => {

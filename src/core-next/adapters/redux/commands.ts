@@ -2,8 +2,10 @@ import { v1 as uuidv1 } from 'uuid'
 import type { AppThunk, RootState } from 'store'
 import { applyClientPatch } from 'store/data'
 import type { TISOMonth } from '../../zenmoney/primitives'
-import type { TCoreContext, TNormalizedPatch } from '../../types'
+import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../types'
 import {
+  compileApplyEnvelopeStructure,
+  compileCreateEnvelope,
   compilePatchEnvelope,
   compileRenameEnvelope,
   compileSetEnvelopeColor,
@@ -11,7 +13,10 @@ import {
   compileUpdateEnvelopeSettings,
   compileSetBudget,
   compileSetGoal,
+  type TApplyEnvelopeStructureInput,
   type TBudgetUpdate,
+  type TCreateEnvelopeInput,
+  type TCreateEnvelopeReceipt,
   type TEnvelopeDraft,
   type TEnvelopeId,
   type TGoal,
@@ -50,6 +55,11 @@ export type TAppCommand =
       type: 'zerro.envelope.settings.update'
       payload: TUpdateEnvelopeSettingsInput
     }
+  | { type: 'zerro.envelope.create'; payload: TCreateEnvelopeInput }
+  | {
+      type: 'zerro.envelope.structure.apply'
+      payload: TApplyEnvelopeStructureInput
+    }
   | { type: 'legacy.patch'; payload: TNormalizedPatch }
 
 export function compileAppCommand(
@@ -57,6 +67,15 @@ export function compileAppCommand(
   command: TAppCommand,
   ctx: TCoreContext
 ): TNormalizedPatch {
+  const result = compileAppCommandResult(state, command, ctx)
+  return isCompiled(result) ? result.patch : result
+}
+
+function compileAppCommandResult(
+  state: RootState,
+  command: TAppCommand,
+  ctx: TCoreContext
+): TNormalizedPatch | TCompiled<unknown> {
   const data = state.data.current
   switch (command.type) {
     case 'zerro.budget.set':
@@ -78,6 +97,32 @@ export function compileAppCommand(
         normalizeEnvelopeSettings(state, command.payload),
         ctx
       )
+    case 'zerro.envelope.create': {
+      const labels = selectCoreEnvelopeLabels()
+      return compileCreateEnvelope(
+        data,
+        {
+          ...command.payload,
+          group: command.payload.group
+            ? getDomainEnvelopeGroup(command.payload.group, labels)
+            : undefined,
+        },
+        ctx
+      )
+    }
+    case 'zerro.envelope.structure.apply': {
+      const labels = selectCoreEnvelopeLabels()
+      const structure = command.payload.map(group => ({
+        ...group,
+        group: getDomainEnvelopeGroup(group.group, labels),
+      }))
+      return compileApplyEnvelopeStructure(
+        data,
+        selectCoreDomainEnvelopes(state),
+        structure,
+        ctx
+      )
+    }
     case 'zerro.envelope.patch': {
       const labels = selectCoreEnvelopeLabels()
       const drafts = command.payload.map(draft =>
@@ -105,11 +150,26 @@ const defaultCtx = { now: () => Date.now(), uuid: () => uuidv1() }
  * applies the resulting normalized patch. The replica step will replace the
  * internals with an outbox append; callers stay unchanged.
  */
-export function executeCommand(command: TAppCommand): AppThunk {
+export function executeCommand(command: TAppCommand): AppThunk<any> {
   return (dispatch, getState) => {
-    const patch = compileAppCommand(getState(), command, defaultCtx)
-    if (isEmptyPatch(patch)) return
-    dispatch(applyClientPatch(patch))
+    const result = compileAppCommandResult(getState(), command, defaultCtx)
+    const patch = isCompiled(result) ? result.patch : result
+    if (!isEmptyPatch(patch)) dispatch(applyClientPatch(patch))
+    return isCompiled(result) ? result.receipt : undefined
+  }
+}
+
+export function createEnvelope(
+  input: TCreateEnvelopeInput
+): AppThunk<TEnvelopeId> {
+  const execute = executeCommand({
+    type: 'zerro.envelope.create',
+    payload: input,
+  })
+
+  return (dispatch, getState, extra) => {
+    const receipt = execute(dispatch, getState, extra) as TCreateEnvelopeReceipt
+    return receipt.envelopeId
   }
 }
 
@@ -134,6 +194,15 @@ export function setEnvelopeComment(id: TEnvelopeId, comment: string): AppThunk {
   return executeCommand({
     type: 'zerro.envelope.comment.set',
     payload: { id, comment },
+  })
+}
+
+export function applyEnvelopeStructure(
+  structure: TApplyEnvelopeStructureInput
+): AppThunk {
+  return executeCommand({
+    type: 'zerro.envelope.structure.apply',
+    payload: structure,
   })
 }
 
@@ -165,4 +234,10 @@ function normalizeEnvelopeSettings(
 
 function isEmptyPatch(patch: TNormalizedPatch): boolean {
   return Object.keys(patch).length === 0
+}
+
+function isCompiled(
+  value: TNormalizedPatch | TCompiled<unknown>
+): value is TCompiled<unknown> {
+  return 'patch' in value && 'receipt' in value
 }

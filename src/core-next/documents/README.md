@@ -47,15 +47,21 @@ The handoff is routing, not proof that code landed. Always verify the tree.
   sends a partial envelope projection or an unused month prop.
 - EnvelopeEditDialog uses one explicit atomic settings command and no longer
   carries a dead create mode or hidden projection fields.
+- Envelope creation is one semantic tag+metadata command with an envelope-id
+  receipt; the app feature no longer chains legacy tag and envelope models.
+- Envelope hierarchy is one semantic structure command; drag-and-drop, group
+  move, group assignment, and group rename send full structure input and the
+  legacy `applyStructure` thunk is gone.
 
 ## Default next slice
 
-Replace the legacy two-step envelope creation flow with one semantic command.
+Retire the compatibility envelope patch path now that it has no app consumers.
 
-1. Define the minimal create input instead of `Partial<TEnvelope>`.
-2. Create the tag and initial envelope metadata atomically.
-3. Return the new envelope id as a compiler receipt.
-4. Migrate only the existing createEnvelope feature.
+1. Confirm nothing dispatches `envelopeModel.patchEnvelope` or
+   `zerro.envelope.patch` at runtime.
+2. Move remaining bridge test coverage onto semantic commands.
+3. Remove the thunk, its command type, and app-layer envelope draft exports.
+4. Update the bridge entry in the design ledger.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 

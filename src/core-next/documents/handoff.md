@@ -2,7 +2,8 @@
 
 - Updated: 2026-07-10
 - Branch: `core-next`
-- Last commit before the current worktree: `3dacae0f Add semantic envelope comment command`
+- Worktree: clean; the branch tip is
+  `Add semantic envelope creation and structure commands`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -25,51 +26,72 @@ claims against the tree before editing.
 | Zerro reads      | Envelopes through activity, metrics, month totals, goals, budgets, settings, hidden data, and FX are present          |
 | Session          | Namespaced semantic `get*` reads over lazy snapshot-local memoization; flat `read` is deprecated compatibility        |
 | Redux reads      | Most budget/envelope/goal/activity/transaction/tag/debtor/balance consumers use Core adapter selectors                |
-| Redux writes     | Budget, goal, and envelope commands use the command funnel; legacy writes still use patch bridges                     |
+| Redux writes     | Budget, goal, and envelope commands (incl. hierarchy) use the command funnel; other legacy writes use patch bridges   |
 | Materializer     | Identity layer is wired into every Redux local patch; server patches bypass it                                        |
 | Engine           | Pure outbox reference exists; no production consumer; replay uses stored `appliedPatch`                               |
 | Presentation     | Domain envelopes are headless; Redux adds localized groups, symbols, and generated/display colors                     |
 | Tests            | Unit, deterministic demo parity, Redux invalidation, and opt-in private parity layers exist                           |
 
-## Current worktree slice
+## Latest landed slices
 
-The uncommitted slice introduces explicit envelope settings:
+The branch tip lands two consecutive slices.
 
-- `compileUpdateEnvelopeSettings` accepts the five fields the form actually
-  edits: name, configured color, currency, visibility, and keep-income;
-- entity and metadata changes compile into one atomic patch;
-- the Redux adapter normalizes unchanged localized null-tag presentation;
-- EnvelopeEditDialog is edit-only and uses `updateEnvelopeSettings(input)`;
-- dead UUID/create behavior and hidden parent/group/comment/carry fields are
-  removed from the form contract;
-- domain and adapter tests verify no-op and resulting state.
+Semantic envelope creation:
 
-No other envelope field, materializer rule, or replica behavior is included.
+- `compileCreateEnvelope` accepts name plus optional group/index/comment;
+- tag creation and initial envelope metadata compile into one patch;
+- the receipt returns the new envelope id;
+- the Redux adapter preserves receipt flow and normalizes default groups;
+- the app create feature no longer chains legacy tag and envelope write models;
+- creation, metadata, receipt, and stable-group behavior are tested.
+
+Semantic envelope structure:
+
+- `compileApplyEnvelopeStructure` compiles the full ordered hierarchy (groups,
+  nesting, order) into one atomic patch; envelopes absent from the input stay
+  untouched;
+- normalization mirrors the projector: empty groups drop, same-named groups
+  merge, deep nesting flattens to two levels, tags under virtual envelopes are
+  elevated;
+- index order counts every flattened node (groups included), matching the
+  structure projector;
+- `toEnvelopeStructureInput` converts a projected structure tree into the
+  minimal command input;
+- the Redux adapter maps localized default group labels back to domain ids
+  before compilation (`zerro.envelope.structure.apply`);
+- the four hierarchy consumers — `moveEnvelope`, `moveGroup`, `assignNewGroup`,
+  `renameGroup` — dispatch `applyEnvelopeStructure` and no longer build
+  `TEnvelopeDraft` patches; the legacy `applyStructure` thunk is deleted;
+- an identity structure apply materializes implicit indices once and is a
+  no-op afterwards; it never writes groups or parents (covered by funnel
+  tests).
+
+The compatibility `patchEnvelope` thunk and `zerro.envelope.patch` command
+remain but no longer have app consumers. No materializer rule or replica
+behavior is included.
 
 ## Default next task
 
-Implement semantic envelope create described in
-[roadmap.md](./roadmap.md#default-next-slice-semantic-envelope-create).
+Retire the compatibility envelope patch path described in
+[roadmap.md](./roadmap.md#default-next-slice-retire-the-compatibility-envelope-patch-path).
 
 Likely files:
 
 ```txt
-src/core-next/zerro/envelopes/commands.ts
-src/core-next/zerro/envelopes/commands.test.ts
+src/5-entities/envelope/patchEnvelope.ts
+src/5-entities/envelope/patchEnvelope.test.ts
+src/5-entities/envelope/index.ts
 src/core-next/adapters/redux/commands.ts
-src/core-next/adapters/redux/commands.test.ts
-src/4-features/envelope/createEnvelope.ts
+src/core-next/documents/design-ledger.md
 src/core-next/documents/roadmap.md
 src/core-next/documents/handoff.md
 ```
 
 Keep the slice bounded:
 
-- use a minimal explicit create input;
-- return the new envelope id as a receipt;
-- preserve group/index initialization;
-- migrate only the createEnvelope feature;
-- retain the compatibility envelope patch command;
+- confirm no runtime consumer dispatches the bridge before removing it;
+- keep envelope drafts internal to Core compile functions;
+- do not migrate transaction, account, or reminder writes;
 - do not start materializer rules; that track is explicitly last.
 
 ## Important guardrails
@@ -89,7 +111,7 @@ Keep the slice bounded:
 
 ## Verification
 
-The semantic rename slice and the preceding facade/domain boundary were
+The semantic structure slice and the preceding envelope command slices were
 verified with:
 
 ```bash
@@ -101,7 +123,7 @@ Expected full-suite baseline at this handoff:
 
 ```txt
 69 test files passed, 4 skipped
-240 tests passed, 6 skipped
+247 tests passed, 6 skipped
 ```
 
 Also run formatting and documentation link checks after changing these files.

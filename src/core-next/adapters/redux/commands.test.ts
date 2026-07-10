@@ -10,10 +10,11 @@ import {
   envId,
   EnvType,
   getEnvelopeMeta,
+  toEnvelopeStructureInput,
 } from '../../zerro'
 import { compileAppCommand, executeCommand } from './commands'
 import { applyLegacyPatch } from './legacyPatch'
-import { selectCoreEnvelopes } from './selectors'
+import { selectCoreEnvelopes, selectCoreEnvelopeStructure } from './selectors'
 
 // Breaks the legacy hidden-store import cycle, same as the private fixture tests.
 vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
@@ -177,6 +178,67 @@ describe('executeCommand funnel', () => {
     )
 
     expect(patch).toEqual({})
+  })
+
+  it('moves an envelope to a new group through the structure command', () => {
+    const current = makeDemoStore({ now: NOW })
+    const state = makeState(current)
+    const input = toEnvelopeStructureInput(selectCoreEnvelopeStructure(state))
+    const [moved, ...restChildren] = input[0].children
+
+    const patch = compileAppCommand(
+      state,
+      {
+        type: 'zerro.envelope.structure.apply',
+        payload: [
+          { ...input[0], children: restChildren },
+          ...input.slice(1),
+          { group: 'Custom', children: [moved] },
+        ],
+      },
+      { now: () => NOW, uuid: () => 'structure-meta' }
+    )
+    const next = applyPatch(current, patch)
+    const nextStructure = selectCoreEnvelopeStructure(makeState(next))
+    const lastGroup = nextStructure[nextStructure.length - 1]
+
+    expect(getEnvelopeMeta(next)[moved.id]).toMatchObject({ group: 'Custom' })
+    expect(lastGroup.id).toBe('Custom')
+    expect(lastGroup.children.map(child => child.id)).toContain(moved.id)
+  })
+
+  it('compiles an unchanged structure to an empty patch after indices settle', () => {
+    const current = makeDemoStore({ now: NOW })
+    const state = makeState(current)
+    const ctx = { now: () => NOW, uuid: () => 'structure-meta' }
+
+    // The first identity apply may materialize implicit indices.
+    const first = compileAppCommand(
+      state,
+      {
+        type: 'zerro.envelope.structure.apply',
+        payload: toEnvelopeStructureInput(selectCoreEnvelopeStructure(state)),
+      },
+      ctx
+    )
+    const settled = makeState(applyPatch(current, first))
+
+    // Presented default group labels normalize back to domain ids, so an
+    // identity apply never writes groups or parents — only indices.
+    Object.values(getEnvelopeMeta(settled.data.current)).forEach(meta => {
+      expect(meta.group).toBeUndefined()
+      expect(meta.parent).toBeUndefined()
+    })
+
+    const second = compileAppCommand(
+      settled,
+      {
+        type: 'zerro.envelope.structure.apply',
+        payload: toEnvelopeStructureInput(selectCoreEnvelopeStructure(settled)),
+      },
+      ctx
+    )
+    expect(second).toEqual({})
   })
 
   it('applies a legacy patch as-is', () => {

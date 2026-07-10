@@ -1,4 +1,8 @@
-import { envelopeModel, TEnvelopeDraft } from '5-entities/envelope'
+import {
+  applyEnvelopeStructure,
+  selectCoreEnvelopeStructure,
+  toEnvelopeStructureInput,
+} from 'core-next/adapters/redux'
 import { AppThunk } from 'store/index'
 
 export function renameGroup(prevName: string, nextName: string): AppThunk {
@@ -6,14 +10,14 @@ export function renameGroup(prevName: string, nextName: string): AppThunk {
     let trimmedNext = nextName.trim()
     if (prevName === nextName || prevName === trimmedNext) return
     if (!prevName || !trimmedNext) return
-    const envelopes = envelopeModel.getEnvelopes(getState())
-    const patches: TEnvelopeDraft[] = []
 
-    Object.values(envelopes).forEach(e => {
-      if (e.group !== prevName) return
-      patches.push({ id: e.id, group: trimmedNext })
-    })
+    const structure = selectCoreEnvelopeStructure(getState())
+    if (!structure.some(group => group.id === prevName)) return
 
-    if (patches.length) dispatch(envelopeModel.patchEnvelope(patches))
+    const input = toEnvelopeStructureInput(structure).map(group =>
+      group.group === prevName ? { ...group, group: trimmedNext } : group
+    )
+
+    dispatch(applyEnvelopeStructure(input))
   }
 }

@@ -30,38 +30,50 @@ its unused month dependency.
 `updateEnvelopeSettings(input)` now owns the edit dialog as one explicit atomic
 command. The dialog is edit-only and sends only its five visible fields.
 
+`createEnvelope(input)` now creates the tag and optional metadata atomically,
+returns the new envelope id as a receipt, and normalizes default group labels at
+the Redux boundary.
+
+Envelope hierarchy is now one semantic command: `applyEnvelopeStructure`
+accepts the full ordered structure (groups, nesting, order) and compiles
+ordering, group, and parent changes into one atomic patch. The four hierarchy
+consumers — envelope drag-and-drop, group move, group assignment, and group
+rename — send only structure input; the legacy `applyStructure` thunk is
+removed. The compatibility `patchEnvelope` thunk and `zerro.envelope.patch`
+command remain but no longer have app consumers.
+
 Replica ownership, server-like materialization rules, and package hardening
 remain incomplete.
 
-## Default next slice: semantic envelope create
+## Default next slice: retire the compatibility envelope patch path
 
-Goal: replace the current tag-create plus envelope-patch sequence with one
-semantic command and receipt.
+Goal: close the envelope write family by removing the unused partial-patch
+bridge.
 
 Scope:
 
-1. Define a minimal input for name and optional initial envelope metadata.
-2. Compile tag creation and metadata creation into one normalized patch.
-3. Return the new envelope id as a receipt.
-4. Add a versionable app command and migrate the existing create feature.
-5. Preserve current group/index behavior with resulting-state tests.
+1. Confirm no runtime consumer dispatches `envelopeModel.patchEnvelope` or
+   `zerro.envelope.patch`.
+2. Move any resulting-state coverage that still exercises the bridge onto the
+   semantic envelope commands.
+3. Remove the deprecated thunk, its command type, and the `TEnvelopeDraft`
+   re-exports from app layers; envelope drafts stay internal to Core compile.
+4. Update the bridge entry in the design ledger.
 
 Done when:
 
-- entity creation and metadata initialization are tested together;
-- the generated envelope id is returned without reading Redux afterward;
-- the real UI consumer sends only semantic input;
-- resulting-state tests pass through the Redux command funnel;
-- legacy envelope patching remains available for other fields.
+- app layers import no envelope draft type and no partial envelope patch;
+- the funnel compiles only semantic envelope commands plus `legacy.patch`;
+- the full suite passes without envelope parity regressions.
 
-Do not add a generic `update(Partial<TEnvelope>)` API or migrate unrelated
-envelope fields in this slice.
+Do not migrate transaction, account, or reminder writes in this slice, and do
+not touch materializer rules.
 
 ## Active tracks
 
 | Track                           | State                          | Next useful outcome                                                       |
 | ------------------------------- | ------------------------------ | ------------------------------------------------------------------------- |
-| A. Public facade and read graph | Active, default                | Add and adopt an explicit semantic envelope create command                |
+| A. Public facade and read graph | Envelope writes semantic       | Decide which adapter-level projectors deserve a supported subpath         |
 | B. Domain/presentation boundary | Boundary landed                | Extract an optional appearance package only when a real consumer needs it |
 | C. ZenMoney materializer rules  | Deferred until final           | Start only after the other architecture and migration tracks are complete |
 | D. Replica and sync             | Designed, not integrated       | Share pure outbox operations and make Redux the replica owner             |
@@ -82,10 +94,14 @@ Current:
 - `setEnvelopeColor(id, colorHex)` is the second adopted narrow write command.
 - `setEnvelopeComment(id, comment)` is the third adopted narrow write command.
 - `updateEnvelopeSettings(input)` atomically owns the edit-dialog use case.
+- `createEnvelope(input)` atomically creates tag+metadata and returns its id.
+- `applyEnvelopeStructure(structure)` owns hierarchy: ordering, groups, and
+  parents compile from full structure input in one atomic patch.
 
 Next:
 
-1. Add domain write methods that compile narrow semantic command inputs.
+1. Add domain write methods that compile narrow semantic command inputs
+   (transaction, account, and reminder families remain).
 2. Decide which adapter-level projectors deserve a supported subpath.
 3. Add explicit singular bulk APIs only when real use cases define atomicity.
 

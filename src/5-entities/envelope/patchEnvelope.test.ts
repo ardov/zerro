@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { i18n } from '6-shared/localization'
 import type { TDataStore } from '6-shared/types'
 import type { AppDispatch, AppThunk, RootState } from 'store'
 import { applyClientPatch } from 'store/data'
@@ -7,6 +8,7 @@ import { makeDemoStore } from 'core-next/demo'
 import { applyPatch } from 'core-next/zenmoney'
 import {
   compilePatchEnvelope,
+  defaultEnvelopeGroupIds,
   envId,
   EnvType,
   getEnvelopeMeta,
@@ -36,11 +38,18 @@ function makeThunkDispatch(initial: RootState) {
   let state = initial
   const dispatch = vi.fn((action: unknown) => {
     if (typeof action === 'function') {
-      return (action as AppThunk)(dispatch as AppDispatch, () => state, undefined)
+      return (action as AppThunk)(
+        dispatch as AppDispatch,
+        () => state,
+        undefined
+      )
     }
     if ((action as { type?: string }).type === applyClientPatch.type) {
       state = makeState(
-        applyPatch(state.data.current, (action as ReturnType<typeof applyClientPatch>).payload)
+        applyPatch(
+          state.data.current,
+          (action as ReturnType<typeof applyClientPatch>).payload
+        )
       )
     }
     return action
@@ -77,21 +86,25 @@ describe('patchEnvelope', () => {
     expect(dispatch).toHaveBeenCalledWith(applyClientPatch(expected))
   })
 
-  it('lets createEnvelope patch metadata after its new tag is in Redux state', () => {
+  it('creates an envelope and metadata through one semantic command', () => {
     vi.spyOn(Date, 'now').mockReturnValue(NOW)
     const runtime = makeThunkDispatch(makeState(makeDemoStore({ now: NOW })))
 
-    const id = createEnvelope({ comment: 'Created through Core' })(
-      runtime.dispatch,
-      runtime.getState,
-      undefined
-    )
+    const id = createEnvelope({
+      comment: 'Created through Core',
+      group: i18n.t('defaultTagGroup', { ns: 'common' }),
+      index: 2,
+    })(runtime.dispatch, runtime.getState, undefined)
 
     expect(id).toBe(envId.get(EnvType.Tag, UUID))
     expect(selectCoreEnvelopes(runtime.getState())[id!]).toBeDefined()
-    expect(getEnvelopeMeta(runtime.getState().data.current)[id!]).toMatchObject({
-      id,
-      comment: 'Created through Core',
-    })
+    expect(getEnvelopeMeta(runtime.getState().data.current)[id!]).toMatchObject(
+      {
+        id,
+        comment: 'Created through Core',
+        group: defaultEnvelopeGroupIds.tags,
+        index: 2,
+      }
+    )
   })
 })

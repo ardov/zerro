@@ -8,6 +8,8 @@
  */
 export { applyLegacyPatch } from './legacyPatch'
 export {
+  applyEnvelopeStructure,
+  createEnvelope,
   executeCommand,
   renameEnvelope,
   setEnvelopeColor,
@@ -15,6 +17,12 @@ export {
   updateEnvelopeSettings,
   type TAppCommand,
 } from './commands'
+export {
+  toEnvelopeStructureInput,
+  type TApplyEnvelopeStructureInput,
+  type TEnvelopeStructureGroupInput,
+  type TEnvelopeStructureNodeInput,
+} from '../../zerro'
 export {
   selectCoreActivity,
   selectCoreBalancesByDate,

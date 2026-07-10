@@ -1,21 +1,30 @@
-import { AppThunk } from 'store'
-import { tagModel } from '5-entities/tag'
-import { envelopeModel, EnvType, TEnvelope } from '5-entities/envelope'
+import type { AppThunk } from 'store'
+import type { TEnvelopeId } from '5-entities/envelope'
+import {
+  createEnvelope as createCoreEnvelope,
+  selectCoreEnvelopes,
+  selectCoreEnvelopeStructure,
+} from 'core-next/adapters/redux'
 import { t } from 'i18next'
 
+type TCreateEnvelopeInput = {
+  name?: string
+  group?: string
+  index?: number
+  comment?: string
+}
+
 export const createEnvelope =
-  (draft: Partial<TEnvelope>): AppThunk =>
-  (dispatch, getState) => {
-    const newTag = dispatch(
-      tagModel.createTag({
-        title: draft.name || t('tagNew', { ns: 'common' }),
-        showOutcome: true,
+  (input: TCreateEnvelopeInput = {}): AppThunk<TEnvelopeId> =>
+  dispatch =>
+    dispatch(
+      createCoreEnvelope({
+        name: input.name || t('tagNew', { ns: 'common' }),
+        group: input.group,
+        index: input.index,
+        comment: input.comment,
       })
-    )[0].id
-    const id = envelopeModel.makeId(EnvType.Tag, newTag)
-    dispatch(envelopeModel.patchEnvelope({ ...draft, id }))
-    return id
-  }
+    )
 
 export const createEnvelopeInGroup =
   (group: string): AppThunk =>
@@ -23,11 +32,11 @@ export const createEnvelopeInGroup =
     // In order for group not jump to the top of the list
     // we need to find the first envelope in the group
     // and create a new envelope right before it
-    const envelopes = envelopeModel.getEnvelopes(getState())
-    const structure = envelopeModel.getEnvelopeStructure(getState())
+    const envelopes = selectCoreEnvelopes(getState())
+    const structure = selectCoreEnvelopeStructure(getState())
     const groupNode = structure.find(gr => gr.id === group)
     if (!groupNode) return
     const firstEnvId = groupNode.children[0]?.id
-    const firstEnvIdx = envelopes[firstEnvId].indexRaw || 0
-    return dispatch(createEnvelope({ group, indexRaw: firstEnvIdx - 1 }))
+    const firstEnvIdx = firstEnvId ? envelopes[firstEnvId].indexRaw || 0 : 0
+    return dispatch(createEnvelope({ group, index: firstEnvIdx - 1 }))
   }
