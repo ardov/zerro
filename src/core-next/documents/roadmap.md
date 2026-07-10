@@ -350,8 +350,10 @@ the pure engine. Redux must become the sole owner of `base`, `outbox`,
 in-memory engine from thunks.
 
 - 2026-07-10: the command funnel exists. `adapters/redux/commands.ts` defines
-  the serializable, versioned `TAppCommand` envelope (`zerro.budget.set`,
-  `zerro.goal.set`, `zerro.envelope.patch`, `legacy.patch`) with
+  the serializable `TAppCommand` envelope (`zerro.budget.set`,
+  `zerro.goal.set`, `zerro.envelope.patch`, `legacy.patch`; no per-command
+  version — breaking payload changes mint a new type, and the persisted
+  outbox gets one schema version at the storage boundary) with
   `compileAppCommand` as the registry and `executeCommand` as the single write
   thunk; `setBudget`/`setGoal`/`patchEnvelope` are one-line command creators.
   Remaining legacy writes flow through `applyLegacyPatch`

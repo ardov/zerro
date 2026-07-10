@@ -53,7 +53,7 @@ describe('executeCommand funnel', () => {
     const state = makeState(makeDemoStore({ now: NOW }))
     const dispatch = makeDispatch(state)
 
-    dispatch(executeCommand({ v: 1, type: 'legacy.patch', payload: {} }))
+    dispatch(executeCommand({ type: 'legacy.patch', payload: {} }))
 
     const actions = dispatch.mock.calls
       .map(([action]: [unknown]) => action)

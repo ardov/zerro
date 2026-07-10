@@ -15,22 +15,22 @@ import {
 import { selectCoreEnvelopes } from './selectors'
 
 /**
- * Serializable app commands. This envelope is the future outbox persistence
- * contract: once entries are stored, changing a payload shape requires a new
- * `v` and a migration, not an edit in place.
+ * Serializable app commands. Once the outbox is persisted, a stored payload
+ * shape becomes a contract: breaking changes mint a new type (for example
+ * `zerro.budget.set@2`) or migrate eagerly at the storage boundary — the
+ * persisted outbox gets its own schema version there.
  *
  * `legacy.patch` wraps not-yet-migrated write paths so every client mutation
  * flows through one funnel; it carries the compiled patch as its payload.
  */
 export type TAppCommand =
-  | { v: 1; type: 'zerro.budget.set'; payload: TBudgetUpdate[] }
+  | { type: 'zerro.budget.set'; payload: TBudgetUpdate[] }
   | {
-      v: 1
       type: 'zerro.goal.set'
       payload: { month: TISOMonth; id: TEnvelopeId; goal: TGoal | null }
     }
-  | { v: 1; type: 'zerro.envelope.patch'; payload: TEnvelopeDraft[] }
-  | { v: 1; type: 'legacy.patch'; payload: TNormalizedPatch }
+  | { type: 'zerro.envelope.patch'; payload: TEnvelopeDraft[] }
+  | { type: 'legacy.patch'; payload: TNormalizedPatch }
 
 export function compileAppCommand(
   state: RootState,

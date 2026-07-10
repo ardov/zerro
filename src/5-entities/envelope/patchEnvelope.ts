@@ -9,7 +9,6 @@ export const patchEnvelope = (
   draft: TEnvelopeDraft | TEnvelopeDraft[]
 ): AppThunk =>
   executeCommand({
-    v: 1,
     type: 'zerro.envelope.patch',
     payload: Array.isArray(draft) ? draft : [draft],
   })

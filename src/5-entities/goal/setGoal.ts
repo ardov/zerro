@@ -12,7 +12,6 @@ export const setGoal =
     const newGoal = normalizeGoal(goal)
     dispatch(
       executeCommand({
-        v: 1,
         type: 'zerro.goal.set',
         payload: { month, id, goal: newGoal },
       })
