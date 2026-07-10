@@ -8,34 +8,28 @@ import {
   TTransactionId,
 } from '6-shared/types'
 import { applyLegacyPatch } from 'core-next/adapters/redux/legacyPatch'
+import {
+  deleteTransactions as deleteTransactionsCommand,
+  deleteTransactionsPermanently as deleteTransactionsPermanentlyCommand,
+  restoreTransaction as restoreTransactionCommand,
+} from 'core-next/adapters/redux'
 import { getTransactionsById } from './model'
 import { isViewed } from './helpers'
 
 export const deleteTransactions =
   (ids: TTransactionId | TTransactionId[]): AppThunk<void> =>
-  (dispatch, getState) => {
+  dispatch => {
     sendEvent('Transaction: delete')
-    const array = Array.isArray(ids) ? ids : [ids]
-    const deleted = array.map(id => ({
-      ...getTransactionsById(getState())[id],
-      deleted: true,
-      changed: Date.now(),
-    }))
-    dispatch(applyLegacyPatch({ transaction: deleted }))
+    dispatch(deleteTransactionsCommand(Array.isArray(ids) ? ids : [ids]))
   }
 
 export const deleteTransactionsPermanently =
   (ids: TTransactionId | TTransactionId[]): AppThunk<void> =>
-  (dispatch, getState) => {
+  dispatch => {
     sendEvent('Transaction: delete permanently')
-    const array = Array.isArray(ids) ? ids : [ids]
-    const deleted = array.map(id => ({
-      ...getTransactionsById(getState())[id],
-      outcome: 0.00001,
-      income: 0.00001,
-      changed: Date.now(),
-    }))
-    dispatch(applyLegacyPatch({ transaction: deleted }))
+    dispatch(
+      deleteTransactionsPermanentlyCommand(Array.isArray(ids) ? ids : [ids])
+    )
   }
 
 export const markViewed =
@@ -57,15 +51,9 @@ export const markViewed =
 
 export const restoreTransaction =
   (id: TTransactionId): AppThunk<void> =>
-  (dispatch, getState) => {
+  dispatch => {
     sendEvent('Transaction: restore')
-    const tr = {
-      ...getTransactionsById(getState())[id],
-      deleted: false,
-      changed: Date.now(),
-      id: uuidv1(),
-    }
-    dispatch(applyLegacyPatch({ transaction: [tr] }))
+    dispatch(restoreTransactionCommand(id))
   }
 
 // Не работает

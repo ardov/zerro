@@ -4,6 +4,12 @@ import { applyClientPatch } from 'store/data'
 import type { TISOMonth } from '../../zenmoney/primitives'
 import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../types'
 import {
+  compileDeleteTransactions,
+  compileDeleteTransactionsPermanently,
+  compileRestoreTransaction,
+  type TTransactionId,
+} from '../../zenmoney'
+import {
   compileApplyEnvelopeStructure,
   compileCreateEnvelope,
   compileRenameEnvelope,
@@ -57,6 +63,12 @@ export type TAppCommand =
       type: 'zerro.envelope.structure.apply'
       payload: TApplyEnvelopeStructureInput
     }
+  | { type: 'zenmoney.transaction.delete'; payload: { ids: TTransactionId[] } }
+  | {
+      type: 'zenmoney.transaction.delete.permanent'
+      payload: { ids: TTransactionId[] }
+    }
+  | { type: 'zenmoney.transaction.restore'; payload: { id: TTransactionId } }
   | { type: 'legacy.patch'; payload: TNormalizedPatch }
 
 export function compileAppCommand(
@@ -120,6 +132,16 @@ function compileAppCommandResult(
         ctx
       )
     }
+    case 'zenmoney.transaction.delete':
+      return compileDeleteTransactions(data, command.payload.ids, ctx)
+    case 'zenmoney.transaction.delete.permanent':
+      return compileDeleteTransactionsPermanently(
+        data,
+        command.payload.ids,
+        ctx
+      )
+    case 'zenmoney.transaction.restore':
+      return compileRestoreTransaction(data, command.payload.id, ctx)
     case 'legacy.patch':
       return command.payload
   }
@@ -195,6 +217,27 @@ export function updateEnvelopeSettings(
   return executeCommand({
     type: 'zerro.envelope.settings.update',
     payload: input,
+  })
+}
+
+export function deleteTransactions(ids: TTransactionId[]): AppThunk {
+  return executeCommand({
+    type: 'zenmoney.transaction.delete',
+    payload: { ids },
+  })
+}
+
+export function deleteTransactionsPermanently(ids: TTransactionId[]): AppThunk {
+  return executeCommand({
+    type: 'zenmoney.transaction.delete.permanent',
+    payload: { ids },
+  })
+}
+
+export function restoreTransaction(id: TTransactionId): AppThunk {
+  return executeCommand({
+    type: 'zenmoney.transaction.restore',
+    payload: { id },
   })
 }
 

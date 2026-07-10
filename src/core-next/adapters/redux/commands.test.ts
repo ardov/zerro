@@ -224,6 +224,70 @@ describe('executeCommand funnel', () => {
     expect(second).toEqual({})
   })
 
+  it('compiles transaction deletion to resulting state', () => {
+    const current = makeDemoStore({ now: NOW })
+    const state = makeState(current)
+    const [softId, hardId] = Object.keys(current.transaction)
+    const ctx = { now: () => NOW, uuid: () => 'unused' }
+
+    const softDeleted = applyPatch(
+      current,
+      compileAppCommand(
+        state,
+        { type: 'zenmoney.transaction.delete', payload: { ids: [softId] } },
+        ctx
+      )
+    )
+    const hardDeleted = applyPatch(
+      current,
+      compileAppCommand(
+        state,
+        {
+          type: 'zenmoney.transaction.delete.permanent',
+          payload: { ids: [hardId] },
+        },
+        ctx
+      )
+    )
+
+    expect(softDeleted.transaction[softId]).toMatchObject({
+      deleted: true,
+      changed: NOW,
+    })
+    expect(hardDeleted.transaction[hardId]).toMatchObject({
+      income: 0.00001,
+      outcome: 0.00001,
+    })
+  })
+
+  it('restores a deleted transaction under a new id', () => {
+    const current = makeDemoStore({ now: NOW })
+    const [id] = Object.keys(current.transaction)
+    const ctx = { now: () => NOW, uuid: () => 'restored-transaction' }
+
+    const deleted = applyPatch(
+      current,
+      compileAppCommand(
+        makeState(current),
+        { type: 'zenmoney.transaction.delete', payload: { ids: [id] } },
+        ctx
+      )
+    )
+    const restored = applyPatch(
+      deleted,
+      compileAppCommand(
+        makeState(deleted),
+        { type: 'zenmoney.transaction.restore', payload: { id } },
+        ctx
+      )
+    )
+
+    expect(restored.transaction['restored-transaction']).toMatchObject({
+      deleted: false,
+      changed: NOW,
+    })
+  })
+
   it('applies a legacy patch as-is', () => {
     const state = makeState(makeDemoStore({ now: NOW }))
     const [tagId] = Object.keys(state.data.current.tag)

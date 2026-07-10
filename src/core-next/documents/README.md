@@ -55,15 +55,17 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 - The envelope write family is fully semantic: the compatibility
   `patchEnvelope` thunk and `zerro.envelope.patch` command are removed, and
   envelope drafts stay internal to Core compile functions.
+- Transaction deletion and restore are semantic commands through the funnel;
+  the other transaction thunks still use the legacy patch bridge.
 
 ## Default next slice
 
-Add semantic transaction commands, starting with deletion and restore.
+Migrate the remaining transaction thunks off `applyLegacyPatch`.
 
-1. Define narrow id-based inputs instead of partial transaction payloads.
-2. Compile intent-only patches; account effects wait for the materializer.
-3. Route the chosen thunks through the command funnel.
-4. Leave the remaining transaction thunks on the legacy bridge for now.
+1. Route mark-viewed and bulk edit; both have narrow inputs and compilers.
+2. Route apply-changes and recreate; recreate returns an id receipt.
+3. Decide whether broken `splitTransfer` deserves a command or removal.
+4. Account-balance effects keep waiting for the materializer phase.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 

@@ -3,7 +3,7 @@
 - Updated: 2026-07-10
 - Branch: `core-next`
 - Worktree: clean; the branch tip is
-  `Retire the compatibility envelope patch path`
+  `Route transaction deletion and restore through the command funnel`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -26,7 +26,7 @@ claims against the tree before editing.
 | Zerro reads      | Envelopes through activity, metrics, month totals, goals, budgets, settings, hidden data, and FX are present          |
 | Session          | Namespaced semantic `get*` reads over lazy snapshot-local memoization; flat `read` is deprecated compatibility        |
 | Redux reads      | Most budget/envelope/goal/activity/transaction/tag/debtor/balance consumers use Core adapter selectors                |
-| Redux writes     | Budget, goal, and all envelope writes are semantic commands; transaction/account/reminder writes use patch bridges    |
+| Redux writes     | Budget, goal, envelope, and transaction delete/restore writes are semantic; other writes use patch bridges            |
 | Materializer     | Identity layer is wired into every Redux local patch; server patches bypass it                                        |
 | Engine           | Pure outbox reference exists; no production consumer; replay uses stored `appliedPatch`                               |
 | Presentation     | Domain envelopes are headless; Redux adds localized groups, symbols, and generated/display colors                     |
@@ -34,7 +34,20 @@ claims against the tree before editing.
 
 ## Latest landed slices
 
-The branch tip retires the compatibility envelope patch path:
+The branch tip routes transaction deletion and restore through the funnel:
+
+- `zenmoney.transaction.delete`, `zenmoney.transaction.delete.permanent`, and
+  `zenmoney.transaction.restore` commands reuse the existing Core compilers;
+- the adapter exports `deleteTransactions`, `deleteTransactionsPermanently`,
+  and `restoreTransaction` thunks;
+- the `5-entities/transaction` thunks keep their signatures and analytics
+  events but delegate to the adapter commands;
+- the remaining transaction thunks (mark viewed, bulk edit, apply changes,
+  recreate, split transfer) still use `applyLegacyPatch`;
+- funnel resulting-state tests cover soft delete, permanent delete, and
+  restore-under-new-id.
+
+The commit before it retired the compatibility envelope patch path:
 
 - `envelopeModel.patchEnvelope`, the `zerro.envelope.patch` command, and the
   app-layer `TEnvelopeDraft` export are removed;
@@ -44,7 +57,7 @@ The branch tip retires the compatibility envelope patch path:
   `src/4-features/envelope/createEnvelope.test.ts`;
 - the funnel compiles only semantic envelope commands plus `legacy.patch`.
 
-The commit before it landed semantic envelope creation and structure.
+The earlier commit landed semantic envelope creation and structure.
 
 Semantic envelope creation:
 
@@ -80,15 +93,14 @@ No materializer rule or replica behavior is included in these slices.
 
 ## Default next task
 
-Add semantic transaction commands described in
-[roadmap.md](./roadmap.md#default-next-slice-semantic-transaction-commands),
-starting with deletion and restore.
+Migrate the remaining transaction thunks described in
+[roadmap.md](./roadmap.md#default-next-slice-remaining-transaction-commands):
+mark viewed and bulk edit first, then apply-changes and recreate (with its
+id receipt), then decide the fate of broken `splitTransfer`.
 
 Likely files:
 
 ```txt
-src/core-next/zenmoney/transactions/commands.ts
-src/core-next/zerro/... (if a zerro-level wrapper is needed)
 src/core-next/adapters/redux/commands.ts
 src/core-next/adapters/redux/commands.test.ts
 src/5-entities/transaction/thunks.ts
@@ -98,10 +110,11 @@ src/core-next/documents/handoff.md
 
 Keep the slice bounded:
 
-- narrow inputs (ids), no partial transaction payloads;
+- reuse the existing Core transaction compilers; do not fork their logic;
 - commands compile intent only; account-balance effects stay reserved for the
   materializer phase;
-- migrate only the chosen thunks; the rest keep the legacy bridge;
+- `recreateTransaction` keeps returning the new id (receipt flow, like
+  `createEnvelope`);
 - do not start materializer rules; deleted-transaction immutability belongs
   there, not in commands.
 
@@ -122,8 +135,8 @@ Keep the slice bounded:
 
 ## Verification
 
-The semantic structure slice and the preceding envelope command slices were
-verified with:
+The transaction delete/restore slice and the preceding envelope command
+slices were verified with:
 
 ```bash
 pnpm exec tsc --noEmit
@@ -134,7 +147,7 @@ Expected full-suite baseline at this handoff:
 
 ```txt
 69 test files passed, 4 skipped
-245 tests passed, 6 skipped
+247 tests passed, 6 skipped
 ```
 
 Also run formatting and documentation link checks after changing these files.

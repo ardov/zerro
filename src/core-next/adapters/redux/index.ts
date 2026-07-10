@@ -10,8 +10,11 @@ export { applyLegacyPatch } from './legacyPatch'
 export {
   applyEnvelopeStructure,
   createEnvelope,
+  deleteTransactions,
+  deleteTransactionsPermanently,
   executeCommand,
   renameEnvelope,
+  restoreTransaction,
   setEnvelopeColor,
   setEnvelopeComment,
   updateEnvelopeSettings,

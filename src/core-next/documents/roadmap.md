@@ -46,34 +46,38 @@ the `zerro.envelope.patch` command, and app-layer `TEnvelopeDraft` exports are
 gone. The envelope write family is fully semantic; envelope drafts stay
 internal to Core compile functions.
 
+Transaction deletion and restore now flow through the funnel:
+`zenmoney.transaction.delete`, `zenmoney.transaction.delete.permanent`, and
+`zenmoney.transaction.restore` reuse the existing Core compilers, and the
+`5-entities/transaction` thunks delegate to the adapter commands. The other
+transaction thunks still use `applyLegacyPatch`.
+
 Replica ownership, server-like materialization rules, and package hardening
 remain incomplete.
 
-## Default next slice: semantic transaction commands
+## Default next slice: remaining transaction commands
 
-Goal: move the transaction write family off `applyLegacyPatch` one narrow
-command at a time.
+Goal: finish moving the transaction write family off `applyLegacyPatch`.
 
 Scope:
 
-1. Inventory `5-entities/transaction/thunks.ts`: delete, permanent delete,
-   restore, mark viewed, bulk edit, split transfer, and recreate.
-2. Start with deletion and restore: define narrow inputs (`ids`, no partial
-   transaction), compile intent-only patches in Core.
-3. Route the chosen commands through the funnel and migrate their app
-   consumers.
+1. Route `markViewed` and `bulkEditTransactions` through the funnel; both have
+   narrow inputs and existing Core compilers.
+2. Route `applyChangesToTransaction` and `recreateTransaction`; recreate
+   returns the new transaction id as a receipt.
+3. Decide whether broken `splitTransfer` is worth a command or should be
+   removed with its consumer.
 4. Keep account-balance effects out of commands; they belong to the deferred
    materializer phase.
 
 Done when:
 
-- the chosen thunks dispatch semantic commands instead of `applyLegacyPatch`;
+- migrated thunks dispatch semantic commands instead of `applyLegacyPatch`;
 - resulting-state tests pass through the Redux command funnel;
-- remaining transaction thunks keep working through the legacy bridge.
+- `5-entities/transaction/thunks.ts` no longer imports `applyLegacyPatch`.
 
-Do not migrate every transaction thunk at once, and do not start materializer
-rules; deleted-transaction immutability is a materializer rule, not command
-logic.
+Do not start materializer rules; deleted-transaction immutability is a
+materializer rule, not command logic.
 
 ## Active tracks
 
@@ -83,7 +87,7 @@ logic.
 | B. Domain/presentation boundary | Boundary landed          | Extract an optional appearance package only when a real consumer needs it |
 | C. ZenMoney materializer rules  | Deferred until final     | Start only after the other architecture and migration tracks are complete |
 | D. Replica and sync             | Designed, not integrated | Share pure outbox operations and make Redux the replica owner             |
-| E. Legacy cutover               | Envelope writes done     | Migrate transaction writes one narrow command at a time                   |
+| E. Legacy cutover               | Transaction writes begun | Migrate the remaining transaction thunks off the legacy bridge            |
 | F. Package and test hardening   | Ongoing                  | Consumer-level export/type test and targeted parity coverage              |
 
 ## Track A: public facade and read graph
