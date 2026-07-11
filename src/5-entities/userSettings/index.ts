@@ -1,11 +1,7 @@
 import { useAppSelector } from 'store/index'
-import {
-  getUserSettings,
-  patchUserSettings,
-  resetUserSettings,
-} from './userSettings'
+import { getUserSettings } from './userSettings'
 
-export type { TUserSettings, TUserSettingsPatch } from './userSettings'
+export type { TUserSettings } from './userSettings'
 
 export const userSettingsModel = {
   // Selectors
@@ -13,8 +9,4 @@ export const userSettingsModel = {
 
   // Hooks
   useUserSettings: () => useAppSelector(getUserSettings),
-
-  // Thunk
-  patch: patchUserSettings,
-  reset: resetUserSettings,
 }

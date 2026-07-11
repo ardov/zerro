@@ -31,10 +31,8 @@ function makeRootState(data: TDataStore): RootState {
 describe('Core tag presentation adapter', () => {
   it('matches the legacy populated-tag selector', async () => {
     await i18n.changeLanguage('en')
-    const [{ tagModel }, { selectCorePopulatedTags }] = await Promise.all([
-      import('5-entities/tag'),
-      import('./selectors'),
-    ])
+    const { selectCorePopulatedTags } = await import('./selectors')
+    const { tagModel } = await import('5-entities/tag')
     const state = makeRootState(makeDemoStore({ now: NOW }))
 
     expect(selectCorePopulatedTags(state)).toEqual(

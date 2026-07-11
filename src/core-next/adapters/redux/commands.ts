@@ -36,6 +36,7 @@ import {
   compileUpdateEnvelopeSettings,
   compileSetBudget,
   compileSetGoal,
+  compilePatchUserSettings,
   type TApplyEnvelopeStructureInput,
   type TBudgetUpdate,
   type TCreateEnvelopeInput,
@@ -66,6 +67,11 @@ export type { TBudgetUpdate } from '../../zerro'
  */
 export type TAppCommand =
   | { type: 'zerro.budget.set'; payload: TBudgetUpdate[] }
+  | { type: 'zerro.userSettings.emojiIcons.set'; payload: { enabled: boolean } }
+  | {
+      type: 'zerro.userSettings.preferZmBudgets.set'
+      payload: { enabled: boolean }
+    }
   | {
       type: 'zerro.goal.set'
       payload: { month: TISOMonth; id: TEnvelopeId; goal: TGoal | null }
@@ -150,6 +156,18 @@ function compileAppCommandResult(
   switch (command.type) {
     case 'zerro.budget.set':
       return compileSetBudget(data, command.payload, ctx)
+    case 'zerro.userSettings.emojiIcons.set':
+      return compilePatchUserSettings(
+        data,
+        { emojiIcons: command.payload.enabled },
+        ctx
+      )
+    case 'zerro.userSettings.preferZmBudgets.set':
+      return compilePatchUserSettings(
+        data,
+        { preferZmBudgets: command.payload.enabled },
+        ctx
+      )
     case 'zerro.goal.set': {
       const { month, id, goal } = command.payload
       return compileSetGoal(data, month, id, goal, ctx)
@@ -306,6 +324,20 @@ function executeCommand(command: TAppCommand): AppThunk<unknown> {
 
 export function setBudget(updates: TBudgetUpdate[]): AppThunk {
   return executeCommand({ type: 'zerro.budget.set', payload: updates })
+}
+
+export function setEmojiIcons(enabled: boolean): AppThunk {
+  return executeCommand({
+    type: 'zerro.userSettings.emojiIcons.set',
+    payload: { enabled },
+  })
+}
+
+export function setPreferZmBudgets(enabled: boolean): AppThunk {
+  return executeCommand({
+    type: 'zerro.userSettings.preferZmBudgets.set',
+    payload: { enabled },
+  })
 }
 
 export function setGoal(

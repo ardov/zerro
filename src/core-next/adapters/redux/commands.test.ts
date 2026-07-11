@@ -16,6 +16,7 @@ import {
   envId,
   EnvType,
   getEnvelopeMeta,
+  getUserSettings,
   toEnvelopeStructureInput,
 } from '../../zerro'
 import { compileAppCommand, recreateTransaction } from './commands'
@@ -52,6 +53,23 @@ function makeDispatch(state: RootState) {
 }
 
 describe('semantic command funnel', () => {
+  it.each([
+    ['zerro.userSettings.emojiIcons.set', 'emojiIcons'],
+    ['zerro.userSettings.preferZmBudgets.set', 'preferZmBudgets'],
+  ] as const)('sets one user setting through %s', (type, key) => {
+    const current = makeDemoStore({ now: NOW })
+    const next = applyPatch(
+      current,
+      compileAppCommand(
+        makeState(current),
+        { type, payload: { enabled: true } },
+        { now: () => NOW, uuid: () => 'settings-id' }
+      )
+    )
+
+    expect(getUserSettings(next)[key]).toBe(true)
+  })
+
   it('compiles semantic envelope settings to entity and metadata state', () => {
     const current = makeDemoStore({ now: NOW })
     const state = makeState(current)

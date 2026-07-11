@@ -38,6 +38,7 @@ import { useAppDispatch } from 'store'
 import { resetData } from 'store/data'
 
 import { userSettingsModel } from '5-entities/userSettings'
+import { setEmojiIcons, setPreferZmBudgets } from 'core-next/adapters/redux'
 import { useRegularSync } from '3-widgets/RegularSyncHandler'
 import { logOut } from '4-features/authorization'
 import { exportCSV } from '4-features/export/exportCSV'
@@ -278,7 +279,7 @@ function IconModeItem() {
   const handleClick = () => {
     const next = !emojiIcons
     sendEvent(`Settings: emoji icons set to ${next}`)
-    dispatch(userSettingsModel.patch({ emojiIcons: next }))
+    dispatch(setEmojiIcons(next))
   }
   return (
     <MenuItem onClick={handleClick}>
@@ -297,7 +298,7 @@ function BudgetSettingsItem() {
   const { preferZmBudgets } = userSettingsModel.useUserSettings()
   const toggleSetting = () => {
     sendEvent(`Settings: preferZmBudgets ${preferZmBudgets ? 'off' : 'on'}`)
-    dispatch(userSettingsModel.patch({ preferZmBudgets: !preferZmBudgets }))
+    dispatch(setPreferZmBudgets(!preferZmBudgets))
   }
   const convertBudgets = () => {
     sendEvent(`Settings: convert old budgets`)

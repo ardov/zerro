@@ -51,6 +51,8 @@ describe('core-next API boundary', () => {
         'setAccountInBalance',
         'setEnvelopeColor',
         'setEnvelopeComment',
+        'setEmojiIcons',
+        'setPreferZmBudgets',
         'setReminder',
         'setBudget',
         'setGoal',

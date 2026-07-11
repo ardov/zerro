@@ -24,10 +24,8 @@ vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
 }))
 
 async function importModels() {
-  const [{ budgetModel }, { selectCoreBudgets }] = await Promise.all([
-    import('5-entities/budget'),
-    import('./selectors'),
-  ])
+  const { selectCoreBudgets } = await import('./selectors')
+  const { budgetModel } = await import('5-entities/budget')
   return { budgetModel, selectCoreBudgets }
 }
 

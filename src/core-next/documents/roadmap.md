@@ -16,6 +16,11 @@ adapter-owned app-facing type, and transaction analytics stay beside UI
 actions. Command routing tests live with the Redux adapter. Transaction reads,
 classification, sorting, filtering, and presentation remain separate.
 
+Account in-budget and user-settings writes are direct Redux adapter commands as
+well. Settings use field-specific intent commands rather than exposing the old
+generic `Partial<TUserSettings>` patch contract. FX writes are next and must
+preserve the distinction between local hidden-data edits and network loading.
+
 Envelope reads are now split: session/Core projectors return domain envelopes,
 and the Redux adapter adds symbols, generated/display colors, localized null
 text, and localized groups. The old `populatedTags` session dependency is gone,

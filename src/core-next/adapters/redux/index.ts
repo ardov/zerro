@@ -26,6 +26,8 @@ export {
   setAccountInBalance,
   setEnvelopeColor,
   setEnvelopeComment,
+  setEmojiIcons,
+  setPreferZmBudgets,
   setReminder,
   setBudget,
   setGoal,

@@ -37,10 +37,11 @@ const ctx = {
 
 async function importModels() {
   await i18n.changeLanguage('en')
-  const [{ envelopeModel }, selectors] = await Promise.all([
-    import('5-entities/envelope'),
-    import('./selectors'),
-  ])
+  // Initialize the adapter graph before the legacy envelope/tag barrels. Their
+  // circular compatibility imports can otherwise interleave under the full
+  // suite and expose a partially initialized populateTags export.
+  const selectors = await import('./selectors')
+  const { envelopeModel } = await import('5-entities/envelope')
   return { envelopeModel, ...selectors }
 }
 

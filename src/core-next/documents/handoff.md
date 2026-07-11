@@ -18,10 +18,10 @@ import semantic commands from the Redux adapter; transaction analytics stay at
 the UI action boundary. Read, classification, sorting, filtering, and
 presentation helpers remain separate migration work.
 
-The account `setInBudget` wrapper is also removed; AccountContextMenu calls the
-Redux adapter and owns its analytics event directly. Next audit user-settings
-and FX write families separately; they have different persistence/network
-behavior and should not be bundled together.
+The account and user-settings write wrappers are removed. SettingsMenu calls
+the narrow `setEmojiIcons` / `setPreferZmBudgets` Redux commands; the unused
+legacy reset is gone too. Next take the FX write family, preserving its split
+between local hidden-data edits and network loading.
 
 The identity materializer stays as the extension point already wired into the
 command path, but implementing its domain rules is deferred until after legacy

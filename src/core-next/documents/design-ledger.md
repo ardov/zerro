@@ -256,6 +256,13 @@ question before enabling non-identity rules.
 
 ## Resolved bridges
 
+### User-settings write wrapper
+
+Resolved on 2026-07-11. SettingsMenu calls narrow Redux adapter commands for
+emoji-icon mode and ZenMoney-budget preference. The generic legacy
+`userSettingsModel.patch`, unused reset member, and `Partial<TUserSettings>` app
+write contract are removed. User-settings reads/hooks remain separate.
+
 ### Account in-budget write wrapper
 
 Resolved on 2026-07-11. AccountContextMenu calls the Redux adapter
