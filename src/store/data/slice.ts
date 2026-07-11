@@ -13,13 +13,11 @@ import {
 import { withPerf } from '6-shared/helpers/performance'
 import { TDataStore, TDiff } from '6-shared/types'
 import { applyDiffMutable } from './shared/applyDiff'
-import { immutableMergeDiffs } from './shared/mergeDiffs'
 
 interface DataSlice {
   current: TDataStore
-  server?: TDataStore
-  diff?: TDiff
-  /** Transitional runtime outbox; not persisted yet. */
+  base?: TDataStore
+  /** Durable local commands; current replays from the applied prefix. */
   outbox?: TOutboxEntry<unknown>[]
   outboxHead?: number
   inbox?: TServerInbox | null
@@ -27,7 +25,7 @@ interface DataSlice {
 
 export interface TServerInbox extends TDiff {
   syncStartTime?: number
-  acknowledgedOutboxIds?: string[]
+  sentOutboxIds?: string[]
 }
 
 const makeDataStore = (): TDataStore => ({
@@ -48,8 +46,7 @@ const makeDataStore = (): TDataStore => ({
 // INITIAL STATE
 const initialState: DataSlice = {
   current: makeDataStore(),
-  server: undefined,
-  diff: undefined,
+  base: undefined,
 }
 
 // SLICE
@@ -65,36 +62,30 @@ const { reducer, actions } = createSlice({
     ),
     rebaseServerInbox: withPerf('rebaseServerInbox', state => {
       if (!state.inbox) return
-      const { syncStartTime, acknowledgedOutboxIds, ...canonicalPatch } =
-        state.inbox
-      const acknowledged = acknowledgedOutboxIds
-        ? new Set(acknowledgedOutboxIds)
-        : null
+      const { syncStartTime, sentOutboxIds, ...canonicalPatch } = state.inbox
+      const sent = sentOutboxIds ? new Set(sentOutboxIds) : null
 
-      state.server ??= makeDataStore()
-      applyDiffMutable(canonicalPatch, state.server)
+      state.base ??= makeDataStore()
+      applyDiffMutable(canonicalPatch, state.base)
 
       const pending = getPendingOutbox(
         state.outbox ?? [],
         state.outboxHead ?? state.outbox?.length ?? 0
       )
       state.outbox =
-        acknowledged || syncStartTime !== undefined
+        sent || syncStartTime !== undefined
           ? pending.filter(entry =>
-              acknowledged
-                ? !acknowledged.has(entry.id)
-                : entry.createdAt > syncStartTime!
+              sent ? !sent.has(entry.id) : entry.createdAt > syncStartTime!
             )
           : []
       state.outboxHead = state.outbox.length
-      state.current = replayOutbox(state.server, state.outbox, state.outboxHead)
-      state.diff = buildOutboxDiff(state.outbox, state.outboxHead)
+      state.current = replayOutbox(state.base, state.outbox, state.outboxHead)
       state.inbox = null
     }),
     appendClientOutboxEntry: withPerf(
       'appendClientOutboxEntry',
       (state, { payload }: PayloadAction<TOutboxEntry<unknown>>) => {
-        state.server ??= state.current
+        state.base ??= state.current
         const next = appendOutbox(
           state.outbox ?? [],
           state.outboxHead ?? state.outbox?.length ?? 0,
@@ -102,31 +93,32 @@ const { reducer, actions } = createSlice({
         )
         state.outbox = next.outbox
         state.outboxHead = next.outboxHead
-        state.current = replayOutbox(
-          state.server,
-          state.outbox,
-          state.outboxHead
-        )
-        state.diff = buildOutboxDiff(state.outbox, state.outboxHead)
+        state.current = replayOutbox(state.base, state.outbox, state.outboxHead)
       }
     ),
+    prepareClientSync: withPerf('prepareClientSync', state => {
+      const outbox = getPendingOutbox(
+        state.outbox ?? [],
+        state.outboxHead ?? state.outbox?.length ?? 0
+      )
+      state.outbox = outbox
+      state.outboxHead = outbox.length
+    }),
     undoClientCommand: withPerf('undoClientCommand', state => {
       const outbox = state.outbox ?? []
       const currentHead = state.outboxHead ?? outbox.length
       const outboxHead = clampOutboxHead(currentHead - 1, outbox.length)
-      if (outboxHead === currentHead || !state.server) return
+      if (outboxHead === currentHead || !state.base) return
       state.outboxHead = outboxHead
-      state.current = replayOutbox(state.server, outbox, outboxHead)
-      state.diff = buildOutboxDiff(outbox, outboxHead)
+      state.current = replayOutbox(state.base, outbox, outboxHead)
     }),
     redoClientCommand: withPerf('redoClientCommand', state => {
       const outbox = state.outbox ?? []
       const currentHead = state.outboxHead ?? outbox.length
       const outboxHead = clampOutboxHead(currentHead + 1, outbox.length)
-      if (outboxHead === currentHead || !state.server) return
+      if (outboxHead === currentHead || !state.base) return
       state.outboxHead = outboxHead
-      state.current = replayOutbox(state.server, outbox, outboxHead)
-      state.diff = buildOutboxDiff(outbox, outboxHead)
+      state.current = replayOutbox(state.base, outbox, outboxHead)
     }),
     restorePersistedReplica: withPerf(
       'restorePersistedReplica',
@@ -134,13 +126,12 @@ const { reducer, actions } = createSlice({
         if (
           !payload ||
           payload.version !== replicaPersistenceVersion ||
-          !state.server ||
-          payload.baseServerTimestamp !== state.server.serverTimestamp
+          !state.base ||
+          payload.baseServerTimestamp !== state.base.serverTimestamp
         ) {
           state.outbox = []
           state.outboxHead = 0
-          state.diff = undefined
-          if (state.server) state.current = state.server
+          if (state.base) state.current = state.base
           return
         }
 
@@ -149,12 +140,7 @@ const { reducer, actions } = createSlice({
           payload.outboxHead,
           payload.outbox.length
         )
-        state.current = replayOutbox(
-          state.server,
-          state.outbox,
-          state.outboxHead
-        )
-        state.diff = buildOutboxDiff(state.outbox, state.outboxHead)
+        state.current = replayOutbox(state.base, state.outbox, state.outboxHead)
       }
     ),
     resetData: () => {
@@ -171,20 +157,9 @@ export const {
   receiveServerPatch,
   rebaseServerInbox,
   appendClientOutboxEntry,
+  prepareClientSync,
   undoClientCommand,
   redoClientCommand,
   restorePersistedReplica,
   resetData,
 } = actions
-
-function buildOutboxDiff(
-  outbox: readonly TOutboxEntry<unknown>[],
-  outboxHead: number
-): TDiff | undefined {
-  const pending = getPendingOutbox(outbox, outboxHead)
-  if (!pending.length) return undefined
-  return pending.reduce<TDiff>(
-    (diff, entry) => immutableMergeDiffs(diff, entry.appliedPatch),
-    {}
-  )
-}
