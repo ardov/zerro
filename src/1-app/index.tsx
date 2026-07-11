@@ -51,8 +51,7 @@ function createZerroInstance(s: typeof store) {
     },
     logs: {},
     resetData: () => s.dispatch(resetData()),
-    applyClientPatch: (patch: TDiff) =>
-      s.dispatch(applyDebugPatch(patch)),
+    applyClientPatch: (patch: TDiff) => s.dispatch(applyDebugPatch(patch)),
     exportPrivateFixture: (name?: string) => {
       if (!import.meta.env.DEV) {
         throw new Error('Private fixture export is available only in dev mode')

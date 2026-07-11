@@ -1,7 +1,5 @@
 import type { TFxAmount, TISOMonth } from '6-shared/types'
-import {
-  selectCoreEnvMetrics,
-} from 'core-next/adapters/redux'
+import { selectCoreEnvMetrics } from 'core-next/adapters/redux'
 import type { TEnvelopeId } from '5-entities/envelope'
 
 import React, { FC, useEffect, useState } from 'react'

@@ -50,10 +50,7 @@ export { DataEntity } from 'core-next/patch'
 // DELETION — owned by Core Next
 // ---------------------------------------------------------------------
 
-export type {
-  TZmDeletionObject,
-  TDeletionObject,
-} from 'core-next/zenmoney'
+export type { TZmDeletionObject, TDeletionObject } from 'core-next/zenmoney'
 import type { TZmDeletionObject } from 'core-next/zenmoney'
 
 // ---------------------------------------------------------------------

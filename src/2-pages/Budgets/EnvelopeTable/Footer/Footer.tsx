@@ -1,8 +1,6 @@
 import React, { FC } from 'react'
 import { useAppSelector } from 'store'
-import {
-  selectCoreMonthTotals,
-} from 'core-next/adapters/redux'
+import { selectCoreMonthTotals } from 'core-next/adapters/redux'
 import { Typography } from '@mui/material'
 import { TableRow } from '../shared/shared'
 

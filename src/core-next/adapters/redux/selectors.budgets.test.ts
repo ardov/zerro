@@ -35,7 +35,8 @@ const ctx = {
   now: () => NOW,
   uuid: (() => {
     let counter = 0
-    return () => `00000000-0000-4000-8000-${String(counter++).padStart(12, '0')}`
+    return () =>
+      `00000000-0000-4000-8000-${String(counter++).padStart(12, '0')}`
   })(),
 }
 
@@ -146,7 +147,9 @@ describe('selectCoreBudgets', () => {
       [{ id: envelopeId, month: MONTH, value: 12_000 }],
       ctx
     )
-    const next = selectCoreBudgets(makeRootState(applyPatch(store, budgetPatch)))
+    const next = selectCoreBudgets(
+      makeRootState(applyPatch(store, budgetPatch))
+    )
 
     expect(next).not.toBe(first)
     expect(next[MONTH][envelopeId]).toBe(12_000)

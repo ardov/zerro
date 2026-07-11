@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  makeTransaction,
-  usdInstruments,
-} from '../../testing/zenmoneyTestData'
+import { makeTransaction, usdInstruments } from '../../testing/zenmoneyTestData'
 import { EnvType, envId } from '../envelope-id'
 import { buildRawActivity, EnvActivity } from './rawActivity'
 

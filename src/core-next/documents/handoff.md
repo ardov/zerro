@@ -343,19 +343,19 @@ cannot quietly return.
 
 ## Verification
 
-The bulk combine/merge slice and the preceding transaction/entity write
-slices were verified with:
+Verify with:
 
 ```bash
 pnpm exec tsc --noEmit
 pnpm exec vitest run
+pnpm format:check
 ```
 
-Expected full-suite baseline at this handoff:
+Expected full-suite baseline after the health slice:
 
 ```txt
 78 test files passed, 4 skipped
-280 tests passed, 6 skipped
+281 tests passed, 6 skipped
 ```
 
 Browser check: the transaction-list multi-select bar and bulk-actions menu

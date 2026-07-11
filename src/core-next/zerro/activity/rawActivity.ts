@@ -34,8 +34,12 @@ export function buildRawActivity(
   const result: ByMonth<TRawActivityNode> = {}
 
   input.transactions.forEach(transaction => {
-    const fromBudget = input.inBudgetAccountIds.includes(transaction.outcomeAccount)
-    const toBudget = input.inBudgetAccountIds.includes(transaction.incomeAccount)
+    const fromBudget = input.inBudgetAccountIds.includes(
+      transaction.outcomeAccount
+    )
+    const toBudget = input.inBudgetAccountIds.includes(
+      transaction.incomeAccount
+    )
     const type = getTransactionType(transaction, input.debtAccountId)
 
     if (!fromBudget && !toBudget) return
@@ -104,7 +108,10 @@ function addInternalTransaction(
   }
 
   const change = addFxAmount(
-    { [instruments[transaction.incomeInstrument].shortTitle]: transaction.income },
+    {
+      [instruments[transaction.incomeInstrument].shortTitle]:
+        transaction.income,
+    },
     {
       [instruments[transaction.outcomeInstrument].shortTitle]:
         -transaction.outcome,
@@ -211,7 +218,8 @@ function getDebtorEnvelopeId(
   transaction: TTransaction,
   debtors: ById<TEnvelopeDebtor>
 ): TEnvelopeId {
-  if (transaction.merchant) return envId.get(EnvType.Merchant, transaction.merchant)
+  if (transaction.merchant)
+    return envId.get(EnvType.Merchant, transaction.merchant)
 
   const cleanName = cleanPayee(String(transaction.payee))
   const debtor = debtors[cleanName]

@@ -110,8 +110,16 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
       selectCoreKeepingEnvelopeIds(state),
       envelopeModel.getKeepingEnvelopes(state)
     )
-    expectSameJsonHash('budgets', selectCoreBudgets(state), budgetModel.get(state))
-    expectSameJsonHash('rawGoals', selectCoreRawGoals(state), goalModel.getRaw(state))
+    expectSameJsonHash(
+      'budgets',
+      selectCoreBudgets(state),
+      budgetModel.get(state)
+    )
+    expectSameJsonHash(
+      'rawGoals',
+      selectCoreRawGoals(state),
+      goalModel.getRaw(state)
+    )
     expectSameJsonHash(
       'debtors',
       selectCoreDebtors(state),
@@ -122,13 +130,21 @@ maybeDescribe('core-next Redux adapter selectors on private fixture', () => {
       selectCoreCurrentFxRates(state),
       fxRateModel.latest(state)
     )
-    expectSameJsonHash('fxRates', selectCoreFxRates(state), fxRateModel.get(state))
+    expectSameJsonHash(
+      'fxRates',
+      selectCoreFxRates(state),
+      fxRateModel.get(state)
+    )
     expectSameJsonHash(
       'rawActivity',
       selectCoreRawActivity(state),
       getRawActivity(state)
     )
-    expectSameJsonHash('activity', selectCoreActivity(state), getActivity(state))
+    expectSameJsonHash(
+      'activity',
+      selectCoreActivity(state),
+      getActivity(state)
+    )
     expectSameJsonHash(
       'monthList',
       selectCoreMonthList(state),

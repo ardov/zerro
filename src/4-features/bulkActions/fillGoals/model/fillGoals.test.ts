@@ -7,7 +7,8 @@ import { setTotalBudget } from '4-features/budget/setTotalBudget'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { fillGoals } from './fillGoals'
 
-vi.mock('core-next/adapters/redux', () => ({
+vi.mock('core-next/adapters/redux', async importOriginal => ({
+  ...(await importOriginal<typeof import('core-next/adapters/redux')>()),
   selectCoreGoals: vi.fn(),
 }))
 vi.mock('4-features/budget/setTotalBudget', () => ({

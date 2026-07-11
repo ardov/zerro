@@ -1,8 +1,6 @@
 import React, { FC, ReactElement, useCallback } from 'react'
 import { useAppSelector } from 'store'
-import {
-  selectCoreMonthList,
-} from 'core-next/adapters/redux'
+import { selectCoreMonthList } from 'core-next/adapters/redux'
 import { Helmet } from 'react-helmet'
 import { Box, Theme, useMediaQuery } from '@mui/material'
 import { useHotkeys } from 'react-hotkeys-hook'

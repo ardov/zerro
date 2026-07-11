@@ -138,7 +138,10 @@ export function mergeNormalizedPatches(
       if (!Array.isArray(value)) return
       const patchKey = key as keyof TNormalizedPatch
       const current = result[patchKey]
-      result[patchKey] = [...(Array.isArray(current) ? current : []), ...value] as never
+      result[patchKey] = [
+        ...(Array.isArray(current) ? current : []),
+        ...value,
+      ] as never
     })
   })
 

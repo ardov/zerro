@@ -1,7 +1,5 @@
 import type { TFxCode, TISOMonth } from '6-shared/types'
-import {
-  selectCoreMonthTotals,
-} from 'core-next/adapters/redux'
+import { selectCoreMonthTotals } from 'core-next/adapters/redux'
 import React, { FC, useEffect, useState } from 'react'
 import {
   Box,

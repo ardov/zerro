@@ -7,7 +7,10 @@ import { populateTags } from './populateTags'
 
 // SELECTORS
 export const getTags = (state: RootState) => state.data.current.tag
-export const getPopulatedTags = createSelector([getTags, getUserSettings], populateTags)
+export const getPopulatedTags = createSelector(
+  [getTags, getUserSettings],
+  populateTags
+)
 
 // TODO below are deprecated methods
 

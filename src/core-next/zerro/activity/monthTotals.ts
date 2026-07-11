@@ -43,8 +43,7 @@ export function buildMonthTotals(
 
   let prev = monthListReversed[0]
   monthListReversed.forEach((month, index) => {
-    const toValue = (amount: TFxAmount) =>
-      input.convertFx(amount, 'USD', month)
+    const toValue = (amount: TFxAmount) => input.convertFx(amount, 'USD', month)
     const isFuture = month > input.currentMonth
     const isCurrent = month === input.currentMonth
     const prevMonth = result[prev] || ({} as Partial<TMonthTotals>)

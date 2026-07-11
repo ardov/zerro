@@ -38,14 +38,7 @@ export async function requestRates(date: TDateDraft) {
   // Probably, should be automatically calculated for all currencies with 'μ' prefix
   // or add a multiplier field to currencySymbols.json
 
-  const MICRO_CURRENCIES = new Set([
-    'ASH',
-    'BCH',
-    'BTC',
-    'ETH',
-    'LTC',
-    'XMR'
-  ])
+  const MICRO_CURRENCIES = new Set(['ASH', 'BCH', 'BTC', 'ETH', 'LTC', 'XMR'])
 
   keys(rates).forEach(key => {
     const code = key.toUpperCase()

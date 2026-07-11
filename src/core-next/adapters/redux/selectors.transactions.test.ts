@@ -47,12 +47,18 @@ describe('Core transaction adapter reads', () => {
   it('matches legacy transaction map, IDs, history, debtors, and balance history', () => {
     const state = makeRootState(makeDemoStore({ now: NOW }))
 
-    expect(selectCoreTransactions(state)).toBe(trModel.getTransactionsById(state))
-    expect(selectCoreTransactionIds(state)).toEqual(trModel.getTransactionIds(state))
+    expect(selectCoreTransactions(state)).toBe(
+      trModel.getTransactionsById(state)
+    )
+    expect(selectCoreTransactionIds(state)).toEqual(
+      trModel.getTransactionIds(state)
+    )
     expect(selectCoreTransactionsHistory(state)).toEqual(
       trModel.getTransactionsHistory(state)
     )
-    expect(selectCoreHistoryStart(state)).toEqual(trModel.getHistoryStart(state))
+    expect(selectCoreHistoryStart(state)).toEqual(
+      trModel.getHistoryStart(state)
+    )
     expect(selectCoreDebtors(state)).toEqual(debtorModel.getDebtors(state))
     expect(selectCoreBalancesByDate(state)).toEqual(
       accBalanceModel.getBalancesByDate(state)

@@ -7,10 +7,7 @@ import { toISOMonth } from '6-shared/helpers/date'
 import { getAverage } from '6-shared/helpers/money/currencyHelpers'
 
 import { useAppSelector } from 'store'
-import {
-  selectCoreEnvMetrics,
-  selectCoreGoals,
-} from 'core-next/adapters/redux'
+import { selectCoreEnvMetrics, selectCoreGoals } from 'core-next/adapters/redux'
 import { fxRateModel } from '5-entities/currency/fxRate'
 
 export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {

@@ -1,8 +1,6 @@
 import type { TDateDraft, TFxAmount, TISOMonth } from '6-shared/types'
 import { useAppSelector } from 'store'
-import {
-  selectCoreEnvMetrics,
-} from 'core-next/adapters/redux'
+import { selectCoreEnvMetrics } from 'core-next/adapters/redux'
 
 import React from 'react'
 import { useTranslation } from 'react-i18next'

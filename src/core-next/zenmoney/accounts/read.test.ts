@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  makeAccount,
-  makeStore,
-} from '../../testing/zenmoneyTestData'
+import { makeAccount, makeStore } from '../../testing/zenmoneyTestData'
 import {
   getAccountList,
   getAccounts,

@@ -1,6 +1,10 @@
 import type { Modify, OptionalExceptFor } from '../../shared/types'
 import type { TDataStore } from '../store'
-import { DataEntity, type TCoreContext, type TNormalizedPatch } from '../../types'
+import {
+  DataEntity,
+  type TCoreContext,
+  type TNormalizedPatch,
+} from '../../types'
 import type { TDateDraft } from '../primitives'
 import { getRootUserId } from '../users'
 import { makeReminder, type TReminderFactoryDraft } from './factory'
@@ -15,7 +19,10 @@ export type TReminderDraft = Modify<
 
 export function compileSetReminder(
   data: TDataStore,
-  draft: TReminderDraft | TReminderPatch | Array<TReminderDraft | TReminderPatch>,
+  draft:
+    | TReminderDraft
+    | TReminderPatch
+    | Array<TReminderDraft | TReminderPatch>,
   ctx: TCoreContext
 ): TNormalizedPatch {
   const list = Array.isArray(draft) ? draft : [draft]

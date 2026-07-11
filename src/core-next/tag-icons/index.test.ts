@@ -35,9 +35,8 @@ describe('tag icon catalog', () => {
       emoji: null,
       svg: '/custom.svg',
     })
-    expect(getTagIconSvg('custom', { svgById: { custom: '/custom.svg' } })).toBe(
-      '/custom.svg'
-    )
+    expect(
+      getTagIconSvg('custom', { svgById: { custom: '/custom.svg' } })
+    ).toBe('/custom.svg')
   })
 })
-

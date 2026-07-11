@@ -13,9 +13,9 @@
     "fixture:test": "node --max-old-space-size=4096 ./node_modules/vitest/vitest.mjs run src/core-next/testing/privateFixture.legacy.test.ts",
     "core-next:package-check": "node scripts/check-core-next-package.mjs",
     "lint:css": "stylelint \"src/**/*.{js,jsx,ts,tsx}\"",
-    "lint:js": "npx eslint --config eslint.config.js src",
     "lint": "npx tsc --noEmit",
-    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,scss,json,md}\""
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,scss,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,css,scss,json,md}\""
   },
   "eslintConfig": {
     "extends": [

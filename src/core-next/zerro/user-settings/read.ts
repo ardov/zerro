@@ -34,7 +34,8 @@ export function getUserSettings(data: THiddenDataSource): TUserSettings {
   return {
     sawMigrationAlert:
       raw.sawMigrationAlert ?? DEFAULT_USER_SETTINGS.sawMigrationAlert,
-    preferZmBudgets: raw.preferZmBudgets ?? DEFAULT_USER_SETTINGS.preferZmBudgets,
+    preferZmBudgets:
+      raw.preferZmBudgets ?? DEFAULT_USER_SETTINGS.preferZmBudgets,
     emojiIcons: raw.emojiIcons ?? DEFAULT_USER_SETTINGS.emojiIcons,
   }
 }

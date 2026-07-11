@@ -179,7 +179,8 @@ function useDataTrend(month: TISOMonth, id: TEnvelopeId): TTrendNode[] {
  * @returns
  */
 function useActivityTrend(month: TISOMonth, id: TEnvelopeId): TFxAmount[] {
-  const activity = useAppSelector(selectCoreActivity)?.[month]?.envActivity?.byEnv
+  const activity =
+    useAppSelector(selectCoreActivity)?.[month]?.envActivity?.byEnv
   const envData = useAppSelector(selectCoreEnvMetrics)?.[month]?.[id]
 
   let trend = new Array(31).fill({})

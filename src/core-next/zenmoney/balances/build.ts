@@ -123,7 +123,11 @@ export function buildBalancesByDate(input: {
   historyStart: TISODate
   currentDate: Date | TISODate
 }): TBalanceNode[] {
-  const dates = makeDateArray(input.historyStart, input.currentDate, GroupBy.Day)
+  const dates = makeDateArray(
+    input.historyStart,
+    input.currentDate,
+    GroupBy.Day
+  )
   let lastUsedBalance = input.balances.startingBalances
 
   return dates.map(date => {
@@ -173,7 +177,8 @@ export function getHistoryStart(
   const currentISODate = toISODate(currentDate)
   const firstTransaction = transactions.find(
     transaction =>
-      transaction.date >= firstReasonableDate && transaction.date <= currentISODate
+      transaction.date >= firstReasonableDate &&
+      transaction.date <= currentISODate
   )
   if (!firstTransaction) return currentISODate
   return firstTransaction.date
@@ -225,6 +230,7 @@ function getCurrentBalanceState(
 }
 
 function getDebtorId(transaction: TTransaction, merchants: ById<TMerchant>) {
-  const merchantTitle = transaction.merchant && merchants[transaction.merchant]?.title
+  const merchantTitle =
+    transaction.merchant && merchants[transaction.merchant]?.title
   return cleanPayee(merchantTitle || transaction.payee || '')
 }

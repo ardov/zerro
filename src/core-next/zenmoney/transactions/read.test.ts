@@ -50,11 +50,9 @@ describe('transaction helpers', () => {
       },
     })
 
-    expect(getTransactionsHistory(data).map(transaction => transaction.id)).toEqual([
-      'older',
-      'newer',
-      'newerCreatedLater',
-    ])
+    expect(
+      getTransactionsHistory(data).map(transaction => transaction.id)
+    ).toEqual(['older', 'newer', 'newerCreatedLater'])
   })
 
   it('keeps every transaction in list order for UI filtering', () => {
@@ -76,12 +74,12 @@ describe('transaction helpers', () => {
 
   it('treats deleted and effectively zeroed transactions as deleted', () => {
     expect(isDeletedTransaction(makeTransaction({ deleted: true }))).toBe(true)
-    expect(isDeletedTransaction(makeTransaction({ income: 0, outcome: 0 }))).toBe(
-      true
-    )
-    expect(isDeletedTransaction(makeTransaction({ income: 1, outcome: 0 }))).toBe(
-      false
-    )
+    expect(
+      isDeletedTransaction(makeTransaction({ income: 0, outcome: 0 }))
+    ).toBe(true)
+    expect(
+      isDeletedTransaction(makeTransaction({ income: 1, outcome: 0 }))
+    ).toBe(false)
   })
 
   it('detects debt transactions before regular transfers', () => {
@@ -100,14 +98,14 @@ describe('transaction helpers', () => {
   })
 
   it('detects income, outcome, and transfer transactions', () => {
-    expect(getTransactionType(makeTransaction({ income: 10, outcome: 0 }))).toBe(
-      TrType.Income
-    )
-    expect(getTransactionType(makeTransaction({ income: 0, outcome: 10 }))).toBe(
-      TrType.Outcome
-    )
-    expect(getTransactionType(makeTransaction({ income: 10, outcome: 10 }))).toBe(
-      TrType.Transfer
-    )
+    expect(
+      getTransactionType(makeTransaction({ income: 10, outcome: 0 }))
+    ).toBe(TrType.Income)
+    expect(
+      getTransactionType(makeTransaction({ income: 0, outcome: 10 }))
+    ).toBe(TrType.Outcome)
+    expect(
+      getTransactionType(makeTransaction({ income: 10, outcome: 10 }))
+    ).toBe(TrType.Transfer)
   })
 })

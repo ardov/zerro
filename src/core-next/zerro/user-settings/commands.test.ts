@@ -9,10 +9,7 @@ import {
 } from '../../testing/zenmoneyTestData'
 import { applyPatch } from '../../zenmoney'
 import { HiddenDataType } from '../hidden-data'
-import {
-  compilePatchUserSettings,
-  compileResetUserSettings,
-} from './commands'
+import { compilePatchUserSettings, compileResetUserSettings } from './commands'
 import { getStoredUserSettings, getUserSettings } from './read'
 
 describe('user settings commands', () => {
@@ -139,6 +136,8 @@ describe('user settings commands', () => {
   })
 
   it('keeps reset of missing settings as a no-op patch', () => {
-    expect(compileResetUserSettings(makeStore(), { now: () => 100 })).toEqual({})
+    expect(compileResetUserSettings(makeStore(), { now: () => 100 })).toEqual(
+      {}
+    )
   })
 })

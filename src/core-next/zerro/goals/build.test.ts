@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  makeEnvMetrics,
-  makeSortedActivity,
-} from '../../testing/zerroTestData'
+import { makeEnvMetrics, makeSortedActivity } from '../../testing/zerroTestData'
 import { EnvType, envId } from '../envelope-id'
 import { buildGoals } from './build'
 import { goalType } from './types'

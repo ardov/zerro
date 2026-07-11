@@ -44,11 +44,13 @@ describe('moveMoney', () => {
     vi.mocked(fxRateModel.converter).mockReturnValue(convertFx)
     vi.mocked(budgetModel.set).mockReturnValue(action as never)
 
-    moveMoney(10, 'USD', source, destination, '2026-07')(
-      dispatch,
-      () => state,
-      undefined
-    )
+    moveMoney(
+      10,
+      'USD',
+      source,
+      destination,
+      '2026-07'
+    )(dispatch, () => state, undefined)
 
     expect(selectCoreEnvMetrics).toHaveBeenCalledWith(state)
     expect(convertFx).toHaveBeenCalledWith({ USD: 10 }, 'EUR', '2026-07')

@@ -5,7 +5,13 @@ import { keys } from '6-shared/helpers/keys'
 import { TReminder, TISOMonth, ByMonth } from '6-shared/types'
 
 import { AppThunk, TSelector } from 'store'
-import { deleteReminder, getReminders, setReminder } from '5-entities/reminder'
+// Split the reminder import to avoid an init-time cycle: `getReminders` is a
+// pure selector read eagerly when this factory runs, so it comes from the
+// cycle-free model module. The write thunks re-export the Core Redux adapter and
+// are only referenced lazily inside dispatched thunks, so the barrel path there
+// is safe.
+import { getReminders } from '5-entities/reminder/model'
+import { deleteReminder, setReminder } from '5-entities/reminder/setReminder'
 import { prepareDataAccount } from './dataAccount'
 import { parseComment } from './helpers'
 import { HiddenDataType } from './types'

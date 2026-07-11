@@ -2,7 +2,11 @@ import type { ByMonth } from '../../shared/types'
 import type { TDataStore } from '../../zenmoney/store'
 import type { TISOMonth } from '../../zenmoney/primitives'
 import type { TCoreContext, TNormalizedPatch } from '../../types'
-import { applyPatch, compileSetTagBudget, type TTagBudgetUpdate } from '../../zenmoney'
+import {
+  applyPatch,
+  compileSetTagBudget,
+  type TTagBudgetUpdate,
+} from '../../zenmoney'
 import { EnvType, envId, type TEnvelopeId } from '../envelope-id'
 import {
   compileSetMonthlyHiddenData,
@@ -63,9 +67,7 @@ export function compileSetEnvBudget(
   const byMonth: ByMonth<TBudgets> = {}
 
   updates.forEach(({ id, month, value }) => {
-    byMonth[month] ??= currentBudgets[month]
-      ? { ...currentBudgets[month] }
-      : {}
+    byMonth[month] ??= currentBudgets[month] ? { ...currentBudgets[month] } : {}
 
     if (value) byMonth[month][id] = value
     else delete byMonth[month][id]

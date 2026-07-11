@@ -93,11 +93,7 @@ export type TSortedActivity = {
 
 export const getSortedActivity: TSelector<ByMonth<TSortedActivity>> =
   createSelector(
-    [
-      getActivityByType,
-      selectCoreKeepingEnvelopeIds,
-      fxRateModel.converter,
-    ],
+    [getActivityByType, selectCoreKeepingEnvelopeIds, fxRateModel.converter],
     (activity, keepingEnvelopes, convert) => {
       const res: ByMonth<TSortedActivity> = {}
 

@@ -29,7 +29,10 @@ export async function downloadPrivateFixture(
   }
 }
 
-export async function makePrivateFixture(state: RootState, fixtureName: string) {
+export async function makePrivateFixture(
+  state: RootState,
+  fixtureName: string
+) {
   const [
     { budgetModel },
     { envelopeModel },

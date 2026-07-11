@@ -19,10 +19,7 @@ export type TGoalContext = {
 }
 
 export const calcGoals = {
-  [goalType.MONTHLY]: (
-    goal: TGoal,
-    context: TGoalContext
-  ): GoalProgress => {
+  [goalType.MONTHLY]: (goal: TGoal, context: TGoalContext): GoalProgress => {
     const { budgeted } = context
     const needStart = goal.amount
     const needNow = Math.max(round(needStart - budgeted), 0)

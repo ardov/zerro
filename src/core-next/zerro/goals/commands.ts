@@ -71,9 +71,7 @@ export function normalizeGoal(goalDraft?: TGoal | null): TGoal | null {
     case goalType.INCOME_PERCENT:
       return { type, amount }
     case goalType.TARGET_BALANCE:
-      return end
-        ? { type, amount, end: toISODate(end) }
-        : { type, amount }
+      return end ? { type, amount, end: toISODate(end) } : { type, amount }
     default:
       return null
   }

@@ -19,10 +19,7 @@ import { Modify, TDateDraft, TISOMonth } from '6-shared/types'
 import { useAppDispatch, useAppSelector } from 'store'
 import { goalModel, goalType, TGoal } from '5-entities/goal'
 import { TEnvelopeId } from '5-entities/envelope'
-import {
-  selectCoreEnvelopes,
-  selectCoreGoals,
-} from 'core-next/adapters/redux'
+import { selectCoreEnvelopes, selectCoreGoals } from 'core-next/adapters/redux'
 
 export type TGoalPopoverProps = Modify<
   PopoverProps,

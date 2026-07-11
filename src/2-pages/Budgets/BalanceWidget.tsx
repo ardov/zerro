@@ -1,8 +1,6 @@
 import { Divider, Paper, Typography } from '@mui/material'
 import { useAppSelector } from 'store'
-import {
-  selectCoreMonthTotals,
-} from 'core-next/adapters/redux'
+import { selectCoreMonthTotals } from 'core-next/adapters/redux'
 import Balancer from 'react-wrap-balancer'
 import { useTranslation } from 'react-i18next'
 import { keys } from '6-shared/helpers/keys'

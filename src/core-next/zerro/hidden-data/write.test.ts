@@ -193,11 +193,9 @@ describe('hidden data write codecs', () => {
 
   it('keeps reset of missing simple hidden data as a no-op patch', () => {
     expect(
-      compileResetSimpleHiddenData(
-        makeStore(),
-        HiddenDataType.UserSettings,
-        { now: () => 100 }
-      )
+      compileResetSimpleHiddenData(makeStore(), HiddenDataType.UserSettings, {
+        now: () => 100,
+      })
     ).toEqual({})
   })
 

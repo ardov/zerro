@@ -32,11 +32,7 @@ export {
   updateEnvelopeSettings,
   type TAppCommand,
 } from './commands'
-export {
-  nullTag,
-  populateTags,
-  type TTagPopulated,
-} from './tagPresentation'
+export { nullTag, populateTags, type TTagPopulated } from './tagPresentation'
 // Narrow pure domain helpers used by real app consumers. Keep the underlying
 // ZenMoney/Zerro implementation barrels internal.
 export { getTransactionType, TrType } from '../../zenmoney'

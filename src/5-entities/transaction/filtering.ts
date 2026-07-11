@@ -114,8 +114,8 @@ function checkSearch(tr: TTransaction, condition?: TrCondition['search']) {
   const upperCondition = condition?.toUpperCase()
   return Boolean(
     !upperCondition ||
-      tr.comment?.toUpperCase().includes(upperCondition) ||
-      tr.payee?.toUpperCase().includes(upperCondition)
+    tr.comment?.toUpperCase().includes(upperCondition) ||
+    tr.payee?.toUpperCase().includes(upperCondition)
   )
 }
 

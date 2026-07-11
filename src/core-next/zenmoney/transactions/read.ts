@@ -28,16 +28,16 @@ export function getTransaction(
  * Every transaction id in legacy list order, including soft-deleted entries.
  * UI filtering decides whether deleted rows are visible.
  */
-export function getTransactionIds(
-  data: TTransactionSource
-): TTransactionId[] {
+export function getTransactionIds(data: TTransactionSource): TTransactionId[] {
   return Object.values(getTransactions(data))
     .sort(compareTransactionDates)
     .reverse()
     .map(transaction => transaction.id)
 }
 
-export function getTransactionsHistory(data: TTransactionSource): TTransaction[] {
+export function getTransactionsHistory(
+  data: TTransactionSource
+): TTransaction[] {
   return Object.values(getTransactions(data))
     .filter(transaction => !isDeletedTransaction(transaction))
     .sort(compareTransactionDates)
