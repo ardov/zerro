@@ -298,6 +298,18 @@ the next safe work should be one concrete Track E deep-import cleanup or a
 Track A facade slice whose public contract is already clear. Do not enforce
 subpath allowlists until their supported list is explicitly settled.
 
+The first Track E adapter-boundary cleanup is complete:
+
+- reminder set/delete now use named Redux-adapter commands and preserve their
+  create receipt;
+- hidden data-account creation is a versioned
+  `infrastructure.dataAccount.prepare@2` command whose title is persisted in
+  its payload; its legacy module is only a thin compatibility wrapper;
+- the debug patch hook and tag-presentation compatibility shims now import the
+  public Redux adapter rather than its executor or presentation implementation;
+- the adapter-boundary test pins these exports. Remaining deep app imports
+  should be retired only when their narrow adapter contract is equally clear.
+
 ## Important guardrails
 
 - Root `core-next` stays facade-only.
@@ -347,7 +359,8 @@ Private fixture parity is optional and requires an ignored local fixture; see
 - Hidden-data reads share the reminder slice, so unrelated hidden-data writes
   can invalidate each other. Optimize only if profiling justifies it.
 - Legacy selector imports have known cycles around hidden-store write paths;
-  avoid widening adapter barrels into those paths.
+  keep adapter command implementations independent from hidden-store modules,
+  with compatibility wrappers delegating inward rather than the reverse.
 - Golden JSON comparisons intentionally ignore `undefined` fields because JSON
   serialization drops them.
 - The large private fixture is roughly 287 MB and must remain local.

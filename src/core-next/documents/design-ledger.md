@@ -154,11 +154,15 @@ core-next/zenmoney
 core-next/zenmoney/users/types
 core-next/zerro/goals
 core-next/patch
-core-next/adapters/redux/tagPresentation
 ```
 
 Exit one consumer at a time after its semantic root or adapter API exists.
 Do not solve this by exporting entire internal barrels from root.
+
+The Redux adapter now explicitly owns reminder set/delete, data-account
+preparation, the debug patch hook, and tag presentation compatibility exports.
+Their former deep app imports are resolved; this does not make the underlying
+ZenMoney/Zerro implementation barrels public.
 
 ### Legacy tag icon files
 

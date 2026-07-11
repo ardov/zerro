@@ -8,6 +8,7 @@
  */
 export {
   applyChangesToTransaction,
+  applyDebugPatch,
   applyEnvelopeStructure,
   bulkEditTransactions,
   combineTransactionsToIncome,
@@ -15,19 +16,27 @@ export {
   createEnvelope,
   deleteTransactions,
   deleteTransactionsPermanently,
+  deleteReminder,
   executeCommand,
   mergeAccounts,
   mergeTransactionsAsTransfer,
+  prepareDataAccount,
   recreateTransaction,
   renameEnvelope,
   restoreTransaction,
   setAccountInBalance,
   setEnvelopeColor,
   setEnvelopeComment,
+  setReminder,
   setTransactionsViewed,
   updateEnvelopeSettings,
   type TAppCommand,
 } from './commands'
+export {
+  nullTag,
+  populateTags,
+  type TTagPopulated,
+} from './tagPresentation'
 export {
   toEnvelopeStructureInput,
   type TApplyEnvelopeStructureInput,

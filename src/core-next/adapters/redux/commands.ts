@@ -6,6 +6,7 @@ import {
   compileBulkEditTransactions,
   compileCombineToIncome,
   compileCombineToOutcome,
+  compileCreateAccount,
   compileDeleteTransactions,
   compileDeleteTransactionsPermanently,
   compileMarkTransactionsViewed,
@@ -21,9 +22,11 @@ import {
   type TTransactionId,
   type TTransactionPatch,
   type TReminderDraft,
+  type TReminder,
   type TReminderId,
   type TReminderPatch,
 } from '../../zenmoney'
+import { getRootUserId } from '../../zenmoney/users'
 import {
   compileApplyEnvelopeStructure,
   compileCreateEnvelope,
@@ -109,6 +112,11 @@ export type TAppCommand =
         | Array<TReminderDraft | TReminderPatch>
     }
   | { type: 'zenmoney.reminder.delete'; payload: { id: TReminderId } }
+  | {
+      type: 'infrastructure.dataAccount.prepare@2'
+      payload: { title: string }
+    }
+  | { type: 'infrastructure.debug.patch'; payload: TNormalizedPatch }
   | {
       type: 'zenmoney.transaction.combineToOutcome'
       payload: { ids: TTransactionId[] }
@@ -216,10 +224,34 @@ function compileAppCommandResult(
       const { source, target } = command.payload
       return compileMergeAccounts(data, source, target, ctx)
     }
-    case 'zenmoney.reminder.set':
-      return compileSetReminder(data, command.payload, ctx)
+    case 'zenmoney.reminder.set': {
+      const patch = compileSetReminder(data, command.payload, ctx)
+      return { patch, receipt: patch.reminder || [] }
+    }
     case 'zenmoney.reminder.delete':
       return compileDeleteReminder(data, command.payload.id, ctx)
+    case 'infrastructure.dataAccount.prepare@2': {
+      const existing = Object.values(data.account).find(
+        account => account.title === command.payload.title
+      )
+      if (existing) return { patch: {}, receipt: existing.id }
+
+      const userId = getRootUserId(data)
+      if (!userId) throw new Error('No root user')
+      const patch = compileCreateAccount(
+        data,
+        {
+          title: command.payload.title,
+          instrument: data.user[userId].currency,
+        },
+        ctx
+      )
+      const accountId = patch.account?.[0]?.id
+      if (!accountId) throw new Error('Data account was not created')
+      return { patch, receipt: accountId }
+    }
+    case 'infrastructure.debug.patch':
+      return command.payload
     case 'zenmoney.transaction.combineToOutcome':
       return compileCombineToOutcome(data, command.payload.ids, ctx)
     case 'zenmoney.transaction.combineToIncome':
@@ -367,6 +399,50 @@ export function mergeAccounts(
   return executeCommand({
     type: 'zenmoney.account.merge',
     payload: { source, target },
+  })
+}
+
+export function setReminder(
+  draft:
+    | TReminderDraft
+    | TReminderPatch
+    | Array<TReminderDraft | TReminderPatch>
+): AppThunk<TReminder[]> {
+  const execute = executeCommand({
+    type: 'zenmoney.reminder.set',
+    payload: draft,
+  })
+
+  return (dispatch, getState, extra) =>
+    (execute(dispatch, getState, extra) as TReminder[] | undefined) || []
+}
+
+export function deleteReminder(id: TReminderId): AppThunk {
+  return executeCommand({
+    type: 'zenmoney.reminder.delete',
+    payload: { id },
+  })
+}
+
+export function prepareDataAccount(title: string): AppThunk<TAccountId> {
+  const execute = executeCommand({
+    type: 'infrastructure.dataAccount.prepare@2',
+    payload: { title },
+  })
+
+  return (dispatch, getState, extra) => {
+    const accountId = execute(dispatch, getState, extra) as
+      | TAccountId
+      | undefined
+    if (!accountId) throw new Error('Data account was not prepared')
+    return accountId
+  }
+}
+
+export function applyDebugPatch(patch: TNormalizedPatch): AppThunk {
+  return executeCommand({
+    type: 'infrastructure.debug.patch',
+    payload: patch,
   })
 }
 

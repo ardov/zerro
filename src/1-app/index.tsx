@@ -5,7 +5,7 @@ import { initSentry } from '6-shared/helpers/tracking'
 import { store } from 'store'
 import { bindWorkerToStore } from 'worker'
 import { resetData } from 'store/data'
-import { executeReduxCommand } from 'core-next/adapters/redux/executeCommand'
+import { applyDebugPatch } from 'core-next/adapters/redux'
 import { downloadPrivateFixture } from '4-features/export/exportPrivateFixture'
 import GlobalErrorBoundary from './GlobalErrorBoundary'
 import App from './App'
@@ -52,12 +52,7 @@ function createZerroInstance(s: typeof store) {
     logs: {},
     resetData: () => s.dispatch(resetData()),
     applyClientPatch: (patch: TDiff) =>
-      s.dispatch(
-        executeReduxCommand(
-          { type: 'infrastructure.debug.patch', payload: patch } as const,
-          () => patch
-        )
-      ),
+      s.dispatch(applyDebugPatch(patch)),
     exportPrivateFixture: (name?: string) => {
       if (!import.meta.env.DEV) {
         throw new Error('Private fixture export is available only in dev mode')
