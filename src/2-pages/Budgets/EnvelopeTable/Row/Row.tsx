@@ -1,4 +1,5 @@
 import React, { FC, ReactNode, useCallback } from 'react'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { useDroppable } from '@dnd-kit/core'
 import { IconButton, IconButtonProps } from '@mui/material'
 import { useTranslation } from 'react-i18next'
@@ -15,7 +16,6 @@ import {
   selectCoreEnvelopes,
   selectCoreGoals,
 } from 'core-next/adapters/redux'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { DragTypes } from '2-pages/Budgets/DnD'
 import { useBudgetPopover } from '../../BudgetPopover'
 import { useGoalPopover } from '../../GoalPopover'
@@ -125,7 +125,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
   const envelope = useAppSelector(selectCoreEnvelopes)[id]
   const envData = useAppSelector(selectCoreEnvMetrics)[month][id]
   const goalInfo = useAppSelector(selectCoreGoals)[month][id]
-  const toDisplay = displayCurrency.useToDisplay(month)
+  const toDisplay = useCoreToDisplay(month)
 
   const isChild = !!envelope.parent || !!isSelf
 

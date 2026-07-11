@@ -28,10 +28,14 @@ Redux selectors; legacy goal/envBalances/displayCurrency projections import the
 old defining selectors directly only while parity paths remain. No Redux
 adapter import was added back into that legacy graph.
 
-Next replace the app-facing `displayCurrency.useToDisplay` helper with a narrow
-Core Redux display-converter selector. First make the adapter derive display
-currency without importing the legacy displayCurrency model, then switch its
-page/widget consumers. Keep the display-currency setter hook separate.
+The app-facing `displayCurrency.useToDisplay` helper is removed. UI consumers
+use `useCoreToDisplay`, backed by Core FX conversion plus Redux display-currency
+state. The adapter derives display currency without importing the legacy model.
+
+Next move the remaining `displayCurrency.useDisplayCurrency` consumers to a
+narrow Redux selector/action hook and retire the legacy display model. Keep the
+old `getConverter` only as long as legacy accBalances parity requires it; do not
+make Core depend on that path again.
 
 The identity materializer stays as the extension point already wired into the
 command path, but implementing its domain rules is deferred until after legacy

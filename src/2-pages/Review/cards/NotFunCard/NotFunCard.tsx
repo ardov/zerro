@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import {
   Box,
   Checkbox,
@@ -224,7 +225,7 @@ export function NotFunCard(props: TCardProps) {
 
 function useIncomeOutcome(onlyRUB: boolean, year: string | number) {
   const yearStats = useStats(year)
-  const toDisplay = displayCurrency.useToDisplay('current')
+  const toDisplay = useCoreToDisplay('current')
   const tags = useAppSelector(selectCorePopulatedTags)
 
   return useMemo(() => {

@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { ButtonBase, Collapse, Stack } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useToggle } from '6-shared/hooks/useToggle'
@@ -88,7 +89,7 @@ function StatWidget(props: {
   const { month, total, items, name, showBar, action } = props
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
   const [currency] = displayCurrency.useDisplayCurrency()
-  const toDisplay = displayCurrency.useToDisplay(month)
+  const toDisplay = useCoreToDisplay(month)
   const envelopes = useAppSelector(selectCoreEnvelopes)
   const [opened, toggleOpened] = useToggle(false)
 

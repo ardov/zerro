@@ -1,4 +1,5 @@
 import React, { FC } from 'react'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { useAppSelector } from 'store'
 import {
   selectCoreActivity,
@@ -14,7 +15,6 @@ import { TFxAmount, TISODate, TISOMonth } from '6-shared/types'
 import { addFxAmount, round } from '6-shared/helpers/money'
 
 import { TEnvelopeId } from '5-entities/envelope'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { DataLine } from '3-widgets/DataLine'
 
 import { useMonth } from '../MonthProvider'
@@ -134,7 +134,7 @@ type TTrendNode = {
 }
 
 function useDataTrend(month: TISOMonth, id: TEnvelopeId): TTrendNode[] {
-  const toDisplay = displayCurrency.useToDisplay(month)
+  const toDisplay = useCoreToDisplay(month)
   const envData = useAppSelector(selectCoreEnvMetrics)?.[month]?.[id]
   const activityTrend = useActivityTrend(month, id)
 

@@ -1,4 +1,5 @@
 import React, { FC } from 'react'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { useAppSelector } from 'store'
 import {
   selectCoreMonthList,
@@ -85,7 +86,7 @@ function useTotalsModel() {
   const [month] = useMonth()
 
   const [currency] = displayCurrency.useDisplayCurrency()
-  const toDisplay = displayCurrency.useToDisplay(month)
+  const toDisplay = useCoreToDisplay(month)
 
   const monthList = useAppSelector(selectCoreMonthList)
   const lastMonth = monthList[monthList.length - 1]

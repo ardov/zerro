@@ -1,4 +1,5 @@
 import React, { FC, ReactNode } from 'react'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import {
   ListSubheader,
   Box,
@@ -77,7 +78,7 @@ export const Subheader: FC<
   } & ListSubheaderProps
 > = ({ name, amount, sx, ...rest }) => {
   const month = toISOMonth(new Date())
-  const toDisplay = displayCurrency.useToDisplay(month)
+  const toDisplay = useCoreToDisplay(month)
   return (
     <ListSubheader sx={{ borderRadius: 1, ...sx }} {...rest}>
       <Box

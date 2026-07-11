@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { Box, Typography, Chip, Stack } from '@mui/material'
 import { entries } from '6-shared/helpers/keys'
 import { addFxAmount } from '6-shared/helpers/money'
@@ -17,7 +18,7 @@ import { useTranslation } from 'react-i18next'
 export function IncomeCard(props: TCardProps) {
   const { t } = useTranslation('yearReview', { keyPrefix: 'incomeCard' })
   const yearStats = useStats(props.year)
-  const toDisplay = displayCurrency.useToDisplay('current')
+  const toDisplay = useCoreToDisplay('current')
   const tags = useAppSelector(selectCorePopulatedTags)
 
   const incomeTags = entries(yearStats.byTag)

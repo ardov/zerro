@@ -1,4 +1,5 @@
 import { Box, Stack, Typography } from '@mui/material'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -11,7 +12,7 @@ import { useStats } from '../shared/getFacts'
 export function SavingsCard({ year }: TCardProps) {
   const { t } = useTranslation('yearReview', { keyPrefix: 'savingsCard' })
   const yearStats = useStats(year)
-  const toDisplay = displayCurrency.useToDisplay('current')
+  const toDisplay = useCoreToDisplay('current')
 
   const income = toDisplay(yearStats.total.income)
   const outcome = toDisplay(yearStats.total.outcome)

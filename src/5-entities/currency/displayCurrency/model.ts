@@ -33,18 +33,7 @@ const getConverter: TSelector<
       convert(amount, displayCurrency, date)
 )
 
-const useToDisplay = (defaultMonth: TDateDraft | 'current') => {
-  const [currency] = useDisplayCurrency()
-  const convert = useAppSelector(getFxConverter)
-  const converter = useCallback(
-    (amount: TFxAmount, date = defaultMonth) => convert(amount, currency, date),
-    [convert, currency, defaultMonth]
-  )
-  return converter
-}
-
 export const displayCurrency = {
   useDisplayCurrency,
-  useToDisplay,
   getConverter,
 }

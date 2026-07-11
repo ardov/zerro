@@ -256,6 +256,13 @@ question before enabling non-identity rules.
 
 ## Resolved bridges
 
+### Display-currency conversion hook
+
+Resolved on 2026-07-11. UI conversion uses `useCoreToDisplay`, backed by
+`selectCoreDisplayConverter` and `selectCoreDisplayCurrency`. The Redux adapter
+no longer imports the legacy displayCurrency model, and its old `useToDisplay`
+helper is removed. The display-currency setter hook remains a separate bridge.
+
 ### FX model object
 
 Resolved on 2026-07-11. The `fxRateModel` object and directory barrel are

@@ -1,4 +1,5 @@
 import React, { FC } from 'react'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { Typography, ButtonBase, ButtonBaseProps } from '@mui/material'
 import { TISOMonth } from '6-shared/types'
 import { formatMoney } from '6-shared/helpers/money'
@@ -33,7 +34,7 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const { month, ...btnProps } = props
   const dispatch = useAppDispatch()
   const [currency] = displayCurrency.useDisplayCurrency()
-  const toDisplay = displayCurrency.useToDisplay(month)
+  const toDisplay = useCoreToDisplay(month)
   const totalProgress = useAppSelector(selectCoreGoalTotals)[month]
   const formatSum = (sum: number) => formatMoney(sum, currency)
 

@@ -1,11 +1,11 @@
 import { useMemo } from 'react'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { TISODate } from '6-shared/types'
 import { GroupBy, makeDateArray, toGroup } from '6-shared/helpers/date'
 
 import { useAppSelector } from 'store/index'
 import { accountModel } from '5-entities/account'
 import { instrumentModel } from '5-entities/currency/instrument'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
 import {
   selectCoreHistoryStart,
   selectCoreTransactionsHistory,
@@ -70,7 +70,7 @@ export function useCashFlow(
     [aggregation, debtAccId, instCodeMap, transactionHistory]
   )
 
-  const toDisplay = displayCurrency.useToDisplay('current')
+  const toDisplay = useCoreToDisplay('current')
   const historyStart = useAppSelector(selectCoreHistoryStart)
   const firstDate = getStartDate(period, aggregation, historyStart)
 

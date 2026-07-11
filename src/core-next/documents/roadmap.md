@@ -38,6 +38,11 @@ projections import their defining FX selectors directly. The next app-facing
 FX boundary is `displayCurrency.useToDisplay`, which should become a narrow
 Redux selector without making the adapter depend on the legacy display model.
 
+`displayCurrency.useToDisplay` is now removed. UI uses the Core Redux
+`useCoreToDisplay` hook, and the adapter owns display-currency selection without
+depending on the legacy model. The remaining display-currency setter hook is
+the next small app-state bridge.
+
 Envelope reads are now split: session/Core projectors return domain envelopes,
 and the Redux adapter adds symbols, generated/display colors, localized null
 text, and localized groups. The old `populatedTags` session dependency is gone,

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { useTranslation } from 'react-i18next'
 import { ButtonBase, IconButton, Stack, Typography } from '@mui/material'
 
@@ -15,7 +16,7 @@ export function PayeeByOutcomeCard(props: TCardProps) {
   const { t } = useTranslation('yearReview', { keyPrefix: 'payeeByOutcome' })
   const [i, setI] = useState(0)
   const yearStats = useStats(props.year)
-  const toDisplay = displayCurrency.useToDisplay('current')
+  const toDisplay = useCoreToDisplay('current')
 
   const topPayees = entries(yearStats.byPayee)
     .map(([payee, info]) => {

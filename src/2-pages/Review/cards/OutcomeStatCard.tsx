@@ -1,4 +1,5 @@
 import { FC, useCallback, useMemo, useState } from 'react'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { Box, Button, Stack } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from '6-shared/ui/Tooltip'
@@ -29,7 +30,7 @@ export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
   const yearStats = useStats(year)
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
   const [currency] = displayCurrency.useDisplayCurrency()
-  const toDisplay = displayCurrency.useToDisplay('current')
+  const toDisplay = useCoreToDisplay('current')
   const [showAll, setShowAll] = useState(false)
   const [showParentOnly, setShowParentOnly] = useState(true)
 

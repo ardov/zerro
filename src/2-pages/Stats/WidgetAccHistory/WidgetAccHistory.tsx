@@ -1,4 +1,5 @@
 import React, { FC, useState, useMemo, useCallback, memo } from 'react'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -31,7 +32,7 @@ type WidgetAccHistoryProps = {
 export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
   ({ period }) => {
     const { t } = useTranslation('accounts')
-    const toDisplay = displayCurrency.useToDisplay(toISOMonth(new Date()))
+    const toDisplay = useCoreToDisplay(toISOMonth(new Date()))
     const trDrawer = useTransactionDrawer()
     const [visible, toggleVisibility] = useToggle()
 
@@ -130,7 +131,7 @@ type SubheaderProps = {
 
 const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
   const month = toISOMonth(new Date())
-  const toDisplay = displayCurrency.useToDisplay(month)
+  const toDisplay = useCoreToDisplay(month)
   const isNegative = toDisplay(amount) < 0
 
   return (

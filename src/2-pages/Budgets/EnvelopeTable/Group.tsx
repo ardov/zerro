@@ -1,4 +1,5 @@
 import React, { FC, useRef } from 'react'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { ButtonBase, IconButton, Typography, Box } from '@mui/material'
 import { isEqual } from 'lodash'
 import { AddIcon, ArrowDownwardIcon, ArrowUpwardIcon } from '6-shared/ui/Icons'
@@ -16,7 +17,6 @@ import {
   selectCoreEnvelopeStructure,
 } from 'core-next/adapters/redux'
 import { addFxAmount } from '6-shared/helpers/money'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { useMonth } from '../MonthProvider'
 import { Amount } from '6-shared/ui/Amount'
 import { useTranslation } from 'react-i18next'
@@ -148,7 +148,7 @@ const useGroupTotals = (id: string) => {
   const [month] = useMonth()
   const data = useAppSelector(selectCoreEnvMetrics)[month]
   const structure = useAppSelector(selectCoreEnvelopeStructure, isEqual)
-  const toDisplay = displayCurrency.useToDisplay(month)
+  const toDisplay = useCoreToDisplay(month)
   const group = structure.find(gr => gr.id === id)
   if (!group || !data) return { budgeted: 0, activity: 0, available: 0 }
 

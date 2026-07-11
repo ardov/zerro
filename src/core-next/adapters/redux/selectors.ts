@@ -3,7 +3,7 @@ import { shallowEqual } from 'react-redux'
 import { toISODate, toISOMonth } from '6-shared/helpers/date'
 import { i18n } from '6-shared/localization'
 import { accountModel } from '5-entities/account'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
+import { getSavedCurrency } from 'store/displayCurrency'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { merchantModel } from '5-entities/merchant'
 import { userModel } from '5-entities/user'
@@ -390,8 +390,23 @@ export const selectCoreBalancesByDate = createSelector(
     })
 )
 
+export const selectCoreDisplayCurrency = createSelector(
+  [getSavedCurrency, userModel.getUserCurrency],
+  (savedCurrency, userCurrency) => savedCurrency || userCurrency
+)
+
+export const selectCoreDisplayConverter = createSelector(
+  [selectCoreConvertFx, selectCoreDisplayCurrency],
+  (convert, currency) =>
+    (
+      amount: Parameters<typeof convert>[0],
+      date: Parameters<typeof convert>[2]
+    ) =>
+      convert(amount, currency, date)
+)
+
 export const selectCoreDisplayBalancesByDate = createSelector(
-  [selectCoreBalancesByDate, displayCurrency.getConverter],
+  [selectCoreBalancesByDate, selectCoreDisplayConverter],
   convertBalancesToDisplay
 )
 

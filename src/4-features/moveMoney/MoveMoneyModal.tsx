@@ -1,4 +1,5 @@
 import React, { FC, useState } from 'react'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { Box, InputAdornment, IconButton, Chip } from '@mui/material'
 import Dialog, { DialogProps } from '@mui/material/Dialog'
 import { AmountInput } from '6-shared/ui/AmountInput'
@@ -33,7 +34,7 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   const metrics = useAppSelector(selectCoreEnvMetrics)[month]
   const totalMetrics = useAppSelector(selectCoreMonthTotals)[month]
   const [currency] = displayCurrency.useDisplayCurrency()
-  const toDisplay = displayCurrency.useToDisplay(month)
+  const toDisplay = useCoreToDisplay(month)
 
   const sourceName =
     source === 'toBeBudgeted' ? 'To be budgeted' : envelopes[source].name

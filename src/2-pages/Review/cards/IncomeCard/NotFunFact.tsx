@@ -1,4 +1,5 @@
 import React from 'react'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { Dialog, IconButton, Link, Stack, Typography } from '@mui/material'
 import Balancer from 'react-wrap-balancer'
 import pluralize from '6-shared/helpers/pluralize'
@@ -7,15 +8,13 @@ import { HelpOutlineIcon } from '6-shared/ui/Icons'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { Amount } from '6-shared/ui/Amount'
 
-import { displayCurrency } from '5-entities/currency/displayCurrency'
-
 /** Median salary in Russia 2024. Source: https://sberindex.ru/ru/dashboards/median-wages */
 const MEDIAN_WAGE_RUB = 62_632
 const MEDIAN_WAGE_SOURCE = 'https://sberindex.ru/ru/dashboards/median-wages'
 
 export function NotFunFact({ income }: { income: TFxAmount }) {
   const [isOpenInfo, toggleInfo] = useToggle(false)
-  const toDisplay = displayCurrency.useToDisplay('current')
+  const toDisplay = useCoreToDisplay('current')
   const rubIncome = income.RUB || 0
   const monthlyIncome = toDisplay(income) / 12
   const displayMedianWage = toDisplay({ RUB: MEDIAN_WAGE_RUB })

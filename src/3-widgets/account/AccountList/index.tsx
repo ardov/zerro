@@ -1,4 +1,5 @@
 import React, { FC } from 'react'
+import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { useTranslation } from 'react-i18next'
 import { Collapse, List, ListItemButton } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
@@ -16,7 +17,7 @@ import { Account, Subheader } from './components'
 
 export default function AccountList({ className = '' }) {
   const { t } = useTranslation('accounts')
-  const toDisplay = displayCurrency.useToDisplay(toISOMonth(new Date()))
+  const toDisplay = useCoreToDisplay(toISOMonth(new Date()))
   const inBudget = accountModel
     .useInBudgetAccounts()
     .sort(
@@ -77,7 +78,7 @@ const ArchivedList: FC<{ accs: TAccountPopulated[] }> = props => {
   const { t } = useTranslation('accounts')
   const { accs } = props
   const month = toISOMonth(new Date())
-  const toDisplay = displayCurrency.useToDisplay(month)
+  const toDisplay = useCoreToDisplay(month)
   const [visible, toggleVisibility] = useToggle()
   if (!accs.length) return null
 
