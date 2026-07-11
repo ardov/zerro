@@ -5,6 +5,9 @@ import { keys } from '../6-shared/helpers/keys'
 import { storage } from '../6-shared/api/storage'
 import { zenmoney } from '../6-shared/api/zenmoney'
 import { convertDiff } from '../6-shared/api/zm-adapter'
+import type { TPersistedReplica } from '../core-next/engine/persistence'
+
+const REPLICA_KEY = 'core-next-replica-v1'
 
 type LocalKey = keyof TLocalData
 const LOCAL_KEYS = [
@@ -50,10 +53,14 @@ async function getLocalData() {
 const obj = {
   convertZmToLocal,
   getLocalData,
+  getReplicaState: () =>
+    storage.get(REPLICA_KEY) as Promise<TPersistedReplica | undefined>,
   clearStorage: () => storage.clear(),
   saveLocalData: (data: TLocalData) => {
     keys(data).forEach(key => storage.set(key, data[key]))
   },
+  saveReplicaState: (replica: TPersistedReplica) =>
+    storage.set(REPLICA_KEY, replica),
   sync,
 }
 

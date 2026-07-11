@@ -176,6 +176,12 @@ ids included in the request and preserves later applied entries; non-sync
 loads without acknowledgement metadata replace the base and clear local
 history.
 
+Replica persistence uses a separate versioned IndexedDB key rather than adding
+metadata to ZenMoney entity keys. Version 1 stores base server timestamp,
+outbox, and head only; `current`, `diff`, and inbox are derived/ephemeral. Reload
+replays only when the persisted base timestamp matches the loaded server base;
+missing, stale, or unknown snapshots fall back to an empty outbox.
+
 Exit when Redux owns explicit `base`, `outbox`, `outboxHead`, `inbox`, and
 replayed `current`. Resolve the sync transport question before enabling
 non-identity rules.

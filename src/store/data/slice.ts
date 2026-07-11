@@ -6,6 +6,10 @@ import {
   replayOutbox,
   type TOutboxEntry,
 } from 'core-next/engine/outbox'
+import {
+  replicaPersistenceVersion,
+  type TPersistedReplica,
+} from 'core-next/engine/persistence'
 import { withPerf } from '6-shared/helpers/performance'
 import { TDataStore, TDiff } from '6-shared/types'
 import { applyDiffMutable } from './shared/applyDiff'
@@ -124,6 +128,35 @@ const { reducer, actions } = createSlice({
       state.current = replayOutbox(state.server, outbox, outboxHead)
       state.diff = buildOutboxDiff(outbox, outboxHead)
     }),
+    restorePersistedReplica: withPerf(
+      'restorePersistedReplica',
+      (state, { payload }: PayloadAction<TPersistedReplica | undefined>) => {
+        if (
+          !payload ||
+          payload.version !== replicaPersistenceVersion ||
+          !state.server ||
+          payload.baseServerTimestamp !== state.server.serverTimestamp
+        ) {
+          state.outbox = []
+          state.outboxHead = 0
+          state.diff = undefined
+          if (state.server) state.current = state.server
+          return
+        }
+
+        state.outbox = [...payload.outbox]
+        state.outboxHead = clampOutboxHead(
+          payload.outboxHead,
+          payload.outbox.length
+        )
+        state.current = replayOutbox(
+          state.server,
+          state.outbox,
+          state.outboxHead
+        )
+        state.diff = buildOutboxDiff(state.outbox, state.outboxHead)
+      }
+    ),
     resetData: () => {
       return initialState
     },
@@ -140,6 +173,7 @@ export const {
   appendClientOutboxEntry,
   undoClientCommand,
   redoClientCommand,
+  restorePersistedReplica,
   resetData,
 } = actions
 

@@ -210,14 +210,17 @@ Suggested order:
    the sync-compatible `diff` from the stored applied prefix; append after undo
    drops the redo tail. The bypassing `applyClientPatch` action is removed.
 3. ◐ Move Redux state toward `base`, `outbox`, `outboxHead`, `inbox`, `current`.
-   `server` currently acts as base; runtime outbox/head/current are live, while
-   inbox staging/rebase is live and persistence remains.
+   `server` currently acts as base; runtime outbox/head/current and inbox
+   staging/rebase are live. Versioned outbox/head persistence is now separate
+   from the legacy ZenMoney entity keys.
 4. ✅ Rebase server patches and expose the pending sync payload. Sync captures
    exact acknowledged entry ids, stages the canonical response in `inbox`,
    removes only that acknowledged prefix, and replays commands created during
    the request over the updated server base. `data.diff` remains the compatible
    pending transport payload.
-5. Add reload plus undo/redo tests before switching more writes.
+5. ✅ Add reload plus undo/redo tests before switching more writes. Reload
+   restores pending applied entries over a matching persisted base; stale or
+   unknown replica snapshots are discarded safely.
 
 The in-memory engine remains a reference/headless implementation. Do not run it
 beside Redux in the app.

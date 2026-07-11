@@ -43,6 +43,9 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 - Canonical sync responses stage through an explicit inbox and acknowledge
   exact entry ids, so commands created while a request is in flight survive
   and replay over the updated server base.
+- Runtime outbox/head now persist under a separate versioned IndexedDB key.
+  Reload validates the base timestamp and derives `current`/`diff` by replay;
+  old storage without replica metadata remains compatible.
 - The session is snapshot-based and lazily memoized. Namespaced `get*` reads are
   the semantic facade; flat `session.read.*` remains deprecated compatibility.
 - Session envelope reads are domain-only. The Redux adapter adds localized
@@ -77,8 +80,9 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 
 ## Default next slice
 
-Continue Track D by persisting the replica state and covering reload with
-pending entries. Keep the existing sync transport stable in that slice.
+Continue Track D by deciding the durable crash-consistency boundary between
+the legacy entity-key writes and the replica metadata key before removing
+`data.diff` from the sync transport.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 

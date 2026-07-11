@@ -220,6 +220,13 @@ only those acknowledged entries and replays entries created during the request
 over the new server base. Initial loads and explicit base replacements without
 acknowledgement metadata clear local history.
 
+Replica persistence is a separate versioned IndexedDB record. It stores only
+the replay inputs (base server timestamp, outbox, and head); `current`, `diff`,
+and inbox are rebuilt or ephemeral. Reload accepts a snapshot only when its
+base timestamp matches the loaded server base, so legacy storage and stale
+metadata degrade to an empty outbox instead of replaying against the wrong
+snapshot.
+
 ## Read model and memoization
 
 Pure projectors own calculations. Runtimes own memoization.

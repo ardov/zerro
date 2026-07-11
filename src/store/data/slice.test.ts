@@ -6,6 +6,7 @@ import reducer, {
   rebaseServerInbox,
   receiveServerPatch,
   redoClientCommand,
+  restorePersistedReplica,
   undoClientCommand,
 } from './slice'
 
@@ -157,5 +158,44 @@ describe('data patch boundaries', () => {
     expect(rebased.outboxHead).toBe(1)
     expect(rebased.diff?.account?.[0].title).toBe('Vault')
     expect(rebased.inbox).toBeNull()
+  })
+
+  it('restores a persisted outbox only over its matching server base', () => {
+    const base = applyServerPatch(undefined, {
+      serverTimestamp: 100,
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    })
+    const entry = {
+      id: 'entry-1',
+      command: { type: 'account.rename', title: 'Wallet' },
+      intentPatch: {
+        account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+      },
+      appliedPatch: {
+        account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+      },
+      materializerVersion: 1,
+      createdAt: 10,
+    }
+    const persisted = {
+      version: 1 as const,
+      baseServerTimestamp: 100,
+      outbox: [entry],
+      outboxHead: 1,
+    }
+
+    const restored = reducer(base, restorePersistedReplica(persisted))
+    expect(restored.server?.account.cash.title).toBe('Cash')
+    expect(restored.current.account.cash.title).toBe('Wallet')
+    expect(restored.diff?.account?.[0].title).toBe('Wallet')
+    expect(restored.outbox).toEqual([entry])
+
+    const stale = reducer(
+      base,
+      restorePersistedReplica({ ...persisted, baseServerTimestamp: 99 })
+    )
+    expect(stale.current.account.cash.title).toBe('Cash')
+    expect(stale.outbox).toEqual([])
+    expect(stale.diff).toBeUndefined()
   })
 })

@@ -3,7 +3,7 @@
 - Updated: 2026-07-11
 - Branch: `core-next`
 - Worktree: clean; the branch tip is
-  `Rebase in-flight commands after sync`
+  `Persist pending Redux outbox`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -33,6 +33,24 @@ claims against the tree before editing.
 | Tests            | Unit, deterministic demo parity, Redux invalidation, and opt-in private parity layers exist                           |
 
 ## Latest landed slices
+
+The current persistence/reload slice makes pending runtime commands durable:
+
+- `core-next/engine/persistence.ts` defines version 1 as base server timestamp
+  plus full outbox and head; derived `current`/`diff` and ephemeral inbox are
+  not serialized;
+- worker storage uses a separate `core-next-replica-v1` IndexedDB key, leaving
+  existing ZenMoney entity keys and old installs compatible;
+- Redux middleware serializes append, undo, redo, rebase, restore, and reset
+  snapshots in order; worker loading is browser-only and lazy, so importing the
+  store remains safe in tests and non-browser runtimes;
+- local load fetches entity data and replica metadata together, applies the
+  server base, then restores and replays matching pending entries;
+- missing, stale-base, or unknown replica snapshots safely produce an empty
+  outbox;
+- tests cover snapshot shape (including redo tail), matching/stale restore, and
+  end-to-end local reload with a pending command. Cross-key crash atomicity is
+  not solved in this slice.
 
 The current inbox/rebase slice prevents in-flight sync data loss:
 
@@ -206,9 +224,9 @@ included in these slices.
 
 ## Default next task
 
-Continue Track D by persisting replica state and covering reload with pending
-entries. Keep the current sync transport stable and do not start materializer
-rules in the same slice.
+Continue Track D by settling cross-key crash consistency between legacy entity
+storage and the replica metadata record before removing `data.diff` from the
+sync transport. Do not start materializer rules in the same slice.
 
 ## Important guardrails
 
@@ -239,7 +257,7 @@ Expected full-suite baseline at this handoff:
 
 ```txt
 69 test files passed, 4 skipped
-268 tests passed, 6 skipped
+272 tests passed, 6 skipped
 ```
 
 Browser check: the transaction-list multi-select bar and bulk-actions menu

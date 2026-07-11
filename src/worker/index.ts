@@ -3,7 +3,7 @@
 import Worker from './worker?worker'
 import * as Comlink from 'comlink'
 import { WorkerObj } from './worker'
-import { AppDispatch } from 'store'
+import type { AppDispatch } from 'store'
 
 type Message = { action: string; payload?: any }
 
@@ -32,7 +32,9 @@ export const workerMethods = Comlink.wrap<WorkerObj>(worker)
 export const {
   convertZmToLocal,
   getLocalData,
+  getReplicaState,
   clearStorage,
   saveLocalData,
+  saveReplicaState,
   sync,
 } = workerMethods

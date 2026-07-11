@@ -6,6 +6,7 @@ export {
   appendClientOutboxEntry,
   undoClientCommand,
   redoClientCommand,
+  restorePersistedReplica,
   resetData,
 } from './slice'
 export { applyServerPatch } from './applyServerPatch'

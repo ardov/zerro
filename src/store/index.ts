@@ -13,6 +13,7 @@ import token from './token'
 import isPending from './isPending'
 import lastSync from './lastSync'
 import displayCurrency from './displayCurrency'
+import { replicaPersistenceMiddleware } from './data/replicaPersistence'
 
 export const store = configureStore({
   reducer: {
@@ -24,7 +25,10 @@ export const store = configureStore({
   },
   preloadedState: { token: tokenStorage.get() },
   middleware: getDefaultMiddleware =>
-    getDefaultMiddleware({ immutableCheck: false, serializableCheck: false }),
+    getDefaultMiddleware({
+      immutableCheck: false,
+      serializableCheck: false,
+    }).concat(replicaPersistenceMiddleware),
 })
 
 export type RootState = ReturnType<typeof store.getState>
