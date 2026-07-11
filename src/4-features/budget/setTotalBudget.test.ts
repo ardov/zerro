@@ -1,16 +1,17 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
-import { selectCoreEnvMetrics, setBudget } from 'core-next/adapters/redux'
-import { fxRateModel } from '5-entities/currency/fxRate'
+import {
+  selectCoreConvertFx,
+  selectCoreEnvMetrics,
+  setBudget,
+} from 'core-next/adapters/redux'
 import type { TEnvelopeId } from '5-entities/envelope'
 import { setTotalBudget } from './setTotalBudget'
 
 vi.mock('core-next/adapters/redux', () => ({
   selectCoreEnvMetrics: vi.fn(),
+  selectCoreConvertFx: vi.fn(),
   setBudget: vi.fn(),
-}))
-vi.mock('5-entities/currency/fxRate', () => ({
-  fxRateModel: { converter: vi.fn() },
 }))
 
 describe('setTotalBudget', () => {
@@ -29,7 +30,7 @@ describe('setTotalBudget', () => {
         },
       },
     } as unknown as ReturnType<typeof selectCoreEnvMetrics>)
-    vi.mocked(fxRateModel.converter).mockReturnValue(convertFx)
+    vi.mocked(selectCoreConvertFx).mockReturnValue(convertFx)
     vi.mocked(setBudget).mockReturnValue(action as never)
 
     setTotalBudget({ id: foodId, month: '2026-07', value: 100 })(

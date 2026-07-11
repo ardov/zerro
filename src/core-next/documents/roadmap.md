@@ -27,6 +27,12 @@ write call remains on a `*Model` object. Continue with read/helper families,
 starting with app-level FX converter/getter consumers; do not mix unrelated
 selector families into one slice.
 
+Direct page/feature FX reads now use narrow Redux selectors. Remaining
+`fxRateModel` references are internal legacy projection dependencies in goals,
+envBalances, and displayCurrency plus parity/export-fixture paths. Retire those
+through Core projection cutover; importing the Redux adapter into that graph
+would create the wrong dependency direction.
+
 Envelope reads are now split: session/Core projectors return domain envelopes,
 and the Redux adapter adds symbols, generated/display colors, localized null
 text, and localized groups. The old `populatedTags` session dependency is gone,

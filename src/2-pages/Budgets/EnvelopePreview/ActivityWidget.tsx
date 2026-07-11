@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState } from 'react'
 import { useAppSelector } from 'store'
 import {
+  selectCoreConvertFx,
   selectCoreEnvMetrics,
   selectCoreMonthList,
 } from 'core-next/adapters/redux'
@@ -12,7 +13,6 @@ import { TFxAmount, TISOMonth } from '6-shared/types'
 import { formatDate } from '6-shared/helpers/date'
 
 import { TEnvelopeId } from '5-entities/envelope'
-import { fxRateModel } from '5-entities/currency/fxRate'
 import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
 import { getDateRange } from './shared'
@@ -24,7 +24,7 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
   const { t } = useTranslation('budgets')
   const [month, setMonth] = useMonth()
   const [highlighted, setHighlighted] = useState(month)
-  const convertFx = fxRateModel.useConverter()
+  const convertFx = useAppSelector(selectCoreConvertFx)
   const envData = useAppSelector(selectCoreEnvMetrics)
   const dates = useAppSelector(selectCoreMonthList)
   const { currency } = envData[month][id]

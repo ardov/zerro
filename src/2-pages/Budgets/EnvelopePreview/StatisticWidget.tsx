@@ -24,11 +24,11 @@ import { getAverage } from '6-shared/helpers/money/currencyHelpers'
 import { useAppSelector } from 'store'
 import { TEnvelopeId } from '5-entities/envelope'
 import {
+  selectCoreConvertFx,
   selectCoreEnvMetrics,
   selectCoreEnvelopes,
   selectCoreMonthList,
 } from 'core-next/adapters/redux'
-import { fxRateModel } from '5-entities/currency/fxRate'
 import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
 import { trimMonths } from './shared'
@@ -80,7 +80,7 @@ function useAggregatedStats(
 ) {
   const dates = useAppSelector(selectCoreMonthList)
   const envData = useAppSelector(selectCoreEnvMetrics)
-  const convertFx = fxRateModel.useConverter()
+  const convertFx = useAppSelector(selectCoreConvertFx)
   const result = dates.map((month, idx) => {
     const aggregatedMonths = dates.slice(
       Math.max(0, idx - aggregationPeriod + 1), // start index

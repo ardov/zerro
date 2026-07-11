@@ -215,7 +215,7 @@ export const selectCoreFxRatesGetter = createSelector(
     })
 )
 
-const selectCoreConvertFx = createSelector(
+export const selectCoreConvertFx = createSelector(
   [selectCoreFxRatesGetter],
   buildFxConverter
 )

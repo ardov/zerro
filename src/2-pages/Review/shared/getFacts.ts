@@ -10,7 +10,6 @@ import {
 } from '6-shared/types'
 import { parseDate } from '6-shared/helpers/date'
 
-import { fxRateModel } from '5-entities/currency/fxRate'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { addFxAmount, convertFx } from '6-shared/helpers/money'
 import { accountModel } from '5-entities/account'
@@ -37,12 +36,11 @@ export type TStats = {
 export const getFactsYearly: TSelector<Record<string, TStats>> = createSelector(
   [
     selectCoreTransactionsHistory,
-    fxRateModel.getter,
     instrumentModel.getInstCodeMap,
     accountModel.getDebtAccountId,
     merchantModel.getMerchants,
   ],
-  (transactions, convert, codeMap, debtAcc, merchants) => {
+  (transactions, codeMap, debtAcc, merchants) => {
     // const rates = convert('current').rates
     // const toValue = (n: number, instr: TInstrumentId) => {
     //   return convertFx({ [codeMap[instr]]: n }, 'USD', rates)

@@ -256,6 +256,15 @@ question before enabling non-identity rules.
 
 ## Resolved bridges
 
+### Direct app FX reads
+
+Resolved on 2026-07-11. Pages and features use `selectCoreConvertFx` and
+`selectCoreFxRatesGetter`; no `2-pages`, `3-widgets`, or `4-features` production
+source calls `fxRateModel`. The remaining references are internal to the legacy
+goal/envBalances/displayCurrency selector graph and parity/export-fixture paths.
+They must be removed by projection cutover, not by importing the Redux adapter
+back into its own legacy dependencies.
+
 ### FX write wrapper
 
 Resolved on 2026-07-11. Monthly FX edits and resets are semantic Redux adapter

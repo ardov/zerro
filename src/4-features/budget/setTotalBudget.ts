@@ -3,17 +3,17 @@ import { AppThunk } from 'store'
 
 import {
   selectCoreEnvMetrics,
+  selectCoreConvertFx,
   setBudget,
   type TBudgetUpdate,
 } from 'core-next/adapters/redux'
-import { fxRateModel } from '5-entities/currency/fxRate'
 
 export function setTotalBudget(upd: TBudgetUpdate | TBudgetUpdate[]): AppThunk {
   return (dispatch, getState) => {
     const state = getState()
     const envMetrics = selectCoreEnvMetrics(state)
     const updates = Array.isArray(upd) ? upd : [upd]
-    const convertFx = fxRateModel.converter(state)
+    const convertFx = selectCoreConvertFx(state)
 
     const adjusted = updates.map(adjustValue)
     dispatch(setBudget(adjusted))

@@ -23,9 +23,15 @@ write methods through `*Model`. FX local edit/reset are semantic Redux adapter
 commands, while HTTP loading is an app feature that dispatches those commands;
 the old FX thunk file and unused freeze action are gone.
 
-Next begin the read/helper cutover one family at a time. Start with app-level FX
-reads (`useConverter`, `useRatesGetter`, converter/getter consumers), exposing
-only narrow Redux selectors while leaving network orchestration outside Core.
+The direct app-level FX read cutover is complete: `2-pages` and `4-features`
+consume narrow Core Redux selectors for conversion and rate lookup. Remaining
+`fxRateModel` references live inside the legacy goal/envBalances/displayCurrency
+selector graph and parity/export-fixture paths.
+
+Next remove that internal FX projection dependency without importing the Redux
+adapter back into legacy selectors. Move one projection family to Core-owned
+inputs or retire its last production consumer; do not create an
+adapter-to-legacy-to-adapter cycle merely to delete the model name.
 
 The identity materializer stays as the extension point already wired into the
 command path, but implementing its domain rules is deferred until after legacy

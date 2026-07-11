@@ -7,10 +7,10 @@ import { sendEvent } from '6-shared/helpers/tracking'
 
 import {
   selectCoreEnvMetrics,
+  selectCoreConvertFx,
   setBudget,
   type TBudgetUpdate,
 } from 'core-next/adapters/redux'
-import { fxRateModel } from '5-entities/currency/fxRate'
 
 export const moveMoney =
   (
@@ -25,7 +25,7 @@ export const moveMoney =
     sendEvent('Budgets: move funds')
     const state = getState()
     const metrics = selectCoreEnvMetrics(state)[month]
-    const convertFx = fxRateModel.converter(state)
+    const convertFx = selectCoreConvertFx(state)
 
     const updates: TBudgetUpdate[] = []
 

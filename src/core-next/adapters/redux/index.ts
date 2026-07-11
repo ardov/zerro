@@ -54,6 +54,7 @@ export {
   selectCoreBalancesByDate,
   selectCoreBudgets,
   selectCoreCurrentFxRates,
+  selectCoreConvertFx,
   selectCoreEnvelopes,
   selectCoreEnvelopeStructure,
   selectCoreEnvMetrics,
