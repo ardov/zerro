@@ -119,15 +119,16 @@ Do the slices below in order; each is small and independently verifiable.
    the persisted replica record so a corrupt outbox fails loudly instead of
    crashing replay on load.
 
-5. **Documentation and test cleanup.** Mark legacy-parity tests (agreement with
+5. ✅ **Documentation and test cleanup.** Mark legacy-parity tests (agreement with
    now-deleted legacy selectors) with an explicit exit condition, like a bridge.
    Compress `handoff.md` to current state plus next step; leave slice history to
    Git. Record the accepted-risk decisions (stale account balance, dirty-session
    sync pause) in the design ledger.
 
-6. **Track C (materializer rules) — last, after everything above.** Unchanged:
-   account-balance recomputation and deleted-transaction immutability stay
-   deferred until the API, replica, and package boundaries are firm.
+6. **Track C (materializer rules) — next.** Account-balance recomputation and
+   deleted-transaction immutability are now the remaining planned work.
+   Start with deleted-transaction immutability, then continue in the Track C
+   order below.
 
 ### Accepted product risks (do not re-litigate)
 

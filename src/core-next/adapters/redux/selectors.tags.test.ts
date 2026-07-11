@@ -4,6 +4,10 @@ import type { RootState } from 'store'
 import { i18n } from '6-shared/localization'
 import { makeDemoStore } from '../../demo'
 
+// LEGACY-PARITY BRIDGE: remove the tagModel comparison when
+// getPopulatedTags has no production consumers and is deleted. Keep adapter
+// presentation and invalidation behavior as direct assertions.
+
 vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
   DATA_ACC_NAME: '🤖 [Zerro Data]',
   getDataAccountId: () => undefined,

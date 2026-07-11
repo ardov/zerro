@@ -11,6 +11,10 @@ import {
   EnvType,
 } from '../../zerro'
 
+// LEGACY-PARITY BRIDGE: remove the legacy comparisons when envelopeModel's
+// matching read methods have no production consumers and are deleted. Preserve
+// distinct demo/meta scenarios as Core-owned assertions before removing them.
+
 // Breaks the legacy hidden-store import cycle, same as the private fixture tests.
 vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
   DATA_ACC_NAME: '🤖 [Zerro Data]',

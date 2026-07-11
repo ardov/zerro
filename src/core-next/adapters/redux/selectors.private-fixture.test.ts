@@ -6,6 +6,10 @@ import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
 import { i18n } from '6-shared/localization'
 
+// LEGACY-PARITY BRIDGE: remove each hash comparison when the corresponding
+// legacy selector loses its last production consumer and is deleted. The
+// private fixture harness remains, but should then assert Core safe summaries.
+
 vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
   DATA_ACC_NAME: '🤖 [Zerro Data]',
   getDataAccountId: () => undefined,

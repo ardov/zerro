@@ -15,6 +15,10 @@ import {
   selectCoreTransactionsHistory,
 } from './selectors'
 
+// LEGACY-PARITY BRIDGE: remove model-to-model comparisons as each matching
+// transaction/debtor/balance legacy read loses its last production consumer.
+// Keep the demo outputs and invalidation cases as explicit Core contracts.
+
 // Breaks the legacy hidden-store import cycle while loading the parity source.
 vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
   DATA_ACC_NAME: '🤖 [Zerro Data]',

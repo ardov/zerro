@@ -10,6 +10,10 @@ import {
   EnvType,
 } from '../../zerro'
 
+// LEGACY-PARITY BRIDGE: remove the budgetModel comparisons when budgetModel.get
+// has no production consumers and is deleted. Keep default/preferZmBudgets as
+// explicit Core-owned scenarios after that cutover.
+
 // Breaks the legacy hidden-store import cycle, same as the private fixture tests.
 vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
   DATA_ACC_NAME: '🤖 [Zerro Data]',

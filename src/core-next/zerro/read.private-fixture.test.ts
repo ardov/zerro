@@ -15,6 +15,10 @@ import {
   getUserSettings as getCoreUserSettings,
 } from './index'
 
+// LEGACY-PARITY BRIDGE: remove comparisons individually when their imported
+// legacy reader loses its last production consumer. Keep the private fixture
+// scenarios only where they can assert a named Core invariant or safe summary.
+
 vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
   DATA_ACC_NAME: '🤖 [Zerro Data]',
   getDataAccountId: () => undefined,

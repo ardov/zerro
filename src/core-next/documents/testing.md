@@ -53,6 +53,19 @@ Use ignored real-account fixtures only for high-confidence large-data checks.
 Tests are opt-in and must compare hashes or safe summaries. See
 [private-fixtures.md](./private-fixtures.md).
 
+## Legacy-parity exit policy
+
+Legacy comparisons are migration bridges, not permanent specifications. Every
+test that imports a legacy selector or compares against captured legacy output
+must carry an explicit `LEGACY-PARITY BRIDGE` comment naming its exit condition.
+
+Remove a comparison when the matching legacy read has no production consumers
+and is deleted. Before removal, preserve only scenarios that protect a named
+Core contract by rewriting them with direct expected values, invariants, or
+privacy-safe summaries. Delete comparisons that merely prove two obsolete
+implementations agree. The private fixture harness may remain after legacy
+outputs disappear, but raw private data must never enter snapshots or diffs.
+
 ## Avoid low-value tests
 
 Do not test direct map access by itself:

@@ -6,6 +6,10 @@ import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
 import { i18n } from '6-shared/localization'
 
+// LEGACY-PARITY BRIDGE: delete this captured-legacy-output suite when every
+// selector listed in actualOutputs has lost its production consumers. Move any
+// still-valuable large-data invariant to a Core-owned private fixture suite.
+
 vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
   DATA_ACC_NAME: '🤖 [Zerro Data]',
   getDataAccountId: () => undefined,

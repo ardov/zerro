@@ -6,6 +6,10 @@ import { makeDemoStore } from '../../demo'
 import { applyPatch } from '../../zenmoney'
 import { compileSetGoal, envId, EnvType, goalType } from '../../zerro'
 
+// LEGACY-PARITY BRIDGE: remove the goalModel comparisons when its matching
+// reads have no production consumers and are deleted. Retain seeded-goal and
+// invalidation coverage as Core-owned regressions.
+
 // Breaks the legacy hidden-store import cycle, same as the private fixture tests.
 vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
   DATA_ACC_NAME: '🤖 [Zerro Data]',
