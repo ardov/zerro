@@ -72,10 +72,11 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 - The envelope write family is fully semantic: the compatibility
   `patchEnvelope` thunk and `zerro.envelope.patch` command are removed, and
   envelope drafts stay internal to Core compile functions.
-- The whole transaction thunk family is semantic commands through the funnel;
-  broken `splitTransfer` is removed.
-- `setInBudget` is a semantic account command; the dead `patchAccount`,
-  `patchTag`, `createTag`, and `patchMerchant` thunks are deleted.
+- Transaction writes are semantic Redux adapter commands; the legacy thunk
+  wrapper family and broken `splitTransfer` are removed.
+- Account in-budget changes call a semantic Redux adapter command directly;
+  the legacy `setInBudget`, `patchAccount`, `patchTag`, `createTag`, and
+  `patchMerchant` thunks are deleted.
 - Transaction-list bulk combine/merge actions are semantic commands; the dead
   `setTagBudget` write is removed.
 - `mergeAccounts` is semantic, including transaction and reminder reassignment,

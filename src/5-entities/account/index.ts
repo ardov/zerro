@@ -8,7 +8,6 @@ import {
   getSavingAccounts,
 } from './selectors'
 import { makeAccount } from './shared/makeAccount'
-import { setInBudget } from './thunks'
 
 export type { TAccountDraft } from './shared/makeAccount'
 export type { TAccountPopulated } from './shared/populate'
@@ -29,6 +28,4 @@ export const accountModel = {
   useSavingAccounts: () => useAppSelector(getSavingAccounts),
   // Actions
   makeAccount,
-  // Thunks
-  setInBudget,
 }

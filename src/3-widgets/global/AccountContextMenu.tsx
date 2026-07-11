@@ -3,8 +3,10 @@ import React, { FC, useCallback } from 'react'
 import { Menu, MenuItem, MenuProps } from '@mui/material'
 import { useAppDispatch } from 'store'
 import { registerPopover } from '6-shared/historyPopovers'
+import { sendEvent } from '6-shared/helpers/tracking'
 import { useTranslation } from 'react-i18next'
 import { accountModel } from '5-entities/account'
+import { setAccountInBalance } from 'core-next/adapters/redux'
 import { getMenuPosition } from './shared/helpers'
 
 type AccountMenuProps = { id: TAccountId }
@@ -42,14 +44,16 @@ export const AccountContextMenu: FC = () => {
       label: t('moveFromBalance'),
       condition: account.inBalance,
       action: () => {
-        dispatch(accountModel.setInBudget(id, false))
+        sendEvent('Accounts: Set in budget')
+        dispatch(setAccountInBalance(id, false))
       },
     },
     {
       label: t('moveInBalance'),
       condition: !account.inBalance,
       action: () => {
-        dispatch(accountModel.setInBudget(id, true))
+        sendEvent('Accounts: Set in budget')
+        dispatch(setAccountInBalance(id, true))
       },
     },
   ]

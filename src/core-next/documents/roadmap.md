@@ -62,7 +62,8 @@ The entity write cleanup landed smaller than planned: inspection showed
 `patchAccount`, `patchTag`, `createTag`, and `patchMerchant` had no app
 consumers left (the envelope migration absorbed them), so they were deleted
 instead of migrated. The one real use case, `setInBudget`, now dispatches the
-semantic `zenmoney.account.inBalance.set` command.
+semantic `zenmoney.account.inBalance.set` command directly from
+AccountContextMenu; its legacy account wrapper is deleted.
 
 The transaction-list bulk actions are now semantic: `combineToOutcome`,
 `combineToIncome`, and `mergeAsTransfer` compile in Core

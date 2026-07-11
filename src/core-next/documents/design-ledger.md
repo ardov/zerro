@@ -256,6 +256,13 @@ question before enabling non-identity rules.
 
 ## Resolved bridges
 
+### Account in-budget write wrapper
+
+Resolved on 2026-07-11. AccountContextMenu calls the Redux adapter
+`setAccountInBalance` command directly and owns its analytics event. The legacy
+`accountModel.setInBudget` member and `5-entities/account/thunks.ts` wrapper are
+deleted; account reads and hooks remain separate migration work.
+
 ### Transaction write wrappers
 
 Resolved on 2026-07-11. Transaction context menus, bulk actions, lists, and the
