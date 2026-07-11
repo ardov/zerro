@@ -105,7 +105,7 @@ Do the slices below in order; each is small and independently verifiable.
    and restore only. Add the missing reference-stability test on the reducer
    replay path that the testing policy already requires for selectors.
 
-3. **Internal-module decision.** Treat Core Next as an internal app module, not
+3. ✅ **Internal-module decision.** Treat Core Next as an internal app module, not
    a published package yet — there is no external consumer. Stop re-exporting
    the low-level engine from root (`export * from './engine'` contradicts the
    facade-only invariant); keep `engine/outbox.ts` internal to the Redux slice.
@@ -171,7 +171,9 @@ Current:
 - `applyEnvelopeStructure(structure)` owns hierarchy: ordering, groups, and
   parents compile from full structure input in one atomic patch.
 
-Next:
+Next: frozen. Do not widen the session facade or add supported subpaths until a
+real headless consumer exists (internal-module decision). The remaining ideas
+below are deferred, not scheduled:
 
 1. Add domain write methods that compile narrow semantic command inputs
    (transaction, account, and reminder families remain).

@@ -9,7 +9,9 @@ describe('core-next API boundary', () => {
   it('keeps the root entrypoint facade-only', () => {
     const rootIndex = readFileSync(join(coreRoot, 'index.ts'), 'utf8')
 
-    expect(rootIndex).not.toMatch(/from ['"]\.\/(?:zenmoney|zerro|adapters)/)
+    expect(rootIndex).not.toMatch(
+      /from ['"]\.\/(?:zenmoney|zerro|adapters|engine)/
+    )
   })
 
   it('pins the Redux adapter command surface', () => {

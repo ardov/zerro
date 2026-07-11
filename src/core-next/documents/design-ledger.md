@@ -8,7 +8,14 @@
 
 ### Package boundary
 
-- The root `core-next` entrypoint is the semantic facade.
+- Core Next is an internal app module, not a published package, until a real
+  external or headless consumer exists.
+- The root `core-next` entrypoint is the semantic facade: constants, shared
+  root types, and the snapshot session only.
+- The reference engine (`createZerroEngine`) and its outbox primitives are an
+  internal implementation detail. Root no longer re-exports them; the Redux
+  slice imports `core-next/engine/*` directly. The `api-boundary` test pins the
+  facade-only root, including no `./engine` re-export.
 - `core-next/zenmoney` and `core-next/zerro` are internal migration paths, not
   supported app-facing APIs.
 - Redux selectors and commands use an explicit adapter entrypoint and are not
@@ -104,11 +111,10 @@
 
 ### Package surface
 
-Current lean: Core Next is an internal app module, not a published package,
-until a real external/headless consumer exists. Root should expose the semantic
-facade only and stop re-exporting the low-level engine; `engine/outbox.ts` stays
-an internal Redux dependency. The completion plan's internal-module slice
-records the concrete change.
+Decided and implemented: Core Next is an internal app module; root is
+facade-only and no longer re-exports the engine (see Package boundary above).
+The remaining open questions concern a future published package, not current
+work:
 
 1. Which supported subpaths should exist besides root and the Redux adapter?
 2. Are `demo`, `testing`, `materializer`, and future `presentation` official

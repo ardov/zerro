@@ -154,10 +154,12 @@ already expanded the same effects.
 The root entrypoint is the package-facing semantic surface:
 
 ```ts
-import { createZerroSession, createZerroEngine } from 'core-next'
+import { createZerroSession } from 'core-next'
 ```
 
-It must not re-export Redux adapters or whole implementation trees. During the
+It must not re-export Redux adapters or whole implementation trees. The
+reference engine and its outbox primitives are internal and are not root
+exports; the Redux slice imports them through `core-next/engine/*`. During the
 migration, app shims and tests may use explicit deep imports, but those paths
 are not stable APIs.
 
