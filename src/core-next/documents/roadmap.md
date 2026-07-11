@@ -272,8 +272,10 @@ The first concrete adapter cleanup moved reminder writes, hidden data-account
 preparation, the debug patch hook, and tag-presentation shims behind
 `core-next/adapters/redux`. The data-account command is
 `infrastructure.dataAccount.prepare@2`, so its semantic title is present in
-the persisted command payload. Keep the remaining deep imports as separate,
-consumer-led slices.
+the persisted command payload. A follow-up moved the remaining goal and Stats
+helpers behind that same adapter and added a production-source guard against
+new implementation-subpath imports. Keep the compatibility facades as
+separate, consumer-led slices.
 
 Switch one path at a time. Add parity or invalidation coverage appropriate to
 that path, then update its bridge entry in the design ledger.

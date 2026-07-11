@@ -164,6 +164,11 @@ preparation, the debug patch hook, and tag presentation compatibility exports.
 Their former deep app imports are resolved; this does not make the underlying
 ZenMoney/Zerro implementation barrels public.
 
+Goal normalization/type checks and transaction classification are also exposed
+as narrow Redux-adapter helpers for their existing app consumers. Production
+app sources are guarded against importing implementation subpaths; the
+`6-shared/types` compatibility facade remains the documented exception.
+
 ### Legacy tag icon files
 
 Status: `core-next/tag-icons` owns package-safe emoji metadata, while

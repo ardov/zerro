@@ -1,5 +1,4 @@
-import { normalizeGoal } from 'core-next/zerro/goals'
-import { executeCommand } from 'core-next/adapters/redux'
+import { executeCommand, normalizeGoal } from 'core-next/adapters/redux'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { TISOMonth } from '6-shared/types'
 import { AppThunk } from 'store'

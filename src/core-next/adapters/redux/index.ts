@@ -37,6 +37,10 @@ export {
   populateTags,
   type TTagPopulated,
 } from './tagPresentation'
+// Narrow pure domain helpers used by real app consumers. Keep the underlying
+// ZenMoney/Zerro implementation barrels internal.
+export { getTransactionType, TrType } from '../../zenmoney'
+export { goalType, normalizeGoal } from '../../zerro/goals'
 export {
   toEnvelopeStructureInput,
   type TApplyEnvelopeStructureInput,

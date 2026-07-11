@@ -1,5 +1,5 @@
 import { TInstCodeMap } from '5-entities/currency/instrument'
-import { getTransactionType, TrType } from 'core-next/zenmoney'
+import { getTransactionType, TrType } from 'core-next/adapters/redux'
 import { GroupBy, toGroup } from '6-shared/helpers/date'
 import { addFxAmount } from '6-shared/helpers/money'
 import {

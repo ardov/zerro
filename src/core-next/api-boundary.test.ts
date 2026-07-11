@@ -96,6 +96,37 @@ describe('core-next API boundary', () => {
 
     expect(violations).toEqual([])
   })
+
+  it('keeps app consumers off Core implementation subpaths', () => {
+    const appRoot = dirname(coreRoot)
+    const violations = walk(appRoot)
+      .filter(file => {
+        const path = relative(appRoot, file)
+        return (
+          /\.(?:ts|tsx)$/.test(path) &&
+          !path.startsWith('core-next/') &&
+          !path.startsWith('6-shared/types/') &&
+          !path.endsWith('.test.ts')
+        )
+      })
+      .flatMap(file => {
+        const source = readFileSync(file, 'utf8')
+        return source
+          .split('\n')
+          .map((line, index) => ({ line, index }))
+          .filter(({ line }) =>
+            /from ['"]core-next\/(?:zenmoney|zerro|patch|tag-icons|materializer|adapters\/redux\/)/.test(
+              line
+            )
+          )
+          .map(
+            ({ line, index }) =>
+              `${relative(appRoot, file)}:${index + 1}: ${line.trim()}`
+          )
+      })
+
+    expect(violations).toEqual([])
+  })
 })
 
 function readProductionCoreFiles(): string[] {

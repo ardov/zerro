@@ -310,6 +310,12 @@ The first Track E adapter-boundary cleanup is complete:
 - the adapter-boundary test pins these exports. Remaining deep app imports
   should be retired only when their narrow adapter contract is equally clear.
 
+The follow-up cleanup closes the remaining ordinary app deep imports: goal
+normalization/type checks and Stats transaction classification use narrow Redux
+adapter exports. The boundary test now scans production app sources, excluding
+the explicit `6-shared/types` compatibility facade, so implementation subpaths
+cannot quietly return.
+
 ## Important guardrails
 
 - Root `core-next` stays facade-only.
