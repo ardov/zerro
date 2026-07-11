@@ -27,8 +27,8 @@ The handoff is routing, not proof that code landed. Always verify the tree.
   data, read projectors, and a substantial command layer.
 - Most budget, envelope, goal, activity, transaction, debtor, and balance reads
   now reach the app through `core-next/adapters/redux`.
-- Budget, goal, and envelope writes use the Core command funnel; remaining
-  writes pass through the legacy patch bridge.
+- All production writes use semantic commands through the Core command funnel;
+  the legacy patch bridge has been removed.
 - Every local Redux patch now passes through an identity materializer. Server
   diffs bypass it as already canonical.
 - `createZerroEngine` models outbox replay but has no production owner yet;
@@ -67,10 +67,9 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 
 ## Default next slice
 
-Choose a bounded Track A, D, or F slice. The smallest default is package/test
-hardening: verify whether the legacy patch compatibility export can be retired,
-or pin the adapter's public command surface with a consumer-level boundary
-test. Do not begin materializer rules yet.
+Begin the first bounded Track D slice: extract reusable pure outbox operations
+from the reference engine before changing Redux state shape. Do not begin
+materializer rules yet.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 

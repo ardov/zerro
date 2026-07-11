@@ -54,8 +54,6 @@ import {
  * `zerro.budget.set@2`) or migrate eagerly at the storage boundary — the
  * persisted outbox gets its own schema version there.
  *
- * `legacy.patch` wraps not-yet-migrated write paths so every client mutation
- * flows through one funnel; it carries the compiled patch as its payload.
  */
 export type TAppCommand =
   | { type: 'zerro.budget.set'; payload: TBudgetUpdate[] }
@@ -111,7 +109,6 @@ export type TAppCommand =
       type: 'zenmoney.transaction.mergeAsTransfer'
       payload: { ids: TTransactionId[] }
     }
-  | { type: 'legacy.patch'; payload: TNormalizedPatch }
 
 export function compileAppCommand(
   state: RootState,
@@ -213,8 +210,6 @@ function compileAppCommandResult(
       return compileCombineToIncome(data, command.payload.ids, ctx)
     case 'zenmoney.transaction.mergeAsTransfer':
       return compileMergeTransactionsAsTransfer(data, command.payload.ids, ctx)
-    case 'legacy.patch':
-      return command.payload
   }
 }
 

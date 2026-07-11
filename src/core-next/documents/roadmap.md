@@ -76,9 +76,9 @@ distinct known behavior (unlike the deleted redundant patch wrappers), so it
 was migrated rather than dropped — the account context menu is its natural
 future home.
 
-**No production code imports `applyLegacyPatch` any more.** Only the
-`legacyPatch.ts` definition, its barrel re-export, and tests remain. Track E's
-write cutover is complete.
+The unused `legacy.patch` command, `applyLegacyPatch` thunk, adapter export, and
+bridge-only tests are removed. A boundary test pins the adapter's supported
+command exports. Track E's write cutover and bridge removal are complete.
 
 Replica ownership, server-like materialization rules, and package hardening
 remain incomplete.
@@ -88,10 +88,8 @@ remain incomplete.
 Every app write now flows through the semantic command funnel, so there is no
 single obvious next legacy cutover. Pick by what the next real task touches:
 
-- **Track F (package/test hardening)** — a good default now that writes are
-  semantic: retire the `applyLegacyPatch` compatibility export if nothing
-  outside tests needs it, or add a consumer-level export/type test that pins
-  the adapter's public command surface (`executeCommand` + the named thunks).
+- **Track F (package/test hardening)** — continue with generated declaration or
+  package-consumer checks now that the adapter command surface is pinned.
 - **Track D (replica and sync)** — begin the outbox work: extract pure outbox
   operations and move Redux state toward `base`/`outbox`/`inbox`/`current`.
   The command funnel is the seam the outbox append will slot into.
@@ -219,11 +217,12 @@ beside Redux in the app.
 
 Goal: remove compatibility paths only when a real consumer can switch safely.
 
-The write cutover is complete: no production consumer imports
-`applyLegacyPatch`, and `mergeAccounts` now has explicit transaction, reminder,
-and internal-transfer semantics. Remaining compatibility work includes:
+The write cutover and bridge retirement are complete: `mergeAccounts` has
+explicit transaction, reminder, and internal-transfer semantics; the unused
+`legacy.patch` command and `applyLegacyPatch` thunk/export are deleted; and the
+adapter command surface is pinned by a boundary test. Other compatibility work
+includes:
 
-- the legacy patch command/export itself, pending an external-consumer check;
 - deep app imports from `core-next/zenmoney`, `core-next/zerro`, and tag
   presentation shims;
 - compatibility re-exports under `6-shared/types`, demo data, and icon assets.

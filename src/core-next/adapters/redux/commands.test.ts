@@ -3,7 +3,6 @@ import type { TDataStore } from '6-shared/types'
 import type { RootState } from 'store'
 import { applyClientPatch } from 'store/data'
 import { makeDemoStore } from '../../demo'
-import type { TNormalizedPatch } from '../../types'
 import { applyPatch } from '../../zenmoney'
 import {
   makeAccount,
@@ -24,7 +23,6 @@ import {
   executeCommand,
   recreateTransaction,
 } from './commands'
-import { applyLegacyPatch } from './legacyPatch'
 import { selectCoreEnvelopes, selectCoreEnvelopeStructure } from './selectors'
 
 // Breaks the legacy hidden-store import cycle, same as the private fixture tests.
@@ -492,30 +490,5 @@ describe('executeCommand funnel', () => {
     expect(next.account.source).toBeUndefined()
     expect(next.transaction.spend.outcomeAccount).toBe('target')
     expect(next.reminder.planned.outcomeAccount).toBe('target')
-  })
-
-  it('applies a legacy patch as-is', () => {
-    const state = makeState(makeDemoStore({ now: NOW }))
-    const [tagId] = Object.keys(state.data.current.tag)
-    const patch: TNormalizedPatch = {
-      tag: [{ ...state.data.current.tag[tagId], title: 'Funneled' }],
-    }
-    const dispatch = makeDispatch(state)
-
-    dispatch(applyLegacyPatch(patch))
-
-    expect(dispatch).toHaveBeenCalledWith(applyClientPatch(patch))
-  })
-
-  it('skips empty patches entirely', () => {
-    const state = makeState(makeDemoStore({ now: NOW }))
-    const dispatch = makeDispatch(state)
-
-    dispatch(executeCommand({ type: 'legacy.patch', payload: {} }))
-
-    const actions = dispatch.mock.calls
-      .map(([action]: [unknown]) => action)
-      .filter((action: unknown) => typeof action !== 'function')
-    expect(actions).toEqual([])
   })
 })

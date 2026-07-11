@@ -144,7 +144,6 @@ core-next/zenmoney/users/types
 core-next/zerro/goals
 core-next/patch
 core-next/adapters/redux/tagPresentation
-core-next/adapters/redux/legacyPatch
 ```
 
 Exit one consumer at a time after its semantic root or adapter API exists.
@@ -169,6 +168,13 @@ replayed `current`. Resolve the sync transport question before enabling
 non-identity rules.
 
 ## Resolved bridges
+
+### Legacy patch command
+
+Resolved on 2026-07-11. After the account merge migration removed the final
+production consumer, the `legacy.patch` command, `applyLegacyPatch` thunk and
+adapter export, source file, and bridge-only tests were deleted. The Redux
+adapter command export list is pinned by `api-boundary.test.ts`.
 
 ### Envelope partial-patch command
 

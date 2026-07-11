@@ -12,41 +12,83 @@ describe('core-next API boundary', () => {
     expect(rootIndex).not.toMatch(/from ['"]\.\/(?:zenmoney|zerro|adapters)/)
   })
 
+  it('pins the Redux adapter command surface', () => {
+    const adapterIndex = readFileSync(
+      join(coreRoot, 'adapters/redux/index.ts'),
+      'utf8'
+    )
+    const commandBlock = adapterIndex.match(
+      /export \{([\s\S]*?)\} from ['"]\.\/commands['"]/
+    )?.[1]
+
+    expect(commandBlock).toBeDefined()
+    expect(
+      commandBlock
+        ?.split(',')
+        .map(name => name.trim().replace(/^type\s+/, ''))
+        .filter(Boolean)
+        .sort()
+    ).toEqual(
+      [
+        'applyChangesToTransaction',
+        'applyEnvelopeStructure',
+        'bulkEditTransactions',
+        'combineTransactionsToIncome',
+        'combineTransactionsToOutcome',
+        'createEnvelope',
+        'deleteTransactions',
+        'deleteTransactionsPermanently',
+        'executeCommand',
+        'mergeAccounts',
+        'mergeTransactionsAsTransfer',
+        'recreateTransaction',
+        'renameEnvelope',
+        'restoreTransaction',
+        'setAccountInBalance',
+        'setEnvelopeColor',
+        'setEnvelopeComment',
+        'setTransactionsViewed',
+        'TAppCommand',
+        'updateEnvelopeSettings',
+      ].sort()
+    )
+    expect(adapterIndex).not.toContain('applyLegacyPatch')
+  })
+
   it('keeps production core free from app runtime imports', () => {
-    const violations = readProductionCoreFiles()
-      .flatMap(file => {
-        const source = readFileSync(file, 'utf8')
-        return source
-          .split('\n')
-          .map((line, index) => ({ line, index }))
-          .filter(({ line }) =>
+    const violations = readProductionCoreFiles().flatMap(file => {
+      const source = readFileSync(file, 'utf8')
+      return source
+        .split('\n')
+        .map((line, index) => ({ line, index }))
+        .filter(
+          ({ line }) =>
             /from ['"](?:store|react|react-redux|@reduxjs\/toolkit|5-entities(?:\/[^'"]*)?|6-shared\/localization|6-shared\/tagIcons\.json|i18next)['"]/.test(
               line
             ) ||
             /from ['"]6-shared\/(?:tagIconsSvg|icons\/[^'"]*)['"]/.test(line)
-          )
-          .map(
-            ({ line, index }) =>
-              `${relative(coreRoot, file)}:${index + 1}: ${line.trim()}`
-          )
-      })
+        )
+        .map(
+          ({ line, index }) =>
+            `${relative(coreRoot, file)}:${index + 1}: ${line.trim()}`
+        )
+    })
 
     expect(violations).toEqual([])
   })
 
   it('keeps production core free from any 6-shared imports', () => {
-    const violations = readProductionCoreFiles()
-      .flatMap(file => {
-        const source = readFileSync(file, 'utf8')
-        return source
-          .split('\n')
-          .map((line, index) => ({ line, index }))
-          .filter(({ line }) => /from ['"]6-shared\//.test(line))
-          .map(
-            ({ line, index }) =>
-              `${relative(coreRoot, file)}:${index + 1}: ${line.trim()}`
-          )
-      })
+    const violations = readProductionCoreFiles().flatMap(file => {
+      const source = readFileSync(file, 'utf8')
+      return source
+        .split('\n')
+        .map((line, index) => ({ line, index }))
+        .filter(({ line }) => /from ['"]6-shared\//.test(line))
+        .map(
+          ({ line, index }) =>
+            `${relative(coreRoot, file)}:${index + 1}: ${line.trim()}`
+        )
+    })
 
     expect(violations).toEqual([])
   })

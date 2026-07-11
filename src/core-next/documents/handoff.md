@@ -3,7 +3,7 @@
 - Updated: 2026-07-11
 - Branch: `core-next`
 - Worktree: clean; the branch tip is
-  `Make transaction bulk combine/merge actions semantic`
+  `Retire legacy patch bridge`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -48,7 +48,8 @@ semantic:
   command routing.
 
 No production code imports `applyLegacyPatch` now. The compatibility command,
-export, and its tests still exist pending an explicit package-hardening slice.
+export, source file, and bridge-only tests are now removed. The Core API
+boundary test pins the exact supported command exports of the Redux adapter.
 
 The branch tip makes the transaction-list bulk combine/merge actions semantic:
 
@@ -95,7 +96,7 @@ funnel. The one before that retired the compatibility envelope patch path:
   compilers; envelope drafts do not cross the package boundary;
 - the createEnvelope resulting-state test moved to
   `src/4-features/envelope/createEnvelope.test.ts`;
-- the funnel compiles only semantic envelope commands plus `legacy.patch`.
+- the funnel compiles only semantic commands.
 
 The earlier commit landed semantic envelope creation and structure.
 
@@ -133,11 +134,9 @@ No materializer rule or replica behavior is included in these slices.
 
 ## Default next task
 
-Choose the next bounded slice from Track A, D, or F as described in
-[roadmap.md](./roadmap.md#default-next-slice-choose-from-track-a-d-or-f).
-Package/test hardening is the smallest default: verify whether the legacy patch
-compatibility export can be retired, or pin the adapter command surface with a
-consumer-level boundary test. Do not start materializer rules yet.
+Begin the first bounded Track D slice described in [roadmap.md](./roadmap.md):
+extract reusable pure outbox operations from the reference engine before
+changing Redux state shape. Do not start materializer rules yet.
 
 ## Important guardrails
 
@@ -168,7 +167,7 @@ Expected full-suite baseline at this handoff:
 
 ```txt
 69 test files passed, 4 skipped
-260 tests passed, 6 skipped
+259 tests passed, 6 skipped
 ```
 
 Browser check: the transaction-list multi-select bar and bulk-actions menu
