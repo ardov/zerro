@@ -4,8 +4,10 @@ import { GroupBy, toGroup } from '6-shared/helpers/date'
 import { keys } from '6-shared/helpers/keys'
 
 import { useAppSelector } from 'store/index'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { selectCoreBalancesByDate } from 'core-next/adapters/redux'
+import {
+  selectCoreBalancesByDate,
+  selectCoreDisplayConverter,
+} from 'core-next/adapters/redux'
 import { balancesToDisplay } from './shared/convertBalancesToDisplay'
 import { TBalanceNode } from './shared/types'
 
@@ -38,7 +40,7 @@ export function useDisplayBalances(
   end?: TDateDraft
 ) {
   const fxBalances = useBalances(aggregation, start, end)
-  const convert = useAppSelector(displayCurrency.getConverter)
+  const convert = useAppSelector(selectCoreDisplayConverter)
   const balances = useMemo(
     () => balancesToDisplay(fxBalances, convert),
     [convert, fxBalances]

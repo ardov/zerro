@@ -1,7 +1,7 @@
 import { Modify, TFxAmount, TISOMonth } from '6-shared/types'
+import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
 import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { Amount, AmountProps } from '6-shared/ui/Amount'
-import { displayCurrency } from './model'
 
 type TDisplayAmountProps = Modify<
   AmountProps,
@@ -14,7 +14,7 @@ type TDisplayAmountProps = Modify<
 
 export const DisplayAmount = (props: TDisplayAmountProps) => {
   const { value, month, noCurrency, ...delegated } = props
-  const [currency] = displayCurrency.useDisplayCurrency()
+  const [currency] = useCoreDisplayCurrency()
   const convert = useCoreToDisplay(month || 'current')
   const amount = typeof value === 'number' ? value : convert(value)
   return (

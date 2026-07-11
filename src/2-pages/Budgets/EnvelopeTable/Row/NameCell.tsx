@@ -1,4 +1,5 @@
 import React, { FC, memo, ReactNode, useCallback, useRef } from 'react'
+import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
 import { useDraggable } from '@dnd-kit/core'
 import { Typography, Box, IconButton, Collapse, Chip } from '@mui/material'
 import { useTranslation } from 'react-i18next'
@@ -12,7 +13,6 @@ import { useFloatingInput } from '6-shared/ui/FloatingInput'
 import { useAppDispatch } from 'store/index'
 import { TEnvelope, TEnvelopeId } from '5-entities/envelope'
 import { renameEnvelope } from 'core-next/adapters/redux'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { DragTypes } from '2-pages/Budgets/DnD'
 
 export const NameCell: FC<{
@@ -26,7 +26,7 @@ export const NameCell: FC<{
   const { id, symbol, colorHex, name, currency, comment, originalName } =
     props.envelope
   const { isReordering, isDefaultVisible, isChild, isSelf, onClick } = props
-  const [displCurrency] = displayCurrency.useDisplayCurrency()
+  const [displCurrency] = useCoreDisplayCurrency()
   const { t } = useTranslation('budgets')
 
   const dispatch = useAppDispatch()

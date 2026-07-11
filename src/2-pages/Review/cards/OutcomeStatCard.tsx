@@ -1,4 +1,5 @@
 import { FC, useCallback, useMemo, useState } from 'react'
+import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
 import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { Box, Button, Stack } from '@mui/material'
 import { useTranslation } from 'react-i18next'
@@ -10,7 +11,6 @@ import { useAppSelector } from 'store'
 import { EnvType, TEnvelopeId } from '5-entities/envelope'
 import { envId } from '5-entities/envelope/shared/envelopeId'
 import { selectCoreEnvelopes } from 'core-next/adapters/redux'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { DataLine } from '3-widgets/DataLine'
 import { Card, TCardProps } from '../shared/Card'
 import { TStats, useStats } from '../shared/getFacts'
@@ -29,7 +29,7 @@ export const MAX_VISIBLE_NODES = 10
 export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
   const yearStats = useStats(year)
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
-  const [currency] = displayCurrency.useDisplayCurrency()
+  const [currency] = useCoreDisplayCurrency()
   const toDisplay = useCoreToDisplay('current')
   const [showAll, setShowAll] = useState(false)
   const [showParentOnly, setShowParentOnly] = useState(true)

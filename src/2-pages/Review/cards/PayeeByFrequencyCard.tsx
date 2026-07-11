@@ -6,10 +6,7 @@ import { ButtonBase, IconButton, Stack, Typography } from '@mui/material'
 import { Card, TCardProps } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
 import { entries } from '6-shared/helpers/keys'
-import {
-  DisplayAmount,
-  displayCurrency,
-} from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { ArrowForwardIcon, ArrowBackIcon } from '6-shared/ui/Icons'
 
 export function PayeeByFrequencyCard(props: TCardProps) {

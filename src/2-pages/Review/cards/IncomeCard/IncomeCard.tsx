@@ -5,10 +5,7 @@ import { entries } from '6-shared/helpers/keys'
 import { addFxAmount } from '6-shared/helpers/money'
 import { useAppSelector } from 'store'
 import { selectCorePopulatedTags } from 'core-next/adapters/redux'
-import {
-  DisplayAmount,
-  displayCurrency,
-} from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '5-entities/currency/displayCurrency'
 
 import { Card, TCardProps } from '../../shared/Card'
 import { useStats } from '../../shared/getFacts'

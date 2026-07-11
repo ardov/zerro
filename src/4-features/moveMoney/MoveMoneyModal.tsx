@@ -1,4 +1,5 @@
 import React, { FC, useState } from 'react'
+import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
 import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { Box, InputAdornment, IconButton, Chip } from '@mui/material'
 import Dialog, { DialogProps } from '@mui/material/Dialog'
@@ -7,7 +8,6 @@ import { ArrowForwardIcon } from '6-shared/ui/Icons'
 import { Modify, TISOMonth } from '6-shared/types'
 import { useAppDispatch, useAppSelector } from 'store'
 
-import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { moveMoney } from './moveMoney'
 import { TEnvelopeId } from '5-entities/envelope'
 import {
@@ -33,7 +33,7 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   const envelopes = useAppSelector(selectCoreEnvelopes)
   const metrics = useAppSelector(selectCoreEnvMetrics)[month]
   const totalMetrics = useAppSelector(selectCoreMonthTotals)[month]
-  const [currency] = displayCurrency.useDisplayCurrency()
+  const [currency] = useCoreDisplayCurrency()
   const toDisplay = useCoreToDisplay(month)
 
   const sourceName =

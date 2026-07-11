@@ -2,10 +2,7 @@ import { Box, Stack, Typography } from '@mui/material'
 import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { useTranslation } from 'react-i18next'
 
-import {
-  DisplayAmount,
-  displayCurrency,
-} from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { Card, TCardProps } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
 

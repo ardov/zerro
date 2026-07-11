@@ -17,10 +17,7 @@ import { Amount } from '6-shared/ui/Amount'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { addFxAmount } from '6-shared/helpers/money'
 import { accountModel, TAccountPopulated } from '5-entities/account'
-import {
-  DisplayAmount,
-  displayCurrency,
-} from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { Period } from '../shared/period'
 import { useAccountHistory } from './model'
 import { useTransactionDrawer } from '3-widgets/global/TransactionListDrawer'

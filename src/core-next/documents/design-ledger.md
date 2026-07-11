@@ -256,6 +256,13 @@ question before enabling non-identity rules.
 
 ## Resolved bridges
 
+### Display-currency model
+
+Resolved on 2026-07-11. UI reads and updates display currency through
+`useCoreDisplayCurrency`; display conversion uses `useCoreToDisplay`. Legacy
+accBalances conversion uses the Core selector directly. The legacy model file
+and object are deleted; `DisplayAmount` remains a thin UI component.
+
 ### Display-currency conversion hook
 
 Resolved on 2026-07-11. UI conversion uses `useCoreToDisplay`, backed by

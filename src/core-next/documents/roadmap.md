@@ -43,6 +43,11 @@ Redux selector without making the adapter depend on the legacy display model.
 depending on the legacy model. The remaining display-currency setter hook is
 the next small app-state bridge.
 
+The display-currency setter is now migrated too, and the legacy model is
+deleted. This is a good intermediate verification checkpoint, not completion:
+the public baseline is strong, but production still contains legacy model calls
+and the opt-in private fixture plus browser smoke remain completion-gate items.
+
 Envelope reads are now split: session/Core projectors return domain envelopes,
 and the Redux adapter adds symbols, generated/display colors, localized null
 text, and localized groups. The old `populatedTags` session dependency is gone,

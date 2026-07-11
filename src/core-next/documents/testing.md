@@ -105,6 +105,24 @@ permissive test builders.
 | Package boundary              | Boundary tests + external consumer type compile   |
 | Private-data-sensitive change | Safe private fixture run when available           |
 
+## Refactor completion gate
+
+The green public suite is an intermediate verification checkpoint, not by
+itself proof that the app has completed the Core cutover. Before declaring the
+refactor complete, require all of the following:
+
+1. Full deterministic suite, TypeScript, package consumer, formatting, and
+   dependency-boundary checks are green.
+2. Opt-in private-fixture parity passes with hashes/safe summaries when a
+   fixture is available; record explicitly when it was unavailable.
+3. A manual browser smoke covers initial load/sync, one budget or goal edit, one
+   transaction edit, reload with pending state, and explicit sync.
+4. Production-source audit finds no remaining legacy model API that the Core
+   Redux surface is intended to replace. Remaining presentation or app-service
+   helpers must have an explicit ownership decision.
+5. Legacy-parity bridges are either removed with their legacy implementation or
+   retain a concrete exit condition.
+
 ## Commands
 
 Focused:

@@ -5,10 +5,7 @@ import { ButtonBase, IconButton, Stack, Typography } from '@mui/material'
 
 import { Card, TCardProps } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
-import {
-  DisplayAmount,
-  displayCurrency,
-} from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { entries } from '6-shared/helpers/keys'
 import { ArrowBackIcon, ArrowForwardIcon } from '6-shared/ui/Icons'
 

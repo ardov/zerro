@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
 import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { ButtonBase, Collapse, Stack } from '@mui/material'
 import { useTranslation } from 'react-i18next'
@@ -6,7 +7,6 @@ import { useToggle } from '6-shared/hooks/useToggle'
 import { TISOMonth } from '6-shared/types'
 import { PercentBar, PercentBarItem } from '6-shared/ui/PercentBar'
 
-import { displayCurrency } from '5-entities/currency/displayCurrency'
 import {
   EnvActivity,
   TrFilterMode,
@@ -88,7 +88,7 @@ function StatWidget(props: {
 }) {
   const { month, total, items, name, showBar, action } = props
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
-  const [currency] = displayCurrency.useDisplayCurrency()
+  const [currency] = useCoreDisplayCurrency()
   const toDisplay = useCoreToDisplay(month)
   const envelopes = useAppSelector(selectCoreEnvelopes)
   const [opened, toggleOpened] = useToggle(false)

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react'
+import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
 import { useCoreToDisplay } from 'core-next/adapters/redux'
 import {
   Box,
@@ -21,10 +22,7 @@ import { useToggle } from '6-shared/hooks/useToggle'
 import { SettingsIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { sendEvent } from '6-shared/helpers/tracking'
-import {
-  DisplayAmount,
-  displayCurrency,
-} from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { Card, TCardProps } from '../../shared/Card'
 import { useStats } from '../../shared/getFacts'
 import { useAppSelector } from 'store'
@@ -40,7 +38,7 @@ export function NotFunCard(props: TCardProps) {
   const [checkedIncome, setCheckedIncome] = useState(income.map(t => t.id))
   const [checkedOutcome, setCheckedOutcome] = useState(outcome.map(t => t.id))
 
-  const [displayCurr] = displayCurrency.useDisplayCurrency()
+  const [displayCurr] = useCoreDisplayCurrency()
   if (displayCurr !== 'RUB') return null
 
   const totalIncome = income

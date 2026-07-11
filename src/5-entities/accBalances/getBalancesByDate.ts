@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { GroupBy, makeDateArray } from '6-shared/helpers/date'
 
 import { TSelector } from 'store/index'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
+import { selectCoreDisplayConverter } from 'core-next/adapters/redux'
 import { trModel } from '5-entities/transaction'
 import { balancesToDisplay } from './shared/convertBalancesToDisplay'
 import { TBalanceNode } from './shared/types'
@@ -27,6 +27,6 @@ export const getBalancesByDate: TSelector<TBalanceNode[]> = createSelector(
 
 export const getDisplayBalancesByDate: TSelector<TBalanceNode<number>[]> =
   createSelector(
-    [getBalancesByDate, displayCurrency.getConverter],
+    [getBalancesByDate, selectCoreDisplayConverter],
     balancesToDisplay
   )

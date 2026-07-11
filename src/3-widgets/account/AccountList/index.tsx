@@ -9,10 +9,7 @@ import { addFxAmount } from '6-shared/helpers/money'
 import { toISOMonth } from '6-shared/helpers/date'
 
 import { accountModel, TAccountPopulated } from '5-entities/account'
-import {
-  DisplayAmount,
-  displayCurrency,
-} from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { Account, Subheader } from './components'
 
 export default function AccountList({ className = '' }) {

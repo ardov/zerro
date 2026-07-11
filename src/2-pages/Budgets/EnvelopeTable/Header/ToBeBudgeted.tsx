@@ -1,4 +1,5 @@
 import React, { FC } from 'react'
+import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
 import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { useAppSelector } from 'store'
 import {
@@ -20,7 +21,6 @@ import { Amount } from '6-shared/ui/Amount'
 import { DataLine } from '3-widgets/DataLine'
 import { ArrowForwardIcon } from '6-shared/ui/Icons'
 
-import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { useMonth } from '../../MonthProvider'
 import { useIsSmall } from '../shared/shared'
 
@@ -85,7 +85,7 @@ function useTotalsModel() {
   const { t } = useTranslation('budgets')
   const [month] = useMonth()
 
-  const [currency] = displayCurrency.useDisplayCurrency()
+  const [currency] = useCoreDisplayCurrency()
   const toDisplay = useCoreToDisplay(month)
 
   const monthList = useAppSelector(selectCoreMonthList)

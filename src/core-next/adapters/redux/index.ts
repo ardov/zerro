@@ -38,7 +38,7 @@ export {
   updateEnvelopeSettings,
 } from './commands'
 export { nullTag, populateTags, type TTagPopulated } from './tagPresentation'
-export { useCoreToDisplay } from './hooks'
+export { useCoreDisplayCurrency, useCoreToDisplay } from './hooks'
 // Narrow pure domain helpers used by real app consumers. Keep the underlying
 // ZenMoney/Zerro implementation barrels internal.
 export { getTransactionType, TrType } from '../../zenmoney'

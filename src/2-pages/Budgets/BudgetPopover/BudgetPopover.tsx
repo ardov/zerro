@@ -1,4 +1,5 @@
 import type { TFxAmount, TISOMonth } from '6-shared/types'
+import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
 import {
   selectCoreConvertFx,
   selectCoreEnvMetrics,
@@ -23,7 +24,6 @@ import { sendEvent } from '6-shared/helpers/tracking'
 import { AdaptivePopover } from '6-shared/ui/AdaptivePopover'
 
 import { useAppDispatch, useAppSelector } from 'store'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
 import { useQuickActions } from './useQuickActions'
 
@@ -37,7 +37,7 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
   const { t } = useTranslation()
   const quickActions = useQuickActions(month, id)
-  const [dispCurrency] = displayCurrency.useDisplayCurrency()
+  const [dispCurrency] = useCoreDisplayCurrency()
   const dispatch = useAppDispatch()
   const envelope = useAppSelector(selectCoreEnvMetrics)[month][id]
   const convertFx = useAppSelector(selectCoreConvertFx)

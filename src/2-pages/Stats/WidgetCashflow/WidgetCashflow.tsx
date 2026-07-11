@@ -1,4 +1,5 @@
 import React from 'react'
+import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
 import { useTranslation } from 'react-i18next'
 import { Paper, Card, Typography, Box, Divider } from '@mui/material'
 import {
@@ -16,10 +17,7 @@ import { formatMoney } from '6-shared/helpers/money'
 import { formatDate, parseDate } from '6-shared/helpers/date'
 import { TISODate } from '6-shared/types'
 
-import {
-  DisplayAmount,
-  displayCurrency,
-} from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { DataLine } from '3-widgets/DataLine'
 import { summarizeCashflow, useCashFlow } from '../shared/cashflow'
 import { Period, PeriodTitle } from '../shared/period'
@@ -150,7 +148,7 @@ type TPayload = {
 
 const CustomTooltip = (props: any) => {
   const { t } = useTranslation('analytics')
-  const [currency] = displayCurrency.useDisplayCurrency()
+  const [currency] = useCoreDisplayCurrency()
   const payload = props.payload as TPayload[]
   const active = props.active as boolean
   if (!active || !payload?.length) return null

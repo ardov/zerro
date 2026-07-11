@@ -1,4 +1,5 @@
 import type { TFxCode, TISOMonth } from '6-shared/types'
+import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
 import {
   editFxRates,
   resetFxRates,
@@ -22,14 +23,13 @@ import { useToggle } from '6-shared/hooks/useToggle'
 import { formatDate } from '6-shared/helpers/date'
 
 import { useAppDispatch, useAppSelector } from 'store'
-import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { canFetchFxRates, loadFxRates } from '4-features/fxRates'
 
 export const FxRates: FC<{ month: TISOMonth }> = props => {
   const dispatch = useAppDispatch()
   const { month } = props
   const { t } = useTranslation('fxRates')
-  const [displCurrency] = displayCurrency.useDisplayCurrency()
+  const [displCurrency] = useCoreDisplayCurrency()
   const funds = useAppSelector(selectCoreMonthTotals)[month].fundsEnd
   const ratesGetter = useAppSelector(selectCoreFxRatesGetter)
   const rateData = ratesGetter(month)

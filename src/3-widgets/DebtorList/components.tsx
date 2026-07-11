@@ -10,10 +10,7 @@ import {
 } from '@mui/material'
 import { TFxAmount, TFxCode } from '6-shared/types'
 import { Amount } from '6-shared/ui/Amount'
-import {
-  DisplayAmount,
-  displayCurrency,
-} from '5-entities/currency/displayCurrency'
+import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { toISOMonth } from '6-shared/helpers/date'
 import { Tooltip } from '6-shared/ui/Tooltip'
 

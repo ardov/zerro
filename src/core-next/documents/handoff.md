@@ -28,14 +28,29 @@ Redux selectors; legacy goal/envBalances/displayCurrency projections import the
 old defining selectors directly only while parity paths remain. No Redux
 adapter import was added back into that legacy graph.
 
-The app-facing `displayCurrency.useToDisplay` helper is removed. UI consumers
-use `useCoreToDisplay`, backed by Core FX conversion plus Redux display-currency
-state. The adapter derives display currency without importing the legacy model.
+The legacy displayCurrency model is removed. UI consumers use
+`useCoreToDisplay` and `useCoreDisplayCurrency`; legacy accBalances conversion
+uses the same Core Redux selector. The display component remains as a thin UI
+component, not a state/model boundary.
 
-Next move the remaining `displayCurrency.useDisplayCurrency` consumers to a
-narrow Redux selector/action hook and retire the legacy display model. Keep the
-old `getConverter` only as long as legacy accBalances parity requires it; do not
-make Core depend on that path again.
+Next take the transaction helper family (`getType`, `isViewed`, date ordering,
+filter compilation, and the type-getter hook) and remove the `trModel` object
+without mixing account/instrument/merchant read migration into that slice.
+
+## Verification checkpoint
+
+Start verification now, but do not call the refactor complete yet. The public
+baseline proves deterministic demo behavior, Core/Redux parity, invalidation,
+command routing, replay, package boundaries, and type safety. In the current
+tree, however, 54 `*Model` calls remain across 25 page/widget/feature files and
+eight legacy-parity bridge suites still exist. The opt-in private fixture is not
+available in this environment, so large real-account parity is not freshly
+verified.
+
+The completion gate is: public baseline green; privacy-safe private fixture
+green when available; one manual browser smoke of sync plus budget/transaction
+editing; and no production dependency on a legacy model API that the new Redux
+surface is meant to replace.
 
 The identity materializer stays as the extension point already wired into the
 command path, but implementing its domain rules is deferred until after legacy

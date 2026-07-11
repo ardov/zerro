@@ -1,4 +1,5 @@
 import React, { FC } from 'react'
+import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
 import { useCoreToDisplay } from 'core-next/adapters/redux'
 import { Typography, ButtonBase, ButtonBaseProps } from '@mui/material'
 import { TISOMonth } from '6-shared/types'
@@ -7,7 +8,6 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 import { RadialProgress } from '6-shared/ui/RadialProgress'
 import { useAppDispatch, useAppSelector } from 'store'
 
-import { displayCurrency } from '5-entities/currency/displayCurrency'
 import { selectCoreGoalTotals } from 'core-next/adapters/redux'
 import { totalGoalsModel } from '../model'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
@@ -33,7 +33,7 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const { t } = useTranslation('goals')
   const { month, ...btnProps } = props
   const dispatch = useAppDispatch()
-  const [currency] = displayCurrency.useDisplayCurrency()
+  const [currency] = useCoreDisplayCurrency()
   const toDisplay = useCoreToDisplay(month)
   const totalProgress = useAppSelector(selectCoreGoalTotals)[month]
   const formatSum = (sum: number) => formatMoney(sum, currency)
