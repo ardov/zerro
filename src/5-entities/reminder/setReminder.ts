@@ -1,20 +1,15 @@
 import { AppThunk } from 'store'
-// Direct patch on purpose: this thunk is inside the legacy hidden-store write
-// path, and importing the command funnel here creates a module cycle
-// (hidden-store factories -> reminder -> adapter -> selectors -> fxRateStore
-// -> hidden-store). It joins the funnel when core reminder commands land.
-import { applyClientPatch } from 'store/data'
-import { userModel } from '5-entities/user'
+import { executeReduxCommand } from 'core-next/adapters/redux/executeCommand'
 import {
-  DataEntity,
+  compileDeleteReminder,
+  compileSetReminder,
+} from 'core-next/zenmoney/reminders'
+import {
   Modify,
   OptionalExceptFor,
   TDateDraft,
-  TDeletionObject,
   TReminderId,
 } from '6-shared/types'
-import { makeReminder } from './makeReminder'
-import { getReminders } from './model'
 import { TReminder } from '6-shared/types'
 
 type ReminderPatch = OptionalExceptFor<TReminder, 'id'>
@@ -28,49 +23,23 @@ export const setReminder =
   (
     draft: ReminderDraft | ReminderPatch | Array<ReminderDraft | ReminderPatch>
   ): AppThunk<TReminder[]> =>
-  (dispatch, getState) => {
-    const arr = Array.isArray(draft) ? draft : [draft]
-    const state = getState()
-
-    const readyReminders = arr.map(el => {
-      const currentReminder = el.id && getReminders(state)[el.id]
-      const patched = {
-        ...(currentReminder || ({} as TReminder)),
-        ...el,
-        changed: el.changed || Date.now(),
-      }
-      if (!patched.user) {
-        const userId = userModel.getRootUserId(state)
-        if (!userId) {
-          throw new Error('User is not defined')
+  dispatch =>
+    dispatch(
+      executeReduxCommand(
+        { type: 'zenmoney.reminder.set', payload: draft } as const,
+        (state, ctx) => {
+          const patch = compileSetReminder(state.data.current, draft, ctx)
+          return { patch, receipt: patch.reminder || [] }
         }
-        patched.user = userId
-      }
-      if (!patched.incomeAccount || !patched.outcomeAccount) {
-        throw new Error('Missing incomeAccount or outcomeAccount')
-      }
-      return makeReminder(patched)
-    })
-    dispatch(applyClientPatch({ reminder: readyReminders }))
-    return readyReminders
-  }
+      )
+    ) as TReminder[]
 
 export const deleteReminder =
   (id: TReminderId): AppThunk =>
-  (dispatch, getState) => {
-    const state = getState()
-    const userId = userModel.getRootUserId(state)
-    if (!userId) {
-      throw new Error('User is not defined')
-    }
-    const currentReminder = getReminders(state)[id]
-    if (currentReminder) {
-      const del: TDeletionObject = {
-        id,
-        object: DataEntity.Reminder,
-        stamp: Date.now(),
-        user: userId,
-      }
-      dispatch(applyClientPatch({ deletion: [del] }))
-    }
-  }
+  dispatch =>
+    dispatch(
+      executeReduxCommand(
+        { type: 'zenmoney.reminder.delete', payload: { id } } as const,
+        (state, ctx) => compileDeleteReminder(state.data.current, id, ctx)
+      )
+    )

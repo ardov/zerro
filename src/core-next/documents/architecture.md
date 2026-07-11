@@ -207,9 +207,11 @@ without exposing them as root package API or introducing a second store.
 
 During the Redux transition, semantic commands append complete runtime outbox
 entries while reducers also maintain legacy `current` and `diff` views. The
-outbox is not replay-authoritative until remaining direct patch producers have
-either semantic commands or explicit infrastructure entry semantics. This
-temporary dual write is a migration boundary, not a second reactive store.
+outbox becomes replay-authoritative only after every patch producer has either
+semantic commands or explicit infrastructure entry semantics. That producer
+cutover is now complete; switching Redux `current` to replay is the next
+bounded step. This temporary dual write is a migration boundary, not a second
+reactive store.
 
 ## Read model and memoization
 

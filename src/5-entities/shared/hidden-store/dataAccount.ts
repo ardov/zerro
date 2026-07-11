@@ -1,11 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { AppThunk, RootState } from 'store'
-// Concrete modules, not the '5-entities/account' barrel: the barrel pulls
-// account thunks -> core-next adapter -> selectors -> displayCurrency ->
-// fxRateStore -> hidden-store, which re-enters this module mid-init.
-import { makeAccount } from '5-entities/account/shared/makeAccount'
-import { applyClientPatch } from 'store/data'
-import { userModel } from '5-entities/user'
+import { executeReduxCommand } from 'core-next/adapters/redux/executeCommand'
+import { compileCreateAccount } from 'core-next/zenmoney/accounts'
+import { getRootUserId } from 'core-next/zenmoney/users'
 import { TAccountId } from '6-shared/types'
 
 export const DATA_ACC_NAME = '🤖 [Zerro Data]'
@@ -25,21 +22,30 @@ export const getDataAccountId = createSelector(
 
 export function prepareDataAccount(): AppThunk<TAccountId> {
   return (dispatch, getState) => {
-    let state = getState()
-    const user = userModel.getRootUser(state)
-    if (!user) {
-      throw new Error('No root user')
-    }
-    let dataAccId = getDataAccountId(state)
+    const state = getState()
+    const dataAccId = getDataAccountId(state)
     if (dataAccId) return dataAccId
 
-    // If no data account create one
-    const acc = makeAccount({
-      title: DATA_ACC_NAME,
-      user: user.id,
-      instrument: user.currency,
-    })
-    dispatch(applyClientPatch({ account: [acc] }))
-    return acc.id
+    return dispatch(
+      executeReduxCommand(
+        { type: 'infrastructure.dataAccount.prepare' } as const,
+        (currentState, ctx) => {
+          const data = currentState.data.current
+          const userId = getRootUserId(data)
+          if (!userId) throw new Error('No root user')
+          const patch = compileCreateAccount(
+            data,
+            {
+              title: DATA_ACC_NAME,
+              instrument: data.user[userId].currency,
+            },
+            ctx
+          )
+          const accountId = patch.account?.[0].id
+          if (!accountId) throw new Error('Data account was not created')
+          return { patch, receipt: accountId }
+        }
+      )
+    ) as TAccountId
   }
 }

@@ -209,8 +209,9 @@ Suggested order:
 2. ◐ Reuse them in Redux reducers. Semantic funnel commands now append full
    entries through `appendClientOutboxEntry`, which reuses redo-tail truncation
    while preserving the legacy `current` and `diff` compatibility views.
-   Direct low-level `applyClientPatch` producers must migrate before outbox
-   replay becomes authoritative.
+   All production patch producers now append semantic or explicit
+   infrastructure entries. Outbox replay can become authoritative in the next
+   Redux slice.
 3. Move Redux state toward `base`, `outbox`, `outboxHead`, `inbox`, `current`.
 4. Rebase `applyServerPatch` and expose the pending sync payload.
 5. Add reload plus undo/redo tests before switching more writes.
@@ -226,10 +227,10 @@ The semantic write cutover and named bridge retirement are complete:
 `mergeAccounts` has
 explicit transaction, reminder, and internal-transfer semantics; the unused
 `legacy.patch` command and `applyLegacyPatch` thunk/export are deleted; and the
-adapter command surface is pinned by a boundary test. Low-level infrastructure
-still calls `applyClientPatch` directly from reminder writes, data-account
-bootstrap, and the debug API; these are active replica-migration debt rather
-than the retired public legacy bridge. Other compatibility work includes:
+adapter command surface is pinned by a boundary test. Reminder writes now use
+semantic commands; data-account bootstrap and the debug API use explicit
+infrastructure entries through the cycle-safe executor. No production caller
+dispatches `applyClientPatch` directly. Other compatibility work includes:
 
 - deep app imports from `core-next/zenmoney`, `core-next/zerro`, and tag
   presentation shims;

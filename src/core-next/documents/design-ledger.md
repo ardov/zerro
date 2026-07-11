@@ -117,18 +117,6 @@
 
 ## Active compatibility bridges
 
-### Direct Redux client patches
-
-Status: semantic funnel commands append complete runtime outbox entries, but
-reminder writes, hidden data-account bootstrap, and the debug API still call
-`applyClientPatch` directly. Redux therefore continues maintaining `current`
-and `diff` as compatibility views, and the runtime outbox is not yet the sole
-replay authority.
-
-Exit one producer at a time. Prefer semantic commands for domain writes and an
-explicit infrastructure entry shape for bootstrap/debug writes; do not wrap
-them in another generic public legacy command.
-
 ### `src/demoData`
 
 Status: thin wrapper over `core-next/demo`.
@@ -180,6 +168,15 @@ replayed `current`. Resolve the sync transport question before enabling
 non-identity rules.
 
 ## Resolved bridges
+
+### Direct Redux client patches
+
+Resolved on 2026-07-11. Reminder create/update/delete uses semantic reminder
+commands through a cycle-safe executor; hidden data-account creation uses the
+Core account compiler with an explicit infrastructure command; and the debug
+patch API appends an explicit infrastructure entry. No production caller
+dispatches `applyClientPatch` directly. The action remains temporarily exported
+for compatibility tests while Redux `current`/`diff` still exist.
 
 ### Legacy patch command
 

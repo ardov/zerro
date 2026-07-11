@@ -3,7 +3,7 @@
 - Updated: 2026-07-11
 - Branch: `core-next`
 - Worktree: clean; the branch tip is
-  `Append semantic commands to Redux outbox`
+  `Route remaining client patches through outbox`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -34,6 +34,21 @@ claims against the tree before editing.
 
 ## Latest landed slices
 
+The current slice closes the remaining direct-client-patch debt:
+
+- a small `executeReduxCommand` module owns cycle-safe materialization and
+  outbox entry construction without importing the adapter selector graph;
+- the main semantic funnel delegates to that executor;
+- reminder set/delete thunks use existing Core reminder compilers, preserve the
+  created-reminder receipt, and append semantic commands without recreating the
+  hidden-store import cycle;
+- hidden data-account creation uses `compileCreateAccount` and an explicit
+  `infrastructure.dataAccount.prepare` entry;
+- the debug patch API uses an explicit `infrastructure.debug.patch` entry;
+- no production caller dispatches `applyClientPatch` directly. Focused tests
+  cover reminder receipts/deletion, data-account creation, existing-account
+  no-op behavior, and outbox entry shapes.
+
 The current Redux Track D slice adopts runtime outbox entries for semantic
 commands:
 
@@ -46,9 +61,8 @@ commands:
   to bypass local materialization;
 - the runtime outbox fields are optional for state-fixture compatibility and
   are not persisted yet;
-- remaining direct `applyClientPatch` producers mean outbox replay is not yet
-  authoritative. They are reminder writes, hidden data-account bootstrap, and
-  the debug API.
+- this slice initially treated outbox as a transitional mirror; the subsequent
+  producer cutover above removed that blocker to authoritative replay.
 
 The current Track D slice extracts reusable pure outbox operations:
 
@@ -161,10 +175,9 @@ No materializer rule or replica behavior is included in these slices.
 
 ## Default next task
 
-Continue Track D by migrating the remaining direct `applyClientPatch`
-producers one bounded family at a time, starting with reminder writes. Do not
-make outbox replay authoritative, change persisted state, or start materializer
-rules yet.
+Continue Track D by rebuilding Redux `current` from the server base plus the
+applied outbox prefix. Keep `diff` as the sync compatibility projection; do not
+change persisted state or start materializer rules in the same slice.
 
 ## Important guardrails
 
@@ -195,7 +208,7 @@ Expected full-suite baseline at this handoff:
 
 ```txt
 69 test files passed, 4 skipped
-263 tests passed, 6 skipped
+267 tests passed, 6 skipped
 ```
 
 Browser check: the transaction-list multi-select bar and bulk-actions menu

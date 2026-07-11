@@ -1,8 +1,4 @@
-import { v1 as uuidv1 } from 'uuid'
 import type { AppThunk, RootState } from 'store'
-import { appendClientOutboxEntry } from 'store/data'
-import type { TOutboxEntry } from '../../engine/outbox'
-import { materializePatch } from '../../materializer'
 import type { TISOMonth } from '../../zenmoney/primitives'
 import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../types'
 import {
@@ -16,12 +12,17 @@ import {
   compileMergeAccounts,
   compileMergeTransactionsAsTransfer,
   compilePatchAccount,
+  compileDeleteReminder,
   compileRecreateTransaction,
   compileRestoreTransaction,
+  compileSetReminder,
   type TAccountId,
   type TTagId,
   type TTransactionId,
   type TTransactionPatch,
+  type TReminderDraft,
+  type TReminderId,
+  type TReminderPatch,
 } from '../../zenmoney'
 import {
   compileApplyEnvelopeStructure,
@@ -49,6 +50,7 @@ import {
   selectCoreDomainEnvelopes,
   selectCoreEnvelopes,
 } from './selectors'
+import { executeReduxCommand } from './executeCommand'
 
 /**
  * Serializable app commands. Once the outbox is persisted, a stored payload
@@ -99,6 +101,14 @@ export type TAppCommand =
       type: 'zenmoney.account.merge'
       payload: { source: TAccountId; target: TAccountId }
     }
+  | {
+      type: 'zenmoney.reminder.set'
+      payload:
+        | TReminderDraft
+        | TReminderPatch
+        | Array<TReminderDraft | TReminderPatch>
+    }
+  | { type: 'zenmoney.reminder.delete'; payload: { id: TReminderId } }
   | {
       type: 'zenmoney.transaction.combineToOutcome'
       payload: { ids: TTransactionId[] }
@@ -206,6 +216,10 @@ function compileAppCommandResult(
       const { source, target } = command.payload
       return compileMergeAccounts(data, source, target, ctx)
     }
+    case 'zenmoney.reminder.set':
+      return compileSetReminder(data, command.payload, ctx)
+    case 'zenmoney.reminder.delete':
+      return compileDeleteReminder(data, command.payload.id, ctx)
     case 'zenmoney.transaction.combineToOutcome':
       return compileCombineToOutcome(data, command.payload.ids, ctx)
     case 'zenmoney.transaction.combineToIncome':
@@ -215,33 +229,15 @@ function compileAppCommandResult(
   }
 }
 
-// Late-bound lookups so Date.now/uuid mocks installed after module load work
-const defaultCtx = { now: () => Date.now(), uuid: () => uuidv1() }
-
 /**
  * The single write funnel: compiles a command against current state and
  * applies the resulting normalized patch. The replica step will replace the
  * internals with an outbox append; callers stay unchanged.
  */
 export function executeCommand(command: TAppCommand): AppThunk<any> {
-  return (dispatch, getState) => {
-    const state = getState()
-    const result = compileAppCommandResult(state, command, defaultCtx)
-    const patch = isCompiled(result) ? result.patch : result
-    if (!isEmptyPatch(patch)) {
-      const materialized = materializePatch(state.data.current, patch)
-      const entry: TOutboxEntry<TAppCommand> = {
-        id: defaultCtx.uuid(),
-        command,
-        intentPatch: materialized.intentPatch,
-        appliedPatch: materialized.appliedPatch,
-        materializerVersion: materialized.materializerVersion,
-        createdAt: defaultCtx.now(),
-      }
-      dispatch(appendClientOutboxEntry(entry))
-    }
-    return isCompiled(result) ? result.receipt : undefined
-  }
+  return executeReduxCommand(command, (state, ctx) =>
+    compileAppCommandResult(state, command, ctx)
+  )
 }
 
 export function createEnvelope(
@@ -420,10 +416,6 @@ function normalizeEnvelopeSettings(
     colorHex:
       input.colorHex === presented.colorHex ? domain.colorHex : input.colorHex,
   }
-}
-
-function isEmptyPatch(patch: TNormalizedPatch): boolean {
-  return Object.keys(patch).length === 0
 }
 
 function isCompiled(
