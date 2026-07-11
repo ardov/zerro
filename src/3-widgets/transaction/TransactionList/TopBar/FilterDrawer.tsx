@@ -19,8 +19,7 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { SmartSelect } from '6-shared/ui/SmartSelect'
 import { TagSelect } from '5-entities/tag/ui/TagSelect'
-import { TrCondition } from '5-entities/transaction'
-import { TrType } from '5-entities/transaction'
+import { TrCondition, TrType } from 'core-next/adapters/redux'
 
 const drawerWidth = { xs: '100vw', sm: 360 }
 const contentSx = {

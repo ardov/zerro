@@ -33,19 +33,32 @@ The legacy displayCurrency model is removed. UI consumers use
 uses the same Core Redux selector. The display component remains as a thin UI
 component, not a state/model boundary.
 
-Next take the transaction helper family (`getType`, `isViewed`, date ordering,
-filter compilation, and the type-getter hook) and remove the `trModel` object
-without mixing account/instrument/merchant read migration into that slice.
+The `trModel` object and barrel are removed. Type, viewed state, date ordering,
+and the type-getter hook are Core Redux exports. Transaction filtering is
+temporarily re-exported by the Redux adapter from its defining legacy module;
+move that implementation after the remaining legacy transaction projections
+are retired.
+
+Next take account read/hooks as one consumer family. They are the largest
+remaining model surface and feed several widgets; expose granular Redux
+selectors rather than one whole-account projection.
 
 ## Verification checkpoint
 
 Start verification now, but do not call the refactor complete yet. The public
 baseline proves deterministic demo behavior, Core/Redux parity, invalidation,
 command routing, replay, package boundaries, and type safety. In the current
-tree, however, 54 `*Model` calls remain across 25 page/widget/feature files and
-eight legacy-parity bridge suites still exist. The opt-in private fixture is not
+tree after the transaction-helper slice, however, 42 `*Model` calls remain
+across 23 page/widget/feature files; recalculate this after every family. Eight
+legacy-parity bridge suites still exist. The opt-in private fixture is not
 available in this environment, so large real-account parity is not freshly
 verified.
+
+The 2026-07-12 browser smoke verified demo load, transaction navigation and
+editing through the Core/Redux command path, a pending outbox entry, persistence
+of both the edit and outbox across reload, and no browser console errors. It did
+not exercise an explicit remote sync or a budget/goal edit, so those completion
+gate items remain open.
 
 The completion gate is: public baseline green; privacy-safe private fixture
 green when available; one manual browser smoke of sync plus budget/transaction

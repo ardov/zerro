@@ -1,6 +1,9 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { trModel, TrType } from '5-entities/transaction'
-import { selectCoreTransactionsHistory } from 'core-next/adapters/redux'
+import {
+  getTransactionType,
+  selectCoreTransactionsHistory,
+  TrType,
+} from 'core-next/adapters/redux'
 import {
   TFxAmount,
   TFxCode,
@@ -63,7 +66,7 @@ export const getFactsYearly: TSelector<Record<string, TStats>> = createSelector(
         tr
       )
 
-      const type = trModel.getType(tr, debtAcc)
+      const type = getTransactionType(tr, debtAcc)
       if (type === TrType.Income) {
         addToGroup(stats.byCurrency, codeMap[tr.incomeInstrument], tr)
       }
@@ -86,7 +89,7 @@ export const getFactsYearly: TSelector<Record<string, TStats>> = createSelector(
     }
 
     function addToNode(node: TInfoNode, tr: TTransaction) {
-      switch (trModel.getType(tr, debtAcc)) {
+      switch (getTransactionType(tr, debtAcc)) {
         case TrType.Transfer:
           node.transferTransactions.push(tr)
           return

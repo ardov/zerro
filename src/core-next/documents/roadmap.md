@@ -48,6 +48,10 @@ deleted. This is a good intermediate verification checkpoint, not completion:
 the public baseline is strong, but production still contains legacy model calls
 and the opt-in private fixture plus browser smoke remain completion-gate items.
 
+The transaction model object is now removed. Core/Redux owns type, viewed,
+ordering, and debt-aware type helpers; filtering is a named temporary bridge to
+the legacy defining module. Account read/hooks are the next consumer family.
+
 Envelope reads are now split: session/Core projectors return domain envelopes,
 and the Redux adapter adds symbols, generated/display colors, localized null
 text, and localized groups. The old `populatedTags` session dependency is gone,

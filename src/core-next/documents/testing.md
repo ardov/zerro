@@ -123,6 +123,11 @@ refactor complete, require all of the following:
 5. Legacy-parity bridges are either removed with their legacy implementation or
    retain a concrete exit condition.
 
+Latest manual checkpoint (2026-07-12): the demo browser flow loaded, navigated
+to transactions, edited a comment, produced one pending outbox item, and kept
+the edit plus outbox after reload without console errors. Explicit remote sync
+and a budget/goal edit were not exercised. The private fixture was unavailable.
+
 ## Commands
 
 Focused:

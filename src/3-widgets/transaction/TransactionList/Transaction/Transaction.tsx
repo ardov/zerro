@@ -5,7 +5,7 @@ import styled from '@emotion/styled'
 import { Theme, TypographyVariant } from '@mui/material'
 import { useContextMenu } from '6-shared/hooks/useContextMenu'
 import { selectCoreTransactions } from 'core-next/adapters/redux'
-import { trModel } from '5-entities/transaction'
+import { useCoreTransactionType } from 'core-next/adapters/redux'
 import { useAppSelector } from 'store'
 import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'
 
@@ -41,7 +41,7 @@ export const Transaction: FC<TTransactionProps> = props => {
     onContextMenu: event => onContextMenu?.(event, id),
   })
   const tr = useAppSelector(state => selectCoreTransactions(state)[id])
-  const getTrType = trModel.useTrTypeGetter()
+  const getTrType = useCoreTransactionType()
   if (!tr) {
     console.warn('Transaction not found', id)
     return null

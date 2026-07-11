@@ -7,7 +7,7 @@ import { TagIcon } from '6-shared/ui/TagIcon'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { useAppSelector } from 'store'
 import { accountModel } from '5-entities/account'
-import { TrType, trModel } from '5-entities/transaction'
+import { isTransactionViewed, TrType } from 'core-next/adapters/redux'
 import { TTagPopulated } from '5-entities/tag'
 import { selectCorePopulatedTags } from 'core-next/adapters/redux'
 import { merchantModel } from '5-entities/merchant'
@@ -50,7 +50,7 @@ export const Symbol: FC<SymbolProps> = ({
         color={color}
         size="m"
       />
-      <NewIndicator viewed={trModel.isViewed(tr)} />
+      <NewIndicator viewed={isTransactionViewed(tr)} />
       {tr.qrCode && <Reciept>🧾</Reciept>}
     </SymbolWrapper>
   )

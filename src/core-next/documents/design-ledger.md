@@ -171,6 +171,16 @@ work:
 
 ## Active compatibility bridges
 
+### Transaction filtering implementation
+
+Status: the Redux adapter exports `compileTransactionFilter`, but its defining
+implementation still lives in `5-entities/transaction/filtering` while legacy
+transaction projections remain.
+
+Exit when those projections are removed: move filtering and basic condition
+types into the adapter/Core-owned boundary and delete the legacy transaction
+directory. Do not recreate a generic model object meanwhile.
+
 ### `src/demoData`
 
 Status: thin wrapper over `core-next/demo`.
@@ -255,6 +265,13 @@ explicit base naming are implemented. Resolve the intent/applied transport
 question before enabling non-identity rules.
 
 ## Resolved bridges
+
+### Transaction model object
+
+Resolved on 2026-07-12. App consumers use Core exports for transaction type,
+viewed state, date ordering, and the debt-aware type hook. Legacy projections
+import their defining selectors directly. The `trModel` object and barrel are
+deleted; filtering remains an explicitly tracked bridge.
 
 ### Display-currency model
 

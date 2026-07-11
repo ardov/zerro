@@ -48,26 +48,28 @@ function makeRootState(data: TDataStore): RootState {
 
 describe('Core transaction adapter reads', () => {
   it('matches legacy transaction map, IDs, history, debtors, and balance history', async () => {
-    const [{ accBalanceModel }, { debtorModel }, { trModel }] =
-      await Promise.all([
-        import('5-entities/accBalances'),
-        import('5-entities/debtors'),
-        import('5-entities/transaction'),
-      ])
+    const [
+      { accBalanceModel },
+      { debtorModel },
+      {
+        getTransactionsById,
+        getTransactionIds,
+        getTransactionsHistory,
+        getHistoryStart,
+      },
+    ] = await Promise.all([
+      import('5-entities/accBalances'),
+      import('5-entities/debtors'),
+      import('5-entities/transaction/model'),
+    ])
     const state = makeRootState(makeDemoStore({ now: NOW }))
 
-    expect(selectCoreTransactions(state)).toBe(
-      trModel.getTransactionsById(state)
-    )
-    expect(selectCoreTransactionIds(state)).toEqual(
-      trModel.getTransactionIds(state)
-    )
+    expect(selectCoreTransactions(state)).toBe(getTransactionsById(state))
+    expect(selectCoreTransactionIds(state)).toEqual(getTransactionIds(state))
     expect(selectCoreTransactionsHistory(state)).toEqual(
-      trModel.getTransactionsHistory(state)
+      getTransactionsHistory(state)
     )
-    expect(selectCoreHistoryStart(state)).toEqual(
-      trModel.getHistoryStart(state)
-    )
+    expect(selectCoreHistoryStart(state)).toEqual(getHistoryStart(state))
     expect(selectCoreDebtors(state)).toEqual(debtorModel.getDebtors(state))
     expect(selectCoreBalancesByDate(state)).toEqual(
       accBalanceModel.getBalancesByDate(state)

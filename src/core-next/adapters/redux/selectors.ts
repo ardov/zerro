@@ -15,6 +15,7 @@ import {
   buildTagStructure,
   convertBalancesToDisplay,
   getHistoryStart,
+  getDebtAccountId,
   getTagBudgets,
   getTransactionIds,
   getTransactions,
@@ -56,6 +57,11 @@ const selectCoreReminderSlice = (state: RootState) =>
 const selectCoreTagBudgetSlice = (state: RootState) => state.data.current.budget
 
 const selectCoreAccountSlice = (state: RootState) => state.data.current.account
+
+export const selectCoreDebtAccountId = createSelector(
+  [selectCoreAccountSlice],
+  account => getDebtAccountId({ account })
+)
 
 const selectCoreTagSlice = (state: RootState) => state.data.current.tag
 

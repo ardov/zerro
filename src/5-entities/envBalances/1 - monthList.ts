@@ -4,7 +4,7 @@ import { nextMonth, toISOMonth } from '6-shared/helpers/date'
 import { keys } from '6-shared/helpers/keys'
 
 import { TSelector } from 'store'
-import { trModel } from '5-entities/transaction'
+import { getTransactionsHistory } from '5-entities/transaction/model'
 import { selectCoreBudgets } from 'core-next/adapters/redux'
 
 /**
@@ -13,7 +13,7 @@ import { selectCoreBudgets } from 'core-next/adapters/redux'
  * in our calculations. Otherwise calculated balance will be wrong.
  */
 const getFirstMonth: TSelector<TISOMonth> = createSelector(
-  [trModel.getTransactionsHistory],
+  [getTransactionsHistory],
   transactions => toISOMonth(transactions[0]?.date || Date.now())
 )
 

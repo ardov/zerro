@@ -6,9 +6,11 @@ import { useAppDispatch } from 'store'
 import { setSavedCurrency } from 'store/displayCurrency'
 import type { TFxCode } from '../../zenmoney/instruments/types'
 import {
+  selectCoreDebtAccountId,
   selectCoreDisplayConverter,
   selectCoreDisplayCurrency,
 } from './selectors'
+import { getTransactionType } from '../../zenmoney'
 
 export function useCoreToDisplay(defaultDate: TDateDraft | 'current') {
   const convert = useAppSelector(selectCoreDisplayConverter)
@@ -27,4 +29,13 @@ export function useCoreDisplayCurrency() {
     [dispatch]
   )
   return [currency, setCurrency] as const
+}
+
+export function useCoreTransactionType() {
+  const debtAccountId = useAppSelector(selectCoreDebtAccountId)
+  return useCallback(
+    (transaction: Parameters<typeof getTransactionType>[0]) =>
+      getTransactionType(transaction, debtAccountId),
+    [debtAccountId]
+  )
 }

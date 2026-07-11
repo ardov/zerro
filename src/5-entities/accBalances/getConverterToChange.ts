@@ -8,7 +8,7 @@ import {
 } from '6-shared/types'
 import { withPerf } from '6-shared/helpers/performance'
 
-import { trModel, TrType } from '5-entities/transaction'
+import { getType, TrType } from '5-entities/transaction/helpers'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { debtorModel } from '5-entities/debtors'
 import { accountModel } from '5-entities/account'
@@ -29,7 +29,7 @@ export const getConverterToChange = createSelector(
   withPerf('getConverterToChange', (debtId, getDebtorId, instCodeMap) => {
     return (tr: TTransaction) => {
       const { id, incomeAccount, outcomeAccount, income, outcome, date } = tr
-      const type = trModel.getType(tr, debtId)
+      const type = getType(tr, debtId)
       const incomeFx = instCodeMap[tr.incomeInstrument]
       const outcomeFx = instCodeMap[tr.outcomeInstrument]
       let effect: TTrEffect = { id, date }

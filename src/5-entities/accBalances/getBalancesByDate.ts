@@ -3,7 +3,7 @@ import { GroupBy, makeDateArray } from '6-shared/helpers/date'
 
 import { TSelector } from 'store/index'
 import { selectCoreDisplayConverter } from 'core-next/adapters/redux'
-import { trModel } from '5-entities/transaction'
+import { getHistoryStart } from '5-entities/transaction/model'
 import { balancesToDisplay } from './shared/convertBalancesToDisplay'
 import { TBalanceNode } from './shared/types'
 import { getBalances } from './getBalances'
@@ -13,7 +13,7 @@ import { getBalances } from './getBalances'
  * Zenmoney may create transactions with date 1970-01-01.
  */
 export const getBalancesByDate: TSelector<TBalanceNode[]> = createSelector(
-  [getBalances, trModel.getHistoryStart],
+  [getBalances, getHistoryStart],
   ({ byDay, startingBalances }, historyStart) => {
     let dates = makeDateArray(historyStart, Date.now(), GroupBy.Day)
     let lastUsedBalance = startingBalances

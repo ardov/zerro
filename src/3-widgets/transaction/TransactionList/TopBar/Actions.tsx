@@ -29,6 +29,8 @@ import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useAppDispatch, useAppSelector } from 'store'
 import {
   bulkEditTransactions,
+  getTransactionType,
+  isTransactionViewed,
   combineTransactionsToIncome,
   combineTransactionsToOutcome,
   deleteTransactions,
@@ -37,7 +39,6 @@ import {
   setTransactionsViewed,
 } from 'core-next/adapters/redux'
 import { TagSelect2 } from '5-entities/tag/ui/TagSelect2'
-import { trModel } from '5-entities/transaction'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { BulkEditModal } from './BulkEditModal'
 import './transitions.css'
@@ -311,7 +312,7 @@ function getAvailableActions(transactions: TTransaction[]) {
     delete: true,
     setMainTag: !transfers.length && (incomes.length || outcomes.length),
     bulkEdit: true,
-    markViewed: transactions.some(tr => !trModel.isViewed(tr)),
+    markViewed: transactions.some(tr => !isTransactionViewed(tr)),
     combineToOutcome: canCombineToOutcome(),
     combineToIncome: canCombineToIncome(),
     collapseTransactionsEasy: canCollapseTransactionsEasy(),
@@ -390,7 +391,7 @@ function groupByType(list: TTransaction[] = []) {
   let transfers: TTransaction[] = []
 
   list?.forEach(tr => {
-    let trType = trModel.getType(tr)
+    let trType = getTransactionType(tr)
     if (trType === 'income') incomes.push(tr)
     if (trType === 'outcome') outcomes.push(tr)
     if (trType === 'transfer') transfers.push(tr)

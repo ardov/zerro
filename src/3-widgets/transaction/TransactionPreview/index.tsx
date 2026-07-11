@@ -33,9 +33,9 @@ import {
   deleteTransactionsPermanently,
   recreateTransaction,
   restoreTransaction,
+  getTransactionType,
   selectCoreTransactions,
 } from 'core-next/adapters/redux'
-import { trModel } from '5-entities/transaction'
 import { accountModel } from '5-entities/account'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { TagList } from '5-entities/tag/ui/TagList'
@@ -98,7 +98,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
   }
 
   const tr = useAppSelector(state => selectCoreTransactions(state)[id])!
-  const trType = trModel.getType(tr)
+  const trType = getTransactionType(tr)
   const incomeAccount = accountModel.usePopulatedAccounts()[tr.incomeAccount]
   const outcomeAccount = accountModel.usePopulatedAccounts()[tr.outcomeAccount]
   const instruments = instrumentModel.useInstruments()
@@ -404,7 +404,7 @@ const SaveButton: FC<{ visible: boolean; onSave: () => void }> = props => {
 
 const RateToWords: FC<{ tr: TTransaction }> = ({ tr }) => {
   const { t } = useTranslation('transaction')
-  const trType = trModel.getType(tr)
+  const trType = getTransactionType(tr)
   const { income, opIncome, outcome, opOutcome } = tr
   const instruments = instrumentModel.useInstruments()
   const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle

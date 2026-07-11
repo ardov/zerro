@@ -15,7 +15,8 @@ import { accountModel, TAccountPopulated } from '5-entities/account'
 import { debtorModel, TDebtor } from '5-entities/debtors'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { cleanPayee } from '5-entities/shared/cleanPayee'
-import { trModel, TrType } from '5-entities/transaction'
+import { compareTrDates, getType, TrType } from '5-entities/transaction/helpers'
+import { getTransactionsHistory } from '5-entities/transaction/model'
 import { envelopeModel, EnvType, TEnvelopeId } from '5-entities/envelope'
 
 export type TRawActivityNode = {
@@ -27,7 +28,7 @@ export type TRawActivityNode = {
 export const getRawActivity: TSelector<ByMonth<TRawActivityNode>> =
   createSelector(
     [
-      trModel.getTransactionsHistory,
+      getTransactionsHistory,
       accountModel.getInBudgetAccounts,
       accountModel.getDebtAccountId,
       debtorModel.getDebtors,
@@ -51,7 +52,7 @@ function getRawActivityFn(
   function addTransaction(tr: TTransaction) {
     const fromBudget = inBudgetAccs.includes(tr.outcomeAccount)
     const toBudget = inBudgetAccs.includes(tr.incomeAccount)
-    const type = trModel.getType(tr, debtAccId)
+    const type = getType(tr, debtAccId)
 
     // Not in budget -> skip
     if (!fromBudget && !toBudget) {
@@ -163,9 +164,7 @@ export class EnvActivity {
     return {
       total: addFxAmount(a.total, b.total),
       trend: a.trend.map((val, i) => addFxAmount(val, b.trend[i])),
-      transactions: [...a.transactions, ...b.transactions].sort(
-        trModel.compareTrDates
-      ),
+      transactions: [...a.transactions, ...b.transactions].sort(compareTrDates),
     }
   }
 }
@@ -177,7 +176,7 @@ function getEnvelope(
   debtAccId: TAccountId | undefined,
   debtors: ById<TDebtor>
 ): TEnvelopeId {
-  const type = trModel.getType(tr, debtAccId)
+  const type = getType(tr, debtAccId)
   const makeId = envelopeModel.makeId
   switch (type) {
     case TrType.Income:

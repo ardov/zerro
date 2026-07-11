@@ -6,11 +6,11 @@ import { registerPopover } from '6-shared/historyPopovers'
 import { sendEvent } from '6-shared/helpers/tracking'
 import {
   deleteTransactions,
+  isTransactionViewed,
   restoreTransaction,
   selectCoreTransactions,
   setTransactionsViewed,
 } from 'core-next/adapters/redux'
-import { trModel } from '5-entities/transaction'
 import { useTranslation } from 'react-i18next'
 import { getMenuPosition } from './shared/helpers'
 
@@ -46,7 +46,7 @@ export const TrContextMenu: FC = () => {
   if (!transaction) return null
 
   const editable = transaction.deleted === false
-  const viewed = trModel.isViewed(transaction)
+  const viewed = isTransactionViewed(transaction)
 
   const options = [
     {

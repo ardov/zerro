@@ -7,6 +7,7 @@ import {
   getTransactionsHistory,
   getTransactionType,
   isDeletedTransaction,
+  isTransactionViewed,
   TrType,
 } from './read'
 
@@ -107,5 +108,15 @@ describe('transaction helpers', () => {
     expect(
       getTransactionType(makeTransaction({ income: 10, outcome: 10 }))
     ).toBe(TrType.Transfer)
+  })
+
+  it('preserves viewed defaults and treats deleted transactions as viewed', () => {
+    expect(isTransactionViewed(makeTransaction({ viewed: undefined }))).toBe(
+      true
+    )
+    expect(isTransactionViewed(makeTransaction({ viewed: false }))).toBe(false)
+    expect(
+      isTransactionViewed(makeTransaction({ viewed: false, deleted: true }))
+    ).toBe(true)
   })
 })

@@ -38,10 +38,24 @@ export {
   updateEnvelopeSettings,
 } from './commands'
 export { nullTag, populateTags, type TTagPopulated } from './tagPresentation'
-export { useCoreDisplayCurrency, useCoreToDisplay } from './hooks'
+export {
+  useCoreDisplayCurrency,
+  useCoreToDisplay,
+  useCoreTransactionType,
+} from './hooks'
 // Narrow pure domain helpers used by real app consumers. Keep the underlying
 // ZenMoney/Zerro implementation barrels internal.
-export { getTransactionType, TrType } from '../../zenmoney'
+export {
+  compareTransactionDates,
+  getTransactionType,
+  isDeletedTransaction,
+  isTransactionViewed,
+  TrType,
+} from '../../zenmoney'
+export {
+  checkRaw as compileTransactionFilter,
+  type TrCondition,
+} from '5-entities/transaction/filtering'
 export { goalType, normalizeGoal } from '../../zerro/goals'
 export { type TFxRates } from '../../zerro/fx-rates'
 export {
@@ -55,6 +69,7 @@ export {
   selectCoreBalancesByDate,
   selectCoreBudgets,
   selectCoreCurrentFxRates,
+  selectCoreDebtAccountId,
   selectCoreConvertFx,
   selectCoreDisplayConverter,
   selectCoreDisplayCurrency,

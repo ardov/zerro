@@ -5,7 +5,7 @@ import { Drawer, Box, Typography, IconButton } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { registerPopover } from '6-shared/historyPopovers'
-import { TrCondition } from '5-entities/transaction'
+import { TrCondition } from 'core-next/adapters/redux'
 import {
   TransactionList,
   TTransactionListProps,

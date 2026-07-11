@@ -6,7 +6,7 @@ import type {
   TTransaction,
   TTransactionId,
 } from '6-shared/types'
-import type { TrCondition } from '5-entities/transaction'
+import type { TrCondition } from 'core-next/adapters/redux'
 
 import React, { useMemo, useState, useCallback, useEffect, FC } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -14,8 +14,10 @@ import { Box, Typography, Theme } from '@mui/material'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { useDebounce } from '6-shared/hooks/useDebounce'
 import { accountModel } from '5-entities/account'
-import { trModel } from '5-entities/transaction'
 import {
+  compareTransactionDates,
+  compileTransactionFilter,
+  isTransactionViewed,
   selectCoreTransactionIds,
   selectCoreTransactions,
   setTransactionsViewed,
@@ -115,7 +117,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
       if (index === -1) return
       const ids = trList
         .slice(index)
-        .filter(tr => !trModel.isViewed(tr))
+        .filter(tr => !isTransactionViewed(tr))
         .map(tr => tr.id)
       sendEvent('Transaction: mark viewed: true')
       dispatch(setTransactionsViewed(ids, true))
@@ -225,12 +227,12 @@ function useFilteredTransactions(
   const transactionsById = useAppSelector(selectCoreTransactions)
   const allTransactionIds = useAppSelector(selectCoreTransactionIds)
   const groups = useMemo(() => {
-    const checker = trModel.checkRaw(conditions)
+    const checker = compileTransactionFilter(conditions)
     const list = trIds || allTransactionIds
     return list
       .map(id => transactionsById[id])
       .filter(checker)
-      .sort(trModel.compareTrDates)
+      .sort(compareTransactionDates)
   }, [trIds, allTransactionIds, conditions, transactionsById])
   return groups
 }

@@ -59,6 +59,13 @@ export function isDeletedTransaction(transaction: TTransaction): boolean {
   return false
 }
 
+export function isTransactionViewed(transaction: TTransaction): boolean {
+  if (transaction.deleted) return true
+  if (transaction.viewed === true) return true
+  if (transaction.viewed === undefined) return true
+  return false
+}
+
 export function getTransactionType(
   transaction: TTransaction,
   debtAccountId?: TAccountId
