@@ -1,6 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit'
 import {
   getTransactionType,
+  selectCoreDebtAccountId,
   selectCoreTransactionsHistory,
   TrType,
 } from 'core-next/adapters/redux'
@@ -15,7 +16,6 @@ import { parseDate } from '6-shared/helpers/date'
 
 import { instrumentModel } from '5-entities/currency/instrument'
 import { addFxAmount, convertFx } from '6-shared/helpers/money'
-import { accountModel } from '5-entities/account'
 import { merchantModel } from '5-entities/merchant'
 import { TSelector, useAppSelector } from 'store/index'
 
@@ -40,7 +40,7 @@ export const getFactsYearly: TSelector<Record<string, TStats>> = createSelector(
   [
     selectCoreTransactionsHistory,
     instrumentModel.getInstCodeMap,
-    accountModel.getDebtAccountId,
+    selectCoreDebtAccountId,
     merchantModel.getMerchants,
   ],
   (transactions, codeMap, debtAcc, merchants) => {

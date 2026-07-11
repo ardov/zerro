@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { shallowEqual } from 'react-redux'
 import { toISODate, toISOMonth } from '6-shared/helpers/date'
 import { i18n } from '6-shared/localization'
-import { accountModel } from '5-entities/account'
+import { ZERRO_DATA_ACCOUNT_NAME } from '../../constants'
 import { getSavedCurrency } from 'store/displayCurrency'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { merchantModel } from '5-entities/merchant'
@@ -16,6 +16,8 @@ import {
   convertBalancesToDisplay,
   getHistoryStart,
   getDebtAccountId,
+  getAccounts,
+  getPopulatedAccounts,
   getTagBudgets,
   getTransactionIds,
   getTransactions,
@@ -61,6 +63,36 @@ const selectCoreAccountSlice = (state: RootState) => state.data.current.account
 export const selectCoreDebtAccountId = createSelector(
   [selectCoreAccountSlice],
   account => getDebtAccountId({ account })
+)
+
+export const selectCoreAccounts = (state: RootState) =>
+  getAccounts({ account: selectCoreAccountSlice(state) })
+
+export const selectCorePopulatedAccounts = createSelector(
+  [selectCoreAccountSlice, instrumentModel.getInstCodeMap],
+  (account, instrumentCodeById) =>
+    getPopulatedAccounts({ account }, instrumentCodeById)
+)
+
+export const selectCoreAccountList = createSelector(
+  [selectCorePopulatedAccounts],
+  accounts => Object.values(accounts)
+)
+
+export const selectCoreInBudgetAccounts = createSelector(
+  [selectCoreAccountList],
+  accounts => accounts.filter(account => account.inBudget)
+)
+
+export const selectCoreSavingAccounts = createSelector(
+  [selectCoreAccountList],
+  accounts =>
+    accounts.filter(
+      account =>
+        !account.inBudget &&
+        account.type !== 'debt' &&
+        account.title !== ZERRO_DATA_ACCOUNT_NAME
+    )
 )
 
 const selectCoreTagSlice = (state: RootState) => state.data.current.tag
@@ -125,7 +157,7 @@ export const selectCoreDebtors = createSelector(
     selectCoreTransactionsHistory,
     merchantModel.getMerchants,
     instrumentModel.getInstruments,
-    accountModel.getDebtAccountId,
+    selectCoreDebtAccountId,
   ],
   (transactions, merchants, instruments, debtAccountId) =>
     buildDebtors({
@@ -260,7 +292,7 @@ export const selectCoreRawActivity = createSelector(
   [
     selectCoreTransactionsHistory,
     selectCoreInBudgetAccountIds,
-    accountModel.getDebtAccountId,
+    selectCoreDebtAccountId,
     selectCoreDebtors,
     instrumentModel.getInstruments,
   ],
@@ -362,11 +394,11 @@ export const selectCoreHistoryStart = createSelector(
 export const selectCoreBalances = createSelector(
   [
     selectCoreTransactionsHistory,
-    accountModel.getAccounts,
+    selectCoreAccounts,
     selectCoreDebtors,
     merchantModel.getMerchants,
     instrumentModel.getInstCodeMap,
-    accountModel.getDebtAccountId,
+    selectCoreDebtAccountId,
   ],
   (
     transactions,

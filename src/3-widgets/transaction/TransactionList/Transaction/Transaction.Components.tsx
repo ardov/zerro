@@ -6,8 +6,11 @@ import { Typography } from '@mui/material'
 import { TagIcon } from '6-shared/ui/TagIcon'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { useAppSelector } from 'store'
-import { accountModel } from '5-entities/account'
-import { isTransactionViewed, TrType } from 'core-next/adapters/redux'
+import {
+  isTransactionViewed,
+  TrType,
+  useCorePopulatedAccounts,
+} from 'core-next/adapters/redux'
 import { TTagPopulated } from '5-entities/tag'
 import { selectCorePopulatedTags } from 'core-next/adapters/redux'
 import { merchantModel } from '5-entities/merchant'
@@ -269,7 +272,7 @@ export const Accounts: FC<InfoProps> = ({
 }
 
 const Account: FC<{ id: string }> = ({ id, ...rest }) => {
-  const account = accountModel.usePopulatedAccounts()[id]
+  const account = useCorePopulatedAccounts()[id]
   return <span {...rest}>{account.title}</span>
 }
 

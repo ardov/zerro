@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { MenuItem, SelectProps, ListItemText } from '@mui/material'
 import { instrumentModel } from '5-entities/currency/instrument'
-import { accountModel } from '5-entities/account'
+import { useCoreInBudgetAccounts } from 'core-next/adapters/redux'
 import { TFxCode, TInstrument } from '6-shared/types'
 import { getCurrencySymbol } from '6-shared/helpers/money'
 import { userModel } from '5-entities/user'
@@ -10,7 +10,7 @@ import { SmartSelect } from '6-shared/ui/SmartSelect'
 export const CurrencyCodeSelect: FC<SelectProps<TFxCode>> = props => {
   const instrumentsByCode = instrumentModel.useInstrumentsByCode()
   const userCurrency = userModel.useUserCurrency()
-  const accs = accountModel.useInBudgetAccounts()
+  const accs = useCoreInBudgetAccounts()
   const value = props.value
 
   const fxSet = new Set(accs.map(a => a.fxCode))

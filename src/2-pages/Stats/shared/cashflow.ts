@@ -1,10 +1,13 @@
 import { useMemo } from 'react'
-import { useCoreToDisplay } from 'core-next/adapters/redux'
+import {
+  selectCoreDebtAccountId,
+  useCorePopulatedAccounts,
+  useCoreToDisplay,
+} from 'core-next/adapters/redux'
 import { TISODate } from '6-shared/types'
 import { GroupBy, makeDateArray, toGroup } from '6-shared/helpers/date'
 
 import { useAppSelector } from 'store/index'
-import { accountModel } from '5-entities/account'
 import { instrumentModel } from '5-entities/currency/instrument'
 import {
   selectCoreHistoryStart,
@@ -55,9 +58,9 @@ export function useCashFlow(
   aggregation: GroupBy = GroupBy.Month
 ): TCashflowPoint[] {
   const transactionHistory = useAppSelector(selectCoreTransactionsHistory)
-  const debtAccId = accountModel.useDebtAccountId()
+  const debtAccId = useAppSelector(selectCoreDebtAccountId)
   const instCodeMap = instrumentModel.useInstCodeMap()
-  const accounts = accountModel.usePopulatedAccounts()
+  const accounts = useCorePopulatedAccounts()
   const aggregatedNodes = useMemo(
     () =>
       calcCashflow(

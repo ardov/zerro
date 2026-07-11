@@ -8,9 +8,9 @@ import { ById } from '6-shared/types'
 import { AppThunk } from 'store'
 import { TrType } from 'core-next/adapters/redux'
 import { instrumentModel } from '5-entities/currency/instrument'
-import { accountModel } from '5-entities/account'
 import {
   selectCorePopulatedTags,
+  selectCoreAccounts,
   selectCoreTransactions,
 } from 'core-next/adapters/redux'
 
@@ -18,7 +18,7 @@ import {
 const getPopulatedTransactions = createSelector(
   [
     instrumentModel.getInstruments,
-    accountModel.getAccounts,
+    selectCoreAccounts,
     selectCorePopulatedTags,
     selectCoreTransactions,
   ],

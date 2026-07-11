@@ -1,5 +1,10 @@
 import React, { FC } from 'react'
-import { useCoreToDisplay } from 'core-next/adapters/redux'
+import {
+  type TAccountPopulated,
+  useCoreInBudgetAccounts,
+  useCoreSavingAccounts,
+  useCoreToDisplay,
+} from 'core-next/adapters/redux'
 import { useTranslation } from 'react-i18next'
 import { Collapse, List, ListItemButton } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
@@ -8,22 +13,19 @@ import { TFxAmount } from '6-shared/types'
 import { addFxAmount } from '6-shared/helpers/money'
 import { toISOMonth } from '6-shared/helpers/date'
 
-import { accountModel, TAccountPopulated } from '5-entities/account'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { Account, Subheader } from './components'
 
 export default function AccountList({ className = '' }) {
   const { t } = useTranslation('accounts')
   const toDisplay = useCoreToDisplay(toISOMonth(new Date()))
-  const inBudget = accountModel
-    .useInBudgetAccounts()
+  const inBudget = useCoreInBudgetAccounts()
     .sort(
       (a, b) =>
         toDisplay({ [b.fxCode]: b.balance }) -
         toDisplay({ [a.fxCode]: a.balance })
     )
-  const savings = accountModel
-    .useSavingAccounts()
+  const savings = useCoreSavingAccounts()
     .sort(
       (a, b) =>
         toDisplay({ [b.fxCode]: b.balance }) -

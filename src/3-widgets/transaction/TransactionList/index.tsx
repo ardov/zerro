@@ -13,13 +13,13 @@ import { useTranslation } from 'react-i18next'
 import { Box, Typography, Theme } from '@mui/material'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { useDebounce } from '6-shared/hooks/useDebounce'
-import { accountModel } from '5-entities/account'
 import {
   compareTransactionDates,
   compileTransactionFilter,
   isTransactionViewed,
   selectCoreTransactionIds,
   selectCoreTransactions,
+  selectCoreDebtAccountId,
   setTransactionsViewed,
 } from 'core-next/adapters/redux'
 import { getEventPosition } from '3-widgets/global/shared/helpers'
@@ -87,7 +87,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   )
   const trList = useFilteredTransactions(transactions, debouncedFilter)
 
-  const debtId = accountModel.useDebtAccountId()
+  const debtId = useAppSelector(selectCoreDebtAccountId)
 
   const [checked, setChecked] = useState<TTransactionId[]>([])
   const uncheckAll = useCallback(() => setChecked([]), [])

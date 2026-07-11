@@ -4,7 +4,7 @@ import { GroupBy } from '6-shared/helpers/date'
 import { keys } from '6-shared/helpers/keys'
 import { round } from '6-shared/helpers/money'
 
-import { accountModel } from '5-entities/account'
+import { useCorePopulatedAccounts } from 'core-next/adapters/redux'
 import { accBalanceModel } from '5-entities/accBalances'
 import { getStart, Period } from '../shared/period'
 
@@ -24,7 +24,7 @@ export function useNetWorth(
   period: Period,
   aggregation: GroupBy
 ): TNetWorthPoint[] {
-  const accs = accountModel.usePopulatedAccounts()
+  const accs = useCorePopulatedAccounts()
 
   return accBalanceModel
     .useDisplayBalances(aggregation, getStart(period, aggregation))

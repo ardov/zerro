@@ -35,8 +35,8 @@ import {
   restoreTransaction,
   getTransactionType,
   selectCoreTransactions,
+  useCorePopulatedAccounts,
 } from 'core-next/adapters/redux'
-import { accountModel } from '5-entities/account'
 import { instrumentModel } from '5-entities/currency/instrument'
 import { TagList } from '5-entities/tag/ui/TagList'
 
@@ -99,8 +99,9 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
 
   const tr = useAppSelector(state => selectCoreTransactions(state)[id])!
   const trType = getTransactionType(tr)
-  const incomeAccount = accountModel.usePopulatedAccounts()[tr.incomeAccount]
-  const outcomeAccount = accountModel.usePopulatedAccounts()[tr.outcomeAccount]
+  const accounts = useCorePopulatedAccounts()
+  const incomeAccount = accounts[tr.incomeAccount]
+  const outcomeAccount = accounts[tr.outcomeAccount]
   const instruments = instrumentModel.useInstruments()
   const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
   const outcomeCurrency = instruments[tr.outcomeInstrument]?.shortTitle

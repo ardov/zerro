@@ -5,8 +5,7 @@ import { useAppDispatch } from 'store'
 import { registerPopover } from '6-shared/historyPopovers'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { useTranslation } from 'react-i18next'
-import { accountModel } from '5-entities/account'
-import { setAccountInBalance } from 'core-next/adapters/redux'
+import { setAccountInBalance, useCoreAccounts } from 'core-next/adapters/redux'
 import { getMenuPosition } from './shared/helpers'
 
 type AccountMenuProps = { id: TAccountId }
@@ -35,7 +34,7 @@ export const AccountContextMenu: FC = () => {
   const { displayProps, extraProps } = accContext.useProps()
   const { id } = extraProps
   const dispatch = useAppDispatch()
-  const account = accountModel.useAccounts()[id]
+  const account = useCoreAccounts()[id]
 
   if (!account) return null
 

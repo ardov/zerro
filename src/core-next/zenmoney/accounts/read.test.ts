@@ -5,6 +5,8 @@ import {
   getAccounts,
   getAccStartBalance,
   getDebtAccountId,
+  getPopulatedAccounts,
+  isInBudgetAccount,
 } from './read'
 import { AccountType } from './types'
 
@@ -63,5 +65,31 @@ describe('zenmoney account reads', () => {
         })
       )
     ).toBe(0)
+  })
+
+  it('builds the account projection used by Redux consumers', () => {
+    const cash = makeAccount({
+      id: 'cash',
+      instrument: 1,
+      inBalance: true,
+      startBalance: 100,
+    })
+    const debt = makeAccount({
+      id: 'debt',
+      instrument: 2,
+      type: AccountType.Debt,
+      inBalance: true,
+    })
+    const data = makeStore({ account: { cash, debt } })
+
+    expect(getPopulatedAccounts(data, { 1: 'RUB', 2: 'USD' })).toEqual({
+      cash: { ...cash, startBalanceReal: 100, inBudget: true, fxCode: 'RUB' },
+      debt: { ...debt, startBalanceReal: 0, inBudget: false, fxCode: 'USD' },
+    })
+    expect(
+      isInBudgetAccount(
+        makeAccount({ id: 'pinned', title: 'Pinned 📍', inBalance: false })
+      )
+    ).toBe(true)
   })
 })

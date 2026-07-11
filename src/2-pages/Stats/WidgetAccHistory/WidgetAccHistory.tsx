@@ -1,5 +1,11 @@
 import React, { FC, useState, useMemo, useCallback, memo } from 'react'
-import { useCoreToDisplay } from 'core-next/adapters/redux'
+import {
+  type TAccountPopulated,
+  useCoreInBudgetAccounts,
+  useCorePopulatedAccounts,
+  useCoreSavingAccounts,
+  useCoreToDisplay,
+} from 'core-next/adapters/redux'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -16,7 +22,6 @@ import { TAccountId, TISODate, TFxAmount } from '6-shared/types'
 import { Amount } from '6-shared/ui/Amount'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { addFxAmount } from '6-shared/helpers/money'
-import { accountModel, TAccountPopulated } from '5-entities/account'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { Period } from '../shared/period'
 import { useAccountHistory } from './model'
@@ -40,8 +45,8 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
       [trDrawer]
     )
 
-    const inBudgetAccounts = accountModel.useInBudgetAccounts()
-    const savingAccounts = accountModel.useSavingAccounts()
+    const inBudgetAccounts = useCoreInBudgetAccounts()
+    const savingAccounts = useCoreSavingAccounts()
 
     const {
       totalInBudget,
@@ -177,7 +182,7 @@ type AccTrendProps = {
 const AccountHistoryWidget: FC<AccTrendProps> = memo(
   ({ id, period, onClick }) => {
     const theme = useAppTheme()
-    const acc = accountModel.usePopulatedAccounts()[id]
+    const acc = useCorePopulatedAccounts()[id]
     const data = useAccountHistory(id, period)
 
     const { dataMax, dataMin, yAxisMin } = useMemo(() => {

@@ -42,6 +42,10 @@ export {
   useCoreDisplayCurrency,
   useCoreToDisplay,
   useCoreTransactionType,
+  useCoreAccounts,
+  useCoreInBudgetAccounts,
+  useCorePopulatedAccounts,
+  useCoreSavingAccounts,
 } from './hooks'
 // Narrow pure domain helpers used by real app consumers. Keep the underlying
 // ZenMoney/Zerro implementation barrels internal.
@@ -51,6 +55,7 @@ export {
   isDeletedTransaction,
   isTransactionViewed,
   TrType,
+  type TAccountPopulated,
 } from '../../zenmoney'
 export {
   checkRaw as compileTransactionFilter,
@@ -66,6 +71,8 @@ export {
 } from '../../zerro'
 export {
   selectCoreActivity,
+  selectCoreAccountList,
+  selectCoreAccounts,
   selectCoreBalancesByDate,
   selectCoreBudgets,
   selectCoreCurrentFxRates,
@@ -80,11 +87,14 @@ export {
   selectCoreGoals,
   selectCoreGoalTotals,
   selectCoreHistoryStart,
+  selectCoreInBudgetAccounts,
   selectCoreKeepingEnvelopeIds,
   selectCoreMonthList,
   selectCoreMonthTotals,
   selectCorePopulatedTags,
   selectCoreRawActivity,
+  selectCorePopulatedAccounts,
+  selectCoreSavingAccounts,
   selectCoreSortedActivity,
   selectCoreDebtors,
   selectCoreTransactionIds,
