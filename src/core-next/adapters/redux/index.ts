@@ -17,6 +17,7 @@ export {
   deleteTransactions,
   deleteTransactionsPermanently,
   executeCommand,
+  mergeAccounts,
   mergeTransactionsAsTransfer,
   recreateTransaction,
   renameEnvelope,

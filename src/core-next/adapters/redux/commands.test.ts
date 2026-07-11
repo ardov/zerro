@@ -5,7 +5,13 @@ import { applyClientPatch } from 'store/data'
 import { makeDemoStore } from '../../demo'
 import type { TNormalizedPatch } from '../../types'
 import { applyPatch } from '../../zenmoney'
-import { makeStore, makeTransaction } from '../../testing/zenmoneyTestData'
+import {
+  makeAccount,
+  makeReminder,
+  makeStore,
+  makeTransaction,
+  makeUser,
+} from '../../testing/zenmoneyTestData'
 import {
   envelopeVisibility,
   envId,
@@ -446,6 +452,46 @@ describe('executeCommand funnel', () => {
 
     expect(next.transaction.in.deleted).toBe(true)
     expect(next.transaction.out).toMatchObject({ outcome: 60, changed: NOW })
+  })
+
+  it('routes an account merge command to transactions and reminders', () => {
+    const current = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+      account: {
+        source: makeAccount({ id: 'source', instrument: 1 }),
+        target: makeAccount({ id: 'target', instrument: 1 }),
+      },
+      transaction: {
+        spend: makeTransaction({
+          id: 'spend',
+          outcomeAccount: 'source',
+          outcome: 10,
+        }),
+      },
+      reminder: {
+        planned: makeReminder({
+          id: 'planned',
+          incomeAccount: 'target',
+          outcomeAccount: 'source',
+        }),
+      },
+    })
+
+    const next = applyPatch(
+      current,
+      compileAppCommand(
+        makeState(current),
+        {
+          type: 'zenmoney.account.merge',
+          payload: { source: 'source', target: 'target' },
+        },
+        { now: () => NOW, uuid: () => 'unused' }
+      )
+    )
+
+    expect(next.account.source).toBeUndefined()
+    expect(next.transaction.spend.outcomeAccount).toBe('target')
+    expect(next.reminder.planned.outcomeAccount).toBe('target')
   })
 
   it('applies a legacy patch as-is', () => {

@@ -1,6 +1,6 @@
 # Core Next handoff
 
-- Updated: 2026-07-10
+- Updated: 2026-07-11
 - Branch: `core-next`
 - Worktree: clean; the branch tip is
   `Make transaction bulk combine/merge actions semantic`
@@ -26,13 +26,29 @@ claims against the tree before editing.
 | Zerro reads      | Envelopes through activity, metrics, month totals, goals, budgets, settings, hidden data, and FX are present          |
 | Session          | Namespaced semantic `get*` reads over lazy snapshot-local memoization; flat `read` is deprecated compatibility        |
 | Redux reads      | Most budget/envelope/goal/activity/transaction/tag/debtor/balance consumers use Core adapter selectors                |
-| Redux writes     | All budget/goal/envelope/transaction/account writes are semantic; only `mergeAccounts` still uses the legacy bridge   |
+| Redux writes     | All budget/goal/envelope/transaction/account writes are semantic; no production consumer uses the legacy bridge       |
 | Materializer     | Identity layer is wired into every Redux local patch; server patches bypass it                                        |
 | Engine           | Pure outbox reference exists; no production consumer; replay uses stored `appliedPatch`                               |
 | Presentation     | Domain envelopes are headless; Redux adds localized groups, symbols, and generated/display colors                     |
 | Tests            | Unit, deterministic demo parity, Redux invalidation, and opt-in private parity layers exist                           |
 
 ## Latest landed slices
+
+The current slice makes `mergeAccounts`, the last legacy write consumer,
+semantic:
+
+- `compileMergeAccounts` reassigns source-side transactions and reminders,
+  collapses transfers between source and target, folds balances, and deletes
+  the source account;
+- source and target must exist, differ, and share an instrument;
+- `zenmoney.account.merge` routes through the Redux command funnel, while the
+  existing feature thunk is now a thin compatibility delegate;
+- Core resulting-state tests cover ordinary and internal transfers, reminders,
+  unrelated entities, deletion, balances, and validation; a funnel test covers
+  command routing.
+
+No production code imports `applyLegacyPatch` now. The compatibility command,
+export, and its tests still exist pending an explicit package-hardening slice.
 
 The branch tip makes the transaction-list bulk combine/merge actions semantic:
 
@@ -50,8 +66,6 @@ The branch tip makes the transaction-list bulk combine/merge actions semantic:
   5-entities helpers are removed (`getTagBudgets` read stays);
 - Core tests cover each compiler (delete/transfer/sum, merge validation) and a
   funnel routing test covers combine-to-outcome.
-
-`mergeAccounts` is now the only `applyLegacyPatch` consumer left.
 
 The commit before it made `setInBudget` semantic and removed the dead
 `patchAccount`/`patchTag`/`createTag`/`patchMerchant` thunks.
@@ -119,29 +133,11 @@ No materializer rule or replica behavior is included in these slices.
 
 ## Default next task
 
-Migrate `mergeAccounts`, the last `applyLegacyPatch` consumer, described in
-[roadmap.md](./roadmap.md#default-next-slice-semantic-mergeaccounts).
-
-Likely files:
-
-```txt
-src/core-next/zenmoney/accounts/commands.ts
-src/core-next/zenmoney/accounts/commands.test.ts
-src/core-next/adapters/redux/commands.ts
-src/4-features/mergeAccounts.ts
-src/core-next/documents/roadmap.md
-src/core-next/documents/handoff.md
-```
-
-Keep the slice bounded:
-
-- reassign transaction income/outcome account references and reminders from
-  source to target, then delete the drained source;
-- handle transfers between source and target so they do not become
-  zero-amount self-transfers;
-- cover transfer and reminder edge cases with resulting-state tests;
-- do not start materializer rules; account-balance recomputation stays
-  deferred.
+Choose the next bounded slice from Track A, D, or F as described in
+[roadmap.md](./roadmap.md#default-next-slice-choose-from-track-a-d-or-f).
+Package/test hardening is the smallest default: verify whether the legacy patch
+compatibility export can be retired, or pin the adapter command surface with a
+consumer-level boundary test. Do not start materializer rules yet.
 
 ## Important guardrails
 
@@ -172,7 +168,7 @@ Expected full-suite baseline at this handoff:
 
 ```txt
 69 test files passed, 4 skipped
-257 tests passed, 6 skipped
+260 tests passed, 6 skipped
 ```
 
 Browser check: the transaction-list multi-select bar and bulk-actions menu

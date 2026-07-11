@@ -1,6 +1,6 @@
 # Core Next roadmap
 
-- Updated: 2026-07-10
+- Updated: 2026-07-11
 - Purpose: choose the next bounded slice; implementation history stays in Git.
 
 ## Current position
@@ -66,50 +66,52 @@ dispatches funnel commands instead of building transaction arrays inline. The
 dead `setTagBudget` write and its now-unused `makeTagBudget`/`getBudgetId`
 5-entities helpers are removed; `getTagBudgets` (read) stays for parity.
 
-The only remaining `applyLegacyPatch` consumer is `mergeAccounts`.
+`mergeAccounts` is now semantic too: `compileMergeAccounts(source, target)`
+reassigns each source transaction to the target, collapses transfers between
+the two accounts into the surviving start balance, reassigns reminders, folds
+the source balance into the target, and deletes the source. Equal source and
+target ids are rejected. The `4-features/mergeAccounts.ts`
+thunk is a thin delegate. It has no UI consumer yet, but the operation is a
+distinct known behavior (unlike the deleted redundant patch wrappers), so it
+was migrated rather than dropped — the account context menu is its natural
+future home.
+
+**No production code imports `applyLegacyPatch` any more.** Only the
+`legacyPatch.ts` definition, its barrel re-export, and tests remain. Track E's
+write cutover is complete.
 
 Replica ownership, server-like materialization rules, and package hardening
 remain incomplete.
 
-## Default next slice: semantic mergeAccounts
+## Default next slice: choose from Track A, D, or F
 
-Goal: remove the final `applyLegacyPatch` consumer.
+Every app write now flows through the semantic command funnel, so there is no
+single obvious next legacy cutover. Pick by what the next real task touches:
 
-`mergeAccounts` ([src/4-features/mergeAccounts.ts](../../4-features/mergeAccounts.ts))
-reassigns every transaction and reminder from a source account to a target,
-then deletes the source. It needs explicit transfer/cascade semantics rather
-than a blind field copy.
+- **Track F (package/test hardening)** — a good default now that writes are
+  semantic: retire the `applyLegacyPatch` compatibility export if nothing
+  outside tests needs it, or add a consumer-level export/type test that pins
+  the adapter's public command surface (`executeCommand` + the named thunks).
+- **Track D (replica and sync)** — begin the outbox work: extract pure outbox
+  operations and move Redux state toward `base`/`outbox`/`inbox`/`current`.
+  The command funnel is the seam the outbox append will slot into.
+- **Track A (facade)** — decide which adapter-level projectors deserve a
+  supported subpath now that the write surface is settled.
 
-Scope:
-
-1. Model the merge as a Core compiler over source/target account ids: rewrite
-   each transaction's income/outcome account references, handle the
-   self-transfer edge case, and delete the drained source account.
-2. Cover reminders that reference the source account.
-3. Add resulting-state tests, including a source that has transfers with the
-   target (which must not become zero-amount self-transfers).
-4. Route it through the funnel and drop `applyLegacyPatch` from the feature.
-
-Done when:
-
-- `mergeAccounts` dispatches a semantic command;
-- no production code imports `applyLegacyPatch` (only the compatibility bridge
-  export and its tests remain);
-- resulting-state tests cover transfer and reminder edge cases.
-
-This closes Track E's transaction/account write cutover. Do not start
-materializer rules; account-balance recomputation stays deferred.
+Do not start Track C (materializer rules) yet; account-balance recomputation
+and deleted-transaction immutability stay deferred until the replica and
+package boundaries are firmer.
 
 ## Active tracks
 
-| Track                           | State                     | Next useful outcome                                                       |
-| ------------------------------- | ------------------------- | ------------------------------------------------------------------------- |
-| A. Public facade and read graph | Envelope writes semantic  | Decide which adapter-level projectors deserve a supported subpath         |
-| B. Domain/presentation boundary | Boundary landed           | Extract an optional appearance package only when a real consumer needs it |
-| C. ZenMoney materializer rules  | Deferred until final      | Start only after the other architecture and migration tracks are complete |
-| D. Replica and sync             | Designed, not integrated  | Share pure outbox operations and make Redux the replica owner             |
-| E. Legacy cutover               | Only `mergeAccounts` left | Migrate `mergeAccounts`; then no production `applyLegacyPatch` remains    |
-| F. Package and test hardening   | Ongoing                   | Consumer-level export/type test and targeted parity coverage              |
+| Track                           | State                    | Next useful outcome                                                       |
+| ------------------------------- | ------------------------ | ------------------------------------------------------------------------- |
+| A. Public facade and read graph | Envelope writes semantic | Decide which adapter-level projectors deserve a supported subpath         |
+| B. Domain/presentation boundary | Boundary landed          | Extract an optional appearance package only when a real consumer needs it |
+| C. ZenMoney materializer rules  | Deferred until final     | Start only after the other architecture and migration tracks are complete |
+| D. Replica and sync             | Designed, not integrated | Share pure outbox operations and make Redux the replica owner             |
+| E. Legacy cutover               | Write cutover complete   | Retire compatibility bridges only after verifying external consumers      |
+| F. Package and test hardening   | Ongoing                  | Consumer-level export/type test and targeted parity coverage              |
 
 ## Track A: public facade and read graph
 
@@ -217,11 +219,11 @@ beside Redux in the app.
 
 Goal: remove compatibility paths only when a real consumer can switch safely.
 
-High-value remaining work:
+The write cutover is complete: no production consumer imports
+`applyLegacyPatch`, and `mergeAccounts` now has explicit transaction, reminder,
+and internal-transfer semantics. Remaining compatibility work includes:
 
-- transaction/account/reminder writes still using `applyLegacyPatch` or direct
-  `applyClientPatch` (envelope writes are fully semantic now);
-- `mergeAccounts`, which needs explicit transfer/cascade semantics;
+- the legacy patch command/export itself, pending an external-consumer check;
 - deep app imports from `core-next/zenmoney`, `core-next/zerro`, and tag
   presentation shims;
 - compatibility re-exports under `6-shared/types`, demo data, and icon assets.

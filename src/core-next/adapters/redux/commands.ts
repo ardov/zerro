@@ -11,6 +11,7 @@ import {
   compileDeleteTransactions,
   compileDeleteTransactionsPermanently,
   compileMarkTransactionsViewed,
+  compileMergeAccounts,
   compileMergeTransactionsAsTransfer,
   compilePatchAccount,
   compileRecreateTransaction,
@@ -93,6 +94,10 @@ export type TAppCommand =
   | {
       type: 'zenmoney.account.inBalance.set'
       payload: { id: TAccountId; inBalance: boolean }
+    }
+  | {
+      type: 'zenmoney.account.merge'
+      payload: { source: TAccountId; target: TAccountId }
     }
   | {
       type: 'zenmoney.transaction.combineToOutcome'
@@ -197,6 +202,10 @@ function compileAppCommandResult(
     case 'zenmoney.account.inBalance.set': {
       const { id, inBalance } = command.payload
       return compilePatchAccount(data, { id, inBalance }, ctx)
+    }
+    case 'zenmoney.account.merge': {
+      const { source, target } = command.payload
+      return compileMergeAccounts(data, source, target, ctx)
     }
     case 'zenmoney.transaction.combineToOutcome':
       return compileCombineToOutcome(data, command.payload.ids, ctx)
@@ -343,6 +352,16 @@ export function setAccountInBalance(
   return executeCommand({
     type: 'zenmoney.account.inBalance.set',
     payload: { id, inBalance },
+  })
+}
+
+export function mergeAccounts(
+  source: TAccountId,
+  target: TAccountId
+): AppThunk {
+  return executeCommand({
+    type: 'zenmoney.account.merge',
+    payload: { source, target },
   })
 }
 

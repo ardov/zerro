@@ -1,10 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import { DataEntity } from '6-shared/types'
-import { makeAccount, makeStore } from '../../testing/zenmoneyTestData'
+import {
+  makeAccount,
+  makeReminder,
+  makeStore,
+  makeTransaction,
+  makeUser,
+} from '../../testing/zenmoneyTestData'
 import { applyPatch } from '../applyPatch'
 import {
   compileCreateAccount,
   compileDeleteAccount,
+  compileMergeAccounts,
   compilePatchAccount,
 } from './commands'
 import { makeAccount as makeCoreAccount } from './factory'
@@ -204,6 +211,140 @@ describe('zenmoney account commands', () => {
     })
     expect(next.account.cash).toBeUndefined()
     expect(data.account.cash.title).toBe('Cash')
+  })
+
+  it('merges a source account into a target, reassigning and collapsing', () => {
+    const data = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+      account: {
+        source: makeAccount({
+          id: 'source',
+          title: 'Old',
+          instrument: 1,
+          startBalance: 30,
+          balance: 200,
+          changed: 1,
+        }),
+        target: makeAccount({
+          id: 'target',
+          title: 'Keep',
+          instrument: 1,
+          startBalance: 100,
+          balance: 500,
+          changed: 1,
+        }),
+        other: makeAccount({ id: 'other', instrument: 1, changed: 1 }),
+      },
+      transaction: {
+        // Plain outcome on the source -> reassigned to the target.
+        spend: makeTransaction({
+          id: 'spend',
+          income: 0,
+          outcome: 10,
+          outcomeAccount: 'source',
+          changed: 1,
+        }),
+        // Transfer source -> other -> only the source side is rewritten.
+        transferOut: makeTransaction({
+          id: 'transferOut',
+          income: 5,
+          incomeAccount: 'other',
+          outcome: 5,
+          outcomeAccount: 'source',
+          changed: 1,
+        }),
+        // Transfer between merged accounts -> deleted, folded into start.
+        internal: makeTransaction({
+          id: 'internal',
+          income: 40,
+          incomeAccount: 'target',
+          outcome: 25,
+          outcomeAccount: 'source',
+          changed: 1,
+        }),
+        // Untouched transaction on unrelated accounts.
+        unrelated: makeTransaction({
+          id: 'unrelated',
+          income: 0,
+          outcome: 7,
+          outcomeAccount: 'other',
+          changed: 1,
+        }),
+      },
+      reminder: {
+        sourceReminder: makeReminder({
+          id: 'sourceReminder',
+          incomeAccount: 'source',
+          outcomeAccount: 'other',
+          changed: 1,
+        }),
+        unrelatedReminder: makeReminder({
+          id: 'unrelatedReminder',
+          incomeAccount: 'target',
+          outcomeAccount: 'other',
+          changed: 1,
+        }),
+      },
+    })
+
+    const patch = compileMergeAccounts(data, 'source', 'target', {
+      now: () => 100,
+    })
+    const next = applyPatch(data, patch)
+
+    // Plain source transaction moved onto the target.
+    expect(next.transaction.spend).toMatchObject({
+      outcomeAccount: 'target',
+      changed: 100,
+    })
+    // Source side of a transfer with a third account rewritten to the target.
+    expect(next.transaction.transferOut).toMatchObject({
+      incomeAccount: 'other',
+      outcomeAccount: 'target',
+      changed: 100,
+    })
+    // Transfer between the merged accounts collapses.
+    expect(next.transaction.internal.deleted).toBe(true)
+    // Unrelated transaction untouched (absent from the patch).
+    expect(patch.transaction?.map(tr => tr.id)).not.toContain('unrelated')
+    expect(next.reminder.sourceReminder).toMatchObject({
+      incomeAccount: 'target',
+      outcomeAccount: 'other',
+      changed: 100,
+    })
+    expect(patch.reminder?.map(reminder => reminder.id)).not.toContain(
+      'unrelatedReminder'
+    )
+
+    // Start balance absorbs the source start (30) plus the internal transfer's
+    // net movement (income 40 - outcome 25 = +15): 100 + 30 + 15 = 145.
+    expect(next.account.target).toMatchObject({
+      startBalance: 145,
+      balance: 700,
+      changed: 100,
+    })
+    // Source account removed.
+    expect(next.account.source).toBeUndefined()
+  })
+
+  it('rejects merging accounts with different currencies', () => {
+    const data = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+      account: {
+        source: makeAccount({ id: 'source', instrument: 1, changed: 1 }),
+        target: makeAccount({ id: 'target', instrument: 2, changed: 1 }),
+      },
+    })
+
+    expect(() =>
+      compileMergeAccounts(data, 'source', 'target', { now: () => 1 })
+    ).toThrow('Currency should be the same')
+    expect(() =>
+      compileMergeAccounts(data, 'missing', 'target', { now: () => 1 })
+    ).toThrow('Account not found')
+    expect(() =>
+      compileMergeAccounts(data, 'target', 'target', { now: () => 1 })
+    ).toThrow('Accounts should be different')
   })
 
   it('validates account create and delete commands', () => {

@@ -60,19 +60,17 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 - `setInBudget` is a semantic account command; the dead `patchAccount`,
   `patchTag`, `createTag`, and `patchMerchant` thunks are deleted.
 - Transaction-list bulk combine/merge actions are semantic commands; the dead
-  `setTagBudget` write is removed. `mergeAccounts` is the only remaining
-  `applyLegacyPatch` consumer.
+  `setTagBudget` write is removed.
+- `mergeAccounts` is semantic, including transaction and reminder reassignment,
+  internal-transfer collapse, validation, and source deletion. No production
+  consumer imports `applyLegacyPatch` now.
 
 ## Default next slice
 
-Migrate `mergeAccounts`, the last `applyLegacyPatch` consumer.
-
-1. Compile the merge in Core over source/target account ids: rewrite each
-   transaction's account references and reminders, then delete the source.
-2. Handle source↔target transfers so they do not become zero-amount
-   self-transfers.
-3. Route through the funnel and drop `applyLegacyPatch` from the feature.
-4. After this, no production code imports `applyLegacyPatch`.
+Choose a bounded Track A, D, or F slice. The smallest default is package/test
+hardening: verify whether the legacy patch compatibility export can be retired,
+or pin the adapter's public command surface with a consumer-level boundary
+test. Do not begin materializer rules yet.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 
