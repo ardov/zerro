@@ -2,7 +2,7 @@ import { sendEvent } from '6-shared/helpers/tracking'
 import { TISOMonth } from '6-shared/types'
 import { AppThunk } from 'store'
 import { goalType, selectCoreGoals } from 'core-next/adapters/redux'
-import { TBudgetUpdate } from '5-entities/budget'
+import { type TBudgetUpdate } from 'core-next/adapters/redux'
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
 
 export const fillGoals =

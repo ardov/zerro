@@ -1,6 +1,7 @@
 import { toISOMonth } from '6-shared/helpers/date'
 import { ById, TBudget, globalBudgetTagId } from '6-shared/types'
-import { getTagBudgets, setEnvBudget, TBudgetUpdate } from '5-entities/budget'
+import { type TBudgetUpdate } from 'core-next/adapters/redux'
+import { getTagBudgets, setEnvBudget } from '5-entities/budget'
 import { envelopeModel, EnvType } from '5-entities/envelope'
 import { AppThunk } from 'store'
 

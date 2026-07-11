@@ -1,7 +1,5 @@
 import { getBudgets } from './getBudgets'
-import { setBudget } from './setBudget'
 
-export type { TBudgetUpdate } from './setBudget'
 export type { TEnvBudgetUpdate } from './envBudget'
 
 export { getTagBudgets } from './tagBudget'
@@ -12,5 +10,4 @@ export const budgetModel = {
   // implementation for parity tests and fixture exports.
   /** @deprecated Read via `selectCoreBudgets` from `core-next/adapters/redux` */
   get: getBudgets,
-  set: setBudget,
 }

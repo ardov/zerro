@@ -5,9 +5,12 @@ import type { TEnvelopeId } from '5-entities/envelope'
 import { round } from '6-shared/helpers/money'
 import { sendEvent } from '6-shared/helpers/tracking'
 
-import { budgetModel, TBudgetUpdate } from '5-entities/budget'
+import {
+  selectCoreEnvMetrics,
+  setBudget,
+  type TBudgetUpdate,
+} from 'core-next/adapters/redux'
 import { fxRateModel } from '5-entities/currency/fxRate'
-import { selectCoreEnvMetrics } from 'core-next/adapters/redux'
 
 export const moveMoney =
   (
@@ -48,5 +51,5 @@ export const moveMoney =
       updates.push({ month, id: env.id, value: newBudget })
     }
 
-    dispatch(budgetModel.set(updates))
+    dispatch(setBudget(updates))
   }

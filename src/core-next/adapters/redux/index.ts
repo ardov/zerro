@@ -30,6 +30,7 @@ export {
   setBudget,
   setGoal,
   setTransactionsViewed,
+  type TBudgetUpdate,
   updateEnvelopeSettings,
 } from './commands'
 export { nullTag, populateTags, type TTagPopulated } from './tagPresentation'

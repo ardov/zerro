@@ -2,9 +2,11 @@ import { sendEvent } from '6-shared/helpers/tracking'
 import { AppThunk } from 'store'
 import { TISOMonth } from '6-shared/types'
 import { prevMonth, toISOMonth } from '6-shared/helpers/date'
-import { selectCoreEnvMetrics } from 'core-next/adapters/redux'
-import { TBudgetUpdate } from '5-entities/budget'
-import { setBudget } from '5-entities/budget/setBudget'
+import {
+  selectCoreEnvMetrics,
+  setBudget,
+  type TBudgetUpdate,
+} from 'core-next/adapters/redux'
 
 export const copyPreviousBudget =
   (month: TISOMonth): AppThunk<void> =>

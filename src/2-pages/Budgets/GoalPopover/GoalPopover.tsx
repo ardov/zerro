@@ -14,12 +14,17 @@ import { AmountInput } from '6-shared/ui/AmountInput'
 import { CloseIcon } from '6-shared/ui/Icons'
 import MonthSelectPopover from '6-shared/ui/MonthSelectPopover'
 import { toISODate, formatDate } from '6-shared/helpers/date'
+import { sendEvent } from '6-shared/helpers/tracking'
 import { Modify, TDateDraft, TISOMonth } from '6-shared/types'
 
 import { useAppDispatch, useAppSelector } from 'store'
-import { goalModel, goalType, TGoal } from '5-entities/goal'
+import { goalType, TGoal } from '5-entities/goal'
 import { TEnvelopeId } from '5-entities/envelope'
-import { selectCoreEnvelopes, selectCoreGoals } from 'core-next/adapters/redux'
+import {
+  selectCoreEnvelopes,
+  selectCoreGoals,
+  setGoal,
+} from 'core-next/adapters/redux'
 
 export type TGoalPopoverProps = Modify<
   PopoverProps,
@@ -66,12 +71,14 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
       if (type === goalType.TARGET_BALANCE && endDate) {
         goal.end = endDate
       }
-      dispatch(goalModel.set(month, id, goal))
+      dispatch(setGoal(month, id, goal))
+      sendEvent(`Goals: set ${goal.type} goal`)
     }
     onClose?.()
   }
   const removeGoal = () => {
-    dispatch(goalModel.set(month, id, null))
+    dispatch(setGoal(month, id, null))
+    sendEvent('Goals: delete goal')
     onClose?.()
   }
 

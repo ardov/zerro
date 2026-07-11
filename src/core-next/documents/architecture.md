@@ -277,6 +277,13 @@ descriptive, not a runtime dependency framework; session and Redux wiring stay
 explicit. Introduce more machinery only if manual wiring continues to create
 real invalidation defects.
 
+This duplication is intentional. `readGraph.ts` is the human-readable
+specification of calculation dependencies, while the session/future engine and
+Redux adapter wire those dependencies explicitly for different memoization and
+reactivity models. Nothing is generated from the map today. Agents should not
+treat agreement between the specification and those implementations as a DRY
+violation or replace it with a graph runtime without a demonstrated defect.
+
 Adapter-level projectors such as `buildRawActivity` and `buildEnvMetrics` may be
 available to runtime adapters without appearing on the root semantic facade.
 Private calculation helpers remain private.

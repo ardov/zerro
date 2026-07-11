@@ -30,7 +30,12 @@
   once.
 - Redux owns cross-snapshot memoization and keeps selectors granular.
 - Internal graph nodes need not appear on the semantic root facade.
-- A small readable graph map is preferred over a generic dependency framework.
+- `facade/readGraph.ts` is a declarative specification for humans, not runtime
+  configuration or a code-generation source.
+- Its dependency edges intentionally duplicate explicit wiring in the
+  session/future engine and Redux adapter because those runtimes have different
+  memoization and reactivity needs. This duplication is accepted; introduce a
+  graph framework only in response to demonstrated wiring defects.
 - Flat `session.read.*` is deprecated compatibility until parity and fixture
   consumers move.
 
@@ -250,6 +255,14 @@ explicit base naming are implemented. Resolve the intent/applied transport
 question before enabling non-identity rules.
 
 ## Resolved bridges
+
+### Budget and goal write wrappers
+
+Resolved on 2026-07-11. Budget features and GoalPopover call the narrow Redux
+adapter `setBudget` / `setGoal` commands directly, and `TBudgetUpdate` is
+exported from that adapter. The legacy `budgetModel.set` and `goalModel.set`
+members, their source files, and wrapper-local tests are removed; command
+routing coverage lives beside the adapter.
 
 ### Legacy local diff
 

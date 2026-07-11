@@ -1,17 +1,14 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
 import type { TEnvelopeId } from '5-entities/envelope'
-import { selectCoreEnvMetrics } from 'core-next/adapters/redux'
-import { budgetModel } from '5-entities/budget'
+import { selectCoreEnvMetrics, setBudget } from 'core-next/adapters/redux'
 import { fxRateModel } from '5-entities/currency/fxRate'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { moveMoney } from './moveMoney'
 
 vi.mock('core-next/adapters/redux', () => ({
   selectCoreEnvMetrics: vi.fn(),
-}))
-vi.mock('5-entities/budget', () => ({
-  budgetModel: { set: vi.fn() },
+  setBudget: vi.fn(),
 }))
 vi.mock('5-entities/currency/fxRate', () => ({
   fxRateModel: { converter: vi.fn() },
@@ -42,7 +39,7 @@ describe('moveMoney', () => {
       },
     } as unknown as ReturnType<typeof selectCoreEnvMetrics>)
     vi.mocked(fxRateModel.converter).mockReturnValue(convertFx)
-    vi.mocked(budgetModel.set).mockReturnValue(action as never)
+    vi.mocked(setBudget).mockReturnValue(action as never)
 
     moveMoney(
       10,
@@ -54,7 +51,7 @@ describe('moveMoney', () => {
 
     expect(selectCoreEnvMetrics).toHaveBeenCalledWith(state)
     expect(convertFx).toHaveBeenCalledWith({ USD: 10 }, 'EUR', '2026-07')
-    expect(budgetModel.set).toHaveBeenCalledWith([
+    expect(setBudget).toHaveBeenCalledWith([
       { id: source, month: '2026-07', value: 90 },
       { id: destination, month: '2026-07', value: 59 },
     ])

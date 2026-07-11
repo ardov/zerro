@@ -55,6 +55,7 @@ describe('core-next API boundary', () => {
         'setBudget',
         'setGoal',
         'setTransactionsViewed',
+        'TBudgetUpdate',
         'updateEnvelopeSettings',
       ].sort()
     )

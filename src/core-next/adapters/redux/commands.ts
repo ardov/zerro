@@ -55,6 +55,8 @@ import {
 } from './selectors'
 import { executeReduxCommand } from './executeCommand'
 
+export type { TBudgetUpdate } from '../../zerro'
+
 /**
  * Serializable app commands. Once the outbox is persisted, a stored payload
  * shape becomes a contract: breaking changes mint a new type (for example

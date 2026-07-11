@@ -2,7 +2,6 @@ import { getGoals } from './getGoals'
 import { getTotals } from './getTotals'
 import { getRawGoals } from './goalStore'
 import { goalToWords } from './shared/helpers'
-import { setGoal } from './setGoal'
 
 export type { TGoal } from './shared/types'
 export type { TGoals } from './goalStore'
@@ -18,9 +17,6 @@ export const goalModel = {
   /** @deprecated Read via `selectCoreGoalTotals` from `core-next/adapters/redux` */
   getTotals: getTotals,
   getRaw: getRawGoals,
-
-  // Thunks
-  set: setGoal,
 
   // Helpers
   toWords: goalToWords,

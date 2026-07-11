@@ -6,7 +6,7 @@ import { isZero } from '6-shared/helpers/money'
 import { AppThunk } from 'store'
 
 import { selectCoreEnvMetrics } from 'core-next/adapters/redux'
-import { TBudgetUpdate } from '5-entities/budget'
+import { type TBudgetUpdate } from 'core-next/adapters/redux'
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
 
 export const startFresh =

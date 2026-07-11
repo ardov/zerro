@@ -10,6 +10,13 @@ The session now exposes namespaced `get*` reads over the same memoized nodes,
 and `facade/readGraph.ts` records the important dependency edges. Flat
 `session.read.*` remains deprecated compatibility.
 
+The first legacy app-function removal slice is landed: budget and goal write
+consumers import narrow Redux adapter commands directly, `TBudgetUpdate` is an
+adapter-owned app-facing type, and the obsolete `budgetModel.set` /
+`goalModel.set` wrappers and source files are deleted. Command routing tests now
+live with the Redux adapter. Transaction write wrappers are the next bounded
+consumer family; transaction reads and presentation helpers remain separate.
+
 Envelope reads are now split: session/Core projectors return domain envelopes,
 and the Redux adapter adds symbols, generated/display colors, localized null
 text, and localized groups. The old `populatedTags` session dependency is gone,

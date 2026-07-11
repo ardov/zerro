@@ -1,8 +1,11 @@
 import { round } from '6-shared/helpers/money'
 import { AppThunk } from 'store'
 
-import { selectCoreEnvMetrics } from 'core-next/adapters/redux'
-import { budgetModel, TBudgetUpdate } from '5-entities/budget'
+import {
+  selectCoreEnvMetrics,
+  setBudget,
+  type TBudgetUpdate,
+} from 'core-next/adapters/redux'
 import { fxRateModel } from '5-entities/currency/fxRate'
 
 export function setTotalBudget(upd: TBudgetUpdate | TBudgetUpdate[]): AppThunk {
@@ -13,7 +16,7 @@ export function setTotalBudget(upd: TBudgetUpdate | TBudgetUpdate[]): AppThunk {
     const convertFx = fxRateModel.converter(state)
 
     const adjusted = updates.map(adjustValue)
-    dispatch(budgetModel.set(adjusted))
+    dispatch(setBudget(adjusted))
 
     /** Adjusts budget depending on children budgets */
     function adjustValue(u: TBudgetUpdate): TBudgetUpdate {

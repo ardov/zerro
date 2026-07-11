@@ -1,15 +1,14 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
 import type { TEnvelopeId } from '5-entities/envelope'
-import { selectCoreEnvMetrics } from 'core-next/adapters/redux'
-import { setBudget } from '5-entities/budget/setBudget'
+import { selectCoreEnvMetrics, setBudget } from 'core-next/adapters/redux'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { copyPreviousBudget } from './index'
 
 vi.mock('core-next/adapters/redux', () => ({
   selectCoreEnvMetrics: vi.fn(),
+  setBudget: vi.fn(),
 }))
-vi.mock('5-entities/budget/setBudget', () => ({ setBudget: vi.fn() }))
 vi.mock('6-shared/helpers/tracking', () => ({ sendEvent: vi.fn() }))
 
 describe('copyPreviousBudget', () => {
