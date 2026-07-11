@@ -10,12 +10,11 @@ The session now exposes namespaced `get*` reads over the same memoized nodes,
 and `facade/readGraph.ts` records the important dependency edges. Flat
 `session.read.*` remains deprecated compatibility.
 
-The first legacy app-function removal slice is landed: budget and goal write
+The budget/goal and transaction legacy write wrappers are removed. App
 consumers import narrow Redux adapter commands directly, `TBudgetUpdate` is an
-adapter-owned app-facing type, and the obsolete `budgetModel.set` /
-`goalModel.set` wrappers and source files are deleted. Command routing tests now
-live with the Redux adapter. Transaction write wrappers are the next bounded
-consumer family; transaction reads and presentation helpers remain separate.
+adapter-owned app-facing type, and transaction analytics stay beside UI
+actions. Command routing tests live with the Redux adapter. Transaction reads,
+classification, sorting, filtering, and presentation remain separate.
 
 Envelope reads are now split: session/Core projectors return domain envelopes,
 and the Redux adapter adds symbols, generated/display colors, localized null
@@ -53,11 +52,11 @@ the `zerro.envelope.patch` command, and app-layer `TEnvelopeDraft` exports are
 gone. The envelope write family is fully semantic; envelope drafts stay
 internal to Core compile functions.
 
-The transaction thunk family now flows through the funnel: delete, permanent
-delete, restore, mark viewed, update, recreate (with an id receipt), and bulk
-edit all reuse the existing Core compilers. Broken `splitTransfer` is removed
-with its commented-out consumer. `5-entities/transaction/thunks.ts` no longer
-imports `applyLegacyPatch`.
+The transaction write family now flows directly from app consumers through the
+Redux adapter: delete, permanent delete, restore, mark viewed, update, recreate
+(with an id receipt), and bulk edit reuse the existing Core compilers. The
+legacy `5-entities/transaction/thunks.ts` file and `trModel` write members are
+deleted. Broken `splitTransfer` remains removed with its commented-out consumer.
 
 The entity write cleanup landed smaller than planned: inspection showed
 `patchAccount`, `patchTag`, `createTag`, and `patchMerchant` had no app

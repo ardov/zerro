@@ -3,9 +3,6 @@ import type { TDataStore } from '6-shared/types'
 import type { RootState } from 'store'
 import { makeDemoStore } from '../../demo'
 import { makeTransaction } from '../../testing/zenmoneyTestData'
-import { accBalanceModel } from '5-entities/accBalances'
-import { debtorModel } from '5-entities/debtors'
-import { trModel } from '5-entities/transaction'
 import {
   selectCoreDebtors,
   selectCoreBalancesByDate,
@@ -50,7 +47,13 @@ function makeRootState(data: TDataStore): RootState {
 }
 
 describe('Core transaction adapter reads', () => {
-  it('matches legacy transaction map, IDs, history, debtors, and balance history', () => {
+  it('matches legacy transaction map, IDs, history, debtors, and balance history', async () => {
+    const [{ accBalanceModel }, { debtorModel }, { trModel }] =
+      await Promise.all([
+        import('5-entities/accBalances'),
+        import('5-entities/debtors'),
+        import('5-entities/transaction'),
+      ])
     const state = makeRootState(makeDemoStore({ now: NOW }))
 
     expect(selectCoreTransactions(state)).toBe(

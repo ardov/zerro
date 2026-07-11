@@ -9,16 +9,6 @@ import {
   getTransactionIds,
   getTrTypeGetter,
 } from './model'
-import {
-  deleteTransactions,
-  deleteTransactionsPermanently,
-  markViewed,
-  restoreTransaction,
-  applyChangesToTransaction,
-  recreateTransaction,
-  bulkEditTransactions,
-} from './thunks'
-export type { TransactionPatch } from './thunks'
 export type { TrCondition } from './filtering'
 export { TrType } from './helpers'
 
@@ -45,13 +35,4 @@ export const trModel = {
 
   //Filtering
   checkRaw,
-
-  // Thunks
-  deleteTransactions,
-  deleteTransactionsPermanently,
-  markViewed,
-  restoreTransaction,
-  applyChangesToTransaction,
-  recreateTransaction,
-  bulkEditTransactions,
 }

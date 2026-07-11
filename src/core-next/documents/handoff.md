@@ -13,11 +13,14 @@ works via a clear Redux adapter API. Continue switching real app consumers from
 legacy `5-entities` model functions to `core-next/adapters/redux`, then delete
 each legacy function with its last consumer.
 
-The budget/goal write wrappers are removed: app features now import `setBudget`,
-`setGoal`, and `TBudgetUpdate` from the Redux adapter. Continue with transaction
-write wrappers (`delete`, `restore`, `viewed`, `update`, `recreate`, and bulk
-edit) as one bounded family. Do not bundle transaction read/classification or
-presentation helpers into that write cutover.
+The budget/goal and transaction write wrappers are removed. App consumers now
+import semantic commands from the Redux adapter; transaction analytics stay at
+the UI action boundary. Read, classification, sorting, filtering, and
+presentation helpers remain separate migration work.
+
+Continue with the small account `setInBudget` wrapper and its two context-menu
+consumers. Then audit user-settings and FX write families separately; they have
+different persistence/network behavior and should not be bundled together.
 
 The identity materializer stays as the extension point already wired into the
 command path, but implementing its domain rules is deferred until after legacy

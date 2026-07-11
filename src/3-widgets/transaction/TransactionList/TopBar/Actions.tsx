@@ -27,10 +27,13 @@ import { sendEvent } from '6-shared/helpers/tracking'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useAppDispatch, useAppSelector } from 'store'
 import {
+  bulkEditTransactions,
   combineTransactionsToIncome,
   combineTransactionsToOutcome,
+  deleteTransactions,
   mergeTransactionsAsTransfer,
   selectCoreTransactions,
+  setTransactionsViewed,
 } from 'core-next/adapters/redux'
 import { TagSelect2 } from '5-entities/tag/ui/TagSelect2'
 import { trModel } from '5-entities/transaction'
@@ -70,9 +73,10 @@ const Actions: FC<ActionsProps> = ({
   }, [visible, checkedIds])
 
   const handleSetTag = (id: string) => {
+    sendEvent('Bulk Actions: set new tags')
     if (!id || id === 'null')
-      dispatch(trModel.bulkEditTransactions(checkedIds, { tags: [] }))
-    else dispatch(trModel.bulkEditTransactions(checkedIds, { tags: [id] }))
+      dispatch(bulkEditTransactions(checkedIds, { tags: [] }))
+    else dispatch(bulkEditTransactions(checkedIds, { tags: [id] }))
     closeMenu()
     onUncheckAll()
   }
@@ -82,7 +86,8 @@ const Actions: FC<ActionsProps> = ({
     okText: t('deleteBtn'),
     cancelText: t('cancelDeletion'),
     onOk: () => {
-      dispatch(trModel.deleteTransactions(checkedIds))
+      sendEvent('Transaction: delete')
+      dispatch(deleteTransactions(checkedIds))
       closeMenu()
       onUncheckAll()
     },
@@ -94,7 +99,8 @@ const Actions: FC<ActionsProps> = ({
   }
 
   const handleMarkViewed = () => {
-    dispatch(trModel.markViewed(checkedIds, true))
+    sendEvent('Transaction: mark viewed: true')
+    dispatch(setTransactionsViewed(checkedIds, true))
     closeMenu()
     onUncheckAll()
   }

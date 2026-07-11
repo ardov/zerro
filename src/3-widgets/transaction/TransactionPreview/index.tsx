@@ -23,10 +23,18 @@ import {
 import { AmountInput } from '6-shared/ui/AmountInput'
 import { rateToWords } from '6-shared/helpers/money'
 import { formatDate, parseDate, toISODate } from '6-shared/helpers/date'
+import { sendEvent } from '6-shared/helpers/tracking'
 
 import { useAppDispatch, useAppSelector } from 'store'
 
-import { selectCoreTransactions } from 'core-next/adapters/redux'
+import {
+  applyChangesToTransaction,
+  deleteTransactions,
+  deleteTransactionsPermanently,
+  recreateTransaction,
+  restoreTransaction,
+  selectCoreTransactions,
+} from 'core-next/adapters/redux'
 import { trModel } from '5-entities/transaction'
 import { accountModel } from '5-entities/account'
 import { instrumentModel } from '5-entities/currency/instrument'
@@ -76,10 +84,18 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
   const { id, onClose, onOpenOther, onSelectSimilar } = props
   const { t } = useTranslation('transaction')
   const dispatch = useAppDispatch()
-  const onDelete = () => dispatch(trModel.deleteTransactions([id]))
-  const onDeletePermanently = () =>
-    dispatch(trModel.deleteTransactionsPermanently([id]))
-  const onRestore = () => dispatch(trModel.restoreTransaction(id))
+  const onDelete = () => {
+    sendEvent('Transaction: delete')
+    dispatch(deleteTransactions([id]))
+  }
+  const onDeletePermanently = () => {
+    sendEvent('Transaction: delete permanently')
+    dispatch(deleteTransactionsPermanently([id]))
+  }
+  const onRestore = () => {
+    sendEvent('Transaction: restore')
+    dispatch(restoreTransaction(id))
+  }
 
   const tr = useAppSelector(state => selectCoreTransactions(state)[id])!
   const trType = trModel.getType(tr)
@@ -140,8 +156,9 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
       let createdDate = parseDate(tr.date)
       createdDate.setHours(hh)
       createdDate.setMinutes(mm)
-      let newId = dispatch(
-        trModel.recreateTransaction({
+      sendEvent('Transaction: recreate')
+      const newId = dispatch(
+        recreateTransaction({
           id,
           created: +createdDate,
           comment: localComment,
@@ -151,11 +168,12 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
           date: localDate,
           tag: localTag,
         })
-      ) as unknown
-      onOpenOther(newId as string)
+      )
+      onOpenOther(newId)
     } else if (hasChanges) {
+      sendEvent('Transaction: edit')
       dispatch(
-        trModel.applyChangesToTransaction({
+        applyChangesToTransaction({
           id,
           comment: localComment,
           outcome: localOutcome,

@@ -14,8 +14,12 @@ import {
   TextField,
 } from '@mui/material'
 import { useAppDispatch, useAppSelector } from 'store'
-import { selectCoreTransactions } from 'core-next/adapters/redux'
-import { trModel } from '5-entities/transaction'
+import { sendEvent } from '6-shared/helpers/tracking'
+import {
+  bulkEditTransactions,
+  getTransactionType,
+  selectCoreTransactions,
+} from 'core-next/adapters/redux'
 import { TagList } from '5-entities/tag/ui/TagList'
 
 type BulkEditModalProps = Modify<DialogProps, { onClose: () => void }> & {
@@ -57,7 +61,8 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
       comment,
     }
     if (opts.tags || opts.comment) {
-      dispatch(trModel.bulkEditTransactions(ids, opts))
+      sendEvent('Bulk Actions: set new tags')
+      dispatch(bulkEditTransactions(ids, opts))
     }
     onApply()
   }
@@ -126,7 +131,7 @@ function equalArrays(a: string[], b: string[]) {
 function getTypes(list: TTransaction[] = []) {
   let res = { income: 0, outcome: 0, transfer: 0 }
   list.forEach(
-    tr => res[trModel.getType(tr) as 'income' | 'outcome' | 'transfer']++
+    tr => res[getTransactionType(tr) as 'income' | 'outcome' | 'transfer']++
   )
   return res
 }

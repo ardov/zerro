@@ -3,7 +3,13 @@ import { Menu, MenuItem, MenuProps } from '@mui/material'
 import { TTransaction, TTransactionId } from '6-shared/types'
 import { useAppDispatch, useAppSelector } from 'store'
 import { registerPopover } from '6-shared/historyPopovers'
-import { selectCoreTransactions } from 'core-next/adapters/redux'
+import { sendEvent } from '6-shared/helpers/tracking'
+import {
+  deleteTransactions,
+  restoreTransaction,
+  selectCoreTransactions,
+  setTransactionsViewed,
+} from 'core-next/adapters/redux'
 import { trModel } from '5-entities/transaction'
 import { useTranslation } from 'react-i18next'
 import { getMenuPosition } from './shared/helpers'
@@ -47,21 +53,24 @@ export const TrContextMenu: FC = () => {
       label: t('restore'),
       condition: transaction.deleted,
       action: () => {
-        dispatch(trModel.restoreTransaction(id))
+        sendEvent('Transaction: restore')
+        dispatch(restoreTransaction(id))
       },
     },
     {
       label: t('markViewed'),
       condition: editable && !viewed,
       action: () => {
-        dispatch(trModel.markViewed([id], true))
+        sendEvent('Transaction: mark viewed: true')
+        dispatch(setTransactionsViewed([id], true))
       },
     },
     {
       label: t('markUnviewed'),
       condition: editable && viewed,
       action: () => {
-        dispatch(trModel.markViewed([id], false))
+        sendEvent('Transaction: mark viewed: false')
+        dispatch(setTransactionsViewed([id], false))
       },
     },
     {
@@ -82,7 +91,8 @@ export const TrContextMenu: FC = () => {
       label: t('delete'),
       condition: !transaction.deleted,
       action: () => {
-        dispatch(trModel.deleteTransactions([id]))
+        sendEvent('Transaction: delete')
+        dispatch(deleteTransactions([id]))
       },
     },
   ]

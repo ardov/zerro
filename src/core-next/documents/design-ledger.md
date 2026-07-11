@@ -256,6 +256,15 @@ question before enabling non-identity rules.
 
 ## Resolved bridges
 
+### Transaction write wrappers
+
+Resolved on 2026-07-11. Transaction context menus, bulk actions, lists, and the
+preview call semantic Redux adapter commands directly for delete, permanent
+delete, restore, viewed state, update, recreate, and bulk edit. The legacy
+transaction thunk file and `trModel` write members are removed. Tracking events
+remain at the UI action boundary; transaction reads, classification, sorting,
+filtering, and presentation helpers are not part of this resolved bridge.
+
 ### Budget and goal write wrappers
 
 Resolved on 2026-07-11. Budget features and GoalPopover call the narrow Redux

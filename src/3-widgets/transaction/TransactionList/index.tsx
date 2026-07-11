@@ -18,6 +18,7 @@ import { trModel } from '5-entities/transaction'
 import {
   selectCoreTransactionIds,
   selectCoreTransactions,
+  setTransactionsViewed,
 } from 'core-next/adapters/redux'
 import { getEventPosition } from '3-widgets/global/shared/helpers'
 
@@ -116,7 +117,8 @@ export const TransactionList: FC<TTransactionListProps> = props => {
         .slice(index)
         .filter(tr => !trModel.isViewed(tr))
         .map(tr => tr.id)
-      dispatch(trModel.markViewed(ids, true))
+      sendEvent('Transaction: mark viewed: true')
+      dispatch(setTransactionsViewed(ids, true))
     },
     [dispatch, trList]
   )
