@@ -1,10 +1,9 @@
-import { useCoreToDisplay } from 'core-next/adapters/redux'
-import { instrumentModel } from '5-entities/currency/instrument'
+import { useCoreInstCodeMap, useCoreToDisplay } from 'core-next/adapters/redux'
 import { TTransaction } from '6-shared/types'
 
 export function useTrToDisplay() {
   const toDisplay = useCoreToDisplay('current')
-  const instCodeMap = instrumentModel.useInstCodeMap()
+  const instCodeMap = useCoreInstCodeMap()
 
   return (tr: TTransaction) => {
     return {

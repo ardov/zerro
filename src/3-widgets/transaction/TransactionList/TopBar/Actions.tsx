@@ -1,5 +1,5 @@
 import type { TTransaction } from '6-shared/types'
-import { useCoreToDisplay } from 'core-next/adapters/redux'
+import { useCoreInstCodeMap, useCoreToDisplay } from 'core-next/adapters/redux'
 import React, { FC, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CSSTransition } from 'react-transition-group'
@@ -39,7 +39,6 @@ import {
   setTransactionsViewed,
 } from 'core-next/adapters/redux'
 import { TagSelect2 } from '5-entities/tag/ui/TagSelect2'
-import { instrumentModel } from '5-entities/currency/instrument'
 import { BulkEditModal } from './BulkEditModal'
 import './transitions.css'
 
@@ -288,7 +287,7 @@ const Actions: FC<ActionsProps> = ({
 
 function getAvailableActions(transactions: TTransaction[]) {
   const { incomes, outcomes, transfers } = groupByType(transactions)
-  const instCodeMap = instrumentModel.useInstCodeMap()
+  const instCodeMap = useCoreInstCodeMap()
   const toDisplay = useCoreToDisplay('current')
 
   const totalOutcome = toDisplay(

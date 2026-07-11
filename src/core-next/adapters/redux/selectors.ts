@@ -4,8 +4,6 @@ import { toISODate, toISOMonth } from '6-shared/helpers/date'
 import { i18n } from '6-shared/localization'
 import { ZERRO_DATA_ACCOUNT_NAME } from '../../constants'
 import { getSavedCurrency } from 'store/displayCurrency'
-import { instrumentModel } from '5-entities/currency/instrument'
-import { merchantModel } from '5-entities/merchant'
 import { userModel } from '5-entities/user'
 import type { RootState } from 'store'
 import {
@@ -17,6 +15,10 @@ import {
   getHistoryStart,
   getDebtAccountId,
   getAccounts,
+  getInstruments,
+  getInstrumentsByCode,
+  getInstCodeMap,
+  getMerchants,
   getPopulatedAccounts,
   getTagBudgets,
   getTransactionIds,
@@ -60,6 +62,28 @@ const selectCoreTagBudgetSlice = (state: RootState) => state.data.current.budget
 
 const selectCoreAccountSlice = (state: RootState) => state.data.current.account
 
+const selectCoreInstrumentSlice = (state: RootState) =>
+  state.data.current.instrument
+
+const selectCoreMerchantSlice = (state: RootState) =>
+  state.data.current.merchant
+
+export const selectCoreInstruments = (state: RootState) =>
+  getInstruments({ instrument: selectCoreInstrumentSlice(state) })
+
+export const selectCoreInstCodeMap = createSelector(
+  [selectCoreInstrumentSlice],
+  instrument => getInstCodeMap({ instrument })
+)
+
+export const selectCoreInstrumentsByCode = createSelector(
+  [selectCoreInstrumentSlice],
+  instrument => getInstrumentsByCode({ instrument })
+)
+
+export const selectCoreMerchants = (state: RootState) =>
+  getMerchants({ merchant: selectCoreMerchantSlice(state) })
+
 export const selectCoreDebtAccountId = createSelector(
   [selectCoreAccountSlice],
   account => getDebtAccountId({ account })
@@ -69,7 +93,7 @@ export const selectCoreAccounts = (state: RootState) =>
   getAccounts({ account: selectCoreAccountSlice(state) })
 
 export const selectCorePopulatedAccounts = createSelector(
-  [selectCoreAccountSlice, instrumentModel.getInstCodeMap],
+  [selectCoreAccountSlice, selectCoreInstCodeMap],
   (account, instrumentCodeById) =>
     getPopulatedAccounts({ account }, instrumentCodeById)
 )
@@ -155,8 +179,8 @@ export const selectCoreEnvelopeLabels = () => getCoreEnvelopeLabels()
 export const selectCoreDebtors = createSelector(
   [
     selectCoreTransactionsHistory,
-    merchantModel.getMerchants,
-    instrumentModel.getInstruments,
+    selectCoreMerchants,
+    selectCoreInstruments,
     selectCoreDebtAccountId,
   ],
   (transactions, merchants, instruments, debtAccountId) =>
@@ -227,7 +251,7 @@ const selectCoreCurrentMonth = () => toISOMonth(Date.now())
 const selectCoreCurrentDate = () => toISODate(Date.now())
 
 export const selectCoreCurrentFxRates = createSelector(
-  [instrumentModel.getInstruments, selectCoreCurrentMonth],
+  [selectCoreInstruments, selectCoreCurrentMonth],
   (instruments, currentMonth) =>
     buildCurrentFxRates({
       instruments,
@@ -275,11 +299,7 @@ const selectCoreInBudgetAccountIds = createSelector(
 )
 
 export const selectCoreCurrentFunds = createSelector(
-  [
-    selectCoreAccountSlice,
-    selectCoreInBudgetAccountIds,
-    instrumentModel.getInstCodeMap,
-  ],
+  [selectCoreAccountSlice, selectCoreInBudgetAccountIds, selectCoreInstCodeMap],
   (accounts, inBudgetIds, instrumentCodeById) =>
     buildCurrentFunds({
       accounts,
@@ -294,7 +314,7 @@ export const selectCoreRawActivity = createSelector(
     selectCoreInBudgetAccountIds,
     selectCoreDebtAccountId,
     selectCoreDebtors,
-    instrumentModel.getInstruments,
+    selectCoreInstruments,
   ],
   (transactions, inBudgetAccountIds, debtAccountId, debtors, instruments) =>
     buildRawActivity({
@@ -396,8 +416,8 @@ export const selectCoreBalances = createSelector(
     selectCoreTransactionsHistory,
     selectCoreAccounts,
     selectCoreDebtors,
-    merchantModel.getMerchants,
-    instrumentModel.getInstCodeMap,
+    selectCoreMerchants,
+    selectCoreInstCodeMap,
     selectCoreDebtAccountId,
   ],
   (

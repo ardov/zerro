@@ -1,14 +1,16 @@
 import React, { FC } from 'react'
 import { MenuItem, SelectProps, ListItemText } from '@mui/material'
-import { instrumentModel } from '5-entities/currency/instrument'
-import { useCoreInBudgetAccounts } from 'core-next/adapters/redux'
+import {
+  useCoreInBudgetAccounts,
+  useCoreInstrumentsByCode,
+} from 'core-next/adapters/redux'
 import { TFxCode, TInstrument } from '6-shared/types'
 import { getCurrencySymbol } from '6-shared/helpers/money'
 import { userModel } from '5-entities/user'
 import { SmartSelect } from '6-shared/ui/SmartSelect'
 
 export const CurrencyCodeSelect: FC<SelectProps<TFxCode>> = props => {
-  const instrumentsByCode = instrumentModel.useInstrumentsByCode()
+  const instrumentsByCode = useCoreInstrumentsByCode()
   const userCurrency = userModel.useUserCurrency()
   const accs = useCoreInBudgetAccounts()
   const value = props.value

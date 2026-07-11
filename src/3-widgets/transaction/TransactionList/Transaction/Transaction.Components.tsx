@@ -9,11 +9,11 @@ import { useAppSelector } from 'store'
 import {
   isTransactionViewed,
   TrType,
+  useCoreMerchants,
   useCorePopulatedAccounts,
 } from 'core-next/adapters/redux'
 import { TTagPopulated } from '5-entities/tag'
 import { selectCorePopulatedTags } from 'core-next/adapters/redux'
-import { merchantModel } from '5-entities/merchant'
 import { SmartAmount } from '3-widgets/Amount'
 
 type HTMLDivProps = React.DetailedHTMLProps<
@@ -281,7 +281,7 @@ const Payee: FC<{
   merchant: string | null
   onClick?: (payee: string) => void
 }> = ({ payee, merchant, onClick, ...rest }) => {
-  const merchants = merchantModel.useMerchants()
+  const merchants = useCoreMerchants()
   if (!payee && !merchant) return null
   let name = merchant ? merchants[merchant]?.title : payee
   return (

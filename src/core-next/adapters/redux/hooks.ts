@@ -13,6 +13,10 @@ import {
   selectCoreInBudgetAccounts,
   selectCorePopulatedAccounts,
   selectCoreSavingAccounts,
+  selectCoreInstruments,
+  selectCoreInstrumentsByCode,
+  selectCoreInstCodeMap,
+  selectCoreMerchants,
 } from './selectors'
 import { getTransactionType } from '../../zenmoney'
 
@@ -58,4 +62,20 @@ export function useCoreInBudgetAccounts() {
 
 export function useCoreSavingAccounts() {
   return useAppSelector(selectCoreSavingAccounts)
+}
+
+export function useCoreInstruments() {
+  return useAppSelector(selectCoreInstruments)
+}
+
+export function useCoreInstrumentsByCode() {
+  return useAppSelector(selectCoreInstrumentsByCode)
+}
+
+export function useCoreInstCodeMap() {
+  return useAppSelector(selectCoreInstCodeMap)
+}
+
+export function useCoreMerchants() {
+  return useAppSelector(selectCoreMerchants)
 }

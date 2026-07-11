@@ -7,6 +7,10 @@ import {
   selectCoreDebtors,
   selectCoreBalancesByDate,
   selectCoreHistoryStart,
+  selectCoreInstCodeMap,
+  selectCoreInstruments,
+  selectCoreInstrumentsByCode,
+  selectCoreMerchants,
   selectCoreTransactionIds,
   selectCoreTransactions,
   selectCoreTransactionsHistory,
@@ -47,6 +51,25 @@ function makeRootState(data: TDataStore): RootState {
 }
 
 describe('Core transaction adapter reads', () => {
+  it('matches legacy reference-data selectors', async () => {
+    const [{ instrumentModel }, { merchantModel }] = await Promise.all([
+      import('5-entities/currency/instrument'),
+      import('5-entities/merchant'),
+    ])
+    const state = makeRootState(makeDemoStore({ now: NOW }))
+
+    expect(selectCoreInstruments(state)).toBe(
+      instrumentModel.getInstruments(state)
+    )
+    expect(selectCoreInstrumentsByCode(state)).toEqual(
+      instrumentModel.getInstrumentsByCode(state)
+    )
+    expect(selectCoreInstCodeMap(state)).toEqual(
+      instrumentModel.getInstCodeMap(state)
+    )
+    expect(selectCoreMerchants(state)).toBe(merchantModel.getMerchants(state))
+  })
+
   it('matches legacy transaction map, IDs, history, debtors, and balance history', async () => {
     const [
       { accBalanceModel },

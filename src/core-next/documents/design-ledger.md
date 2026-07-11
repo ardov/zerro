@@ -266,6 +266,15 @@ question before enabling non-identity rules.
 
 ## Resolved bridges
 
+### Account and reference-data model objects
+
+Resolved on 2026-07-12. App consumers use Core Redux selectors/hooks for raw
+and populated accounts, account subsets, instruments, currency-code maps, and
+merchants. The account projection is a Core read helper with explicit currency
+metadata input; the Redux adapter owns only state selection and memoization.
+The adapter no longer imports legacy account, instrument, or merchant model
+objects.
+
 ### Transaction model object
 
 Resolved on 2026-07-12. App consumers use Core exports for transaction type,

@@ -46,6 +46,10 @@ export {
   useCoreInBudgetAccounts,
   useCorePopulatedAccounts,
   useCoreSavingAccounts,
+  useCoreInstruments,
+  useCoreInstrumentsByCode,
+  useCoreInstCodeMap,
+  useCoreMerchants,
 } from './hooks'
 // Narrow pure domain helpers used by real app consumers. Keep the underlying
 // ZenMoney/Zerro implementation barrels internal.
@@ -88,9 +92,13 @@ export {
   selectCoreGoalTotals,
   selectCoreHistoryStart,
   selectCoreInBudgetAccounts,
+  selectCoreInstruments,
+  selectCoreInstrumentsByCode,
+  selectCoreInstCodeMap,
   selectCoreKeepingEnvelopeIds,
   selectCoreMonthList,
   selectCoreMonthTotals,
+  selectCoreMerchants,
   selectCorePopulatedTags,
   selectCoreRawActivity,
   selectCorePopulatedAccounts,

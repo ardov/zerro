@@ -35,9 +35,9 @@ import {
   restoreTransaction,
   getTransactionType,
   selectCoreTransactions,
+  useCoreInstruments,
   useCorePopulatedAccounts,
 } from 'core-next/adapters/redux'
-import { instrumentModel } from '5-entities/currency/instrument'
 import { TagList } from '5-entities/tag/ui/TagList'
 
 import { Reciept } from './Reciept'
@@ -102,7 +102,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
   const accounts = useCorePopulatedAccounts()
   const incomeAccount = accounts[tr.incomeAccount]
   const outcomeAccount = accounts[tr.outcomeAccount]
-  const instruments = instrumentModel.useInstruments()
+  const instruments = useCoreInstruments()
   const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
   const outcomeCurrency = instruments[tr.outcomeInstrument]?.shortTitle
 
@@ -407,7 +407,7 @@ const RateToWords: FC<{ tr: TTransaction }> = ({ tr }) => {
   const { t } = useTranslation('transaction')
   const trType = getTransactionType(tr)
   const { income, opIncome, outcome, opOutcome } = tr
-  const instruments = instrumentModel.useInstruments()
+  const instruments = useCoreInstruments()
   const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
   const opIncomeCurrency =
     tr.opIncomeInstrument && instruments[tr.opIncomeInstrument]?.shortTitle
