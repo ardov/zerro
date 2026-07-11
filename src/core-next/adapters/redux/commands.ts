@@ -1,6 +1,8 @@
 import { v1 as uuidv1 } from 'uuid'
 import type { AppThunk, RootState } from 'store'
-import { applyClientPatch } from 'store/data'
+import { appendClientOutboxEntry } from 'store/data'
+import type { TOutboxEntry } from '../../engine/outbox'
+import { materializePatch } from '../../materializer'
 import type { TISOMonth } from '../../zenmoney/primitives'
 import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../types'
 import {
@@ -223,9 +225,21 @@ const defaultCtx = { now: () => Date.now(), uuid: () => uuidv1() }
  */
 export function executeCommand(command: TAppCommand): AppThunk<any> {
   return (dispatch, getState) => {
-    const result = compileAppCommandResult(getState(), command, defaultCtx)
+    const state = getState()
+    const result = compileAppCommandResult(state, command, defaultCtx)
     const patch = isCompiled(result) ? result.patch : result
-    if (!isEmptyPatch(patch)) dispatch(applyClientPatch(patch))
+    if (!isEmptyPatch(patch)) {
+      const materialized = materializePatch(state.data.current, patch)
+      const entry: TOutboxEntry<TAppCommand> = {
+        id: defaultCtx.uuid(),
+        command,
+        intentPatch: materialized.intentPatch,
+        appliedPatch: materialized.appliedPatch,
+        materializerVersion: materialized.materializerVersion,
+        createdAt: defaultCtx.now(),
+      }
+      dispatch(appendClientOutboxEntry(entry))
+    }
     return isCompiled(result) ? result.receipt : undefined
   }
 }

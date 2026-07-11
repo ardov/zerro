@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { i18n } from '6-shared/localization'
 import type { TDataStore } from '6-shared/types'
 import type { AppDispatch, AppThunk, RootState } from 'store'
-import { applyClientPatch } from 'store/data'
+import { appendClientOutboxEntry } from 'store/data'
 import { makeDemoStore } from 'core-next/demo'
 import { applyPatch } from 'core-next/zenmoney'
 import {
@@ -42,11 +42,12 @@ function makeThunkDispatch(initial: RootState) {
         undefined
       )
     }
-    if ((action as { type?: string }).type === applyClientPatch.type) {
+    if ((action as { type?: string }).type === appendClientOutboxEntry.type) {
       state = makeState(
         applyPatch(
           state.data.current,
-          (action as ReturnType<typeof applyClientPatch>).payload
+          (action as ReturnType<typeof appendClientOutboxEntry>).payload
+            .appliedPatch
         )
       )
     }

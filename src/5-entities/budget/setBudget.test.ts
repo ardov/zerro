@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { TDataStore, TISOMonth } from '6-shared/types'
-import { applyClientPatch } from 'store/data'
+import { appendClientOutboxEntry } from 'store/data'
 import type { RootState } from 'store'
 import { makeDemoStore } from 'core-next/demo'
 import { applyPatch } from 'core-next/zenmoney'
@@ -36,13 +36,17 @@ describe('setBudget', () => {
     const base = makeDemoStore({ now: NOW })
     const current = applyPatch(
       base,
-      compilePatchUserSettings(base, { preferZmBudgets: true }, {
-        now: () => NOW,
-        uuid: (() => {
-          const ids = ['data-account', 'settings-reminder']
-          return () => ids.shift() || 'unused'
-        })(),
-      })
+      compilePatchUserSettings(
+        base,
+        { preferZmBudgets: true },
+        {
+          now: () => NOW,
+          uuid: (() => {
+            const ids = ['data-account', 'settings-reminder']
+            return () => ids.shift() || 'unused'
+          })(),
+        }
+      )
     )
     const [tagId] = Object.keys(current.tag)
     const [accountId] = Object.keys(current.account)
@@ -66,7 +70,16 @@ describe('setBudget', () => {
 
     expect(expected.budget).toHaveLength(1)
     expect(expected.reminder).toHaveLength(1)
-    expect(dispatch).toHaveBeenCalledWith(applyClientPatch(expected))
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: appendClientOutboxEntry.type,
+        payload: expect.objectContaining({
+          command: { type: 'zerro.budget.set', payload: updates },
+          intentPatch: expected,
+          appliedPatch: expected,
+        }),
+      })
+    )
   })
 
   it('does not dispatch an empty patch', () => {

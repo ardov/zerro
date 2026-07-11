@@ -205,6 +205,12 @@ redo-tail truncation on append, and replay from stored applied patches. The
 reference engine uses these operations; Redux can reuse them incrementally
 without exposing them as root package API or introducing a second store.
 
+During the Redux transition, semantic commands append complete runtime outbox
+entries while reducers also maintain legacy `current` and `diff` views. The
+outbox is not replay-authoritative until remaining direct patch producers have
+either semantic commands or explicit infrastructure entry semantics. This
+temporary dual write is a migration boundary, not a second reactive store.
+
 ## Read model and memoization
 
 Pure projectors own calculations. Runtimes own memoization.

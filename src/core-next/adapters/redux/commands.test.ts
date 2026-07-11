@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { TDataStore } from '6-shared/types'
 import type { RootState } from 'store'
-import { applyClientPatch } from 'store/data'
+import { appendClientOutboxEntry } from 'store/data'
 import { makeDemoStore } from '../../demo'
 import { applyPatch } from '../../zenmoney'
 import {
@@ -359,11 +359,11 @@ describe('executeCommand funnel', () => {
 
     const newId = dispatch(recreateTransaction({ id, comment: 'Recreated' }))
 
-    const patches = dispatch.mock.calls
+    const entries = dispatch.mock.calls
       .map(([action]: [any]) => action)
-      .filter((action: any) => action?.type === applyClientPatch.type)
-    expect(patches).toHaveLength(1)
-    const [oldTr, newTr] = patches[0].payload.transaction
+      .filter((action: any) => action?.type === appendClientOutboxEntry.type)
+    expect(entries).toHaveLength(1)
+    const [oldTr, newTr] = entries[0].payload.appliedPatch.transaction
     expect(newId).toBe(newTr.id)
     expect(newId).not.toBe(id)
     expect(oldTr).toMatchObject({ id, income: 0.00001, outcome: 0.00001 })

@@ -2,7 +2,12 @@ import reducer from './slice'
 export default reducer
 
 // ACTIONS
-export { applyServerPatch, applyClientPatch, resetData } from './slice'
+export {
+  applyServerPatch,
+  applyClientPatch,
+  appendClientOutboxEntry,
+  resetData,
+} from './slice'
 
 // SELECTORS
 export {

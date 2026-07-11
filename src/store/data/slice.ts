@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { materializePatch } from 'core-next/materializer'
+import { appendOutbox, type TOutboxEntry } from 'core-next/engine/outbox'
 import { withPerf } from '6-shared/helpers/performance'
 import { TDataStore, TDiff } from '6-shared/types'
 import { applyDiffMutable } from './shared/applyDiff'
@@ -9,6 +10,9 @@ interface DataSlice {
   current: TDataStore
   server?: TDataStore
   diff?: TDiff
+  /** Transitional runtime outbox; not persisted yet. */
+  outbox?: TOutboxEntry<unknown>[]
+  outboxHead?: number
 }
 
 const makeDataStore = (): TDataStore => ({
@@ -51,6 +55,8 @@ const { reducer, actions } = createSlice({
         state.current = state.server
         // TODO: Тут хорошо бы не всё удалять, а только то что синхронизировалось (по времени старта). После этого надо ещё current пересобрать на основе серверных данных и диффа
         state.diff = undefined
+        state.outbox = []
+        state.outboxHead = 0
       }
     ),
     applyClientPatch: withPerf(
@@ -63,6 +69,21 @@ const { reducer, actions } = createSlice({
         else mergeDiffs(state.diff, appliedPatch)
       }
     ),
+    appendClientOutboxEntry: withPerf(
+      'appendClientOutboxEntry',
+      (state, { payload }: PayloadAction<TOutboxEntry<unknown>>) => {
+        const next = appendOutbox(
+          state.outbox ?? [],
+          state.outboxHead ?? state.outbox?.length ?? 0,
+          payload
+        )
+        state.outbox = next.outbox
+        state.outboxHead = next.outboxHead
+        applyDiffMutable(payload.appliedPatch, state.current)
+        if (!state.diff) state.diff = { ...payload.appliedPatch }
+        else mergeDiffs(state.diff, payload.appliedPatch)
+      }
+    ),
     resetData: () => {
       return initialState
     },
@@ -73,4 +94,9 @@ const { reducer, actions } = createSlice({
 export default reducer
 
 // ACTIONS
-export const { applyServerPatch, applyClientPatch, resetData } = actions
+export const {
+  applyServerPatch,
+  applyClientPatch,
+  appendClientOutboxEntry,
+  resetData,
+} = actions

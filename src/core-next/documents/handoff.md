@@ -3,7 +3,7 @@
 - Updated: 2026-07-11
 - Branch: `core-next`
 - Worktree: clean; the branch tip is
-  `Extract pure outbox operations`
+  `Append semantic commands to Redux outbox`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -33,6 +33,22 @@ claims against the tree before editing.
 | Tests            | Unit, deterministic demo parity, Redux invalidation, and opt-in private parity layers exist                           |
 
 ## Latest landed slices
+
+The current Redux Track D slice adopts runtime outbox entries for semantic
+commands:
+
+- `executeCommand` now compiles and materializes against the current snapshot,
+  creates a complete entry (`command`, intent/applied patches, materializer
+  version, id, timestamp), and dispatches `appendClientOutboxEntry`;
+- the data reducer reuses `appendOutbox`, including redo-tail truncation, while
+  still updating legacy `current` and `diff` compatibility views;
+- canonical server patches clear the acknowledged runtime outbox and continue
+  to bypass local materialization;
+- the runtime outbox fields are optional for state-fixture compatibility and
+  are not persisted yet;
+- remaining direct `applyClientPatch` producers mean outbox replay is not yet
+  authoritative. They are reminder writes, hidden data-account bootstrap, and
+  the debug API.
 
 The current Track D slice extracts reusable pure outbox operations:
 
@@ -145,9 +161,10 @@ No materializer rule or replica behavior is included in these slices.
 
 ## Default next task
 
-Continue Track D by reusing the pure outbox operations in Redux reducers before
-changing the persisted state shape. Keep the slice bounded to reducer behavior
-and tests; do not start materializer rules yet.
+Continue Track D by migrating the remaining direct `applyClientPatch`
+producers one bounded family at a time, starting with reminder writes. Do not
+make outbox replay authoritative, change persisted state, or start materializer
+rules yet.
 
 ## Important guardrails
 
@@ -178,7 +195,7 @@ Expected full-suite baseline at this handoff:
 
 ```txt
 69 test files passed, 4 skipped
-262 tests passed, 6 skipped
+263 tests passed, 6 skipped
 ```
 
 Browser check: the transaction-list multi-select bar and bulk-actions menu

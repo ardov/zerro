@@ -1,15 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { TDataStore, TISOMonth } from '6-shared/types'
 import type { RootState } from 'store'
-import { applyClientPatch } from 'store/data'
+import { appendClientOutboxEntry } from 'store/data'
 import { makeDemoStore } from 'core-next/demo'
 import { applyPatch } from 'core-next/zenmoney'
-import {
-  compileSetGoal,
-  envId,
-  EnvType,
-  goalType,
-} from 'core-next/zerro'
+import { compileSetGoal, envId, EnvType, goalType } from 'core-next/zerro'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { setGoal } from './setGoal'
 
@@ -65,7 +60,19 @@ describe('setGoal', () => {
 
     expect(expected.reminder).toHaveLength(1)
     expect(expected.deletion).toHaveLength(1)
-    expect(dispatch).toHaveBeenCalledWith(applyClientPatch(expected))
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: appendClientOutboxEntry.type,
+        payload: expect.objectContaining({
+          command: {
+            type: 'zerro.goal.set',
+            payload: { month: MONTH, id, goal },
+          },
+          intentPatch: expected,
+          appliedPatch: expected,
+        }),
+      })
+    )
     expect(sendEvent).toHaveBeenCalledWith('Goals: set monthly goal')
   })
 

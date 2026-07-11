@@ -36,6 +36,9 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 - Pure internal outbox operations now own head clamping, pending-prefix reads,
   redo-tail truncation on append, and applied-patch replay; the reference
   engine reuses them without exposing them from the root package surface.
+- Semantic Redux commands now append complete runtime outbox entries. Legacy
+  `current`/`diff` views remain active because a few low-level reminder,
+  bootstrap, and debug patch producers have not migrated yet.
 - The session is snapshot-based and lazily memoized. Namespaced `get*` reads are
   the semantic facade; flat `session.read.*` remains deprecated compatibility.
 - Session envelope reads are domain-only. The Redux adapter adds localized
@@ -70,8 +73,9 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 
 ## Default next slice
 
-Continue Track D by reusing the pure outbox operations in Redux reducers before
-changing the persisted state shape. Do not begin materializer rules yet.
+Continue Track D by migrating the remaining direct `applyClientPatch`
+producers one bounded family at a time. Do not make outbox replay authoritative
+or change persisted state until those compatibility paths are accounted for.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 

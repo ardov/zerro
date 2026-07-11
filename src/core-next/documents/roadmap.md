@@ -206,7 +206,11 @@ Suggested order:
 1. ✅ Extract pure outbox operations: append, drop redo tail, clamp head, replay
    applied prefix, and list pending entries. `createZerroEngine` now reuses
    these internal operations without widening the root package surface.
-2. Reuse them in Redux reducers.
+2. ◐ Reuse them in Redux reducers. Semantic funnel commands now append full
+   entries through `appendClientOutboxEntry`, which reuses redo-tail truncation
+   while preserving the legacy `current` and `diff` compatibility views.
+   Direct low-level `applyClientPatch` producers must migrate before outbox
+   replay becomes authoritative.
 3. Move Redux state toward `base`, `outbox`, `outboxHead`, `inbox`, `current`.
 4. Rebase `applyServerPatch` and expose the pending sync payload.
 5. Add reload plus undo/redo tests before switching more writes.
@@ -218,11 +222,14 @@ beside Redux in the app.
 
 Goal: remove compatibility paths only when a real consumer can switch safely.
 
-The write cutover and bridge retirement are complete: `mergeAccounts` has
+The semantic write cutover and named bridge retirement are complete:
+`mergeAccounts` has
 explicit transaction, reminder, and internal-transfer semantics; the unused
 `legacy.patch` command and `applyLegacyPatch` thunk/export are deleted; and the
-adapter command surface is pinned by a boundary test. Other compatibility work
-includes:
+adapter command surface is pinned by a boundary test. Low-level infrastructure
+still calls `applyClientPatch` directly from reminder writes, data-account
+bootstrap, and the debug API; these are active replica-migration debt rather
+than the retired public legacy bridge. Other compatibility work includes:
 
 - deep app imports from `core-next/zenmoney`, `core-next/zerro`, and tag
   presentation shims;

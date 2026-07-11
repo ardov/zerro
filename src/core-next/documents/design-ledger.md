@@ -117,6 +117,18 @@
 
 ## Active compatibility bridges
 
+### Direct Redux client patches
+
+Status: semantic funnel commands append complete runtime outbox entries, but
+reminder writes, hidden data-account bootstrap, and the debug API still call
+`applyClientPatch` directly. Redux therefore continues maintaining `current`
+and `diff` as compatibility views, and the runtime outbox is not yet the sole
+replay authority.
+
+Exit one producer at a time. Prefer semantic commands for domain writes and an
+explicit infrastructure entry shape for bootstrap/debug writes; do not wrap
+them in another generic public legacy command.
+
 ### `src/demoData`
 
 Status: thin wrapper over `core-next/demo`.
