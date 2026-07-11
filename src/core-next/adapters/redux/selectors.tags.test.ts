@@ -16,7 +16,7 @@ const NOW = Date.parse('2026-05-15T12:00:00Z')
 
 function makeRootState(data: TDataStore): RootState {
   return {
-    data: { current: data, base: data },
+    data: { current: data, base: data, outbox: [], outboxHead: 0 },
     displayCurrency: null,
     isPending: false,
     lastSync: { finishedAt: 0, isSuccessful: null, errorMessage: null },

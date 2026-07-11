@@ -199,6 +199,8 @@ function makeRootState(data: RootState['data']['current']): RootState {
     data: {
       current: data,
       base: data,
+      outbox: [],
+      outboxHead: 0,
     },
     displayCurrency: null,
     isPending: false,

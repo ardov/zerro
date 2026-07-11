@@ -22,7 +22,7 @@ afterEach(() => vi.restoreAllMocks())
 
 function makeState(current: TDataStore): RootState {
   return {
-    data: { current, base: current },
+    data: { current, base: current, outbox: [], outboxHead: 0 },
     displayCurrency: null,
     isPending: false,
     lastSync: { finishedAt: 0, isSuccessful: null, errorMessage: null },

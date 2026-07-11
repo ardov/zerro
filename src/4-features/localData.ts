@@ -3,6 +3,7 @@ import { applyServerPatch } from 'store/data'
 import { restorePersistedReplica } from 'store/data'
 import { getDataToSave } from '4-features/shared/getDataToSave'
 import { TLocalData } from '6-shared/types'
+import { parsePersistedReplica } from 'core-next/engine/persistence'
 import {
   getLocalData,
   getReplicaState,
@@ -43,7 +44,7 @@ export const saveDataLocally =
 export const loadLocalData = (): AppThunk => async dispatch => {
   const [data, replica] = await Promise.all([getLocalData(), getReplicaState()])
   dispatch(applyServerPatch(data))
-  dispatch(restorePersistedReplica(replica))
+  dispatch(restorePersistedReplica(parsePersistedReplica(replica)))
   return data
 }
 

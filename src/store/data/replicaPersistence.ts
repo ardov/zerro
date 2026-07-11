@@ -18,22 +18,21 @@ import {
 type TReplicaStateSource = {
   data: {
     current: TDataStore
-    base?: TDataStore
-    outbox?: TOutboxEntry<unknown>[]
-    outboxHead?: number
+    base: TDataStore
+    outbox: TOutboxEntry<unknown>[]
+    outboxHead: number
   }
 }
 
 export function getPersistedReplica(
   state: TReplicaStateSource
 ): TPersistedReplica {
-  const outbox = state.data.outbox ?? []
+  const outbox = state.data.outbox
   return {
     version: replicaPersistenceVersion,
-    baseServerTimestamp:
-      state.data.base?.serverTimestamp ?? state.data.current.serverTimestamp,
+    baseServerTimestamp: state.data.base.serverTimestamp,
     outbox: [...outbox],
-    outboxHead: state.data.outboxHead ?? outbox.length,
+    outboxHead: state.data.outboxHead,
   }
 }
 

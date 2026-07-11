@@ -10,16 +10,14 @@ claims against the tree before editing. It has accumulated slice-by-slice
 history that duplicates Git; compressing it to current-state-plus-next-step is
 the cleanup slice in [roadmap.md](./roadmap.md).
 
-## Next task: follow the completion plan
+## Next task: documentation and test cleanup
 
-The semantic write cutover is done. The next work is the ordered completion
-plan in [roadmap.md](./roadmap.md), starting with the **health slice**: return
-the suite to green (three failing tests), repair or remove the broken `lint:js`
-script, and apply Prettier. The full order is health → replay/clone fix →
-internal-module decision → adapter/slice hygiene → doc and test cleanup →
-Track C last. Accepted product risks (stale balances, dirty-session sync pause,
-undo/redo without UI) are recorded in [design-ledger.md](./design-ledger.md);
-do not re-litigate them.
+The semantic write cutover and adapter/slice hygiene are done. The next work is
+step 5 in [roadmap.md](./roadmap.md): mark legacy-parity tests with explicit
+exit conditions and compress this handoff to current state plus next step.
+Track C remains last. Accepted product risks (stale balances, dirty-session
+sync pause, undo/redo without UI) are recorded in
+[design-ledger.md](./design-ledger.md); do not re-litigate them.
 
 ## Read order
 
@@ -32,20 +30,36 @@ do not re-litigate them.
 
 ## Current branch state
 
-| Area             | State                                                                                                                 |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------- |
-| Package boundary | Root exports constants, shared root types, engine, and facade only; production Core has no runtime `6-shared` imports |
-| ZenMoney layer   | Normalized entities, factories, focused reads, commands, patch/replay, debtors, and balances are present              |
-| Zerro reads      | Envelopes through activity, metrics, month totals, goals, budgets, settings, hidden data, and FX are present          |
-| Session          | Namespaced semantic `get*` reads over lazy snapshot-local memoization; flat `read` is deprecated compatibility        |
-| Redux reads      | Most budget/envelope/goal/activity/transaction/tag/debtor/balance consumers use Core adapter selectors                |
-| Redux writes     | All budget/goal/envelope/transaction/account writes are semantic; no production consumer uses the legacy bridge       |
-| Materializer     | Identity layer is wired into every Redux local patch; server patches bypass it                                        |
-| Engine           | Pure outbox reference exists; no production consumer; replay uses stored `appliedPatch`                               |
-| Presentation     | Domain envelopes are headless; Redux adds localized groups, symbols, and generated/display colors                     |
-| Tests            | Unit, deterministic demo parity, Redux invalidation, and opt-in private parity layers exist                           |
+| Area             | State                                                                                                           |
+| ---------------- | --------------------------------------------------------------------------------------------------------------- |
+| Package boundary | Root exports constants, shared root types, and facade only; production Core has no runtime `6-shared` imports   |
+| ZenMoney layer   | Normalized entities, factories, focused reads, commands, patch/replay, debtors, and balances are present        |
+| Zerro reads      | Envelopes through activity, metrics, month totals, goals, budgets, settings, hidden data, and FX are present    |
+| Session          | Namespaced semantic `get*` reads over lazy snapshot-local memoization; flat `read` is deprecated compatibility  |
+| Redux reads      | Most budget/envelope/goal/activity/transaction/tag/debtor/balance consumers use Core adapter selectors          |
+| Redux writes     | All budget/goal/envelope/transaction/account writes are semantic; no production consumer uses the legacy bridge |
+| Materializer     | Identity layer is wired into every Redux local patch; server patches bypass it                                  |
+| Engine           | Pure outbox operations back the Redux slice; the reference engine remains internal                              |
+| Presentation     | Domain envelopes are headless; Redux adds localized groups, symbols, and generated/display colors               |
+| Tests            | Unit, deterministic demo parity, Redux invalidation, and opt-in private parity layers exist                     |
 
 ## Latest landed slices
+
+The current adapter/slice hygiene slice closes the completed-migration escape
+hatches:
+
+- command receipts are typed at the internal funnel overloads; create,
+  recreate, reminder, and data-account callers no longer recover receipts with
+  `as` casts or `AppThunk<any>`;
+- generic `executeCommand` and `TAppCommand` are no longer exported by the
+  Redux adapter; budget and goal compatibility shims call narrow semantic
+  adapter commands;
+- Redux `base`, `outbox`, and `outboxHead` are mandatory and initialized, so
+  reducers, selectors, sync, persistence, and test fixtures no longer carry
+  transitional optional fallbacks;
+- persisted replica storage enters the app as `unknown` and is validated before
+  replay. Corrupt versions, metadata, heads, and normalized patches fail with a
+  descriptive error instead of crashing inside replay.
 
 The current Track D slice names the Redux replica base explicitly:
 

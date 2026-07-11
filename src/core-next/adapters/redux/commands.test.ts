@@ -18,11 +18,7 @@ import {
   getEnvelopeMeta,
   toEnvelopeStructureInput,
 } from '../../zerro'
-import {
-  compileAppCommand,
-  executeCommand,
-  recreateTransaction,
-} from './commands'
+import { compileAppCommand, recreateTransaction } from './commands'
 import { selectCoreEnvelopes, selectCoreEnvelopeStructure } from './selectors'
 
 // Breaks the legacy hidden-store import cycle, same as the private fixture tests.
@@ -38,7 +34,7 @@ const NOW = Date.parse('2026-07-10T12:00:00Z')
 
 function makeState(current: TDataStore): RootState {
   return {
-    data: { current, base: current },
+    data: { current, base: current, outbox: [], outboxHead: 0 },
     displayCurrency: null,
     isPending: false,
     lastSync: { finishedAt: 0, isSuccessful: null, errorMessage: null },
@@ -55,7 +51,7 @@ function makeDispatch(state: RootState) {
   return dispatch
 }
 
-describe('executeCommand funnel', () => {
+describe('semantic command funnel', () => {
   it('compiles semantic envelope settings to entity and metadata state', () => {
     const current = makeDemoStore({ now: NOW })
     const state = makeState(current)

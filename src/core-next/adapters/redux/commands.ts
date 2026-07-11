@@ -262,14 +262,59 @@ function compileAppCommandResult(
 }
 
 /**
- * The single write funnel: compiles a command against current state and
- * applies the resulting normalized patch. The replica step will replace the
- * internals with an outbox append; callers stay unchanged.
+ * The internal write funnel compiles a command against current state and
+ * appends its materialized result to the Redux-owned outbox. Only narrow
+ * semantic commands are exported from this adapter.
  */
-export function executeCommand(command: TAppCommand): AppThunk<any> {
+type TCreateEnvelopeCommand = Extract<
+  TAppCommand,
+  { type: 'zerro.envelope.create' }
+>
+type TRecreateTransactionCommand = Extract<
+  TAppCommand,
+  { type: 'zenmoney.transaction.recreate' }
+>
+type TSetReminderCommand = Extract<
+  TAppCommand,
+  { type: 'zenmoney.reminder.set' }
+>
+type TPrepareDataAccountCommand = Extract<
+  TAppCommand,
+  { type: 'infrastructure.dataAccount.prepare@2' }
+>
+
+function executeCommand(
+  command: TCreateEnvelopeCommand
+): AppThunk<TCreateEnvelopeReceipt | undefined>
+function executeCommand(
+  command: TRecreateTransactionCommand
+): AppThunk<{ transactionId: TTransactionId } | undefined>
+function executeCommand(
+  command: TSetReminderCommand
+): AppThunk<TReminder[] | undefined>
+function executeCommand(
+  command: TPrepareDataAccountCommand
+): AppThunk<TAccountId | undefined>
+function executeCommand(command: TAppCommand): AppThunk<undefined>
+function executeCommand(command: TAppCommand): AppThunk<unknown> {
   return executeReduxCommand(command, (state, ctx) =>
     compileAppCommandResult(state, command, ctx)
   )
+}
+
+export function setBudget(updates: TBudgetUpdate[]): AppThunk {
+  return executeCommand({ type: 'zerro.budget.set', payload: updates })
+}
+
+export function setGoal(
+  month: TISOMonth,
+  id: TEnvelopeId,
+  goal: TGoal | null
+): AppThunk {
+  return executeCommand({
+    type: 'zerro.goal.set',
+    payload: { month, id, goal },
+  })
 }
 
 export function createEnvelope(
@@ -281,7 +326,8 @@ export function createEnvelope(
   })
 
   return (dispatch, getState, extra) => {
-    const receipt = execute(dispatch, getState, extra) as TCreateEnvelopeReceipt
+    const receipt = execute(dispatch, getState, extra)
+    if (!receipt) throw new Error('Envelope was not created')
     return receipt.envelopeId
   }
 }
@@ -375,9 +421,8 @@ export function recreateTransaction(
   })
 
   return (dispatch, getState, extra) => {
-    const receipt = execute(dispatch, getState, extra) as {
-      transactionId: TTransactionId
-    }
+    const receipt = execute(dispatch, getState, extra)
+    if (!receipt) throw new Error('Transaction was not recreated')
     return receipt.transactionId
   }
 }
@@ -413,8 +458,7 @@ export function setReminder(
     payload: draft,
   })
 
-  return (dispatch, getState, extra) =>
-    (execute(dispatch, getState, extra) as TReminder[] | undefined) || []
+  return (dispatch, getState, extra) => execute(dispatch, getState, extra) || []
 }
 
 export function deleteReminder(id: TReminderId): AppThunk {
@@ -431,9 +475,7 @@ export function prepareDataAccount(title: string): AppThunk<TAccountId> {
   })
 
   return (dispatch, getState, extra) => {
-    const accountId = execute(dispatch, getState, extra) as
-      | TAccountId
-      | undefined
+    const accountId = execute(dispatch, getState, extra)
     if (!accountId) throw new Error('Data account was not prepared')
     return accountId
   }

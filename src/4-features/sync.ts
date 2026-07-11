@@ -21,8 +21,8 @@ import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
 export const syncData = (): AppThunk => async (dispatch, getState) => {
   dispatch(prepareClientSync())
   const state = getState()
-  const sentOutboxIds = (state.data.outbox ?? [])
-    .slice(0, state.data.outboxHead ?? state.data.outbox?.length ?? 0)
+  const sentOutboxIds = state.data.outbox
+    .slice(0, state.data.outboxHead)
     .map(entry => entry.id)
   const diff: TDiff = {
     ...(getPendingSyncDiff(state) || {}),

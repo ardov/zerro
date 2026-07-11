@@ -51,6 +51,7 @@ const createTestStore = () =>
     },
     preloadedState: {
       data: {
+        ...dataReducer(undefined, { type: 'test/init' }),
         current: {
           serverTimestamp: 0,
           instrument: {},

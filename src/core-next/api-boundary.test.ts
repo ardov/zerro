@@ -42,7 +42,6 @@ describe('core-next API boundary', () => {
         'deleteTransactions',
         'deleteTransactionsPermanently',
         'deleteReminder',
-        'executeCommand',
         'mergeAccounts',
         'mergeTransactionsAsTransfer',
         'prepareDataAccount',
@@ -53,8 +52,9 @@ describe('core-next API boundary', () => {
         'setEnvelopeColor',
         'setEnvelopeComment',
         'setReminder',
+        'setBudget',
+        'setGoal',
         'setTransactionsViewed',
-        'TAppCommand',
         'updateEnvelopeSettings',
       ].sort()
     )

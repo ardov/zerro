@@ -5,11 +5,8 @@ import { createSelector } from '@reduxjs/toolkit'
 import { getPendingOutbox } from 'core-next/engine/outbox'
 import { immutableMergeDiffs } from './shared/mergeDiffs'
 
-const EMPTY_OUTBOX: NonNullable<RootState['data']['outbox']> = []
-
-const getOutbox = (state: RootState) => state.data.outbox ?? EMPTY_OUTBOX
-const getOutboxHead = (state: RootState) =>
-  state.data.outboxHead ?? state.data.outbox?.length ?? 0
+const getOutbox = (state: RootState) => state.data.outbox
+const getOutboxHead = (state: RootState) => state.data.outboxHead
 
 const getAppliedOutbox = createSelector(
   [getOutbox, getOutboxHead],

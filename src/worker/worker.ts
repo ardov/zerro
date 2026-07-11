@@ -53,8 +53,7 @@ async function getLocalData() {
 const obj = {
   convertZmToLocal,
   getLocalData,
-  getReplicaState: () =>
-    storage.get(REPLICA_KEY) as Promise<TPersistedReplica | undefined>,
+  getReplicaState: () => storage.get(REPLICA_KEY) as Promise<unknown>,
   clearStorage: () => storage.clear(),
   saveLocalData: (data: TLocalData) => {
     keys(data).forEach(key => storage.set(key, data[key]))

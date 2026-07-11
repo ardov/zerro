@@ -80,8 +80,8 @@ The unused `legacy.patch` command, `applyLegacyPatch` thunk, adapter export, and
 bridge-only tests are removed. A boundary test pins the adapter's supported
 command exports. Track E's write cutover and bridge removal are complete.
 
-Replica ownership, server-like materialization rules, and package hardening
-remain incomplete.
+Replica ownership and package hardening are complete through the adapter/slice
+hygiene boundary. Server-like materialization rules remain incomplete.
 
 ## Completion plan
 
@@ -112,7 +112,7 @@ Do the slices below in order; each is small and independently verifiable.
    Freeze the session facade; do not widen Track A until a real headless
    consumer exists. Record the decision in the design ledger.
 
-4. **Adapter and slice hygiene.** Type command receipts instead of `as` casts
+4. ✅ **Adapter and slice hygiene.** Type command receipts instead of `as` casts
    and `AppThunk<any>`; stop exporting the generic `executeCommand` escape
    hatch from the adapter; make `outbox`/`outboxHead`/`base` mandatory in the
    data slice now that the migration is complete; add a runtime validator for

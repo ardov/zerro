@@ -17,10 +17,10 @@ import { applyDiffMutable } from './shared/applyDiff'
 
 interface DataSlice {
   current: TDataStore
-  base?: TDataStore
+  base: TDataStore
   /** Durable local commands; current replays from the applied prefix. */
-  outbox?: TOutboxEntry<unknown>[]
-  outboxHead?: number
+  outbox: TOutboxEntry<unknown>[]
+  outboxHead: number
   inbox?: TServerInbox | null
 }
 
@@ -45,9 +45,12 @@ const makeDataStore = (): TDataStore => ({
 })
 
 // INITIAL STATE
+const initialBase = makeDataStore()
 const initialState: DataSlice = {
-  current: makeDataStore(),
-  base: undefined,
+  current: initialBase,
+  base: initialBase,
+  outbox: [],
+  outboxHead: 0,
 }
 
 // SLICE
@@ -66,13 +69,9 @@ const { reducer, actions } = createSlice({
       const { syncStartTime, sentOutboxIds, ...canonicalPatch } = state.inbox
       const sent = sentOutboxIds ? new Set(sentOutboxIds) : null
 
-      state.base ??= makeDataStore()
       applyDiffMutable(canonicalPatch, state.base)
 
-      const pending = getPendingOutbox(
-        state.outbox ?? [],
-        state.outboxHead ?? state.outbox?.length ?? 0
-      )
+      const pending = getPendingOutbox(state.outbox, state.outboxHead)
       state.outbox =
         sent || syncStartTime !== undefined
           ? pending.filter(entry =>
@@ -86,12 +85,7 @@ const { reducer, actions } = createSlice({
     appendClientOutboxEntry: withPerf(
       'appendClientOutboxEntry',
       (state, { payload }: PayloadAction<TOutboxEntry<unknown>>) => {
-        state.base ??= state.current
-        const next = appendOutbox(
-          state.outbox ?? [],
-          state.outboxHead ?? state.outbox?.length ?? 0,
-          payload
-        )
+        const next = appendOutbox(state.outbox, state.outboxHead, payload)
         state.outbox = next.outbox
         state.outboxHead = next.outboxHead
         // `current` already reflects the applied prefix up to the old head, and
@@ -102,26 +96,23 @@ const { reducer, actions } = createSlice({
       }
     ),
     prepareClientSync: withPerf('prepareClientSync', state => {
-      const outbox = getPendingOutbox(
-        state.outbox ?? [],
-        state.outboxHead ?? state.outbox?.length ?? 0
-      )
+      const outbox = getPendingOutbox(state.outbox, state.outboxHead)
       state.outbox = outbox
       state.outboxHead = outbox.length
     }),
     undoClientCommand: withPerf('undoClientCommand', state => {
-      const outbox = state.outbox ?? []
-      const currentHead = state.outboxHead ?? outbox.length
+      const outbox = state.outbox
+      const currentHead = state.outboxHead
       const outboxHead = clampOutboxHead(currentHead - 1, outbox.length)
-      if (outboxHead === currentHead || !state.base) return
+      if (outboxHead === currentHead) return
       state.outboxHead = outboxHead
       state.current = replayOutbox(state.base, outbox, outboxHead)
     }),
     redoClientCommand: withPerf('redoClientCommand', state => {
-      const outbox = state.outbox ?? []
-      const currentHead = state.outboxHead ?? outbox.length
+      const outbox = state.outbox
+      const currentHead = state.outboxHead
       const outboxHead = clampOutboxHead(currentHead + 1, outbox.length)
-      if (outboxHead === currentHead || !state.base) return
+      if (outboxHead === currentHead) return
       state.outboxHead = outboxHead
       state.current = replayOutbox(state.base, outbox, outboxHead)
     }),
@@ -131,12 +122,11 @@ const { reducer, actions } = createSlice({
         if (
           !payload ||
           payload.version !== replicaPersistenceVersion ||
-          !state.base ||
           payload.baseServerTimestamp !== state.base.serverTimestamp
         ) {
           state.outbox = []
           state.outboxHead = 0
-          if (state.base) state.current = state.base
+          state.current = state.base
           return
         }
 

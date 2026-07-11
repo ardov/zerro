@@ -63,4 +63,20 @@ describe('loadLocalData', () => {
     ).toBe('Wallet')
     expect(dataState.outbox?.map(entry => entry.id)).toEqual(['entry-1'])
   })
+
+  it('rejects corrupt replica storage before replay', async () => {
+    getLocalDataMock.mockResolvedValue({ serverTimestamp: 100 })
+    getReplicaStateMock.mockResolvedValue({
+      version: 1,
+      baseServerTimestamp: 100,
+      outbox: [{ id: 'broken' }],
+      outboxHead: 1,
+    })
+
+    const dispatch = vi.fn()
+    await expect(
+      loadLocalData()(dispatch, () => ({}) as any, undefined)
+    ).rejects.toThrow('outbox[0] metadata is invalid')
+    expect(dispatch).toHaveBeenCalledTimes(1)
+  })
 })

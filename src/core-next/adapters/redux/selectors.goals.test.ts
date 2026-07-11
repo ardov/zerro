@@ -57,6 +57,8 @@ function makeRootState(data: TDataStore): RootState {
     data: {
       current: data,
       base: data,
+      outbox: [],
+      outboxHead: 0,
     },
     displayCurrency: null,
     isPending: false,

@@ -30,6 +30,8 @@ export function makeCoreNextDemoRootState(
     data: {
       current: data,
       base: data,
+      outbox: [],
+      outboxHead: 0,
     },
     displayCurrency: null,
     isPending: false,

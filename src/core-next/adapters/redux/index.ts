@@ -17,7 +17,6 @@ export {
   deleteTransactions,
   deleteTransactionsPermanently,
   deleteReminder,
-  executeCommand,
   mergeAccounts,
   mergeTransactionsAsTransfer,
   prepareDataAccount,
@@ -28,9 +27,10 @@ export {
   setEnvelopeColor,
   setEnvelopeComment,
   setReminder,
+  setBudget,
+  setGoal,
   setTransactionsViewed,
   updateEnvelopeSettings,
-  type TAppCommand,
 } from './commands'
 export { nullTag, populateTags, type TTagPopulated } from './tagPresentation'
 // Narrow pure domain helpers used by real app consumers. Keep the underlying

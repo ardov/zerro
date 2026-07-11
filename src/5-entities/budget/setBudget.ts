@@ -1,12 +1,9 @@
-import { executeCommand } from 'core-next/adapters/redux'
+import { setBudget as setCoreBudget } from 'core-next/adapters/redux'
 import { AppThunk } from 'store/index'
 import { TEnvBudgetUpdate } from './envBudget'
 
 export type TBudgetUpdate = TEnvBudgetUpdate
 
 export function setBudget(upd: TBudgetUpdate | TBudgetUpdate[]): AppThunk {
-  return executeCommand({
-    type: 'zerro.budget.set',
-    payload: Array.isArray(upd) ? upd : [upd],
-  })
+  return setCoreBudget(Array.isArray(upd) ? upd : [upd])
 }
