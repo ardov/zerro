@@ -1,4 +1,4 @@
-// Types first: the factories pull dataAccount -> accountModel and can re-enter
+// Types first: the factories pull dataAccount -> account selectors and can re-enter
 // this barrel through module cycles; dependency-free exports must already be
 // initialized by then.
 export { HiddenDataType } from './types'

@@ -54,10 +54,12 @@ wording lives in adapter presentation, and bulk actions are named thunks rather
 than model objects. Legacy projection internals import their defining selectors
 directly.
 
-Production code now contains zero `*Model.*` calls. A boundary test keeps that
-invariant. Model-object calls remain only inside explicit legacy-parity tests;
-the next cleanup step is to retire those bridges together with the corresponding
-legacy selector implementations and then remove the now test-only model objects.
+Production code now contains zero `*Model.*` calls, and the test-only model
+objects are removed as well. Parity tests import concrete legacy selectors by
+name, so their comparison intent remains visible without preserving aggregate
+model APIs. A boundary test keeps model-object calls and declarations from
+returning. The next cleanup step is to retire each parity bridge together with
+its corresponding legacy selector implementation.
 
 ## Verification checkpoint
 
@@ -65,8 +67,8 @@ Start verification now, but do not call the refactor complete yet. The public
 baseline proves deterministic demo behavior, Core/Redux parity, invalidation,
 command routing, replay, package boundaries, and type safety. In the current
 tree after the final model-call cutover has zero production `*Model.*` calls.
-Eight legacy-parity bridge suites still exist and intentionally exercise
-test-only model objects. The opt-in private fixture is not
+Eight legacy-parity bridge suites still exist and exercise named legacy
+selectors. The opt-in private fixture is not
 available in this environment, so large real-account parity is not freshly
 verified.
 

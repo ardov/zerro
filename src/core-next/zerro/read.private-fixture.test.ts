@@ -43,7 +43,7 @@ maybeDescribe('core-next Zerro readers on private fixture', () => {
   it('match the current legacy readers', async () => {
     const fixture = readFixture(fixturePath!)
     const state = makeRootState(fixture.input.data)
-    const [{ userSettingsModel }, { getEnvelopeMeta }] = await Promise.all([
+    const [{ getUserSettings }, { getEnvelopeMeta }] = await Promise.all([
       import('5-entities/userSettings'),
       import('5-entities/envelope/shared/metaData'),
     ])
@@ -51,7 +51,7 @@ maybeDescribe('core-next Zerro readers on private fixture', () => {
     expectSameJsonHash(
       'userSettings',
       getCoreUserSettings(fixture.input.data),
-      userSettingsModel.get(state)
+      getUserSettings(state)
     )
     expectSameJsonHash(
       'envelopeMeta',
@@ -66,13 +66,7 @@ maybeDescribe('core-next Zerro readers on private fixture', () => {
 
     await i18n.changeLanguage(fixture.manifest.locale || 'ru')
 
-    const [
-      { accountModel },
-      { debtorModel },
-      { envelopeModel },
-      { tagModel },
-      { userModel },
-    ] = await Promise.all([
+    const [account, debtors, legacyEnvelopes, tags, user] = await Promise.all([
       import('5-entities/account'),
       import('5-entities/debtors'),
       import('5-entities/envelope'),
@@ -81,15 +75,15 @@ maybeDescribe('core-next Zerro readers on private fixture', () => {
     ])
 
     const actual = buildEnvelopes({
-      debtors: debtorModel.getDebtors(state),
+      debtors: debtors.getDebtors(state),
       tags: buildTagStructure({ tags: fixture.input.data.tag }),
-      savingAccounts: accountModel.getSavingAccounts(state),
+      savingAccounts: account.getSavingAccounts(state),
       envelopeMeta: getCoreEnvelopeMeta(fixture.input.data),
-      userCurrency: userModel.getUserCurrency(state),
+      userCurrency: user.getUserCurrency(state),
     })
     const presented = presentEnvelopes(
       actual.byId,
-      tagModel.getPopulatedTags(state),
+      tags.getPopulatedTags(state),
       {
         defaultTagGroup: i18n.t('defaultTagGroup', { ns: 'common' }),
         defaultAccountGroup: i18n.t('defaultAccountGroup', { ns: 'common' }),
@@ -101,12 +95,12 @@ maybeDescribe('core-next Zerro readers on private fixture', () => {
     expectSameJsonHash(
       'envelopes',
       presented.byId,
-      envelopeModel.getEnvelopes(state)
+      legacyEnvelopes.getEnvelopes(state)
     )
     expectSameJsonHash(
       'envelopeStructure',
       presented.structure,
-      envelopeModel.getEnvelopeStructure(state)
+      legacyEnvelopes.getEnvelopeStructure(state)
     )
   })
 
@@ -114,7 +108,7 @@ maybeDescribe('core-next Zerro readers on private fixture', () => {
     const fixture = readFixture(fixturePath!)
     const state = makeRootState(fixture.input.data)
 
-    const [{ budgetModel }, { getTagBudgets }] = await Promise.all([
+    const [{ getBudgets }, { getTagBudgets }] = await Promise.all([
       import('5-entities/budget'),
       import('5-entities/budget/tagBudget'),
     ])
@@ -125,7 +119,7 @@ maybeDescribe('core-next Zerro readers on private fixture', () => {
       preferZmBudgets: getCoreUserSettings(fixture.input.data).preferZmBudgets,
     })
 
-    expectSameJsonHash('budgets', actual, budgetModel.get(state))
+    expectSameJsonHash('budgets', actual, getBudgets(state))
   })
 })
 

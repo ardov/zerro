@@ -46,8 +46,8 @@ maybeDescribe('private fixture legacy outputs', () => {
     await import('../adapters/redux/selectors')
 
     const [
-      { budgetModel },
-      { envelopeModel },
+      { getBudgets },
+      { getEnvelopes, getEnvelopeStructure, getKeepingEnvelopes },
       { getMonthList },
       { getRawActivity },
       { getActivity },
@@ -71,10 +71,10 @@ maybeDescribe('private fixture legacy outputs', () => {
     try {
       const actualOutputs = {
         monthList: getMonthList(state),
-        envelopes: envelopeModel.getEnvelopes(state),
-        envelopeStructure: envelopeModel.getEnvelopeStructure(state),
-        keepingEnvelopeIds: envelopeModel.getKeepingEnvelopes(state),
-        budgets: budgetModel.get(state),
+        envelopes: getEnvelopes(state),
+        envelopeStructure: getEnvelopeStructure(state),
+        keepingEnvelopeIds: getKeepingEnvelopes(state),
+        budgets: getBudgets(state),
         rawActivity: getRawActivity(state),
         activity: getActivity(state),
         sortedActivity: getSortedActivity(state),

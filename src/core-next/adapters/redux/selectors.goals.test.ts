@@ -6,8 +6,8 @@ import { makeDemoStore } from '../../demo'
 import { applyPatch } from '../../zenmoney'
 import { compileSetGoal, envId, EnvType, goalType } from '../../zerro'
 
-// LEGACY-PARITY BRIDGE: remove the goalModel comparisons when its matching
-// reads have no production consumers and are deleted. Retain seeded-goal and
+// LEGACY-PARITY BRIDGE: remove the legacy goal selector comparisons when the
+// matching reads are deleted. Retain seeded-goal and
 // invalidation coverage as Core-owned regressions.
 
 // Breaks the legacy hidden-store import cycle, same as the private fixture tests.
@@ -37,8 +37,8 @@ async function importModels() {
   // envBalances/monthList, so the adapter graph must finish initializing
   // before the goal graph evaluates (concurrent dynamic imports interleave).
   const selectors = await import('./selectors')
-  const { goalModel } = await import('5-entities/goal')
-  return { goalModel, ...selectors }
+  const legacyGoals = await import('5-entities/goal')
+  return { legacyGoals, ...selectors }
 }
 
 function makeSeededStore() {
@@ -76,15 +76,15 @@ function makeRootState(data: TDataStore): RootState {
 }
 
 describe('selectCoreGoals chain', () => {
-  it('matches legacy goalModel on demo data with a seeded goal', async () => {
-    const { goalModel, selectCoreGoals, selectCoreGoalTotals } =
+  it('matches legacy goal selectors on demo data with a seeded goal', async () => {
+    const { legacyGoals, selectCoreGoals, selectCoreGoalTotals } =
       await importModels()
     const { store, envelopeId } = makeSeededStore()
     const state = makeRootState(store)
 
     const core = selectCoreGoals(state)
-    expect(core).toEqual(goalModel.get(state))
-    expect(selectCoreGoalTotals(state)).toEqual(goalModel.getTotals(state))
+    expect(core).toEqual(legacyGoals.getGoals(state))
+    expect(selectCoreGoalTotals(state)).toEqual(legacyGoals.getTotals(state))
     expect(core[MONTH][envelopeId]?.goal.amount).toBe(30_000)
   })
 

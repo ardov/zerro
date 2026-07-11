@@ -4,7 +4,7 @@ import type { RootState } from 'store'
 import { i18n } from '6-shared/localization'
 import { makeDemoStore } from '../../demo'
 
-// LEGACY-PARITY BRIDGE: remove the tagModel comparison when
+// LEGACY-PARITY BRIDGE: remove the legacy tag selector comparison when
 // getPopulatedTags has no production consumers and is deleted. Keep adapter
 // presentation and invalidation behavior as direct assertions.
 
@@ -32,12 +32,10 @@ describe('Core tag presentation adapter', () => {
   it('matches the legacy populated-tag selector', async () => {
     await i18n.changeLanguage('en')
     const { selectCorePopulatedTags } = await import('./selectors')
-    const { tagModel } = await import('5-entities/tag')
+    const { getPopulatedTags } = await import('5-entities/tag')
     const state = makeRootState(makeDemoStore({ now: NOW }))
 
-    expect(selectCorePopulatedTags(state)).toEqual(
-      tagModel.getPopulatedTags(state)
-    )
+    expect(selectCorePopulatedTags(state)).toEqual(getPopulatedTags(state))
   })
 
   it('stays cached across unrelated data changes and recomputes for tags', async () => {

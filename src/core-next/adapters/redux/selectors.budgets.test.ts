@@ -10,9 +10,9 @@ import {
   EnvType,
 } from '../../zerro'
 
-// LEGACY-PARITY BRIDGE: remove the budgetModel comparisons when budgetModel.get
-// has no production consumers and is deleted. Keep default/preferZmBudgets as
-// explicit Core-owned scenarios after that cutover.
+// LEGACY-PARITY BRIDGE: remove the getBudgets comparisons when that legacy
+// selector is deleted. Keep default/preferZmBudgets as explicit Core-owned
+// scenarios after that cutover.
 
 // Breaks the legacy hidden-store import cycle, same as the private fixture tests.
 vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
@@ -25,8 +25,8 @@ vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
 
 async function importModels() {
   const { selectCoreBudgets } = await import('./selectors')
-  const { budgetModel } = await import('5-entities/budget')
-  return { budgetModel, selectCoreBudgets }
+  const { getBudgets } = await import('5-entities/budget')
+  return { getBudgets, selectCoreBudgets }
 }
 
 const NOW = Date.parse('2026-05-15T12:00:00Z')
@@ -92,13 +92,13 @@ function makeRootState(data: TDataStore): RootState {
 }
 
 describe('selectCoreBudgets', () => {
-  it('matches legacy budgetModel.get with default settings', async () => {
-    const { budgetModel, selectCoreBudgets } = await importModels()
+  it('matches the legacy budget selector with default settings', async () => {
+    const { getBudgets, selectCoreBudgets } = await importModels()
     const { store, tagA, tagB } = makeSeededStore()
     const state = makeRootState(store)
 
     const core = selectCoreBudgets(state)
-    const legacy = budgetModel.get(state)
+    const legacy = getBudgets(state)
 
     expect(core).toEqual(legacy)
     expect(core[MONTH][envId.get(EnvType.Tag, tagA)]).toBe(10_000)
@@ -107,8 +107,8 @@ describe('selectCoreBudgets', () => {
     expect(core[MONTH][envId.get(EnvType.Tag, tagB)]).toBeUndefined()
   })
 
-  it('matches legacy budgetModel.get with preferZmBudgets enabled', async () => {
-    const { budgetModel, selectCoreBudgets } = await importModels()
+  it('matches the legacy budget selector with preferZmBudgets enabled', async () => {
+    const { getBudgets, selectCoreBudgets } = await importModels()
     const { store, tagB } = makeSeededStore()
     const settingsPatch = compilePatchUserSettings(
       store,
@@ -118,7 +118,7 @@ describe('selectCoreBudgets', () => {
     const state = makeRootState(applyPatch(store, settingsPatch))
 
     const core = selectCoreBudgets(state)
-    const legacy = budgetModel.get(state)
+    const legacy = getBudgets(state)
 
     expect(core).toEqual(legacy)
     // ZenMoney tag budget wins for tag envelopes now

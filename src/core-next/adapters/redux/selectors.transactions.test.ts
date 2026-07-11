@@ -52,28 +52,26 @@ function makeRootState(data: TDataStore): RootState {
 
 describe('Core transaction adapter reads', () => {
   it('matches legacy reference-data selectors', async () => {
-    const [{ instrumentModel }, { merchantModel }] = await Promise.all([
+    const [instrument, merchant] = await Promise.all([
       import('5-entities/currency/instrument'),
       import('5-entities/merchant'),
     ])
     const state = makeRootState(makeDemoStore({ now: NOW }))
 
-    expect(selectCoreInstruments(state)).toBe(
-      instrumentModel.getInstruments(state)
-    )
+    expect(selectCoreInstruments(state)).toBe(instrument.getInstruments(state))
     expect(selectCoreInstrumentsByCode(state)).toEqual(
-      instrumentModel.getInstrumentsByCode(state)
+      instrument.getInstrumentsByCode(state)
     )
     expect(selectCoreInstCodeMap(state)).toEqual(
-      instrumentModel.getInstCodeMap(state)
+      instrument.getInstCodeMap(state)
     )
-    expect(selectCoreMerchants(state)).toBe(merchantModel.getMerchants(state))
+    expect(selectCoreMerchants(state)).toBe(merchant.getMerchants(state))
   })
 
   it('matches legacy transaction map, IDs, history, debtors, and balance history', async () => {
     const [
-      { accBalanceModel },
-      { debtorModel },
+      { getBalancesByDate },
+      { getDebtors },
       {
         getTransactionsById,
         getTransactionIds,
@@ -93,10 +91,8 @@ describe('Core transaction adapter reads', () => {
       getTransactionsHistory(state)
     )
     expect(selectCoreHistoryStart(state)).toEqual(getHistoryStart(state))
-    expect(selectCoreDebtors(state)).toEqual(debtorModel.getDebtors(state))
-    expect(selectCoreBalancesByDate(state)).toEqual(
-      accBalanceModel.getBalancesByDate(state)
-    )
+    expect(selectCoreDebtors(state)).toEqual(getDebtors(state))
+    expect(selectCoreBalancesByDate(state)).toEqual(getBalancesByDate(state))
   })
 
   it('stays cached across unrelated data changes', () => {

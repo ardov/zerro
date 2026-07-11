@@ -1,5 +1,5 @@
 import { TFxCode, TUserId } from '6-shared/types'
-import { RootState, useAppSelector } from 'store'
+import { RootState } from 'store'
 import { getInstCodeMap } from '5-entities/currency/instrument/model'
 
 export const getUsers = (state: RootState) => state.data.current.user
@@ -22,16 +22,4 @@ export const getUserCurrency = (state: RootState): TFxCode => {
   const userInstrument = getUserInstrumentId(state)
   if (typeof userInstrument !== 'number') return 'USD'
   return getInstCodeMap(state)[userInstrument]
-}
-
-export const userModel = {
-  getUsers,
-  getRootUser,
-  getRootUserId,
-  getUserInstrumentId,
-  getUserCurrency,
-  // Hooks
-  useRootUserId: () => useAppSelector(getRootUserId),
-  useUserCurrency: () => useAppSelector(getUserCurrency),
-  useUserInstrumentId: () => useAppSelector(getUserInstrumentId),
 }

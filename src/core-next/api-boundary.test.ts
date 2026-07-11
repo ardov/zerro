@@ -151,7 +151,11 @@ describe('core-next API boundary', () => {
         return source
           .split('\n')
           .map((line, index) => ({ line, index }))
-          .filter(({ line }) => /\b[A-Za-z]\w*Model\s*\./.test(line))
+          .filter(
+            ({ line }) =>
+              /\b[A-Za-z]\w*Model\s*\./.test(line) ||
+              /\bexport const [A-Za-z]\w*Model\b/.test(line)
+          )
           .map(
             ({ line, index }) =>
               `${relative(appRoot, file)}:${index + 1}: ${line.trim()}`

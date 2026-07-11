@@ -270,10 +270,11 @@ question before enabling non-identity rules.
 
 Resolved on 2026-07-12. Production app code and legacy projection internals no
 longer invoke `*Model.*`. Reactive reads go through the Core Redux adapter;
-small remaining helpers use named exports with explicit ownership. A source
-boundary test prevents production model-object calls from returning. Legacy
-parity tests may still call model objects until each bridge and its old selector
-implementation are removed together.
+small remaining helpers use named exports with explicit ownership. Test-only
+model objects are removed; parity suites import concrete legacy selectors by
+name. A source boundary test prevents model-object calls or declarations from
+returning. Each parity bridge and its old selector implementation still need to
+be removed together.
 
 ### Account and reference-data model objects
 
