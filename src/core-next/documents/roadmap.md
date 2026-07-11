@@ -88,11 +88,11 @@ remain incomplete.
 Every app write now flows through the semantic command funnel, so there is no
 single obvious next legacy cutover. Pick by what the next real task touches:
 
-- **Track F (package/test hardening)** — continue with generated declaration or
-  package-consumer checks now that the adapter command surface is pinned.
-- **Track D (replica and sync)** — begin the outbox work: extract pure outbox
-  operations and move Redux state toward `base`/`outbox`/`inbox`/`current`.
-  The command funnel is the seam the outbox append will slot into.
+- **Track F (package/test hardening)** — declaration generation plus an
+  external root-consumer compile now run as a committed guardrail; settle
+  supported subpaths before enforcing an allowlist.
+- **Track D (replica and sync)** — paused at the explicit lifecycle/migration
+  decision checkpoint recorded below.
 - **Track A (facade)** — decide which adapter-level projectors deserve a
   supported subpath now that the write surface is settled.
 
@@ -107,9 +107,9 @@ package boundaries are firmer.
 | A. Public facade and read graph | Envelope writes semantic | Decide which adapter-level projectors deserve a supported subpath         |
 | B. Domain/presentation boundary | Boundary landed          | Extract an optional appearance package only when a real consumer needs it |
 | C. ZenMoney materializer rules  | Deferred until final     | Start only after the other architecture and migration tracks are complete |
-| D. Replica and sync             | Designed, not integrated | Share pure outbox operations and make Redux the replica owner             |
+| D. Replica and sync             | Runtime/persistence live | Re-review sync lifecycle and whether replica migrations are needed        |
 | E. Legacy cutover               | Write cutover complete   | Retire compatibility bridges only after verifying external consumers      |
-| F. Package and test hardening   | Ongoing                  | Consumer-level export/type test and targeted parity coverage              |
+| F. Package and test hardening   | Root consumer check live | Settle supported subpaths before enforcing their allowlist                |
 
 ## Track A: public facade and read graph
 
@@ -225,6 +225,11 @@ Suggested order:
 The in-memory engine remains a reference/headless implementation. Do not run it
 beside Redux in the app.
 
+Further Track D changes are paused at a decision checkpoint: re-review the full
+sync/data/outbox persistence lifecycle and decide whether replica migrations
+are necessary or whether stale metadata should remain disposable. Do not build
+migration or cross-key transaction machinery before that discussion.
+
 ## Track E: legacy cutover
 
 Goal: remove compatibility paths only when a real consumer can switch safely.
@@ -251,8 +256,9 @@ Goal: keep the package boundary trustworthy while migration continues.
 
 Useful slices:
 
-1. Generate declarations and compile a tiny external consumer using only
-   supported entrypoints.
+1. ✅ Generate declarations and compile a tiny external consumer using only
+   the supported root entrypoint. `pnpm core-next:package-check` emits into a
+   temporary package, then type-checks a consumer importing `core-next`.
 2. Enforce allowed subpaths once their list is settled.
 3. Add demo scenarios only for genuinely distinct domain shapes.
 4. Keep private fixture runs opt-in and privacy-safe.

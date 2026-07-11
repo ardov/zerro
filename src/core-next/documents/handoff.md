@@ -3,7 +3,7 @@
 - Updated: 2026-07-11
 - Branch: `core-next`
 - Worktree: clean; the branch tip is
-  `Persist pending Redux outbox`
+  `Verify Core package consumer`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -33,6 +33,18 @@ claims against the tree before editing.
 | Tests            | Unit, deterministic demo parity, Redux invalidation, and opt-in private parity layers exist                           |
 
 ## Latest landed slices
+
+The current independent Track F slice verifies the real root package surface:
+
+- `pnpm core-next:package-check` emits declarations from
+  `src/core-next/index.ts` into a temporary directory;
+- the emitted tree is installed there as a synthetic `core-next` package and a
+  tiny external consumer imports only root constants, types, session, and
+  engine APIs;
+- consumer compilation uses normal Node package resolution rather than the
+  repo's `baseUrl` alias, catching declaration leaks and unsupported imports;
+- a Vitest guard runs the same check in the full suite; generated files never
+  enter the worktree.
 
 The current persistence/reload slice makes pending runtime commands durable:
 
@@ -224,9 +236,15 @@ included in these slices.
 
 ## Default next task
 
-Continue Track D by settling cross-key crash consistency between legacy entity
-storage and the replica metadata record before removing `data.diff` from the
-sync transport. Do not start materializer rules in the same slice.
+Track D is paused for an explicit user discussion: revisit the complete sync
+lifecycle, its effects on data/outbox, persistence ordering, and whether replica
+migrations are needed at all. Do not add migration machinery or remove
+`data.diff` before that checkpoint.
+
+The independent root package check is complete. Until the Track D discussion,
+the next safe work should be one concrete Track E deep-import cleanup or a
+Track A facade slice whose public contract is already clear. Do not enforce
+subpath allowlists until their supported list is explicitly settled.
 
 ## Important guardrails
 
@@ -257,7 +275,7 @@ Expected full-suite baseline at this handoff:
 
 ```txt
 69 test files passed, 4 skipped
-272 tests passed, 6 skipped
+273 tests passed, 6 skipped
 ```
 
 Browser check: the transaction-list multi-select bar and bulk-actions menu

@@ -94,6 +94,22 @@
 
 ### Materializer and sync
 
+Decision checkpoint requested on 2026-07-11: before changing sync transport,
+cross-key persistence, or replica version handling again, walk through the full
+lifecycle together:
+
+1. what is sent and acknowledged by sync;
+2. how canonical responses change `server`, inbox, outbox/head, `current`, and
+   `diff`;
+3. when entity keys and replica metadata are persisted and what a crash between
+   them means;
+4. whether persisted replica formats need migrations at all, or whether stale
+   metadata can simply be discarded and rebuilt.
+
+It is explicitly acceptable that the answer may be “no migrations; treat the
+replica record as disposable metadata.” Do not add migration machinery before
+this discussion.
+
 1. Once materialization is non-identity, should ZenMoney sync send
    `intentPatch`, `appliedPatch`, or use a per-command transport encoder?
 2. Which real ZenMoney responses should become parity fixtures for account
@@ -181,6 +197,10 @@ metadata to ZenMoney entity keys. Version 1 stores base server timestamp,
 outbox, and head only; `current`, `diff`, and inbox are derived/ephemeral. Reload
 replays only when the persisted base timestamp matches the loaded server base;
 missing, stale, or unknown snapshots fall back to an empty outbox.
+
+Cross-key crash consistency and replica migrations are intentionally deferred
+to the decision checkpoint in “Materializer and sync”; current version checks
+must not be expanded into a migration framework by default.
 
 Exit when Redux owns explicit `base`, `outbox`, `outboxHead`, `inbox`, and
 replayed `current`. Resolve the sync transport question before enabling

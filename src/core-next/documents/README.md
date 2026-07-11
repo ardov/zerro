@@ -80,9 +80,9 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 
 ## Default next slice
 
-Continue Track D by deciding the durable crash-consistency boundary between
-the legacy entity-key writes and the replica metadata key before removing
-`data.diff` from the sync transport.
+Track D is paused for the recorded sync/outbox/persistence discussion,
+including whether replica migrations are needed at all. Until then, choose an
+independent Track A, E, or F slice that does not change replica semantics.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 

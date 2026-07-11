@@ -99,6 +99,7 @@ Focused:
 ```bash
 pnpm exec vitest run path/to/test.ts
 pnpm exec tsc --noEmit
+pnpm core-next:package-check
 ```
 
 Shared boundary:
