@@ -6,15 +6,18 @@
 
 This is the current routing document. Implementation history belongs in Git.
 
-## Next task: Track C materializer rules
+## Next task: remove legacy app functions
 
-The completion plan through documentation/test cleanup is done. Start Track C
-in the order defined by [roadmap.md](./roadmap.md), beginning with deleted
-transaction immutability. Keep each materializer rule as a separate verified
-slice and increment `materializerVersion` when semantics change.
+The current refactor goal is an independent Core module through which the app
+works via a clear Redux adapter API. Continue switching real app consumers from
+legacy `5-entities` model functions to `core-next/adapters/redux`, then delete
+each legacy function with its last consumer.
 
-Do not widen the frozen session facade, publish engine APIs, or add more replica
-machinery without a concrete consumer or product requirement.
+Start with the small budget/goal write wrappers still used by app features, then
+continue one consumer family at a time. The identity materializer stays as the
+extension point already wired into the command path, but implementing its
+domain rules is deferred until after legacy removal. Building the semantic
+engine facade is also later work.
 
 ## Read order
 
@@ -40,7 +43,8 @@ machinery without a concrete consumer or product requirement.
   sync until explicit user synchronization.
 - Domain envelopes remain headless; Redux owns localization, symbols, and
   generated/display colors.
-- The session facade is frozen until a real headless consumer exists.
+- The session facade is frozen; the current supported app surface is the Redux
+  adapter. A semantic engine facade comes later.
 
 ## Boundaries to preserve
 
@@ -59,7 +63,7 @@ machinery without a concrete consumer or product requirement.
 ## Accepted product risks
 
 These are recorded in [design-ledger.md](./design-ledger.md) and should not be
-re-litigated during Track C unless new evidence changes the product requirement:
+re-litigated during legacy removal unless new evidence changes the requirement:
 
 - account balances may remain stale until synchronization;
 - dirty sessions pause remote pulls until explicit sync;
@@ -69,9 +73,9 @@ re-litigated during Track C unless new evidence changes the product requirement:
 
 ## Verification baseline
 
-For every materializer rule, test both the materialized patch and resulting
-state, including batches and already-deleted entities. Compare with a real
-ZenMoney response when available without exposing private fixture contents.
+For every legacy cutover, verify its last real consumers, switch them to a
+narrow Redux adapter export, delete the obsolete function, and retain parity or
+invalidation coverage appropriate to that read/write path.
 
 Before committing a slice, run:
 

@@ -54,9 +54,9 @@
 - Command compilers produce intent patches.
 - Every local patch passes through `materializePatch`; the first implementation
   is identity-only.
-- Server-like materializer rules are the final migration phase; keep the layer
-  identity-only while the public API, replica, package, and legacy boundaries
-  are still moving.
+- The identity materializer is a useful extension point, but server-like rules
+  are not a goal of the current refactor. Keep it identity-only until remaining
+  legacy app functions are removed; domain-rule work happens afterward.
 - Canonical server diffs bypass local materialization.
 - The outbox stores `command`, `intentPatch`, `appliedPatch`, and
   `materializerVersion`.
@@ -67,8 +67,9 @@
 ### Replica and conflicts
 
 - Redux remains the sole reactive replica owner in the React app.
-- The in-memory engine is a reference/headless runtime, not a parallel app
-  store.
+- The in-memory engine is a reference/headless primitive, not the current app
+  API. Build the semantic engine facade only after the Redux adapter cutover;
+  do not run a parallel engine store beside Redux.
 - Undo/redo move `outboxHead`; inverse patches are not stored.
 - The durable logical replica is exactly `base`, `outbox`, and `outboxHead`;
   `current` and request-local sync transport are derived.
@@ -98,6 +99,16 @@
 - Undo/redo semantics stay without a production UI control. The outbox already
   implements and tests them; a UI affordance is a later slice, not premature
   complexity to remove.
+
+### Current refactor target
+
+- The application should access Core behavior through clear, narrow exports
+  from `core-next/adapters/redux`.
+- Remaining legacy model functions are migration wrappers, not the desired
+  final app API. Switch their real consumers and delete each wrapper when its
+  last consumer moves.
+- Materializer domain rules and the semantic engine facade are explicitly later
+  work; their existing seams may remain inert during this cutover.
 
 ### Testing
 

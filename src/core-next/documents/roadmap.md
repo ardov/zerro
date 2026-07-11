@@ -125,10 +125,15 @@ Do the slices below in order; each is small and independently verifiable.
    Git. Record the accepted-risk decisions (stale account balance, dirty-session
    sync pause) in the design ledger.
 
-6. **Track C (materializer rules) — next.** Account-balance recomputation and
-   deleted-transaction immutability are now the remaining planned work.
-   Start with deleted-transaction immutability, then continue in the Track C
-   order below.
+6. **Legacy app-function removal — current.** Switch remaining production
+   consumers from legacy model functions to the Redux adapter and delete each
+   obsolete function with its last consumer. The target is an app operating
+   through a clear Core Redux surface, not Core implementations hidden behind
+   legacy wrappers.
+
+7. **Materializer and engine — deferred.** Keep materialization identity-only.
+   Implement server-like domain rules and a semantic engine facade only after
+   the legacy app-function cutover; neither is a goal of the current refactor.
 
 ### Accepted product risks (do not re-litigate)
 
@@ -147,11 +152,11 @@ Do the slices below in order; each is small and independently verifiable.
 
 | Track                           | State                    | Next useful outcome                                                        |
 | ------------------------------- | ------------------------ | -------------------------------------------------------------------------- |
-| A. Public facade and read graph | Envelope writes semantic | Decide which adapter-level projectors deserve a supported subpath          |
+| A. Public facade and read graph | Redux adapter in use     | Move remaining app consumers to narrow adapter exports                     |
 | B. Domain/presentation boundary | Boundary landed          | Extract an optional appearance package only when a real consumer needs it  |
-| C. ZenMoney materializer rules  | Deferred until final     | Start only after the other architecture and migration tracks are complete  |
+| C. ZenMoney materializer rules  | Explicitly deferred      | Keep identity-only until legacy app functions are removed                  |
 | D. Replica and sync             | Replica boundary live    | Choose a concrete crash-consistency or response-staging need before more D |
-| E. Legacy cutover               | Write cutover complete   | Retire compatibility bridges only after verifying external consumers       |
+| E. Legacy cutover               | Current priority         | Remove one legacy consumer/function family at a time                       |
 | F. Package and test hardening   | Root consumer check live | Settle supported subpaths before enforcing their allowlist                 |
 
 ## Track A: public facade and read graph
@@ -212,10 +217,10 @@ stable domain envelopes and final decorated Redux views during migration.
 Goal: reproduce known ZenMoney cross-entity behavior in one deterministic
 layer instead of every command.
 
-This track is intentionally last. Keep materialization identity-only until the
-public API, presentation/package boundary, replica groundwork, legacy cutover,
-and package hardening are complete enough that rule work will not churn their
-contracts.
+This track is outside the current refactor. Keep materialization identity-only
+until the app uses the Core Redux adapter instead of legacy model functions.
+The existing seam is sufficient; do not implement rules merely because the
+extension point exists.
 
 Current:
 
@@ -300,14 +305,16 @@ Track A, E, or F unless work directly touches replica behavior.
 
 Goal: remove compatibility paths only when a real consumer can switch safely.
 
-The semantic write cutover and named bridge retirement are complete:
-`mergeAccounts` has
+The semantic command implementations and named bridge retirement are complete,
+but the app-function cutover is not. `mergeAccounts` has
 explicit transaction, reminder, and internal-transfer semantics; the unused
 `legacy.patch` command and `applyLegacyPatch` thunk/export are deleted; and the
 adapter command surface is pinned by a boundary test. Reminder writes now use
 semantic commands; data-account bootstrap and the debug API use explicit
 infrastructure entries through the cycle-safe executor. No production caller
-dispatches `applyClientPatch` directly. Other compatibility work includes:
+dispatches `applyClientPatch` directly. Some app consumers still call legacy
+model wrappers that delegate to Core; move them to narrow adapter exports and
+delete the wrappers. Other compatibility work includes:
 
 - deep app imports from `core-next/zenmoney`, `core-next/zerro`, and tag
   presentation shims;
@@ -344,15 +351,13 @@ Do not add tests for trivial map lookups or speculative APIs.
 
 ## Choosing work
 
-Follow the numbered completion plan above in order; it supersedes free track
-selection until the health, replay, internal-module, hygiene, and cleanup
-slices are done. The tracks below remain the vocabulary for classifying a
-slice, not a menu to pick from freely:
+Follow the current legacy app-function removal goal above. The tracks below
+remain vocabulary for classifying a slice:
 
 - Track B when working on tags, envelopes, icons, localization, or bank
   appearance.
-- Do not choose Track C until the completion plan is finished; materializer
-  rules are the final phase.
+- Do not choose Track C during the current refactor; materializer rules and the
+  engine facade are later phases after legacy removal.
 - Track D when changing sync, undo/redo, persistence, or Redux data state.
 - Track E for a single concrete app consumer.
 - Track F stays limited to the existing package-check; do not enforce subpath
