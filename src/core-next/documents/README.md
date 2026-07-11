@@ -77,6 +77,8 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 - Account in-budget changes call a semantic Redux adapter command directly;
   the legacy `setInBudget`, `patchAccount`, `patchTag`, `createTag`, and
   `patchMerchant` thunks are deleted.
+- FX edit/reset use semantic Core Redux commands; HTTP rate loading remains an
+  app feature. The legacy FX thunk file and unused freeze action are deleted.
 - Transaction-list bulk combine/merge actions are semantic commands; the dead
   `setTagBudget` write is removed.
 - `mergeAccounts` is semantic, including transaction and reminder reassignment,

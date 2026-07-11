@@ -206,7 +206,7 @@ export const selectCoreFxRates = createSelector(
     })
 )
 
-const selectCoreFxRatesGetter = createSelector(
+export const selectCoreFxRatesGetter = createSelector(
   [selectCoreFxRates, selectCoreCurrentFxRates],
   (rates, currentRates) =>
     buildFxRatesGetter({

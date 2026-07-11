@@ -16,6 +16,7 @@ import {
   envId,
   EnvType,
   getEnvelopeMeta,
+  getStoredFxRates,
   getUserSettings,
   toEnvelopeStructureInput,
 } from '../../zerro'
@@ -53,6 +54,27 @@ function makeDispatch(state: RootState) {
 }
 
 describe('semantic command funnel', () => {
+  it('merges an FX edit with the selected month rates', () => {
+    const current = makeDemoStore({ now: NOW })
+    const next = applyPatch(
+      current,
+      compileAppCommand(
+        makeState(current),
+        {
+          type: 'zerro.fxRates.edit',
+          payload: { month: '2026-07', patch: { EUR: 0.75 } },
+        },
+        { now: () => NOW, uuid: () => 'fx-rates-id' }
+      )
+    )
+
+    expect(getStoredFxRates(next)['2026-07']).toMatchObject({
+      date: '2026-07',
+      changed: NOW,
+      rates: expect.objectContaining({ EUR: 0.75 }),
+    })
+  })
+
   it.each([
     ['zerro.userSettings.emojiIcons.set', 'emojiIcons'],
     ['zerro.userSettings.preferZmBudgets.set', 'preferZmBudgets'],

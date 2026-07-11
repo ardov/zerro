@@ -36,6 +36,8 @@ import {
   compileUpdateEnvelopeSettings,
   compileSetBudget,
   compileSetGoal,
+  compileSetFxRates,
+  compileResetFxRates,
   compilePatchUserSettings,
   type TApplyEnvelopeStructureInput,
   type TBudgetUpdate,
@@ -43,6 +45,7 @@ import {
   type TCreateEnvelopeReceipt,
   type TEnvelopeId,
   type TGoal,
+  type TFxRates,
   type TRenameEnvelopeInput,
   type TSetEnvelopeColorInput,
   type TSetEnvelopeCommentInput,
@@ -53,6 +56,7 @@ import {
   selectCoreEnvelopeLabels,
   selectCoreDomainEnvelopes,
   selectCoreEnvelopes,
+  selectCoreFxRatesGetter,
 } from './selectors'
 import { executeReduxCommand } from './executeCommand'
 
@@ -67,6 +71,11 @@ export type { TBudgetUpdate } from '../../zerro'
  */
 export type TAppCommand =
   | { type: 'zerro.budget.set'; payload: TBudgetUpdate[] }
+  | {
+      type: 'zerro.fxRates.edit'
+      payload: { month: TISOMonth; patch: TFxRates }
+    }
+  | { type: 'zerro.fxRates.reset'; payload: { month: TISOMonth } }
   | { type: 'zerro.userSettings.emojiIcons.set'; payload: { enabled: boolean } }
   | {
       type: 'zerro.userSettings.preferZmBudgets.set'
@@ -156,6 +165,16 @@ function compileAppCommandResult(
   switch (command.type) {
     case 'zerro.budget.set':
       return compileSetBudget(data, command.payload, ctx)
+    case 'zerro.fxRates.edit': {
+      const current = selectCoreFxRatesGetter(state)(command.payload.month)
+      const rates = { ...current.rates }
+      Object.entries(command.payload.patch).forEach(([code, rate]) => {
+        if (rate > 0) rates[code] = rate
+      })
+      return compileSetFxRates(data, command.payload.month, rates, ctx)
+    }
+    case 'zerro.fxRates.reset':
+      return compileResetFxRates(data, command.payload.month, ctx)
     case 'zerro.userSettings.emojiIcons.set':
       return compilePatchUserSettings(
         data,
@@ -324,6 +343,20 @@ function executeCommand(command: TAppCommand): AppThunk<unknown> {
 
 export function setBudget(updates: TBudgetUpdate[]): AppThunk {
   return executeCommand({ type: 'zerro.budget.set', payload: updates })
+}
+
+export function editFxRates(month: TISOMonth, patch: TFxRates): AppThunk {
+  return executeCommand({
+    type: 'zerro.fxRates.edit',
+    payload: { month, patch },
+  })
+}
+
+export function resetFxRates(month: TISOMonth): AppThunk {
+  return executeCommand({
+    type: 'zerro.fxRates.reset',
+    payload: { month },
+  })
 }
 
 export function setEmojiIcons(enabled: boolean): AppThunk {

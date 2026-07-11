@@ -17,10 +17,12 @@ export {
   deleteTransactions,
   deleteTransactionsPermanently,
   deleteReminder,
+  editFxRates,
   mergeAccounts,
   mergeTransactionsAsTransfer,
   prepareDataAccount,
   recreateTransaction,
+  resetFxRates,
   renameEnvelope,
   restoreTransaction,
   setAccountInBalance,
@@ -40,6 +42,7 @@ export { nullTag, populateTags, type TTagPopulated } from './tagPresentation'
 // ZenMoney/Zerro implementation barrels internal.
 export { getTransactionType, TrType } from '../../zenmoney'
 export { goalType, normalizeGoal } from '../../zerro/goals'
+export { type TFxRates } from '../../zerro/fx-rates'
 export {
   toEnvelopeStructureInput,
   type TApplyEnvelopeStructureInput,
@@ -50,9 +53,11 @@ export {
   selectCoreActivity,
   selectCoreBalancesByDate,
   selectCoreBudgets,
+  selectCoreCurrentFxRates,
   selectCoreEnvelopes,
   selectCoreEnvelopeStructure,
   selectCoreEnvMetrics,
+  selectCoreFxRatesGetter,
   selectCoreGoals,
   selectCoreGoalTotals,
   selectCoreHistoryStart,

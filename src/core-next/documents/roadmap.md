@@ -21,6 +21,12 @@ well. Settings use field-specific intent commands rather than exposing the old
 generic `Partial<TUserSettings>` patch contract. FX writes are next and must
 preserve the distinction between local hidden-data edits and network loading.
 
+The legacy model write cutover is now complete. FX edit/reset are Core Redux
+commands; network loading is an app feature that dispatches them. No production
+write call remains on a `*Model` object. Continue with read/helper families,
+starting with app-level FX converter/getter consumers; do not mix unrelated
+selector families into one slice.
+
 Envelope reads are now split: session/Core projectors return domain envelopes,
 and the Redux adapter adds symbols, generated/display colors, localized null
 text, and localized groups. The old `populatedTags` session dependency is gone,

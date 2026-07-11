@@ -256,6 +256,20 @@ question before enabling non-identity rules.
 
 ## Resolved bridges
 
+### FX write wrapper
+
+Resolved on 2026-07-11. Monthly FX edits and resets are semantic Redux adapter
+commands backed by Core hidden-data compilers. Historical/current rate loading
+is an app feature because it owns HTTP access and dispatches the semantic edit
+command with the result. The legacy `patchRates.ts`, `fxRateModel` write
+members, and unused freeze action are removed. FX reads remain separate.
+
+### Legacy model writes
+
+Resolved on 2026-07-11. A production-source search finds no remaining write
+calls through `*Model`; app writes enter through narrow Redux adapter commands
+or app features that orchestrate external effects around those commands.
+
 ### User-settings write wrapper
 
 Resolved on 2026-07-11. SettingsMenu calls narrow Redux adapter commands for

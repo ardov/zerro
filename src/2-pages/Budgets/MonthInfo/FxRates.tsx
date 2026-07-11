@@ -1,5 +1,11 @@
 import type { TFxCode, TISOMonth } from '6-shared/types'
-import { selectCoreMonthTotals } from 'core-next/adapters/redux'
+import {
+  editFxRates,
+  resetFxRates,
+  selectCoreFxRatesGetter,
+  selectCoreMonthTotals,
+  type TFxRates,
+} from 'core-next/adapters/redux'
 import React, { FC, useEffect, useState } from 'react'
 import {
   Box,
@@ -13,11 +19,11 @@ import { useTranslation } from 'react-i18next'
 import { keys } from '6-shared/helpers/keys'
 import { useDebouncedCallback } from '6-shared/hooks/useDebouncedCallback'
 import { useToggle } from '6-shared/hooks/useToggle'
-import { formatDate, toISOMonth } from '6-shared/helpers/date'
+import { formatDate } from '6-shared/helpers/date'
 
 import { useAppDispatch, useAppSelector } from 'store'
 import { displayCurrency } from '5-entities/currency/displayCurrency'
-import { fxRateModel, TFxRates } from '5-entities/currency/fxRate'
+import { canFetchFxRates, loadFxRates } from '4-features/fxRates'
 
 export const FxRates: FC<{ month: TISOMonth }> = props => {
   const dispatch = useAppDispatch()
@@ -25,7 +31,7 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
   const { t } = useTranslation('fxRates')
   const [displCurrency] = displayCurrency.useDisplayCurrency()
   const funds = useAppSelector(selectCoreMonthTotals)[month].fundsEnd
-  const ratesGetter = fxRateModel.useRatesGetter()
+  const ratesGetter = useAppSelector(selectCoreFxRatesGetter)
   const rateData = ratesGetter(month)
 
   const currencies = keys(funds)
@@ -42,8 +48,7 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
   if (currencies.length === 0) return null
 
   const isSaved = rateData.type === 'saved' && rateData.date === month
-  const canFetch =
-    toISOMonth(Date.now()) > month && fxRateModel.canFetchRates(month)
+  const canFetch = canFetchFxRates(month)
   const isCurrentRates = rateData.type === 'current'
 
   return (
@@ -65,9 +70,7 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
             code={c.code}
             mainCode={displCurrency}
             rates={rateData.rates}
-            onChange={rate =>
-              dispatch(fxRateModel.edit({ [c.code]: rate }, month))
-            }
+            onChange={rate => dispatch(editFxRates(month, { [c.code]: rate }))}
           />
         ))}
         <Typography
@@ -82,12 +85,12 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
           })}
         </Typography>
         {isSaved && (
-          <Button fullWidth onClick={() => dispatch(fxRateModel.reset(month))}>
+          <Button fullWidth onClick={() => dispatch(resetFxRates(month))}>
             {t('reset')}
           </Button>
         )}
         {canFetch && !isSaved && (
-          <Button fullWidth onClick={() => dispatch(fxRateModel.load(month))}>
+          <Button fullWidth onClick={() => dispatch(loadFxRates(month))}>
             {t('download')}
           </Button>
         )}

@@ -18,10 +18,14 @@ import semantic commands from the Redux adapter; transaction analytics stay at
 the UI action boundary. Read, classification, sorting, filtering, and
 presentation helpers remain separate migration work.
 
-The account and user-settings write wrappers are removed. SettingsMenu calls
-the narrow `setEmojiIcons` / `setPreferZmBudgets` Redux commands; the unused
-legacy reset is gone too. Next take the FX write family, preserving its split
-between local hidden-data edits and network loading.
+The legacy model write cutover is complete: production code no longer invokes
+write methods through `*Model`. FX local edit/reset are semantic Redux adapter
+commands, while HTTP loading is an app feature that dispatches those commands;
+the old FX thunk file and unused freeze action are gone.
+
+Next begin the read/helper cutover one family at a time. Start with app-level FX
+reads (`useConverter`, `useRatesGetter`, converter/getter consumers), exposing
+only narrow Redux selectors while leaving network orchestration outside Core.
 
 The identity materializer stays as the extension point already wired into the
 command path, but implementing its domain rules is deferred until after legacy
