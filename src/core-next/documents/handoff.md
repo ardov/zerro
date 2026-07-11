@@ -2,11 +2,24 @@
 
 - Updated: 2026-07-11
 - Branch: `core-next`
-- Worktree: contains the current uncommitted Track D sync slices; the branch
-  tip is `Verify Core package consumer`
+- Worktree: clean; the write cutover and Track D replica/sync lifecycle are
+  committed.
 
 This document describes the current branch, not project history. Verify its
-claims against the tree before editing.
+claims against the tree before editing. It has accumulated slice-by-slice
+history that duplicates Git; compressing it to current-state-plus-next-step is
+the cleanup slice in [roadmap.md](./roadmap.md).
+
+## Next task: follow the completion plan
+
+The semantic write cutover is done. The next work is the ordered completion
+plan in [roadmap.md](./roadmap.md), starting with the **health slice**: return
+the suite to green (three failing tests), repair or remove the broken `lint:js`
+script, and apply Prettier. The full order is health → replay/clone fix →
+internal-module decision → adapter/slice hygiene → doc and test cleanup →
+Track C last. Accepted product risks (stale balances, dirty-session sync pause,
+undo/redo without UI) are recorded in [design-ledger.md](./design-ledger.md);
+do not re-litigate them.
 
 ## Read order
 
@@ -286,17 +299,14 @@ Semantic envelope structure:
 No materializer rule, persisted outbox, or explicit inbox/rebase behavior is
 included in these slices.
 
-## Default next task
+## Track history
 
-Track D's lifecycle, manual commit boundary, outbox-derived transport, and
-explicit base naming are complete. Do not extend Track D mechanically: choose
-crash-consistency or response-staging work only when a concrete failure or user
-need justifies it. Otherwise choose an independent Track A, E, or F slice.
-
-The independent root package check is complete. Until the Track D discussion,
-the next safe work should be one concrete Track E deep-import cleanup or a
-Track A facade slice whose public contract is already clear. Do not enforce
-subpath allowlists until their supported list is explicitly settled.
+The completion plan in [roadmap.md](./roadmap.md) supersedes free track
+selection. Track D's lifecycle, manual commit boundary, outbox-derived
+transport, and explicit base naming are complete; the independent root package
+check is complete. Do not extend Track D mechanically or enforce subpath
+allowlists — Core Next stays an internal module until a real external consumer
+exists. The remaining committed context below is history for reference only.
 
 The first Track E adapter-boundary cleanup is complete:
 

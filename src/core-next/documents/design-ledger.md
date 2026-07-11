@@ -1,6 +1,6 @@
 # Core Next design ledger
 
-- Updated: 2026-07-10
+- Updated: 2026-07-11
 - Purpose: keep settled decisions, unresolved questions, and temporary bridges
   in one place.
 
@@ -77,6 +77,21 @@
 - First-stage conflict resolution is entity-level last write wins, including
   hidden-data blobs.
 
+### Accepted product risks
+
+- Stale account balances are accepted. The transaction `effects.ts` balance
+  update was removed with the intent-only transaction slice; recomputing
+  `account.balance` is a materializer (Track C) concern. Because periodic sync
+  is paused in a dirty session, the stale window is now visible until manual
+  sync. This is intentional, not a defect to patch before Track C.
+- The dirty-session sync pause is accepted. A session with applied outbox
+  entries does not pull remote changes until the user syncs manually, even
+  though the rebase machinery could support more. This is the first product
+  policy; revisit only for real multi-device demand.
+- Undo/redo semantics stay without a production UI control. The outbox already
+  implements and tests them; a UI affordance is a later slice, not premature
+  complexity to remove.
+
 ### Testing
 
 - Use focused unit tests for domain rules and contracts.
@@ -88,6 +103,12 @@
 ## Open questions
 
 ### Package surface
+
+Current lean: Core Next is an internal app module, not a published package,
+until a real external/headless consumer exists. Root should expose the semantic
+facade only and stop re-exporting the low-level engine; `engine/outbox.ts` stays
+an internal Redux dependency. The completion plan's internal-module slice
+records the concrete change.
 
 1. Which supported subpaths should exist besides root and the Redux adapter?
 2. Are `demo`, `testing`, `materializer`, and future `presentation` official

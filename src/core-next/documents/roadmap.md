@@ -1,7 +1,7 @@
 # Core Next roadmap
 
 - Updated: 2026-07-11
-- Purpose: choose the next bounded slice; implementation history stays in Git.
+- Purpose: drive the finishing order; implementation history stays in Git.
 
 ## Current position
 
@@ -83,22 +83,64 @@ command exports. Track E's write cutover and bridge removal are complete.
 Replica ownership, server-like materialization rules, and package hardening
 remain incomplete.
 
-## Default next slice: choose from Track A, D, or F
+## Completion plan
 
-Every app write now flows through the semantic command funnel, so there is no
-single obvious next legacy cutover. Pick by what the next real task touches:
+The write cutover is done. Two independent reviews of the branch converged on a
+finishing order that prioritizes a trustworthy baseline over new architecture.
+Do the slices below in order; each is small and independently verifiable.
 
-- **Track F (package/test hardening)** — declaration generation plus an
-  external root-consumer compile now run as a committed guardrail; settle
-  supported subpaths before enforcing an allowlist.
-- **Track D (replica and sync)** — lifecycle is accepted; the next slice makes
-  manual sync an explicit commit boundary.
-- **Track A (facade)** — decide which adapter-level projectors deserve a
-  supported subpath now that the write surface is settled.
+1. **Health slice.** Return the suite to green and make local development
+   honest before any further change. Fix the three failing tests
+   (`selectors.tags.test.ts`, `TagSelect2.test.tsx` init, `fillGoals.test.ts`
+   missing `goalType` mock), repair or remove the broken `lint:js` script
+   (ESLint 9 with a missing `eslint.config.js`), and apply Prettier across the
+   ~52 drifted files. No architectural change. No CI pipeline in this repo yet;
+   add only local developer tooling that helps agents keep the baseline green.
 
-Do not start Track C (materializer rules) yet; account-balance recomputation
-and deleted-transaction immutability stay deferred until the replica and
-package boundaries are firmer.
+2. **Replay/clone fix.** `cloneDataStore` copies all 11 entity maps on every
+   patch and `replayOutbox` replays from `base` on every append, so each write
+   invalidates every memoized selector (violates architecture invariant 5).
+   Clone only the maps a patch touches; append incrementally
+   (`current = applyPatch(current, appliedPatch)`) and keep full replay for undo
+   and restore only. Add the missing reference-stability test on the reducer
+   replay path that the testing policy already requires for selectors.
+
+3. **Internal-module decision.** Treat Core Next as an internal app module, not
+   a published package yet — there is no external consumer. Stop re-exporting
+   the low-level engine from root (`export * from './engine'` contradicts the
+   facade-only invariant); keep `engine/outbox.ts` internal to the Redux slice.
+   Freeze the session facade; do not widen Track A until a real headless
+   consumer exists. Record the decision in the design ledger.
+
+4. **Adapter and slice hygiene.** Type command receipts instead of `as` casts
+   and `AppThunk<any>`; stop exporting the generic `executeCommand` escape
+   hatch from the adapter; make `outbox`/`outboxHead`/`base` mandatory in the
+   data slice now that the migration is complete; add a runtime validator for
+   the persisted replica record so a corrupt outbox fails loudly instead of
+   crashing replay on load.
+
+5. **Documentation and test cleanup.** Mark legacy-parity tests (agreement with
+   now-deleted legacy selectors) with an explicit exit condition, like a bridge.
+   Compress `handoff.md` to current state plus next step; leave slice history to
+   Git. Record the accepted-risk decisions (stale account balance, dirty-session
+   sync pause) in the design ledger.
+
+6. **Track C (materializer rules) — last, after everything above.** Unchanged:
+   account-balance recomputation and deleted-transaction immutability stay
+   deferred until the API, replica, and package boundaries are firm.
+
+### Accepted product risks (do not re-litigate)
+
+- **Stale account balances.** Removing the transaction `effects.ts` balance
+  updates means `account.balance` can be stale until the next sync; with
+  periodic sync paused in a dirty session, that window is now user-visible until
+  manual sync. Accepted: balance recomputation is a materializer concern and
+  waits for Track C.
+- **Dirty-session sync pause.** A dirty session does not pull remote changes
+  until the user syncs manually. Accepted as the first product policy despite
+  the rebase machinery being capable of more.
+- **Undo/redo without UI.** The outbox undo/redo semantics stay even though no
+  production control uses them yet; a UI affordance is a planned later slice.
 
 ## Active tracks
 
@@ -299,14 +341,19 @@ Do not add tests for trivial map lookups or speculative APIs.
 
 ## Choosing work
 
-- Choose Track A by default.
-- Choose Track B when working on tags, envelopes, icons, localization, or bank
+Follow the numbered completion plan above in order; it supersedes free track
+selection until the health, replay, internal-module, hygiene, and cleanup
+slices are done. The tracks below remain the vocabulary for classifying a
+slice, not a menu to pick from freely:
+
+- Track B when working on tags, envelopes, icons, localization, or bank
   appearance.
-- Do not choose Track C until the other tracks are complete; materializer rules
-  are the final phase.
-- Choose Track D when changing sync, undo/redo, persistence, or Redux data state.
-- Choose Track E for a single concrete app consumer.
-- Choose Track F when a boundary or fixture problem blocks another track.
+- Do not choose Track C until the completion plan is finished; materializer
+  rules are the final phase.
+- Track D when changing sync, undo/redo, persistence, or Redux data state.
+- Track E for a single concrete app consumer.
+- Track F stays limited to the existing package-check; do not enforce subpath
+  allowlists while Core Next is an internal module.
 
 If a task touches more than one track, split it unless the contract cannot be
 verified independently.
