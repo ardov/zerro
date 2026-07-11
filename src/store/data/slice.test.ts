@@ -1,8 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
 import { makeAccount } from 'core-next/testing/zenmoneyTestData'
+import {
+  getChangedNum,
+  getLastChangeTime,
+  getPendingSyncDiff,
+} from './selectors'
 import reducer, {
   appendClientOutboxEntry,
+  prepareClientSync,
   rebaseServerInbox,
   receiveServerPatch,
   redoClientCommand,
@@ -17,8 +23,16 @@ function applyServerPatch(
   return reducer(reducer(state, receiveServerPatch(patch)), rebaseServerInbox())
 }
 
+function getPendingDiff(state: ReturnType<typeof reducer>) {
+  return getPendingSyncDiff({ data: state } as any)
+}
+
+function getRootState(state: ReturnType<typeof reducer>) {
+  return { data: state } as any
+}
+
 describe('data patch boundaries', () => {
-  it('applies canonical server patches and clears acknowledged outbox state', () => {
+  it('applies canonical server patches and clears sent outbox state', () => {
     const initial = reducer(undefined, { type: 'test/init' })
     const received = reducer(
       initial,
@@ -34,7 +48,7 @@ describe('data patch boundaries', () => {
     expect(next.outboxHead).toBe(0)
   })
 
-  it('replays current and diff from the applied outbox prefix', () => {
+  it('replays current and derives the transport diff from the outbox prefix', () => {
     const base = applyServerPatch(undefined, {
       account: [makeAccount({ id: 'cash', title: 'Cash' })],
     })
@@ -66,14 +80,17 @@ describe('data patch boundaries', () => {
       appendClientOutboxEntry(second)
     )
 
-    expect(appended.server?.account.cash.title).toBe('Cash')
+    expect(appended.base?.account.cash.title).toBe('Cash')
     expect(appended.current.account.cash.title).toBe('Vault')
-    expect(appended.diff?.account?.[0].title).toBe('Vault')
+    expect(getPendingDiff(appended)?.account?.[0].title).toBe('Vault')
+    expect(getChangedNum(getRootState(appended))).toBe(1)
+    expect(getLastChangeTime(getRootState(appended))).toBe(20)
     expect(appended.outboxHead).toBe(2)
 
     const undone = reducer(appended, undoClientCommand())
     expect(undone.current.account.cash.title).toBe('Wallet')
-    expect(undone.diff?.account?.[0].title).toBe('Wallet')
+    expect(getPendingDiff(undone)?.account?.[0].title).toBe('Wallet')
+    expect(getLastChangeTime(getRootState(undone))).toBe(10)
     expect(undone.outboxHead).toBe(1)
 
     const replacement = {
@@ -96,12 +113,12 @@ describe('data patch boundaries', () => {
 
     const reset = reducer(undone, undoClientCommand())
     expect(reset.current.account.cash.title).toBe('Cash')
-    expect(reset.diff).toBeUndefined()
+    expect(getPendingDiff(reset)).toBeUndefined()
     expect(reset.outboxHead).toBe(0)
 
     const redone = reducer(reset, redoClientCommand())
     expect(redone.current.account.cash.title).toBe('Wallet')
-    expect(redone.diff?.account?.[0].title).toBe('Wallet')
+    expect(getPendingDiff(redone)?.account?.[0].title).toBe('Wallet')
     expect(redone.outboxHead).toBe(1)
   })
 
@@ -109,7 +126,7 @@ describe('data patch boundaries', () => {
     const base = applyServerPatch(undefined, {
       account: [makeAccount({ id: 'cash', title: 'Cash' })],
     })
-    const acknowledged = {
+    const sent = {
       id: 'entry-before-sync',
       command: { type: 'account.rename', title: 'Wallet' },
       intentPatch: {
@@ -134,7 +151,7 @@ describe('data patch boundaries', () => {
       createdAt: 20,
     }
     const pending = reducer(
-      reducer(base, appendClientOutboxEntry(acknowledged)),
+      reducer(base, appendClientOutboxEntry(sent)),
       appendClientOutboxEntry(createdDuringSync)
     )
     const received = reducer(
@@ -142,7 +159,7 @@ describe('data patch boundaries', () => {
       receiveServerPatch({
         account: [makeAccount({ id: 'cash', title: 'Server Wallet' })],
         syncStartTime: 15,
-        acknowledgedOutboxIds: [acknowledged.id],
+        sentOutboxIds: [sent.id],
       })
     )
 
@@ -150,14 +167,58 @@ describe('data patch boundaries', () => {
     expect(received.inbox).toBeTruthy()
 
     const rebased = reducer(received, rebaseServerInbox())
-    expect(rebased.server?.account.cash.title).toBe('Server Wallet')
+    expect(rebased.base?.account.cash.title).toBe('Server Wallet')
     expect(rebased.current.account.cash.title).toBe('Vault')
     expect(rebased.outbox?.map(entry => entry.id)).toEqual([
       'entry-during-sync',
     ])
     expect(rebased.outboxHead).toBe(1)
-    expect(rebased.diff?.account?.[0].title).toBe('Vault')
+    expect(getPendingDiff(rebased)?.account?.[0].title).toBe('Vault')
     expect(rebased.inbox).toBeNull()
+  })
+
+  it('commits the applied history branch before sync by dropping redo', () => {
+    const base = applyServerPatch(undefined, {
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    })
+    const first = {
+      id: 'entry-1',
+      command: { type: 'account.rename', title: 'Wallet' },
+      intentPatch: {
+        account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+      },
+      appliedPatch: {
+        account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+      },
+      materializerVersion: 1,
+      createdAt: 10,
+    }
+    const redo = {
+      ...first,
+      id: 'entry-2',
+      command: { type: 'account.rename', title: 'Vault' },
+      intentPatch: {
+        account: [makeAccount({ id: 'cash', title: 'Vault' })],
+      },
+      appliedPatch: {
+        account: [makeAccount({ id: 'cash', title: 'Vault' })],
+      },
+      createdAt: 20,
+    }
+    const withRedo = reducer(
+      reducer(
+        reducer(base, appendClientOutboxEntry(first)),
+        appendClientOutboxEntry(redo)
+      ),
+      undoClientCommand()
+    )
+
+    const prepared = reducer(withRedo, prepareClientSync())
+
+    expect(prepared.outbox?.map(entry => entry.id)).toEqual(['entry-1'])
+    expect(prepared.outboxHead).toBe(1)
+    expect(prepared.current.account.cash.title).toBe('Wallet')
+    expect(getPendingDiff(prepared)?.account?.[0].title).toBe('Wallet')
   })
 
   it('restores a persisted outbox only over its matching server base', () => {
@@ -185,9 +246,9 @@ describe('data patch boundaries', () => {
     }
 
     const restored = reducer(base, restorePersistedReplica(persisted))
-    expect(restored.server?.account.cash.title).toBe('Cash')
+    expect(restored.base?.account.cash.title).toBe('Cash')
     expect(restored.current.account.cash.title).toBe('Wallet')
-    expect(restored.diff?.account?.[0].title).toBe('Wallet')
+    expect(getPendingDiff(restored)?.account?.[0].title).toBe('Wallet')
     expect(restored.outbox).toEqual([entry])
 
     const stale = reducer(
@@ -196,6 +257,6 @@ describe('data patch boundaries', () => {
     )
     expect(stale.current.account.cash.title).toBe('Cash')
     expect(stale.outbox).toEqual([])
-    expect(stale.diff).toBeUndefined()
+    expect(getPendingDiff(stale)).toBeUndefined()
   })
 })

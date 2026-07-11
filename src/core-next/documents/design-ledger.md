@@ -63,6 +63,17 @@
 - The in-memory engine is a reference/headless runtime, not a parallel app
   store.
 - Undo/redo move `outboxHead`; inverse patches are not stored.
+- The durable logical replica is exactly `base`, `outbox`, and `outboxHead`;
+  `current` and request-local sync transport are derived.
+- Periodic sync runs only when the applied outbox prefix is empty. The first
+  local command pauses it until explicit user synchronization.
+- Manual sync is a commit boundary: discard the redo tail, send the applied
+  prefix, accept a successful ZenMoney response as canonical, remove all sent
+  entries, and replay only entries created while the request was in flight.
+- A successful response is treated as acceptance of the complete sent batch;
+  per-command acknowledgement is not required in the first implementation.
+- There is no product inbox or incoming-change history. Temporary Redux response
+  staging is an internal implementation detail and is not durable state.
 - First-stage conflict resolution is entity-level last write wins, including
   hidden-data blobs.
 
@@ -94,22 +105,6 @@
 
 ### Materializer and sync
 
-Decision checkpoint requested on 2026-07-11: before changing sync transport,
-cross-key persistence, or replica version handling again, walk through the full
-lifecycle together:
-
-1. what is sent and acknowledged by sync;
-2. how canonical responses change `server`, inbox, outbox/head, `current`, and
-   `diff`;
-3. when entity keys and replica metadata are persisted and what a crash between
-   them means;
-4. whether persisted replica formats need migrations at all, or whether stale
-   metadata can simply be discarded and rebuilt.
-
-It is explicitly acceptable that the answer may be “no migrations; treat the
-replica record as disposable metadata.” Do not add migration machinery before
-this discussion.
-
 1. Once materialization is non-identity, should ZenMoney sync send
    `intentPatch`, `appliedPatch`, or use a per-command transport encoder?
 2. Which real ZenMoney responses should become parity fixtures for account
@@ -120,16 +115,10 @@ this discussion.
 ### Replica
 
 1. What is the minimum public command set for the first Redux-backed engine?
-2. What metadata belongs in `inbox`: patch, timestamps, summary, or conflict
-   diagnostics?
-3. What happens to the redo tail after successful sync?
-4. When should remote changes be applied automatically versus deferred?
-
-Current first-stage answer: canonical sync responses are staged in Redux
-`inbox` and immediately rebased. The request captures exact applied outbox entry
-ids; the response acknowledges only those ids, while entries appended during
-the request replay over the updated server base. Timestamp acknowledgement is
-fallback compatibility only.
+2. When the persisted shape eventually changes, is retaining a reader for the
+   previous outbox format sufficient, or does a real migration become useful?
+3. Should base domains and outbox metadata eventually share one IndexedDB
+   transaction, or is recovery by the next canonical sync sufficient?
 
 ### Demo data
 
@@ -180,33 +169,55 @@ app-asset sources.
 Exit after the presentation-package decision and consumer migration. Concrete
 SVG URLs must remain outside domain Core.
 
-### Legacy local diff
+### Replica storage
 
-Status: Redux `current` replays from `data.server` plus the applied runtime
-outbox prefix. `data.diff` is derived from that prefix and remains only as the
-current sync transport compatibility shape; the identity materializer means
-intent and applied patches are currently equal.
+Status: Redux `current` replays from `data.base` plus the applied runtime outbox
+prefix. Sync transport, changed count, and pending-change time derive directly
+from that prefix; Redux no longer stores `data.diff`.
 
-Canonical responses stage through `data.inbox`. Rebase removes the exact entry
-ids included in the request and preserves later applied entries; non-sync
-loads without acknowledgement metadata replace the base and clear local
-history.
+Canonical responses may stage temporarily through `data.inbox`, but this is
+not a product inbox and is never persisted. Rebase removes the exact entry ids
+sent in the request and preserves later applied entries; non-sync loads
+without sent-entry metadata replace the base and clear local history.
+
+`prepareClientSync` now enforces the commit boundary before payload capture: it
+drops the redo tail and persists the chosen applied branch. Request metadata is
+named `sentOutboxIds`; successful batch acceptance is inferred from the
+canonical ZenMoney response rather than represented as per-entry server
+acknowledgement.
 
 Replica persistence uses a separate versioned IndexedDB key rather than adding
 metadata to ZenMoney entity keys. Version 1 stores base server timestamp,
-outbox, and head only; `current`, `diff`, and inbox are derived/ephemeral. Reload
+outbox, and head only; `current`, transport, and response staging are
+derived/ephemeral. Reload
 replays only when the persisted base timestamp matches the loaded server base;
 missing, stale, or unknown snapshots fall back to an empty outbox.
 
-Cross-key crash consistency and replica migrations are intentionally deferred
-to the decision checkpoint in “Materializer and sync”; current version checks
-must not be expanded into a migration framework by default.
+Cross-key crash consistency and replica migrations remain deferred until a
+concrete failure or format change requires them. The logical durability contract
+is still `base + outbox + outboxHead`; unknown pending outbox data must not be
+treated as casually disposable user state.
 
-Exit when Redux owns explicit `base`, `outbox`, `outboxHead`, `inbox`, and
-replayed `current`. Resolve the sync transport question before enabling
-non-identity rules.
+The documented manual-sync commit boundary, outbox-derived transport, and
+explicit base naming are implemented. Resolve the intent/applied transport
+question before enabling non-identity rules.
 
 ## Resolved bridges
+
+### Legacy local diff
+
+Resolved on 2026-07-11. Redux no longer stores or maintains `data.diff`.
+`getPendingSyncDiff` merges the applied outbox prefix for the request payload
+and pending-count UI, while the before-unload timestamp derives from applied
+entry `createdAt` values. Undo, redo, restore, rebase, and prepare-sync therefore
+have only one authoritative pending representation.
+
+### Redux server name
+
+Resolved on 2026-07-11. Runtime Redux state now calls the accepted snapshot
+`data.base`; reducers, local save, persistence snapshots, test builders, and
+fixtures no longer use `data.server`. The IndexedDB record shape is unchanged:
+it still anchors outbox metadata with `baseServerTimestamp`.
 
 ### Direct Redux client patches
 

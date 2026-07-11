@@ -4,6 +4,7 @@ export default reducer
 // ACTIONS
 export {
   appendClientOutboxEntry,
+  prepareClientSync,
   undoClientCommand,
   redoClientCommand,
   restorePersistedReplica,
@@ -13,7 +14,8 @@ export { applyServerPatch } from './applyServerPatch'
 
 // SELECTORS
 export {
-  getDiff,
+  getPendingSyncDiff,
+  getHasPendingChanges,
   getChangedNum,
   getLastChangeTime,
   getLastSyncTime,

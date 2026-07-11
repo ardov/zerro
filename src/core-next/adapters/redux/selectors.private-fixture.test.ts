@@ -182,8 +182,7 @@ function makeRootState(data: RootState['data']['current']): RootState {
   return {
     data: {
       current: data,
-      server: data,
-      diff: undefined,
+      base: data,
     },
     displayCurrency: null,
     isPending: false,

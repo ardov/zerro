@@ -9,7 +9,7 @@ describe('applyServerPatch', () => {
     const patch = {
       serverTimestamp: 100,
       syncStartTime: 90,
-      acknowledgedOutboxIds: ['entry-1'],
+      sentOutboxIds: ['entry-1'],
     }
 
     applyServerPatch(patch)(dispatch as any, vi.fn() as any, undefined)

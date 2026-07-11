@@ -205,27 +205,35 @@ redo-tail truncation on append, and replay from stored applied patches. The
 reference engine uses these operations; Redux can reuse them incrementally
 without exposing them as root package API or introducing a second store.
 
-During the Redux transition, semantic commands append complete runtime outbox
-entries while reducers also maintain legacy `current` and `diff` views. The
-outbox becomes replay-authoritative only after every patch producer has either
-semantic commands or explicit infrastructure entry semantics. That producer
-cutover is now complete. Redux performs authoritative replay for append, undo,
-and redo, and
-derives the legacy sync `diff` from the same applied prefix. There is still only
-one reactive store.
+Semantic commands append complete runtime outbox entries. Redux performs
+authoritative `current` replay for append, undo, and redo. The sync adapter
+derives its request-local transport diff directly from the same applied outbox
+prefix; Redux no longer stores a parallel `data.diff` projection. There is still
+only one reactive store.
 
-Canonical sync responses use a two-step Redux boundary: receive into `inbox`,
-then rebase. A request records the exact applied entry ids it sent; rebase drops
-only those acknowledged entries and replays entries created during the request
-over the new server base. Initial loads and explicit base replacements without
-acknowledgement metadata clear local history.
+Synchronization follows a deliberate clean/dirty session policy. While the
+applied outbox prefix is empty, periodic sync may apply canonical server diffs
+directly to `base`; `current` then equals `base`. Once a local command is
+applied, periodic sync pauses until the user explicitly synchronizes.
+
+Manual sync is a commit boundary. It discards the redo tail, records the exact
+applied entry ids being sent, and sends their combined transport diff against
+the current base server timestamp. A successful ZenMoney response is canonical:
+it includes the accepted local changes, remote changes, and a new server
+timestamp. The response updates `base`, all sent entries are removed, and only
+commands created while the request was in flight are replayed over the new
+base. A failed request leaves the applied outbox intact for retry.
+
+Redux may temporarily stage a response between reducer actions, but that is an
+implementation detail, not a product inbox. The first product version neither
+polls nor stores remote changes while local changes are pending, and it keeps no
+incoming-change history.
 
 Replica persistence is a separate versioned IndexedDB record. It stores only
-the replay inputs (base server timestamp, outbox, and head); `current`, `diff`,
-and inbox are rebuilt or ephemeral. Reload accepts a snapshot only when its
-base timestamp matches the loaded server base, so legacy storage and stale
-metadata degrade to an empty outbox instead of replaying against the wrong
-snapshot.
+the replay inputs (base server timestamp, outbox, and head); `current`, pending
+transport, and sync status are derived or ephemeral. Reload accepts a snapshot only when
+its base timestamp matches the loaded server base, so legacy storage and stale
+metadata do not replay against the wrong snapshot.
 
 ## Read model and memoization
 
@@ -336,17 +344,19 @@ Adapters own:
 
 ## Replica model
 
-Replica state consists of:
+The logical persisted replica consists of:
 
 ```ts
 type ReplicaState = {
   base: TDataStore
-  baseServerTimestamp?: number
   outbox: OutboxEntry[]
   outboxHead: number
-  inbox?: RemoteBatch | null
 }
 ```
+
+`base.serverTimestamp` identifies the accepted server snapshot. Physical
+storage may keep normalized base domains and outbox metadata in separate
+records, but together they must describe one coherent logical replica.
 
 `base` is the last accepted snapshot. `current` is derived by replaying the
 applied outbox prefix:
@@ -374,7 +384,12 @@ type OutboxEntry = {
 Replay never recompiles commands or rematerializes historical intent.
 
 Undo and redo move only `outboxHead`. A new command after undo drops the redo
-tail. No inverse patches are stored.
+tail. Starting manual sync also drops the redo tail because synchronization
+commits the currently applied history branch. No inverse patches are stored.
+
+Only `base`, `outbox`, and `outboxHead` are durable inputs. `current` and the
+request-local transport diff are derived; sync progress and errors are ephemeral.
+There is no durable inbox or incoming-change history.
 
 The next replica implementation must share pure outbox operations with the
 reference engine or fold the reference engine into Redux. Two implementations
@@ -382,12 +397,24 @@ of append, replay-prefix, clamp, and redo-tail rules are not acceptable.
 
 ## Sync and conflicts
 
-Server responses are canonical normalized diffs:
+Successful ZenMoney responses are canonical normalized diffs. They contain the
+accepted local changes as well as remote changes and the new server timestamp:
 
 ```txt
-server diff -> dumb applyPatch(base, diff)
-            -> replay remaining local applied patches
+sent applied outbox prefix + base timestamp -> ZenMoney
+successful canonical diff                 -> applyPatch(base, diff)
+                                          -> remove sent entries
+                                          -> replay later local entries
 ```
+
+The first implementation treats any successful response as acceptance of the
+whole sent batch; it does not require per-command acknowledgement. If the
+request fails, neither base nor the applied outbox changes.
+
+Periodic sync uses the same canonical response boundary but runs only when the
+applied outbox prefix is empty. This intentionally trades remote freshness
+during a dirty editing session for a simple user model without background
+rebases or a product inbox.
 
 Before the materializer becomes non-identity, sync must decide whether to send
 minimal intent, expanded applied patches, or choose through a transport encoder.

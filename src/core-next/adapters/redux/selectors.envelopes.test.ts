@@ -44,8 +44,7 @@ function makeRootState(data: TDataStore): RootState {
   return {
     data: {
       current: data,
-      server: data,
-      diff: undefined,
+      base: data,
     },
     displayCurrency: null,
     isPending: false,

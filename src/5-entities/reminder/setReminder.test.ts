@@ -29,7 +29,7 @@ function makeState(withReminder = false): RootState {
       : {},
   })
   return {
-    data: { current, server: current, diff: undefined },
+    data: { current, base: current },
     displayCurrency: null,
     isPending: false,
     lastSync: { finishedAt: 0, isSuccessful: null, errorMessage: null },

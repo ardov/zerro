@@ -38,7 +38,7 @@ const NOW = Date.parse('2026-07-10T12:00:00Z')
 
 function makeState(current: TDataStore): RootState {
   return {
-    data: { current, server: current, diff: undefined },
+    data: { current, base: current },
     displayCurrency: null,
     isPending: false,
     lastSync: { finishedAt: 0, isSuccessful: null, errorMessage: null },

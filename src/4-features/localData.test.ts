@@ -13,6 +13,7 @@ vi.mock('worker', () => ({
 }))
 
 import { makeAccount } from 'core-next/testing/zenmoneyTestData'
+import { getPendingSyncDiff } from 'store/data'
 import reducer from 'store/data/slice'
 import { loadLocalData } from './localData'
 
@@ -55,9 +56,11 @@ describe('loadLocalData', () => {
       undefined
     )
 
-    expect(dataState.server?.account.cash.title).toBe('Cash')
+    expect(dataState.base?.account.cash.title).toBe('Cash')
     expect(dataState.current.account.cash.title).toBe('Wallet')
-    expect(dataState.diff?.account?.[0].title).toBe('Wallet')
+    expect(
+      getPendingSyncDiff({ data: dataState } as any)?.account?.[0].title
+    ).toBe('Wallet')
     expect(dataState.outbox?.map(entry => entry.id)).toEqual(['entry-1'])
   })
 })

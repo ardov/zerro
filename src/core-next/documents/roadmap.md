@@ -91,8 +91,8 @@ single obvious next legacy cutover. Pick by what the next real task touches:
 - **Track F (package/test hardening)** — declaration generation plus an
   external root-consumer compile now run as a committed guardrail; settle
   supported subpaths before enforcing an allowlist.
-- **Track D (replica and sync)** — paused at the explicit lifecycle/migration
-  decision checkpoint recorded below.
+- **Track D (replica and sync)** — lifecycle is accepted; the next slice makes
+  manual sync an explicit commit boundary.
 - **Track A (facade)** — decide which adapter-level projectors deserve a
   supported subpath now that the write surface is settled.
 
@@ -102,14 +102,14 @@ package boundaries are firmer.
 
 ## Active tracks
 
-| Track                           | State                    | Next useful outcome                                                       |
-| ------------------------------- | ------------------------ | ------------------------------------------------------------------------- |
-| A. Public facade and read graph | Envelope writes semantic | Decide which adapter-level projectors deserve a supported subpath         |
-| B. Domain/presentation boundary | Boundary landed          | Extract an optional appearance package only when a real consumer needs it |
-| C. ZenMoney materializer rules  | Deferred until final     | Start only after the other architecture and migration tracks are complete |
-| D. Replica and sync             | Runtime/persistence live | Re-review sync lifecycle and whether replica migrations are needed        |
-| E. Legacy cutover               | Write cutover complete   | Retire compatibility bridges only after verifying external consumers      |
-| F. Package and test hardening   | Root consumer check live | Settle supported subpaths before enforcing their allowlist                |
+| Track                           | State                    | Next useful outcome                                                        |
+| ------------------------------- | ------------------------ | -------------------------------------------------------------------------- |
+| A. Public facade and read graph | Envelope writes semantic | Decide which adapter-level projectors deserve a supported subpath          |
+| B. Domain/presentation boundary | Boundary landed          | Extract an optional appearance package only when a real consumer needs it  |
+| C. ZenMoney materializer rules  | Deferred until final     | Start only after the other architecture and migration tracks are complete  |
+| D. Replica and sync             | Replica boundary live    | Choose a concrete crash-consistency or response-staging need before more D |
+| E. Legacy cutover               | Write cutover complete   | Retire compatibility bridges only after verifying external consumers       |
+| F. Package and test hardening   | Root consumer check live | Settle supported subpaths before enforcing their allowlist                 |
 
 ## Track A: public facade and read graph
 
@@ -206,29 +206,50 @@ Suggested order:
 1. ✅ Extract pure outbox operations: append, drop redo tail, clamp head, replay
    applied prefix, and list pending entries. `createZerroEngine` now reuses
    these internal operations without widening the root package surface.
-2. ✅ Reuse them in Redux reducers. Append, undo, and redo rebuild `current` and
-   the sync-compatible `diff` from the stored applied prefix; append after undo
-   drops the redo tail. The bypassing `applyClientPatch` action is removed.
-3. ◐ Move Redux state toward `base`, `outbox`, `outboxHead`, `inbox`, `current`.
-   `server` currently acts as base; runtime outbox/head/current and inbox
-   staging/rebase are live. Versioned outbox/head persistence is now separate
-   from the legacy ZenMoney entity keys.
+2. ✅ Reuse them in Redux reducers. Append, undo, and redo rebuild `current`
+   from the stored applied prefix; append after undo drops the redo tail. The
+   bypassing `applyClientPatch` action is removed.
+3. ✅ Move Redux state to logical `base`, `outbox`, `outboxHead`, and derived
+   `current`. Runtime outbox/head/current and temporary response staging are
+   live. Versioned outbox/head persistence remains separate from the legacy
+   ZenMoney entity keys.
 4. ✅ Rebase server patches and expose the pending sync payload. Sync captures
-   exact acknowledged entry ids, stages the canonical response in `inbox`,
-   removes only that acknowledged prefix, and replays commands created during
-   the request over the updated server base. `data.diff` remains the compatible
-   pending transport payload.
+   the exact sent entry ids, temporarily stages the canonical response, removes
+   only that sent prefix, and replays commands created during the request over
+   the updated server base.
 5. ✅ Add reload plus undo/redo tests before switching more writes. Reload
    restores pending applied entries over a matching persisted base; stale or
    unknown replica snapshots are discarded safely.
+6. ✅ Pause periodic sync whenever the applied outbox prefix is non-empty.
+   Clean sessions continue periodic canonical refreshes; dirty sessions wait
+   for explicit user synchronization.
+7. ✅ Make sync an explicit commit boundary. `prepareClientSync` drops the redo
+   tail before payload capture; successful canonical responses remove the exact
+   sent ids and preserve commands created in flight, while failures retain the
+   applied entries for retry.
+8. ✅ Build sync transport directly from the applied outbox prefix. The Redux
+   `data.diff` mirror and its timestamp helper are removed; request payload,
+   changed count, and before-unload state now derive from outbox selectors.
+
+Accepted lifecycle:
+
+- persisted inputs are `base + outbox + outboxHead`; `current` and request
+  transport are derived;
+- clean sessions may sync periodically, while the first local command pauses
+  periodic sync;
+- manual sync drops the redo tail, sends the applied prefix, accepts a
+  successful ZenMoney response as canonical, and removes all sent entries;
+- there is no product inbox or incoming-change history;
+- pending outbox is durable user state, so it is not casually disposable;
+- no replica migration framework is added without a concrete format change.
 
 The in-memory engine remains a reference/headless implementation. Do not run it
 beside Redux in the app.
 
-Further Track D changes are paused at a decision checkpoint: re-review the full
-sync/data/outbox persistence lifecycle and decide whether replica migrations
-are necessary or whether stale metadata should remain disposable. Do not build
-migration or cross-key transaction machinery before that discussion.
+Track D has no mandatory mechanical follow-up. Keep cross-key transaction
+machinery and technical response-staging simplification deferred until a
+concrete failure or user need justifies either one. Choose the next slice from
+Track A, E, or F unless work directly touches replica behavior.
 
 ## Track E: legacy cutover
 

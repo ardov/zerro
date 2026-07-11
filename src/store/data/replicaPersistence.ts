@@ -7,6 +7,7 @@ import {
 import type { TOutboxEntry } from 'core-next/engine/outbox'
 import {
   appendClientOutboxEntry,
+  prepareClientSync,
   rebaseServerInbox,
   redoClientCommand,
   resetData,
@@ -17,7 +18,7 @@ import {
 type TReplicaStateSource = {
   data: {
     current: TDataStore
-    server?: TDataStore
+    base?: TDataStore
     outbox?: TOutboxEntry<unknown>[]
     outboxHead?: number
   }
@@ -30,7 +31,7 @@ export function getPersistedReplica(
   return {
     version: replicaPersistenceVersion,
     baseServerTimestamp:
-      state.data.server?.serverTimestamp ?? state.data.current.serverTimestamp,
+      state.data.base?.serverTimestamp ?? state.data.current.serverTimestamp,
     outbox: [...outbox],
     outboxHead: state.data.outboxHead ?? outbox.length,
   }
@@ -59,6 +60,7 @@ export const replicaPersistenceMiddleware: Middleware =
 function isReplicaMutation(action: unknown): boolean {
   return (
     appendClientOutboxEntry.match(action) ||
+    prepareClientSync.match(action) ||
     undoClientCommand.match(action) ||
     redoClientCommand.match(action) ||
     rebaseServerInbox.match(action) ||

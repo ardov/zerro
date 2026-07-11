@@ -1,18 +1,39 @@
 import { RootState, TSelector } from 'store'
 import { getItemsCount } from './shared/getItemsCount'
-import { getLastDiffChange } from './shared/getLastDiffChange'
-import { AccountType, TAccountId } from '6-shared/types'
+import { AccountType, TAccountId, TDiff } from '6-shared/types'
 import { createSelector } from '@reduxjs/toolkit'
+import { getPendingOutbox } from 'core-next/engine/outbox'
+import { immutableMergeDiffs } from './shared/mergeDiffs'
 
-export const getDiff = (state: RootState) => state.data.diff
+const EMPTY_OUTBOX: NonNullable<RootState['data']['outbox']> = []
+
+const getOutbox = (state: RootState) => state.data.outbox ?? EMPTY_OUTBOX
+const getOutboxHead = (state: RootState) =>
+  state.data.outboxHead ?? state.data.outbox?.length ?? 0
+
+const getAppliedOutbox = createSelector(
+  [getOutbox, getOutboxHead],
+  getPendingOutbox
+)
+
+export const getPendingSyncDiff = createSelector([getAppliedOutbox], outbox => {
+  if (!outbox.length) return undefined
+  return outbox.reduce<TDiff>(
+    (diff, entry) => immutableMergeDiffs(diff, entry.appliedPatch),
+    {}
+  )
+})
+
+export const getHasPendingChanges = (state: RootState) =>
+  getOutboxHead(state) > 0
 
 export const getChangedNum = (state: RootState) => {
-  return getItemsCount(getDiff(state))
+  return getItemsCount(getPendingSyncDiff(state))
 }
 
-export const getLastChangeTime = (state: RootState) => {
-  return getLastDiffChange(getDiff(state))
-}
+export const getLastChangeTime = createSelector([getAppliedOutbox], outbox =>
+  outbox.reduce((latest, entry) => Math.max(latest, entry.createdAt), 0)
+)
 
 export const getLastSyncTime = (state: RootState) => {
   return state.data.current.serverTimestamp

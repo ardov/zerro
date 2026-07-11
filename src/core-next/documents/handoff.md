@@ -2,8 +2,8 @@
 
 - Updated: 2026-07-11
 - Branch: `core-next`
-- Worktree: clean; the branch tip is
-  `Verify Core package consumer`
+- Worktree: contains the current uncommitted Track D sync slices; the branch
+  tip is `Verify Core package consumer`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -34,6 +34,56 @@ claims against the tree before editing.
 
 ## Latest landed slices
 
+The current Track D slice names the Redux replica base explicitly:
+
+- runtime `data.server` is renamed to `data.base` across reducers, local save,
+  replica persistence, tests, demo state, and private-fixture builders;
+- persisted record version 1 and its `baseServerTimestamp` anchor are unchanged,
+  so this is not an IndexedDB migration;
+- `current` still replays the applied outbox prefix over `base`, preserving the
+  existing sync and reload behavior;
+- focused reducer, persistence, reload, and sync tests cover the renamed
+  boundary, while TypeScript prevents lingering state fixtures.
+
+The current Track D slice removes the legacy local diff mirror:
+
+- Redux state and reducers no longer store or rebuild `data.diff`;
+- `getPendingSyncDiff` merges `appliedPatch` values from the applied outbox
+  prefix for the ZenMoney request payload and pending-change count;
+- the before-unload timestamp derives from applied outbox entry `createdAt`
+  values rather than scanning entity timestamps inside a mirrored diff;
+- undo, redo, restore, rebase, and prepare-sync now mutate only the authoritative
+  outbox/head plus replayed `current`;
+- the obsolete `getLastDiffChange` helper is removed, and focused tests cover
+  transport merging, count, timestamp, reload, and sync payload behavior.
+
+The current Track D slice makes every sync an explicit commit boundary:
+
+- `prepareClientSync` runs before the request payload is read and permanently
+  drops the redo tail;
+- sync captures the applied entry ids after that preparation and names them
+  `sentOutboxIds`, reflecting that successful batch acceptance is inferred from
+  the canonical response rather than acknowledged entry by entry;
+- a successful response removes the sent entries and retains commands created
+  while the request was in flight; a failed request keeps the applied entries
+  for retry, with the abandoned redo branch still discarded;
+- prepare-sync mutations join the ordered replica persistence queue;
+- reducer tests pin redo truncation without changing `current` or the derived
+  transport diff; a thunk integration test pins preparation before payload
+  capture and preserves the applied branch after a failed request.
+
+The current Track D policy slice adopts the accepted user-facing sync model:
+
+- clean sessions continue periodic canonical synchronization;
+- any applied outbox entry pauses periodic sync until the user explicitly
+  synchronizes; the former automatic push after 20 seconds is removed;
+- restored pending changes are therefore not sent merely because the app was
+  opened;
+- focused policy tests cover initial clean sync, dirty-session pause, periodic
+  clean sync, and hidden-window behavior;
+- the accepted durable model is `base + outbox + outboxHead`; `current` and
+  request transport are derived, with no product inbox or incoming history.
+
 The current independent Track F slice verifies the real root package surface:
 
 - `pnpm core-next:package-check` emits declarations from
@@ -49,8 +99,8 @@ The current independent Track F slice verifies the real root package surface:
 The current persistence/reload slice makes pending runtime commands durable:
 
 - `core-next/engine/persistence.ts` defines version 1 as base server timestamp
-  plus full outbox and head; derived `current`/`diff` and ephemeral inbox are
-  not serialized;
+  plus full outbox and head; derived `current`, request transport, and ephemeral
+  response staging are not serialized;
 - worker storage uses a separate `core-next-replica-v1` IndexedDB key, leaving
   existing ZenMoney entity keys and old installs compatible;
 - Redux middleware serializes append, undo, redo, rebase, restore, and reset
@@ -70,28 +120,29 @@ The current inbox/rebase slice prevents in-flight sync data loss:
   with `receiveServerPatch`, then applies `rebaseServerInbox`;
 - sync captures the exact applied outbox entry ids present when the request
   starts and attaches them to the canonical response;
-- rebase updates the server base, removes only acknowledged ids, retains
+- rebase updates the server base, removes only sent ids, retains
   entries appended during the request, and replays them over the new base;
 - `syncStartTime` remains a fallback for older callers, avoiding timestamp
   ambiguity in the main path;
-- patches without acknowledgement metadata (initial load, demo, backup)
+- patches without sent-entry metadata (initial load, demo, backup)
   replace the base and clear local history;
-- reducer tests cover staged inbox visibility, exact acknowledgement, retained
-  in-flight commands, updated base/current/diff, and inbox clearing. Replica
+- reducer tests cover staged response visibility, exact sent-entry removal,
+  retained in-flight commands, updated base/current/pending transport, and
+  staging clearing. Replica
   persistence is not included.
 
 The current Redux replay slice makes the runtime outbox authoritative:
 
 - `appendClientOutboxEntry`, `undoClientCommand`, and `redoClientCommand`
   rebuild `current` from `server` plus the stored applied prefix;
-- `diff` is rebuilt from that same prefix as a temporary sync-transport
-  projection, so undo/redo affects both current state and pending sync data;
+- pending sync transport is derived from that same prefix, so undo/redo affects
+  both current state and the request payload;
 - append after undo drops the redo tail and replays the replacement branch;
-- canonical server patches remain the base update boundary and clear the
-  acknowledged runtime outbox;
+- canonical server patches remain the base update boundary and clear the sent
+  runtime outbox;
 - the bypassing `applyClientPatch` reducer action/export is deleted;
-- reducer tests cover base preservation, replay, undo to base, redo, diff
-  projection, and redo-tail replacement. Persistence and explicit inbox/rebase
+- reducer tests cover base preservation, replay, undo to base, redo, transport
+  projection, and redo-tail replacement. Persistence and explicit staging/rebase
   semantics are not included.
 
 The current slice closes the remaining direct-client-patch debt:
@@ -115,9 +166,10 @@ commands:
 - `executeCommand` now compiles and materializes against the current snapshot,
   creates a complete entry (`command`, intent/applied patches, materializer
   version, id, timestamp), and dispatches `appendClientOutboxEntry`;
-- the data reducer reuses `appendOutbox`, including redo-tail truncation, while
-  still updating legacy `current` and `diff` compatibility views;
-- canonical server patches clear the acknowledged runtime outbox and continue
+- the data reducer reuses `appendOutbox`, including redo-tail truncation; this
+  slice initially still updated legacy compatibility views before the later
+  authoritative replay and diff-removal slices;
+- canonical server patches clear the sent runtime outbox and continue
   to bypass local materialization;
 - the runtime outbox fields are optional for state-fixture compatibility and
   are not persisted yet;
@@ -236,10 +288,10 @@ included in these slices.
 
 ## Default next task
 
-Track D is paused for an explicit user discussion: revisit the complete sync
-lifecycle, its effects on data/outbox, persistence ordering, and whether replica
-migrations are needed at all. Do not add migration machinery or remove
-`data.diff` before that checkpoint.
+Track D's lifecycle, manual commit boundary, outbox-derived transport, and
+explicit base naming are complete. Do not extend Track D mechanically: choose
+crash-consistency or response-staging work only when a concrete failure or user
+need justifies it. Otherwise choose an independent Track A, E, or F slice.
 
 The independent root package check is complete. Until the Track D discussion,
 the next safe work should be one concrete Track E deep-import cleanup or a
@@ -274,8 +326,8 @@ pnpm exec vitest run
 Expected full-suite baseline at this handoff:
 
 ```txt
-69 test files passed, 4 skipped
-273 tests passed, 6 skipped
+78 test files passed, 4 skipped
+280 tests passed, 6 skipped
 ```
 
 Browser check: the transaction-list multi-select bar and bulk-actions menu

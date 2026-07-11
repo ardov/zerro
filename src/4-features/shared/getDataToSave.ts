@@ -4,7 +4,7 @@ import { TDiff, TLocalData } from '6-shared/types'
 import { convertDiff } from '6-shared/api/zm-adapter'
 
 export const getDataToSave = (state: RootState): TLocalData => {
-  const data = state.data.server
+  const data = state.data.base
   if (!data) return { serverTimestamp: 0 }
   let result: TDiff = { serverTimestamp: 0 }
   keys(data).forEach(key => {

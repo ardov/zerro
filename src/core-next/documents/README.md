@@ -39,12 +39,16 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 - Semantic Redux commands and explicit bootstrap/debug infrastructure commands
   now append complete runtime outbox entries. No production caller dispatches
   `applyClientPatch` directly, and the bypassing action is removed. Redux
-  `current` and sync-compatible `diff` replay from the applied outbox prefix.
-- Canonical sync responses stage through an explicit inbox and acknowledge
-  exact entry ids, so commands created while a request is in flight survive
-  and replay over the updated server base.
+  `current` replays from the applied outbox prefix; sync transport derives from
+  that prefix without a parallel Redux `data.diff` mirror.
+- Canonical sync responses may stage internally between reducer actions and
+  remove the exact entry ids captured at request start, so commands created
+  while a request is in flight survive and replay over the updated server base.
+  This is not a product inbox.
+- Periodic sync runs only for a clean applied outbox prefix. Dirty sessions wait
+  for explicit user synchronization; no incoming-change history is kept.
 - Runtime outbox/head now persist under a separate versioned IndexedDB key.
-  Reload validates the base timestamp and derives `current`/`diff` by replay;
+  Reload validates the base timestamp and derives `current` by replay;
   old storage without replica metadata remains compatible.
 - The session is snapshot-based and lazily memoized. Namespaced `get*` reads are
   the semantic facade; flat `session.read.*` remains deprecated compatibility.
@@ -80,9 +84,9 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 
 ## Default next slice
 
-Track D is paused for the recorded sync/outbox/persistence discussion,
-including whether replica migrations are needed at all. Until then, choose an
-independent Track A, E, or F slice that does not change replica semantics.
+Track D's sync/outbox/persistence lifecycle, manual commit boundary,
+outbox-derived transport, and explicit Redux `data.base` are live. Further
+Track D work waits for a concrete crash-consistency or response-staging need.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 

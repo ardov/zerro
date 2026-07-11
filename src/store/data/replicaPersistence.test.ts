@@ -7,7 +7,7 @@ const { saveReplicaStateMock } = vi.hoisted(() => ({
 vi.mock('worker', () => ({ saveReplicaState: saveReplicaStateMock }))
 
 import { makeStore } from 'core-next/testing/zenmoneyTestData'
-import { appendClientOutboxEntry } from './slice'
+import { appendClientOutboxEntry, prepareClientSync } from './slice'
 import {
   getPersistedReplica,
   replicaPersistenceMiddleware,
@@ -33,7 +33,7 @@ describe('replica persistence snapshot', () => {
     expect(
       getPersistedReplica({
         data: {
-          server: base,
+          base,
           current: makeStore({ serverTimestamp: 999 }),
           outbox: [entry],
           outboxHead: 0,
@@ -60,7 +60,7 @@ describe('replica persistence snapshot', () => {
     }
     const state = {
       data: {
-        server: current,
+        base: current,
         current,
         outbox: [entry],
         outboxHead: 1,
@@ -73,6 +73,42 @@ describe('replica persistence snapshot', () => {
     })(next)
 
     invoke(appendClientOutboxEntry(entry))
+
+    await vi.waitFor(() =>
+      expect(saveReplicaStateMock).toHaveBeenCalledWith({
+        version: 1,
+        baseServerTimestamp: 100,
+        outbox: [entry],
+        outboxHead: 1,
+      })
+    )
+  })
+
+  it('persists the committed branch prepared for sync', async () => {
+    vi.stubGlobal('Worker', class {})
+    const current = makeStore({ serverTimestamp: 100 })
+    const entry = {
+      id: 'entry-1',
+      command: { type: 'test.command' },
+      intentPatch: {},
+      appliedPatch: {},
+      materializerVersion: 1,
+      createdAt: 10,
+    }
+    const state = {
+      data: {
+        base: current,
+        current,
+        outbox: [entry],
+        outboxHead: 1,
+      },
+    }
+    const invoke = (replicaPersistenceMiddleware as any)({
+      getState: () => state,
+      dispatch: vi.fn(),
+    })(vi.fn(action => action))
+
+    invoke(prepareClientSync())
 
     await vi.waitFor(() =>
       expect(saveReplicaStateMock).toHaveBeenCalledWith({

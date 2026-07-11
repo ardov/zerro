@@ -8,19 +8,24 @@ import { formatDate } from '6-shared/helpers/date'
 import { AppThunk } from 'store'
 import { TLocalData } from '6-shared/types'
 import { sync } from 'worker'
-import { getDiff, applyServerPatch } from 'store/data'
+import {
+  getPendingSyncDiff,
+  applyServerPatch,
+  prepareClientSync,
+} from 'store/data'
 import { keys } from '6-shared/helpers/keys'
 import { TDiff } from '6-shared/types'
 import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
 
 /** All syncs with zenmoney goes through this thunk */
 export const syncData = (): AppThunk => async (dispatch, getState) => {
+  dispatch(prepareClientSync())
   const state = getState()
-  const acknowledgedOutboxIds = (state.data.outbox ?? [])
+  const sentOutboxIds = (state.data.outbox ?? [])
     .slice(0, state.data.outboxHead ?? state.data.outbox?.length ?? 0)
     .map(entry => entry.id)
   const diff: TDiff = {
-    ...(getDiff(state) || {}),
+    ...(getPendingSyncDiff(state) || {}),
     serverTimestamp: getLastSyncTime(state),
   }
   const token = getToken(state) || ''
@@ -43,9 +48,7 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
     else sendEvent(`Sync: Successful first`)
 
     const data = response.data
-    dispatch(
-      applyServerPatch({ ...data, syncStartTime, acknowledgedOutboxIds })
-    )
+    dispatch(applyServerPatch({ ...data, syncStartTime, sentOutboxIds }))
     const changedDomains = getChangedDomains(data)
     dispatch(saveDataLocally(changedDomains))
     console.log(`✅ Data synced ${formatDate(new Date(), 'HH:mm:ss')}`)
