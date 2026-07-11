@@ -211,8 +211,12 @@ Suggested order:
    drops the redo tail. The bypassing `applyClientPatch` action is removed.
 3. ◐ Move Redux state toward `base`, `outbox`, `outboxHead`, `inbox`, `current`.
    `server` currently acts as base; runtime outbox/head/current are live, while
-   explicit inbox and persistence remain.
-4. Rebase `applyServerPatch` and expose the pending sync payload.
+   inbox staging/rebase is live and persistence remains.
+4. ✅ Rebase server patches and expose the pending sync payload. Sync captures
+   exact acknowledged entry ids, stages the canonical response in `inbox`,
+   removes only that acknowledged prefix, and replays commands created during
+   the request over the updated server base. `data.diff` remains the compatible
+   pending transport payload.
 5. Add reload plus undo/redo tests before switching more writes.
 
 The in-memory engine remains a reference/headless implementation. Do not run it

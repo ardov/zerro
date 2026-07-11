@@ -18,6 +18,12 @@ interface DataSlice {
   /** Transitional runtime outbox; not persisted yet. */
   outbox?: TOutboxEntry<unknown>[]
   outboxHead?: number
+  inbox?: TServerInbox | null
+}
+
+export interface TServerInbox extends TDiff {
+  syncStartTime?: number
+  acknowledgedOutboxIds?: string[]
 }
 
 const makeDataStore = (): TDataStore => ({
@@ -42,28 +48,45 @@ const initialState: DataSlice = {
   diff: undefined,
 }
 
-interface ExtendedDiff extends TDiff {
-  syncStartTime?: number
-}
-
 // SLICE
 const { reducer, actions } = createSlice({
   name: 'data',
   initialState,
   reducers: {
-    applyServerPatch: withPerf(
-      'applyServerPatch',
-      (state, { payload }: PayloadAction<ExtendedDiff>) => {
-        if (!payload) return
-        state.server ??= makeDataStore()
-        applyDiffMutable(payload, state.server)
-        state.current = state.server
-        // TODO: Тут хорошо бы не всё удалять, а только то что синхронизировалось (по времени старта). После этого надо ещё current пересобрать на основе серверных данных и диффа
-        state.diff = undefined
-        state.outbox = []
-        state.outboxHead = 0
+    receiveServerPatch: withPerf(
+      'receiveServerPatch',
+      (state, { payload }: PayloadAction<TServerInbox>) => {
+        state.inbox = payload
       }
     ),
+    rebaseServerInbox: withPerf('rebaseServerInbox', state => {
+      if (!state.inbox) return
+      const { syncStartTime, acknowledgedOutboxIds, ...canonicalPatch } =
+        state.inbox
+      const acknowledged = acknowledgedOutboxIds
+        ? new Set(acknowledgedOutboxIds)
+        : null
+
+      state.server ??= makeDataStore()
+      applyDiffMutable(canonicalPatch, state.server)
+
+      const pending = getPendingOutbox(
+        state.outbox ?? [],
+        state.outboxHead ?? state.outbox?.length ?? 0
+      )
+      state.outbox =
+        acknowledged || syncStartTime !== undefined
+          ? pending.filter(entry =>
+              acknowledged
+                ? !acknowledged.has(entry.id)
+                : entry.createdAt > syncStartTime!
+            )
+          : []
+      state.outboxHead = state.outbox.length
+      state.current = replayOutbox(state.server, state.outbox, state.outboxHead)
+      state.diff = buildOutboxDiff(state.outbox, state.outboxHead)
+      state.inbox = null
+    }),
     appendClientOutboxEntry: withPerf(
       'appendClientOutboxEntry',
       (state, { payload }: PayloadAction<TOutboxEntry<unknown>>) => {
@@ -112,7 +135,8 @@ export default reducer
 
 // ACTIONS
 export const {
-  applyServerPatch,
+  receiveServerPatch,
+  rebaseServerInbox,
   appendClientOutboxEntry,
   undoClientCommand,
   redoClientCommand,

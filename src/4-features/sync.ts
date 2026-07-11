@@ -16,6 +16,9 @@ import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
 /** All syncs with zenmoney goes through this thunk */
 export const syncData = (): AppThunk => async (dispatch, getState) => {
   const state = getState()
+  const acknowledgedOutboxIds = (state.data.outbox ?? [])
+    .slice(0, state.data.outboxHead ?? state.data.outbox?.length ?? 0)
+    .map(entry => entry.id)
   const diff: TDiff = {
     ...(getDiff(state) || {}),
     serverTimestamp: getLastSyncTime(state),
@@ -40,7 +43,9 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
     else sendEvent(`Sync: Successful first`)
 
     const data = response.data
-    dispatch(applyServerPatch({ ...data, syncStartTime }))
+    dispatch(
+      applyServerPatch({ ...data, syncStartTime, acknowledgedOutboxIds })
+    )
     const changedDomains = getChangedDomains(data)
     dispatch(saveDataLocally(changedDomains))
     console.log(`✅ Data synced ${formatDate(new Date(), 'HH:mm:ss')}`)

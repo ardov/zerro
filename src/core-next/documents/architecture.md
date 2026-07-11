@@ -214,6 +214,12 @@ and redo, and
 derives the legacy sync `diff` from the same applied prefix. There is still only
 one reactive store.
 
+Canonical sync responses use a two-step Redux boundary: receive into `inbox`,
+then rebase. A request records the exact applied entry ids it sent; rebase drops
+only those acknowledged entries and replays entries created during the request
+over the new server base. Initial loads and explicit base replacements without
+acknowledgement metadata clear local history.
+
 ## Read model and memoization
 
 Pure projectors own calculations. Runtimes own memoization.

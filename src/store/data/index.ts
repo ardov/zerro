@@ -3,12 +3,12 @@ export default reducer
 
 // ACTIONS
 export {
-  applyServerPatch,
   appendClientOutboxEntry,
   undoClientCommand,
   redoClientCommand,
   resetData,
 } from './slice'
+export { applyServerPatch } from './applyServerPatch'
 
 // SELECTORS
 export {

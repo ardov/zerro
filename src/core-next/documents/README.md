@@ -40,6 +40,9 @@ The handoff is routing, not proof that code landed. Always verify the tree.
   now append complete runtime outbox entries. No production caller dispatches
   `applyClientPatch` directly, and the bypassing action is removed. Redux
   `current` and sync-compatible `diff` replay from the applied outbox prefix.
+- Canonical sync responses stage through an explicit inbox and acknowledge
+  exact entry ids, so commands created while a request is in flight survive
+  and replay over the updated server base.
 - The session is snapshot-based and lazily memoized. Namespaced `get*` reads are
   the semantic facade; flat `session.read.*` remains deprecated compatibility.
 - Session envelope reads are domain-only. The Redux adapter adds localized
@@ -74,9 +77,8 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 
 ## Default next slice
 
-Continue Track D by defining explicit inbox/server rebase behavior and
-persisting replica state. Keep the existing sync transport stable while that
-contract is introduced.
+Continue Track D by persisting the replica state and covering reload with
+pending entries. Keep the existing sync transport stable in that slice.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 

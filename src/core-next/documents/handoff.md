@@ -3,7 +3,7 @@
 - Updated: 2026-07-11
 - Branch: `core-next`
 - Worktree: clean; the branch tip is
-  `Replay Redux current from outbox`
+  `Rebase in-flight commands after sync`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -33,6 +33,22 @@ claims against the tree before editing.
 | Tests            | Unit, deterministic demo parity, Redux invalidation, and opt-in private parity layers exist                           |
 
 ## Latest landed slices
+
+The current inbox/rebase slice prevents in-flight sync data loss:
+
+- public `applyServerPatch` is now a synchronous thunk that stages the payload
+  with `receiveServerPatch`, then applies `rebaseServerInbox`;
+- sync captures the exact applied outbox entry ids present when the request
+  starts and attaches them to the canonical response;
+- rebase updates the server base, removes only acknowledged ids, retains
+  entries appended during the request, and replays them over the new base;
+- `syncStartTime` remains a fallback for older callers, avoiding timestamp
+  ambiguity in the main path;
+- patches without acknowledgement metadata (initial load, demo, backup)
+  replace the base and clear local history;
+- reducer tests cover staged inbox visibility, exact acknowledgement, retained
+  in-flight commands, updated base/current/diff, and inbox clearing. Replica
+  persistence is not included.
 
 The current Redux replay slice makes the runtime outbox authoritative:
 
@@ -190,9 +206,9 @@ included in these slices.
 
 ## Default next task
 
-Continue Track D by defining explicit inbox/server rebase semantics and then
-persisting replica state. Keep the current sync transport stable and do not
-start materializer rules in the same slice.
+Continue Track D by persisting replica state and covering reload with pending
+entries. Keep the current sync transport stable and do not start materializer
+rules in the same slice.
 
 ## Important guardrails
 
@@ -223,7 +239,7 @@ Expected full-suite baseline at this handoff:
 
 ```txt
 69 test files passed, 4 skipped
-266 tests passed, 6 skipped
+268 tests passed, 6 skipped
 ```
 
 Browser check: the transaction-list multi-select bar and bulk-actions menu

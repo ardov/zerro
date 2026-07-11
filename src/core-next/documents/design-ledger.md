@@ -109,6 +109,12 @@
 3. What happens to the redo tail after successful sync?
 4. When should remote changes be applied automatically versus deferred?
 
+Current first-stage answer: canonical sync responses are staged in Redux
+`inbox` and immediately rebased. The request captures exact applied outbox entry
+ids; the response acknowledges only those ids, while entries appended during
+the request replay over the updated server base. Timestamp acknowledgement is
+fallback compatibility only.
+
 ### Demo data
 
 1. Is `makeDemoStore` enough, or should demo expose a ready engine/runtime?
@@ -164,6 +170,11 @@ Status: Redux `current` replays from `data.server` plus the applied runtime
 outbox prefix. `data.diff` is derived from that prefix and remains only as the
 current sync transport compatibility shape; the identity materializer means
 intent and applied patches are currently equal.
+
+Canonical responses stage through `data.inbox`. Rebase removes the exact entry
+ids included in the request and preserves later applied entries; non-sync
+loads without acknowledgement metadata replace the base and clear local
+history.
 
 Exit when Redux owns explicit `base`, `outbox`, `outboxHead`, `inbox`, and
 replayed `current`. Resolve the sync transport question before enabling
