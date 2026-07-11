@@ -40,7 +40,7 @@ digraph G {
     getTagBudgets
     getEnvBudgets
     userSettingsModel_get [label="userSettingsModel.get"]
-    fxConverter [label="fxRateModel.converter"]
+    fxConverter [label="getConverter"]
   }
 
   subgraph cluster_budget_source {

@@ -23,15 +23,15 @@ write methods through `*Model`. FX local edit/reset are semantic Redux adapter
 commands, while HTTP loading is an app feature that dispatches those commands;
 the old FX thunk file and unused freeze action are gone.
 
-The direct app-level FX read cutover is complete: `2-pages` and `4-features`
-consume narrow Core Redux selectors for conversion and rate lookup. Remaining
-`fxRateModel` references live inside the legacy goal/envBalances/displayCurrency
-selector graph and parity/export-fixture paths.
+The `fxRateModel` object and barrel are removed. Direct app consumers use Core
+Redux selectors; legacy goal/envBalances/displayCurrency projections import the
+old defining selectors directly only while parity paths remain. No Redux
+adapter import was added back into that legacy graph.
 
-Next remove that internal FX projection dependency without importing the Redux
-adapter back into legacy selectors. Move one projection family to Core-owned
-inputs or retire its last production consumer; do not create an
-adapter-to-legacy-to-adapter cycle merely to delete the model name.
+Next replace the app-facing `displayCurrency.useToDisplay` helper with a narrow
+Core Redux display-converter selector. First make the adapter derive display
+currency without importing the legacy displayCurrency model, then switch its
+page/widget consumers. Keep the display-currency setter hook separate.
 
 The identity materializer stays as the extension point already wired into the
 command path, but implementing its domain rules is deferred until after legacy

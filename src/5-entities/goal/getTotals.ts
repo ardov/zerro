@@ -6,7 +6,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { addFxAmount } from '6-shared/helpers/money'
 import { keys } from '6-shared/helpers/keys'
 
-import { fxRateModel } from '5-entities/currency/fxRate'
+import { getConverter } from '5-entities/currency/fxRate/converter'
 import { getGoals, TGoalInfo } from './getGoals'
 import { getProgress } from './shared/calcGoals'
 import { goalType, TGoal } from './shared/types'
@@ -14,7 +14,7 @@ import { goalType, TGoal } from './shared/types'
 type TGoalTotals = ReturnType<typeof calcGoalTotals>
 
 export const getTotals: TSelector<ByMonth<TGoalTotals>> = createSelector(
-  [getGoals, fxRateModel.converter],
+  [getGoals, getConverter],
   (goals, convertFx) => {
     let result: ByMonth<TGoalTotals> = {}
     keys(goals).forEach(month => {

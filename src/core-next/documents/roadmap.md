@@ -33,6 +33,11 @@ envBalances, and displayCurrency plus parity/export-fixture paths. Retire those
 through Core projection cutover; importing the Redux adapter into that graph
 would create the wrong dependency direction.
 
+The `fxRateModel` object and barrel are now removed; temporary legacy
+projections import their defining FX selectors directly. The next app-facing
+FX boundary is `displayCurrency.useToDisplay`, which should become a narrow
+Redux selector without making the adapter depend on the legacy display model.
+
 Envelope reads are now split: session/Core projectors return domain envelopes,
 and the Redux adapter adds symbols, generated/display colors, localized null
 text, and localized groups. The old `populatedTags` session dependency is gone,

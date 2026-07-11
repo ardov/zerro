@@ -13,7 +13,10 @@ import { createSelector } from '@reduxjs/toolkit'
 import { keys } from '6-shared/helpers/keys'
 import { withPerf } from '6-shared/helpers/performance'
 
-import { fxRateModel, TFxConverter } from '5-entities/currency/fxRate'
+import {
+  getConverter,
+  type TFxConverter,
+} from '5-entities/currency/fxRate/converter'
 import { balances, TEnvMetrics, TSortedActivity } from '5-entities/envBalances'
 import { goalStore, TGoals } from './goalStore'
 import { calcGoals } from './shared/calcGoals'
@@ -39,7 +42,7 @@ export const getGoals: TSelector<ByMonth<ById<TGoalInfo>>> = createSelector(
     balances.monthList,
     balances.envData,
     balances.sortedActivity,
-    fxRateModel.converter,
+    getConverter,
   ],
   withPerf('🖤 getGoals', calcGoalData)
 )

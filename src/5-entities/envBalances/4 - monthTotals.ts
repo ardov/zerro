@@ -6,7 +6,10 @@ import { toISOMonth } from '6-shared/helpers/date'
 import { addFxAmount, subFxAmount } from '6-shared/helpers/money'
 import { withPerf } from '6-shared/helpers/performance'
 
-import { fxRateModel, TFxConverter } from '5-entities/currency/fxRate'
+import {
+  getConverter,
+  type TFxConverter,
+} from '5-entities/currency/fxRate/converter'
 import { getCurrentFunds } from './1 - currentFunds'
 import { getMonthList } from './1 - monthList'
 import { getActivity, TActivityNode } from './2 - activity'
@@ -37,13 +40,7 @@ export type TMonthTotals = {
 }
 
 export const getMonthTotals: TSelector<ByMonth<TMonthTotals>> = createSelector(
-  [
-    getMonthList,
-    getCurrentFunds,
-    getActivity,
-    getEnvMetrics,
-    fxRateModel.converter,
-  ],
+  [getMonthList, getCurrentFunds, getActivity, getEnvMetrics, getConverter],
   withPerf('🖤 getMonthTotals', calcMonthTotals)
 )
 

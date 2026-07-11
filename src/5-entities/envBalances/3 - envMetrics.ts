@@ -17,7 +17,10 @@ import {
   selectCoreBudgets,
   selectCoreEnvelopes,
 } from 'core-next/adapters/redux'
-import { fxRateModel, TFxConverter } from '5-entities/currency/fxRate'
+import {
+  getConverter,
+  type TFxConverter,
+} from '5-entities/currency/fxRate/converter'
 import { getMonthList } from './1 - monthList'
 import { getActivity, TActivityNode } from './2 - activity'
 
@@ -59,7 +62,7 @@ export const getEnvMetrics: TSelector<ByMonth<ById<TEnvMetrics>>> =
       selectCoreEnvelopes,
       getActivity,
       selectCoreBudgets,
-      fxRateModel.converter,
+      getConverter,
     ],
     withPerf('🖤 getEnvMetrics', calcEnvMetrics)
   )

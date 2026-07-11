@@ -256,6 +256,14 @@ question before enabling non-identity rules.
 
 ## Resolved bridges
 
+### FX model object
+
+Resolved on 2026-07-11. The `fxRateModel` object and directory barrel are
+deleted. Direct app reads already use Core Redux selectors; legacy projection
+and parity code imports defining FX selectors directly, avoiding an
+adapter-to-legacy-to-adapter cycle. Those defining selectors remain temporary
+dependencies until their legacy projections are retired.
+
 ### Direct app FX reads
 
 Resolved on 2026-07-11. Pages and features use `selectCoreConvertFx` and

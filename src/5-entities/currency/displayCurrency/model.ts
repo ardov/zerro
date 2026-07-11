@@ -4,7 +4,7 @@ import { TDateDraft, TFxAmount, TFxCode } from '6-shared/types'
 
 import { TSelector, useAppDispatch, useAppSelector } from 'store/index'
 import { userModel } from '5-entities/user'
-import { fxRateModel } from '5-entities/currency/fxRate'
+import { getConverter as getFxConverter } from '5-entities/currency/fxRate/converter'
 import { getSavedCurrency, setSavedCurrency } from 'store/displayCurrency'
 
 const getDisplayCurrency: TSelector<TFxCode> = createSelector(
@@ -27,7 +27,7 @@ function useDisplayCurrency() {
 const getConverter: TSelector<
   (amount: TFxAmount, date: 'current' | TDateDraft) => number
 > = createSelector(
-  [fxRateModel.converter, getDisplayCurrency],
+  [getFxConverter, getDisplayCurrency],
   (convert, displayCurrency) =>
     (amount: TFxAmount, date: 'current' | TDateDraft) =>
       convert(amount, displayCurrency, date)
@@ -35,7 +35,7 @@ const getConverter: TSelector<
 
 const useToDisplay = (defaultMonth: TDateDraft | 'current') => {
   const [currency] = useDisplayCurrency()
-  const convert = useAppSelector(fxRateModel.converter)
+  const convert = useAppSelector(getFxConverter)
   const converter = useCallback(
     (amount: TFxAmount, date = defaultMonth) => convert(amount, currency, date),
     [convert, currency, defaultMonth]
