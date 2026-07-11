@@ -200,6 +200,11 @@ The current in-memory `createZerroEngine` is a pure reference primitive, not a
 production state owner. In the React app, Redux must own replica state; a
 Redux-backed facade dispatches commands without creating another store.
 
+Internal pure outbox operations define head clamping, applied-prefix reads,
+redo-tail truncation on append, and replay from stored applied patches. The
+reference engine uses these operations; Redux can reuse them incrementally
+without exposing them as root package API or introducing a second store.
+
 ## Read model and memoization
 
 Pure projectors own calculations. Runtimes own memoization.

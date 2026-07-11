@@ -3,7 +3,7 @@
 - Updated: 2026-07-11
 - Branch: `core-next`
 - Worktree: clean; the branch tip is
-  `Retire legacy patch bridge`
+  `Extract pure outbox operations`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -33,6 +33,17 @@ claims against the tree before editing.
 | Tests            | Unit, deterministic demo parity, Redux invalidation, and opt-in private parity layers exist                           |
 
 ## Latest landed slices
+
+The current Track D slice extracts reusable pure outbox operations:
+
+- `engine/outbox.ts` owns head clamping, applied-prefix selection, append with
+  redo-tail truncation, and replay from stored `appliedPatch` values;
+- `createZerroEngine` delegates those behaviors instead of implementing them
+  inside its closure;
+- focused tests pin clamping, pending selection, redo-tail replacement, and
+  replay through the selected head;
+- the operations stay internal and do not widen the root package surface;
+  Redux state shape and persistence are unchanged.
 
 The current slice makes `mergeAccounts`, the last legacy write consumer,
 semantic:
@@ -134,9 +145,9 @@ No materializer rule or replica behavior is included in these slices.
 
 ## Default next task
 
-Begin the first bounded Track D slice described in [roadmap.md](./roadmap.md):
-extract reusable pure outbox operations from the reference engine before
-changing Redux state shape. Do not start materializer rules yet.
+Continue Track D by reusing the pure outbox operations in Redux reducers before
+changing the persisted state shape. Keep the slice bounded to reducer behavior
+and tests; do not start materializer rules yet.
 
 ## Important guardrails
 
@@ -167,7 +178,7 @@ Expected full-suite baseline at this handoff:
 
 ```txt
 69 test files passed, 4 skipped
-259 tests passed, 6 skipped
+262 tests passed, 6 skipped
 ```
 
 Browser check: the transaction-list multi-select bar and bulk-actions menu

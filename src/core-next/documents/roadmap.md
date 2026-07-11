@@ -203,9 +203,10 @@ second app store.
 
 Suggested order:
 
-1. Extract pure outbox operations: append, drop redo tail, clamp head, replay
-   applied prefix, and list pending entries.
-2. Reuse them in `createZerroEngine` and Redux reducers.
+1. ✅ Extract pure outbox operations: append, drop redo tail, clamp head, replay
+   applied prefix, and list pending entries. `createZerroEngine` now reuses
+   these internal operations without widening the root package surface.
+2. Reuse them in Redux reducers.
 3. Move Redux state toward `base`, `outbox`, `outboxHead`, `inbox`, `current`.
 4. Rebase `applyServerPatch` and expose the pending sync payload.
 5. Add reload plus undo/redo tests before switching more writes.

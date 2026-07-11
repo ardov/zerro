@@ -1,16 +1,15 @@
 import type { TDataStore } from '../zenmoney/store'
 import type { TCompiled, TCoreContext, TNormalizedPatch } from '../types'
-import { replay } from '../zenmoney'
 import { materializePatch, type TMaterializedPatch } from '../materializer'
+import {
+  appendOutbox,
+  clampOutboxHead,
+  getPendingOutbox as selectPendingOutbox,
+  replayOutbox,
+  type TOutboxEntry,
+} from './outbox'
 
-export type TOutboxEntry<TCommand = unknown> = {
-  id: string
-  command: TCommand
-  intentPatch: TNormalizedPatch
-  appliedPatch: TNormalizedPatch
-  materializerVersion: number
-  createdAt: number
-}
+export type { TOutboxEntry } from './outbox'
 
 export type TZerroEngineState<TCommand = unknown> = {
   base: TDataStore
@@ -72,14 +71,11 @@ export function createZerroEngine<TCommand = unknown>(
   }
 
   function getCurrent(): TDataStore {
-    return replay(
-      state.base,
-      state.outbox.slice(0, state.outboxHead).map(entry => entry.appliedPatch)
-    )
+    return replayOutbox(state.base, state.outbox, state.outboxHead)
   }
 
   function getPendingOutbox(): TOutboxEntry<TCommand>[] {
-    return state.outbox.slice(0, state.outboxHead)
+    return selectPendingOutbox(state.outbox, state.outboxHead)
   }
 
   function execute<TReceipt = unknown>(
@@ -114,7 +110,6 @@ export function createZerroEngine<TCommand = unknown>(
     command: TCommand,
     materialized: TMaterializedPatch
   ): TOutboxEntry<TCommand> {
-    const outbox = state.outbox.slice(0, state.outboxHead)
     const entry: TOutboxEntry<TCommand> = {
       id: input.ctx.uuid(),
       command,
@@ -124,11 +119,10 @@ export function createZerroEngine<TCommand = unknown>(
       createdAt: input.ctx.now(),
     }
 
-    outbox.push(entry)
+    const next = appendOutbox(state.outbox, state.outboxHead, entry)
     state = {
       ...state,
-      outbox,
-      outboxHead: outbox.length,
+      ...next,
     }
     return entry
   }
@@ -156,8 +150,4 @@ function isCompiled<TReceipt>(
   value: TNormalizedPatch | TCompiled<TReceipt>
 ): value is TCompiled<TReceipt> {
   return 'patch' in value && 'receipt' in value
-}
-
-function clampOutboxHead(outboxHead: number, outboxLength: number): number {
-  return Math.max(0, Math.min(outboxHead, outboxLength))
 }

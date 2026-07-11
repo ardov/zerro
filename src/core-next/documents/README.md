@@ -33,6 +33,9 @@ The handoff is routing, not proof that code landed. Always verify the tree.
   diffs bypass it as already canonical.
 - `createZerroEngine` models outbox replay but has no production owner yet;
   Redux must remain the sole reactive state owner in the app.
+- Pure internal outbox operations now own head clamping, pending-prefix reads,
+  redo-tail truncation on append, and applied-patch replay; the reference
+  engine reuses them without exposing them from the root package surface.
 - The session is snapshot-based and lazily memoized. Namespaced `get*` reads are
   the semantic facade; flat `session.read.*` remains deprecated compatibility.
 - Session envelope reads are domain-only. The Redux adapter adds localized
@@ -67,9 +70,8 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 
 ## Default next slice
 
-Begin the first bounded Track D slice: extract reusable pure outbox operations
-from the reference engine before changing Redux state shape. Do not begin
-materializer rules yet.
+Continue Track D by reusing the pure outbox operations in Redux reducers before
+changing the persisted state shape. Do not begin materializer rules yet.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 
