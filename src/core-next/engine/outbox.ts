@@ -1,5 +1,5 @@
 import type { TNormalizedPatch } from '../types'
-import { replay } from '../zenmoney'
+import { applyPatch, replay } from '../zenmoney'
 import type { TDataStore } from '../zenmoney/store'
 
 export type TOutboxEntry<TCommand = unknown> = {
@@ -49,4 +49,17 @@ export function replayOutbox<TCommand>(
     base,
     getPendingOutbox(outbox, outboxHead).map(entry => entry.appliedPatch)
   )
+}
+
+/**
+ * Advance `current` by one applied entry without replaying from base. Callers
+ * must hold the invariant that `current` already equals the replay of the
+ * applied prefix up to the current head; append then only needs this entry's
+ * effect. Undo, redo, and base changes still require a full `replayOutbox`.
+ */
+export function applyOutboxEntry<TCommand>(
+  current: TDataStore,
+  entry: TOutboxEntry<TCommand>
+): TDataStore {
+  return applyPatch(current, entry.appliedPatch)
 }

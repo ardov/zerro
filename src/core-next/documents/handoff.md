@@ -355,7 +355,7 @@ Expected full-suite baseline after the health slice:
 
 ```txt
 78 test files passed, 4 skipped
-281 tests passed, 6 skipped
+285 tests passed, 6 skipped
 ```
 
 Browser check: the transaction-list multi-select bar and bulk-actions menu

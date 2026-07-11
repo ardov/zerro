@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import {
   appendOutbox,
+  applyOutboxEntry,
   clampOutboxHead,
   getPendingOutbox,
   replayOutbox,
@@ -93,7 +94,11 @@ const { reducer, actions } = createSlice({
         )
         state.outbox = next.outbox
         state.outboxHead = next.outboxHead
-        state.current = replayOutbox(state.base, state.outbox, state.outboxHead)
+        // `current` already reflects the applied prefix up to the old head, and
+        // appendOutbox drops any redo tail past it, so advancing by this one
+        // entry is equivalent to a full replay but keeps unrelated entity maps
+        // reference-stable for memoized selectors.
+        state.current = applyOutboxEntry(state.current, payload)
       }
     ),
     prepareClientSync: withPerf('prepareClientSync', state => {

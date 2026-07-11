@@ -89,7 +89,7 @@ The write cutover is done. Two independent reviews of the branch converged on a
 finishing order that prioritizes a trustworthy baseline over new architecture.
 Do the slices below in order; each is small and independently verifiable.
 
-1. **Health slice.** Return the suite to green and make local development
+1. ✅ **Health slice.** Return the suite to green and make local development
    honest before any further change. Fix the three failing tests
    (`selectors.tags.test.ts`, `TagSelect2.test.tsx` init, `fillGoals.test.ts`
    missing `goalType` mock), repair or remove the broken `lint:js` script
@@ -97,7 +97,7 @@ Do the slices below in order; each is small and independently verifiable.
    ~52 drifted files. No architectural change. No CI pipeline in this repo yet;
    add only local developer tooling that helps agents keep the baseline green.
 
-2. **Replay/clone fix.** `cloneDataStore` copies all 11 entity maps on every
+2. ✅ **Replay/clone fix.** `cloneDataStore` copies all 11 entity maps on every
    patch and `replayOutbox` replays from `base` on every append, so each write
    invalidates every memoized selector (violates architecture invariant 5).
    Clone only the maps a patch touches; append incrementally

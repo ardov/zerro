@@ -47,6 +47,49 @@ describe('zenmoney patch primitives', () => {
     expect(next.tag.fun.title).toBe('Fun')
   })
 
+  it('clones only the maps a patch touches and shares the rest', () => {
+    const base = makeStore({
+      account: { cash: entity({ id: 'cash', title: 'Cash' }) },
+      transaction: { t1: entity({ id: 't1' }) },
+      tag: { food: entity({ id: 'food', title: 'Food' }) },
+    })
+
+    const next = applyPatch(base, {
+      account: [entity({ id: 'card', title: 'Card' })],
+    } as TDiff)
+
+    expect(next.account).not.toBe(base.account)
+    expect(next.transaction).toBe(base.transaction)
+    expect(next.tag).toBe(base.tag)
+  })
+
+  it('shares every entity map for a timestamp-only patch', () => {
+    const base = makeStore({
+      account: { cash: entity({ id: 'cash', title: 'Cash' }) },
+    })
+
+    const next = applyPatch(base, { serverTimestamp: 999 } as TDiff)
+
+    expect(next).not.toBe(base)
+    expect(next.serverTimestamp).toBe(999)
+    expect(next.account).toBe(base.account)
+    expect(next.transaction).toBe(base.transaction)
+  })
+
+  it('clones only the deleted entity map', () => {
+    const base = makeStore({
+      tag: { food: entity({ id: 'food', title: 'Food' }) },
+      account: { cash: entity({ id: 'cash', title: 'Cash' }) },
+    })
+
+    const next = applyPatch(base, {
+      deletion: [{ object: DataEntity.Tag, id: 'food' }],
+    } as TDiff)
+
+    expect(next.tag).not.toBe(base.tag)
+    expect(next.account).toBe(base.account)
+  })
+
   it('applies patches mutably when requested', () => {
     const store = makeStore()
 

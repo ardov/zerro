@@ -2,9 +2,27 @@ import { keys } from '../shared/keys'
 import type { TDataStore, TDiff } from './store'
 
 export function applyPatch(base: TDataStore, patch: TDiff): TDataStore {
-  const next = cloneDataStore(base)
+  // Clone only the entity maps the patch touches; keep every other map's
+  // reference from base. Downstream memoized selectors depend on unrelated
+  // maps staying reference-stable across a write (architecture invariant 5), so
+  // cloning all maps here would invalidate every calculation on any change.
+  const next: TDataStore = { ...base }
+  touchedEntityKeys(patch).forEach(key => {
+    // @ts-expect-error Dynamic ZenMoney entity access.
+    next[key] = { ...base[key] }
+  })
   applyPatchMutable(next, patch)
   return next
+}
+
+function touchedEntityKeys(patch: TDiff): Set<string> {
+  const touched = new Set<string>()
+  patch.deletion?.forEach(obj => touched.add(obj.object))
+  keys(patch).forEach(key => {
+    if (key === 'serverTimestamp' || key === 'deletion' || !patch[key]) return
+    touched.add(key)
+  })
+  return touched
 }
 
 export function applyPatchMutable(store: TDataStore, patch: TDiff): void {
@@ -40,21 +58,4 @@ export function applyPatchMutable(store: TDataStore, patch: TDiff): void {
       }
     })
   })
-}
-
-function cloneDataStore(store: TDataStore): TDataStore {
-  return {
-    serverTimestamp: store.serverTimestamp,
-    instrument: { ...store.instrument },
-    country: { ...store.country },
-    company: { ...store.company },
-    user: { ...store.user },
-    merchant: { ...store.merchant },
-    account: { ...store.account },
-    tag: { ...store.tag },
-    budget: { ...store.budget },
-    reminder: { ...store.reminder },
-    reminderMarker: { ...store.reminderMarker },
-    transaction: { ...store.transaction },
-  }
 }

@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import { makeAccount } from 'core-next/testing/zenmoneyTestData'
+import {
+  makeAccount,
+  makeTransaction,
+} from 'core-next/testing/zenmoneyTestData'
 import {
   getChangedNum,
   getLastChangeTime,
@@ -46,6 +49,32 @@ describe('data patch boundaries', () => {
     expect(next.current.serverTimestamp).toBe(300)
     expect(next.outbox).toEqual([])
     expect(next.outboxHead).toBe(0)
+  })
+
+  it('keeps unrelated entity maps reference-stable across an append', () => {
+    const base = applyServerPatch(undefined, {
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+      transaction: [makeTransaction({ id: 't1' })],
+    })
+    const beforeTransactions = base.current.transaction
+    const beforeAccount = base.current.account
+
+    const entry = {
+      id: 'entry-1',
+      command: { type: 'account.rename' },
+      intentPatch: { account: [makeAccount({ id: 'cash', title: 'Wallet' })] },
+      appliedPatch: { account: [makeAccount({ id: 'cash', title: 'Wallet' })] },
+      materializerVersion: 1,
+      createdAt: 10,
+    }
+
+    const appended = reducer(base, appendClientOutboxEntry(entry))
+
+    // The touched map is a new object; unrelated maps keep their reference so
+    // transaction-heavy memoized selectors do not recompute after this write.
+    expect(appended.current.account).not.toBe(beforeAccount)
+    expect(appended.current.account.cash.title).toBe('Wallet')
+    expect(appended.current.transaction).toBe(beforeTransactions)
   })
 
   it('replays current and derives the transport diff from the outbox prefix', () => {
