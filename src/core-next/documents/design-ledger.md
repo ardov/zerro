@@ -160,7 +160,9 @@ SVG URLs must remain outside domain Core.
 
 ### Legacy local diff
 
-Status: Redux still accumulates `data.diff`; the identity materializer means
+Status: Redux `current` replays from `data.server` plus the applied runtime
+outbox prefix. `data.diff` is derived from that prefix and remains only as the
+current sync transport compatibility shape; the identity materializer means
 intent and applied patches are currently equal.
 
 Exit when Redux owns explicit `base`, `outbox`, `outboxHead`, `inbox`, and
@@ -175,8 +177,8 @@ Resolved on 2026-07-11. Reminder create/update/delete uses semantic reminder
 commands through a cycle-safe executor; hidden data-account creation uses the
 Core account compiler with an explicit infrastructure command; and the debug
 patch API appends an explicit infrastructure entry. No production caller
-dispatches `applyClientPatch` directly. The action remains temporarily exported
-for compatibility tests while Redux `current`/`diff` still exist.
+dispatches `applyClientPatch` directly. The bypassing action/export was removed
+when Redux replay became authoritative.
 
 ### Legacy patch command
 

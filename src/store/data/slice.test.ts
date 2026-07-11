@@ -1,72 +1,94 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
-import type { TNormalizedPatch } from 'core-next'
+import { makeAccount } from 'core-next/testing/zenmoneyTestData'
 import reducer, {
   appendClientOutboxEntry,
-  applyClientPatch,
   applyServerPatch,
+  redoClientCommand,
+  undoClientCommand,
 } from './slice'
 
-const { materializePatchMock } = vi.hoisted(() => ({
-  materializePatchMock: vi.fn(),
-}))
-
-vi.mock('core-next/materializer', () => ({
-  materializePatch: materializePatchMock,
-}))
-
 describe('data patch boundaries', () => {
-  beforeEach(() => {
-    materializePatchMock.mockReset()
-  })
-
-  it('materializes local client patches before applying and accumulating them', () => {
-    const intentPatch: TNormalizedPatch = { serverTimestamp: 100 }
-    const appliedPatch: TNormalizedPatch = { serverTimestamp: 200 }
-    let observedServerTimestamp: number | undefined
-    let observedIntentPatch: TNormalizedPatch | undefined
-    materializePatchMock.mockImplementation((snapshot, intent) => {
-      observedServerTimestamp = snapshot.serverTimestamp
-      observedIntentPatch = intent
-      return { appliedPatch }
-    })
-
-    const initial = reducer(undefined, { type: 'test/init' })
-    const next = reducer(initial, applyClientPatch(intentPatch))
-
-    expect(materializePatchMock).toHaveBeenCalledOnce()
-    expect(observedServerTimestamp).toBe(initial.current.serverTimestamp)
-    expect(observedIntentPatch).toBe(intentPatch)
-    expect(next.current.serverTimestamp).toBe(200)
-    expect(next.diff).toEqual(appliedPatch)
-  })
-
-  it('applies canonical server patches without local materialization', () => {
+  it('applies canonical server patches and clears acknowledged outbox state', () => {
     const initial = reducer(undefined, { type: 'test/init' })
     const next = reducer(initial, applyServerPatch({ serverTimestamp: 300 }))
 
-    expect(materializePatchMock).not.toHaveBeenCalled()
     expect(next.current.serverTimestamp).toBe(300)
     expect(next.outbox).toEqual([])
     expect(next.outboxHead).toBe(0)
   })
 
-  it('appends semantic entries and keeps current and diff compatible', () => {
-    const initial = reducer(undefined, { type: 'test/init' })
-    const entry = {
+  it('replays current and diff from the applied outbox prefix', () => {
+    const base = reducer(
+      undefined,
+      applyServerPatch({
+        account: [makeAccount({ id: 'cash', title: 'Cash' })],
+      })
+    )
+    const first = {
       id: 'entry-1',
       command: { type: 'test.patch' },
-      intentPatch: { serverTimestamp: 100 },
-      appliedPatch: { serverTimestamp: 200 },
+      intentPatch: {
+        account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+      },
+      appliedPatch: {
+        account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+      },
       materializerVersion: 1,
       createdAt: 10,
     }
-    const next = reducer(initial, appendClientOutboxEntry(entry))
+    const second = {
+      ...first,
+      id: 'entry-2',
+      intentPatch: {
+        account: [makeAccount({ id: 'cash', title: 'Vault' })],
+      },
+      appliedPatch: {
+        account: [makeAccount({ id: 'cash', title: 'Vault' })],
+      },
+      createdAt: 20,
+    }
+    const appended = reducer(
+      reducer(base, appendClientOutboxEntry(first)),
+      appendClientOutboxEntry(second)
+    )
 
-    expect(materializePatchMock).not.toHaveBeenCalled()
-    expect(next.current.serverTimestamp).toBe(200)
-    expect(next.diff).toEqual(entry.appliedPatch)
-    expect(next.outbox).toEqual([entry])
-    expect(next.outboxHead).toBe(1)
+    expect(appended.server?.account.cash.title).toBe('Cash')
+    expect(appended.current.account.cash.title).toBe('Vault')
+    expect(appended.diff?.account?.[0].title).toBe('Vault')
+    expect(appended.outboxHead).toBe(2)
+
+    const undone = reducer(appended, undoClientCommand())
+    expect(undone.current.account.cash.title).toBe('Wallet')
+    expect(undone.diff?.account?.[0].title).toBe('Wallet')
+    expect(undone.outboxHead).toBe(1)
+
+    const replacement = {
+      ...first,
+      id: 'entry-3',
+      intentPatch: {
+        account: [makeAccount({ id: 'cash', title: 'Pocket' })],
+      },
+      appliedPatch: {
+        account: [makeAccount({ id: 'cash', title: 'Pocket' })],
+      },
+      createdAt: 30,
+    }
+    const branched = reducer(undone, appendClientOutboxEntry(replacement))
+    expect(branched.outbox?.map(entry => entry.id)).toEqual([
+      'entry-1',
+      'entry-3',
+    ])
+    expect(branched.current.account.cash.title).toBe('Pocket')
+
+    const reset = reducer(undone, undoClientCommand())
+    expect(reset.current.account.cash.title).toBe('Cash')
+    expect(reset.diff).toBeUndefined()
+    expect(reset.outboxHead).toBe(0)
+
+    const redone = reducer(reset, redoClientCommand())
+    expect(redone.current.account.cash.title).toBe('Wallet')
+    expect(redone.diff?.account?.[0].title).toBe('Wallet')
+    expect(redone.outboxHead).toBe(1)
   })
 })

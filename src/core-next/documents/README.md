@@ -38,8 +38,8 @@ The handoff is routing, not proof that code landed. Always verify the tree.
   engine reuses them without exposing them from the root package surface.
 - Semantic Redux commands and explicit bootstrap/debug infrastructure commands
   now append complete runtime outbox entries. No production caller dispatches
-  `applyClientPatch` directly; legacy `current`/`diff` views remain active only
-  as replica compatibility state.
+  `applyClientPatch` directly, and the bypassing action is removed. Redux
+  `current` and sync-compatible `diff` replay from the applied outbox prefix.
 - The session is snapshot-based and lazily memoized. Namespaced `get*` reads are
   the semantic facade; flat `session.read.*` remains deprecated compatibility.
 - Session envelope reads are domain-only. The Redux adapter adds localized
@@ -74,9 +74,9 @@ The handoff is routing, not proof that code landed. Always verify the tree.
 
 ## Default next slice
 
-Continue Track D by making Redux `current` replay from the server base plus the
-applied outbox prefix. Keep `diff` as the sync compatibility projection and do
-not change persisted state in the same slice.
+Continue Track D by defining explicit inbox/server rebase behavior and
+persisting replica state. Keep the existing sync transport stable while that
+contract is introduced.
 
 See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 

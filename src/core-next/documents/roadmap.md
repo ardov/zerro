@@ -206,13 +206,12 @@ Suggested order:
 1. ✅ Extract pure outbox operations: append, drop redo tail, clamp head, replay
    applied prefix, and list pending entries. `createZerroEngine` now reuses
    these internal operations without widening the root package surface.
-2. ◐ Reuse them in Redux reducers. Semantic funnel commands now append full
-   entries through `appendClientOutboxEntry`, which reuses redo-tail truncation
-   while preserving the legacy `current` and `diff` compatibility views.
-   All production patch producers now append semantic or explicit
-   infrastructure entries. Outbox replay can become authoritative in the next
-   Redux slice.
-3. Move Redux state toward `base`, `outbox`, `outboxHead`, `inbox`, `current`.
+2. ✅ Reuse them in Redux reducers. Append, undo, and redo rebuild `current` and
+   the sync-compatible `diff` from the stored applied prefix; append after undo
+   drops the redo tail. The bypassing `applyClientPatch` action is removed.
+3. ◐ Move Redux state toward `base`, `outbox`, `outboxHead`, `inbox`, `current`.
+   `server` currently acts as base; runtime outbox/head/current are live, while
+   explicit inbox and persistence remain.
 4. Rebase `applyServerPatch` and expose the pending sync payload.
 5. Add reload plus undo/redo tests before switching more writes.
 

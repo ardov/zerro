@@ -3,7 +3,7 @@
 - Updated: 2026-07-11
 - Branch: `core-next`
 - Worktree: clean; the branch tip is
-  `Route remaining client patches through outbox`
+  `Replay Redux current from outbox`
 
 This document describes the current branch, not project history. Verify its
 claims against the tree before editing.
@@ -33,6 +33,20 @@ claims against the tree before editing.
 | Tests            | Unit, deterministic demo parity, Redux invalidation, and opt-in private parity layers exist                           |
 
 ## Latest landed slices
+
+The current Redux replay slice makes the runtime outbox authoritative:
+
+- `appendClientOutboxEntry`, `undoClientCommand`, and `redoClientCommand`
+  rebuild `current` from `server` plus the stored applied prefix;
+- `diff` is rebuilt from that same prefix as a temporary sync-transport
+  projection, so undo/redo affects both current state and pending sync data;
+- append after undo drops the redo tail and replays the replacement branch;
+- canonical server patches remain the base update boundary and clear the
+  acknowledged runtime outbox;
+- the bypassing `applyClientPatch` reducer action/export is deleted;
+- reducer tests cover base preservation, replay, undo to base, redo, diff
+  projection, and redo-tail replacement. Persistence and explicit inbox/rebase
+  semantics are not included.
 
 The current slice closes the remaining direct-client-patch debt:
 
@@ -171,13 +185,14 @@ Semantic envelope structure:
   no-op afterwards; it never writes groups or parents (covered by funnel
   tests).
 
-No materializer rule or replica behavior is included in these slices.
+No materializer rule, persisted outbox, or explicit inbox/rebase behavior is
+included in these slices.
 
 ## Default next task
 
-Continue Track D by rebuilding Redux `current` from the server base plus the
-applied outbox prefix. Keep `diff` as the sync compatibility projection; do not
-change persisted state or start materializer rules in the same slice.
+Continue Track D by defining explicit inbox/server rebase semantics and then
+persisting replica state. Keep the current sync transport stable and do not
+start materializer rules in the same slice.
 
 ## Important guardrails
 
@@ -208,7 +223,7 @@ Expected full-suite baseline at this handoff:
 
 ```txt
 69 test files passed, 4 skipped
-267 tests passed, 6 skipped
+266 tests passed, 6 skipped
 ```
 
 Browser check: the transaction-list multi-select bar and bulk-actions menu

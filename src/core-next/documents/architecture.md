@@ -209,9 +209,10 @@ During the Redux transition, semantic commands append complete runtime outbox
 entries while reducers also maintain legacy `current` and `diff` views. The
 outbox becomes replay-authoritative only after every patch producer has either
 semantic commands or explicit infrastructure entry semantics. That producer
-cutover is now complete; switching Redux `current` to replay is the next
-bounded step. This temporary dual write is a migration boundary, not a second
-reactive store.
+cutover is now complete. Redux performs authoritative replay for append, undo,
+and redo, and
+derives the legacy sync `diff` from the same applied prefix. There is still only
+one reactive store.
 
 ## Read model and memoization
 

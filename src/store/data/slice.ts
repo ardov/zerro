@@ -1,10 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { materializePatch } from 'core-next/materializer'
-import { appendOutbox, type TOutboxEntry } from 'core-next/engine/outbox'
+import {
+  appendOutbox,
+  clampOutboxHead,
+  getPendingOutbox,
+  replayOutbox,
+  type TOutboxEntry,
+} from 'core-next/engine/outbox'
 import { withPerf } from '6-shared/helpers/performance'
 import { TDataStore, TDiff } from '6-shared/types'
 import { applyDiffMutable } from './shared/applyDiff'
-import { mergeDiffs } from './shared/mergeDiffs'
+import { immutableMergeDiffs } from './shared/mergeDiffs'
 
 interface DataSlice {
   current: TDataStore
@@ -59,19 +64,10 @@ const { reducer, actions } = createSlice({
         state.outboxHead = 0
       }
     ),
-    applyClientPatch: withPerf(
-      'applyClientPatch',
-      (state, { payload }: PayloadAction<TDiff>) => {
-        if (!payload) return
-        const { appliedPatch } = materializePatch(state.current, payload)
-        applyDiffMutable(appliedPatch, state.current)
-        if (!state.diff) state.diff = { ...appliedPatch }
-        else mergeDiffs(state.diff, appliedPatch)
-      }
-    ),
     appendClientOutboxEntry: withPerf(
       'appendClientOutboxEntry',
       (state, { payload }: PayloadAction<TOutboxEntry<unknown>>) => {
+        state.server ??= state.current
         const next = appendOutbox(
           state.outbox ?? [],
           state.outboxHead ?? state.outbox?.length ?? 0,
@@ -79,11 +75,32 @@ const { reducer, actions } = createSlice({
         )
         state.outbox = next.outbox
         state.outboxHead = next.outboxHead
-        applyDiffMutable(payload.appliedPatch, state.current)
-        if (!state.diff) state.diff = { ...payload.appliedPatch }
-        else mergeDiffs(state.diff, payload.appliedPatch)
+        state.current = replayOutbox(
+          state.server,
+          state.outbox,
+          state.outboxHead
+        )
+        state.diff = buildOutboxDiff(state.outbox, state.outboxHead)
       }
     ),
+    undoClientCommand: withPerf('undoClientCommand', state => {
+      const outbox = state.outbox ?? []
+      const currentHead = state.outboxHead ?? outbox.length
+      const outboxHead = clampOutboxHead(currentHead - 1, outbox.length)
+      if (outboxHead === currentHead || !state.server) return
+      state.outboxHead = outboxHead
+      state.current = replayOutbox(state.server, outbox, outboxHead)
+      state.diff = buildOutboxDiff(outbox, outboxHead)
+    }),
+    redoClientCommand: withPerf('redoClientCommand', state => {
+      const outbox = state.outbox ?? []
+      const currentHead = state.outboxHead ?? outbox.length
+      const outboxHead = clampOutboxHead(currentHead + 1, outbox.length)
+      if (outboxHead === currentHead || !state.server) return
+      state.outboxHead = outboxHead
+      state.current = replayOutbox(state.server, outbox, outboxHead)
+      state.diff = buildOutboxDiff(outbox, outboxHead)
+    }),
     resetData: () => {
       return initialState
     },
@@ -96,7 +113,20 @@ export default reducer
 // ACTIONS
 export const {
   applyServerPatch,
-  applyClientPatch,
   appendClientOutboxEntry,
+  undoClientCommand,
+  redoClientCommand,
   resetData,
 } = actions
+
+function buildOutboxDiff(
+  outbox: readonly TOutboxEntry<unknown>[],
+  outboxHead: number
+): TDiff | undefined {
+  const pending = getPendingOutbox(outbox, outboxHead)
+  if (!pending.length) return undefined
+  return pending.reduce<TDiff>(
+    (diff, entry) => immutableMergeDiffs(diff, entry.appliedPatch),
+    {}
+  )
+}

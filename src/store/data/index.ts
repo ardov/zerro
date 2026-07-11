@@ -4,8 +4,9 @@ export default reducer
 // ACTIONS
 export {
   applyServerPatch,
-  applyClientPatch,
   appendClientOutboxEntry,
+  undoClientCommand,
+  redoClientCommand,
   resetData,
 } from './slice'
 
