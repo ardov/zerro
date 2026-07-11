@@ -1,8 +1,7 @@
 import { toISOMonth } from '6-shared/helpers/date'
 import { ById, TBudget, globalBudgetTagId } from '6-shared/types'
-import { type TBudgetUpdate } from 'core-next/adapters/redux'
+import { envId, EnvType, type TBudgetUpdate } from 'core-next/adapters/redux'
 import { getTagBudgets, setEnvBudget } from '5-entities/budget'
-import { envelopeModel, EnvType } from '5-entities/envelope'
 import { AppThunk } from 'store'
 
 export function convertZmBudgetsToZerro(): AppThunk<TBudgetUpdate[]> {
@@ -21,7 +20,7 @@ function convertTagBudgetsToUpdates(tagBudgets: ById<TBudget>) {
     if (!budget.outcome) return
     if (budget.tag === globalBudgetTagId) return
     updates.push({
-      id: envelopeModel.makeId(EnvType.Tag, String(budget.tag)),
+      id: envId.get(EnvType.Tag, String(budget.tag)),
       month: toISOMonth(budget.date),
       value: budget.outcome,
     })

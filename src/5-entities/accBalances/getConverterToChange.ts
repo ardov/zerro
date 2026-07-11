@@ -9,9 +9,9 @@ import {
 import { withPerf } from '6-shared/helpers/performance'
 
 import { getType, TrType } from '5-entities/transaction/helpers'
-import { instrumentModel } from '5-entities/currency/instrument'
-import { debtorModel } from '5-entities/debtors'
-import { accountModel } from '5-entities/account'
+import { getInstCodeMap } from '5-entities/currency/instrument/model'
+import { debtorGetter } from '5-entities/debtors/debtorGetter'
+import { getDebtAccountId } from '5-entities/account/selectors'
 
 export type TTrEffect = {
   id: TTransactionId
@@ -21,11 +21,7 @@ export type TTrEffect = {
 }
 
 export const getConverterToChange = createSelector(
-  [
-    accountModel.getDebtAccountId,
-    debtorModel.detector,
-    instrumentModel.getInstCodeMap,
-  ],
+  [getDebtAccountId, debtorGetter, getInstCodeMap],
   withPerf('getConverterToChange', (debtId, getDebtorId, instCodeMap) => {
     return (tr: TTransaction) => {
       const { id, incomeAccount, outcomeAccount, income, outcome, date } = tr

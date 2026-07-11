@@ -12,12 +12,12 @@ import { round } from '6-shared/helpers/money'
 import { withPerf } from '6-shared/helpers/performance'
 
 import { TSelector } from 'store'
-import { accountModel } from '5-entities/account'
+import { getDebtAccountId } from '5-entities/account/selectors'
 import { getTransactionsHistory } from '5-entities/transaction/model'
 import { getType, TrType } from '5-entities/transaction/helpers'
 import { cleanPayee } from '5-entities/shared/cleanPayee'
-import { merchantModel } from '5-entities/merchant'
-import { instrumentModel } from '5-entities/currency/instrument'
+import { getMerchants } from '5-entities/merchant/model'
+import { getInstruments } from '5-entities/currency/instrument/model'
 
 export type TDebtor = {
   id: string
@@ -30,12 +30,7 @@ export type TDebtor = {
 }
 
 export const getDebtors: TSelector<ById<TDebtor>> = createSelector(
-  [
-    getTransactionsHistory,
-    merchantModel.getMerchants,
-    instrumentModel.getInstruments,
-    accountModel.getDebtAccountId,
-  ],
+  [getTransactionsHistory, getMerchants, getInstruments, getDebtAccountId],
   withPerf('getDebtors', collectDebtors)
 )
 

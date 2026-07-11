@@ -1,7 +1,8 @@
 import React, { FC } from 'react'
 import { useAppSelector } from 'store'
 import { selectCorePopulatedTags } from 'core-next/adapters/redux'
-import { tagModel, TagTreeNode, TTagPopulated } from '5-entities/tag'
+import { TagTreeNode, TTagPopulated } from '5-entities/tag'
+import { getTagsTree } from '5-entities/tag/model/model'
 import { Box, Autocomplete, TextField } from '@mui/material'
 import { TagIcon } from '6-shared/ui/TagIcon'
 import { TagChip } from './TagChip'
@@ -35,7 +36,7 @@ type TagOption = TTagPopulated | TagTreeNode
 
 export const TagSelect: FC<TagSelectProps> = props => {
   const { onChange, tagFilters, multiple, value, label, ...rest } = props
-  const tagsTree = tagModel.useTagsTree()
+  const tagsTree = useAppSelector(getTagsTree)
   const tags = useAppSelector(selectCorePopulatedTags)
   const options = getMatchedTags(tagsTree, tagFilters)
 

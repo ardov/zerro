@@ -3,15 +3,15 @@ import { MenuItem, SelectProps, ListItemText } from '@mui/material'
 import {
   useCoreInBudgetAccounts,
   useCoreInstrumentsByCode,
+  useCoreUserCurrency,
 } from 'core-next/adapters/redux'
 import { TFxCode, TInstrument } from '6-shared/types'
 import { getCurrencySymbol } from '6-shared/helpers/money'
-import { userModel } from '5-entities/user'
 import { SmartSelect } from '6-shared/ui/SmartSelect'
 
 export const CurrencyCodeSelect: FC<SelectProps<TFxCode>> = props => {
   const instrumentsByCode = useCoreInstrumentsByCode()
-  const userCurrency = userModel.useUserCurrency()
+  const userCurrency = useCoreUserCurrency()
   const accs = useCoreInBudgetAccounts()
   const value = props.value
 

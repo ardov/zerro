@@ -38,6 +38,7 @@ export {
   updateEnvelopeSettings,
 } from './commands'
 export { nullTag, populateTags, type TTagPopulated } from './tagPresentation'
+export { formatGoal } from './goalPresentation'
 export {
   useCoreDisplayCurrency,
   useCoreToDisplay,
@@ -50,6 +51,10 @@ export {
   useCoreInstrumentsByCode,
   useCoreInstCodeMap,
   useCoreMerchants,
+  useCoreRootUserId,
+  useCoreUserCurrency,
+  useCoreUserInstrumentId,
+  useCoreUserSettings,
 } from './hooks'
 // Narrow pure domain helpers used by real app consumers. Keep the underlying
 // ZenMoney/Zerro implementation barrels internal.
@@ -65,10 +70,15 @@ export {
   checkRaw as compileTransactionFilter,
   type TrCondition,
 } from '5-entities/transaction/filtering'
-export { goalType, normalizeGoal } from '../../zerro/goals'
+export { goalType, normalizeGoal, type TGoal } from '../../zerro/goals'
 export { type TFxRates } from '../../zerro/fx-rates'
 export {
+  envId,
+  EnvType,
+  flattenStructure,
   toEnvelopeStructureInput,
+  type TEnvNode,
+  type TGroupNode,
   type TApplyEnvelopeStructureInput,
   type TEnvelopeStructureGroupInput,
   type TEnvelopeStructureNodeInput,
@@ -99,6 +109,8 @@ export {
   selectCoreMonthList,
   selectCoreMonthTotals,
   selectCoreMerchants,
+  selectCoreRootUser,
+  selectCoreRootUserId,
   selectCorePopulatedTags,
   selectCoreRawActivity,
   selectCorePopulatedAccounts,
@@ -108,4 +120,7 @@ export {
   selectCoreTransactionIds,
   selectCoreTransactions,
   selectCoreTransactionsHistory,
+  selectCoreUserCurrency,
+  selectCoreUserInstrumentId,
+  selectCoreUserSettings,
 } from './selectors'

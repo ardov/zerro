@@ -1,2 +1,2 @@
 export { OverspendNotice } from './ui/OverspendNotice'
-export { overspendModel } from './model'
+export { fixOverspends } from './model/fixOverspends'

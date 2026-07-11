@@ -11,13 +11,18 @@ import { toISOMonth } from '6-shared/helpers/date'
 import { addFxAmount } from '6-shared/helpers/money'
 import { withPerf } from '6-shared/helpers/performance'
 import { TSelector } from 'store/index'
-import { accountModel, TAccountPopulated } from '5-entities/account'
-import { debtorModel, TDebtor } from '5-entities/debtors'
-import { instrumentModel } from '5-entities/currency/instrument'
+import {
+  getDebtAccountId,
+  getInBudgetAccounts,
+} from '5-entities/account/selectors'
+import type { TAccountPopulated } from '5-entities/account'
+import { getDebtors, TDebtor } from '5-entities/debtors/getDebtors'
+import { getInstruments } from '5-entities/currency/instrument/model'
 import { cleanPayee } from '5-entities/shared/cleanPayee'
 import { compareTrDates, getType, TrType } from '5-entities/transaction/helpers'
 import { getTransactionsHistory } from '5-entities/transaction/model'
-import { envelopeModel, EnvType, TEnvelopeId } from '5-entities/envelope'
+import { TEnvelopeId } from '5-entities/envelope'
+import { envId, EnvType } from 'core-next/adapters/redux'
 
 export type TRawActivityNode = {
   internal: EnvActivity
@@ -29,10 +34,10 @@ export const getRawActivity: TSelector<ByMonth<TRawActivityNode>> =
   createSelector(
     [
       getTransactionsHistory,
-      accountModel.getInBudgetAccounts,
-      accountModel.getDebtAccountId,
-      debtorModel.getDebtors,
-      instrumentModel.getInstruments,
+      getInBudgetAccounts,
+      getDebtAccountId,
+      getDebtors,
+      getInstruments,
     ],
     withPerf('🖤 getRawActivity', getRawActivityFn)
   )
@@ -177,7 +182,7 @@ function getEnvelope(
   debtors: ById<TDebtor>
 ): TEnvelopeId {
   const type = getType(tr, debtAccId)
-  const makeId = envelopeModel.makeId
+  const makeId = envId.get
   switch (type) {
     case TrType.Income:
     case TrType.Outcome:

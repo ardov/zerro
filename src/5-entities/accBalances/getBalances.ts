@@ -6,8 +6,9 @@ import { isZero, subFxAmount } from '6-shared/helpers/money'
 
 import { TSelector } from 'store/index'
 import { getTransactionsHistory } from '5-entities/transaction/model'
-import { debtorModel, TDebtor } from '5-entities/debtors'
-import { accountModel, TAccountPopulated } from '5-entities/account'
+import { getDebtors, TDebtor } from '5-entities/debtors/getDebtors'
+import { getPopulatedAccounts } from '5-entities/account/selectors'
+import type { TAccountPopulated } from '5-entities/account'
 import { TBalanceState } from './shared/types'
 import { TTrEffect, getConverterToChange } from './getConverterToChange'
 
@@ -25,8 +26,8 @@ export const getBalances: TSelector<{
   [
     getTransactionsHistory,
     getConverterToChange,
-    accountModel.getPopulatedAccounts,
-    debtorModel.getDebtors,
+    getPopulatedAccounts,
+    getDebtors,
   ],
   withPerf(
     'getBalances',

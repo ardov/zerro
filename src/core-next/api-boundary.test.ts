@@ -134,6 +134,32 @@ describe('core-next API boundary', () => {
 
     expect(violations).toEqual([])
   })
+
+  it('keeps production code off legacy model-object calls', () => {
+    const appRoot = dirname(coreRoot)
+    const violations = walk(appRoot)
+      .filter(file => {
+        const path = relative(appRoot, file)
+        return (
+          /\.(?:ts|tsx)$/.test(path) &&
+          !path.endsWith('.test.ts') &&
+          !path.endsWith('.test.tsx')
+        )
+      })
+      .flatMap(file => {
+        const source = readFileSync(file, 'utf8')
+        return source
+          .split('\n')
+          .map((line, index) => ({ line, index }))
+          .filter(({ line }) => /\b[A-Za-z]\w*Model\s*\./.test(line))
+          .map(
+            ({ line, index }) =>
+              `${relative(appRoot, file)}:${index + 1}: ${line.trim()}`
+          )
+      })
+
+    expect(violations).toEqual([])
+  })
 })
 
 function readProductionCoreFiles(): string[] {

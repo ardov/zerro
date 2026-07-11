@@ -4,7 +4,6 @@ import { toISODate, toISOMonth } from '6-shared/helpers/date'
 import { i18n } from '6-shared/localization'
 import { ZERRO_DATA_ACCOUNT_NAME } from '../../constants'
 import { getSavedCurrency } from 'store/displayCurrency'
-import { userModel } from '5-entities/user'
 import type { RootState } from 'store'
 import {
   buildBalances,
@@ -24,6 +23,10 @@ import {
   getTransactionIds,
   getTransactions,
   getTransactionsHistory,
+  getRootUser,
+  getRootUserId,
+  getUserCurrency,
+  getUserInstrumentId,
 } from '../../zenmoney'
 import {
   buildActivity,
@@ -68,6 +71,8 @@ const selectCoreInstrumentSlice = (state: RootState) =>
 const selectCoreMerchantSlice = (state: RootState) =>
   state.data.current.merchant
 
+const selectCoreUserSlice = (state: RootState) => state.data.current.user
+
 export const selectCoreInstruments = (state: RootState) =>
   getInstruments({ instrument: selectCoreInstrumentSlice(state) })
 
@@ -83,6 +88,26 @@ export const selectCoreInstrumentsByCode = createSelector(
 
 export const selectCoreMerchants = (state: RootState) =>
   getMerchants({ merchant: selectCoreMerchantSlice(state) })
+
+export const selectCoreRootUser = createSelector(
+  [selectCoreUserSlice, selectCoreInstrumentSlice],
+  (user, instrument) => getRootUser({ user, instrument })
+)
+
+export const selectCoreRootUserId = createSelector(
+  [selectCoreUserSlice, selectCoreInstrumentSlice],
+  (user, instrument) => getRootUserId({ user, instrument })
+)
+
+export const selectCoreUserInstrumentId = createSelector(
+  [selectCoreUserSlice, selectCoreInstrumentSlice],
+  (user, instrument) => getUserInstrumentId({ user, instrument })
+)
+
+export const selectCoreUserCurrency = createSelector(
+  [selectCoreUserSlice, selectCoreInstrumentSlice],
+  (user, instrument) => getUserCurrency({ user, instrument })
+)
 
 export const selectCoreDebtAccountId = createSelector(
   [selectCoreAccountSlice],
@@ -198,7 +223,7 @@ const selectCoreDomainEnvelopeProjection = createSelector(
     selectCoreTagStructure,
     selectCoreAccountSlice,
     selectCoreEnvelopeMeta,
-    userModel.getUserCurrency,
+    selectCoreUserCurrency,
   ],
   (debtors, tags, account, envelopeMeta, userCurrency) =>
     buildEnvelopes({
@@ -449,7 +474,7 @@ export const selectCoreBalancesByDate = createSelector(
 )
 
 export const selectCoreDisplayCurrency = createSelector(
-  [getSavedCurrency, userModel.getUserCurrency],
+  [getSavedCurrency, selectCoreUserCurrency],
   (savedCurrency, userCurrency) => savedCurrency || userCurrency
 )
 

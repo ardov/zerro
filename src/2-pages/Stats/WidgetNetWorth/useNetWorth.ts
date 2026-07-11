@@ -5,7 +5,7 @@ import { keys } from '6-shared/helpers/keys'
 import { round } from '6-shared/helpers/money'
 
 import { useCorePopulatedAccounts } from 'core-next/adapters/redux'
-import { accBalanceModel } from '5-entities/accBalances'
+import { useDisplayBalances } from '5-entities/accBalances/useBalances'
 import { getStart, Period } from '../shared/period'
 
 export type TNetWorthPoint = {
@@ -26,9 +26,8 @@ export function useNetWorth(
 ): TNetWorthPoint[] {
   const accs = useCorePopulatedAccounts()
 
-  return accBalanceModel
-    .useDisplayBalances(aggregation, getStart(period, aggregation))
-    .map(({ date, balances }) => {
+  return useDisplayBalances(aggregation, getStart(period, aggregation)).map(
+    ({ date, balances }) => {
       const { accounts, debtors } = balances
 
       let lented = 0
@@ -70,5 +69,6 @@ export function useNetWorth(
       })
 
       return { date, lented, debts, fundsInBudget, fundsSaving, accountDebts }
-    })
+    }
+  )
 }

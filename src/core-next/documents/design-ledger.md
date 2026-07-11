@@ -266,6 +266,15 @@ question before enabling non-identity rules.
 
 ## Resolved bridges
 
+### Production model-object calls
+
+Resolved on 2026-07-12. Production app code and legacy projection internals no
+longer invoke `*Model.*`. Reactive reads go through the Core Redux adapter;
+small remaining helpers use named exports with explicit ownership. A source
+boundary test prevents production model-object calls from returning. Legacy
+parity tests may still call model objects until each bridge and its old selector
+implementation are removed together.
+
 ### Account and reference-data model objects
 
 Resolved on 2026-07-12. App consumers use Core Redux selectors/hooks for raw

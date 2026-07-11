@@ -17,6 +17,10 @@ import {
   selectCoreInstrumentsByCode,
   selectCoreInstCodeMap,
   selectCoreMerchants,
+  selectCoreRootUserId,
+  selectCoreUserCurrency,
+  selectCoreUserInstrumentId,
+  selectCoreUserSettings,
 } from './selectors'
 import { getTransactionType } from '../../zenmoney'
 
@@ -78,4 +82,20 @@ export function useCoreInstCodeMap() {
 
 export function useCoreMerchants() {
   return useAppSelector(selectCoreMerchants)
+}
+
+export function useCoreRootUserId() {
+  return useAppSelector(selectCoreRootUserId)
+}
+
+export function useCoreUserCurrency() {
+  return useAppSelector(selectCoreUserCurrency)
+}
+
+export function useCoreUserInstrumentId() {
+  return useAppSelector(selectCoreUserInstrumentId)
+}
+
+export function useCoreUserSettings() {
+  return useAppSelector(selectCoreUserSettings)
 }

@@ -1,11 +1,11 @@
-import { merchantModel } from '5-entities/merchant'
+import { getMerchants } from '5-entities/merchant/model'
 import { cleanPayee } from '../shared/cleanPayee'
 import { createSelector } from '@reduxjs/toolkit'
 import { TTransaction } from '6-shared/types'
 import { TSelector } from 'store/index'
 
 export const debtorGetter: TSelector<(tr: TTransaction) => string> =
-  createSelector([merchantModel.getMerchants], merchants => tr => {
+  createSelector([getMerchants], merchants => tr => {
     const merchantTitle = tr.merchant && merchants[tr.merchant]?.title
     return cleanPayee(merchantTitle || tr.payee || '')
   })

@@ -19,7 +19,7 @@ import { TDateDraft, TISOMonth } from '6-shared/types'
 
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import {
-  overspendModel,
+  fixOverspends as fixAllOverspends,
   OverspendNotice,
 } from '4-features/bulkActions/fixOverspend'
 import { copyPreviousBudget } from '4-features/bulkActions/copyPrevMonth'
@@ -31,7 +31,7 @@ import {
   selectCoreGoalTotals,
   selectCoreMonthTotals,
 } from 'core-next/adapters/redux'
-import { totalGoalsModel } from '4-features/bulkActions/fillGoals'
+import { fillGoals } from '4-features/bulkActions/fillGoals'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useTranslation } from 'react-i18next'
 
@@ -54,7 +54,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
   })
 
   const fixOverspends = useConfirm({
-    onOk: () => dispatch(overspendModel.fixAll(month)),
+    onOk: () => dispatch(fixAllOverspends(month)),
     title: t('fixOverspends.title'),
     okText: t('fixOverspends.okText'),
     cancelText: t('fixOverspends.cancelText'),
@@ -168,7 +168,7 @@ function GoalAction(props: { month: TISOMonth }) {
   const canComplete = progress < 1 && goalsCount > 0
 
   const completeAll = useConfirm({
-    onOk: () => dispatch(totalGoalsModel.fillAll(month)),
+    onOk: () => dispatch(fillGoals(month)),
     title: t('title'),
     description: t('description'),
     okText: t('okText'),

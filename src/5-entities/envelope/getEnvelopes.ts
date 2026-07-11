@@ -5,10 +5,10 @@ import { withPerf } from '6-shared/helpers/performance'
 import { keys } from '6-shared/helpers/keys'
 
 import { TSelector } from 'store'
-import { accountModel } from '5-entities/account'
-import { debtorModel } from '5-entities/debtors'
-import { tagModel } from '5-entities/tag'
-import { userModel } from '5-entities/user'
+import { getSavingAccounts } from '5-entities/account/selectors'
+import { getDebtors } from '5-entities/debtors/getDebtors'
+import { getPopulatedTags } from '5-entities/tag/model/model'
+import { getUserCurrency } from '5-entities/user/model'
 
 import { makeEnvelope, TEnvelope } from './shared/makeEnvelope'
 import { getEnvelopeMeta } from './shared/metaData'
@@ -20,11 +20,11 @@ const getCompiledEnvelopes: TSelector<{
   structure: ReturnType<typeof buildStructure>
 }> = createSelector(
   [
-    debtorModel.getDebtors,
-    tagModel.getPopulatedTags,
-    accountModel.getSavingAccounts,
+    getDebtors,
+    getPopulatedTags,
+    getSavingAccounts,
     getEnvelopeMeta,
-    userModel.getUserCurrency,
+    getUserCurrency,
   ],
   withPerf(
     'getCompiledEnvelopes',

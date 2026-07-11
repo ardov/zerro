@@ -1,5 +1,9 @@
 import React, { FC, ReactNode, useCallback } from 'react'
-import { useCoreToDisplay } from 'core-next/adapters/redux'
+import {
+  formatGoal,
+  type TGoal,
+  useCoreToDisplay,
+} from 'core-next/adapters/redux'
 import { useDroppable } from '@dnd-kit/core'
 import { IconButton, IconButtonProps } from '@mui/material'
 import { useTranslation } from 'react-i18next'
@@ -9,7 +13,6 @@ import { RadialProgress } from '6-shared/ui/RadialProgress'
 import { TFxCode, TISOMonth } from '6-shared/types'
 
 import { useAppSelector } from 'store'
-import { goalModel, TGoal } from '5-entities/goal'
 import { TEnvelopeId } from '5-entities/envelope'
 import {
   selectCoreEnvMetrics,
@@ -276,7 +279,7 @@ const GoalButton: FC<GoalButtonProps> = props => {
 
   return (
     <span>
-      <Tooltip title={goalModel.toWords(goal, currency)}>
+      <Tooltip title={formatGoal(goal, currency)}>
         <IconButton size="small" onClick={onClick}>
           <RadialProgress value={goalProgress || 0} fontSize="inherit" />
         </IconButton>

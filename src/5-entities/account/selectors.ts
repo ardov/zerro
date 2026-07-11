@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { populate } from './shared/populate'
 import { AccountType, ById } from '6-shared/types'
 import { RootState } from 'store'
-import { instrumentModel } from '5-entities/currency/instrument'
+import { getInstCodeMap } from '5-entities/currency/instrument/model'
 import { TAccountPopulated } from './shared/populate'
 // Import the constant from Core Next directly: going through the hidden-store
 // barrel creates a module cycle (hidden-store -> dataAccount -> accountModel).
@@ -19,7 +19,7 @@ export const getDebtAccountId = createSelector([getAccounts], accounts => {
 })
 
 export const getPopulatedAccounts = createSelector(
-  [getAccounts, instrumentModel.getInstCodeMap],
+  [getAccounts, getInstCodeMap],
   (accounts, fxIdMap) => {
     const result: ById<TAccountPopulated> = {}
     for (const id in accounts) {

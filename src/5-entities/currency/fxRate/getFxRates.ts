@@ -3,7 +3,7 @@ import { TISOMonth, ByMonth, ById, TInstrument, TMsTime } from '6-shared/types'
 import { keys } from '6-shared/helpers/keys'
 import { toISOMonth } from '6-shared/helpers/date'
 import { TSelector } from 'store'
-import { instrumentModel } from '5-entities/currency/instrument'
+import { getInstruments } from '5-entities/currency/instrument/model'
 import { fxRateStore, TFxRates, TFxRatesStoredValue } from './fxRateStore'
 
 export type TFxRateData = {
@@ -14,7 +14,7 @@ export type TFxRateData = {
 }
 
 export const getCurrentRates: TSelector<TFxRateData> = createSelector(
-  [instrumentModel.getInstruments],
+  [getInstruments],
   (instruments: ById<TInstrument>): TFxRateData => {
     const result: TFxRateData = {
       date: toISOMonth(new Date()),

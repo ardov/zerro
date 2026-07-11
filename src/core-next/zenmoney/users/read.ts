@@ -7,11 +7,13 @@ import {
 } from '../instruments'
 import type { TUser, TUserId } from './types'
 
-export function getUsers(data: TDataStore): ById<TUser> {
+export type TUserSource = Pick<TDataStore, 'user' | 'instrument'>
+
+export function getUsers(data: TUserSource): ById<TUser> {
   return data.user
 }
 
-export function getRootUser(data: TDataStore): TUser | null {
+export function getRootUser(data: TUserSource): TUser | null {
   const users = getUsers(data)
   for (const id in users) {
     if (!users[id].parent) return users[id]
@@ -19,15 +21,15 @@ export function getRootUser(data: TDataStore): TUser | null {
   return null
 }
 
-export function getRootUserId(data: TDataStore): TUserId | null {
+export function getRootUserId(data: TUserSource): TUserId | null {
   return getRootUser(data)?.id || null
 }
 
-export function getUserInstrumentId(data: TDataStore): TInstrumentId | null {
+export function getUserInstrumentId(data: TUserSource): TInstrumentId | null {
   return getRootUser(data)?.currency || null
 }
 
-export function getUserCurrency(data: TDataStore): TFxCode {
+export function getUserCurrency(data: TUserSource): TFxCode {
   const instrumentId = getUserInstrumentId(data)
   if (typeof instrumentId !== 'number') return 'USD'
   return getInstCodeMap(data)[instrumentId] || 'USD'

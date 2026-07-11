@@ -2,8 +2,10 @@ import React, { FC } from 'react'
 import { OptionalExceptFor, TInstrumentId } from '6-shared/types'
 import { AmountProps, Amount } from '6-shared/ui/Amount'
 
-import { useCoreInstruments } from 'core-next/adapters/redux'
-import { userModel } from '5-entities/user'
+import {
+  useCoreInstruments,
+  useCoreUserInstrumentId,
+} from 'core-next/adapters/redux'
 
 export type TSmartAmountProps = AmountProps & {
   instrument?: TInstrumentId | 'user'
@@ -20,7 +22,7 @@ type ConnectedAmountProps = OptionalExceptFor<
   'value' | 'instrument'
 >
 function ConnectedAmount(props: ConnectedAmountProps) {
-  const userInstrumentId = userModel.useUserInstrumentId()
+  const userInstrumentId = useCoreUserInstrumentId()
   const instruments = useCoreInstruments()
   const id = props.instrument === 'user' ? userInstrumentId : props.instrument
   const currency = id ? instruments?.[id]?.shortTitle : undefined

@@ -48,19 +48,25 @@ Instrument maps and merchants now also use Core Redux exports. The adapter owns
 their direct Redux-slice selectors and derives code maps locally, so neither app
 consumers nor adapter wiring import their legacy model objects.
 
-Next take user and user-settings reads as one family. They are the remaining
-small reactive preference surface; keep feature-specific goal/envelope helpers
-separate rather than creating another catch-all adapter API.
+User and user-settings reads now use Core Redux selectors/hooks. Envelope IDs
+and structure flattening are exported as narrow Core helpers, localized goal
+wording lives in adapter presentation, and bulk actions are named thunks rather
+than model objects. Legacy projection internals import their defining selectors
+directly.
+
+Production code now contains zero `*Model.*` calls. A boundary test keeps that
+invariant. Model-object calls remain only inside explicit legacy-parity tests;
+the next cleanup step is to retire those bridges together with the corresponding
+legacy selector implementations and then remove the now test-only model objects.
 
 ## Verification checkpoint
 
 Start verification now, but do not call the refactor complete yet. The public
 baseline proves deterministic demo behavior, Core/Redux parity, invalidation,
 command routing, replay, package boundaries, and type safety. In the current
-tree after the account and reference-data slices, however, 16 `*Model` calls
-remain across 11 page/widget/feature files; recalculate this after every family.
-Eight
-legacy-parity bridge suites still exist. The opt-in private fixture is not
+tree after the final model-call cutover has zero production `*Model.*` calls.
+Eight legacy-parity bridge suites still exist and intentionally exercise
+test-only model objects. The opt-in private fixture is not
 available in this environment, so large real-account parity is not freshly
 verified.
 

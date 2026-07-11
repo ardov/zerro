@@ -10,8 +10,8 @@ import { sendEvent } from '6-shared/helpers/tracking'
 
 import { useAppDispatch, useAppSelector } from 'store'
 import { TEnvelope, TEnvelopeId } from '5-entities/envelope'
-import { goalModel } from '5-entities/goal'
 import {
+  formatGoal,
   selectCoreEnvMetrics,
   selectCoreEnvelopes,
   selectCoreGoals,
@@ -71,9 +71,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
               component="span"
               color={goalInfo ? 'text.primary' : 'text.disabled'}
             >
-              {goalInfo
-                ? goalModel.toWords(goalInfo.goal, currency)
-                : t('goal')}
+              {goalInfo ? formatGoal(goalInfo.goal, currency) : t('goal')}
             </Typography>
           </ButtonBase>
         </Grid>

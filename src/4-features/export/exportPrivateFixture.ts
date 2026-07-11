@@ -34,8 +34,8 @@ export async function makePrivateFixture(
   fixtureName: string
 ) {
   const [
-    { budgetModel },
-    { envelopeModel },
+    { getBudgets },
+    { getEnvelopes, getEnvelopeStructure, getKeepingEnvelopes },
     { getMonthList },
     { getRawActivity },
     { getActivity },
@@ -43,8 +43,8 @@ export async function makePrivateFixture(
     { getEnvMetrics },
     { getMonthTotals },
   ] = await Promise.all([
-    import('5-entities/budget'),
-    import('5-entities/envelope'),
+    import('5-entities/budget/getBudgets'),
+    import('5-entities/envelope/getEnvelopes'),
     import('5-entities/envBalances/1 - monthList'),
     import('5-entities/envBalances/1 - rawActivity'),
     import('5-entities/envBalances/2 - activity'),
@@ -85,10 +85,10 @@ export async function makePrivateFixture(
       schemaVersion: 1,
       outputs: {
         monthList: getMonthList(state),
-        envelopes: envelopeModel.getEnvelopes(state),
-        envelopeStructure: envelopeModel.getEnvelopeStructure(state),
-        keepingEnvelopeIds: envelopeModel.getKeepingEnvelopes(state),
-        budgets: budgetModel.get(state),
+        envelopes: getEnvelopes(state),
+        envelopeStructure: getEnvelopeStructure(state),
+        keepingEnvelopeIds: getKeepingEnvelopes(state),
+        budgets: getBudgets(state),
         rawActivity: getRawActivity(state),
         activity: getActivity(state),
         sortedActivity: getSortedActivity(state),

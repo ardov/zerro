@@ -9,7 +9,7 @@ import { RadialProgress } from '6-shared/ui/RadialProgress'
 import { useAppDispatch, useAppSelector } from 'store'
 
 import { selectCoreGoalTotals } from 'core-next/adapters/redux'
-import { totalGoalsModel } from '../model'
+import { fillGoals } from '../model/fillGoals'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useTranslation } from 'react-i18next'
 
@@ -39,7 +39,7 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const formatSum = (sum: number) => formatMoney(sum, currency)
 
   const completeAll = useConfirm({
-    onOk: () => dispatch(totalGoalsModel.fillAll(month)),
+    onOk: () => dispatch(fillGoals(month)),
     title: t('completeAll.title'),
     description: t('completeAll.description'),
     okText: t('completeAll.okText'),

@@ -14,7 +14,7 @@ import { PopoverManager } from '6-shared/historyPopovers'
 import { useAppSelector } from 'store'
 import { getLoginState } from 'store/token'
 import { getLastSyncTime } from 'store/data/selectors'
-import { userModel } from '5-entities/user'
+import { useCoreRootUserId } from 'core-next/adapters/redux'
 import { RegularSyncHandler } from '3-widgets/RegularSyncHandler'
 import Nav from '3-widgets/Navigation'
 import { MobileNavigation } from '3-widgets/Navigation'
@@ -40,7 +40,7 @@ export default function App() {
 
   const isLoggedIn = useAppSelector(getLoginState)
   const hasData = useAppSelector(state => !!getLastSyncTime(state))
-  const userId = userModel.useRootUserId()
+  const userId = useCoreRootUserId()
   useEffect(() => {
     if (userId) setUserId(userId)
   }, [userId])

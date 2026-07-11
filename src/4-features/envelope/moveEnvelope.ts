@@ -1,9 +1,11 @@
 import { AppThunk } from 'store/index'
-import { envelopeModel, TEnvNode, TGroupNode } from '5-entities/envelope'
 import {
   applyEnvelopeStructure,
+  flattenStructure,
   selectCoreEnvelopeStructure,
   toEnvelopeStructureInput,
+  type TEnvNode,
+  type TGroupNode,
 } from 'core-next/adapters/redux'
 
 export function moveEnvelope(
@@ -15,7 +17,7 @@ export function moveEnvelope(
     const structure = selectCoreEnvelopeStructure(getState())
 
     const newStructure = JSON.parse(JSON.stringify(structure)) as TGroupNode[]
-    const flatList = envelopeModel.flattenStructure(newStructure)
+    const flatList = flattenStructure(newStructure)
     const active = flatList[sourceIdx]
     const over = flatList[targetIdx]
 

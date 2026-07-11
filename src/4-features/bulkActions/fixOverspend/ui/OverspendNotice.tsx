@@ -8,14 +8,14 @@ import { isZero } from '6-shared/helpers/money'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useAppDispatch, useAppSelector } from 'store'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
-import { overspendModel } from '../model'
+import { fixOverspends as fixAllOverspends } from '../model/fixOverspends'
 
 export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
   const { t } = useTranslation('overspendNotice')
   const dispatch = useAppDispatch()
   const { overspend } = useAppSelector(selectCoreMonthTotals)[month]
   const fixOverspends = useConfirm({
-    onOk: () => dispatch(overspendModel.fixAll(month)),
+    onOk: () => dispatch(fixAllOverspends(month)),
     title: t('confirm.title'),
     okText: t('confirm.okText'),
     cancelText: t('confirm.cancelText'),

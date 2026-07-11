@@ -5,7 +5,9 @@ import React, {
   useState,
   useRef,
 } from 'react'
-import { tagModel, TagTreeNode, TTagPopulated } from '5-entities/tag'
+import { TagTreeNode, TTagPopulated } from '5-entities/tag'
+import { getTagsTree } from '5-entities/tag/model/model'
+import { useAppSelector } from 'store'
 import {
   Popover,
   Paper,
@@ -85,7 +87,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
   ...popoverProps
 }) => {
   const { t } = useTranslation('common')
-  const tags = tagModel.useTagsTree()
+  const tags = useAppSelector(getTagsTree)
   const [search, setSearch] = useState('')
   const [focused, setFocused] = useState(0)
   const [localTagType, setLocalTagType] = useState(tagType)

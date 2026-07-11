@@ -3,7 +3,8 @@ import { ByMonth, TFxAmount } from '6-shared/types'
 import { keys } from '6-shared/helpers/keys'
 import { TSelector } from 'store/index'
 
-import { envelopeModel, EnvType, TEnvelopeId } from '5-entities/envelope'
+import { TEnvelopeId } from '5-entities/envelope'
+import { envId, EnvType } from 'core-next/adapters/redux'
 import { selectCoreKeepingEnvelopeIds } from 'core-next/adapters/redux'
 import { getConverter } from '5-entities/currency/fxRate/converter'
 
@@ -60,7 +61,7 @@ const getActivityByType: TSelector<ByMonth<TActivityByType>> = createSelector(
     return res
 
     function getEnvCategory(id: TEnvelopeId) {
-      const { type } = envelopeModel.parseId(id)
+      const { type } = envId.parse(id)
       if (type === EnvType.Tag) return 'tags'
       if (type === EnvType.Account) return 'transfers'
       return 'debts'
