@@ -5,7 +5,7 @@ import { entries } from '6-shared/helpers/keys'
 import { isZero, subFxAmount } from '6-shared/helpers/money'
 
 import { TSelector } from 'store/index'
-import { getTransactionsHistory } from '5-entities/transaction/model'
+import { selectCoreTransactionsHistory } from 'core-next/adapters/redux'
 import { getDebtors, TDebtor } from '5-entities/debtors/getDebtors'
 import { getPopulatedAccounts } from '5-entities/account/selectors'
 import type { TAccountPopulated } from '5-entities/account'
@@ -24,7 +24,7 @@ export const getBalances: TSelector<{
   startingBalances: TBalanceState
 }> = createSelector(
   [
-    getTransactionsHistory,
+    selectCoreTransactionsHistory,
     getConverterToChange,
     getPopulatedAccounts,
     getDebtors,

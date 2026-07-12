@@ -39,6 +39,11 @@ temporarily re-exported by the Redux adapter from its defining legacy module;
 move that implementation after the remaining legacy transaction projections
 are retired.
 
+The legacy transaction selector module is now deleted. Remaining legacy balance,
+debtor, and envBalances projections select Core transaction history and history
+start directly; their parity suite keeps only the still-legacy downstream
+projections under comparison.
+
 Account reads/hooks now use granular Core Redux exports: raw and populated
 accounts, lists, in-budget and saving subsets, plus debt-account selection.
 The populated projection belongs to the Core account read layer and receives

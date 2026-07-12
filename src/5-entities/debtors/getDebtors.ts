@@ -13,7 +13,7 @@ import { withPerf } from '6-shared/helpers/performance'
 
 import { TSelector } from 'store'
 import { getDebtAccountId } from '5-entities/account/selectors'
-import { getTransactionsHistory } from '5-entities/transaction/model'
+import { selectCoreTransactionsHistory } from 'core-next/adapters/redux'
 import { getType, TrType } from '5-entities/transaction/helpers'
 import { cleanPayee } from '5-entities/shared/cleanPayee'
 import { getMerchants } from '5-entities/merchant/model'
@@ -30,7 +30,12 @@ export type TDebtor = {
 }
 
 export const getDebtors: TSelector<ById<TDebtor>> = createSelector(
-  [getTransactionsHistory, getMerchants, getInstruments, getDebtAccountId],
+  [
+    selectCoreTransactionsHistory,
+    getMerchants,
+    getInstruments,
+    getDebtAccountId,
+  ],
   withPerf('getDebtors', collectDebtors)
 )
 

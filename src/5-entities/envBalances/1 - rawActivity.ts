@@ -20,7 +20,7 @@ import { getDebtors, TDebtor } from '5-entities/debtors/getDebtors'
 import { getInstruments } from '5-entities/currency/instrument/model'
 import { cleanPayee } from '5-entities/shared/cleanPayee'
 import { compareTrDates, getType, TrType } from '5-entities/transaction/helpers'
-import { getTransactionsHistory } from '5-entities/transaction/model'
+import { selectCoreTransactionsHistory } from 'core-next/adapters/redux'
 import { TEnvelopeId } from '5-entities/envelope'
 import { envId, EnvType } from 'core-next/adapters/redux'
 
@@ -33,7 +33,7 @@ export type TRawActivityNode = {
 export const getRawActivity: TSelector<ByMonth<TRawActivityNode>> =
   createSelector(
     [
-      getTransactionsHistory,
+      selectCoreTransactionsHistory,
       getInBudgetAccounts,
       getDebtAccountId,
       getDebtors,

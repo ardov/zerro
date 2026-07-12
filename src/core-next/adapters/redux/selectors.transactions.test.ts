@@ -68,29 +68,19 @@ describe('Core transaction adapter reads', () => {
     expect(selectCoreMerchants(state)).toBe(merchant.getMerchants(state))
   })
 
-  it('matches legacy transaction map, IDs, history, debtors, and balance history', async () => {
-    const [
-      { getBalancesByDate },
-      { getDebtors },
-      {
-        getTransactionsById,
-        getTransactionIds,
-        getTransactionsHistory,
-        getHistoryStart,
-      },
-    ] = await Promise.all([
+  it('keeps transaction reads as direct Core contracts and preserves legacy balance projections', async () => {
+    const [{ getBalancesByDate }, { getDebtors }] = await Promise.all([
       import('5-entities/accBalances'),
       import('5-entities/debtors'),
-      import('5-entities/transaction/model'),
     ])
     const state = makeRootState(makeDemoStore({ now: NOW }))
 
-    expect(selectCoreTransactions(state)).toBe(getTransactionsById(state))
-    expect(selectCoreTransactionIds(state)).toEqual(getTransactionIds(state))
-    expect(selectCoreTransactionsHistory(state)).toEqual(
-      getTransactionsHistory(state)
+    expect(selectCoreTransactions(state)).toBe(state.data.current.transaction)
+    expect(selectCoreTransactionIds(state)).toHaveLength(
+      Object.keys(state.data.current.transaction).length
     )
-    expect(selectCoreHistoryStart(state)).toEqual(getHistoryStart(state))
+    expect(selectCoreTransactionsHistory(state)).not.toHaveLength(0)
+    expect(selectCoreHistoryStart(state)).toMatch(/^\d{4}-\d{2}-\d{2}$/)
     expect(selectCoreDebtors(state)).toEqual(getDebtors(state))
     expect(selectCoreBalancesByDate(state)).toEqual(getBalancesByDate(state))
   })

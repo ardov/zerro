@@ -292,6 +292,11 @@ viewed state, date ordering, and the debt-aware type hook. Legacy projections
 import their defining selectors directly. The `trModel` object and barrel are
 deleted; filtering remains an explicitly tracked bridge.
 
+The old transaction selector module was deleted after its remaining legacy
+consumers switched to `selectCoreTransactionsHistory` and
+`selectCoreHistoryStart`. Balance and debtor parity remain separate because
+their old projections still exist.
+
 ### Display-currency model
 
 Resolved on 2026-07-11. UI reads and updates display currency through
