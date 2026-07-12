@@ -12,7 +12,7 @@ import {
   selectCoreEnvelopes,
   selectCoreRawActivity,
 } from 'core-next/adapters/redux'
-import { TrFilterMode } from '5-entities/envBalances'
+import { TrFilterMode } from 'core-next/adapters/redux'
 import {
   TransactionList,
   TTransactionListProps,

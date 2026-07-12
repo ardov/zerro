@@ -38,6 +38,7 @@ export {
   updateEnvelopeSettings,
 } from './commands'
 export { nullTag, populateTags, type TTagPopulated } from './tagPresentation'
+export type { TPresentedEnvelope } from './envelopePresentation'
 export { formatGoal } from './goalPresentation'
 export {
   useCoreDisplayCurrency,
@@ -65,20 +66,27 @@ export {
   isTransactionViewed,
   TrType,
   type TAccountPopulated,
+  type TDebtor,
 } from '../../zenmoney'
 export {
   checkRaw as compileTransactionFilter,
   type TrCondition,
 } from '5-entities/transaction/filtering'
 export { goalType, normalizeGoal, type TGoal } from '../../zerro/goals'
+export type { TGoalInfo } from '../../zerro/goals'
 export { type TFxRates } from '../../zerro/fx-rates'
 export {
   envId,
+  EnvActivity,
   EnvType,
   flattenStructure,
+  TrFilterMode,
   toEnvelopeStructureInput,
+  type TEnvMetrics,
   type TEnvNode,
   type TGroupNode,
+  type TMonthTotals,
+  type TSortedActivityNode,
   type TApplyEnvelopeStructureInput,
   type TEnvelopeStructureGroupInput,
   type TEnvelopeStructureNodeInput,

@@ -26,7 +26,7 @@ import {
 } from '6-shared/helpers/date'
 
 import { TEnvelopeId } from '5-entities/envelope'
-import { TrFilterMode } from '5-entities/envBalances'
+import { TrFilterMode } from 'core-next/adapters/redux'
 import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 import { OneLiner } from '3-widgets/DataLine'
 import { cardStyle } from './shared'

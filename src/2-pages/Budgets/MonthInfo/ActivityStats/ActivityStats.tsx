@@ -11,7 +11,7 @@ import {
   EnvActivity,
   TrFilterMode,
   TSortedActivityNode,
-} from '5-entities/envBalances'
+} from 'core-next/adapters/redux'
 import { useAppSelector } from 'store'
 import {
   selectCoreEnvelopes,
