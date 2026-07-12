@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import { useCoreToDisplay } from 'core-next/adapters/redux'
+import { useCoreToDisplay } from 'zerro-core/redux'
 import { Box, Typography, Chip, Stack } from '@mui/material'
 import { entries } from '6-shared/helpers/keys'
 import { addFxAmount } from '6-shared/helpers/money'
 import { useAppSelector } from 'store'
-import { selectCorePopulatedTags } from 'core-next/adapters/redux'
+import { selectCorePopulatedTags } from 'zerro-core/redux'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 
 import { Card, TCardProps } from '../../shared/Card'

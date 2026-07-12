@@ -13,7 +13,7 @@ vi.mock('6-shared/api/fxRates', () => ({
   firstPossibleDate: '2024-03-10',
   requestRates: requestRatesMock,
 }))
-vi.mock('core-next/adapters/redux', () => ({
+vi.mock('zerro-core/redux', () => ({
   editFxRates: editFxRatesMock,
   selectCoreCurrentFxRates: selectCurrentMock,
 }))

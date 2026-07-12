@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { useAppSelector } from 'store'
-import { selectCorePopulatedTags } from 'core-next/adapters/redux'
+import { selectCorePopulatedTags } from 'zerro-core/redux'
 import { TagTreeNode, TTagPopulated } from '5-entities/tag'
 import { getTagsTree } from '5-entities/tag/model/model'
 import { Box, Autocomplete, TextField } from '@mui/material'

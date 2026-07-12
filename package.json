@@ -9,7 +9,7 @@
     "preview": "vite preview --port 3000",
     "tsc": "tsc --watch",
     "test": "vitest",
-    "core-next:package-check": "node scripts/check-core-next-package.mjs",
+    "zerro-core:package-check": "node scripts/check-zerro-core-package.mjs",
     "lint:css": "stylelint \"src/**/*.{js,jsx,ts,tsx}\"",
     "lint": "npx tsc --noEmit",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,scss,json,md}\"",

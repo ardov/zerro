@@ -6,7 +6,7 @@ import {
   selectCoreConvertFx,
   setBudget,
   type TBudgetUpdate,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 
 export function setTotalBudget(upd: TBudgetUpdate | TBudgetUpdate[]): AppThunk {
   return (dispatch, getState) => {

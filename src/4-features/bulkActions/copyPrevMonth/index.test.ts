@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
 import type { TEnvelopeId } from '5-entities/envelope'
-import { selectCoreEnvMetrics, setBudget } from 'core-next/adapters/redux'
+import { selectCoreEnvMetrics, setBudget } from 'zerro-core/redux'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { copyPreviousBudget } from './index'
 
-vi.mock('core-next/adapters/redux', () => ({
+vi.mock('zerro-core/redux', () => ({
   selectCoreEnvMetrics: vi.fn(),
   setBudget: vi.fn(),
 }))

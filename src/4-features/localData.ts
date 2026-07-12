@@ -3,7 +3,7 @@ import { applyServerPatch } from 'store/data'
 import { restorePersistedReplica } from 'store/data'
 import { getDataToSave } from '4-features/shared/getDataToSave'
 import { TLocalData } from '6-shared/types'
-import { parsePersistedReplica } from 'core-next/engine/persistence'
+import { parsePersistedReplica } from 'zerro-core/infrastructure/replica/persistence'
 import {
   getLocalData,
   getReplicaState,

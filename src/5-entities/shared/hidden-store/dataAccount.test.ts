@@ -6,7 +6,7 @@ import {
   makeAccount,
   makeStore,
   makeUser,
-} from 'core-next/testing/zenmoneyTestData'
+} from 'zerro-core/testing/zenmoneyTestData'
 import { DATA_ACC_NAME, prepareDataAccount } from './dataAccount'
 
 const NOW = Date.parse('2026-07-11T12:00:00Z')

@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
-import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
-import { useCoreToDisplay } from 'core-next/adapters/redux'
+import { useCoreDisplayCurrency } from 'zerro-core/redux'
+import { useCoreToDisplay } from 'zerro-core/redux'
 import { ButtonBase, Collapse, Stack } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useToggle } from '6-shared/hooks/useToggle'
@@ -11,12 +11,12 @@ import {
   EnvActivity,
   TrFilterMode,
   TSortedActivityNode,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { useAppSelector } from 'store'
 import {
   selectCoreEnvelopes,
   selectCoreSortedActivity,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { DataLine } from '3-widgets/DataLine'
 import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 

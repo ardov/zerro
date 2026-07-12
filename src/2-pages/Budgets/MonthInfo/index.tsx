@@ -30,7 +30,7 @@ import { ActivityStats } from './ActivityStats'
 import {
   selectCoreGoalTotals,
   selectCoreMonthTotals,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { fillGoals } from '4-features/bulkActions/fillGoals'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useTranslation } from 'react-i18next'

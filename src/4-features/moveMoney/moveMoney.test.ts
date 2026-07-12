@@ -5,11 +5,11 @@ import {
   selectCoreConvertFx,
   selectCoreEnvMetrics,
   setBudget,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { moveMoney } from './moveMoney'
 
-vi.mock('core-next/adapters/redux', () => ({
+vi.mock('zerro-core/redux', () => ({
   selectCoreEnvMetrics: vi.fn(),
   selectCoreConvertFx: vi.fn(),
   setBudget: vi.fn(),

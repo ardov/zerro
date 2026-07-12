@@ -11,9 +11,9 @@ import {
   TrType,
   useCoreMerchants,
   useCorePopulatedAccounts,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { TTagPopulated } from '5-entities/tag'
-import { selectCorePopulatedTags } from 'core-next/adapters/redux'
+import { selectCorePopulatedTags } from 'zerro-core/redux'
 import { SmartAmount } from '3-widgets/Amount'
 
 type HTMLDivProps = React.DetailedHTMLProps<

@@ -5,8 +5,8 @@ import { keys } from '6-shared/helpers/keys'
 import { isZero } from '6-shared/helpers/money'
 import { AppThunk } from 'store'
 
-import { selectCoreEnvMetrics } from 'core-next/adapters/redux'
-import { type TBudgetUpdate } from 'core-next/adapters/redux'
+import { selectCoreEnvMetrics } from 'zerro-core/redux'
+import { type TBudgetUpdate } from 'zerro-core/redux'
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
 
 export const startFresh =

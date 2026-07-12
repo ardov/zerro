@@ -11,7 +11,7 @@ import {
   selectCoreConvertFx,
   selectCoreEnvMetrics,
   selectCoreGoals,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 
 export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
   const { t } = useTranslation()

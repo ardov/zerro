@@ -24,7 +24,7 @@ import {
   selectCoreEnvelopes,
   selectCoreGoals,
   setGoal,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 
 export type TGoalPopoverProps = Modify<
   PopoverProps,

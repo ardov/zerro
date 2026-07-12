@@ -1,11 +1,11 @@
 import React, { FC } from 'react'
-import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
-import { useCoreToDisplay } from 'core-next/adapters/redux'
+import { useCoreDisplayCurrency } from 'zerro-core/redux'
+import { useCoreToDisplay } from 'zerro-core/redux'
 import { useAppSelector } from 'store'
 import {
   selectCoreMonthList,
   selectCoreMonthTotals,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import {
   Typography,
   ButtonBase,

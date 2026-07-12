@@ -11,8 +11,8 @@ import {
   selectCoreActivity,
   selectCoreEnvelopes,
   selectCoreRawActivity,
-} from 'core-next/adapters/redux'
-import { TrFilterMode } from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
+import { TrFilterMode } from 'zerro-core/redux'
 import {
   TransactionList,
   TTransactionListProps,

@@ -6,7 +6,7 @@ import {
   selectCoreMerchants,
   selectCoreTransactionsHistory,
   TrType,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import {
   TFxAmount,
   TFxCode,

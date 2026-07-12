@@ -28,7 +28,7 @@ import {
   selectCoreEnvMetrics,
   selectCoreEnvelopes,
   selectCoreMonthList,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
 import { trimMonths } from './shared'

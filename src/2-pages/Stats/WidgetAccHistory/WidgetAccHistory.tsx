@@ -5,7 +5,7 @@ import {
   useCorePopulatedAccounts,
   useCoreSavingAccounts,
   useCoreToDisplay,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { useTranslation } from 'react-i18next'
 import {
   Box,

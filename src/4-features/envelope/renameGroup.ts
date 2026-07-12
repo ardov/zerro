@@ -2,7 +2,7 @@ import {
   applyEnvelopeStructure,
   selectCoreEnvelopeStructure,
   toEnvelopeStructureInput,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { AppThunk } from 'store/index'
 
 export function renameGroup(prevName: string, nextName: string): AppThunk {

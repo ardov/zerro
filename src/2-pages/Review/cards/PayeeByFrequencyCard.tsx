@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useCoreToDisplay } from 'core-next/adapters/redux'
+import { useCoreToDisplay } from 'zerro-core/redux'
 import { useTranslation } from 'react-i18next'
 import { ButtonBase, IconButton, Stack, Typography } from '@mui/material'
 

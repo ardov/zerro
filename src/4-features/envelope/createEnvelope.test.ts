@@ -3,15 +3,15 @@ import { i18n } from '6-shared/localization'
 import type { TDataStore } from '6-shared/types'
 import type { AppDispatch, AppThunk, RootState } from 'store'
 import { appendClientOutboxEntry } from 'store/data'
-import { makeDemoStore } from 'core-next/demo'
-import { applyPatch } from 'core-next/zenmoney'
+import { makeDemoStore } from 'zerro-core/demo'
+import { applyPatch } from 'zerro-core/domain/zenmoney'
 import {
   defaultEnvelopeGroupIds,
   envId,
   EnvType,
   getEnvelopeMeta,
-} from 'core-next/zerro'
-import { selectCoreEnvelopes } from 'core-next/adapters/redux'
+} from 'zerro-core/domain/zerro'
+import { selectCoreEnvelopes } from 'zerro-core/redux'
 import { createEnvelope } from './createEnvelope'
 
 const NOW = Date.parse('2026-07-10T12:00:00Z')

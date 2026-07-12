@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react'
-import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
-import { useCoreToDisplay } from 'core-next/adapters/redux'
+import { useCoreDisplayCurrency } from 'zerro-core/redux'
+import { useCoreToDisplay } from 'zerro-core/redux'
 import { Box, InputAdornment, IconButton, Chip } from '@mui/material'
 import Dialog, { DialogProps } from '@mui/material/Dialog'
 import { AmountInput } from '6-shared/ui/AmountInput'
@@ -14,7 +14,7 @@ import {
   selectCoreEnvMetrics,
   selectCoreEnvelopes,
   selectCoreMonthTotals,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 
 export type MoveMoneyModalProps = Modify<
   DialogProps,

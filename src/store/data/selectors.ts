@@ -2,7 +2,7 @@ import { RootState, TSelector } from 'store'
 import { getItemsCount } from './shared/getItemsCount'
 import { AccountType, TAccountId, TDiff } from '6-shared/types'
 import { createSelector } from '@reduxjs/toolkit'
-import { getPendingOutbox } from 'core-next/engine/outbox'
+import { getPendingOutbox } from 'zerro-core/infrastructure/replica/outbox'
 import { immutableMergeDiffs } from './shared/mergeDiffs'
 
 const getOutbox = (state: RootState) => state.data.outbox

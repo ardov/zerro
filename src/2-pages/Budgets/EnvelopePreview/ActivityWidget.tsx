@@ -4,7 +4,7 @@ import {
   selectCoreConvertFx,
   selectCoreEnvMetrics,
   selectCoreMonthList,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { Stack, Box, BoxProps } from '@mui/material'
 import { useTranslation } from 'react-i18next'

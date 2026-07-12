@@ -1,5 +1,5 @@
 import type { TTransaction } from '6-shared/types'
-import { useCoreInstCodeMap, useCoreToDisplay } from 'core-next/adapters/redux'
+import { useCoreInstCodeMap, useCoreToDisplay } from 'zerro-core/redux'
 import React, { FC, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CSSTransition } from 'react-transition-group'
@@ -37,7 +37,7 @@ import {
   mergeTransactionsAsTransfer,
   selectCoreTransactions,
   setTransactionsViewed,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { TagSelect2 } from '5-entities/tag/ui/TagSelect2'
 import { BulkEditModal } from './BulkEditModal'
 import './transitions.css'

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { hashJson } from 'core-next/testing/stableJson'
-import { makeDemoDiff as makeCoreDemoDiff } from 'core-next/demo'
+import { hashJson } from 'zerro-core/testing/stableJson'
+import { makeDemoDiff as makeCoreDemoDiff } from 'zerro-core/demo'
 import { makeDemoDiff } from './index'
 
 const demoOptions = {
@@ -11,7 +11,7 @@ const demoOptions = {
 }
 
 describe('demoData compatibility wrapper', () => {
-  it('delegates to core-next demo generation', () => {
+  it('delegates to zerro-core demo generation', () => {
     expect(hashJson(makeDemoDiff(demoOptions))).toBe(
       hashJson(makeCoreDemoDiff(demoOptions))
     )

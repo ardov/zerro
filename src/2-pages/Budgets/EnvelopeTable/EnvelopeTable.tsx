@@ -7,7 +7,7 @@ import { useToggle } from '6-shared/hooks/useToggle'
 
 import { useAppSelector } from 'store/index'
 import { TEnvelopeId } from '5-entities/envelope'
-import { selectCoreEnvelopeStructure } from 'core-next/adapters/redux'
+import { selectCoreEnvelopeStructure } from 'zerro-core/redux'
 
 import { Parent } from './Parent'
 import { Row } from './Row'

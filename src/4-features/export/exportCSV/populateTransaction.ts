@@ -1,4 +1,4 @@
-import { TrType } from 'core-next/adapters/redux'
+import { TrType } from 'zerro-core/redux'
 import { getType } from '5-entities/transaction/helpers'
 import {
   ByIdOld,

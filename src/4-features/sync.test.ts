@@ -12,7 +12,7 @@ vi.mock('worker', () => ({
 
 vi.mock('6-shared/helpers/tracking', () => ({ sendEvent: vi.fn() }))
 
-import { makeAccount } from 'core-next/testing/zenmoneyTestData'
+import { makeAccount } from 'zerro-core/testing/zenmoneyTestData'
 import data, {
   appendClientOutboxEntry,
   applyServerPatch,

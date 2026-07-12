@@ -1,9 +1,9 @@
 import type { TFxAmount, TISOMonth } from '6-shared/types'
-import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
+import { useCoreDisplayCurrency } from 'zerro-core/redux'
 import {
   selectCoreConvertFx,
   selectCoreEnvMetrics,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import type { TEnvelopeId } from '5-entities/envelope'
 
 import React, { FC, useEffect, useState } from 'react'

@@ -1,12 +1,12 @@
 import type { TFxCode, TISOMonth } from '6-shared/types'
-import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
+import { useCoreDisplayCurrency } from 'zerro-core/redux'
 import {
   editFxRates,
   resetFxRates,
   selectCoreFxRatesGetter,
   selectCoreMonthTotals,
   type TFxRates,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import React, { FC, useEffect, useState } from 'react'
 import {
   Box,

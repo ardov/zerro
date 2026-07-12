@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { AppThunk, RootState } from 'store'
-import { prepareDataAccount as prepareCoreDataAccount } from 'core-next/adapters/redux'
+import { prepareDataAccount as prepareCoreDataAccount } from 'zerro-core/redux'
 import { TAccountId } from '6-shared/types'
 
 export const DATA_ACC_NAME = '🤖 [Zerro Data]'

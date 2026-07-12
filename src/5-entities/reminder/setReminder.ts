@@ -1,1 +1,1 @@
-export { deleteReminder, setReminder } from 'core-next/adapters/redux'
+export { deleteReminder, setReminder } from 'zerro-core/redux'

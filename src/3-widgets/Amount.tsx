@@ -5,7 +5,7 @@ import { AmountProps, Amount } from '6-shared/ui/Amount'
 import {
   useCoreInstruments,
   useCoreUserInstrumentId,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 
 export type TSmartAmountProps = AmountProps & {
   instrument?: TInstrumentId | 'user'

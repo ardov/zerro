@@ -1,6 +1,6 @@
 import { toISOMonth } from '6-shared/helpers/date'
 import { ById, TBudget, globalBudgetTagId } from '6-shared/types'
-import { envId, EnvType, type TBudgetUpdate } from 'core-next/adapters/redux'
+import { envId, EnvType, type TBudgetUpdate } from 'zerro-core/redux'
 import { getTagBudgets, setEnvBudget } from '5-entities/budget'
 import { AppThunk } from 'store'
 

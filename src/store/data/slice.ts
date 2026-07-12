@@ -6,11 +6,11 @@ import {
   getPendingOutbox,
   replayOutbox,
   type TOutboxEntry,
-} from 'core-next/engine/outbox'
+} from 'zerro-core/infrastructure/replica/outbox'
 import {
   replicaPersistenceVersion,
   type TPersistedReplica,
-} from 'core-next/engine/persistence'
+} from 'zerro-core/infrastructure/replica/persistence'
 import { withPerf } from '6-shared/helpers/performance'
 import { TDataStore, TDiff } from '6-shared/types'
 import { applyDiffMutable } from './shared/applyDiff'

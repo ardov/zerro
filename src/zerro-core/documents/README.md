@@ -1,0 +1,151 @@
+# Zerro Core documentation
+
+`src/zerro-core` is the staged extraction of Zerro domain behavior into a
+storage-agnostic module. These documents are the durable control plane for the
+migration; implementation history belongs in Git.
+
+## Module layout
+
+```txt
+domain/          pure normalized ZenMoney and Zerro domain behavior
+application/     snapshot session and materialization use cases
+infrastructure/  replica, outbox, replay, and persistence contracts
+redux/           React app integration: commands, selectors, and hooks
+presentation/    optional package-safe appearance data
+demo/            deterministic public demo data
+testing/         test-only builders and stable comparison helpers
+```
+
+Dependencies point inward: domain code does not import application,
+infrastructure, Redux, presentation, or app modules. The root `zerro-core`
+entrypoint remains the supported headless facade; `zerro-core/redux` is the
+explicit application integration entrypoint.
+
+## Start here
+
+For a new task or agent:
+
+1. Inspect `git status --short` and the current `src/zerro-core` tree.
+2. Read [handoff.md](./handoff.md) for the verified branch state and default
+   next slice.
+3. Read the relevant section of [architecture.md](./architecture.md) before
+   changing a boundary or contract.
+4. Use [roadmap.md](./roadmap.md) to choose another independent track.
+5. Check [design-ledger.md](./design-ledger.md) before settling an open question
+   or removing a compatibility bridge.
+
+The handoff is routing, not proof that code landed. Always verify the tree.
+
+## Current position
+
+- Production Core is independent of Redux, React, i18n, storage, ZenMoney HTTP,
+  and runtime imports from `6-shared`.
+- Core owns normalized ZenMoney entities, patch/replay primitives, Zerro hidden
+  data, read projectors, and a substantial command layer.
+- Most budget, envelope, goal, activity, transaction, debtor, and balance reads
+  now reach the app through `zerro-core/redux`.
+- All production writes use semantic commands through the Core command funnel;
+  the legacy patch bridge has been removed.
+- Every local Redux patch now passes through an identity materializer. Server
+  diffs bypass it as already canonical.
+- `createZerroEngine` models outbox replay but has no production owner yet;
+  Redux must remain the sole reactive state owner in the app.
+- Pure internal outbox operations now own head clamping, pending-prefix reads,
+  redo-tail truncation on append, and applied-patch replay; the reference
+  engine reuses them without exposing them from the root package surface.
+- Semantic Redux commands and explicit bootstrap/debug infrastructure commands
+  now append complete runtime outbox entries. No production caller dispatches
+  `applyClientPatch` directly, and the bypassing action is removed. Redux
+  `current` replays from the applied outbox prefix; sync transport derives from
+  that prefix without a parallel Redux `data.diff` mirror.
+- Canonical sync responses may stage internally between reducer actions and
+  remove the exact entry ids captured at request start, so commands created
+  while a request is in flight survive and replay over the updated server base.
+  This is not a product inbox.
+- Periodic sync runs only for a clean applied outbox prefix. Dirty sessions wait
+  for explicit user synchronization; no incoming-change history is kept.
+- Runtime outbox/head now persist under a separate versioned IndexedDB key.
+  Reload validates the base timestamp and derives `current` by replay;
+  old storage without replica metadata remains compatible.
+- The session is snapshot-based and lazily memoized. Namespaced `get*` reads are
+  the semantic facade; flat `session.read.*` remains deprecated compatibility.
+- Session envelope reads are domain-only. The Redux adapter adds localized
+  groups, icons, and generated/display colors while preserving legacy output.
+- Envelope rename now has a narrow semantic compiler and Redux command;
+  NameCell no longer sends a partial envelope projection.
+- Tag envelope color has a validated semantic command; the color picker no
+  longer sends a partial envelope projection.
+- Transaction commands compile transaction intent only; account-balance
+  effects are reserved for the final materializer phase.
+- Envelope comments have a semantic metadata command; CommentWidget no longer
+  sends a partial envelope projection or an unused month prop.
+- EnvelopeEditDialog uses one explicit atomic settings command and no longer
+  carries a dead create mode or hidden projection fields.
+- Envelope creation is one semantic tag+metadata command with an envelope-id
+  receipt; the app feature no longer chains legacy tag and envelope models.
+- Envelope hierarchy is one semantic structure command; drag-and-drop, group
+  move, group assignment, and group rename send full structure input and the
+  legacy `applyStructure` thunk is gone.
+- The envelope write family is fully semantic: the compatibility
+  `patchEnvelope` thunk and `zerro.envelope.patch` command are removed, and
+  envelope drafts stay internal to Core compile functions.
+- Transaction writes are semantic Redux adapter commands; the legacy thunk
+  wrapper family and broken `splitTransfer` are removed.
+- Account in-budget changes call a semantic Redux adapter command directly;
+  the legacy `setInBudget`, `patchAccount`, `patchTag`, `createTag`, and
+  `patchMerchant` thunks are deleted.
+- FX edit/reset use semantic Core Redux commands; HTTP rate loading remains an
+  app feature. The legacy FX thunk file and unused freeze action are deleted.
+- Transaction-list bulk combine/merge actions are semantic commands; the dead
+  `setTagBudget` write is removed.
+- `mergeAccounts` is semantic, including transaction and reminder reassignment,
+  internal-transfer collapse, validation, and source deletion. No production
+  consumer imports `applyLegacyPatch` now.
+
+## Default next slice
+
+Track D's sync/outbox/persistence lifecycle, manual commit boundary,
+outbox-derived transport, and explicit Redux `data.base` are live. Further
+Track D work waits for a concrete crash-consistency or response-staging need.
+
+See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
+
+## Document map
+
+| Document                               | Question it answers                                |
+| -------------------------------------- | -------------------------------------------------- |
+| [handoff.md](./handoff.md)             | What is true on this branch right now?             |
+| [architecture.md](./architecture.md)   | Which boundaries and contracts should remain true? |
+| [roadmap.md](./roadmap.md)             | What can be done next, and in what order?          |
+| [design-ledger.md](./design-ledger.md) | Which decisions are settled, open, or temporary?   |
+| [testing.md](./testing.md)             | Which tests protect which kind of change?          |
+
+Entity-specific ZenMoney knowledge belongs beside the implementation under
+`src/zerro-core/domain/zenmoney/*/README.md`, not in the migration roadmap.
+
+## Working rules
+
+- Prefer one bounded layer and its tests over a broad rewrite.
+- Keep the root `zerro-core` entrypoint facade-only.
+- Treat `zerro-core/domain`, `zerro-core/application`,
+  `zerro-core/infrastructure`, and `zerro-core/presentation` as internal
+  implementation paths, not supported app-facing APIs.
+- Keep pure projectors explicit about dependencies.
+- Keep presentation, localization, SVG URLs, Redux, and persistence outside
+  domain code.
+- Compare resulting state for command migrations, not only patch shape.
+- Update the handoff, roadmap, or design ledger in the same slice when their
+  claims change.
+
+## Verification defaults
+
+For ordinary Core work:
+
+```bash
+pnpm exec tsc --noEmit
+pnpm exec vitest run
+```
+
+For a narrow slice, run focused tests first, then the full suite when a shared
+boundary such as patch application, materialization, Redux state, or package
+exports changes.

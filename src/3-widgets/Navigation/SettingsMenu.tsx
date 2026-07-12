@@ -41,7 +41,7 @@ import {
   setEmojiIcons,
   setPreferZmBudgets,
   useCoreUserSettings,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { useRegularSync } from '3-widgets/RegularSyncHandler'
 import { logOut } from '4-features/authorization'
 import { exportCSV } from '4-features/export/exportCSV'

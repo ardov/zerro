@@ -1,6 +1,6 @@
 import { Modify, TFxAmount, TISOMonth } from '6-shared/types'
-import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
-import { useCoreToDisplay } from 'core-next/adapters/redux'
+import { useCoreDisplayCurrency } from 'zerro-core/redux'
+import { useCoreToDisplay } from 'zerro-core/redux'
 import { Amount, AmountProps } from '6-shared/ui/Amount'
 
 type TDisplayAmountProps = Modify<

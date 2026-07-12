@@ -16,7 +16,7 @@ import {
   selectCoreEnvelopes,
   selectCoreGoals,
   setEnvelopeColor,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { useMonth } from '../MonthProvider'
 import { EnvelopeEditDialog, useEditDialog } from '../EnvelopeEditDialog'
 import { ActivityWidget } from './ActivityWidget'

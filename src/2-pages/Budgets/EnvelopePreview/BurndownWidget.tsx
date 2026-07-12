@@ -1,10 +1,10 @@
 import React, { FC } from 'react'
-import { useCoreToDisplay } from 'core-next/adapters/redux'
+import { useCoreToDisplay } from 'zerro-core/redux'
 import { useAppSelector } from 'store'
 import {
   selectCoreActivity,
   selectCoreEnvMetrics,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { Area, ComposedChart, Line, ResponsiveContainer, YAxis } from 'recharts'
 import { Stack, Box, BoxProps } from '@mui/material'
 import { useTranslation } from 'react-i18next'

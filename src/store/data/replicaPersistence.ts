@@ -3,8 +3,8 @@ import type { TDataStore } from '6-shared/types'
 import {
   replicaPersistenceVersion,
   type TPersistedReplica,
-} from 'core-next/engine/persistence'
-import type { TOutboxEntry } from 'core-next/engine/outbox'
+} from 'zerro-core/infrastructure/replica/persistence'
+import type { TOutboxEntry } from 'zerro-core/infrastructure/replica/outbox'
 import {
   appendClientOutboxEntry,
   prepareClientSync,

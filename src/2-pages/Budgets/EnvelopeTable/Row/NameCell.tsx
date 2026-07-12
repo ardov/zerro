@@ -1,5 +1,5 @@
 import React, { FC, memo, ReactNode, useCallback, useRef } from 'react'
-import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
+import { useCoreDisplayCurrency } from 'zerro-core/redux'
 import { useDraggable } from '@dnd-kit/core'
 import { Typography, Box, IconButton, Collapse, Chip } from '@mui/material'
 import { useTranslation } from 'react-i18next'
@@ -12,7 +12,7 @@ import { getCurrencySymbol } from '6-shared/helpers/money'
 import { useFloatingInput } from '6-shared/ui/FloatingInput'
 import { useAppDispatch } from 'store/index'
 import { TEnvelope, TEnvelopeId } from '5-entities/envelope'
-import { renameEnvelope } from 'core-next/adapters/redux'
+import { renameEnvelope } from 'zerro-core/redux'
 import { DragTypes } from '2-pages/Budgets/DnD'
 
 export const NameCell: FC<{

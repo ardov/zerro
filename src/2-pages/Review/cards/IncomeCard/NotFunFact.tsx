@@ -1,5 +1,5 @@
 import React from 'react'
-import { useCoreToDisplay } from 'core-next/adapters/redux'
+import { useCoreToDisplay } from 'zerro-core/redux'
 import { Dialog, IconButton, Link, Stack, Typography } from '@mui/material'
 import Balancer from 'react-wrap-balancer'
 import pluralize from '6-shared/helpers/pluralize'

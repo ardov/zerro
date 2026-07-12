@@ -3,4 +3,4 @@ export {
   makeDemoDiff,
   makeDemoStore,
   type TDemoDataOptions,
-} from 'core-next/demo'
+} from 'zerro-core/demo'

@@ -5,7 +5,7 @@ import { Debtor, Subheader } from './components'
 import { addFxAmount, isZero } from '6-shared/helpers/money'
 import { keys } from '6-shared/helpers/keys'
 import { TFxCode } from '6-shared/types'
-import { selectCoreDebtors } from 'core-next/adapters/redux'
+import { selectCoreDebtors } from 'zerro-core/redux'
 import { useAppSelector } from 'store'
 
 type TDebtorInfo = {

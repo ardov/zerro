@@ -7,7 +7,7 @@ import { useAppSelector } from 'store/index'
 import {
   selectCoreBalancesByDate,
   selectCoreDisplayConverter,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { balancesToDisplay } from './shared/convertBalancesToDisplay'
 import { TBalanceNode } from './shared/types'
 

@@ -4,7 +4,7 @@ import {
   useCoreInstCodeMap,
   useCorePopulatedAccounts,
   useCoreToDisplay,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { TISODate } from '6-shared/types'
 import { GroupBy, makeDateArray, toGroup } from '6-shared/helpers/date'
 
@@ -12,7 +12,7 @@ import { useAppSelector } from 'store/index'
 import {
   selectCoreHistoryStart,
   selectCoreTransactionsHistory,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { Period, getStart } from './period'
 import { calcCashflow } from './calcCashflow'
 

@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { selectCoreMonthTotals } from 'core-next/adapters/redux'
+import { selectCoreMonthTotals } from 'zerro-core/redux'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Button } from '@mui/material'
 import { TISOMonth } from '6-shared/types'

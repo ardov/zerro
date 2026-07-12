@@ -4,7 +4,7 @@ import {
   createEnvelope as createCoreEnvelope,
   selectCoreEnvelopes,
   selectCoreEnvelopeStructure,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { t } from 'i18next'
 
 type TCreateEnvelopeInput = {

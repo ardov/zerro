@@ -4,7 +4,7 @@ import {
   useCoreInBudgetAccounts,
   useCoreSavingAccounts,
   useCoreToDisplay,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { useTranslation } from 'react-i18next'
 import { Collapse, List, ListItemButton } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'

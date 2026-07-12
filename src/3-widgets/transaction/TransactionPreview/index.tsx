@@ -37,7 +37,7 @@ import {
   selectCoreTransactions,
   useCoreInstruments,
   useCorePopulatedAccounts,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { TagList } from '5-entities/tag/ui/TagList'
 
 import { Reciept } from './Reciept'

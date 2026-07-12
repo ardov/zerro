@@ -3,7 +3,7 @@ import {
   applyEnvelopeStructure,
   selectCoreEnvelopeStructure,
   toEnvelopeStructureInput,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { arrayMove } from './arrayMove'
 
 export function moveGroup(fromIdx: number, toIdx: number): AppThunk {

@@ -1,5 +1,5 @@
 import React, { FC, useRef } from 'react'
-import { useCoreToDisplay } from 'core-next/adapters/redux'
+import { useCoreToDisplay } from 'zerro-core/redux'
 import { ButtonBase, IconButton, Typography, Box } from '@mui/material'
 import { isEqual } from 'lodash'
 import { AddIcon, ArrowDownwardIcon, ArrowUpwardIcon } from '6-shared/ui/Icons'
@@ -15,7 +15,7 @@ import { TFxAmount } from '6-shared/types'
 import {
   selectCoreEnvMetrics,
   selectCoreEnvelopeStructure,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { addFxAmount } from '6-shared/helpers/money'
 import { useMonth } from '../MonthProvider'
 import { Amount } from '6-shared/ui/Amount'

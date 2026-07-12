@@ -7,7 +7,7 @@ import {
   makeReminder,
   makeStore,
   makeUser,
-} from 'core-next/testing/zenmoneyTestData'
+} from 'zerro-core/testing/zenmoneyTestData'
 import { deleteReminder, setReminder } from './setReminder'
 
 const NOW = Date.parse('2026-07-11T12:00:00Z')

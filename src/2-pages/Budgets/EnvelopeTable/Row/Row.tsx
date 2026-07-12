@@ -3,7 +3,7 @@ import {
   formatGoal,
   type TGoal,
   useCoreToDisplay,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { useDroppable } from '@dnd-kit/core'
 import { IconButton, IconButtonProps } from '@mui/material'
 import { useTranslation } from 'react-i18next'
@@ -18,7 +18,7 @@ import {
   selectCoreEnvMetrics,
   selectCoreEnvelopes,
   selectCoreGoals,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { DragTypes } from '2-pages/Budgets/DnD'
 import { useBudgetPopover } from '../../BudgetPopover'
 import { useGoalPopover } from '../../GoalPopover'

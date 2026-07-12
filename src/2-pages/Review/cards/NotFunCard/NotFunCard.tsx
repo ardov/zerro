@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
-import { useCoreDisplayCurrency } from 'core-next/adapters/redux'
-import { useCoreToDisplay } from 'core-next/adapters/redux'
+import { useCoreDisplayCurrency } from 'zerro-core/redux'
+import { useCoreToDisplay } from 'zerro-core/redux'
 import {
   Box,
   Checkbox,
@@ -26,7 +26,7 @@ import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { Card, TCardProps } from '../../shared/Card'
 import { useStats } from '../../shared/getFacts'
 import { useAppSelector } from 'store'
-import { selectCorePopulatedTags } from 'core-next/adapters/redux'
+import { selectCorePopulatedTags } from 'zerro-core/redux'
 import { TagSelect } from './TagSelect'
 import { TaxesChart } from './Chart'
 import { getTaxes } from './getTaxesByIncome'

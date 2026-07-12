@@ -6,7 +6,7 @@ import {
   toEnvelopeStructureInput,
   type TEnvNode,
   type TGroupNode,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 
 export function moveEnvelope(
   sourceIdx: number,

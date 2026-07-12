@@ -1,6 +1,6 @@
 import { v1 as uuidv1 } from 'uuid'
 import { OptionalExceptFor, TTag } from '6-shared/types'
-import { nullTag } from 'core-next/adapters/redux'
+import { nullTag } from 'zerro-core/redux'
 
 type TagDraft = OptionalExceptFor<TTag, 'user' | 'title'>
 

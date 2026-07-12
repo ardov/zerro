@@ -4,11 +4,11 @@ import {
   selectCoreConvertFx,
   selectCoreEnvMetrics,
   setBudget,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import type { TEnvelopeId } from '5-entities/envelope'
 import { setTotalBudget } from './setTotalBudget'
 
-vi.mock('core-next/adapters/redux', () => ({
+vi.mock('zerro-core/redux', () => ({
   selectCoreEnvMetrics: vi.fn(),
   selectCoreConvertFx: vi.fn(),
   setBudget: vi.fn(),

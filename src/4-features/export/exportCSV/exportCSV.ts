@@ -6,13 +6,13 @@ import {
 import { formatDate } from '6-shared/helpers/date'
 import { ById } from '6-shared/types'
 import { AppThunk } from 'store'
-import { TrType } from 'core-next/adapters/redux'
+import { TrType } from 'zerro-core/redux'
 import {
   selectCorePopulatedTags,
   selectCoreAccounts,
   selectCoreInstruments,
   selectCoreTransactions,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 
 // Only for CSV
 const getPopulatedTransactions = createSelector(

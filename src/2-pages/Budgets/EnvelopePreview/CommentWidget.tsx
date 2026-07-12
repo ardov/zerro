@@ -7,7 +7,7 @@ import { TEnvelopeId } from '5-entities/envelope'
 import {
   selectCoreEnvelopes,
   setEnvelopeComment,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { useDebouncedCallback } from '6-shared/hooks/useDebouncedCallback'
 import { useTranslation } from 'react-i18next'
 

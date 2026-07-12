@@ -8,7 +8,7 @@ import IconButton from '@mui/material/IconButton'
 import { FilterListIcon, CloseIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { useToggle } from '6-shared/hooks/useToggle'
-import { TrCondition } from 'core-next/adapters/redux'
+import { TrCondition } from 'zerro-core/redux'
 import FilterDrawer from './FilterDrawer'
 
 type FilterProps = {

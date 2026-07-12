@@ -9,7 +9,7 @@ import {
   selectCoreEnvMetrics,
   selectCoreGoals,
   selectCoreMonthList,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { isEqual } from 'lodash'
 
 export type TRenderInfo = {

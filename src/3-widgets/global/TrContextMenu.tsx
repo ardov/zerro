@@ -10,7 +10,7 @@ import {
   restoreTransaction,
   selectCoreTransactions,
   setTransactionsViewed,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { useTranslation } from 'react-i18next'
 import { getMenuPosition } from './shared/helpers'
 

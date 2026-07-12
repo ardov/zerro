@@ -5,7 +5,7 @@ import {
   selectCoreEnvelopeStructure,
   toEnvelopeStructureInput,
   TEnvelopeStructureNodeInput,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { AppThunk } from 'store/index'
 
 export function assignNewGroup(id: TEnvelopeId): AppThunk {

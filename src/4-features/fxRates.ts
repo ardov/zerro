@@ -2,7 +2,7 @@ import type { AppThunk } from 'store'
 import type { TISODate, TISOMonth } from '6-shared/types'
 import { firstPossibleDate, requestRates } from '6-shared/api/fxRates'
 import { toISOMonth } from '6-shared/helpers/date'
-import { editFxRates, selectCoreCurrentFxRates } from 'core-next/adapters/redux'
+import { editFxRates, selectCoreCurrentFxRates } from 'zerro-core/redux'
 
 const getRequestDate = (month: TISOMonth) => (month + '-28') as TISODate
 

@@ -19,7 +19,7 @@ import {
   bulkEditTransactions,
   getTransactionType,
   selectCoreTransactions,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { TagList } from '5-entities/tag/ui/TagList'
 
 type BulkEditModalProps = Modify<DialogProps, { onClose: () => void }> & {

@@ -3,7 +3,7 @@ import { TAccountId, TISODate } from '6-shared/types'
 import {
   selectCoreBalancesByDate,
   useCorePopulatedAccounts,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { getStart, Period } from '../shared/period'
 import { useAppSelector } from 'store/index'
 import { useMemo } from 'react'

@@ -7,7 +7,7 @@ import { Chip, ChipProps } from '@mui/material'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { TagIcon } from '../../../6-shared/ui/TagIcon'
 import { useAppSelector } from 'store'
-import { selectCorePopulatedTags } from 'core-next/adapters/redux'
+import { selectCorePopulatedTags } from 'zerro-core/redux'
 import { TTagPopulated } from '../model'
 
 export const TagChip: FC<ChipProps & { id: TTagId }> = ({ id, ...rest }) => {

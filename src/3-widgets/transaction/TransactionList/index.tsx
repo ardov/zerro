@@ -6,7 +6,7 @@ import type {
   TTransaction,
   TTransactionId,
 } from '6-shared/types'
-import type { TrCondition } from 'core-next/adapters/redux'
+import type { TrCondition } from 'zerro-core/redux'
 
 import React, { useMemo, useState, useCallback, useEffect, FC } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -21,7 +21,7 @@ import {
   selectCoreTransactions,
   selectCoreDebtAccountId,
   setTransactionsViewed,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 import { getEventPosition } from '3-widgets/global/shared/helpers'
 
 import { GrouppedList } from './GrouppedList'

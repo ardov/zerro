@@ -1,5 +1,5 @@
 import React, { FC, ReactNode, useCallback } from 'react'
-import { useCoreToDisplay } from 'core-next/adapters/redux'
+import { useCoreToDisplay } from 'zerro-core/redux'
 import {
   ListSubheader,
   Box,

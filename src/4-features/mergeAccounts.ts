@@ -1,6 +1,6 @@
 import { TAccountId } from '6-shared/types'
 import { AppThunk } from 'store'
-import { mergeAccounts as mergeAccountsCommand } from 'core-next/adapters/redux'
+import { mergeAccounts as mergeAccountsCommand } from 'zerro-core/redux'
 
 /**
  * Deletes an account and moves all its transactions to another one.

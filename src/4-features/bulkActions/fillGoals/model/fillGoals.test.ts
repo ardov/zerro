@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
 import type { TEnvelopeId } from '5-entities/envelope'
-import { selectCoreGoals } from 'core-next/adapters/redux'
-import { goalType } from 'core-next/zerro/goals'
+import { selectCoreGoals } from 'zerro-core/redux'
+import { goalType } from 'zerro-core/domain/zerro/goals'
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { fillGoals } from './fillGoals'
 
-vi.mock('core-next/adapters/redux', async importOriginal => ({
-  ...(await importOriginal<typeof import('core-next/adapters/redux')>()),
+vi.mock('zerro-core/redux', async importOriginal => ({
+  ...(await importOriginal<typeof import('zerro-core/redux')>()),
   selectCoreGoals: vi.fn(),
 }))
 vi.mock('4-features/budget/setTotalBudget', () => ({

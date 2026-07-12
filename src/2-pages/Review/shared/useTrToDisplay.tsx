@@ -1,4 +1,4 @@
-import { useCoreInstCodeMap, useCoreToDisplay } from 'core-next/adapters/redux'
+import { useCoreInstCodeMap, useCoreToDisplay } from 'zerro-core/redux'
 import { TTransaction } from '6-shared/types'
 
 export function useTrToDisplay() {

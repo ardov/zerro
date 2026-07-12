@@ -10,7 +10,7 @@ import {
   selectCoreConvertFx,
   setBudget,
   type TBudgetUpdate,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 
 export const moveMoney =
   (

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   makeAccount,
   makeTransaction,
-} from 'core-next/testing/zenmoneyTestData'
+} from 'zerro-core/testing/zenmoneyTestData'
 import {
   getChangedNum,
   getLastChangeTime,

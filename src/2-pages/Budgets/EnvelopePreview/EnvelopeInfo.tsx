@@ -3,7 +3,7 @@ import { useAppSelector } from 'store'
 import {
   selectCoreConvertFx,
   selectCoreEnvMetrics,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -26,7 +26,7 @@ import {
 } from '6-shared/helpers/date'
 
 import { TEnvelopeId } from '5-entities/envelope'
-import { TrFilterMode } from 'core-next/adapters/redux'
+import { TrFilterMode } from 'zerro-core/redux'
 import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 import { OneLiner } from '3-widgets/DataLine'
 import { cardStyle } from './shared'

@@ -4,9 +4,9 @@ import { AccountType, ById } from '6-shared/types'
 import { RootState } from 'store'
 import { getInstCodeMap } from '5-entities/currency/instrument/model'
 import { TAccountPopulated } from './shared/populate'
-// Import the constant from Core Next directly: going through the hidden-store
+// Import the constant from Zerro Core directly: going through the hidden-store
 // barrel creates a module cycle (hidden-store -> dataAccount -> account selectors).
-import { ZERRO_DATA_ACCOUNT_NAME as DATA_ACC_NAME } from 'core-next'
+import { ZERRO_DATA_ACCOUNT_NAME as DATA_ACC_NAME } from 'zerro-core'
 
 // SELECTORS
 

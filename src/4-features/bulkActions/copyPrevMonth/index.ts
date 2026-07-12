@@ -6,7 +6,7 @@ import {
   selectCoreEnvMetrics,
   setBudget,
   type TBudgetUpdate,
-} from 'core-next/adapters/redux'
+} from 'zerro-core/redux'
 
 export const copyPreviousBudget =
   (month: TISOMonth): AppThunk<void> =>
