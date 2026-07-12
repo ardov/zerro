@@ -74,9 +74,9 @@ Start verification now, but do not call the refactor complete yet. The public
 baseline proves deterministic demo behavior, Core/Redux parity, invalidation,
 command routing, replay, package boundaries, and type safety. In the current
 tree after the final model-call cutover has zero production `*Model.*` calls.
-The targeted legacy derived-read parity bridges are removed. The opt-in private fixture is not
-available in this environment, so large real-account parity is not freshly
-verified.
+The targeted legacy derived-read parity bridges and their private-fixture
+harness are removed. The deterministic public baseline is now the refactor's
+regression gate.
 
 The 2026-07-12 browser smoke verified demo load, transaction navigation and
 editing through the Core/Redux command path, a pending outbox entry, persistence
@@ -84,10 +84,9 @@ of both the edit and outbox across reload, and no browser console errors. It did
 not exercise an explicit remote sync or a budget/goal edit, so those completion
 gate items remain open.
 
-The completion gate is: public baseline green; privacy-safe private fixture
-green when available; one manual browser smoke of sync plus budget/transaction
-editing; and no production dependency on a legacy model API that the new Redux
-surface is meant to replace.
+The completion gate is: public baseline green; one manual browser smoke of sync
+plus budget/transaction editing; and no production dependency on a legacy
+model API that the new Redux surface is meant to replace.
 
 The identity materializer is the extension point already wired into the command
 path. Legacy derived reads no longer block implementing its domain rules.

@@ -118,7 +118,9 @@
 
 - Use focused unit tests for domain rules and contracts.
 - Use deterministic demo data for representative public graph regressions.
-- Use private fixtures only for opt-in high-confidence parity.
+- The legacy private-fixture parity harness is retired with the legacy read
+  graph. Add new real-data fixtures only when a materializer rule has a
+  concrete regression case that public deterministic data cannot represent.
 - Private failures compare hashes or safe summaries, never raw objects.
 - Trivial map-lookup tests are low value unless they protect extra semantics.
 

@@ -46,7 +46,7 @@ the next small app-state bridge.
 The display-currency setter is now migrated too, and the legacy model is
 deleted. This is a good intermediate verification checkpoint, not completion:
 the public baseline is strong, but production still contains legacy model calls
-and the opt-in private fixture plus browser smoke remain completion-gate items.
+and the browser smoke remains a completion-gate item.
 
 The transaction model object is now removed. Core/Redux owns type, viewed,
 ordering, and debt-aware type helpers; filtering is a named temporary bridge to
@@ -385,7 +385,8 @@ Useful slices:
    temporary package, then type-checks a consumer importing `core-next`.
 2. Enforce allowed subpaths once their list is settled.
 3. Add demo scenarios only for genuinely distinct domain shapes.
-4. Keep private fixture runs opt-in and privacy-safe.
+4. Add real-data fixtures only for concrete regressions that deterministic
+   public scenarios cannot represent.
 5. Add dependency-direction checks for foundational type modules if barrel
    cycles continue to obscure the graph.
 
@@ -416,6 +417,3 @@ Focused tests first, then:
 pnpm exec tsc --noEmit
 pnpm exec vitest run
 ```
-
-Use private fixture commands only when the ignored local fixture exists. See
-[private-fixtures.md](./private-fixtures.md).

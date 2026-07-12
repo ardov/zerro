@@ -464,6 +464,7 @@ it appears in legacy code; preserve it until its listed replacement is ready.
 10. Replay uses stored `appliedPatch`, never recompilation.
 11. Redux remains the sole replica owner in the React app.
 12. Presentation decoration is not domain state.
-13. Private fixture comparisons use hashes or safe summaries.
+13. Real-account fixtures require a concrete regression case and must never
+    print or commit private contents.
 14. Every migration slice is small, independently testable, and documented
     when it changes a boundary or next step.

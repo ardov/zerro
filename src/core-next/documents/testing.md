@@ -47,12 +47,6 @@ selector, test both:
 Do not replace granular selectors with a selector over the whole `current`
 snapshot.
 
-### 4. Private fixture parity
-
-Use ignored real-account fixtures only for high-confidence large-data checks.
-Tests are opt-in and must compare hashes or safe summaries. See
-[private-fixtures.md](./private-fixtures.md).
-
 ## Legacy-parity exit policy
 
 Legacy comparisons are migration bridges, not permanent specifications. Every
@@ -62,9 +56,8 @@ must carry an explicit `LEGACY-PARITY BRIDGE` comment naming its exit condition.
 Remove a comparison when the matching legacy read has no production consumers
 and is deleted. Before removal, preserve only scenarios that protect a named
 Core contract by rewriting them with direct expected values, invariants, or
-privacy-safe summaries. Delete comparisons that merely prove two obsolete
-implementations agree. The private fixture harness may remain after legacy
-outputs disappear, but raw private data must never enter snapshots or diffs.
+safe summaries. Delete comparisons that merely prove two obsolete
+implementations agree.
 
 ## Avoid low-value tests
 
@@ -94,16 +87,15 @@ permissive test builders.
 
 ## Verification by change type
 
-| Change                        | Minimum verification                              |
-| ----------------------------- | ------------------------------------------------- |
-| Pure helper or one projector  | Focused unit tests + TypeScript                   |
-| Command compiler              | Compiler tests + resulting-state test             |
-| Selector wiring               | Parity + relevant/unrelated invalidation tests    |
-| Facade/read graph             | Session tests + deterministic demo parity         |
-| Materializer or patch apply   | Focused tests + reducer/engine tests + full suite |
-| Replica/sync                  | Reload, undo/redo, rebase, and full suite         |
-| Package boundary              | Boundary tests + external consumer type compile   |
-| Private-data-sensitive change | Safe private fixture run when available           |
+| Change                       | Minimum verification                              |
+| ---------------------------- | ------------------------------------------------- |
+| Pure helper or one projector | Focused unit tests + TypeScript                   |
+| Command compiler             | Compiler tests + resulting-state test             |
+| Selector wiring              | Parity + relevant/unrelated invalidation tests    |
+| Facade/read graph            | Session tests + deterministic demo parity         |
+| Materializer or patch apply  | Focused tests + reducer/engine tests + full suite |
+| Replica/sync                 | Reload, undo/redo, rebase, and full suite         |
+| Package boundary             | Boundary tests + external consumer type compile   |
 
 ## Refactor completion gate
 
@@ -113,20 +105,18 @@ refactor complete, require all of the following:
 
 1. Full deterministic suite, TypeScript, package consumer, formatting, and
    dependency-boundary checks are green.
-2. Opt-in private-fixture parity passes with hashes/safe summaries when a
-   fixture is available; record explicitly when it was unavailable.
-3. A manual browser smoke covers initial load/sync, one budget or goal edit, one
+2. A manual browser smoke covers initial load/sync, one budget or goal edit, one
    transaction edit, reload with pending state, and explicit sync.
-4. Production-source audit finds no remaining legacy model API that the Core
+3. Production-source audit finds no remaining legacy model API that the Core
    Redux surface is intended to replace. Remaining presentation or app-service
    helpers must have an explicit ownership decision.
-5. Legacy-parity bridges are either removed with their legacy implementation or
+4. Legacy-parity bridges are either removed with their legacy implementation or
    retain a concrete exit condition.
 
 Latest manual checkpoint (2026-07-12): the demo browser flow loaded, navigated
 to transactions, edited a comment, produced one pending outbox item, and kept
 the edit plus outbox after reload without console errors. Explicit remote sync
-and a budget/goal edit were not exercised. The private fixture was unavailable.
+and a budget/goal edit were not exercised.
 
 ## Commands
 

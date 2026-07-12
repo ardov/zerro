@@ -23,7 +23,7 @@ import {
 import { compileAppCommand, recreateTransaction } from './commands'
 import { selectCoreEnvelopes, selectCoreEnvelopeStructure } from './selectors'
 
-// Breaks the legacy hidden-store import cycle, same as the private fixture tests.
+// Breaks the legacy hidden-store import cycle.
 vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
   DATA_ACC_NAME: '🤖 [Zerro Data]',
   getDataAccountId: () => undefined,

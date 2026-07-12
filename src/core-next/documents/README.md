@@ -95,14 +95,13 @@ See [roadmap.md](./roadmap.md) for completion criteria and parallel tracks.
 
 ## Document map
 
-| Document                                     | Question it answers                                |
-| -------------------------------------------- | -------------------------------------------------- |
-| [handoff.md](./handoff.md)                   | What is true on this branch right now?             |
-| [architecture.md](./architecture.md)         | Which boundaries and contracts should remain true? |
-| [roadmap.md](./roadmap.md)                   | What can be done next, and in what order?          |
-| [design-ledger.md](./design-ledger.md)       | Which decisions are settled, open, or temporary?   |
-| [testing.md](./testing.md)                   | Which tests protect which kind of change?          |
-| [private-fixtures.md](./private-fixtures.md) | How can private parity data be used safely?        |
+| Document                               | Question it answers                                |
+| -------------------------------------- | -------------------------------------------------- |
+| [handoff.md](./handoff.md)             | What is true on this branch right now?             |
+| [architecture.md](./architecture.md)   | Which boundaries and contracts should remain true? |
+| [roadmap.md](./roadmap.md)             | What can be done next, and in what order?          |
+| [design-ledger.md](./design-ledger.md) | Which decisions are settled, open, or temporary?   |
+| [testing.md](./testing.md)             | Which tests protect which kind of change?          |
 
 Entity-specific ZenMoney knowledge belongs beside the implementation under
 `src/core-next/zenmoney/*/README.md`, not in the migration roadmap.
@@ -117,7 +116,6 @@ Entity-specific ZenMoney knowledge belongs beside the implementation under
 - Keep presentation, localization, SVG URLs, Redux, and persistence outside
   domain code.
 - Compare resulting state for command migrations, not only patch shape.
-- Never print or commit private fixture contents.
 - Update the handoff, roadmap, or design ledger in the same slice when their
   claims change.
 
@@ -133,5 +131,3 @@ pnpm exec vitest run
 For a narrow slice, run focused tests first, then the full suite when a shared
 boundary such as patch application, materialization, Redux state, or package
 exports changes.
-
-Private fixture commands are opt-in and documented separately.
