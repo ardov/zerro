@@ -59,9 +59,8 @@
 - Command compilers produce intent patches.
 - Every local patch passes through `materializePatch`; the first implementation
   is identity-only.
-- The identity materializer is a useful extension point, but server-like rules
-  are not a goal of the current refactor. Keep it identity-only until remaining
-  legacy app functions are removed; domain-rule work happens afterward.
+- The identity materializer was kept inert through legacy removal. That gate is
+  now cleared; add server-like rules as isolated versioned checkpoints.
 - Canonical server diffs bypass local materialization.
 - The outbox stores `command`, `intentPatch`, `appliedPatch`, and
   `materializerVersion`.

@@ -4,13 +4,7 @@ import path from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 
 import type { RootState } from 'store'
-import { i18n } from '6-shared/localization'
-import { presentEnvelopes } from '../adapters/redux/envelopePresentation'
-import { buildTagStructure } from '../zenmoney'
 import {
-  buildBudgets,
-  buildEnvelopes,
-  getEnvBudgets,
   getEnvelopeMeta as getCoreEnvelopeMeta,
   getUserSettings as getCoreUserSettings,
 } from './index'
@@ -58,68 +52,6 @@ maybeDescribe('core-next Zerro readers on private fixture', () => {
       getCoreEnvelopeMeta(fixture.input.data),
       getEnvelopeMeta(state)
     )
-  })
-
-  it('builds envelopes matching the current legacy selector', async () => {
-    const fixture = readFixture(fixturePath!)
-    const state = makeRootState(fixture.input.data)
-
-    await i18n.changeLanguage(fixture.manifest.locale || 'ru')
-
-    const [account, debtors, legacyEnvelopes, tags, user] = await Promise.all([
-      import('5-entities/account'),
-      import('5-entities/debtors'),
-      import('5-entities/envelope'),
-      import('5-entities/tag'),
-      import('5-entities/user'),
-    ])
-
-    const actual = buildEnvelopes({
-      debtors: debtors.getDebtors(state),
-      tags: buildTagStructure({ tags: fixture.input.data.tag }),
-      savingAccounts: account.getSavingAccounts(state),
-      envelopeMeta: getCoreEnvelopeMeta(fixture.input.data),
-      userCurrency: user.getUserCurrency(state),
-    })
-    const presented = presentEnvelopes(
-      actual.byId,
-      tags.getPopulatedTags(state),
-      {
-        defaultTagGroup: i18n.t('defaultTagGroup', { ns: 'common' }),
-        defaultAccountGroup: i18n.t('defaultAccountGroup', { ns: 'common' }),
-        defaultMerchantGroup: i18n.t('defaultMerchantGroup', { ns: 'common' }),
-        defaultPayeeGroup: i18n.t('defaultPayeeGroup', { ns: 'common' }),
-      }
-    )
-
-    expectSameJsonHash(
-      'envelopes',
-      presented.byId,
-      legacyEnvelopes.getEnvelopes(state)
-    )
-    expectSameJsonHash(
-      'envelopeStructure',
-      presented.structure,
-      legacyEnvelopes.getEnvelopeStructure(state)
-    )
-  })
-
-  it('builds budgets matching the current legacy selector', async () => {
-    const fixture = readFixture(fixturePath!)
-    const state = makeRootState(fixture.input.data)
-
-    const [{ getBudgets }, { getTagBudgets }] = await Promise.all([
-      import('5-entities/budget'),
-      import('5-entities/budget/tagBudget'),
-    ])
-
-    const actual = buildBudgets({
-      tagBudgets: getTagBudgets(state),
-      envBudgets: getEnvBudgets(fixture.input.data),
-      preferZmBudgets: getCoreUserSettings(fixture.input.data).preferZmBudgets,
-    })
-
-    expectSameJsonHash('budgets', actual, getBudgets(state))
   })
 })
 

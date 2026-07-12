@@ -6,12 +6,16 @@
 
 This is the current routing document. Implementation history belongs in Git.
 
-## Next task: remove legacy app functions
+## Next task: implement materializer rules
 
-The current refactor goal is an independent Core module through which the app
-works via a clear Redux adapter API. Continue switching real app consumers from
-legacy `5-entities` model functions to `core-next/adapters/redux`, then delete
-each legacy function with its last consumer.
+The legacy derived-read graph for activity, month totals, budgets, goals,
+envelopes, debtors, and balances is removed. Real app consumers use the Core
+Redux graph; the old parity selectors and captured legacy fixture outputs no
+longer keep a second implementation alive.
+
+The next architectural phase is Track C: implement deterministic ZenMoney
+materializer rules in the documented order, starting with deleted-transaction
+immutability. Keep each rule as a separate verified checkpoint.
 
 The budget/goal and transaction write wrappers are removed. App consumers now
 import semantic commands from the Redux adapter; transaction analytics stay at
@@ -59,12 +63,10 @@ wording lives in adapter presentation, and bulk actions are named thunks rather
 than model objects. Legacy projection internals import their defining selectors
 directly.
 
-Production code now contains zero `*Model.*` calls, and the test-only model
-objects are removed as well. Parity tests import concrete legacy selectors by
-name, so their comparison intent remains visible without preserving aggregate
-model APIs. A boundary test keeps model-object calls and declarations from
-returning. The next cleanup step is to retire each parity bridge together with
-its corresponding legacy selector implementation.
+Production code contains zero `*Model.*` calls. The obsolete derived selector
+implementations and their parity bridges are now deleted; remaining
+`5-entities` imports are presentation, app-service, or compatibility ownership
+work rather than a parallel calculation graph.
 
 ## Verification checkpoint
 
@@ -72,8 +74,7 @@ Start verification now, but do not call the refactor complete yet. The public
 baseline proves deterministic demo behavior, Core/Redux parity, invalidation,
 command routing, replay, package boundaries, and type safety. In the current
 tree after the final model-call cutover has zero production `*Model.*` calls.
-Eight legacy-parity bridge suites still exist and exercise named legacy
-selectors. The opt-in private fixture is not
+The targeted legacy derived-read parity bridges are removed. The opt-in private fixture is not
 available in this environment, so large real-account parity is not freshly
 verified.
 
@@ -88,9 +89,9 @@ green when available; one manual browser smoke of sync plus budget/transaction
 editing; and no production dependency on a legacy model API that the new Redux
 surface is meant to replace.
 
-The identity materializer stays as the extension point already wired into the
-command path, but implementing its domain rules is deferred until after legacy
-removal. Building the semantic engine facade is also later work.
+The identity materializer is the extension point already wired into the command
+path. Legacy derived reads no longer block implementing its domain rules.
+Building the semantic engine facade remains later work.
 
 ## Read order
 

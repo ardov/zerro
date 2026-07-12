@@ -33,30 +33,23 @@ export async function makePrivateFixture(
   state: RootState,
   fixtureName: string
 ) {
-  const [
-    { getBudgets },
-    { getEnvelopes, getEnvelopeStructure, getKeepingEnvelopes },
-    { getMonthList },
-    { getRawActivity },
-    { getActivity },
-    { getSortedActivity },
-    { getEnvMetrics },
-    { getMonthTotals },
-  ] = await Promise.all([
-    import('5-entities/budget/getBudgets'),
-    import('5-entities/envelope/getEnvelopes'),
-    import('5-entities/envBalances/1 - monthList'),
-    import('5-entities/envBalances/1 - rawActivity'),
-    import('5-entities/envBalances/2 - activity'),
-    import('5-entities/envBalances/2 - sortedActivity'),
-    import('5-entities/envBalances/3 - envMetrics'),
-    import('5-entities/envBalances/4 - monthTotals'),
-  ])
+  const {
+    selectCoreActivity,
+    selectCoreBudgets,
+    selectCoreEnvelopes,
+    selectCoreEnvelopeStructure,
+    selectCoreEnvMetrics,
+    selectCoreKeepingEnvelopeIds,
+    selectCoreMonthList,
+    selectCoreMonthTotals,
+    selectCoreRawActivity,
+    selectCoreSortedActivity,
+  } = await import('core-next/adapters/redux')
 
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     manifest: {
-      schemaVersion: 1,
+      schemaVersion: 2,
       name: fixtureName,
       createdAt: new Date().toISOString(),
       appVersion,
@@ -81,19 +74,19 @@ export async function makePrivateFixture(
       schemaVersion: 1,
       data: state.data.current,
     },
-    legacyOutput: {
-      schemaVersion: 1,
+    coreOutput: {
+      schemaVersion: 2,
       outputs: {
-        monthList: getMonthList(state),
-        envelopes: getEnvelopes(state),
-        envelopeStructure: getEnvelopeStructure(state),
-        keepingEnvelopeIds: getKeepingEnvelopes(state),
-        budgets: getBudgets(state),
-        rawActivity: getRawActivity(state),
-        activity: getActivity(state),
-        sortedActivity: getSortedActivity(state),
-        envMetrics: getEnvMetrics(state),
-        monthTotals: getMonthTotals(state),
+        monthList: selectCoreMonthList(state),
+        envelopes: selectCoreEnvelopes(state),
+        envelopeStructure: selectCoreEnvelopeStructure(state),
+        keepingEnvelopeIds: selectCoreKeepingEnvelopeIds(state),
+        budgets: selectCoreBudgets(state),
+        rawActivity: selectCoreRawActivity(state),
+        activity: selectCoreActivity(state),
+        sortedActivity: selectCoreSortedActivity(state),
+        envMetrics: selectCoreEnvMetrics(state),
+        monthTotals: selectCoreMonthTotals(state),
       },
     },
   }
@@ -122,8 +115,8 @@ function getFixtureSummary(fixture: PrivateFixture) {
     reminders: Object.keys(data.reminder).length,
     tags: Object.keys(data.tag).length,
     transactions: Object.keys(data.transaction).length,
-    months: fixture.legacyOutput.outputs.monthList.length,
-    envelopes: Object.keys(fixture.legacyOutput.outputs.envelopes).length,
+    months: fixture.coreOutput.outputs.monthList.length,
+    envelopes: Object.keys(fixture.coreOutput.outputs.envelopes).length,
   }
 }
 

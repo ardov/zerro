@@ -1,10 +1,10 @@
 # Private fixture workflow
 
 - Status: implemented, opt-in
-- Updated: 2026-07-10
+- Updated: 2026-07-12
 
-Private fixtures compare Core Next with legacy behavior on a large real account
-without committing or printing private data.
+Private fixtures exercise Core Next on a large real account without committing
+or printing private data.
 
 ## Safety rules
 
@@ -36,7 +36,7 @@ The bundle contains:
 schemaVersion
 manifest       creation time, app version, locale, source, output names
 input          normalized state.data.current snapshot
-legacyOutput   selected legacy selector results
+coreOutput     selected Core Redux selector results
 ```
 
 The exporter is a local developer tool and uploads nothing.
@@ -52,21 +52,12 @@ pnpm fixture:summary private-fixtures/my-large-account/fixture.json
 The summary must not print account names, comments, payees, transaction values,
 or other private fields.
 
-## Parity tests
+## Private fixture tests
 
-Legacy-output reproduction:
+Core reader and facade checks:
 
 ```bash
 PRIVATE_FIXTURE=private-fixtures/my-large-account/fixture.json pnpm fixture:test
-```
-
-Core read and Redux adapter parity can be run directly when needed:
-
-```bash
-PRIVATE_FIXTURE=private-fixtures/my-large-account/fixture.json \
-  node --max-old-space-size=4096 ./node_modules/vitest/vitest.mjs run \
-  src/core-next/zerro/read.private-fixture.test.ts \
-  src/core-next/adapters/redux/selectors.private-fixture.test.ts
 ```
 
 These tests skip when `PRIVATE_FIXTURE` is absent.
@@ -91,10 +82,8 @@ transaction arrays and object references.
 
 - JSON drops fields with `undefined`; stable comparisons intentionally follow
   JSON semantics.
-- The fixture manifest records locale because legacy envelope presentation can
+- The fixture manifest records locale because adapter envelope presentation can
   depend on i18n initialization.
-- The legacy private test mocks the hidden-store data-account cycle because it
-  needs read selectors only.
 - If a fixture becomes too large, reduce selected months/ids or store safe
   aggregates rather than weakening privacy protections.
 

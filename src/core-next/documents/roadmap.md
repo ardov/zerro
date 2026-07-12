@@ -168,15 +168,14 @@ Do the slices below in order; each is small and independently verifiable.
    Git. Record the accepted-risk decisions (stale account balance, dirty-session
    sync pause) in the design ledger.
 
-6. **Legacy app-function removal — current.** Switch remaining production
+6. ✅ **Legacy app-function removal.** Switch remaining production
    consumers from legacy model functions to the Redux adapter and delete each
    obsolete function with its last consumer. The target is an app operating
    through a clear Core Redux surface, not Core implementations hidden behind
    legacy wrappers.
 
-7. **Materializer and engine — deferred.** Keep materialization identity-only.
-   Implement server-like domain rules and a semantic engine facade only after
-   the legacy app-function cutover; neither is a goal of the current refactor.
+7. **Materializer rules — current.** Implement the documented server-like
+   domain rules one at a time. Keep the semantic engine facade deferred.
 
 ### Accepted product risks (do not re-litigate)
 
@@ -197,7 +196,7 @@ Do the slices below in order; each is small and independently verifiable.
 | ------------------------------- | ------------------------ | -------------------------------------------------------------------------- |
 | A. Public facade and read graph | Redux adapter in use     | Move remaining app consumers to narrow adapter exports                     |
 | B. Domain/presentation boundary | Boundary landed          | Extract an optional appearance package only when a real consumer needs it  |
-| C. ZenMoney materializer rules  | Explicitly deferred      | Keep identity-only until legacy app functions are removed                  |
+| C. ZenMoney materializer rules  | Current priority         | Start with deleted-transaction immutability                                |
 | D. Replica and sync             | Replica boundary live    | Choose a concrete crash-consistency or response-staging need before more D |
 | E. Legacy cutover               | Current priority         | Remove one legacy consumer/function family at a time                       |
 | F. Package and test hardening   | Root consumer check live | Settle supported subpaths before enforcing their allowlist                 |
