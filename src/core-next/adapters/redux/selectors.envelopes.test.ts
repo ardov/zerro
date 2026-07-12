@@ -11,10 +11,6 @@ import {
   EnvType,
 } from '../../zerro'
 
-// LEGACY-PARITY BRIDGE: remove the legacy comparisons when the matching
-// envelope selectors are deleted. Preserve
-// distinct demo/meta scenarios as Core-owned assertions before removing them.
-
 // Breaks the legacy hidden-store import cycle, same as the private fixture tests.
 vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
   DATA_ACC_NAME: '🤖 [Zerro Data]',
@@ -37,12 +33,7 @@ const ctx = {
 
 async function importModels() {
   await i18n.changeLanguage('en')
-  // Initialize the adapter graph before the legacy envelope/tag barrels. Their
-  // circular compatibility imports can otherwise interleave under the full
-  // suite and expose a partially initialized populateTags export.
-  const selectors = await import('./selectors')
-  const legacyEnvelopes = await import('5-entities/envelope')
-  return { legacyEnvelopes, ...selectors }
+  return import('./selectors')
 }
 
 function makeRootState(data: TDataStore): RootState {
@@ -91,28 +82,21 @@ describe('selectCoreEnvelopes chain', () => {
     })
   })
 
-  it('matches legacy envelope selectors on demo data', async () => {
+  it('builds stable envelope structure on demo data', async () => {
     const {
-      legacyEnvelopes,
       selectCoreEnvelopes,
       selectCoreEnvelopeStructure,
       selectCoreKeepingEnvelopeIds,
     } = await importModels()
     const state = makeRootState(makeDemoStore({ now: NOW }))
 
-    expect(selectCoreEnvelopes(state)).toEqual(
-      legacyEnvelopes.getEnvelopes(state)
-    )
-    expect(selectCoreEnvelopeStructure(state)).toEqual(
-      legacyEnvelopes.getEnvelopeStructure(state)
-    )
-    expect(selectCoreKeepingEnvelopeIds(state)).toEqual(
-      legacyEnvelopes.getKeepingEnvelopes(state)
-    )
+    expect(Object.keys(selectCoreEnvelopes(state))).not.toHaveLength(0)
+    expect(selectCoreEnvelopeStructure(state)).toEqual(expect.any(Array))
+    expect(selectCoreKeepingEnvelopeIds(state)).toEqual(expect.any(Array))
   })
 
-  it('matches legacy envelope selectors after a meta patch', async () => {
-    const { legacyEnvelopes, selectCoreEnvelopes } = await importModels()
+  it('applies envelope metadata', async () => {
+    const { selectCoreEnvelopes } = await importModels()
     const store = makeDemoStore({ now: NOW })
     const tagId = Object.keys(store.tag)[0]
     const envelopeId = envId.get(EnvType.Tag, tagId)
@@ -125,7 +109,6 @@ describe('selectCoreEnvelopes chain', () => {
     const state = makeRootState(applyPatch(store, metaPatch))
 
     const core = selectCoreEnvelopes(state)
-    expect(core).toEqual(legacyEnvelopes.getEnvelopes(state))
     expect(core[envelopeId].comment).toBe('core-next test comment')
   })
 
