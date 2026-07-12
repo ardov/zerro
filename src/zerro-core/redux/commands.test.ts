@@ -23,15 +23,6 @@ import {
 import { compileAppCommand, recreateTransaction } from './commands'
 import { selectCoreEnvelopes, selectCoreEnvelopeStructure } from './selectors'
 
-// Breaks the legacy hidden-store import cycle.
-vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
-  DATA_ACC_NAME: '🤖 [Zerro Data]',
-  getDataAccountId: () => undefined,
-  prepareDataAccount: () => {
-    throw new Error('prepareDataAccount is not available in this test')
-  },
-}))
-
 const NOW = Date.parse('2026-07-10T12:00:00Z')
 
 function makeState(current: TDataStore): RootState {

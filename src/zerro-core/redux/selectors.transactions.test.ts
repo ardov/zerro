@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import type { TDataStore } from '6-shared/types'
 import type { RootState } from 'store'
 import { makeDemoStore } from '../demo'
@@ -15,19 +15,6 @@ import {
   selectCoreTransactions,
   selectCoreTransactionsHistory,
 } from './selectors'
-
-// LEGACY-PARITY BRIDGE: remove model-to-model comparisons as each matching
-// transaction/debtor/balance legacy read loses its last production consumer.
-// Keep the demo outputs and invalidation cases as explicit Core contracts.
-
-// Breaks the legacy hidden-store import cycle while loading the parity source.
-vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
-  DATA_ACC_NAME: '🤖 [Zerro Data]',
-  getDataAccountId: () => undefined,
-  prepareDataAccount: () => {
-    throw new Error('prepareDataAccount is not available in this test')
-  },
-}))
 
 const NOW = Date.parse('2026-05-15T12:00:00Z')
 
@@ -51,21 +38,18 @@ function makeRootState(data: TDataStore): RootState {
 }
 
 describe('Core transaction adapter reads', () => {
-  it('matches legacy reference-data selectors', async () => {
-    const [instrument, merchant] = await Promise.all([
-      import('5-entities/currency/instrument'),
-      import('5-entities/merchant'),
-    ])
+  it('exposes reference data through explicit Core contracts', () => {
     const state = makeRootState(makeDemoStore({ now: NOW }))
+    const instruments = Object.values(state.data.current.instrument)
 
-    expect(selectCoreInstruments(state)).toBe(instrument.getInstruments(state))
+    expect(selectCoreInstruments(state)).toBe(state.data.current.instrument)
     expect(selectCoreInstrumentsByCode(state)).toEqual(
-      instrument.getInstrumentsByCode(state)
+      Object.fromEntries(instruments.map(item => [item.shortTitle, item]))
     )
     expect(selectCoreInstCodeMap(state)).toEqual(
-      instrument.getInstCodeMap(state)
+      Object.fromEntries(instruments.map(item => [item.id, item.shortTitle]))
     )
-    expect(selectCoreMerchants(state)).toBe(merchant.getMerchants(state))
+    expect(selectCoreMerchants(state)).toBe(state.data.current.merchant)
   })
 
   it('keeps transaction, debtor, and balance reads as direct Core contracts', async () => {

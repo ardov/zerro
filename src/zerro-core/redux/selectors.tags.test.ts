@@ -1,20 +1,8 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import type { TDataStore } from '6-shared/types'
 import type { RootState } from 'store'
 import { i18n } from '6-shared/localization'
 import { makeDemoStore } from '../demo'
-
-// LEGACY-PARITY BRIDGE: remove the legacy tag selector comparison when
-// getPopulatedTags has no production consumers and is deleted. Keep adapter
-// presentation and invalidation behavior as direct assertions.
-
-vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
-  DATA_ACC_NAME: '🤖 [Zerro Data]',
-  getDataAccountId: () => undefined,
-  prepareDataAccount: () => {
-    throw new Error('prepareDataAccount is not available in this test')
-  },
-}))
 
 const NOW = Date.parse('2026-05-15T12:00:00Z')
 
@@ -29,13 +17,30 @@ function makeRootState(data: TDataStore): RootState {
 }
 
 describe('Core tag presentation adapter', () => {
-  it('matches the legacy populated-tag selector', async () => {
+  it('adds presentation fields and the uncategorized tag', async () => {
     await i18n.changeLanguage('en')
     const { selectCorePopulatedTags } = await import('./selectors')
-    const { getPopulatedTags } = await import('5-entities/tag')
     const state = makeRootState(makeDemoStore({ now: NOW }))
+    const tags = selectCorePopulatedTags(state)
+    const tag = state.data.current.tag[Object.keys(state.data.current.tag)[0]]
 
-    expect(selectCorePopulatedTags(state)).toEqual(getPopulatedTags(state))
+    expect(tags).toHaveProperty('null')
+    expect(tags.null).toMatchObject({
+      id: 'null',
+      title: expect.any(String),
+      colorDisplay: expect.any(String),
+      colorGenerated: expect.any(String),
+      symbol: expect.any(String),
+    })
+    expect(tags[tag.id]).toMatchObject({
+      id: tag.id,
+      title: tag.title,
+      parent: tag.parent,
+      colorHEX: expect.any(String),
+      colorDisplay: expect.any(String),
+      colorGenerated: expect.any(String),
+      symbol: expect.any(String),
+    })
   })
 
   it('stays cached across unrelated data changes and recomputes for tags', async () => {

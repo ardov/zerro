@@ -6,15 +6,6 @@ import { makeDemoStore } from '../demo'
 import { applyPatch } from '../domain/zenmoney'
 import { compileSetGoal, envId, EnvType, goalType } from '../domain/zerro'
 
-// Breaks the legacy hidden-store import cycle.
-vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
-  DATA_ACC_NAME: '🤖 [Zerro Data]',
-  getDataAccountId: () => undefined,
-  prepareDataAccount: () => {
-    throw new Error('prepareDataAccount is not available in this test')
-  },
-}))
-
 const NOW = Date.parse('2026-05-15T12:00:00Z')
 const MONTH = '2026-05' as TISOMonth
 
