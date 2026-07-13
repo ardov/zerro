@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { shallowEqual } from 'react-redux'
 import { useFormik } from 'formik'
 import {
@@ -77,7 +77,7 @@ const EnvelopeEditDialogForm: FC<{
         return { originalName: t('nameError') }
       }
     },
-    onSubmit: (values, helpers) => {
+    onSubmit: values => {
       close()
       dispatch(
         coreEnvelopes.updateSettings({

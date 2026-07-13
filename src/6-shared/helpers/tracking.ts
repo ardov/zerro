@@ -22,7 +22,7 @@ export function captureError(error: Error, errorInfo?: ErrorInfo) {
 
   if (errorInfo) {
     Sentry.withScope(scope => {
-      // @ts-ignore
+      // @ts-expect-error errorInfo doesn't match the Extras type
       scope.setExtras(errorInfo)
       Sentry.captureException(error)
     })
@@ -49,9 +49,9 @@ export function setUserId(userId: number) {
 
 export function sendEvent(event: string) {
   if (event && isProduction) {
-    // @ts-ignore
+    // @ts-expect-error ym is the Yandex Metrika global
     if (window.ym && ymid) {
-      // @ts-ignore
+      // @ts-expect-error ym is the Yandex Metrika global
       window.ym(ymid, 'reachGoal', event)
     }
 

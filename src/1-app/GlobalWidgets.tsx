@@ -1,4 +1,3 @@
-import React from 'react'
 import { SmartConfirm } from '6-shared/ui/SmartConfirm'
 import { SmartTransactionListDrawer } from '3-widgets/global/TransactionListDrawer'
 import { SmartTransactionPreview } from '3-widgets/global/TransactionPreviewDrawer'

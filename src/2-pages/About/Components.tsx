@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useEffect } from 'react'
+import { FC, ReactNode, useEffect } from 'react'
 import { useLocation, Link as RouterLink } from 'react-router-dom'
 import { Box, BoxProps, ButtonBase } from '@mui/material'
 import { ChevronRightIcon } from '6-shared/ui/Icons'

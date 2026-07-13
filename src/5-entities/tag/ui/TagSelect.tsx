@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { useAppSelector } from 'store'
 import { tags as coreTags } from 'zerro-core/redux'
 
@@ -49,7 +49,7 @@ export const TagSelect: FC<TagSelectProps> = props => {
         if (!onChange) return
         if (!value) return onChange(null)
         // Хз как заставить его нормально работать
-        // @ts-ignore
+        // @ts-expect-error value type depends on the multiple flag
         return onChange(value)
       }}
       openOnFocus

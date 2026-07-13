@@ -1,4 +1,4 @@
-import React, { FC, memo, useCallback } from 'react'
+import { FC, memo, useCallback } from 'react'
 import { Box, Drawer } from '@mui/material'
 import { TEnvelopeId } from '5-entities/envelope'
 import { MonthInfo } from './MonthInfo'

@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { Box, BoxProps, IconButton } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { AddIcon } from '6-shared/ui/Icons'

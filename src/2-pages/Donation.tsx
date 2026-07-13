@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { Box, Link, Typography } from '@mui/material'
 import { Stack } from '@mui/system'
 import { Helmet } from 'react-helmet'

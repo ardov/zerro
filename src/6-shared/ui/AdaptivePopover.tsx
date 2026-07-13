@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Popover,
   PopoverProps,
@@ -30,7 +29,7 @@ export const AdaptivePopover = (
         onOpen={() => {}}
         disableSwipeToOpen
         {...rest}
-        onClose={e => {
+        onClose={() => {
           if (rest.onClose) rest.onClose({}, 'backdropClick')
         }}
         slotProps={{

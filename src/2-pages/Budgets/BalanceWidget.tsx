@@ -19,7 +19,6 @@ export function BalanceWidget(props: { month: TISOMonth }) {
   const [currency, setDisplayCurrency] = coreCurrency.useDisplayCurrency()
   const toDisplay = coreCurrency.useToDisplay(props.month)
   const currencies = keys(totals.fundsEnd)
-  const currCount = currencies.length
 
   const cycleForward = () => {
     const idx = currencies.findIndex(c => c === currency)
@@ -27,12 +26,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
     if (currencies[newIdx]) setDisplayCurrency(currencies[newIdx])
   }
 
-  const currString =
-    currCount > 1
-      ? ` | ${t('currency', { ns: 'common', count: currCount })}`
-      : ''
   const fundsEnd = toDisplay(totals.fundsEnd)
-  const fundsChange = toDisplay(totals.fundsChange)
   const available = toDisplay(totals.available)
   const budgetedInFuture = toDisplay(totals.budgetedInFuture)
   const toBeBudgeted = toDisplay(totals.toBeBudgeted)

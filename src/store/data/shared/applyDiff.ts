@@ -15,8 +15,7 @@ export function applyDiffMutable(diff: TDiff, store: TDataStore) {
   if (diff.deletion) {
     diff.deletion.forEach(obj => {
       try {
-        // @ts-ignore
-        // TODO: Need some TS magic to use correct id type here
+        // @ts-expect-error TODO: Need some TS magic to use correct id type here
         delete store[obj.object][obj.id]
       } catch (error) {
         console.error('Error deleting object', error, obj)
@@ -34,8 +33,7 @@ export function applyDiffMutable(diff: TDiff, store: TDataStore) {
     if (!store[key]) store[key] = {} // For new objects
     diff[key].forEach(el => {
       try {
-        // @ts-ignore
-        // TODO: Need some TS magic to use correct id type here
+        // @ts-expect-error TODO: Need some TS magic to use correct id type here
         store[key][el.id] = el
       } catch (error) {
         console.error('Error adding object', error, el)

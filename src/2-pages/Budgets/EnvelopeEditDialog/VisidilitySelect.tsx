@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { MenuItem, SelectProps } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { SmartSelect } from '6-shared/ui/SmartSelect'

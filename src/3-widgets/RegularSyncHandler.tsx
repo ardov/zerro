@@ -64,7 +64,7 @@ function useUnsavedChangesAlert() {
   }, [lastChange])
 }
 
-export const RegularSyncHandler: FC<{}> = props => {
+export const RegularSyncHandler: FC = () => {
   useUnsavedChangesAlert()
   const dispatch = useAppDispatch()
   const sync = useConditionalSync()

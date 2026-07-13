@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, FC } from 'react'
+import { useState, useEffect, useRef, FC } from 'react'
 import {
   TextField,
   InputAdornment,
@@ -58,7 +58,6 @@ export const AmountInput: FC<AmountInputProps> = ({
 
   const calc = (str: string) => {
     try {
-       
       const computed = +eval(
         str
           .replace(/^0*(?=0|0.|[1-9])/g, '') // remove leading zeroes
@@ -66,7 +65,7 @@ export const AmountInput: FC<AmountInputProps> = ({
           .replace(/^[+*/]*/g, '') // trim symbols at the beginning
       )
       return computed || 0
-    } catch (error) {
+    } catch {
       return value
     }
   }

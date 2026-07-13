@@ -1,6 +1,6 @@
 import type { ById } from '../../shared/types'
 import type { TDataStore } from '../store'
-import type { TMerchant, TMerchantId } from './types'
+import type { TMerchant } from './types'
 
 export type TMerchantSource = Pick<TDataStore, 'merchant'>
 

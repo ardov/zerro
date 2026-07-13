@@ -1,11 +1,11 @@
-import React, { FC, memo, ReactNode, useCallback, useRef } from 'react'
+import { FC, memo, ReactNode, useCallback, useRef } from 'react'
 import {
   currency as coreCurrency,
   envelopes as coreEnvelopes,
 } from 'zerro-core/redux'
 
 import { useDraggable } from '@dnd-kit/core'
-import { Typography, Box, IconButton, Collapse, Chip } from '@mui/material'
+import { Typography, Box, IconButton, Chip } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 import { TagIcon } from '6-shared/ui/TagIcon'

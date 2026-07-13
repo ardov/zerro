@@ -1,4 +1,4 @@
-import React, { FC, ReactElement, useCallback } from 'react'
+import { FC, ReactElement, useCallback } from 'react'
 import { useAppSelector } from 'store'
 import {
   months as coreMonths,

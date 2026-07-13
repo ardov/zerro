@@ -88,18 +88,6 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TDiff {
 
   // Countries
   const RU = 1
-  const UA = 2
-  const DE = 3
-  const US = 4
-
-  // Companies
-  const CRYSTALBANK = 15638
-  const DENIZBANK = 15639
-  const INGROMANIA = 15640
-  const TALLINNABANK = 15641
-  const KAPITALBANK = 15642
-  const BANKOFAMERICA = 15643
-  const BANKOFCHINA = 15644
 
   // User
   const mainUser: TUser = {

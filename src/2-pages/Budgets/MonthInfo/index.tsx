@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { useAppDispatch, useAppSelector } from 'store'
 import { isZero } from '6-shared/helpers/money'
 import { formatDate } from '6-shared/helpers/date'

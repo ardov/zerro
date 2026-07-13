@@ -1,6 +1,6 @@
 import type { ById } from '6-shared/types'
 
-import React, { useCallback, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { DragEndEvent, DragMoveEvent, useDndMonitor } from '@dnd-kit/core'
 import { Box, SxProps } from '@mui/system'
 import { useAppDispatch, useAppSelector } from 'store/index'

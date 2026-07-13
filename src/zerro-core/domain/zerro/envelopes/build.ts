@@ -1,6 +1,5 @@
 import type { ById } from '../../shared/types'
 import type { TAccount } from '../../zenmoney/accounts/types'
-import type { TFxAmount } from '../../shared/money'
 import type { TFxCode } from '../../zenmoney/instruments/types'
 import type { TTagId, TTagStructure } from '../../zenmoney/tags'
 import { keys } from '../../shared/keys'

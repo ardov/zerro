@@ -13,12 +13,10 @@ import {
   Paper,
   IconButton,
   List,
-  ListItem,
   ListItemButton,
   ListItemText,
   TextField,
   PopoverProps,
-  ListItemProps,
 } from '@mui/material'
 import { AddIcon } from '6-shared/ui/Icons'
 import { TagIcon } from '6-shared/ui/TagIcon'

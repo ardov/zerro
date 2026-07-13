@@ -1,4 +1,3 @@
-import React from 'react'
 import { ButtonBase, Stack, Typography } from '@mui/material'
 import { Card, TCardProps } from '../shared/Card'
 import { useStats } from '../shared/getFacts'

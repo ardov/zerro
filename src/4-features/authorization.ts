@@ -10,7 +10,7 @@ import { clearLocalData, saveDataLocally } from './localData'
 import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
 import { getDemoData } from 'demoData'
 
-export const logOut = (): AppThunk => (dispatch, getState) => {
+export const logOut = (): AppThunk => dispatch => {
   workerMethods.clearStorage()
   dispatch(resetData())
   dispatch(setToken(null))
@@ -20,7 +20,7 @@ export const logOut = (): AppThunk => (dispatch, getState) => {
 
 export const logIn =
   (endpoint: EndpointPreference): AppThunk =>
-  async (dispatch, getState) => {
+  async dispatch => {
     // Clear all data before logging in
     dispatch(logOut())
 
@@ -39,7 +39,7 @@ export const logIn =
 
 export const loadBackup =
   (file: File): AppThunk<void> =>
-  async (dispatch, getState) => {
+  async dispatch => {
     try {
       const txt = await file.text()
       const data = JSON.parse(txt)
@@ -54,17 +54,16 @@ export const loadBackup =
     }
   }
 
-export const loadDemoData =
-  (): AppThunk<void> => async (dispatch, getState) => {
-    try {
-      const diff = getDemoData()
-      console.log(diff)
-      // TODO: maybe later make more elegant solution for local data
-      tokenStorage.set(zenmoney.fakeToken)
-      dispatch(setToken(zenmoney.fakeToken))
-      dispatch(applyServerPatch(diff))
-      dispatch(saveDataLocally())
-    } catch (error) {
-      console.error(error)
-    }
+export const loadDemoData = (): AppThunk<void> => async dispatch => {
+  try {
+    const diff = getDemoData()
+    console.log(diff)
+    // TODO: maybe later make more elegant solution for local data
+    tokenStorage.set(zenmoney.fakeToken)
+    dispatch(setToken(zenmoney.fakeToken))
+    dispatch(applyServerPatch(diff))
+    dispatch(saveDataLocally())
+  } catch (error) {
+    console.error(error)
   }
+}

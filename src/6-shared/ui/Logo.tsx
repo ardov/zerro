@@ -1,5 +1,3 @@
-import React from 'react'
-
 const styles = {
   circle: (visible: boolean) =>
     visible

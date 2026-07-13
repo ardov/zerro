@@ -52,12 +52,12 @@ export function SmartSelect<T>(props: TSmartSelectProps<T>) {
         >
           <MenuList autoFocus>
             {React.Children.toArray(selectProps.children).map(child => {
-              // @ts-expect-error
+              // @ts-expect-error child props are not typed
               const value = child.props.value
               const selected = value === selectProps.value
-              // @ts-expect-error
+              // @ts-expect-error child props are not typed
               return React.cloneElement(child, {
-                // @ts-expect-error
+                // @ts-expect-error onClick is missing in cloneElement props type
                 onClick: event => {
                   onClose()
 
@@ -76,7 +76,7 @@ export function SmartSelect<T>(props: TSmartSelectProps<T>) {
                       writable: true,
                       value: { value, name: selectProps.name },
                     })
-                    // @ts-expect-error
+                    // @ts-expect-error cloned event doesn't match the expected event type
                     selectProps.onChange(clonedEvent)
                   }
                 },

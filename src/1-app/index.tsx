@@ -1,6 +1,5 @@
 import type { TDiff } from '6-shared/types'
 
-import React from 'react'
 import { initSentry } from '6-shared/helpers/tracking'
 import { store } from 'store'
 import { bindWorkerToStore } from 'worker'
@@ -34,12 +33,11 @@ export const MainApp = () => (
 function createZerroInstance(s: typeof store) {
   let logsShow = localStorage.getItem('showLogs') === 'true'
 
-  // @ts-ignore
+  // @ts-expect-error window.zerro is an untyped debug object
   window.zerro = {
     get state() {
       return s.getState()
     },
-    // @ts-ignore
     env: import.meta.env,
     get logsShow() {
       return logsShow
@@ -57,7 +55,7 @@ function createZerroInstance(s: typeof store) {
       const data = s.getState().data.current
       return (
         Object.values(data)
-          // @ts-ignore
+          // @ts-expect-error indexing a union of collections
           .map(c => c[id])
           .filter(Boolean)[0]
       )

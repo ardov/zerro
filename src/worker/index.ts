@@ -1,4 +1,3 @@
-// @ts-ignore Module not found
 import Worker from './worker?worker'
 import * as Comlink from 'comlink'
 import { WorkerObj } from './worker'
@@ -18,7 +17,7 @@ export const sendMessage = (message: Message) => {
   worker.postMessage(message)
 }
 
-export const bindWorkerToStore = (dispatch: AppDispatch) =>
+export const bindWorkerToStore = (_dispatch: AppDispatch) =>
   worker.addEventListener('message', (message: any) => {
     if (typeof message.data?.action === 'string') {
       console.log(`⚙️ ${message.data?.action}`, message.data)

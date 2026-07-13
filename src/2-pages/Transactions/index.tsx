@@ -1,4 +1,4 @@
-import React, { useState, FC, useCallback } from 'react'
+import { useState, FC, useCallback } from 'react'
 import { TransactionList } from '3-widgets/transaction/TransactionList'
 import {
   Box,

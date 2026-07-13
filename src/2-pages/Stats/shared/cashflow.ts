@@ -68,7 +68,7 @@ export function useCashFlow(
         accounts,
         aggregation
       ),
-    [aggregation, debtAccId, instCodeMap, transactionHistory]
+    [accounts, aggregation, debtAccId, instCodeMap, transactionHistory]
   )
 
   const toDisplay = coreCurrency.useToDisplay('current')

@@ -3,7 +3,6 @@ import {
   UnknownAction,
   ThunkAction,
   ThunkDispatch,
-  createSelector,
 } from '@reduxjs/toolkit'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 import { tokenStorage } from '6-shared/api/tokenStorage'

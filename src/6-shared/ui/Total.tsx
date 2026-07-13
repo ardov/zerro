@@ -1,4 +1,3 @@
-import React from 'react'
 import { Box, BoxProps, Typography } from '@mui/material'
 import { Amount, AmountProps } from '6-shared/ui/Amount'
 

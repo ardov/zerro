@@ -1,5 +1,5 @@
 import type { TAccountId } from '6-shared/types'
-import React, { FC, useCallback } from 'react'
+import { FC, useCallback } from 'react'
 import { Menu, MenuItem, MenuProps } from '@mui/material'
 import { useAppDispatch } from 'store'
 import { registerPopover } from '6-shared/historyPopovers'

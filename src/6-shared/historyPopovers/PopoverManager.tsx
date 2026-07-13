@@ -59,7 +59,7 @@ type TBaseProps = { open: boolean; onClose: () => void }
 const registeredPopovers = {} as Record<TKey, any>
 
 export function registerPopover<
-  ExtraProps extends object = {},
+  ExtraProps extends object = object,
   DisplayProps extends object = TBaseProps,
 >(
   key: TKey,

@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { useAppSelector } from 'store'
 import { months as coreMonths } from 'zerro-core/redux'
 

@@ -1,4 +1,3 @@
-import type { OptionalExceptFor } from '../../shared/types'
 import type { TDataStore } from '../store'
 import {
   DataEntity,

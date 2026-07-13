@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { useLocation, useHistory } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import {

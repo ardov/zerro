@@ -1,4 +1,3 @@
-import React from 'react'
 import { Drawer, Box } from '@mui/material'
 import { registerPopover } from '6-shared/historyPopovers'
 import { TTransactionId } from '6-shared/types'

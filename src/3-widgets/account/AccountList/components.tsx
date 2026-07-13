@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useCallback } from 'react'
+import { FC, ReactNode, useCallback } from 'react'
 import { currency as coreCurrency } from 'zerro-core/redux'
 
 import {

@@ -59,7 +59,7 @@ async function fetchWithFallback(links: string[]) {
     try {
       response = await fetch(link)
       if (response.ok) return response
-    } catch (e) {}
+    } catch {}
   }
   return response
 }

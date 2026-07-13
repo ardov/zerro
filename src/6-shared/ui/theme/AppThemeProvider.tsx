@@ -4,7 +4,7 @@ import { Global, css } from '@emotion/react'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider, Theme } from '@mui/material/styles'
 import { appTheme } from './createTheme'
-import { THEME_KEY, fixOldTheme, useAppTheme, useColorScheme } from './hooks'
+import { fixOldTheme, useAppTheme, useColorScheme } from './hooks'
 
 import './styles.scss'
 

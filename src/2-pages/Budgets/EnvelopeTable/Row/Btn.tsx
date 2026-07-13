@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { ButtonBase, ButtonBaseProps } from '@mui/material'
 
 const style = {

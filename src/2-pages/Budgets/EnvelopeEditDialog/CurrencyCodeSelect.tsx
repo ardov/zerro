@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { MenuItem, SelectProps, ListItemText } from '@mui/material'
 import {
   accounts as coreAccounts,

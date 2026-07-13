@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react'
+import { FC, useCallback } from 'react'
 import { Menu, MenuItem, MenuProps } from '@mui/material'
 import { TTransaction, TTransactionId } from '6-shared/types'
 import { useAppDispatch, useAppSelector } from 'store'

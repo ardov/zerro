@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { currency as coreCurrency, tags as coreTags } from 'zerro-core/redux'
 
 import { Box, Typography, Chip, Stack } from '@mui/material'

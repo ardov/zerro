@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import { FC } from 'react'
 import {
   currency as coreCurrency,
   months as coreMonths,

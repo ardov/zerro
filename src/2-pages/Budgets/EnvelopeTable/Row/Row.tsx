@@ -207,7 +207,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
           outcome={
             <ActivityCell
               value={activity}
-              onClick={e => openTransactionsPopover(id)}
+              onClick={() => openTransactionsPopover(id)}
             />
           }
           available={

@@ -5,7 +5,7 @@ import {
   months as coreMonths,
 } from 'zerro-core/redux'
 
-import React, { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import {
   Box,
   Button,

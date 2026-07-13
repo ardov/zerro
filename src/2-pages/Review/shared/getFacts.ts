@@ -6,16 +6,10 @@ import {
   transactions as coreTransactions,
 } from 'zerro-core/redux'
 
-import {
-  TFxAmount,
-  TFxCode,
-  TInstrumentId,
-  TTagId,
-  TTransaction,
-} from '6-shared/types'
+import { TFxAmount, TFxCode, TTagId, TTransaction } from '6-shared/types'
 import { parseDate } from '6-shared/helpers/date'
 
-import { addFxAmount, convertFx } from '6-shared/helpers/money'
+import { addFxAmount } from '6-shared/helpers/money'
 import { TSelector, useAppSelector } from 'store/index'
 
 type TInfoNode = {
@@ -148,22 +142,5 @@ function makeStatsNode(): TStats {
     byTag: {},
     byMonth: {},
     byWeekday: {},
-  }
-}
-
-/** Returns a function to sort transactions ascending by amount */
-function compareByAmount(
-  toValue: (amount: number, id: TInstrumentId) => number
-) {
-  return function (tr1: TTransaction, tr2: TTransaction) {
-    const amount1 = Math.max(
-      toValue(tr1.income, tr1.incomeInstrument),
-      toValue(tr1.outcome, tr1.outcomeInstrument)
-    )
-    const amount2 = Math.max(
-      toValue(tr2.income, tr2.incomeInstrument),
-      toValue(tr2.outcome, tr2.outcomeInstrument)
-    )
-    return amount2 - amount1
   }
 }

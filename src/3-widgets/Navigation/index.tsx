@@ -1,4 +1,3 @@
-import React from 'react'
 import NavDrawer from './NavDrawer'
 import { MobileNavigation } from './MobileNavigation'
 

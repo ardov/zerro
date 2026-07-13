@@ -28,7 +28,7 @@ export function useHomeBar() {
     window.screen.height / window.screen.width === 736 / 414 &&
     window.devicePixelRatio === 3
   const hasHomeBar =
-    // @ts-ignore
+    // @ts-expect-error standalone is a non-standard iOS Safari property
     window.navigator.standalone && isiPhoneWithHomeBar && !isiPhone8Plus
   return hasHomeBar
 }

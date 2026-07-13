@@ -49,7 +49,7 @@ import { registerPopover } from '6-shared/historyPopovers'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useColorScheme } from '6-shared/ui/theme'
 
-const settingsHooks = registerPopover<{}, PopoverProps>('settingsMenu', {})
+const settingsHooks = registerPopover<object, PopoverProps>('settingsMenu', {})
 
 export const useSettingsMenu = () => {
   const { open } = settingsHooks.useMethods()
@@ -166,7 +166,7 @@ function ThemeItem({ onClose }: ItemProps) {
   )
 }
 
-function LangItem({ onClose }: ItemProps) {
+function LangItem(_props: ItemProps) {
   const { t, i18n } = useTranslation('settings')
   const currentLang = i18n.resolvedLanguage || i18n.language
 
@@ -234,7 +234,7 @@ function NavItems({ onClose }: ItemProps) {
   )
 }
 
-function ReloadDataItem({ onClose }: ItemProps) {
+function ReloadDataItem(_props: ItemProps) {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
   const reloadData = () => {

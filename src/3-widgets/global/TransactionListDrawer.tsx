@@ -1,5 +1,5 @@
 import type { TTransaction } from '6-shared/types'
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Drawer, Box, Typography, IconButton } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'

@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { months as coreMonths } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'

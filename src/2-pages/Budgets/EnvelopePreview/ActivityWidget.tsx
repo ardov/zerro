@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { useAppSelector } from 'store'
 import {
   activity as coreActivity,
@@ -127,19 +127,19 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
             <Bar
               dataKey="startingAmount"
               fill={startingAmountColor}
-              // @ts-ignore
+              // @ts-expect-error recharts shape prop typing
               shape={<BudgetBar />}
             />
             <Bar
               dataKey="activity"
               fill={activityColor}
-              // @ts-ignore
+              // @ts-expect-error recharts shape prop typing
               shape={<ActivityBar current={highlighted} />}
             />
             <Bar
               dataKey="startingAmount"
               fill={budgetLineColor}
-              // @ts-ignore
+              // @ts-expect-error recharts shape prop typing
               shape={<BudgetLine />}
             />
             <XAxis

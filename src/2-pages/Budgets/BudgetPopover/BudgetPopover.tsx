@@ -6,7 +6,7 @@ import {
 
 import type { TEnvelopeId } from '5-entities/envelope'
 
-import React, { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import {
   ListItemText,
   InputAdornment,

@@ -10,7 +10,7 @@ const savedCurrency = {
     if (!raw) return null
     try {
       return JSON.parse(raw) as TFxCode
-    } catch (error) {
+    } catch {
       return null
     }
   },
@@ -41,7 +41,7 @@ export const getSavedCurrency = (state: RootState) => state.displayCurrency
 
 export const setSavedCurrency =
   (currency: TFxCode | null): AppThunk =>
-  (dispatch, getState) => {
+  dispatch => {
     savedCurrency.set(currency)
     dispatch(setCurrency(currency))
     sendEvent('DisplayCurrency: set')

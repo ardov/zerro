@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { currency as coreCurrency, goals as coreGoals } from 'zerro-core/redux'
 
 import { Typography, ButtonBase, ButtonBaseProps } from '@mui/material'

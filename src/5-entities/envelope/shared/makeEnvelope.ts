@@ -127,9 +127,9 @@ const funcs: TFuncs = {
     debtor: (el, fx, meta) => meta?.parent || null,
   },
   children: {
-    tag: el => [],
-    account: el => [],
-    debtor: el => [],
+    tag: () => [],
+    account: () => [],
+    debtor: () => [],
   },
   index: {
     tag: (el, fx, meta) => meta?.index || -1,

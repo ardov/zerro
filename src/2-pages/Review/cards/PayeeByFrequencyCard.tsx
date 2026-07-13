@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { currency as coreCurrency } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'

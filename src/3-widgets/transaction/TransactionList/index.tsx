@@ -6,12 +6,9 @@ import type {
   TTransaction,
   TTransactionId,
 } from '6-shared/types'
-import {
-  accounts as coreAccounts,
-  transactions as coreTransactions,
-} from 'zerro-core/redux'
+import { transactions as coreTransactions } from 'zerro-core/redux'
 
-import React, { useMemo, useState, useCallback, useEffect, FC } from 'react'
+import { useMemo, useState, useCallback, useEffect, FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Theme } from '@mui/material'
 import { sendEvent } from '6-shared/helpers/tracking'
@@ -86,8 +83,6 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   )
   const trList = useFilteredTransactions(transactions, debouncedFilter)
 
-  const debtId = useAppSelector(coreAccounts.selectDebtAccountId)
-
   const [checked, setChecked] = useState<TTransactionId[]>([])
   const uncheckAll = useCallback(() => setChecked([]), [])
   const checkAll = useCallback(
@@ -157,7 +152,6 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     return Object.values(groups)
   }, [
     trList,
-    debtId,
     opened,
     checked,
     onTrOpen,

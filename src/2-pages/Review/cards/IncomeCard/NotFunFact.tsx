@@ -1,4 +1,3 @@
-import React from 'react'
 import { currency as coreCurrency } from 'zerro-core/redux'
 
 import { Dialog, IconButton, Link, Stack, Typography } from '@mui/material'

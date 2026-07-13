@@ -6,16 +6,16 @@ export const withPerf = <T extends Array<any>, U>(
     const t0 = performance.now()
     const res = fn(...args)
     const time = +(performance.now() - t0).toFixed(4)
-    //@ts-ignore
+    //@ts-expect-error window.zerro is an untyped debug object
     if (window?.zerro?.logsShow) console.log('⏱ ' + name.padEnd(32, ' '), time)
 
-    //@ts-ignore
+    //@ts-expect-error window.zerro is an untyped debug object
     if (window.zerro) {
-      //@ts-ignore
+      //@ts-expect-error window.zerro is an untyped debug object
       window.zerro.logs ??= {}
-      //@ts-ignore
+      //@ts-expect-error window.zerro is an untyped debug object
       window.zerro.logs[name] ??= []
-      //@ts-ignore
+      //@ts-expect-error window.zerro is an untyped debug object
       window.zerro.logs[name].push(time)
     }
     return res

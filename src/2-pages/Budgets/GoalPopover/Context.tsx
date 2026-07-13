@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react'
+import { FC, useCallback } from 'react'
 import { useMonth } from '../MonthProvider'
 
 import { TEnvelopeId } from '5-entities/envelope'

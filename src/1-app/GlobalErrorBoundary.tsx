@@ -9,7 +9,7 @@ export default class GlobalErrorBoundary extends React.Component<{
 }> {
   state = { hasError: false }
 
-  static getDerivedStateFromError = (error: any) => ({ hasError: true })
+  static getDerivedStateFromError = (_error: any) => ({ hasError: true })
 
   componentDidCatch = (error: Error, errorInfo: React.ErrorInfo) => {
     // Automatically reload the page if a chunk fails to load

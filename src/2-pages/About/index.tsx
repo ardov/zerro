@@ -1,6 +1,5 @@
 import type { MDXComponents } from 'mdx/types'
 
-import React from 'react'
 import { Switch, Route } from 'react-router'
 import { Box } from '@mui/material'
 import { Link } from 'react-router-dom'

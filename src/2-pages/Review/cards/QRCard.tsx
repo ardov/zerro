@@ -1,4 +1,3 @@
-import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { ButtonBase, Stack, Typography } from '@mui/material'
 import { Card, TCardProps } from '../shared/Card'

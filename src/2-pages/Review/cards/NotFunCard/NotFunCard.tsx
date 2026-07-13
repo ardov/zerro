@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { currency as coreCurrency, tags as coreTags } from 'zerro-core/redux'
 
 import {

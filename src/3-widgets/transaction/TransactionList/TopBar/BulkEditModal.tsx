@@ -1,7 +1,7 @@
 import type { DialogProps } from '@mui/material/Dialog'
 import type { Modify, TTransaction } from '6-shared/types'
 
-import React, { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -29,7 +29,6 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
   onClose,
   onApply,
   open = false,
-  keepMounted = false,
   ...rest
 }) => {
   const { t } = useTranslation('transactionsBulkEdit')

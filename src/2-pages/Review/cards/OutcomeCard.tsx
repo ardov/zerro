@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Box, IconButton, Stack, Typography } from '@mui/material'
 import { formatDate } from '6-shared/helpers/date'
 import { useAppSelector } from 'store'

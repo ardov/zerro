@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { Typography, Box, Button } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { ChevronDownIcon } from '6-shared/ui/Icons'

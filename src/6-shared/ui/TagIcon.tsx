@@ -8,7 +8,6 @@ import {
   SxProps,
   Theme,
 } from '@mui/material'
-import React from 'react'
 
 const emojiSizes = { s: 32, m: 40 }
 const emojiFonts = { s: '1rem', m: '1.5rem' }

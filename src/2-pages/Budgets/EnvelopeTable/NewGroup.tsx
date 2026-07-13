@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Box, Collapse } from '@mui/material'
 import { useDroppable } from '@dnd-kit/core'
 import { DragTypes } from '../DnD'

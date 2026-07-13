@@ -14,7 +14,7 @@ import { setTotalBudget } from '4-features/budget/setTotalBudget'
 
 export const startFresh =
   (month: TISOMonth): AppThunk<void> =>
-  (dispatch, getState) => {
+  dispatch => {
     sendEvent('Budgets: start fresh')
     const prevMonthISO = toISOMonth(prevMonth(month))
     dispatch(resetMonthThunk(prevMonthISO))

@@ -16,7 +16,6 @@ describe('readDependencies', () => {
   })
 
   it('keeps the documented projection graph acyclic', () => {
-    const nodes = new Set(Object.keys(readDependencies))
     const visited = new Set<string>()
     const active = new Set<string>()
 

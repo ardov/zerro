@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom'
-import React, { FC, ReactNode, useEffect, useState } from 'react'
+import { FC, ReactNode, useEffect, useState } from 'react'
 import { useCallback } from 'react'
 import {
   useDndMonitor,

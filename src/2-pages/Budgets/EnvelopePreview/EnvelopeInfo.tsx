@@ -6,7 +6,6 @@ import {
   transactions as coreTransactions,
 } from 'zerro-core/redux'
 
-import React from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Box,

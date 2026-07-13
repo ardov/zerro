@@ -56,7 +56,7 @@ i18n.on('languageChanged', function (lng) {
   document.documentElement.lang = i18n.resolvedLanguage || lng
 })
 
-i18n.on('missingKey', function (lngs, namespace, key, res) {
+i18n.on('missingKey', function (lngs, namespace, key) {
   console.warn(`Missing translation: ${lngs[0]}, ${namespace}, ${key}`)
 })
 

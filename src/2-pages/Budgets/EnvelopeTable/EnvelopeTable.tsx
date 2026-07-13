@@ -1,4 +1,4 @@
-import React, { FC, memo, useCallback } from 'react'
+import { FC, memo, useCallback } from 'react'
 import { shallowEqual } from 'react-redux'
 import { isEqual } from 'lodash'
 import { Paper } from '@mui/material'

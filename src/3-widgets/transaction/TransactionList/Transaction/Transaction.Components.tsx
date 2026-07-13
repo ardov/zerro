@@ -38,7 +38,6 @@ export const Symbol: FC<SymbolProps> = ({
   isChecked,
   isInSelectionMode,
   onToggle,
-  ...rest
 }) => {
   const tags = useAppSelector(coreTags.selectPopulated)
   const mainTagId = tr.tag?.length ? tr.tag[0] : 'null'
@@ -200,12 +199,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
 
 type InfoProps = TrElementProps & { onFilterByPayee?: (payee: string) => void }
 
-export const Info: FC<InfoProps> = ({
-  tr,
-  trType,
-  onFilterByPayee,
-  ...rest
-}) => {
+export const Info: FC<InfoProps> = ({ tr, trType, onFilterByPayee }) => {
   return (
     <InfoWrapper>
       {trType !== 'incomeDebt' && trType !== 'outcomeDebt' && (

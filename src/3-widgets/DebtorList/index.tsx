@@ -1,4 +1,3 @@
-import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { List } from '@mui/material'
 import { Debtor, Subheader } from './components'
