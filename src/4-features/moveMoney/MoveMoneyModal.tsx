@@ -1,6 +1,11 @@
 import React, { FC, useState } from 'react'
-import { useCoreDisplayCurrency } from 'zerro-core/redux'
-import { useCoreToDisplay } from 'zerro-core/redux'
+import {
+  activity as coreActivity,
+  currency as coreCurrency,
+  envelopes as coreEnvelopes,
+  months as coreMonths,
+} from 'zerro-core/redux'
+
 import { Box, InputAdornment, IconButton, Chip } from '@mui/material'
 import Dialog, { DialogProps } from '@mui/material/Dialog'
 import { AmountInput } from '6-shared/ui/AmountInput'
@@ -10,11 +15,6 @@ import { useAppDispatch, useAppSelector } from 'store'
 
 import { moveMoney } from './moveMoney'
 import { TEnvelopeId } from '5-entities/envelope'
-import {
-  selectCoreEnvMetrics,
-  selectCoreEnvelopes,
-  selectCoreMonthTotals,
-} from 'zerro-core/redux'
 
 export type MoveMoneyModalProps = Modify<
   DialogProps,
@@ -30,11 +30,11 @@ export const MoveMoneyModal: FC<MoveMoneyModalProps> = props => {
   const dispatch = useAppDispatch()
   const { open, onClose, source, month, destination } = props
 
-  const envelopes = useAppSelector(selectCoreEnvelopes)
-  const metrics = useAppSelector(selectCoreEnvMetrics)[month]
-  const totalMetrics = useAppSelector(selectCoreMonthTotals)[month]
-  const [currency] = useCoreDisplayCurrency()
-  const toDisplay = useCoreToDisplay(month)
+  const envelopes = useAppSelector(coreEnvelopes.selectAll)
+  const metrics = useAppSelector(coreActivity.selectEnvelopeMetrics)[month]
+  const totalMetrics = useAppSelector(coreMonths.selectTotals)[month]
+  const [currency] = coreCurrency.useDisplayCurrency()
+  const toDisplay = coreCurrency.useToDisplay(month)
 
   const sourceName =
     source === 'toBeBudgeted' ? 'To be budgeted' : envelopes[source].name

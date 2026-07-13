@@ -1,10 +1,9 @@
 import React, { FC } from 'react'
 import {
-  type TAccountPopulated,
-  useCoreInBudgetAccounts,
-  useCoreSavingAccounts,
-  useCoreToDisplay,
+  accounts as coreAccounts,
+  currency as coreCurrency,
 } from 'zerro-core/redux'
+
 import { useTranslation } from 'react-i18next'
 import { Collapse, List, ListItemButton } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
@@ -18,14 +17,16 @@ import { Account, Subheader } from './components'
 
 export default function AccountList({ className = '' }) {
   const { t } = useTranslation('accounts')
-  const toDisplay = useCoreToDisplay(toISOMonth(new Date()))
-  const inBudget = useCoreInBudgetAccounts()
+  const toDisplay = coreCurrency.useToDisplay(toISOMonth(new Date()))
+  const inBudget = coreAccounts
+    .useInBudget()
     .sort(
       (a, b) =>
         toDisplay({ [b.fxCode]: b.balance }) -
         toDisplay({ [a.fxCode]: a.balance })
     )
-  const savings = useCoreSavingAccounts()
+  const savings = coreAccounts
+    .useSaving()
     .sort(
       (a, b) =>
         toDisplay({ [b.fxCode]: b.balance }) -
@@ -73,11 +74,11 @@ export default function AccountList({ className = '' }) {
   )
 }
 
-const ArchivedList: FC<{ accs: TAccountPopulated[] }> = props => {
+const ArchivedList: FC<{ accs: coreAccounts.TAccountPopulated[] }> = props => {
   const { t } = useTranslation('accounts')
   const { accs } = props
   const month = toISOMonth(new Date())
-  const toDisplay = useCoreToDisplay(month)
+  const toDisplay = coreCurrency.useToDisplay(month)
   const [visible, toggleVisibility] = useToggle()
   if (!accs.length) return null
 
@@ -117,7 +118,7 @@ const ArchivedList: FC<{ accs: TAccountPopulated[] }> = props => {
   )
 }
 
-function getTotal(accs: TAccountPopulated[]): TFxAmount {
+function getTotal(accs: coreAccounts.TAccountPopulated[]): TFxAmount {
   return accs.reduce(
     (sum, a) => addFxAmount(sum, { [a.fxCode]: a.balance }),
     {}

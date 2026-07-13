@@ -5,7 +5,8 @@ import { Drawer, Box, Typography, IconButton } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { registerPopover } from '6-shared/historyPopovers'
-import { TrCondition } from 'zerro-core/redux'
+import { transactions as coreTransactions } from 'zerro-core/redux'
+
 import {
   TransactionList,
   TTransactionListProps,
@@ -15,7 +16,7 @@ import { useTransactionPreview } from './TransactionPreviewDrawer'
 export type TransactionDrawerProps = {
   title?: string
   transactions?: TTransaction[]
-  filterConditions?: TrCondition
+  filterConditions?: coreTransactions.TrCondition
   initialDate?: TTransactionListProps['initialDate']
 }
 

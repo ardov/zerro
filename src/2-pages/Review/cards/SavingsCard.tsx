@@ -1,5 +1,6 @@
 import { Box, Stack, Typography } from '@mui/material'
-import { useCoreToDisplay } from 'zerro-core/redux'
+import { currency as coreCurrency } from 'zerro-core/redux'
+
 import { useTranslation } from 'react-i18next'
 
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
@@ -9,7 +10,7 @@ import { useStats } from '../shared/getFacts'
 export function SavingsCard({ year }: TCardProps) {
   const { t } = useTranslation('yearReview', { keyPrefix: 'savingsCard' })
   const yearStats = useStats(year)
-  const toDisplay = useCoreToDisplay('current')
+  const toDisplay = coreCurrency.useToDisplay('current')
 
   const income = toDisplay(yearStats.total.income)
   const outcome = toDisplay(yearStats.total.outcome)

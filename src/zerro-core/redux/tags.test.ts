@@ -19,9 +19,10 @@ function makeRootState(data: TDataStore): RootState {
 describe('Core tag presentation adapter', () => {
   it('adds presentation fields and the uncategorized tag', async () => {
     await i18n.changeLanguage('en')
-    const { selectCorePopulatedTags } = await import('./selectors')
+    const { selectPopulatedTags } =
+      await import('../testing/reduxSelectors')
     const state = makeRootState(makeDemoStore({ now: NOW }))
-    const tags = selectCorePopulatedTags(state)
+    const tags = selectPopulatedTags(state)
     const tag = state.data.current.tag[Object.keys(state.data.current.tag)[0]]
 
     expect(tags).toHaveProperty('null')
@@ -44,9 +45,10 @@ describe('Core tag presentation adapter', () => {
   })
 
   it('stays cached across unrelated data changes and recomputes for tags', async () => {
-    const { selectCorePopulatedTags } = await import('./selectors')
+    const { selectPopulatedTags } =
+      await import('../testing/reduxSelectors')
     const store = makeDemoStore({ now: NOW })
-    const first = selectCorePopulatedTags(makeRootState(store))
+    const first = selectPopulatedTags(makeRootState(store))
     const unrelated = makeRootState({ ...store, company: { ...store.company } })
     const tagId = Object.keys(store.tag)[0]
     const changed = makeRootState({
@@ -54,7 +56,7 @@ describe('Core tag presentation adapter', () => {
       tag: { ...store.tag, [tagId]: { ...store.tag[tagId], title: 'Changed' } },
     })
 
-    expect(selectCorePopulatedTags(unrelated)).toBe(first)
-    expect(selectCorePopulatedTags(changed)).not.toBe(first)
+    expect(selectPopulatedTags(unrelated)).toBe(first)
+    expect(selectPopulatedTags(changed)).not.toBe(first)
   })
 })

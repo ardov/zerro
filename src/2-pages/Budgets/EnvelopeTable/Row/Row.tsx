@@ -1,9 +1,11 @@
 import React, { FC, ReactNode, useCallback } from 'react'
 import {
-  formatGoal,
-  type TGoal,
-  useCoreToDisplay,
+  activity as coreActivity,
+  currency as coreCurrency,
+  envelopes as coreEnvelopes,
+  goals as coreGoals,
 } from 'zerro-core/redux'
+
 import { useDroppable } from '@dnd-kit/core'
 import { IconButton, IconButtonProps } from '@mui/material'
 import { useTranslation } from 'react-i18next'
@@ -14,11 +16,7 @@ import { TFxCode, TISOMonth } from '6-shared/types'
 
 import { useAppSelector } from 'store'
 import { TEnvelopeId } from '5-entities/envelope'
-import {
-  selectCoreEnvMetrics,
-  selectCoreEnvelopes,
-  selectCoreGoals,
-} from 'zerro-core/redux'
+
 import { DragTypes } from '2-pages/Budgets/DnD'
 import { useBudgetPopover } from '../../BudgetPopover'
 import { useGoalPopover } from '../../GoalPopover'
@@ -125,10 +123,10 @@ export const Row: FC<EnvelopeRowProps> = props => {
   const isSmall = useIsSmall()
   const { columns } = useColumns()
 
-  const envelope = useAppSelector(selectCoreEnvelopes)[id]
-  const envData = useAppSelector(selectCoreEnvMetrics)[month][id]
-  const goalInfo = useAppSelector(selectCoreGoals)[month][id]
-  const toDisplay = useCoreToDisplay(month)
+  const envelope = useAppSelector(coreEnvelopes.selectAll)[id]
+  const envData = useAppSelector(coreActivity.selectEnvelopeMetrics)[month][id]
+  const goalInfo = useAppSelector(coreGoals.selectAll)[month][id]
+  const toDisplay = coreCurrency.useToDisplay(month)
 
   const isChild = !!envelope.parent || !!isSelf
 
@@ -255,7 +253,7 @@ const Droppable: FC<{
 }
 
 type GoalButtonProps = {
-  goal: TGoal | null
+  goal: coreGoals.TGoal | null
   currency: TFxCode
   goalProgress?: number | null
   onClick: IconButtonProps['onClick']
@@ -279,7 +277,7 @@ const GoalButton: FC<GoalButtonProps> = props => {
 
   return (
     <span>
-      <Tooltip title={formatGoal(goal, currency)}>
+      <Tooltip title={coreGoals.formatGoal(goal, currency)}>
         <IconButton size="small" onClick={onClick}>
           <RadialProgress value={goalProgress || 0} fontSize="inherit" />
         </IconButton>

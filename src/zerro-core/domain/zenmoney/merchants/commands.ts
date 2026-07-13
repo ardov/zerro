@@ -1,10 +1,10 @@
-import type { OptionalExceptFor } from '../../shared/types'
 import type { TDataStore } from '../store'
 import type { TCoreContext, TNormalizedPatch } from '../../../types'
 import { getMerchants } from './read'
 import type { TMerchant } from './types'
 
-export type TMerchantPatch = OptionalExceptFor<TMerchant, 'id'>
+export type TMerchantPatch = Pick<TMerchant, 'id'> &
+  Partial<Pick<TMerchant, 'title'>>
 
 export function compilePatchMerchant(
   data: TDataStore,

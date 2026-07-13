@@ -7,13 +7,14 @@ import { TagIcon } from '6-shared/ui/TagIcon'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { useAppSelector } from 'store'
 import {
-  isTransactionViewed,
-  TrType,
-  useCoreMerchants,
-  useCorePopulatedAccounts,
+  accounts as coreAccounts,
+  merchants as coreMerchants,
+  tags as coreTags,
+  transactions as coreTransactions,
 } from 'zerro-core/redux'
+
 import { TTagPopulated } from '5-entities/tag'
-import { selectCorePopulatedTags } from 'zerro-core/redux'
+
 import { SmartAmount } from '3-widgets/Amount'
 
 type HTMLDivProps = React.DetailedHTMLProps<
@@ -22,7 +23,7 @@ type HTMLDivProps = React.DetailedHTMLProps<
 >
 type TrElementProps = HTMLDivProps & {
   tr: TTransaction
-  trType: TrType
+  trType: coreTransactions.TrType
 }
 
 type SymbolProps = TrElementProps & {
@@ -39,7 +40,7 @@ export const Symbol: FC<SymbolProps> = ({
   onToggle,
   ...rest
 }) => {
-  const tags = useAppSelector(selectCorePopulatedTags)
+  const tags = useAppSelector(coreTags.selectPopulated)
   const mainTagId = tr.tag?.length ? tr.tag[0] : 'null'
   const tag = tags[mainTagId]
   const { symbol, color } = getSymAndColor(trType, tag)
@@ -53,21 +54,21 @@ export const Symbol: FC<SymbolProps> = ({
         color={color}
         size="m"
       />
-      <NewIndicator viewed={isTransactionViewed(tr)} />
+      <NewIndicator viewed={coreTransactions.isViewed(tr)} />
       {tr.qrCode && <Reciept>🧾</Reciept>}
     </SymbolWrapper>
   )
 
-  function getSymAndColor(type: TrType, tag: TTagPopulated) {
+  function getSymAndColor(type: coreTransactions.TrType, tag: TTagPopulated) {
     switch (type) {
-      case TrType.Income:
-      case TrType.Outcome:
+      case coreTransactions.TrType.Income:
+      case coreTransactions.TrType.Outcome:
         return { symbol: tag.symbol, color: tag.colorHEX }
-      case TrType.Transfer:
+      case coreTransactions.TrType.Transfer:
         return { symbol: '↔️' }
-      case TrType.OutcomeDebt:
+      case coreTransactions.TrType.OutcomeDebt:
         return { symbol: '⬅️' }
-      case TrType.IncomeDebt:
+      case coreTransactions.TrType.IncomeDebt:
         return { symbol: '➡️' }
       default:
         return { symbol: '' }
@@ -77,7 +78,7 @@ export const Symbol: FC<SymbolProps> = ({
 
 export const Tags: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
   const { t } = useTranslation()
-  const tags = useAppSelector(selectCorePopulatedTags)
+  const tags = useAppSelector(coreTags.selectPopulated)
   switch (trType) {
     case 'income':
     case 'outcome':
@@ -272,7 +273,7 @@ export const Accounts: FC<InfoProps> = ({
 }
 
 const Account: FC<{ id: string }> = ({ id, ...rest }) => {
-  const account = useCorePopulatedAccounts()[id]
+  const account = coreAccounts.usePopulated()[id]
   return <span {...rest}>{account.title}</span>
 }
 
@@ -281,7 +282,7 @@ const Payee: FC<{
   merchant: string | null
   onClick?: (payee: string) => void
 }> = ({ payee, merchant, onClick, ...rest }) => {
-  const merchants = useCoreMerchants()
+  const merchants = coreMerchants.useAll()
   if (!payee && !merchant) return null
   let name = merchant ? merchants[merchant]?.title : payee
   return (

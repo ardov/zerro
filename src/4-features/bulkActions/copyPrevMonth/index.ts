@@ -3,22 +3,21 @@ import { AppThunk } from 'store'
 import { TISOMonth } from '6-shared/types'
 import { prevMonth, toISOMonth } from '6-shared/helpers/date'
 import {
-  selectCoreEnvMetrics,
-  setBudget,
-  type TBudgetUpdate,
+  activity as coreActivity,
+  budgets as coreBudgets,
 } from 'zerro-core/redux'
 
 export const copyPreviousBudget =
   (month: TISOMonth): AppThunk<void> =>
   (dispatch, getState) => {
     sendEvent('Budgets: copy previous')
-    const envData = selectCoreEnvMetrics(getState())
+    const envData = coreActivity.selectEnvelopeMetrics(getState())
     const curr = envData[month]
     const prev = envData[toISOMonth(prevMonth(month))]
 
     if (!curr || !prev) return
 
-    const updates: TBudgetUpdate[] = []
+    const updates: coreBudgets.TBudgetUpdate[] = []
     Object.values(prev).forEach(({ id, currency, selfBudgeted }) => {
       let prevVal = selfBudgeted[currency]
       let currVal = curr[id].selfBudgeted[currency]
@@ -29,5 +28,5 @@ export const copyPreviousBudget =
       if (prevVal === currVal) return
       updates.push({ id, value: prevVal, month })
     })
-    dispatch(setBudget(updates))
+    dispatch(coreBudgets.set(updates))
   }

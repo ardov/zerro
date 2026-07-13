@@ -1,8 +1,9 @@
 import type { TDateDraft, TFxAmount, TISOMonth } from '6-shared/types'
 import { useAppSelector } from 'store'
 import {
-  selectCoreConvertFx,
-  selectCoreEnvMetrics,
+  activity as coreActivity,
+  currency as coreCurrency,
+  transactions as coreTransactions,
 } from 'zerro-core/redux'
 
 import React from 'react'
@@ -26,7 +27,7 @@ import {
 } from '6-shared/helpers/date'
 
 import { TEnvelopeId } from '5-entities/envelope'
-import { TrFilterMode } from 'zerro-core/redux'
+
 import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 import { OneLiner } from '3-widgets/DataLine'
 import { cardStyle } from './shared'
@@ -45,8 +46,10 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
   const theme = useTheme()
   const transactionDrawer = useEnvTransactionsDrawer()
   const openBudgetPopover = useBudgetPopover()
-  const convertFx = useAppSelector(selectCoreConvertFx)
-  const envMetrics = useAppSelector(selectCoreEnvMetrics)[month][id]
+  const convertFx = useAppSelector(coreCurrency.selectConvertFx)
+  const envMetrics = useAppSelector(coreActivity.selectEnvelopeMetrics)[month][
+    id
+  ]
 
   if (!envMetrics) return null
 
@@ -127,7 +130,11 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
           }}
           onClick={() => {
             transactionDrawer.open({
-              envelopeConditions: { id, month, mode: TrFilterMode.Envelope },
+              envelopeConditions: {
+                id,
+                month,
+                mode: coreTransactions.TrFilterMode.Envelope,
+              },
             })
           }}
         >

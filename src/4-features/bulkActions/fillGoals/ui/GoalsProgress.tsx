@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
-import { useCoreDisplayCurrency } from 'zerro-core/redux'
-import { useCoreToDisplay } from 'zerro-core/redux'
+import { currency as coreCurrency, goals as coreGoals } from 'zerro-core/redux'
+
 import { Typography, ButtonBase, ButtonBaseProps } from '@mui/material'
 import { TISOMonth } from '6-shared/types'
 import { formatMoney } from '6-shared/helpers/money'
@@ -8,7 +8,6 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 import { RadialProgress } from '6-shared/ui/RadialProgress'
 import { useAppDispatch, useAppSelector } from 'store'
 
-import { selectCoreGoalTotals } from 'zerro-core/redux'
 import { fillGoals } from '../model/fillGoals'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useTranslation } from 'react-i18next'
@@ -33,9 +32,9 @@ export const GoalsProgress: FC<TGoalsProgressProps> = props => {
   const { t } = useTranslation('goals')
   const { month, ...btnProps } = props
   const dispatch = useAppDispatch()
-  const [currency] = useCoreDisplayCurrency()
-  const toDisplay = useCoreToDisplay(month)
-  const totalProgress = useAppSelector(selectCoreGoalTotals)[month]
+  const [currency] = coreCurrency.useDisplayCurrency()
+  const toDisplay = coreCurrency.useToDisplay(month)
+  const totalProgress = useAppSelector(coreGoals.selectTotals)[month]
   const formatSum = (sum: number) => formatMoney(sum, currency)
 
   const completeAll = useConfirm({

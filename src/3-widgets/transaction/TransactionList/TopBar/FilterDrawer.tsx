@@ -19,7 +19,7 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { SmartSelect } from '6-shared/ui/SmartSelect'
 import { TagSelect } from '5-entities/tag/ui/TagSelect'
-import { TrCondition, TrType } from 'zerro-core/redux'
+import { transactions as coreTransactions } from 'zerro-core/redux'
 
 const drawerWidth = { xs: '100vw', sm: 360 }
 const contentSx = {
@@ -28,8 +28,8 @@ const contentSx = {
 }
 
 type FilterDrawerProps = {
-  setCondition: (c: TrCondition) => void
-  conditions: TrCondition
+  setCondition: (c: coreTransactions.TrCondition) => void
+  conditions: coreTransactions.TrCondition
   clearFilter: () => void
   onClose: () => void
   open: boolean
@@ -45,7 +45,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
 }) => {
   const { t } = useTranslation('filterDrawer')
   const handleTypeChange = (e: SelectChangeEvent<string>) => {
-    const value = e.target.value as TrType
+    const value = e.target.value as coreTransactions.TrType
     setCondition({ type: value || undefined })
   }
 
@@ -157,13 +157,13 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
               fullWidth
             >
               <MenuItem value="">{t('transactionType_all')}</MenuItem>
-              <MenuItem value={TrType.Income}>
+              <MenuItem value={coreTransactions.TrType.Income}>
                 {t('transactionType_income')}
               </MenuItem>
-              <MenuItem value={TrType.Outcome}>
+              <MenuItem value={coreTransactions.TrType.Outcome}>
                 {t('transactionType_outcome')}
               </MenuItem>
-              <MenuItem value={TrType.Transfer}>
+              <MenuItem value={coreTransactions.TrType.Transfer}>
                 {t('transactionType_transfer')}
               </MenuItem>
             </SmartSelect>
@@ -176,7 +176,9 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
             tagFilters={{ includeNull: true }}
             value={conditions.tags || []}
             onChange={tags =>
-              setCondition({ tags: tags as TrCondition['tags'] })
+              setCondition({
+                tags: tags as coreTransactions.TrCondition['tags'],
+              })
             }
           />
         </Box>
@@ -228,7 +230,7 @@ const FilterDrawer: FC<FilterDrawerProps> = ({
 
 export default FilterDrawer
 
-function getGteLte(amount: TrCondition['amount']) {
+function getGteLte(amount: coreTransactions.TrCondition['amount']) {
   if (amount === undefined || amount === null)
     return { gte: undefined, lte: undefined }
   if (typeof amount === 'number') return { gte: amount, lte: amount }

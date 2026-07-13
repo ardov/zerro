@@ -109,6 +109,12 @@ Building the semantic engine facade remains later work.
   and sync transport are derived.
 - All production writes use semantic adapter commands. The generic command
   executor and legacy patch bridge are not public.
+- All application consumers use domain namespaces from `zerro-core/redux`;
+  the flat selector/hook/command export surface is removed. Entity-local patch
+  compilers remain internal and expose only explicitly writable fields.
+- Redux selectors and hooks live with their owning domain modules. Shared raw
+  inputs live in `redux/state.ts`; command-only snapshot reads live in
+  `redux/commandRead.ts`. There is no central selector/hook graph file.
 - Local commands store intent and materialized patches. Replay uses the stored
   applied patch and preserves unrelated entity-map references where possible.
 - Persisted replica input is versioned and runtime-validated before replay.

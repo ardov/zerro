@@ -1,10 +1,16 @@
 import { toISOMonth } from '6-shared/helpers/date'
 import { ById, TBudget, globalBudgetTagId } from '6-shared/types'
-import { envId, EnvType, type TBudgetUpdate } from 'zerro-core/redux'
+import {
+  budgets as coreBudgets,
+  envelopes as coreEnvelopes,
+} from 'zerro-core/redux'
+
 import { getTagBudgets, setEnvBudget } from '5-entities/budget'
 import { AppThunk } from 'store'
 
-export function convertZmBudgetsToZerro(): AppThunk<TBudgetUpdate[]> {
+export function convertZmBudgetsToZerro(): AppThunk<
+  coreBudgets.TBudgetUpdate[]
+> {
   return (dispatch, getState) => {
     const tagBudgets = getTagBudgets(getState())
     const updates = convertTagBudgetsToUpdates(tagBudgets)
@@ -14,13 +20,16 @@ export function convertZmBudgetsToZerro(): AppThunk<TBudgetUpdate[]> {
 }
 
 function convertTagBudgetsToUpdates(tagBudgets: ById<TBudget>) {
-  let updates = [] as TBudgetUpdate[]
+  let updates = [] as coreBudgets.TBudgetUpdate[]
 
   Object.values(tagBudgets).forEach(budget => {
     if (!budget.outcome) return
     if (budget.tag === globalBudgetTagId) return
     updates.push({
-      id: envId.get(EnvType.Tag, String(budget.tag)),
+      id: coreEnvelopes.envId.get(
+        coreEnvelopes.EnvType.Tag,
+        String(budget.tag)
+      ),
       month: toISOMonth(budget.date),
       value: budget.outcome,
     })

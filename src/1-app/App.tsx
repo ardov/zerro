@@ -14,7 +14,8 @@ import { PopoverManager } from '6-shared/historyPopovers'
 import { useAppSelector } from 'store'
 import { getLoginState } from 'store/token'
 import { getLastSyncTime } from 'store/data/selectors'
-import { useCoreRootUserId } from 'zerro-core/redux'
+import { users as coreUsers } from 'zerro-core/redux'
+
 import { RegularSyncHandler } from '3-widgets/RegularSyncHandler'
 import Nav from '3-widgets/Navigation'
 import { MobileNavigation } from '3-widgets/Navigation'
@@ -40,7 +41,7 @@ export default function App() {
 
   const isLoggedIn = useAppSelector(getLoginState)
   const hasData = useAppSelector(state => !!getLastSyncTime(state))
-  const userId = useCoreRootUserId()
+  const userId = coreUsers.useRootId()
   useEffect(() => {
     if (userId) setUserId(userId)
   }, [userId])

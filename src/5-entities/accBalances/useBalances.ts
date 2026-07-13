@@ -5,9 +5,10 @@ import { keys } from '6-shared/helpers/keys'
 
 import { useAppSelector } from 'store/index'
 import {
-  selectCoreBalancesByDate,
-  selectCoreDisplayConverter,
+  balances as coreBalances,
+  currency as coreCurrency,
 } from 'zerro-core/redux'
+
 import { balancesToDisplay } from './shared/convertBalancesToDisplay'
 import { TBalanceNode } from './shared/types'
 
@@ -16,7 +17,7 @@ export function useBalances(
   start?: TDateDraft,
   end?: TDateDraft
 ) {
-  const list = useAppSelector(selectCoreBalancesByDate)
+  const list = useAppSelector(coreBalances.selectByDate)
   const startDate = toGroup(start || list[0].date, aggregation)
   const endDate = toGroup(end || Date.now(), aggregation)
   const balances = useMemo(() => {
@@ -40,7 +41,7 @@ export function useDisplayBalances(
   end?: TDateDraft
 ) {
   const fxBalances = useBalances(aggregation, start, end)
-  const convert = useAppSelector(selectCoreDisplayConverter)
+  const convert = useAppSelector(coreCurrency.selectDisplayConverter)
   const balances = useMemo(
     () => balancesToDisplay(fxBalances, convert),
     [convert, fxBalances]

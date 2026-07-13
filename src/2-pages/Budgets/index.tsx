@@ -1,6 +1,10 @@
 import React, { FC, ReactElement, useCallback } from 'react'
 import { useAppSelector } from 'store'
-import { selectCoreMonthList } from 'zerro-core/redux'
+import {
+  months as coreMonths,
+  transactions as coreTransactions,
+} from 'zerro-core/redux'
+
 import { Helmet } from 'react-helmet'
 import { Box, Theme, useMediaQuery } from '@mui/material'
 import { useHotkeys } from 'react-hotkeys-hook'
@@ -8,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { formatDate } from '6-shared/helpers/date'
 import { nextMonth, prevMonth, toISOMonth } from '6-shared/helpers/date'
 import { TEnvelopeId } from '5-entities/envelope'
-import { TrFilterMode } from 'zerro-core/redux'
+
 import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 
 import { MonthProvider, useMonth } from './MonthProvider'
@@ -40,7 +44,7 @@ function Budgets() {
         envelopeConditions: {
           id: opts.id,
           month,
-          mode: TrFilterMode.Envelope,
+          mode: coreTransactions.TrFilterMode.Envelope,
           isExact: opts.isExact,
         },
       }),
@@ -131,7 +135,7 @@ const BudgetLayout: FC<{
 }
 
 function useMonthHotkeys() {
-  const monthList = useAppSelector(selectCoreMonthList)
+  const monthList = useAppSelector(coreMonths.selectList)
   const minMonth = monthList[0]
   const maxMonth = monthList[monthList.length - 1]
   const [month, setMonth] = useMonth()

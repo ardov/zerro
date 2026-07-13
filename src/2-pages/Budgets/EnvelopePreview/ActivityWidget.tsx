@@ -1,10 +1,11 @@
 import React, { FC, useEffect, useState } from 'react'
 import { useAppSelector } from 'store'
 import {
-  selectCoreConvertFx,
-  selectCoreEnvMetrics,
-  selectCoreMonthList,
+  activity as coreActivity,
+  currency as coreCurrency,
+  months as coreMonths,
 } from 'zerro-core/redux'
+
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 import { Stack, Box, BoxProps } from '@mui/material'
 import { useTranslation } from 'react-i18next'
@@ -24,9 +25,9 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
   const { t } = useTranslation('budgets')
   const [month, setMonth] = useMonth()
   const [highlighted, setHighlighted] = useState(month)
-  const convertFx = useAppSelector(selectCoreConvertFx)
-  const envData = useAppSelector(selectCoreEnvMetrics)
-  const dates = useAppSelector(selectCoreMonthList)
+  const convertFx = useAppSelector(coreCurrency.selectConvertFx)
+  const envData = useAppSelector(coreActivity.selectEnvelopeMetrics)
+  const dates = useAppSelector(coreMonths.selectList)
   const { currency } = envData[month][id]
   const dateRange = getDateRange(dates, 12, month)
 

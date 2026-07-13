@@ -21,7 +21,10 @@ import {
   toEnvelopeStructureInput,
 } from '../domain/zerro'
 import { compileAppCommand, recreateTransaction } from './commands'
-import { selectCoreEnvelopes, selectCoreEnvelopeStructure } from './selectors'
+import {
+  selectEnvelopes,
+  selectEnvelopeStructure,
+} from '../testing/reduxSelectors'
 
 const NOW = Date.parse('2026-07-10T12:00:00Z')
 
@@ -121,7 +124,7 @@ describe('semantic command funnel', () => {
     const current = makeDemoStore({ now: NOW })
     const state = makeState(current)
     const id = envId.get(EnvType.Tag, null)
-    const presented = selectCoreEnvelopes(state)[id]
+    const presented = selectEnvelopes(state)[id]
 
     const patch = compileAppCommand(
       state,
@@ -202,7 +205,7 @@ describe('semantic command funnel', () => {
   it('moves an envelope to a new group through the structure command', () => {
     const current = makeDemoStore({ now: NOW })
     const state = makeState(current)
-    const input = toEnvelopeStructureInput(selectCoreEnvelopeStructure(state))
+    const input = toEnvelopeStructureInput(selectEnvelopeStructure(state))
     const [moved, ...restChildren] = input[0].children
 
     const patch = compileAppCommand(
@@ -218,7 +221,7 @@ describe('semantic command funnel', () => {
       { now: () => NOW, uuid: () => 'structure-meta' }
     )
     const next = applyPatch(current, patch)
-    const nextStructure = selectCoreEnvelopeStructure(makeState(next))
+    const nextStructure = selectEnvelopeStructure(makeState(next))
     const lastGroup = nextStructure[nextStructure.length - 1]
 
     expect(getEnvelopeMeta(next)[moved.id]).toMatchObject({ group: 'Custom' })
@@ -236,7 +239,7 @@ describe('semantic command funnel', () => {
       state,
       {
         type: 'zerro.envelope.structure.apply',
-        payload: toEnvelopeStructureInput(selectCoreEnvelopeStructure(state)),
+        payload: toEnvelopeStructureInput(selectEnvelopeStructure(state)),
       },
       ctx
     )
@@ -253,7 +256,7 @@ describe('semantic command funnel', () => {
       settled,
       {
         type: 'zerro.envelope.structure.apply',
-        payload: toEnvelopeStructureInput(selectCoreEnvelopeStructure(settled)),
+        payload: toEnvelopeStructureInput(selectEnvelopeStructure(settled)),
       },
       ctx
     )

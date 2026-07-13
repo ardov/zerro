@@ -4,7 +4,8 @@ import { GroupBy } from '6-shared/helpers/date'
 import { keys } from '6-shared/helpers/keys'
 import { round } from '6-shared/helpers/money'
 
-import { useCorePopulatedAccounts } from 'zerro-core/redux'
+import { accounts as coreAccounts } from 'zerro-core/redux'
+
 import { useDisplayBalances } from '5-entities/accBalances/useBalances'
 import { getStart, Period } from '../shared/period'
 
@@ -24,7 +25,7 @@ export function useNetWorth(
   period: Period,
   aggregation: GroupBy
 ): TNetWorthPoint[] {
-  const accs = useCorePopulatedAccounts()
+  const accs = coreAccounts.usePopulated()
 
   return useDisplayBalances(aggregation, getStart(period, aggregation)).map(
     ({ date, balances }) => {

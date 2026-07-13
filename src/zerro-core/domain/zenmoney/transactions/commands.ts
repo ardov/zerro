@@ -9,7 +9,10 @@ import { makeTransaction, type TTransactionFactoryDraft } from './factory'
 import { getTransaction, getTransactionType, TrType } from './read'
 import type { TTransaction, TTransactionId } from './types'
 
-export type TTransactionPatch = OptionalExceptFor<TTransaction, 'id'>
+export type TTransactionPatch = OptionalExceptFor<
+  Omit<TTransaction, 'changed' | 'user'>,
+  'id'
+>
 export type TTransactionDraft = Modify<
   Omit<TTransactionFactoryDraft, 'user'>,
   { date: TDateDraft; changed?: TDateDraft; created?: TDateDraft }

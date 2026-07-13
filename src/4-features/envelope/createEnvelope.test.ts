@@ -11,7 +11,8 @@ import {
   EnvType,
   getEnvelopeMeta,
 } from 'zerro-core/domain/zerro'
-import { selectCoreEnvelopes } from 'zerro-core/redux'
+import { envelopes as coreEnvelopes } from 'zerro-core/redux'
+
 import { createEnvelope } from './createEnvelope'
 
 const NOW = Date.parse('2026-07-10T12:00:00Z')
@@ -69,7 +70,7 @@ describe('createEnvelope', () => {
     })(runtime.dispatch, runtime.getState, undefined)
 
     expect(id).toBe(envId.get(EnvType.Tag, UUID))
-    expect(selectCoreEnvelopes(runtime.getState())[id!]).toBeDefined()
+    expect(coreEnvelopes.selectAll(runtime.getState())[id!]).toBeDefined()
     expect(getEnvelopeMeta(runtime.getState().data.current)[id!]).toMatchObject(
       {
         id,

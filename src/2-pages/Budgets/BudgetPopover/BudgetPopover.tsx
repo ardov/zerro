@@ -1,9 +1,9 @@
 import type { TFxAmount, TISOMonth } from '6-shared/types'
-import { useCoreDisplayCurrency } from 'zerro-core/redux'
 import {
-  selectCoreConvertFx,
-  selectCoreEnvMetrics,
+  activity as coreActivity,
+  currency as coreCurrency,
 } from 'zerro-core/redux'
+
 import type { TEnvelopeId } from '5-entities/envelope'
 
 import React, { FC, useEffect, useState } from 'react'
@@ -37,10 +37,10 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
   const { t } = useTranslation()
   const quickActions = useQuickActions(month, id)
-  const [dispCurrency] = useCoreDisplayCurrency()
+  const [dispCurrency] = coreCurrency.useDisplayCurrency()
   const dispatch = useAppDispatch()
-  const envelope = useAppSelector(selectCoreEnvMetrics)[month][id]
-  const convertFx = useAppSelector(selectCoreConvertFx)
+  const envelope = useAppSelector(coreActivity.selectEnvelopeMetrics)[month][id]
+  const convertFx = useAppSelector(coreCurrency.selectConvertFx)
 
   const currency = {
     env: envelope.currency, // Envelope currency

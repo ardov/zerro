@@ -1,11 +1,11 @@
 import React, { FC } from 'react'
-import { useCoreDisplayCurrency } from 'zerro-core/redux'
-import { useCoreToDisplay } from 'zerro-core/redux'
-import { useAppSelector } from 'store'
 import {
-  selectCoreMonthList,
-  selectCoreMonthTotals,
+  currency as coreCurrency,
+  months as coreMonths,
 } from 'zerro-core/redux'
+
+import { useAppSelector } from 'store'
+
 import {
   Typography,
   ButtonBase,
@@ -85,14 +85,14 @@ function useTotalsModel() {
   const { t } = useTranslation('budgets')
   const [month] = useMonth()
 
-  const [currency] = useCoreDisplayCurrency()
-  const toDisplay = useCoreToDisplay(month)
+  const [currency] = coreCurrency.useDisplayCurrency()
+  const toDisplay = coreCurrency.useToDisplay(month)
 
-  const monthList = useAppSelector(selectCoreMonthList)
+  const monthList = useAppSelector(coreMonths.selectList)
   const lastMonth = monthList[monthList.length - 1]
 
-  const totals = useAppSelector(selectCoreMonthTotals)[month]
-  const lastTotals = useAppSelector(selectCoreMonthTotals)[lastMonth]
+  const totals = useAppSelector(coreMonths.selectTotals)[month]
+  const lastTotals = useAppSelector(coreMonths.selectTotals)[lastMonth]
 
   const toBeBudgeted = toDisplay(totals.toBeBudgeted)
   const overspend = toDisplay(totals.overspend)

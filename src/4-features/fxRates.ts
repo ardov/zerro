@@ -2,7 +2,7 @@ import type { AppThunk } from 'store'
 import type { TISODate, TISOMonth } from '6-shared/types'
 import { firstPossibleDate, requestRates } from '6-shared/api/fxRates'
 import { toISOMonth } from '6-shared/helpers/date'
-import { editFxRates, selectCoreCurrentFxRates } from 'zerro-core/redux'
+import { fxRates as coreFxRates } from 'zerro-core/redux'
 
 const getRequestDate = (month: TISOMonth) => (month + '-28') as TISODate
 
@@ -16,7 +16,9 @@ export const loadFxRates =
   async (dispatch, getState) => {
     const isPastMonth = month < toISOMonth(new Date())
     if (!isPastMonth) {
-      dispatch(editFxRates(month, selectCoreCurrentFxRates(getState()).rates))
+      dispatch(
+        coreFxRates.edit(month, coreFxRates.selectCurrent(getState()).rates)
+      )
       return
     }
 
@@ -24,5 +26,5 @@ export const loadFxRates =
     const rates = await requestRates(
       date < firstPossibleDate ? firstPossibleDate : date
     )
-    dispatch(editFxRates(month, rates))
+    dispatch(coreFxRates.edit(month, rates))
   }

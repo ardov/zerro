@@ -1,0 +1,58 @@
+export {
+  applyChangesToTransaction as update,
+  bulkEditTransactions as bulkEdit,
+  combineTransactionsToIncome as combineToIncome,
+  combineTransactionsToOutcome as combineToOutcome,
+  deleteTransactions as remove,
+  deleteTransactionsPermanently as removePermanently,
+  mergeTransactionsAsTransfer as mergeAsTransfer,
+  recreateTransaction as recreate,
+  restoreTransaction as restore,
+  setTransactionsViewed as setViewed,
+} from './commands'
+import { createSelector } from '@reduxjs/toolkit'
+import { useCallback } from 'react'
+import { useAppSelector } from 'store'
+import type { RootState } from 'store'
+import {
+  getHistoryStart,
+  getTransactionType,
+  getTransactionIds,
+  getTransactions,
+  getTransactionsHistory,
+} from '../domain/zenmoney'
+import { selectCurrentDate, selectTransactionSlice } from './state'
+import * as accounts from './accounts'
+
+export const selectAll = (state: RootState) =>
+  getTransactions({ transaction: selectTransactionSlice(state) })
+export const selectIds = createSelector([selectAll], transaction =>
+  getTransactionIds({ transaction })
+)
+export const selectHistory = createSelector([selectAll], transaction =>
+  getTransactionsHistory({ transaction })
+)
+export const selectHistoryStart = createSelector(
+  [selectHistory, selectCurrentDate],
+  getHistoryStart
+)
+export const useType = () => {
+  const debtAccountId = useAppSelector(accounts.selectDebtAccountId)
+  return useCallback(
+    (transaction: Parameters<typeof getTransactionType>[0]) =>
+      getTransactionType(transaction, debtAccountId),
+    [debtAccountId]
+  )
+}
+export {
+  compareTransactionDates,
+  getTransactionType as getType,
+  isDeletedTransaction as isDeleted,
+  isTransactionViewed as isViewed,
+  TrType,
+} from '../domain/zenmoney'
+export {
+  checkRaw as compileFilter,
+  type TrCondition,
+} from '5-entities/transaction/filtering'
+export { TrFilterMode } from '../domain/zerro'

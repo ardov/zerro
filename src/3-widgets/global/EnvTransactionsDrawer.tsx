@@ -8,11 +8,11 @@ import { registerPopover } from '6-shared/historyPopovers'
 import { useAppSelector } from 'store'
 import { TEnvelopeId } from '5-entities/envelope'
 import {
-  selectCoreActivity,
-  selectCoreEnvelopes,
-  selectCoreRawActivity,
+  activity as coreActivity,
+  envelopes as coreEnvelopes,
+  transactions as coreTransactions,
 } from 'zerro-core/redux'
-import { TrFilterMode } from 'zerro-core/redux'
+
 import {
   TransactionList,
   TTransactionListProps,
@@ -23,15 +23,20 @@ type TEnvConditions = {
   month: TISOMonth
   id: TEnvelopeId | 'transferFees' | null
   isExact?: boolean
-  mode?: TrFilterMode
+  mode?: coreTransactions.TrFilterMode
 }
 
 function useFilteredByEnvelope(conditions?: TEnvConditions): TTransaction[] {
-  const { id, month, mode = TrFilterMode.Envelope, isExact } = conditions || {}
+  const {
+    id,
+    month,
+    mode = coreTransactions.TrFilterMode.Envelope,
+    isExact,
+  } = conditions || {}
 
-  const envelopes = useAppSelector(selectCoreEnvelopes)
-  const fullActivity = useAppSelector(selectCoreActivity)
-  const fullRawActivity = useAppSelector(selectCoreRawActivity)
+  const envelopes = useAppSelector(coreEnvelopes.selectAll)
+  const fullActivity = useAppSelector(coreActivity.selectAll)
+  const fullRawActivity = useAppSelector(coreActivity.selectRaw)
 
   const transactionList = useMemo(() => {
     if (!id || !month) return []
@@ -49,15 +54,15 @@ function useFilteredByEnvelope(conditions?: TEnvConditions): TTransaction[] {
     const transactions = ids
       .map(id => {
         switch (mode) {
-          case TrFilterMode.GeneralIncome:
+          case coreTransactions.TrFilterMode.GeneralIncome:
             return activity?.generalIncome.byEnv[id]?.transactions || []
-          case TrFilterMode.Envelope:
+          case coreTransactions.TrFilterMode.Envelope:
             return activity?.envActivity.byEnv[id]?.transactions || []
-          case TrFilterMode.Income:
+          case coreTransactions.TrFilterMode.Income:
             return rawActivity?.income[id]?.transactions || []
-          case TrFilterMode.Outcome:
+          case coreTransactions.TrFilterMode.Outcome:
             return rawActivity?.outcome[id]?.transactions || []
-          case TrFilterMode.All:
+          case coreTransactions.TrFilterMode.All:
             return [
               ...(rawActivity?.income[id]?.transactions || []),
               ...(rawActivity?.outcome[id]?.transactions || []),

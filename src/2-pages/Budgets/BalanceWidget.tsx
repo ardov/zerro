@@ -1,8 +1,11 @@
 import { Divider, Paper, Typography } from '@mui/material'
-import { useCoreDisplayCurrency } from 'zerro-core/redux'
-import { useCoreToDisplay } from 'zerro-core/redux'
+import {
+  currency as coreCurrency,
+  months as coreMonths,
+} from 'zerro-core/redux'
+
 import { useAppSelector } from 'store'
-import { selectCoreMonthTotals } from 'zerro-core/redux'
+
 import Balancer from 'react-wrap-balancer'
 import { useTranslation } from 'react-i18next'
 import { keys } from '6-shared/helpers/keys'
@@ -12,9 +15,9 @@ import { DataLine } from '3-widgets/DataLine'
 
 export function BalanceWidget(props: { month: TISOMonth }) {
   const { t } = useTranslation('budgets')
-  const totals = useAppSelector(selectCoreMonthTotals)[props.month]
-  const [currency, setDisplayCurrency] = useCoreDisplayCurrency()
-  const toDisplay = useCoreToDisplay(props.month)
+  const totals = useAppSelector(coreMonths.selectTotals)[props.month]
+  const [currency, setDisplayCurrency] = coreCurrency.useDisplayCurrency()
+  const toDisplay = coreCurrency.useToDisplay(props.month)
   const currencies = keys(totals.fundsEnd)
   const currCount = currencies.length
 

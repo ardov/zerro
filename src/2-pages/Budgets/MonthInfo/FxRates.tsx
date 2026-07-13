@@ -1,12 +1,10 @@
 import type { TFxCode, TISOMonth } from '6-shared/types'
-import { useCoreDisplayCurrency } from 'zerro-core/redux'
 import {
-  editFxRates,
-  resetFxRates,
-  selectCoreFxRatesGetter,
-  selectCoreMonthTotals,
-  type TFxRates,
+  currency as coreCurrency,
+  fxRates as coreFxRates,
+  months as coreMonths,
 } from 'zerro-core/redux'
+
 import React, { FC, useEffect, useState } from 'react'
 import {
   Box,
@@ -29,9 +27,9 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
   const dispatch = useAppDispatch()
   const { month } = props
   const { t } = useTranslation('fxRates')
-  const [displCurrency] = useCoreDisplayCurrency()
-  const funds = useAppSelector(selectCoreMonthTotals)[month].fundsEnd
-  const ratesGetter = useAppSelector(selectCoreFxRatesGetter)
+  const [displCurrency] = coreCurrency.useDisplayCurrency()
+  const funds = useAppSelector(coreMonths.selectTotals)[month].fundsEnd
+  const ratesGetter = useAppSelector(coreFxRates.selectGetter)
   const rateData = ratesGetter(month)
 
   const currencies = keys(funds)
@@ -70,7 +68,9 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
             code={c.code}
             mainCode={displCurrency}
             rates={rateData.rates}
-            onChange={rate => dispatch(editFxRates(month, { [c.code]: rate }))}
+            onChange={rate =>
+              dispatch(coreFxRates.edit(month, { [c.code]: rate }))
+            }
           />
         ))}
         <Typography
@@ -85,7 +85,7 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
           })}
         </Typography>
         {isSaved && (
-          <Button fullWidth onClick={() => dispatch(resetFxRates(month))}>
+          <Button fullWidth onClick={() => dispatch(coreFxRates.reset(month))}>
             {t('reset')}
           </Button>
         )}
@@ -102,7 +102,7 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
 const FxRateInput: FC<{
   code: TFxCode
   mainCode: TFxCode
-  rates: TFxRates
+  rates: coreFxRates.TFxRates
   onChange: (rate: number) => void
 }> = props => {
   const { code, mainCode, rates, onChange } = props

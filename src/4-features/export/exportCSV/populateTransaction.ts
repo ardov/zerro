@@ -1,4 +1,5 @@
-import { TrType } from 'zerro-core/redux'
+import { transactions as coreTransactions } from 'zerro-core/redux'
+
 import { getType } from '5-entities/transaction/helpers'
 import {
   ByIdOld,
@@ -26,7 +27,7 @@ export type PopulatedTransaction = Modify<
     outcomeAccount: TAccount
     opOutcomeInstrument: TInstrument
     tag: TTag[] | null
-    type: TrType
+    type: coreTransactions.TrType
   }
 >
 

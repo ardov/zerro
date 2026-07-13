@@ -1,13 +1,17 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
 import type { TEnvelopeId } from '5-entities/envelope'
-import { selectCoreEnvMetrics, setBudget } from 'zerro-core/redux'
+import {
+  activity as coreActivity,
+  budgets as coreBudgets,
+} from 'zerro-core/redux'
+
 import { sendEvent } from '6-shared/helpers/tracking'
 import { copyPreviousBudget } from './index'
 
 vi.mock('zerro-core/redux', () => ({
-  selectCoreEnvMetrics: vi.fn(),
-  setBudget: vi.fn(),
+  activity: { selectEnvelopeMetrics: vi.fn() },
+  budgets: { set: vi.fn() },
 }))
 vi.mock('6-shared/helpers/tracking', () => ({ sendEvent: vi.fn() }))
 
@@ -18,7 +22,7 @@ describe('copyPreviousBudget', () => {
     const foodId = 'tag#food' as TEnvelopeId
     const dispatch = vi.fn()
 
-    vi.mocked(selectCoreEnvMetrics).mockReturnValue({
+    vi.mocked(coreActivity.selectEnvelopeMetrics).mockReturnValue({
       '2026-06': {
         [foodId]: {
           id: foodId,
@@ -33,13 +37,13 @@ describe('copyPreviousBudget', () => {
           selfBudgeted: { USD: 50 },
         },
       },
-    } as unknown as ReturnType<typeof selectCoreEnvMetrics>)
-    vi.mocked(setBudget).mockReturnValue(action as never)
+    } as unknown as ReturnType<typeof coreActivity.selectEnvelopeMetrics>)
+    vi.mocked(coreBudgets.set).mockReturnValue(action as never)
 
     copyPreviousBudget('2026-07')(dispatch, () => state, undefined)
 
-    expect(selectCoreEnvMetrics).toHaveBeenCalledWith(state)
-    expect(setBudget).toHaveBeenCalledWith([
+    expect(coreActivity.selectEnvelopeMetrics).toHaveBeenCalledWith(state)
+    expect(coreBudgets.set).toHaveBeenCalledWith([
       { id: foodId, month: '2026-07', value: 100 },
     ])
     expect(dispatch).toHaveBeenCalledWith(action)

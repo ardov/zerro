@@ -7,12 +7,13 @@ import { Chip, ChipProps } from '@mui/material'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { TagIcon } from '../../../6-shared/ui/TagIcon'
 import { useAppSelector } from 'store'
-import { selectCorePopulatedTags } from 'zerro-core/redux'
+import { tags as coreTags } from 'zerro-core/redux'
+
 import { TTagPopulated } from '../model'
 
 export const TagChip: FC<ChipProps & { id: TTagId }> = ({ id, ...rest }) => {
   const { t } = useTranslation()
-  let tag = useAppSelector(selectCorePopulatedTags)[id]
+  let tag = useAppSelector(coreTags.selectPopulated)[id]
   const label = id === 'mixed' ? t('mixedCategories') : getTagLabel(tag)
   return <Chip deleteIcon={<CloseIcon />} label={label} {...rest} />
 }

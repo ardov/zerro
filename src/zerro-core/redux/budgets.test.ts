@@ -11,7 +11,7 @@ import {
 } from '../domain/zerro'
 
 async function importModels() {
-  return import('./selectors')
+  return import('../testing/reduxSelectors')
 }
 
 const NOW = Date.parse('2026-05-15T12:00:00Z')
@@ -76,13 +76,13 @@ function makeRootState(data: TDataStore): RootState {
   }
 }
 
-describe('selectCoreBudgets', () => {
+describe('selectBudgets', () => {
   it('uses hidden budgets with default settings', async () => {
-    const { selectCoreBudgets } = await importModels()
+    const { selectBudgets } = await importModels()
     const { store, tagA, tagB } = makeSeededStore()
     const state = makeRootState(store)
 
-    const core = selectCoreBudgets(state)
+    const core = selectBudgets(state)
     expect(core[MONTH][envId.get(EnvType.Tag, tagA)]).toBe(10_000)
     expect(core[NEXT_MONTH][envId.get(EnvType.Tag, tagB)]).toBe(5_000)
     // ZenMoney tag budget is ignored while preferZmBudgets is off
@@ -90,7 +90,7 @@ describe('selectCoreBudgets', () => {
   })
 
   it('uses ZenMoney tag budgets when preferZmBudgets is enabled', async () => {
-    const { selectCoreBudgets } = await importModels()
+    const { selectBudgets } = await importModels()
     const { store, tagB } = makeSeededStore()
     const settingsPatch = compilePatchUserSettings(
       store,
@@ -99,15 +99,15 @@ describe('selectCoreBudgets', () => {
     )
     const state = makeRootState(applyPatch(store, settingsPatch))
 
-    const core = selectCoreBudgets(state)
+    const core = selectBudgets(state)
     // ZenMoney tag budget wins for tag envelopes now
     expect(core[MONTH][envId.get(EnvType.Tag, tagB)]).toBe(7_000)
   })
 
   it('stays cached across unrelated data changes', async () => {
-    const { selectCoreBudgets } = await importModels()
+    const { selectBudgets } = await importModels()
     const { store } = makeSeededStore()
-    const first = selectCoreBudgets(makeRootState(store))
+    const first = selectBudgets(makeRootState(store))
 
     // New current object, new transaction slice, same budget/reminder slices
     const unrelatedChange = makeRootState({
@@ -115,14 +115,14 @@ describe('selectCoreBudgets', () => {
       transaction: { ...store.transaction },
     })
 
-    expect(selectCoreBudgets(unrelatedChange)).toBe(first)
+    expect(selectBudgets(unrelatedChange)).toBe(first)
   })
 
   it('recomputes when hidden env budgets change', async () => {
-    const { selectCoreBudgets } = await importModels()
+    const { selectBudgets } = await importModels()
     const { store, tagA } = makeSeededStore()
     const envelopeId = envId.get(EnvType.Tag, tagA)
-    const first = selectCoreBudgets(makeRootState(store))
+    const first = selectBudgets(makeRootState(store))
     expect(first[MONTH][envelopeId]).toBe(10_000)
 
     const budgetPatch = compileSetBudget(
@@ -130,7 +130,7 @@ describe('selectCoreBudgets', () => {
       [{ id: envelopeId, month: MONTH, value: 12_000 }],
       ctx
     )
-    const next = selectCoreBudgets(
+    const next = selectBudgets(
       makeRootState(applyPatch(store, budgetPatch))
     )
 

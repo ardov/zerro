@@ -15,11 +15,8 @@ import {
 } from '@mui/material'
 import { useAppDispatch, useAppSelector } from 'store'
 import { sendEvent } from '6-shared/helpers/tracking'
-import {
-  bulkEditTransactions,
-  getTransactionType,
-  selectCoreTransactions,
-} from 'zerro-core/redux'
+import { transactions as coreTransactions } from 'zerro-core/redux'
+
 import { TagList } from '5-entities/tag/ui/TagList'
 
 type BulkEditModalProps = Modify<DialogProps, { onClose: () => void }> & {
@@ -37,7 +34,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
 }) => {
   const { t } = useTranslation('transactionsBulkEdit')
   const dispatch = useAppDispatch()
-  const allTransactions = useAppSelector(selectCoreTransactions)
+  const allTransactions = useAppSelector(coreTransactions.selectAll)
   const transactions = ids.map(id => allTransactions[id]).filter(Boolean)
   const sameTags = isSameTags(transactions)
   const sameComments = isSameComments(transactions)
@@ -62,7 +59,7 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
     }
     if (opts.tags || opts.comment) {
       sendEvent('Bulk Actions: set new tags')
-      dispatch(bulkEditTransactions(ids, opts))
+      dispatch(coreTransactions.bulkEdit(ids, opts))
     }
     onApply()
   }
@@ -131,7 +128,8 @@ function equalArrays(a: string[], b: string[]) {
 function getTypes(list: TTransaction[] = []) {
   let res = { income: 0, outcome: 0, transfer: 0 }
   list.forEach(
-    tr => res[getTransactionType(tr) as 'income' | 'outcome' | 'transfer']++
+    tr =>
+      res[coreTransactions.getType(tr) as 'income' | 'outcome' | 'transfer']++
   )
   return res
 }

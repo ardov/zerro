@@ -1,8 +1,10 @@
+import type { goals as CoreGoals } from 'zerro-core/redux'
+
 export { getRawGoals } from './goalStore'
 export { goalToWords } from './shared/helpers'
 
 export type { TGoal } from './shared/types'
 export type { TGoals } from './goalStore'
-export type { TGoalInfo } from 'zerro-core/redux'
+export type TGoalInfo = CoreGoals.TGoalInfo
 
 export { goalType } from './shared/types'

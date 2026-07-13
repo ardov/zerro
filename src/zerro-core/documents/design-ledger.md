@@ -18,8 +18,10 @@
   facade-only root, including no `./infrastructure/replica` re-export.
 - `zerro-core/domain/zenmoney` and `zerro-core/domain/zerro` are internal migration paths, not
   supported app-facing APIs.
-- Redux selectors and commands use an explicit adapter entrypoint and are not
-  re-exported from root.
+- Redux selectors, hooks, commands, and app-facing types use domain namespaces
+  from the explicit `zerro-core/redux` adapter entrypoint. Flat adapter exports
+  and per-domain package subpaths are unsupported; the root does not re-export
+  the adapter.
 - Internal modules are organized by responsibility: pure behavior in `domain`,
   use cases in `application`, replica mechanics in `infrastructure`, React app
   integration in `redux`, and package-safe appearance data in `presentation`.
@@ -32,6 +34,9 @@
 - A session represents one immutable snapshot and memoizes each internal node
   once.
 - Redux owns cross-snapshot memoization and keeps selectors granular.
+- Redux domain modules own their selectors and hooks beside the exported model
+  namespace. A tiny `state.ts` owns raw inputs; central `selectors.ts`,
+  `projectionGraph.ts`, and `hooks.ts` barrels are removed.
 - Internal graph nodes need not appear on the semantic root facade.
 - `application/session/readGraph.ts` is a declarative specification for humans, not runtime
   configuration or a code-generation source.
@@ -57,6 +62,10 @@
 
 - Commands use narrow semantic inputs instead of `Partial<FullEntity>` or
   `Partial<Projection>`.
+- Entity-local patch compilers are internal reusable primitives and whitelist
+  writable fields. Semantic commands may delegate to them, but persisted
+  outbox commands retain the original domain intent rather than becoming a
+  generic `entity.patch` command.
 - Singular commands are the default; bulk APIs are added only with explicit
   atomicity and error semantics.
 - Command compilers produce intent patches.

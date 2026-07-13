@@ -1,6 +1,6 @@
 import { v1 as uuidv1 } from 'uuid'
 import { OptionalExceptFor, TTag } from '6-shared/types'
-import { nullTag } from 'zerro-core/redux'
+import { tags as coreTags } from 'zerro-core/redux'
 
 type TagDraft = OptionalExceptFor<TTag, 'user' | 'title'>
 
@@ -24,4 +24,4 @@ export function makeTag(raw: TagDraft): TTag {
   }
 }
 
-export { nullTag }
+export const nullTag = coreTags.nullTag

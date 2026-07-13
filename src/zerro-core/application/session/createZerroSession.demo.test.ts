@@ -26,141 +26,141 @@ describe('createZerroSession on deterministic demo data', () => {
       const data = makeCoreNextDemoStore()
       const state = makeCoreNextDemoRootState(data)
       const {
-        selectCoreActivity,
-        selectCoreBalances,
-        selectCoreBalancesByDate,
-        selectCoreBudgets,
-        selectCoreCurrentFunds,
-        selectCoreCurrentFxRates,
-        selectCoreDebtors,
-        selectCoreEnvMetrics,
-        selectCoreFxRates,
-        selectCoreGoalTotals,
-        selectCoreGoals,
-        selectCoreHistoryStart,
-        selectCoreKeepingEnvelopeIds,
-        selectCoreMonthList,
-        selectCoreMonthTotals,
-        selectCoreRawActivity,
-        selectCoreRawGoals,
-        selectCoreSortedActivity,
-        selectCoreDomainEnvelopes,
-        selectCoreDomainEnvelopeStructure,
-        selectCoreTransactionsHistory,
-        selectCoreUserSettings,
-      } = await import('../../redux/selectors')
+        selectActivity,
+        selectBalances,
+        selectBalancesByDate,
+        selectBudgets,
+        selectCurrentFunds,
+        selectCurrentFxRates,
+        selectDebtors,
+        selectEnvMetrics,
+        selectFxRates,
+        selectGoalTotals,
+        selectGoals,
+        selectHistoryStart,
+        selectKeepingEnvelopeIds,
+        selectMonthList,
+        selectMonthTotals,
+        selectRawActivity,
+        selectRawGoals,
+        selectSortedActivity,
+        selectDomainEnvelopes,
+        selectDomainEnvelopeStructure,
+        selectTransactionsHistory,
+        selectUserSettings,
+      } = await import('../../testing/reduxSelectors')
 
       const session = createZerroSession(data, coreNextDemoContext)
 
       expectSameJsonHash(
         'userSettings',
         session.settings.get(),
-        selectCoreUserSettings(state)
+        selectUserSettings(state)
       )
       expectSameJsonHash(
         'debtors',
         session.debtors.getAll(),
-        selectCoreDebtors(state)
+        selectDebtors(state)
       )
       expectSameJsonHash(
         'transactionsHistory',
         session.transactions.getHistory(),
-        selectCoreTransactionsHistory(state)
+        selectTransactionsHistory(state)
       )
       expectSameJsonHash(
         'envelopes',
         session.envelopes.getAll(),
-        selectCoreDomainEnvelopes(state)
+        selectDomainEnvelopes(state)
       )
       expectSameJsonHash(
         'envelopeStructure',
         session.envelopes.getStructure(),
-        selectCoreDomainEnvelopeStructure(state)
+        selectDomainEnvelopeStructure(state)
       )
       expectSameJsonHash(
         'keepingEnvelopeIds',
         session.envelopes.getKeepingIds(),
-        selectCoreKeepingEnvelopeIds(state)
+        selectKeepingEnvelopeIds(state)
       )
       expectSameJsonHash(
         'budgets',
         session.budgets.getAll(),
-        selectCoreBudgets(state)
+        selectBudgets(state)
       )
       expectSameJsonHash(
         'currentFunds',
         session.accounts.getCurrentFunds(),
-        selectCoreCurrentFunds(state)
+        selectCurrentFunds(state)
       )
       expectSameJsonHash(
         'currentFxRates',
         session.fx.getCurrentRates(),
-        selectCoreCurrentFxRates(state)
+        selectCurrentFxRates(state)
       )
       expectSameJsonHash(
         'fxRates',
         session.fx.getRates(),
-        selectCoreFxRates(state)
+        selectFxRates(state)
       )
       expectSameJsonHash(
         'rawActivity',
         session.read.rawActivity(),
-        selectCoreRawActivity(state)
+        selectRawActivity(state)
       )
       expectSameJsonHash(
         'activity',
         session.activity.getAll(),
-        selectCoreActivity(state)
+        selectActivity(state)
       )
       expectSameJsonHash(
         'monthList',
         session.months.getList(),
-        selectCoreMonthList(state)
+        selectMonthList(state)
       )
       expectSameJsonHash(
         'envMetrics',
         session.envelopes.getMetrics(),
-        selectCoreEnvMetrics(state)
+        selectEnvMetrics(state)
       )
       expectSameJsonHash(
         'sortedActivity',
         session.activity.getSorted(),
-        selectCoreSortedActivity(state)
+        selectSortedActivity(state)
       )
       expectSameJsonHash(
         'monthTotals',
         session.months.getTotals(),
-        selectCoreMonthTotals(state)
+        selectMonthTotals(state)
       )
       expectSameJsonHash(
         'rawGoals',
         session.read.rawGoals(),
-        selectCoreRawGoals(state)
+        selectRawGoals(state)
       )
       expectSameJsonHash(
         'goals',
         session.goals.getAll(),
-        selectCoreGoals(state)
+        selectGoals(state)
       )
       expectSameJsonHash(
         'goalTotals',
         session.goals.getTotals(),
-        selectCoreGoalTotals(state)
+        selectGoalTotals(state)
       )
       expectSameJsonHash(
         'historyStart',
         session.transactions.getHistoryStart(),
-        selectCoreHistoryStart(state)
+        selectHistoryStart(state)
       )
       expectSameJsonHash(
         'balances',
         session.balances.getAll(),
-        selectCoreBalances(state)
+        selectBalances(state)
       )
       expectSameJsonHash(
         'balancesByDate',
         session.balances.getByDate(),
-        selectCoreBalancesByDate(state)
+        selectBalancesByDate(state)
       )
     } finally {
       vi.useRealTimers()

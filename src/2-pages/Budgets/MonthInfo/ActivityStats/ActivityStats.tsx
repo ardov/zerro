@@ -1,33 +1,30 @@
 import { useCallback } from 'react'
-import { useCoreDisplayCurrency } from 'zerro-core/redux'
-import { useCoreToDisplay } from 'zerro-core/redux'
+import {
+  activity as coreActivity,
+  currency as coreCurrency,
+  envelopes as coreEnvelopes,
+  transactions as coreTransactions,
+} from 'zerro-core/redux'
+
 import { ButtonBase, Collapse, Stack } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { TISOMonth } from '6-shared/types'
 import { PercentBar, PercentBarItem } from '6-shared/ui/PercentBar'
 
-import {
-  EnvActivity,
-  TrFilterMode,
-  TSortedActivityNode,
-} from 'zerro-core/redux'
 import { useAppSelector } from 'store'
-import {
-  selectCoreEnvelopes,
-  selectCoreSortedActivity,
-} from 'zerro-core/redux'
+
 import { DataLine } from '3-widgets/DataLine'
 import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 
 export function ActivityStats(props: { month: TISOMonth }) {
   const { month } = props
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
-  const activity = useAppSelector(selectCoreSortedActivity)[month]
+  const activity = useAppSelector(coreActivity.selectSorted)[month]
   const transactionDrawer = useEnvTransactionsDrawer()
 
   const showTransactions = useCallback(
-    (id: TDataNode['id'], trMode: TrFilterMode) => {
+    (id: TDataNode['id'], trMode: coreTransactions.TrFilterMode) => {
       transactionDrawer.open({
         envelopeConditions: { id, month, mode: trMode, isExact: true },
       })
@@ -74,23 +71,23 @@ export function ActivityStats(props: { month: TISOMonth }) {
 }
 
 type TDataNode = {
-  id: TSortedActivityNode['id']
-  trMode: TSortedActivityNode['trMode']
+  id: coreActivity.TSortedActivityNode['id']
+  trMode: coreActivity.TSortedActivityNode['trMode']
 } & PercentBarItem
 
 function StatWidget(props: {
   month: TISOMonth
   name: string
   showBar?: boolean
-  total: EnvActivity
-  items: TSortedActivityNode[]
-  action: (id: TDataNode['id'], trMode: TrFilterMode) => void
+  total: coreActivity.EnvActivity
+  items: coreActivity.TSortedActivityNode[]
+  action: (id: TDataNode['id'], trMode: coreTransactions.TrFilterMode) => void
 }) {
   const { month, total, items, name, showBar, action } = props
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
-  const [currency] = useCoreDisplayCurrency()
-  const toDisplay = useCoreToDisplay(month)
-  const envelopes = useAppSelector(selectCoreEnvelopes)
+  const [currency] = coreCurrency.useDisplayCurrency()
+  const toDisplay = coreCurrency.useToDisplay(month)
+  const envelopes = useAppSelector(coreEnvelopes.selectAll)
   const [opened, toggleOpened] = useToggle(false)
 
   const nodes: TDataNode[] = items.map(node => {

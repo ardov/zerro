@@ -82,8 +82,8 @@ Commands describe user intent and remain serializable:
 ```ts
 type Command =
   | {
-      type: 'zerro.envelope.patch'
-      payload: EnvelopePatchInput
+      type: 'zerro.envelope.rename'
+      payload: { id: EnvelopeId; name: string }
     }
   | {
       type: 'zerro.budget.set'
@@ -95,8 +95,7 @@ Internal compilers may keep the `compile*` prefix. The public facade should use
 short domain verbs:
 
 ```ts
-session.envelopes.patch({ id, changes })
-engine.envelopes.rename(id, title)
+engine.envelopes.rename({ id, name })
 engine.budgets.set(update)
 ```
 
@@ -163,6 +162,29 @@ exports; the Redux slice imports them through `zerro-core/infrastructure/replica
 migration, app shims and tests may use explicit deep imports, but those paths
 are not stable APIs.
 
+The React app uses one explicit Redux adapter entrypoint grouped by domain:
+
+```ts
+import {
+  envelopes as coreEnvelopes,
+  transactions as coreTransactions,
+} from 'zerro-core/redux'
+
+const envelopes = useAppSelector(coreEnvelopes.selectAll)
+dispatch(coreEnvelopes.rename(id, name))
+dispatch(coreTransactions.remove(ids))
+```
+
+The namespaces contain granular selectors, hooks, semantic command creators,
+and their domain types. They do not own state or read the Redux store
+imperatively. Flat adapter exports are intentionally unsupported.
+
+Each Redux domain module owns its selector implementations and hook wrappers;
+there is no shared selector or hook barrel. `redux/state.ts` contains only raw
+slice/time inputs. Command-time derived reads use `commandRead.ts`, which builds
+an immutable snapshot on demand and deliberately does not participate in the
+memoized selector graph.
+
 ### Snapshot session
 
 `createZerroSession` represents one immutable snapshot. Its internal reads are
@@ -192,7 +214,7 @@ The eventual engine facade should expose the same domain vocabulary as the
 session, but execute commands and own undo/redo:
 
 ```ts
-engine.envelopes.rename(id, title)
+engine.envelopes.rename({ id, name })
 engine.budgets.set(update)
 engine.undo()
 engine.redo()

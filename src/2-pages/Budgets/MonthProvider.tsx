@@ -1,6 +1,7 @@
 import React, { FC, ReactNode, useCallback, useState } from 'react'
 import { useAppSelector } from 'store'
-import { selectCoreMonthList } from 'zerro-core/redux'
+import { months as coreMonths } from 'zerro-core/redux'
+
 import { TDateDraft, TISOMonth } from '6-shared/types'
 import { isISOMonth, toISOMonth } from '6-shared/helpers/date'
 
@@ -15,7 +16,7 @@ export const useMonth = () => React.useContext(MonthContext)
 
 export const MonthProvider: FC<{ children: ReactNode }> = props => {
   const currentMonth = toISOMonth(new Date())
-  const monthList = useAppSelector(selectCoreMonthList)
+  const monthList = useAppSelector(coreMonths.selectList)
   const firstMonth = monthList[0] || currentMonth
   const lastMonth = monthList[monthList.length - 1] || currentMonth
   const [selected, setSelected] = useState<TISOMonth>(currentMonth)

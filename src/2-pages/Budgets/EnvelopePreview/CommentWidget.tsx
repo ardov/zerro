@@ -4,23 +4,21 @@ import { NotesIcon } from '6-shared/ui/Icons'
 import { useAppDispatch, useAppSelector } from 'store'
 import { cardStyle } from './shared'
 import { TEnvelopeId } from '5-entities/envelope'
-import {
-  selectCoreEnvelopes,
-  setEnvelopeComment,
-} from 'zerro-core/redux'
+import { envelopes as coreEnvelopes } from 'zerro-core/redux'
+
 import { useDebouncedCallback } from '6-shared/hooks/useDebouncedCallback'
 import { useTranslation } from 'react-i18next'
 
 export const CommentWidget: FC<{ id: TEnvelopeId }> = ({ id }) => {
   const { t } = useTranslation('common')
   const dispatch = useAppDispatch()
-  const comment = useAppSelector(s => selectCoreEnvelopes(s)[id].comment)
+  const comment = useAppSelector(s => coreEnvelopes.selectAll(s)[id].comment)
   const [value, setValue] = useState(comment)
 
   const applyChanges = useDebouncedCallback(
     value => {
       if (comment !== value) {
-        dispatch(setEnvelopeComment(id, value))
+        dispatch(coreEnvelopes.setComment(id, value))
       }
     },
     [id, dispatch],

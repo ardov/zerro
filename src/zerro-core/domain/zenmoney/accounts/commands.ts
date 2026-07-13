@@ -13,7 +13,9 @@ import { makeAccount, type TAccountFactoryDraft } from './factory'
 import { getAccounts } from './read'
 import type { TAccount, TAccountId } from './types'
 
-export type TAccountPatch = OptionalExceptFor<TAccount, 'id'>
+export type TAccountPatch = { id: TAccountId } & Partial<
+  Pick<TAccount, 'title' | 'inBalance'>
+>
 export type TAccountDraft = Omit<TAccountFactoryDraft, 'user'>
 
 export function compileCreateAccount(

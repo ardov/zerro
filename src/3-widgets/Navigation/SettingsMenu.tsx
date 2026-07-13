@@ -37,11 +37,8 @@ import { appVersion } from '6-shared/config'
 import { useAppDispatch } from 'store'
 import { resetData } from 'store/data'
 
-import {
-  setEmojiIcons,
-  setPreferZmBudgets,
-  useCoreUserSettings,
-} from 'zerro-core/redux'
+import { settings as coreSettings } from 'zerro-core/redux'
+
 import { useRegularSync } from '3-widgets/RegularSyncHandler'
 import { logOut } from '4-features/authorization'
 import { exportCSV } from '4-features/export/exportCSV'
@@ -278,11 +275,11 @@ function AutoSyncItem() {
 function IconModeItem() {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
-  const { emojiIcons } = useCoreUserSettings()
+  const { emojiIcons } = coreSettings.use()
   const handleClick = () => {
     const next = !emojiIcons
     sendEvent(`Settings: emoji icons set to ${next}`)
-    dispatch(setEmojiIcons(next))
+    dispatch(coreSettings.setEmojiIcons(next))
   }
   return (
     <MenuItem onClick={handleClick}>
@@ -298,10 +295,10 @@ function BudgetSettingsItem() {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
   const setSnackbar = useSnackbar()
-  const { preferZmBudgets } = useCoreUserSettings()
+  const { preferZmBudgets } = coreSettings.use()
   const toggleSetting = () => {
     sendEvent(`Settings: preferZmBudgets ${preferZmBudgets ? 'off' : 'on'}`)
-    dispatch(setPreferZmBudgets(!preferZmBudgets))
+    dispatch(coreSettings.setPreferZmBudgets(!preferZmBudgets))
   }
   const convertBudgets = () => {
     sendEvent(`Settings: convert old budgets`)

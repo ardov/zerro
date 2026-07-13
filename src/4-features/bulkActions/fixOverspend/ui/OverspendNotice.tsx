@@ -1,5 +1,6 @@
 import React, { FC } from 'react'
-import { selectCoreMonthTotals } from 'zerro-core/redux'
+import { months as coreMonths } from 'zerro-core/redux'
+
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Button } from '@mui/material'
 import { TISOMonth } from '6-shared/types'
@@ -13,7 +14,7 @@ import { fixOverspends as fixAllOverspends } from '../model/fixOverspends'
 export const OverspendNotice: FC<{ month: TISOMonth }> = ({ month }) => {
   const { t } = useTranslation('overspendNotice')
   const dispatch = useAppDispatch()
-  const { overspend } = useAppSelector(selectCoreMonthTotals)[month]
+  const { overspend } = useAppSelector(coreMonths.selectTotals)[month]
   const fixOverspends = useConfirm({
     onOk: () => dispatch(fixAllOverspends(month)),
     title: t('confirm.title'),

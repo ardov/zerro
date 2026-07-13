@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
-import { useCoreToDisplay } from 'zerro-core/redux'
+import { currency as coreCurrency, tags as coreTags } from 'zerro-core/redux'
+
 import { Box, Typography, Chip, Stack } from '@mui/material'
 import { entries } from '6-shared/helpers/keys'
 import { addFxAmount } from '6-shared/helpers/money'
 import { useAppSelector } from 'store'
-import { selectCorePopulatedTags } from 'zerro-core/redux'
+
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 
 import { Card, TCardProps } from '../../shared/Card'
@@ -15,8 +16,8 @@ import { useTranslation } from 'react-i18next'
 export function IncomeCard(props: TCardProps) {
   const { t } = useTranslation('yearReview', { keyPrefix: 'incomeCard' })
   const yearStats = useStats(props.year)
-  const toDisplay = useCoreToDisplay('current')
-  const tags = useAppSelector(selectCorePopulatedTags)
+  const toDisplay = coreCurrency.useToDisplay('current')
+  const tags = useAppSelector(coreTags.selectPopulated)
 
   const incomeTags = entries(yearStats.byTag)
     .map(([id, info]) => {

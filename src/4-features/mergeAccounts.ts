@@ -1,6 +1,6 @@
 import { TAccountId } from '6-shared/types'
 import { AppThunk } from 'store'
-import { mergeAccounts as mergeAccountsCommand } from 'zerro-core/redux'
+import { accounts as coreAccounts } from 'zerro-core/redux'
 
 /**
  * Deletes an account and moves all its transactions to another one.
@@ -10,4 +10,4 @@ import { mergeAccounts as mergeAccountsCommand } from 'zerro-core/redux'
 export const mergeAccounts =
   (source: TAccountId, target: TAccountId): AppThunk =>
   dispatch =>
-    dispatch(mergeAccountsCommand(source, target))
+    dispatch(coreAccounts.merge(source, target))

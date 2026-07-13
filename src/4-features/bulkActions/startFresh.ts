@@ -5,8 +5,11 @@ import { keys } from '6-shared/helpers/keys'
 import { isZero } from '6-shared/helpers/money'
 import { AppThunk } from 'store'
 
-import { selectCoreEnvMetrics } from 'zerro-core/redux'
-import { type TBudgetUpdate } from 'zerro-core/redux'
+import {
+  activity as coreActivity,
+  budgets as coreBudgets,
+} from 'zerro-core/redux'
+
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
 
 export const startFresh =
@@ -26,7 +29,7 @@ export const startFresh =
 export const removeFutureBudgets =
   (targetMonth: TISOMonth): AppThunk<void> =>
   (dispatch, getState) => {
-    const envData = selectCoreEnvMetrics(getState())
+    const envData = coreActivity.selectEnvelopeMetrics(getState())
     const updates = keys(envData)
       .filter(month => month > targetMonth)
       .reduce((updates, month) => {
@@ -34,7 +37,7 @@ export const removeFutureBudgets =
           .filter(e => !isZero(e.selfBudgeted))
           .map(e => ({ id: e.id, value: 0, month }))
           .concat(updates)
-      }, [] as Array<TBudgetUpdate>)
+      }, [] as Array<coreBudgets.TBudgetUpdate>)
     dispatch(setTotalBudget(updates))
   }
 
@@ -55,7 +58,7 @@ export const resetMonthThunk =
   (month: TISOMonth): AppThunk<void> =>
   (dispatch, getState) => {
     // Step 1. Remove children balances
-    const envData = selectCoreEnvMetrics(getState())[month]
+    const envData = coreActivity.selectEnvelopeMetrics(getState())[month]
     const updates = Object.values(envData)
       .filter(e => e.parent) // Only children
       .filter(e => {
@@ -71,7 +74,7 @@ export const resetMonthThunk =
     dispatch(setTotalBudget(updates))
 
     // Step 2. Remove parent balances
-    const envData2 = selectCoreEnvMetrics(getState())[month]
+    const envData2 = coreActivity.selectEnvelopeMetrics(getState())[month]
     const updates2 = Object.values(envData2)
       .filter(e => !e.parent) // Only parents
       .filter(e => !isZero(e.selfAvailable)) // with positive available

@@ -1,5 +1,9 @@
 import React, { FC, memo, ReactNode, useCallback, useRef } from 'react'
-import { useCoreDisplayCurrency } from 'zerro-core/redux'
+import {
+  currency as coreCurrency,
+  envelopes as coreEnvelopes,
+} from 'zerro-core/redux'
+
 import { useDraggable } from '@dnd-kit/core'
 import { Typography, Box, IconButton, Collapse, Chip } from '@mui/material'
 import { useTranslation } from 'react-i18next'
@@ -12,7 +16,7 @@ import { getCurrencySymbol } from '6-shared/helpers/money'
 import { useFloatingInput } from '6-shared/ui/FloatingInput'
 import { useAppDispatch } from 'store/index'
 import { TEnvelope, TEnvelopeId } from '5-entities/envelope'
-import { renameEnvelope } from 'zerro-core/redux'
+
 import { DragTypes } from '2-pages/Budgets/DnD'
 
 export const NameCell: FC<{
@@ -26,14 +30,14 @@ export const NameCell: FC<{
   const { id, symbol, colorHex, name, currency, comment, originalName } =
     props.envelope
   const { isReordering, isDefaultVisible, isChild, isSelf, onClick } = props
-  const [displCurrency] = useCoreDisplayCurrency()
+  const [displCurrency] = coreCurrency.useDisplayCurrency()
   const { t } = useTranslation('budgets')
 
   const dispatch = useAppDispatch()
   const ref = useRef<any>()
   const updateName = useCallback(
     (v: string) => {
-      dispatch(renameEnvelope(id, v))
+      dispatch(coreEnvelopes.rename(id, v))
     },
     [dispatch, id]
   )

@@ -1,18 +1,16 @@
 import { useMemo } from 'react'
 import {
-  selectCoreDebtAccountId,
-  useCoreInstCodeMap,
-  useCorePopulatedAccounts,
-  useCoreToDisplay,
+  accounts as coreAccounts,
+  currency as coreCurrency,
+  instruments as coreInstruments,
+  transactions as coreTransactions,
 } from 'zerro-core/redux'
+
 import { TISODate } from '6-shared/types'
 import { GroupBy, makeDateArray, toGroup } from '6-shared/helpers/date'
 
 import { useAppSelector } from 'store/index'
-import {
-  selectCoreHistoryStart,
-  selectCoreTransactionsHistory,
-} from 'zerro-core/redux'
+
 import { Period, getStart } from './period'
 import { calcCashflow } from './calcCashflow'
 
@@ -57,10 +55,10 @@ export function useCashFlow(
   period: Period,
   aggregation: GroupBy = GroupBy.Month
 ): TCashflowPoint[] {
-  const transactionHistory = useAppSelector(selectCoreTransactionsHistory)
-  const debtAccId = useAppSelector(selectCoreDebtAccountId)
-  const instCodeMap = useCoreInstCodeMap()
-  const accounts = useCorePopulatedAccounts()
+  const transactionHistory = useAppSelector(coreTransactions.selectHistory)
+  const debtAccId = useAppSelector(coreAccounts.selectDebtAccountId)
+  const instCodeMap = coreInstruments.useCodeMap()
+  const accounts = coreAccounts.usePopulated()
   const aggregatedNodes = useMemo(
     () =>
       calcCashflow(
@@ -73,8 +71,8 @@ export function useCashFlow(
     [aggregation, debtAccId, instCodeMap, transactionHistory]
   )
 
-  const toDisplay = useCoreToDisplay('current')
-  const historyStart = useAppSelector(selectCoreHistoryStart)
+  const toDisplay = coreCurrency.useToDisplay('current')
+  const historyStart = useAppSelector(coreTransactions.selectHistoryStart)
   const firstDate = getStartDate(period, aggregation, historyStart)
 
   return makeDateArray(firstDate, Date.now(), aggregation).map(date => {

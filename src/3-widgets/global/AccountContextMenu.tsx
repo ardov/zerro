@@ -5,7 +5,8 @@ import { useAppDispatch } from 'store'
 import { registerPopover } from '6-shared/historyPopovers'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { useTranslation } from 'react-i18next'
-import { setAccountInBalance, useCoreAccounts } from 'zerro-core/redux'
+import { accounts as coreAccounts } from 'zerro-core/redux'
+
 import { getMenuPosition } from './shared/helpers'
 
 type AccountMenuProps = { id: TAccountId }
@@ -34,7 +35,7 @@ export const AccountContextMenu: FC = () => {
   const { displayProps, extraProps } = accContext.useProps()
   const { id } = extraProps
   const dispatch = useAppDispatch()
-  const account = useCoreAccounts()[id]
+  const account = coreAccounts.useAll()[id]
 
   if (!account) return null
 
@@ -44,7 +45,7 @@ export const AccountContextMenu: FC = () => {
       condition: account.inBalance,
       action: () => {
         sendEvent('Accounts: Set in budget')
-        dispatch(setAccountInBalance(id, false))
+        dispatch(coreAccounts.setInBalance(id, false))
       },
     },
     {
@@ -52,7 +53,7 @@ export const AccountContextMenu: FC = () => {
       condition: !account.inBalance,
       action: () => {
         sendEvent('Accounts: Set in budget')
-        dispatch(setAccountInBalance(id, true))
+        dispatch(coreAccounts.setInBalance(id, true))
       },
     },
   ]

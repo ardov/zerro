@@ -24,7 +24,7 @@ const ctx = {
 
 async function importModels() {
   await i18n.changeLanguage('en')
-  return import('./selectors')
+  return import('../testing/reduxSelectors')
 }
 
 function makeRootState(data: TDataStore): RootState {
@@ -46,15 +46,15 @@ function makeRootState(data: TDataStore): RootState {
   }
 }
 
-describe('selectCoreEnvelopes chain', () => {
+describe('selectEnvelopes chain', () => {
   it('keeps appearance out of domain envelopes and adds it in the adapter', async () => {
-    const { selectCoreDomainEnvelopes, selectCoreEnvelopes } =
+    const { selectDomainEnvelopes, selectEnvelopes } =
       await importModels()
     const state = makeRootState(makeDemoStore({ now: NOW }))
     const id = envId.get(EnvType.Tag, null)
 
-    const domain = selectCoreDomainEnvelopes(state)[id]
-    const presented = selectCoreEnvelopes(state)[id]
+    const domain = selectDomainEnvelopes(state)[id]
+    const presented = selectEnvelopes(state)[id]
 
     expect(domain).toMatchObject({
       name: 'No category',
@@ -75,19 +75,19 @@ describe('selectCoreEnvelopes chain', () => {
 
   it('builds stable envelope structure on demo data', async () => {
     const {
-      selectCoreEnvelopes,
-      selectCoreEnvelopeStructure,
-      selectCoreKeepingEnvelopeIds,
+      selectEnvelopes,
+      selectEnvelopeStructure,
+      selectKeepingEnvelopeIds,
     } = await importModels()
     const state = makeRootState(makeDemoStore({ now: NOW }))
 
-    expect(Object.keys(selectCoreEnvelopes(state))).not.toHaveLength(0)
-    expect(selectCoreEnvelopeStructure(state)).toEqual(expect.any(Array))
-    expect(selectCoreKeepingEnvelopeIds(state)).toEqual(expect.any(Array))
+    expect(Object.keys(selectEnvelopes(state))).not.toHaveLength(0)
+    expect(selectEnvelopeStructure(state)).toEqual(expect.any(Array))
+    expect(selectKeepingEnvelopeIds(state)).toEqual(expect.any(Array))
   })
 
   it('applies envelope metadata', async () => {
-    const { selectCoreEnvelopes } = await importModels()
+    const { selectEnvelopes } = await importModels()
     const store = makeDemoStore({ now: NOW })
     const tagId = Object.keys(store.tag)[0]
     const envelopeId = envId.get(EnvType.Tag, tagId)
@@ -99,16 +99,16 @@ describe('selectCoreEnvelopes chain', () => {
     )
     const state = makeRootState(applyPatch(store, metaPatch))
 
-    const core = selectCoreEnvelopes(state)
+    const core = selectEnvelopes(state)
     expect(core[envelopeId].comment).toBe('zerro-core test comment')
   })
 
   it('stays cached across unrelated data changes', async () => {
-    const { selectCoreEnvelopes, selectCoreEnvelopeStructure } =
+    const { selectEnvelopes, selectEnvelopeStructure } =
       await importModels()
     const store = makeDemoStore({ now: NOW })
-    const envelopes = selectCoreEnvelopes(makeRootState(store))
-    const structure = selectCoreEnvelopeStructure(makeRootState(store))
+    const envelopes = selectEnvelopes(makeRootState(store))
+    const structure = selectEnvelopeStructure(makeRootState(store))
 
     // New current object, new budget slice, same tag/account/reminder slices
     const unrelatedChange = makeRootState({
@@ -116,7 +116,7 @@ describe('selectCoreEnvelopes chain', () => {
       budget: { ...store.budget },
     })
 
-    expect(selectCoreEnvelopes(unrelatedChange)).toBe(envelopes)
-    expect(selectCoreEnvelopeStructure(unrelatedChange)).toBe(structure)
+    expect(selectEnvelopes(unrelatedChange)).toBe(envelopes)
+    expect(selectEnvelopeStructure(unrelatedChange)).toBe(structure)
   })
 })

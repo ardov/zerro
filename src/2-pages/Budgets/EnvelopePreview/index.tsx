@@ -11,12 +11,11 @@ import { sendEvent } from '6-shared/helpers/tracking'
 import { useAppDispatch, useAppSelector } from 'store'
 import { TEnvelope, TEnvelopeId } from '5-entities/envelope'
 import {
-  formatGoal,
-  selectCoreEnvMetrics,
-  selectCoreEnvelopes,
-  selectCoreGoals,
-  setEnvelopeColor,
+  activity as coreActivity,
+  envelopes as coreEnvelopes,
+  goals as coreGoals,
 } from 'zerro-core/redux'
+
 import { useMonth } from '../MonthProvider'
 import { EnvelopeEditDialog, useEditDialog } from '../EnvelopeEditDialog'
 import { ActivityWidget } from './ActivityWidget'
@@ -37,10 +36,12 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   const [month] = useMonth()
   const openGoalPopover = useGoalPopover()
 
-  const envMetrics = useAppSelector(selectCoreEnvMetrics)[month][id]
-  const env = useAppSelector(selectCoreEnvelopes)[id]
+  const envMetrics = useAppSelector(coreActivity.selectEnvelopeMetrics)[month][
+    id
+  ]
+  const env = useAppSelector(coreEnvelopes.selectAll)[id]
 
-  const goalInfo = useAppSelector(selectCoreGoals)[month][id]
+  const goalInfo = useAppSelector(coreGoals.selectAll)[month][id]
   if (!envMetrics) return null
 
   const { currency } = envMetrics
@@ -71,7 +72,9 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
               component="span"
               color={goalInfo ? 'text.primary' : 'text.disabled'}
             >
-              {goalInfo ? formatGoal(goalInfo.goal, currency) : t('goal')}
+              {goalInfo
+                ? coreGoals.formatGoal(goalInfo.goal, currency)
+                : t('goal')}
             </Typography>
           </ButtonBase>
         </Grid>
@@ -107,7 +110,7 @@ const Header: FC<{
   const handleColorChange = useCallback(
     (hex?: string | null) => {
       sendEvent('Tag: set color: ' + hex)
-      dispatch(setEnvelopeColor(envelope.id, hex ?? null))
+      dispatch(coreEnvelopes.setColor(envelope.id, hex ?? null))
     },
     [dispatch, envelope.id]
   )

@@ -2,8 +2,11 @@ import { add } from '6-shared/helpers/money'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { TISOMonth } from '6-shared/types'
 import { AppThunk } from 'store'
-import { selectCoreEnvMetrics } from 'zerro-core/redux'
-import { type TBudgetUpdate } from 'zerro-core/redux'
+import {
+  activity as coreActivity,
+  budgets as coreBudgets,
+} from 'zerro-core/redux'
+
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
 
 export const fixOverspends =
@@ -15,8 +18,8 @@ export const fixOverspends =
     fixOverspendingParents()
 
     function fixOverspendingChildren() {
-      const metrics = selectCoreEnvMetrics(getState())[month]
-      let childrenUpdates: TBudgetUpdate[] = []
+      const metrics = coreActivity.selectEnvelopeMetrics(getState())[month]
+      let childrenUpdates: coreBudgets.TBudgetUpdate[] = []
       Object.values(metrics).forEach(m => {
         if (!m.parent) return
         const budgeted = m.selfBudgeted[m.currency] || 0
@@ -33,8 +36,8 @@ export const fixOverspends =
     }
 
     function fixOverspendingParents() {
-      const metrics = selectCoreEnvMetrics(getState())[month]
-      let parentUpdates: TBudgetUpdate[] = []
+      const metrics = coreActivity.selectEnvelopeMetrics(getState())[month]
+      let parentUpdates: coreBudgets.TBudgetUpdate[] = []
       Object.values(metrics).forEach(m => {
         if (m.parent) return
         const totalBudgeted = m.totalBudgeted[m.currency] || 0

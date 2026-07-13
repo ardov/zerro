@@ -1,5 +1,10 @@
 import type { TTransaction } from '6-shared/types'
-import { useCoreInstCodeMap, useCoreToDisplay } from 'zerro-core/redux'
+import {
+  currency as coreCurrency,
+  instruments as coreInstruments,
+  transactions as coreTransactions,
+} from 'zerro-core/redux'
+
 import React, { FC, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CSSTransition } from 'react-transition-group'
@@ -27,17 +32,7 @@ import { addFxAmount, createFxAmount } from '6-shared/helpers/money'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useAppDispatch, useAppSelector } from 'store'
-import {
-  bulkEditTransactions,
-  getTransactionType,
-  isTransactionViewed,
-  combineTransactionsToIncome,
-  combineTransactionsToOutcome,
-  deleteTransactions,
-  mergeTransactionsAsTransfer,
-  selectCoreTransactions,
-  setTransactionsViewed,
-} from 'zerro-core/redux'
+
 import { TagSelect2 } from '5-entities/tag/ui/TagSelect2'
 import { BulkEditModal } from './BulkEditModal'
 import './transitions.css'
@@ -57,7 +52,7 @@ const Actions: FC<ActionsProps> = ({
 }) => {
   const { t } = useTranslation('transactionActions')
   const dispatch = useAppDispatch()
-  const allTransactions = useAppSelector(selectCoreTransactions)
+  const allTransactions = useAppSelector(coreTransactions.selectAll)
   const [ids, setIds] = useState(checkedIds)
   const transactions = ids?.map(id => allTransactions[id])
   const actions = getAvailableActions(transactions)
@@ -75,8 +70,8 @@ const Actions: FC<ActionsProps> = ({
   const handleSetTag = (id: string) => {
     sendEvent('Bulk Actions: set new tags')
     if (!id || id === 'null')
-      dispatch(bulkEditTransactions(checkedIds, { tags: [] }))
-    else dispatch(bulkEditTransactions(checkedIds, { tags: [id] }))
+      dispatch(coreTransactions.bulkEdit(checkedIds, { tags: [] }))
+    else dispatch(coreTransactions.bulkEdit(checkedIds, { tags: [id] }))
     closeMenu()
     onUncheckAll()
   }
@@ -87,7 +82,7 @@ const Actions: FC<ActionsProps> = ({
     cancelText: t('cancelDeletion'),
     onOk: () => {
       sendEvent('Transaction: delete')
-      dispatch(deleteTransactions(checkedIds))
+      dispatch(coreTransactions.remove(checkedIds))
       closeMenu()
       onUncheckAll()
     },
@@ -100,7 +95,7 @@ const Actions: FC<ActionsProps> = ({
 
   const handleMarkViewed = () => {
     sendEvent('Transaction: mark viewed: true')
-    dispatch(setTransactionsViewed(checkedIds, true))
+    dispatch(coreTransactions.setViewed(checkedIds, true))
     closeMenu()
     onUncheckAll()
   }
@@ -205,7 +200,7 @@ const Actions: FC<ActionsProps> = ({
                 <MenuItem
                   onClick={() => {
                     sendEvent('Transaction: combine to outcome')
-                    dispatch(combineTransactionsToOutcome(ids))
+                    dispatch(coreTransactions.combineToOutcome(ids))
                     onUncheckAll()
                   }}
                 >
@@ -223,7 +218,7 @@ const Actions: FC<ActionsProps> = ({
                 <MenuItem
                   onClick={() => {
                     sendEvent('Transaction: combine to income')
-                    dispatch(combineTransactionsToIncome(ids))
+                    dispatch(coreTransactions.combineToIncome(ids))
                     onUncheckAll()
                   }}
                 >
@@ -253,7 +248,7 @@ const Actions: FC<ActionsProps> = ({
                 <MenuItem
                   onClick={() => {
                     sendEvent('Transaction: merge as transfer')
-                    dispatch(mergeTransactionsAsTransfer(ids))
+                    dispatch(coreTransactions.mergeAsTransfer(ids))
                     onUncheckAll()
                   }}
                 >
@@ -287,8 +282,8 @@ const Actions: FC<ActionsProps> = ({
 
 function getAvailableActions(transactions: TTransaction[]) {
   const { incomes, outcomes, transfers } = groupByType(transactions)
-  const instCodeMap = useCoreInstCodeMap()
-  const toDisplay = useCoreToDisplay('current')
+  const instCodeMap = coreInstruments.useCodeMap()
+  const toDisplay = coreCurrency.useToDisplay('current')
 
   const totalOutcome = toDisplay(
     addFxAmount(
@@ -311,7 +306,7 @@ function getAvailableActions(transactions: TTransaction[]) {
     delete: true,
     setMainTag: !transfers.length && (incomes.length || outcomes.length),
     bulkEdit: true,
-    markViewed: transactions.some(tr => !isTransactionViewed(tr)),
+    markViewed: transactions.some(tr => !coreTransactions.isViewed(tr)),
     combineToOutcome: canCombineToOutcome(),
     combineToIncome: canCombineToIncome(),
     collapseTransactionsEasy: canCollapseTransactionsEasy(),
@@ -390,7 +385,7 @@ function groupByType(list: TTransaction[] = []) {
   let transfers: TTransaction[] = []
 
   list?.forEach(tr => {
-    let trType = getTransactionType(tr)
+    let trType = coreTransactions.getType(tr)
     if (trType === 'income') incomes.push(tr)
     if (trType === 'outcome') outcomes.push(tr)
     if (trType === 'transfer') transfers.push(tr)

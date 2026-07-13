@@ -1,11 +1,9 @@
 import React, { FC, useState, useMemo, useCallback, memo } from 'react'
 import {
-  type TAccountPopulated,
-  useCoreInBudgetAccounts,
-  useCorePopulatedAccounts,
-  useCoreSavingAccounts,
-  useCoreToDisplay,
+  accounts as coreAccounts,
+  currency as coreCurrency,
 } from 'zerro-core/redux'
+
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -34,7 +32,7 @@ type WidgetAccHistoryProps = {
 export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
   ({ period }) => {
     const { t } = useTranslation('accounts')
-    const toDisplay = useCoreToDisplay(toISOMonth(new Date()))
+    const toDisplay = coreCurrency.useToDisplay(toISOMonth(new Date()))
     const trDrawer = useTransactionDrawer()
     const [visible, toggleVisibility] = useToggle()
 
@@ -45,8 +43,8 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
       [trDrawer]
     )
 
-    const inBudgetAccounts = useCoreInBudgetAccounts()
-    const savingAccounts = useCoreSavingAccounts()
+    const inBudgetAccounts = coreAccounts.useInBudget()
+    const savingAccounts = coreAccounts.useSaving()
 
     const {
       totalInBudget,
@@ -133,7 +131,7 @@ type SubheaderProps = {
 
 const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
   const month = toISOMonth(new Date())
-  const toDisplay = useCoreToDisplay(month)
+  const toDisplay = coreCurrency.useToDisplay(month)
   const isNegative = toDisplay(amount) < 0
 
   return (
@@ -182,7 +180,7 @@ type AccTrendProps = {
 const AccountHistoryWidget: FC<AccTrendProps> = memo(
   ({ id, period, onClick }) => {
     const theme = useAppTheme()
-    const acc = useCorePopulatedAccounts()[id]
+    const acc = coreAccounts.usePopulated()[id]
     const data = useAccountHistory(id, period)
 
     const { dataMax, dataMin, yAxisMin } = useMemo(() => {
@@ -296,9 +294,9 @@ const AccountHistoryWidget: FC<AccTrendProps> = memo(
 )
 
 const sortAccountsByBalance = (
-  accounts: TAccountPopulated[],
+  accounts: coreAccounts.TAccountPopulated[],
   toDisplay: (amount: TFxAmount) => number
-): TAccountPopulated[] => {
+): coreAccounts.TAccountPopulated[] => {
   return [...accounts].sort(
     (a, b) =>
       toDisplay({ [b.fxCode]: b.balance }) -
@@ -306,7 +304,7 @@ const sortAccountsByBalance = (
   )
 }
 
-function getTotal(accs: TAccountPopulated[]): TFxAmount {
+function getTotal(accs: coreAccounts.TAccountPopulated[]): TFxAmount {
   if (!accs.length) return {}
 
   return accs.reduce(

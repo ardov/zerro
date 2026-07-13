@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import type { RootState } from 'store'
 import { makeDemoStore } from '../demo'
 import {
-  selectCoreDisplayConverter,
-  selectCoreDisplayCurrency,
-} from './selectors'
+  selectDisplayConverter,
+  selectDisplayCurrency,
+} from '../testing/reduxSelectors'
 
 const NOW = Date.parse('2026-07-11T12:00:00Z')
 
@@ -22,9 +22,9 @@ function makeState(displayCurrency: RootState['displayCurrency']): RootState {
 describe('Core display currency selectors', () => {
   it('prefers the saved display currency and binds it to the FX converter', () => {
     const state = makeState('EUR')
-    const convert = selectCoreDisplayConverter(state)
+    const convert = selectDisplayConverter(state)
 
-    expect(selectCoreDisplayCurrency(state)).toBe('EUR')
+    expect(selectDisplayCurrency(state)).toBe('EUR')
     expect(convert({ EUR: 25 }, 'current')).toBe(25)
   })
 
@@ -33,6 +33,6 @@ describe('Core display currency selectors', () => {
     const userCurrency = Object.values(state.data.current.user)[0].currency
     const instrument = state.data.current.instrument[userCurrency]
 
-    expect(selectCoreDisplayCurrency(state)).toBe(instrument.shortTitle)
+    expect(selectDisplayCurrency(state)).toBe(instrument.shortTitle)
   })
 })

@@ -211,16 +211,18 @@ Current:
 - `session.read.*` remains deprecated compatibility;
 - `application/session/readGraph.ts` records important graph edges without driving runtime;
 - Redux independently wires the same calculations with cross-snapshot caches.
-- `renameEnvelope(id, name)` is the first adopted narrow write command.
-- `setEnvelopeColor(id, colorHex)` is the second adopted narrow write command.
-- `setEnvelopeComment(id, comment)` is the third adopted narrow write command.
-- `updateEnvelopeSettings(input)` atomically owns the edit-dialog use case.
-- `createEnvelope(input)` atomically creates tag+metadata and returns its id.
-- `applyEnvelopeStructure(structure)` owns hierarchy: ordering, groups, and
+- the app-facing Redux adapter is grouped into domain namespaces such as
+  `envelopes.selectAll`, `envelopes.rename`, `transactions.remove`, and
+  `currency.useToDisplay`; the former flat export surface is removed;
+- `envelopes.rename(id, name)`, `setColor(id, colorHex)`, and
+  `setComment(id, comment)` are narrow semantic commands;
+- `envelopes.updateSettings(input)` atomically owns the edit-dialog use case;
+- `envelopes.create(input)` atomically creates tag+metadata and returns its id;
+- `envelopes.applyStructure(structure)` owns hierarchy: ordering, groups, and
   parents compile from full structure input in one atomic patch.
 
-Next: frozen. Do not widen the session facade or add supported subpaths until a
-real headless consumer exists (internal-module decision). The remaining ideas
+Next: frozen. Do not widen the session facade or add supported per-domain
+package subpaths until a real headless consumer exists. The remaining ideas
 below are deferred, not scheduled:
 
 1. Add domain write methods that compile narrow semantic command inputs

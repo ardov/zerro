@@ -21,9 +21,8 @@ import { useAppDispatch, useAppSelector } from 'store'
 import { goalType, TGoal } from '5-entities/goal'
 import { TEnvelopeId } from '5-entities/envelope'
 import {
-  selectCoreEnvelopes,
-  selectCoreGoals,
-  setGoal,
+  envelopes as coreEnvelopes,
+  goals as coreGoals,
 } from 'zerro-core/redux'
 
 export type TGoalPopoverProps = Modify<
@@ -38,8 +37,8 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
   const { id, month, onClose, ...rest } = props
   const { t } = useTranslation('goals')
   const dispatch = useAppDispatch()
-  const envelope = useAppSelector(selectCoreEnvelopes)[id]
-  const goalInfo = useAppSelector(selectCoreGoals)[month][id] || {}
+  const envelope = useAppSelector(coreEnvelopes.selectAll)[id]
+  const goalInfo = useAppSelector(coreGoals.selectAll)[month][id] || {}
   const { goal } = goalInfo
 
   const [type, setType] = useState(goal?.type || goalType.MONTHLY_SPEND)
@@ -71,13 +70,13 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
       if (type === goalType.TARGET_BALANCE && endDate) {
         goal.end = endDate
       }
-      dispatch(setGoal(month, id, goal))
+      dispatch(coreGoals.set(month, id, goal))
       sendEvent(`Goals: set ${goal.type} goal`)
     }
     onClose?.()
   }
   const removeGoal = () => {
-    dispatch(setGoal(month, id, null))
+    dispatch(coreGoals.set(month, id, null))
     sendEvent('Goals: delete goal')
     onClose?.()
   }

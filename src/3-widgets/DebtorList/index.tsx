@@ -5,7 +5,8 @@ import { Debtor, Subheader } from './components'
 import { addFxAmount, isZero } from '6-shared/helpers/money'
 import { keys } from '6-shared/helpers/keys'
 import { TFxCode } from '6-shared/types'
-import { selectCoreDebtors } from 'zerro-core/redux'
+import { debtors as coreDebtors } from 'zerro-core/redux'
+
 import { useAppSelector } from 'store'
 
 type TDebtorInfo = {
@@ -16,7 +17,7 @@ type TDebtorInfo = {
 
 export function DebtorList({ className = '' }) {
   const { t } = useTranslation('common')
-  const debtors = useAppSelector(selectCoreDebtors)
+  const debtors = useAppSelector(coreDebtors.selectAll)
   const list = Object.values(debtors)
     .filter(debtor => !isZero(debtor.balance))
     .reduce((acc, debtor) => {

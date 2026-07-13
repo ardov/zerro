@@ -6,10 +6,9 @@ import { round } from '6-shared/helpers/money'
 import { sendEvent } from '6-shared/helpers/tracking'
 
 import {
-  selectCoreEnvMetrics,
-  selectCoreConvertFx,
-  setBudget,
-  type TBudgetUpdate,
+  activity as coreActivity,
+  budgets as coreBudgets,
+  currency as coreCurrency,
 } from 'zerro-core/redux'
 
 export const moveMoney =
@@ -24,10 +23,10 @@ export const moveMoney =
     if (!source || !amount || !destination || source === destination) return
     sendEvent('Budgets: move funds')
     const state = getState()
-    const metrics = selectCoreEnvMetrics(state)[month]
-    const convertFx = selectCoreConvertFx(state)
+    const metrics = coreActivity.selectEnvelopeMetrics(state)[month]
+    const convertFx = coreCurrency.selectConvertFx(state)
 
-    const updates: TBudgetUpdate[] = []
+    const updates: coreBudgets.TBudgetUpdate[] = []
 
     if (source !== 'toBeBudgeted') {
       const env = metrics[source]
@@ -51,5 +50,5 @@ export const moveMoney =
       updates.push({ month, id: env.id, value: newBudget })
     }
 
-    dispatch(setBudget(updates))
+    dispatch(coreBudgets.set(updates))
   }

@@ -18,7 +18,8 @@ import {
 import { ColorPicker, useColorPicker } from '6-shared/ui/ColorPickerPopover'
 import { useAppDispatch } from 'store'
 import { envelopeVisibility, TEnvelope } from '5-entities/envelope'
-import { updateEnvelopeSettings } from 'zerro-core/redux'
+import { envelopes as coreEnvelopes } from 'zerro-core/redux'
+
 // import { TagSelect } from '@components/TagSelect'
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'
 import { VisibilitySelect } from './VisidilitySelect'
@@ -79,7 +80,7 @@ const EnvelopeEditDialogForm: FC<{
     onSubmit: (values, helpers) => {
       close()
       dispatch(
-        updateEnvelopeSettings({
+        coreEnvelopes.updateSettings({
           id,
           name: values.originalName,
           colorHex: values.colorHex,

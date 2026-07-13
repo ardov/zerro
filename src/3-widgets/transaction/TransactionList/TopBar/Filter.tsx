@@ -8,12 +8,13 @@ import IconButton from '@mui/material/IconButton'
 import { FilterListIcon, CloseIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { useToggle } from '6-shared/hooks/useToggle'
-import { TrCondition } from 'zerro-core/redux'
+import { transactions as coreTransactions } from 'zerro-core/redux'
+
 import FilterDrawer from './FilterDrawer'
 
 type FilterProps = {
-  setCondition: (c: TrCondition) => void
-  conditions?: TrCondition
+  setCondition: (c: coreTransactions.TrCondition) => void
+  conditions?: coreTransactions.TrCondition
   clearFilter: () => void
   sx?: SxProps<Theme>
 }

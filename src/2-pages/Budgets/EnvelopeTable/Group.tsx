@@ -1,5 +1,10 @@
 import React, { FC, useRef } from 'react'
-import { useCoreToDisplay } from 'zerro-core/redux'
+import {
+  activity as coreActivity,
+  currency as coreCurrency,
+  envelopes as coreEnvelopes,
+} from 'zerro-core/redux'
+
 import { ButtonBase, IconButton, Typography, Box } from '@mui/material'
 import { isEqual } from 'lodash'
 import { AddIcon, ArrowDownwardIcon, ArrowUpwardIcon } from '6-shared/ui/Icons'
@@ -12,10 +17,7 @@ import { moveGroup } from '4-features/envelope/moveGroup'
 import { createEnvelopeInGroup } from '4-features/envelope/createEnvelope'
 import { TableRow } from './shared/shared'
 import { TFxAmount } from '6-shared/types'
-import {
-  selectCoreEnvMetrics,
-  selectCoreEnvelopeStructure,
-} from 'zerro-core/redux'
+
 import { addFxAmount } from '6-shared/helpers/money'
 import { useMonth } from '../MonthProvider'
 import { Amount } from '6-shared/ui/Amount'
@@ -146,9 +148,9 @@ const useGroupTotals = (id: string) => {
     available: number
   }
   const [month] = useMonth()
-  const data = useAppSelector(selectCoreEnvMetrics)[month]
-  const structure = useAppSelector(selectCoreEnvelopeStructure, isEqual)
-  const toDisplay = useCoreToDisplay(month)
+  const data = useAppSelector(coreActivity.selectEnvelopeMetrics)[month]
+  const structure = useAppSelector(coreEnvelopes.selectStructure, isEqual)
+  const toDisplay = coreCurrency.useToDisplay(month)
   const group = structure.find(gr => gr.id === id)
   if (!group || !data) return { budgeted: 0, activity: 0, available: 0 }
 

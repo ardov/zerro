@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { useCoreToDisplay } from 'zerro-core/redux'
+import { currency as coreCurrency } from 'zerro-core/redux'
+
 import { useTranslation } from 'react-i18next'
 import { ButtonBase, IconButton, Stack, Typography } from '@mui/material'
 
@@ -13,7 +14,7 @@ export function PayeeByFrequencyCard(props: TCardProps) {
   const { t } = useTranslation('yearReview', { keyPrefix: 'payeeByFrequency' })
   const [i, setI] = useState(0)
   const yearStats = useStats(props.year)
-  const toDisplay = useCoreToDisplay('current')
+  const toDisplay = coreCurrency.useToDisplay('current')
 
   const topPayees = entries(yearStats.byPayee)
     .map(([payee, info]) => {

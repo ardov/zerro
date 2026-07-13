@@ -4,13 +4,8 @@ import { TTransaction, TTransactionId } from '6-shared/types'
 import { useAppDispatch, useAppSelector } from 'store'
 import { registerPopover } from '6-shared/historyPopovers'
 import { sendEvent } from '6-shared/helpers/tracking'
-import {
-  deleteTransactions,
-  isTransactionViewed,
-  restoreTransaction,
-  selectCoreTransactions,
-  setTransactionsViewed,
-} from 'zerro-core/redux'
+import { transactions as coreTransactions } from 'zerro-core/redux'
+
 import { useTranslation } from 'react-i18next'
 import { getMenuPosition } from './shared/helpers'
 
@@ -41,12 +36,14 @@ export const TrContextMenu: FC = () => {
   const { displayProps, extraProps } = trContext.useProps()
   const { id, onSelectSimilar, onMarkOlderViewed } = extraProps
   const dispatch = useAppDispatch()
-  const transaction = useAppSelector(state => selectCoreTransactions(state)[id])
+  const transaction = useAppSelector(
+    state => coreTransactions.selectAll(state)[id]
+  )
 
   if (!transaction) return null
 
   const editable = transaction.deleted === false
-  const viewed = isTransactionViewed(transaction)
+  const viewed = coreTransactions.isViewed(transaction)
 
   const options = [
     {
@@ -54,7 +51,7 @@ export const TrContextMenu: FC = () => {
       condition: transaction.deleted,
       action: () => {
         sendEvent('Transaction: restore')
-        dispatch(restoreTransaction(id))
+        dispatch(coreTransactions.restore(id))
       },
     },
     {
@@ -62,7 +59,7 @@ export const TrContextMenu: FC = () => {
       condition: editable && !viewed,
       action: () => {
         sendEvent('Transaction: mark viewed: true')
-        dispatch(setTransactionsViewed([id], true))
+        dispatch(coreTransactions.setViewed([id], true))
       },
     },
     {
@@ -70,7 +67,7 @@ export const TrContextMenu: FC = () => {
       condition: editable && viewed,
       action: () => {
         sendEvent('Transaction: mark viewed: false')
-        dispatch(setTransactionsViewed([id], false))
+        dispatch(coreTransactions.setViewed([id], false))
       },
     },
     {
@@ -92,7 +89,7 @@ export const TrContextMenu: FC = () => {
       condition: !transaction.deleted,
       action: () => {
         sendEvent('Transaction: delete')
-        dispatch(deleteTransactions([id]))
+        dispatch(coreTransactions.remove([id]))
       },
     },
   ]

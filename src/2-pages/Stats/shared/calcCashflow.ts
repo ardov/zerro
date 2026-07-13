@@ -1,5 +1,6 @@
 import { TInstCodeMap } from '5-entities/currency/instrument'
-import { getTransactionType, TrType } from 'zerro-core/redux'
+import { transactions as coreTransactions } from 'zerro-core/redux'
+
 import { GroupBy, toGroup } from '6-shared/helpers/date'
 import { addFxAmount } from '6-shared/helpers/money'
 import {
@@ -52,17 +53,17 @@ export function calcCashflow(
         transfers: {},
       }
 
-    const type = getTransactionType(tr, debtAccId)
+    const type = coreTransactions.getType(tr, debtAccId)
     const incomeCurrency = instCodeMap[tr.incomeInstrument]
     const outcomeCurrency = instCodeMap[tr.outcomeInstrument]
     switch (type) {
-      case TrType.Income:
+      case coreTransactions.TrType.Income:
         result[group].income = addFxAmount(result[group].income, {
           [incomeCurrency]: tr.income,
         })
         return
 
-      case TrType.Outcome:
+      case coreTransactions.TrType.Outcome:
         const account = accounts[tr.outcomeAccount]
         if (account?.inBudget) {
           result[group].outcomeInBalance = addFxAmount(
@@ -77,19 +78,19 @@ export function calcCashflow(
         }
         return
 
-      case TrType.IncomeDebt:
+      case coreTransactions.TrType.IncomeDebt:
         result[group].debts = addFxAmount(result[group].debts, {
           [incomeCurrency]: tr.income,
         })
         return
 
-      case TrType.OutcomeDebt:
+      case coreTransactions.TrType.OutcomeDebt:
         result[group].debts = addFxAmount(result[group].debts, {
           [outcomeCurrency]: -tr.outcome,
         })
         return
 
-      case TrType.Transfer:
+      case coreTransactions.TrType.Transfer:
         result[group].transfers = addFxAmount(
           result[group].transfers,
           { [incomeCurrency]: tr.income },

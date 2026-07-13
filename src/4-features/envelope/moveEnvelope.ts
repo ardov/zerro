@@ -1,12 +1,5 @@
 import { AppThunk } from 'store/index'
-import {
-  applyEnvelopeStructure,
-  flattenStructure,
-  selectCoreEnvelopeStructure,
-  toEnvelopeStructureInput,
-  type TEnvNode,
-  type TGroupNode,
-} from 'zerro-core/redux'
+import { envelopes as coreEnvelopes } from 'zerro-core/redux'
 
 export function moveEnvelope(
   sourceIdx: number,
@@ -14,10 +7,12 @@ export function moveEnvelope(
   asChild: boolean
 ): AppThunk {
   return (dispatch, getState) => {
-    const structure = selectCoreEnvelopeStructure(getState())
+    const structure = coreEnvelopes.selectStructure(getState())
 
-    const newStructure = JSON.parse(JSON.stringify(structure)) as TGroupNode[]
-    const flatList = flattenStructure(newStructure)
+    const newStructure = JSON.parse(
+      JSON.stringify(structure)
+    ) as coreEnvelopes.TGroupNode[]
+    const flatList = coreEnvelopes.flattenStructure(newStructure)
     const active = flatList[sourceIdx]
     const over = flatList[targetIdx]
 
@@ -25,11 +20,18 @@ export function moveEnvelope(
 
     cutOutNode(active, newStructure)
     placeNode(active, over, asChild, newStructure)
-    dispatch(applyEnvelopeStructure(toEnvelopeStructureInput(newStructure)))
+    dispatch(
+      coreEnvelopes.applyStructure(
+        coreEnvelopes.toEnvelopeStructureInput(newStructure)
+      )
+    )
   }
 }
 
-function cutOutNode(node: TEnvNode | TGroupNode, structure: TGroupNode[]) {
+function cutOutNode(
+  node: coreEnvelopes.TEnvNode | coreEnvelopes.TGroupNode,
+  structure: coreEnvelopes.TGroupNode[]
+) {
   if (node.type === 'group') {
     structure = structure.filter(gr => gr !== node)
     return
@@ -50,10 +52,10 @@ function cutOutNode(node: TEnvNode | TGroupNode, structure: TGroupNode[]) {
 }
 
 function placeNode(
-  node: TEnvNode | TGroupNode,
-  under: TEnvNode | TGroupNode,
+  node: coreEnvelopes.TEnvNode | coreEnvelopes.TGroupNode,
+  under: coreEnvelopes.TEnvNode | coreEnvelopes.TGroupNode,
   asChild: boolean,
-  structure: TGroupNode[]
+  structure: coreEnvelopes.TGroupNode[]
 ) {
   for (let grIdx = 0; grIdx < structure.length; grIdx++) {
     const group = structure[grIdx]

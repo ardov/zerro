@@ -53,11 +53,11 @@ import {
 } from '../domain/zerro'
 import { getDomainEnvelopeGroup } from './envelopePresentation'
 import {
-  selectCoreEnvelopeLabels,
-  selectCoreDomainEnvelopes,
-  selectCoreEnvelopes,
-  selectCoreFxRatesGetter,
-} from './selectors'
+  getCommandDomainEnvelopes,
+  getCommandEnvelopeLabels,
+  getCommandFxRates,
+  getCommandPresentedEnvelopes,
+} from './commandRead'
 import { executeReduxCommand } from './executeCommand'
 
 export type { TBudgetUpdate } from '../domain/zerro'
@@ -166,7 +166,7 @@ function compileAppCommandResult(
     case 'zerro.budget.set':
       return compileSetBudget(data, command.payload, ctx)
     case 'zerro.fxRates.edit': {
-      const current = selectCoreFxRatesGetter(state)(command.payload.month)
+      const current = getCommandFxRates(state)(command.payload.month)
       const rates = { ...current.rates }
       Object.entries(command.payload.patch).forEach(([code, rate]) => {
         if (rate > 0) rates[code] = rate
@@ -200,12 +200,12 @@ function compileAppCommandResult(
     case 'zerro.envelope.settings.update':
       return compileUpdateEnvelopeSettings(
         data,
-        selectCoreDomainEnvelopes(state),
+        getCommandDomainEnvelopes(state),
         normalizeEnvelopeSettings(state, command.payload),
         ctx
       )
     case 'zerro.envelope.create': {
-      const labels = selectCoreEnvelopeLabels()
+      const labels = getCommandEnvelopeLabels()
       return compileCreateEnvelope(
         data,
         {
@@ -218,14 +218,14 @@ function compileAppCommandResult(
       )
     }
     case 'zerro.envelope.structure.apply': {
-      const labels = selectCoreEnvelopeLabels()
+      const labels = getCommandEnvelopeLabels()
       const structure = command.payload.map(group => ({
         ...group,
         group: getDomainEnvelopeGroup(group.group, labels),
       }))
       return compileApplyEnvelopeStructure(
         data,
-        selectCoreDomainEnvelopes(state),
+        getCommandDomainEnvelopes(state),
         structure,
         ctx
       )
@@ -590,8 +590,8 @@ function normalizeEnvelopeSettings(
   state: RootState,
   input: TUpdateEnvelopeSettingsInput
 ): TUpdateEnvelopeSettingsInput {
-  const domain = selectCoreDomainEnvelopes(state)[input.id]
-  const presented = selectCoreEnvelopes(state)[input.id]
+  const domain = getCommandDomainEnvelopes(state)[input.id]
+  const presented = getCommandPresentedEnvelopes(state)[input.id]
   if (!domain || !presented) return input
 
   return {

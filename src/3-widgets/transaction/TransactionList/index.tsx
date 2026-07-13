@@ -6,22 +6,17 @@ import type {
   TTransaction,
   TTransactionId,
 } from '6-shared/types'
-import type { TrCondition } from 'zerro-core/redux'
+import {
+  accounts as coreAccounts,
+  transactions as coreTransactions,
+} from 'zerro-core/redux'
 
 import React, { useMemo, useState, useCallback, useEffect, FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Theme } from '@mui/material'
 import { sendEvent } from '6-shared/helpers/tracking'
 import { useDebounce } from '6-shared/hooks/useDebounce'
-import {
-  compareTransactionDates,
-  compileTransactionFilter,
-  isTransactionViewed,
-  selectCoreTransactionIds,
-  selectCoreTransactions,
-  selectCoreDebtAccountId,
-  setTransactionsViewed,
-} from 'zerro-core/redux'
+
 import { getEventPosition } from '3-widgets/global/shared/helpers'
 
 import { GrouppedList } from './GrouppedList'
@@ -35,7 +30,7 @@ export type TTransactionListProps = {
   onTrOpen?: (id: TTransactionId) => void
   opened?: TTransactionId
   transactions?: TTransaction[]
-  preFilter?: TrCondition
+  preFilter?: coreTransactions.TrCondition
   hideFilter?: boolean
   checkedDate?: Date | null
   initialDate?: TDateDraft
@@ -55,9 +50,11 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   } = props
 
   const dispatch = useAppDispatch()
-  const [filter, setFilter] = useState<TrCondition | undefined>(undefined)
+  const [filter, setFilter] = useState<
+    coreTransactions.TrCondition | undefined
+  >(undefined)
   const setCondition = useCallback(
-    (condition?: TrCondition) =>
+    (condition?: coreTransactions.TrCondition) =>
       setFilter(filter => {
         return { ...filter, ...condition }
       }),
@@ -74,7 +71,9 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
   const resultFilter = useMemo(() => {
     if (preFilter) {
-      return filter ? ({ and: [preFilter, filter] } as TrCondition) : preFilter
+      return filter
+        ? ({ and: [preFilter, filter] } as coreTransactions.TrCondition)
+        : preFilter
     }
     return filter
   }, [filter, preFilter])
@@ -87,7 +86,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   )
   const trList = useFilteredTransactions(transactions, debouncedFilter)
 
-  const debtId = useAppSelector(selectCoreDebtAccountId)
+  const debtId = useAppSelector(coreAccounts.selectDebtAccountId)
 
   const [checked, setChecked] = useState<TTransactionId[]>([])
   const uncheckAll = useCallback(() => setChecked([]), [])
@@ -117,10 +116,10 @@ export const TransactionList: FC<TTransactionListProps> = props => {
       if (index === -1) return
       const ids = trList
         .slice(index)
-        .filter(tr => !isTransactionViewed(tr))
+        .filter(tr => !coreTransactions.isViewed(tr))
         .map(tr => tr.id)
       sendEvent('Transaction: mark viewed: true')
-      dispatch(setTransactionsViewed(ids, true))
+      dispatch(coreTransactions.setViewed(ids, true))
     },
     [dispatch, trList]
   )
@@ -222,17 +221,17 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
 function useFilteredTransactions(
   trIds?: TTransactionId[],
-  conditions?: TrCondition
+  conditions?: coreTransactions.TrCondition
 ) {
-  const transactionsById = useAppSelector(selectCoreTransactions)
-  const allTransactionIds = useAppSelector(selectCoreTransactionIds)
+  const transactionsById = useAppSelector(coreTransactions.selectAll)
+  const allTransactionIds = useAppSelector(coreTransactions.selectIds)
   const groups = useMemo(() => {
-    const checker = compileTransactionFilter(conditions)
+    const checker = coreTransactions.compileFilter(conditions)
     const list = trIds || allTransactionIds
     return list
       .map(id => transactionsById[id])
       .filter(checker)
-      .sort(compareTransactionDates)
+      .sort(coreTransactions.compareTransactionDates)
   }, [trIds, allTransactionIds, conditions, transactionsById])
   return groups
 }

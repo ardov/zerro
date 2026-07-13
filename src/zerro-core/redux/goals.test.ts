@@ -20,7 +20,7 @@ const ctx = {
 
 async function importModels() {
   await i18n.changeLanguage('en')
-  return import('./selectors')
+  return import('../testing/reduxSelectors')
 }
 
 function makeSeededStore() {
@@ -57,22 +57,22 @@ function makeRootState(data: TDataStore): RootState {
   }
 }
 
-describe('selectCoreGoals chain', () => {
+describe('selectGoals chain', () => {
   it('builds goals and totals from seeded goal data', async () => {
-    const { selectCoreGoals, selectCoreGoalTotals } = await importModels()
+    const { selectGoals, selectGoalTotals } = await importModels()
     const { store, envelopeId } = makeSeededStore()
     const state = makeRootState(store)
 
-    const core = selectCoreGoals(state)
+    const core = selectGoals(state)
     expect(core[MONTH][envelopeId]?.goal.amount).toBe(30_000)
-    expect(selectCoreGoalTotals(state)[MONTH].goalsCount).toBeGreaterThan(0)
+    expect(selectGoalTotals(state)[MONTH].goalsCount).toBeGreaterThan(0)
   })
 
   it('stays cached across unrelated data changes', async () => {
-    const { selectCoreGoals, selectCoreGoalTotals } = await importModels()
+    const { selectGoals, selectGoalTotals } = await importModels()
     const { store } = makeSeededStore()
-    const goals = selectCoreGoals(makeRootState(store))
-    const totals = selectCoreGoalTotals(makeRootState(store))
+    const goals = selectGoals(makeRootState(store))
+    const totals = selectGoalTotals(makeRootState(store))
 
     // Goals pull nearly the whole projection graph, so this also guards the
     // upstream nodes against accidental whole-current dependencies.
@@ -82,14 +82,14 @@ describe('selectCoreGoals chain', () => {
       company: { ...store.company },
     })
 
-    expect(selectCoreGoals(unrelatedChange)).toBe(goals)
-    expect(selectCoreGoalTotals(unrelatedChange)).toBe(totals)
+    expect(selectGoals(unrelatedChange)).toBe(goals)
+    expect(selectGoalTotals(unrelatedChange)).toBe(totals)
   })
 
   it('recomputes when a goal changes', async () => {
-    const { selectCoreGoals } = await importModels()
+    const { selectGoals } = await importModels()
     const { store, envelopeId } = makeSeededStore()
-    const first = selectCoreGoals(makeRootState(store))
+    const first = selectGoals(makeRootState(store))
 
     const goalPatch = compileSetGoal(
       store,
@@ -98,7 +98,7 @@ describe('selectCoreGoals chain', () => {
       { type: goalType.MONTHLY, amount: 45_000 },
       ctx
     )
-    const next = selectCoreGoals(makeRootState(applyPatch(store, goalPatch)))
+    const next = selectGoals(makeRootState(applyPatch(store, goalPatch)))
 
     expect(next).not.toBe(first)
     expect(next[MONTH][envelopeId]?.goal.amount).toBe(45_000)

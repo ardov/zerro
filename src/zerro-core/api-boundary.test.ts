@@ -14,52 +14,35 @@ describe('zerro-core API boundary', () => {
     )
   })
 
-  it('pins the Redux adapter command surface', () => {
+  it('pins the domain-grouped Redux adapter surface', () => {
     const adapterIndex = readFileSync(join(coreRoot, 'redux/index.ts'), 'utf8')
-    const commandBlock = adapterIndex.match(
-      /export \{([\s\S]*?)\} from ['"]\.\/commands['"]/
-    )?.[1]
-
-    expect(commandBlock).toBeDefined()
     expect(
-      commandBlock
-        ?.split(',')
-        .map(name => name.trim().replace(/^type\s+/, ''))
-        .filter(Boolean)
+      [...adapterIndex.matchAll(/export \* as (\w+) from/g)]
+        .map(match => match[1])
         .sort()
     ).toEqual(
       [
-        'applyChangesToTransaction',
-        'applyDebugPatch',
-        'applyEnvelopeStructure',
-        'bulkEditTransactions',
-        'combineTransactionsToIncome',
-        'combineTransactionsToOutcome',
-        'createEnvelope',
-        'deleteTransactions',
-        'deleteTransactionsPermanently',
-        'deleteReminder',
-        'editFxRates',
-        'mergeAccounts',
-        'mergeTransactionsAsTransfer',
-        'prepareDataAccount',
-        'recreateTransaction',
-        'resetFxRates',
-        'renameEnvelope',
-        'restoreTransaction',
-        'setAccountInBalance',
-        'setEnvelopeColor',
-        'setEnvelopeComment',
-        'setEmojiIcons',
-        'setPreferZmBudgets',
-        'setReminder',
-        'setBudget',
-        'setGoal',
-        'setTransactionsViewed',
-        'TBudgetUpdate',
-        'updateEnvelopeSettings',
+        'accounts',
+        'activity',
+        'balances',
+        'budgets',
+        'currency',
+        'debtors',
+        'envelopes',
+        'fxRates',
+        'goals',
+        'infrastructure',
+        'instruments',
+        'merchants',
+        'months',
+        'reminders',
+        'settings',
+        'tags',
+        'transactions',
+        'users',
       ].sort()
     )
+    expect(adapterIndex).not.toMatch(/export \{[\s\S]*?\} from/)
     expect(adapterIndex).not.toContain('applyLegacyPatch')
   })
 
