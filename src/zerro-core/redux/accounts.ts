@@ -16,18 +16,18 @@ export const selectDebtAccountId = createSelector(
 )
 export const selectAll = (state: RootState) =>
   getAccounts({ account: selectAccountSlice(state) })
-export const selectPopulated = createSelector(
+const selectPopulated = createSelector(
   [selectAccountSlice, instruments.selectCodeMap],
   (account, instrumentCodeById) =>
     getPopulatedAccounts({ account }, instrumentCodeById)
 )
-export const selectList = createSelector([selectPopulated], accounts =>
+const selectList = createSelector([selectPopulated], accounts =>
   Object.values(accounts)
 )
-export const selectInBudget = createSelector([selectList], accounts =>
+const selectInBudget = createSelector([selectList], accounts =>
   accounts.filter(account => account.inBudget)
 )
-export const selectSaving = createSelector([selectList], accounts =>
+const selectSaving = createSelector([selectList], accounts =>
   accounts.filter(
     account =>
       !account.inBudget &&
@@ -39,8 +39,5 @@ export const useAll = () => useAppSelector(selectAll)
 export const usePopulated = () => useAppSelector(selectPopulated)
 export const useInBudget = () => useAppSelector(selectInBudget)
 export const useSaving = () => useAppSelector(selectSaving)
-export {
-  mergeAccounts as merge,
-  setAccountInBalance as setInBalance,
-} from './commands'
+export { setAccountInBalance as setInBalance } from './commands'
 export type { TAccountPopulated } from '../domain/zenmoney'

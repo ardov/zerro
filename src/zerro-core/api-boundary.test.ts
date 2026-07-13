@@ -84,6 +84,26 @@ describe('zerro-core API boundary', () => {
     expect(violations).toEqual([])
   })
 
+  it('keeps the Redux adapter off legacy entity ownership', () => {
+    const violations = walk(join(coreRoot, 'redux'))
+      .filter(file => file.endsWith('.ts') && !file.endsWith('.test.ts'))
+      .flatMap(file => {
+        const source = readFileSync(file, 'utf8')
+        return source
+          .split('\n')
+          .map((line, index) => ({ line, index }))
+          .filter(({ line }) =>
+            /from ['"]5-entities(?:\/[^'"]*)?['"]/.test(line)
+          )
+          .map(
+            ({ line, index }) =>
+              `${relative(coreRoot, file)}:${index + 1}: ${line.trim()}`
+          )
+      })
+
+    expect(violations).toEqual([])
+  })
+
   it('keeps app consumers off Core implementation subpaths', () => {
     const appRoot = dirname(coreRoot)
     const violations = walk(appRoot)

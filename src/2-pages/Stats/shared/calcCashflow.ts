@@ -1,5 +1,7 @@
-import { TInstCodeMap } from '5-entities/currency/instrument'
-import { transactions as coreTransactions } from 'zerro-core/redux'
+import {
+  instruments as coreInstruments,
+  transactions as coreTransactions,
+} from 'zerro-core/redux'
 
 import { GroupBy, toGroup } from '6-shared/helpers/date'
 import { addFxAmount } from '6-shared/helpers/money'
@@ -35,7 +37,7 @@ type TPoint = {
 export function calcCashflow(
   transactions: TTransaction[],
   debtAccId: TAccountId | undefined,
-  instCodeMap: TInstCodeMap,
+  instCodeMap: coreInstruments.TInstrumentCodeMap,
   accounts: Record<string, Account>,
   aggregation: GroupBy = GroupBy.Month
 ): ByDate<TPoint> {

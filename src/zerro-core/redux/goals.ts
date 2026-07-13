@@ -25,9 +25,4 @@ export const selectTotals = createSelector(
   buildGoalTotals
 )
 export { formatGoal } from './goalPresentation'
-export {
-  goalType,
-  normalizeGoal,
-  type TGoal,
-  type TGoalInfo,
-} from '../domain/zerro/goals'
+export { goalType, type TGoal, type TGoalInfo } from '../domain/zerro/goals'

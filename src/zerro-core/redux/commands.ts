@@ -10,7 +10,6 @@ import {
   compileDeleteTransactions,
   compileDeleteTransactionsPermanently,
   compileMarkTransactionsViewed,
-  compileMergeAccounts,
   compileMergeTransactionsAsTransfer,
   compilePatchAccount,
   compileDeleteReminder,
@@ -116,10 +115,6 @@ export type TAppCommand =
   | {
       type: 'zenmoney.account.inBalance.set'
       payload: { id: TAccountId; inBalance: boolean }
-    }
-  | {
-      type: 'zenmoney.account.merge'
-      payload: { source: TAccountId; target: TAccountId }
     }
   | {
       type: 'zenmoney.reminder.set'
@@ -258,10 +253,6 @@ function compileAppCommandResult(
     case 'zenmoney.account.inBalance.set': {
       const { id, inBalance } = command.payload
       return compilePatchAccount(data, { id, inBalance }, ctx)
-    }
-    case 'zenmoney.account.merge': {
-      const { source, target } = command.payload
-      return compileMergeAccounts(data, source, target, ctx)
     }
     case 'zenmoney.reminder.set': {
       const patch = compileSetReminder(data, command.payload, ctx)
@@ -479,16 +470,6 @@ export function setAccountInBalance(
   return executeCommand({
     type: 'zenmoney.account.inBalance.set',
     payload: { id, inBalance },
-  })
-}
-
-export function mergeAccounts(
-  source: TAccountId,
-  target: TAccountId
-): AppThunk {
-  return executeCommand({
-    type: 'zenmoney.account.merge',
-    payload: { source, target },
   })
 }
 

@@ -1,4 +1,5 @@
 export * from './commands'
 export * from './factory'
+export * from './filtering'
 export * from './read'
 export * from './types'

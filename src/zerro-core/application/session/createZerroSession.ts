@@ -192,42 +192,6 @@ export function createZerroSession(
       currentDate: currentDate(),
     })
   )
-  const read = {
-    currentDate,
-    currentMonth,
-    userSettings,
-    envelopeMeta,
-    envBudgets,
-    rawGoals,
-    storedFxRates,
-    currentFxRates,
-    fxRates,
-    fxRatesGetter,
-    convertFx,
-    debtAccountId,
-    instrumentCodeById,
-    transactionsHistory,
-    tagStructure,
-    debtors,
-    envelopesCompiled,
-    envelopes,
-    envelopeStructure,
-    keepingEnvelopeIds,
-    budgets,
-    monthList,
-    currentFunds,
-    rawActivity,
-    activity,
-    envMetrics,
-    sortedActivity,
-    monthTotals,
-    goals,
-    goalTotals,
-    historyStart,
-    balances,
-    balancesByDate,
-  }
-
   const calendar = {
     getCurrentDate: currentDate,
     getCurrentMonth: currentMonth,
@@ -255,6 +219,7 @@ export function createZerroSession(
     getAll: budgets,
   }
   const activityApi = {
+    getRaw: rawActivity,
     getAll: activity,
     getSorted: sortedActivity,
   }
@@ -263,6 +228,7 @@ export function createZerroSession(
     getTotals: monthTotals,
   }
   const goalsApi = {
+    getRaw: rawGoals,
     getAll: goals,
     getTotals: goalTotals,
   }
@@ -290,8 +256,6 @@ export function createZerroSession(
     goals: goalsApi,
     balances: balancesApi,
     fx,
-    /** @deprecated Use the namespaced domain reads above. */
-    read,
   }
 }
 

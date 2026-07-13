@@ -24,9 +24,8 @@ The main migration is complete:
 - Redux owns `base + outbox + outboxHead` and persists minimal replay inputs;
 - materialization is wired into every local command but remains identity-only.
 
-Reliable automated verification is complete. Some compatibility bridges are
-now ready to remove, and the final explicit-sync browser smoke has not been
-completed.
+Reliable automated verification and the ready bridge removals are complete.
+The descriptive read graph and final explicit-sync browser smoke remain.
 
 ## Phase 1: health and closure — current
 
@@ -49,7 +48,7 @@ from the app, worker, and package-consumer entrypoints.
 
 Exit: the documented default commands are reproducibly green.
 
-### 2. Ready bridge removal
+### 2. Ready bridge removal — completed 2026-07-14
 
 - Remove deprecated flat `session.read` and rewrite the two remaining parity
   assertions through namespaced reads.
@@ -61,6 +60,10 @@ Exit: the documented default commands are reproducibly green.
   unused commands instead of preserving them as hypothetical API.
 - Keep the namespace-first adapter shape. The cleanup target is unused members,
   not a return to a flat barrel.
+
+The snapshot session is namespace-only, transaction filtering is owned and
+tested by the Core transaction domain, legacy account/instrument selectors are
+gone, and the adapter no longer exposes members without application consumers.
 
 Exit: remaining legacy imports are presentation or explicit compatibility, not
 domain/read/write ownership.

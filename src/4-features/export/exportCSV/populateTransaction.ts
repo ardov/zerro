@@ -1,6 +1,4 @@
 import { transactions as coreTransactions } from 'zerro-core/redux'
-
-import { getType } from '5-entities/transaction/helpers'
 import {
   ByIdOld,
   Modify,
@@ -44,7 +42,7 @@ export const populateTransaction = (
   opOutcomeInstrument: instruments[Number(raw.opOutcomeInstrument)],
   tag: mapTags(raw.tag, tags),
   //COMPUTED PROPERTIES
-  type: getType(raw),
+  type: coreTransactions.getType(raw),
 })
 
 function mapTags(ids: TTagId[] | null, tags: ByIdOld<TTag>) {

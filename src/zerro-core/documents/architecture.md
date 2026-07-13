@@ -209,9 +209,8 @@ session.budgets.getAll()
 session.months.getTotals()
 ```
 
-Flat `session.read.*` is a deprecated compatibility surface. It has no
-production consumer and should be removed in the closure phase; new reads
-belong only on the namespaced facade.
+The snapshot session exposes only namespaced reads; new reads belong on the
+matching domain namespace.
 
 Session context contains only nondeterministic dependencies such as `now()` and
 `uuid()`. Root user and currency are derived from normalized data.

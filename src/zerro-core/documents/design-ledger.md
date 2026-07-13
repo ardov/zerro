@@ -82,18 +82,6 @@
 
 ## Active compatibility bridges
 
-### Flat session reads
-
-`createZerroSession().read` duplicates the namespaced facade. It has no
-production consumer and should leave in the closure phase; do not add methods
-to both surfaces.
-
-### Transaction filtering
-
-The Redux adapter still re-exports filtering implemented in
-`5-entities/transaction`. The legacy projection exit condition has been met;
-move filtering and condition types into a Core-owned transaction module.
-
 ### `6-shared/types`
 
 This is the intentional compatibility facade for Core-owned normalized types.

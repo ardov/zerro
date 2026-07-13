@@ -13,17 +13,10 @@ import {
   compileDeleteTransactions,
   compileDeleteTransactionsPermanently,
   compileMarkTransactionsViewed,
-  compileMergeAccounts,
   compilePatchAccount,
   compileRestoreTransaction,
 } from '../domain/zenmoney'
-import {
-  makeAccount,
-  makeReminder,
-  makeStore,
-  makeTransaction,
-  makeUser,
-} from '../testing/zenmoneyTestData'
+import { makeStore, makeTransaction } from '../testing/zenmoneyTestData'
 import {
   compileRenameEnvelope,
   compileSetEnvelopeColor,
@@ -254,40 +247,6 @@ const routingCases: Array<{
           payload: { ids: ['out', 'in'] },
         },
         direct: ctx => compileCombineToOutcome(data, ['out', 'in'], ctx),
-      }
-    },
-  },
-  {
-    name: 'account merge',
-    make: () => {
-      const data = makeStore({
-        user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
-        account: {
-          source: makeAccount({ id: 'source', instrument: 1 }),
-          target: makeAccount({ id: 'target', instrument: 1 }),
-        },
-        transaction: {
-          spend: makeTransaction({
-            id: 'spend',
-            outcomeAccount: 'source',
-            outcome: 10,
-          }),
-        },
-        reminder: {
-          planned: makeReminder({
-            id: 'planned',
-            incomeAccount: 'target',
-            outcomeAccount: 'source',
-          }),
-        },
-      })
-      return {
-        data,
-        command: {
-          type: 'zenmoney.account.merge',
-          payload: { source: 'source', target: 'target' },
-        },
-        direct: ctx => compileMergeAccounts(data, 'source', 'target', ctx),
       }
     },
   },

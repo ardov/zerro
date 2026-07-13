@@ -1,6 +1,5 @@
 // Test-only aggregate for cross-runtime parity assertions. Production code
 // imports selectors from their owning Redux domain model.
-export { selectAll as selectAccounts } from '../redux/accounts'
 export {
   selectAll as selectActivity,
   selectEnvelopeMetrics as selectEnvMetrics,

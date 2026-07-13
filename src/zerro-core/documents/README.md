@@ -34,17 +34,13 @@ React, storage, localization, or app-layer runtime modules.
 - Materialization is still identity-only. Cross-entity ZenMoney rules are the
   next architectural phase, after the closure gate below.
 
-## Next slice: health and closure
+## Next slice: closure smoke
 
 Before adding non-identity materializer rules:
 
-1. make the default parallel Vitest run reliable;
-2. close ready bridges: flat `session.read`, transaction filtering, and the
-   legacy instrument selector;
-3. remove unconsumed Redux-adapter exports and make dead-code reporting useful;
-4. finish the manual budget/goal edit plus explicit-sync smoke;
-5. compress or remove the descriptive `readGraph` unless it can verify real
+1. compress or remove the descriptive `readGraph` unless it can verify real
    wiring.
+2. finish the manual budget/goal edit plus explicit-sync smoke.
 
 Then settle the sync transport contract for `intentPatch` versus
 `appliedPatch` before balance or cascade rules are enabled.

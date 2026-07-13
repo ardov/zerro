@@ -1,22 +1,17 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { useAppSelector } from 'store'
 import {
-  getRootUser,
   getRootUserId,
   getUserCurrency,
   getUserInstrumentId,
 } from '../domain/zenmoney'
 import { selectInstrumentSlice, selectUserSlice } from './state'
 
-export const selectRoot = createSelector(
-  [selectUserSlice, selectInstrumentSlice],
-  (user, instrument) => getRootUser({ user, instrument })
-)
-export const selectRootId = createSelector(
+const selectRootId = createSelector(
   [selectUserSlice, selectInstrumentSlice],
   (user, instrument) => getRootUserId({ user, instrument })
 )
-export const selectInstrumentId = createSelector(
+const selectInstrumentId = createSelector(
   [selectUserSlice, selectInstrumentSlice],
   (user, instrument) => getUserInstrumentId({ user, instrument })
 )

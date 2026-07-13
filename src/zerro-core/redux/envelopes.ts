@@ -47,7 +47,7 @@ export const selectDomainStructure = (state: RootState) =>
   selectDomainProjection(state).structure
 let labelsCacheLanguage: string | undefined
 let labelsCache: TEnvelopeLabels | undefined
-export const selectLabels = () => {
+const selectLabels = () => {
   if (labelsCache && labelsCacheLanguage === i18n.language) return labelsCache
   labelsCacheLanguage = i18n.language
   labelsCache = {
@@ -76,8 +76,6 @@ export {
   EnvType,
   flattenStructure,
   toEnvelopeStructureInput,
-  type TApplyEnvelopeStructureInput,
-  type TEnvelopeStructureGroupInput,
   type TEnvelopeStructureNodeInput,
   type TEnvNode,
   type TGroupNode,

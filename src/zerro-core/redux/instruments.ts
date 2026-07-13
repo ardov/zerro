@@ -21,3 +21,4 @@ export const selectByCode = createSelector(
 export const useAll = () => useAppSelector(selectAll)
 export const useByCode = () => useAppSelector(selectByCode)
 export const useCodeMap = () => useAppSelector(selectCodeMap)
+export type { TInstrumentCodeMap } from '../domain/zenmoney'

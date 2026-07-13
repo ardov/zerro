@@ -17,7 +17,6 @@ describe('createZerroSession', () => {
     now = Date.parse('2026-02-15T12:00:00.000Z')
 
     expect(session.calendar.getCurrentMonth()).toBe('2026-01')
-    expect(session.read.currentMonth).toBe(session.calendar.getCurrentMonth)
   })
 
   it('can build headless envelopes without adapter-provided populated tags', () => {
@@ -36,7 +35,6 @@ describe('createZerroSession', () => {
       currency: 'USD',
     })
     expect(session.envelopes.getAll()).toBe(envelopes)
-    expect(session.read.envelopes()).toBe(envelopes)
   })
 })
 

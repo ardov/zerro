@@ -6,8 +6,6 @@ import type { TDateDraft } from '../domain/zenmoney/primitives'
 import type { TFxAmount } from '../domain/shared/money'
 import type { TFxCode } from '../domain/zenmoney/instruments/types'
 import { setSavedCurrency } from 'store/displayCurrency'
-import { convertBalancesToDisplay } from '../domain/zenmoney'
-import * as balances from './balances'
 import * as fxRates from './fxRates'
 import * as users from './users'
 
@@ -24,10 +22,6 @@ export const selectDisplayConverter = createSelector(
       date: Parameters<typeof convert>[2]
     ) =>
       convert(amount, currency, date)
-)
-export const selectDisplayBalancesByDate = createSelector(
-  [balances.selectByDate, selectDisplayConverter],
-  convertBalancesToDisplay
 )
 export const useDisplayCurrency = () => {
   const currency = useAppSelector(selectDisplayCurrency)

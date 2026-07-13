@@ -1,5 +1,8 @@
 import { FC, ReactNode, useCallback } from 'react'
-import { currency as coreCurrency } from 'zerro-core/redux'
+import {
+  accounts as coreAccounts,
+  currency as coreCurrency,
+} from 'zerro-core/redux'
 
 import {
   ListSubheader,
@@ -14,7 +17,6 @@ import { Amount } from '6-shared/ui/Amount'
 import { TFxAmount } from '6-shared/types'
 import { Tooltip } from '6-shared/ui/Tooltip'
 
-import { TAccountPopulated } from '5-entities/account'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { useTransactionDrawer } from '3-widgets/global/TransactionListDrawer'
 import { useAccountContextMenu } from '3-widgets/global/AccountContextMenu'
@@ -22,7 +24,7 @@ import { useContextMenu } from '6-shared/hooks/useContextMenu'
 import { getEventPosition } from '3-widgets/global/shared/helpers'
 
 export const Account: FC<
-  { account: TAccountPopulated } & ListItemButtonProps
+  { account: coreAccounts.TAccountPopulated } & ListItemButtonProps
 > = ({ account, sx, ...rest }) => {
   const transactionDrawer = useTransactionDrawer()
   const openContextMenu = useAccountContextMenu()

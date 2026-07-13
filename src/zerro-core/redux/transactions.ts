@@ -47,12 +47,11 @@ export const useType = () => {
 export {
   compareTransactionDates,
   getTransactionType as getType,
-  isDeletedTransaction as isDeleted,
   isTransactionViewed as isViewed,
   TrType,
 } from '../domain/zenmoney'
 export {
-  checkRaw as compileFilter,
+  compileTransactionFilter as compileFilter,
   type TrCondition,
-} from '5-entities/transaction/filtering'
+} from '../domain/zenmoney'
 export { TrFilterMode } from '../domain/zerro'

@@ -3,15 +3,14 @@ import type { TDataStore } from '../store'
 import type { TFxCode, TInstrument, TInstrumentId } from './types'
 
 export type TInstrumentSource = Pick<TDataStore, 'instrument'>
+export type TInstrumentCodeMap = Record<TInstrumentId, TFxCode>
 
 export function getInstruments(data: TInstrumentSource): ById<TInstrument> {
   return data.instrument
 }
 
 /** Map of instrument IDs to currency codes. */
-export function getInstCodeMap(
-  data: TInstrumentSource
-): Record<TInstrumentId, TFxCode> {
+export function getInstCodeMap(data: TInstrumentSource): TInstrumentCodeMap {
   return Object.fromEntries(
     Object.values(data.instrument).map(i => [i.id, i.shortTitle])
   )

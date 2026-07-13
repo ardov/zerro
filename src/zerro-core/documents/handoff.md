@@ -19,8 +19,7 @@ This file routes the next task. Git contains implementation history.
   `materializerVersion`, and creation time. Replay uses stored applied patches.
 - Persistence validates versioned replay inputs and does not store derived
   state.
-- The snapshot session remains frozen. Its deprecated flat `read` surface has
-  no production consumer and is ready for removal.
+- The snapshot session remains frozen and exposes only namespaced reads.
 - Materialization is identity-only. The engine facade and package expansion
   remain deferred until a real consumer exists.
 
@@ -28,15 +27,10 @@ This file routes the next task. Git contains implementation history.
 
 Land this as small independent commits where practical:
 
-1. **Ready bridge removal**
-   - remove deprecated `createZerroSession().read` and update parity tests;
-   - move transaction filtering out of `5-entities` into a Core-owned boundary;
-   - migrate the last legacy instrument selector consumers;
-   - remove adapter members without real consumers.
-2. **Remove false documentation**
+1. **Remove false documentation**
    - delete the descriptive `readGraph` and its self-consistency tests unless
      it is changed to verify actual session/Redux wiring.
-3. **Manual completion smoke**
+2. **Manual completion smoke**
    - edit a budget or goal;
    - edit a transaction and reload with a pending outbox;
    - perform explicit sync and verify canonical rebase.
