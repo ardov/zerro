@@ -1,8 +1,7 @@
-import { describe, expect, it, vi } from 'vitest'
-import type { TDataStore } from '6-shared/types'
-import type { RootState } from 'store'
+import { describe, expect, it } from 'vitest'
 import { i18n } from '6-shared/localization'
 import { makeDemoStore } from '../demo'
+import { makeTestRootState } from '../testing/rootState'
 import { applyPatch } from '../domain/zenmoney'
 import {
   compilePatchEnvelopeMeta,
@@ -27,24 +26,7 @@ async function importModels() {
   return import('../testing/reduxSelectors')
 }
 
-function makeRootState(data: TDataStore): RootState {
-  return {
-    data: {
-      current: data,
-      base: data,
-      outbox: [],
-      outboxHead: 0,
-    },
-    displayCurrency: null,
-    isPending: false,
-    lastSync: {
-      finishedAt: 0,
-      isSuccessful: null,
-      errorMessage: null,
-    },
-    token: null,
-  }
-}
+const makeRootState = makeTestRootState
 
 describe('selectEnvelopes chain', () => {
   it('keeps appearance out of domain envelopes and adds it in the adapter', async () => {

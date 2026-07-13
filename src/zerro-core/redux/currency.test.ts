@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { RootState } from 'store'
 import { makeDemoStore } from '../demo'
+import { makeTestRootState } from '../testing/rootState'
 import {
   selectDisplayConverter,
   selectDisplayCurrency,
@@ -9,14 +10,7 @@ import {
 const NOW = Date.parse('2026-07-11T12:00:00Z')
 
 function makeState(displayCurrency: RootState['displayCurrency']): RootState {
-  const current = makeDemoStore({ now: NOW })
-  return {
-    data: { current, base: current, outbox: [], outboxHead: 0 },
-    displayCurrency,
-    isPending: false,
-    lastSync: { finishedAt: 0, isSuccessful: null, errorMessage: null },
-    token: null,
-  }
+  return makeTestRootState(makeDemoStore({ now: NOW }), { displayCurrency })
 }
 
 describe('Core display currency selectors', () => {

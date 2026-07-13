@@ -1,8 +1,8 @@
-import { describe, expect, it, vi } from 'vitest'
-import type { TDataStore, TISOMonth } from '6-shared/types'
-import type { RootState } from 'store'
+import { describe, expect, it } from 'vitest'
+import type { TISOMonth } from '6-shared/types'
 import { i18n } from '6-shared/localization'
 import { makeDemoStore } from '../demo'
+import { makeTestRootState } from '../testing/rootState'
 import { applyPatch } from '../domain/zenmoney'
 import { compileSetGoal, envId, EnvType, goalType } from '../domain/zerro'
 
@@ -38,24 +38,7 @@ function makeSeededStore() {
   return { store: applyPatch(demo, goalPatch), envelopeId }
 }
 
-function makeRootState(data: TDataStore): RootState {
-  return {
-    data: {
-      current: data,
-      base: data,
-      outbox: [],
-      outboxHead: 0,
-    },
-    displayCurrency: null,
-    isPending: false,
-    lastSync: {
-      finishedAt: 0,
-      isSuccessful: null,
-      errorMessage: null,
-    },
-    token: null,
-  }
-}
+const makeRootState = makeTestRootState
 
 describe('selectGoals chain', () => {
   it('builds goals and totals from seeded goal data', async () => {

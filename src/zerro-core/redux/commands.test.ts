@@ -1,9 +1,22 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { TDataStore } from '6-shared/types'
 import type { RootState } from 'store'
+import type { TCoreContext, TNormalizedPatch } from '../types'
 import { appendClientOutboxEntry } from 'store/data'
 import { makeDemoStore } from '../demo'
-import { applyPatch } from '../domain/zenmoney'
+import { makeTestRootState } from '../testing/rootState'
+import {
+  applyPatch,
+  compileApplyChangesToTransaction,
+  compileBulkEditTransactions,
+  compileCombineToOutcome,
+  compileDeleteTransactions,
+  compileDeleteTransactionsPermanently,
+  compileMarkTransactionsViewed,
+  compileMergeAccounts,
+  compilePatchAccount,
+  compileRestoreTransaction,
+} from '../domain/zenmoney'
 import {
   makeAccount,
   makeReminder,
@@ -12,7 +25,9 @@ import {
   makeUser,
 } from '../testing/zenmoneyTestData'
 import {
-  envelopeVisibility,
+  compileRenameEnvelope,
+  compileSetEnvelopeColor,
+  compileSetEnvelopeComment,
   envId,
   EnvType,
   getEnvelopeMeta,
@@ -20,7 +35,7 @@ import {
   getUserSettings,
   toEnvelopeStructureInput,
 } from '../domain/zerro'
-import { compileAppCommand, recreateTransaction } from './commands'
+import { compileAppCommand, recreateTransaction, type TAppCommand } from './commands'
 import {
   selectEnvelopes,
   selectEnvelopeStructure,
@@ -28,15 +43,15 @@ import {
 
 const NOW = Date.parse('2026-07-10T12:00:00Z')
 
-function makeState(current: TDataStore): RootState {
-  return {
-    data: { current, base: current, outbox: [], outboxHead: 0 },
-    displayCurrency: null,
-    isPending: false,
-    lastSync: { finishedAt: 0, isSuccessful: null, errorMessage: null },
-    token: null,
-  }
+// A fresh deterministic context per call keeps uuid sequences identical when a
+// command is compiled twice (through the funnel and directly), so equivalence
+// assertions stay byte-for-byte stable.
+const makeCtx = (): TCoreContext => {
+  let counter = 0
+  return { now: () => NOW, uuid: () => `id-${counter++}` }
 }
+
+const makeState = makeTestRootState
 
 function makeDispatch(state: RootState) {
   const dispatch: any = vi.fn(action =>
@@ -47,7 +62,246 @@ function makeDispatch(state: RootState) {
   return dispatch
 }
 
-describe('semantic command funnel', () => {
+// Pass-through commands do nothing but unpack their payload and hand it to a
+// domain compiler. Testing that the funnel produces the same patch as calling
+// the compiler directly pins the routing (right compiler, right argument order)
+// without duplicating the domain semantics — these cases track the domain
+// suites automatically when behavior changes.
+const routingCases: Array<{
+  name: string
+  make: () => {
+    data: TDataStore
+    command: TAppCommand
+    direct: (ctx: TCoreContext) => TNormalizedPatch
+  }
+}> = [
+  {
+    name: 'transaction delete',
+    make: () => {
+      const data = makeDemoStore({ now: NOW })
+      const [id] = Object.keys(data.transaction)
+      return {
+        data,
+        command: { type: 'zenmoney.transaction.delete', payload: { ids: [id] } },
+        direct: ctx => compileDeleteTransactions(data, [id], ctx),
+      }
+    },
+  },
+  {
+    name: 'permanent transaction delete',
+    make: () => {
+      const data = makeDemoStore({ now: NOW })
+      const [id] = Object.keys(data.transaction)
+      return {
+        data,
+        command: {
+          type: 'zenmoney.transaction.delete.permanent',
+          payload: { ids: [id] },
+        },
+        direct: ctx => compileDeleteTransactionsPermanently(data, [id], ctx),
+      }
+    },
+  },
+  {
+    name: 'transaction restore',
+    make: () => {
+      const data = makeDemoStore({ now: NOW })
+      const [id] = Object.keys(data.transaction)
+      return {
+        data,
+        command: { type: 'zenmoney.transaction.restore', payload: { id } },
+        direct: ctx => compileRestoreTransaction(data, id, ctx),
+      }
+    },
+  },
+  {
+    name: 'mark transactions viewed',
+    make: () => {
+      const data = makeDemoStore({ now: NOW })
+      const [id] = Object.keys(data.transaction)
+      return {
+        data,
+        command: {
+          type: 'zenmoney.transaction.viewed.set',
+          payload: { ids: [id], viewed: false },
+        },
+        direct: ctx => compileMarkTransactionsViewed(data, [id], false, ctx),
+      }
+    },
+  },
+  {
+    name: 'transaction update',
+    make: () => {
+      const data = makeDemoStore({ now: NOW })
+      const [id] = Object.keys(data.transaction)
+      const patch = { id, comment: 'Edited through command' }
+      return {
+        data,
+        command: { type: 'zenmoney.transaction.update', payload: patch },
+        direct: ctx => compileApplyChangesToTransaction(data, patch, ctx),
+      }
+    },
+  },
+  {
+    name: 'bulk transaction edit',
+    make: () => {
+      const data = makeDemoStore({ now: NOW })
+      const ids = Object.keys(data.transaction).slice(0, 2)
+      const [tagId] = Object.keys(data.tag)
+      return {
+        data,
+        command: {
+          type: 'zenmoney.transaction.bulk.edit',
+          payload: { ids, tags: [tagId], comment: 'Bulk comment' },
+        },
+        direct: ctx =>
+          compileBulkEditTransactions(
+            data,
+            ids,
+            { tags: [tagId], comment: 'Bulk comment' },
+            ctx
+          ),
+      }
+    },
+  },
+  {
+    name: 'account budget participation',
+    make: () => {
+      const data = makeDemoStore({ now: NOW })
+      const [id] = Object.keys(data.account)
+      const inBalance = !data.account[id].inBalance
+      return {
+        data,
+        command: {
+          type: 'zenmoney.account.inBalance.set',
+          payload: { id, inBalance },
+        },
+        direct: ctx => compilePatchAccount(data, { id, inBalance }, ctx),
+      }
+    },
+  },
+  {
+    name: 'envelope rename',
+    make: () => {
+      const data = makeDemoStore({ now: NOW })
+      const id = envId.get(EnvType.Tag, Object.keys(data.tag)[0])
+      const payload = { id, name: 'Renamed through command' }
+      return {
+        data,
+        command: { type: 'zerro.envelope.rename', payload },
+        direct: ctx => compileRenameEnvelope(data, payload, ctx),
+      }
+    },
+  },
+  {
+    name: 'envelope color',
+    make: () => {
+      const data = makeDemoStore({ now: NOW })
+      const id = envId.get(EnvType.Tag, Object.keys(data.tag)[0])
+      const payload = { id, colorHex: '#00ff00' }
+      return {
+        data,
+        command: { type: 'zerro.envelope.color.set', payload },
+        direct: ctx => compileSetEnvelopeColor(data, payload, ctx),
+      }
+    },
+  },
+  {
+    name: 'envelope comment',
+    make: () => {
+      const data = makeDemoStore({ now: NOW })
+      const id = envId.get(EnvType.Tag, Object.keys(data.tag)[0])
+      const payload = { id, comment: 'Semantic note' }
+      return {
+        data,
+        command: { type: 'zerro.envelope.comment.set', payload },
+        direct: ctx => compileSetEnvelopeComment(data, payload, ctx),
+      }
+    },
+  },
+  {
+    name: 'combine to outcome',
+    make: () => {
+      const data = makeStore({
+        transaction: {
+          out: makeTransaction({
+            id: 'out',
+            income: 0,
+            outcome: 100,
+            outcomeInstrument: 1,
+            outcomeAccount: 'card',
+          }),
+          in: makeTransaction({
+            id: 'in',
+            income: 40,
+            incomeInstrument: 1,
+            incomeAccount: 'card',
+            outcome: 0,
+          }),
+        },
+      })
+      return {
+        data,
+        command: {
+          type: 'zenmoney.transaction.combineToOutcome',
+          payload: { ids: ['out', 'in'] },
+        },
+        direct: ctx => compileCombineToOutcome(data, ['out', 'in'], ctx),
+      }
+    },
+  },
+  {
+    name: 'account merge',
+    make: () => {
+      const data = makeStore({
+        user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+        account: {
+          source: makeAccount({ id: 'source', instrument: 1 }),
+          target: makeAccount({ id: 'target', instrument: 1 }),
+        },
+        transaction: {
+          spend: makeTransaction({
+            id: 'spend',
+            outcomeAccount: 'source',
+            outcome: 10,
+          }),
+        },
+        reminder: {
+          planned: makeReminder({
+            id: 'planned',
+            incomeAccount: 'target',
+            outcomeAccount: 'source',
+          }),
+        },
+      })
+      return {
+        data,
+        command: {
+          type: 'zenmoney.account.merge',
+          payload: { source: 'source', target: 'target' },
+        },
+        direct: ctx => compileMergeAccounts(data, 'source', 'target', ctx),
+      }
+    },
+  },
+]
+
+describe('command funnel routing', () => {
+  it.each(routingCases)(
+    'routes $name through the matching domain compiler',
+    ({ make }) => {
+      const { data, command, direct } = make()
+
+      expect(compileAppCommand(makeState(data), command, makeCtx())).toEqual(
+        direct(makeCtx())
+      )
+    }
+  )
+})
+
+// The remaining tests cover funnel-only behavior: payload adaptation and
+// receipts that the domain compilers never see.
+describe('command funnel adaptation', () => {
   it('merges an FX edit with the selected month rates', () => {
     const current = makeDemoStore({ now: NOW })
     const next = applyPatch(
@@ -86,40 +340,6 @@ describe('semantic command funnel', () => {
     expect(getUserSettings(next)[key]).toBe(true)
   })
 
-  it('compiles semantic envelope settings to entity and metadata state', () => {
-    const current = makeDemoStore({ now: NOW })
-    const state = makeState(current)
-    const tagId = Object.keys(current.tag)[0]
-    const id = envId.get(EnvType.Tag, tagId)
-
-    const patch = compileAppCommand(
-      state,
-      {
-        type: 'zerro.envelope.settings.update',
-        payload: {
-          id,
-          name: 'Configured',
-          colorHex: '#00ff00',
-          currency: 'EUR',
-          visibility: envelopeVisibility.hidden,
-          keepIncome: true,
-        },
-      },
-      { now: () => NOW, uuid: () => 'settings-meta' }
-    )
-    const next = applyPatch(current, patch)
-
-    expect(next.tag[tagId]).toMatchObject({
-      title: 'Configured',
-      color: 0x00ff00,
-    })
-    expect(getEnvelopeMeta(next)[id]).toMatchObject({
-      currency: 'EUR',
-      visibility: envelopeVisibility.hidden,
-      keepIncome: true,
-    })
-  })
-
   it('normalizes unchanged presented null-tag settings to domain values', () => {
     const current = makeDemoStore({ now: NOW })
     const state = makeState(current)
@@ -145,64 +365,7 @@ describe('semantic command funnel', () => {
     expect(patch).toEqual({})
   })
 
-  it('compiles semantic envelope comment to resulting metadata state', () => {
-    const current = makeDemoStore({ now: NOW })
-    const state = makeState(current)
-    const id = envId.get(EnvType.Tag, Object.keys(current.tag)[0])
-
-    const patch = compileAppCommand(
-      state,
-      {
-        type: 'zerro.envelope.comment.set',
-        payload: { id, comment: 'Semantic note' },
-      },
-      { now: () => NOW, uuid: () => 'comment-meta' }
-    )
-    const next = applyPatch(current, patch)
-
-    expect(getEnvelopeMeta(next)[id]?.comment).toBe('Semantic note')
-  })
-
-  it('compiles semantic envelope color to resulting tag state', () => {
-    const current = makeDemoStore({ now: NOW })
-    const state = makeState(current)
-    const tagId = Object.keys(current.tag)[0]
-    const id = envId.get(EnvType.Tag, tagId)
-
-    const patch = compileAppCommand(
-      state,
-      {
-        type: 'zerro.envelope.color.set',
-        payload: { id, colorHex: '#00ff00' },
-      },
-      { now: () => NOW, uuid: () => 'test-id' }
-    )
-    const next = applyPatch(current, patch)
-
-    expect(next.tag[tagId].color).toBe(0x00ff00)
-  })
-
-  it('compiles semantic envelope rename to resulting entity state', () => {
-    const current = makeDemoStore({ now: NOW })
-    const state = makeState(current)
-    const id = envId.get(EnvType.Tag, Object.keys(current.tag)[0])
-
-    const patch = compileAppCommand(
-      state,
-      {
-        type: 'zerro.envelope.rename',
-        payload: { id, name: 'Renamed through command' },
-      },
-      { now: () => NOW, uuid: () => 'test-id' }
-    )
-    const next = applyPatch(current, patch)
-
-    expect(next.tag[Object.keys(current.tag)[0]].title).toBe(
-      'Renamed through command'
-    )
-  })
-
-  it('moves an envelope to a new group through the structure command', () => {
+  it('translates the presented group label when moving an envelope', () => {
     const current = makeDemoStore({ now: NOW })
     const state = makeState(current)
     const input = toEnvelopeStructureInput(selectEnvelopeStructure(state))
@@ -229,7 +392,7 @@ describe('semantic command funnel', () => {
     expect(lastGroup.children.map(child => child.id)).toContain(moved.id)
   })
 
-  it('compiles an unchanged structure to an empty patch after indices settle', () => {
+  it('normalizes an unchanged structure to an empty patch after indices settle', () => {
     const current = makeDemoStore({ now: NOW })
     const state = makeState(current)
     const ctx = { now: () => NOW, uuid: () => 'structure-meta' }
@@ -263,124 +426,6 @@ describe('semantic command funnel', () => {
     expect(second).toEqual({})
   })
 
-  it('compiles transaction deletion to resulting state', () => {
-    const current = makeDemoStore({ now: NOW })
-    const state = makeState(current)
-    const [softId, hardId] = Object.keys(current.transaction)
-    const ctx = { now: () => NOW, uuid: () => 'unused' }
-
-    const softDeleted = applyPatch(
-      current,
-      compileAppCommand(
-        state,
-        { type: 'zenmoney.transaction.delete', payload: { ids: [softId] } },
-        ctx
-      )
-    )
-    const hardDeleted = applyPatch(
-      current,
-      compileAppCommand(
-        state,
-        {
-          type: 'zenmoney.transaction.delete.permanent',
-          payload: { ids: [hardId] },
-        },
-        ctx
-      )
-    )
-
-    expect(softDeleted.transaction[softId]).toMatchObject({
-      deleted: true,
-      changed: NOW,
-    })
-    expect(hardDeleted.transaction[hardId]).toMatchObject({
-      income: 0.00001,
-      outcome: 0.00001,
-    })
-  })
-
-  it('restores a deleted transaction under a new id', () => {
-    const current = makeDemoStore({ now: NOW })
-    const [id] = Object.keys(current.transaction)
-    const ctx = { now: () => NOW, uuid: () => 'restored-transaction' }
-
-    const deleted = applyPatch(
-      current,
-      compileAppCommand(
-        makeState(current),
-        { type: 'zenmoney.transaction.delete', payload: { ids: [id] } },
-        ctx
-      )
-    )
-    const restored = applyPatch(
-      deleted,
-      compileAppCommand(
-        makeState(deleted),
-        { type: 'zenmoney.transaction.restore', payload: { id } },
-        ctx
-      )
-    )
-
-    expect(restored.transaction['restored-transaction']).toMatchObject({
-      deleted: false,
-      changed: NOW,
-    })
-  })
-
-  it('marks transactions viewed only when the state changes', () => {
-    const current = makeDemoStore({ now: NOW })
-    const [id] = Object.keys(current.transaction)
-    const ctx = { now: () => NOW, uuid: () => 'unused' }
-
-    const marked = applyPatch(
-      current,
-      compileAppCommand(
-        makeState(current),
-        {
-          type: 'zenmoney.transaction.viewed.set',
-          payload: { ids: [id], viewed: false },
-        },
-        ctx
-      )
-    )
-    const repeat = compileAppCommand(
-      makeState(marked),
-      {
-        type: 'zenmoney.transaction.viewed.set',
-        payload: { ids: [id], viewed: false },
-      },
-      ctx
-    )
-
-    expect(marked.transaction[id]).toMatchObject({
-      viewed: false,
-      changed: NOW,
-    })
-    expect(repeat.transaction).toEqual([])
-  })
-
-  it('applies transaction field changes through the update command', () => {
-    const current = makeDemoStore({ now: NOW })
-    const [id] = Object.keys(current.transaction)
-
-    const next = applyPatch(
-      current,
-      compileAppCommand(
-        makeState(current),
-        {
-          type: 'zenmoney.transaction.update',
-          payload: { id, comment: 'Edited through command' },
-        },
-        { now: () => NOW, uuid: () => 'unused' }
-      )
-    )
-
-    expect(next.transaction[id]).toMatchObject({
-      comment: 'Edited through command',
-      changed: NOW,
-    })
-  })
-
   it('recreates a transaction and returns the new id as a receipt', () => {
     const current = makeDemoStore({ now: NOW })
     const state = makeState(current)
@@ -398,127 +443,5 @@ describe('semantic command funnel', () => {
     expect(newId).not.toBe(id)
     expect(oldTr).toMatchObject({ id, income: 0.00001, outcome: 0.00001 })
     expect(newTr.comment).toBe('Recreated')
-  })
-
-  it('bulk-edits transaction tags and comments', () => {
-    const current = makeDemoStore({ now: NOW })
-    const ids = Object.keys(current.transaction).slice(0, 2)
-    const [tagId] = Object.keys(current.tag)
-
-    const next = applyPatch(
-      current,
-      compileAppCommand(
-        makeState(current),
-        {
-          type: 'zenmoney.transaction.bulk.edit',
-          payload: { ids, tags: [tagId], comment: 'Bulk comment' },
-        },
-        { now: () => NOW, uuid: () => 'unused' }
-      )
-    )
-
-    ids.forEach(id => {
-      expect(next.transaction[id]).toMatchObject({
-        tag: [tagId],
-        comment: 'Bulk comment',
-        changed: NOW,
-      })
-    })
-  })
-
-  it('toggles account budget participation to resulting state', () => {
-    const current = makeDemoStore({ now: NOW })
-    const [id] = Object.keys(current.account)
-    const inBalance = !current.account[id].inBalance
-
-    const next = applyPatch(
-      current,
-      compileAppCommand(
-        makeState(current),
-        {
-          type: 'zenmoney.account.inBalance.set',
-          payload: { id, inBalance },
-        },
-        { now: () => NOW, uuid: () => 'unused' }
-      )
-    )
-
-    expect(next.account[id]).toMatchObject({ inBalance, changed: NOW })
-  })
-
-  it('routes a combine-to-outcome command to resulting state', () => {
-    const current = makeStore({
-      transaction: {
-        out: makeTransaction({
-          id: 'out',
-          income: 0,
-          outcome: 100,
-          outcomeInstrument: 1,
-          outcomeAccount: 'card',
-        }),
-        in: makeTransaction({
-          id: 'in',
-          income: 40,
-          incomeInstrument: 1,
-          incomeAccount: 'card',
-          outcome: 0,
-        }),
-      },
-    })
-
-    const next = applyPatch(
-      current,
-      compileAppCommand(
-        makeState(current),
-        {
-          type: 'zenmoney.transaction.combineToOutcome',
-          payload: { ids: ['out', 'in'] },
-        },
-        { now: () => NOW, uuid: () => 'unused' }
-      )
-    )
-
-    expect(next.transaction.in.deleted).toBe(true)
-    expect(next.transaction.out).toMatchObject({ outcome: 60, changed: NOW })
-  })
-
-  it('routes an account merge command to transactions and reminders', () => {
-    const current = makeStore({
-      user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
-      account: {
-        source: makeAccount({ id: 'source', instrument: 1 }),
-        target: makeAccount({ id: 'target', instrument: 1 }),
-      },
-      transaction: {
-        spend: makeTransaction({
-          id: 'spend',
-          outcomeAccount: 'source',
-          outcome: 10,
-        }),
-      },
-      reminder: {
-        planned: makeReminder({
-          id: 'planned',
-          incomeAccount: 'target',
-          outcomeAccount: 'source',
-        }),
-      },
-    })
-
-    const next = applyPatch(
-      current,
-      compileAppCommand(
-        makeState(current),
-        {
-          type: 'zenmoney.account.merge',
-          payload: { source: 'source', target: 'target' },
-        },
-        { now: () => NOW, uuid: () => 'unused' }
-      )
-    )
-
-    expect(next.account.source).toBeUndefined()
-    expect(next.transaction.spend.outcomeAccount).toBe('target')
-    expect(next.reminder.planned.outcomeAccount).toBe('target')
   })
 })

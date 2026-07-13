@@ -1,20 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import type { TDataStore } from '6-shared/types'
-import type { RootState } from 'store'
 import { i18n } from '6-shared/localization'
 import { makeDemoStore } from '../demo'
+import { makeTestRootState } from '../testing/rootState'
 
 const NOW = Date.parse('2026-05-15T12:00:00Z')
 
-function makeRootState(data: TDataStore): RootState {
-  return {
-    data: { current: data, base: data, outbox: [], outboxHead: 0 },
-    displayCurrency: null,
-    isPending: false,
-    lastSync: { finishedAt: 0, isSuccessful: null, errorMessage: null },
-    token: null,
-  }
-}
+const makeRootState = makeTestRootState
 
 describe('Core tag presentation adapter', () => {
   it('adds presentation fields and the uncategorized tag', async () => {

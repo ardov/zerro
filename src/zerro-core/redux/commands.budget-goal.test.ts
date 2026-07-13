@@ -3,6 +3,7 @@ import type { RootState } from 'store'
 import { appendClientOutboxEntry } from 'store/data'
 import { makeDemoStore } from '../demo'
 import { applyPatch } from '../domain/zenmoney'
+import { makeTestRootState } from '../testing/rootState'
 import {
   compilePatchUserSettings,
   compileSetBudget,
@@ -22,15 +23,7 @@ vi.mock('uuid', () => ({ v1: () => UUID }))
 
 afterEach(() => vi.restoreAllMocks())
 
-function makeState(current: RootState['data']['current']): RootState {
-  return {
-    data: { current, base: current, outbox: [], outboxHead: 0 },
-    displayCurrency: null,
-    isPending: false,
-    lastSync: { finishedAt: 0, isSuccessful: null, errorMessage: null },
-    token: null,
-  }
-}
+const makeState = makeTestRootState
 
 function makeDispatch(state: RootState) {
   const dispatch: any = vi.fn(action =>
