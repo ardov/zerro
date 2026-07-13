@@ -55,7 +55,7 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
       const active = e.active.data.current as TDragData
       const over = e.over?.data.current as TDragData
       if (!active || !over || !month) return
-      let dataType = active?.type
+      const dataType = active?.type
       if (dataType === DragTypes.amount && active.id !== over.id) {
         setMoneySource(active.id)
         setMoneyDestination(over.id)

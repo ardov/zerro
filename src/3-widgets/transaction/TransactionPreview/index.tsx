@@ -149,7 +149,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
     if (timeChanged) {
       const hh = +localTime.split(':')[0]
       const mm = +localTime.split(':')[1]
-      let createdDate = parseDate(tr.date)
+      const createdDate = parseDate(tr.date)
       createdDate.setHours(hh)
       createdDate.setMinutes(mm)
       sendEvent('Transaction: recreate')

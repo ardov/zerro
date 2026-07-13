@@ -39,7 +39,7 @@ export function assignNewGroup(id: TEnvelopeId): AppThunk {
 
 function getNewGroupName(structure: { id: string }[]) {
   const baseName = t('groupNew', { ns: 'common' })
-  let names = structure
+  const names = structure
     .map(group => group.id)
     .filter(name => name.startsWith(baseName))
   if (names.length === 0) return baseName

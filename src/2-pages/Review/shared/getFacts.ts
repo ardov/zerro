@@ -56,7 +56,7 @@ export const getFactsYearly: TSelector<Record<string, TStats>> = createSelector(
 
     function processTransaction(tr: TTransaction) {
       const year = tr.date.slice(0, 4)
-      let stats = (result[year] ??= makeStatsNode())
+      const stats = (result[year] ??= makeStatsNode())
       addToNode(stats.total, tr)
 
       addToGroup(

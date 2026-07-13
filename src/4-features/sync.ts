@@ -60,7 +60,7 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
 }
 
 function getChangedDomains(data: TDiff) {
-  let domains: Set<keyof TLocalData> = new Set()
+  const domains: Set<keyof TLocalData> = new Set()
   keys(data).forEach(key => {
     if (key === 'deletion') data[key]?.forEach(item => domains.add(item.object))
     else domains.add(key)

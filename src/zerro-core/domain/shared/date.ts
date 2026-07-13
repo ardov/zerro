@@ -120,7 +120,7 @@ export function makeDateArray(
   aggregation: GroupBy = GroupBy.Month
 ): Array<TISODate> {
   let current = toGroup(from, aggregation)
-  let last = toGroup(to, aggregation)
+  const last = toGroup(to, aggregation)
   const months = [current]
   while (current < last) {
     current = nextGroup(current, aggregation)

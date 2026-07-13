@@ -35,9 +35,9 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
     const envelope = envData[month][id]
     const toEnvelope = (a: TFxAmount) => convertFx(a, currency, month)
     let activity = toEnvelope(envelope.totalActivity)
-    let leftover = toEnvelope(envelope.totalLeftover)
-    let budgeted = toEnvelope(envelope.totalBudgeted)
-    let available = toEnvelope(envelope.totalAvailable)
+    const leftover = toEnvelope(envelope.totalLeftover)
+    const budgeted = toEnvelope(envelope.totalBudgeted)
+    const available = toEnvelope(envelope.totalAvailable)
     let startingAmount = leftover + budgeted
     if (activity > 0) {
       // Handle positive outcome. It's possible with income transfers

@@ -84,7 +84,7 @@ const convertDeletion: TZmAdapter<TZmDeletionObject, TDeletionObject> = {
 export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
   toClient: d => {
     const t0 = performance.now()
-    let r: TDiff = { serverTimestamp: 0 }
+    const r: TDiff = { serverTimestamp: 0 }
     if (d.serverTimestamp) r.serverTimestamp = unixToMs(d.serverTimestamp)
     if (d.deletion) r.deletion = d.deletion.map(convertDeletion.toClient)
     if (d.instrument)
@@ -108,7 +108,7 @@ export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
 
   toServer: d => {
     const t0 = performance.now()
-    let r: TZmDiff = { serverTimestamp: 0 }
+    const r: TZmDiff = { serverTimestamp: 0 }
     if (d.serverTimestamp) r.serverTimestamp = msToUnix(d.serverTimestamp)
     if (d.deletion) r.deletion = d.deletion.map(convertDeletion.toServer)
     if (d.instrument)

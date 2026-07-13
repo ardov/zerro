@@ -188,7 +188,7 @@ function useActivityTrend(month: TISOMonth, id: TEnvelopeId): TFxAmount[] {
     id
   ]
 
-  let trend = new Array(31).fill({})
+  const trend = new Array(31).fill({})
   if (!envData) return trend
 
   const activityTrends = [

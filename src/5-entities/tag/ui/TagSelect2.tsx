@@ -98,7 +98,7 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
     showNull,
   })
 
-  let flatList: TagNode[] = []
+  const flatList: TagNode[] = []
   tags.forEach(tag => {
     if (checkTag(tag)) {
       flatList.push(tag)

@@ -4,7 +4,7 @@ import { AppThunk } from 'store/index'
 
 export function renameGroup(prevName: string, nextName: string): AppThunk {
   return (dispatch, getState) => {
-    let trimmedNext = nextName.trim()
+    const trimmedNext = nextName.trim()
     if (prevName === nextName || prevName === trimmedNext) return
     if (!prevName || !trimmedNext) return
 

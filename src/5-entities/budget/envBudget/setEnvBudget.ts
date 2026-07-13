@@ -18,7 +18,7 @@ export function setEnvBudget(
     const updates = Array.isArray(upd) ? upd : [upd]
     if (!upd || !updates.length) return null
 
-    let byMonth: ByMonth<TBudgets> = {}
+    const byMonth: ByMonth<TBudgets> = {}
 
     updates.forEach(({ id, month, value }) => {
       // Create month if not exists

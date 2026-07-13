@@ -24,7 +24,7 @@ export function useExpandEnvelopes(month: TISOMonth = toISOMonth(new Date())): {
         : setExpanded([...expanded, id])
     },
     expandAll: () => {
-      let expandedList = Object.values(renderInfo)
+      const expandedList = Object.values(renderInfo)
         .filter(e => e.hasChildren)
         .map(e => e.id)
       setExpanded(expandedList)

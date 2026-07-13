@@ -13,7 +13,7 @@ export const fillGoals =
     const updates: coreBudgets.TBudgetUpdate[] = []
 
     Object.values(goals).forEach(goalInfo => {
-      let { id, goal, needNow, targetBudget } = goalInfo
+      const { id, goal, needNow, targetBudget } = goalInfo
       // Ignore filled goals
       if (!needNow) return
       // Ignore endless goals with target balance

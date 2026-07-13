@@ -110,7 +110,7 @@ function useTotalsModel() {
         : budgetedInFuture
 
   const msgType: TMsgType =
-    toBeBudgeted < 0 ? 'error' : !!overspend ? 'warning' : 'success'
+    toBeBudgeted < 0 ? 'error' : overspend ? 'warning' : 'success'
 
   const messages = {
     success: toBeBudgeted

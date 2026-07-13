@@ -1,0 +1,10 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/worker/index.ts",
+    "scripts/zerro-core-package/consumer.ts"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{ts,mjs}"],
+  "ignore": ["src/zerro-core/infrastructure/replica/**"],
+  "ignoreDependencies": ["react-scan"]
+}

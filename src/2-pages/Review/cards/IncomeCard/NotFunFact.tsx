@@ -77,7 +77,7 @@ function getPeopleArray(length: number) {
     '👨🏼‍🦳',
     '👩‍🦳',
   ]
-  let arr = []
+  const arr = []
   for (let i = 0; i < length; i++) {
     arr.push(people[i % (people.length - 1)])
   }

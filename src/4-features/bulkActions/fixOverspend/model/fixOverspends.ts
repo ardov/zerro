@@ -19,7 +19,7 @@ export const fixOverspends =
 
     function fixOverspendingChildren() {
       const metrics = coreActivity.selectEnvelopeMetrics(getState())[month]
-      let childrenUpdates: coreBudgets.TBudgetUpdate[] = []
+      const childrenUpdates: coreBudgets.TBudgetUpdate[] = []
       Object.values(metrics).forEach(m => {
         if (!m.parent) return
         const budgeted = m.selfBudgeted[m.currency] || 0
@@ -37,7 +37,7 @@ export const fixOverspends =
 
     function fixOverspendingParents() {
       const metrics = coreActivity.selectEnvelopeMetrics(getState())[month]
-      let parentUpdates: coreBudgets.TBudgetUpdate[] = []
+      const parentUpdates: coreBudgets.TBudgetUpdate[] = []
       Object.values(metrics).forEach(m => {
         if (m.parent) return
         const totalBudgeted = m.totalBudgeted[m.currency] || 0

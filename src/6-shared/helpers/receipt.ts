@@ -42,7 +42,7 @@ function stringToObject(str: string) {
 }
 
 function parseReceiptUnsafe(string: string): TReciept {
-  let obj = stringToObject(string)
+  const obj = stringToObject(string)
   const date = parseDate(obj.t as TDateDraft)
   if (!isValidDate(date) || isNaN(+obj.s)) {
     throw new Error('Unknown reciept format')

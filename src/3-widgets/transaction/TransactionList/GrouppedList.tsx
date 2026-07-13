@@ -151,7 +151,7 @@ const useRenderState = (isScrolling?: boolean, delay = 300) => {
   const [renderContent, setRenderContent] = useState(!isScrolling)
   useEffect(() => {
     if (!isScrolling) setRenderContent(true)
-    let timer = setTimeout(() => setRenderContent(true), delay)
+    const timer = setTimeout(() => setRenderContent(true), delay)
     return () => clearTimeout(timer)
   }, [delay, isScrolling])
   return renderContent

@@ -126,7 +126,7 @@ function equalArrays(a: string[], b: string[]) {
 }
 
 function getTypes(list: TTransaction[] = []) {
-  let res = { income: 0, outcome: 0, transfer: 0 }
+  const res = { income: 0, outcome: 0, transfer: 0 }
   list.forEach(
     tr =>
       res[coreTransactions.getType(tr) as 'income' | 'outcome' | 'transfer']++

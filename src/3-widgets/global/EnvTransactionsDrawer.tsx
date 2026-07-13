@@ -133,7 +133,7 @@ export const SmartEnvTransactionsDrawer = () => {
   const trPreview = useTransactionPreview()
   const { title, envelopeConditions, initialDate } = drawer.extraProps
   const { onClose, open } = drawer.displayProps
-  let filteredTransactions = useFilteredByEnvelope(envelopeConditions)
+  const filteredTransactions = useFilteredByEnvelope(envelopeConditions)
 
   const showTransaction = useCallback(
     (id: string) => {

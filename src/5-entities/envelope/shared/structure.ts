@@ -108,8 +108,8 @@ export function normalizeStructure(structure: TGroupNode[]): TGroupNode[] {
 
       group.children.forEach(parent => {
         const parentIsTag = envId.parse(parent.id).type === EnvType.Tag
-        let parentChildren = [] as TEnvNode[]
-        let elevated = [] as TEnvNode[]
+        const parentChildren = [] as TEnvNode[]
+        const elevated = [] as TEnvNode[]
 
         flattenChildren(parent.children).forEach(child => {
           const childIsTag = envId.parse(child.id).type === EnvType.Tag
@@ -163,7 +163,7 @@ function flattenChildren(children: TEnvNode[]) {
  * @returns sorted list of tree nodes
  */
 export function flattenStructure(tree: TGroupNode[]) {
-  let flatList: (TEnvNode | TGroupNode)[] = []
+  const flatList: (TEnvNode | TGroupNode)[] = []
   tree.forEach(addNode)
   return flatList
 

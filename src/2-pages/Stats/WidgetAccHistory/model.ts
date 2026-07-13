@@ -15,9 +15,9 @@ export type TPoint = {
 }
 
 export function useAccountHistory(id: TAccountId, period: Period): TPoint[] {
-  let { fxCode } = coreAccounts.usePopulated()[id]
+  const { fxCode } = coreAccounts.usePopulated()[id]
 
-  let allBalances = useAppSelector(coreBalances.selectByDate)
+  const allBalances = useAppSelector(coreBalances.selectByDate)
 
   return useMemo(() => {
     const firstDate = getStart(period, GroupBy.Day)

@@ -42,7 +42,7 @@ export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
       function getEnvelopesInfo(month: TISOMonth) {
         const metrics = envData[month]
         const goalInfo = goals[month]
-        let result: ById<TRenderInfo> = {}
+        const result: ById<TRenderInfo> = {}
 
         Object.values(envelopes)
           .filter(e => e.parent)

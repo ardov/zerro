@@ -39,7 +39,7 @@ export function calcCashflow(
   accounts: Record<string, Account>,
   aggregation: GroupBy = GroupBy.Month
 ): ByDate<TPoint> {
-  let result: ByDate<TPoint> = {}
+  const result: ByDate<TPoint> = {}
 
   transactions.forEach(tr => {
     const group = toGroup(tr.date, aggregation)
@@ -63,7 +63,7 @@ export function calcCashflow(
         })
         return
 
-      case coreTransactions.TrType.Outcome:
+      case coreTransactions.TrType.Outcome: {
         const account = accounts[tr.outcomeAccount]
         if (account?.inBudget) {
           result[group].outcomeInBalance = addFxAmount(
@@ -77,6 +77,7 @@ export function calcCashflow(
           )
         }
         return
+      }
 
       case coreTransactions.TrType.IncomeDebt:
         result[group].debts = addFxAmount(result[group].debts, {

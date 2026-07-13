@@ -58,8 +58,8 @@ export const AmountInput: FC<AmountInputProps> = ({
 
   const calc = (str: string) => {
     try {
-      // eslint-disable-next-line no-eval
-      let computed = +eval(
+       
+      const computed = +eval(
         str
           .replace(/^0*(?=0|0.|[1-9])/g, '') // remove leading zeroes
           .replace(/[-+*/]*$/g, '') // trim symbols in the end

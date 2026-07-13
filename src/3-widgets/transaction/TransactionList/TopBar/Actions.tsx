@@ -380,12 +380,12 @@ function areApproximatelyEqual(
 }
 
 function groupByType(list: TTransaction[] = []) {
-  let incomes: TTransaction[] = []
-  let outcomes: TTransaction[] = []
-  let transfers: TTransaction[] = []
+  const incomes: TTransaction[] = []
+  const outcomes: TTransaction[] = []
+  const transfers: TTransaction[] = []
 
   list?.forEach(tr => {
-    let trType = coreTransactions.getType(tr)
+    const trType = coreTransactions.getType(tr)
     if (trType === 'income') incomes.push(tr)
     if (trType === 'outcome') outcomes.push(tr)
     if (trType === 'transfer') transfers.push(tr)

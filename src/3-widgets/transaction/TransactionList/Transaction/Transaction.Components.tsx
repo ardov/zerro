@@ -181,7 +181,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
           />
         </AmountsWrapper>
       )
-    case 'transfer':
+    case 'transfer': {
       const isEqual =
         tr.income === tr.outcome && tr.incomeInstrument === tr.outcomeInstrument
       return (
@@ -192,6 +192,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
           <SmartAmount value={tr.income} instrument={tr.incomeInstrument} />
         </AmountsWrapper>
       )
+    }
     default:
       return null
   }
@@ -284,7 +285,7 @@ const Payee: FC<{
 }> = ({ payee, merchant, onClick, ...rest }) => {
   const merchants = coreMerchants.useAll()
   if (!payee && !merchant) return null
-  let name = merchant ? merchants[merchant]?.title : payee
+  const name = merchant ? merchants[merchant]?.title : payee
   return (
     <PayeeWrapper
       onClick={e => {

@@ -32,7 +32,7 @@ export async function requestRates(date: TDateDraft) {
   const rates = response?.[base] as Record<TFxCode, number>
   if (!rates) throw new Error(`No rates found in a response. ${response}`)
 
-  let result: Record<TFxCode, number> = {}
+  const result: Record<TFxCode, number> = {}
 
   // Convert BTC and other crypto currencies to µ-units.
   // Probably, should be automatically calculated for all currencies with 'μ' prefix
@@ -55,7 +55,7 @@ export async function requestRates(date: TDateDraft) {
 
 async function fetchWithFallback(links: string[]) {
   let response
-  for (let link of links) {
+  for (const link of links) {
     try {
       response = await fetch(link)
       if (response.ok) return response

@@ -58,7 +58,7 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
     )
 
   const points: Point[] = balances.map(b => {
-    let total = round(
+    const total = round(
       (isVisible('lented') ? b.lented : 0) +
         (isVisible('debts') ? b.debts : 0) +
         (isVisible('accountDebts') ? b.accountDebts : 0) +

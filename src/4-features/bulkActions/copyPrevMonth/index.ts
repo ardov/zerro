@@ -19,8 +19,8 @@ export const copyPreviousBudget =
 
     const updates: coreBudgets.TBudgetUpdate[] = []
     Object.values(prev).forEach(({ id, currency, selfBudgeted }) => {
-      let prevVal = selfBudgeted[currency]
-      let currVal = curr[id].selfBudgeted[currency]
+      const prevVal = selfBudgeted[currency]
+      const currVal = curr[id].selfBudgeted[currency]
       console.assert(
         typeof prevVal === 'number' && typeof currVal === 'number',
         'Value is not number'

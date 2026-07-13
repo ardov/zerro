@@ -98,6 +98,5 @@ export const TextLink: FC<TextLinkProps> = ({ href, ...rest }) => {
   if (href?.startsWith('/')) {
     return <RouterLink to={href} {...rest} />
   }
-  // eslint-disable-next-line jsx-a11y/anchor-has-content
   return <a href={href} target="_blank" rel="noopener noreferrer" {...rest} />
 }

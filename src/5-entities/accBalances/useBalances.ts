@@ -21,9 +21,9 @@ export function useBalances(
   const startDate = toGroup(start || list[0].date, aggregation)
   const endDate = toGroup(end || Date.now(), aggregation)
   const balances = useMemo(() => {
-    let byGroup: Record<TISODate, TBalanceNode> = {}
+    const byGroup: Record<TISODate, TBalanceNode> = {}
     list.forEach(node => {
-      let date = toGroup(node.date, aggregation)
+      const date = toGroup(node.date, aggregation)
       if (date < startDate || date > endDate) return
       byGroup[date] = { date, balances: node.balances }
     })

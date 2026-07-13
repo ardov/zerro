@@ -32,7 +32,7 @@ export function OutcomeCard(props: TCardProps) {
   const { date, comment, payee, tag } = tr
 
   const tagTitle = tags[tag?.[0] || 'null'].title
-  let additionalInfo = [formatDate(date)]
+  const additionalInfo = [formatDate(date)]
   if (tagTitle) additionalInfo.push(tagTitle)
   if (payee) additionalInfo.push(payee)
   return (

@@ -26,17 +26,17 @@ export const getColorForString = (str: string) => {
 
 export const int2hex = (int: number | null) => {
   if (typeof int !== 'number') return null
-  let r = ((int >> 16) & 0xff).toString(16).padStart(2, '0')
-  let g = ((int >> 8) & 0xff).toString(16).padStart(2, '0')
-  let b = (int & 0xff).toString(16).padStart(2, '0')
+  const r = ((int >> 16) & 0xff).toString(16).padStart(2, '0')
+  const g = ((int >> 8) & 0xff).toString(16).padStart(2, '0')
+  const b = (int & 0xff).toString(16).padStart(2, '0')
   return `#${r}${g}${b}`
 }
 
 export const hex2int = (hex?: string | null) => {
   if (!isHEX(hex)) return null
-  let r = parseInt(hex.slice(1, 3), 16)
-  let g = parseInt(hex.slice(3, 5), 16)
-  let b = parseInt(hex.slice(5, 7), 16)
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
   return rgbToInt(r, g, b)
 }
 
@@ -52,9 +52,9 @@ export const hex2rgb = (hex?: string | null): RGB | null => {
     console.warn('Error parsing hex: ' + hex)
     return null
   }
-  let r = parseInt(hex.slice(1, 3), 16)
-  let g = parseInt(hex.slice(3, 5), 16)
-  let b = parseInt(hex.slice(5, 7), 16)
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
   return [r, g, b]
 }
 

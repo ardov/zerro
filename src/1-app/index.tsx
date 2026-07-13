@@ -54,7 +54,7 @@ function createZerroInstance(s: typeof store) {
     applyClientPatch: (patch: TDiff) =>
       s.dispatch(coreInfrastructure.applyDebugPatch(patch)),
     showEl: (id: string) => {
-      let data = s.getState().data.current
+      const data = s.getState().data.current
       return (
         Object.values(data)
           // @ts-ignore

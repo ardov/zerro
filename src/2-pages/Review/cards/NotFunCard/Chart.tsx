@@ -13,13 +13,13 @@ type TaxesChartProps = {
 export const TaxesChart: FC<TaxesChartProps> = ({ income, outcome }) => {
   const theme = useAppTheme()
 
-  let primaryColor = theme.palette.primary.main // theme.palette.success.light
-  let taxesColor = theme.palette.error.light
+  const primaryColor = theme.palette.primary.main // theme.palette.success.light
+  const taxesColor = theme.palette.error.light
 
   const taxes = getTaxes(income, outcome).sort((a, b) => b.value - a.value)
-  let totalTaxes = taxes.reduce((sum, t) => round(sum + t.value), 0)
+  const totalTaxes = taxes.reduce((sum, t) => round(sum + t.value), 0)
 
-  let data = [
+  const data = [
     {
       name: 'Ваш доход',
       rate: 0,
@@ -29,7 +29,7 @@ export const TaxesChart: FC<TaxesChartProps> = ({ income, outcome }) => {
     ...taxes,
   ]
 
-  let dataOutline = [
+  const dataOutline = [
     {
       name: '💵 ' + Math.round((100 * income) / (income + totalTaxes)) + '%',
       value: income,

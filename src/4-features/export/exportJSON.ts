@@ -10,7 +10,7 @@ export const exportJSON: AppThunk = (_, getState) => {
   const href = window.URL.createObjectURL(blob)
   const fileName = `zm-backup-${formatDate(Date.now(), 'yyyyMMdd-HHmm')}.json`
 
-  var link = document.createElement('a')
+  const link = document.createElement('a')
   link.setAttribute('href', href)
   link.setAttribute('download', fileName)
   document.body.appendChild(link) // Required for FF

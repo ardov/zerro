@@ -21,10 +21,10 @@ type TagSelectProps = {
 
 export function TagSelect(props: TagSelectProps) {
   const { t } = useTranslation('common')
-  let { options, onChange, selected, label } = props
-  let renderText = (selected: TagSelectProps['selected']) => {
+  const { options, onChange, selected, label } = props
+  const renderText = (selected: TagSelectProps['selected']) => {
     if (selected.length === 1) {
-      let opt = options.find(opt => opt.id === selected[0])
+      const opt = options.find(opt => opt.id === selected[0])
       if (opt?.name) return opt.name
     }
     return t('tagSelected', { count: selected.length })
@@ -37,7 +37,7 @@ export function TagSelect(props: TagSelectProps) {
         multiple
         value={selected}
         onChange={e => {
-          let v = e.target.value
+          const v = e.target.value
           onChange(typeof v === 'string' ? v.split(',') : v)
         }}
         input={<OutlinedInput label={label} />}

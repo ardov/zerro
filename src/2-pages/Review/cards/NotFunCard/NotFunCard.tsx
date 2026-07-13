@@ -51,7 +51,7 @@ export function NotFunCard(props: TCardProps) {
   const taxes = getTaxes(totalIncome, totalOutcome).sort(
     (a, b) => b.value - a.value
   )
-  let totalTaxes = taxes.reduce((sum, t) => round(sum + t.value), 0)
+  const totalTaxes = taxes.reduce((sum, t) => round(sum + t.value), 0)
 
   const taxesRatio = totalTaxes / (totalTaxes + totalIncome)
   const taxMonths = Math.round(taxesRatio * 12 * 10) / 10
@@ -229,7 +229,7 @@ function useIncomeOutcome(onlyRUB: boolean, year: string | number) {
   return useMemo(() => {
     const incomeTags = entries(yearStats.byTag)
       .map(([id, info]) => {
-        let amount = toDisplay(
+        const amount = toDisplay(
           onlyRUB ? { RUB: info.income['RUB'] || 0 } : info.income
         )
         return { id, name: tags[id].uniqueName, amount }
@@ -239,7 +239,7 @@ function useIncomeOutcome(onlyRUB: boolean, year: string | number) {
 
     const outcomeTags = entries(yearStats.byTag)
       .map(([id, info]) => {
-        let amount = toDisplay(
+        const amount = toDisplay(
           onlyRUB ? { RUB: info.outcome['RUB'] || 0 } : info.outcome
         )
         return { id, name: tags[id].uniqueName, amount }

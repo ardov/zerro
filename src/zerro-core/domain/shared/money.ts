@@ -26,7 +26,7 @@ export function addFxAmount(...amounts: TFxAmount[]): TFxAmount {
 }
 
 export function subFxAmount(acc: TFxAmount, fxAmount: TFxAmount): TFxAmount {
-  let copy: TFxAmount = { ...acc }
+  const copy: TFxAmount = { ...acc }
   keys(fxAmount).forEach(fx => {
     copy[fx] ??= 0
     copy[fx] = sub(copy[fx], fxAmount[fx])

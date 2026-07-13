@@ -39,7 +39,7 @@ export const exportCSV: AppThunk = (_, getState) => {
   const blob = new Blob([csvContent], { type: 'text/csv' })
   const href = window.URL.createObjectURL(blob)
 
-  var link = document.createElement('a')
+  const link = document.createElement('a')
   link.setAttribute('href', href)
   link.setAttribute(
     'download',
@@ -130,10 +130,10 @@ const transactionToRowObj = (t: PopulatedTransaction): RowObj =>
     Категория: t.tag ? t.tag[0].title : '',
     'Доп категории': '',
     'Со счёта': t.outcomeAccount ? t.outcomeAccount.title : '',
-    Расход: !!t.outcome ? t.outcome : '',
+    Расход: t.outcome ? t.outcome : '',
     'Валюта -': t.outcomeInstrument ? t.outcomeInstrument.shortTitle : '',
     'На счёт': t.incomeAccount ? t.incomeAccount.title : '',
-    Доход: !!t.income ? t.income : '',
+    Доход: t.income ? t.income : '',
     'Валюта +': t.incomeInstrument ? t.incomeInstrument.shortTitle : '',
     Плательщик: t.payee || '',
     Комментарий: t.comment || '',

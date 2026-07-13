@@ -1,6 +1,6 @@
 // From https://github.com/react-hookz/web/blob/master/src/useDebouncedCallback/useDebouncedCallback.ts
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { DependencyList, useMemo, useRef } from 'react'
 
 export interface DebouncedFunction<Fn extends (...args: any[]) => any> {
@@ -56,7 +56,7 @@ export function useDebouncedCallback<Fn extends (...args: any[]) => any>(
         clear()
       }
 
-      // eslint-disable-next-line func-names
+       
       const wrapped = function (this, ...args) {
         if (timeout.current) {
           clearTimeout(timeout.current)
@@ -80,7 +80,7 @@ export function useDebouncedCallback<Fn extends (...args: any[]) => any>(
 
       return wrapped
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps,@typescript-eslint/no-unsafe-assignment
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [delay, maxWait, ...deps]
   )
 }

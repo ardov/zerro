@@ -20,7 +20,7 @@ export function convertZmBudgetsToZerro(): AppThunk<
 }
 
 function convertTagBudgetsToUpdates(tagBudgets: ById<TBudget>) {
-  let updates = [] as coreBudgets.TBudgetUpdate[]
+  const updates = [] as coreBudgets.TBudgetUpdate[]
 
   Object.values(tagBudgets).forEach(budget => {
     if (!budget.outcome) return

@@ -10,7 +10,7 @@ export function balancesToDisplay(
   return list.map(convertNode)
 
   function convertNode(node: TBalanceNode<TFxAmount>): TBalanceNode<number> {
-    let displayNode: TBalanceNode<number> = {
+    const displayNode: TBalanceNode<number> = {
       date: node.date,
       balances: { accounts: {}, debtors: {} },
     }

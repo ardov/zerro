@@ -16,7 +16,7 @@ export const getPopulatedTags = createSelector(
 
 export type TagTreeNode = Modify<TTagPopulated, { children: TTagPopulated[] }>
 export const getTagsTree = createSelector([getPopulatedTags], tags => {
-  let result = []
+  const result = []
   for (const id in tags) {
     if (tags[id].parent) continue
     const tag = { ...tags[id], children: [] } as TagTreeNode

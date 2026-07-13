@@ -35,9 +35,10 @@ export const goalToWords = (
       return t('toWords.monthlySpend', { sum, ns: 'goals' })
     case goalType.TARGET_BALANCE:
       return t('toWords.targetBalance', { sum, ns: 'goals' }) + monthSuffix(end)
-    case goalType.INCOME_PERCENT:
+    case goalType.INCOME_PERCENT: {
       const percent = round(amount * 100)
       return t('toWords.incomePercent', { percent, ns: 'goals' })
+    }
     default:
       throw new Error(`Unsupported type ${type}`)
   }

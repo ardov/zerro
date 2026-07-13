@@ -70,9 +70,10 @@ export const TagSelect: FC<TagSelectProps> = props => {
         </Box>
       )}
       renderTags={(tags, getTagProps) =>
-        tags.map((tag, index) => (
-          <TagChip id={tag} {...getTagProps({ index })} />
-        ))
+        tags.map((tag, index) => {
+          const { key, ...tagProps } = getTagProps({ index })
+          return <TagChip key={key} id={tag} {...tagProps} />
+        })
       }
       renderInput={params => (
         <TextField

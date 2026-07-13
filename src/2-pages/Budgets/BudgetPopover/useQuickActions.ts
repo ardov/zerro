@@ -29,7 +29,7 @@ export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
   const prevMonth = getPrevMonth(month)
   const prevEnvelopeData = envMetrics[prevMonth]?.[id]
 
-  let prevActivity: number[] = getPrev12MonthsISO(month)
+  const prevActivity: number[] = getPrev12MonthsISO(month)
     .map(month => envMetrics?.[month]?.[id]?.totalActivity)
     .filter(outcome => outcome !== undefined)
     .map(convert)
@@ -126,7 +126,7 @@ function getQuickActions({
 }
 
 function getPrev12MonthsISO(date: TDateDraft): TISOMonth[] {
-  let prevMonths: TISOMonth[] = []
+  const prevMonths: TISOMonth[] = []
   let monthToAdd = toISOMonth(date) // current month won't be added; only use it to get previous month
   for (let i = 0; i < 12; i++) {
     monthToAdd = getPrevMonth(monthToAdd)

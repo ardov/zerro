@@ -99,7 +99,7 @@ export function BalanceWidget(props: { month: TISOMonth }) {
     toBeBudgeted: number,
     overspend: number
   ) {
-    if (!!overspend) {
+    if (overspend) {
       return t('explainer.overspend')
     }
     if (toBeBudgeted > 0) {

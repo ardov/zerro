@@ -62,7 +62,7 @@ export const resetMonthThunk =
     const updates = Object.values(envData)
       .filter(e => e.parent) // Only children
       .filter(e => {
-        let available = e.selfAvailable[e.currency]
+        const available = e.selfAvailable[e.currency]
         if (!available) return false // already empty
         return true
       })

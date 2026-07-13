@@ -38,7 +38,7 @@ async function sync(
 ) {
   const zmDiff = convertDiff.toServer(diff)
   try {
-    let data = await zenmoney.fetchDiff(token, preference, zmDiff)
+    const data = await zenmoney.fetchDiff(token, preference, zmDiff)
     return { data: convertDiff.toClient(data) }
   } catch (error: any) {
     return { error: error.message as string }
@@ -46,8 +46,8 @@ async function sync(
 }
 
 async function getLocalData() {
-  let data = {} as TLocalData
-  let arr = await Promise.all(LOCAL_KEYS.map(key => storage.get(key)))
+  const data = {} as TLocalData
+  const arr = await Promise.all(LOCAL_KEYS.map(key => storage.get(key)))
   LOCAL_KEYS.forEach((key, i) => (data[key] = arr[i]))
   return convertDiff.toClient(data)
 }

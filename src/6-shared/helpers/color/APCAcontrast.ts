@@ -82,8 +82,8 @@ export function apcaContrast(
   background: [number, number, number],
   text: [number, number, number]
 ) {
-  let [Rbg, Gbg, Bbg] = background
-  let [Rtxt, Gtxt, Btxt] = text
+  const [Rbg, Gbg, Bbg] = background
+  const [Rtxt, Gtxt, Btxt] = text
 
   /////  MAGICAL NUMBERS  ///////////////////////////////
 

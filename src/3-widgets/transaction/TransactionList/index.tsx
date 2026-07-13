@@ -131,9 +131,9 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   }, [onSelectSimilar, checkedDate])
 
   const groups = useMemo(() => {
-    let groups: ByDate<{ date: TISODate; transactions: JSX.Element[] }> = {}
+    const groups: ByDate<{ date: TISODate; transactions: JSX.Element[] }> = {}
     trList.forEach(tr => {
-      let Component = (
+      const Component = (
         <Transaction
           key={tr.id}
           id={tr.id}

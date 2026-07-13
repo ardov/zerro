@@ -50,9 +50,9 @@ export function Highlight() {
         info.activeType === DragTypes.envelope &&
         info.overType === DragTypes.envelope
       ) {
-        let width = info.overRect.width - (info.isNesting ? OFFSET : 0)
-        let left = info.overRect.left + (info.isNesting ? OFFSET : 0)
-        let top = info.overRect.top + info.overRect.height
+        const width = info.overRect.width - (info.isNesting ? OFFSET : 0)
+        const left = info.overRect.left + (info.isNesting ? OFFSET : 0)
+        const top = info.overRect.top + info.overRect.height
         el.style.display = `block`
         el.style.width = `${width}px`
         el.style.height = `2px`

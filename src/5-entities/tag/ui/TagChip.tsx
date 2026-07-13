@@ -13,7 +13,7 @@ import { TTagPopulated } from '../model'
 
 export const TagChip: FC<ChipProps & { id: TTagId }> = ({ id, ...rest }) => {
   const { t } = useTranslation()
-  let tag = useAppSelector(coreTags.selectPopulated)[id]
+  const tag = useAppSelector(coreTags.selectPopulated)[id]
   const label = id === 'mixed' ? t('mixedCategories') : getTagLabel(tag)
   return <Chip deleteIcon={<CloseIcon />} label={label} {...rest} />
 }

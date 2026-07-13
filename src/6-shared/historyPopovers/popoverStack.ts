@@ -30,7 +30,7 @@ function useActions(): {
         const currStack = getStack(history.location)
         if (currStack.includes(key)) return // Do nothing if already visible
         const { pathname, hash, search, state = {} } = history.location
-        let nextState = { ...state, dialogs: [...currStack, key] } // add key
+        const nextState = { ...state, dialogs: [...currStack, key] } // add key
         history.push(pathname + hash + search, nextState)
       },
       close: (key: TKey) => {
