@@ -140,6 +140,13 @@ than in every command compiler:
 Materialization is pure and receives the current normalized snapshot. It must
 return a complete deterministic `appliedPatch` and a rule-set version.
 
+Replay and transport are separate concerns. Replay always consumes the stored
+`appliedPatch`. The current sync adapter also merges applied patches, which is
+equivalent while materialization is identity-only. Before balance updates or
+account/transaction cascades are enabled, choose whether transport sends
+`intentPatch`, `appliedPatch`, or a dedicated per-command encoding. The choice
+must prevent server-like effects from being applied twice.
+
 ### Dumb patch application
 
 `applyPatch` performs only the changes explicitly present in an applied patch.
@@ -202,8 +209,9 @@ session.budgets.getAll()
 session.months.getTotals()
 ```
 
-The namespaced facade is implemented additively. Flat `session.read.*` remains
-a deprecated migration surface for existing parity and private-fixture tests.
+Flat `session.read.*` is a deprecated compatibility surface. It has no
+production consumer and should be removed in the closure phase; new reads
+belong only on the namespaced facade.
 
 Session context contains only nondeterministic dependencies such as `now()` and
 `uuid()`. Root user and currency are derived from normalized data.
@@ -294,17 +302,11 @@ rawGoals + monthList + envMetrics + sortedActivity + FX
                                                -> goals
 ```
 
-The important edges are recorded in `application/session/readGraph.ts`. The map is
-descriptive, not a runtime dependency framework; session and Redux wiring stay
-explicit. Introduce more machinery only if manual wiring continues to create
-real invalidation defects.
-
-This duplication is intentional. `readGraph.ts` is the human-readable
-specification of calculation dependencies, while the session/future engine and
-Redux adapter wire those dependencies explicitly for different memoization and
-reactivity models. Nothing is generated from the map today. Agents should not
-treat agreement between the specification and those implementations as a DRY
-violation or replace it with a graph runtime without a demonstrated defect.
+The diagram above is the human-readable dependency reference. The current
+`application/session/readGraph.ts` duplicates it without validating session or
+Redux wiring, so the closure phase should remove that file and its
+self-consistency tests. Do not replace it with a graph runtime unless explicit
+wiring causes repeated, demonstrated defects.
 
 Adapter-level projectors such as `buildRawActivity` and `buildEnvMetrics` may be
 available to runtime adapters without appearing on the root semantic facade.

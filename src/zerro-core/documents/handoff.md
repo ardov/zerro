@@ -1,170 +1,93 @@
 # Zerro Core handoff
 
-- Updated: 2026-07-11
-- Branch: `zerro-core`
-- Worktree at handoff: verify before editing
+- Updated: 2026-07-13
+- Branch: `core-next`
+- Module: `src/zerro-core`
+- Worktree: verify before editing
 
-This is the current routing document. Implementation history belongs in Git.
-
-## Next task: implement materializer rules
-
-The legacy derived-read graph for activity, month totals, budgets, goals,
-envelopes, debtors, and balances is removed. Real app consumers use the Core
-Redux graph; the old parity selectors and captured legacy fixture outputs no
-longer keep a second implementation alive.
-
-The next architectural phase is Track C: implement deterministic ZenMoney
-materializer rules in the documented order, starting with deleted-transaction
-immutability. Keep each rule as a separate verified checkpoint.
-
-The budget/goal and transaction write wrappers are removed. App consumers now
-import semantic commands from the Redux adapter; transaction analytics stay at
-the UI action boundary. Read, classification, sorting, filtering, and
-presentation helpers remain separate migration work.
-
-The legacy model write cutover is complete: production code no longer invokes
-write methods through `*Model`. FX local edit/reset are semantic Redux adapter
-commands, while HTTP loading is an app feature that dispatches those commands;
-the old FX thunk file and unused freeze action are gone.
-
-The `fxRateModel` object and barrel are removed. Direct app consumers use Core
-Redux selectors; legacy goal/envBalances/displayCurrency projections import the
-old defining selectors directly only while parity paths remain. No Redux
-adapter import was added back into that legacy graph.
-
-The legacy displayCurrency model is removed. UI consumers use
-`useCoreToDisplay` and `useCoreDisplayCurrency`; legacy accBalances conversion
-uses the same Core Redux selector. The display component remains as a thin UI
-component, not a state/model boundary.
-
-The `trModel` object and barrel are removed. Type, viewed state, date ordering,
-and the type-getter hook are Core Redux exports. Transaction filtering is
-temporarily re-exported by the Redux adapter from its defining legacy module;
-move that implementation after the remaining legacy transaction projections
-are retired.
-
-The legacy transaction selector module is now deleted. Remaining legacy balance,
-debtor, and envBalances projections select Core transaction history and history
-start directly; their parity suite keeps only the still-legacy downstream
-projections under comparison.
-
-Account reads/hooks now use granular Core Redux exports: raw and populated
-accounts, lists, in-budget and saving subsets, plus debt-account selection.
-The populated projection belongs to the Core account read layer and receives
-currency metadata explicitly; it is not a recreated legacy model object.
-
-Instrument maps and merchants now also use Core Redux exports. The adapter owns
-their direct Redux-slice selectors and derives code maps locally, so neither app
-consumers nor adapter wiring import their legacy model objects.
-
-User and user-settings reads now use Core Redux selectors/hooks. Envelope IDs
-and structure flattening are exported as narrow Core helpers, localized goal
-wording lives in adapter presentation, and bulk actions are named thunks rather
-than model objects. Legacy projection internals import their defining selectors
-directly.
-
-Production code contains zero `*Model.*` calls. The obsolete derived selector
-implementations and their parity bridges are now deleted; remaining
-`5-entities` imports are presentation, app-service, or compatibility ownership
-work rather than a parallel calculation graph.
-
-## Verification checkpoint
-
-Start verification now, but do not call the refactor complete yet. The public
-baseline proves deterministic demo behavior, Core/Redux parity, invalidation,
-command routing, replay, package boundaries, and type safety. In the current
-tree after the final model-call cutover has zero production `*Model.*` calls.
-The targeted legacy derived-read parity bridges and their private-fixture
-harness are removed. The deterministic public baseline is now the refactor's
-regression gate.
-
-The 2026-07-12 browser smoke verified demo load, transaction navigation and
-editing through the Core/Redux command path, a pending outbox entry, persistence
-of both the edit and outbox across reload, and no browser console errors. It did
-not exercise an explicit remote sync or a budget/goal edit, so those completion
-gate items remain open.
-
-The completion gate is: public baseline green; one manual browser smoke of sync
-plus budget/transaction editing; and no production dependency on a legacy
-model API that the new Redux surface is meant to replace.
-
-The identity materializer is the extension point already wired into the command
-path. Legacy derived reads no longer block implementing its domain rules.
-Building the semantic engine facade remains later work.
-
-## Read order
-
-1. [roadmap.md](./roadmap.md) for the finishing order and Track C rules.
-2. [architecture.md](./architecture.md) for dependency and command boundaries.
-3. [design-ledger.md](./design-ledger.md) for accepted decisions and risks.
-4. [testing.md](./testing.md) for verification and legacy-parity exits.
-5. Entity READMEs beside `src/zerro-core/domain/zenmoney/*` when changing normalized
-   ZenMoney behavior.
+This file routes the next task. Git contains implementation history.
 
 ## Current state
 
-- The root is an internal facade: constants, shared root types, and snapshot
-  session only. Engine/outbox operations remain internal.
-- Redux is the sole reactive owner of `base + outbox + outboxHead`; `current`
-  and sync transport are derived.
-- All production writes use semantic adapter commands. The generic command
-  executor and legacy patch bridge are not public.
-- All application consumers use domain namespaces from `zerro-core/redux`;
-  the flat selector/hook/command export surface is removed. Entity-local patch
-  compilers remain internal and expose only explicitly writable fields.
-- Redux selectors and hooks live with their owning domain modules. Shared raw
-  inputs live in `redux/state.ts`; command-only snapshot reads live in
-  `redux/commandRead.ts`. There is no central selector/hook graph file.
-- Local commands store intent and materialized patches. Replay uses the stored
-  applied patch and preserves unrelated entity-map references where possible.
-- Persisted replica input is versioned and runtime-validated before replay.
-- Clean sessions may sync periodically; applied local commands pause periodic
-  sync until explicit user synchronization.
-- Domain envelopes remain headless; Redux owns localization, symbols, and
-  generated/display colors.
-- The session facade is frozen; the current supported app surface is the Redux
-  adapter. A semantic engine facade comes later.
+- Legacy model objects, generic local patch writes, and the duplicate derived
+  read graph are removed from production paths.
+- App consumers use domain namespaces from `zerro-core/redux`; the adapter is
+  the supported application surface.
+- Redux owns `base + outbox + outboxHead`. `current`, pending counts, and sync
+  transport derive from the applied prefix.
+- Local commands store `command`, `intentPatch`, `appliedPatch`,
+  `materializerVersion`, and creation time. Replay uses stored applied patches.
+- Persistence validates versioned replay inputs and does not store derived
+  state.
+- The snapshot session remains frozen. Its deprecated flat `read` surface has
+  no production consumer and is ready for removal.
+- Materialization is identity-only. The engine facade and package expansion
+  remain deferred until a real consumer exists.
+
+## Next checkpoint: health and closure
+
+Land this as small independent commits where practical:
+
+1. **Reliable verification**
+   - make default parallel `pnpm exec vitest run` green;
+   - keep package declaration checking as an explicit boundary gate;
+   - make changed Core files pass ESLint and Prettier;
+   - configure dead-code reporting before deleting from its output.
+2. **Ready bridge removal**
+   - remove deprecated `createZerroSession().read` and update parity tests;
+   - move transaction filtering out of `5-entities` into a Core-owned boundary;
+   - migrate the last legacy instrument selector consumers;
+   - remove adapter members without real consumers.
+3. **Remove false documentation**
+   - delete the descriptive `readGraph` and its self-consistency tests unless
+     it is changed to verify actual session/Redux wiring.
+4. **Manual completion smoke**
+   - edit a budget or goal;
+   - edit a transaction and reload with a pending outbox;
+   - perform explicit sync and verify canonical rebase.
+
+## After closure: materializer checkpoint
+
+Before transaction-balance effects or account-deletion cascades:
+
+1. decide whether sync sends intent, applied effects, or a dedicated transport
+   encoding;
+2. capture representative ZenMoney responses for each rule;
+3. define pending-outbox behavior across materializer versions;
+4. implement one deterministic rule per verified commit.
+
+Deleted-transaction immutability is the smallest first rule. Balance effects,
+account deletion, and transfer conversion follow only after the transport
+decision.
 
 ## Boundaries to preserve
 
-- `src/zerro-core/index.ts` is the facade-only root.
-- `src/zerro-core/domain/zenmoney` and `src/zerro-core/domain/zerro` are implementation paths,
-  not supported package APIs.
-- Core must not import Redux, React, IndexedDB, localization, worker code, or
-  app-layer `5-entities`/`6-shared` runtime modules.
-- Commands express writable intent; avoid `Partial<TEntity>` contracts.
-- `applyPatch` remains dumb. Cross-entity server-like behavior belongs in the
-  materializer.
-- Canonical server patches bypass local materialization.
-- Persist only base timestamp, outbox, and head. Do not persist derived
-  `current`, sync transport, or response staging.
+- Root `zerro-core` stays facade-only; the app uses `zerro-core/redux`.
+- Domain/application code must not import Redux, React, IndexedDB,
+  localization, worker code, or app runtime modules.
+- Commands express writable intent; avoid `Partial<TEntity>` APIs.
+- `applyPatch` remains dumb; cross-entity behavior belongs in materialization.
+- Canonical server diffs bypass local materialization.
+- Redux remains the only reactive replica owner.
+- Persist replay inputs, not `current`, sync transport, or response staging.
 
 ## Accepted product risks
 
-These are recorded in [design-ledger.md](./design-ledger.md) and should not be
-re-litigated during legacy removal unless new evidence changes the requirement:
+- Account balances may be stale until explicit synchronization.
+- Dirty sessions pause remote pulls until explicit sync.
+- Undo/redo semantics exist without a production UI.
+- Replica metadata is disposable until continuity requirements justify
+  migrations.
 
-- account balances may remain stale until synchronization;
-- dirty sessions pause remote pulls until explicit sync;
-- undo/redo semantics exist without a production UI;
-- replica metadata is disposable; migrations are not required without a
-  concrete continuity need.
+## Completion gate
 
-## Verification baseline
+Do not call the refactor complete until:
 
-For every legacy cutover, verify its last real consumers, switch them to a
-narrow Redux adapter export, delete the obsolete function, and retain parity or
-invalidation coverage appropriate to that read/write path.
+1. focused tests, TypeScript, default parallel Vitest, package consumer,
+   formatting, and dependency boundaries are green;
+2. the manual budget/goal, transaction reload, and explicit-sync smoke passes;
+3. production uses no legacy model API that the Redux adapter replaces;
+4. remaining compatibility code has an owner and an exit condition.
 
-Before committing a slice, run:
-
-```bash
-pnpm exec vitest run <focused tests>
-pnpm exec vitest run
-pnpm exec tsc --noEmit
-pnpm zerro-core:package-check
-git diff --check
-```
-
-The full repository Prettier check currently reports pre-existing drift outside
-Zerro Core; changed files must still pass Prettier.
+See [testing.md](./testing.md) for the verification matrix and
+[roadmap.md](./roadmap.md) for ordering.
