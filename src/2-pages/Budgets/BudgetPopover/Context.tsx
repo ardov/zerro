@@ -27,5 +27,6 @@ export const SmartBudgetPopover: FC = () => {
   const popover = budgetPopover.useProps()
   const { month, id } = popover.extraProps
   if (!month || !id) return null
-  return <BudgetPopover {...popover.displayProps} {...{ month, id }} />
+  const { key, ...displayProps } = popover.displayProps
+  return <BudgetPopover key={key} {...displayProps} month={month} id={id} />
 }

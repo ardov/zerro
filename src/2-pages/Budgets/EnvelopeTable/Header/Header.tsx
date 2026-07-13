@@ -20,6 +20,20 @@ type HeaderProps = {
   onOpenOverview: () => void
 }
 
+const ColumnTitle: FC<{ name: string; onClick?: () => void }> = props => (
+  <Typography
+    variant="overline"
+    align="right"
+    onClick={props.onClick}
+    noWrap
+    sx={{
+      color: 'text.secondary',
+    }}
+  >
+    {props.name}
+  </Typography>
+)
+
 export const Header: FC<HeaderProps> = props => {
   const {
     month,
@@ -39,19 +53,6 @@ export const Header: FC<HeaderProps> = props => {
   })
 
   const { nextColumn } = useColumns()
-  const ColumnTitle: FC<{ name: string }> = props => (
-    <Typography
-      variant="overline"
-      align="right"
-      onClick={nextColumn}
-      noWrap
-      sx={{
-        color: 'text.secondary',
-      }}
-    >
-      {props.name}
-    </Typography>
-  )
 
   return (
     <>
@@ -111,9 +112,9 @@ export const Header: FC<HeaderProps> = props => {
               </Button>
             </div>
           }
-          budgeted={<ColumnTitle name={t('budget')} />}
-          outcome={<ColumnTitle name={t('activity')} />}
-          available={<ColumnTitle name={t('available')} />}
+          budgeted={<ColumnTitle name={t('budget')} onClick={nextColumn} />}
+          outcome={<ColumnTitle name={t('activity')} onClick={nextColumn} />}
+          available={<ColumnTitle name={t('available')} onClick={nextColumn} />}
           goal={null}
         />
       </Box>

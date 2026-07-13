@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react'
+import { FC, useState } from 'react'
 import {
   BarChart,
   Bar,
@@ -144,9 +144,11 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
   const [selectedMonth, setSelectedMonth] = useState(month)
   const selectedData = trimmedData.find(node => node.month === selectedMonth)
 
-  useEffect(() => {
+  const [prevMonth, setPrevMonth] = useState(month)
+  if (prevMonth !== month) {
+    setPrevMonth(month)
     setSelectedMonth(month)
-  }, [month])
+  }
 
   return (
     <Box

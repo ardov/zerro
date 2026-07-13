@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react'
+import { FC, useState } from 'react'
 import { useAppSelector } from 'store'
 import {
   activity as coreActivity,
@@ -59,9 +59,11 @@ export const ActivityWidget: FC<ActivityWidgetProps> = props => {
   })
 
   const selectedData = data.find(node => node.date === highlighted)
-  useEffect(() => {
+  const [prevMonth, setPrevMonth] = useState(month)
+  if (prevMonth !== month) {
+    setPrevMonth(month)
     setHighlighted(month)
-  }, [month])
+  }
 
   const theme = useAppTheme()
   const activityColor = theme.palette.info.main

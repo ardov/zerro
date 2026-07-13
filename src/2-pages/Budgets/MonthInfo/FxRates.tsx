@@ -5,7 +5,7 @@ import {
   months as coreMonths,
 } from 'zerro-core/redux'
 
-import { FC, useEffect, useState } from 'react'
+import { FC, useState } from 'react'
 import {
   Box,
   Button,
@@ -117,9 +117,11 @@ const FxRateInput: FC<{
   const [value, setValue] = useState(String(rate))
 
   // Update rate when not focused
-  useEffect(() => {
+  const [prevRate, setPrevRate] = useState({ rate, focused })
+  if (prevRate.rate !== rate || prevRate.focused !== focused) {
+    setPrevRate({ rate, focused })
     if (!focused) setValue(String(rate))
-  }, [rate, focused])
+  }
 
   const onChg = useDebouncedCallback(
     (v: string) =>

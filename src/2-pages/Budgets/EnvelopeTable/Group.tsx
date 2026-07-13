@@ -31,6 +31,19 @@ type TGroupProps = {
   isReordering: boolean
   children?: React.ReactNode[]
 }
+const Sum: FC<{ value: number }> = ({ value }) => (
+  <Typography
+    align="right"
+    noWrap
+    sx={{
+      alignSelf: 'baseline',
+      color: 'text.disabled',
+    }}
+  >
+    <Amount value={value} decimals="ifOnly" />
+  </Typography>
+)
+
 export const Group: FC<TGroupProps> = ({
   name,
   groupIdx,
@@ -98,19 +111,6 @@ export const Group: FC<TGroupProps> = ({
 
       {isReordering && Actions}
     </Box>
-  )
-
-  const Sum: FC<{ value: number }> = ({ value }) => (
-    <Typography
-      align="right"
-      noWrap
-      sx={{
-        alignSelf: 'baseline',
-        color: 'text.disabled',
-      }}
-    >
-      <Amount value={value} decimals="ifOnly" />
-    </Typography>
   )
 
   return (

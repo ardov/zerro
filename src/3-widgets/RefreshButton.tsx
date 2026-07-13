@@ -38,12 +38,17 @@ const RefreshButton: FC<{ isMobile?: boolean; sx?: SxProps }> = ({
 
   const [notification, setNotification] = useState<ButtonState | null>(null)
 
+  const [prevFinishedAt, setPrevFinishedAt] = useState(finishedAt)
+  if (prevFinishedAt !== finishedAt) {
+    setPrevFinishedAt(finishedAt)
+    if (finishedAt) setNotification(isSuccessful ? 'success' : 'fail')
+  }
+
   useEffect(() => {
-    if (!finishedAt) return
-    setNotification(isSuccessful ? 'success' : 'fail')
-    const timer1 = setTimeout(() => setNotification(null), 2500)
-    return () => clearTimeout(timer1)
-  }, [isSuccessful, finishedAt])
+    if (!notification) return
+    const timer = setTimeout(() => setNotification(null), 2500)
+    return () => clearTimeout(timer)
+  }, [notification])
 
   const state: ButtonState = notification || buttonState
 

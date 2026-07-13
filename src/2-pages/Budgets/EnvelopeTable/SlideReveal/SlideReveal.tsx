@@ -48,17 +48,21 @@ function useSlideRevealGesture(revealWidth: number) {
   // Keep a ref so pointer handlers always see the current value without
   // needing offsetX in their dependency arrays.
   const offsetXRef = useRef(offsetX)
-  offsetXRef.current = offsetX
+  useEffect(() => {
+    offsetXRef.current = offsetX
+  }, [offsetX])
 
   const [isDragging, setIsDragging] = useState(false)
   const dragRef = useRef<DragState | null>(null)
 
   // Clamp or close when the panel width changes (column switch, breakpoint).
-  useEffect(() => {
+  const [prevRevealWidth, setPrevRevealWidth] = useState(revealWidth)
+  if (prevRevealWidth !== revealWidth) {
+    setPrevRevealWidth(revealWidth)
     setOffsetX(prev =>
       prev === 0 ? 0 : Math.max(-revealWidth, Math.min(0, prev))
     )
-  }, [revealWidth])
+  }
 
   const closeReveal = useCallback(() => setOffsetX(0), [])
 

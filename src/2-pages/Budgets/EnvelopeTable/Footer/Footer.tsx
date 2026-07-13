@@ -15,23 +15,23 @@ type FooterProps = {
   metric: Metric
 }
 
+const Sum: FC<{ value: TFxAmount; month: TISOMonth }> = ({ value, month }) => (
+  <Typography
+    variant="overline"
+    align="right"
+    noWrap
+    sx={{
+      color: 'text.secondary',
+    }}
+  >
+    <DisplayAmount value={value} decimals="ifOnly" month={month} noCurrency />
+  </Typography>
+)
+
 export const Footer: FC<FooterProps> = props => {
   const { month } = props
   const totals = useAppSelector(coreMonths.selectTotals)[month]
   const { t } = useTranslation('common')
-
-  const Sum: FC<{ value: TFxAmount }> = ({ value }) => (
-    <Typography
-      variant="overline"
-      align="right"
-      noWrap
-      sx={{
-        color: 'text.secondary',
-      }}
-    >
-      <DisplayAmount value={value} decimals="ifOnly" month={month} noCurrency />
-    </Typography>
-  )
 
   return (
     <TableRow
@@ -48,9 +48,9 @@ export const Footer: FC<FooterProps> = props => {
           </Typography>
         </div>
       }
-      budgeted={<Sum value={totals.budgeted} />}
-      outcome={<Sum value={totals.envActivity} />}
-      available={<Sum value={totals.available} />}
+      budgeted={<Sum value={totals.budgeted} month={month} />}
+      outcome={<Sum value={totals.envActivity} month={month} />}
+      available={<Sum value={totals.available} month={month} />}
       goal={null}
     />
   )

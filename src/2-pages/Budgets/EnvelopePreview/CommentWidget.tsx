@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react'
+import { FC, useState } from 'react'
 import { InputBase, InputAdornment } from '@mui/material'
 import { NotesIcon } from '6-shared/ui/Icons'
 import { useAppDispatch, useAppSelector } from 'store'
@@ -25,9 +25,11 @@ export const CommentWidget: FC<{ id: TEnvelopeId }> = ({ id }) => {
     300
   )
 
-  useEffect(() => {
+  const [prevComment, setPrevComment] = useState(comment)
+  if (prevComment !== comment) {
+    setPrevComment(comment)
     setValue(comment)
-  }, [comment])
+  }
 
   return (
     <InputBase

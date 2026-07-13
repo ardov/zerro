@@ -30,7 +30,10 @@ export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
   const value = props.value ? toISOMonth(props.value) : null
   const start = minMonth ? toISOMonth(minMonth) : null
   const end = maxMonth ? toISOMonth(maxMonth) : null
-  const [year, setYear] = useState(new Date(value || Date.now()).getFullYear())
+  const [year, setYear] = useState(
+    // eslint-disable-next-line react-hooks/purity -- initial state only, sampled once on mount
+    new Date(value || Date.now()).getFullYear()
+  )
   const months: TISOMonth[] = []
   for (let month = 0; month < 12; month++) {
     months.push(toISOMonth(new Date(year, month)))

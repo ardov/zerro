@@ -36,12 +36,16 @@ export const AmountInput: FC<AmountInputProps> = ({
   ...rest
 }) => {
   const ref = useRef<HTMLInputElement>()
-  const [expression, setExpression] = useState(value.toString())
+  const [expression, setExpression] = useState(
+    value === 0 ? '' : value.toString()
+  )
   const [focused, setFocused] = useState(false)
 
-  useEffect(() => {
+  const [prevValue, setPrevValue] = useState({ value, focused })
+  if (prevValue.value !== value || prevValue.focused !== focused) {
+    setPrevValue({ value, focused })
     if (!focused) setExpression(value === 0 ? '' : value.toString())
-  }, [value, focused])
+  }
 
   useEffect(() => {
     if (focused && ref && selectOnFocus) ref?.current?.select()
@@ -58,7 +62,7 @@ export const AmountInput: FC<AmountInputProps> = ({
 
   const calc = (str: string) => {
     try {
-      const computed = +eval(
+      const computed = evalExpression(
         str
           .replace(/^0*(?=0|0.|[1-9])/g, '') // remove leading zeroes
           .replace(/[-+*/]*$/g, '') // trim symbols in the end
@@ -183,4 +187,39 @@ function iOS() {
     // iPad on iOS 13 detection
     (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
   )
+}
+
+/** Evaluates expressions with numbers and + - * / (the only characters the
+ * input allows). Returns NaN for an empty string, throws on invalid input. */
+function evalExpression(source: string): number {
+  const tokens = source.match(/\d*\.?\d+|[+\-*/]/g) || []
+  if (!tokens.length) return NaN
+  let pos = 0
+  const parseFactor = (): number => {
+    let sign = 1
+    while (tokens[pos] === '+' || tokens[pos] === '-') {
+      if (tokens[pos] === '-') sign = -sign
+      pos++
+    }
+    return sign * Number(tokens[pos++])
+  }
+  const parseTerm = (): number => {
+    let result = parseFactor()
+    while (tokens[pos] === '*' || tokens[pos] === '/') {
+      const op = tokens[pos++]
+      const rhs = parseFactor()
+      result = op === '*' ? result * rhs : result / rhs
+    }
+    return result
+  }
+  let result = parseTerm()
+  while (tokens[pos] === '+' || tokens[pos] === '-') {
+    const op = tokens[pos++]
+    const rhs = parseTerm()
+    result = op === '+' ? result + rhs : result - rhs
+  }
+  if (pos !== tokens.length || Number.isNaN(result)) {
+    throw new Error('Invalid expression: ' + source)
+  }
+  return result
 }

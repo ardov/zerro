@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react'
+import React, { ChangeEvent, FC, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -55,9 +55,11 @@ export const ColorPicker: FC = () => {
     onColorChange?.(color)
     popover.close()
   }
-  useEffect(() => {
+  const [prevValue, setPrevValue] = useState(value)
+  if (prevValue !== value) {
+    setPrevValue(value)
     setCustom(value || '')
-  }, [value])
+  }
 
   return (
     <Popover {...popover.displayProps}>

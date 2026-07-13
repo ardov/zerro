@@ -149,11 +149,12 @@ const TrSkeleton = (props: { length: number }) => (
 /** Used to delay rendering of complex components */
 const useRenderState = (isScrolling?: boolean, delay = 300) => {
   const [renderContent, setRenderContent] = useState(!isScrolling)
+  if (!isScrolling && !renderContent) setRenderContent(true)
   useEffect(() => {
-    if (!isScrolling) setRenderContent(true)
+    if (renderContent) return
     const timer = setTimeout(() => setRenderContent(true), delay)
     return () => clearTimeout(timer)
-  }, [delay, isScrolling])
+  }, [renderContent, delay])
   return renderContent
 }
 

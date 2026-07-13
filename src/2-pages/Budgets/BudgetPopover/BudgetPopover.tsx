@@ -6,7 +6,7 @@ import {
 
 import type { TEnvelopeId } from '5-entities/envelope'
 
-import { FC, useEffect, useState } from 'react'
+import { FC, useState } from 'react'
 import {
   ListItemText,
   InputAdornment,
@@ -81,9 +81,11 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
     disp: value.disp - budgeted.disp + available.disp,
   }
 
-  useEffect(() => {
+  const [prevBudgeted, setPrevBudgeted] = useState(budgeted.env)
+  if (prevBudgeted !== budgeted.env) {
+    setPrevBudgeted(budgeted.env)
     setInputValue(budgeted.env)
-  }, [budgeted.env])
+  }
 
   const onChange = (value: number) =>
     dispatch(setTotalBudget({ month, id, value }))

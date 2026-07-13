@@ -8,7 +8,7 @@ import type {
 } from '6-shared/types'
 import { transactions as coreTransactions } from 'zerro-core/redux'
 
-import { useMemo, useState, useCallback, useEffect, FC } from 'react'
+import { useMemo, useState, useCallback, FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Theme } from '@mui/material'
 import { sendEvent } from '6-shared/helpers/tracking'
@@ -121,9 +121,11 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
   const openContextMenu = useTrContextMenu()
 
-  useEffect(() => {
+  const [prevCheckedDate, setPrevCheckedDate] = useState(checkedDate)
+  if (prevCheckedDate !== checkedDate) {
+    setPrevCheckedDate(checkedDate)
     if (checkedDate) onSelectSimilar(checkedDate)
-  }, [onSelectSimilar, checkedDate])
+  }
 
   const groups = useMemo(() => {
     const groups: ByDate<{ date: TISODate; transactions: JSX.Element[] }> = {}

@@ -136,12 +136,12 @@ export const SmartEnvTransactionsDrawer = () => {
   const filteredTransactions = useFilteredByEnvelope(envelopeConditions)
 
   const showTransaction = useCallback(
-    (id: string) => {
+    function show(id: string) {
       trPreview.open({
         id,
         onOpenOther: (id: string) => {
           trPreview.close()
-          showTransaction(id)
+          show(id)
         },
         onSelectSimilar: () => {
           // TODO: implement

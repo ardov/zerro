@@ -152,17 +152,16 @@ function useDataTrend(month: TISOMonth, id: TEnvelopeId): TTrendNode[] {
     balance: startBalance,
   }
 
-  let prevBalance = startNode.balance
-  const eodBalances = activityTrend.map((activity, i) => {
+  const eodBalances: (typeof startNode)[] = []
+  for (let i = 0; i < activityTrend.length; i++) {
     const day = i + 1
-    const node = {
+    const prevBalance = eodBalances[i - 1]?.balance ?? startNode.balance
+    eodBalances.push({
       day,
       date: getDate(month, day),
-      balance: addFxAmount(prevBalance, activity),
-    }
-    prevBalance = node.balance
-    return node
-  })
+      balance: addFxAmount(prevBalance, activityTrend[i]),
+    })
+  }
 
   const array = [startNode, ...eodBalances]
 

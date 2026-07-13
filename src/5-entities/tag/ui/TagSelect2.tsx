@@ -106,17 +106,21 @@ const TagSelectPopover: FC<TagSelectPopoverProps> = ({
     }
   })
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState({ open, tagType })
+  if (prevOpen.open !== open || prevOpen.tagType !== tagType) {
+    setPrevOpen({ open, tagType })
     if (open) {
       setSearch('')
       setLocalTagType(tagType)
       setFocused(0)
     }
-  }, [open, tagType])
+  }
 
-  useEffect(() => {
+  const [prevSearch, setPrevSearch] = useState(search)
+  if (prevSearch !== search) {
+    setPrevSearch(search)
     setFocused(0)
-  }, [search])
+  }
 
   const handleClick = (id: string) => () => onTagSelect(id)
 

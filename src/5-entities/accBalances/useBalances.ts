@@ -19,6 +19,7 @@ export function useBalances(
 ) {
   const list = useAppSelector(coreBalances.selectByDate)
   const startDate = toGroup(start || list[0].date, aggregation)
+  // eslint-disable-next-line react-hooks/purity -- 'today' is intentionally sampled on render
   const endDate = toGroup(end || Date.now(), aggregation)
   const balances = useMemo(() => {
     const byGroup: Record<TISODate, TBalanceNode> = {}

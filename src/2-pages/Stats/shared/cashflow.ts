@@ -75,6 +75,7 @@ export function useCashFlow(
   const historyStart = useAppSelector(coreTransactions.selectHistoryStart)
   const firstDate = getStartDate(period, aggregation, historyStart)
 
+  // eslint-disable-next-line react-hooks/purity -- 'today' is intentionally sampled on render
   return makeDateArray(firstDate, Date.now(), aggregation).map(date => {
     const point = aggregatedNodes[date] || {
       date,

@@ -5,7 +5,7 @@ import {
   transactions as coreTransactions,
 } from 'zerro-core/redux'
 
-import React, { FC, useEffect, useState } from 'react'
+import React, { FC, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CSSTransition } from 'react-transition-group'
 import { EditOutlined } from '@mui/icons-material'
@@ -63,9 +63,14 @@ const Actions: FC<ActionsProps> = ({
     setAnchorEl(event.currentTarget)
   const closeMenu = () => setAnchorEl(null)
 
-  useEffect(() => {
+  const [prevChecked, setPrevChecked] = useState({ visible, checkedIds })
+  if (
+    prevChecked.visible !== visible ||
+    prevChecked.checkedIds !== checkedIds
+  ) {
+    setPrevChecked({ visible, checkedIds })
     if (visible) setIds(checkedIds)
-  }, [visible, checkedIds])
+  }
 
   const handleSetTag = (id: string) => {
     sendEvent('Bulk Actions: set new tags')

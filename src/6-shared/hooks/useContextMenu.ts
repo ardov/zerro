@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 const waitBeforeContextMenu = 500
 const cooldownAfterContextMenu = 800
@@ -24,6 +24,10 @@ export function useContextMenu(props: {
   const treshold = props.treshold || waitBeforeContextMenu
   const contextMenuCb = useRef(props.onContextMenu)
   const onClickCb = useRef(props.onClick)
+  useEffect(() => {
+    contextMenuCb.current = props.onContextMenu
+    onClickCb.current = props.onClick
+  })
 
   const propsToPass = useMemo(() => {
     const iOS = isIOS()
@@ -34,7 +38,7 @@ export function useContextMenu(props: {
           event.preventDefault()
           contextMenuCb.current?.(event)
         },
-        onClick: onClickCb.current,
+        onClick: (event: React.MouseEvent) => onClickCb.current?.(event),
         style: touchDevice ? style : undefined,
       }
     }

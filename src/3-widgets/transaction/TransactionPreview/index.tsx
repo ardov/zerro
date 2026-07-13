@@ -1,6 +1,6 @@
 import type { TTransaction, TTransactionId } from '6-shared/types'
 
-import { useState, useEffect, FC } from 'react'
+import { useState, FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -124,7 +124,9 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
   const [localTime, setLocalTime] = useState(formatDate(tr.created, 'HH:mm'))
   const [localTag, setLocalTag] = useState(tr.tag)
 
-  useEffect(() => {
+  const [prevTr, setPrevTr] = useState(tr)
+  if (prevTr !== tr) {
+    setPrevTr(tr)
     setLocalComment(tr.comment)
     setLocalOutcome(tr.outcome)
     setLocalIncome(tr.income)
@@ -132,7 +134,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
     setLocalDate(tr.date)
     setLocalTime(formatDate(tr.created, 'HH:mm'))
     setLocalTag(tr.tag)
-  }, [tr])
+  }
 
   const timeChanged = formatDate(tr.created, 'HH:mm') !== localTime
 

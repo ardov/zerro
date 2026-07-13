@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 /**
  * Updates value only when clock is true.
@@ -6,8 +6,6 @@ import { useEffect, useState } from 'react'
  */
 export function useCachedValue<T>(value: T, clock: boolean): T {
   const [cachedValue, setCachedValue] = useState(value)
-  useEffect(() => {
-    if (clock) setCachedValue(value)
-  }, [value, clock])
+  if (clock && cachedValue !== value) setCachedValue(value)
   return cachedValue
 }
