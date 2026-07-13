@@ -11,13 +11,11 @@ import {
   type TOutboxEntry,
 } from './outbox'
 
-type TCommand = { type: 'account.rename'; title: string }
-
 function makeEntry(
   id: string,
   title: string,
   patch: TNormalizedPatch
-): TOutboxEntry<TCommand> {
+): TOutboxEntry {
   return {
     id,
     command: { type: 'account.rename', title },

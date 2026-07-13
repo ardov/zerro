@@ -19,7 +19,7 @@ interface DataSlice {
   current: TDataStore
   base: TDataStore
   /** Durable local commands; current replays from the applied prefix. */
-  outbox: TOutboxEntry<unknown>[]
+  outbox: TOutboxEntry[]
   outboxHead: number
   inbox?: TServerInbox | null
 }
@@ -84,7 +84,7 @@ const { reducer, actions } = createSlice({
     }),
     appendClientOutboxEntry: withPerf(
       'appendClientOutboxEntry',
-      (state, { payload }: PayloadAction<TOutboxEntry<unknown>>) => {
+      (state, { payload }: PayloadAction<TOutboxEntry>) => {
         const next = appendOutbox(state.outbox, state.outboxHead, payload)
         state.outbox = next.outbox
         state.outboxHead = next.outboxHead

@@ -19,7 +19,7 @@ type TReplicaStateSource = {
   data: {
     current: TDataStore
     base: TDataStore
-    outbox: TOutboxEntry<unknown>[]
+    outbox: TOutboxEntry[]
     outboxHead: number
   }
 }

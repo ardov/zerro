@@ -23,6 +23,26 @@ describe('parsePersistedReplica', () => {
     expect(parsePersistedReplica(validReplica)).toBe(validReplica)
   })
 
+  it('accepts normalized patches with numeric ids, deletions, and timestamps', () => {
+    const patch = {
+      serverTimestamp: 200,
+      instrument: [{ id: 2, title: 'Euro' }],
+      deletion: [{ id: 3, object: 'company', stamp: 10, user: 1 }],
+    }
+    const replica = {
+      ...validReplica,
+      outbox: [
+        {
+          ...validReplica.outbox[0],
+          intentPatch: patch,
+          appliedPatch: patch,
+        },
+      ],
+    }
+
+    expect(parsePersistedReplica(replica)).toBe(replica)
+  })
+
   it.each([
     [{ ...validReplica, version: 2 }, 'unsupported version'],
     [{ ...validReplica, outboxHead: 2 }, 'outbox head is out of range'],

@@ -5,11 +5,13 @@ export const replicaPersistenceVersion = 1 as const
 export type TPersistedReplica = {
   version: typeof replicaPersistenceVersion
   baseServerTimestamp: number
-  outbox: TOutboxEntry<unknown>[]
+  outbox: TOutboxEntry[]
   outboxHead: number
 }
 
 const patchKeys = new Set([
+  'serverTimestamp',
+  'deletion',
   'instrument',
   'country',
   'company',
@@ -70,17 +72,34 @@ function validateOutboxEntry(value: unknown, index: number): void {
 function validatePatch(value: unknown, path: string): void {
   if (!isRecord(value))
     throw new Error(`Invalid persisted Core replica: ${path} is not an object`)
-  for (const [key, entities] of Object.entries(value)) {
-    if (
-      !patchKeys.has(key) ||
-      !Array.isArray(entities) ||
-      entities.some(
-        entity => !isRecord(entity) || typeof entity.id !== 'string'
-      )
-    )
+  for (const [key, patchValue] of Object.entries(value)) {
+    if (!patchKeys.has(key)) {
       throw new Error(
         `Invalid persisted Core replica: ${path}.${key} is invalid`
       )
+    }
+
+    if (key === 'serverTimestamp') {
+      if (!isFiniteNumber(patchValue)) {
+        throw new Error(
+          `Invalid persisted Core replica: ${path}.${key} is invalid`
+        )
+      }
+      continue
+    }
+
+    if (
+      !Array.isArray(patchValue) ||
+      patchValue.some(
+        entity =>
+          !isRecord(entity) ||
+          (typeof entity.id !== 'string' && typeof entity.id !== 'number')
+      )
+    ) {
+      throw new Error(
+        `Invalid persisted Core replica: ${path}.${key} is invalid`
+      )
+    }
   }
 }
 

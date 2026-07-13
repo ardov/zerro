@@ -1,5 +1,5 @@
 import { hex2int, isHEX } from '../../zenmoney/colors'
-import type { ById, OptionalExceptFor } from '../../shared/types'
+import type { ById } from '../../shared/types'
 import type { TFxCode } from '../../zenmoney/instruments'
 import type { TDataStore } from '../../zenmoney/store'
 import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../../types'
@@ -23,7 +23,19 @@ import {
 import { mergeNormalizedPatches } from '../hidden-data'
 import type { TEnvelope, TEnvNode, TGroupNode } from './build'
 
-export type TEnvelopeDraft = OptionalExceptFor<TEnvelope, 'id'>
+type TEnvelopePatchInput = {
+  id: TEnvelopeId
+  originalName?: string
+  colorHex?: string | null
+  indexRaw?: number
+  parent?: TEnvelopeId | null
+  visibility?: envelopeVisibility
+  group?: string
+  comment?: string
+  currency?: TFxCode
+  keepIncome?: boolean
+  carryNegatives?: boolean
+}
 
 export type TRenameEnvelopeInput = {
   id: TEnvelopeId
@@ -146,7 +158,7 @@ export function compileApplyEnvelopeStructure(
   input: TApplyEnvelopeStructureInput,
   ctx: TCoreContext
 ): TNormalizedPatch {
-  const drafts: TEnvelopeDraft[] = []
+  const drafts: TEnvelopePatchInput[] = []
   // Index counts every flattened node, group nodes included, matching the
   // index order the structure projector assigns after `flattenStructure`.
   let index = 0
@@ -322,7 +334,7 @@ export function compileUpdateEnvelopeSettings(
 export function compilePatchEnvelope(
   data: TDataStore,
   envelopes: ById<TEnvelope>,
-  draft: TEnvelopeDraft | TEnvelopeDraft[],
+  draft: TEnvelopePatchInput | TEnvelopePatchInput[],
   ctx: TCoreContext
 ): TNormalizedPatch {
   const patches = getEnvelopePatches(draft, envelopes)
@@ -339,22 +351,8 @@ export function compilePatchEnvelope(
   )
 }
 
-export function compilePatchEnvelopeMetadata(
-  data: TDataStore,
-  envelopes: ById<TEnvelope>,
-  draft: TEnvelopeDraft | TEnvelopeDraft[],
-  ctx: TCoreContext
-): TNormalizedPatch {
-  const metaPatches = toArray(draft)
-    .map(item => getEnvelopePatch(item, envelopes).meta)
-    .filter((patch): patch is TEnvelopeMetaPatch => !!patch)
-
-  if (!metaPatches.length) return {}
-  return compilePatchEnvelopeMeta(data, metaPatches, ctx)
-}
-
 function getEnvelopePatches(
-  draft: TEnvelopeDraft | TEnvelopeDraft[],
+  draft: TEnvelopePatchInput | TEnvelopePatchInput[],
   envelopes: ById<TEnvelope>
 ): TEnvelopePatches {
   const patches: TEnvelopePatches = {
@@ -376,7 +374,7 @@ function getEnvelopePatches(
 }
 
 function getEnvelopePatch(
-  draft: TEnvelopeDraft,
+  draft: TEnvelopePatchInput,
   envelopes: ById<TEnvelope>
 ): TEnvelopePatch {
   const current = envelopes[draft.id]
@@ -385,61 +383,70 @@ function getEnvelopePatch(
   const { type, id } = envId.parse(draft.id)
   const patch: TEnvelopePatch = {}
 
-  Object.entries(draft).forEach(([key, value]) => {
-    const draftKey = key as keyof TEnvelopeDraft
-    if (current[draftKey] === value) return
+  if (
+    draft.originalName !== undefined &&
+    current.originalName !== draft.originalName
+  ) {
+    if (type === EnvType.Tag) patch.tag = { id, title: draft.originalName }
+    if (type === EnvType.Account)
+      patch.account = { id, title: draft.originalName }
+    if (type === EnvType.Merchant)
+      patch.merchant = { id, title: draft.originalName }
+  }
 
-    switch (draftKey) {
-      case 'originalName':
-        if (type === EnvType.Tag) {
-          patch.tag ??= { id }
-          patch.tag.title = value as TEnvelope['originalName']
-        } else if (type === EnvType.Account) {
-          patch.account ??= { id }
-          patch.account.title = value as TEnvelope['originalName']
-        } else if (type === EnvType.Merchant) {
-          patch.merchant ??= { id }
-          patch.merchant.title = value as TEnvelope['originalName']
-        }
-        break
+  if (
+    type === EnvType.Tag &&
+    'colorHex' in draft &&
+    current.colorHex !== draft.colorHex
+  ) {
+    patch.tag = { ...patch.tag, id, color: getTagColor(draft.colorHex) }
+  }
 
-      case 'colorHex':
-        if (type === EnvType.Tag) {
-          patch.tag ??= { id }
-          patch.tag.color = getTagColor(value as TEnvelope['colorHex'])
-        }
-        break
+  if ('indexRaw' in draft && current.indexRaw !== draft.indexRaw) {
+    patch.meta = { ...patch.meta, id: draft.id, index: draft.indexRaw }
+  }
 
-      case 'indexRaw':
-        patch.meta ??= { id: draft.id }
-        patch.meta.index = value as TEnvelope['indexRaw']
-        break
-
-      case 'parent':
-        if (type === EnvType.Tag) {
-          patch.tag ??= { id }
-          patch.tag.parent = getRightTagParent(
-            value as TEnvelope['parent'],
-            envelopes
-          )
-        } else {
-          patch.meta ??= { id: draft.id }
-          patch.meta.parent =
-            getRightParent(value as TEnvelope['parent'], envelopes) || undefined
-        }
-        break
-
-      case 'visibility':
-      case 'group':
-      case 'comment':
-      case 'currency':
-      case 'keepIncome':
-      case 'carryNegatives':
-        patch.meta ??= { id: draft.id }
-        patch.meta[draftKey] = value as never
-        break
+  if ('parent' in draft && current.parent !== draft.parent) {
+    if (type === EnvType.Tag) {
+      patch.tag = {
+        ...patch.tag,
+        id,
+        parent: getRightTagParent(draft.parent, envelopes),
+      }
+    } else {
+      patch.meta = {
+        ...patch.meta,
+        id: draft.id,
+        parent: getRightParent(draft.parent, envelopes) || undefined,
+      }
     }
-  })
+  }
+
+  if ('visibility' in draft && current.visibility !== draft.visibility) {
+    patch.meta = { ...patch.meta, id: draft.id, visibility: draft.visibility }
+  }
+  if ('group' in draft && current.group !== draft.group) {
+    patch.meta = { ...patch.meta, id: draft.id, group: draft.group }
+  }
+  if ('comment' in draft && current.comment !== draft.comment) {
+    patch.meta = { ...patch.meta, id: draft.id, comment: draft.comment }
+  }
+  if ('currency' in draft && current.currency !== draft.currency) {
+    patch.meta = { ...patch.meta, id: draft.id, currency: draft.currency }
+  }
+  if ('keepIncome' in draft && current.keepIncome !== draft.keepIncome) {
+    patch.meta = { ...patch.meta, id: draft.id, keepIncome: draft.keepIncome }
+  }
+  if (
+    'carryNegatives' in draft &&
+    current.carryNegatives !== draft.carryNegatives
+  ) {
+    patch.meta = {
+      ...patch.meta,
+      id: draft.id,
+      carryNegatives: draft.carryNegatives,
+    }
+  }
 
   return patch
 }

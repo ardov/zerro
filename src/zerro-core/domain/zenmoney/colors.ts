@@ -28,7 +28,7 @@ export function hex2rgb(hex?: string | null): TRgb | null {
   return [r, g, b]
 }
 
-export function isHEX(hex: any): hex is string {
+export function isHEX(hex: unknown): hex is string {
   if (typeof hex === 'string') return /^#[0-9A-F]{6}$/i.test(hex)
   return false
 }

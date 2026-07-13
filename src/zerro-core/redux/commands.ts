@@ -305,39 +305,17 @@ function compileAppCommandResult(
  * appends its materialized result to the Redux-owned outbox. Only narrow
  * semantic commands are exported from this adapter.
  */
-type TCreateEnvelopeCommand = Extract<
-  TAppCommand,
-  { type: 'zerro.envelope.create' }
->
-type TRecreateTransactionCommand = Extract<
-  TAppCommand,
-  { type: 'zenmoney.transaction.recreate' }
->
-type TSetReminderCommand = Extract<
-  TAppCommand,
-  { type: 'zenmoney.reminder.set' }
->
-type TPrepareDataAccountCommand = Extract<
-  TAppCommand,
-  { type: 'infrastructure.dataAccount.prepare@2' }
->
-
-function executeCommand(
-  command: TCreateEnvelopeCommand
-): AppThunk<TCreateEnvelopeReceipt | undefined>
-function executeCommand(
-  command: TRecreateTransactionCommand
-): AppThunk<{ transactionId: TTransactionId } | undefined>
-function executeCommand(
-  command: TSetReminderCommand
-): AppThunk<TReminder[] | undefined>
-function executeCommand(
-  command: TPrepareDataAccountCommand
-): AppThunk<TAccountId | undefined>
-function executeCommand(command: TAppCommand): AppThunk<undefined>
-function executeCommand(command: TAppCommand): AppThunk<unknown> {
-  return executeReduxCommand(command, (state, ctx) =>
-    compileAppCommandResult(state, command, ctx)
+function executeCommand<TReceipt = undefined>(
+  command: TAppCommand
+): AppThunk<TReceipt | undefined> {
+  return executeReduxCommand<TReceipt>(
+    command,
+    (state, ctx) =>
+      // Receipt types are documented by the four public wrappers that request
+      // one; the command compiler stays a simple runtime switch.
+      compileAppCommandResult(state, command, ctx) as
+        | TNormalizedPatch
+        | TCompiled<TReceipt>
   )
 }
 
@@ -387,7 +365,7 @@ export function setGoal(
 export function createEnvelope(
   input: TCreateEnvelopeInput
 ): AppThunk<TEnvelopeId> {
-  const execute = executeCommand({
+  const execute = executeCommand<TCreateEnvelopeReceipt>({
     type: 'zerro.envelope.create',
     payload: input,
   })
@@ -482,7 +460,7 @@ export function applyChangesToTransaction(patch: TTransactionPatch): AppThunk {
 export function recreateTransaction(
   patch: TTransactionPatch
 ): AppThunk<TTransactionId> {
-  const execute = executeCommand({
+  const execute = executeCommand<{ transactionId: TTransactionId }>({
     type: 'zenmoney.transaction.recreate',
     payload: patch,
   })
@@ -520,7 +498,7 @@ export function setReminder(
     | TReminderPatch
     | Array<TReminderDraft | TReminderPatch>
 ): AppThunk<TReminder[]> {
-  const execute = executeCommand({
+  const execute = executeCommand<TReminder[]>({
     type: 'zenmoney.reminder.set',
     payload: draft,
   })
@@ -536,7 +514,7 @@ export function deleteReminder(id: TReminderId): AppThunk {
 }
 
 export function prepareDataAccount(title: string): AppThunk<TAccountId> {
-  const execute = executeCommand({
+  const execute = executeCommand<TAccountId>({
     type: 'infrastructure.dataAccount.prepare@2',
     payload: { title },
   })

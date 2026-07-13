@@ -43,10 +43,6 @@ export type TDeletionObject = TZmDeletionObject & {
   stamp: TMsTime
 }
 
-export type TDataStorePatch = Partial<TDataStore> & {
-  deletion?: TZmDeletionObject[]
-}
-
 /** Normalized patch: the replay/apply unit stored in the outbox. */
 export type TDiff = {
   serverTimestamp?: TMsTime

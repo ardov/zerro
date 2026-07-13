@@ -14,18 +14,18 @@ import {
 
 export type { TOutboxEntry } from './outbox'
 
-export type TZerroEngineState<TCommand = unknown> = {
+export type TZerroEngineState = {
   base: TDataStore
   baseServerTimestamp?: number
-  outbox: TOutboxEntry<TCommand>[]
+  outbox: TOutboxEntry[]
   outboxHead: number
   inbox?: TNormalizedPatch | null
 }
 
-export type TZerroEngineInput<TCommand = unknown> = {
+export type TZerroEngineInput = {
   base: TDataStore
   baseServerTimestamp?: number
-  outbox?: TOutboxEntry<TCommand>[]
+  outbox?: TOutboxEntry[]
   outboxHead?: number
   inbox?: TNormalizedPatch | null
   ctx: TCoreContext
@@ -37,15 +37,13 @@ export type TCommandCompiler<TCommand, TReceipt = unknown> = (
   ctx: TCoreContext
 ) => TNormalizedPatch | TCompiled<TReceipt>
 
-export type TExecuteResult<TCommand, TReceipt = unknown> = {
-  entry: TOutboxEntry<TCommand>
+export type TExecuteResult<TReceipt = unknown> = {
+  entry: TOutboxEntry
   receipt?: TReceipt
 }
 
-export function createZerroEngine<TCommand = unknown>(
-  input: TZerroEngineInput<TCommand>
-) {
-  let state: TZerroEngineState<TCommand> = {
+export function createZerroEngine(input: TZerroEngineInput) {
+  let state: TZerroEngineState = {
     base: input.base,
     baseServerTimestamp: input.baseServerTimestamp,
     outbox: input.outbox ? [...input.outbox] : [],
@@ -66,7 +64,7 @@ export function createZerroEngine<TCommand = unknown>(
     redo,
   }
 
-  function getState(): TZerroEngineState<TCommand> {
+  function getState(): TZerroEngineState {
     return {
       ...state,
       outbox: [...state.outbox],
@@ -77,14 +75,14 @@ export function createZerroEngine<TCommand = unknown>(
     return replayOutbox(state.base, state.outbox, state.outboxHead)
   }
 
-  function getPendingOutbox(): TOutboxEntry<TCommand>[] {
+  function getPendingOutbox(): TOutboxEntry[] {
     return selectPendingOutbox(state.outbox, state.outboxHead)
   }
 
-  function execute<TReceipt = unknown>(
+  function execute<TCommand, TReceipt = unknown>(
     command: TCommand,
     compile: TCommandCompiler<TCommand, TReceipt>
-  ): TExecuteResult<TCommand, TReceipt> {
+  ): TExecuteResult<TReceipt> {
     const current = getCurrent()
     const result = compile(current, command, input.ctx)
     const intentPatch = isCompiled(result) ? result.patch : result
@@ -100,9 +98,9 @@ export function createZerroEngine<TCommand = unknown>(
   }
 
   function executeCompiled(
-    command: TCommand,
+    command: unknown,
     intentPatch: TNormalizedPatch
-  ): TOutboxEntry<TCommand> {
+  ): TOutboxEntry {
     return appendMaterialized(
       command,
       materializePatch(getCurrent(), intentPatch)
@@ -110,10 +108,10 @@ export function createZerroEngine<TCommand = unknown>(
   }
 
   function appendMaterialized(
-    command: TCommand,
+    command: unknown,
     materialized: TMaterializedPatch
-  ): TOutboxEntry<TCommand> {
-    const entry: TOutboxEntry<TCommand> = {
+  ): TOutboxEntry {
+    const entry: TOutboxEntry = {
       id: input.ctx.uuid(),
       command,
       intentPatch: materialized.intentPatch,

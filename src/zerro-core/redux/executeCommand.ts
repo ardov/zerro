@@ -19,8 +19,8 @@ const defaultCtx = { now: () => Date.now(), uuid: () => uuidv1() }
  * or app entity modules, so hidden-store reminder writers can join the outbox
  * without entering the adapter selector graph during module initialization.
  */
-export function executeReduxCommand<TCommand, TReceipt = unknown>(
-  command: TCommand,
+export function executeReduxCommand<TReceipt = unknown>(
+  command: unknown,
   compile: TReduxCommandCompiler<TReceipt>
 ): AppThunk<TReceipt | undefined> {
   return (dispatch, getState) => {
@@ -30,7 +30,7 @@ export function executeReduxCommand<TCommand, TReceipt = unknown>(
 
     if (!isEmptyPatch(patch)) {
       const materialized = materializePatch(state.data.current, patch)
-      const entry: TOutboxEntry<TCommand> = {
+      const entry: TOutboxEntry = {
         id: defaultCtx.uuid(),
         command,
         intentPatch: materialized.intentPatch,

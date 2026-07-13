@@ -2,17 +2,18 @@ import type { TNormalizedPatch } from '../../types'
 import { applyPatch, replay } from '../../domain/zenmoney'
 import type { TDataStore } from '../../domain/zenmoney/store'
 
-export type TOutboxEntry<TCommand = unknown> = {
+export type TOutboxEntry = {
   id: string
-  command: TCommand
+  /** Serializable command metadata. Replay relies on the stored patches. */
+  command: unknown
   intentPatch: TNormalizedPatch
   appliedPatch: TNormalizedPatch
   materializerVersion: number
   createdAt: number
 }
 
-export type TOutboxState<TCommand = unknown> = {
-  outbox: TOutboxEntry<TCommand>[]
+export type TOutboxState = {
+  outbox: TOutboxEntry[]
   outboxHead: number
 }
 
@@ -23,26 +24,26 @@ export function clampOutboxHead(
   return Math.max(0, Math.min(outboxHead, outboxLength))
 }
 
-export function getPendingOutbox<TCommand>(
-  outbox: readonly TOutboxEntry<TCommand>[],
+export function getPendingOutbox(
+  outbox: readonly TOutboxEntry[],
   outboxHead: number
-): TOutboxEntry<TCommand>[] {
+): TOutboxEntry[] {
   return outbox.slice(0, clampOutboxHead(outboxHead, outbox.length))
 }
 
-export function appendOutbox<TCommand>(
-  outbox: readonly TOutboxEntry<TCommand>[],
+export function appendOutbox(
+  outbox: readonly TOutboxEntry[],
   outboxHead: number,
-  entry: TOutboxEntry<TCommand>
-): TOutboxState<TCommand> {
+  entry: TOutboxEntry
+): TOutboxState {
   const nextOutbox = getPendingOutbox(outbox, outboxHead)
   nextOutbox.push(entry)
   return { outbox: nextOutbox, outboxHead: nextOutbox.length }
 }
 
-export function replayOutbox<TCommand>(
+export function replayOutbox(
   base: TDataStore,
-  outbox: readonly TOutboxEntry<TCommand>[],
+  outbox: readonly TOutboxEntry[],
   outboxHead: number
 ): TDataStore {
   return replay(
@@ -57,9 +58,9 @@ export function replayOutbox<TCommand>(
  * applied prefix up to the current head; append then only needs this entry's
  * effect. Undo, redo, and base changes still require a full `replayOutbox`.
  */
-export function applyOutboxEntry<TCommand>(
+export function applyOutboxEntry(
   current: TDataStore,
-  entry: TOutboxEntry<TCommand>
+  entry: TOutboxEntry
 ): TDataStore {
   return applyPatch(current, entry.appliedPatch)
 }
