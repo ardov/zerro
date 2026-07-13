@@ -15,7 +15,8 @@ const selectStoredFxRates = createSelector([selectReminderSlice], reminder =>
 )
 export const selectCurrent = createSelector(
   [instruments.selectAll, selectCurrentMonth],
-  (instruments, currentMonth) => buildCurrentFxRates({ instruments, currentMonth })
+  (instruments, currentMonth) =>
+    buildCurrentFxRates({ instruments, currentMonth })
 )
 export const selectRates = createSelector(
   [selectStoredFxRates, selectCurrent],

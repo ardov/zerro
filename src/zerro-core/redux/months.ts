@@ -15,7 +15,14 @@ export const selectTotals = createSelector(
     fxRates.selectConvertFx,
     selectCurrentMonth,
   ],
-  (monthList, currentFunds, activityData, envMetrics, convertFx, currentMonth) =>
+  (
+    monthList,
+    currentFunds,
+    activityData,
+    envMetrics,
+    convertFx,
+    currentMonth
+  ) =>
     buildMonthTotals({
       monthList,
       currentFunds,

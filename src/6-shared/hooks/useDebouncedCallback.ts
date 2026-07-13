@@ -1,6 +1,5 @@
 // From https://github.com/react-hookz/web/blob/master/src/useDebouncedCallback/useDebouncedCallback.ts
 
- 
 import { DependencyList, useMemo, useRef } from 'react'
 
 export interface DebouncedFunction<Fn extends (...args: any[]) => any> {
@@ -56,7 +55,6 @@ export function useDebouncedCallback<Fn extends (...args: any[]) => any>(
         clear()
       }
 
-       
       const wrapped = function (this, ...args) {
         if (timeout.current) {
           clearTimeout(timeout.current)

@@ -113,9 +113,7 @@ describe('selectBudgets', () => {
       [{ id: envelopeId, month: MONTH, value: 12_000 }],
       ctx
     )
-    const next = selectBudgets(
-      makeRootState(applyPatch(store, budgetPatch))
-    )
+    const next = selectBudgets(makeRootState(applyPatch(store, budgetPatch)))
 
     expect(next).not.toBe(first)
     expect(next[MONTH][envelopeId]).toBe(12_000)

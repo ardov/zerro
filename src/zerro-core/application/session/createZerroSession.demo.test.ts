@@ -97,11 +97,7 @@ describe('createZerroSession on deterministic demo data', () => {
         session.fx.getCurrentRates(),
         selectCurrentFxRates(state)
       )
-      expectSameJsonHash(
-        'fxRates',
-        session.fx.getRates(),
-        selectFxRates(state)
-      )
+      expectSameJsonHash('fxRates', session.fx.getRates(), selectFxRates(state))
       expectSameJsonHash(
         'rawActivity',
         session.read.rawActivity(),
@@ -137,11 +133,7 @@ describe('createZerroSession on deterministic demo data', () => {
         session.read.rawGoals(),
         selectRawGoals(state)
       )
-      expectSameJsonHash(
-        'goals',
-        session.goals.getAll(),
-        selectGoals(state)
-      )
+      expectSameJsonHash('goals', session.goals.getAll(), selectGoals(state))
       expectSameJsonHash(
         'goalTotals',
         session.goals.getTotals(),

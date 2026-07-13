@@ -35,7 +35,11 @@ import {
   getUserSettings,
   toEnvelopeStructureInput,
 } from '../domain/zerro'
-import { compileAppCommand, recreateTransaction, type TAppCommand } from './commands'
+import {
+  compileAppCommand,
+  recreateTransaction,
+  type TAppCommand,
+} from './commands'
 import {
   selectEnvelopes,
   selectEnvelopeStructure,
@@ -82,7 +86,10 @@ const routingCases: Array<{
       const [id] = Object.keys(data.transaction)
       return {
         data,
-        command: { type: 'zenmoney.transaction.delete', payload: { ids: [id] } },
+        command: {
+          type: 'zenmoney.transaction.delete',
+          payload: { ids: [id] },
+        },
         direct: ctx => compileDeleteTransactions(data, [id], ctx),
       }
     },

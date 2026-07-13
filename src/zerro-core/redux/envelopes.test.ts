@@ -30,8 +30,7 @@ const makeRootState = makeTestRootState
 
 describe('selectEnvelopes chain', () => {
   it('keeps appearance out of domain envelopes and adds it in the adapter', async () => {
-    const { selectDomainEnvelopes, selectEnvelopes } =
-      await importModels()
+    const { selectDomainEnvelopes, selectEnvelopes } = await importModels()
     const state = makeRootState(makeDemoStore({ now: NOW }))
     const id = envId.get(EnvType.Tag, null)
 
@@ -86,8 +85,7 @@ describe('selectEnvelopes chain', () => {
   })
 
   it('stays cached across unrelated data changes', async () => {
-    const { selectEnvelopes, selectEnvelopeStructure } =
-      await importModels()
+    const { selectEnvelopes, selectEnvelopeStructure } = await importModels()
     const store = makeDemoStore({ now: NOW })
     const envelopes = selectEnvelopes(makeRootState(store))
     const structure = selectEnvelopeStructure(makeRootState(store))

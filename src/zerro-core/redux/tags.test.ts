@@ -10,8 +10,7 @@ const makeRootState = makeTestRootState
 describe('Core tag presentation adapter', () => {
   it('adds presentation fields and the uncategorized tag', async () => {
     await i18n.changeLanguage('en')
-    const { selectPopulatedTags } =
-      await import('../testing/reduxSelectors')
+    const { selectPopulatedTags } = await import('../testing/reduxSelectors')
     const state = makeRootState(makeDemoStore({ now: NOW }))
     const tags = selectPopulatedTags(state)
     const tag = state.data.current.tag[Object.keys(state.data.current.tag)[0]]
@@ -36,8 +35,7 @@ describe('Core tag presentation adapter', () => {
   })
 
   it('stays cached across unrelated data changes and recomputes for tags', async () => {
-    const { selectPopulatedTags } =
-      await import('../testing/reduxSelectors')
+    const { selectPopulatedTags } = await import('../testing/reduxSelectors')
     const store = makeDemoStore({ now: NOW })
     const first = selectPopulatedTags(makeRootState(store))
     const unrelated = makeRootState({ ...store, company: { ...store.company } })
