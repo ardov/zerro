@@ -89,19 +89,20 @@ permissive test builders.
 | Replica/sync                | Reload + undo/redo + rebase + default full suite |
 | Package/dependency boundary | Boundary tests + external consumer type compile  |
 
-## Current health debt
+## Verification health
 
-At the 2026-07-13 audit:
+The 2026-07-13 audit found load-sensitive parallel tests, formatting and ESLint
+drift, and an untrustworthy Knip configuration. Closed on 2026-07-14:
 
-- TypeScript and `zerro-core:package-check` passed;
-- focused failing candidates passed in isolation;
-- the default parallel full suite timed out in two import-heavy tests;
-- the same 296 tests passed serially with `--no-file-parallelism`;
-- Core still had formatting drift and ESLint warnings;
-- Knip did not have trustworthy application entrypoints.
+- package declaration compilation runs only as the explicit
+  `zerro-core:package-check` gate;
+- the import-heavy session parity test loads its dependencies before the test
+  timeout starts;
+- the default parallel suite is reproducibly green without a timeout increase;
+- ESLint enforces zero warnings and Core formatting is clean;
+- Knip starts from the real app, worker, and package-consumer entrypoints.
 
-Treat these as closure work. Do not hide them with a global timeout increase,
-serial-only CI, warning-only lint, or unreviewed bulk deletion.
+Knip output is evidence for an audit, not automatic deletion authority.
 
 ## Completion gate
 

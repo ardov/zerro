@@ -28,20 +28,15 @@ This file routes the next task. Git contains implementation history.
 
 Land this as small independent commits where practical:
 
-1. **Reliable verification**
-   - make default parallel `pnpm exec vitest run` green;
-   - keep package declaration checking as an explicit boundary gate;
-   - make changed Core files pass ESLint and Prettier;
-   - configure dead-code reporting before deleting from its output.
-2. **Ready bridge removal**
+1. **Ready bridge removal**
    - remove deprecated `createZerroSession().read` and update parity tests;
    - move transaction filtering out of `5-entities` into a Core-owned boundary;
    - migrate the last legacy instrument selector consumers;
    - remove adapter members without real consumers.
-3. **Remove false documentation**
+2. **Remove false documentation**
    - delete the descriptive `readGraph` and its self-consistency tests unless
      it is changed to verify actual session/Redux wiring.
-4. **Manual completion smoke**
+3. **Manual completion smoke**
    - edit a budget or goal;
    - edit a transaction and reload with a pending outbox;
    - perform explicit sync and verify canonical rebase.

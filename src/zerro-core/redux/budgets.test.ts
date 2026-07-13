@@ -9,10 +9,7 @@ import {
   envId,
   EnvType,
 } from '../domain/zerro'
-
-async function importModels() {
-  return import('../testing/reduxSelectors')
-}
+import { selectBudgets } from '../testing/reduxSelectors'
 
 const NOW = Date.parse('2026-05-15T12:00:00Z')
 const MONTH = '2026-05' as TISOMonth
@@ -60,8 +57,7 @@ function makeSeededStore() {
 const makeRootState = makeTestRootState
 
 describe('selectBudgets', () => {
-  it('uses hidden budgets with default settings', async () => {
-    const { selectBudgets } = await importModels()
+  it('uses hidden budgets with default settings', () => {
     const { store, tagA, tagB } = makeSeededStore()
     const state = makeRootState(store)
 
@@ -72,8 +68,7 @@ describe('selectBudgets', () => {
     expect(core[MONTH][envId.get(EnvType.Tag, tagB)]).toBeUndefined()
   })
 
-  it('uses ZenMoney tag budgets when preferZmBudgets is enabled', async () => {
-    const { selectBudgets } = await importModels()
+  it('uses ZenMoney tag budgets when preferZmBudgets is enabled', () => {
     const { store, tagB } = makeSeededStore()
     const settingsPatch = compilePatchUserSettings(
       store,
@@ -87,8 +82,7 @@ describe('selectBudgets', () => {
     expect(core[MONTH][envId.get(EnvType.Tag, tagB)]).toBe(7_000)
   })
 
-  it('stays cached across unrelated data changes', async () => {
-    const { selectBudgets } = await importModels()
+  it('stays cached across unrelated data changes', () => {
     const { store } = makeSeededStore()
     const first = selectBudgets(makeRootState(store))
 
@@ -101,8 +95,7 @@ describe('selectBudgets', () => {
     expect(selectBudgets(unrelatedChange)).toBe(first)
   })
 
-  it('recomputes when hidden env budgets change', async () => {
-    const { selectBudgets } = await importModels()
+  it('recomputes when hidden env budgets change', () => {
     const { store, tagA } = makeSeededStore()
     const envelopeId = envId.get(EnvType.Tag, tagA)
     const first = selectBudgets(makeRootState(store))

@@ -1,10 +1,11 @@
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import type { TISOMonth } from '6-shared/types'
 import { i18n } from '6-shared/localization'
 import { makeDemoStore } from '../demo'
 import { makeTestRootState } from '../testing/rootState'
 import { applyPatch } from '../domain/zenmoney'
 import { compileSetGoal, envId, EnvType, goalType } from '../domain/zerro'
+import { selectGoals, selectGoalTotals } from '../testing/reduxSelectors'
 
 const NOW = Date.parse('2026-05-15T12:00:00Z')
 const MONTH = '2026-05' as TISOMonth
@@ -16,11 +17,6 @@ const ctx = {
     return () =>
       `00000000-0000-4000-8000-${String(counter++).padStart(12, '0')}`
   })(),
-}
-
-async function importModels() {
-  await i18n.changeLanguage('en')
-  return import('../testing/reduxSelectors')
 }
 
 function makeSeededStore() {
@@ -41,8 +37,9 @@ function makeSeededStore() {
 const makeRootState = makeTestRootState
 
 describe('selectGoals chain', () => {
-  it('builds goals and totals from seeded goal data', async () => {
-    const { selectGoals, selectGoalTotals } = await importModels()
+  beforeAll(() => i18n.changeLanguage('en'))
+
+  it('builds goals and totals from seeded goal data', () => {
     const { store, envelopeId } = makeSeededStore()
     const state = makeRootState(store)
 
@@ -51,8 +48,7 @@ describe('selectGoals chain', () => {
     expect(selectGoalTotals(state)[MONTH].goalsCount).toBeGreaterThan(0)
   })
 
-  it('stays cached across unrelated data changes', async () => {
-    const { selectGoals, selectGoalTotals } = await importModels()
+  it('stays cached across unrelated data changes', () => {
     const { store } = makeSeededStore()
     const goals = selectGoals(makeRootState(store))
     const totals = selectGoalTotals(makeRootState(store))
@@ -69,8 +65,7 @@ describe('selectGoals chain', () => {
     expect(selectGoalTotals(unrelatedChange)).toBe(totals)
   })
 
-  it('recomputes when a goal changes', async () => {
-    const { selectGoals } = await importModels()
+  it('recomputes when a goal changes', () => {
     const { store, envelopeId } = makeSeededStore()
     const first = selectGoals(makeRootState(store))
 

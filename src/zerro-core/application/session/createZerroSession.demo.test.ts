@@ -7,6 +7,30 @@ import {
   makeCoreNextDemoRootState,
   makeCoreNextDemoStore,
 } from '../../testing/demoState'
+import {
+  selectActivity,
+  selectBalances,
+  selectBalancesByDate,
+  selectBudgets,
+  selectCurrentFunds,
+  selectCurrentFxRates,
+  selectDebtors,
+  selectDomainEnvelopes,
+  selectDomainEnvelopeStructure,
+  selectEnvMetrics,
+  selectFxRates,
+  selectGoals,
+  selectGoalTotals,
+  selectHistoryStart,
+  selectKeepingEnvelopeIds,
+  selectMonthList,
+  selectMonthTotals,
+  selectRawActivity,
+  selectRawGoals,
+  selectSortedActivity,
+  selectTransactionsHistory,
+  selectUserSettings,
+} from '../../testing/reduxSelectors'
 import { hashJson } from '../../testing/stableJson'
 
 vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
@@ -18,38 +42,13 @@ vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
 }))
 
 describe('createZerroSession on deterministic demo data', () => {
-  it('matches the current core Redux adapter selectors', async () => {
+  it('matches the current core Redux adapter selectors', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date(coreNextDemoOptions.now))
 
     try {
       const data = makeCoreNextDemoStore()
       const state = makeCoreNextDemoRootState(data)
-      const {
-        selectActivity,
-        selectBalances,
-        selectBalancesByDate,
-        selectBudgets,
-        selectCurrentFunds,
-        selectCurrentFxRates,
-        selectDebtors,
-        selectEnvMetrics,
-        selectFxRates,
-        selectGoalTotals,
-        selectGoals,
-        selectHistoryStart,
-        selectKeepingEnvelopeIds,
-        selectMonthList,
-        selectMonthTotals,
-        selectRawActivity,
-        selectRawGoals,
-        selectSortedActivity,
-        selectDomainEnvelopes,
-        selectDomainEnvelopeStructure,
-        selectTransactionsHistory,
-        selectUserSettings,
-      } = await import('../../testing/reduxSelectors')
-
       const session = createZerroSession(data, coreNextDemoContext)
 
       expectSameJsonHash(

@@ -12,7 +12,7 @@
     "zerro-core:package-check": "node scripts/check-zerro-core-package.mjs",
     "lint:css": "stylelint \"src/**/*.{js,jsx,ts,tsx}\"",
     "lint": "npx tsc --noEmit",
-    "lint:js": "eslint src",
+    "lint:js": "eslint src --max-warnings 0",
     "knip": "knip",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,scss,json,md}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,css,scss,json,md}\""

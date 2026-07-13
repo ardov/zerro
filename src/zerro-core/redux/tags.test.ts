@@ -1,16 +1,17 @@
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { i18n } from '6-shared/localization'
 import { makeDemoStore } from '../demo'
 import { makeTestRootState } from '../testing/rootState'
+import { selectPopulatedTags } from '../testing/reduxSelectors'
 
 const NOW = Date.parse('2026-05-15T12:00:00Z')
 
 const makeRootState = makeTestRootState
 
 describe('Core tag presentation adapter', () => {
-  it('adds presentation fields and the uncategorized tag', async () => {
-    await i18n.changeLanguage('en')
-    const { selectPopulatedTags } = await import('../testing/reduxSelectors')
+  beforeAll(() => i18n.changeLanguage('en'))
+
+  it('adds presentation fields and the uncategorized tag', () => {
     const state = makeRootState(makeDemoStore({ now: NOW }))
     const tags = selectPopulatedTags(state)
     const tag = state.data.current.tag[Object.keys(state.data.current.tag)[0]]
@@ -34,8 +35,7 @@ describe('Core tag presentation adapter', () => {
     })
   })
 
-  it('stays cached across unrelated data changes and recomputes for tags', async () => {
-    const { selectPopulatedTags } = await import('../testing/reduxSelectors')
+  it('stays cached across unrelated data changes and recomputes for tags', () => {
     const store = makeDemoStore({ now: NOW })
     const first = selectPopulatedTags(makeRootState(store))
     const unrelated = makeRootState({ ...store, company: { ...store.company } })

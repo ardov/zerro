@@ -24,13 +24,13 @@ The main migration is complete:
 - Redux owns `base + outbox + outboxHead` and persists minimal replay inputs;
 - materialization is wired into every local command but remains identity-only.
 
-The refactor is not complete because the default test gate is load-sensitive,
-some compatibility bridges are now ready to remove, and the final explicit-sync
-browser smoke has not been completed.
+Reliable automated verification is complete. Some compatibility bridges are
+now ready to remove, and the final explicit-sync browser smoke has not been
+completed.
 
 ## Phase 1: health and closure — current
 
-### 1. Reliable verification
+### 1. Reliable verification — completed 2026-07-14
 
 - Make default parallel `pnpm exec vitest run` stable. The same suite passing
   only with `--no-file-parallelism` is not sufficient.
@@ -41,6 +41,11 @@ browser smoke has not been completed.
 - Make Core formatting clean and adopt a useful ESLint warning budget.
 - Configure Knip with real application entrypoints before treating its report
   as deletion authority.
+
+The package declaration consumer is an explicit gate rather than a nested
+Vitest test, the import-heavy session parity test loads its dependencies before
+the test timeout starts, ESLint enforces a zero-warning budget, and Knip starts
+from the app, worker, and package-consumer entrypoints.
 
 Exit: the documented default commands are reproducibly green.
 
