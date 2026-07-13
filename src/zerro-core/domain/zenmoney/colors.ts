@@ -2,8 +2,6 @@
 // codec plus the Zerro convention for tags without an explicit color: a
 // deterministic color generated from the tag title.
 
-export type TRgb = [number, number, number]
-
 export function int2hex(int: number | null): string | null {
   if (typeof int !== 'number') return null
   const r = ((int >> 16) & 0xff).toString(16).padStart(2, '0')
@@ -18,14 +16,6 @@ export function hex2int(hex?: string | null): number | null {
   const g = parseInt(hex.slice(3, 5), 16)
   const b = parseInt(hex.slice(5, 7), 16)
   return rgbToInt(r, g, b)
-}
-
-export function hex2rgb(hex?: string | null): TRgb | null {
-  if (!isHEX(hex)) return null
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return [r, g, b]
 }
 
 export function isHEX(hex: unknown): hex is string {

@@ -44,11 +44,6 @@ export function toISOMonth(date: TDateDraft): TISOMonth {
   return `${yyyy}-${mm}` as TISOMonth
 }
 
-export function prevMonth(d: TDateDraft) {
-  const date = parseDate(d)
-  return new Date(date.getFullYear(), date.getMonth() - 1, 1)
-}
-
 export function nextDay(d: TDateDraft) {
   const date = parseDate(d)
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)

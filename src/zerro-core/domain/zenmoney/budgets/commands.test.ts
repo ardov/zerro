@@ -7,7 +7,7 @@ import {
 import { applyPatch } from '../applyPatch'
 import { compileSetTagBudget } from './commands'
 import { makeTagBudget } from './factory'
-import { getTagBudgetId } from './id'
+import { toBudgetId } from './id'
 import { getTagBudgets } from './read'
 
 describe('zenmoney budget commands', () => {
@@ -110,8 +110,8 @@ describe('zenmoney budget commands', () => {
   })
 
   it('builds budget ids from normalized date and tag', () => {
-    expect(getTagBudgetId('2026-02', 'food')).toBe('2026-02-01#food')
-    expect(getTagBudgetId('2026-02-10', null)).toBe('2026-02-10#null')
+    expect(toBudgetId('2026-02', 'food')).toBe('2026-02-01#food')
+    expect(toBudgetId('2026-02-10', null)).toBe('2026-02-10#null')
   })
 
   it('validates root user for tag budget updates', () => {

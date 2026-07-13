@@ -15,4 +15,3 @@ export const selectAll = createSelector(
   (transactions, merchants, instruments, debtAccountId) =>
     buildDebtors({ transactions, merchants, instruments, debtAccountId })
 )
-export type { TDebtor } from '../domain/zenmoney'

@@ -4,7 +4,7 @@ import type { TCoreContext, TNormalizedPatch } from '../../../types'
 import type { TTagId } from '../tags'
 import { getRootUserId } from '../users'
 import { makeTagBudget } from './factory'
-import { getTagBudgetId } from './id'
+import { toBudgetId } from './id'
 import { getTagBudgets } from './read'
 
 export type TTagBudgetUpdate = {
@@ -28,7 +28,7 @@ export function compileSetTagBudget(
 
   return {
     budget: updates.map(({ tag, month, value }) => {
-      const id = getTagBudgetId(month, tag)
+      const id = toBudgetId(month, tag)
       const current = tagBudgets[id]
 
       return makeTagBudget(

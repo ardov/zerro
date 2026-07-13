@@ -41,15 +41,14 @@ patch workaround.
 
 ## Tooling cleanup after the closure gate
 
-### Knip entrypoints
+### Knip audit — 2026-07-14
 
-The current report contains useful candidates but is not deletion authority
-until the real Vite application entrypoint, worker, tests, and package consumer
-are modeled. After configuration, remove exports with no runtime, test, or
-supported-consumer use.
+The app, worker, tests, and package consumer are modeled. The latest audit has
+no unused files after removing the dead legacy envelope/debtor/goal/reminder
+implementations. Remaining findings are unused exports and types; treat those
+as API-surface candidates, not deletion authority.
 
 ### Adapter member audit
 
-The namespace-first Redux adapter is the desired shape, but some members may be
-historical or speculative. Remove unconsumed members; do not replace namespaces
-with a flat barrel.
+The namespace-first Redux adapter is the desired shape. Its unconsumed runtime
+members were removed; do not replace namespaces with a flat barrel.

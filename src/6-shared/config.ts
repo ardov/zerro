@@ -10,7 +10,6 @@ export const gaid = import.meta.env.REACT_APP_GAID as string
 
 // Info about the app
 export const appVersion = APP_VERSION
-export const appPublicUrl = import.meta.env.BASE_URL
 export const isProduction = import.meta.env.PROD
 
 // Database parameters
