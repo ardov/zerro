@@ -284,28 +284,123 @@ Redux adapter
 Do not create one selector from the entire `current` store. It would invalidate
 transaction-heavy calculations after unrelated writes.
 
-The important graph currently includes:
+The important session read dependencies are documented here rather than as
+executable graph metadata. Snapshot-session and Redux wiring remain explicit in
+their owning modules; raw snapshot fields and context inputs are omitted.
 
-```txt
-transactions -> debtors ----------------------> envelopes
-tags + accounts + envelopeMeta ---------------> envelopes
-transactions + accounts + debtors ------------> rawActivity
-rawActivity + keepingEnvelopeIds --------------> activity
-rawActivity + keepingEnvelopeIds + FX ---------> sortedActivity
-transactions + budgets + currentMonth --------> monthList
-monthList + envelopes + activity + budgets + FX
-                                               -> envMetrics
-monthList + currentFunds + activity + envMetrics + FX
-                                               -> monthTotals
-rawGoals + monthList + envMetrics + sortedActivity + FX
-                                               -> goals
+```mermaid
+flowchart LR
+  subgraph Base["Base reads"]
+    currentDate
+    currentMonth
+    userSettings
+    envelopeMeta
+    envBudgets
+    rawGoals
+    storedFxRates
+    debtAccountId
+    instrumentCodeById
+    transactionsHistory
+    tagStructure
+    inBudgetAccountIds
+  end
+
+  subgraph FX["FX"]
+    currentFxRates
+    fxRates
+    fxRatesGetter
+    convertFx
+  end
+
+  subgraph Projections["Domain projections"]
+    debtors
+    envelopesCompiled
+    envelopes
+    envelopeStructure
+    keepingEnvelopeIds
+    budgets
+    monthList
+    currentFunds
+    rawActivity
+    activity
+    envMetrics
+    sortedActivity
+    monthTotals
+    goals
+    goalTotals
+    historyStart
+    balances
+    balancesByDate
+  end
+
+  currentMonth --> currentFxRates
+  storedFxRates --> fxRates
+  currentFxRates --> fxRates
+  fxRates --> fxRatesGetter
+  currentFxRates --> fxRatesGetter
+  fxRatesGetter --> convertFx
+
+  transactionsHistory --> debtors
+  debtAccountId --> debtors
+  debtors --> envelopesCompiled
+  tagStructure --> envelopesCompiled
+  envelopeMeta --> envelopesCompiled
+  envelopesCompiled --> envelopes
+  envelopesCompiled --> envelopeStructure
+  envelopes --> keepingEnvelopeIds
+
+  envBudgets --> budgets
+  userSettings --> budgets
+  transactionsHistory --> monthList
+  budgets --> monthList
+  currentMonth --> monthList
+  inBudgetAccountIds --> currentFunds
+  instrumentCodeById --> currentFunds
+
+  transactionsHistory --> rawActivity
+  inBudgetAccountIds --> rawActivity
+  debtAccountId --> rawActivity
+  debtors --> rawActivity
+  rawActivity --> activity
+  keepingEnvelopeIds --> activity
+  rawActivity --> sortedActivity
+  keepingEnvelopeIds --> sortedActivity
+  convertFx --> sortedActivity
+
+  monthList --> envMetrics
+  envelopes --> envMetrics
+  activity --> envMetrics
+  budgets --> envMetrics
+  convertFx --> envMetrics
+  monthList --> monthTotals
+  currentFunds --> monthTotals
+  activity --> monthTotals
+  envMetrics --> monthTotals
+  convertFx --> monthTotals
+  currentMonth --> monthTotals
+
+  rawGoals --> goals
+  monthList --> goals
+  envMetrics --> goals
+  sortedActivity --> goals
+  convertFx --> goals
+  goals --> goalTotals
+  convertFx --> goalTotals
+
+  transactionsHistory --> historyStart
+  currentDate --> historyStart
+  transactionsHistory --> balances
+  debtors --> balances
+  instrumentCodeById --> balances
+  debtAccountId --> balances
+  balances --> balancesByDate
+  historyStart --> balancesByDate
+  currentDate --> balancesByDate
 ```
 
-The diagram above is the human-readable dependency reference. The current
-`application/session/readGraph.ts` duplicates it without validating session or
-Redux wiring, so the closure phase should remove that file and its
-self-consistency tests. Do not replace it with a graph runtime unless explicit
-wiring causes repeated, demonstrated defects.
+Keep this diagram aligned with meaningful projection changes during normal
+review. Do not turn it into a graph runtime unless explicit wiring causes
+repeated, demonstrated defects.
 
 Adapter-level projectors such as `buildRawActivity` and `buildEnvMetrics` may be
 available to runtime adapters without appearing on the root semantic facade.

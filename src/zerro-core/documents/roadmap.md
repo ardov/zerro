@@ -24,8 +24,8 @@ The main migration is complete:
 - Redux owns `base + outbox + outboxHead` and persists minimal replay inputs;
 - materialization is wired into every local command but remains identity-only.
 
-Reliable automated verification and the ready bridge removals are complete.
-The descriptive read graph and final explicit-sync browser smoke remain.
+Reliable automated verification, ready bridge removal, and read-graph
+documentation are complete. The final explicit-sync browser smoke remains.
 
 ## Phase 1: health and closure — current
 
@@ -68,7 +68,7 @@ gone, and the adapter no longer exposes members without application consumers.
 Exit: remaining legacy imports are presentation or explicit compatibility, not
 domain/read/write ownership.
 
-### 3. Session/read-graph simplification
+### 3. Session/read-graph simplification — completed 2026-07-14
 
 `application/session/readGraph.ts` is descriptive and its tests only validate
 the description against itself. Choose one:
@@ -78,6 +78,10 @@ the description against itself. Choose one:
 
 Default recommendation: delete it. The architecture document is the durable
 human-readable dependency reference.
+
+Decision: preserve the dependency map as a Mermaid diagram in
+`architecture.md`. The executable description and its self-consistency tests
+were removed because they did not validate real session or Redux wiring.
 
 ### 4. Manual completion smoke
 

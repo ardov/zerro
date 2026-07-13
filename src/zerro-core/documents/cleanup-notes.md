@@ -53,10 +53,3 @@ supported-consumer use.
 The namespace-first Redux adapter is the desired shape, but some members may be
 historical or speculative. Remove unconsumed members; do not replace namespaces
 with a flat barrel.
-
-### Descriptive read graph
-
-`application/session/readGraph.ts` and its tests validate a handwritten graph
-against itself, not against session or Redux wiring. The roadmap recommends
-deletion unless it becomes a real contract without introducing a graph
-framework.

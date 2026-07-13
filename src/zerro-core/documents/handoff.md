@@ -27,10 +27,7 @@ This file routes the next task. Git contains implementation history.
 
 Land this as small independent commits where practical:
 
-1. **Remove false documentation**
-   - delete the descriptive `readGraph` and its self-consistency tests unless
-     it is changed to verify actual session/Redux wiring.
-2. **Manual completion smoke**
+1. **Manual completion smoke**
    - edit a budget or goal;
    - edit a transaction and reload with a pending outbox;
    - perform explicit sync and verify canonical rebase.

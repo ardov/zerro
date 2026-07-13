@@ -25,6 +25,8 @@
 - Session reads are grouped by domain and use `get*` names.
 - A session represents one immutable snapshot and memoizes each node once.
 - Redux owns cross-snapshot memoization with granular entity-shaped selectors.
+- The projection dependency map is maintained as Mermaid documentation in
+  `architecture.md`, not as executable graph metadata.
 - Selector, hook, command, and app-facing types live in their domain modules;
   `redux/state.ts` owns raw inputs and `commandRead.ts` owns command-time reads.
 - Domain namespaces are the desired adapter shape. Add and retain members only

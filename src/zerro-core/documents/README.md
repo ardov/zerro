@@ -36,11 +36,8 @@ React, storage, localization, or app-layer runtime modules.
 
 ## Next slice: closure smoke
 
-Before adding non-identity materializer rules:
-
-1. compress or remove the descriptive `readGraph` unless it can verify real
-   wiring.
-2. finish the manual budget/goal edit plus explicit-sync smoke.
+Before adding non-identity materializer rules, finish the manual budget/goal
+edit plus explicit-sync smoke.
 
 Then settle the sync transport contract for `intentPatch` versus
 `appliedPatch` before balance or cascade rules are enabled.
