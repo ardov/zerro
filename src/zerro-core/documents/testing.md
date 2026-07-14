@@ -89,6 +89,20 @@ permissive test builders.
 | Replica/sync                | Reload + undo/redo + rebase + default full suite |
 | Package/dependency boundary | Boundary tests + external consumer type compile  |
 
+## Agent verification discipline
+
+During implementation, run only the focused tests that protect the changed
+contract. Do not repeat a successful check while its relevant source, test, and
+configuration files are unchanged.
+
+Run TypeScript and any required broad checks once before handing off the
+completed slice. Run the default full Vitest suite only for changes whose row in
+the verification matrix requires it, and run `zerro-core:package-check` only
+when the package or dependency boundary changes.
+
+Run ESLint and Prettier against touched files during the loop. Prefer Vitest's
+compact agent output: `--reporter=agent --silent=passed-only`.
+
 ## Verification health
 
 The 2026-07-13 audit found load-sensitive parallel tests, formatting and ESLint
