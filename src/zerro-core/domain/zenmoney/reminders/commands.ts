@@ -20,9 +20,7 @@ export type TReminderDraft = Modify<
 export function compileSetReminder(
   data: TDataStore,
   draft:
-    | TReminderDraft
-    | TReminderPatch
-    | Array<TReminderDraft | TReminderPatch>,
+    TReminderDraft | TReminderPatch | Array<TReminderDraft | TReminderPatch>,
   ctx: TCoreContext
 ): TNormalizedPatch {
   const list = Array.isArray(draft) ? draft : [draft]

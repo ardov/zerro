@@ -119,9 +119,7 @@ export type TAppCommand =
   | {
       type: 'zenmoney.reminder.set'
       payload:
-        | TReminderDraft
-        | TReminderPatch
-        | Array<TReminderDraft | TReminderPatch>
+        TReminderDraft | TReminderPatch | Array<TReminderDraft | TReminderPatch>
     }
   | { type: 'zenmoney.reminder.delete'; payload: { id: TReminderId } }
   | {
@@ -305,8 +303,7 @@ function executeCommand<TReceipt = undefined>(
       // Receipt types are documented by the four public wrappers that request
       // one; the command compiler stays a simple runtime switch.
       compileAppCommandResult(state, command, ctx) as
-        | TNormalizedPatch
-        | TCompiled<TReceipt>
+        TNormalizedPatch | TCompiled<TReceipt>
   )
 }
 
@@ -475,9 +472,7 @@ export function setAccountInBalance(
 
 export function setReminder(
   draft:
-    | TReminderDraft
-    | TReminderPatch
-    | Array<TReminderDraft | TReminderPatch>
+    TReminderDraft | TReminderPatch | Array<TReminderDraft | TReminderPatch>
 ): AppThunk<TReminder[]> {
   const execute = executeCommand<TReminder[]>({
     type: 'zenmoney.reminder.set',

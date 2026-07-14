@@ -5,10 +5,7 @@ export type AnalyticsEventMap = {
   }
   budget_automation_applied: {
     automation:
-      | 'copy_previous'
-      | 'fill_goals'
-      | 'fix_overspends'
-      | 'start_fresh'
+      'copy_previous' | 'fill_goals' | 'fix_overspends' | 'start_fresh'
   }
   budget_funds_moved: Record<string, never>
   budget_goal_changed: {

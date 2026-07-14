@@ -72,8 +72,7 @@ export function registerPopover<
   registeredPopovers[key] = true
 
   type TStored =
-    | { extra: ExtraProps; display?: WithoutBaseProps<DisplayProps> }
-    | undefined
+    { extra: ExtraProps; display?: WithoutBaseProps<DisplayProps> } | undefined
 
   function useMethods() {
     const { open, close } = useContext(PopoverMethodsContext)
