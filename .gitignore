@@ -18,6 +18,7 @@
 # misc
 .idea
 .vscode
+.claude
 .DS_Store
 .env.local
 .env.development.local
