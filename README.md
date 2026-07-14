@@ -25,6 +25,9 @@ Zerro syncs with your ZenMoney account and lets you plan every koruna, euro or d
 
 If you want to contribute, let's discuss the idea first here in issues or in [chat](https://t.me/zerrochat)/[dm](https://t.me/ardov). I'm open to suggestions and ideas but I don't want to waste your time on things that don't fit the product 🖤
 
+The ordered dependency upgrade work is tracked in
+[docs/dependency-migrations.md](./docs/dependency-migrations.md).
+
 ### Run locally
 
 1. Install [pnpm](https://pnpm.io/) and [Node.js](https://nodejs.org/)
