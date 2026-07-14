@@ -34,7 +34,7 @@ export const NameCell: FC<{
   const { t } = useTranslation('budgets')
 
   const dispatch = useAppDispatch()
-  const ref = useRef<any>()
+  const ref = useRef<HTMLElement>(null)
   const updateName = useCallback(
     (v: string) => {
       dispatch(coreEnvelopes.rename(id, v))

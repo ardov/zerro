@@ -14,7 +14,7 @@ import { registerPopover } from '6-shared/historyPopovers'
 
 type GroupNode = {
   date: TISODate
-  transactions: JSX.Element[]
+  transactions: React.JSX.Element[]
 }
 
 const HEADER_HEIGHT = 48

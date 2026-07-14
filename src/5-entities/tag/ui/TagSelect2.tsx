@@ -27,7 +27,7 @@ type TagType = 'income' | 'outcome' | undefined | null
 type TagNode = TagTreeNode | TTagPopulated
 type TagSelectProps = {
   onChange: (id: string) => void
-  trigger?: React.ReactElement
+  trigger?: React.ReactElement<{ onClick?: React.MouseEventHandler }>
   value?: string[] | null
   exclude?: string[] | null
   tagType?: TagType

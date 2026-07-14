@@ -21,7 +21,7 @@ type HTMLDivProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLDivElement>,
   HTMLDivElement
 >
-type TrElementProps = HTMLDivProps & {
+type TrElementProps = Omit<HTMLDivProps, 'onToggle'> & {
   tr: TTransaction
   trType: coreTransactions.TrType
 }

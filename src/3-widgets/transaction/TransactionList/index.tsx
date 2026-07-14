@@ -8,7 +8,7 @@ import type {
 } from '6-shared/types'
 import { transactions as coreTransactions } from 'zerro-core/redux'
 
-import { useMemo, useState, useCallback, FC } from 'react'
+import { useMemo, useState, useCallback, FC, ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Theme } from '@mui/material'
 import { track } from '6-shared/analytics'
@@ -127,7 +127,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   }
 
   const groups = useMemo(() => {
-    const groups: ByDate<{ date: TISODate; transactions: JSX.Element[] }> = {}
+    const groups: ByDate<{ date: TISODate; transactions: ReactElement[] }> = {}
     trList.forEach(tr => {
       const Component = (
         <Transaction

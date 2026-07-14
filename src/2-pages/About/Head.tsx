@@ -1,5 +1,5 @@
 import { FC } from 'react'
-import { Helmet } from 'react-helmet'
+import { Helmet } from 'react-helmet-async'
 
 /* Need this component because MDX changes Helmet children and raw Helmet doesn't work */
 export const Head: FC<{

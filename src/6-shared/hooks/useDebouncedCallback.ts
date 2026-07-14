@@ -21,12 +21,17 @@ export function useDebouncedCallback<Fn extends (...args: any[]) => any>(
   delay: number,
   maxWait = 0
 ): DebouncedFunction<Fn> {
-  const timeout = useRef<ReturnType<typeof setTimeout>>()
-  const waitTimeout = useRef<ReturnType<typeof setTimeout>>()
-  const lastCall = useRef<{
-    args: Parameters<Fn>
-    this: ThisParameterType<Fn>
-  }>()
+  const timeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const waitTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  )
+  const lastCall = useRef<
+    | {
+        args: Parameters<Fn>
+        this: ThisParameterType<Fn>
+      }
+    | undefined
+  >(undefined)
 
   const clear = () => {
     if (timeout.current) {

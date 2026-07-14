@@ -52,10 +52,11 @@ export function SmartSelect<T>(props: TSmartSelectProps<T>) {
         >
           <MenuList autoFocus>
             {React.Children.toArray(selectProps.children).map(child => {
-              // @ts-expect-error child props are not typed
+              if (!React.isValidElement<{ value?: unknown }>(child))
+                return child
+
               const value = child.props.value
               const selected = value === selectProps.value
-              // @ts-expect-error child props are not typed
               return React.cloneElement(child, {
                 // @ts-expect-error onClick is missing in cloneElement props type
                 onClick: event => {
@@ -67,10 +68,7 @@ export function SmartSelect<T>(props: TSmartSelectProps<T>) {
                     // https://github.com/mui/material-ui/issues/13485#issuecomment-676048492
                     // Clone the event to not override `target` of the original event.
                     const nativeEvent = event.nativeEvent || event
-                    const clonedEvent = new nativeEvent.constructor(
-                      nativeEvent.type,
-                      nativeEvent
-                    )
+                    const clonedEvent = new Event(nativeEvent.type, nativeEvent)
 
                     Object.defineProperty(clonedEvent, 'target', {
                       writable: true,

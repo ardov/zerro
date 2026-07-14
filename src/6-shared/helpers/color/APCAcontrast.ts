@@ -135,8 +135,7 @@ export function apcaContrast(
     Math.pow(Gtxt / 255.0, mainTRC) * Gco +
     Math.pow(Btxt / 255.0, mainTRC) * Bco
 
-  let SAPC = 0.0 // For holding raw SAPC values
-  let outputContrast = 0.0 // For weighted final values
+  let outputContrast: number // For weighted final values
 
   ///// TUTORIAL  /////
 
@@ -168,7 +167,7 @@ export function apcaContrast(
 
     ///// Calculate the SAPC contrast value and scale
 
-    SAPC = (Math.pow(Ybg, normBG) - Math.pow(Ytxt, normTXT)) * scaleBoW
+    const SAPC = (Math.pow(Ybg, normBG) - Math.pow(Ytxt, normTXT)) * scaleBoW
 
     ///// NEW! SAPC SmoothScale™
     // Low Contrast Smooth Scale Rollout to prevent polarity reversal
@@ -185,7 +184,7 @@ export function apcaContrast(
     // For reverse polarity, light text on dark
     // WoB should always return negative value.
 
-    SAPC = (Math.pow(Ybg, revBG) - Math.pow(Ytxt, revTXT)) * scaleWoB
+    const SAPC = (Math.pow(Ybg, revBG) - Math.pow(Ytxt, revTXT)) * scaleWoB
 
     outputContrast =
       SAPC > -loClip

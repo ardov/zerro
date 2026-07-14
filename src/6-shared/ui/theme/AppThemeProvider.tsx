@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { Helmet } from 'react-helmet'
+import { Helmet } from 'react-helmet-async'
 import { Global, css } from '@emotion/react'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider, Theme } from '@mui/material/styles'

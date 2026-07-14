@@ -1,6 +1,6 @@
 import { Box } from '@mui/material'
 import AccountList from '3-widgets/account/AccountList'
-import { Helmet } from 'react-helmet'
+import { Helmet } from 'react-helmet-async'
 import { DebtorList } from '3-widgets/DebtorList'
 import { useTranslation } from 'react-i18next'
 

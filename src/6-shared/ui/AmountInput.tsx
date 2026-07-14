@@ -35,7 +35,7 @@ export const AmountInput: FC<AmountInputProps> = ({
   slotProps,
   ...rest
 }) => {
-  const ref = useRef<HTMLInputElement>()
+  const ref = useRef<HTMLInputElement>(null)
   const [expression, setExpression] = useState(
     value === 0 ? '' : value.toString()
   )

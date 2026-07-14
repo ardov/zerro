@@ -59,7 +59,7 @@ export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
         >
           <IconButton
             children={<ChevronLeftIcon />}
-            onClick={() => setYear(year => --year)}
+            onClick={() => setYear(year => year - 1)}
             disabled={isPrevYearDisabled}
           />
           <Box
@@ -68,7 +68,7 @@ export default function MonthSelectPopover(props: MonthSelectPopoverProps) {
           />
           <IconButton
             children={<ChevronRightIcon />}
-            onClick={() => setYear(year => ++year)}
+            onClick={() => setYear(year => year + 1)}
             disabled={isNextYearDisabled}
           />
         </Box>

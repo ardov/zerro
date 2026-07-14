@@ -12,7 +12,7 @@ import {
   TrEmptyState,
   TransactionPreview,
 } from '3-widgets/transaction/TransactionPreview'
-import { Helmet } from 'react-helmet'
+import { Helmet } from 'react-helmet-async'
 import { registerPopover } from '6-shared/historyPopovers'
 import { TTransaction, TTransactionId } from '6-shared/types'
 import { track } from '6-shared/analytics'

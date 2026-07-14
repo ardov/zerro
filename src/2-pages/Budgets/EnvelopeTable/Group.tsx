@@ -55,7 +55,7 @@ export const Group: FC<TGroupProps> = ({
   const { t } = useTranslation('budgets')
   const dispatch = useAppDispatch()
   const { budgeted, available, activity } = useGroupTotals(name)
-  const ref = useRef()
+  const ref = useRef<HTMLDivElement>(null)
 
   const floating = useFloatingInput(ref, val =>
     dispatch(renameGroup(name, val))

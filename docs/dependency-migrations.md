@@ -41,10 +41,16 @@ Vite's native `resolve.tsconfigPaths` replaced the redundant
 `vite-tsconfig-paths` plugin. The local development server starts and serves the
 application shell.
 
-### 3. ESLint 10
+### 3. ESLint 10 — completed 2026-07-14
 
 Upgrade `eslint` and `@eslint/js` together, then verify every configured plugin
 against ESLint 10. Accept or override new recommended rules explicitly.
+
+Result: ESLint 10 runs with TypeScript ESLint and the officially compatible
+React Hooks plugin. The general `eslint-plugin-react` dependency was removed:
+ESLint 10 tracks JSX references, TypeScript checks JSX types, and the old plugin
+did not declare ESLint 10 support. New core diagnostics were fixed rather than
+suppressed.
 
 ### 4. React Router 5 to 6
 
@@ -70,14 +76,23 @@ Before changing Router APIs, add regression coverage proving that:
 6. Forward restores an overlay only if restoring history-backed UI remains the
    accepted product behavior.
 
-The Router migration is incomplete until this contract passes in an automated
-test and in a browser smoke test on a real dialog.
+Automated coverage now pins the current history behavior, including same-URL
+state pushes, nested Back handling, explicit close, and Forward restoration. It
+also caught and fixed query/hash reordering in overlay history entries. The
+Router migration remains incomplete until the same contract passes after the
+API change and in a browser smoke test on a real dialog.
 
-### 5. React 19
+### 5. React 19 — completed 2026-07-14
 
 Upgrade `react`, `react-dom`, their types, and React-sensitive test utilities as
 one compatibility slice. Recheck refs, effects, dialogs, portals, and Strict
 Mode behavior. The app already uses `createRoot` and the modern JSX transform.
+
+Result: React and React DOM 19 are installed with matching types. React 19 type
+changes were applied to refs, JSX element types, DOM prop intersections, and
+element cloning. `react-helmet` was replaced by the React 19-compatible
+`react-helmet-async` provider. The history-backed overlay contract passes on
+React 19.
 
 ### 6. Material UI 9 and MUI X 9
 

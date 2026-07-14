@@ -1,7 +1,7 @@
-import { FC } from 'react'
+import { FC, ReactElement } from 'react'
 import { Box, Link, Typography } from '@mui/material'
 import { Stack } from '@mui/system'
-import { Helmet } from 'react-helmet'
+import { Helmet } from 'react-helmet-async'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 
@@ -65,9 +65,9 @@ export default function Donation() {
 }
 
 interface LinkCardProps {
-  icon: JSX.Element
-  primary: JSX.Element | string
-  secondary: JSX.Element | string
+  icon: ReactElement
+  primary: ReactElement | string
+  secondary: ReactElement | string
   href: string
 }
 const LinkCard: FC<LinkCardProps> = props => {

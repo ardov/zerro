@@ -5,7 +5,7 @@ import {
   transactions as coreTransactions,
 } from 'zerro-core/redux'
 
-import { Helmet } from 'react-helmet'
+import { Helmet } from 'react-helmet-async'
 import { Box, Theme, useMediaQuery } from '@mui/material'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'

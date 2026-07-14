@@ -3,7 +3,7 @@ import { TextField, Box, Popover, PopoverProps } from '@mui/material'
 import { useFormik } from 'formik'
 
 export function useFloatingInput(
-  ref: React.MutableRefObject<any>,
+  ref: React.RefObject<HTMLElement | null>,
   onSubmit: (v: string) => void
 ) {
   const [value, setValue] = useState('')
