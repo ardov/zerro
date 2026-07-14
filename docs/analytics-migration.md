@@ -1,10 +1,31 @@
 # Analytics migration plan
 
-- Status: proposed
+- Status: implemented 2026-07-14
 - Created: 2026-07-12
 - Scope: product analytics, navigation measurement, provider adapters, and the
   boundary between analytics and diagnostics
-- Current implementation: `src/6-shared/helpers/tracking.ts`
+- Current implementation: `src/6-shared/analytics`
+
+## Implementation decision
+
+Google Analytics 4 is now the only destination for typed product events.
+Yandex Metrica remains enabled as a base counter through the external runtime
+configuration, but the application no longer calls `reachGoal` or forwards
+product events to it. `REACT_APP_YMID` remains part of the deployment contract.
+The legacy Universal Analytics-shaped `react-ga` adapter and free-form
+`sendEvent(string)` API were removed.
+
+The typed catalog in `src/6-shared/analytics/events.ts` is the source of truth.
+GA4 is loaded through the Google tag using `REACT_APP_GAID`; this deployment
+value must be a GA4/Google tag id, not a Universal Analytics property id.
+Product events use stable names and bounded properties, initial and subsequent
+SPA page views are explicit, and provider failures cannot affect application
+operations. Sentry remains the diagnostic destination for exceptions.
+
+The remainder of this document preserves the reasoning and rollout checklist
+that led to the implementation. Provider-baseline comparison, report setup,
+custom-dimension registration, consent policy, and live DebugView verification
+remain deployment/analytics-administration tasks rather than source changes.
 
 ## Purpose
 

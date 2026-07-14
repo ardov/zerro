@@ -1,5 +1,5 @@
 import React from 'react'
-import { captureError, sendEvent } from '6-shared/helpers/tracking'
+import { captureError } from '6-shared/diagnostics'
 import { clearStorage } from 'worker'
 import { tokenStorage } from '6-shared/api/tokenStorage'
 import { useTranslation } from 'react-i18next'
@@ -27,7 +27,6 @@ export default class GlobalErrorBoundary extends React.Component<{
       sessionStorage.removeItem('global_error_retry')
     }
 
-    sendEvent(`GlobalError: ${error.message}`)
     captureError(error, errorInfo)
   }
 

@@ -4,7 +4,7 @@ import type { TEnvelopeId } from '5-entities/envelope'
 import { activity as coreActivity } from 'zerro-core/redux'
 
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { startFresh } from './startFresh'
 
 vi.mock('zerro-core/redux', () => ({
@@ -13,7 +13,7 @@ vi.mock('zerro-core/redux', () => ({
 vi.mock('4-features/budget/setTotalBudget', () => ({
   setTotalBudget: vi.fn(),
 }))
-vi.mock('6-shared/helpers/tracking', () => ({ sendEvent: vi.fn() }))
+vi.mock('6-shared/analytics', () => ({ track: vi.fn() }))
 
 describe('startFresh', () => {
   it('uses Core metrics for both resets and future-budget cleanup', () => {
@@ -60,7 +60,9 @@ describe('startFresh', () => {
     expect(setTotalBudget).toHaveBeenNthCalledWith(5, [
       { id: futureId, month: '2026-08', value: 0 },
     ])
-    expect(sendEvent).toHaveBeenCalledWith('Budgets: start fresh')
+    expect(track).toHaveBeenCalledWith('budget_automation_applied', {
+      automation: 'start_fresh',
+    })
   })
 })
 

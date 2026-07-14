@@ -29,7 +29,7 @@ import {
   Switch,
   Typography,
 } from '@mui/material'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { useSnackbar } from '6-shared/ui/SnackbarProvider'
 import { AdaptivePopover } from '6-shared/ui/AdaptivePopover'
 import { appVersion } from '6-shared/config'
@@ -116,7 +116,7 @@ function ExportCsvItem() {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
   const handleExportCSV = () => {
-    sendEvent('Settings: export csv')
+    track('data_export_requested', { format: 'csv' })
     dispatch(exportCSV)
   }
   return (
@@ -133,7 +133,7 @@ function ExportJsonItem() {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
   const handleExportCSV = () => {
-    sendEvent('Settings: export json')
+    track('data_export_requested', { format: 'json' })
     dispatch(exportJSON)
   }
   return (
@@ -150,9 +150,9 @@ function ThemeItem({ onClose }: ItemProps) {
   const { t } = useTranslation('settings')
   const theme = useColorScheme()
   const handleThemeChange = () => {
-    sendEvent('Settings: toggle theme')
     onClose()
     theme.toggle()
+    track('setting_changed', { setting: 'theme', value: 'changed' })
   }
   return (
     <MenuItem onClick={handleThemeChange}>
@@ -172,8 +172,8 @@ function LangItem(_props: ItemProps) {
 
   const setNextLang = () => {
     const nextLang = currentLang === 'en' ? 'ru' : 'en'
-    sendEvent(`Settings: change language to ${nextLang}`)
     i18n.changeLanguage(nextLang)
+    track('setting_changed', { setting: 'language', value: 'changed' })
   }
 
   return (
@@ -238,7 +238,7 @@ function ReloadDataItem(_props: ItemProps) {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
   const reloadData = () => {
-    sendEvent('Settings: reload data')
+    track('local_data_reload_requested', {})
     dispatch(resetData())
     dispatch(clearLocalData())
     window.location.reload()
@@ -258,8 +258,8 @@ function AutoSyncItem() {
   const { t } = useTranslation('settings')
   const [regular, setRegular] = useRegularSync()
   const handleClick = () => {
-    sendEvent(`Settings: turn sync ${regular ? 'off' : 'on'}`)
     setRegular(c => !c)
+    track('setting_changed', { setting: 'auto_sync', value: !regular })
   }
   return (
     <MenuItem onClick={handleClick}>
@@ -278,8 +278,8 @@ function IconModeItem() {
   const { emojiIcons } = coreSettings.use()
   const handleClick = () => {
     const next = !emojiIcons
-    sendEvent(`Settings: emoji icons set to ${next}`)
     dispatch(coreSettings.setEmojiIcons(next))
+    track('setting_changed', { setting: 'emoji_icons', value: next })
   }
   return (
     <MenuItem onClick={handleClick}>
@@ -297,12 +297,15 @@ function BudgetSettingsItem() {
   const setSnackbar = useSnackbar()
   const { preferZmBudgets } = coreSettings.use()
   const toggleSetting = () => {
-    sendEvent(`Settings: preferZmBudgets ${preferZmBudgets ? 'off' : 'on'}`)
     dispatch(coreSettings.setPreferZmBudgets(!preferZmBudgets))
+    track('setting_changed', {
+      setting: 'prefer_zenmoney_budgets',
+      value: !preferZmBudgets,
+    })
   }
   const convertBudgets = () => {
-    sendEvent(`Settings: convert old budgets`)
     const updated = dispatch(convertZmBudgetsToZerro())
+    track('legacy_budgets_converted', {})
     setSnackbar({
       message: t('budgetsConverted', {
         budgets: updated.length,
@@ -344,7 +347,7 @@ function LogOutItem({ onClose }: ItemProps) {
   const dispatch = useAppDispatch()
   const handleClick = () => {
     onClose()
-    sendEvent('Settings: log out')
+    track('logout', { source: 'settings_menu' })
     dispatch(logOut())
   }
   return (

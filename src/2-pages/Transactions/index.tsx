@@ -15,7 +15,7 @@ import {
 import { Helmet } from 'react-helmet'
 import { registerPopover } from '6-shared/historyPopovers'
 import { TTransaction, TTransactionId } from '6-shared/types'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { useTranslation } from 'react-i18next'
 
 const sideWidth = 360
@@ -36,7 +36,7 @@ export default function TransactionsView() {
 
   const handleTrOpen = useCallback(
     (id: TTransactionId) => {
-      sendEvent('Transaction: see details')
+      track('transaction_details_viewed', { source: 'transactions_page' })
       open({
         id,
         onSelectSimilar: changed => setCheckedDate(new Date(changed)),

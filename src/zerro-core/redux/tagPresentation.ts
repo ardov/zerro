@@ -1,5 +1,4 @@
 import type { ById, TFxCode } from '6-shared/types'
-import { sendEvent } from '6-shared/helpers/tracking'
 import noCategoryIconUrl from '6-shared/icons/no_category-icon.svg'
 import { tagIconsSvg } from '6-shared/tagIconsSvg'
 import { t } from 'i18next'
@@ -93,7 +92,6 @@ function getSymbol(tag: TTag, userSettings: TTagPresentationSettings) {
     if (!useSvgIcons && emoji) {
       return emoji
     }
-    sendEvent('Tags: UnknownNames: ' + tag.icon)
   }
   const titleArr = toArray(tag.title)
   if (getTagName(tag.title) !== tag.title) return titleArr[0]

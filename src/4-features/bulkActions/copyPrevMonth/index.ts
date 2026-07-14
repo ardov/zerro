@@ -1,4 +1,4 @@
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { AppThunk } from 'store'
 import { TISOMonth } from '6-shared/types'
 import { prevMonth, toISOMonth } from '6-shared/helpers/date'
@@ -10,7 +10,6 @@ import {
 export const copyPreviousBudget =
   (month: TISOMonth): AppThunk<void> =>
   (dispatch, getState) => {
-    sendEvent('Budgets: copy previous')
     const envData = coreActivity.selectEnvelopeMetrics(getState())
     const curr = envData[month]
     const prev = envData[toISOMonth(prevMonth(month))]
@@ -29,4 +28,5 @@ export const copyPreviousBudget =
       updates.push({ id, value: prevVal, month })
     })
     dispatch(coreBudgets.set(updates))
+    track('budget_automation_applied', { automation: 'copy_previous' })
   }

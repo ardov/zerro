@@ -19,7 +19,6 @@ const NOW = Date.parse('2026-07-10T12:00:00Z')
 const UUID = '00000000-0000-4000-8000-000000000001'
 
 vi.mock('uuid', () => ({ v1: () => UUID }))
-vi.mock('6-shared/helpers/tracking', () => ({ sendEvent: vi.fn() }))
 
 afterEach(() => vi.restoreAllMocks())
 

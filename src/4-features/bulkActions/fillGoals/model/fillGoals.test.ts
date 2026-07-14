@@ -5,7 +5,7 @@ import { goals as coreGoals } from 'zerro-core/redux'
 
 import { goalType } from 'zerro-core/domain/zerro/goals'
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { fillGoals } from './fillGoals'
 
 vi.mock('zerro-core/redux', async importOriginal => {
@@ -18,7 +18,7 @@ vi.mock('zerro-core/redux', async importOriginal => {
 vi.mock('4-features/budget/setTotalBudget', () => ({
   setTotalBudget: vi.fn(),
 }))
-vi.mock('6-shared/helpers/tracking', () => ({ sendEvent: vi.fn() }))
+vi.mock('6-shared/analytics', () => ({ track: vi.fn() }))
 
 describe('fillGoals', () => {
   it('uses Core goals and skips fulfilled and endless target-balance goals', () => {
@@ -60,6 +60,8 @@ describe('fillGoals', () => {
       { id: monthlyId, month: '2026-07', value: 100 },
     ])
     expect(dispatch).toHaveBeenCalledWith(action)
-    expect(sendEvent).toHaveBeenCalledWith('Budgets: fill goals')
+    expect(track).toHaveBeenCalledWith('budget_automation_applied', {
+      automation: 'fill_goals',
+    })
   })
 })

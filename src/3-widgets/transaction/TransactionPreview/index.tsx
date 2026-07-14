@@ -23,7 +23,7 @@ import {
 import { AmountInput } from '6-shared/ui/AmountInput'
 import { rateToWords } from '6-shared/helpers/money'
 import { formatDate, parseDate, toISODate } from '6-shared/helpers/date'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 
 import { useAppDispatch, useAppSelector } from 'store'
 
@@ -80,16 +80,16 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
   const { t } = useTranslation('transaction')
   const dispatch = useAppDispatch()
   const onDelete = () => {
-    sendEvent('Transaction: delete')
     dispatch(coreTransactions.remove([id]))
+    track('transaction_deleted', { mode: 'single', source: 'preview' })
   }
   const onDeletePermanently = () => {
-    sendEvent('Transaction: delete permanently')
     dispatch(coreTransactions.removePermanently([id]))
+    track('transaction_deleted_permanently', { source: 'preview' })
   }
   const onRestore = () => {
-    sendEvent('Transaction: restore')
     dispatch(coreTransactions.restore(id))
+    track('transaction_restored', { source: 'preview' })
   }
 
   const tr = useAppSelector(state => coreTransactions.selectAll(state)[id])!
@@ -154,7 +154,6 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
       const createdDate = parseDate(tr.date)
       createdDate.setHours(hh)
       createdDate.setMinutes(mm)
-      sendEvent('Transaction: recreate')
       const newId = dispatch(
         coreTransactions.recreate({
           id,
@@ -167,9 +166,9 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
           tag: localTag,
         })
       )
+      track('transaction_recreated', { source: 'preview' })
       onOpenOther(newId)
     } else if (hasChanges) {
-      sendEvent('Transaction: edit')
       dispatch(
         coreTransactions.update({
           id,
@@ -181,6 +180,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
           tag: localTag,
         })
       )
+      track('transaction_edited', { source: 'preview' })
     }
   }
 

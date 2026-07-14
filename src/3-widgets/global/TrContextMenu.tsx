@@ -3,7 +3,7 @@ import { Menu, MenuItem, MenuProps } from '@mui/material'
 import { TTransaction, TTransactionId } from '6-shared/types'
 import { useAppDispatch, useAppSelector } from 'store'
 import { registerPopover } from '6-shared/historyPopovers'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { transactions as coreTransactions } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
@@ -50,24 +50,32 @@ export const TrContextMenu: FC = () => {
       label: t('restore'),
       condition: transaction.deleted,
       action: () => {
-        sendEvent('Transaction: restore')
         dispatch(coreTransactions.restore(id))
+        track('transaction_restored', { source: 'context_menu' })
       },
     },
     {
       label: t('markViewed'),
       condition: editable && !viewed,
       action: () => {
-        sendEvent('Transaction: mark viewed: true')
         dispatch(coreTransactions.setViewed([id], true))
+        track('transaction_viewed_changed', {
+          viewed: true,
+          mode: 'single',
+          source: 'context_menu',
+        })
       },
     },
     {
       label: t('markUnviewed'),
       condition: editable && viewed,
       action: () => {
-        sendEvent('Transaction: mark viewed: false')
         dispatch(coreTransactions.setViewed([id], false))
+        track('transaction_viewed_changed', {
+          viewed: false,
+          mode: 'single',
+          source: 'context_menu',
+        })
       },
     },
     {
@@ -88,8 +96,11 @@ export const TrContextMenu: FC = () => {
       label: t('delete'),
       condition: !transaction.deleted,
       action: () => {
-        sendEvent('Transaction: delete')
         dispatch(coreTransactions.remove([id]))
+        track('transaction_deleted', {
+          mode: 'single',
+          source: 'context_menu',
+        })
       },
     },
   ]

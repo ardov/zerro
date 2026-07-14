@@ -1,4 +1,4 @@
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { TISOMonth } from '6-shared/types'
 import { prevMonth, toISOMonth } from '6-shared/helpers/date'
 import { keys } from '6-shared/helpers/keys'
@@ -15,11 +15,11 @@ import { setTotalBudget } from '4-features/budget/setTotalBudget'
 export const startFresh =
   (month: TISOMonth): AppThunk<void> =>
   dispatch => {
-    sendEvent('Budgets: start fresh')
     const prevMonthISO = toISOMonth(prevMonth(month))
     dispatch(resetMonthThunk(prevMonthISO))
     dispatch(resetMonthThunk(month))
     dispatch(removeFutureBudgets(month))
+    track('budget_automation_applied', { automation: 'start_fresh' })
   }
 
 /**

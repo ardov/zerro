@@ -7,7 +7,7 @@ import {
   currency as coreCurrency,
 } from 'zerro-core/redux'
 
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { moveMoney } from './moveMoney'
 
 vi.mock('zerro-core/redux', () => ({
@@ -15,7 +15,7 @@ vi.mock('zerro-core/redux', () => ({
   currency: { selectConvertFx: vi.fn() },
   budgets: { set: vi.fn() },
 }))
-vi.mock('6-shared/helpers/tracking', () => ({ sendEvent: vi.fn() }))
+vi.mock('6-shared/analytics', () => ({ track: vi.fn() }))
 
 describe('moveMoney', () => {
   it('uses Core metrics and converts the destination budget to its currency', () => {
@@ -58,6 +58,6 @@ describe('moveMoney', () => {
       { id: destination, month: '2026-07', value: 59 },
     ])
     expect(dispatch).toHaveBeenCalledWith(action)
-    expect(sendEvent).toHaveBeenCalledWith('Budgets: move funds')
+    expect(track).toHaveBeenCalledWith('budget_funds_moved', {})
   })
 })

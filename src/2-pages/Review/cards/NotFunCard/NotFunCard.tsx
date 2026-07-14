@@ -21,7 +21,7 @@ import { entries } from '6-shared/helpers/keys'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { SettingsIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { Card, TCardProps } from '../../shared/Card'
 import { useStats } from '../../shared/getFacts'
@@ -158,7 +158,11 @@ export function NotFunCard(props: TCardProps) {
             color="secondary"
             href="https://journal.tinkoff.ru/fns-loves-you/"
             target="_blank"
-            onClick={() => sendEvent('Review: go_to_taxes_calculator')}
+            onClick={() =>
+              track('external_link_opened', {
+                destination: 'taxes_calculator',
+              })
+            }
           >
             калькуляторе Тинькофф журнала
           </Link>{' '}
@@ -167,7 +171,9 @@ export function NotFunCard(props: TCardProps) {
             color="secondary"
             href="https://youtu.be/xL8Z1mbcQ78"
             target="_blank"
-            onClick={() => sendEvent('Review: go_to_taxes_video')}
+            onClick={() =>
+              track('external_link_opened', { destination: 'taxes_video' })
+            }
           >
             видео про налоги
           </Link>{' '}
@@ -182,7 +188,7 @@ export function NotFunCard(props: TCardProps) {
       <Card sx={{ position: 'relative' }}>
         <IconButton
           onClick={() => {
-            sendEvent('Review: open_taxes_settings')
+            track('external_link_opened', { destination: 'taxes_settings' })
             toggleSettings()
           }}
           sx={{ position: 'absolute', top: 8, right: 8 }}

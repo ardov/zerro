@@ -5,7 +5,7 @@ import { TagIcon } from '6-shared/ui/TagIcon'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon, EditIcon, EmojiFlagsIcon } from '6-shared/ui/Icons'
 import { ColorPicker, useColorPicker } from '6-shared/ui/ColorPickerPopover'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 // import { usePopover } from '@shared/ui/PopoverManager'
 
 import { useAppDispatch, useAppSelector } from 'store'
@@ -109,7 +109,7 @@ const Header: FC<{
   const dispatch = useAppDispatch()
   const handleColorChange = useCallback(
     (hex?: string | null) => {
-      sendEvent('Tag: set color: ' + hex)
+      track('envelope_color_changed', {})
       dispatch(coreEnvelopes.setColor(envelope.id, hex ?? null))
     },
     [dispatch, envelope.id]

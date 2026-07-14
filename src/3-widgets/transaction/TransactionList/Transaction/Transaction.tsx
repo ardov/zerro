@@ -49,7 +49,6 @@ export const Transaction: FC<TTransactionProps> = props => {
   const trType = getTrType(tr)
   const { deleted } = tr
 
-  // sendEvent('Transaction: open context menu')
   return (
     <Wrapper opened={isOpened} deleted={deleted} {...propsToPass}>
       <Symbol {...{ tr, trType, isChecked, isInSelectionMode, onToggle }} />

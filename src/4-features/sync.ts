@@ -2,7 +2,7 @@ import { getLastSyncTime } from 'store/data/selectors'
 import { getToken } from 'store/token'
 import { setPending } from 'store/isPending'
 import { saveDataLocally } from '4-features/localData'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { setSyncData } from 'store/lastSync'
 import { formatDate } from '6-shared/helpers/date'
 import { AppThunk } from 'store'
@@ -44,18 +44,16 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
   )
 
   if (response.data) {
-    if (diff.serverTimestamp) sendEvent(`Sync: Successful update`)
-    else sendEvent(`Sync: Successful first`)
-
     const data = response.data
     dispatch(applyServerPatch({ ...data, syncStartTime, sentOutboxIds }))
     const changedDomains = getChangedDomains(data)
     dispatch(saveDataLocally(changedDomains))
+    track('sync_completed', {
+      mode: diff.serverTimestamp ? 'update' : 'first',
+    })
     console.log(`✅ Data synced ${formatDate(new Date(), 'HH:mm:ss')}`)
   } else {
     console.warn('Syncing failed', response)
-    sendEvent(`Error: ${response.error}`)
-    // captureError(err)
   }
 }
 

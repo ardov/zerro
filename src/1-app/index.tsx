@@ -1,6 +1,6 @@
 import type { TDiff } from '6-shared/types'
 
-import { initSentry } from '6-shared/helpers/tracking'
+import { initSentry } from '6-shared/diagnostics'
 import { store } from 'store'
 import { bindWorkerToStore } from 'worker'
 import { resetData } from 'store/data'

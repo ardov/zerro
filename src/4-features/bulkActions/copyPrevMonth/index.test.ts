@@ -6,14 +6,14 @@ import {
   budgets as coreBudgets,
 } from 'zerro-core/redux'
 
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { copyPreviousBudget } from './index'
 
 vi.mock('zerro-core/redux', () => ({
   activity: { selectEnvelopeMetrics: vi.fn() },
   budgets: { set: vi.fn() },
 }))
-vi.mock('6-shared/helpers/tracking', () => ({ sendEvent: vi.fn() }))
+vi.mock('6-shared/analytics', () => ({ track: vi.fn() }))
 
 describe('copyPreviousBudget', () => {
   it('uses Core metrics to copy changed own budgets from the previous month', () => {
@@ -47,6 +47,8 @@ describe('copyPreviousBudget', () => {
       { id: foodId, month: '2026-07', value: 100 },
     ])
     expect(dispatch).toHaveBeenCalledWith(action)
-    expect(sendEvent).toHaveBeenCalledWith('Budgets: copy previous')
+    expect(track).toHaveBeenCalledWith('budget_automation_applied', {
+      automation: 'copy_previous',
+    })
   })
 })

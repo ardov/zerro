@@ -10,7 +10,7 @@ vi.mock('worker', () => ({
   saveLocalData: vi.fn(),
 }))
 
-vi.mock('6-shared/helpers/tracking', () => ({ sendEvent: vi.fn() }))
+vi.mock('6-shared/analytics', () => ({ track: vi.fn() }))
 
 import { makeAccount } from 'zerro-core/testing/zenmoneyTestData'
 import data, {

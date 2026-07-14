@@ -4,7 +4,7 @@ import type { TEnvelopeId } from '5-entities/envelope'
 import { activity as coreActivity } from 'zerro-core/redux'
 
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { fixOverspends } from './fixOverspends'
 
 vi.mock('zerro-core/redux', () => ({
@@ -13,7 +13,7 @@ vi.mock('zerro-core/redux', () => ({
 vi.mock('4-features/budget/setTotalBudget', () => ({
   setTotalBudget: vi.fn(),
 }))
-vi.mock('6-shared/helpers/tracking', () => ({ sendEvent: vi.fn() }))
+vi.mock('6-shared/analytics', () => ({ track: vi.fn() }))
 
 describe('fixOverspends', () => {
   it('uses Core metrics for child and parent overspends', () => {
@@ -59,6 +59,8 @@ describe('fixOverspends', () => {
     expect(setTotalBudget).toHaveBeenNthCalledWith(2, [
       { id: parentId, month: '2026-07', value: 130 },
     ])
-    expect(sendEvent).toHaveBeenCalledWith('Budgets: fix overspends')
+    expect(track).toHaveBeenCalledWith('budget_automation_applied', {
+      automation: 'fix_overspends',
+    })
   })
 })

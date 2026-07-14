@@ -11,7 +11,7 @@ import { transactions as coreTransactions } from 'zerro-core/redux'
 import { useMemo, useState, useCallback, FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Theme } from '@mui/material'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { useDebounce } from '6-shared/hooks/useDebounce'
 
 import { getEventPosition } from '3-widgets/global/shared/helpers'
@@ -98,23 +98,22 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   }, [])
   const onSelectSimilar = useCallback(
     (date: Date | number) => {
-      sendEvent('Transaction: select similar')
       const ids = trList.filter(tr => tr.changed === +date).map(tr => tr.id)
       setChecked(ids)
+      track('similar_transactions_selected', {})
     },
     [trList]
   )
   const onMarkOlderViewed = useCallback(
     (id: TTransactionId) => {
-      sendEvent('Transaction: mark older viewed')
       const index = trList.findIndex(tr => tr.id === id)
       if (index === -1) return
       const ids = trList
         .slice(index)
         .filter(tr => !coreTransactions.isViewed(tr))
         .map(tr => tr.id)
-      sendEvent('Transaction: mark viewed: true')
       dispatch(coreTransactions.setViewed(ids, true))
+      track('transactions_older_marked_viewed', {})
     },
     [dispatch, trList]
   )

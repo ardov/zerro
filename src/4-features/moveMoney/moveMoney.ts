@@ -3,7 +3,7 @@ import type { TISOMonth, TFxCode } from '6-shared/types'
 import type { TEnvelopeId } from '5-entities/envelope'
 
 import { round } from '6-shared/helpers/money'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 
 import {
   activity as coreActivity,
@@ -21,7 +21,6 @@ export const moveMoney =
   ): AppThunk<void> =>
   (dispatch, getState) => {
     if (!source || !amount || !destination || source === destination) return
-    sendEvent('Budgets: move funds')
     const state = getState()
     const metrics = coreActivity.selectEnvelopeMetrics(state)[month]
     const convertFx = coreCurrency.selectConvertFx(state)
@@ -51,4 +50,5 @@ export const moveMoney =
     }
 
     dispatch(coreBudgets.set(updates))
+    track('budget_funds_moved', {})
   }

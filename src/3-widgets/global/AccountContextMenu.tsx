@@ -3,7 +3,7 @@ import { FC, useCallback } from 'react'
 import { Menu, MenuItem, MenuProps } from '@mui/material'
 import { useAppDispatch } from 'store'
 import { registerPopover } from '6-shared/historyPopovers'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { useTranslation } from 'react-i18next'
 import { accounts as coreAccounts } from 'zerro-core/redux'
 
@@ -44,16 +44,22 @@ export const AccountContextMenu: FC = () => {
       label: t('moveFromBalance'),
       condition: account.inBalance,
       action: () => {
-        sendEvent('Accounts: Set in budget')
         dispatch(coreAccounts.setInBalance(id, false))
+        track('account_budget_membership_changed', {
+          in_budget: false,
+          source: 'context_menu',
+        })
       },
     },
     {
       label: t('moveInBalance'),
       condition: !account.inBalance,
       action: () => {
-        sendEvent('Accounts: Set in budget')
         dispatch(coreAccounts.setInBalance(id, true))
+        track('account_budget_membership_changed', {
+          in_budget: true,
+          source: 'context_menu',
+        })
       },
     },
   ]

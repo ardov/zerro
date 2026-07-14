@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react'
 import { connect } from 'react-redux'
 import { logOut } from '4-features/authorization'
-import { captureError, sendEvent } from '6-shared/helpers/tracking'
+import { captureError } from '6-shared/diagnostics'
 import { ErrorMessage } from './ErrorMessage'
 import { AppDispatch } from 'store'
 
@@ -23,7 +23,6 @@ class ErrorBoundary extends React.Component<
     message: error.message,
   })
   componentDidCatch = (error: Error, errorInfo: React.ErrorInfo) => {
-    sendEvent(`Error: ${error.message}`)
     captureError(error, errorInfo)
   }
   render() {

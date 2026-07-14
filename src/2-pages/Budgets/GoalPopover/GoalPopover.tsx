@@ -14,7 +14,7 @@ import { AmountInput } from '6-shared/ui/AmountInput'
 import { CloseIcon } from '6-shared/ui/Icons'
 import MonthSelectPopover from '6-shared/ui/MonthSelectPopover'
 import { toISODate, formatDate } from '6-shared/helpers/date'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { Modify, TDateDraft, TISOMonth } from '6-shared/types'
 
 import { useAppDispatch, useAppSelector } from 'store'
@@ -71,13 +71,16 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
         goal.end = endDate
       }
       dispatch(coreGoals.set(month, id, goal))
-      sendEvent(`Goals: set ${goal.type} goal`)
+      track('budget_goal_changed', {
+        operation: 'set',
+        goal_type: goal.type,
+      })
     }
     onClose?.()
   }
   const removeGoal = () => {
     dispatch(coreGoals.set(month, id, null))
-    sendEvent('Goals: delete goal')
+    track('budget_goal_changed', { operation: 'delete' })
     onClose?.()
   }
 

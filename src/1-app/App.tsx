@@ -9,7 +9,7 @@ import {
   Theme,
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import { initTracking, setUserId } from '6-shared/helpers/tracking'
+import { initAnalytics, setAnalyticsUser } from '6-shared/analytics'
 import { PopoverManager } from '6-shared/historyPopovers'
 import { useAppSelector } from 'store'
 import { getLoginState } from 'store/token'
@@ -36,14 +36,14 @@ const history = createBrowserHistory()
 
 export default function App() {
   useEffect(() => {
-    initTracking(history)
+    return initAnalytics(history)
   }, [])
 
   const isLoggedIn = useAppSelector(getLoginState)
   const hasData = useAppSelector(state => !!getLastSyncTime(state))
   const userId = coreUsers.useRootId()
   useEffect(() => {
-    if (userId) setUserId(userId)
+    setAnalyticsUser(userId || null)
   }, [userId])
 
   const publicRoutes = [

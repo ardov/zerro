@@ -29,7 +29,7 @@ import {
 } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { addFxAmount, createFxAmount } from '6-shared/helpers/money'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useAppDispatch, useAppSelector } from 'store'
 
@@ -73,10 +73,13 @@ const Actions: FC<ActionsProps> = ({
   }
 
   const handleSetTag = (id: string) => {
-    sendEvent('Bulk Actions: set new tags')
     if (!id || id === 'null')
       dispatch(coreTransactions.bulkEdit(checkedIds, { tags: [] }))
     else dispatch(coreTransactions.bulkEdit(checkedIds, { tags: [id] }))
+    track('transaction_tags_changed', {
+      mode: 'bulk',
+      source: 'bulk_toolbar',
+    })
     closeMenu()
     onUncheckAll()
   }
@@ -86,8 +89,11 @@ const Actions: FC<ActionsProps> = ({
     okText: t('deleteBtn'),
     cancelText: t('cancelDeletion'),
     onOk: () => {
-      sendEvent('Transaction: delete')
       dispatch(coreTransactions.remove(checkedIds))
+      track('transaction_deleted', {
+        mode: 'bulk',
+        source: 'bulk_toolbar',
+      })
       closeMenu()
       onUncheckAll()
     },
@@ -99,8 +105,12 @@ const Actions: FC<ActionsProps> = ({
   }
 
   const handleMarkViewed = () => {
-    sendEvent('Transaction: mark viewed: true')
     dispatch(coreTransactions.setViewed(checkedIds, true))
+    track('transaction_viewed_changed', {
+      viewed: true,
+      mode: 'bulk',
+      source: 'bulk_toolbar',
+    })
     closeMenu()
     onUncheckAll()
   }
@@ -204,8 +214,11 @@ const Actions: FC<ActionsProps> = ({
               {actions.combineToOutcome && (
                 <MenuItem
                   onClick={() => {
-                    sendEvent('Transaction: combine to outcome')
                     dispatch(coreTransactions.combineToOutcome(ids))
+                    track('transactions_combined', {
+                      result_type: 'outcome',
+                      source: 'bulk_toolbar',
+                    })
                     onUncheckAll()
                   }}
                 >
@@ -222,8 +235,11 @@ const Actions: FC<ActionsProps> = ({
               {actions.combineToIncome && (
                 <MenuItem
                   onClick={() => {
-                    sendEvent('Transaction: combine to income')
                     dispatch(coreTransactions.combineToIncome(ids))
+                    track('transactions_combined', {
+                      result_type: 'income',
+                      source: 'bulk_toolbar',
+                    })
                     onUncheckAll()
                   }}
                 >
@@ -252,8 +268,11 @@ const Actions: FC<ActionsProps> = ({
               {actions.canMergeAsTransfer && (
                 <MenuItem
                   onClick={() => {
-                    sendEvent('Transaction: merge as transfer')
                     dispatch(coreTransactions.mergeAsTransfer(ids))
+                    track('transactions_combined', {
+                      result_type: 'transfer',
+                      source: 'bulk_toolbar',
+                    })
                     onUncheckAll()
                   }}
                 >

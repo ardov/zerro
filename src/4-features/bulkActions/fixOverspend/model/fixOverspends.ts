@@ -1,5 +1,5 @@
 import { add } from '6-shared/helpers/money'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { TISOMonth } from '6-shared/types'
 import { AppThunk } from 'store'
 import {
@@ -12,10 +12,9 @@ import { setTotalBudget } from '4-features/budget/setTotalBudget'
 export const fixOverspends =
   (month: TISOMonth): AppThunk<void> =>
   (dispatch, getState) => {
-    sendEvent('Budgets: fix overspends')
-
     fixOverspendingChildren()
     fixOverspendingParents()
+    track('budget_automation_applied', { automation: 'fix_overspends' })
 
     function fixOverspendingChildren() {
       const metrics = coreActivity.selectEnvelopeMetrics(getState())[month]

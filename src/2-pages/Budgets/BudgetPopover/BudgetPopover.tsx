@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next'
 import { ArrowForwardIcon } from '6-shared/ui/Icons'
 import { AmountInput } from '6-shared/ui/AmountInput'
 import { formatMoney } from '6-shared/helpers/money'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { AdaptivePopover } from '6-shared/ui/AdaptivePopover'
 
 import { useAppDispatch, useAppSelector } from 'store'
@@ -143,14 +143,16 @@ export const BudgetPopover: FC<TBudgetPopoverProps> = props => {
         />
 
         <MenuList>
-          {quickActions.map(({ text, amount }) => (
+          {quickActions.map(({ text, amount }, index) => (
             <MenuItem
               key={text}
               selected={inputValue === amount}
               sx={{ borderRadius: 1 }}
               onClick={() => {
-                sendEvent('Budgets: quick budget: ' + text)
                 changeAndClose(amount)
+                track('budget_quick_amount_selected', {
+                  preset_position: index + 1,
+                })
               }}
             >
               <ListItemText

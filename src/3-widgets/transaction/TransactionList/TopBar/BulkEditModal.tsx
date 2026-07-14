@@ -14,7 +14,7 @@ import {
   TextField,
 } from '@mui/material'
 import { useAppDispatch, useAppSelector } from 'store'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 import { transactions as coreTransactions } from 'zerro-core/redux'
 
 import { TagList } from '5-entities/tag/ui/TagList'
@@ -58,7 +58,10 @@ export const BulkEditModal: FC<BulkEditModalProps> = ({
       comment,
     }
     if (opts.tags || opts.comment) {
-      sendEvent('Bulk Actions: set new tags')
+      track('transaction_tags_changed', {
+        mode: 'bulk',
+        source: 'bulk_modal',
+      })
       dispatch(coreTransactions.bulkEdit(ids, opts))
     }
     onApply()

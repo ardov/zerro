@@ -5,6 +5,8 @@ export const redirectUri = import.meta.env.REACT_APP_REDIRECT_URI as string
 
 // Tracking parameters
 export const sentryDSN = import.meta.env.REACT_APP_SENTRY_DSN as string
+// The Yandex Metrica counter is initialized outside the application bundle.
+// Keep its deployment configuration, but do not send product events/reachGoal.
 export const ymid = import.meta.env.REACT_APP_YMID as string
 export const gaid = import.meta.env.REACT_APP_GAID as string
 

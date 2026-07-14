@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { AppThunk, RootState } from 'store'
 import { TFxCode } from '6-shared/types'
-import { sendEvent } from '6-shared/helpers/tracking'
+import { track } from '6-shared/analytics'
 
 const KEY = 'display-currency'
 const savedCurrency = {
@@ -44,5 +44,8 @@ export const setSavedCurrency =
   dispatch => {
     savedCurrency.set(currency)
     dispatch(setCurrency(currency))
-    sendEvent('DisplayCurrency: set')
+    track('setting_changed', {
+      setting: 'display_currency',
+      value: currency ? 'set' : 'changed',
+    })
   }
