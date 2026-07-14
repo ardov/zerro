@@ -10,14 +10,6 @@
     opacity: 0;
   }
 
-  &:hover .marker {
-    transform: scale(1.1);
-  }
-
-  &:active .marker {
-    transform: scale(1);
-  }
-
   & .marker {
     position: absolute;
     transform: scale(1);
@@ -33,5 +25,13 @@
       border-radius: 6px;
       transform: rotate(45deg) scale(1.1);
     }
+  }
+
+  &:hover .marker {
+    transform: scale(1.1);
+  }
+
+  &:active .marker {
+    transform: scale(1);
   }
 }
