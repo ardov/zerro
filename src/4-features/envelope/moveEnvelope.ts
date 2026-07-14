@@ -33,7 +33,8 @@ function cutOutNode(
   structure: coreEnvelopes.TGroupNode[]
 ) {
   if (node.type === 'group') {
-    structure = structure.filter(gr => gr !== node)
+    const groupIndex = structure.indexOf(node)
+    if (groupIndex !== -1) structure.splice(groupIndex, 1)
     return
   }
 
