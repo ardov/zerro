@@ -50,10 +50,12 @@ const Filter: FC<FilterProps> = ({ query, setQuery }) => {
   const chipRefs = useRef<Partial<Record<Clause['kind'], HTMLElement | null>>>(
     {}
   )
+  const pendingEditingKind = useRef<EditableFilterKind | null>(null)
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
   const [editingKind, setEditingKind] = useState<EditableFilterKind | null>(
     null
   )
+  const [editorOptionsOpen, setEditorOptionsOpen] = useState(false)
   const search = query.clauses.find(clause => clause.kind === 'search')
   const appliedClauses = query.clauses.filter(
     clause => clause.kind !== 'search'
@@ -84,18 +86,32 @@ const Filter: FC<FilterProps> = ({ query, setQuery }) => {
   }
 
   const openAddMenu = (event: MouseEvent<HTMLElement>) => {
+    pendingEditingKind.current = null
+    setEditorOptionsOpen(false)
     setEditingKind(null)
     setMenuAnchor(event.currentTarget)
   }
 
   const chooseKind = (kind: AddableFilterKind) => {
     upsertClause(makeDefaultClause(kind))
+    pendingEditingKind.current = isEditableKind(kind) ? kind : null
     setMenuAnchor(null)
-    if (isEditableKind(kind)) setEditingKind(kind)
+  }
+
+  const openPendingEditor = () => {
+    const kind = pendingEditingKind.current
+    pendingEditingKind.current = null
+    if (!kind) return
+
+    setEditorOptionsOpen(false)
+    setEditingKind(kind)
   }
 
   const openEditor = (clause: Clause) => {
-    if (isEditableKind(clause.kind)) setEditingKind(clause.kind)
+    if (isEditableKind(clause.kind)) {
+      setEditorOptionsOpen(false)
+      setEditingKind(clause.kind)
+    }
   }
 
   const closeEditor = () => {
@@ -106,11 +122,15 @@ const Filter: FC<FilterProps> = ({ query, setQuery }) => {
         ),
       }))
     }
+    setEditorOptionsOpen(false)
     setEditingKind(null)
   }
 
   const removeClause = (clause: Clause) => {
-    if (editingKind === clause.kind) setEditingKind(null)
+    if (editingKind === clause.kind) {
+      setEditorOptionsOpen(false)
+      setEditingKind(null)
+    }
     setQuery(current => ({
       clauses: current.clauses.filter(item => item !== clause),
     }))
@@ -199,6 +219,7 @@ const Filter: FC<FilterProps> = ({ query, setQuery }) => {
         open={Boolean(menuAnchor)}
         onClose={() => setMenuAnchor(null)}
         transitionDuration={0}
+        slotProps={{ transition: { onExited: openPendingEditor } }}
       >
         {availableKinds.map(kind => (
           <MenuItem key={kind} onClick={() => chooseKind(kind)}>
@@ -214,10 +235,22 @@ const Filter: FC<FilterProps> = ({ query, setQuery }) => {
         open={Boolean(editingClause)}
         onClose={closeEditor}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        slotProps={{
+          transition: {
+            onEntered: () => setEditorOptionsOpen(true),
+            onExit: () => setEditorOptionsOpen(false),
+          },
+        }}
       >
         {editingClause && (
           <Box sx={{ width: 340, maxWidth: '90vw', p: 1.5 }}>
-            <FilterEditor clause={editingClause} onChange={upsertClause} />
+            <FilterEditor
+              clause={editingClause}
+              onChange={upsertClause}
+              optionsOpen={editorOptionsOpen}
+              onOptionsOpen={() => setEditorOptionsOpen(true)}
+              onOptionsClose={() => setEditorOptionsOpen(false)}
+            />
           </Box>
         )}
       </Popover>
@@ -228,8 +261,11 @@ const Filter: FC<FilterProps> = ({ query, setQuery }) => {
 function FilterEditor(props: {
   clause: Clause
   onChange: (clause: Clause) => void
+  optionsOpen: boolean
+  onOptionsOpen: () => void
+  onOptionsClose: () => void
 }) {
-  const { clause, onChange } = props
+  const { clause, onChange, optionsOpen, onOptionsOpen, onOptionsClose } = props
   const { t } = useTranslation('filterDrawer')
   const accounts = coreAccounts.usePopulated()
   const tags = useAppSelector(coreTags.selectPopulated)
@@ -239,7 +275,9 @@ function FilterEditor(props: {
       return (
         <Autocomplete
           multiple
-          openOnFocus
+          open={optionsOpen}
+          onOpen={onOptionsOpen}
+          onClose={onOptionsClose}
           disableCloseOnSelect
           options={Object.keys(accounts)}
           value={clause.ids}
@@ -254,7 +292,9 @@ function FilterEditor(props: {
       return (
         <Autocomplete
           multiple
-          openOnFocus
+          open={optionsOpen}
+          onOpen={onOptionsOpen}
+          onClose={onOptionsClose}
           disableCloseOnSelect
           options={Object.keys(tags)}
           value={clause.ids}
@@ -269,7 +309,9 @@ function FilterEditor(props: {
       return (
         <Autocomplete
           multiple
-          openOnFocus
+          open={optionsOpen}
+          onOpen={onOptionsOpen}
+          onClose={onOptionsClose}
           disableCloseOnSelect
           options={[
             coreTransactions.TrType.Income,
