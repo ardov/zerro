@@ -16,6 +16,8 @@ export { applyServerPatch } from './applyServerPatch'
 export {
   getPendingSyncDiff,
   getHasPendingChanges,
+  getCanUndoClientCommand,
+  getCanRedoClientCommand,
   getChangedNum,
   getLastChangeTime,
   getLastSyncTime,

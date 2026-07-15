@@ -6,6 +6,7 @@ import { EnvType, envId } from '../envelope-id'
 import {
   compileTransactionQuery,
   TrFilterMode,
+  TrFilterType,
   type TTransactionQuery,
   type TTransactionQueryContext,
 } from './query'
@@ -65,6 +66,29 @@ describe('compileTransactionQuery', () => {
       compileTransactionQuery({
         clauses: [{ kind: 'deleted', mode: 'only' }],
       })(makeTransaction({ income: 1 }))
+    ).toBe(false)
+  })
+
+  it('groups both debt directions under the product debt filter', () => {
+    const matches = compileTransactionQuery(
+      { clauses: [{ kind: 'type', values: [TrFilterType.Debt] }] },
+      makeContext({
+        routing: {
+          inBudgetAccountIds: new Set(['card']),
+          debtAccountId: 'debt',
+          debtors: {},
+        },
+      })
+    )
+
+    expect(
+      matches(makeTransaction({ incomeAccount: 'debt', outcome: 10 }))
+    ).toBe(true)
+    expect(
+      matches(makeTransaction({ outcomeAccount: 'debt', income: 10 }))
+    ).toBe(true)
+    expect(
+      matches(makeTransaction({ outcomeAccount: 'card', income: 10 }))
     ).toBe(false)
   })
 

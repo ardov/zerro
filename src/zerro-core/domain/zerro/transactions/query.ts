@@ -25,11 +25,20 @@ export enum TrFilterMode {
   TransferFees = 'transferFees',
 }
 
+export const TrFilterType = {
+  Income: TrType.Income,
+  Outcome: TrType.Outcome,
+  Transfer: TrType.Transfer,
+  Debt: 'debt',
+} as const
+
+export type TrFilterType = (typeof TrFilterType)[keyof typeof TrFilterType]
+
 export type TTransactionFilterClause =
   | { kind: 'search'; value: string }
   | { kind: 'account'; ids: TAccountId[] }
   | { kind: 'tag'; ids: Array<TTagId | 'null'> }
-  | { kind: 'type'; values: TrType[] }
+  | { kind: 'type'; values: TrFilterType[] }
   | { kind: 'amount'; gte?: number; lte?: number }
   | { kind: 'date'; from?: TISODate; to?: TISODate }
   | { kind: 'viewed'; value: boolean }
@@ -103,11 +112,18 @@ function compileClause(
     }
     case 'type': {
       const values = new Set(clause.values)
-      return transaction =>
-        !values.size ||
-        values.has(
-          getTransactionType(transaction, context?.routing.debtAccountId)
+      return transaction => {
+        if (!values.size) return true
+
+        const type = getTransactionType(
+          transaction,
+          context?.routing.debtAccountId
         )
+        if (type === TrType.IncomeDebt || type === TrType.OutcomeDebt) {
+          return values.has(TrFilterType.Debt)
+        }
+        return values.has(type)
+      }
     }
     case 'amount':
       return transaction => {

@@ -53,6 +53,7 @@ export {
 export {
   compileTransactionQuery as compileQuery,
   TrFilterMode,
+  TrFilterType,
   type TTransactionFilterClause,
   type TTransactionQuery,
   type TTransactionQueryContext,

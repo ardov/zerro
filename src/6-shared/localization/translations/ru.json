@@ -527,6 +527,7 @@
     "transactionType_all": "Все операции",
     "transactionType_outcome": "Расход",
     "transactionType_transfer": "Перевод",
+    "transactionType_debt": "Долг",
     "transactionType_income": "Доход",
     "onlyNew": "Только новые",
     "showDeleted": "Показать удалённые",

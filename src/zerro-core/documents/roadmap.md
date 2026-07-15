@@ -1,6 +1,6 @@
 # Zerro Core roadmap
 
-- Updated: 2026-07-13
+- Updated: 2026-07-15
 - Purpose: order remaining work; history stays in Git.
 
 ## Goal
@@ -132,7 +132,7 @@ For each rule:
 - semantic Redux-backed engine facade;
 - published package exports and supported implementation subpaths;
 - presentation package split and asset-resolver API;
-- product undo/redo controls;
+- visible undo/redo controls beyond the existing keyboard shortcuts;
 - replica migration framework or atomic multi-store persistence;
 - generic graph/configuration framework;
 - richer demo runtimes and speculative bulk APIs.

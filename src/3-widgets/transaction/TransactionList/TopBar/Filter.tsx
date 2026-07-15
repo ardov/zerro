@@ -31,6 +31,8 @@ type EditableFilterKind = Exclude<AddableFilterKind, 'viewed' | 'deleted'>
 type FilterProps = {
   query: coreTransactions.TTransactionQuery
   setQuery: Dispatch<SetStateAction<coreTransactions.TTransactionQuery>>
+  search: string
+  setSearch: Dispatch<SetStateAction<string>>
 }
 
 const filterKinds: AddableFilterKind[] = [
@@ -42,7 +44,7 @@ const filterKinds: AddableFilterKind[] = [
   'deleted',
 ]
 
-const Filter: FC<FilterProps> = ({ query, setQuery }) => {
+const Filter: FC<FilterProps> = ({ query, setQuery, search, setSearch }) => {
   const { t, i18n } = useTranslation('filterDrawer')
   const accounts = coreAccounts.usePopulated()
   const envelopes = useAppSelector(coreEnvelopes.selectAll)
@@ -56,25 +58,13 @@ const Filter: FC<FilterProps> = ({ query, setQuery }) => {
     null
   )
   const [editorOptionsOpen, setEditorOptionsOpen] = useState(false)
-  const search = query.clauses.find(clause => clause.kind === 'search')
-  const appliedClauses = query.clauses.filter(
-    clause => clause.kind !== 'search'
-  )
+  const appliedClauses = query.clauses
   const editingClause = editingKind
     ? query.clauses.find(clause => clause.kind === editingKind)
     : undefined
   const availableKinds = filterKinds.filter(
     kind => !appliedClauses.some(clause => clause.kind === kind)
   )
-
-  const updateSearch = (value: string) => {
-    setQuery(current => ({
-      clauses: [
-        ...current.clauses.filter(clause => clause.kind !== 'search'),
-        ...(value ? [{ kind: 'search' as const, value }] : []),
-      ],
-    }))
-  }
 
   const upsertClause = (clause: Clause) => {
     setQuery(current => ({
@@ -148,16 +138,16 @@ const Filter: FC<FilterProps> = ({ query, setQuery }) => {
     >
       <Box sx={{ display: 'flex', alignItems: 'center', minHeight: 36, px: 1 }}>
         <InputBase
-          value={search?.kind === 'search' ? search.value : ''}
+          value={search}
           placeholder={t('searchComments')}
-          onChange={event => updateSearch(event.target.value)}
+          onChange={event => setSearch(event.target.value)}
           sx={{ flexGrow: 1 }}
         />
-        {search?.kind === 'search' && Boolean(search.value) && (
+        {Boolean(search) && (
           <Tooltip title={t('clearField')}>
             <IconButton
               size="small"
-              onClick={() => updateSearch('')}
+              onClick={() => setSearch('')}
               children={<CloseIcon />}
             />
           </Tooltip>
@@ -314,9 +304,10 @@ function FilterEditor(props: {
           onClose={onOptionsClose}
           disableCloseOnSelect
           options={[
-            coreTransactions.TrType.Income,
-            coreTransactions.TrType.Outcome,
-            coreTransactions.TrType.Transfer,
+            coreTransactions.TrFilterType.Income,
+            coreTransactions.TrFilterType.Outcome,
+            coreTransactions.TrFilterType.Transfer,
+            coreTransactions.TrFilterType.Debt,
           ]}
           value={clause.values}
           getOptionLabel={value => getTypeLabel(value, t)}
@@ -487,19 +478,18 @@ function getKindLabel(
 }
 
 function getTypeLabel(
-  type: coreTransactions.TrType,
+  type: coreTransactions.TrFilterType,
   t: ReturnType<typeof useTranslation>['t']
 ) {
   switch (type) {
-    case coreTransactions.TrType.Income:
+    case coreTransactions.TrFilterType.Income:
       return t('transactionType_income')
-    case coreTransactions.TrType.Outcome:
+    case coreTransactions.TrFilterType.Outcome:
       return t('transactionType_outcome')
-    case coreTransactions.TrType.Transfer:
+    case coreTransactions.TrFilterType.Transfer:
       return t('transactionType_transfer')
-    case coreTransactions.TrType.IncomeDebt:
-    case coreTransactions.TrType.OutcomeDebt:
-      return t('transactionType_transfer')
+    case coreTransactions.TrFilterType.Debt:
+      return t('transactionType_debt')
   }
 }
 

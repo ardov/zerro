@@ -64,7 +64,8 @@ decision.
 
 - Account balances may be stale until explicit synchronization.
 - Dirty sessions pause remote pulls until explicit sync.
-- Undo/redo semantics exist without a production UI.
+- Undo/redo is available through platform keyboard shortcuts outside text-editing
+  controls.
 - Replica metadata is disposable until continuity requirements justify
   migrations.
 

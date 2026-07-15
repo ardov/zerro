@@ -15,6 +15,7 @@ import { useMemo, useState, useCallback, FC, ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Theme } from '@mui/material'
 import { track } from '6-shared/analytics'
+import { useDebounce } from '6-shared/hooks/useDebounce'
 
 import { getEventPosition } from '3-widgets/global/shared/helpers'
 
@@ -50,20 +51,34 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
   const dispatch = useAppDispatch()
   const [query, setQuery] = useState<coreTransactions.TTransactionQuery>(
-    initialQuery || { clauses: [] }
+    () => ({
+      clauses:
+        initialQuery?.clauses.filter(clause => clause.kind !== 'search') || [],
+    })
+  )
+  const [search, setSearch] = useState(
+    () =>
+      initialQuery?.clauses.find(clause => clause.kind === 'search')?.value ||
+      ''
+  )
+  const debouncedSearch = useDebounce(search, 300)
+  const appliedQuery = useMemo<coreTransactions.TTransactionQuery>(
+    () => ({
+      clauses: [
+        ...query.clauses,
+        ...(debouncedSearch
+          ? [{ kind: 'search' as const, value: debouncedSearch }]
+          : []),
+      ],
+    }),
+    [debouncedSearch, query]
   )
   const onFilterByPayee = useCallback(
-    (payee?: string) =>
-      setQuery(current => ({
-        clauses: [
-          ...current.clauses.filter(clause => clause.kind !== 'search'),
-          ...(payee ? [{ kind: 'search' as const, value: payee }] : []),
-        ],
-      })),
+    (payee?: string) => setSearch(payee || ''),
     []
   )
 
-  const trList = useFilteredTransactions(transactionIds, query)
+  const trList = useFilteredTransactions(transactionIds, appliedQuery)
 
   const [checked, setChecked] = useState<TTransactionId[]>([])
   const uncheckAll = useCallback(() => setChecked([]), [])
@@ -169,7 +184,12 @@ export const TransactionList: FC<TTransactionListProps> = props => {
               mx: 'auto',
             }}
           >
-            <Filter query={query} setQuery={setQuery} />
+            <Filter
+              query={query}
+              setQuery={setQuery}
+              search={search}
+              setSearch={setSearch}
+            />
           </Box>
         )}
 

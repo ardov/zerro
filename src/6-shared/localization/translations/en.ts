@@ -549,6 +549,7 @@ export const en: typeof ru = {
     transactionType_all: 'All Transactions',
     transactionType_outcome: 'Expense',
     transactionType_transfer: 'Transfer',
+    transactionType_debt: 'Debt',
     transactionType_income: 'Income',
     onlyNew: 'Only New',
     showDeleted: 'Show Deleted',

@@ -1,6 +1,6 @@
 # Zerro Core design ledger
 
-- Updated: 2026-07-13
+- Updated: 2026-07-15
 - Purpose: settled decisions, accepted risks, active bridges, and unresolved
   architectural questions. History stays in Git.
 
@@ -63,6 +63,8 @@
 - The durable logical replica is `base`, `outbox`, and `outboxHead`; `current`
   and request transport are derived.
 - Undo/redo move `outboxHead`; append after undo drops the redo tail.
+- The loaded app maps platform history shortcuts to undo/redo only outside
+  text-editing controls and only when that history direction is available.
 - Persistence stores versioned replay inputs plus the base server timestamp,
   not derived state.
 - Periodic sync runs only while the applied prefix is empty.
@@ -87,7 +89,8 @@
 - Transaction edits may leave `account.balance` stale until synchronization;
   balance effects belong to materialization.
 - Dirty sessions do not pull remote changes until explicit sync.
-- Undo/redo semantics exist without production controls.
+- Undo/redo is keyboard-accessible in the loaded application; visible controls
+  remain deferred.
 - Replica metadata is disposable until product continuity requirements justify
   migrations.
 

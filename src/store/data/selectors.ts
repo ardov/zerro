@@ -24,6 +24,12 @@ export const getPendingSyncDiff = createSelector([getAppliedOutbox], outbox => {
 export const getHasPendingChanges = (state: RootState) =>
   getOutboxHead(state) > 0
 
+export const getCanUndoClientCommand = (state: RootState) =>
+  getOutboxHead(state) > 0
+
+export const getCanRedoClientCommand = (state: RootState) =>
+  getOutboxHead(state) < getOutbox(state).length
+
 export const getChangedNum = (state: RootState) => {
   return getItemsCount(getPendingSyncDiff(state))
 }
