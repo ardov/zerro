@@ -141,9 +141,9 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
             left={
               <span>
                 <span>{t('transactions', { ns: 'common' })}</span>
-                {Boolean(envMetrics.totalTransactions.length) && (
+                {Boolean(envMetrics.totalTransactionCount) && (
                   <span style={{ opacity: 0.5 }}>
-                    {' ' + envMetrics.totalTransactions.length}
+                    {' ' + envMetrics.totalTransactionCount}
                   </span>
                 )}
               </span>

@@ -59,9 +59,7 @@ describe('buildRawActivity', () => {
     })
 
     expect(result['2026-01'].internal.total).toEqual({ USD: -1 })
-    expect(result['2026-01'].internal.transactions.map(tr => tr.id)).toEqual([
-      'fee-transfer',
-    ])
+    expect(result['2026-01'].internal.transactionCount).toBe(1)
   })
 
   it('routes debt transactions through debtor envelopes', () => {

@@ -1,6 +1,6 @@
 # Zerro Core handoff
 
-- Updated: 2026-07-13
+- Updated: 2026-07-15
 - Branch: `core-next`
 - Module: `src/zerro-core`
 - Worktree: verify before editing
@@ -20,6 +20,9 @@ This file routes the next task. Git contains implementation history.
 - Persistence validates versioned replay inputs and does not store derived
   state.
 - The snapshot session remains frozen and exposes only namespaced reads.
+- Activity and budget projections retain counts instead of transaction arrays;
+  typed transaction queries reconstruct intrinsic and envelope-filtered lists
+  from canonical history on demand.
 - Materialization is identity-only. The engine facade and package expansion
   remain deferred until a real consumer exists.
 

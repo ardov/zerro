@@ -50,7 +50,7 @@ export const SmartTransactionPreview = () => {
 }
 
 const drawerWidth = { xs: '100vw', sm: 360 }
+// MUI Slide uses the modal root as its viewport; only size the paper.
 const contentSx = {
-  width: drawerWidth,
   [`& .MuiDrawer-paper`]: { width: drawerWidth },
 }

@@ -38,7 +38,10 @@ export const WidgetAccHistory: FC<WidgetAccHistoryProps> = memo(
 
     const onClick = useCallback(
       (id: TAccountId, date: TISODate) => {
-        trDrawer.open({ filterConditions: { account: id }, initialDate: date })
+        trDrawer.open({
+          initialQuery: { clauses: [{ kind: 'account', ids: [id] }] },
+          initialDate: date,
+        })
       },
       [trDrawer]
     )

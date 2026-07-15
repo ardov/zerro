@@ -1,17 +1,12 @@
 import { keys } from '../../shared/keys'
 import type { ByMonth } from '../../shared/types'
-import type { TFxAmount } from '../../shared/money'
+import { addFxAmount, type TFxAmount } from '../../shared/money'
 import { EnvType, envId, TEnvelopeId } from '../envelope-id'
 import type { TFxConverter } from '../fx-rates'
+import { TrFilterMode } from '../transactions'
 import { EnvActivity, TRawActivityNode } from './rawActivity'
 
-export enum TrFilterMode {
-  GeneralIncome = 'generalIncome',
-  Envelope = 'envelope',
-  Income = 'income',
-  Outcome = 'outcome',
-  All = 'All',
-}
+export { TrFilterMode } from '../transactions'
 
 type TActivityPair = { income?: EnvActivity; outcome?: EnvActivity }
 
@@ -25,21 +20,20 @@ type TActivityByType = {
 export type TSortedActivityNode = {
   id: TEnvelopeId | 'transferFees'
   trMode: TrFilterMode
-  total: EnvActivity
-  income?: EnvActivity
-  outcome?: EnvActivity
-  keepIncome?: boolean
+  total: TActivitySummary
 }
+
+export type TActivitySummary = Pick<EnvActivity, 'total' | 'transactionCount'>
 
 export type TSortedActivity = {
   incomes: TSortedActivityNode[]
   outcomes: TSortedActivityNode[]
   transfers: TSortedActivityNode[]
   debts: TSortedActivityNode[]
-  incomesTotal: EnvActivity
-  outcomesTotal: EnvActivity
-  transfersTotal: EnvActivity
-  debtsTotal: EnvActivity
+  incomesTotal: TActivitySummary
+  outcomesTotal: TActivitySummary
+  transfersTotal: TActivitySummary
+  debtsTotal: TActivitySummary
 }
 
 export type TBuildSortedActivityInput = {
@@ -66,11 +60,8 @@ export function buildSortedActivity(
       if (keepIncome) {
         const envInfo: TSortedActivityNode = {
           id,
-          income,
-          outcome,
-          keepIncome,
           trMode: TrFilterMode.Envelope,
-          total: EnvActivity.merge(income, outcome),
+          total: mergeActivitySummary(income, outcome),
         }
         const value = toValue(envInfo.total.total)
         if (value > 0) node.incomes.push(envInfo)
@@ -81,18 +72,14 @@ export function buildSortedActivity(
       if (income) {
         node.incomes.push({
           id,
-          total: income,
-          income,
-          keepIncome,
+          total: summarizeActivity(income),
           trMode: TrFilterMode.GeneralIncome,
         })
       }
       if (outcome) {
         node.outcomes.push({
           id,
-          total: outcome,
-          outcome,
-          keepIncome,
+          total: summarizeActivity(outcome),
           trMode: TrFilterMode.Envelope,
         })
       }
@@ -101,8 +88,8 @@ export function buildSortedActivity(
     if (toValue(internal.total)) {
       node.transfers.push({
         id: 'transferFees',
-        total: internal,
-        trMode: TrFilterMode.All,
+        total: summarizeActivity(internal),
+        trMode: TrFilterMode.TransferFees,
       })
     }
 
@@ -110,10 +97,7 @@ export function buildSortedActivity(
       const { income, outcome } = transfers[id]
       node.transfers.push({
         id,
-        income,
-        outcome,
-        total: EnvActivity.merge(income, outcome),
-        keepIncome: input.keepingEnvelopeIds.includes(id),
+        total: mergeActivitySummary(income, outcome),
         trMode: TrFilterMode.All,
       })
     })
@@ -122,10 +106,7 @@ export function buildSortedActivity(
       const { income, outcome } = debts[id]
       node.debts.push({
         id,
-        income,
-        outcome,
-        total: EnvActivity.merge(income, outcome),
-        keepIncome: input.keepingEnvelopeIds.includes(id),
+        total: mergeActivitySummary(income, outcome),
         trMode: TrFilterMode.All,
       })
     })
@@ -192,16 +173,38 @@ function makeSortedActivity(): TSortedActivity {
     outcomes: [],
     transfers: [],
     debts: [],
-    incomesTotal: new EnvActivity(),
-    outcomesTotal: new EnvActivity(),
-    transfersTotal: new EnvActivity(),
-    debtsTotal: new EnvActivity(),
+    incomesTotal: emptyActivitySummary(),
+    outcomesTotal: emptyActivitySummary(),
+    transfersTotal: emptyActivitySummary(),
+    debtsTotal: emptyActivitySummary(),
   }
 }
 
-function sumActivity(nodes: TSortedActivityNode[]): EnvActivity {
+function sumActivity(nodes: TSortedActivityNode[]): TActivitySummary {
   return nodes.reduce(
-    (sum, node) => EnvActivity.merge(sum, node.total),
-    new EnvActivity()
+    (sum, node) => mergeActivitySummary(sum, node.total),
+    emptyActivitySummary()
   )
+}
+
+function summarizeActivity(activity: EnvActivity): TActivitySummary {
+  return {
+    total: activity.total,
+    transactionCount: activity.transactionCount,
+  }
+}
+
+function mergeActivitySummary(
+  activityA: TActivitySummary | undefined,
+  activityB: TActivitySummary | undefined
+): TActivitySummary {
+  return {
+    total: addFxAmount(activityA?.total || {}, activityB?.total || {}),
+    transactionCount:
+      (activityA?.transactionCount || 0) + (activityB?.transactionCount || 0),
+  }
+}
+
+function emptyActivitySummary(): TActivitySummary {
+  return { total: {}, transactionCount: 0 }
 }

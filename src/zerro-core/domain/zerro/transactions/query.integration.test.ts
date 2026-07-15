@@ -1,0 +1,93 @@
+import { describe, expect, it } from 'vitest'
+import { createZerroSession } from '../../../application/session/createZerroSession'
+import { makeDemoStore } from '../../../demo'
+import { getDebtAccountId } from '../../zenmoney'
+import type { TISOMonth } from '../../zenmoney/primitives'
+import { getZerroInBudgetAccountIds } from '../accounts'
+import type { TEnvelopeId } from '../envelope-id'
+import {
+  compileTransactionQuery,
+  TrFilterMode,
+  type TTransactionQueryContext,
+} from './query'
+
+describe('transaction query integration', () => {
+  it('reconstructs activity and envelope transaction counts on demand', () => {
+    const store = makeDemoStore()
+    const session = createZerroSession(store, {
+      now: () => Date.parse('2026-07-06T12:00:00.000Z'),
+      uuid: () => 'query-integration-id',
+    })
+    const history = session.transactions.getHistory()
+    const context: TTransactionQueryContext = {
+      routing: {
+        inBudgetAccountIds: new Set(getZerroInBudgetAccountIds(store)),
+        debtAccountId: getDebtAccountId(store),
+        debtors: session.debtors.getAll(),
+      },
+      envelopes: session.envelopes.getAll(),
+      keepingEnvelopeIds: new Set(session.envelopes.getKeepingIds()),
+    }
+
+    Object.entries(session.activity.getSorted()).forEach(
+      ([month, activity]) => {
+        const isoMonth = month as TISOMonth
+        const nodes = [
+          ...activity.incomes,
+          ...activity.outcomes,
+          ...activity.transfers,
+          ...activity.debts,
+        ]
+
+        nodes.forEach(node => {
+          const envelopeIds: TEnvelopeId[] =
+            node.id === 'transferFees' ? [] : [node.id]
+          const matches = compileTransactionQuery(
+            {
+              clauses: [
+                {
+                  kind: 'activity',
+                  envelopeIds,
+                  scope: 'self',
+                  mode: node.trMode,
+                  month: isoMonth,
+                },
+              ],
+            },
+            context
+          )
+
+          expect(history.filter(matches)).toHaveLength(
+            node.total.transactionCount
+          )
+        })
+      }
+    )
+
+    Object.entries(session.envelopes.getMetrics()).forEach(
+      ([month, metrics]) => {
+        const isoMonth = month as TISOMonth
+        Object.values(metrics).forEach(metric => {
+          const matches = compileTransactionQuery(
+            {
+              clauses: [
+                {
+                  kind: 'activity',
+                  envelopeIds: [metric.id],
+                  scope: 'tree',
+                  mode: TrFilterMode.Envelope,
+                  month: isoMonth,
+                },
+              ],
+            },
+            context
+          )
+
+          expect(history.filter(matches)).toHaveLength(
+            metric.totalTransactionCount
+          )
+        })
+      }
+    )
+  })
+})

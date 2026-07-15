@@ -45,6 +45,14 @@ export const selectRaw = createSelector(
       instruments,
     })
 )
+export const selectTransactionRoutingContext = createSelector(
+  [selectInBudgetAccountIds, accounts.selectDebtAccountId, debtors.selectAll],
+  (inBudgetAccountIds, debtAccountId, debtors) => ({
+    inBudgetAccountIds: new Set(inBudgetAccountIds),
+    debtAccountId,
+    debtors,
+  })
+)
 export const selectAll = createSelector(
   [selectRaw, envelopes.selectKeepingIds],
   (rawActivity, keepingEnvelopeIds) =>
@@ -72,5 +80,5 @@ export const selectSorted = createSelector(
   (rawActivity, keepingEnvelopeIds, convertFx) =>
     buildSortedActivity({ rawActivity, keepingEnvelopeIds, convertFx })
 )
-export type { TSortedActivityNode } from '../domain/zerro'
+export type { TActivitySummary, TSortedActivityNode } from '../domain/zerro'
 export { EnvActivity } from '../domain/zerro'

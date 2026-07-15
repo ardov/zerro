@@ -3,16 +3,18 @@ import type {
   ByDate,
   TDateDraft,
   TISODate,
-  TTransaction,
   TTransactionId,
 } from '6-shared/types'
-import { transactions as coreTransactions } from 'zerro-core/redux'
+import {
+  activity as coreActivity,
+  envelopes as coreEnvelopes,
+  transactions as coreTransactions,
+} from 'zerro-core/redux'
 
 import { useMemo, useState, useCallback, FC, ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Theme } from '@mui/material'
 import { track } from '6-shared/analytics'
-import { useDebounce } from '6-shared/hooks/useDebounce'
 
 import { getEventPosition } from '3-widgets/global/shared/helpers'
 
@@ -26,8 +28,8 @@ import { useAppDispatch, useAppSelector } from 'store'
 export type TTransactionListProps = {
   onTrOpen?: (id: TTransactionId) => void
   opened?: TTransactionId
-  transactions?: TTransaction[]
-  preFilter?: coreTransactions.TrCondition
+  transactionIds?: TTransactionId[]
+  initialQuery?: coreTransactions.TTransactionQuery
   hideFilter?: boolean
   checkedDate?: Date | null
   initialDate?: TDateDraft
@@ -38,8 +40,8 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   const {
     onTrOpen,
     opened,
-    transactions: transactionObjects,
-    preFilter,
+    transactionIds,
+    initialQuery,
     hideFilter = false,
     checkedDate,
     initialDate,
@@ -47,41 +49,21 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   } = props
 
   const dispatch = useAppDispatch()
-  const [filter, setFilter] = useState<
-    coreTransactions.TrCondition | undefined
-  >(undefined)
-  const setCondition = useCallback(
-    (condition?: coreTransactions.TrCondition) =>
-      setFilter(filter => {
-        return { ...filter, ...condition }
-      }),
-    []
+  const [query, setQuery] = useState<coreTransactions.TTransactionQuery>(
+    initialQuery || { clauses: [] }
   )
-  const handleClearFilter = useCallback(() => {
-    setFilter(undefined)
-  }, [])
-
   const onFilterByPayee = useCallback(
-    (payee?: string) => setFilter({ search: payee }),
+    (payee?: string) =>
+      setQuery(current => ({
+        clauses: [
+          ...current.clauses.filter(clause => clause.kind !== 'search'),
+          ...(payee ? [{ kind: 'search' as const, value: payee }] : []),
+        ],
+      })),
     []
   )
 
-  const resultFilter = useMemo(() => {
-    if (preFilter) {
-      return filter
-        ? ({ and: [preFilter, filter] } as coreTransactions.TrCondition)
-        : preFilter
-    }
-    return filter
-  }, [filter, preFilter])
-
-  const debouncedFilter = useDebounce(resultFilter, 300)
-
-  const transactions = useMemo(
-    () => transactionObjects?.map(tr => tr.id),
-    [transactionObjects]
-  )
-  const trList = useFilteredTransactions(transactions, debouncedFilter)
+  const trList = useFilteredTransactions(transactionIds, query)
 
   const [checked, setChecked] = useState<TTransactionId[]>([])
   const uncheckAll = useCallback(() => setChecked([]), [])
@@ -187,11 +169,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
               mx: 'auto',
             }}
           >
-            <Filter
-              conditions={filter}
-              setCondition={setCondition}
-              clearFilter={handleClearFilter}
-            />
+            <Filter query={query} setQuery={setQuery} />
           </Box>
         )}
 
@@ -216,18 +194,29 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
 function useFilteredTransactions(
   trIds?: TTransactionId[],
-  conditions?: coreTransactions.TrCondition
+  query: coreTransactions.TTransactionQuery = { clauses: [] }
 ) {
   const transactionsById = useAppSelector(coreTransactions.selectAll)
   const allTransactionIds = useAppSelector(coreTransactions.selectIds)
+  const routing = useAppSelector(coreActivity.selectTransactionRoutingContext)
+  const envelopes = useAppSelector(coreEnvelopes.selectDomain)
+  const keepingEnvelopeIds = useAppSelector(coreEnvelopes.selectKeepingIds)
+  const context = useMemo<coreTransactions.TTransactionQueryContext>(
+    () => ({
+      routing,
+      envelopes,
+      keepingEnvelopeIds: new Set(keepingEnvelopeIds),
+    }),
+    [envelopes, keepingEnvelopeIds, routing]
+  )
   const groups = useMemo(() => {
-    const checker = coreTransactions.compileFilter(conditions)
+    const checker = coreTransactions.compileQuery(query, context)
     const list = trIds || allTransactionIds
     return list
       .map(id => transactionsById[id])
       .filter(checker)
       .sort(coreTransactions.compareTransactionDates)
-  }, [trIds, allTransactionIds, conditions, transactionsById])
+  }, [trIds, allTransactionIds, context, query, transactionsById])
   return groups
 }
 

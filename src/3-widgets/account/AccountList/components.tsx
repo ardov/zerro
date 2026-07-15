@@ -32,7 +32,9 @@ export const Account: FC<
     () =>
       transactionDrawer.open({
         title: account.title,
-        filterConditions: { account: account.id },
+        initialQuery: {
+          clauses: [{ kind: 'account', ids: [account.id] }],
+        },
       }),
     [account.id, account.title, transactionDrawer]
   )

@@ -31,6 +31,15 @@
   `redux/state.ts` owns raw inputs and `commandRead.ts` owns command-time reads.
 - Domain namespaces are the desired adapter shape. Add and retain members only
   for real consumers.
+- Activity and budget projections retain aggregate amounts and transaction
+  counts, never transaction arrays. Transaction lists filter the canonical
+  history on demand.
+- Transaction filters are typed query clauses. Intrinsic clauses compile from
+  transaction fields; activity/envelope clauses use the same pure routing
+  projector as activity calculation, with context prepared at the adapter
+  boundary.
+- Query clauses compose with AND; multiple values inside one clause compose
+  with OR. Compile sets and envelope scope once, outside the transaction loop.
 - Localization, generated colors, icons, and asset URLs remain outside domain
   Core.
 

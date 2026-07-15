@@ -79,7 +79,7 @@ function StatWidget(props: {
   month: TISOMonth
   name: string
   showBar?: boolean
-  total: coreActivity.EnvActivity
+  total: coreActivity.TActivitySummary
   items: coreActivity.TSortedActivityNode[]
   action: (id: TDataNode['id'], trMode: coreTransactions.TrFilterMode) => void
 }) {

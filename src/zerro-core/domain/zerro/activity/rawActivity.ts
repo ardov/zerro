@@ -1,18 +1,13 @@
-import { toISOMonth } from '../../shared/date'
 import { addFxAmount } from '../../shared/money'
 import type { ById, ByMonth } from '../../shared/types'
 import type { TAccountId } from '../../zenmoney/accounts/types'
 import type { TFxAmount } from '../../shared/money'
 import type { TInstrument } from '../../zenmoney/instruments/types'
+import type { TISOMonth } from '../../zenmoney/primitives'
 import type { TTransaction } from '../../zenmoney/transactions/types'
-import {
-  cleanPayee,
-  compareTransactionDates,
-  getTransactionType,
-  TrType,
-} from '../../zenmoney'
-import { EnvType, envId, TEnvelopeId } from '../envelope-id'
+import type { TEnvelopeId } from '../envelope-id'
 import type { TEnvelopeDebtor } from '../envelopes'
+import { routeTransactionToActivity } from './transactionRouting'
 
 export type TRawActivityNode = {
   internal: EnvActivity
@@ -32,38 +27,42 @@ export function buildRawActivity(
   input: TBuildRawActivityInput
 ): ByMonth<TRawActivityNode> {
   const result: ByMonth<TRawActivityNode> = {}
+  const routingContext = {
+    inBudgetAccountIds: new Set(input.inBudgetAccountIds),
+    debtAccountId: input.debtAccountId,
+    debtors: input.debtors,
+  }
 
   input.transactions.forEach(transaction => {
-    const fromBudget = input.inBudgetAccountIds.includes(
-      transaction.outcomeAccount
-    )
-    const toBudget = input.inBudgetAccountIds.includes(
-      transaction.incomeAccount
-    )
-    const type = getTransactionType(transaction, input.debtAccountId)
+    const route = routeTransactionToActivity(transaction, routingContext)
+    if (!route) return
 
-    if (!fromBudget && !toBudget) return
-
-    if (type === TrType.Transfer && fromBudget && toBudget) {
-      addInternalTransaction(transaction, result, input.instruments)
-      return
-    }
-
-    if (
-      type === TrType.Outcome ||
-      type === TrType.OutcomeDebt ||
-      (type === TrType.Transfer && fromBudget)
-    ) {
-      addOutcomeTransaction(transaction, result, input)
-      return
-    }
-
-    if (
-      type === TrType.Income ||
-      type === TrType.IncomeDebt ||
-      (type === TrType.Transfer && toBudget)
-    ) {
-      addIncomeTransaction(transaction, result, input)
+    switch (route.direction) {
+      case 'internal':
+        addInternalTransaction(
+          transaction,
+          route.month,
+          result,
+          input.instruments
+        )
+        return
+      case 'income':
+        addIncomeTransaction(
+          transaction,
+          route.month,
+          route.envelopeId,
+          result,
+          input.instruments
+        )
+        return
+      case 'outcome':
+        addOutcomeTransaction(
+          transaction,
+          route.month,
+          route.envelopeId,
+          result,
+          input.instruments
+        )
     }
   })
 
@@ -73,7 +72,7 @@ export function buildRawActivity(
 export class EnvActivity {
   total: TFxAmount = {}
   trend: TFxAmount[] = new Array(31).fill({}).map(() => ({}))
-  transactions: TTransaction[] = []
+  transactionCount = 0
 
   static merge(
     activityA: EnvActivity | undefined,
@@ -88,25 +87,17 @@ export class EnvActivity {
       trend: activityA.trend.map((value, index) =>
         addFxAmount(value, activityB.trend[index])
       ),
-      transactions: [...activityA.transactions, ...activityB.transactions].sort(
-        compareTransactionDates
-      ),
+      transactionCount: activityA.transactionCount + activityB.transactionCount,
     }
   }
 }
 
 function addInternalTransaction(
   transaction: TTransaction,
+  month: TISOMonth,
   result: ByMonth<TRawActivityNode>,
   instruments: ById<TInstrument>
 ) {
-  if (
-    transaction.income === transaction.outcome &&
-    transaction.incomeInstrument === transaction.outcomeInstrument
-  ) {
-    return
-  }
-
   const change = addFxAmount(
     {
       [instruments[transaction.incomeInstrument].shortTitle]:
@@ -117,21 +108,21 @@ function addInternalTransaction(
         -transaction.outcome,
     }
   )
-  const node = getMonthNode(result, transaction).internal
+  const node = getMonthNode(result, month).internal
   addToActivity(node, transaction, change)
 }
 
 function addIncomeTransaction(
   transaction: TTransaction,
+  month: TISOMonth,
+  envelopeId: TEnvelopeId,
   result: ByMonth<TRawActivityNode>,
-  input: TBuildRawActivityInput
+  instruments: ById<TInstrument>
 ) {
   const change = {
-    [input.instruments[transaction.incomeInstrument].shortTitle]:
-      transaction.income,
+    [instruments[transaction.incomeInstrument].shortTitle]: transaction.income,
   }
-  const envelopeId = getEnvelopeId(transaction, 'income', input)
-  const node = (getMonthNode(result, transaction).income[envelopeId] ??=
+  const node = (getMonthNode(result, month).income[envelopeId] ??=
     new EnvActivity())
 
   addToActivity(node, transaction, change)
@@ -139,15 +130,16 @@ function addIncomeTransaction(
 
 function addOutcomeTransaction(
   transaction: TTransaction,
+  month: TISOMonth,
+  envelopeId: TEnvelopeId,
   result: ByMonth<TRawActivityNode>,
-  input: TBuildRawActivityInput
+  instruments: ById<TInstrument>
 ) {
   const change = {
-    [input.instruments[transaction.outcomeInstrument].shortTitle]:
+    [instruments[transaction.outcomeInstrument].shortTitle]:
       -transaction.outcome,
   }
-  const envelopeId = getEnvelopeId(transaction, 'outcome', input)
-  const node = (getMonthNode(result, transaction).outcome[envelopeId] ??=
+  const node = (getMonthNode(result, month).outcome[envelopeId] ??=
     new EnvActivity())
 
   addToActivity(node, transaction, change)
@@ -159,7 +151,7 @@ function addToActivity(
   change: TFxAmount
 ) {
   const dayIndex = getISODateDayIndex(transaction.date)
-  activity.transactions.push(transaction)
+  activity.transactionCount += 1
   activity.total = addFxAmount(activity.total, change)
   activity.trend[dayIndex] = addFxAmount(activity.trend[dayIndex], change)
 }
@@ -170,9 +162,8 @@ function getISODateDayIndex(date: string): number {
 
 function getMonthNode(
   result: ByMonth<TRawActivityNode>,
-  transaction: TTransaction
-) {
-  const month = toISOMonth(transaction.date)
+  month: TISOMonth
+): TRawActivityNode {
   return (result[month] ??= makeMonthNode())
 }
 
@@ -182,49 +173,4 @@ function makeMonthNode(): TRawActivityNode {
     income: {},
     outcome: {},
   }
-}
-
-function getEnvelopeId(
-  transaction: TTransaction,
-  direction: 'income' | 'outcome',
-  input: TBuildRawActivityInput
-): TEnvelopeId {
-  const type = getTransactionType(transaction, input.debtAccountId)
-
-  switch (type) {
-    case TrType.Income:
-    case TrType.Outcome:
-      return envId.get(EnvType.Tag, transaction.tag?.[0] || 'null')
-
-    case TrType.IncomeDebt:
-    case TrType.OutcomeDebt:
-      return getDebtorEnvelopeId(transaction, input.debtors)
-
-    case TrType.Transfer:
-      if (direction === 'outcome') {
-        return envId.get(EnvType.Account, transaction.incomeAccount)
-      }
-      if (direction === 'income') {
-        return envId.get(EnvType.Account, transaction.outcomeAccount)
-      }
-      throw new Error('Unknown direction: ' + direction)
-
-    default:
-      throw new Error('Unknown transaction type: ' + type)
-  }
-}
-
-function getDebtorEnvelopeId(
-  transaction: TTransaction,
-  debtors: ById<TEnvelopeDebtor>
-): TEnvelopeId {
-  if (transaction.merchant)
-    return envId.get(EnvType.Merchant, transaction.merchant)
-
-  const cleanName = cleanPayee(String(transaction.payee))
-  const debtor = debtors[cleanName]
-
-  return debtor.merchantId
-    ? envId.get(EnvType.Merchant, debtor.merchantId)
-    : envId.get(EnvType.Payee, cleanName)
 }

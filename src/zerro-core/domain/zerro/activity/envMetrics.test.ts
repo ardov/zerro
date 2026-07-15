@@ -13,11 +13,13 @@ describe('buildEnvMetrics', () => {
   it('rolls child overspend into parent availability', () => {
     const parentId = envId.get(EnvType.Tag, 'parent')
     const childId = envId.get(EnvType.Tag, 'child')
+    const childActivity = makeEnvActivity({ USD: -25 })
+    childActivity.transactionCount = 1
     const activity = buildActivity({
       rawActivity: {
         '2026-01': makeRawActivityNode({
           outcome: {
-            [childId]: makeEnvActivity({ USD: -25 }),
+            [childId]: childActivity,
           },
         }),
       },
@@ -42,6 +44,12 @@ describe('buildEnvMetrics', () => {
     expect(result['2026-01'][childId].selfAvailable).toEqual({ USD: -25 })
     expect(result['2026-01'][parentId].childrenOverspend).toEqual({ USD: -25 })
     expect(result['2026-01'][parentId].selfAvailable).toEqual({ USD: 75 })
+    expect(result['2026-01'][childId].selfTransactionCount).toBe(1)
+    expect(result['2026-01'][parentId]).toMatchObject({
+      selfTransactionCount: 0,
+      childrenTransactionCount: 1,
+      totalTransactionCount: 1,
+    })
   })
 
   it('carries positive leftover into the next month', () => {

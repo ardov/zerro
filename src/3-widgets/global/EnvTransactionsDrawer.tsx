@@ -1,17 +1,12 @@
-import type { TISOMonth, TTransaction } from '6-shared/types'
+import type { TISOMonth } from '6-shared/types'
 import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Drawer, Box, Typography, IconButton } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { registerPopover } from '6-shared/historyPopovers'
-import { useAppSelector } from 'store'
 import { TEnvelopeId } from '5-entities/envelope'
-import {
-  activity as coreActivity,
-  envelopes as coreEnvelopes,
-  transactions as coreTransactions,
-} from 'zerro-core/redux'
+import { transactions as coreTransactions } from 'zerro-core/redux'
 
 import {
   TransactionList,
@@ -25,91 +20,6 @@ type TEnvConditions = {
   isExact?: boolean
   mode?: coreTransactions.TrFilterMode
 }
-
-function useFilteredByEnvelope(conditions?: TEnvConditions): TTransaction[] {
-  const {
-    id,
-    month,
-    mode = coreTransactions.TrFilterMode.Envelope,
-    isExact,
-  } = conditions || {}
-
-  const envelopes = useAppSelector(coreEnvelopes.selectAll)
-  const fullActivity = useAppSelector(coreActivity.selectAll)
-  const fullRawActivity = useAppSelector(coreActivity.selectRaw)
-
-  const transactionList = useMemo(() => {
-    if (!id || !month) return []
-    const activity = fullActivity[month]
-    const rawActivity = fullRawActivity[month]
-    if (!activity || !rawActivity) return []
-
-    // Return transfer fees
-    if (id === 'transferFees') return activity.transferFees.transactions
-
-    // Prepare ids to get transactions
-    const ids = isExact ? [id] : [id, ...envelopes[id].children]
-
-    // Prepare and merge transactions
-    const transactions = ids
-      .map(id => {
-        switch (mode) {
-          case coreTransactions.TrFilterMode.GeneralIncome:
-            return activity?.generalIncome.byEnv[id]?.transactions || []
-          case coreTransactions.TrFilterMode.Envelope:
-            return activity?.envActivity.byEnv[id]?.transactions || []
-          case coreTransactions.TrFilterMode.Income:
-            return rawActivity?.income[id]?.transactions || []
-          case coreTransactions.TrFilterMode.Outcome:
-            return rawActivity?.outcome[id]?.transactions || []
-          case coreTransactions.TrFilterMode.All:
-            return [
-              ...(rawActivity?.income[id]?.transactions || []),
-              ...(rawActivity?.outcome[id]?.transactions || []),
-            ]
-          default:
-            throw new Error(`Unknown mode: ${mode}`)
-        }
-      })
-      .reduce((acc, arr) => acc.concat(arr), [])
-    return transactions
-  }, [envelopes, fullActivity, fullRawActivity, id, isExact, mode, month])
-
-  return transactionList
-}
-
-/*
-NOTES
-
-Which transaction filters do I need?
-
-- Envelope drawer
-
-    - all transactions affecting envelope balance
-    activity.envActivity.byEnv[id]
-
-- Incomes widget
-
-  - if not keeping income => only general income
-  activity.generalIncome.byEnv[id]
-
-  - if keeping income => usual env transaction
-  activity.envActivity.byEnv[id]
-
-- Outcomes widget
-
-  - all transactions affecting envelope balance
-    activity.envActivity.byEnv[id]
-
-- Transfers & debts widget
-
-  - Envelope transactions + general income transactions
-    activity.generalIncome.byEnv[id] + activity.envActivity.byEnv[id]
-
-  - Transfer fees
-    activity.transferFees
-
-*/
 
 export type EnvTransactionsDrawerProps = {
   title?: string
@@ -125,7 +35,8 @@ const trDrawerHooks = registerPopover(
 export const useEnvTransactionsDrawer = trDrawerHooks.useMethods
 
 const width = { xs: '100vw', sm: 360 }
-const contentSx = { width, [`& .MuiDrawer-paper`]: { width } }
+// MUI Slide uses the modal root as its viewport; only size the paper.
+const contentSx = { [`& .MuiDrawer-paper`]: { width } }
 
 export const SmartEnvTransactionsDrawer = () => {
   const { t } = useTranslation('common')
@@ -133,7 +44,30 @@ export const SmartEnvTransactionsDrawer = () => {
   const trPreview = useTransactionPreview()
   const { title, envelopeConditions, initialDate } = drawer.extraProps
   const { onClose, open } = drawer.displayProps
-  const filteredTransactions = useFilteredByEnvelope(envelopeConditions)
+  const initialQuery = useMemo<coreTransactions.TTransactionQuery>(() => {
+    if (!envelopeConditions) return { clauses: [] }
+
+    const {
+      id,
+      month,
+      isExact,
+      mode = coreTransactions.TrFilterMode.Envelope,
+    } = envelopeConditions
+    return {
+      clauses: [
+        {
+          kind: 'activity',
+          envelopeIds: id === 'transferFees' || id === null ? [] : [id],
+          scope: isExact ? 'self' : 'tree',
+          mode:
+            id === 'transferFees'
+              ? coreTransactions.TrFilterMode.TransferFees
+              : mode,
+          month,
+        },
+      ],
+    }
+  }, [envelopeConditions])
 
   const showTransaction = useCallback(
     function show(id: string) {
@@ -191,10 +125,9 @@ export const SmartEnvTransactionsDrawer = () => {
         </Box>
 
         <TransactionList
-          transactions={filteredTransactions}
+          initialQuery={initialQuery}
           initialDate={initialDate}
           onTrOpen={showTransaction}
-          hideFilter
           sx={{ flex: '1 1 auto' }}
         />
       </Box>

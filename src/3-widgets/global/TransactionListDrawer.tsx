@@ -16,7 +16,7 @@ import { useTransactionPreview } from './TransactionPreviewDrawer'
 export type TransactionDrawerProps = {
   title?: string
   transactions?: TTransaction[]
-  filterConditions?: coreTransactions.TrCondition
+  initialQuery?: coreTransactions.TTransactionQuery
   initialDate?: TTransactionListProps['initialDate']
 }
 
@@ -28,14 +28,14 @@ const trDrawerHooks = registerPopover(
 export const useTransactionDrawer = trDrawerHooks.useMethods
 
 const width = { xs: '100vw', sm: 360 }
-const contentSx = { width, [`& .MuiDrawer-paper`]: { width } }
+// MUI Slide uses the modal root as its viewport; only size the paper.
+const contentSx = { [`& .MuiDrawer-paper`]: { width } }
 
 export const SmartTransactionListDrawer = () => {
   const { t } = useTranslation('common')
   const drawer = trDrawerHooks.useProps()
   const trPreview = useTransactionPreview()
-  const { title, transactions, filterConditions, initialDate } =
-    drawer.extraProps
+  const { title, transactions, initialQuery, initialDate } = drawer.extraProps
   const { onClose, open } = drawer.displayProps
 
   const showTransaction = useCallback(
@@ -94,11 +94,10 @@ export const SmartTransactionListDrawer = () => {
         </Box>
 
         <TransactionList
-          transactions={transactions}
-          preFilter={filterConditions}
+          transactionIds={transactions?.map(transaction => transaction.id)}
+          initialQuery={initialQuery}
           initialDate={initialDate}
           onTrOpen={showTransaction}
-          hideFilter
           sx={{ flex: '1 1 auto' }}
         />
       </Box>

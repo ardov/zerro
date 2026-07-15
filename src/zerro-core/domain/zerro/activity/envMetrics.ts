@@ -4,7 +4,6 @@ import type { ById, ByMonth } from '../../shared/types'
 import type { TFxAmount } from '../../shared/money'
 import type { TFxCode } from '../../zenmoney/instruments/types'
 import type { TISOMonth } from '../../zenmoney/primitives'
-import type { TTransaction } from '../../zenmoney/transactions/types'
 import type { TFxConverter } from '../fx-rates'
 import type { TEnvelopeId } from '../envelope-id'
 import type { TEnvelope } from '../envelopes'
@@ -18,20 +17,20 @@ export type TEnvMetrics = {
   currency: TEnvelope['currency']
   carryNegatives: TEnvelope['carryNegatives']
 
-  selfTransactions: TTransaction[]
+  selfTransactionCount: number
   selfLeftover: TFxAmount
   selfBudgeted: TFxAmount
   selfActivity: TFxAmount
   selfAvailable: TFxAmount
 
-  childrenTransactions: TTransaction[]
+  childrenTransactionCount: number
   childrenLeftover: TFxAmount
   childrenBudgeted: TFxAmount
   childrenActivity: TFxAmount
   childrenSurplus: TFxAmount
   childrenOverspend: TFxAmount
 
-  totalTransactions: TTransaction[]
+  totalTransactionCount: number
   totalLeftover: TFxAmount
   totalBudgeted: TFxAmount
   totalActivity: TFxAmount
@@ -89,7 +88,7 @@ function calcEnv(
   let childrenActivity = {} as TFxAmount
   let childrenSurplus = {} as TFxAmount
   let childrenOverspend = {} as TFxAmount
-  const childrenTransactions = [] as TTransaction[]
+  let childrenTransactionCount = 0
 
   children.forEach(id => {
     const child = metrics[id]
@@ -101,7 +100,7 @@ function calcEnv(
     } else {
       childrenOverspend = addFxAmount(childrenOverspend, child.selfAvailable)
     }
-    childrenTransactions.push(...child.selfTransactions)
+    childrenTransactionCount += child.selfTransactionCount
   })
 
   const selfLeftover = getLeftover(
@@ -122,8 +121,7 @@ function calcEnv(
     [currency]: input.convertFx(selfAvailableRaw, currency, month),
   }
 
-  const selfTransactions =
-    input.activity?.[month]?.envActivity?.byEnv?.[id]?.transactions || []
+  const selfTransactionCount = envActivity?.transactionCount || 0
 
   return {
     id,
@@ -133,20 +131,20 @@ function calcEnv(
     currency,
     carryNegatives,
 
-    selfTransactions,
+    selfTransactionCount,
     selfLeftover,
     selfBudgeted,
     selfActivity,
     selfAvailable,
 
-    childrenTransactions,
+    childrenTransactionCount,
     childrenLeftover,
     childrenBudgeted,
     childrenActivity,
     childrenSurplus,
     childrenOverspend,
 
-    totalTransactions: [...selfTransactions, ...childrenTransactions],
+    totalTransactionCount: selfTransactionCount + childrenTransactionCount,
     totalLeftover: addFxAmount(selfLeftover, childrenLeftover),
     totalBudgeted: addFxAmount(selfBudgeted, childrenBudgeted),
     totalActivity: addFxAmount(selfActivity, childrenActivity),

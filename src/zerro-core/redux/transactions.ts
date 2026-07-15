@@ -51,7 +51,9 @@ export {
   TrType,
 } from '../domain/zenmoney'
 export {
-  compileTransactionFilter as compileFilter,
-  type TrCondition,
-} from '../domain/zenmoney'
-export { TrFilterMode } from '../domain/zerro'
+  compileTransactionQuery as compileQuery,
+  TrFilterMode,
+  type TTransactionFilterClause,
+  type TTransactionQuery,
+  type TTransactionQueryContext,
+} from '../domain/zerro'
