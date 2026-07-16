@@ -29,8 +29,11 @@ import {
   toEnvelopeStructureInput,
 } from '../domain/zerro'
 import {
+  applyChangesToTransaction,
+  bulkEditTransactions,
   compileAppCommand,
   recreateTransaction,
+  setTransactionsViewed,
   type TAppCommand,
 } from './commands'
 import {
@@ -268,6 +271,91 @@ describe('command funnel routing', () => {
 // The remaining tests cover funnel-only behavior: payload adaptation and
 // receipts that the domain compilers never see.
 describe('command funnel adaptation', () => {
+  it('stores transaction field edits as one sparse durable command', () => {
+    const now = vi.spyOn(Date, 'now').mockReturnValue(NOW)
+    const first = makeTransaction({ id: 'first', viewed: false })
+    const second = makeTransaction({ id: 'second', viewed: false })
+    const state = makeState(makeStore({ transaction: { first, second } }))
+    const dispatch = makeDispatch(state)
+
+    dispatch(setTransactionsViewed(['first', 'second'], true))
+    dispatch(applyChangesToTransaction({ id: 'first', comment: 'Edited' }))
+    dispatch(
+      bulkEditTransactions(['first', 'second'], {
+        tags: ['food'],
+        comment: 'Shared',
+      })
+    )
+
+    const commands = dispatch.mock.calls
+      .map(([action]: [any]) => action)
+      .filter((action: any) => action?.type === appendClientOutboxEntry.type)
+      .map((action: any) => {
+        const { createdAt: _, ...command } = action.payload
+        return command
+      })
+
+    expect(commands).toEqual([
+      {
+        type: 'transactions.patch',
+        payload: { ids: ['first', 'second'], set: { viewed: true } },
+      },
+      {
+        type: 'transactions.patch',
+        payload: { ids: ['first'], set: { comment: 'Edited' } },
+      },
+      {
+        type: 'transactions.patch',
+        payload: {
+          ids: ['first', 'second'],
+          set: { tag: ['food'], comment: 'Shared' },
+        },
+      },
+    ])
+    now.mockRestore()
+  })
+
+  it('stores time edits as a durable recreate command and returns its new id', () => {
+    const now = vi.spyOn(Date, 'now').mockReturnValue(NOW)
+    const source = makeTransaction({
+      id: 'source',
+      income: 0,
+      outcome: 25,
+      comment: 'Before',
+    })
+    const state = makeState(makeStore({ transaction: { source } }))
+    const dispatch = makeDispatch(state)
+
+    const replacementId = dispatch(
+      recreateTransaction({
+        id: source.id,
+        created: NOW - 60_000,
+        income: source.income,
+        outcome: source.outcome,
+        comment: 'After',
+      })
+    )
+    const entry = dispatch.mock.calls
+      .map(([action]: [any]) => action)
+      .find((action: any) => action?.type === appendClientOutboxEntry.type)
+
+    expect(entry.payload).toEqual({
+      type: 'transaction.recreate',
+      payload: {
+        sourceId: source.id,
+        replacementId,
+        set: {
+          created: NOW - 60_000,
+          income: source.income,
+          outcome: source.outcome,
+          comment: 'After',
+        },
+      },
+      createdAt: NOW,
+    })
+    now.mockRestore()
+  })
+
   it('merges an FX edit with the selected month rates', () => {
     const current = makeDemoStore({ now: NOW })
     const next = applyPatch(
@@ -390,24 +478,5 @@ describe('command funnel adaptation', () => {
       ctx
     )
     expect(second).toEqual({})
-  })
-
-  it('recreates a transaction and returns the new id as a receipt', () => {
-    const current = makeDemoStore({ now: NOW })
-    const state = makeState(current)
-    const [id] = Object.keys(current.transaction)
-    const dispatch = makeDispatch(state)
-
-    const newId = dispatch(recreateTransaction({ id, comment: 'Recreated' }))
-
-    const entries = dispatch.mock.calls
-      .map(([action]: [any]) => action)
-      .filter((action: any) => action?.type === appendClientOutboxEntry.type)
-    expect(entries).toHaveLength(1)
-    const [oldTr, newTr] = entries[0].payload.appliedPatch.transaction
-    expect(newId).toBe(newTr.id)
-    expect(newId).not.toBe(id)
-    expect(oldTr).toMatchObject({ id, income: 0.00001, outcome: 0.00001 })
-    expect(newTr.comment).toBe('Recreated')
   })
 })

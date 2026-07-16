@@ -35,7 +35,7 @@ export type TAccount = {
 
   creditLimit: TUnits
   inBalance: boolean
-  savings: boolean
+  savings: boolean | null
   enableCorrection: boolean
   balanceCorrectionType: 'request' | null
   enableSMS: boolean

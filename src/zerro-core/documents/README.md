@@ -25,22 +25,25 @@ React, storage, localization, or app-layer runtime modules.
   `zerro-core/redux`.
 - Production writes use semantic commands; generic patch APIs and legacy model
   objects are retired.
-- Redux is the sole reactive owner of `base + outbox + outboxHead`; `current`
-  and sync transport are derived.
+- Redux is the sole reactive owner of `base + command outbox + outboxHead`;
+  `current` and sync transport are rematerialized from commands.
 - The root entrypoint remains a small internal facade: constants, shared root
   types, and the snapshot session. Replica primitives stay internal.
-- Local commands persist intent and applied patches. Replay uses the stored
-  applied patch and never rematerializes history.
-- Materialization is still identity-only. Cross-entity ZenMoney rules are the
-  next architectural phase, after the closure gate below.
+- Outbox entries persist one durable command, not parallel intent and applied
+  patches. `transactions.patch` rebases whitelisted field sets over current
+  entities. Time edits use `transaction.recreate` because
+  `created` is immutable after creation. Unmigrated behavior uses transitional
+  `patch`.
+- Materialization now owns command replay and deleted-transaction no-ops.
+  Balance and cascade rules remain the next architectural phase.
 
 ## Next slice: closure smoke
 
 Before adding non-identity materializer rules, finish the manual budget/goal
 edit plus explicit-sync smoke.
 
-Then settle the sync transport contract for `intentPatch` versus
-`appliedPatch` before balance or cascade rules are enabled.
+Then migrate resolved `patch` command families to narrow commands before
+enabling their balance or cascade rules.
 
 ## Start here
 
@@ -57,14 +60,15 @@ prose.
 
 ## Document map
 
-| Document                               | Purpose                                      |
-| -------------------------------------- | -------------------------------------------- |
-| [handoff.md](./handoff.md)             | Current state and next checkpoint            |
-| [architecture.md](./architecture.md)   | Durable boundaries and runtime contracts     |
-| [roadmap.md](./roadmap.md)             | Ordered completion plan                      |
-| [design-ledger.md](./design-ledger.md) | Settled decisions, risks, and open questions |
-| [testing.md](./testing.md)             | Verification policy and completion gate      |
-| [cleanup-notes.md](./cleanup-notes.md) | Deferred concrete cleanup                    |
+| Document                                            | Purpose                                      |
+| --------------------------------------------------- | -------------------------------------------- |
+| [handoff.md](./handoff.md)                          | Current state and next checkpoint            |
+| [architecture.md](./architecture.md)                | Durable boundaries and runtime contracts     |
+| [roadmap.md](./roadmap.md)                          | Ordered completion plan                      |
+| [design-ledger.md](./design-ledger.md)              | Settled decisions, risks, and open questions |
+| [testing.md](./testing.md)                          | Verification policy and completion gate      |
+| [cleanup-notes.md](./cleanup-notes.md)              | Deferred concrete cleanup                    |
+| [ZenMoney sync API](../domain/zenmoney/sync-api.md) | Observed server behavior and wire shape      |
 
 Entity-specific ZenMoney behavior belongs beside its implementation under
 `domain/zenmoney/*/README.md`.

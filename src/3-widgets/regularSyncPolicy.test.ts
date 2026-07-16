@@ -9,7 +9,7 @@ describe('needSync', () => {
     isLoggedIn: true,
     isPending: false,
     lastSync: now - 3 * 60_000,
-    hasPendingChanges: false,
+    hasBlockingChanges: false,
     regular: true,
     isDocumentHidden: false,
     now,
@@ -19,11 +19,15 @@ describe('needSync', () => {
     expect(needSync({ ...clean, lastSync: 0, regular: false })).toBe(true)
   })
 
-  it('pauses every automatic sync while applied outbox entries exist', () => {
-    expect(needSync({ ...clean, lastSync: 0, hasPendingChanges: true })).toBe(
+  it('pauses automatic sync while a non-rebase-safe command exists', () => {
+    expect(needSync({ ...clean, lastSync: 0, hasBlockingChanges: true })).toBe(
       false
     )
-    expect(needSync({ ...clean, hasPendingChanges: true })).toBe(false)
+    expect(needSync({ ...clean, hasBlockingChanges: true })).toBe(false)
+  })
+
+  it('allows regular sync with only rebase-safe pending commands', () => {
+    expect(needSync(clean)).toBe(true)
   })
 
   it('periodically syncs a clean visible session', () => {

@@ -16,12 +16,6 @@ keys and still need `@ts-expect-error` or `as never`. The behavior is
 centralized and tested. If these files change for domain reasons, prefer one
 small explicit entity-map helper over a mapped-type framework.
 
-### Broad transaction edit input
-
-`TTransactionPatch` derives from most of `TTransaction`, so stored-entity shape
-changes can leak into the command API. Replace it with a handwritten
-optional-field input when the transaction editor or materializer next changes.
-
 ### Reminder command atomicity
 
 Reminder `set` accepts create drafts, update patches, arrays, and mixed arrays.

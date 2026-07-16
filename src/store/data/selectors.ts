@@ -2,39 +2,63 @@ import { RootState, TSelector } from 'store'
 import { getItemsCount } from './shared/getItemsCount'
 import { AccountType, TAccountId, TDiff } from '6-shared/types'
 import { createSelector } from '@reduxjs/toolkit'
-import { getPendingOutbox } from 'zerro-core/infrastructure/replica/outbox'
+import {
+  getMaterializedOutboxPatches,
+  getPendingOutbox,
+  isOutboxEntryRebaseSafe,
+} from 'zerro-core/infrastructure/replica/outbox'
 import { immutableMergeDiffs } from './shared/mergeDiffs'
 
+const getBase = (state: RootState) => state.data.base
 const getOutbox = (state: RootState) => state.data.outbox
 const getOutboxHead = (state: RootState) => state.data.outboxHead
 
-const getAppliedOutbox = createSelector(
+const getPendingEntries = createSelector(
   [getOutbox, getOutboxHead],
   getPendingOutbox
 )
 
-export const getPendingSyncDiff = createSelector([getAppliedOutbox], outbox => {
-  if (!outbox.length) return undefined
-  return outbox.reduce<TDiff>(
-    (diff, entry) => immutableMergeDiffs(diff, entry.appliedPatch),
-    {}
+export const getPendingSyncDiff = createSelector(
+  [getBase, getOutbox, getOutboxHead],
+  (base, outbox, outboxHead) =>
+    mergeMaterializedPatches(
+      getMaterializedOutboxPatches(base, outbox, outboxHead)
+    )
+)
+
+export function getPendingSyncTransport(
+  state: RootState,
+  changedAt: number
+): TDiff | undefined {
+  return mergeMaterializedPatches(
+    getMaterializedOutboxPatches(
+      state.data.base,
+      state.data.outbox,
+      state.data.outboxHead,
+      changedAt
+    )
   )
-})
+}
 
 export const getHasPendingChanges = (state: RootState) =>
   getOutboxHead(state) > 0
 
+export const getHasBlockingSyncChanges = createSelector(
+  [getPendingEntries],
+  entries => entries.some(entry => !isOutboxEntryRebaseSafe(entry))
+)
+
 export const getCanUndoClientCommand = (state: RootState) =>
-  getOutboxHead(state) > 0
+  !state.isPending && getOutboxHead(state) > 0
 
 export const getCanRedoClientCommand = (state: RootState) =>
-  getOutboxHead(state) < getOutbox(state).length
+  !state.isPending && getOutboxHead(state) < getOutbox(state).length
 
 export const getChangedNum = (state: RootState) => {
   return getItemsCount(getPendingSyncDiff(state))
 }
 
-export const getLastChangeTime = createSelector([getAppliedOutbox], outbox =>
+export const getLastChangeTime = createSelector([getPendingEntries], outbox =>
   outbox.reduce((latest, entry) => Math.max(latest, entry.createdAt), 0)
 )
 
@@ -61,3 +85,8 @@ export const getDebtAccountId: TSelector<TAccountId> = createSelector(
     return 'null_debt_account'
   }
 )
+
+function mergeMaterializedPatches(patches: TDiff[]): TDiff | undefined {
+  if (!patches.length) return undefined
+  return patches.reduce<TDiff>(immutableMergeDiffs, {})
+}

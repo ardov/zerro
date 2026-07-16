@@ -172,12 +172,12 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
       dispatch(
         coreTransactions.update({
           id,
-          comment: localComment,
-          outcome: localOutcome,
-          income: localIncome,
-          payee: localPayee,
-          date: localDate,
-          tag: localTag,
+          ...(comment !== localComment && { comment: localComment }),
+          ...(outcome !== localOutcome && { outcome: localOutcome }),
+          ...(income !== localIncome && { income: localIncome }),
+          ...(payee !== localPayee && { payee: localPayee }),
+          ...(date !== localDate && { date: localDate }),
+          ...(tag !== localTag && { tag: localTag }),
         })
       )
       track('transaction_edited', { source: 'preview' })

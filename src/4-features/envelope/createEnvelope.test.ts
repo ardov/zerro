@@ -5,6 +5,7 @@ import type { AppDispatch, AppThunk, RootState } from 'store'
 import { appendClientOutboxEntry } from 'store/data'
 import { makeDemoStore } from 'zerro-core/demo'
 import { applyPatch } from 'zerro-core/domain/zenmoney'
+import { materializeCommand } from 'zerro-core/application/materializer'
 import {
   defaultEnvelopeGroupIds,
   envId,
@@ -46,8 +47,12 @@ function makeThunkDispatch(initial: RootState) {
       state = makeState(
         applyPatch(
           state.data.current,
-          (action as ReturnType<typeof appendClientOutboxEntry>).payload
-            .appliedPatch
+          materializeCommand(
+            state.data.current,
+            (action as ReturnType<typeof appendClientOutboxEntry>).payload,
+            (action as ReturnType<typeof appendClientOutboxEntry>).payload
+              .createdAt
+          )
         )
       )
     }

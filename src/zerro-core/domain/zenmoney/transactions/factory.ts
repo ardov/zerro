@@ -33,6 +33,7 @@ export function makeTransaction(
     deleted: draft.deleted || false,
     hold: draft.hold || false,
     viewed: draft.viewed || false,
+    source: draft.source ?? null,
 
     qrCode: draft.qrCode || null,
 

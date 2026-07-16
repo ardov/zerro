@@ -1,4 +1,5 @@
 import type { AppThunk, RootState } from 'store'
+import { v1 as uuidv1 } from 'uuid'
 import type { TISOMonth } from '../domain/zenmoney/primitives'
 import type { TCompiled, TCoreContext, TNormalizedPatch } from '../types'
 import {
@@ -13,12 +14,13 @@ import {
   compileMergeTransactionsAsTransfer,
   compilePatchAccount,
   compileDeleteReminder,
-  compileRecreateTransaction,
   compileRestoreTransaction,
   compileSetReminder,
   type TAccountId,
   type TTagId,
   type TTransactionId,
+  type TTransactionEditablePatch,
+  type TTransactionRecreatePatch,
   type TTransactionPatch,
   type TReminderDraft,
   type TReminder,
@@ -57,16 +59,17 @@ import {
   getCommandFxRates,
   getCommandPresentedEnvelopes,
 } from './commandRead'
-import { executeReduxCommand } from './executeCommand'
+import {
+  executeReduxCommand,
+  executeReduxDurableCommand,
+} from './executeCommand'
 
 export type { TBudgetUpdate } from '../domain/zerro'
 
 /**
- * Serializable app commands. Once the outbox is persisted, a stored payload
- * shape becomes a contract: breaking changes mint a new type (for example
- * `zerro.budget.set@2`) or migrate eagerly at the storage boundary — the
- * persisted outbox gets its own schema version there.
- *
+ * App-level semantic inputs. The execution funnel resolves commands that have
+ * not migrated yet to `patch`; narrow durable commands are stored
+ * directly in the outbox.
  */
 export type TAppCommand =
   | { type: 'zerro.budget.set'; payload: TBudgetUpdate[] }
@@ -107,7 +110,6 @@ export type TAppCommand =
       payload: { ids: TTransactionId[]; viewed: boolean }
     }
   | { type: 'zenmoney.transaction.update'; payload: TTransactionPatch }
-  | { type: 'zenmoney.transaction.recreate'; payload: TTransactionPatch }
   | {
       type: 'zenmoney.transaction.bulk.edit'
       payload: { ids: TTransactionId[]; tags?: TTagId[]; comment?: string }
@@ -123,7 +125,7 @@ export type TAppCommand =
     }
   | { type: 'zenmoney.reminder.delete'; payload: { id: TReminderId } }
   | {
-      type: 'infrastructure.dataAccount.prepare@2'
+      type: 'infrastructure.dataAccount.prepare'
       payload: { title: string }
     }
   | { type: 'infrastructure.debug.patch'; payload: TNormalizedPatch }
@@ -242,8 +244,6 @@ function compileAppCommandResult(
       )
     case 'zenmoney.transaction.update':
       return compileApplyChangesToTransaction(data, command.payload, ctx)
-    case 'zenmoney.transaction.recreate':
-      return compileRecreateTransaction(data, command.payload, ctx)
     case 'zenmoney.transaction.bulk.edit': {
       const { ids, tags, comment } = command.payload
       return compileBulkEditTransactions(data, ids, { tags, comment }, ctx)
@@ -258,7 +258,7 @@ function compileAppCommandResult(
     }
     case 'zenmoney.reminder.delete':
       return compileDeleteReminder(data, command.payload.id, ctx)
-    case 'infrastructure.dataAccount.prepare@2': {
+    case 'infrastructure.dataAccount.prepare': {
       const existing = Object.values(data.account).find(
         account => account.title === command.payload.title
       )
@@ -432,31 +432,42 @@ export function setTransactionsViewed(
   ids: TTransactionId[],
   viewed: boolean
 ): AppThunk {
-  return executeCommand({
-    type: 'zenmoney.transaction.viewed.set',
-    payload: { ids, viewed },
+  return patchTransactions(ids, { viewed })
+}
+
+export function patchTransactions(
+  ids: TTransactionId[],
+  set: TTransactionEditablePatch
+): AppThunk {
+  return executeReduxDurableCommand({
+    type: 'transactions.patch',
+    payload: { ids: [...new Set(ids)], set },
   })
 }
 
-export function applyChangesToTransaction(patch: TTransactionPatch): AppThunk {
-  return executeCommand({
-    type: 'zenmoney.transaction.update',
-    payload: patch,
-  })
+export function applyChangesToTransaction(
+  patch: TTransactionEditablePatch & { id: TTransactionId }
+): AppThunk {
+  const { id, ...set } = patch
+  return patchTransactions([id], set)
 }
 
 export function recreateTransaction(
-  patch: TTransactionPatch
+  patch: TTransactionRecreatePatch & { id: TTransactionId }
 ): AppThunk<TTransactionId> {
-  const execute = executeCommand<{ transactionId: TTransactionId }>({
-    type: 'zenmoney.transaction.recreate',
-    payload: patch,
-  })
-
   return (dispatch, getState, extra) => {
-    const receipt = execute(dispatch, getState, extra)
-    if (!receipt) throw new Error('Transaction was not recreated')
-    return receipt.transactionId
+    if (!getState().data.current.transaction[patch.id]) {
+      throw new Error(`Transaction ${patch.id} does not exist`)
+    }
+
+    const { id: sourceId, ...set } = patch
+    const replacementId = uuidv1()
+    const execute = executeReduxDurableCommand({
+      type: 'transaction.recreate',
+      payload: { sourceId, replacementId, set },
+    })
+    execute(dispatch, getState, extra)
+    return replacementId
   }
 }
 
@@ -491,7 +502,7 @@ export function deleteReminder(id: TReminderId): AppThunk {
 
 export function prepareDataAccount(title: string): AppThunk<TAccountId> {
   const execute = executeCommand<TAccountId>({
-    type: 'infrastructure.dataAccount.prepare@2',
+    type: 'infrastructure.dataAccount.prepare',
     payload: { title },
   })
 
@@ -513,6 +524,13 @@ export function bulkEditTransactions(
   ids: TTransactionId[],
   opts: { tags?: TTagId[]; comment?: string }
 ): AppThunk {
+  if (!opts.tags?.includes('mixed') && !opts.comment?.includes('$&')) {
+    const set: TTransactionEditablePatch = {}
+    if (opts.tags) set.tag = opts.tags.filter(tag => tag !== 'null')
+    if (opts.comment) set.comment = opts.comment
+    return patchTransactions(ids, set)
+  }
+
   return executeCommand({
     type: 'zenmoney.transaction.bulk.edit',
     payload: { ids, ...opts },

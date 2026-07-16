@@ -1,1 +1,1 @@
-export * from './materializePatch'
+export * from './materializeCommand'

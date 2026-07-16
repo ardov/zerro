@@ -1,4 +1,4 @@
-import type { Modify, OptionalExceptFor } from '../../shared/types'
+import type { Modify } from '../../shared/types'
 import type { TDataStore } from '../store'
 import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../../types'
 import type { TDateDraft } from '../primitives'
@@ -7,12 +7,15 @@ import { round } from '../../shared/money'
 import { getRootUserId } from '../users'
 import { makeTransaction, type TTransactionFactoryDraft } from './factory'
 import { getTransaction, getTransactionType, TrType } from './read'
-import type { TTransaction, TTransactionId } from './types'
+import type {
+  TTransaction,
+  TTransactionEditablePatch,
+  TTransactionId,
+} from './types'
 
-export type TTransactionPatch = OptionalExceptFor<
-  Omit<TTransaction, 'changed' | 'user'>,
-  'id'
->
+export type TTransactionPatch = TTransactionEditablePatch & {
+  id: TTransactionId
+}
 export type TTransactionDraft = Modify<
   Omit<TTransactionFactoryDraft, 'user'>,
   { date: TDateDraft; changed?: TDateDraft; created?: TDateDraft }
@@ -107,35 +110,6 @@ export function compileRestoreTransaction(
         id: ctx.uuid(),
       },
     ],
-  }
-}
-
-export function compileRecreateTransaction(
-  data: TDataStore,
-  patch: TTransactionPatch,
-  ctx: TCoreContext
-): TCompiled<{ transactionId: TTransactionId }> {
-  const transaction = getExistingTransaction(data, patch.id)
-  const transactionId = ctx.uuid()
-
-  return {
-    patch: {
-      transaction: [
-        {
-          ...transaction,
-          outcome: 0.00001,
-          income: 0.00001,
-          changed: ctx.now(),
-        },
-        {
-          ...transaction,
-          ...patch,
-          id: transactionId,
-          changed: ctx.now(),
-        },
-      ],
-    },
-    receipt: { transactionId },
   }
 }
 

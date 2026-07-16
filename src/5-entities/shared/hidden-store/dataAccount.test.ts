@@ -58,11 +58,8 @@ describe('prepareDataAccount', () => {
       expect.objectContaining({
         type: appendClientOutboxEntry.type,
         payload: expect.objectContaining({
-          command: {
-            type: 'infrastructure.dataAccount.prepare@2',
-            payload: { title: DATA_ACC_NAME },
-          },
-          appliedPatch: {
+          type: 'patch',
+          payload: {
             account: [
               expect.objectContaining({
                 id: UUID,

@@ -1,9 +1,13 @@
 import { v1 as uuidv1 } from 'uuid'
-import type { AppThunk, RootState } from 'store'
+import type { AppDispatch, AppThunk, RootState } from 'store'
 import { appendClientOutboxEntry } from 'store/data'
 
 import type { TOutboxEntry } from '../infrastructure/replica/outbox'
-import { materializePatch } from '../application/materializer'
+import {
+  makeResolvedPatchCommand,
+  materializeCommand,
+  type TDurableCommand,
+} from '../application/materializer'
 import type { TCompiled, TCoreContext, TNormalizedPatch } from '../types'
 
 export type TReduxCommandCompiler<TReceipt = unknown> = (
@@ -20,7 +24,7 @@ const defaultCtx = { now: () => Date.now(), uuid: () => uuidv1() }
  * without entering the adapter selector graph during module initialization.
  */
 export function executeReduxCommand<TReceipt = unknown>(
-  command: unknown,
+  _sourceCommand: unknown,
   compile: TReduxCommandCompiler<TReceipt>
 ): AppThunk<TReceipt | undefined> {
   return (dispatch, getState) => {
@@ -29,20 +33,33 @@ export function executeReduxCommand<TReceipt = unknown>(
     const patch = isCompiled(result) ? result.patch : result
 
     if (!isEmptyPatch(patch)) {
-      const materialized = materializePatch(state.data.current, patch)
-      const entry: TOutboxEntry = {
-        id: defaultCtx.uuid(),
-        command,
-        intentPatch: materialized.intentPatch,
-        appliedPatch: materialized.appliedPatch,
-        materializerVersion: materialized.materializerVersion,
-        createdAt: defaultCtx.now(),
-      }
-      dispatch(appendClientOutboxEntry(entry))
+      appendDurableCommand(dispatch, state, makeResolvedPatchCommand(patch))
     }
 
     return isCompiled(result) ? result.receipt : undefined
   }
+}
+
+export function executeReduxDurableCommand(command: TDurableCommand): AppThunk {
+  return (dispatch, getState) => {
+    appendDurableCommand(dispatch, getState(), command)
+  }
+}
+
+function appendDurableCommand(
+  dispatch: AppDispatch,
+  state: RootState,
+  command: TDurableCommand
+): void {
+  const createdAt = defaultCtx.now()
+  const patch = materializeCommand(state.data.current, command, createdAt)
+  if (isEmptyPatch(patch)) return
+
+  const entry: TOutboxEntry = {
+    ...command,
+    createdAt,
+  }
+  dispatch(appendClientOutboxEntry(entry))
 }
 
 function isEmptyPatch(patch: TNormalizedPatch): boolean {

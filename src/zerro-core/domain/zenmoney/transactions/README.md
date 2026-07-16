@@ -25,7 +25,7 @@ Core transaction commands currently cover existing mutation flows:
 - viewed-state update;
 - field changes;
 - restore under a new id;
-- recreate with a replacement transaction;
+- recreate under a durable new id when immutable `created` changes;
 - bulk tag/comment edits.
 
 Transaction commands compile intent only. Account-balance expansion belongs to

@@ -1,8 +1,8 @@
 import type { TDataStore } from '../../domain/zenmoney/store'
 import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../types'
 import {
-  materializePatch,
-  type TMaterializedPatch,
+  makeResolvedPatchCommand,
+  type TDurableCommand,
 } from '../../application/materializer'
 import {
   appendOutbox,
@@ -85,11 +85,8 @@ export function createZerroEngine(input: TZerroEngineInput) {
   ): TExecuteResult<TReceipt> {
     const current = getCurrent()
     const result = compile(current, command, input.ctx)
-    const intentPatch = isCompiled(result) ? result.patch : result
-    const entry = appendMaterialized(
-      command,
-      materializePatch(current, intentPatch)
-    )
+    const patch = isCompiled(result) ? result.patch : result
+    const entry = appendCommand(makeResolvedPatchCommand(patch))
 
     if (isCompiled(result)) {
       return { entry, receipt: result.receipt }
@@ -98,25 +95,15 @@ export function createZerroEngine(input: TZerroEngineInput) {
   }
 
   function executeCompiled(
-    command: unknown,
-    intentPatch: TNormalizedPatch
+    _sourceCommand: unknown,
+    patch: TNormalizedPatch
   ): TOutboxEntry {
-    return appendMaterialized(
-      command,
-      materializePatch(getCurrent(), intentPatch)
-    )
+    return appendCommand(makeResolvedPatchCommand(patch))
   }
 
-  function appendMaterialized(
-    command: unknown,
-    materialized: TMaterializedPatch
-  ): TOutboxEntry {
+  function appendCommand(command: TDurableCommand): TOutboxEntry {
     const entry: TOutboxEntry = {
-      id: input.ctx.uuid(),
-      command,
-      intentPatch: materialized.intentPatch,
-      appliedPatch: materialized.appliedPatch,
-      materializerVersion: materialized.materializerVersion,
+      ...command,
       createdAt: input.ctx.now(),
     }
 

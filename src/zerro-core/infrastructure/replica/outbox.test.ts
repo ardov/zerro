@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 
-import { materializerVersion } from '../../application/materializer'
 import { makeAccount, makeStore } from '../../testing/zenmoneyTestData'
 import type { TNormalizedPatch } from '../../types'
 import {
@@ -11,33 +10,26 @@ import {
   type TOutboxEntry,
 } from './outbox'
 
-function makeEntry(
-  id: string,
-  title: string,
-  patch: TNormalizedPatch
-): TOutboxEntry {
+function makeEntry(createdAt: number, patch: TNormalizedPatch): TOutboxEntry {
   return {
-    id,
-    command: { type: 'account.rename', title },
-    intentPatch: patch,
-    appliedPatch: patch,
-    materializerVersion,
-    createdAt: Number(id.replace('entry-', '')),
+    type: 'patch',
+    payload: patch,
+    createdAt,
   }
 }
 
 describe('outbox operations', () => {
-  const first = makeEntry('entry-1', 'Wallet', {
+  const first = makeEntry(1, {
     account: [makeAccount({ id: 'cash', title: 'Wallet' })],
   })
-  const second = makeEntry('entry-2', 'Pocket', {
+  const second = makeEntry(2, {
     account: [makeAccount({ id: 'cash', title: 'Pocket' })],
   })
-  const replacement = makeEntry('entry-3', 'Vault', {
+  const replacement = makeEntry(3, {
     account: [makeAccount({ id: 'cash', title: 'Vault' })],
   })
 
-  it('clamps restored heads and lists only the applied prefix', () => {
+  it('clamps restored heads and lists only the command prefix', () => {
     expect(clampOutboxHead(-1, 2)).toBe(0)
     expect(clampOutboxHead(1, 2)).toBe(1)
     expect(clampOutboxHead(3, 2)).toBe(2)
@@ -45,14 +37,14 @@ describe('outbox operations', () => {
     expect(getPendingOutbox([first, second], 10)).toEqual([first, second])
   })
 
-  it('appends after the applied prefix and drops the redo tail', () => {
+  it('appends after the command prefix and drops the redo tail', () => {
     expect(appendOutbox([first, second], 1, replacement)).toEqual({
       outbox: [first, replacement],
       outboxHead: 2,
     })
   })
 
-  it('replays only stored applied patches through the clamped head', () => {
+  it('rematerializes only the command prefix through the clamped head', () => {
     const base = makeStore({
       account: { cash: makeAccount({ id: 'cash', title: 'Cash' }) },
     })

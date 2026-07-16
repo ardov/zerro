@@ -36,7 +36,7 @@ export type TUser = {
   /** Normalized timestamp in milliseconds. ZenMoney wire data uses seconds. */
   paidTill: TMsTime
 
-  subscription: '10yearssubscription' | '1MonthSubscription' | string
+  subscription: '10yearssubscription' | '1MonthSubscription' | string | null
 
   /** Shape is controlled by ZenMoney sync data and is not normalized yet. */
   subscriptionRenewalDate: any | null

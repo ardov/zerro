@@ -22,8 +22,10 @@ export type TBudget = {
   date: TISODate
   income: TUnits
   incomeLock: boolean
+  isIncomeForecast: boolean
   outcome: TUnits
   outcomeLock: boolean
+  isOutcomeForecast: boolean
 }
 
 export type TZmBudget = Omit<TBudget, 'id' | 'changed'> & {

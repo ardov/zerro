@@ -4,6 +4,7 @@ import { Provider } from 'react-redux'
 import { describe, expect, it, vi } from 'vitest'
 
 import dataReducer, { appendClientOutboxEntry } from 'store/data'
+import isPendingReducer, { setPending } from 'store/isPending'
 import {
   getHistoryShortcut,
   handleHistoryShortcut,
@@ -109,14 +110,13 @@ describe('history shortcuts', () => {
   })
 
   it('moves the Redux history head from the global listener', () => {
-    const store = configureStore({ reducer: { data: dataReducer } })
+    const store = configureStore({
+      reducer: { data: dataReducer, isPending: isPendingReducer },
+    })
     store.dispatch(
       appendClientOutboxEntry({
-        id: 'entry-1',
-        command: { type: 'test.command' },
-        intentPatch: {},
-        appliedPatch: {},
-        materializerVersion: 1,
+        type: 'patch',
+        payload: {},
         createdAt: 1,
       })
     )
@@ -138,6 +138,28 @@ describe('history shortcuts', () => {
     })
     expect(store.getState().data.outboxHead).toBe(1)
 
+    view.unmount()
+  })
+
+  it('keeps the sent outbox prefix fixed while sync is pending', () => {
+    const store = configureStore({
+      reducer: { data: dataReducer, isPending: isPendingReducer },
+    })
+    store.dispatch(
+      appendClientOutboxEntry({ type: 'patch', payload: {}, createdAt: 1 })
+    )
+    store.dispatch(setPending(true))
+    const view = render(
+      <Provider store={store}>
+        <HistoryShortcuts />
+      </Provider>
+    )
+
+    act(() => {
+      window.dispatchEvent(keydown({ key: 'z', code: 'KeyZ', metaKey: true }))
+    })
+
+    expect(store.getState().data.outboxHead).toBe(1)
     view.unmount()
   })
 })

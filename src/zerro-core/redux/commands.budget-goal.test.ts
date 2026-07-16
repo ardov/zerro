@@ -71,9 +71,8 @@ describe('budget and goal Redux commands', () => {
       expect.objectContaining({
         type: appendClientOutboxEntry.type,
         payload: expect.objectContaining({
-          command: { type: 'zerro.budget.set', payload: updates },
-          intentPatch: expected,
-          appliedPatch: expected,
+          type: 'patch',
+          payload: expected,
         }),
       })
     )
@@ -109,12 +108,8 @@ describe('budget and goal Redux commands', () => {
       expect.objectContaining({
         type: appendClientOutboxEntry.type,
         payload: expect.objectContaining({
-          command: {
-            type: 'zerro.goal.set',
-            payload: { month: MONTH, id, goal },
-          },
-          intentPatch: expected,
-          appliedPatch: expected,
+          type: 'patch',
+          payload: expected,
         }),
       })
     )

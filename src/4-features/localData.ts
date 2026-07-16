@@ -44,8 +44,17 @@ export const saveDataLocally =
 export const loadLocalData = (): AppThunk => async dispatch => {
   const [data, replica] = await Promise.all([getLocalData(), getReplicaState()])
   dispatch(applyServerPatch(data))
-  dispatch(restorePersistedReplica(parsePersistedReplica(replica)))
+  dispatch(restorePersistedReplica(parseReplicaOrUndefined(replica)))
   return data
+}
+
+function parseReplicaOrUndefined(replica: unknown) {
+  try {
+    return parsePersistedReplica(replica)
+  } catch (error) {
+    console.warn('Ignoring invalid persisted Core replica', error)
+    return undefined
+  }
 }
 
 export const clearLocalData = (): AppThunk => () => clearStorage()

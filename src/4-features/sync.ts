@@ -9,7 +9,7 @@ import { AppThunk } from 'store'
 import { TLocalData } from '6-shared/types'
 import { sync } from 'worker'
 import {
-  getPendingSyncDiff,
+  getPendingSyncTransport,
   applyServerPatch,
   prepareClientSync,
 } from 'store/data'
@@ -21,20 +21,17 @@ import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
 export const syncData = (): AppThunk => async (dispatch, getState) => {
   dispatch(prepareClientSync())
   const state = getState()
-  const sentOutboxIds = state.data.outbox
-    .slice(0, state.data.outboxHead)
-    .map(entry => entry.id)
+  const sentOutboxCount = state.data.outboxHead
+  const syncStartTime = Date.now()
   const diff: TDiff = {
-    ...(getPendingSyncDiff(state) || {}),
+    ...(getPendingSyncTransport(state, syncStartTime) || {}),
     serverTimestamp: getLastSyncTime(state),
   }
   const token = getToken(state) || ''
 
-  const syncStartTime = Date.now()
   dispatch(setPending(true))
 
   const response = await sync(token, zmPreferenceStorage.get(), diff)
-  dispatch(setPending(false))
   dispatch(
     setSyncData({
       isSuccessful: !response.error,
@@ -45,7 +42,7 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
 
   if (response.data) {
     const data = response.data
-    dispatch(applyServerPatch({ ...data, syncStartTime, sentOutboxIds }))
+    dispatch(applyServerPatch({ ...data, sentOutboxCount }))
     const changedDomains = getChangedDomains(data)
     dispatch(saveDataLocally(changedDomains))
     track('sync_completed', {
@@ -55,6 +52,7 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
   } else {
     console.warn('Syncing failed', response)
   }
+  dispatch(setPending(false))
 }
 
 function getChangedDomains(data: TDiff) {

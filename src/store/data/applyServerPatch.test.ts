@@ -8,8 +8,7 @@ describe('applyServerPatch', () => {
     const dispatch = vi.fn()
     const patch = {
       serverTimestamp: 100,
-      syncStartTime: 90,
-      sentOutboxIds: ['entry-1'],
+      sentOutboxCount: 1,
     }
 
     applyServerPatch(patch)(dispatch as any, vi.fn() as any, undefined)

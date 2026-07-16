@@ -1,6 +1,6 @@
 # Zerro Core roadmap
 
-- Updated: 2026-07-15
+- Updated: 2026-07-16
 - Purpose: order remaining work; history stays in Git.
 
 ## Goal
@@ -21,8 +21,10 @@ The main migration is complete:
 - production writes use semantic commands;
 - production app reads use domain-grouped Redux namespaces;
 - legacy model-object calls and duplicate derived projections are removed;
-- Redux owns `base + outbox + outboxHead` and persists minimal replay inputs;
-- materialization is wired into every local command but remains identity-only.
+- Redux owns `base + outbox + outboxHead` and persists command-only replay
+  inputs;
+- sparse transaction field edits rematerialize over the latest base while
+  unmigrated behavior uses resolved patch commands.
 
 Reliable automated verification, ready bridge removal, and read-graph
 documentation are complete. The final explicit-sync browser smoke remains.
@@ -96,19 +98,19 @@ Verify in one session:
 
 Exit: the completion gate in `testing.md` is satisfied.
 
-## Phase 2: materializer contract
+## Phase 2: durable command migration — current
 
-Do not add balance or cascade effects until these decisions are explicit:
+The command-only replica and generic `transactions.patch` are in place.
+Migrate remaining behavior by command family:
 
-1. **Transport:** send `intentPatch`, `appliedPatch`, or a dedicated
-   per-command transport encoding.
-2. **Evidence:** record representative ZenMoney responses for account deletion,
-   transfer conversion, and transaction balance changes.
-3. **Versioning:** decide how pending entries created under an older
-   `materializerVersion` behave after an upgrade.
-4. **Atomicity:** define behavior for batches and already-deleted entities.
+1. transaction delete/permanent delete/restore;
+2. transaction combine and transfer merge;
+3. account and reminder writes;
+4. Zerro hidden-data commands.
 
-Keep replay on stored `appliedPatch`; do not reinterpret historical commands.
+For each family, define narrow payload, terminal no-op/conflict behavior,
+satisfaction, and primary transport entities. Do not add cross-entity effects
+while the family still stores `patch`.
 
 ## Phase 3: materializer rules
 
@@ -124,7 +126,7 @@ For each rule:
 - test the materialized patch and resulting state;
 - cover batches, missing entities, and already-deleted entities;
 - compare with a real ZenMoney response when possible;
-- increment `materializerVersion` when semantics change;
+- add command versioning only when real persisted compatibility exists;
 - keep canonical server diffs and dumb `applyPatch` unchanged.
 
 ## Deferred until evidence exists

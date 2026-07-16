@@ -115,6 +115,10 @@ resolve the currency inside the projector.
 
 ## Documentation
 
+See [sync-api.md](./sync-api.md) for behavior observed against the live ZenMoney
+sync endpoint, including version comparison, acknowledgements, wire shape, and
+server-side materialization.
+
 Use field comments for non-obvious invariants: timestamp units, wire-vs-core
 differences, reference-data deletion flags, and fields that are easy to confuse.
 Use entity READMEs for domain explanations, relationships, mutability, and

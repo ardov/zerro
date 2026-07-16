@@ -72,6 +72,7 @@ export function makeTransaction(
     deleted: false,
     hold: null,
     viewed: false,
+    source: null,
     qrCode: null,
     incomeBankID: null,
     income: 0,
@@ -204,8 +205,10 @@ export function makeBudget(patch: Partial<TBudget> & { id: string }): TBudget {
     tag: 'food',
     income: 0,
     incomeLock: true,
+    isIncomeForecast: false,
     outcome: 0,
     outcomeLock: true,
+    isOutcomeForecast: false,
     ...patch,
   } as TBudget
 }

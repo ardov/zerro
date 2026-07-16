@@ -36,25 +36,15 @@ describe('syncData', () => {
       }) as any
     )
     const first = {
-      id: 'entry-1',
-      command: { type: 'account.rename', title: 'Wallet' },
-      intentPatch: {
+      type: 'patch' as const,
+      payload: {
         account: [makeAccount({ id: 'cash', title: 'Wallet' })],
       },
-      appliedPatch: {
-        account: [makeAccount({ id: 'cash', title: 'Wallet' })],
-      },
-      materializerVersion: 1,
       createdAt: 10,
     }
     const redo = {
       ...first,
-      id: 'entry-2',
-      command: { type: 'account.rename', title: 'Vault' },
-      intentPatch: {
-        account: [makeAccount({ id: 'cash', title: 'Vault' })],
-      },
-      appliedPatch: {
+      payload: {
         account: [makeAccount({ id: 'cash', title: 'Vault' })],
       },
       createdAt: 20,
@@ -69,9 +59,7 @@ describe('syncData', () => {
       account: [expect.objectContaining({ id: 'cash', title: 'Wallet' })],
       serverTimestamp: 100,
     })
-    expect(store.getState().data.outbox?.map(entry => entry.id)).toEqual([
-      'entry-1',
-    ])
+    expect(store.getState().data.outbox).toEqual([first])
     expect(store.getState().data.outboxHead).toBe(1)
     expect(store.getState().data.current.account.cash.title).toBe('Wallet')
   })

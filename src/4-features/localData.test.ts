@@ -30,11 +30,8 @@ describe('loadLocalData', () => {
       baseServerTimestamp: 100,
       outbox: [
         {
-          id: 'entry-1',
-          command: { type: 'account.rename', title: 'Wallet' },
-          intentPatch: { account: [pendingAccount] },
-          appliedPatch: { account: [pendingAccount] },
-          materializerVersion: 1,
+          type: 'patch',
+          payload: { account: [pendingAccount] },
           createdAt: 10,
         },
       ],
@@ -61,10 +58,12 @@ describe('loadLocalData', () => {
     expect(
       getPendingSyncDiff({ data: dataState } as any)?.account?.[0].title
     ).toBe('Wallet')
-    expect(dataState.outbox?.map(entry => entry.id)).toEqual(['entry-1'])
+    expect(dataState.outbox).toEqual([
+      { type: 'patch', payload: { account: [pendingAccount] }, createdAt: 10 },
+    ])
   })
 
-  it('rejects corrupt replica storage before replay', async () => {
+  it('ignores corrupt replica storage without blocking canonical data', async () => {
     getLocalDataMock.mockResolvedValue({ serverTimestamp: 100 })
     getReplicaStateMock.mockResolvedValue({
       version: 1,
@@ -73,10 +72,28 @@ describe('loadLocalData', () => {
       outboxHead: 1,
     })
 
-    const dispatch = vi.fn()
-    await expect(
-      loadLocalData()(dispatch, () => ({}) as any, undefined)
-    ).rejects.toThrow('outbox[0] metadata is invalid')
-    expect(dispatch).toHaveBeenCalledTimes(1)
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    let dataState = reducer(undefined, { type: 'test/init' })
+    const dispatch: any = (action: any) => {
+      if (typeof action === 'function') {
+        return action(dispatch, () => ({ data: dataState }), undefined)
+      }
+      dataState = reducer(dataState, action)
+      return action
+    }
+
+    await loadLocalData()(
+      dispatch,
+      () => ({ data: dataState }) as any,
+      undefined
+    )
+
+    expect(dataState.base.serverTimestamp).toBe(100)
+    expect(dataState.outbox).toEqual([])
+    expect(warn).toHaveBeenCalledWith(
+      'Ignoring invalid persisted Core replica',
+      expect.any(Error)
+    )
+    warn.mockRestore()
   })
 })

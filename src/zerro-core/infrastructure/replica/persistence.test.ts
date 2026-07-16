@@ -6,11 +6,8 @@ const validReplica = {
   baseServerTimestamp: 100,
   outbox: [
     {
-      id: 'entry-1',
-      command: { type: 'test.command' },
-      intentPatch: {},
-      appliedPatch: { account: [{ id: 'cash', title: 'Wallet' }] },
-      materializerVersion: 1,
+      type: 'patch',
+      payload: { account: [{ id: 'cash', title: 'Wallet' }] },
       createdAt: 10,
     },
   ],
@@ -18,24 +15,41 @@ const validReplica = {
 }
 
 describe('parsePersistedReplica', () => {
-  it('accepts a valid replay record and missing storage', () => {
+  it('accepts command-only replay records and missing storage', () => {
     expect(parsePersistedReplica(undefined)).toBeUndefined()
     expect(parsePersistedReplica(validReplica)).toBe(validReplica)
   })
 
-  it('accepts normalized patches with numeric ids, deletions, and timestamps', () => {
-    const patch = {
-      serverTimestamp: 200,
-      instrument: [{ id: 2, title: 'Euro' }],
-      deletion: [{ id: 3, object: 'company', stamp: 10, user: 1 }],
-    }
+  it('accepts a whitelisted sparse transaction patch', () => {
     const replica = {
       ...validReplica,
       outbox: [
         {
-          ...validReplica.outbox[0],
-          intentPatch: patch,
-          appliedPatch: patch,
+          type: 'transactions.patch',
+          payload: {
+            ids: ['tr-1', 'tr-2'],
+            set: { viewed: true, tag: ['food'] },
+          },
+          createdAt: 10,
+        },
+      ],
+    }
+
+    expect(parsePersistedReplica(replica)).toBe(replica)
+  })
+
+  it('accepts a transaction recreate command with explicit replacement id', () => {
+    const replica = {
+      ...validReplica,
+      outbox: [
+        {
+          type: 'transaction.recreate',
+          payload: {
+            sourceId: 'source',
+            replacementId: 'replacement',
+            set: { created: 50, income: 0, outcome: 25 },
+          },
+          createdAt: 10,
         },
       ],
     }
@@ -49,9 +63,28 @@ describe('parsePersistedReplica', () => {
     [
       {
         ...validReplica,
-        outbox: [{ ...validReplica.outbox[0], appliedPatch: { nope: [] } }],
+        outbox: [
+          {
+            type: 'transactions.patch',
+            payload: { ids: ['tr-1'], set: { changed: 10 } },
+            createdAt: 10,
+          },
+        ],
       },
-      'appliedPatch.nope is invalid',
+      'outbox[0] is invalid',
+    ],
+    [
+      {
+        ...validReplica,
+        outbox: [
+          {
+            type: 'transactions.patch',
+            payload: { ids: ['tr-1'], set: { created: 10 } },
+            createdAt: 10,
+          },
+        ],
+      },
+      'outbox[0] is invalid',
     ],
     [
       {

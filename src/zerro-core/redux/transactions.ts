@@ -6,6 +6,7 @@ export {
   deleteTransactions as remove,
   deleteTransactionsPermanently as removePermanently,
   mergeTransactionsAsTransfer as mergeAsTransfer,
+  patchTransactions as patch,
   recreateTransaction as recreate,
   restoreTransaction as restore,
   setTransactionsViewed as setViewed,

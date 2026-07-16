@@ -66,8 +66,8 @@ describe('reminder semantic writes', () => {
       expect.objectContaining({
         type: appendClientOutboxEntry.type,
         payload: expect.objectContaining({
-          command: expect.objectContaining({ type: 'zenmoney.reminder.set' }),
-          appliedPatch: { reminder: reminders },
+          type: 'patch',
+          payload: { reminder: reminders },
         }),
       })
     )
@@ -84,13 +84,14 @@ describe('reminder semantic writes', () => {
       expect.objectContaining({
         type: appendClientOutboxEntry.type,
         payload: expect.objectContaining({
-          command: {
-            type: 'zenmoney.reminder.delete',
-            payload: { id: 'existing' },
-          },
-          appliedPatch: {
+          type: 'patch',
+          payload: {
             deletion: [
-              expect.objectContaining({ id: 'existing', stamp: NOW, user: 1 }),
+              expect.objectContaining({
+                id: 'existing',
+                stamp: NOW,
+                user: 1,
+              }),
             ],
           },
         }),

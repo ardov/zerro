@@ -6,7 +6,7 @@ type TSyncPolicyInput = {
   isLoggedIn: boolean
   isPending: boolean
   lastSync: number
-  hasPendingChanges: boolean
+  hasBlockingChanges: boolean
   regular: boolean
   isDocumentHidden: boolean
   now: number
@@ -18,7 +18,7 @@ export function needSync({
   isLoggedIn,
   isPending,
   lastSync,
-  hasPendingChanges,
+  hasBlockingChanges,
   regular,
   isDocumentHidden,
   now,
@@ -26,7 +26,7 @@ export function needSync({
   if (!isOnline) return false
   if (!isLoggedIn) return false
   if (isPending) return false
-  if (hasPendingChanges) return false
+  if (hasBlockingChanges) return false
   if (lastSync === 0) return true
   if (!regular) return false
   if (isDocumentHidden) return false

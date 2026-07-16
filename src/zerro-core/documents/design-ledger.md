@@ -1,6 +1,6 @@
 # Zerro Core design ledger
 
-- Updated: 2026-07-15
+- Updated: 2026-07-16
 - Purpose: settled decisions, accepted risks, active bridges, and unresolved
   architectural questions. History stays in Git.
 
@@ -45,18 +45,24 @@
 
 ### Commands and materialization
 
-- Commands use narrow semantic inputs, not `Partial<TEntity>` projections.
-- Internal entity patch compilers whitelist writable fields; outbox commands
-  retain original domain intent.
-- Singular commands are the default. Bulk APIs require explicit atomicity and
-  error semantics.
-- Command compilers produce intent patches. Local execution materializes them
-  into complete applied patches.
+- Outbox entries are flat durable commands with only creation time added. They
+  persist neither entry ids nor parallel intent/applied patches.
+- `transactions.patch` stores one whitelist field set plus target
+  ids. The whole entry is one undo/redo and acknowledgement unit.
+- `created` is server-owned after transaction creation. A time edit stores
+  `transaction.recreate` with durable source/replacement ids and
+  materializes both hiding the original and creating the replacement.
+- Commands set absolute values and remain idempotent. Relative operations such
+  as toggle or increment require a distinct semantic command.
+- Specialized adapter verbs such as `setViewed` may compile directly to the
+  generic durable transaction patch without minting another persisted shape.
+- Unmigrated command families use `patch`, a resolved full-patch command.
+  It preserves behavior but does not promise field-level remote rebase.
 - `applyPatch` applies only explicit changes and owns no cross-entity rules.
 - Canonical server diffs bypass local materialization.
-- Replay uses stored `appliedPatch`; it never recompiles commands or
-  rematerializes history.
-- Materialization remains identity-only until the transport checkpoint below.
+- Replay rematerializes the command prefix against `base` in order.
+- Missing or deleted transaction targets are terminal no-ops for sparse field
+  patches, matching observed server immutability.
 
 ### Replica and sync
 
@@ -67,10 +73,15 @@
   text-editing controls and only when that history direction is available.
 - Persistence stores versioned replay inputs plus the base server timestamp,
   not derived state.
-- Periodic sync runs only while the applied prefix is empty.
-- Manual sync is a commit boundary: drop the redo tail, capture sent entry ids,
-  accept a successful response as canonical, remove exactly the sent entries,
-  and replay commands created during the request.
+- Periodic sync may run with a non-empty prefix only when every pending command
+  is a rebase-safe transaction patch or recreate. Transitional commands still
+  pause it.
+- Manual sync drops the redo tail, captures the sent prefix length,
+  rematerializes transport with fresh entity versions, applies the response as
+  canonical, and removes narrow commands only when their requested fields are
+  satisfied. Undo/redo remains disabled until the request finishes.
+- Transitional `patch` retains whole-batch acknowledgement until its
+  command family is migrated.
 - First-stage conflict policy is entity-level last write wins.
 
 ### Testing
@@ -88,7 +99,7 @@
 
 - Transaction edits may leave `account.balance` stale until synchronization;
   balance effects belong to materialization.
-- Dirty sessions do not pull remote changes until explicit sync.
+- Dirty sessions containing transitional commands do not sync automatically.
 - Undo/redo is keyboard-accessible in the loaded application; visible controls
   remain deferred.
 - Replica metadata is disposable until product continuity requirements justify
@@ -113,30 +124,26 @@ useful.
 
 ## Open questions
 
-### Materializer transport — blocks non-identity effects
+### Resolved command migration — blocks non-identity effects
 
-Current sync transport merges stored `appliedPatch` values. Before balance or
-cascade rules, decide whether the server should receive:
-
-1. the original `intentPatch`;
-2. the complete local `appliedPatch`; or
-3. a dedicated per-command transport encoding.
-
-The decision must prevent double application of server-like effects while
-keeping local replay deterministic.
+Current sync transport rematerializes commands. Before adding balance or
+cascade effects for a command family, replace its transitional `patch`
+with a narrow durable command and define which primary entities its transport
+encoder sends. Server-materialized balance and cascade effects must not be sent
+back as client intent.
 
 ### Materializer evidence and versioning
 
 - Which real ZenMoney responses become fixtures for transaction balance,
   account deletion, and transfer conversion?
-- Do pending entries retain old applied effects indefinitely, or does a rule
-  upgrade ever require an explicit outbox migration?
+- Pending replica metadata currently has no compatibility or migration
+  requirement. Revisit versioning only when real persisted users exist.
 
 ### Product rules
 
 - How should renaming a visible payee envelope affect several raw payee
   spellings?
-- When, if ever, should dirty sessions accept background remote changes?
+- Which migrated command families are safe enough to opt into background sync?
 
 ### Future surfaces — not scheduled
 

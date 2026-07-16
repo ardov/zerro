@@ -15,7 +15,6 @@ import {
   compileDeleteTransactionsPermanently,
   compileMarkTransactionsViewed,
   compileMergeTransactionsAsTransfer,
-  compileRecreateTransaction,
   compileRestoreTransaction,
 } from './commands'
 import { makeTransaction as makeCoreTransaction } from './factory'
@@ -253,44 +252,6 @@ describe('zenmoney transaction commands', () => {
       changed: 100,
     })
     expect(patch.account).toBeUndefined()
-  })
-
-  it('recreates a transaction and returns the new id', () => {
-    const data = makeStore({
-      account: {
-        cash: makeAccount({ id: 'cash', balance: 100 }),
-        card: makeAccount({ id: 'card', balance: 50 }),
-      },
-      transaction: {
-        tr: makeTransaction({ id: 'tr', income: 50, outcome: 0, changed: 1 }),
-      },
-    })
-    const timestamps = [100, 200, 300, 400]
-
-    const result = compileRecreateTransaction(
-      data,
-      { id: 'tr', outcome: 25, income: 0 },
-      {
-        now: () => timestamps.shift() ?? 0,
-        uuid: () => 'new-tr',
-      }
-    )
-
-    expect(result.receipt.transactionId).toBe('new-tr')
-    expect(result.patch.transaction).toHaveLength(2)
-    expect(result.patch.transaction?.[0]).toMatchObject({
-      id: 'tr',
-      income: 0.00001,
-      outcome: 0.00001,
-      changed: 100,
-    })
-    expect(result.patch.transaction?.[1]).toMatchObject({
-      id: 'new-tr',
-      income: 0,
-      outcome: 25,
-      changed: 200,
-    })
-    expect(result.patch.account).toBeUndefined()
   })
 
   it('bulk-edits tags and comments with legacy placeholders', () => {

@@ -4,6 +4,7 @@ import {
   applyOutboxEntry,
   clampOutboxHead,
   getPendingOutbox,
+  isOutboxEntrySatisfied,
   replayOutbox,
   type TOutboxEntry,
 } from 'zerro-core/infrastructure/replica/outbox'
@@ -18,15 +19,14 @@ import { applyDiffMutable } from './shared/applyDiff'
 interface DataSlice {
   current: TDataStore
   base: TDataStore
-  /** Durable local commands; current replays from the applied prefix. */
+  /** Durable local commands; current rematerializes from the command prefix. */
   outbox: TOutboxEntry[]
   outboxHead: number
   inbox?: TServerInbox | null
 }
 
 export interface TServerInbox extends TDiff {
-  syncStartTime?: number
-  sentOutboxIds?: string[]
+  sentOutboxCount?: number
 }
 
 const makeDataStore = (): TDataStore => ({
@@ -66,18 +66,17 @@ const { reducer, actions } = createSlice({
     ),
     rebaseServerInbox: withPerf('rebaseServerInbox', state => {
       if (!state.inbox) return
-      const { syncStartTime, sentOutboxIds, ...canonicalPatch } = state.inbox
-      const sent = sentOutboxIds ? new Set(sentOutboxIds) : null
+      const { sentOutboxCount, ...canonicalPatch } = state.inbox
 
       applyDiffMutable(canonicalPatch, state.base)
 
       const pending = getPendingOutbox(state.outbox, state.outboxHead)
-      state.outbox =
-        sent || syncStartTime !== undefined
-          ? pending.filter(entry =>
-              sent ? !sent.has(entry.id) : entry.createdAt > syncStartTime!
-            )
-          : []
+      state.outbox = pending.filter(
+        (entry, index) =>
+          sentOutboxCount === undefined ||
+          index >= sentOutboxCount ||
+          !isOutboxEntrySatisfied(state.base, entry)
+      )
       state.outboxHead = state.outbox.length
       state.current = replayOutbox(state.base, state.outbox, state.outboxHead)
       state.inbox = null
@@ -88,7 +87,7 @@ const { reducer, actions } = createSlice({
         const next = appendOutbox(state.outbox, state.outboxHead, payload)
         state.outbox = next.outbox
         state.outboxHead = next.outboxHead
-        // `current` already reflects the applied prefix up to the old head, and
+        // `current` already reflects the command prefix up to the old head, and
         // appendOutbox drops any redo tail past it, so advancing by this one
         // entry is equivalent to a full replay but keeps unrelated entity maps
         // reference-stable for memoized selectors.
