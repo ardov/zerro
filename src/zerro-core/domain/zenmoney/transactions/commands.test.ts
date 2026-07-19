@@ -108,6 +108,35 @@ describe('zenmoney transaction commands', () => {
     )
   })
 
+  it('preserves explicit writable falsy values in the transaction factory', () => {
+    expect(
+      makeCoreTransaction(
+        {
+          user: 1,
+          date: '2026-02',
+          incomeInstrument: 1,
+          incomeAccount: 'cash',
+          outcomeInstrument: 1,
+          outcomeAccount: 'card',
+          hold: null,
+          comment: '',
+          latitude: 0,
+          longitude: 0,
+          opIncome: null,
+          opOutcome: null,
+        },
+        { now: () => 100, uuid: () => 'tr-new' }
+      )
+    ).toMatchObject({
+      hold: null,
+      comment: '',
+      latitude: 0,
+      longitude: 0,
+      opIncome: null,
+      opOutcome: null,
+    })
+  })
+
   it('soft-deletes transactions', () => {
     const data = makeStore({
       account: {

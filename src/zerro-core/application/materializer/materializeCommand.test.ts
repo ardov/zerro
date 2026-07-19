@@ -43,7 +43,7 @@ describe('materializeCommand', () => {
     })
   })
 
-  it('patches a batch and skips no-op, deleted, or missing targets', () => {
+  it('patches a batch and skips no-op or deleted targets', () => {
     const first = makeTransaction({ id: 'first', viewed: false })
     const second = makeTransaction({ id: 'second', viewed: true })
     const deleted = makeTransaction({ id: 'deleted', deleted: true })
@@ -51,7 +51,7 @@ describe('materializeCommand', () => {
     const command = issuePatch(
       snapshot,
       {
-        transaction: ['first', 'second', 'deleted', 'missing'].map(id => ({
+        transaction: ['first', 'second', 'deleted'].map(id => ({
           id,
           viewed: true,
         })),
@@ -66,14 +66,16 @@ describe('materializeCommand', () => {
     ).toEqual(['first'])
   })
 
-  it('materializes a missing sparse target as an empty patch', () => {
-    const command = issuePatch(
-      makeStore(),
-      { transaction: [{ id: 'missing', viewed: true }] },
-      100
+  it('rejects incomplete transaction creation intent before persistence', () => {
+    expect(() =>
+      issuePatch(
+        makeStore(),
+        { transaction: [{ id: 'missing', viewed: true }] },
+        100
+      )
+    ).toThrow(
+      'Cannot create transaction: missing date, incomeInstrument, incomeAccount, outcomeInstrument, outcomeAccount'
     )
-
-    expect(materializeCommand(makeStore(), command)).toEqual({})
   })
 
   it('filters system fields from stale runtime transaction patches', () => {
@@ -107,6 +109,9 @@ describe('materializeCommand', () => {
       100
     )
 
+    expect(command.patch).toEqual({
+      transaction: [{ id: 'tr-1', deleted: true }],
+    })
     expect(materializeCommand(snapshot, command).transaction?.[0]).toEqual({
       ...current,
       deleted: true,
@@ -129,7 +134,11 @@ describe('materializeCommand', () => {
       created: 500,
       comment: 'After',
     }
-    const snapshot = makeStore({ transaction: { source } })
+    const rootUser = makeUser({ id: 1, parent: null, currency: 2 })
+    const snapshot = makeStore({
+      user: { 1: rootUser },
+      transaction: { source },
+    })
     const command = issuePatch(
       snapshot,
       {
@@ -141,6 +150,24 @@ describe('materializeCommand', () => {
       300
     )
 
+    expect(command.patch).toEqual({
+      transaction: [
+        { id: 'source', income: 0.00001, outcome: 0.00001 },
+        {
+          id: 'replacement',
+          created: 500,
+          hold: null,
+          incomeInstrument: 1,
+          incomeAccount: 'cash',
+          outcomeInstrument: 1,
+          outcomeAccount: 'card',
+          outcome: 25,
+          comment: 'After',
+          date: '2026-01-10',
+        },
+      ],
+    })
+
     const initial = materializeCommand(snapshot, command)
     expect(initial.transaction).toEqual([
       { ...source, income: 0.00001, outcome: 0.00001, changed: 1200 },
@@ -149,7 +176,10 @@ describe('materializeCommand', () => {
 
     const hiddenSource = initial.transaction![0]
     const retry = materializeCommand(
-      makeStore({ transaction: { source: hiddenSource } }),
+      makeStore({
+        user: { 1: rootUser },
+        transaction: { source: hiddenSource },
+      }),
       command,
       400
     )
@@ -525,10 +555,11 @@ describe('materializeCommand', () => {
   })
 
   it('marks supported sparse updates and creations as rebase-safe', () => {
+    const transaction = makeTransaction({ id: 'tr-1', viewed: false })
     expect(
       isCommandRebaseSafe(
         issuePatch(
-          makeStore(),
+          makeStore({ transaction: { 'tr-1': transaction } }),
           { transaction: [{ id: 'tr-1', viewed: true }] },
           100
         )

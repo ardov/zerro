@@ -5,7 +5,9 @@ import type {
   TDiff,
 } from '../../domain/zenmoney/store'
 import {
+  makeTransaction,
   transactionIntentFields,
+  transactionWritableFields,
   type TTransactionPatch,
 } from '../../domain/zenmoney/transactions'
 import {
@@ -224,6 +226,15 @@ function materializeIntentPatch(
           ) as unknown as Record<string, unknown>,
         ]
       }
+      if (key === 'transaction') {
+        return [
+          materializeTransactionCreation(
+            snapshot,
+            intent,
+            changedAt
+          ) as unknown as Record<string, unknown>,
+        ]
+      }
 
       // Other entity families remain transitional until they gain a factory-
       // backed creation rule. Their sparse missing targets are terminal no-ops.
@@ -318,6 +329,18 @@ function compileIntentPatch(
     else delete result.budget
   }
 
+  if (intentPatch.transaction) {
+    const transaction = compileEntityIntents(
+      snapshot.transaction,
+      intentPatch.transaction,
+      transactionWritableFields,
+      intent => compactTransactionCreation(snapshot, intent, issuedAt),
+      transactionIntentFields
+    ) as TTransactionPatch[]
+    if (transaction.length) result.transaction = transaction
+    else delete result.transaction
+  }
+
   if (intentPatch.deletion) {
     result.deletion = intentPatch.deletion.map(({ id, object }) => ({
       id,
@@ -337,14 +360,16 @@ function compileEntityIntents(
   writableFields: readonly string[],
   compileCreation: (
     intent: { id: string | number } & Record<string, unknown>
-  ) => { id: string | number } & Record<string, unknown>
+  ) => { id: string | number } & Record<string, unknown>,
+  creationFields: readonly string[] = writableFields
 ): Array<{ id: string | number } & Record<string, unknown>> {
   return entities.flatMap(entity => {
     const current = currentById[entity.id]
     const intent: { id: string | number } & Record<string, unknown> = {
       id: entity.id,
     }
-    writableFields.forEach(field => {
+    const fields = current ? writableFields : creationFields
+    fields.forEach(field => {
       if (
         field in entity &&
         (!current || !valuesEqual(field, current[field], entity[field]))
@@ -428,6 +453,27 @@ function compactBudgetCreation(
   const required = ['tag', 'date'] as const
   requireFields('budget', intent, required)
   const baseline = materializeBudgetCreation(
+    snapshot,
+    pickFields(intent, required),
+    issuedAt
+  ) as unknown as Record<string, unknown>
+  return omitFactoryDefaults(intent, baseline, required)
+}
+
+function compactTransactionCreation(
+  snapshot: TDataStore,
+  intent: { id: string | number } & Record<string, unknown>,
+  issuedAt: TMsTime
+) {
+  const required = [
+    'date',
+    'incomeInstrument',
+    'incomeAccount',
+    'outcomeInstrument',
+    'outcomeAccount',
+  ] as const
+  requireFields('transaction', intent, required)
+  const baseline = materializeTransactionCreation(
     snapshot,
     pickFields(intent, required),
     issuedAt
@@ -528,6 +574,18 @@ function materializeBudgetCreation(
   return budget
 }
 
+function materializeTransactionCreation(
+  snapshot: TDataStore,
+  intent: { id: string | number } & Record<string, unknown>,
+  changedAt: TMsTime
+) {
+  const user = requireRootUser(snapshot, 'transaction')
+  return makeTransaction(
+    { ...intent, user } as Parameters<typeof makeTransaction>[0],
+    deterministicContext(changedAt)
+  )
+}
+
 function requireFields(
   entity: string,
   intent: Record<string, unknown>,
@@ -565,7 +623,7 @@ function hasOnlyFields(
 function pickTransactionPatch(
   fields: Record<string, unknown>
 ): Record<string, unknown> {
-  const allowed = new Set<string>(transactionIntentFields)
+  const allowed = new Set<string>(transactionWritableFields)
   return Object.fromEntries(
     Object.entries(fields).filter(([key]) => key === 'id' || allowed.has(key))
   )

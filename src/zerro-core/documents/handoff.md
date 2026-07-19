@@ -38,21 +38,24 @@ This file routes the next task. Git contains implementation history.
 - Hidden-data commands need no dedicated intent type: their account, reminder,
   and deletion output is reduced by the existing entity paths.
 - Transaction lifecycle intent includes `deleted`; UI-editable transaction
-  fields remain a narrower input type. Some domain transaction compilers still
-  emit complete results and are the last sparse-intent cleanup.
+  fields remain a narrower input type. Issue reduces complete domain compiler
+  results to writable fields. Missing ids materialize through the transaction
+  factory; required account, instrument, and date fields are validated before
+  persistence, while immutable `created` is accepted only as creation intent.
 - Writable patch contracts now live beside their entity contracts. Account,
-  tag, merchant, reminder, transaction, envelope-meta, and user-settings
+  tag, merchant, budget, reminder, transaction, envelope-meta, and user-settings
   command modules consume those colocated types. Account intent explicitly
   covers creation fields while excluding managed `changed`, `user`, and
   derived `balance`.
 
-## Next checkpoint: sparse compilers and upsert
+## Next checkpoint: primary-only transport
 
 Land this as small independent commits where practical:
 
-1. reduce remaining full-result transaction compilers to sparse lifecycle/edit
-   intent and make creation requirements explicit;
-2. split primary-only transport from local materialized effects;
+1. replay the sent prefix against `base` with fresh `sentAt`, applying primary
+   intent without future predicted effects;
+2. collect touched ids/deletions and build full transport entities from that
+   primary-only working snapshot;
 3. run reload, undo/redo, repeated-field, in-flight append, and explicit-sync
    smoke.
 

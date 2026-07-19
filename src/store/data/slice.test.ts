@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   makeAccount,
   makeTransaction,
+  makeUser,
 } from 'zerro-core/testing/zenmoneyTestData'
 import type { TCommand } from 'zerro-core/infrastructure/replica/outbox'
 import {
@@ -232,8 +233,9 @@ describe('command outbox boundaries', () => {
     ).toMatchObject({ changed: 6000, viewed: true })
   })
 
-  it('allows automatic sync only for rebase-safe command prefixes', () => {
+  it('treats sparse transaction updates and creations as rebase-safe', () => {
     const base = applyServerPatch(undefined, {
+      user: [makeUser({ id: 1, parent: null, currency: 1 })],
       transaction: [makeTransaction({ id: 'tr-1', viewed: false })],
     })
     const sparse = reducer(
@@ -246,19 +248,27 @@ describe('command outbox boundaries', () => {
     )
     expect(getHasBlockingSyncChanges(getRootState(sparse))).toBe(false)
 
-    const recreate = reducer(
+    const creation = reducer(
       sparse,
       appendClientCommand({
         type: 'patch',
         patch: {
           transaction: [
-            makeTransaction({ id: 'tr-2', created: 50, income: 0, outcome: 0 }),
+            {
+              id: 'tr-2',
+              created: 50,
+              date: '2026-01-10',
+              incomeInstrument: 1,
+              incomeAccount: 'cash',
+              outcomeInstrument: 1,
+              outcomeAccount: 'card',
+            },
           ],
         },
         issuedAt: 15,
       })
     )
-    expect(getHasBlockingSyncChanges(getRootState(recreate))).toBe(true)
+    expect(getHasBlockingSyncChanges(getRootState(creation))).toBe(false)
   })
 
   it('keeps commands created during sync and drops the committed redo tail', () => {

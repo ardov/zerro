@@ -90,10 +90,19 @@ export type TTransactionEditablePatch = Partial<
   Pick<TTransaction, TTransactionEditableField>
 >
 
-/** Fields that may be persisted as transaction intent, including lifecycle. */
-export const transactionIntentFields = [
+/** Existing transaction fields that may be changed, including lifecycle. */
+export const transactionWritableFields = [
   'deleted',
   ...transactionEditableFields,
+] as const satisfies readonly (keyof TTransaction)[]
+
+export type TTransactionWritableField =
+  (typeof transactionWritableFields)[number]
+
+/** Upsert intent also accepts immutable creation metadata for a missing id. */
+export const transactionIntentFields = [
+  'created',
+  ...transactionWritableFields,
 ] as const satisfies readonly (keyof TTransaction)[]
 
 export type TTransactionIntentField = (typeof transactionIntentFields)[number]

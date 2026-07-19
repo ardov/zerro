@@ -31,18 +31,19 @@ React, storage, localization, or app-layer runtime modules.
   types, and the snapshot session. Replica primitives stay internal.
 - The outbox persists direct `TCommand[]` values with `type: 'patch'`,
   `issuedAt`, and `TIntentPatch`. Account, reminder, merchant, tag, budget, and
-  direct transaction edits persist sparse intent. Hidden data composes sparse
-  account/reminder/deletion intent rather than defining another patch type;
-  some transaction compilers still return complete results for issue to reduce.
+  transaction results persist sparse intent. Hidden data composes sparse
+  account/reminder/deletion intent rather than defining another patch type.
+  Transitional domain compilers may return complete results, which issue
+  reduces before the command reaches the outbox.
 - Materialization now owns command replay and deleted-transaction no-ops.
   Balance and cascade rules remain the next architectural phase.
 
-## Next slice: sparse compilers and upsert
+## Next slice: primary-only transport
 
-Convert transitional full-entity compilers to sparse intent and deletion refs,
-then add deterministic factory-backed upsert replay and primary-only transport.
-Successful sync already acknowledges the captured sent prefix as a batch. The
-ordered implementation slices are in [roadmap.md](./roadmap.md).
+Sparse factory-backed upsert replay is complete for production command entity
+families. The next boundary is primary-only transport. Successful sync already
+acknowledges the captured sent prefix as a batch. The ordered implementation
+slices are in [roadmap.md](./roadmap.md).
 
 ## Start here
 

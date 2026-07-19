@@ -20,6 +20,7 @@ import {
   makeAccount,
   makeStore,
   makeTransaction,
+  makeUser,
 } from '../testing/zenmoneyTestData'
 import {
   compileRenameEnvelope,
@@ -354,7 +355,12 @@ describe('command funnel adaptation', () => {
       outcome: 25,
       comment: 'Before',
     })
-    const state = makeState(makeStore({ transaction: { source } }))
+    const state = makeState(
+      makeStore({
+        user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+        transaction: { source },
+      })
+    )
     const dispatch = makeDispatch(state)
 
     const replacementId = dispatch(
@@ -378,7 +384,6 @@ describe('command funnel adaptation', () => {
           {
             id: replacementId,
             created: NOW - 60_000,
-            income: source.income,
             outcome: source.outcome,
             comment: 'After',
           },
