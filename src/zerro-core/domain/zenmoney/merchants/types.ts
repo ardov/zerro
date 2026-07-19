@@ -14,7 +14,13 @@ export type TMerchant = {
   title: string
 }
 
-export type TMerchantPatch = EntityPatch<TMerchant, 'title'>
+export const merchantWritableFields = [
+  'title',
+] as const satisfies readonly (keyof TMerchant)[]
+
+export type TMerchantWritableField = (typeof merchantWritableFields)[number]
+
+export type TMerchantPatch = EntityPatch<TMerchant, TMerchantWritableField>
 
 export type TZmMerchant = Omit<TMerchant, 'changed'> & {
   /** ZenMoney wire timestamp in seconds. */

@@ -36,18 +36,21 @@ export type TTag = {
   picture: string | null
 }
 
-export type TTagPatch = EntityPatch<
-  TTag,
-  | 'title'
-  | 'icon'
-  | 'budgetIncome'
-  | 'budgetOutcome'
-  | 'archive'
-  | 'showIncome'
-  | 'showOutcome'
-  | 'parent'
-  | 'color'
->
+export const tagWritableFields = [
+  'title',
+  'icon',
+  'budgetIncome',
+  'budgetOutcome',
+  'archive',
+  'showIncome',
+  'showOutcome',
+  'parent',
+  'color',
+] as const satisfies readonly (keyof TTag)[]
+
+export type TTagWritableField = (typeof tagWritableFields)[number]
+
+export type TTagPatch = EntityPatch<TTag, TTagWritableField>
 
 export type TZmTag = Omit<TTag, 'changed'> & {
   /** ZenMoney wire timestamp in seconds. */

@@ -30,9 +30,9 @@ React, storage, localization, or app-layer runtime modules.
 - The root entrypoint remains a small internal facade: constants, shared root
   types, and the snapshot session. Replica primitives stay internal.
 - The outbox persists direct `TCommand[]` values with `type: 'patch'`,
-  `issuedAt`, and `TIntentPatch`. Sparse transaction edits rebase over current
-  entities; transitional compilers may still put complete entities into the
-  same patch shape.
+  `issuedAt`, and `TIntentPatch`. Account, reminder, merchant, tag, and
+  transaction edits persist sparse intent; transitional hidden-data compilers
+  may still put complete entities into the same patch shape.
 - Materialization now owns command replay and deleted-transaction no-ops.
   Balance and cascade rules remain the next architectural phase.
 

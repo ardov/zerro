@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 
 import {
   makeAccount,
+  makeMerchant,
   makeReminder,
   makeStore,
+  makeTag,
   makeTransaction,
   makeUser,
 } from '../../testing/zenmoneyTestData'
@@ -169,6 +171,32 @@ describe('materializeCommand', () => {
     })
   })
 
+  it('compiles existing merchant and tag results to sparse intent', () => {
+    const merchant = makeMerchant({ id: 'shop', title: 'Shop' })
+    const tag = makeTag({ id: 'food', title: 'Food', color: null })
+    const snapshot = makeStore({
+      merchant: { shop: merchant },
+      tag: { food: tag },
+    })
+    const command = issuePatch(
+      snapshot,
+      {
+        merchant: [{ ...merchant, title: 'Market' }],
+        tag: [{ ...tag, title: 'Groceries', color: 0x00ff00 }],
+      },
+      100
+    )
+
+    expect(command.patch).toEqual({
+      merchant: [{ id: 'shop', title: 'Market' }],
+      tag: [{ id: 'food', title: 'Groceries', color: 0x00ff00 }],
+    })
+    expect(materializeCommand(snapshot, command)).toEqual({
+      merchant: [{ ...merchant, title: 'Market', changed: 1000 }],
+      tag: [{ ...tag, title: 'Groceries', color: 0x00ff00, changed: 1000 }],
+    })
+  })
+
   it('stores deletion identity and materializes protocol metadata', () => {
     const snapshot = makeStore({
       user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
@@ -259,6 +287,45 @@ describe('materializeCommand', () => {
     )
   })
 
+  it('stores minimal merchant creation intent and materializes through factory', () => {
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+    })
+    const merchant = makeMerchant({
+      id: 'new-merchant',
+      changed: 100,
+      user: 1,
+      title: 'Market',
+    })
+    const command = issuePatch(snapshot, { merchant: [merchant] }, 100)
+
+    expect(command.patch).toEqual({
+      merchant: [{ id: 'new-merchant', title: 'Market' }],
+    })
+    expect(materializeCommand(snapshot, command).merchant?.[0]).toEqual(
+      merchant
+    )
+  })
+
+  it('stores minimal tag creation intent and materializes through factory', () => {
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+    })
+    const tag = makeTag({
+      id: 'new-tag',
+      changed: 100,
+      user: 1,
+      title: 'Food',
+      showOutcome: true,
+    })
+    const command = issuePatch(snapshot, { tag: [tag] }, 100)
+
+    expect(command.patch).toEqual({
+      tag: [{ id: 'new-tag', title: 'Food', showOutcome: true }],
+    })
+    expect(materializeCommand(snapshot, command).tag?.[0]).toEqual(tag)
+  })
+
   it('rejects incomplete creation intent before persistence', () => {
     const snapshot = makeStore({
       user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
@@ -278,6 +345,12 @@ describe('materializeCommand', () => {
         100
       )
     ).toThrow('Cannot create reminder: missing outcomeAccount')
+    expect(() =>
+      issuePatch(snapshot, { merchant: [{ id: 'new-merchant' }] }, 100)
+    ).toThrow('Cannot create merchant: missing title')
+    expect(() =>
+      issuePatch(snapshot, { tag: [{ id: 'new-tag' }] }, 100)
+    ).toThrow('Cannot create tag: missing title')
   })
 
   it('marks supported sparse updates and creations as rebase-safe', () => {
@@ -308,6 +381,15 @@ describe('materializeCommand', () => {
         issuePatch(
           creationSnapshot,
           { account: [makeAccount({ id: 'cash', title: 'Wallet' })] },
+          100
+        )
+      )
+    ).toBe(true)
+    expect(
+      isCommandRebaseSafe(
+        issuePatch(
+          creationSnapshot,
+          { tag: [makeTag({ id: 'food', title: 'Food' })] },
           100
         )
       )

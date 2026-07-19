@@ -13,13 +13,21 @@ import {
   makeAccount,
   type TAccountPatch,
 } from '../../domain/zenmoney/accounts'
-import type { TMerchantPatch } from '../../domain/zenmoney/merchants'
+import {
+  makeMerchant,
+  merchantWritableFields,
+  type TMerchantPatch,
+} from '../../domain/zenmoney/merchants'
 import {
   makeReminder,
   reminderWritableFields,
   type TReminderPatch,
 } from '../../domain/zenmoney/reminders'
-import type { TTagPatch } from '../../domain/zenmoney/tags'
+import {
+  makeTag,
+  tagWritableFields,
+  type TTagPatch,
+} from '../../domain/zenmoney/tags'
 import { getRootUserId } from '../../domain/zenmoney/users'
 
 export type TIntentPatch = Omit<
@@ -85,6 +93,14 @@ export function isCommandRebaseSafe(command: TCommand): boolean {
       case 'reminder':
         return command.patch.reminder!.every(reminder =>
           hasOnlyFields(reminder, reminderWritableFields)
+        )
+      case 'merchant':
+        return command.patch.merchant!.every(merchant =>
+          hasOnlyFields(merchant, merchantWritableFields)
+        )
+      case 'tag':
+        return command.patch.tag!.every(tag =>
+          hasOnlyFields(tag, tagWritableFields)
         )
       case 'transaction':
         return command.patch.transaction!.every(transaction =>
@@ -170,6 +186,24 @@ function materializeIntentPatch(
           ) as unknown as Record<string, unknown>,
         ]
       }
+      if (key === 'merchant') {
+        return [
+          materializeMerchantCreation(
+            snapshot,
+            intent,
+            changedAt
+          ) as unknown as Record<string, unknown>,
+        ]
+      }
+      if (key === 'tag') {
+        return [
+          materializeTagCreation(
+            snapshot,
+            intent,
+            changedAt
+          ) as unknown as Record<string, unknown>,
+        ]
+      }
 
       // Other entity families remain transitional until they gain a factory-
       // backed creation rule. Their sparse missing targets are terminal no-ops.
@@ -229,6 +263,28 @@ function compileIntentPatch(
     ) as TReminderPatch[]
     if (reminder.length) result.reminder = reminder
     else delete result.reminder
+  }
+
+  if (intentPatch.merchant) {
+    const merchant = compileEntityIntents(
+      snapshot.merchant,
+      intentPatch.merchant,
+      merchantWritableFields,
+      intent => compactMerchantCreation(snapshot, intent, issuedAt)
+    ) as TMerchantPatch[]
+    if (merchant.length) result.merchant = merchant
+    else delete result.merchant
+  }
+
+  if (intentPatch.tag) {
+    const tag = compileEntityIntents(
+      snapshot.tag,
+      intentPatch.tag,
+      tagWritableFields,
+      intent => compactTagCreation(snapshot, intent, issuedAt)
+    ) as TTagPatch[]
+    if (tag.length) result.tag = tag
+    else delete result.tag
   }
 
   if (intentPatch.deletion) {
@@ -303,6 +359,36 @@ function compactReminderCreation(
   return omitFactoryDefaults(intent, baseline, required)
 }
 
+function compactMerchantCreation(
+  snapshot: TDataStore,
+  intent: { id: string | number } & Record<string, unknown>,
+  issuedAt: TMsTime
+) {
+  const required = ['title'] as const
+  requireFields('merchant', intent, required)
+  const baseline = materializeMerchantCreation(
+    snapshot,
+    pickFields(intent, required),
+    issuedAt
+  ) as unknown as Record<string, unknown>
+  return omitFactoryDefaults(intent, baseline, required)
+}
+
+function compactTagCreation(
+  snapshot: TDataStore,
+  intent: { id: string | number } & Record<string, unknown>,
+  issuedAt: TMsTime
+) {
+  const required = ['title'] as const
+  requireFields('tag', intent, required)
+  const baseline = materializeTagCreation(
+    snapshot,
+    pickFields(intent, required),
+    issuedAt
+  ) as unknown as Record<string, unknown>
+  return omitFactoryDefaults(intent, baseline, required)
+}
+
 function pickFields(
   intent: { id: string | number } & Record<string, unknown>,
   fields: readonly string[]
@@ -352,6 +438,30 @@ function materializeReminderCreation(
   const user = requireRootUser(snapshot, 'reminder')
   return makeReminder(
     { ...intent, user } as Parameters<typeof makeReminder>[0],
+    deterministicContext(changedAt)
+  )
+}
+
+function materializeMerchantCreation(
+  snapshot: TDataStore,
+  intent: { id: string | number } & Record<string, unknown>,
+  changedAt: TMsTime
+) {
+  const user = requireRootUser(snapshot, 'merchant')
+  return makeMerchant(
+    { ...intent, user } as Parameters<typeof makeMerchant>[0],
+    deterministicContext(changedAt)
+  )
+}
+
+function materializeTagCreation(
+  snapshot: TDataStore,
+  intent: { id: string | number } & Record<string, unknown>,
+  changedAt: TMsTime
+) {
+  const user = requireRootUser(snapshot, 'tag')
+  return makeTag(
+    { ...intent, user } as Parameters<typeof makeTag>[0],
     deterministicContext(changedAt)
   )
 }

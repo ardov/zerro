@@ -1,6 +1,6 @@
 # Zerro Core roadmap
 
-- Updated: 2026-07-19
+- Updated: 2026-07-20
 - Purpose: order remaining work; history stays in Git.
 
 ## Goal
@@ -111,12 +111,12 @@ the work as bounded verified slices:
    `TIntentPatch`;
 3. **Done:** issue captures time, generated ids, absolute values, and
    caller-only receipts before append;
-4. **In progress:** existing account/reminder results compile to changed
-   writable fields and deletions persist only identity; convert the remaining
-   transitional entity families;
-5. **In progress:** account/reminder use deterministic factory-backed upsert and
-   reject incomplete creation intent before persistence; add the remaining
-   entity families;
+4. **In progress:** existing account, reminder, merchant, and tag results
+   compile to changed writable fields and deletions persist only identity;
+   convert the remaining transitional entity families;
+5. **In progress:** account, reminder, merchant, and tag use deterministic
+   factory-backed upsert and reject incomplete creation intent before
+   persistence; add the remaining entity families;
 6. replay the applied prefix into `current`, keeping `applyPatch` dumb.
 
 Exit: all production writes persist the same command type; reload and undo/redo

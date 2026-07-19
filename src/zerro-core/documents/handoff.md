@@ -1,6 +1,6 @@
 # Zerro Core handoff
 
-- Updated: 2026-07-19
+- Updated: 2026-07-20
 - Branch: `core-next`
 - Module: `src/zerro-core`
 - Worktree: verify before editing
@@ -25,14 +25,15 @@ This file routes the next task. Git contains implementation history.
   typed transaction queries reconstruct intrinsic and envelope-filtered lists
   from canonical history on demand.
 - Materialization overlays sparse fields on existing entities and uses domain
-  factories to create missing account/reminder ids without ambient time or id
-  generation. Other entity creation and cross-entity effects remain deferred.
+  factories to create missing account, reminder, merchant, and tag ids without
+  ambient time or id generation. Other entity creation and cross-entity effects
+  remain deferred.
 - Successful sync removes exactly the captured sent prefix; per-command
   satisfaction checks are removed. Commands appended in flight remain pending.
-- Issue reduces existing account/reminder results to changed writable fields
-  and creation results to required fields plus non-default values. Incomplete
-  creation intent fails before append. Deletion commands persist only
-  `{ id, object }`; materialization supplies `stamp` and `user`.
+- Issue reduces existing account, reminder, merchant, and tag results to changed
+  writable fields and creation results to required fields plus non-default
+  values. Incomplete creation intent fails before append. Deletion commands
+  persist only `{ id, object }`; materialization supplies `stamp` and `user`.
 - Writable patch contracts now live beside their entity contracts. Account,
   tag, merchant, reminder, transaction, envelope-meta, and user-settings
   command modules consume those colocated types. Account intent explicitly
@@ -43,10 +44,9 @@ This file routes the next task. Git contains implementation history.
 
 Land this as small independent commits where practical:
 
-1. convert merchant and tag results to sparse factory-backed upsert intent;
-2. convert budget and remaining hidden-data results to sparse intent;
-3. split primary-only transport from local materialized effects;
-4. run reload, undo/redo, repeated-field, in-flight append, and explicit-sync
+1. convert budget and remaining hidden-data results to sparse intent;
+2. split primary-only transport from local materialized effects;
+3. run reload, undo/redo, repeated-field, in-flight append, and explicit-sync
    smoke.
 
 Until the first command-schema rollout, persisted outbox compatibility is not a
