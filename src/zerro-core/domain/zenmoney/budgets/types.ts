@@ -1,3 +1,4 @@
+import type { EntityPatch } from '../../shared/types'
 import type { TISODate, TMsTime, TUnixTime, TUnits } from '../primitives'
 import type { TTagId } from '../tags'
 import type { TUserId } from '../users'
@@ -27,6 +28,21 @@ export type TBudget = {
   outcomeLock: boolean
   isOutcomeForecast: boolean
 }
+
+export const budgetWritableFields = [
+  'tag',
+  'date',
+  'income',
+  'incomeLock',
+  'isIncomeForecast',
+  'outcome',
+  'outcomeLock',
+  'isOutcomeForecast',
+] as const satisfies readonly (keyof TBudget)[]
+
+export type TBudgetWritableField = (typeof budgetWritableFields)[number]
+
+export type TBudgetPatch = EntityPatch<TBudget, TBudgetWritableField>
 
 export type TZmBudget = Omit<TBudget, 'id' | 'changed'> & {
   /** ZenMoney wire timestamp in seconds. */

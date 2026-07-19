@@ -21,10 +21,10 @@ export function makeTagBudget(
     tag: draft.tag || null,
     changed: draft.changed || ctx.now(),
     income: draft.income || 0,
-    incomeLock: draft.incomeLock || true,
+    incomeLock: draft.incomeLock ?? true,
     isIncomeForecast: draft.isIncomeForecast ?? false,
     outcome: draft.outcome || 0,
-    outcomeLock: draft.outcomeLock || true,
+    outcomeLock: draft.outcomeLock ?? true,
     isOutcomeForecast: draft.isOutcomeForecast ?? false,
   }
 }

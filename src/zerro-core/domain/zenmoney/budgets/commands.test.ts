@@ -109,6 +109,21 @@ describe('zenmoney budget commands', () => {
     )
   })
 
+  it('preserves explicit writable false values in the budget factory', () => {
+    expect(
+      makeTagBudget(
+        {
+          user: 1,
+          date: '2026-01',
+          tag: 'food',
+          incomeLock: false,
+          outcomeLock: false,
+        },
+        { now: () => 100 }
+      )
+    ).toMatchObject({ incomeLock: false, outcomeLock: false })
+  })
+
   it('builds budget ids from normalized date and tag', () => {
     expect(toBudgetId('2026-02', 'food')).toBe('2026-02-01#food')
     expect(toBudgetId('2026-02-10', null)).toBe('2026-02-10#null')

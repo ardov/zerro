@@ -1,6 +1,6 @@
 # Zerro Core design ledger
 
-- Updated: 2026-07-19
+- Updated: 2026-07-20
 - Purpose: settled decisions, accepted risks, active bridges, and unresolved
   architectural questions. History stays in Git.
 
@@ -51,6 +51,9 @@
 - Entity patch types live beside entity types and use
   `EntityPatch<TEntity, TWritableFields>`. `id` is required and every field that
   may appear in sparse intent is explicitly listed.
+- Writable field lists document the domain capability, not only fields used by
+  current production callers. Every non-managed field that may be changed must
+  be accepted, persisted, and materialized even before a UI exposes it.
 - Entity patches use upsert semantics: an existing id is patched and a missing
   id is created. Commands capture generated ids and every other nondeterministic
   input before persistence.

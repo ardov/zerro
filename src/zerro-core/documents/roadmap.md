@@ -111,12 +111,13 @@ the work as bounded verified slices:
    `TIntentPatch`;
 3. **Done:** issue captures time, generated ids, absolute values, and
    caller-only receipts before append;
-4. **In progress:** existing account, reminder, merchant, and tag results
-   compile to changed writable fields and deletions persist only identity;
-   convert the remaining transitional entity families;
-5. **In progress:** account, reminder, merchant, and tag use deterministic
-   factory-backed upsert and reject incomplete creation intent before
-   persistence; add the remaining entity families;
+4. **In progress:** existing account, reminder, merchant, tag, and budget
+   results compile to changed writable fields; hidden data composes those
+   intents and deletions persist only identity. Reduce the remaining full-result
+   transaction compilers;
+5. **In progress:** account, reminder, merchant, tag, and budget use
+   deterministic factory-backed upsert and reject incomplete creation intent
+   before persistence. Make transaction creation intent explicit;
 6. replay the applied prefix into `current`, keeping `applyPatch` dumb.
 
 Exit: all production writes persist the same command type; reload and undo/redo

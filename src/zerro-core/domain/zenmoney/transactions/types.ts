@@ -90,9 +90,17 @@ export type TTransactionEditablePatch = Partial<
   Pick<TTransaction, TTransactionEditableField>
 >
 
+/** Fields that may be persisted as transaction intent, including lifecycle. */
+export const transactionIntentFields = [
+  'deleted',
+  ...transactionEditableFields,
+] as const satisfies readonly (keyof TTransaction)[]
+
+export type TTransactionIntentField = (typeof transactionIntentFields)[number]
+
 export type TTransactionPatch = EntityPatch<
   TTransaction,
-  TTransactionEditableField
+  TTransactionIntentField
 >
 
 /** Fields accepted while creating a replacement transaction. */

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   makeAccount,
+  makeBudget,
   makeMerchant,
   makeReminder,
   makeStore,
@@ -10,6 +11,11 @@ import {
   makeUser,
 } from '../../testing/zenmoneyTestData'
 import { DataEntity } from '../../domain/patch'
+import { compileDeleteTransactions } from '../../domain/zenmoney/transactions'
+import {
+  compileSetSimpleHiddenData,
+  HiddenDataType,
+} from '../../domain/zerro/hidden-data'
 import {
   isCommandRebaseSafe,
   issuePatch,
@@ -90,6 +96,22 @@ describe('materializeCommand', () => {
         command
       ).transaction?.[0]
     ).toMatchObject({ created: 100, comment: 'After' })
+  })
+
+  it('preserves transaction lifecycle intent while filtering system fields', () => {
+    const current = makeTransaction({ id: 'tr-1', deleted: false })
+    const snapshot = makeStore({ transaction: { 'tr-1': current } })
+    const command = issuePatch(
+      snapshot,
+      compileDeleteTransactions(snapshot, current.id, { now: () => 100 }),
+      100
+    )
+
+    expect(materializeCommand(snapshot, command).transaction?.[0]).toEqual({
+      ...current,
+      deleted: true,
+      changed: 1001,
+    })
   })
 
   it('recreates a transaction as two intents in the same command', () => {
@@ -194,6 +216,57 @@ describe('materializeCommand', () => {
     expect(materializeCommand(snapshot, command)).toEqual({
       merchant: [{ ...merchant, title: 'Market', changed: 1000 }],
       tag: [{ ...tag, title: 'Groceries', color: 0x00ff00, changed: 1000 }],
+    })
+  })
+
+  it('compiles an existing budget result to sparse intent', () => {
+    const budget = makeBudget({
+      id: '2026-01-01#food',
+      date: '2026-01-01',
+      tag: 'food',
+      outcome: 100,
+    })
+    const snapshot = makeStore({ budget: { [budget.id]: budget } })
+    const command = issuePatch(
+      snapshot,
+      {
+        budget: [
+          {
+            ...budget,
+            income: 50,
+            incomeLock: false,
+            isIncomeForecast: true,
+            outcome: 200,
+            outcomeLock: false,
+            isOutcomeForecast: true,
+          },
+        ],
+      },
+      100
+    )
+
+    expect(command.patch).toEqual({
+      budget: [
+        {
+          id: budget.id,
+          income: 50,
+          incomeLock: false,
+          isIncomeForecast: true,
+          outcome: 200,
+          outcomeLock: false,
+          isOutcomeForecast: true,
+        },
+      ],
+    })
+    expect(materializeCommand(snapshot, command).budget?.[0]).toEqual({
+      ...budget,
+      income: 50,
+      incomeLock: false,
+      isIncomeForecast: true,
+      outcome: 200,
+      outcomeLock: false,
+      isOutcomeForecast: true,
+      changed: 1001,
     })
   })
 
@@ -326,6 +399,82 @@ describe('materializeCommand', () => {
     expect(materializeCommand(snapshot, command).tag?.[0]).toEqual(tag)
   })
 
+  it('stores minimal budget creation intent and materializes through factory', () => {
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+    })
+    const budget = makeBudget({
+      id: '2026-01-01#null',
+      changed: 100,
+      user: 1,
+      date: '2026-01-01',
+      tag: null,
+      income: 50,
+      incomeLock: false,
+      isIncomeForecast: true,
+      outcome: 200,
+      outcomeLock: false,
+      isOutcomeForecast: true,
+    })
+    const command = issuePatch(snapshot, { budget: [budget] }, 100)
+
+    expect(command.patch).toEqual({
+      budget: [
+        {
+          id: '2026-01-01#null',
+          tag: null,
+          date: '2026-01-01',
+          income: 50,
+          incomeLock: false,
+          isIncomeForecast: true,
+          outcome: 200,
+          outcomeLock: false,
+          isOutcomeForecast: true,
+        },
+      ],
+    })
+    expect(materializeCommand(snapshot, command).budget?.[0]).toEqual(budget)
+  })
+
+  it('stores hidden data through account and reminder intent', () => {
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+    })
+    const ids = ['data-account', 'settings-reminder']
+    const patch = compileSetSimpleHiddenData(
+      snapshot,
+      HiddenDataType.UserSettings,
+      { emojiIcons: true },
+      { now: () => 100, uuid: () => ids.shift() || 'unused' }
+    )
+    const command = issuePatch(snapshot, patch, 100)
+
+    expect(command.patch).toEqual({
+      account: [
+        {
+          id: 'data-account',
+          instrument: 2,
+          title: '🤖 [Zerro Data]',
+        },
+      ],
+      reminder: [
+        {
+          id: 'settings-reminder',
+          incomeAccount: 'data-account',
+          outcomeAccount: 'data-account',
+          income: 1,
+          startDate: '2020-01-01',
+          endDate: '2020-01-01',
+          comment: JSON.stringify({
+            type: HiddenDataType.UserSettings,
+            payload: { emojiIcons: true },
+          }),
+        },
+      ],
+    })
+    expect(materializeCommand(snapshot, command)).toEqual(patch)
+  })
+
   it('rejects incomplete creation intent before persistence', () => {
     const snapshot = makeStore({
       user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
@@ -351,6 +500,28 @@ describe('materializeCommand', () => {
     expect(() =>
       issuePatch(snapshot, { tag: [{ id: 'new-tag' }] }, 100)
     ).toThrow('Cannot create tag: missing title')
+    expect(() =>
+      issuePatch(
+        snapshot,
+        { budget: [{ id: '2026-01-01#food', tag: 'food' }] },
+        100
+      )
+    ).toThrow('Cannot create budget: missing date')
+    expect(() =>
+      issuePatch(
+        snapshot,
+        {
+          budget: [
+            {
+              id: '2026-02-01#food',
+              tag: 'food',
+              date: '2026-01-01',
+            },
+          ],
+        },
+        100
+      )
+    ).toThrow('Cannot create budget: id does not match date and tag')
   })
 
   it('marks supported sparse updates and creations as rebase-safe', () => {
@@ -390,6 +561,23 @@ describe('materializeCommand', () => {
         issuePatch(
           creationSnapshot,
           { tag: [makeTag({ id: 'food', title: 'Food' })] },
+          100
+        )
+      )
+    ).toBe(true)
+    expect(
+      isCommandRebaseSafe(
+        issuePatch(
+          creationSnapshot,
+          {
+            budget: [
+              makeBudget({
+                id: '2026-01-01#food',
+                date: '2026-01-01',
+                tag: 'food',
+              }),
+            ],
+          },
           100
         )
       )

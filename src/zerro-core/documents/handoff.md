@@ -32,8 +32,14 @@ This file routes the next task. Git contains implementation history.
   satisfaction checks are removed. Commands appended in flight remain pending.
 - Issue reduces existing account, reminder, merchant, and tag results to changed
   writable fields and creation results to required fields plus non-default
-  values. Incomplete creation intent fails before append. Deletion commands
-  persist only `{ id, object }`; materialization supplies `stamp` and `user`.
+  values. Budget now follows the same rule and validates its derived `date#tag`
+  id. Incomplete creation intent fails before append. Deletion commands persist
+  only `{ id, object }`; materialization supplies `stamp` and `user`.
+- Hidden-data commands need no dedicated intent type: their account, reminder,
+  and deletion output is reduced by the existing entity paths.
+- Transaction lifecycle intent includes `deleted`; UI-editable transaction
+  fields remain a narrower input type. Some domain transaction compilers still
+  emit complete results and are the last sparse-intent cleanup.
 - Writable patch contracts now live beside their entity contracts. Account,
   tag, merchant, reminder, transaction, envelope-meta, and user-settings
   command modules consume those colocated types. Account intent explicitly
@@ -44,7 +50,8 @@ This file routes the next task. Git contains implementation history.
 
 Land this as small independent commits where practical:
 
-1. convert budget and remaining hidden-data results to sparse intent;
+1. reduce remaining full-result transaction compilers to sparse lifecycle/edit
+   intent and make creation requirements explicit;
 2. split primary-only transport from local materialized effects;
 3. run reload, undo/redo, repeated-field, in-flight append, and explicit-sync
    smoke.

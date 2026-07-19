@@ -5,7 +5,7 @@ import type {
   TDiff,
 } from '../../domain/zenmoney/store'
 import {
-  transactionEditableFields,
+  transactionIntentFields,
   type TTransactionPatch,
 } from '../../domain/zenmoney/transactions'
 import {
@@ -13,6 +13,11 @@ import {
   makeAccount,
   type TAccountPatch,
 } from '../../domain/zenmoney/accounts'
+import {
+  budgetWritableFields,
+  makeTagBudget,
+  type TBudgetPatch,
+} from '../../domain/zenmoney/budgets'
 import {
   makeMerchant,
   merchantWritableFields,
@@ -37,6 +42,7 @@ export type TIntentPatch = Omit<
   | 'account'
   | 'merchant'
   | 'tag'
+  | 'budget'
   | 'reminder'
   | 'transaction'
 > & {
@@ -44,6 +50,7 @@ export type TIntentPatch = Omit<
   account?: TAccountPatch[]
   merchant?: TMerchantPatch[]
   tag?: TTagPatch[]
+  budget?: TBudgetPatch[]
   reminder?: TReminderPatch[]
   transaction?: TTransactionPatch[]
 }
@@ -102,9 +109,13 @@ export function isCommandRebaseSafe(command: TCommand): boolean {
         return command.patch.tag!.every(tag =>
           hasOnlyFields(tag, tagWritableFields)
         )
+      case 'budget':
+        return command.patch.budget!.every(budget =>
+          hasOnlyFields(budget, budgetWritableFields)
+        )
       case 'transaction':
         return command.patch.transaction!.every(transaction =>
-          hasOnlyFields(transaction, transactionEditableFields)
+          hasOnlyFields(transaction, transactionIntentFields)
         )
       case 'deletion':
         return command.patch.deletion!.every(deletion =>
@@ -204,6 +215,15 @@ function materializeIntentPatch(
           ) as unknown as Record<string, unknown>,
         ]
       }
+      if (key === 'budget') {
+        return [
+          materializeBudgetCreation(
+            snapshot,
+            intent,
+            changedAt
+          ) as unknown as Record<string, unknown>,
+        ]
+      }
 
       // Other entity families remain transitional until they gain a factory-
       // backed creation rule. Their sparse missing targets are terminal no-ops.
@@ -285,6 +305,17 @@ function compileIntentPatch(
     ) as TTagPatch[]
     if (tag.length) result.tag = tag
     else delete result.tag
+  }
+
+  if (intentPatch.budget) {
+    const budget = compileEntityIntents(
+      snapshot.budget,
+      intentPatch.budget,
+      budgetWritableFields,
+      intent => compactBudgetCreation(snapshot, intent, issuedAt)
+    ) as TBudgetPatch[]
+    if (budget.length) result.budget = budget
+    else delete result.budget
   }
 
   if (intentPatch.deletion) {
@@ -389,6 +420,21 @@ function compactTagCreation(
   return omitFactoryDefaults(intent, baseline, required)
 }
 
+function compactBudgetCreation(
+  snapshot: TDataStore,
+  intent: { id: string | number } & Record<string, unknown>,
+  issuedAt: TMsTime
+) {
+  const required = ['tag', 'date'] as const
+  requireFields('budget', intent, required)
+  const baseline = materializeBudgetCreation(
+    snapshot,
+    pickFields(intent, required),
+    issuedAt
+  ) as unknown as Record<string, unknown>
+  return omitFactoryDefaults(intent, baseline, required)
+}
+
 function pickFields(
   intent: { id: string | number } & Record<string, unknown>,
   fields: readonly string[]
@@ -466,6 +512,22 @@ function materializeTagCreation(
   )
 }
 
+function materializeBudgetCreation(
+  snapshot: TDataStore,
+  intent: { id: string | number } & Record<string, unknown>,
+  changedAt: TMsTime
+) {
+  const user = requireRootUser(snapshot, 'budget')
+  const budget = makeTagBudget(
+    { ...intent, user } as Parameters<typeof makeTagBudget>[0],
+    deterministicContext(changedAt)
+  )
+  if (budget.id !== intent.id) {
+    throw new Error('Cannot create budget: id does not match date and tag')
+  }
+  return budget
+}
+
 function requireFields(
   entity: string,
   intent: Record<string, unknown>,
@@ -503,7 +565,7 @@ function hasOnlyFields(
 function pickTransactionPatch(
   fields: Record<string, unknown>
 ): Record<string, unknown> {
-  const allowed = new Set<string>(transactionEditableFields)
+  const allowed = new Set<string>(transactionIntentFields)
   return Object.fromEntries(
     Object.entries(fields).filter(([key]) => key === 'id' || allowed.has(key))
   )
