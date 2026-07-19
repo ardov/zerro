@@ -43,6 +43,8 @@ export type TDeletionObject = TZmDeletionObject & {
   stamp: TMsTime
 }
 
+export type TDeletionIntent = Pick<TDeletionObject, 'id' | 'object'>
+
 /** Normalized patch: the replay/apply unit stored in the outbox. */
 export type TDiff = {
   serverTimestamp?: TMsTime

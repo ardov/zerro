@@ -73,6 +73,31 @@ describe('reminder semantic writes', () => {
     )
   })
 
+  it('stores only changed fields when patching an existing reminder', () => {
+    vi.spyOn(Date, 'now').mockReturnValue(NOW)
+    const state = makeState(true)
+    const dispatch = makeDispatch(state)
+
+    const reminders = dispatch(
+      setReminder({ id: 'existing', comment: 'Updated' })
+    )
+
+    expect(reminders[0]).toMatchObject({
+      id: 'existing',
+      comment: 'Updated',
+    })
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: appendClientCommand.type,
+        payload: expect.objectContaining({
+          patch: {
+            reminder: [{ id: 'existing', comment: 'Updated' }],
+          },
+        }),
+      })
+    )
+  })
+
   it('appends semantic deletion only when the reminder exists', () => {
     vi.spyOn(Date, 'now').mockReturnValue(NOW)
     const state = makeState(true)
@@ -89,8 +114,7 @@ describe('reminder semantic writes', () => {
             deletion: [
               expect.objectContaining({
                 id: 'existing',
-                stamp: NOW,
-                user: 1,
+                object: 'reminder',
               }),
             ],
           },

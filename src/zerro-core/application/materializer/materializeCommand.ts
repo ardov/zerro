@@ -1,23 +1,36 @@
 import type { TMsTime } from '../../domain/zenmoney/primitives'
-import type { TDataStore, TDiff } from '../../domain/zenmoney/store'
+import type {
+  TDataStore,
+  TDeletionIntent,
+  TDiff,
+} from '../../domain/zenmoney/store'
 import {
   transactionEditableFields,
   type TTransactionPatch,
 } from '../../domain/zenmoney/transactions'
-import type { TAccountPatch } from '../../domain/zenmoney/accounts'
+import {
+  accountWritableFields,
+  type TAccountPatch,
+} from '../../domain/zenmoney/accounts'
 import type { TMerchantPatch } from '../../domain/zenmoney/merchants'
-import type { TReminderPatch } from '../../domain/zenmoney/reminders'
+import {
+  reminderWritableFields,
+  type TReminderPatch,
+} from '../../domain/zenmoney/reminders'
 import type { TTagPatch } from '../../domain/zenmoney/tags'
+import { getRootUserId } from '../../domain/zenmoney/users'
 
 export type TIntentPatch = Omit<
   TDiff,
   | 'serverTimestamp'
+  | 'deletion'
   | 'account'
   | 'merchant'
   | 'tag'
   | 'reminder'
   | 'transaction'
 > & {
+  deletion?: TDeletionIntent[]
   account?: TAccountPatch[]
   merchant?: TMerchantPatch[]
   tag?: TTagPatch[]
@@ -32,11 +45,11 @@ export type TCommand = {
 }
 
 export function issuePatch(
+  snapshot: TDataStore,
   patch: TDiff | TIntentPatch,
   issuedAt: TMsTime
 ): TCommand {
-  const { serverTimestamp: _, ...intentPatch } = patch as TDiff
-  return { type: 'patch', issuedAt, patch: intentPatch }
+  return { type: 'patch', issuedAt, patch: compileIntentPatch(snapshot, patch) }
 }
 
 /** Materializes one command against the latest local snapshot. */
@@ -49,18 +62,36 @@ export function materializeCommand(
 }
 
 /**
- * Transitional safety check for automatic sync. Sparse transaction edits can
- * rebase without overwriting unrelated fields; resolved full entity intents
- * wait for explicit sync until their compilers become sparse.
+ * Transitional safety check for automatic sync. Sparse entity edits and
+ * deletion identity can rebase without overwriting unrelated fields; complete
+ * creation intents wait for explicit sync until primary-only transport lands.
  */
 export function isCommandRebaseSafe(command: TCommand): boolean {
   const keys = Object.keys(command.patch)
-  if (keys.length !== 1 || keys[0] !== 'transaction') return false
+  if (!keys.length) return false
 
-  const allowed = new Set<string>(['id', ...transactionEditableFields])
-  return !!command.patch.transaction?.every(transaction =>
-    Object.keys(transaction).every(key => allowed.has(key))
-  )
+  return keys.every(key => {
+    switch (key) {
+      case 'account':
+        return command.patch.account!.every(account =>
+          hasOnlyFields(account, accountWritableFields)
+        )
+      case 'reminder':
+        return command.patch.reminder!.every(reminder =>
+          hasOnlyFields(reminder, reminderWritableFields)
+        )
+      case 'transaction':
+        return command.patch.transaction!.every(transaction =>
+          hasOnlyFields(transaction, transactionEditableFields)
+        )
+      case 'deletion':
+        return command.patch.deletion!.every(deletion =>
+          hasOnlyFields(deletion, ['object'])
+        )
+      default:
+        return false
+    }
+  })
 }
 
 function materializeIntentPatch(
@@ -130,9 +161,12 @@ function materializeIntentPatch(
 
   if (patch.deletion) {
     if (patch.deletion.length) {
+      const user = getRootUserId(snapshot)
+      if (!user) throw new Error('Cannot materialize deletion without user')
       result.deletion = patch.deletion.map(entity => ({
         ...entity,
-        stamp: Math.max(changedAt, entity.stamp),
+        stamp: changedAt,
+        user,
       }))
     } else {
       delete result.deletion
@@ -140,6 +174,78 @@ function materializeIntentPatch(
   }
 
   return result
+}
+
+function compileIntentPatch(
+  snapshot: TDataStore,
+  patch: TDiff | TIntentPatch
+): TIntentPatch {
+  const { serverTimestamp: _, ...intentPatch } = patch as TDiff
+  const result = { ...intentPatch } as TIntentPatch
+
+  if (intentPatch.account) {
+    const account = compileExistingEntityIntents(
+      snapshot.account,
+      intentPatch.account,
+      accountWritableFields
+    ) as TAccountPatch[]
+    if (account.length) result.account = account
+    else delete result.account
+  }
+
+  if (intentPatch.reminder) {
+    const reminder = compileExistingEntityIntents(
+      snapshot.reminder,
+      intentPatch.reminder,
+      reminderWritableFields
+    ) as TReminderPatch[]
+    if (reminder.length) result.reminder = reminder
+    else delete result.reminder
+  }
+
+  if (intentPatch.deletion) {
+    result.deletion = intentPatch.deletion.map(({ id, object }) => ({
+      id,
+      object,
+    }))
+  }
+
+  return result
+}
+
+function compileExistingEntityIntents(
+  currentById: Record<
+    string | number,
+    ({ id: string | number } & Record<string, unknown>) | undefined
+  >,
+  entities: readonly ({ id: string | number } & Record<string, unknown>)[],
+  writableFields: readonly string[]
+): Array<{ id: string | number } & Record<string, unknown>> {
+  return entities.flatMap(entity => {
+    const current = currentById[entity.id]
+    if (!current) return [entity]
+
+    const intent: { id: string | number } & Record<string, unknown> = {
+      id: entity.id,
+    }
+    writableFields.forEach(field => {
+      if (
+        field in entity &&
+        !valuesEqual(field, current[field], entity[field])
+      ) {
+        intent[field] = entity[field]
+      }
+    })
+    return Object.keys(intent).length > 1 ? [intent] : []
+  })
+}
+
+function hasOnlyFields(
+  value: { id: string | number },
+  allowedFields: readonly string[]
+): boolean {
+  const allowed = new Set<string>(['id', ...allowedFields])
+  return Object.keys(value).every(key => allowed.has(key))
 }
 
 function pickTransactionPatch(

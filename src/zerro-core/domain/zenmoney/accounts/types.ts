@@ -65,7 +65,14 @@ export type TAccount = {
   payoffInterval: 'month' | 'year' | null
 }
 
-export type TAccountPatch = EntityPatch<TAccount, 'title' | 'inBalance'>
+export const accountWritableFields = [
+  'title',
+  'inBalance',
+] as const satisfies readonly (keyof TAccount)[]
+
+export type TAccountWritableField = (typeof accountWritableFields)[number]
+
+export type TAccountPatch = EntityPatch<TAccount, TAccountWritableField>
 
 export type TZmAccount = Omit<TAccount, 'changed'> & {
   /** ZenMoney wire timestamp in seconds. */

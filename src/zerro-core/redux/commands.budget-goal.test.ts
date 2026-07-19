@@ -109,7 +109,13 @@ describe('budget and goal Redux commands', () => {
         type: appendClientCommand.type,
         payload: expect.objectContaining({
           type: 'patch',
-          patch: expected,
+          patch: {
+            ...expected,
+            deletion: expected.deletion?.map(({ id, object }) => ({
+              id,
+              object,
+            })),
+          },
         }),
       })
     )

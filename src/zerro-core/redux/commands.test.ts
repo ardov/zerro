@@ -16,7 +16,11 @@ import {
   compilePatchAccount,
   compileRestoreTransaction,
 } from '../domain/zenmoney'
-import { makeStore, makeTransaction } from '../testing/zenmoneyTestData'
+import {
+  makeAccount,
+  makeStore,
+  makeTransaction,
+} from '../testing/zenmoneyTestData'
 import {
   compileRenameEnvelope,
   compileSetEnvelopeColor,
@@ -33,6 +37,7 @@ import {
   bulkEditTransactions,
   compileAppCommand,
   recreateTransaction,
+  setAccountInBalance,
   setTransactionsViewed,
   type TAppCommand,
 } from './commands'
@@ -271,6 +276,25 @@ describe('command funnel routing', () => {
 // The remaining tests cover funnel-only behavior: payload adaptation and
 // receipts that the domain compilers never see.
 describe('command funnel adaptation', () => {
+  it('stores an account update as sparse writable intent', () => {
+    const now = vi.spyOn(Date, 'now').mockReturnValue(NOW)
+    const account = makeAccount({ id: 'cash', inBalance: false })
+    const state = makeState(makeStore({ account: { cash: account } }))
+    const dispatch = makeDispatch(state)
+
+    dispatch(setAccountInBalance('cash', true))
+
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: appendClientCommand.type,
+        payload: expect.objectContaining({
+          patch: { account: [{ id: 'cash', inBalance: true }] },
+        }),
+      })
+    )
+    now.mockRestore()
+  })
+
   it('stores transaction field edits as one sparse durable command', () => {
     const now = vi.spyOn(Date, 'now').mockReturnValue(NOW)
     const first = makeTransaction({ id: 'first', viewed: false })

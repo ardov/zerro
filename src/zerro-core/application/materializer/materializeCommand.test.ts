@@ -2,9 +2,12 @@ import { describe, expect, it } from 'vitest'
 
 import {
   makeAccount,
+  makeReminder,
   makeStore,
   makeTransaction,
+  makeUser,
 } from '../../testing/zenmoneyTestData'
+import { DataEntity } from '../../domain/patch'
 import {
   isCommandRebaseSafe,
   issuePatch,
@@ -20,17 +23,14 @@ describe('materializeCommand', () => {
       income: 11,
       viewed: true,
     })
+    const snapshot = makeStore({ transaction: { 'tr-1': current } })
     const command = issuePatch(
+      snapshot,
       { transaction: [{ id: 'tr-1', viewed: false }] },
       100
     )
 
-    expect(
-      materializeCommand(
-        makeStore({ transaction: { 'tr-1': current } }),
-        command
-      )
-    ).toEqual({
+    expect(materializeCommand(snapshot, command)).toEqual({
       transaction: [{ ...current, viewed: false, changed: 1200 }],
     })
   })
@@ -39,7 +39,9 @@ describe('materializeCommand', () => {
     const first = makeTransaction({ id: 'first', viewed: false })
     const second = makeTransaction({ id: 'second', viewed: true })
     const deleted = makeTransaction({ id: 'deleted', deleted: true })
+    const snapshot = makeStore({ transaction: { first, second, deleted } })
     const command = issuePatch(
+      snapshot,
       {
         transaction: ['first', 'second', 'deleted', 'missing'].map(id => ({
           id,
@@ -50,15 +52,15 @@ describe('materializeCommand', () => {
     )
 
     expect(
-      materializeCommand(
-        makeStore({ transaction: { first, second, deleted } }),
-        command
-      ).transaction?.map(transaction => transaction.id)
+      materializeCommand(snapshot, command).transaction?.map(
+        transaction => transaction.id
+      )
     ).toEqual(['first'])
   })
 
   it('materializes a missing sparse target as an empty patch', () => {
     const command = issuePatch(
+      makeStore(),
       { transaction: [{ id: 'missing', viewed: true }] },
       100
     )
@@ -103,7 +105,9 @@ describe('materializeCommand', () => {
       created: 500,
       comment: 'After',
     }
+    const snapshot = makeStore({ transaction: { source } })
     const command = issuePatch(
+      snapshot,
       {
         transaction: [
           { id: source.id, income: 0.00001, outcome: 0.00001 },
@@ -113,10 +117,7 @@ describe('materializeCommand', () => {
       300
     )
 
-    const initial = materializeCommand(
-      makeStore({ transaction: { source } }),
-      command
-    )
+    const initial = materializeCommand(snapshot, command)
     expect(initial.transaction).toEqual([
       { ...source, income: 0.00001, outcome: 0.00001, changed: 1200 },
       { ...replacement, changed: 300 },
@@ -131,28 +132,101 @@ describe('materializeCommand', () => {
     expect(retry.transaction).toEqual([{ ...replacement, changed: 400 }])
   })
 
-  it('replays a complete transitional patch with a fresh version', () => {
+  it('compiles an existing account result to sparse intent', () => {
     const account = makeAccount({ id: 'cash', changed: 500, title: 'Cash' })
+    const snapshot = makeStore({ account: { cash: account } })
     const command = issuePatch(
+      snapshot,
       { account: [{ ...account, title: 'Wallet' }] },
       100
     )
 
-    expect(
-      materializeCommand(makeStore({ account: { cash: account } }), command)
-        .account?.[0]
-    ).toMatchObject({ title: 'Wallet', changed: 1500 })
+    expect(command.patch).toEqual({
+      account: [{ id: 'cash', title: 'Wallet' }],
+    })
+    expect(materializeCommand(snapshot, command).account?.[0]).toMatchObject({
+      title: 'Wallet',
+      changed: 1500,
+    })
   })
 
-  it('only marks sparse transaction patches as safe for automatic rebase', () => {
+  it('compiles an existing reminder result to sparse intent', () => {
+    const reminder = makeReminder('rent', { comment: 'Before', notify: false })
+    const snapshot = makeStore({ reminder: { rent: reminder } })
+    const command = issuePatch(
+      snapshot,
+      { reminder: [{ ...reminder, comment: 'After', notify: true }] },
+      100
+    )
+
+    expect(command.patch).toEqual({
+      reminder: [{ id: 'rent', comment: 'After', notify: true }],
+    })
+    expect(materializeCommand(snapshot, command).reminder?.[0]).toMatchObject({
+      id: 'rent',
+      comment: 'After',
+      notify: true,
+    })
+  })
+
+  it('stores deletion identity and materializes protocol metadata', () => {
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+    })
+    const command = issuePatch(
+      snapshot,
+      {
+        deletion: [
+          {
+            id: 'rent',
+            object: DataEntity.Reminder,
+            stamp: 50,
+            user: 1,
+          },
+        ],
+      },
+      100
+    )
+
+    expect(command.patch).toEqual({
+      deletion: [{ id: 'rent', object: DataEntity.Reminder }],
+    })
+    expect(materializeCommand(snapshot, command)).toEqual({
+      deletion: [
+        {
+          id: 'rent',
+          object: DataEntity.Reminder,
+          stamp: 100,
+          user: 1,
+        },
+      ],
+    })
+  })
+
+  it('marks sparse intent as safe and complete creation as blocking', () => {
     expect(
       isCommandRebaseSafe(
-        issuePatch({ transaction: [{ id: 'tr-1', viewed: true }] }, 100)
+        issuePatch(
+          makeStore(),
+          { transaction: [{ id: 'tr-1', viewed: true }] },
+          100
+        )
+      )
+    ).toBe(true)
+    const account = makeAccount({ id: 'cash', title: 'Cash' })
+    expect(
+      isCommandRebaseSafe(
+        issuePatch(
+          makeStore({ account: { cash: account } }),
+          { account: [{ ...account, title: 'Wallet' }] },
+          100
+        )
       )
     ).toBe(true)
     expect(
       isCommandRebaseSafe(
         issuePatch(
+          makeStore(),
           { account: [makeAccount({ id: 'cash', title: 'Wallet' })] },
           100
         )

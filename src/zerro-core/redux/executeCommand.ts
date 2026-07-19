@@ -50,7 +50,7 @@ function appendIntentPatch(
   state: RootState,
   patch: TNormalizedPatch | TIntentPatch
 ): void {
-  const command = issuePatch(patch, defaultCtx.now())
+  const command = issuePatch(state.data.current, patch, defaultCtx.now())
   const materialized = materializeCommand(state.data.current, command)
   if (isEmptyPatch(materialized)) return
 

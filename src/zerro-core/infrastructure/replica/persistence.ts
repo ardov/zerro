@@ -1,4 +1,5 @@
 import type { TCommand } from '../../application/materializer'
+import { DataEntity } from '../../domain/patch'
 
 export const replicaPersistenceVersion = 2 as const
 
@@ -83,6 +84,19 @@ function validatePatch(value: unknown, path: string): void {
         entity =>
           !isRecord(entity) ||
           (typeof entity.id !== 'string' && typeof entity.id !== 'number')
+      )
+    ) {
+      throw new Error(
+        `Invalid persisted Core replica: ${path}.${key} is invalid`
+      )
+    }
+
+    if (
+      key === 'deletion' &&
+      patchValue.some(
+        entity =>
+          !isRecord(entity) ||
+          !Object.values(DataEntity).includes(entity.object as DataEntity)
       )
     ) {
       throw new Error(

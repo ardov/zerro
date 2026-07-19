@@ -29,6 +29,10 @@ This file routes the next task. Git contains implementation history.
   Transitional full-entity intents and cross-entity effects remain deferred.
 - Successful sync removes exactly the captured sent prefix; per-command
   satisfaction checks are removed. Commands appended in flight remain pending.
+- Issue reduces existing account and reminder compiler results to changed
+  writable fields. Creation remains a complete transitional entity until
+  factory-backed upsert lands. Deletion commands persist only `{ id, object }`;
+  materialization supplies `stamp` and `user`.
 - Writable patch contracts now live beside their entity contracts. Account,
   tag, merchant, reminder, transaction, envelope-meta, and user-settings
   command modules consume those colocated types without widening their current
@@ -38,13 +42,17 @@ This file routes the next task. Git contains implementation history.
 
 Land this as small independent commits where practical:
 
-1. convert remaining full-entity Redux compilers to sparse intent and deletion
-   refs;
-2. implement deterministic factory-backed upsert replay and reject incomplete
-   creation intent before append;
+1. implement deterministic factory-backed account/reminder upsert replay and
+   reject incomplete creation intent before append;
+2. convert the remaining merchant, tag, budget, and hidden-data compiler results
+   to sparse intent;
 3. split primary-only transport from local materialized effects;
 4. run reload, undo/redo, repeated-field, in-flight append, and explicit-sync
    smoke.
+
+Until the first command-schema rollout, persisted outbox compatibility is not a
+product requirement and incompatible local metadata may be discarded. After
+that rollout, persisted commands become a durable compatibility contract.
 
 See the ordered slices in [roadmap.md](./roadmap.md). Add balance and cascade
 rules only after primary-only transport is established.

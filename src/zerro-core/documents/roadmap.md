@@ -111,8 +111,9 @@ the work as bounded verified slices:
    `TIntentPatch`;
 3. **Done:** issue captures time, generated ids, absolute values, and
    caller-only receipts before append;
-4. convert transitional Redux compilers from complete entities to sparse entity
-   intent and deletion refs;
+4. **In progress:** existing account/reminder results compile to changed
+   writable fields and deletions persist only identity; convert the remaining
+   transitional entity families;
 5. implement deterministic upsert materialization: patch an existing id, create
    a missing id, and reject incomplete creation intent before persistence;
 6. replay the applied prefix into `current`, keeping `applyPatch` dumb.
@@ -134,6 +135,10 @@ reproduce the same `current` without ambient ids or time.
    base; on failure leave base and outbox unchanged;
 6. update persistence validation/versioning and discard incompatible local
    metadata rather than adding a migration framework.
+
+Compatibility boundary: until the first rollout of this command schema, local
+outbox metadata is disposable. After rollout, persisted commands require
+backward compatibility or an explicit migration/product decision.
 
 Exit: two sent commands may touch the same field, the last value wins, and the
 whole successful prefix is acknowledged without losing commands appended in

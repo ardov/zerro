@@ -82,7 +82,7 @@ export function createZerroEngine(input: TZerroEngineInput) {
     const current = getCurrent()
     const result = compile(current, sourceCommand, input.ctx)
     const patch = isCompiled(result) ? result.patch : result
-    const command = appendCommand(issuePatch(patch, input.ctx.now()))
+    const command = appendCommand(issuePatch(current, patch, input.ctx.now()))
 
     if (isCompiled(result)) {
       return { command, receipt: result.receipt }
@@ -94,7 +94,7 @@ export function createZerroEngine(input: TZerroEngineInput) {
     _sourceCommand: unknown,
     patch: TNormalizedPatch
   ): TCommand {
-    return appendCommand(issuePatch(patch, input.ctx.now()))
+    return appendCommand(issuePatch(getCurrent(), patch, input.ctx.now()))
   }
 
   function appendCommand(command: TCommand): TCommand {

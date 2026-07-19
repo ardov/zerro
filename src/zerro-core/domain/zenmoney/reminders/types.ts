@@ -35,25 +35,28 @@ export type TReminder = {
   notify: boolean
 }
 
-export type TReminderPatch = EntityPatch<
-  TReminder,
-  | 'incomeInstrument'
-  | 'incomeAccount'
-  | 'income'
-  | 'outcomeInstrument'
-  | 'outcomeAccount'
-  | 'outcome'
-  | 'tag'
-  | 'merchant'
-  | 'payee'
-  | 'comment'
-  | 'interval'
-  | 'step'
-  | 'points'
-  | 'startDate'
-  | 'endDate'
-  | 'notify'
->
+export const reminderWritableFields = [
+  'incomeInstrument',
+  'incomeAccount',
+  'income',
+  'outcomeInstrument',
+  'outcomeAccount',
+  'outcome',
+  'tag',
+  'merchant',
+  'payee',
+  'comment',
+  'interval',
+  'step',
+  'points',
+  'startDate',
+  'endDate',
+  'notify',
+] as const satisfies readonly (keyof TReminder)[]
+
+export type TReminderWritableField = (typeof reminderWritableFields)[number]
+
+export type TReminderPatch = EntityPatch<TReminder, TReminderWritableField>
 
 export type TZmReminder = Omit<TReminder, 'changed'> & {
   /** ZenMoney wire timestamp in seconds. */

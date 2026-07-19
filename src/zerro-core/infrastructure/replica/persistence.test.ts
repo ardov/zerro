@@ -60,6 +60,23 @@ describe('parsePersistedReplica', () => {
     expect(parsePersistedReplica(replica)).toBe(replica)
   })
 
+  it('accepts deletion identity without materialized protocol metadata', () => {
+    const replica = {
+      ...validReplica,
+      outbox: [
+        {
+          type: 'patch',
+          patch: {
+            deletion: [{ id: 'rent', object: 'reminder' }],
+          },
+          issuedAt: 10,
+        },
+      ],
+    }
+
+    expect(parsePersistedReplica(replica)).toBe(replica)
+  })
+
   it.each([
     [{ ...validReplica, version: 1 }, 'unsupported version'],
     [{ ...validReplica, outboxHead: 2 }, 'outbox head is out of range'],
@@ -88,6 +105,19 @@ describe('parsePersistedReplica', () => {
         ],
       },
       'outbox[0].patch.unknown is invalid',
+    ],
+    [
+      {
+        ...validReplica,
+        outbox: [
+          {
+            type: 'patch',
+            patch: { deletion: [{ id: 'rent', object: 'unknown' }] },
+            issuedAt: 10,
+          },
+        ],
+      },
+      'outbox[0].patch.deletion is invalid',
     ],
     [
       {

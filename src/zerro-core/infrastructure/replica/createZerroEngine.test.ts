@@ -7,7 +7,7 @@ import { createZerroEngine } from './createZerroEngine'
 function makeCommand(title: string, issuedAt: number): TCommand {
   return {
     type: 'patch',
-    patch: { account: [makeAccount({ id: 'cash', title })] },
+    patch: { account: [{ id: 'cash', title }] },
     issuedAt,
   }
 }
