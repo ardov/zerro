@@ -1,23 +1,19 @@
 import type { TDataStore } from '../../domain/zenmoney/store'
 import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../types'
-import {
-  makeResolvedPatchCommand,
-  type TDurableCommand,
-} from '../../application/materializer'
+import { issuePatch, type TCommand } from '../../application/materializer'
 import {
   appendOutbox,
   clampOutboxHead,
   getPendingOutbox as selectPendingOutbox,
   replayOutbox,
-  type TOutboxEntry,
 } from './outbox'
 
-export type { TOutboxEntry } from './outbox'
+export type { TCommand } from '../../application/materializer'
 
 export type TZerroEngineState = {
   base: TDataStore
   baseServerTimestamp?: number
-  outbox: TOutboxEntry[]
+  outbox: TCommand[]
   outboxHead: number
   inbox?: TNormalizedPatch | null
 }
@@ -25,7 +21,7 @@ export type TZerroEngineState = {
 export type TZerroEngineInput = {
   base: TDataStore
   baseServerTimestamp?: number
-  outbox?: TOutboxEntry[]
+  outbox?: TCommand[]
   outboxHead?: number
   inbox?: TNormalizedPatch | null
   ctx: TCoreContext
@@ -38,7 +34,7 @@ export type TCommandCompiler<TCommand, TReceipt = unknown> = (
 ) => TNormalizedPatch | TCompiled<TReceipt>
 
 export type TExecuteResult<TReceipt = unknown> = {
-  entry: TOutboxEntry
+  command: TCommand
   receipt?: TReceipt
 }
 
@@ -75,44 +71,39 @@ export function createZerroEngine(input: TZerroEngineInput) {
     return replayOutbox(state.base, state.outbox, state.outboxHead)
   }
 
-  function getPendingOutbox(): TOutboxEntry[] {
+  function getPendingOutbox(): TCommand[] {
     return selectPendingOutbox(state.outbox, state.outboxHead)
   }
 
-  function execute<TCommand, TReceipt = unknown>(
-    command: TCommand,
-    compile: TCommandCompiler<TCommand, TReceipt>
+  function execute<TSourceCommand, TReceipt = unknown>(
+    sourceCommand: TSourceCommand,
+    compile: TCommandCompiler<TSourceCommand, TReceipt>
   ): TExecuteResult<TReceipt> {
     const current = getCurrent()
-    const result = compile(current, command, input.ctx)
+    const result = compile(current, sourceCommand, input.ctx)
     const patch = isCompiled(result) ? result.patch : result
-    const entry = appendCommand(makeResolvedPatchCommand(patch))
+    const command = appendCommand(issuePatch(patch, input.ctx.now()))
 
     if (isCompiled(result)) {
-      return { entry, receipt: result.receipt }
+      return { command, receipt: result.receipt }
     }
-    return { entry }
+    return { command }
   }
 
   function executeCompiled(
     _sourceCommand: unknown,
     patch: TNormalizedPatch
-  ): TOutboxEntry {
-    return appendCommand(makeResolvedPatchCommand(patch))
+  ): TCommand {
+    return appendCommand(issuePatch(patch, input.ctx.now()))
   }
 
-  function appendCommand(command: TDurableCommand): TOutboxEntry {
-    const entry: TOutboxEntry = {
-      ...command,
-      createdAt: input.ctx.now(),
-    }
-
-    const next = appendOutbox(state.outbox, state.outboxHead, entry)
+  function appendCommand(command: TCommand): TCommand {
+    const next = appendOutbox(state.outbox, state.outboxHead, command)
     state = {
       ...state,
       ...next,
     }
-    return entry
+    return command
   }
 
   function undo(): boolean {

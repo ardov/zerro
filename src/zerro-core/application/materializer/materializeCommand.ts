@@ -1,202 +1,74 @@
-import type { TNormalizedPatch } from '../../types'
-import type { TDataStore } from '../../domain/zenmoney/store'
+import type { TMsTime } from '../../domain/zenmoney/primitives'
+import type { TDataStore, TDiff } from '../../domain/zenmoney/store'
 import {
-  isDeletedTransaction,
   transactionEditableFields,
-  transactionRecreateFields,
-  type TTransactionEditablePatch,
-  type TTransactionId,
-  type TTransactionRecreatePatch,
+  type TTransactionPatch,
 } from '../../domain/zenmoney/transactions'
+import type { TAccountPatch } from '../../domain/zenmoney/accounts'
+import type { TMerchantPatch } from '../../domain/zenmoney/merchants'
+import type { TReminderPatch } from '../../domain/zenmoney/reminders'
+import type { TTagPatch } from '../../domain/zenmoney/tags'
 
-export type TTransactionsPatchCommand = {
-  type: 'transactions.patch'
-  payload: {
-    ids: TTransactionId[]
-    set: TTransactionEditablePatch
-  }
+export type TIntentPatch = Omit<
+  TDiff,
+  | 'serverTimestamp'
+  | 'account'
+  | 'merchant'
+  | 'tag'
+  | 'reminder'
+  | 'transaction'
+> & {
+  account?: TAccountPatch[]
+  merchant?: TMerchantPatch[]
+  tag?: TTagPatch[]
+  reminder?: TReminderPatch[]
+  transaction?: TTransactionPatch[]
 }
 
-export type TTransactionRecreateCommand = {
-  type: 'transaction.recreate'
-  payload: {
-    sourceId: TTransactionId
-    replacementId: TTransactionId
-    set: TTransactionRecreatePatch
-  }
-}
-
-/**
- * Transitional command for behavior whose narrow durable form is not migrated
- * yet. The resolved patch is replayable, but does not provide field-level
- * rebase semantics.
- */
-export type TResolvedPatchCommand = {
+export type TCommand = {
   type: 'patch'
-  payload: TNormalizedPatch
+  issuedAt: TMsTime
+  patch: TIntentPatch
 }
 
-export type TDurableCommand =
-  | TTransactionsPatchCommand
-  | TTransactionRecreateCommand
-  | TResolvedPatchCommand
-
-export function makeResolvedPatchCommand(
-  patch: TNormalizedPatch
-): TResolvedPatchCommand {
-  return { type: 'patch', payload: patch }
+export function issuePatch(
+  patch: TDiff | TIntentPatch,
+  issuedAt: TMsTime
+): TCommand {
+  const { serverTimestamp: _, ...intentPatch } = patch as TDiff
+  return { type: 'patch', issuedAt, patch: intentPatch }
 }
 
-/** Materializes one durable command against the latest local snapshot. */
+/** Materializes one command against the latest local snapshot. */
 export function materializeCommand(
   snapshot: TDataStore,
-  command: TDurableCommand,
-  changedAt: number
-): TNormalizedPatch {
-  switch (command.type) {
-    case 'transactions.patch':
-      return materializeTransactionsPatch(snapshot, command, changedAt)
-    case 'transaction.recreate':
-      return materializeTransactionRecreate(snapshot, command, changedAt)
-    case 'patch':
-      return refreshPatchTimestamps(snapshot, command.payload, changedAt)
-  }
+  command: TCommand,
+  changedAt: TMsTime = command.issuedAt
+): TDiff {
+  return materializeIntentPatch(snapshot, command.patch, changedAt)
 }
 
 /**
- * Whether canonical data already represents the command. Resolved legacy
- * patches retain whole-batch acknowledgement until they gain narrow commands.
+ * Transitional safety check for automatic sync. Sparse transaction edits can
+ * rebase without overwriting unrelated fields; resolved full entity intents
+ * wait for explicit sync until their compilers become sparse.
  */
-export function isCommandSatisfied(
-  canonical: TDataStore,
-  command: TDurableCommand
-): boolean {
-  if (command.type === 'patch') return true
+export function isCommandRebaseSafe(command: TCommand): boolean {
+  const keys = Object.keys(command.patch)
+  if (keys.length !== 1 || keys[0] !== 'transaction') return false
 
-  if (command.type === 'transaction.recreate') {
-    const source = canonical.transaction[command.payload.sourceId]
-    if (!source || source.deleted) return true
-
-    const replacement = canonical.transaction[command.payload.replacementId]
-    return (
-      isDeletedTransaction(source) &&
-      !!replacement &&
-      !replacement.deleted &&
-      patchIsApplied(replacement, command.payload.set)
-    )
-  }
-
-  return command.payload.ids.every(id => {
-    const transaction = canonical.transaction[id]
-    if (!transaction || transaction.deleted) return true
-    return patchIsApplied(
-      transaction,
-      pickTransactionEditablePatch(command.payload.set)
-    )
-  })
-}
-
-function materializeTransactionRecreate(
-  snapshot: TDataStore,
-  command: TTransactionRecreateCommand,
-  changedAt: number
-): TNormalizedPatch {
-  const source = snapshot.transaction[command.payload.sourceId]
-  if (!source || source.deleted) return {}
-
-  const replacement = snapshot.transaction[command.payload.replacementId]
-  const transaction = []
-
-  if (!isDeletedTransaction(source)) {
-    transaction.push({
-      ...source,
-      income: 0.00001,
-      outcome: 0.00001,
-      changed: nextChanged(changedAt, source.changed),
-    })
-  }
-
-  if (!replacement || !patchIsApplied(replacement, command.payload.set)) {
-    transaction.push({
-      ...(replacement || source),
-      ...command.payload.set,
-      id: command.payload.replacementId,
-      deleted: false,
-      changed: replacement
-        ? nextChanged(changedAt, replacement.changed)
-        : changedAt,
-    })
-  }
-
-  return transaction.length ? { transaction } : {}
-}
-
-function materializeTransactionsPatch(
-  snapshot: TDataStore,
-  command: TTransactionsPatchCommand,
-  changedAt: number
-): TNormalizedPatch {
-  const set = pickTransactionEditablePatch(command.payload.set)
-  if (!Object.keys(set).length) return {}
-
-  const transaction = command.payload.ids.flatMap(id => {
-    const current = snapshot.transaction[id]
-    // Missing and server-deleted transactions are terminal no-ops on rebase.
-    if (!current || current.deleted) return []
-    if (patchIsApplied(current, set)) return []
-
-    return [
-      {
-        ...current,
-        ...set,
-        changed: nextChanged(changedAt, current.changed),
-      },
-    ]
-  })
-
-  return transaction.length ? { transaction } : {}
-}
-
-function pickTransactionEditablePatch(
-  patch: TTransactionEditablePatch
-): TTransactionEditablePatch {
-  return Object.fromEntries(
-    Object.entries(patch).filter(([key]) => isTransactionEditableField(key))
-  ) as TTransactionEditablePatch
-}
-
-function patchIsApplied(
-  current: Record<string, unknown>,
-  patch: TTransactionEditablePatch
-): boolean {
-  return Object.entries(patch).every(([key, value]) =>
-    transactionValuesEqual(key, current[key], value)
+  const allowed = new Set<string>(['id', ...transactionEditableFields])
+  return !!command.patch.transaction?.every(transaction =>
+    Object.keys(transaction).every(key => allowed.has(key))
   )
 }
 
-function transactionValuesEqual(
-  key: string,
-  left: unknown,
-  right: unknown
-): boolean {
-  // ZenMoney canonicalizes an empty transaction comment to null.
-  if (key === 'comment') return (left ?? '') === (right ?? '')
-
-  if (Array.isArray(left) && Array.isArray(right)) {
-    return (
-      left.length === right.length &&
-      left.every((value, index) => Object.is(value, right[index]))
-    )
-  }
-  return Object.is(left, right)
-}
-
-function refreshPatchTimestamps(
+function materializeIntentPatch(
   snapshot: TDataStore,
-  patch: TNormalizedPatch,
-  changedAt: number
-): TNormalizedPatch {
-  const result: TNormalizedPatch = { ...patch }
+  patch: TIntentPatch,
+  changedAt: TMsTime
+): TDiff {
+  const result: TDiff = { ...patch } as TDiff
   const entityKeys = [
     'instrument',
     'company',
@@ -211,43 +83,97 @@ function refreshPatchTimestamps(
   ] as const
 
   entityKeys.forEach(key => {
-    const entities = patch[key]
-    if (!entities) return
+    const intents = patch[key] as
+      | Array<{ id: string | number; changed?: number; deleted?: boolean }>
+      | undefined
+    if (!intents) return
+
     const currentById = snapshot[key] as Record<
       string | number,
-      { changed?: number } | undefined
+      | ({ id: string | number; changed?: number; deleted?: boolean } & Record<
+          string,
+          unknown
+        >)
+      | undefined
     >
-    // The dynamic entity union is localized to this transport/replay seam.
-    ;(result[key] as Array<{ id: string | number; changed: number }>) =
-      entities.map(entity => ({
-        ...entity,
-        changed: nextChanged(changedAt, currentById[entity.id]?.changed),
-      })) as Array<{ id: string | number; changed: number }>
+
+    const entities = intents.flatMap(intent => {
+      const current = currentById[intent.id]
+      if (key === 'transaction' && current?.deleted) return []
+
+      const { changed: _ignored, ...fields } = intent
+      if (current) {
+        const applicableFields =
+          key === 'transaction' ? pickTransactionPatch(fields) : fields
+        if (patchIsApplied(current, applicableFields)) return []
+        return [
+          {
+            ...current,
+            ...applicableFields,
+            changed: nextChanged(changedAt, current.changed),
+          },
+        ]
+      }
+
+      // Until factory-backed upsert lands, only already-complete legacy intent
+      // can create a missing entity. Sparse updates remain terminal no-ops.
+      if (intent.changed === undefined) return []
+      return [{ ...fields, changed: changedAt }]
+    })
+
+    if (entities.length) {
+      ;(result[key] as Array<Record<string, unknown>>) = entities
+    } else {
+      delete result[key]
+    }
   })
 
   if (patch.deletion) {
-    result.deletion = patch.deletion.map(entity => ({
-      ...entity,
-      stamp: Math.max(changedAt, entity.stamp),
-    }))
+    if (patch.deletion.length) {
+      result.deletion = patch.deletion.map(entity => ({
+        ...entity,
+        stamp: Math.max(changedAt, entity.stamp),
+      }))
+    } else {
+      delete result.deletion
+    }
   }
 
   return result
 }
 
+function pickTransactionPatch(
+  fields: Record<string, unknown>
+): Record<string, unknown> {
+  const allowed = new Set<string>(transactionEditableFields)
+  return Object.fromEntries(
+    Object.entries(fields).filter(([key]) => key === 'id' || allowed.has(key))
+  )
+}
+
+function patchIsApplied(
+  current: Record<string, unknown>,
+  patch: Record<string, unknown>
+): boolean {
+  return Object.entries(patch).every(([key, value]) =>
+    valuesEqual(key, current[key], value)
+  )
+}
+
+function valuesEqual(key: string, left: unknown, right: unknown): boolean {
+  // ZenMoney canonicalizes an empty transaction comment to null.
+  if (key === 'comment') return (left ?? '') === (right ?? '')
+
+  if (Array.isArray(left) && Array.isArray(right)) {
+    return (
+      left.length === right.length &&
+      left.every((value, index) => Object.is(value, right[index]))
+    )
+  }
+  return Object.is(left, right)
+}
+
 function nextChanged(changedAt: number, currentChanged = 0): number {
   // ZenMoney compares second-resolution entity versions strictly.
   return Math.max(changedAt, currentChanged + 1000)
-}
-
-export function isTransactionEditableField(
-  value: string
-): value is (typeof transactionEditableFields)[number] {
-  return (transactionEditableFields as readonly string[]).includes(value)
-}
-
-export function isTransactionRecreateField(
-  value: string
-): value is (typeof transactionRecreateFields)[number] {
-  return (transactionRecreateFields as readonly string[]).includes(value)
 }

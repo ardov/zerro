@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { parsePersistedReplica } from './persistence'
 
 const validReplica = {
-  version: 1,
+  version: 2,
   baseServerTimestamp: 100,
   outbox: [
     {
       type: 'patch',
-      payload: { account: [{ id: 'cash', title: 'Wallet' }] },
-      createdAt: 10,
+      patch: { account: [{ id: 'cash', title: 'Wallet' }] },
+      issuedAt: 10,
     },
   ],
   outboxHead: 1,
@@ -20,17 +20,19 @@ describe('parsePersistedReplica', () => {
     expect(parsePersistedReplica(validReplica)).toBe(validReplica)
   })
 
-  it('accepts a whitelisted sparse transaction patch', () => {
+  it('accepts a sparse transaction patch', () => {
     const replica = {
       ...validReplica,
       outbox: [
         {
-          type: 'transactions.patch',
-          payload: {
-            ids: ['tr-1', 'tr-2'],
-            set: { viewed: true, tag: ['food'] },
+          type: 'patch',
+          patch: {
+            transaction: [
+              { id: 'tr-1', viewed: true, tag: ['food'] },
+              { id: 'tr-2', viewed: true, tag: ['food'] },
+            ],
           },
-          createdAt: 10,
+          issuedAt: 10,
         },
       ],
     }
@@ -38,18 +40,19 @@ describe('parsePersistedReplica', () => {
     expect(parsePersistedReplica(replica)).toBe(replica)
   })
 
-  it('accepts a transaction recreate command with explicit replacement id', () => {
+  it('accepts multiple transaction intents in one command', () => {
     const replica = {
       ...validReplica,
       outbox: [
         {
-          type: 'transaction.recreate',
-          payload: {
-            sourceId: 'source',
-            replacementId: 'replacement',
-            set: { created: 50, income: 0, outcome: 25 },
+          type: 'patch',
+          patch: {
+            transaction: [
+              { id: 'source', income: 0.00001, outcome: 0.00001 },
+              { id: 'replacement', income: 0, outcome: 25 },
+            ],
           },
-          createdAt: 10,
+          issuedAt: 10,
         },
       ],
     }
@@ -58,38 +61,38 @@ describe('parsePersistedReplica', () => {
   })
 
   it.each([
-    [{ ...validReplica, version: 2 }, 'unsupported version'],
+    [{ ...validReplica, version: 1 }, 'unsupported version'],
     [{ ...validReplica, outboxHead: 2 }, 'outbox head is out of range'],
     [
       {
         ...validReplica,
         outbox: [
           {
-            type: 'transactions.patch',
-            payload: { ids: ['tr-1'], set: { changed: 10 } },
-            createdAt: 10,
+            type: 'unknown',
+            patch: { transaction: [{ id: 'tr-1', viewed: true }] },
+            issuedAt: 10,
           },
         ],
       },
-      'outbox[0] is invalid',
+      'outbox[0].type is invalid',
     ],
     [
       {
         ...validReplica,
         outbox: [
           {
-            type: 'transactions.patch',
-            payload: { ids: ['tr-1'], set: { created: 10 } },
-            createdAt: 10,
+            type: 'patch',
+            patch: { unknown: [{ id: 'tr-1' }] },
+            issuedAt: 10,
           },
         ],
       },
-      'outbox[0] is invalid',
+      'outbox[0].patch.unknown is invalid',
     ],
     [
       {
         ...validReplica,
-        outbox: [{ ...validReplica.outbox[0], createdAt: 'yesterday' }],
+        outbox: [{ ...validReplica.outbox[0], issuedAt: 'yesterday' }],
       },
       'metadata is invalid',
     ],

@@ -59,17 +59,13 @@ import {
   getCommandFxRates,
   getCommandPresentedEnvelopes,
 } from './commandRead'
-import {
-  executeReduxCommand,
-  executeReduxDurableCommand,
-} from './executeCommand'
+import { executeReduxCommand, executeReduxPatch } from './executeCommand'
 
 export type { TBudgetUpdate } from '../domain/zerro'
 
 /**
- * App-level semantic inputs. The execution funnel resolves commands that have
- * not migrated yet to `patch`; narrow durable commands are stored
- * directly in the outbox.
+ * App-level semantic inputs. The execution funnel converts every command to
+ * the same persisted sparse patch shape.
  */
 export type TAppCommand =
   | { type: 'zerro.budget.set'; payload: TBudgetUpdate[] }
@@ -439,9 +435,8 @@ export function patchTransactions(
   ids: TTransactionId[],
   set: TTransactionEditablePatch
 ): AppThunk {
-  return executeReduxDurableCommand({
-    type: 'transactions.patch',
-    payload: { ids: [...new Set(ids)], set },
+  return executeReduxPatch({
+    transaction: [...new Set(ids)].map(id => ({ id, ...set })),
   })
 }
 
@@ -456,15 +451,24 @@ export function recreateTransaction(
   patch: TTransactionRecreatePatch & { id: TTransactionId }
 ): AppThunk<TTransactionId> {
   return (dispatch, getState, extra) => {
-    if (!getState().data.current.transaction[patch.id]) {
+    const source = getState().data.current.transaction[patch.id]
+    if (!source) {
       throw new Error(`Transaction ${patch.id} does not exist`)
     }
 
     const { id: sourceId, ...set } = patch
     const replacementId = uuidv1()
-    const execute = executeReduxDurableCommand({
-      type: 'transaction.recreate',
-      payload: { sourceId, replacementId, set },
+    const replacement = {
+      ...source,
+      ...set,
+      id: replacementId,
+      deleted: false,
+    }
+    const execute = executeReduxPatch({
+      transaction: [
+        { id: sourceId, income: 0.00001, outcome: 0.00001 },
+        replacement,
+      ],
     })
     execute(dispatch, getState, extra)
     return replacementId

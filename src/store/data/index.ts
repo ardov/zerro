@@ -3,7 +3,7 @@ export default reducer
 
 // ACTIONS
 export {
-  appendClientOutboxEntry,
+  appendClientCommand,
   prepareClientSync,
   undoClientCommand,
   redoClientCommand,

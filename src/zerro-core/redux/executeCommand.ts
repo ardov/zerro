@@ -1,12 +1,11 @@
 import { v1 as uuidv1 } from 'uuid'
 import type { AppDispatch, AppThunk, RootState } from 'store'
-import { appendClientOutboxEntry } from 'store/data'
+import { appendClientCommand } from 'store/data'
 
-import type { TOutboxEntry } from '../infrastructure/replica/outbox'
 import {
-  makeResolvedPatchCommand,
+  issuePatch,
   materializeCommand,
-  type TDurableCommand,
+  type TIntentPatch,
 } from '../application/materializer'
 import type { TCompiled, TCoreContext, TNormalizedPatch } from '../types'
 
@@ -33,33 +32,29 @@ export function executeReduxCommand<TReceipt = unknown>(
     const patch = isCompiled(result) ? result.patch : result
 
     if (!isEmptyPatch(patch)) {
-      appendDurableCommand(dispatch, state, makeResolvedPatchCommand(patch))
+      appendIntentPatch(dispatch, state, patch)
     }
 
     return isCompiled(result) ? result.receipt : undefined
   }
 }
 
-export function executeReduxDurableCommand(command: TDurableCommand): AppThunk {
+export function executeReduxPatch(patch: TIntentPatch): AppThunk {
   return (dispatch, getState) => {
-    appendDurableCommand(dispatch, getState(), command)
+    appendIntentPatch(dispatch, getState(), patch)
   }
 }
 
-function appendDurableCommand(
+function appendIntentPatch(
   dispatch: AppDispatch,
   state: RootState,
-  command: TDurableCommand
+  patch: TNormalizedPatch | TIntentPatch
 ): void {
-  const createdAt = defaultCtx.now()
-  const patch = materializeCommand(state.data.current, command, createdAt)
-  if (isEmptyPatch(patch)) return
+  const command = issuePatch(patch, defaultCtx.now())
+  const materialized = materializeCommand(state.data.current, command)
+  if (isEmptyPatch(materialized)) return
 
-  const entry: TOutboxEntry = {
-    ...command,
-    createdAt,
-  }
-  dispatch(appendClientOutboxEntry(entry))
+  dispatch(appendClientCommand(command))
 }
 
 function isEmptyPatch(patch: TNormalizedPatch): boolean {

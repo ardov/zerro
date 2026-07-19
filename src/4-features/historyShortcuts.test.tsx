@@ -3,7 +3,7 @@ import { act, render } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { describe, expect, it, vi } from 'vitest'
 
-import dataReducer, { appendClientOutboxEntry } from 'store/data'
+import dataReducer, { appendClientCommand } from 'store/data'
 import isPendingReducer, { setPending } from 'store/isPending'
 import {
   getHistoryShortcut,
@@ -114,10 +114,10 @@ describe('history shortcuts', () => {
       reducer: { data: dataReducer, isPending: isPendingReducer },
     })
     store.dispatch(
-      appendClientOutboxEntry({
+      appendClientCommand({
         type: 'patch',
-        payload: {},
-        createdAt: 1,
+        patch: {},
+        issuedAt: 1,
       })
     )
     const view = render(
@@ -146,7 +146,7 @@ describe('history shortcuts', () => {
       reducer: { data: dataReducer, isPending: isPendingReducer },
     })
     store.dispatch(
-      appendClientOutboxEntry({ type: 'patch', payload: {}, createdAt: 1 })
+      appendClientCommand({ type: 'patch', patch: {}, issuedAt: 1 })
     )
     store.dispatch(setPending(true))
     const view = render(

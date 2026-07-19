@@ -4,7 +4,7 @@ import {
   makeAccount,
   makeTransaction,
 } from 'zerro-core/testing/zenmoneyTestData'
-import type { TOutboxEntry } from 'zerro-core/infrastructure/replica/outbox'
+import type { TCommand } from 'zerro-core/infrastructure/replica/outbox'
 import {
   getChangedNum,
   getHasBlockingSyncChanges,
@@ -13,7 +13,7 @@ import {
   getPendingSyncTransport,
 } from './selectors'
 import reducer, {
-  appendClientOutboxEntry,
+  appendClientCommand,
   prepareClientSync,
   rebaseServerInbox,
   receiveServerPatch,
@@ -37,11 +37,11 @@ function getPendingDiff(state: ReturnType<typeof reducer>) {
   return getPendingSyncDiff(getRootState(state))
 }
 
-function makeAccountEntry(title: string, createdAt: number): TOutboxEntry {
+function makeAccountEntry(title: string, issuedAt: number): TCommand {
   return {
     type: 'patch',
-    payload: { account: [makeAccount({ id: 'cash', title })] },
-    createdAt,
+    patch: { account: [makeAccount({ id: 'cash', title })] },
+    issuedAt,
   }
 }
 
@@ -69,7 +69,7 @@ describe('command outbox boundaries', () => {
 
     const appended = reducer(
       base,
-      appendClientOutboxEntry(makeAccountEntry('Wallet', 10))
+      appendClientCommand(makeAccountEntry('Wallet', 10))
     )
 
     expect(appended.current.account).not.toBe(beforeAccount)
@@ -84,8 +84,8 @@ describe('command outbox boundaries', () => {
     const first = makeAccountEntry('Wallet', 10)
     const second = makeAccountEntry('Vault', 20)
     const appended = reducer(
-      reducer(base, appendClientOutboxEntry(first)),
-      appendClientOutboxEntry(second)
+      reducer(base, appendClientCommand(first)),
+      appendClientCommand(second)
     )
 
     expect(appended.current.account.cash.title).toBe('Vault')
@@ -99,9 +99,9 @@ describe('command outbox boundaries', () => {
 
     const branched = reducer(
       undone,
-      appendClientOutboxEntry(makeAccountEntry('Pocket', 30))
+      appendClientCommand(makeAccountEntry('Pocket', 30))
     )
-    expect(branched.outbox.map(entry => entry.createdAt)).toEqual([10, 30])
+    expect(branched.outbox.map(entry => entry.issuedAt)).toEqual([10, 30])
 
     const reset = reducer(undone, undoClientCommand())
     expect(reset.current.account.cash.title).toBe('Cash')
@@ -121,12 +121,12 @@ describe('command outbox boundaries', () => {
     const base = applyServerPatch(undefined, {
       transaction: [baseTransaction],
     })
-    const entry: TOutboxEntry = {
-      type: 'transactions.patch',
-      payload: { ids: ['tr-1'], set: { viewed: false } },
-      createdAt: 200,
+    const entry: TCommand = {
+      type: 'patch',
+      patch: { transaction: [{ id: 'tr-1', viewed: false }] },
+      issuedAt: 200,
     }
-    const pending = reducer(base, appendClientOutboxEntry(entry))
+    const pending = reducer(base, appendClientCommand(entry))
 
     const rebased = applyServerPatch(pending, {
       transaction: [
@@ -147,41 +147,35 @@ describe('command outbox boundaries', () => {
     expect(rebased.outbox).toEqual([entry])
   })
 
-  it('keeps a silently rejected sparse command until canonical data satisfies it', () => {
+  it('acknowledges the sent prefix after a successful response', () => {
     const base = applyServerPatch(undefined, {
       transaction: [makeTransaction({ id: 'tr-1', viewed: false })],
     })
-    const entry: TOutboxEntry = {
-      type: 'transactions.patch',
-      payload: { ids: ['tr-1'], set: { viewed: true } },
-      createdAt: 10,
+    const entry: TCommand = {
+      type: 'patch',
+      patch: { transaction: [{ id: 'tr-1', viewed: true }] },
+      issuedAt: 10,
     }
-    const pending = reducer(base, appendClientOutboxEntry(entry))
+    const pending = reducer(base, appendClientCommand(entry))
 
-    const rejected = applyServerPatch(pending, {
+    const accepted = applyServerPatch(pending, {
       transaction: [makeTransaction({ id: 'tr-1', viewed: false })],
       sentOutboxCount: 1,
     })
-    expect(rejected.outbox).toEqual([entry])
-    expect(rejected.current.transaction['tr-1'].viewed).toBe(true)
-
-    const accepted = applyServerPatch(rejected, {
-      transaction: [makeTransaction({ id: 'tr-1', viewed: true })],
-      sentOutboxCount: 1,
-    })
     expect(accepted.outbox).toEqual([])
+    expect(accepted.current.transaction['tr-1'].viewed).toBe(false)
   })
 
   it('acknowledges an empty comment canonicalized by ZenMoney to null', () => {
     const base = applyServerPatch(undefined, {
       transaction: [makeTransaction({ id: 'tr-1', comment: 'Before' })],
     })
-    const entry: TOutboxEntry = {
-      type: 'transactions.patch',
-      payload: { ids: ['tr-1'], set: { comment: '' } },
-      createdAt: 10,
+    const entry: TCommand = {
+      type: 'patch',
+      patch: { transaction: [{ id: 'tr-1', comment: '' }] },
+      issuedAt: 10,
     }
-    const pending = reducer(base, appendClientOutboxEntry(entry))
+    const pending = reducer(base, appendClientCommand(entry))
 
     const accepted = applyServerPatch(pending, {
       transaction: [makeTransaction({ id: 'tr-1', comment: null })],
@@ -192,44 +186,32 @@ describe('command outbox boundaries', () => {
     expect(accepted.current.transaction['tr-1'].comment).toBeNull()
   })
 
-  it('acknowledges recreate only after both replacement effects are canonical', () => {
-    const source = makeTransaction({ id: 'source', outcome: 25 })
-    const base = applyServerPatch(undefined, { transaction: [source] })
-    const entry: TOutboxEntry = {
-      type: 'transaction.recreate',
-      payload: {
-        sourceId: source.id,
-        replacementId: 'replacement',
-        set: { created: 500, income: 0, outcome: 25 },
-      },
-      createdAt: 10,
+  it('acknowledges two sent commands even when only the last value is visible', () => {
+    const base = applyServerPatch(undefined, {
+      transaction: [makeTransaction({ id: 'tr-1', comment: null })],
+    })
+    const first: TCommand = {
+      type: 'patch',
+      patch: { transaction: [{ id: 'tr-1', comment: 'First' }] },
+      issuedAt: 10,
     }
-    const pending = reducer(base, appendClientOutboxEntry(entry))
+    const second: TCommand = {
+      type: 'patch',
+      patch: { transaction: [{ id: 'tr-1', comment: 'Second' }] },
+      issuedAt: 20,
+    }
+    const pending = reducer(
+      reducer(base, appendClientCommand(first)),
+      appendClientCommand(second)
+    )
 
-    const partial = applyServerPatch(pending, {
-      transaction: [
-        { ...source, income: 0.00001, outcome: 0.00001, changed: 20 },
-      ],
-      sentOutboxCount: 1,
-    })
-    expect(partial.outbox).toEqual([entry])
-    expect(partial.current.transaction.replacement).toMatchObject({
-      created: 500,
-      outcome: 25,
+    const accepted = applyServerPatch(pending, {
+      transaction: [makeTransaction({ id: 'tr-1', comment: 'Second' })],
+      sentOutboxCount: 2,
     })
 
-    const accepted = applyServerPatch(partial, {
-      transaction: [
-        makeTransaction({
-          id: 'replacement',
-          created: 500,
-          income: 0,
-          outcome: 25,
-        }),
-      ],
-      sentOutboxCount: 1,
-    })
     expect(accepted.outbox).toEqual([])
+    expect(accepted.current.transaction['tr-1'].comment).toBe('Second')
   })
 
   it('uses a fresh strict entity version for request transport', () => {
@@ -238,12 +220,12 @@ describe('command outbox boundaries', () => {
         makeTransaction({ id: 'tr-1', changed: 5000, viewed: false }),
       ],
     })
-    const entry: TOutboxEntry = {
-      type: 'transactions.patch',
-      payload: { ids: ['tr-1'], set: { viewed: true } },
-      createdAt: 10,
+    const entry: TCommand = {
+      type: 'patch',
+      patch: { transaction: [{ id: 'tr-1', viewed: true }] },
+      issuedAt: 10,
     }
-    const pending = reducer(base, appendClientOutboxEntry(entry))
+    const pending = reducer(base, appendClientCommand(entry))
 
     expect(
       getPendingSyncTransport(getRootState(pending), 100)?.transaction?.[0]
@@ -256,31 +238,31 @@ describe('command outbox boundaries', () => {
     })
     const sparse = reducer(
       base,
-      appendClientOutboxEntry({
-        type: 'transactions.patch',
-        payload: { ids: ['tr-1'], set: { viewed: true } },
-        createdAt: 10,
+      appendClientCommand({
+        type: 'patch',
+        patch: { transaction: [{ id: 'tr-1', viewed: true }] },
+        issuedAt: 10,
       })
     )
     expect(getHasBlockingSyncChanges(getRootState(sparse))).toBe(false)
 
     const recreate = reducer(
       sparse,
-      appendClientOutboxEntry({
-        type: 'transaction.recreate',
-        payload: {
-          sourceId: 'tr-1',
-          replacementId: 'tr-2',
-          set: { created: 50, income: 0, outcome: 0 },
+      appendClientCommand({
+        type: 'patch',
+        patch: {
+          transaction: [
+            makeTransaction({ id: 'tr-2', created: 50, income: 0, outcome: 0 }),
+          ],
         },
-        createdAt: 15,
+        issuedAt: 15,
       })
     )
-    expect(getHasBlockingSyncChanges(getRootState(recreate))).toBe(false)
+    expect(getHasBlockingSyncChanges(getRootState(recreate))).toBe(true)
 
     const resolved = reducer(
       recreate,
-      appendClientOutboxEntry(makeAccountEntry('Wallet', 20))
+      appendClientCommand(makeAccountEntry('Wallet', 20))
     )
     expect(getHasBlockingSyncChanges(getRootState(resolved))).toBe(true)
   })
@@ -292,8 +274,8 @@ describe('command outbox boundaries', () => {
     const sent = makeAccountEntry('Wallet', 10)
     const during = makeAccountEntry('Vault', 20)
     const pending = reducer(
-      reducer(base, appendClientOutboxEntry(sent)),
-      appendClientOutboxEntry(during)
+      reducer(base, appendClientCommand(sent)),
+      appendClientCommand(during)
     )
     const rebased = applyServerPatch(pending, {
       account: [makeAccount({ id: 'cash', title: 'Server Wallet' })],
@@ -305,8 +287,8 @@ describe('command outbox boundaries', () => {
 
     const withRedo = reducer(
       reducer(
-        reducer(base, appendClientOutboxEntry(sent)),
-        appendClientOutboxEntry(during)
+        reducer(base, appendClientCommand(sent)),
+        appendClientCommand(during)
       ),
       undoClientCommand()
     )
@@ -321,7 +303,7 @@ describe('command outbox boundaries', () => {
     })
     const entry = makeAccountEntry('Wallet', 10)
     const persisted = {
-      version: 1 as const,
+      version: 2 as const,
       baseServerTimestamp: 100,
       outbox: [entry],
       outboxHead: 1,

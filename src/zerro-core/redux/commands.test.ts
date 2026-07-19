@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import type { TDataStore } from '6-shared/types'
 import type { RootState } from 'store'
 import type { TCoreContext, TNormalizedPatch } from '../types'
-import { appendClientOutboxEntry } from 'store/data'
+import { appendClientCommand } from 'store/data'
 import { makeDemoStore } from '../demo'
 import { makeTestRootState } from '../testing/rootState'
 import {
@@ -289,26 +289,33 @@ describe('command funnel adaptation', () => {
 
     const commands = dispatch.mock.calls
       .map(([action]: [any]) => action)
-      .filter((action: any) => action?.type === appendClientOutboxEntry.type)
+      .filter((action: any) => action?.type === appendClientCommand.type)
       .map((action: any) => {
-        const { createdAt: _, ...command } = action.payload
+        const { issuedAt: _, ...command } = action.payload
         return command
       })
 
     expect(commands).toEqual([
       {
-        type: 'transactions.patch',
-        payload: { ids: ['first', 'second'], set: { viewed: true } },
+        type: 'patch',
+        patch: {
+          transaction: [
+            { id: 'first', viewed: true },
+            { id: 'second', viewed: true },
+          ],
+        },
       },
       {
-        type: 'transactions.patch',
-        payload: { ids: ['first'], set: { comment: 'Edited' } },
+        type: 'patch',
+        patch: { transaction: [{ id: 'first', comment: 'Edited' }] },
       },
       {
-        type: 'transactions.patch',
-        payload: {
-          ids: ['first', 'second'],
-          set: { tag: ['food'], comment: 'Shared' },
+        type: 'patch',
+        patch: {
+          transaction: [
+            { id: 'first', tag: ['food'], comment: 'Shared' },
+            { id: 'second', tag: ['food'], comment: 'Shared' },
+          ],
         },
       },
     ])
@@ -337,21 +344,23 @@ describe('command funnel adaptation', () => {
     )
     const entry = dispatch.mock.calls
       .map(([action]: [any]) => action)
-      .find((action: any) => action?.type === appendClientOutboxEntry.type)
+      .find((action: any) => action?.type === appendClientCommand.type)
 
-    expect(entry.payload).toEqual({
-      type: 'transaction.recreate',
-      payload: {
-        sourceId: source.id,
-        replacementId,
-        set: {
-          created: NOW - 60_000,
-          income: source.income,
-          outcome: source.outcome,
-          comment: 'After',
-        },
+    expect(entry.payload).toMatchObject({
+      type: 'patch',
+      patch: {
+        transaction: [
+          { id: source.id, income: 0.00001, outcome: 0.00001 },
+          {
+            id: replacementId,
+            created: NOW - 60_000,
+            income: source.income,
+            outcome: source.outcome,
+            comment: 'After',
+          },
+        ],
       },
-      createdAt: NOW,
+      issuedAt: NOW,
     })
     now.mockRestore()
   })

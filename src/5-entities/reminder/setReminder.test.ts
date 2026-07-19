@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { appendClientOutboxEntry } from 'store/data'
+import { appendClientCommand } from 'store/data'
 import type { RootState } from 'store'
 import {
   makeAccount,
@@ -64,10 +64,10 @@ describe('reminder semantic writes', () => {
     expect(reminders[0]).toMatchObject({ id: UUID, comment: 'Rent', user: 1 })
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: appendClientOutboxEntry.type,
+        type: appendClientCommand.type,
         payload: expect.objectContaining({
           type: 'patch',
-          payload: { reminder: reminders },
+          patch: { reminder: reminders },
         }),
       })
     )
@@ -82,10 +82,10 @@ describe('reminder semantic writes', () => {
 
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: appendClientOutboxEntry.type,
+        type: appendClientCommand.type,
         payload: expect.objectContaining({
           type: 'patch',
-          payload: {
+          patch: {
             deletion: [
               expect.objectContaining({
                 id: 'existing',
@@ -102,7 +102,7 @@ describe('reminder semantic writes', () => {
     missingDispatch(deleteReminder('missing'))
     expect(
       missingDispatch.mock.calls.filter(
-        ([action]: [any]) => action?.type === appendClientOutboxEntry.type
+        ([action]: [any]) => action?.type === appendClientCommand.type
       )
     ).toEqual([])
   })

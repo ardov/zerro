@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { RootState } from 'store'
-import { appendClientOutboxEntry } from 'store/data'
+import { appendClientCommand } from 'store/data'
 import {
   makeAccount,
   makeStore,
@@ -56,10 +56,10 @@ describe('prepareDataAccount', () => {
     expect(dispatch(prepareDataAccount())).toBe(UUID)
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: appendClientOutboxEntry.type,
+        type: appendClientCommand.type,
         payload: expect.objectContaining({
           type: 'patch',
-          payload: {
+          patch: {
             account: [
               expect.objectContaining({
                 id: UUID,
@@ -80,7 +80,7 @@ describe('prepareDataAccount', () => {
     expect(dispatch(prepareDataAccount())).toBe('existing')
     expect(
       dispatch.mock.calls.filter(
-        ([action]: [any]) => action?.type === appendClientOutboxEntry.type
+        ([action]: [any]) => action?.type === appendClientCommand.type
       )
     ).toEqual([])
   })

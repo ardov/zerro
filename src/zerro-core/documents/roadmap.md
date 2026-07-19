@@ -23,8 +23,9 @@ The main migration is complete:
 - legacy model-object calls and duplicate derived projections are removed;
 - Redux owns `base + outbox + outboxHead` and persists command-only replay
   inputs;
-- sparse transaction field edits rematerialize over the latest base while
-  unmigrated behavior uses resolved patch commands.
+- every outbox value uses the same `TCommand` patch shape; sparse transaction
+  edits rematerialize over the latest base while transitional compilers still
+  emit complete entities inside that patch.
 
 Reliable automated verification, ready bridge removal, and read-graph
 documentation are complete. The final explicit-sync browser smoke remains.
@@ -105,11 +106,13 @@ the work as bounded verified slices:
 
 1. **Done:** writable entity patch types live beside entity types and use
    `EntityPatch<TEntity, TWritableFields>` to list their writable surface;
-2. replace `TOutboxEntry`/`TDurableCommand` with direct `TCommand[]` storage;
-   every command stores `type: 'patch'`, `issuedAt`, and `TIntentPatch`;
-3. make issue capture time, generated ids, absolute values, and caller-only
-   receipts before append;
-4. convert Redux command compilers to sparse entity intent and deletion refs;
+2. **Done:** direct `TCommand[]` storage replaced `TOutboxEntry` and the durable
+   command union; every command stores `type: 'patch'`, `issuedAt`, and
+   `TIntentPatch`;
+3. **Done:** issue captures time, generated ids, absolute values, and
+   caller-only receipts before append;
+4. convert transitional Redux compilers from complete entities to sparse entity
+   intent and deletion refs;
 5. implement deterministic upsert materialization: patch an existing id, create
    a missing id, and reject incomplete creation intent before persistence;
 6. replay the applied prefix into `current`, keeping `applyPatch` dumb.
@@ -125,8 +128,8 @@ reproduce the same `current` without ambient ids or time.
    fresh `sentAt` versions;
 3. collect touched ids/deletions and build transport from that working snapshot,
    never from UI `current`;
-4. on success apply the canonical response to `base` and remove exactly the
-   sent command count without per-command satisfaction checks;
+4. **Done:** on success apply the canonical response to `base` and remove
+   exactly the sent command count without per-command satisfaction checks;
 5. preserve commands appended during the request and replay them over the new
    base; on failure leave base and outbox unchanged;
 6. update persistence validation/versioning and discard incompatible local

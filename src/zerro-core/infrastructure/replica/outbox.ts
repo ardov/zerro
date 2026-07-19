@@ -1,17 +1,16 @@
 import type { TNormalizedPatch } from '../../types'
 import {
-  isCommandSatisfied,
+  isCommandRebaseSafe,
   materializeCommand,
-  type TDurableCommand,
+  type TCommand,
 } from '../../application/materializer'
 import { applyPatch } from '../../domain/zenmoney'
 import type { TDataStore } from '../../domain/zenmoney/store'
 
-/** A durable command with only its replay timestamp added. */
-export type TOutboxEntry = TDurableCommand & { createdAt: number }
+export type { TCommand } from '../../application/materializer'
 
 export type TOutboxState = {
-  outbox: TOutboxEntry[]
+  outbox: TCommand[]
   outboxHead: number
 }
 
@@ -23,25 +22,25 @@ export function clampOutboxHead(
 }
 
 export function getPendingOutbox(
-  outbox: readonly TOutboxEntry[],
+  outbox: readonly TCommand[],
   outboxHead: number
-): TOutboxEntry[] {
+): TCommand[] {
   return outbox.slice(0, clampOutboxHead(outboxHead, outbox.length))
 }
 
 export function appendOutbox(
-  outbox: readonly TOutboxEntry[],
+  outbox: readonly TCommand[],
   outboxHead: number,
-  entry: TOutboxEntry
+  command: TCommand
 ): TOutboxState {
   const nextOutbox = getPendingOutbox(outbox, outboxHead)
-  nextOutbox.push(entry)
+  nextOutbox.push(command)
   return { outbox: nextOutbox, outboxHead: nextOutbox.length }
 }
 
 export function replayOutbox(
   base: TDataStore,
-  outbox: readonly TOutboxEntry[],
+  outbox: readonly TCommand[],
   outboxHead: number
 ): TDataStore {
   return materializeOutbox(base, outbox, outboxHead).current
@@ -49,7 +48,7 @@ export function replayOutbox(
 
 export function getMaterializedOutboxPatches(
   base: TDataStore,
-  outbox: readonly TOutboxEntry[],
+  outbox: readonly TCommand[],
   outboxHead: number,
   changedAt?: number
 ): TNormalizedPatch[] {
@@ -57,48 +56,36 @@ export function getMaterializedOutboxPatches(
 }
 
 /**
- * Advance `current` by one command entry without replaying from base. Callers
+ * Advance `current` by one command without replaying from base. Callers
  * must hold the invariant that `current` already equals the replay of the
- * command prefix up to the current head; append then only needs this entry's
+ * command prefix up to the current head; append then only needs this command's
  * effect. Undo, redo, and base changes still require a full `replayOutbox`.
  */
-export function applyOutboxEntry(
+export function applyOutboxCommand(
   current: TDataStore,
-  entry: TOutboxEntry
+  command: TCommand
 ): TDataStore {
-  return applyPatch(
-    current,
-    materializeCommand(current, entry, entry.createdAt)
-  )
+  return applyPatch(current, materializeCommand(current, command))
 }
 
-export function isOutboxEntrySatisfied(
-  canonical: TDataStore,
-  entry: TOutboxEntry
-): boolean {
-  return isCommandSatisfied(canonical, entry)
-}
-
-export function isOutboxEntryRebaseSafe(entry: TOutboxEntry): boolean {
-  return (
-    entry.type === 'transactions.patch' || entry.type === 'transaction.recreate'
-  )
+export function isOutboxCommandRebaseSafe(command: TCommand): boolean {
+  return isCommandRebaseSafe(command)
 }
 
 function materializeOutbox(
   base: TDataStore,
-  outbox: readonly TOutboxEntry[],
+  outbox: readonly TCommand[],
   outboxHead: number,
   changedAt?: number
 ): { current: TDataStore; patches: TNormalizedPatch[] } {
   let current = base
   const patches: TNormalizedPatch[] = []
 
-  getPendingOutbox(outbox, outboxHead).forEach(entry => {
+  getPendingOutbox(outbox, outboxHead).forEach(command => {
     const patch = materializeCommand(
       current,
-      entry,
-      changedAt ?? entry.createdAt
+      command,
+      changedAt ?? command.issuedAt
     )
     patches.push(patch)
     current = applyPatch(current, patch)

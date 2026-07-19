@@ -4,9 +4,9 @@ import {
   replicaPersistenceVersion,
   type TPersistedReplica,
 } from 'zerro-core/infrastructure/replica/persistence'
-import type { TOutboxEntry } from 'zerro-core/infrastructure/replica/outbox'
+import type { TCommand } from 'zerro-core/infrastructure/replica/outbox'
 import {
-  appendClientOutboxEntry,
+  appendClientCommand,
   prepareClientSync,
   rebaseServerInbox,
   redoClientCommand,
@@ -19,7 +19,7 @@ type TReplicaStateSource = {
   data: {
     current: TDataStore
     base: TDataStore
-    outbox: TOutboxEntry[]
+    outbox: TCommand[]
     outboxHead: number
   }
 }
@@ -58,7 +58,7 @@ export const replicaPersistenceMiddleware: Middleware =
 
 function isReplicaMutation(action: unknown): boolean {
   return (
-    appendClientOutboxEntry.match(action) ||
+    appendClientCommand.match(action) ||
     prepareClientSync.match(action) ||
     undoClientCommand.match(action) ||
     redoClientCommand.match(action) ||

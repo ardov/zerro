@@ -1,13 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import {
   appendOutbox,
-  applyOutboxEntry,
+  applyOutboxCommand,
   clampOutboxHead,
   getPendingOutbox,
-  isOutboxEntrySatisfied,
   replayOutbox,
-  type TOutboxEntry,
 } from 'zerro-core/infrastructure/replica/outbox'
+import type { TCommand } from 'zerro-core/infrastructure/replica/outbox'
 import {
   replicaPersistenceVersion,
   type TPersistedReplica,
@@ -20,7 +19,7 @@ interface DataSlice {
   current: TDataStore
   base: TDataStore
   /** Durable local commands; current rematerializes from the command prefix. */
-  outbox: TOutboxEntry[]
+  outbox: TCommand[]
   outboxHead: number
   inbox?: TServerInbox | null
 }
@@ -71,19 +70,15 @@ const { reducer, actions } = createSlice({
       applyDiffMutable(canonicalPatch, state.base)
 
       const pending = getPendingOutbox(state.outbox, state.outboxHead)
-      state.outbox = pending.filter(
-        (entry, index) =>
-          sentOutboxCount === undefined ||
-          index >= sentOutboxCount ||
-          !isOutboxEntrySatisfied(state.base, entry)
-      )
+      state.outbox =
+        sentOutboxCount === undefined ? pending : pending.slice(sentOutboxCount)
       state.outboxHead = state.outbox.length
       state.current = replayOutbox(state.base, state.outbox, state.outboxHead)
       state.inbox = null
     }),
-    appendClientOutboxEntry: withPerf(
-      'appendClientOutboxEntry',
-      (state, { payload }: PayloadAction<TOutboxEntry>) => {
+    appendClientCommand: withPerf(
+      'appendClientCommand',
+      (state, { payload }: PayloadAction<TCommand>) => {
         const next = appendOutbox(state.outbox, state.outboxHead, payload)
         state.outbox = next.outbox
         state.outboxHead = next.outboxHead
@@ -91,7 +86,7 @@ const { reducer, actions } = createSlice({
         // appendOutbox drops any redo tail past it, so advancing by this one
         // entry is equivalent to a full replay but keeps unrelated entity maps
         // reference-stable for memoized selectors.
-        state.current = applyOutboxEntry(state.current, payload)
+        state.current = applyOutboxCommand(state.current, payload)
       }
     ),
     prepareClientSync: withPerf('prepareClientSync', state => {
@@ -150,7 +145,7 @@ export default reducer
 export const {
   receiveServerPatch,
   rebaseServerInbox,
-  appendClientOutboxEntry,
+  appendClientCommand,
   prepareClientSync,
   undoClientCommand,
   redoClientCommand,

@@ -26,13 +26,13 @@ describe('loadLocalData', () => {
       account: [baseAccount],
     })
     getReplicaStateMock.mockResolvedValue({
-      version: 1,
+      version: 2,
       baseServerTimestamp: 100,
       outbox: [
         {
           type: 'patch',
-          payload: { account: [pendingAccount] },
-          createdAt: 10,
+          patch: { account: [pendingAccount] },
+          issuedAt: 10,
         },
       ],
       outboxHead: 1,
@@ -59,14 +59,14 @@ describe('loadLocalData', () => {
       getPendingSyncDiff({ data: dataState } as any)?.account?.[0].title
     ).toBe('Wallet')
     expect(dataState.outbox).toEqual([
-      { type: 'patch', payload: { account: [pendingAccount] }, createdAt: 10 },
+      { type: 'patch', patch: { account: [pendingAccount] }, issuedAt: 10 },
     ])
   })
 
   it('ignores corrupt replica storage without blocking canonical data', async () => {
     getLocalDataMock.mockResolvedValue({ serverTimestamp: 100 })
     getReplicaStateMock.mockResolvedValue({
-      version: 1,
+      version: 2,
       baseServerTimestamp: 100,
       outbox: [{ id: 'broken' }],
       outboxHead: 1,

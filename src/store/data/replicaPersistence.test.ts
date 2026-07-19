@@ -7,17 +7,17 @@ const { saveReplicaStateMock } = vi.hoisted(() => ({
 vi.mock('worker', () => ({ saveReplicaState: saveReplicaStateMock }))
 
 import { makeStore } from 'zerro-core/testing/zenmoneyTestData'
-import type { TOutboxEntry } from 'zerro-core/infrastructure/replica/outbox'
-import { appendClientOutboxEntry, prepareClientSync } from './slice'
+import type { TCommand } from 'zerro-core/infrastructure/replica/outbox'
+import { appendClientCommand, prepareClientSync } from './slice'
 import {
   getPersistedReplica,
   replicaPersistenceMiddleware,
 } from './replicaPersistence'
 
-const entry: TOutboxEntry = {
+const entry: TCommand = {
   type: 'patch',
-  payload: {},
-  createdAt: 10,
+  patch: {},
+  issuedAt: 10,
 }
 
 afterEach(() => {
@@ -39,14 +39,14 @@ describe('replica persistence snapshot', () => {
         },
       })
     ).toEqual({
-      version: 1,
+      version: 2,
       baseServerTimestamp: 100,
       outbox: [entry],
       outboxHead: 0,
     })
   })
 
-  it.each([appendClientOutboxEntry(entry), prepareClientSync()])(
+  it.each([appendClientCommand(entry), prepareClientSync()])(
     'queues a browser persistence write after %s',
     async action => {
       vi.stubGlobal('Worker', class {})
@@ -68,7 +68,7 @@ describe('replica persistence snapshot', () => {
 
       await vi.waitFor(() =>
         expect(saveReplicaStateMock).toHaveBeenCalledWith({
-          version: 1,
+          version: 2,
           baseServerTimestamp: 100,
           outbox: [entry],
           outboxHead: 1,

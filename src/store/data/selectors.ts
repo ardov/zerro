@@ -5,7 +5,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import {
   getMaterializedOutboxPatches,
   getPendingOutbox,
-  isOutboxEntryRebaseSafe,
+  isOutboxCommandRebaseSafe,
 } from 'zerro-core/infrastructure/replica/outbox'
 import { immutableMergeDiffs } from './shared/mergeDiffs'
 
@@ -45,7 +45,7 @@ export const getHasPendingChanges = (state: RootState) =>
 
 export const getHasBlockingSyncChanges = createSelector(
   [getPendingEntries],
-  entries => entries.some(entry => !isOutboxEntryRebaseSafe(entry))
+  commands => commands.some(command => !isOutboxCommandRebaseSafe(command))
 )
 
 export const getCanUndoClientCommand = (state: RootState) =>
@@ -59,7 +59,7 @@ export const getChangedNum = (state: RootState) => {
 }
 
 export const getLastChangeTime = createSelector([getPendingEntries], outbox =>
-  outbox.reduce((latest, entry) => Math.max(latest, entry.createdAt), 0)
+  outbox.reduce((latest, command) => Math.max(latest, command.issuedAt), 0)
 )
 
 export const getLastSyncTime = (state: RootState) => {

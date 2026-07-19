@@ -6,11 +6,10 @@ import {
   makeTransaction,
 } from '../../testing/zenmoneyTestData'
 import {
-  isCommandSatisfied,
-  makeResolvedPatchCommand,
+  isCommandRebaseSafe,
+  issuePatch,
   materializeCommand,
-  type TTransactionRecreateCommand,
-  type TTransactionsPatchCommand,
+  type TCommand,
 } from './materializeCommand'
 
 describe('materializeCommand', () => {
@@ -21,41 +20,50 @@ describe('materializeCommand', () => {
       income: 11,
       viewed: true,
     })
-    const command: TTransactionsPatchCommand = {
-      type: 'transactions.patch',
-      payload: { ids: ['tr-1'], set: { viewed: false } },
-    }
+    const command = issuePatch(
+      { transaction: [{ id: 'tr-1', viewed: false }] },
+      100
+    )
 
     expect(
       materializeCommand(
         makeStore({ transaction: { 'tr-1': current } }),
-        command,
-        100
+        command
       )
     ).toEqual({
       transaction: [{ ...current, viewed: false, changed: 1200 }],
     })
   })
 
-  it('patches a batch as one command and skips no-op or deleted targets', () => {
+  it('patches a batch and skips no-op, deleted, or missing targets', () => {
     const first = makeTransaction({ id: 'first', viewed: false })
     const second = makeTransaction({ id: 'second', viewed: true })
     const deleted = makeTransaction({ id: 'deleted', deleted: true })
-    const command: TTransactionsPatchCommand = {
-      type: 'transactions.patch',
-      payload: {
-        ids: ['first', 'second', 'deleted', 'missing'],
-        set: { viewed: true },
+    const command = issuePatch(
+      {
+        transaction: ['first', 'second', 'deleted', 'missing'].map(id => ({
+          id,
+          viewed: true,
+        })),
       },
-    }
+      100
+    )
 
     expect(
       materializeCommand(
         makeStore({ transaction: { first, second, deleted } }),
-        command,
-        100
+        command
       ).transaction?.map(transaction => transaction.id)
     ).toEqual(['first'])
+  })
+
+  it('materializes a missing sparse target as an empty patch', () => {
+    const command = issuePatch(
+      { transaction: [{ id: 'missing', viewed: true }] },
+      100
+    )
+
+    expect(materializeCommand(makeStore(), command)).toEqual({})
   })
 
   it('filters system fields from stale runtime transaction patches', () => {
@@ -65,34 +73,22 @@ describe('materializeCommand', () => {
       comment: 'Before',
     })
     const command = {
-      type: 'transactions.patch',
-      payload: {
-        ids: ['tr-1'],
-        set: { created: 500, comment: 'After' },
+      type: 'patch',
+      issuedAt: 300,
+      patch: {
+        transaction: [{ id: 'tr-1', created: 500, comment: 'After' }],
       },
-    } as unknown as TTransactionsPatchCommand
+    } as unknown as TCommand
 
     expect(
       materializeCommand(
         makeStore({ transaction: { 'tr-1': current } }),
-        command,
-        300
+        command
       ).transaction?.[0]
     ).toMatchObject({ created: 100, comment: 'After' })
-
-    expect(
-      isCommandSatisfied(
-        makeStore({
-          transaction: {
-            'tr-1': { ...current, comment: 'After' },
-          },
-        }),
-        command
-      )
-    ).toBe(true)
   })
 
-  it('recreates a transaction under a new id and can finish a partial retry', () => {
+  it('recreates a transaction as two intents in the same command', () => {
     const source = makeTransaction({
       id: 'source',
       changed: 200,
@@ -101,34 +97,29 @@ describe('materializeCommand', () => {
       outcome: 25,
       comment: 'Before',
     })
-    const command: TTransactionRecreateCommand = {
-      type: 'transaction.recreate',
-      payload: {
-        sourceId: 'source',
-        replacementId: 'replacement',
-        set: {
-          created: 500,
-          income: 0,
-          outcome: 25,
-          comment: 'After',
-        },
-      },
+    const replacement = {
+      ...source,
+      id: 'replacement',
+      created: 500,
+      comment: 'After',
     }
+    const command = issuePatch(
+      {
+        transaction: [
+          { id: source.id, income: 0.00001, outcome: 0.00001 },
+          replacement,
+        ],
+      },
+      300
+    )
 
     const initial = materializeCommand(
       makeStore({ transaction: { source } }),
-      command,
-      300
+      command
     )
     expect(initial.transaction).toEqual([
       { ...source, income: 0.00001, outcome: 0.00001, changed: 1200 },
-      {
-        ...source,
-        id: 'replacement',
-        created: 500,
-        comment: 'After',
-        changed: 300,
-      },
+      { ...replacement, changed: 300 },
     ])
 
     const hiddenSource = initial.transaction![0]
@@ -137,120 +128,35 @@ describe('materializeCommand', () => {
       command,
       400
     )
-    expect(retry.transaction).toEqual([
-      {
-        ...hiddenSource,
-        id: 'replacement',
-        created: 500,
-        income: 0,
-        outcome: 25,
-        comment: 'After',
-        changed: 400,
-      },
-    ])
+    expect(retry.transaction).toEqual([{ ...replacement, changed: 400 }])
   })
 
-  it('replays transitional resolved patches with a fresh entity version', () => {
+  it('replays a complete transitional patch with a fresh version', () => {
     const account = makeAccount({ id: 'cash', changed: 500, title: 'Cash' })
-    const command = makeResolvedPatchCommand({
-      account: [{ ...account, title: 'Wallet' }],
-    })
+    const command = issuePatch(
+      { account: [{ ...account, title: 'Wallet' }] },
+      100
+    )
 
     expect(
-      materializeCommand(
-        makeStore({ account: { cash: account } }),
-        command,
-        100
-      ).account?.[0]
+      materializeCommand(makeStore({ account: { cash: account } }), command)
+        .account?.[0]
     ).toMatchObject({ title: 'Wallet', changed: 1500 })
   })
 
-  it('acknowledges sparse commands only after canonical fields match', () => {
-    const command: TTransactionsPatchCommand = {
-      type: 'transactions.patch',
-      payload: { ids: ['tr-1'], set: { viewed: true, tag: ['food'] } },
-    }
-
+  it('only marks sparse transaction patches as safe for automatic rebase', () => {
     expect(
-      isCommandSatisfied(
-        makeStore({
-          transaction: {
-            'tr-1': makeTransaction({
-              id: 'tr-1',
-              viewed: false,
-              tag: ['food'],
-            }),
-          },
-        }),
-        command
+      isCommandRebaseSafe(
+        issuePatch({ transaction: [{ id: 'tr-1', viewed: true }] }, 100)
+      )
+    ).toBe(true)
+    expect(
+      isCommandRebaseSafe(
+        issuePatch(
+          { account: [makeAccount({ id: 'cash', title: 'Wallet' })] },
+          100
+        )
       )
     ).toBe(false)
-    expect(
-      isCommandSatisfied(
-        makeStore({
-          transaction: {
-            'tr-1': makeTransaction({
-              id: 'tr-1',
-              viewed: true,
-              tag: ['food'],
-            }),
-          },
-        }),
-        command
-      )
-    ).toBe(true)
-  })
-
-  it('treats an empty comment and canonical null as the same intent', () => {
-    const command: TTransactionsPatchCommand = {
-      type: 'transactions.patch',
-      payload: { ids: ['tr-1'], set: { comment: '' } },
-    }
-
-    expect(
-      isCommandSatisfied(
-        makeStore({
-          transaction: {
-            'tr-1': makeTransaction({ id: 'tr-1', comment: null }),
-          },
-        }),
-        command
-      )
-    ).toBe(true)
-  })
-
-  it('acknowledges recreate only after the old row is hidden and replacement exists', () => {
-    const source = makeTransaction({ id: 'source', outcome: 25 })
-    const replacement = makeTransaction({
-      id: 'replacement',
-      created: 500,
-      outcome: 25,
-    })
-    const command: TTransactionRecreateCommand = {
-      type: 'transaction.recreate',
-      payload: {
-        sourceId: source.id,
-        replacementId: replacement.id,
-        set: { created: 500, income: 0, outcome: 25 },
-      },
-    }
-
-    expect(
-      isCommandSatisfied(
-        makeStore({ transaction: { source, replacement } }),
-        command
-      )
-    ).toBe(false)
-    expect(
-      isCommandSatisfied(
-        makeStore({
-          transaction: {
-            source: { ...source, income: 0.00001, outcome: 0.00001 },
-            replacement,
-          },
-        }),
-        command
-      )
-    ).toBe(true)
   })
 })

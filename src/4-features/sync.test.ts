@@ -14,7 +14,7 @@ vi.mock('6-shared/analytics', () => ({ track: vi.fn() }))
 
 import { makeAccount } from 'zerro-core/testing/zenmoneyTestData'
 import data, {
-  appendClientOutboxEntry,
+  appendClientCommand,
   applyServerPatch,
   undoClientCommand,
 } from 'store/data'
@@ -37,20 +37,20 @@ describe('syncData', () => {
     )
     const first = {
       type: 'patch' as const,
-      payload: {
+      patch: {
         account: [makeAccount({ id: 'cash', title: 'Wallet' })],
       },
-      createdAt: 10,
+      issuedAt: 10,
     }
     const redo = {
       ...first,
-      payload: {
+      patch: {
         account: [makeAccount({ id: 'cash', title: 'Vault' })],
       },
-      createdAt: 20,
+      issuedAt: 20,
     }
-    store.dispatch(appendClientOutboxEntry(first))
-    store.dispatch(appendClientOutboxEntry(redo))
+    store.dispatch(appendClientCommand(first))
+    store.dispatch(appendClientCommand(redo))
     store.dispatch(undoClientCommand())
 
     await store.dispatch(syncData() as any)

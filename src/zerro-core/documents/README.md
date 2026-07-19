@@ -29,20 +29,19 @@ React, storage, localization, or app-layer runtime modules.
   `current` and sync transport are rematerialized from commands.
 - The root entrypoint remains a small internal facade: constants, shared root
   types, and the snapshot session. Replica primitives stay internal.
-- Outbox entries persist one durable command, not parallel intent and applied
-  patches. `transactions.patch` rebases whitelisted field sets over current
-  entities. Time edits use `transaction.recreate` because
-  `created` is immutable after creation. Unmigrated behavior uses transitional
-  `patch`.
+- The outbox persists direct `TCommand[]` values with `type: 'patch'`,
+  `issuedAt`, and `TIntentPatch`. Sparse transaction edits rebase over current
+  entities; transitional compilers may still put complete entities into the
+  same patch shape.
 - Materialization now owns command replay and deleted-transaction no-ops.
   Balance and cascade rules remain the next architectural phase.
 
-## Next slice: one sparse patch command
+## Next slice: sparse compilers and upsert
 
-Unify persisted writes as direct `TCommand[]` entries with `issuedAt` and sparse
-entity intent, then add deterministic upsert replay and primary-only transport.
-Successful sync acknowledges the captured sent prefix as a batch. The ordered
-implementation slices are in [roadmap.md](./roadmap.md).
+Convert transitional full-entity compilers to sparse intent and deletion refs,
+then add deterministic factory-backed upsert replay and primary-only transport.
+Successful sync already acknowledges the captured sent prefix as a batch. The
+ordered implementation slices are in [roadmap.md](./roadmap.md).
 
 ## Start here
 

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
-import { appendClientOutboxEntry } from 'store/data'
+import { appendClientCommand } from 'store/data'
 import { makeDemoStore } from '../demo'
 import { applyPatch } from '../domain/zenmoney'
 import { makeTestRootState } from '../testing/rootState'
@@ -69,10 +69,10 @@ describe('budget and goal Redux commands', () => {
 
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: appendClientOutboxEntry.type,
+        type: appendClientCommand.type,
         payload: expect.objectContaining({
           type: 'patch',
-          payload: expected,
+          patch: expected,
         }),
       })
     )
@@ -106,10 +106,10 @@ describe('budget and goal Redux commands', () => {
     expect(expected.deletion).toHaveLength(1)
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: appendClientOutboxEntry.type,
+        type: appendClientCommand.type,
         payload: expect.objectContaining({
           type: 'patch',
-          payload: expected,
+          patch: expected,
         }),
       })
     )

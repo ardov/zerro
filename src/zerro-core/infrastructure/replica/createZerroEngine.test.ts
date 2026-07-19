@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
 import { makeAccount, makeStore } from '../../testing/zenmoneyTestData'
-import type { TOutboxEntry } from './outbox'
+import type { TCommand } from '../../application/materializer'
 import { createZerroEngine } from './createZerroEngine'
 
-function makeEntry(title: string, createdAt: number): TOutboxEntry {
+function makeCommand(title: string, issuedAt: number): TCommand {
   return {
     type: 'patch',
-    payload: { account: [makeAccount({ id: 'cash', title })] },
-    createdAt,
+    patch: { account: [makeAccount({ id: 'cash', title })] },
+    issuedAt,
   }
 }
 
@@ -19,25 +19,25 @@ describe('createZerroEngine', () => {
     },
   })
 
-  it('stores compiled behavior as one durable resolved command', () => {
+  it('stores compiled behavior as one patch command', () => {
     const engine = createZerroEngine({
       base,
       ctx: { now: () => 100, uuid: () => 'entry-1' },
     })
 
-    const entry = engine.executeCompiled(
+    const command = engine.executeCompiled(
       { type: 'account.patch' },
       { account: [makeAccount({ id: 'cash', title: 'Wallet' })] }
     )
 
-    expect(entry).toEqual(makeEntry('Wallet', 100))
+    expect(command).toEqual(makeCommand('Wallet', 100))
     expect(engine.getCurrent().account.cash.title).toBe('Wallet')
   })
 
   it('executes compilers against rematerialized current state', () => {
     const engine = createZerroEngine({
       base,
-      outbox: [makeEntry('Wallet', 100)],
+      outbox: [makeCommand('Wallet', 100)],
       outboxHead: 1,
       ctx: { now: () => 200, uuid: () => 'entry-2' },
     })
@@ -47,7 +47,7 @@ describe('createZerroEngine', () => {
       return { account: [makeAccount({ id: 'cash', title: 'Vault' })] }
     })
 
-    expect(result.entry).toEqual(makeEntry('Vault', 200))
+    expect(result.command).toEqual(makeCommand('Vault', 200))
     expect(engine.getCurrent().account.cash.title).toBe('Vault')
   })
 
@@ -63,17 +63,17 @@ describe('createZerroEngine', () => {
     }))
 
     expect(result.receipt).toEqual({ transactionId: 'tr-new' })
-    expect(result.entry).toEqual({
+    expect(result.command).toEqual({
       type: 'patch',
-      payload: {},
-      createdAt: 100,
+      patch: {},
+      issuedAt: 100,
     })
   })
 
   it('moves the head for undo and redo and drops a redo tail on append', () => {
     const engine = createZerroEngine({
       base,
-      outbox: [makeEntry('Wallet', 100), makeEntry('Pocket', 200)],
+      outbox: [makeCommand('Wallet', 100), makeCommand('Pocket', 200)],
       outboxHead: 2,
       ctx: { now: () => 300, uuid: () => 'entry-3' },
     })
@@ -85,7 +85,7 @@ describe('createZerroEngine', () => {
       { account: [makeAccount({ id: 'cash', title: 'Vault' })] }
     )
 
-    expect(engine.getState().outbox.map(entry => entry.createdAt)).toEqual([
+    expect(engine.getState().outbox.map(command => command.issuedAt)).toEqual([
       100, 300,
     ])
     expect(engine.redo()).toBe(false)
@@ -95,7 +95,7 @@ describe('createZerroEngine', () => {
   it('rebuilds deterministically from persisted command state', () => {
     const first = createZerroEngine({
       base,
-      outbox: [makeEntry('Wallet', 100)],
+      outbox: [makeCommand('Wallet', 100)],
       outboxHead: 1,
       ctx: { now: () => 200, uuid: () => 'unused' },
     })

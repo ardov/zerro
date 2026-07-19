@@ -1,31 +1,31 @@
 import { describe, expect, it } from 'vitest'
 
 import { makeAccount, makeStore } from '../../testing/zenmoneyTestData'
+import type { TCommand } from '../../application/materializer'
 import type { TNormalizedPatch } from '../../types'
 import {
   appendOutbox,
   clampOutboxHead,
   getPendingOutbox,
   replayOutbox,
-  type TOutboxEntry,
 } from './outbox'
 
-function makeEntry(createdAt: number, patch: TNormalizedPatch): TOutboxEntry {
+function makeCommand(issuedAt: number, patch: TNormalizedPatch): TCommand {
   return {
     type: 'patch',
-    payload: patch,
-    createdAt,
+    patch,
+    issuedAt,
   }
 }
 
 describe('outbox operations', () => {
-  const first = makeEntry(1, {
+  const first = makeCommand(1, {
     account: [makeAccount({ id: 'cash', title: 'Wallet' })],
   })
-  const second = makeEntry(2, {
+  const second = makeCommand(2, {
     account: [makeAccount({ id: 'cash', title: 'Pocket' })],
   })
-  const replacement = makeEntry(3, {
+  const replacement = makeCommand(3, {
     account: [makeAccount({ id: 'cash', title: 'Vault' })],
   })
 

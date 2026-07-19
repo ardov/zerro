@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { i18n } from '6-shared/localization'
 import type { TDataStore } from '6-shared/types'
 import type { AppDispatch, AppThunk, RootState } from 'store'
-import { appendClientOutboxEntry } from 'store/data'
+import { appendClientCommand } from 'store/data'
 import { makeDemoStore } from 'zerro-core/demo'
 import { applyPatch } from 'zerro-core/domain/zenmoney'
 import { materializeCommand } from 'zerro-core/application/materializer'
@@ -43,15 +43,13 @@ function makeThunkDispatch(initial: RootState) {
         undefined
       )
     }
-    if ((action as { type?: string }).type === appendClientOutboxEntry.type) {
+    if ((action as { type?: string }).type === appendClientCommand.type) {
       state = makeState(
         applyPatch(
           state.data.current,
           materializeCommand(
             state.data.current,
-            (action as ReturnType<typeof appendClientOutboxEntry>).payload,
-            (action as ReturnType<typeof appendClientOutboxEntry>).payload
-              .createdAt
+            (action as ReturnType<typeof appendClientCommand>).payload
           )
         )
       )

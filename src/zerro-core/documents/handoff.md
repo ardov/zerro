@@ -15,34 +15,35 @@ This file routes the next task. Git contains implementation history.
   the supported application surface.
 - Redux owns `base + outbox + outboxHead`. `current`, pending counts, and sync
   transport rematerialize from the command prefix.
-- Local entries are flat durable commands with only `createdAt` added.
-  `transactions.patch` is the first narrow durable command;
-  `transaction.recreate` handles immutable `created`; unmigrated command
-  families resolve to transitional `patch`.
-- Persistence validates current replay inputs and does not store derived state;
-  no old command format needs migration.
+- The outbox stores direct `TCommand[]` values. Every command has exactly
+  `type: 'patch'`, `issuedAt`, and `TIntentPatch`; there is no entry wrapper or
+  durable command union.
+- Persistence version 2 validates the command-only shape and does not store
+  derived state; no old command format needs migration.
 - The snapshot session remains frozen and exposes only namespaced reads.
 - Activity and budget projections retain counts instead of transaction arrays;
   typed transaction queries reconstruct intrinsic and envelope-filtered lists
   from canonical history on demand.
-- Materialization recompiles durable commands, preserves remote transaction
-  fields during sparse rebase, skips deleted transactions, and assigns strict
-  fresh entity versions. Cross-entity effects remain deferred.
+- Materialization overlays sparse transaction fields on the latest entity,
+  skips deleted transactions, and assigns strict fresh entity versions.
+  Transitional full-entity intents and cross-entity effects remain deferred.
+- Successful sync removes exactly the captured sent prefix; per-command
+  satisfaction checks are removed. Commands appended in flight remain pending.
 - Writable patch contracts now live beside their entity contracts. Account,
   tag, merchant, reminder, transaction, envelope-meta, and user-settings
   command modules consume those colocated types without widening their current
   writable fields.
 
-## Next checkpoint: one sparse patch command
+## Next checkpoint: sparse compilers and upsert
 
 Land this as small independent commits where practical:
 
-1. store one `TCommand` shape directly in the outbox with `issuedAt` and sparse
-   intent;
-2. convert Redux compilers and implement deterministic upsert replay;
+1. convert remaining full-entity Redux compilers to sparse intent and deletion
+   refs;
+2. implement deterministic factory-backed upsert replay and reject incomplete
+   creation intent before append;
 3. split primary-only transport from local materialized effects;
-4. acknowledge every successful request by removing `sentOutboxCount` commands;
-5. run reload, undo/redo, repeated-field, in-flight append, and explicit-sync
+4. run reload, undo/redo, repeated-field, in-flight append, and explicit-sync
    smoke.
 
 See the ordered slices in [roadmap.md](./roadmap.md). Add balance and cascade

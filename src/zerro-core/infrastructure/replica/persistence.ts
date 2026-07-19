@@ -1,20 +1,15 @@
-import type { TOutboxEntry } from './outbox'
-import {
-  isTransactionEditableField,
-  isTransactionRecreateField,
-} from '../../application/materializer'
+import type { TCommand } from '../../application/materializer'
 
-export const replicaPersistenceVersion = 1 as const
+export const replicaPersistenceVersion = 2 as const
 
 export type TPersistedReplica = {
   version: typeof replicaPersistenceVersion
   baseServerTimestamp: number
-  outbox: TOutboxEntry[]
+  outbox: TCommand[]
   outboxHead: number
 }
 
 const patchKeys = new Set([
-  'serverTimestamp',
   'deletion',
   'instrument',
   'country',
@@ -61,60 +56,15 @@ function validateOutboxEntry(value: unknown, index: number): void {
     throw new Error(
       `Invalid persisted Core replica: outbox[${index}] is not an object`
     )
-  if (!isFiniteNumber(value.createdAt))
+  if (!isFiniteNumber(value.issuedAt))
     throw new Error(
       `Invalid persisted Core replica: outbox[${index}] metadata is invalid`
     )
-  validateCommand(value, `outbox[${index}]`)
-}
-
-function validateCommand(value: unknown, path: string): void {
-  if (!isRecord(value) || typeof value.type !== 'string') {
-    throw new Error(`Invalid persisted Core replica: ${path} is invalid`)
-  }
-
-  if (value.type === 'patch') {
-    validatePatch(value.payload, `${path}.payload`)
-    return
-  }
-
-  if (value.type === 'transactions.patch') {
-    if (
-      !isRecord(value.payload) ||
-      !Array.isArray(value.payload.ids) ||
-      value.payload.ids.length === 0 ||
-      value.payload.ids.some(id => typeof id !== 'string') ||
-      !isRecord(value.payload.set) ||
-      Object.keys(value.payload.set).length === 0 ||
-      Object.keys(value.payload.set).some(
-        key => !isTransactionEditableField(key)
-      )
-    ) {
-      throw new Error(`Invalid persisted Core replica: ${path} is invalid`)
-    }
-    return
-  }
-
-  if (value.type === 'transaction.recreate') {
-    if (
-      !isRecord(value.payload) ||
-      typeof value.payload.sourceId !== 'string' ||
-      typeof value.payload.replacementId !== 'string' ||
-      value.payload.sourceId === value.payload.replacementId ||
-      !isRecord(value.payload.set) ||
-      !isFiniteNumber(value.payload.set.created) ||
-      !isFiniteNumber(value.payload.set.income) ||
-      !isFiniteNumber(value.payload.set.outcome) ||
-      Object.keys(value.payload.set).some(
-        key => !isTransactionRecreateField(key)
-      )
-    ) {
-      throw new Error(`Invalid persisted Core replica: ${path} is invalid`)
-    }
-    return
-  }
-
-  throw new Error(`Invalid persisted Core replica: ${path}.type is invalid`)
+  if (value.type !== 'patch')
+    throw new Error(
+      `Invalid persisted Core replica: outbox[${index}].type is invalid`
+    )
+  validatePatch(value.patch, `outbox[${index}].patch`)
 }
 
 function validatePatch(value: unknown, path: string): void {
@@ -125,15 +75,6 @@ function validatePatch(value: unknown, path: string): void {
       throw new Error(
         `Invalid persisted Core replica: ${path}.${key} is invalid`
       )
-    }
-
-    if (key === 'serverTimestamp') {
-      if (!isFiniteNumber(patchValue)) {
-        throw new Error(
-          `Invalid persisted Core replica: ${path}.${key} is invalid`
-        )
-      }
-      continue
     }
 
     if (
