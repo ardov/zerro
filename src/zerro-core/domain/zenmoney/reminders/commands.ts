@@ -1,4 +1,4 @@
-import type { Modify, OptionalExceptFor } from '../../shared/types'
+import type { Modify } from '../../shared/types'
 import type { TDataStore } from '../store'
 import {
   DataEntity,
@@ -9,9 +9,8 @@ import type { TDateDraft } from '../primitives'
 import { getRootUserId } from '../users'
 import { makeReminder, type TReminderFactoryDraft } from './factory'
 import { getReminders } from './read'
-import type { TReminder, TReminderId } from './types'
+import type { TReminder, TReminderId, TReminderPatch } from './types'
 
-export type TReminderPatch = OptionalExceptFor<TReminder, 'id'>
 export type TReminderDraft = Modify<
   Omit<TReminderFactoryDraft, 'user'>,
   { startDate?: TDateDraft; endDate?: TDateDraft }
@@ -28,10 +27,11 @@ export function compileSetReminder(
   return {
     reminder: list.map(item => {
       const current = hasId(item) ? getReminders(data)[item.id] : undefined
+      const changed = 'changed' in item ? item.changed : undefined
       const patched = {
         ...(current || ({} as TReminder)),
         ...item,
-        changed: item.changed || ctx.now(),
+        changed: changed || ctx.now(),
       } as TReminderFactoryDraft
 
       if (!patched.user) {

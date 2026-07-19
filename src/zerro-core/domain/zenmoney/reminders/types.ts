@@ -1,3 +1,4 @@
+import type { EntityPatch } from '../../shared/types'
 import type { TAccountId } from '../accounts'
 import type { TInstrumentId } from '../instruments'
 import type { TMerchantId } from '../merchants'
@@ -33,6 +34,26 @@ export type TReminder = {
   endDate: TISODate
   notify: boolean
 }
+
+export type TReminderPatch = EntityPatch<
+  TReminder,
+  | 'incomeInstrument'
+  | 'incomeAccount'
+  | 'income'
+  | 'outcomeInstrument'
+  | 'outcomeAccount'
+  | 'outcome'
+  | 'tag'
+  | 'merchant'
+  | 'payee'
+  | 'comment'
+  | 'interval'
+  | 'step'
+  | 'points'
+  | 'startDate'
+  | 'endDate'
+  | 'notify'
+>
 
 export type TZmReminder = Omit<TReminder, 'changed'> & {
   /** ZenMoney wire timestamp in seconds. */

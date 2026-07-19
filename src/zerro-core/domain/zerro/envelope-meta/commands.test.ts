@@ -10,7 +10,8 @@ import { applyPatch } from '../../zenmoney'
 import { EnvType, envId } from '../envelope-id'
 import { HiddenDataType } from '../hidden-data'
 import { compilePatchEnvelopeMeta } from './commands'
-import { envelopeVisibility, getEnvelopeMeta } from './read'
+import { getEnvelopeMeta } from './read'
+import { envelopeVisibility } from './types'
 
 describe('envelope meta commands', () => {
   it('patches one envelope meta record over existing hidden data', () => {

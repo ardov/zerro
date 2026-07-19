@@ -1,3 +1,4 @@
+import type { EntityPatch } from '../../shared/types'
 import type { TCompanyId } from '../companies'
 import type { TInstrumentId } from '../instruments'
 import type { TISODate, TMsTime, TUnixTime, TUnits } from '../primitives'
@@ -63,6 +64,8 @@ export type TAccount = {
   /** Meaningful only for loan and deposit accounts; otherwise usually null. */
   payoffInterval: 'month' | 'year' | null
 }
+
+export type TAccountPatch = EntityPatch<TAccount, 'title' | 'inBalance'>
 
 export type TZmAccount = Omit<TAccount, 'changed'> & {
   /** ZenMoney wire timestamp in seconds. */

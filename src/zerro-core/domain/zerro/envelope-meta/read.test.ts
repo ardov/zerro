@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { makeReminder, makeStore } from '../../../testing/zenmoneyTestData'
 import { envId, EnvType } from '../envelope-id'
 import { HiddenDataType } from '../hidden-data'
-import { envelopeVisibility, getEnvelopeMeta } from './read'
+import { getEnvelopeMeta } from './read'
+import { envelopeVisibility } from './types'
 
 describe('envelope meta read helpers', () => {
   it('returns an empty object by default', () => {

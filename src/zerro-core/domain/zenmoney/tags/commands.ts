@@ -4,22 +4,8 @@ import type { TCoreContext, TNormalizedPatch } from '../../../types'
 import { getRootUserId } from '../users'
 import { makeTag } from './factory'
 import { getTags } from './read'
-import type { TTag } from './types'
+import type { TTag, TTagPatch } from './types'
 
-export type TTagPatch = { id: TTag['id'] } & Partial<
-  Pick<
-    TTag,
-    | 'title'
-    | 'icon'
-    | 'budgetIncome'
-    | 'budgetOutcome'
-    | 'archive'
-    | 'showIncome'
-    | 'showOutcome'
-    | 'parent'
-    | 'color'
-  >
->
 export type TTagDraft = OptionalExceptFor<TTag, 'title'>
 
 export function compilePatchTag(

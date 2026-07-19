@@ -1,6 +1,6 @@
 # Zerro Core design ledger
 
-- Updated: 2026-07-16
+- Updated: 2026-07-19
 - Purpose: settled decisions, accepted risks, active bridges, and unresolved
   architectural questions. History stays in Git.
 
@@ -45,24 +45,27 @@
 
 ### Commands and materialization
 
-- Outbox entries are flat durable commands with only creation time added. They
-  persist neither entry ids nor parallel intent/applied patches.
-- `transactions.patch` stores one whitelist field set plus target
-  ids. The whole entry is one undo/redo and acknowledgement unit.
-- `created` is server-owned after transaction creation. A time edit stores
-  `transaction.recreate` with durable source/replacement ids and
-  materializes both hiding the original and creating the replacement.
+- The outbox stores `TCommand[]` directly. Every command has the same `patch`
+  shape: `type: 'patch'`, `issuedAt`, and a sparse entity intent patch. There is
+  no separate outbox-entry wrapper, entry id, or persisted materialized patch.
+- Entity patch types live beside entity types and use
+  `EntityPatch<TEntity, TWritableFields>`. `id` is required and every field that
+  may appear in sparse intent is explicitly listed.
+- Entity patches use upsert semantics: an existing id is patched and a missing
+  id is created. Commands capture generated ids and every other nondeterministic
+  input before persistence.
+- Deletion intent stores entity identity; materialization supplies transport
+  metadata such as timestamps and ownership.
 - Commands set absolute values and remain idempotent. Relative operations such
-  as toggle or increment require a distinct semantic command.
-- Specialized adapter verbs such as `setViewed` may compile directly to the
-  generic durable transaction patch without minting another persisted shape.
-- Unmigrated command families use `patch`, a resolved full-patch command.
-  It preserves behavior but does not promise field-level remote rebase.
+  as toggle or increment are resolved to absolute intent before issue.
+- Semantic Redux verbs may compile differently, but they all issue the same
+  persisted command type. Receipts are caller-only and are not replay state.
+- Local materialization first expands sparse primary intent to full entities,
+  then derives predicted server side effects. Transport materialization expands
+  primary intent only and must not echo predicted effects back to ZenMoney.
 - `applyPatch` applies only explicit changes and owns no cross-entity rules.
 - Canonical server diffs bypass local materialization.
 - Replay rematerializes the command prefix against `base` in order.
-- Missing or deleted transaction targets are terminal no-ops for sparse field
-  patches, matching observed server immutability.
 
 ### Replica and sync
 
@@ -73,16 +76,16 @@
   text-editing controls and only when that history direction is available.
 - Persistence stores versioned replay inputs plus the base server timestamp,
   not derived state.
-- Periodic sync may run with a non-empty prefix only when every pending command
-  is a rebase-safe transaction patch or recreate. Transitional commands still
-  pause it.
 - Manual sync drops the redo tail, captures the sent prefix length,
-  rematerializes transport with fresh entity versions, applies the response as
-  canonical, and removes narrow commands only when their requested fields are
-  satisfied. Undo/redo remains disabled until the request finishes.
-- Transitional `patch` retains whole-batch acknowledgement until its
-  command family is migrated.
-- First-stage conflict policy is entity-level last write wins.
+  builds primary-only transport with fresh entity versions, and applies the
+  response as canonical. Any successful response acknowledges the whole sent
+  prefix; Core removes exactly `sentOutboxCount` commands without inspecting
+  final field values. Undo/redo remains disabled until the request finishes.
+- Commands appended while a request is active remain after the acknowledged
+  prefix and replay over the new canonical base.
+- First-stage conflict policy is field-level last write wins within command
+  order. Several commands may touch the same field; the last one determines the
+  final value without making earlier commands unacknowledged.
 
 ### Testing
 
@@ -99,7 +102,11 @@
 
 - Transaction edits may leave `account.balance` stale until synchronization;
   balance effects belong to materialization.
-- Dirty sessions containing transitional commands do not sync automatically.
+- Upsert may recreate an entity that disappeared remotely while a local patch
+  remained pending.
+- A successful response is trusted as whole-batch acknowledgement. A server
+  that silently rejects part of a request can therefore cause local intent to
+  be dropped; revisit only with evidence that this occurs.
 - Undo/redo is keyboard-accessible in the loaded application; visible controls
   remain deferred.
 - Replica metadata is disposable until product continuity requirements justify
@@ -124,13 +131,12 @@ useful.
 
 ## Open questions
 
-### Resolved command migration — blocks non-identity effects
+### Materializer effects and primary transport
 
-Current sync transport rematerializes commands. Before adding balance or
-cascade effects for a command family, replace its transitional `patch`
-with a narrow durable command and define which primary entities its transport
-encoder sends. Server-materialized balance and cascade effects must not be sent
-back as client intent.
+Before adding balance or cascade effects, implement primary-only transport
+replay separately from UI `current`. The encoder may collect touched entity ids
+and read their final full values from a primary-only working snapshot; it must
+not read full entities from `current`, which also contains predicted effects.
 
 ### Materializer evidence and versioning
 
@@ -143,7 +149,8 @@ back as client intent.
 
 - How should renaming a visible payee envelope affect several raw payee
   spellings?
-- Which migrated command families are safe enough to opt into background sync?
+- Which dirty sessions should opt into automatic sync after the unified
+  primary-only transport path lands?
 
 ### Future surfaces — not scheduled
 

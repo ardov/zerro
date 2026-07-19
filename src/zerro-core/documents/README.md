@@ -37,13 +37,12 @@ React, storage, localization, or app-layer runtime modules.
 - Materialization now owns command replay and deleted-transaction no-ops.
   Balance and cascade rules remain the next architectural phase.
 
-## Next slice: closure smoke
+## Next slice: one sparse patch command
 
-Before adding non-identity materializer rules, finish the manual budget/goal
-edit plus explicit-sync smoke.
-
-Then migrate resolved `patch` command families to narrow commands before
-enabling their balance or cascade rules.
+Unify persisted writes as direct `TCommand[]` entries with `issuedAt` and sparse
+entity intent, then add deterministic upsert replay and primary-only transport.
+Successful sync acknowledges the captured sent prefix as a batch. The ordered
+implementation slices are in [roadmap.md](./roadmap.md).
 
 ## Start here
 

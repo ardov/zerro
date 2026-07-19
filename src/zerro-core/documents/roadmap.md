@@ -1,6 +1,6 @@
 # Zerro Core roadmap
 
-- Updated: 2026-07-16
+- Updated: 2026-07-19
 - Purpose: order remaining work; history stays in Git.
 
 ## Goal
@@ -98,21 +98,45 @@ Verify in one session:
 
 Exit: the completion gate in `testing.md` is satisfied.
 
-## Phase 2: durable command migration — current
+## Phase 2: one sparse patch command — current
 
-The command-only replica and generic `transactions.patch` are in place.
-Migrate remaining behavior by command family:
+Replace the transitional command split with one persisted command shape. Land
+the work as bounded verified slices:
 
-1. transaction delete/permanent delete/restore;
-2. transaction combine and transfer merge;
-3. account and reminder writes;
-4. Zerro hidden-data commands.
+1. **Done:** writable entity patch types live beside entity types and use
+   `EntityPatch<TEntity, TWritableFields>` to list their writable surface;
+2. replace `TOutboxEntry`/`TDurableCommand` with direct `TCommand[]` storage;
+   every command stores `type: 'patch'`, `issuedAt`, and `TIntentPatch`;
+3. make issue capture time, generated ids, absolute values, and caller-only
+   receipts before append;
+4. convert Redux command compilers to sparse entity intent and deletion refs;
+5. implement deterministic upsert materialization: patch an existing id, create
+   a missing id, and reject incomplete creation intent before persistence;
+6. replay the applied prefix into `current`, keeping `applyPatch` dumb.
 
-For each family, define narrow payload, terminal no-op/conflict behavior,
-satisfaction, and primary transport entities. Do not add cross-entity effects
-while the family still stores `patch`.
+Exit: all production writes persist the same command type; reload and undo/redo
+reproduce the same `current` without ambient ids or time.
 
-## Phase 3: materializer rules
+## Phase 3: primary-only sync and batch acknowledgement
+
+1. freeze the applied prefix as `sentOutboxCount` and disable undo/redo while
+   the request is active;
+2. replay the sent prefix from `base` into a primary-only working snapshot with
+   fresh `sentAt` versions;
+3. collect touched ids/deletions and build transport from that working snapshot,
+   never from UI `current`;
+4. on success apply the canonical response to `base` and remove exactly the
+   sent command count without per-command satisfaction checks;
+5. preserve commands appended during the request and replay them over the new
+   base; on failure leave base and outbox unchanged;
+6. update persistence validation/versioning and discard incompatible local
+   metadata rather than adding a migration framework.
+
+Exit: two sent commands may touch the same field, the last value wins, and the
+whole successful prefix is acknowledged without losing commands appended in
+flight.
+
+## Phase 4: materializer rules
 
 Implement one rule per checkpoint:
 
@@ -124,10 +148,11 @@ Implement one rule per checkpoint:
 For each rule:
 
 - test the materialized patch and resulting state;
-- cover batches, missing entities, and already-deleted entities;
+- cover batches, upsert creation, deletion, and repeated field writes;
 - compare with a real ZenMoney response when possible;
 - add command versioning only when real persisted compatibility exists;
-- keep canonical server diffs and dumb `applyPatch` unchanged.
+- keep canonical server diffs and dumb `applyPatch` unchanged;
+- keep predicted effects out of primary-only transport.
 
 ## Deferred until evidence exists
 
@@ -141,7 +166,8 @@ For each rule:
 
 ## Choosing work
 
-- Finish Phase 1 before Phase 2.
+- Follow the current phase in order; a verified independent smoke may land
+  between command slices.
 - Split work by contract: verification, bridge removal, transport decision, and
   each materializer rule should remain separate commits.
 - A concrete product regression may override this order; document the evidence

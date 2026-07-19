@@ -1,6 +1,6 @@
 # Zerro Core handoff
 
-- Updated: 2026-07-16
+- Updated: 2026-07-19
 - Branch: `core-next`
 - Module: `src/zerro-core`
 - Worktree: verify before editing
@@ -28,38 +28,40 @@ This file routes the next task. Git contains implementation history.
 - Materialization recompiles durable commands, preserves remote transaction
   fields during sparse rebase, skips deleted transactions, and assigns strict
   fresh entity versions. Cross-entity effects remain deferred.
+- Writable patch contracts now live beside their entity contracts. Account,
+  tag, merchant, reminder, transaction, envelope-meta, and user-settings
+  command modules consume those colocated types without widening their current
+  writable fields.
 
-## Next checkpoint: health and closure
+## Next checkpoint: one sparse patch command
 
 Land this as small independent commits where practical:
 
-1. **Manual completion smoke**
-   - edit a budget or goal;
-   - edit a transaction and reload with a pending outbox;
-   - perform explicit sync and verify canonical rebase.
+1. store one `TCommand` shape directly in the outbox with `issuedAt` and sparse
+   intent;
+2. convert Redux compilers and implement deterministic upsert replay;
+3. split primary-only transport from local materialized effects;
+4. acknowledge every successful request by removing `sentOutboxCount` commands;
+5. run reload, undo/redo, repeated-field, in-flight append, and explicit-sync
+   smoke.
 
-## After closure: materializer checkpoint
-
-Before transaction-balance effects or account-deletion cascades:
-
-1. migrate the command family to a narrow durable shape;
-2. define its satisfaction and terminal no-op rules;
-3. encode only primary entities for transport;
-4. implement one deterministic materializer rule per verified commit.
-
-Deleted-transaction immutability is the smallest first rule. Balance effects,
-account deletion, and transfer conversion follow only after the transport
-decision.
+See the ordered slices in [roadmap.md](./roadmap.md). Add balance and cascade
+rules only after primary-only transport is established.
 
 ## Boundaries to preserve
 
 - Root `zerro-core` stays facade-only; the app uses `zerro-core/redux`.
 - Domain/application code must not import Redux, React, IndexedDB,
   localization, worker code, or app runtime modules.
-- Commands express writable intent through explicit field whitelists; avoid
-  `Partial<TEntity>` APIs.
+- Commands express sparse writable intent. Entity patch types live beside
+  entity types and use `EntityPatch<TEntity, TWritableFields>` so their writable
+  fields remain explicit.
+- Missing ids use the accepted upsert behavior and create entities; issue must
+  capture ids, time, and every nondeterministic input.
 - `applyPatch` remains dumb; cross-entity behavior belongs in materialization.
 - Canonical server diffs bypass local materialization.
+- Transport uses primary-only replay and never reads predicted effects from UI
+  `current`.
 - Redux remains the only reactive replica owner.
 - Persist commands, not materialized patches, `current`, sync transport, or
   response staging.
@@ -67,8 +69,9 @@ decision.
 ## Accepted product risks
 
 - Account balances may be stale until explicit synchronization.
-- Automatic sync continues with only sparse transaction patches pending. A
-  transitional `patch` still pauses it until explicit sync.
+- A pending patch may recreate an entity deleted remotely.
+- Successful sync drops the whole sent prefix; silently rejected partial writes
+  are not detected without new evidence that detection is needed.
 - Undo/redo is available through platform keyboard shortcuts outside text-editing
   controls.
 - Replica metadata is disposable until continuity requirements justify

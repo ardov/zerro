@@ -1,3 +1,4 @@
+import type { EntityPatch } from '../../shared/types'
 import type { TMsTime, TUnixTime } from '../primitives'
 import type { TUserId } from '../users'
 
@@ -12,6 +13,8 @@ export type TMerchant = {
   user: TUserId
   title: string
 }
+
+export type TMerchantPatch = EntityPatch<TMerchant, 'title'>
 
 export type TZmMerchant = Omit<TMerchant, 'changed'> & {
   /** ZenMoney wire timestamp in seconds. */

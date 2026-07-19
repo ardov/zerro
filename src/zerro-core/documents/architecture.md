@@ -1,7 +1,7 @@
 # Zerro Core architecture
 
 - Status: accepted target architecture for an incremental migration
-- Updated: 2026-07-16
+- Updated: 2026-07-19
 
 ## Purpose
 
@@ -75,39 +75,34 @@ current               -> derived views
 
 ### Commands
 
-Durable commands describe user intent and remain serializable. The first
-generic field command is:
+Durable commands describe sparse user intent and remain serializable. The
+outbox stores one command shape directly:
 
 ```ts
-type Command =
-  | {
-      type: 'transactions.patch'
-      payload: {
-        ids: TransactionId[]
-        set: TransactionEditablePatch
-      }
-    }
-  | {
-      type: 'transaction.recreate'
-      payload: {
-        sourceId: TransactionId
-        replacementId: TransactionId
-        set: TransactionRecreatePatch
-      }
-    }
-  | {
-      type: 'patch'
-      payload: TNormalizedPatch
-    }
+type Command = {
+  type: 'patch'
+  issuedAt: TMsTime
+  patch: IntentPatch
+}
+
+type IntentPatch = {
+  account?: AccountPatch[]
+  tag?: TagPatch[]
+  transaction?: TransactionPatch[]
+  deletion?: DeleteIntent[]
+  // other normalized entity patches
+}
 ```
 
-`TransactionEditablePatch` is built from an explicit whitelist and excludes
-identity, user ownership, the sync version timestamp, source, and server-only
-fields, including `created`. ZenMoney does not update `created` on an existing
-transaction. Editing transaction time therefore emits `transaction.recreate`:
-the original is hidden by zeroing its amounts and a replacement with a durable
-new id is created with the requested `created`. One command may target several
-ids; it remains one undo/redo and acknowledgement unit.
+Entity patch types live beside their entity types and document locally writable
+fields through `EntityPatch<TEntity, TWritableFields>`. The helper makes `id`
+required and only the explicitly listed writable fields optional. A present id
+is patched and a missing id is created. This upsert rule deliberately favors one
+simple command shape over separate create/update operations.
+
+Command issue captures generated ids, `issuedAt`, and every other
+nondeterministic input. Replay must not call ambient time or generate a new id.
+Deletion intent stores entity identity; materialization adds protocol metadata.
 
 Internal compilers may keep the `compile*` prefix. The public facade should use
 short domain verbs:
@@ -117,16 +112,16 @@ engine.envelopes.rename({ id, name })
 engine.budgets.set(update)
 ```
 
-Commands set absolute values and must be idempotent under rebase. Do not store
-relative functions such as toggle or increment. Adapter conveniences such as
-`setViewed(ids, value)` may emit the generic durable patch; specialized command
-kinds are added only when `ids + one set` cannot describe the behavior.
+Commands set absolute values and must be idempotent under rebase. Semantic Redux
+verbs may use different compilers, but they all issue this persisted patch
+shape. Relative requests such as toggle or increment are resolved to absolute
+values before issue.
 
 If compilation generates caller-only metadata, it returns:
 
 ```ts
 type TCompiled<TReceipt> = {
-  patch: TNormalizedPatch
+  patch: TIntentPatch
   receipt: TReceipt
 }
 ```
@@ -135,21 +130,24 @@ The receipt is not replay state.
 
 ### Materialization
 
-Local writes pass through one ZenMoney-compatible materializer:
+Local writes pass through one deterministic pipeline:
 
 ```txt
 base
-  -> materializeCommand(command 1)
-  -> applyPatch
-  -> materializeCommand(command 2)
-  -> applyPatch
+  -> expand sparse primary intent
+  -> derive predicted server effects
+  -> applyPatch(primary + effects)
+  -> repeat for the next command
   -> current
 ```
 
-Sparse transaction patches read the full latest transaction, overlay only
-whitelisted fields, and assign a version strictly newer than the current
-entity. Missing and deleted targets become terminal no-ops. Future rules belong
-here rather than in every command compiler:
+Sparse patches read the latest entity and overlay only present fields. A missing
+id invokes the entity factory and creates a complete entity; an incomplete
+creation intent fails before it can be persisted. Patching an entity that
+disappeared remotely therefore recreates it after rebase. Command order resolves
+delete-then-patch and repeated field writes.
+
+Future predicted server rules belong here rather than in command compilers:
 
 - changing transaction amounts updates affected account balances;
 - deleting an account permanently deletes its non-transfer transactions;
@@ -157,16 +155,11 @@ here rather than in every command compiler:
   surviving account;
 - a transaction already marked `deleted` ignores subsequent patches.
 
-Materialization is pure and receives the current normalized snapshot, durable
-command, and explicit timestamp. Replay uses entry creation time; request
-transport rematerializes with a fresh timestamp. Before balance updates or
-account/transaction cascades are enabled, each command family must define a
-transport encoding that sends primary changes without echoing locally
-materialized server effects.
-
-`patch` is a transitional resolved command for behavior not yet moved to
-a narrow durable shape. It is deterministic and keeps the command-only replica,
-but its full entities do not provide field-level remote rebase.
+Materialization is pure and receives the current normalized snapshot, command,
+and explicit version time. Local replay uses `issuedAt`; request transport uses
+a fresh `sentAt`. Local `current` contains primary changes plus predicted
+effects. Transport is built from a separate primary-only replay so predicted
+server effects are never sent as client intent.
 
 ### Dumb patch application
 
@@ -257,24 +250,24 @@ redo-tail truncation on append, and command rematerialization. The
 reference engine uses these operations; Redux can reuse them incrementally
 without exposing them as root package API or introducing a second store.
 
-Durable commands append complete runtime outbox entries. Redux performs
+Issued commands append directly to the outbox. Redux performs
 authoritative `current` rematerialization for append, undo, redo, and base
 changes. The sync adapter derives request transport from the same command
 prefix; Redux stores no parallel `data.diff` projection.
 
-Synchronization follows a command-capability policy. Periodic sync may run
-while the prefix is empty or contains only rebase-safe transaction patches and
-recreates. Any transitional resolved command pauses periodic sync until the
-user explicitly synchronizes.
+Periodic and manual sync use the same primary-only transport path. Whether a
+dirty session syncs automatically remains an adapter policy, not a capability
+classification between persisted command kinds.
 
 Manual sync is a commit boundary. It discards the redo tail, records the sent
 prefix length, and rematerializes its transport against the current base with
 fresh entity versions. Undo/redo is disabled while the request is active, so
-new commands can only append after that stable prefix. A ZenMoney response
-updates `base`. Narrow commands are
-removed only when canonical data satisfies their requested fields; silently
-rejected commands stay pending. Commands created while the request was in
-flight are preserved and replayed over the new base.
+new commands can only append after that stable prefix. A successful ZenMoney
+response updates `base` and acknowledges the whole sent prefix. Core removes
+exactly the captured command count without comparing final field values. This
+matters when several commands changed the same field: the last value wins, while
+every sent command remains part of the accepted batch. Commands created while
+the request was in flight are preserved and replayed over the new base.
 
 Redux may temporarily stage a response between reducer actions, but that is an
 implementation detail, not a product inbox. Rebase-safe commands may accept
@@ -496,7 +489,7 @@ The logical persisted replica consists of:
 ```ts
 type ReplicaState = {
   base: TDataStore
-  outbox: OutboxEntry[]
+  outbox: Command[]
   outboxHead: number
 }
 ```
@@ -512,12 +505,14 @@ the command prefix:
 current = materializeCommands(base, outbox.slice(0, outboxHead))
 ```
 
-An outbox entry stores one durable command:
+The outbox stores commands directly:
 
 ```ts
-type OutboxEntry = {
-  createdAt: number
-} & DurableCommand
+type Command = {
+  type: 'patch'
+  issuedAt: TMsTime
+  patch: IntentPatch
+}
 ```
 
 Replica persistence stores the current command-only schema. There are no
@@ -545,31 +540,23 @@ accepted local changes as well as remote changes and the new server timestamp:
 ```txt
 fresh transport from command prefix + cursor -> ZenMoney
 canonical diff                               -> applyPatch(base, diff)
-                                             -> ack satisfied commands
+                                             -> drop sent command count
                                              -> rematerialize pending commands
 ```
 
-Sparse transaction commands are acknowledged only when canonical response data
-contains every requested field value. A missing or deleted transaction is a
-terminal acknowledgement. A recreate is acknowledged only when its original
-is hidden and its replacement exists with the requested values. Transitional
-`patch` commands keep whole-batch acknowledgement until their command
-families receive narrow encodings. If the request fails, neither base nor the
-command outbox changes.
+Transport replay starts from `base`, applies only primary command patches to a
+working snapshot, and records touched ids and deletions. The final full entities
+come from that primary-only snapshot, never from UI `current` with predicted
+effects. A successful response acknowledges and removes exactly the captured
+sent prefix. If the request fails, neither base nor the command outbox changes.
 
-Periodic sync uses the same canonical response boundary. It may run with an
-empty prefix or with only rebase-safe transaction patches and recreates; a
-transitional resolved patch pauses it.
+Periodic sync uses the same canonical response and whole-prefix acknowledgement
+boundary.
 
-First-stage conflict resolution is field-level last write wins for migrated
-transaction fields: materialization overlays only requested fields on the
-latest canonical entity. Transitional resolved patches remain full-entity and
-therefore retain entity-level replacement behavior.
-Hidden-data blobs inherit the same limitation.
-
-Revisit this only when multi-device editing or remote previews justify semantic
-rebase. Stored high-level commands leave room for revalidation or recompilation,
-but normal replay stays patch-based and deterministic.
+First-stage conflict resolution is field-level last write wins in command
+order. Upsert intentionally recreates a missing entity. Revisit this only with
+evidence that remote deletion or silent partial rejection needs a different
+product policy or multi-device editing justifies a richer conflict model.
 
 ## Migrations and compatibility
 
@@ -595,7 +582,7 @@ it appears in legacy code; preserve it until its listed replacement is ready.
 7. Commands use narrow semantic inputs and do not import Redux selectors.
 8. Local intent passes through the materializer; canonical server diffs do not.
 9. `applyPatch` remains dumb and deterministic.
-10. Replay rematerializes versioned durable commands in prefix order.
+10. Replay rematerializes issued patch commands in prefix order.
 11. Redux remains the sole replica owner in the React app.
 12. Presentation decoration is not domain state.
 13. Real-account fixtures require a concrete regression case and must never

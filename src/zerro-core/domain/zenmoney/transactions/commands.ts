@@ -11,11 +11,9 @@ import type {
   TTransaction,
   TTransactionEditablePatch,
   TTransactionId,
+  TTransactionPatch,
 } from './types'
 
-export type TTransactionPatch = TTransactionEditablePatch & {
-  id: TTransactionId
-}
 export type TTransactionDraft = Modify<
   Omit<TTransactionFactoryDraft, 'user'>,
   { date: TDateDraft; changed?: TDateDraft; created?: TDateDraft }

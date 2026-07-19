@@ -1,3 +1,4 @@
+import type { EntityPatch } from '../../shared/types'
 import type { TAccountId } from '../accounts'
 import type { TCompanyId } from '../companies'
 import type { TInstrumentId } from '../instruments'
@@ -87,6 +88,11 @@ export type TTransactionEditableField =
 
 export type TTransactionEditablePatch = Partial<
   Pick<TTransaction, TTransactionEditableField>
+>
+
+export type TTransactionPatch = EntityPatch<
+  TTransaction,
+  TTransactionEditableField
 >
 
 /** Fields accepted while creating a replacement transaction. */

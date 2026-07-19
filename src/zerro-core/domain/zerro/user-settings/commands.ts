@@ -5,9 +5,8 @@ import {
   compileSetSimpleHiddenData,
   HiddenDataType,
 } from '../hidden-data'
-import { getStoredUserSettings, type TUserSettings } from './read'
-
-export type TUserSettingsPatch = Partial<TUserSettings>
+import { getStoredUserSettings } from './read'
+import type { TUserSettingsPatch } from './types'
 
 export function compilePatchUserSettings(
   data: TDataStore,

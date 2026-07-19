@@ -1,10 +1,7 @@
 import type { TDataStore } from '../store'
 import type { TCoreContext, TNormalizedPatch } from '../../../types'
 import { getMerchants } from './read'
-import type { TMerchant } from './types'
-
-export type TMerchantPatch = Pick<TMerchant, 'id'> &
-  Partial<Pick<TMerchant, 'title'>>
+import type { TMerchantPatch } from './types'
 
 export function compilePatchMerchant(
   data: TDataStore,

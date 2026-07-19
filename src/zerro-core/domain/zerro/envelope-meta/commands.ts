@@ -1,10 +1,8 @@
-import type { OptionalExceptFor } from '../../shared/types'
 import type { TDataStore } from '../../zenmoney/store'
 import type { TCoreContext, TNormalizedPatch } from '../../../types'
 import { compileSetSimpleHiddenData, HiddenDataType } from '../hidden-data'
-import { getEnvelopeMeta, type TEnvelopeMeta } from './read'
-
-export type TEnvelopeMetaPatch = OptionalExceptFor<TEnvelopeMeta, 'id'>
+import { getEnvelopeMeta } from './read'
+import type { TEnvelopeMetaPatch } from './types'
 
 export function compilePatchEnvelopeMeta(
   data: TDataStore,

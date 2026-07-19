@@ -1,3 +1,4 @@
+import type { EntityPatch } from '../../shared/types'
 import type { TMsTime, TUnixTime } from '../primitives'
 import type { TUserId } from '../users'
 
@@ -34,6 +35,19 @@ export type TTag = {
   /** Deprecated field */
   picture: string | null
 }
+
+export type TTagPatch = EntityPatch<
+  TTag,
+  | 'title'
+  | 'icon'
+  | 'budgetIncome'
+  | 'budgetOutcome'
+  | 'archive'
+  | 'showIncome'
+  | 'showOutcome'
+  | 'parent'
+  | 'color'
+>
 
 export type TZmTag = Omit<TTag, 'changed'> & {
   /** ZenMoney wire timestamp in seconds. */

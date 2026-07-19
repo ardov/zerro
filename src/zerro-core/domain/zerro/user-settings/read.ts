@@ -3,14 +3,7 @@ import {
   HiddenDataType,
   THiddenDataSource,
 } from '../hidden-data'
-
-export type TUserSettings = {
-  sawMigrationAlert: boolean
-  preferZmBudgets: boolean
-  emojiIcons: boolean
-}
-
-export type TStoredUserSettings = Partial<TUserSettings>
+import type { TStoredUserSettings, TUserSettings } from './types'
 
 export const DEFAULT_USER_SETTINGS: TUserSettings = {
   sawMigrationAlert: false,

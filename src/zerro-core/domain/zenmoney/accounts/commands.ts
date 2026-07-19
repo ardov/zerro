@@ -10,11 +10,8 @@ import { getTransactionsHistory } from '../transactions/read'
 import type { TTransaction } from '../transactions/types'
 import { makeAccount, type TAccountFactoryDraft } from './factory'
 import { getAccounts } from './read'
-import type { TAccount, TAccountId } from './types'
+import type { TAccountId, TAccountPatch } from './types'
 
-export type TAccountPatch = { id: TAccountId } & Partial<
-  Pick<TAccount, 'title' | 'inBalance'>
->
 export type TAccountDraft = Omit<TAccountFactoryDraft, 'user'>
 
 export function compileCreateAccount(
