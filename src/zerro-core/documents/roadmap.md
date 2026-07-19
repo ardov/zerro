@@ -124,20 +124,20 @@ the work as bounded verified slices:
 Exit: all production writes persist the same command type; reload and undo/redo
 reproduce the same `current` without ambient ids or time.
 
-## Phase 3: primary-only sync and batch acknowledgement
+## Phase 3: primary-only sync and batch acknowledgement — completed 2026-07-20
 
-1. freeze the applied prefix as `sentOutboxCount` and disable undo/redo while
-   the request is active;
-2. replay the sent prefix from `base` into a primary-only working snapshot with
-   fresh `sentAt` versions;
-3. collect touched ids/deletions and build transport from that working snapshot,
-   never from UI `current`;
+1. **Done:** freeze the applied prefix as `sentOutboxCount` and disable undo/redo
+   while the request is active;
+2. **Done:** replay the sent prefix from `base` into a primary-only working
+   snapshot with fresh `sentAt` versions;
+3. **Done:** collect touched ids/deletions and build transport from that working
+   snapshot, never from UI `current`;
 4. **Done:** on success apply the canonical response to `base` and remove
    exactly the sent command count without per-command satisfaction checks;
-5. preserve commands appended during the request and replay them over the new
-   base; on failure leave base and outbox unchanged;
-6. update persistence validation/versioning and discard incompatible local
-   metadata rather than adding a migration framework.
+5. **Done:** preserve commands appended during the request and replay them over
+   the new base; on failure leave base and outbox unchanged;
+6. **Done:** validate the current persistence schema and discard incompatible
+   local metadata rather than adding a migration framework.
 
 Compatibility boundary: until the first rollout of this command schema, local
 outbox metadata is disposable. After rollout, persisted commands require

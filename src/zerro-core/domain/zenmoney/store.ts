@@ -32,6 +32,22 @@ export type TDataStore = {
   transaction:      ById<TTransaction>
 }
 
+export const dataEntityKeys = [
+  'instrument',
+  'country',
+  'company',
+  'user',
+  'merchant',
+  'account',
+  'tag',
+  'budget',
+  'reminder',
+  'reminderMarker',
+  'transaction',
+] as const satisfies readonly Exclude<keyof TDataStore, 'serverTimestamp'>[]
+
+export type TDataEntityKey = (typeof dataEntityKeys)[number]
+
 export type TZmDeletionObject = {
   id: string | number
   object: DataEntity

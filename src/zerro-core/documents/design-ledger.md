@@ -89,6 +89,9 @@
 - First-stage conflict policy is field-level last write wins within command
   order. Several commands may touch the same field; the last one determines the
   final value without making earlier commands unacknowledged.
+- Primary-only transport replays from `base`, records the last operation for
+  each touched identity, and reads final full entities from that working
+  snapshot. It never reads UI `current` or sends predicted effects.
 
 ### Testing
 
@@ -133,13 +136,6 @@ Keep these bridges until a real consumer or package decision makes their exit
 useful.
 
 ## Open questions
-
-### Materializer effects and primary transport
-
-Before adding balance or cascade effects, implement primary-only transport
-replay separately from UI `current`. The encoder may collect touched entity ids
-and read their final full values from a primary-only working snapshot; it must
-not read full entities from `current`, which also contains predicted effects.
 
 ### Materializer evidence and versioning
 

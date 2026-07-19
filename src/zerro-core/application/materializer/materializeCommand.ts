@@ -4,6 +4,7 @@ import type {
   TDeletionIntent,
   TDiff,
 } from '../../domain/zenmoney/store'
+import { dataEntityKeys } from '../../domain/zenmoney/store'
 import {
   makeTransaction,
   transactionIntentFields,
@@ -81,13 +82,21 @@ export function materializeCommand(
   command: TCommand,
   changedAt: TMsTime = command.issuedAt
 ): TDiff {
+  return materializePrimaryCommand(snapshot, command, changedAt)
+}
+
+/** Expands only persisted user intent, without predicted server side effects. */
+export function materializePrimaryCommand(
+  snapshot: TDataStore,
+  command: TCommand,
+  changedAt: TMsTime = command.issuedAt
+): TDiff {
   return materializeIntentPatch(snapshot, command.patch, changedAt)
 }
 
 /**
- * Transitional safety check for automatic sync. Sparse entity edits and
- * deletion identity can rebase without overwriting unrelated fields; complete
- * creation intents wait for explicit sync until primary-only transport lands.
+ * Safety check for automatic sync. Supported sparse entity intent and deletion
+ * identity rebase without overwriting unrelated fields.
  */
 export function isCommandRebaseSafe(command: TCommand): boolean {
   const keys = Object.keys(command.patch)
@@ -135,20 +144,7 @@ function materializeIntentPatch(
   changedAt: TMsTime
 ): TDiff {
   const result: TDiff = { ...patch } as TDiff
-  const entityKeys = [
-    'instrument',
-    'company',
-    'user',
-    'merchant',
-    'account',
-    'tag',
-    'budget',
-    'reminder',
-    'reminderMarker',
-    'transaction',
-  ] as const
-
-  entityKeys.forEach(key => {
+  dataEntityKeys.forEach(key => {
     const intents = patch[key] as
       | Array<{ id: string | number; changed?: number; deleted?: boolean }>
       | undefined

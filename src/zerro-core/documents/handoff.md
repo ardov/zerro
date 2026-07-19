@@ -25,9 +25,8 @@ This file routes the next task. Git contains implementation history.
   typed transaction queries reconstruct intrinsic and envelope-filtered lists
   from canonical history on demand.
 - Materialization overlays sparse fields on existing entities and uses domain
-  factories to create missing account, reminder, merchant, and tag ids without
-  ambient time or id generation. Other entity creation and cross-entity effects
-  remain deferred.
+  factories to create missing ids for every production command entity family
+  without ambient time or id generation. Cross-entity effects remain deferred.
 - Successful sync removes exactly the captured sent prefix; per-command
   satisfaction checks are removed. Commands appended in flight remain pending.
 - Issue reduces existing account, reminder, merchant, and tag results to changed
@@ -47,24 +46,27 @@ This file routes the next task. Git contains implementation history.
   command modules consume those colocated types. Account intent explicitly
   covers creation fields while excluding managed `changed`, `user`, and
   derived `balance`.
+- Sync transport independently replays the captured command prefix from `base`
+  with fresh `sentAt`, tracks the last operation for each entity identity, and
+  reads final full entities from the primary-only working snapshot. It never
+  reads UI `current`; delete-then-upsert and upsert-then-delete send only their
+  final operation.
 
-## Next checkpoint: primary-only transport
+## Next checkpoint: completion smoke
 
 Land this as small independent commits where practical:
 
-1. replay the sent prefix against `base` with fresh `sentAt`, applying primary
-   intent without future predicted effects;
-2. collect touched ids/deletions and build full transport entities from that
-   primary-only working snapshot;
-3. run reload, undo/redo, repeated-field, in-flight append, and explicit-sync
-   smoke.
+1. verify reload with a pending command outbox;
+2. verify undo/redo, repeated-field writes, and a command appended in flight;
+3. verify explicit sync sends the final primary entities and clears only the
+   captured prefix.
 
 Until the first command-schema rollout, persisted outbox compatibility is not a
 product requirement and incompatible local metadata may be discarded. After
 that rollout, persisted commands become a durable compatibility contract.
 
 See the ordered slices in [roadmap.md](./roadmap.md). Add balance and cascade
-rules only after primary-only transport is established.
+rules after the completion smoke.
 
 ## Boundaries to preserve
 

@@ -3,6 +3,7 @@ import { getItemsCount } from './shared/getItemsCount'
 import { AccountType, TAccountId, TDiff } from '6-shared/types'
 import { createSelector } from '@reduxjs/toolkit'
 import {
+  buildOutboxTransport,
   getMaterializedOutboxPatches,
   getPendingOutbox,
   isOutboxCommandRebaseSafe,
@@ -28,15 +29,13 @@ export const getPendingSyncDiff = createSelector(
 
 export function getPendingSyncTransport(
   state: RootState,
-  changedAt: number
+  sentAt: number
 ): TDiff | undefined {
-  return mergeMaterializedPatches(
-    getMaterializedOutboxPatches(
-      state.data.base,
-      state.data.outbox,
-      state.data.outboxHead,
-      changedAt
-    )
+  return buildOutboxTransport(
+    state.data.base,
+    state.data.outbox,
+    state.data.outboxHead,
+    sentAt
   )
 }
 

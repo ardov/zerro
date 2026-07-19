@@ -38,12 +38,13 @@ React, storage, localization, or app-layer runtime modules.
 - Materialization now owns command replay and deleted-transaction no-ops.
   Balance and cascade rules remain the next architectural phase.
 
-## Next slice: primary-only transport
+## Next slice: completion smoke
 
 Sparse factory-backed upsert replay is complete for production command entity
-families. The next boundary is primary-only transport. Successful sync already
-acknowledges the captured sent prefix as a batch. The ordered implementation
-slices are in [roadmap.md](./roadmap.md).
+families. Sync transport now replays primary intent from `base` with fresh
+`sentAt`, collects touched ids, and reads their final full values from that
+working snapshot. The next checkpoint is the reload and explicit-sync smoke in
+[testing.md](./testing.md).
 
 ## Start here
 

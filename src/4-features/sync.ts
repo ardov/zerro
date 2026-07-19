@@ -22,9 +22,9 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
   dispatch(prepareClientSync())
   const state = getState()
   const sentOutboxCount = state.data.outboxHead
-  const syncStartTime = Date.now()
+  const sentAt = Date.now()
   const diff: TDiff = {
-    ...(getPendingSyncTransport(state, syncStartTime) || {}),
+    ...(getPendingSyncTransport(state, sentAt) || {}),
     serverTimestamp: getLastSyncTime(state),
   }
   const token = getToken(state) || ''
