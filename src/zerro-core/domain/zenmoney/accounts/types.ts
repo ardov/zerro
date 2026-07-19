@@ -66,8 +66,28 @@ export type TAccount = {
 }
 
 export const accountWritableFields = [
+  'instrument',
   'title',
+  'role',
+  'company',
+  'type',
+  'syncID',
+  'startBalance',
+  'creditLimit',
   'inBalance',
+  'savings',
+  'enableCorrection',
+  'balanceCorrectionType',
+  'enableSMS',
+  'archive',
+  'private',
+  'capitalization',
+  'percent',
+  'startDate',
+  'endDateOffset',
+  'endDateOffsetInterval',
+  'payoffStep',
+  'payoffInterval',
 ] as const satisfies readonly (keyof TAccount)[]
 
 export type TAccountWritableField = (typeof accountWritableFields)[number]

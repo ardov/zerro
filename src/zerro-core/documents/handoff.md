@@ -24,28 +24,27 @@ This file routes the next task. Git contains implementation history.
 - Activity and budget projections retain counts instead of transaction arrays;
   typed transaction queries reconstruct intrinsic and envelope-filtered lists
   from canonical history on demand.
-- Materialization overlays sparse transaction fields on the latest entity,
-  skips deleted transactions, and assigns strict fresh entity versions.
-  Transitional full-entity intents and cross-entity effects remain deferred.
+- Materialization overlays sparse fields on existing entities and uses domain
+  factories to create missing account/reminder ids without ambient time or id
+  generation. Other entity creation and cross-entity effects remain deferred.
 - Successful sync removes exactly the captured sent prefix; per-command
   satisfaction checks are removed. Commands appended in flight remain pending.
-- Issue reduces existing account and reminder compiler results to changed
-  writable fields. Creation remains a complete transitional entity until
-  factory-backed upsert lands. Deletion commands persist only `{ id, object }`;
-  materialization supplies `stamp` and `user`.
+- Issue reduces existing account/reminder results to changed writable fields
+  and creation results to required fields plus non-default values. Incomplete
+  creation intent fails before append. Deletion commands persist only
+  `{ id, object }`; materialization supplies `stamp` and `user`.
 - Writable patch contracts now live beside their entity contracts. Account,
   tag, merchant, reminder, transaction, envelope-meta, and user-settings
-  command modules consume those colocated types without widening their current
-  writable fields.
+  command modules consume those colocated types. Account intent explicitly
+  covers creation fields while excluding managed `changed`, `user`, and
+  derived `balance`.
 
 ## Next checkpoint: sparse compilers and upsert
 
 Land this as small independent commits where practical:
 
-1. implement deterministic factory-backed account/reminder upsert replay and
-   reject incomplete creation intent before append;
-2. convert the remaining merchant, tag, budget, and hidden-data compiler results
-   to sparse intent;
+1. convert merchant and tag results to sparse factory-backed upsert intent;
+2. convert budget and remaining hidden-data results to sparse intent;
 3. split primary-only transport from local materialized effects;
 4. run reload, undo/redo, repeated-field, in-flight append, and explicit-sync
    smoke.

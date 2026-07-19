@@ -114,8 +114,9 @@ the work as bounded verified slices:
 4. **In progress:** existing account/reminder results compile to changed
    writable fields and deletions persist only identity; convert the remaining
    transitional entity families;
-5. implement deterministic upsert materialization: patch an existing id, create
-   a missing id, and reject incomplete creation intent before persistence;
+5. **In progress:** account/reminder use deterministic factory-backed upsert and
+   reject incomplete creation intent before persistence; add the remaining
+   entity families;
 6. replay the applied prefix into `current`, keeping `applyPatch` dumb.
 
 Exit: all production writes persist the same command type; reload and undo/redo

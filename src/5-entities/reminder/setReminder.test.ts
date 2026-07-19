@@ -67,7 +67,16 @@ describe('reminder semantic writes', () => {
         type: appendClientCommand.type,
         payload: expect.objectContaining({
           type: 'patch',
-          patch: { reminder: reminders },
+          patch: {
+            reminder: [
+              {
+                id: UUID,
+                incomeAccount: 'cash',
+                outcomeAccount: 'card',
+                comment: 'Rent',
+              },
+            ],
+          },
         }),
       })
     )

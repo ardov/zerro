@@ -10,10 +10,12 @@ import {
 } from '../../domain/zenmoney/transactions'
 import {
   accountWritableFields,
+  makeAccount,
   type TAccountPatch,
 } from '../../domain/zenmoney/accounts'
 import type { TMerchantPatch } from '../../domain/zenmoney/merchants'
 import {
+  makeReminder,
   reminderWritableFields,
   type TReminderPatch,
 } from '../../domain/zenmoney/reminders'
@@ -49,7 +51,11 @@ export function issuePatch(
   patch: TDiff | TIntentPatch,
   issuedAt: TMsTime
 ): TCommand {
-  return { type: 'patch', issuedAt, patch: compileIntentPatch(snapshot, patch) }
+  return {
+    type: 'patch',
+    issuedAt,
+    patch: compileIntentPatch(snapshot, patch, issuedAt),
+  }
 }
 
 /** Materializes one command against the latest local snapshot. */
@@ -128,7 +134,7 @@ function materializeIntentPatch(
       | undefined
     >
 
-    const entities = intents.flatMap(intent => {
+    const entities = intents.flatMap<Record<string, unknown>>(intent => {
       const current = currentById[intent.id]
       if (key === 'transaction' && current?.deleted) return []
 
@@ -146,8 +152,27 @@ function materializeIntentPatch(
         ]
       }
 
-      // Until factory-backed upsert lands, only already-complete legacy intent
-      // can create a missing entity. Sparse updates remain terminal no-ops.
+      if (key === 'account') {
+        return [
+          materializeAccountCreation(
+            snapshot,
+            intent,
+            changedAt
+          ) as unknown as Record<string, unknown>,
+        ]
+      }
+      if (key === 'reminder') {
+        return [
+          materializeReminderCreation(
+            snapshot,
+            intent,
+            changedAt
+          ) as unknown as Record<string, unknown>,
+        ]
+      }
+
+      // Other entity families remain transitional until they gain a factory-
+      // backed creation rule. Their sparse missing targets are terminal no-ops.
       if (intent.changed === undefined) return []
       return [{ ...fields, changed: changedAt }]
     })
@@ -178,26 +203,29 @@ function materializeIntentPatch(
 
 function compileIntentPatch(
   snapshot: TDataStore,
-  patch: TDiff | TIntentPatch
+  patch: TDiff | TIntentPatch,
+  issuedAt: TMsTime
 ): TIntentPatch {
   const { serverTimestamp: _, ...intentPatch } = patch as TDiff
   const result = { ...intentPatch } as TIntentPatch
 
   if (intentPatch.account) {
-    const account = compileExistingEntityIntents(
+    const account = compileEntityIntents(
       snapshot.account,
       intentPatch.account,
-      accountWritableFields
+      accountWritableFields,
+      intent => compactAccountCreation(snapshot, intent, issuedAt)
     ) as TAccountPatch[]
     if (account.length) result.account = account
     else delete result.account
   }
 
   if (intentPatch.reminder) {
-    const reminder = compileExistingEntityIntents(
+    const reminder = compileEntityIntents(
       snapshot.reminder,
       intentPatch.reminder,
-      reminderWritableFields
+      reminderWritableFields,
+      intent => compactReminderCreation(snapshot, intent, issuedAt)
     ) as TReminderPatch[]
     if (reminder.length) result.reminder = reminder
     else delete result.reminder
@@ -213,31 +241,145 @@ function compileIntentPatch(
   return result
 }
 
-function compileExistingEntityIntents(
+function compileEntityIntents(
   currentById: Record<
     string | number,
     ({ id: string | number } & Record<string, unknown>) | undefined
   >,
   entities: readonly ({ id: string | number } & Record<string, unknown>)[],
-  writableFields: readonly string[]
+  writableFields: readonly string[],
+  compileCreation: (
+    intent: { id: string | number } & Record<string, unknown>
+  ) => { id: string | number } & Record<string, unknown>
 ): Array<{ id: string | number } & Record<string, unknown>> {
   return entities.flatMap(entity => {
     const current = currentById[entity.id]
-    if (!current) return [entity]
-
     const intent: { id: string | number } & Record<string, unknown> = {
       id: entity.id,
     }
     writableFields.forEach(field => {
       if (
         field in entity &&
-        !valuesEqual(field, current[field], entity[field])
+        (!current || !valuesEqual(field, current[field], entity[field]))
       ) {
         intent[field] = entity[field]
       }
     })
+
+    if (!current) {
+      return [compileCreation(intent)]
+    }
     return Object.keys(intent).length > 1 ? [intent] : []
   })
+}
+
+function compactAccountCreation(
+  snapshot: TDataStore,
+  intent: { id: string | number } & Record<string, unknown>,
+  issuedAt: TMsTime
+) {
+  const required = ['instrument', 'title'] as const
+  requireFields('account', intent, required)
+  const baseline = materializeAccountCreation(
+    snapshot,
+    pickFields(intent, required),
+    issuedAt
+  ) as unknown as Record<string, unknown>
+  return omitFactoryDefaults(intent, baseline, required)
+}
+
+function compactReminderCreation(
+  snapshot: TDataStore,
+  intent: { id: string | number } & Record<string, unknown>,
+  issuedAt: TMsTime
+) {
+  const required = ['incomeAccount', 'outcomeAccount'] as const
+  requireFields('reminder', intent, required)
+  const baseline = materializeReminderCreation(
+    snapshot,
+    pickFields(intent, required),
+    issuedAt
+  ) as unknown as Record<string, unknown>
+  return omitFactoryDefaults(intent, baseline, required)
+}
+
+function pickFields(
+  intent: { id: string | number } & Record<string, unknown>,
+  fields: readonly string[]
+) {
+  const result: { id: string | number } & Record<string, unknown> = {
+    id: intent.id,
+  }
+  fields.forEach(field => {
+    result[field] = intent[field]
+  })
+  return result
+}
+
+function omitFactoryDefaults(
+  intent: { id: string | number } & Record<string, unknown>,
+  baseline: Record<string, unknown>,
+  requiredFields: readonly string[]
+) {
+  const required = new Set(requiredFields)
+  return Object.fromEntries(
+    Object.entries(intent).filter(
+      ([field, value]) =>
+        field === 'id' ||
+        required.has(field) ||
+        !valuesEqual(field, baseline[field], value)
+    )
+  ) as { id: string | number } & Record<string, unknown>
+}
+
+function materializeAccountCreation(
+  snapshot: TDataStore,
+  intent: { id: string | number } & Record<string, unknown>,
+  changedAt: TMsTime
+) {
+  const user = requireRootUser(snapshot, 'account')
+  return makeAccount(
+    { ...intent, user } as Parameters<typeof makeAccount>[0],
+    deterministicContext(changedAt)
+  )
+}
+
+function materializeReminderCreation(
+  snapshot: TDataStore,
+  intent: { id: string | number } & Record<string, unknown>,
+  changedAt: TMsTime
+) {
+  const user = requireRootUser(snapshot, 'reminder')
+  return makeReminder(
+    { ...intent, user } as Parameters<typeof makeReminder>[0],
+    deterministicContext(changedAt)
+  )
+}
+
+function requireFields(
+  entity: string,
+  intent: Record<string, unknown>,
+  fields: readonly string[]
+): void {
+  const missing = fields.filter(field => intent[field] === undefined)
+  if (missing.length) {
+    throw new Error(`Cannot create ${entity}: missing ${missing.join(', ')}`)
+  }
+}
+
+function requireRootUser(snapshot: TDataStore, entity: string) {
+  const user = getRootUserId(snapshot)
+  if (!user) throw new Error(`Cannot create ${entity} without user`)
+  return user
+}
+
+function deterministicContext(now: TMsTime) {
+  return {
+    now: () => now,
+    uuid: () => {
+      throw new Error('Materialization must not generate ids')
+    },
+  }
 }
 
 function hasOnlyFields(

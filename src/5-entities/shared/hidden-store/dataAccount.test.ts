@@ -65,7 +65,6 @@ describe('prepareDataAccount', () => {
                 id: UUID,
                 title: DATA_ACC_NAME,
                 instrument: 7,
-                user: 1,
               }),
             ],
           },

@@ -259,12 +259,6 @@ describe('command outbox boundaries', () => {
       })
     )
     expect(getHasBlockingSyncChanges(getRootState(recreate))).toBe(true)
-
-    const resolved = reducer(
-      recreate,
-      appendClientCommand(makeAccountEntry('Wallet', 20))
-    )
-    expect(getHasBlockingSyncChanges(getRootState(resolved))).toBe(true)
   })
 
   it('keeps commands created during sync and drops the committed redo tail', () => {

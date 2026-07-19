@@ -203,7 +203,84 @@ describe('materializeCommand', () => {
     })
   })
 
-  it('marks sparse intent as safe and complete creation as blocking', () => {
+  it('stores minimal account creation intent and materializes through factory', () => {
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+    })
+    const account = makeAccount({
+      id: 'new-account',
+      changed: 100,
+      user: 1,
+      instrument: 2,
+      title: 'Wallet',
+    })
+    const command = issuePatch(snapshot, { account: [account] }, 100)
+
+    expect(command.patch).toEqual({
+      account: [
+        {
+          id: 'new-account',
+          instrument: 2,
+          title: 'Wallet',
+        },
+      ],
+    })
+    expect(materializeCommand(snapshot, command).account?.[0]).toEqual(account)
+  })
+
+  it('stores minimal reminder creation intent and materializes through factory', () => {
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+    })
+    const reminder = makeReminder({
+      id: 'new-reminder',
+      changed: 100,
+      user: 1,
+      incomeAccount: 'cash',
+      outcomeAccount: 'card',
+      comment: 'Rent',
+      startDate: '1970-01-01',
+      endDate: '1970-01-01',
+    })
+    const command = issuePatch(snapshot, { reminder: [reminder] }, 100)
+
+    expect(command.patch).toEqual({
+      reminder: [
+        {
+          id: 'new-reminder',
+          incomeAccount: 'cash',
+          outcomeAccount: 'card',
+          comment: 'Rent',
+        },
+      ],
+    })
+    expect(materializeCommand(snapshot, command).reminder?.[0]).toEqual(
+      reminder
+    )
+  })
+
+  it('rejects incomplete creation intent before persistence', () => {
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+    })
+
+    expect(() =>
+      issuePatch(
+        snapshot,
+        { account: [{ id: 'new-account', title: 'Wallet' }] },
+        100
+      )
+    ).toThrow('Cannot create account: missing instrument')
+    expect(() =>
+      issuePatch(
+        snapshot,
+        { reminder: [{ id: 'new-reminder', incomeAccount: 'cash' }] },
+        100
+      )
+    ).toThrow('Cannot create reminder: missing outcomeAccount')
+  })
+
+  it('marks supported sparse updates and creations as rebase-safe', () => {
     expect(
       isCommandRebaseSafe(
         issuePatch(
@@ -223,14 +300,17 @@ describe('materializeCommand', () => {
         )
       )
     ).toBe(true)
+    const creationSnapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+    })
     expect(
       isCommandRebaseSafe(
         issuePatch(
-          makeStore(),
+          creationSnapshot,
           { account: [makeAccount({ id: 'cash', title: 'Wallet' })] },
           100
         )
       )
-    ).toBe(false)
+    ).toBe(true)
   })
 })
