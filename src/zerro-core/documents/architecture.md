@@ -87,12 +87,19 @@ type Command = {
 
 type IntentPatch = {
   account?: AccountPatch[]
+  merchant?: MerchantPatch[]
   tag?: TagPatch[]
+  budget?: BudgetPatch[]
+  reminder?: ReminderPatch[]
   transaction?: TransactionPatch[]
   deletion?: DeleteIntent[]
-  // other normalized entity patches
 }
 ```
+
+This list is closed. Reference and server-owned families such as instruments,
+countries, companies, users, and reminder markers are not command intent. The
+issue and persistence boundaries reject them instead of implicitly inheriting
+every `TDiff` member.
 
 Entity patch types live beside their entity types and document locally writable
 fields through `EntityPatch<TEntity, TWritableFields>`. The helper makes `id`
@@ -154,6 +161,14 @@ Future predicted server rules belong here rather than in command compilers:
 - transfers involving a deleted account become income or outcome on the
   surviving account;
 - a transaction already marked `deleted` ignores subsequent patches.
+
+Ownership is split by behavior rather than by pipeline stage. Each entity
+domain owns its writable patch contract, its sparse-to-full primary expansion,
+and effects triggered by changing that entity. The application materializer
+keeps the command loop: it invokes those rules against the latest snapshot,
+orders primary changes and effects, and combines changes across entity maps.
+Thus a transaction balance rule belongs near transactions, while the generic
+materializer does not move wholesale into domain.
 
 Materialization is pure and receives the current normalized snapshot, command,
 and explicit version time. Local replay uses `issuedAt`; request transport uses

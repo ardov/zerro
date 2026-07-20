@@ -6,7 +6,6 @@ import {
   buildOutboxTransport,
   getMaterializedOutboxPatches,
   getPendingOutbox,
-  isOutboxCommandRebaseSafe,
 } from 'zerro-core/infrastructure/replica/outbox'
 import { immutableMergeDiffs } from './shared/mergeDiffs'
 
@@ -41,11 +40,6 @@ export function getPendingSyncTransport(
 
 export const getHasPendingChanges = (state: RootState) =>
   getOutboxHead(state) > 0
-
-export const getHasBlockingSyncChanges = createSelector(
-  [getPendingEntries],
-  commands => commands.some(command => !isOutboxCommandRebaseSafe(command))
-)
 
 export const getCanUndoClientCommand = (state: RootState) =>
   !state.isPending && getOutboxHead(state) > 0

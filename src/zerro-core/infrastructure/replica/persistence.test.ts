@@ -112,6 +112,19 @@ describe('parsePersistedReplica', () => {
         outbox: [
           {
             type: 'patch',
+            patch: { instrument: [{ id: 1, title: 'USD' }] },
+            issuedAt: 10,
+          },
+        ],
+      },
+      'outbox[0].patch.instrument is invalid',
+    ],
+    [
+      {
+        ...validReplica,
+        outbox: [
+          {
+            type: 'patch',
             patch: { deletion: [{ id: 'rent', object: 'unknown' }] },
             issuedAt: 10,
           },

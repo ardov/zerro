@@ -54,6 +54,10 @@
 - Writable field lists document the domain capability, not only fields used by
   current production callers. Every non-managed field that may be changed must
   be accepted, persisted, and materialized even before a UI exposes it.
+- `TIntentPatch` is a closed list of command-capable families: deletion,
+  account, merchant, tag, budget, reminder, and transaction. It does not inherit
+  reference/server-owned families from `TDiff`; issue and persistence reject
+  unsupported keys.
 - Entity patches use upsert semantics: an existing id is patched and a missing
   id is created. Commands capture generated ids and every other nondeterministic
   input before persistence.
@@ -69,6 +73,9 @@
 - `applyPatch` applies only explicit changes and owns no cross-entity rules.
 - Canonical server diffs bypass local materialization.
 - Replay rematerializes the command prefix against `base` in order.
+- Target ownership is entity-shaped: entity domains own writable fields, sparse
+  primary expansion, and outgoing effects. The application materializer owns
+  command ordering and coordinates changes spanning entity maps.
 
 ### Replica and sync
 
@@ -92,6 +99,8 @@
 - Primary-only transport replays from `base`, records the last operation for
   each touched identity, and reads final full entities from that working
   snapshot. It never reads UI `current` or sends predicted effects.
+- Background sync does not classify commands as rebase-safe versus blocking:
+  every admitted command follows the same sparse replay contract.
 
 ### Testing
 

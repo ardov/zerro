@@ -1,4 +1,4 @@
-import type { TCommand } from '../../application/materializer'
+import { intentPatchKeys, type TCommand } from '../../application/materializer'
 import { DataEntity } from '../../domain/patch'
 
 export const replicaPersistenceVersion = 2 as const
@@ -10,20 +10,7 @@ export type TPersistedReplica = {
   outboxHead: number
 }
 
-const patchKeys = new Set([
-  'deletion',
-  'instrument',
-  'country',
-  'company',
-  'user',
-  'merchant',
-  'account',
-  'tag',
-  'budget',
-  'reminder',
-  'reminderMarker',
-  'transaction',
-])
+const patchKeys = new Set<string>(intentPatchKeys)
 
 export function parsePersistedReplica(
   value: unknown

@@ -17,7 +17,6 @@ export {
   getPendingSyncDiff,
   getPendingSyncTransport,
   getHasPendingChanges,
-  getHasBlockingSyncChanges,
   getCanUndoClientCommand,
   getCanRedoClientCommand,
   getChangedNum,

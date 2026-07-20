@@ -19,7 +19,9 @@ This file routes the next task. Git contains implementation history.
   `type: 'patch'`, `issuedAt`, and `TIntentPatch`; there is no entry wrapper or
   durable command union.
 - Persistence version 2 validates the command-only shape and does not store
-  derived state; no old command format needs migration.
+  derived state. Its supported patch keys come from the explicit
+  `TIntentPatch` families; reference/server-owned entity families are rejected.
+  No old command format needs migration.
 - The snapshot session remains frozen and exposes only namespaced reads.
 - Activity and budget projections retain counts instead of transaction arrays;
   typed transaction queries reconstruct intrinsic and envelope-filtered lists
@@ -51,6 +53,9 @@ This file routes the next task. Git contains implementation history.
   reads final full entities from the primary-only working snapshot. It never
   reads UI `current`; delete-then-upsert and upsert-then-delete send only their
   final operation.
+- All commands admitted by the issue and persistence boundaries use the same
+  sparse replay contract, so background sync no longer maintains a separate
+  rebase-safety classification or blocking selector.
 
 ## Next checkpoint: completion smoke
 
@@ -79,6 +84,10 @@ rules after the completion smoke.
 - Missing ids use the accepted upsert behavior and create entities; issue must
   capture ids, time, and every nondeterministic input.
 - `applyPatch` remains dumb; cross-entity behavior belongs in materialization.
+- Entity patch contracts own what can change. Primary expansion and effects
+  triggered by an entity should move beside that entity as the materializer is
+  split. The application materializer keeps command order and cross-map
+  coordination.
 - Canonical server diffs bypass local materialization.
 - Transport uses primary-only replay and never reads predicted effects from UI
   `current`.

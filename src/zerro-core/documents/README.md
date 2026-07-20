@@ -31,12 +31,16 @@ React, storage, localization, or app-layer runtime modules.
   types, and the snapshot session. Replica primitives stay internal.
 - The outbox persists direct `TCommand[]` values with `type: 'patch'`,
   `issuedAt`, and `TIntentPatch`. Account, reminder, merchant, tag, budget, and
-  transaction results persist sparse intent. Hidden data composes sparse
-  account/reminder/deletion intent rather than defining another patch type.
+  transaction are the explicitly supported intent families; server-owned
+  families are rejected at issue and persistence boundaries. Hidden data
+  composes sparse account/reminder/deletion intent rather than defining another
+  patch type.
   Transitional domain compilers may return complete results, which issue
   reduces before the command reaches the outbox.
-- Materialization now owns command replay and deleted-transaction no-ops.
-  Balance and cascade rules remain the next architectural phase.
+- Entity domains own their writable contracts; primary expansion and outgoing
+  predicted effects are the next ownership target. The application materializer
+  owns ordered command replay and cross-entity orchestration. Balance and
+  cascade rules remain the next architectural phase.
 
 ## Next slice: completion smoke
 

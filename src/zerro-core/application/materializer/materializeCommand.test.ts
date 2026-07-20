@@ -17,7 +17,6 @@ import {
   HiddenDataType,
 } from '../../domain/zerro/hidden-data'
 import {
-  isCommandRebaseSafe,
   issuePatch,
   materializeCommand,
   type TCommand,
@@ -554,64 +553,9 @@ describe('materializeCommand', () => {
     ).toThrow('Cannot create budget: id does not match date and tag')
   })
 
-  it('marks supported sparse updates and creations as rebase-safe', () => {
-    const transaction = makeTransaction({ id: 'tr-1', viewed: false })
-    expect(
-      isCommandRebaseSafe(
-        issuePatch(
-          makeStore({ transaction: { 'tr-1': transaction } }),
-          { transaction: [{ id: 'tr-1', viewed: true }] },
-          100
-        )
-      )
-    ).toBe(true)
-    const account = makeAccount({ id: 'cash', title: 'Cash' })
-    expect(
-      isCommandRebaseSafe(
-        issuePatch(
-          makeStore({ account: { cash: account } }),
-          { account: [{ ...account, title: 'Wallet' }] },
-          100
-        )
-      )
-    ).toBe(true)
-    const creationSnapshot = makeStore({
-      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
-    })
-    expect(
-      isCommandRebaseSafe(
-        issuePatch(
-          creationSnapshot,
-          { account: [makeAccount({ id: 'cash', title: 'Wallet' })] },
-          100
-        )
-      )
-    ).toBe(true)
-    expect(
-      isCommandRebaseSafe(
-        issuePatch(
-          creationSnapshot,
-          { tag: [makeTag({ id: 'food', title: 'Food' })] },
-          100
-        )
-      )
-    ).toBe(true)
-    expect(
-      isCommandRebaseSafe(
-        issuePatch(
-          creationSnapshot,
-          {
-            budget: [
-              makeBudget({
-                id: '2026-01-01#food',
-                date: '2026-01-01',
-                tag: 'food',
-              }),
-            ],
-          },
-          100
-        )
-      )
-    ).toBe(true)
+  it('rejects server-owned entity families at the command boundary', () => {
+    expect(() => issuePatch(makeStore(), { instrument: [] }, 100)).toThrow(
+      'Unsupported command intent: instrument'
+    )
   })
 })

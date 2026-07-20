@@ -4,7 +4,6 @@ import type {
   TDeletionIntent,
   TDiff,
 } from '../../domain/zenmoney/store'
-import { dataEntityKeys } from '../../domain/zenmoney/store'
 import {
   makeTransaction,
   transactionIntentFields,
@@ -38,17 +37,7 @@ import {
 } from '../../domain/zenmoney/tags'
 import { getRootUserId } from '../../domain/zenmoney/users'
 
-export type TIntentPatch = Omit<
-  TDiff,
-  | 'serverTimestamp'
-  | 'deletion'
-  | 'account'
-  | 'merchant'
-  | 'tag'
-  | 'budget'
-  | 'reminder'
-  | 'transaction'
-> & {
+export type TIntentPatch = {
   deletion?: TDeletionIntent[]
   account?: TAccountPatch[]
   merchant?: TMerchantPatch[]
@@ -57,6 +46,22 @@ export type TIntentPatch = Omit<
   reminder?: TReminderPatch[]
   transaction?: TTransactionPatch[]
 }
+
+export const intentEntityKeys = [
+  'account',
+  'merchant',
+  'tag',
+  'budget',
+  'reminder',
+  'transaction',
+] as const satisfies readonly Exclude<keyof TIntentPatch, 'deletion'>[]
+
+export const intentPatchKeys = [
+  'deletion',
+  ...intentEntityKeys,
+] as const satisfies readonly (keyof TIntentPatch)[]
+
+const intentPatchKeySet = new Set<string>(intentPatchKeys)
 
 export type TCommand = {
   type: 'patch'
@@ -94,57 +99,13 @@ export function materializePrimaryCommand(
   return materializeIntentPatch(snapshot, command.patch, changedAt)
 }
 
-/**
- * Safety check for automatic sync. Supported sparse entity intent and deletion
- * identity rebase without overwriting unrelated fields.
- */
-export function isCommandRebaseSafe(command: TCommand): boolean {
-  const keys = Object.keys(command.patch)
-  if (!keys.length) return false
-
-  return keys.every(key => {
-    switch (key) {
-      case 'account':
-        return command.patch.account!.every(account =>
-          hasOnlyFields(account, accountWritableFields)
-        )
-      case 'reminder':
-        return command.patch.reminder!.every(reminder =>
-          hasOnlyFields(reminder, reminderWritableFields)
-        )
-      case 'merchant':
-        return command.patch.merchant!.every(merchant =>
-          hasOnlyFields(merchant, merchantWritableFields)
-        )
-      case 'tag':
-        return command.patch.tag!.every(tag =>
-          hasOnlyFields(tag, tagWritableFields)
-        )
-      case 'budget':
-        return command.patch.budget!.every(budget =>
-          hasOnlyFields(budget, budgetWritableFields)
-        )
-      case 'transaction':
-        return command.patch.transaction!.every(transaction =>
-          hasOnlyFields(transaction, transactionIntentFields)
-        )
-      case 'deletion':
-        return command.patch.deletion!.every(deletion =>
-          hasOnlyFields(deletion, ['object'])
-        )
-      default:
-        return false
-    }
-  })
-}
-
 function materializeIntentPatch(
   snapshot: TDataStore,
   patch: TIntentPatch,
   changedAt: TMsTime
 ): TDiff {
   const result: TDiff = { ...patch } as TDiff
-  dataEntityKeys.forEach(key => {
+  intentEntityKeys.forEach(key => {
     const intents = patch[key] as
       | Array<{ id: string | number; changed?: number; deleted?: boolean }>
       | undefined
@@ -232,10 +193,7 @@ function materializeIntentPatch(
         ]
       }
 
-      // Other entity families remain transitional until they gain a factory-
-      // backed creation rule. Their sparse missing targets are terminal no-ops.
-      if (intent.changed === undefined) return []
-      return [{ ...fields, changed: changedAt }]
+      throw new Error(`Missing creation materializer for ${key}`)
     })
 
     if (entities.length) {
@@ -267,8 +225,14 @@ function compileIntentPatch(
   patch: TDiff | TIntentPatch,
   issuedAt: TMsTime
 ): TIntentPatch {
-  const { serverTimestamp: _, ...intentPatch } = patch as TDiff
-  const result = { ...intentPatch } as TIntentPatch
+  Object.keys(patch).forEach(key => {
+    if (key !== 'serverTimestamp' && !intentPatchKeySet.has(key)) {
+      throw new Error(`Unsupported command intent: ${key}`)
+    }
+  })
+
+  const intentPatch = patch
+  const result: TIntentPatch = {}
 
   if (intentPatch.account) {
     const account = compileEntityIntents(
@@ -606,14 +570,6 @@ function deterministicContext(now: TMsTime) {
       throw new Error('Materialization must not generate ids')
     },
   }
-}
-
-function hasOnlyFields(
-  value: { id: string | number },
-  allowedFields: readonly string[]
-): boolean {
-  const allowed = new Set<string>(['id', ...allowedFields])
-  return Object.keys(value).every(key => allowed.has(key))
 }
 
 function pickTransactionPatch(

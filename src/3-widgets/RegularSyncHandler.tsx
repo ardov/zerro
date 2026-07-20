@@ -1,11 +1,7 @@
 import { FC, useCallback, useEffect, useRef } from 'react'
 import { getLoginState } from 'store/token'
 import { syncData } from '4-features/sync'
-import {
-  getHasBlockingSyncChanges,
-  getLastSyncTime,
-  getLastChangeTime,
-} from 'store/data'
+import { getLastSyncTime, getLastChangeTime } from 'store/data'
 import { getPendingState } from 'store/isPending'
 import { loadLocalData } from '4-features/localData'
 import useLocalStorageState from 'use-local-storage-state'
@@ -26,7 +22,6 @@ function useConditionalSync() {
   const [regular] = useRegularSync()
   const isLoggedIn = useAppSelector(getLoginState)
   const lastSync = useAppSelector(getLastSyncTime)
-  const hasBlockingChanges = useAppSelector(getHasBlockingSyncChanges)
   const isPending = useAppSelector(getPendingState)
 
   const trySyncing = useCallback(() => {
@@ -35,13 +30,12 @@ function useConditionalSync() {
       isLoggedIn,
       isPending,
       lastSync,
-      hasBlockingChanges,
       regular,
       isDocumentHidden: document.hidden,
       now: Date.now(),
     })
     if (shouldSync) dispatch(syncData())
-  }, [isLoggedIn, isPending, lastSync, hasBlockingChanges, regular, dispatch])
+  }, [isLoggedIn, isPending, lastSync, regular, dispatch])
 
   return trySyncing
 }

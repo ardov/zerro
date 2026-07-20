@@ -1,6 +1,5 @@
 import type { TNormalizedPatch } from '../../types'
 import {
-  isCommandRebaseSafe,
   materializeCommand,
   materializePrimaryCommand,
   type TCommand,
@@ -134,10 +133,6 @@ export function applyOutboxCommand(
   command: TCommand
 ): TDataStore {
   return applyPatch(current, materializeCommand(current, command))
-}
-
-export function isOutboxCommandRebaseSafe(command: TCommand): boolean {
-  return isCommandRebaseSafe(command)
 }
 
 function materializeOutbox(
