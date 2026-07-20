@@ -121,7 +121,9 @@ separate product requirement justifies data routers.
 Router 7 is completed 2026-07-20. The previously enabled v7 future behaviors
 are now defaults, so their `future` props were removed. Declarative routes and
 the history-backed overlay contract remain unchanged; TypeScript, tests, build,
-and package check pass. Router 8 remains a separate next step.
+and package check pass. Router 8 remains a separate next step; as of
+2026-07-20, the npm stable channel ends at `react-router-dom` 7.18.1, so do not
+use a prerelease merely to advance this plan.
 
 ### 8. TypeScript 7
 
