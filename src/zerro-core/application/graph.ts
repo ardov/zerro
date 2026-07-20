@@ -2,6 +2,8 @@ import { toISODate, toISOMonth } from '../domain/shared/date'
 import type { TDataStore } from '../domain/zenmoney/store'
 import type { TCoreContext } from '../types'
 import {
+  buildBalances,
+  buildBalancesByDate,
   buildDebtors,
   getDebtAccountId,
   getHistoryStart,
@@ -12,13 +14,22 @@ import {
   getUserCurrency,
 } from '../domain/zenmoney'
 import {
+  buildActivity,
+  buildActivityRoutingContext,
   buildBudgets,
+  buildCurrentFunds,
   buildCurrentFxRates,
   buildEnvelopes,
+  buildEnvMetrics,
   buildFxConverter,
   buildFxRates,
   buildFxRatesGetter,
+  buildGoals,
+  buildGoalTotals,
   buildMonthList,
+  buildMonthTotals,
+  buildRawActivity,
+  buildSortedActivity,
   getEnvBudgets,
   getEnvelopeMeta,
   getKeepingEnvelopes,
@@ -180,6 +191,125 @@ export function createProjectionGraph(ctx: TCoreContext) {
       buildMonthList({ transactions, budgets, currentMonth })
   )
 
+  // --- activity chain (the expensive nodes) --------------------------------
+  const currentFunds = memoOn(
+    (d: TDataStore) =>
+      [d.account, inBudgetAccountIds(d), instrumentCodeById(d)] as const,
+    (accounts, inBudgetIds, instrumentCodeById) =>
+      buildCurrentFunds({ accounts, inBudgetIds, instrumentCodeById })
+  )
+  const routingContext = memoOn(
+    (d: TDataStore) =>
+      [inBudgetAccountIds(d), debtAccountId(d), debtors(d)] as const,
+    (inBudgetAccountIds, debtAccountId, debtors) =>
+      buildActivityRoutingContext({
+        inBudgetAccountIds,
+        debtAccountId,
+        debtors,
+      })
+  )
+  const rawActivity = memoOn(
+    (d: TDataStore) =>
+      [transactionsHistory(d), routingContext(d), d.instrument] as const,
+    (transactions, routing, instruments) =>
+      buildRawActivity({ transactions, routing, instruments })
+  )
+  const activity = memoOn(
+    (d: TDataStore) => [rawActivity(d), keepingEnvelopeIds(d)] as const,
+    (rawActivity, keepingEnvelopeIds) =>
+      buildActivity({ rawActivity, keepingEnvelopeIds })
+  )
+  const envMetrics = memoOn(
+    (d: TDataStore) =>
+      [
+        monthList(d),
+        envelopes(d),
+        activity(d),
+        budgets(d),
+        convertFx(d),
+      ] as const,
+    (monthList, envelopes, activity, budgets, convertFx) =>
+      buildEnvMetrics({ monthList, envelopes, activity, budgets, convertFx })
+  )
+  const sortedActivity = memoOn(
+    (d: TDataStore) =>
+      [rawActivity(d), keepingEnvelopeIds(d), convertFx(d)] as const,
+    (rawActivity, keepingEnvelopeIds, convertFx) =>
+      buildSortedActivity({ rawActivity, keepingEnvelopeIds, convertFx })
+  )
+  const monthTotals = memoOn(
+    (d: TDataStore) =>
+      [
+        monthList(d),
+        currentFunds(d),
+        activity(d),
+        envMetrics(d),
+        convertFx(d),
+        currentMonth(),
+      ] as const,
+    (monthList, currentFunds, activity, envMetrics, convertFx, currentMonth) =>
+      buildMonthTotals({
+        monthList,
+        currentFunds,
+        activity,
+        envMetrics,
+        convertFx,
+        currentMonth,
+      })
+  )
+
+  // --- goals ---------------------------------------------------------------
+  const goals = memoOn(
+    (d: TDataStore) =>
+      [
+        rawGoals(d),
+        monthList(d),
+        envMetrics(d),
+        sortedActivity(d),
+        convertFx(d),
+      ] as const,
+    (rawGoals, monthList, envMetrics, sortedActivity, convertFx) =>
+      buildGoals({ rawGoals, monthList, envMetrics, sortedActivity, convertFx })
+  )
+  const goalTotals = memoOn(
+    (d: TDataStore) => [goals(d), convertFx(d)] as const,
+    buildGoalTotals
+  )
+
+  // --- balances ------------------------------------------------------------
+  const balances = memoOn(
+    (d: TDataStore) =>
+      [
+        transactionsHistory(d),
+        d.account,
+        debtors(d),
+        d.merchant,
+        instrumentCodeById(d),
+        debtAccountId(d),
+      ] as const,
+    (
+      transactions,
+      accounts,
+      debtors,
+      merchants,
+      instrumentCodeById,
+      debtAccountId
+    ) =>
+      buildBalances({
+        transactions,
+        accounts,
+        debtors,
+        merchants,
+        instrumentCodeById,
+        debtAccountId,
+      })
+  )
+  const balancesByDate = memoOn(
+    (d: TDataStore) => [balances(d), historyStart(d), currentDate()] as const,
+    (balances, historyStart, currentDate) =>
+      buildBalancesByDate({ balances, historyStart, currentDate })
+  )
+
   return {
     currentMonth,
     currentDate,
@@ -207,7 +337,16 @@ export function createProjectionGraph(ctx: TCoreContext) {
     keepingEnvelopeIds,
     budgets,
     monthList,
+    currentFunds,
+    routingContext,
+    rawActivity,
+    activity,
+    envMetrics,
+    sortedActivity,
+    monthTotals,
+    goals,
+    goalTotals,
+    balances,
+    balancesByDate,
   }
 }
-
-export type TProjectionGraph = ReturnType<typeof createProjectionGraph>
