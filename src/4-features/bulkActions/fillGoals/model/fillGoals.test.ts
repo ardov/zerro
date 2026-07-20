@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
 import type { TEnvelopeId } from '5-entities/envelope'
-import { goals as coreGoals } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { goalType } from 'zerro-core/domain/zerro/goals'
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
@@ -29,7 +29,7 @@ describe('fillGoals', () => {
     const action = { type: 'budget/total' }
     const dispatch = vi.fn()
 
-    vi.mocked(coreGoals.selectAll).mockReturnValue({
+    vi.mocked(core.goals.selectAll).mockReturnValue({
       '2026-07': {
         [monthlyId]: {
           id: monthlyId,
@@ -50,12 +50,12 @@ describe('fillGoals', () => {
           targetBudget: 200,
         },
       },
-    } as unknown as ReturnType<typeof coreGoals.selectAll>)
+    } as unknown as ReturnType<typeof core.goals.selectAll>)
     vi.mocked(setTotalBudget).mockReturnValue(action as never)
 
     fillGoals('2026-07')(dispatch, () => state, undefined)
 
-    expect(coreGoals.selectAll).toHaveBeenCalledWith(state)
+    expect(core.goals.selectAll).toHaveBeenCalledWith(state)
     expect(setTotalBudget).toHaveBeenCalledWith([
       { id: monthlyId, month: '2026-07', value: 100 },
     ])

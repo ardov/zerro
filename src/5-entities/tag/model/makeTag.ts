@@ -1,3 +1,3 @@
-import { tags as coreTags } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
-export const nullTag = coreTags.nullTag
+export const nullTag = core.tags.nullTag

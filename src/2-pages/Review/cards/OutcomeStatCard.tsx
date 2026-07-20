@@ -1,8 +1,5 @@
 import { FC, useCallback, useMemo, useState } from 'react'
-import {
-  currency as coreCurrency,
-  envelopes as coreEnvelopes,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { Box, Button, Stack } from '@mui/material'
 import { useTranslation } from 'react-i18next'
@@ -32,8 +29,8 @@ export const MAX_VISIBLE_NODES = 10
 export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
   const yearStats = useStats(year)
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
-  const [currency] = coreCurrency.useDisplayCurrency()
-  const toDisplay = coreCurrency.useToDisplay('current')
+  const [currency] = core.currency.useDisplayCurrency()
+  const toDisplay = core.currency.useToDisplay('current')
   const [showAll, setShowAll] = useState(false)
   const [showParentOnly, setShowParentOnly] = useState(true)
 
@@ -130,7 +127,7 @@ function useCreateNodeFromTag(
   toDisplay: (amount: TFxAmount, date?: 'current' | TDateDraft) => number
 ) {
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
-  const envelopes = useAppSelector(coreEnvelopes.selectAll)
+  const envelopes = useAppSelector(core.envelopes.selectAll)
 
   return useCallback(
     (id: string): TDataNode => {

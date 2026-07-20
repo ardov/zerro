@@ -1,7 +1,4 @@
-import {
-  instruments as coreInstruments,
-  transactions as coreTransactions,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { GroupBy, toGroup } from '6-shared/helpers/date'
 import { addFxAmount } from '6-shared/helpers/money'
@@ -37,7 +34,7 @@ type TPoint = {
 export function calcCashflow(
   transactions: TTransaction[],
   debtAccId: TAccountId | undefined,
-  instCodeMap: coreInstruments.TInstrumentCodeMap,
+  instCodeMap: core.instruments.TInstrumentCodeMap,
   accounts: Record<string, Account>,
   aggregation: GroupBy = GroupBy.Month
 ): ByDate<TPoint> {
@@ -55,17 +52,17 @@ export function calcCashflow(
         transfers: {},
       }
 
-    const type = coreTransactions.getType(tr, debtAccId)
+    const type = core.transactions.getType(tr, debtAccId)
     const incomeCurrency = instCodeMap[tr.incomeInstrument]
     const outcomeCurrency = instCodeMap[tr.outcomeInstrument]
     switch (type) {
-      case coreTransactions.TrType.Income:
+      case core.transactions.TrType.Income:
         result[group].income = addFxAmount(result[group].income, {
           [incomeCurrency]: tr.income,
         })
         return
 
-      case coreTransactions.TrType.Outcome: {
+      case core.transactions.TrType.Outcome: {
         const account = accounts[tr.outcomeAccount]
         if (account?.inBudget) {
           result[group].outcomeInBalance = addFxAmount(
@@ -81,19 +78,19 @@ export function calcCashflow(
         return
       }
 
-      case coreTransactions.TrType.IncomeDebt:
+      case core.transactions.TrType.IncomeDebt:
         result[group].debts = addFxAmount(result[group].debts, {
           [incomeCurrency]: tr.income,
         })
         return
 
-      case coreTransactions.TrType.OutcomeDebt:
+      case core.transactions.TrType.OutcomeDebt:
         result[group].debts = addFxAmount(result[group].debts, {
           [outcomeCurrency]: -tr.outcome,
         })
         return
 
-      case coreTransactions.TrType.Transfer:
+      case core.transactions.TrType.Transfer:
         result[group].transfers = addFxAmount(
           result[group].transfers,
           { [incomeCurrency]: tr.income },

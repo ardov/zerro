@@ -7,7 +7,7 @@ import { useToggle } from '6-shared/hooks/useToggle'
 
 import { useAppSelector } from 'store/index'
 import { TEnvelopeId } from '5-entities/envelope'
-import { envelopes as coreEnvelopes } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { Parent } from './Parent'
 import { Row } from './Row'
@@ -39,7 +39,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
     onShowTransactions,
   } = props
 
-  const structure = useAppSelector(coreEnvelopes.selectStructure, isEqual)
+  const structure = useAppSelector(core.envelopes.selectStructure, isEqual)
   const renderInfo = useEnvRenderInfo(month)
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
   const { metric } = useMetric()

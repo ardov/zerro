@@ -18,7 +18,7 @@ import { Typography } from '@mui/material'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { useAppDispatch, useAppSelector } from 'store/index'
 import { TEnvelopeId } from '5-entities/envelope'
-import { envelopes as coreEnvelopes } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { MoveMoneyModal } from '4-features/moveMoney'
 import { assignNewGroup } from '4-features/envelope/assignNewGroup'
@@ -125,7 +125,7 @@ const DragObj = () => {
   const { t } = useTranslation('common')
   const [activeType, setActiveType] = useState<DragTypes>(DragTypes.amount)
   const [activeId, setActiveId] = useState<TEnvelopeId>()
-  const envelopes = useAppSelector(coreEnvelopes.selectAll)
+  const envelopes = useAppSelector(core.envelopes.selectAll)
 
   useDndMonitor({
     onDragStart(e) {

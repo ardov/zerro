@@ -23,12 +23,7 @@ import { getAverage } from '6-shared/helpers/money/currencyHelpers'
 
 import { useAppSelector } from 'store'
 import { TEnvelopeId } from '5-entities/envelope'
-import {
-  activity as coreActivity,
-  currency as coreCurrency,
-  envelopes as coreEnvelopes,
-  months as coreMonths,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
@@ -79,9 +74,9 @@ function useAggregatedStats(
   currency: TFxCode,
   aggregationPeriod: number
 ) {
-  const dates = useAppSelector(coreMonths.selectList)
-  const envData = useAppSelector(coreActivity.selectEnvelopeMetrics)
-  const convertFx = useAppSelector(coreCurrency.selectConvertFx)
+  const dates = useAppSelector(core.months.selectList)
+  const envData = useAppSelector(core.activity.selectEnvelopeMetrics)
+  const convertFx = useAppSelector(core.currency.selectConvertFx)
   const result = dates.map((month, idx) => {
     const aggregatedMonths = dates.slice(
       Math.max(0, idx - aggregationPeriod + 1), // start index
@@ -126,7 +121,7 @@ export const StatisticWidget: FC<StatisticWidgetProps> = ({
   const [period, setPeriod] = useState<aggregatePeriod>(aggregatePeriod.months6)
   const switchPeriod = () => setPeriod(nextPeriod)
 
-  const currency = useAppSelector(coreEnvelopes.selectAll)[id].currency
+  const currency = useAppSelector(core.envelopes.selectAll)[id].currency
 
   const aggregatedData = useAggregatedStats(
     id,

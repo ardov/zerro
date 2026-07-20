@@ -37,7 +37,7 @@ import { appVersion } from '6-shared/config'
 import { useAppDispatch } from 'store'
 import { resetData } from 'store/data'
 
-import { settings as coreSettings } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { useRegularSync } from '3-widgets/RegularSyncHandler'
 import { logOut } from '4-features/authorization'
@@ -275,10 +275,10 @@ function AutoSyncItem() {
 function IconModeItem() {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
-  const { emojiIcons } = coreSettings.use()
+  const { emojiIcons } = core.settings.use()
   const handleClick = () => {
     const next = !emojiIcons
-    dispatch(coreSettings.setEmojiIcons(next))
+    dispatch(core.settings.setEmojiIcons(next))
     track('setting_changed', { setting: 'emoji_icons', value: next })
   }
   return (
@@ -295,9 +295,9 @@ function BudgetSettingsItem() {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
   const setSnackbar = useSnackbar()
-  const { preferZmBudgets } = coreSettings.use()
+  const { preferZmBudgets } = core.settings.use()
   const toggleSetting = () => {
-    dispatch(coreSettings.setPreferZmBudgets(!preferZmBudgets))
+    dispatch(core.settings.setPreferZmBudgets(!preferZmBudgets))
     track('setting_changed', {
       setting: 'prefer_zenmoney_budgets',
       value: !preferZmBudgets,

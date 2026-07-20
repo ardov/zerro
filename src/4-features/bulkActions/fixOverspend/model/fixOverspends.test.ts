@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
 import type { TEnvelopeId } from '5-entities/envelope'
-import { activity as coreActivity } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
 import { track } from '6-shared/analytics'
@@ -27,7 +27,7 @@ describe('fixOverspends', () => {
       return action
     })
 
-    vi.mocked(coreActivity.selectEnvelopeMetrics).mockReturnValue({
+    vi.mocked(core.activity.selectEnvelopeMetrics).mockReturnValue({
       '2026-07': {
         [childId]: {
           id: childId,
@@ -45,14 +45,14 @@ describe('fixOverspends', () => {
           selfAvailable: { USD: -5 },
         },
       },
-    } as unknown as ReturnType<typeof coreActivity.selectEnvelopeMetrics>)
+    } as unknown as ReturnType<typeof core.activity.selectEnvelopeMetrics>)
     vi.mocked(setTotalBudget).mockImplementation(
       updates => ({ type: 'budget/total', payload: updates }) as never
     )
 
     fixOverspends('2026-07')(dispatch, () => state, undefined)
 
-    expect(coreActivity.selectEnvelopeMetrics).toHaveBeenCalledTimes(2)
+    expect(core.activity.selectEnvelopeMetrics).toHaveBeenCalledTimes(2)
     expect(setTotalBudget).toHaveBeenNthCalledWith(1, [
       { id: childId, month: '2026-07', value: 120 },
     ])

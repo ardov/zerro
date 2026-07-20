@@ -1,4 +1,4 @@
-import { currency as coreCurrency } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
 import { Paper, Card, Typography, Box, Divider } from '@mui/material'
@@ -148,7 +148,7 @@ type TPayload = {
 
 const CustomTooltip = (props: any) => {
   const { t } = useTranslation('analytics')
-  const [currency] = coreCurrency.useDisplayCurrency()
+  const [currency] = core.currency.useDisplayCurrency()
   const payload = props.payload as TPayload[]
   const active = props.active as boolean
   if (!active || !payload?.length) return null

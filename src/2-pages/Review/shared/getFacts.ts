@@ -1,10 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import {
-  accounts as coreAccounts,
-  instruments as coreInstruments,
-  merchants as coreMerchants,
-  transactions as coreTransactions,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { TFxAmount, TFxCode, TTagId, TTransaction } from '6-shared/types'
 import { parseDate } from '6-shared/helpers/date'
@@ -31,10 +26,10 @@ export type TStats = {
 
 export const getFactsYearly: TSelector<Record<string, TStats>> = createSelector(
   [
-    coreTransactions.selectHistory,
-    coreInstruments.selectCodeMap,
-    coreAccounts.selectDebtAccountId,
-    coreMerchants.selectAll,
+    core.transactions.selectHistory,
+    core.instruments.selectCodeMap,
+    core.accounts.selectDebtAccountId,
+    core.merchants.selectAll,
   ],
   (transactions, codeMap, debtAcc, merchants) => {
     // const rates = convert('current').rates
@@ -59,11 +54,11 @@ export const getFactsYearly: TSelector<Record<string, TStats>> = createSelector(
         tr
       )
 
-      const type = coreTransactions.getType(tr, debtAcc)
-      if (type === coreTransactions.TrType.Income) {
+      const type = core.transactions.getType(tr, debtAcc)
+      if (type === core.transactions.TrType.Income) {
         addToGroup(stats.byCurrency, codeMap[tr.incomeInstrument], tr)
       }
-      if (type === coreTransactions.TrType.Outcome) {
+      if (type === core.transactions.TrType.Outcome) {
         addToGroup(stats.byCurrency, codeMap[tr.outcomeInstrument], tr)
       }
 
@@ -82,19 +77,19 @@ export const getFactsYearly: TSelector<Record<string, TStats>> = createSelector(
     }
 
     function addToNode(node: TInfoNode, tr: TTransaction) {
-      switch (coreTransactions.getType(tr, debtAcc)) {
-        case coreTransactions.TrType.Transfer:
+      switch (core.transactions.getType(tr, debtAcc)) {
+        case core.transactions.TrType.Transfer:
           node.transferTransactions.push(tr)
           return
 
-        case coreTransactions.TrType.Income:
+        case core.transactions.TrType.Income:
           node.incomeTransactions.push(tr)
           node.income = addFxAmount(node.income, {
             [codeMap[tr.incomeInstrument]]: tr.income,
           })
           return
 
-        case coreTransactions.TrType.Outcome:
+        case core.transactions.TrType.Outcome:
           node.outcomeTransactions.push(tr)
           node.outcome = addFxAmount(node.outcome, {
             [codeMap[tr.outcomeInstrument]]: tr.outcome,

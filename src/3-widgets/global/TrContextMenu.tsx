@@ -4,7 +4,7 @@ import { TTransaction, TTransactionId } from '6-shared/types'
 import { useAppDispatch, useAppSelector } from 'store'
 import { registerPopover } from '6-shared/historyPopovers'
 import { track } from '6-shared/analytics'
-import { transactions as coreTransactions } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
 import { getMenuPosition } from './shared/helpers'
@@ -37,20 +37,20 @@ export const TrContextMenu: FC = () => {
   const { id, onSelectSimilar, onMarkOlderViewed } = extraProps
   const dispatch = useAppDispatch()
   const transaction = useAppSelector(
-    state => coreTransactions.selectAll(state)[id]
+    state => core.transactions.selectAll(state)[id]
   )
 
   if (!transaction) return null
 
   const editable = transaction.deleted === false
-  const viewed = coreTransactions.isViewed(transaction)
+  const viewed = core.transactions.isViewed(transaction)
 
   const options = [
     {
       label: t('restore'),
       condition: transaction.deleted,
       action: () => {
-        dispatch(coreTransactions.restore(id))
+        dispatch(core.transactions.restore(id))
         track('transaction_restored', { source: 'context_menu' })
       },
     },
@@ -58,7 +58,7 @@ export const TrContextMenu: FC = () => {
       label: t('markViewed'),
       condition: editable && !viewed,
       action: () => {
-        dispatch(coreTransactions.setViewed([id], true))
+        dispatch(core.transactions.setViewed([id], true))
         track('transaction_viewed_changed', {
           viewed: true,
           mode: 'single',
@@ -70,7 +70,7 @@ export const TrContextMenu: FC = () => {
       label: t('markUnviewed'),
       condition: editable && viewed,
       action: () => {
-        dispatch(coreTransactions.setViewed([id], false))
+        dispatch(core.transactions.setViewed([id], false))
         track('transaction_viewed_changed', {
           viewed: false,
           mode: 'single',
@@ -96,7 +96,7 @@ export const TrContextMenu: FC = () => {
       label: t('delete'),
       condition: !transaction.deleted,
       action: () => {
-        dispatch(coreTransactions.remove([id]))
+        dispatch(core.transactions.remove([id]))
         track('transaction_deleted', {
           mode: 'single',
           source: 'context_menu',

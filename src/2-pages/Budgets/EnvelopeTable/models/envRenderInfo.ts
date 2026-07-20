@@ -4,12 +4,7 @@ import { ById, ByMonth, TISOMonth } from '6-shared/types'
 
 import { TSelector, useAppSelector } from 'store'
 import { envelopeVisibility, TEnvelope, TEnvelopeId } from '5-entities/envelope'
-import {
-  activity as coreActivity,
-  envelopes as coreEnvelopes,
-  goals as coreGoals,
-  months as coreMonths,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { isEqual } from 'lodash'
 
@@ -25,10 +20,10 @@ export type TRenderInfo = {
 export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
   createSelector(
     [
-      coreEnvelopes.selectAll,
-      coreMonths.selectList,
-      coreActivity.selectEnvelopeMetrics,
-      coreGoals.selectAll,
+      core.envelopes.selectAll,
+      core.months.selectList,
+      core.activity.selectEnvelopeMetrics,
+      core.goals.selectAll,
     ],
     (envelopes, monthList, envData, goals) => {
       const result: ByMonth<ById<TRenderInfo>> = {}

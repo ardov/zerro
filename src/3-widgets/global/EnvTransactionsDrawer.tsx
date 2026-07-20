@@ -6,7 +6,7 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { registerPopover } from '6-shared/historyPopovers'
 import { TEnvelopeId } from '5-entities/envelope'
-import { transactions as coreTransactions } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import {
   TransactionList,
@@ -18,7 +18,7 @@ type TEnvConditions = {
   month: TISOMonth
   id: TEnvelopeId | 'transferFees' | null
   isExact?: boolean
-  mode?: coreTransactions.TrFilterMode
+  mode?: core.transactions.TrFilterMode
 }
 
 export type EnvTransactionsDrawerProps = {
@@ -44,14 +44,14 @@ export const SmartEnvTransactionsDrawer = () => {
   const trPreview = useTransactionPreview()
   const { title, envelopeConditions, initialDate } = drawer.extraProps
   const { onClose, open } = drawer.displayProps
-  const initialQuery = useMemo<coreTransactions.TTransactionQuery>(() => {
+  const initialQuery = useMemo<core.transactions.TTransactionQuery>(() => {
     if (!envelopeConditions) return { clauses: [] }
 
     const {
       id,
       month,
       isExact,
-      mode = coreTransactions.TrFilterMode.Envelope,
+      mode = core.transactions.TrFilterMode.Envelope,
     } = envelopeConditions
     return {
       clauses: [
@@ -61,7 +61,7 @@ export const SmartEnvTransactionsDrawer = () => {
           scope: isExact ? 'self' : 'tree',
           mode:
             id === 'transferFees'
-              ? coreTransactions.TrFilterMode.TransferFees
+              ? core.transactions.TrFilterMode.TransferFees
               : mode,
           month,
         },

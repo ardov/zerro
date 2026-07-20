@@ -1,19 +1,15 @@
 import { FC } from 'react'
 import { MenuItem, SelectProps, ListItemText } from '@mui/material'
-import {
-  accounts as coreAccounts,
-  instruments as coreInstruments,
-  users as coreUsers,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { TFxCode, TInstrument } from '6-shared/types'
 import { getCurrencySymbol } from '6-shared/helpers/money'
 import { SmartSelect } from '6-shared/ui/SmartSelect'
 
 export const CurrencyCodeSelect: FC<SelectProps<TFxCode>> = props => {
-  const instrumentsByCode = coreInstruments.useByCode()
-  const userCurrency = coreUsers.useCurrency()
-  const accs = coreAccounts.useInBudget()
+  const instrumentsByCode = core.instruments.useByCode()
+  const userCurrency = core.users.useCurrency()
+  const accs = core.accounts.useInBudget()
   const value = props.value
 
   const fxSet = new Set(accs.map(a => a.fxCode))

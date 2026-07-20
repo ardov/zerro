@@ -1,9 +1,5 @@
 import type { TFxCode, TISOMonth } from '6-shared/types'
-import {
-  currency as coreCurrency,
-  fxRates as coreFxRates,
-  months as coreMonths,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { FC, useState } from 'react'
 import {
@@ -27,9 +23,9 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
   const dispatch = useAppDispatch()
   const { month } = props
   const { t } = useTranslation('fxRates')
-  const [displCurrency] = coreCurrency.useDisplayCurrency()
-  const funds = useAppSelector(coreMonths.selectTotals)[month].fundsEnd
-  const ratesGetter = useAppSelector(coreFxRates.selectGetter)
+  const [displCurrency] = core.currency.useDisplayCurrency()
+  const funds = useAppSelector(core.months.selectTotals)[month].fundsEnd
+  const ratesGetter = useAppSelector(core.fxRates.selectGetter)
   const rateData = ratesGetter(month)
 
   const currencies = keys(funds)
@@ -69,7 +65,7 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
             mainCode={displCurrency}
             rates={rateData.rates}
             onChange={rate =>
-              dispatch(coreFxRates.edit(month, { [c.code]: rate }))
+              dispatch(core.fxRates.edit(month, { [c.code]: rate }))
             }
           />
         ))}
@@ -85,7 +81,7 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
           })}
         </Typography>
         {isSaved && (
-          <Button fullWidth onClick={() => dispatch(coreFxRates.reset(month))}>
+          <Button fullWidth onClick={() => dispatch(core.fxRates.reset(month))}>
             {t('reset')}
           </Button>
         )}
@@ -102,7 +98,7 @@ export const FxRates: FC<{ month: TISOMonth }> = props => {
 const FxRateInput: FC<{
   code: TFxCode
   mainCode: TFxCode
-  rates: coreFxRates.TFxRates
+  rates: core.fxRates.TFxRates
   onChange: (rate: number) => void
 }> = props => {
   const { code, mainCode, rates, onChange } = props

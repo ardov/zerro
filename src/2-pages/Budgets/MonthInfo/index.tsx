@@ -27,7 +27,7 @@ import { useMonth } from '../MonthProvider'
 import { BalanceWidget } from '../BalanceWidget'
 import { FxRates } from './FxRates'
 import { ActivityStats } from './ActivityStats'
-import { goals as coreGoals, months as coreMonths } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { fillGoals } from '4-features/bulkActions/fillGoals'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
@@ -39,7 +39,7 @@ export const MonthInfo: FC<MonthInfoProps> = ({ onClose, ...rest }) => {
   const { t } = useTranslation('budgets', { keyPrefix: 'actions' })
   const [month] = useMonth()
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
-  const { overspend } = useAppSelector(coreMonths.selectTotals)[month]
+  const { overspend } = useAppSelector(core.months.selectTotals)[month]
 
   const dispatch = useAppDispatch()
 
@@ -162,7 +162,9 @@ function GoalAction(props: { month: TISOMonth }) {
   })
   const dispatch = useAppDispatch()
   const { month } = props
-  const { progress, goalsCount } = useAppSelector(coreGoals.selectTotals)[month]
+  const { progress, goalsCount } = useAppSelector(core.goals.selectTotals)[
+    month
+  ]
   const canComplete = progress < 1 && goalsCount > 0
 
   const completeAll = useConfirm({

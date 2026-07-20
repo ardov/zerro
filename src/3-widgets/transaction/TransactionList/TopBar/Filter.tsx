@@ -14,23 +14,18 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
-import {
-  accounts as coreAccounts,
-  envelopes as coreEnvelopes,
-  tags as coreTags,
-  transactions as coreTransactions,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 import { useAppSelector } from 'store'
 import { AddIcon, CloseIcon, FilterListIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
 
-type Clause = coreTransactions.TTransactionFilterClause
+type Clause = core.transactions.TTransactionFilterClause
 type AddableFilterKind = Exclude<Clause['kind'], 'search' | 'date' | 'activity'>
 type EditableFilterKind = Exclude<AddableFilterKind, 'viewed' | 'deleted'>
 
 type FilterProps = {
-  query: coreTransactions.TTransactionQuery
-  setQuery: Dispatch<SetStateAction<coreTransactions.TTransactionQuery>>
+  query: core.transactions.TTransactionQuery
+  setQuery: Dispatch<SetStateAction<core.transactions.TTransactionQuery>>
   search: string
   setSearch: Dispatch<SetStateAction<string>>
 }
@@ -46,9 +41,9 @@ const filterKinds: AddableFilterKind[] = [
 
 const Filter: FC<FilterProps> = ({ query, setQuery, search, setSearch }) => {
   const { t, i18n } = useTranslation('filterDrawer')
-  const accounts = coreAccounts.usePopulated()
-  const envelopes = useAppSelector(coreEnvelopes.selectAll)
-  const tags = useAppSelector(coreTags.selectPopulated)
+  const accounts = core.accounts.usePopulated()
+  const envelopes = useAppSelector(core.envelopes.selectAll)
+  const tags = useAppSelector(core.tags.selectPopulated)
   const chipRefs = useRef<Partial<Record<Clause['kind'], HTMLElement | null>>>(
     {}
   )
@@ -257,8 +252,8 @@ function FilterEditor(props: {
 }) {
   const { clause, onChange, optionsOpen, onOptionsOpen, onOptionsClose } = props
   const { t } = useTranslation('filterDrawer')
-  const accounts = coreAccounts.usePopulated()
-  const tags = useAppSelector(coreTags.selectPopulated)
+  const accounts = core.accounts.usePopulated()
+  const tags = useAppSelector(core.tags.selectPopulated)
 
   switch (clause.kind) {
     case 'account':
@@ -304,10 +299,10 @@ function FilterEditor(props: {
           onClose={onOptionsClose}
           disableCloseOnSelect
           options={[
-            coreTransactions.TrFilterType.Income,
-            coreTransactions.TrFilterType.Outcome,
-            coreTransactions.TrFilterType.Transfer,
-            coreTransactions.TrFilterType.Debt,
+            core.transactions.TrFilterType.Income,
+            core.transactions.TrFilterType.Outcome,
+            core.transactions.TrFilterType.Transfer,
+            core.transactions.TrFilterType.Debt,
           ]}
           value={clause.values}
           getOptionLabel={value => getTypeLabel(value, t)}
@@ -394,9 +389,9 @@ function isEmptyClause(clause: Clause): boolean {
 function getClauseLabel(
   clause: Clause,
   context: {
-    accounts: ReturnType<typeof coreAccounts.usePopulated>
-    envelopes: ReturnType<typeof coreEnvelopes.selectAll>
-    tags: ReturnType<typeof coreTags.selectPopulated>
+    accounts: ReturnType<typeof core.accounts.usePopulated>
+    envelopes: ReturnType<typeof core.envelopes.selectAll>
+    tags: ReturnType<typeof core.tags.selectPopulated>
     t: ReturnType<typeof useTranslation>['t']
     language: string
   }
@@ -408,7 +403,7 @@ function getClauseLabel(
         ? joinLabels(clause.ids, id => accounts[id]?.title || id)
         : t('account')
     case 'activity':
-      if (clause.mode === coreTransactions.TrFilterMode.TransferFees) {
+      if (clause.mode === core.transactions.TrFilterMode.TransferFees) {
         return t('transferFees')
       }
       return joinLabels(clause.envelopeIds, id => envelopes[id]?.name || id)
@@ -478,17 +473,17 @@ function getKindLabel(
 }
 
 function getTypeLabel(
-  type: coreTransactions.TrFilterType,
+  type: core.transactions.TrFilterType,
   t: ReturnType<typeof useTranslation>['t']
 ) {
   switch (type) {
-    case coreTransactions.TrFilterType.Income:
+    case core.transactions.TrFilterType.Income:
       return t('transactionType_income')
-    case coreTransactions.TrFilterType.Outcome:
+    case core.transactions.TrFilterType.Outcome:
       return t('transactionType_outcome')
-    case coreTransactions.TrFilterType.Transfer:
+    case core.transactions.TrFilterType.Transfer:
       return t('transactionType_transfer')
-    case coreTransactions.TrFilterType.Debt:
+    case core.transactions.TrFilterType.Debt:
       return t('transactionType_debt')
   }
 }

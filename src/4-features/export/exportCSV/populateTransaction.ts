@@ -1,4 +1,4 @@
-import { transactions as coreTransactions } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 import {
   ByIdOld,
   Modify,
@@ -25,7 +25,7 @@ export type PopulatedTransaction = Modify<
     outcomeAccount: TAccount
     opOutcomeInstrument: TInstrument
     tag: TTag[] | null
-    type: coreTransactions.TrType
+    type: core.transactions.TrType
   }
 >
 
@@ -42,7 +42,7 @@ export const populateTransaction = (
   opOutcomeInstrument: instruments[Number(raw.opOutcomeInstrument)],
   tag: mapTags(raw.tag, tags),
   //COMPUTED PROPERTIES
-  type: coreTransactions.getType(raw),
+  type: core.transactions.getType(raw),
 })
 
 function mapTags(ids: TTagId[] | null, tags: ByIdOld<TTag>) {

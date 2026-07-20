@@ -5,11 +5,7 @@ import type {
   TISODate,
   TTransactionId,
 } from '6-shared/types'
-import {
-  activity as coreActivity,
-  envelopes as coreEnvelopes,
-  transactions as coreTransactions,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { useMemo, useState, useCallback, FC, ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -30,7 +26,7 @@ export type TTransactionListProps = {
   onTrOpen?: (id: TTransactionId) => void
   opened?: TTransactionId
   transactionIds?: TTransactionId[]
-  initialQuery?: coreTransactions.TTransactionQuery
+  initialQuery?: core.transactions.TTransactionQuery
   hideFilter?: boolean
   checkedDate?: Date | null
   initialDate?: TDateDraft
@@ -50,7 +46,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
   } = props
 
   const dispatch = useAppDispatch()
-  const [query, setQuery] = useState<coreTransactions.TTransactionQuery>(
+  const [query, setQuery] = useState<core.transactions.TTransactionQuery>(
     () => ({
       clauses:
         initialQuery?.clauses.filter(clause => clause.kind !== 'search') || [],
@@ -62,7 +58,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
       ''
   )
   const debouncedSearch = useDebounce(search, 300)
-  const appliedQuery = useMemo<coreTransactions.TTransactionQuery>(
+  const appliedQuery = useMemo<core.transactions.TTransactionQuery>(
     () => ({
       clauses: [
         ...query.clauses,
@@ -107,9 +103,9 @@ export const TransactionList: FC<TTransactionListProps> = props => {
       if (index === -1) return
       const ids = trList
         .slice(index)
-        .filter(tr => !coreTransactions.isViewed(tr))
+        .filter(tr => !core.transactions.isViewed(tr))
         .map(tr => tr.id)
-      dispatch(coreTransactions.setViewed(ids, true))
+      dispatch(core.transactions.setViewed(ids, true))
       track('transactions_older_marked_viewed', {})
     },
     [dispatch, trList]
@@ -214,24 +210,24 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
 function useFilteredTransactions(
   trIds?: TTransactionId[],
-  query: coreTransactions.TTransactionQuery = { clauses: [] }
+  query: core.transactions.TTransactionQuery = { clauses: [] }
 ) {
-  const transactionsById = useAppSelector(coreTransactions.selectAll)
-  const allTransactionIds = useAppSelector(coreTransactions.selectIds)
-  const routing = useAppSelector(coreActivity.selectTransactionRoutingContext)
-  const envelopes = useAppSelector(coreEnvelopes.selectDomain)
-  const keepingEnvelopeIds = useAppSelector(coreEnvelopes.selectKeepingIds)
-  const context = useMemo<coreTransactions.TTransactionQueryContext>(
+  const transactionsById = useAppSelector(core.transactions.selectAll)
+  const allTransactionIds = useAppSelector(core.transactions.selectIds)
+  const routing = useAppSelector(core.activity.selectTransactionRoutingContext)
+  const envelopes = useAppSelector(core.envelopes.selectDomain)
+  const keepingEnvelopeIds = useAppSelector(core.envelopes.selectKeepingIds)
+  const context = useMemo<core.transactions.TTransactionQueryContext>(
     () => ({ routing, envelopes, keepingEnvelopeIds }),
     [envelopes, keepingEnvelopeIds, routing]
   )
   const groups = useMemo(() => {
-    const checker = coreTransactions.compileQuery(query, context)
+    const checker = core.transactions.compileQuery(query, context)
     const list = trIds || allTransactionIds
     return list
       .map(id => transactionsById[id])
       .filter(checker)
-      .sort(coreTransactions.compareTransactionDates)
+      .sort(core.transactions.compareTransactionDates)
   }, [trIds, allTransactionIds, context, query, transactionsById])
   return groups
 }

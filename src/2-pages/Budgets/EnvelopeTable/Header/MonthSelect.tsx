@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, FC } from 'react'
 import { useAppSelector } from 'store'
-import { months as coreMonths } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { Box, Typography, IconButton, ButtonBase } from '@mui/material'
 import { BoxProps } from '@mui/system'
@@ -14,7 +14,7 @@ import { useMonth } from '../../MonthProvider'
 
 export const MonthSelect: FC<BoxProps> = props => {
   const [month, setMonth] = useMonth()
-  const list = useAppSelector(coreMonths.selectList)
+  const list = useAppSelector(core.months.selectList)
   const first = list[0]
   const last = list[list.length - 1]
 

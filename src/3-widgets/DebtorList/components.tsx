@@ -1,5 +1,5 @@
 import { FC, ReactNode } from 'react'
-import { currency as coreCurrency } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import {
   ListSubheader,
@@ -76,7 +76,7 @@ export const Subheader: FC<
   } & ListSubheaderProps
 > = ({ name, amount, sx, ...rest }) => {
   const month = toISOMonth(new Date())
-  const toDisplay = coreCurrency.useToDisplay(month)
+  const toDisplay = core.currency.useToDisplay(month)
   return (
     <ListSubheader sx={{ borderRadius: 1, ...sx }} {...rest}>
       <Box

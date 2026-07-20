@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { useAppSelector } from 'store'
-import { months as coreMonths } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { Typography } from '@mui/material'
 import { TableRow } from '../shared/shared'
@@ -30,7 +30,7 @@ const Sum: FC<{ value: TFxAmount; month: TISOMonth }> = ({ value, month }) => (
 
 export const Footer: FC<FooterProps> = props => {
   const { month } = props
-  const totals = useAppSelector(coreMonths.selectTotals)[month]
+  const totals = useAppSelector(core.months.selectTotals)[month]
   const { t } = useTranslation('common')
 
   return (

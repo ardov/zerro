@@ -1,5 +1,5 @@
 import { AppThunk } from 'store/index'
-import { envelopes as coreEnvelopes } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 export function moveEnvelope(
   sourceIdx: number,
@@ -7,12 +7,12 @@ export function moveEnvelope(
   asChild: boolean
 ): AppThunk {
   return (dispatch, getState) => {
-    const structure = coreEnvelopes.selectStructure(getState())
+    const structure = core.envelopes.selectStructure(getState())
 
     const newStructure = JSON.parse(
       JSON.stringify(structure)
-    ) as coreEnvelopes.TGroupNode[]
-    const flatList = coreEnvelopes.flattenStructure(newStructure)
+    ) as core.envelopes.TGroupNode[]
+    const flatList = core.envelopes.flattenStructure(newStructure)
     const active = flatList[sourceIdx]
     const over = flatList[targetIdx]
 
@@ -21,16 +21,16 @@ export function moveEnvelope(
     cutOutNode(active, newStructure)
     placeNode(active, over, asChild, newStructure)
     dispatch(
-      coreEnvelopes.applyStructure(
-        coreEnvelopes.toEnvelopeStructureInput(newStructure)
+      core.envelopes.applyStructure(
+        core.envelopes.toEnvelopeStructureInput(newStructure)
       )
     )
   }
 }
 
 function cutOutNode(
-  node: coreEnvelopes.TEnvNode | coreEnvelopes.TGroupNode,
-  structure: coreEnvelopes.TGroupNode[]
+  node: core.envelopes.TEnvNode | core.envelopes.TGroupNode,
+  structure: core.envelopes.TGroupNode[]
 ) {
   if (node.type === 'group') {
     const groupIndex = structure.indexOf(node)
@@ -53,10 +53,10 @@ function cutOutNode(
 }
 
 function placeNode(
-  node: coreEnvelopes.TEnvNode | coreEnvelopes.TGroupNode,
-  under: coreEnvelopes.TEnvNode | coreEnvelopes.TGroupNode,
+  node: core.envelopes.TEnvNode | core.envelopes.TGroupNode,
+  under: core.envelopes.TEnvNode | core.envelopes.TGroupNode,
   asChild: boolean,
-  structure: coreEnvelopes.TGroupNode[]
+  structure: core.envelopes.TGroupNode[]
 ) {
   for (let grIdx = 0; grIdx < structure.length; grIdx++) {
     const group = structure[grIdx]

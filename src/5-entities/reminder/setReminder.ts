@@ -1,4 +1,4 @@
-import { reminders as coreReminders } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
-export const deleteReminder = coreReminders.remove
-export const setReminder = coreReminders.set
+export const deleteReminder = core.reminders.remove
+export const setReminder = core.reminders.set

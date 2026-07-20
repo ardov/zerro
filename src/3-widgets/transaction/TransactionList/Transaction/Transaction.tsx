@@ -4,7 +4,7 @@ import React, { FC } from 'react'
 import styled from '@emotion/styled'
 import { Theme, TypographyVariant } from '@mui/material'
 import { useContextMenu } from '6-shared/hooks/useContextMenu'
-import { transactions as coreTransactions } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { useAppSelector } from 'store'
 import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'
@@ -40,8 +40,8 @@ export const Transaction: FC<TTransactionProps> = props => {
     onClick: () => onOpen?.(id),
     onContextMenu: event => onContextMenu?.(event, id),
   })
-  const tr = useAppSelector(state => coreTransactions.selectAll(state)[id])
-  const getTrType = coreTransactions.useType()
+  const tr = useAppSelector(state => core.transactions.selectAll(state)[id])
+  const getTrType = core.transactions.useType()
   if (!tr) {
     console.warn('Transaction not found', id)
     return null

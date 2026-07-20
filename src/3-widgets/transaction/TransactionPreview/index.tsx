@@ -27,11 +27,7 @@ import { track } from '6-shared/analytics'
 
 import { useAppDispatch, useAppSelector } from 'store'
 
-import {
-  accounts as coreAccounts,
-  instruments as coreInstruments,
-  transactions as coreTransactions,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { TagList } from '5-entities/tag/ui/TagList'
 
@@ -70,7 +66,7 @@ export type TransactionPreviewProps = {
 
 export const TransactionPreview: FC<TransactionPreviewProps> = props => {
   const transaction = useAppSelector(
-    state => coreTransactions.selectAll(state)[props.id]
+    state => core.transactions.selectAll(state)[props.id]
   )
   return transaction ? <TransactionContent {...props} /> : <TrEmptyState />
 }
@@ -80,24 +76,24 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
   const { t } = useTranslation('transaction')
   const dispatch = useAppDispatch()
   const onDelete = () => {
-    dispatch(coreTransactions.remove([id]))
+    dispatch(core.transactions.remove([id]))
     track('transaction_deleted', { mode: 'single', source: 'preview' })
   }
   const onDeletePermanently = () => {
-    dispatch(coreTransactions.removePermanently([id]))
+    dispatch(core.transactions.removePermanently([id]))
     track('transaction_deleted_permanently', { source: 'preview' })
   }
   const onRestore = () => {
-    dispatch(coreTransactions.restore(id))
+    dispatch(core.transactions.restore(id))
     track('transaction_restored', { source: 'preview' })
   }
 
-  const tr = useAppSelector(state => coreTransactions.selectAll(state)[id])!
-  const trType = coreTransactions.getType(tr)
-  const accounts = coreAccounts.usePopulated()
+  const tr = useAppSelector(state => core.transactions.selectAll(state)[id])!
+  const trType = core.transactions.getType(tr)
+  const accounts = core.accounts.usePopulated()
   const incomeAccount = accounts[tr.incomeAccount]
   const outcomeAccount = accounts[tr.outcomeAccount]
-  const instruments = coreInstruments.useAll()
+  const instruments = core.instruments.useAll()
   const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
   const outcomeCurrency = instruments[tr.outcomeInstrument]?.shortTitle
 
@@ -155,7 +151,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
       createdDate.setHours(hh)
       createdDate.setMinutes(mm)
       const newId = dispatch(
-        coreTransactions.recreate({
+        core.transactions.recreate({
           id,
           created: +createdDate,
           comment: localComment,
@@ -170,7 +166,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
       onOpenOther(newId)
     } else if (hasChanges) {
       dispatch(
-        coreTransactions.update({
+        core.transactions.update({
           id,
           ...(comment !== localComment && { comment: localComment }),
           ...(outcome !== localOutcome && { outcome: localOutcome }),
@@ -402,9 +398,9 @@ const SaveButton: FC<{ visible: boolean; onSave: () => void }> = props => {
 
 const RateToWords: FC<{ tr: TTransaction }> = ({ tr }) => {
   const { t } = useTranslation('transaction')
-  const trType = coreTransactions.getType(tr)
+  const trType = core.transactions.getType(tr)
   const { income, opIncome, outcome, opOutcome } = tr
-  const instruments = coreInstruments.useAll()
+  const instruments = core.instruments.useAll()
   const incomeCurrency = instruments[tr.incomeInstrument]?.shortTitle
   const opIncomeCurrency =
     tr.opIncomeInstrument && instruments[tr.opIncomeInstrument]?.shortTitle

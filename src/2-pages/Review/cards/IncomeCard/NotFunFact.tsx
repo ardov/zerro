@@ -1,4 +1,4 @@
-import { currency as coreCurrency } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { Dialog, IconButton, Link, Stack, Typography } from '@mui/material'
 import Balancer from 'react-wrap-balancer'
@@ -14,7 +14,7 @@ const MEDIAN_WAGE_SOURCE = 'https://sberindex.ru/ru/dashboards/median-wages'
 
 export function NotFunFact({ income }: { income: TFxAmount }) {
   const [isOpenInfo, toggleInfo] = useToggle(false)
-  const toDisplay = coreCurrency.useToDisplay('current')
+  const toDisplay = core.currency.useToDisplay('current')
   const rubIncome = income.RUB || 0
   const monthlyIncome = toDisplay(income) / 12
   const displayMedianWage = toDisplay({ RUB: MEDIAN_WAGE_RUB })

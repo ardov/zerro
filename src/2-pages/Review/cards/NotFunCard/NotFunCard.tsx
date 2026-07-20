@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { currency as coreCurrency, tags as coreTags } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import {
   Box,
@@ -38,7 +38,7 @@ export function NotFunCard(props: TCardProps) {
   const [checkedIncome, setCheckedIncome] = useState(income.map(t => t.id))
   const [checkedOutcome, setCheckedOutcome] = useState(outcome.map(t => t.id))
 
-  const [displayCurr] = coreCurrency.useDisplayCurrency()
+  const [displayCurr] = core.currency.useDisplayCurrency()
   if (displayCurr !== 'RUB') return null
 
   const totalIncome = income
@@ -229,8 +229,8 @@ export function NotFunCard(props: TCardProps) {
 
 function useIncomeOutcome(onlyRUB: boolean, year: string | number) {
   const yearStats = useStats(year)
-  const toDisplay = coreCurrency.useToDisplay('current')
-  const tags = useAppSelector(coreTags.selectPopulated)
+  const toDisplay = core.currency.useToDisplay('current')
+  const tags = useAppSelector(core.tags.selectPopulated)
 
   return useMemo(() => {
     const incomeTags = entries(yearStats.byTag)

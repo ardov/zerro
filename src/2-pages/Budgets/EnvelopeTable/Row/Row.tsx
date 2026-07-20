@@ -1,10 +1,5 @@
 import React, { FC, ReactNode, useCallback } from 'react'
-import {
-  activity as coreActivity,
-  currency as coreCurrency,
-  envelopes as coreEnvelopes,
-  goals as coreGoals,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { useDroppable } from '@dnd-kit/core'
 import { IconButton, IconButtonProps } from '@mui/material'
@@ -123,10 +118,10 @@ export const Row: FC<EnvelopeRowProps> = props => {
   const isSmall = useIsSmall()
   const { columns } = useColumns()
 
-  const envelope = useAppSelector(coreEnvelopes.selectAll)[id]
-  const envData = useAppSelector(coreActivity.selectEnvelopeMetrics)[month][id]
-  const goalInfo = useAppSelector(coreGoals.selectAll)[month][id]
-  const toDisplay = coreCurrency.useToDisplay(month)
+  const envelope = useAppSelector(core.envelopes.selectAll)[id]
+  const envData = useAppSelector(core.activity.selectEnvelopeMetrics)[month][id]
+  const goalInfo = useAppSelector(core.goals.selectAll)[month][id]
+  const toDisplay = core.currency.useToDisplay(month)
 
   const isChild = !!envelope.parent || !!isSelf
 
@@ -253,7 +248,7 @@ const Droppable: FC<{
 }
 
 type GoalButtonProps = {
-  goal: coreGoals.TGoal | null
+  goal: core.goals.TGoal | null
   currency: TFxCode
   goalProgress?: number | null
   onClick: IconButtonProps['onClick']
@@ -277,7 +272,7 @@ const GoalButton: FC<GoalButtonProps> = props => {
 
   return (
     <span>
-      <Tooltip title={coreGoals.formatGoal(goal, currency)}>
+      <Tooltip title={core.goals.formatGoal(goal, currency)}>
         <IconButton size="small" onClick={onClick}>
           <RadialProgress value={goalProgress || 0} fontSize="inherit" />
         </IconButton>

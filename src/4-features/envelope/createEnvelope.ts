@@ -1,6 +1,6 @@
 import type { AppThunk } from 'store'
 import type { TEnvelopeId } from '5-entities/envelope'
-import { envelopes as coreEnvelopes } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { t } from 'i18next'
 
@@ -15,7 +15,7 @@ export const createEnvelope =
   (input: TCreateEnvelopeInput = {}): AppThunk<TEnvelopeId> =>
   dispatch =>
     dispatch(
-      coreEnvelopes.create({
+      core.envelopes.create({
         name: input.name || t('tagNew', { ns: 'common' }),
         group: input.group,
         index: input.index,
@@ -29,8 +29,8 @@ export const createEnvelopeInGroup =
     // In order for group not jump to the top of the list
     // we need to find the first envelope in the group
     // and create a new envelope right before it
-    const envelopes = coreEnvelopes.selectAll(getState())
-    const structure = coreEnvelopes.selectStructure(getState())
+    const envelopes = core.envelopes.selectAll(getState())
+    const structure = core.envelopes.selectStructure(getState())
     const groupNode = structure.find(gr => gr.id === group)
     if (!groupNode) return
     const firstEnvId = groupNode.children[0]?.id

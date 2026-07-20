@@ -5,7 +5,7 @@ import { DragEndEvent, DragMoveEvent, useDndMonitor } from '@dnd-kit/core'
 import { Box, SxProps } from '@mui/system'
 import { useAppDispatch, useAppSelector } from 'store/index'
 import { TEnvelope, TEnvelopeId } from '5-entities/envelope'
-import { envelopes as coreEnvelopes } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { moveEnvelope } from '4-features/envelope/moveEnvelope'
 import { DragTypes } from './dragTypes'
@@ -31,7 +31,7 @@ export function Highlight() {
   const dispatch = useAppDispatch()
   const [isDragging, setIsDragging] = useState(false)
 
-  const envelopes = useAppSelector(coreEnvelopes.selectAll)
+  const envelopes = useAppSelector(core.envelopes.selectAll)
 
   const boxRef = useRef<HTMLDivElement>(null)
 

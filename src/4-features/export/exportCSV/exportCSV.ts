@@ -6,20 +6,15 @@ import {
 import { formatDate } from '6-shared/helpers/date'
 import { ById } from '6-shared/types'
 import { AppThunk } from 'store'
-import {
-  accounts as coreAccounts,
-  instruments as coreInstruments,
-  tags as coreTags,
-  transactions as coreTransactions,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 // Only for CSV
 const getPopulatedTransactions = createSelector(
   [
-    coreInstruments.selectAll,
-    coreAccounts.selectAll,
-    coreTags.selectPopulated,
-    coreTransactions.selectAll,
+    core.instruments.selectAll,
+    core.accounts.selectAll,
+    core.tags.selectPopulated,
+    core.transactions.selectAll,
   ],
   (instruments, accounts, tags, transactions) => {
     const result: { [id: string]: PopulatedTransaction } = {}
@@ -98,11 +93,11 @@ function transactionsToCsvContent(tr: ById<PopulatedTransaction>) {
 }
 
 const types = {
-  [coreTransactions.TrType.Income]: 'Доход',
-  [coreTransactions.TrType.Outcome]: 'Расход',
-  [coreTransactions.TrType.Transfer]: 'Перевод',
-  [coreTransactions.TrType.OutcomeDebt]: '',
-  [coreTransactions.TrType.IncomeDebt]: '',
+  [core.transactions.TrType.Income]: 'Доход',
+  [core.transactions.TrType.Outcome]: 'Расход',
+  [core.transactions.TrType.Transfer]: 'Перевод',
+  [core.transactions.TrType.OutcomeDebt]: '',
+  [core.transactions.TrType.IncomeDebt]: '',
 }
 
 const csvEscapeString = (term: string): string => {
@@ -126,7 +121,7 @@ const transactionToRowObj = (t: PopulatedTransaction): RowObj =>
   csvEscapeRow({
     Дата: t.date,
     Создана: formatDate(t.created, 'yyyy-MM-dd HH:mm'),
-    Тип: types[t.type as coreTransactions.TrType],
+    Тип: types[t.type as core.transactions.TrType],
     Категория: t.tag ? t.tag[0].title : '',
     'Доп категории': '',
     'Со счёта': t.outcomeAccount ? t.outcomeAccount.title : '',

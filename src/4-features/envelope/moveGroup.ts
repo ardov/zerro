@@ -1,11 +1,11 @@
 import { AppThunk } from 'store/index'
-import { envelopes as coreEnvelopes } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { arrayMove } from './arrayMove'
 
 export function moveGroup(fromIdx: number, toIdx: number): AppThunk {
   return (dispatch, getState) => {
-    const structure = coreEnvelopes.selectStructure(getState())
+    const structure = core.envelopes.selectStructure(getState())
     if (fromIdx === toIdx) return
     if (!structure[fromIdx] || !structure[toIdx]) return
 
@@ -13,8 +13,8 @@ export function moveGroup(fromIdx: number, toIdx: number): AppThunk {
     arrayMove(updatedStructure, fromIdx, toIdx)
 
     dispatch(
-      coreEnvelopes.applyStructure(
-        coreEnvelopes.toEnvelopeStructureInput(updatedStructure)
+      core.envelopes.applyStructure(
+        core.envelopes.toEnvelopeStructureInput(updatedStructure)
       )
     )
   }

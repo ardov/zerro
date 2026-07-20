@@ -1,8 +1,5 @@
 import { FC, memo, ReactNode, useCallback, useRef } from 'react'
-import {
-  currency as coreCurrency,
-  envelopes as coreEnvelopes,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { useDraggable } from '@dnd-kit/core'
 import { Typography, Box, IconButton, Chip } from '@mui/material'
@@ -30,14 +27,14 @@ export const NameCell: FC<{
   const { id, symbol, colorHex, name, currency, comment, originalName } =
     props.envelope
   const { isReordering, isDefaultVisible, isChild, isSelf, onClick } = props
-  const [displCurrency] = coreCurrency.useDisplayCurrency()
+  const [displCurrency] = core.currency.useDisplayCurrency()
   const { t } = useTranslation('budgets')
 
   const dispatch = useAppDispatch()
   const ref = useRef<HTMLElement>(null)
   const updateName = useCallback(
     (v: string) => {
-      dispatch(coreEnvelopes.rename(id, v))
+      dispatch(core.envelopes.rename(id, v))
     },
     [dispatch, id]
   )

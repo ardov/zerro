@@ -1,8 +1,5 @@
 import { FC, ReactNode, useCallback } from 'react'
-import {
-  accounts as coreAccounts,
-  currency as coreCurrency,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import {
   ListSubheader,
@@ -24,7 +21,7 @@ import { useContextMenu } from '6-shared/hooks/useContextMenu'
 import { getEventPosition } from '3-widgets/global/shared/helpers'
 
 export const Account: FC<
-  { account: coreAccounts.TAccountPopulated } & ListItemButtonProps
+  { account: core.accounts.TAccountPopulated } & ListItemButtonProps
 > = ({ account, sx, ...rest }) => {
   const transactionDrawer = useTransactionDrawer()
   const openContextMenu = useAccountContextMenu()
@@ -105,7 +102,7 @@ export const Subheader: FC<
   } & ListSubheaderProps
 > = ({ name, amount, sx, ...rest }) => {
   const month = toISOMonth(new Date())
-  const toDisplay = coreCurrency.useToDisplay(month)
+  const toDisplay = core.currency.useToDisplay(month)
   const isNegative = toDisplay(amount) < 0
   return (
     <ListSubheader sx={{ borderRadius: 1, ...sx }} {...rest}>

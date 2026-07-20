@@ -1,4 +1,4 @@
-import { tags as coreTags } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
-export type TTagPopulated = coreTags.TTagPopulated
-export const populateTags = coreTags.presentTags
+export type TTagPopulated = core.tags.TTagPopulated
+export const populateTags = core.tags.presentTags

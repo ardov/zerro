@@ -1,9 +1,5 @@
 import React, { FC, useRef } from 'react'
-import {
-  activity as coreActivity,
-  currency as coreCurrency,
-  envelopes as coreEnvelopes,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { ButtonBase, IconButton, Typography, Box } from '@mui/material'
 import { isEqual } from 'lodash'
@@ -148,9 +144,9 @@ const useGroupTotals = (id: string) => {
     available: number
   }
   const [month] = useMonth()
-  const data = useAppSelector(coreActivity.selectEnvelopeMetrics)[month]
-  const structure = useAppSelector(coreEnvelopes.selectStructure, isEqual)
-  const toDisplay = coreCurrency.useToDisplay(month)
+  const data = useAppSelector(core.activity.selectEnvelopeMetrics)[month]
+  const structure = useAppSelector(core.envelopes.selectStructure, isEqual)
+  const toDisplay = core.currency.useToDisplay(month)
   const group = structure.find(gr => gr.id === id)
   if (!group || !data) return { budgeted: 0, activity: 0, available: 0 }
 

@@ -1,10 +1,5 @@
 import { useMemo } from 'react'
-import {
-  accounts as coreAccounts,
-  currency as coreCurrency,
-  instruments as coreInstruments,
-  transactions as coreTransactions,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { TISODate } from '6-shared/types'
 import { GroupBy, makeDateArray, toGroup } from '6-shared/helpers/date'
@@ -55,10 +50,10 @@ export function useCashFlow(
   period: Period,
   aggregation: GroupBy = GroupBy.Month
 ): TCashflowPoint[] {
-  const transactionHistory = useAppSelector(coreTransactions.selectHistory)
-  const debtAccId = useAppSelector(coreAccounts.selectDebtAccountId)
-  const instCodeMap = coreInstruments.useCodeMap()
-  const accounts = coreAccounts.usePopulated()
+  const transactionHistory = useAppSelector(core.transactions.selectHistory)
+  const debtAccId = useAppSelector(core.accounts.selectDebtAccountId)
+  const instCodeMap = core.instruments.useCodeMap()
+  const accounts = core.accounts.usePopulated()
   const aggregatedNodes = useMemo(
     () =>
       calcCashflow(
@@ -71,8 +66,8 @@ export function useCashFlow(
     [accounts, aggregation, debtAccId, instCodeMap, transactionHistory]
   )
 
-  const toDisplay = coreCurrency.useToDisplay('current')
-  const historyStart = useAppSelector(coreTransactions.selectHistoryStart)
+  const toDisplay = core.currency.useToDisplay('current')
+  const historyStart = useAppSelector(core.transactions.selectHistoryStart)
   const firstDate = getStartDate(period, aggregation, historyStart)
 
   // eslint-disable-next-line react-hooks/purity -- 'today' is intentionally sampled on render

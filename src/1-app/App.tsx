@@ -14,7 +14,7 @@ import { PopoverManager } from '6-shared/historyPopovers'
 import { useAppSelector } from 'store'
 import { getLoginState } from 'store/token'
 import { getLastSyncTime } from 'store/data/selectors'
-import { users as coreUsers } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { HistoryShortcuts } from '4-features/historyShortcuts'
 import { RegularSyncHandler } from '3-widgets/RegularSyncHandler'
@@ -42,7 +42,7 @@ export default function App() {
 
   const isLoggedIn = useAppSelector(getLoginState)
   const hasData = useAppSelector(state => !!getLastSyncTime(state))
-  const userId = coreUsers.useRootId()
+  const userId = core.users.useRootId()
   useEffect(() => {
     setAnalyticsUser(userId || null)
   }, [userId])

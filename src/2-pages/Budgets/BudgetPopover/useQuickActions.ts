@@ -7,17 +7,13 @@ import { toISOMonth } from '6-shared/helpers/date'
 import { getAverage } from '6-shared/helpers/money/currencyHelpers'
 
 import { useAppSelector } from 'store'
-import {
-  activity as coreActivity,
-  currency as coreCurrency,
-  goals as coreGoals,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
   const { t } = useTranslation()
-  const convertFx = useAppSelector(coreCurrency.selectConvertFx)
-  const envMetrics = useAppSelector(coreActivity.selectEnvelopeMetrics)
-  const goals = useAppSelector(coreGoals.selectAll)[month]
+  const convertFx = useAppSelector(core.currency.selectConvertFx)
+  const envMetrics = useAppSelector(core.activity.selectEnvelopeMetrics)
+  const goals = useAppSelector(core.goals.selectAll)[month]
   if (!id) return []
 
   const envelope = envMetrics[month][id]

@@ -2,10 +2,7 @@ import { FC } from 'react'
 import { OptionalExceptFor, TInstrumentId } from '6-shared/types'
 import { AmountProps, Amount } from '6-shared/ui/Amount'
 
-import {
-  instruments as coreInstruments,
-  users as coreUsers,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 export type TSmartAmountProps = AmountProps & {
   instrument?: TInstrumentId | 'user'
@@ -22,8 +19,8 @@ type ConnectedAmountProps = OptionalExceptFor<
   'value' | 'instrument'
 >
 function ConnectedAmount(props: ConnectedAmountProps) {
-  const userInstrumentId = coreUsers.useInstrumentId()
-  const instruments = coreInstruments.useAll()
+  const userInstrumentId = core.users.useInstrumentId()
+  const instruments = core.instruments.useAll()
   const id = props.instrument === 'user' ? userInstrumentId : props.instrument
   const currency = id ? instruments?.[id]?.shortTitle : undefined
   return <Amount {...props} currency={currency} />

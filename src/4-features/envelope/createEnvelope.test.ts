@@ -12,7 +12,7 @@ import {
   EnvType,
   getEnvelopeMeta,
 } from 'zerro-core/domain/zerro'
-import { envelopes as coreEnvelopes } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { createEnvelope } from './createEnvelope'
 
@@ -72,7 +72,7 @@ describe('createEnvelope', () => {
     })(runtime.dispatch, runtime.getState, undefined)
 
     expect(id).toBe(envId.get(EnvType.Tag, UUID))
-    expect(coreEnvelopes.selectAll(runtime.getState())[id!]).toBeDefined()
+    expect(core.envelopes.selectAll(runtime.getState())[id!]).toBeDefined()
     expect(getEnvelopeMeta(runtime.getState().data.current)[id!]).toMatchObject(
       {
         id,

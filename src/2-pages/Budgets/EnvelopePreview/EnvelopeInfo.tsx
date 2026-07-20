@@ -1,10 +1,6 @@
 import type { TDateDraft, TFxAmount, TISOMonth } from '6-shared/types'
 import { useAppSelector } from 'store'
-import {
-  activity as coreActivity,
-  currency as coreCurrency,
-  transactions as coreTransactions,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
 import {
@@ -45,8 +41,8 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
   const theme = useTheme()
   const transactionDrawer = useEnvTransactionsDrawer()
   const openBudgetPopover = useBudgetPopover()
-  const convertFx = useAppSelector(coreCurrency.selectConvertFx)
-  const envMetrics = useAppSelector(coreActivity.selectEnvelopeMetrics)[month][
+  const convertFx = useAppSelector(core.currency.selectConvertFx)
+  const envMetrics = useAppSelector(core.activity.selectEnvelopeMetrics)[month][
     id
   ]
 
@@ -132,7 +128,7 @@ export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
               envelopeConditions: {
                 id,
                 month,
-                mode: coreTransactions.TrFilterMode.Envelope,
+                mode: core.transactions.TrFilterMode.Envelope,
               },
             })
           }}

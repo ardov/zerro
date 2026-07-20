@@ -5,7 +5,7 @@ import { useAppDispatch } from 'store'
 import { registerPopover } from '6-shared/historyPopovers'
 import { track } from '6-shared/analytics'
 import { useTranslation } from 'react-i18next'
-import { accounts as coreAccounts } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { getMenuPosition } from './shared/helpers'
 
@@ -35,7 +35,7 @@ export const AccountContextMenu: FC = () => {
   const { displayProps, extraProps } = accContext.useProps()
   const { id } = extraProps
   const dispatch = useAppDispatch()
-  const account = coreAccounts.useAll()[id]
+  const account = core.accounts.useAll()[id]
 
   if (!account) return null
 
@@ -44,7 +44,7 @@ export const AccountContextMenu: FC = () => {
       label: t('moveFromBalance'),
       condition: account.inBalance,
       action: () => {
-        dispatch(coreAccounts.setInBalance(id, false))
+        dispatch(core.accounts.setInBalance(id, false))
         track('account_budget_membership_changed', {
           in_budget: false,
           source: 'context_menu',
@@ -55,7 +55,7 @@ export const AccountContextMenu: FC = () => {
       label: t('moveInBalance'),
       condition: !account.inBalance,
       action: () => {
-        dispatch(coreAccounts.setInBalance(id, true))
+        dispatch(core.accounts.setInBalance(id, true))
         track('account_budget_membership_changed', {
           in_budget: true,
           source: 'context_menu',

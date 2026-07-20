@@ -1,13 +1,10 @@
-import {
-  currency as coreCurrency,
-  instruments as coreInstruments,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { TTransaction } from '6-shared/types'
 
 export function useTrToDisplay() {
-  const toDisplay = coreCurrency.useToDisplay('current')
-  const instCodeMap = coreInstruments.useCodeMap()
+  const toDisplay = core.currency.useToDisplay('current')
+  const instCodeMap = core.instruments.useCodeMap()
 
   return (tr: TTransaction) => {
     return {

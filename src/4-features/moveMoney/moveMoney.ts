@@ -5,11 +5,7 @@ import type { TEnvelopeId } from '5-entities/envelope'
 import { round } from '6-shared/helpers/money'
 import { track } from '6-shared/analytics'
 
-import {
-  activity as coreActivity,
-  budgets as coreBudgets,
-  currency as coreCurrency,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 export const moveMoney =
   (
@@ -22,10 +18,10 @@ export const moveMoney =
   (dispatch, getState) => {
     if (!source || !amount || !destination || source === destination) return
     const state = getState()
-    const metrics = coreActivity.selectEnvelopeMetrics(state)[month]
-    const convertFx = coreCurrency.selectConvertFx(state)
+    const metrics = core.activity.selectEnvelopeMetrics(state)[month]
+    const convertFx = core.currency.selectConvertFx(state)
 
-    const updates: coreBudgets.TBudgetUpdate[] = []
+    const updates: core.budgets.TBudgetUpdate[] = []
 
     if (source !== 'toBeBudgeted') {
       const env = metrics[source]
@@ -49,6 +45,6 @@ export const moveMoney =
       updates.push({ month, id: env.id, value: newBudget })
     }
 
-    dispatch(coreBudgets.set(updates))
+    dispatch(core.budgets.set(updates))
     track('budget_funds_moved', {})
   }

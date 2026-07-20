@@ -4,7 +4,7 @@ import { initSentry } from '6-shared/diagnostics'
 import { store } from 'store'
 import { bindWorkerToStore } from 'worker'
 import { resetData } from 'store/data'
-import { infrastructure as coreInfrastructure } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import GlobalErrorBoundary from './GlobalErrorBoundary'
 import App from './App'
@@ -50,7 +50,7 @@ function createZerroInstance(s: typeof store) {
     logs: {},
     resetData: () => s.dispatch(resetData()),
     applyClientPatch: (patch: TNormalizedPatch) =>
-      s.dispatch(coreInfrastructure.applyDebugPatch(patch)),
+      s.dispatch(core.infrastructure.applyDebugPatch(patch)),
     showEl: (id: string) => {
       const data = s.getState().data.current
       return (

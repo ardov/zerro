@@ -1,9 +1,5 @@
 import type { TTransaction } from '6-shared/types'
-import {
-  currency as coreCurrency,
-  instruments as coreInstruments,
-  transactions as coreTransactions,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import React, { FC, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -52,7 +48,7 @@ const Actions: FC<ActionsProps> = ({
 }) => {
   const { t } = useTranslation('transactionActions')
   const dispatch = useAppDispatch()
-  const allTransactions = useAppSelector(coreTransactions.selectAll)
+  const allTransactions = useAppSelector(core.transactions.selectAll)
   const [ids, setIds] = useState(checkedIds)
   const transactions = ids?.map(id => allTransactions[id])
   const actions = getAvailableActions(transactions)
@@ -74,8 +70,8 @@ const Actions: FC<ActionsProps> = ({
 
   const handleSetTag = (id: string) => {
     if (!id || id === 'null')
-      dispatch(coreTransactions.bulkEdit(checkedIds, { tags: [] }))
-    else dispatch(coreTransactions.bulkEdit(checkedIds, { tags: [id] }))
+      dispatch(core.transactions.bulkEdit(checkedIds, { tags: [] }))
+    else dispatch(core.transactions.bulkEdit(checkedIds, { tags: [id] }))
     track('transaction_tags_changed', {
       mode: 'bulk',
       source: 'bulk_toolbar',
@@ -89,7 +85,7 @@ const Actions: FC<ActionsProps> = ({
     okText: t('deleteBtn'),
     cancelText: t('cancelDeletion'),
     onOk: () => {
-      dispatch(coreTransactions.remove(checkedIds))
+      dispatch(core.transactions.remove(checkedIds))
       track('transaction_deleted', {
         mode: 'bulk',
         source: 'bulk_toolbar',
@@ -105,7 +101,7 @@ const Actions: FC<ActionsProps> = ({
   }
 
   const handleMarkViewed = () => {
-    dispatch(coreTransactions.setViewed(checkedIds, true))
+    dispatch(core.transactions.setViewed(checkedIds, true))
     track('transaction_viewed_changed', {
       viewed: true,
       mode: 'bulk',
@@ -214,7 +210,7 @@ const Actions: FC<ActionsProps> = ({
               {actions.combineToOutcome && (
                 <MenuItem
                   onClick={() => {
-                    dispatch(coreTransactions.combineToOutcome(ids))
+                    dispatch(core.transactions.combineToOutcome(ids))
                     track('transactions_combined', {
                       result_type: 'outcome',
                       source: 'bulk_toolbar',
@@ -235,7 +231,7 @@ const Actions: FC<ActionsProps> = ({
               {actions.combineToIncome && (
                 <MenuItem
                   onClick={() => {
-                    dispatch(coreTransactions.combineToIncome(ids))
+                    dispatch(core.transactions.combineToIncome(ids))
                     track('transactions_combined', {
                       result_type: 'income',
                       source: 'bulk_toolbar',
@@ -268,7 +264,7 @@ const Actions: FC<ActionsProps> = ({
               {actions.canMergeAsTransfer && (
                 <MenuItem
                   onClick={() => {
-                    dispatch(coreTransactions.mergeAsTransfer(ids))
+                    dispatch(core.transactions.mergeAsTransfer(ids))
                     track('transactions_combined', {
                       result_type: 'transfer',
                       source: 'bulk_toolbar',
@@ -306,8 +302,8 @@ const Actions: FC<ActionsProps> = ({
 
 function getAvailableActions(transactions: TTransaction[]) {
   const { incomes, outcomes, transfers } = groupByType(transactions)
-  const instCodeMap = coreInstruments.useCodeMap()
-  const toDisplay = coreCurrency.useToDisplay('current')
+  const instCodeMap = core.instruments.useCodeMap()
+  const toDisplay = core.currency.useToDisplay('current')
 
   const totalOutcome = toDisplay(
     addFxAmount(
@@ -330,7 +326,7 @@ function getAvailableActions(transactions: TTransaction[]) {
     delete: true,
     setMainTag: !transfers.length && (incomes.length || outcomes.length),
     bulkEdit: true,
-    markViewed: transactions.some(tr => !coreTransactions.isViewed(tr)),
+    markViewed: transactions.some(tr => !core.transactions.isViewed(tr)),
     combineToOutcome: canCombineToOutcome(),
     combineToIncome: canCombineToIncome(),
     collapseTransactionsEasy: canCollapseTransactionsEasy(),
@@ -409,7 +405,7 @@ function groupByType(list: TTransaction[] = []) {
   const transfers: TTransaction[] = []
 
   list?.forEach(tr => {
-    const trType = coreTransactions.getType(tr)
+    const trType = core.transactions.getType(tr)
     if (trType === 'income') incomes.push(tr)
     if (trType === 'outcome') outcomes.push(tr)
     if (trType === 'transfer') transfers.push(tr)

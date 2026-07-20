@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { useAppSelector } from 'store'
-import { tags as coreTags } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { TagTreeNode, TTagPopulated } from '5-entities/tag'
 import { getTagsTree } from '5-entities/tag/model/model'
@@ -38,7 +38,7 @@ type TagOption = TTagPopulated | TagTreeNode
 export const TagSelect: FC<TagSelectProps> = props => {
   const { onChange, tagFilters, multiple, value, label, ...rest } = props
   const tagsTree = useAppSelector(getTagsTree)
-  const tags = useAppSelector(coreTags.selectPopulated)
+  const tags = useAppSelector(core.tags.selectPopulated)
   const options = getMatchedTags(tagsTree, tagFilters)
 
   return (

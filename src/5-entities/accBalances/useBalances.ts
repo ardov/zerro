@@ -4,10 +4,7 @@ import { GroupBy, toGroup } from '6-shared/helpers/date'
 import { keys } from '6-shared/helpers/keys'
 
 import { useAppSelector } from 'store/index'
-import {
-  balances as coreBalances,
-  currency as coreCurrency,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { balancesToDisplay } from './shared/convertBalancesToDisplay'
 import { TBalanceNode } from './shared/types'
@@ -17,7 +14,7 @@ export function useBalances(
   start?: TDateDraft,
   end?: TDateDraft
 ) {
-  const list = useAppSelector(coreBalances.selectByDate)
+  const list = useAppSelector(core.balances.selectByDate)
   const startDate = toGroup(start || list[0].date, aggregation)
   // eslint-disable-next-line react-hooks/purity -- 'today' is intentionally sampled on render
   const endDate = toGroup(end || Date.now(), aggregation)
@@ -42,7 +39,7 @@ export function useDisplayBalances(
   end?: TDateDraft
 ) {
   const fxBalances = useBalances(aggregation, start, end)
-  const convert = useAppSelector(coreCurrency.selectDisplayConverter)
+  const convert = useAppSelector(core.currency.selectDisplayConverter)
   const balances = useMemo(
     () => balancesToDisplay(fxBalances, convert),
     [convert, fxBalances]

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Box, IconButton, Stack, Typography } from '@mui/material'
 import { formatDate } from '6-shared/helpers/date'
 import { useAppSelector } from 'store'
-import { tags as coreTags } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { Card, TCardProps } from '../shared/Card'
@@ -16,7 +16,7 @@ export function OutcomeCard(props: TCardProps) {
   const [i, setI] = useState(0)
   const yearStats = useStats(props.year)
   const toVal = useTrToDisplay()
-  const tags = useAppSelector(coreTags.selectPopulated)
+  const tags = useAppSelector(core.tags.selectPopulated)
 
   const topTransactions = yearStats.total.outcomeTransactions
     .map(tr => ({ tr, val: toVal(tr).outcome }))

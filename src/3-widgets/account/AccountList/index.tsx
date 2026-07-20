@@ -1,8 +1,5 @@
 import { FC } from 'react'
-import {
-  accounts as coreAccounts,
-  currency as coreCurrency,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
 import { Collapse, List, ListItemButton } from '@mui/material'
@@ -17,15 +14,15 @@ import { Account, Subheader } from './components'
 
 export default function AccountList({ className = '' }) {
   const { t } = useTranslation('accounts')
-  const toDisplay = coreCurrency.useToDisplay(toISOMonth(new Date()))
-  const inBudget = coreAccounts
+  const toDisplay = core.currency.useToDisplay(toISOMonth(new Date()))
+  const inBudget = core.accounts
     .useInBudget()
     .sort(
       (a, b) =>
         toDisplay({ [b.fxCode]: b.balance }) -
         toDisplay({ [a.fxCode]: a.balance })
     )
-  const savings = coreAccounts
+  const savings = core.accounts
     .useSaving()
     .sort(
       (a, b) =>
@@ -74,11 +71,11 @@ export default function AccountList({ className = '' }) {
   )
 }
 
-const ArchivedList: FC<{ accs: coreAccounts.TAccountPopulated[] }> = props => {
+const ArchivedList: FC<{ accs: core.accounts.TAccountPopulated[] }> = props => {
   const { t } = useTranslation('accounts')
   const { accs } = props
   const month = toISOMonth(new Date())
-  const toDisplay = coreCurrency.useToDisplay(month)
+  const toDisplay = core.currency.useToDisplay(month)
   const [visible, toggleVisibility] = useToggle()
   if (!accs.length) return null
 
@@ -118,7 +115,7 @@ const ArchivedList: FC<{ accs: coreAccounts.TAccountPopulated[] }> = props => {
   )
 }
 
-function getTotal(accs: coreAccounts.TAccountPopulated[]): TFxAmount {
+function getTotal(accs: core.accounts.TAccountPopulated[]): TFxAmount {
   return accs.reduce(
     (sum, a) => addFxAmount(sum, { [a.fxCode]: a.balance }),
     {}

@@ -1,10 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
-import {
-  activity as coreActivity,
-  budgets as coreBudgets,
-  currency as coreCurrency,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import type { TEnvelopeId } from '5-entities/envelope'
 import { setTotalBudget } from './setTotalBudget'
@@ -23,16 +19,16 @@ describe('setTotalBudget', () => {
     const dispatch = vi.fn()
     const foodId = 'tag#food' as TEnvelopeId
 
-    vi.mocked(coreActivity.selectEnvelopeMetrics).mockReturnValue({
+    vi.mocked(core.activity.selectEnvelopeMetrics).mockReturnValue({
       '2026-07': {
         [foodId]: {
           childrenBudgeted: { EUR: 10 },
           currency: 'USD',
         },
       },
-    } as unknown as ReturnType<typeof coreActivity.selectEnvelopeMetrics>)
-    vi.mocked(coreCurrency.selectConvertFx).mockReturnValue(convertFx)
-    vi.mocked(coreBudgets.set).mockReturnValue(action as never)
+    } as unknown as ReturnType<typeof core.activity.selectEnvelopeMetrics>)
+    vi.mocked(core.currency.selectConvertFx).mockReturnValue(convertFx)
+    vi.mocked(core.budgets.set).mockReturnValue(action as never)
 
     setTotalBudget({ id: foodId, month: '2026-07', value: 100 })(
       dispatch,
@@ -40,9 +36,9 @@ describe('setTotalBudget', () => {
       undefined
     )
 
-    expect(coreActivity.selectEnvelopeMetrics).toHaveBeenCalledWith(state)
+    expect(core.activity.selectEnvelopeMetrics).toHaveBeenCalledWith(state)
     expect(convertFx).toHaveBeenCalledWith({ EUR: 10 }, 'USD', '2026-07')
-    expect(coreBudgets.set).toHaveBeenCalledWith([
+    expect(core.budgets.set).toHaveBeenCalledWith([
       { id: foodId, month: '2026-07', value: 88 },
     ])
     expect(dispatch).toHaveBeenCalledWith(action)

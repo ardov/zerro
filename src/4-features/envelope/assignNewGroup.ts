@@ -1,18 +1,18 @@
 import { t } from 'i18next'
 import { TEnvelopeId } from '5-entities/envelope'
-import { envelopes as coreEnvelopes } from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { AppThunk } from 'store/index'
 
 export function assignNewGroup(id: TEnvelopeId): AppThunk {
   return (dispatch, getState) => {
-    const structure = coreEnvelopes.selectStructure(getState())
+    const structure = core.envelopes.selectStructure(getState())
     const groupName = getNewGroupName(structure)
 
     // Cut the envelope out of its current place. A top-level envelope keeps
     // its children; a nested one moves out alone.
-    let moved: coreEnvelopes.TEnvelopeStructureNodeInput = { id }
-    const rest = coreEnvelopes
+    let moved: core.envelopes.TEnvelopeStructureNodeInput = { id }
+    const rest = core.envelopes
       .toEnvelopeStructureInput(structure)
       .map(group => ({
         ...group,
@@ -29,7 +29,7 @@ export function assignNewGroup(id: TEnvelopeId): AppThunk {
       }))
 
     dispatch(
-      coreEnvelopes.applyStructure([
+      core.envelopes.applyStructure([
         { group: groupName, children: [moved] },
         ...rest,
       ])

@@ -1,10 +1,5 @@
 import { useCallback } from 'react'
-import {
-  activity as coreActivity,
-  currency as coreCurrency,
-  envelopes as coreEnvelopes,
-  transactions as coreTransactions,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { ButtonBase, Collapse, Stack } from '@mui/material'
 import { useTranslation } from 'react-i18next'
@@ -20,11 +15,11 @@ import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer
 export function ActivityStats(props: { month: TISOMonth }) {
   const { month } = props
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
-  const activity = useAppSelector(coreActivity.selectSorted)[month]
+  const activity = useAppSelector(core.activity.selectSorted)[month]
   const transactionDrawer = useEnvTransactionsDrawer()
 
   const showTransactions = useCallback(
-    (id: TDataNode['id'], trMode: coreTransactions.TrFilterMode) => {
+    (id: TDataNode['id'], trMode: core.transactions.TrFilterMode) => {
       transactionDrawer.open({
         envelopeConditions: { id, month, mode: trMode, isExact: true },
       })
@@ -71,23 +66,23 @@ export function ActivityStats(props: { month: TISOMonth }) {
 }
 
 type TDataNode = {
-  id: coreActivity.TSortedActivityNode['id']
-  trMode: coreActivity.TSortedActivityNode['trMode']
+  id: core.activity.TSortedActivityNode['id']
+  trMode: core.activity.TSortedActivityNode['trMode']
 } & PercentBarItem
 
 function StatWidget(props: {
   month: TISOMonth
   name: string
   showBar?: boolean
-  total: coreActivity.TActivitySummary
-  items: coreActivity.TSortedActivityNode[]
-  action: (id: TDataNode['id'], trMode: coreTransactions.TrFilterMode) => void
+  total: core.activity.TActivitySummary
+  items: core.activity.TSortedActivityNode[]
+  action: (id: TDataNode['id'], trMode: core.transactions.TrFilterMode) => void
 }) {
   const { month, total, items, name, showBar, action } = props
   const { t } = useTranslation('budgets', { keyPrefix: 'activityStats' })
-  const [currency] = coreCurrency.useDisplayCurrency()
-  const toDisplay = coreCurrency.useToDisplay(month)
-  const envelopes = useAppSelector(coreEnvelopes.selectAll)
+  const [currency] = core.currency.useDisplayCurrency()
+  const toDisplay = core.currency.useToDisplay(month)
+  const envelopes = useAppSelector(core.envelopes.selectAll)
   const [opened, toggleOpened] = useToggle(false)
 
   const nodes: TDataNode[] = items.map(node => {

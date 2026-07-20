@@ -1,8 +1,5 @@
 import { FC } from 'react'
-import {
-  activity as coreActivity,
-  currency as coreCurrency,
-} from 'zerro-core/redux'
+import * as core from 'zerro-core/redux'
 
 import { useAppSelector } from 'store'
 
@@ -28,7 +25,7 @@ export const BurndownWidget: FC<BurndownWidgetProps> = ({
 }) => {
   const { t } = useTranslation('budgets')
   const [month] = useMonth()
-  const envData = useAppSelector(coreActivity.selectEnvelopeMetrics)
+  const envData = useAppSelector(core.activity.selectEnvelopeMetrics)
   const { currency } = envData[month][id]
 
   return (
@@ -135,10 +132,10 @@ type TTrendNode = {
 }
 
 function useDataTrend(month: TISOMonth, id: TEnvelopeId): TTrendNode[] {
-  const toDisplay = coreCurrency.useToDisplay(month)
-  const envData = useAppSelector(coreActivity.selectEnvelopeMetrics)?.[month]?.[
-    id
-  ]
+  const toDisplay = core.currency.useToDisplay(month)
+  const envData = useAppSelector(core.activity.selectEnvelopeMetrics)?.[
+    month
+  ]?.[id]
   const activityTrend = useActivityTrend(month, id)
 
   const startBalance = addFxAmount(
@@ -181,11 +178,11 @@ function useDataTrend(month: TISOMonth, id: TEnvelopeId): TTrendNode[] {
  * @returns
  */
 function useActivityTrend(month: TISOMonth, id: TEnvelopeId): TFxAmount[] {
-  const activity = useAppSelector(coreActivity.selectAll)?.[month]?.envActivity
+  const activity = useAppSelector(core.activity.selectAll)?.[month]?.envActivity
     ?.byEnv
-  const envData = useAppSelector(coreActivity.selectEnvelopeMetrics)?.[month]?.[
-    id
-  ]
+  const envData = useAppSelector(core.activity.selectEnvelopeMetrics)?.[
+    month
+  ]?.[id]
 
   const trend = new Array(31).fill({})
   if (!envData) return trend
