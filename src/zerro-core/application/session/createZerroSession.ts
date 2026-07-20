@@ -1,29 +1,17 @@
 import type { TCoreContext } from '../../types'
 import type { TDataStore } from '../../domain/zenmoney/store'
 import { createProjectionGraph } from '../graph'
-import {
-  buildBalances,
-  buildBalancesByDate,
-  buildDebtors,
-} from '../../domain/zenmoney'
+import { buildBalances, buildBalancesByDate } from '../../domain/zenmoney'
 import {
   buildActivity,
   buildActivityRoutingContext,
-  buildBudgets,
-  buildCurrentFxRates,
   buildCurrentFunds,
-  buildEnvelopes,
   buildEnvMetrics,
-  buildFxConverter,
-  buildFxRates,
-  buildFxRatesGetter,
   buildGoals,
   buildGoalTotals,
-  buildMonthList,
   buildMonthTotals,
   buildRawActivity,
   buildSortedActivity,
-  getKeepingEnvelopes,
 } from '../../domain/zerro'
 
 export type TZerroSession = ReturnType<typeof createZerroSession>
@@ -42,66 +30,19 @@ export function createZerroSession(data: TDataStore, ctx: TCoreContext) {
   const currentDate = g.currentDate
   const currentMonth = g.currentMonth
   const userSettings = bind(g.userSettings)
-  const envelopeMeta = bind(g.envelopeMeta)
-  const envBudgets = bind(g.envBudgets)
   const rawGoals = bind(g.rawGoals)
-  const storedFxRates = bind(g.storedFxRates)
   const debtAccountId = bind(g.debtAccountId)
   const instrumentCodeById = bind(g.instrumentCodeById)
   const transactionsHistory = bind(g.transactionsHistory)
-  const currentFxRates = memo(() =>
-    buildCurrentFxRates({
-      instruments: data.instrument,
-      currentMonth: currentMonth(),
-    })
-  )
-  const fxRates = memo(() =>
-    buildFxRates({
-      storedRates: storedFxRates(),
-      currentRates: currentFxRates(),
-    })
-  )
-  const fxRatesGetter = memo(() =>
-    buildFxRatesGetter({
-      rates: fxRates(),
-      currentRates: currentFxRates(),
-    })
-  )
-  const convertFx = memo(() => buildFxConverter(fxRatesGetter()))
-  const debtors = memo(() =>
-    buildDebtors({
-      transactions: transactionsHistory(),
-      merchants: data.merchant,
-      instruments: data.instrument,
-      debtAccountId: debtAccountId(),
-    })
-  )
-  const envelopesCompiled = memo(() =>
-    buildEnvelopes({
-      debtors: debtors(),
-      tags: data.tag,
-      savingAccounts: g.savingAccounts(data),
-      envelopeMeta: envelopeMeta(),
-      userCurrency: g.userCurrency(data),
-    })
-  )
-  const envelopes = memo(() => envelopesCompiled().byId)
-  const envelopeStructure = memo(() => envelopesCompiled().structure)
-  const keepingEnvelopeIds = memo(() => getKeepingEnvelopes(envelopes()))
-  const budgets = memo(() =>
-    buildBudgets({
-      tagBudgets: g.tagBudgets(data),
-      envBudgets: envBudgets(),
-      preferZmBudgets: userSettings().preferZmBudgets,
-    })
-  )
-  const monthList = memo(() =>
-    buildMonthList({
-      transactions: transactionsHistory(),
-      budgets: budgets(),
-      currentMonth: currentMonth(),
-    })
-  )
+  const currentFxRates = bind(g.currentFxRates)
+  const fxRates = bind(g.fxRates)
+  const convertFx = bind(g.convertFx)
+  const debtors = bind(g.debtors)
+  const envelopes = bind(g.envelopes)
+  const envelopeStructure = bind(g.envelopeStructure)
+  const keepingEnvelopeIds = bind(g.keepingEnvelopeIds)
+  const budgets = bind(g.budgets)
+  const monthList = bind(g.monthList)
   const inBudgetAccountIds = bind(g.inBudgetAccountIds)
   const currentFunds = memo(() =>
     buildCurrentFunds({

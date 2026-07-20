@@ -1,30 +1,13 @@
 export { editFxRates as edit, resetFxRates as reset } from './commands'
-import { createSelector } from '@reduxjs/toolkit'
 import type { RootState } from 'store'
-import {
-  buildCurrentFxRates,
-  buildFxConverter,
-  buildFxRates,
-  buildFxRatesGetter,
-} from '../domain/zerro'
 import { graph } from './graph'
-import * as instruments from './instruments'
-import { selectCurrentMonth } from './state'
 
-const selectStoredFxRates = (state: RootState) =>
-  graph.storedFxRates(state.data.current)
-export const selectCurrent = createSelector(
-  [instruments.selectAll, selectCurrentMonth],
-  (instruments, currentMonth) =>
-    buildCurrentFxRates({ instruments, currentMonth })
-)
-export const selectRates = createSelector(
-  [selectStoredFxRates, selectCurrent],
-  (storedRates, currentRates) => buildFxRates({ storedRates, currentRates })
-)
-export const selectGetter = createSelector(
-  [selectRates, selectCurrent],
-  (rates, currentRates) => buildFxRatesGetter({ rates, currentRates })
-)
-export const selectConvertFx = createSelector([selectGetter], buildFxConverter)
+export const selectCurrent = (state: RootState) =>
+  graph.currentFxRates(state.data.current)
+export const selectRates = (state: RootState) =>
+  graph.fxRates(state.data.current)
+export const selectGetter = (state: RootState) =>
+  graph.fxRatesGetter(state.data.current)
+export const selectConvertFx = (state: RootState) =>
+  graph.convertFx(state.data.current)
 export type { TFxRates } from '../domain/zerro/fx-rates'

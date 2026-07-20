@@ -2,6 +2,7 @@ import { toISODate, toISOMonth } from '../domain/shared/date'
 import type { TDataStore } from '../domain/zenmoney/store'
 import type { TCoreContext } from '../types'
 import {
+  buildDebtors,
   getDebtAccountId,
   getHistoryStart,
   getInstCodeMap,
@@ -11,8 +12,16 @@ import {
   getUserCurrency,
 } from '../domain/zenmoney'
 import {
+  buildBudgets,
+  buildCurrentFxRates,
+  buildEnvelopes,
+  buildFxConverter,
+  buildFxRates,
+  buildFxRatesGetter,
+  buildMonthList,
   getEnvBudgets,
   getEnvelopeMeta,
+  getKeepingEnvelopes,
   getRawGoals,
   getStoredFxRates,
   getUserSettings,
@@ -97,6 +106,80 @@ export function createProjectionGraph(ctx: TCoreContext) {
     sameItems
   )
 
+  // --- fx ------------------------------------------------------------------
+  const currentFxRates = memoOn(
+    (d: TDataStore) => [d.instrument, currentMonth()] as const,
+    (instruments, currentMonth) =>
+      buildCurrentFxRates({ instruments, currentMonth })
+  )
+  const fxRates = memoOn(
+    (d: TDataStore) => [storedFxRates(d), currentFxRates(d)] as const,
+    (storedRates, currentRates) => buildFxRates({ storedRates, currentRates })
+  )
+  const fxRatesGetter = memoOn(
+    (d: TDataStore) => [fxRates(d), currentFxRates(d)] as const,
+    (rates, currentRates) => buildFxRatesGetter({ rates, currentRates })
+  )
+  const convertFx = memoOn(
+    (d: TDataStore) => [fxRatesGetter(d)] as const,
+    buildFxConverter
+  )
+
+  // --- debtors -------------------------------------------------------------
+  const debtors = memoOn(
+    (d: TDataStore) =>
+      [
+        transactionsHistory(d),
+        d.merchant,
+        d.instrument,
+        debtAccountId(d),
+      ] as const,
+    (transactions, merchants, instruments, debtAccountId) =>
+      buildDebtors({ transactions, merchants, instruments, debtAccountId })
+  )
+
+  // --- envelopes (domain only; presentation stays in the adapter) ----------
+  const envelopesCompiled = memoOn(
+    (d: TDataStore) =>
+      [
+        debtors(d),
+        d.tag,
+        savingAccounts(d),
+        envelopeMeta(d),
+        userCurrency(d),
+      ] as const,
+    (debtors, tags, savingAccounts, envelopeMeta, userCurrency) =>
+      buildEnvelopes({
+        debtors,
+        tags,
+        savingAccounts,
+        envelopeMeta,
+        userCurrency,
+      })
+  )
+  // Pass-through: the parent object is memoized, so its fields are already
+  // reference-stable.
+  const envelopes = (d: TDataStore) => envelopesCompiled(d).byId
+  const envelopeStructure = (d: TDataStore) => envelopesCompiled(d).structure
+  const keepingEnvelopeIds = memoOn(
+    (d: TDataStore) => [envelopes(d)] as const,
+    getKeepingEnvelopes
+  )
+
+  // --- budgets and month list ----------------------------------------------
+  const budgets = memoOn(
+    (d: TDataStore) =>
+      [tagBudgets(d), envBudgets(d), userSettings(d).preferZmBudgets] as const,
+    (tagBudgets, envBudgets, preferZmBudgets) =>
+      buildBudgets({ tagBudgets, envBudgets, preferZmBudgets })
+  )
+  const monthList = memoOn(
+    (d: TDataStore) =>
+      [transactionsHistory(d), budgets(d), currentMonth()] as const,
+    (transactions, budgets, currentMonth) =>
+      buildMonthList({ transactions, budgets, currentMonth })
+  )
+
   return {
     currentMonth,
     currentDate,
@@ -114,6 +197,16 @@ export function createProjectionGraph(ctx: TCoreContext) {
     tagBudgets,
     savingAccounts,
     inBudgetAccountIds,
+    currentFxRates,
+    fxRates,
+    fxRatesGetter,
+    convertFx,
+    debtors,
+    envelopes,
+    envelopeStructure,
+    keepingEnvelopeIds,
+    budgets,
+    monthList,
   }
 }
 
