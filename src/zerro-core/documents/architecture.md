@@ -186,16 +186,17 @@ reducer actions, but that is an implementation detail, not a product inbox.
 
 ## Read model and memoization
 
-Pure projectors own calculations and declare which inputs are required.
-Runtimes own memoization: the snapshot session memoizes each node lazily once
-per immutable snapshot; the Redux adapter memoizes across changing snapshots.
-Do not create one selector from the entire `current` store — it would
-invalidate transaction-heavy calculations after unrelated writes.
+Pure projectors own calculations and declare which inputs are required. The
+projection graph is defined once in `application/graph.ts`; both runtimes
+instantiate it and own memoization at their own scope — a session binds the
+graph to one frozen snapshot, the Redux adapter keeps one instance across
+snapshots. Do not depend a node on the entire `current` store — it would
+invalidate transaction-heavy calculations after unrelated writes; the graph
+depends on individual entity maps and `projectionStability.test.ts` guards it.
 
-The living projection dependency graph is the lazy memo wiring in
-`application/session/createZerroSession.ts`; read it there rather than in a
-maintained diagram. Snapshot-session and Redux wiring remain explicit in their
-owning modules.
+Read `application/graph.ts` for the living dependency wiring rather than a
+maintained diagram. Whether a node is memoized is a deliberate per-node call,
+recorded in [design-ledger.md](./design-ledger.md#reads-and-redux-adapter).
 
 Carry-forward projections such as `envMetrics` may need the full month range
 up to the requested month; the optimization target is stable upstream caching,

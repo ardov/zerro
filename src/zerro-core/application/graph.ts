@@ -53,8 +53,8 @@ import { memoOn, sameItems } from './memo'
  * Not every node is memoized. A node earns its memo entry only if it allocates
  * something a dependent reads, or if it is expensive. Nodes returning a
  * primitive or passing a store map straight through are plain functions: a
- * memo entry there costs more than the call it saves. See the cost census in
- * documents/design-ledger.md.
+ * memo entry there costs more than the call it saves. The cost census behind
+ * this split is in documents/design-ledger.md (Reads and Redux adapter).
  */
 export function createProjectionGraph(ctx: TCoreContext) {
   // Called per read, never captured: the Redux instance lives for the whole

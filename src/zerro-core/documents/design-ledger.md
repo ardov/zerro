@@ -23,11 +23,22 @@
 ### Reads and Redux adapter
 
 - Session reads are grouped by domain and use `get*` names.
-- A session represents one immutable snapshot and memoizes each node once.
-- Redux owns cross-snapshot memoization with granular entity-shaped selectors.
-- The projection dependency graph is not maintained as executable graph
-  metadata or a hand-kept diagram; the lazy memo wiring in
-  `application/session/createZerroSession.ts` is the readable reference.
+- The projection dependency graph is defined once in `application/graph.ts` and
+  instantiated by both runtimes. `createZerroSession` binds each node to one
+  frozen snapshot; the Redux adapter keeps one instance and memoizes across
+  snapshots. Neither runtime re-declares the chain, so the two cannot drift.
+  The graph wiring is itself the readable reference — not a hand-kept diagram.
+- Memoization is a per-node decision, not a default. Measured on a
+  16866-transaction demo store: `buildRawActivity` ~18ms and `buildBalances`
+  ~10ms are memoized for cost; cheap-but-allocating nodes are memoized only so
+  dependents keep their reference; nodes returning a primitive or passing a
+  store map straight through get no memo, because the entry would cost more
+  than the call. `inBudgetAccountIds` additionally uses result equality so an
+  unrelated account edit does not invalidate the activity chain.
+- The graph reads `now()` per call so the long-lived Redux instance follows the
+  clock; a session freezes `now` at construction so its snapshot stays on one
+  instant. `projectionStability.test.ts` guards the whole-store-dependency and
+  result-equality contracts.
 - Selector, hook, command, and app-facing types live in their domain modules;
   `redux/state.ts` owns raw inputs and `commandRead.ts` owns command-time reads.
 - Domain namespaces are the desired adapter shape. Add and retain members only
