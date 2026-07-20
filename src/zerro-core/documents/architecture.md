@@ -150,9 +150,11 @@ and their domain types. They do not own state or read the Redux store
 imperatively. Flat adapter exports are intentionally unsupported. Each Redux
 domain module owns its selector implementations and hook wrappers; there is no
 shared selector or hook barrel. `redux/state.ts` contains only raw slice/time
-inputs. Command-time derived reads use `commandRead.ts`, which builds an
-immutable snapshot on demand and deliberately does not participate in the
-memoized selector graph.
+inputs. Command-time derived reads use `commandRead.ts`; it exposes the same
+projection-graph nodes under command-local names because `commands.ts` cannot
+import the domain namespace modules (they re-export command creators, which
+would cycle). It reads the committed snapshot, so it shares the graph memo
+rather than recomputing.
 
 ### Snapshot session
 

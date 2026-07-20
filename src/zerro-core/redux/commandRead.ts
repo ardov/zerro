@@ -1,36 +1,24 @@
 import { i18n } from '6-shared/localization'
 import type { RootState } from 'store'
-import { createZerroSession } from '../application/session'
-import { buildFxRatesGetter, getUserSettings } from '../domain/zerro'
+import { getUserSettings } from '../domain/zerro'
+import { fromGraph, graph } from './graph'
 import { presentEnvelopes, type TEnvelopeLabels } from './envelopePresentation'
 import { presentTags } from './tagPresentation'
 
-// Read-only: these sessions only feed command compilation with derived values
-// and must never reach an entity factory. Fail loudly if one ever does.
-const readContext = {
-  now: () => Date.now(),
-  uuid: () => {
-    throw new Error('Command-time reads must not generate ids')
-  },
-}
+// Command-side reads. `commands.ts` cannot import the domain namespace modules
+// (envelopes/fxRates re-export command creators from commands.ts, which would
+// cycle), so these expose the same graph nodes under command-local names. They
+// read the committed `state.data.current`, so they hit the shared memo the UI
+// already populated rather than recomputing.
 
-export function getCommandDomainEnvelopes(state: RootState) {
-  return createZerroSession(state.data.current, readContext).envelopes.getAll()
-}
+export const getCommandDomainEnvelopes = fromGraph(graph.envelopes)
+export const getCommandFxRates = fromGraph(graph.fxRatesGetter)
 
 export function getCommandPresentedEnvelopes(state: RootState) {
   const data = state.data.current
   const domain = getCommandDomainEnvelopes(state)
   const tags = presentTags(data.tag, getUserSettings(data))
   return presentEnvelopes(domain, tags, getCommandEnvelopeLabels()).byId
-}
-
-export function getCommandFxRates(state: RootState) {
-  const session = createZerroSession(state.data.current, readContext)
-  return buildFxRatesGetter({
-    rates: session.fx.getRates(),
-    currentRates: session.fx.getCurrentRates(),
-  })
 }
 
 let labelsCacheLanguage: string | undefined
