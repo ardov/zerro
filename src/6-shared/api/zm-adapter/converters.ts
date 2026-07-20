@@ -22,7 +22,7 @@ import type {
   TZmUser,
   TUser,
   TZmDiff,
-  TDiff,
+  TNormalizedPatch,
   TZmDeletionObject,
   TDeletionObject,
   TUnixTime,
@@ -81,10 +81,10 @@ const convertDeletion: TZmAdapter<TZmDeletionObject, TDeletionObject> = {
 }
 
 /** Main diff converter */
-export const convertDiff: TZmAdapter<TZmDiff, TDiff> = {
+export const convertDiff: TZmAdapter<TZmDiff, TNormalizedPatch> = {
   toClient: d => {
     const t0 = performance.now()
-    const r: TDiff = { serverTimestamp: 0 }
+    const r: TNormalizedPatch = { serverTimestamp: 0 }
     if (d.serverTimestamp) r.serverTimestamp = unixToMs(d.serverTimestamp)
     if (d.deletion) r.deletion = d.deletion.map(convertDeletion.toClient)
     if (d.instrument)

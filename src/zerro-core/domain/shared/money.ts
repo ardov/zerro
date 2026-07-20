@@ -1,5 +1,5 @@
 // Internal money utilities. Not part of the public Zerro Core API.
-import type { TFxCode } from '../zenmoney/instruments/types'
+import type { TFxCode } from '../zenmoney/instruments'
 import { keys } from './keys'
 
 /** Money amounts by currency code */

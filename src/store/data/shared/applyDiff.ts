@@ -1,5 +1,5 @@
 import { keys } from '6-shared/helpers/keys'
-import { TDiff } from '6-shared/types'
+import { TNormalizedPatch } from '6-shared/types'
 import { TDataStore } from '6-shared/types'
 
 /**
@@ -7,7 +7,7 @@ import { TDataStore } from '6-shared/types'
  * @param diff
  * @param store
  */
-export function applyDiffMutable(diff: TDiff, store: TDataStore) {
+export function applyDiffMutable(diff: TNormalizedPatch, store: TDataStore) {
   // Update server timestamp
   if (diff.serverTimestamp) store.serverTimestamp = diff.serverTimestamp
 

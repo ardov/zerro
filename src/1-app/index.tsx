@@ -1,4 +1,4 @@
-import type { TDiff } from '6-shared/types'
+import type { TNormalizedPatch } from '6-shared/types'
 
 import { initSentry } from '6-shared/diagnostics'
 import { store } from 'store'
@@ -49,7 +49,7 @@ function createZerroInstance(s: typeof store) {
     },
     logs: {},
     resetData: () => s.dispatch(resetData()),
-    applyClientPatch: (patch: TDiff) =>
+    applyClientPatch: (patch: TNormalizedPatch) =>
       s.dispatch(coreInfrastructure.applyDebugPatch(patch)),
     showEl: (id: string) => {
       const data = s.getState().data.current

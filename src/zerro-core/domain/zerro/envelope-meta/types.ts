@@ -1,5 +1,5 @@
 import type { EntityPatch } from '../../shared/types'
-import type { TFxCode } from '../../zenmoney/instruments/types'
+import type { TFxCode } from '../../zenmoney/instruments'
 import type { TEnvelopeId } from '../envelope-id'
 
 export enum envelopeVisibility {

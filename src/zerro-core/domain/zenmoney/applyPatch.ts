@@ -1,10 +1,10 @@
 import { keys } from '../shared/keys'
-import type { TDataStore, TDiff, TIntentPatch } from './store'
+import type { TDataStore, TNormalizedPatch, TIntentPatch } from './store'
 
 /** Applies either a canonical diff or sparse local intent without deriving effects. */
 export function applyPatch(
   base: TDataStore,
-  patch: TDiff | TIntentPatch
+  patch: TNormalizedPatch | TIntentPatch
 ): TDataStore {
   // Clone only the entity maps the patch touches; keep every other map's
   // reference from base. Downstream memoized selectors depend on unrelated
@@ -19,7 +19,7 @@ export function applyPatch(
   return next
 }
 
-function touchedEntityKeys(patch: TDiff | TIntentPatch): Set<string> {
+function touchedEntityKeys(patch: TNormalizedPatch | TIntentPatch): Set<string> {
   const touched = new Set<string>()
   patch.deletion?.forEach(obj => touched.add(obj.object))
   keys(patch).forEach(key => {
@@ -31,7 +31,7 @@ function touchedEntityKeys(patch: TDiff | TIntentPatch): Set<string> {
 
 export function applyPatchMutable(
   store: TDataStore,
-  patch: TDiff | TIntentPatch
+  patch: TNormalizedPatch | TIntentPatch
 ): void {
   if ('serverTimestamp' in patch && patch.serverTimestamp) {
     store.serverTimestamp = patch.serverTimestamp

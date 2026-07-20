@@ -14,7 +14,7 @@ import {
   prepareClientSync,
 } from 'store/data'
 import { keys } from '6-shared/helpers/keys'
-import { TDiff } from '6-shared/types'
+import { TNormalizedPatch } from '6-shared/types'
 import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
 
 /** All syncs with zenmoney goes through this thunk */
@@ -23,7 +23,7 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
   const state = getState()
   const sentOutboxCount = state.data.outboxHead
   const sentAt = Date.now()
-  const diff: TDiff = {
+  const diff: TNormalizedPatch = {
     ...(getPendingSyncTransport(state, sentAt) || {}),
     serverTimestamp: getLastSyncTime(state),
   }
@@ -55,7 +55,7 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
   dispatch(setPending(false))
 }
 
-function getChangedDomains(data: TDiff) {
+function getChangedDomains(data: TNormalizedPatch) {
   const domains: Set<keyof TLocalData> = new Set()
   keys(data).forEach(key => {
     if (key === 'deletion') data[key]?.forEach(item => domains.add(item.object))

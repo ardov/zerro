@@ -3,12 +3,12 @@ import { describe, expect, it } from 'vitest'
 import {
   makeBudget as makeTestBudget,
   makeStore,
-} from '../../../testing/zenmoneyTestData'
-import { applyPatch } from '../applyPatch'
-import { compileSetTagBudget } from './commands'
-import { makeTagBudget } from './factory'
-import { toBudgetId } from './id'
-import { getTagBudgets } from './read'
+} from '../../testing/zenmoneyTestData'
+import { applyPatch } from './applyPatch'
+import { compileSetTagBudget } from './budgets'
+import { makeTagBudget } from './budgets'
+import { toBudgetId } from './budgets'
+import { getTagBudgets } from './budgets'
 
 describe('zenmoney budget commands', () => {
   it('reads the normalized tag budget map', () => {

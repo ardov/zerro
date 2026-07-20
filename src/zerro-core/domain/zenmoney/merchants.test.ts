@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   makeMerchant as makeTestMerchant,
   makeStore,
-} from '../../../testing/zenmoneyTestData'
-import { compilePatchMerchant } from './commands'
-import { makeMerchant } from './factory'
+} from '../../testing/zenmoneyTestData'
+import { compilePatchMerchant } from './merchants'
+import { makeMerchant } from './merchants'
 
 describe('zenmoney merchant commands', () => {
   it('compiles sparse patches for existing merchants', () => {

@@ -98,14 +98,18 @@ Public wrappers now compile directly against the current Redux state; the
 deleted dispatcher had no production consumer. Tests cover the public outbox
 contract instead of routing through a private command representation.
 
-### W6. One file per small entity — wave 3
+### W6. One file per small entity — wave 3, done 2026-07-20
 
 Collapse `merchants`, `users`, `instruments`, `countries`, `companies`,
 `budgets`, `reminderMarkers` (5–7 files each) into one `<entity>.ts` per
 entity; merge their mini-READMEs into `domain/zenmoney/README.md`. Keep
 folders for transactions, envelopes, activity, accounts, tags, reminders if
 they stay multi-file. Naming cleanup: keep two patch words (`TIntentPatch`
-sparse, `TNormalizedPatch` full), retire the `TDiff` alias.
+sparse, `TNormalizedPatch` full), retire the old diff alias.
+
+All seven small entities now live in flat modules with colocated tests. Their
+mini-READMEs are merged into the domain README, legacy type-only subpaths are
+gone, and normalized patches use one name across Core and app adapters.
 
 ## Verification gate (every wave)
 

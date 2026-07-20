@@ -72,18 +72,21 @@ Legend:
   `currency` is an instrument id, not an FX code. Company `deleted` entries
   can remain in synced data; neither entity has user commands.
 - `Budget` depends on users and tags, but Zerro envelope budgets are a separate
-  hidden-data projection under `zerro-core/domain/zerro/budgets`.
+  hidden-data projection under `zerro-core/domain/zerro/budgets`. ZenMoney tag
+  budgets default to locked income and outcome values.
+- `Merchant` is a user-owned payee-normalization entity used by transactions,
+  debtors, and envelope-like projections.
 - `Reminder` and `ReminderMarker` depend on users, instruments, accounts, tags,
-  and merchants. Markers also depend on reminders.
+  and merchants. Markers also depend on reminders; Core owns their factory but
+  has no marker write command yet.
 - `Transaction` should stay last among normalized ZenMoney entities because it
   can reference user, company, instrument, account, tag, merchant, and reminder
   marker data.
 - Derived reads such as `debtors` and `balances` come after transactions because
   they scan transaction history.
 
-Folders are intentionally not numbered. Import paths are part of the future
-library API, so ordering belongs in this README and in `index.ts`, not in path
-names.
+Small entities stay as flat modules; entities with multiple cohesive concerns
+keep folders. Ordering belongs in this README and `index.ts`, not path names.
 
 ## Type Ownership
 

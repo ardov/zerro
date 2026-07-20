@@ -1,6 +1,6 @@
 import { RootState, TSelector } from 'store'
 import { getItemsCount } from './shared/getItemsCount'
-import { AccountType, TAccountId, TDiff } from '6-shared/types'
+import { AccountType, TAccountId, TNormalizedPatch } from '6-shared/types'
 import { createSelector } from '@reduxjs/toolkit'
 import {
   buildOutboxTransport,
@@ -29,7 +29,7 @@ export const getPendingSyncDiff = createSelector(
 export function getPendingSyncTransport(
   state: RootState,
   sentAt: number
-): TDiff | undefined {
+): TNormalizedPatch | undefined {
   return buildOutboxTransport(
     state.data.base,
     state.data.outbox,
@@ -79,7 +79,7 @@ export const getDebtAccountId: TSelector<TAccountId> = createSelector(
   }
 )
 
-function mergeMaterializedPatches(patches: TDiff[]): TDiff | undefined {
+function mergeMaterializedPatches(patches: TNormalizedPatch[]): TNormalizedPatch | undefined {
   if (!patches.length) return undefined
-  return patches.reduce<TDiff>(immutableMergeDiffs, {})
+  return patches.reduce<TNormalizedPatch>(immutableMergeDiffs, {})
 }

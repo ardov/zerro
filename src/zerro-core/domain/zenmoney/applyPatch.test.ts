@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { TDiff } from '6-shared/types'
+import type { TNormalizedPatch } from '6-shared/types'
 import { makeStore } from '../../testing/zenmoneyTestData'
 import { applyPatch, applyPatchMutable, replay } from '.'
 
@@ -17,7 +17,7 @@ describe('zenmoney patch primitives', () => {
         entity({ id: 'cash', title: 'Cash updated' }),
         entity({ id: 'card', title: 'Card' }),
       ],
-    } as TDiff
+    } as TNormalizedPatch
 
     const next = applyPatch(base, patch)
 
@@ -40,7 +40,7 @@ describe('zenmoney patch primitives', () => {
 
     const next = applyPatch(base, {
       deletion: [{ object: 'tag', id: 'food' }],
-    } as TDiff)
+    } as TNormalizedPatch)
 
     expect(base.tag.food.title).toBe('Food')
     expect(next.tag.food).toBeUndefined()
@@ -56,7 +56,7 @@ describe('zenmoney patch primitives', () => {
 
     const next = applyPatch(base, {
       account: [entity({ id: 'card', title: 'Card' })],
-    } as TDiff)
+    } as TNormalizedPatch)
 
     expect(next.account).not.toBe(base.account)
     expect(next.transaction).toBe(base.transaction)
@@ -68,7 +68,7 @@ describe('zenmoney patch primitives', () => {
       account: { cash: entity({ id: 'cash', title: 'Cash' }) },
     })
 
-    const next = applyPatch(base, { serverTimestamp: 999 } as TDiff)
+    const next = applyPatch(base, { serverTimestamp: 999 } as TNormalizedPatch)
 
     expect(next).not.toBe(base)
     expect(next.serverTimestamp).toBe(999)
@@ -84,7 +84,7 @@ describe('zenmoney patch primitives', () => {
 
     const next = applyPatch(base, {
       deletion: [{ object: 'tag', id: 'food' }],
-    } as TDiff)
+    } as TNormalizedPatch)
 
     expect(next.tag).not.toBe(base.tag)
     expect(next.account).toBe(base.account)
@@ -95,7 +95,7 @@ describe('zenmoney patch primitives', () => {
 
     applyPatchMutable(store, {
       merchant: [entity({ id: 'shop', title: 'Shop' })],
-    } as TDiff)
+    } as TNormalizedPatch)
 
     expect(store.merchant.shop.title).toBe('Shop')
   })
@@ -107,7 +107,7 @@ describe('zenmoney patch primitives', () => {
       { account: [entity({ id: 'cash', title: 'Cash' })] },
       { account: [entity({ id: 'cash', title: 'Cash renamed' })] },
       { deletion: [{ object: 'account', id: 'cash' }] },
-    ] as TDiff[])
+    ] as TNormalizedPatch[])
 
     expect(base.account.cash).toBeUndefined()
     expect(next.account.cash).toBeUndefined()

@@ -3,7 +3,7 @@ import type { TIntentPatch } from './domain/zenmoney/store'
 export type {
   TDataEntityKey,
   TDataStore,
-  TDiff as TNormalizedPatch,
+  TNormalizedPatch,
   TIntentPatch,
 } from './domain/zenmoney/store'
 

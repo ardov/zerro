@@ -1,4 +1,4 @@
-import { TDiff } from '6-shared/types'
+import { TNormalizedPatch } from '6-shared/types'
 
 /**
  * Adds changes from the second diff to the first diff
@@ -6,7 +6,7 @@ import { TDiff } from '6-shared/types'
  * @param target - target object will be mutated
  * @param diff - object with changes
  */
-export function mergeDiffs(target: TDiff, diff: TDiff) {
+export function mergeDiffs(target: TNormalizedPatch, diff: TNormalizedPatch) {
   if (diff.serverTimestamp) target.serverTimestamp = diff.serverTimestamp
   if (diff.deletion) {
     if (target.deletion) target.deletion = target.deletion.concat(diff.deletion)
@@ -28,7 +28,7 @@ export function mergeDiffs(target: TDiff, diff: TDiff) {
    * Merges all objects from diff key into target key
    * @param key - all diff keys except serverTimestamp and deletion
    */
-  function merge(key: keyof TDiff) {
+  function merge(key: keyof TNormalizedPatch) {
     if (key === 'serverTimestamp' || key === 'deletion') return
     if (!diff[key]) return
     if (target[key]) {
@@ -49,8 +49,8 @@ export function mergeDiffs(target: TDiff, diff: TDiff) {
  * @param target - target object will be mutated
  * @param diff - object with changes
  */
-export function immutableMergeDiffs(target: TDiff, diff: TDiff) {
-  const result: TDiff = { ...target }
+export function immutableMergeDiffs(target: TNormalizedPatch, diff: TNormalizedPatch) {
+  const result: TNormalizedPatch = { ...target }
   if (diff.serverTimestamp) result.serverTimestamp = diff.serverTimestamp
   if (diff.deletion) {
     if (result.deletion) {
@@ -77,7 +77,7 @@ export function immutableMergeDiffs(target: TDiff, diff: TDiff) {
    * Merges all objects from diff key into target key
    * @param key - all diff keys except serverTimestamp and deletion
    */
-  function merge(key: keyof TDiff) {
+  function merge(key: keyof TNormalizedPatch) {
     if (key === 'serverTimestamp' || key === 'deletion') return
     if (!diff[key]) return
     if (result[key]) {

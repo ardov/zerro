@@ -1,7 +1,7 @@
 import { keys } from '../../shared/keys'
 import type { ById, ByMonth } from '../../shared/types'
 import type { TFxAmount } from '../../shared/money'
-import type { TFxCode } from '../../zenmoney/instruments/types'
+import type { TFxCode } from '../../zenmoney/instruments'
 import type { TISOMonth } from '../../zenmoney/primitives'
 import type { TEnvelopeId } from '../envelope-id'
 import type { TEnvMetrics } from '../activity/envMetrics'

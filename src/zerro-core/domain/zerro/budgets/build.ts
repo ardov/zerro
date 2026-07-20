@@ -1,7 +1,7 @@
 import { toISOMonth } from '../../shared/date'
 import { keys } from '../../shared/keys'
 import type { ById, ByMonth } from '../../shared/types'
-import type { TBudget } from '../../zenmoney/budgets/types'
+import type { TBudget } from '../../zenmoney/budgets'
 import { EnvType, envId, TEnvelopeId } from '../envelope-id'
 import type { TBudgets } from './read'
 

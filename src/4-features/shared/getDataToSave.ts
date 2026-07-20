@@ -1,12 +1,12 @@
 import { keys } from '6-shared/helpers/keys'
 import { RootState } from 'store'
-import { TDiff, TLocalData } from '6-shared/types'
+import { TNormalizedPatch, TLocalData } from '6-shared/types'
 import { convertDiff } from '6-shared/api/zm-adapter'
 
 export const getDataToSave = (state: RootState): TLocalData => {
   const data = state.data.base
   if (!data) return { serverTimestamp: 0 }
-  const result: TDiff = { serverTimestamp: 0 }
+  const result: TNormalizedPatch = { serverTimestamp: 0 }
   keys(data).forEach(key => {
     if (key === 'serverTimestamp') {
       result[key] = data[key]

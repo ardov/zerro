@@ -3,16 +3,16 @@
 // these types.
 import type { ById } from '../shared/types'
 import type { TMsTime, TUnixTime } from './primitives'
-import type { TInstrument } from './instruments/types'
+import type { TInstrument } from './instruments'
 import type { TCountry } from './countries'
 import type { TCompany } from './companies'
-import type { TUser, TUserId } from './users/types'
-import type { TMerchant, TMerchantPatch } from './merchants/types'
+import type { TUser, TUserId } from './users'
+import type { TMerchant, TMerchantPatch } from './merchants'
 import type { TAccount, TAccountPatch } from './accounts/types'
 import type { TTag, TTagPatch } from './tags/types'
-import type { TBudget, TBudgetPatch } from './budgets/types'
+import type { TBudget, TBudgetPatch } from './budgets'
 import type { TReminder, TReminderPatch } from './reminders/types'
-import type { TReminderMarker } from './reminderMarkers/types'
+import type { TReminderMarker } from './reminderMarkers'
 import type { TTransaction, TTransactionPatch } from './transactions/types'
 
 // prettier-ignore
@@ -90,7 +90,7 @@ export const intentPatchKeys = [
 ] as const satisfies readonly (keyof TIntentPatch)[]
 
 /** Complete normalized entities applied to a snapshot after materialization. */
-export type TDiff = {
+export type TNormalizedPatch = {
   serverTimestamp?: TMsTime
   deletion?: TDeletionObject[]
   instrument?: TInstrument[]

@@ -98,7 +98,7 @@ type IntentPatch = {
 This list is closed. Reference and server-owned families such as instruments,
 countries, companies, users, and reminder markers are not command intent. The
 issue and persistence boundaries reject them instead of implicitly inheriting
-every `TDiff` member. There is no outbox-entry wrapper, entry id, durable
+every `TNormalizedPatch` member. There is no outbox-entry wrapper, entry id, durable
 command union, or persisted materialized patch.
 
 Entity patch types live beside their entity types and document locally writable

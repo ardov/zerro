@@ -3,7 +3,7 @@ import {
   intentEntityKeys,
   intentPatchKeys,
   type TDataStore,
-  type TDiff,
+  type TNormalizedPatch,
   type TIntentPatch,
 } from '../../domain/zenmoney/store'
 import {
@@ -129,7 +129,7 @@ const entityRegistry = [
 
 export function issuePatch(
   snapshot: TDataStore,
-  patch: TDiff | TIntentPatch,
+  patch: TNormalizedPatch | TIntentPatch,
   issuedAt: TMsTime
 ): TCommand {
   return {
@@ -144,7 +144,7 @@ export function materializeCommand(
   snapshot: TDataStore,
   command: TCommand,
   changedAt: TMsTime = command.issuedAt
-): TDiff {
+): TNormalizedPatch {
   return materializePrimaryCommand(snapshot, command, changedAt)
 }
 
@@ -153,7 +153,7 @@ export function materializePrimaryCommand(
   snapshot: TDataStore,
   command: TCommand,
   changedAt: TMsTime = command.issuedAt
-): TDiff {
+): TNormalizedPatch {
   return materializeIntentPatch(snapshot, command.patch, changedAt)
 }
 
@@ -161,8 +161,8 @@ function materializeIntentPatch(
   snapshot: TDataStore,
   patch: TIntentPatch,
   changedAt: TMsTime
-): TDiff {
-  const result: TDiff = { ...patch } as TDiff
+): TNormalizedPatch {
+  const result: TNormalizedPatch = { ...patch } as TNormalizedPatch
   const resultByKey = result as Record<string, unknown>
   entityRegistry.forEach(row => {
     const intents = patch[row.key] as TEntity[] | undefined
@@ -192,7 +192,7 @@ function materializeIntentPatch(
 
 function compileIntentPatch(
   snapshot: TDataStore,
-  patch: TDiff | TIntentPatch,
+  patch: TNormalizedPatch | TIntentPatch,
   issuedAt: TMsTime
 ): TIntentPatch {
   Object.keys(patch).forEach(key => {

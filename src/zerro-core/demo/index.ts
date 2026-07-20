@@ -3,11 +3,11 @@ import companies from './companies.json'
 import instruments from './instruments.json'
 import type { ById } from '../domain/shared/types'
 import type { TAccountId } from '../domain/zenmoney/accounts/types'
-import type { TDataStore, TDiff } from '../domain/zenmoney/store'
-import type { TInstrumentId } from '../domain/zenmoney/instruments/types'
+import type { TDataStore, TNormalizedPatch } from '../domain/zenmoney/store'
+import type { TInstrumentId } from '../domain/zenmoney/instruments'
 import type { TISODate } from '../domain/zenmoney/primitives'
 import type { TTagId } from '../domain/zenmoney/tags/types'
-import type { TUser } from '../domain/zenmoney/users/types'
+import type { TUser } from '../domain/zenmoney/users'
 import { round } from '../domain/shared/money'
 import { generateTransactions } from './generateTransactions'
 import { getColorForString, hex2int } from '../domain/zenmoney/colors'
@@ -29,7 +29,7 @@ export type TDemoDataOptions = {
   scale?: number
 }
 
-function updateBalances(diff: TDiff) {
+function updateBalances(diff: TNormalizedPatch) {
   const totals: Record<TAccountId, number> = {}
   diff.account?.forEach(acc => (totals[acc.id] = acc.balance))
   diff.transaction?.forEach(tr => {
@@ -39,11 +39,11 @@ function updateBalances(diff: TDiff) {
   diff.account?.forEach(acc => (acc.balance = round(totals[acc.id])))
 }
 
-export function getDemoData(options: TDemoDataOptions = {}): TDiff {
+export function getDemoData(options: TDemoDataOptions = {}): TNormalizedPatch {
   return makeDemoDiff(options)
 }
 
-export function makeDemoDiff(options: TDemoDataOptions = {}): TDiff {
+export function makeDemoDiff(options: TDemoDataOptions = {}): TNormalizedPatch {
   /*
     Order of creating demo data:
     01. instrument
@@ -613,7 +613,7 @@ export function makeDemoDiff(options: TDemoDataOptions = {}): TDiff {
     }),
   ]
 
-  const diff: TDiff = {
+  const diff: TNormalizedPatch = {
     serverTimestamp: NOW,
     instrument: instruments,
     country: countries,

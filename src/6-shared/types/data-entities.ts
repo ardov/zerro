@@ -34,7 +34,7 @@ export type {
   TUser,
   TUserId,
   TZmUser,
-} from 'zerro-core/domain/zenmoney/users/types'
+} from 'zerro-core/domain/zenmoney/users'
 export type {
   TMerchant,
   TMerchantId,
@@ -98,7 +98,7 @@ export type TZmDiff = {
 }
 
 // The normalized diff/patch shape is owned by Zerro Core.
-export type { TDiff } from 'zerro-core/domain/zenmoney'
+export type { TNormalizedPatch } from 'zerro-core/domain/zenmoney'
 
 export type TZmRequest = TZmDiff & {
   currentClientTimestamp: TUnixTime

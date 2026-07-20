@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest'
 import {
   makeReminderMarker as makeTestReminderMarker,
   makeStore,
-} from '../../../testing/zenmoneyTestData'
-import { makeReminderMarker } from './factory'
-import { getReminderMarkers } from './read'
+} from '../../testing/zenmoneyTestData'
+import { makeReminderMarker } from './reminderMarkers'
+import { getReminderMarkers } from './reminderMarkers'
 
 describe('zenmoney reminder marker reads and factory', () => {
   it('reads the normalized reminder marker map', () => {

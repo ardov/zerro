@@ -12,7 +12,7 @@ import {
   type TPersistedReplica,
 } from 'zerro-core/infrastructure/replica/persistence'
 import { withPerf } from '6-shared/helpers/performance'
-import { TDataStore, TDiff } from '6-shared/types'
+import { TDataStore, TNormalizedPatch } from '6-shared/types'
 import { applyDiffMutable } from './shared/applyDiff'
 
 interface DataSlice {
@@ -24,7 +24,7 @@ interface DataSlice {
   inbox?: TServerInbox | null
 }
 
-export interface TServerInbox extends TDiff {
+export interface TServerInbox extends TNormalizedPatch {
   sentOutboxCount?: number
 }
 

@@ -4,7 +4,7 @@ import { convertFx } from '../../shared/money'
 import type { ById, ByMonth } from '../../shared/types'
 import type { TDateDraft, TISOMonth, TMsTime } from '../../zenmoney/primitives'
 import type { TFxAmount } from '../../shared/money'
-import type { TFxCode, TInstrument } from '../../zenmoney/instruments/types'
+import type { TFxCode, TInstrument } from '../../zenmoney/instruments'
 import {
   getMonthlyHiddenData,
   HiddenDataType,

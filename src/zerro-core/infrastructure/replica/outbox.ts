@@ -1,4 +1,3 @@
-import type { TNormalizedPatch } from '../../types'
 import {
   materializeCommand,
   materializePrimaryCommand,
@@ -9,7 +8,7 @@ import type {
   TDataStore,
   TDataEntityKey,
   TDeletionObject,
-  TDiff,
+  TNormalizedPatch,
 } from '../../domain/zenmoney/store'
 import { dataEntityKeys } from '../../domain/zenmoney/store'
 
@@ -69,7 +68,7 @@ export function buildOutboxTransport(
   outbox: readonly TCommand[],
   outboxHead: number,
   sentAt: number
-): TDiff | undefined {
+): TNormalizedPatch | undefined {
   const commands = getPendingOutbox(outbox, outboxHead)
   if (!commands.length) return undefined
 
@@ -101,7 +100,7 @@ export function buildOutboxTransport(
     current = applyPatch(current, patch)
   })
 
-  const transport: TDiff = {}
+  const transport: TNormalizedPatch = {}
   dataEntityKeys.forEach(key => {
     const ids = touched.get(key)
     if (!ids?.size) return
