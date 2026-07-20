@@ -12,7 +12,7 @@ vi.mock('worker', () => ({
   saveLocalData: vi.fn(),
 }))
 
-import { makeAccount } from 'zerro-core/testing/zenmoneyTestData'
+import { makeAccount } from 'zerro-core/support/testing/zenmoneyTestData'
 import { getPendingSyncDiff } from 'store/data'
 import reducer from 'store/data/slice'
 import { loadLocalData } from './localData'

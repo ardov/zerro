@@ -5,12 +5,10 @@ import {
   clampOutboxHead,
   getPendingOutbox,
   replayOutbox,
-} from 'zerro-core/infrastructure/replica/outbox'
-import type { TCommand } from 'zerro-core/infrastructure/replica/outbox'
-import {
   replicaPersistenceVersion,
+  type TCommand,
   type TPersistedReplica,
-} from 'zerro-core/infrastructure/replica/persistence'
+} from 'zerro-core/replica'
 import { withPerf } from '6-shared/helpers/performance'
 import { TDataStore, TNormalizedPatch } from '6-shared/types'
 import { applyDiffMutable } from './shared/applyDiff'

@@ -5,7 +5,7 @@ import { keys } from '../6-shared/helpers/keys'
 import { storage } from '../6-shared/api/storage'
 import { zenmoney } from '../6-shared/api/zenmoney'
 import { convertDiff } from '../6-shared/api/zm-adapter'
-import type { TPersistedReplica } from '../zerro-core/infrastructure/replica/persistence'
+import type { TPersistedReplica } from 'zerro-core/replica'
 
 const REPLICA_KEY = 'zerro-core-replica-v1'
 

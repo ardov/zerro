@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { hashJson } from 'zerro-core/testing/stableJson'
+import { hashJson } from 'zerro-core/support/testing/stableJson'
 import { makeDemoDiff as makeCoreDemoDiff } from 'zerro-core/demo'
 import { makeDemoDiff } from './index'
 

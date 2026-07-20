@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest'
 import {
   makeAccount,
   makeTransaction,
-} from 'zerro-core/testing/zenmoneyTestData'
-import type { TCommand } from 'zerro-core/infrastructure/replica/outbox'
+} from 'zerro-core/support/testing/zenmoneyTestData'
+import type { TCommand } from 'zerro-core/replica'
 import {
   getChangedNum,
   getLastChangeTime,

@@ -1,11 +1,26 @@
 import { describe, expect, it } from 'vitest'
 import { readdirSync, readFileSync } from 'node:fs'
-import { dirname, join, relative } from 'node:path'
+import { dirname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const coreRoot = dirname(fileURLToPath(import.meta.url))
+const productionCoreEntrypoints = new Set([
+  'zerro-core',
+  'zerro-core/demo',
+  'zerro-core/redux',
+  'zerro-core/replica',
+])
 
 describe('zerro-core API boundary', () => {
+  it('keeps only ownership layers as root directories', () => {
+    const directories = readdirSync(coreRoot, { withFileTypes: true })
+      .filter(entry => entry.isDirectory())
+      .map(entry => entry.name)
+      .sort()
+
+    expect(directories).toEqual(['internal', 'public', 'runtime', 'support'])
+  })
+
   it('keeps the root entrypoint facade-only', () => {
     const rootIndex = readFileSync(join(coreRoot, 'index.ts'), 'utf8')
 
@@ -15,16 +30,13 @@ describe('zerro-core API boundary', () => {
   })
 
   it('pins the domain-grouped Redux adapter surface', () => {
-    // The root exposes the whole adapter as one `core` namespace.
-    const adapterIndex = readFileSync(join(coreRoot, 'redux/index.ts'), 'utf8')
-    expect(adapterIndex).toMatch(
-      /export \* as core from ['"]\.\/namespaces['"]/
-    )
-    expect(adapterIndex).not.toMatch(/export \{[\s\S]*?\} from/)
+    // The root exposes the runtime adapter through a thin public facade.
+    const adapterIndex = readFileSync(join(coreRoot, 'redux.ts'), 'utf8')
+    expect(adapterIndex).toMatch(/export \* from ['"]\.\/runtime\/redux['"]/)
 
-    // The domains it groups are pinned in namespaces.ts.
+    // The domains it groups are pinned in the runtime implementation.
     const namespaces = readFileSync(
-      join(coreRoot, 'redux/namespaces.ts'),
+      join(coreRoot, 'runtime/redux/namespaces.ts'),
       'utf8'
     )
     expect(
@@ -42,7 +54,7 @@ describe('zerro-core API boundary', () => {
         'envelopes',
         'fxRates',
         'goals',
-        'infrastructure',
+        'debug',
         'instruments',
         'merchants',
         'months',
@@ -54,6 +66,14 @@ describe('zerro-core API boundary', () => {
       ].sort()
     )
     expect(namespaces).not.toContain('applyLegacyPatch')
+  })
+
+  it('keeps the replica integration entrypoint explicit', () => {
+    const replicaIndex = readFileSync(join(coreRoot, 'replica.ts'), 'utf8')
+
+    expect(replicaIndex).not.toMatch(/export \*/)
+    expect(replicaIndex).toContain('appendOutbox')
+    expect(replicaIndex).toContain('parsePersistedReplica')
   })
 
   it('keeps production core free from app runtime imports', () => {
@@ -94,8 +114,92 @@ describe('zerro-core API boundary', () => {
     expect(violations).toEqual([])
   })
 
+  it('keeps domain foundation independent of ZenMoney and Zerro', () => {
+    const foundationRoot = join(coreRoot, 'internal/domain/foundation')
+    const domainRoot = join(coreRoot, 'internal/domain')
+    const forbiddenRoots = [
+      join(domainRoot, 'zenmoney'),
+      join(domainRoot, 'zerro'),
+    ]
+    const violations = walk(foundationRoot)
+      .filter(file => file.endsWith('.ts') && !file.endsWith('.test.ts'))
+      .flatMap(file => {
+        const source = readFileSync(file, 'utf8')
+        return readModuleSpecifiers(source)
+          .filter(specifier => {
+            if (specifier.startsWith('zerro-core/internal/domain/')) {
+              return /zerro-core\/internal\/domain\/(?:zenmoney|zerro)/.test(
+                specifier
+              )
+            }
+            if (!specifier.startsWith('.')) return false
+            const target = resolve(dirname(file), specifier)
+            return forbiddenRoots.some(
+              root => target === root || target.startsWith(root + sep)
+            )
+          })
+          .map(
+            specifier =>
+              `${relative(coreRoot, file)}: foundation imports '${specifier}'`
+          )
+      })
+
+    expect(violations).toEqual([])
+  })
+
+  it('keeps ZenMoney entities independent of its aggregate model', () => {
+    const entitiesRoot = join(coreRoot, 'internal/domain/zenmoney/entities')
+    const forbiddenRoots = [
+      join(coreRoot, 'internal/domain/zenmoney/model'),
+      join(coreRoot, 'internal/domain/zenmoney/read-models'),
+    ]
+    const violations = walk(entitiesRoot)
+      .filter(file => file.endsWith('.ts') && !file.endsWith('.test.ts'))
+      .flatMap(file => {
+        const source = readFileSync(file, 'utf8')
+        return readModuleSpecifiers(source)
+          .filter(specifier => {
+            if (specifier.startsWith('zerro-core/internal/domain/zenmoney/')) {
+              return /zerro-core\/internal\/domain\/zenmoney\/(?:model|read-models)/.test(
+                specifier
+              )
+            }
+            if (!specifier.startsWith('.')) return false
+            const target = resolve(dirname(file), specifier)
+            return forbiddenRoots.some(
+              root => target === root || target.startsWith(root + sep)
+            )
+          })
+          .map(
+            specifier =>
+              `${relative(coreRoot, file)}: entity imports '${specifier}'`
+          )
+      })
+
+    expect(violations).toEqual([])
+  })
+
+  it('keeps production imports off the broad ZenMoney barrel', () => {
+    const violations = readProductionCoreFiles().flatMap(file => {
+      const source = readFileSync(file, 'utf8')
+      return readModuleSpecifiers(source)
+        .filter(
+          specifier =>
+            specifier === './internal/domain/zenmoney' ||
+            specifier === '../../internal/domain/zenmoney' ||
+            specifier === 'zerro-core/internal/domain/zenmoney'
+        )
+        .map(
+          specifier =>
+            `${relative(coreRoot, file)}: broad ZenMoney import '${specifier}'`
+        )
+    })
+
+    expect(violations).toEqual([])
+  })
+
   it('keeps the Redux adapter off legacy entity ownership', () => {
-    const violations = walk(join(coreRoot, 'redux'))
+    const violations = walk(join(coreRoot, 'runtime/redux'))
       .filter(file => file.endsWith('.ts') && !file.endsWith('.test.ts'))
       .flatMap(file => {
         const source = readFileSync(file, 'utf8')
@@ -114,7 +218,7 @@ describe('zerro-core API boundary', () => {
     expect(violations).toEqual([])
   })
 
-  it('keeps app consumers off Core implementation subpaths', () => {
+  it('keeps production consumers on declared Core entrypoints', () => {
     const appRoot = dirname(coreRoot)
     const violations = walk(appRoot)
       .filter(file => {
@@ -123,22 +227,23 @@ describe('zerro-core API boundary', () => {
           /\.(?:ts|tsx)$/.test(path) &&
           !path.startsWith('zerro-core/') &&
           !path.startsWith('6-shared/types/') &&
-          !path.endsWith('.test.ts')
+          !/\.(?:test|spec)\.tsx?$/.test(path)
         )
       })
       .flatMap(file => {
         const source = readFileSync(file, 'utf8')
-        return source
-          .split('\n')
-          .map((line, index) => ({ line, index }))
-          .filter(({ line }) =>
-            /from ['"]zerro-core\/(?:domain|application|presentation|redux\/)/.test(
-              line
-            )
-          )
+        return readModuleSpecifiers(source)
+          .filter(specifier => {
+            if (specifier.startsWith('zerro-core')) {
+              return !productionCoreEntrypoints.has(specifier)
+            }
+            if (!specifier.startsWith('.')) return false
+            const target = resolve(dirname(file), specifier)
+            return target === coreRoot || target.startsWith(coreRoot + sep)
+          })
           .map(
-            ({ line, index }) =>
-              `${relative(appRoot, file)}:${index + 1}: ${line.trim()}`
+            specifier =>
+              `${relative(appRoot, file)}: undeclared Core import '${specifier}'`
           )
       })
 
@@ -174,6 +279,27 @@ describe('zerro-core API boundary', () => {
 
     expect(violations).toEqual([])
   })
+
+  it('keeps implementation layers off support modules', () => {
+    const supportRoot = join(coreRoot, 'support')
+    const violations = readProductionCoreFiles().flatMap(file => {
+      const path = relative(coreRoot, file)
+      if (path === 'demo.ts') return []
+      const source = readFileSync(file, 'utf8')
+      return readModuleSpecifiers(source)
+        .filter(specifier => {
+          if (specifier.startsWith('zerro-core/support/')) return true
+          if (!specifier.startsWith('.')) return false
+          const target = resolve(dirname(file), specifier)
+          return target === supportRoot || target.startsWith(supportRoot + sep)
+        })
+        .map(
+          specifier => `${path}: implementation imports support '${specifier}'`
+        )
+    })
+
+    expect(violations).toEqual([])
+  })
 })
 
 function readProductionCoreFiles(): string[] {
@@ -183,10 +309,19 @@ function readProductionCoreFiles(): string[] {
       path.endsWith('.ts') &&
       !path.endsWith('.test.ts') &&
       !path.startsWith('redux/') &&
-      !path.startsWith('documents/') &&
+      !path.startsWith('runtime/') &&
+      !path.startsWith('support/') &&
       !path.startsWith('testing/')
     )
   })
+}
+
+function readModuleSpecifiers(source: string): string[] {
+  return [
+    ...source.matchAll(
+      /\bfrom\s*['"]([^'"]+)['"]|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g
+    ),
+  ].map(match => match[1] || match[2])
 }
 
 function walk(dir: string): string[] {

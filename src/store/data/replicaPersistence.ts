@@ -2,9 +2,9 @@ import type { Middleware } from '@reduxjs/toolkit'
 import type { TDataStore } from '6-shared/types'
 import {
   replicaPersistenceVersion,
+  type TCommand,
   type TPersistedReplica,
-} from 'zerro-core/infrastructure/replica/persistence'
-import type { TCommand } from 'zerro-core/infrastructure/replica/outbox'
+} from 'zerro-core/replica'
 import {
   appendClientCommand,
   prepareClientSync,

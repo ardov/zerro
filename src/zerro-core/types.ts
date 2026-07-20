@@ -1,11 +1,11 @@
-import type { TIntentPatch } from './domain/zenmoney'
+import type { TIntentPatch } from './internal/domain/zenmoney/model/store'
 
 export type {
   TDataEntityKey,
   TDataStore,
   TNormalizedPatch,
   TIntentPatch,
-} from './domain/zenmoney'
+} from './internal/domain/zenmoney/model/store'
 
 export type TCoreContext = {
   now: () => number

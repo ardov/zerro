@@ -12,7 +12,7 @@ vi.mock('worker', () => ({
 
 vi.mock('6-shared/analytics', () => ({ track: vi.fn() }))
 
-import { makeAccount } from 'zerro-core/testing/zenmoneyTestData'
+import { makeAccount } from 'zerro-core/support/testing/zenmoneyTestData'
 import data, {
   appendClientCommand,
   applyServerPatch,

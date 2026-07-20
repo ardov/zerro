@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
 import { core } from 'zerro-core/redux'
 
-import { goalType } from 'zerro-core/domain/zerro/goals'
+import { goalType } from 'zerro-core/internal/domain/zerro/goals'
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
 import { track } from '6-shared/analytics'
 import { fillGoals } from './fillGoals'

@@ -6,7 +6,7 @@ import {
   buildOutboxTransport,
   getMaterializedOutboxPatches,
   getPendingOutbox,
-} from 'zerro-core/infrastructure/replica/outbox'
+} from 'zerro-core/replica'
 import { immutableMergeDiffs } from './shared/mergeDiffs'
 
 const getBase = (state: RootState) => state.data.base

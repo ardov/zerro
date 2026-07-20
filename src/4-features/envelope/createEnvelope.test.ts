@@ -4,14 +4,14 @@ import type { TDataStore } from '6-shared/types'
 import type { AppDispatch, AppThunk, RootState } from 'store'
 import { appendClientCommand } from 'store/data'
 import { makeDemoStore } from 'zerro-core/demo'
-import { applyPatch } from 'zerro-core/domain/zenmoney'
-import { materializeCommand } from 'zerro-core/application/materializer'
+import { applyPatch } from 'zerro-core/internal/domain/zenmoney'
+import { materializeCommand } from 'zerro-core/internal/operations/materialization'
 import {
   defaultEnvelopeGroupIds,
   envId,
   EnvType,
   getEnvelopeMeta,
-} from 'zerro-core/domain/zerro'
+} from 'zerro-core/internal/domain/zerro'
 import { core } from 'zerro-core/redux'
 
 import { createEnvelope } from './createEnvelope'

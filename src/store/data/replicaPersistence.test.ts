@@ -6,8 +6,8 @@ const { saveReplicaStateMock } = vi.hoisted(() => ({
 
 vi.mock('worker', () => ({ saveReplicaState: saveReplicaStateMock }))
 
-import { makeStore } from 'zerro-core/testing/zenmoneyTestData'
-import type { TCommand } from 'zerro-core/infrastructure/replica/outbox'
+import { makeStore } from 'zerro-core/support/testing/zenmoneyTestData'
+import type { TCommand } from 'zerro-core/replica'
 import { appendClientCommand, prepareClientSync } from './slice'
 import {
   getPersistedReplica,
