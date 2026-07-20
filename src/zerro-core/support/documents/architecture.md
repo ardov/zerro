@@ -34,8 +34,8 @@ shared primitives
 Core persists requested changes and derives their complete local effects:
 
 ```txt
-base + command prefix -> materialized patches -> current
-base + command prefix -> fresh transport patch
+base + durable outbox -> materialized patches -> current
+base + durable outbox -> fresh transport patch
 current               -> derived views
 ```
 
@@ -171,21 +171,21 @@ namespace. Session context contains only nondeterministic dependencies such as
 
 ### Runtime engine
 
-`infrastructure/replica/outbox.ts` is the engine: pure operations defining head
-clamping, command-prefix reads, redo-tail truncation on append, command
-rematerialization, and primary-only transport. The only runtime-specific part
-is who owns the state — in the React app that is Redux (`store/data/slice.ts`),
-and a future standalone package wraps the same functions.
+`internal/operations/replication/outbox.ts` is the engine: pure operations
+defining append, undo/redo stack transitions, command rematerialization, and
+primary-only transport. The only runtime-specific part is who owns the state —
+in the React app that is Redux (`store/data/slice.ts`), and a future standalone
+package wraps the same functions.
 
 There is deliberately no second engine object. An in-memory `createZerroEngine`
 reference implementation existed and was deleted: it had no production
 consumer and was a standing invitation to grow a second implementation of
-append, replay-prefix, clamp, and redo-tail rules. If a semantic engine facade
-is ever needed, build it over these operations rather than beside them.
+append, undo, redo, and replay rules. If a semantic engine facade is ever
+needed, build it over these operations rather than beside them.
 
 Issued commands append directly to the outbox. Redux performs authoritative
 `current` rematerialization for append, undo, redo, and base changes. The sync
-adapter derives request transport from the same command prefix; Redux stores no
+adapter derives request transport from the same durable outbox; Redux stores no
 parallel `data.diff` projection. Redux may temporarily stage a response between
 reducer actions, but that is an implementation detail, not a product inbox.
 
@@ -241,13 +241,14 @@ domain group ids.
 
 ## Replica model
 
-The logical persisted replica consists of:
+The runtime replica consists of durable accepted and pending state plus a
+session-only redo stack:
 
 ```ts
 type ReplicaState = {
   base: TDataStore
   outbox: Command[] // the persisted command shape defined in Commands above
-  outboxHead: number
+  redo: Command[] // session-only undone commands
 }
 ```
 
@@ -255,31 +256,45 @@ type ReplicaState = {
 storage may keep normalized base domains and outbox metadata in separate
 records, but together they must describe one coherent logical replica.
 
-`base` is the last accepted snapshot. `current` is derived by rematerializing
-the command prefix:
+`base` is the last accepted snapshot. `outbox` contains exactly the applied
+unsynchronized commands, so it is both the sync outbox and the undo stack.
+`current` is derived by rematerializing it:
 
 ```ts
-current = materializeCommands(base, outbox.slice(0, outboxHead))
+current = materializeCommands(base, outbox)
 ```
 
 Replica persistence is a separate versioned IndexedDB record storing the
-current command-only schema and nothing derived. There are no compatibility or
-migration requirements for an older command format. Malformed replay metadata
-is discarded rather than blocking canonical local data from loading. Reload
-accepts a snapshot only when its base timestamp matches the loaded server
-base, so legacy storage and stale metadata do not replay against the wrong
-snapshot.
+current command-only schema and nothing derived:
 
-Undo and redo move only `outboxHead`. A new command after undo drops the redo
-tail. Starting manual sync also drops the redo tail because synchronization
-commits the currently applied history branch. No inverse patches are stored.
+```ts
+type PersistedReplica = {
+  version: 3
+  baseServerTimestamp: number
+  outbox: Command[]
+}
+```
 
-Only `base`, `outbox`, and `outboxHead` are durable inputs; sync progress and
-errors are ephemeral. There is no durable inbox or incoming-change history.
+Reload accepts a snapshot only when its base timestamp matches the loaded
+server base. It restores `outbox` and always starts with an empty `redo` stack.
+The one-way V2 reader preserves only `outbox.slice(0, outboxHead)`, deliberately
+discarding the previously durable redo tail without losing applied pending
+commands. Malformed replay metadata is discarded rather than blocking
+canonical local data from loading.
+
+Undo moves the last command from `outbox` to `redo`; redo moves it back. A new
+command clears `redo`. Starting manual sync and applying a canonical base change
+also clear `redo`, because synchronization commits the currently applied
+history branch. No inverse patches are stored.
+
+Only `base` and `outbox` are durable inputs. `redo`, sync progress, and errors
+are ephemeral. Logout resets both history stacks in memory and awaits an
+ordered browser-storage clear; saves queued by the previous login are
+invalidated before the clear. There is no durable inbox or incoming-change
+history.
 
 Any future replica implementation must reuse the pure outbox operations. Two
-implementations of append, replay-prefix, clamp, and redo-tail rules are not
-acceptable.
+implementations of append, undo, redo, or replay rules are not acceptable.
 
 ## Sync and conflicts
 
@@ -293,8 +308,8 @@ canonical diff                               -> applyPatch(base, diff)
                                              -> rematerialize pending commands
 ```
 
-Manual sync is a commit boundary. It discards the redo tail, records the sent
-prefix length, and rematerializes its transport against the current base with
+Manual sync is a commit boundary. It clears `redo`, records the sent outbox
+length, and rematerializes its transport against the current base with
 fresh entity versions. Undo/redo is disabled while the request is active, so
 new commands can only append after that stable prefix. Transport replay starts
 from `base`, applies only primary command patches to a working snapshot, and

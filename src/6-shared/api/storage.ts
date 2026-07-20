@@ -4,20 +4,24 @@ import { idbBaseName, idbStoreName } from '../config'
 const VERSION = 1
 
 export function getIDBStorage(base: string, store: string) {
-  const dbPromise = openDB(base, VERSION, {
-    upgrade(db) {
-      db.createObjectStore(store)
-    },
-  })
+  // Opened on first use, so that merely importing this module does not
+  // require IndexedDB to exist (tests, SSR).
+  let dbPromise: ReturnType<typeof openDB> | undefined
+  const getDB = () =>
+    (dbPromise ??= openDB(base, VERSION, {
+      upgrade(db) {
+        db.createObjectStore(store)
+      },
+    }))
   return {
     set: async (key: string, value: any) => {
-      return (await dbPromise).put(store, value, key)
+      return (await getDB()).put(store, value, key)
     },
     get: async (key: string) => {
-      return (await dbPromise).get(store, key)
+      return (await getDB()).get(store, key)
     },
     clear: async () => {
-      return (await dbPromise).clear(store)
+      return (await getDB()).clear(store)
     },
   }
 }

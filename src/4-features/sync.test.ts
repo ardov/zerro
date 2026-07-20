@@ -5,10 +5,9 @@ const { syncMock } = vi.hoisted(() => ({
   syncMock: vi.fn(),
 }))
 
-vi.mock('worker', () => ({
-  sync: syncMock,
-  saveLocalData: vi.fn(),
-}))
+vi.mock('6-shared/api/syncDiff', () => ({ sync: syncMock }))
+
+vi.mock('6-shared/api/localStore', () => ({ saveLocalData: vi.fn() }))
 
 vi.mock('6-shared/analytics', () => ({ track: vi.fn() }))
 
@@ -60,7 +59,7 @@ describe('syncData', () => {
       serverTimestamp: 100,
     })
     expect(store.getState().data.outbox).toEqual([first])
-    expect(store.getState().data.outboxHead).toBe(1)
+    expect(store.getState().data.redo).toEqual([])
     expect(store.getState().data.current.account.cash.title).toBe('Wallet')
   })
 })

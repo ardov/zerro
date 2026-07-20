@@ -11,6 +11,7 @@ export {
   resetData,
 } from './slice'
 export { applyServerPatch } from './applyServerPatch'
+export { clearPersistedLocalData } from './replicaPersistence'
 
 // SELECTORS
 export {

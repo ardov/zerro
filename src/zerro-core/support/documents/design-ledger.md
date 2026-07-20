@@ -84,6 +84,10 @@ there:
 
 - The loaded app maps platform history shortcuts to undo/redo only outside
   text-editing controls and only when that history direction is available.
+- Applied unsynchronized commands form the durable outbox and undo stack. Redo
+  is session-only and resets on reload, sync, canonical rebase, and logout.
+- Logout resets replica state immediately and awaits an ordered storage clear;
+  queued saves from the previous login are invalidated.
 - Background sync does not classify commands as rebase-safe versus blocking:
   every admitted command follows the same sparse replay contract.
 
@@ -109,8 +113,9 @@ there:
   be dropped; revisit only with evidence that this occurs.
 - Undo/redo is keyboard-accessible in the loaded application; visible controls
   remain deferred.
-- Replica metadata is disposable until product continuity requirements justify
-  migrations.
+- Persisted replica V2 has a one-way compatibility reader that preserves its
+  applied prefix and discards its redo tail. This is a bounded migration, not a
+  general migration framework.
 
 ## Active compatibility bridges
 
@@ -135,8 +140,8 @@ useful.
 
 - Which real ZenMoney responses become fixtures for transaction balance,
   account deletion, and transfer conversion?
-- Pending replica metadata currently has no compatibility or migration
-  requirement. Revisit versioning only when real persisted users exist.
+- Future command-shape changes need an explicit compatibility decision; do not
+  add a general migration framework without evidence.
 
 ### Product rules
 

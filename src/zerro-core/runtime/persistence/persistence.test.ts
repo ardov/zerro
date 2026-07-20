@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { parsePersistedReplica } from './persistence'
 
 const validReplica = {
-  version: 2,
+  version: 3,
   baseServerTimestamp: 100,
   outbox: [
     {
@@ -11,13 +11,35 @@ const validReplica = {
       issuedAt: 10,
     },
   ],
-  outboxHead: 1,
 }
 
 describe('parsePersistedReplica', () => {
   it('accepts command-only replay records and missing storage', () => {
     expect(parsePersistedReplica(undefined)).toBeUndefined()
     expect(parsePersistedReplica(validReplica)).toBe(validReplica)
+  })
+
+  it('migrates v2 by preserving only the applied command prefix', () => {
+    const undone = { ...validReplica.outbox[0], issuedAt: 20 }
+    expect(
+      parsePersistedReplica({
+        ...validReplica,
+        version: 2,
+        outbox: [...validReplica.outbox, undone],
+        outboxHead: 1,
+      })
+    ).toEqual(validReplica)
+  })
+
+  it('does not validate the discarded v2 redo tail', () => {
+    expect(
+      parsePersistedReplica({
+        ...validReplica,
+        version: 2,
+        outbox: [...validReplica.outbox, { id: 'discarded-redo' }],
+        outboxHead: 1,
+      })
+    ).toEqual(validReplica)
   })
 
   it('accepts a sparse transaction patch', () => {
@@ -79,7 +101,10 @@ describe('parsePersistedReplica', () => {
 
   it.each([
     [{ ...validReplica, version: 1 }, 'unsupported version'],
-    [{ ...validReplica, outboxHead: 2 }, 'outbox head is out of range'],
+    [
+      { ...validReplica, version: 2, outboxHead: 2 },
+      'outbox head is out of range',
+    ],
     [
       {
         ...validReplica,

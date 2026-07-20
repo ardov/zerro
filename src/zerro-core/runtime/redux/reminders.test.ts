@@ -29,7 +29,7 @@ function makeState(withReminder = false): RootState {
       : {},
   })
   return {
-    data: { current, base: current, outbox: [], outboxHead: 0 },
+    data: { current, base: current, outbox: [], redo: [] },
     displayCurrency: null,
     isPending: false,
     lastSync: { finishedAt: 0, isSuccessful: null, errorMessage: null },

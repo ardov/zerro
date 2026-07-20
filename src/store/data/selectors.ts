@@ -5,53 +5,40 @@ import { createSelector } from '@reduxjs/toolkit'
 import {
   buildOutboxTransport,
   getMaterializedOutboxPatches,
-  getPendingOutbox,
 } from 'zerro-core/replica'
 import { immutableMergeDiffs } from './shared/mergeDiffs'
 
 const getBase = (state: RootState) => state.data.base
 const getOutbox = (state: RootState) => state.data.outbox
-const getOutboxHead = (state: RootState) => state.data.outboxHead
-
-const getPendingEntries = createSelector(
-  [getOutbox, getOutboxHead],
-  getPendingOutbox
-)
+const getRedo = (state: RootState) => state.data.redo
 
 export const getPendingSyncDiff = createSelector(
-  [getBase, getOutbox, getOutboxHead],
-  (base, outbox, outboxHead) =>
-    mergeMaterializedPatches(
-      getMaterializedOutboxPatches(base, outbox, outboxHead)
-    )
+  [getBase, getOutbox],
+  (base, outbox) =>
+    mergeMaterializedPatches(getMaterializedOutboxPatches(base, outbox))
 )
 
 export function getPendingSyncTransport(
   state: RootState,
   sentAt: number
 ): TNormalizedPatch | undefined {
-  return buildOutboxTransport(
-    state.data.base,
-    state.data.outbox,
-    state.data.outboxHead,
-    sentAt
-  )
+  return buildOutboxTransport(state.data.base, state.data.outbox, sentAt)
 }
 
 export const getHasPendingChanges = (state: RootState) =>
-  getOutboxHead(state) > 0
+  getOutbox(state).length > 0
 
 export const getCanUndoClientCommand = (state: RootState) =>
-  !state.isPending && getOutboxHead(state) > 0
+  !state.isPending && getOutbox(state).length > 0
 
 export const getCanRedoClientCommand = (state: RootState) =>
-  !state.isPending && getOutboxHead(state) < getOutbox(state).length
+  !state.isPending && getRedo(state).length > 0
 
 export const getChangedNum = (state: RootState) => {
   return getItemsCount(getPendingSyncDiff(state))
 }
 
-export const getLastChangeTime = createSelector([getPendingEntries], outbox =>
+export const getLastChangeTime = createSelector([getOutbox], outbox =>
   outbox.reduce((latest, command) => Math.max(latest, command.issuedAt), 0)
 )
 

@@ -31,7 +31,7 @@ export function makeCoreNextDemoRootState(
       current: data,
       base: data,
       outbox: [],
-      outboxHead: 0,
+      redo: [],
     },
     displayCurrency: null,
     isPending: false,

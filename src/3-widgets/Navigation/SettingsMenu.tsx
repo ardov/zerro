@@ -237,10 +237,10 @@ function NavItems({ onClose }: ItemProps) {
 function ReloadDataItem(_props: ItemProps) {
   const { t } = useTranslation('settings')
   const dispatch = useAppDispatch()
-  const reloadData = () => {
+  const reloadData = async () => {
     track('local_data_reload_requested', {})
     dispatch(resetData())
-    dispatch(clearLocalData())
+    await dispatch(clearLocalData())
     window.location.reload()
   }
   const reload = useConfirm({ onOk: reloadData })

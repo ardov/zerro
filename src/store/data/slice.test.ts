@@ -17,6 +17,7 @@ import reducer, {
   rebaseServerInbox,
   receiveServerPatch,
   redoClientCommand,
+  resetData,
   restorePersistedReplica,
   undoClientCommand,
 } from './slice'
@@ -76,7 +77,7 @@ describe('command outbox boundaries', () => {
     expect(appended.current.transaction).toBe(beforeTransactions)
   })
 
-  it('rematerializes current and derives transport from the command prefix', () => {
+  it('moves commands between the durable outbox and session redo stack', () => {
     const base = applyServerPatch(undefined, {
       account: [makeAccount({ id: 'cash', title: 'Cash' })],
     })
@@ -95,12 +96,15 @@ describe('command outbox boundaries', () => {
     const undone = reducer(appended, undoClientCommand())
     expect(undone.current.account.cash.title).toBe('Wallet')
     expect(getPendingDiff(undone)?.account?.[0].title).toBe('Wallet')
+    expect(undone.outbox).toEqual([first])
+    expect(undone.redo).toEqual([second])
 
     const branched = reducer(
       undone,
       appendClientCommand(makeAccountEntry('Pocket', 30))
     )
     expect(branched.outbox.map(entry => entry.issuedAt)).toEqual([10, 30])
+    expect(branched.redo).toEqual([])
 
     const reset = reducer(undone, undoClientCommand())
     expect(reset.current.account.cash.title).toBe('Cash')
@@ -108,6 +112,7 @@ describe('command outbox boundaries', () => {
 
     const redone = reducer(reset, redoClientCommand())
     expect(redone.current.account.cash.title).toBe('Wallet')
+    expect(redone.outbox).toEqual([first])
   })
 
   it('rebases sparse transaction fields over a remote entity change', () => {
@@ -258,6 +263,7 @@ describe('command outbox boundaries', () => {
     )
     const prepared = reducer(withRedo, prepareClientSync())
     expect(prepared.outbox).toEqual([sent])
+    expect(prepared.redo).toEqual([])
   })
 
   it('restores command-only persistence only over its matching base', () => {
@@ -267,15 +273,15 @@ describe('command outbox boundaries', () => {
     })
     const entry = makeAccountEntry('Wallet', 10)
     const persisted = {
-      version: 2 as const,
+      version: 3 as const,
       baseServerTimestamp: 100,
       outbox: [entry],
-      outboxHead: 1,
     }
 
     const restored = reducer(base, restorePersistedReplica(persisted))
     expect(restored.current.account.cash.title).toBe('Wallet')
     expect(restored.outbox).toEqual([entry])
+    expect(restored.redo).toEqual([])
 
     const stale = reducer(
       base,
@@ -283,5 +289,20 @@ describe('command outbox boundaries', () => {
     )
     expect(stale.current.account.cash.title).toBe('Cash')
     expect(stale.outbox).toEqual([])
+  })
+
+  it('clears both history stacks when data resets on logout', () => {
+    const base = applyServerPatch(undefined, {
+      account: [makeAccount({ id: 'cash', title: 'Cash' })],
+    })
+    const withRedo = reducer(
+      reducer(base, appendClientCommand(makeAccountEntry('Wallet', 10))),
+      undoClientCommand()
+    )
+
+    const reset = reducer(withRedo, resetData())
+    expect(reset.outbox).toEqual([])
+    expect(reset.redo).toEqual([])
+    expect(reset.current.serverTimestamp).toBe(0)
   })
 })

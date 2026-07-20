@@ -5,7 +5,7 @@ const { getLocalDataMock, getReplicaStateMock } = vi.hoisted(() => ({
   getReplicaStateMock: vi.fn(),
 }))
 
-vi.mock('worker', () => ({
+vi.mock('6-shared/api/localStore', () => ({
   getLocalData: getLocalDataMock,
   getReplicaState: getReplicaStateMock,
   clearStorage: vi.fn(),
@@ -26,7 +26,7 @@ describe('loadLocalData', () => {
       account: [baseAccount],
     })
     getReplicaStateMock.mockResolvedValue({
-      version: 2,
+      version: 3,
       baseServerTimestamp: 100,
       outbox: [
         {
@@ -35,7 +35,6 @@ describe('loadLocalData', () => {
           issuedAt: 10,
         },
       ],
-      outboxHead: 1,
     })
 
     let dataState = reducer(undefined, { type: 'test/init' })
@@ -66,10 +65,9 @@ describe('loadLocalData', () => {
   it('ignores corrupt replica storage without blocking canonical data', async () => {
     getLocalDataMock.mockResolvedValue({ serverTimestamp: 100 })
     getReplicaStateMock.mockResolvedValue({
-      version: 2,
+      version: 3,
       baseServerTimestamp: 100,
       outbox: [{ id: 'broken' }],
-      outboxHead: 1,
     })
 
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)

@@ -1,32 +1,17 @@
 import { AppThunk } from 'store'
-import { applyServerPatch } from 'store/data'
-import { restorePersistedReplica } from 'store/data'
+import {
+  applyServerPatch,
+  clearPersistedLocalData,
+  restorePersistedReplica,
+} from 'store/data'
 import { getDataToSave } from '4-features/shared/getDataToSave'
-import { TLocalData } from '6-shared/types'
 import { parsePersistedReplica } from 'zerro-core/replica'
 import {
+  LOCAL_KEYS,
   getLocalData,
   getReplicaState,
-  clearStorage,
   saveLocalData,
-} from 'worker'
-
-type LocalKey = keyof TLocalData
-
-const LOCAL_KEYS = [
-  'serverTimestamp',
-  'instrument',
-  'user',
-  'merchant',
-  'country',
-  'company',
-  'reminder',
-  'reminderMarker',
-  'account',
-  'tag',
-  'budget',
-  'transaction',
-] as LocalKey[]
+} from '6-shared/api/localStore'
 
 export const saveDataLocally =
   (changedDomains = LOCAL_KEYS): AppThunk =>
@@ -57,4 +42,5 @@ function parseReplicaOrUndefined(replica: unknown) {
   }
 }
 
-export const clearLocalData = (): AppThunk => () => clearStorage()
+export const clearLocalData = (): AppThunk<Promise<void>> => () =>
+  clearPersistedLocalData()

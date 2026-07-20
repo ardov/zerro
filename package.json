@@ -49,7 +49,6 @@
     "@mui/x-date-pickers": "^8.29.2",
     "@reduxjs/toolkit": "^2.12.0",
     "@sentry/browser": "^10.65.0",
-    "comlink": "^4.4.2",
     "date-fns": "^4.4.0",
     "formik": "^2.4.9",
     "history": "^4.10.1",

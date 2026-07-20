@@ -109,7 +109,7 @@ describe('history shortcuts', () => {
     expect(undo).not.toHaveBeenCalled()
   })
 
-  it('moves the Redux history head from the global listener', () => {
+  it('moves commands between Redux undo and redo stacks', () => {
     const store = configureStore({
       reducer: { data: dataReducer, isPending: isPendingReducer },
     })
@@ -129,14 +129,16 @@ describe('history shortcuts', () => {
     act(() => {
       window.dispatchEvent(keydown({ key: 'z', code: 'KeyZ', metaKey: true }))
     })
-    expect(store.getState().data.outboxHead).toBe(0)
+    expect(store.getState().data.outbox).toEqual([])
+    expect(store.getState().data.redo).toHaveLength(1)
 
     act(() => {
       window.dispatchEvent(
         keydown({ key: 'Z', code: 'KeyZ', metaKey: true, shiftKey: true })
       )
     })
-    expect(store.getState().data.outboxHead).toBe(1)
+    expect(store.getState().data.outbox).toHaveLength(1)
+    expect(store.getState().data.redo).toEqual([])
 
     view.unmount()
   })
@@ -159,7 +161,8 @@ describe('history shortcuts', () => {
       window.dispatchEvent(keydown({ key: 'z', code: 'KeyZ', metaKey: true }))
     })
 
-    expect(store.getState().data.outboxHead).toBe(1)
+    expect(store.getState().data.outbox).toHaveLength(1)
+    expect(store.getState().data.redo).toEqual([])
     view.unmount()
   })
 })

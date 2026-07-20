@@ -7,13 +7,12 @@ import {
   type TDataEntityKey,
 } from '../../internal/domain/zenmoney/model/store'
 
-export const replicaPersistenceVersion = 2 as const
+export const replicaPersistenceVersion = 3 as const
 
 export type TPersistedReplica = {
   version: typeof replicaPersistenceVersion
   baseServerTimestamp: number
   outbox: TCommand[]
-  outboxHead: number
 }
 
 const patchKeys = new Set<string>(intentPatchKeys)
@@ -24,7 +23,7 @@ export function parsePersistedReplica(
   if (value === undefined || value === null) return undefined
   if (!isRecord(value))
     throw new Error('Invalid persisted Core replica: expected an object')
-  if (value.version !== replicaPersistenceVersion)
+  if (value.version !== replicaPersistenceVersion && value.version !== 2)
     throw new Error(
       `Invalid persisted Core replica: unsupported version ${String(value.version)}`
     )
@@ -32,15 +31,27 @@ export function parsePersistedReplica(
     throw new Error('Invalid persisted Core replica: invalid base timestamp')
   if (!Array.isArray(value.outbox))
     throw new Error('Invalid persisted Core replica: outbox must be an array')
-  if (
-    typeof value.outboxHead !== 'number' ||
-    !Number.isInteger(value.outboxHead) ||
-    value.outboxHead < 0 ||
-    value.outboxHead > value.outbox.length
-  )
-    throw new Error(
-      'Invalid persisted Core replica: outbox head is out of range'
+
+  if (value.version === 2) {
+    if (
+      typeof value.outboxHead !== 'number' ||
+      !Number.isInteger(value.outboxHead) ||
+      value.outboxHead < 0 ||
+      value.outboxHead > value.outbox.length
     )
+      throw new Error(
+        'Invalid persisted Core replica: outbox head is out of range'
+      )
+
+    const outbox = value.outbox.slice(0, value.outboxHead)
+    outbox.forEach((entry, index) => validateOutboxEntry(entry, index))
+    return {
+      version: replicaPersistenceVersion,
+      baseServerTimestamp: value.baseServerTimestamp,
+      outbox: outbox as TCommand[],
+    }
+  }
+
   value.outbox.forEach((entry, index) => validateOutboxEntry(entry, index))
   return value as TPersistedReplica
 }

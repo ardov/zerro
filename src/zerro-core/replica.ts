@@ -9,10 +9,10 @@ export {
   appendOutbox,
   applyOutboxCommand,
   buildOutboxTransport,
-  clampOutboxHead,
   getMaterializedOutboxPatches,
-  getPendingOutbox,
+  redoOutbox,
   replayOutbox,
+  undoOutbox,
   type TCommand,
   type TOutboxState,
 } from './internal/operations/replication/outbox'

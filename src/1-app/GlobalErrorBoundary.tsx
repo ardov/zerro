@@ -1,6 +1,6 @@
 import React from 'react'
 import { captureError } from '6-shared/diagnostics'
-import { clearStorage } from 'worker'
+import { clearStorage } from '6-shared/api/localStore'
 import { tokenStorage } from '6-shared/api/tokenStorage'
 import { useTranslation } from 'react-i18next'
 

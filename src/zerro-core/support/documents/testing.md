@@ -16,7 +16,8 @@ Use for:
 - materializer intent/applied contracts and cross-entity effects;
 - hidden-data parsing and writes;
 - envelope, budget, FX, activity, month-total, goal, and transaction edge cases;
-- outbox append, undo/redo, reload, rebase, and redo-tail behavior;
+- outbox append, undo/redo, reload redo reset, logout clearing, rebase, and
+  session redo behavior;
 - dependency and package boundaries.
 
 For command changes, compare state after applying the patch. Patch shape alone

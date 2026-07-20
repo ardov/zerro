@@ -2,10 +2,10 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import {
   appendOutbox,
   applyOutboxCommand,
-  clampOutboxHead,
-  getPendingOutbox,
+  redoOutbox,
   replayOutbox,
   replicaPersistenceVersion,
+  undoOutbox,
   type TCommand,
   type TPersistedReplica,
 } from 'zerro-core/replica'
@@ -16,9 +16,10 @@ import { applyDiffMutable } from './shared/applyDiff'
 interface DataSlice {
   current: TDataStore
   base: TDataStore
-  /** Durable local commands; current rematerializes from the command prefix. */
+  /** Applied local commands. This is the durable undo stack and sync outbox. */
   outbox: TCommand[]
-  outboxHead: number
+  /** Undone commands available only until reload, logout, or sync. */
+  redo: TCommand[]
   inbox?: TServerInbox | null
 }
 
@@ -47,7 +48,7 @@ const initialState: DataSlice = {
   current: initialBase,
   base: initialBase,
   outbox: [],
-  outboxHead: 0,
+  redo: [],
 }
 
 // SLICE
@@ -67,46 +68,42 @@ const { reducer, actions } = createSlice({
 
       applyDiffMutable(canonicalPatch, state.base)
 
-      const pending = getPendingOutbox(state.outbox, state.outboxHead)
       state.outbox =
-        sentOutboxCount === undefined ? pending : pending.slice(sentOutboxCount)
-      state.outboxHead = state.outbox.length
-      state.current = replayOutbox(state.base, state.outbox, state.outboxHead)
+        sentOutboxCount === undefined
+          ? state.outbox
+          : state.outbox.slice(sentOutboxCount)
+      state.redo = []
+      state.current = replayOutbox(state.base, state.outbox)
       state.inbox = null
     }),
     appendClientCommand: withPerf(
       'appendClientCommand',
       (state, { payload }: PayloadAction<TCommand>) => {
-        const next = appendOutbox(state.outbox, state.outboxHead, payload)
+        const next = appendOutbox(state.outbox, payload)
         state.outbox = next.outbox
-        state.outboxHead = next.outboxHead
-        // `current` already reflects the command prefix up to the old head, and
-        // appendOutbox drops any redo tail past it, so advancing by this one
-        // entry is equivalent to a full replay but keeps unrelated entity maps
-        // reference-stable for memoized selectors.
+        state.redo = next.redo
+        // `current` already reflects the durable outbox, so advancing by this
+        // one entry is equivalent to a full replay but keeps unrelated entity
+        // maps reference-stable for memoized selectors.
         state.current = applyOutboxCommand(state.current, payload)
       }
     ),
     prepareClientSync: withPerf('prepareClientSync', state => {
-      const outbox = getPendingOutbox(state.outbox, state.outboxHead)
-      state.outbox = outbox
-      state.outboxHead = outbox.length
+      state.redo = []
     }),
     undoClientCommand: withPerf('undoClientCommand', state => {
-      const outbox = state.outbox
-      const currentHead = state.outboxHead
-      const outboxHead = clampOutboxHead(currentHead - 1, outbox.length)
-      if (outboxHead === currentHead) return
-      state.outboxHead = outboxHead
-      state.current = replayOutbox(state.base, outbox, outboxHead)
+      if (!state.outbox.length) return
+      const next = undoOutbox(state.outbox, state.redo)
+      state.outbox = next.outbox
+      state.redo = next.redo
+      state.current = replayOutbox(state.base, state.outbox)
     }),
     redoClientCommand: withPerf('redoClientCommand', state => {
-      const outbox = state.outbox
-      const currentHead = state.outboxHead
-      const outboxHead = clampOutboxHead(currentHead + 1, outbox.length)
-      if (outboxHead === currentHead) return
-      state.outboxHead = outboxHead
-      state.current = replayOutbox(state.base, outbox, outboxHead)
+      if (!state.redo.length) return
+      const next = redoOutbox(state.outbox, state.redo)
+      state.outbox = next.outbox
+      state.redo = next.redo
+      state.current = replayOutbox(state.base, state.outbox)
     }),
     restorePersistedReplica: withPerf(
       'restorePersistedReplica',
@@ -117,17 +114,14 @@ const { reducer, actions } = createSlice({
           payload.baseServerTimestamp !== state.base.serverTimestamp
         ) {
           state.outbox = []
-          state.outboxHead = 0
+          state.redo = []
           state.current = state.base
           return
         }
 
         state.outbox = [...payload.outbox]
-        state.outboxHead = clampOutboxHead(
-          payload.outboxHead,
-          payload.outbox.length
-        )
-        state.current = replayOutbox(state.base, state.outbox, state.outboxHead)
+        state.redo = []
+        state.current = replayOutbox(state.base, state.outbox)
       }
     ),
     resetData: () => {

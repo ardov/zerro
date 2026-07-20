@@ -5,24 +5,23 @@ import { zenmoney } from '6-shared/api/zenmoney'
 import { setToken } from 'store/token'
 import { applyServerPatch, resetData } from 'store/data'
 import { syncData } from '4-features/sync'
-import { convertZmToLocal, workerMethods } from 'worker'
+import { convertDiff } from '6-shared/api/zm-adapter'
 import { clearLocalData, saveDataLocally } from './localData'
 import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
 import { getDemoData } from 'demoData'
 
-export const logOut = (): AppThunk => dispatch => {
-  workerMethods.clearStorage()
+export const logOut = (): AppThunk<Promise<void>> => async dispatch => {
   dispatch(resetData())
   dispatch(setToken(null))
-  dispatch(clearLocalData())
   tokenStorage.clear()
+  await dispatch(clearLocalData())
 }
 
 export const logIn =
   (endpoint: EndpointPreference): AppThunk =>
   async dispatch => {
     // Clear all data before logging in
-    dispatch(logOut())
+    await dispatch(logOut())
 
     // Get token
     const token = await zenmoney.authorize(endpoint)
@@ -43,7 +42,7 @@ export const loadBackup =
     try {
       const txt = await file.text()
       const data = JSON.parse(txt)
-      const converted = await convertZmToLocal(data)
+      const converted = convertDiff.toClient(data)
       // TODO: maybe later make more elegant solution for local data
       tokenStorage.set(zenmoney.fakeToken)
       dispatch(setToken(zenmoney.fakeToken))

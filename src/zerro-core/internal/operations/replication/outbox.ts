@@ -1,11 +1,12 @@
 /**
- * Engine core: the pure replica operations over `base + outbox + outboxHead`.
+ * Engine core: the pure replica operations over durable `base + outbox` and
+ * session-only `redo`.
  *
  * Every append, undo, redo, replay, and transport rule lives here as a plain
  * function, so the only runtime-specific part left is who owns the state. In
  * this app Redux owns it (`store/data/slice.ts`); a future standalone package
  * wraps these same functions. Do not grow a second implementation of append,
- * replay-prefix, clamp, or redo-tail rules beside this file.
+ * replay or history-stack rules beside this file.
  */
 import {
   materializeCommand,
@@ -25,47 +26,52 @@ export type { TCommand } from '../materialization'
 
 export type TOutboxState = {
   outbox: TCommand[]
-  outboxHead: number
-}
-
-export function clampOutboxHead(
-  outboxHead: number,
-  outboxLength: number
-): number {
-  return Math.max(0, Math.min(outboxHead, outboxLength))
-}
-
-export function getPendingOutbox(
-  outbox: readonly TCommand[],
-  outboxHead: number
-): TCommand[] {
-  return outbox.slice(0, clampOutboxHead(outboxHead, outbox.length))
+  redo: TCommand[]
 }
 
 export function appendOutbox(
   outbox: readonly TCommand[],
-  outboxHead: number,
   command: TCommand
 ): TOutboxState {
-  const nextOutbox = getPendingOutbox(outbox, outboxHead)
-  nextOutbox.push(command)
-  return { outbox: nextOutbox, outboxHead: nextOutbox.length }
+  return { outbox: [...outbox, command], redo: [] }
+}
+
+export function undoOutbox(
+  outbox: readonly TCommand[],
+  redo: readonly TCommand[]
+): TOutboxState {
+  const command = outbox[outbox.length - 1]
+  if (!command) return { outbox: [...outbox], redo: [...redo] }
+  return {
+    outbox: outbox.slice(0, -1),
+    redo: [...redo, command],
+  }
+}
+
+export function redoOutbox(
+  outbox: readonly TCommand[],
+  redo: readonly TCommand[]
+): TOutboxState {
+  const command = redo[redo.length - 1]
+  if (!command) return { outbox: [...outbox], redo: [...redo] }
+  return {
+    outbox: [...outbox, command],
+    redo: redo.slice(0, -1),
+  }
 }
 
 export function replayOutbox(
   base: TDataStore,
-  outbox: readonly TCommand[],
-  outboxHead: number
+  outbox: readonly TCommand[]
 ): TDataStore {
-  return materializeOutbox(base, outbox, outboxHead).current
+  return materializeOutbox(base, outbox).current
 }
 
 export function getMaterializedOutboxPatches(
   base: TDataStore,
-  outbox: readonly TCommand[],
-  outboxHead: number
+  outbox: readonly TCommand[]
 ): TNormalizedPatch[] {
-  return materializeOutbox(base, outbox, outboxHead).patches
+  return materializeOutbox(base, outbox).patches
 }
 
 /**
@@ -75,11 +81,9 @@ export function getMaterializedOutboxPatches(
 export function buildOutboxTransport(
   base: TDataStore,
   outbox: readonly TCommand[],
-  outboxHead: number,
   sentAt: number
 ): TNormalizedPatch | undefined {
-  const commands = getPendingOutbox(outbox, outboxHead)
-  if (!commands.length) return undefined
+  if (!outbox.length) return undefined
 
   let current = base
   const touched = new Map<TDataEntityKey, Set<string | number>>()
@@ -88,7 +92,7 @@ export function buildOutboxTransport(
     Map<string | number, TDeletionObject>
   >()
 
-  commands.forEach(command => {
+  outbox.forEach(command => {
     const patch = materializePrimaryCommand(current, command, sentAt)
 
     patch.deletion?.forEach(item => {
@@ -133,8 +137,8 @@ export function buildOutboxTransport(
 /**
  * Advance `current` by one command without replaying from base. Callers
  * must hold the invariant that `current` already equals the replay of the
- * command prefix up to the current head; append then only needs this command's
- * effect. Undo, redo, and base changes still require a full `replayOutbox`.
+ * durable outbox; append then only needs this command's effect. Undo, redo,
+ * and base changes still require a full `replayOutbox`.
  */
 export function applyOutboxCommand(
   current: TDataStore,
@@ -145,13 +149,12 @@ export function applyOutboxCommand(
 
 function materializeOutbox(
   base: TDataStore,
-  outbox: readonly TCommand[],
-  outboxHead: number
+  outbox: readonly TCommand[]
 ): { current: TDataStore; patches: TNormalizedPatch[] } {
   let current = base
   const patches: TNormalizedPatch[] = []
 
-  getPendingOutbox(outbox, outboxHead).forEach(command => {
+  outbox.forEach(command => {
     const patch = materializeCommand(current, command)
     patches.push(patch)
     current = applyPatch(current, patch)

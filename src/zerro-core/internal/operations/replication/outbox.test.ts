@@ -9,9 +9,9 @@ import type { TCommand } from '../materialization'
 import {
   appendOutbox,
   buildOutboxTransport,
-  clampOutboxHead,
-  getPendingOutbox,
+  redoOutbox,
   replayOutbox,
+  undoOutbox,
 } from './outbox'
 
 function makeCommand(issuedAt: number, patch: TCommand['patch']): TCommand {
@@ -33,30 +33,29 @@ describe('outbox operations', () => {
     account: [makeAccount({ id: 'cash', title: 'Vault' })],
   })
 
-  it('clamps restored heads and lists only the command prefix', () => {
-    expect(clampOutboxHead(-1, 2)).toBe(0)
-    expect(clampOutboxHead(1, 2)).toBe(1)
-    expect(clampOutboxHead(3, 2)).toBe(2)
-    expect(getPendingOutbox([first, second], 1)).toEqual([first])
-    expect(getPendingOutbox([first, second], 10)).toEqual([first, second])
-  })
-
-  it('appends after the command prefix and drops the redo tail', () => {
-    expect(appendOutbox([first, second], 1, replacement)).toEqual({
-      outbox: [first, replacement],
-      outboxHead: 2,
+  it('moves commands between the durable outbox and session redo stack', () => {
+    const undone = undoOutbox([first, second], [])
+    expect(undone).toEqual({ outbox: [first], redo: [second] })
+    expect(redoOutbox(undone.outbox, undone.redo)).toEqual({
+      outbox: [first, second],
+      redo: [],
     })
   })
 
-  it('rematerializes only the command prefix through the clamped head', () => {
+  it('appends to the durable outbox and drops the redo stack', () => {
+    expect(appendOutbox([first], replacement)).toEqual({
+      outbox: [first, replacement],
+      redo: [],
+    })
+  })
+
+  it('rematerializes the durable outbox', () => {
     const base = makeStore({
       account: { cash: makeAccount({ id: 'cash', title: 'Cash' }) },
     })
 
-    expect(replayOutbox(base, [first, second], 1).account.cash.title).toBe(
-      'Wallet'
-    )
-    expect(replayOutbox(base, [first, second], 2).account.cash.title).toBe(
+    expect(replayOutbox(base, [first]).account.cash.title).toBe('Wallet')
+    expect(replayOutbox(base, [first, second]).account.cash.title).toBe(
       'Pocket'
     )
   })
@@ -77,7 +76,7 @@ describe('outbox operations', () => {
       makeCommand(20, { account: [{ id: 'cash', inBalance: true }] }),
     ]
 
-    expect(buildOutboxTransport(base, commands, commands.length, 100)).toEqual({
+    expect(buildOutboxTransport(base, commands, 100)).toEqual({
       account: [
         {
           ...base.account.cash,
@@ -103,7 +102,7 @@ describe('outbox operations', () => {
       }),
     ]
 
-    expect(buildOutboxTransport(base, commands, commands.length, 100)).toEqual({
+    expect(buildOutboxTransport(base, commands, 100)).toEqual({
       account: [
         expect.objectContaining({
           id: 'cash',
@@ -126,7 +125,7 @@ describe('outbox operations', () => {
       }),
     ]
 
-    expect(buildOutboxTransport(base, commands, commands.length, 100)).toEqual({
+    expect(buildOutboxTransport(base, commands, 100)).toEqual({
       deletion: [{ id: 'cash', object: 'account', stamp: 100, user: 1 }],
     })
   })

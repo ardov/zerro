@@ -10,10 +10,10 @@
 
 The behavioral migration is complete: production reads and writes go through the
 domain namespaces of `zerro-core/redux`; legacy model objects, generic patch
-APIs, and duplicate derived projections are gone; Redux owns
-`base + outbox + outboxHead` and persists command-only replay inputs; sync uses
-primary-only transport with whole-prefix acknowledgement. The persisted command
-shape is specified once in
+APIs, and duplicate derived projections are gone; Redux owns durable
+`base + outbox` plus a session-only `redo` stack and persists only the applied
+command outbox; sync uses primary-only transport with whole-prefix
+acknowledgement. The persisted command shape is specified once in
 [architecture.md](./architecture.md#commands).
 
 Reliable automated verification, ready bridge removal, and read-graph
@@ -52,18 +52,19 @@ Verify in one session:
 1. initial load;
 2. budget or goal edit;
 3. transaction edit;
-4. reload with pending outbox state (pending command outbox survives reload);
-5. undo/redo, repeated-field writes, and a command appended in flight;
+4. reload with pending outbox state (the undo stack survives and redo resets);
+5. undo/redo, logout history reset, repeated-field writes, and a command
+   appended in flight;
 6. explicit sync sends the final primary entities, clears only the captured
    prefix, and rebases pending commands on the canonical response;
 7. no console errors or lost local commands.
 
 Exit: the completion gate in [testing.md](./testing.md) is satisfied.
 
-Compatibility boundary: until the first rollout of this command schema, local
-outbox metadata is disposable and incompatible local metadata may be discarded.
-After rollout, persisted commands require backward compatibility or an explicit
-migration/product decision.
+Compatibility boundary: persisted replica V3 stores only the applied outbox.
+The V2 reader performs one explicit migration by retaining its applied prefix
+and dropping its redo tail. Future persisted command changes require backward
+compatibility or an explicit migration/product decision.
 
 ### 2. Materializer rules
 

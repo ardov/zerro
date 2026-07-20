@@ -7,7 +7,7 @@ import { setSyncData } from 'store/lastSync'
 import { formatDate } from '6-shared/helpers/date'
 import { AppThunk } from 'store'
 import { TLocalData } from '6-shared/types'
-import { sync } from 'worker'
+import { sync } from '6-shared/api/syncDiff'
 import {
   getPendingSyncTransport,
   applyServerPatch,
@@ -21,7 +21,7 @@ import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
 export const syncData = (): AppThunk => async (dispatch, getState) => {
   dispatch(prepareClientSync())
   const state = getState()
-  const sentOutboxCount = state.data.outboxHead
+  const sentOutboxCount = state.data.outbox.length
   const sentAt = Date.now()
   const diff: TNormalizedPatch = {
     ...(getPendingSyncTransport(state, sentAt) || {}),

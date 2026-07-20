@@ -5,9 +5,9 @@ import {
   type TCommand,
   type TPersistedReplica,
 } from 'zerro-core/replica'
+import { clearStorage, saveReplicaState } from '6-shared/api/localStore'
 import {
   appendClientCommand,
-  prepareClientSync,
   rebaseServerInbox,
   redoClientCommand,
   resetData,
@@ -20,7 +20,6 @@ type TReplicaStateSource = {
     current: TDataStore
     base: TDataStore
     outbox: TCommand[]
-    outboxHead: number
   }
 }
 
@@ -32,23 +31,24 @@ export function getPersistedReplica(
     version: replicaPersistenceVersion,
     baseServerTimestamp: state.data.base.serverTimestamp,
     outbox: [...outbox],
-    outboxHead: state.data.outboxHead,
   }
 }
 
 let saveQueue: Promise<unknown> = Promise.resolve()
+let persistenceGeneration = 0
 
 export const replicaPersistenceMiddleware: Middleware =
   api => next => action => {
     const result = next(action)
-    if (isReplicaMutation(action) && typeof Worker !== 'undefined') {
+    if (isReplicaMutation(action)) {
       const snapshot = getPersistedReplica(
         api.getState() as TReplicaStateSource
       )
+      const generation = persistenceGeneration
       saveQueue = saveQueue
         .catch(() => undefined)
         .then(async () => {
-          const { saveReplicaState } = await import('worker')
+          if (generation !== persistenceGeneration) return
           await saveReplicaState(snapshot)
         })
         .catch(error => console.error('Failed to persist Core replica', error))
@@ -56,10 +56,21 @@ export const replicaPersistenceMiddleware: Middleware =
     return result
   }
 
+/** Clears all browser data after every save from the previous login is done. */
+export function clearPersistedLocalData(): Promise<void> {
+  persistenceGeneration += 1
+  const clear = saveQueue
+    .catch(() => undefined)
+    .then(() => clearStorage())
+  saveQueue = clear.catch(error =>
+    console.error('Failed to clear local data', error)
+  )
+  return clear
+}
+
 function isReplicaMutation(action: unknown): boolean {
   return (
     appendClientCommand.match(action) ||
-    prepareClientSync.match(action) ||
     undoClientCommand.match(action) ||
     redoClientCommand.match(action) ||
     rebaseServerInbox.match(action) ||
