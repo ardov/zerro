@@ -2,7 +2,7 @@
   "compilerOptions": {
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
-    "baseUrl": "src",
+    "paths": { "*": ["./src/*"] },
     "target": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "skipLibCheck": true,
