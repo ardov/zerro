@@ -1,6 +1,11 @@
 import React, { FC, lazy, Suspense, useEffect, useState } from 'react'
-import { Router, Route, Redirect, Switch } from 'react-router-dom'
-import { createBrowserHistory } from 'history'
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from 'react-router-dom'
 import {
   Box,
   CircularProgress,
@@ -9,7 +14,11 @@ import {
   Theme,
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-import { initAnalytics, setAnalyticsUser } from '6-shared/analytics'
+import {
+  initAnalytics,
+  setAnalyticsUser,
+  trackPageView,
+} from '6-shared/analytics'
 import { PopoverManager } from '6-shared/historyPopovers'
 import { useAppSelector } from 'store'
 import { getLoginState } from 'store/token'
@@ -33,13 +42,7 @@ const Token = lazy(() => import('2-pages/Token'))
 const Stats = lazy(() => import('2-pages/Stats'))
 const Review = lazy(() => import('2-pages/Review'))
 
-const history = createBrowserHistory()
-
 export default function App() {
-  useEffect(() => {
-    return initAnalytics(history)
-  }, [])
-
   const isLoggedIn = useAppSelector(getLoginState)
   const hasData = useAppSelector(state => !!getLastSyncTime(state))
   const userId = core.users.useRootId()
@@ -48,31 +51,34 @@ export default function App() {
   }, [userId])
 
   const publicRoutes = [
-    <Route key="about" path="/about" component={About} />,
-    <Route key="about/*" path="/about/*" component={About} />,
-    <Route key="donation" path="/donation" component={Donation} />,
+    <Route key="about" path="/about/*" element={<About />} />,
+    <Route key="donation" path="/donation" element={<Donation />} />,
   ]
 
   const notLoggedIn = [
     ...publicRoutes,
-    <Route key="*" path="/*" component={Auth} />,
+    <Route key="*" path="*" element={<Auth />} />,
   ]
 
   const loggedInNoData = [
     ...publicRoutes,
-    <Route key="token" path="/token" component={Token} />,
-    <Route key="*" path="*" component={MainLoader} />,
+    <Route key="token" path="/token" element={<Token />} />,
+    <Route key="*" path="*" element={<MainLoader />} />,
   ]
 
   const loggedInWithData = [
     ...publicRoutes,
-    <Route key="token" path="/token" component={Token} />,
-    <Route key="transactions" path="/transactions" component={Transactions} />,
-    <Route key="review" path="/review" component={Review} />,
-    <Route key="accounts" path="/accounts" component={Accounts} />,
-    <Route key="budget" path="/budget" component={Budgets} />,
-    <Route key="stats" path="/stats" component={Stats} />,
-    <Route key="*" path="*" render={() => <Redirect to="/budget" />} />,
+    <Route key="token" path="/token" element={<Token />} />,
+    <Route
+      key="transactions"
+      path="/transactions"
+      element={<Transactions />}
+    />,
+    <Route key="review" path="/review" element={<Review />} />,
+    <Route key="accounts" path="/accounts" element={<Accounts />} />,
+    <Route key="budget" path="/budget" element={<Budgets />} />,
+    <Route key="stats" path="/stats" element={<Stats />} />,
+    <Route key="*" path="*" element={<Navigate to="/budget" replace />} />,
   ]
 
   const getRoutes = () => {
@@ -84,21 +90,33 @@ export default function App() {
   const routes = getRoutes()
 
   return (
-    <Router history={history}>
+    <BrowserRouter
+      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+    >
+      <AnalyticsNavigation />
       <PopoverManager>
         <RegularSyncHandler />
         {isLoggedIn && hasData && <HistoryShortcuts />}
         <Layout isLoggedIn={isLoggedIn}>
           <ErrorBoundary>
             <Suspense fallback={<FallbackLoader />}>
-              <Switch>{routes}</Switch>
+              <Routes>{routes}</Routes>
             </Suspense>
           </ErrorBoundary>
         </Layout>
         <GlobalWidgets />
       </PopoverManager>
-    </Router>
+    </BrowserRouter>
   )
+}
+
+function AnalyticsNavigation() {
+  const { pathname } = useLocation()
+
+  useEffect(() => initAnalytics(), [])
+  useEffect(() => trackPageView(pathname), [pathname])
+
+  return null
 }
 
 const Layout: FC<{

@@ -1,5 +1,5 @@
 import { FC } from 'react'
-import { useLocation, useHistory } from 'react-router'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   BottomNavigation,
@@ -22,7 +22,7 @@ const actionSx = { minWidth: 32 }
 export const MobileNavigation: FC = () => {
   const { t } = useTranslation('navigation')
   const path = useLocation().pathname
-  const history = useHistory()
+  const navigate = useNavigate()
   const openSettings = useSettingsMenu()
 
   const hasHomeBar = useHomeBar()
@@ -49,7 +49,7 @@ export const MobileNavigation: FC = () => {
       <BottomNavigation
         value={currentRoute?.path}
         onChange={(e, newValue) => {
-          if (newValue[0] === '/') history.push(newValue)
+          if (newValue[0] === '/') navigate(newValue)
         }}
       >
         {routes.map(route => (

@@ -1,39 +1,43 @@
 import type { ReactNode } from 'react'
 import { act, renderHook } from '@testing-library/react'
-import { createMemoryHistory } from 'history'
-import { Router } from 'react-router-dom'
+import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import { popoverStack } from './popoverStack'
 
 function makeHarness() {
-  const history = createMemoryHistory({
-    initialEntries: ['/accounts', '/budgets?month=2026-07#activity'],
-    initialIndex: 1,
-  })
-
   function Wrapper(props: { children: ReactNode }) {
-    return <Router history={history}>{props.children}</Router>
+    return (
+      <MemoryRouter
+        initialEntries={['/accounts', '/budgets?month=2026-07#activity']}
+        initialIndex={1}
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
+        {props.children}
+      </MemoryRouter>
+    )
   }
 
   const hook = renderHook(
     () => ({
       actions: popoverStack.useActions(),
       stack: popoverStack.usePopoverStack(),
+      location: useLocation(),
+      navigate: useNavigate(),
     }),
     { wrapper: Wrapper }
   )
 
-  return { history, hook }
+  return { hook }
 }
 
 describe('history-backed popover stack', () => {
   it('closes overlays with Back before leaving the current page', () => {
-    const { history, hook } = makeHarness()
+    const { hook } = makeHarness()
 
     act(() => hook.result.current.actions.open('drawer'))
     act(() => hook.result.current.actions.open('dialog'))
 
-    expect(history.location).toMatchObject({
+    expect(hook.result.current.location).toMatchObject({
       pathname: '/budgets',
       search: '?month=2026-07',
       hash: '#activity',
@@ -41,29 +45,29 @@ describe('history-backed popover stack', () => {
     })
     expect(hook.result.current.stack).toEqual(['drawer', 'dialog'])
 
-    act(() => history.goBack())
-    expect(history.location.pathname).toBe('/budgets')
+    act(() => hook.result.current.navigate(-1))
+    expect(hook.result.current.location.pathname).toBe('/budgets')
     expect(hook.result.current.stack).toEqual(['drawer'])
 
-    act(() => history.goBack())
-    expect(history.location.pathname).toBe('/budgets')
+    act(() => hook.result.current.navigate(-1))
+    expect(hook.result.current.location.pathname).toBe('/budgets')
     expect(hook.result.current.stack).toEqual([])
 
-    act(() => history.goBack())
-    expect(history.location.pathname).toBe('/accounts')
+    act(() => hook.result.current.navigate(-1))
+    expect(hook.result.current.location.pathname).toBe('/accounts')
   })
 
   it('has matching close and Forward history behavior', () => {
-    const { history, hook } = makeHarness()
+    const { hook } = makeHarness()
 
     act(() => hook.result.current.actions.open('dialog'))
     act(() => hook.result.current.actions.close('dialog'))
 
-    expect(history.location.pathname).toBe('/budgets')
+    expect(hook.result.current.location.pathname).toBe('/budgets')
     expect(hook.result.current.stack).toEqual([])
 
-    act(() => history.goForward())
-    expect(history.location.pathname).toBe('/budgets')
+    act(() => hook.result.current.navigate(1))
+    expect(hook.result.current.location.pathname).toBe('/budgets')
     expect(hook.result.current.stack).toEqual(['dialog'])
   })
 })

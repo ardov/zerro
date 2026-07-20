@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useState } from 'react'
-import { Link, useHistory } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   SaveAltIcon,
@@ -191,13 +191,13 @@ function LangItem(_props: ItemProps) {
 
 function NavItems({ onClose }: ItemProps) {
   const { t } = useTranslation('navigation')
-  const history = useHistory()
+  const navigate = useNavigate()
   const handleNav =
     (path: string): React.MouseEventHandler<HTMLAnchorElement> =>
     e => {
       e.preventDefault()
       onClose()
-      setTimeout(() => history.push(path), 10)
+      setTimeout(() => navigate(path), 10)
     }
   return (
     <>

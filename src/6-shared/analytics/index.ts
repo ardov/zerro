@@ -1,2 +1,7 @@
-export { initAnalytics, setAnalyticsUser, track } from './analytics'
+export {
+  initAnalytics,
+  setAnalyticsUser,
+  track,
+  trackPageView,
+} from './analytics'
 export type { AnalyticsEventMap, AnalyticsEventName } from './events'

@@ -52,7 +52,7 @@ ESLint 10 tracks JSX references, TypeScript checks JSX types, and the old plugin
 did not declare ESLint 10 support. New core diagnostics were fixed rather than
 suppressed.
 
-### 4. React Router 5 to 6
+### 4. React Router 5 to 6 — completed 2026-07-20
 
 First migrate only the existing declarative routing model. Replace `Switch`,
 `Redirect`, `useHistory`, and `useRouteMatch`, then remove the direct `history`
@@ -79,8 +79,13 @@ Before changing Router APIs, add regression coverage proving that:
 Automated coverage now pins the current history behavior, including same-URL
 state pushes, nested Back handling, explicit close, and Forward restoration. It
 also caught and fixed query/hash reordering in overlay history entries. The
-Router migration remains incomplete until the same contract passes after the
-API change and in a browser smoke test on a real dialog.
+Router 6 migration now uses `BrowserRouter`, `Routes`, `Navigate`, and the
+navigation/location hooks without an application-owned history object. The
+direct `history`, `react-router`, and legacy `@types` dependencies are gone.
+Analytics follows Router location changes, and the v7 compatibility flags are
+enabled ahead of the next major migration. The same overlay contract passes on
+Router 6; browser smoke confirmed that Back closes the real Settings overlay
+without leaving `/budget`, and the console remains clean.
 
 ### 5. React 19 — completed 2026-07-14
 

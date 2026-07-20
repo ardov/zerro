@@ -1,5 +1,5 @@
 import { toISODate } from '../../foundation/date'
-import type { ById, Modify, OptionalExceptFor } from '../../foundation/types'
+import type { Modify, OptionalExceptFor } from '../../foundation/types'
 import type { TCoreContext } from '../../../../types'
 import type { TAccountId } from './accounts'
 import type { TInstrumentId } from './instruments'

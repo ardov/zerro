@@ -1,6 +1,6 @@
-import type { Location } from 'history'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useHistory } from 'react-router-dom'
+import type { Location } from 'react-router-dom'
+import { useCallback, useMemo } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 /**
  * A set of hooks for managing a stack of popovers/dialogs in the history state.
@@ -22,26 +22,28 @@ function useActions(): {
   open: (key: TKey) => void
   close: (key: TKey) => void
 } {
-  const history = useHistory<TLocationState>()
+  const location = useLocation()
+  const navigate = useNavigate()
   return useMemo(
     () => ({
       open: (key: TKey) => {
         if (!key) return
-        const currStack = getStack(history.location)
+        const currStack = getStack(location)
         if (currStack.includes(key)) return // Do nothing if already visible
-        const { pathname, hash, search, state = {} } = history.location
+        const { pathname, hash, search } = location
+        const state = getState(location)
         const nextState = { ...state, dialogs: [...currStack, key] } // add key
-        history.push(pathname + search + hash, nextState)
+        navigate(pathname + search + hash, { state: nextState })
       },
       close: (key: TKey) => {
         if (!key) return
-        const stack = getStack(history.location)
+        const stack = getStack(location)
         const lastIndex = stack.indexOf(key)
         if (lastIndex === -1) return
-        history.go(lastIndex - stack.length)
+        navigate(lastIndex - stack.length)
       },
     }),
-    [history]
+    [location, navigate]
   )
 }
 
@@ -49,19 +51,7 @@ function useActions(): {
  * Returns the current stack of open dialogs.
  */
 export function usePopoverStack() {
-  const history = useHistory<TLocationState>()
-  const [stack, setStack] = useState(getStack(history.location))
-  // Update stack whenever location changes
-  useEffect(() => {
-    const unlisten = history.listen(location => {
-      const newStack = getStack(location)
-      setStack(prevStack =>
-        prevStack.toString() === newStack.toString() ? prevStack : newStack
-      )
-    })
-    return unlisten
-  }, [history])
-  return stack as TKey[]
+  return getStack(useLocation())
 }
 
 /**
@@ -80,20 +70,13 @@ export function usePopoverStack() {
  * )
  */
 function usePopoverState(key: TKey): [boolean, () => void, () => void] {
-  const history = useHistory<TLocationState>()
-  const [opened, setOpened] = useState(isOpen(key, history.location))
+  const location = useLocation()
   const { open, close } = useActions()
 
   const openPopover = useCallback(() => open(key), [key, open])
   const closePopover = useCallback(() => close(key), [key, close])
 
-  // Subscribe to history updates
-  useEffect(
-    () => history.listen(location => setOpened(isOpen(key, location))),
-    [history, key]
-  )
-
-  return [opened, openPopover, closePopover]
+  return [isOpen(key, location), openPopover, closePopover]
 }
 
 //
@@ -102,10 +85,16 @@ function usePopoverState(key: TKey): [boolean, () => void, () => void] {
 // =============================================================================
 //
 
-function isOpen(key: string, location: Location<TLocationState>) {
-  return Boolean(location?.state?.dialogs?.includes(key))
+function isOpen(key: string, location: Location) {
+  return getStack(location).includes(key)
 }
 
-function getStack(location: Location<TLocationState>) {
-  return location?.state?.dialogs || []
+function getStack(location: Location) {
+  return getState(location).dialogs || []
+}
+
+function getState(location: Location): TLocationState {
+  return typeof location.state === 'object' && location.state
+    ? (location.state as TLocationState)
+    : {}
 }

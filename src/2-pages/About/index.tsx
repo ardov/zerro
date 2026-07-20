@@ -1,6 +1,6 @@
 import type { MDXComponents } from 'mdx/types'
 
-import { Switch, Route } from 'react-router'
+import { Route, Routes } from 'react-router-dom'
 import { Box } from '@mui/material'
 import { Link } from 'react-router-dom'
 import { useAppTheme } from '6-shared/ui/theme'
@@ -61,11 +61,11 @@ export default function Main() {
           className="article"
           sx={{ width: '100%', maxWidth: 680, minWidth: 100 }}
         >
-          <Switch>
-            <Route path="/about/method" render={() => <Method />} />
-            <Route path="/about/quick-start" render={() => <QuickStart />} />
-            <Route path="/about" render={() => <About />} />
-          </Switch>
+          <Routes>
+            <Route path="method" element={<Method />} />
+            <Route path="quick-start" element={<QuickStart />} />
+            <Route index element={<About />} />
+          </Routes>
         </Box>
       </Box>
     </Box>

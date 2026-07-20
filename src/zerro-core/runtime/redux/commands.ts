@@ -1,6 +1,5 @@
 import type { AppThunk, RootState } from 'store'
 import { v1 as uuidv1 } from 'uuid'
-import type { TNormalizedPatch } from '../../types'
 import {
   compileBulkEditTransactions,
   compileCombineToIncome,

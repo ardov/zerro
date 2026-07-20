@@ -1,14 +1,6 @@
-import { FC, useState } from 'react'
+import { useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
-import {
-  Box,
-  Button,
-  Fade,
-  Stack,
-  ButtonOwnProps,
-  Typography,
-  ButtonBase,
-} from '@mui/material'
+import { Box, Button, Fade, Stack, Typography, ButtonBase } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 import { zenmoney } from '6-shared/api/zenmoney'
@@ -111,9 +103,15 @@ export default function Auth() {
 
         <Fade in timeout={3000}>
           <Box sx={{ mt: 2 }}>
-            <RouterLink to="/about" component={SecondaryLink}>
+            <Button
+              component={RouterLink}
+              to="/about"
+              variant="text"
+              color="primary"
+              size="large"
+            >
               {t('btnAbout')}
-            </RouterLink>
+            </Button>
             <Button
               variant="text"
               color="primary"
@@ -128,8 +126,3 @@ export default function Auth() {
     </Stack>
   )
 }
-
-const SecondaryLink: FC<ButtonOwnProps & { navigate: any }> = ({
-  navigate,
-  ...props
-}) => <Button variant="text" color="primary" size="large" {...props} />

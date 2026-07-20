@@ -1,4 +1,3 @@
-import type { History } from 'history'
 import { appVersion, gaid, isProduction } from '6-shared/config'
 import type { AnalyticsEventMap, AnalyticsEventName } from './events'
 
@@ -17,8 +16,8 @@ declare global {
 
 let tagInitialized = false
 
-export function initAnalytics(history: History): () => void {
-  if (!isProduction || !gaid) return () => undefined
+export function initAnalytics(): void {
+  if (!isProduction || !gaid) return
 
   if (!tagInitialized) {
     tagInitialized = true
@@ -34,9 +33,11 @@ export function initAnalytics(history: History): () => void {
     window.gtag('config', gaid, { send_page_view: false })
     window.gtag('set', { app_version: appVersion })
   }
+}
 
-  pageView(history.location.pathname)
-  return history.listen(location => pageView(location.pathname))
+export function trackPageView(pathname: string): void {
+  if (!isProduction || !gaid) return
+  pageView(pathname)
 }
 
 export function track<K extends AnalyticsEventName>(

@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { useRouteMatch } from 'react-router-dom'
+import { useMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import RefreshButton from '3-widgets/RefreshButton'
 import { MenuButton } from './MenuButton'
@@ -160,7 +160,7 @@ const NavigationLink: FC<{
   text: React.ReactNode
   path: string
 }> = ({ icon, text, path }) => {
-  const match = useRouteMatch(path)
+  const match = useMatch({ path, end: false })
   return (
     <ListItemButton
       sx={{ borderRadius: 1 }}
