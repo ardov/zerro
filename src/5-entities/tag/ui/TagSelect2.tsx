@@ -21,7 +21,7 @@ import {
 import { AddIcon } from '6-shared/ui/Icons'
 import { TagIcon } from '6-shared/ui/TagIcon'
 import { useTranslation } from 'react-i18next'
-import { nullTag } from '../model/makeTag'
+import { core } from 'zerro-core/redux'
 
 type TagType = 'income' | 'outcome' | undefined | null
 type TagNode = TagTreeNode | TTagPopulated
@@ -260,7 +260,7 @@ const makeTagChecker = (props: {
   return function (tag: TagNode) {
     // never show excluded tags
     if (exclude?.includes(tag.id)) return false
-    if (!showNull && tag.id === nullTag.id) return false
+    if (!showNull && tag.id === core.tags.nullTag.id) return false
     if (search) return checkSearch(tag, search)
     if (tagType === 'income') return !!tag.showIncome
     if (tagType === 'outcome') return !!tag.showOutcome

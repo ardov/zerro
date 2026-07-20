@@ -1,21 +1,14 @@
 import type { Modify } from '6-shared/types'
-import { getUserSettings } from '../../userSettings/userSettings'
-import type { TTagPopulated } from './populateTags'
 import { createSelector } from '@reduxjs/toolkit'
-import { RootState } from 'store'
-import { populateTags } from './populateTags'
+import { core } from 'zerro-core/redux'
 
-// SELECTORS
-export const getTags = (state: RootState) => state.data.current.tag
-export const getPopulatedTags = createSelector(
-  [getTags, getUserSettings],
-  populateTags
-)
+export type TTagPopulated = core.tags.TTagPopulated
+export const getPopulatedTags = core.tags.selectPopulated
 
 // TODO below are deprecated methods
 
 export type TagTreeNode = Modify<TTagPopulated, { children: TTagPopulated[] }>
-export const getTagsTree = createSelector([getPopulatedTags], tags => {
+export const getTagsTree = createSelector([core.tags.selectPopulated], tags => {
   const result = []
   for (const id in tags) {
     if (tags[id].parent) continue
