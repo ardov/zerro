@@ -17,15 +17,15 @@ class ErrorBoundary extends React.Component<
   ErrorBoundaryProps,
   ErrorBoundaryState
 > {
-  state = { hasError: false, message: '' }
+  override state = { hasError: false, message: '' }
   static getDerivedStateFromError = (error: Error) => ({
     hasError: true,
     message: error.message,
   })
-  componentDidCatch = (error: Error, errorInfo: React.ErrorInfo) => {
+  override componentDidCatch = (error: Error, errorInfo: React.ErrorInfo) => {
     captureError(error, errorInfo)
   }
-  render() {
+  override render() {
     return this.state.hasError ? (
       <ErrorMessage message={this.state.message} onLogOut={this.props.logOut} />
     ) : (

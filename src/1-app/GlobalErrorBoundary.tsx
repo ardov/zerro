@@ -7,11 +7,11 @@ import { useTranslation } from 'react-i18next'
 export default class GlobalErrorBoundary extends React.Component<{
   children: React.ReactNode
 }> {
-  state = { hasError: false }
+  override state = { hasError: false }
 
   static getDerivedStateFromError = (_error: any) => ({ hasError: true })
 
-  componentDidCatch = (error: Error, errorInfo: React.ErrorInfo) => {
+  override componentDidCatch = (error: Error, errorInfo: React.ErrorInfo) => {
     // Automatically reload the page if a chunk fails to load
     // This usually happens after a new deployment
     if (
@@ -30,7 +30,7 @@ export default class GlobalErrorBoundary extends React.Component<{
     captureError(error, errorInfo)
   }
 
-  render() {
+  override render() {
     return this.state.hasError ? <ErrorFallback /> : this.props.children
   }
 }
