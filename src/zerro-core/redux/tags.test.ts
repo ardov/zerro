@@ -2,7 +2,9 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { i18n } from '6-shared/localization'
 import { makeDemoStore } from '../demo'
 import { makeTestRootState } from '../testing/rootState'
+import { makeTag } from '../testing/zenmoneyTestData'
 import { selectPopulatedTags } from '../testing/reduxSelectors'
+import { populateTags } from './tags'
 
 const NOW = Date.parse('2026-05-15T12:00:00Z')
 
@@ -32,6 +34,36 @@ describe('Core tag presentation adapter', () => {
       colorDisplay: expect.any(String),
       colorGenerated: expect.any(String),
       symbol: expect.any(String),
+    })
+  })
+
+  it('owns display names, duplicate labels, colors, and the tag tree', () => {
+    const tags = populateTags(
+      {
+        parent: makeTag({
+          id: 'parent',
+          title: '🍔 Food',
+          color: 0xff8800,
+        }),
+        child: makeTag({
+          id: 'child',
+          title: '🍔 Food',
+          parent: 'parent',
+        }),
+      },
+      { emojiIcons: true }
+    )
+
+    expect(tags.parent).toMatchObject({
+      name: 'Food',
+      uniqueName: 'Food',
+      children: ['child'],
+      colorHEX: '#ff8800',
+    })
+    expect(tags.child).toMatchObject({
+      name: 'Food',
+      uniqueName: 'Food / Food',
+      children: [],
     })
   })
 

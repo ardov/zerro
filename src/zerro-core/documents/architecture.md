@@ -314,7 +314,7 @@ flowchart LR
     debtAccountId
     instrumentCodeById
     transactionsHistory
-    tagStructure
+    tags
     inBudgetAccountIds
   end
 
@@ -356,7 +356,7 @@ flowchart LR
   transactionsHistory --> debtors
   debtAccountId --> debtors
   debtors --> envelopesCompiled
-  tagStructure --> envelopesCompiled
+  tags --> envelopesCompiled
   envelopeMeta --> envelopesCompiled
   envelopesCompiled --> envelopes
   envelopesCompiled --> envelopeStructure

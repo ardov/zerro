@@ -40,8 +40,8 @@
   boundary.
 - Query clauses compose with AND; multiple values inside one clause compose
   with OR. Compile sets and envelope scope once, outside the transaction loop.
-- Localization, generated colors, icons, and asset URLs remain outside domain
-  Core.
+- Display names, duplicate-name labels, tag child lists, formatted/generated
+  colors, icons, localization, and asset URLs remain outside domain Core.
 
 ### Commands and materialization
 

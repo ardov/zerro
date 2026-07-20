@@ -1,5 +1,4 @@
 export * from './commands'
 export * from './factory'
-export * from './project'
 export * from './read'
 export * from './types'

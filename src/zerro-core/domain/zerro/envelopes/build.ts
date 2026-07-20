@@ -1,7 +1,8 @@
 import type { ById } from '../../shared/types'
 import type { TAccount } from '../../zenmoney/accounts/types'
 import type { TFxCode } from '../../zenmoney/instruments/types'
-import type { TTagId, TTagStructure } from '../../zenmoney/tags'
+import { int2hex } from '../../zenmoney/colors'
+import type { TTag, TTagId } from '../../zenmoney/tags'
 import { keys } from '../../shared/keys'
 import type { TDebtor } from '../../zenmoney'
 import { EnvType, envId, TEnvelopeId } from '../envelope-id'
@@ -18,8 +19,8 @@ export type TDefaultEnvelopeGroupId =
   (typeof defaultEnvelopeGroupIds)[keyof typeof defaultEnvelopeGroupIds]
 
 export type TEnvelopeTag = Pick<
-  TTagStructure,
-  'id' | 'title' | 'name' | 'parent' | 'showOutcome' | 'colorHex'
+  TTag,
+  'id' | 'title' | 'parent' | 'showOutcome' | 'color'
 >
 
 export const uncategorizedTagId = 'null' as TTagId
@@ -28,8 +29,7 @@ export const uncategorizedEnvelopeName = 'No category'
 const uncategorizedEnvelopeTag: TEnvelopeTag = {
   id: uncategorizedTagId,
   title: uncategorizedEnvelopeName,
-  name: uncategorizedEnvelopeName,
-  colorHex: null,
+  color: null,
   showOutcome: false,
   parent: null,
 }
@@ -148,9 +148,9 @@ function makeEnvelopeFromTag(
     id,
     type: EnvType.Tag,
     entityId: tag.id,
-    name: tag.name || tag.title,
+    name: tag.title,
     originalName: tag.title,
-    colorHex: tag.colorHex,
+    colorHex: int2hex(tag.color),
     visibility: getVisibility(meta?.visibility, tag.showOutcome),
     parent: tag.parent ? envId.get(EnvType.Tag, tag.parent) : null,
     children: [],

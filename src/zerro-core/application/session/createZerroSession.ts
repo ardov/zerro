@@ -4,7 +4,6 @@ import {
   buildBalances,
   buildBalancesByDate,
   buildDebtors,
-  buildTagStructure,
   getDebtAccountId,
   getHistoryStart,
   getInstCodeMap,
@@ -59,7 +58,6 @@ export function createZerroSession(
   const debtAccountId = memo(() => getDebtAccountId(data))
   const instrumentCodeById = memo(() => getInstCodeMap(data))
   const transactionsHistory = memo(() => getTransactionsHistory(data))
-  const tagStructure = memo(() => buildTagStructure({ tags: data.tag }))
   const currentFxRates = memo(() =>
     buildCurrentFxRates({
       instruments: data.instrument,
@@ -90,7 +88,7 @@ export function createZerroSession(
   const envelopesCompiled = memo(() =>
     buildEnvelopes({
       debtors: debtors(),
-      tags: tagStructure(),
+      tags: data.tag,
       savingAccounts: getZerroSavingAccounts(data),
       envelopeMeta: envelopeMeta(),
       userCurrency: getUserCurrency(data),

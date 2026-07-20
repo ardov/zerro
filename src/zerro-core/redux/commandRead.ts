@@ -1,7 +1,6 @@
 import { i18n } from '6-shared/localization'
 import type { RootState } from 'store'
 import { createZerroSession } from '../application/session'
-import { buildTagStructure } from '../domain/zenmoney'
 import { buildFxRatesGetter, getUserSettings } from '../domain/zerro'
 import { presentEnvelopes, type TEnvelopeLabels } from './envelopePresentation'
 import { presentTags } from './tagPresentation'
@@ -15,10 +14,7 @@ export function getCommandDomainEnvelopes(state: RootState) {
 export function getCommandPresentedEnvelopes(state: RootState) {
   const data = state.data.current
   const domain = getCommandDomainEnvelopes(state)
-  const tags = presentTags(
-    buildTagStructure({ tags: data.tag }),
-    getUserSettings(data)
-  )
+  const tags = presentTags(data.tag, getUserSettings(data))
   return presentEnvelopes(domain, tags, getCommandEnvelopeLabels()).byId
 }
 

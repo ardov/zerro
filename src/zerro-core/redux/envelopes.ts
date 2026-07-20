@@ -17,7 +17,11 @@ import {
 } from '../domain/zerro'
 import * as debtors from './debtors'
 import { presentEnvelopes, type TEnvelopeLabels } from './envelopePresentation'
-import { selectAccountSlice, selectReminderSlice } from './state'
+import {
+  selectAccountSlice,
+  selectReminderSlice,
+  selectTagSlice,
+} from './state'
 import * as tags from './tags'
 import * as users from './users'
 
@@ -27,7 +31,7 @@ const selectEnvelopeMeta = createSelector([selectReminderSlice], reminder =>
 const selectDomainProjection = createSelector(
   [
     debtors.selectAll,
-    tags.selectStructure,
+    selectTagSlice,
     selectAccountSlice,
     selectEnvelopeMeta,
     users.selectCurrency,

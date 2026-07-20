@@ -19,17 +19,15 @@ describe('buildEnvelopes', () => {
     const result = buildEnvelopes({
       userCurrency: 'USD',
       tags: {
-        null: tag({ id: 'null', title: 'No category', name: 'No category' }),
+        null: tag({ id: 'null', title: 'No category' }),
         food: tag({
           id: 'food',
           title: 'Food',
-          name: 'Food',
           showOutcome: true,
         }),
         cafes: tag({
           id: 'cafes',
           title: 'Cafes',
-          name: 'Cafes',
           parent: 'food',
         }),
       },
@@ -109,6 +107,25 @@ describe('buildEnvelopes', () => {
     expect(result.byId[payeeId].group).toBe(defaultEnvelopeGroupIds.payees)
   })
 
+  it('keeps raw tag titles in the domain projection', () => {
+    const tagId = envId.get(EnvType.Tag, 'food')
+    const result = buildEnvelopes({
+      userCurrency: 'USD',
+      tags: {
+        food: tag({ id: 'food', title: '🍔 Food', color: 0xff8800 }),
+      },
+      savingAccounts: [],
+      envelopeMeta: {},
+      debtors: {},
+    })
+
+    expect(result.byId[tagId]).toMatchObject({
+      name: '🍔 Food',
+      originalName: '🍔 Food',
+      colorHex: '#ff8800',
+    })
+  })
+
   it('creates the uncategorized envelope without adapter-provided null tag', () => {
     const nullTagId = envId.get(EnvType.Tag, null)
 
@@ -141,12 +158,12 @@ describe('buildEnvelopes', () => {
 })
 
 function tag(
-  patch: Partial<TEnvelopeTag> & { id: string; title: string; name: string }
+  patch: Partial<TEnvelopeTag> & { id: string; title: string }
 ): TEnvelopeTag {
   return {
     parent: null,
     showOutcome: false,
-    colorHex: null,
+    color: null,
     ...patch,
   }
 }
