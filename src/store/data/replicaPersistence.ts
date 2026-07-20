@@ -59,9 +59,7 @@ export const replicaPersistenceMiddleware: Middleware =
 /** Clears all browser data after every save from the previous login is done. */
 export function clearPersistedLocalData(): Promise<void> {
   persistenceGeneration += 1
-  const clear = saveQueue
-    .catch(() => undefined)
-    .then(() => clearStorage())
+  const clear = saveQueue.catch(() => undefined).then(() => clearStorage())
   saveQueue = clear.catch(error =>
     console.error('Failed to clear local data', error)
   )

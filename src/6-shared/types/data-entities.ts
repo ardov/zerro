@@ -46,7 +46,11 @@ export type {
   TZmAccount,
 } from 'zerro-core/internal/domain/zenmoney'
 export type { TTag, TTagId, TZmTag } from 'zerro-core/internal/domain/zenmoney'
-export type { TBudget, TBudgetId, TZmBudget } from 'zerro-core/internal/domain/zenmoney'
+export type {
+  TBudget,
+  TBudgetId,
+  TZmBudget,
+} from 'zerro-core/internal/domain/zenmoney'
 export { globalBudgetTagId } from 'zerro-core/internal/domain/zenmoney'
 export type {
   TReminder,

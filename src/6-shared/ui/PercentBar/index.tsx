@@ -36,33 +36,51 @@ export const PercentBar: FC<PercentBarProps> = ({
 
   return (
     <Box
-      display="flex"
-      width="100%"
-      height={height}
-      borderRadius="6px"
-      overflow="hidden"
       {...rest}
+      sx={[
+        {
+          display: 'flex',
+          width: '100%',
+          height: height,
+          borderRadius: '6px',
+          overflow: 'hidden',
+        },
+        ...(Array.isArray(rest.sx) ? rest.sx : [rest.sx]),
+      ]}
     >
       {displayData.map((bar, i) => (
         <Tooltip title={bar.name} key={bar.id}>
           <Box
-            flexBasis={(Math.abs(bar.amount) * 100) / totalSum + '%'}
-            minWidth={'2px'}
-            pl={i === 0 ? 0 : '1px'}
+            sx={{
+              flexBasis: (Math.abs(bar.amount) * 100) / totalSum + '%',
+              minWidth: '2px',
+              pl: i === 0 ? 0 : '1px',
+            }}
           >
-            <Box bgcolor={bar.color} height="100%" />
+            <Box
+              sx={{
+                bgcolor: bar.color,
+                height: '100%',
+              }}
+            />
           </Box>
         </Tooltip>
       ))}
-
       {!showAll && hiddenSum > 0 && (
         <Tooltip title={t('otherCategories')}>
           <Box
-            flexBasis={(hiddenSum * 100) / totalSum + '%'}
-            minWidth={'2px'}
-            pl={'1px'}
+            sx={{
+              flexBasis: (hiddenSum * 100) / totalSum + '%',
+              minWidth: '2px',
+              pl: '1px',
+            }}
           >
-            <Box bgcolor={'#333333'} height="100%" />
+            <Box
+              sx={{
+                bgcolor: '#333333',
+                height: '100%',
+              }}
+            />
           </Box>
         </Tooltip>
       )}

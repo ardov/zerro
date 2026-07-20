@@ -314,7 +314,12 @@ function FilterEditor(props: {
       )
     case 'amount':
       return (
-        <Stack direction="row" gap={1}>
+        <Stack
+          direction="row"
+          sx={{
+            gap: 1,
+          }}
+        >
           <TextField
             autoFocus
             type="number"

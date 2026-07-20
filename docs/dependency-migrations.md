@@ -99,11 +99,18 @@ element cloning. `react-helmet` was replaced by the React 19-compatible
 `react-helmet-async` provider. The history-backed overlay contract passes on
 React 19.
 
-### 6. Material UI 9 and MUI X 9
+### 6. Material UI 9 and MUI X 9 — completed 2026-07-20
 
 Upgrade Material UI, icons, system, and date pickers together. Run supported
 codemods in small groups and manually verify dialogs, menus, popovers, tabs,
 theme overrides, and date localization.
+
+Result: Material UI, icons, system, and X date pickers now use their current
+9.x releases. The official system-props codemod moved removed layout props to
+`sx`; wrapper seams and Tooltip's removed `PopperProps` API were migrated
+manually. TypeScript, tests, production build, and package check pass. Browser
+smoke covers history-backed Settings menu closing, transaction preview, and the
+localized date picker calendar with a clean console.
 
 ### 7. React Router 6 to 7 to 8
 

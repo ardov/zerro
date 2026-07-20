@@ -76,7 +76,13 @@ export function WidgetCashflow(props: WidgetCashflowProps) {
           </span>{' '}
           <Summary income={income} outcome={outcome} />
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+        <Typography
+          variant="body1"
+          sx={{
+            color: 'text.secondary',
+            mt: 1,
+          }}
+        >
           {t(savingsRate >= 0 ? 'savingsRatePositive' : 'savingsRateNegative', {
             percent: formatSavingsRate(savingsRate),
           })}
@@ -209,7 +215,11 @@ function Summary(props: { income: number; outcome: number }) {
   const netIncome = income - outcome
 
   const tooltip = (
-    <Box p={1}>
+    <Box
+      sx={{
+        p: 1,
+      }}
+    >
       <Typography variant="body2" gutterBottom>
         {t('income')}: <DisplayAmount value={income} />
       </Typography>

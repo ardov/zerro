@@ -74,7 +74,7 @@ export const NameCell: FC<{
         <TagIcon
           symbol={isSelf ? '–' : symbol}
           color={isSelf ? null : colorHex}
-          mr={1.5}
+          sx={{ mr: 1.5 }}
         />
         <Typography
           component="span"

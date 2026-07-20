@@ -118,7 +118,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
                 />
               }
               placement="top"
-              PopperProps={{ disablePortal: true }}
+              slotProps={{ popper: { disablePortal: true } }}
             >
               <Typography
                 variant="body2"
@@ -153,7 +153,7 @@ export const Amounts: FC<TrElementProps> = ({ tr, trType, ...rest }) => {
                 />
               }
               placement="top"
-              PopperProps={{ disablePortal: true }}
+              slotProps={{ popper: { disablePortal: true } }}
             >
               <Typography
                 variant="body2"

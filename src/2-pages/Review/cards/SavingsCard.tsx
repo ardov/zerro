@@ -27,7 +27,12 @@ export function SavingsCard({ year }: TCardProps) {
 
   return (
     <Card>
-      <Stack spacing={1} alignItems="center">
+      <Stack
+        spacing={1}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <Typography variant="body1" align="center">
           {t('youSaved')}
         </Typography>
@@ -39,7 +44,11 @@ export function SavingsCard({ year }: TCardProps) {
           <DisplayAmount value={savings} noShade decimals="ifOnly" />
         </Typography>
 
-        <Box mt={2}>
+        <Box
+          sx={{
+            mt: 2,
+          }}
+        >
           <Typography variant="body1" align="center">
             {t('savingsPercent', { percent: savingsPercent }) +
               ' ' +
@@ -47,7 +56,13 @@ export function SavingsCard({ year }: TCardProps) {
           </Typography>
 
           {monthsOfSavings > 0 && (
-            <Typography variant="body1" align="center" mt={1}>
+            <Typography
+              variant="body1"
+              align="center"
+              sx={{
+                mt: 1,
+              }}
+            >
               {t('savingsMonths', { months: monthsOfSavings })}
             </Typography>
           )}

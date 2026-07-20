@@ -42,10 +42,21 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
   const { currency } = envMetrics
 
   return (
-    <Box position="relative">
+    <Box
+      sx={{
+        position: 'relative',
+      }}
+    >
       <Header envelope={env} onClose={onClose} />
-
-      <Grid container spacing={2} px={3} pb={5} pt={3}>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          px: 3,
+          pb: 5,
+          pt: 3,
+        }}
+      >
         <Grid size={12}>
           <CommentWidget key={id} id={id} />
         </Grid>
@@ -63,9 +74,11 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
             <EmojiFlagsIcon />
             <Typography
               variant="body1"
-              textAlign="left"
               component="span"
               color={goalInfo ? 'text.primary' : 'text.disabled'}
+              sx={{
+                textAlign: 'left',
+              }}
             >
               {goalInfo
                 ? core.goals.formatGoal(goalInfo.goal, currency)
@@ -112,21 +125,29 @@ const Header: FC<{
   const openColorPicker = useColorPicker(color, handleColorChange)
   return (
     <Box
-      py={1}
-      px={3}
-      display="flex"
-      alignItems="center"
-      position="sticky"
-      bgcolor="background.paper"
-      zIndex={5}
-      top={0}
+      sx={{
+        py: 1,
+        px: 3,
+        display: 'flex',
+        alignItems: 'center',
+        position: 'sticky',
+        bgcolor: 'background.paper',
+        zIndex: 5,
+        top: 0,
+      }}
     >
-      <Box flexGrow={1} display="flex" minWidth={0} alignItems="center">
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          minWidth: 0,
+          alignItems: 'center',
+        }}
+      >
         <TagIcon
           size="m"
           symbol={symbol}
-          mr={2}
-          flexShrink={0}
+          sx={{ mr: 2, flexShrink: 0 }}
           color={color}
           onClick={openColorPicker}
           button
@@ -135,7 +156,6 @@ const Header: FC<{
           {name}
         </Typography>
       </Box>
-
       <Tooltip title={t('edit')}>
         <IconButton
           onClick={() => openEditDialog({ envelope }, { key: envelope.id })}

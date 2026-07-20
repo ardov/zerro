@@ -21,7 +21,7 @@ function getTagLabel(tag?: core.tags.TTagPopulated): ReactNode {
   if (tag.icon)
     return (
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <TagIcon symbol={tag.symbol} ml={-1.5} mr={0.5} />
+        <TagIcon symbol={tag.symbol} sx={{ ml: -1.5, mr: 0.5 }} />
         {tag.name}
       </Box>
     )

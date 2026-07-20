@@ -154,8 +154,10 @@ const Subheader: FC<SubheaderProps> = memo(({ name, amount, onClick }) => {
 
         <Box
           component="span"
-          sx={{ ml: 2 }}
-          color={isNegative ? 'error.main' : 'text.secondary'}
+          sx={{
+            color: isNegative ? 'error.main' : 'text.secondary',
+            ml: 2,
+          }}
         >
           <b>
             <DisplayAmount

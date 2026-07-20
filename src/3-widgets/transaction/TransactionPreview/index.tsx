@@ -50,7 +50,13 @@ export const TrEmptyState = () => {
         p: 3,
       }}
     >
-      <Typography variant="body2" align="center" color="inherit">
+      <Typography
+        variant="body2"
+        align="center"
+        sx={{
+          color: 'inherit',
+        }}
+      >
         {t('fullEmptyState')}
       </Typography>
     </Box>
@@ -208,9 +214,7 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
           tags={localTag}
           onChange={setLocalTag}
           tagType={trType}
-          px={3}
-          py={2}
-          bgcolor="background.default"
+          sx={{ px: 3, py: 2, bgcolor: 'background.default' }}
         />
       )}
       <Stack

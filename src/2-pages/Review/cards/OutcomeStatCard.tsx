@@ -72,7 +72,13 @@ export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
 
   return (
     <Card>
-      <Stack gap={1} mt={1} width="80%">
+      <Stack
+        sx={{
+          gap: 1,
+          mt: 1,
+          width: '80%',
+        }}
+      >
         <DataLine
           name={t('yearlyExpenses')}
           amount={totalAmount}
@@ -83,7 +89,7 @@ export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
         />
 
         {!!totalAmount && (
-          <PercentBar data={nodes} visibleData={visibleNodes} mt={1} />
+          <PercentBar data={nodes} visibleData={visibleNodes} sx={{ mt: 1 }} />
         )}
 
         <CategoryList
@@ -92,7 +98,14 @@ export function OutcomeStatCard({ year, onShowTransactions }: TCardProps) {
           onShowTransactions={handleShowTransactions}
         />
 
-        <Box display="flex" justifyContent="center" gap={2} mt={1}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 2,
+            mt: 1,
+          }}
+        >
           <Tooltip title={t('combineIntoParentCategories')}>
             <Button
               onClick={() => setShowParentOnly(!showParentOnly)}
@@ -256,7 +269,12 @@ const CategoryList: FC<CategoryListProps> = ({
   onShowTransactions,
 }) => {
   return (
-    <Stack gap={1.5} mt={2}>
+    <Stack
+      sx={{
+        gap: 1.5,
+        mt: 2,
+      }}
+    >
       {visibleNodes.map(point => (
         <DataLine
           key={point.id}

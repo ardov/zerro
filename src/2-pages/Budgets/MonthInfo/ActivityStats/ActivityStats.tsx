@@ -137,7 +137,9 @@ function StatWidget(props: {
 
         <DataLine name={name} amount={totalAmount} currency={currency} />
 
-        {showBar && !!totalAmount && <PercentBar data={nodes} mt={1.5} />}
+        {showBar && !!totalAmount && (
+          <PercentBar data={nodes} sx={{ mt: 1.5 }} />
+        )}
 
         <Collapse in={opened} unmountOnExit>
           <Stack

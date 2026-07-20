@@ -126,7 +126,13 @@ export function WidgetNetWorth(props: WidgetNetWorthProps) {
           </span>
         </Typography>
 
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+        <Typography
+          variant="body1"
+          sx={{
+            color: 'text.secondary',
+            mt: 1,
+          }}
+        >
           <SurviveFact />
         </Typography>
       </Box>
@@ -231,7 +237,11 @@ function SurviveFact() {
   if (fundedMonths <= 0) return null
 
   const tooltipContent = (
-    <Box p={1}>
+    <Box
+      sx={{
+        p: 1,
+      }}
+    >
       <Typography variant="body2" gutterBottom>
         {t('netWorth.tooltipCurrentBalance')}:{' '}
         <DisplayAmount value={currentBalance} />

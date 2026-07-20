@@ -271,9 +271,11 @@ const RevealCellContent: FC<{
   <>
     <Typography
       variant="caption"
-      color="text.secondary"
       noWrap
-      sx={{ lineHeight: 1.2 }}
+      sx={{
+        color: 'text.secondary',
+        lineHeight: 1.2,
+      }}
     >
       {label}
     </Typography>

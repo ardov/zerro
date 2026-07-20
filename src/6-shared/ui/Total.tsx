@@ -28,8 +28,10 @@ export function Total({
       <Typography
         align={align}
         variant="body2"
-        color="text.secondary"
         children={title}
+        sx={{
+          color: 'text.secondary',
+        }}
       />
       <Typography
         align={align}
