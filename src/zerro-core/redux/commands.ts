@@ -2,7 +2,6 @@ import type { AppThunk, RootState } from 'store'
 import { v1 as uuidv1 } from 'uuid'
 import type { TISOMonth } from '../domain/zenmoney/primitives'
 import {
-  isCompiled,
   type TCompiled,
   type TCoreContext,
   type TIntentPatch,
@@ -61,261 +60,55 @@ import {
   getCommandFxRates,
   getCommandPresentedEnvelopes,
 } from './commandRead'
-import { executeReduxCommand, executeReduxPatch } from './executeCommand'
+import {
+  executeReduxCommand,
+  executeReduxPatch,
+  type TReduxCommandCompiler,
+} from './executeCommand'
 
 export type { TBudgetUpdate } from '../domain/zerro'
 
-/**
- * App-level semantic inputs. The execution funnel converts every command to
- * the same persisted sparse patch shape.
- */
-export type TAppCommand =
-  | { type: 'zerro.budget.set'; payload: TBudgetUpdate[] }
-  | {
-      type: 'zerro.fxRates.edit'
-      payload: { month: TISOMonth; patch: TFxRates }
-    }
-  | { type: 'zerro.fxRates.reset'; payload: { month: TISOMonth } }
-  | { type: 'zerro.userSettings.emojiIcons.set'; payload: { enabled: boolean } }
-  | {
-      type: 'zerro.userSettings.preferZmBudgets.set'
-      payload: { enabled: boolean }
-    }
-  | {
-      type: 'zerro.goal.set'
-      payload: { month: TISOMonth; id: TEnvelopeId; goal: TGoal | null }
-    }
-  | { type: 'zerro.envelope.rename'; payload: TRenameEnvelopeInput }
-  | { type: 'zerro.envelope.color.set'; payload: TSetEnvelopeColorInput }
-  | { type: 'zerro.envelope.comment.set'; payload: TSetEnvelopeCommentInput }
-  | {
-      type: 'zerro.envelope.settings.update'
-      payload: TUpdateEnvelopeSettingsInput
-    }
-  | { type: 'zerro.envelope.create'; payload: TCreateEnvelopeInput }
-  | {
-      type: 'zerro.envelope.structure.apply'
-      payload: TApplyEnvelopeStructureInput
-    }
-  | { type: 'zenmoney.transaction.delete'; payload: { ids: TTransactionId[] } }
-  | {
-      type: 'zenmoney.transaction.delete.permanent'
-      payload: { ids: TTransactionId[] }
-    }
-  | { type: 'zenmoney.transaction.restore'; payload: { id: TTransactionId } }
-  | {
-      type: 'zenmoney.transaction.bulk.edit'
-      payload: { ids: TTransactionId[]; tags?: TTagId[]; comment?: string }
-    }
-  | {
-      type: 'zenmoney.account.inBalance.set'
-      payload: { id: TAccountId; inBalance: boolean }
-    }
-  | {
-      type: 'zenmoney.reminder.set'
-      payload:
-        TReminderDraft | TReminderPatch | Array<TReminderDraft | TReminderPatch>
-    }
-  | { type: 'zenmoney.reminder.delete'; payload: { id: TReminderId } }
-  | {
-      type: 'infrastructure.dataAccount.prepare'
-      payload: { title: string }
-    }
-  | { type: 'infrastructure.debug.patch'; payload: TNormalizedPatch }
-  | {
-      type: 'zenmoney.transaction.combineToOutcome'
-      payload: { ids: TTransactionId[] }
-    }
-  | {
-      type: 'zenmoney.transaction.combineToIncome'
-      payload: { ids: TTransactionId[] }
-    }
-  | {
-      type: 'zenmoney.transaction.mergeAsTransfer'
-      payload: { ids: TTransactionId[] }
-    }
-
-export function compileAppCommand(
-  state: RootState,
-  command: TAppCommand,
-  ctx: TCoreContext
-): TIntentPatch {
-  const result = compileAppCommandResult(state, command, ctx)
-  return isCompiled(result) ? result.patch : result
-}
-
-function compileAppCommandResult(
-  state: RootState,
-  command: TAppCommand,
-  ctx: TCoreContext
-): TIntentPatch | TCompiled<unknown> {
-  const data = state.data.current
-  switch (command.type) {
-    case 'zerro.budget.set':
-      return compileSetBudget(data, command.payload, ctx)
-    case 'zerro.fxRates.edit': {
-      const current = getCommandFxRates(state)(command.payload.month)
-      const rates = { ...current.rates }
-      Object.entries(command.payload.patch).forEach(([code, rate]) => {
-        if (rate > 0) rates[code] = rate
-      })
-      return compileSetFxRates(data, command.payload.month, rates, ctx)
-    }
-    case 'zerro.fxRates.reset':
-      return compileResetFxRates(data, command.payload.month)
-    case 'zerro.userSettings.emojiIcons.set':
-      return compilePatchUserSettings(
-        data,
-        { emojiIcons: command.payload.enabled },
-        ctx
-      )
-    case 'zerro.userSettings.preferZmBudgets.set':
-      return compilePatchUserSettings(
-        data,
-        { preferZmBudgets: command.payload.enabled },
-        ctx
-      )
-    case 'zerro.goal.set': {
-      const { month, id, goal } = command.payload
-      return compileSetGoal(data, month, id, goal, ctx)
-    }
-    case 'zerro.envelope.rename':
-      return compileRenameEnvelope(data, command.payload)
-    case 'zerro.envelope.color.set':
-      return compileSetEnvelopeColor(data, command.payload)
-    case 'zerro.envelope.comment.set':
-      return compileSetEnvelopeComment(data, command.payload, ctx)
-    case 'zerro.envelope.settings.update':
-      return compileUpdateEnvelopeSettings(
-        data,
-        getCommandDomainEnvelopes(state),
-        normalizeEnvelopeSettings(state, command.payload),
-        ctx
-      )
-    case 'zerro.envelope.create': {
-      const labels = getCommandEnvelopeLabels()
-      return compileCreateEnvelope(
-        data,
-        {
-          ...command.payload,
-          group: command.payload.group
-            ? getDomainEnvelopeGroup(command.payload.group, labels)
-            : undefined,
-        },
-        ctx
-      )
-    }
-    case 'zerro.envelope.structure.apply': {
-      const labels = getCommandEnvelopeLabels()
-      const structure = command.payload.map(group => ({
-        ...group,
-        group: getDomainEnvelopeGroup(group.group, labels),
-      }))
-      return compileApplyEnvelopeStructure(
-        data,
-        getCommandDomainEnvelopes(state),
-        structure,
-        ctx
-      )
-    }
-    case 'zenmoney.transaction.delete':
-      return compileDeleteTransactions(data, command.payload.ids)
-    case 'zenmoney.transaction.delete.permanent':
-      return compileDeleteTransactionsPermanently(data, command.payload.ids)
-    case 'zenmoney.transaction.restore':
-      return compileRestoreTransaction(data, command.payload.id, ctx)
-    case 'zenmoney.transaction.bulk.edit': {
-      const { ids, tags, comment } = command.payload
-      return compileBulkEditTransactions(data, ids, { tags, comment })
-    }
-    case 'zenmoney.account.inBalance.set': {
-      const { id, inBalance } = command.payload
-      return compilePatchAccount(data, { id, inBalance })
-    }
-    case 'zenmoney.reminder.set': {
-      const patch = compileSetReminder(data, command.payload, ctx)
-      return { patch, receipt: patch.reminder || [] }
-    }
-    case 'zenmoney.reminder.delete':
-      return compileDeleteReminder(data, command.payload.id)
-    case 'infrastructure.dataAccount.prepare': {
-      const existing = Object.values(data.account).find(
-        account => account.title === command.payload.title
-      )
-      if (existing) return { patch: {}, receipt: existing.id }
-
-      const userId = getRootUserId(data)
-      if (!userId) throw new Error('No root user')
-      const patch = compileCreateAccount(
-        data,
-        {
-          title: command.payload.title,
-          instrument: data.user[userId].currency,
-        },
-        ctx
-      )
-      const accountId = patch.account?.[0]?.id
-      if (!accountId) throw new Error('Data account was not created')
-      return { patch, receipt: accountId }
-    }
-    case 'infrastructure.debug.patch':
-      return command.payload
-    case 'zenmoney.transaction.combineToOutcome':
-      return compileCombineToOutcome(data, command.payload.ids)
-    case 'zenmoney.transaction.combineToIncome':
-      return compileCombineToIncome(data, command.payload.ids)
-    case 'zenmoney.transaction.mergeAsTransfer':
-      return compileMergeTransactionsAsTransfer(data, command.payload.ids)
-  }
-}
-
-/**
- * The internal write funnel compiles a command against current state and
- * appends its materialized result to the Redux-owned outbox. Only narrow
- * semantic commands are exported from this adapter.
- */
 function executeCommand<TReceipt = undefined>(
-  command: TAppCommand
+  compile: TReduxCommandCompiler<TReceipt>
 ): AppThunk<TReceipt | undefined> {
-  return executeReduxCommand<TReceipt>(
-    (state, ctx) =>
-      // Receipt types are documented by the four public wrappers that request
-      // one; the command compiler stays a simple runtime switch.
-      compileAppCommandResult(state, command, ctx) as
-        TIntentPatch | TCompiled<TReceipt>
-  )
+  return executeReduxCommand(compile)
 }
 
 export function setBudget(updates: TBudgetUpdate[]): AppThunk {
-  return executeCommand({ type: 'zerro.budget.set', payload: updates })
+  return executeCommand((state, ctx) =>
+    compileSetBudget(state.data.current, updates, ctx)
+  )
 }
 
 export function editFxRates(month: TISOMonth, patch: TFxRates): AppThunk {
-  return executeCommand({
-    type: 'zerro.fxRates.edit',
-    payload: { month, patch },
+  return executeCommand((state, ctx) => {
+    const current = getCommandFxRates(state)(month)
+    const rates = { ...current.rates }
+    Object.entries(patch).forEach(([code, rate]) => {
+      if (rate > 0) rates[code] = rate
+    })
+    return compileSetFxRates(state.data.current, month, rates, ctx)
   })
 }
 
 export function resetFxRates(month: TISOMonth): AppThunk {
-  return executeCommand({
-    type: 'zerro.fxRates.reset',
-    payload: { month },
-  })
+  return executeCommand(state => compileResetFxRates(state.data.current, month))
 }
 
 export function setEmojiIcons(enabled: boolean): AppThunk {
-  return executeCommand({
-    type: 'zerro.userSettings.emojiIcons.set',
-    payload: { enabled },
-  })
+  return executeCommand((state, ctx) =>
+    compilePatchUserSettings(state.data.current, { emojiIcons: enabled }, ctx)
+  )
 }
 
 export function setPreferZmBudgets(enabled: boolean): AppThunk {
-  return executeCommand({
-    type: 'zerro.userSettings.preferZmBudgets.set',
-    payload: { enabled },
-  })
+  return executeCommand((state, ctx) =>
+    compilePatchUserSettings(
+      state.data.current,
+      { preferZmBudgets: enabled },
+      ctx
+    )
+  )
 }
 
 export function setGoal(
@@ -323,18 +116,26 @@ export function setGoal(
   id: TEnvelopeId,
   goal: TGoal | null
 ): AppThunk {
-  return executeCommand({
-    type: 'zerro.goal.set',
-    payload: { month, id, goal },
-  })
+  return executeCommand((state, ctx) =>
+    compileSetGoal(state.data.current, month, id, goal, ctx)
+  )
 }
 
 export function createEnvelope(
   input: TCreateEnvelopeInput
 ): AppThunk<TEnvelopeId> {
-  const execute = executeCommand<TCreateEnvelopeReceipt>({
-    type: 'zerro.envelope.create',
-    payload: input,
+  const execute = executeCommand<TCreateEnvelopeReceipt>((state, ctx) => {
+    const labels = getCommandEnvelopeLabels()
+    return compileCreateEnvelope(
+      state.data.current,
+      {
+        ...input,
+        group: input.group
+          ? getDomainEnvelopeGroup(input.group, labels)
+          : undefined,
+      },
+      ctx
+    )
   })
 
   return (dispatch, getState, extra) => {
@@ -345,66 +146,72 @@ export function createEnvelope(
 }
 
 export function renameEnvelope(id: TEnvelopeId, name: string): AppThunk {
-  return executeCommand({
-    type: 'zerro.envelope.rename',
-    payload: { id, name },
-  })
+  return executeCommand(state =>
+    compileRenameEnvelope(state.data.current, { id, name })
+  )
 }
 
 export function setEnvelopeColor(
   id: TEnvelopeId,
   colorHex: string | null
 ): AppThunk {
-  return executeCommand({
-    type: 'zerro.envelope.color.set',
-    payload: { id, colorHex },
-  })
+  return executeCommand(state =>
+    compileSetEnvelopeColor(state.data.current, { id, colorHex })
+  )
 }
 
 export function setEnvelopeComment(id: TEnvelopeId, comment: string): AppThunk {
-  return executeCommand({
-    type: 'zerro.envelope.comment.set',
-    payload: { id, comment },
-  })
+  return executeCommand((state, ctx) =>
+    compileSetEnvelopeComment(state.data.current, { id, comment }, ctx)
+  )
 }
 
 export function applyEnvelopeStructure(
   structure: TApplyEnvelopeStructureInput
 ): AppThunk {
-  return executeCommand({
-    type: 'zerro.envelope.structure.apply',
-    payload: structure,
+  return executeCommand((state, ctx) => {
+    const labels = getCommandEnvelopeLabels()
+    return compileApplyEnvelopeStructure(
+      state.data.current,
+      getCommandDomainEnvelopes(state),
+      structure.map(group => ({
+        ...group,
+        group: getDomainEnvelopeGroup(group.group, labels),
+      })),
+      ctx
+    )
   })
 }
 
 export function updateEnvelopeSettings(
   input: TUpdateEnvelopeSettingsInput
 ): AppThunk {
-  return executeCommand({
-    type: 'zerro.envelope.settings.update',
-    payload: input,
-  })
+  return executeCommand((state, ctx) =>
+    compileUpdateEnvelopeSettings(
+      state.data.current,
+      getCommandDomainEnvelopes(state),
+      normalizeEnvelopeSettings(state, input),
+      ctx
+    )
+  )
 }
 
 export function deleteTransactions(ids: TTransactionId[]): AppThunk {
-  return executeCommand({
-    type: 'zenmoney.transaction.delete',
-    payload: { ids },
-  })
+  return executeCommand(state =>
+    compileDeleteTransactions(state.data.current, ids)
+  )
 }
 
 export function deleteTransactionsPermanently(ids: TTransactionId[]): AppThunk {
-  return executeCommand({
-    type: 'zenmoney.transaction.delete.permanent',
-    payload: { ids },
-  })
+  return executeCommand(state =>
+    compileDeleteTransactionsPermanently(state.data.current, ids)
+  )
 }
 
 export function restoreTransaction(id: TTransactionId): AppThunk {
-  return executeCommand({
-    type: 'zenmoney.transaction.restore',
-    payload: { id },
-  })
+  return executeCommand((state, ctx) =>
+    compileRestoreTransaction(state.data.current, id, ctx)
+  )
 }
 
 export function setTransactionsViewed(
@@ -462,35 +269,44 @@ export function setAccountInBalance(
   id: TAccountId,
   inBalance: boolean
 ): AppThunk {
-  return executeCommand({
-    type: 'zenmoney.account.inBalance.set',
-    payload: { id, inBalance },
-  })
+  return executeCommand(state =>
+    compilePatchAccount(state.data.current, { id, inBalance })
+  )
 }
 
 export function setReminder(
   draft:
     TReminderDraft | TReminderPatch | Array<TReminderDraft | TReminderPatch>
 ): AppThunk<TReminderPatch[]> {
-  const execute = executeCommand<TReminderPatch[]>({
-    type: 'zenmoney.reminder.set',
-    payload: draft,
+  const execute = executeCommand<TReminderPatch[]>((state, ctx) => {
+    const patch = compileSetReminder(state.data.current, draft, ctx)
+    return { patch, receipt: patch.reminder || [] }
   })
 
   return (dispatch, getState, extra) => execute(dispatch, getState, extra) || []
 }
 
 export function deleteReminder(id: TReminderId): AppThunk {
-  return executeCommand({
-    type: 'zenmoney.reminder.delete',
-    payload: { id },
-  })
+  return executeCommand(state => compileDeleteReminder(state.data.current, id))
 }
 
 export function prepareDataAccount(title: string): AppThunk<TAccountId> {
-  const execute = executeCommand<TAccountId>({
-    type: 'infrastructure.dataAccount.prepare',
-    payload: { title },
+  const execute = executeCommand<TAccountId>((state, ctx) => {
+    const data = state.data.current
+    const existing = Object.values(data.account).find(
+      account => account.title === title
+    )
+    if (existing) return { patch: {}, receipt: existing.id }
+    const userId = getRootUserId(data)
+    if (!userId) throw new Error('No root user')
+    const patch = compileCreateAccount(
+      data,
+      { title, instrument: data.user[userId].currency },
+      ctx
+    )
+    const accountId = patch.account?.[0]?.id
+    if (!accountId) throw new Error('Data account was not created')
+    return { patch, receipt: accountId }
   })
 
   return (dispatch, getState, extra) => {
@@ -501,10 +317,7 @@ export function prepareDataAccount(title: string): AppThunk<TAccountId> {
 }
 
 export function applyDebugPatch(patch: TNormalizedPatch): AppThunk {
-  return executeCommand({
-    type: 'infrastructure.debug.patch',
-    payload: patch,
-  })
+  return executeCommand(() => patch)
 }
 
 export function bulkEditTransactions(
@@ -518,31 +331,27 @@ export function bulkEditTransactions(
     return patchTransactions(ids, set)
   }
 
-  return executeCommand({
-    type: 'zenmoney.transaction.bulk.edit',
-    payload: { ids, ...opts },
-  })
+  return executeCommand(state =>
+    compileBulkEditTransactions(state.data.current, ids, opts)
+  )
 }
 
 export function combineTransactionsToOutcome(ids: TTransactionId[]): AppThunk {
-  return executeCommand({
-    type: 'zenmoney.transaction.combineToOutcome',
-    payload: { ids },
-  })
+  return executeCommand(state =>
+    compileCombineToOutcome(state.data.current, ids)
+  )
 }
 
 export function combineTransactionsToIncome(ids: TTransactionId[]): AppThunk {
-  return executeCommand({
-    type: 'zenmoney.transaction.combineToIncome',
-    payload: { ids },
-  })
+  return executeCommand(state =>
+    compileCombineToIncome(state.data.current, ids)
+  )
 }
 
 export function mergeTransactionsAsTransfer(ids: TTransactionId[]): AppThunk {
-  return executeCommand({
-    type: 'zenmoney.transaction.mergeAsTransfer',
-    payload: { ids },
-  })
+  return executeCommand(state =>
+    compileMergeTransactionsAsTransfer(state.data.current, ids)
+  )
 }
 
 function normalizeEnvelopeSettings(

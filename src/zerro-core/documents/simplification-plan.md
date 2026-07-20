@@ -87,12 +87,16 @@ The registry now drives intent compaction, creation materialization, and
 existing-entity replay. `materializeCommand.ts` fell from 609 to 398 lines;
 the materializer suite preserves the prior behavior.
 
-### W5. Collapse TAppCommand layer — wave 3
+### W5. Collapse TAppCommand layer — wave 3, done 2026-07-20
 
 Each command lives three times (union member, switch case, wrapper). Wrappers
 are the only production entry and the union is never serialized (durable form
 is `type: 'patch'`). Make each wrapper call `executeReduxCommand` with its own
 compile closure directly; delete the union and switch.
+
+Public wrappers now compile directly against the current Redux state; the
+deleted dispatcher had no production consumer. Tests cover the public outbox
+contract instead of routing through a private command representation.
 
 ### W6. One file per small entity — wave 3
 
