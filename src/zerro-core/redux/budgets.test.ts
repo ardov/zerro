@@ -10,6 +10,7 @@ import {
   EnvType,
 } from '../domain/zerro'
 import { selectBudgets } from '../testing/reduxSelectors'
+import { selectRaw } from './budgets'
 
 const NOW = Date.parse('2026-05-15T12:00:00Z')
 const MONTH = '2026-05' as TISOMonth
@@ -57,6 +58,12 @@ function makeSeededStore() {
 const makeRootState = makeTestRootState
 
 describe('selectBudgets', () => {
+  it('exposes the raw ZenMoney budget slice separately', () => {
+    const { store } = makeSeededStore()
+
+    expect(selectRaw(makeRootState(store))).toBe(store.budget)
+  })
+
   it('uses hidden budgets with default settings', () => {
     const { store, tagA, tagB } = makeSeededStore()
     const state = makeRootState(store)

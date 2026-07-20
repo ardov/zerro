@@ -2,6 +2,7 @@ import type { RootState } from 'store'
 
 export const selectAccountSlice = (state: RootState) =>
   state.data.current.account
+export const selectBudgetSlice = (state: RootState) => state.data.current.budget
 export const selectInstrumentSlice = (state: RootState) =>
   state.data.current.instrument
 export const selectMerchantSlice = (state: RootState) =>

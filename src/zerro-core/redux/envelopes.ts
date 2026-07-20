@@ -31,8 +31,10 @@ export type { TPresentedEnvelope } from './envelopePresentation'
 export {
   envId,
   EnvType,
+  envelopeVisibility,
   flattenStructure,
   toEnvelopeStructureInput,
+  type TEnvelopeId,
   type TEnvelopeStructureNodeInput,
   type TEnvNode,
   type TGroupNode,
