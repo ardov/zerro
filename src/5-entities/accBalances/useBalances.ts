@@ -9,7 +9,7 @@ import { core } from 'zerro-core/redux'
 import { balancesToDisplay } from './shared/convertBalancesToDisplay'
 import { TBalanceNode } from './shared/types'
 
-export function useBalances(
+function useBalances(
   aggregation: GroupBy,
   start?: TDateDraft,
   end?: TDateDraft
