@@ -5,7 +5,7 @@ import { ById, ByMonth, TISOMonth } from '6-shared/types'
 import { TSelector, useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
-import { isEqual } from 'lodash'
+import { deepEqual } from '6-shared/helpers/deepEqual'
 
 export type TRenderInfo = {
   id: core.envelopes.TEnvelopeId
@@ -87,5 +87,5 @@ export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
   )
 
 export function useEnvRenderInfo(month: TISOMonth): ById<TRenderInfo> {
-  return useAppSelector(s => getEnvRenderInfo(s)[month], isEqual)
+  return useAppSelector(s => getEnvRenderInfo(s)[month], deepEqual)
 }

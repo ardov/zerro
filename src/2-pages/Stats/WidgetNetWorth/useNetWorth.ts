@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { isFinite } from 'lodash'
 import { AccountType, TDateDraft, TISODate } from '6-shared/types'
 import { GroupBy, toGroup } from '6-shared/helpers/date'
 import { keys } from '6-shared/helpers/keys'
@@ -36,7 +35,7 @@ export function useNetWorth(
       let debts = 0
       keys(debtors).forEach(id => {
         console.assert(
-          isFinite(debtors[id]),
+          Number.isFinite(debtors[id]),
           `debtors[${id}] is not a number`,
           debtors[id],
           date
@@ -52,7 +51,7 @@ export function useNetWorth(
       keys(accounts).forEach(id => {
         if (accs[id].type === AccountType.Debt) return
         console.assert(
-          isFinite(accounts[id]),
+          Number.isFinite(accounts[id]),
           `accounts[${id}] is not a number`,
           accounts[id],
           date

@@ -1,6 +1,6 @@
 import { FC, memo, useCallback } from 'react'
 import { shallowEqual } from 'react-redux'
-import { isEqual } from 'lodash'
+import { deepEqual } from '6-shared/helpers/deepEqual'
 import { Paper } from '@mui/material'
 import { TISOMonth } from '6-shared/types'
 import { useToggle } from '6-shared/hooks/useToggle'
@@ -38,7 +38,7 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
     onShowTransactions,
   } = props
 
-  const structure = useAppSelector(core.envelopes.selectStructure, isEqual)
+  const structure = useAppSelector(core.envelopes.selectStructure, deepEqual)
   const renderInfo = useEnvRenderInfo(month)
   const { expanded, toggle, expandAll, collapseAll } = useExpandEnvelopes()
   const { metric } = useMetric()

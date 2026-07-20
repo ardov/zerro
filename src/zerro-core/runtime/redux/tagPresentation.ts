@@ -2,7 +2,7 @@ import type { ById, TFxCode } from '6-shared/types'
 import noCategoryIconUrl from '6-shared/icons/no_category-icon.svg'
 import { tagIconsSvg } from '6-shared/tagIconsSvg'
 import { t } from 'i18next'
-import toArray from 'lodash/toArray'
+import { toGraphemes } from '6-shared/helpers/graphemes'
 import type { TTag, TTagId } from '../../internal/domain/zenmoney/entities/tags'
 import { int2hex } from '../../internal/domain/zenmoney/model/color'
 import { getColorForString } from '../presentation/colors'
@@ -87,7 +87,7 @@ export function presentTags(
 }
 
 function getTagName(title: string): string {
-  const titleArr = toArray(title)
+  const titleArr = toGraphemes(title)
   if (isEmoji(titleArr[0])) {
     titleArr.shift()
     return titleArr.join('').trim()
@@ -109,7 +109,7 @@ function getSymbol(tag: TTag, userSettings: TTagPresentationSettings) {
       return emoji
     }
   }
-  const titleArr = toArray(tag.title)
+  const titleArr = toGraphemes(tag.title)
   if (getTagName(tag.title) !== tag.title) return titleArr[0]
   return (titleArr[0] + titleArr[1]).trim() || '?'
 }

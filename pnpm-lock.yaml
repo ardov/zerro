@@ -50,9 +50,6 @@ importers:
       json2mq:
         specifier: ^0.2.0
         version: 0.2.0
-      lodash:
-        specifier: ^4.18.1
-        version: 4.18.1
       qrcode.react:
         specifier: ^4.2.0
         version: 4.2.0(react@19.2.7)
@@ -123,9 +120,6 @@ importers:
       '@types/json2mq':
         specifier: ^0.2.2
         version: 0.2.2
-      '@types/lodash':
-        specifier: ^4.17.24
-        version: 4.17.24
       '@types/mdx':
         specifier: ^2.0.14
         version: 2.0.14
@@ -2498,9 +2492,6 @@ packages:
 
   '@types/json2mq@0.2.2':
     resolution: {integrity: sha512-JqJOjbozVUnL8yP1b3Mmn+P8QBcp67hZfgf+zZmrIatxWUlll/HQRaG7mCD57uni0mVAUTpdPe6nGuNXcl9Yrg==}
-
-  '@types/lodash@4.17.24':
-    resolution: {integrity: sha512-gIW7lQLZbue7lRSWEFql49QJJWThrTFFeIMJdp3eH4tKoxm1OvEPg02rm4wCCSHS0cL3/Fizimb35b7k8atwsQ==}
 
   '@types/mdast@4.0.4':
     resolution: {integrity: sha512-kGaNbPh1k7AFzgpud/gMdvIm5xuECykRR+JnWKQno9TAXVa6WIVCGTPvYGekIDL4uwCZQSYbUxNBSb1aUo79oA==}
@@ -7454,8 +7445,6 @@ snapshots:
   '@types/json-schema@7.0.15': {}
 
   '@types/json2mq@0.2.2': {}
-
-  '@types/lodash@4.17.24': {}
 
   '@types/mdast@4.0.4':
     dependencies:
