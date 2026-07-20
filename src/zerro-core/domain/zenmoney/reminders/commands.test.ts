@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { DataEntity } from '6-shared/types'
 
 import {
   makeReminder as makeTestReminder,
@@ -117,7 +116,7 @@ describe('zenmoney reminder commands', () => {
       deletion: [
         {
           id: 'reminder',
-          object: DataEntity.Reminder,
+          object: 'reminder',
         },
       ],
     })

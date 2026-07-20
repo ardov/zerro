@@ -11,9 +11,8 @@ import type {
   TZmReminder,
   TZmReminderMarker,
   TZmTransaction,
+  TDataEntityKey,
 } from 'zerro-core/domain/zenmoney'
-
-import { DataEntity } from 'zerro-core/domain/patch'
 
 export type {
   TFxCode,
@@ -68,8 +67,6 @@ export { AccountType } from 'zerro-core/domain/zenmoney'
 
 // export type TToken = TAccessToken['access_token']
 
-export { DataEntity } from 'zerro-core/domain/patch'
-
 // ---------------------------------------------------------------------
 // DELETION — owned by Zerro Core
 // ---------------------------------------------------------------------
@@ -105,5 +102,5 @@ export type { TDiff } from 'zerro-core/domain/zenmoney'
 
 export type TZmRequest = TZmDiff & {
   currentClientTimestamp: TUnixTime
-  forceFetch?: DataEntity[]
+  forceFetch?: TDataEntityKey[]
 }

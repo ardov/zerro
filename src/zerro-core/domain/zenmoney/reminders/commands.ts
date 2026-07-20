@@ -1,11 +1,7 @@
 import { toISODate } from '../../shared/date'
 import type { Modify } from '../../shared/types'
 import type { TDataStore } from '../store'
-import {
-  DataEntity,
-  type TCoreContext,
-  type TIntentPatch,
-} from '../../../types'
+import type { TCoreContext, TIntentPatch } from '../../../types'
 import type { TDateDraft } from '../primitives'
 import { getRootUserId } from '../users'
 import { makeReminder, type TReminderFactoryDraft } from './factory'
@@ -60,6 +56,6 @@ export function compileDeleteReminder(
   if (!getReminders(data)[id]) return {}
 
   return {
-    deletion: [{ id, object: DataEntity.Reminder }],
+    deletion: [{ id, object: 'reminder' }],
   }
 }

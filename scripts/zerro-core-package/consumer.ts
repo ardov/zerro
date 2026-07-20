@@ -1,8 +1,8 @@
 import {
-  DataEntity,
   ZERRO_DATA_ACCOUNT_NAME,
   createZerroSession,
   type TCoreContext,
+  type TDataEntityKey,
   type TDataStore,
 } from 'zerro-core'
 
@@ -13,5 +13,6 @@ const session = createZerroSession(data, ctx)
 
 session.envelopes.getAll()
 
-void DataEntity.Account
+const dataEntity: TDataEntityKey = 'account'
+void dataEntity
 void ZERRO_DATA_ACCOUNT_NAME

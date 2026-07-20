@@ -1,7 +1,6 @@
 // The normalized ZenMoney data store and patch shapes. This is the core
 // domain contract: `applyPatch(store, patch)` and command compilers speak in
 // these types.
-import { DataEntity } from '../patch'
 import type { ById } from '../shared/types'
 import type { TMsTime, TUnixTime } from './primitives'
 import type { TInstrument } from './instruments/types'
@@ -50,7 +49,7 @@ export type TDataEntityKey = (typeof dataEntityKeys)[number]
 
 export type TDeletionObject = {
   id: string | number
-  object: DataEntity
+  object: TDataEntityKey
   stamp: TMsTime
   user: TUserId
 }

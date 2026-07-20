@@ -1,7 +1,7 @@
 import type { TIntentPatch } from './domain/zenmoney/store'
 
-export { DataEntity } from './domain/patch'
 export type {
+  TDataEntityKey,
   TDataStore,
   TDiff as TNormalizedPatch,
   TIntentPatch,

@@ -84,7 +84,7 @@ export function buildOutboxTransport(
     const patch = materializePrimaryCommand(current, command, sentAt)
 
     patch.deletion?.forEach(item => {
-      const key = item.object as TDataEntityKey
+      const key = item.object
       touched.get(key)?.delete(item.id)
       getOrCreate(deleted, key, () => new Map()).set(item.id, item)
     })

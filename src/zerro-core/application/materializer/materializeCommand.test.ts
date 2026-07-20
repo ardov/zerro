@@ -10,7 +10,6 @@ import {
   makeTransaction,
   makeUser,
 } from '../../testing/zenmoneyTestData'
-import { DataEntity } from '../../domain/patch'
 import { compileDeleteTransactions } from '../../domain/zenmoney/transactions'
 import {
   compileSetSimpleHiddenData,
@@ -309,7 +308,7 @@ describe('materializeCommand', () => {
         deletion: [
           {
             id: 'rent',
-            object: DataEntity.Reminder,
+            object: 'reminder',
             stamp: 50,
             user: 1,
           },
@@ -319,13 +318,13 @@ describe('materializeCommand', () => {
     )
 
     expect(command.patch).toEqual({
-      deletion: [{ id: 'rent', object: DataEntity.Reminder }],
+      deletion: [{ id: 'rent', object: 'reminder' }],
     })
     expect(materializeCommand(snapshot, command)).toEqual({
       deletion: [
         {
           id: 'rent',
-          object: DataEntity.Reminder,
+          object: 'reminder',
           stamp: 100,
           user: 1,
         },

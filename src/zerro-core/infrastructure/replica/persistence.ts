@@ -1,5 +1,8 @@
 import { intentPatchKeys, type TCommand } from '../../application/materializer'
-import { DataEntity } from '../../domain/patch'
+import {
+  dataEntityKeys,
+  type TDataEntityKey,
+} from '../../domain/zenmoney/store'
 
 export const replicaPersistenceVersion = 2 as const
 
@@ -83,7 +86,7 @@ function validatePatch(value: unknown, path: string): void {
       patchValue.some(
         entity =>
           !isRecord(entity) ||
-          !Object.values(DataEntity).includes(entity.object as DataEntity)
+          !dataEntityKeys.includes(entity.object as TDataEntityKey)
       )
     ) {
       throw new Error(

@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { DataEntity } from '6-shared/types'
 import { makeAccount, makeStore } from '../../../testing/zenmoneyTestData'
 import {
   issuePatch,
@@ -177,13 +176,13 @@ describe('zenmoney account commands', () => {
     const next = applyPatch(data, materializeCommand(data, command))
 
     expect(patch).toEqual({
-      deletion: [{ id: 'cash', object: DataEntity.Account }],
+      deletion: [{ id: 'cash', object: 'account' }],
     })
     expect(materializeCommand(data, command)).toEqual({
       deletion: [
         {
           id: 'cash',
-          object: DataEntity.Account,
+          object: 'account',
           stamp: 1700000000000,
           user: 1,
         },

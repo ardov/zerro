@@ -6,7 +6,6 @@ import {
   makeUser,
 } from '../../testing/zenmoneyTestData'
 import type { TCommand } from '../../application/materializer'
-import { DataEntity } from '../../domain/patch'
 import {
   appendOutbox,
   buildOutboxTransport,
@@ -97,7 +96,7 @@ describe('outbox operations', () => {
     })
     const commands = [
       makeCommand(10, {
-        deletion: [{ id: 'cash', object: DataEntity.Account }],
+        deletion: [{ id: 'cash', object: 'account' }],
       }),
       makeCommand(20, {
         account: [{ id: 'cash', instrument: 1, title: 'Wallet' }],
@@ -123,14 +122,12 @@ describe('outbox operations', () => {
     const commands = [
       makeCommand(10, { account: [{ id: 'cash', title: 'Wallet' }] }),
       makeCommand(20, {
-        deletion: [{ id: 'cash', object: DataEntity.Account }],
+        deletion: [{ id: 'cash', object: 'account' }],
       }),
     ]
 
     expect(buildOutboxTransport(base, commands, commands.length, 100)).toEqual({
-      deletion: [
-        { id: 'cash', object: DataEntity.Account, stamp: 100, user: 1 },
-      ],
+      deletion: [{ id: 'cash', object: 'account', stamp: 100, user: 1 }],
     })
   })
 })

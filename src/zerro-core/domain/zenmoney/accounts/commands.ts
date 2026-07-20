@@ -1,9 +1,5 @@
 import type { TDataStore } from '../store'
-import {
-  DataEntity,
-  type TCoreContext,
-  type TIntentPatch,
-} from '../../../types'
+import type { TCoreContext, TIntentPatch } from '../../../types'
 import { getRootUserId } from '../users'
 import { makeAccount, type TAccountFactoryDraft } from './factory'
 import { getAccounts } from './read'
@@ -45,6 +41,6 @@ export function compileDeleteAccount(
   if (!getAccounts(data)[id]) throw new Error('Account not found')
 
   return {
-    deletion: [{ id, object: DataEntity.Account }],
+    deletion: [{ id, object: 'account' }],
   }
 }

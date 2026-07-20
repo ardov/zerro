@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DataEntity, TDiff } from '6-shared/types'
+import type { TDiff } from '6-shared/types'
 import { makeStore } from '../../testing/zenmoneyTestData'
 import { applyPatch, applyPatchMutable, replay } from '.'
 
@@ -39,7 +39,7 @@ describe('zenmoney patch primitives', () => {
     })
 
     const next = applyPatch(base, {
-      deletion: [{ object: DataEntity.Tag, id: 'food' }],
+      deletion: [{ object: 'tag', id: 'food' }],
     } as TDiff)
 
     expect(base.tag.food.title).toBe('Food')
@@ -83,7 +83,7 @@ describe('zenmoney patch primitives', () => {
     })
 
     const next = applyPatch(base, {
-      deletion: [{ object: DataEntity.Tag, id: 'food' }],
+      deletion: [{ object: 'tag', id: 'food' }],
     } as TDiff)
 
     expect(next.tag).not.toBe(base.tag)
@@ -106,7 +106,7 @@ describe('zenmoney patch primitives', () => {
     const next = replay(base, [
       { account: [entity({ id: 'cash', title: 'Cash' })] },
       { account: [entity({ id: 'cash', title: 'Cash renamed' })] },
-      { deletion: [{ object: DataEntity.Account, id: 'cash' }] },
+      { deletion: [{ object: 'account', id: 'cash' }] },
     ] as TDiff[])
 
     expect(base.account.cash).toBeUndefined()

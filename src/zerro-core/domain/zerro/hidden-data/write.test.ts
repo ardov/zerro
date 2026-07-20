@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { DataEntity } from '6-shared/types'
 
 import {
   makeAccount,
@@ -180,7 +179,7 @@ describe('hidden data write codecs', () => {
       deletion: [
         {
           id: 'jan',
-          object: DataEntity.Reminder,
+          object: 'reminder',
         },
       ],
     })

@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { DataEntity } from '6-shared/types'
 
 import {
   makeAccount,
@@ -122,7 +121,7 @@ describe('user settings commands', () => {
       deletion: [
         {
           id: 'settings',
-          object: DataEntity.Reminder,
+          object: 'reminder',
         },
       ],
     })
