@@ -1,6 +1,6 @@
 import { toISOMonth } from '../../shared/date'
 import type { ById } from '../../shared/types'
-import type { TAccountId } from '../../zenmoney/accounts/types'
+import type { TAccountId } from '../../zenmoney/accounts'
 import { cleanPayee } from '../../zenmoney/debtors'
 import type { TISOMonth } from '../../zenmoney/primitives'
 import { getTransactionType, TrType } from '../../zenmoney/transactions'

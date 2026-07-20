@@ -27,8 +27,6 @@ React, storage, localization, or app-layer runtime modules.
    Commands section is the single canonical persisted command shape.
 4. Check [design-ledger.md](./design-ledger.md) before changing a settled
    decision.
-5. Use [simplification-plan.md](./simplification-plan.md) for the active
-   code/documentation diet workstreams.
 
 The notes are routing, not proof. Git and current verification outrank stale
 prose.
@@ -40,7 +38,6 @@ prose.
 | [architecture.md](./architecture.md)                | Durable boundaries and runtime contracts          |
 | [design-ledger.md](./design-ledger.md)              | Settled decisions, risks, and open questions      |
 | [notes.md](./notes.md)                              | Current position, remaining work, deferred smells |
-| [simplification-plan.md](./simplification-plan.md)  | Active simplification workstreams                 |
 | [testing.md](./testing.md)                          | Verification policy and completion gate           |
 | [ZenMoney sync API](../domain/zenmoney/sync-api.md) | Observed server behavior and wire shape           |
 

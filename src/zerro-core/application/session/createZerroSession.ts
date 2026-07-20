@@ -1,4 +1,5 @@
 import { toISODate, toISOMonth } from '../../domain/shared/date'
+import type { TCoreContext } from '../../types'
 import type { TDataStore } from '../../domain/zenmoney/store'
 import {
   buildBalances,
@@ -37,17 +38,9 @@ import {
   getUserSettings,
 } from '../../domain/zerro'
 
-export type TZerroSessionContext = {
-  now: () => number
-  uuid: () => string
-}
-
 export type TZerroSession = ReturnType<typeof createZerroSession>
 
-export function createZerroSession(
-  data: TDataStore,
-  ctx: TZerroSessionContext
-) {
+export function createZerroSession(data: TDataStore, ctx: TCoreContext) {
   const currentDate = memo(() => toISODate(ctx.now()))
   const currentMonth = memo(() => toISOMonth(ctx.now()))
   const userSettings = memo(() => getUserSettings(data))

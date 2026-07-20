@@ -1,17 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { makeAccount, makeStore } from '../../../testing/zenmoneyTestData'
-import {
-  issuePatch,
-  materializeCommand,
-} from '../../../application/materializer'
-import { applyPatch } from '../applyPatch'
-import {
-  compileCreateAccount,
-  compileDeleteAccount,
-  compilePatchAccount,
-} from './commands'
-import { makeAccount as makeCoreAccount } from './factory'
-import { AccountType } from './types'
+import { makeAccount, makeStore } from '../../testing/zenmoneyTestData'
+import { issuePatch, materializeCommand } from '../../application/materializer'
+import { applyPatch } from './applyPatch'
+import { compileCreateAccount, compilePatchAccount } from './accounts'
+import { makeAccount as makeCoreAccount } from './accounts'
+import { AccountType } from './accounts'
 
 describe('zenmoney account commands', () => {
   it('creates accounts with root user and deterministic id/time', () => {
@@ -159,9 +152,17 @@ describe('zenmoney account commands', () => {
     expect(() =>
       compilePatchAccount(data, { id: 'missing', title: 'Missing' })
     ).toThrow('Account not found')
+
+    expect(() =>
+      compileCreateAccount(
+        makeStore(),
+        { instrument: 1, title: 'No user' },
+        { now: () => 1, uuid: () => 'account' }
+      )
+    ).toThrow('No user')
   })
 
-  it('compiles sparse deletions and materializes protocol metadata', () => {
+  it('materializes deletion protocol metadata onto sparse deletion intent', () => {
     const data = makeStore({
       user: {
         1: { id: 1, parent: null },
@@ -171,7 +172,7 @@ describe('zenmoney account commands', () => {
       },
     })
 
-    const patch = compileDeleteAccount(data, 'cash')
+    const patch = { deletion: [{ id: 'cash', object: 'account' } as const] }
     const command = issuePatch(data, patch, 1700000000000)
     const next = applyPatch(data, materializeCommand(data, command))
 
@@ -190,19 +191,5 @@ describe('zenmoney account commands', () => {
     })
     expect(next.account.cash).toBeUndefined()
     expect(data.account.cash.title).toBe('Cash')
-  })
-
-  it('validates account create and delete commands', () => {
-    expect(() =>
-      compileCreateAccount(
-        makeStore(),
-        { instrument: 1, title: 'No user' },
-        { now: () => 1, uuid: () => 'account' }
-      )
-    ).toThrow('No user')
-
-    expect(() => compileDeleteAccount(makeStore(), 'missing')).toThrow(
-      'Account not found'
-    )
   })
 })

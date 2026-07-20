@@ -5,7 +5,14 @@ import { buildFxRatesGetter, getUserSettings } from '../domain/zerro'
 import { presentEnvelopes, type TEnvelopeLabels } from './envelopePresentation'
 import { presentTags } from './tagPresentation'
 
-const readContext = { now: () => Date.now(), uuid: () => '' }
+// Read-only: these sessions only feed command compilation with derived values
+// and must never reach an entity factory. Fail loudly if one ever does.
+const readContext = {
+  now: () => Date.now(),
+  uuid: () => {
+    throw new Error('Command-time reads must not generate ids')
+  },
+}
 
 export function getCommandDomainEnvelopes(state: RootState) {
   return createZerroSession(state.data.current, readContext).envelopes.getAll()

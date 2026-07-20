@@ -1,34 +1,9 @@
-import type { Modify } from '../../shared/types'
 import type { TDataStore } from '../store'
-import type { TCompiled, TCoreContext, TIntentPatch } from '../../../types'
-import type { TDateDraft } from '../primitives'
+import type { TCoreContext, TIntentPatch } from '../../../types'
 import type { TTagId } from '../tags'
 import { round } from '../../shared/money'
-import { getRootUserId } from '../users'
-import { makeTransaction, type TTransactionFactoryDraft } from './factory'
 import { getTransaction, getTransactionType, TrType } from './read'
 import type { TTransaction, TTransactionId, TTransactionPatch } from './types'
-
-export type TTransactionDraft = Modify<
-  Omit<TTransactionFactoryDraft, 'user'>,
-  { date: TDateDraft; changed?: TDateDraft; created?: TDateDraft }
->
-
-export function compileCreateTransaction(
-  data: TDataStore,
-  draft: TTransactionDraft,
-  ctx: TCoreContext
-): TCompiled<{ transactionId: TTransactionId }> {
-  const user = getRootUserId(data)
-  if (!user) throw new Error('No user')
-
-  const transaction = makeTransaction({ ...draft, user }, ctx)
-
-  return {
-    patch: { transaction: [transaction] },
-    receipt: { transactionId: transaction.id },
-  }
-}
 
 export function compileDeleteTransactions(
   data: TDataStore,

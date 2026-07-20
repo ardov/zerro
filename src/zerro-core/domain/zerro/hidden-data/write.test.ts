@@ -8,7 +8,6 @@ import {
 } from '../../../testing/zenmoneyTestData'
 import { applyPatch } from '../../zenmoney'
 import {
-  compileResetSimpleHiddenData,
   compileSetMonthlyHiddenData,
   compileSetSimpleHiddenData,
   HiddenDataType,
@@ -183,12 +182,6 @@ describe('hidden data write codecs', () => {
         },
       ],
     })
-  })
-
-  it('keeps reset of missing simple hidden data as a no-op patch', () => {
-    expect(
-      compileResetSimpleHiddenData(makeStore(), HiddenDataType.UserSettings)
-    ).toEqual({})
   })
 
   it('validates monthly hidden data month', () => {

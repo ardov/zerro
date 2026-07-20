@@ -1,7 +1,7 @@
 import type { RootState } from 'store'
 import { makeDemoStore, type TDemoDataOptions } from '../demo'
 import type { TDataStore } from '../domain/zenmoney/store'
-import type { TZerroSessionContext } from '../application/session'
+import type { TCoreContext } from '../types'
 
 export const coreNextDemoOptions = {
   now: '2026-04-15T12:00:00.000Z',
@@ -9,7 +9,7 @@ export const coreNextDemoOptions = {
   scale: 0.35,
 } satisfies TDemoDataOptions
 
-export const coreNextDemoContext: TZerroSessionContext = {
+export const coreNextDemoContext: TCoreContext = {
   now: () => Date.parse(coreNextDemoOptions.now),
   uuid: () => 'zerro-core-demo-test-id',
 }

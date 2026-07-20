@@ -19,7 +19,9 @@ export function applyPatch(
   return next
 }
 
-function touchedEntityKeys(patch: TNormalizedPatch | TIntentPatch): Set<string> {
+function touchedEntityKeys(
+  patch: TNormalizedPatch | TIntentPatch
+): Set<string> {
   const touched = new Set<string>()
   patch.deletion?.forEach(obj => touched.add(obj.object))
   keys(patch).forEach(key => {

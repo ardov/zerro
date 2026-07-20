@@ -18,7 +18,7 @@ Raw account responses and the bearer token are not stored in the repository.
   older or equal value is silently ignored; only a newer value is accepted.
 - The submitted `changed` is only an ordering gate. On accept, the server
   discards it and stamps its own clock — while the write response echoes the
-  *submitted* value back. The comparison for the next write runs against the
+  _submitted_ value back. The comparison for the next write runs against the
   stored server-clock value, not against what was previously submitted. Only a
   follow-up pull shows the real stored entity; the write-response echo is not
   authoritative.

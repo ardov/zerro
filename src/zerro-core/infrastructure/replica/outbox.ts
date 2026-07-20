@@ -1,3 +1,12 @@
+/**
+ * Engine core: the pure replica operations over `base + outbox + outboxHead`.
+ *
+ * Every append, undo, redo, replay, and transport rule lives here as a plain
+ * function, so the only runtime-specific part left is who owns the state. In
+ * this app Redux owns it (`store/data/slice.ts`); a future standalone package
+ * wraps these same functions. Do not grow a second implementation of append,
+ * replay-prefix, clamp, or redo-tail rules beside this file.
+ */
 import {
   materializeCommand,
   materializePrimaryCommand,

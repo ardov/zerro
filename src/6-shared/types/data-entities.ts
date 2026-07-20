@@ -30,11 +30,7 @@ export type {
   TCountryId,
   TZmCountry,
 } from 'zerro-core/domain/zenmoney'
-export type {
-  TUser,
-  TUserId,
-  TZmUser,
-} from 'zerro-core/domain/zenmoney/users'
+export type { TUser, TUserId, TZmUser } from 'zerro-core/domain/zenmoney/users'
 export type {
   TMerchant,
   TMerchantId,

@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import type { ById, TAccount, TInstrumentId } from '6-shared/types'
 import { AccountType } from '6-shared/types'
-import { makeAccount, makeTransaction } from '../../../testing/zenmoneyTestData'
+import { makeAccount, makeTransaction } from '../../testing/zenmoneyTestData'
 import {
   buildBalances,
   buildBalancesByDate,
   buildTransactionEffect,
   convertBalancesToDisplay,
   getHistoryStart,
-} from './build'
+} from './balances'
 
 describe('buildTransactionEffect', () => {
   it('converts income, outcome, transfer, and debt transactions to balance effects', () => {

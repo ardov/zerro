@@ -1,5 +1,5 @@
 import { toISODate, parseDate } from '../domain/shared/date'
-import type { TAccount } from '../domain/zenmoney/accounts/types'
+import type { TAccount } from '../domain/zenmoney/accounts'
 import type { TISODate } from '../domain/zenmoney/primitives'
 import type { TTransaction } from '../domain/zenmoney/transactions/types'
 

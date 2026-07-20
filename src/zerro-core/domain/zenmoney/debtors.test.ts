@@ -3,8 +3,8 @@ import {
   makeMerchant,
   makeTransaction,
   usdInstruments,
-} from '../../../testing/zenmoneyTestData'
-import { buildDebtors, cleanPayee } from './read'
+} from '../../testing/zenmoneyTestData'
+import { buildDebtors, cleanPayee } from './debtors'
 
 describe('buildDebtors', () => {
   it('collects payee debt transactions and balances', () => {

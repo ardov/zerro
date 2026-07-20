@@ -8,10 +8,10 @@ import type { TCountry } from './countries'
 import type { TCompany } from './companies'
 import type { TUser, TUserId } from './users'
 import type { TMerchant, TMerchantPatch } from './merchants'
-import type { TAccount, TAccountPatch } from './accounts/types'
-import type { TTag, TTagPatch } from './tags/types'
+import type { TAccount, TAccountPatch } from './accounts'
+import type { TTag, TTagPatch } from './tags'
 import type { TBudget, TBudgetPatch } from './budgets'
-import type { TReminder, TReminderPatch } from './reminders/types'
+import type { TReminder, TReminderPatch } from './reminders'
 import type { TReminderMarker } from './reminderMarkers'
 import type { TTransaction, TTransactionPatch } from './transactions/types'
 
@@ -88,6 +88,33 @@ export const intentPatchKeys = [
   'deletion',
   ...intentEntityKeys,
 ] as const satisfies readonly (keyof TIntentPatch)[]
+
+type TIntentEntityKey = (typeof intentEntityKeys)[number]
+
+/**
+ * Sparse patch intent for entities whose only compile rule is "it must already
+ * exist". Entity modules wrap this with their own types and any extra guard.
+ */
+export function compileEntityPatch<TKey extends TIntentEntityKey>(
+  data: TDataStore,
+  key: TKey,
+  patch:
+    NonNullable<TIntentPatch[TKey]> | NonNullable<TIntentPatch[TKey]>[number]
+): TIntentPatch {
+  const list = Array.isArray(patch) ? patch : [patch]
+  const byId = data[key] as Record<string | number, unknown>
+
+  list.forEach(item => {
+    if (!item.id) throw new Error(`Trying to patch ${key} without id`)
+    if (!byId[item.id]) throw new Error(`${capitalize(key)} not found`)
+  })
+
+  return { [key]: list }
+}
+
+function capitalize(value: string): string {
+  return value[0].toUpperCase() + value.slice(1)
+}
 
 /** Complete normalized entities applied to a snapshot after materialization. */
 export type TNormalizedPatch = {

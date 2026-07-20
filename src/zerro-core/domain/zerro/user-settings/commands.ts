@@ -1,10 +1,6 @@
 import type { TDataStore } from '../../zenmoney/store'
 import type { TCoreContext, TIntentPatch } from '../../../types'
-import {
-  compileResetSimpleHiddenData,
-  compileSetSimpleHiddenData,
-  HiddenDataType,
-} from '../hidden-data'
+import { compileSetSimpleHiddenData, HiddenDataType } from '../hidden-data'
 import { getStoredUserSettings } from './read'
 import type { TUserSettingsPatch } from './types'
 
@@ -26,8 +22,4 @@ export function compilePatchUserSettings(
     payload,
     ctx
   )
-}
-
-export function compileResetUserSettings(data: TDataStore): TIntentPatch {
-  return compileResetSimpleHiddenData(data, HiddenDataType.UserSettings)
 }

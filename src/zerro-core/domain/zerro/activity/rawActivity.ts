@@ -1,6 +1,6 @@
 import { addFxAmount } from '../../shared/money'
 import type { ById, ByMonth } from '../../shared/types'
-import type { TAccountId } from '../../zenmoney/accounts/types'
+import type { TAccountId } from '../../zenmoney/accounts'
 import type { TFxAmount } from '../../shared/money'
 import type { TInstrument } from '../../zenmoney/instruments'
 import type { TISOMonth } from '../../zenmoney/primitives'

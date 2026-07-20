@@ -1,12 +1,7 @@
 import type { AppThunk, RootState } from 'store'
 import { v1 as uuidv1 } from 'uuid'
 import type { TISOMonth } from '../domain/zenmoney/primitives'
-import {
-  type TCompiled,
-  type TCoreContext,
-  type TIntentPatch,
-  type TNormalizedPatch,
-} from '../types'
+import type { TNormalizedPatch } from '../types'
 import {
   compileBulkEditTransactions,
   compileCombineToIncome,
@@ -48,9 +43,6 @@ import {
   type TEnvelopeId,
   type TGoal,
   type TFxRates,
-  type TRenameEnvelopeInput,
-  type TSetEnvelopeColorInput,
-  type TSetEnvelopeCommentInput,
   type TUpdateEnvelopeSettingsInput,
 } from '../domain/zerro'
 import { getDomainEnvelopeGroup } from './envelopePresentation'

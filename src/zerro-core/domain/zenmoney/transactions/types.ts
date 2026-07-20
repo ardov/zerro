@@ -90,6 +90,15 @@ export type TTransactionEditablePatch = Partial<
   Pick<TTransaction, TTransactionEditableField>
 >
 
+/** Fields the factory cannot default: creation intent must supply them. */
+export const transactionRequiredFields = [
+  'date',
+  'incomeInstrument',
+  'incomeAccount',
+  'outcomeInstrument',
+  'outcomeAccount',
+] as const satisfies readonly (keyof TTransaction)[]
+
 /** Existing transaction fields that may be changed, including lifecycle. */
 export const transactionWritableFields = [
   'deleted',

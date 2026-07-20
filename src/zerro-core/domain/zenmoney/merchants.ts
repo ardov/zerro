@@ -1,7 +1,7 @@
 import type { EntityPatch, ById, OptionalExceptFor } from '../shared/types'
 import type { TCoreContext, TIntentPatch } from '../../types'
 import type { TMsTime, TUnixTime } from './primitives'
-import type { TDataStore } from './store'
+import { compileEntityPatch, type TDataStore } from './store'
 import type { TUserId } from './users'
 
 export type TMerchantId = string
@@ -11,6 +11,11 @@ export type TMerchant = {
   user: TUserId
   title: string
 }
+/** Fields the factory cannot default: creation intent must supply them. */
+export const merchantRequiredFields = [
+  'title',
+] as const satisfies readonly (keyof TMerchant)[]
+
 export const merchantWritableFields = [
   'title',
 ] as const satisfies readonly (keyof TMerchant)[]
@@ -37,11 +42,5 @@ export function compilePatchMerchant(
   data: TDataStore,
   patch: TMerchantPatch | TMerchantPatch[]
 ): TIntentPatch {
-  const list = Array.isArray(patch) ? patch : [patch]
-  const merchants = getMerchants(data)
-  list.forEach(item => {
-    if (!item.id) throw new Error('Trying to patch merchant without id')
-    if (!merchants[item.id]) throw new Error('Merchant not found')
-  })
-  return { merchant: list }
+  return compileEntityPatch(data, 'merchant', patch)
 }

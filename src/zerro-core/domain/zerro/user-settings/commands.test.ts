@@ -8,7 +8,7 @@ import {
 } from '../../../testing/zenmoneyTestData'
 import { applyPatch } from '../../zenmoney'
 import { HiddenDataType } from '../hidden-data'
-import { compilePatchUserSettings, compileResetUserSettings } from './commands'
+import { compilePatchUserSettings } from './commands'
 import { getStoredUserSettings, getUserSettings } from './read'
 
 describe('user settings commands', () => {
@@ -99,40 +99,5 @@ describe('user settings commands', () => {
       }),
     ])
     expect(getStoredUserSettings(next)).toEqual({ preferZmBudgets: true })
-  })
-
-  it('resets existing settings through a deletion patch', () => {
-    const data = makeStore({
-      user: {
-        1: makeUser({ id: 1, parent: null, currency: 2 }),
-      },
-      reminder: {
-        settings: makeReminder('settings', {
-          type: HiddenDataType.UserSettings,
-          payload: { emojiIcons: true },
-        }),
-      },
-    })
-
-    const patch = compileResetUserSettings(data)
-    const next = applyPatch(data, patch)
-
-    expect(patch).toEqual({
-      deletion: [
-        {
-          id: 'settings',
-          object: 'reminder',
-        },
-      ],
-    })
-    expect(getUserSettings(next)).toEqual({
-      sawMigrationAlert: false,
-      preferZmBudgets: false,
-      emojiIcons: false,
-    })
-  })
-
-  it('keeps reset of missing settings as a no-op patch', () => {
-    expect(compileResetUserSettings(makeStore())).toEqual({})
   })
 })

@@ -79,7 +79,9 @@ export const getDebtAccountId: TSelector<TAccountId> = createSelector(
   }
 )
 
-function mergeMaterializedPatches(patches: TNormalizedPatch[]): TNormalizedPatch | undefined {
+function mergeMaterializedPatches(
+  patches: TNormalizedPatch[]
+): TNormalizedPatch | undefined {
   if (!patches.length) return undefined
   return patches.reduce<TNormalizedPatch>(immutableMergeDiffs, {})
 }

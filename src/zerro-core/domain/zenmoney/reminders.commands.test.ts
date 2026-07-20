@@ -3,11 +3,11 @@ import { describe, expect, it } from 'vitest'
 import {
   makeReminder as makeTestReminder,
   makeStore,
-} from '../../../testing/zenmoneyTestData'
-import { applyPatch } from '../applyPatch'
-import { compileDeleteReminder, compileSetReminder } from './commands'
-import { makeReminder } from './factory'
-import { getReminders } from './read'
+} from '../../testing/zenmoneyTestData'
+import { applyPatch } from './applyPatch'
+import { compileDeleteReminder, compileSetReminder } from './reminders'
+import { makeReminder } from './reminders'
+import { getReminders } from './reminders'
 
 describe('zenmoney reminder commands', () => {
   it('reads the normalized reminder map', () => {

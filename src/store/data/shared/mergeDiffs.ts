@@ -49,7 +49,10 @@ export function mergeDiffs(target: TNormalizedPatch, diff: TNormalizedPatch) {
  * @param target - target object will be mutated
  * @param diff - object with changes
  */
-export function immutableMergeDiffs(target: TNormalizedPatch, diff: TNormalizedPatch) {
+export function immutableMergeDiffs(
+  target: TNormalizedPatch,
+  diff: TNormalizedPatch
+) {
   const result: TNormalizedPatch = { ...target }
   if (diff.serverTimestamp) result.serverTimestamp = diff.serverTimestamp
   if (diff.deletion) {

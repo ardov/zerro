@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   makeStore,
   makeTag as makeTestTag,
-} from '../../../testing/zenmoneyTestData'
-import { compileCreateTag, compilePatchTag } from './commands'
-import { makeTag } from './factory'
+} from '../../testing/zenmoneyTestData'
+import { compileCreateTag, compilePatchTag } from './tags'
+import { makeTag } from './tags'
 
 describe('zenmoney tag commands', () => {
   it('compiles sparse patches for existing tags', () => {

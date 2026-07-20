@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { makeAccount, makeStore } from '../../../testing/zenmoneyTestData'
+import { makeAccount, makeStore } from '../../testing/zenmoneyTestData'
 import {
   getAccountList,
   getAccounts,
@@ -7,8 +7,8 @@ import {
   getDebtAccountId,
   getPopulatedAccounts,
   isInBudgetAccount,
-} from './read'
-import { AccountType } from './types'
+} from './accounts'
+import { AccountType } from './accounts'
 
 describe('zenmoney account reads', () => {
   it('reads accounts by map, id, and list', () => {

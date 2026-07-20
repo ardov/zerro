@@ -11,53 +11,23 @@ future local-only runtime. The module is not a storage layer and does not own
 UI reactivity. It provides pure domain operations plus facades that runtimes
 can adapt.
 
-## Goals
-
-1. Keep domain behavior independent of Redux, React, IndexedDB, localization,
-   and the ZenMoney HTTP client.
-2. Preserve Zerro hidden-data compatibility with ZenMoney entities.
-3. Offer one ergonomic semantic facade for app and headless consumers.
-4. Keep expensive projection dependencies visible and independently cached.
-5. Support deterministic local commands, materialized effects, replay, and
-   undo/redo without inverse patches.
-6. Allow incremental migration with focused parity tests.
-
 Near-term non-goals: solving memory pressure for the largest accounts; rich
 field-level remote conflict previews; replacing Redux with a second reactive
 Core store; publishing a standalone package before its API stabilizes.
 
 ## Boundaries
 
-```mermaid
-flowchart TD
-  UI["React / UI"] --> ReduxAdapter["Redux adapter"]
-  Headless["Worker / server / tests"] --> Facade["Core facade"]
-  ReduxAdapter --> Facade
-
-  Facade --> Session["Snapshot session"]
-  Facade --> Commands["Command registry"]
-  Commands --> Materializer["ZenMoney materializer"]
-
-  Session --> Projections["Zerro projections"]
-  Projections --> Zerro["Zerro Core"]
-  Materializer --> Zen["ZenMoney Core"]
-  Zerro --> Zen
-
-  ReduxAdapter --> Persistence["Redux / IndexedDB / sync"]
-```
-
-Dependency direction is one-way:
+Dependency direction is one-way, and Core must not import back from adapters
+or app layers:
 
 ```txt
 shared primitives
   -> normalized ZenMoney entities and operations
   -> Zerro hidden data and domain behavior
   -> projections and materializer
-  -> facade
-  -> runtime adapters
+  -> facade (snapshot session, command compilers)
+  -> runtime adapters (Redux, persistence, sync, UI)
 ```
-
-Core must not import back from adapters or app layers.
 
 ## Change pipeline
 
@@ -119,8 +89,8 @@ values before issue.
 If compilation generates caller-only metadata, it returns
 `{ patch: TIntentPatch, receipt: TReceipt }`. The receipt is not replay state.
 
-Internal compilers may keep the `compile*` prefix; the public facade uses short
-domain verbs such as `engine.envelopes.rename({ id, name })`.
+Internal compilers keep the `compile*` prefix; runtime namespaces expose short
+domain verbs such as `envelopes.rename(id, name)`.
 
 ### Materialization
 
@@ -149,13 +119,9 @@ Future predicted server rules belong here rather than in command compilers:
   surviving account;
 - a transaction already marked `deleted` ignores subsequent patches.
 
-Ownership is split by behavior rather than by pipeline stage. Each entity
-domain owns its writable patch contract, its sparse-to-full primary expansion,
-and effects triggered by changing that entity. The application materializer
-keeps the command loop: it invokes those rules against the latest snapshot,
-orders primary changes and effects, and combines changes across entity maps.
-
-Materialization is pure and receives the current normalized snapshot, command,
+Each entity module owns its writable, required, and creation field contracts
+next to its factory; the application materializer holds the command loop and
+one registry row per entity. Materialization is pure and receives the current normalized snapshot, command,
 and explicit version time. Local replay uses `issuedAt`; request transport uses
 a fresh `sentAt`. Local `current` contains primary changes plus predicted
 effects. Transport is built from a separate primary-only replay so predicted
@@ -172,8 +138,8 @@ already expanded the same effects.
 
 The root entrypoint (`import { createZerroSession } from 'zerro-core'`) is the
 package-facing semantic surface. It must not re-export Redux adapters or whole
-implementation trees. The reference engine and its outbox primitives are
-internal and are not root exports; the Redux slice imports them through
+implementation trees. The outbox engine operations are internal and are not
+root exports; the Redux slice imports them through
 `zerro-core/infrastructure/replica/*`. Migration-era deep imports are not
 stable APIs.
 
@@ -200,16 +166,17 @@ namespace. Session context contains only nondeterministic dependencies such as
 
 ### Runtime engine
 
-The eventual engine facade should expose the same domain vocabulary as the
-session, but execute commands and own undo/redo. The current in-memory
-`createZerroEngine` is a pure reference primitive, not a production state
-owner. In the React app, Redux must own replica state; a Redux-backed facade
-dispatches commands without creating another store.
+`infrastructure/replica/outbox.ts` is the engine: pure operations defining head
+clamping, command-prefix reads, redo-tail truncation on append, command
+rematerialization, and primary-only transport. The only runtime-specific part
+is who owns the state — in the React app that is Redux (`store/data/slice.ts`),
+and a future standalone package wraps the same functions.
 
-Internal pure outbox operations define head clamping, command-prefix reads,
-redo-tail truncation on append, and command rematerialization. The reference
-engine uses these operations; Redux can reuse them incrementally without
-exposing them as root package API or introducing a second store.
+There is deliberately no second engine object. An in-memory `createZerroEngine`
+reference implementation existed and was deleted: it had no production
+consumer and was a standing invitation to grow a second implementation of
+append, replay-prefix, clamp, and redo-tail rules. If a semantic engine facade
+is ever needed, build it over these operations rather than beside them.
 
 Issued commands append directly to the outbox. Redux performs authoritative
 `current` rematerialization for append, undo, redo, and base changes. The sync
@@ -230,11 +197,9 @@ The living projection dependency graph is the lazy memo wiring in
 maintained diagram. Snapshot-session and Redux wiring remain explicit in their
 owning modules.
 
-Adapter-level projectors such as `buildRawActivity` and `buildEnvMetrics` may
-be available to runtime adapters without appearing on the root semantic
-facade. Carry-forward projections such as `envMetrics` may need the full month
-range up to the requested month; the optimization target is stable upstream
-caching, not independent calculation of every month.
+Carry-forward projections such as `envMetrics` may need the full month range
+up to the requested month; the optimization target is stable upstream caching,
+not independent calculation of every month.
 
 ## Domain and presentation
 
@@ -306,9 +271,9 @@ commits the currently applied history branch. No inverse patches are stored.
 Only `base`, `outbox`, and `outboxHead` are durable inputs; sync progress and
 errors are ephemeral. There is no durable inbox or incoming-change history.
 
-The next replica implementation must share pure outbox operations with the
-reference engine or fold the reference engine into Redux. Two implementations
-of append, replay-prefix, clamp, and redo-tail rules are not acceptable.
+Any future replica implementation must reuse the pure outbox operations. Two
+implementations of append, replay-prefix, clamp, and redo-tail rules are not
+acceptable.
 
 ## Sync and conflicts
 

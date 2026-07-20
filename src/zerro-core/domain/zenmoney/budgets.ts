@@ -35,6 +35,12 @@ export type TBudget = {
   outcomeLock: boolean
   isOutcomeForecast: boolean
 }
+/** Fields the factory cannot default: creation intent must supply them. */
+export const budgetRequiredFields = [
+  'tag',
+  'date',
+] as const satisfies readonly (keyof TBudget)[]
+
 export const budgetWritableFields = [
   'tag',
   'date',

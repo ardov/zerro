@@ -6,7 +6,6 @@ import {
 } from '../../../testing/zenmoneyTestData'
 import { applyPatch } from '../applyPatch'
 import {
-  compileCreateTransaction,
   compileBulkEditTransactions,
   compileCombineToIncome,
   compileCombineToOutcome,
@@ -18,60 +17,6 @@ import {
 import { makeTransaction as makeCoreTransaction } from './factory'
 
 describe('zenmoney transaction commands', () => {
-  it('creates transaction intent without materialized balance effects', () => {
-    const data = makeStore({
-      user: {
-        1: { id: 1, parent: null },
-      } as any,
-      account: {
-        cash: makeAccount({ id: 'cash', balance: 100 }),
-        card: makeAccount({ id: 'card', balance: 50 }),
-      },
-    })
-
-    const result = compileCreateTransaction(
-      data,
-      {
-        date: '2026-02',
-        income: 25,
-        incomeInstrument: 1,
-        incomeAccount: 'cash',
-        outcome: 10,
-        outcomeInstrument: 1,
-        outcomeAccount: 'card',
-        comment: 'Transfer',
-      },
-      {
-        now: () => 1700000000000,
-        uuid: () => 'tr-new',
-      }
-    )
-    const next = applyPatch(data, result.patch)
-
-    expect(result.receipt.transactionId).toBe('tr-new')
-    expect(result.patch.transaction?.[0]).toEqual(
-      makeTransaction({
-        id: 'tr-new',
-        changed: 1700000000000,
-        created: 1700000000000,
-        user: 1,
-        date: '2026-02-01',
-        income: 25,
-        incomeInstrument: 1,
-        incomeAccount: 'cash',
-        outcome: 10,
-        outcomeInstrument: 1,
-        outcomeAccount: 'card',
-        comment: 'Transfer',
-        hold: false,
-      })
-    )
-    expect(result.patch.account).toBeUndefined()
-    expect(next.transaction['tr-new'].comment).toBe('Transfer')
-    expect(next.account.cash.balance).toBe(100)
-    expect(next.account.card.balance).toBe(50)
-  })
-
   it('creates production transaction defaults through the transaction factory', () => {
     expect(
       makeCoreTransaction(
@@ -369,23 +314,6 @@ describe('zenmoney transaction commands', () => {
   })
 
   it('validates transaction existence', () => {
-    expect(() =>
-      compileCreateTransaction(
-        makeStore(),
-        {
-          date: '2026-01-01',
-          incomeInstrument: 1,
-          incomeAccount: 'cash',
-          outcomeInstrument: 1,
-          outcomeAccount: 'card',
-        },
-        {
-          now: () => 1,
-          uuid: () => 'tr',
-        }
-      )
-    ).toThrow('No user')
-
     expect(() => compileDeleteTransactions(makeStore(), 'missing')).toThrow(
       'Transaction not found'
     )

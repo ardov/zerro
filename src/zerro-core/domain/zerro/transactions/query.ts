@@ -1,7 +1,7 @@
 import type { ById } from '../../shared/types'
-import type { TAccountId } from '../../zenmoney/accounts/types'
+import type { TAccountId } from '../../zenmoney/accounts'
 import type { TISODate, TISOMonth } from '../../zenmoney/primitives'
-import type { TTagId } from '../../zenmoney/tags/types'
+import type { TTagId } from '../../zenmoney/tags'
 import {
   getTransactionType,
   isDeletedTransaction,

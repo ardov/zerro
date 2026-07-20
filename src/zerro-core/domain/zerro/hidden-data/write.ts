@@ -44,15 +44,6 @@ export function compileSetSimpleHiddenData<TPayload>(
   return mergePatches(accountPatch, reminderPatch)
 }
 
-export function compileResetSimpleHiddenData(
-  data: TDataStore,
-  type: HiddenDataType
-): TIntentPatch {
-  const reminder = getSimpleHiddenDataReminder(data, type)
-  if (!reminder) return {}
-  return compileDeleteReminder(data, reminder.id)
-}
-
 export function compileSetMonthlyHiddenData<TPayload>(
   data: TDataStore,
   type: HiddenDataType,
@@ -149,7 +140,8 @@ export function applyIntentPatch(
   })
 
   patch.deletion?.forEach(({ id, object }) => {
-    const entities = next[object as Exclude<keyof TDataStore, 'serverTimestamp'>]
+    const entities =
+      next[object as Exclude<keyof TDataStore, 'serverTimestamp'>]
     const map = { ...entities } as Record<string | number, object>
     delete map[id]
     // @ts-expect-error Dynamic ZenMoney entity access.
@@ -159,9 +151,7 @@ export function applyIntentPatch(
   return next
 }
 
-export function mergePatches(
-  ...patches: TIntentPatch[]
-): TIntentPatch {
+export function mergePatches(...patches: TIntentPatch[]): TIntentPatch {
   const result: TIntentPatch = {}
 
   patches.forEach(patch => {

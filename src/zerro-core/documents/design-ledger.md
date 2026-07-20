@@ -15,8 +15,8 @@
 - The React app uses the explicit namespace-first `zerro-core/redux` adapter.
 - `domain`, `application`, `infrastructure`, and `presentation` are internal
   implementation paths, not supported app APIs.
-- The reference engine and outbox primitives are internal. Redux remains the
-  only reactive replica owner.
+- The outbox engine operations are internal. Redux remains the only reactive
+  replica owner.
 - Do not add package subpaths, an `exports` policy, or a semantic engine facade
   in advance of a consumer.
 

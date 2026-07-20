@@ -1,11 +1,11 @@
-import { round } from '../../shared/money'
-import type { ById } from '../../shared/types'
-import type { TAccountId } from '../accounts/types'
-import type { TFxAmount } from '../../shared/money'
-import type { TInstrument } from '../instruments'
-import type { TMerchant, TMerchantId } from '../merchants'
-import type { TTransaction } from '../transactions/types'
-import { getTransactionType, TrType } from '../transactions'
+import { round } from '../shared/money'
+import type { ById } from '../shared/types'
+import type { TAccountId } from './accounts'
+import type { TFxAmount } from '../shared/money'
+import type { TInstrument } from './instruments'
+import type { TMerchant, TMerchantId } from './merchants'
+import type { TTransaction } from './transactions/types'
+import { getTransactionType, TrType } from './transactions'
 
 export type TDebtor = {
   id: string

@@ -339,12 +339,8 @@ export function compilePatchEnvelope(
 
   return mergePatches(
     patches.tag.length ? compilePatchTag(data, patches.tag) : {},
-    patches.account.length
-      ? compilePatchAccount(data, patches.account)
-      : {},
-    patches.merchant.length
-      ? compilePatchMerchant(data, patches.merchant)
-      : {},
+    patches.account.length ? compilePatchAccount(data, patches.account) : {},
+    patches.merchant.length ? compilePatchMerchant(data, patches.merchant) : {},
     patches.meta.length ? compilePatchEnvelopeMeta(data, patches.meta, ctx) : {}
   )
 }

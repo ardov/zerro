@@ -17,8 +17,9 @@ shape is specified once in
 [architecture.md](./architecture.md#commands).
 
 Reliable automated verification, ready bridge removal, and read-graph
-simplification are done (see Git for the phase history). Remaining work: the
-manual completion smoke, then materializer rules, then the simplification plan.
+simplification are done (see Git for the phase history). The code and
+documentation diet is complete through the entity-flattening wave. Remaining
+work: the manual completion smoke, then materializer rules.
 
 ## Remaining work
 
@@ -60,11 +61,6 @@ For each rule:
 - keep canonical server diffs and dumb `applyPatch` unchanged;
 - keep predicted effects out of primary-only transport.
 
-### 3. Simplification plan
-
-Code and documentation diet workstreams live in
-[simplification-plan.md](./simplification-plan.md).
-
 ## Deferred until evidence exists
 
 - semantic Redux-backed engine facade;
@@ -78,8 +74,8 @@ Code and documentation diet workstreams live in
 ## Choosing work
 
 - Follow the order above; a verified independent smoke may land between slices.
-- Split work by contract: each materializer rule and each simplification
-  workstream should remain separate commits.
+- Split work by contract: each materializer rule should remain a separate
+  commit.
 - A concrete product regression may override this order; document the evidence
   when it does.
 
@@ -118,4 +114,5 @@ patch workaround.
 Knip is configured from the real app, worker, and package-consumer entrypoints
 (audit 2026-07-14: no unused files). Remaining findings are unused exports and
 types; Knip output is evidence for an audit, not automatic deletion authority.
-Dead-export deletion is tracked as workstream W1 of the simplification plan.
+Knip's remaining core findings are exported types used only internally; treat
+them as audit evidence, not a deletion queue.

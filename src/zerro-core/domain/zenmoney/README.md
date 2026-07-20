@@ -71,6 +71,20 @@ Legend:
   use countries; accounts and transactions may reference companies. Country
   `currency` is an instrument id, not an FX code. Company `deleted` entries
   can remain in synced data; neither entity has user commands.
+- `Account` is a user-owned entity; `instrument` is a currency id, not an FX
+  code, and `company` is an optional linked bank/provider id. `balance` is the
+  current persisted balance — transaction commands do not mutate it, and
+  future materializer rules will keep it in sync. Loan/deposit-only fields
+  (`capitalization`, `percent`, `startDate`, `endDateOffset`,
+  `endDateOffsetInterval`, `payoffStep`, `payoffInterval`) are usually null for
+  other account types, and `startBalance` means initial deposit or loan
+  principal for those two types. Account reads intentionally exclude FX
+  resolution and Zerro-specific conventions such as pinned titles and the
+  hidden data account, which live under `zerro-core/domain/zerro/accounts`.
+- `Tag` is a user-owned category entity. Creating a tag with an existing id
+  routes through patch semantics to preserve legacy behavior. The localized
+  `null` sentinel tag and its `tag#null` envelope fallback stay outside this
+  ZenMoney entity slice; see `zerro-core/domain/zerro/envelopes`.
 - `Budget` depends on users and tags, but Zerro envelope budgets are a separate
   hidden-data projection under `zerro-core/domain/zerro/budgets`. ZenMoney tag
   budgets default to locked income and outcome values.
@@ -78,7 +92,10 @@ Legend:
   debtors, and envelope-like projections.
 - `Reminder` and `ReminderMarker` depend on users, instruments, accounts, tags,
   and merchants. Markers also depend on reminders; Core owns their factory but
-  has no marker write command yet.
+  has no marker write command yet. `compileDeleteReminder` compiles a missing
+  reminder to an empty patch, mirroring the legacy thunk's no-op behavior.
+  Hidden Zerro data also uses reminders as a storage carrier, but the
+  hidden-data codec stays under `zerro-core/domain/zerro/hidden-data`.
 - `Transaction` should stay last among normalized ZenMoney entities because it
   can reference user, company, instrument, account, tag, merchant, and reminder
   marker data.

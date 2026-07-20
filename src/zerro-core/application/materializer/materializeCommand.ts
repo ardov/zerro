@@ -9,25 +9,34 @@ import {
 import {
   makeTransaction,
   transactionIntentFields,
+  transactionRequiredFields,
   transactionWritableFields,
 } from '../../domain/zenmoney/transactions'
 import {
+  accountRequiredFields,
   accountWritableFields,
   makeAccount,
 } from '../../domain/zenmoney/accounts'
 import {
+  budgetRequiredFields,
   budgetWritableFields,
   makeTagBudget,
 } from '../../domain/zenmoney/budgets'
 import {
   makeMerchant,
+  merchantRequiredFields,
   merchantWritableFields,
 } from '../../domain/zenmoney/merchants'
 import {
   makeReminder,
+  reminderRequiredFields,
   reminderWritableFields,
 } from '../../domain/zenmoney/reminders'
-import { makeTag, tagWritableFields } from '../../domain/zenmoney/tags'
+import {
+  makeTag,
+  tagRequiredFields,
+  tagWritableFields,
+} from '../../domain/zenmoney/tags'
 import { getRootUserId } from '../../domain/zenmoney/users'
 
 export { intentPatchKeys } from '../../domain/zenmoney/store'
@@ -66,35 +75,35 @@ const entityRegistry = [
   {
     key: 'account',
     writableFields: accountWritableFields,
-    requiredFields: ['instrument', 'title'],
+    requiredFields: accountRequiredFields,
     make: (draft, ctx) =>
       makeAccount(draft as Parameters<typeof makeAccount>[0], ctx) as TEntity,
   },
   {
     key: 'reminder',
     writableFields: reminderWritableFields,
-    requiredFields: ['incomeAccount', 'outcomeAccount'],
+    requiredFields: reminderRequiredFields,
     make: (draft, ctx) =>
       makeReminder(draft as Parameters<typeof makeReminder>[0], ctx) as TEntity,
   },
   {
     key: 'merchant',
     writableFields: merchantWritableFields,
-    requiredFields: ['title'],
+    requiredFields: merchantRequiredFields,
     make: (draft, ctx) =>
       makeMerchant(draft as Parameters<typeof makeMerchant>[0], ctx) as TEntity,
   },
   {
     key: 'tag',
     writableFields: tagWritableFields,
-    requiredFields: ['title'],
+    requiredFields: tagRequiredFields,
     make: (draft, ctx) =>
       makeTag(draft as Parameters<typeof makeTag>[0], ctx) as TEntity,
   },
   {
     key: 'budget',
     writableFields: budgetWritableFields,
-    requiredFields: ['tag', 'date'],
+    requiredFields: budgetRequiredFields,
     make: (draft, ctx) =>
       makeTagBudget(
         draft as Parameters<typeof makeTagBudget>[0],
@@ -110,13 +119,7 @@ const entityRegistry = [
     key: 'transaction',
     writableFields: transactionWritableFields,
     creationFields: transactionIntentFields,
-    requiredFields: [
-      'date',
-      'incomeInstrument',
-      'incomeAccount',
-      'outcomeInstrument',
-      'outcomeAccount',
-    ],
+    requiredFields: transactionRequiredFields,
     make: (draft, ctx) =>
       makeTransaction(
         draft as Parameters<typeof makeTransaction>[0],
