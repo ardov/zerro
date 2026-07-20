@@ -1,17 +1,17 @@
 {
   "compilerOptions": {
     "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
     "baseUrl": "src",
     "target": "esnext",
-    "lib": ["dom", "dom.iterable", "es2021"],
-    "allowJs": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -22,6 +22,5 @@
     "typings/theme.d.ts",
     "typings/vite-env.d.ts",
     "typings/i18n.d.ts"
-  ],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  ]
 }
