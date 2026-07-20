@@ -35,11 +35,6 @@
   "browserslist": [
     "defaults"
   ],
-  "pnpm": {
-    "overrides": {
-      "@types/react": "19.2.17"
-    }
-  },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@emotion/react": "^11.14.0",
@@ -85,7 +80,7 @@
     "@types/lodash": "^4.17.24",
     "@types/mdx": "^2.0.14",
     "@types/node": "^26.1.1",
-    "@types/react": "19.2.17",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@types/react-transition-group": "^4.4.12",
     "@vitejs/plugin-react": "^6.0.3",
