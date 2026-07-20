@@ -1,6 +1,5 @@
 import { initSentry } from '6-shared/diagnostics'
 import { store } from 'store'
-import { bindWorkerToStore } from 'worker'
 import { resetData } from 'store/data'
 
 import GlobalErrorBoundary from './GlobalErrorBoundary'
@@ -15,7 +14,6 @@ registerSW({
   },
 })
 initSentry()
-bindWorkerToStore(store.dispatch)
 createZerroInstance(store)
 
 export const MainApp = () => (
