@@ -48,15 +48,15 @@ export const dataEntityKeys = [
 
 export type TDataEntityKey = (typeof dataEntityKeys)[number]
 
-export type TZmDeletionObject = {
+export type TDeletionObject = {
   id: string | number
   object: DataEntity
-  stamp: TUnixTime
+  stamp: TMsTime
   user: TUserId
 }
 
-export type TDeletionObject = TZmDeletionObject & {
-  stamp: TMsTime
+export type TZmDeletionObject = TDeletionObject & {
+  stamp: TUnixTime
 }
 
 export type TDeletionIntent = Pick<TDeletionObject, 'id' | 'object'>
