@@ -1,7 +1,22 @@
-import type { ById } from '../../shared/types'
-import type { TDataStore } from '../store'
-import type { TFxCode, TInstrument, TInstrumentId } from './types'
+import type { ById } from '../shared/types'
+import type { TMsTime, TUnixTime } from './primitives'
+import type { TDataStore } from './store'
 
+export type TInstrumentId = number
+export type TFxCode = string
+
+export type TInstrument = {
+  id: TInstrumentId
+  changed: TMsTime
+  title: string
+  shortTitle: TFxCode
+  symbol: string
+  rate: number
+}
+
+export type TZmInstrument = Omit<TInstrument, 'changed'> & {
+  changed: TUnixTime
+}
 export type TInstrumentSource = Pick<TDataStore, 'instrument'>
 export type TInstrumentCodeMap = Record<TInstrumentId, TFxCode>
 
@@ -9,15 +24,12 @@ export function getInstruments(data: TInstrumentSource): ById<TInstrument> {
   return data.instrument
 }
 
-/** Map of instrument IDs to currency codes. */
 export function getInstCodeMap(data: TInstrumentSource): TInstrumentCodeMap {
   return Object.fromEntries(
     Object.values(data.instrument).map(i => [i.id, i.shortTitle])
   )
 }
 
-// TODO: used only in one place, remove later
-/** Map of currency codes to instruments. */
 export function getInstrumentsByCode(
   data: TInstrumentSource
 ): Record<TFxCode, TInstrument> {
