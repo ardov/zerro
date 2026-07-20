@@ -1,6 +1,7 @@
-import type { core } from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
-export type { TGoal } from './shared/types'
+export type TGoal = core.goals.TGoal
 export type TGoalInfo = core.goals.TGoalInfo
 
-export { goalType } from './shared/types'
+export const goalType = core.goals.goalType
+export type goalType = core.goals.goalType

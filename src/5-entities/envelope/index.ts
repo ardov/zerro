@@ -1,8 +1,10 @@
 import { core } from 'zerro-core/redux'
 
-export type { TEnvelopeId } from './shared/envelopeId'
+export type TEnvelopeId = core.envelopes.TEnvelopeId
 export type TEnvelope = core.envelopes.TPresentedEnvelope
 
 export const envelopeVisibility = core.envelopes.envelopeVisibility
 export type envelopeVisibility = core.envelopes.envelopeVisibility
-export { EnvType, envId } from './shared/envelopeId'
+export const EnvType = core.envelopes.EnvType
+export type EnvType = core.envelopes.EnvType
+export const envId = core.envelopes.envId

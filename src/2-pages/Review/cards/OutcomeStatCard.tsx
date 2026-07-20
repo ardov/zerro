@@ -8,8 +8,7 @@ import { TDateDraft, TFxAmount, TTransaction } from '6-shared/types'
 import { PercentBar, PercentBarItem } from '6-shared/ui/PercentBar'
 
 import { useAppSelector } from 'store'
-import { EnvType, TEnvelopeId } from '5-entities/envelope'
-import { envId } from '5-entities/envelope/shared/envelopeId'
+import { EnvType, envId, TEnvelopeId } from '5-entities/envelope'
 
 import { DataLine } from '3-widgets/DataLine'
 import { Card, TCardProps } from '../shared/Card'

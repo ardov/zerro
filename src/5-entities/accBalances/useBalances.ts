@@ -6,8 +6,7 @@ import { keys } from '6-shared/helpers/keys'
 import { useAppSelector } from 'store/index'
 import { core } from 'zerro-core/redux'
 
-import { balancesToDisplay } from './shared/convertBalancesToDisplay'
-import { TBalanceNode } from './shared/types'
+type TBalanceNode = core.balances.TBalanceNode
 
 function useBalances(
   aggregation: GroupBy,
@@ -41,7 +40,7 @@ export function useDisplayBalances(
   const fxBalances = useBalances(aggregation, start, end)
   const convert = useAppSelector(core.currency.selectDisplayConverter)
   const balances = useMemo(
-    () => balancesToDisplay(fxBalances, convert),
+    () => core.balances.convertToDisplay(fxBalances, convert),
     [convert, fxBalances]
   )
   return balances
