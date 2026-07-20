@@ -40,15 +40,16 @@ import {
   getZerroInBudgetAccountIds,
   getZerroSavingAccounts,
 } from '../domain/zerro'
-import { memoOn, sameItems } from './memo'
+import { memoOn, memoOnObject, sameItems } from './memo'
 
 /** A projection: one value derived from a snapshot. */
 type TNode<T> = (data: TDataStore) => T
 
 /**
- * A memoized node. Pins {@link memoOn}'s input to `TDataStore` so a node's
- * dependency selector infers `data` and returns a tuple without a `: TDataStore`
- * annotation or an `as const` at every call site.
+ * A memoized node from a dependency tuple. Pins the memo's input to
+ * `TDataStore` so the dependency selector infers `data` and returns a tuple
+ * without a `: TDataStore` annotation or an `as const` at every call site. Use
+ * for a compute that takes its dependencies positionally.
  */
 function node<TDeps extends readonly unknown[], TResult>(
   selectDeps: (data: TDataStore) => readonly [...TDeps],
@@ -56,6 +57,20 @@ function node<TDeps extends readonly unknown[], TResult>(
   isEqualResult?: (previous: TResult, next: TResult) => boolean
 ): TNode<TResult> {
   return memoOn(selectDeps, compute, isEqualResult)
+}
+
+/**
+ * A memoized node from a named-dependency object. The object matches the
+ * compute's parameter, so the compute is the bare `build*`/`get*` function and
+ * each dependency is named once, by key. Use for the object-parameter domain
+ * functions.
+ */
+function nodeObj<TArg extends Record<string, unknown>, TResult>(
+  selectArg: (data: TDataStore) => TArg,
+  compute: (arg: TArg) => TResult,
+  isEqualResult?: (previous: TResult, next: TResult) => boolean
+): TNode<TResult> {
+  return memoOnObject(selectArg, compute, isEqualResult)
 }
 
 /**
@@ -88,9 +103,9 @@ export function createProjectionGraph(ctx: TCoreContext) {
     getHistoryStart(transactionsHistory(d), currentDate())
 
   // --- transactions: one sort, two slices ----------------------------------
-  const sortedTransactions = node(
-    d => [d.transaction],
-    transaction => getSortedTransactions({ transaction })
+  const sortedTransactions = nodeObj(
+    d => ({ transaction: d.transaction }),
+    getSortedTransactions
   )
   const transactionsHistory = node(
     d => [sortedTransactions(d)],
@@ -99,86 +114,67 @@ export function createProjectionGraph(ctx: TCoreContext) {
   const transactionIds = node(d => [sortedTransactions(d)], toTransactionIds)
 
   // --- reads off a single entity map ---------------------------------------
-  const instrumentCodeById = node(
-    d => [d.instrument],
-    instrument => getInstCodeMap({ instrument })
+  const instrumentCodeById = nodeObj(
+    d => ({ instrument: d.instrument }),
+    getInstCodeMap
   )
-  const userSettings = node(
-    d => [d.reminder],
-    reminder => getUserSettings({ reminder })
+  const userSettings = nodeObj(d => ({ reminder: d.reminder }), getUserSettings)
+  const envelopeMeta = nodeObj(d => ({ reminder: d.reminder }), getEnvelopeMeta)
+  const envBudgets = nodeObj(d => ({ reminder: d.reminder }), getEnvBudgets)
+  const rawGoals = nodeObj(d => ({ reminder: d.reminder }), getRawGoals)
+  const storedFxRates = nodeObj(
+    d => ({ reminder: d.reminder }),
+    getStoredFxRates
   )
-  const envelopeMeta = node(
-    d => [d.reminder],
-    reminder => getEnvelopeMeta({ reminder })
-  )
-  const envBudgets = node(
-    d => [d.reminder],
-    reminder => getEnvBudgets({ reminder })
-  )
-  const rawGoals = node(
-    d => [d.reminder],
-    reminder => getRawGoals({ reminder })
-  )
-  const storedFxRates = node(
-    d => [d.reminder],
-    reminder => getStoredFxRates({ reminder })
-  )
-  const tagBudgets = node(
-    d => [d.budget],
-    budget => getTagBudgets({ budget })
-  )
-  const savingAccounts = node(
-    d => [d.account],
-    account => getZerroSavingAccounts({ account })
+  const tagBudgets = nodeObj(d => ({ budget: d.budget }), getTagBudgets)
+  const savingAccounts = nodeObj(
+    d => ({ account: d.account }),
+    getZerroSavingAccounts
   )
   // Result equality matters here: this list is rebuilt from the whole account
   // map, and every account edit would otherwise invalidate the activity chain.
-  const inBudgetAccountIds = node(
-    d => [d.account],
-    account => getZerroInBudgetAccountIds({ account }),
+  const inBudgetAccountIds = nodeObj(
+    d => ({ account: d.account }),
+    getZerroInBudgetAccountIds,
     sameItems
   )
 
   // --- fx ------------------------------------------------------------------
-  const currentFxRates = node(
-    d => [d.instrument, currentMonth()],
-    (instruments, currentMonth) =>
-      buildCurrentFxRates({ instruments, currentMonth })
+  const currentFxRates = nodeObj(
+    d => ({ instruments: d.instrument, currentMonth: currentMonth() }),
+    buildCurrentFxRates
   )
-  const fxRates = node(
-    d => [storedFxRates(d), currentFxRates(d)],
-    (storedRates, currentRates) => buildFxRates({ storedRates, currentRates })
+  const fxRates = nodeObj(
+    d => ({ storedRates: storedFxRates(d), currentRates: currentFxRates(d) }),
+    buildFxRates
   )
-  const fxRatesGetter = node(
-    d => [fxRates(d), currentFxRates(d)],
-    (rates, currentRates) => buildFxRatesGetter({ rates, currentRates })
+  const fxRatesGetter = nodeObj(
+    d => ({ rates: fxRates(d), currentRates: currentFxRates(d) }),
+    buildFxRatesGetter
   )
   const convertFx = node(d => [fxRatesGetter(d)], buildFxConverter)
 
   // --- debtors -------------------------------------------------------------
-  const debtors = node(
-    d => [transactionsHistory(d), d.merchant, d.instrument, debtAccountId(d)],
-    (transactions, merchants, instruments, debtAccountId) =>
-      buildDebtors({ transactions, merchants, instruments, debtAccountId })
+  const debtors = nodeObj(
+    d => ({
+      transactions: transactionsHistory(d),
+      merchants: d.merchant,
+      instruments: d.instrument,
+      debtAccountId: debtAccountId(d),
+    }),
+    buildDebtors
   )
 
   // --- envelopes (domain only; presentation stays in the adapter) ----------
-  const envelopesCompiled = node(
-    d => [
-      debtors(d),
-      d.tag,
-      savingAccounts(d),
-      envelopeMeta(d),
-      userCurrency(d),
-    ],
-    (debtors, tags, savingAccounts, envelopeMeta, userCurrency) =>
-      buildEnvelopes({
-        debtors,
-        tags,
-        savingAccounts,
-        envelopeMeta,
-        userCurrency,
-      })
+  const envelopesCompiled = nodeObj(
+    d => ({
+      debtors: debtors(d),
+      tags: d.tag,
+      savingAccounts: savingAccounts(d),
+      envelopeMeta: envelopeMeta(d),
+      userCurrency: userCurrency(d),
+    }),
+    buildEnvelopes
   )
   // Pass-through: the parent object is memoized, so its fields are already
   // reference-stable.
@@ -190,117 +186,117 @@ export function createProjectionGraph(ctx: TCoreContext) {
   const keepingEnvelopeIds = node(d => [envelopes(d)], getKeepingEnvelopes)
 
   // --- budgets and month list ----------------------------------------------
-  const budgets = node(
-    d => [tagBudgets(d), envBudgets(d), userSettings(d).preferZmBudgets],
-    (tagBudgets, envBudgets, preferZmBudgets) =>
-      buildBudgets({ tagBudgets, envBudgets, preferZmBudgets })
+  const budgets = nodeObj(
+    d => ({
+      tagBudgets: tagBudgets(d),
+      envBudgets: envBudgets(d),
+      preferZmBudgets: userSettings(d).preferZmBudgets,
+    }),
+    buildBudgets
   )
-  const monthList = node(
-    d => [transactionsHistory(d), budgets(d), currentMonth()],
-    (transactions, budgets, currentMonth) =>
-      buildMonthList({ transactions, budgets, currentMonth })
+  const monthList = nodeObj(
+    d => ({
+      transactions: transactionsHistory(d),
+      budgets: budgets(d),
+      currentMonth: currentMonth(),
+    }),
+    buildMonthList
   )
 
   // --- activity chain (the expensive nodes) --------------------------------
-  const currentFunds = node(
-    d => [d.account, inBudgetAccountIds(d), instrumentCodeById(d)],
-    (accounts, inBudgetIds, instrumentCodeById) =>
-      buildCurrentFunds({ accounts, inBudgetIds, instrumentCodeById })
+  const currentFunds = nodeObj(
+    d => ({
+      accounts: d.account,
+      inBudgetIds: inBudgetAccountIds(d),
+      instrumentCodeById: instrumentCodeById(d),
+    }),
+    buildCurrentFunds
   )
-  const routingContext = node(
-    d => [inBudgetAccountIds(d), debtAccountId(d), debtors(d)],
-    (inBudgetAccountIds, debtAccountId, debtors) =>
-      buildActivityRoutingContext({
-        inBudgetAccountIds,
-        debtAccountId,
-        debtors,
-      })
+  const routingContext = nodeObj(
+    d => ({
+      inBudgetAccountIds: inBudgetAccountIds(d),
+      debtAccountId: debtAccountId(d),
+      debtors: debtors(d),
+    }),
+    buildActivityRoutingContext
   )
-  const rawActivity = node(
-    d => [transactionsHistory(d), routingContext(d), d.instrument],
-    (transactions, routing, instruments) =>
-      buildRawActivity({ transactions, routing, instruments })
+  const rawActivity = nodeObj(
+    d => ({
+      transactions: transactionsHistory(d),
+      routing: routingContext(d),
+      instruments: d.instrument,
+    }),
+    buildRawActivity
   )
-  const activity = node(
-    d => [rawActivity(d), keepingEnvelopeIds(d)],
-    (rawActivity, keepingEnvelopeIds) =>
-      buildActivity({ rawActivity, keepingEnvelopeIds })
+  const activity = nodeObj(
+    d => ({
+      rawActivity: rawActivity(d),
+      keepingEnvelopeIds: keepingEnvelopeIds(d),
+    }),
+    buildActivity
   )
-  const envMetrics = node(
-    d => [monthList(d), envelopes(d), activity(d), budgets(d), convertFx(d)],
-    (monthList, envelopes, activity, budgets, convertFx) =>
-      buildEnvMetrics({ monthList, envelopes, activity, budgets, convertFx })
+  const envMetrics = nodeObj(
+    d => ({
+      monthList: monthList(d),
+      envelopes: envelopes(d),
+      activity: activity(d),
+      budgets: budgets(d),
+      convertFx: convertFx(d),
+    }),
+    buildEnvMetrics
   )
-  const sortedActivity = node(
-    d => [rawActivity(d), keepingEnvelopeIds(d), convertFx(d)],
-    (rawActivity, keepingEnvelopeIds, convertFx) =>
-      buildSortedActivity({ rawActivity, keepingEnvelopeIds, convertFx })
+  const sortedActivity = nodeObj(
+    d => ({
+      rawActivity: rawActivity(d),
+      keepingEnvelopeIds: keepingEnvelopeIds(d),
+      convertFx: convertFx(d),
+    }),
+    buildSortedActivity
   )
-  const monthTotals = node(
-    d => [
-      monthList(d),
-      currentFunds(d),
-      activity(d),
-      envMetrics(d),
-      convertFx(d),
-      currentMonth(),
-    ],
-    (monthList, currentFunds, activity, envMetrics, convertFx, currentMonth) =>
-      buildMonthTotals({
-        monthList,
-        currentFunds,
-        activity,
-        envMetrics,
-        convertFx,
-        currentMonth,
-      })
+  const monthTotals = nodeObj(
+    d => ({
+      monthList: monthList(d),
+      currentFunds: currentFunds(d),
+      activity: activity(d),
+      envMetrics: envMetrics(d),
+      convertFx: convertFx(d),
+      currentMonth: currentMonth(),
+    }),
+    buildMonthTotals
   )
 
   // --- goals ---------------------------------------------------------------
-  const goals = node(
-    d => [
-      rawGoals(d),
-      monthList(d),
-      envMetrics(d),
-      sortedActivity(d),
-      convertFx(d),
-    ],
-    (rawGoals, monthList, envMetrics, sortedActivity, convertFx) =>
-      buildGoals({ rawGoals, monthList, envMetrics, sortedActivity, convertFx })
+  const goals = nodeObj(
+    d => ({
+      rawGoals: rawGoals(d),
+      monthList: monthList(d),
+      envMetrics: envMetrics(d),
+      sortedActivity: sortedActivity(d),
+      convertFx: convertFx(d),
+    }),
+    buildGoals
   )
   const goalTotals = node(d => [goals(d), convertFx(d)], buildGoalTotals)
 
   // --- balances ------------------------------------------------------------
-  const balances = node(
-    d => [
-      transactionsHistory(d),
-      d.account,
-      debtors(d),
-      d.merchant,
-      instrumentCodeById(d),
-      debtAccountId(d),
-    ],
-    (
-      transactions,
-      accounts,
-      debtors,
-      merchants,
-      instrumentCodeById,
-      debtAccountId
-    ) =>
-      buildBalances({
-        transactions,
-        accounts,
-        debtors,
-        merchants,
-        instrumentCodeById,
-        debtAccountId,
-      })
+  const balances = nodeObj(
+    d => ({
+      transactions: transactionsHistory(d),
+      accounts: d.account,
+      debtors: debtors(d),
+      merchants: d.merchant,
+      instrumentCodeById: instrumentCodeById(d),
+      debtAccountId: debtAccountId(d),
+    }),
+    buildBalances
   )
-  const balancesByDate = node(
-    d => [balances(d), historyStart(d), currentDate()],
-    (balances, historyStart, currentDate) =>
-      buildBalancesByDate({ balances, historyStart, currentDate })
+  const balancesByDate = nodeObj(
+    d => ({
+      balances: balances(d),
+      historyStart: historyStart(d),
+      currentDate: currentDate(),
+    }),
+    buildBalancesByDate
   )
 
   return {
