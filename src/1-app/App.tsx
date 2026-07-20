@@ -90,9 +90,7 @@ export default function App() {
   const routes = getRoutes()
 
   return (
-    <BrowserRouter
-      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-    >
+    <BrowserRouter>
       <AnalyticsNavigation />
       <PopoverManager>
         <RegularSyncHandler />

@@ -118,6 +118,11 @@ Adopt supported compatibility flags on each intermediate major. Do not jump
 directly from Router 5 to the current major. Keep declarative routing unless a
 separate product requirement justifies data routers.
 
+Router 7 is completed 2026-07-20. The previously enabled v7 future behaviors
+are now defaults, so their `future` props were removed. Declarative routes and
+the history-backed overlay contract remain unchanged; TypeScript, tests, build,
+and package check pass. Router 8 remains a separate next step.
+
 ### 8. TypeScript 7
 
 Take this last because compiler and module-resolution changes affect the whole

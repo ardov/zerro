@@ -10,7 +10,6 @@ function makeHarness() {
       <MemoryRouter
         initialEntries={['/accounts', '/budgets?month=2026-07#activity']}
         initialIndex={1}
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
       >
         {props.children}
       </MemoryRouter>
