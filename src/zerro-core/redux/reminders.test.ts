@@ -7,8 +7,8 @@ import {
   makeReminder,
   makeStore,
   makeUser,
-} from 'zerro-core/testing/zenmoneyTestData'
-import { deleteReminder, setReminder } from './setReminder'
+} from '../testing/zenmoneyTestData'
+import { remove, set } from './reminders'
 
 const NOW = Date.parse('2026-07-11T12:00:00Z')
 const UUID = 'reminder-new'
@@ -46,14 +46,14 @@ function makeDispatch(state: RootState) {
   return dispatch
 }
 
-describe('reminder semantic writes', () => {
+describe('reminder Redux commands', () => {
   it('returns created reminders and appends a semantic outbox entry', () => {
     vi.spyOn(Date, 'now').mockReturnValue(NOW)
     const state = makeState()
     const dispatch = makeDispatch(state)
 
     const reminders = dispatch(
-      setReminder({
+      set({
         incomeAccount: 'cash',
         outcomeAccount: 'card',
         comment: 'Rent',
@@ -87,9 +87,7 @@ describe('reminder semantic writes', () => {
     const state = makeState(true)
     const dispatch = makeDispatch(state)
 
-    const reminders = dispatch(
-      setReminder({ id: 'existing', comment: 'Updated' })
-    )
+    const reminders = dispatch(set({ id: 'existing', comment: 'Updated' }))
 
     expect(reminders[0]).toMatchObject({
       id: 'existing',
@@ -112,7 +110,7 @@ describe('reminder semantic writes', () => {
     const state = makeState(true)
     const dispatch = makeDispatch(state)
 
-    dispatch(deleteReminder('existing'))
+    dispatch(remove('existing'))
 
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -132,7 +130,7 @@ describe('reminder semantic writes', () => {
     )
 
     const missingDispatch = makeDispatch(state)
-    missingDispatch(deleteReminder('missing'))
+    missingDispatch(remove('missing'))
     expect(
       missingDispatch.mock.calls.filter(
         ([action]: [any]) => action?.type === appendClientCommand.type

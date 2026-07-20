@@ -33,14 +33,6 @@ import {
 } from '../../testing/reduxSelectors'
 import { hashJson } from '../../testing/stableJson'
 
-vi.mock('5-entities/shared/hidden-store/dataAccount', () => ({
-  DATA_ACC_NAME: '🤖 [Zerro Data]',
-  getDataAccountId: () => undefined,
-  prepareDataAccount: () => {
-    throw new Error('prepareDataAccount is not available in demo tests')
-  },
-}))
-
 describe('createZerroSession on deterministic demo data', () => {
   it('matches the current core Redux adapter selectors', () => {
     vi.useFakeTimers()
