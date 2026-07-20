@@ -68,7 +68,9 @@ Legend:
 - `Instrument` should stay first among reference data because many entities hold
   instrument ids and FX conversion depends on instrument codes/rates.
 - `Country` and `Company` are synchronized reference data. Users and companies
-  use countries; accounts and transactions may reference companies.
+  use countries; accounts and transactions may reference companies. Country
+  `currency` is an instrument id, not an FX code. Company `deleted` entries
+  can remain in synced data; neither entity has user commands.
 - `Budget` depends on users and tags, but Zerro envelope budgets are a separate
   hidden-data projection under `zerro-core/domain/zerro/budgets`.
 - `Reminder` and `ReminderMarker` depend on users, instruments, accounts, tags,
@@ -121,5 +123,5 @@ server-side materialization.
 
 Use field comments for non-obvious invariants: timestamp units, wire-vs-core
 differences, reference-data deletion flags, and fields that are easy to confuse.
-Use entity READMEs for domain explanations, relationships, mutability, and
-module-level guidance.
+Keep domain explanations, relationships, and mutability beside the relevant
+flat entity module.
