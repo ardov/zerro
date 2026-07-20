@@ -1,19 +1,14 @@
 import { createSelector } from '@reduxjs/toolkit'
 import type { RootState } from 'store'
 import { useAppSelector } from 'store'
-import {
-  getInstruments,
-  getInstrumentsByCode,
-  getInstCodeMap,
-} from '../domain/zenmoney'
+import { getInstruments, getInstrumentsByCode } from '../domain/zenmoney'
+import { graph } from './graph'
 import { selectInstrumentSlice } from './state'
 
 export const selectAll = (state: RootState) =>
   getInstruments({ instrument: selectInstrumentSlice(state) })
-export const selectCodeMap = createSelector(
-  [selectInstrumentSlice],
-  instrument => getInstCodeMap({ instrument })
-)
+export const selectCodeMap = (state: RootState) =>
+  graph.instrumentCodeById(state.data.current)
 export const selectByCode = createSelector(
   [selectInstrumentSlice],
   instrument => getInstrumentsByCode({ instrument })

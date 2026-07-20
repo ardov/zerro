@@ -1,18 +1,18 @@
 export { editFxRates as edit, resetFxRates as reset } from './commands'
 import { createSelector } from '@reduxjs/toolkit'
+import type { RootState } from 'store'
 import {
   buildCurrentFxRates,
   buildFxConverter,
   buildFxRates,
   buildFxRatesGetter,
-  getStoredFxRates,
 } from '../domain/zerro'
+import { graph } from './graph'
 import * as instruments from './instruments'
-import { selectCurrentMonth, selectReminderSlice } from './state'
+import { selectCurrentMonth } from './state'
 
-const selectStoredFxRates = createSelector([selectReminderSlice], reminder =>
-  getStoredFxRates({ reminder })
-)
+const selectStoredFxRates = (state: RootState) =>
+  graph.storedFxRates(state.data.current)
 export const selectCurrent = createSelector(
   [instruments.selectAll, selectCurrentMonth],
   (instruments, currentMonth) =>

@@ -1,16 +1,10 @@
-import { toISODate, toISOMonth } from '../../domain/shared/date'
 import type { TCoreContext } from '../../types'
 import type { TDataStore } from '../../domain/zenmoney/store'
+import { createProjectionGraph } from '../graph'
 import {
   buildBalances,
   buildBalancesByDate,
   buildDebtors,
-  getDebtAccountId,
-  getHistoryStart,
-  getInstCodeMap,
-  getTagBudgets,
-  getTransactionsHistory,
-  getUserCurrency,
 } from '../../domain/zenmoney'
 import {
   buildActivity,
@@ -29,29 +23,32 @@ import {
   buildMonthTotals,
   buildRawActivity,
   buildSortedActivity,
-  getEnvBudgets,
-  getEnvelopeMeta,
-  getZerroInBudgetAccountIds,
-  getZerroSavingAccounts,
-  getStoredFxRates,
   getKeepingEnvelopes,
-  getRawGoals,
-  getUserSettings,
 } from '../../domain/zerro'
 
 export type TZerroSession = ReturnType<typeof createZerroSession>
 
 export function createZerroSession(data: TDataStore, ctx: TCoreContext) {
-  const currentDate = memo(() => toISODate(ctx.now()))
-  const currentMonth = memo(() => toISOMonth(ctx.now()))
-  const userSettings = memo(() => getUserSettings(data))
-  const envelopeMeta = memo(() => getEnvelopeMeta(data))
-  const envBudgets = memo(() => getEnvBudgets(data))
-  const rawGoals = memo(() => getRawGoals(data))
-  const storedFxRates = memo(() => getStoredFxRates(data))
-  const debtAccountId = memo(() => getDebtAccountId(data))
-  const instrumentCodeById = memo(() => getInstCodeMap(data))
-  const transactionsHistory = memo(() => getTransactionsHistory(data))
+  // One snapshot means one instant. The graph reads `now()` per call so the
+  // long-lived Redux instance follows the clock; a session must not, so freeze
+  // it here and every derived date stays stable for the session lifetime.
+  const frozenNow = ctx.now()
+  const g = createProjectionGraph({ ...ctx, now: () => frozenNow })
+  const bind =
+    <T>(node: (snapshot: TDataStore) => T) =>
+    () =>
+      node(data)
+
+  const currentDate = g.currentDate
+  const currentMonth = g.currentMonth
+  const userSettings = bind(g.userSettings)
+  const envelopeMeta = bind(g.envelopeMeta)
+  const envBudgets = bind(g.envBudgets)
+  const rawGoals = bind(g.rawGoals)
+  const storedFxRates = bind(g.storedFxRates)
+  const debtAccountId = bind(g.debtAccountId)
+  const instrumentCodeById = bind(g.instrumentCodeById)
+  const transactionsHistory = bind(g.transactionsHistory)
   const currentFxRates = memo(() =>
     buildCurrentFxRates({
       instruments: data.instrument,
@@ -83,9 +80,9 @@ export function createZerroSession(data: TDataStore, ctx: TCoreContext) {
     buildEnvelopes({
       debtors: debtors(),
       tags: data.tag,
-      savingAccounts: getZerroSavingAccounts(data),
+      savingAccounts: g.savingAccounts(data),
       envelopeMeta: envelopeMeta(),
-      userCurrency: getUserCurrency(data),
+      userCurrency: g.userCurrency(data),
     })
   )
   const envelopes = memo(() => envelopesCompiled().byId)
@@ -93,7 +90,7 @@ export function createZerroSession(data: TDataStore, ctx: TCoreContext) {
   const keepingEnvelopeIds = memo(() => getKeepingEnvelopes(envelopes()))
   const budgets = memo(() =>
     buildBudgets({
-      tagBudgets: getTagBudgets(data),
+      tagBudgets: g.tagBudgets(data),
       envBudgets: envBudgets(),
       preferZmBudgets: userSettings().preferZmBudgets,
     })
@@ -105,7 +102,7 @@ export function createZerroSession(data: TDataStore, ctx: TCoreContext) {
       currentMonth: currentMonth(),
     })
   )
-  const inBudgetAccountIds = memo(() => getZerroInBudgetAccountIds(data))
+  const inBudgetAccountIds = bind(g.inBudgetAccountIds)
   const currentFunds = memo(() =>
     buildCurrentFunds({
       accounts: data.account,
@@ -169,9 +166,7 @@ export function createZerroSession(data: TDataStore, ctx: TCoreContext) {
     })
   )
   const goalTotals = memo(() => buildGoalTotals(goals(), convertFx()))
-  const historyStart = memo(() =>
-    getHistoryStart(transactionsHistory(), currentDate())
-  )
+  const historyStart = bind(g.historyStart)
   const balances = memo(() =>
     buildBalances({
       transactions: transactionsHistory(),

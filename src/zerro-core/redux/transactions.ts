@@ -10,32 +10,22 @@ export {
   restoreTransaction as restore,
   setTransactionsViewed as setViewed,
 } from './commands'
-import { createSelector } from '@reduxjs/toolkit'
 import { useCallback } from 'react'
 import { useAppSelector } from 'store'
 import type { RootState } from 'store'
-import {
-  getHistoryStart,
-  getTransactionType,
-  getTransactionIds,
-  getTransactions,
-  getTransactionsHistory,
-} from '../domain/zenmoney'
-import { selectCurrentDate, selectTransactionSlice } from './state'
+import { getTransactionType, getTransactions } from '../domain/zenmoney'
+import { graph } from './graph'
+import { selectTransactionSlice } from './state'
 import * as accounts from './accounts'
 
 export const selectAll = (state: RootState) =>
   getTransactions({ transaction: selectTransactionSlice(state) })
-export const selectIds = createSelector([selectAll], transaction =>
-  getTransactionIds({ transaction })
-)
-export const selectHistory = createSelector([selectAll], transaction =>
-  getTransactionsHistory({ transaction })
-)
-export const selectHistoryStart = createSelector(
-  [selectHistory, selectCurrentDate],
-  getHistoryStart
-)
+export const selectIds = (state: RootState) =>
+  graph.transactionIds(state.data.current)
+export const selectHistory = (state: RootState) =>
+  graph.transactionsHistory(state.data.current)
+export const selectHistoryStart = (state: RootState) =>
+  graph.historyStart(state.data.current)
 export const useType = () => {
   const debtAccountId = useAppSelector(accounts.selectDebtAccountId)
   return useCallback(

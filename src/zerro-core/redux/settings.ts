@@ -1,10 +1,8 @@
 export { setEmojiIcons, setPreferZmBudgets } from './commands'
-import { createSelector } from '@reduxjs/toolkit'
 import { useAppSelector } from 'store'
-import { getUserSettings } from '../domain/zerro'
-import { selectReminderSlice } from './state'
+import type { RootState } from 'store'
+import { graph } from './graph'
 
-export const select = createSelector([selectReminderSlice], reminder =>
-  getUserSettings({ reminder })
-)
+export const select = (state: RootState) =>
+  graph.userSettings(state.data.current)
 export const use = () => useAppSelector(select)

@@ -1,0 +1,15 @@
+import { createProjectionGraph } from '../application/graph'
+
+/**
+ * One graph instance for the app, so every node memoizes across snapshots
+ * exactly as the hand-written `createSelector` chain used to.
+ *
+ * Projections never create entities, so `uuid` is a trap rather than a
+ * generator: reaching it means a command compiler leaked into a read path.
+ */
+export const graph = createProjectionGraph({
+  now: () => Date.now(),
+  uuid: () => {
+    throw new Error('Projections must not generate ids')
+  },
+})

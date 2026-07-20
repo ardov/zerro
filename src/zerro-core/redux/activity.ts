@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { shallowEqual } from 'react-redux'
+import type { RootState } from 'store'
 import {
   buildActivity,
   buildActivityRoutingContext,
@@ -7,8 +7,8 @@ import {
   buildEnvMetrics,
   buildRawActivity,
   buildSortedActivity,
-  getZerroInBudgetAccountIds,
 } from '../domain/zerro'
+import { graph } from './graph'
 import * as accounts from './accounts'
 import * as budgets from './budgets'
 import * as debtors from './debtors'
@@ -16,16 +16,12 @@ import * as envelopes from './envelopes'
 import * as fxRates from './fxRates'
 import * as instruments from './instruments'
 import * as monthList from './monthList'
-import { selectAccountSlice } from './state'
 import * as transactions from './transactions'
 
-const selectInBudgetAccountIds = createSelector(
-  [selectAccountSlice],
-  account => getZerroInBudgetAccountIds({ account }),
-  { memoizeOptions: { resultEqualityCheck: shallowEqual } }
-)
+const selectInBudgetAccountIds = (state: RootState) =>
+  graph.inBudgetAccountIds(state.data.current)
 export const selectCurrentFunds = createSelector(
-  [selectAccountSlice, selectInBudgetAccountIds, instruments.selectCodeMap],
+  [accounts.selectAll, selectInBudgetAccountIds, instruments.selectCodeMap],
   (account, inBudgetIds, instrumentCodeById) =>
     buildCurrentFunds({ accounts: account, inBudgetIds, instrumentCodeById })
 )

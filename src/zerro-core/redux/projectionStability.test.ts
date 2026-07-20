@@ -63,6 +63,30 @@ describe('projection memoization', () => {
     expect(recomputed).toEqual([])
   })
 
+  it('spares the activity chain when an account changes but its ids do not', () => {
+    // The expensive guard: `inBudgetAccountIds` is rebuilt from the whole
+    // account map, so without result equality any account edit would recompute
+    // `buildRawActivity` (~18ms on a large account) and everything under it.
+    const store = makeDemoStore({ now: NOW })
+    const state = makeTestRootState(store)
+    const beforeIds = selectors.selectRawActivity(state)
+    const beforeRouting = activity.selectTransactionRoutingContext(state)
+
+    const [accountId] = Object.keys(store.account)
+    const renamed = makeTestRootState({
+      ...store,
+      account: {
+        ...store.account,
+        [accountId]: { ...store.account[accountId], syncID: ['changed'] },
+      },
+    })
+
+    expect(activity.selectTransactionRoutingContext(renamed)).toBe(
+      beforeRouting
+    )
+    expect(selectors.selectRawActivity(renamed)).toBe(beforeIds)
+  })
+
   it('still recomputes when a slice a projection reads does change', () => {
     const store = makeDemoStore({ now: NOW })
     const state = makeTestRootState(store)

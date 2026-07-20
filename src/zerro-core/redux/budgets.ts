@@ -1,18 +1,19 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { buildBudgets, getEnvBudgets } from '../domain/zerro'
-import { getTagBudgets } from '../domain/zenmoney'
+import type { RootState } from 'store'
+import { buildBudgets } from '../domain/zerro'
+import { graph } from './graph'
 import * as settings from './settings'
-import { selectReminderSlice, selectTagBudgetSlice } from './state'
 export { setBudget as set, type TBudgetUpdate } from './commands'
 
-const selectEnvBudgets = createSelector([selectReminderSlice], reminder =>
-  getEnvBudgets({ reminder })
-)
 export const selectAll = createSelector(
-  [selectTagBudgetSlice, selectEnvBudgets, settings.select],
-  (budget, envBudgets, userSettings) =>
+  [
+    (state: RootState) => graph.tagBudgets(state.data.current),
+    (state: RootState) => graph.envBudgets(state.data.current),
+    settings.select,
+  ],
+  (tagBudgets, envBudgets, userSettings) =>
     buildBudgets({
-      tagBudgets: getTagBudgets({ budget }),
+      tagBudgets,
       envBudgets,
       preferZmBudgets: userSettings.preferZmBudgets,
     })

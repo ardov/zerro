@@ -8,39 +8,28 @@ export {
 } from './commands'
 import { createSelector } from '@reduxjs/toolkit'
 import type { RootState } from 'store'
-import {
-  buildEnvelopes,
-  getEnvelopeMeta,
-  getKeepingEnvelopes,
-  getZerroSavingAccounts,
-} from '../domain/zerro'
+import { buildEnvelopes, getKeepingEnvelopes } from '../domain/zerro'
+import { graph } from './graph'
 import { getCommandEnvelopeLabels } from './commandRead'
 import * as debtors from './debtors'
 import { presentEnvelopes } from './envelopePresentation'
-import {
-  selectAccountSlice,
-  selectReminderSlice,
-  selectTagSlice,
-} from './state'
+import { selectTagSlice } from './state'
 import * as tags from './tags'
 import * as users from './users'
 
-const selectEnvelopeMeta = createSelector([selectReminderSlice], reminder =>
-  getEnvelopeMeta({ reminder })
-)
 const selectDomainProjection = createSelector(
   [
     debtors.selectAll,
     selectTagSlice,
-    selectAccountSlice,
-    selectEnvelopeMeta,
+    (state: RootState) => graph.savingAccounts(state.data.current),
+    (state: RootState) => graph.envelopeMeta(state.data.current),
     users.selectCurrency,
   ],
-  (debtors, tags, account, envelopeMeta, userCurrency) =>
+  (debtors, tags, savingAccounts, envelopeMeta, userCurrency) =>
     buildEnvelopes({
       debtors,
       tags,
-      savingAccounts: getZerroSavingAccounts({ account }),
+      savingAccounts,
       envelopeMeta,
       userCurrency,
     })
