@@ -137,6 +137,9 @@ Take narrow majors such as `uuid`, i18next, globals, and Stylelint between the
 larger steps. They should not share commits with React, Router, MUI, Vite, or
 TypeScript migrations.
 
+Completed 2026-07-20: `uuid` 14 and the compatible i18next 26 /
+react-i18next 17 pair. Each was verified and committed independently.
+
 ## Verification template
 
 ```bash
