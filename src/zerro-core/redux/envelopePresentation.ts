@@ -1,13 +1,13 @@
 import type { ById } from '../domain/shared/types'
-import { getColorForString } from '../domain/zenmoney/colors'
+import { getColorForString } from '../domain/zenmoney'
 import {
   buildStructure,
   defaultEnvelopeGroupIds,
+  EnvType,
   flattenStructure,
   type TEnvelope,
   type TGroupNode,
-} from '../domain/zerro/envelopes'
-import { EnvType } from '../domain/zerro/envelope-id'
+} from '../domain/zerro'
 import type { TTagPopulated } from './tagPresentation'
 
 export type TEnvelopeLabels = {

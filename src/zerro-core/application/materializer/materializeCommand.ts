@@ -1,46 +1,34 @@
-import type { TMsTime } from '../../domain/zenmoney/primitives'
-import {
-  intentEntityKeys,
-  intentPatchKeys,
-  type TDataStore,
-  type TNormalizedPatch,
-  type TIntentPatch,
-} from '../../domain/zenmoney/store'
-import {
-  makeTransaction,
-  transactionIntentFields,
-  transactionRequiredFields,
-  transactionWritableFields,
-} from '../../domain/zenmoney/transactions'
 import {
   accountRequiredFields,
   accountWritableFields,
-  makeAccount,
-} from '../../domain/zenmoney/accounts'
-import {
   budgetRequiredFields,
   budgetWritableFields,
-  makeTagBudget,
-} from '../../domain/zenmoney/budgets'
-import {
+  getRootUserId,
+  intentEntityKeys,
+  intentPatchKeys,
+  makeAccount,
   makeMerchant,
+  makeReminder,
+  makeTag,
+  makeTagBudget,
+  makeTransaction,
   merchantRequiredFields,
   merchantWritableFields,
-} from '../../domain/zenmoney/merchants'
-import {
-  makeReminder,
   reminderRequiredFields,
   reminderWritableFields,
-} from '../../domain/zenmoney/reminders'
-import {
-  makeTag,
   tagRequiredFields,
   tagWritableFields,
-} from '../../domain/zenmoney/tags'
-import { getRootUserId } from '../../domain/zenmoney/users'
+  transactionIntentFields,
+  transactionRequiredFields,
+  transactionWritableFields,
+  type TDataStore,
+  type TIntentPatch,
+  type TMsTime,
+  type TNormalizedPatch,
+} from '../../domain/zenmoney'
 
-export { intentPatchKeys } from '../../domain/zenmoney/store'
-export type { TIntentPatch } from '../../domain/zenmoney/store'
+export { intentPatchKeys } from '../../domain/zenmoney'
+export type { TIntentPatch } from '../../domain/zenmoney'
 
 const intentPatchKeySet = new Set<string>(intentPatchKeys)
 

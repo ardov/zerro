@@ -1,14 +1,14 @@
-import type { TEnvelope } from '../domain/zerro/envelopes'
-import { EnvType } from '../domain/zerro/envelope-id'
-import { envelopeVisibility } from '../domain/zerro/envelope-meta'
-import type { TEnvMetrics } from '../domain/zerro/activity/envMetrics'
 import {
   EnvActivity,
+  EnvType,
+  envelopeVisibility,
+  goalType,
+  type TEnvelope,
+  type TEnvMetrics,
+  type TGoalInfo,
   type TRawActivityNode,
-} from '../domain/zerro/activity/rawActivity'
-import type { TSortedActivity } from '../domain/zerro/activity/sortedActivity'
-import type { TGoalInfo } from '../domain/zerro/goals/build'
-import { goalType } from '../domain/zerro/goals/types'
+  type TSortedActivity,
+} from '../domain/zerro'
 
 export function makeEnvelope(
   patch: Partial<TEnvelope> & { id: TEnvelope['id'] }

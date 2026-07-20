@@ -2,21 +2,23 @@ import countries from './countries.json'
 import companies from './companies.json'
 import instruments from './instruments.json'
 import type { ById } from '../domain/shared/types'
-import type { TAccountId } from '../domain/zenmoney/accounts'
-import type { TDataStore, TNormalizedPatch } from '../domain/zenmoney/store'
-import type { TInstrumentId } from '../domain/zenmoney/instruments'
-import type { TISODate } from '../domain/zenmoney/primitives'
-import type { TTagId } from '../domain/zenmoney/tags'
-import type { TUser } from '../domain/zenmoney/users'
 import { round } from '../domain/shared/money'
 import { generateTransactions } from './generateTransactions'
-import { getColorForString, hex2int } from '../domain/zenmoney/colors'
 import type { TTagIconId } from '../presentation/tag-icons'
 import {
   AccountType,
+  getColorForString,
+  hex2int,
   makeAccount as makeCoreAccount,
   makeMerchant as makeCoreMerchant,
   makeTag as makeCoreTag,
+  type TAccountId,
+  type TDataStore,
+  type TInstrumentId,
+  type TISODate,
+  type TNormalizedPatch,
+  type TTagId,
+  type TUser,
 } from '../domain/zenmoney'
 
 const since: TISODate = '2022-06-19'

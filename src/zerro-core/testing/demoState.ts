@@ -1,6 +1,6 @@
 import type { RootState } from 'store'
 import { makeDemoStore, type TDemoDataOptions } from '../demo'
-import type { TDataStore } from '../domain/zenmoney/store'
+import type { TDataStore } from '../domain/zenmoney'
 import type { TCoreContext } from '../types'
 
 export const coreNextDemoOptions = {

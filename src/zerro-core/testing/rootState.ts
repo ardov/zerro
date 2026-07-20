@@ -1,5 +1,5 @@
 import type { RootState } from 'store'
-import type { TDataStore } from '../domain/zenmoney/store'
+import type { TDataStore } from '../domain/zenmoney'
 
 /**
  * Builds a minimal RootState around a data store for adapter/selector tests.

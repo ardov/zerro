@@ -5,4 +5,4 @@ export const selectCurrent = fromGraph(graph.currentFxRates)
 export const selectRates = fromGraph(graph.fxRates)
 export const selectGetter = fromGraph(graph.fxRatesGetter)
 export const selectConvertFx = fromGraph(graph.convertFx)
-export type { TFxRates } from '../domain/zerro/fx-rates'
+export type { TFxRates } from '../domain/zerro'

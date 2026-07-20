@@ -1,8 +1,5 @@
 import { intentPatchKeys, type TCommand } from '../../application/materializer'
-import {
-  dataEntityKeys,
-  type TDataEntityKey,
-} from '../../domain/zenmoney/store'
+import { dataEntityKeys, type TDataEntityKey } from '../../domain/zenmoney'
 
 export const replicaPersistenceVersion = 2 as const
 

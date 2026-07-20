@@ -1,5 +1,5 @@
 import type { TCoreContext } from '../../types'
-import type { TDataStore } from '../../domain/zenmoney/store'
+import type { TDataStore } from '../../domain/zenmoney'
 import { createProjectionGraph } from '../graph'
 
 export type TZerroSession = ReturnType<typeof createZerroSession>

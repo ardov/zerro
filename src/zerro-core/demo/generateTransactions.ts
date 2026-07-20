@@ -1,7 +1,5 @@
 import { toISODate, parseDate } from '../domain/shared/date'
-import type { TAccount } from '../domain/zenmoney/accounts'
-import type { TISODate } from '../domain/zenmoney/primitives'
-import type { TTransaction } from '../domain/zenmoney/transactions/types'
+import type { TAccount, TISODate, TTransaction } from '../domain/zenmoney'
 
 type TPatternValue<T> = T | T[] | ((index: number, date: Date) => T)
 

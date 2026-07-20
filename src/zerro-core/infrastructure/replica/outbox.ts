@@ -12,14 +12,14 @@ import {
   materializePrimaryCommand,
   type TCommand,
 } from '../../application/materializer'
-import { applyPatch } from '../../domain/zenmoney'
-import type {
-  TDataStore,
-  TDataEntityKey,
-  TDeletionObject,
-  TNormalizedPatch,
-} from '../../domain/zenmoney/store'
-import { dataEntityKeys } from '../../domain/zenmoney/store'
+import {
+  applyPatch,
+  dataEntityKeys,
+  type TDataEntityKey,
+  type TDataStore,
+  type TDeletionObject,
+  type TNormalizedPatch,
+} from '../../domain/zenmoney'
 
 export type { TCommand } from '../../application/materializer'
 

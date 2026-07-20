@@ -1,6 +1,5 @@
 import type { AppThunk, RootState } from 'store'
 import { v1 as uuidv1 } from 'uuid'
-import type { TISOMonth } from '../domain/zenmoney/primitives'
 import type { TNormalizedPatch } from '../types'
 import {
   compileBulkEditTransactions,
@@ -14,7 +13,9 @@ import {
   compileDeleteReminder,
   compileRestoreTransaction,
   compileSetReminder,
+  getRootUserId,
   type TAccountId,
+  type TISOMonth,
   type TTagId,
   type TTransactionId,
   type TTransactionEditablePatch,
@@ -23,7 +24,6 @@ import {
   type TReminderId,
   type TReminderPatch,
 } from '../domain/zenmoney'
-import { getRootUserId } from '../domain/zenmoney/users'
 import {
   compileApplyEnvelopeStructure,
   compileCreateEnvelope,

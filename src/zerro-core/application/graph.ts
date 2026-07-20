@@ -1,5 +1,5 @@
 import { toISODate, toISOMonth } from '../domain/shared/date'
-import type { TDataStore } from '../domain/zenmoney/store'
+import type { TDataStore } from '../domain/zenmoney'
 import type { TCoreContext } from '../types'
 import {
   buildBalances,
