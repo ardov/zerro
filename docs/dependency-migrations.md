@@ -131,6 +131,11 @@ Take this last because compiler and module-resolution changes affect the whole
 repository, ESLint parsing, Vite config, and the Zerro Core declaration
 consumer. Keep package-check as a blocking gate.
 
+Blocked as of 2026-07-21: the current `typescript-eslint` 8.65.0 peer range
+ends at TypeScript 6.0, so TypeScript 7 would leave the repository's ESLint
+toolchain unsupported. Revisit when a compatible `typescript-eslint` release
+is available; keep TypeScript 5.9.3 until then.
+
 ## Smaller major upgrades
 
 Take narrow majors such as `uuid`, i18next, globals, and Stylelint between the
