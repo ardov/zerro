@@ -73,7 +73,7 @@ transaction compilers now return sparse intent. `applyPatch` applies sparse
 fields as a dumb merge for compiler composition and tests; only the
 materializer adds factory defaults, timestamps, and deletion protocol metadata.
 
-### W4. Entity registry in the materializer — wave 2
+### W4. Entity registry in the materializer — wave 2, done 2026-07-20
 
 `materializeCommand.ts` (609 lines) holds six near-identical triples of
 `compact*Creation` / `materialize*Creation` / `compileIntentPatch` blocks.
@@ -82,6 +82,10 @@ Replace with one per-entity table
 generic functions. Special cases (budget id check, transaction field filter and
 deleted-guard) stay as per-row hooks. Adding an entity becomes a one-row
 change; the `as unknown as` casts disappear.
+
+The registry now drives intent compaction, creation materialization, and
+existing-entity replay. `materializeCommand.ts` fell from 609 to 398 lines;
+the materializer suite preserves the prior behavior.
 
 ### W5. Collapse TAppCommand layer — wave 3
 

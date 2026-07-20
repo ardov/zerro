@@ -10,33 +10,24 @@ import {
   makeTransaction,
   transactionIntentFields,
   transactionWritableFields,
-  type TTransactionPatch,
 } from '../../domain/zenmoney/transactions'
 import {
   accountWritableFields,
   makeAccount,
-  type TAccountPatch,
 } from '../../domain/zenmoney/accounts'
 import {
   budgetWritableFields,
   makeTagBudget,
-  type TBudgetPatch,
 } from '../../domain/zenmoney/budgets'
 import {
   makeMerchant,
   merchantWritableFields,
-  type TMerchantPatch,
 } from '../../domain/zenmoney/merchants'
 import {
   makeReminder,
   reminderWritableFields,
-  type TReminderPatch,
 } from '../../domain/zenmoney/reminders'
-import {
-  makeTag,
-  tagWritableFields,
-  type TTagPatch,
-} from '../../domain/zenmoney/tags'
+import { makeTag, tagWritableFields } from '../../domain/zenmoney/tags'
 import { getRootUserId } from '../../domain/zenmoney/users'
 
 export { intentPatchKeys } from '../../domain/zenmoney/store'
@@ -49,6 +40,92 @@ export type TCommand = {
   issuedAt: TMsTime
   patch: TIntentPatch
 }
+
+type TEntity = {
+  id: string | number
+  changed?: number
+  deleted?: boolean
+  [field: string]: unknown
+}
+
+type TEntityRow = {
+  key: (typeof intentEntityKeys)[number]
+  writableFields: readonly string[]
+  requiredFields: readonly string[]
+  creationFields?: readonly string[]
+  make: (
+    draft: TEntity,
+    ctx: ReturnType<typeof deterministicContext>
+  ) => TEntity
+  existingFields?: (fields: TEntity) => TEntity
+  skipExisting?: (current: TEntity) => boolean
+  validateCreation?: (entity: TEntity, intent: TEntity) => void
+}
+
+const entityRegistry = [
+  {
+    key: 'account',
+    writableFields: accountWritableFields,
+    requiredFields: ['instrument', 'title'],
+    make: (draft, ctx) =>
+      makeAccount(draft as Parameters<typeof makeAccount>[0], ctx) as TEntity,
+  },
+  {
+    key: 'reminder',
+    writableFields: reminderWritableFields,
+    requiredFields: ['incomeAccount', 'outcomeAccount'],
+    make: (draft, ctx) =>
+      makeReminder(draft as Parameters<typeof makeReminder>[0], ctx) as TEntity,
+  },
+  {
+    key: 'merchant',
+    writableFields: merchantWritableFields,
+    requiredFields: ['title'],
+    make: (draft, ctx) =>
+      makeMerchant(draft as Parameters<typeof makeMerchant>[0], ctx) as TEntity,
+  },
+  {
+    key: 'tag',
+    writableFields: tagWritableFields,
+    requiredFields: ['title'],
+    make: (draft, ctx) =>
+      makeTag(draft as Parameters<typeof makeTag>[0], ctx) as TEntity,
+  },
+  {
+    key: 'budget',
+    writableFields: budgetWritableFields,
+    requiredFields: ['tag', 'date'],
+    make: (draft, ctx) =>
+      makeTagBudget(
+        draft as Parameters<typeof makeTagBudget>[0],
+        ctx
+      ) as TEntity,
+    validateCreation: (budget, intent) => {
+      if (budget.id !== intent.id) {
+        throw new Error('Cannot create budget: id does not match date and tag')
+      }
+    },
+  },
+  {
+    key: 'transaction',
+    writableFields: transactionWritableFields,
+    creationFields: transactionIntentFields,
+    requiredFields: [
+      'date',
+      'incomeInstrument',
+      'incomeAccount',
+      'outcomeInstrument',
+      'outcomeAccount',
+    ],
+    make: (draft, ctx) =>
+      makeTransaction(
+        draft as Parameters<typeof makeTransaction>[0],
+        ctx
+      ) as TEntity,
+    existingFields: fields => pickTransactionPatch(fields) as TEntity,
+    skipExisting: transaction => transaction.deleted === true,
+  },
+] as const satisfies readonly TEntityRow[]
 
 export function issuePatch(
   snapshot: TDataStore,
@@ -86,102 +163,14 @@ function materializeIntentPatch(
   changedAt: TMsTime
 ): TDiff {
   const result: TDiff = { ...patch } as TDiff
-  intentEntityKeys.forEach(key => {
-    const intents = patch[key] as
-      | Array<{ id: string | number; changed?: number; deleted?: boolean }>
-      | undefined
+  const resultByKey = result as Record<string, unknown>
+  entityRegistry.forEach(row => {
+    const intents = patch[row.key] as TEntity[] | undefined
     if (!intents) return
 
-    const currentById = snapshot[key] as Record<
-      string | number,
-      | ({ id: string | number; changed?: number; deleted?: boolean } & Record<
-          string,
-          unknown
-        >)
-      | undefined
-    >
-
-    const entities = intents.flatMap<Record<string, unknown>>(intent => {
-      const current = currentById[intent.id]
-      if (key === 'transaction' && current?.deleted) return []
-
-      const { changed: _ignored, ...fields } = intent
-      if (current) {
-        const applicableFields =
-          key === 'transaction' ? pickTransactionPatch(fields) : fields
-        if (patchIsApplied(current, applicableFields)) return []
-        return [
-          {
-            ...current,
-            ...applicableFields,
-            changed: nextChanged(changedAt, current.changed),
-          },
-        ]
-      }
-
-      if (key === 'account') {
-        return [
-          materializeAccountCreation(
-            snapshot,
-            intent,
-            changedAt
-          ) as unknown as Record<string, unknown>,
-        ]
-      }
-      if (key === 'reminder') {
-        return [
-          materializeReminderCreation(
-            snapshot,
-            intent,
-            changedAt
-          ) as unknown as Record<string, unknown>,
-        ]
-      }
-      if (key === 'merchant') {
-        return [
-          materializeMerchantCreation(
-            snapshot,
-            intent,
-            changedAt
-          ) as unknown as Record<string, unknown>,
-        ]
-      }
-      if (key === 'tag') {
-        return [
-          materializeTagCreation(
-            snapshot,
-            intent,
-            changedAt
-          ) as unknown as Record<string, unknown>,
-        ]
-      }
-      if (key === 'budget') {
-        return [
-          materializeBudgetCreation(
-            snapshot,
-            intent,
-            changedAt
-          ) as unknown as Record<string, unknown>,
-        ]
-      }
-      if (key === 'transaction') {
-        return [
-          materializeTransactionCreation(
-            snapshot,
-            intent,
-            changedAt
-          ) as unknown as Record<string, unknown>,
-        ]
-      }
-
-      throw new Error(`Missing creation materializer for ${key}`)
-    })
-
-    if (entities.length) {
-      ;(result[key] as Array<Record<string, unknown>>) = entities
-    } else {
-      delete result[key]
-    }
+    const entities = materializeEntityIntents(snapshot, row, intents, changedAt)
+    if (entities.length) resultByKey[row.key] = entities
+    else delete resultByKey[row.key]
   })
 
   if (patch.deletion) {
@@ -214,73 +203,15 @@ function compileIntentPatch(
 
   const intentPatch = patch
   const result: TIntentPatch = {}
+  const resultByKey = result as Record<string, unknown>
+  entityRegistry.forEach(row => {
+    const entities = intentPatch[row.key] as TEntity[] | undefined
+    if (!entities) return
 
-  if (intentPatch.account) {
-    const account = compileEntityIntents(
-      snapshot.account,
-      intentPatch.account,
-      accountWritableFields,
-      intent => compactAccountCreation(snapshot, intent, issuedAt)
-    ) as TAccountPatch[]
-    if (account.length) result.account = account
-    else delete result.account
-  }
-
-  if (intentPatch.reminder) {
-    const reminder = compileEntityIntents(
-      snapshot.reminder,
-      intentPatch.reminder,
-      reminderWritableFields,
-      intent => compactReminderCreation(snapshot, intent, issuedAt)
-    ) as TReminderPatch[]
-    if (reminder.length) result.reminder = reminder
-    else delete result.reminder
-  }
-
-  if (intentPatch.merchant) {
-    const merchant = compileEntityIntents(
-      snapshot.merchant,
-      intentPatch.merchant,
-      merchantWritableFields,
-      intent => compactMerchantCreation(snapshot, intent, issuedAt)
-    ) as TMerchantPatch[]
-    if (merchant.length) result.merchant = merchant
-    else delete result.merchant
-  }
-
-  if (intentPatch.tag) {
-    const tag = compileEntityIntents(
-      snapshot.tag,
-      intentPatch.tag,
-      tagWritableFields,
-      intent => compactTagCreation(snapshot, intent, issuedAt)
-    ) as TTagPatch[]
-    if (tag.length) result.tag = tag
-    else delete result.tag
-  }
-
-  if (intentPatch.budget) {
-    const budget = compileEntityIntents(
-      snapshot.budget,
-      intentPatch.budget,
-      budgetWritableFields,
-      intent => compactBudgetCreation(snapshot, intent, issuedAt)
-    ) as TBudgetPatch[]
-    if (budget.length) result.budget = budget
-    else delete result.budget
-  }
-
-  if (intentPatch.transaction) {
-    const transaction = compileEntityIntents(
-      snapshot.transaction,
-      intentPatch.transaction,
-      transactionWritableFields,
-      intent => compactTransactionCreation(snapshot, intent, issuedAt),
-      transactionIntentFields
-    ) as TTransactionPatch[]
-    if (transaction.length) result.transaction = transaction
-    else delete result.transaction
-  }
+    const intents = compileEntityIntents(snapshot, row, entities, issuedAt)
+    if (intents.length) resultByKey[row.key] = intents
+    else delete resultByKey[row.key]
+  })
 
   if (intentPatch.deletion) {
     result.deletion = intentPatch.deletion.map(({ id, object }) => ({
@@ -293,23 +224,18 @@ function compileIntentPatch(
 }
 
 function compileEntityIntents(
-  currentById: Record<
-    string | number,
-    ({ id: string | number } & Record<string, unknown>) | undefined
-  >,
-  entities: readonly ({ id: string | number } & Record<string, unknown>)[],
-  writableFields: readonly string[],
-  compileCreation: (
-    intent: { id: string | number } & Record<string, unknown>
-  ) => { id: string | number } & Record<string, unknown>,
-  creationFields: readonly string[] = writableFields
-): Array<{ id: string | number } & Record<string, unknown>> {
+  snapshot: TDataStore,
+  row: TEntityRow,
+  entities: readonly TEntity[],
+  issuedAt: TMsTime
+): TEntity[] {
+  const currentById = snapshot[row.key] as Record<string | number, TEntity>
   return entities.flatMap(entity => {
     const current = currentById[entity.id]
-    const intent: { id: string | number } & Record<string, unknown> = {
-      id: entity.id,
-    }
-    const fields = current ? writableFields : creationFields
+    const intent: TEntity = { id: entity.id }
+    const fields = current
+      ? row.writableFields
+      : (row.creationFields ?? row.writableFields)
     fields.forEach(field => {
       if (
         field in entity &&
@@ -320,115 +246,73 @@ function compileEntityIntents(
     })
 
     if (!current) {
-      return [compileCreation(intent)]
+      return [compactEntityCreation(snapshot, row, intent, issuedAt)]
     }
     return Object.keys(intent).length > 1 ? [intent] : []
   })
 }
 
-function compactAccountCreation(
+function compactEntityCreation(
   snapshot: TDataStore,
-  intent: { id: string | number } & Record<string, unknown>,
+  row: TEntityRow,
+  intent: TEntity,
   issuedAt: TMsTime
-) {
-  const required = ['instrument', 'title'] as const
-  requireFields('account', intent, required)
-  const baseline = materializeAccountCreation(
+): TEntity {
+  requireFields(row.key, intent, row.requiredFields)
+  const baseline = materializeEntityCreation(
     snapshot,
-    pickFields(intent, required),
+    row,
+    pickFields(intent, row.requiredFields),
     issuedAt
-  ) as unknown as Record<string, unknown>
-  return omitFactoryDefaults(intent, baseline, required)
+  )
+  return omitFactoryDefaults(intent, baseline, row.requiredFields)
 }
 
-function compactReminderCreation(
+function materializeEntityIntents(
   snapshot: TDataStore,
-  intent: { id: string | number } & Record<string, unknown>,
-  issuedAt: TMsTime
-) {
-  const required = ['incomeAccount', 'outcomeAccount'] as const
-  requireFields('reminder', intent, required)
-  const baseline = materializeReminderCreation(
-    snapshot,
-    pickFields(intent, required),
-    issuedAt
-  ) as unknown as Record<string, unknown>
-  return omitFactoryDefaults(intent, baseline, required)
+  row: TEntityRow,
+  intents: readonly TEntity[],
+  changedAt: TMsTime
+): TEntity[] {
+  const currentById = snapshot[row.key] as Record<string | number, TEntity>
+  return intents.flatMap(intent => {
+    const current = currentById[intent.id]
+    if (current && row.skipExisting?.(current)) return []
+
+    const { changed: _ignored, ...rawFields } = intent
+    const fields = rawFields as TEntity
+    if (current) {
+      const applicableFields = row.existingFields?.(fields) ?? fields
+      if (patchIsApplied(current, applicableFields)) return []
+      return [
+        {
+          ...current,
+          ...applicableFields,
+          changed: nextChanged(
+            changedAt,
+            current.changed as number | undefined
+          ),
+        },
+      ]
+    }
+    return [materializeEntityCreation(snapshot, row, intent, changedAt)]
+  })
 }
 
-function compactMerchantCreation(
+function materializeEntityCreation(
   snapshot: TDataStore,
-  intent: { id: string | number } & Record<string, unknown>,
-  issuedAt: TMsTime
-) {
-  const required = ['title'] as const
-  requireFields('merchant', intent, required)
-  const baseline = materializeMerchantCreation(
-    snapshot,
-    pickFields(intent, required),
-    issuedAt
-  ) as unknown as Record<string, unknown>
-  return omitFactoryDefaults(intent, baseline, required)
+  row: TEntityRow,
+  intent: TEntity,
+  changedAt: TMsTime
+): TEntity {
+  const user = requireRootUser(snapshot, row.key)
+  const entity = row.make({ ...intent, user }, deterministicContext(changedAt))
+  row.validateCreation?.(entity, intent)
+  return entity
 }
 
-function compactTagCreation(
-  snapshot: TDataStore,
-  intent: { id: string | number } & Record<string, unknown>,
-  issuedAt: TMsTime
-) {
-  const required = ['title'] as const
-  requireFields('tag', intent, required)
-  const baseline = materializeTagCreation(
-    snapshot,
-    pickFields(intent, required),
-    issuedAt
-  ) as unknown as Record<string, unknown>
-  return omitFactoryDefaults(intent, baseline, required)
-}
-
-function compactBudgetCreation(
-  snapshot: TDataStore,
-  intent: { id: string | number } & Record<string, unknown>,
-  issuedAt: TMsTime
-) {
-  const required = ['tag', 'date'] as const
-  requireFields('budget', intent, required)
-  const baseline = materializeBudgetCreation(
-    snapshot,
-    pickFields(intent, required),
-    issuedAt
-  ) as unknown as Record<string, unknown>
-  return omitFactoryDefaults(intent, baseline, required)
-}
-
-function compactTransactionCreation(
-  snapshot: TDataStore,
-  intent: { id: string | number } & Record<string, unknown>,
-  issuedAt: TMsTime
-) {
-  const required = [
-    'date',
-    'incomeInstrument',
-    'incomeAccount',
-    'outcomeInstrument',
-    'outcomeAccount',
-  ] as const
-  requireFields('transaction', intent, required)
-  const baseline = materializeTransactionCreation(
-    snapshot,
-    pickFields(intent, required),
-    issuedAt
-  ) as unknown as Record<string, unknown>
-  return omitFactoryDefaults(intent, baseline, required)
-}
-
-function pickFields(
-  intent: { id: string | number } & Record<string, unknown>,
-  fields: readonly string[]
-) {
-  const result: { id: string | number } & Record<string, unknown> = {
-    id: intent.id,
-  }
+function pickFields(intent: TEntity, fields: readonly string[]): TEntity {
+  const result: TEntity = { id: intent.id }
   fields.forEach(field => {
     result[field] = intent[field]
   })
@@ -436,10 +320,10 @@ function pickFields(
 }
 
 function omitFactoryDefaults(
-  intent: { id: string | number } & Record<string, unknown>,
-  baseline: Record<string, unknown>,
+  intent: TEntity,
+  baseline: TEntity,
   requiredFields: readonly string[]
-) {
+): TEntity {
   const required = new Set(requiredFields)
   return Object.fromEntries(
     Object.entries(intent).filter(
@@ -448,83 +332,7 @@ function omitFactoryDefaults(
         required.has(field) ||
         !valuesEqual(field, baseline[field], value)
     )
-  ) as { id: string | number } & Record<string, unknown>
-}
-
-function materializeAccountCreation(
-  snapshot: TDataStore,
-  intent: { id: string | number } & Record<string, unknown>,
-  changedAt: TMsTime
-) {
-  const user = requireRootUser(snapshot, 'account')
-  return makeAccount(
-    { ...intent, user } as Parameters<typeof makeAccount>[0],
-    deterministicContext(changedAt)
-  )
-}
-
-function materializeReminderCreation(
-  snapshot: TDataStore,
-  intent: { id: string | number } & Record<string, unknown>,
-  changedAt: TMsTime
-) {
-  const user = requireRootUser(snapshot, 'reminder')
-  return makeReminder(
-    { ...intent, user } as Parameters<typeof makeReminder>[0],
-    deterministicContext(changedAt)
-  )
-}
-
-function materializeMerchantCreation(
-  snapshot: TDataStore,
-  intent: { id: string | number } & Record<string, unknown>,
-  changedAt: TMsTime
-) {
-  const user = requireRootUser(snapshot, 'merchant')
-  return makeMerchant(
-    { ...intent, user } as Parameters<typeof makeMerchant>[0],
-    deterministicContext(changedAt)
-  )
-}
-
-function materializeTagCreation(
-  snapshot: TDataStore,
-  intent: { id: string | number } & Record<string, unknown>,
-  changedAt: TMsTime
-) {
-  const user = requireRootUser(snapshot, 'tag')
-  return makeTag(
-    { ...intent, user } as Parameters<typeof makeTag>[0],
-    deterministicContext(changedAt)
-  )
-}
-
-function materializeBudgetCreation(
-  snapshot: TDataStore,
-  intent: { id: string | number } & Record<string, unknown>,
-  changedAt: TMsTime
-) {
-  const user = requireRootUser(snapshot, 'budget')
-  const budget = makeTagBudget(
-    { ...intent, user } as Parameters<typeof makeTagBudget>[0],
-    deterministicContext(changedAt)
-  )
-  if (budget.id !== intent.id) {
-    throw new Error('Cannot create budget: id does not match date and tag')
-  }
-  return budget
-}
-
-function materializeTransactionCreation(
-  snapshot: TDataStore,
-  intent: { id: string | number } & Record<string, unknown>,
-  changedAt: TMsTime
-) {
-  const user = requireRootUser(snapshot, 'transaction')
-  return makeTransaction(
-    { ...intent, user } as Parameters<typeof makeTransaction>[0],
-    deterministicContext(changedAt)
-  )
+  ) as TEntity
 }
 
 function requireFields(
