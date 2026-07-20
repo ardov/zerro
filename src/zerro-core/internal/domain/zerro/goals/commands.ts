@@ -19,7 +19,7 @@ export function compileSetGoal(
   goal: TGoal | null | undefined,
   ctx: TCoreContext
 ): TIntentPatch {
-  const goals = getRawGoals(data)
+  const goals = getRawGoals(data.reminder)
   const newGoal = normalizeGoal(goal)
   const patches: TIntentPatch[] = []
   let state = data

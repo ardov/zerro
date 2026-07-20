@@ -6,7 +6,6 @@ import {
 import {
   getTransaction,
   getTransactionIds,
-  getTransactions,
   getTransactionsHistory,
   getTransactionType,
   isDeletedTransaction,
@@ -15,7 +14,7 @@ import {
 } from './read'
 
 describe('transaction helpers', () => {
-  it('reads transactions by map and id', () => {
+  it('reads transactions by id', () => {
     const transaction = makeTransaction({ id: 'tr' })
     const data = makeStore({
       transaction: {
@@ -23,9 +22,8 @@ describe('transaction helpers', () => {
       },
     })
 
-    expect(getTransactions(data)).toBe(data.transaction)
-    expect(getTransaction(data, 'tr')).toBe(transaction)
-    expect(getTransaction(data, 'missing')).toBeNull()
+    expect(getTransaction(data.transaction, 'tr')).toBe(transaction)
+    expect(getTransaction(data.transaction, 'missing')).toBeNull()
   })
 
   it('builds transaction history without deleted or zeroed transactions', () => {
@@ -55,7 +53,9 @@ describe('transaction helpers', () => {
     })
 
     expect(
-      getTransactionsHistory(data).map(transaction => transaction.id)
+      getTransactionsHistory(data.transaction).map(
+        transaction => transaction.id
+      )
     ).toEqual(['older', 'newer', 'newerCreatedLater'])
   })
 
@@ -73,7 +73,11 @@ describe('transaction helpers', () => {
       },
     })
 
-    expect(getTransactionIds(data)).toEqual(['older', 'newer', 'deleted'])
+    expect(getTransactionIds(data.transaction)).toEqual([
+      'older',
+      'newer',
+      'deleted',
+    ])
   })
 
   it('treats deleted and effectively zeroed transactions as deleted', () => {

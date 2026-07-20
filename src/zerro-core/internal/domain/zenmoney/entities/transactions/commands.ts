@@ -12,24 +12,24 @@ export type TTransactionIntent = {
 }
 
 export function compileDeleteTransactions(
-  data: TTransactionSource,
+  transactions: ById<TTransaction>,
   ids: TTransactionId | TTransactionId[]
 ): TTransactionIntent {
   return {
     transaction: toArray(ids).map(id => ({
-      id: getExistingTransaction(data, id).id,
+      id: getExistingTransaction(transactions, id).id,
       deleted: true,
     })),
   }
 }
 
 export function compileDeleteTransactionsPermanently(
-  data: TTransactionSource,
+  transactions: ById<TTransaction>,
   ids: TTransactionId | TTransactionId[]
 ): TTransactionIntent {
   return {
     transaction: toArray(ids).map(id => ({
-      id: getExistingTransaction(data, id).id,
+      id: getExistingTransaction(transactions, id).id,
       outcome: 0.00001,
       income: 0.00001,
     })),
@@ -37,13 +37,16 @@ export function compileDeleteTransactionsPermanently(
 }
 
 export function compileRestoreTransaction(
-  data: TTransactionSource,
+  transactions: ById<TTransaction>,
   id: TTransactionId,
   ctx: TCoreContext
 ): TTransactionIntent {
   // Creation: the replacement id must be generated at issue time, so the full
   // source transaction is re-emitted under a fresh id.
-  const { changed: _changed, ...source } = getExistingTransaction(data, id)
+  const { changed: _changed, ...source } = getExistingTransaction(
+    transactions,
+    id
+  )
   return {
     transaction: [
       {
@@ -56,13 +59,13 @@ export function compileRestoreTransaction(
 }
 
 export function compileBulkEditTransactions(
-  data: TTransactionSource,
+  transactions: ById<TTransaction>,
   ids: TTransactionId[],
   opts: { tags?: TTagId[]; comment?: string }
 ): TTransactionIntent {
   return {
     transaction: ids.map(id => {
-      const transaction = getExistingTransaction(data, id)
+      const transaction = getExistingTransaction(transactions, id)
       return {
         id,
         tag: modifyTags(transaction.tag, opts.tags),
@@ -80,10 +83,10 @@ export function compileBulkEditTransactions(
  * incomes) is decided by the caller.
  */
 export function compileCombineToOutcome(
-  data: TTransactionSource,
+  transactions: ById<TTransaction>,
   ids: TTransactionId[]
 ): TTransactionIntent {
-  const { incomes, outcomes } = groupTransactionsByType(data, ids)
+  const { incomes, outcomes } = groupTransactionsByType(transactions, ids)
   const outcome = outcomes[0]
   if (!outcome) throw new Error('No outcome transaction to combine into')
 
@@ -112,10 +115,10 @@ export function compileCombineToOutcome(
  * the single selected income.
  */
 export function compileCombineToIncome(
-  data: TTransactionSource,
+  transactions: ById<TTransaction>,
   ids: TTransactionId[]
 ): TTransactionIntent {
-  const { incomes, outcomes } = groupTransactionsByType(data, ids)
+  const { incomes, outcomes } = groupTransactionsByType(transactions, ids)
   const income = incomes[0]
   if (!income) throw new Error('No income transaction to combine into')
 
@@ -145,10 +148,10 @@ export function compileCombineToIncome(
  * deleted. The caller guarantees exactly one income and one outcome.
  */
 export function compileMergeTransactionsAsTransfer(
-  data: TTransactionSource,
+  transactions: ById<TTransaction>,
   ids: TTransactionId[]
 ): TTransactionIntent {
-  const { incomes, outcomes } = groupTransactionsByType(data, ids)
+  const { incomes, outcomes } = groupTransactionsByType(transactions, ids)
   if (incomes.length !== 1 || outcomes.length !== 1) {
     throw new Error('Transfer merge needs exactly one income and one outcome')
   }
@@ -169,14 +172,14 @@ export function compileMergeTransactionsAsTransfer(
 }
 
 function groupTransactionsByType(
-  data: TTransactionSource,
+  transactions: ById<TTransaction>,
   ids: TTransactionId[]
 ): { incomes: TTransaction[]; outcomes: TTransaction[] } {
   const incomes: TTransaction[] = []
   const outcomes: TTransaction[] = []
 
   ids.forEach(id => {
-    const transaction = getExistingTransaction(data, id)
+    const transaction = getExistingTransaction(transactions, id)
     const type = getTransactionType(transaction)
     if (type === TrType.Income) incomes.push(transaction)
     if (type === TrType.Outcome) outcomes.push(transaction)
@@ -186,15 +189,13 @@ function groupTransactionsByType(
 }
 
 function getExistingTransaction(
-  data: TTransactionSource,
+  transactions: ById<TTransaction>,
   id: TTransactionId
 ): TTransaction {
-  const transaction = getTransaction(data, id)
+  const transaction = getTransaction(transactions, id)
   if (!transaction) throw new Error('Transaction not found')
   return transaction
 }
-
-type TTransactionSource = { transaction: ById<TTransaction> }
 
 function modifyTags(prevTags: TTagId[] | null, newTags?: TTagId[]) {
   if (!newTags) return prevTags

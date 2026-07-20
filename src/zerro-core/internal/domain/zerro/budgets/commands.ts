@@ -32,7 +32,7 @@ export function compileSetBudget(
   const updates = Array.isArray(update) ? update : [update]
   if (!updates.length) return {}
 
-  const preferZmBudgets = getUserSettings(data).preferZmBudgets
+  const preferZmBudgets = getUserSettings(data.reminder).preferZmBudgets
   const tagUpdates: TTagBudgetUpdate[] = []
   const envUpdates: TEnvBudgetUpdate[] = []
 
@@ -63,7 +63,7 @@ export function compileSetEnvBudget(
   const updates = Array.isArray(update) ? update : [update]
   if (!updates.length) return {}
 
-  const currentBudgets = getEnvBudgets(data)
+  const currentBudgets = getEnvBudgets(data.reminder)
   const byMonth: ByMonth<TBudgets> = {}
 
   updates.forEach(({ id, month, value }) => {

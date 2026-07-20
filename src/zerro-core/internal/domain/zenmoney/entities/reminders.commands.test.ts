@@ -7,16 +7,8 @@ import {
 import { applyPatch } from '../model/applyPatch'
 import { compileDeleteReminder, compileSetReminder } from './reminders'
 import { makeReminder } from './reminders'
-import { getReminders } from './reminders'
 
 describe('zenmoney reminder commands', () => {
-  it('reads the normalized reminder map', () => {
-    const reminder = makeTestReminder({ id: 'reminder', comment: 'hello' })
-    const data = makeStore({ reminder: { reminder } })
-
-    expect(getReminders(data)).toBe(data.reminder)
-  })
-
   it('creates reminders with root user and deterministic id/time', () => {
     const data = makeStore({
       user: {
@@ -25,7 +17,7 @@ describe('zenmoney reminder commands', () => {
     })
 
     const patch = compileSetReminder(
-      data,
+      { reminders: data.reminder, users: data.user },
       {
         incomeAccount: 'cash',
         outcomeAccount: 'card',
@@ -62,7 +54,7 @@ describe('zenmoney reminder commands', () => {
     const data = makeStore({ reminder: { reminder: current } })
 
     const patch = compileSetReminder(
-      data,
+      { reminders: data.reminder, users: data.user },
       { id: 'reminder', comment: 'New' },
       { now: () => 200, uuid: () => 'unused' }
     )
@@ -109,7 +101,7 @@ describe('zenmoney reminder commands', () => {
       },
     })
 
-    const patch = compileDeleteReminder(data, 'reminder')
+    const patch = compileDeleteReminder(data.reminder, 'reminder')
     const next = applyPatch(data, patch)
 
     expect(patch).toEqual({
@@ -130,13 +122,20 @@ describe('zenmoney reminder commands', () => {
       } as any,
     })
 
-    expect(compileDeleteReminder(data, 'missing')).toEqual({})
+    expect(compileDeleteReminder(data.reminder, 'missing')).toEqual({})
   })
 
   it('validates reminder set and delete commands', () => {
+    const empty = makeStore()
+    const withUser = makeStore({
+      user: {
+        1: { id: 1, parent: null },
+      } as any,
+    })
+
     expect(() =>
       compileSetReminder(
-        makeStore(),
+        { reminders: empty.reminder, users: empty.user },
         { incomeAccount: 'cash', outcomeAccount: 'card' },
         { now: () => 1, uuid: () => 'reminder' }
       )
@@ -144,16 +143,14 @@ describe('zenmoney reminder commands', () => {
 
     expect(() =>
       compileSetReminder(
-        makeStore({
-          user: {
-            1: { id: 1, parent: null },
-          } as any,
-        }),
+        { reminders: withUser.reminder, users: withUser.user },
         { incomeAccount: 'cash' } as any,
         { now: () => 1, uuid: () => 'reminder' }
       )
     ).toThrow('Missing incomeAccount or outcomeAccount')
 
-    expect(() => compileDeleteReminder(makeStore(), 'reminder')).not.toThrow()
+    expect(() =>
+      compileDeleteReminder(empty.reminder, 'reminder')
+    ).not.toThrow()
   })
 })

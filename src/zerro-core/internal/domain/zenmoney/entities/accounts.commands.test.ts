@@ -22,7 +22,7 @@ describe('zenmoney account commands', () => {
     })
 
     const patch = compileCreateAccount(
-      data,
+      data.user,
       {
         instrument: 2,
         title: 'Savings',
@@ -95,7 +95,7 @@ describe('zenmoney account commands', () => {
       },
     })
 
-    const patch = compilePatchAccount(data, {
+    const patch = compilePatchAccount(data.account, {
       id: 'cash',
       title: 'Wallet',
       inBalance: true,
@@ -119,7 +119,10 @@ describe('zenmoney account commands', () => {
       },
     })
 
-    const patch = compilePatchAccount(data, { id: 'cash', title: 'Wallet' })
+    const patch = compilePatchAccount(data.account, {
+      id: 'cash',
+      title: 'Wallet',
+    })
     const command = issuePatch(data, patch, 1700000000000)
     const next = applyPatch(data, materializeCommand(data, command))
 
@@ -135,7 +138,7 @@ describe('zenmoney account commands', () => {
         card: makeAccount({ id: 'card', title: 'Card', changed: 2 }),
       },
     })
-    const patch = compilePatchAccount(data, [
+    const patch = compilePatchAccount(data.account, [
       { id: 'cash', title: 'Wallet' },
       { id: 'card', title: 'Credit Card' },
     ])
@@ -152,16 +155,16 @@ describe('zenmoney account commands', () => {
         cash: makeAccount({ id: 'cash', title: 'Cash', changed: 1 }),
       },
     })
-    expect(() => compilePatchAccount(data, { title: 'No id' } as any)).toThrow(
-      'Trying to patch account without id'
-    )
     expect(() =>
-      compilePatchAccount(data, { id: 'missing', title: 'Missing' })
+      compilePatchAccount(data.account, { title: 'No id' } as any)
+    ).toThrow('Trying to patch account without id')
+    expect(() =>
+      compilePatchAccount(data.account, { id: 'missing', title: 'Missing' })
     ).toThrow('Account not found')
 
     expect(() =>
       compileCreateAccount(
-        makeStore(),
+        makeStore().user,
         { instrument: 1, title: 'No user' },
         { now: () => 1, uuid: () => 'account' }
       )

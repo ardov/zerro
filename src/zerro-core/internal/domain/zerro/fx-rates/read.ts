@@ -5,11 +5,8 @@ import type { ById, ByMonth } from '../../foundation/types'
 import type { TDateDraft, TISOMonth, TMsTime } from '../../zenmoney/primitives'
 import type { TFxAmount } from '../../zenmoney/model/money'
 import type { TFxCode, TInstrument } from '../../zenmoney/entities/instruments'
-import {
-  getMonthlyHiddenData,
-  HiddenDataType,
-  THiddenDataSource,
-} from '../hidden-data'
+import type { TReminder } from '../../zenmoney/entities/reminders'
+import { getMonthlyHiddenData, HiddenDataType } from '../hidden-data'
 
 export type TFxRates = Record<TFxCode, number>
 
@@ -35,9 +32,12 @@ export type TFxConverter = (
 ) => number
 
 export function getStoredFxRates(
-  data: THiddenDataSource
+  reminders: ById<TReminder>
 ): ByMonth<TFxRatesStoredValue> {
-  return getMonthlyHiddenData<TFxRatesStoredValue>(data, HiddenDataType.FxRates)
+  return getMonthlyHiddenData<TFxRatesStoredValue>(
+    reminders,
+    HiddenDataType.FxRates
+  )
 }
 
 export function buildCurrentFxRates(input: {

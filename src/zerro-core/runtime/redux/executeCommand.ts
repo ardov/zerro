@@ -12,6 +12,7 @@ import {
   type TCoreContext,
   type TIntentPatch,
 } from '../../types'
+import { selectData } from './state'
 
 export type TReduxCommandCompiler<TReceipt = unknown> = (
   state: RootState,
@@ -53,8 +54,9 @@ function appendIntentPatch(
   state: RootState,
   patch: TIntentPatch
 ): void {
-  const command = issuePatch(state.data.current, patch, defaultCtx.now())
-  const materialized = materializeCommand(state.data.current, command)
+  const data = selectData(state)
+  const command = issuePatch(data, patch, defaultCtx.now())
+  const materialized = materializeCommand(data, command)
   if (isEmptyPatch(materialized)) return
 
   dispatch(appendClientCommand(command))

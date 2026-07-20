@@ -1,14 +1,13 @@
 import type { ById } from '../../foundation/types'
-import {
-  getSimpleHiddenData,
-  HiddenDataType,
-  THiddenDataSource,
-} from '../hidden-data'
+import type { TReminder } from '../../zenmoney/entities/reminders'
+import { getSimpleHiddenData, HiddenDataType } from '../hidden-data'
 import type { TEnvelopeMeta } from './types'
 
-export function getEnvelopeMeta(data: THiddenDataSource): ById<TEnvelopeMeta> {
+export function getEnvelopeMeta(
+  reminders: ById<TReminder>
+): ById<TEnvelopeMeta> {
   return getSimpleHiddenData<ById<TEnvelopeMeta>>(
-    data,
+    reminders,
     HiddenDataType.EnvelopeMeta,
     {}
   )

@@ -30,7 +30,7 @@ export function compileSetSimpleHiddenData<TPayload>(
     patch: accountPatch,
     receipt: { accountId },
   } = compileEnsureZerroDataAccount(data, ctx)
-  const reminder = getSimpleHiddenDataReminder(data, type)
+  const reminder = getSimpleHiddenDataReminder(data.reminder, type)
   const reminderPatch = compileSetHiddenDataReminder(
     data,
     {
@@ -60,7 +60,7 @@ export function compileSetMonthlyHiddenData<TPayload>(
     patch: accountPatch,
     receipt: { accountId },
   } = compileEnsureZerroDataAccount(data, ctx)
-  const reminder = getMonthlyHiddenDataReminders(data, type)[month]
+  const reminder = getMonthlyHiddenDataReminders(data.reminder, type)[month]
   const reminderPatch = compileSetHiddenDataReminder(
     data,
     {
@@ -81,9 +81,9 @@ export function compileResetMonthlyHiddenData(
 ): TIntentPatch {
   if (!isISOMonth(month)) throw new Error('Invalid month')
 
-  const reminder = getMonthlyHiddenDataReminders(data, type)[month]
+  const reminder = getMonthlyHiddenDataReminders(data.reminder, type)[month]
   if (!reminder) return {}
-  return compileDeleteReminder(data, reminder.id)
+  return compileDeleteReminder(data.reminder, reminder.id)
 }
 
 function compileSetHiddenDataReminder(
@@ -96,7 +96,7 @@ function compileSetHiddenDataReminder(
   ctx: TCoreContext
 ): TIntentPatch {
   return compileSetReminder(
-    data,
+    { reminders: data.reminder, users: data.user },
     {
       id: input.id,
       incomeAccount: input.accountId,

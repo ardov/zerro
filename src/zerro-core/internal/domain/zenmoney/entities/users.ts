@@ -26,19 +26,21 @@ export type TZmUser = Omit<TUser, 'changed' | 'paidTill'> & {
   changed: TUnixTime
   paidTill: TUnixTime
 }
-export type TUserSource = { user: ById<TUser> }
-type TUserCurrencySource = TUserSource & { instrument: ById<TInstrument> }
-
-export function getRootUser(data: TUserSource): TUser | null {
-  return Object.values(data.user).find(user => !user.parent) || null
+export function getRootUser(users: ById<TUser>): TUser | null {
+  return Object.values(users).find(user => !user.parent) || null
 }
-export function getRootUserId(data: TUserSource): TUserId | null {
-  return getRootUser(data)?.id || null
+export function getRootUserId(users: ById<TUser>): TUserId | null {
+  return getRootUser(users)?.id || null
 }
-export function getUserInstrumentId(data: TUserSource): TInstrumentId | null {
-  return getRootUser(data)?.currency || null
+export function getUserInstrumentId(users: ById<TUser>): TInstrumentId | null {
+  return getRootUser(users)?.currency || null
 }
-export function getUserCurrency(data: TUserCurrencySource): TFxCode {
-  const id = getUserInstrumentId(data)
-  return typeof id === 'number' ? getInstCodeMap(data)[id] || 'USD' : 'USD'
+export function getUserCurrency(data: {
+  users: ById<TUser>
+  instruments: ById<TInstrument>
+}): TFxCode {
+  const id = getUserInstrumentId(data.users)
+  return typeof id === 'number'
+    ? getInstCodeMap(data.instruments)[id] || 'USD'
+    : 'USD'
 }

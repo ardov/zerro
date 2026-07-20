@@ -8,20 +8,8 @@ import { applyPatch } from '../model/applyPatch'
 import { compileSetTagBudget } from './budgets'
 import { makeTagBudget } from './budgets'
 import { toBudgetId } from './budgets'
-import { getTagBudgets } from './budgets'
 
 describe('zenmoney budget commands', () => {
-  it('reads the normalized tag budget map', () => {
-    const budget = makeTestBudget({
-      id: '2026-01-01#food',
-      tag: 'food',
-      outcome: 100,
-    })
-    const data = makeStore({ budget: { [budget.id]: budget } })
-
-    expect(getTagBudgets(data)).toBe(data.budget)
-  })
-
   it('compiles sparse tag-budget creation intent', () => {
     const data = makeStore({
       user: {

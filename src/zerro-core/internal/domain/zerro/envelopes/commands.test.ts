@@ -49,7 +49,7 @@ describe('envelope commands', () => {
       title: 'Travel',
       showOutcome: true,
     })
-    expect(getEnvelopeMeta(next)[id]).toMatchObject({
+    expect(getEnvelopeMeta(next.reminder)[id]).toMatchObject({
       id,
       group: 'Plans',
       index: 2,
@@ -113,7 +113,7 @@ describe('envelope commands', () => {
       title: 'Groceries',
       color: 0x00ff00,
     })
-    expect(getEnvelopeMeta(next)[id]).toMatchObject({
+    expect(getEnvelopeMeta(next.reminder)[id]).toMatchObject({
       currency: 'EUR',
       visibility: envelopeVisibility.hidden,
       keepIncome: true,
@@ -143,8 +143,8 @@ describe('envelope commands', () => {
       compileSetEnvelopeComment(withComment, { id, comment: '' }, ctx)
     )
 
-    expect(getEnvelopeMeta(withComment)[id]?.comment).toBe('Notes')
-    expect(getEnvelopeMeta(cleared)[id]?.comment).toBe('')
+    expect(getEnvelopeMeta(withComment.reminder)[id]?.comment).toBe('Notes')
+    expect(getEnvelopeMeta(cleared.reminder)[id]?.comment).toBe('')
   })
 
   it('sets, clears, and skips unchanged tag envelope colors', () => {
@@ -336,7 +336,7 @@ describe('envelope commands', () => {
       id: 'shop',
       title: 'Market',
     })
-    expect(getEnvelopeMeta(next)[accountId]).toEqual({
+    expect(getEnvelopeMeta(next.reminder)[accountId]).toEqual({
       id: accountId,
       keepIncome: true,
     })
@@ -404,7 +404,7 @@ describe('envelope commands', () => {
       { now: () => 100, uuid: () => 'meta-reminder' }
     )
     const next = applyPatch(data, patch)
-    const meta = getEnvelopeMeta(next)
+    const meta = getEnvelopeMeta(next.reminder)
 
     // Flat order: [Costs, parent, food, Savings, cash, fun]
     expect(next.tag.food.parent).toBe('parent')
@@ -487,7 +487,7 @@ describe('envelope commands', () => {
       { now: () => 100, uuid: () => 'meta-reminder' }
     )
     const next = applyPatch(data, patch)
-    const meta = getEnvelopeMeta(next)
+    const meta = getEnvelopeMeta(next.reminder)
 
     // Flat order: [G, virt, t (elevated), p, c2, c1]
     expect(next.tag.t.parent).toBeNull()
@@ -551,7 +551,7 @@ describe('envelope commands', () => {
       ctx
     )
     const next = applyPatch(data, merged)
-    const meta = getEnvelopeMeta(next)
+    const meta = getEnvelopeMeta(next.reminder)
 
     // Flat order: [A, food, fun] — the empty group takes no index
     expect(meta[foodId]).toBeUndefined()

@@ -9,7 +9,7 @@ export function compilePatchEnvelopeMeta(
   updates: TEnvelopeMetaPatch | TEnvelopeMetaPatch[],
   ctx: TCoreContext
 ): TIntentPatch {
-  const currentData = getEnvelopeMeta(data)
+  const currentData = getEnvelopeMeta(data.reminder)
   const payload = { ...currentData }
 
   const list = Array.isArray(updates) ? updates : [updates]

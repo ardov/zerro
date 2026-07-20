@@ -24,8 +24,8 @@ describe('transaction query integration', () => {
     const history = session.transactions.getHistory()
     const context: TTransactionQueryContext = {
       routing: {
-        inBudgetAccountIds: new Set(getZerroInBudgetAccountIds(store)),
-        debtAccountId: getDebtAccountId(store),
+        inBudgetAccountIds: new Set(getZerroInBudgetAccountIds(store.account)),
+        debtAccountId: getDebtAccountId(store.account),
         debtors: session.debtors.getAll(),
       },
       envelopes: session.envelopes.getAll(),

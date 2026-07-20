@@ -1,20 +1,18 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { useAppSelector } from 'store'
 import type { RootState } from 'store'
-import { getAccounts } from '../../internal/domain/zenmoney/entities/accounts'
 import { getPopulatedAccounts } from '../../internal/domain/zerro/accounts/read'
 import { fromGraph, graph } from './graph'
 import { ZERRO_DATA_ACCOUNT_NAME } from '../../constants'
 import * as instruments from './instruments'
-import { selectAccountSlice } from './state'
+import { selectData } from './state'
 
 export const selectDebtAccountId = fromGraph(graph.debtAccountId)
-export const selectAll = (state: RootState) =>
-  getAccounts({ account: selectAccountSlice(state) })
+export const selectAll = (state: RootState) => selectData(state).account
 const selectPopulated = createSelector(
-  [selectAccountSlice, instruments.selectCodeMap],
+  [selectAll, instruments.selectCodeMap],
   (account, instrumentCodeById) =>
-    getPopulatedAccounts({ account }, instrumentCodeById)
+    getPopulatedAccounts(account, instrumentCodeById)
 )
 const selectList = createSelector([selectPopulated], accounts =>
   Object.values(accounts)

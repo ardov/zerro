@@ -22,8 +22,8 @@ describe('zerro account reads', () => {
       },
     })
 
-    expect(getZerroDataAccountId(data)).toBe('data')
-    expect(getZerroDataAccountId(makeStore())).toBeUndefined()
+    expect(getZerroDataAccountId(data.account)).toBe('data')
+    expect(getZerroDataAccountId(makeStore().account)).toBeUndefined()
   })
 
   it('classifies Zerro in-budget accounts with pin-title convention', () => {
@@ -51,7 +51,7 @@ describe('zerro account reads', () => {
     expect(isZerroInBudgetAccount(data.account.cash)).toBe(true)
     expect(isZerroInBudgetAccount(data.account.pinned)).toBe(true)
     expect(isZerroInBudgetAccount(data.account.debt)).toBe(false)
-    expect(getZerroInBudgetAccountIds(data)).toEqual(['cash', 'pinned'])
+    expect(getZerroInBudgetAccountIds(data.account)).toEqual(['cash', 'pinned'])
   })
 
   it('builds Zerro account projection used by Redux consumers', () => {
@@ -69,7 +69,7 @@ describe('zerro account reads', () => {
     })
     const data = makeStore({ account: { cash, debt } })
 
-    expect(getPopulatedAccounts(data, { 1: 'RUB', 2: 'USD' })).toEqual({
+    expect(getPopulatedAccounts(data.account, { 1: 'RUB', 2: 'USD' })).toEqual({
       cash: { ...cash, startBalanceReal: 100, inBudget: true, fxCode: 'RUB' },
       debt: { ...debt, startBalanceReal: 0, inBudget: false, fxCode: 'USD' },
     })
@@ -102,8 +102,8 @@ describe('zerro account reads', () => {
       },
     })
 
-    expect(getZerroSavingAccounts(data).map(account => account.id)).toEqual([
-      'safe',
-    ])
+    expect(
+      getZerroSavingAccounts(data.account).map(account => account.id)
+    ).toEqual(['safe'])
   })
 })

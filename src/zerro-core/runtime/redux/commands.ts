@@ -26,6 +26,7 @@ import {
 } from '../../internal/domain/zenmoney/entities/reminders'
 import type { TISOMonth } from '../../internal/domain/foundation/primitives'
 import type { TTagId } from '../../internal/domain/zenmoney/entities/tags'
+import { selectData } from './state'
 import {
   compileApplyEnvelopeStructure,
   compileCreateEnvelope,
@@ -70,7 +71,7 @@ function executeCommand<TReceipt = undefined>(
 
 export function setBudget(updates: TBudgetUpdate[]): AppThunk {
   return executeCommand((state, ctx) =>
-    compileSetBudget(state.data.current, updates, ctx)
+    compileSetBudget(selectData(state), updates, ctx)
   )
 }
 
@@ -81,24 +82,24 @@ export function editFxRates(month: TISOMonth, patch: TFxRates): AppThunk {
     Object.entries(patch).forEach(([code, rate]) => {
       if (rate > 0) rates[code] = rate
     })
-    return compileSetFxRates(state.data.current, month, rates, ctx)
+    return compileSetFxRates(selectData(state), month, rates, ctx)
   })
 }
 
 export function resetFxRates(month: TISOMonth): AppThunk {
-  return executeCommand(state => compileResetFxRates(state.data.current, month))
+  return executeCommand(state => compileResetFxRates(selectData(state), month))
 }
 
 export function setEmojiIcons(enabled: boolean): AppThunk {
   return executeCommand((state, ctx) =>
-    compilePatchUserSettings(state.data.current, { emojiIcons: enabled }, ctx)
+    compilePatchUserSettings(selectData(state), { emojiIcons: enabled }, ctx)
   )
 }
 
 export function setPreferZmBudgets(enabled: boolean): AppThunk {
   return executeCommand((state, ctx) =>
     compilePatchUserSettings(
-      state.data.current,
+      selectData(state),
       { preferZmBudgets: enabled },
       ctx
     )
@@ -111,7 +112,7 @@ export function setGoal(
   goal: TGoal | null
 ): AppThunk {
   return executeCommand((state, ctx) =>
-    compileSetGoal(state.data.current, month, id, goal, ctx)
+    compileSetGoal(selectData(state), month, id, goal, ctx)
   )
 }
 
@@ -121,7 +122,7 @@ export function createEnvelope(
   const execute = executeCommand<TCreateEnvelopeReceipt>((state, ctx) => {
     const labels = getCommandEnvelopeLabels()
     return compileCreateEnvelope(
-      state.data.current,
+      selectData(state),
       {
         ...input,
         group: input.group
@@ -141,7 +142,7 @@ export function createEnvelope(
 
 export function renameEnvelope(id: TEnvelopeId, name: string): AppThunk {
   return executeCommand(state =>
-    compileRenameEnvelope(state.data.current, { id, name })
+    compileRenameEnvelope(selectData(state), { id, name })
   )
 }
 
@@ -150,13 +151,13 @@ export function setEnvelopeColor(
   colorHex: string | null
 ): AppThunk {
   return executeCommand(state =>
-    compileSetEnvelopeColor(state.data.current, { id, colorHex })
+    compileSetEnvelopeColor(selectData(state), { id, colorHex })
   )
 }
 
 export function setEnvelopeComment(id: TEnvelopeId, comment: string): AppThunk {
   return executeCommand((state, ctx) =>
-    compileSetEnvelopeComment(state.data.current, { id, comment }, ctx)
+    compileSetEnvelopeComment(selectData(state), { id, comment }, ctx)
   )
 }
 
@@ -166,7 +167,7 @@ export function applyEnvelopeStructure(
   return executeCommand((state, ctx) => {
     const labels = getCommandEnvelopeLabels()
     return compileApplyEnvelopeStructure(
-      state.data.current,
+      selectData(state),
       getCommandDomainEnvelopes(state),
       structure.map(group => ({
         ...group,
@@ -182,7 +183,7 @@ export function updateEnvelopeSettings(
 ): AppThunk {
   return executeCommand((state, ctx) =>
     compileUpdateEnvelopeSettings(
-      state.data.current,
+      selectData(state),
       getCommandDomainEnvelopes(state),
       normalizeEnvelopeSettings(state, input),
       ctx
@@ -192,19 +193,19 @@ export function updateEnvelopeSettings(
 
 export function deleteTransactions(ids: TTransactionId[]): AppThunk {
   return executeCommand(state =>
-    compileDeleteTransactions(state.data.current, ids)
+    compileDeleteTransactions(selectData(state).transaction, ids)
   )
 }
 
 export function deleteTransactionsPermanently(ids: TTransactionId[]): AppThunk {
   return executeCommand(state =>
-    compileDeleteTransactionsPermanently(state.data.current, ids)
+    compileDeleteTransactionsPermanently(selectData(state).transaction, ids)
   )
 }
 
 export function restoreTransaction(id: TTransactionId): AppThunk {
   return executeCommand((state, ctx) =>
-    compileRestoreTransaction(state.data.current, id, ctx)
+    compileRestoreTransaction(selectData(state).transaction, id, ctx)
   )
 }
 
@@ -264,7 +265,7 @@ export function setAccountInBalance(
   inBalance: boolean
 ): AppThunk {
   return executeCommand(state =>
-    compilePatchAccount(state.data.current, { id, inBalance })
+    compilePatchAccount(selectData(state).account, { id, inBalance })
   )
 }
 
@@ -273,7 +274,12 @@ export function setReminder(
     TReminderDraft | TReminderPatch | Array<TReminderDraft | TReminderPatch>
 ): AppThunk<TReminderPatch[]> {
   const execute = executeCommand<TReminderPatch[]>((state, ctx) => {
-    const patch = compileSetReminder(state.data.current, draft, ctx)
+    const data = selectData(state)
+    const patch = compileSetReminder(
+      { reminders: data.reminder, users: data.user },
+      draft,
+      ctx
+    )
     return { patch, receipt: patch.reminder || [] }
   })
 
@@ -281,7 +287,9 @@ export function setReminder(
 }
 
 export function deleteReminder(id: TReminderId): AppThunk {
-  return executeCommand(state => compileDeleteReminder(state.data.current, id))
+  return executeCommand(state =>
+    compileDeleteReminder(selectData(state).reminder, id)
+  )
 }
 
 export function bulkEditTransactions(
@@ -296,25 +304,25 @@ export function bulkEditTransactions(
   }
 
   return executeCommand(state =>
-    compileBulkEditTransactions(state.data.current, ids, opts)
+    compileBulkEditTransactions(selectData(state).transaction, ids, opts)
   )
 }
 
 export function combineTransactionsToOutcome(ids: TTransactionId[]): AppThunk {
   return executeCommand(state =>
-    compileCombineToOutcome(state.data.current, ids)
+    compileCombineToOutcome(selectData(state).transaction, ids)
   )
 }
 
 export function combineTransactionsToIncome(ids: TTransactionId[]): AppThunk {
   return executeCommand(state =>
-    compileCombineToIncome(state.data.current, ids)
+    compileCombineToIncome(selectData(state).transaction, ids)
   )
 }
 
 export function mergeTransactionsAsTransfer(ids: TTransactionId[]): AppThunk {
   return executeCommand(state =>
-    compileMergeTransactionsAsTransfer(state.data.current, ids)
+    compileMergeTransactionsAsTransfer(selectData(state).transaction, ids)
   )
 }
 

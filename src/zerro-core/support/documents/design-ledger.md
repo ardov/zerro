@@ -27,7 +27,8 @@
 ### Reads and Redux adapter
 
 - Session reads are grouped by domain and use `get*` names.
-- The projection dependency graph is defined once in `application/graph.ts` and
+- The projection dependency graph is defined once in
+  `internal/projections/graph.ts` and
   instantiated by both runtimes. `createZerroSession` binds each node to one
   frozen snapshot; the Redux adapter keeps one instance and memoizes across
   snapshots. Neither runtime re-declares the chain, so the two cannot drift.
@@ -44,7 +45,11 @@
   instant. `projectionStability.test.ts` guards the whole-store-dependency and
   result-equality contracts.
 - Selector, hook, command, and app-facing types live in their domain modules;
-  `redux/state.ts` owns raw inputs and `commandRead.ts` owns command-time reads.
+  `runtime/redux/state.ts` owns only the complete-snapshot path, entity modules
+  own narrowing selectors, and `commandRead.ts` owns command-time reads.
+- Domain functions accept the entity map directly when they need one
+  collection, or a small inline object of named maps when they need several.
+  One-field `*Source` aliases and identity getters are intentionally absent.
 - Domain namespaces are the desired adapter shape. Add and retain members only
   for real consumers.
 - Activity and budget projections retain aggregate amounts and transaction

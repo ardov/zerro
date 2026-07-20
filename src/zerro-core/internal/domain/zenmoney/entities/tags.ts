@@ -60,8 +60,6 @@ export const tagWritableFields = [
 export type TTagWritableField = (typeof tagWritableFields)[number]
 
 export type TTagPatch = EntityPatch<TTag, TTagWritableField>
-export type TTagSource = { tag: ById<TTag> }
-type TTagCommandSource = TTagSource & { user: ById<TUser> }
 export type TTagIntent = { tag: TTagPatch[] }
 
 export type TZmTag = Omit<TTag, 'changed'> & {
@@ -95,7 +93,7 @@ export function makeTag(
 export type TTagDraft = OptionalExceptFor<TTag, 'title'>
 
 export function compilePatchTag(
-  data: TTagSource,
+  tags: ById<TTag>,
   draft: TTagPatch | TTagPatch[]
 ): TTagIntent {
   const list = Array.isArray(draft) ? draft : [draft]
@@ -103,18 +101,18 @@ export function compilePatchTag(
     if (item.id === 'null') throw new Error('Trying to patch null tag')
   })
 
-  return compileExistingEntityPatch(data.tag, 'tag', list)
+  return compileExistingEntityPatch(tags, 'tag', list)
 }
 
 export function compileCreateTag(
-  data: TTagCommandSource,
+  data: { tags: ById<TTag>; users: ById<TUser> },
   draft: TTagDraft,
   ctx: TCoreContext
 ): TTagIntent {
-  if (hasId(draft)) return compilePatchTag(data, draft)
+  if (hasId(draft)) return compilePatchTag(data.tags, draft)
   if (!draft.title) throw new Error('Trying to create tag without title')
 
-  const user = getRootUserId(data)
+  const user = getRootUserId(data.users)
   if (!user) throw new Error('No user')
 
   return {

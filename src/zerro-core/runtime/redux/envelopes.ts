@@ -8,15 +8,13 @@ export {
 } from './commands'
 import { createSelector } from '@reduxjs/toolkit'
 import type { RootState } from 'store'
-import { graph } from './graph'
+import { fromGraph, graph } from './graph'
 import { getCommandEnvelopeLabels } from './commandRead'
 import { presentEnvelopes } from './envelopePresentation'
 import * as tags from './tags'
 
-export const selectDomain = (state: RootState) =>
-  graph.envelopes(state.data.current)
-export const selectDomainStructure = (state: RootState) =>
-  graph.envelopeStructure(state.data.current)
+export const selectDomain = fromGraph(graph.envelopes)
+export const selectDomainStructure = fromGraph(graph.envelopeStructure)
 const selectPresentedProjection = createSelector(
   [selectDomain, tags.selectPopulated, getCommandEnvelopeLabels],
   (domainById, tags, labels) => presentEnvelopes(domainById, tags, labels)
@@ -25,8 +23,7 @@ export const selectAll = (state: RootState) =>
   selectPresentedProjection(state).byId
 export const selectStructure = (state: RootState) =>
   selectPresentedProjection(state).structure
-export const selectKeepingIds = (state: RootState) =>
-  graph.keepingEnvelopeIds(state.data.current)
+export const selectKeepingIds = fromGraph(graph.keepingEnvelopeIds)
 export type { TPresentedEnvelope } from './envelopePresentation'
 export {
   envId,

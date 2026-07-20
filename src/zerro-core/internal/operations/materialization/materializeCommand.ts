@@ -166,7 +166,7 @@ function materializeIntentPatch(
 
   if (patch.deletion) {
     if (patch.deletion.length) {
-      const user = getRootUserId(snapshot)
+      const user = getRootUserId(snapshot.user)
       if (!user) throw new Error('Cannot materialize deletion without user')
       result.deletion = patch.deletion.map(entity => ({
         ...entity,
@@ -338,7 +338,7 @@ function requireFields(
 }
 
 function requireRootUser(snapshot: TDataStore, entity: string) {
-  const user = getRootUserId(snapshot)
+  const user = getRootUserId(snapshot.user)
   if (!user) throw new Error(`Cannot create ${entity} without user`)
   return user
 }

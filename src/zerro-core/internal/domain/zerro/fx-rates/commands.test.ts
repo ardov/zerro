@@ -22,13 +22,15 @@ describe('FX rate commands', () => {
     const setPatch = compileSetFxRates(data, '2026-06', rates, ctx)
     const withRates = applyPatch(data, setPatch)
 
-    expect(getStoredFxRates(withRates)['2026-06']).toEqual({
+    expect(getStoredFxRates(withRates.reminder)['2026-06']).toEqual({
       date: '2026-06',
       changed: 100,
       rates,
     })
 
     const resetPatch = compileResetFxRates(withRates, '2026-06')
-    expect(getStoredFxRates(applyPatch(withRates, resetPatch))).toEqual({})
+    expect(
+      getStoredFxRates(applyPatch(withRates, resetPatch).reminder)
+    ).toEqual({})
   })
 })

@@ -1,20 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  makeReminderMarker as makeTestReminderMarker,
-  makeStore,
-} from '../../../../support/testing/zenmoneyTestData'
+import { makeReminderMarker as makeTestReminderMarker } from '../../../../support/testing/zenmoneyTestData'
 import { makeReminderMarker } from './reminderMarkers'
-import { getReminderMarkers } from './reminderMarkers'
 
-describe('zenmoney reminder marker reads and factory', () => {
-  it('reads the normalized reminder marker map', () => {
-    const marker = makeTestReminderMarker({ id: 'marker' })
-    const data = makeStore({ reminderMarker: { marker } })
-
-    expect(getReminderMarkers(data)).toBe(data.reminderMarker)
-  })
-
+describe('zenmoney reminder marker factory', () => {
   it('creates production reminder marker defaults through the marker factory', () => {
     expect(
       makeReminderMarker(

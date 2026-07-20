@@ -7,7 +7,7 @@ import {
   makeStore,
   makeUser,
 } from '../../../../support/testing/zenmoneyTestData'
-import { applyPatch, getTagBudgets } from '../../zenmoney'
+import { applyPatch } from '../../zenmoney'
 import {
   issuePatch,
   materializeCommand,
@@ -41,7 +41,7 @@ describe('env budget commands', () => {
     )
 
     expect(patch.budget).toBeUndefined()
-    expect(getEnvBudgets(next)).toEqual({
+    expect(getEnvBudgets(next.reminder)).toEqual({
       '2026-01': {
         [foodId]: 100,
       },
@@ -76,7 +76,7 @@ describe('env budget commands', () => {
     )
 
     expect(patch.reminder).toBeUndefined()
-    expect(getTagBudgets(next)).toEqual({
+    expect(next.budget).toEqual({
       '2026-01-01#food': makeBudget({
         id: '2026-01-01#food',
         changed: 100,
@@ -124,7 +124,7 @@ describe('env budget commands', () => {
       tag: 'food',
       outcome: 100,
     })
-    expect(getEnvBudgets(next)).toEqual({
+    expect(getEnvBudgets(next.reminder)).toEqual({
       '2026-01': {
         [cashId]: 200,
       },
@@ -172,7 +172,7 @@ describe('env budget commands', () => {
     const next = applyPatch(data, patch)
 
     expect(patch.account).toBeUndefined()
-    expect(getEnvBudgets(next)).toEqual({
+    expect(getEnvBudgets(next.reminder)).toEqual({
       '2026-01': {
         [foodId]: 200,
       },
@@ -215,7 +215,7 @@ describe('env budget commands', () => {
       'jan-reminder',
       'feb-reminder',
     ])
-    expect(getEnvBudgets(next)).toEqual({
+    expect(getEnvBudgets(next.reminder)).toEqual({
       '2026-01': {
         [foodId]: 100,
       },
@@ -251,7 +251,7 @@ describe('env budget commands', () => {
     const next = applyPatch(data, patch)
 
     expect(patch.deletion?.[0].id).toBe('jan')
-    expect(getEnvBudgets(next)).toEqual({})
+    expect(getEnvBudgets(next.reminder)).toEqual({})
   })
 
   it('keeps empty update lists as no-op patches', () => {

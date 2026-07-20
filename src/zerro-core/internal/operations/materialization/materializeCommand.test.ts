@@ -103,7 +103,7 @@ describe('materializeCommand', () => {
     const snapshot = makeStore({ transaction: { 'tr-1': current } })
     const command = issuePatch(
       snapshot,
-      compileDeleteTransactions(snapshot, current.id),
+      compileDeleteTransactions(snapshot.transaction, current.id),
       100
     )
 

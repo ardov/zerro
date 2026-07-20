@@ -5,14 +5,13 @@ import {
 } from '../../../../support/testing/zenmoneyTestData'
 import {
   getAccountList,
-  getAccounts,
   getAccStartBalance,
   getDebtAccountId,
 } from './accounts'
 import { AccountType } from './accounts'
 
 describe('zenmoney account reads', () => {
-  it('reads accounts by map, id, and list', () => {
+  it('reads accounts as a list', () => {
     const cash = makeAccount({ id: 'cash', title: 'Cash' })
     const card = makeAccount({ id: 'card', title: 'Card' })
     const data = makeStore({
@@ -22,8 +21,7 @@ describe('zenmoney account reads', () => {
       },
     })
 
-    expect(getAccounts(data)).toBe(data.account)
-    expect(getAccountList(data)).toEqual([cash, card])
+    expect(getAccountList(data.account)).toEqual([cash, card])
   })
 
   it('finds the debt account id', () => {
@@ -34,8 +32,8 @@ describe('zenmoney account reads', () => {
       },
     })
 
-    expect(getDebtAccountId(data)).toBe('debt')
-    expect(getDebtAccountId(makeStore())).toBeUndefined()
+    expect(getDebtAccountId(data.account)).toBe('debt')
+    expect(getDebtAccountId(makeStore().account)).toBeUndefined()
   })
 
   it('normalizes start balance for loan and deposit account facts', () => {

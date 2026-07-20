@@ -16,23 +16,20 @@ export type TInstrument = {
 export type TZmInstrument = Omit<TInstrument, 'changed'> & {
   changed: TUnixTime
 }
-export type TInstrumentSource = { instrument: ById<TInstrument> }
 export type TInstrumentCodeMap = Record<TInstrumentId, TFxCode>
 
-export function getInstruments(data: TInstrumentSource): ById<TInstrument> {
-  return data.instrument
-}
-
-export function getInstCodeMap(data: TInstrumentSource): TInstrumentCodeMap {
+export function getInstCodeMap(
+  instruments: ById<TInstrument>
+): TInstrumentCodeMap {
   return Object.fromEntries(
-    Object.values(data.instrument).map(i => [i.id, i.shortTitle])
+    Object.values(instruments).map(i => [i.id, i.shortTitle])
   )
 }
 
 export function getInstrumentsByCode(
-  data: TInstrumentSource
+  instruments: ById<TInstrument>
 ): Record<TFxCode, TInstrument> {
   return Object.fromEntries(
-    Object.values(data.instrument).map(i => [i.shortTitle, i])
+    Object.values(instruments).map(i => [i.shortTitle, i])
   )
 }

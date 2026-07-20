@@ -1,6 +1,7 @@
 import type { RootState } from 'store'
 import type { TDataStore } from '../../internal/domain/zenmoney/model/store'
 import { createProjectionGraph } from '../../internal/projections/graph'
+import { selectData } from './state'
 
 /**
  * One graph instance for the app, so every node memoizes across snapshots
@@ -18,10 +19,10 @@ export const graph = createProjectionGraph({
 
 /**
  * Adapts a graph node into a Redux selector. The node reads a `TDataStore`;
- * a selector reads it from `state.data.current`. Use for domain modules that
- * expose a graph node unchanged: `export const selectAll = fromGraph(graph.x)`.
+ * `selectData` owns the Redux path. Use for domain modules that expose a graph
+ * node unchanged: `export const selectAll = fromGraph(graph.x)`.
  */
 export const fromGraph =
   <T>(node: (data: TDataStore) => T) =>
   (state: RootState): T =>
-    node(state.data.current)
+    node(selectData(state))

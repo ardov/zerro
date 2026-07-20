@@ -35,15 +35,18 @@ describe('hidden data read codecs', () => {
       },
     })
 
-    expect(getSimpleHiddenData(data, HiddenDataType.UserSettings, {})).toEqual({
+    expect(
+      getSimpleHiddenData(data.reminder, HiddenDataType.UserSettings, {})
+    ).toEqual({
       emojiIcons: true,
     })
     expect(
-      getSimpleHiddenDataReminder(data, HiddenDataType.UserSettings)?.id
+      getSimpleHiddenDataReminder(data.reminder, HiddenDataType.UserSettings)
+        ?.id
     ).toBe('settings')
-    expect(getSimpleHiddenData(data, HiddenDataType.EnvelopeMeta, {})).toEqual(
-      {}
-    )
+    expect(
+      getSimpleHiddenData(data.reminder, HiddenDataType.EnvelopeMeta, {})
+    ).toEqual({})
   })
 
   it('reads monthly hidden data and ignores invalid months', () => {
@@ -67,11 +70,15 @@ describe('hidden data read codecs', () => {
       },
     })
 
-    expect(getMonthlyHiddenData(data, HiddenDataType.Budgets)).toEqual({
-      '2026-01': { envelope: 100 },
-    })
+    expect(getMonthlyHiddenData(data.reminder, HiddenDataType.Budgets)).toEqual(
+      {
+        '2026-01': { envelope: 100 },
+      }
+    )
     expect(
-      Object.keys(getMonthlyHiddenDataReminders(data, HiddenDataType.Budgets))
+      Object.keys(
+        getMonthlyHiddenDataReminders(data.reminder, HiddenDataType.Budgets)
+      )
     ).toEqual(['2026-01'])
   })
 })

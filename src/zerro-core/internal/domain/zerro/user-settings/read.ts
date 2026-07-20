@@ -1,8 +1,6 @@
-import {
-  getSimpleHiddenData,
-  HiddenDataType,
-  THiddenDataSource,
-} from '../hidden-data'
+import { getSimpleHiddenData, HiddenDataType } from '../hidden-data'
+import type { ById } from '../../foundation/types'
+import type { TReminder } from '../../zenmoney/entities/reminders'
 import type { TStoredUserSettings, TUserSettings } from './types'
 
 export const DEFAULT_USER_SETTINGS: TUserSettings = {
@@ -12,17 +10,17 @@ export const DEFAULT_USER_SETTINGS: TUserSettings = {
 }
 
 export function getStoredUserSettings(
-  data: THiddenDataSource
+  reminders: ById<TReminder>
 ): TStoredUserSettings {
   return getSimpleHiddenData<TStoredUserSettings>(
-    data,
+    reminders,
     HiddenDataType.UserSettings,
     {}
   )
 }
 
-export function getUserSettings(data: THiddenDataSource): TUserSettings {
-  const raw = getStoredUserSettings(data)
+export function getUserSettings(reminders: ById<TReminder>): TUserSettings {
+  const raw = getStoredUserSettings(reminders)
 
   return {
     sawMigrationAlert:

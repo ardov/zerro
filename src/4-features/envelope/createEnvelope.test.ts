@@ -73,13 +73,13 @@ describe('createEnvelope', () => {
 
     expect(id).toBe(envId.get(EnvType.Tag, UUID))
     expect(core.envelopes.selectAll(runtime.getState())[id!]).toBeDefined()
-    expect(getEnvelopeMeta(runtime.getState().data.current)[id!]).toMatchObject(
-      {
-        id,
-        comment: 'Created through Core',
-        group: defaultEnvelopeGroupIds.tags,
-        index: 2,
-      }
-    )
+    expect(
+      getEnvelopeMeta(runtime.getState().data.current.reminder)[id!]
+    ).toMatchObject({
+      id,
+      comment: 'Created through Core',
+      group: defaultEnvelopeGroupIds.tags,
+      index: 2,
+    })
   })
 })

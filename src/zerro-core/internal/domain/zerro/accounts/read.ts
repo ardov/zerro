@@ -3,10 +3,8 @@ import {
   AccountType,
   getAccStartBalance,
   getAccountList,
-  getAccounts,
   type TAccount,
   type TAccountId,
-  type TAccountSource,
 } from '../../zenmoney/entities/accounts'
 import type {
   TFxCode,
@@ -22,11 +20,11 @@ export type TAccountPopulated = TAccount & {
 
 /** Zerro's UI account projection; ZenMoney entities remain policy-free. */
 export function getPopulatedAccounts(
-  data: TAccountSource,
+  accounts: ById<TAccount>,
   instrumentCodeById: Record<TInstrumentId, TFxCode>
 ): ById<TAccountPopulated> {
   return Object.fromEntries(
-    Object.entries(getAccounts(data)).map(([id, account]) => [
+    Object.entries(accounts).map(([id, account]) => [
       id,
       {
         ...account,
@@ -39,22 +37,23 @@ export function getPopulatedAccounts(
 }
 
 export function getZerroDataAccountId(
-  data: TAccountSource
+  accounts: ById<TAccount>
 ): TAccountId | undefined {
-  const accounts = getAccounts(data)
   for (const id in accounts) {
     if (accounts[id].title === ZERRO_DATA_ACCOUNT_NAME) return id
   }
 }
 
-export function getZerroInBudgetAccountIds(data: TAccountSource): TAccountId[] {
-  return getAccountList(data)
+export function getZerroInBudgetAccountIds(
+  accounts: ById<TAccount>
+): TAccountId[] {
+  return getAccountList(accounts)
     .filter(isZerroInBudgetAccount)
     .map(account => account.id)
 }
 
-export function getZerroSavingAccounts(data: TAccountSource): TAccount[] {
-  return getAccountList(data).filter(
+export function getZerroSavingAccounts(accounts: ById<TAccount>): TAccount[] {
+  return getAccountList(accounts).filter(
     account =>
       !isZerroInBudgetAccount(account) &&
       account.type !== AccountType.Debt &&

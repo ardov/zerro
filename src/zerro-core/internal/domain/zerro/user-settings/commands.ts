@@ -9,7 +9,7 @@ export function compilePatchUserSettings(
   update: TUserSettingsPatch,
   ctx: TCoreContext
 ): TIntentPatch {
-  const payload = { ...getStoredUserSettings(data), ...update }
+  const payload = { ...getStoredUserSettings(data.reminder), ...update }
 
   Object.keys(payload).forEach(key => {
     const settingKey = key as keyof TUserSettingsPatch

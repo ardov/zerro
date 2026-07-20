@@ -26,12 +26,7 @@ export const merchantWritableFields = [
 export type TMerchantWritableField = (typeof merchantWritableFields)[number]
 export type TMerchantPatch = EntityPatch<TMerchant, TMerchantWritableField>
 export type TZmMerchant = Omit<TMerchant, 'changed'> & { changed: TUnixTime }
-export type TMerchantSource = { merchant: ById<TMerchant> }
 export type TMerchantIntent = { merchant: TMerchantPatch[] }
-
-export function getMerchants(data: TMerchantSource): ById<TMerchant> {
-  return data.merchant
-}
 export function makeMerchant(
   draft: OptionalExceptFor<TMerchant, 'user' | 'title'>,
   ctx: TCoreContext
@@ -44,8 +39,8 @@ export function makeMerchant(
   }
 }
 export function compilePatchMerchant(
-  data: TMerchantSource,
+  merchants: ById<TMerchant>,
   patch: TMerchantPatch | TMerchantPatch[]
 ): TMerchantIntent {
-  return compileExistingEntityPatch(data.merchant, 'merchant', patch)
+  return compileExistingEntityPatch(merchants, 'merchant', patch)
 }

@@ -7,13 +7,10 @@ implementation history belongs in Git.
 ## Module layout
 
 ```txt
-domain/          normalized ZenMoney and Zerro domain behavior
-application/     snapshot session and materialization use cases
-infrastructure/  replica, outbox, replay, and persistence
-redux/           React app selectors, hooks, and semantic commands
-presentation/    package-safe appearance data
-demo/            deterministic public demo data
-testing/         test-only builders and comparison helpers
+internal/  domain behavior, operations, and shared projections
+public/    package-safe snapshot session
+runtime/   persistence, presentation policy, and Redux adapter
+support/   demo data, documentation, and test builders
 ```
 
 Dependencies point inward. Domain and application code do not import Redux,
@@ -33,17 +30,17 @@ prose.
 
 ## Document map
 
-| Document                                            | Purpose                                           |
-| --------------------------------------------------- | ------------------------------------------------- |
-| [architecture.md](./architecture.md)                | Durable boundaries and runtime contracts          |
-| [design-ledger.md](./design-ledger.md)              | Settled decisions, risks, and open questions      |
-| [notes.md](./notes.md)                              | Current position, remaining work, deferred smells |
-| [structure-migration.md](./structure-migration.md)  | Active alphabetical source-layout migration       |
-| [testing.md](./testing.md)                          | Verification policy and completion gate           |
-| [ZenMoney sync API](../domain/zenmoney/sync-api.md) | Observed server behavior and wire shape           |
+| Document                                                        | Purpose                                           |
+| --------------------------------------------------------------- | ------------------------------------------------- |
+| [architecture.md](./architecture.md)                            | Durable boundaries and runtime contracts          |
+| [design-ledger.md](./design-ledger.md)                          | Settled decisions, risks, and open questions      |
+| [notes.md](./notes.md)                                          | Current position, remaining work, deferred smells |
+| [structure-migration.md](./structure-migration.md)              | Completed alphabetical source-layout migration    |
+| [testing.md](./testing.md)                                      | Verification policy and completion gate           |
+| [ZenMoney sync API](../../internal/domain/zenmoney/sync-api.md) | Observed server behavior and wire shape           |
 
 Entity-specific ZenMoney behavior belongs beside its implementation under
-`domain/zenmoney/*/README.md`.
+`internal/domain/zenmoney/*/README.md`.
 
 ## Working rules
 

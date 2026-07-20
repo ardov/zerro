@@ -23,16 +23,23 @@ describe('zenmoney users', () => {
         2: makeInstrument({ id: 2, shortTitle: 'USD' }),
       },
     })
-    expect(getRootUser(data)?.id).toBe(1)
-    expect(getRootUserId(data)).toBe(1)
-    expect(getUserInstrumentId(data)).toBe(1)
-    expect(getUserCurrency(data)).toBe('EUR')
+    expect(getRootUser(data.user)?.id).toBe(1)
+    expect(getRootUserId(data.user)).toBe(1)
+    expect(getUserInstrumentId(data.user)).toBe(1)
+    expect(
+      getUserCurrency({ users: data.user, instruments: data.instrument })
+    ).toBe('EUR')
   })
 
   it('falls back without a root user or instrument', () => {
-    expect(getRootUser(makeStore())).toBeNull()
-    expect(getRootUserId(makeStore())).toBeNull()
-    expect(getUserInstrumentId(makeStore())).toBeNull()
-    expect(getUserCurrency(makeStore())).toBe('USD')
+    expect(getRootUser(makeStore().user)).toBeNull()
+    expect(getRootUserId(makeStore().user)).toBeNull()
+    expect(getUserInstrumentId(makeStore().user)).toBeNull()
+    expect(
+      getUserCurrency({
+        users: makeStore().user,
+        instruments: makeStore().instrument,
+      })
+    ).toBe('USD')
   })
 })

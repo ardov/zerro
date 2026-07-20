@@ -62,8 +62,10 @@ describe('activity projection performance', () => {
       },
       {
         routing: {
-          inBudgetAccountIds: new Set(getZerroInBudgetAccountIds(store)),
-          debtAccountId: getDebtAccountId(store),
+          inBudgetAccountIds: new Set(
+            getZerroInBudgetAccountIds(store.account)
+          ),
+          debtAccountId: getDebtAccountId(store.account),
           debtors: session.debtors.getAll(),
         },
         envelopes: session.envelopes.getAll(),

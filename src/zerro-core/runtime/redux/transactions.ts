@@ -13,16 +13,12 @@ export {
 import { useCallback } from 'react'
 import { useAppSelector } from 'store'
 import type { RootState } from 'store'
-import {
-  getTransactionType,
-  getTransactions,
-} from '../../internal/domain/zenmoney/entities/transactions'
+import { getTransactionType } from '../../internal/domain/zenmoney/entities/transactions'
 import { fromGraph, graph } from './graph'
-import { selectTransactionSlice } from './state'
+import { selectData } from './state'
 import * as accounts from './accounts'
 
-export const selectAll = (state: RootState) =>
-  getTransactions({ transaction: selectTransactionSlice(state) })
+export const selectAll = (state: RootState) => selectData(state).transaction
 export const selectIds = fromGraph(graph.transactionIds)
 export const selectHistory = fromGraph(graph.transactionsHistory)
 export const selectHistoryStart = fromGraph(graph.historyStart)

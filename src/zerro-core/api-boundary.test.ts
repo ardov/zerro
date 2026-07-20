@@ -54,7 +54,6 @@ describe('zerro-core API boundary', () => {
         'envelopes',
         'fxRates',
         'goals',
-        'debug',
         'instruments',
         'merchants',
         'months',
@@ -66,6 +65,32 @@ describe('zerro-core API boundary', () => {
       ].sort()
     )
     expect(namespaces).not.toContain('applyLegacyPatch')
+  })
+
+  it('keeps the Redux data path behind one raw-input selector', () => {
+    const stateModule = readFileSync(
+      join(coreRoot, 'runtime/redux/state.ts'),
+      'utf8'
+    )
+    expect(
+      [...stateModule.matchAll(/export const (\w+)/g)].map(match => match[1])
+    ).toEqual(['selectData'])
+
+    const violations = walk(join(coreRoot, 'runtime/redux'))
+      .filter(
+        file =>
+          file.endsWith('.ts') &&
+          !file.endsWith('.test.ts') &&
+          file !== join(coreRoot, 'runtime/redux/state.ts')
+      )
+      .flatMap(file => {
+        const source = readFileSync(file, 'utf8')
+        return source.includes('state.data.current')
+          ? [relative(coreRoot, file)]
+          : []
+      })
+
+    expect(violations).toEqual([])
   })
 
   it('keeps the replica integration entrypoint explicit', () => {
@@ -174,6 +199,19 @@ describe('zerro-core API boundary', () => {
             specifier =>
               `${relative(coreRoot, file)}: entity imports '${specifier}'`
           )
+      })
+
+    expect(violations).toEqual([])
+  })
+
+  it('keeps domain dependencies explicit without source-wrapper types', () => {
+    const violations = walk(join(coreRoot, 'internal/domain'))
+      .filter(file => file.endsWith('.ts') && !file.endsWith('.test.ts'))
+      .flatMap(file => {
+        const source = readFileSync(file, 'utf8')
+        return [...source.matchAll(/\btype\s+(T\w+Source)\b/g)].map(
+          match => `${relative(coreRoot, file)}: ${match[1]}`
+        )
       })
 
     expect(violations).toEqual([])

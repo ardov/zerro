@@ -10,7 +10,7 @@ import { envelopeVisibility } from './types'
 
 describe('envelope meta read helpers', () => {
   it('returns an empty object by default', () => {
-    expect(getEnvelopeMeta(makeStore())).toEqual({})
+    expect(getEnvelopeMeta(makeStore().reminder)).toEqual({})
   })
 
   it('reads envelope meta from hidden data', () => {
@@ -30,7 +30,7 @@ describe('envelope meta read helpers', () => {
       },
     })
 
-    expect(getEnvelopeMeta(data)).toEqual({
+    expect(getEnvelopeMeta(data.reminder)).toEqual({
       [envelopeId]: {
         id: envelopeId,
         visibility: envelopeVisibility.hidden,

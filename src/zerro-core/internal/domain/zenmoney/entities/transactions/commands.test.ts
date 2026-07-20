@@ -96,7 +96,7 @@ describe('zenmoney transaction commands', () => {
       },
     })
 
-    const patch = compileDeleteTransactions(data, 'tr')
+    const patch = compileDeleteTransactions(data.transaction, 'tr')
     const next = applyPatch(data, patch)
 
     expect(patch.transaction?.[0]).toMatchObject({
@@ -120,7 +120,7 @@ describe('zenmoney transaction commands', () => {
       },
     })
 
-    const patch = compileDeleteTransactionsPermanently(data, 'tr')
+    const patch = compileDeleteTransactionsPermanently(data.transaction, 'tr')
 
     expect(patch.transaction?.[0]).toMatchObject({
       id: 'tr',
@@ -146,7 +146,7 @@ describe('zenmoney transaction commands', () => {
       },
     })
 
-    const patch = compileRestoreTransaction(data, 'tr', {
+    const patch = compileRestoreTransaction(data.transaction, 'tr', {
       now: () => 100,
       uuid: () => 'new-tr',
     })
@@ -171,7 +171,7 @@ describe('zenmoney transaction commands', () => {
       },
     })
 
-    const patch = compileBulkEditTransactions(data, ['tr'], {
+    const patch = compileBulkEditTransactions(data.transaction, ['tr'], {
       tags: ['mixed', 'work', 'null', 'food'],
       comment: 'Team $&',
     })
@@ -210,7 +210,11 @@ describe('zenmoney transaction commands', () => {
       },
     })
 
-    const patch = compileCombineToOutcome(data, ['out', 'inSame', 'inOther'])
+    const patch = compileCombineToOutcome(data.transaction, [
+      'out',
+      'inSame',
+      'inOther',
+    ])
     const byId = Object.fromEntries(
       (patch.transaction ?? []).map(tr => [tr.id, tr])
     )
@@ -254,7 +258,11 @@ describe('zenmoney transaction commands', () => {
       },
     })
 
-    const patch = compileCombineToIncome(data, ['in', 'outSame', 'outOther'])
+    const patch = compileCombineToIncome(data.transaction, [
+      'in',
+      'outSame',
+      'outOther',
+    ])
     const byId = Object.fromEntries(
       (patch.transaction ?? []).map(tr => [tr.id, tr])
     )
@@ -288,7 +296,10 @@ describe('zenmoney transaction commands', () => {
       },
     })
 
-    const patch = compileMergeTransactionsAsTransfer(data, ['out', 'in'])
+    const patch = compileMergeTransactionsAsTransfer(data.transaction, [
+      'out',
+      'in',
+    ])
     const byId = Object.fromEntries(
       (patch.transaction ?? []).map(tr => [tr.id, tr])
     )
@@ -308,14 +319,14 @@ describe('zenmoney transaction commands', () => {
       },
     })
 
-    expect(() => compileMergeTransactionsAsTransfer(data, ['out'])).toThrow(
-      'Transfer merge needs exactly one income and one outcome'
-    )
+    expect(() =>
+      compileMergeTransactionsAsTransfer(data.transaction, ['out'])
+    ).toThrow('Transfer merge needs exactly one income and one outcome')
   })
 
   it('validates transaction existence', () => {
-    expect(() => compileDeleteTransactions(makeStore(), 'missing')).toThrow(
-      'Transaction not found'
-    )
+    expect(() =>
+      compileDeleteTransactions(makeStore().transaction, 'missing')
+    ).toThrow('Transaction not found')
   })
 })

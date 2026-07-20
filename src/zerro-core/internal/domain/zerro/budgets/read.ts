@@ -1,13 +1,10 @@
-import type { ByMonth } from '../../foundation/types'
+import type { ById, ByMonth } from '../../foundation/types'
+import type { TReminder } from '../../zenmoney/entities/reminders'
 import type { TEnvelopeId } from '../envelope-id'
-import {
-  getMonthlyHiddenData,
-  HiddenDataType,
-  THiddenDataSource,
-} from '../hidden-data'
+import { getMonthlyHiddenData, HiddenDataType } from '../hidden-data'
 
 export type TBudgets = Record<TEnvelopeId, number>
 
-export function getEnvBudgets(data: THiddenDataSource): ByMonth<TBudgets> {
-  return getMonthlyHiddenData<TBudgets>(data, HiddenDataType.Budgets)
+export function getEnvBudgets(reminders: ById<TReminder>): ByMonth<TBudgets> {
+  return getMonthlyHiddenData<TBudgets>(reminders, HiddenDataType.Budgets)
 }

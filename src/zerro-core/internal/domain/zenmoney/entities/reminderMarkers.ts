@@ -46,15 +46,6 @@ export type TReminderMarkerFactoryDraft = Modify<
   >,
   { date: TDateDraft }
 >
-export type TReminderMarkerSource = {
-  reminderMarker: ById<TReminderMarker>
-}
-
-export function getReminderMarkers(
-  data: TReminderMarkerSource
-): ById<TReminderMarker> {
-  return data.reminderMarker
-}
 export function makeReminderMarker(
   draft: TReminderMarkerFactoryDraft,
   ctx: TCoreContext

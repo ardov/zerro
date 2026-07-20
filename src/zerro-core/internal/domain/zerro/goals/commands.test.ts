@@ -44,7 +44,7 @@ describe('goal commands', () => {
         instrument: 2,
       }),
     ])
-    expect(getRawGoals(next)).toEqual({
+    expect(getRawGoals(next.reminder)).toEqual({
       '2026-01': {
         [envelopeId]: { type: goalType.MONTHLY, amount: 100 },
       },
@@ -69,7 +69,7 @@ describe('goal commands', () => {
     const next = applyPatch(data, patch)
 
     expect(patch.account).toBeUndefined()
-    expect(getRawGoals(next)).toEqual({
+    expect(getRawGoals(next.reminder)).toEqual({
       '2026-02': {
         [envelopeId]: null,
       },
@@ -115,7 +115,7 @@ describe('goal commands', () => {
 
     expect(patch.reminder?.map(reminder => reminder.id)).toEqual(['jan'])
     expect(patch.deletion?.map(deletion => deletion.id)).toEqual(['feb'])
-    expect(getRawGoals(next)).toEqual({
+    expect(getRawGoals(next.reminder)).toEqual({
       '2026-01': {
         [envelopeId]: { type: goalType.MONTHLY_SPEND, amount: 50 },
       },
@@ -172,7 +172,7 @@ describe('goal commands', () => {
     const next = applyPatch(data, patch)
 
     expect(patch.deletion).toBeUndefined()
-    expect(getRawGoals(next)['2026-03']).toEqual({
+    expect(getRawGoals(next.reminder)['2026-03']).toEqual({
       [envelopeId]: null,
     })
   })

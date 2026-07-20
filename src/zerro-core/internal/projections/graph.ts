@@ -9,7 +9,6 @@ import {
   getHistoryStart,
   getInstCodeMap,
   getSortedTransactions,
-  getTagBudgets,
   getUserCurrency,
   toTransactionHistory,
   toTransactionIds,
@@ -95,18 +94,15 @@ export function createProjectionGraph(ctx: TCoreContext) {
   const currentDate = () => toISODate(ctx.now())
 
   // --- pass-through and primitive nodes: no memo ---------------------------
-  const debtAccountId: TNode<ReturnType<typeof getDebtAccountId>> =
-    getDebtAccountId
-  const userCurrency: TNode<ReturnType<typeof getUserCurrency>> =
-    getUserCurrency
+  const debtAccountId: TNode<ReturnType<typeof getDebtAccountId>> = d =>
+    getDebtAccountId(d.account)
+  const userCurrency: TNode<ReturnType<typeof getUserCurrency>> = d =>
+    getUserCurrency({ users: d.user, instruments: d.instrument })
   const historyStart: TNode<ReturnType<typeof getHistoryStart>> = d =>
     getHistoryStart(transactionsHistory(d), currentDate())
 
   // --- transactions: one sort, two slices ----------------------------------
-  const sortedTransactions = nodeObj(
-    d => ({ transaction: d.transaction }),
-    getSortedTransactions
-  )
+  const sortedTransactions = node(d => [d.transaction], getSortedTransactions)
   const transactionsHistory = node(
     d => [sortedTransactions(d)],
     toTransactionHistory
@@ -114,27 +110,18 @@ export function createProjectionGraph(ctx: TCoreContext) {
   const transactionIds = node(d => [sortedTransactions(d)], toTransactionIds)
 
   // --- reads off a single entity map ---------------------------------------
-  const instrumentCodeById = nodeObj(
-    d => ({ instrument: d.instrument }),
-    getInstCodeMap
-  )
-  const userSettings = nodeObj(d => ({ reminder: d.reminder }), getUserSettings)
-  const envelopeMeta = nodeObj(d => ({ reminder: d.reminder }), getEnvelopeMeta)
-  const envBudgets = nodeObj(d => ({ reminder: d.reminder }), getEnvBudgets)
-  const rawGoals = nodeObj(d => ({ reminder: d.reminder }), getRawGoals)
-  const storedFxRates = nodeObj(
-    d => ({ reminder: d.reminder }),
-    getStoredFxRates
-  )
-  const tagBudgets = nodeObj(d => ({ budget: d.budget }), getTagBudgets)
-  const savingAccounts = nodeObj(
-    d => ({ account: d.account }),
-    getZerroSavingAccounts
-  )
+  const instrumentCodeById = node(d => [d.instrument], getInstCodeMap)
+  const userSettings = node(d => [d.reminder], getUserSettings)
+  const envelopeMeta = node(d => [d.reminder], getEnvelopeMeta)
+  const envBudgets = node(d => [d.reminder], getEnvBudgets)
+  const rawGoals = node(d => [d.reminder], getRawGoals)
+  const storedFxRates = node(d => [d.reminder], getStoredFxRates)
+  const tagBudgets: TNode<TDataStore['budget']> = d => d.budget
+  const savingAccounts = node(d => [d.account], getZerroSavingAccounts)
   // Result equality matters here: this list is rebuilt from the whole account
   // map, and every account edit would otherwise invalidate the activity chain.
-  const inBudgetAccountIds = nodeObj(
-    d => ({ account: d.account }),
+  const inBudgetAccountIds = node(
+    d => [d.account],
     getZerroInBudgetAccountIds,
     sameItems
   )

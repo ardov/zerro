@@ -149,8 +149,11 @@ The namespaces contain granular selectors, hooks, semantic command creators,
 and their domain types. They do not own state or read the Redux store
 imperatively. Flat adapter exports are intentionally unsupported. Each Redux
 domain module owns its selector implementations and hook wrappers; there is no
-shared selector or hook barrel. `redux/state.ts` contains only raw slice/time
-inputs. Command-time derived reads use `commandRead.ts`; it exposes the same
+shared selector or hook barrel. `runtime/redux/state.ts` owns only `selectData`,
+the path from `RootState` to the complete Core snapshot. Each domain namespace
+owns its `selectAll`/`selectRaw` narrowing selector, and downstream selectors
+depend on that stable entity-map reference. Command-time derived reads use
+`commandRead.ts`; it exposes the same
 projection-graph nodes under command-local names because `commands.ts` cannot
 import the domain namespace modules (they re-export command creators, which
 would cycle). It reads the committed snapshot, so it shares the graph memo
@@ -189,14 +192,14 @@ reducer actions, but that is an implementation detail, not a product inbox.
 ## Read model and memoization
 
 Pure projectors own calculations and declare which inputs are required. The
-projection graph is defined once in `application/graph.ts`; both runtimes
+projection graph is defined once in `internal/projections/graph.ts`; both runtimes
 instantiate it and own memoization at their own scope — a session binds the
 graph to one frozen snapshot, the Redux adapter keeps one instance across
 snapshots. Do not depend a node on the entire `current` store — it would
 invalidate transaction-heavy calculations after unrelated writes; the graph
 depends on individual entity maps and `projectionStability.test.ts` guards it.
 
-Read `application/graph.ts` for the living dependency wiring rather than a
+Read `internal/projections/graph.ts` for the living dependency wiring rather than a
 maintained diagram. Whether a node is memoized is a deliberate per-node call,
 recorded in [design-ledger.md](./design-ledger.md#reads-and-redux-adapter).
 

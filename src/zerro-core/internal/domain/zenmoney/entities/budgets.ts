@@ -1,6 +1,5 @@
 import { toISODate } from '../../foundation/date'
 import type {
-  ById,
   EntityPatch,
   Modify,
   OptionalExceptFor,
@@ -66,12 +65,7 @@ export type TTagBudgetUpdate = {
 export function toBudgetId(date: TDateDraft, tag: TBudgetTagId): TBudgetId {
   return `${toISODate(date)}#${tag}` as TBudgetId
 }
-export type TBudgetSource = { budget: ById<TBudget> }
 export type TBudgetIntent = { budget?: TBudgetPatch[] }
-
-export function getTagBudgets(data: TBudgetSource): ById<TBudget> {
-  return data.budget
-}
 export function makeTagBudget(
   draft: TTagBudgetFactoryDraft,
   ctx: Pick<TCoreContext, 'now'>

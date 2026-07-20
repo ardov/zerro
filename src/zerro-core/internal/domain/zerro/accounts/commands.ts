@@ -9,10 +9,10 @@ export function compileEnsureZerroDataAccount(
   data: TDataStore,
   ctx: TCoreContext
 ): TCompiled<{ accountId: TAccountId }> {
-  const existingId = getZerroDataAccountId(data)
+  const existingId = getZerroDataAccountId(data.account)
   if (existingId) return { patch: {}, receipt: { accountId: existingId } }
 
-  const user = getRootUser(data)
+  const user = getRootUser(data.user)
   if (!user) throw new Error('No root user')
 
   const account = makeAccount(

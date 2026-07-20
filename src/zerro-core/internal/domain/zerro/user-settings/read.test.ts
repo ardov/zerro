@@ -21,11 +21,13 @@ describe('user settings read helpers', () => {
       },
     })
 
-    expect(getStoredUserSettings(data)).toEqual({ preferZmBudgets: true })
+    expect(getStoredUserSettings(data.reminder)).toEqual({
+      preferZmBudgets: true,
+    })
   })
 
   it('applies defaults for missing settings', () => {
-    expect(getUserSettings(makeStore())).toEqual(DEFAULT_USER_SETTINGS)
+    expect(getUserSettings(makeStore().reminder)).toEqual(DEFAULT_USER_SETTINGS)
 
     const data = makeStore({
       reminder: {
@@ -36,7 +38,7 @@ describe('user settings read helpers', () => {
       },
     })
 
-    expect(getUserSettings(data)).toEqual({
+    expect(getUserSettings(data.reminder)).toEqual({
       sawMigrationAlert: false,
       preferZmBudgets: false,
       emojiIcons: true,

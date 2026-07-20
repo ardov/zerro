@@ -10,17 +10,11 @@ export enum TrType {
   OutcomeDebt = 'outcomeDebt',
 }
 
-export type TTransactionSource = { transaction: ById<TTransaction> }
-
-export function getTransactions(data: TTransactionSource): ById<TTransaction> {
-  return data.transaction
-}
-
 export function getTransaction(
-  data: TTransactionSource,
+  transactions: ById<TTransaction>,
   id: TTransactionId
 ): TTransaction | null {
-  return getTransactions(data)[id] || null
+  return transactions[id] || null
 }
 
 /**
@@ -29,11 +23,9 @@ export function getTransaction(
  * a runtime can memoize it once and derive both without re-sorting.
  */
 export function getSortedTransactions(
-  data: TTransactionSource
+  transactions: ById<TTransaction>
 ): TTransaction[] {
-  return Object.values(getTransactions(data))
-    .sort(compareTransactionDates)
-    .reverse()
+  return Object.values(transactions).sort(compareTransactionDates).reverse()
 }
 
 /** Non-deleted transactions in list order. */
@@ -49,14 +41,16 @@ export function toTransactionIds(sorted: TTransaction[]): TTransactionId[] {
   return sorted.map(transaction => transaction.id)
 }
 
-export function getTransactionIds(data: TTransactionSource): TTransactionId[] {
-  return toTransactionIds(getSortedTransactions(data))
+export function getTransactionIds(
+  transactions: ById<TTransaction>
+): TTransactionId[] {
+  return toTransactionIds(getSortedTransactions(transactions))
 }
 
 export function getTransactionsHistory(
-  data: TTransactionSource
+  transactions: ById<TTransaction>
 ): TTransaction[] {
-  return toTransactionHistory(getSortedTransactions(data))
+  return toTransactionHistory(getSortedTransactions(transactions))
 }
 
 export function compareTransactionDates(

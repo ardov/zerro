@@ -57,7 +57,7 @@ describe('envelope meta commands', () => {
     const next = applyPatch(data, patch)
 
     expect(patch.account).toBeUndefined()
-    expect(getEnvelopeMeta(next)).toEqual({
+    expect(getEnvelopeMeta(next.reminder)).toEqual({
       [envelopeId]: {
         id: envelopeId,
         visibility: envelopeVisibility.visible,
@@ -106,7 +106,7 @@ describe('envelope meta commands', () => {
         instrument: 2,
       }),
     ])
-    expect(getEnvelopeMeta(next)).toEqual({
+    expect(getEnvelopeMeta(next.reminder)).toEqual({
       [tagEnvelopeId]: {
         id: tagEnvelopeId,
         visibility: envelopeVisibility.hidden,

@@ -83,15 +83,9 @@ export type TZmReminder = Omit<TReminder, 'changed'> & {
   changed: TUnixTime
 }
 
-export type TReminderSource = { reminder: ById<TReminder> }
-export type TReminderCommandSource = TReminderSource & { user: ById<TUser> }
 export type TReminderIntent = {
   deletion?: Array<{ id: TReminderId; object: 'reminder' }>
   reminder?: TReminderPatch[]
-}
-
-export function getReminders(data: TReminderSource): ById<TReminder> {
-  return data.reminder
 }
 
 export type TReminderFactoryDraft = Modify<
@@ -139,7 +133,7 @@ export type TReminderDraft = Modify<
 >
 
 export function compileSetReminder(
-  data: TReminderCommandSource,
+  data: { reminders: ById<TReminder>; users: ById<TUser> },
   draft:
     TReminderDraft | TReminderPatch | Array<TReminderDraft | TReminderPatch>,
   ctx: TCoreContext
@@ -149,7 +143,7 @@ export function compileSetReminder(
   return {
     reminder: list.map(item => {
       // Update: pass the sparse patch through; issue keeps only changed fields.
-      if (item.id && getReminders(data)[item.id]) {
+      if (item.id && data.reminders[item.id]) {
         const {
           changed: _ignored,
           startDate,
@@ -163,7 +157,7 @@ export function compileSetReminder(
       }
 
       // Creation: the factory captures generated ids and defaults at issue time.
-      const user = getRootUserId(data)
+      const user = getRootUserId(data.users)
       if (!user) throw new Error('User is not defined')
       if (!item.incomeAccount || !item.outcomeAccount) {
         throw new Error('Missing incomeAccount or outcomeAccount')
@@ -175,10 +169,10 @@ export function compileSetReminder(
 }
 
 export function compileDeleteReminder(
-  data: TReminderSource,
+  reminders: ById<TReminder>,
   id: TReminderId
 ): TReminderIntent {
-  if (!getReminders(data)[id]) return {}
+  if (!reminders[id]) return {}
 
   return {
     deletion: [{ id, object: 'reminder' }],

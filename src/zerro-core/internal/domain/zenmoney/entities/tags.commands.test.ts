@@ -14,7 +14,7 @@ describe('zenmoney tag commands', () => {
       },
     })
 
-    const patch = compilePatchTag(data, {
+    const patch = compilePatchTag(data.tag, {
       id: 'food',
       title: 'Groceries',
       budgetOutcome: true,
@@ -36,7 +36,7 @@ describe('zenmoney tag commands', () => {
     })
 
     const patch = compileCreateTag(
-      data,
+      { tags: data.tag, users: data.user },
       { title: 'Travel', budgetOutcome: true },
       { now: () => 100, uuid: () => 'tag-new' }
     )
@@ -83,7 +83,7 @@ describe('zenmoney tag commands', () => {
     })
 
     const patch = compileCreateTag(
-      data,
+      { tags: data.tag, users: data.user },
       { id: 'food', title: 'Groceries' },
       { now: () => 100, uuid: () => 'unused' }
     )
@@ -101,18 +101,18 @@ describe('zenmoney tag commands', () => {
       },
     })
 
-    expect(() => compilePatchTag(data, { title: 'No id' } as any)).toThrow(
+    expect(() => compilePatchTag(data.tag, { title: 'No id' } as any)).toThrow(
       'Trying to patch tag without id'
     )
     expect(() =>
-      compilePatchTag(data, { id: 'null', title: 'Null tag' })
+      compilePatchTag(data.tag, { id: 'null', title: 'Null tag' })
     ).toThrow('Trying to patch null tag')
     expect(() =>
-      compilePatchTag(data, { id: 'missing', title: 'Missing' })
+      compilePatchTag(data.tag, { id: 'missing', title: 'Missing' })
     ).toThrow('Tag not found')
     expect(() =>
       compileCreateTag(
-        makeStore(),
+        { tags: makeStore().tag, users: makeStore().user },
         { title: 'No user' },
         {
           now: () => 1,
@@ -121,7 +121,7 @@ describe('zenmoney tag commands', () => {
       )
     ).toThrow('No user')
     expect(() =>
-      compileCreateTag(data, {} as any, {
+      compileCreateTag({ tags: data.tag, users: data.user }, {} as any, {
         now: () => 1,
         uuid: () => 'tag',
       })

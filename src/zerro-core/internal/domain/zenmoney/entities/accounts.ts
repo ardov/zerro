@@ -120,24 +120,18 @@ export type TZmAccount = Omit<TAccount, 'changed'> & {
   changed: TUnixTime
 }
 
-/** Account reads must not depend on wider store slices. */
-export type TAccountSource = { account: ById<TAccount> }
-export type TAccountCommandSource = TAccountSource & { user: ById<TUser> }
 export type TAccountIntent = { account: TAccountPatch[] }
 
-export function getAccounts(data: TAccountSource): ById<TAccount> {
-  return data.account
-}
-
-export function getDebtAccountId(data: TAccountSource): TAccountId | undefined {
-  const accounts = getAccounts(data)
+export function getDebtAccountId(
+  accounts: ById<TAccount>
+): TAccountId | undefined {
   for (const id in accounts) {
     if (accounts[id].type === AccountType.Debt) return id
   }
 }
 
-export function getAccountList(data: TAccountSource): TAccount[] {
-  return Object.values(getAccounts(data))
+export function getAccountList(accounts: ById<TAccount>): TAccount[] {
+  return Object.values(accounts)
 }
 
 export function getAccStartBalance(acc: TAccount): number {
@@ -193,11 +187,11 @@ export function makeAccount(
 export type TAccountDraft = Omit<TAccountFactoryDraft, 'user'>
 
 export function compileCreateAccount(
-  data: TAccountCommandSource,
+  users: ById<TUser>,
   draft: TAccountDraft,
   ctx: TCoreContext
 ): TAccountIntent {
-  const user = getRootUserId(data)
+  const user = getRootUserId(users)
   if (!user) throw new Error('No user')
 
   return {
@@ -206,8 +200,8 @@ export function compileCreateAccount(
 }
 
 export function compilePatchAccount(
-  data: TAccountSource,
+  accounts: ById<TAccount>,
   patch: TAccountPatch | TAccountPatch[]
 ): TAccountIntent {
-  return compileExistingEntityPatch(data.account, 'account', patch)
+  return compileExistingEntityPatch(accounts, 'account', patch)
 }

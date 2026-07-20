@@ -108,7 +108,7 @@ export function compileCreateEnvelope(
   ctx: TCoreContext
 ): TCompiled<TCreateEnvelopeReceipt> {
   const tagPatch = compileCreateTag(
-    data,
+    { tags: data.tag, users: data.user },
     { title: input.name, showOutcome: true },
     ctx
   )
@@ -247,13 +247,13 @@ export function compileRenameEnvelope(
   switch (type) {
     case EnvType.Tag:
       if (data.tag[id]?.title === input.name) return {}
-      return compilePatchTag(data, { id, title: input.name })
+      return compilePatchTag(data.tag, { id, title: input.name })
     case EnvType.Account:
       if (data.account[id]?.title === input.name) return {}
-      return compilePatchAccount(data, { id, title: input.name })
+      return compilePatchAccount(data.account, { id, title: input.name })
     case EnvType.Merchant:
       if (data.merchant[id]?.title === input.name) return {}
-      return compilePatchMerchant(data, { id, title: input.name })
+      return compilePatchMerchant(data.merchant, { id, title: input.name })
     case EnvType.Payee:
       // TODO: Resolve the payee envelope to all debtor.payeeNames variants and
       // patch `transaction.payee` for every matching transaction. Merchant
@@ -279,7 +279,7 @@ export function compileSetEnvelopeColor(
 
   const color = hex2int(input.colorHex)
   if (data.tag[id]?.color === color) return {}
-  return compilePatchTag(data, { id, color })
+  return compilePatchTag(data.tag, { id, color })
 }
 
 export function compileSetEnvelopeComment(
@@ -287,7 +287,7 @@ export function compileSetEnvelopeComment(
   input: TSetEnvelopeCommentInput,
   ctx: TCoreContext
 ): TIntentPatch {
-  const currentComment = getEnvelopeMeta(data)[input.id]?.comment || ''
+  const currentComment = getEnvelopeMeta(data.reminder)[input.id]?.comment || ''
   if (currentComment === input.comment) return {}
 
   return compilePatchEnvelopeMeta(data, input, ctx)
@@ -342,9 +342,13 @@ export function compilePatchEnvelope(
   const patches = getEnvelopePatches(draft, envelopes)
 
   return mergePatches(
-    patches.tag.length ? compilePatchTag(data, patches.tag) : {},
-    patches.account.length ? compilePatchAccount(data, patches.account) : {},
-    patches.merchant.length ? compilePatchMerchant(data, patches.merchant) : {},
+    patches.tag.length ? compilePatchTag(data.tag, patches.tag) : {},
+    patches.account.length
+      ? compilePatchAccount(data.account, patches.account)
+      : {},
+    patches.merchant.length
+      ? compilePatchMerchant(data.merchant, patches.merchant)
+      : {},
     patches.meta.length ? compilePatchEnvelopeMeta(data, patches.meta, ctx) : {}
   )
 }

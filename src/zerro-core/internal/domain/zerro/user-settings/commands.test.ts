@@ -60,11 +60,11 @@ describe('user settings commands', () => {
         },
       })
     )
-    expect(getStoredUserSettings(next)).toEqual({
+    expect(getStoredUserSettings(next.reminder)).toEqual({
       emojiIcons: false,
       sawMigrationAlert: true,
     })
-    expect(getUserSettings(next)).toEqual({
+    expect(getUserSettings(next.reminder)).toEqual({
       sawMigrationAlert: true,
       preferZmBudgets: false,
       emojiIcons: false,
@@ -98,6 +98,8 @@ describe('user settings commands', () => {
         instrument: 2,
       }),
     ])
-    expect(getStoredUserSettings(next)).toEqual({ preferZmBudgets: true })
+    expect(getStoredUserSettings(next.reminder)).toEqual({
+      preferZmBudgets: true,
+    })
   })
 })

@@ -20,7 +20,7 @@ describe('budget read helpers', () => {
       },
     })
 
-    expect(getEnvBudgets(data)).toEqual({
+    expect(getEnvBudgets(data.reminder)).toEqual({
       '2026-01': {
         [envelopeId]: 100,
       },

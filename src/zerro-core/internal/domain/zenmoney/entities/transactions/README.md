@@ -7,7 +7,6 @@ instruments, optional tags, optional merchant, and optional reminder marker.
 
 The transaction read layer exposes direct normalized reads:
 
-- `getTransactions` for the entity map;
 - `getTransaction` for a nullable lookup by id;
 - `getTransactionsHistory` for legacy-compatible non-deleted history order;
 - `getTransactionType` for income/outcome/transfer/debt classification.

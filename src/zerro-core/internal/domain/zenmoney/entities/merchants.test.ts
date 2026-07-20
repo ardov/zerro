@@ -14,7 +14,10 @@ describe('zenmoney merchant commands', () => {
       },
     })
 
-    const patch = compilePatchMerchant(data, { id: 'shop', title: 'Market' })
+    const patch = compilePatchMerchant(data.merchant, {
+      id: 'shop',
+      title: 'Market',
+    })
 
     expect(patch.merchant?.[0]).toEqual({ id: 'shop', title: 'Market' })
   })
@@ -43,11 +46,11 @@ describe('zenmoney merchant commands', () => {
       },
     })
 
-    expect(() => compilePatchMerchant(data, { title: 'No id' } as any)).toThrow(
-      'Trying to patch merchant without id'
-    )
     expect(() =>
-      compilePatchMerchant(data, { id: 'missing', title: 'Missing' })
+      compilePatchMerchant(data.merchant, { title: 'No id' } as any)
+    ).toThrow('Trying to patch merchant without id')
+    expect(() =>
+      compilePatchMerchant(data.merchant, { id: 'missing', title: 'Missing' })
     ).toThrow('Merchant not found')
   })
 })
