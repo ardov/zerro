@@ -1,7 +1,8 @@
 import type { TKey } from './popoverStack'
-import React, { FC, ReactNode, useContext, useMemo, useState } from 'react'
+import type { FC, ReactNode } from 'react'
+import React, { useContext, useMemo, useState } from 'react'
 import { popoverStack } from './popoverStack'
-import { Modify } from '6-shared/types'
+import type { Modify } from '6-shared/types'
 
 /** Context for methods to open/close popovers */
 const PopoverMethodsContext = React.createContext<{

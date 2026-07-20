@@ -1,11 +1,12 @@
-import { core } from 'zerro-core/redux'
-import { FC, useCallback } from 'react'
+import type { core } from 'zerro-core/redux'
+import type { FC } from 'react'
+import { useCallback } from 'react'
 import { useMonth } from '../MonthProvider'
 
 import { GoalPopover } from './GoalPopover'
 import { registerPopover } from '6-shared/historyPopovers'
-import { TISOMonth } from '6-shared/types'
-import { PopoverProps } from '@mui/material'
+import type { TISOMonth } from '6-shared/types'
+import type { PopoverProps } from '@mui/material'
 
 const goalPopover = registerPopover<
   { id?: core.envelopes.TEnvelopeId; month?: TISOMonth },

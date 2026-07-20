@@ -1,16 +1,18 @@
 import type { TFxAmount, TISOMonth } from '6-shared/types'
 import { core } from 'zerro-core/redux'
 
-import { FC, useState } from 'react'
+import type { FC } from 'react'
+import { useState } from 'react'
+import type { PopoverProps } from '@mui/material'
 import {
   ListItemText,
   InputAdornment,
   IconButton,
-  PopoverProps,
   MenuList,
   MenuItem,
 } from '@mui/material'
-import { Box, BoxProps } from '@mui/system'
+import type { BoxProps } from '@mui/system'
+import { Box } from '@mui/system'
 import { useTranslation } from 'react-i18next'
 import { ArrowForwardIcon } from '6-shared/ui/Icons'
 import { AmountInput } from '6-shared/ui/AmountInput'

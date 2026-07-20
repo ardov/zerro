@@ -5,8 +5,8 @@ import { saveDataLocally } from '4-features/localData'
 import { track } from '6-shared/analytics'
 import { setSyncData } from 'store/lastSync'
 import { formatDate } from '6-shared/helpers/date'
-import { AppThunk } from 'store'
-import { TLocalData } from '6-shared/types'
+import type { AppThunk } from 'store'
+import type { TLocalData } from '6-shared/types'
 import { sync } from '6-shared/api/syncDiff'
 import {
   getPendingSyncTransport,
@@ -14,7 +14,7 @@ import {
   prepareClientSync,
 } from 'store/data'
 import { keys } from '6-shared/helpers/keys'
-import { TNormalizedPatch } from '6-shared/types'
+import type { TNormalizedPatch } from '6-shared/types'
 import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
 
 /** All syncs with zenmoney goes through this thunk */

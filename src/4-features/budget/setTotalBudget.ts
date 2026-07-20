@@ -1,5 +1,5 @@
 import { round } from '6-shared/helpers/money'
-import { AppThunk } from 'store'
+import type { AppThunk } from 'store'
 
 import { core } from 'zerro-core/redux'
 

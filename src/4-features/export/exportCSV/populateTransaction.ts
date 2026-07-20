@@ -1,5 +1,5 @@
 import { core } from 'zerro-core/redux'
-import {
+import type {
   ByIdOld,
   Modify,
   TAccount,

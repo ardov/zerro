@@ -1,12 +1,8 @@
-import React, {
-  FC,
-  KeyboardEventHandler,
-  useEffect,
-  useState,
-  useRef,
-} from 'react'
+import type { FC, KeyboardEventHandler } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { createSelector } from '@reduxjs/toolkit'
 import { useAppSelector } from 'store'
+import type { PopoverProps } from '@mui/material'
 import {
   Popover,
   Paper,
@@ -15,7 +11,6 @@ import {
   ListItemButton,
   ListItemText,
   TextField,
-  PopoverProps,
 } from '@mui/material'
 import { AddIcon } from '6-shared/ui/Icons'
 import { TagIcon } from '6-shared/ui/TagIcon'

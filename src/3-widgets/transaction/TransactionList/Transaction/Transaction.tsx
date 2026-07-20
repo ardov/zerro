@@ -1,8 +1,9 @@
 import type { TTransactionId } from '6-shared/types'
 
-import React, { FC } from 'react'
+import type { FC } from 'react'
+import React from 'react'
 import styled from '@emotion/styled'
-import { Theme, TypographyVariant } from '@mui/material'
+import type { Theme, TypographyVariant } from '@mui/material'
 import { useContextMenu } from '6-shared/hooks/useContextMenu'
 import { core } from 'zerro-core/redux'
 

@@ -1,5 +1,5 @@
 import { Stack } from '@mui/material'
-import { FC } from 'react'
+import type { FC } from 'react'
 import { useAppTheme } from '6-shared/ui/theme'
 import { round } from '6-shared/helpers/money'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'

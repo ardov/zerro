@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
-import Button, { ButtonProps } from '@mui/material/Button'
+import type { ButtonProps } from '@mui/material/Button'
+import Button from '@mui/material/Button'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'

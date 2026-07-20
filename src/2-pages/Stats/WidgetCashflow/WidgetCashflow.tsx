@@ -15,12 +15,13 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 import { useAppTheme } from '6-shared/ui/theme'
 import { formatMoney } from '6-shared/helpers/money'
 import { formatDate, parseDate } from '6-shared/helpers/date'
-import { TISODate } from '6-shared/types'
+import type { TISODate } from '6-shared/types'
 
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { DataLine } from '3-widgets/DataLine'
 import { summarizeCashflow, useCashFlow } from '../shared/cashflow'
-import { Period, PeriodTitle } from '../shared/period'
+import type { Period } from '../shared/period'
+import { PeriodTitle } from '../shared/period'
 
 type Point = {
   date: TISODate

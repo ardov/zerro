@@ -1,6 +1,7 @@
 import type { TTransaction, TTransactionId } from '6-shared/types'
 
-import { useState, FC } from 'react'
+import type { FC } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Box,

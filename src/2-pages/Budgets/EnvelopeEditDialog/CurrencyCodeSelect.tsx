@@ -1,8 +1,9 @@
-import { FC } from 'react'
-import { MenuItem, SelectProps, ListItemText } from '@mui/material'
+import type { FC } from 'react'
+import type { SelectProps } from '@mui/material'
+import { MenuItem, ListItemText } from '@mui/material'
 import { core } from 'zerro-core/redux'
 
-import { TFxCode, TInstrument } from '6-shared/types'
+import type { TFxCode, TInstrument } from '6-shared/types'
 import { getCurrencySymbol } from '6-shared/helpers/money'
 import { SmartSelect } from '6-shared/ui/SmartSelect'
 

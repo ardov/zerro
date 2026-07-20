@@ -1,20 +1,15 @@
-import { useState, FC, useCallback } from 'react'
+import type { FC } from 'react'
+import { useState, useCallback } from 'react'
 import { TransactionList } from '3-widgets/transaction/TransactionList'
-import {
-  Box,
-  Drawer,
-  useMediaQuery,
-  Paper,
-  Theme,
-  DrawerProps,
-} from '@mui/material'
+import type { Theme, DrawerProps } from '@mui/material'
+import { Box, Drawer, useMediaQuery, Paper } from '@mui/material'
 import {
   TrEmptyState,
   TransactionPreview,
 } from '3-widgets/transaction/TransactionPreview'
 import { Helmet } from 'react-helmet-async'
 import { registerPopover } from '6-shared/historyPopovers'
-import { TTransaction, TTransactionId } from '6-shared/types'
+import type { TTransaction, TTransactionId } from '6-shared/types'
 import { track } from '6-shared/analytics'
 import { useTranslation } from 'react-i18next'
 

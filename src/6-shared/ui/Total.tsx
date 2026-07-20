@@ -1,5 +1,7 @@
-import { Box, BoxProps, Typography } from '@mui/material'
-import { Amount, AmountProps } from '6-shared/ui/Amount'
+import type { BoxProps } from '@mui/material'
+import { Box, Typography } from '@mui/material'
+import type { AmountProps } from '6-shared/ui/Amount'
+import { Amount } from '6-shared/ui/Amount'
 
 interface TotalProps extends BoxProps {
   title: string

@@ -1,6 +1,6 @@
 import { track } from '6-shared/analytics'
-import { TISOMonth } from '6-shared/types'
-import { AppThunk } from 'store'
+import type { TISOMonth } from '6-shared/types'
+import type { AppThunk } from 'store'
 import { core } from 'zerro-core/redux'
 
 import { setTotalBudget } from '4-features/budget/setTotalBudget'

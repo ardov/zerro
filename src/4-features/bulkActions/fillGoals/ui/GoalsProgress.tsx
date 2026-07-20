@@ -1,8 +1,9 @@
-import { FC } from 'react'
+import type { FC } from 'react'
 import { core } from 'zerro-core/redux'
 
-import { Typography, ButtonBase, ButtonBaseProps } from '@mui/material'
-import { TISOMonth } from '6-shared/types'
+import type { ButtonBaseProps } from '@mui/material'
+import { Typography, ButtonBase } from '@mui/material'
+import type { TISOMonth } from '6-shared/types'
 import { formatMoney } from '6-shared/helpers/money'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { RadialProgress } from '6-shared/ui/RadialProgress'

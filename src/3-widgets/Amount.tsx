@@ -1,6 +1,7 @@
-import { FC } from 'react'
-import { OptionalExceptFor, TInstrumentId } from '6-shared/types'
-import { AmountProps, Amount } from '6-shared/ui/Amount'
+import type { FC } from 'react'
+import type { OptionalExceptFor, TInstrumentId } from '6-shared/types'
+import type { AmountProps } from '6-shared/ui/Amount'
+import { Amount } from '6-shared/ui/Amount'
 
 import { core } from 'zerro-core/redux'
 

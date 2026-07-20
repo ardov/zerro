@@ -11,7 +11,8 @@ import type {
   TTransaction,
   TTransactionId,
 } from '../entities/transactions/types'
-import { cleanPayee, TDebtor } from './debtors'
+import type { TDebtor } from './debtors'
+import { cleanPayee } from './debtors'
 import { getTransactionType, TrType } from '../entities/transactions'
 
 export type TBalanceState<Value = TFxAmount> = {

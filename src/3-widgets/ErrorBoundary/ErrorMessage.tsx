@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import type { FC } from 'react'
 import { Box, Typography, Button } from '@mui/material'
 import { SyncIcon } from '6-shared/ui/Icons'
 import { useTranslation } from 'react-i18next'

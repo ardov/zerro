@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { calcGoals, TGoalContext } from './progress'
-import { goalType, TGoal } from './types'
+import type { TGoalContext } from './progress'
+import { calcGoals } from './progress'
+import type { TGoal } from './types'
+import { goalType } from './types'
 
 const context: TGoalContext = {
   month: '2026-01',

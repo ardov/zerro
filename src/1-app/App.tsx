@@ -1,4 +1,5 @@
-import React, { FC, lazy, Suspense, useEffect, useState } from 'react'
+import type { FC } from 'react'
+import React, { lazy, Suspense, useEffect, useState } from 'react'
 import {
   BrowserRouter,
   Navigate,
@@ -6,13 +7,8 @@ import {
   Routes,
   useLocation,
 } from 'react-router-dom'
-import {
-  Box,
-  CircularProgress,
-  Typography,
-  useMediaQuery,
-  Theme,
-} from '@mui/material'
+import type { Theme } from '@mui/material'
+import { Box, CircularProgress, Typography, useMediaQuery } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import {
   initAnalytics,

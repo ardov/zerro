@@ -1,11 +1,13 @@
-import { FC, useState } from 'react'
+import type { FC } from 'react'
+import { useState } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { Box, InputAdornment, IconButton, Chip } from '@mui/material'
-import Dialog, { DialogProps } from '@mui/material/Dialog'
+import type { DialogProps } from '@mui/material/Dialog'
+import Dialog from '@mui/material/Dialog'
 import { AmountInput } from '6-shared/ui/AmountInput'
 import { ArrowForwardIcon } from '6-shared/ui/Icons'
-import { Modify, TISOMonth } from '6-shared/types'
+import type { Modify, TISOMonth } from '6-shared/types'
 import { useAppDispatch, useAppSelector } from 'store'
 
 import { moveMoney } from './moveMoney'

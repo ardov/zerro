@@ -1,8 +1,10 @@
-import React, { FC } from 'react'
+import type { FC } from 'react'
+import React from 'react'
 import { useMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import RefreshButton from '3-widgets/RefreshButton'
 import { MenuButton } from './MenuButton'
+import type { DrawerProps } from '@mui/material'
 import {
   Box,
   Drawer,
@@ -10,7 +12,6 @@ import {
   List,
   ListItemText,
   ListItemIcon,
-  DrawerProps,
   ListItemButton,
 } from '@mui/material'
 import {

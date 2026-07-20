@@ -1,4 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import type { PayloadAction } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 import {
   appendOutbox,
   applyOutboxCommand,
@@ -10,7 +11,7 @@ import {
   type TPersistedReplica,
 } from 'zerro-core/replica'
 import { withPerf } from '6-shared/helpers/performance'
-import { TDataStore, TNormalizedPatch } from '6-shared/types'
+import type { TDataStore, TNormalizedPatch } from '6-shared/types'
 import { applyDiffMutable } from './shared/applyDiff'
 
 interface DataSlice {

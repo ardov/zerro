@@ -1,8 +1,9 @@
 import { GroupBy } from '6-shared/helpers/date'
-import { TAccountId, TISODate } from '6-shared/types'
+import type { TAccountId, TISODate } from '6-shared/types'
 import { core } from 'zerro-core/redux'
 
-import { getStart, Period } from '../shared/period'
+import type { Period } from '../shared/period'
+import { getStart } from '../shared/period'
 import { useAppSelector } from 'store/index'
 import { useMemo } from 'react'
 

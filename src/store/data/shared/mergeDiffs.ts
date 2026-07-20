@@ -1,4 +1,4 @@
-import { TNormalizedPatch } from '6-shared/types'
+import type { TNormalizedPatch } from '6-shared/types'
 
 /**
  * Adds changes from the second diff to the first diff

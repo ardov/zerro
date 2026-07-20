@@ -1,5 +1,6 @@
 import type { TTransaction } from '6-shared/types'
-import React, { FC } from 'react'
+import type { FC } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from '@emotion/styled'
 import { Typography } from '@mui/material'

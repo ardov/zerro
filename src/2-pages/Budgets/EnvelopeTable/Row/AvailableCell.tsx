@@ -1,4 +1,5 @@
-import React, { FC } from 'react'
+import type { FC } from 'react'
+import React from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { Typography, Box } from '@mui/material'
 import { useTranslation } from 'react-i18next'

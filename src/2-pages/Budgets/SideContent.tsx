@@ -1,5 +1,6 @@
-import { core } from 'zerro-core/redux'
-import { FC, memo, useCallback } from 'react'
+import type { core } from 'zerro-core/redux'
+import type { FC } from 'react'
+import { memo, useCallback } from 'react'
 import { Box, Drawer } from '@mui/material'
 import { MonthInfo } from './MonthInfo'
 import { EnvelopePreview } from './EnvelopePreview'

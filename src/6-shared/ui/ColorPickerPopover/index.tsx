@@ -1,14 +1,14 @@
-import React, { ChangeEvent, FC, useCallback, useState } from 'react'
+import type { ChangeEvent, FC } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import type { PopoverProps, SxProps } from '@mui/material'
 import {
   Box,
   Button,
   Divider,
   InputAdornment,
   Popover,
-  PopoverProps,
   Stack,
-  SxProps,
   TextField,
 } from '@mui/material'
 import './styles.scss'

@@ -1,6 +1,8 @@
-import { FC, ReactNode, useEffect } from 'react'
+import type { FC, ReactNode } from 'react'
+import { useEffect } from 'react'
 import { useLocation, Link as RouterLink } from 'react-router-dom'
-import { Box, BoxProps, ButtonBase } from '@mui/material'
+import type { BoxProps } from '@mui/material'
+import { Box, ButtonBase } from '@mui/material'
 import { ChevronRightIcon } from '6-shared/ui/Icons'
 import { useToggle } from '6-shared/hooks/useToggle'
 

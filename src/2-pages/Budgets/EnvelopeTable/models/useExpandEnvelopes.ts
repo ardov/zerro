@@ -1,7 +1,7 @@
-import { core } from 'zerro-core/redux'
+import type { core } from 'zerro-core/redux'
 import { useState } from 'react'
 import { toISOMonth } from '6-shared/helpers/date'
-import { TISOMonth } from '6-shared/types'
+import type { TISOMonth } from '6-shared/types'
 import { useEnvRenderInfo } from './envRenderInfo'
 
 export function useExpandEnvelopes(month: TISOMonth = toISOMonth(new Date())): {

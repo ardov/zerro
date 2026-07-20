@@ -1,12 +1,14 @@
-import { FC, useState } from 'react'
+import type { FC } from 'react'
+import { useState } from 'react'
 import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
-import { Stack, Box, BoxProps } from '@mui/material'
+import type { BoxProps } from '@mui/material'
+import { Stack, Box } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
-import { TFxAmount, TISOMonth } from '6-shared/types'
+import type { TFxAmount, TISOMonth } from '6-shared/types'
 import { formatDate } from '6-shared/helpers/date'
 
 import { DataLine } from '3-widgets/DataLine'

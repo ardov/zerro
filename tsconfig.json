@@ -3,6 +3,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noImplicitOverride": true,
+    "verbatimModuleSyntax": true,
     "paths": { "*": ["./src/*"] },
     "target": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],

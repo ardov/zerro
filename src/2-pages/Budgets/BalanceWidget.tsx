@@ -6,7 +6,7 @@ import { useAppSelector } from 'store'
 import Balancer from 'react-wrap-balancer'
 import { useTranslation } from 'react-i18next'
 import { keys } from '6-shared/helpers/keys'
-import { TISOMonth } from '6-shared/types'
+import type { TISOMonth } from '6-shared/types'
 import { Total } from '6-shared/ui/Total'
 import { DataLine } from '3-widgets/DataLine'
 

@@ -1,4 +1,5 @@
-import { FC, memo, ReactNode, useCallback, useRef } from 'react'
+import type { FC, ReactNode } from 'react'
+import { memo, useCallback, useRef } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useDraggable } from '@dnd-kit/core'
@@ -7,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 
 import { TagIcon } from '6-shared/ui/TagIcon'
 import { DragIndicatorIcon } from '6-shared/ui/Icons'
-import { TFxCode } from '6-shared/types'
+import type { TFxCode } from '6-shared/types'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { getCurrencySymbol } from '6-shared/helpers/money'
 import { useFloatingInput } from '6-shared/ui/FloatingInput'

@@ -1,11 +1,11 @@
-import { FC } from 'react'
+import type { FC } from 'react'
+import type { TooltipProps } from '@mui/material'
 import {
   styled,
   Tooltip as MaterialTooltip,
   tooltipClasses,
-  TooltipProps,
 } from '@mui/material'
-import { Modify } from '6-shared/types'
+import type { Modify } from '6-shared/types'
 
 const StyledTooltip = styled(({ className, ...props }: TooltipProps) => (
   <MaterialTooltip {...props} classes={{ popper: className }} />

@@ -1,4 +1,4 @@
-import { TFxCode } from '6-shared/types'
+import type { TFxCode } from '6-shared/types'
 import currencySymbols from './currencySymbols.json'
 
 const currencyInfo = currencySymbols as Record<

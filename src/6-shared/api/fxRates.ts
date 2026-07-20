@@ -1,6 +1,6 @@
 import { toISODate } from '6-shared/helpers/date'
 import { keys } from '6-shared/helpers/keys'
-import { TDateDraft, TFxCode, TISODate } from '6-shared/types'
+import type { TDateDraft, TFxCode, TISODate } from '6-shared/types'
 
 /*
 Currency rates are loaded from this great repository by Fawaz Ahmed

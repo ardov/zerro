@@ -1,4 +1,5 @@
-import { FC, useState } from 'react'
+import type { FC } from 'react'
+import { useState } from 'react'
 import { InputBase, InputAdornment } from '@mui/material'
 import { NotesIcon } from '6-shared/ui/Icons'
 import { useAppDispatch, useAppSelector } from 'store'

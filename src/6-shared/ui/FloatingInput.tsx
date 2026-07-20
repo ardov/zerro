@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { TextField, Box, Popover, PopoverProps } from '@mui/material'
+import type { PopoverProps } from '@mui/material'
+import { TextField, Box, Popover } from '@mui/material'
 import { useFormik } from 'formik'
 
 export function useFloatingInput(

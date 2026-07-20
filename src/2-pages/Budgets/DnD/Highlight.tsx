@@ -1,8 +1,10 @@
 import type { ById } from '6-shared/types'
 
 import { useCallback, useRef, useState } from 'react'
-import { DragEndEvent, DragMoveEvent, useDndMonitor } from '@dnd-kit/core'
-import { Box, SxProps } from '@mui/system'
+import type { DragEndEvent, DragMoveEvent } from '@dnd-kit/core'
+import { useDndMonitor } from '@dnd-kit/core'
+import type { SxProps } from '@mui/system'
+import { Box } from '@mui/system'
 import { useAppDispatch, useAppSelector } from 'store/index'
 import { core } from 'zerro-core/redux'
 

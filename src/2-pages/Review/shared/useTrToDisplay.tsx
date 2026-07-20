@@ -1,6 +1,6 @@
 import { core } from 'zerro-core/redux'
 
-import { TTransaction } from '6-shared/types'
+import type { TTransaction } from '6-shared/types'
 
 export function useTrToDisplay() {
   const toDisplay = core.currency.useToDisplay('current')

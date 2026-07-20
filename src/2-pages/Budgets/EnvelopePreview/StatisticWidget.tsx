@@ -1,4 +1,5 @@
-import { FC, useState } from 'react'
+import type { FC } from 'react'
+import { useState } from 'react'
 import {
   BarChart,
   Bar,
@@ -6,18 +7,11 @@ import {
   ResponsiveContainer,
   ReferenceDot,
 } from 'recharts'
-import {
-  Stack,
-  Box,
-  BoxProps,
-  Typography,
-  ButtonBase,
-  ButtonBaseProps,
-  SxProps,
-} from '@mui/material'
+import type { BoxProps, ButtonBaseProps, SxProps } from '@mui/material'
+import { Stack, Box, Typography, ButtonBase } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
-import { TFxCode, TISOMonth } from '6-shared/types'
+import type { TFxCode, TISOMonth } from '6-shared/types'
 import { formatDate, toISOMonth } from '6-shared/helpers/date'
 import { getAverage } from '6-shared/helpers/money/currencyHelpers'
 

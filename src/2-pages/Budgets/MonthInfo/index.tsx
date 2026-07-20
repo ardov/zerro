@@ -1,21 +1,20 @@
-import { FC } from 'react'
+import type { FC } from 'react'
 import { useAppDispatch, useAppSelector } from 'store'
 import { isZero } from '6-shared/helpers/money'
 import { formatDate } from '6-shared/helpers/date'
 import { startFresh } from '4-features/bulkActions/startFresh'
+import type { Theme, BoxProps } from '@mui/material'
 import {
   Box,
   Typography,
   Button,
   IconButton,
   useMediaQuery,
-  Theme,
-  BoxProps,
   Stack,
 } from '@mui/material'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
-import { TDateDraft, TISOMonth } from '6-shared/types'
+import type { TDateDraft, TISOMonth } from '6-shared/types'
 
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import {

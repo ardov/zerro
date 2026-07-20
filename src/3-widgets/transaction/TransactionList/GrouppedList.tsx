@@ -1,13 +1,13 @@
-import React, { FC, useCallback, useEffect, useRef } from 'react'
-import { List, ListImperativeAPI, RowComponentProps } from 'react-window'
-import {
-  StaticDatePicker,
-  StaticDatePickerProps,
-} from '@mui/x-date-pickers/StaticDatePicker'
+import type { FC } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
+import type { ListImperativeAPI, RowComponentProps } from 'react-window'
+import { List } from 'react-window'
+import type { StaticDatePickerProps } from '@mui/x-date-pickers/StaticDatePicker'
+import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker'
 import { AutoSizer } from 'react-virtualized-auto-sizer'
 import { ListSubheader } from '@mui/material'
 import { formatDate, parseDate } from '6-shared/helpers/date'
-import { TDateDraft, TISODate } from '6-shared/types'
+import type { TDateDraft, TISODate } from '6-shared/types'
 import { toISODate } from '6-shared/helpers/date'
 import { SmartDialog } from '6-shared/ui/SmartDialog'
 import { registerPopover } from '6-shared/historyPopovers'

@@ -1,4 +1,4 @@
-import { core } from 'zerro-core/redux'
+import type { core } from 'zerro-core/redux'
 import React from 'react'
 import { Collapse, Box, IconButton } from '@mui/material'
 import { ChevronRightIcon } from '6-shared/ui/Icons'

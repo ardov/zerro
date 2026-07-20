@@ -7,9 +7,11 @@ import type {
 } from '6-shared/types'
 import { core } from 'zerro-core/redux'
 
-import { useMemo, useState, useCallback, FC, ReactElement } from 'react'
+import type { FC, ReactElement } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, Theme } from '@mui/material'
+import type { Theme } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import { track } from '6-shared/analytics'
 import { useDebounce } from '6-shared/hooks/useDebounce'
 

@@ -1,9 +1,10 @@
 import type { TTagId } from '6-shared/types'
 import { Box } from '@mui/material'
 
-import { FC, ReactNode } from 'react'
+import type { FC, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Chip, ChipProps } from '@mui/material'
+import type { ChipProps } from '@mui/material'
+import { Chip } from '@mui/material'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { TagIcon } from '../../../6-shared/ui/TagIcon'
 import { useAppSelector } from 'store'

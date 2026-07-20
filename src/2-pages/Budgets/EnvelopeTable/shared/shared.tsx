@@ -1,6 +1,8 @@
-import { Theme, useMediaQuery } from '@mui/material'
-import { Box, BoxProps, SxProps } from '@mui/system'
-import { FC, ReactNode } from 'react'
+import type { Theme } from '@mui/material'
+import { useMediaQuery } from '@mui/material'
+import type { BoxProps, SxProps } from '@mui/system'
+import { Box } from '@mui/system'
+import type { FC, ReactNode } from 'react'
 import { Metric, useColumns } from '../models/useMetric'
 
 export function useIsSmall() {

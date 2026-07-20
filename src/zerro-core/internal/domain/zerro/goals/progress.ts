@@ -1,7 +1,8 @@
 import { differenceInCalendarMonths, toISOMonth } from '../../foundation/date'
 import { round } from '../../foundation/numbers'
 import type { TISOMonth } from '../../zenmoney/primitives'
-import { goalType, TGoal } from './types'
+import type { TGoal } from './types'
+import { goalType } from './types'
 
 type GoalProgress = {
   progress: number

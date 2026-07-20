@@ -1,15 +1,10 @@
-import React, {
-  FC,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import type { FC, ReactNode } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import { Box, ButtonBase, SxProps, Theme, Typography } from '@mui/material'
+import type { SxProps, Theme } from '@mui/material'
+import { Box, ButtonBase, Typography } from '@mui/material'
 import { Amount } from '6-shared/ui/Amount'
-import { DragTypes } from '2-pages/Budgets/DnD'
+import type { DragTypes } from '2-pages/Budgets/DnD'
 
 const REVEAL_CELL_WIDTH = 88
 const AXIS_DECISION_THRESHOLD = 8

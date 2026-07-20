@@ -1,4 +1,4 @@
-import { AppThunk } from 'store/index'
+import type { AppThunk } from 'store/index'
 import { core } from 'zerro-core/redux'
 
 export function moveEnvelope(

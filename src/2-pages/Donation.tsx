@@ -1,4 +1,4 @@
-import { FC, ReactElement } from 'react'
+import type { FC, ReactElement } from 'react'
 import { Box, Link, Typography } from '@mui/material'
 import { Stack } from '@mui/system'
 import { Helmet } from 'react-helmet-async'

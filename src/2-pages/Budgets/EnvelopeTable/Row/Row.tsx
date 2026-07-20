@@ -1,13 +1,15 @@
-import React, { FC, ReactNode, useCallback } from 'react'
+import type { FC, ReactNode } from 'react'
+import React, { useCallback } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useDroppable } from '@dnd-kit/core'
-import { IconButton, IconButtonProps } from '@mui/material'
+import type { IconButtonProps } from '@mui/material'
+import { IconButton } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { EmojiFlagsIcon } from '6-shared/ui/Icons'
 import { RadialProgress } from '6-shared/ui/RadialProgress'
-import { TFxCode, TISOMonth } from '6-shared/types'
+import type { TFxCode, TISOMonth } from '6-shared/types'
 
 import { useAppSelector } from 'store'
 
@@ -17,7 +19,8 @@ import { useGoalPopover } from '../../GoalPopover'
 
 import { Metric, useColumns } from '../models/useMetric'
 import { TableRow, useIsSmall } from '../shared/shared'
-import { RevealItem, SlideReveal } from '../SlideReveal'
+import type { RevealItem } from '../SlideReveal'
+import { SlideReveal } from '../SlideReveal'
 import { NameCell } from './NameCell'
 import { BudgetCell } from './BudgetCell'
 import { ActivityCell } from './ActivityCell'

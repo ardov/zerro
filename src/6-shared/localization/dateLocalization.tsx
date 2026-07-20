@@ -1,7 +1,7 @@
 import React from 'react'
 import { ru as ruDateLocale } from 'date-fns/locale'
 import { enUS as enDateLocale } from 'date-fns/locale'
-import { i18n } from './i18n'
+import type { i18n } from './i18n'
 
 import { LocalizationProvider as DatePickerLocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'

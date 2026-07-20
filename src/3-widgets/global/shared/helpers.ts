@@ -1,4 +1,4 @@
-import { MenuProps } from '@mui/material'
+import type { MenuProps } from '@mui/material'
 
 export function getMenuPosition(anchorPosition?: {
   left: number

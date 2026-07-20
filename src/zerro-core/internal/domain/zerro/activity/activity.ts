@@ -2,8 +2,9 @@ import { keys } from '../../foundation/keys'
 import { addFxAmount } from '../../zenmoney/model/money'
 import type { ByMonth } from '../../foundation/types'
 import type { TFxAmount } from '../../zenmoney/model/money'
-import { TEnvelopeId } from '../envelope-id'
-import { EnvActivity, TRawActivityNode } from './rawActivity'
+import type { TEnvelopeId } from '../envelope-id'
+import type { TRawActivityNode } from './rawActivity'
+import { EnvActivity } from './rawActivity'
 
 export type TActivityNode = {
   total: TFxAmount

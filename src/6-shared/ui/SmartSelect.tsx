@@ -1,14 +1,10 @@
 import React from 'react'
-import {
-  FormControl,
-  InputLabel,
-  MenuList,
-  Select,
-  SelectProps,
-} from '@mui/material'
+import type { SelectProps } from '@mui/material'
+import { FormControl, InputLabel, MenuList, Select } from '@mui/material'
 import { popoverStack } from '6-shared/historyPopovers'
 
-import { SwipeableDrawer, Theme, useMediaQuery } from '@mui/material'
+import type { Theme } from '@mui/material'
+import { SwipeableDrawer, useMediaQuery } from '@mui/material'
 
 type TSmartSelectProps<T = unknown> = SelectProps<T> & { elKey: string }
 

@@ -1,11 +1,5 @@
-import {
-  Popover,
-  PopoverProps,
-  SwipeableDrawer,
-  SwipeableDrawerProps,
-  Theme,
-  useMediaQuery,
-} from '@mui/material'
+import type { PopoverProps, SwipeableDrawerProps, Theme } from '@mui/material'
+import { Popover, SwipeableDrawer, useMediaQuery } from '@mui/material'
 
 const radius = '16px'
 const br = {

@@ -5,7 +5,8 @@ import type { TFxAmount } from '../../zenmoney/model/money'
 import type { TEnvelopeId } from '../envelope-id'
 import type { TFxConverter } from '../fx-rates'
 import { getProgress } from './progress'
-import { goalType, TGoal } from './types'
+import type { TGoal } from './types'
+import { goalType } from './types'
 import type { TGoalInfo } from './build'
 
 export type TGoalTotals = {

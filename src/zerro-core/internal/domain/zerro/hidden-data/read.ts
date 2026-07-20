@@ -2,7 +2,7 @@ import { isISOMonth } from '../../foundation/date'
 import type { ById, ByMonth } from '../../foundation/types'
 import type { TISOMonth } from '../../zenmoney/primitives'
 import type { TReminder } from '../../zenmoney/entities/reminders'
-import { HiddenDataType, THiddenDataComment } from './types'
+import type { HiddenDataType, THiddenDataComment } from './types'
 
 export function parseHiddenDataComment(
   comment: string | null

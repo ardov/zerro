@@ -1,4 +1,5 @@
-import React, { FC } from 'react'
+import type { FC } from 'react'
+import React from 'react'
 import { Typography, Box } from '@mui/material'
 import { Amount } from '6-shared/ui/Amount'
 import { Btn } from './Btn'

@@ -9,7 +9,7 @@ import {
   Select,
 } from '@mui/material'
 import { formatMoney } from '6-shared/helpers/money'
-import { TTagId } from '6-shared/types'
+import type { TTagId } from '6-shared/types'
 
 type TagSelectProps = {
   options: { id: TTagId; name: string; amount: number }[]

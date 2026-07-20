@@ -2,7 +2,8 @@ import { toISOMonth } from '../../foundation/date'
 import { keys } from '../../foundation/keys'
 import type { ById, ByMonth } from '../../foundation/types'
 import type { TBudget } from '../../zenmoney/entities/budgets'
-import { EnvType, envId, TEnvelopeId } from '../envelope-id'
+import type { TEnvelopeId } from '../envelope-id'
+import { EnvType, envId } from '../envelope-id'
 import type { TBudgets } from './read'
 
 export type TBuildBudgetsInput = {

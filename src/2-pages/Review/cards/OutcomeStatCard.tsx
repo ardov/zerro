@@ -1,17 +1,21 @@
-import { FC, useCallback, useMemo, useState } from 'react'
+import type { FC } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { Box, Button, Stack } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from '6-shared/ui/Tooltip'
-import { TDateDraft, TFxAmount, TTransaction } from '6-shared/types'
-import { PercentBar, PercentBarItem } from '6-shared/ui/PercentBar'
+import type { TDateDraft, TFxAmount, TTransaction } from '6-shared/types'
+import type { PercentBarItem } from '6-shared/ui/PercentBar'
+import { PercentBar } from '6-shared/ui/PercentBar'
 
 import { useAppSelector } from 'store'
 
 import { DataLine } from '3-widgets/DataLine'
-import { Card, TCardProps } from '../shared/Card'
-import { TStats, useStats } from '../shared/getFacts'
+import type { TCardProps } from '../shared/Card'
+import { Card } from '../shared/Card'
+import type { TStats } from '../shared/getFacts'
+import { useStats } from '../shared/getFacts'
 
 type TDataNode = {
   parent: string | null

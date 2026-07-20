@@ -1,19 +1,21 @@
 import { createPortal } from 'react-dom'
-import { FC, ReactNode, useEffect, useState } from 'react'
+import type { FC, ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { useCallback } from 'react'
+import type { DragEndEvent } from '@dnd-kit/core'
 import {
   useDndMonitor,
   useSensor,
   useSensors,
   DndContext,
   DragOverlay,
-  DragEndEvent,
   MouseSensor,
   TouchSensor,
   KeyboardSensor,
 } from '@dnd-kit/core'
 import { useTranslation } from 'react-i18next'
-import { Box, SxProps } from '@mui/system'
+import type { SxProps } from '@mui/system'
+import { Box } from '@mui/system'
 import { Typography } from '@mui/material'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { useAppDispatch, useAppSelector } from 'store/index'
@@ -22,7 +24,8 @@ import { core } from 'zerro-core/redux'
 import { MoveMoneyModal } from '4-features/moveMoney'
 import { assignNewGroup } from '4-features/envelope/assignNewGroup'
 import { useMonth } from '../MonthProvider'
-import { TDragData, DragTypes } from './dragTypes'
+import type { TDragData } from './dragTypes'
+import { DragTypes } from './dragTypes'
 import { Highlight } from './Highlight'
 
 const vibrate = () => window?.navigator?.vibrate?.(100)

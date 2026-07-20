@@ -1,4 +1,4 @@
-import { TZmDiff, TInstrumentId, TFxCode } from './data-entities'
+import type { TZmDiff, TInstrumentId, TFxCode } from './data-entities'
 
 type TYear = `${number}${number}${number}${number}`
 type TMonth = `${number}${number}`

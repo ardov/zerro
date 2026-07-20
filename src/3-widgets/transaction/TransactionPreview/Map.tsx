@@ -1,5 +1,6 @@
-import { FC } from 'react'
-import { BoxProps, Paper } from '@mui/material'
+import type { FC } from 'react'
+import type { BoxProps } from '@mui/material'
+import { Paper } from '@mui/material'
 import styled from '@emotion/styled'
 
 interface MapProps {

@@ -1,4 +1,4 @@
-import ru from './ru.json'
+import type ru from './ru.json'
 
 export const en: typeof ru = {
   common: {

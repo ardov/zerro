@@ -1,7 +1,8 @@
 import type { TTransaction } from '6-shared/types'
 import { core } from 'zerro-core/redux'
 
-import React, { FC, useRef, useState } from 'react'
+import type { FC } from 'react'
+import React, { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CSSTransition } from 'react-transition-group'
 import { EditOutlined } from '@mui/icons-material'

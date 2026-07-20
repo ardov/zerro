@@ -1,15 +1,10 @@
-import { FC } from 'react'
+import type { FC } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useAppSelector } from 'store'
 
-import {
-  Typography,
-  ButtonBase,
-  Divider,
-  ButtonBaseProps,
-  Stack,
-} from '@mui/material'
+import type { ButtonBaseProps } from '@mui/material'
+import { Typography, ButtonBase, Divider, Stack } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
 import { sub } from '6-shared/helpers/money'

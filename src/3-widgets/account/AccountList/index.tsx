@@ -1,11 +1,11 @@
-import { FC } from 'react'
+import type { FC } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
 import { Collapse, List, ListItemButton } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { useToggle } from '6-shared/hooks/useToggle'
-import { TFxAmount } from '6-shared/types'
+import type { TFxAmount } from '6-shared/types'
 import { addFxAmount } from '6-shared/helpers/money'
 import { toISOMonth } from '6-shared/helpers/date'
 

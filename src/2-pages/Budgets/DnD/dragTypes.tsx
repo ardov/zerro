@@ -1,4 +1,4 @@
-import { core } from 'zerro-core/redux'
+import type { core } from 'zerro-core/redux'
 
 export enum DragTypes {
   newGroup = 'newGroup',

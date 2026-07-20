@@ -1,6 +1,6 @@
 import { track } from '6-shared/analytics'
-import { AppThunk } from 'store'
-import { TISOMonth } from '6-shared/types'
+import type { AppThunk } from 'store'
+import type { TISOMonth } from '6-shared/types'
 import { prevMonth, toISOMonth } from '6-shared/helpers/date'
 import { core } from 'zerro-core/redux'
 

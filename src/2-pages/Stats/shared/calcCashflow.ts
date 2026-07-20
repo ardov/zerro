@@ -2,7 +2,7 @@ import { core } from 'zerro-core/redux'
 
 import { GroupBy, toGroup } from '6-shared/helpers/date'
 import { addFxAmount } from '6-shared/helpers/money'
-import {
+import type {
   TTransaction,
   TAccountId,
   ByDate,

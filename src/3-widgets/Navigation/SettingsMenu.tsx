@@ -1,4 +1,5 @@
-import React, { FC, useCallback, useState } from 'react'
+import type { FC } from 'react'
+import React, { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -17,6 +18,7 @@ import {
   GlobeIcon,
   TagIcon,
 } from '6-shared/ui/Icons'
+import type { PopoverProps } from '@mui/material'
 import {
   Divider,
   ListItemIcon,
@@ -25,7 +27,6 @@ import {
   ListSubheader,
   MenuItem,
   MenuList,
-  PopoverProps,
   Switch,
   Typography,
 } from '@mui/material'

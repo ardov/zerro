@@ -1,4 +1,4 @@
-import { TNormalizedPatch } from '6-shared/types'
+import type { TNormalizedPatch } from '6-shared/types'
 
 /**
  * Counts all items in a diff object

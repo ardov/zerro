@@ -1,6 +1,7 @@
-import { RootState, TSelector } from 'store'
+import type { RootState, TSelector } from 'store'
 import { getItemsCount } from './shared/getItemsCount'
-import { AccountType, TAccountId, TNormalizedPatch } from '6-shared/types'
+import type { TAccountId, TNormalizedPatch } from '6-shared/types'
+import { AccountType } from '6-shared/types'
 import { createSelector } from '@reduxjs/toolkit'
 import {
   buildOutboxTransport,

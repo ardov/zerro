@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react'
-import { Menu, MenuItem, PopoverProps } from '@mui/material'
+import type { PopoverProps } from '@mui/material'
+import { Menu, MenuItem } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { registerPopover } from '6-shared/historyPopovers'
 

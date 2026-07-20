@@ -1,4 +1,5 @@
-import { FC, useCallback } from 'react'
+import type { FC } from 'react'
+import { useCallback } from 'react'
 import { Box, Typography, IconButton, Grid, ButtonBase } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { TagIcon } from '6-shared/ui/TagIcon'

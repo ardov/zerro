@@ -1,6 +1,6 @@
 import { keys } from '6-shared/helpers/keys'
-import { TNormalizedPatch } from '6-shared/types'
-import { TDataStore } from '6-shared/types'
+import type { TNormalizedPatch } from '6-shared/types'
+import type { TDataStore } from '6-shared/types'
 
 /**
  * Mutable method

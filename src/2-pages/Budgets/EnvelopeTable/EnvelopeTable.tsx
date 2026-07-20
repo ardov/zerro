@@ -1,8 +1,9 @@
-import { FC, memo, useCallback } from 'react'
+import type { FC } from 'react'
+import { memo, useCallback } from 'react'
 import { shallowEqual } from 'react-redux'
 import { deepEqual } from '6-shared/helpers/deepEqual'
 import { Paper } from '@mui/material'
-import { TISOMonth } from '6-shared/types'
+import type { TISOMonth } from '6-shared/types'
 import { useToggle } from '6-shared/hooks/useToggle'
 
 import { useAppSelector } from 'store/index'

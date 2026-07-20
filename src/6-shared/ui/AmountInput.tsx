@@ -1,13 +1,9 @@
-import { useState, useEffect, useRef, FC } from 'react'
-import {
-  TextField,
-  InputAdornment,
-  TextFieldProps,
-  Button,
-  Stack,
-} from '@mui/material'
+import type { FC } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import type { TextFieldProps } from '@mui/material'
+import { TextField, InputAdornment, Button, Stack } from '@mui/material'
 import { getCurrencySymbol } from '6-shared/helpers/money'
-import { Modify } from '6-shared/types'
+import type { Modify } from '6-shared/types'
 
 export type AmountInputProps = Modify<
   TextFieldProps,

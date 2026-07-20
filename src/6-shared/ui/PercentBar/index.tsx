@@ -1,5 +1,6 @@
-import { FC } from 'react'
-import { Box, BoxProps } from '@mui/material'
+import type { FC } from 'react'
+import type { BoxProps } from '@mui/material'
+import { Box } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { useTranslation } from 'react-i18next'
 

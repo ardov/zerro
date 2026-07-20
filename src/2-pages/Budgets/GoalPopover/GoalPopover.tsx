@@ -1,4 +1,6 @@
-import { useState, FC } from 'react'
+import type { FC } from 'react'
+import { useState } from 'react'
+import type { OutlinedTextFieldProps, PopoverProps } from '@mui/material'
 import {
   Box,
   Popover,
@@ -6,8 +8,6 @@ import {
   MenuItem,
   Button,
   IconButton,
-  OutlinedTextFieldProps,
-  PopoverProps,
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { AmountInput } from '6-shared/ui/AmountInput'
@@ -15,7 +15,7 @@ import { CloseIcon } from '6-shared/ui/Icons'
 import MonthSelectPopover from '6-shared/ui/MonthSelectPopover'
 import { toISODate, formatDate } from '6-shared/helpers/date'
 import { track } from '6-shared/analytics'
-import { Modify, TDateDraft, TISOMonth } from '6-shared/types'
+import type { Modify, TDateDraft, TISOMonth } from '6-shared/types'
 
 import { useAppDispatch, useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'

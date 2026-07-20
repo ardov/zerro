@@ -1,10 +1,10 @@
+import type { intentEntityKeys } from '../../domain/zenmoney'
 import {
   accountRequiredFields,
   accountWritableFields,
   budgetRequiredFields,
   budgetWritableFields,
   getRootUserId,
-  intentEntityKeys,
   intentPatchKeys,
   makeAccount,
   makeMerchant,

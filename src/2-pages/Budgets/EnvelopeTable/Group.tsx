@@ -1,4 +1,5 @@
-import React, { FC, useRef } from 'react'
+import type { FC } from 'react'
+import React, { useRef } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { ButtonBase, IconButton, Typography, Box } from '@mui/material'
@@ -12,7 +13,7 @@ import { renameGroup } from '4-features/envelope/renameGroup'
 import { moveGroup } from '4-features/envelope/moveGroup'
 import { createEnvelopeInGroup } from '4-features/envelope/createEnvelope'
 import { TableRow } from './shared/shared'
-import { TFxAmount } from '6-shared/types'
+import type { TFxAmount } from '6-shared/types'
 
 import { addFxAmount } from '6-shared/helpers/money'
 import { useMonth } from '../MonthProvider'

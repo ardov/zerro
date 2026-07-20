@@ -1,15 +1,16 @@
-import { FC } from 'react'
+import type { FC } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useAppSelector } from 'store'
 
 import { Area, ComposedChart, Line, ResponsiveContainer, YAxis } from 'recharts'
-import { Stack, Box, BoxProps } from '@mui/material'
+import type { BoxProps } from '@mui/material'
+import { Stack, Box } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { formatDate, getMonthLength, toISODate } from '6-shared/helpers/date'
 import { useAppTheme } from '6-shared/ui/theme'
 import { prevMonth, toISOMonth } from '6-shared/helpers/date'
-import { TFxAmount, TISODate, TISOMonth } from '6-shared/types'
+import type { TFxAmount, TISODate, TISOMonth } from '6-shared/types'
 import { addFxAmount, round } from '6-shared/helpers/money'
 
 import { DataLine } from '3-widgets/DataLine'

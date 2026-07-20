@@ -1,4 +1,5 @@
-import { FC, useCallback, useEffect, useRef } from 'react'
+import type { FC } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { getLoginState } from 'store/token'
 import { syncData } from '4-features/sync'
 import { getLastSyncTime, getLastChangeTime } from 'store/data'

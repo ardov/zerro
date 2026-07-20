@@ -1,8 +1,9 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { isZero } from '6-shared/helpers/money'
-import { ById, ByMonth, TISOMonth } from '6-shared/types'
+import type { ById, ByMonth, TISOMonth } from '6-shared/types'
 
-import { TSelector, useAppSelector } from 'store'
+import type { TSelector } from 'store'
+import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
 import { deepEqual } from '6-shared/helpers/deepEqual'

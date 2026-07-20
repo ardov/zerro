@@ -1,10 +1,5 @@
-import {
-  Dialog,
-  DialogProps,
-  SwipeableDrawer,
-  Theme,
-  useMediaQuery,
-} from '@mui/material'
+import type { DialogProps, Theme } from '@mui/material'
+import { Dialog, SwipeableDrawer, useMediaQuery } from '@mui/material'
 import { popoverStack } from '6-shared/historyPopovers'
 
 export type TSmartDialogProps = Omit<DialogProps, 'open'> & { elKey: string }

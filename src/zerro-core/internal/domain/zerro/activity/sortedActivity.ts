@@ -1,10 +1,11 @@
 import { keys } from '../../foundation/keys'
 import type { ByMonth } from '../../foundation/types'
 import { addFxAmount, type TFxAmount } from '../../zenmoney/model/money'
-import { EnvType, envId, TEnvelopeId } from '../envelope-id'
+import type { TEnvelopeId } from '../envelope-id'
+import { EnvType, envId } from '../envelope-id'
 import type { TFxConverter } from '../fx-rates'
 import { TrFilterMode } from '../transactions'
-import { EnvActivity, TRawActivityNode } from './rawActivity'
+import type { EnvActivity, TRawActivityNode } from './rawActivity'
 
 export { TrFilterMode } from '../transactions'
 

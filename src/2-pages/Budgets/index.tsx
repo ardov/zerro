@@ -1,9 +1,11 @@
-import { FC, ReactElement, useCallback } from 'react'
+import type { FC, ReactElement } from 'react'
+import { useCallback } from 'react'
 import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
 import { Helmet } from 'react-helmet-async'
-import { Box, Theme, useMediaQuery } from '@mui/material'
+import type { Theme } from '@mui/material'
+import { Box, useMediaQuery } from '@mui/material'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '6-shared/helpers/date'

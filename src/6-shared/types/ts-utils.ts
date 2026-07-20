@@ -1,4 +1,4 @@
-import { TISODate, TISOMonth } from './types'
+import type { TISODate, TISOMonth } from './types'
 
 /** Objects stored in collection by id */
 export type ByIdOld<T> = { [id: string]: T }

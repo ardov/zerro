@@ -1,6 +1,6 @@
 import { keys } from '6-shared/helpers/keys'
-import { RootState } from 'store'
-import { TNormalizedPatch, TLocalData } from '6-shared/types'
+import type { RootState } from 'store'
+import type { TNormalizedPatch, TLocalData } from '6-shared/types'
 import { convertDiff } from '6-shared/api/zm-adapter'
 
 export const getDataToSave = (state: RootState): TLocalData => {

@@ -1,5 +1,6 @@
-import { Box, BoxProps } from '@mui/material'
-import { TTransaction } from '6-shared/types'
+import type { BoxProps } from '@mui/material'
+import { Box } from '@mui/material'
+import type { TTransaction } from '6-shared/types'
 
 export type TCardProps = {
   year: string | number

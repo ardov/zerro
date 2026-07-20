@@ -1,6 +1,6 @@
 import { core } from 'zerro-core/redux'
 
-import { AppThunk } from 'store/index'
+import type { AppThunk } from 'store/index'
 
 export function renameGroup(prevName: string, nextName: string): AppThunk {
   return (dispatch, getState) => {

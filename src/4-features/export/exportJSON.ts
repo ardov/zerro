@@ -1,5 +1,5 @@
 import { formatDate } from '6-shared/helpers/date'
-import { AppThunk } from 'store'
+import type { AppThunk } from 'store'
 import { getDataToSave } from '../shared/getDataToSave'
 
 export const exportJSON: AppThunk = (_, getState) => {

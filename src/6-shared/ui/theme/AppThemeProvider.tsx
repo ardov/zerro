@@ -1,8 +1,10 @@
-import React, { FC } from 'react'
+import type { FC } from 'react'
+import React from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Global, css } from '@emotion/react'
 import CssBaseline from '@mui/material/CssBaseline'
-import { ThemeProvider, Theme } from '@mui/material/styles'
+import type { Theme } from '@mui/material/styles'
+import { ThemeProvider } from '@mui/material/styles'
 import { appTheme } from './createTheme'
 import { fixOldTheme, useAppTheme, useColorScheme } from './hooks'
 

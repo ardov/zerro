@@ -1,6 +1,7 @@
-import { FC } from 'react'
+import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
-import { IconButton, IconButtonProps } from '@mui/material'
+import type { IconButtonProps } from '@mui/material'
+import { IconButton } from '@mui/material'
 import { SettingsIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'
 

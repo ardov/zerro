@@ -1,12 +1,12 @@
-import { FC } from 'react'
+import type { FC } from 'react'
 import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
 import { Typography } from '@mui/material'
 import { TableRow } from '../shared/shared'
 
-import { Metric } from '../models/useMetric'
-import { TFxAmount, TISOMonth } from '6-shared/types'
+import type { Metric } from '../models/useMetric'
+import type { TFxAmount, TISOMonth } from '6-shared/types'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { useTranslation } from 'react-i18next'
 

@@ -4,7 +4,7 @@ import {
   eachDayOfInterval as eachDayOfIntervalFNS,
   parseISO,
 } from 'date-fns'
-import {
+import type {
   TDateDraft,
   TISODate,
   TISOMonth,

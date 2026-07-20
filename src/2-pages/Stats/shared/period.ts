@@ -1,5 +1,6 @@
-import { TISODate } from '6-shared/types'
-import { GroupBy, toGroup, toISODate } from '6-shared/helpers/date'
+import type { TISODate } from '6-shared/types'
+import type { GroupBy } from '6-shared/helpers/date'
+import { toGroup, toISODate } from '6-shared/helpers/date'
 import { useTranslation } from 'react-i18next'
 
 export enum Period {

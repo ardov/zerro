@@ -1,5 +1,7 @@
-import { Theme, useMediaQuery } from '@mui/material'
-import React, { FC, ReactNode, useContext, useState } from 'react'
+import type { Theme } from '@mui/material'
+import { useMediaQuery } from '@mui/material'
+import type { FC, ReactNode } from 'react'
+import React, { useContext, useState } from 'react'
 
 export enum Metric {
   budgeted = 'budgeted',

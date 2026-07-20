@@ -1,8 +1,8 @@
-import { FC } from 'react'
+import type { FC } from 'react'
 import { Typography, Box, Button } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { ChevronDownIcon } from '6-shared/ui/Icons'
-import { TISOMonth } from '6-shared/types'
+import type { TISOMonth } from '6-shared/types'
 
 import { GoalsProgress } from '4-features/bulkActions/fillGoals'
 import { TableRow, useIsSmall } from '../shared/shared'

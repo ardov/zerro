@@ -1,13 +1,16 @@
 import { useMemo } from 'react'
-import { AccountType, TDateDraft, TISODate } from '6-shared/types'
-import { GroupBy, toGroup } from '6-shared/helpers/date'
+import type { TDateDraft, TISODate } from '6-shared/types'
+import { AccountType } from '6-shared/types'
+import type { GroupBy } from '6-shared/helpers/date'
+import { toGroup } from '6-shared/helpers/date'
 import { keys } from '6-shared/helpers/keys'
 import { round } from '6-shared/helpers/money'
 import { useAppSelector } from 'store'
 
 import { core } from 'zerro-core/redux'
 
-import { getStart, Period } from '../shared/period'
+import type { Period } from '../shared/period'
+import { getStart } from '../shared/period'
 
 export type TNetWorthPoint = {
   date: TISODate

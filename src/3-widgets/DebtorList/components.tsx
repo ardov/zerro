@@ -1,15 +1,9 @@
-import { FC, ReactNode } from 'react'
+import type { FC, ReactNode } from 'react'
 import { core } from 'zerro-core/redux'
 
-import {
-  ListSubheader,
-  Box,
-  ListItemButtonProps,
-  ListSubheaderProps,
-  Typography,
-  ListItemButton,
-} from '@mui/material'
-import { TFxAmount, TFxCode } from '6-shared/types'
+import type { ListItemButtonProps, ListSubheaderProps } from '@mui/material'
+import { ListSubheader, Box, Typography, ListItemButton } from '@mui/material'
+import type { TFxAmount, TFxCode } from '6-shared/types'
 import { Amount } from '6-shared/ui/Amount'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { toISOMonth } from '6-shared/helpers/date'

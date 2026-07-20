@@ -1,6 +1,7 @@
 import { core } from 'zerro-core/redux'
-import { FC } from 'react'
-import { MenuItem, SelectProps } from '@mui/material'
+import type { FC } from 'react'
+import type { SelectProps } from '@mui/material'
+import { MenuItem } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { SmartSelect } from '6-shared/ui/SmartSelect'
 

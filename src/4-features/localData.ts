@@ -1,4 +1,4 @@
-import { AppThunk } from 'store'
+import type { AppThunk } from 'store'
 import {
   applyServerPatch,
   clearPersistedLocalData,

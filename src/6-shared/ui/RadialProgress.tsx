@@ -1,4 +1,5 @@
-import React, { FC } from 'react'
+import type { FC } from 'react'
+import React from 'react'
 import { useAppTheme } from '6-shared/ui/theme'
 
 export type RadialProgressProps = React.SVGProps<SVGSVGElement> & {

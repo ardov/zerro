@@ -1,17 +1,12 @@
-import { FC, ReactNode, useCallback } from 'react'
+import type { FC, ReactNode } from 'react'
+import { useCallback } from 'react'
 import { core } from 'zerro-core/redux'
 
-import {
-  ListSubheader,
-  Box,
-  ListItemButtonProps,
-  ListSubheaderProps,
-  Typography,
-  ListItemButton,
-} from '@mui/material'
+import type { ListItemButtonProps, ListSubheaderProps } from '@mui/material'
+import { ListSubheader, Box, Typography, ListItemButton } from '@mui/material'
 import { toISOMonth } from '6-shared/helpers/date'
 import { Amount } from '6-shared/ui/Amount'
-import { TFxAmount } from '6-shared/types'
+import type { TFxAmount } from '6-shared/types'
 import { Tooltip } from '6-shared/ui/Tooltip'
 
 import { DisplayAmount } from '5-entities/currency/displayCurrency'

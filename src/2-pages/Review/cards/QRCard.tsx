@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { ButtonBase, Stack, Typography } from '@mui/material'
-import { Card, TCardProps } from '../shared/Card'
+import type { TCardProps } from '../shared/Card'
+import { Card } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
 
 export function QRCard(props: TCardProps) {

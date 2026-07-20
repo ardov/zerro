@@ -5,8 +5,10 @@ import { int2hex } from '../../zenmoney/model/color'
 import type { TTag, TTagId } from '../../zenmoney/entities/tags'
 import { keys } from '../../foundation/keys'
 import type { TDebtor } from '../../zenmoney/read-models/debtors'
-import { EnvType, envId, TEnvelopeId } from '../envelope-id'
-import { envelopeVisibility, TEnvelopeMeta } from '../envelope-meta'
+import type { TEnvelopeId } from '../envelope-id'
+import { EnvType, envId } from '../envelope-id'
+import type { TEnvelopeMeta } from '../envelope-meta'
+import { envelopeVisibility } from '../envelope-meta'
 
 export const defaultEnvelopeGroupIds = {
   tags: 'default:tags',

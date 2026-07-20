@@ -1,12 +1,13 @@
 import { useMemo } from 'react'
 import { core } from 'zerro-core/redux'
 
-import { TISODate } from '6-shared/types'
+import type { TISODate } from '6-shared/types'
 import { GroupBy, makeDateArray, toGroup } from '6-shared/helpers/date'
 
 import { useAppSelector } from 'store/index'
 
-import { Period, getStart } from './period'
+import type { Period } from './period'
+import { getStart } from './period'
 import { calcCashflow } from './calcCashflow'
 
 export type TCashflowPoint = {

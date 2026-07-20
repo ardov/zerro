@@ -18,9 +18,9 @@ import {
   type TTagPatch,
 } from '../../zenmoney/entities/tags'
 import { EnvType, envId, type TEnvelopeId } from '../envelope-id'
+import type { envelopeVisibility } from '../envelope-meta'
 import {
   compilePatchEnvelopeMeta,
-  envelopeVisibility,
   getEnvelopeMeta,
   type TEnvelopeMetaPatch,
 } from '../envelope-meta'

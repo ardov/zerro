@@ -1,15 +1,12 @@
-import React, { FC, ReactNode } from 'react'
-import {
-  Box,
-  BoxProps,
-  TooltipProps,
-  Typography,
-  TypographyProps,
-} from '@mui/material'
-import { AmountProps } from '6-shared/ui/Amount'
+import type { FC, ReactNode } from 'react'
+import React from 'react'
+import type { BoxProps, TooltipProps, TypographyProps } from '@mui/material'
+import { Box, Typography } from '@mui/material'
+import type { AmountProps } from '6-shared/ui/Amount'
 import { Tooltip } from '6-shared/ui/Tooltip'
 // TODO: use Amount instead
-import { SmartAmount, TSmartAmountProps } from '3-widgets/Amount'
+import type { TSmartAmountProps } from '3-widgets/Amount'
+import { SmartAmount } from '3-widgets/Amount'
 
 type DataLineProps = BoxProps & {
   name: ReactNode

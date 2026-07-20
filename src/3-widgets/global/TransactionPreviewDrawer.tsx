@@ -1,10 +1,8 @@
 import { Drawer, Box } from '@mui/material'
 import { registerPopover } from '6-shared/historyPopovers'
-import { TTransactionId } from '6-shared/types'
-import {
-  TransactionPreview,
-  TransactionPreviewProps,
-} from '../transaction/TransactionPreview'
+import type { TTransactionId } from '6-shared/types'
+import type { TransactionPreviewProps } from '../transaction/TransactionPreview'
+import { TransactionPreview } from '../transaction/TransactionPreview'
 
 export type TransactionPreviewDrawerProps = {
   id: TTransactionId

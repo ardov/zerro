@@ -1,13 +1,13 @@
-import { FC } from 'react'
+import type { FC } from 'react'
 import { shallowEqual } from 'react-redux'
 import { useFormik } from 'formik'
+import type { DialogProps } from '@mui/material'
 import {
   Button,
   ButtonBase,
   Checkbox,
   Dialog,
   DialogContent,
-  DialogProps,
   DialogTitle,
   FormControlLabel,
   FormGroup,

@@ -12,7 +12,8 @@ import {
   getMonthlyHiddenDataReminders,
   getSimpleHiddenDataReminder,
 } from './read'
-import { HiddenDataType, type THiddenDataComment } from './types'
+import type { HiddenDataType } from './types'
+import { type THiddenDataComment } from './types'
 
 export function stringifyHiddenDataComment<TPayload>(
   comment: THiddenDataComment<TPayload>

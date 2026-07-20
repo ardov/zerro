@@ -1,6 +1,7 @@
-import React, { FC } from 'react'
+import type { FC } from 'react'
+import React from 'react'
 import { formatMoney } from '6-shared/helpers/money'
-import { TFxCode } from '6-shared/types'
+import type { TFxCode } from '6-shared/types'
 
 export type AmountProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLSpanElement>,

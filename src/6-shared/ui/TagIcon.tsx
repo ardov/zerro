@@ -1,13 +1,7 @@
 import { getMostContrast } from '6-shared/helpers/color'
-import { Modify } from '6-shared/types'
-import {
-  Box,
-  BoxProps,
-  Checkbox,
-  CheckboxProps,
-  SxProps,
-  Theme,
-} from '@mui/material'
+import type { Modify } from '6-shared/types'
+import type { BoxProps, CheckboxProps, SxProps, Theme } from '@mui/material'
+import { Box, Checkbox } from '@mui/material'
 
 const emojiSizes = { s: 32, m: 40 }
 const emojiFonts = { s: '1rem', m: '1.5rem' }

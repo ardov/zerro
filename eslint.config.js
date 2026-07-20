@@ -14,6 +14,17 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
+      // Keeps import statements compatible with verbatimModuleSyntax.
+      // Inline import() type annotations are unrelated to that and stay
+      // allowed: Vitest's importOriginal<typeof import('...')>() needs them.
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'separate-type-imports',
+          disallowTypeAnnotations: false,
+        },
+      ],
       '@typescript-eslint/ban-ts-comment': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'warn',

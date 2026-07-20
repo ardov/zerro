@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import './index.scss'
-import { TTransaction } from '6-shared/types'
+import type { TTransaction } from '6-shared/types'
 
 import { useTransactionDrawer } from '3-widgets/global/TransactionListDrawer'
 import { OutcomeCard } from './cards/OutcomeCard'

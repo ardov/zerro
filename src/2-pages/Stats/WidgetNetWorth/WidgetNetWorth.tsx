@@ -27,7 +27,8 @@ import { formatDate, GroupBy } from '6-shared/helpers/date'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { DataLine } from '3-widgets/DataLine'
 import { Period, PeriodTitle } from '../shared/period'
-import { TNetWorthPoint, useNetWorth } from './useNetWorth'
+import type { TNetWorthPoint } from './useNetWorth'
+import { useNetWorth } from './useNetWorth'
 import { useAverageExpenses } from './useAverageExpenses'
 
 type Point = TNetWorthPoint & { total: number }

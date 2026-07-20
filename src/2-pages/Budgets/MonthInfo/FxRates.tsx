@@ -1,7 +1,8 @@
 import type { TFxCode, TISOMonth } from '6-shared/types'
 import { core } from 'zerro-core/redux'
 
-import { FC, useState } from 'react'
+import type { FC } from 'react'
+import { useState } from 'react'
 import {
   Box,
   Button,

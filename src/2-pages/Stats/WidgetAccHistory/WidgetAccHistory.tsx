@@ -1,4 +1,5 @@
-import React, { FC, useState, useMemo, useCallback, memo } from 'react'
+import type { FC } from 'react'
+import React, { useState, useMemo, useCallback, memo } from 'react'
 import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
@@ -13,12 +14,12 @@ import {
 import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts'
 import { useAppTheme } from '6-shared/ui/theme'
 import { formatDate, toISOMonth } from '6-shared/helpers/date'
-import { TAccountId, TISODate, TFxAmount } from '6-shared/types'
+import type { TAccountId, TISODate, TFxAmount } from '6-shared/types'
 import { Amount } from '6-shared/ui/Amount'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { addFxAmount } from '6-shared/helpers/money'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
-import { Period } from '../shared/period'
+import type { Period } from '../shared/period'
 import { useAccountHistory } from './model'
 import { useTransactionDrawer } from '3-widgets/global/TransactionListDrawer'
 

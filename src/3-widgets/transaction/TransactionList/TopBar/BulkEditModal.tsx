@@ -1,7 +1,8 @@
 import type { DialogProps } from '@mui/material/Dialog'
 import type { Modify, TTransaction } from '6-shared/types'
 
-import { FC, useState } from 'react'
+import type { FC } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Box,

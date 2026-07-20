@@ -1,5 +1,6 @@
-import { FC } from 'react'
-import { ButtonBase, ButtonBaseProps } from '@mui/material'
+import type { FC } from 'react'
+import type { ButtonBaseProps } from '@mui/material'
+import { ButtonBase } from '@mui/material'
 
 const style = {
   py: 1,
