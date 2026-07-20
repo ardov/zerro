@@ -1,8 +1,6 @@
 import type { TFxAmount, TISOMonth } from '6-shared/types'
 import { core } from 'zerro-core/redux'
 
-import type { TEnvelopeId } from '5-entities/envelope'
-
 import { FC, useState } from 'react'
 import {
   ListItemText,
@@ -26,7 +24,7 @@ import { useQuickActions } from './useQuickActions'
 
 export type TBudgetPopoverProps = Omit<PopoverProps, 'onClose'> & {
   onClose: () => void
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
   month: TISOMonth
 }
 

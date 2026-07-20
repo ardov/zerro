@@ -17,7 +17,6 @@ import { Box, SxProps } from '@mui/system'
 import { Typography } from '@mui/material'
 import { useToggle } from '6-shared/hooks/useToggle'
 import { useAppDispatch, useAppSelector } from 'store/index'
-import { TEnvelopeId } from '5-entities/envelope'
 import { core } from 'zerro-core/redux'
 
 import { MoveMoneyModal } from '4-features/moveMoney'
@@ -42,11 +41,11 @@ export const DnDContext: FC<{ children?: ReactNode }> = ({ children }) => {
     useSensor(KeyboardSensor)
   )
 
-  const [moneySource, setMoneySource] = useState<TEnvelopeId | 'toBeBudgeted'>(
-    'toBeBudgeted'
-  )
+  const [moneySource, setMoneySource] = useState<
+    core.envelopes.TEnvelopeId | 'toBeBudgeted'
+  >('toBeBudgeted')
   const [moneyDestination, setMoneyDestination] = useState<
-    TEnvelopeId | 'toBeBudgeted'
+    core.envelopes.TEnvelopeId | 'toBeBudgeted'
   >('toBeBudgeted')
   const [isOpen, toggleOpen] = useToggle()
 
@@ -124,7 +123,7 @@ const Monies = () => {
 const DragObj = () => {
   const { t } = useTranslation('common')
   const [activeType, setActiveType] = useState<DragTypes>(DragTypes.amount)
-  const [activeId, setActiveId] = useState<TEnvelopeId>()
+  const [activeId, setActiveId] = useState<core.envelopes.TEnvelopeId>()
   const envelopes = useAppSelector(core.envelopes.selectAll)
 
   useDndMonitor({

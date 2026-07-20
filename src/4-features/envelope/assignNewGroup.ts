@@ -1,10 +1,9 @@
 import { t } from 'i18next'
-import { TEnvelopeId } from '5-entities/envelope'
 import { core } from 'zerro-core/redux'
 
 import { AppThunk } from 'store/index'
 
-export function assignNewGroup(id: TEnvelopeId): AppThunk {
+export function assignNewGroup(id: core.envelopes.TEnvelopeId): AppThunk {
   return (dispatch, getState) => {
     const structure = core.envelopes.selectStructure(getState())
     const groupName = getNewGroupName(structure)

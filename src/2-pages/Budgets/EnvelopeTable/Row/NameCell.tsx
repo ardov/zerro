@@ -12,12 +12,11 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 import { getCurrencySymbol } from '6-shared/helpers/money'
 import { useFloatingInput } from '6-shared/ui/FloatingInput'
 import { useAppDispatch } from 'store/index'
-import { TEnvelope, TEnvelopeId } from '5-entities/envelope'
 
 import { DragTypes } from '2-pages/Budgets/DnD'
 
 export const NameCell: FC<{
-  envelope: TEnvelope
+  envelope: core.envelopes.TPresentedEnvelope
   isChild?: boolean
   isSelf?: boolean
   isReordering: boolean
@@ -121,7 +120,10 @@ const envDraggableSx = {
   placeItems: 'center',
 }
 
-const EnvDraggable: FC<{ id: TEnvelopeId; children: ReactNode }> = props => {
+const EnvDraggable: FC<{
+  id: core.envelopes.TEnvelopeId
+  children: ReactNode
+}> = props => {
   const { id, children } = props
   const { setNodeRef, attributes, listeners } = useDraggable({
     id: 'envelope' + id,

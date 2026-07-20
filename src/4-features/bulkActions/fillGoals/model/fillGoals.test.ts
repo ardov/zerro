@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
-import type { TEnvelopeId } from '5-entities/envelope'
 import { core } from 'zerro-core/redux'
 
 import { goalType } from 'zerro-core/domain/zerro/goals'
@@ -25,9 +24,9 @@ vi.mock('6-shared/analytics', () => ({ track: vi.fn() }))
 describe('fillGoals', () => {
   it('uses Core goals and skips fulfilled and endless target-balance goals', () => {
     const state = {} as RootState
-    const monthlyId = 'tag#monthly' as TEnvelopeId
-    const endlessId = 'tag#endless' as TEnvelopeId
-    const fulfilledId = 'tag#fulfilled' as TEnvelopeId
+    const monthlyId = 'tag#monthly' as core.envelopes.TEnvelopeId
+    const endlessId = 'tag#endless' as core.envelopes.TEnvelopeId
+    const fulfilledId = 'tag#fulfilled' as core.envelopes.TEnvelopeId
     const action = { type: 'budget/total' }
     const dispatch = vi.fn()
 

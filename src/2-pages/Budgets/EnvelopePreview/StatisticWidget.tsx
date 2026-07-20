@@ -22,14 +22,13 @@ import { formatDate, toISOMonth } from '6-shared/helpers/date'
 import { getAverage } from '6-shared/helpers/money/currencyHelpers'
 
 import { useAppSelector } from 'store'
-import { TEnvelopeId } from '5-entities/envelope'
 import { core } from 'zerro-core/redux'
 
 import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
 import { trimMonths } from './shared'
 
-type StatisticWidgetProps = BoxProps & { id: TEnvelopeId }
+type StatisticWidgetProps = BoxProps & { id: core.envelopes.TEnvelopeId }
 
 const WINDOW = 12 // Number of months to show in the chart
 
@@ -70,7 +69,7 @@ const getPeriodLength = (period: aggregatePeriod): number => {
 
 /** Calculate average budgeted and expenses for the given envelope */
 function useAggregatedStats(
-  id: TEnvelopeId,
+  id: core.envelopes.TEnvelopeId,
   currency: TFxCode,
   aggregationPeriod: number
 ) {

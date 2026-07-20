@@ -12,12 +12,11 @@ import { prevMonth, toISOMonth } from '6-shared/helpers/date'
 import { TFxAmount, TISODate, TISOMonth } from '6-shared/types'
 import { addFxAmount, round } from '6-shared/helpers/money'
 
-import { TEnvelopeId } from '5-entities/envelope'
 import { DataLine } from '3-widgets/DataLine'
 
 import { useMonth } from '../MonthProvider'
 
-type BurndownWidgetProps = BoxProps & { id: TEnvelopeId }
+type BurndownWidgetProps = BoxProps & { id: core.envelopes.TEnvelopeId }
 
 export const BurndownWidget: FC<BurndownWidgetProps> = ({
   id,
@@ -58,7 +57,7 @@ export const BurndownWidget: FC<BurndownWidgetProps> = ({
 
 type ChartProps = {
   month: TISOMonth
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
 }
 
 export function ChangesChart(props: ChartProps) {
@@ -105,7 +104,7 @@ export function ChangesChart(props: ChartProps) {
   )
 }
 
-function useDoubleTrend(month: TISOMonth, id: TEnvelopeId) {
+function useDoubleTrend(month: TISOMonth, id: core.envelopes.TEnvelopeId) {
   const monthPrev = toISOMonth(prevMonth(month))
   const currTrend = useDataTrend(month, id)
   const prevTrend = useDataTrend(monthPrev, id)
@@ -131,7 +130,10 @@ type TTrendNode = {
   balance: number | null
 }
 
-function useDataTrend(month: TISOMonth, id: TEnvelopeId): TTrendNode[] {
+function useDataTrend(
+  month: TISOMonth,
+  id: core.envelopes.TEnvelopeId
+): TTrendNode[] {
   const toDisplay = core.currency.useToDisplay(month)
   const envData = useAppSelector(core.activity.selectEnvelopeMetrics)?.[
     month
@@ -177,7 +179,10 @@ function useDataTrend(month: TISOMonth, id: TEnvelopeId): TTrendNode[] {
  * @param id
  * @returns
  */
-function useActivityTrend(month: TISOMonth, id: TEnvelopeId): TFxAmount[] {
+function useActivityTrend(
+  month: TISOMonth,
+  id: core.envelopes.TEnvelopeId
+): TFxAmount[] {
   const activity = useAppSelector(core.activity.selectAll)?.[month]?.envActivity
     ?.byEnv
   const envData = useAppSelector(core.activity.selectEnvelopeMetrics)?.[

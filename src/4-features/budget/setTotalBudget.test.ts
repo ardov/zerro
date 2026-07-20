@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
 import { core } from 'zerro-core/redux'
 
-import type { TEnvelopeId } from '5-entities/envelope'
 import { setTotalBudget } from './setTotalBudget'
 
 vi.mock('zerro-core/redux', () => ({
@@ -19,7 +18,7 @@ describe('setTotalBudget', () => {
     const action = { type: 'budget/set' }
     const convertFx = vi.fn(() => 12)
     const dispatch = vi.fn()
-    const foodId = 'tag#food' as TEnvelopeId
+    const foodId = 'tag#food' as core.envelopes.TEnvelopeId
 
     vi.mocked(core.activity.selectEnvelopeMetrics).mockReturnValue({
       '2026-07': {

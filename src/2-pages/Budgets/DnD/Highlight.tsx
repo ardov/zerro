@@ -4,7 +4,6 @@ import { useCallback, useRef, useState } from 'react'
 import { DragEndEvent, DragMoveEvent, useDndMonitor } from '@dnd-kit/core'
 import { Box, SxProps } from '@mui/system'
 import { useAppDispatch, useAppSelector } from 'store/index'
-import { TEnvelope, TEnvelopeId } from '5-entities/envelope'
 import { core } from 'zerro-core/redux'
 
 import { moveEnvelope } from '4-features/envelope/moveEnvelope'
@@ -114,7 +113,7 @@ export function Highlight() {
 
 function whatsHappening(
   e: DragEndEvent | DragMoveEvent,
-  envelopes: ById<TEnvelope>,
+  envelopes: ById<core.envelopes.TPresentedEnvelope>,
   offset: number
 ) {
   const activeData = e.active.data.current
@@ -137,7 +136,7 @@ function whatsHappening(
     return null
   }
 
-  const overEnv = envelopes[overData.id as TEnvelopeId]
+  const overEnv = envelopes[overData.id as core.envelopes.TEnvelopeId]
   const isOverChild = !!overEnv?.parent
   const isLastVisibleChild = !!overData.isLastVisibleChild
   const isExpanded = !!overData.isExpanded
@@ -154,11 +153,11 @@ function whatsHappening(
         isExpanded
       ),
 
-    activeId: activeData.id as TEnvelopeId,
+    activeId: activeData.id as core.envelopes.TEnvelopeId,
     activeType: activeData.type as DragTypes,
     activeRect: activeRect,
 
-    overId: overData.id as TEnvelopeId,
+    overId: overData.id as core.envelopes.TEnvelopeId,
     overType: overData.type as DragTypes,
     overRect: overRect,
   }

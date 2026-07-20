@@ -9,14 +9,13 @@ import { Modify, TISOMonth } from '6-shared/types'
 import { useAppDispatch, useAppSelector } from 'store'
 
 import { moveMoney } from './moveMoney'
-import { TEnvelopeId } from '5-entities/envelope'
 
 export type MoveMoneyModalProps = Modify<
   DialogProps,
   {
     month: TISOMonth
-    source: TEnvelopeId | 'toBeBudgeted'
-    destination: TEnvelopeId | 'toBeBudgeted'
+    source: core.envelopes.TEnvelopeId | 'toBeBudgeted'
+    destination: core.envelopes.TEnvelopeId | 'toBeBudgeted'
     onClose: () => void
   }
 >

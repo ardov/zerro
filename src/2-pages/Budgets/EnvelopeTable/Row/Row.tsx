@@ -10,7 +10,6 @@ import { RadialProgress } from '6-shared/ui/RadialProgress'
 import { TFxCode, TISOMonth } from '6-shared/types'
 
 import { useAppSelector } from 'store'
-import { TEnvelopeId } from '5-entities/envelope'
 
 import { DragTypes } from '2-pages/Budgets/DnD'
 import { useBudgetPopover } from '../../BudgetPopover'
@@ -25,28 +24,28 @@ import { ActivityCell } from './ActivityCell'
 import { AvailableCell, getAvailableColor } from './AvailableCell'
 
 type EnvelopeRowProps = {
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
   month: TISOMonth
   isSelf?: boolean
   isDefaultVisible: boolean
   isLastVisibleChild?: boolean
   isExpanded?: boolean
   isReordering: boolean
-  openDetails: (id: TEnvelopeId) => void
-  openTransactionsPopover: (id: TEnvelopeId) => void
+  openDetails: (id: core.envelopes.TEnvelopeId) => void
+  openTransactionsPopover: (id: core.envelopes.TEnvelopeId) => void
 }
 
 /** Builds reveal items for metrics not currently shown as columns. */
 function useRevealItems(params: {
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
   columns: Metric[]
   budgeted: number
   activity: number
   available: number
   isChild: boolean
   isSelf?: boolean
-  openBudgetPopover: (id: TEnvelopeId, el: Element) => void
-  openTransactionsPopover: (id: TEnvelopeId) => void
+  openBudgetPopover: (id: core.envelopes.TEnvelopeId, el: Element) => void
+  openTransactionsPopover: (id: core.envelopes.TEnvelopeId) => void
 }): RevealItem[] {
   const {
     id,
@@ -232,7 +231,7 @@ export const Row: FC<EnvelopeRowProps> = props => {
 }
 
 const Droppable: FC<{
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
   isChild: boolean
   isLastVisibleChild: boolean
   isExpanded: boolean

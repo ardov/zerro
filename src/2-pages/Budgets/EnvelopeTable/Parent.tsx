@@ -1,14 +1,14 @@
+import { core } from 'zerro-core/redux'
 import React from 'react'
 import { Collapse, Box, IconButton } from '@mui/material'
 import { ChevronRightIcon } from '6-shared/ui/Icons'
-import { TEnvelopeId } from '5-entities/envelope'
 
 type ParentProps = {
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
   isExpanded: boolean
   parent: React.ReactNode
   children?: React.ReactNode[]
-  onExpandToggle: (id: TEnvelopeId) => void
+  onExpandToggle: (id: core.envelopes.TEnvelopeId) => void
   onExpandAll: () => void
   onCollapseAll: () => void
 }

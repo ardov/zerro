@@ -8,7 +8,6 @@ import { TDateDraft, TFxAmount, TTransaction } from '6-shared/types'
 import { PercentBar, PercentBarItem } from '6-shared/ui/PercentBar'
 
 import { useAppSelector } from 'store'
-import { EnvType, envId, TEnvelopeId } from '5-entities/envelope'
 
 import { DataLine } from '3-widgets/DataLine'
 import { Card, TCardProps } from '../shared/Card'
@@ -16,7 +15,7 @@ import { TStats, useStats } from '../shared/getFacts'
 
 type TDataNode = {
   parent: string | null
-  envelopeId: TEnvelopeId | null
+  envelopeId: core.envelopes.TEnvelopeId | null
   childIds: string[]
 } & PercentBarItem
 
@@ -132,7 +131,12 @@ function useCreateNodeFromTag(
     (id: string): TDataNode => {
       const nodeData = yearStats.byTag[id] || {}
       const envelopeId =
-        id !== 'null' ? (envId.get(EnvType.Tag, id) as TEnvelopeId) : null
+        id !== 'null'
+          ? (core.envelopes.envId.get(
+              core.envelopes.EnvType.Tag,
+              id
+            ) as core.envelopes.TEnvelopeId)
+          : null
       const envelope = envelopeId ? envelopes[envelopeId] : null
       const parentId = envelope?.parent
         ? envelopes[envelope.parent]?.entityId

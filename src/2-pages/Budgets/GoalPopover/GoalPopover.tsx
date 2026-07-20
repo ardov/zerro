@@ -18,15 +18,13 @@ import { track } from '6-shared/analytics'
 import { Modify, TDateDraft, TISOMonth } from '6-shared/types'
 
 import { useAppDispatch, useAppSelector } from 'store'
-import { goalType, TGoal } from '5-entities/goal'
-import { TEnvelopeId } from '5-entities/envelope'
 import { core } from 'zerro-core/redux'
 
 export type TGoalPopoverProps = Modify<
   PopoverProps,
   { onClose: () => void }
 > & {
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
   month: TISOMonth
 }
 
@@ -38,17 +36,19 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
   const goalInfo = useAppSelector(core.goals.selectAll)[month][id] || {}
   const { goal } = goalInfo
 
-  const [type, setType] = useState(goal?.type || goalType.MONTHLY_SPEND)
-  const isInPercents = type === goalType.INCOME_PERCENT
+  const [type, setType] = useState(
+    goal?.type || core.goals.goalType.MONTHLY_SPEND
+  )
+  const isInPercents = type === core.goals.goalType.INCOME_PERCENT
   const [rawValue, setRawValue] = useState(getInput(goal?.amount))
-  const [endDate, setEndDate] = useState<TGoal['end']>(goal?.end)
+  const [endDate, setEndDate] = useState<core.goals.TGoal['end']>(goal?.end)
 
   const [monthPopoverAnchor, setMonthPopoverAnchor] =
     useState<(typeof props)['anchorEl']>(null)
   if (!id || !month) return null
 
   const handleTypeChange: OutlinedTextFieldProps['onChange'] = e =>
-    setType(e.target.value as goalType)
+    setType(e.target.value as core.goals.goalType)
   const openMonthPopover = () => setMonthPopoverAnchor(props.anchorEl)
   const closeMonthPopover = () => setMonthPopoverAnchor(null)
   const handleDateChange = (date?: TDateDraft) => {
@@ -63,8 +63,8 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
       amount !== goal?.amount || type !== goal?.type || endDate !== goal?.end
 
     if (hasChanges) {
-      const goal: TGoal = { type, amount }
-      if (type === goalType.TARGET_BALANCE && endDate) {
+      const goal: core.goals.TGoal = { type, amount }
+      if (type === core.goals.goalType.TARGET_BALANCE && endDate) {
         goal.end = endDate
       }
       dispatch(core.goals.set(month, id, goal))
@@ -81,13 +81,13 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
     onClose?.()
   }
 
-  const showDateBlock = type === goalType.TARGET_BALANCE
+  const showDateBlock = type === core.goals.goalType.TARGET_BALANCE
 
   const amountLabels = {
-    [goalType.MONTHLY]: t('inputLabels.monthly'),
-    [goalType.MONTHLY_SPEND]: t('inputLabels.monthlySpend'),
-    [goalType.TARGET_BALANCE]: t('inputLabels.targetBalance'),
-    [goalType.INCOME_PERCENT]: t('inputLabels.incomePercent'),
+    [core.goals.goalType.MONTHLY]: t('inputLabels.monthly'),
+    [core.goals.goalType.MONTHLY_SPEND]: t('inputLabels.monthlySpend'),
+    [core.goals.goalType.TARGET_BALANCE]: t('inputLabels.targetBalance'),
+    [core.goals.goalType.INCOME_PERCENT]: t('inputLabels.incomePercent'),
   }
 
   return (
@@ -109,14 +109,16 @@ export const GoalPopover: FC<TGoalPopoverProps> = props => {
             label={t('goalType')}
             fullWidth
           >
-            <MenuItem value={goalType.MONTHLY}>{t('names.monthly')}</MenuItem>
-            <MenuItem value={goalType.MONTHLY_SPEND}>
+            <MenuItem value={core.goals.goalType.MONTHLY}>
+              {t('names.monthly')}
+            </MenuItem>
+            <MenuItem value={core.goals.goalType.MONTHLY_SPEND}>
               {t('names.monthlySpend')}
             </MenuItem>
-            <MenuItem value={goalType.TARGET_BALANCE}>
+            <MenuItem value={core.goals.goalType.TARGET_BALANCE}>
               {t('names.targetBalance')}
             </MenuItem>
-            <MenuItem value={goalType.INCOME_PERCENT}>
+            <MenuItem value={core.goals.goalType.INCOME_PERCENT}>
               {t('names.incomePercent')}
             </MenuItem>
           </TextField>

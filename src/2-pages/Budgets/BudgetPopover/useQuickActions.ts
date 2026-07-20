@@ -1,6 +1,5 @@
 import type { TFunction } from 'i18next'
 import type { TDateDraft, TFxAmount, TISOMonth } from '6-shared/types'
-import type { TEnvelopeId } from '5-entities/envelope'
 import { useTranslation } from 'react-i18next'
 import { round } from '6-shared/helpers/money'
 import { toISOMonth } from '6-shared/helpers/date'
@@ -9,7 +8,10 @@ import { getAverage } from '6-shared/helpers/money/currencyHelpers'
 import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
-export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
+export const useQuickActions = (
+  month: TISOMonth,
+  id?: core.envelopes.TEnvelopeId
+) => {
   const { t } = useTranslation()
   const convertFx = useAppSelector(core.currency.selectConvertFx)
   const envMetrics = useAppSelector(core.activity.selectEnvelopeMetrics)

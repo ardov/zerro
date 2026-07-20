@@ -9,7 +9,6 @@ import { track } from '6-shared/analytics'
 // import { usePopover } from '@shared/ui/PopoverManager'
 
 import { useAppDispatch, useAppSelector } from 'store'
-import { TEnvelope, TEnvelopeId } from '5-entities/envelope'
 import { core } from 'zerro-core/redux'
 
 import { useMonth } from '../MonthProvider'
@@ -23,7 +22,7 @@ import { EnvelopeInfo } from './EnvelopeInfo'
 import { StatisticWidget } from './StatisticWidget'
 
 type EnvelopePreviewProps = {
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
   onClose: () => void
 }
 
@@ -96,7 +95,7 @@ export const EnvelopePreview: FC<EnvelopePreviewProps> = ({ onClose, id }) => {
 }
 
 const Header: FC<{
-  envelope: TEnvelope
+  envelope: core.envelopes.TPresentedEnvelope
   onClose: () => void
 }> = ({ envelope, onClose }) => {
   const { symbol, colorHex: color, name } = envelope

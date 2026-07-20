@@ -17,7 +17,6 @@ import {
 } from '@mui/material'
 import { ColorPicker, useColorPicker } from '6-shared/ui/ColorPickerPopover'
 import { useAppDispatch } from 'store'
-import { envelopeVisibility, TEnvelope } from '5-entities/envelope'
 import { core } from 'zerro-core/redux'
 
 // import { TagSelect } from '@components/TagSelect'
@@ -26,10 +25,10 @@ import { VisibilitySelect } from './VisidilitySelect'
 import { registerPopover } from '6-shared/historyPopovers'
 import { useTranslation } from 'react-i18next'
 
-const editDialog = registerPopover<{ envelope?: TEnvelope }, DialogProps>(
-  'envelopeEditDialog',
-  {}
-)
+const editDialog = registerPopover<
+  { envelope?: core.envelopes.TPresentedEnvelope },
+  DialogProps
+>('envelopeEditDialog', {})
 
 export const useEditDialog = () => {
   const { open } = editDialog.useMethods()
@@ -51,7 +50,7 @@ export const EnvelopeEditDialog: FC = () => {
 
 const EnvelopeEditDialogForm: FC<{
   displayProps: DialogProps
-  envelope: TEnvelope
+  envelope: core.envelopes.TPresentedEnvelope
   close: () => void
 }> = ({ displayProps, envelope, close }) => {
   const dispatch = useAppDispatch()
@@ -67,7 +66,7 @@ const EnvelopeEditDialogForm: FC<{
   } = useFormik({
     initialValues: {
       originalName: envelope.originalName,
-      visibility: envelope.visibility || envelopeVisibility.auto,
+      visibility: envelope.visibility || core.envelopes.envelopeVisibility.auto,
       keepIncome: envelope.keepIncome,
       colorHex: envelope.colorHex,
       currency: envelope.currency,

@@ -1,11 +1,11 @@
+import { core } from 'zerro-core/redux'
 import { FC, memo, useCallback } from 'react'
 import { Box, Drawer } from '@mui/material'
-import { TEnvelopeId } from '5-entities/envelope'
 import { MonthInfo } from './MonthInfo'
 import { EnvelopePreview } from './EnvelopePreview'
 import { registerPopover } from '6-shared/historyPopovers'
 
-type TDrawerId = TEnvelopeId | 'overview'
+type TDrawerId = core.envelopes.TEnvelopeId | 'overview'
 
 const sideDrawer = registerPopover<{ id: TDrawerId }>('sideContent', {
   id: 'overview',

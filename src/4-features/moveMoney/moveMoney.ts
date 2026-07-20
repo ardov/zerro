@@ -1,6 +1,5 @@
 import type { AppThunk } from 'store'
 import type { TISOMonth, TFxCode } from '6-shared/types'
-import type { TEnvelopeId } from '5-entities/envelope'
 
 import { round } from '6-shared/helpers/money'
 import { track } from '6-shared/analytics'
@@ -11,8 +10,8 @@ export const moveMoney =
   (
     amount: number,
     currency: TFxCode,
-    source: TEnvelopeId | 'toBeBudgeted',
-    destination: TEnvelopeId | 'toBeBudgeted',
+    source: core.envelopes.TEnvelopeId | 'toBeBudgeted',
+    destination: core.envelopes.TEnvelopeId | 'toBeBudgeted',
     month: TISOMonth
   ): AppThunk<void> =>
   (dispatch, getState) => {

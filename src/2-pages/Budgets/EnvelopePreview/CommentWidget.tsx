@@ -3,13 +3,14 @@ import { InputBase, InputAdornment } from '@mui/material'
 import { NotesIcon } from '6-shared/ui/Icons'
 import { useAppDispatch, useAppSelector } from 'store'
 import { cardStyle } from './shared'
-import { TEnvelopeId } from '5-entities/envelope'
 import { core } from 'zerro-core/redux'
 
 import { useDebouncedCallback } from '6-shared/hooks/useDebouncedCallback'
 import { useTranslation } from 'react-i18next'
 
-export const CommentWidget: FC<{ id: TEnvelopeId }> = ({ id }) => {
+export const CommentWidget: FC<{ id: core.envelopes.TEnvelopeId }> = ({
+  id,
+}) => {
   const { t } = useTranslation('common')
   const dispatch = useAppDispatch()
   const comment = useAppSelector(s => core.envelopes.selectAll(s)[id].comment)

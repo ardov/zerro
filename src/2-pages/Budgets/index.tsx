@@ -8,7 +8,6 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '6-shared/helpers/date'
 import { nextMonth, prevMonth, toISOMonth } from '6-shared/helpers/date'
-import { TEnvelopeId } from '5-entities/envelope'
 
 import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 
@@ -36,7 +35,7 @@ function Budgets() {
   const openOverview = useCallback(() => openSide('overview'), [openSide])
 
   const openTransactions = useCallback(
-    (opts: { id: TEnvelopeId; isExact?: boolean }) =>
+    (opts: { id: core.envelopes.TEnvelopeId; isExact?: boolean }) =>
       transactionDrawer.open({
         envelopeConditions: {
           id: opts.id,

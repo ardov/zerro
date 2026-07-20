@@ -21,8 +21,6 @@ import {
   toISOMonth,
 } from '6-shared/helpers/date'
 
-import { TEnvelopeId } from '5-entities/envelope'
-
 import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 import { OneLiner } from '3-widgets/DataLine'
 import { cardStyle } from './shared'
@@ -35,7 +33,10 @@ const getMonthNum = (month: TISOMonth | TDateDraft) =>
 const getMonthContext = (month: TISOMonth | TDateDraft): MonthContext =>
   String(getMonthNum(month)) as MonthContext
 
-export function EnvelopeInfo(props: { month: TISOMonth; id: TEnvelopeId }) {
+export function EnvelopeInfo(props: {
+  month: TISOMonth
+  id: core.envelopes.TEnvelopeId
+}) {
   const { month, id } = props
   const { t } = useTranslation('budgets')
   const theme = useTheme()

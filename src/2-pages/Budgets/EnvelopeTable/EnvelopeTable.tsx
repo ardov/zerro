@@ -6,7 +6,6 @@ import { TISOMonth } from '6-shared/types'
 import { useToggle } from '6-shared/hooks/useToggle'
 
 import { useAppSelector } from 'store/index'
-import { TEnvelopeId } from '5-entities/envelope'
 import { core } from 'zerro-core/redux'
 
 import { Parent } from './Parent'
@@ -22,10 +21,10 @@ import { NewGroup } from './NewGroup'
 type TagTableProps = {
   month: TISOMonth
   className?: string
-  onOpenDetails: (id: TEnvelopeId) => void
+  onOpenDetails: (id: core.envelopes.TEnvelopeId) => void
   onOpenOverview: () => void
   onShowTransactions: (conditions: {
-    id: TEnvelopeId
+    id: core.envelopes.TEnvelopeId
     isExact?: boolean | undefined
   }) => void
 }
@@ -47,11 +46,12 @@ const EnvelopeTable2: FC<TagTableProps> = props => {
   const [reorderMode, toggleReorderMode] = useToggle()
 
   const onShowExactTransactions = useCallback(
-    (id: TEnvelopeId) => onShowTransactions({ id, isExact: true }),
+    (id: core.envelopes.TEnvelopeId) =>
+      onShowTransactions({ id, isExact: true }),
     [onShowTransactions]
   )
   const onShowAllTransactions = useCallback(
-    (id: TEnvelopeId) => onShowTransactions({ id }),
+    (id: core.envelopes.TEnvelopeId) => onShowTransactions({ id }),
     [onShowTransactions]
   )
 

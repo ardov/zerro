@@ -9,12 +9,11 @@ import { useAppTheme } from '6-shared/ui/theme'
 import { TFxAmount, TISOMonth } from '6-shared/types'
 import { formatDate } from '6-shared/helpers/date'
 
-import { TEnvelopeId } from '5-entities/envelope'
 import { DataLine } from '3-widgets/DataLine'
 import { useMonth } from '../MonthProvider'
 import { getDateRange } from './shared'
 
-type ActivityWidgetProps = BoxProps & { id: TEnvelopeId }
+type ActivityWidgetProps = BoxProps & { id: core.envelopes.TEnvelopeId }
 
 export const ActivityWidget: FC<ActivityWidgetProps> = props => {
   const { id, ...boxProps } = props

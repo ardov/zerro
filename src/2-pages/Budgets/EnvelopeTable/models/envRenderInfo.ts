@@ -3,13 +3,12 @@ import { isZero } from '6-shared/helpers/money'
 import { ById, ByMonth, TISOMonth } from '6-shared/types'
 
 import { TSelector, useAppSelector } from 'store'
-import { envelopeVisibility, TEnvelope, TEnvelopeId } from '5-entities/envelope'
 import { core } from 'zerro-core/redux'
 
 import { isEqual } from 'lodash'
 
 export type TRenderInfo = {
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
   showSelf: boolean
   isDefaultVisible: boolean
   isDefaultExpanded: boolean
@@ -46,7 +45,7 @@ export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
           .filter(e => !e.parent)
           .forEach(addInfo)
 
-        function addInfo(e: TEnvelope) {
+        function addInfo(e: core.envelopes.TPresentedEnvelope) {
           const visibility = e.visibility
           const hasChildren = !!e.children.length
           const hasGoal = !!goalInfo[e.id]?.goal
@@ -57,9 +56,9 @@ export const getEnvRenderInfo: TSelector<ByMonth<ById<TRenderInfo>>> =
             id => result[id].isDefaultVisible
           )
           const isDefaultVisible =
-            visibility === envelopeVisibility.hidden
+            visibility === core.envelopes.envelopeVisibility.hidden
               ? false
-              : visibility === envelopeVisibility.visible ||
+              : visibility === core.envelopes.envelopeVisibility.visible ||
                 hasGoal ||
                 hasBudget ||
                 hasActivity ||

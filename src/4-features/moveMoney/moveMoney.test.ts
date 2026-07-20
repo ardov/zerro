@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
-import type { TEnvelopeId } from '5-entities/envelope'
 import { core } from 'zerro-core/redux'
 
 import { track } from '6-shared/analytics'
@@ -19,8 +18,8 @@ describe('moveMoney', () => {
   it('uses Core metrics and converts the destination budget to its currency', () => {
     const state = {} as RootState
     const action = { type: 'budget/set' }
-    const source = 'tag#source' as TEnvelopeId
-    const destination = 'tag#destination' as TEnvelopeId
+    const source = 'tag#source' as core.envelopes.TEnvelopeId
+    const destination = 'tag#destination' as core.envelopes.TEnvelopeId
     const convertFx = vi.fn(() => 9)
     const dispatch = vi.fn()
 

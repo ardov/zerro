@@ -1,4 +1,4 @@
-import { TEnvelopeId } from '5-entities/envelope'
+import { core } from 'zerro-core/redux'
 
 export enum DragTypes {
   newGroup = 'newGroup',
@@ -8,7 +8,7 @@ export enum DragTypes {
 
 export type TDragData = {
   type: DragTypes
-  id: TEnvelopeId
+  id: core.envelopes.TEnvelopeId
   isExpanded?: boolean
   isLastVisibleChild?: boolean
 }

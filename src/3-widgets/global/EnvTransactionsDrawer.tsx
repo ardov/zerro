@@ -5,7 +5,6 @@ import { Drawer, Box, Typography, IconButton } from '@mui/material'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { CloseIcon } from '6-shared/ui/Icons'
 import { registerPopover } from '6-shared/historyPopovers'
-import { TEnvelopeId } from '5-entities/envelope'
 import { core } from 'zerro-core/redux'
 
 import {
@@ -16,7 +15,7 @@ import { useTransactionPreview } from './TransactionPreviewDrawer'
 
 type TEnvConditions = {
   month: TISOMonth
-  id: TEnvelopeId | 'transferFees' | null
+  id: core.envelopes.TEnvelopeId | 'transferFees' | null
   isExact?: boolean
   mode?: core.transactions.TrFilterMode
 }

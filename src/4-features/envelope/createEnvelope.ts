@@ -1,5 +1,4 @@
 import type { AppThunk } from 'store'
-import type { TEnvelopeId } from '5-entities/envelope'
 import { core } from 'zerro-core/redux'
 
 import { t } from 'i18next'
@@ -12,7 +11,7 @@ type TCreateEnvelopeInput = {
 }
 
 export const createEnvelope =
-  (input: TCreateEnvelopeInput = {}): AppThunk<TEnvelopeId> =>
+  (input: TCreateEnvelopeInput = {}): AppThunk<core.envelopes.TEnvelopeId> =>
   dispatch =>
     dispatch(
       core.envelopes.create({
