@@ -14,18 +14,15 @@ import { useCallback } from 'react'
 import { useAppSelector } from 'store'
 import type { RootState } from 'store'
 import { getTransactionType, getTransactions } from '../domain/zenmoney'
-import { graph } from './graph'
+import { fromGraph, graph } from './graph'
 import { selectTransactionSlice } from './state'
 import * as accounts from './accounts'
 
 export const selectAll = (state: RootState) =>
   getTransactions({ transaction: selectTransactionSlice(state) })
-export const selectIds = (state: RootState) =>
-  graph.transactionIds(state.data.current)
-export const selectHistory = (state: RootState) =>
-  graph.transactionsHistory(state.data.current)
-export const selectHistoryStart = (state: RootState) =>
-  graph.historyStart(state.data.current)
+export const selectIds = fromGraph(graph.transactionIds)
+export const selectHistory = fromGraph(graph.transactionsHistory)
+export const selectHistoryStart = fromGraph(graph.historyStart)
 export const useType = () => {
   const debtAccountId = useAppSelector(accounts.selectDebtAccountId)
   return useCallback(

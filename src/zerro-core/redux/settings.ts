@@ -1,8 +1,6 @@
 export { setEmojiIcons, setPreferZmBudgets } from './commands'
 import { useAppSelector } from 'store'
-import type { RootState } from 'store'
-import { graph } from './graph'
+import { fromGraph, graph } from './graph'
 
-export const select = (state: RootState) =>
-  graph.userSettings(state.data.current)
+export const select = fromGraph(graph.userSettings)
 export const use = () => useAppSelector(select)

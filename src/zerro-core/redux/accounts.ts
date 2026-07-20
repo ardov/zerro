@@ -2,13 +2,12 @@ import { createSelector } from '@reduxjs/toolkit'
 import { useAppSelector } from 'store'
 import type { RootState } from 'store'
 import { getAccounts, getPopulatedAccounts } from '../domain/zenmoney'
-import { graph } from './graph'
+import { fromGraph, graph } from './graph'
 import { ZERRO_DATA_ACCOUNT_NAME } from '../constants'
 import * as instruments from './instruments'
 import { selectAccountSlice } from './state'
 
-export const selectDebtAccountId = (state: RootState) =>
-  graph.debtAccountId(state.data.current)
+export const selectDebtAccountId = fromGraph(graph.debtAccountId)
 export const selectAll = (state: RootState) =>
   getAccounts({ account: selectAccountSlice(state) })
 const selectPopulated = createSelector(
