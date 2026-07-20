@@ -1,5 +1,5 @@
 import { Modify, TFxAmount, TISOMonth } from '6-shared/types'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { Amount, AmountProps } from '6-shared/ui/Amount'
 

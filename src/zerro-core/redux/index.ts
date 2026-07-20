@@ -1,25 +1,10 @@
 /**
- * Public surface of the Redux adapter.
+ * Public surface of the Redux adapter: one `core` namespace grouping every
+ * domain. Consumers `import { core } from 'zerro-core/redux'` and read
+ * `core.envelopes.selectAll`, `core.transactions.remove`, and so on.
  *
- * Only selectors that real app consumers read belong here — add an export when
- * a consumer switches, not in advance. Cross-domain memoization wiring stays
- * internal and must not leak through this entrypoint.
+ * The domains live in `namespaces.ts`; only the ones a real consumer reads
+ * belong there. Cross-domain memoization wiring stays internal and must not
+ * leak through this entrypoint.
  */
-export * as accounts from './accounts'
-export * as activity from './activity'
-export * as balances from './balances'
-export * as budgets from './budgets'
-export * as currency from './currency'
-export * as debtors from './debtors'
-export * as envelopes from './envelopes'
-export * as fxRates from './fxRates'
-export * as goals from './goals'
-export * as infrastructure from './infrastructure'
-export * as instruments from './instruments'
-export * as merchants from './merchants'
-export * as months from './months'
-export * as reminders from './reminders'
-export * as settings from './settings'
-export * as tags from './tags'
-export * as transactions from './transactions'
-export * as users from './users'
+export * as core from './namespaces'

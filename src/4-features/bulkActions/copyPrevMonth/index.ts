@@ -2,7 +2,7 @@ import { track } from '6-shared/analytics'
 import { AppThunk } from 'store'
 import { TISOMonth } from '6-shared/types'
 import { prevMonth, toISOMonth } from '6-shared/helpers/date'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 export const copyPreviousBudget =
   (month: TISOMonth): AppThunk<void> =>

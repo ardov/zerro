@@ -1,5 +1,5 @@
 import { FC } from 'react'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { Typography, ButtonBase, ButtonBaseProps } from '@mui/material'
 import { TISOMonth } from '6-shared/types'

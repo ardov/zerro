@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { TFxAmount, TFxCode, TTagId, TTransaction } from '6-shared/types'
 import { parseDate } from '6-shared/helpers/date'

@@ -4,7 +4,7 @@ import { GroupBy, toGroup } from '6-shared/helpers/date'
 import { keys } from '6-shared/helpers/keys'
 
 import { useAppSelector } from 'store/index'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { balancesToDisplay } from './shared/convertBalancesToDisplay'
 import { TBalanceNode } from './shared/types'

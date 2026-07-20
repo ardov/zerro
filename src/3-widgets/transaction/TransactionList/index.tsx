@@ -5,7 +5,7 @@ import type {
   TISODate,
   TTransactionId,
 } from '6-shared/types'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { useMemo, useState, useCallback, FC, ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'

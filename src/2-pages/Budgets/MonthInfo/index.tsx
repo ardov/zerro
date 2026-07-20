@@ -27,7 +27,7 @@ import { useMonth } from '../MonthProvider'
 import { BalanceWidget } from '../BalanceWidget'
 import { FxRates } from './FxRates'
 import { ActivityStats } from './ActivityStats'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { fillGoals } from '4-features/bulkActions/fillGoals'
 import { useConfirm } from '6-shared/ui/SmartConfirm'

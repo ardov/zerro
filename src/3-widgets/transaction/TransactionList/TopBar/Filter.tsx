@@ -14,7 +14,7 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 import { useAppSelector } from 'store'
 import { AddIcon, CloseIcon, FilterListIcon } from '6-shared/ui/Icons'
 import { Tooltip } from '6-shared/ui/Tooltip'

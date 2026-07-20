@@ -27,7 +27,7 @@ import { track } from '6-shared/analytics'
 
 import { useAppDispatch, useAppSelector } from 'store'
 
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { TagList } from '5-entities/tag/ui/TagList'
 

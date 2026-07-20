@@ -15,7 +15,7 @@ import {
 } from '@mui/material'
 import { useAppDispatch, useAppSelector } from 'store'
 import { track } from '6-shared/analytics'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { TagList } from '5-entities/tag/ui/TagList'
 

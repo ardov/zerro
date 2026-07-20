@@ -4,7 +4,7 @@ import { GroupBy } from '6-shared/helpers/date'
 import { keys } from '6-shared/helpers/keys'
 import { round } from '6-shared/helpers/money'
 
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { useDisplayBalances } from '5-entities/accBalances/useBalances'
 import { getStart, Period } from '../shared/period'

@@ -18,7 +18,7 @@ import {
 import { ColorPicker, useColorPicker } from '6-shared/ui/ColorPickerPopover'
 import { useAppDispatch } from 'store'
 import { envelopeVisibility, TEnvelope } from '5-entities/envelope'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 // import { TagSelect } from '@components/TagSelect'
 import { CurrencyCodeSelect } from './CurrencyCodeSelect'

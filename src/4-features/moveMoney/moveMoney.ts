@@ -5,7 +5,7 @@ import type { TEnvelopeId } from '5-entities/envelope'
 import { round } from '6-shared/helpers/money'
 import { track } from '6-shared/analytics'
 
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 export const moveMoney =
   (

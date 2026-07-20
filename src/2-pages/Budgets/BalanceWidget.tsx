@@ -1,5 +1,5 @@
 import { Divider, Paper, Typography } from '@mui/material'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { useAppSelector } from 'store'
 

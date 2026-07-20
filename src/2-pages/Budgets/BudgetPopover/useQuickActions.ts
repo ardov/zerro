@@ -7,7 +7,7 @@ import { toISOMonth } from '6-shared/helpers/date'
 import { getAverage } from '6-shared/helpers/money/currencyHelpers'
 
 import { useAppSelector } from 'store'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 export const useQuickActions = (month: TISOMonth, id?: TEnvelopeId) => {
   const { t } = useTranslation()

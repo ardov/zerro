@@ -14,7 +14,7 @@ import { PopoverManager } from '6-shared/historyPopovers'
 import { useAppSelector } from 'store'
 import { getLoginState } from 'store/token'
 import { getLastSyncTime } from 'store/data/selectors'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { HistoryShortcuts } from '4-features/historyShortcuts'
 import { RegularSyncHandler } from '3-widgets/RegularSyncHandler'

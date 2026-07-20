@@ -4,7 +4,7 @@ import { ById, ByMonth, TISOMonth } from '6-shared/types'
 
 import { TSelector, useAppSelector } from 'store'
 import { envelopeVisibility, TEnvelope, TEnvelopeId } from '5-entities/envelope'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { isEqual } from 'lodash'
 

@@ -12,7 +12,7 @@ import {
   EnvType,
   getEnvelopeMeta,
 } from 'zerro-core/domain/zerro'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { createEnvelope } from './createEnvelope'
 

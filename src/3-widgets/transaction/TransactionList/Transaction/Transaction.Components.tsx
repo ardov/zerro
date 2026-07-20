@@ -6,7 +6,7 @@ import { Typography } from '@mui/material'
 import { TagIcon } from '6-shared/ui/TagIcon'
 import { Tooltip } from '6-shared/ui/Tooltip'
 import { useAppSelector } from 'store'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { TTagPopulated } from '5-entities/tag'
 

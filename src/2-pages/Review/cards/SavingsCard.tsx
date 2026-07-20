@@ -1,5 +1,5 @@
 import { Box, Stack, Typography } from '@mui/material'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
 

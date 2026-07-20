@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useCallback, useState } from 'react'
 import { useAppSelector } from 'store'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { TDateDraft, TISOMonth } from '6-shared/types'
 import { isISOMonth, toISOMonth } from '6-shared/helpers/date'

@@ -1,14 +1,16 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import type { TEnvelopeId } from '5-entities/envelope'
 import { setTotalBudget } from './setTotalBudget'
 
 vi.mock('zerro-core/redux', () => ({
-  activity: { selectEnvelopeMetrics: vi.fn() },
-  currency: { selectConvertFx: vi.fn() },
-  budgets: { set: vi.fn() },
+  core: {
+    activity: { selectEnvelopeMetrics: vi.fn() },
+    currency: { selectConvertFx: vi.fn() },
+    budgets: { set: vi.fn() },
+  },
 }))
 
 describe('setTotalBudget', () => {

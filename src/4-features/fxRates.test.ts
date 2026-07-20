@@ -14,9 +14,11 @@ vi.mock('6-shared/api/fxRates', () => ({
   requestRates: requestRatesMock,
 }))
 vi.mock('zerro-core/redux', () => ({
-  fxRates: {
-    edit: editFxRatesMock,
-    selectCurrent: selectCurrentMock,
+  core: {
+    fxRates: {
+      edit: editFxRatesMock,
+      selectCurrent: selectCurrentMock,
+    },
   },
 }))
 

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
 import type { TEnvelopeId } from '5-entities/envelope'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { goalType } from 'zerro-core/domain/zerro/goals'
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
@@ -11,8 +11,10 @@ import { fillGoals } from './fillGoals'
 vi.mock('zerro-core/redux', async importOriginal => {
   const actual = await importOriginal<typeof import('zerro-core/redux')>()
   return {
-    ...actual,
-    goals: { ...actual.goals, selectAll: vi.fn() },
+    core: {
+      ...actual.core,
+      goals: { ...actual.core.goals, selectAll: vi.fn() },
+    },
   }
 })
 vi.mock('4-features/budget/setTotalBudget', () => ({

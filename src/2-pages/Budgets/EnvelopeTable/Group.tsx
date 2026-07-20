@@ -1,5 +1,5 @@
 import React, { FC, useRef } from 'react'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { ButtonBase, IconButton, Typography, Box } from '@mui/material'
 import { isEqual } from 'lodash'

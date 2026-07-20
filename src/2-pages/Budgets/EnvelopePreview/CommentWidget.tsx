@@ -4,7 +4,7 @@ import { NotesIcon } from '6-shared/ui/Icons'
 import { useAppDispatch, useAppSelector } from 'store'
 import { cardStyle } from './shared'
 import { TEnvelopeId } from '5-entities/envelope'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { useDebouncedCallback } from '6-shared/hooks/useDebouncedCallback'
 import { useTranslation } from 'react-i18next'

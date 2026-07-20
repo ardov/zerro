@@ -1,7 +1,7 @@
 import { round } from '6-shared/helpers/money'
 import { AppThunk } from 'store'
 
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 export function setTotalBudget(
   upd: core.budgets.TBudgetUpdate | core.budgets.TBudgetUpdate[]

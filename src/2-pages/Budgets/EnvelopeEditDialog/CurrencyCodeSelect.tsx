@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { MenuItem, SelectProps, ListItemText } from '@mui/material'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { TFxCode, TInstrument } from '6-shared/types'
 import { getCurrencySymbol } from '6-shared/helpers/money'

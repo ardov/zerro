@@ -1,5 +1,5 @@
 import { FC, memo, ReactNode, useCallback, useRef } from 'react'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { useDraggable } from '@dnd-kit/core'
 import { Typography, Box, IconButton, Chip } from '@mui/material'

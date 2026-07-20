@@ -4,7 +4,7 @@ import { initSentry } from '6-shared/diagnostics'
 import { store } from 'store'
 import { bindWorkerToStore } from 'worker'
 import { resetData } from 'store/data'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import GlobalErrorBoundary from './GlobalErrorBoundary'
 import App from './App'

@@ -1,6 +1,6 @@
 import { FC, ReactElement, useCallback } from 'react'
 import { useAppSelector } from 'store'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { Helmet } from 'react-helmet-async'
 import { Box, Theme, useMediaQuery } from '@mui/material'

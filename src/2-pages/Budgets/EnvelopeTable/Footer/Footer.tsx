@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { useAppSelector } from 'store'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { Typography } from '@mui/material'
 import { TableRow } from '../shared/shared'

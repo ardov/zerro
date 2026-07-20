@@ -1,5 +1,5 @@
 import { AppThunk } from 'store/index'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { arrayMove } from './arrayMove'
 

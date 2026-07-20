@@ -1,4 +1,4 @@
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { Dialog, IconButton, Link, Stack, Typography } from '@mui/material'
 import Balancer from 'react-wrap-balancer'

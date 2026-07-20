@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { Box, Typography, Chip, Stack } from '@mui/material'
 import { entries } from '6-shared/helpers/keys'

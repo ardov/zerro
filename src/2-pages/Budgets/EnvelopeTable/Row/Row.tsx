@@ -1,5 +1,5 @@
 import React, { FC, ReactNode, useCallback } from 'react'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { useDroppable } from '@dnd-kit/core'
 import { IconButton, IconButtonProps } from '@mui/material'

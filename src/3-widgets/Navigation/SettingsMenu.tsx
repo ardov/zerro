@@ -37,7 +37,7 @@ import { appVersion } from '6-shared/config'
 import { useAppDispatch } from 'store'
 import { resetData } from 'store/data'
 
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { useRegularSync } from '3-widgets/RegularSyncHandler'
 import { logOut } from '4-features/authorization'

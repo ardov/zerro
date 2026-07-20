@@ -10,7 +10,7 @@ import { track } from '6-shared/analytics'
 
 import { useAppDispatch, useAppSelector } from 'store'
 import { TEnvelope, TEnvelopeId } from '5-entities/envelope'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { useMonth } from '../MonthProvider'
 import { EnvelopeEditDialog, useEditDialog } from '../EnvelopeEditDialog'

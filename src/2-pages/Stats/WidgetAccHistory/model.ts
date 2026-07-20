@@ -1,6 +1,6 @@
 import { GroupBy } from '6-shared/helpers/date'
 import { TAccountId, TISODate } from '6-shared/types'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { getStart, Period } from '../shared/period'
 import { useAppSelector } from 'store/index'

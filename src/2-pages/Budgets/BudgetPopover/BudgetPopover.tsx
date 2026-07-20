@@ -1,5 +1,5 @@
 import type { TFxAmount, TISOMonth } from '6-shared/types'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import type { TEnvelopeId } from '5-entities/envelope'
 

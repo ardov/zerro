@@ -2,7 +2,7 @@ import { add } from '6-shared/helpers/money'
 import { track } from '6-shared/analytics'
 import { TISOMonth } from '6-shared/types'
 import { AppThunk } from 'store'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
 

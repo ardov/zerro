@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { useAppSelector } from 'store'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { TagTreeNode, TTagPopulated } from '5-entities/tag'
 import { getTagsTree } from '5-entities/tag/model/model'

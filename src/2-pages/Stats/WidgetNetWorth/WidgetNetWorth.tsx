@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
 import {

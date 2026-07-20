@@ -1,4 +1,4 @@
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
 import { Paper, Card, Typography, Box, Divider } from '@mui/material'

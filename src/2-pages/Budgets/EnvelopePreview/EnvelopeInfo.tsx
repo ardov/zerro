@@ -1,6 +1,6 @@
 import type { TDateDraft, TFxAmount, TISOMonth } from '6-shared/types'
 import { useAppSelector } from 'store'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { useTranslation } from 'react-i18next'
 import {

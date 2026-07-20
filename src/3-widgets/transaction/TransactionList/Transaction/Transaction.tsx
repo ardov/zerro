@@ -4,7 +4,7 @@ import React, { FC } from 'react'
 import styled from '@emotion/styled'
 import { Theme, TypographyVariant } from '@mui/material'
 import { useContextMenu } from '6-shared/hooks/useContextMenu'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { useAppSelector } from 'store'
 import { Symbol, Tags, Amounts, Info, Accounts } from './Transaction.Components'

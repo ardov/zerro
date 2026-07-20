@@ -5,7 +5,7 @@ import { keys } from '6-shared/helpers/keys'
 import { isZero } from '6-shared/helpers/money'
 import { AppThunk } from 'store'
 
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { setTotalBudget } from '4-features/budget/setTotalBudget'
 

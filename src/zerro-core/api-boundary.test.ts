@@ -15,9 +15,20 @@ describe('zerro-core API boundary', () => {
   })
 
   it('pins the domain-grouped Redux adapter surface', () => {
+    // The root exposes the whole adapter as one `core` namespace.
     const adapterIndex = readFileSync(join(coreRoot, 'redux/index.ts'), 'utf8')
+    expect(adapterIndex).toMatch(
+      /export \* as core from ['"]\.\/namespaces['"]/
+    )
+    expect(adapterIndex).not.toMatch(/export \{[\s\S]*?\} from/)
+
+    // The domains it groups are pinned in namespaces.ts.
+    const namespaces = readFileSync(
+      join(coreRoot, 'redux/namespaces.ts'),
+      'utf8'
+    )
     expect(
-      [...adapterIndex.matchAll(/export \* as (\w+) from/g)]
+      [...namespaces.matchAll(/export \* as (\w+) from/g)]
         .map(match => match[1])
         .sort()
     ).toEqual(
@@ -42,8 +53,7 @@ describe('zerro-core API boundary', () => {
         'users',
       ].sort()
     )
-    expect(adapterIndex).not.toMatch(/export \{[\s\S]*?\} from/)
-    expect(adapterIndex).not.toContain('applyLegacyPatch')
+    expect(namespaces).not.toContain('applyLegacyPatch')
   })
 
   it('keeps production core free from app runtime imports', () => {

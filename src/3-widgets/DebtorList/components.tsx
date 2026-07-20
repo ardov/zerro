@@ -1,5 +1,5 @@
 import { FC, ReactNode } from 'react'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import {
   ListSubheader,

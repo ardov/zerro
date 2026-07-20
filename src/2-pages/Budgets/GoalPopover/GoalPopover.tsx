@@ -20,7 +20,7 @@ import { Modify, TDateDraft, TISOMonth } from '6-shared/types'
 import { useAppDispatch, useAppSelector } from 'store'
 import { goalType, TGoal } from '5-entities/goal'
 import { TEnvelopeId } from '5-entities/envelope'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 export type TGoalPopoverProps = Modify<
   PopoverProps,

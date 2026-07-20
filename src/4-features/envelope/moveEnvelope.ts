@@ -1,5 +1,5 @@
 import { AppThunk } from 'store/index'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 export function moveEnvelope(
   sourceIdx: number,

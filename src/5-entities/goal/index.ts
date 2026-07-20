@@ -1,4 +1,4 @@
-import type * as core from 'zerro-core/redux'
+import type { core } from 'zerro-core/redux'
 
 export { getRawGoals } from './goalStore'
 export type { TGoal } from './shared/types'

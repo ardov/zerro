@@ -1,6 +1,6 @@
 import type { AppThunk } from 'store'
 import type { TEnvelopeId } from '5-entities/envelope'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { t } from 'i18next'
 

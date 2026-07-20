@@ -1,5 +1,5 @@
 import type { TTransaction } from '6-shared/types'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import React, { FC, useState } from 'react'
 import { useTranslation } from 'react-i18next'

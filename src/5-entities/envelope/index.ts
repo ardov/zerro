@@ -1,4 +1,4 @@
-import type * as core from 'zerro-core/redux'
+import type { core } from 'zerro-core/redux'
 
 export type { TEnvelopeId } from './shared/envelopeId'
 export type TEnvelope = core.envelopes.TPresentedEnvelope

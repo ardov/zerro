@@ -2,7 +2,7 @@ import { FC } from 'react'
 import { OptionalExceptFor, TInstrumentId } from '6-shared/types'
 import { AmountProps, Amount } from '6-shared/ui/Amount'
 
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 export type TSmartAmountProps = AmountProps & {
   instrument?: TInstrumentId | 'user'

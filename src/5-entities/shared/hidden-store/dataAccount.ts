@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import { AppThunk, RootState } from 'store'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { TAccountId } from '6-shared/types'
 

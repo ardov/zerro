@@ -5,7 +5,7 @@ import { useAppDispatch } from 'store'
 import { registerPopover } from '6-shared/historyPopovers'
 import { track } from '6-shared/analytics'
 import { useTranslation } from 'react-i18next'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { getMenuPosition } from './shared/helpers'
 

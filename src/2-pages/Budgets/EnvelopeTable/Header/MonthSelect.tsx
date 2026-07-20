@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, FC } from 'react'
 import { useAppSelector } from 'store'
-import * as core from 'zerro-core/redux'
+import { core } from 'zerro-core/redux'
 
 import { Box, Typography, IconButton, ButtonBase } from '@mui/material'
 import { BoxProps } from '@mui/system'
