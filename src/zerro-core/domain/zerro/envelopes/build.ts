@@ -125,8 +125,10 @@ export function buildEnvelopes(input: TBuildEnvelopesInput): {
   return { byId: envelopes, structure }
 }
 
-export function getKeepingEnvelopes(envelopes: ById<TEnvelope>): TEnvelopeId[] {
-  return keys(envelopes).filter(id => envelopes[id].keepIncome)
+export function getKeepingEnvelopes(
+  envelopes: ById<TEnvelope>
+): ReadonlySet<TEnvelopeId> {
+  return new Set(keys(envelopes).filter(id => envelopes[id].keepIncome))
 }
 
 function getEnvelopeTags(tags: ById<TEnvelopeTag>): ById<TEnvelopeTag> {

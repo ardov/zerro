@@ -2,6 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import { shallowEqual } from 'react-redux'
 import {
   buildActivity,
+  buildActivityRoutingContext,
   buildCurrentFunds,
   buildEnvMetrics,
   buildRawActivity,
@@ -28,30 +29,19 @@ export const selectCurrentFunds = createSelector(
   (account, inBudgetIds, instrumentCodeById) =>
     buildCurrentFunds({ accounts: account, inBudgetIds, instrumentCodeById })
 )
+export const selectTransactionRoutingContext = createSelector(
+  [selectInBudgetAccountIds, accounts.selectDebtAccountId, debtors.selectAll],
+  (inBudgetAccountIds, debtAccountId, debtors) =>
+    buildActivityRoutingContext({ inBudgetAccountIds, debtAccountId, debtors })
+)
 export const selectRaw = createSelector(
   [
     transactions.selectHistory,
-    selectInBudgetAccountIds,
-    accounts.selectDebtAccountId,
-    debtors.selectAll,
+    selectTransactionRoutingContext,
     instruments.selectAll,
   ],
-  (transactions, inBudgetAccountIds, debtAccountId, debtors, instruments) =>
-    buildRawActivity({
-      transactions,
-      inBudgetAccountIds,
-      debtAccountId,
-      debtors,
-      instruments,
-    })
-)
-export const selectTransactionRoutingContext = createSelector(
-  [selectInBudgetAccountIds, accounts.selectDebtAccountId, debtors.selectAll],
-  (inBudgetAccountIds, debtAccountId, debtors) => ({
-    inBudgetAccountIds: new Set(inBudgetAccountIds),
-    debtAccountId,
-    debtors,
-  })
+  (transactions, routing, instruments) =>
+    buildRawActivity({ transactions, routing, instruments })
 )
 export const selectAll = createSelector(
   [selectRaw, envelopes.selectKeepingIds],

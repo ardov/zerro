@@ -23,7 +23,7 @@ describe('buildEnvMetrics', () => {
           },
         }),
       },
-      keepingEnvelopeIds: [],
+      keepingEnvelopeIds: new Set([]),
     })
 
     const result = buildEnvMetrics({
@@ -89,7 +89,7 @@ describe('buildEnvMetrics', () => {
           },
         }),
       },
-      keepingEnvelopeIds: [],
+      keepingEnvelopeIds: new Set([]),
     })
 
     const result = buildEnvMetrics({

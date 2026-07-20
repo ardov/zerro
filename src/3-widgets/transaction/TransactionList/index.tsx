@@ -222,11 +222,7 @@ function useFilteredTransactions(
   const envelopes = useAppSelector(coreEnvelopes.selectDomain)
   const keepingEnvelopeIds = useAppSelector(coreEnvelopes.selectKeepingIds)
   const context = useMemo<coreTransactions.TTransactionQueryContext>(
-    () => ({
-      routing,
-      envelopes,
-      keepingEnvelopeIds: new Set(keepingEnvelopeIds),
-    }),
+    () => ({ routing, envelopes, keepingEnvelopeIds }),
     [envelopes, keepingEnvelopeIds, routing]
   )
   const groups = useMemo(() => {

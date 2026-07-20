@@ -38,7 +38,7 @@ export type TSortedActivity = {
 
 export type TBuildSortedActivityInput = {
   rawActivity: ByMonth<TRawActivityNode>
-  keepingEnvelopeIds: TEnvelopeId[]
+  keepingEnvelopeIds: ReadonlySet<TEnvelopeId>
   convertFx: TFxConverter
 }
 
@@ -55,7 +55,7 @@ export function buildSortedActivity(
 
     keys(tags).forEach(id => {
       const { income, outcome } = tags[id]
-      const keepIncome = input.keepingEnvelopeIds.includes(id)
+      const keepIncome = input.keepingEnvelopeIds.has(id)
 
       if (keepIncome) {
         const envInfo: TSortedActivityNode = {

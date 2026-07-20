@@ -69,7 +69,7 @@ describe('buildEnvelopes', () => {
       visibility: envelopeVisibility.hidden,
       currency: 'EUR',
     })
-    expect(getKeepingEnvelopes(result.byId)).toEqual([parentId])
+    expect(getKeepingEnvelopes(result.byId)).toEqual(new Set([parentId]))
   })
 
   it('uses stable default group ids for debtors', () => {

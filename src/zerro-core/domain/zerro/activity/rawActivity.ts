@@ -1,13 +1,14 @@
 import { addFxAmount } from '../../shared/money'
 import type { ById, ByMonth } from '../../shared/types'
-import type { TAccountId } from '../../zenmoney/accounts'
 import type { TFxAmount } from '../../shared/money'
 import type { TInstrument } from '../../zenmoney/instruments'
 import type { TISOMonth } from '../../zenmoney/primitives'
 import type { TTransaction } from '../../zenmoney/transactions/types'
 import type { TEnvelopeId } from '../envelope-id'
-import type { TEnvelopeDebtor } from '../envelopes'
-import { routeTransactionToActivity } from './transactionRouting'
+import {
+  routeTransactionToActivity,
+  type TTransactionActivityRoutingContext,
+} from './transactionRouting'
 
 export type TRawActivityNode = {
   internal: EnvActivity
@@ -17,9 +18,7 @@ export type TRawActivityNode = {
 
 export type TBuildRawActivityInput = {
   transactions: TTransaction[]
-  inBudgetAccountIds: TAccountId[]
-  debtAccountId: TAccountId | undefined
-  debtors: ById<TEnvelopeDebtor>
+  routing: TTransactionActivityRoutingContext
   instruments: ById<TInstrument>
 }
 
@@ -27,14 +26,9 @@ export function buildRawActivity(
   input: TBuildRawActivityInput
 ): ByMonth<TRawActivityNode> {
   const result: ByMonth<TRawActivityNode> = {}
-  const routingContext = {
-    inBudgetAccountIds: new Set(input.inBudgetAccountIds),
-    debtAccountId: input.debtAccountId,
-    debtors: input.debtors,
-  }
 
   input.transactions.forEach(transaction => {
-    const route = routeTransactionToActivity(transaction, routingContext)
+    const route = routeTransactionToActivity(transaction, input.routing)
     if (!route) return
 
     switch (route.direction) {

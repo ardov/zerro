@@ -19,7 +19,7 @@ describe('buildActivity', () => {
           },
         }),
       },
-      keepingEnvelopeIds: [keepingId],
+      keepingEnvelopeIds: new Set([keepingId]),
     })
 
     expect(result['2026-01'].total).toEqual({ USD: 120 })
@@ -38,7 +38,7 @@ describe('buildActivity', () => {
           },
         }),
       },
-      keepingEnvelopeIds: [],
+      keepingEnvelopeIds: new Set([]),
     })
 
     expect(result['2026-01'].total).toEqual({ USD: -21 })
@@ -59,7 +59,7 @@ describe('buildActivity', () => {
           },
         }),
       },
-      keepingEnvelopeIds: [envelopeId],
+      keepingEnvelopeIds: new Set([envelopeId]),
     })
 
     expect(result['2026-01'].envActivity.byEnv[envelopeId].total).toEqual({

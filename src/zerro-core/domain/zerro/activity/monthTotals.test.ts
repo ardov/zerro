@@ -23,7 +23,7 @@ describe('buildMonthTotals', () => {
           },
         }),
       },
-      keepingEnvelopeIds: [],
+      keepingEnvelopeIds: new Set([]),
     })
     const envMetrics = buildEnvMetrics({
       monthList: ['2026-01'],

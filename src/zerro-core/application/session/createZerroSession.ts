@@ -14,6 +14,7 @@ import {
 } from '../../domain/zenmoney'
 import {
   buildActivity,
+  buildActivityRoutingContext,
   buildBudgets,
   buildCurrentFxRates,
   buildCurrentFunds,
@@ -112,12 +113,17 @@ export function createZerroSession(data: TDataStore, ctx: TCoreContext) {
       instrumentCodeById: instrumentCodeById(),
     })
   )
-  const rawActivity = memo(() =>
-    buildRawActivity({
-      transactions: transactionsHistory(),
+  const routingContext = memo(() =>
+    buildActivityRoutingContext({
       inBudgetAccountIds: inBudgetAccountIds(),
       debtAccountId: debtAccountId(),
       debtors: debtors(),
+    })
+  )
+  const rawActivity = memo(() =>
+    buildRawActivity({
+      transactions: transactionsHistory(),
+      routing: routingContext(),
       instruments: data.instrument,
     })
   )
@@ -210,6 +216,7 @@ export function createZerroSession(data: TDataStore, ctx: TCoreContext) {
     getAll: budgets,
   }
   const activityApi = {
+    getRoutingContext: routingContext,
     getRaw: rawActivity,
     getAll: activity,
     getSorted: sortedActivity,

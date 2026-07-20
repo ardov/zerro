@@ -14,6 +14,26 @@ export type TTransactionActivityRoutingContext = {
   debtors: ById<Pick<TEnvelopeDebtor, 'id' | 'merchantId'>>
 }
 
+/**
+ * Builds the routing context once. Both consumers of
+ * {@link routeTransactionToActivity} — the bulk `buildRawActivity` projection
+ * and the per-transaction filter predicate — must share one context, or the
+ * transaction filter and the budget table can disagree about the same
+ * transaction. `inBudgetAccountIds` stays an array upstream so the Redux
+ * adapter can keep its shallow result-equality check on it.
+ */
+export function buildActivityRoutingContext(input: {
+  inBudgetAccountIds: readonly TAccountId[]
+  debtAccountId: TAccountId | undefined
+  debtors: ById<Pick<TEnvelopeDebtor, 'id' | 'merchantId'>>
+}): TTransactionActivityRoutingContext {
+  return {
+    inBudgetAccountIds: new Set(input.inBudgetAccountIds),
+    debtAccountId: input.debtAccountId,
+    debtors: input.debtors,
+  }
+}
+
 export type TTransactionActivityRoute =
   | {
       month: TISOMonth

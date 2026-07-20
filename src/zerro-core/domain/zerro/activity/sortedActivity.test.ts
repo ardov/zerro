@@ -20,7 +20,7 @@ describe('buildSortedActivity', () => {
           },
         }),
       },
-      keepingEnvelopeIds: [],
+      keepingEnvelopeIds: new Set([]),
       convertFx: amount => amount.USD || 0,
     })
 
@@ -49,7 +49,7 @@ describe('buildSortedActivity', () => {
           },
         }),
       },
-      keepingEnvelopeIds: [projectId],
+      keepingEnvelopeIds: new Set([projectId]),
       convertFx: amount => amount.USD || 0,
     })
 
@@ -71,7 +71,7 @@ describe('buildSortedActivity', () => {
           },
         }),
       },
-      keepingEnvelopeIds: [],
+      keepingEnvelopeIds: new Set([]),
       convertFx: amount => amount.USD || 0,
     })
 

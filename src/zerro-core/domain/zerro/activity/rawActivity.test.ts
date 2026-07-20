@@ -5,6 +5,7 @@ import {
 } from '../../../testing/zenmoneyTestData'
 import { EnvType, envId } from '../envelope-id'
 import { buildRawActivity, EnvActivity } from './rawActivity'
+import { buildActivityRoutingContext } from './transactionRouting'
 
 describe('buildRawActivity', () => {
   it('groups income and outcome transactions by envelope', () => {
@@ -24,9 +25,11 @@ describe('buildRawActivity', () => {
           tag: ['food'],
         }),
       ],
-      inBudgetAccountIds: ['card'],
-      debtAccountId: undefined,
-      debtors: {},
+      routing: buildActivityRoutingContext({
+        inBudgetAccountIds: ['card'],
+        debtAccountId: undefined,
+        debtors: {},
+      }),
       instruments: usdInstruments,
     })
 
@@ -52,9 +55,11 @@ describe('buildRawActivity', () => {
           outcomeAccount: 'card',
         }),
       ],
-      inBudgetAccountIds: ['card', 'cash'],
-      debtAccountId: undefined,
-      debtors: {},
+      routing: buildActivityRoutingContext({
+        inBudgetAccountIds: ['card', 'cash'],
+        debtAccountId: undefined,
+        debtors: {},
+      }),
       instruments: usdInstruments,
     })
 
@@ -75,17 +80,11 @@ describe('buildRawActivity', () => {
           payee: 'Alex!',
         }),
       ],
-      inBudgetAccountIds: ['card'],
-      debtAccountId: 'debt',
-      debtors: {
-        alex: {
-          id: 'alex',
-          name: 'Alex!',
-          payeeNames: ['Alex!'],
-          transactions: [],
-          balance: {},
-        },
-      },
+      routing: buildActivityRoutingContext({
+        inBudgetAccountIds: ['card'],
+        debtAccountId: 'debt',
+        debtors: { alex: { id: 'alex', merchantId: undefined } },
+      }),
       instruments: usdInstruments,
     })
 

@@ -20,7 +20,7 @@ export type TActivityNode = {
 
 export type TBuildActivityInput = {
   rawActivity: ByMonth<TRawActivityNode>
-  keepingEnvelopeIds: TEnvelopeId[]
+  keepingEnvelopeIds: ReadonlySet<TEnvelopeId>
 }
 
 export function buildActivity(
@@ -39,7 +39,7 @@ export function buildActivity(
       const activity = income[envelopeId]
       node.total = addFxAmount(node.total, activity.total)
 
-      if (input.keepingEnvelopeIds.includes(envelopeId)) {
+      if (input.keepingEnvelopeIds.has(envelopeId)) {
         node.envActivity.total = addFxAmount(
           node.envActivity.total,
           activity.total

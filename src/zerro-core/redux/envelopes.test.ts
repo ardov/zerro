@@ -61,7 +61,7 @@ describe('selectEnvelopes chain', () => {
 
     expect(Object.keys(selectEnvelopes(state))).not.toHaveLength(0)
     expect(selectEnvelopeStructure(state)).toEqual(expect.any(Array))
-    expect(selectKeepingEnvelopeIds(state)).toEqual(expect.any(Array))
+    expect(selectKeepingEnvelopeIds(state)).toEqual(expect.any(Set))
   })
 
   it('applies envelope metadata', () => {
