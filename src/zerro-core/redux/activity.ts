@@ -81,4 +81,3 @@ export const selectSorted = createSelector(
     buildSortedActivity({ rawActivity, keepingEnvelopeIds, convertFx })
 )
 export type { TActivitySummary, TSortedActivityNode } from '../domain/zerro'
-export { EnvActivity } from '../domain/zerro'

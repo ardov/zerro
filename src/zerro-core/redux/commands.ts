@@ -1,16 +1,20 @@
 import type { AppThunk, RootState } from 'store'
 import { v1 as uuidv1 } from 'uuid'
 import type { TISOMonth } from '../domain/zenmoney/primitives'
-import type { TCompiled, TCoreContext, TNormalizedPatch } from '../types'
 import {
-  compileApplyChangesToTransaction,
+  isCompiled,
+  type TCompiled,
+  type TCoreContext,
+  type TIntentPatch,
+  type TNormalizedPatch,
+} from '../types'
+import {
   compileBulkEditTransactions,
   compileCombineToIncome,
   compileCombineToOutcome,
   compileCreateAccount,
   compileDeleteTransactions,
   compileDeleteTransactionsPermanently,
-  compileMarkTransactionsViewed,
   compileMergeTransactionsAsTransfer,
   compilePatchAccount,
   compileDeleteReminder,
@@ -21,9 +25,7 @@ import {
   type TTransactionId,
   type TTransactionEditablePatch,
   type TTransactionRecreatePatch,
-  type TTransactionPatch,
   type TReminderDraft,
-  type TReminder,
   type TReminderId,
   type TReminderPatch,
 } from '../domain/zenmoney'
@@ -102,11 +104,6 @@ export type TAppCommand =
     }
   | { type: 'zenmoney.transaction.restore'; payload: { id: TTransactionId } }
   | {
-      type: 'zenmoney.transaction.viewed.set'
-      payload: { ids: TTransactionId[]; viewed: boolean }
-    }
-  | { type: 'zenmoney.transaction.update'; payload: TTransactionPatch }
-  | {
       type: 'zenmoney.transaction.bulk.edit'
       payload: { ids: TTransactionId[]; tags?: TTagId[]; comment?: string }
     }
@@ -142,7 +139,7 @@ export function compileAppCommand(
   state: RootState,
   command: TAppCommand,
   ctx: TCoreContext
-): TNormalizedPatch {
+): TIntentPatch {
   const result = compileAppCommandResult(state, command, ctx)
   return isCompiled(result) ? result.patch : result
 }
@@ -151,7 +148,7 @@ function compileAppCommandResult(
   state: RootState,
   command: TAppCommand,
   ctx: TCoreContext
-): TNormalizedPatch | TCompiled<unknown> {
+): TIntentPatch | TCompiled<unknown> {
   const data = state.data.current
   switch (command.type) {
     case 'zerro.budget.set':
@@ -165,7 +162,7 @@ function compileAppCommandResult(
       return compileSetFxRates(data, command.payload.month, rates, ctx)
     }
     case 'zerro.fxRates.reset':
-      return compileResetFxRates(data, command.payload.month, ctx)
+      return compileResetFxRates(data, command.payload.month)
     case 'zerro.userSettings.emojiIcons.set':
       return compilePatchUserSettings(
         data,
@@ -183,9 +180,9 @@ function compileAppCommandResult(
       return compileSetGoal(data, month, id, goal, ctx)
     }
     case 'zerro.envelope.rename':
-      return compileRenameEnvelope(data, command.payload, ctx)
+      return compileRenameEnvelope(data, command.payload)
     case 'zerro.envelope.color.set':
-      return compileSetEnvelopeColor(data, command.payload, ctx)
+      return compileSetEnvelopeColor(data, command.payload)
     case 'zerro.envelope.comment.set':
       return compileSetEnvelopeComment(data, command.payload, ctx)
     case 'zerro.envelope.settings.update':
@@ -222,38 +219,25 @@ function compileAppCommandResult(
       )
     }
     case 'zenmoney.transaction.delete':
-      return compileDeleteTransactions(data, command.payload.ids, ctx)
+      return compileDeleteTransactions(data, command.payload.ids)
     case 'zenmoney.transaction.delete.permanent':
-      return compileDeleteTransactionsPermanently(
-        data,
-        command.payload.ids,
-        ctx
-      )
+      return compileDeleteTransactionsPermanently(data, command.payload.ids)
     case 'zenmoney.transaction.restore':
       return compileRestoreTransaction(data, command.payload.id, ctx)
-    case 'zenmoney.transaction.viewed.set':
-      return compileMarkTransactionsViewed(
-        data,
-        command.payload.ids,
-        command.payload.viewed,
-        ctx
-      )
-    case 'zenmoney.transaction.update':
-      return compileApplyChangesToTransaction(data, command.payload, ctx)
     case 'zenmoney.transaction.bulk.edit': {
       const { ids, tags, comment } = command.payload
-      return compileBulkEditTransactions(data, ids, { tags, comment }, ctx)
+      return compileBulkEditTransactions(data, ids, { tags, comment })
     }
     case 'zenmoney.account.inBalance.set': {
       const { id, inBalance } = command.payload
-      return compilePatchAccount(data, { id, inBalance }, ctx)
+      return compilePatchAccount(data, { id, inBalance })
     }
     case 'zenmoney.reminder.set': {
       const patch = compileSetReminder(data, command.payload, ctx)
       return { patch, receipt: patch.reminder || [] }
     }
     case 'zenmoney.reminder.delete':
-      return compileDeleteReminder(data, command.payload.id, ctx)
+      return compileDeleteReminder(data, command.payload.id)
     case 'infrastructure.dataAccount.prepare': {
       const existing = Object.values(data.account).find(
         account => account.title === command.payload.title
@@ -277,11 +261,11 @@ function compileAppCommandResult(
     case 'infrastructure.debug.patch':
       return command.payload
     case 'zenmoney.transaction.combineToOutcome':
-      return compileCombineToOutcome(data, command.payload.ids, ctx)
+      return compileCombineToOutcome(data, command.payload.ids)
     case 'zenmoney.transaction.combineToIncome':
-      return compileCombineToIncome(data, command.payload.ids, ctx)
+      return compileCombineToIncome(data, command.payload.ids)
     case 'zenmoney.transaction.mergeAsTransfer':
-      return compileMergeTransactionsAsTransfer(data, command.payload.ids, ctx)
+      return compileMergeTransactionsAsTransfer(data, command.payload.ids)
   }
 }
 
@@ -294,12 +278,11 @@ function executeCommand<TReceipt = undefined>(
   command: TAppCommand
 ): AppThunk<TReceipt | undefined> {
   return executeReduxCommand<TReceipt>(
-    command,
     (state, ctx) =>
       // Receipt types are documented by the four public wrappers that request
       // one; the command compiler stays a simple runtime switch.
       compileAppCommandResult(state, command, ctx) as
-        TNormalizedPatch | TCompiled<TReceipt>
+        TIntentPatch | TCompiled<TReceipt>
   )
 }
 
@@ -431,7 +414,7 @@ export function setTransactionsViewed(
   return patchTransactions(ids, { viewed })
 }
 
-export function patchTransactions(
+function patchTransactions(
   ids: TTransactionId[],
   set: TTransactionEditablePatch
 ): AppThunk {
@@ -488,8 +471,8 @@ export function setAccountInBalance(
 export function setReminder(
   draft:
     TReminderDraft | TReminderPatch | Array<TReminderDraft | TReminderPatch>
-): AppThunk<TReminder[]> {
-  const execute = executeCommand<TReminder[]>({
+): AppThunk<TReminderPatch[]> {
+  const execute = executeCommand<TReminderPatch[]>({
     type: 'zenmoney.reminder.set',
     payload: draft,
   })
@@ -577,10 +560,4 @@ function normalizeEnvelopeSettings(
     colorHex:
       input.colorHex === presented.colorHex ? domain.colorHex : input.colorHex,
   }
-}
-
-function isCompiled(
-  value: TNormalizedPatch | TCompiled<unknown>
-): value is TCompiled<unknown> {
-  return 'patch' in value && 'receipt' in value
 }

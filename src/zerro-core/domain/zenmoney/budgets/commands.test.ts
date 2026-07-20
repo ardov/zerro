@@ -22,29 +22,25 @@ describe('zenmoney budget commands', () => {
     expect(getTagBudgets(data)).toBe(data.budget)
   })
 
-  it('creates tag budgets with root user, normalized date, and deterministic time', () => {
+  it('compiles sparse tag-budget creation intent', () => {
     const data = makeStore({
       user: {
         1: { id: 1, parent: null },
       } as any,
     })
 
-    const patch = compileSetTagBudget(
-      data,
-      { tag: 'food', month: '2026-01', value: 100 },
-      { now: () => 1700000000000 }
-    )
+    const patch = compileSetTagBudget(data, {
+      tag: 'food',
+      month: '2026-01',
+      value: 100,
+    })
 
-    expect(patch.budget?.[0]).toEqual(
-      makeTestBudget({
-        id: '2026-01-01#food',
-        changed: 1700000000000,
-        user: 1,
-        date: '2026-01-01',
-        tag: 'food',
-        outcome: 100,
-      })
-    )
+    expect(patch.budget?.[0]).toEqual({
+      id: '2026-01-01#food',
+      date: '2026-01-01',
+      tag: 'food',
+      outcome: 100,
+    })
   })
 
   it('preserves existing budget fields when updating a tag budget', () => {
@@ -66,24 +62,19 @@ describe('zenmoney budget commands', () => {
       },
     })
 
-    const patch = compileSetTagBudget(
-      data,
-      { tag: 'food', month: '2026-01', value: 100 },
-      { now: () => 200 }
-    )
+    const patch = compileSetTagBudget(data, {
+      tag: 'food',
+      month: '2026-01',
+      value: 100,
+    })
     const next = applyPatch(data, patch)
 
-    expect(patch.budget?.[0]).toEqual(
-      makeTestBudget({
-        id: '2026-01-01#food',
-        changed: 200,
-        user: 2,
-        date: '2026-01-01',
-        tag: 'food',
-        income: 40,
-        outcome: 100,
-      })
-    )
+    expect(patch.budget?.[0]).toEqual({
+      id: '2026-01-01#food',
+      date: '2026-01-01',
+      tag: 'food',
+      outcome: 100,
+    })
     expect(next.budget[current.id].outcome).toBe(100)
     expect(data.budget[current.id].outcome).toBe(80)
   })
@@ -129,13 +120,13 @@ describe('zenmoney budget commands', () => {
     expect(toBudgetId('2026-02-10', null)).toBe('2026-02-10#null')
   })
 
-  it('validates root user for tag budget updates', () => {
+  it('defers root-user validation for tag budget creation to materialization', () => {
     expect(() =>
-      compileSetTagBudget(
-        makeStore(),
-        { tag: 'food', month: '2026-01', value: 100 },
-        { now: () => 1 }
-      )
-    ).toThrow('No user')
+      compileSetTagBudget(makeStore(), {
+        tag: 'food',
+        month: '2026-01',
+        value: 100,
+      })
+    ).not.toThrow()
   })
 })

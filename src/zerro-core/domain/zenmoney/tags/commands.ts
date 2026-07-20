@@ -1,6 +1,6 @@
 import type { OptionalExceptFor } from '../../shared/types'
 import type { TDataStore } from '../store'
-import type { TCoreContext, TNormalizedPatch } from '../../../types'
+import type { TCoreContext, TIntentPatch } from '../../../types'
 import { getRootUserId } from '../users'
 import { makeTag } from './factory'
 import { getTags } from './read'
@@ -10,30 +10,25 @@ export type TTagDraft = OptionalExceptFor<TTag, 'title'>
 
 export function compilePatchTag(
   data: TDataStore,
-  draft: TTagPatch | TTagPatch[],
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
+  draft: TTagPatch | TTagPatch[]
+): TIntentPatch {
   const list = Array.isArray(draft) ? draft : [draft]
 
-  return {
-    tag: list.map(item => {
-      if (!item.id) throw new Error('Trying to patch tag without id')
-      if (item.id === 'null') throw new Error('Trying to patch null tag')
+  list.forEach(item => {
+    if (!item.id) throw new Error('Trying to patch tag without id')
+    if (item.id === 'null') throw new Error('Trying to patch null tag')
+    if (!getTags(data)[item.id]) throw new Error('Tag not found')
+  })
 
-      const current = getTags(data)[item.id]
-      if (!current) throw new Error('Tag not found')
-
-      return { ...current, ...item, changed: ctx.now() }
-    }),
-  }
+  return { tag: list }
 }
 
 export function compileCreateTag(
   data: TDataStore,
   draft: TTagDraft,
   ctx: TCoreContext
-): TNormalizedPatch {
-  if (hasId(draft)) return compilePatchTag(data, draft, ctx)
+): TIntentPatch {
+  if (hasId(draft)) return compilePatchTag(data, draft)
   if (!draft.title) throw new Error('Trying to create tag without title')
 
   const user = getRootUserId(data)

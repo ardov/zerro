@@ -1,12 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { DataEntity } from '6-shared/types'
+import { makeAccount, makeStore } from '../../../testing/zenmoneyTestData'
 import {
-  makeAccount,
-  makeReminder,
-  makeStore,
-  makeTransaction,
-  makeUser,
-} from '../../../testing/zenmoneyTestData'
+  issuePatch,
+  materializeCommand,
+} from '../../../application/materializer'
 import { applyPatch } from '../applyPatch'
 import {
   compileCreateAccount,
@@ -86,7 +84,7 @@ describe('zenmoney account commands', () => {
     )
   })
 
-  it('compiles account patches using current data and deterministic time', () => {
+  it('compiles sparse patches for existing accounts', () => {
     const data = makeStore({
       account: {
         cash: makeAccount({
@@ -99,26 +97,18 @@ describe('zenmoney account commands', () => {
       },
     })
 
-    const patch = compilePatchAccount(
-      data,
-      { id: 'cash', title: 'Wallet', inBalance: true },
-      { now: () => 1700000000000 }
-    )
+    const patch = compilePatchAccount(data, {
+      id: 'cash',
+      title: 'Wallet',
+      inBalance: true,
+    })
 
     expect(patch).toEqual({
-      account: [
-        makeAccount({
-          id: 'cash',
-          title: 'Wallet',
-          balance: 100,
-          inBalance: true,
-          changed: 1700000000000,
-        }),
-      ],
+      account: [{ id: 'cash', title: 'Wallet', inBalance: true }],
     })
   })
 
-  it('applies the compiled patch without mutating the input store', () => {
+  it('materializes timestamps without mutating the input store', () => {
     const data = makeStore({
       account: {
         cash: makeAccount({
@@ -131,39 +121,30 @@ describe('zenmoney account commands', () => {
       },
     })
 
-    const patch = compilePatchAccount(
-      data,
-      { id: 'cash', title: 'Wallet' },
-      { now: () => 1700000000000 }
-    )
-    const next = applyPatch(data, patch)
+    const patch = compilePatchAccount(data, { id: 'cash', title: 'Wallet' })
+    const command = issuePatch(data, patch, 1700000000000)
+    const next = applyPatch(data, materializeCommand(data, command))
 
     expect(data.account.cash.title).toBe('Cash')
     expect(next.account.cash.title).toBe('Wallet')
     expect(next.account.cash.changed).toBe(1700000000000)
   })
 
-  it('patches every account with a fresh timestamp from the context', () => {
+  it('keeps every account patch sparse', () => {
     const data = makeStore({
       account: {
         cash: makeAccount({ id: 'cash', title: 'Cash', changed: 1 }),
         card: makeAccount({ id: 'card', title: 'Card', changed: 2 }),
       },
     })
-    const timestamps = [10, 20]
+    const patch = compilePatchAccount(data, [
+      { id: 'cash', title: 'Wallet' },
+      { id: 'card', title: 'Credit Card' },
+    ])
 
-    const patch = compilePatchAccount(
-      data,
-      [
-        { id: 'cash', title: 'Wallet' },
-        { id: 'card', title: 'Credit Card' },
-      ],
-      { now: () => timestamps.shift() ?? 0 }
-    )
-
-    expect(patch.account?.map(acc => [acc.id, acc.changed])).toEqual([
-      ['cash', 10],
-      ['card', 20],
+    expect(patch.account).toEqual([
+      { id: 'cash', title: 'Wallet' },
+      { id: 'card', title: 'Credit Card' },
     ])
   })
 
@@ -173,17 +154,15 @@ describe('zenmoney account commands', () => {
         cash: makeAccount({ id: 'cash', title: 'Cash', changed: 1 }),
       },
     })
-    const ctx = { now: () => 1 }
-
+    expect(() => compilePatchAccount(data, { title: 'No id' } as any)).toThrow(
+      'Trying to patch account without id'
+    )
     expect(() =>
-      compilePatchAccount(data, { title: 'No id' } as any, ctx)
-    ).toThrow('Trying to patch account without id')
-    expect(() =>
-      compilePatchAccount(data, { id: 'missing', title: 'Missing' }, ctx)
+      compilePatchAccount(data, { id: 'missing', title: 'Missing' })
     ).toThrow('Account not found')
   })
 
-  it('deletes accounts through normalized deletion patches', () => {
+  it('compiles sparse deletions and materializes protocol metadata', () => {
     const data = makeStore({
       user: {
         1: { id: 1, parent: null },
@@ -193,12 +172,14 @@ describe('zenmoney account commands', () => {
       },
     })
 
-    const patch = compileDeleteAccount(data, 'cash', {
-      now: () => 1700000000000,
-    })
-    const next = applyPatch(data, patch)
+    const patch = compileDeleteAccount(data, 'cash')
+    const command = issuePatch(data, patch, 1700000000000)
+    const next = applyPatch(data, materializeCommand(data, command))
 
     expect(patch).toEqual({
+      deletion: [{ id: 'cash', object: DataEntity.Account }],
+    })
+    expect(materializeCommand(data, command)).toEqual({
       deletion: [
         {
           id: 'cash',
@@ -221,20 +202,8 @@ describe('zenmoney account commands', () => {
       )
     ).toThrow('No user')
 
-    expect(() =>
-      compileDeleteAccount(makeStore(), 'missing', { now: () => 1 })
-    ).toThrow('Account not found')
-
-    expect(() =>
-      compileDeleteAccount(
-        makeStore({
-          account: {
-            cash: makeAccount({ id: 'cash', title: 'Cash', changed: 1 }),
-          },
-        }),
-        'cash',
-        { now: () => 1 }
-      )
-    ).toThrow('No user')
+    expect(() => compileDeleteAccount(makeStore(), 'missing')).toThrow(
+      'Account not found'
+    )
   })
 })

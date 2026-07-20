@@ -1,4 +1,4 @@
-import type { TCoreContext, TNormalizedPatch } from '../../../types'
+import type { TCoreContext, TIntentPatch } from '../../../types'
 import type { TISOMonth } from '../../zenmoney/primitives'
 import type { TDataStore } from '../../zenmoney/store'
 import {
@@ -13,7 +13,7 @@ export function compileSetFxRates(
   month: TISOMonth,
   rates: TFxRates,
   ctx: TCoreContext
-): TNormalizedPatch {
+): TIntentPatch {
   const payload: TFxRatesStoredValue = {
     date: month,
     changed: ctx.now(),
@@ -30,8 +30,7 @@ export function compileSetFxRates(
 
 export function compileResetFxRates(
   data: TDataStore,
-  month: TISOMonth,
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
-  return compileResetMonthlyHiddenData(data, HiddenDataType.FxRates, month, ctx)
+  month: TISOMonth
+): TIntentPatch {
+  return compileResetMonthlyHiddenData(data, HiddenDataType.FxRates, month)
 }

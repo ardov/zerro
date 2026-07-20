@@ -1,18 +1,16 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { TDataStore } from '6-shared/types'
 import type { RootState } from 'store'
-import type { TCoreContext, TNormalizedPatch } from '../types'
+import type { TCoreContext, TIntentPatch } from '../types'
 import { appendClientCommand } from 'store/data'
 import { makeDemoStore } from '../demo'
 import { makeTestRootState } from '../testing/rootState'
 import {
   applyPatch,
-  compileApplyChangesToTransaction,
   compileBulkEditTransactions,
   compileCombineToOutcome,
   compileDeleteTransactions,
   compileDeleteTransactionsPermanently,
-  compileMarkTransactionsViewed,
   compilePatchAccount,
   compileRestoreTransaction,
 } from '../domain/zenmoney'
@@ -78,7 +76,7 @@ const routingCases: Array<{
   make: () => {
     data: TDataStore
     command: TAppCommand
-    direct: (ctx: TCoreContext) => TNormalizedPatch
+    direct: (ctx: TCoreContext) => TIntentPatch
   }
 }> = [
   {
@@ -92,7 +90,7 @@ const routingCases: Array<{
           type: 'zenmoney.transaction.delete',
           payload: { ids: [id] },
         },
-        direct: ctx => compileDeleteTransactions(data, [id], ctx),
+        direct: () => compileDeleteTransactions(data, [id]),
       }
     },
   },
@@ -107,7 +105,7 @@ const routingCases: Array<{
           type: 'zenmoney.transaction.delete.permanent',
           payload: { ids: [id] },
         },
-        direct: ctx => compileDeleteTransactionsPermanently(data, [id], ctx),
+        direct: () => compileDeleteTransactionsPermanently(data, [id]),
       }
     },
   },
@@ -124,34 +122,6 @@ const routingCases: Array<{
     },
   },
   {
-    name: 'mark transactions viewed',
-    make: () => {
-      const data = makeDemoStore({ now: NOW })
-      const [id] = Object.keys(data.transaction)
-      return {
-        data,
-        command: {
-          type: 'zenmoney.transaction.viewed.set',
-          payload: { ids: [id], viewed: false },
-        },
-        direct: ctx => compileMarkTransactionsViewed(data, [id], false, ctx),
-      }
-    },
-  },
-  {
-    name: 'transaction update',
-    make: () => {
-      const data = makeDemoStore({ now: NOW })
-      const [id] = Object.keys(data.transaction)
-      const patch = { id, comment: 'Edited through command' }
-      return {
-        data,
-        command: { type: 'zenmoney.transaction.update', payload: patch },
-        direct: ctx => compileApplyChangesToTransaction(data, patch, ctx),
-      }
-    },
-  },
-  {
     name: 'bulk transaction edit',
     make: () => {
       const data = makeDemoStore({ now: NOW })
@@ -163,13 +133,11 @@ const routingCases: Array<{
           type: 'zenmoney.transaction.bulk.edit',
           payload: { ids, tags: [tagId], comment: 'Bulk comment' },
         },
-        direct: ctx =>
-          compileBulkEditTransactions(
-            data,
-            ids,
-            { tags: [tagId], comment: 'Bulk comment' },
-            ctx
-          ),
+        direct: () =>
+          compileBulkEditTransactions(data, ids, {
+            tags: [tagId],
+            comment: 'Bulk comment',
+          }),
       }
     },
   },
@@ -185,7 +153,7 @@ const routingCases: Array<{
           type: 'zenmoney.account.inBalance.set',
           payload: { id, inBalance },
         },
-        direct: ctx => compilePatchAccount(data, { id, inBalance }, ctx),
+        direct: () => compilePatchAccount(data, { id, inBalance }),
       }
     },
   },
@@ -198,7 +166,7 @@ const routingCases: Array<{
       return {
         data,
         command: { type: 'zerro.envelope.rename', payload },
-        direct: ctx => compileRenameEnvelope(data, payload, ctx),
+        direct: () => compileRenameEnvelope(data, payload),
       }
     },
   },
@@ -211,7 +179,7 @@ const routingCases: Array<{
       return {
         data,
         command: { type: 'zerro.envelope.color.set', payload },
-        direct: ctx => compileSetEnvelopeColor(data, payload, ctx),
+        direct: () => compileSetEnvelopeColor(data, payload),
       }
     },
   },
@@ -255,7 +223,7 @@ const routingCases: Array<{
           type: 'zenmoney.transaction.combineToOutcome',
           payload: { ids: ['out', 'in'] },
         },
-        direct: ctx => compileCombineToOutcome(data, ['out', 'in'], ctx),
+        direct: () => compileCombineToOutcome(data, ['out', 'in']),
       }
     },
   },

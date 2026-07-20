@@ -111,22 +111,19 @@ describe('hidden data write codecs', () => {
     )
 
     expect(patch.account).toBeUndefined()
-    expect(patch.reminder).toEqual([
-      makeReminder({
-        id: 'settings',
-        changed: 200,
-        user: 1,
-        incomeAccount: 'data',
-        outcomeAccount: 'data',
-        income: 1,
-        startDate: '2020-01-01',
-        endDate: '2020-01-01',
-        comment: JSON.stringify({
-          type: HiddenDataType.UserSettings,
-          payload: { emojiIcons: true },
-        }),
+    expect(patch.reminder?.[0]).toMatchObject({
+      id: 'settings',
+      incomeAccount: 'data',
+      outcomeAccount: 'data',
+      income: 1,
+      startDate: '2020-01-01',
+      endDate: '2020-01-01',
+      comment: JSON.stringify({
+        type: HiddenDataType.UserSettings,
+        payload: { emojiIcons: true },
       }),
-    ])
+    })
+    expect(patch.reminder?.[0]).not.toHaveProperty('changed')
   })
 
   it('sets monthly hidden data and deletes empty monthly payloads', () => {
@@ -184,8 +181,6 @@ describe('hidden data write codecs', () => {
         {
           id: 'jan',
           object: DataEntity.Reminder,
-          stamp: 300,
-          user: 1,
         },
       ],
     })
@@ -193,9 +188,7 @@ describe('hidden data write codecs', () => {
 
   it('keeps reset of missing simple hidden data as a no-op patch', () => {
     expect(
-      compileResetSimpleHiddenData(makeStore(), HiddenDataType.UserSettings, {
-        now: () => 100,
-      })
+      compileResetSimpleHiddenData(makeStore(), HiddenDataType.UserSettings)
     ).toEqual({})
   })
 

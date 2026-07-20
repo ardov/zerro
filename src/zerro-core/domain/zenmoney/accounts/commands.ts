@@ -2,7 +2,7 @@ import type { TDataStore } from '../store'
 import {
   DataEntity,
   type TCoreContext,
-  type TNormalizedPatch,
+  type TIntentPatch,
 } from '../../../types'
 import { getRootUserId } from '../users'
 import { makeAccount, type TAccountFactoryDraft } from './factory'
@@ -15,7 +15,7 @@ export function compileCreateAccount(
   data: TDataStore,
   draft: TAccountDraft,
   ctx: TCoreContext
-): TNormalizedPatch {
+): TIntentPatch {
   const user = getRootUserId(data)
   if (!user) throw new Error('No user')
 
@@ -26,41 +26,25 @@ export function compileCreateAccount(
 
 export function compilePatchAccount(
   data: TDataStore,
-  patch: TAccountPatch | TAccountPatch[],
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
+  patch: TAccountPatch | TAccountPatch[]
+): TIntentPatch {
   const list = Array.isArray(patch) ? patch : [patch]
 
-  return {
-    account: list.map(item => {
-      if (!item.id) throw new Error('Trying to patch account without id')
+  list.forEach(item => {
+    if (!item.id) throw new Error('Trying to patch account without id')
+    if (!getAccounts(data)[item.id]) throw new Error('Account not found')
+  })
 
-      const current = getAccounts(data)[item.id]
-      if (!current) throw new Error('Account not found')
-
-      return { ...current, ...item, changed: ctx.now() }
-    }),
-  }
+  return { account: list }
 }
 
 export function compileDeleteAccount(
   data: TDataStore,
-  id: TAccountId,
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
+  id: TAccountId
+): TIntentPatch {
   if (!getAccounts(data)[id]) throw new Error('Account not found')
 
-  const user = getRootUserId(data)
-  if (!user) throw new Error('No user')
-
   return {
-    deletion: [
-      {
-        id,
-        object: DataEntity.Account,
-        stamp: ctx.now(),
-        user,
-      },
-    ],
+    deletion: [{ id, object: DataEntity.Account }],
   }
 }

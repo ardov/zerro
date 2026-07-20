@@ -61,7 +61,7 @@ export function makeMonthlyHiddenStore<TPayload>(
     }
 
   const setData =
-    (payload: TPayload, month: TISOMonth): AppThunk<TReminder | void> =>
+    (payload: TPayload, month: TISOMonth): AppThunk =>
     (dispatch, getState) => {
       if (!isISOMonth(month)) throw new Error('Invalid month')
 
@@ -80,7 +80,7 @@ export function makeMonthlyHiddenStore<TPayload>(
       const dataAccId = dispatch(prepareDataAccount())
       const existingReminder = getDataReminders(state)[month]
 
-      return dispatch(
+      dispatch(
         setReminder({
           id: existingReminder?.id,
           incomeAccount: dataAccId,
@@ -90,7 +90,7 @@ export function makeMonthlyHiddenStore<TPayload>(
           endDate: '2020-01-01',
           comment: JSON.stringify({ type, month, payload }),
         })
-      )[0]
+      )
     }
 
   return {

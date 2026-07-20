@@ -1,5 +1,10 @@
 import type { TDataStore } from '../../domain/zenmoney/store'
-import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../types'
+import {
+  isCompiled,
+  type TCompiled,
+  type TCoreContext,
+  type TIntentPatch,
+} from '../../types'
 import { issuePatch, type TCommand } from '../../application/materializer'
 import {
   appendOutbox,
@@ -15,7 +20,6 @@ export type TZerroEngineState = {
   baseServerTimestamp?: number
   outbox: TCommand[]
   outboxHead: number
-  inbox?: TNormalizedPatch | null
 }
 
 export type TZerroEngineInput = {
@@ -23,7 +27,6 @@ export type TZerroEngineInput = {
   baseServerTimestamp?: number
   outbox?: TCommand[]
   outboxHead?: number
-  inbox?: TNormalizedPatch | null
   ctx: TCoreContext
 }
 
@@ -31,7 +34,7 @@ export type TCommandCompiler<TCommand, TReceipt = unknown> = (
   data: TDataStore,
   command: TCommand,
   ctx: TCoreContext
-) => TNormalizedPatch | TCompiled<TReceipt>
+) => TIntentPatch | TCompiled<TReceipt>
 
 export type TExecuteResult<TReceipt = unknown> = {
   command: TCommand
@@ -47,7 +50,6 @@ export function createZerroEngine(input: TZerroEngineInput) {
       input.outboxHead ?? input.outbox?.length ?? 0,
       input.outbox?.length ?? 0
     ),
-    inbox: input.inbox ?? null,
   }
 
   return {
@@ -90,10 +92,7 @@ export function createZerroEngine(input: TZerroEngineInput) {
     return { command }
   }
 
-  function executeCompiled(
-    _sourceCommand: unknown,
-    patch: TNormalizedPatch
-  ): TCommand {
+  function executeCompiled(patch: TIntentPatch): TCommand {
     return appendCommand(issuePatch(getCurrent(), patch, input.ctx.now()))
   }
 
@@ -123,10 +122,4 @@ export function createZerroEngine(input: TZerroEngineInput) {
     }
     return true
   }
-}
-
-function isCompiled<TReceipt>(
-  value: TNormalizedPatch | TCompiled<TReceipt>
-): value is TCompiled<TReceipt> {
-  return 'patch' in value && 'receipt' in value
 }

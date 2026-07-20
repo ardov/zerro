@@ -50,7 +50,7 @@ describe('zenmoney reminder commands', () => {
     )
   })
 
-  it('patches existing reminders and preserves current fields', () => {
+  it('compiles sparse patches for existing reminders', () => {
     const current = makeTestReminder({
       id: 'reminder',
       changed: 1,
@@ -69,17 +69,7 @@ describe('zenmoney reminder commands', () => {
     )
     const next = applyPatch(data, patch)
 
-    expect(patch.reminder?.[0]).toEqual(
-      makeTestReminder({
-        id: 'reminder',
-        changed: 200,
-        user: 1,
-        incomeAccount: 'cash',
-        outcomeAccount: 'card',
-        comment: 'New',
-        outcome: 50,
-      })
-    )
+    expect(patch.reminder?.[0]).toEqual({ id: 'reminder', comment: 'New' })
     expect(next.reminder.reminder.comment).toBe('New')
     expect(data.reminder.reminder.comment).toBe('Old')
   })
@@ -110,7 +100,7 @@ describe('zenmoney reminder commands', () => {
     )
   })
 
-  it('deletes existing reminders through normalized deletion patches', () => {
+  it('compiles sparse deletion intent for existing reminders', () => {
     const data = makeStore({
       user: {
         1: { id: 1, parent: null },
@@ -120,7 +110,7 @@ describe('zenmoney reminder commands', () => {
       },
     })
 
-    const patch = compileDeleteReminder(data, 'reminder', { now: () => 200 })
+    const patch = compileDeleteReminder(data, 'reminder')
     const next = applyPatch(data, patch)
 
     expect(patch).toEqual({
@@ -128,8 +118,6 @@ describe('zenmoney reminder commands', () => {
         {
           id: 'reminder',
           object: DataEntity.Reminder,
-          stamp: 200,
-          user: 1,
         },
       ],
     })
@@ -143,9 +131,7 @@ describe('zenmoney reminder commands', () => {
       } as any,
     })
 
-    expect(compileDeleteReminder(data, 'missing', { now: () => 200 })).toEqual(
-      {}
-    )
+    expect(compileDeleteReminder(data, 'missing')).toEqual({})
   })
 
   it('validates reminder set and delete commands', () => {
@@ -169,8 +155,6 @@ describe('zenmoney reminder commands', () => {
       )
     ).toThrow('Missing incomeAccount or outcomeAccount')
 
-    expect(() =>
-      compileDeleteReminder(makeStore(), 'reminder', { now: () => 1 })
-    ).toThrow('User is not defined')
+    expect(() => compileDeleteReminder(makeStore(), 'reminder')).not.toThrow()
   })
 })

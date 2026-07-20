@@ -1,5 +1,5 @@
 import type { TDataStore } from '../../zenmoney/store'
-import type { TCoreContext, TNormalizedPatch } from '../../../types'
+import type { TCoreContext, TIntentPatch } from '../../../types'
 import {
   compileResetSimpleHiddenData,
   compileSetSimpleHiddenData,
@@ -12,7 +12,7 @@ export function compilePatchUserSettings(
   data: TDataStore,
   update: TUserSettingsPatch,
   ctx: TCoreContext
-): TNormalizedPatch {
+): TIntentPatch {
   const payload = { ...getStoredUserSettings(data), ...update }
 
   Object.keys(payload).forEach(key => {
@@ -28,9 +28,6 @@ export function compilePatchUserSettings(
   )
 }
 
-export function compileResetUserSettings(
-  data: TDataStore,
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
-  return compileResetSimpleHiddenData(data, HiddenDataType.UserSettings, ctx)
+export function compileResetUserSettings(data: TDataStore): TIntentPatch {
+  return compileResetSimpleHiddenData(data, HiddenDataType.UserSettings)
 }

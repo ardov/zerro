@@ -9,7 +9,7 @@ import type { TUser, TUserId } from './types'
 
 export type TUserSource = Pick<TDataStore, 'user' | 'instrument'>
 
-export function getUsers(data: TUserSource): ById<TUser> {
+function getUsers(data: TUserSource): ById<TUser> {
   return data.user
 }
 

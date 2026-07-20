@@ -7,22 +7,16 @@ import { compilePatchMerchant } from './commands'
 import { makeMerchant } from './factory'
 
 describe('zenmoney merchant commands', () => {
-  it('patches existing merchants with deterministic time', () => {
+  it('compiles sparse patches for existing merchants', () => {
     const data = makeStore({
       merchant: {
         shop: makeTestMerchant({ id: 'shop', title: 'Shop', changed: 1 }),
       },
     })
 
-    const patch = compilePatchMerchant(
-      data,
-      { id: 'shop', title: 'Market' },
-      { now: () => 100 }
-    )
+    const patch = compilePatchMerchant(data, { id: 'shop', title: 'Market' })
 
-    expect(patch.merchant?.[0]).toEqual(
-      makeTestMerchant({ id: 'shop', title: 'Market', changed: 100 })
-    )
+    expect(patch.merchant?.[0]).toEqual({ id: 'shop', title: 'Market' })
   })
 
   it('creates production merchant defaults through the merchant factory', () => {
@@ -49,17 +43,11 @@ describe('zenmoney merchant commands', () => {
       },
     })
 
+    expect(() => compilePatchMerchant(data, { title: 'No id' } as any)).toThrow(
+      'Trying to patch merchant without id'
+    )
     expect(() =>
-      compilePatchMerchant(data, { title: 'No id' } as any, { now: () => 1 })
-    ).toThrow('Trying to patch merchant without id')
-    expect(() =>
-      compilePatchMerchant(
-        data,
-        { id: 'missing', title: 'Missing' },
-        {
-          now: () => 1,
-        }
-      )
+      compilePatchMerchant(data, { id: 'missing', title: 'Missing' })
     ).toThrow('Merchant not found')
   })
 })

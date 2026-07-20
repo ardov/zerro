@@ -25,10 +25,9 @@ describe('createZerroEngine', () => {
       ctx: { now: () => 100, uuid: () => 'entry-1' },
     })
 
-    const command = engine.executeCompiled(
-      { type: 'account.patch' },
-      { account: [makeAccount({ id: 'cash', title: 'Wallet' })] }
-    )
+    const command = engine.executeCompiled({
+      account: [makeAccount({ id: 'cash', title: 'Wallet' })],
+    })
 
     expect(command).toEqual(makeCommand('Wallet', 100))
     expect(engine.getCurrent().account.cash.title).toBe('Wallet')
@@ -80,10 +79,9 @@ describe('createZerroEngine', () => {
 
     expect(engine.undo()).toBe(true)
     expect(engine.getCurrent().account.cash.title).toBe('Wallet')
-    engine.executeCompiled(
-      { type: 'account.patch' },
-      { account: [makeAccount({ id: 'cash', title: 'Vault' })] }
-    )
+    engine.executeCompiled({
+      account: [makeAccount({ id: 'cash', title: 'Vault' })],
+    })
 
     expect(engine.getState().outbox.map(command => command.issuedAt)).toEqual([
       100, 300,

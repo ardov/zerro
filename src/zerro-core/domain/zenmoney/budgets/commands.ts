@@ -1,11 +1,9 @@
+import { toISODate } from '../../shared/date'
 import type { TDataStore } from '../store'
 import type { TISOMonth } from '../primitives'
-import type { TCoreContext, TNormalizedPatch } from '../../../types'
+import type { TIntentPatch } from '../../../types'
 import type { TTagId } from '../tags'
-import { getRootUserId } from '../users'
-import { makeTagBudget } from './factory'
 import { toBudgetId } from './id'
-import { getTagBudgets } from './read'
 
 export type TTagBudgetUpdate = {
   tag: TTagId | null
@@ -15,33 +13,17 @@ export type TTagBudgetUpdate = {
 
 export function compileSetTagBudget(
   data: TDataStore,
-  update: TTagBudgetUpdate | TTagBudgetUpdate[],
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
+  update: TTagBudgetUpdate | TTagBudgetUpdate[]
+): TIntentPatch {
   const updates = Array.isArray(update) ? update : [update]
   if (!updates.length) return {}
 
-  const user = getRootUserId(data)
-  if (!user) throw new Error('No user')
-
-  const tagBudgets = getTagBudgets(data)
-
   return {
-    budget: updates.map(({ tag, month, value }) => {
-      const id = toBudgetId(month, tag)
-      const current = tagBudgets[id]
-
-      return makeTagBudget(
-        {
-          ...current,
-          user: current?.user || user,
-          tag,
-          date: month,
-          outcome: value,
-          changed: ctx.now(),
-        },
-        ctx
-      )
-    }),
+    budget: updates.map(({ tag, month, value }) => ({
+      id: toBudgetId(month, tag),
+      tag,
+      date: toISODate(month),
+      outcome: value,
+    })),
   }
 }

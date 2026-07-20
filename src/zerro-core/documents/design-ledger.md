@@ -25,8 +25,9 @@
 - Session reads are grouped by domain and use `get*` names.
 - A session represents one immutable snapshot and memoizes each node once.
 - Redux owns cross-snapshot memoization with granular entity-shaped selectors.
-- The projection dependency map is maintained as Mermaid documentation in
-  `architecture.md`, not as executable graph metadata.
+- The projection dependency graph is not maintained as executable graph
+  metadata or a hand-kept diagram; the lazy memo wiring in
+  `application/session/createZerroSession.ts` is the readable reference.
 - Selector, hook, command, and app-facing types live in their domain modules;
   `redux/state.ts` owns raw inputs and `commandRead.ts` owns command-time reads.
 - Domain namespaces are the desired adapter shape. Add and retain members only
@@ -45,60 +46,24 @@
 
 ### Commands and materialization
 
-- The outbox stores `TCommand[]` directly. Every command has the same `patch`
-  shape: `type: 'patch'`, `issuedAt`, and a sparse entity intent patch. There is
-  no separate outbox-entry wrapper, entry id, or persisted materialized patch.
-- Entity patch types live beside entity types and use
-  `EntityPatch<TEntity, TWritableFields>`. `id` is required and every field that
-  may appear in sparse intent is explicitly listed.
+The persisted command shape, upsert semantics, materialization pipeline, and
+ownership split are specified once in
+[architecture.md](./architecture.md#change-pipeline). Decisions not restated
+there:
+
 - Writable field lists document the domain capability, not only fields used by
   current production callers. Every non-managed field that may be changed must
   be accepted, persisted, and materialized even before a UI exposes it.
-- `TIntentPatch` is a closed list of command-capable families: deletion,
-  account, merchant, tag, budget, reminder, and transaction. It does not inherit
-  reference/server-owned families from `TDiff`; issue and persistence reject
-  unsupported keys.
-- Entity patches use upsert semantics: an existing id is patched and a missing
-  id is created. Commands capture generated ids and every other nondeterministic
-  input before persistence.
-- Deletion intent stores entity identity; materialization supplies transport
-  metadata such as timestamps and ownership.
-- Commands set absolute values and remain idempotent. Relative operations such
-  as toggle or increment are resolved to absolute intent before issue.
-- Semantic Redux verbs may compile differently, but they all issue the same
-  persisted command type. Receipts are caller-only and are not replay state.
-- Local materialization first expands sparse primary intent to full entities,
-  then derives predicted server side effects. Transport materialization expands
-  primary intent only and must not echo predicted effects back to ZenMoney.
-- `applyPatch` applies only explicit changes and owns no cross-entity rules.
-- Canonical server diffs bypass local materialization.
-- Replay rematerializes the command prefix against `base` in order.
-- Target ownership is entity-shaped: entity domains own writable fields, sparse
-  primary expansion, and outgoing effects. The application materializer owns
-  command ordering and coordinates changes spanning entity maps.
 
 ### Replica and sync
 
-- The durable logical replica is `base`, `outbox`, and `outboxHead`; `current`
-  and request transport are derived.
-- Undo/redo move `outboxHead`; append after undo drops the redo tail.
+The replica model, undo/redo rules, manual-sync commit boundary, primary-only
+transport, and conflict policy are specified in
+[architecture.md](./architecture.md#replica-model). Decisions not restated
+there:
+
 - The loaded app maps platform history shortcuts to undo/redo only outside
   text-editing controls and only when that history direction is available.
-- Persistence stores versioned replay inputs plus the base server timestamp,
-  not derived state.
-- Manual sync drops the redo tail, captures the sent prefix length,
-  builds primary-only transport with fresh entity versions, and applies the
-  response as canonical. Any successful response acknowledges the whole sent
-  prefix; Core removes exactly `sentOutboxCount` commands without inspecting
-  final field values. Undo/redo remains disabled until the request finishes.
-- Commands appended while a request is active remain after the acknowledged
-  prefix and replay over the new canonical base.
-- First-stage conflict policy is field-level last write wins within command
-  order. Several commands may touch the same field; the last one determines the
-  final value without making earlier commands unacknowledged.
-- Primary-only transport replays from `base`, records the last operation for
-  each touched identity, and reads final full entities from that working
-  snapshot. It never reads UI `current` or sends predicted effects.
 - Background sync does not classify commands as rebase-safe versus blocking:
   every admitted command follows the same sparse replay contract.
 
@@ -171,5 +136,5 @@ useful.
 - Move an answer into settled decisions only when it is implemented or
   explicitly accepted.
 - Remove a bridge with its last consumer.
-- Put concrete local smells in [cleanup-notes.md](./cleanup-notes.md).
+- Put concrete local smells in [notes.md](./notes.md).
 - Put implementation history in Git, not this ledger.

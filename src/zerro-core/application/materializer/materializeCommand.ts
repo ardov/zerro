@@ -1,8 +1,10 @@
 import type { TMsTime } from '../../domain/zenmoney/primitives'
-import type {
-  TDataStore,
-  TDeletionIntent,
-  TDiff,
+import {
+  intentEntityKeys,
+  intentPatchKeys,
+  type TDataStore,
+  type TDiff,
+  type TIntentPatch,
 } from '../../domain/zenmoney/store'
 import {
   makeTransaction,
@@ -37,29 +39,8 @@ import {
 } from '../../domain/zenmoney/tags'
 import { getRootUserId } from '../../domain/zenmoney/users'
 
-export type TIntentPatch = {
-  deletion?: TDeletionIntent[]
-  account?: TAccountPatch[]
-  merchant?: TMerchantPatch[]
-  tag?: TTagPatch[]
-  budget?: TBudgetPatch[]
-  reminder?: TReminderPatch[]
-  transaction?: TTransactionPatch[]
-}
-
-export const intentEntityKeys = [
-  'account',
-  'merchant',
-  'tag',
-  'budget',
-  'reminder',
-  'transaction',
-] as const satisfies readonly Exclude<keyof TIntentPatch, 'deletion'>[]
-
-export const intentPatchKeys = [
-  'deletion',
-  ...intentEntityKeys,
-] as const satisfies readonly (keyof TIntentPatch)[]
+export { intentPatchKeys } from '../../domain/zenmoney/store'
+export type { TIntentPatch } from '../../domain/zenmoney/store'
 
 const intentPatchKeySet = new Set<string>(intentPatchKeys)
 

@@ -2,7 +2,7 @@ import { hex2int, isHEX } from '../../zenmoney/colors'
 import type { ById } from '../../shared/types'
 import type { TFxCode } from '../../zenmoney/instruments'
 import type { TDataStore } from '../../zenmoney/store'
-import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../../types'
+import type { TCompiled, TCoreContext, TIntentPatch } from '../../../types'
 import {
   compileCreateTag,
   compilePatchAccount,
@@ -20,7 +20,7 @@ import {
   getEnvelopeMeta,
   type TEnvelopeMetaPatch,
 } from '../envelope-meta'
-import { mergeNormalizedPatches } from '../hidden-data'
+import { mergePatches } from '../hidden-data'
 import type { TEnvelope, TEnvNode, TGroupNode } from './build'
 
 type TEnvelopePatchInput = {
@@ -123,7 +123,7 @@ export function compileCreateEnvelope(
       : {}
 
   return {
-    patch: mergeNormalizedPatches(tagPatch, metadataPatch),
+    patch: mergePatches(tagPatch, metadataPatch),
     receipt: { envelopeId },
   }
 }
@@ -157,7 +157,7 @@ export function compileApplyEnvelopeStructure(
   envelopes: ById<TEnvelope>,
   input: TApplyEnvelopeStructureInput,
   ctx: TCoreContext
-): TNormalizedPatch {
+): TIntentPatch {
   const drafts: TEnvelopePatchInput[] = []
   // Index counts every flattened node, group nodes included, matching the
   // index order the structure projector assigns after `flattenStructure`.
@@ -236,21 +236,20 @@ function flattenStructureDescendants(
 
 export function compileRenameEnvelope(
   data: TDataStore,
-  input: TRenameEnvelopeInput,
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
+  input: TRenameEnvelopeInput
+): TIntentPatch {
   const { type, id } = envId.parse(input.id)
 
   switch (type) {
     case EnvType.Tag:
       if (data.tag[id]?.title === input.name) return {}
-      return compilePatchTag(data, { id, title: input.name }, ctx)
+      return compilePatchTag(data, { id, title: input.name })
     case EnvType.Account:
       if (data.account[id]?.title === input.name) return {}
-      return compilePatchAccount(data, { id, title: input.name }, ctx)
+      return compilePatchAccount(data, { id, title: input.name })
     case EnvType.Merchant:
       if (data.merchant[id]?.title === input.name) return {}
-      return compilePatchMerchant(data, { id, title: input.name }, ctx)
+      return compilePatchMerchant(data, { id, title: input.name })
     case EnvType.Payee:
       // TODO: Resolve the payee envelope to all debtor.payeeNames variants and
       // patch `transaction.payee` for every matching transaction. Merchant
@@ -261,9 +260,8 @@ export function compileRenameEnvelope(
 
 export function compileSetEnvelopeColor(
   data: TDataStore,
-  input: TSetEnvelopeColorInput,
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
+  input: TSetEnvelopeColorInput
+): TIntentPatch {
   const { type, id } = envId.parse(input.id)
   if (type !== EnvType.Tag) {
     throw new Error('Only tag envelopes have configurable colors')
@@ -277,14 +275,14 @@ export function compileSetEnvelopeColor(
 
   const color = hex2int(input.colorHex)
   if (data.tag[id]?.color === color) return {}
-  return compilePatchTag(data, { id, color }, ctx)
+  return compilePatchTag(data, { id, color })
 }
 
 export function compileSetEnvelopeComment(
   data: TDataStore,
   input: TSetEnvelopeCommentInput,
   ctx: TCoreContext
-): TNormalizedPatch {
+): TIntentPatch {
   const currentComment = getEnvelopeMeta(data)[input.id]?.comment || ''
   if (currentComment === input.comment) return {}
 
@@ -296,7 +294,7 @@ export function compileUpdateEnvelopeSettings(
   envelopes: ById<TEnvelope>,
   input: TUpdateEnvelopeSettingsInput,
   ctx: TCoreContext
-): TNormalizedPatch {
+): TIntentPatch {
   const current = envelopes[input.id]
   if (!current) throw new Error('Envelope not found')
 
@@ -336,16 +334,16 @@ export function compilePatchEnvelope(
   envelopes: ById<TEnvelope>,
   draft: TEnvelopePatchInput | TEnvelopePatchInput[],
   ctx: TCoreContext
-): TNormalizedPatch {
+): TIntentPatch {
   const patches = getEnvelopePatches(draft, envelopes)
 
-  return mergeNormalizedPatches(
-    patches.tag.length ? compilePatchTag(data, patches.tag, ctx) : {},
+  return mergePatches(
+    patches.tag.length ? compilePatchTag(data, patches.tag) : {},
     patches.account.length
-      ? compilePatchAccount(data, patches.account, ctx)
+      ? compilePatchAccount(data, patches.account)
       : {},
     patches.merchant.length
-      ? compilePatchMerchant(data, patches.merchant, ctx)
+      ? compilePatchMerchant(data, patches.merchant)
       : {},
     patches.meta.length ? compilePatchEnvelopeMeta(data, patches.meta, ctx) : {}
   )

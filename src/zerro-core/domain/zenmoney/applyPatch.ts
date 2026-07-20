@@ -1,7 +1,11 @@
 import { keys } from '../shared/keys'
-import type { TDataStore, TDiff } from './store'
+import type { TDataStore, TDiff, TIntentPatch } from './store'
 
-export function applyPatch(base: TDataStore, patch: TDiff): TDataStore {
+/** Applies either a canonical diff or sparse local intent without deriving effects. */
+export function applyPatch(
+  base: TDataStore,
+  patch: TDiff | TIntentPatch
+): TDataStore {
   // Clone only the entity maps the patch touches; keep every other map's
   // reference from base. Downstream memoized selectors depend on unrelated
   // maps staying reference-stable across a write (architecture invariant 5), so
@@ -15,18 +19,23 @@ export function applyPatch(base: TDataStore, patch: TDiff): TDataStore {
   return next
 }
 
-function touchedEntityKeys(patch: TDiff): Set<string> {
+function touchedEntityKeys(patch: TDiff | TIntentPatch): Set<string> {
   const touched = new Set<string>()
   patch.deletion?.forEach(obj => touched.add(obj.object))
   keys(patch).forEach(key => {
-    if (key === 'serverTimestamp' || key === 'deletion' || !patch[key]) return
+    if (key === 'deletion' || !patch[key]) return
     touched.add(key)
   })
   return touched
 }
 
-export function applyPatchMutable(store: TDataStore, patch: TDiff): void {
-  if (patch.serverTimestamp) store.serverTimestamp = patch.serverTimestamp
+export function applyPatchMutable(
+  store: TDataStore,
+  patch: TDiff | TIntentPatch
+): void {
+  if ('serverTimestamp' in patch && patch.serverTimestamp) {
+    store.serverTimestamp = patch.serverTimestamp
+  }
 
   patch.deletion?.forEach(obj => {
     try {
@@ -39,7 +48,7 @@ export function applyPatchMutable(store: TDataStore, patch: TDiff): void {
   })
 
   keys(patch).forEach(key => {
-    if (key === 'serverTimestamp' || key === 'deletion' || !patch[key]) return
+    if (key === 'deletion' || !patch[key]) return
 
     if (!Array.isArray(patch[key])) {
       console.error('Expected array for key', key, 'got', typeof patch[key])
@@ -52,7 +61,7 @@ export function applyPatchMutable(store: TDataStore, patch: TDiff): void {
       try {
         // TODO: replace with typed entity-map access when core owns data types.
         // @ts-expect-error Dynamic ZenMoney entity access.
-        store[key][el.id] = el
+        store[key][el.id] = { ...store[key][el.id], ...el }
       } catch (error) {
         console.error('Error adding object', error, el)
       }

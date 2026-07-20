@@ -19,61 +19,30 @@ testing/         test-only builders and comparison helpers
 Dependencies point inward. Domain and application code do not import Redux,
 React, storage, localization, or app-layer runtime modules.
 
-## Current position
-
-- The app reads and writes Core through domain namespaces from
-  `zerro-core/redux`.
-- Production writes use semantic commands; generic patch APIs and legacy model
-  objects are retired.
-- Redux is the sole reactive owner of `base + command outbox + outboxHead`;
-  `current` and sync transport are rematerialized from commands.
-- The root entrypoint remains a small internal facade: constants, shared root
-  types, and the snapshot session. Replica primitives stay internal.
-- The outbox persists direct `TCommand[]` values with `type: 'patch'`,
-  `issuedAt`, and `TIntentPatch`. Account, reminder, merchant, tag, budget, and
-  transaction are the explicitly supported intent families; server-owned
-  families are rejected at issue and persistence boundaries. Hidden data
-  composes sparse account/reminder/deletion intent rather than defining another
-  patch type.
-  Transitional domain compilers may return complete results, which issue
-  reduces before the command reaches the outbox.
-- Entity domains own their writable contracts; primary expansion and outgoing
-  predicted effects are the next ownership target. The application materializer
-  owns ordered command replay and cross-entity orchestration. Balance and
-  cascade rules remain the next architectural phase.
-
-## Next slice: completion smoke
-
-Sparse factory-backed upsert replay is complete for production command entity
-families. Sync transport now replays primary intent from `base` with fresh
-`sentAt`, collects touched ids, and reads their final full values from that
-working snapshot. The next checkpoint is the reload and explicit-sync smoke in
-[testing.md](./testing.md).
-
 ## Start here
 
 1. Inspect `git status --short` and recent commits.
-2. Read [handoff.md](./handoff.md) for the next bounded checkpoint.
-3. Read [architecture.md](./architecture.md) before changing a boundary.
-4. Use [roadmap.md](./roadmap.md) for ordering.
-5. Check [design-ledger.md](./design-ledger.md) before changing a settled
+2. Read [notes.md](./notes.md) for the current position and next checkpoint.
+3. Read [architecture.md](./architecture.md) before changing a boundary; its
+   Commands section is the single canonical persisted command shape.
+4. Check [design-ledger.md](./design-ledger.md) before changing a settled
    decision.
-6. Use [cleanup-notes.md](./cleanup-notes.md) for deferred local smells.
+5. Use [simplification-plan.md](./simplification-plan.md) for the active
+   code/documentation diet workstreams.
 
-The handoff is routing, not proof. Git and current verification outrank stale
+The notes are routing, not proof. Git and current verification outrank stale
 prose.
 
 ## Document map
 
-| Document                                            | Purpose                                      |
-| --------------------------------------------------- | -------------------------------------------- |
-| [handoff.md](./handoff.md)                          | Current state and next checkpoint            |
-| [architecture.md](./architecture.md)                | Durable boundaries and runtime contracts     |
-| [roadmap.md](./roadmap.md)                          | Ordered completion plan                      |
-| [design-ledger.md](./design-ledger.md)              | Settled decisions, risks, and open questions |
-| [testing.md](./testing.md)                          | Verification policy and completion gate      |
-| [cleanup-notes.md](./cleanup-notes.md)              | Deferred concrete cleanup                    |
-| [ZenMoney sync API](../domain/zenmoney/sync-api.md) | Observed server behavior and wire shape      |
+| Document                                            | Purpose                                           |
+| --------------------------------------------------- | ------------------------------------------------- |
+| [architecture.md](./architecture.md)                | Durable boundaries and runtime contracts          |
+| [design-ledger.md](./design-ledger.md)              | Settled decisions, risks, and open questions      |
+| [notes.md](./notes.md)                              | Current position, remaining work, deferred smells |
+| [simplification-plan.md](./simplification-plan.md)  | Active simplification workstreams                 |
+| [testing.md](./testing.md)                          | Verification policy and completion gate           |
+| [ZenMoney sync API](../domain/zenmoney/sync-api.md) | Observed server behavior and wire shape           |
 
 Entity-specific ZenMoney behavior belongs beside its implementation under
 `domain/zenmoney/*/README.md`.
@@ -86,7 +55,7 @@ Entity-specific ZenMoney behavior belongs beside its implementation under
   domain layer.
 - Compare resulting state for command changes, not only patch shape.
 - Add public exports only for real consumers.
-- Update the relevant decision or handoff in the same commit as a boundary
+- Update the relevant decision or note in the same commit as a boundary
   change.
 
 ## Verification defaults

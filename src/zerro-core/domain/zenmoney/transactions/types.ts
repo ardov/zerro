@@ -55,7 +55,7 @@ export type TTransaction = Omit<TZmTransaction, 'changed' | 'created'> & {
 }
 
 /** Fields that a local transaction patch may set directly. */
-export const transactionEditableFields = [
+const transactionEditableFields = [
   'hold',
   'viewed',
   'qrCode',
@@ -113,13 +113,7 @@ export type TTransactionPatch = EntityPatch<
 >
 
 /** Fields accepted while creating a replacement transaction. */
-export const transactionRecreateFields = [
-  'created',
-  ...transactionEditableFields,
-] as const satisfies readonly (keyof TTransaction)[]
-
-export type TTransactionRecreateField =
-  (typeof transactionRecreateFields)[number]
+export type TTransactionRecreateField = 'created' | TTransactionEditableField
 
 export type TTransactionRecreatePatch = Partial<
   Pick<TTransaction, TTransactionRecreateField>

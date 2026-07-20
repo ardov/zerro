@@ -37,12 +37,12 @@ export function makeSimpleHiddenStore<TPayload>(
     }
   )
   const setData =
-    (payload: TPayload): AppThunk<TReminder> =>
+    (payload: TPayload): AppThunk =>
     (dispatch, getState) => {
       const state = getState()
       const dataAccId = dispatch(prepareDataAccount())
       const existingReminder = getDataReminder(state)
-      return dispatch(
+      dispatch(
         setReminder({
           id: existingReminder?.id,
           incomeAccount: dataAccId,
@@ -52,7 +52,7 @@ export function makeSimpleHiddenStore<TPayload>(
           endDate: '2020-01-01',
           comment: JSON.stringify({ type, payload }),
         })
-      )[0]
+      )
     }
 
   const resetData = (): AppThunk => (dispatch, getState) => {

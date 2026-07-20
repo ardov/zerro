@@ -1,9 +1,10 @@
-import type { TDiff as TNormalizedPatch } from './domain/zenmoney/store'
+import type { TIntentPatch } from './domain/zenmoney/store'
 
 export { DataEntity } from './domain/patch'
 export type {
   TDataStore,
   TDiff as TNormalizedPatch,
+  TIntentPatch,
 } from './domain/zenmoney/store'
 
 export type TCoreContext = {
@@ -12,6 +13,12 @@ export type TCoreContext = {
 }
 
 export type TCompiled<TReceipt> = {
-  patch: TNormalizedPatch
+  patch: TIntentPatch
   receipt: TReceipt
+}
+
+export function isCompiled<TReceipt>(
+  value: TIntentPatch | TCompiled<TReceipt>
+): value is TCompiled<TReceipt> {
+  return 'patch' in value && 'receipt' in value
 }

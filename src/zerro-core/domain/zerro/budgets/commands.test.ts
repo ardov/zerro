@@ -8,6 +8,10 @@ import {
   makeUser,
 } from '../../../testing/zenmoneyTestData'
 import { applyPatch, getTagBudgets } from '../../zenmoney'
+import {
+  issuePatch,
+  materializeCommand,
+} from '../../../application/materializer'
 import { EnvType, envId } from '../envelope-id'
 import { HiddenDataType } from '../hidden-data'
 import { compileSetBudget, compileSetEnvBudget } from './commands'
@@ -31,7 +35,10 @@ describe('env budget commands', () => {
         uuid: () => ids.shift() || 'unused',
       }
     )
-    const next = applyPatch(data, patch)
+    const next = applyPatch(
+      data,
+      materializeCommand(data, issuePatch(data, patch, 100))
+    )
 
     expect(patch.budget).toBeUndefined()
     expect(getEnvBudgets(next)).toEqual({
@@ -63,7 +70,10 @@ describe('env budget commands', () => {
         uuid: () => 'unused',
       }
     )
-    const next = applyPatch(data, patch)
+    const next = applyPatch(
+      data,
+      materializeCommand(data, issuePatch(data, patch, 100))
+    )
 
     expect(patch.reminder).toBeUndefined()
     expect(getTagBudgets(next)).toEqual({

@@ -1,15 +1,16 @@
+import { toISODate } from '../../shared/date'
 import type { Modify } from '../../shared/types'
 import type { TDataStore } from '../store'
 import {
   DataEntity,
   type TCoreContext,
-  type TNormalizedPatch,
+  type TIntentPatch,
 } from '../../../types'
 import type { TDateDraft } from '../primitives'
 import { getRootUserId } from '../users'
 import { makeReminder, type TReminderFactoryDraft } from './factory'
 import { getReminders } from './read'
-import type { TReminder, TReminderId, TReminderPatch } from './types'
+import type { TReminderId, TReminderPatch } from './types'
 
 export type TReminderDraft = Modify<
   Omit<TReminderFactoryDraft, 'user'>,
@@ -21,57 +22,44 @@ export function compileSetReminder(
   draft:
     TReminderDraft | TReminderPatch | Array<TReminderDraft | TReminderPatch>,
   ctx: TCoreContext
-): TNormalizedPatch {
+): TIntentPatch {
   const list = Array.isArray(draft) ? draft : [draft]
 
   return {
     reminder: list.map(item => {
-      const current = hasId(item) ? getReminders(data)[item.id] : undefined
-      const changed = 'changed' in item ? item.changed : undefined
-      const patched = {
-        ...(current || ({} as TReminder)),
-        ...item,
-        changed: changed || ctx.now(),
-      } as TReminderFactoryDraft
-
-      if (!patched.user) {
-        const user = getRootUserId(data)
-        if (!user) throw new Error('User is not defined')
-        patched.user = user
+      // Update: pass the sparse patch through; issue keeps only changed fields.
+      if (item.id && getReminders(data)[item.id]) {
+        const {
+          changed: _ignored,
+          startDate,
+          endDate,
+          ...fields
+        } = item as TReminderDraft
+        const patch: TReminderPatch = { ...fields, id: item.id }
+        if (startDate !== undefined) patch.startDate = toISODate(startDate)
+        if (endDate !== undefined) patch.endDate = toISODate(endDate)
+        return patch
       }
-      if (!patched.incomeAccount || !patched.outcomeAccount) {
+
+      // Creation: the factory captures generated ids and defaults at issue time.
+      const user = getRootUserId(data)
+      if (!user) throw new Error('User is not defined')
+      if (!item.incomeAccount || !item.outcomeAccount) {
         throw new Error('Missing incomeAccount or outcomeAccount')
       }
 
-      return makeReminder(patched, ctx)
+      return makeReminder({ ...item, user } as TReminderFactoryDraft, ctx)
     }),
   }
 }
 
 export function compileDeleteReminder(
   data: TDataStore,
-  id: TReminderId,
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
-  const user = getRootUserId(data)
-  if (!user) throw new Error('User is not defined')
-
+  id: TReminderId
+): TIntentPatch {
   if (!getReminders(data)[id]) return {}
 
   return {
-    deletion: [
-      {
-        id,
-        object: DataEntity.Reminder,
-        stamp: ctx.now(),
-        user,
-      },
-    ],
+    deletion: [{ id, object: DataEntity.Reminder }],
   }
-}
-
-function hasId(
-  reminder: TReminderDraft | TReminderPatch
-): reminder is TReminderPatch {
-  return !!reminder.id
 }

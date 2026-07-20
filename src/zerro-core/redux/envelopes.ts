@@ -7,7 +7,6 @@ export {
   updateEnvelopeSettings as updateSettings,
 } from './commands'
 import { createSelector } from '@reduxjs/toolkit'
-import { i18n } from '6-shared/localization'
 import type { RootState } from 'store'
 import {
   buildEnvelopes,
@@ -15,8 +14,9 @@ import {
   getKeepingEnvelopes,
   getZerroSavingAccounts,
 } from '../domain/zerro'
+import { getCommandEnvelopeLabels } from './commandRead'
 import * as debtors from './debtors'
-import { presentEnvelopes, type TEnvelopeLabels } from './envelopePresentation'
+import { presentEnvelopes } from './envelopePresentation'
 import {
   selectAccountSlice,
   selectReminderSlice,
@@ -49,21 +49,8 @@ export const selectDomain = (state: RootState) =>
   selectDomainProjection(state).byId
 export const selectDomainStructure = (state: RootState) =>
   selectDomainProjection(state).structure
-let labelsCacheLanguage: string | undefined
-let labelsCache: TEnvelopeLabels | undefined
-const selectLabels = () => {
-  if (labelsCache && labelsCacheLanguage === i18n.language) return labelsCache
-  labelsCacheLanguage = i18n.language
-  labelsCache = {
-    defaultTagGroup: i18n.t('defaultTagGroup', { ns: 'common' }),
-    defaultAccountGroup: i18n.t('defaultAccountGroup', { ns: 'common' }),
-    defaultMerchantGroup: i18n.t('defaultMerchantGroup', { ns: 'common' }),
-    defaultPayeeGroup: i18n.t('defaultPayeeGroup', { ns: 'common' }),
-  }
-  return labelsCache
-}
 const selectPresentedProjection = createSelector(
-  [selectDomainProjection, tags.selectPopulated, selectLabels],
+  [selectDomainProjection, tags.selectPopulated, getCommandEnvelopeLabels],
   (compiled, tags, labels) => presentEnvelopes(compiled.byId, tags, labels)
 )
 export const selectAll = (state: RootState) =>

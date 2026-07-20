@@ -28,7 +28,7 @@ describe('FX rate commands', () => {
       rates,
     })
 
-    const resetPatch = compileResetFxRates(withRates, '2026-06', ctx)
+    const resetPatch = compileResetFxRates(withRates, '2026-06')
     expect(getStoredFxRates(applyPatch(withRates, resetPatch))).toEqual({})
   })
 })

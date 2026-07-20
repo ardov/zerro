@@ -7,7 +7,7 @@ export function hashJson(value: unknown): string {
     .digest('hex')
 }
 
-export function stableStringify(value: unknown): string {
+function stableStringify(value: unknown): string {
   if (typeof value === 'undefined') return 'undefined'
   if (value === null || typeof value !== 'object') return JSON.stringify(value)
 

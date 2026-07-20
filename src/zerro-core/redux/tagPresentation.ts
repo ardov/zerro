@@ -45,13 +45,6 @@ export const nullTag: TTag = {
   picture: null,
 }
 
-export function populateTags(
-  rawTags: ById<TTag>,
-  userSettings: TTagPresentationSettings
-): ById<TTagPopulated> {
-  return presentTags(rawTags, userSettings)
-}
-
 export function presentTags(
   rawTags: ById<TTag>,
   userSettings: TTagPresentationSettings

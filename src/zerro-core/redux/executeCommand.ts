@@ -2,17 +2,18 @@ import { v1 as uuidv1 } from 'uuid'
 import type { AppDispatch, AppThunk, RootState } from 'store'
 import { appendClientCommand } from 'store/data'
 
+import { issuePatch, materializeCommand } from '../application/materializer'
 import {
-  issuePatch,
-  materializeCommand,
+  isCompiled,
+  type TCompiled,
+  type TCoreContext,
   type TIntentPatch,
-} from '../application/materializer'
-import type { TCompiled, TCoreContext, TNormalizedPatch } from '../types'
+} from '../types'
 
 export type TReduxCommandCompiler<TReceipt = unknown> = (
   state: RootState,
   ctx: TCoreContext
-) => TNormalizedPatch | TCompiled<TReceipt>
+) => TIntentPatch | TCompiled<TReceipt>
 
 // Late-bound lookups so Date.now/uuid mocks installed after module load work.
 const defaultCtx = { now: () => Date.now(), uuid: () => uuidv1() }
@@ -23,7 +24,6 @@ const defaultCtx = { now: () => Date.now(), uuid: () => uuidv1() }
  * without entering the adapter selector graph during module initialization.
  */
 export function executeReduxCommand<TReceipt = unknown>(
-  _sourceCommand: unknown,
   compile: TReduxCommandCompiler<TReceipt>
 ): AppThunk<TReceipt | undefined> {
   return (dispatch, getState) => {
@@ -48,7 +48,7 @@ export function executeReduxPatch(patch: TIntentPatch): AppThunk {
 function appendIntentPatch(
   dispatch: AppDispatch,
   state: RootState,
-  patch: TNormalizedPatch | TIntentPatch
+  patch: TIntentPatch
 ): void {
   const command = issuePatch(state.data.current, patch, defaultCtx.now())
   const materialized = materializeCommand(state.data.current, command)
@@ -57,12 +57,6 @@ function appendIntentPatch(
   dispatch(appendClientCommand(command))
 }
 
-function isEmptyPatch(patch: TNormalizedPatch): boolean {
+function isEmptyPatch(patch: TIntentPatch): boolean {
   return Object.keys(patch).length === 0
-}
-
-function isCompiled<TReceipt>(
-  value: TNormalizedPatch | TCompiled<TReceipt>
-): value is TCompiled<TReceipt> {
-  return 'patch' in value && 'receipt' in value
 }

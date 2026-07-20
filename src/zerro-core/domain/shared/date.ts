@@ -44,7 +44,7 @@ export function toISOMonth(date: TDateDraft): TISOMonth {
   return `${yyyy}-${mm}` as TISOMonth
 }
 
-export function nextDay(d: TDateDraft) {
+function nextDay(d: TDateDraft) {
   const date = parseDate(d)
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
 }
@@ -54,7 +54,7 @@ export function nextMonth(d: TDateDraft) {
   return new Date(date.getFullYear(), date.getMonth() + 1, 1)
 }
 
-export function nextYear(d: TDateDraft) {
+function nextYear(d: TDateDraft) {
   const date = parseDate(d)
   return new Date(date.getFullYear() + 1, 0, 1)
 }
@@ -68,7 +68,7 @@ export function isISOMonth(date?: unknown): date is TISOMonth {
 }
 
 /** Checks if string is valid ISO date */
-export function isISODate(date?: unknown): date is TISODate {
+function isISODate(date?: unknown): date is TISODate {
   if (!date) return false
   if (typeof date !== 'string') return false
   const regex = /\d{4}-\d{2}-\d{2}/g // 0000-00-00
@@ -81,7 +81,7 @@ export enum GroupBy {
   Year = 'year',
 }
 
-export function toGroup(date: TDateDraft, aggregation: GroupBy): TISODate {
+function toGroup(date: TDateDraft, aggregation: GroupBy): TISODate {
   const isoDate = toISODate(date)
   switch (aggregation) {
     case GroupBy.Year:
@@ -95,7 +95,7 @@ export function toGroup(date: TDateDraft, aggregation: GroupBy): TISODate {
   }
 }
 
-export function nextGroup(date: TDateDraft, aggregation: GroupBy): TISODate {
+function nextGroup(date: TDateDraft, aggregation: GroupBy): TISODate {
   const currGroup = toGroup(date, aggregation)
   switch (aggregation) {
     case GroupBy.Year:

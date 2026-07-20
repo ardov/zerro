@@ -28,7 +28,7 @@ export type TAccountPopulated = TAccount & {
 }
 
 /** UI-friendly account projection. Currency metadata stays an explicit input. */
-export function populateAccount(
+function populateAccount(
   account: TAccount,
   instrumentCodeById: Record<TInstrumentId, TFxCode>
 ): TAccountPopulated {

@@ -155,50 +155,41 @@ describe('envelope commands', () => {
       tag: { food: makeTag({ id: 'food', title: 'Food', color: 0x00ff00 }) },
     })
     const id = envId.get(EnvType.Tag, 'food')
-    const ctx = { now: () => 100 }
-
     const colored = applyPatch(
       data,
-      compileSetEnvelopeColor(data, { id, colorHex: '#00ff00' }, ctx)
+      compileSetEnvelopeColor(data, { id, colorHex: '#00ff00' })
     )
     const cleared = applyPatch(
       coloredData,
-      compileSetEnvelopeColor(coloredData, { id, colorHex: null }, ctx)
+      compileSetEnvelopeColor(coloredData, { id, colorHex: null })
     )
 
     expect(colored.tag.food.color).toBe(0x00ff00)
     expect(cleared.tag.food.color).toBeNull()
-    expect(compileSetEnvelopeColor(data, { id, colorHex: null }, ctx)).toEqual(
-      {}
-    )
+    expect(compileSetEnvelopeColor(data, { id, colorHex: null })).toEqual({})
   })
 
   it('rejects invalid, uncategorized, and non-tag envelope colors', () => {
     const data = makeStore({
       tag: { food: makeTag({ id: 'food', title: 'Food' }) },
     })
-    const ctx = { now: () => 100 }
-
     expect(() =>
-      compileSetEnvelopeColor(
-        data,
-        { id: envId.get(EnvType.Tag, 'food'), colorHex: 'red' },
-        ctx
-      )
+      compileSetEnvelopeColor(data, {
+        id: envId.get(EnvType.Tag, 'food'),
+        colorHex: 'red',
+      })
     ).toThrow('Invalid envelope color')
     expect(() =>
-      compileSetEnvelopeColor(
-        data,
-        { id: envId.get(EnvType.Tag, null), colorHex: '#ff0000' },
-        ctx
-      )
+      compileSetEnvelopeColor(data, {
+        id: envId.get(EnvType.Tag, null),
+        colorHex: '#ff0000',
+      })
     ).toThrow('Uncategorized envelope color cannot be changed')
     expect(() =>
-      compileSetEnvelopeColor(
-        data,
-        { id: envId.get(EnvType.Account, 'cash'), colorHex: '#ff0000' },
-        ctx
-      )
+      compileSetEnvelopeColor(data, {
+        id: envId.get(EnvType.Account, 'cash'),
+        colorHex: '#ff0000',
+      })
     ).toThrow('Only tag envelopes have configurable colors')
   })
 
@@ -208,31 +199,26 @@ describe('envelope commands', () => {
       account: { cash: makeAccount({ id: 'cash', title: 'Cash' }) },
       merchant: { shop: makeMerchant({ id: 'shop', title: 'Shop' }) },
     })
-    const ctx = { now: () => 100 }
-
     const renamedTag = applyPatch(
       data,
-      compileRenameEnvelope(
-        data,
-        { id: envId.get(EnvType.Tag, 'food'), name: 'Groceries' },
-        ctx
-      )
+      compileRenameEnvelope(data, {
+        id: envId.get(EnvType.Tag, 'food'),
+        name: 'Groceries',
+      })
     )
     const renamedAccount = applyPatch(
       data,
-      compileRenameEnvelope(
-        data,
-        { id: envId.get(EnvType.Account, 'cash'), name: 'Wallet' },
-        ctx
-      )
+      compileRenameEnvelope(data, {
+        id: envId.get(EnvType.Account, 'cash'),
+        name: 'Wallet',
+      })
     )
     const renamedMerchant = applyPatch(
       data,
-      compileRenameEnvelope(
-        data,
-        { id: envId.get(EnvType.Merchant, 'shop'), name: 'Market' },
-        ctx
-      )
+      compileRenameEnvelope(data, {
+        id: envId.get(EnvType.Merchant, 'shop'),
+        name: 'Market',
+      })
     )
 
     expect(renamedTag.tag.food.title).toBe('Groceries')
@@ -244,21 +230,17 @@ describe('envelope commands', () => {
     const data = makeStore({
       tag: { food: makeTag({ id: 'food', title: 'Food' }) },
     })
-    const ctx = { now: () => 100 }
-
     expect(
-      compileRenameEnvelope(
-        data,
-        { id: envId.get(EnvType.Tag, 'food'), name: 'Food' },
-        ctx
-      )
+      compileRenameEnvelope(data, {
+        id: envId.get(EnvType.Tag, 'food'),
+        name: 'Food',
+      })
     ).toEqual({})
     expect(() =>
-      compileRenameEnvelope(
-        data,
-        { id: envId.get(EnvType.Payee, 'Alex'), name: 'Alexander' },
-        ctx
-      )
+      compileRenameEnvelope(data, {
+        id: envId.get(EnvType.Payee, 'Alex'),
+        name: 'Alexander',
+      })
     ).toThrow('Payee envelopes cannot be renamed')
   })
 
@@ -345,17 +327,14 @@ describe('envelope commands', () => {
       title: 'Groceries',
       color: 65280,
       parent: 'parent',
-      changed: 100,
     })
     expect(patch.account?.[0]).toMatchObject({
       id: 'cash',
       title: 'Wallet',
-      changed: 200,
     })
     expect(patch.merchant?.[0]).toMatchObject({
       id: 'shop',
       title: 'Market',
-      changed: 300,
     })
     expect(getEnvelopeMeta(next)[accountId]).toEqual({
       id: accountId,

@@ -7,24 +7,23 @@ import { compileCreateTag, compilePatchTag } from './commands'
 import { makeTag } from './factory'
 
 describe('zenmoney tag commands', () => {
-  it('patches existing tags with deterministic time', () => {
+  it('compiles sparse patches for existing tags', () => {
     const data = makeStore({
       tag: {
         food: makeTestTag({ id: 'food', title: 'Food', changed: 1 }),
       },
     })
 
-    const patch = compilePatchTag(
-      data,
-      { id: 'food', title: 'Groceries', budgetOutcome: true },
-      { now: () => 100 }
-    )
+    const patch = compilePatchTag(data, {
+      id: 'food',
+      title: 'Groceries',
+      budgetOutcome: true,
+    })
 
     expect(patch.tag?.[0]).toMatchObject({
       id: 'food',
       title: 'Groceries',
       budgetOutcome: true,
-      changed: 100,
     })
   })
 
@@ -92,7 +91,6 @@ describe('zenmoney tag commands', () => {
     expect(patch.tag?.[0]).toMatchObject({
       id: 'food',
       title: 'Groceries',
-      changed: 100,
     })
   })
 
@@ -103,18 +101,14 @@ describe('zenmoney tag commands', () => {
       },
     })
 
+    expect(() => compilePatchTag(data, { title: 'No id' } as any)).toThrow(
+      'Trying to patch tag without id'
+    )
     expect(() =>
-      compilePatchTag(data, { title: 'No id' } as any, { now: () => 1 })
-    ).toThrow('Trying to patch tag without id')
-    expect(() =>
-      compilePatchTag(data, { id: 'null', title: 'Null tag' }, { now: () => 1 })
+      compilePatchTag(data, { id: 'null', title: 'Null tag' })
     ).toThrow('Trying to patch null tag')
     expect(() =>
-      compilePatchTag(
-        data,
-        { id: 'missing', title: 'Missing' },
-        { now: () => 1 }
-      )
+      compilePatchTag(data, { id: 'missing', title: 'Missing' })
     ).toThrow('Tag not found')
     expect(() =>
       compileCreateTag(

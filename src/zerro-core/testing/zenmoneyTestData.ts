@@ -238,7 +238,7 @@ export function makeReminderMarker(
   } as TReminderMarker
 }
 
-export const usdInstrument = makeInstrument({
+const usdInstrument = makeInstrument({
   id: 1,
   changed: 1,
   title: 'US Dollar',

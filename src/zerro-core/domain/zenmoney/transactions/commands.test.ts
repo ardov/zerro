@@ -7,13 +7,11 @@ import {
 import { applyPatch } from '../applyPatch'
 import {
   compileCreateTransaction,
-  compileApplyChangesToTransaction,
   compileBulkEditTransactions,
   compileCombineToIncome,
   compileCombineToOutcome,
   compileDeleteTransactions,
   compileDeleteTransactionsPermanently,
-  compileMarkTransactionsViewed,
   compileMergeTransactionsAsTransfer,
   compileRestoreTransaction,
 } from './commands'
@@ -153,15 +151,12 @@ describe('zenmoney transaction commands', () => {
       },
     })
 
-    const patch = compileDeleteTransactions(data, 'tr', {
-      now: () => 100,
-    })
+    const patch = compileDeleteTransactions(data, 'tr')
     const next = applyPatch(data, patch)
 
     expect(patch.transaction?.[0]).toMatchObject({
       id: 'tr',
       deleted: true,
-      changed: 100,
     })
     expect(next.transaction.tr.deleted).toBe(true)
     expect(patch.account).toBeUndefined()
@@ -180,76 +175,12 @@ describe('zenmoney transaction commands', () => {
       },
     })
 
-    const patch = compileDeleteTransactionsPermanently(data, 'tr', {
-      now: () => 100,
-    })
+    const patch = compileDeleteTransactionsPermanently(data, 'tr')
 
     expect(patch.transaction?.[0]).toMatchObject({
       id: 'tr',
       income: 0.00001,
       outcome: 0.00001,
-      changed: 100,
-    })
-    expect(patch.account).toBeUndefined()
-  })
-
-  it('marks only transactions whose viewed state changes', () => {
-    const data = makeStore({
-      transaction: {
-        fresh: makeTransaction({ id: 'fresh', viewed: false, changed: 1 }),
-        alreadyViewed: makeTransaction({
-          id: 'alreadyViewed',
-          viewed: true,
-          changed: 1,
-        }),
-        deleted: makeTransaction({ id: 'deleted', deleted: true, changed: 1 }),
-      },
-    })
-
-    const patch = compileMarkTransactionsViewed(
-      data,
-      ['fresh', 'alreadyViewed', 'deleted'],
-      true,
-      { now: () => 100 }
-    )
-
-    expect(patch.transaction?.map(transaction => transaction.id)).toEqual([
-      'fresh',
-    ])
-    expect(patch.transaction?.[0]).toMatchObject({
-      viewed: true,
-      changed: 100,
-    })
-  })
-
-  it('applies transaction field changes', () => {
-    const data = makeStore({
-      account: {
-        cash: makeAccount({ id: 'cash', balance: 100 }),
-        card: makeAccount({ id: 'card', balance: 50 }),
-      },
-      transaction: {
-        tr: makeTransaction({
-          id: 'tr',
-          outcome: 10,
-          outcomeAccount: 'card',
-          comment: 'Old',
-          changed: 1,
-        }),
-      },
-    })
-
-    const patch = compileApplyChangesToTransaction(
-      data,
-      { id: 'tr', comment: 'New', outcome: 20 },
-      { now: () => 100 }
-    )
-
-    expect(patch.transaction?.[0]).toMatchObject({
-      id: 'tr',
-      comment: 'New',
-      outcome: 20,
-      changed: 100,
     })
     expect(patch.account).toBeUndefined()
   })
@@ -278,8 +209,8 @@ describe('zenmoney transaction commands', () => {
     expect(patch.transaction?.[0]).toMatchObject({
       id: 'new-tr',
       deleted: false,
-      changed: 100,
     })
+    expect(patch.transaction?.[0]).not.toHaveProperty('changed')
     expect(patch.account).toBeUndefined()
   })
 
@@ -295,18 +226,15 @@ describe('zenmoney transaction commands', () => {
       },
     })
 
-    const patch = compileBulkEditTransactions(
-      data,
-      ['tr'],
-      { tags: ['mixed', 'work', 'null', 'food'], comment: 'Team $&' },
-      { now: () => 100 }
-    )
+    const patch = compileBulkEditTransactions(data, ['tr'], {
+      tags: ['mixed', 'work', 'null', 'food'],
+      comment: 'Team $&',
+    })
 
     expect(patch.transaction?.[0]).toMatchObject({
       id: 'tr',
       tag: ['food', 'cash', 'work'],
       comment: 'Team Lunch',
-      changed: 100,
     })
   })
 
@@ -337,24 +265,21 @@ describe('zenmoney transaction commands', () => {
       },
     })
 
-    const patch = compileCombineToOutcome(data, ['out', 'inSame', 'inOther'], {
-      now: () => 100,
-    })
+    const patch = compileCombineToOutcome(data, ['out', 'inSame', 'inOther'])
     const byId = Object.fromEntries(
       (patch.transaction ?? []).map(tr => [tr.id, tr])
     )
 
     // Same-account income is deleted.
-    expect(byId.inSame).toMatchObject({ deleted: true, changed: 100 })
+    expect(byId.inSame).toMatchObject({ deleted: true })
     // Cross-account income becomes a transfer into the outcome account.
     expect(byId.inOther).toMatchObject({
       outcomeAccount: 'card',
       outcome: 20,
       outcomeInstrument: 1,
-      changed: 100,
     })
     // Outcome absorbs both incomes: 100 - 30 - 20 = 50.
-    expect(byId.out).toMatchObject({ outcome: 50, changed: 100 })
+    expect(byId.out).toMatchObject({ outcome: 50 })
   })
 
   it('combines outcomes into the income, deleting or transferring each', () => {
@@ -384,21 +309,18 @@ describe('zenmoney transaction commands', () => {
       },
     })
 
-    const patch = compileCombineToIncome(data, ['in', 'outSame', 'outOther'], {
-      now: () => 100,
-    })
+    const patch = compileCombineToIncome(data, ['in', 'outSame', 'outOther'])
     const byId = Object.fromEntries(
       (patch.transaction ?? []).map(tr => [tr.id, tr])
     )
 
-    expect(byId.outSame).toMatchObject({ deleted: true, changed: 100 })
+    expect(byId.outSame).toMatchObject({ deleted: true })
     expect(byId.outOther).toMatchObject({
       incomeAccount: 'card',
       income: 20,
       incomeInstrument: 1,
-      changed: 100,
     })
-    expect(byId.in).toMatchObject({ income: 50, changed: 100 })
+    expect(byId.in).toMatchObject({ income: 50 })
   })
 
   it('merges an income and outcome into a single transfer', () => {
@@ -421,21 +343,16 @@ describe('zenmoney transaction commands', () => {
       },
     })
 
-    const patch = compileMergeTransactionsAsTransfer(data, ['out', 'in'], {
-      now: () => 100,
-    })
+    const patch = compileMergeTransactionsAsTransfer(data, ['out', 'in'])
     const byId = Object.fromEntries(
       (patch.transaction ?? []).map(tr => [tr.id, tr])
     )
 
-    expect(byId.out).toMatchObject({ deleted: true, changed: 100 })
+    expect(byId.out).toMatchObject({ deleted: true })
     expect(byId.in).toMatchObject({
-      income: 100,
-      incomeAccount: 'card',
       outcome: 100,
       outcomeAccount: 'cash',
       outcomeInstrument: 1,
-      changed: 100,
     })
   })
 
@@ -446,9 +363,9 @@ describe('zenmoney transaction commands', () => {
       },
     })
 
-    expect(() =>
-      compileMergeTransactionsAsTransfer(data, ['out'], { now: () => 100 })
-    ).toThrow('Transfer merge needs exactly one income and one outcome')
+    expect(() => compileMergeTransactionsAsTransfer(data, ['out'])).toThrow(
+      'Transfer merge needs exactly one income and one outcome'
+    )
   })
 
   it('validates transaction existence', () => {
@@ -469,8 +386,8 @@ describe('zenmoney transaction commands', () => {
       )
     ).toThrow('No user')
 
-    expect(() =>
-      compileDeleteTransactions(makeStore(), 'missing', { now: () => 1 })
-    ).toThrow('Transaction not found')
+    expect(() => compileDeleteTransactions(makeStore(), 'missing')).toThrow(
+      'Transaction not found'
+    )
   })
 })

@@ -23,7 +23,7 @@ export type TEnvelopeTag = Pick<
   'id' | 'title' | 'parent' | 'showOutcome' | 'color'
 >
 
-export const uncategorizedTagId = 'null' as TTagId
+const uncategorizedTagId = 'null' as TTagId
 export const uncategorizedEnvelopeName = 'No category'
 
 const uncategorizedEnvelopeTag: TEnvelopeTag = {

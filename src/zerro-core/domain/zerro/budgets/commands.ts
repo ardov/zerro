@@ -1,17 +1,14 @@
 import type { ByMonth } from '../../shared/types'
 import type { TDataStore } from '../../zenmoney/store'
 import type { TISOMonth } from '../../zenmoney/primitives'
-import type { TCoreContext, TNormalizedPatch } from '../../../types'
-import {
-  applyPatch,
-  compileSetTagBudget,
-  type TTagBudgetUpdate,
-} from '../../zenmoney'
+import type { TCoreContext, TIntentPatch } from '../../../types'
+import { compileSetTagBudget, type TTagBudgetUpdate } from '../../zenmoney'
 import { EnvType, envId, type TEnvelopeId } from '../envelope-id'
 import {
+  applyIntentPatch,
   compileSetMonthlyHiddenData,
   HiddenDataType,
-  mergeNormalizedPatches,
+  mergePatches,
 } from '../hidden-data'
 import { getUserSettings } from '../user-settings'
 import { getEnvBudgets, type TBudgets } from './read'
@@ -28,7 +25,7 @@ export function compileSetBudget(
   data: TDataStore,
   update: TBudgetUpdate | TBudgetUpdate[],
   ctx: TCoreContext
-): TNormalizedPatch {
+): TIntentPatch {
   const updates = Array.isArray(update) ? update : [update]
   if (!updates.length) return {}
 
@@ -49,8 +46,8 @@ export function compileSetBudget(
     }
   })
 
-  return mergeNormalizedPatches(
-    tagUpdates.length ? compileSetTagBudget(data, tagUpdates, ctx) : {},
+  return mergePatches(
+    tagUpdates.length ? compileSetTagBudget(data, tagUpdates) : {},
     envUpdates.length ? compileSetEnvBudget(data, envUpdates, ctx) : {}
   )
 }
@@ -59,7 +56,7 @@ export function compileSetEnvBudget(
   data: TDataStore,
   update: TEnvBudgetUpdate | TEnvBudgetUpdate[],
   ctx: TCoreContext
-): TNormalizedPatch {
+): TIntentPatch {
   const updates = Array.isArray(update) ? update : [update]
   if (!updates.length) return {}
 
@@ -82,9 +79,9 @@ export function compileSetEnvBudget(
       month as TISOMonth,
       ctx
     )
-    state = applyPatch(state, patch)
+    state = applyIntentPatch(state, patch)
     return patch
   })
 
-  return mergeNormalizedPatches(...patches)
+  return mergePatches(...patches)
 }

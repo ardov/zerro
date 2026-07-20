@@ -1,7 +1,7 @@
 import { isISOMonth } from '../../shared/date'
-import type { TDataStore } from '../../zenmoney/store'
+import { intentEntityKeys, type TDataStore } from '../../zenmoney/store'
 import type { TISOMonth } from '../../zenmoney/primitives'
-import type { TCoreContext, TNormalizedPatch } from '../../../types'
+import type { TCoreContext, TIntentPatch } from '../../../types'
 import {
   compileDeleteReminder,
   compileSetReminder,
@@ -25,7 +25,7 @@ export function compileSetSimpleHiddenData<TPayload>(
   type: HiddenDataType,
   payload: TPayload,
   ctx: TCoreContext
-): TNormalizedPatch {
+): TIntentPatch {
   const {
     patch: accountPatch,
     receipt: { accountId },
@@ -41,17 +41,16 @@ export function compileSetSimpleHiddenData<TPayload>(
     ctx
   )
 
-  return mergeNormalizedPatches(accountPatch, reminderPatch)
+  return mergePatches(accountPatch, reminderPatch)
 }
 
 export function compileResetSimpleHiddenData(
   data: TDataStore,
-  type: HiddenDataType,
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
+  type: HiddenDataType
+): TIntentPatch {
   const reminder = getSimpleHiddenDataReminder(data, type)
   if (!reminder) return {}
-  return compileDeleteReminder(data, reminder.id, ctx)
+  return compileDeleteReminder(data, reminder.id)
 }
 
 export function compileSetMonthlyHiddenData<TPayload>(
@@ -60,10 +59,10 @@ export function compileSetMonthlyHiddenData<TPayload>(
   payload: TPayload,
   month: TISOMonth,
   ctx: TCoreContext
-): TNormalizedPatch {
+): TIntentPatch {
   if (!isISOMonth(month)) throw new Error('Invalid month')
   if (isHiddenDataPayloadEmpty(payload)) {
-    return compileResetMonthlyHiddenData(data, type, month, ctx)
+    return compileResetMonthlyHiddenData(data, type, month)
   }
 
   const {
@@ -81,20 +80,19 @@ export function compileSetMonthlyHiddenData<TPayload>(
     ctx
   )
 
-  return mergeNormalizedPatches(accountPatch, reminderPatch)
+  return mergePatches(accountPatch, reminderPatch)
 }
 
 export function compileResetMonthlyHiddenData(
   data: TDataStore,
   type: HiddenDataType,
-  month: TISOMonth,
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
+  month: TISOMonth
+): TIntentPatch {
   if (!isISOMonth(month)) throw new Error('Invalid month')
 
   const reminder = getMonthlyHiddenDataReminders(data, type)[month]
   if (!reminder) return {}
-  return compileDeleteReminder(data, reminder.id, ctx)
+  return compileDeleteReminder(data, reminder.id)
 }
 
 function compileSetHiddenDataReminder(
@@ -105,7 +103,7 @@ function compileSetHiddenDataReminder(
     comment: string
   },
   ctx: TCoreContext
-): TNormalizedPatch {
+): TIntentPatch {
   return compileSetReminder(
     data,
     {
@@ -128,15 +126,48 @@ function isHiddenDataPayloadEmpty(payload: unknown): boolean {
   return false
 }
 
-export function mergeNormalizedPatches(
-  ...patches: TNormalizedPatch[]
-): TNormalizedPatch {
-  const result: TNormalizedPatch = {}
+/**
+ * Best-effort application of a sparse intent patch onto a snapshot for chained
+ * compilation: sparse entities merge over current so later reads in the same
+ * compile see earlier writes. Not a substitute for real materialization.
+ */
+export function applyIntentPatch(
+  base: TDataStore,
+  patch: TIntentPatch
+): TDataStore {
+  const next: TDataStore = { ...base }
+
+  intentEntityKeys.forEach(key => {
+    const intents = patch[key]
+    if (!intents?.length) return
+    const map = { ...next[key] } as Record<string | number, object>
+    intents.forEach(intent => {
+      map[intent.id] = { ...map[intent.id], ...intent }
+    })
+    // @ts-expect-error Dynamic ZenMoney entity access.
+    next[key] = map
+  })
+
+  patch.deletion?.forEach(({ id, object }) => {
+    const entities = next[object as Exclude<keyof TDataStore, 'serverTimestamp'>]
+    const map = { ...entities } as Record<string | number, object>
+    delete map[id]
+    // @ts-expect-error Dynamic ZenMoney entity access.
+    next[object] = map
+  })
+
+  return next
+}
+
+export function mergePatches(
+  ...patches: TIntentPatch[]
+): TIntentPatch {
+  const result: TIntentPatch = {}
 
   patches.forEach(patch => {
     Object.entries(patch).forEach(([key, value]) => {
       if (!Array.isArray(value)) return
-      const patchKey = key as keyof TNormalizedPatch
+      const patchKey = key as keyof TIntentPatch
       const current = result[patchKey]
       result[patchKey] = [
         ...(Array.isArray(current) ? current : []),

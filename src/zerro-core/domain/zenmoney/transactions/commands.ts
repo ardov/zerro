@@ -1,18 +1,13 @@
 import type { Modify } from '../../shared/types'
 import type { TDataStore } from '../store'
-import type { TCompiled, TCoreContext, TNormalizedPatch } from '../../../types'
+import type { TCompiled, TCoreContext, TIntentPatch } from '../../../types'
 import type { TDateDraft } from '../primitives'
 import type { TTagId } from '../tags'
 import { round } from '../../shared/money'
 import { getRootUserId } from '../users'
 import { makeTransaction, type TTransactionFactoryDraft } from './factory'
 import { getTransaction, getTransactionType, TrType } from './read'
-import type {
-  TTransaction,
-  TTransactionEditablePatch,
-  TTransactionId,
-  TTransactionPatch,
-} from './types'
+import type { TTransaction, TTransactionId, TTransactionPatch } from './types'
 
 export type TTransactionDraft = Modify<
   Omit<TTransactionFactoryDraft, 'user'>,
@@ -37,60 +32,26 @@ export function compileCreateTransaction(
 
 export function compileDeleteTransactions(
   data: TDataStore,
-  ids: TTransactionId | TTransactionId[],
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
+  ids: TTransactionId | TTransactionId[]
+): TIntentPatch {
   return {
     transaction: toArray(ids).map(id => ({
-      ...getExistingTransaction(data, id),
+      id: getExistingTransaction(data, id).id,
       deleted: true,
-      changed: ctx.now(),
     })),
   }
 }
 
 export function compileDeleteTransactionsPermanently(
   data: TDataStore,
-  ids: TTransactionId | TTransactionId[],
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
+  ids: TTransactionId | TTransactionId[]
+): TIntentPatch {
   return {
     transaction: toArray(ids).map(id => ({
-      ...getExistingTransaction(data, id),
+      id: getExistingTransaction(data, id).id,
       outcome: 0.00001,
       income: 0.00001,
-      changed: ctx.now(),
     })),
-  }
-}
-
-export function compileMarkTransactionsViewed(
-  data: TDataStore,
-  ids: TTransactionId | TTransactionId[],
-  viewed: boolean,
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
-  return {
-    transaction: toArray(ids)
-      .map(id => getExistingTransaction(data, id))
-      .filter(transaction => isTransactionViewed(transaction) !== viewed)
-      .map(transaction => ({
-        ...transaction,
-        viewed,
-        changed: ctx.now(),
-      })),
-  }
-}
-
-export function compileApplyChangesToTransaction(
-  data: TDataStore,
-  patch: TTransactionPatch,
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
-  const transaction = getExistingTransaction(data, patch.id)
-
-  return {
-    transaction: [{ ...transaction, ...patch, changed: ctx.now() }],
   }
 }
 
@@ -98,13 +59,15 @@ export function compileRestoreTransaction(
   data: TDataStore,
   id: TTransactionId,
   ctx: TCoreContext
-): TNormalizedPatch {
+): TIntentPatch {
+  // Creation: the replacement id must be generated at issue time, so the full
+  // source transaction is re-emitted under a fresh id.
+  const { changed: _changed, ...source } = getExistingTransaction(data, id)
   return {
     transaction: [
       {
-        ...getExistingTransaction(data, id),
+        ...source,
         deleted: false,
-        changed: ctx.now(),
         id: ctx.uuid(),
       },
     ],
@@ -114,17 +77,15 @@ export function compileRestoreTransaction(
 export function compileBulkEditTransactions(
   data: TDataStore,
   ids: TTransactionId[],
-  opts: { tags?: TTagId[]; comment?: string },
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
+  opts: { tags?: TTagId[]; comment?: string }
+): TIntentPatch {
   return {
     transaction: ids.map(id => {
       const transaction = getExistingTransaction(data, id)
       return {
-        ...transaction,
+        id,
         tag: modifyTags(transaction.tag, opts.tags),
         comment: modifyComment(transaction.comment, opts.comment),
-        changed: ctx.now(),
       }
     }),
   }
@@ -139,9 +100,8 @@ export function compileBulkEditTransactions(
  */
 export function compileCombineToOutcome(
   data: TDataStore,
-  ids: TTransactionId[],
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
+  ids: TTransactionId[]
+): TIntentPatch {
   const { incomes, outcomes } = groupTransactionsByType(data, ids)
   const outcome = outcomes[0]
   if (!outcome) throw new Error('No outcome transaction to combine into')
@@ -149,20 +109,19 @@ export function compileCombineToOutcome(
   const { outcomeInstrument, outcomeAccount } = outcome
   let outcomeSum = outcome.outcome
 
-  const transaction = incomes.map(tr => {
+  const transaction: TTransactionPatch[] = incomes.map(tr => {
     outcomeSum = round(outcomeSum - tr.income)
     if (tr.incomeAccount === outcomeAccount) {
-      return { ...tr, changed: ctx.now(), deleted: true }
+      return { id: tr.id, deleted: true }
     }
     return {
-      ...tr,
-      changed: ctx.now(),
+      id: tr.id,
       outcomeAccount,
       outcome: tr.income,
       outcomeInstrument,
     }
   })
-  transaction.push({ ...outcome, outcome: outcomeSum, changed: ctx.now() })
+  transaction.push({ id: outcome.id, outcome: outcomeSum })
 
   return { transaction }
 }
@@ -173,9 +132,8 @@ export function compileCombineToOutcome(
  */
 export function compileCombineToIncome(
   data: TDataStore,
-  ids: TTransactionId[],
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
+  ids: TTransactionId[]
+): TIntentPatch {
   const { incomes, outcomes } = groupTransactionsByType(data, ids)
   const income = incomes[0]
   if (!income) throw new Error('No income transaction to combine into')
@@ -183,20 +141,19 @@ export function compileCombineToIncome(
   const { incomeInstrument, incomeAccount } = income
   let incomeSum = income.income
 
-  const transaction = outcomes.map(tr => {
+  const transaction: TTransactionPatch[] = outcomes.map(tr => {
     incomeSum = round(incomeSum - tr.outcome)
     if (tr.outcomeAccount === incomeAccount) {
-      return { ...tr, changed: ctx.now(), deleted: true }
+      return { id: tr.id, deleted: true }
     }
     return {
-      ...tr,
-      changed: ctx.now(),
+      id: tr.id,
       incomeAccount,
       income: tr.outcome,
       incomeInstrument,
     }
   })
-  transaction.push({ ...income, income: incomeSum, changed: ctx.now() })
+  transaction.push({ id: income.id, income: incomeSum })
 
   return { transaction }
 }
@@ -208,9 +165,8 @@ export function compileCombineToIncome(
  */
 export function compileMergeTransactionsAsTransfer(
   data: TDataStore,
-  ids: TTransactionId[],
-  ctx: Pick<TCoreContext, 'now'>
-): TNormalizedPatch {
+  ids: TTransactionId[]
+): TIntentPatch {
   const { incomes, outcomes } = groupTransactionsByType(data, ids)
   if (incomes.length !== 1 || outcomes.length !== 1) {
     throw new Error('Transfer merge needs exactly one income and one outcome')
@@ -220,13 +176,12 @@ export function compileMergeTransactionsAsTransfer(
 
   return {
     transaction: [
-      { ...outcome, deleted: true, changed: ctx.now() },
+      { id: outcome.id, deleted: true },
       {
-        ...income,
+        id: income.id,
         outcomeAccount: outcome.outcomeAccount,
         outcome: outcome.outcome,
         outcomeInstrument: outcome.outcomeInstrument,
-        changed: ctx.now(),
       },
     ],
   }
@@ -256,13 +211,6 @@ function getExistingTransaction(
   const transaction = getTransaction(data, id)
   if (!transaction) throw new Error('Transaction not found')
   return transaction
-}
-
-function isTransactionViewed(transaction: TTransaction): boolean {
-  if (transaction.deleted) return true
-  if (transaction.viewed === true) return true
-  if (transaction.viewed === undefined) return true
-  return false
 }
 
 function modifyTags(prevTags: TTagId[] | null, newTags?: TTagId[]) {

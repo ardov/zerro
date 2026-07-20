@@ -4,7 +4,7 @@ import { makeDemoStore } from '../demo'
 import { makeTestRootState } from '../testing/rootState'
 import { makeTag } from '../testing/zenmoneyTestData'
 import { selectPopulatedTags } from '../testing/reduxSelectors'
-import { populateTags } from './tags'
+import { presentTags } from './tags'
 
 const NOW = Date.parse('2026-05-15T12:00:00Z')
 
@@ -38,7 +38,7 @@ describe('Core tag presentation adapter', () => {
   })
 
   it('owns display names, duplicate labels, colors, and the tag tree', () => {
-    const tags = populateTags(
+    const tags = presentTags(
       {
         parent: makeTag({
           id: 'parent',

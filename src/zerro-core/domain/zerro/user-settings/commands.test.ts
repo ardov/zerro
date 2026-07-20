@@ -115,7 +115,7 @@ describe('user settings commands', () => {
       },
     })
 
-    const patch = compileResetUserSettings(data, { now: () => 100 })
+    const patch = compileResetUserSettings(data)
     const next = applyPatch(data, patch)
 
     expect(patch).toEqual({
@@ -123,8 +123,6 @@ describe('user settings commands', () => {
         {
           id: 'settings',
           object: DataEntity.Reminder,
-          stamp: 100,
-          user: 1,
         },
       ],
     })
@@ -136,8 +134,6 @@ describe('user settings commands', () => {
   })
 
   it('keeps reset of missing settings as a no-op patch', () => {
-    expect(compileResetUserSettings(makeStore(), { now: () => 100 })).toEqual(
-      {}
-    )
+    expect(compileResetUserSettings(makeStore())).toEqual({})
   })
 })

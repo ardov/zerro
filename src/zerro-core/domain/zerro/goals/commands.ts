@@ -1,13 +1,13 @@
 import { toISODate } from '../../shared/date'
 import type { TDataStore } from '../../zenmoney/store'
 import type { TISOMonth } from '../../zenmoney/primitives'
-import type { TCoreContext, TNormalizedPatch } from '../../../types'
-import { applyPatch } from '../../zenmoney'
+import type { TCoreContext, TIntentPatch } from '../../../types'
 import type { TEnvelopeId } from '../envelope-id'
 import {
+  applyIntentPatch,
   compileSetMonthlyHiddenData,
   HiddenDataType,
-  mergeNormalizedPatches,
+  mergePatches,
 } from '../hidden-data'
 import { getRawGoals, type TGoals } from './read'
 import { goalType, type TGoal } from './types'
@@ -18,10 +18,10 @@ export function compileSetGoal(
   id: TEnvelopeId,
   goal: TGoal | null | undefined,
   ctx: TCoreContext
-): TNormalizedPatch {
+): TIntentPatch {
   const goals = getRawGoals(data)
   const newGoal = normalizeGoal(goal)
-  const patches: TNormalizedPatch[] = []
+  const patches: TIntentPatch[] = []
   let state = data
 
   const addMonthPatch = (targetMonth: TISOMonth, payload: TGoals) => {
@@ -33,7 +33,7 @@ export function compileSetGoal(
       ctx
     )
     patches.push(patch)
-    state = applyPatch(state, patch)
+    state = applyIntentPatch(state, patch)
   }
 
   addMonthPatch(month, {
@@ -58,10 +58,10 @@ export function compileSetGoal(
     }
   }
 
-  return mergeNormalizedPatches(...patches)
+  return mergePatches(...patches)
 }
 
-export function normalizeGoal(goalDraft?: TGoal | null): TGoal | null {
+function normalizeGoal(goalDraft?: TGoal | null): TGoal | null {
   const { type, amount, end } = goalDraft || {}
   if (!type || !amount) return null
 
