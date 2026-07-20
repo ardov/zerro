@@ -17,7 +17,7 @@ import { useAppDispatch, useAppSelector } from 'store'
 import { track } from '6-shared/analytics'
 import { core } from 'zerro-core/redux'
 
-import { TagList } from '5-entities/tag/ui/TagList'
+import { TagList } from '../../TagSelect/TagList'
 
 type BulkEditModalProps = Modify<DialogProps, { onClose: () => void }> & {
   ids: string[]

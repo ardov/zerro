@@ -29,7 +29,7 @@ import { useAppDispatch, useAppSelector } from 'store'
 
 import { core } from 'zerro-core/redux'
 
-import { TagList } from '5-entities/tag/ui/TagList'
+import { TagList } from '../TagSelect/TagList'
 
 import { Reciept } from './Reciept'
 import { Map } from './Map'

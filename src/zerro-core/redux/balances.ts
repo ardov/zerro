@@ -5,5 +5,4 @@ export const selectByDate = fromGraph(graph.balancesByDate)
 export {
   convertBalancesToDisplay as convertToDisplay,
   type TBalanceNode,
-  type TBalanceState,
 } from '../domain/zenmoney'

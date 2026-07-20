@@ -8,8 +8,6 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
-import { TTagPopulated } from '5-entities/tag'
-
 import { SmartAmount } from '3-widgets/Amount'
 
 type HTMLDivProps = React.DetailedHTMLProps<
@@ -53,7 +51,10 @@ export const Symbol: FC<SymbolProps> = ({
     </SymbolWrapper>
   )
 
-  function getSymAndColor(type: core.transactions.TrType, tag: TTagPopulated) {
+  function getSymAndColor(
+    type: core.transactions.TrType,
+    tag: core.tags.TTagPopulated
+  ) {
     switch (type) {
       case core.transactions.TrType.Income:
       case core.transactions.TrType.Outcome:

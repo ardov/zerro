@@ -5,7 +5,6 @@ import {
   compileBulkEditTransactions,
   compileCombineToIncome,
   compileCombineToOutcome,
-  compileCreateAccount,
   compileDeleteTransactions,
   compileDeleteTransactionsPermanently,
   compileMergeTransactionsAsTransfer,
@@ -13,7 +12,6 @@ import {
   compileDeleteReminder,
   compileRestoreTransaction,
   compileSetReminder,
-  getRootUserId,
   type TAccountId,
   type TISOMonth,
   type TTagId,
@@ -280,32 +278,6 @@ export function setReminder(
 
 export function deleteReminder(id: TReminderId): AppThunk {
   return executeCommand(state => compileDeleteReminder(state.data.current, id))
-}
-
-export function prepareDataAccount(title: string): AppThunk<TAccountId> {
-  const execute = executeCommand<TAccountId>((state, ctx) => {
-    const data = state.data.current
-    const existing = Object.values(data.account).find(
-      account => account.title === title
-    )
-    if (existing) return { patch: {}, receipt: existing.id }
-    const userId = getRootUserId(data)
-    if (!userId) throw new Error('No root user')
-    const patch = compileCreateAccount(
-      data,
-      { title, instrument: data.user[userId].currency },
-      ctx
-    )
-    const accountId = patch.account?.[0]?.id
-    if (!accountId) throw new Error('Data account was not created')
-    return { patch, receipt: accountId }
-  })
-
-  return (dispatch, getState, extra) => {
-    const accountId = execute(dispatch, getState, extra)
-    if (!accountId) throw new Error('Data account was not prepared')
-    return accountId
-  }
 }
 
 export function applyDebugPatch(patch: TNormalizedPatch): AppThunk {

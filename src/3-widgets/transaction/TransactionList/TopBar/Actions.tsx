@@ -1,7 +1,7 @@
 import type { TTransaction } from '6-shared/types'
 import { core } from 'zerro-core/redux'
 
-import React, { FC, useState } from 'react'
+import React, { FC, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CSSTransition } from 'react-transition-group'
 import { EditOutlined } from '@mui/icons-material'
@@ -29,7 +29,7 @@ import { track } from '6-shared/analytics'
 import { useConfirm } from '6-shared/ui/SmartConfirm'
 import { useAppDispatch, useAppSelector } from 'store'
 
-import { TagSelect2 } from '5-entities/tag/ui/TagSelect2'
+import { TagSelect2 } from '../../TagSelect/TagSelect2'
 import { BulkEditModal } from './BulkEditModal'
 import './transitions.css'
 
@@ -49,6 +49,7 @@ const Actions: FC<ActionsProps> = ({
   const { t } = useTranslation('transactionActions')
   const dispatch = useAppDispatch()
   const allTransactions = useAppSelector(core.transactions.selectAll)
+  const actionsRef = useRef<HTMLDivElement>(null)
   const [ids, setIds] = useState(checkedIds)
   const transactions = ids?.map(id => allTransactions[id])
   const actions = getAvailableActions(transactions)
@@ -133,6 +134,7 @@ const Actions: FC<ActionsProps> = ({
         }}
       >
         <CSSTransition
+          nodeRef={actionsRef}
           mountOnEnter
           unmountOnExit
           in={visible}
@@ -140,6 +142,7 @@ const Actions: FC<ActionsProps> = ({
           classNames="actions-transition"
         >
           <Box
+            ref={actionsRef}
             sx={{
               display: 'flex',
               alignItems: 'center',

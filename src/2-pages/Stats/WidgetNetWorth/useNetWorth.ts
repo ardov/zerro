@@ -1,12 +1,13 @@
+import { useMemo } from 'react'
 import { isFinite } from 'lodash'
-import { AccountType, TISODate } from '6-shared/types'
-import { GroupBy } from '6-shared/helpers/date'
+import { AccountType, TDateDraft, TISODate } from '6-shared/types'
+import { GroupBy, toGroup } from '6-shared/helpers/date'
 import { keys } from '6-shared/helpers/keys'
 import { round } from '6-shared/helpers/money'
+import { useAppSelector } from 'store'
 
 import { core } from 'zerro-core/redux'
 
-import { useDisplayBalances } from '5-entities/accBalances/useBalances'
 import { getStart, Period } from '../shared/period'
 
 export type TNetWorthPoint = {
@@ -71,5 +72,35 @@ export function useNetWorth(
 
       return { date, lented, debts, fundsInBudget, fundsSaving, accountDebts }
     }
+  )
+}
+
+type TBalanceNode = core.balances.TBalanceNode
+
+function useDisplayBalances(
+  aggregation: GroupBy,
+  start?: TDateDraft,
+  end?: TDateDraft
+) {
+  const list = useAppSelector(core.balances.selectByDate)
+  const startDate = toGroup(start || list[0].date, aggregation)
+  // eslint-disable-next-line react-hooks/purity -- 'today' is intentionally sampled on render
+  const endDate = toGroup(end || Date.now(), aggregation)
+  const fxBalances = useMemo(() => {
+    const byGroup: Record<TISODate, TBalanceNode> = {}
+    list.forEach(node => {
+      const date = toGroup(node.date, aggregation)
+      if (date < startDate || date > endDate) return
+      byGroup[date] = { date, balances: node.balances }
+    })
+    return keys(byGroup)
+      .sort()
+      .map(group => byGroup[group])
+  }, [aggregation, endDate, list, startDate])
+
+  const convert = useAppSelector(core.currency.selectDisplayConverter)
+  return useMemo(
+    () => core.balances.convertToDisplay(fxBalances, convert),
+    [convert, fxBalances]
   )
 }

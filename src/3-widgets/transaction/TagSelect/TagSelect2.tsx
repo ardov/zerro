@@ -5,8 +5,7 @@ import React, {
   useState,
   useRef,
 } from 'react'
-import { TagTreeNode, TTagPopulated } from '5-entities/tag'
-import { getTagsTree } from '5-entities/tag/model/model'
+import { createSelector } from '@reduxjs/toolkit'
 import { useAppSelector } from 'store'
 import {
   Popover,
@@ -20,8 +19,31 @@ import {
 } from '@mui/material'
 import { AddIcon } from '6-shared/ui/Icons'
 import { TagIcon } from '6-shared/ui/TagIcon'
+import type { Modify } from '6-shared/types'
 import { useTranslation } from 'react-i18next'
 import { core } from 'zerro-core/redux'
+
+type TTagPopulated = core.tags.TTagPopulated
+type TagTreeNode = Modify<TTagPopulated, { children: TTagPopulated[] }>
+const getTagsTree = createSelector([core.tags.selectPopulated], tags => {
+  const result = []
+  for (const id in tags) {
+    if (tags[id].parent) continue
+    const tag = { ...tags[id], children: [] } as TagTreeNode
+    if (tags[id].children) {
+      tag.children = tags[id].children
+        .map(childId => tags[childId])
+        .sort(compareTags)
+    }
+    result.push(tag)
+  }
+  result.sort(compareTags)
+  return result
+})
+
+function compareTags<T extends { name: string }>(tag1: T, tag2: T) {
+  return tag1.name.localeCompare(tag2.name)
+}
 
 type TagType = 'income' | 'outcome' | undefined | null
 type TagNode = TagTreeNode | TTagPopulated

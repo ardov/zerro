@@ -9,8 +9,6 @@ import { TagIcon } from '../../../6-shared/ui/TagIcon'
 import { useAppSelector } from 'store'
 import { core } from 'zerro-core/redux'
 
-import { TTagPopulated } from '../model'
-
 export const TagChip: FC<ChipProps & { id: TTagId }> = ({ id, ...rest }) => {
   const { t } = useTranslation()
   const tag = useAppSelector(core.tags.selectPopulated)[id]
@@ -18,7 +16,7 @@ export const TagChip: FC<ChipProps & { id: TTagId }> = ({ id, ...rest }) => {
   return <Chip deleteIcon={<CloseIcon />} label={label} {...rest} />
 }
 
-function getTagLabel(tag?: TTagPopulated): ReactNode {
+function getTagLabel(tag?: core.tags.TTagPopulated): ReactNode {
   if (!tag) return null
   if (tag.icon)
     return (

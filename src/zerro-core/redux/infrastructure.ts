@@ -1,4 +1,1 @@
-export {
-  applyDebugPatch as applyDebugPatch,
-  prepareDataAccount as prepareDataAccount,
-} from './commands'
+export { applyDebugPatch as applyDebugPatch } from './commands'
