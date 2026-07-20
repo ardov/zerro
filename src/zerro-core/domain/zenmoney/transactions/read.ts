@@ -25,23 +25,39 @@ export function getTransaction(
 }
 
 /**
- * Every transaction id in legacy list order, including soft-deleted entries.
- * UI filtering decides whether deleted rows are visible.
+ * Every transaction in canonical list order, including soft-deleted entries.
+ * The id list and the non-deleted history are both slices of this one sort, so
+ * a runtime can memoize it once and derive both without re-sorting.
  */
-export function getTransactionIds(data: TTransactionSource): TTransactionId[] {
+export function getSortedTransactions(
+  data: TTransactionSource
+): TTransaction[] {
   return Object.values(getTransactions(data))
     .sort(compareTransactionDates)
     .reverse()
-    .map(transaction => transaction.id)
+}
+
+/** Non-deleted transactions in list order. */
+export function toTransactionHistory(sorted: TTransaction[]): TTransaction[] {
+  return sorted.filter(transaction => !isDeletedTransaction(transaction))
+}
+
+/**
+ * Every transaction id in list order, including soft-deleted entries.
+ * UI filtering decides whether deleted rows are visible.
+ */
+export function toTransactionIds(sorted: TTransaction[]): TTransactionId[] {
+  return sorted.map(transaction => transaction.id)
+}
+
+export function getTransactionIds(data: TTransactionSource): TTransactionId[] {
+  return toTransactionIds(getSortedTransactions(data))
 }
 
 export function getTransactionsHistory(
   data: TTransactionSource
 ): TTransaction[] {
-  return Object.values(getTransactions(data))
-    .filter(transaction => !isDeletedTransaction(transaction))
-    .sort(compareTransactionDates)
-    .reverse()
+  return toTransactionHistory(getSortedTransactions(data))
 }
 
 export function compareTransactionDates(

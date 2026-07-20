@@ -8,10 +8,11 @@ import {
   getDebtAccountId,
   getHistoryStart,
   getInstCodeMap,
+  getSortedTransactions,
   getTagBudgets,
-  getTransactionIds,
-  getTransactionsHistory,
   getUserCurrency,
+  toTransactionHistory,
+  toTransactionIds,
 } from '../domain/zenmoney'
 import {
   buildActivity,
@@ -41,6 +42,22 @@ import {
 } from '../domain/zerro'
 import { memoOn, sameItems } from './memo'
 
+/** A projection: one value derived from a snapshot. */
+type TNode<T> = (data: TDataStore) => T
+
+/**
+ * A memoized node. Pins {@link memoOn}'s input to `TDataStore` so a node's
+ * dependency selector infers `data` and returns a tuple without a `: TDataStore`
+ * annotation or an `as const` at every call site.
+ */
+function node<TDeps extends readonly unknown[], TResult>(
+  selectDeps: (data: TDataStore) => readonly [...TDeps],
+  compute: (...deps: TDeps) => TResult,
+  isEqualResult?: (previous: TResult, next: TResult) => boolean
+): TNode<TResult> {
+  return memoOn(selectDeps, compute, isEqualResult)
+}
+
 /**
  * The projection dependency graph, defined once.
  *
@@ -63,102 +80,97 @@ export function createProjectionGraph(ctx: TCoreContext) {
   const currentDate = () => toISODate(ctx.now())
 
   // --- pass-through and primitive nodes: no memo ---------------------------
-  const debtAccountId = (d: TDataStore) => getDebtAccountId(d)
-  const userCurrency = (d: TDataStore) => getUserCurrency(d)
-  const historyStart = (d: TDataStore) =>
+  const debtAccountId: TNode<ReturnType<typeof getDebtAccountId>> =
+    getDebtAccountId
+  const userCurrency: TNode<ReturnType<typeof getUserCurrency>> =
+    getUserCurrency
+  const historyStart: TNode<ReturnType<typeof getHistoryStart>> = d =>
     getHistoryStart(transactionsHistory(d), currentDate())
 
-  // --- memoized because they allocate or cost ------------------------------
-  const transactionsHistory = memoOn(
-    (d: TDataStore) => [d.transaction] as const,
-    transaction => getTransactionsHistory({ transaction })
+  // --- transactions: one sort, two slices ----------------------------------
+  const sortedTransactions = node(
+    d => [d.transaction],
+    transaction => getSortedTransactions({ transaction })
   )
-  const transactionIds = memoOn(
-    (d: TDataStore) => [d.transaction] as const,
-    transaction => getTransactionIds({ transaction })
+  const transactionsHistory = node(
+    d => [sortedTransactions(d)],
+    toTransactionHistory
   )
-  const instrumentCodeById = memoOn(
-    (d: TDataStore) => [d.instrument] as const,
+  const transactionIds = node(d => [sortedTransactions(d)], toTransactionIds)
+
+  // --- reads off a single entity map ---------------------------------------
+  const instrumentCodeById = node(
+    d => [d.instrument],
     instrument => getInstCodeMap({ instrument })
   )
-  const userSettings = memoOn(
-    (d: TDataStore) => [d.reminder] as const,
+  const userSettings = node(
+    d => [d.reminder],
     reminder => getUserSettings({ reminder })
   )
-  const envelopeMeta = memoOn(
-    (d: TDataStore) => [d.reminder] as const,
+  const envelopeMeta = node(
+    d => [d.reminder],
     reminder => getEnvelopeMeta({ reminder })
   )
-  const envBudgets = memoOn(
-    (d: TDataStore) => [d.reminder] as const,
+  const envBudgets = node(
+    d => [d.reminder],
     reminder => getEnvBudgets({ reminder })
   )
-  const rawGoals = memoOn(
-    (d: TDataStore) => [d.reminder] as const,
+  const rawGoals = node(
+    d => [d.reminder],
     reminder => getRawGoals({ reminder })
   )
-  const storedFxRates = memoOn(
-    (d: TDataStore) => [d.reminder] as const,
+  const storedFxRates = node(
+    d => [d.reminder],
     reminder => getStoredFxRates({ reminder })
   )
-  const tagBudgets = memoOn(
-    (d: TDataStore) => [d.budget] as const,
+  const tagBudgets = node(
+    d => [d.budget],
     budget => getTagBudgets({ budget })
   )
-  const savingAccounts = memoOn(
-    (d: TDataStore) => [d.account] as const,
+  const savingAccounts = node(
+    d => [d.account],
     account => getZerroSavingAccounts({ account })
   )
   // Result equality matters here: this list is rebuilt from the whole account
   // map, and every account edit would otherwise invalidate the activity chain.
-  const inBudgetAccountIds = memoOn(
-    (d: TDataStore) => [d.account] as const,
+  const inBudgetAccountIds = node(
+    d => [d.account],
     account => getZerroInBudgetAccountIds({ account }),
     sameItems
   )
 
   // --- fx ------------------------------------------------------------------
-  const currentFxRates = memoOn(
-    (d: TDataStore) => [d.instrument, currentMonth()] as const,
+  const currentFxRates = node(
+    d => [d.instrument, currentMonth()],
     (instruments, currentMonth) =>
       buildCurrentFxRates({ instruments, currentMonth })
   )
-  const fxRates = memoOn(
-    (d: TDataStore) => [storedFxRates(d), currentFxRates(d)] as const,
+  const fxRates = node(
+    d => [storedFxRates(d), currentFxRates(d)],
     (storedRates, currentRates) => buildFxRates({ storedRates, currentRates })
   )
-  const fxRatesGetter = memoOn(
-    (d: TDataStore) => [fxRates(d), currentFxRates(d)] as const,
+  const fxRatesGetter = node(
+    d => [fxRates(d), currentFxRates(d)],
     (rates, currentRates) => buildFxRatesGetter({ rates, currentRates })
   )
-  const convertFx = memoOn(
-    (d: TDataStore) => [fxRatesGetter(d)] as const,
-    buildFxConverter
-  )
+  const convertFx = node(d => [fxRatesGetter(d)], buildFxConverter)
 
   // --- debtors -------------------------------------------------------------
-  const debtors = memoOn(
-    (d: TDataStore) =>
-      [
-        transactionsHistory(d),
-        d.merchant,
-        d.instrument,
-        debtAccountId(d),
-      ] as const,
+  const debtors = node(
+    d => [transactionsHistory(d), d.merchant, d.instrument, debtAccountId(d)],
     (transactions, merchants, instruments, debtAccountId) =>
       buildDebtors({ transactions, merchants, instruments, debtAccountId })
   )
 
   // --- envelopes (domain only; presentation stays in the adapter) ----------
-  const envelopesCompiled = memoOn(
-    (d: TDataStore) =>
-      [
-        debtors(d),
-        d.tag,
-        savingAccounts(d),
-        envelopeMeta(d),
-        userCurrency(d),
-      ] as const,
+  const envelopesCompiled = node(
+    d => [
+      debtors(d),
+      d.tag,
+      savingAccounts(d),
+      envelopeMeta(d),
+      userCurrency(d),
+    ],
     (debtors, tags, savingAccounts, envelopeMeta, userCurrency) =>
       buildEnvelopes({
         debtors,
@@ -170,37 +182,33 @@ export function createProjectionGraph(ctx: TCoreContext) {
   )
   // Pass-through: the parent object is memoized, so its fields are already
   // reference-stable.
-  const envelopes = (d: TDataStore) => envelopesCompiled(d).byId
-  const envelopeStructure = (d: TDataStore) => envelopesCompiled(d).structure
-  const keepingEnvelopeIds = memoOn(
-    (d: TDataStore) => [envelopes(d)] as const,
-    getKeepingEnvelopes
-  )
+  const envelopes: TNode<ReturnType<typeof envelopesCompiled>['byId']> = d =>
+    envelopesCompiled(d).byId
+  const envelopeStructure: TNode<
+    ReturnType<typeof envelopesCompiled>['structure']
+  > = d => envelopesCompiled(d).structure
+  const keepingEnvelopeIds = node(d => [envelopes(d)], getKeepingEnvelopes)
 
   // --- budgets and month list ----------------------------------------------
-  const budgets = memoOn(
-    (d: TDataStore) =>
-      [tagBudgets(d), envBudgets(d), userSettings(d).preferZmBudgets] as const,
+  const budgets = node(
+    d => [tagBudgets(d), envBudgets(d), userSettings(d).preferZmBudgets],
     (tagBudgets, envBudgets, preferZmBudgets) =>
       buildBudgets({ tagBudgets, envBudgets, preferZmBudgets })
   )
-  const monthList = memoOn(
-    (d: TDataStore) =>
-      [transactionsHistory(d), budgets(d), currentMonth()] as const,
+  const monthList = node(
+    d => [transactionsHistory(d), budgets(d), currentMonth()],
     (transactions, budgets, currentMonth) =>
       buildMonthList({ transactions, budgets, currentMonth })
   )
 
   // --- activity chain (the expensive nodes) --------------------------------
-  const currentFunds = memoOn(
-    (d: TDataStore) =>
-      [d.account, inBudgetAccountIds(d), instrumentCodeById(d)] as const,
+  const currentFunds = node(
+    d => [d.account, inBudgetAccountIds(d), instrumentCodeById(d)],
     (accounts, inBudgetIds, instrumentCodeById) =>
       buildCurrentFunds({ accounts, inBudgetIds, instrumentCodeById })
   )
-  const routingContext = memoOn(
-    (d: TDataStore) =>
-      [inBudgetAccountIds(d), debtAccountId(d), debtors(d)] as const,
+  const routingContext = node(
+    d => [inBudgetAccountIds(d), debtAccountId(d), debtors(d)],
     (inBudgetAccountIds, debtAccountId, debtors) =>
       buildActivityRoutingContext({
         inBudgetAccountIds,
@@ -208,45 +216,35 @@ export function createProjectionGraph(ctx: TCoreContext) {
         debtors,
       })
   )
-  const rawActivity = memoOn(
-    (d: TDataStore) =>
-      [transactionsHistory(d), routingContext(d), d.instrument] as const,
+  const rawActivity = node(
+    d => [transactionsHistory(d), routingContext(d), d.instrument],
     (transactions, routing, instruments) =>
       buildRawActivity({ transactions, routing, instruments })
   )
-  const activity = memoOn(
-    (d: TDataStore) => [rawActivity(d), keepingEnvelopeIds(d)] as const,
+  const activity = node(
+    d => [rawActivity(d), keepingEnvelopeIds(d)],
     (rawActivity, keepingEnvelopeIds) =>
       buildActivity({ rawActivity, keepingEnvelopeIds })
   )
-  const envMetrics = memoOn(
-    (d: TDataStore) =>
-      [
-        monthList(d),
-        envelopes(d),
-        activity(d),
-        budgets(d),
-        convertFx(d),
-      ] as const,
+  const envMetrics = node(
+    d => [monthList(d), envelopes(d), activity(d), budgets(d), convertFx(d)],
     (monthList, envelopes, activity, budgets, convertFx) =>
       buildEnvMetrics({ monthList, envelopes, activity, budgets, convertFx })
   )
-  const sortedActivity = memoOn(
-    (d: TDataStore) =>
-      [rawActivity(d), keepingEnvelopeIds(d), convertFx(d)] as const,
+  const sortedActivity = node(
+    d => [rawActivity(d), keepingEnvelopeIds(d), convertFx(d)],
     (rawActivity, keepingEnvelopeIds, convertFx) =>
       buildSortedActivity({ rawActivity, keepingEnvelopeIds, convertFx })
   )
-  const monthTotals = memoOn(
-    (d: TDataStore) =>
-      [
-        monthList(d),
-        currentFunds(d),
-        activity(d),
-        envMetrics(d),
-        convertFx(d),
-        currentMonth(),
-      ] as const,
+  const monthTotals = node(
+    d => [
+      monthList(d),
+      currentFunds(d),
+      activity(d),
+      envMetrics(d),
+      convertFx(d),
+      currentMonth(),
+    ],
     (monthList, currentFunds, activity, envMetrics, convertFx, currentMonth) =>
       buildMonthTotals({
         monthList,
@@ -259,34 +257,29 @@ export function createProjectionGraph(ctx: TCoreContext) {
   )
 
   // --- goals ---------------------------------------------------------------
-  const goals = memoOn(
-    (d: TDataStore) =>
-      [
-        rawGoals(d),
-        monthList(d),
-        envMetrics(d),
-        sortedActivity(d),
-        convertFx(d),
-      ] as const,
+  const goals = node(
+    d => [
+      rawGoals(d),
+      monthList(d),
+      envMetrics(d),
+      sortedActivity(d),
+      convertFx(d),
+    ],
     (rawGoals, monthList, envMetrics, sortedActivity, convertFx) =>
       buildGoals({ rawGoals, monthList, envMetrics, sortedActivity, convertFx })
   )
-  const goalTotals = memoOn(
-    (d: TDataStore) => [goals(d), convertFx(d)] as const,
-    buildGoalTotals
-  )
+  const goalTotals = node(d => [goals(d), convertFx(d)], buildGoalTotals)
 
   // --- balances ------------------------------------------------------------
-  const balances = memoOn(
-    (d: TDataStore) =>
-      [
-        transactionsHistory(d),
-        d.account,
-        debtors(d),
-        d.merchant,
-        instrumentCodeById(d),
-        debtAccountId(d),
-      ] as const,
+  const balances = node(
+    d => [
+      transactionsHistory(d),
+      d.account,
+      debtors(d),
+      d.merchant,
+      instrumentCodeById(d),
+      debtAccountId(d),
+    ],
     (
       transactions,
       accounts,
@@ -304,8 +297,8 @@ export function createProjectionGraph(ctx: TCoreContext) {
         debtAccountId,
       })
   )
-  const balancesByDate = memoOn(
-    (d: TDataStore) => [balances(d), historyStart(d), currentDate()] as const,
+  const balancesByDate = node(
+    d => [balances(d), historyStart(d), currentDate()],
     (balances, historyStart, currentDate) =>
       buildBalancesByDate({ balances, historyStart, currentDate })
   )
