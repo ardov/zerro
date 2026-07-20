@@ -63,7 +63,7 @@
     "react-i18next": "^17.0.10",
     "react-redux": "^9.3.0",
     "react-router-dom": "^7.18.1",
-    "react-scan": "^0.4.3",
+    "react-scan": "^0.5.7",
     "react-transition-group": "^4.4.5",
     "react-virtualized-auto-sizer": "^2.0.3",
     "react-window": "^2.2.7",
