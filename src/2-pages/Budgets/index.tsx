@@ -10,6 +10,7 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '6-shared/helpers/date'
 import { nextMonth, prevMonth, toISOMonth } from '6-shared/helpers/date'
+import { useDocumentTitle } from '6-shared/hooks/useDocumentTitle'
 
 import { useEnvTransactionsDrawer } from '3-widgets/global/EnvTransactionsDrawer'
 
@@ -32,6 +33,9 @@ function Budgets() {
   useMonthHotkeys()
   const { t } = useTranslation('budgets')
   const [month] = useMonth()
+  useDocumentTitle(
+    `${t('pageTitle', { month: formatDate(month, 'LLLL yyyy') })} | Zerro`
+  )
   const openSide = useSideContent()
   const transactionDrawer = useEnvTransactionsDrawer()
   const openOverview = useCallback(() => openSide('overview'), [openSide])
@@ -74,9 +78,6 @@ function Budgets() {
   return (
     <>
       <Helmet>
-        <title>
-          {t('pageTitle', { month: formatDate(month, 'LLLL yyyy') })} | Zerro
-        </title>
         <meta name="description" content="" />
         <link rel="canonical" href="https://zerro.app/budget" />
       </Helmet>

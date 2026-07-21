@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Button, Stack, Typography } from '@mui/material'
+import { useDocumentTitle } from '6-shared/hooks/useDocumentTitle'
 import './index.scss'
 import type { TTransaction } from '6-shared/types'
 
@@ -23,6 +24,7 @@ const startingYear = currMonth >= 11 ? currYear : currYear - 1
 
 export default function Review() {
   const { t } = useTranslation('yearReview')
+  useDocumentTitle(`${t('pageTitle')} | Zerro`)
   const [year, setYear] = useState(startingYear)
   const trDrawer = useTransactionDrawer()
 

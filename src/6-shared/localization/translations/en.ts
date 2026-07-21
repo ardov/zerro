@@ -559,6 +559,7 @@ export const en: typeof ru = {
   },
 
   yearReview: {
+    pageTitle: 'Year in Review',
     yearReview: 'YEAR IN REVIEW',
     whatWasInPreviousYear: 'What was in the previous year?',
 
