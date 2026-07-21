@@ -7,21 +7,21 @@ import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker'
 import { AutoSizer } from 'react-virtualized-auto-sizer'
 import { ListSubheader } from '@mui/material'
 import { formatDate, parseDate } from '6-shared/helpers/date'
-import type { TDateDraft, TISODate } from '6-shared/types'
+import type { TDateDraft, TISODate, TTransactionId } from '6-shared/types'
 import { toISODate } from '6-shared/helpers/date'
 import { SmartDialog } from '6-shared/ui/SmartDialog'
 import { registerPopover } from '6-shared/historyPopovers'
 
 type GroupNode = {
   date: TISODate
-  transactions: React.JSX.Element[]
+  ids: TTransactionId[]
 }
 
 const HEADER_HEIGHT = 48
 const TRANSACTION_HEIGHT = 72
 
 const groupHeight = (group: GroupNode) =>
-  HEADER_HEIGHT + TRANSACTION_HEIGHT * group.transactions.length
+  HEADER_HEIGHT + TRANSACTION_HEIGHT * group.ids.length
 
 const findDateIndex = (groups: GroupNode[], date: GroupNode['date']) => {
   for (let i = 0; i < groups.length; i++) {
@@ -44,11 +44,12 @@ const findTopIndex = (offsets: number[], scrollTop: number) => {
 
 type GrouppedListProps = {
   groups: GroupNode[]
+  renderTransaction: (id: TTransactionId) => React.ReactNode
   initialDate?: TDateDraft
 }
 
 export const GrouppedList: FC<GrouppedListProps> = props => {
-  const { groups, initialDate } = props
+  const { groups, renderTransaction, initialDate } = props
   const listRef = useRef<ListImperativeAPI>(null)
   const datePopover = dateDialog.useMethods()
 
@@ -121,7 +122,7 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
                 style={{ height }}
                 listRef={listRef}
                 rowCount={groups.length}
-                rowProps={{ groups, onDateClick }}
+                rowProps={{ groups, onDateClick, renderTransaction }}
                 rowHeight={i => groupHeight(groups[i])}
                 rowComponent={Day}
                 onScroll={e => setScrollTop(e.currentTarget.scrollTop)}
@@ -157,19 +158,20 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
 type DayData = {
   groups: GroupNode[]
   onDateClick: (date: TISODate) => void
+  renderTransaction: (id: TTransactionId) => React.ReactNode
 }
 const Day = (props: RowComponentProps<DayData>): React.ReactElement => {
-  const { index, style, groups, onDateClick } = props
-  const date = groups[index].date
+  const { index, style, groups, onDateClick, renderTransaction } = props
+  const group = groups[index]
   return (
     <div style={{ ...groupStyle, ...style }}>
       {/* Sticky is handled by the overlay header in GrouppedList, because
           react-window's row transform breaks native `position: sticky`. */}
-      <ListSubheader disableSticky onClick={() => onDateClick(date)}>
-        {formatDate(date)}
+      <ListSubheader disableSticky onClick={() => onDateClick(group.date)}>
+        {formatDate(group.date)}
       </ListSubheader>
 
-      {groups[index].transactions}
+      {group.ids.map(renderTransaction)}
     </div>
   )
 }

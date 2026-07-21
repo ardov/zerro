@@ -7,7 +7,7 @@ import type {
 } from '6-shared/types'
 import { core } from 'zerro-core/redux'
 
-import type { FC, ReactElement } from 'react'
+import type { FC } from 'react'
 import { useMemo, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Theme } from '@mui/material'
@@ -121,42 +121,55 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     if (checkedDate) onSelectSimilar(checkedDate)
   }
 
+  // Groups carry only ids and depend on the list alone, so opening or checking
+  // a transaction never rebuilds them. The heavy `<Transaction>` elements are
+  // created lazily by `renderTransaction`, only for the groups react-window
+  // actually mounts.
   const groups = useMemo(() => {
-    const groups: ByDate<{ date: TISODate; transactions: ReactElement[] }> = {}
+    const byDate: ByDate<{ date: TISODate; ids: TTransactionId[] }> = {}
     trList.forEach(tr => {
-      const Component = (
-        <Transaction
-          key={tr.id}
-          id={tr.id}
-          isOpened={tr.id === opened}
-          isChecked={checked.includes(tr.id)}
-          isInSelectionMode={!!checked.length}
-          onOpen={onTrOpen}
-          onToggle={toggleTransaction}
-          onPayeeClick={onFilterByPayee}
-          onContextMenu={(e, id) =>
-            openContextMenu(
-              { id, onSelectSimilar, onMarkOlderViewed },
-              getEventPosition(e)
-            )
-          }
-        />
-      )
-      groups[tr.date] ??= { date: tr.date, transactions: [] }
-      groups[tr.date].transactions.push(Component)
+      byDate[tr.date] ??= { date: tr.date, ids: [] }
+      byDate[tr.date].ids.push(tr.id)
     })
-    return Object.values(groups)
-  }, [
-    trList,
-    opened,
-    checked,
-    onTrOpen,
-    toggleTransaction,
-    onFilterByPayee,
-    openContextMenu,
-    onSelectSimilar,
-    onMarkOlderViewed,
-  ])
+    return Object.values(byDate)
+  }, [trList])
+
+  const onContextMenu = useCallback(
+    (e: React.MouseEvent | React.TouchEvent, id: TTransactionId) =>
+      openContextMenu(
+        { id, onSelectSimilar, onMarkOlderViewed },
+        getEventPosition(e)
+      ),
+    [openContextMenu, onSelectSimilar, onMarkOlderViewed]
+  )
+
+  const checkedSet = useMemo(() => new Set(checked), [checked])
+  const isInSelectionMode = checked.length > 0
+
+  const renderTransaction = useCallback(
+    (id: TTransactionId) => (
+      <Transaction
+        key={id}
+        id={id}
+        isOpened={id === opened}
+        isChecked={checkedSet.has(id)}
+        isInSelectionMode={isInSelectionMode}
+        onOpen={onTrOpen}
+        onToggle={toggleTransaction}
+        onPayeeClick={onFilterByPayee}
+        onContextMenu={onContextMenu}
+      />
+    ),
+    [
+      opened,
+      checkedSet,
+      isInSelectionMode,
+      onTrOpen,
+      toggleTransaction,
+      onFilterByPayee,
+      onContextMenu,
+    ]
+  )
 
   return (
     <>
@@ -200,7 +213,7 @@ export const TransactionList: FC<TTransactionListProps> = props => {
 
         <Box sx={{ flex: '1 1 auto' }}>
           {groups.length ? (
-            <GrouppedList {...{ groups, initialDate }} />
+            <GrouppedList {...{ groups, renderTransaction, initialDate }} />
           ) : (
             <EmptyState />
           )}

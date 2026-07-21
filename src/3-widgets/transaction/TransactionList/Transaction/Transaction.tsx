@@ -1,6 +1,5 @@
 import type { TTransactionId } from '6-shared/types'
 
-import type { FC } from 'react'
 import React from 'react'
 import styled from '@emotion/styled'
 import type { Theme, TypographyVariant } from '@mui/material'
@@ -25,7 +24,9 @@ export type TTransactionProps = {
   ) => void
 }
 
-export const Transaction: FC<TTransactionProps> = props => {
+export const Transaction = React.memo(function Transaction(
+  props: TTransactionProps
+) {
   const {
     id,
     isChecked,
@@ -65,7 +66,7 @@ export const Transaction: FC<TTransactionProps> = props => {
       </Content>
     </Wrapper>
   )
-}
+})
 
 const Wrapper = styled.div<{ opened: boolean; deleted: boolean }>`
   user-select: none;
