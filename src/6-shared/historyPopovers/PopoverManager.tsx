@@ -67,8 +67,11 @@ export function registerPopover<
   defaultExtraProps: ExtraProps,
   defaultDisplayProps?: WithoutBaseProps<DisplayProps>
 ) {
-  // Prevent duplicate registration
-  if (registeredPopovers[key])
+  // Prevent duplicate registration. Under HMR a module re-executes and calls
+  // this again with the same key — that's expected in dev, so only treat a
+  // duplicate as a fatal error in a production build (where each module loads
+  // once and a real duplicate is a genuine bug).
+  if (registeredPopovers[key] && import.meta.env.PROD)
     throw new Error(`Popover "${key}" already registered`)
   registeredPopovers[key] = true
 
