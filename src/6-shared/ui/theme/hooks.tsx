@@ -5,7 +5,7 @@ import {
 } from '@mui/material'
 import { useCallback } from 'react'
 
-export const THEME_KEY = 'theme'
+const THEME_KEY = 'theme'
 
 export const useAppTheme = () => useTheme()
 

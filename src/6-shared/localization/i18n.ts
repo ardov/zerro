@@ -7,7 +7,7 @@ import { isProduction } from '6-shared/config'
 const LOCAL_STORAGE_KEY = 'language'
 export const resources = { ru, en }
 export const defaultNS = 'common'
-export const languges = Object.keys(resources) as (keyof typeof resources)[]
+const languges = Object.keys(resources) as (keyof typeof resources)[]
 
 function detectBestLanguage(languges: string[]) {
   const getLangOnly = (lang: string) => lang.split(/-|_/)[0]

@@ -1,4 +1,4 @@
-import type { TFxAmount, TFxCode, TRates } from '6-shared/types'
+import type { TFxAmount, TFxCode } from '6-shared/types'
 import { keys } from '6-shared/helpers/keys'
 
 export const round = (amount: number): number => Math.round(amount * 100) / 100
@@ -26,23 +26,6 @@ export function addFxAmount(...amounts: TFxAmount[]): TFxAmount {
   }, {} as TFxAmount)
 }
 
-export function subFxAmount(acc: TFxAmount, fxAmount: TFxAmount): TFxAmount {
-  const copy: TFxAmount = { ...acc }
-  keys(fxAmount).forEach(fx => {
-    copy[fx] ??= 0
-    copy[fx] = sub(copy[fx], fxAmount[fx])
-  })
-  return copy
-}
-
-export function isEqualFxAmount(a1: TFxAmount, a2: TFxAmount): boolean {
-  const currencies = keys(a1).concat(keys(a2))
-  for (const fx of currencies) {
-    if (a1[fx] !== a2[fx]) return false
-  }
-  return true
-}
-
 export function isZero(a: TFxAmount): boolean {
   const currencies = keys(a)
   for (const fx of currencies) {
@@ -51,29 +34,8 @@ export function isZero(a: TFxAmount): boolean {
   return true
 }
 
-export function convertFx(
-  fxAmount: TFxAmount,
-  targetFxCode: TFxCode,
-  rates: TRates
-): number {
-  let result = 0
-  keys(fxAmount).forEach(fx => {
-    result = round(result + (fxAmount[fx] * rates[fx]) / rates[targetFxCode])
-  })
-  return result
-}
-
 export function getAverage(numbers: number[]): number {
   if (!numbers.length) return 0
   const sum = numbers.reduce((acc, val) => acc + val, 0)
   return round(sum / numbers.length)
-}
-
-export function getMedian(numbers: number[]): number {
-  if (!numbers.length) return 0
-  const sorted = [...numbers].sort((a, b) => a - b)
-  const mid = Math.floor(sorted.length / 2)
-  const median =
-    sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
-  return round(median)
 }

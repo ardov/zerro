@@ -1,3 +1,3 @@
 export * from './utils'
-export { GroupBy, toGroup, nextGroup, makeDateArray } from './makeDateArray'
+export { GroupBy, toGroup, makeDateArray } from './makeDateArray'
 export { formatDate } from './formatDate'
