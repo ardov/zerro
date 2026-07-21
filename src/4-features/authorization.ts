@@ -8,7 +8,7 @@ import { syncData } from '4-features/sync'
 import { convertDiff } from '6-shared/api/zm-adapter'
 import { clearLocalData, saveDataLocally } from './localData'
 import { zmPreferenceStorage } from '6-shared/api/zmPreferenceStorage'
-import { getDemoData } from 'demoData'
+import { getDemoData } from 'zerro-core/demo'
 
 export const logOut = (): AppThunk<Promise<void>> => async dispatch => {
   dispatch(resetData())

@@ -2,8 +2,6 @@
 
 This optional Zerro Core module owns deterministic public demo data. It describes what a realistic normalized ZenMoney/Zerro snapshot can look like without using private account data.
 
-`src/demoData` is only a compatibility wrapper for the current app import.
-
 ## Creating demo data is needed for:
 
 - Testing. That's why it should be predictable and repeatable.

@@ -17,7 +17,6 @@ export { clearPersistedLocalData } from './replicaPersistence'
 export {
   getPendingSyncDiff,
   getPendingSyncTransport,
-  getHasPendingChanges,
   getCanUndoClientCommand,
   getCanRedoClientCommand,
   getChangedNum,

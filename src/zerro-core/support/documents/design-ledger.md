@@ -125,9 +125,8 @@ This is the intentional compatibility facade for Core-owned normalized types.
 Move consumers gradually; do not perform a big-bang type migration or widen the
 Core root to expose implementation barrels.
 
-### Demo and presentation wrappers
+### Presentation wrappers
 
-- `src/demoData` remains a thin wrapper over `zerro-core/demo`.
 - App tag SVG/assets remain outside domain Core while package-safe emoji
   metadata lives in `presentation/tag-icons`.
 

@@ -2,52 +2,9 @@ import type { TNormalizedPatch } from '6-shared/types'
 
 /**
  * Adds changes from the second diff to the first diff
- * ⚠️ Mutable method
- * @param target - target object will be mutated
+ * @param target - base object, left untouched
  * @param diff - object with changes
- */
-export function mergeDiffs(target: TNormalizedPatch, diff: TNormalizedPatch) {
-  if (diff.serverTimestamp) target.serverTimestamp = diff.serverTimestamp
-  if (diff.deletion) {
-    if (target.deletion) target.deletion = target.deletion.concat(diff.deletion)
-    else target.deletion = diff.deletion
-  }
-  merge('instrument')
-  merge('country')
-  merge('company')
-  merge('user')
-  merge('account')
-  merge('merchant')
-  merge('tag')
-  merge('budget')
-  merge('reminder')
-  merge('reminderMarker')
-  merge('transaction')
-
-  /**
-   * Merges all objects from diff key into target key
-   * @param key - all diff keys except serverTimestamp and deletion
-   */
-  function merge(key: keyof TNormalizedPatch) {
-    if (key === 'serverTimestamp' || key === 'deletion') return
-    if (!diff[key]) return
-    if (target[key]) {
-      diff[key]?.forEach((el: any) => {
-        const id = el.id
-        const filtered = target[key]?.filter((el: any) => id !== el.id) || []
-        target[key] = [...filtered, el]
-      })
-    } else {
-      // @ts-expect-error TS can't narrow array type by diff key
-      target[key] = diff[key]
-    }
-  }
-}
-
-/**
- * Adds changes from the second diff to the first diff
- * @param target - target object will be mutated
- * @param diff - object with changes
+ * @returns a new merged object
  */
 export function immutableMergeDiffs(
   target: TNormalizedPatch,
