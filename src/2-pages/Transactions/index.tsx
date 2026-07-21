@@ -8,6 +8,7 @@ import {
   TransactionPreview,
 } from '3-widgets/transaction/TransactionPreview'
 import { Helmet } from 'react-helmet-async'
+import { useDocumentTitle } from '6-shared/hooks/useDocumentTitle'
 import { registerPopover } from '6-shared/historyPopovers'
 import type { TTransaction, TTransactionId } from '6-shared/types'
 import { track } from '6-shared/analytics'
@@ -23,6 +24,7 @@ const sideSx = {
 
 export default function TransactionsView() {
   const { t } = useTranslation('transactions')
+  useDocumentTitle(`${t('pageTitle')} | Zerro`)
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const [checkedDate, setCheckedDate] = useState<Date | null>(null)
   const { open } = trPreview.useMethods()
@@ -43,7 +45,6 @@ export default function TransactionsView() {
   return (
     <>
       <Helmet>
-        <title>{t('pageTitle')}</title>
         <meta name="description" content={t('pageDescription')} />
         <link rel="canonical" href="https://zerro.app/transactions" />
       </Helmet>
@@ -73,6 +74,7 @@ export default function TransactionsView() {
           >
             <TransactionList
               checkedDate={checkedDate}
+              storageKey="transactionsPage"
               sx={{ flex: '1 1 auto' }}
               onTrOpen={handleTrOpen}
               opened={opened || undefined}

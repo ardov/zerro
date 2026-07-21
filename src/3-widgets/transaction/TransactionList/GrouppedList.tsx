@@ -1,5 +1,11 @@
 import type { FC } from 'react'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import type { ListImperativeAPI, RowComponentProps } from 'react-window'
 import { List } from 'react-window'
 import type { StaticDatePickerProps } from '@mui/x-date-pickers/StaticDatePicker'
@@ -9,6 +15,7 @@ import { ListSubheader } from '@mui/material'
 import { formatDate, parseDate } from '6-shared/helpers/date'
 import type { TDateDraft, TISODate, TTransactionId } from '6-shared/types'
 import { toISODate } from '6-shared/helpers/date'
+import { loadMemory, saveMemory } from '6-shared/helpers/viewMemory'
 import { SmartDialog } from '6-shared/ui/SmartDialog'
 import { registerPopover } from '6-shared/historyPopovers'
 
@@ -23,7 +30,8 @@ const TRANSACTION_HEIGHT = 72
 const groupHeight = (group: GroupNode) =>
   HEADER_HEIGHT + TRANSACTION_HEIGHT * group.ids.length
 
-const findDateIndex = (groups: GroupNode[], date: GroupNode['date']) => {
+/** Index of the first group at or before `date` (groups are newest-first). */
+const findDateIndex = (groups: GroupNode[], date: TISODate) => {
   for (let i = 0; i < groups.length; i++) {
     if (groups[i].date <= date) return i
   }
@@ -46,18 +54,35 @@ type GrouppedListProps = {
   groups: GroupNode[]
   renderTransaction: (id: TTransactionId) => React.ReactNode
   initialDate?: TDateDraft
+  storageKey?: string
 }
 
 export const GrouppedList: FC<GrouppedListProps> = props => {
-  const { groups, renderTransaction, initialDate } = props
+  const { groups, renderTransaction, initialDate, storageKey } = props
   const listRef = useRef<ListImperativeAPI>(null)
   const datePopover = dateDialog.useMethods()
+
+  const scrollKey = storageKey && `${storageKey}:scroll`
 
   // react-window v2 offsets rows with `transform: translateY(...)`, which
   // breaks `position: sticky` on the in-row headers. So we render the pinned
   // header as an overlay driven by the scroll position instead, including the
   // classic "push" where the next day's header nudges the current one up.
-  const [scrollTop, setScrollTop] = useState(0)
+  // We persist the *top visible date* rather than a pixel offset: the list can
+  // have a different height between sessions (data synced, filters), so a raw
+  // scrollTop would land in the wrong place — or past the content, leaving the
+  // list blank. A date is stable and maps back through `scrollToDate`.
+  const [scrollTop, setScrollTop] = useState(() => {
+    if (!scrollKey || !groups.length) return 0
+    const savedDate = loadMemory<TISODate>(scrollKey)
+    if (!savedDate) return 0
+    // Offset of the saved group, so the overlay header is correct on the first
+    // paint (it matches where `scrollToDate` will land below).
+    const idx = findDateIndex(groups, savedDate)
+    let sum = 0
+    for (let i = 0; i < idx; i++) sum += groupHeight(groups[i])
+    return sum
+  })
 
   // Prefix sum of group tops: offsets[i] is the y where group i starts.
   const offsets = useMemo(() => {
@@ -72,6 +97,7 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
 
   const scrollToDate = useCallback(
     (date: TDateDraft) => {
+      if (!groups.length) return
       const idx = findDateIndex(groups, toISODate(date))
       listRef.current?.scrollToRow({ index: idx, align: 'start' })
     },
@@ -84,22 +110,48 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
         value: parseDate(date),
         minDate: parseDate(groups[groups.length - 1]?.date || 0),
         maxDate: parseDate(groups[0]?.date || 0),
+        // Closing is handled inside `DateDialog` via its own (fresh) onClose —
+        // the `close` captured here is stale (the dialog isn't on the history
+        // stack yet at click time), so calling it would be a no-op.
         onChange: (d: TDateDraft | null) => {
-          if (d) {
-            datePopover.close()
-            scrollToDate(d as TISODate)
-          }
+          if (d) scrollToDate(d as TISODate)
         },
       })
     },
     [datePopover, groups, scrollToDate]
   )
 
-  // Scroll to initial date if it's provided
-  // We should render first and only then scroll.
-  // That's why there is a timeout. Downside of is that the list jumps.
+  // Position the list once, after react-window has actually mounted and
+  // measured its rows (that's when `element` and `scrollToRow` become usable).
+  // `onRowsRendered` fires on every render, so guard it to run a single time.
+  // `initialDate` ("jump to this date") wins over a restored scroll position.
+  const positionedRef = useRef(false)
+  const applyInitialPosition = useCallback(() => {
+    if (positionedRef.current) return
+    positionedRef.current = true
+    // Defer to the next frame: `onRowsRendered` fires before react-window has
+    // attached its imperative handle (so `element` is still null here), and
+    // react-window also syncs its own scroll offset to 0 right after mount.
+    // By the next frame the element exists and its offset is settled.
+    requestAnimationFrame(() => {
+      if (!listRef.current?.element) return
+      if (initialDate) {
+        scrollToDate(initialDate)
+      } else if (scrollKey) {
+        const savedDate = loadMemory<TISODate>(scrollKey)
+        if (savedDate) scrollToDate(savedDate)
+      }
+    })
+  }, [initialDate, scrollKey, scrollToDate])
+
+  // Re-jump when `initialDate` changes while already mounted — e.g. clicking
+  // another point on the analytics chart reuses this list and only updates the
+  // prop. The initial mount is handled by `applyInitialPosition` above.
+  const prevInitialDate = useRef(initialDate)
   useEffect(() => {
-    if (initialDate) setTimeout(() => scrollToDate(initialDate), 10)
+    if (prevInitialDate.current === initialDate) return
+    prevInitialDate.current = initialDate
+    if (positionedRef.current && initialDate) scrollToDate(initialDate)
   }, [initialDate, scrollToDate])
 
   const topIndex = findTopIndex(offsets, scrollTop)
@@ -125,7 +177,15 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
                 rowProps={{ groups, onDateClick, renderTransaction }}
                 rowHeight={i => groupHeight(groups[i])}
                 rowComponent={Day}
-                onScroll={e => setScrollTop(e.currentTarget.scrollTop)}
+                onRowsRendered={applyInitialPosition}
+                onScroll={e => {
+                  const top = e.currentTarget.scrollTop
+                  setScrollTop(top)
+                  if (scrollKey) {
+                    const date = groups[findTopIndex(offsets, top)]?.date
+                    if (date) saveMemory(scrollKey, date)
+                  }
+                }}
               />
             )
           }}
@@ -211,10 +271,20 @@ const dateDialog = registerPopover<TDateDialogProps>('listSateDialog', {
 })
 
 const DateDialog = () => {
-  const { extraProps } = dateDialog.useProps()
+  const { extraProps, displayProps } = dateDialog.useProps()
+  const { onChange, ...pickerProps } = extraProps
   return (
     <SmartDialog elKey={dateDialog.key}>
-      <StaticDatePicker {...extraProps} openTo="day" />
+      <StaticDatePicker
+        {...pickerProps}
+        openTo="day"
+        // No action bar — picking a day applies and closes immediately.
+        slotProps={{ actionBar: { actions: [] } }}
+        onChange={(value, ...rest) => {
+          displayProps.onClose()
+          onChange?.(value, ...rest)
+        }}
+      />
     </SmartDialog>
   )
 }
