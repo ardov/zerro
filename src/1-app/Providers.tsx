@@ -1,5 +1,4 @@
 import React from 'react'
-import { HelmetProvider } from 'react-helmet-async'
 import { Provider } from 'react-redux'
 import { StyledEngineProvider } from '@mui/material/styles'
 import { store } from 'store'
@@ -12,16 +11,14 @@ export function Providers(props: {
   store?: typeof store
 }) {
   return (
-    <HelmetProvider>
-      <StyledEngineProvider injectFirst>
-        <Provider store={props.store || store}>
-          <LocalizationProvider>
-            <AppThemeProvider>
-              <SnackbarProvider>{props.children}</SnackbarProvider>
-            </AppThemeProvider>
-          </LocalizationProvider>
-        </Provider>
-      </StyledEngineProvider>
-    </HelmetProvider>
+    <StyledEngineProvider injectFirst>
+      <Provider store={props.store || store}>
+        <LocalizationProvider>
+          <AppThemeProvider>
+            <SnackbarProvider>{props.children}</SnackbarProvider>
+          </AppThemeProvider>
+        </LocalizationProvider>
+      </Provider>
+    </StyledEngineProvider>
   )
 }

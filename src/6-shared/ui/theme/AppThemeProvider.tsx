@@ -1,6 +1,5 @@
 import type { FC } from 'react'
 import React from 'react'
-import { Helmet } from 'react-helmet-async'
 import { Global, css } from '@emotion/react'
 import CssBaseline from '@mui/material/CssBaseline'
 import type { Theme } from '@mui/material/styles'
@@ -38,9 +37,7 @@ const WithTheme: FC = () => {
   const theme = useAppTheme()
   return (
     <>
-      <Helmet>
-        <meta name="theme-color" content={theme.palette.background.paper} />
-      </Helmet>
+      <meta name="theme-color" content={theme.palette.background.paper} />
       <CssBaseline enableColorScheme />
       <GlobalVaribles theme={theme} />
     </>

@@ -1,20 +1,16 @@
 import type { FC, ReactElement } from 'react'
 import { Box, Link, Typography } from '@mui/material'
 import { Stack } from '@mui/system'
-import { Helmet } from 'react-helmet-async'
 import { useTranslation } from 'react-i18next'
 import { useAppTheme } from '6-shared/ui/theme'
-import { useDocumentTitle } from '6-shared/hooks/useDocumentTitle'
 
 export default function Donation() {
   const { t } = useTranslation('donation')
-  useDocumentTitle(`${t('pageTitle')} | Zerro`)
   return (
     <>
-      <Helmet>
-        <meta name="description" content={t('pageDescription')} />
-        <link rel="canonical" href="https://zerro.app/donation" />
-      </Helmet>
+      <title>{`${t('pageTitle')} | Zerro`}</title>
+      <meta name="description" content={t('pageDescription')} />
+      <link rel="canonical" href="https://zerro.app/donation" />
       <Box
         sx={{
           display: 'flex',

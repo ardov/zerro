@@ -1,23 +1,19 @@
 import React from 'react'
 import { Box, Button, Typography } from '@mui/material'
-import { Helmet } from 'react-helmet-async'
 import { useTranslation } from 'react-i18next'
 import { getToken } from 'store/token'
 import { useAppSelector } from 'store'
-import { useDocumentTitle } from '6-shared/hooks/useDocumentTitle'
 
 export default function Token() {
   const { t } = useTranslation('token')
-  useDocumentTitle(`${t('pageTitle')} | Zerro`)
   const token = useAppSelector(getToken)
   const [tokenIsVisible, setTokenVisibility] = React.useState(false)
 
   return (
     <>
-      <Helmet>
-        <meta name="description" content={t('pageDescription')} />
-        <link rel="canonical" href="https://zerro.app/token" />
-      </Helmet>
+      <title>{`${t('pageTitle')} | Zerro`}</title>
+      <meta name="description" content={t('pageDescription')} />
+      <link rel="canonical" href="https://zerro.app/token" />
       <Box
         sx={{
           display: 'flex',
