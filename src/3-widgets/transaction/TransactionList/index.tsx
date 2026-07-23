@@ -8,13 +8,12 @@ import type {
 import { core } from 'zerro-core/redux'
 
 import type { FC } from 'react'
-import { useEffect, useMemo, useState, useCallback } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Theme } from '@mui/material'
 import { Box, Typography } from '@mui/material'
 import { track } from '6-shared/analytics'
 import { useDebounce } from '6-shared/hooks/useDebounce'
-import { loadMemory, saveMemory } from '6-shared/helpers/viewMemory'
 
 import { getEventPosition } from '3-widgets/global/shared/helpers'
 
@@ -33,13 +32,17 @@ export type TTransactionListProps = {
   hideFilter?: boolean
   checkedDate?: Date | null
   initialDate?: TDateDraft
-  /**
-   * When set, the filter query, search text and scroll position are kept in
-   * memory under this key, so leaving the page and returning within the session
-   * restores the list as it was.
-   */
-  storageKey?: string
+  view?: TTransactionListView
   sx?: SxProps<Theme>
+}
+
+export type TTransactionListView = {
+  query: core.transactions.TTransactionQuery
+  search: string
+  restoredTopDate: TISODate | null
+  onQueryChange: (query: core.transactions.TTransactionQuery) => void
+  onSearchChange: (search: string) => void
+  onTopDateChange: (date: TISODate) => void
 }
 
 export const TransactionList: FC<TTransactionListProps> = props => {
@@ -51,40 +54,25 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     hideFilter = false,
     checkedDate,
     initialDate,
-    storageKey,
+    view,
     sx,
   } = props
 
   const dispatch = useAppDispatch()
-  const queryKey = storageKey && `${storageKey}:query`
-  const searchKey = storageKey && `${storageKey}:search`
-  const [query, setQuery] = useState<core.transactions.TTransactionQuery>(
-    () => {
-      const saved =
-        queryKey && loadMemory<core.transactions.TTransactionQuery>(queryKey)
-      if (saved) return saved
-      return {
-        clauses:
-          initialQuery?.clauses.filter(clause => clause.kind !== 'search') ||
-          [],
-      }
-    }
-  )
-  const [search, setSearch] = useState(() => {
-    const saved = searchKey ? loadMemory<string>(searchKey) : undefined
-    if (saved !== undefined) return saved
-    return (
+  const [localQuery, setLocalQuery] =
+    useState<core.transactions.TTransactionQuery>(() => ({
+      clauses:
+        initialQuery?.clauses.filter(clause => clause.kind !== 'search') || [],
+    }))
+  const [localSearch, setLocalSearch] = useState(
+    () =>
       initialQuery?.clauses.find(clause => clause.kind === 'search')?.value ||
       ''
-    )
-  })
-
-  useEffect(() => {
-    if (queryKey) saveMemory(queryKey, query)
-  }, [queryKey, query])
-  useEffect(() => {
-    if (searchKey) saveMemory(searchKey, search)
-  }, [searchKey, search])
+  )
+  const query = view?.query ?? localQuery
+  const search = view?.search ?? localSearch
+  const onQueryChange = view?.onQueryChange ?? setLocalQuery
+  const onSearchChange = view?.onSearchChange ?? setLocalSearch
   const debouncedSearch = useDebounce(search, 300)
   const appliedQuery = useMemo<core.transactions.TTransactionQuery>(
     () => ({
@@ -98,8 +86,8 @@ export const TransactionList: FC<TTransactionListProps> = props => {
     [debouncedSearch, query]
   )
   const onFilterByPayee = useCallback(
-    (payee?: string) => setSearch(payee || ''),
-    []
+    (payee?: string) => onSearchChange(payee || ''),
+    [onSearchChange]
   )
 
   const trList = useFilteredTransactions(transactionIds, appliedQuery)
@@ -223,9 +211,9 @@ export const TransactionList: FC<TTransactionListProps> = props => {
           >
             <Filter
               query={query}
-              setQuery={setQuery}
+              onQueryChange={onQueryChange}
               search={search}
-              setSearch={setSearch}
+              onSearchChange={onSearchChange}
             />
           </Box>
         )}
@@ -240,7 +228,13 @@ export const TransactionList: FC<TTransactionListProps> = props => {
         <Box sx={{ flex: '1 1 auto' }}>
           {groups.length ? (
             <GrouppedList
-              {...{ groups, renderTransaction, initialDate, storageKey }}
+              {...{
+                groups,
+                renderTransaction,
+                initialDate,
+                restoredTopDate: view?.restoredTopDate,
+                onTopDateChange: view?.onTopDateChange,
+              }}
             />
           ) : (
             <EmptyState />

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { makeDemoStore } from '../../support/demo'
-import { makeTestRootState } from '../../support/testing/rootState'
+import { makeTestRootState } from 'store/testing'
 import { makeTransaction } from '../../support/testing/zenmoneyTestData'
 import {
   selectDebtors,

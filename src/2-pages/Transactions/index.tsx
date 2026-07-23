@@ -12,6 +12,8 @@ import type { TTransaction, TTransactionId } from '6-shared/types'
 import { track } from '6-shared/analytics'
 import { useTranslation } from 'react-i18next'
 
+import { useTransactionsPageView } from './useTransactionsPageView'
+
 const sideWidth = 360
 const sideSx = {
   width: sideWidth,
@@ -25,6 +27,7 @@ export default function TransactionsView() {
   const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down('md'))
   const [checkedDate, setCheckedDate] = useState<Date | null>(null)
   const { open } = trPreview.useMethods()
+  const view = useTransactionsPageView()
   const openedProps = trPreview.useProps()
   const opened = openedProps.displayProps.open && openedProps.extraProps.id
 
@@ -70,7 +73,7 @@ export default function TransactionsView() {
           >
             <TransactionList
               checkedDate={checkedDate}
-              storageKey="transactionsPage"
+              view={view}
               sx={{ flex: '1 1 auto' }}
               onTrOpen={handleTrOpen}
               opened={opened || undefined}

@@ -26,7 +26,7 @@ import { rateToWords } from '6-shared/helpers/money'
 import { formatDate, parseDate, toISODate } from '6-shared/helpers/date'
 import { track } from '6-shared/analytics'
 
-import { useAppDispatch, useAppSelector } from 'store'
+import { useAppCommand, useAppSelector } from 'store'
 
 import { core } from 'zerro-core/redux'
 
@@ -51,13 +51,7 @@ export const TrEmptyState = () => {
         p: 3,
       }}
     >
-      <Typography
-        variant="body2"
-        align="center"
-        sx={{
-          color: 'inherit',
-        }}
-      >
+      <Typography variant="body2" align="center" sx={{ color: 'inherit' }}>
         {t('fullEmptyState')}
       </Typography>
     </Box>
@@ -81,17 +75,21 @@ export const TransactionPreview: FC<TransactionPreviewProps> = props => {
 const TransactionContent: FC<TransactionPreviewProps> = props => {
   const { id, onClose, onOpenOther, onSelectSimilar } = props
   const { t } = useTranslation('transaction')
-  const dispatch = useAppDispatch()
+  const remove = useAppCommand(core.transactions.remove)
+  const removePermanently = useAppCommand(core.transactions.removePermanently)
+  const restore = useAppCommand(core.transactions.restore)
+  const recreate = useAppCommand(core.transactions.recreate)
+  const update = useAppCommand(core.transactions.update)
   const onDelete = () => {
-    dispatch(core.transactions.remove([id]))
+    remove([id])
     track('transaction_deleted', { mode: 'single', source: 'preview' })
   }
   const onDeletePermanently = () => {
-    dispatch(core.transactions.removePermanently([id]))
+    removePermanently([id])
     track('transaction_deleted_permanently', { source: 'preview' })
   }
   const onRestore = () => {
-    dispatch(core.transactions.restore(id))
+    restore(id)
     track('transaction_restored', { source: 'preview' })
   }
 
@@ -157,32 +155,28 @@ const TransactionContent: FC<TransactionPreviewProps> = props => {
       const createdDate = parseDate(tr.date)
       createdDate.setHours(hh)
       createdDate.setMinutes(mm)
-      const newId = dispatch(
-        core.transactions.recreate({
-          id,
-          created: +createdDate,
-          comment: localComment,
-          outcome: localOutcome,
-          income: localIncome,
-          payee: localPayee,
-          date: localDate,
-          tag: localTag,
-        })
-      )
+      const newId = recreate({
+        id,
+        created: +createdDate,
+        comment: localComment,
+        outcome: localOutcome,
+        income: localIncome,
+        payee: localPayee,
+        date: localDate,
+        tag: localTag,
+      })
       track('transaction_recreated', { source: 'preview' })
       onOpenOther(newId)
     } else if (hasChanges) {
-      dispatch(
-        core.transactions.update({
-          id,
-          ...(comment !== localComment && { comment: localComment }),
-          ...(outcome !== localOutcome && { outcome: localOutcome }),
-          ...(income !== localIncome && { income: localIncome }),
-          ...(payee !== localPayee && { payee: localPayee }),
-          ...(date !== localDate && { date: localDate }),
-          ...(tag !== localTag && { tag: localTag }),
-        })
-      )
+      update({
+        id,
+        ...(comment !== localComment && { comment: localComment }),
+        ...(outcome !== localOutcome && { outcome: localOutcome }),
+        ...(income !== localIncome && { income: localIncome }),
+        ...(payee !== localPayee && { payee: localPayee }),
+        ...(date !== localDate && { date: localDate }),
+        ...(tag !== localTag && { tag: localTag }),
+      })
       track('transaction_edited', { source: 'preview' })
     }
   }

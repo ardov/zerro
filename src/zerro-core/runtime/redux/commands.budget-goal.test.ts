@@ -4,7 +4,7 @@ import { appendClientCommand } from 'store/data'
 import { issuePatch } from '../../internal/operations/materialization'
 import { makeDemoStore } from '../../support/demo'
 import { applyPatch } from '../../internal/domain/zenmoney'
-import { makeTestRootState } from '../../support/testing/rootState'
+import { makeTestRootState } from 'store/testing'
 import {
   compilePatchUserSettings,
   compileSetBudget,

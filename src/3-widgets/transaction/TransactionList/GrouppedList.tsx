@@ -1,11 +1,5 @@
 import type { FC } from 'react'
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ListImperativeAPI, RowComponentProps } from 'react-window'
 import { List } from 'react-window'
 import type { StaticDatePickerProps } from '@mui/x-date-pickers/StaticDatePicker'
@@ -15,7 +9,6 @@ import { ListSubheader } from '@mui/material'
 import { formatDate, parseDate } from '6-shared/helpers/date'
 import type { TDateDraft, TISODate, TTransactionId } from '6-shared/types'
 import { toISODate } from '6-shared/helpers/date'
-import { loadMemory, saveMemory } from '6-shared/helpers/viewMemory'
 import { SmartDialog } from '6-shared/ui/SmartDialog'
 import { registerPopover } from '6-shared/historyPopovers'
 
@@ -54,31 +47,34 @@ type GrouppedListProps = {
   groups: GroupNode[]
   renderTransaction: (id: TTransactionId) => React.ReactNode
   initialDate?: TDateDraft
-  storageKey?: string
+  restoredTopDate?: TISODate | null
+  onTopDateChange?: (date: TISODate) => void
 }
 
 export const GrouppedList: FC<GrouppedListProps> = props => {
-  const { groups, renderTransaction, initialDate, storageKey } = props
+  const {
+    groups,
+    renderTransaction,
+    initialDate,
+    restoredTopDate,
+    onTopDateChange,
+  } = props
   const listRef = useRef<ListImperativeAPI>(null)
   const datePopover = dateDialog.useMethods()
-
-  const scrollKey = storageKey && `${storageKey}:scroll`
 
   // react-window v2 offsets rows with `transform: translateY(...)`, which
   // breaks `position: sticky` on the in-row headers. So we render the pinned
   // header as an overlay driven by the scroll position instead, including the
   // classic "push" where the next day's header nudges the current one up.
-  // We persist the *top visible date* rather than a pixel offset: the list can
-  // have a different height between sessions (data synced, filters), so a raw
-  // scrollTop would land in the wrong place — or past the content, leaving the
-  // list blank. A date is stable and maps back through `scrollToDate`.
+  // The page controller receives the *top visible date* rather than a pixel
+  // offset: the list can have a different height after data changes, so a raw
+  // scrollTop could land in the wrong place — or past the content. A date is
+  // stable and maps back through `scrollToDate`.
   const [scrollTop, setScrollTop] = useState(() => {
-    if (!scrollKey || !groups.length) return 0
-    const savedDate = loadMemory<TISODate>(scrollKey)
-    if (!savedDate) return 0
+    if (!restoredTopDate || !groups.length) return 0
     // Offset of the saved group, so the overlay header is correct on the first
     // paint (it matches where `scrollToDate` will land below).
-    const idx = findDateIndex(groups, savedDate)
+    const idx = findDateIndex(groups, restoredTopDate)
     let sum = 0
     for (let i = 0; i < idx; i++) sum += groupHeight(groups[i])
     return sum
@@ -137,12 +133,11 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
       if (!listRef.current?.element) return
       if (initialDate) {
         scrollToDate(initialDate)
-      } else if (scrollKey) {
-        const savedDate = loadMemory<TISODate>(scrollKey)
-        if (savedDate) scrollToDate(savedDate)
+      } else if (restoredTopDate) {
+        scrollToDate(restoredTopDate)
       }
     })
-  }, [initialDate, scrollKey, scrollToDate])
+  }, [initialDate, restoredTopDate, scrollToDate])
 
   // Re-jump when `initialDate` changes while already mounted — e.g. clicking
   // another point on the analytics chart reuses this list and only updates the
@@ -156,6 +151,7 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
 
   const topIndex = findTopIndex(offsets, scrollTop)
   const topDate = groups[topIndex]?.date
+  const reportedTopDate = useRef<TISODate | null>(null)
   // Distance from the list top to the next day's header. Once it enters the
   // header band, push the pinned header up so the two swap seamlessly.
   const nextHeaderTop = (offsets[topIndex + 1] ?? Infinity) - scrollTop
@@ -181,9 +177,10 @@ export const GrouppedList: FC<GrouppedListProps> = props => {
                 onScroll={e => {
                   const top = e.currentTarget.scrollTop
                   setScrollTop(top)
-                  if (scrollKey) {
-                    const date = groups[findTopIndex(offsets, top)]?.date
-                    if (date) saveMemory(scrollKey, date)
+                  const date = groups[findTopIndex(offsets, top)]?.date
+                  if (date && date !== reportedTopDate.current) {
+                    reportedTopDate.current = date
+                    onTopDateChange?.(date)
                   }
                 }}
               />

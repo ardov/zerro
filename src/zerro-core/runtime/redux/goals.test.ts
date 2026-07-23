@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import type { TISOMonth } from '6-shared/types'
 import { i18n } from '6-shared/localization'
 import { makeDemoStore } from '../../support/demo'
-import { makeTestRootState } from '../../support/testing/rootState'
+import { makeTestRootState } from 'store/testing'
 import { applyPatch } from '../../internal/domain/zenmoney'
 import {
   compileSetGoal,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { RootState } from 'store'
 import { makeDemoStore } from '../../support/demo'
-import { makeTestRootState } from '../../support/testing/rootState'
+import { makeTestRootState } from 'store/testing'
 import * as selectors from '../../support/testing/reduxSelectors'
 import * as activity from './activity'
 

@@ -12,6 +12,7 @@ vi.mock('6-shared/api/localStore', () => ({
 
 import { makeStore } from 'zerro-core/support/testing/zenmoneyTestData'
 import type { TCommand } from 'zerro-core/replica'
+import { patchTransactionsPage } from '../view'
 import { appendClientCommand } from './slice'
 import {
   clearPersistedLocalData,
@@ -73,6 +74,19 @@ describe('replica persistence snapshot', () => {
         outbox: [entry],
       })
     )
+  })
+
+  it('does not persist transient view actions', async () => {
+    const current = makeStore({ serverTimestamp: 100 })
+    const invoke = (replicaPersistenceMiddleware as any)({
+      getState: () => ({ data: { base: current, current, outbox: [] } }),
+      dispatch: vi.fn(),
+    })(vi.fn(nextAction => nextAction))
+
+    invoke(patchTransactionsPage({ search: 'coffee' }))
+
+    await Promise.resolve()
+    expect(saveReplicaStateMock).not.toHaveBeenCalled()
   })
 
   it('clears storage after invalidating saves from the previous login', async () => {

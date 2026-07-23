@@ -26,10 +26,10 @@ export function getPendingSyncTransport(
 }
 
 export const getCanUndoClientCommand = (state: RootState) =>
-  !state.isPending && getOutbox(state).length > 0
+  state.sync.status !== 'pending' && getOutbox(state).length > 0
 
 export const getCanRedoClientCommand = (state: RootState) =>
-  !state.isPending && getRedo(state).length > 0
+  state.sync.status !== 'pending' && getRedo(state).length > 0
 
 export const getChangedNum = (state: RootState) => {
   return getItemsCount(getPendingSyncDiff(state))

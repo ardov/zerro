@@ -15,8 +15,7 @@ import {
 import { Tooltip } from '6-shared/ui/Tooltip'
 
 import { getChangedNum } from 'store/data'
-import { getPendingState } from 'store/isPending'
-import { getLastSyncInfo } from 'store/lastSync'
+import { selectIsSyncPending, selectLastSyncResult } from 'store/sync'
 import { useAppDispatch, useAppSelector } from 'store'
 import { syncData } from '4-features/sync'
 import { useRegularSync } from '3-widgets/RegularSyncHandler'
@@ -31,8 +30,9 @@ const RefreshButton: FC<{ isMobile?: boolean; sx?: SxProps }> = ({
   const dispatch = useAppDispatch()
   const handleClick = useCallback(() => dispatch(syncData()), [dispatch])
   const changedNum = useAppSelector(getChangedNum)
-  const isPending = useAppSelector(getPendingState)
-  const { isSuccessful, finishedAt } = useAppSelector(getLastSyncInfo)
+  const isPending = useAppSelector(selectIsSyncPending)
+  const lastResult = useAppSelector(selectLastSyncResult)
+  const finishedAt = lastResult?.finishedAt || 0
   const [regular] = useRegularSync()
 
   let buttonState: ButtonState = 'idle'
@@ -43,7 +43,8 @@ const RefreshButton: FC<{ isMobile?: boolean; sx?: SxProps }> = ({
   const [prevFinishedAt, setPrevFinishedAt] = useState(finishedAt)
   if (prevFinishedAt !== finishedAt) {
     setPrevFinishedAt(finishedAt)
-    if (finishedAt) setNotification(isSuccessful ? 'success' : 'fail')
+    if (finishedAt)
+      setNotification(lastResult?.isSuccessful ? 'success' : 'fail')
   }
 
   useEffect(() => {

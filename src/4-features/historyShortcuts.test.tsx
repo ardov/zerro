@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { describe, expect, it, vi } from 'vitest'
 
 import dataReducer, { appendClientCommand } from 'store/data'
-import isPendingReducer, { setPending } from 'store/isPending'
+import syncReducer, { syncStarted } from 'store/sync'
 import {
   getHistoryShortcut,
   handleHistoryShortcut,
@@ -111,7 +111,7 @@ describe('history shortcuts', () => {
 
   it('moves commands between Redux undo and redo stacks', () => {
     const store = configureStore({
-      reducer: { data: dataReducer, isPending: isPendingReducer },
+      reducer: { data: dataReducer, sync: syncReducer },
     })
     store.dispatch(
       appendClientCommand({
@@ -145,12 +145,12 @@ describe('history shortcuts', () => {
 
   it('keeps the sent outbox prefix fixed while sync is pending', () => {
     const store = configureStore({
-      reducer: { data: dataReducer, isPending: isPendingReducer },
+      reducer: { data: dataReducer, sync: syncReducer },
     })
     store.dispatch(
       appendClientCommand({ type: 'patch', patch: {}, issuedAt: 1 })
     )
-    store.dispatch(setPending(true))
+    store.dispatch(syncStarted())
     const view = render(
       <Provider store={store}>
         <HistoryShortcuts />

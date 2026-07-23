@@ -4,6 +4,7 @@ import { tokenStorage } from '6-shared/api/tokenStorage'
 import { zenmoney } from '6-shared/api/zenmoney'
 import { setToken } from 'store/token'
 import { applyServerPatch, resetData } from 'store/data'
+import { resetViews } from 'store/view'
 import { syncData } from '4-features/sync'
 import { convertDiff } from '6-shared/api/zm-adapter'
 import { clearLocalData, saveDataLocally } from './localData'
@@ -12,6 +13,7 @@ import { getDemoData } from 'zerro-core/demo'
 
 export const logOut = (): AppThunk<Promise<void>> => async dispatch => {
   dispatch(resetData())
+  dispatch(resetViews())
   dispatch(setToken(null))
   tokenStorage.clear()
   await dispatch(clearLocalData())

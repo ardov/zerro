@@ -1,9 +1,8 @@
 import { getLastSyncTime } from 'store/data/selectors'
 import { getToken } from 'store/token'
-import { setPending } from 'store/isPending'
 import { saveDataLocally } from '4-features/localData'
 import { track } from '6-shared/analytics'
-import { setSyncData } from 'store/lastSync'
+import { syncFinished, syncStarted } from 'store/sync'
 import { formatDate } from '6-shared/helpers/date'
 import type { AppThunk } from 'store'
 import type { TLocalData } from '6-shared/types'
@@ -29,30 +28,46 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
   }
   const token = getToken(state) || ''
 
-  dispatch(setPending(true))
+  dispatch(syncStarted())
 
-  const response = await sync(token, zmPreferenceStorage.get(), diff)
-  dispatch(
-    setSyncData({
+  try {
+    const response = await sync(token, zmPreferenceStorage.get(), diff)
+    const result = {
       isSuccessful: !response.error,
       finishedAt: Date.now(),
       errorMessage: response.error || null,
-    })
-  )
+    }
 
-  if (response.data) {
-    const data = response.data
-    dispatch(applyServerPatch({ ...data, sentOutboxCount }))
-    const changedDomains = getChangedDomains(data)
-    dispatch(saveDataLocally(changedDomains))
-    track('sync_completed', {
-      mode: diff.serverTimestamp ? 'update' : 'first',
-    })
-    console.log(`✅ Data synced ${formatDate(new Date(), 'HH:mm:ss')}`)
-  } else {
-    console.warn('Syncing failed', response)
+    if (response.data) {
+      const data = response.data
+      dispatch(applyServerPatch({ ...data, sentOutboxCount }))
+      const changedDomains = getChangedDomains(data)
+      dispatch(saveDataLocally(changedDomains))
+      track('sync_completed', {
+        mode: diff.serverTimestamp ? 'update' : 'first',
+      })
+      console.log(`✅ Data synced ${formatDate(new Date(), 'HH:mm:ss')}`)
+    } else {
+      console.warn('Syncing failed', response)
+    }
+
+    dispatch(syncFinished(result))
+  } catch (error) {
+    const errorMessage = getErrorMessage(error)
+    console.error('Syncing failed', error)
+    dispatch(
+      syncFinished({
+        isSuccessful: false,
+        finishedAt: Date.now(),
+        errorMessage,
+      })
+    )
   }
-  dispatch(setPending(false))
+}
+
+function getErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error)
+  return message.slice(0, 500) || 'Unknown sync failure'
 }
 
 function getChangedDomains(data: TNormalizedPatch) {

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { RootState } from 'store'
 import { appendClientCommand } from 'store/data'
-import { makeTestRootState } from '../../support/testing/rootState'
+import { makeTestRootState } from 'store/testing'
 import {
   makeAccount,
   makeStore,

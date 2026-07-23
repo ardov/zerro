@@ -28,6 +28,9 @@ If you want to contribute, let's discuss the idea first here in issues or in [ch
 The ordered dependency upgrade work is tracked in
 [docs/dependency-migrations.md](./docs/dependency-migrations.md).
 
+The transient view-state and Redux-surface cleanup is tracked in
+[docs/view-state-migration.md](./docs/view-state-migration.md).
+
 ### Run locally
 
 1. Install [pnpm](https://pnpm.io/) and [Node.js](https://nodejs.org/)

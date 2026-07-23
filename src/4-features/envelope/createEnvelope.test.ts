@@ -13,6 +13,7 @@ import {
   getEnvelopeMeta,
 } from 'zerro-core/internal/domain/zerro'
 import { core } from 'zerro-core/redux'
+import { makeTestRootState } from 'store/testing'
 
 import { createEnvelope } from './createEnvelope'
 
@@ -24,13 +25,7 @@ vi.mock('uuid', () => ({ v1: () => UUID }))
 afterEach(() => vi.restoreAllMocks())
 
 function makeState(current: TDataStore): RootState {
-  return {
-    data: { current, base: current, outbox: [], redo: [] },
-    displayCurrency: null,
-    isPending: false,
-    lastSync: { finishedAt: 0, isSuccessful: null, errorMessage: null },
-    token: null,
-  }
+  return makeTestRootState(current)
 }
 
 function makeThunkDispatch(initial: RootState) {

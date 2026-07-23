@@ -8,6 +8,7 @@ import {
   makeStore,
   makeUser,
 } from '../../support/testing/zenmoneyTestData'
+import { makeTestRootState } from 'store/testing'
 import { remove, set } from './reminders'
 
 const NOW = Date.parse('2026-07-11T12:00:00Z')
@@ -28,13 +29,7 @@ function makeState(withReminder = false): RootState {
       ? { existing: makeReminder({ id: 'existing' }) }
       : {},
   })
-  return {
-    data: { current, base: current, outbox: [], redo: [] },
-    displayCurrency: null,
-    isPending: false,
-    lastSync: { finishedAt: 0, isSuccessful: null, errorMessage: null },
-    token: null,
-  }
+  return makeTestRootState(current)
 }
 
 function makeDispatch(state: RootState) {

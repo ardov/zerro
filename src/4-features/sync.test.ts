@@ -17,16 +17,32 @@ import data, {
   applyServerPatch,
   undoClientCommand,
 } from 'store/data'
-import isPending from 'store/isPending'
-import lastSync from 'store/lastSync'
+import syncReducer from 'store/sync'
 import token from 'store/token'
 import { syncData } from './sync'
 
 describe('syncData', () => {
+  it('records a successful result after applying the canonical response', async () => {
+    syncMock.mockResolvedValueOnce({
+      data: { serverTimestamp: 200 },
+    })
+    const store = configureStore({
+      reducer: { data, sync: syncReducer, token },
+    })
+
+    await store.dispatch(syncData() as any)
+
+    expect(store.getState().sync).toMatchObject({
+      status: 'idle',
+      lastResult: { isSuccessful: true, errorMessage: null },
+    })
+    expect(store.getState().data.current.serverTimestamp).toBe(200)
+  })
+
   it('drops the redo tail before building a failed request payload', async () => {
     syncMock.mockResolvedValueOnce({ error: 'offline' })
     const store = configureStore({
-      reducer: { data, isPending, lastSync, token },
+      reducer: { data, sync: syncReducer, token },
     })
     store.dispatch(
       applyServerPatch({
@@ -61,5 +77,26 @@ describe('syncData', () => {
     expect(store.getState().data.outbox).toEqual([first])
     expect(store.getState().data.redo).toEqual([])
     expect(store.getState().data.current.account.cash.title).toBe('Wallet')
+    expect(store.getState().sync).toMatchObject({
+      status: 'idle',
+      lastResult: { isSuccessful: false, errorMessage: 'offline' },
+    })
+  })
+
+  it('settles pending state when the transport throws', async () => {
+    syncMock.mockRejectedValueOnce(new Error('network unavailable'))
+    const store = configureStore({
+      reducer: { data, sync: syncReducer, token },
+    })
+
+    await store.dispatch(syncData() as any)
+
+    expect(store.getState().sync).toMatchObject({
+      status: 'idle',
+      lastResult: {
+        isSuccessful: false,
+        errorMessage: 'network unavailable',
+      },
+    })
   })
 })

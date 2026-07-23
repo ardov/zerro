@@ -1,4 +1,4 @@
-import type { Dispatch, FC, MouseEvent, SetStateAction } from 'react'
+import type { FC, MouseEvent } from 'react'
 import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -25,9 +25,9 @@ type EditableFilterKind = Exclude<AddableFilterKind, 'viewed' | 'deleted'>
 
 type FilterProps = {
   query: core.transactions.TTransactionQuery
-  setQuery: Dispatch<SetStateAction<core.transactions.TTransactionQuery>>
+  onQueryChange: (query: core.transactions.TTransactionQuery) => void
   search: string
-  setSearch: Dispatch<SetStateAction<string>>
+  onSearchChange: (search: string) => void
 }
 
 const filterKinds: AddableFilterKind[] = [
@@ -39,7 +39,12 @@ const filterKinds: AddableFilterKind[] = [
   'deleted',
 ]
 
-const Filter: FC<FilterProps> = ({ query, setQuery, search, setSearch }) => {
+const Filter: FC<FilterProps> = ({
+  query,
+  onQueryChange,
+  search,
+  onSearchChange,
+}) => {
   const { t, i18n } = useTranslation('filterDrawer')
   const accounts = core.accounts.usePopulated()
   const envelopes = useAppSelector(core.envelopes.selectAll)
@@ -62,12 +67,12 @@ const Filter: FC<FilterProps> = ({ query, setQuery, search, setSearch }) => {
   )
 
   const upsertClause = (clause: Clause) => {
-    setQuery(current => ({
+    onQueryChange({
       clauses: [
-        ...current.clauses.filter(item => item.kind !== clause.kind),
+        ...query.clauses.filter(item => item.kind !== clause.kind),
         clause,
       ],
-    }))
+    })
   }
 
   const openAddMenu = (event: MouseEvent<HTMLElement>) => {
@@ -101,11 +106,11 @@ const Filter: FC<FilterProps> = ({ query, setQuery, search, setSearch }) => {
 
   const closeEditor = () => {
     if (editingClause && isEmptyClause(editingClause)) {
-      setQuery(current => ({
-        clauses: current.clauses.filter(
+      onQueryChange({
+        clauses: query.clauses.filter(
           clause => clause.kind !== editingClause.kind
         ),
-      }))
+      })
     }
     setEditorOptionsOpen(false)
     setEditingKind(null)
@@ -116,9 +121,9 @@ const Filter: FC<FilterProps> = ({ query, setQuery, search, setSearch }) => {
       setEditorOptionsOpen(false)
       setEditingKind(null)
     }
-    setQuery(current => ({
-      clauses: current.clauses.filter(item => item !== clause),
-    }))
+    onQueryChange({
+      clauses: query.clauses.filter(item => item !== clause),
+    })
   }
 
   const labels = useMemo(
@@ -135,14 +140,14 @@ const Filter: FC<FilterProps> = ({ query, setQuery, search, setSearch }) => {
         <InputBase
           value={search}
           placeholder={t('searchComments')}
-          onChange={event => setSearch(event.target.value)}
+          onChange={event => onSearchChange(event.target.value)}
           sx={{ flexGrow: 1 }}
         />
         {Boolean(search) && (
           <Tooltip title={t('clearField')}>
             <IconButton
               size="small"
-              onClick={() => setSearch('')}
+              onClick={() => onSearchChange('')}
               children={<CloseIcon />}
             />
           </Tooltip>
