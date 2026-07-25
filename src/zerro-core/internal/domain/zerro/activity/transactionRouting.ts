@@ -1,7 +1,7 @@
 import { toISOMonth } from '../../foundation/date'
 import type { ById } from '../../foundation/types'
 import type { TAccountId } from '../../zenmoney/entities/accounts'
-import { cleanPayee } from '../../zenmoney/read-models/debtors'
+import { normalizePayee } from '../../zenmoney/read-models/debtors'
 import type { TISOMonth } from '../../zenmoney/primitives'
 import {
   getTransactionType,
@@ -130,10 +130,10 @@ function getDebtorEnvelopeId(
     return envId.get(EnvType.Merchant, transaction.merchant)
   }
 
-  const cleanName = cleanPayee(String(transaction.payee))
-  const debtor = debtors[cleanName]
+  const normalizedName = normalizePayee(transaction.payee)
+  const debtor = debtors[normalizedName]
 
   return debtor.merchantId
     ? envId.get(EnvType.Merchant, debtor.merchantId)
-    : envId.get(EnvType.Payee, cleanName)
+    : envId.get(EnvType.Payee, normalizedName)
 }

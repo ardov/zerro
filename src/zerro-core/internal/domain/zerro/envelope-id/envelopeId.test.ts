@@ -21,4 +21,13 @@ describe('envelope id helpers', () => {
       id: 'null',
     })
   })
+
+  it('preserves a payee id containing the envelope separator', () => {
+    const id = envId.get(EnvType.Payee, 'alice#bob')
+
+    expect(envId.parse(id)).toEqual({
+      type: EnvType.Payee,
+      id: 'alice#bob',
+    })
+  })
 })

@@ -56,8 +56,12 @@ export function buildDebtors(input: TBuildDebtorsInput): ById<TDebtor> {
   return debtors
 }
 
-export function cleanPayee(name: string) {
-  return name.replace(/[^\d\wа-яА-ЯёЁ]/g, '').toLowerCase()
+/** Canonical payee key used by ZenMoney. */
+export function normalizePayee(name: string | null | undefined) {
+  return (name || '')
+    .replace(/[\s.,;!?():\-"'&«»„”`*]+/g, ' ')
+    .trim()
+    .toLowerCase()
 }
 
 function getTransactionDebtor(
@@ -67,7 +71,7 @@ function getTransactionDebtor(
 ): TDebtor | undefined {
   if (transaction.merchant) {
     const merchant = merchants[transaction.merchant]
-    const id = cleanPayee(merchant.title)
+    const id = normalizePayee(merchant.title)
     const debtor = (debtors[id] ??= makeDebtorFromMerchant(merchant))
     debtor.merchantId = merchant.id
     debtor.merchantName = merchant.title
@@ -77,7 +81,7 @@ function getTransactionDebtor(
 
   if (!transaction.payee) return undefined
 
-  const id = cleanPayee(transaction.payee)
+  const id = normalizePayee(transaction.payee)
   const debtor = (debtors[id] ??= makeDebtorFromPayee(transaction.payee))
   if (!debtor.payeeNames.includes(transaction.payee)) {
     debtor.payeeNames.push(transaction.payee)
@@ -88,7 +92,7 @@ function getTransactionDebtor(
 
 function makeDebtorFromMerchant(merchant: TMerchant): TDebtor {
   return {
-    id: cleanPayee(merchant.title),
+    id: normalizePayee(merchant.title),
     name: merchant.title,
     merchantId: merchant.id,
     merchantName: merchant.title,
@@ -100,7 +104,7 @@ function makeDebtorFromMerchant(merchant: TMerchant): TDebtor {
 
 function makeDebtorFromPayee(payee: string): TDebtor {
   return {
-    id: cleanPayee(payee),
+    id: normalizePayee(payee),
     name: payee,
     merchantId: undefined,
     merchantName: undefined,

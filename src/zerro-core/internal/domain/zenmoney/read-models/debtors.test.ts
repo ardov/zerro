@@ -4,7 +4,7 @@ import {
   makeTransaction,
   usdInstruments,
 } from '../../../../support/testing/zenmoneyTestData'
-import { buildDebtors, cleanPayee } from './debtors'
+import { buildDebtors, normalizePayee } from './debtors'
 
 describe('buildDebtors', () => {
   it('collects payee debt transactions and balances', () => {
@@ -57,8 +57,8 @@ describe('buildDebtors', () => {
       debtAccountId: 'debt',
     })
 
-    expect(result.bobco).toMatchObject({
-      id: 'bobco',
+    expect(result['bob co']).toMatchObject({
+      id: 'bob co',
       name: 'Bob & Co.',
       merchantId: 'm1',
       merchantName: 'Bob & Co.',
@@ -66,7 +66,7 @@ describe('buildDebtors', () => {
     })
   })
 
-  it('ignores non-debt transactions and cleans payee names like legacy', () => {
+  it('ignores non-debt transactions and preserves payee word boundaries', () => {
     const result = buildDebtors({
       transactions: [
         makeTransaction({
@@ -83,6 +83,8 @@ describe('buildDebtors', () => {
     })
 
     expect(result).toEqual({})
-    expect(cleanPayee(' Вася + Alex! ')).toBe('васяalex')
+    expect(normalizePayee(' Вася + Alex! ')).toBe('вася + alex')
+    expect(normalizePayee('A B')).not.toBe(normalizePayee('AB'))
+    expect(normalizePayee('张三')).toBe('张三')
   })
 })

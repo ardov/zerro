@@ -20,9 +20,10 @@ export const envId = {
     return `${type}#${id}` as TEnvelopeId
   },
   parse: (id: TEnvelopeId) => {
+    const separatorIndex = id.indexOf('#')
     return {
-      type: id.split('#')[0] as EnvType,
-      id: id.split('#')[1],
+      type: id.slice(0, separatorIndex) as EnvType,
+      id: id.slice(separatorIndex + 1),
     }
   },
 }

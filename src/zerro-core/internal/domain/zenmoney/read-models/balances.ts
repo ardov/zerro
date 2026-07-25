@@ -12,7 +12,7 @@ import type {
   TTransactionId,
 } from '../entities/transactions/types'
 import type { TDebtor } from './debtors'
-import { cleanPayee } from './debtors'
+import { normalizePayee } from './debtors'
 import { getTransactionType, TrType } from '../entities/transactions'
 
 export type TBalanceState<Value = TFxAmount> = {
@@ -104,14 +104,14 @@ export function buildTransactionEffect(
     case TrType.IncomeDebt:
       effect.accounts = { [incomeAccount]: { [incomeFx]: income } }
       effect.debtors = {
-        [getDebtorId(transaction, input.merchants)]: { [outcomeFx]: -income },
+        [getDebtorId(transaction, input.merchants)]: { [incomeFx]: -income },
       }
       break
 
     case TrType.OutcomeDebt:
       effect.accounts = { [outcomeAccount]: { [outcomeFx]: -outcome } }
       effect.debtors = {
-        [getDebtorId(transaction, input.merchants)]: { [incomeFx]: outcome },
+        [getDebtorId(transaction, input.merchants)]: { [outcomeFx]: outcome },
       }
       break
 
@@ -236,5 +236,5 @@ function getCurrentBalanceState(
 function getDebtorId(transaction: TTransaction, merchants: ById<TMerchant>) {
   const merchantTitle =
     transaction.merchant && merchants[transaction.merchant]?.title
-  return cleanPayee(merchantTitle || transaction.payee || '')
+  return normalizePayee(merchantTitle || transaction.payee || '')
 }

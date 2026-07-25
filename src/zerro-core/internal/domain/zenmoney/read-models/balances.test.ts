@@ -56,6 +56,49 @@ describe('buildTransactionEffect', () => {
       debtors: { alex: { USD: 20 } },
     })
   })
+
+  it('uses the non-debt account instrument for cross-currency debt effects', () => {
+    const input = {
+      merchants: {},
+      instrumentCodeById: {
+        1: 'USD',
+        2: 'EUR',
+      } as Record<TInstrumentId, 'USD' | 'EUR'>,
+      debtAccountId: 'debt',
+    }
+
+    expect(
+      buildTransactionEffect(
+        makeTransaction({
+          id: 'borrow',
+          income: 100,
+          incomeAccount: 'card',
+          incomeInstrument: 1,
+          outcome: 90,
+          outcomeAccount: 'debt',
+          outcomeInstrument: 2,
+          payee: 'Alex',
+        }),
+        input
+      ).debtors
+    ).toEqual({ alex: { USD: -100 } })
+
+    expect(
+      buildTransactionEffect(
+        makeTransaction({
+          id: 'lend',
+          income: 90,
+          incomeAccount: 'debt',
+          incomeInstrument: 2,
+          outcome: 100,
+          outcomeAccount: 'card',
+          outcomeInstrument: 1,
+          payee: 'Alex',
+        }),
+        input
+      ).debtors
+    ).toEqual({ alex: { USD: 100 } })
+  })
 })
 
 describe('buildBalances', () => {
