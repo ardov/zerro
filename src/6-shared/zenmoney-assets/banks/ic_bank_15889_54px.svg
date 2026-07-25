@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="54" height="54">
+  <defs/>
+  <path d="M0,0h54v54H0z" fill="#183794"/>
+  <path d="M50.92,3.08L3.08,3.08v47.84h47.84zM3.08,1L1,1v52h52L53,1zM31.076,13.133h10.137v28.08h-24.96l2.08,-2.08h20.8v-23.92h-7.196L12.787,34.28l-0.042,-2.815zM36.36,16.947h-2.857l-20.716,20.8v2.773L34.28,19.11v15.17L23.187,34.28l-2.08,2.08L36.36,36.36z" fill="#fff" fill-rule="evenodd"/>
+</svg>

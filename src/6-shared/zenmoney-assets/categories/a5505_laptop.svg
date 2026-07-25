@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs/>
+  <path d="M3.44,5.44A1.5,1.5 0,0 1,4.5 5h15A1.5,1.5 0,0 1,21 6.5V15a1.5,1.5 0,0 1,-1.5 1.5h-15A1.5,1.5 0,0 1,3 15V6.5c0,-0.398 0.158,-0.78 0.44,-1.06M4.5,6.5V15h15V6.5z" fill="#151516" fill-rule="evenodd"/>
+  <path d="M2,18.5h20V20H2z" fill="#151516"/>
+</svg>

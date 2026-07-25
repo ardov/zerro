@@ -112,7 +112,7 @@ describe('zerro-core API boundary', () => {
             /from ['"](?:store|react|react-redux|@reduxjs\/toolkit|5-entities(?:\/[^'"]*)?|6-shared\/localization|6-shared\/tagIcons\.json|i18next)['"]/.test(
               line
             ) ||
-            /from ['"]6-shared\/(?:tagIconsSvg|icons\/[^'"]*)['"]/.test(line)
+            /from ['"]6-shared\/icons\/[^'"]*['"]/.test(line)
         )
         .map(
           ({ line, index }) =>

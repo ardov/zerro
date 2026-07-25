@@ -1,6 +1,5 @@
 import type { ById, TFxCode } from '6-shared/types'
-import noCategoryIconUrl from '6-shared/icons/no_category-icon.svg'
-import { tagIconsSvg } from '6-shared/tagIconsSvg'
+import { categoryIconById, noCategoryIconUrl } from '6-shared/zenmoney-assets'
 import { t } from 'i18next'
 import { toGraphemes } from '6-shared/helpers/graphemes'
 import type { TTag, TTagId } from '../../internal/domain/zenmoney/entities/tags'
@@ -101,8 +100,8 @@ function getSymbol(tag: TTag, userSettings: TTagPresentationSettings) {
     return useSvgIcons ? noCategoryIconUrl : '?'
   }
   if (tag.icon) {
-    if (useSvgIcons && tagIconsSvg[tag.icon]) {
-      return tagIconsSvg[tag.icon]
+    if (useSvgIcons && categoryIconById[tag.icon]) {
+      return categoryIconById[tag.icon]
     }
     const emoji = getTagIconEmoji(tag.icon)
     if (!useSvgIcons && emoji) {

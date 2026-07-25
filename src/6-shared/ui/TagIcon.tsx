@@ -1,4 +1,3 @@
-import { getMostContrast } from '6-shared/helpers/color'
 import type { Modify } from '6-shared/types'
 import type { BoxProps, CheckboxProps, SxProps, Theme } from '@mui/material'
 import { Box, Checkbox } from '@mui/material'
@@ -89,12 +88,15 @@ export function TagIcon(props: TagIconProps) {
     '& .svg-icon': {
       width: svgSizes[size],
       height: svgSizes[size],
-      // Make SVG white on dark backgrounds
-      filter: theme => {
-        const bgColor = color || theme.palette.background.paper
-        const shouldInvert = getMostContrast(bgColor) === '#ffffff'
-        return shouldInvert ? 'brightness(0) invert(1)' : 'none'
-      },
+      backgroundColor: 'currentColor',
+      maskImage: `url("${symbol}")`,
+      maskPosition: 'center',
+      maskRepeat: 'no-repeat',
+      maskSize: 'contain',
+      WebkitMaskImage: `url("${symbol}")`,
+      WebkitMaskPosition: 'center',
+      WebkitMaskRepeat: 'no-repeat',
+      WebkitMaskSize: 'contain',
     },
     '&:hover .svg-icon': {
       opacity: isInteractive ? 0 : 1,
@@ -121,7 +123,7 @@ export function TagIcon(props: TagIconProps) {
       ]}
     >
       {isSvg ? (
-        <img className="svg-icon" src={symbol} alt="" />
+        <span className="svg-icon" aria-hidden />
       ) : (
         <span className="emoji">{symbol}</span>
       )}

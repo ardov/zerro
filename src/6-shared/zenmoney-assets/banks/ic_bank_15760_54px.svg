@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="54" height="54">
+  <defs/>
+  <path d="M0,27a27,27 0,1 1,54 0,27 27,0 1,1 -54,0" fill="#009fdf"/>
+  <path d="m18.697,17 l-1.675,4h23.216l1.675,-4zM16.102,24 L14.62,28h23.216l1.483,-4zM13.675,31L12,35h23.216l1.675,-4z" fill="#fffffe" fill-rule="evenodd"/>
+</svg>
