@@ -1,4 +1,4 @@
-import { getLastSyncTime } from 'store/data/selectors'
+import { getSyncCursor } from 'store/data/selectors'
 import { getToken } from 'store/token'
 import { saveDataLocally } from '4-features/localData'
 import { track } from '6-shared/analytics'
@@ -24,7 +24,7 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
   const sentAt = Date.now()
   const diff: TNormalizedPatch = {
     ...(getPendingSyncTransport(state, sentAt) || {}),
-    serverTimestamp: getLastSyncTime(state),
+    serverTimestamp: getSyncCursor(state),
   }
   const token = getToken(state) || ''
 
@@ -48,7 +48,7 @@ export const syncData = (): AppThunk => async (dispatch, getState) => {
       })
       console.log(`✅ Data synced ${formatDate(new Date(), 'HH:mm:ss')}`)
     } else {
-      console.warn('Syncing failed', response)
+      console.warn('Syncing failed', response.error)
     }
 
     dispatch(syncFinished(result))

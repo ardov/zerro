@@ -22,4 +22,5 @@ export {
   getChangedNum,
   getLastChangeTime,
   getLastSyncTime,
+  getSyncCursor,
 } from './selectors'

@@ -111,13 +111,9 @@ creation intent fails before it can be persisted. Patching an entity that
 disappeared remotely therefore recreates it after rebase. Command order resolves
 delete-then-patch and repeated field writes.
 
-Future predicted server rules belong here rather than in command compilers:
-
-- changing transaction amounts updates affected account balances;
-- deleting an account permanently deletes its non-transfer transactions;
-- transfers involving a deleted account become income or outcome on the
-  surviving account;
-- a transaction already marked `deleted` ignores subsequent patches.
+Predicted server rules belong here rather than in command compilers. Their
+content — which effects Core predicts, which the server owns, and where the two
+deliberately differ — is specified in [materialization.md](./materialization.md).
 
 Each entity module owns its writable, required, and creation field contracts
 next to its factory; the application materializer holds the command loop and

@@ -13,7 +13,8 @@ export async function sync(
   try {
     const data = await zenmoney.fetchDiff(token, preference, zmDiff)
     return { data: convertDiff.toClient(data) }
-  } catch (error: any) {
-    return { error: error.message as string }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    return { error: message.slice(0, 500) || 'Unknown sync failure' }
   }
 }

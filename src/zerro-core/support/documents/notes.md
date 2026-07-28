@@ -68,21 +68,13 @@ compatibility or an explicit migration/product decision.
 
 ### 2. Materializer rules
 
-Implement one rule per checkpoint:
-
-1. deleted transactions ignore subsequent patches;
-2. transaction amount/account changes update affected account balances;
-3. deleting an account permanently deletes its non-transfer transactions;
-4. transfers involving a deleted account become income/outcome on the survivor.
-
-For each rule:
-
-- test the materialized patch and resulting state;
-- cover batches, upsert creation, deletion, and repeated field writes;
-- compare with a real ZenMoney response when possible;
-- add command versioning only when real persisted compatibility exists;
-- keep canonical server diffs and dumb `applyPatch` unchanged;
-- keep predicted effects out of primary-only transport.
+The rule set, its evidence, and the per-rule verification requirements live in
+[materialization.md](./materialization.md). Implement one rule per checkpoint.
+Rules 1 (deleted transactions ignore patches) and 2 (the verified same-account
+permanent-delete write purges the row) are done; balances are the next valuable
+one because they are the remaining rule with a visible wrong number today.
+Account, tag, and merchant cascades become reachable when the matching deletion
+commands ship.
 
 ## Deferred until evidence exists
 

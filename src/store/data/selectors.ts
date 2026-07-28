@@ -43,6 +43,25 @@ export const getLastSyncTime = (state: RootState) => {
   return state.data.current.serverTimestamp
 }
 
+/**
+ * Read cursor sent to ZenMoney, deliberately one second behind the accepted
+ * base.
+ *
+ * The server returns its own wall clock as `serverTimestamp` and the diff
+ * boundary is exclusive (`changed > cursor`). An entity another client commits
+ * in the same second as our response would therefore never appear in any later
+ * incremental pull. Overlapping by one second re-delivers at most that second
+ * of changes, which `applyPatch` merges idempotently.
+ */
+export const getSyncCursor = (state: RootState) => {
+  const cursor = getLastSyncTime(state)
+  if (!cursor) return 0
+  // Never let the overlap turn an incremental cursor into a full-sync one.
+  return Math.max(syncCursorOverlap, cursor - syncCursorOverlap)
+}
+
+const syncCursorOverlap = 1000
+
 function mergeMaterializedPatches(
   patches: TNormalizedPatch[]
 ): TNormalizedPatch | undefined {

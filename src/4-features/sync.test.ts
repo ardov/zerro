@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { syncMock } = vi.hoisted(() => ({
   syncMock: vi.fn(),
@@ -22,6 +22,10 @@ import token from 'store/token'
 import { syncData } from './sync'
 
 describe('syncData', () => {
+  beforeEach(() => {
+    syncMock.mockClear()
+  })
+
   it('records a successful result after applying the canonical response', async () => {
     syncMock.mockResolvedValueOnce({
       data: { serverTimestamp: 200 },
@@ -36,6 +40,9 @@ describe('syncData', () => {
       status: 'idle',
       lastResult: { isSuccessful: true, errorMessage: null },
     })
+    // A fresh replica still asks for a full sync: the overlap never turns a
+    // zero cursor into an incremental one.
+    expect(syncMock).toHaveBeenCalledWith('', 'ru', { serverTimestamp: 0 })
     expect(store.getState().data.current.serverTimestamp).toBe(200)
   })
 
@@ -46,7 +53,7 @@ describe('syncData', () => {
     })
     store.dispatch(
       applyServerPatch({
-        serverTimestamp: 100,
+        serverTimestamp: 100_000,
         account: [makeAccount({ id: 'cash', title: 'Cash' })],
       }) as any
     )
@@ -70,9 +77,11 @@ describe('syncData', () => {
 
     await store.dispatch(syncData() as any)
 
+    // The sent cursor overlaps the accepted base by one second, so an entity
+    // committed in the same second as the previous response is not skipped.
     expect(syncMock).toHaveBeenCalledWith('', 'ru', {
       account: [expect.objectContaining({ id: 'cash', title: 'Wallet' })],
-      serverTimestamp: 100,
+      serverTimestamp: 99_000,
     })
     expect(store.getState().data.outbox).toEqual([first])
     expect(store.getState().data.redo).toEqual([])

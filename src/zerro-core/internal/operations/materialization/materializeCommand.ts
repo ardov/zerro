@@ -5,6 +5,7 @@ import {
   budgetRequiredFields,
   budgetWritableFields,
   getRootUserId,
+  hasDeletableAmounts,
   intentPatchKeys,
   makeAccount,
   makeMerchant,
@@ -136,7 +137,8 @@ export function materializeCommand(
   command: TCommand,
   changedAt: TMsTime = command.issuedAt
 ): TNormalizedPatch {
-  return materializePrimaryCommand(snapshot, command, changedAt)
+  const patch = materializePrimaryCommand(snapshot, command, changedAt)
+  return withPredictedEffects(snapshot, patch, changedAt)
 }
 
 /** Expands only persisted user intent, without predicted server side effects. */
@@ -146,6 +148,81 @@ export function materializePrimaryCommand(
   changedAt: TMsTime = command.issuedAt
 ): TNormalizedPatch {
   return materializeIntentPatch(snapshot, command.patch, changedAt)
+}
+
+/**
+ * Adds predicted server effects to a primary patch. Local only: transport is
+ * built from `materializePrimaryCommand`, so nothing here is ever sent as
+ * client intent.
+ *
+ * Rule: the exact verified permanent-delete write — both amounts at `0.00001`
+ * on the same account — makes ZenMoney purge the row and answer with a real
+ * tombstone rather than an updated entity. Predicting the removal keeps
+ * `current` identical to the state the next canonical diff will confirm.
+ *
+ * The primary patch still carries the exact amount write, because that is what
+ * triggers the server-side purge. A `deletion` entry would not:
+ * ZenMoney converts a direct transaction deletion into a soft delete instead.
+ */
+function withPredictedEffects(
+  snapshot: TDataStore,
+  patch: TNormalizedPatch,
+  changedAt: TMsTime
+): TNormalizedPatch {
+  const transactions = patch.transaction
+  if (!transactions?.length) return patch
+
+  const purged = transactions.filter(entity =>
+    isPurgedByAmounts(snapshot, entity)
+  )
+  if (!purged.length) return patch
+
+  const user = requireRootUser(snapshot, 'transaction')
+  const result: TNormalizedPatch = { ...patch }
+  const remaining = transactions.filter(entity => !purged.includes(entity))
+  if (remaining.length) result.transaction = remaining
+  else delete result.transaction
+
+  result.deletion = [
+    ...(patch.deletion ?? []),
+    ...purged.map(entity => ({
+      id: entity.id,
+      object: 'transaction' as const,
+      stamp: changedAt,
+      user,
+    })),
+  ]
+
+  return result
+}
+
+/**
+ * The purge is an effect of this write, so it is predicted only for the exact
+ * verified amount and account shape.
+ *
+ * A create is never predicted: the purge is verified for rewriting an existing
+ * transaction, whether a create behaves the same is untested, and Zerro never
+ * issues one. A row already hidden by the read threshold is not re-deleted
+ * either — that state is not something this command caused.
+ */
+function isPurgedByAmounts(
+  snapshot: TDataStore,
+  entity: {
+    id: string
+    income: number
+    outcome: number
+    incomeAccount: string
+    outcomeAccount: string
+  }
+): boolean {
+  const stored = snapshot.transaction[entity.id]
+  if (!stored) return false
+  return (
+    entity.income === 0.00001 &&
+    entity.outcome === 0.00001 &&
+    entity.incomeAccount === entity.outcomeAccount &&
+    !hasDeletableAmounts(stored)
+  )
 }
 
 function materializeIntentPatch(

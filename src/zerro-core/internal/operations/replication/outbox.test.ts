@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   makeAccount,
   makeStore,
+  makeTransaction,
   makeUser,
 } from '../../../support/testing/zenmoneyTestData'
 import type { TCommand } from '../materialization'
@@ -111,6 +112,47 @@ describe('outbox operations', () => {
         }),
       ],
     })
+  })
+
+  it('predicts the verified purge locally while still sending the write', () => {
+    const base = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+      transaction: {
+        tr: makeTransaction({
+          id: 'tr',
+          changed: 5000,
+          incomeAccount: 'cash',
+          outcomeAccount: 'cash',
+          outcome: 25,
+        }),
+      },
+    })
+    const purge = makeCommand(10, {
+      transaction: [{ id: 'tr', income: 0.00001, outcome: 0.00001 }],
+    })
+
+    // Local state matches what the server will confirm: the row is gone, so
+    // showing deleted transactions cannot surface the temporary tiny transfer.
+    expect(replayOutbox(base, [purge]).transaction).toEqual({})
+
+    // The request still carries the exact amount write, which is what makes
+    // ZenMoney purge the verified row and answer with a real tombstone.
+    expect(buildOutboxTransport(base, [purge], 100)).toEqual({
+      transaction: [
+        {
+          ...base.transaction.tr,
+          income: 0.00001,
+          outcome: 0.00001,
+          changed: 6000,
+        },
+      ],
+    })
+
+    // Undo replays the surviving outbox over `base`, which still holds the
+    // original entity, so the predicted purge reverses itself.
+    expect(
+      replayOutbox(base, undoOutbox([purge], []).outbox).transaction
+    ).toEqual(base.transaction)
   })
 
   it('keeps only the final deletion when it follows an entity patch', () => {

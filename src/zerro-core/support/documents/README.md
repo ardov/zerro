@@ -33,6 +33,7 @@ prose.
 | Document                                                        | Purpose                                           |
 | --------------------------------------------------------------- | ------------------------------------------------- |
 | [architecture.md](./architecture.md)                            | Durable boundaries and runtime contracts          |
+| [materialization.md](./materialization.md)                      | Predicted local effects and server cascades       |
 | [design-ledger.md](./design-ledger.md)                          | Settled decisions, risks, and open questions      |
 | [notes.md](./notes.md)                                          | Current position, remaining work, deferred smells |
 | [structure-migration.md](./structure-migration.md)              | Completed alphabetical source-layout migration    |

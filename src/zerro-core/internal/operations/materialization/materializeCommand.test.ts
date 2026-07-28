@@ -18,6 +18,7 @@ import {
 import {
   issuePatch,
   materializeCommand,
+  materializePrimaryCommand,
   type TCommand,
 } from './materializeCommand'
 
@@ -124,6 +125,7 @@ describe('materializeCommand', () => {
       created: 100,
       income: 0,
       outcome: 25,
+      outcomeAccount: 'cash',
       comment: 'Before',
     })
     const replacement = {
@@ -155,10 +157,13 @@ describe('materializeCommand', () => {
           id: 'replacement',
           created: 500,
           hold: null,
+          // Kept because the source fixture diverges from the `viewed: true`
+          // factory default.
+          viewed: false,
           incomeInstrument: 1,
           incomeAccount: 'cash',
           outcomeInstrument: 1,
-          outcomeAccount: 'card',
+          outcomeAccount: 'cash',
           outcome: 25,
           comment: 'After',
           date: '2026-01-10',
@@ -166,13 +171,27 @@ describe('materializeCommand', () => {
       ],
     })
 
+    // Local materialization predicts the server-side purge of the source, so
+    // `current` never keeps the tiny row that would surface as a nonsense
+    // transfer once deleted transactions are made visible.
     const initial = materializeCommand(snapshot, command)
-    expect(initial.transaction).toEqual([
-      { ...source, income: 0.00001, outcome: 0.00001, changed: 1200 },
-      { ...replacement, changed: 300 },
+    expect(initial.transaction).toEqual([{ ...replacement, changed: 300 }])
+    expect(initial.deletion).toEqual([
+      { id: 'source', object: 'transaction', stamp: 300, user: 1 },
     ])
 
-    const hiddenSource = initial.transaction![0]
+    // Transport keeps the exact amount write: that upsert is what makes ZenMoney
+    // purge the row, while a `deletion` entry would only soft-delete it.
+    const transport = materializePrimaryCommand(snapshot, command, 400)
+    expect(transport.transaction).toEqual([
+      { ...source, income: 0.00001, outcome: 0.00001, changed: 1200 },
+      { ...replacement, changed: 400 },
+    ])
+    expect(transport.deletion).toBeUndefined()
+
+    // Replaying against a snapshot where the source already sits under the
+    // threshold neither re-sends nor re-deletes it.
+    const hiddenSource = transport.transaction![0]
     const retry = materializeCommand(
       makeStore({
         user: { 1: rootUser },
@@ -182,6 +201,33 @@ describe('materializeCommand', () => {
       400
     )
     expect(retry.transaction).toEqual([{ ...replacement, changed: 400 }])
+    expect(retry.deletion).toBeUndefined()
+  })
+
+  it('does not predict a purge outside the exact verified account shape', () => {
+    const source = makeTransaction({
+      id: 'source',
+      incomeAccount: 'cash',
+      outcomeAccount: 'card',
+      outcome: 25,
+    })
+    const snapshot = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
+      transaction: { source },
+    })
+    const command = issuePatch(
+      snapshot,
+      {
+        transaction: [{ id: source.id, income: 0.00001, outcome: 0.00001 }],
+      },
+      300
+    )
+
+    expect(materializeCommand(snapshot, command)).toEqual({
+      transaction: [
+        { ...source, income: 0.00001, outcome: 0.00001, changed: 1001 },
+      ],
+    })
   })
 
   it('compiles an existing account result to sparse intent', () => {

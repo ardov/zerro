@@ -30,10 +30,30 @@ export async function fetchDiff(
       Authorization: `Bearer ${token}`,
     },
   })
-  const json = await response.json()
-  if (json.error) throw Error(JSON.stringify(json.error))
+
+  // A failing status may carry HTML or an empty body. Include the status in the
+  // error instead of leaking an unhelpful bare SyntaxError.
+  const text = await response.text()
+  let json: unknown
+  try {
+    json = JSON.parse(text)
+  } catch {
+    throw new Error(`Unparsable diff response (HTTP ${response.status})`)
+  }
+
+  const apiError = readApiError(json)
+  if (apiError) throw new Error(JSON.stringify(apiError))
+
+  if (response.status < 200 || response.status >= 300) {
+    throw new Error(`Diff request failed (HTTP ${response.status})`)
+  }
 
   return json as TZmDiff
+}
+
+function readApiError(body: unknown): unknown {
+  if (!body || typeof body !== 'object') return undefined
+  return (body as { error?: unknown }).error
 }
 
 function getCurrentClientTimestamp(diff: TZmDiff): number {

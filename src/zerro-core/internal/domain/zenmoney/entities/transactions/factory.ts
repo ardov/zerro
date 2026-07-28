@@ -32,7 +32,9 @@ export function makeTransaction(
     user: draft.user,
     deleted: draft.deleted ?? false,
     hold: draft.hold === undefined ? false : draft.hold,
-    viewed: draft.viewed ?? false,
+    // ZenMoney stores `viewed: true` when a write omits the field, and a
+    // transaction the user just entered here is not an unseen bank import.
+    viewed: draft.viewed ?? true,
     source: draft.source ?? null,
 
     qrCode: draft.qrCode ?? null,

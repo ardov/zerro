@@ -74,6 +74,12 @@ there:
 - Writable field lists document the domain capability, not only fields used by
   current production callers. Every non-managed field that may be changed must
   be accepted, persisted, and materialized even before a UI exposes it.
+- `materializeCommand` and `materializePrimaryCommand` are allowed to diverge:
+  the first adds predicted server effects for local `current`, the second stays
+  the transport source. The verified same-account `0.00001` purge is the first
+  case where they do, and it must stay that way — sending the predicted
+  `deletion` instead of the write would make ZenMoney soft-delete rather than
+  purge.
 
 ### Replica and sync
 
@@ -110,7 +116,10 @@ there:
   remained pending.
 - A successful response is trusted as whole-batch acknowledgement. A server
   that silently rejects part of a request can therefore cause local intent to
-  be dropped; revisit only with evidence that this occurs.
+  be dropped. Probing confirmed that the mechanism exists (an older or equal
+  `changed` is ignored under HTTP 200, and some invalid field values are dropped
+  while the write applies); the product accepts that risk to keep one stable
+  whole-prefix acknowledgement rule.
 - Undo/redo is keyboard-accessible in the loaded application; visible controls
   remain deferred.
 - Persisted replica V2 has a one-way compatibility reader that preserves its

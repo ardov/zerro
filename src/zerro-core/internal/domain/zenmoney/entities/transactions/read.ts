@@ -62,10 +62,28 @@ export function compareTransactionDates(
   return transactionB.created - transactionA.created
 }
 
+/**
+ * Historical read-model threshold used to hide effectively empty rows.
+ *
+ * This is a presentation heuristic, not a general statement about server purge
+ * semantics. The exact write shape verified to produce a tombstone is kept
+ * separately in the materializer.
+ */
+const deletableAmount = 0.0001
+
+/** Both amounts are small enough for Zerro to treat the row as hidden. */
+export function hasDeletableAmounts(
+  transaction: Pick<TTransaction, 'income' | 'outcome'>
+): boolean {
+  return (
+    transaction.income < deletableAmount &&
+    transaction.outcome < deletableAmount
+  )
+}
+
 export function isDeletedTransaction(transaction: TTransaction): boolean {
   if (transaction.deleted) return true
-  if (transaction.income < 0.0001 && transaction.outcome < 0.0001) return true
-  return false
+  return hasDeletableAmounts(transaction)
 }
 
 export function isTransactionViewed(transaction: TTransaction): boolean {

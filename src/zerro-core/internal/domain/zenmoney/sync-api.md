@@ -1,14 +1,21 @@
 # ZenMoney sync API behavior
 
 This document records behavior observed against a disposable ZenMoney account
-in two probe rounds (2026-07-16 and 2026-07-19). It complements the public API
-documentation where the live endpoint behaves more narrowly or exposes
-additional fields.
+in four probe rounds (2026-07-16, 2026-07-19, 2026-07-24, and 2026-07-25). It
+complements the public API documentation where the live endpoint behaves more
+narrowly or exposes additional fields.
 
 The reproducible probes and sanitized evidence live under
-[`experiments/zenmoney-api-probe`](../../../../experiments/zenmoney-api-probe/)
-(round 2: [`round2/results`](../../../../experiments/zenmoney-api-probe/round2/results/)).
+[`experiments/zenmoney-api-probe`](../../../../experiments/zenmoney-api-probe/);
+its [REPORT.md](../../../../experiments/zenmoney-api-probe/REPORT.md) keeps the
+experiment limits and the plan for closing unknowns. Rules recovered from the
+official Android client 26.6b1 are marked as such and come from
+[`experiments/26.6b1-analysis`](../../../../experiments/26.6b1-analysis/REPORT.md).
 Raw account responses and the bearer token are not stored in the repository.
+
+Everything here describes one endpoint and one account. An absent collection or
+rule is not proof of absence for family, private, paid, or server-only
+scenarios.
 
 ## Cursor and entity versions
 
@@ -31,10 +38,25 @@ Raw account responses and the bearer token are not stored in the repository.
   is no bootstrap call that hands out a cursor — a future or up-to-date
   `serverTimestamp` simply yields an empty diff, and the response's
   `serverTimestamp` is always the server's real position, never an echo.
+- The cursor boundary is effectively exclusive: an object with `changed = T`
+  appears at cursor `T - 1` but not at cursor `T`.
+- The cursor tracks the server's wall clock and grows without any writes; it is
+  not `max(changed)` of the returned objects.
 
-This means a background pull may advance `serverTimestamp` without invalidating
-an older pending edit. Before sending that edit, Zerro must rebuild the full
-entity over the latest canonical version and assign a fresh `changed` value.
+Because the cursor and per-entity versions are independent, a background pull
+may advance `serverTimestamp` without invalidating an older pending edit. Before
+sending that edit, Zerro must rebuild the full entity over the latest canonical
+version and assign a fresh `changed` value.
+
+The last two bullets together also mean a change another client commits in the
+same second as our response can never appear in a later incremental pull. Zerro
+therefore sends the accepted base cursor minus one second (`getSyncCursor` in
+`store/data/selectors.ts`) and re-applies that second of overlap idempotently.
+The official client hedges the same way in the other direction: it commits its
+local upload cursor as the time the sync _started_, not the response time.
+
+The client also sends `currentClientTimezoneOffset` (`ZONE_OFFSET / 60000`,
+without `DST_OFFSET`). The server does not require it and Zerro omits it.
 
 ## Responses and acknowledgements
 
@@ -42,13 +64,10 @@ ZenMoney can return HTTP 200 while silently rejecting an entity with an older
 or equal `changed`. In a mixed batch, the response contained accepted entities
 only and no rejection list.
 
-Therefore neither HTTP success nor the presence of an entity id in the request
-acknowledges an outbox entry. The safe acknowledgement rule is:
-
-1. Apply the response as canonical server data.
-2. Check whether the sent local intent is satisfied by the new canonical state.
-3. Remove only satisfied intents. Retain and rematerialize the rest, or expose a
-   semantic conflict.
+Therefore HTTP success does not prove that every requested field was accepted.
+Zerro deliberately accepts that risk: it applies the canonical response and
+acknowledges the whole sent prefix without per-field satisfaction checks. This
+keeps one stable commit boundary; a silently rejected write may be lost.
 
 ## Batch semantics
 
@@ -70,13 +89,58 @@ acknowledges an outbox entry. The safe acknowledgement rule is:
   between `deletion` and entity arrays never matters. Untested corner:
   whether a 400 batch rolls back `deletion` entries sent alongside the
   failing upsert.
-- A write combined with `forceFetch` in one request returns the full entity
-  list with the write already applied.
 - Unknown entity fields are silently stripped. There is no type coercion:
   string-typed numbers are rejected with 400. Negative amounts are coerced to
   their absolute value; `income == outcome == 0` is explicitly rejected.
 - `account` and `merchant` relations are hard-validated (400 naming the bad
   relation); dangling `tag` ids are silently dropped to `null` instead.
+
+Because a validation error is atomic, a single malformed local intent makes
+every subsequent sync fail identically. A client must not rely on the server to
+sort valid from invalid work.
+
+## Never send these shapes
+
+Two payloads returned HTTP 500 during probing and must not be reproduced. Both
+halted their round by design, so their exact cause is not isolated.
+
+- a reminder with `income == 0 && outcome == 0` (a control pull confirmed the
+  500 write did not apply);
+- one batch carrying two ordinary reminders with mixed comments of roughly 2 KB
+  and 8 KB, including NUL bytes, emoji, and HTML/JSON-like text.
+
+The second shape matters because Zerro stores hidden data in reminder comments.
+Small comments work, and Zerro's own production comments are multi-KB JSON
+produced by `JSON.stringify`, which escapes control bytes — so size alone is
+unlikely to be the trigger. Until the cause is isolated in a disposable
+environment, do not treat a kilobyte-scale reminder comment as guaranteed-safe
+storage, and never use `points` to carry data.
+
+Duplicate ids inside one entity array also return 500 (see batch semantics).
+
+## forceFetch
+
+`forceFetch` names collections to be returned in full. A write combined with
+`forceFetch` in one request returns the full entity list with the write already
+applied.
+
+How the official client uses it, which is the useful part for Zerro:
+
+- the set is durable, stored as a comma-separated `ReloadEntities` preference,
+  additive, and cleared on logout;
+- collections listed in `forceFetch` are excluded from the local changes
+  uploaded in that same request;
+- neither the server cursor nor the local change cursor is committed while the
+  set is non-empty, so a force-fetch round never lets the cursor skip the rows
+  it deliberately did not upload;
+- the set is cleared after a successful sync only if it still equals what was
+  sent, so concurrent additions survive;
+- the observed trigger is a local schema migration: reaching local DB version 11
+  schedules a full refetch of `brand`.
+
+That makes `forceFetch` the natural repair mechanism for a client whose local
+format changed — the analogue for Zerro being a hidden-data or replica format
+migration that needs canonical reminders re-read.
 
 ## Field mutability
 
@@ -88,7 +152,10 @@ acknowledges an outbox entry. The safe acknowledgement rule is:
   coerced to the account's instrument, without FX.
 - `account.type` transitions between ordinary types (cash/checking/ccard) are
   unrestricted; transitions into `debt` are blocked while a debt account
-  exists.
+  exists. A client may create `cash`, `checking`, and `ccard`; `emoney`
+  creation is rejected, and `deposit`/`loan` additionally require
+  `startDate`, `endDateOffset`, `endDateOffsetInterval`, `capitalization`,
+  `percent`, and `payoffStep`.
 - `user` on any entity is immutable (explicit 400). Dictionaries
   (`instrument`, `company`) are read-only (explicit 400).
 - `transaction.date` is freely mutable (any distance); moving a transaction
@@ -107,7 +174,9 @@ acknowledges an outbox entry. The safe acknowledgement rule is:
 
 - Deletions are not version-checked: any `stamp`, however old, applies
   unconditionally. The stored stamp is the server's clock, not the submitted
-  value.
+  value. The request-side entry nonetheless requires `user` and `stamp` to be
+  _present_ — omitting either is a `400 validationError`, independent of
+  whether their values are ever compared.
 - Bogus deletions (nonexistent id, or wrong `object` for an existing id) are
   silent no-ops; `(id, object)` acts as a compound lookup key.
 - A hard-deleted id is a permanent tombstone: a later upsert of the same id is
@@ -117,13 +186,32 @@ acknowledges an outbox entry. The safe acknowledgement rule is:
   incremental pulls.
 - Cascades: deleting a tag nulls `transaction.tag` on referencing transactions
   and removes budget rows keyed to that tag; deleting a merchant nulls
-  `transaction.merchant`. No dangling references are left behind.
-- Transactions can never be hard-deleted by a direct `deletion` entry: it is
-  converted to an ordinary soft-delete (or no-ops if already soft-deleted)
-  and no `deletion`-array tombstone is produced. `deleted: true` is a one-way
+  `transaction.merchant`. One resumed probe pull, however, showed a deleted
+  merchant alongside a surviving `payee`/merchant reference. Until that is
+  re-checked in a clean fixture, "no dangling references are left behind" is
+  the expectation, not a proven invariant.
+- A direct `deletion` entry naming an existing transaction is converted to an
+  ordinary soft-delete (or no-ops if already soft-deleted) and produces no
+  `deletion`-array tombstone. `deleted: true` reached this way is a one-way
   ratchet — no later write, however fresh its `changed`, can resurrect the
   transaction.
-- The one real purge path is the account-deletion cascade: deleting an
+- **Purge by near-zero amount is real, through a different path.** Rewriting
+  an _existing_ transaction's `income` and `outcome` to `0.00001`/`0.00001`
+  (live-verified 2026-07-25, `experiments/zenmoney-api-probe/round5`) makes the
+  server classify the upsert as a deletion: the write response's `deletion[]`
+  carries a genuine `{ object: 'transaction', id, stamp, user }` tombstone, and
+  a follow-up `forceFetch` pull confirms the row is gone — not
+  `deleted: true`, actually absent. This is a distinct code path from the
+  direct-`deletion`-entry case above: an upsert can trigger a real hard purge
+  that a `deletion` array entry on the same id cannot. Earlier probing found
+  other amounts in this range persisting (`0.001` did not purge; values down
+  to `0.0004` stayed as ordinary rows) — those results are not retracted, but
+  the two are not yet reconciled by one rule. The verified case specifically
+  had `incomeAccount == outcomeAccount` on both sides; whether magnitude,
+  same-account net effect, or something else is the actual trigger is still
+  open. Do not treat "any near-zero amount purges" as proven beyond the exact
+  case above.
+- A second real purge path is the account-deletion cascade: deleting an
   account hard-purges transactions contained in it (even one created in the
   same request) and emits genuine `deletion[]` tombstones for them.
   Transactions that also reference a surviving account are not purged — the
@@ -141,6 +229,26 @@ acknowledges an outbox entry. The safe acknowledgement rule is:
   satisfies the requirement (explicit 400). On accept, the server populates
   `originalPayee` from the submitted `payee`.
 
+## Merchants and payee
+
+- Renaming a merchant updates `payee` and `changed` on every linked
+  transaction, but leaves `originalPayee` untouched. One rename can therefore
+  produce a large canonical diff of transactions whose only change is the
+  payee string.
+- The server never derives a merchant from `payee` and never attaches an
+  existing merchant by matching title. `payee` and `merchant` can be
+  desynchronized in both directions.
+- On create with a non-null `payee`, the server writes `originalPayee = payee`
+  even when `originalPayee: null` was submitted; with a null payee it stays
+  null.
+- `payee` is trimmed at the edges but keeps Unicode and embedded newlines;
+  `comment: ""` and `payee: ""` are stored as `null`. Merchant `title` is not
+  trimmed, not case-folded, and not unique — empty and duplicate titles are
+  accepted.
+- Consequence for Zerro: resolve display names through the merchant id instead
+  of rewriting `transaction.payee` locally. See
+  [materialization.md](../../../support/documents/materialization.md).
+
 ## Reminders, markers, budgets
 
 - The diff endpoint does not server-generate `reminderMarker`s for created
@@ -153,6 +261,43 @@ acknowledges an outbox entry. The safe acknowledgement rule is:
   id). Mid-month dates are accepted as independent rows. There is no true
   budget delete — `deletion` no-ops; zeroing is the only removal, except that
   deleting the tag removes its budget rows.
+- Reminder scheduling is canonicalized: a one-shot reminder (`interval: null`)
+  normalizes `step` to 0, while a recurring one requires a positive step
+  (negative and zero are invalid). Empty `points` becomes `[0]`, and in every
+  accepted check `points` came back as `[0]`; an array longer than `step` is a 400. `endDate < startDate` and `endDate: null` are accepted.
+- A reminder touching the debt account requires a non-null `payee`;
+  debt→debt is rejected regardless of amounts, while a mixed debt/ordinary pair
+  is accepted. Self-referencing reminder storage therefore cannot live on the
+  debt account.
+- A second marker for the same `(reminder, date)` was silently rejected —
+  treated as a uniqueness hypothesis, not a proven constraint.
+
+## Required fields and omission defaults
+
+A round-4 create matrix removed exactly one field at a time from a full safe
+fixture for every writable collection and read the stored state back after each
+HTTP 200. "Required" below means the wire key must be **present**; it may still
+be null (`role` and `company` were sent as null). Every 400 was a clean
+`validationError`.
+
+| Entity           | Required by presence                                                                                                                                                                                                                                                                             | Verified defaults on omission                                                                                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `merchant`       | `id`, `changed`, `user`, `title`                                                                                                                                                                                                                                                                 | none                                                                                                                                                                                  |
+| `tag`            | `id`, `changed`, `user`, `title`, `showIncome`, `showOutcome`, `parent`                                                                                                                                                                                                                          | `icon: null`, `budgetIncome: false`, `budgetOutcome: false`, `archive: true`, `color: null`, `required: null`, `staticId: null`, `picture: null`                                      |
+| `account` (cash) | `id`, `changed`, `user`, `instrument`, `title`, `role`, `company`, `type`, `syncID`, `balance`, `startBalance`, `creditLimit`, `inBalance`, `enableSMS`, `archive`, `private`                                                                                                                    | `savings: null`, `enableCorrection: true`, `balanceCorrectionType: 'request'`, all loan/deposit fields `null`                                                                         |
+| `transaction`    | `id`, `changed`, `created`, `user`, `deleted`, `incomeBankID`, `outcome`, `outcomeInstrument`, `outcomeAccount`, `outcomeBankID`, `opIncome`, `opIncomeInstrument`, `opOutcome`, `opOutcomeInstrument`, `tag`, `date`, `comment`, `payee`, `merchant`, `latitude`, `longitude`, `reminderMarker` | `hold: null`, `viewed: true`, `source: null`, `qrCode: null`, `income: 0`, `incomeInstrument: 2`, absent `incomeAccount` copies `outcomeAccount`, `mcc` absent, `originalPayee: null` |
+| `budget`         | `changed`, `user`, `tag`, `date`, `income`, `incomeLock`, `outcome`, `outcomeLock`                                                                                                                                                                                                               | `isIncomeForecast: false`, `isOutcomeForecast: false`                                                                                                                                 |
+| `reminder`       | `id`, `changed`, `user`, `outcomeInstrument`, `outcomeAccount`, `tag`, `merchant`, `payee`, `comment`, `interval`, `step`, `points`, `startDate`, `endDate`                                                                                                                                      | `incomeInstrument: 2`, absent `incomeAccount` copies `outcomeAccount`, `notify: false`                                                                                                |
+| `reminderMarker` | `id`, `changed`, `user`, `outcomeInstrument`, `outcomeAccount`, `outcome`, `tag`, `merchant`, `payee`, `comment`, `date`, `reminder`, `state`                                                                                                                                                    | `incomeInstrument: 2`, absent `incomeAccount` copies `outcomeAccount`, `income: 0`, `notify: false`                                                                                   |
+
+Reminder `income` and `outcome` were deliberately never omitted: the omission
+could have produced the zero-amount 500 shape. That is a safety blind spot, not
+evidence that the fields are optional.
+
+Zerro sends full canonical entities from its own snapshot, so presence is
+satisfied structurally. The defaults matter when comparing local state with what
+the server actually stored — `viewed` in particular defaults to `true`, which is
+why the local transaction factory does the same.
 
 ## Transaction wire shape
 
@@ -228,4 +373,4 @@ The resulting sync order is:
 2. Rematerialize pending local intents over that base in order.
 3. Encode full ZenMoney entities with fresh per-entity `changed` values.
 4. Push primary changes.
-5. Apply the canonical response and acknowledge intents by satisfaction.
+5. Apply the canonical response and acknowledge the whole sent prefix.

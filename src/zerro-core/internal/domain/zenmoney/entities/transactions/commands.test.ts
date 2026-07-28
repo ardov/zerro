@@ -45,6 +45,7 @@ describe('zenmoney transaction commands', () => {
         outcomeInstrument: 1,
         outcomeAccount: 'card',
         hold: false,
+        viewed: true,
         opIncome: 0,
         opOutcome: 0,
       })
