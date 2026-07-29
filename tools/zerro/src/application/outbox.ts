@@ -123,6 +123,7 @@ function presentOutboxCommand(command: TCommand, index: number) {
 }
 
 function summarize(entityTypes: readonly string[]): string {
+  if (entityTypes.includes('transaction')) return 'transaction creation'
   if (entityTypes.includes('budget') || entityTypes.includes('reminder'))
     return 'budget update'
   return entityTypes.length ? 'entity update' : 'empty entity update'

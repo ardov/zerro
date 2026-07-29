@@ -214,6 +214,40 @@ const commands = [
       'INVALID_STATE',
     ],
   },
+  {
+    name: 'transaction preview-create',
+    effect: 'none',
+    required: ['--input'],
+    optional: [],
+    example: 'pnpm zerro -- transaction preview-create --input expense.json',
+    successShape: 'transactionPreview',
+    errors: [
+      'INVALID_INPUT',
+      'INPUT_READ_FAILED',
+      'STATE_NOT_INITIALIZED',
+      'ENTITY_NOT_FOUND',
+      'INVALID_STATE',
+    ],
+  },
+  {
+    name: 'transaction stage-create',
+    effect: 'local',
+    required: ['--request-id', '--input'],
+    optional: [],
+    example:
+      'pnpm zerro -- transaction stage-create --request-id groceries-1 --input expense.json',
+    successShape: 'transactionStageReceipt',
+    errors: [
+      'INVALID_REQUEST_ID',
+      'INVALID_INPUT',
+      'INPUT_READ_FAILED',
+      'IDEMPOTENCY_CONFLICT',
+      'STATE_NOT_INITIALIZED',
+      'ENTITY_NOT_FOUND',
+      'STATE_WRITE_FAILED',
+      'INVALID_STATE',
+    ],
+  },
 ] as const
 
 export function getHelp(meta: TMeta) {

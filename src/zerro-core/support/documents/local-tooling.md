@@ -1,6 +1,6 @@
 # Local finance tooling MVP
 
-- Status: implementation active; W0–W2 complete
+- Status: implementation active; W0–W3 complete
 - Updated: 2026-07-29
 - Scope: a local CLI first, with an optional MCP adapter after the CLI contract
   is stable
@@ -916,7 +916,7 @@ feat(zerro-tool): preview and stage envelope budgets
 
 This is the first useful write-capable MVP checkpoint.
 
-### W3 — Semantic transaction creation
+### W3 — Semantic transaction creation — complete
 
 Goal: preview and stage a new expense, income, or transfer.
 
@@ -938,6 +938,27 @@ Steps:
    atomically persist.
 6. Return a compact before/after transaction view and transaction id.
 7. Include `balancePendingCanonicalSync: true`.
+
+Completed:
+
+- exact JSON-only expense, income, and transfer DTO parser with strict calendar
+  dates, positive finite amounts, bounded unique tag ids, and no unknown keys;
+- direct delegation to `compileCreateTransaction` for factory defaults,
+  reference validation, same-account rejection, and same/cross-instrument
+  transfer rules;
+- preview through the same Core compiler/materializer without state-file
+  persistence, returning only a compact created-transaction representation;
+- stage through `stageCompiledCommand`, atomically persisting one durable
+  command and a flat idempotency receipt with the generated transaction id;
+- transaction-aware compact outbox summary without raw patches;
+- focused coverage for expense, replay/idempotency, transport, same- and
+  cross-instrument transfers, strict parsing, missing references, and no-write
+  failure paths.
+
+Exit evidence:
+
+- full Vitest, typecheck, ESLint, Knip, package-boundary, Prettier, and diff
+  checks pass.
 
 Exit:
 
@@ -1103,7 +1124,7 @@ Update one row at a time. Use `pending`, `active`, `blocked`, or `complete`.
 | W0   | complete | focused Node tests; types, ESLint, Knip, package check     |
 | W1   | complete | 102 files / 405 tests; live read-only smoke passes         |
 | W2   | complete | 103 files / 411 tests; local budget/outbox/undo gates pass |
-| W3   | pending  | —                                                          |
+| W3   | complete | 104 files / 416 tests; local transaction-create gates pass |
 | W4   | pending  | —                                                          |
 | W5   | pending  | optional                                                   |
 

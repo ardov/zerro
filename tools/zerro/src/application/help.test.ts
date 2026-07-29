@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { getHelp } from './help'
 
 describe('local tool help manifest', () => {
-  it('describes every W0-W2 command with explicit side effects', () => {
+  it('describes every W0-W3 command with explicit side effects', () => {
     const result = getHelp({
       observedAt: '2026-07-29T00:00:00.000Z',
       baseServerTimestampMs: 0,
@@ -33,6 +33,8 @@ describe('local tool help manifest', () => {
       ['budget stage-set', 'local'],
       ['outbox list', 'none'],
       ['outbox undo', 'local'],
+      ['transaction preview-create', 'none'],
+      ['transaction stage-create', 'local'],
     ])
   })
 })

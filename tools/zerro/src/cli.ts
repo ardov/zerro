@@ -27,6 +27,11 @@ import {
 } from './application/reads'
 import { refresh } from './application/refresh'
 import { getStatus } from './application/status'
+import {
+  parseCreateTransactionRequest,
+  previewCreateTransaction,
+  stageCreateTransaction,
+} from './application/transactionCreate'
 
 const commandOptions = {
   query: { type: 'string' },
@@ -121,6 +126,23 @@ async function run(): Promise<void> {
           requireRequestId(options['request-id'], command)
         )
         break
+      case 'transaction preview-create': {
+        const input = parseCreateTransactionRequest(
+          await readJsonInput(options.input, command),
+          command
+        )
+        result = await previewCreateTransaction(context, input)
+        break
+      }
+      case 'transaction stage-create': {
+        const requestId = requireRequestId(options['request-id'], command)
+        const input = parseCreateTransactionRequest(
+          await readJsonInput(options.input, command),
+          command
+        )
+        result = await stageCreateTransaction(context, requestId, input)
+        break
+      }
       default:
         throw invalidCommand(command)
     }
@@ -197,6 +219,8 @@ function assertAllowedOptions(command: string, options: TReadOptions): void {
     'budget stage-set': ['input', 'request-id'],
     'outbox list': ['limit', 'cursor'],
     'outbox undo': ['request-id'],
+    'transaction preview-create': ['input'],
+    'transaction stage-create': ['input', 'request-id'],
   }
   const keys = Object.keys(options).filter(key => options[key] !== undefined)
   const invalid = keys.find(key => !allowed[command]?.includes(key))

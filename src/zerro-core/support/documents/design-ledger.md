@@ -160,6 +160,11 @@ there:
   tail.
 - Transaction creation remains semantic and accepts a narrower agent JSON DTO
   than Core's internal date draft. Transaction update and delete are deferred.
+- Transaction preview and stage share the Core compiler and materializer. The
+  CLI validates only its strict external JSON contract and resolves references
+  for bounded errors; it neither rebuilds factory defaults nor predicts account
+  balances. A staged receipt retains the generated id solely for idempotent
+  local retry.
 - The CLI accepts the same whole-prefix acknowledgement and silent-drop risk as
   the app. Generalized satisfaction checks, quarantine, and retry are deferred.
   Transport failures that may have reached ZenMoney are reported as an unknown,
