@@ -62,7 +62,9 @@ describe('goal commands', () => {
       user: { 1: makeUser({ id: 1, parent: null, currency: 2 }) },
     })
 
-    expect(setGoal(data, '2026-01', { type: goalType.MONTHLY, amount: 100 })).toEqual({
+    expect(
+      setGoal(data, '2026-01', { type: goalType.MONTHLY, amount: 100 })
+    ).toEqual({
       '2026-01': { [envelopeId]: { type: goalType.MONTHLY, amount: 100 } },
     })
   })
