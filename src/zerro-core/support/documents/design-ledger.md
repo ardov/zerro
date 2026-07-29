@@ -1,6 +1,6 @@
 # Zerro Core design ledger
 
-- Updated: 2026-07-20
+- Updated: 2026-07-29
 - Purpose: settled decisions, accepted risks, active bridges, and unresolved
   architectural questions. History stays in Git.
 
@@ -8,21 +8,33 @@
 
 ### Module and package boundary
 
-- Zerro Core is an internal app module until a real external/headless consumer
-  exists.
+- Zerro Core remains an internal source module for the first real headless
+  consumer: the repository-local CLI planned in
+  [local-tooling.md](./local-tooling.md). Proving that consumer does not require
+  publishing or physically moving Core.
 - Root `zerro-core` exports only constants, shared root types, and the snapshot
   session.
 - The React app uses the explicit namespace-first `zerro-core/redux` adapter.
 - The current Redux store and worker use `zerro-core/replica` as an explicit
   integration seam. Its implementation remains internal and it is not a
   package-facing semantic API.
+- `zerro-core/headless` is the explicit non-Redux source entrypoint. It exports
+  only the narrow read, semantic-command, and replica capabilities required by
+  the accepted local tool; it does not export internal barrels.
 - `domain`, `application`, `infrastructure`, and `presentation` are internal
   implementation paths, not supported app APIs.
-- The outbox engine operations are internal. Redux remains the only reactive
-  replica owner.
-- Do not add npm package subpaths, an `exports` policy, or a semantic engine
-  facade in advance of a consumer. Source entrypoints for the current app are
-  allowed when they replace deep implementation imports.
+- Redux remains the only reactive app replica owner. The CLI owns one
+  non-reactive local `base + outbox` document and must reuse the same pure
+  outbox operations.
+- Do not add a second semantic engine object. A narrow source entrypoint for the
+  accepted CLI is allowed; npm package publication, an `exports` policy, and a
+  physical package move remain deferred until another real consumer needs them.
+- Canonical patch acceptance, empty-replica creation, and sync cursor overlap
+  are pure Core operations reused by Redux. A headless consumer must not
+  reimplement those transitions.
+- Semantic transaction creation is exposed through both
+  `zerro-core/headless` and `core.transactions.create`; both delegate to the
+  same Core compiler and command/outbox path.
 
 ### Reads and Redux adapter
 
@@ -108,6 +120,26 @@ there:
 - The default parallel suite must pass; serial-only green is diagnostic, not a
   completion result.
 
+### Local tooling MVP
+
+- Implement a CLI with JSON output before an MCP adapter. Shell access is a
+  sufficient first agent interface.
+- The only mutation states are pure preview, explicit stage into the durable
+  outbox, and explicit sync. Preview and sync are never implicit side effects
+  of reads.
+- Preview is not persisted. Stage recompiles semantic input against the latest
+  local `current`.
+- The tool supports one profile, one JSON state document, and one
+  environment-provided token. It deliberately has no OAuth, keychain,
+  multi-profile database, capability system, daemon, or network listener.
+- Persist only `base + outbox`; derive `current` and keep redo session-only.
+- Concurrent writers are outside MVP scope. Atomic file replacement is still
+  required to prevent truncated local state.
+- The CLI accepts the same whole-prefix acknowledgement and silent-drop risk as
+  the app. Generalized satisfaction checks, quarantine, and retry are deferred.
+- MCP, if added after the CLI, delegates to the same application functions and
+  contains no business, persistence, query, or sync logic.
+
 ## Accepted product risks
 
 - Transaction edits may leave `account.balance` stale until synchronization;
@@ -160,7 +192,8 @@ useful.
 
 ### Future surfaces — not scheduled
 
-- Which consumer would justify a semantic engine facade?
+- Does a second external consumer justify publishing or physically moving the
+  Core package after the local CLI proves the source boundary?
 - Which presentation assets need a supported package boundary?
 - Which package subpaths should exist if Core becomes publishable?
 

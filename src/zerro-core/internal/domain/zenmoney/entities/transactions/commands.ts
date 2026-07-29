@@ -1,14 +1,155 @@
 import type { ById } from '../../../foundation/types'
-import type { TCoreContext } from '../../../../../types'
-import type { TTagId } from '../tags'
+import type { TCompiled, TCoreContext } from '../../../../../types'
+import type { TDateDraft } from '../../primitives'
+import type { TAccount, TAccountId } from '../accounts'
+import type { TMerchant, TMerchantId } from '../merchants'
+import type { TTag, TTagId } from '../tags'
+import { getRootUser, type TUser } from '../users'
 import { round } from '../../../foundation/numbers'
 import { getTransaction, getTransactionType, TrType } from './read'
-import type { TTransaction, TTransactionId, TTransactionPatch } from './types'
+import { makeTransaction } from './factory'
+import {
+  transactionIntentFields,
+  type TTransaction,
+  type TTransactionId,
+  type TTransactionPatch,
+} from './types'
 
 export type TTransactionIntent = {
   transaction: TTransactionPatch[]
   /** Transaction commands intentionally do not change account balances. */
   account?: never
+}
+
+type TCreateTransactionDetails = {
+  date: TDateDraft
+  comment?: string | null
+}
+
+type TCreateCategorizedTransactionDetails = TCreateTransactionDetails & {
+  tagIds?: TTagId[]
+  merchantId?: TMerchantId | null
+  payee?: string | null
+}
+
+export type TCreateTransactionInput =
+  | (TCreateCategorizedTransactionDetails & {
+      kind: 'expense'
+      accountId: TAccountId
+      amount: number
+    })
+  | (TCreateCategorizedTransactionDetails & {
+      kind: 'income'
+      accountId: TAccountId
+      amount: number
+    })
+  | (TCreateTransactionDetails & {
+      kind: 'transfer'
+      outcomeAccountId: TAccountId
+      incomeAccountId: TAccountId
+      outcome: number
+      income?: number
+    })
+
+export type TCreateTransactionReceipt = {
+  transactionId: TTransactionId
+}
+
+export type TCreateTransactionData = {
+  user: ById<TUser>
+  account: ById<TAccount>
+  tag: ById<TTag>
+  merchant: ById<TMerchant>
+}
+
+export function compileCreateTransaction(
+  data: TCreateTransactionData,
+  input: TCreateTransactionInput,
+  ctx: TCoreContext
+): TCompiled<TCreateTransactionReceipt> {
+  const user = getRootUser(data.user)
+  if (!user) throw new Error('Cannot create transaction without root user')
+
+  let transaction: TTransaction
+  if (input.kind === 'transfer') {
+    const outcomeAccount = requireEntity(
+      data.account,
+      input.outcomeAccountId,
+      'outcome account'
+    )
+    const incomeAccount = requireEntity(
+      data.account,
+      input.incomeAccountId,
+      'income account'
+    )
+    if (outcomeAccount.id === incomeAccount.id) {
+      throw new Error('Transfer accounts must be different')
+    }
+
+    requirePositiveAmount(input.outcome, 'outcome')
+    const income =
+      input.income ??
+      (outcomeAccount.instrument === incomeAccount.instrument
+        ? input.outcome
+        : undefined)
+    if (income === undefined) {
+      throw new Error('Cross-instrument transfer requires income amount')
+    }
+    requirePositiveAmount(income, 'income')
+
+    const issuedAt = ctx.now()
+    transaction = makeTransaction(
+      {
+        id: ctx.uuid() as TTransactionId,
+        user: user.id,
+        date: input.date,
+        comment: input.comment,
+        created: issuedAt,
+        changed: issuedAt,
+        outcome: input.outcome,
+        outcomeAccount: outcomeAccount.id,
+        outcomeInstrument: outcomeAccount.instrument,
+        income,
+        incomeAccount: incomeAccount.id,
+        incomeInstrument: incomeAccount.instrument,
+      },
+      ctx
+    )
+  } else {
+    const account = requireEntity(data.account, input.accountId, 'account')
+    requirePositiveAmount(input.amount, 'amount')
+    input.tagIds?.forEach(id => requireEntity(data.tag, id, 'tag'))
+    if (input.merchantId != null) {
+      requireEntity(data.merchant, input.merchantId, 'merchant')
+    }
+
+    const issuedAt = ctx.now()
+    transaction = makeTransaction(
+      {
+        id: ctx.uuid() as TTransactionId,
+        user: user.id,
+        date: input.date,
+        comment: input.comment,
+        created: issuedAt,
+        changed: issuedAt,
+        income: input.kind === 'income' ? input.amount : 0,
+        outcome: input.kind === 'expense' ? input.amount : 0,
+        incomeAccount: account.id,
+        outcomeAccount: account.id,
+        incomeInstrument: account.instrument,
+        outcomeInstrument: account.instrument,
+        tag: input.tagIds?.length ? [...input.tagIds] : null,
+        merchant: input.merchantId ?? null,
+        payee: input.payee,
+      },
+      ctx
+    )
+  }
+
+  return {
+    patch: { transaction: [toCreationPatch(transaction)] },
+    receipt: { transactionId: transaction.id },
+  }
 }
 
 export function compileDeleteTransactions(
@@ -220,4 +361,28 @@ function modifyComment(prevComment: string | null, newComment?: string) {
 
 function toArray<T>(value: T | T[]): T[] {
   return Array.isArray(value) ? value : [value]
+}
+
+function requirePositiveAmount(value: number, field: string): void {
+  if (!Number.isFinite(value) || value <= 0) {
+    throw new Error(`Transaction ${field} must be a finite positive amount`)
+  }
+}
+
+function requireEntity<TEntity extends { id: string | number }>(
+  entities: ById<TEntity>,
+  id: TEntity['id'],
+  entity: string
+): TEntity {
+  const value = entities[id]
+  if (!value) throw new Error(`Transaction ${entity} not found: ${id}`)
+  return value
+}
+
+function toCreationPatch(transaction: TTransaction): TTransactionPatch {
+  const patch: Record<string, unknown> = { id: transaction.id }
+  transactionIntentFields.forEach(field => {
+    patch[field] = transaction[field]
+  })
+  return patch as TTransactionPatch
 }

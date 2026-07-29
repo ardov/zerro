@@ -18,6 +18,15 @@ export {
 } from './internal/operations/replication/outbox'
 
 export {
+  acceptCanonicalPatch,
+  type TAcceptedCanonicalPatch,
+} from './internal/operations/replication/canonical'
+
+export { getSyncCursor } from './internal/operations/replication/cursor'
+
+export { createEmptyDataStore } from './internal/domain/zenmoney/model/store'
+
+export {
   parsePersistedReplica,
   replicaPersistenceVersion,
   type TPersistedReplica,

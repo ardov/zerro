@@ -7,6 +7,7 @@ const coreRoot = dirname(fileURLToPath(import.meta.url))
 const productionCoreEntrypoints = new Set([
   'zerro-core',
   'zerro-core/demo',
+  'zerro-core/headless',
   'zerro-core/redux',
   'zerro-core/replica',
 ])
@@ -101,6 +102,19 @@ describe('zerro-core API boundary', () => {
     expect(replicaIndex).toContain('parsePersistedReplica')
   })
 
+  it('keeps the headless source entrypoint narrow and explicit', () => {
+    const headlessIndex = readFileSync(join(coreRoot, 'headless.ts'), 'utf8')
+
+    expect(headlessIndex).not.toMatch(/export \*/)
+    expect(headlessIndex).toContain('createZerroSession')
+    expect(headlessIndex).toContain('compileCreateTransaction')
+    expect(headlessIndex).toContain('acceptCanonicalPatch')
+    expect(headlessIndex).toContain('parsePersistedReplica')
+    expect(headlessIndex).not.toMatch(
+      /from ['"]\.\/internal\/domain\/(?:zenmoney|zerro)['"]/
+    )
+  })
+
   it('keeps production core free from app runtime imports', () => {
     const violations = readProductionCoreFiles().flatMap(file => {
       const source = readFileSync(file, 'utf8')
@@ -111,8 +125,7 @@ describe('zerro-core API boundary', () => {
           ({ line }) =>
             /from ['"](?:store|react|react-redux|@reduxjs\/toolkit|5-entities(?:\/[^'"]*)?|6-shared\/localization|6-shared\/tagIcons\.json|i18next)['"]/.test(
               line
-            ) ||
-            /from ['"]6-shared\/icons\/[^'"]*['"]/.test(line)
+            ) || /from ['"]6-shared\/icons\/[^'"]*['"]/.test(line)
         )
         .map(
           ({ line, index }) =>

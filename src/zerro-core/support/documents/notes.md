@@ -1,6 +1,6 @@
 # Zerro Core working notes
 
-- Updated: 2026-07-20
+- Updated: 2026-07-29
 - Purpose: current position, remaining work, and deferred local smells.
   Implementation history stays in Git; contracts stay in
   [architecture.md](./architecture.md); settled decisions and risks stay in
@@ -18,34 +18,20 @@ acknowledgement. The persisted command shape is specified once in
 
 Reliable automated verification, ready bridge removal, and read-graph
 simplification are done (see Git for the phase history). The code and
-documentation diet is complete through the entity-flattening wave. The active
-work is now the alphabetical source-layout migration in
-[structure-migration.md](./structure-migration.md). It changes ownership and
-import paths without changing runtime behavior. After it lands, resume the
-manual completion smoke and materializer rules below.
+documentation diet and alphabetical source-layout migration are complete. The
+remaining Core completion smoke and materializer rules stay below. A local
+agent-facing CLI is now an accepted independent MVP track; its executable plan
+is [local-tooling.md](./local-tooling.md).
+
+The local-tooling W-1 Core preparation is complete: canonical acceptance,
+cursor overlap, empty-store creation, semantic transaction creation, session
+transaction queries, and the explicit `zerro-core/headless` boundary are in
+place and reused by Redux where applicable. W0 is the first incomplete tooling
+wave.
 
 ## Remaining work
 
-### 0. Alphabetical source layout — active
-
-Follow the independently verified waves in
-[structure-migration.md](./structure-migration.md). W1 is complete: production
-uses the explicit replica entrypoint and the external-import allowlist is
-enforced. W2 is complete: `domain/foundation` is independent and FX amount
-helpers belong to ZenMoney. W3 is complete: ZenMoney now distinguishes
-entities, model, and read-models; Zerro owns its account conventions and UI
-color generation. W4 is complete: materialization, replication, and the shared
-projection graph now live under `internal`. W5 is complete: public/session and
-runtime implementations are at their final ownership paths, and the Redux
-debug capability is named `core.debug`. The support part of W6 is complete:
-demo data, test builders, and Core documents live under `support`; public
-demo is a thin file facade, while tests import `support/testing` explicitly.
-The few broad internal ZenMoney-barrel imports have been replaced with direct
-owners and are now rejected by the boundary test. The Core root contains only
-files plus the four intended ownership levels: `internal`, `public`, `runtime`,
-and `support`.
-
-### 1. Manual completion smoke — next checkpoint
+### 0. Manual completion smoke — next Core checkpoint
 
 Verify in one session:
 
@@ -66,7 +52,7 @@ The V2 reader performs one explicit migration by retaining its applied prefix
 and dropping its redo tail. Future persisted command changes require backward
 compatibility or an explicit migration/product decision.
 
-### 2. Materializer rules
+### 1. Materializer rules
 
 The rule set, its evidence, and the per-rule verification requirements live in
 [materialization.md](./materialization.md). Implement one rule per checkpoint.
@@ -75,6 +61,17 @@ permanent-delete write purges the row) are done; balances are the next valuable
 one because they are the remaining rule with a visible wrong number today.
 Account, tag, and merchant cascades become reachable when the matching deletion
 commands ship.
+
+### 2. Local agent tooling — accepted independent track
+
+Follow [local-tooling.md](./local-tooling.md) from its first incomplete status
+row. The accepted MVP is a repository-local CLI with bounded JSON output, one
+JSON replica file, `ZERRO_TOKEN`, preview by default, explicit staging, and
+explicit sync. MCP is optional and starts only after the CLI is complete.
+
+This track does not require publishing or physically moving Core. It may
+proceed before balance prediction lands, provided transaction previews state
+that canonical account balances may change after sync.
 
 ## Deferred until evidence exists
 
@@ -91,6 +88,8 @@ commands ship.
 - Follow the order above; a verified independent smoke may land between slices.
 - Split work by contract: each materializer rule should remain a separate
   commit.
+- When working on local tooling, follow its own wave order and status table
+  rather than interleaving several waves.
 - A concrete product regression may override this order; document the evidence
   when it does.
 

@@ -5,6 +5,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import {
   buildOutboxTransport,
   getMaterializedOutboxPatches,
+  getSyncCursor as getCoreSyncCursor,
 } from 'zerro-core/replica'
 import { immutableMergeDiffs } from './shared/mergeDiffs'
 
@@ -54,13 +55,8 @@ export const getLastSyncTime = (state: RootState) => {
  * of changes, which `applyPatch` merges idempotently.
  */
 export const getSyncCursor = (state: RootState) => {
-  const cursor = getLastSyncTime(state)
-  if (!cursor) return 0
-  // Never let the overlap turn an incremental cursor into a full-sync one.
-  return Math.max(syncCursorOverlap, cursor - syncCursorOverlap)
+  return getCoreSyncCursor(getLastSyncTime(state))
 }
-
-const syncCursorOverlap = 1000
 
 function mergeMaterializedPatches(
   patches: TNormalizedPatch[]

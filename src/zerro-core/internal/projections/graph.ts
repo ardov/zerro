@@ -292,6 +292,7 @@ export function createProjectionGraph(ctx: TCoreContext) {
     debtAccountId,
     userCurrency,
     historyStart,
+    sortedTransactions,
     transactionsHistory,
     transactionIds,
     instrumentCodeById,

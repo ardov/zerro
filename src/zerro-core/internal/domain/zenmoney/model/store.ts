@@ -34,6 +34,24 @@ export type TDataStore = {
   transaction:      ById<TTransaction>
 }
 
+/** Creates a fresh empty normalized snapshot for a new replica. */
+export function createEmptyDataStore(): TDataStore {
+  return {
+    serverTimestamp: 0,
+    instrument: {},
+    country: {},
+    company: {},
+    user: {},
+    merchant: {},
+    account: {},
+    tag: {},
+    budget: {},
+    reminder: {},
+    reminderMarker: {},
+    transaction: {},
+  }
+}
+
 export const dataEntityKeys = [
   'instrument',
   'country',

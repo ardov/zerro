@@ -4,10 +4,13 @@ import {
   compileBulkEditTransactions,
   compileCombineToIncome,
   compileCombineToOutcome,
+  compileCreateTransaction,
   compileDeleteTransactions,
   compileDeleteTransactionsPermanently,
   compileMergeTransactionsAsTransfer,
   compileRestoreTransaction,
+  type TCreateTransactionInput,
+  type TCreateTransactionReceipt,
   type TTransactionId,
   type TTransactionEditablePatch,
   type TTransactionRecreatePatch,
@@ -194,6 +197,20 @@ export function deleteTransactions(ids: TTransactionId[]): AppThunk {
   return executeCommand(state =>
     compileDeleteTransactions(selectData(state).transaction, ids)
   )
+}
+
+export function createTransaction(
+  input: TCreateTransactionInput
+): AppThunk<TTransactionId> {
+  const execute = executeCommand<TCreateTransactionReceipt>((state, ctx) =>
+    compileCreateTransaction(selectData(state), input, ctx)
+  )
+
+  return (dispatch, getState, extra) => {
+    const receipt = execute(dispatch, getState, extra)
+    if (!receipt) throw new Error('Transaction was not created')
+    return receipt.transactionId
+  }
 }
 
 export function deleteTransactionsPermanently(ids: TTransactionId[]): AppThunk {

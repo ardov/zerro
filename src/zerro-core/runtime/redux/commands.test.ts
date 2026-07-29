@@ -1,18 +1,29 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { configureStore } from '@reduxjs/toolkit'
 import type { RootState } from 'store'
 import { appendClientCommand } from 'store/data'
+import { rootReducer } from 'store/rootReducer'
 import { makeTestRootState } from 'store/testing'
 import {
   makeAccount,
   makeStore,
   makeTransaction,
+  makeUser,
 } from '../../support/testing/zenmoneyTestData'
 import {
   applyChangesToTransaction,
   bulkEditTransactions,
+  createTransaction,
   setAccountInBalance,
   setTransactionsViewed,
 } from './commands'
+
+const NOW = Date.parse('2026-07-29T12:00:00Z')
+const UUID = 'redux-created-transaction'
+
+vi.mock('uuid', () => ({ v1: () => UUID }))
+
+afterEach(() => vi.restoreAllMocks())
 
 function makeDispatch(state: RootState) {
   const dispatch: any = vi.fn(action =>
@@ -24,6 +35,62 @@ function makeDispatch(state: RootState) {
 }
 
 describe('Redux semantic commands', () => {
+  it('creates a transaction through the public wrapper and returns its id', () => {
+    vi.spyOn(Date, 'now').mockReturnValue(NOW)
+    const current = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+      account: {
+        cash: makeAccount({ id: 'cash', instrument: 1 }),
+      },
+    })
+    const store = configureStore({
+      reducer: rootReducer,
+      preloadedState: makeTestRootState(current),
+      middleware: getDefaultMiddleware =>
+        getDefaultMiddleware({
+          immutableCheck: false,
+          serializableCheck: false,
+        }),
+    })
+
+    const transactionId = store.dispatch(
+      createTransaction({
+        kind: 'expense',
+        accountId: 'cash',
+        amount: 12.5,
+        date: '2026-07-29',
+        comment: 'Lunch',
+      })
+    )
+
+    expect(transactionId).toBe(UUID)
+    expect(store.getState().data.outbox).toHaveLength(1)
+    expect(
+      store.getState().data.outbox[0].patch.transaction?.[0]
+    ).toMatchObject({
+      id: UUID,
+      date: '2026-07-29',
+      outcome: 12.5,
+      incomeAccount: 'cash',
+      outcomeAccount: 'cash',
+      comment: 'Lunch',
+    })
+    expect(store.getState().data.current.transaction[UUID]).toMatchObject({
+      id: UUID,
+      user: 1,
+      changed: NOW,
+      created: NOW,
+      income: 0,
+      outcome: 12.5,
+      incomeAccount: 'cash',
+      outcomeAccount: 'cash',
+      incomeInstrument: 1,
+      outcomeInstrument: 1,
+      comment: 'Lunch',
+      viewed: true,
+    })
+  })
+
   it('writes sparse account intent through the public wrapper', () => {
     const account = makeAccount({ id: 'cash', inBalance: false })
     const dispatch = makeDispatch(

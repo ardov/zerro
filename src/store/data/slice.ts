@@ -1,8 +1,10 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
 import {
+  acceptCanonicalPatch,
   appendOutbox,
   applyOutboxCommand,
+  createEmptyDataStore,
   redoOutbox,
   replayOutbox,
   replicaPersistenceVersion,
@@ -12,7 +14,6 @@ import {
 } from 'zerro-core/replica'
 import { withPerf } from '6-shared/helpers/performance'
 import type { TDataStore, TNormalizedPatch } from '6-shared/types'
-import { applyDiffMutable } from './shared/applyDiff'
 
 interface DataSlice {
   current: TDataStore
@@ -28,23 +29,8 @@ export interface TServerInbox extends TNormalizedPatch {
   sentOutboxCount?: number
 }
 
-const makeDataStore = (): TDataStore => ({
-  serverTimestamp: 0,
-  instrument: {},
-  country: {},
-  company: {},
-  user: {},
-  merchant: {},
-  account: {},
-  tag: {},
-  budget: {},
-  reminder: {},
-  reminderMarker: {},
-  transaction: {},
-})
-
 // INITIAL STATE
-const initialBase = makeDataStore()
+const initialBase = createEmptyDataStore()
 const initialState: DataSlice = {
   current: initialBase,
   base: initialBase,
@@ -66,15 +52,16 @@ const { reducer, actions } = createSlice({
     rebaseServerInbox: withPerf('rebaseServerInbox', state => {
       if (!state.inbox) return
       const { sentOutboxCount, ...canonicalPatch } = state.inbox
+      const accepted = acceptCanonicalPatch(
+        { base: state.base, outbox: state.outbox },
+        canonicalPatch,
+        sentOutboxCount
+      )
 
-      applyDiffMutable(canonicalPatch, state.base)
-
-      state.outbox =
-        sentOutboxCount === undefined
-          ? state.outbox
-          : state.outbox.slice(sentOutboxCount)
-      state.redo = []
-      state.current = replayOutbox(state.base, state.outbox)
+      state.base = accepted.base
+      state.current = accepted.current
+      state.outbox = accepted.outbox
+      state.redo = accepted.redo
       state.inbox = null
     }),
     appendClientCommand: withPerf(

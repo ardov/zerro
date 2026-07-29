@@ -24,6 +24,8 @@ React, storage, localization, or app-layer runtime modules.
    Commands section is the single canonical persisted command shape.
 4. Check [design-ledger.md](./design-ledger.md) before changing a settled
    decision.
+5. For local CLI or MCP work, follow
+   [local-tooling.md](./local-tooling.md) one wave at a time.
 
 The notes are routing, not proof. Git and current verification outrank stale
 prose.
@@ -34,9 +36,9 @@ prose.
 | --------------------------------------------------------------- | ------------------------------------------------- |
 | [architecture.md](./architecture.md)                            | Durable boundaries and runtime contracts          |
 | [materialization.md](./materialization.md)                      | Predicted local effects and server cascades       |
+| [local-tooling.md](./local-tooling.md)                          | Accepted local CLI and optional MCP MVP plan      |
 | [design-ledger.md](./design-ledger.md)                          | Settled decisions, risks, and open questions      |
 | [notes.md](./notes.md)                                          | Current position, remaining work, deferred smells |
-| [structure-migration.md](./structure-migration.md)              | Completed alphabetical source-layout migration    |
 | [testing.md](./testing.md)                                      | Verification policy and completion gate           |
 | [ZenMoney sync API](../../internal/domain/zenmoney/sync-api.md) | Observed server behavior and wire shape           |
 

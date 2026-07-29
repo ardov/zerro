@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { TDataStore } from '6-shared/types'
 import { EnvType, envId } from '../../internal/domain/zerro/envelope-id'
+import { makeTransaction } from '../../support/testing/zenmoneyTestData'
 import { createZerroSession } from './createZerroSession'
 
 describe('createZerroSession', () => {
@@ -35,6 +36,46 @@ describe('createZerroSession', () => {
       currency: 'USD',
     })
     expect(session.envelopes.getAll()).toBe(envelopes)
+  })
+
+  it('queries sorted transactions with Core filter semantics', () => {
+    const data = makeEmptyData()
+    data.transaction = {
+      expense: makeTransaction({
+        id: 'expense',
+        date: '2026-01-10',
+        outcome: 25,
+        income: 0,
+        comment: 'Market',
+      }),
+      income: makeTransaction({
+        id: 'income',
+        date: '2026-01-11',
+        outcome: 0,
+        income: 100,
+      }),
+      deleted: makeTransaction({
+        id: 'deleted',
+        date: '2026-01-12',
+        deleted: true,
+        outcome: 10,
+      }),
+    }
+    const session = createZerroSession(data, {
+      now: () => Date.parse('2026-01-15T12:00:00.000Z'),
+      uuid: () => 'test-id',
+    })
+
+    expect(
+      session.transactions
+        .query({ clauses: [{ kind: 'search', value: 'market' }] })
+        .map(transaction => transaction.id)
+    ).toEqual(['expense'])
+    expect(
+      session.transactions
+        .query({ clauses: [{ kind: 'deleted', mode: 'include' }] })
+        .map(transaction => transaction.id)
+    ).toEqual(['expense', 'income', 'deleted'])
   })
 })
 

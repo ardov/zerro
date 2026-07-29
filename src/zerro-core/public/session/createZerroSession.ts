@@ -1,5 +1,9 @@
 import type { TCoreContext } from '../../types'
 import type { TDataStore } from '../../internal/domain/zenmoney/model/store'
+import {
+  compileTransactionQuery,
+  type TTransactionQuery,
+} from '../../internal/domain/zerro/transactions/query'
 import { createProjectionGraph } from '../../internal/projections/graph'
 
 export type TZerroSession = ReturnType<typeof createZerroSession>
@@ -19,6 +23,14 @@ export function createZerroSession(data: TDataStore, ctx: TCoreContext) {
     <T>(node: (snapshot: TDataStore) => T) =>
     () =>
       node(data)
+  const queryTransactions = (query: TTransactionQuery) =>
+    g.sortedTransactions(data).filter(
+      compileTransactionQuery(query, {
+        routing: g.routingContext(data),
+        envelopes: g.envelopes(data),
+        keepingEnvelopeIds: new Set(g.keepingEnvelopeIds(data)),
+      })
+    )
 
   return {
     data,
@@ -33,6 +45,7 @@ export function createZerroSession(data: TDataStore, ctx: TCoreContext) {
     transactions: {
       getHistory: bind(g.transactionsHistory),
       getHistoryStart: bind(g.historyStart),
+      query: queryTransactions,
     },
     debtors: {
       getAll: bind(g.debtors),
