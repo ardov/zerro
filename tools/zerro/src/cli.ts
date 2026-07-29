@@ -12,7 +12,7 @@ import {
 } from './application/cliParser'
 import { createToolContext } from './application/context'
 import { projectResultFields } from './application/fields'
-import { getHelp, getHelpShape } from './application/help'
+import { getHelp, getHelpShape, getVersion } from './application/help'
 import { readJsonInput } from './application/input'
 import { listOutbox, undoLastOutboxCommand } from './application/outbox'
 import { failure, ToolError } from './application/output'
@@ -31,7 +31,7 @@ import {
   searchTransactions,
 } from './application/reads'
 import { refresh } from './application/refresh'
-import { getSpendingReport } from './application/reports'
+import { getActivityReport } from './application/reports'
 import { getStatus } from './application/status'
 import { sync } from './application/sync'
 import {
@@ -39,7 +39,11 @@ import {
   previewCreateTransaction,
   stageCreateTransaction,
 } from './application/transactionCreate'
-import { parseFormat, renderResultAsTsv } from './application/tsv'
+import {
+  hasUnconvertedCurrencyVectors,
+  parseFormat,
+  renderResultAsTsv,
+} from './application/tsv'
 
 async function run(): Promise<void> {
   let result: unknown
@@ -58,6 +62,11 @@ async function run(): Promise<void> {
         result = options.shape
           ? getHelpShape(meta, options.shape)
           : getHelp(meta)
+        break
+      }
+      case 'version': {
+        const workspace = await loadWorkspace(context, 'version')
+        result = getVersion(workspaceMeta(workspace, context.now()))
         break
       }
       case 'status':
@@ -99,8 +108,8 @@ async function run(): Promise<void> {
       case 'debtors list':
         result = await listDebtors(context, options)
         break
-      case 'report spending':
-        result = await getSpendingReport(context, options)
+      case 'report activity':
+        result = await getActivityReport(context, options)
         break
       case 'budget preview-set': {
         const input = parseSetEnvelopeBudgetsRequest(
@@ -149,7 +158,13 @@ async function run(): Promise<void> {
         throw invalidCommand(command)
     }
     result = projectResultFields(result, options.fields)
-    if (format === 'tsv') tsvOutput = renderResultAsTsv(command, result)
+    if (format === 'tsv') {
+      tsvOutput = renderResultAsTsv(command, result)
+      if (hasUnconvertedCurrencyVectors(result))
+        process.stderr.write(
+          'Warning: some columns contain currency vectors printed as JSON (e.g. {"CZK":100}); pass --display-currency to get one convertible number per row instead.\n'
+        )
+    }
   } catch (error) {
     const normalized =
       error instanceof ToolError

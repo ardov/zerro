@@ -7,11 +7,38 @@ export type TShapeFields = Record<string, string>
 
 export const successShapes: Record<string, TShapeFields> = {
   commandManifest: {
-    commands:
-      'Array of command descriptors: name, effect, required/optional flags, example invocation, successShape, possible error codes.',
+    commands: 'Array of command descriptors.',
+    'commands[].name': 'Command name, e.g. "report activity".',
+    'commands[].effect':
+      '"none" (read-only), "local" (writes the local state file only), or "remote" (talks to ZenMoney).',
+    'commands[].required':
+      'Prerequisites for this command: either a plain string (an env var or positional argument, e.g. "ZM_TOKEN" or "month") or an option descriptor object (name/type/values/default/description) for a required flag.',
+    'commands[].optional': 'Option descriptor objects for every optional flag.',
+    'commands[].optional[].name': 'Flag as typed on the command line, e.g. "--limit".',
+    'commands[].optional[].type':
+      '"string", "integer", "boolean", or "enum".',
+    'commands[].optional[].values': 'Allowed values. Present only when type is "enum".',
+    'commands[].optional[].default': 'Value used when the flag is omitted, if any.',
+    'commands[].optional[].description': 'What the flag does.',
+    'commands[].example': 'A runnable example invocation.',
+    'commands[].successShape':
+      'Name to pass to `help --shape` for this command\'s response field docs.',
+    'commands[].errors': 'Error codes this command can return in a failure response.',
     defaults: 'Server-wide defaults applied when a command omits an option.',
     'defaults.limit': 'Page size used when --limit is omitted.',
     'defaults.maximumLimit': 'Largest value --limit accepts.',
+    guide: 'Orientation notes for using this CLI, worth reading once.',
+    'guide.fieldReference': 'How to look up field docs for any successShape.',
+    'guide.successShapes': 'Every valid name for help --shape <name>.',
+    'guide.tableOutput': 'How to get a table instead of JSON.',
+    'guide.quietOutput': 'How to get pure JSON on stdout, without the pnpm banner.',
+    'guide.multiCurrency': 'Why most amounts are {CURRENCY: amount} vectors, and how to collapse one to a number.',
+    'guide.warnings': 'What a top-level "warnings" array on a successful response means.',
+    'guide.shellGotcha': 'A zsh/bash pipe that corrupts JSON containing transaction comments with newlines, and the fix.',
+  },
+
+  versionInfo: {
+    version: 'zerro package version this CLI was built from.',
   },
 
   localStatus: {
@@ -50,21 +77,35 @@ export const successShapes: Record<string, TShapeFields> = {
   },
 
   accountPage: {
+    includeArchived: '--include-archived as passed (default false).',
+    displayCurrency:
+      'Currency code passed via --display-currency, or null if not requested.',
     items: 'Page of accounts, sorted by title.',
     'items[].id': 'Account id.',
     'items[].title': 'Account display name.',
     'items[].type': 'Account type: checking, cash, ccard, deposit, debt, etc.',
     'items[].archive': 'Whether the account is archived.',
     'items[].inBalance':
-      "Whether the account counts toward the user's total balance.",
-    'items[].canonicalBalance':
-      'Last balance ZenMoney confirmed for this account.',
-    'items[].balancePendingCanonicalSync':
+      "Whether the account counts toward the user's total balance — the same flag `totals.inBudget`/`totals.offBudget` split on.",
+    'items[].balance': 'Last balance ZenMoney confirmed for this account.',
+    'items[].hasPendingChanges':
       'True when a staged outbox command may have changed this balance locally before ZenMoney confirmed it.',
     'items[].instrument': "Account's currency: id, code, symbol.",
+    'items[].balanceConverted':
+      'items[].balance converted to one number in displayCurrency. Present only when --display-currency was given.',
     returned: 'Number of items in this page.',
     totalCount: 'Total number of rows matching the query, across all pages.',
     nextCursor: 'Opaque cursor for the next page, or null on the last page.',
+    totals: 'Totals across every visible account, not just this page.',
+    'totals.netWorth': 'Sum of every visible account balance, by currency.',
+    'totals.inBudget':
+      'Same sum restricted to accounts where inBalance is true.',
+    'totals.offBudget':
+      'Same sum restricted to accounts where inBalance is false (investments, trackers, etc.).',
+    'totals.netWorthConverted':
+      'totals.netWorth converted to one number in displayCurrency. Present only when --display-currency was given.',
+    'totals.inBudgetConverted': 'totals.inBudget converted the same way.',
+    'totals.offBudgetConverted': 'totals.offBudget converted the same way.',
   },
 
   tagPage: {
@@ -93,11 +134,13 @@ export const successShapes: Record<string, TShapeFields> = {
   },
 
   transactionPage: {
+    displayCurrency:
+      'Currency code passed via --display-currency, or null if not requested.',
     items: 'Page of transactions, newest first.',
     'items[].id': 'Transaction id.',
     'items[].date': 'Transaction date (YYYY-MM-DD).',
     'items[].type':
-      '"income", "outcome", "transfer", "incomeDebt", or "outcomeDebt", derived from which accounts the amounts flow through.',
+      '"income", "outcome", "transfer", "incomeDebt", or "outcomeDebt", derived from which accounts the amounts flow through — matches the values --type filters on ("debt" covers both incomeDebt and outcomeDebt).',
     'items[].income':
       'Income side: amount, account, instrument. Zero amount if none.',
     'items[].outcome':
@@ -113,6 +156,13 @@ export const successShapes: Record<string, TShapeFields> = {
     returned: 'Number of items in this page.',
     totalCount: 'Total number of rows matching the query, across all pages.',
     nextCursor: 'Opaque cursor for the next page, or null on the last page.',
+    totals: 'Totals across every matching transaction, not just this page.',
+    'totals.income': 'Sum of items[].income.amount, by currency.',
+    'totals.outcome': 'Sum of items[].outcome.amount, by currency.',
+    'totals.transactionCount': 'Total matching transactions.',
+    'totals.incomeConverted':
+      'totals.income converted to one number in displayCurrency. Present only when --display-currency was given.',
+    'totals.outcomeConverted': 'totals.outcome converted the same way.',
   },
 
   monthSummary: {
@@ -191,6 +241,8 @@ export const successShapes: Record<string, TShapeFields> = {
     'items[].childCount': 'Total number of direct children.',
     'items[].currency': "Envelope's currency.",
     'items[].visibility': 'Display visibility setting, e.g. "auto".',
+    'items[].keepIncome':
+      'When true, income categorized on this envelope stays here (net against its spending) instead of flowing to the month\'s general income. `report activity --direction net` uses this exact flag to decide whether a refund offsets spending or counts as separate income.',
     'items[].self': "This envelope's own metrics, excluding children.",
     'items[].self.budgetByCurrency':
       'Amount budgeted directly on this envelope.',
@@ -230,6 +282,8 @@ export const successShapes: Record<string, TShapeFields> = {
     childCount: 'Total number of direct children.',
     currency: "Envelope's currency.",
     visibility: 'Display visibility setting, e.g. "auto".',
+    keepIncome:
+      'When true, income categorized on this envelope stays here (net against its spending) instead of flowing to the month\'s general income. `report activity --direction net` uses this exact flag to decide whether a refund offsets spending or counts as separate income.',
     self: "This envelope's own metrics, excluding children.",
     withChildren: 'Rolled-up metrics including all descendant envelopes.',
   },
@@ -279,27 +333,29 @@ export const successShapes: Record<string, TShapeFields> = {
   reportPage: {
     groupBy:
       '"tag", "merchant", "account", or "month" — the aggregation dimension.',
+    direction:
+      '"net" (default), "outcome", or "income" — see items[].total for what each computes. Scope is tag-routed activity only: transfers between accounts and debt movements never appear here (see `transactions search --type transfer|debt` and `debtors list` instead).',
     from: '--from as passed, or null.',
     to: '--to as passed, or null.',
     displayCurrency:
       'Currency code passed via --display-currency, or null if not requested.',
-    items:
-      'Spending groups, largest first (outcome-type transactions only; income, transfers, and debt movements are excluded).',
+    items: 'Groups, sorted by descending absolute value, largest first.',
     'items[].key':
-      'Group identifier: a tag/merchant/account id, a YYYY-MM month, or "none" when the transaction had no tag/merchant. A transaction with multiple tags is grouped under its first tag only.',
+      'Group identifier: a tag/merchant/account id, a YYYY-MM month, or "none" when the transaction had no tag/merchant.',
     'items[].name': 'Display name for the group.',
-    'items[].total': 'Spending in this group, by currency.',
+    'items[].total':
+      'Amount in this group, by currency. Sign depends on --direction: "outcome" and "income" are always positive (gross); "net" is positive when the group is a net spend and negative when it is a net inflow (e.g. a salary tag, or a group where refunds exceeded spending) — the mirror image of `month get`\'s `totals.envActivity` sign, chosen so an ordinary spending group reads as a plain positive number.',
     'items[].transactionCount': 'Number of transactions in this group.',
     'items[].totalConverted':
-      'items[].total converted to one number in displayCurrency. Present only when --display-currency was given.',
+      'items[].total converted to one signed number in displayCurrency. Present only when --display-currency was given.',
     returned: 'Number of items in this page.',
     totalCount: 'Total number of groups matching the query, across all pages.',
     nextCursor: 'Opaque cursor for the next page, or null on the last page.',
     totals: 'Grand totals across every group, not just this page.',
-    'totals.total': 'Total spending across all groups, by currency.',
-    'totals.transactionCount': 'Total outcome transactions across all groups.',
+    'totals.total': 'Total across all groups, by currency, same sign rules as items[].total.',
+    'totals.transactionCount': 'Total transactions counted across all groups.',
     'totals.totalConverted':
-      'totals.total converted to one number in displayCurrency. Present only when --display-currency was given.',
+      'totals.total converted to one signed number in displayCurrency. Present only when --display-currency was given.',
   },
 
   budgetPreview: {

@@ -24,6 +24,7 @@ describe('local tool help manifest', () => {
       result.data.commands.map(command => [command.name, command.effect])
     ).toEqual([
       ['help', 'none'],
+      ['version', 'none'],
       ['status', 'none'],
       ['refresh', 'local'],
       ['sync', 'remote'],
@@ -37,7 +38,7 @@ describe('local tool help manifest', () => {
       ['envelopes get', 'none'],
       ['goals list', 'none'],
       ['debtors list', 'none'],
-      ['report spending', 'none'],
+      ['report activity', 'none'],
       ['budget preview-set', 'none'],
       ['budget stage-set', 'local'],
       ['outbox list', 'none'],
@@ -85,6 +86,34 @@ describe('local tool help manifest', () => {
   it('rejects an unknown --shape name', () => {
     expect(() => getHelpShape(sampleMeta, 'notAShape')).toThrow(
       expect.objectContaining({ code: 'INVALID_INPUT' })
+    )
+  })
+
+  it('exposes an orientation guide listing every successShape', () => {
+    const result = getHelp(sampleMeta)
+    expect(result.data.guide.successShapes).toEqual(
+      Object.keys(successShapes).sort()
+    )
+  })
+
+  it('describes optional flags as typed objects, not bare strings', () => {
+    const result = getHelp(sampleMeta)
+    const accounts = result.data.commands.find(
+      command => command.name === 'accounts list'
+    )
+    expect(accounts?.optional).toContainEqual(
+      expect.objectContaining({ name: '--limit', type: 'integer', default: 50 })
+    )
+    const report = result.data.commands.find(
+      command => command.name === 'report activity'
+    )
+    expect(report?.optional).toContainEqual(
+      expect.objectContaining({
+        name: '--direction',
+        type: 'enum',
+        values: ['net', 'outcome', 'income'],
+        default: 'net',
+      })
     )
   })
 })

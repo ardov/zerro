@@ -2,7 +2,11 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { applyFieldsProjection, projectResultFields } from './fields'
+import {
+  applyFieldsProjection,
+  findUnmatchedFieldPaths,
+  projectResultFields,
+} from './fields'
 
 describe('applyFieldsProjection', () => {
   it('projects a scalar top-level field', () => {
@@ -74,6 +78,26 @@ describe('applyFieldsProjection', () => {
   })
 })
 
+describe('findUnmatchedFieldPaths', () => {
+  it('returns nothing when every path matches', () => {
+    const data = { items: [{ name: 'Food' }] }
+    expect(findUnmatchedFieldPaths(data, 'items.name')).toEqual([])
+  })
+
+  it('flags a path that matches nothing anywhere in the data', () => {
+    const data = { items: [{ name: 'Food' }] }
+    expect(findUnmatchedFieldPaths(data, 'items.bogus,bogusTop')).toEqual([
+      'items.bogus',
+      'bogusTop',
+    ])
+  })
+
+  it('does not flag a path crossing an empty array as unmatched', () => {
+    const data = { items: [] as unknown[] }
+    expect(findUnmatchedFieldPaths(data, 'items.name')).toEqual([])
+  })
+})
+
 describe('projectResultFields', () => {
   it('projects only the data field of a success envelope', () => {
     const result = {
@@ -101,5 +125,45 @@ describe('projectResultFields', () => {
   it('passes the result through unchanged when no --fields was given', () => {
     const result = { ok: true, data: { a: 1 } }
     expect(projectResultFields(result, undefined)).toBe(result)
+  })
+
+  it('warns about a --fields path that matched nothing, without failing the command', () => {
+    const result = {
+      ok: true,
+      data: { items: [{ id: '1', title: 'Cash' }], returned: 1 },
+    }
+    const projected = projectResultFields(result, 'items.title,items.bogus')
+    expect(projected).toMatchObject({
+      data: { items: [{ title: 'Cash' }] },
+      warnings: [
+        {
+          code: 'UNKNOWN_FIELD_PATH',
+          entityIds: ['items.bogus'],
+        },
+      ],
+    })
+  })
+
+  it('adds no warnings key when every requested path matches', () => {
+    const result = {
+      ok: true,
+      data: { items: [{ id: '1', title: 'Cash' }], returned: 1 },
+    }
+    const projected = projectResultFields(result, 'items.title')
+    expect(projected).not.toHaveProperty('warnings')
+  })
+
+  it('appends to warnings a command already carried', () => {
+    const result = {
+      ok: true,
+      data: { items: [{ id: '1' }], returned: 1 },
+      warnings: [{ code: 'EXISTING', message: 'pre-existing' }],
+    }
+    const projected = projectResultFields(result, 'items.bogus') as {
+      warnings: unknown[]
+    }
+    expect(projected.warnings).toHaveLength(2)
+    expect(projected.warnings[0]).toMatchObject({ code: 'EXISTING' })
+    expect(projected.warnings[1]).toMatchObject({ code: 'UNKNOWN_FIELD_PATH' })
   })
 })

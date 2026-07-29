@@ -70,3 +70,35 @@ function formatCell(value: unknown): string {
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
+
+/**
+ * True when `--format tsv` rendered at least one currency-vector cell (e.g.
+ * `{"CZK":100,"USD":5}`) as opaque JSON, and the caller never passed
+ * --display-currency to get a single convertible number instead. Checked
+ * separately from `renderResultAsTsv` since tsv output is the entire stdout
+ * payload in that mode — there's no room in it for a warning — so the CLI
+ * prints this to stderr instead.
+ */
+export function hasUnconvertedCurrencyVectors(result: unknown): boolean {
+  if (!isRecord(result) || result.ok !== true || !isRecord(result.data))
+    return false
+  if (
+    'displayCurrency' in result.data &&
+    result.data.displayCurrency !== null
+  )
+    return false
+  const items = result.data.items
+  if (!Array.isArray(items)) return false
+  return items.some(
+    item => isRecord(item) && Object.values(item).some(looksLikeCurrencyVector)
+  )
+}
+
+function looksLikeCurrencyVector(value: unknown): boolean {
+  if (!isRecord(value)) return false
+  const entries = Object.entries(value)
+  if (!entries.length) return false
+  return entries.every(
+    ([key, amount]) => /^[A-Z]{3,4}$/.test(key) && typeof amount === 'number'
+  )
+}

@@ -1,3 +1,5 @@
+import type { TWarning } from './output'
+
 // Pagination protocol fields survive --fields even when not requested — a
 // caller mid-pagination who asked for "items.name" still needs nextCursor to
 // fetch the next page, not just the content fields they were projecting.
@@ -8,9 +10,9 @@ const PRESERVED_KEYS = ['returned', 'totalCount', 'nextCursor'] as const
  * e.g. "items.name,items.self.budgetByCurrency". Paths that cross an array
  * are mapped per-element, and multiple paths sharing an array prefix are
  * merged into the same per-item objects rather than producing separate
- * parallel arrays. Unknown paths are silently dropped — this is a read-time
- * convenience, not a schema, so a typo just yields no field instead of an
- * error the caller has to parse.
+ * parallel arrays. A path that matches nothing is dropped here rather than
+ * erroring — this stays a best-effort projection — but `projectResultFields`
+ * surfaces the miss as a warning so a typo doesn't silently read as "no data".
  */
 export function applyFieldsProjection(
   data: unknown,
@@ -31,6 +33,18 @@ export function applyFieldsProjection(
   return root
 }
 
+/** Requested --fields paths that matched no value anywhere in `data`. */
+export function findUnmatchedFieldPaths(
+  data: unknown,
+  fieldsCsv: string
+): string[] {
+  return fieldsCsv
+    .split(',')
+    .map(path => path.trim())
+    .filter(Boolean)
+    .filter(path => !pathExists(data, path.split('.')))
+}
+
 /** Applies --fields to a command's `{ ok: true, data }` result envelope, if present. */
 export function projectResultFields(
   result: unknown,
@@ -39,7 +53,27 @@ export function projectResultFields(
   if (!fieldsCsv) return result
   if (!isRecord(result) || result.ok !== true || !('data' in result))
     return result
-  return { ...result, data: applyFieldsProjection(result.data, fieldsCsv) }
+  const unmatched = findUnmatchedFieldPaths(result.data, fieldsCsv)
+  const projected = { ...result, data: applyFieldsProjection(result.data, fieldsCsv) }
+  if (!unmatched.length) return projected
+  const existingWarnings = Array.isArray(result.warnings) ? result.warnings : []
+  const warning: TWarning = {
+    code: 'UNKNOWN_FIELD_PATH',
+    message: `--fields matched nothing for: ${unmatched.join(', ')}`,
+    entityIds: unmatched,
+  }
+  return { ...projected, warnings: [...existingWarnings, warning] }
+}
+
+function pathExists(source: unknown, segments: readonly string[]): boolean {
+  const [key, ...rest] = segments
+  if (!isRecord(source)) return false
+  const value = source[key]
+  if (value === undefined) return false
+  if (rest.length === 0) return true
+  if (Array.isArray(value))
+    return value.length === 0 || value.some(item => pathExists(item, rest))
+  return pathExists(value, rest)
 }
 
 function setPath(
