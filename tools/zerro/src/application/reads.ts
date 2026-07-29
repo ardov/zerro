@@ -1,9 +1,17 @@
 import {
   createZerroSession,
+  TrFilterType,
   type TTransactionFilterClause,
 } from 'zerro-core/headless'
 
 import type { TToolContext } from './context'
+import {
+  buildFullRates,
+  convertFx,
+  resolveDisplayCurrency,
+  round,
+  type TFxVector,
+} from './fx'
 import { ToolError, success } from './output'
 import { page, parseLimit } from './pagination'
 import { resolveEntityId, resolveEntityIds } from './resolve'
@@ -15,45 +23,97 @@ import {
 
 export type TReadOptions = Record<string, string | undefined>
 
+const TRANSACTION_TYPE_VALUES = [
+  TrFilterType.Income,
+  TrFilterType.Outcome,
+  TrFilterType.Transfer,
+  TrFilterType.Debt,
+] as const
+
 export async function listAccounts(
   context: TToolContext,
   options: TReadOptions
 ) {
   const command = 'accounts list'
   const workspace = await loadWorkspace(context, command)
+  const includeArchived =
+    (options as { 'include-archived'?: boolean })['include-archived'] === true
+  const displayCurrency = resolveDisplayCurrency(
+    options,
+    workspace.current.instrument,
+    command
+  )
   const limit = parseLimit(options.limit, command)
-  const rows = Object.values(workspace.current.account)
-    .sort(compareTitleAndId)
-    .map(account => {
-      const instrument = workspace.current.instrument[account.instrument]
-      return {
-        id: account.id,
-        title: account.title,
-        type: account.type,
-        archive: account.archive,
-        inBalance: account.inBalance,
-        canonicalBalance: account.balance,
-        balancePendingCanonicalSync: workspace.state.outbox.length > 0,
-        instrument: instrument
-          ? {
-              id: instrument.id,
-              code: instrument.shortTitle,
-              symbol: instrument.symbol,
-            }
-          : { id: account.instrument, code: '', symbol: '' },
-      }
-    })
+  const rates = buildFullRates(workspace.current.instrument)
+
+  const visibleAccounts = Object.values(workspace.current.account).filter(
+    account => includeArchived || !account.archive
+  )
+
+  const rows = visibleAccounts.sort(compareTitleAndId).map(account => {
+    const instrument = workspace.current.instrument[account.instrument]
+    const code = instrument?.shortTitle
+    return {
+      id: account.id,
+      title: account.title,
+      type: account.type,
+      archive: account.archive,
+      inBalance: account.inBalance,
+      balance: account.balance,
+      hasPendingChanges: workspace.state.outbox.length > 0,
+      instrument: instrument
+        ? { id: instrument.id, code, symbol: instrument.symbol }
+        : { id: account.instrument, code: '', symbol: '' },
+      ...(displayCurrency && code
+        ? {
+            balanceConverted: convertFx(
+              { [code]: account.balance },
+              displayCurrency,
+              rates
+            ),
+          }
+        : {}),
+    }
+  })
+
+  const netWorth: TFxVector = {}
+  const inBudget: TFxVector = {}
+  const offBudget: TFxVector = {}
+  visibleAccounts.forEach(account => {
+    const code = workspace.current.instrument[account.instrument]?.shortTitle
+    if (!code) return
+    netWorth[code] = round((netWorth[code] ?? 0) + account.balance)
+    const bucket = account.inBalance ? inBudget : offBudget
+    bucket[code] = round((bucket[code] ?? 0) + account.balance)
+  })
+
   return readSuccess(
     context,
     workspace,
     command,
-    page(rows, {
-      command,
-      revision: workspace.revision,
-      query: {},
-      limit,
-      cursor: options.cursor,
-    })
+    {
+      includeArchived,
+      displayCurrency: displayCurrency ?? null,
+      ...page(rows, {
+        command,
+        revision: workspace.revision,
+        query: { includeArchived, displayCurrency: displayCurrency ?? null },
+        limit,
+        cursor: options.cursor,
+      }),
+      totals: {
+        netWorth,
+        inBudget,
+        offBudget,
+        ...(displayCurrency
+          ? {
+              netWorthConverted: convertFx(netWorth, displayCurrency, rates),
+              inBudgetConverted: convertFx(inBudget, displayCurrency, rates),
+              offBudgetConverted: convertFx(offBudget, displayCurrency, rates),
+            }
+          : {}),
+      },
+    }
   )
 }
 
@@ -132,6 +192,12 @@ export async function searchTransactions(
       '--from must not be after --to',
       2
     )
+  const displayCurrency = resolveDisplayCurrency(
+    options,
+    workspace.current.instrument,
+    command
+  )
+  const types = options.type ? parseTransactionTypes(options.type, command) : undefined
   const accountId = options.account
     ? resolveEntityId(workspace.current.account, options.account, {
         command,
@@ -158,6 +224,7 @@ export async function searchTransactions(
   if (query) clauses.push({ kind: 'search', value: query })
   if (accountId) clauses.push({ kind: 'account', ids: [accountId] })
   if (tagIds?.length) clauses.push({ kind: 'tag', ids: tagIds })
+  if (types?.length) clauses.push({ kind: 'type', values: types })
   if (options.from || options.to)
     clauses.push({
       kind: 'date',
@@ -183,6 +250,7 @@ export async function searchTransactions(
     uuid: () => 'read-only',
   })
   const routing = session.activity.getRoutingContext()
+  const rates = buildFullRates(workspace.current.instrument)
   const merchantIdSet = merchantIds ? new Set(merchantIds) : undefined
   const rows = session.transactions
     .query({ clauses })
@@ -229,24 +297,58 @@ export async function searchTransactions(
       deleted: transaction.deleted,
       viewed: transaction.viewed ?? false,
     }))
+
+  const incomeTotal: TFxVector = {}
+  const outcomeTotal: TFxVector = {}
+  rows.forEach(row => {
+    if (row.income.amount && row.income.instrument.code)
+      incomeTotal[row.income.instrument.code] = round(
+        (incomeTotal[row.income.instrument.code] ?? 0) + row.income.amount
+      )
+    if (row.outcome.amount && row.outcome.instrument.code)
+      outcomeTotal[row.outcome.instrument.code] = round(
+        (outcomeTotal[row.outcome.instrument.code] ?? 0) + row.outcome.amount
+      )
+  })
+
   return readSuccess(
     context,
     workspace,
     command,
-    page(rows, {
-      command,
-      revision: workspace.revision,
-      query: {
-        query,
-        from: options.from ?? null,
-        to: options.to ?? null,
-        account: accountId ?? null,
-        tags: tagIds ?? null,
-        merchants: merchantIds ?? null,
+    {
+      displayCurrency: displayCurrency ?? null,
+      ...page(rows, {
+        command,
+        revision: workspace.revision,
+        query: {
+          query,
+          from: options.from ?? null,
+          to: options.to ?? null,
+          account: accountId ?? null,
+          tags: tagIds ?? null,
+          merchants: merchantIds ?? null,
+          types: types ?? null,
+          displayCurrency: displayCurrency ?? null,
+        },
+        limit,
+        cursor: options.cursor,
+      }),
+      totals: {
+        income: incomeTotal,
+        outcome: outcomeTotal,
+        transactionCount: rows.length,
+        ...(displayCurrency
+          ? {
+              incomeConverted: convertFx(incomeTotal, displayCurrency, rates),
+              outcomeConverted: convertFx(
+                outcomeTotal,
+                displayCurrency,
+                rates
+              ),
+            }
+          : {}),
       },
-      limit,
-      cursor: options.cursor,
-    })
+    }
   )
 }
 
@@ -297,6 +399,29 @@ export function transactionType(
   )
     return 'transfer'
   return transaction.income > 0 ? 'income' : 'outcome'
+}
+
+function parseTransactionTypes(
+  csv: string,
+  command: string
+): TrFilterType[] {
+  const values = csv
+    .split(',')
+    .map(part => part.trim())
+    .filter(Boolean)
+  const invalid = values.find(
+    value => !(TRANSACTION_TYPE_VALUES as readonly string[]).includes(value)
+  )
+  if (invalid)
+    throw new ToolError(
+      command,
+      'none',
+      'INVALID_INPUT',
+      `--type must be a comma-separated list of: ${TRANSACTION_TYPE_VALUES.join(', ')}`,
+      2,
+      { type: invalid }
+    )
+  return values as TrFilterType[]
 }
 
 function readSuccess<T>(
