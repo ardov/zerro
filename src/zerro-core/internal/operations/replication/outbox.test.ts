@@ -10,8 +10,10 @@ import type { TCommand } from '../materialization'
 import {
   appendOutbox,
   buildOutboxTransport,
+  parseCommandOutbox,
   redoOutbox,
   replayOutbox,
+  stageCompiledCommand,
   undoOutbox,
 } from './outbox'
 
@@ -32,6 +34,30 @@ describe('outbox operations', () => {
   })
   const replacement = makeCommand(3, {
     account: [makeAccount({ id: 'cash', title: 'Vault' })],
+  })
+
+  it('validates durable command arrays and stages one compiled command', () => {
+    const base = makeStore({
+      user: { 1: makeUser({ id: 1, parent: null, currency: 1 }) },
+    })
+    const staged = stageCompiledCommand(
+      base,
+      [],
+      {
+        patch: {
+          account: [{ id: 'cash', instrument: 1, title: 'Wallet' }],
+        },
+        receipt: { accountId: 'cash' },
+      },
+      1_000
+    )
+
+    expect(staged.outbox).toHaveLength(1)
+    expect(staged.current.account.cash.title).toBe('Wallet')
+    expect(parseCommandOutbox(staged.outbox)).toEqual(staged.outbox)
+    expect(() =>
+      parseCommandOutbox([{ type: 'patch', issuedAt: 1, patch: { nope: [] } }])
+    ).toThrow('patch.nope is invalid')
   })
 
   it('moves commands between the durable outbox and session redo stack', () => {

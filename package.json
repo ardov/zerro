@@ -6,18 +6,19 @@
   "scripts": {
     "dev": "vite --port 3000",
     "build": "pnpm typecheck && vite build",
-    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.node.json",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.node.json && tsc -p tools/zerro/tsconfig.json",
     "preview": "vite preview --port 3000",
     "tsc": "tsc --watch",
     "test": "vitest",
     "zerro-core:package-check": "node scripts/check-zerro-core-package.mjs",
     "lint:css": "stylelint \"src/**/*.{css,scss}\" --max-warnings 0",
     "lint": "pnpm typecheck",
-    "lint:js": "eslint src --max-warnings 0",
+    "lint:js": "eslint src tools --max-warnings 0",
+    "zerro": "tsx tools/zerro/src/cli.ts",
     "knip": "knip --dependencies",
     "knip:exports": "knip --exports --no-exit-code",
-    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,scss,json,md}\"",
-    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,css,scss,json,md}\""
+    "format": "prettier --write \"{src,tools}/**/*.{js,jsx,ts,tsx,css,scss,json,md}\"",
+    "format:check": "prettier --check \"{src,tools}/**/*.{js,jsx,ts,tsx,css,scss,json,md}\""
   },
   "prettier": {
     "trailingComma": "es5",
@@ -89,6 +90,7 @@
     "sass": "^1.101.0",
     "stylelint": "^17.14.0",
     "stylelint-config-recommended-scss": "17.0.1",
+    "tsx": "4.23.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.63.0",
     "vite": "^8.1.4",

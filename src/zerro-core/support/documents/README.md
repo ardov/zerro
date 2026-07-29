@@ -36,7 +36,7 @@ prose.
 | --------------------------------------------------------------- | ------------------------------------------------- |
 | [architecture.md](./architecture.md)                            | Durable boundaries and runtime contracts          |
 | [materialization.md](./materialization.md)                      | Predicted local effects and server cascades       |
-| [local-tooling.md](./local-tooling.md)                          | Accepted local CLI and optional MCP MVP plan      |
+| [local-tooling.md](./local-tooling.md)                          | Agent CLI, envelope budgets, and optional MCP MVP |
 | [design-ledger.md](./design-ledger.md)                          | Settled decisions, risks, and open questions      |
 | [notes.md](./notes.md)                                          | Current position, remaining work, deferred smells |
 | [testing.md](./testing.md)                                      | Verification policy and completion gate           |

@@ -26,6 +26,8 @@ function touchedEntityKeys(
   patch.deletion?.forEach(obj => touched.add(obj.object))
   keys(patch).forEach(key => {
     if (key === 'deletion' || !patch[key]) return
+    const rawKey: string = key
+    if (rawKey === 'serverTimestamp') return
     touched.add(key)
   })
   return touched
@@ -51,6 +53,8 @@ export function applyPatchMutable(
 
   keys(patch).forEach(key => {
     if (key === 'deletion' || !patch[key]) return
+    const rawKey: string = key
+    if (rawKey === 'serverTimestamp') return
 
     if (!Array.isArray(patch[key])) {
       console.error('Expected array for key', key, 'got', typeof patch[key])

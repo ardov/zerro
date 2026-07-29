@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.node.json",
+  "compilerOptions": {
+    "baseUrl": "../..",
+    "paths": {
+      "*": ["src/*"],
+      "zerro-core/*": ["src/zerro-core/*"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

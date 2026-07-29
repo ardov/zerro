@@ -109,10 +109,26 @@ describe('zerro-core API boundary', () => {
     expect(headlessIndex).toContain('createZerroSession')
     expect(headlessIndex).toContain('compileCreateTransaction')
     expect(headlessIndex).toContain('acceptCanonicalPatch')
-    expect(headlessIndex).toContain('parsePersistedReplica')
+    expect(headlessIndex).toContain('parseCommandOutbox')
+    expect(headlessIndex).not.toContain('parsePersistedReplica')
     expect(headlessIndex).not.toMatch(
       /from ['"]\.\/internal\/domain\/(?:zenmoney|zerro)['"]/
     )
+  })
+
+  it('keeps the local tool on explicit Core entrypoints', () => {
+    const toolRoot = join(coreRoot, '../../tools/zerro/src')
+    const violations = walk(toolRoot)
+      .filter(file => file.endsWith('.ts') && !file.endsWith('.test.ts'))
+      .flatMap(file =>
+        readModuleSpecifiers(readFileSync(file, 'utf8'))
+          .filter(specifier => specifier.startsWith('zerro-core/internal/'))
+          .map(
+            specifier => `${relative(toolRoot, file)} imports '${specifier}'`
+          )
+      )
+
+    expect(violations).toEqual([])
   })
 
   it('keeps production core free from app runtime imports', () => {

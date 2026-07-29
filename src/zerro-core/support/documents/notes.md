@@ -26,8 +26,10 @@ is [local-tooling.md](./local-tooling.md).
 The local-tooling W-1 Core preparation is complete: canonical acceptance,
 cursor overlap, empty-store creation, semantic transaction creation, session
 transaction queries, and the explicit `zerro-core/headless` boundary are in
-place and reused by Redux where applicable. W0 is the first incomplete tooling
-wave.
+place and reused by Redux where applicable. W0 and W1 are complete: the CLI can
+refresh a private local replica and expose bounded account, tag, merchant,
+transaction, month, envelope, goal, and debtor reads. W2 envelope-budget
+preview/stage plus outbox inspection and undo is the next incomplete slice.
 
 ## Remaining work
 
@@ -65,9 +67,13 @@ commands ship.
 ### 2. Local agent tooling — accepted independent track
 
 Follow [local-tooling.md](./local-tooling.md) from its first incomplete status
-row. The accepted MVP is a repository-local CLI with bounded JSON output, one
-JSON replica file, `ZERRO_TOKEN`, preview by default, explicit staging, and
-explicit sync. MCP is optional and starts only after the CLI is complete.
+row. The accepted MVP is an agent-first repository-local CLI with
+machine-readable help, bounded JSON, one private JSON replica file,
+`ZERRO_TOKEN`, separate preview/stage/sync operations, and retry-safe outbox
+request ids. It includes bounded account/tag/merchant/envelope discovery,
+envelope hierarchy and monthly metrics, atomic envelope-budget preview/stage,
+transaction creation, outbox undo, and explicit sync. MCP is optional and starts
+only after the CLI is complete.
 
 This track does not require publishing or physically moving Core. It may
 proceed before balance prediction lands, provided transaction previews state

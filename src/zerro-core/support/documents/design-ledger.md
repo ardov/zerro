@@ -122,23 +122,51 @@ there:
 
 ### Local tooling MVP
 
-- Implement a CLI with JSON output before an MCP adapter. Shell access is a
-  sufficient first agent interface.
-- The only mutation states are pure preview, explicit stage into the durable
-  outbox, and explicit sync. Preview and sync are never implicit side effects
-  of reads.
+- Implement an agent-first CLI with bounded JSON output before an MCP adapter.
+  Shell access is a sufficient first agent interface; machine-readable help and
+  explicit side-effect metadata are part of the CLI contract.
+- Preview, local stage/undo, and remote sync are separate commands. Reads and
+  previews never mutate implicitly, and no command combines stage with sync.
 - Preview is not persisted. Stage recompiles semantic input against the latest
   local `current`.
-- The tool supports one profile, one JSON state document, and one
-  environment-provided token. It deliberately has no OAuth, keychain,
+- Outbox mutations require caller-provided request ids. One bounded cache of
+  recent receipts makes agent retries idempotent without becoming a proposal
+  store, history, or audit database. Refresh remains naturally repeatable and
+  does not use the cache.
+- The tool supports one profile, one endpoint, one JSON state document, and one
+  environment-provided token. The endpoint comes from `ZERRO_ENDPOINT` with
+  `ru` as the first-state default. The tool deliberately has no OAuth, keychain,
   multi-profile database, capability system, daemon, or network listener.
-- Persist only `base + outbox`; derive `current` and keep redo session-only.
+- Persist replica/domain truth only as `base + outbox`; derive `current` and
+  keep redo session-only. The same document may additionally contain only the
+  bounded recent-request cache as tool-local transport metadata.
+- The tool owns its state-document parser. Core exposes durable command-array
+  validation; the browser-specific persisted-replica migration parser does not
+  belong in the headless tool boundary.
 - Concurrent writers are outside MVP scope. Atomic file replacement is still
-  required to prevent truncated local state.
+  required to prevent truncated local state, and the local financial document
+  uses private directory/file permissions.
+- Stable ids are discovered through bounded account, tag, merchant, and
+  envelope reads. Automatic title matching is deferred rather than choosing an
+  ambiguous entity.
+- Envelope hierarchy, monthly budgets, and metrics are required reads.
+  Envelope-budget preview/stage is a required write and delegates one bounded
+  batch to the existing semantic `compileSetBudget` routing. Envelope creation,
+  rename, settings, and structure mutation remain outside MVP.
+- Budget writes accept only a strict JSON batch of explicit `set` or `clear`
+  operations. Preview materializes that batch only in memory; stage and undo
+  persist exactly one outbox transition plus a bounded flat retry receipt.
+  The tool never exposes a raw patch, hidden reminder payload, or durable redo
+  tail.
+- Transaction creation remains semantic and accepts a narrower agent JSON DTO
+  than Core's internal date draft. Transaction update and delete are deferred.
 - The CLI accepts the same whole-prefix acknowledgement and silent-drop risk as
   the app. Generalized satisfaction checks, quarantine, and retry are deferred.
+  Transport failures that may have reached ZenMoney are reported as an unknown,
+  non-retryable outcome rather than inviting a blind retry.
 - MCP, if added after the CLI, delegates to the same application functions and
-  contains no business, persistence, query, or sync logic.
+  maps one-to-one to the CLI operations; it contains no business, persistence,
+  query, or sync logic.
 
 ## Accepted product risks
 

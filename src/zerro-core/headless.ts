@@ -42,11 +42,19 @@ export {
   applyOutboxCommand,
   buildOutboxTransport,
   getMaterializedOutboxPatches,
+  parseCommandOutbox,
   redoOutbox,
   replayOutbox,
+  stageCompiledCommand,
   undoOutbox,
   type TOutboxState,
+  type TStagedCompiledCommand,
 } from './internal/operations/replication/outbox'
+
+export {
+  compileSetBudget,
+  type TBudgetUpdate,
+} from './internal/domain/zerro/budgets/commands'
 
 export {
   acceptCanonicalPatch,
@@ -54,11 +62,5 @@ export {
 } from './internal/operations/replication/canonical'
 
 export { getSyncCursor } from './internal/operations/replication/cursor'
-
-export {
-  parsePersistedReplica,
-  replicaPersistenceVersion,
-  type TPersistedReplica,
-} from './runtime/persistence/persistence'
 
 export type { TCompiled, TCoreContext } from './types'

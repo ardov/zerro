@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["scripts/zerro-core-package/consumer.ts"],
-  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{ts,mjs}"],
+  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{ts,mjs}", "tools/**/*.ts"],
   "ignoreDependencies": ["react-scan"]
 }

@@ -16,17 +16,92 @@ import {
 import {
   applyPatch,
   dataEntityKeys,
+  intentPatchKeys,
   type TDataEntityKey,
   type TDataStore,
   type TDeletionObject,
   type TNormalizedPatch,
 } from '../../domain/zenmoney'
+import { issuePatch } from '../materialization'
+import type { TCompiled } from '../../../types'
 
 export type { TCommand } from '../materialization'
 
 export type TOutboxState = {
   outbox: TCommand[]
   redo: TCommand[]
+}
+
+export type TStagedCompiledCommand<TReceipt> = {
+  base: TDataStore
+  current: TDataStore
+  outbox: TCommand[]
+  command: TCommand
+  receipt: TReceipt
+}
+
+/**
+ * Validates the durable command-array shape without importing a runtime
+ * persistence format. Entity fields are validated when materialized.
+ */
+export function parseCommandOutbox(value: unknown): TCommand[] {
+  if (!Array.isArray(value)) throw new Error('Command outbox must be an array')
+
+  value.forEach((entry, index) => {
+    if (!isRecord(entry))
+      throw new Error(`Command outbox[${index}] must be an object`)
+    if (entry.type !== 'patch' || !isFiniteNumber(entry.issuedAt))
+      throw new Error(`Command outbox[${index}] metadata is invalid`)
+    if (!isRecord(entry.patch))
+      throw new Error(`Command outbox[${index}].patch must be an object`)
+
+    Object.entries(entry.patch).forEach(([key, entities]) => {
+      if (!(intentPatchKeys as readonly string[]).includes(key))
+        throw new Error(`Command outbox[${index}].patch.${key} is invalid`)
+      if (
+        !Array.isArray(entities) ||
+        entities.some(
+          entity =>
+            !isRecord(entity) ||
+            (typeof entity.id !== 'string' && typeof entity.id !== 'number')
+        )
+      )
+        throw new Error(`Command outbox[${index}].patch.${key} is invalid`)
+      if (
+        key === 'deletion' &&
+        entities.some(
+          entity =>
+            !isRecord(entity) ||
+            !dataEntityKeys.includes(entity.object as TDataEntityKey)
+        )
+      )
+        throw new Error(`Command outbox[${index}].patch.${key} is invalid`)
+    })
+  })
+
+  return value as TCommand[]
+}
+
+/** Issues and appends one compiled semantic intent against the latest replay. */
+export function stageCompiledCommand<TReceipt>(
+  base: TDataStore,
+  outbox: readonly TCommand[],
+  compiled: TCompiled<TReceipt>,
+  issuedAt: number
+): TStagedCompiledCommand<TReceipt> {
+  const current = replayOutbox(base, outbox)
+  const command = issuePatch(current, compiled.patch, issuedAt)
+  const materialized = materializeCommand(current, command)
+  if (!Object.keys(materialized).length)
+    throw new Error('Compiled command did not change the snapshot')
+  const next = appendOutbox(outbox, command).outbox
+  return {
+    base,
+    current: applyPatch(current, materialized),
+    outbox: next,
+    command,
+    receipt: compiled.receipt,
+  }
 }
 
 export function appendOutbox(
@@ -173,4 +248,12 @@ function getOrCreate<TKey, TValue>(
   const value = create()
   map.set(key, value)
   return value
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value)
 }
