@@ -1,11 +1,17 @@
 export type TEffect = 'none' | 'local' | 'remote'
 
+export type TRatesMeta = {
+  base: string
+  values: Record<string, number>
+}
+
 export type TMeta = {
   observedAt: string
   baseServerTimestampMs: number
   stateRevision: string
   pendingCommandCount: number
   balancePendingCanonicalSync: boolean
+  rates: TRatesMeta
 }
 
 export type TWarning = {

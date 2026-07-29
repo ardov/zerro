@@ -15,6 +15,7 @@ import {
   listDebtors,
   listEnvelopes,
   listGoals,
+  listMonths,
 } from './projections'
 import { searchTransactions } from './reads'
 import { saveWorkspace } from '../adapters/stateFile'
@@ -92,12 +93,96 @@ describe('finance projection reads', () => {
       uuid: () => 'test',
     })
 
-    expect(result.data.totals).toEqual(session.months.getTotals()[month])
+    const coreTotals = session.months.getTotals()[month]
+    // The tool renames core's fields for clarity: `budgeted` here is core's
+    // `positiveBudgeted` (gross allocations), and `budgetedNet` is core's
+    // `budgeted` (net of negative allocations on income envelopes).
+    expect(result.data.totals).toEqual({
+      ...coreTotals,
+      budgeted: coreTotals.positiveBudgeted,
+      budgetedNet: coreTotals.budgeted,
+      undistributedIncome: expect.any(Object),
+    })
     expect(result.data.envelopes.envelopeCount).toBe(
       Object.keys(session.envelopes.getAll()).length
     )
     expect(result.data.envelopes.transactionCount).toBeGreaterThanOrEqual(0)
     expectFiniteNumbers(result.data)
+  })
+
+  it('reports undistributed income separately from budgeted allocations', async () => {
+    const result = await getMonth(context, '2026-07')
+    expect(result.data.totals.undistributedIncome).toEqual(expect.any(Object))
+    // Every currency the user's income envelopes are still holding must be
+    // non-negative until the user allocates it.
+    Object.values(result.data.totals.undistributedIncome).forEach(amount => {
+      expect(amount).toBeGreaterThanOrEqual(0)
+    })
+  })
+
+  it('converts month totals into the requested display currency', async () => {
+    const month = '2026-07'
+    const result = await getMonth(context, month, {
+      'display-currency': 'RUB',
+    })
+
+    expect(result.data.displayCurrency).toBe('RUB')
+    expect(result.data.totalsConverted).toMatchObject({
+      fundsStart: expect.any(Number),
+      toBeBudgeted: expect.any(Number),
+    })
+    // RUB is the base currency (rate 1), so a RUB-only vector converts to itself.
+    expect(result.data.totalsConverted?.overspend).toBeCloseTo(
+      result.data.totals.overspend.RUB ?? 0,
+      2
+    )
+  })
+
+  it('rejects an unknown --display-currency code', async () => {
+    await expect(
+      getMonth(context, '2026-07', { 'display-currency': 'ZZZ' })
+    ).rejects.toMatchObject({ code: 'INVALID_INPUT' })
+  })
+
+  it('lists months in a range and matches month get for each one', async () => {
+    const listed = await listMonths(context, {
+      from: '2026-01',
+      to: '2026-07',
+      limit: '200',
+    })
+    expect(listed.data.items.map(item => item.month)).toEqual([
+      '2026-01',
+      '2026-02',
+      '2026-03',
+      '2026-04',
+      '2026-05',
+      '2026-06',
+      '2026-07',
+    ])
+    const single = await getMonth(context, '2026-04')
+    const matching = listed.data.items.find(item => item.month === '2026-04')
+    expect(matching).toEqual(single.data)
+  })
+
+  it('rejects --from after --to for months list', async () => {
+    await expect(
+      listMonths(context, { from: '2026-07', to: '2026-01' })
+    ).rejects.toMatchObject({ code: 'INVALID_INPUT' })
+  })
+
+  it('paginates months list and converts each month when requested', async () => {
+    const page = await listMonths(context, {
+      from: '2026-01',
+      to: '2026-07',
+      limit: '3',
+      'display-currency': 'RUB',
+    })
+    expect(page.data.items).toHaveLength(3)
+    expect(page.data.displayCurrency).toBe('RUB')
+    expect(page.data.nextCursor).not.toBeNull()
+    for (const item of page.data.items) {
+      expect(item.totalsConverted).toBeDefined()
+    }
   })
 
   it('lists and gets bounded envelope metrics for one month', async () => {
@@ -106,6 +191,7 @@ describe('finance projection reads', () => {
       limit: '5',
     })
     expect(listed.data.returned).toBe(5)
+    expect(listed.data.totalCount).toBeGreaterThan(5)
     expect(listed.data.nextCursor).not.toBeNull()
     expect(listed.data.items[0]).toMatchObject({
       id: expect.any(String),
@@ -130,6 +216,45 @@ describe('finance projection reads', () => {
     expectFiniteNumbers(listed.data)
   })
 
+  it('adds converted scalars to envelope rows when --display-currency is set', async () => {
+    const listed = await listEnvelopes(context, {
+      month: '2026-07',
+      limit: '5',
+      'display-currency': 'RUB',
+    })
+    expect(listed.data.displayCurrency).toBe('RUB')
+    for (const item of listed.data.items) {
+      expect(item.self.converted).toMatchObject({
+        budget: expect.any(Number),
+        activity: expect.any(Number),
+        available: expect.any(Number),
+      })
+      expect(item.withChildren.converted).toMatchObject({
+        budget: expect.any(Number),
+        activity: expect.any(Number),
+        available: expect.any(Number),
+      })
+    }
+  })
+
+  it('marks root envelopes and filters to them with --roots-only', async () => {
+    const all = await listEnvelopes(context, {
+      month: '2026-07',
+      limit: '200',
+    })
+    expect(all.data.items.some(item => item.isRoot)).toBe(true)
+    expect(all.data.items.some(item => !item.isRoot)).toBe(true)
+
+    const roots = await listEnvelopes(context, {
+      month: '2026-07',
+      limit: '200',
+      'roots-only': true,
+    } as unknown as Parameters<typeof listEnvelopes>[1])
+    expect(roots.data.items.length).toBeGreaterThan(0)
+    expect(roots.data.items.every(item => item.isRoot)).toBe(true)
+    expect(roots.data.totalCount).toBeLessThan(all.data.totalCount)
+  })
+
   it('keeps goal and debtor outputs compact and free of raw transactions', async () => {
     const goals = await listGoals(context, {
       month: '2026-07',
@@ -152,14 +277,77 @@ describe('finance projection reads', () => {
     expectFiniteNumbers(debtors.data)
   })
 
+  it('converts goal totals into the requested display currency', async () => {
+    const goals = await listGoals(context, {
+      month: '2026-07',
+      limit: '10',
+      'display-currency': 'RUB',
+    })
+    expect(goals.data.displayCurrency).toBe('RUB')
+    expect(goals.data.totalsConverted).toMatchObject({
+      need: expect.any(Number),
+      target: expect.any(Number),
+    })
+  })
+
   it('caps representative large-fixture pages at 200 rows', async () => {
     expect(Object.keys(demo.transaction).length).toBeGreaterThan(200)
     const page = await searchTransactions(context, { limit: '200' })
     expect(page.data.returned).toBe(200)
     expect(page.data.items).toHaveLength(200)
+    expect(page.data.totalCount).toBeGreaterThan(200)
     await expect(
       searchTransactions(context, { limit: '201' })
     ).rejects.toMatchObject({ code: 'INVALID_INPUT' })
+  })
+
+  it('filters transactions by --tag and --merchant, resolving names as well as ids', async () => {
+    const sample = Object.values(demo.transaction).find(
+      transaction => transaction.tag?.length && transaction.merchant
+    )
+    if (!sample)
+      throw new Error('fixture needs a transaction with a tag and a merchant')
+    const tagId = sample.tag?.[0]
+    const merchantId = sample.merchant
+    if (!tagId || !merchantId) throw new Error('unreachable')
+
+    const byTag = await searchTransactions(context, {
+      tag: tagId,
+      limit: '200',
+    })
+    expect(byTag.data.items.length).toBeGreaterThan(0)
+    expect(
+      byTag.data.items.every(item => item.tags.some(t => t.id === tagId))
+    ).toBe(true)
+
+    const byMerchant = await searchTransactions(context, {
+      merchant: merchantId,
+      limit: '200',
+    })
+    expect(byMerchant.data.items.length).toBeGreaterThan(0)
+    expect(
+      byMerchant.data.items.every(item => item.merchant?.id === merchantId)
+    ).toBe(true)
+
+    const tagTitle = demo.tag[tagId]?.title
+    const byTagName = await searchTransactions(context, {
+      tag: tagTitle,
+      limit: '200',
+    })
+    expect(byTagName.data.totalCount).toBe(byTag.data.totalCount)
+
+    await expect(
+      searchTransactions(context, { tag: 'nonexistent-tag' })
+    ).rejects.toMatchObject({
+      code: 'ENTITY_NOT_FOUND',
+      details: { tagId: 'nonexistent-tag' },
+    })
+    await expect(
+      searchTransactions(context, { merchant: 'nonexistent-merchant' })
+    ).rejects.toMatchObject({
+      code: 'ENTITY_NOT_FOUND',
+      details: { merchantId: 'nonexistent-merchant' },
+    })
   })
 
   it('rejects invalid, unavailable, and mismatched projection references', async () => {

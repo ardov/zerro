@@ -6,6 +6,7 @@ import {
 import type { TToolContext } from './context'
 import { ToolError, success } from './output'
 import { page, parseLimit } from './pagination'
+import { resolveEntityId, resolveEntityIds } from './resolve'
 import {
   loadWorkspace,
   workspaceMeta,
@@ -131,19 +132,32 @@ export async function searchTransactions(
       '--from must not be after --to',
       2
     )
-  if (options.account && !workspace.current.account[options.account])
-    throw new ToolError(
-      command,
-      'none',
-      'ENTITY_NOT_FOUND',
-      'Account was not found',
-      3,
-      { accountId: options.account }
-    )
+  const accountId = options.account
+    ? resolveEntityId(workspace.current.account, options.account, {
+        command,
+        option: 'accountId',
+        entityLabel: 'Account',
+      })
+    : undefined
+  const tagIds = options.tag
+    ? resolveEntityIds(workspace.current.tag, options.tag, {
+        command,
+        option: 'tagId',
+        entityLabel: 'Tag',
+      })
+    : undefined
+  const merchantIds = options.merchant
+    ? resolveEntityIds(workspace.current.merchant, options.merchant, {
+        command,
+        option: 'merchantId',
+        entityLabel: 'Merchant',
+      })
+    : undefined
 
   const clauses: TTransactionFilterClause[] = []
   if (query) clauses.push({ kind: 'search', value: query })
-  if (options.account) clauses.push({ kind: 'account', ids: [options.account] })
+  if (accountId) clauses.push({ kind: 'account', ids: [accountId] })
+  if (tagIds?.length) clauses.push({ kind: 'tag', ids: tagIds })
   if (options.from || options.to)
     clauses.push({
       kind: 'date',
@@ -169,9 +183,15 @@ export async function searchTransactions(
     uuid: () => 'read-only',
   })
   const routing = session.activity.getRoutingContext()
+  const merchantIdSet = merchantIds ? new Set(merchantIds) : undefined
   const rows = session.transactions
     .query({ clauses })
-    .slice()
+    .filter(
+      transaction =>
+        !merchantIdSet ||
+        (transaction.merchant !== null &&
+          merchantIdSet.has(transaction.merchant))
+    )
     .sort(
       (left, right) =>
         right.date.localeCompare(left.date) || left.id.localeCompare(right.id)
@@ -220,7 +240,9 @@ export async function searchTransactions(
         query,
         from: options.from ?? null,
         to: options.to ?? null,
-        account: options.account ?? null,
+        account: accountId ?? null,
+        tags: tagIds ?? null,
+        merchants: merchantIds ?? null,
       },
       limit,
       cursor: options.cursor,
@@ -247,7 +269,7 @@ function moneySide(
   }
 }
 
-function transactionType(
+export function transactionType(
   transaction: {
     income: number
     outcome: number

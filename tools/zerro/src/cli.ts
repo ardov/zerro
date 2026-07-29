@@ -1,5 +1,3 @@
-import { parseArgs } from 'node:util'
-
 import { withLocalZmToken } from './adapters/dotenv'
 import { loadWorkspace, workspaceMeta } from './adapters/stateFile'
 import {
@@ -7,8 +5,14 @@ import {
   previewSetEnvelopeBudgets,
   stageSetEnvelopeBudgets,
 } from './application/budgetSet'
+import {
+  invalidCommand,
+  parseCommand,
+  requireRequestId,
+} from './application/cliParser'
 import { createToolContext } from './application/context'
-import { getHelp } from './application/help'
+import { projectResultFields } from './application/fields'
+import { getHelp, getHelpShape } from './application/help'
 import { readJsonInput } from './application/input'
 import { listOutbox, undoLastOutboxCommand } from './application/outbox'
 import { failure, ToolError } from './application/output'
@@ -18,15 +22,16 @@ import {
   listDebtors,
   listEnvelopes,
   listGoals,
+  listMonths,
 } from './application/projections'
 import {
   listAccounts,
   searchMerchants,
   searchTags,
   searchTransactions,
-  type TReadOptions,
 } from './application/reads'
 import { refresh } from './application/refresh'
+import { getSpendingReport } from './application/reports'
 import { getStatus } from './application/status'
 import { sync } from './application/sync'
 import {
@@ -34,39 +39,25 @@ import {
   previewCreateTransaction,
   stageCreateTransaction,
 } from './application/transactionCreate'
-
-const commandOptions = {
-  query: { type: 'string' },
-  from: { type: 'string' },
-  to: { type: 'string' },
-  account: { type: 'string' },
-  month: { type: 'string' },
-  limit: { type: 'string' },
-  cursor: { type: 'string' },
-  input: { type: 'string' },
-  'request-id': { type: 'string' },
-} as const
-
-type TCliOptions = TReadOptions & {
-  input?: string
-  'request-id'?: string
-}
+import { parseFormat, renderResultAsTsv } from './application/tsv'
 
 async function run(): Promise<void> {
   let result: unknown
   let exitCode = 0
+  let tsvOutput: string | undefined
   try {
     const context = createToolContext(await withLocalZmToken())
-    const parsed = parseCliArgs()
-    const [domain = 'help', action, ...positionals] = parsed.positionals
-    const command = action ? `${domain} ${action}` : domain
-    const options = parsed.values as TCliOptions
-    assertPositionals(command, positionals)
-    assertAllowedOptions(command, options)
+    const { command, options, positionals } = parseCommand(
+      process.argv.slice(2)
+    )
+    const format = parseFormat(options.format, command)
     switch (command) {
       case 'help': {
         const workspace = await loadWorkspace(context, 'help')
-        result = getHelp(workspaceMeta(workspace, context.now()))
+        const meta = workspaceMeta(workspace, context.now())
+        result = options.shape
+          ? getHelpShape(meta, options.shape)
+          : getHelp(meta)
         break
       }
       case 'status':
@@ -91,7 +82,10 @@ async function run(): Promise<void> {
         result = await searchTransactions(context, options)
         break
       case 'month get':
-        result = await getMonth(context, positionals[0])
+        result = await getMonth(context, positionals[0], options)
+        break
+      case 'months list':
+        result = await listMonths(context, options)
         break
       case 'envelopes list':
         result = await listEnvelopes(context, options)
@@ -104,6 +98,9 @@ async function run(): Promise<void> {
         break
       case 'debtors list':
         result = await listDebtors(context, options)
+        break
+      case 'report spending':
+        result = await getSpendingReport(context, options)
         break
       case 'budget preview-set': {
         const input = parseSetEnvelopeBudgetsRequest(
@@ -151,6 +148,8 @@ async function run(): Promise<void> {
       default:
         throw invalidCommand(command)
     }
+    result = projectResultFields(result, options.fields)
+    if (format === 'tsv') tsvOutput = renderResultAsTsv(command, result)
   } catch (error) {
     const normalized =
       error instanceof ToolError
@@ -164,109 +163,13 @@ async function run(): Promise<void> {
           )
     result = failure(normalized)
     exitCode = normalized.exitCode
+    tsvOutput = undefined
   }
 
-  process.stdout.write(`${JSON.stringify(result)}\n`)
+  process.stdout.write(
+    tsvOutput !== undefined ? `${tsvOutput}\n` : `${JSON.stringify(result)}\n`
+  )
   process.exitCode = exitCode
-}
-
-function invalidCommand(command: string): ToolError {
-  return new ToolError(
-    command || 'help',
-    'none',
-    'INVALID_COMMAND',
-    'Unknown command; run "pnpm zerro -- help"',
-    2
-  )
-}
-
-function parseCliArgs() {
-  try {
-    return parseArgs({
-      args: process.argv.slice(2),
-      options: commandOptions,
-      strict: true,
-      allowPositionals: true,
-    })
-  } catch {
-    throw new ToolError(
-      'startup',
-      'none',
-      'INVALID_INPUT',
-      'Invalid CLI options; run "pnpm zerro -- help"',
-      2
-    )
-  }
-}
-
-function assertAllowedOptions(command: string, options: TReadOptions): void {
-  const allowed: Record<string, readonly string[]> = {
-    help: [],
-    status: [],
-    refresh: [],
-    sync: [],
-    'accounts list': ['limit', 'cursor'],
-    'tags search': ['query', 'limit', 'cursor'],
-    'merchants search': ['query', 'limit', 'cursor'],
-    'transactions search': [
-      'query',
-      'from',
-      'to',
-      'account',
-      'limit',
-      'cursor',
-    ],
-    'month get': [],
-    'envelopes list': ['month', 'query', 'limit', 'cursor'],
-    'envelopes get': ['month'],
-    'goals list': ['month', 'query', 'limit', 'cursor'],
-    'debtors list': ['query', 'limit', 'cursor'],
-    'budget preview-set': ['input'],
-    'budget stage-set': ['input', 'request-id'],
-    'outbox list': ['limit', 'cursor'],
-    'outbox undo': ['request-id'],
-    'transaction preview-create': ['input'],
-    'transaction stage-create': ['input', 'request-id'],
-  }
-  const keys = Object.keys(options).filter(key => options[key] !== undefined)
-  const invalid = keys.find(key => !allowed[command]?.includes(key))
-  if (invalid)
-    throw new ToolError(
-      command,
-      'none',
-      'INVALID_INPUT',
-      `Option --${invalid} is not valid for this command`,
-      2
-    )
-}
-
-function requireRequestId(value: string | undefined, command: string): string {
-  if (value) return value
-  throw new ToolError(
-    command,
-    'local',
-    'INVALID_REQUEST_ID',
-    'Command requires --request-id',
-    2
-  )
-}
-
-function assertPositionals(command: string, values: readonly string[]): void {
-  const expected: Record<string, number> = {
-    'month get': 1,
-    'envelopes get': 1,
-  }
-  const count = expected[command] ?? 0
-  if (values.length !== count)
-    throw new ToolError(
-      command,
-      'none',
-      'INVALID_INPUT',
-      count
-        ? `Command requires ${count} positional argument`
-        : 'Command does not accept positional arguments',
-      2
-    )
 }
 
 void run()

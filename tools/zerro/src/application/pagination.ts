@@ -33,7 +33,12 @@ export function page<T>(
     limit: number
     cursor?: string
   }
-): { items: T[]; returned: number; nextCursor: string | null } {
+): {
+  items: T[]
+  returned: number
+  totalCount: number
+  nextCursor: string | null
+} {
   const queryHash = createHash('sha256')
     .update(canonicalJson(input.query))
     .digest('hex')
@@ -54,7 +59,12 @@ export function page<T>(
           } satisfies TCursor)
         ).toString('base64url')
       : null
-  return { items, returned: items.length, nextCursor }
+  return {
+    items,
+    returned: items.length,
+    totalCount: rows.length,
+    nextCursor,
+  }
 }
 
 function parseCursor(

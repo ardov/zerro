@@ -19,6 +19,7 @@ import {
 } from 'zerro-core/headless'
 
 import type { TEndpoint, TToolContext } from '../application/context'
+import { buildRatesMeta } from '../application/fx'
 import { ToolError, type TMeta } from '../application/output'
 
 export type TReceiptValue = string | number | boolean | null
@@ -268,12 +269,18 @@ export function workspaceMeta(
   workspaceValue: TWorkspace,
   observedAt: number
 ): TMeta {
+  const usedInstrumentIds = new Set(
+    Object.values(workspaceValue.current.account).map(
+      account => account.instrument
+    )
+  )
   return {
     observedAt: new Date(observedAt).toISOString(),
     baseServerTimestampMs: workspaceValue.state.base.serverTimestamp,
     stateRevision: workspaceValue.revision,
     pendingCommandCount: workspaceValue.state.outbox.length,
     balancePendingCanonicalSync: workspaceValue.state.outbox.length > 0,
+    rates: buildRatesMeta(workspaceValue.current.instrument, usedInstrumentIds),
   }
 }
 

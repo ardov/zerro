@@ -12,7 +12,7 @@ import {
 import { afterEach, describe, expect, it } from 'vitest'
 
 import type { TToolContext } from './context'
-import { listAccounts, searchTags } from './reads'
+import { listAccounts, searchTags, searchTransactions } from './reads'
 import { saveWorkspace } from '../adapters/stateFile'
 
 const directories: string[] = []
@@ -69,6 +69,41 @@ describe('bounded local reads', () => {
     await expect(
       searchTags(context, { cursor: first.data.nextCursor ?? undefined })
     ).rejects.toMatchObject({ code: 'INVALID_CURSOR' })
+  })
+
+  it('resolves --account by exact id, exact title, or case-insensitive title', async () => {
+    const context = await makeContext()
+    const base = createEmptyDataStore()
+    base.instrument[1] = {
+      id: 1,
+      changed: 1,
+      title: 'Czech koruna',
+      shortTitle: 'CZK',
+      symbol: 'Kč',
+      rate: 1,
+    }
+    base.account.a = makeAccount('a', 'Alpha')
+    await saveWorkspace(
+      context.statePath,
+      { version: 1, endpoint: 'ru', base, outbox: [], recentRequests: [] },
+      'fixture'
+    )
+
+    await expect(
+      searchTransactions(context, { account: 'a' })
+    ).resolves.toMatchObject({ data: { returned: 0 } })
+    await expect(
+      searchTransactions(context, { account: 'Alpha' })
+    ).resolves.toMatchObject({ data: { returned: 0 } })
+    await expect(
+      searchTransactions(context, { account: 'alpha' })
+    ).resolves.toMatchObject({ data: { returned: 0 } })
+    await expect(
+      searchTransactions(context, { account: 'nonexistent' })
+    ).rejects.toMatchObject({
+      code: 'ENTITY_NOT_FOUND',
+      details: { accountId: 'nonexistent' },
+    })
   })
 })
 

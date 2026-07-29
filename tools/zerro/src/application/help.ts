@@ -1,22 +1,22 @@
-import type { TMeta } from './output'
-import { success } from './output'
+import { getShapeFields } from './shapes'
+import { ToolError, success, type TMeta } from './output'
 
 const commands = [
   {
     name: 'help',
     effect: 'none',
     required: [],
-    optional: [],
-    example: 'pnpm zerro -- help',
+    optional: ['--shape'],
+    example: 'pnpm zerro help --shape monthSummary',
     successShape: 'commandManifest',
-    errors: [],
+    errors: ['INVALID_INPUT'],
   },
   {
     name: 'status',
     effect: 'none',
     required: [],
     optional: [],
-    example: 'pnpm zerro -- status',
+    example: 'pnpm zerro status',
     successShape: 'localStatus',
     errors: ['INVALID_STATE', 'ENDPOINT_MISMATCH'],
   },
@@ -25,7 +25,7 @@ const commands = [
     effect: 'local',
     required: ['ZM_TOKEN'],
     optional: [],
-    example: 'ZM_TOKEN=... pnpm zerro -- refresh',
+    example: 'ZM_TOKEN=... pnpm zerro refresh',
     successShape: 'refreshReceipt',
     errors: [
       'TOKEN_REQUIRED',
@@ -40,7 +40,7 @@ const commands = [
     effect: 'remote',
     required: ['ZM_TOKEN when outbox is non-empty'],
     optional: [],
-    example: 'ZM_TOKEN=... pnpm zerro -- sync',
+    example: 'ZM_TOKEN=... pnpm zerro sync',
     successShape: 'syncReceipt',
     errors: [
       'TOKEN_REQUIRED',
@@ -55,8 +55,8 @@ const commands = [
     name: 'accounts list',
     effect: 'none',
     required: [],
-    optional: ['--limit', '--cursor'],
-    example: 'pnpm zerro -- accounts list --limit 50',
+    optional: ['--limit', '--cursor', '--fields', '--format'],
+    example: 'pnpm zerro accounts list --limit 50',
     successShape: 'accountPage',
     errors: ['INVALID_INPUT', 'INVALID_CURSOR', 'INVALID_STATE'],
   },
@@ -64,8 +64,8 @@ const commands = [
     name: 'tags search',
     effect: 'none',
     required: [],
-    optional: ['--query', '--limit', '--cursor'],
-    example: 'pnpm zerro -- tags search --query food',
+    optional: ['--query', '--limit', '--cursor', '--fields', '--format'],
+    example: 'pnpm zerro tags search --query food',
     successShape: 'tagPage',
     errors: ['INVALID_INPUT', 'INVALID_CURSOR', 'INVALID_STATE'],
   },
@@ -73,8 +73,8 @@ const commands = [
     name: 'merchants search',
     effect: 'none',
     required: [],
-    optional: ['--query', '--limit', '--cursor'],
-    example: 'pnpm zerro -- merchants search --query amazon',
+    optional: ['--query', '--limit', '--cursor', '--fields', '--format'],
+    example: 'pnpm zerro merchants search --query amazon',
     successShape: 'merchantPage',
     errors: ['INVALID_INPUT', 'INVALID_CURSOR', 'INVALID_STATE'],
   },
@@ -82,9 +82,19 @@ const commands = [
     name: 'transactions search',
     effect: 'none',
     required: [],
-    optional: ['--query', '--from', '--to', '--account', '--limit', '--cursor'],
-    example:
-      'pnpm zerro -- transactions search --from 2026-07-01 --to 2026-07-31',
+    optional: [
+      '--query',
+      '--from',
+      '--to',
+      '--account',
+      '--tag',
+      '--merchant',
+      '--limit',
+      '--cursor',
+      '--fields',
+      '--format',
+    ],
+    example: 'pnpm zerro transactions search --from 2026-07-01 --to 2026-07-31',
     successShape: 'transactionPage',
     errors: [
       'INVALID_INPUT',
@@ -97,8 +107,8 @@ const commands = [
     name: 'month get',
     effect: 'none',
     required: ['month'],
-    optional: [],
-    example: 'pnpm zerro -- month get 2026-07',
+    optional: ['--display-currency', '--fields'],
+    example: 'pnpm zerro month get 2026-07',
     successShape: 'monthSummary',
     errors: [
       'INVALID_INPUT',
@@ -108,11 +118,41 @@ const commands = [
     ],
   },
   {
+    name: 'months list',
+    effect: 'none',
+    required: [],
+    optional: [
+      '--from',
+      '--to',
+      '--limit',
+      '--cursor',
+      '--display-currency',
+      '--fields',
+      '--format',
+    ],
+    example: 'pnpm zerro months list --from 2026-01 --to 2026-07',
+    successShape: 'monthPage',
+    errors: [
+      'INVALID_INPUT',
+      'STATE_NOT_INITIALIZED',
+      'INVALID_CURSOR',
+      'INVALID_STATE',
+    ],
+  },
+  {
     name: 'envelopes list',
     effect: 'none',
     required: ['--month'],
-    optional: ['--query', '--limit', '--cursor'],
-    example: 'pnpm zerro -- envelopes list --month 2026-07',
+    optional: [
+      '--query',
+      '--limit',
+      '--cursor',
+      '--roots-only',
+      '--display-currency',
+      '--fields',
+      '--format',
+    ],
+    example: 'pnpm zerro envelopes list --month 2026-07',
     successShape: 'envelopePage',
     errors: [
       'INVALID_INPUT',
@@ -126,8 +166,8 @@ const commands = [
     name: 'envelopes get',
     effect: 'none',
     required: ['envelopeId', '--month'],
-    optional: [],
-    example: 'pnpm zerro -- envelopes get tag#food --month 2026-07',
+    optional: ['--display-currency', '--fields'],
+    example: 'pnpm zerro envelopes get tag#food --month 2026-07',
     successShape: 'envelope',
     errors: [
       'INVALID_INPUT',
@@ -141,8 +181,15 @@ const commands = [
     name: 'goals list',
     effect: 'none',
     required: ['--month'],
-    optional: ['--query', '--limit', '--cursor'],
-    example: 'pnpm zerro -- goals list --month 2026-07',
+    optional: [
+      '--query',
+      '--limit',
+      '--cursor',
+      '--display-currency',
+      '--fields',
+      '--format',
+    ],
+    example: 'pnpm zerro goals list --month 2026-07',
     successShape: 'goalPage',
     errors: [
       'INVALID_INPUT',
@@ -156,9 +203,32 @@ const commands = [
     name: 'debtors list',
     effect: 'none',
     required: [],
-    optional: ['--query', '--limit', '--cursor'],
-    example: 'pnpm zerro -- debtors list --limit 50',
+    optional: ['--query', '--limit', '--cursor', '--fields', '--format'],
+    example: 'pnpm zerro debtors list --limit 50',
     successShape: 'debtorPage',
+    errors: [
+      'INVALID_INPUT',
+      'STATE_NOT_INITIALIZED',
+      'INVALID_CURSOR',
+      'INVALID_STATE',
+    ],
+  },
+  {
+    name: 'report spending',
+    effect: 'none',
+    required: ['--group-by'],
+    optional: [
+      '--from',
+      '--to',
+      '--display-currency',
+      '--limit',
+      '--cursor',
+      '--fields',
+      '--format',
+    ],
+    example:
+      'pnpm zerro report spending --group-by tag --from 2026-07-01 --to 2026-07-31',
+    successShape: 'reportPage',
     errors: [
       'INVALID_INPUT',
       'STATE_NOT_INITIALIZED',
@@ -171,7 +241,7 @@ const commands = [
     effect: 'none',
     required: ['--input'],
     optional: [],
-    example: 'pnpm zerro -- budget preview-set --input budgets.json',
+    example: 'pnpm zerro budget preview-set --input budgets.json',
     successShape: 'budgetPreview',
     errors: [
       'INVALID_INPUT',
@@ -190,7 +260,7 @@ const commands = [
     required: ['--request-id', '--input'],
     optional: [],
     example:
-      'pnpm zerro -- budget stage-set --request-id july-food-1 --input budgets.json',
+      'pnpm zerro budget stage-set --request-id july-food-1 --input budgets.json',
     successShape: 'budgetStageReceipt',
     errors: [
       'INVALID_REQUEST_ID',
@@ -210,8 +280,8 @@ const commands = [
     name: 'outbox list',
     effect: 'none',
     required: [],
-    optional: ['--limit', '--cursor'],
-    example: 'pnpm zerro -- outbox list',
+    optional: ['--limit', '--cursor', '--fields', '--format'],
+    example: 'pnpm zerro outbox list',
     successShape: 'outboxPage',
     errors: ['INVALID_INPUT', 'INVALID_CURSOR', 'INVALID_STATE'],
   },
@@ -220,7 +290,7 @@ const commands = [
     effect: 'local',
     required: ['--request-id'],
     optional: [],
-    example: 'pnpm zerro -- outbox undo --request-id undo-july-food-1',
+    example: 'pnpm zerro outbox undo --request-id undo-july-food-1',
     successShape: 'undoReceipt',
     errors: [
       'INVALID_REQUEST_ID',
@@ -235,7 +305,7 @@ const commands = [
     effect: 'none',
     required: ['--input'],
     optional: [],
-    example: 'pnpm zerro -- transaction preview-create --input expense.json',
+    example: 'pnpm zerro transaction preview-create --input expense.json',
     successShape: 'transactionPreview',
     errors: [
       'INVALID_INPUT',
@@ -251,7 +321,7 @@ const commands = [
     required: ['--request-id', '--input'],
     optional: [],
     example:
-      'pnpm zerro -- transaction stage-create --request-id groceries-1 --input expense.json',
+      'pnpm zerro transaction stage-create --request-id groceries-1 --input expense.json',
     successShape: 'transactionStageReceipt',
     errors: [
       'INVALID_REQUEST_ID',
@@ -271,4 +341,18 @@ export function getHelp(meta: TMeta) {
     commands,
     defaults: { limit: 50, maximumLimit: 200 },
   })
+}
+
+export function getHelpShape(meta: TMeta, shape: string) {
+  const fields = getShapeFields(shape)
+  if (!fields)
+    throw new ToolError(
+      'help',
+      'none',
+      'INVALID_INPUT',
+      `Unknown --shape "${shape}"; run "pnpm zerro help" for the list of successShape names`,
+      2,
+      { shape }
+    )
+  return success('help', 'none', meta, { shape, fields })
 }
