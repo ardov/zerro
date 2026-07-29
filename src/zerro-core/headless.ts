@@ -33,6 +33,12 @@ export {
 } from './internal/domain/zerro/transactions/query'
 
 export {
+  routeTransactionToActivity,
+  type TTransactionActivityRoute,
+  type TTransactionActivityRoutingContext,
+} from './internal/domain/zerro/activity/transactionRouting'
+
+export {
   issuePatch,
   type TCommand,
 } from './internal/operations/materialization'
