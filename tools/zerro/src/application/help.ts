@@ -36,6 +36,22 @@ const commands = [
     ],
   },
   {
+    name: 'sync',
+    effect: 'remote',
+    required: ['ZERRO_TOKEN when outbox is non-empty'],
+    optional: [],
+    example: 'ZERRO_TOKEN=... pnpm zerro -- sync',
+    successShape: 'syncReceipt',
+    errors: [
+      'TOKEN_REQUIRED',
+      'NETWORK_FAILURE',
+      'ZENMONEY_REJECTED',
+      'INVALID_ZENMONEY_RESPONSE',
+      'OUTBOX_NO_TRANSPORT',
+      'INVALID_STATE',
+    ],
+  },
+  {
     name: 'accounts list',
     effect: 'none',
     required: [],

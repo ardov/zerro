@@ -8,6 +8,12 @@ export type TMeta = {
   balancePendingCanonicalSync: boolean
 }
 
+export type TWarning = {
+  code: string
+  message: string
+  entityIds?: Array<string | number>
+}
+
 export class ToolError extends Error {
   constructor(
     readonly command: string,
@@ -30,7 +36,8 @@ export function success<T>(
   command: string,
   effect: TEffect,
   meta: TMeta,
-  data: T
+  data: T,
+  warnings?: TWarning[]
 ) {
   return {
     schemaVersion: 1 as const,
@@ -39,6 +46,7 @@ export function success<T>(
     effect,
     meta,
     data,
+    ...(warnings?.length ? { warnings } : {}),
   }
 }
 

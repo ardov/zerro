@@ -27,6 +27,7 @@ import {
 } from './application/reads'
 import { refresh } from './application/refresh'
 import { getStatus } from './application/status'
+import { sync } from './application/sync'
 import {
   parseCreateTransactionRequest,
   previewCreateTransaction,
@@ -72,6 +73,9 @@ async function run(): Promise<void> {
         break
       case 'refresh':
         result = await refresh(context)
+        break
+      case 'sync':
+        result = await sync(context)
         break
       case 'accounts list':
         result = await listAccounts(context, options)
@@ -199,6 +203,7 @@ function assertAllowedOptions(command: string, options: TReadOptions): void {
     help: [],
     status: [],
     refresh: [],
+    sync: [],
     'accounts list': ['limit', 'cursor'],
     'tags search': ['query', 'limit', 'cursor'],
     'merchants search': ['query', 'limit', 'cursor'],

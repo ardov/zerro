@@ -13,13 +13,16 @@ export type TZenMoneyDependencies = {
   now: () => number
 }
 
+export type TExchangeMode = 'refresh' | 'sync'
+
 export async function exchangeDiff(
   input: {
     endpoint: TEndpoint
     token: string
     diff: TZmDiff
   },
-  dependencies: TZenMoneyDependencies
+  dependencies: TZenMoneyDependencies,
+  mode: TExchangeMode = 'refresh'
 ): Promise<TZmDiff> {
   let response: Response
   try {
@@ -38,41 +41,36 @@ export async function exchangeDiff(
       },
     })
   } catch {
-    throw new ToolError(
-      'refresh',
-      'local',
-      'NETWORK_FAILURE',
-      'ZenMoney refresh request failed',
-      6,
-      undefined,
-      'not_applied',
-      true
-    )
+    throw exchangeFailure(mode, 'NETWORK_FAILURE', responseMessage(mode), 6)
   }
+
+  const body = await response.text()
+  if (!response.ok)
+    throw exchangeFailure(
+      mode,
+      'ZENMONEY_REJECTED',
+      'ZenMoney rejected the request',
+      6,
+      { httpStatus: response.status },
+      response.status >= 500
+    )
 
   let value: unknown
   try {
-    value = JSON.parse(await response.text())
+    value = JSON.parse(body)
   } catch {
-    throw invalidResponse(response.status)
+    throw invalidResponse(response.status, mode)
   }
-  if (!response.ok)
-    throw new ToolError(
-      'refresh',
-      'local',
-      'ZENMONEY_REJECTED',
-      'ZenMoney rejected the refresh request',
-      6,
-      { httpStatus: response.status },
-      'not_applied',
-      response.status >= 500
-    )
-  return parseWireDiff(value, response.status)
+  return parseWireDiff(value, response.status, mode)
 }
 
-function parseWireDiff(value: unknown, httpStatus: number): TZmDiff {
+function parseWireDiff(
+  value: unknown,
+  httpStatus: number,
+  mode: TExchangeMode
+): TZmDiff {
   if (!isRecord(value) || !isFiniteNumber(value.serverTimestamp))
-    throw invalidResponse(httpStatus)
+    throw invalidResponse(httpStatus, mode)
   const allowedKeys = new Set([
     'serverTimestamp',
     'deletion',
@@ -89,13 +87,13 @@ function parseWireDiff(value: unknown, httpStatus: number): TZmDiff {
     'transaction',
   ])
   for (const [key, entities] of Object.entries(value)) {
-    if (!allowedKeys.has(key)) throw invalidResponse(httpStatus)
+    if (!allowedKeys.has(key)) throw invalidResponse(httpStatus, mode)
     if (
       key !== 'serverTimestamp' &&
       (!Array.isArray(entities) ||
         entities.some(entity => !isWireEntity(key, entity)))
     )
-      throw invalidResponse(httpStatus)
+      throw invalidResponse(httpStatus, mode)
   }
   return value as TZmDiff
 }
@@ -134,17 +132,49 @@ function currentClientTimestamp(diff: TZmDiff, now: number): number {
   return timestamp
 }
 
-function invalidResponse(httpStatus: number): ToolError {
-  return new ToolError(
-    'refresh',
-    'local',
+function invalidResponse(httpStatus: number, mode: TExchangeMode): ToolError {
+  return exchangeFailure(
+    mode,
     'INVALID_ZENMONEY_RESPONSE',
     'ZenMoney returned an invalid bounded diff response',
     6,
-    { httpStatus },
-    'not_applied',
-    true
+    { httpStatus }
   )
+}
+
+function exchangeFailure(
+  mode: TExchangeMode,
+  code: string,
+  message: string,
+  exitCode: number,
+  details?: Record<string, number>,
+  isUncertain = true
+): ToolError {
+  if (mode === 'sync')
+    return new ToolError(
+      'sync',
+      'remote',
+      code,
+      message,
+      exitCode,
+      details,
+      isUncertain ? 'unknown' : 'not_applied',
+      false
+    )
+  return new ToolError(
+    'refresh',
+    'local',
+    code,
+    message,
+    exitCode,
+    details,
+    'not_applied',
+    isUncertain
+  )
+}
+
+function responseMessage(mode: TExchangeMode): string {
+  return `ZenMoney ${mode} request failed`
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

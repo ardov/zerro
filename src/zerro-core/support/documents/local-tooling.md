@@ -1,6 +1,6 @@
 # Local finance tooling MVP
 
-- Status: implementation active; W0–W3 complete
+- Status: implementation active; W0–W4 complete
 - Updated: 2026-07-29
 - Scope: a local CLI first, with an optional MCP adapter after the CLI contract
   is stable
@@ -975,7 +975,7 @@ Suggested commit:
 feat(zerro-tool): preview and stage transaction creation
 ```
 
-### W4 — Explicit sync
+### W4 — Explicit sync — complete
 
 Goal: send the local outbox using the already accepted replica semantics.
 
@@ -999,6 +999,27 @@ Steps:
 7. Warn when a staged create id is absent from the canonical response.
 8. Cover a command appended after the captured prefix in the pure replica test,
    even though concurrent CLI writers remain unsupported.
+
+Completed:
+
+- explicit `sync` returns a no-network receipt for an empty outbox before it
+  requires a token;
+- captured outbox count, overlap cursor, and fresh materialization timestamp
+  feed the sole `buildOutboxTransport` path;
+- successful validated response accepts exactly the captured prefix, replays
+  the surviving outbox, and atomically persists canonical base state;
+- explicit client rejection is `not_applied`; network failure, server failure,
+  and malformed successful response are `unknown` and non-retryable;
+- canonical responses that omit a staged transaction retain the accepted
+  whole-prefix policy but emit a bounded warning with its id;
+- fixture coverage proves empty no-op, missing token, primary-only transport,
+  canonical persistence, failure immutability, outcome classification, and
+  silent-drop warning.
+
+Exit evidence:
+
+- full Vitest, typecheck, ESLint, Knip, package-boundary, Prettier, and diff
+  checks pass.
 
 Exit:
 
@@ -1125,7 +1146,7 @@ Update one row at a time. Use `pending`, `active`, `blocked`, or `complete`.
 | W1   | complete | 102 files / 405 tests; live read-only smoke passes         |
 | W2   | complete | 103 files / 411 tests; local budget/outbox/undo gates pass |
 | W3   | complete | 104 files / 416 tests; local transaction-create gates pass |
-| W4   | pending  | —                                                          |
+| W4   | complete | 105 files / 421 tests; explicit sync gates pass            |
 | W5   | pending  | optional                                                   |
 
 ## MVP completion

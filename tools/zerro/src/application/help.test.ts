@@ -20,6 +20,7 @@ describe('local tool help manifest', () => {
       ['help', 'none'],
       ['status', 'none'],
       ['refresh', 'local'],
+      ['sync', 'remote'],
       ['accounts list', 'none'],
       ['tags search', 'none'],
       ['merchants search', 'none'],

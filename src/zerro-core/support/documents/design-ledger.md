@@ -169,6 +169,11 @@ there:
   the app. Generalized satisfaction checks, quarantine, and retry are deferred.
   Transport failures that may have reached ZenMoney are reported as an unknown,
   non-retryable outcome rather than inviting a blind retry.
+- Sync is explicit and uses the Core primary-only transport plus canonical
+  prefix acknowledgement. Empty outboxes never require a token or open the
+  network path; an explicit 4xx refusal is a definitive local no-op, while
+  transport, server, or malformed-success uncertainty preserves the outbox and
+  is never represented as retry-safe.
 - MCP, if added after the CLI, delegates to the same application functions and
   maps one-to-one to the CLI operations; it contains no business, persistence,
   query, or sync logic.
