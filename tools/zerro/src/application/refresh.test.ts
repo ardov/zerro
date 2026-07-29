@@ -23,7 +23,7 @@ afterEach(async () => {
 
 describe('refresh', () => {
   it('bootstraps and then uses the one-second overlap cursor', async () => {
-    const context = await makeContext({ ZERRO_TOKEN: 'secret' })
+    const context = await makeContext({ ZM_TOKEN: 'secret' })
     const requests: Array<Record<string, unknown>> = []
     const fetchMock = vi.fn(
       async (_url: string | URL | Request, init?: RequestInit) => {
@@ -59,7 +59,7 @@ describe('refresh', () => {
   })
 
   it('bootstraps a fresh state from a complete canonical fixture', async () => {
-    const context = await makeContext({ ZERRO_TOKEN: 'secret' })
+    const context = await makeContext({ ZM_TOKEN: 'secret' })
     const wire = convertDiff.toServer(makeDemoDiff({ until: '2022-06-19' }))
     await refresh(context, {
       fetch: vi.fn(
@@ -78,7 +78,7 @@ describe('refresh', () => {
   })
 
   it('accepts canonical wire budgets without a synthetic id', async () => {
-    const context = await makeContext({ ZERRO_TOKEN: 'secret' })
+    const context = await makeContext({ ZM_TOKEN: 'secret' })
     await refresh(context, {
       fetch: vi.fn(
         async () =>
@@ -118,7 +118,7 @@ describe('refresh', () => {
   })
 
   it('applies remote deletions and rebases the unchanged pending outbox', async () => {
-    const context = await makeContext({ ZERRO_TOKEN: 'secret' })
+    const context = await makeContext({ ZM_TOKEN: 'secret' })
     const base = makeDemoStore({ until: '2022-06-19' })
     const account = Object.values(base.account)[0]
     const tag = Object.values(base.tag)[0]
@@ -172,7 +172,7 @@ describe('refresh', () => {
 
   it('requires a token and leaves an existing state byte-for-byte unchanged', async () => {
     const context = await makeContext({})
-    const seeded = await makeContext({ ZERRO_TOKEN: 'seed' }, context.statePath)
+    const seeded = await makeContext({ ZM_TOKEN: 'seed' }, context.statePath)
     await refresh(seeded, {
       fetch: vi.fn(
         async () =>
@@ -190,7 +190,7 @@ describe('refresh', () => {
   })
 
   it('does not persist malformed or failed responses', async () => {
-    const context = await makeContext({ ZERRO_TOKEN: 'secret' })
+    const context = await makeContext({ ZM_TOKEN: 'secret' })
     await expect(
       refresh(context, {
         fetch: vi.fn(

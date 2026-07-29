@@ -31,13 +31,13 @@ export async function sync(
       noOp: true,
     })
 
-  const token = context.env.ZERRO_TOKEN
+  const token = context.env.ZM_TOKEN
   if (!token)
     throw new ToolError(
       command,
       'remote',
       'TOKEN_REQUIRED',
-      'ZERRO_TOKEN is required for sync',
+      'ZM_TOKEN is required for sync',
       4
     )
   const sentOutboxCount = workspace.state.outbox.length

@@ -23,9 +23,9 @@ const commands = [
   {
     name: 'refresh',
     effect: 'local',
-    required: ['ZERRO_TOKEN'],
+    required: ['ZM_TOKEN'],
     optional: [],
-    example: 'ZERRO_TOKEN=... pnpm zerro -- refresh',
+    example: 'ZM_TOKEN=... pnpm zerro -- refresh',
     successShape: 'refreshReceipt',
     errors: [
       'TOKEN_REQUIRED',
@@ -38,9 +38,9 @@ const commands = [
   {
     name: 'sync',
     effect: 'remote',
-    required: ['ZERRO_TOKEN when outbox is non-empty'],
+    required: ['ZM_TOKEN when outbox is non-empty'],
     optional: [],
-    example: 'ZERRO_TOKEN=... pnpm zerro -- sync',
+    example: 'ZM_TOKEN=... pnpm zerro -- sync',
     successShape: 'syncReceipt',
     errors: [
       'TOKEN_REQUIRED',

@@ -15,6 +15,6 @@ export async function getStatus(context: TToolContext) {
     transactionCount: Object.keys(workspace.current.transaction).length,
     pendingCommandCount: workspace.state.outbox.length,
     lastCommandIssuedAt: last ? new Date(last.issuedAt).toISOString() : null,
-    tokenAvailable: Boolean(context.env.ZERRO_TOKEN),
+    tokenAvailable: Boolean(context.env.ZM_TOKEN),
   })
 }

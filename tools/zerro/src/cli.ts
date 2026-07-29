@@ -1,5 +1,6 @@
 import { parseArgs } from 'node:util'
 
+import { withLocalZmToken } from './adapters/dotenv'
 import { loadWorkspace, workspaceMeta } from './adapters/stateFile'
 import {
   parseSetEnvelopeBudgetsRequest,
@@ -55,7 +56,7 @@ async function run(): Promise<void> {
   let result: unknown
   let exitCode = 0
   try {
-    const context = createToolContext()
+    const context = createToolContext(await withLocalZmToken())
     const parsed = parseCliArgs()
     const [domain = 'help', action, ...positionals] = parsed.positionals
     const command = action ? `${domain} ${action}` : domain

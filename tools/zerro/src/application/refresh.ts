@@ -17,13 +17,13 @@ export async function refresh(
   dependencies: TZenMoneyDependencies = { fetch, now: context.now }
 ) {
   const command = 'refresh'
-  const token = context.env.ZERRO_TOKEN
+  const token = context.env.ZM_TOKEN
   if (!token)
     throw new ToolError(
       command,
       'local',
       'TOKEN_REQUIRED',
-      'ZERRO_TOKEN is required for refresh',
+      'ZM_TOKEN is required for refresh',
       4
     )
   const workspace = await loadWorkspace(context, command)

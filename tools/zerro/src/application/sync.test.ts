@@ -22,7 +22,7 @@ beforeEach(async () => {
   directories.push(directory)
   context = {
     now: () => Date.parse('2026-07-06T12:00:00.000Z'),
-    env: { ZERRO_TOKEN: 'secret' },
+    env: { ZM_TOKEN: 'secret' },
     statePath: join(directory, 'state.json'),
     endpoint: 'ru',
     endpointExplicit: false,

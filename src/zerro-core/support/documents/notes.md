@@ -69,7 +69,7 @@ commands ship.
 Follow [local-tooling.md](./local-tooling.md) from its first incomplete status
 row. The accepted MVP is an agent-first repository-local CLI with
 machine-readable help, bounded JSON, one private JSON replica file,
-`ZERRO_TOKEN`, separate preview/stage/sync operations, and retry-safe outbox
+`ZM_TOKEN`, separate preview/stage/sync operations, and retry-safe outbox
 request ids. It includes bounded account/tag/merchant/envelope discovery,
 envelope hierarchy and monthly metrics, atomic envelope-budget preview/stage,
 transaction creation, outbox undo, and explicit sync. MCP is optional and starts

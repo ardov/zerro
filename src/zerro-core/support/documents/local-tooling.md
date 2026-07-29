@@ -73,7 +73,9 @@ Useful current seams:
 - keep Core under `src/zerro-core`;
 - run the TypeScript CLI from the repository instead of publishing a package;
 - support one local profile and one endpoint at a time;
-- read the token only from `ZERRO_TOKEN`;
+- read the token from explicit `ZM_TOKEN`, or as a convenience from the same
+  name in the ignored repository-local `.env.local`; the explicit environment
+  variable wins, and the file is parsed rather than sourced;
 - store one JSON document instead of IndexedDB, SQLite, or multiple domain
   files;
 - do not persist proposals: preview is a pure response, and stage reruns the
@@ -611,7 +613,7 @@ entrypoint and so no tool imports `zerro-core/internal/*`.
 1. load and validate local state;
 2. return a successful local no-op without network access when the outbox is
    empty;
-3. fail before network access when `ZERRO_TOKEN` is missing;
+3. fail before network access when `ZM_TOKEN` is missing;
 4. capture `sentOutboxCount = outbox.length`;
 5. compute `sentAt`;
 6. build primary-only transport from `base` and the captured outbox;
@@ -1146,14 +1148,15 @@ Update one row at a time. Use `pending`, `active`, `blocked`, or `complete`.
 | W1   | complete | 102 files / 405 tests; live read-only smoke passes         |
 | W2   | complete | 103 files / 411 tests; local budget/outbox/undo gates pass |
 | W3   | complete | 104 files / 416 tests; local transaction-create gates pass |
-| W4   | complete | 105 files / 421 tests; explicit sync gates pass            |
+| W4   | complete | 106 files / 424 tests; explicit sync gates pass            |
 | W5   | pending  | optional                                                   |
 
 ## MVP completion
 
 The CLI MVP is complete when a fresh local checkout can:
 
-1. receive a token only through `ZERRO_TOKEN`;
+1. receive a token through explicit `ZM_TOKEN` or ignored `.env.local`
+   `ZM_TOKEN`;
 2. discover every command and its side-effect class through JSON `help`;
 3. bootstrap a snapshot with `refresh`;
 4. discover account, tag, merchant, and envelope ids through bounded JSON;
