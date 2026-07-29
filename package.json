@@ -112,7 +112,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "happy-dom": "^20.9.0",
-    "postcss": "^8.5.12",
+    "postcss": "^8.5.18",
     "prettier": "^3.8.3",
     "sass": "^1.99.0",
     "stylelint": "^16.26.1",
