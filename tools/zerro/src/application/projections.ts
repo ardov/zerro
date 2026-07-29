@@ -395,6 +395,7 @@ function presentEnvelope(
     childCount: envelope.children.length,
     currency: envelope.currency,
     visibility: envelope.visibility,
+    keepIncome: envelope.keepIncome,
     self: {
       budgetByCurrency: metrics.selfBudgeted,
       activityByCurrency: metrics.selfActivity,

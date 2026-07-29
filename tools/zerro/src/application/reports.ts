@@ -1,5 +1,6 @@
 import {
   createZerroSession,
+  routeTransactionToActivity,
   type TTransactionFilterClause,
 } from 'zerro-core/headless'
 
@@ -8,11 +9,12 @@ import {
   buildFullRates,
   convertFx,
   resolveDisplayCurrency,
+  round,
   type TFxVector,
 } from './fx'
-import { ToolError, success } from './output'
+import { ToolError, success, type TWarning } from './output'
 import { page, parseLimit } from './pagination'
-import { transactionType, type TReadOptions } from './reads'
+import type { TReadOptions } from './reads'
 import {
   loadWorkspace,
   workspaceMeta,
@@ -22,25 +24,41 @@ import {
 const GROUP_BY_VALUES = ['tag', 'merchant', 'account', 'month'] as const
 type TGroupBy = (typeof GROUP_BY_VALUES)[number]
 
+const DIRECTION_VALUES = ['net', 'outcome', 'income'] as const
+type TDirection = (typeof DIRECTION_VALUES)[number]
+
+type TRouteDirection = 'income' | 'outcome'
+
 type TReportTransaction = {
+  id: string
   date: string
   income: number
   outcome: number
   incomeAccount: string
   outcomeAccount: string
+  incomeInstrument: number
   outcomeInstrument: number
   tag: string[] | null
   merchant: string | null
 }
 
-export async function getSpendingReport(
+/**
+ * Scoped to tag-routed activity: the same in-budget/out-of-budget and
+ * envelope-category split `routeTransactionToActivity` uses for the app's
+ * own envelope view. Transfers between accounts and debt movements land on
+ * account/merchant/payee envelopes, not tag envelopes, and are out of scope
+ * here — see `transactions search --type transfer|debt` and `debtors list`
+ * for those.
+ */
+export async function getActivityReport(
   context: TToolContext,
   options: TReadOptions
 ) {
-  const command = 'report spending'
+  const command = 'report activity'
   const workspace = await loadWorkspace(context, command)
   requireInitialized(workspace, command)
   const groupBy = parseGroupBy(options['group-by'], command)
+  const direction = parseDirection(options.direction, command)
   validateDate(options.from, '--from', command)
   validateDate(options.to, '--to', command)
   if (options.from && options.to && options.from > options.to)
@@ -88,6 +106,7 @@ export async function getSpendingReport(
     uuid: () => 'read-only',
   })
   const routing = session.activity.getRoutingContext()
+  const envelopes = session.envelopes.getAll()
 
   const groups = new Map<
     string,
@@ -95,26 +114,49 @@ export async function getSpendingReport(
   >()
   const grandTotal: TFxVector = {}
   let grandCount = 0
+  let multiTagCount = 0
+  const multiTagIds: string[] = []
 
   session.transactions.query({ clauses }).forEach(transaction => {
-    if (transactionType(transaction, routing.debtAccountId) !== 'outcome')
-      return
+    const route = routeTransactionToActivity(transaction, routing)
+    if (!route || route.direction === 'internal') return
+    const envelope = envelopes[route.envelopeId]
+    if (!envelope || envelope.type !== 'tag') return
+    const routeDirection: TRouteDirection = route.direction
+
+    const signedAmount = signedActivityAmount(
+      direction,
+      routeDirection,
+      envelope.keepIncome,
+      transaction
+    )
+    if (signedAmount === null) return
+
     const code =
-      workspace.current.instrument[transaction.outcomeInstrument]?.shortTitle
+      workspace.current.instrument[
+        routeDirection === 'income'
+          ? transaction.incomeInstrument
+          : transaction.outcomeInstrument
+      ]?.shortTitle
     if (!code) return
-    const amount = transaction.outcome
-    grandTotal[code] = round((grandTotal[code] ?? 0) + amount)
+
+    if ((transaction.tag?.length ?? 0) > 1) {
+      multiTagCount += 1
+      if (multiTagIds.length < 20) multiTagIds.push(transaction.id)
+    }
+
+    grandTotal[code] = round((grandTotal[code] ?? 0) + signedAmount)
     grandCount += 1
 
-    const bucket = bucketFor(groupBy, transaction, workspace)
+    const bucket = bucketFor(groupBy, transaction, routeDirection, workspace)
     const existing = groups.get(bucket.key)
     if (existing) {
-      existing.total[code] = round((existing.total[code] ?? 0) + amount)
+      existing.total[code] = round((existing.total[code] ?? 0) + signedAmount)
       existing.transactionCount += 1
     } else {
       groups.set(bucket.key, {
         name: bucket.name,
-        total: { [code]: amount },
+        total: { [code]: signedAmount },
         transactionCount: 1,
       })
     }
@@ -129,41 +171,80 @@ export async function getSpendingReport(
       ...(displayCurrency
         ? { totalConverted: convertFx(group.total, displayCurrency, rates) }
         : {}),
-      sortValue: convertFx(group.total, sortCurrency, rates),
+      sortValue: Math.abs(convertFx(group.total, sortCurrency, rates)),
     }))
     .sort((left, right) => right.sortValue - left.sortValue)
     .map(({ sortValue: _sortValue, ...row }) => row)
 
-  return success(command, 'none', workspaceMeta(workspace, context.now()), {
-    groupBy,
-    from: options.from ?? null,
-    to: options.to ?? null,
-    displayCurrency: displayCurrency ?? null,
-    ...page(rows, {
-      command,
-      revision: workspace.revision,
-      query: {
-        groupBy,
-        from: options.from ?? null,
-        to: options.to ?? null,
-        displayCurrency: displayCurrency ?? null,
+  const warnings: TWarning[] = []
+  if (multiTagCount > 0)
+    warnings.push({
+      code: 'MULTI_TAG_TRANSACTIONS',
+      message: `${multiTagCount} transaction(s) carry more than one tag; only the first tag is used for grouping and netting, so totals may undercount the others.`,
+      entityIds: multiTagIds,
+    })
+
+  return success(
+    command,
+    'none',
+    workspaceMeta(workspace, context.now()),
+    {
+      groupBy,
+      direction,
+      from: options.from ?? null,
+      to: options.to ?? null,
+      displayCurrency: displayCurrency ?? null,
+      ...page(rows, {
+        command,
+        revision: workspace.revision,
+        query: {
+          groupBy,
+          direction,
+          from: options.from ?? null,
+          to: options.to ?? null,
+          displayCurrency: displayCurrency ?? null,
+        },
+        limit,
+        cursor: options.cursor,
+      }),
+      totals: {
+        total: grandTotal,
+        transactionCount: grandCount,
+        ...(displayCurrency
+          ? { totalConverted: convertFx(grandTotal, displayCurrency, rates) }
+          : {}),
       },
-      limit,
-      cursor: options.cursor,
-    }),
-    totals: {
-      total: grandTotal,
-      transactionCount: grandCount,
-      ...(displayCurrency
-        ? { totalConverted: convertFx(grandTotal, displayCurrency, rates) }
-        : {}),
     },
-  })
+    warnings
+  )
+}
+
+/**
+ * Sign convention: positive = money leaving the budget (spend), negative =
+ * net money entering it. `net` mirrors the app's own envelope rule — a
+ * refund only offsets spend in envelopes configured to keep their income
+ * (`keepIncome`); income elsewhere (salary, interest, debt collection) is
+ * general income and stays out of a spending report, matching why it
+ * doesn't appear in `report spending` today either.
+ */
+function signedActivityAmount(
+  direction: TDirection,
+  routeDirection: TRouteDirection,
+  keepIncome: boolean,
+  transaction: TReportTransaction
+): number | null {
+  if (direction === 'outcome')
+    return routeDirection === 'outcome' ? transaction.outcome : null
+  if (direction === 'income')
+    return routeDirection === 'income' ? transaction.income : null
+  if (routeDirection === 'outcome') return transaction.outcome
+  return keepIncome ? -transaction.income : null
 }
 
 function bucketFor(
   groupBy: TGroupBy,
   transaction: TReportTransaction,
+  routeDirection: TRouteDirection,
   workspace: TWorkspace
 ): { key: string; name: string } {
   switch (groupBy) {
@@ -181,7 +262,10 @@ function bucketFor(
       }
     }
     case 'account': {
-      const accountId = transaction.outcomeAccount
+      const accountId =
+        routeDirection === 'income'
+          ? transaction.incomeAccount
+          : transaction.outcomeAccount
       return {
         key: accountId,
         name: workspace.current.account[accountId]?.title ?? accountId,
@@ -215,6 +299,22 @@ function parseGroupBy(value: string | undefined, command: string): TGroupBy {
   )
 }
 
+function parseDirection(
+  value: string | undefined,
+  command: string
+): TDirection {
+  if (value === undefined) return 'net'
+  if ((DIRECTION_VALUES as readonly string[]).includes(value))
+    return value as TDirection
+  throw new ToolError(
+    command,
+    'none',
+    'INVALID_INPUT',
+    '--direction must be one of: net, outcome, income',
+    2
+  )
+}
+
 function validateDate(
   value: string | undefined,
   option: string,
@@ -242,8 +342,4 @@ function requireInitialized(workspace: TWorkspace, command: string): void {
       'Run refresh before reading reports',
       4
     )
-}
-
-function round(amount: number): number {
-  return Math.round(amount * 100) / 100
 }

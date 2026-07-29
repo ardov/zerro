@@ -216,6 +216,21 @@ describe('finance projection reads', () => {
     expectFiniteNumbers(listed.data)
   })
 
+  it('exposes keepIncome so callers can tell a refund from general income', async () => {
+    const listed = await listEnvelopes(context, {
+      month: '2026-07',
+      limit: '200',
+    })
+    expect(listed.data.items.length).toBeGreaterThan(0)
+    for (const item of listed.data.items) {
+      expect(typeof item.keepIncome).toBe('boolean')
+    }
+    const selected = await getEnvelope(context, listed.data.items[0].id, {
+      month: '2026-07',
+    })
+    expect(selected.data.keepIncome).toBe(listed.data.items[0].keepIncome)
+  })
+
   it('adds converted scalars to envelope rows when --display-currency is set', async () => {
     const listed = await listEnvelopes(context, {
       month: '2026-07',
