@@ -14,6 +14,7 @@ import { instrumentModel } from '5-entities/currency/instrument'
 import { addFxAmount, convertFx } from '6-shared/helpers/money'
 import { accountModel } from '5-entities/account'
 import { merchantModel } from '5-entities/merchant'
+import { nullTagId } from '5-entities/tag'
 import { TSelector, useAppSelector } from 'store/index'
 
 type TInfoNode = {
@@ -72,7 +73,7 @@ export const getFactsYearly: TSelector<Record<string, TStats>> = createSelector(
         addToGroup(stats.byCurrency, codeMap[tr.outcomeInstrument], tr)
       }
 
-      addToGroup(stats.byTag, tr.tag ? tr.tag[0] : 'null', tr)
+      addToGroup(stats.byTag, tr.tag?.[0] ?? nullTagId, tr)
       addToGroup(stats.byMonth, parseDate(tr.date).getMonth().toString(), tr)
       addToGroup(stats.byWeekday, parseDate(tr.date).getDay().toString(), tr)
     }

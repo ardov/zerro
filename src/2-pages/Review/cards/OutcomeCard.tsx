@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Box, IconButton, Stack, Typography } from '@mui/material'
 import { formatDate } from '6-shared/helpers/date'
-import { tagModel } from '5-entities/tag'
+import { nullTagId, tagModel } from '5-entities/tag'
 import { DisplayAmount } from '5-entities/currency/displayCurrency'
 import { Card, TCardProps } from '../shared/Card'
 import { useStats } from '../shared/getFacts'
@@ -29,7 +29,7 @@ export function OutcomeCard(props: TCardProps) {
   const { val, tr } = topTransactions[i]
   const { date, comment, payee, tag } = tr
 
-  const tagTitle = tags[tag?.[0] || 'null'].title
+  const tagTitle = (tags[tag?.[0] || nullTagId] ?? tags[nullTagId])?.title
   let additionalInfo = [formatDate(date)]
   if (tagTitle) additionalInfo.push(tagTitle)
   if (payee) additionalInfo.push(payee)

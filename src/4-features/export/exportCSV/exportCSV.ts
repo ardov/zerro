@@ -125,7 +125,7 @@ const transactionToRowObj = (t: PopulatedTransaction): RowObj =>
     Дата: t.date,
     Создана: formatDate(t.created, 'yyyy-MM-dd HH:mm'),
     Тип: types[t.type as TrType],
-    Категория: t.tag ? t.tag[0].title : '',
+    Категория: t.tag?.[0]?.title || '',
     'Доп категории': '',
     'Со счёта': t.outcomeAccount ? t.outcomeAccount.title : '',
     Расход: !!t.outcome ? t.outcome : '',
