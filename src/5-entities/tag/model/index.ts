@@ -3,6 +3,7 @@ import { getPopulatedTags, getTags, getTagsTree } from './model'
 import { makeTag } from './makeTag'
 import { createTag, patchTag } from './thunks'
 
+export { mixedTagId, nullTagId } from './constants'
 export type { TagTreeNode } from './model'
 export type { TTagPopulated } from './populateTags'
 export type { TTagDraft } from './thunks'

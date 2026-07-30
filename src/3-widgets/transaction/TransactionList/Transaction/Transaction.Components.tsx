@@ -8,7 +8,7 @@ import { Tooltip } from '6-shared/ui/Tooltip'
 import { useAppSelector } from 'store'
 import { accountModel } from '5-entities/account'
 import { TrType, trModel } from '5-entities/transaction'
-import { TTagPopulated, tagModel } from '5-entities/tag'
+import { TTagPopulated, nullTagId, tagModel } from '5-entities/tag'
 import { merchantModel } from '5-entities/merchant'
 import { SmartAmount } from '3-widgets/Amount'
 
@@ -36,8 +36,9 @@ export const Symbol: FC<SymbolProps> = ({
   ...rest
 }) => {
   const tags = tagModel.usePopulatedTags()
-  const mainTagId = tr.tag?.length ? tr.tag[0] : 'null'
-  const tag = tags[mainTagId]
+  const mainTagId = tr.tag?.length ? tr.tag[0] : nullTagId
+  // Fall back to the null tag: an unknown id would crash the whole list
+  const tag = tags[mainTagId] ?? tags[nullTagId]
   const { symbol, color } = getSymAndColor(trType, tag)
   return (
     <SymbolWrapper>
