@@ -1,17 +1,20 @@
 # Zerro Core design ledger
 
-- Updated: 2026-07-29
+- Updated: 2026-07-30
 - Purpose: settled decisions, accepted risks, active bridges, and unresolved
-  architectural questions. History stays in Git.
+  architectural questions. History stays in Git. Questions that need the
+  maintainer rather than an implementer are listed for review in
+  [open-decisions.md](../../../../docs/open-decisions.md); an answer becomes a
+  settled decision here.
 
 ## Settled decisions
 
 ### Module and package boundary
 
-- Zerro Core remains an internal source module for the first real headless
-  consumer: the repository-local CLI planned in
-  [local-tooling.md](./local-tooling.md). Proving that consumer does not require
-  publishing or physically moving Core.
+- Zerro Core remains an internal source module. Its first real headless
+  consumer, the repository-local CLI in
+  [local-tooling.md](./local-tooling.md), shipped without publishing or
+  physically moving Core, which is the evidence that the source boundary holds.
 - Root `zerro-core` exports only constants, shared root types, and the snapshot
   session.
 - The React app uses the explicit namespace-first `zerro-core/redux` adapter.
@@ -108,6 +111,26 @@ there:
   queued saves from the previous login are invalidated.
 - Background sync does not classify commands as rebase-safe versus blocking:
   every admitted command follows the same sparse replay contract.
+- Pushing the outbox is always a deliberate user action. Automatic sync is
+  pull-only, because a push clears the acknowledged prefix and therefore
+  destroys the undo history the user still expects to have. Decided
+  2026-07-30; the background handler currently pushes and has to change.
+- The app tells the user when unsynchronized intent exists: a leave
+  confirmation before unload, and a visible notice after load when the restored
+  outbox is not empty. A silent pending outbox is not acceptable, because
+  nothing else distinguishes "saved locally" from "saved in ZenMoney".
+
+### Product rules
+
+- Renaming a payee envelope promotes it to a merchant. If a matching merchant
+  exists, it is renamed and every transaction that carried only the raw payee
+  string is attached to it; otherwise the merchant is created first. The
+  several raw spellings behind one visible payee therefore collapse under one
+  merchant instead of being rewritten one by one. Decided 2026-07-30.
+- The promotion is one command, so undo reverses the rename, the creation, and
+  every attachment together. It also changes the envelope id from `payee#…` to
+  `merchant#…`, so it must carry the envelope's metadata — budget, goal,
+  parent, group, visibility — to the new id rather than orphaning it.
 
 ### Testing
 
@@ -120,11 +143,20 @@ there:
 - The default parallel suite must pass; serial-only green is diagnostic, not a
   completion result.
 
-### Local tooling MVP
+### Local tooling
 
-- Implement an agent-first CLI with bounded JSON output before an MCP adapter.
-  Shell access is a sufficient first agent interface; machine-readable help and
-  explicit side-effect metadata are part of the CLI contract.
+- The agent interface is one CLI with bounded JSON output. Shell access plus
+  machine-readable help and explicit side-effect metadata proved sufficient for
+  a maintainer working in a repository checkout, so no MCP adapter ships with
+  the CLI.
+- An MCP adapter is still open, but as part of a different product question:
+  a desktop host that embeds Zerro and owns the ZenMoney token, so a user never
+  pastes one into a terminal. Distribution, not agent ergonomics, is what would
+  justify it. See
+  [open-decisions.md](../../../../docs/open-decisions.md#1-mcp-inside-a-desktop-host).
+  If it ships, it delegates to the same application functions as the CLI, maps
+  one-to-one onto its commands, and contains no business, persistence, query,
+  or sync logic of its own.
 - Preview, local stage/undo, and remote sync are separate commands. Reads and
   previews never mutate implicitly, and no command combines stage with sync.
 - Preview is not persisted. Stage recompiles semantic input against the latest
@@ -174,9 +206,10 @@ there:
   network path; an explicit 4xx refusal is a definitive local no-op, while
   transport, server, or malformed-success uncertainty preserves the outbox and
   is never represented as retry-safe.
-- MCP, if added after the CLI, delegates to the same application functions and
-  maps one-to-one to the CLI operations; it contains no business, persistence,
-  query, or sync logic.
+- Read options are shared vocabulary: paging, `--fields`, `--format`,
+  `--display-currency`, and `--query` keep one name and meaning across every
+  read that offers them. Entity options resolve a stable id or an exact
+  case-insensitive title and never choose among substring matches.
 
 ## Accepted product risks
 
@@ -214,19 +247,16 @@ useful.
 
 ## Open questions
 
+These are the architectural questions themselves. The ones that need the
+maintainer's answer before any implementation are restated with their options
+and consequences in [open-decisions.md](../../../../docs/open-decisions.md).
+
 ### Materializer evidence and versioning
 
 - Which real ZenMoney responses become fixtures for transaction balance,
   account deletion, and transfer conversion?
 - Future command-shape changes need an explicit compatibility decision; do not
   add a general migration framework without evidence.
-
-### Product rules
-
-- How should renaming a visible payee envelope affect several raw payee
-  spellings?
-- Which dirty sessions should opt into automatic sync after the unified
-  primary-only transport path lands?
 
 ### Future surfaces — not scheduled
 
@@ -240,5 +270,8 @@ useful.
 - Move an answer into settled decisions only when it is implemented or
   explicitly accepted.
 - Remove a bridge with its last consumer.
+- Remove an item from
+  [open-decisions.md](../../../../docs/open-decisions.md) in the same commit
+  that records its answer here.
 - Put concrete local smells in [notes.md](./notes.md).
 - Put implementation history in Git, not this ledger.

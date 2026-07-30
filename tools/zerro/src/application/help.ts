@@ -19,7 +19,10 @@ function opt(
   name: string,
   type: TOptionType,
   description: string,
-  extra: { values?: readonly string[]; default?: string | number | boolean } = {}
+  extra: {
+    values?: readonly string[]
+    default?: string | number | boolean
+  } = {}
 ): TOptionSpec {
   return { name, type, description, ...extra }
 }
@@ -60,7 +63,13 @@ const commands = [
     name: 'help',
     effect: 'none',
     required: [],
-    optional: [opt('--shape', 'string', 'Print field docs for one successShape instead of the command manifest.')],
+    optional: [
+      opt(
+        '--shape',
+        'string',
+        'Print field docs for one successShape instead of the command manifest.'
+      ),
+    ],
     example: 'pnpm zerro help --shape monthSummary',
     successShape: 'commandManifest',
     errors: ['INVALID_INPUT'],
@@ -158,19 +167,24 @@ const commands = [
       QUERY,
       FROM_DATE,
       TO_DATE,
-      opt('--account', 'string', 'Account id or title (exact or substring match).'),
+      opt(
+        '--account',
+        'string',
+        'Account id or exact title, case-insensitive. A miss lists matching candidates instead of guessing.'
+      ),
       opt(
         '--tag',
         'string',
-        'Comma-separated tag ids or titles. A transaction matches if any of its tags is in the list.'
+        'Comma-separated tag ids or exact titles. A transaction matches if any of its tags is in the list.'
       ),
-      opt('--merchant', 'string', 'Comma-separated merchant ids or titles.'),
       opt(
-        '--type',
-        'enum',
-        'Comma-separated transaction types to include.',
-        { values: ['income', 'outcome', 'transfer', 'debt'] }
+        '--merchant',
+        'string',
+        'Comma-separated merchant ids or exact titles.'
       ),
+      opt('--type', 'enum', 'Comma-separated transaction types to include.', {
+        values: ['income', 'outcome', 'transfer', 'debt'],
+      }),
       DISPLAY_CURRENCY,
       LIMIT,
       CURSOR,
@@ -204,7 +218,15 @@ const commands = [
     name: 'months list',
     effect: 'none',
     required: [],
-    optional: [FROM_DATE, TO_DATE, LIMIT, CURSOR, DISPLAY_CURRENCY, FIELDS, FORMAT],
+    optional: [
+      FROM_DATE,
+      TO_DATE,
+      LIMIT,
+      CURSOR,
+      DISPLAY_CURRENCY,
+      FIELDS,
+      FORMAT,
+    ],
     example: 'pnpm zerro months list --from 2026-01 --to 2026-07',
     successShape: 'monthPage',
     errors: [
@@ -297,7 +319,7 @@ const commands = [
       opt(
         '--direction',
         'enum',
-        'net (default) nets refunds against spending per the envelope\'s keepIncome flag and excludes general income; outcome/income report one gross side only. See `help --shape reportPage` for the sign convention.',
+        "net (default) nets refunds against spending per the envelope's keepIncome flag and excludes general income; outcome/income report one gross side only. See `help --shape reportPage` for the sign convention.",
         { values: ['net', 'outcome', 'income'], default: 'net' }
       ),
       DISPLAY_CURRENCY,
@@ -338,7 +360,11 @@ const commands = [
     name: 'budget stage-set',
     effect: 'local',
     required: [
-      opt('--request-id', 'string', 'Caller-chosen idempotency key for this write.'),
+      opt(
+        '--request-id',
+        'string',
+        'Caller-chosen idempotency key for this write.'
+      ),
       opt('--input', 'string', 'Path to a JSON request file.'),
     ],
     optional: [],
@@ -371,7 +397,9 @@ const commands = [
   {
     name: 'outbox undo',
     effect: 'local',
-    required: [opt('--request-id', 'string', 'Idempotency key of the undo itself.')],
+    required: [
+      opt('--request-id', 'string', 'Idempotency key of the undo itself.'),
+    ],
     optional: [],
     example: 'pnpm zerro outbox undo --request-id undo-july-food-1',
     successShape: 'undoReceipt',
@@ -402,7 +430,11 @@ const commands = [
     name: 'transaction stage-create',
     effect: 'local',
     required: [
-      opt('--request-id', 'string', 'Caller-chosen idempotency key for this write.'),
+      opt(
+        '--request-id',
+        'string',
+        'Caller-chosen idempotency key for this write.'
+      ),
       opt('--input', 'string', 'Path to a JSON request file.'),
     ],
     optional: [],
@@ -437,7 +469,7 @@ const guide = {
   tableOutput:
     '--format tsv renders data.items as a tab-separated table. Combine with --fields to pick columns, e.g. --fields items.name,items.totalConverted --format tsv.',
   quietOutput:
-    'pnpm prints its own banner before the command\'s JSON on stdout. Run pnpm with -s (pnpm -s zerro ...) for JSON-only output, or always read the last line.',
+    "pnpm prints its own banner before the command's JSON on stdout. Run pnpm with -s (pnpm -s zerro ...) for JSON-only output, or always read the last line.",
   multiCurrency:
     'Most amounts are vectors of {CURRENCY: amount}, not a single number, since accounts span multiple currencies. Pass --display-currency <CODE> to also get one converted number alongside the vector.',
   warnings:

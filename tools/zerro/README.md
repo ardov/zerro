@@ -27,7 +27,7 @@ forget it, take the last line of output instead of piping the whole thing to
    `month get`, `envelopes list`, `report activity`, etc. Pure local reads off
    the last `refresh`. Never touch the network or the state file.
 3. **`preview-*` / `stage-*`** (`effect: "none"` / `"local"`) — `budget
-   preview-set` / `budget stage-set`, `transaction preview-create` /
+preview-set` / `budget stage-set`, `transaction preview-create` /
    `transaction stage-create`. `preview-*` computes what a change would do
    without writing anything. `stage-*` writes it to a local outbox, guarded by
    a caller-chosen `--request-id` so retries are idempotent. Nothing reaches
@@ -54,18 +54,19 @@ multi-currency amounts, the `warnings` array, and a zsh/bash pipe gotcha
 
 ## Exit codes
 
-| Code | Meaning |
-|---|---|
-| 0 | success |
-| 2 | `INVALID_INPUT` / `INVALID_COMMAND` / `INVALID_REQUEST_ID` — bad input, nothing attempted |
-| 3 | `ENTITY_NOT_FOUND` / `MONTH_NOT_FOUND` — valid input, no match |
-| 4 | `STATE_NOT_INITIALIZED` / `INVALID_STATE` — run `refresh` first |
-| 5 | `INTERNAL_ERROR` — the local tool failed without applying a change |
+| Code | Meaning                                                                                                                                                                                                |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 0    | success                                                                                                                                                                                                |
+| 2    | bad input, nothing attempted — `INVALID_INPUT`, `INVALID_COMMAND`, `INVALID_CURSOR`, `INVALID_REQUEST_ID`, `INVALID_ENDPOINT`, `INPUT_READ_FAILED`, `CURRENCY_MISMATCH`                                |
+| 3    | valid input, nothing to do — `ENTITY_NOT_FOUND`, `MONTH_NOT_FOUND`, `NO_CHANGES`, `OUTBOX_EMPTY`                                                                                                       |
+| 4    | missing prerequisite — `STATE_NOT_INITIALIZED` (run `refresh` first), `TOKEN_REQUIRED`                                                                                                                 |
+| 5    | local failure, no change applied — `INTERNAL_ERROR`, `INVALID_STATE`, `STATE_READ_FAILED`, `STATE_WRITE_FAILED`, `IDEMPOTENCY_CONFLICT`, `INVALID_RECEIPT`, `OUTBOX_NO_TRANSPORT`, `ENDPOINT_MISMATCH` |
+| 6    | ZenMoney transport or response — `NETWORK_FAILURE`, `ZENMONEY_REJECTED`, `INVALID_ZENMONEY_RESPONSE`                                                                                                   |
 
-Network/write failures (`NETWORK_FAILURE`, `ZENMONEY_REJECTED`,
-`STATE_WRITE_FAILED`, `IDEMPOTENCY_CONFLICT`, ...) use their own codes — see
-`error.code` and `error.retryable` in the response, or `help` for the full
-list per command.
+Exit code 6 is the only class where the write may or may not have reached
+ZenMoney: check `error.outcome` (`not_applied` vs `unknown`) and
+`error.retryable` before retrying, and never retry `sync` blindly after
+`unknown`. `help` lists the error codes each command can return.
 
 ## A shell gotcha that will corrupt your JSON
 
@@ -94,47 +95,55 @@ deeper than one level, pipe the plain JSON through `jq` instead, as in a
 couple of the recipes below.
 
 Spending by tag for a month, net of refunds, converted to one currency:
+
 ```bash
 pnpm -s zerro report activity --group-by tag --from 2026-07-01 --to 2026-07-31 \
   --display-currency RUB --fields items.name,items.totalConverted --format tsv
 ```
 
 Monthly funds trend:
+
 ```bash
 pnpm -s zerro months list --from 2026-01 --to 2026-07 --display-currency RUB \
   | jq -r '.data.items[] | [.month, .totalsConverted.fundsStart, .totalsConverted.fundsChange] | @tsv'
 ```
 
 Top merchants over a period:
+
 ```bash
 pnpm -s zerro report activity --group-by merchant --from 2026-01-01 --to 2026-07-31 \
   --display-currency RUB --limit 20 --format tsv
 ```
 
 Every account's balance and whether it counts toward the budget:
+
 ```bash
 pnpm -s zerro accounts list --display-currency RUB \
   --fields items.title,items.balanceConverted,items.inBalance --format tsv
 ```
 
 Which envelopes are overspent this month:
+
 ```bash
 pnpm -s zerro envelopes list --month 2026-07 --display-currency RUB --roots-only \
   | jq -r '.data.items[] | select(.withChildren.converted.available < 0) | [.name, .withChildren.converted.available] | @tsv'
 ```
 
 Only outgoing transfers between your own accounts (money moved, not spent):
+
 ```bash
 pnpm -s zerro transactions search --from 2026-07-01 --to 2026-07-31 --type transfer
 ```
 
 Who owes money right now (`debtors list` has no --display-currency yet, so a
 debtor owed in more than one currency prints as a vector):
+
 ```bash
 pnpm -s zerro debtors list --fields items.name,items.balance --format tsv
 ```
 
 What's staged locally but not yet sent to ZenMoney:
+
 ```bash
 pnpm -s zerro outbox list
 ```
@@ -145,3 +154,7 @@ pnpm -s zerro outbox list
 pnpm --filter zerro exec vitest    # or: pnpm test -- tools/zerro
 pnpm typecheck                     # also type-checks tools/zerro/tsconfig.json
 ```
+
+The contract behind this tool — state model, mutation rules, output guarantees,
+and what stays deliberately out of scope — is
+[local-tooling.md](../../src/zerro-core/support/documents/local-tooling.md).

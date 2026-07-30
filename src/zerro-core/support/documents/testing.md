@@ -1,5 +1,8 @@
 # Zerro Core testing policy
 
+- Status: active policy; the migration completion gate is satisfied
+- Updated: 2026-07-30
+
 Tests protect domain rules, dependency boundaries, replay, and consumer-visible
 behavior. They should not make thin helpers or obsolete compatibility layers
 expensive to change.
@@ -119,21 +122,27 @@ drift, and an untrustworthy Knip configuration. Closed on 2026-07-14:
 
 Knip output is evidence for an audit, not automatic deletion authority.
 
-## Completion gate
+## Completion gate — satisfied
 
-Before calling the refactor complete:
+The Core migration was complete once:
 
 1. focused tests, TypeScript, default parallel Vitest, package consumer,
-   formatting, and dependency checks are reproducibly green;
-2. a manual smoke covers initial load, budget/goal edit, transaction edit,
+   formatting, and dependency checks were reproducibly green;
+2. a manual smoke covered initial load, budget/goal edit, transaction edit,
    reload with pending state, and explicit sync;
-3. production has no legacy model dependency replaced by the Core Redux API;
-4. remaining presentation/app-service compatibility has an owner and exit
+3. production had no legacy model dependency replaced by the Core Redux API;
+4. remaining presentation/app-service compatibility had an owner and exit
    condition.
 
-Latest manual checkpoint (2026-07-12): demo load, transaction edit, pending
-outbox, and reload persistence passed without console errors. Explicit sync and
-budget/goal edit remain open.
+Latest manual checkpoint (2026-07-30, maintainer-run): the full smoke listed
+above passed, including undo/redo, logout history reset, and explicit sync with
+a pending outbox. The 2026-07-12 partial checkpoint it replaces stays in Git.
+
+Automated evidence at the same date: 111 test files / 495 tests green in the
+default parallel suite.
+
+Re-run the manual smoke when replica persistence, the command shape, or the
+sync transport changes; routine domain work does not need it.
 
 ## Commands
 

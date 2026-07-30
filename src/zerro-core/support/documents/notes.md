@@ -1,10 +1,11 @@
 # Zerro Core working notes
 
-- Updated: 2026-07-29
+- Updated: 2026-07-30
 - Purpose: current position, remaining work, and deferred local smells.
   Implementation history stays in Git; contracts stay in
   [architecture.md](./architecture.md); settled decisions and risks stay in
-  [design-ledger.md](./design-ledger.md).
+  [design-ledger.md](./design-ledger.md); questions that need the maintainer
+  stay in [open-decisions.md](../../../../docs/open-decisions.md).
 
 ## Current position
 
@@ -19,40 +20,21 @@ acknowledgement. The persisted command shape is specified once in
 Reliable automated verification, ready bridge removal, and read-graph
 simplification are done (see Git for the phase history). The code and
 documentation diet and alphabetical source-layout migration are complete. The
-remaining Core completion smoke and materializer rules stay below. A local
-agent-facing CLI is now an accepted independent MVP track; its executable plan
-is [local-tooling.md](./local-tooling.md).
+manual completion smoke passed on 2026-07-30, so the completion gate in
+[testing.md](./testing.md) is satisfied and the Core migration is closed.
 
-The local-tooling W-1 Core preparation is complete: canonical acceptance,
-cursor overlap, empty-store creation, semantic transaction creation, session
-transaction queries, and the explicit `zerro-core/headless` boundary are in
-place and reused by Redux where applicable. W0 and W1 are complete: the CLI can
-refresh a private local replica and expose bounded account, tag, merchant,
-transaction, month, envelope, goal, and debtor reads. W2 envelope-budget
-preview/stage plus outbox inspection and undo is the next incomplete slice.
+The local CLI is also complete. Waves W-1 through W4 of
+[local-tooling.md](./local-tooling.md) shipped: the headless Core boundary,
+an atomic private replica, bounded reads, envelope-budget and transaction
+preview/stage, outbox undo, and explicit sync. No MCP adapter ships with it;
+that surface belongs to the open desktop-host question.
+
+Remaining work is materializer rules plus two app behaviors decided on
+2026-07-30: pull-only automatic sync and payee-to-merchant promotion. Questions
+still waiting on an answer live in
+[open-decisions.md](../../../../docs/open-decisions.md).
 
 ## Remaining work
-
-### 0. Manual completion smoke — next Core checkpoint
-
-Verify in one session:
-
-1. initial load;
-2. budget or goal edit;
-3. transaction edit;
-4. reload with pending outbox state (the undo stack survives and redo resets);
-5. undo/redo, logout history reset, repeated-field writes, and a command
-   appended in flight;
-6. explicit sync sends the final primary entities, clears only the captured
-   prefix, and rebases pending commands on the canonical response;
-7. no console errors or lost local commands.
-
-Exit: the completion gate in [testing.md](./testing.md) is satisfied.
-
-Compatibility boundary: persisted replica V3 stores only the applied outbox.
-The V2 reader performs one explicit migration by retaining its applied prefix
-and dropping its redo tail. Future persisted command changes require backward
-compatibility or an explicit migration/product decision.
 
 ### 1. Materializer rules
 
@@ -64,20 +46,53 @@ one because they are the remaining rule with a visible wrong number today.
 Account, tag, and merchant cascades become reachable when the matching deletion
 commands ship.
 
-### 2. Local agent tooling — accepted independent track
+### 2. Pull-only automatic sync
 
-Follow [local-tooling.md](./local-tooling.md) from its first incomplete status
-row. The accepted MVP is an agent-first repository-local CLI with
-machine-readable help, bounded JSON, one private JSON replica file,
-`ZM_TOKEN`, separate preview/stage/sync operations, and retry-safe outbox
-request ids. It includes bounded account/tag/merchant/envelope discovery,
-envelope hierarchy and monthly metrics, atomic envelope-budget preview/stage,
-transaction creation, outbox undo, and explicit sync. MCP is optional and starts
-only after the CLI is complete.
+Decided 2026-07-30 (see [design-ledger.md](./design-ledger.md#replica-and-sync)):
+automatic sync must never push. Today it does, so the undo history is silently
+truncated roughly every two minutes of idle time.
 
-This track does not require publishing or physically moving Core. It may
-proceed before balance prediction lands, provided transaction previews state
-that canonical account balances may change after sync.
+What has to change:
+
+1. `src/4-features/sync.ts` needs a pull-only path — the canonical cursor
+   request with no transport entities and `sentOutboxCount: 0`, so pending
+   commands rebase instead of being acknowledged. Core already supports this;
+   the CLI `refresh` is the same transition.
+2. `src/3-widgets/regularSyncPolicy.ts` keeps deciding _when_ to pull. The
+   background handler stops choosing to push at all.
+3. Loading with a restored non-empty outbox shows a notice with a manual sync
+   action.
+
+Already in place: the leave confirmation in
+`src/3-widgets/RegularSyncHandler.tsx` fires whenever the outbox is not empty.
+
+Verification: the replica/sync row of [testing.md](./testing.md) — a pull with
+pending commands must rebase them and keep the undo stack, and no automatic
+path may clear an outbox prefix.
+
+### 3. Payee-to-merchant promotion
+
+Decided 2026-07-30 (see
+[design-ledger.md](./design-ledger.md#product-rules)). Renaming a payee
+envelope creates or renames a merchant and attaches the matching transactions
+to it, replacing the current explicit refusal in
+`internal/domain/zerro/envelopes/commands.ts` and its `TODO`.
+
+Two constraints make this more than a rename: it must be one command so undo is
+atomic, and it changes the envelope id from `payee#…` to `merchant#…`, so the
+envelope's budget, goal, parent, group, and visibility metadata must move with
+it. Compare resulting state, not patch shape.
+
+### 4. Local agent tooling — follow-ups only
+
+The MVP is complete; see the follow-up list in
+[local-tooling.md](./local-tooling.md#post-mvp-follow-ups). Nothing there is
+scheduled. Take an item only when a real agent session needs it, and keep the
+MVP contracts: no implicit refresh, no combined stage-and-sync, no raw patch
+surface, and no Core internal imports from `tools/zerro`.
+
+Until balance prediction lands, transaction previews must keep stating that
+canonical account balances may change after sync.
 
 ## Deferred until evidence exists
 
@@ -91,13 +106,14 @@ that canonical account balances may change after sync.
 
 ## Choosing work
 
-- Follow the order above; a verified independent smoke may land between slices.
-- Split work by contract: each materializer rule should remain a separate
+- Materializer rules are the default next work; split by contract, one rule per
   commit.
-- When working on local tooling, follow its own wave order and status table
-  rather than interleaving several waves.
+- Local tooling follow-ups are demand-driven, not a queue to work through.
 - A concrete product regression may override this order; document the evidence
   when it does.
+- An item in [open-decisions.md](../../../../docs/open-decisions.md) is not
+  implementation work until its decision is recorded in
+  [design-ledger.md](./design-ledger.md).
 
 ## Deferred local smells
 
@@ -122,12 +138,6 @@ partial failure, and atomicity.
 
 `isISODate` and `isISOMonth` accept correctly shaped invalid calendar values.
 Add calendar validation only at a boundary with a demonstrated bad-data case.
-
-### Payee envelope rename
-
-One visible payee may represent several raw transaction spellings. Renaming
-needs a product rule; keep the explicit unsupported case instead of a type or
-patch workaround.
 
 ### Knip findings
 

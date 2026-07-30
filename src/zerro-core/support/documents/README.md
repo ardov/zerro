@@ -24,23 +24,26 @@ React, storage, localization, or app-layer runtime modules.
    Commands section is the single canonical persisted command shape.
 4. Check [design-ledger.md](./design-ledger.md) before changing a settled
    decision.
-5. For local CLI or MCP work, follow
-   [local-tooling.md](./local-tooling.md) one wave at a time.
+5. For local CLI work, read [local-tooling.md](./local-tooling.md) for the
+   contract and [tools/zerro/README.md](../../../../tools/zerro/README.md) for
+   usage.
 
 The notes are routing, not proof. Git and current verification outrank stale
 prose.
 
 ## Document map
 
-| Document                                                        | Purpose                                           |
-| --------------------------------------------------------------- | ------------------------------------------------- |
-| [architecture.md](./architecture.md)                            | Durable boundaries and runtime contracts          |
-| [materialization.md](./materialization.md)                      | Predicted local effects and server cascades       |
-| [local-tooling.md](./local-tooling.md)                          | Agent CLI, envelope budgets, and optional MCP MVP |
-| [design-ledger.md](./design-ledger.md)                          | Settled decisions, risks, and open questions      |
-| [notes.md](./notes.md)                                          | Current position, remaining work, deferred smells |
-| [testing.md](./testing.md)                                      | Verification policy and completion gate           |
-| [ZenMoney sync API](../../internal/domain/zenmoney/sync-api.md) | Observed server behavior and wire shape           |
+| Document                                                        | Purpose                                            |
+| --------------------------------------------------------------- | -------------------------------------------------- |
+| [architecture.md](./architecture.md)                            | Durable boundaries and runtime contracts           |
+| [materialization.md](./materialization.md)                      | Predicted local effects and server cascades        |
+| [local-tooling.md](./local-tooling.md)                          | Agent CLI contract and what its MVP had to satisfy |
+| [design-ledger.md](./design-ledger.md)                          | Settled decisions, risks, and open questions       |
+| [notes.md](./notes.md)                                          | Current position, remaining work, deferred smells  |
+| [testing.md](./testing.md)                                      | Verification policy and completion gate            |
+| [ZenMoney sync API](../../internal/domain/zenmoney/sync-api.md) | Observed server behavior and wire shape            |
+| [tools/zerro/README.md](../../../../tools/zerro/README.md)      | How to use the shipped CLI                         |
+| [docs/open-decisions.md](../../../../docs/open-decisions.md)    | Questions waiting on the maintainer                |
 
 Entity-specific ZenMoney behavior belongs beside its implementation under
 `internal/domain/zenmoney/*/README.md`.
@@ -56,15 +59,7 @@ Entity-specific ZenMoney behavior belongs beside its implementation under
 - Update the relevant decision or note in the same commit as a boundary
   change.
 
-## Verification defaults
+## Verification
 
-```bash
-pnpm exec vitest run <focused tests>
-pnpm exec tsc --noEmit
-pnpm exec vitest run
-pnpm zerro-core:package-check
-git diff --check
-```
-
-Changed files must also pass Prettier. The default parallel test run must be
-green; a serial-only pass is diagnostic evidence, not the completion gate.
+[testing.md](./testing.md) owns the commands, the per-change matrix, and the
+rule that only a green default parallel run counts as a result.
